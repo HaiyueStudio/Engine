@@ -1,0 +1,1920 @@
+{
+  "schemaVersion": 1,
+  "kind": "examples",
+  "entries": [
+    {
+      "id": "animation-spec",
+      "title": "Lottie to HYA Playground",
+      "entry": "animation-spec/main.ts",
+      "capabilities": [
+        "animation-format",
+        "lottie-conversion",
+        "url-import",
+        "json-editor",
+        "binary-animation",
+        "timeline-scrubbing",
+        "hya-download",
+        "particle-system",
+        "canvas-text",
+        "timeline-audio",
+        "2d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 4
+      }
+    },
+    {
+      "id": "hya-state-machine",
+      "title": "HYA State Machine",
+      "entry": "hya-state-machine/main.ts",
+      "capabilities": [
+        "animation-format",
+        "animation-state-machine",
+        "single-asset-clips",
+        "cross-fade",
+        "binary-animation",
+        "format-preview",
+        "2d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 7
+      }
+    },
+    {
+      "id": "hya-samples",
+      "title": "HYA Animation Samples",
+      "entry": "hya-samples/main.ts",
+      "capabilities": [
+        "animation-format",
+        "binary-animation",
+        "capability-gallery",
+        "url-import",
+        "file-import",
+        "format-preview",
+        "runtime-diagnostics",
+        "2d"
+      ],
+      "assets": [
+        "../animation-spec/samples/manifest.json"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 8
+      }
+    },
+    {
+      "id": "hya-corpus-dashboard",
+      "title": "HYA Lottie Corpus Dashboard",
+      "entry": "hya-corpus-dashboard/main.ts",
+      "capabilities": [
+        "animation-format",
+        "lottie-conversion",
+        "real-asset-corpus",
+        "fidelity-benchmark",
+        "size-benchmark",
+        "parse-benchmark",
+        "first-frame-benchmark",
+        "webgpu",
+        "2d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 5
+      }
+    },
+    {
+      "id": "consumer-walkthrough",
+      "title": "Engine Consumer Walkthrough",
+      "entry": "consumer-walkthrough/main.ts",
+      "capabilities": [
+        "engine-golden-path",
+        "asset-lifecycle",
+        "texture-loading",
+        "frame-animation",
+        "explicit-disposal",
+        "webgpu",
+        "3d"
+      ],
+      "assets": [
+        "../animation-spec/samples/assets/sprite1.png"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 9
+      }
+    },
+    {
+      "id": "bvh-lod",
+      "title": "BVH Mesh LOD",
+      "entry": "bvh-lod/main.ts",
+      "capabilities": [
+        "bvh-lod",
+        "mesh-lod"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 13
+      }
+    },
+    {
+      "id": "bitmap-font",
+      "title": "Bitmap Font",
+      "entry": "bitmap-font/main.ts",
+      "capabilities": [
+        "bitmap-font"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "materials",
+        "order": 9
+      }
+    },
+    {
+      "id": "blending",
+      "title": "Blending",
+      "entry": "blending/main.ts",
+      "capabilities": [
+        "blending"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "materials",
+        "order": 8
+      }
+    },
+    {
+      "id": "blinn-phong",
+      "title": "Blinn-Phong Lighting",
+      "entry": "blinn-phong/main.ts",
+      "capabilities": [
+        "blinn-phong"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "rendering",
+        "order": 2
+      }
+    },
+    {
+      "id": "box-selection",
+      "title": "Box Selection",
+      "entry": "box-selection/main.ts",
+      "capabilities": [
+        "box-selection"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "interaction",
+        "order": 3
+      }
+    },
+    {
+      "id": "toon-layers",
+      "title": "Four-layer Toon Material",
+      "entry": "toon-layers/main.ts",
+      "capabilities": [
+        "toon-material",
+        "layer-textures",
+        "directional-shadow"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "materials",
+        "order": 10
+      }
+    },
+    {
+      "id": "toon-pencil-sketch",
+      "title": "Toon Pencil Sketch",
+      "entry": "toon-pencil-sketch/main.ts",
+      "capabilities": [
+        "toon-material",
+        "layer-textures",
+        "outline",
+        "procedural-texture",
+        "pencil-sketch"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "materials",
+        "order": 11
+      }
+    },
+    {
+      "id": "box2d-collision",
+      "title": "Box2D Collision",
+      "entry": "box2d-collision/main.ts",
+      "capabilities": [
+        "2d-physics",
+        "2d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "physics",
+        "order": 0
+      }
+    },
+    {
+      "id": "box2d-filtering",
+      "title": "Box2D Filtering",
+      "entry": "box2d-filtering/main.ts",
+      "capabilities": [
+        "box2d-filtering"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "physics",
+        "order": 1
+      }
+    },
+    {
+      "id": "box2d-joints",
+      "title": "Box2D Joints",
+      "entry": "box2d-joints/main.ts",
+      "capabilities": [
+        "box2d-joints"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "physics",
+        "order": 2
+      }
+    },
+    {
+      "id": "box2d-mouse-drag",
+      "title": "Box2D Mouse Drag",
+      "entry": "box2d-mouse-drag/main.ts",
+      "capabilities": [
+        "box2d-mouse-drag"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "physics",
+        "order": 3
+      }
+    },
+    {
+      "id": "physics3d-collision",
+      "title": "3D Rigid Bodies & Mouse Drag",
+      "entry": "physics3d-collision/main.ts",
+      "capabilities": [
+        "3d-physics",
+        "rigid-body",
+        "raycast",
+        "pointer-drag",
+        "webgpu"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "physics",
+        "order": 4
+      }
+    },
+    {
+      "id": "physics3d-joints",
+      "title": "3D Joint Constraints",
+      "entry": "physics3d-joints/main.ts",
+      "capabilities": [
+        "3d-physics",
+        "joint-constraints",
+        "rapier",
+        "webgpu"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "physics",
+        "order": 5
+      }
+    },
+    {
+      "id": "physics3d-buoyancy",
+      "title": "3D Buoyancy",
+      "entry": "physics3d-buoyancy/main.ts",
+      "capabilities": [
+        "3d-physics",
+        "buoyancy",
+        "force-at-point",
+        "webgpu"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "physics",
+        "order": 6
+      }
+    },
+    {
+      "id": "physics3d-orbital-gravity",
+      "title": "3D Orbital Gravity",
+      "entry": "physics3d-orbital-gravity/main.ts",
+      "capabilities": [
+        "3d-physics",
+        "orbital-gravity",
+        "inverse-square-force",
+        "webgpu"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "physics",
+        "order": 7
+      }
+    },
+    {
+      "id": "physics3d-cloth",
+      "title": "3D Cloth Simulation",
+      "entry": "physics3d-cloth/main.ts",
+      "capabilities": [
+        "3d-physics",
+        "cloth-simulation",
+        "spring-constraints",
+        "dynamic-geometry",
+        "webgpu"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "physics",
+        "order": 8
+      }
+    },
+    {
+      "id": "camera-switch",
+      "title": "Camera Switch",
+      "entry": "camera-switch/main.ts",
+      "capabilities": [
+        "camera-switch"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "cameras",
+        "order": 1
+      }
+    },
+    {
+      "id": "csg",
+      "title": "CSG Boolean Geometry",
+      "entry": "csg/main.ts",
+      "capabilities": [
+        "csg"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "rendering",
+        "order": 10
+      }
+    },
+    {
+      "id": "css-material",
+      "title": "CssMaterial",
+      "entry": "css-material/main.ts",
+      "capabilities": [
+        "css-material"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "materials",
+        "order": 5
+      }
+    },
+    {
+      "id": "cube-texture",
+      "title": "Textured Cube",
+      "entry": "cube-texture/main.ts",
+      "capabilities": [
+        "cube-texture"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "materials",
+        "order": 2
+      }
+    },
+    {
+      "id": "depth-material",
+      "title": "Depth Material",
+      "entry": "depth-material/main.ts",
+      "capabilities": [
+        "depth-material"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "materials",
+        "order": 6
+      }
+    },
+    {
+      "id": "fog",
+      "title": "Distance & Height Fog",
+      "entry": "fog/main.ts",
+      "capabilities": [
+        "distance-fog",
+        "height-fog"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": true,
+        "baseline": "review/baselines/render-pixels-fog.json"
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 12
+      }
+    },
+    {
+      "id": "frustum-cull",
+      "title": "Frustum Culling",
+      "entry": "frustum-cull/main.ts",
+      "capabilities": [
+        "frustum-cull"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "interaction",
+        "order": 5
+      }
+    },
+    {
+      "id": "game-of-life",
+      "title": "Conway's Game of Life",
+      "entry": "game-of-life/main.ts",
+      "capabilities": [
+        "game-of-life"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "compute",
+        "order": 0
+      }
+    },
+    {
+      "id": "wind-field",
+      "title": "GPU Wind Field",
+      "entry": "wind-field/main.ts",
+      "capabilities": [
+        "wind-field",
+        "gpu-particles",
+        "compute",
+        "trail-ping-pong",
+        "equirectangular-map"
+      ],
+      "assets": [
+        "wind-field/2016112000.json",
+        "wind-field/2016112000.png",
+        "wind-field/ne_110m_coastline.geojson"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "compute",
+        "order": 3
+      }
+    },
+    {
+      "id": "gltf-viewer",
+      "title": "glTF Viewer",
+      "entry": "gltf-viewer/main.ts",
+      "capabilities": [
+        "gltf",
+        "pbr-metallic-roughness",
+        "pbr-clearcoat",
+        "material-variants",
+        "asset-lifecycle"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 0
+      }
+    },
+    {
+      "id": "gltf-animation3d-crossfade",
+      "title": "glTF Animation3D Cross-fade",
+      "entry": "gltf-animation3d-crossfade/main.ts",
+      "capabilities": [
+        "gltf",
+        "animation3d",
+        "cross-fade",
+        "skinning",
+        "gpu-morph",
+        "step-linear-cubic-spline"
+      ],
+      "assets": [
+        "../extensions/test/fixtures/gltf/animation-characterization.gltf"
+      ],
+      "screenshot": {
+        "required": true,
+        "baseline": "review/baselines/product-screenshots/character-animation.json"
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 6
+      }
+    },
+    {
+      "id": "gpu-driven-instancing",
+      "title": "GPU Driven Instancing",
+      "entry": "gpu-driven-instancing/main.ts",
+      "capabilities": [
+        "gpu-driven-instancing"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "rendering",
+        "order": 4
+      }
+    },
+    {
+      "id": "gpu-driven-megabatch",
+      "title": "GPU Driven Mega Batch",
+      "entry": "gpu-driven-megabatch/main.ts",
+      "capabilities": [
+        "render-profiles",
+        "gpu-driven",
+        "device-fallback",
+        "frame-diagnostics"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": {
+        "scenario": "gpu-driven.mega-batch-build.8000",
+        "budget": "review/baselines/benchmark-stage9.json"
+      },
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 5
+      }
+    },
+    {
+      "id": "gui-runtime",
+      "title": "GUI Runtime",
+      "entry": "gui-runtime/main.ts",
+      "capabilities": [
+        "gui",
+        "2d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 2
+      }
+    },
+    {
+      "id": "icosahedron",
+      "title": "Icosahedron Geometry",
+      "entry": "icosahedron/main.ts",
+      "capabilities": [
+        "icosahedron"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 3
+      }
+    },
+    {
+      "id": "instancing-raycast",
+      "title": "Instancing Raycast",
+      "entry": "instancing-raycast/main.ts",
+      "capabilities": [
+        "instancing-raycast"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "interaction",
+        "order": 1
+      }
+    },
+    {
+      "id": "instancing",
+      "title": "Instanced Rendering",
+      "entry": "instancing/main.ts",
+      "capabilities": [
+        "instancing"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "rendering",
+        "order": 3
+      }
+    },
+    {
+      "id": "interactive",
+      "title": "Interactive Raycasting",
+      "entry": "interactive/main.ts",
+      "capabilities": [
+        "interactive"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "interaction",
+        "order": 0
+      }
+    },
+    {
+      "id": "page-turn-book",
+      "title": "Lazy PDF Page-Turn Reader",
+      "entry": "page-turn-book/main.ts",
+      "capabilities": [
+        "dynamic-geometry",
+        "segmented-paper",
+        "page-turn",
+        "pointer-drag",
+        "pdfjs",
+        "pdf-page-texture",
+        "lazy-page-cache",
+        "local-file-import",
+        "pbr-material",
+        "directional-shadow",
+        "3d"
+      ],
+      "assets": [
+        "page-turn-book/ai.pdf"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "interaction",
+        "order": 7
+      }
+    },
+    {
+      "id": "ktx2-matrix",
+      "title": "KTX2 Regression Matrix",
+      "entry": "ktx2-matrix/main.ts",
+      "capabilities": [
+        "ktx2",
+        "texture-compression",
+        "device-fallback"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "materials",
+        "order": 4
+      }
+    },
+    {
+      "id": "ktx2-volume",
+      "title": "KTX2 3D Texture",
+      "entry": "ktx2-volume/main.ts",
+      "capabilities": [
+        "ktx2-volume"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "materials",
+        "order": 3
+      }
+    },
+    {
+      "id": "lines",
+      "title": "Thick Lines",
+      "entry": "lines/main.ts",
+      "capabilities": [
+        "lines"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "rendering",
+        "order": 7
+      }
+    },
+    {
+      "id": "mesh-helper",
+      "title": "Mesh Helpers",
+      "entry": "mesh-helper/main.ts",
+      "capabilities": [
+        "mesh-helper"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "interaction",
+        "order": 4
+      }
+    },
+    {
+      "id": "mirror-hall",
+      "title": "Recursive Mirror Hall",
+      "entry": "mirror-hall/main.ts",
+      "capabilities": [
+        "planar-reflection",
+        "recursive-reflection",
+        "multi-view"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 15
+      }
+    },
+    {
+      "id": "mixed-scene",
+      "title": "Mixed 3D + 2D HUD",
+      "entry": "mixed-scene/main.ts",
+      "capabilities": [
+        "2d",
+        "3d",
+        "gui",
+        "render-pipeline"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 0
+      }
+    },
+    {
+      "id": "msaa",
+      "title": "MSAA",
+      "entry": "msaa/main.ts",
+      "capabilities": [
+        "msaa"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "postprocess",
+        "order": 5
+      }
+    },
+    {
+      "id": "normal-material",
+      "title": "Normal Material",
+      "entry": "normal-material/main.ts",
+      "capabilities": [
+        "normal-material"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "materials",
+        "order": 7
+      }
+    },
+    {
+      "id": "orbit-control",
+      "title": "Orbit Control",
+      "entry": "orbit-control/main.ts",
+      "capabilities": [
+        "orbit-control"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "cameras",
+        "order": 0
+      }
+    },
+    {
+      "id": "outline-postprocess",
+      "title": "Outline Postprocess",
+      "entry": "outline-postprocess/main.ts",
+      "capabilities": [
+        "outline-postprocess"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "postprocess",
+        "order": 1
+      }
+    },
+    {
+      "id": "pbr-showcase",
+      "title": "PBR Showcase",
+      "entry": "pbr-showcase/main.ts",
+      "capabilities": [
+        "render-profiles",
+        "pbr-metallic-roughness",
+        "pbr-clearcoat",
+        "directional-shadow",
+        "environment-ibl",
+        "material-variants",
+        "device-fallback",
+        "resource-lifecycle"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": true,
+        "baseline": "review/baselines/render-pixels-stage9-pbr-example.json"
+      },
+      "performance": {
+        "scenario": "render-product.pbr-material-frame.4000",
+        "budget": "review/baselines/benchmark-stage9.json"
+      },
+      "ci": "smoke",
+      "catalog": {
+        "group": "materials",
+        "order": 0
+      }
+    },
+    {
+      "id": "ibl",
+      "title": "Image-based Lighting",
+      "entry": "ibl/main.ts",
+      "capabilities": [
+        "environment-ibl",
+        "diffuse-irradiance-cubemap",
+        "prefiltered-specular-cubemap",
+        "pbr-metallic-roughness",
+        "environment-rotation"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "materials",
+        "order": 1
+      }
+    },
+    {
+      "id": "planar-mirror",
+      "title": "Planar Mirror",
+      "entry": "planar-mirror/main.ts",
+      "capabilities": [
+        "planar-reflection",
+        "render-to-texture",
+        "oblique-clipping"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 14
+      }
+    },
+    {
+      "id": "postprocess",
+      "title": "Post-processing",
+      "entry": "postprocess/main.ts",
+      "capabilities": [
+        "postprocess",
+        "render-pipeline"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "postprocess",
+        "order": 0
+      }
+    },
+    {
+      "id": "raycast-bvh",
+      "title": "Raycast BVH",
+      "entry": "raycast-bvh/main.ts",
+      "capabilities": [
+        "raycast-bvh"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "interaction",
+        "order": 2
+      }
+    },
+    {
+      "id": "render-pipeline",
+      "title": "Render Pipeline",
+      "entry": "render-pipeline/main.ts",
+      "capabilities": [
+        "render-pipeline",
+        "frame-diagnostics"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 1
+      }
+    },
+    {
+      "id": "reverse-z",
+      "title": "Reverse-Z",
+      "entry": "reverse-z/main.ts",
+      "capabilities": [
+        "reverse-z"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "cameras",
+        "order": 3
+      }
+    },
+    {
+      "id": "rtt",
+      "title": "Render to Texture",
+      "entry": "rtt/main.ts",
+      "capabilities": [
+        "rtt"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "postprocess",
+        "order": 3
+      }
+    },
+    {
+      "id": "shapes2d",
+      "title": "2D Shapes",
+      "entry": "shapes2d/main.ts",
+      "capabilities": [
+        "2d",
+        "geometry"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 8
+      }
+    },
+    {
+      "id": "sky",
+      "title": "Sky",
+      "entry": "sky/main.ts",
+      "capabilities": [
+        "sky",
+        "environment"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "rendering",
+        "order": 6
+      }
+    },
+    {
+      "id": "sobel-postprocess",
+      "title": "Sobel Postprocess",
+      "entry": "sobel-postprocess/main.ts",
+      "capabilities": [
+        "sobel-postprocess"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "postprocess",
+        "order": 2
+      }
+    },
+    {
+      "id": "taa-postprocess",
+      "title": "Temporal Anti-Aliasing",
+      "entry": "taa-postprocess/main.ts",
+      "capabilities": [
+        "temporal-antialiasing",
+        "projection-jitter",
+        "history-reprojection",
+        "depth-rejection"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "postprocess",
+        "order": 4
+      }
+    },
+    {
+      "id": "motion-blur",
+      "title": "Camera and Object Motion Blur",
+      "entry": "motion-blur/main.ts",
+      "capabilities": [
+        "motion-blur",
+        "motion-vectors",
+        "camera-motion",
+        "object-motion",
+        "depth-rejection",
+        "postprocess"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "postprocess",
+        "order": 6
+      }
+    },
+    {
+      "id": "ambient-occlusion",
+      "title": "Ambient Occlusion · GTAO / SAO / SSAO",
+      "entry": "ambient-occlusion/main.ts",
+      "capabilities": [
+        "ambient-occlusion",
+        "gtao",
+        "sao",
+        "ssao",
+        "linear-depth",
+        "view-normal",
+        "postprocess",
+        "webgpu"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": true,
+        "baseline": "review/baselines/product-screenshots/ambient-occlusion.json"
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "postprocess",
+        "order": 7
+      }
+    },
+    {
+      "id": "spine-viewer",
+      "title": "Spine Viewer",
+      "entry": "spine-viewer/main.ts",
+      "capabilities": [
+        "spine",
+        "asset-lifecycle"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": true,
+        "baseline": "review/baselines/product-screenshots/spine-animation.json"
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 1
+      }
+    },
+    {
+      "id": "svg-geometry",
+      "title": "SVG Geometry",
+      "entry": "svg-geometry/main.ts",
+      "capabilities": [
+        "svg-geometry"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "rendering",
+        "order": 9
+      }
+    },
+    {
+      "id": "texture-convolution",
+      "title": "WebGPU Blur Comparison",
+      "entry": "texture-convolution/main.ts",
+      "capabilities": [
+        "texture-convolution",
+        "separable-gaussian-blur",
+        "box-blur",
+        "mipmap-blur",
+        "kawase-blur",
+        "split-comparison"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "compute",
+        "order": 2
+      }
+    },
+    {
+      "id": "transform3d-basis",
+      "title": "Basis Transform3D",
+      "entry": "transform3d-basis/main.ts",
+      "capabilities": [
+        "transform3d-basis"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "cameras",
+        "order": 2
+      }
+    },
+    {
+      "id": "viewport-scissor",
+      "title": "Viewport & Scissor",
+      "entry": "viewport-scissor/main.ts",
+      "capabilities": [
+        "viewport-scissor"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "rendering",
+        "order": 11
+      }
+    },
+    {
+      "id": "particles-2d",
+      "title": "Native 2D Particles",
+      "entry": "particles-2d/main.ts",
+      "capabilities": [
+        "particle-system",
+        "soa-simulation",
+        "gpu-instancing",
+        "additive-blending",
+        "2d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 16
+      }
+    },
+    {
+      "id": "particles-3d",
+      "title": "Native 3D Particles",
+      "entry": "particles-3d/main.ts",
+      "capabilities": [
+        "particle-system",
+        "soa-simulation",
+        "gpu-instancing",
+        "camera-facing-billboard",
+        "view-local-radix-sort",
+        "depth-test",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 17
+      }
+    },
+    {
+      "id": "triangle-disintegration",
+      "title": "Triangle Dust Disintegration",
+      "entry": "triangle-disintegration/main.ts",
+      "capabilities": [
+        "geometry-processing",
+        "triangle-separation",
+        "non-indexed-geometry",
+        "gpu-vertex-animation",
+        "procedural-dust",
+        "webgpu",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 18
+      }
+    },
+    {
+      "id": "geometry-subdivision",
+      "title": "Geometry Subdivision",
+      "entry": "geometry-subdivision/main.ts",
+      "capabilities": [
+        "geometry-processing",
+        "triangle-subdivision",
+        "shared-edge-midpoints",
+        "vertex-displacement",
+        "pbr-metallic-roughness",
+        "webgpu",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 19
+      }
+    },
+    {
+      "id": "geometry-simplification",
+      "title": "Geometry Simplification",
+      "entry": "geometry-simplification/main.ts",
+      "capabilities": [
+        "geometry-processing",
+        "mesh-simplification",
+        "quadric-error-metrics",
+        "edge-collapse",
+        "topology-preservation",
+        "wireframe",
+        "webgpu",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 20
+      }
+    },
+    {
+      "id": "shadow-map",
+      "title": "Multiple Shadow Maps",
+      "entry": "shadow-map/main.ts",
+      "capabilities": [
+        "directional-light",
+        "multiple-shadow-maps",
+        "depth-texture-array",
+        "percentage-closer-filtering",
+        "pbr-metallic-roughness",
+        "webgpu",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": true,
+        "baseline": "review/baselines/product-screenshots/multiple-directional-shadows.json"
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 21
+      }
+    },
+    {
+      "id": "cubemap",
+      "title": "Cubemap",
+      "entry": "cubemap/main.ts",
+      "capabilities": [
+        "cubemap",
+        "texture-cube",
+        "six-face-upload",
+        "skybox",
+        "environment-reflection",
+        "procedural-texture",
+        "webgpu",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "rendering",
+        "order": 22
+      }
+    },
+    {
+      "id": "equirectangular-reflection",
+      "title": "Equirectangular Reflection Map",
+      "entry": "equirectangular-reflection/main.ts",
+      "capabilities": [
+        "equirectangular-reflection-map",
+        "equirectangular-to-cubemap",
+        "environment-reflection",
+        "pbr-metallic-roughness",
+        "skybox",
+        "webgpu",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "materials",
+        "order": 12
+      }
+    },
+    {
+      "id": "refraction-glass",
+      "title": "PBR Glass Refraction",
+      "entry": "refraction-glass/main.ts",
+      "capabilities": [
+        "pbr-metallic-roughness",
+        "scene-color-capture",
+        "screen-space-refraction",
+        "transmission",
+        "volume-thickness",
+        "ior",
+        "beer-lambert-attenuation",
+        "webgpu",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "materials",
+        "order": 13
+      }
+    },
+    {
+      "id": "shader-language-lab",
+      "title": "Shader Language Lab",
+      "entry": "shader-language-lab/main.ts",
+      "capabilities": [
+        "shader-language",
+        "typed-shader-ir",
+        "wgsl-codegen",
+        "glsl-es300-codegen",
+        "webgpu",
+        "webgl2",
+        "pixel-parity",
+        "reflection",
+        "source-map",
+        "pbr-material-graph",
+        "normal-map",
+        "metallic-roughness",
+        "fog",
+        "gltf-animation3d",
+        "gpu-morph",
+        "skinning",
+        "character-five-pass",
+        "motion-vectors"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "materials",
+        "order": 14
+      }
+    },
+    {
+      "id": "shader-language-character-material",
+      "title": "Shader Language Character Material",
+      "entry": "shader-language-character-material/main.ts",
+      "capabilities": [
+        "shader-language",
+        "typed-shader-ir",
+        "precompiled-shader-artifact",
+        "webgpu",
+        "gltf-animation3d",
+        "character-material",
+        "gpu-morph",
+        "skinning",
+        "character-five-pass",
+        "shared-deformation-abi",
+        "motion-vectors",
+        "shadow",
+        "outline-selection"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "materials",
+        "order": 15
+      }
+    },
+    {
+      "id": "clipping-planes",
+      "title": "Multiple Clipping Planes",
+      "entry": "clipping-planes/main.ts",
+      "capabilities": [
+        "clipping-planes",
+        "entity-scoped-rendering",
+        "world-space-planes",
+        "pbr-metallic-roughness",
+        "directional-shadow",
+        "gpu-driven",
+        "webgpu",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "materials",
+        "order": 16
+      }
+    },
+    {
+      "id": "navmesh-rts",
+      "title": "NavMesh RTS Navigation",
+      "entry": "navmesh-rts/main.ts",
+      "capabilities": [
+        "navmesh",
+        "pathfinding",
+        "agent-clearance",
+        "dynamic-obstacles",
+        "rts-controls",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "interaction",
+        "order": 6
+      }
+    },
+    {
+      "id": "navmesh-first-person",
+      "title": "NavMesh Hole + First Person",
+      "entry": "navmesh-first-person/main.ts",
+      "capabilities": [
+        "navmesh",
+        "surface-hole",
+        "local-surface-sampling",
+        "first-person-controls",
+        "pointer-lock",
+        "jump",
+        "step-navigation",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "interaction",
+        "order": 8
+      }
+    },
+    {
+      "id": "wfc-map",
+      "title": "Wave Function Collapse Map",
+      "entry": "wfc-map/main.ts",
+      "capabilities": [
+        "tilemap",
+        "2d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "compute",
+        "order": 1
+      }
+    }
+  ],
+  "catalog": {
+    "groups": [
+      {
+        "id": "rendering",
+        "title": "Rendering",
+        "icon": "R",
+        "order": 0,
+        "expanded": true
+      },
+      {
+        "id": "materials",
+        "title": "Materials & Textures",
+        "icon": "M",
+        "order": 1,
+        "expanded": true
+      },
+      {
+        "id": "cameras",
+        "title": "Camera & Transforms",
+        "icon": "C",
+        "order": 2,
+        "expanded": true
+      },
+      {
+        "id": "postprocess",
+        "title": "Post Processing",
+        "icon": "P",
+        "order": 3,
+        "expanded": true
+      },
+      {
+        "id": "compute",
+        "title": "Compute",
+        "icon": "G",
+        "order": 4,
+        "expanded": true
+      },
+      {
+        "id": "interaction",
+        "title": "Interaction & Debug",
+        "icon": "I",
+        "order": 5,
+        "expanded": true
+      },
+      {
+        "id": "physics",
+        "title": "Physics",
+        "icon": "B",
+        "order": 6,
+        "expanded": true
+      },
+      {
+        "id": "assets-ui",
+        "title": "Assets & UI",
+        "icon": "A",
+        "order": 7,
+        "expanded": true
+      }
+    ]
+  }
+}

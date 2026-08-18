@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 · 3D 刚体碰撞与拖拽</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <link rel="stylesheet" href="../physics3d-example.css" />
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <aside class="panel">
+    <h1>3D 刚体碰撞与拖拽</h1>
+    <p class="intro">动态 box/sphere、静态边界、CCD 与射线拾取。鼠标拖拽通过后端无关的弹簧约束拉动物体。</p>
+    <div class="badges"><span class="badge">Physics3DSystem</span><span class="badge">Rapier adapter</span><span class="badge">ray cast</span></div>
+    <div class="metric"><span>交互状态</span><strong id="status">点击物体并拖拽</strong></div>
+    <button id="reset" type="button">重置刚体</button>
+  </aside>
+  <div class="hint">左键物体：拖拽 · 左键空白：Orbit · 滚轮：缩放</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

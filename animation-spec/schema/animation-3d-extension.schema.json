@@ -1,0 +1,573 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haiyue.dev/schema/animation/extension/animation-3d/1.json",
+  "title": "Haiyue native 3D animation extension payload v1",
+  "type": "object",
+  "required": ["format", "mode", "coordinateSystem", "viewport", "materials", "nodes", "clips"],
+  "properties": {
+    "format": { "const": "haiyue-animation-3d@1" },
+    "mode": { "const": "native-3d" },
+    "coordinateSystem": { "$ref": "#/$defs/coordinateSystem" },
+    "viewport": { "$ref": "#/$defs/viewport" },
+    "materials": { "type": "array", "items": { "$ref": "#/$defs/material" } },
+    "nodes": { "type": "array", "items": { "$ref": "#/$defs/node" } },
+    "clips": { "type": "array", "items": { "$ref": "#/$defs/clip" } },
+    "stateMachine": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/stateMachine" }
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "coordinateSystem": {
+      "type": "object",
+      "required": ["handedness", "upAxis", "forwardAxis", "unit", "angles", "rotationStorage"],
+      "properties": {
+        "handedness": { "const": "right" },
+        "upAxis": { "const": "+y" },
+        "forwardAxis": { "const": "-z" },
+        "unit": { "const": "meter" },
+        "angles": { "const": "radian" },
+        "rotationStorage": { "const": "normalized-xyzw-quaternion" }
+      },
+      "additionalProperties": false
+    },
+    "viewport": {
+      "type": "object",
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "vec2": {
+      "type": "array",
+      "prefixItems": [{ "type": "number" }, { "type": "number" }],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "vec3": {
+      "type": "array",
+      "prefixItems": [{ "type": "number" }, { "type": "number" }, { "type": "number" }],
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "nonNegativeVec3": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "number", "minimum": 0 },
+        { "type": "number", "minimum": 0 },
+        { "type": "number", "minimum": 0 }
+      ],
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "vec4": {
+      "type": "array",
+      "prefixItems": [{ "type": "number" }, { "type": "number" }, { "type": "number" }, { "type": "number" }],
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "color3": {
+      "type": "array",
+      "items": { "type": "number", "minimum": 0 },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "color4": {
+      "type": "array",
+      "items": { "type": "number", "minimum": 0, "maximum": 1 },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "range": {
+      "oneOf": [
+        { "type": "number" },
+        {
+          "type": "array",
+          "prefixItems": [{ "type": "number" }, { "type": "number" }],
+          "minItems": 2,
+          "maxItems": 2
+        }
+      ]
+    },
+    "transform": {
+      "type": "object",
+      "required": ["translation", "rotation", "scale"],
+      "properties": {
+        "translation": { "$ref": "#/$defs/vec3" },
+        "rotation": { "$ref": "#/$defs/vec4" },
+        "scale": { "$ref": "#/$defs/vec3" }
+      },
+      "additionalProperties": false
+    },
+    "material": {
+      "type": "object",
+      "required": ["id", "name", "baseColorFactor", "metallicFactor", "roughnessFactor", "emissiveFactor", "alphaMode", "doubleSided"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "baseColorFactor": { "$ref": "#/$defs/color4" },
+        "metallicFactor": { "type": "number", "minimum": 0, "maximum": 1 },
+        "roughnessFactor": { "type": "number", "minimum": 0, "maximum": 1 },
+        "emissiveFactor": { "$ref": "#/$defs/color3" },
+        "alphaMode": { "enum": ["opaque", "mask", "blend"] },
+        "alphaCutoff": { "type": "number", "minimum": 0, "maximum": 1 },
+        "doubleSided": { "type": "boolean" },
+        "baseColorTexture": { "type": "string", "minLength": 1 },
+        "normalTexture": { "type": "string", "minLength": 1 },
+        "metallicRoughnessTexture": { "type": "string", "minLength": 1 },
+        "emissiveTexture": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "camera": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "fovYRadians", "near", "far"],
+          "properties": {
+            "kind": { "const": "perspective" },
+            "fovYRadians": { "type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 3.141592653589793 },
+            "near": { "type": "number", "exclusiveMinimum": 0 },
+            "far": { "type": "number", "exclusiveMinimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "orthoHeight", "near", "far"],
+          "properties": {
+            "kind": { "const": "orthographic" },
+            "orthoHeight": { "type": "number", "exclusiveMinimum": 0 },
+            "near": { "type": "number", "minimum": 0 },
+            "far": { "type": "number", "exclusiveMinimum": 0 }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "particle": {
+      "type": "object",
+      "required": ["maxParticles", "emissionRate", "burst", "duration", "loop", "seed", "lifetime", "speed", "direction", "spread", "gravity", "startSize", "endSize", "rotation", "angularVelocity", "startColor", "endColor", "shape", "blendMode", "radial", "opacity", "depthTest", "depthWrite", "sortMode"],
+      "properties": {
+        "maxParticles": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+        "emissionRate": { "type": "number", "minimum": 0 },
+        "burst": { "type": "integer", "minimum": 0 },
+        "duration": { "type": "number", "exclusiveMinimum": 0 },
+        "loop": { "type": "boolean" },
+        "seed": { "type": "integer" },
+        "lifetime": { "$ref": "#/$defs/range" },
+        "speed": { "$ref": "#/$defs/range" },
+        "direction": { "$ref": "#/$defs/vec3" },
+        "spread": { "type": "number", "minimum": 0, "maximum": 3.141592653589793 },
+        "gravity": { "$ref": "#/$defs/vec3" },
+        "startSize": { "$ref": "#/$defs/range" },
+        "endSize": { "$ref": "#/$defs/range" },
+        "rotation": { "$ref": "#/$defs/range" },
+        "angularVelocity": { "$ref": "#/$defs/range" },
+        "startColor": { "$ref": "#/$defs/color4" },
+        "endColor": { "$ref": "#/$defs/color4" },
+        "shape": { "enum": ["point", "box", "sphere"] },
+        "shapeSize": { "$ref": "#/$defs/nonNegativeVec3" },
+        "shapeRadius": { "type": "number", "minimum": 0 },
+        "blendMode": { "enum": ["normal", "additive"] },
+        "textureResource": { "type": "string", "minLength": 1 },
+        "radial": { "type": "boolean" },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "depthTest": { "type": "boolean" },
+        "depthWrite": { "type": "boolean" },
+        "sortMode": { "enum": ["none", "back-to-front"] }
+      },
+      "additionalProperties": false
+    },
+    "component": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["id", "kind", "projection"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "kind": { "const": "camera3d" },
+            "projection": { "$ref": "#/$defs/camera" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["id", "kind", "primitive", "materialId"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "kind": { "const": "primitive3d" },
+            "primitive": { "enum": ["box", "sphere", "plane", "cylinder", "cone"] },
+            "materialId": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["id", "kind", "resource"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "kind": { "const": "model3d" },
+            "resource": { "type": "string", "minLength": 1 },
+            "materialOverrides": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["slot", "materialId"],
+                "properties": {
+                  "slot": { "type": "string", "minLength": 1 },
+                  "materialId": { "type": "string", "minLength": 1 }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["id", "kind", "descriptor"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "kind": { "const": "particle3d" },
+            "descriptor": { "$ref": "#/$defs/particle" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "node": {
+      "type": "object",
+      "required": ["id", "name", "transform", "components"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "parent": { "type": "string", "minLength": 1 },
+        "start": { "type": "number", "minimum": 0 },
+        "duration": { "type": "number", "exclusiveMinimum": 0 },
+        "transform": { "$ref": "#/$defs/transform" },
+        "components": { "type": "array", "items": { "$ref": "#/$defs/component" } }
+      },
+      "additionalProperties": false
+    },
+    "bindingTarget": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "nodeId"],
+          "properties": {
+            "kind": { "const": "node-id" },
+            "nodeId": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "segments"],
+          "properties": {
+            "kind": { "const": "node-path" },
+            "segments": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "slot"],
+          "properties": {
+            "kind": { "const": "slot" },
+            "slot": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "binding": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["id", "target", "path", "valueType", "valueSize"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "target": { "$ref": "#/$defs/bindingTarget" },
+            "path": { "const": "transform.translation" },
+            "valueType": { "const": "vec3" },
+            "valueSize": { "const": 3 }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["id", "target", "path", "valueType", "valueSize"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "target": { "$ref": "#/$defs/bindingTarget" },
+            "path": { "const": "transform.rotation" },
+            "valueType": { "const": "quaternion" },
+            "valueSize": { "const": 4 }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["id", "target", "path", "valueType", "valueSize"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "target": { "$ref": "#/$defs/bindingTarget" },
+            "path": { "const": "transform.scale" },
+            "valueType": { "const": "vec3" },
+            "valueSize": { "const": 3 }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["id", "target", "path", "valueType", "valueSize"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "target": { "$ref": "#/$defs/bindingTarget" },
+            "path": { "const": "morph.weights" },
+            "valueType": { "const": "weights" },
+            "valueSize": { "type": "integer", "minimum": 1 }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["id", "target", "path", "component", "property", "valueType", "valueSize"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "target": { "$ref": "#/$defs/bindingTarget" },
+            "path": { "const": "property" },
+            "component": { "enum": ["material3d", "camera3d"] },
+            "property": { "enum": ["baseColorFactor", "metallicFactor", "roughnessFactor", "emissiveFactor", "alphaCutoff", "fovYRadians", "near", "far", "orthoHeight"] },
+            "valueType": { "enum": ["scalar", "vec3", "vec4"] },
+            "valueSize": { "enum": [1, 3, 4] }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "track": {
+      "type": "object",
+      "required": ["id", "binding", "interpolation", "times", "values"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "binding": { "$ref": "#/$defs/binding" },
+        "interpolation": { "enum": ["step", "linear", "cubic-spline"] },
+        "times": { "type": "array", "minItems": 1, "items": { "type": "number", "minimum": 0 } },
+        "values": { "type": "array", "minItems": 1, "items": { "type": "number" } }
+      },
+      "additionalProperties": false
+    },
+    "event": {
+      "type": "object",
+      "required": ["id", "time", "name"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "time": { "type": "number", "minimum": 0 },
+        "name": { "type": "string", "minLength": 1 },
+        "payload": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "clip": {
+      "type": "object",
+      "required": ["format", "id", "name", "duration", "tracks", "events"],
+      "properties": {
+        "format": { "const": "haiyue-animation3d-clip@1" },
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "duration": { "type": "number", "exclusiveMinimum": 0 },
+        "tracks": { "type": "array", "items": { "$ref": "#/$defs/track" } },
+        "events": { "type": "array", "items": { "$ref": "#/$defs/event" } }
+      },
+      "additionalProperties": false
+    },
+    "parameter": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["name", "type", "defaultValue"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "type": { "const": "float" },
+            "defaultValue": { "type": "number" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["name", "type", "defaultValue"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "type": { "const": "integer" },
+            "defaultValue": { "type": "integer" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["name", "type", "defaultValue"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "type": { "const": "boolean" },
+            "defaultValue": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["name", "type"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "type": { "const": "trigger" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "motion": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "clipId"],
+          "properties": {
+            "kind": { "const": "clip" },
+            "clipId": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "parameter", "children"],
+          "properties": {
+            "kind": { "const": "blend-1d" },
+            "parameter": { "type": "string", "minLength": 1 },
+            "children": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["threshold", "motion"],
+                "properties": {
+                  "threshold": { "type": "number" },
+                  "motion": { "$ref": "#/$defs/motion" }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "algorithm", "parameterX", "parameterY", "children"],
+          "properties": {
+            "kind": { "const": "blend-2d" },
+            "algorithm": { "enum": ["cartesian", "directional"] },
+            "parameterX": { "type": "string", "minLength": 1 },
+            "parameterY": { "type": "string", "minLength": 1 },
+            "children": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["position", "motion"],
+                "properties": {
+                  "position": { "$ref": "#/$defs/vec2" },
+                  "motion": { "$ref": "#/$defs/motion" }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "condition": {
+      "type": "object",
+      "required": ["parameter", "operator"],
+      "properties": {
+        "parameter": { "type": "string", "minLength": 1 },
+        "operator": { "enum": ["greater", "greater-or-equal", "less", "less-or-equal", "equal", "not-equal", "is-true", "is-false", "triggered"] },
+        "value": { "oneOf": [{ "type": "number" }, { "type": "boolean" }] }
+      },
+      "additionalProperties": false
+    },
+    "stateMachine": {
+      "type": "object",
+      "required": ["format", "id", "name", "parameters", "layers"],
+      "properties": {
+        "format": { "const": "haiyue-animation3d-state-machine@1" },
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "parameters": { "type": "array", "items": { "$ref": "#/$defs/parameter" } },
+        "layers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "initialStateId", "states", "transitions"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "name": { "type": "string" },
+              "initialStateId": { "type": "string", "minLength": 1 },
+              "states": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["id", "name", "motion"],
+                  "properties": {
+                    "id": { "type": "string", "minLength": 1 },
+                    "name": { "type": "string" },
+                    "motion": { "$ref": "#/$defs/motion" },
+                    "speed": { "type": "number" },
+                    "speedParameter": { "type": "string", "minLength": 1 },
+                    "loop": { "enum": ["once", "repeat", "ping-pong"] }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "transitions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["id", "from", "to", "conditions", "duration"],
+                  "properties": {
+                    "id": { "type": "string", "minLength": 1 },
+                    "from": { "type": "string", "minLength": 1 },
+                    "to": { "type": "string", "minLength": 1 },
+                    "conditions": { "type": "array", "items": { "$ref": "#/$defs/condition" } },
+                    "duration": { "type": "number", "minimum": 0 },
+                    "hasExitTime": { "type": "boolean" },
+                    "exitTime": { "type": "number", "minimum": 0 },
+                    "destinationOffset": { "type": "number", "minimum": 0 },
+                    "interruption": { "enum": ["none", "source", "destination", "source-then-destination", "destination-then-source"] }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "blendMode": { "enum": ["override", "additive"] },
+              "weight": { "type": "number", "minimum": 0, "maximum": 1 },
+              "mask": {
+                "type": "object",
+                "properties": {
+                  "include": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+                  "exclude": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

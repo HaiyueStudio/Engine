@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "goal": "g05-async-worker-asset-substrate",
+  "protocol": {
+    "name": "haiyue-worker-channel",
+    "version": 1,
+    "request": {
+      "required": ["version", "id", "type"],
+      "version": 1,
+      "id": "finite number unique within one channel lifetime",
+      "type": "non-empty consumer-owned string",
+      "payload": "plain cloneable fields owned and validated by the consumer"
+    },
+    "success": {
+      "required": ["version", "id", "ok", "value"],
+      "version": 1,
+      "ok": true,
+      "value": "unknown until consumer validator accepts it"
+    },
+    "failure": {
+      "required": ["version", "id", "ok", "error"],
+      "version": 1,
+      "ok": false,
+      "error": "SerializedEngineError"
+    },
+    "cancel": {
+      "required": ["version", "id", "type"],
+      "version": 1,
+      "type": "cancel"
+    }
+  },
+  "channelPolicy": {
+    "defaultMaxPending": 64,
+    "latestWins": "a latestKey cancels and rejects its older request before the replacement is sent",
+    "abort": "abort-before-send posts nothing; in-flight abort posts a versioned cancel and rejects AbortError",
+    "faultRetirement": ["error", "messageerror", "version-mismatch", "invalid-envelope", "invalid-value"],
+    "dispose": "idempotent; removes listeners, rejects pending work and terminates at most once",
+    "lateReply": "ignored after request retirement"
+  },
+  "formalReleaseEvidence": false,
+  "candidateRevision": "commit-containing-this-schema"
+}

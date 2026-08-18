@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 · Image-based Lighting</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      color: #eef6ff;
+      background: #02050c;
+      font: 12px/1.45 Inter, ui-sans-serif, system-ui, sans-serif;
+    }
+    canvas { display: block; }
+    #panel {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: min(300px, calc(100vw - 32px));
+      padding: 15px;
+      border: 1px solid rgba(155, 198, 255, .2);
+      border-radius: 12px;
+      background: rgba(4, 10, 22, .82);
+      box-shadow: 0 20px 55px rgba(0, 0, 0, .34);
+      backdrop-filter: blur(16px);
+    }
+    h1 { margin: 0; font-size: 17px; font-weight: 680; letter-spacing: -.01em; }
+    .subtitle { margin: 4px 0 13px; color: rgba(222, 235, 255, .55); font-size: 11px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+    .badge {
+      padding: 3px 7px;
+      border: 1px solid rgba(104, 174, 255, .2);
+      border-radius: 99px;
+      color: rgba(214, 233, 255, .72);
+      background: rgba(43, 121, 210, .11);
+      font: 10px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .control { margin-top: 11px; }
+    .control-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: rgba(232, 241, 255, .76); }
+    output { color: #fff; font-variant-numeric: tabular-nums; }
+    input[type="range"] { width: 100%; margin: 6px 0 0; accent-color: #55a8ff; }
+    .switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; color: rgba(232, 241, 255, .76); }
+    input[type="checkbox"] { width: 16px; height: 16px; accent-color: #55a8ff; }
+    #legend {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      width: min(560px, calc(100vw - 36px));
+      transform: translateX(-50%);
+      color: rgba(235, 243, 255, .68);
+      text-align: center;
+      text-shadow: 0 1px 5px #000;
+      pointer-events: none;
+    }
+    .scale { display: flex; justify-content: space-between; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255, 255, 255, .35); font: 10px ui-monospace, monospace; }
+    #hint { position: fixed; right: 18px; bottom: 18px; color: rgba(231, 241, 255, .44); text-shadow: 0 1px 4px #000; }
+    body[data-ibl-mode="color-fallback"] .badge:first-child { color: #ffd48c; border-color: rgba(255, 180, 80, .3); background: rgba(220, 125, 30, .12); }
+    @media (max-width: 720px) { #hint { display: none; } #legend { bottom: 12px; } }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <aside id="panel">
+    <h1>Image-based Lighting</h1>
+    <p class="subtitle">同一环境同时提供漫反射辐照度与按粗糙度预过滤的镜面反射。</p>
+    <div class="badges">
+      <span class="badge">texture IBL</span>
+      <span class="badge">diffuse 16² × 6</span>
+      <span class="badge">specular 128² × 6 · 8 mips</span>
+    </div>
+    <label class="switch"><span>使用环境立方体贴图</span><input id="texture-toggle" type="checkbox" checked /></label>
+    <div class="control">
+      <div class="control-line"><label for="intensity">IBL 强度</label><output id="intensity-value">1.15</output></div>
+      <input id="intensity" type="range" min="0" max="2.5" step="0.01" value="1.15" />
+    </div>
+    <div class="control">
+      <div class="control-line"><label for="rotation">环境旋转</label><output id="rotation-value">0°</output></div>
+      <input id="rotation" type="range" min="-180" max="180" step="1" value="0" />
+    </div>
+    <label class="switch"><span>自动旋转环境</span><input id="animate" type="checkbox" /></label>
+  </aside>
+  <div id="legend">
+    <div>上排：金属　·　下排：非金属　·　从左至右粗糙度递增</div>
+    <div class="scale"><span>镜面 0.06</span><span>粗糙 1.00</span></div>
+  </div>
+  <div id="hint">拖动旋转 · 滚轮缩放</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

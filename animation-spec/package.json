@@ -1,0 +1,69 @@
+{
+  "name": "@haiyue/animation-spec",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Source-neutral HYA animation schemas, validation, binary codecs, and conversion adapters.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HaiyueStudio/Engine.git",
+    "directory": "animation-spec"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "schema",
+    "LICENSE",
+    "README.md",
+    "SPECIFICATION.md",
+    "test/fixtures/basic-lottie.json",
+    "src/**/*"
+  ],
+  "bin": {
+    "hya-convert": "./bin/hya-convert.mjs"
+  },
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./lottie": {
+      "source": "./src/lottie.ts",
+      "types": "./dist/lottie.d.ts",
+      "import": "./dist/lottie.js"
+    },
+    "./native3d": {
+      "source": "./src/native3d.ts",
+      "types": "./dist/native3d.d.ts",
+      "import": "./dist/native3d.js"
+    }
+  },
+  "scripts": {
+    "build": "node ../scripts/build-rollup-once.mjs",
+    "test": "node ../scripts/build-rollup-once.mjs && node --test --test-concurrency=1 \"test/**/*.test.mjs\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "samples:generate": "node ../scripts/build-rollup-once.mjs && node scripts/generate-samples.mjs",
+    "corpus:sync": "node ../scripts/hya-corpus/sync.mjs"
+  },
+  "devDependencies": {
+    "rollup": "^4.0.0",
+    "tslib": "^2.6.0",
+    "typescript": "^5.2.0"
+  },
+  "dependencies": {
+    "polygon-clipping": "^0.15.7"
+  }
+}

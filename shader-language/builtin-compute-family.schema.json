@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Haiyue Production Compute Family v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "id", "abiVersion", "passes"],
+  "properties": {
+    "format": { "const": "haiyue-production-compute-family" },
+    "version": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$" },
+    "abiVersion": { "const": 1 },
+    "passes": {
+      "type": "array", "minItems": 5, "maxItems": 5,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "operation", "entryPoint", "workgroupSize", "dispatch", "resources", "effects"],
+        "properties": {
+          "id": { "type": "string" },
+          "operation": { "enum": ["gpu-draw-command", "gpu-sort-bitonic", "instanced-cull", "instanced-depth-sort-key", "mesh3d-cull"] },
+          "entryPoint": { "const": "cs_main" },
+          "workgroupSize": { "$ref": "#/$defs/tuple" },
+          "dispatch": {
+            "type": "object", "additionalProperties": false,
+            "required": ["domain", "schedule", "ceilDivisor"],
+            "properties": {
+              "domain": { "enum": ["command-count", "padded-count", "instance-count"] },
+              "schedule": { "enum": ["single", "bitonic-network"] },
+              "ceilDivisor": { "$ref": "#/$defs/tuple" }
+            }
+          },
+          "resources": {
+            "type": "array", "minItems": 1,
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["id", "binding", "kind", "access", "minBindingSize"],
+              "properties": {
+                "id": { "type": "string" }, "binding": { "type": "integer", "minimum": 0 },
+                "kind": { "enum": ["uniform-buffer", "storage-buffer"] },
+                "access": { "enum": ["read", "read-write", "atomic-read-write"] },
+                "minBindingSize": { "type": "integer", "minimum": 0 }
+              }
+            }
+          },
+          "effects": {
+            "type": "array", "minItems": 1,
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["kind", "resource"],
+              "properties": { "kind": { "enum": ["store", "atomic-add"] }, "resource": { "type": "string" } }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "tuple": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "integer", "minimum": 1 } }
+  }
+}

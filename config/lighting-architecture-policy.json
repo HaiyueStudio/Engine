@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "forwardPlus": {
+    "decision": "hold",
+    "currentTotalLightCapacity": 8,
+    "minimumDeviceClassCount": 2,
+    "maximumSmallSceneGpuP95RegressionRatio": 0.05,
+    "evidencePath": "review/lighting/forward-plus-product-evidence.json"
+  },
+  "csm": {
+    "decision": "hold",
+    "minimumDeviceClassCount": 2,
+    "minimumRequiredShadowDistanceMeters": 100,
+    "evidencePath": "review/lighting/csm-product-evidence.json"
+  }
+}

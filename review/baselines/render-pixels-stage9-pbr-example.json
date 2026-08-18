@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "fixture": "haiyue-pbr-showcase-clearcoat-chrome-960x640",
+  "width": 960,
+  "height": 640,
+  "modes": {
+    "off": {
+      "hash": "2965a59f89c14956f9ac858ec0da838e2b83bf0805fc5d0301cd236ff4221a75",
+      "bytes": 112184
+    },
+    "on": {
+      "hash": "bb2a9d7bad58a81bf84fa87a5c84515599ae72925da9fd5cffe117e80b76b307",
+      "bytes": 117722
+    },
+    "specular": {
+      "hash": "b4db779170a56a63bc1000aea2f928efdd61321184d31c5e7f021050f9dcdbfb",
+      "bytes": 117193
+    },
+    "sheen": {
+      "hash": "e8bd5f0fde5086fc67a10bc52dde21cfb019e0bba70eb23da0c1b04dbbba246e",
+      "bytes": 115916
+    },
+    "transmission": {
+      "hash": "9f52675ee034207b20adf347f2ce688a7e6459499858b5410aed454c3a4dfcd9",
+      "bytes": 113206
+    },
+    "shadowInstancing": {
+      "hash": "82e2270da6f258b90555bd34af10ed28a67fd32385eb58582d76aab6918429d8",
+      "bytes": 130528
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "contractVersion": 1,
+  "phase": 4,
+  "status": "implemented",
+  "packageStatus": "private-workspace",
+  "implementation": "deformation-ir-multi-pass-pilot",
+  "primaryTarget": "webgpu-wgsl",
+  "deliverables": [
+    "canonical-typed-ir-aggregate-deformation-region-v1",
+    "morph-skin-object-displacement-single-order",
+    "automatic-vertex-attribute-reflection",
+    "automatic-pass-varying-reflection",
+    "forward-depth-shadow-motion-outline-derivation",
+    "shared-deformation-module-hash",
+    "current-previous-same-ir-motion-semantics",
+    "per-view-per-entity-history-policy",
+    "first-frame-seek-teleport-reset-policy",
+    "auxiliary-pass-surface-dce",
+    "real-gltf-animation3d-runtime-input",
+    "webgpu-multi-pass-pixel-gate",
+    "renderer-owned-resource-contract"
+  ],
+  "deformationOrder": [
+    "morph-target-blend",
+    "linear-blend-skinning",
+    "object-normal-sine-displacement"
+  ],
+  "pilot": {
+    "id": "multi-pass-deformation",
+    "status": "passed",
+    "realFixture": "extensions/test/fixtures/gltf/animation-characterization.gltf",
+    "animationTransition": "Idle -> Run",
+    "passCount": 5,
+    "morphTargetCount": 2,
+    "jointCount": 2,
+    "maximumSilhouetteMismatchPixels": 0,
+    "maximumResetVelocityChannelDelta": 1,
+    "unclassifiedFailureCount": 0
+  },
+  "resourceOwnership": {
+    "compilerCreatesGpuResources": false,
+    "objectStateUploadPerAnimationPhase": 1,
+    "jointStateUploadPerAnimationPhase": 1,
+    "multiPassDuplicateUploads": 0,
+    "ownerResidualAfterDestroy": 0
+  },
+  "productionMigrations": [],
+  "productionFirstFrameRegressionPercent": 0,
+  "productionFirstFrameEvidence": "Phase 4 remains a standalone compiler/WebGPU pilot; production renderer source and pre-generated shaders are unchanged.",
+  "releaseGateStatus": "standalone-webgpu-pilot-not-release-gating",
+  "deferred": [
+    "production-renderer-deformation-migration",
+    "production-shadow-depth-motion-adapters",
+    "arbitrary-deformation-node-plugin-registry",
+    "eight-influence-skinning",
+    "dual-quaternion-skinning",
+    "glsl-es300-codegen",
+    "runtime-renderer-adapter",
+    "production-pbr-migration",
+    "visual-shader-graph-editor",
+    "stable-public-api"
+  ],
+  "acceptance": [
+    "npm run typecheck -w ./shader-language",
+    "npm test -w ./shader-language",
+    "npm run shader-language:check",
+    "npm run verify:shader-language-stage4"
+  ]
+}

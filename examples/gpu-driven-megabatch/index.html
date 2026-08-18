@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPU Driven Mega Batch</title>
+  <style>
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #070b10; color: #dce7f5; font-family: system-ui, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .panel {
+      position: fixed; left: 16px; top: 16px; width: 340px; padding: 12px;
+      background: rgba(8, 12, 18, 0.86); border: 1px solid rgba(180, 210, 255, 0.24);
+      border-radius: 8px; backdrop-filter: blur(12px);
+    }
+    .buttons { display: grid; gap: 8px; margin-bottom: 10px; }
+    .counts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+    .layout { display: grid; gap: 8px; margin-bottom: 10px; }
+    button {
+      min-width: 0; border: 1px solid rgba(180, 210, 255, 0.24); color: #dce7f5;
+      background: rgba(255,255,255,0.08); border-radius: 6px; padding: 8px 10px;
+      cursor: pointer; text-align: left; font: inherit; font-size: 13px;
+    }
+    button.active { background: #2366a8; border-color: #58a6ff; color: #fff; }
+    .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; margin: 6px 0; font-size: 13px; }
+    .row span { color: #9fb2ca; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div class="panel">
+    <div class="buttons">
+      <button id="mode-simple">Simple</button>
+      <button id="mode-batched">Batched</button>
+      <button id="mode-gpu-driven">GPU driven</button>
+      <button id="mode-diagnostic">Diagnostic</button>
+    </div>
+    <div class="counts">
+      <button id="count-500">500</button>
+      <button id="count-2000">2k</button>
+      <button id="count-8000">8k</button>
+    </div>
+    <div class="layout">
+      <button id="layout-stress">Cull stress: off</button>
+    </div>
+    <div id="stats"></div>
+  </div>
+  <script src="./bundle.js"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>海月 · Shader Language Character Material</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    :root { color-scheme: dark; --bg: #050812; --panel: #0b1220; --line: #26344b; --muted: #91a4bf; --cyan: #48f2df; --pink: #ff4fa4; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-width: 320px; min-height: 100%; background: radial-gradient(circle at 50% -20%, #172946 0, var(--bg) 48%); color: #edf6ff; font: 13px/1.45 Inter, ui-sans-serif, system-ui, sans-serif; }
+    body { padding: 22px; }
+    button, input { font: inherit; }
+    .shell { width: min(1240px, 100%); margin: 0 auto; }
+    header { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+    .eyebrow { margin: 0 0 4px; color: var(--cyan); font: 700 10px/1.2 ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(21px, 3vw, 34px); letter-spacing: -.04em; }
+    .lead { max-width: 730px; margin: 8px 0 0; color: var(--muted); }
+    #status { padding: 8px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: #0a1120; font: 10px/1 ui-monospace, monospace; white-space: nowrap; }
+    #status[data-status="passed"] { border-color: #48f2df66; color: var(--cyan); }
+    #status[data-status="failed"] { border-color: #ff4f6c66; color: #ff8298; }
+    .passes { display: grid; grid-template-columns: repeat(5, minmax(145px, 1fr)); gap: 10px; }
+    .pass { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #070c16; box-shadow: 0 18px 42px #0005; }
+    .pass__head { display: flex; justify-content: space-between; gap: 6px; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+    .pass strong { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+    .pass span { color: var(--muted); font: 9px/1.4 ui-monospace, monospace; }
+    canvas { display: block; width: 100%; aspect-ratio: 160 / 208; background: #02040a; }
+    .lower { display: grid; grid-template-columns: minmax(260px, .68fr) minmax(440px, 1.32fr); gap: 12px; margin-top: 12px; }
+    .panel { border: 1px solid var(--line); border-radius: 12px; background: #0b1220e8; }
+    .panel h2 { margin: 0; padding: 11px 13px; border-bottom: 1px solid var(--line); font-size: 12px; }
+    .controls { display: grid; gap: 11px; padding: 13px; }
+    label { display: grid; grid-template-columns: 1fr 54px; align-items: center; gap: 10px; color: #ccd9e9; font-size: 11px; }
+    input[type="color"] { width: 54px; height: 30px; padding: 2px; border: 1px solid var(--line); border-radius: 7px; background: transparent; }
+    button { padding: 8px 10px; border: 1px solid #48f2df55; border-radius: 7px; color: #cafff8; background: #48f2df0d; cursor: pointer; }
+    .chain { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; padding: 12px 13px 5px; }
+    .chip { padding: 5px 8px; border: 1px solid #ff4fa43d; border-radius: 999px; color: #ffd0e6; background: #ff4fa40b; font: 9px/1 ui-monospace, monospace; }
+    .arrow { color: #60738e; }
+    .evidence { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; margin: 9px 13px 13px; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--line); }
+    .datum { min-width: 0; padding: 10px; background: var(--panel); }
+    .datum span { display: block; color: var(--muted); font-size: 8px; letter-spacing: .05em; text-transform: uppercase; }
+    .datum strong { display: block; margin-top: 4px; overflow: hidden; font: 11px/1.25 ui-monospace, monospace; text-overflow: ellipsis; white-space: nowrap; }
+    #result { display: none; }
+    @media (max-width: 900px) { .passes { grid-template-columns: repeat(3, 1fr); } .lower { grid-template-columns: 1fr; } header { align-items: flex-start; flex-direction: column; } }
+    @media (max-width: 560px) { body { padding: 12px; } .passes { grid-template-columns: repeat(2, 1fr); } .evidence { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body data-render-status="loading">
+  <main class="shell">
+    <header>
+      <div>
+        <p class="eyebrow">Build-time Shader Language artifact</p>
+        <h1>Character Material · Five Pass Contract</h1>
+        <p class="lead">真实 19-joint glTF 角色由 Animation3D 驱动；forward、depth、shadow、motion-vector 与 outline 共用 morph → skinning → displacement 和 current/previous history ABI。</p>
+      </div>
+      <span id="status" data-status="loading">starting</span>
+    </header>
+
+    <section class="passes" aria-label="Character material pass family">
+      <article class="pass"><div class="pass__head"><strong>Forward</strong><span id="metric-forward">—</span></div><canvas data-character-pass="forward"></canvas></article>
+      <article class="pass"><div class="pass__head"><strong>Depth</strong><span id="metric-depth">—</span></div><canvas data-character-pass="depth"></canvas></article>
+      <article class="pass"><div class="pass__head"><strong>Shadow</strong><span id="metric-shadow">—</span></div><canvas data-character-pass="shadow"></canvas></article>
+      <article class="pass"><div class="pass__head"><strong>Motion</strong><span id="metric-motion-vector">—</span></div><canvas data-character-pass="motion-vector"></canvas></article>
+      <article class="pass"><div class="pass__head"><strong>Outline</strong><span id="metric-outline-selection">—</span></div><canvas data-character-pass="outline-selection"></canvas></article>
+    </section>
+
+    <section class="lower">
+      <article class="panel">
+        <h2>Material parameters · uniform only</h2>
+        <div class="controls">
+          <label>Forward color <input id="forward-color" type="color" value="#29c7ff" /></label>
+          <label>Outline color <input id="outline-color" type="color" value="#ff4fa4" /></label>
+          <button id="animation-toggle" type="button">Pause animation</button>
+        </div>
+      </article>
+      <article class="panel">
+        <h2>Generated artifact and runtime evidence</h2>
+        <div class="chain"><span class="chip">glTF clip</span><span class="arrow">→</span><span class="chip">Animation3DMixer</span><span class="arrow">→</span><span class="chip">morph</span><span class="arrow">→</span><span class="chip">skinning</span><span class="arrow">→</span><span class="chip">displacement</span><span class="arrow">→</span><span class="chip">5 passes</span></div>
+        <div class="evidence">
+          <div class="datum"><span>Shared module</span><strong id="module-hash">—</strong></div>
+          <div class="datum"><span>Pass count</span><strong id="pass-count">—</strong></div>
+          <div class="datum"><span>Compiler boundary</span><strong id="compiler-boundary">—</strong></div>
+          <div class="datum"><span>Runtime</span><strong id="runtime">—</strong></div>
+          <div class="datum"><span>Asset</span><strong id="asset">—</strong></div>
+          <div class="datum"><span>Geometry</span><strong id="geometry">—</strong></div>
+          <div class="datum"><span>Silhouette mismatch</span><strong id="silhouette">—</strong></div>
+          <div class="datum"><span>Uploads</span><strong id="uploads">—</strong></div>
+          <div class="datum"><span>Velocity delta</span><strong id="velocity">—</strong></div>
+          <div class="datum"><span>Material pixel delta</span><strong id="material-delta">—</strong></div>
+          <div class="datum"><span>Pipeline rebuilds</span><strong id="pipeline-rebuilds">—</strong></div>
+        </div>
+      </article>
+    </section>
+    <pre id="result" aria-hidden="true"></pre>
+  </main>
+  <script src="./bundle.js"></script>
+</body>
+</html>

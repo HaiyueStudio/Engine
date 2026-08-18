@@ -1,0 +1,277 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haiyue.dev/schema/shader-reflection-v1.schema.json",
+  "title": "Haiyue Shader Reflection v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "compilerVersion",
+    "target",
+    "profile",
+    "irHash",
+    "variantKey",
+    "entryPoints",
+    "resources",
+    "uniformBlocks",
+    "vertexSemantics",
+    "varyings",
+    "capabilities",
+    "passRequirements",
+    "sourceMap"
+  ],
+  "properties": {
+    "format": {
+      "const": "haiyue-shader-reflection"
+    },
+    "version": {
+      "const": 1
+    },
+    "compilerVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target": {
+      "enum": [
+        "webgpu-wgsl",
+        "webgl2-glsl-es300"
+      ]
+    },
+    "profile": {
+      "enum": [
+        "webgpu-portable",
+        "webgpu-enhanced",
+        "webgl2-compatible"
+      ]
+    },
+    "irHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "variantKey": {
+      "type": "string",
+      "minLength": 1
+    },
+    "entryPoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stage",
+          "name"
+        ],
+        "properties": {
+          "stage": {
+            "enum": [
+              "vertex",
+              "fragment",
+              "compute"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "space",
+          "group",
+          "binding",
+          "kind",
+          "visibility"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "space": {
+            "enum": [
+              "frame",
+              "object",
+              "material",
+              "pass"
+            ]
+          },
+          "group": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "binding": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "kind": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "vertex",
+                "fragment",
+                "compute"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "uniformBlocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "alignment",
+          "byteSize",
+          "fields"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "alignment": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "byteSize": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "type",
+                "offset",
+                "size"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "offset": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "size": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "arrayStride": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "matrixStride": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "vertexSemantics": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "varyings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "semantic",
+          "location",
+          "type",
+          "interpolation"
+        ],
+        "properties": {
+          "semantic": {
+            "type": "string"
+          },
+          "location": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "type": {
+            "type": "string"
+          },
+          "interpolation": {
+            "enum": [
+              "perspective",
+              "linear",
+              "flat"
+            ]
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "passRequirements": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "sourceMap": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceId",
+          "generatedStartLine",
+          "generatedEndLine"
+        ],
+        "properties": {
+          "sourceId": {
+            "type": "string"
+          },
+          "sourcePort": {
+            "type": "string"
+          },
+          "generatedStartLine": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "generatedEndLine": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    }
+  }
+}

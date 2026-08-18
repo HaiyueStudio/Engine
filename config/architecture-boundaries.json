@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "workspaces": {
+    "shader-language": {
+      "root": "shader-language",
+      "sources": ["shader-language/src"],
+      "packageNames": ["@haiyue/shader-language"],
+      "allowedWorkspaceDependencies": []
+    },
+    "animation-spec": {
+      "root": "animation-spec",
+      "sources": ["animation-spec/src"],
+      "packageNames": ["@haiyue/animation-spec"],
+      "allowedWorkspaceDependencies": []
+    },
+    "engine": {
+      "root": "engine",
+      "sources": ["engine/src"],
+      "packageNames": ["@haiyue/engine"],
+      "allowedWorkspaceDependencies": []
+    },
+    "extensions": {
+      "root": "extensions",
+      "sources": ["extensions/src"],
+      "packageNames": ["@haiyue/extensions"],
+      "allowedWorkspaceDependencies": ["animation-spec", "engine"]
+    },
+    "examples": {
+      "root": "examples",
+      "sources": ["examples"],
+      "packageNames": ["@haiyue/examples"],
+      "allowedWorkspaceDependencies": ["animation-spec", "engine", "extensions"]
+    }
+  }
+}

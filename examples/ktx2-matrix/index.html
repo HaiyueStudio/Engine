@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - KTX2 Matrix</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      color: #dbe7f7;
+      background: #080b10;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .matrix {
+      width: 100vw;
+      height: 100vh;
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      background: #080b10;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid #273142;
+      background: #101722;
+    }
+
+    .title {
+      margin-right: 12px;
+      font-size: 17px;
+      font-weight: 760;
+      color: #f8fbff;
+    }
+
+    button,
+    .file-label {
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      border: 1px solid #314059;
+      border-radius: 6px;
+      background: #172235;
+      color: #eef5ff;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 1px;
+      border-bottom: 1px solid #273142;
+      background: #273142;
+    }
+
+    .stat {
+      min-width: 0;
+      padding: 10px 12px;
+      background: #0f1621;
+    }
+
+    .stat-label {
+      color: #91a4bf;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      margin-top: 4px;
+      color: #f8fbff;
+      font-size: 15px;
+      font-weight: 720;
+      overflow-wrap: anywhere;
+    }
+
+    .content {
+      min-height: 0;
+      max-height: 100%;
+      overflow: auto;
+      padding: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #101722;
+      border: 1px solid #273142;
+    }
+
+    th,
+    td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #273142;
+      text-align: left;
+      vertical-align: top;
+      font-size: 12px;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #172235;
+      color: #a9bdd8;
+      font-weight: 680;
+    }
+
+    .name {
+      min-width: 170px;
+      color: #f8fbff;
+      font-weight: 650;
+      overflow-wrap: anywhere;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      height: 20px;
+      padding: 0 7px;
+      border-radius: 999px;
+      background: #22314a;
+      color: #c8d8ee;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .ok {
+      background: #123b2a;
+      color: #8df0bd;
+    }
+
+    .fail {
+      background: #471c25;
+      color: #ff9cad;
+    }
+
+    .warn {
+      background: #4a3514;
+      color: #ffd284;
+    }
+
+    .preview {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      border: 1px solid #33425a;
+      background: #05070b;
+    }
+
+    .muted {
+      color: #8ea1ba;
+    }
+
+    .error {
+      max-width: 360px;
+      color: #ffadb9;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 900px) {
+      .summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .content {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="matrix">
+    <div class="toolbar">
+      <div class="title">KTX2 Regression Matrix</div>
+      <label class="file-label">
+        Select KTX2 Files
+        <input id="file-input" type="file" accept=".ktx2,image/ktx2,application/ktx2" multiple />
+      </label>
+      <label class="file-label">
+        Select KTX2 Directory
+        <input id="directory-input" type="file" accept=".ktx2,image/ktx2,application/ktx2" multiple webkitdirectory />
+      </label>
+      <button id="clear-button" type="button">Clear</button>
+      <span id="status" class="muted">Waiting for KTX2 files.</span>
+    </div>
+    <section class="summary" id="summary"></section>
+    <section class="content">
+      <table>
+        <thead>
+          <tr>
+            <th>Preview</th>
+            <th>File</th>
+            <th>Shape</th>
+            <th>Format</th>
+            <th>Compression</th>
+            <th>Feature</th>
+            <th>Path</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </section>
+  </main>
+  <script src="./bundle.js"></script>
+</body>
+</html>

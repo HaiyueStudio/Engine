@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "goal": "g06-ci-supply-chain-release-rehearsal",
+  "candidateState": "g06-rehearsal-passed-g07-clean-replay-required",
+  "sourceBase": "3199ab752bd247c531189828f5cce785c05d3c6d",
+  "formalBaselineUpdated": false,
+  "milestoneStatusUpdated": false,
+  "externalPublishPerformed": false,
+  "delivered": [
+    "fast/smoke/full/device/release workflow routing policy",
+    "locked clean-CI bootstrap without historical dist or diagnostic artifact dependencies",
+    "production vulnerability, license, package-content and credential audit",
+    "checksums, in-toto provenance and CycloneDX SBOM for eight release-manifest artifacts",
+    "version, changelog, tag, npm, GitHub Release, recovery and rollback dry-run",
+    "independent post-build validation of artifact bytes, SBOM hashes, provenance inputs/runtime, release notes and raw evidence"
+  ],
+  "verification": [
+    { "command": "node --test scripts/fast-gate-workspace-policy.test.mjs scripts/release-*.test.mjs scripts/benchmark/cpu-benchmark-policy.test.mjs", "status": "passed", "testCount": 45 },
+    { "command": "node scripts/release-supply-chain.mjs --output artifacts/release/g06-supply-chain-check", "status": "passed", "productionHigh": 0, "productionCritical": 0 },
+    { "command": "node scripts/release-ci-bootstrap.mjs && npm run check:fast", "status": "passed" },
+    {
+      "command": "node scripts/release-rehearsal.mjs --candidate-snapshot",
+      "status": "passed",
+      "executionMode": "candidate-snapshot",
+      "candidateRevisionEvidence": "artifacts/release/rehearsal/report.json#source.revision",
+      "artifactCount": 8,
+      "report": "artifacts/release/rehearsal/report.json",
+      "formalBaselineSha256Before": "c9d208a6997a2c0c7c29965c88605dedb6f4e439669053cf587e560faddc5d91",
+      "formalBaselineSha256After": "c9d208a6997a2c0c7c29965c88605dedb6f4e439669053cf587e560faddc5d91"
+    },
+    {
+      "command": "node scripts/release-rehearsal-policy.mjs --bundle artifacts/release/rehearsal",
+      "status": "passed",
+      "validated": ["artifact bytes/checksums", "SBOM hashes", "provenance inputs/runtime", "release notes", "raw audit/package/app evidence", "rollback inputs"]
+    },
+    {
+      "command": "npm run check:slow -- --content-tier=full",
+      "status": "blocked-by-classified-product-pixel-gate",
+      "selectedTargetCount": 55,
+      "manualTargetCount": 0,
+      "failure": "Fog distance/height/no-fog PNG hashes and byte sizes differ from the existing pixel baseline on this local runner; no baseline update was performed."
+    }
+  ],
+  "handoff": {
+    "candidateArtifact": "artifacts/release/rehearsal/report.json",
+    "g07Required": "Replay from the frozen clean HEAD, run full and all required physical-device validators, then decide go/no-go.",
+    "knownLimits": [
+      "No tag, push, npm publish, GitHub Release, deployment, signing, notarization or artifact upload was executed.",
+      "Current-host Electron output is an unsigned preview; protected release runners must rebuild every intended platform.",
+      "Required Apple and Windows physical-device evidence remains owned by G07 and is not claimed by this candidate.",
+      "The local full content gate selected all 55 automatic targets but stopped at a classified Fog pixel mismatch; G07 must reproduce and visually review it on the frozen clean runner without reusing this local result.",
+      "npm ci reports one high advisory in the complete development graph; the required production-only audit covers 104 components and reports zero high/critical vulnerabilities."
+    ]
+  }
+}

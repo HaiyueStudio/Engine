@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Haiyue · Cubemap</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #030711; color: #edf7ff; }
+    canvas { display: block; width: 100vw; height: 100vh; cursor: grab; touch-action: none; }
+    canvas:active { cursor: grabbing; }
+    .panel {
+      position: fixed; z-index: 2; top: 20px; left: 20px;
+      width: min(390px, calc(100vw - 40px)); padding: 18px;
+      border: 1px solid rgba(104, 170, 222, .25); border-radius: 16px;
+      background: linear-gradient(145deg, rgba(5, 12, 25, .92), rgba(9, 18, 31, .78));
+      box-shadow: 0 28px 80px rgba(0, 0, 0, .48), inset 0 1px rgba(255, 255, 255, .04);
+      backdrop-filter: blur(18px);
+    }
+    .eyebrow { margin: 0 0 7px; color: #77d7ff; font: 700 10px ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -.025em; }
+    .intro { margin: 9px 0 14px; color: #91a7bb; font-size: 12px; line-height: 1.65; }
+    code { color: #a4e6ff; font: 11px ui-monospace, SFMono-Regular, monospace; }
+    .faces { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 14px; }
+    .face { padding: 7px 2px; border: 1px solid rgba(255, 255, 255, .16); border-radius: 8px; color: #fff; text-align: center; font: 750 10px ui-monospace, monospace; box-shadow: inset 0 -15px 22px rgba(0, 0, 0, .25); }
+    .face:nth-child(1) { background: #ef5350; } .face:nth-child(2) { background: #26c6da; }
+    .face:nth-child(3) { background: #66bb6a; } .face:nth-child(4) { background: #ffa726; }
+    .face:nth-child(5) { background: #42a5f5; } .face:nth-child(6) { background: #ab47bc; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 14px; }
+    .metric { padding: 8px 5px; border: 1px solid rgba(92, 136, 170, .18); border-radius: 9px; background: rgba(5, 13, 25, .64); text-align: center; }
+    .metric strong { display: block; font: 700 13px ui-monospace, monospace; }
+    .metric span { color: #607a90; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+    .controls { display: grid; gap: 8px; padding-top: 12px; border-top: 1px solid rgba(92, 136, 170, .16); }
+    label { display: grid; grid-template-columns: 76px 1fr 42px; align-items: center; gap: 8px; color: #9eb1c1; font-size: 11px; }
+    input[type="range"] { width: 100%; accent-color: #55b9ef; }
+    output { color: #9de3ff; text-align: right; font: 10px ui-monospace, monospace; }
+    button { min-height: 34px; margin-top: 3px; border: 1px solid #29445b; border-radius: 9px; background: #0b1927; color: #deeff8; cursor: pointer; }
+    button:hover, button.active { border-color: #62c6f3; background: #102b3c; box-shadow: 0 0 18px rgba(68, 183, 232, .13); }
+    .hint { position: fixed; right: 19px; bottom: 17px; color: rgba(184, 213, 228, .5); font-size: 10px; }
+    #result { display: none; }
+    @media (max-width: 680px) { .panel { top: 12px; left: 12px; width: calc(100vw - 24px); padding: 14px; } .hint { display: none; } }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <aside class="panel">
+    <p class="eyebrow">Texture Cube · Skybox · Reflection</p>
+    <h1>Cubemap</h1>
+    <p class="intro">六张程序化 face 被上传为六层 <code>GPUTexture</code>，通过 <code>createView({ dimension: 'cube' })</code> 同时驱动天空和反射球。</p>
+    <div class="faces" aria-label="Cubemap face order">
+      <div class="face">+X</div><div class="face">−X</div><div class="face">+Y</div>
+      <div class="face">−Y</div><div class="face">+Z</div><div class="face">−Z</div>
+    </div>
+    <div class="metrics">
+      <div class="metric"><strong>6</strong><span>Array layers</span></div>
+      <div class="metric"><strong>256²</strong><span>Face size</span></div>
+      <div class="metric"><strong>Cube</strong><span>View dimension</span></div>
+    </div>
+    <div class="controls">
+      <label for="rotation"><span>环境旋转</span><input id="rotation" type="range" min="-180" max="180" step="1" value="0" /><output id="rotation-value">0°</output></label>
+      <label for="reflectivity"><span>反射强度</span><input id="reflectivity" type="range" min="0" max="1" step="0.01" value="0.94" /><output id="reflectivity-value">94%</output></label>
+      <label for="exposure"><span>曝光</span><input id="exposure" type="range" min="0.35" max="1.65" step="0.01" value="1" /><output id="exposure-value">1.00</output></label>
+      <button id="auto-rotate" type="button" class="active" aria-pressed="true">自动旋转环境</button>
+    </div>
+  </aside>
+  <div class="hint">拖拽观察六个方向 · 滚轮缩放 · 调整环境旋转验证反射同步</div>
+  <pre id="result" aria-hidden="true"></pre>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

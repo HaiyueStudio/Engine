@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "planning-fixture-identity",
+  "sourceRevision": "04696d815265bb384119f25cd7d825e5977b1960",
+  "capturedAt": "2026-08-16",
+  "formalEvidence": false,
+  "publicContract": "review/api/release-manifest.json",
+  "fixtures": {
+    "shader": [
+      "shader-language/test/shader-cost-policy.test.mjs",
+      "shader-language/test/stage14-glsl-es300.test.mjs",
+      "scripts/verify-shader-language-stage14-dag.mjs"
+    ],
+    "renderScheduling": [
+      "engine/test/render-graph.test.mjs",
+      "engine/test/render-pipeline.test.mjs"
+    ],
+    "renderer": [
+      "engine/test/renderer-object-table.test.mjs",
+      "engine/test/render3d-gpu-driven-batch.test.mjs",
+      "engine/test/renderer-resource-lifecycle.test.mjs",
+      "scripts/verify-render-regressions.mjs"
+    ],
+    "asyncAssets": [
+      "engine/test/assets.test.mjs",
+      "extensions/test/asset-parser-contract.test.mjs",
+      "scripts/verify-webgpu-gltf-asset.mjs"
+    ],
+    "computeGui": [
+      "engine/test/compute-shader-family.test.mjs",
+      "engine/test/gui-runtime.test.mjs",
+      "engine/test/gui-events.test.mjs",
+      "engine/test/serialization.test.mjs"
+    ],
+    "sceneBatch": [
+      "engine/test/wasm-feasibility-benchmark.mjs",
+      "scripts/benchmark/real-renderer-scenario.mjs"
+    ]
+  },
+  "shaderCost": {
+    "generatedWgslBytes": 305504,
+    "generatedWgslFiles": 64,
+    "variantCount": 56,
+    "pipelineCount": 56
+  },
+  "notes": [
+    "This file freezes identities and existing declared cost values only.",
+    "It is not a CPU, GPU, pixel, browser, device, gzip, fidelity, or release baseline."
+  ]
+}

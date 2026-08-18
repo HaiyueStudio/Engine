@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - KTX2 3D Texture</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #06080c; color: #d8e2f2; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .hud {
+      position: fixed;
+      left: 16px;
+      top: 16px;
+      display: grid;
+      gap: 4px;
+      padding: 10px 12px;
+      border: 1px solid rgba(133, 153, 184, 0.26);
+      border-radius: 6px;
+      background: rgba(8, 12, 18, 0.72);
+      backdrop-filter: blur(10px);
+      pointer-events: none;
+    }
+    .title { font-size: 13px; font-weight: 700; color: #f8fafc; }
+    .meta { font-size: 12px; color: #9fb1c9; }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div class="hud">
+    <div class="title">KTX2 3D Texture</div>
+    <div id="meta" class="meta">Loading volume...</div>
+  </div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - Outline Postprocess</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #080a0d;
+      color: #edf2f7;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    canvas {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      touch-action: none;
+    }
+    #hud {
+      position: absolute;
+      left: 16px;
+      bottom: 14px;
+      color: rgba(237,242,247,0.58);
+      font-size: 12px;
+      pointer-events: none;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+    }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas" width="960" height="640"></canvas>
+  <div id="hud">left drag = orbit · scroll = zoom · GUI adjusts outline</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

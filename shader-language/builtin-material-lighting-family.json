@@ -1,0 +1,14 @@
+{
+  "format": "haiyue-production-material-lighting-family",
+  "version": 1,
+  "id": "engine-material-lighting",
+  "abiVersion": 1,
+  "passes": [
+    { "id": "pbr", "operation": "pbr" },
+    { "id": "pbr-clearcoat", "operation": "pbr-clearcoat" },
+    { "id": "pbr-transmission", "operation": "pbr-transmission" },
+    { "id": "pbr-transmission-clearcoat", "operation": "pbr-transmission-clearcoat" },
+    { "id": "blinn-phong", "operation": "blinn-phong" },
+    { "id": "toon", "operation": "toon" }
+  ]
+}

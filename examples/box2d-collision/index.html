@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - Box2D Collision</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      height: 100vh;
+      overflow: hidden;
+      background: #111318;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: monospace;
+      color: rgba(255,255,255,0.72);
+    }
+    canvas { display: block; }
+    #label {
+      position: absolute;
+      left: 16px;
+      top: 16px;
+      padding: 8px 10px;
+      background: rgba(0,0,0,0.42);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 6px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas" width="900" height="600"></canvas>
+  <div id="label">Box2D: dynamic bodies collide with static walls</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

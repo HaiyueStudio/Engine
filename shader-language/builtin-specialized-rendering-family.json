@@ -1,0 +1,15 @@
+{
+  "format": "haiyue-production-specialized-rendering-family",
+  "version": 1,
+  "id": "engine-specialized-rendering",
+  "abiVersion": 1,
+  "passes": [
+    { "id": "instanced-mesh3d", "operation": "instanced-mesh3d" },
+    { "id": "line3d", "operation": "line3d" },
+    { "id": "planar-mirror", "operation": "planar-mirror" },
+    { "id": "volume", "operation": "volume" },
+    { "id": "texture-convolution", "operation": "texture-convolution" },
+    { "id": "mipmap", "operation": "mipmap" },
+    { "id": "equirectangular-to-cube", "operation": "equirectangular-to-cube" }
+  ]
+}

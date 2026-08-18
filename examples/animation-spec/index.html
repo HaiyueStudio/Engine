@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lottie → HYA 工作台</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --panel: #090f20;
+      --panel-soft: #0e1830;
+      --line: #243454;
+      --muted: #91a0bd;
+      --text: #edf5ff;
+      --accent: #74f2ce;
+      --accent-2: #6fe0ff;
+      --danger: #ff7890;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #050713; color: var(--text); }
+    button, input, textarea { font: inherit; }
+    button {
+      border: 1px solid var(--line); border-radius: 8px; background: #12203f; color: var(--text);
+      min-height: 34px; padding: 7px 11px; cursor: pointer; transition: border-color .15s, background .15s, transform .15s;
+    }
+    button:hover:not(:disabled) { border-color: #5874a7; background: #192b50; }
+    button:active:not(:disabled) { transform: translateY(1px); }
+    button:disabled { cursor: default; opacity: .42; }
+    button.primary { color: #061511; border-color: #68d9ba; background: var(--accent); font-weight: 700; }
+    button.primary:hover:not(:disabled) { background: #9af8de; }
+    input[type="url"], textarea {
+      width: 100%; border: 1px solid var(--line); border-radius: 9px; outline: none;
+      background: #050b18; color: #dce9ff;
+    }
+    input[type="url"] { height: 36px; padding: 0 10px; }
+    textarea { min-height: 230px; padding: 10px; resize: vertical; line-height: 1.45; tab-size: 2; font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    input:focus, textarea:focus { border-color: #5f83bc; box-shadow: 0 0 0 2px rgba(111, 224, 255, .08); }
+    input[type="range"] { accent-color: var(--accent); }
+    .app { display: grid; grid-template-columns: minmax(330px, 390px) minmax(0, 1fr); height: 100vh; }
+    .sidebar {
+      position: relative; z-index: 3; overflow: auto; padding: 18px;
+      border-right: 1px solid var(--line); background: linear-gradient(180deg, #0a1124 0%, #070c18 100%);
+      box-shadow: 15px 0 50px rgba(0, 0, 0, .22);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+    .brand-mark { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 20px rgba(116, 242, 206, .8); }
+    h1 { margin: 0; font-size: 17px; letter-spacing: .01em; }
+    .intro { margin: 0 0 16px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .section { margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(56, 75, 111, .5); }
+    .section-title { display: flex; justify-content: space-between; align-items: center; margin: 0 0 8px; color: #cbd8ee; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .row { display: flex; align-items: center; gap: 8px; }
+    .row + .row { margin-top: 8px; }
+    .url-row input { min-width: 0; flex: 1; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 9px; }
+    .toggle { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+    .toggle input { margin-top: 2px; accent-color: var(--accent); }
+    .status { min-height: 34px; margin-top: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); background: rgba(7, 13, 27, .7); font-size: 11px; line-height: 1.45; }
+    .status[data-kind="success"] { border-color: rgba(116, 242, 206, .32); color: var(--accent); }
+    .status[data-kind="error"] { border-color: rgba(255, 120, 144, .4); color: #ff9caf; }
+    .status[data-kind="working"] { color: var(--accent-2); }
+    #stats { display: block; margin-top: 8px; color: var(--accent-2); font: 10px/1.5 ui-monospace, SFMono-Regular, monospace; }
+    .diagnostics { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; max-height: 160px; overflow: auto; }
+    .diagnostic { display: grid; gap: 3px; padding: 7px 8px; border-radius: 7px; background: #070d1b; color: var(--muted); font-size: 10px; line-height: 1.4; }
+    .diagnostic code { color: #f6c968; }
+    .diagnostic--success { color: #8adfc6; }
+    .diagnostic--error { color: #ff9caf; }
+    details { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #060c19; }
+    summary { padding: 8px 10px; cursor: pointer; color: #b8c7e1; font-size: 11px; }
+    #hya-json { max-height: 260px; overflow: auto; margin: 0; padding: 10px; border-top: 1px solid var(--line); color: #9db4da; white-space: pre-wrap; overflow-wrap: anywhere; font: 10px/1.5 ui-monospace, SFMono-Regular, monospace; }
+    .viewport { position: relative; min-width: 0; overflow: hidden; background: radial-gradient(circle at 50% 40%, #111d3c 0%, #050713 68%); }
+    canvas { width: 100%; height: 100%; display: block; }
+    .viewport-badge { position: absolute; top: 14px; right: 16px; padding: 5px 8px; border: 1px solid rgba(111, 224, 255, .2); border-radius: 999px; color: #8aa2c8; background: rgba(5, 10, 22, .65); font-size: 10px; backdrop-filter: blur(10px); }
+    .transport {
+      position: absolute; z-index: 2; right: 18px; bottom: 18px; left: 18px;
+      padding: 12px 14px; border: 1px solid rgba(116, 242, 206, .22); border-radius: 13px;
+      background: rgba(7, 13, 28, .86); box-shadow: 0 14px 50px rgba(0,0,0,.28); backdrop-filter: blur(16px);
+    }
+    .transport-top { display: flex; align-items: center; gap: 7px; }
+    .icon-button { min-width: 38px; padding-inline: 9px; }
+    .time-readout { margin-left: 5px; color: #d8e5fa; font: 11px ui-monospace, SFMono-Regular, monospace; white-space: nowrap; }
+    .time-readout output:first-child { color: var(--accent); }
+    .transport-options { display: flex; align-items: center; gap: 12px; margin-left: auto; color: var(--muted); font-size: 11px; }
+    .transport-options label { display: flex; align-items: center; gap: 6px; }
+    #speed { width: 90px; }
+    #speed-value { min-width: 38px; color: var(--accent); }
+    #timeline { display: block; width: 100%; margin: 11px 0 1px; }
+    #result { display: none; }
+    @media (max-width: 840px) {
+      .app { display: block; }
+      .sidebar { position: absolute; inset: 10px auto 92px 10px; width: min(355px, calc(100vw - 20px)); border: 1px solid var(--line); border-radius: 13px; background: rgba(8, 14, 29, .94); }
+      .viewport { height: 100vh; }
+      .transport { right: 10px; bottom: 10px; left: 10px; }
+      .transport-options { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="sidebar" aria-label="Lottie 转换配置">
+      <div class="brand"><span class="brand-mark"></span><h1>Lottie → HYA 工作台</h1></div>
+      <p class="intro">从 URL 或 JSON 读取 Lottie，转换为网页运行时 HYA。转换结果可以立即预览、检查诊断并下载到本地。</p>
+
+      <section>
+        <div class="section-title"><span>远程 Lottie URL</span><span>需要 CORS</span></div>
+        <div class="row url-row">
+          <input id="lottie-url" type="url" inputmode="url" spellcheck="false" placeholder="https://example.com/animation.json" />
+          <button id="load-url" type="button">加载</button>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><span>Lottie JSON</span><span>可直接编辑</span></div>
+        <textarea id="lottie-json" aria-label="Lottie JSON" spellcheck="false"></textarea>
+        <label class="toggle">
+          <input id="particle-demo" type="checkbox" />
+          <span>转换后附加一个 HYA 原生粒子节点。默认关闭，保证普通转换结果忠实于 Lottie 输入。</span>
+        </label>
+        <div class="actions">
+          <button id="reset-source" type="button">恢复示例</button>
+          <button id="convert" class="primary" type="button">生成并预览 HYA</button>
+        </div>
+        <div id="conversion-status" class="status" data-kind="idle" role="status">等待输入。</div>
+        <small id="stats"></small>
+      </section>
+
+      <section class="section">
+        <div class="section-title"><span>转换诊断</span><span>不会静默降级</span></div>
+        <ul id="diagnostics" class="diagnostics"></ul>
+      </section>
+
+      <section class="section">
+        <div class="actions">
+          <button id="copy-json" type="button" disabled>复制 HYA JSON</button>
+          <button id="download-hya" class="primary" type="button" disabled>下载 .hya</button>
+        </div>
+        <details style="margin-top: 8px">
+          <summary>查看 HYA JSON 表示</summary>
+          <pre id="hya-json"></pre>
+        </details>
+      </section>
+    </aside>
+
+    <section class="viewport" aria-label="WebGPU 动画预览">
+      <canvas id="canvas" width="800" height="450"></canvas>
+      <div class="viewport-badge">WebGPU LIVE PREVIEW</div>
+      <div class="transport">
+        <div class="transport-top">
+          <button id="previous-frame" class="icon-button" type="button" title="上一帧（←）" disabled>−1f</button>
+          <button id="play" class="primary" type="button" disabled>播放</button>
+          <button id="next-frame" class="icon-button" type="button" title="下一帧（→）" disabled>+1f</button>
+          <button id="restart" type="button" disabled>重播</button>
+          <span class="time-readout"><output id="current-time">0.000s</output> / <output id="duration">0.000s</output></span>
+          <div class="transport-options">
+            <label>速度 <input id="speed" type="range" min="0.25" max="2" step="0.25" value="1" /><output id="speed-value">1.00×</output></label>
+            <label><input id="loop" type="checkbox" checked /> 循环</label>
+          </div>
+        </div>
+        <input id="timeline" type="range" min="0" max="1" step="0.0166667" value="0" disabled aria-label="动画时间轴" />
+      </div>
+    </section>
+  </main>
+  <pre id="result" aria-hidden="true"></pre>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

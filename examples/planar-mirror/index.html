@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 – Planar Mirror</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #050812; color: #eef4ff; font-family: Inter, system-ui, sans-serif; }
+    canvas { display: block; }
+    #panel {
+      position: absolute; top: 16px; left: 16px; width: 250px; padding: 14px;
+      border: 1px solid rgba(160, 196, 255, .2); border-radius: 11px;
+      background: rgba(8, 14, 27, .82); box-shadow: 0 16px 40px rgba(0, 0, 0, .32);
+      backdrop-filter: blur(14px);
+    }
+    h1 { margin: 0 0 5px; font-size: 17px; font-weight: 680; }
+    p { margin: 0 0 12px; color: rgba(224, 235, 255, .58); font-size: 11px; line-height: 1.5; }
+    .buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 12px; }
+    button {
+      padding: 8px; border: 1px solid rgba(255, 255, 255, .14); border-radius: 7px;
+      color: rgba(235, 243, 255, .68); background: rgba(255, 255, 255, .05); cursor: pointer;
+      font-size: 11px;
+    }
+    button:hover { background: rgba(255, 255, 255, .1); }
+    button.active { color: #fff; border-color: rgba(94, 174, 255, .72); background: rgba(61, 139, 255, .22); }
+    label { display: grid; grid-template-columns: 1fr 44px; align-items: center; gap: 7px; margin-top: 9px; font-size: 11px; color: rgba(224, 235, 255, .68); }
+    input { grid-column: 1 / -1; width: 100%; accent-color: #62a9ff; }
+    output { text-align: right; color: #fff; font-variant-numeric: tabular-nums; }
+    #hint { position: absolute; bottom: 14px; width: 100%; text-align: center; color: rgba(235, 243, 255, .44); font-size: 11px; text-shadow: 0 1px 4px #000; }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas" width="1100" height="700"></canvas>
+  <aside id="panel">
+    <h1>Planar Mirror</h1>
+    <p>A Mesh3D plus one PlanarMirror component. Reflection rendering uses a mirrored view and oblique clipping.</p>
+    <div class="buttons">
+      <button id="toggle-mirror" class="active">Mirror enabled</button>
+      <button id="toggle-animation" class="active">Animation enabled</button>
+    </div>
+    <label>Reflectivity <output id="reflectivity-value">0.96</output>
+      <input id="reflectivity" type="range" min="0" max="1" step="0.01" value="0.96" />
+    </label>
+    <label>Resolution <output id="resolution-value">65%</output>
+      <input id="resolution" type="range" min="0.25" max="1" step="0.05" value="0.65" />
+    </label>
+  </aside>
+  <div id="hint">M = toggle mirror · Space = pause animation · drag = orbit · scroll = zoom</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

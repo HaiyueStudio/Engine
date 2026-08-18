@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "name": "haiyue-production-gltf-first-visible-corpus",
+  "upstream": {
+    "repository": "https://github.com/KhronosGroup/glTF-Sample-Assets",
+    "commit": "2bac6f8c57bf471df0d2a1e8a8ec023c7801dddf"
+  },
+  "tiers": [
+    {
+      "id": "small",
+      "name": "Animated Morph Cube",
+      "entry": "small-animated-morph-cube/AnimatedMorphCube.glb",
+      "sourcePath": "Models/AnimatedMorphCube/glTF-Binary/AnimatedMorphCube.glb",
+      "license": "CC0-1.0",
+      "attribution": "2017 Public; contributed by Microsoft",
+      "features": ["morph", "animation"],
+      "expected": {
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "materialCount": 1,
+        "textureCount": 0,
+        "animationCount": 1,
+        "skinCount": 0,
+        "morphTargetCount": 2
+      },
+      "gate": {
+        "firstVisibleFrameMaxMs": 5000
+      },
+      "files": [
+        {
+          "path": "small-animated-morph-cube/AnimatedMorphCube.glb",
+          "bytes": 6752,
+          "sha256": "214ee56160a50dbf22543a1d66dbf860986e87f0efac3d89feac1359d0e6aeab"
+        },
+        {
+          "path": "small-animated-morph-cube/LICENSE.md",
+          "bytes": 708,
+          "sha256": "f329408d3b37552eb0773907af5448a8aa1ae078c1c22c3e83e7ee5e10ec45bd"
+        }
+      ]
+    },
+    {
+      "id": "medium",
+      "name": "Rigged Figure Draco",
+      "entry": "medium-rigged-figure-draco/RiggedFigure.gltf",
+      "sourcePath": "Models/RiggedFigure/glTF-Draco/RiggedFigure.gltf",
+      "license": "CC-BY-4.0",
+      "attribution": "2017 Cesium",
+      "features": ["draco", "skin", "animation"],
+      "expected": {
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "materialCount": 1,
+        "textureCount": 0,
+        "animationCount": 1,
+        "skinCount": 1,
+        "morphTargetCount": 0
+      },
+      "gate": {
+        "firstVisibleFrameMaxMs": 5000
+      },
+      "files": [
+        {
+          "path": "medium-rigged-figure-draco/RiggedFigure.gltf",
+          "bytes": 50939,
+          "sha256": "25039daae7c4cd7394b39180341fd2519af82d6ac6ca2e8bec737cb9866b6d69"
+        },
+        {
+          "path": "medium-rigged-figure-draco/RiggedFigure0.bin",
+          "bytes": 6172,
+          "sha256": "ef8c02bf4d186b058d21d5615bd133e75ec5be46f23cc4943d2543d745ede5cb"
+        },
+        {
+          "path": "medium-rigged-figure-draco/LICENSE.md",
+          "bytes": 704,
+          "sha256": "7e6c51b3129aafef4c626283fc18cab4298d73a7f3ee746058b5f211b6b95165"
+        }
+      ]
+    },
+    {
+      "id": "large",
+      "name": "Stained Glass Lamp KTX2",
+      "entry": "large-stained-glass-lamp-ktx2/StainedGlassLamp.gltf",
+      "sourcePath": "Models/StainedGlassLamp/glTF-KTX-BasisU/StainedGlassLamp.gltf",
+      "license": "CC-BY-4.0",
+      "attribution": "2021 Wayfair; Eric Chadwick",
+      "features": ["ktx2", "basis", "multi-material", "multi-texture"],
+      "expected": {
+        "meshCount": 8,
+        "primitiveCount": 8,
+        "materialCount": 13,
+        "textureCount": 19,
+        "animationCount": 0,
+        "skinCount": 0,
+        "morphTargetCount": 0
+      },
+      "gate": {
+        "firstVisibleFrameMaxMs": 15000,
+        "uploadFrameBudgetBytes": 1048576
+      },
+      "files": [
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp.gltf",
+          "bytes": 31509,
+          "sha256": "4157e692bb4b7fb9bc5ac59d972d2f77700955b141464642b43b13a4ac726fb8"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp.bin",
+          "bytes": 1847592,
+          "sha256": "7873a6f30835589b3b6fc3b0d749b8fe80f1ea29f4f170fba6d8ac11083d9397"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_base_basecolor.ktx2",
+          "bytes": 303936,
+          "sha256": "0b8d3376f0f1dc58b804756256a3b38ae6279b6aeb22ba24475ee9eaeb867daa"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_base_emissive.ktx2",
+          "bytes": 174821,
+          "sha256": "a354583d8f7e6605a57797d3d70a1b6032b416380f5782654f8fcaad4ec59658"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_base_normal.ktx2",
+          "bytes": 282290,
+          "sha256": "ed9e50d14137ee380095ec108050ad828025abd68521bae9ff8598752c0ec8b2"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_base_occlusion-rough-metal.ktx2",
+          "bytes": 919576,
+          "sha256": "b5d9e7021a9f2c7a0403000e8a8c7e4e806a97647f409c76441b7395f638382f"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_bulbs_occlusion.ktx2",
+          "bytes": 26976,
+          "sha256": "54c646ddc5bcdbe5bcdeed17c22e47bfde61fba43739c395e656a9defd3807ee"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_glass_basecolor-alpha.ktx2",
+          "bytes": 1779325,
+          "sha256": "c29e86278b417f34d9221f509cb21b30348364905f875db7914fed102f64cdc8"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_glass_emissive.ktx2",
+          "bytes": 541399,
+          "sha256": "dcf80976e11ac51b2bac8f34a697e9f6392c2b4065e9c053d2dbc024b4a97976"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_glass_normal.ktx2",
+          "bytes": 1563379,
+          "sha256": "1444cc1ae65d2b3a8b84c7d82dc0d179de7deef8608a7a4e32dc837546392f1d"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_glass_occlusion-rough-metal.ktx2",
+          "bytes": 503612,
+          "sha256": "7d7f1aa17aff14d025320eb6062964bc59764e42f2218e42ec0d4feacd223ced"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_glass_transmission-clearcoat.ktx2",
+          "bytes": 439778,
+          "sha256": "ea3fff36824c0d4715a87d84fc7e4caaee74381e5b19b69e031bfb94f831a9da"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_grill_basecolor-alpha.ktx2",
+          "bytes": 217120,
+          "sha256": "1ad2e5f610b99ea673ea332818d4a43413808253966266436cbfba810c62dd42"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_grill_emissive.ktx2",
+          "bytes": 29183,
+          "sha256": "bb90c9fa9ae0666666e18e91155e3c812b25509d54f7f05c28bd3572de1eef86"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_grill_normal.ktx2",
+          "bytes": 780467,
+          "sha256": "9123bdcb18e8bc04be404dc6cb72b90b33f715306b58035084d22e1b066c4c26"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_grill_occlusion-rough-metal.ktx2",
+          "bytes": 590811,
+          "sha256": "99c46448580ad86a5cf503437bb530f90391abdb3a736d18dd789f24efc0d8ab"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_hardware_basecolor.ktx2",
+          "bytes": 17224,
+          "sha256": "f96c1526e96abd9c19bba3667cc08aeec529f73e0fccfb9d5cb37be41c791c2f"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_hardware_emissive.ktx2",
+          "bytes": 59008,
+          "sha256": "a3e32214faaddc3de6c747e466c279e72b308c8c2618918d28a9e443b78414c5"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_hardware_normal.ktx2",
+          "bytes": 112123,
+          "sha256": "b89f5e1e15949442af898f0af5670ac993d903ee8a99aee3cb3bd4792525fa7e"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_hardware_occlusion-rough-metal.ktx2",
+          "bytes": 210306,
+          "sha256": "c296f1794f96c79dbfa05211dd0a77d962d02e05277c0adee0fadc0d6948d045"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/StainedGlassLamp_steel_occlusion.ktx2",
+          "bytes": 44947,
+          "sha256": "a391ac6160d7d07a7922e16541a5d6eb4aab39282e3e7c96a01a66a1d203af26"
+        },
+        {
+          "path": "large-stained-glass-lamp-ktx2/LICENSE.md",
+          "bytes": 709,
+          "sha256": "fec4380b73f21e468b6fb0ec9984c8ea6f3b589e1ff431112a8cfa6c960f7bbb"
+        }
+      ]
+    }
+  ]
+}

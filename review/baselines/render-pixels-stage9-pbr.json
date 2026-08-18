@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "fixture": "pbr-shadow-ibl-rgba8unorm-96x64",
+  "width": 96,
+  "height": 64,
+  "hash": "a2ae2374",
+  "spherePixels": 2621,
+  "shadowPixels": 325,
+  "dielectric": [
+    93,
+    125,
+    150,
+    255
+  ],
+  "metal": [
+    101,
+    93,
+    77,
+    255
+  ],
+  "shadow": [
+    16,
+    25,
+    40,
+    255
+  ],
+  "corner": [
+    6,
+    12,
+    21,
+    255
+  ],
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "pascal",
+    "device": "",
+    "description": ""
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36"
+}

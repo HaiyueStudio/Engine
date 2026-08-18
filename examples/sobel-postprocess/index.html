@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - Sobel Postprocess</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    body {
+      background: #e5e7eb;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    #hud {
+      position: absolute;
+      left: 18px;
+      top: 18px;
+      color: rgba(15, 23, 42, 0.72);
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 6px;
+      padding: 8px 12px;
+      pointer-events: none;
+      backdrop-filter: blur(10px);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div id="hud">Sobel Postprocess</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

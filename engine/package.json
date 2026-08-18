@@ -1,0 +1,229 @@
+{
+  "name": "@haiyue/engine",
+  "version": "0.1.0",
+  "private": false,
+  "description": "A WebGPU-first 2D/3D game engine with PBR rendering, ECS, assets, animation, physics, and browser tooling.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HaiyueStudio/Engine.git",
+    "directory": "engine"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "src/**/*"
+  ],
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./core": {
+      "source": "./src/core.ts",
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js"
+    },
+    "./assets": {
+      "source": "./src/assets.ts",
+      "types": "./dist/assets.d.ts",
+      "import": "./dist/assets.js"
+    },
+    "./diagnostics": {
+      "source": "./src/diagnostics.ts",
+      "types": "./dist/diagnostics.d.ts",
+      "import": "./dist/diagnostics.js"
+    },
+    "./extension-authoring": {
+      "source": "./src/extension-authoring.ts",
+      "types": "./dist/extension-authoring.d.ts",
+      "import": "./dist/extension-authoring.js"
+    },
+    "./ecs": {
+      "source": "./src/ecs.ts",
+      "types": "./dist/ecs.d.ts",
+      "import": "./dist/ecs.js"
+    },
+    "./components": {
+      "source": "./src/components.ts",
+      "types": "./dist/components.d.ts",
+      "import": "./dist/components.js"
+    },
+    "./geometry": {
+      "source": "./src/geometry.ts",
+      "types": "./dist/geometry.d.ts",
+      "import": "./dist/geometry.js"
+    },
+    "./material": {
+      "source": "./src/material.ts",
+      "types": "./dist/material.d.ts",
+      "import": "./dist/material.js"
+    },
+    "./experimental": {
+      "source": "./src/experimental.ts",
+      "types": "./dist/experimental.d.ts",
+      "import": "./dist/experimental.js"
+    },
+    "./experimental/assets": {
+      "source": "./src/experimental/assets.ts",
+      "types": "./dist/experimental/assets.d.ts",
+      "import": "./dist/experimental/assets.js"
+    },
+    "./experimental/async": {
+      "source": "./src/experimental/async.ts",
+      "types": "./dist/experimental/async.d.ts",
+      "import": "./dist/experimental/async.js"
+    },
+    "./experimental/ktx2-worker-runtime": {
+      "source": "./src/experimental/ktx2-worker-runtime.ts",
+      "types": "./dist/experimental/ktx2-worker-runtime.d.ts",
+      "import": "./dist/experimental/ktx2-worker-runtime.js"
+    },
+    "./experimental/diagnostics": {
+      "source": "./src/experimental/diagnostics.ts",
+      "types": "./dist/experimental/diagnostics.d.ts",
+      "import": "./dist/experimental/diagnostics.js"
+    },
+    "./experimental/gpu-driven": {
+      "source": "./src/experimental/gpu-driven.ts",
+      "types": "./dist/experimental/gpu-driven.d.ts",
+      "import": "./dist/experimental/gpu-driven.js"
+    },
+    "./experimental/renderer": {
+      "source": "./src/experimental/renderer.ts",
+      "types": "./dist/experimental/renderer.d.ts",
+      "import": "./dist/experimental/renderer.js"
+    },
+    "./systems": {
+      "source": "./src/systems.ts",
+      "types": "./dist/systems.d.ts",
+      "import": "./dist/systems.js"
+    },
+    "./physics": {
+      "source": "./src/physics.ts",
+      "types": "./dist/physics.d.ts",
+      "import": "./dist/physics.js"
+    },
+    "./physics/components": {
+      "source": "./src/physics-components.ts",
+      "types": "./dist/physics-components.d.ts",
+      "import": "./dist/physics-components.js"
+    },
+    "./physics/backend": {
+      "source": "./src/physics/backend.ts",
+      "types": "./dist/physics/backend.d.ts",
+      "import": "./dist/physics/backend.js"
+    },
+    "./postprocess": {
+      "source": "./src/postprocess.ts",
+      "types": "./dist/postprocess.d.ts",
+      "import": "./dist/postprocess.js"
+    },
+    "./gui": {
+      "source": "./src/gui.ts",
+      "types": "./dist/gui.d.ts",
+      "import": "./dist/gui.js"
+    },
+    "./compute": {
+      "source": "./src/compute.ts",
+      "types": "./dist/compute.d.ts",
+      "import": "./dist/compute.js"
+    },
+    "./scene": {
+      "source": "./src/scene.ts",
+      "types": "./dist/scene.d.ts",
+      "import": "./dist/scene.js"
+    },
+    "./input": {
+      "source": "./src/input.ts",
+      "types": "./dist/input.d.ts",
+      "import": "./dist/input.js"
+    },
+    "./controls": {
+      "source": "./src/controls.ts",
+      "types": "./dist/controls.d.ts",
+      "import": "./dist/controls.js"
+    },
+    "./tween": {
+      "source": "./src/tween.ts",
+      "types": "./dist/tween.d.ts",
+      "import": "./dist/tween.js"
+    },
+    "./rtt": {
+      "source": "./src/rtt.ts",
+      "types": "./dist/rtt.d.ts",
+      "import": "./dist/rtt.js"
+    },
+    "./font": {
+      "source": "./src/font.ts",
+      "types": "./dist/font.d.ts",
+      "import": "./dist/font.js"
+    },
+    "./color": {
+      "source": "./src/color.ts",
+      "types": "./dist/color.d.ts",
+      "import": "./dist/color.js"
+    },
+    "./lighting": {
+      "source": "./src/lighting.ts",
+      "types": "./dist/lighting.d.ts",
+      "import": "./dist/lighting.js"
+    },
+    "./math": {
+      "source": "./src/math.ts",
+      "types": "./dist/math.d.ts",
+      "import": "./dist/math.js"
+    },
+    "./serialization": {
+      "source": "./src/serialization.ts",
+      "types": "./dist/serialization.d.ts",
+      "import": "./dist/serialization.js"
+    },
+    "./navigation": {
+      "source": "./src/navigation.ts",
+      "types": "./dist/navigation.d.ts",
+      "import": "./dist/navigation.js"
+    }
+  },
+  "scripts": {
+    "build": "node ../scripts/build-rollup-once.mjs",
+    "dev": "rollup -c rollup.config.js --watch",
+    "benchmark:wasm": "node ../scripts/build-rollup-once.mjs && node ../scripts/benchmark/m025-scene-batch-wasm.mjs",
+    "test": "node ../scripts/build-rollup-once.mjs && node --test --test-concurrency=1 \"test/**/*.test.mjs\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.19.3",
+    "@loaders.gl/schema": "^4.4.3",
+    "@loaders.gl/worker-utils": "^4.4.3",
+    "box2d.ts": "^1.0.2",
+    "earcut": "^3.0.2",
+    "pako": "^1.0.11",
+    "wgpu-matrix": "^3.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.2",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@loaders.gl/textures": "^4.4.3",
+    "@webgpu/types": "^0.1.40",
+    "rollup": "^4.0.0",
+    "tslib": "^2.6.0",
+    "typescript": "^5.2.0"
+  }
+}

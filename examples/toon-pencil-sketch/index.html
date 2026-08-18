@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>海月 · Toon Pencil Sketch</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; overflow: hidden; background: #eae2d2; color: #2f2b26; font: 14px/1.5 ui-serif, Georgia, serif; }
+    canvas { width: 100vw; height: 100vh; display: block; }
+    .panel {
+      position: fixed; left: 24px; top: 24px; width: min(330px, calc(100vw - 80px)); padding: 18px 20px;
+      border: 1px solid #493f342f; border-radius: 3px; background: #f4eee2dc;
+      box-shadow: 0 12px 35px #493f341c; backdrop-filter: blur(9px);
+    }
+    .eyebrow { margin: 0 0 3px; color: #766d60; font: 600 10px/1.2 system-ui, sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
+    .description { margin: 7px 0 14px; color: #655d52; }
+    .layers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 0 0 15px; }
+    .layers span { height: 7px; border-radius: 1px; box-shadow: inset 0 0 0 1px #2f29221c; }
+    .layers span:nth-child(1) { background: #655f57; }
+    .layers span:nth-child(2) { background: #9b9488; }
+    .layers span:nth-child(3) { background: #cac2b3; }
+    .layers span:nth-child(4) { background: #eee7d9; }
+    .control { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; margin-top: 9px; font: 12px/1 system-ui, sans-serif; }
+    .control output { min-width: 30px; color: #655d52; font-variant-numeric: tabular-nums; }
+    input[type="range"] { width: 100%; accent-color: #51483e; }
+    input[type="checkbox"] { accent-color: #51483e; }
+    .hint { margin: 15px 0 0; padding-top: 12px; border-top: 1px solid #493f3420; color: #81786c; font-size: 12px; }
+  </style>
+</head>
+<body data-render-status="pending">
+  <canvas id="canvas" width="1100" height="720"></canvas>
+  <section class="panel">
+    <p class="eyebrow">Stylized rendering study</p>
+    <h1>铅笔素描 Toon</h1>
+    <p class="description">四档 Toon 明暗分别映射纸纹、单向排线和交叉排线，再用乘法描边压出石墨轮廓。</p>
+    <div class="layers" aria-label="四个明暗纹理层"><span></span><span></span><span></span><span></span></div>
+    <label class="control">
+      <input id="outline-toggle" type="checkbox" checked />
+      <span>轮廓描边</span>
+      <output id="outline-state">on</output>
+    </label>
+    <label class="control" for="outline-strength">
+      <span>线条力度</span>
+      <input id="outline-strength" type="range" min="0.25" max="1.4" step="0.05" value="0.92" />
+      <output id="outline-strength-value">0.92</output>
+    </label>
+    <p class="hint">拖拽旋转 · 滚轮缩放 · 纹理均由 Canvas 程序生成</p>
+  </section>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

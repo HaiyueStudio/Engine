@@ -1,0 +1,104 @@
+{
+  "contractVersion": 1,
+  "phase": 6,
+  "status": "implemented",
+  "packageStatus": "private-compiler-with-production-artifacts",
+  "implementation": "build-time-artifact-runtime-adapter-motion-blur-migration",
+  "primaryTarget": "webgpu-wgsl",
+  "decision": {
+    "motionBlurProductionMigration": "go",
+    "pbrProductionMigration": "deferred",
+    "deformationProductionMigration": "deferred"
+  },
+  "deliverables": [
+    "renderer-selected-physical-group-codegen",
+    "serializable-precompiled-shader-artifact-v1",
+    "deterministic-build-time-motion-blur-generator",
+    "checked-in-production-wgsl-and-reflection-manifest",
+    "fast-gate-generated-artifact-staleness-check",
+    "engine-private-reflection-runtime-adapter",
+    "reflection-driven-bind-group-and-pipeline-layout",
+    "reflection-driven-reusable-uniform-writer",
+    "per-device-shader-module-and-layout-cache",
+    "instance-owned-resource-lifecycle",
+    "single-production-shader-source-of-truth",
+    "production-browser-pixel-and-warmup-evidence"
+  ],
+  "productionMigrations": [
+    {
+      "id": "engine-motion-blur-postprocess-shaders",
+      "passes": [
+        "motion-tile-max",
+        "motion-neighbor-max",
+        "motion-blur-resolve"
+      ],
+      "status": "migrated",
+      "publicApiChanged": false,
+      "handwrittenSourcesRemoved": true
+    }
+  ],
+  "artifact": {
+    "format": "haiyue-precompiled-shader-artifact",
+    "version": 1,
+    "path": "engine/src/shaders/generated/motion-blur-artifact.generated.ts",
+    "generator": "shader-language/scripts/generate-motion-blur-production.mjs",
+    "artifactHash": "df09e715d1fef60c0ac30495958e9bc4a269518d434ba9d4a6e40e0c2cd8ca7f",
+    "sourceGraphSha256": "967aa5e75e0f9fed3575ce01c3e17eca99f70322b204e1685c88f29eaaab0c91",
+    "graphCanonicalHash": "bcf86dd8d974d52061e010f2700df013dbc850f922e7f8853217caad5a6b0f0b",
+    "typedModuleHash": "1c40f6b5a68dbc08aa464942931a2d05ef4d099437d03ca4cc0cfa41063c3f2d",
+    "logicalResourceGroup": 3,
+    "physicalResourceGroup": 0,
+    "stringBindingReplacement": false
+  },
+  "runtime": {
+    "engineDependsOnShaderLanguagePackage": false,
+    "runtimeCompilerIncluded": false,
+    "runtimeShaderGenerationCalls": 0,
+    "compilerCreatesGpuResources": false,
+    "compilerSchedulesPasses": false,
+    "perDevicePassRuntimeCount": 3,
+    "secondInstanceAdditionalShaderModules": 0,
+    "secondInstanceAdditionalBindGroupLayouts": 0,
+    "secondInstanceAdditionalPipelineLayouts": 0,
+    "uniformBlockByteSizes": [16, 48],
+    "instanceOwnerResidualAfterDestroy": 0
+  },
+  "workBudget": {
+    "centeredPassCount": 1,
+    "centeredActiveIntermediateTextureCount": 0,
+    "tileNeighborPassCount": 3,
+    "tileNeighborActiveIntermediateTextureCount": 2,
+    "pipelineCount": 3
+  },
+  "evidence": {
+    "generatedVsProductionMaximumChannelDelta": 0,
+    "webgpuValidationErrorCount": 0,
+    "unclassifiedFailureCount": 0,
+    "productionPixelGate": "verify:motion-blur",
+    "pipelineWarmupMetric": "four enabled browser cases report raw samples, p50 and p95",
+    "timingBaselinePromoted": false,
+    "timingBaselineReason": "Stage 6 records real warmup samples but does not promote a device timing threshold from one local run."
+  },
+  "publicApiChanges": [],
+  "apiBaselineUpdated": false,
+  "releaseGateStatus": "artifact-stale-check-fast-and-production-motion-blur-webgpu-slow",
+  "deferred": [
+    "production-pbr-shader-migration",
+    "production-deformation-pass-migration",
+    "generic-user-graph-runtime-cache",
+    "depth-aware-motion-reconstruction",
+    "glsl-es300-codegen",
+    "webgl2-renderer-fallback",
+    "visual-shader-graph-editor",
+    "stable-public-shader-api"
+  ],
+  "acceptance": [
+    "npm run shader-language:check",
+    "npm run shader-language:stage6:check",
+    "npm test -w ./engine",
+    "npm run verify:shader-language-stage5",
+    "npm run verify:motion-blur",
+    "npm run verify:shader-language-stage6",
+    "npm run check:fast"
+  ]
+}

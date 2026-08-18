@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>海月 · 动态模糊</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    body { margin: 0; overflow: hidden; background: #02050d; color: #eef7ff; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .panel { position: fixed; top: 20px; left: 20px; width: min(370px, calc(100vw - 40px)); max-height: calc(100vh - 80px); overflow: auto; padding: 18px 20px; border: 1px solid #62e7df33; border-radius: 12px; background: #07111ee8; box-shadow: 0 22px 70px #0009; backdrop-filter: blur(14px); }
+    .eyebrow { margin: 0 0 4px; color: #67e9d8; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 0; font: 650 22px/1.2 system-ui, sans-serif; letter-spacing: -.02em; }
+    .description { margin: 8px 0 16px; color: #9eb1c4; }
+    .control { display: grid; grid-template-columns: 96px 1fr 48px; align-items: center; gap: 9px; margin: 9px 0; }
+    .toggle { grid-template-columns: auto 1fr auto; }
+    input[type="range"] { width: 100%; accent-color: #59e3d0; }
+    input[type="checkbox"] { accent-color: #59e3d0; }
+    select { min-width: 0; padding: 4px 6px; border: 1px solid #65e7d844; border-radius: 5px; color: #eafcff; background: #0b1b2b; }
+    output { color: #65e7d8; text-align: right; font-variant-numeric: tabular-nums; }
+    .metrics { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 12px; border-top: 1px solid #67e9d822; color: #758ca3; }
+    .metrics strong { color: #f4fbff; }
+    .status::before { content: 'velocity buffer active'; color: #65e7d8; }
+    .blur-off .status::before { content: 'raw scene'; color: #ff755d; }
+    .hint { position: fixed; right: 18px; bottom: 15px; color: #91a8bd88; font-size: 10px; }
+    .split-labels { display: none; position: fixed; inset: 14px 0 auto; pointer-events: none; color: #fff; font: 700 11px/1 system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase; text-shadow: 0 1px 8px #000; }
+    body[data-display-mode="split"] .split-labels { display: grid; grid-template-columns: 1fr 1fr; }
+    .split-labels span { text-align: center; }
+    #result { display: none; }
+  </style>
+</head>
+<body data-render-status="pending">
+  <canvas id="canvas" width="1200" height="760"></canvas>
+  <section class="panel">
+    <p class="eyebrow">Post-process laboratory</p>
+    <h1>动态模糊 · Motion Blur</h1>
+    <p class="description">高频纹理转子与真实 19-joint glTF 角色验证运动速度。默认左右分屏：左侧原图，右侧稳定 tile/neighbor-max 重建。</p>
+    <label class="control toggle"><input id="blur-enabled" type="checkbox" checked /><span>动态模糊</span><output class="status"></output></label>
+    <label class="control toggle"><input id="scene-animate" type="checkbox" checked /><span>物体运动</span><output id="scene-animate-value">on</output></label>
+    <label class="control toggle"><input id="camera-motion" type="checkbox" checked /><span>相机运动</span><output id="camera-motion-value">on</output></label>
+    <label class="control"><span>运动速度</span><input id="motion-speed" type="range" min="0" max="2" step="0.05" value="1" /><output id="motion-speed-value">1.00×</output></label>
+    <label class="control"><span>快门角度</span><input id="shutter" type="range" min="0" max="360" step="5" value="270" /><output id="shutter-value">270°</output></label>
+    <label class="control"><span>艺术强度</span><input id="intensity" type="range" min="0" max="4" step="0.05" value="2.75" /><output id="intensity-value">2.75×</output></label>
+    <label class="control"><span>采样数</span><input id="samples" type="range" min="1" max="32" step="1" value="24" /><output id="samples-value">24</output></label>
+    <label class="control"><span>最大长度</span><input id="radius" type="range" min="0" max="96" step="1" value="48" /><output id="radius-value">48px</output></label>
+    <label class="control"><span>显示模式</span><select id="display-mode"><option value="blur">动态模糊</option><option value="split" selected>左右分屏</option><option value="velocity">速度热图</option></select><output></output></label>
+    <label class="control"><span>轮廓重建</span><select id="reconstruction"><option value="centered">Centered</option><option value="tile-neighbor-max" selected>Tile/Neighbor</option></select><output></output></label>
+    <div class="metrics"><span>已处理帧</span><strong id="frame-count">0</strong></div>
+  </section>
+  <div class="split-labels"><span>Raw</span><span>Motion blur</span></div>
+  <div class="hint">拖拽旋转 · 滚轮缩放 · 切换动态模糊进行对比</div>
+  <pre id="result" aria-hidden="true"></pre>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

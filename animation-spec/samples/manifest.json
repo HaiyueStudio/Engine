@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "kind": "hya-samples",
+  "entries": [
+    {
+      "id": "transform-position",
+      "title": "位置关键帧",
+      "category": "基础动画",
+      "capability": "transform/position",
+      "file": "transform-position.hya",
+      "description": "LINEAR 位置轨道与循环播放。"
+    },
+    {
+      "id": "transform-hierarchy",
+      "title": "父子层级变换",
+      "category": "基础动画",
+      "capability": "transform/hierarchy",
+      "file": "transform-hierarchy.hya",
+      "description": "父节点旋转、缩放时，子节点继承组合后的世界变换。"
+    },
+    {
+      "id": "spatial-bezier",
+      "title": "空间贝塞尔路径",
+      "category": "基础动画",
+      "capability": "animation/spatial-bezier",
+      "file": "spatial-bezier.hya",
+      "description": "时间缓动与二维 spatial tangents 协同生成曲线运动。"
+    },
+    {
+      "id": "sprite-sheet-coin",
+      "title": "Spritesheet 金币",
+      "category": "图片动画",
+      "capability": "sprite/uv-rect-track",
+      "file": "sprite-sheet-coin.hya",
+      "description": "单张 5×5 atlas 通过 STEP uvRectTrack 循环播放 25 帧金币旋转动画。"
+    },
+    {
+      "id": "projected-wire-cube",
+      "title": "投影线框立方体",
+      "category": "3D 视觉效果",
+      "capability": "pseudo-3d/projected-cube",
+      "file": "projected-wire-cube.hya",
+      "description": "离线 3D 旋转与透视投影烘焙为 12 条拓扑稳定的矢量 morph 轨道。"
+    },
+    {
+      "id": "depth-tunnel",
+      "title": "纵深霓虹隧道",
+      "category": "3D 视觉效果",
+      "capability": "pseudo-3d/depth-tunnel",
+      "file": "depth-tunnel.hya",
+      "description": "多层 scale、opacity 与 rotation 相位编排形成连续向镜头推进的纵深感。"
+    },
+    {
+      "id": "perspective-card-flip",
+      "title": "透视卡片翻转",
+      "category": "3D 视觉效果",
+      "capability": "pseudo-3d/card-flip",
+      "file": "perspective-card-flip.hya",
+      "description": "预投影四角 morph、正反面 STEP 颜色和动态投影共同表现 Y 轴翻转。"
+    },
+    {
+      "id": "lottie-precomp-layers",
+      "title": "Lottie 嵌套 Precomp",
+      "category": "合成",
+      "capability": "layers/precomp",
+      "file": "lottie-precomp-layers.hya",
+      "description": "由 Lottie layers/assets 转换，覆盖重复 precomp 实例、三级 composition、parent、opacity、in/out、start time 与 time stretch。"
+    },
+    {
+      "id": "vector-gradient",
+      "title": "矢量渐变",
+      "category": "矢量图形",
+      "capability": "vector/gradient-fill",
+      "file": "vector-gradient.hya",
+      "description": "原生矢量路径和动画线性渐变填充。"
+    },
+    {
+      "id": "vector-trim-path",
+      "title": "路径修剪",
+      "category": "矢量图形",
+      "capability": "vector/trim-path",
+      "file": "vector-trim-path.hya",
+      "description": "Trim Path modifier 动态控制描边的可见区间。"
+    },
+    {
+      "id": "vector-path-morph",
+      "title": "路径形变",
+      "category": "矢量图形",
+      "capability": "vector/path-morph",
+      "file": "vector-path-morph.hya",
+      "description": "同拓扑矢量路径在多个关键形状之间插值。"
+    },
+    {
+      "id": "mask-stack",
+      "title": "Mask 合成",
+      "category": "合成",
+      "capability": "composite/mask-stack",
+      "file": "mask-stack.hya",
+      "description": "动态 alpha mask、subtract operation 与 feather。"
+    },
+    {
+      "id": "text-selector",
+      "title": "文字选择器",
+      "category": "文字",
+      "capability": "text/range-selector",
+      "file": "text-selector.hya",
+      "description": "逐字符 range selector 驱动位移、缩放、透明度和颜色。"
+    },
+    {
+      "id": "drop-shadow-effect",
+      "title": "投影效果",
+      "category": "图层效果",
+      "capability": "effect/drop-shadow",
+      "file": "drop-shadow-effect.hya",
+      "description": "图层级 drop-shadow 的动画 offset、blur 与 opacity。"
+    },
+    {
+      "id": "particle-emitter",
+      "title": "粒子发射器",
+      "category": "运行时组件",
+      "capability": "component/particle2d",
+      "file": "particle-emitter.hya",
+      "description": "确定性 seed、burst、持续发射、重力和 additive blending。"
+    }
+  ]
+}

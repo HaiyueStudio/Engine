@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - glTF Viewer</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: #0d1117;
+      color: #d6deeb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      cursor: grab;
+    }
+    canvas:active { cursor: grabbing; }
+    #toolbar {
+      position: fixed;
+      left: 16px;
+      top: 16px;
+      display: grid;
+      grid-template-columns: minmax(260px, 420px) auto auto auto auto;
+      gap: 8px;
+      align-items: center;
+      padding: 10px;
+      background: rgba(11, 17, 27, 0.86);
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+    }
+    input, button {
+      height: 32px;
+      border: 1px solid rgba(148, 163, 184, 0.32);
+      border-radius: 6px;
+      background: #111827;
+      color: #e5e7eb;
+      font: inherit;
+    }
+    input { padding: 0 10px; min-width: 0; }
+    button { padding: 0 12px; cursor: pointer; }
+    button:hover { background: #1f2937; }
+    #scene-tree {
+      position: fixed;
+      left: 16px;
+      top: 78px;
+      width: min(320px, calc(100vw - 32px));
+      max-height: calc(100vh - 150px);
+      overflow: auto;
+      padding: 10px;
+      background: rgba(11, 17, 27, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 8px;
+      color: #cbd5e1;
+      font-size: 12px;
+      backdrop-filter: blur(10px);
+    }
+    #scene-tree h2 {
+      margin: 0 0 8px;
+      color: #e5e7eb;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .tree-empty {
+      color: #94a3b8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .tree-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      width: 100%;
+      min-height: 28px;
+      height: auto;
+      margin: 1px 0;
+      padding: 4px 8px;
+      align-items: center;
+      gap: 8px;
+      text-align: left;
+      border-color: transparent;
+      background: transparent;
+      color: #cbd5e1;
+    }
+    .tree-row:hover {
+      background: rgba(51, 65, 85, 0.7);
+    }
+    .tree-row.selected {
+      border-color: rgba(34, 211, 238, 0.45);
+      background: rgba(8, 145, 178, 0.24);
+      color: #ecfeff;
+    }
+    .tree-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tree-badges {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .tree-badge {
+      padding: 1px 5px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.86);
+      color: #93c5fd;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10px;
+      line-height: 16px;
+    }
+    #status {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      padding: 8px 10px;
+      background: rgba(11, 17, 27, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 6px;
+      color: #aab7cf;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+    }
+    #stats-panel {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      width: min(360px, calc(100vw - 32px));
+      max-height: calc(100vh - 120px);
+      overflow: auto;
+      padding: 10px 12px;
+      background: rgba(11, 17, 27, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 8px;
+      color: #cbd5e1;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      backdrop-filter: blur(10px);
+    }
+    #stats-panel summary {
+      cursor: pointer;
+      color: #e5e7eb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    #stats-panel dl {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      gap: 6px 10px;
+      margin: 10px 0 0;
+    }
+    #stats-panel dt {
+      color: #94a3b8;
+    }
+    #stats-panel dd {
+      margin: 0;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      color: #dbeafe;
+    }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div id="toolbar">
+    <input id="src-input" spellcheck="false" placeholder="glTF / GLB URL" />
+    <button id="load-button">Load</button>
+    <button id="file-button">File</button>
+    <button id="folder-button">Folder</button>
+    <button id="sample-button">Sample</button>
+    <input id="file-input" type="file" accept=".gltf,.glb,model/gltf+json,model/gltf-binary" hidden />
+    <input id="folder-input" type="file" webkitdirectory multiple hidden />
+  </div>
+  <div id="scene-tree">
+    <h2>Scene Hierarchy</h2>
+    <div class="tree-empty">Loading hierarchy...</div>
+  </div>
+  <div id="status">Loading sample glTF...</div>
+  <div id="stats-panel">Loading stats...</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

@@ -1,0 +1,611 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haiyue.dev/schema/animation/1.0.json",
+  "title": "Haiyue Animation 1.0 authoring document",
+  "type": "object",
+  "required": ["format", "version", "canvas", "duration", "nodes"],
+  "properties": {
+    "format": { "const": "haiyue-animation" },
+    "version": { "const": "1.0" },
+    "name": { "type": "string" },
+    "canvas": {
+      "type": "object",
+      "required": ["width", "height", "coordinateSystem"],
+      "properties": {
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 },
+        "coordinateSystem": { "const": "screen-y-down" }
+      },
+      "additionalProperties": false
+    },
+    "duration": { "type": "number", "exclusiveMinimum": 0 },
+    "frameRate": { "type": "number", "exclusiveMinimum": 0 },
+    "endBehavior": { "enum": ["hold", "loop", "destroy"] },
+    "resources": { "type": "array", "items": { "$ref": "#/$defs/resource" } },
+    "nodes": { "type": "array", "items": { "$ref": "#/$defs/node" } },
+    "tracks": { "type": "array", "items": { "$ref": "#/$defs/track" } },
+    "extensionsUsed": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/extensionId" } },
+    "extensionsRequired": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/extensionId" } },
+    "extensions": {
+      "type": "object",
+      "properties": {
+        "org.haiyue.animation-state-machine@1": { "$ref": "#/$defs/hyaStateMachineExtension" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "vec2": { "type": "array", "prefixItems": [{ "type": "number" }, { "type": "number" }], "minItems": 2, "maxItems": 2 },
+    "positiveVec2": { "type": "array", "prefixItems": [{ "type": "number", "exclusiveMinimum": 0 }, { "type": "number", "exclusiveMinimum": 0 }], "minItems": 2, "maxItems": 2 },
+    "nonNegativeVec2": { "type": "array", "prefixItems": [{ "type": "number", "minimum": 0 }, { "type": "number", "minimum": 0 }], "minItems": 2, "maxItems": 2 },
+    "color": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 4, "maxItems": 4 },
+    "extensionId": { "type": "string", "pattern": "^[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)+@[1-9][0-9]*$" },
+    "resource": {
+      "type": "object",
+      "required": ["id", "type", "uri"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["image", "audio", "binary"] },
+        "uri": { "type": "string", "minLength": 1 },
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 },
+        "mimeType": { "type": "string", "minLength": 1 },
+        "integrity": { "type": "string", "minLength": 1 },
+        "colorSpace": { "enum": ["srgb", "linear"] }
+      },
+      "additionalProperties": false
+    },
+    "transform": {
+      "type": "object",
+      "properties": {
+        "position": { "$ref": "#/$defs/vec2" },
+        "rotation": { "type": "number" },
+        "scale": { "$ref": "#/$defs/vec2" },
+        "anchor": { "$ref": "#/$defs/vec2" },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "shape2d": {
+      "type": "object",
+      "required": ["type", "shape", "size", "fill"],
+      "properties": {
+        "type": { "const": "shape2d" },
+        "shape": { "enum": ["rect", "ellipse"] },
+        "size": { "$ref": "#/$defs/positiveVec2" },
+        "position": { "$ref": "#/$defs/vec2" },
+        "fill": { "$ref": "#/$defs/color" }
+      },
+      "additionalProperties": false
+    },
+    "sprite2d": {
+      "type": "object",
+      "required": ["type", "resource", "size"],
+      "properties": {
+        "type": { "const": "sprite2d" },
+        "resource": { "type": "string", "minLength": 1 },
+        "size": { "$ref": "#/$defs/positiveVec2" },
+        "position": { "$ref": "#/$defs/vec2" },
+        "tint": { "$ref": "#/$defs/color" },
+        "uvRect": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 4, "maxItems": 4 },
+        "uvRectTrack": { "$ref": "#/$defs/spriteUvRectTrack" }
+      },
+      "additionalProperties": false
+    },
+    "path2d": {
+      "type": "object",
+      "required": ["type", "commands", "values", "fill"],
+      "properties": {
+        "type": { "const": "path2d" },
+        "commands": { "type": "string", "pattern": "^M[MLQCZ]*Z[MLQCZ]*$" },
+        "values": { "type": "array", "items": { "type": "number" } },
+        "fill": { "$ref": "#/$defs/color" },
+        "fillRule": { "enum": ["nonzero", "evenodd"] },
+        "tolerance": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "text2d": {
+      "type": "object",
+      "required": ["type", "text", "size", "color"],
+      "properties": {
+        "type": { "const": "text2d" },
+        "text": { "type": "string" },
+        "size": { "$ref": "#/$defs/positiveVec2" },
+        "position": { "$ref": "#/$defs/vec2" },
+        "fontFamily": { "type": "string", "minLength": 1 },
+        "fontSize": { "type": "number", "exclusiveMinimum": 0 },
+        "fontWeight": { "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "number", "minimum": 1, "maximum": 1000 }] },
+        "fontStyle": { "enum": ["normal", "italic"] },
+        "fontResource": { "type": "string", "minLength": 1 },
+        "lineHeight": { "type": "number", "exclusiveMinimum": 0 },
+        "tracking": { "type": "number" },
+        "textAlign": { "enum": ["left", "center", "right"] },
+        "verticalAlign": { "enum": ["top", "middle", "bottom"] },
+        "color": { "$ref": "#/$defs/color" },
+        "backgroundColor": { "$ref": "#/$defs/color" },
+        "padding": { "type": "number", "minimum": 0 },
+        "resolutionScale": { "type": "number", "exclusiveMinimum": 0, "maximum": 4 },
+        "documents": { "type": "array", "minItems": 1, "maxItems": 128, "items": { "$ref": "#/$defs/textDocument" } },
+        "animators": { "type": "array", "minItems": 1, "maxItems": 16, "items": { "$ref": "#/$defs/textAnimator" } }
+      },
+      "additionalProperties": false
+    },
+    "textDocument": {
+      "type": "object", "required": ["time", "text"],
+      "properties": {
+        "time": { "type": "number", "minimum": 0 }, "text": { "type": "string" },
+        "fontFamily": { "type": "string", "minLength": 1 }, "fontSize": { "type": "number", "exclusiveMinimum": 0 },
+        "fontWeight": { "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "number", "minimum": 1, "maximum": 1000 }] },
+        "fontStyle": { "enum": ["normal", "italic"] }, "fontResource": { "type": "string", "minLength": 1 },
+        "lineHeight": { "type": "number", "exclusiveMinimum": 0 }, "tracking": { "type": "number" },
+        "textAlign": { "enum": ["left", "center", "right"] }, "color": { "$ref": "#/$defs/color" }
+      }, "additionalProperties": false
+    },
+    "textSelector": {
+      "type": "object", "required": ["start", "end"],
+      "properties": {
+        "start": { "type": "number" }, "end": { "type": "number" }, "offset": { "type": "number" },
+        "units": { "enum": ["percent", "index"] }, "amount": { "type": "number", "minimum": -1, "maximum": 1 },
+        "shape": { "enum": ["square", "ramp-up", "ramp-down", "triangle", "round", "smooth"] },
+        "basedOn": { "enum": ["characters", "characters-excluding-spaces", "words", "lines"] },
+        "easing": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 4, "maxItems": 4 },
+        "smoothness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "randomSeed": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "startTrack": { "$ref": "#/$defs/vectorTrack" }, "endTrack": { "$ref": "#/$defs/vectorTrack" },
+        "offsetTrack": { "$ref": "#/$defs/vectorTrack" }, "amountTrack": { "$ref": "#/$defs/vectorTrack" }
+      }, "additionalProperties": false
+    },
+    "textAnimator": {
+      "type": "object", "required": ["selector"],
+      "properties": {
+        "selector": { "$ref": "#/$defs/textSelector" }, "position": { "$ref": "#/$defs/vec2" }, "scale": { "$ref": "#/$defs/vec2" },
+        "rotation": { "type": "number" }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "fillColor": { "$ref": "#/$defs/color" }, "tracking": { "type": "number" },
+        "positionTrack": { "$ref": "#/$defs/vectorTrack" }, "scaleTrack": { "$ref": "#/$defs/vectorTrack" },
+        "rotationTrack": { "$ref": "#/$defs/vectorTrack" }, "opacityTrack": { "$ref": "#/$defs/vectorTrack" },
+        "fillColorTrack": { "$ref": "#/$defs/vectorTrack" }, "trackingTrack": { "$ref": "#/$defs/vectorTrack" }
+      }, "additionalProperties": false
+    },
+    "particle2d": {
+      "type": "object",
+      "required": ["type", "maxParticles", "emissionRate", "lifetime", "speed", "angle", "startSize", "endSize", "startColor", "endColor"],
+      "properties": {
+        "type": { "const": "particle2d" },
+        "maxParticles": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+        "emissionRate": { "type": "number", "minimum": 0 },
+        "burst": { "type": "integer", "minimum": 0 },
+        "duration": { "type": "number", "exclusiveMinimum": 0 },
+        "loop": { "type": "boolean" },
+        "seed": { "type": "integer" },
+        "lifetime": { "$ref": "#/$defs/vec2" },
+        "speed": { "$ref": "#/$defs/vec2" },
+        "angle": { "$ref": "#/$defs/vec2" },
+        "gravity": { "$ref": "#/$defs/vec2" },
+        "startSize": { "$ref": "#/$defs/vec2" },
+        "endSize": { "$ref": "#/$defs/vec2" },
+        "startColor": { "$ref": "#/$defs/color" },
+        "endColor": { "$ref": "#/$defs/color" },
+        "shape": { "enum": ["point", "box", "circle"] },
+        "shapeSize": { "$ref": "#/$defs/vec2" },
+        "shapeRadius": { "type": "number", "minimum": 0 },
+        "blendMode": { "enum": ["normal", "additive"] },
+        "resource": { "type": "string", "minLength": 1 },
+        "radial": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "audio": {
+      "type": "object",
+      "required": ["type", "resource"],
+      "properties": {
+        "type": { "const": "audio" },
+        "resource": { "type": "string", "minLength": 1 },
+        "volume": { "type": "number", "minimum": 0, "maximum": 1 },
+        "loop": { "type": "boolean" },
+        "startOffset": { "type": "number", "minimum": 0 },
+        "playbackRate": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "composite": {
+      "oneOf": [
+        { "$ref": "#/$defs/compositeLayer" },
+        {
+          "type": "object",
+          "required": ["layers"],
+          "properties": {
+            "layers": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "items": { "$ref": "#/$defs/compositeLayer" }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "compositeLayer": {
+      "type": "object",
+      "required": ["kind", "source", "mode"],
+      "properties": {
+        "kind": { "enum": ["mask", "matte"] },
+        "source": { "type": "string", "minLength": 1 },
+        "mode": { "enum": ["alpha", "alpha-inverted", "luma", "luma-inverted"] },
+        "operation": { "enum": ["add", "subtract", "intersect", "difference"] },
+        "feather": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number", "minimum": 0 }
+        },
+        "expansion": { "type": "number" },
+        "expansionTrack": { "$ref": "#/$defs/vectorValueTrack" }
+      },
+      "additionalProperties": false
+    },
+    "vectorValueTrack": {
+      "type": "object",
+      "required": ["interpolation", "times", "values", "valueSize"],
+      "properties": {
+        "interpolation": { "enum": ["step", "linear", "cubic-bezier"] },
+        "times": { "type": "array", "minItems": 1, "items": { "type": "number", "minimum": 0 } },
+        "values": { "type": "array", "minItems": 1, "items": { "type": "number" } },
+        "valueSize": { "type": "integer", "minimum": 1 },
+        "easings": { "type": "array", "items": { "type": "number" } }
+      },
+      "additionalProperties": false
+    },
+    "spriteUvRectTrack": {
+      "type": "object",
+      "required": ["interpolation", "times", "values", "valueSize"],
+      "properties": {
+        "interpolation": { "const": "step" },
+        "times": { "type": "array", "minItems": 1, "items": { "type": "number", "minimum": 0 } },
+        "values": { "type": "array", "minItems": 4, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+        "valueSize": { "const": 4 }
+      },
+      "additionalProperties": false
+    },
+    "vectorSolidPaint": {
+      "type": "object",
+      "required": ["kind", "color"],
+      "properties": {
+        "kind": { "const": "solid" },
+        "color": { "$ref": "#/$defs/color" },
+        "colorTrack": { "$ref": "#/$defs/vectorValueTrack" },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "opacityTrack": { "$ref": "#/$defs/vectorValueTrack" }
+      },
+      "additionalProperties": false
+    },
+    "vectorGradientPaint": {
+      "type": "object",
+      "required": ["kind", "start", "end", "stops"],
+      "properties": {
+        "kind": { "enum": ["linear-gradient", "radial-gradient"] },
+        "start": { "$ref": "#/$defs/vec2" },
+        "end": { "$ref": "#/$defs/vec2" },
+        "stops": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 40,
+          "items": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "startTrack": { "$ref": "#/$defs/vectorValueTrack" },
+        "endTrack": { "$ref": "#/$defs/vectorValueTrack" },
+        "stopsTrack": { "$ref": "#/$defs/vectorValueTrack" },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "opacityTrack": { "$ref": "#/$defs/vectorValueTrack" }
+      },
+      "additionalProperties": false
+    },
+    "vectorStroke": {
+      "type": "object",
+      "required": ["color", "width", "lineCap", "lineJoin", "miterLimit"],
+      "properties": {
+        "color": { "$ref": "#/$defs/color" },
+        "gradient": { "$ref": "#/$defs/vectorGradientPaint" },
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "widthTrack": { "$ref": "#/$defs/vectorValueTrack" },
+        "lineCap": { "enum": ["butt", "round", "square"] },
+        "lineJoin": { "enum": ["miter", "round", "bevel"] },
+        "miterLimit": { "type": "number", "exclusiveMinimum": 0 },
+        "dash": { "type": "array", "minItems": 1, "maxItems": 32, "items": { "type": "number", "minimum": 0 } },
+        "dashOffset": { "type": "number" },
+        "dashOffsetTrack": { "$ref": "#/$defs/vectorValueTrack" }
+      },
+      "additionalProperties": false
+    },
+    "vectorShape": {
+      "type": "object",
+      "required": ["type", "commands", "values"],
+      "properties": {
+        "type": { "const": "org.haiyue.vector-shape@1" },
+        "commands": { "type": "string", "pattern": "^M[MLQCZ]*$" },
+        "values": { "type": "array", "items": { "type": "number" } },
+        "morph": { "$ref": "#/$defs/vectorValueTrack" },
+        "morphRelative": { "type": "boolean" },
+        "fill": {
+          "oneOf": [
+            { "$ref": "#/$defs/vectorSolidPaint" },
+            { "$ref": "#/$defs/vectorGradientPaint" }
+          ]
+        },
+        "stroke": { "$ref": "#/$defs/vectorStroke" },
+        "modifiers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/vectorPathModifier" }
+        },
+        "fillRule": { "enum": ["nonzero", "evenodd"] },
+        "tolerance": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "anyOf": [{ "required": ["fill"] }, { "required": ["stroke"] }],
+      "additionalProperties": false
+    },
+    "vectorPathModifier": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "start", "end", "offset", "mode"],
+          "properties": {
+            "kind": { "const": "trim-path" },
+            "start": { "type": "number" },
+            "end": { "type": "number" },
+            "offset": { "type": "number" },
+            "mode": { "enum": ["simultaneous", "individual"] },
+            "startTrack": { "$ref": "#/$defs/vectorValueTrack" },
+            "endTrack": { "$ref": "#/$defs/vectorValueTrack" },
+            "offsetTrack": { "$ref": "#/$defs/vectorValueTrack" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "radius"],
+          "properties": {
+            "kind": { "const": "round-corners" },
+            "radius": { "type": "number", "minimum": 0 },
+            "radiusTrack": { "$ref": "#/$defs/vectorValueTrack" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "extensionComponent": {
+      "type": "object",
+      "required": ["type"],
+      "properties": { "type": { "$ref": "#/$defs/extensionId" } },
+      "not": {
+        "properties": { "type": { "const": "org.haiyue.vector-shape@1" } },
+        "required": ["type"]
+      },
+      "additionalProperties": true
+    },
+    "layerEffect": {
+      "oneOf": [
+        {
+          "type": "object", "required": ["kind", "black", "white", "amount"],
+          "properties": {
+            "kind": { "const": "tint" },
+            "black": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+            "white": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+            "amount": { "type": "number", "minimum": 0, "maximum": 1 },
+            "blackTrack": { "$ref": "#/$defs/vectorTrack" }, "whiteTrack": { "$ref": "#/$defs/vectorTrack" }, "amountTrack": { "$ref": "#/$defs/vectorTrack" }
+          }, "additionalProperties": false
+        },
+        {
+          "type": "object", "required": ["kind", "color"],
+          "properties": {
+            "kind": { "const": "fill" }, "color": { "$ref": "#/$defs/color" }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+            "colorTrack": { "$ref": "#/$defs/vectorTrack" }, "opacityTrack": { "$ref": "#/$defs/vectorTrack" }
+          }, "additionalProperties": false
+        },
+        {
+          "type": "object", "required": ["kind", "opacity"],
+          "properties": { "kind": { "const": "opacity" }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 }, "opacityTrack": { "$ref": "#/$defs/vectorTrack" } },
+          "additionalProperties": false
+        },
+        {
+          "type": "object", "required": ["kind", "matrix"],
+          "properties": {
+            "kind": { "const": "color-matrix" }, "matrix": { "type": "array", "minItems": 20, "maxItems": 20, "items": { "type": "number" } },
+            "matrixTrack": { "$ref": "#/$defs/vectorTrack" }
+          }, "additionalProperties": false
+        },
+        {
+          "type": "object", "required": ["kind", "radius"],
+          "properties": { "kind": { "const": "blur" }, "radius": { "$ref": "#/$defs/nonNegativeVec2" }, "radiusTrack": { "$ref": "#/$defs/vectorTrack" } },
+          "additionalProperties": false
+        },
+        {
+          "type": "object", "required": ["kind", "color", "opacity", "offset", "blur"],
+          "properties": {
+            "kind": { "const": "drop-shadow" }, "color": { "$ref": "#/$defs/color" }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+            "offset": { "$ref": "#/$defs/vec2" }, "blur": { "type": "number", "minimum": 0 },
+            "colorTrack": { "$ref": "#/$defs/vectorTrack" }, "opacityTrack": { "$ref": "#/$defs/vectorTrack" },
+            "offsetTrack": { "$ref": "#/$defs/vectorTrack" }, "blurTrack": { "$ref": "#/$defs/vectorTrack" }
+          }, "additionalProperties": false
+        }
+      ]
+    },
+    "node": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "parent": { "type": "string", "minLength": 1 },
+        "start": { "type": "number", "minimum": 0 },
+        "duration": { "type": "number", "exclusiveMinimum": 0 },
+        "transform": { "$ref": "#/$defs/transform" },
+        "composite": { "$ref": "#/$defs/composite" },
+        "effects": { "type": "array", "minItems": 1, "maxItems": 8, "items": { "$ref": "#/$defs/layerEffect" } },
+        "components": { "type": "array", "items": { "oneOf": [{ "$ref": "#/$defs/shape2d" }, { "$ref": "#/$defs/path2d" }, { "$ref": "#/$defs/sprite2d" }, { "$ref": "#/$defs/text2d" }, { "$ref": "#/$defs/particle2d" }, { "$ref": "#/$defs/audio" }, { "$ref": "#/$defs/vectorShape" }, { "$ref": "#/$defs/extensionComponent" }] } },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "track": {
+      "type": "object",
+      "required": ["node", "property", "interpolation", "times", "values"],
+      "properties": {
+        "node": { "type": "string", "minLength": 1 },
+        "property": { "enum": ["position", "rotation", "scale", "opacity"] },
+        "interpolation": { "enum": ["step", "linear", "cubic-bezier"] },
+        "times": { "type": "array", "minItems": 1, "items": { "type": "number", "minimum": 0 } },
+        "values": { "type": "array", "minItems": 1, "items": { "type": "number" } },
+        "easings": { "type": "array", "items": { "type": "number" } },
+        "spatialTangents": { "type": "array", "items": { "type": "number" } }
+      },
+      "additionalProperties": false
+    },
+    "hyaStateMachineExtension": {
+      "type": "object",
+      "required": ["clips", "stateMachine"],
+      "properties": {
+        "clips": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10000,
+          "items": {
+            "type": "object",
+            "required": ["id", "start", "duration"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "name": { "type": "string" },
+              "start": { "type": "number", "minimum": 0 },
+              "duration": { "type": "number", "exclusiveMinimum": 0 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "stateMachine": { "$ref": "#/$defs/hyaStateMachine" }
+      },
+      "additionalProperties": false
+    },
+    "hyaStateMachine": {
+      "type": "object",
+      "required": ["format", "id", "name", "parameters", "layers"],
+      "properties": {
+        "format": { "const": "haiyue-animation-state-machine@1" },
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "parameters": { "type": "array", "maxItems": 1000, "items": { "$ref": "#/$defs/hyaStateMachineParameter" } },
+        "layers": { "type": "array", "minItems": 1, "maxItems": 128, "items": { "$ref": "#/$defs/hyaStateMachineLayer" } }
+      },
+      "additionalProperties": false
+    },
+    "hyaStateMachineParameter": {
+      "oneOf": [
+        {
+          "type": "object", "required": ["name", "type", "defaultValue"],
+          "properties": { "name": { "type": "string", "minLength": 1 }, "type": { "const": "float" }, "defaultValue": { "type": "number" } },
+          "additionalProperties": false
+        },
+        {
+          "type": "object", "required": ["name", "type", "defaultValue"],
+          "properties": { "name": { "type": "string", "minLength": 1 }, "type": { "const": "integer" }, "defaultValue": { "type": "integer" } },
+          "additionalProperties": false
+        },
+        {
+          "type": "object", "required": ["name", "type", "defaultValue"],
+          "properties": { "name": { "type": "string", "minLength": 1 }, "type": { "const": "boolean" }, "defaultValue": { "type": "boolean" } },
+          "additionalProperties": false
+        },
+        {
+          "type": "object", "required": ["name", "type"],
+          "properties": { "name": { "type": "string", "minLength": 1 }, "type": { "const": "trigger" } },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "hyaStateMachineMotion": {
+      "oneOf": [
+        {
+          "type": "object", "required": ["kind", "clipId"],
+          "properties": { "kind": { "const": "clip" }, "clipId": { "type": "string", "minLength": 1 } },
+          "additionalProperties": false
+        },
+        {
+          "type": "object", "required": ["kind", "parameter", "children"],
+          "properties": {
+            "kind": { "const": "blend-1d" }, "parameter": { "type": "string", "minLength": 1 },
+            "children": { "type": "array", "minItems": 1, "maxItems": 4096, "items": {
+              "type": "object", "required": ["threshold", "motion"],
+              "properties": { "threshold": { "type": "number" }, "motion": { "$ref": "#/$defs/hyaStateMachineMotion" } },
+              "additionalProperties": false
+            } }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object", "required": ["kind", "algorithm", "parameterX", "parameterY", "children"],
+          "properties": {
+            "kind": { "const": "blend-2d" }, "algorithm": { "enum": ["cartesian", "directional"] },
+            "parameterX": { "type": "string", "minLength": 1 }, "parameterY": { "type": "string", "minLength": 1 },
+            "children": { "type": "array", "minItems": 1, "maxItems": 4096, "items": {
+              "type": "object", "required": ["position", "motion"],
+              "properties": { "position": { "$ref": "#/$defs/vec2" }, "motion": { "$ref": "#/$defs/hyaStateMachineMotion" } },
+              "additionalProperties": false
+            } }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "hyaStateMachineCondition": {
+      "type": "object",
+      "required": ["parameter", "operator"],
+      "properties": {
+        "parameter": { "type": "string", "minLength": 1 },
+        "operator": { "enum": ["greater", "greater-or-equal", "less", "less-or-equal", "equal", "not-equal", "is-true", "is-false", "triggered"] },
+        "value": { "type": ["number", "boolean"] }
+      },
+      "additionalProperties": false
+    },
+    "hyaStateMachineLayer": {
+      "type": "object",
+      "required": ["id", "name", "initialStateId", "states", "transitions"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 }, "name": { "type": "string" },
+        "initialStateId": { "type": "string", "minLength": 1 },
+        "states": { "type": "array", "minItems": 1, "items": {
+          "type": "object", "required": ["id", "name", "motion"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 }, "name": { "type": "string" },
+            "motion": { "$ref": "#/$defs/hyaStateMachineMotion" }, "speed": { "type": "number" },
+            "speedParameter": { "type": "string", "minLength": 1 }, "loop": { "enum": ["once", "repeat", "ping-pong"] }
+          },
+          "additionalProperties": false
+        } },
+        "transitions": { "type": "array", "items": {
+          "type": "object", "required": ["id", "from", "to", "conditions", "duration"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 }, "from": { "type": "string", "minLength": 1 }, "to": { "type": "string", "minLength": 1 },
+            "conditions": { "type": "array", "items": { "$ref": "#/$defs/hyaStateMachineCondition" } },
+            "duration": { "type": "number", "minimum": 0 }, "hasExitTime": { "type": "boolean" },
+            "exitTime": { "type": "number", "minimum": 0 }, "destinationOffset": { "type": "number", "minimum": 0 },
+            "interruption": { "enum": ["none", "source", "destination", "source-then-destination", "destination-then-source"] }
+          },
+          "additionalProperties": false
+        } },
+        "blendMode": { "enum": ["override", "additive"] }, "weight": { "type": "number", "minimum": 0, "maximum": 1 },
+        "mask": {
+          "type": "object",
+          "properties": {
+            "include": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "exclude": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

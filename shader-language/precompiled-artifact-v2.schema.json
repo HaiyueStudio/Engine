@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haiyue.dev/schema/precompiled-shader-artifact-v2.schema.json",
+  "title": "Haiyue Precompiled Shader Artifact v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format", "version", "compilerVersion", "source", "canonicalHash",
+    "typedModuleHash", "passes", "artifactHash"
+  ],
+  "properties": {
+    "format": { "const": "haiyue-precompiled-shader-artifact" },
+    "version": { "const": 2 },
+    "compilerVersion": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "sha256"],
+      "properties": {
+        "kind": { "enum": ["graph", "typed-ir", "module-family"] },
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "canonicalHash": { "$ref": "#/$defs/hash" },
+    "typedModuleHash": { "$ref": "#/$defs/hash" },
+    "passes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/pass" }
+    },
+    "artifactHash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "stage": { "enum": ["vertex", "fragment", "compute"] },
+    "bindingLayout": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "bufferType", "hasDynamicOffset", "minBindingSize"],
+          "properties": {
+            "kind": { "const": "buffer" },
+            "bufferType": { "enum": ["uniform", "storage", "read-only-storage"] },
+            "hasDynamicOffset": { "type": "boolean" },
+            "minBindingSize": { "type": "integer", "minimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "samplerType"],
+          "properties": {
+            "kind": { "const": "sampler" },
+            "samplerType": { "enum": ["filtering", "non-filtering", "comparison"] }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "sampleType", "viewDimension", "multisampled"],
+          "properties": {
+            "kind": { "const": "texture" },
+            "sampleType": { "enum": ["float", "unfilterable-float", "depth", "sint", "uint"] },
+            "viewDimension": { "enum": ["1d", "2d", "2d-array", "cube", "cube-array", "3d"] },
+            "multisampled": { "type": "boolean" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "access", "format", "viewDimension"],
+          "properties": {
+            "kind": { "const": "storage-texture" },
+            "access": { "enum": ["write-only", "read-only", "read-write"] },
+            "format": { "type": "string", "minLength": 1 },
+            "viewDimension": { "enum": ["1d", "2d", "2d-array", "3d"] }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": { "kind": { "const": "external-texture" } }
+        }
+      ]
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "binding", "visibility", "layout"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "binding": { "type": "integer", "minimum": 0 },
+        "visibility": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "$ref": "#/$defs/stage" }
+        },
+        "layout": { "$ref": "#/$defs/bindingLayout" }
+      }
+    },
+    "bindGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["logicalSpace", "logicalGroup", "physicalGroup", "owner", "bindings"],
+      "properties": {
+        "logicalSpace": { "enum": ["frame", "object", "material", "pass"] },
+        "logicalGroup": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "physicalGroup": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "owner": { "enum": ["artifact", "renderer"] },
+        "bindings": { "type": "array", "items": { "$ref": "#/$defs/binding" } }
+      }
+    },
+    "uniformField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "offset", "size"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "minLength": 1 },
+        "offset": { "type": "integer", "minimum": 0 },
+        "size": { "type": "integer", "minimum": 0 },
+        "arrayStride": { "type": "integer", "minimum": 0 },
+        "matrixStride": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "uniformBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "alignment", "byteSize", "fields"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "alignment": { "type": "integer", "minimum": 1 },
+        "byteSize": { "type": "integer", "minimum": 0 },
+        "fields": { "type": "array", "items": { "$ref": "#/$defs/uniformField" } }
+      }
+    },
+    "vertexAttribute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic", "shaderLocation", "offset", "format"],
+      "properties": {
+        "semantic": { "type": "string", "minLength": 1 },
+        "shaderLocation": { "type": "integer", "minimum": 0 },
+        "offset": { "type": "integer", "minimum": 0 },
+        "format": { "type": "string", "minLength": 1 }
+      }
+    },
+    "vertexBuffer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["arrayStride", "stepMode", "attributes"],
+      "properties": {
+        "arrayStride": { "type": "integer", "minimum": 0 },
+        "stepMode": { "enum": ["vertex", "instance"] },
+        "attributes": { "type": "array", "items": { "$ref": "#/$defs/vertexAttribute" } }
+      }
+    },
+    "varying": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["semantic", "location", "type", "interpolation"],
+      "properties": {
+        "semantic": { "type": "string", "minLength": 1 },
+        "location": { "type": "integer", "minimum": 0 },
+        "type": { "type": "string", "minLength": 1 },
+        "interpolation": { "enum": ["perspective", "linear", "flat"] }
+      }
+    },
+    "renderTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["location", "formatClass"],
+      "properties": {
+        "location": { "type": "integer", "minimum": 0 },
+        "formatClass": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sourceMapEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceId", "sourceName", "generatedStartLine", "generatedEndLine"],
+      "properties": {
+        "sourceId": { "type": "string", "minLength": 1 },
+        "sourceName": { "type": "string", "minLength": 1 },
+        "generatedStartLine": { "type": "integer", "minimum": 1 },
+        "generatedEndLine": { "type": "integer", "minimum": 1 },
+        "sourceStartLine": { "type": "integer", "minimum": 1 },
+        "sourceStartColumn": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "pass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "code", "canonicalHash", "entryPoints", "bindGroups", "uniformBlocks",
+        "vertexBuffers", "varyings", "renderTargets", "capabilities", "passRequirements", "sourceMap"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "code": { "type": "string", "minLength": 1 },
+        "canonicalHash": { "$ref": "#/$defs/hash" },
+        "entryPoints": {
+          "type": "object",
+          "additionalProperties": false,
+          "oneOf": [
+            { "required": ["vertex", "fragment"], "not": { "required": ["compute"] } },
+            { "required": ["compute"], "not": { "anyOf": [{ "required": ["vertex"] }, { "required": ["fragment"] }] } }
+          ],
+          "properties": {
+            "vertex": { "type": "string", "minLength": 1 },
+            "fragment": { "type": "string", "minLength": 1 },
+            "compute": { "type": "string", "minLength": 1 }
+          }
+        },
+        "bindGroups": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/bindGroup" } },
+        "uniformBlocks": { "type": "array", "items": { "$ref": "#/$defs/uniformBlock" } },
+        "vertexBuffers": { "type": "array", "items": { "$ref": "#/$defs/vertexBuffer" } },
+        "varyings": { "type": "array", "items": { "$ref": "#/$defs/varying" } },
+        "renderTargets": { "type": "array", "items": { "$ref": "#/$defs/renderTarget" } },
+        "capabilities": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+        "passRequirements": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+        "sourceMap": { "type": "array", "items": { "$ref": "#/$defs/sourceMapEntry" } }
+      }
+    }
+  }
+}

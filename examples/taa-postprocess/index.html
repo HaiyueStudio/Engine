@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>海月 · Temporal Anti-Aliasing</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    body { margin: 0; overflow: hidden; background: #050914; color: #e8f3ff; font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    canvas { width: 100vw; height: 100vh; display: block; }
+    .panel { position: fixed; top: 22px; left: 22px; width: min(330px, calc(100vw - 86px)); padding: 18px 20px; border: 1px solid #76dcff30; border-radius: 10px; background: #081224d9; box-shadow: 0 18px 70px #0008; backdrop-filter: blur(12px); }
+    .eyebrow { margin: 0 0 4px; color: #64dff2; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; }
+    h1 { margin: 0; font: 600 22px/1.2 system-ui, sans-serif; letter-spacing: -.02em; }
+    .description { margin: 8px 0 16px; color: #a6b9cc; }
+    .control { display: grid; grid-template-columns: 94px 1fr 38px; align-items: center; gap: 9px; margin: 9px 0; }
+    .toggle { grid-template-columns: auto 1fr auto; }
+    output { text-align: right; color: #72e1f2; font-variant-numeric: tabular-nums; }
+    input[type="range"] { width: 100%; accent-color: #3fd4e9; }
+    input[type="checkbox"] { accent-color: #3fd4e9; }
+    .hint { margin: 15px 0 0; padding-top: 12px; border-top: 1px solid #76dcff22; color: #7890a8; font-size: 11px; }
+    .status::before { content: 'temporal resolve active'; color: #72e1f2; }
+    .taa-off .status::before { content: 'raw 1× sample'; color: #ff795b; }
+  </style>
+</head>
+<body data-render-status="pending">
+  <canvas id="canvas" width="1200" height="760"></canvas>
+  <section class="panel">
+    <p class="eyebrow">Post-process laboratory</p>
+    <h1>Temporal Anti-Aliasing</h1>
+    <p class="description">亚像素抖动结合历史重投影；细杆、棋盘和缓慢运动的叶片用于观察稳定性与拖影抑制。</p>
+    <label class="control toggle"><input id="taa-enabled" type="checkbox" checked /><span>TAA</span><output class="status"></output></label>
+    <label class="control toggle"><input id="scene-animate" type="checkbox" checked /><span>动态测试</span><output>on</output></label>
+    <label class="control" for="taa-feedback"><span>历史反馈</span><input id="taa-feedback" type="range" min="0" max="0.98" step="0.01" value="0.90" /><output id="taa-feedback-value">0.90</output></label>
+    <label class="control" for="taa-sharpness"><span>锐化</span><input id="taa-sharpness" type="range" min="0" max="0.6" step="0.01" value="0.12" /><output id="taa-sharpness-value">0.12</output></label>
+    <label class="control" for="taa-jitter"><span>抖动幅度</span><input id="taa-jitter" type="range" min="0" max="1.5" step="0.05" value="1" /><output id="taa-jitter-value">1.00</output></label>
+    <p class="hint">切换 TAA 对比 1× 原始采样 · 拖拽旋转 · 滚轮缩放</p>
+  </section>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+{
+  "contractVersion": 1,
+  "phase": 7,
+  "status": "implemented",
+  "packageStatus": "private-compiler-with-generic-production-artifacts",
+  "implementation": "artifact-v2-multi-group-runtime-abi-and-migration-governance",
+  "primaryTarget": "webgpu-wgsl",
+  "artifact": {
+    "format": "haiyue-precompiled-shader-artifact",
+    "currentVersion": 2,
+    "compatibleVersions": [1, 2],
+    "multiBindGroup": true,
+    "logicalPhysicalGroupMapping": true,
+    "layoutOwners": ["artifact", "renderer"],
+    "bindingKinds": ["buffer", "sampler", "texture", "storage-texture", "external-texture"],
+    "runtimeParsesWgsl": false
+  },
+  "runtime": {
+    "rendererOwnedLayoutsAreExplicit": true,
+    "externalLayoutIdentityInCacheKey": true,
+    "moduleCacheIndependentOfExternalLayout": true,
+    "artifactLayoutCacheIndependentOfExternalLayout": true,
+    "missingRendererLayoutFailsBeforeGpuAllocation": true,
+    "engineDependsOnShaderLanguagePackage": false,
+    "runtimeCompilerIncluded": false
+  },
+  "generation": {
+    "registry": "shader-language/scripts/generate-production-shaders.mjs",
+    "registeredGeneratorIds": ["motion-blur"],
+    "staleCheckInFastGate": true,
+    "migrationManifest": "shader-language/migration-manifest.json"
+  },
+  "inventory": {
+    "wgslSourceCount": 57,
+    "generatedSourceCount": 3,
+    "handwrittenSourceCount": 54,
+    "inlineShaderSiteCount": 3,
+    "escapeHatchCount": 4
+  },
+  "fixtures": [
+    "single-group-postprocess-artifact-v2",
+    "multi-group-renderer-owned-layout-artifact-v2",
+    "real-webgpu-multi-group-pixel-and-cache"
+  ],
+  "productionMigrations": [],
+  "publicApiChanges": [],
+  "apiBaselineUpdated": false,
+  "evidence": {
+    "webgpuExpectedCenterPixel": [51, 153, 204, 255],
+    "webgpuMaximumChannelDelta": 1,
+    "webgpuValidationErrorCount": 0,
+    "unclassifiedFailureCount": 0,
+    "sameLayoutShaderModuleCount": 1,
+    "alternateExternalLayoutShaderModuleCount": 1,
+    "alternateExternalLayoutArtifactLayoutCount": 1,
+    "alternateExternalLayoutPipelineLayoutCount": 2
+  },
+  "acceptance": [
+    "npm run shader-language:check",
+    "npm run shader-language:stage7:check",
+    "npm run verify:shader-language-stage7",
+    "npm test -w ./engine",
+    "npm run check:fast"
+  ],
+  "deferred": [
+    "postprocess-production-migration",
+    "2d-ui-production-migration",
+    "production-deformation-pass-migration",
+    "production-pbr-shader-migration",
+    "compute-ir-side-effects-and-production-migration",
+    "glsl-es300-codegen",
+    "webgl2-renderer-fallback",
+    "visual-shader-graph-editor",
+    "stable-public-shader-api"
+  ]
+}

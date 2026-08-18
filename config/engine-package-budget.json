@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 2,
+  "publicPackages": {
+    "@haiyue/engine": {
+      "workspace": "engine",
+      "maxPackedBytes": 1900000,
+      "maxUnpackedBytes": 8200000,
+      "maxFileCount": 549,
+      "declaredFiles": [
+        "README.md",
+        "LICENSE",
+        "dist/**/*.js",
+        "dist/**/*.d.ts"
+      ],
+      "allowedFilePatterns": [
+        "package.json",
+        "README.md",
+        "LICENSE",
+        "dist/**/*.js",
+        "dist/**/*.d.ts"
+      ]
+    },
+    "@haiyue/animation-spec": {
+      "workspace": "animation-spec",
+      "maxPackedBytes": 105000,
+      "maxUnpackedBytes": 490000,
+      "maxFileCount": 31,
+      "declaredFiles": [
+        "dist",
+        "bin",
+        "schema",
+        "LICENSE",
+        "README.md",
+        "SPECIFICATION.md"
+      ],
+      "allowedFilePatterns": [
+        "package.json",
+        "README.md",
+        "LICENSE",
+        "SPECIFICATION.md",
+        "bin/*.mjs",
+        "dist/**/*.js",
+        "dist/**/*.d.ts",
+        "schema/**/*.json"
+      ]
+    },
+    "@haiyue/extensions": {
+      "workspace": "extensions",
+      "maxPackedBytes": 550000,
+      "maxUnpackedBytes": 2500000,
+      "maxFileCount": 190,
+      "declaredFiles": [
+        "README.md",
+        "LICENSE",
+        "dist/**/*.js",
+        "dist/**/*.d.ts"
+      ],
+      "allowedFilePatterns": [
+        "package.json",
+        "README.md",
+        "LICENSE",
+        "dist/**/*.js",
+        "dist/**/*.d.ts"
+      ]
+    }
+  },
+  "tarball": {
+    "maxPackedBytes": 1900000,
+    "maxUnpackedBytes": 8200000,
+    "maxFileCount": 549,
+    "filesWhitelist": [
+      "README.md",
+      "LICENSE",
+      "dist/**/*.js",
+      "dist/**/*.d.ts"
+    ],
+    "allowedFilePatterns": [
+      "package.json",
+      "README.md",
+      "LICENSE",
+      "dist/**/*.js",
+      "dist/**/*.d.ts"
+    ]
+  },
+  "consumers": {
+    "root-golden-path": {
+      "fixture": "scripts/fixtures/engine-consumers/root-golden-path.mjs",
+      "maxGzipBytes": 60000,
+      "requiredExports": [
+        "CartesianTransform3D",
+        "Component",
+        "Entity",
+        "System",
+        "World"
+      ],
+      "allowedGeneratedShaderArtifacts": []
+    },
+    "fxaa-only": {
+      "fixture": "scripts/fixtures/engine-consumers/fxaa-only.mjs",
+      "maxGzipBytes": 14000,
+      "requiredExports": ["FxaaPass"],
+      "allowedGeneratedShaderArtifacts": ["postprocess-shader-artifact"]
+    },
+    "geometry-only": {
+      "fixture": "scripts/fixtures/engine-consumers/geometry-only.mjs",
+      "maxGzipBytes": 15000,
+      "requiredExports": [
+        "Geometry3D",
+        "createBox3D",
+        "separateGeometryTriangles",
+        "simplifyGeometryTriangles",
+        "subdivideGeometryTriangles"
+      ],
+      "allowedGeneratedShaderArtifacts": []
+    },
+    "tween-only": {
+      "fixture": "scripts/fixtures/engine-consumers/tween-only.mjs",
+      "maxGzipBytes": 9000,
+      "requiredExports": [
+        "Easing",
+        "Tween",
+        "TweenManager",
+        "lerpNumber"
+      ],
+      "allowedGeneratedShaderArtifacts": []
+    },
+    "worker-url-only": {
+      "fixture": "scripts/fixtures/engine-consumers/worker-url-only.mjs",
+      "maxGzipBytes": 21000,
+      "requiredExports": [
+        "createAssetWorkerSource",
+        "createCSGWorkerSource",
+        "createKtx2TextureWorkerSource",
+        "resolveWorkerUrl"
+      ],
+      "allowedGeneratedShaderArtifacts": []
+    }
+  },
+  "animationSpecConsumers": {
+    "animation-spec-root": {
+      "fixture": "scripts/fixtures/engine-consumers/animation-spec-root.mjs",
+      "packageName": "@haiyue/animation-spec",
+      "maxGzipBytes": 27000,
+      "requiredExports": [
+        "ANIMATION_FILE_EXTENSION",
+        "ANIMATION_FORMAT",
+        "decodeAnimationBinary",
+        "encodeAnimationBinary",
+        "parseAnimation"
+      ]
+    },
+    "animation-spec-lottie": {
+      "fixture": "scripts/fixtures/engine-consumers/animation-spec-lottie.mjs",
+      "packageName": "@haiyue/animation-spec",
+      "maxGzipBytes": 47000,
+      "requiredExports": [
+        "convertLottie",
+        "convertLottieDocument",
+        "inspectLottieFonts"
+      ]
+    },
+    "animation-spec-native3d": {
+      "fixture": "scripts/fixtures/engine-consumers/animation-spec-native3d.mjs",
+      "packageName": "@haiyue/animation-spec",
+      "maxGzipBytes": 33000,
+      "requiredExports": [
+        "NATIVE_3D_ANIMATION_EXTENSION_ID",
+        "createNative3DAnimationExtensionHandler",
+        "parseNative3DAnimation",
+        "parseNative3DAnimationPayload"
+      ]
+    }
+  },
+  "extensionConsumers": {
+    "extensions-animation": {
+      "fixture": "scripts/fixtures/engine-consumers/extensions-animation.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 120000,
+      "requiredExports": ["Animation2DComponent", "Animation2DRenderSystem", "Animation2DSystem", "createAnimationAssetLoader"]
+    },
+    "extensions-animation3d": {
+      "fixture": "scripts/fixtures/engine-consumers/extensions-animation3d.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 25000,
+      "requiredExports": [
+        "Animation3DMixer",
+        "Animation3DPoseBuffer",
+        "Animation3DStateMachineController"
+      ]
+    },
+    "extensions-gltf": {
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gltf.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 140000,
+      "requiredExports": [
+        "GltfModelComponent",
+        "GltfModelSystem",
+        "createGltfPlugin"
+      ]
+    },
+    "extensions-gltf-animation3d": {
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gltf-animation3d.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 48000,
+      "requiredExports": [
+        "GltfAnimation3DRuntime",
+        "createGltfAnimation3DClips",
+        "createGltfAnimation3DRuntime"
+      ]
+    },
+    "extensions-hya-state-machine": {
+      "fixture": "scripts/fixtures/engine-consumers/extensions-hya-state-machine.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 130000,
+      "requiredExports": ["Animation2DStateMachineComponent", "Animation2DStateMachineSystem", "createHyaAnimation2DClips"]
+    },
+    "extensions-spine": {
+      "fixture": "scripts/fixtures/engine-consumers/extensions-spine.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 90000,
+      "requiredExports": ["Spine2DComponent", "Spine2DRenderSystem", "createSpinePlugin"]
+    },
+    "extensions-tilemap": {
+      "fixture": "scripts/fixtures/engine-consumers/extensions-tilemap.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 45000,
+      "requiredExports": ["Tilemap2DComponent", "Tilemap2DRenderSystem", "createTilemapPlugin"]
+    },
+    "extensions-canvas-text": {
+      "fixture": "scripts/fixtures/engine-consumers/extensions-canvas-text.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 50000,
+      "requiredExports": ["CanvasText2DRenderSystem", "CanvasTextComponent"]
+    },
+    "extensions-tween": {
+      "fixture": "scripts/fixtures/engine-consumers/extensions-tween.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 32000,
+      "requiredExports": ["Tween2DComponent", "Tween2DSystem"]
+    },
+    "extensions-grid": {
+      "fixture": "scripts/fixtures/engine-consumers/extensions-grid.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 9000,
+      "requiredExports": ["Grid2DComponent"]
+    }
+  }
+}

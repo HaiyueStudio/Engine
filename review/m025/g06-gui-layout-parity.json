@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "goal": "g06-compute-gui-data-lifecycle",
+  "layouts": [
+    {
+      "id": "gui-shape",
+      "floatsPerVertex": 15,
+      "arrayStride": 60,
+      "fields": ["position", "color", "rect", "radius", "clip"],
+      "cpuGpuByteParity": true,
+      "artifactReflectionParity": true
+    },
+    {
+      "id": "gui-image-text",
+      "floatsPerVertex": 12,
+      "arrayStride": 48,
+      "fields": ["position", "uv", "color", "clip"],
+      "cpuGpuByteParity": true,
+      "imageArtifactReflectionParity": true,
+      "textArtifactReflectionParity": true
+    }
+  ],
+  "sourceOwner": "engine/src/gui/rendering/GuiVertexLayout.ts",
+  "parallelMagicSearchResidual": 0
+}

@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "webgl2Fallback": {
+    "decision": "hold",
+    "evidencePath": "review/capabilities/webgl2-fallback-product-evidence.json",
+    "minimumTelemetryWindowDays": 28,
+    "minimumMeasuredSessions": 1000,
+    "minimumUnavailableSessionRatio": 0.05,
+    "minimumRepresentativeSceneCount": 3,
+    "minimumDeviceClassCount": 2,
+    "requiredParityAreas": [
+      "golden-path",
+      "pbr",
+      "asset-loading"
+    ]
+  },
+  "layeredNavMesh": {
+    "decision": "hold",
+    "evidencePath": "review/capabilities/layered-navmesh-product-evidence.json",
+    "minimumOverlappingSurfaceCount": 2,
+    "minimumDeviceClassCount": 1,
+    "acceptedTopologyKinds": [
+      "cave",
+      "stacked-bridge",
+      "tunnel-underpass"
+    ]
+  },
+  "clippingExtensions": {
+    "caps": {
+      "decision": "hold",
+      "evidencePath": "review/capabilities/clipping-caps-product-evidence.json",
+      "minimumDeviceClassCount": 1,
+      "workloadMetric": "requiredClosedSectionCount",
+      "minimumWorkload": 1,
+      "acceptedUseCases": [
+        "cad-section",
+        "editor-section",
+        "game-cutaway"
+      ]
+    },
+    "instanced": {
+      "decision": "hold",
+      "evidencePath": "review/capabilities/instanced-clipping-product-evidence.json",
+      "minimumDeviceClassCount": 2,
+      "workloadMetric": "representativeInstanceCount",
+      "minimumWorkload": 1000,
+      "acceptedUseCases": [
+        "large-instance-inspection",
+        "large-instance-reveal"
+      ]
+    },
+    "line": {
+      "decision": "hold",
+      "evidencePath": "review/capabilities/line-clipping-product-evidence.json",
+      "minimumDeviceClassCount": 1,
+      "workloadMetric": "requiredClippedLineCount",
+      "minimumWorkload": 1,
+      "acceptedUseCases": [
+        "cad-section",
+        "editor-gizmo",
+        "game-cutaway"
+      ]
+    },
+    "planarMirror": {
+      "decision": "hold",
+      "evidencePath": "review/capabilities/planar-mirror-clipping-product-evidence.json",
+      "minimumDeviceClassCount": 2,
+      "workloadMetric": "requiredReflectionPlaneCount",
+      "minimumWorkload": 1,
+      "acceptedUseCases": [
+        "mirror-cutaway",
+        "portal-reflection",
+        "editor-section"
+      ]
+    }
+  }
+}

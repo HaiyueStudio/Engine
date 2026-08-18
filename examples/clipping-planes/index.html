@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Haiyue · Multiple Clipping Planes</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; color: #edf8ff; background: #030712; }
+    canvas { display: block; width: 100vw; height: 100vh; cursor: grab; touch-action: none; }
+    canvas:active { cursor: grabbing; }
+    .panel {
+      position: fixed; z-index: 2; top: 18px; left: 18px; width: min(330px, calc(100vw - 36px)); padding: 17px;
+      border: 1px solid rgba(80, 190, 255, .25); border-radius: 15px;
+      background: linear-gradient(145deg, rgba(5, 13, 29, .92), rgba(4, 16, 31, .78));
+      box-shadow: 0 24px 72px rgba(0, 0, 0, .5); backdrop-filter: blur(18px);
+    }
+    .eyebrow { margin: 0 0 6px; color: #5fe1ff; font: 700 10px ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: 21px; letter-spacing: -.025em; }
+    .intro { margin: 8px 0 14px; color: #91a8bc; font-size: 11px; line-height: 1.6; }
+    code { color: #a8edff; font: 10px ui-monospace, monospace; }
+    .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 13px; }
+    .legend span { padding: 7px; border: 1px solid rgba(100, 202, 255, .13); border-radius: 7px; color: #b9d3e2; background: rgba(8, 28, 48, .64); font-size: 10px; text-align: center; }
+    .control { margin-top: 9px; }
+    .line, .switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #c7d8e4; font-size: 11px; }
+    output { color: #6ee8ff; font: 11px ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+    input[type="range"] { width: 100%; margin: 5px 0 0; accent-color: #51d6f7; }
+    input[type="checkbox"] { width: 16px; height: 16px; accent-color: #4bdafc; }
+    .switch { margin-top: 12px; padding-top: 11px; border-top: 1px solid rgba(255, 255, 255, .09); }
+    .note { margin: 11px 0 0; color: rgba(194, 219, 233, .5); font-size: 9px; line-height: 1.55; }
+    .badge { position: fixed; right: 18px; top: 18px; padding: 8px 11px; border: 1px solid rgba(86, 217, 255, .22); border-radius: 999px; color: #9eeeff; background: rgba(3, 13, 25, .72); font: 10px ui-monospace, monospace; backdrop-filter: blur(12px); }
+    .hint { position: fixed; right: 18px; bottom: 17px; color: rgba(191, 222, 237, .48); font-size: 10px; }
+    #result { display: none; }
+    @media (max-width: 700px) { .panel { top: 10px; left: 10px; width: min(305px, calc(100vw - 20px)); padding: 13px; } .badge, .hint { display: none; } }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <aside class="panel">
+    <p class="eyebrow">Entity · Multi-plane clipping</p>
+    <h1>多截取平面</h1>
+    <p class="intro">左侧球体同时应用三个世界空间平面，并保留每个平面的正半空间。右侧球体共享相同的几何体和材质，但没有 <code>ClippingPlanes</code>。</p>
+    <div class="legend"><span>左：3 planes</span><span>右：reference</span></div>
+    <div class="control">
+      <div class="line"><label for="plane-x">X 截面</label><output id="plane-x-value">-0.42</output></div>
+      <input id="plane-x" type="range" min="-1.1" max="0.8" step="0.01" value="-0.42" />
+    </div>
+    <div class="control">
+      <div class="line"><label for="plane-y">Y 截面</label><output id="plane-y-value">-0.38</output></div>
+      <input id="plane-y" type="range" min="-1.1" max="0.8" step="0.01" value="-0.38" />
+    </div>
+    <div class="control">
+      <div class="line"><label for="plane-z">Z 截面</label><output id="plane-z-value">-0.42</output></div>
+      <input id="plane-z" type="range" min="-1.1" max="0.8" step="0.01" value="-0.42" />
+    </div>
+    <label class="switch"><span>自动移动 Z 平面</span><input id="animate" type="checkbox" checked /></label>
+    <p class="note">裁剪发生在片元阶段并作用于 forward/depth/shadow/motion/outline/normal Pass；当前不会为截面生成封口几何。</p>
+  </aside>
+  <div class="badge">3 / 8 world-space planes</div>
+  <div class="hint">拖拽旋转 · 滚轮缩放 · 移动截面观察阴影</div>
+  <pre id="result" aria-hidden="true"></pre>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

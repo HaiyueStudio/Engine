@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:," />
+  <title>HYA Animation Samples</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --bg: #050812; --panel: #0b1221; --line: #223250; --text: #edf5ff; --muted: #8fa3c3;
+      --accent: #58f0c0; --blue: #6bd9ff; --danger: #ff819a; --warning: #f5c86a;
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: var(--text); }
+    button, input, select { font: inherit; }
+    button, select, input[type="url"], input[type="search"] {
+      min-height: 36px; border: 1px solid var(--line); border-radius: 8px; background: #0b1427; color: var(--text); outline: none;
+    }
+    button { padding: 0 12px; cursor: pointer; }
+    button:hover:not(:disabled) { border-color: #476588; background: #14233e; }
+    button:disabled { opacity: .42; cursor: default; }
+    button.primary { border-color: #53d8b1; background: var(--accent); color: #051510; font-weight: 750; }
+    input[type="url"], input[type="search"], select { padding: 0 10px; }
+    input:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(107,217,255,.1); }
+    .app { display: grid; grid-template-columns: 320px minmax(0, 1fr) 340px; width: 100vw; height: 100vh; }
+    .panel { min-height: 0; background: linear-gradient(180deg, #0c1425, #080e1b); }
+    .library { display: grid; grid-template-rows: auto auto minmax(0,1fr); border-right: 1px solid var(--line); }
+    .brand { padding: 18px 17px 13px; border-bottom: 1px solid var(--line); }
+    .brand-row { display: flex; align-items: center; gap: 9px; }
+    .brand-mark { width: 11px; height: 11px; border-radius: 4px; background: var(--accent); transform: rotate(45deg); box-shadow: 0 0 22px rgba(88,240,192,.65); }
+    h1 { margin: 0; font-size: 17px; }
+    .brand p { margin: 7px 0 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .filters { display: grid; grid-template-columns: 1fr 112px; gap: 8px; padding: 11px; border-bottom: 1px solid var(--line); }
+    .filters input { min-width: 0; }
+    .samples { overflow: auto; padding: 9px; }
+    .sample-card { display: grid; width: 100%; min-height: 74px; margin-bottom: 7px; padding: 9px 10px; text-align: left; }
+    .sample-card[data-active="true"] { border-color: rgba(88,240,192,.8); background: rgba(47,157,129,.16); box-shadow: inset 3px 0 var(--accent); }
+    .sample-card strong { margin: 2px 0 5px; font-size: 13px; }
+    .sample-card code { overflow: hidden; color: var(--blue); font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; text-overflow: ellipsis; white-space: nowrap; }
+    .sample-category { color: var(--muted); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+    #sample-empty { padding: 28px 10px; color: var(--muted); font-size: 12px; text-align: center; }
+    .stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: radial-gradient(circle at 50% 42%, #132342, #050812 70%); }
+    canvas { display: block; width: 100%; height: 100%; }
+    .stage-label { position: absolute; top: 15px; left: 16px; padding: 6px 9px; border: 1px solid rgba(107,217,255,.2); border-radius: 999px; background: rgba(5,10,22,.72); color: #9bb0cf; font-size: 9px; letter-spacing: .08em; backdrop-filter: blur(10px); }
+    .transport { position: absolute; right: 16px; bottom: 16px; left: 16px; padding: 11px 12px; border: 1px solid rgba(88,240,192,.25); border-radius: 13px; background: rgba(7,13,27,.88); box-shadow: 0 16px 50px rgba(0,0,0,.32); backdrop-filter: blur(16px); }
+    .transport-row { display: flex; align-items: center; gap: 8px; }
+    .transport input[type="range"] { width: 100%; margin: 10px 0 0; accent-color: var(--accent); }
+    .time { color: var(--muted); font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #current-time { color: var(--accent); }
+    .transport-spacer { flex: 1; }
+    .transport label { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 10px; }
+    .transport select { min-height: 30px; }
+    .inspector { overflow: auto; border-left: 1px solid var(--line); }
+    .section { padding: 15px; border-bottom: 1px solid var(--line); }
+    .section-title { margin: 0 0 9px; color: #becce2; font-size: 10px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+    .source-row { display: grid; grid-template-columns: 1fr auto; gap: 7px; }
+    .source-row input { min-width: 0; }
+    .source-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 7px; }
+    #source-file { display: none; }
+    #status { margin-top: 8px; padding: 7px 9px; border-radius: 7px; background: #08101f; color: var(--muted); font-size: 10px; line-height: 1.45; }
+    #status[data-kind="working"] { color: var(--blue); }
+    #status[data-kind="success"] { color: var(--accent); }
+    #status[data-kind="error"] { color: var(--danger); }
+    .details h2 { margin: 0; font-size: 16px; }
+    #details-capability { display: inline-block; margin-top: 7px; color: var(--blue); font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    #details-description { margin: 8px 0 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    #stats { margin-top: 9px; color: #b4c7e4; font: 9px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .diagnostics { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .diagnostics li { display: grid; gap: 3px; padding: 8px; border: 1px solid rgba(67,91,128,.32); border-radius: 7px; background: #080f1d; font-size: 10px; }
+    .diagnostics li strong { color: #c9d8ed; }
+    .diagnostics li span { color: var(--muted); line-height: 1.45; }
+    .diagnostics li[data-kind="success"] strong { color: var(--accent); }
+    .diagnostics li[data-kind="warning"] strong { color: var(--warning); }
+    .diagnostics li[data-kind="error"] strong { color: var(--danger); }
+    details { overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: #070d19; }
+    summary { padding: 9px 10px; color: #b9c9df; cursor: pointer; font-size: 10px; }
+    #format-preview { max-height: 330px; overflow: auto; margin: 0; padding: 10px; border-top: 1px solid var(--line); color: #9bb1d2; white-space: pre-wrap; overflow-wrap: anywhere; font: 9px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .drop-overlay { position: fixed; z-index: 20; inset: 18px; display: none; place-items: center; border: 2px dashed var(--accent); border-radius: 18px; background: rgba(4,13,22,.9); color: var(--accent); font-size: 18px; font-weight: 750; pointer-events: none; }
+    body[data-drop-active="true"] .drop-overlay { display: grid; }
+    #result { display: none; }
+    @media (max-width: 1050px) {
+      .app { grid-template-columns: 270px minmax(0,1fr); }
+      .inspector { position: absolute; z-index: 5; top: 12px; right: 12px; bottom: 94px; width: 320px; border: 1px solid var(--line); border-radius: 12px; background: rgba(8,14,27,.94); backdrop-filter: blur(18px); }
+    }
+    @media (max-width: 720px) {
+      .app { display: block; }
+      .library { position: absolute; z-index: 6; top: 10px; bottom: 94px; left: 10px; width: min(275px, calc(100vw - 20px)); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+      .stage { width: 100vw; height: 100vh; }
+      .inspector { display: none; }
+      .transport label { display: none; }
+    }
+  </style>
+</head>
+<body data-render-status="pending">
+  <main class="app">
+    <aside class="panel library" aria-label="HYA samples">
+      <header class="brand">
+        <div class="brand-row"><span class="brand-mark"></span><h1>HYA Samples</h1></div>
+        <p>每个二进制样例聚焦一个格式能力。选择样例，或载入自己的 HYA 文件。</p>
+      </header>
+      <div class="filters">
+        <input id="sample-search" type="search" placeholder="搜索能力…" aria-label="搜索样例" />
+        <select id="category-filter" aria-label="能力分类"><option value="">全部分类</option></select>
+      </div>
+      <div class="samples"><div id="sample-list"></div><div id="sample-empty" hidden>没有匹配的样例。</div></div>
+    </aside>
+
+    <section class="stage" aria-label="HYA WebGPU preview">
+      <canvas id="canvas" width="960" height="540"></canvas>
+      <div class="stage-label">HYA · WEBGPU LIVE</div>
+      <div class="transport">
+        <div class="transport-row">
+          <button id="play" class="primary" type="button" disabled>播放</button>
+          <button id="restart" type="button" disabled>重播</button>
+          <span class="time"><output id="current-time">0.000s</output> / <output id="duration">0.000s</output></span>
+          <span class="transport-spacer"></span>
+          <label>速度 <select id="speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label>
+          <label><input id="loop" type="checkbox" checked /> 循环</label>
+        </div>
+        <input id="timeline" type="range" min="0" max="1" step="0.016667" value="0" disabled aria-label="动画时间轴" />
+      </div>
+    </section>
+
+    <aside class="panel inspector" aria-label="HYA inspector">
+      <section class="section">
+        <h3 class="section-title">载入外部动画</h3>
+        <div class="source-row"><input id="source-url" type="url" placeholder="https://…/animation.hya" spellcheck="false" /><button id="load-url" type="button">URL</button></div>
+        <div class="source-actions"><button id="choose-file" type="button">选择 HYA / JSON</button><button id="download" type="button" disabled>下载 .hya</button></div>
+        <input id="source-file" type="file" accept=".hya,.json,application/vnd.haiyue.animation,application/json" />
+        <div id="status" data-kind="working" role="status">正在初始化 WebGPU…</div>
+      </section>
+      <section class="section details">
+        <h3 class="section-title">当前能力</h3>
+        <h2 id="details-title">等待载入</h2>
+        <code id="details-capability">—</code>
+        <p id="details-description">选择左侧样例开始预览。</p>
+        <div id="stats"></div>
+      </section>
+      <section class="section">
+        <h3 class="section-title">Diagnostics</h3>
+        <ul id="diagnostics" class="diagnostics"></ul>
+      </section>
+      <section class="section"><details><summary>查看 HYA JSON 表示</summary><pre id="format-preview"></pre></details></section>
+    </aside>
+  </main>
+  <div class="drop-overlay">释放文件以载入 HYA</div>
+  <pre id="result" aria-hidden="true"></pre>
+  <script type="module" src="../../examples/hya-samples/bundle.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "outDir": "dist",
+    "declaration": false,
+    "paths": {
+      "@haiyue/animation-spec": ["../animation-spec/src/index.ts"],
+      "@haiyue/animation-spec/lottie": ["../animation-spec/src/lottie.ts"],
+      "@haiyue/extensions/animation": ["../extensions/src/animation.ts"],
+      "@haiyue/extensions/canvas-text": ["../extensions/src/canvas-text.ts"],
+      "@haiyue/extensions/gltf": ["../extensions/src/gltf.ts"],
+      "@haiyue/extensions/experimental/gltf-worker": ["../extensions/src/experimental-gltf-worker.ts"],
+      "@haiyue/extensions/gltf-animation3d": ["../extensions/src/gltf-animation3d.ts"],
+      "@haiyue/extensions/hya-state-machine": ["../extensions/src/hya-state-machine.ts"],
+      "@haiyue/extensions/grid": ["../extensions/src/grid.ts"],
+      "@haiyue/extensions/spine": ["../extensions/src/spine.ts"],
+      "@haiyue/extensions/tilemap": ["../extensions/src/tilemap.ts"],
+      "@haiyue/extensions/tween": ["../extensions/src/tween.ts"],
+      "@haiyue/extensions": ["../extensions/src/index.ts"],
+      "@haiyue/engine/*": ["../engine/src/*.ts"],
+      "@haiyue/engine": ["../engine/src/index.ts"]
+    },
+    "typeRoots": ["../node_modules", "../node_modules/@types", "../engine/node_modules", "../engine/node_modules/@types"],
+    "types": ["@webgpu/types", "dat.gui"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

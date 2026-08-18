@@ -1,0 +1,350 @@
+{
+  "schemaVersion": 1,
+  "suite": "haiyue-navmesh-multilayer-conformance-v1",
+  "coordinateConvention": {
+    "positions": "world-space xyz",
+    "upVector": "normalized world-space direction",
+    "connectivity": "explicit portals only",
+    "surfaceResolution": "projected polygon containment plus nearest signed up-axis elevation"
+  },
+  "cases": [
+    {
+      "id": "bridge-stacked-over-ground",
+      "features": ["bridge", "stacked-surfaces", "no-implicit-vertical-edge"],
+      "up": [0, 1, 0],
+      "surfaceTolerance": 0.1,
+      "regions": [
+        { "id": "ground-west", "layer": "ground", "vertices": [[0, 0, 0], [2, 0, 0], [2, 0, 2], [0, 0, 2]] },
+        { "id": "ground-mid", "layer": "ground", "vertices": [[2, 0, 0], [4, 0, 0], [4, 0, 2], [2, 0, 2]] },
+        { "id": "ground-east", "layer": "ground", "vertices": [[4, 0, 0], [6, 0, 0], [6, 0, 2], [4, 0, 2]] },
+        { "id": "bridge-west", "layer": "bridge", "vertices": [[0, 4, 0], [2, 4, 0], [2, 4, 2], [0, 4, 2]] },
+        { "id": "bridge-mid", "layer": "bridge", "vertices": [[2, 4, 0], [4, 4, 0], [4, 4, 2], [2, 4, 2]] },
+        { "id": "bridge-east", "layer": "bridge", "vertices": [[4, 4, 0], [6, 4, 0], [6, 4, 2], [4, 4, 2]] }
+      ],
+      "portals": [
+        { "id": "ground-west-mid", "from": "ground-west", "to": "ground-mid", "position": [2, 0, 1], "width": 2, "bidirectional": true },
+        { "id": "ground-mid-east", "from": "ground-mid", "to": "ground-east", "position": [4, 0, 1], "width": 2, "bidirectional": true },
+        { "id": "bridge-west-mid", "from": "bridge-west", "to": "bridge-mid", "position": [2, 4, 1], "width": 2, "bidirectional": true },
+        { "id": "bridge-mid-east", "from": "bridge-mid", "to": "bridge-east", "position": [4, 4, 1], "width": 2, "bidirectional": true }
+      ],
+      "obstacles": [],
+      "queries": [
+        {
+          "id": "ground-remains-on-ground",
+          "start": [1, 0, 1],
+          "target": [5, 0, 1],
+          "agentRadius": 0.2,
+          "expected": {
+            "status": "complete",
+            "startRegion": "ground-west",
+            "targetRegion": "ground-east",
+            "regionPath": ["ground-west", "ground-mid", "ground-east"],
+            "portalPath": ["ground-west-mid", "ground-mid-east"]
+          }
+        },
+        {
+          "id": "bridge-remains-on-bridge",
+          "start": [1, 4, 1],
+          "target": [5, 4, 1],
+          "agentRadius": 0.2,
+          "expected": {
+            "status": "complete",
+            "startRegion": "bridge-west",
+            "targetRegion": "bridge-east",
+            "regionPath": ["bridge-west", "bridge-mid", "bridge-east"],
+            "portalPath": ["bridge-west-mid", "bridge-mid-east"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "cave-below-surface",
+      "features": ["cave", "overlapping-projection", "layer-preservation"],
+      "up": [0, 1, 0],
+      "surfaceTolerance": 0.1,
+      "regions": [
+        { "id": "surface-west", "layer": "surface", "vertices": [[0, 5, 0], [3, 5, 0], [3, 5, 3], [0, 5, 3]] },
+        { "id": "surface-east", "layer": "surface", "vertices": [[3, 5, 0], [6, 5, 0], [6, 5, 3], [3, 5, 3]] },
+        { "id": "cave-mouth", "layer": "cave", "vertices": [[0, 0, 0], [2, 0, 0], [2, 0, 3], [0, 0, 3]] },
+        { "id": "cave-tunnel", "layer": "cave", "vertices": [[2, 0, 0], [4, 0, 0], [4, 0, 3], [2, 0, 3]] },
+        { "id": "cave-chamber", "layer": "cave", "vertices": [[4, 0, 0], [6, 0, 0], [6, 0, 3], [4, 0, 3]] }
+      ],
+      "portals": [
+        { "id": "surface-ridge", "from": "surface-west", "to": "surface-east", "position": [3, 5, 1.5], "width": 3, "bidirectional": true },
+        { "id": "cave-mouth-tunnel", "from": "cave-mouth", "to": "cave-tunnel", "position": [2, 0, 1.5], "width": 2, "bidirectional": true },
+        { "id": "cave-tunnel-chamber", "from": "cave-tunnel", "to": "cave-chamber", "position": [4, 0, 1.5], "width": 2, "bidirectional": true }
+      ],
+      "obstacles": [],
+      "queries": [
+        {
+          "id": "surface-does-not-drop-into-cave",
+          "start": [1, 5, 1.5],
+          "target": [5, 5, 1.5],
+          "agentRadius": 0.2,
+          "expected": {
+            "status": "complete",
+            "startRegion": "surface-west",
+            "targetRegion": "surface-east",
+            "regionPath": ["surface-west", "surface-east"],
+            "portalPath": ["surface-ridge"]
+          }
+        },
+        {
+          "id": "cave-route-stays-under-surface",
+          "start": [1, 0, 1.5],
+          "target": [5, 0, 1.5],
+          "agentRadius": 0.2,
+          "expected": {
+            "status": "complete",
+            "startRegion": "cave-mouth",
+            "targetRegion": "cave-chamber",
+            "regionPath": ["cave-mouth", "cave-tunnel", "cave-chamber"],
+            "portalPath": ["cave-mouth-tunnel", "cave-tunnel-chamber"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "explicit-portal-connectivity",
+      "features": ["portal", "cross-layer-portal", "disjoint-polygons", "portal-disable", "bidirectional"],
+      "up": [0, 1, 0],
+      "surfaceTolerance": 0.1,
+      "regions": [
+        { "id": "room-a", "layer": "rooms", "vertices": [[0, 0, 0], [2, 0, 0], [2, 0, 2], [0, 0, 2]] },
+        { "id": "room-b", "layer": "upper-room", "vertices": [[4, 3, 0], [6, 3, 0], [6, 3, 2], [4, 3, 2]] }
+      ],
+      "portals": [
+        { "id": "door-a-b", "from": "room-a", "to": "room-b", "position": [3, 1.5, 1], "width": 1.5, "bidirectional": true }
+      ],
+      "obstacles": [],
+      "queries": [
+        {
+          "id": "portal-connects-disjoint-regions",
+          "start": [1, 0, 1],
+          "target": [5, 3, 1],
+          "agentRadius": 0.2,
+          "expected": {
+            "status": "complete",
+            "startRegion": "room-a",
+            "targetRegion": "room-b",
+            "regionPath": ["room-a", "room-b"],
+            "portalPath": ["door-a-b"]
+          }
+        },
+        {
+          "id": "disabled-portal-is-unreachable",
+          "start": [1, 0, 1],
+          "target": [5, 3, 1],
+          "agentRadius": 0.2,
+          "disabledPortalIds": ["door-a-b"],
+          "expected": {
+            "status": "unreachable",
+            "startRegion": "room-a",
+            "targetRegion": "room-b",
+            "regionPath": ["room-a"],
+            "portalPath": []
+          }
+        },
+        {
+          "id": "bidirectional-portal-reverses",
+          "start": [5, 3, 1],
+          "target": [1, 0, 1],
+          "agentRadius": 0.2,
+          "expected": {
+            "status": "complete",
+            "startRegion": "room-b",
+            "targetRegion": "room-a",
+            "regionPath": ["room-b", "room-a"],
+            "portalPath": ["door-a-b"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "stacked-without-connection",
+      "features": ["stacked-surfaces", "unconnected", "same-planar-position"],
+      "up": [0, 1, 0],
+      "surfaceTolerance": 0.1,
+      "regions": [
+        { "id": "lower-deck", "layer": "lower", "vertices": [[0, 0, 0], [4, 0, 0], [4, 0, 4], [0, 0, 4]] },
+        { "id": "upper-deck", "layer": "upper", "vertices": [[0, 3, 0], [4, 3, 0], [4, 3, 4], [0, 3, 4]] }
+      ],
+      "portals": [],
+      "obstacles": [],
+      "queries": [
+        {
+          "id": "overlap-does-not-create-an-edge",
+          "start": [2, 0, 2],
+          "target": [2, 3, 2],
+          "agentRadius": 0.2,
+          "expected": {
+            "status": "unreachable",
+            "startRegion": "lower-deck",
+            "targetRegion": "upper-deck",
+            "regionPath": ["lower-deck"],
+            "portalPath": []
+          }
+        },
+        {
+          "id": "same-deck-remains-reachable",
+          "start": [1, 3, 1],
+          "target": [3, 3, 3],
+          "agentRadius": 0.2,
+          "expected": {
+            "status": "complete",
+            "startRegion": "upper-deck",
+            "targetRegion": "upper-deck",
+            "regionPath": ["upper-deck"],
+            "portalPath": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "diagonal-up-rotated-navigation-frame",
+      "features": ["rotated-up-vector", "diagonal-up", "stacked-surfaces"],
+      "up": [0, 0.7071067811865476, 0.7071067811865476],
+      "surfaceTolerance": 0.1,
+      "regions": [
+        { "id": "diagonal-left", "layer": "elevation-0", "vertices": [[0, 0, 0], [2, 0, 0], [2, 1.4142135623730951, -1.4142135623730951], [0, 1.4142135623730951, -1.4142135623730951]] },
+        { "id": "diagonal-right", "layer": "elevation-0", "vertices": [[2, 0, 0], [4, 0, 0], [4, 1.4142135623730951, -1.4142135623730951], [2, 1.4142135623730951, -1.4142135623730951]] },
+        { "id": "diagonal-upper", "layer": "elevation-3", "vertices": [[0, 2.121320343559643, 2.121320343559643], [4, 2.121320343559643, 2.121320343559643], [4, 3.535533905932738, 0.7071067811865479], [0, 3.535533905932738, 0.7071067811865479]] }
+      ],
+      "portals": [
+        { "id": "diagonal-left-right", "from": "diagonal-left", "to": "diagonal-right", "position": [2, 0.7071067811865476, -0.7071067811865476], "width": 2, "bidirectional": true }
+      ],
+      "obstacles": [],
+      "queries": [
+        {
+          "id": "diagonal-up-path-uses-derived-plane",
+          "start": [1, 0.7071067811865476, -0.7071067811865476],
+          "target": [3, 0.7071067811865476, -0.7071067811865476],
+          "agentRadius": 0.2,
+          "expected": {
+            "status": "complete",
+            "startRegion": "diagonal-left",
+            "targetRegion": "diagonal-right",
+            "regionPath": ["diagonal-left", "diagonal-right"],
+            "portalPath": ["diagonal-left-right"]
+          }
+        },
+        {
+          "id": "diagonal-up-elevation-separates-overlap",
+          "start": [1, 0.7071067811865476, -0.7071067811865476],
+          "target": [1, 2.8284271247461903, 1.4142135623730954],
+          "agentRadius": 0.2,
+          "expected": {
+            "status": "unreachable",
+            "startRegion": "diagonal-left",
+            "targetRegion": "diagonal-upper",
+            "regionPath": ["diagonal-left"],
+            "portalPath": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "layer-scoped-dynamic-obstacles",
+      "features": ["dynamic-obstacle", "layer-scoped-obstacle", "stacked-portals", "ignore-obstacle"],
+      "up": [0, 1, 0],
+      "surfaceTolerance": 0.1,
+      "regions": [
+        { "id": "ground-left", "layer": "ground", "vertices": [[0, 0, 0], [3, 0, 0], [3, 0, 2], [0, 0, 2]] },
+        { "id": "ground-right", "layer": "ground", "vertices": [[3, 0, 0], [6, 0, 0], [6, 0, 2], [3, 0, 2]] },
+        { "id": "upper-left", "layer": "upper", "vertices": [[0, 4, 0], [3, 4, 0], [3, 4, 2], [0, 4, 2]] },
+        { "id": "upper-right", "layer": "upper", "vertices": [[3, 4, 0], [6, 4, 0], [6, 4, 2], [3, 4, 2]] }
+      ],
+      "portals": [
+        { "id": "ground-door", "from": "ground-left", "to": "ground-right", "position": [3, 0, 1], "width": 1, "bidirectional": true },
+        { "id": "upper-door", "from": "upper-left", "to": "upper-right", "position": [3, 4, 1], "width": 1, "bidirectional": true }
+      ],
+      "obstacles": [
+        { "id": "ground-blocker", "position": [2.8, 0, 1], "radius": 0.55, "enabled": true },
+        { "id": "upper-blocker", "position": [2.8, 4, 1], "radius": 0.55, "enabled": true }
+      ],
+      "queries": [
+        {
+          "id": "upper-obstacle-blocks-upper-layer",
+          "start": [1, 4, 1],
+          "target": [5, 4, 1],
+          "agentRadius": 0.1,
+          "activeObstacleIds": ["upper-blocker"],
+          "expected": {
+            "status": "unreachable",
+            "startRegion": "upper-left",
+            "targetRegion": "upper-right",
+            "regionPath": ["upper-left"],
+            "portalPath": [],
+            "blockedPortalIds": ["upper-door"],
+            "obstacleRegions": { "upper-blocker": "upper-left" }
+          }
+        },
+        {
+          "id": "upper-obstacle-does-not-block-ground",
+          "start": [1, 0, 1],
+          "target": [5, 0, 1],
+          "agentRadius": 0.1,
+          "activeObstacleIds": ["upper-blocker"],
+          "expected": {
+            "status": "complete",
+            "startRegion": "ground-left",
+            "targetRegion": "ground-right",
+            "regionPath": ["ground-left", "ground-right"],
+            "portalPath": ["ground-door"],
+            "blockedPortalIds": ["upper-door"],
+            "obstacleRegions": { "upper-blocker": "upper-left" }
+          }
+        },
+        {
+          "id": "ground-obstacle-blocks-ground-layer",
+          "start": [1, 0, 1],
+          "target": [5, 0, 1],
+          "agentRadius": 0.1,
+          "activeObstacleIds": ["ground-blocker"],
+          "expected": {
+            "status": "unreachable",
+            "startRegion": "ground-left",
+            "targetRegion": "ground-right",
+            "regionPath": ["ground-left"],
+            "portalPath": [],
+            "blockedPortalIds": ["ground-door"],
+            "obstacleRegions": { "ground-blocker": "ground-left" }
+          }
+        },
+        {
+          "id": "ground-obstacle-does-not-block-upper",
+          "start": [1, 4, 1],
+          "target": [5, 4, 1],
+          "agentRadius": 0.1,
+          "activeObstacleIds": ["ground-blocker"],
+          "expected": {
+            "status": "complete",
+            "startRegion": "upper-left",
+            "targetRegion": "upper-right",
+            "regionPath": ["upper-left", "upper-right"],
+            "portalPath": ["upper-door"],
+            "blockedPortalIds": ["ground-door"],
+            "obstacleRegions": { "ground-blocker": "ground-left" }
+          }
+        },
+        {
+          "id": "ignored-layer-obstacle-restores-route",
+          "start": [1, 4, 1],
+          "target": [5, 4, 1],
+          "agentRadius": 0.1,
+          "activeObstacleIds": ["upper-blocker"],
+          "ignoreObstacleIds": ["upper-blocker"],
+          "expected": {
+            "status": "complete",
+            "startRegion": "upper-left",
+            "targetRegion": "upper-right",
+            "regionPath": ["upper-left", "upper-right"],
+            "portalPath": ["upper-door"],
+            "blockedPortalIds": [],
+            "obstacleRegions": {}
+          }
+        }
+      ]
+    }
+  ]
+}

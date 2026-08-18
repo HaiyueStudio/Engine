@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@haiyue/engine/*": ["../engine/dist/*.d.ts"],
+      "@haiyue/engine": ["../engine/dist/index.d.ts"]
+    },
+    "typeRoots": [
+      "../node_modules",
+      "../node_modules/@types",
+      "../engine/node_modules",
+      "../engine/node_modules/@types"
+    ],
+    "types": ["@webgpu/types"]
+  },
+  "include": [
+    "src/animation3d/**/*.ts",
+    "type-tests/animation3d-contract.type-test.ts",
+    "type-tests/gltf-animation3d-contract.type-test.ts"
+  ]
+}

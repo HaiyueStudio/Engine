@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 – BVH Mesh LOD</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; color: #edf5ff; background: #07101c; font: 12px Inter, system-ui, sans-serif; }
+    canvas { display: block; }
+    #panel {
+      position: absolute; top: 16px; left: 16px; width: 292px; padding: 15px;
+      border: 1px solid rgba(160, 192, 235, .2); border-radius: 12px;
+      background: rgba(9, 18, 31, .86); backdrop-filter: blur(14px);
+      box-shadow: 0 16px 42px rgba(0, 0, 0, .32);
+    }
+    h1 { margin: 0 0 5px; font-size: 17px; font-weight: 680; letter-spacing: -.01em; }
+    .subtitle { margin: 0 0 13px; color: rgba(220, 235, 255, .58); font-size: 11px; line-height: 1.5; }
+    button {
+      width: 100%; margin-bottom: 13px; padding: 8px 10px; color: #eaf3ff;
+      border: 1px solid rgba(88, 167, 255, .48); border-radius: 7px;
+      background: rgba(51, 121, 206, .2); cursor: pointer;
+    }
+    button:hover, button.active { background: rgba(51, 137, 236, .32); }
+    .stats { display: grid; grid-template-columns: 1fr auto; gap: 7px 12px; padding: 11px 0; border-block: 1px solid rgba(255,255,255,.09); }
+    .label { color: rgba(220, 235, 255, .58); }
+    .value { color: #fff; font: 600 11px ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+    .legend { display: grid; gap: 8px; padding-top: 12px; }
+    .legend-row { display: grid; grid-template-columns: 10px 1fr auto; gap: 8px; align-items: center; }
+    .swatch { width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+    .high { color: #40f0ad; background: #40f0ad; }
+    .medium { color: #ffaa33; background: #ffaa33; }
+    .low { color: #e64573; background: #e64573; }
+    .distance { color: rgba(220, 235, 255, .45); font-size: 10px; }
+    #hint { position: absolute; right: 16px; bottom: 14px; color: rgba(225, 238, 255, .5); font-size: 11px; text-shadow: 0 1px 4px #000; }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <aside id="panel">
+    <h1>BVH Mesh LOD</h1>
+    <p class="subtitle">The BVH indexes high-detail activation volumes. Only nearby candidates run exact distance selection; everything else stays on the fallback mesh.</p>
+    <button id="auto-orbit">Start camera tour</button>
+    <div class="stats">
+      <span class="label">LOD objects</span><span id="objects" class="value">0</span>
+      <span class="label">BVH nodes</span><span id="nodes" class="value">0</span>
+      <span class="label">Nearby candidates</span><span id="candidates" class="value">0</span>
+      <span class="label">Switches this frame</span><span id="switches" class="value">0</span>
+      <span class="label">Index rebuilds</span><span id="rebuilds" class="value">0</span>
+    </div>
+    <div class="legend">
+      <div class="legend-row"><i class="swatch high"></i><span>High · smooth sphere</span><span id="high-count" class="value">0</span></div>
+      <div class="legend-row"><i class="swatch medium"></i><span>Medium · faceted sphere</span><span id="medium-count" class="value">0</span></div>
+      <div class="legend-row"><i class="swatch low"></i><span>Low · coarse sphere</span><span id="low-count" class="value">0</span></div>
+      <div class="distance">Thresholds: 18 / 34 world units · 12% hysteresis</div>
+    </div>
+  </aside>
+  <div id="hint">drag = orbit · right-drag = pan · scroll = move through LOD bands</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "format": "haiyue-builtin-render-family",
+  "version": 1,
+  "id": "engine-2d-ui",
+  "kind": "2d-ui",
+  "passes": [
+    { "id": "bitmap-text", "operation": "bitmap-text" },
+    { "id": "gui-image", "operation": "gui-image" },
+    { "id": "gui-shape", "operation": "gui-shape" },
+    { "id": "gui-text", "operation": "gui-text" },
+    { "id": "mesh2d", "operation": "mesh2d" },
+    { "id": "particle2d", "operation": "particle2d" },
+    { "id": "radial-shadow", "operation": "radial-shadow" }
+  ]
+}

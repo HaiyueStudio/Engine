@@ -1,0 +1,61 @@
+{
+  "contractVersion": 1,
+  "phase": 14,
+  "status": "implemented",
+  "implementation": "typed-ir-glsl-es300-codegen-feasibility",
+  "packageStatus": "private-compiler-only",
+  "primaryTarget": "webgpu-wgsl",
+  "feasibilityTarget": "webgl2-glsl-es300",
+  "productRendererContract": "webgpu-only-unchanged",
+  "canonicalRepresentation": "haiyue-typed-shader-ir",
+  "backend": {
+    "input": "canonical-typed-expression-ir",
+    "wgslTextTranslation": false,
+    "profile": "webgl2-compatible",
+    "stages": ["vertex", "fragment"],
+    "completeStageSources": true,
+    "deterministicBackendHash": true,
+    "sourceMap": true,
+    "uniformLayout": "std140",
+    "separateWgslTextureSamplerLowering": "compiler-owned-combined-sampler2d",
+    "explicitUnsupportedDiagnostics": true
+  },
+  "portableSubset": {
+    "resourceKinds": ["uniform-buffer-with-fields", "texture-2d-f32", "filtering-sampler"],
+    "unsupportedResourceKinds": ["storage-buffer-read", "storage-buffer-read-write", "storage-texture"],
+    "unsupportedStages": ["compute"],
+    "limits": { "uniformBufferBindings": 12, "combinedTextureUnits": 16 }
+  },
+  "reflection": ["std140-field-offset-size-matrix-stride", "uniform-block-binding", "combined-sampler-texture-unit", "entry-source-map"],
+  "productionMigrations": [],
+  "inventory": { "wgslSourceCount": 64, "generatedSourceCount": 63, "handwrittenSourceCount": 1 },
+  "evidence": {
+    "fixture": "fixture.stage14-dual-backend",
+    "canonicalHash": "7fc4cd5fdc0572b154e6f03af6a60e4796877ea57194814924e943c1083e06a3",
+    "glslBackendHash": "e7f7167d8fba6ea89073a48830f335ca54d150099886f1076c9e9ef05984a61f",
+    "glslEntryCount": 2,
+    "webgpuCompilationErrorCount": 0,
+    "webgpuValidationErrorCount": 0,
+    "webgl2CompileErrorCount": 0,
+    "webgl2LinkErrorCount": 0,
+    "crossBackendMaxPixelDelta": 0,
+    "unclassifiedFailureCount": 0
+  },
+  "privateCompilerApiChanges": ["compileShaderIrProgramToGlslEs300", "mapGlslEs300SourceLocation"],
+  "publicApiChanges": [],
+  "apiBaselineUpdated": false,
+  "acceptance": [
+    "npm run shader-language:check",
+    "npm run shader-language:stage14:check",
+    "npm run verify:shader-language-stage14",
+    "npm run check:fast"
+  ],
+  "deferred": [
+    "webgl2-renderer-fallback",
+    "production-family-cross-compilation",
+    "cross-stage-varying-linker",
+    "multi-render-target-ir",
+    "visual-shader-graph-editor",
+    "stable-public-shader-api"
+  ]
+}

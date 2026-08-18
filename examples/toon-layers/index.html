@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>海月 · Four-layer Toon</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    body { margin: 0; background: #071020; color: #eef3ff; font: 14px/1.5 system-ui, sans-serif; }
+    canvas { width: 100vw; height: 100vh; display: block; }
+    .panel { position: fixed; left: 20px; top: 20px; padding: 14px 16px; border: 1px solid #ffffff26; border-radius: 10px; background: #091124c9; backdrop-filter: blur(10px); }
+    h1 { margin: 0 0 5px; font-size: 17px; }
+    p { margin: 0; color: #aab7d4; }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="960" height="640"></canvas>
+  <section class="panel">
+    <h1>Four independent Toon layers</h1>
+    <p>阴影 / 半影 / 主色 / 高光分别使用独立纹理。拖拽旋转，滚轮缩放。</p>
+  </section>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

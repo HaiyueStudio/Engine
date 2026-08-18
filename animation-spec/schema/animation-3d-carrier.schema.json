@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haiyue.dev/schema/animation/extension/animation-3d/carrier-1.json",
+  "title": "Haiyue Animation 1.0 native 3D extension carrier",
+  "type": "object",
+  "required": ["format", "version", "canvas", "duration", "nodes", "tracks", "extensionsUsed", "extensionsRequired", "extensions"],
+  "properties": {
+    "format": { "const": "haiyue-animation" },
+    "version": { "const": "1.0" },
+    "name": { "type": "string" },
+    "canvas": {
+      "description": "Pixel output viewport only; it is not a 2D world coordinate space for this carrier.",
+      "type": "object",
+      "required": ["width", "height", "coordinateSystem"],
+      "properties": {
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "height": { "type": "number", "exclusiveMinimum": 0 },
+        "coordinateSystem": { "const": "screen-y-down" }
+      },
+      "additionalProperties": false
+    },
+    "duration": { "type": "number", "exclusiveMinimum": 0 },
+    "frameRate": { "type": "number", "exclusiveMinimum": 0 },
+    "endBehavior": { "enum": ["hold", "loop", "destroy"] },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "uri"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "type": { "enum": ["image", "audio", "binary"] },
+          "uri": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:https://|data:|(?!(?:blob|file|javascript):)(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._~!$&'()*+,;=:@%/-]+)$"
+          },
+          "width": { "type": "number", "exclusiveMinimum": 0 },
+          "height": { "type": "number", "exclusiveMinimum": 0 },
+          "mimeType": { "type": "string", "minLength": 1 },
+          "integrity": { "type": "string", "minLength": 1 },
+          "colorSpace": { "enum": ["srgb", "linear"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "nodes": { "type": "array", "maxItems": 0 },
+    "tracks": { "type": "array", "maxItems": 0 },
+    "extensionsUsed": {
+      "type": "array",
+      "uniqueItems": true,
+      "contains": { "const": "org.haiyue.animation-3d@1" },
+      "items": { "type": "string" }
+    },
+    "extensionsRequired": {
+      "type": "array",
+      "uniqueItems": true,
+      "contains": { "const": "org.haiyue.animation-3d@1" },
+      "items": { "type": "string" }
+    },
+    "extensions": {
+      "type": "object",
+      "required": ["org.haiyue.animation-3d@1"],
+      "properties": {
+        "org.haiyue.animation-3d@1": {
+          "$ref": "https://haiyue.dev/schema/animation/extension/animation-3d/1.json"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

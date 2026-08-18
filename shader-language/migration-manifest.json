@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "stage": 14,
+  "policy": "Every engine-owned WGSL source is classified; generated sources have one registered build-time generator and raw user shader inputs remain explicit escape hatches.",
+  "sourceFamilies": [
+    {
+      "id": "motion-blur",
+      "status": "generated",
+      "generator": "motion-blur",
+      "sources": [
+        "engine/src/shaders/generated/motion-blur-resolve.generated.wgsl",
+        "engine/src/shaders/generated/motion-neighbor-max.generated.wgsl",
+        "engine/src/shaders/generated/motion-tile-max.generated.wgsl"
+      ]
+    },
+    {
+      "id": "postprocess-builtins",
+      "status": "generated",
+      "generator": "builtin-postprocess",
+      "sources": [
+        "engine/src/shaders/generated/postprocess-fullscreen.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-ao-denoise.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-ao-upscale.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-fxaa.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-gaussian-blur.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-gtao.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-grayscale.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-outline-blur.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-outline-edge.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-outline-overlay.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-present.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-sao.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-sobel.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-ssao.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-taa.generated.wgsl"
+      ]
+    },
+    {
+      "id": "custom-pass-support",
+      "status": "retained-escape-hatch",
+      "sources": ["engine/src/shaders/postprocess/custom-pass-bindings.wgsl"]
+    },
+    {
+      "id": "2d-ui",
+      "status": "generated",
+      "generator": "builtin-render",
+      "sources": [
+        "extensions/src/shaders/generated/2d-ui-animation-2d.generated.wgsl",
+        "extensions/src/shaders/generated/2d-ui-canvas-text-2d.generated.wgsl",
+        "extensions/src/shaders/generated/2d-ui-spine2d.generated.wgsl",
+        "extensions/src/shaders/generated/2d-ui-tilemap2d.generated.wgsl",
+        "engine/src/shaders/generated/2d-ui-bitmap-text.generated.wgsl",
+        "engine/src/shaders/generated/2d-ui-gui-image.generated.wgsl",
+        "engine/src/shaders/generated/2d-ui-gui-shape.generated.wgsl",
+        "engine/src/shaders/generated/2d-ui-gui-text.generated.wgsl",
+        "engine/src/shaders/generated/2d-ui-mesh2d.generated.wgsl",
+        "engine/src/shaders/generated/2d-ui-particle2d.generated.wgsl",
+        "engine/src/shaders/generated/2d-ui-radial-shadow.generated.wgsl"
+      ]
+    },
+    {
+      "id": "simple-3d",
+      "status": "generated",
+      "generator": "builtin-render",
+      "sources": [
+        "engine/src/shaders/generated/simple3d-mesh-helper.generated.wgsl",
+        "engine/src/shaders/generated/simple3d-normal-material.generated.wgsl",
+        "engine/src/shaders/generated/simple3d-particle3d.generated.wgsl",
+        "engine/src/shaders/generated/simple3d-sky.generated.wgsl"
+      ]
+    },
+    {
+      "id": "deformation-pass-family",
+      "status": "generated",
+      "generator": "deformation",
+      "sources": [
+        "engine/src/shaders/generated/deformation-depth.generated.wgsl",
+        "engine/src/shaders/generated/deformation-forward-skinned.generated.wgsl",
+        "engine/src/shaders/generated/deformation-forward.generated.wgsl",
+        "engine/src/shaders/generated/deformation-morph.generated.wgsl",
+        "engine/src/shaders/generated/deformation-motion-vector.generated.wgsl",
+        "engine/src/shaders/generated/deformation-outline.generated.wgsl",
+        "engine/src/shaders/generated/deformation-shadow-morph.generated.wgsl",
+        "engine/src/shaders/generated/deformation-shadow-skinned-morph.generated.wgsl",
+        "engine/src/shaders/generated/deformation-shadow-skinned.generated.wgsl",
+        "engine/src/shaders/generated/deformation-shadow.generated.wgsl",
+        "engine/src/shaders/generated/deformation-skinning.generated.wgsl"
+      ]
+    },
+    {
+      "id": "material-lighting",
+      "status": "generated",
+      "generator": "material-lighting",
+      "sources": [
+        "engine/src/shaders/generated/material-lighting-blinn-phong.generated.wgsl",
+        "engine/src/shaders/generated/material-lighting-fog.generated.wgsl",
+        "engine/src/shaders/generated/material-lighting-pbr-brdf.generated.wgsl",
+        "engine/src/shaders/generated/material-lighting-pbr-clearcoat.generated.wgsl",
+        "engine/src/shaders/generated/material-lighting-pbr-transmission-clearcoat.generated.wgsl",
+        "engine/src/shaders/generated/material-lighting-pbr-transmission.generated.wgsl",
+        "engine/src/shaders/generated/material-lighting-pbr.generated.wgsl",
+        "engine/src/shaders/generated/material-lighting-toon.generated.wgsl"
+      ]
+    },
+    {
+      "id": "specialized-rendering",
+      "status": "generated",
+      "generator": "specialized-rendering",
+      "sources": [
+        "engine/src/shaders/generated/specialized-equirectangular-to-cube.generated.wgsl",
+        "engine/src/shaders/generated/specialized-instanced-mesh3d.generated.wgsl",
+        "engine/src/shaders/generated/specialized-line3d.generated.wgsl",
+        "engine/src/shaders/generated/specialized-mipmap.generated.wgsl",
+        "engine/src/shaders/generated/specialized-planar-mirror.generated.wgsl",
+        "engine/src/shaders/generated/specialized-texture-convolution.generated.wgsl",
+        "engine/src/shaders/generated/specialized-volume.generated.wgsl"
+      ]
+    },
+    {
+      "id": "compute-builtins",
+      "status": "generated",
+      "generator": "compute",
+      "sources": [
+        "engine/src/shaders/generated/compute-gpu-draw-command.generated.wgsl",
+        "engine/src/shaders/generated/compute-gpu-sort-bitonic.generated.wgsl",
+        "engine/src/shaders/generated/compute-instanced-cull.generated.wgsl",
+        "engine/src/shaders/generated/compute-instanced-depth-sort-key.generated.wgsl",
+        "engine/src/shaders/generated/compute-mesh3d-cull.generated.wgsl"
+      ]
+    }
+  ],
+  "inlineShaderSites": [
+    { "path": "engine/src/assets/ImageTextureUpload.ts", "disposition": "migrated-to-specialized-rendering-artifact" },
+    { "path": "engine/src/lighting/EquirectangularReflectionMap.ts", "disposition": "migrated-to-specialized-rendering-artifact" }
+  ],
+  "escapeHatches": [
+    { "id": "custom-pass", "path": "engine/src/postprocess/CustomPass.ts", "disposition": "retain-raw-wgsl" },
+    { "id": "compute-kernel", "path": "engine/src/compute/ComputeKernel.ts", "disposition": "retain-raw-wgsl" },
+    { "id": "compute-pass-base", "path": "engine/src/compute/ComputePassBase.ts", "disposition": "retain-private-runtime-infrastructure-consuming-generated-reflection" },
+    { "id": "wgsl-feature-composer", "path": "engine/src/shader/WgslFeatureComposer.ts", "disposition": "retain-until-separate-breaking-adr" }
+  ]
+}

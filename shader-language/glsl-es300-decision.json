@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "decision": "retain-optional-portability-verifier",
+  "productBackend": false,
+  "runtimeDependency": false,
+  "productionFamilyTarget": false,
+  "input": "canonical-typed-ir-only",
+  "requiredGate": "verify:shader-language-stage14",
+  "coverage": ["vertex-fragment-compile-link", "std140-uniforms", "texture-sampler-pairs", "cross-backend-pixel"],
+  "unsupported": ["compute", "storage-buffer", "storage-texture", "cross-stage-varying-linker", "mrt", "production-family-degradation"],
+  "webgl2Fallback": "not-authorized",
+  "authority": "docs/for-ai/adr/0075-production-shader-single-source-convergence.md"
+}

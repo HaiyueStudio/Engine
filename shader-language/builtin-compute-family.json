@@ -1,0 +1,95 @@
+{
+  "format": "haiyue-production-compute-family",
+  "version": 1,
+  "id": "engine-production-compute",
+  "abiVersion": 1,
+  "passes": [
+    {
+      "id": "gpu-draw-command",
+      "operation": "gpu-draw-command",
+      "entryPoint": "cs_main",
+      "workgroupSize": [64, 1, 1],
+      "dispatch": { "domain": "command-count", "schedule": "single", "ceilDivisor": [64, 1, 1] },
+      "resources": [
+        { "id": "pass.commands", "binding": 0, "kind": "storage-buffer", "access": "read", "minBindingSize": 36 },
+        { "id": "pass.indexedIndirect", "binding": 1, "kind": "storage-buffer", "access": "read-write", "minBindingSize": 20 },
+        { "id": "pass.drawIndirect", "binding": 2, "kind": "storage-buffer", "access": "read-write", "minBindingSize": 16 },
+        { "id": "pass.drawCommandParams", "binding": 3, "kind": "uniform-buffer", "access": "read", "minBindingSize": 16 }
+      ],
+      "effects": [
+        { "kind": "store", "resource": "pass.indexedIndirect" },
+        { "kind": "store", "resource": "pass.drawIndirect" }
+      ]
+    },
+    {
+      "id": "gpu-sort-bitonic",
+      "operation": "gpu-sort-bitonic",
+      "entryPoint": "cs_main",
+      "workgroupSize": [64, 1, 1],
+      "dispatch": { "domain": "padded-count", "schedule": "bitonic-network", "ceilDivisor": [64, 1, 1] },
+      "resources": [
+        { "id": "pass.sortKeys", "binding": 0, "kind": "storage-buffer", "access": "read-write", "minBindingSize": 4 },
+        { "id": "pass.sortIndices", "binding": 1, "kind": "storage-buffer", "access": "read-write", "minBindingSize": 4 },
+        { "id": "pass.sortParams", "binding": 2, "kind": "storage-buffer", "access": "read", "minBindingSize": 32 }
+      ],
+      "effects": [
+        { "kind": "store", "resource": "pass.sortKeys" },
+        { "kind": "store", "resource": "pass.sortIndices" }
+      ]
+    },
+    {
+      "id": "instanced-cull",
+      "operation": "instanced-cull",
+      "entryPoint": "cs_main",
+      "workgroupSize": [64, 1, 1],
+      "dispatch": { "domain": "instance-count", "schedule": "single", "ceilDivisor": [64, 1, 1] },
+      "resources": [
+        { "id": "pass.transforms", "binding": 0, "kind": "storage-buffer", "access": "read", "minBindingSize": 64 },
+        { "id": "pass.visibleIndices", "binding": 1, "kind": "storage-buffer", "access": "read-write", "minBindingSize": 4 },
+        { "id": "pass.visibleCounter", "binding": 2, "kind": "storage-buffer", "access": "atomic-read-write", "minBindingSize": 4 },
+        { "id": "pass.frustum", "binding": 3, "kind": "uniform-buffer", "access": "read", "minBindingSize": 96 },
+        { "id": "pass.cullingParams", "binding": 4, "kind": "uniform-buffer", "access": "read", "minBindingSize": 32 }
+      ],
+      "effects": [
+        { "kind": "store", "resource": "pass.visibleIndices" },
+        { "kind": "atomic-add", "resource": "pass.visibleCounter" }
+      ]
+    },
+    {
+      "id": "instanced-depth-sort-key",
+      "operation": "instanced-depth-sort-key",
+      "entryPoint": "cs_main",
+      "workgroupSize": [64, 1, 1],
+      "dispatch": { "domain": "padded-count", "schedule": "single", "ceilDivisor": [64, 1, 1] },
+      "resources": [
+        { "id": "pass.transforms", "binding": 0, "kind": "storage-buffer", "access": "read", "minBindingSize": 64 },
+        { "id": "pass.sortKeys", "binding": 1, "kind": "storage-buffer", "access": "read-write", "minBindingSize": 4 },
+        { "id": "pass.sortIndices", "binding": 2, "kind": "storage-buffer", "access": "read-write", "minBindingSize": 4 },
+        { "id": "pass.sortKeyParams", "binding": 3, "kind": "uniform-buffer", "access": "read", "minBindingSize": 80 }
+      ],
+      "effects": [
+        { "kind": "store", "resource": "pass.sortKeys" },
+        { "kind": "store", "resource": "pass.sortIndices" }
+      ]
+    },
+    {
+      "id": "mesh3d-cull",
+      "operation": "mesh3d-cull",
+      "entryPoint": "cs_main",
+      "workgroupSize": [64, 1, 1],
+      "dispatch": { "domain": "command-count", "schedule": "single", "ceilDivisor": [64, 1, 1] },
+      "resources": [
+        { "id": "pass.commands", "binding": 0, "kind": "storage-buffer", "access": "read", "minBindingSize": 36 },
+        { "id": "pass.bounds", "binding": 1, "kind": "storage-buffer", "access": "read", "minBindingSize": 16 },
+        { "id": "pass.indexedIndirect", "binding": 2, "kind": "storage-buffer", "access": "read-write", "minBindingSize": 20 },
+        { "id": "pass.drawIndirect", "binding": 3, "kind": "storage-buffer", "access": "read-write", "minBindingSize": 16 },
+        { "id": "pass.frustum", "binding": 4, "kind": "uniform-buffer", "access": "read", "minBindingSize": 96 },
+        { "id": "pass.cullParams", "binding": 5, "kind": "uniform-buffer", "access": "read", "minBindingSize": 16 }
+      ],
+      "effects": [
+        { "kind": "store", "resource": "pass.indexedIndirect" },
+        { "kind": "store", "resource": "pass.drawIndirect" }
+      ]
+    }
+  ]
+}

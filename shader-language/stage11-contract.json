@@ -1,0 +1,98 @@
+{
+  "contractVersion": 1,
+  "phase": 11,
+  "status": "implemented",
+  "implementation": "atomic-production-material-lighting-family-migration",
+  "packageStatus": "private-compiler-with-generated-production-artifacts",
+  "primaryTarget": "webgpu-wgsl",
+  "family": {
+    "id": "engine-material-lighting",
+    "path": "shader-language/builtin-material-lighting-family.json",
+    "sha256": "a38db8aada6b65cfc174e807f47da7679e09413f0b11ce02506957875d5e7d9f",
+    "abiVersion": 1,
+    "passCount": 6,
+    "artifactHash": "224cb325154a12db5dc821cab04026b10d30c2960b8700a92a79cb99dc4a354f",
+    "lightingModuleHash": "5d97c3daa97c1993c3737129fc6165fcbb694988dea7527b0022e36430b38117",
+    "deformationModuleHash": "838a52b0431a0e60d82ce4505dcaba6c9f5c7a32520faf7f726a351cb73601ef"
+  },
+  "passes": [
+    "pbr",
+    "pbr-clearcoat",
+    "pbr-transmission",
+    "pbr-transmission-clearcoat",
+    "blinn-phong",
+    "toon"
+  ],
+  "abi": {
+    "sceneFrameBytes": 272,
+    "lightCapacity": 8,
+    "lightBlockBytes": 528,
+    "pbrDirectionalShadowCapacity": 3,
+    "pbrDirectionalShadowBlockBytes": 240,
+    "toonDirectionalShadowCapacity": 1,
+    "toonDirectionalShadowBlockBytes": 80,
+    "pbrMaterialBytes": 608,
+    "pbrObjectRecordBytes": 160,
+    "blinnPhongObjectRecordBytes": 128,
+    "toonObjectRecordBytes": 128,
+    "clippingBlockBytes": 144,
+    "clippingStorageBinding": "group1-binding1-companion-table",
+    "blinnPhongMaterialBytes": 64,
+    "toonMaterialBytes": 240,
+    "pbrDeformationOrder": ["morph", "skin"],
+    "layoutOwner": "renderer"
+  },
+  "productionMigrations": [
+    "PbrRenderer.pbr",
+    "PbrRenderer.clearcoat",
+    "PbrRenderer.transmission",
+    "PbrRenderer.transmission-clearcoat",
+    "BlinnPhongRenderer",
+    "ToonRenderer"
+  ],
+  "artifact": {
+    "formatVersion": 2,
+    "runtimeParsesWgsl": false,
+    "runtimeCompilesDsl": false,
+    "runtimeComposesWgsl": false
+  },
+  "inventory": {
+    "wgslSourceCount": 58,
+    "generatedSourceCount": 47,
+    "handwrittenSourceCount": 11,
+    "stage11GeneratedSourceCount": 8,
+    "replacedHandwrittenSourceCount": 8
+  },
+  "bundle": {
+    "materialLightingArtifactRawBytes": 203563,
+    "materialLightingArtifactGzipBytes": 14080,
+    "materialLightingArtifactGzipBudgetBytes": 15000,
+    "runtimeContainsCompiler": false
+  },
+  "evidence": {
+    "webgpuCompiledPassCount": 6,
+    "webgpuRendererLayoutCount": 24,
+    "webgpuPipelineLayoutCount": 6,
+    "blinnAmbientPixel": [255, 0, 0, 255],
+    "postLightingFogPixel": [0, 0, 255, 255],
+    "webgpuValidationErrorCount": 0,
+    "unclassifiedFailureCount": 0
+  },
+  "publicApiChanges": [],
+  "apiBaselineUpdated": false,
+  "acceptance": [
+    "npm run shader-language:check",
+    "npm run shader-language:stage11:check",
+    "npm run verify:shader-language-stage11",
+    "npm test -w ./engine",
+    "npm run check:fast"
+  ],
+  "deferred": [
+    "specialized-rendering-family-migration",
+    "compute-ir-side-effects-and-production-migration",
+    "glsl-es300-codegen",
+    "webgl2-renderer-fallback",
+    "visual-shader-graph-editor",
+    "stable-public-shader-api"
+  ]
+}

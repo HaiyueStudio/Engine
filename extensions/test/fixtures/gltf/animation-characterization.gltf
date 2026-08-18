@@ -1,0 +1,344 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "Haiyue glTF animation characterization corpus"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "AnimationCharacterizationScene",
+      "nodes": [0]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "SceneRoot",
+      "children": [1, 2, 3]
+    },
+    {
+      "name": "AnimatedTRS",
+      "translation": [1, 2, 3],
+      "rotation": [0, 0, 0.7071067811865476, 0.7071067811865476],
+      "scale": [1, 1, 1]
+    },
+    {
+      "name": "SkinnedMorph",
+      "mesh": 0,
+      "skin": 0
+    },
+    {
+      "name": "JointRoot",
+      "children": [4]
+    },
+    {
+      "name": "JointTip",
+      "translation": [0, 1, 0]
+    }
+  ],
+  "meshes": [
+    {
+      "name": "CharacterTriangle",
+      "weights": [0.1, 0.2],
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "JOINTS_0": 1,
+            "WEIGHTS_0": 2
+          },
+          "targets": [
+            {
+              "POSITION": 3
+            },
+            {
+              "POSITION": 4
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skins": [
+    {
+      "name": "TwoJointSkin",
+      "inverseBindMatrices": 5,
+      "skeleton": 3,
+      "joints": [3, 4]
+    }
+  ],
+  "animations": [
+    {
+      "name": "Take",
+      "samplers": [
+        {
+          "input": 6,
+          "output": 7,
+          "interpolation": "LINEAR"
+        },
+        {
+          "input": 6,
+          "output": 8,
+          "interpolation": "STEP"
+        },
+        {
+          "input": 6,
+          "output": 9,
+          "interpolation": "CUBICSPLINE"
+        },
+        {
+          "input": 6,
+          "output": 10,
+          "interpolation": "LINEAR"
+        },
+        {
+          "input": 6,
+          "output": 11,
+          "interpolation": "LINEAR"
+        }
+      ],
+      "channels": [
+        {
+          "sampler": 0,
+          "target": {
+            "node": 1,
+            "path": "translation"
+          }
+        },
+        {
+          "sampler": 1,
+          "target": {
+            "node": 1,
+            "path": "rotation"
+          }
+        },
+        {
+          "sampler": 2,
+          "target": {
+            "node": 1,
+            "path": "scale"
+          }
+        },
+        {
+          "sampler": 3,
+          "target": {
+            "node": 2,
+            "path": "weights"
+          }
+        },
+        {
+          "sampler": 4,
+          "target": {
+            "node": 4,
+            "path": "translation"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Take",
+      "samplers": [
+        {
+          "input": 6,
+          "output": 12,
+          "interpolation": "STEP"
+        }
+      ],
+      "channels": [
+        {
+          "sampler": 0,
+          "target": {
+            "node": 1,
+            "path": "translation"
+          }
+        }
+      ]
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 496,
+      "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAQAAAAEAAAABAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIC/AAAAAAAAgD8AAAAAAACAPwAAgD8AAABAAABAQAAAQEAAAIBAAACgQAAAAAAAAAAA8wQ1P/MENT8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAQEAAAIBAAAAAAAAAAAAAAAAAAACAPgAAQD8AAEA/AACAPgAAAAAAAIA/AAAAAAAAAAAAAEBAAAAAAAAAgD8AAABAAABAQAAAEEEAAABBAADgQA=="
+    }
+  ],
+  "bufferViews": [
+    {
+      "name": "positions",
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 36
+    },
+    {
+      "name": "joints",
+      "buffer": 0,
+      "byteOffset": 36,
+      "byteLength": 12
+    },
+    {
+      "name": "weights",
+      "buffer": 0,
+      "byteOffset": 48,
+      "byteLength": 48
+    },
+    {
+      "name": "morphX",
+      "buffer": 0,
+      "byteOffset": 96,
+      "byteLength": 36
+    },
+    {
+      "name": "morphY",
+      "buffer": 0,
+      "byteOffset": 132,
+      "byteLength": 36
+    },
+    {
+      "name": "inverseBindMatrices",
+      "buffer": 0,
+      "byteOffset": 168,
+      "byteLength": 128
+    },
+    {
+      "name": "times",
+      "buffer": 0,
+      "byteOffset": 296,
+      "byteLength": 8
+    },
+    {
+      "name": "translationLinear",
+      "buffer": 0,
+      "byteOffset": 304,
+      "byteLength": 24
+    },
+    {
+      "name": "rotationStep",
+      "buffer": 0,
+      "byteOffset": 328,
+      "byteLength": 32
+    },
+    {
+      "name": "scaleCubicSpline",
+      "buffer": 0,
+      "byteOffset": 360,
+      "byteLength": 72
+    },
+    {
+      "name": "morphLinear",
+      "buffer": 0,
+      "byteOffset": 432,
+      "byteLength": 16
+    },
+    {
+      "name": "jointLinear",
+      "buffer": 0,
+      "byteOffset": 448,
+      "byteLength": 24
+    },
+    {
+      "name": "translationStep",
+      "buffer": 0,
+      "byteOffset": 472,
+      "byteLength": 24
+    }
+  ],
+  "accessors": [
+    {
+      "name": "POSITION",
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 3,
+      "type": "VEC3",
+      "min": [0, 0, 0],
+      "max": [1, 1, 0]
+    },
+    {
+      "name": "JOINTS_0",
+      "bufferView": 1,
+      "componentType": 5121,
+      "count": 3,
+      "type": "VEC4"
+    },
+    {
+      "name": "WEIGHTS_0",
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 3,
+      "type": "VEC4"
+    },
+    {
+      "name": "MorphX",
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 3,
+      "type": "VEC3",
+      "min": [1, 0, 0],
+      "max": [1, 0, 0]
+    },
+    {
+      "name": "MorphY",
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 3,
+      "type": "VEC3",
+      "min": [0, 1, 0],
+      "max": [0, 1, 0]
+    },
+    {
+      "name": "InverseBindMatrices",
+      "bufferView": 5,
+      "componentType": 5126,
+      "count": 2,
+      "type": "MAT4"
+    },
+    {
+      "name": "AnimationTimes",
+      "bufferView": 6,
+      "componentType": 5126,
+      "count": 2,
+      "type": "SCALAR",
+      "min": [0],
+      "max": [1]
+    },
+    {
+      "name": "TranslationLinear",
+      "bufferView": 7,
+      "componentType": 5126,
+      "count": 2,
+      "type": "VEC3"
+    },
+    {
+      "name": "RotationStep",
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 2,
+      "type": "VEC4"
+    },
+    {
+      "name": "ScaleCubicSpline",
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 6,
+      "type": "VEC3"
+    },
+    {
+      "name": "MorphLinear",
+      "bufferView": 10,
+      "componentType": 5126,
+      "count": 4,
+      "type": "SCALAR"
+    },
+    {
+      "name": "JointLinear",
+      "bufferView": 11,
+      "componentType": 5126,
+      "count": 2,
+      "type": "VEC3"
+    },
+    {
+      "name": "TranslationStep",
+      "bufferView": 12,
+      "componentType": 5126,
+      "count": 2,
+      "type": "VEC3"
+    }
+  ]
+}

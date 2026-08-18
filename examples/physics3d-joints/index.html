@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 · 3D 关节约束</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <link rel="stylesheet" href="../physics3d-example.css" />
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <aside class="panel">
+    <h1>3D 关节约束</h1>
+    <p class="intro">同一套 Physics3DJoint 组件演示转轴、球形、滑轨与弹簧约束，业务层不持有 Rapier joint。</p>
+    <div class="badges"><span class="badge">revolute</span><span class="badge">spherical</span><span class="badge">prismatic</span><span class="badge">spring</span></div>
+    <button id="kick" type="button">施加一组冲量</button>
+  </aside>
+  <div class="hint">拖动空白区域旋转视角 · 滚轮缩放</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

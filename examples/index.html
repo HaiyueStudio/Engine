@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>海月 Examples</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      color: #d8e2f2;
+      background: #0d1118;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .app {
+      width: 100vw;
+      height: 100vh;
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 48px minmax(0, 1fr);
+      background: #0d1118;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+      padding: 0 18px;
+      border-bottom: 1px solid #263142;
+      background: #121822;
+    }
+
+    .brand {
+      flex: 0 0 auto;
+      font-size: 16px;
+      font-weight: 760;
+      letter-spacing: 0;
+      color: #f8fafc;
+    }
+
+    .current {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #9fb1c9;
+      font-size: 12px;
+    }
+
+    .source-toggle {
+      flex: 0 0 auto;
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      border: 1px solid #2b3a4f;
+      border-radius: 6px;
+      background: #171f2c;
+      color: #aebdd1;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+    }
+
+    .source-toggle:hover {
+      border-color: #49617f;
+      color: #eef4ff;
+      background: #1b2635;
+    }
+
+    .source-toggle:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+
+    .source-toggle-track {
+      position: relative;
+      width: 28px;
+      height: 16px;
+      border-radius: 999px;
+      background: #43516a;
+      transition: background 120ms ease;
+    }
+
+    .source-toggle-track::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #f8fafc;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+      transition: transform 120ms ease;
+    }
+
+    .source-toggle[aria-pressed="true"] {
+      border-color: #2563eb;
+      color: #dbeafe;
+      background: rgba(37, 99, 235, 0.14);
+    }
+
+    .source-toggle[aria-pressed="true"] .source-toggle-track {
+      background: #2563eb;
+    }
+
+    .source-toggle[aria-pressed="true"] .source-toggle-track::after {
+      transform: translateX(12px);
+    }
+
+    .shell {
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .sidebar {
+      height: 100%;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      border-right: 1px solid #263142;
+      background: #121822;
+    }
+
+    .sidebar-header {
+      display: grid;
+      gap: 8px;
+      padding: 10px 12px;
+      border-bottom: 1px solid #263142;
+    }
+
+    .catalog-status {
+      padding: 7px 9px;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 5px;
+      color: #fcd34d;
+      background: rgba(245, 158, 11, 0.08);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .catalog-status[data-level="error"] {
+      border-color: rgba(248, 113, 113, 0.4);
+      color: #fca5a5;
+      background: rgba(248, 113, 113, 0.08);
+    }
+
+    .catalog-status[hidden] {
+      display: none;
+    }
+
+    .search {
+      width: 100%;
+      height: 36px;
+      min-width: 0;
+      padding: 0 12px;
+      border: 1px solid #2b3a4f;
+      border-radius: 6px;
+      outline: none;
+      background: #0d1118;
+      color: #eef4ff;
+      font: inherit;
+      font-size: 13px;
+    }
+
+    .search::placeholder {
+      color: #74859e;
+    }
+
+    .search:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+    }
+
+    ge-tree {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      border: 0;
+      background: #121822;
+    }
+
+    .preview {
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      overflow: hidden;
+      background: #05070b;
+    }
+
+    .preview[data-source-visible="true"] {
+      grid-template-columns: minmax(320px, 1fr) minmax(360px, 44%);
+    }
+
+    .viewer-pane {
+      min-width: 0;
+      min-height: 0;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #05070b;
+    }
+
+    .source-panel {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 40px minmax(0, 1fr);
+      border-left: 1px solid #263142;
+      background: #0b1018;
+    }
+
+    .source-panel[hidden] {
+      display: none;
+    }
+
+    .source-header {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      border-bottom: 1px solid #263142;
+      color: #91a4be;
+      background: #121822;
+      font: 12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .source-filename {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .source-editor {
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      color: #d8e2f2;
+      background: #0b1018;
+      font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .source-editor[data-state="loading"],
+    .source-editor[data-state="error"] {
+      padding: 16px 18px 28px;
+      white-space: pre-wrap;
+      color: #91a4be;
+    }
+
+    .source-editor[data-state="error"] {
+      color: #fca5a5;
+    }
+
+    .source-editor[data-state="ready"] {
+      padding: 0;
+    }
+
+    @media (max-width: 820px) {
+      .app {
+        grid-template-rows: 44px minmax(0, 1fr);
+      }
+
+      .brand {
+        font-size: 14px;
+      }
+
+      .source-toggle-label {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .preview[data-source-visible="true"] {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(240px, 1fr) minmax(220px, 0.8fr);
+      }
+
+      .source-panel {
+        border-top: 1px solid #263142;
+        border-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">海月 Examples</div>
+      <div id="current" class="current"></div>
+      <button
+        id="source-toggle"
+        class="source-toggle"
+        type="button"
+        aria-controls="source-panel"
+        aria-pressed="false"
+        title="Show TypeScript source"
+      >
+        <span class="source-toggle-track" aria-hidden="true"></span>
+        <span class="source-toggle-label">TS Source</span>
+      </button>
+    </header>
+
+    <ge-split class="shell" direction="horizontal" ratio="0.24" min-first="260" min-second="420">
+      <aside class="sidebar" slot="first">
+        <div class="sidebar-header">
+          <input id="example-search" class="search" type="search" placeholder="Search examples" autocomplete="off" />
+          <div id="catalog-status" class="catalog-status" role="status" hidden></div>
+        </div>
+        <ge-tree id="example-tree"></ge-tree>
+      </aside>
+
+      <section id="preview" class="preview" slot="second" data-source-visible="false">
+        <div class="viewer-pane">
+          <iframe id="viewer" title="Example preview" allow="camera; microphone; fullscreen; xr-spatial-tracking"></iframe>
+        </div>
+        <aside id="source-panel" class="source-panel" aria-label="TypeScript source" hidden>
+          <header class="source-header">
+            <span id="source-filename" class="source-filename"></span>
+          </header>
+          <div id="source-editor" class="source-editor" data-state="idle">TypeScript source is hidden.</div>
+        </aside>
+      </section>
+    </ge-split>
+  </main>
+
+  <script type="module">
+    import { defineHaiyueUI } from '../ui/dist/index.js';
+    import { loadExampleCatalogReport } from './catalog.js';
+
+    defineHaiyueUI();
+
+    const tree = document.getElementById('example-tree');
+    const viewer = document.getElementById('viewer');
+    const current = document.getElementById('current');
+    const search = document.getElementById('example-search');
+    const catalogStatus = document.getElementById('catalog-status');
+    const preview = document.getElementById('preview');
+    const sourceToggle = document.getElementById('source-toggle');
+    const sourcePanel = document.getElementById('source-panel');
+    const sourceFilename = document.getElementById('source-filename');
+    const sourceEditor = document.getElementById('source-editor');
+
+    const sourceCache = new Map();
+    let sourceViewerPromise = null;
+    let activeNode = null;
+    let sourceVisible = false;
+    let sourceRequest = 0;
+
+    let examples = [];
+    try {
+      const report = await loadExampleCatalogReport();
+      examples = report.catalog;
+      if (report.diagnostics.length > 0) {
+        catalogStatus.hidden = false;
+        catalogStatus.textContent = report.skippedEntryCount > 0
+          ? `Skipped ${report.skippedEntryCount} invalid example${report.skippedEntryCount === 1 ? '' : 's'}. Other examples remain available.`
+          : 'Some empty catalog groups were omitted.';
+        catalogStatus.title = report.diagnostics.map(diagnostic => diagnostic.message).join('\n');
+        console.groupCollapsed(
+          `[examples] Catalog loaded with ${report.diagnostics.length} diagnostic${report.diagnostics.length === 1 ? '' : 's'}.`,
+        );
+        for (const diagnostic of report.diagnostics) console.warn(diagnostic.message, diagnostic);
+        console.groupEnd();
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      current.textContent = message;
+      catalogStatus.hidden = false;
+      catalogStatus.dataset.level = 'error';
+      catalogStatus.textContent = `Catalog failed to load: ${message}`;
+      console.error('[examples] Catalog failed to load.', error);
+    }
+
+    function flatten(nodes, out = []) {
+      for (const node of nodes) {
+        out.push(node);
+        if (node.children) flatten(node.children, out);
+      }
+      return out;
+    }
+
+    const allNodes = flatten(examples);
+    const defaultNode = allNodes.find(node => node.url);
+
+    tree.data = examples;
+
+    function normalizeSearchText(value) {
+      return value.trim().toLowerCase();
+    }
+
+    function fuzzyMatch(text, query) {
+      if (text.includes(query)) return true;
+      let index = 0;
+      for (const char of text) {
+        if (char === query[index]) index++;
+        if (index === query.length) return true;
+      }
+      return false;
+    }
+
+    function filterExamples(query) {
+      const normalized = normalizeSearchText(query);
+      if (!normalized) return examples;
+
+      return examples
+        .map(group => {
+          const children = (group.children ?? []).filter(node => {
+            const label = node.label.toLowerCase();
+            const id = node.id.toLowerCase();
+            return fuzzyMatch(label, normalized) || fuzzyMatch(id, normalized);
+          });
+          return children.length
+            ? { ...group, expanded: true, children }
+            : null;
+        })
+        .filter(Boolean);
+    }
+
+    function updateTreeFilter() {
+      tree.data = filterExamples(search.value);
+      const selected = tree.selectedId && flatten(tree.data).some(node => node.id === tree.selectedId);
+      tree.selectedId = selected ? tree.selectedId : null;
+    }
+
+    function openNode(node, updateHash = true) {
+      if (!node?.url) return;
+      activeNode = node;
+      viewer.src = node.url;
+      current.textContent = node.label;
+      tree.selectedId = node.id;
+      document.title = `${node.label} - 海月 Examples`;
+      if (updateHash) history.replaceState(null, '', `#${encodeURIComponent(node.id)}`);
+      if (sourceVisible) loadSource(node);
+    }
+
+    async function loadSource(node) {
+      if (!node?.sourceUrl) return;
+      const request = ++sourceRequest;
+      sourceFilename.textContent = node.sourceUrl.replace(/^\.\//, '');
+      sourceEditor.dataset.state = 'loading';
+      if (!sourceViewerPromise) sourceEditor.textContent = 'Loading CodeMirror…';
+
+      let sourceViewer = null;
+
+      try {
+        sourceViewer = await getSourceViewer();
+        if (request !== sourceRequest) return;
+        sourceEditor.dataset.state = 'loading-source';
+        sourceViewer.setSource('Loading TypeScript source…');
+
+        let source = sourceCache.get(node.sourceUrl);
+        if (source === undefined) {
+          const response = await fetch(node.sourceUrl, { cache: 'no-store' });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          source = await response.text();
+          sourceCache.set(node.sourceUrl, source);
+        }
+        if (request !== sourceRequest) return;
+        sourceEditor.dataset.state = 'ready';
+        sourceViewer.setSource(source);
+      } catch (error) {
+        if (request !== sourceRequest) return;
+        const message = `Failed to load TypeScript source: ${error instanceof Error ? error.message : String(error)}`;
+        if (sourceViewer) {
+          sourceEditor.dataset.state = 'ready';
+          sourceViewer.setSource(`// ${message}`);
+        } else {
+          sourceEditor.dataset.state = 'error';
+          sourceEditor.textContent = message;
+        }
+      }
+    }
+
+    function getSourceViewer() {
+      sourceViewerPromise ??= import('./source-viewer/bundle.js').then(({ createSourceViewer }) => {
+        sourceEditor.replaceChildren();
+        return createSourceViewer(sourceEditor);
+      });
+      return sourceViewerPromise;
+    }
+
+    function setSourceVisible(visible) {
+      sourceVisible = visible;
+      sourceToggle.setAttribute('aria-pressed', String(visible));
+      sourceToggle.title = visible ? 'Hide TypeScript source' : 'Show TypeScript source';
+      preview.dataset.sourceVisible = String(visible);
+      sourcePanel.hidden = !visible;
+      if (visible) loadSource(activeNode);
+      else sourceRequest++;
+    }
+
+    tree.addEventListener('selection-change', event => {
+      const node = event.detail.node;
+      if (node?.url) openNode(node);
+    });
+
+    search.addEventListener('input', updateTreeFilter);
+    sourceToggle.addEventListener('click', () => setSourceVisible(!sourceVisible));
+
+    window.addEventListener('hashchange', () => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const node = allNodes.find(item => item.id === id && item.url) ?? defaultNode;
+      openNode(node, false);
+    });
+
+    const initialId = decodeURIComponent(location.hash.slice(1));
+    const initialNode = allNodes.find(node => node.id === initialId && node.url) ?? defaultNode;
+    openNode(initialNode, !location.hash);
+  </script>
+</body>
+</html>

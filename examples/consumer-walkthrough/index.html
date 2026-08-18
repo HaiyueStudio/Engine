@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Haiyue · 新用户黄金路径</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #07111f; color: #e8f4ff; font: 14px/1.5 system-ui, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .panel {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: min(420px, calc(100vw - 32px));
+      padding: 16px;
+      border: 1px solid #74c9ff55;
+      border-radius: 12px;
+      background: #07111fe8;
+      box-shadow: 0 16px 42px #0008;
+      backdrop-filter: blur(14px);
+    }
+    h1 { margin: 0 0 8px; font-size: 18px; }
+    p { margin: 0 0 12px; color: #a9bfd3; }
+    output { display: block; color: #81e7cb; }
+    button { margin-top: 12px; padding: 7px 12px; border: 1px solid #74c9ff66; border-radius: 7px; background: #17344d; color: inherit; cursor: pointer; }
+    button:hover { border-color: #74c9ff; }
+    #result { display: none; }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <section class="panel">
+    <h1>新用户黄金路径</h1>
+    <p>公开 Engine 入口：初始化 → 渲染 → 加载纹理 → 逐帧动画 → 显式释放。</p>
+    <output id="status" aria-live="polite">正在初始化 WebGPU…</output>
+    <button id="dispose" type="button">释放运行时</button>
+  </section>
+  <output id="result"></output>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

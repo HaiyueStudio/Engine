@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - Icosahedron Geometry</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #07090d;
+      font-family: monospace;
+    }
+    canvas {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+    #stats {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      min-width: 220px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 6px;
+      background: rgba(4,7,12,0.72);
+      color: rgba(235,242,255,0.82);
+      line-height: 1.7;
+      pointer-events: none;
+    }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div id="stats"></div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

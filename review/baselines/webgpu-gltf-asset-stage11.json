@@ -1,0 +1,2070 @@
+{
+  "schemaVersion": 2,
+  "suite": "haiyue-production-gltf-first-visible-corpus",
+  "configuration": {
+    "mode": "optimized",
+    "gltfWorker": "production-inline",
+    "ktx2Worker": true,
+    "ktx2WorkerPoolSize": 4
+  },
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+    "adapter": {
+      "vendor": "nvidia",
+      "architecture": "pascal",
+      "device": "",
+      "description": ""
+    },
+    "features": [
+      "core-features-and-limits",
+      "texture-compression-bc"
+    ]
+  },
+  "corpus": {
+    "manifest": "scripts/webgpu-gate/assets/gltf-corpus/manifest.json",
+    "upstreamCommit": "2bac6f8c57bf471df0d2a1e8a8ec023c7801dddf",
+    "totalPinnedBytes": 10541366
+  },
+  "animation3D": {
+    "fixture": "/extensions/test/fixtures/gltf/animation-characterization.gltf",
+    "clipIds": [
+      "Idle",
+      "Run"
+    ],
+    "interpolation": [
+      "cubic-spline",
+      "linear",
+      "step"
+    ],
+    "phases": [
+      {
+        "name": "start",
+        "mixerTime": 0,
+        "rootLocalMatrix": [
+          2.220446049250313e-16,
+          1,
+          0,
+          0,
+          -1,
+          2.220446049250313e-16,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          1,
+          2,
+          3,
+          1
+        ],
+        "morphWeights": [
+          0.10000000149011612,
+          0.20000000298023224
+        ],
+        "skinJointTipMatrix": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "visiblePixel": true
+      },
+      {
+        "name": "mid",
+        "mixerTime": 0.5,
+        "rootLocalMatrix": [
+          2.7755575615628914e-16,
+          1.25,
+          0,
+          0,
+          -1.5,
+          3.3306690738754696e-16,
+          0,
+          0,
+          0,
+          0,
+          1.75,
+          0,
+          1.5,
+          2.5,
+          3.5,
+          1
+        ],
+        "morphWeights": [
+          0.30000001192092896,
+          0.3499999940395355
+        ],
+        "skinJointTipMatrix": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0.5,
+          0,
+          1
+        ],
+        "visiblePixel": true
+      },
+      {
+        "name": "end",
+        "mixerTime": 1,
+        "rootLocalMatrix": [
+          -2,
+          0,
+          0,
+          0,
+          0,
+          -3,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          3,
+          4,
+          5,
+          1
+        ],
+        "morphWeights": [
+          0.75,
+          0.25
+        ],
+        "skinJointTipMatrix": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          2,
+          0,
+          1
+        ],
+        "visiblePixel": true
+      }
+    ],
+    "gpuMorph": true,
+    "skinning": true,
+    "positionsRemainBase": true,
+    "lifecycle": {
+      "runtimeState": "destroyed",
+      "actionCount": 0,
+      "bindingCount": 0,
+      "targetCount": 0
+    }
+  },
+  "tiers": [
+    {
+      "id": "small",
+      "asset": {
+        "entry": "small-animated-morph-cube/AnimatedMorphCube.glb",
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "materialCount": 1,
+        "textureCount": 0,
+        "animationCount": 1,
+        "skinCount": 0,
+        "morphTargetCount": 2,
+        "features": [
+          "morph",
+          "animation"
+        ]
+      },
+      "timings": {
+        "fetchMs": 3.0999999940395355,
+        "workerParseMs": 0.6949999928474426,
+        "mainParseMs": 0,
+        "dracoDecodeMs": 0,
+        "geometryPreparationMs": 0.39499999582767487,
+        "instantiateMs": 1.3399999886751175,
+        "imageDecodeTranscodeMs": 0.09000000357627869,
+        "gpuUploadMs": 0,
+        "scheduledUploadCpuMs": 0,
+        "pipelineWarmupMs": 4.274999991059303,
+        "visibleSubmitMs": 5.375,
+        "firstVisibleFrameMs": 16.96000000834465
+      },
+      "resources": {
+        "assetTransferBytes": 6752,
+        "sourceBytes": 6752,
+        "decodedGeometryBytes": 2376,
+        "workerTransferBytes": 6084,
+        "workerTransferBufferCount": 8,
+        "peakCpuStagingBytes": 15212,
+        "peakGpuEstimatedBytes": 595712,
+        "gpuUploadCalls": 9,
+        "gpuUploadBytes": 3336,
+        "assetUploadCalls": 0,
+        "assetUploadBytes": 0,
+        "maxFrameAssetUploadBytes": 0,
+        "pendingUploadTasksAfterVisible": 0,
+        "postVisibleAssetUploadBytes": 0
+      },
+      "render": {
+        "passCount": 2,
+        "visiblePixel": true
+      },
+      "lifecycle": {
+        "duplicateLoad": true,
+        "recordCacheHits": 1,
+        "sceneDestroyResidualRecords": 0,
+        "recoveryFailures": null,
+        "recoveredTextureRecords": 0
+      }
+    },
+    {
+      "id": "medium",
+      "asset": {
+        "entry": "medium-rigged-figure-draco/RiggedFigure.gltf",
+        "meshCount": 1,
+        "primitiveCount": 1,
+        "materialCount": 1,
+        "textureCount": 0,
+        "animationCount": 1,
+        "skinCount": 1,
+        "morphTargetCount": 0,
+        "features": [
+          "draco",
+          "skin",
+          "animation"
+        ]
+      },
+      "timings": {
+        "fetchMs": 6.32499997317791,
+        "workerParseMs": 0.635000005364418,
+        "mainParseMs": 0,
+        "dracoDecodeMs": 25.280000001192093,
+        "geometryPreparationMs": 25.444999992847443,
+        "instantiateMs": 3.1400000005960464,
+        "imageDecodeTranscodeMs": 0.06000000238418579,
+        "gpuUploadMs": 0,
+        "scheduledUploadCpuMs": 0,
+        "pipelineWarmupMs": 3.7899999916553497,
+        "visibleSubmitMs": 4.8900000005960464,
+        "firstVisibleFrameMs": 46.3500000089407
+      },
+      "resources": {
+        "assetTransferBytes": 57111,
+        "sourceBytes": 57111,
+        "decodedGeometryBytes": 23304,
+        "workerTransferBytes": 25324,
+        "workerTransferBufferCount": 6,
+        "peakCpuStagingBytes": 105739,
+        "peakGpuEstimatedBytes": 631368,
+        "gpuUploadCalls": 10,
+        "gpuUploadBytes": 35816,
+        "assetUploadCalls": 0,
+        "assetUploadBytes": 0,
+        "maxFrameAssetUploadBytes": 0,
+        "pendingUploadTasksAfterVisible": 0,
+        "postVisibleAssetUploadBytes": 0
+      },
+      "render": {
+        "passCount": 2,
+        "visiblePixel": true
+      },
+      "lifecycle": {
+        "duplicateLoad": true,
+        "recordCacheHits": 1,
+        "sceneDestroyResidualRecords": 0,
+        "recoveryFailures": null,
+        "recoveredTextureRecords": 0
+      }
+    },
+    {
+      "id": "large",
+      "asset": {
+        "entry": "large-stained-glass-lamp-ktx2/StainedGlassLamp.gltf",
+        "meshCount": 8,
+        "primitiveCount": 8,
+        "materialCount": 13,
+        "textureCount": 19,
+        "animationCount": 0,
+        "skinCount": 0,
+        "morphTargetCount": 0,
+        "features": [
+          "ktx2",
+          "basis",
+          "multi-material",
+          "multi-texture"
+        ]
+      },
+      "timings": {
+        "fetchMs": 94.51000002026558,
+        "workerParseMs": 31.144999995827675,
+        "mainParseMs": 0,
+        "dracoDecodeMs": 0,
+        "geometryPreparationMs": 30.825000002980232,
+        "instantiateMs": 16.189999997615814,
+        "imageDecodeTranscodeMs": 985.2000000029802,
+        "gpuUploadMs": 770.3299999982119,
+        "scheduledUploadCpuMs": 13.90000006556511,
+        "pipelineWarmupMs": 1191.5100000053644,
+        "visibleSubmitMs": 3.2899999916553497,
+        "firstVisibleFrameMs": 2312.0349999964237
+      },
+      "resources": {
+        "assetTransferBytes": 10475382,
+        "sourceBytes": 1879101,
+        "decodedGeometryBytes": 1847592,
+        "workerTransferBytes": 1847592,
+        "workerTransferBufferCount": 32,
+        "peakCpuStagingBytes": 27125100,
+        "peakGpuEstimatedBytes": 25648688,
+        "gpuUploadCalls": 93,
+        "gpuUploadBytes": 17070744,
+        "assetUploadCalls": 38,
+        "assetUploadBytes": 13985792,
+        "maxFrameAssetUploadBytes": 1048576,
+        "pendingUploadTasksAfterVisible": 0,
+        "postVisibleAssetUploadBytes": 0
+      },
+      "render": {
+        "passCount": 2,
+        "visiblePixel": true
+      },
+      "lifecycle": {
+        "duplicateLoad": true,
+        "recordCacheHits": 20,
+        "sceneDestroyResidualRecords": 0,
+        "recoveryFailures": 0,
+        "recoveredTextureRecords": 38
+      }
+    }
+  ],
+  "timings": {
+    "firstVisibleFrameMs": 2375.345000013709,
+    "maxTierFirstVisibleFrameMs": 2312.0349999964237
+  },
+  "resources": {
+    "peakCpuStagingBytes": 27125100,
+    "peakGpuEstimatedBytes": 25648688,
+    "gpuUploadCalls": 112,
+    "gpuUploadBytes": 17109896,
+    "liveGpuResourcesAfterDestroy": 0,
+    "liveGpuBytesAfterDestroy": 0,
+    "releasedOwnerResiduals": 0
+  },
+  "lifecycle": {
+    "cancelledLoadRejected": true,
+    "cancelledLoadWasInFlight": true
+  },
+  "validation": {
+    "errors": [],
+    "uncapturedErrors": [],
+    "deviceLost": false
+  },
+  "browserEvidence": {
+    "product": "Chrome/151.0.7922.75",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+    "platform": "Win32",
+    "url": "http://127.0.0.1:56973/scripts/webgpu-gate/gltf-corpus-fixture.html?mode=optimized",
+    "angleBackend": "d3d11",
+    "nativeBackend": true
+  },
+  "browserDiagnostics": {
+    "consoleErrorCount": 0,
+    "exceptionCount": 0,
+    "unclassifiedFailureCount": 0
+  },
+  "httpProvenance": {
+    "transport": "http",
+    "requestCount": 176,
+    "uniqueFileCount": 153,
+    "files": [
+      {
+        "sourcePath": "engine/dist/assets.js",
+        "byteLength": 648,
+        "sha256": "0db77eb2ec83277461995a89772dabd5c2bb4fcc0bf9706c92ec48e0a4cd7d46",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/align-BX53GGTW.js",
+        "byteLength": 312,
+        "sha256": "13eb1de3423eda38e8fe2b8c39217e8d3ec22e6b01c1d3b802f54e06fa5e6a49",
+        "requestCount": 5
+      },
+      {
+        "sourcePath": "engine/dist/chunks/AmbientLight-C5mWXn7A.js",
+        "byteLength": 548,
+        "sha256": "5dccc777c282e9a7338b1bd7434dc1bad7bb982831fce78936664bad55ad2052",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/arrayAccess-DMgV9vsQ.js",
+        "byteLength": 1568,
+        "sha256": "f8201af21ff5e65ec188c97ef200a81e176b7c3f78e01e7c35860c92332a7bf5",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/assets-BsHhCZEH.js",
+        "byteLength": 28864,
+        "sha256": "105d1047c9d4272dffcd0a6eed8b09355233c6abe6b1c58f49811268a38d2076",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/AssetUploadScheduler-CrMhyMEK.js",
+        "byteLength": 315452,
+        "sha256": "36c2f9093bdc34625969d803bf9d1f4fe31d3a61255224bf9a87499573e3c70e",
+        "requestCount": 5
+      },
+      {
+        "sourcePath": "engine/dist/chunks/BaseRenderer-DEKljufN.js",
+        "byteLength": 8605,
+        "sha256": "6a756879421c8a8ba9bf5deceaad087d6a7a41ae241a79ef1ce753c40275fe48",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/BasicMaterial-BU1pUOu5.js",
+        "byteLength": 4621,
+        "sha256": "4b2eaa6e6069cc0cd2fd2ee1a53c2e5f7b689fc6f8b49dd912d903f17b61d3bd",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/BitmapFontBuilder-C06uZ7Uf.js",
+        "byteLength": 3522,
+        "sha256": "4446503543bc869ac9392ac48967bf844aeb29348c5ebc94b8e3d7802c1e169c",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/BitmapFontParser-DjNLC50b.js",
+        "byteLength": 6300,
+        "sha256": "e793f075147fe08e2626fb024a17d15a76a983799cb9905645ae26ee58f08053",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/BitmapText-BR-jsEuP.js",
+        "byteLength": 1378,
+        "sha256": "0d5a55db31b7a69335a58352ac6d88d5369e10e056f274b714a6cb4ba530ac77",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/BitmapTextRenderer-53EWQz5H.js",
+        "byteLength": 16211,
+        "sha256": "ebef5e1b655ceb185382ab54abe5b5fb31b219dfd84332dc6cd8c040917a29f4",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/BitmapTextRenderSystem-CdSvXnIv.js",
+        "byteLength": 7008,
+        "sha256": "c0a25d3e734672dd5ca3008b9e3f4b4e1add6764e400b9d4cc7664e4d95dac6a",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/BlinnPhongMaterial-D6aCbIFa.js",
+        "byteLength": 2665,
+        "sha256": "7d6c5273cfdee33561cabd0812d392bb6c08915711946585f38af5e725aef4d6",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Box2DPhysics2DBackend-DG69RHJi.js",
+        "byteLength": 1025766,
+        "sha256": "424c7d7c0b68278eb22fcdd7d102c99ad43a2937badbe73e8e7e4abfda285051",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/BoxSelectionControl-SDDTp_pb.js",
+        "byteLength": 14425,
+        "sha256": "4f63f2ae4f1ef022ca692c5d90e8408c62e34bc91ca23dc85e1c2680becde317",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/BuiltinRenderShader-4o-Hd2hR.js",
+        "byteLength": 953,
+        "sha256": "225c97c51ea114788b2b0412cbbb5a11062f66187659def32f8a9fcbef267ec0",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/BuiltinSpecializedRenderingShader-CWsuNVNG.js",
+        "byteLength": 802,
+        "sha256": "a8b7acc667696c6e22059f2dc547a15eae7a0be8befe70993cd0ee66e018ea06",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/BvhLod3D-CrDMn2hg.js",
+        "byteLength": 5947,
+        "sha256": "3d93767f54b45f88fba199714168dfb05fd73401d0dc8c3a6cfe140285e3873c",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Camera3D-DL4_NAPs.js",
+        "byteLength": 7545,
+        "sha256": "985d733a0dfb143c02d7d92e6c38719fb6c2afd37169d642ec7b7866ca62f1a6",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/CartesianTransform3D-Dz_RwwrF.js",
+        "byteLength": 6067,
+        "sha256": "ea16fab91105a584d47655147702243da53cff987b877a55f142c5203d328f7a",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/ClippingPlanes-CMq5GScg.js",
+        "byteLength": 4625,
+        "sha256": "e7ab5ded624eee06c2324a1e980bf38121dbb85e7bf14c7f5c9e3fc24748e7a9",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/ColorSRGB-UPmwuXYH.js",
+        "byteLength": 4365,
+        "sha256": "614c8b4bc083284aa93d1c0295f9bcd2be19f46f6c6d17e1a76b8a07d76b2849",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Component-Du0fittL.js",
+        "byteLength": 5010,
+        "sha256": "685f63bc79b39ad0d3913d99d52d5cb2dabcc00b0ff716e39fe433923f53af33",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/ComponentSerializationRegistry-DabS4quk.js",
+        "byteLength": 29457,
+        "sha256": "9d0407a34b95ee6476bb5a83c9f95a7a3c03c6c5761eab9b446091cd2d532fdc",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/constants-Do1J_v-k.js",
+        "byteLength": 188,
+        "sha256": "bbeb0c6e0d36fe3f6cc271cbeb5a997b08a922c9dadf0a54fbde908ede75d848",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/CssMaterial-Cu9p0tTU.js",
+        "byteLength": 11613,
+        "sha256": "1d6b61e3cd27dd63e786cd64731f04d4022f2754e40ae9c6b8a21c542cad4052",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Engine-BahX1K2h.js",
+        "byteLength": 56914,
+        "sha256": "9ae8e5327ad80ebf83291125345f6f43b56f987f7f8c644518d8fbae1bc5fe0a",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/EngineDiagnosticsAccess-SXWvpo8N.js",
+        "byteLength": 785,
+        "sha256": "83ef06a54945d6f5801917bbef2dd210786a075a89f2e020c9afe162de8e9ff9",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/EngineError-Cp-e1RTL.js",
+        "byteLength": 10324,
+        "sha256": "320dbdc121cdf5fcf2b540235114047757bc5f4d2f5af142b6775b778c499cc9",
+        "requestCount": 5
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Entity-D9WtM8el.js",
+        "byteLength": 24569,
+        "sha256": "eb37adad603057d2b0a48ca3143d505f04053919580c322a3545750dbba4c3c1",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Frustum-CNFdM8nF.js",
+        "byteLength": 11397,
+        "sha256": "422c319bc3b7c440426a9e118ae88aa8965619c4a0ea7f468ed78f9907904725",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Geometry2D-CDDy-caX.js",
+        "byteLength": 3341,
+        "sha256": "7569223e039c0987ccfe3fed1fb0c4226b6f37c593f07985ebb6a25487824596",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Geometry3D-3ggVGdr9.js",
+        "byteLength": 22823,
+        "sha256": "39f173487b105cc3dfc8c355cda16d9f80562fba1090b236295bca7cab1cfb7c",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Global-Ny7k6KJK.js",
+        "byteLength": 1074,
+        "sha256": "cb9476d924e852917be05bd4ca28900c0f3c3ed1d3409b31a08806646da448e4",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+        "byteLength": 25387,
+        "sha256": "84a037a8d103a39c7e8ef6adf1a3000a26b5bd9ebce9f98e4234097d04bd2e5a",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/GuiSystem-gc_1Whwv.js",
+        "byteLength": 124171,
+        "sha256": "ac118f45887a7f9749850b3a6d98fe5fbe75f6a71dd13b334a9c0ac20f97593c",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/hierarchy-CZkgLn-Q.js",
+        "byteLength": 1012,
+        "sha256": "9873bcd2267676559b2434745666376ee688e66646061373fec307fd486f5dd3",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/IEngine-BXne_fZR.js",
+        "byteLength": 925,
+        "sha256": "c16788372b421d43de8a06d41cd95774aca7f52f918e236ad2333c0700b3d4c2",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/ImageTextureUpload-DOXRSnCq.js",
+        "byteLength": 5529,
+        "sha256": "3de9c8254b098a1d790978bbcdf4fc35134ca9108be889dfe36c02a5cfcd906b",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/IndirectDrawCommandBuffer-CZC_AGeK.js",
+        "byteLength": 1843,
+        "sha256": "0a7860cbb36640d43aad07bafc51edfd325ba85e1d75a2fc14f5339d55a46545",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/InstancedPbrMaterial-DdcxiJNy.js",
+        "byteLength": 7849,
+        "sha256": "64e2bb7c8c9672bac241b5cf7b07c594abb37f26a4b6a9924a42dab2f0e0af93",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/InteractionSystem-BwCsdAy6.js",
+        "byteLength": 71864,
+        "sha256": "c4ef87b46047a1d652b092f8ee95f400e0aafdc9cff4d732067e0af05223e53d",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Line3D-BJTzM1Sa.js",
+        "byteLength": 4071,
+        "sha256": "117bded41d54ca26cdcf4e10a3e1f66f3df8dca80652b9a7ff7477b3c9582945",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/LineMaterial-nZ13kiOf.js",
+        "byteLength": 2032,
+        "sha256": "60b566f9677f2151dd7842e0c9d0c3c1bd192da6898bcdf7e8797ba3bb522d58",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Material2D-CkEiMEWE.js",
+        "byteLength": 1095,
+        "sha256": "3e6a08a2bd14c9d87a4fdc8972ee703638425a6e2082f4fe15b2b59b7ce57dcd",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/MaterialRegistryBase-DngXOQhW.js",
+        "byteLength": 3422,
+        "sha256": "a23e68cc20442811427ddd0c4a0326381ea265675090e4ba0db2271b834725b0",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/MaterialRendererRegistry-DHoPE7S9.js",
+        "byteLength": 40275,
+        "sha256": "03aecab7b3863658a06089b1081c573187edb64f2e497324c4b75b500e96b0c0",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Mesh2D-Bw9Dheem.js",
+        "byteLength": 9330,
+        "sha256": "a8defc1460a5f5aae5be028412aa5c3f977e7372721a7ffc6557ae37fc452ba6",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Mesh2DRenderer-CES_I22y.js",
+        "byteLength": 18658,
+        "sha256": "b02fef844b13780742c22dc8cbef56eec10298bc2f84821b11badfa3d6ec62d8",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Mesh2DRenderSystem-sdFZ6icO.js",
+        "byteLength": 6420,
+        "sha256": "8d571d7b310176d404acc165abc8fded248a4f0605e8eb56f840c231be7db391",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Mesh3D-BTWnThco.js",
+        "byteLength": 2391,
+        "sha256": "2572ac9896b1bb3b595b5aed85c0312e3e5b0e9a286f6627dde99ed5378fa1bf",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/OrbitControl-B7WtQKVM.js",
+        "byteLength": 8928,
+        "sha256": "37eb67b72f69c030cee80dde0d5b02846c639f590e966e1b6921fe7980cbe1f2",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/OutlinePass-tHU0H9y_.js",
+        "byteLength": 80902,
+        "sha256": "e2ac5a6fb4975ddd21b979cd0216b01e93af9d2d5767890d313a823610408d37",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/ParticleEmitter3D-qTvZwiEl.js",
+        "byteLength": 31711,
+        "sha256": "b6c8804918e3b88270889652e6a43b5265a432abca21bcd41a9c2b55774f700e",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/physics-components-k1t-DPVR.js",
+        "byteLength": 7002,
+        "sha256": "1437d615b1d89772ec6fe4550a6d1e8887d45d090bd159ae8326112584291caf",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Physics2DSystem-ArRxm2W5.js",
+        "byteLength": 21254,
+        "sha256": "e17d96c4c1da0557543fa58a229d2f421d563f69f45dd632b1b53862081a03ca",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Physics2DTo3DTransformSync-DJYQr2KX.js",
+        "byteLength": 1554,
+        "sha256": "cce72238a0eb8b190a17f156c56d938cc264ec6ec6221bbd9996cad86b260c90",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Physics2DTo3DTransformSyncSystem-zAhcTO5j.js",
+        "byteLength": 3745,
+        "sha256": "3219d8d4ec43b259acfcd2e51c5f1e8016dad023bb2cdcacd34bd1758ea4373e",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Physics3DJoint-CtGDynYE.js",
+        "byteLength": 8617,
+        "sha256": "d0d472b851d2f0f139e13c36de45ad7833312c24999f38d4bd045f22425850ac",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/PipelineWarmup-DxQVxQVj.js",
+        "byteLength": 15759,
+        "sha256": "70c4a81a7e49af050bafbda42522b6a0a445f59359d8392523ea796967262736",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/PlanarMirror-CCIJqzcP.js",
+        "byteLength": 10457,
+        "sha256": "ebfc14bcce3ea39f240d24b96c66ec8b9c71e7c9d27a0068990e53b121f0c91c",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/PlanarMirrorMaterial-Ccr9esCq.js",
+        "byteLength": 2552,
+        "sha256": "4d29d47ec250345b71251a928b7630d9b87d3f59830604225800ca271f94aeb5",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/PlaneGeometry-C-PnYjxI.js",
+        "byteLength": 5575,
+        "sha256": "2f91e6eac8e799d296c2b6da578f00481ffc623d43d5fd52bb226506fe723125",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/PointLight-CPweOrQl.js",
+        "byteLength": 11443,
+        "sha256": "5fc9129dc7a6e2d8c21114dc850e6762e9a8ad8430a86c67a6639ed921277197",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/PostProcessSceneTextureStore-DcOkFAwK.js",
+        "byteLength": 18787,
+        "sha256": "63e734d46283107d12714ccddf0d368ed62ffaad576279f3fdb1e2648bf9c933",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/RadialShadowRenderer-B4XgawZ6.js",
+        "byteLength": 57692,
+        "sha256": "92f8a4871c3632a09e8f6c8c6efd185cccf827656ed4a720ed4ef46aeeae23d4",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Ray-DzCV4t0z.js",
+        "byteLength": 17901,
+        "sha256": "31d6bbda8190e71d3ad1a1878a254b35f9e44b733d576550b4f28b6954aa8486",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Render3DSystem-0l0V673H.js",
+        "byteLength": 339034,
+        "sha256": "08ce7cab2854986aa58f4de00560d0ef96f2995246c0ebb30a7ddcfea0784037",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/RenderCommandContext-CXCRBl_l.js",
+        "byteLength": 32540,
+        "sha256": "9f27ba40ed46baca975d37f36424c7e9674647ba7e744d77bfa88dda4cfc7a70",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/RendererCacheMap-Bok-IbPr.js",
+        "byteLength": 30554,
+        "sha256": "6c5447764a8729609311d45c57cfae0b9311063ff4483c09d48e22f074de45c4",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/RttEngine-Ba1Q7K3L.js",
+        "byteLength": 8621,
+        "sha256": "9ca8c30d773727d26915edd80260dece9b4a6b1ec4cd5b8c2a6771dc90eb7dcf",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/RttRenderContributor-D5MHqjA0.js",
+        "byteLength": 3052,
+        "sha256": "2d197674bc1365f108ca89566d6b15d36de8f3fbee83f8ced9f24b255be6ed51",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Scene-DZFMv72p.js",
+        "byteLength": 39963,
+        "sha256": "d775b0c16db32dbb92463cbab14c1cc6ce40f02eb87cad8d8ebcb13c60b61067",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/ScriptComponent-Du-iqh4R.js",
+        "byteLength": 34762,
+        "sha256": "0e5d10f3a0eb3eb9d8d20db875f6a0e524baa22b6c5967d1fb0575c9af0dfb4b",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/ScriptResource-DMZ4JtpT.js",
+        "byteLength": 8077,
+        "sha256": "e0c67f61b8c2f9f4755e280f6760d3e1b0e843edad8a6a43b981d743ad054099",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Sky-CMwO4Q6R.js",
+        "byteLength": 2654,
+        "sha256": "1e287ffd6f0b7bea685af2dbb3f807b85272a9a1a4511d38bf67e3a409bf61da",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/SpatialIndexService-CHSkJsdW.js",
+        "byteLength": 56693,
+        "sha256": "fd3f1249a58b873e633c30b7bb2f9111f67feee3bc2c0e8735aea61c7d551397",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/SphericalTransform3D-HT4XhI6y.js",
+        "byteLength": 5687,
+        "sha256": "b2f06110d015723b5f66b8a4c74ab9045d54bf540c4ecf123cb92b81f9476376",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/SVGGeometry2D-BBMd8uy2.js",
+        "byteLength": 115579,
+        "sha256": "441a3de8f22ebf4cae308db27aea3e8bfc65a6f8302e27c14953bad497e0ae70",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/System-CIIb_ci6.js",
+        "byteLength": 3406,
+        "sha256": "84f2bcb7f7b93635bdf95ec307bcc41953268deefbff368da1a57892331af27c",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/ToonMaterial-KY7z4YHh.js",
+        "byteLength": 7950,
+        "sha256": "d282a0852d3c283963f2643525bd934cf08a719f3db47f257ae1793c54a00e77",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Transform2D-Lwrtzbz9.js",
+        "byteLength": 5218,
+        "sha256": "8c459271f7c23ec3c55b5fcbb597d9be795c168cd7474ea4a09439e158cbad9c",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/Transform3D-FMiF1z-r.js",
+        "byteLength": 4432,
+        "sha256": "cc57945720db6873b8607ceda2d7b517ec5701f8b6d81db55ae05d8deebd372b",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/TransparentMegaBatch-3XZMWTHm.js",
+        "byteLength": 314633,
+        "sha256": "b46b280cd87f8677a13515aa2f6787858ea73a4e9b40f77eb7e128a9bd2a9eeb",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/VolumeMaterial-NwU4wbgJ.js",
+        "byteLength": 6677,
+        "sha256": "1956360488b7e4647a7d41c53956dc32dcfddb34d9d9546a96c8dd2192c4823d",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/World-DnC2UUYh.js",
+        "byteLength": 59239,
+        "sha256": "d300e7fa3f6af96f6d8ca1727d21dd4b64ff659236fbce06fd74218423e5c14c",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/chunks/WorldResourceCleanup-CSTul4-x.js",
+        "byteLength": 892,
+        "sha256": "d22ecd6960a36ab7707a70bb5999c7c87123688c0787e301cffaa72f50607f48",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/color.js",
+        "byteLength": 8426,
+        "sha256": "41d702fa68ae88ae321f7f254cdd2369e07ae5708e75876c648d32c93eb604f0",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/components.js",
+        "byteLength": 2388,
+        "sha256": "c31ddcd312a304f9685bbbc6ac611c4ea281034ecc896ad0632b6c8fbcb2ee37",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/compute.js",
+        "byteLength": 7574,
+        "sha256": "381df71005e4011295b2d9b1f48506166c75e275978d56b73068d74be691ea93",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/core.js",
+        "byteLength": 3490,
+        "sha256": "710d62dd8fd12dbb429b783fc13ab8b62d879e8b327da552c10b4185cb54192c",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/ecs.js",
+        "byteLength": 795,
+        "sha256": "97049cabc23d9cd1401cb59c3eda3da844729bed408da10d0c289bd5089c12a6",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/experimental.js",
+        "byteLength": 36628,
+        "sha256": "605b3d77222c2c58df7a5dd852dcd2da59ca7345b73230b780563206d172e50c",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/experimental/assets.js",
+        "byteLength": 27020,
+        "sha256": "8d93424be32680dad4105ff0409b02e2a5064b874e3c99049b2460c7aa384bf7",
+        "requestCount": 6
+      },
+      {
+        "sourcePath": "engine/dist/experimental/diagnostics.js",
+        "byteLength": 4502,
+        "sha256": "371e96e91d7bb2428e7bf706a9f391b857a331365e4131c1fa0ef2eabc8ab9e1",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/experimental/renderer.js",
+        "byteLength": 24769,
+        "sha256": "d0294b0b84aab70816b7a224ad4ffe83e1d901cf0363976d3c10a58bf79d52b2",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/gui.js",
+        "byteLength": 12523,
+        "sha256": "2ce6f57474a3c859cd14773f2228b1f2fbca79e94a384260515900bc20929f0e",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/index.js",
+        "byteLength": 3839,
+        "sha256": "04501e8eabc59c703890c263af417818856d2aaa6a3a442d33b956cce865c1b1",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/input.js",
+        "byteLength": 3818,
+        "sha256": "fe114fc7ac9e07841d8f7ca830160df4b0ab620a256463a7099bed70544f5781",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/internal/2d-ui-shader-artifact.js",
+        "byteLength": 53787,
+        "sha256": "d9719d72ec89cce1029e843de072884453b52f993a46d6474ec463b4b3569894",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/internal/compute-shader-artifact.js",
+        "byteLength": 33400,
+        "sha256": "477d0cfce36f516f486551f3f2fd0a51b48b4668e49d25d34c96ca89f95fe4b5",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/internal/deformation-shader-artifact.js",
+        "byteLength": 132969,
+        "sha256": "a8b75dc946a8e7742fcbec5b791995f0acca2c97ffff52e729bec9eb70cbe43c",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/internal/material-lighting-shader-artifact.js",
+        "byteLength": 203563,
+        "sha256": "809fbe559ed014bb5a8739a996bc89e9863d82f6bacf8f3cba3184d28924caf8",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/internal/postprocess-shader-artifact.js",
+        "byteLength": 60064,
+        "sha256": "5cbc27d937c15a07caa1bc94c6884e79f358360a8dc1c0e062bdd222d8296ff8",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/internal/precompiled-shader-runtime.js",
+        "byteLength": 9950,
+        "sha256": "c8fcc531c9527aae728dded1d675c002ea9443d21ce89a1e85be19328fbcf05f",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/internal/simple3d-shader-artifact.js",
+        "byteLength": 43080,
+        "sha256": "7585055ef48c54c779dbc67626192861894375e74d36e3eb9b86b5b592535655",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/internal/specialized-rendering-shader-artifact.js",
+        "byteLength": 75897,
+        "sha256": "4c1d825f7d6de4c8379fc829f53257df6840308d10561cbf56d4a52909193aed",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/material.js",
+        "byteLength": 2155,
+        "sha256": "b71731a54e63f10c30f9cbdfbabc53b9b6cb0cfb1da50237e7b6d5e3ed59466a",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/renderer.js",
+        "byteLength": 3304,
+        "sha256": "926fd707aa08595456b12c4ad9f527e2c033a036b751edc7e99094bfb260adf4",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "engine/dist/tween.js",
+        "byteLength": 14618,
+        "sha256": "a9ac01e5a4383ad1057f8e1ff3fe51de16812e8022b190af0a89ba2b14d2f110",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "extensions/dist/chunks/GltfAnimation3DAdapter-ayDU4Cd3.js",
+        "byteLength": 85334,
+        "sha256": "445d2ccb8d5825c2234c5e4bc6655e314b422ecbb6b2ccdcb5a53da47721bcff",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "extensions/dist/chunks/GltfAnimationRuntime-BxPy5M2g.js",
+        "byteLength": 27165,
+        "sha256": "44c574c1c50d372ee491b22659114668f9fe9d420c8af54489e609584e38b93b",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "extensions/dist/chunks/gltfLoader-SoYEALG7.js",
+        "byteLength": 91123,
+        "sha256": "00262669479a63a33d0f945aa7691456ee66a7df717b082693341a030e211084",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "extensions/dist/chunks/pluginUtils-CvwroRMd.js",
+        "byteLength": 1084,
+        "sha256": "210cf1c9c98f48b096bb21a3e24eb179c11fcfa95d0ee772c82c93d00adae22d",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "extensions/dist/experimental-gltf-worker.js",
+        "byteLength": 9956,
+        "sha256": "7e5090fe0903ca11786c4aac600bf77921de0b5cc647576c044b911bc43d6e42",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "extensions/dist/gltf-animation3d.js",
+        "byteLength": 369,
+        "sha256": "9913d8a68b6d37b5c3ee978bc67362bd27f8c50f681a5103ae53821f5d3119c8",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "extensions/dist/gltf-worker-runtime.js",
+        "byteLength": 245373,
+        "sha256": "2bb6a097397313412966e85b7fa4cf9d01e3c90ecc9a35028edf861bb23b57e2",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "extensions/dist/gltf.js",
+        "byteLength": 23074,
+        "sha256": "68a4078a14c7c7f15a33f21ed14d79c153d338e197badfac524bdedec0884f33",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "extensions/test/fixtures/gltf/animation-characterization.gltf",
+        "byteLength": 7000,
+        "sha256": "c95e740825f19d6f2c812e50b9d36da9849bde96a715f92f1d897204357cd9ff",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "node_modules/@loaders.gl/textures/dist/libs/basis_encoder.js",
+        "byteLength": 126945,
+        "sha256": "d204cc62dfdf910f92bce616872a6d6057b6d2b45bbaffbc0ef047375351e4a6",
+        "requestCount": 4
+      },
+      {
+        "sourcePath": "node_modules/@loaders.gl/textures/dist/libs/basis_encoder.wasm",
+        "byteLength": 1460592,
+        "sha256": "62ce0364ea8f4969e1e4277ce275213dcce5b234c8c96586da06e3879010341c",
+        "requestCount": 4
+      },
+      {
+        "sourcePath": "node_modules/draco3dgltf/draco_decoder_gltf_nodejs.js",
+        "byteLength": 58456,
+        "sha256": "8bb2952d2ba7d67e1414f8df819410cb0434a666be53f671fff75f68843d76f6",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "node_modules/draco3dgltf/draco_decoder_gltf.wasm",
+        "byteLength": 192593,
+        "sha256": "712db3449ae2041d6e8a224c395bda6cedb49e51322fae38b7db9beb8b381889",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js",
+        "byteLength": 199533,
+        "sha256": "32cdefcfe7b340710c242b0982316d5af501bb81ccdc3744f57bd0b2acd4e400",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_base_basecolor.ktx2",
+        "byteLength": 303936,
+        "sha256": "0b8d3376f0f1dc58b804756256a3b38ae6279b6aeb22ba24475ee9eaeb867daa",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_base_emissive.ktx2",
+        "byteLength": 174821,
+        "sha256": "a354583d8f7e6605a57797d3d70a1b6032b416380f5782654f8fcaad4ec59658",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_base_normal.ktx2",
+        "byteLength": 282290,
+        "sha256": "ed9e50d14137ee380095ec108050ad828025abd68521bae9ff8598752c0ec8b2",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_base_occlusion-rough-metal.ktx2",
+        "byteLength": 919576,
+        "sha256": "b5d9e7021a9f2c7a0403000e8a8c7e4e806a97647f409c76441b7395f638382f",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_bulbs_occlusion.ktx2",
+        "byteLength": 26976,
+        "sha256": "54c646ddc5bcdbe5bcdeed17c22e47bfde61fba43739c395e656a9defd3807ee",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_glass_basecolor-alpha.ktx2",
+        "byteLength": 1779325,
+        "sha256": "c29e86278b417f34d9221f509cb21b30348364905f875db7914fed102f64cdc8",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_glass_emissive.ktx2",
+        "byteLength": 541399,
+        "sha256": "dcf80976e11ac51b2bac8f34a697e9f6392c2b4065e9c053d2dbc024b4a97976",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_glass_normal.ktx2",
+        "byteLength": 1563379,
+        "sha256": "1444cc1ae65d2b3a8b84c7d82dc0d179de7deef8608a7a4e32dc837546392f1d",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_glass_occlusion-rough-metal.ktx2",
+        "byteLength": 503612,
+        "sha256": "7d7f1aa17aff14d025320eb6062964bc59764e42f2218e42ec0d4feacd223ced",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_glass_transmission-clearcoat.ktx2",
+        "byteLength": 439778,
+        "sha256": "ea3fff36824c0d4715a87d84fc7e4caaee74381e5b19b69e031bfb94f831a9da",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_grill_basecolor-alpha.ktx2",
+        "byteLength": 217120,
+        "sha256": "1ad2e5f610b99ea673ea332818d4a43413808253966266436cbfba810c62dd42",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_grill_emissive.ktx2",
+        "byteLength": 29183,
+        "sha256": "bb90c9fa9ae0666666e18e91155e3c812b25509d54f7f05c28bd3572de1eef86",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_grill_normal.ktx2",
+        "byteLength": 780467,
+        "sha256": "9123bdcb18e8bc04be404dc6cb72b90b33f715306b58035084d22e1b066c4c26",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_grill_occlusion-rough-metal.ktx2",
+        "byteLength": 590811,
+        "sha256": "99c46448580ad86a5cf503437bb530f90391abdb3a736d18dd789f24efc0d8ab",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_hardware_basecolor.ktx2",
+        "byteLength": 17224,
+        "sha256": "f96c1526e96abd9c19bba3667cc08aeec529f73e0fccfb9d5cb37be41c791c2f",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_hardware_emissive.ktx2",
+        "byteLength": 59008,
+        "sha256": "a3e32214faaddc3de6c747e466c279e72b308c8c2618918d28a9e443b78414c5",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_hardware_normal.ktx2",
+        "byteLength": 112123,
+        "sha256": "b89f5e1e15949442af898f0af5670ac993d903ee8a99aee3cb3bd4792525fa7e",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_hardware_occlusion-rough-metal.ktx2",
+        "byteLength": 210306,
+        "sha256": "c296f1794f96c79dbfa05211dd0a77d962d02e05277c0adee0fadc0d6948d045",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp_steel_occlusion.ktx2",
+        "byteLength": 44947,
+        "sha256": "a391ac6160d7d07a7922e16541a5d6eb4aab39282e3e7c96a01a66a1d203af26",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp.bin",
+        "byteLength": 1847592,
+        "sha256": "7873a6f30835589b3b6fc3b0d749b8fe80f1ea29f4f170fba6d8ac11083d9397",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/large-stained-glass-lamp-ktx2/StainedGlassLamp.gltf",
+        "byteLength": 31509,
+        "sha256": "4157e692bb4b7fb9bc5ac59d972d2f77700955b141464642b43b13a4ac726fb8",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/manifest.json",
+        "byteLength": 8186,
+        "sha256": "161095831c7298b0a5d1576b751fb2331fe6bc9034f06cc22cc62103a3e0492b",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/medium-rigged-figure-draco/RiggedFigure.gltf",
+        "byteLength": 50939,
+        "sha256": "25039daae7c4cd7394b39180341fd2519af82d6ac6ca2e8bec737cb9866b6d69",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/medium-rigged-figure-draco/RiggedFigure0.bin",
+        "byteLength": 6172,
+        "sha256": "ef8c02bf4d186b058d21d5615bd133e75ec5be46f23cc4943d2543d745ede5cb",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/small-animated-morph-cube/AnimatedMorphCube.glb",
+        "byteLength": 6752,
+        "sha256": "214ee56160a50dbf22543a1d66dbf860986e87f0efac3d89feac1359d0e6aeab",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/gltf-corpus-contract.mjs",
+        "byteLength": 10759,
+        "sha256": "bf470836e398d072ea9f68168d82734690bae469561642b14b0f93d4ee6276a4",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/gltf-corpus-fixture.html",
+        "byteLength": 1837,
+        "sha256": "5315e7cbf725f7cd4b70df6d6cb44711aec39cdc4df12da9e392161a2f09069f",
+        "requestCount": 1
+      },
+      {
+        "sourcePath": "scripts/webgpu-gate/gltf-corpus-fixture.mjs",
+        "byteLength": 25337,
+        "sha256": "346e2325c7c72bea2e98b4dfa5df34ec8873b2ecf22fe970b51dc6c670ec4c0e",
+        "requestCount": 1
+      }
+    ]
+  },
+  "comparison": {
+    "policy": "same pinned corpus, upload budget, render path, and pixel gate; reference disables glTF and KTX2 workers",
+    "before": {
+      "configuration": {
+        "mode": "reference",
+        "gltfWorker": "disabled",
+        "ktx2Worker": false,
+        "ktx2WorkerPoolSize": 0
+      },
+      "animation3D": {
+        "fixture": "/extensions/test/fixtures/gltf/animation-characterization.gltf",
+        "clipIds": [
+          "Idle",
+          "Run"
+        ],
+        "interpolation": [
+          "cubic-spline",
+          "linear",
+          "step"
+        ],
+        "phases": [
+          {
+            "name": "start",
+            "mixerTime": 0,
+            "rootLocalMatrix": [
+              2.220446049250313e-16,
+              1,
+              0,
+              0,
+              -1,
+              2.220446049250313e-16,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              2,
+              3,
+              1
+            ],
+            "morphWeights": [
+              0.10000000149011612,
+              0.20000000298023224
+            ],
+            "skinJointTipMatrix": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            "visiblePixel": true
+          },
+          {
+            "name": "mid",
+            "mixerTime": 0.5,
+            "rootLocalMatrix": [
+              2.7755575615628914e-16,
+              1.25,
+              0,
+              0,
+              -1.5,
+              3.3306690738754696e-16,
+              0,
+              0,
+              0,
+              0,
+              1.75,
+              0,
+              1.5,
+              2.5,
+              3.5,
+              1
+            ],
+            "morphWeights": [
+              0.30000001192092896,
+              0.3499999940395355
+            ],
+            "skinJointTipMatrix": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0.5,
+              0,
+              1
+            ],
+            "visiblePixel": true
+          },
+          {
+            "name": "end",
+            "mixerTime": 1,
+            "rootLocalMatrix": [
+              -2,
+              0,
+              0,
+              0,
+              0,
+              -3,
+              0,
+              0,
+              0,
+              0,
+              4,
+              0,
+              3,
+              4,
+              5,
+              1
+            ],
+            "morphWeights": [
+              0.75,
+              0.25
+            ],
+            "skinJointTipMatrix": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              2,
+              0,
+              1
+            ],
+            "visiblePixel": true
+          }
+        ],
+        "gpuMorph": true,
+        "skinning": true,
+        "positionsRemainBase": true,
+        "lifecycle": {
+          "runtimeState": "destroyed",
+          "actionCount": 0,
+          "bindingCount": 0,
+          "targetCount": 0
+        }
+      },
+      "tiers": [
+        {
+          "id": "small",
+          "asset": {
+            "entry": "small-animated-morph-cube/AnimatedMorphCube.glb",
+            "meshCount": 1,
+            "primitiveCount": 1,
+            "materialCount": 1,
+            "textureCount": 0,
+            "animationCount": 1,
+            "skinCount": 0,
+            "morphTargetCount": 2,
+            "features": [
+              "morph",
+              "animation"
+            ]
+          },
+          "timings": {
+            "fetchMs": 4.370000004768372,
+            "workerParseMs": 0,
+            "mainParseMs": 0.699999988079071,
+            "dracoDecodeMs": 0,
+            "geometryPreparationMs": 0.5300000011920929,
+            "instantiateMs": 1.0499999970197678,
+            "imageDecodeTranscodeMs": 0.10000000894069672,
+            "gpuUploadMs": 0,
+            "scheduledUploadCpuMs": 0,
+            "pipelineWarmupMs": 4.594999998807907,
+            "visibleSubmitMs": 3.0049999952316284,
+            "firstVisibleFrameMs": 15.479999989271164
+          },
+          "resources": {
+            "assetTransferBytes": 6752,
+            "sourceBytes": 6752,
+            "decodedGeometryBytes": 2376,
+            "workerTransferBytes": 0,
+            "workerTransferBufferCount": 0,
+            "peakCpuStagingBytes": 9128,
+            "peakGpuEstimatedBytes": 595712,
+            "gpuUploadCalls": 9,
+            "gpuUploadBytes": 3336,
+            "assetUploadCalls": 0,
+            "assetUploadBytes": 0,
+            "maxFrameAssetUploadBytes": 0,
+            "pendingUploadTasksAfterVisible": 0,
+            "postVisibleAssetUploadBytes": 0
+          },
+          "render": {
+            "passCount": 2,
+            "visiblePixel": true
+          },
+          "lifecycle": {
+            "duplicateLoad": true,
+            "recordCacheHits": 1,
+            "sceneDestroyResidualRecords": 0,
+            "recoveryFailures": null,
+            "recoveredTextureRecords": 0
+          }
+        },
+        {
+          "id": "medium",
+          "asset": {
+            "entry": "medium-rigged-figure-draco/RiggedFigure.gltf",
+            "meshCount": 1,
+            "primitiveCount": 1,
+            "materialCount": 1,
+            "textureCount": 0,
+            "animationCount": 1,
+            "skinCount": 1,
+            "morphTargetCount": 0,
+            "features": [
+              "draco",
+              "skin",
+              "animation"
+            ]
+          },
+          "timings": {
+            "fetchMs": 8.715000003576279,
+            "workerParseMs": 0,
+            "mainParseMs": 0.7300000041723251,
+            "dracoDecodeMs": 35.83999998867512,
+            "geometryPreparationMs": 0.20000000298023224,
+            "instantiateMs": 4.5999999940395355,
+            "imageDecodeTranscodeMs": 0.1599999964237213,
+            "gpuUploadMs": 0,
+            "scheduledUploadCpuMs": 0,
+            "pipelineWarmupMs": 4.1500000059604645,
+            "visibleSubmitMs": 4.2249999940395355,
+            "firstVisibleFrameMs": 59.67000000178814
+          },
+          "resources": {
+            "assetTransferBytes": 57111,
+            "sourceBytes": 57111,
+            "decodedGeometryBytes": 23304,
+            "workerTransferBytes": 0,
+            "workerTransferBufferCount": 0,
+            "peakCpuStagingBytes": 80415,
+            "peakGpuEstimatedBytes": 631368,
+            "gpuUploadCalls": 10,
+            "gpuUploadBytes": 35816,
+            "assetUploadCalls": 0,
+            "assetUploadBytes": 0,
+            "maxFrameAssetUploadBytes": 0,
+            "pendingUploadTasksAfterVisible": 0,
+            "postVisibleAssetUploadBytes": 0
+          },
+          "render": {
+            "passCount": 2,
+            "visiblePixel": true
+          },
+          "lifecycle": {
+            "duplicateLoad": true,
+            "recordCacheHits": 1,
+            "sceneDestroyResidualRecords": 0,
+            "recoveryFailures": null,
+            "recoveredTextureRecords": 0
+          }
+        },
+        {
+          "id": "large",
+          "asset": {
+            "entry": "large-stained-glass-lamp-ktx2/StainedGlassLamp.gltf",
+            "meshCount": 8,
+            "primitiveCount": 8,
+            "materialCount": 13,
+            "textureCount": 19,
+            "animationCount": 0,
+            "skinCount": 0,
+            "morphTargetCount": 0,
+            "features": [
+              "ktx2",
+              "basis",
+              "multi-material",
+              "multi-texture"
+            ]
+          },
+          "timings": {
+            "fetchMs": 107.83000001311302,
+            "workerParseMs": 0,
+            "mainParseMs": 0.510000005364418,
+            "dracoDecodeMs": 0,
+            "geometryPreparationMs": 38.82999999821186,
+            "instantiateMs": 15.900000005960464,
+            "imageDecodeTranscodeMs": 1113.4800000041723,
+            "gpuUploadMs": 243.33500000834465,
+            "scheduledUploadCpuMs": 18.31999997794628,
+            "pipelineWarmupMs": 1233.1199999898672,
+            "visibleSubmitMs": 2.189999997615814,
+            "firstVisibleFrameMs": 2687.5349999964237
+          },
+          "resources": {
+            "assetTransferBytes": 10475382,
+            "sourceBytes": 1879101,
+            "decodedGeometryBytes": 1847592,
+            "workerTransferBytes": 0,
+            "workerTransferBufferCount": 0,
+            "peakCpuStagingBytes": 42962293,
+            "peakGpuEstimatedBytes": 26132112,
+            "gpuUploadCalls": 93,
+            "gpuUploadBytes": 17070744,
+            "assetUploadCalls": 38,
+            "assetUploadBytes": 13985792,
+            "maxFrameAssetUploadBytes": 1048576,
+            "pendingUploadTasksAfterVisible": 0,
+            "postVisibleAssetUploadBytes": 0
+          },
+          "render": {
+            "passCount": 2,
+            "visiblePixel": true
+          },
+          "lifecycle": {
+            "duplicateLoad": true,
+            "recordCacheHits": 20,
+            "sceneDestroyResidualRecords": 0,
+            "recoveryFailures": 0,
+            "recoveredTextureRecords": 38
+          }
+        }
+      ],
+      "timings": {
+        "firstVisibleFrameMs": 2762.684999987483,
+        "maxTierFirstVisibleFrameMs": 2687.5349999964237
+      },
+      "resources": {
+        "peakCpuStagingBytes": 42962293,
+        "peakGpuEstimatedBytes": 26132112,
+        "gpuUploadCalls": 112,
+        "gpuUploadBytes": 17109896,
+        "liveGpuResourcesAfterDestroy": 0,
+        "liveGpuBytesAfterDestroy": 0,
+        "releasedOwnerResiduals": 0
+      },
+      "lifecycle": {
+        "cancelledLoadRejected": true,
+        "cancelledLoadWasInFlight": true
+      },
+      "validation": {
+        "errors": [],
+        "uncapturedErrors": [],
+        "deviceLost": false
+      }
+    },
+    "after": {
+      "configuration": {
+        "mode": "optimized",
+        "gltfWorker": "production-inline",
+        "ktx2Worker": true,
+        "ktx2WorkerPoolSize": 4
+      },
+      "animation3D": {
+        "fixture": "/extensions/test/fixtures/gltf/animation-characterization.gltf",
+        "clipIds": [
+          "Idle",
+          "Run"
+        ],
+        "interpolation": [
+          "cubic-spline",
+          "linear",
+          "step"
+        ],
+        "phases": [
+          {
+            "name": "start",
+            "mixerTime": 0,
+            "rootLocalMatrix": [
+              2.220446049250313e-16,
+              1,
+              0,
+              0,
+              -1,
+              2.220446049250313e-16,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              2,
+              3,
+              1
+            ],
+            "morphWeights": [
+              0.10000000149011612,
+              0.20000000298023224
+            ],
+            "skinJointTipMatrix": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              1
+            ],
+            "visiblePixel": true
+          },
+          {
+            "name": "mid",
+            "mixerTime": 0.5,
+            "rootLocalMatrix": [
+              2.7755575615628914e-16,
+              1.25,
+              0,
+              0,
+              -1.5,
+              3.3306690738754696e-16,
+              0,
+              0,
+              0,
+              0,
+              1.75,
+              0,
+              1.5,
+              2.5,
+              3.5,
+              1
+            ],
+            "morphWeights": [
+              0.30000001192092896,
+              0.3499999940395355
+            ],
+            "skinJointTipMatrix": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0.5,
+              0,
+              1
+            ],
+            "visiblePixel": true
+          },
+          {
+            "name": "end",
+            "mixerTime": 1,
+            "rootLocalMatrix": [
+              -2,
+              0,
+              0,
+              0,
+              0,
+              -3,
+              0,
+              0,
+              0,
+              0,
+              4,
+              0,
+              3,
+              4,
+              5,
+              1
+            ],
+            "morphWeights": [
+              0.75,
+              0.25
+            ],
+            "skinJointTipMatrix": [
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              0,
+              2,
+              0,
+              1
+            ],
+            "visiblePixel": true
+          }
+        ],
+        "gpuMorph": true,
+        "skinning": true,
+        "positionsRemainBase": true,
+        "lifecycle": {
+          "runtimeState": "destroyed",
+          "actionCount": 0,
+          "bindingCount": 0,
+          "targetCount": 0
+        }
+      },
+      "tiers": [
+        {
+          "id": "small",
+          "asset": {
+            "entry": "small-animated-morph-cube/AnimatedMorphCube.glb",
+            "meshCount": 1,
+            "primitiveCount": 1,
+            "materialCount": 1,
+            "textureCount": 0,
+            "animationCount": 1,
+            "skinCount": 0,
+            "morphTargetCount": 2,
+            "features": [
+              "morph",
+              "animation"
+            ]
+          },
+          "timings": {
+            "fetchMs": 3.0999999940395355,
+            "workerParseMs": 0.6949999928474426,
+            "mainParseMs": 0,
+            "dracoDecodeMs": 0,
+            "geometryPreparationMs": 0.39499999582767487,
+            "instantiateMs": 1.3399999886751175,
+            "imageDecodeTranscodeMs": 0.09000000357627869,
+            "gpuUploadMs": 0,
+            "scheduledUploadCpuMs": 0,
+            "pipelineWarmupMs": 4.274999991059303,
+            "visibleSubmitMs": 5.375,
+            "firstVisibleFrameMs": 16.96000000834465
+          },
+          "resources": {
+            "assetTransferBytes": 6752,
+            "sourceBytes": 6752,
+            "decodedGeometryBytes": 2376,
+            "workerTransferBytes": 6084,
+            "workerTransferBufferCount": 8,
+            "peakCpuStagingBytes": 15212,
+            "peakGpuEstimatedBytes": 595712,
+            "gpuUploadCalls": 9,
+            "gpuUploadBytes": 3336,
+            "assetUploadCalls": 0,
+            "assetUploadBytes": 0,
+            "maxFrameAssetUploadBytes": 0,
+            "pendingUploadTasksAfterVisible": 0,
+            "postVisibleAssetUploadBytes": 0
+          },
+          "render": {
+            "passCount": 2,
+            "visiblePixel": true
+          },
+          "lifecycle": {
+            "duplicateLoad": true,
+            "recordCacheHits": 1,
+            "sceneDestroyResidualRecords": 0,
+            "recoveryFailures": null,
+            "recoveredTextureRecords": 0
+          }
+        },
+        {
+          "id": "medium",
+          "asset": {
+            "entry": "medium-rigged-figure-draco/RiggedFigure.gltf",
+            "meshCount": 1,
+            "primitiveCount": 1,
+            "materialCount": 1,
+            "textureCount": 0,
+            "animationCount": 1,
+            "skinCount": 1,
+            "morphTargetCount": 0,
+            "features": [
+              "draco",
+              "skin",
+              "animation"
+            ]
+          },
+          "timings": {
+            "fetchMs": 6.32499997317791,
+            "workerParseMs": 0.635000005364418,
+            "mainParseMs": 0,
+            "dracoDecodeMs": 25.280000001192093,
+            "geometryPreparationMs": 25.444999992847443,
+            "instantiateMs": 3.1400000005960464,
+            "imageDecodeTranscodeMs": 0.06000000238418579,
+            "gpuUploadMs": 0,
+            "scheduledUploadCpuMs": 0,
+            "pipelineWarmupMs": 3.7899999916553497,
+            "visibleSubmitMs": 4.8900000005960464,
+            "firstVisibleFrameMs": 46.3500000089407
+          },
+          "resources": {
+            "assetTransferBytes": 57111,
+            "sourceBytes": 57111,
+            "decodedGeometryBytes": 23304,
+            "workerTransferBytes": 25324,
+            "workerTransferBufferCount": 6,
+            "peakCpuStagingBytes": 105739,
+            "peakGpuEstimatedBytes": 631368,
+            "gpuUploadCalls": 10,
+            "gpuUploadBytes": 35816,
+            "assetUploadCalls": 0,
+            "assetUploadBytes": 0,
+            "maxFrameAssetUploadBytes": 0,
+            "pendingUploadTasksAfterVisible": 0,
+            "postVisibleAssetUploadBytes": 0
+          },
+          "render": {
+            "passCount": 2,
+            "visiblePixel": true
+          },
+          "lifecycle": {
+            "duplicateLoad": true,
+            "recordCacheHits": 1,
+            "sceneDestroyResidualRecords": 0,
+            "recoveryFailures": null,
+            "recoveredTextureRecords": 0
+          }
+        },
+        {
+          "id": "large",
+          "asset": {
+            "entry": "large-stained-glass-lamp-ktx2/StainedGlassLamp.gltf",
+            "meshCount": 8,
+            "primitiveCount": 8,
+            "materialCount": 13,
+            "textureCount": 19,
+            "animationCount": 0,
+            "skinCount": 0,
+            "morphTargetCount": 0,
+            "features": [
+              "ktx2",
+              "basis",
+              "multi-material",
+              "multi-texture"
+            ]
+          },
+          "timings": {
+            "fetchMs": 94.51000002026558,
+            "workerParseMs": 31.144999995827675,
+            "mainParseMs": 0,
+            "dracoDecodeMs": 0,
+            "geometryPreparationMs": 30.825000002980232,
+            "instantiateMs": 16.189999997615814,
+            "imageDecodeTranscodeMs": 985.2000000029802,
+            "gpuUploadMs": 770.3299999982119,
+            "scheduledUploadCpuMs": 13.90000006556511,
+            "pipelineWarmupMs": 1191.5100000053644,
+            "visibleSubmitMs": 3.2899999916553497,
+            "firstVisibleFrameMs": 2312.0349999964237
+          },
+          "resources": {
+            "assetTransferBytes": 10475382,
+            "sourceBytes": 1879101,
+            "decodedGeometryBytes": 1847592,
+            "workerTransferBytes": 1847592,
+            "workerTransferBufferCount": 32,
+            "peakCpuStagingBytes": 27125100,
+            "peakGpuEstimatedBytes": 25648688,
+            "gpuUploadCalls": 93,
+            "gpuUploadBytes": 17070744,
+            "assetUploadCalls": 38,
+            "assetUploadBytes": 13985792,
+            "maxFrameAssetUploadBytes": 1048576,
+            "pendingUploadTasksAfterVisible": 0,
+            "postVisibleAssetUploadBytes": 0
+          },
+          "render": {
+            "passCount": 2,
+            "visiblePixel": true
+          },
+          "lifecycle": {
+            "duplicateLoad": true,
+            "recordCacheHits": 20,
+            "sceneDestroyResidualRecords": 0,
+            "recoveryFailures": 0,
+            "recoveredTextureRecords": 38
+          }
+        }
+      ],
+      "timings": {
+        "firstVisibleFrameMs": 2375.345000013709,
+        "maxTierFirstVisibleFrameMs": 2312.0349999964237
+      },
+      "resources": {
+        "peakCpuStagingBytes": 27125100,
+        "peakGpuEstimatedBytes": 25648688,
+        "gpuUploadCalls": 112,
+        "gpuUploadBytes": 17109896,
+        "liveGpuResourcesAfterDestroy": 0,
+        "liveGpuBytesAfterDestroy": 0,
+        "releasedOwnerResiduals": 0
+      },
+      "lifecycle": {
+        "cancelledLoadRejected": true,
+        "cancelledLoadWasInFlight": true
+      },
+      "validation": {
+        "errors": [],
+        "uncapturedErrors": [],
+        "deviceLost": false
+      }
+    }
+  },
+  "gate": {
+    "status": "passed",
+    "checkedAt": "2026-08-15T13:53:34.261Z",
+    "chromePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "angleBackend": "d3d11",
+    "validationErrors": [],
+    "manifest": "scripts\\webgpu-gate\\assets\\gltf-corpus\\manifest.json"
+  }
+}

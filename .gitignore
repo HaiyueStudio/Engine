@@ -1,0 +1,15 @@
+node_modules/
+.npm-cache/
+.cert/
+dist/
+dist-test/
+voxelEditor/app-dist/
+voxelEditor/electron/app-dist/
+voxelEditor/release-electron/
+bundle.js
+bundle.js.map
+bundle.meta.json
+examples/page-turn-book/pdf.worker.min.mjs
+artifacts/
+animation-spec/corpus/.cache/
+.DS_Store

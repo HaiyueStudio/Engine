@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - Box Selection Control</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #05070b;
+      font-family: monospace;
+    }
+    canvas { display: block; }
+
+    #ui {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      min-width: 240px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 6px;
+      background: rgba(0,0,0,0.55);
+      color: rgba(255,255,255,0.82);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    select {
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 5px 8px;
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 5px;
+      background: rgba(10,14,20,0.9);
+      color: rgba(255,255,255,0.86);
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    #hint {
+      position: absolute;
+      bottom: 14px;
+      color: rgba(255,255,255,0.28);
+      font-size: 11px;
+    }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas" width="960" height="620"></canvas>
+
+  <div id="ui">
+    <select id="mode">
+      <option value="center">Mode: center point</option>
+      <option value="intersect">Mode: any triangle intersects</option>
+      <option value="all">Mode: all triangles inside/intersect</option>
+    </select>
+    <div id="count">Selected: 0</div>
+    <div id="names">Drag a rectangle over boxes</div>
+  </div>
+
+  <div id="hint">
+    left drag = box select &nbsp;·&nbsp; right drag = pan &nbsp;·&nbsp; scroll = zoom
+  </div>
+
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

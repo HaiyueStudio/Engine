@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "goal": "g06-compute-gui-data-lifecycle",
+  "contract": "compute-resource-access-order",
+  "cases": [
+    {
+      "id": "storage-to-indirect",
+      "producer": "storage-write",
+      "consumer": "indirect",
+      "missingDependency": "E_COMPUTE_INVALID_PARAMETER",
+      "explicitDependency": "passed"
+    },
+    {
+      "id": "storage-to-render-read",
+      "producer": "storage-write",
+      "consumer": "render-read",
+      "explicitDependency": "passed"
+    },
+    {
+      "id": "same-pass-storage-write-indirect",
+      "result": "E_COMPUTE_INVALID_PARAMETER",
+      "path": "fixture.samePass.indirect"
+    },
+    {
+      "id": "active-render-pass",
+      "result": "E_COMPUTE_INVALID_PARAMETER",
+      "path": "fixture.activeRender.passEncoder"
+    }
+  ],
+  "productionConsumers": [
+    "Render3DGpuDrivenBatchBuilder",
+    "InstancedMesh3DRenderSystem",
+    "InstancedMesh3DRenderer",
+    "TransparentMegaBatch"
+  ],
+  "webgpu": {
+    "stage13PassCount": 5,
+    "executedPassCount": 3,
+    "sideEffects": ["draw-command", "bitonic-sort", "mesh-cull"],
+    "validationErrorCount": 0
+  }
+}

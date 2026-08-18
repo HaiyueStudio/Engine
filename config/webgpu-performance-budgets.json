@@ -1,0 +1,246 @@
+{
+  "schemaVersion": 1,
+  "evidenceMaxAgeHours": 336,
+  "candidateEvidence": {
+    "root": "artifacts/performance-candidates",
+    "workload": "full",
+    "requiredTimingCohorts": 3,
+    "requiredCpuCohorts": 3,
+    "requiredReadbackFrames": 1800,
+    "remoteSessionAllowed": false,
+    "softwareAdapterAllowed": false
+  },
+  "suites": {
+    "render3d.real-frame": {
+      "minimumSamples": { "smoke": 20, "full": 30 },
+      "budgetChannels": ["timing", "sampleWall", "queueWait"],
+      "rules": [
+        { "id": "interactive-256-1v", "modes": ["smoke"], "match": { "entityCount": 256, "viewCount": 1 }, "expectedCount": 4 },
+        { "id": "interactive-256-4v", "modes": ["smoke"], "match": { "entityCount": 256, "viewCount": 4 }, "expectedCount": 4 },
+        { "id": "interactive-1000-1v", "modes": ["full"], "match": { "entityCount": 1000, "viewCount": 1 }, "expectedCount": 4 },
+        { "id": "interactive-1000-4v", "modes": ["full"], "match": { "entityCount": 1000, "viewCount": 4 }, "expectedCount": 4 }
+      ]
+    },
+    "render3d.planar-reflection": {
+      "minimumSamples": { "smoke": 40, "full": 40 },
+      "rules": [
+        { "id": "interactive-single-mirror", "modes": ["smoke", "full"], "match": { "id": "render3d.planar-reflection.1000e.1m.1b.1v" }, "expectedCount": 1 },
+        { "id": "interactive-recursive-mirrors", "modes": ["smoke", "full"], "match": { "id": "render3d.planar-reflection.1000e.2m.3b.4v" }, "expectedCount": 1 },
+        { "id": "stress-10k-deep", "modes": ["smoke", "full"], "match": { "id": "render3d.planar-reflection.10000e.4m.5b.1v" }, "expectedCount": 1 },
+        { "id": "stress-10k-deep-multiview", "modes": ["smoke", "full"], "match": { "id": "render3d.planar-reflection.10000e.4m.8b.4v" }, "expectedCount": 1 }
+      ]
+    },
+    "ambient-occlusion.gpu-cost": {
+      "minimumSamples": { "smoke": 3, "full": 30 },
+      "budgetChannels": ["gpu.occlusion", "gpu.denoise", "gpu.upscale", "gpu.total"],
+      "artifact": {
+        "schemaVersion": 2,
+        "caseCount": 18,
+        "selectedScratchFormat": "r8unorm",
+        "resolutionScale": 0.5,
+        "maxScratchBytes": { "720p": 460800, "1080p": 1036800, "4k": 4147200 },
+        "maxEstimatedBandwidthBytes": {
+          "720p.low.r8unorm": 137088000,
+          "720p.medium.r8unorm": 153676800,
+          "720p.high.r8unorm": 185011200,
+          "1080p.low.r8unorm": 308448000,
+          "1080p.medium.r8unorm": 345772800,
+          "1080p.high.r8unorm": 416275200,
+          "4k.low.r8unorm": 1233792000,
+          "4k.medium.r8unorm": 1383091200,
+          "4k.high.r8unorm": 1665100800
+        }
+      },
+      "rules": [
+        { "id": "720p.low.r8unorm", "modes": ["smoke", "full"], "match": { "id": "720p.low.r8unorm" }, "expectedCount": 1 },
+        { "id": "720p.medium.r8unorm", "modes": ["smoke", "full"], "match": { "id": "720p.medium.r8unorm" }, "expectedCount": 1 },
+        { "id": "720p.high.r8unorm", "modes": ["smoke", "full"], "match": { "id": "720p.high.r8unorm" }, "expectedCount": 1 },
+        { "id": "1080p.low.r8unorm", "modes": ["smoke", "full"], "match": { "id": "1080p.low.r8unorm" }, "expectedCount": 1 },
+        { "id": "1080p.medium.r8unorm", "modes": ["smoke", "full"], "match": { "id": "1080p.medium.r8unorm" }, "expectedCount": 1 },
+        { "id": "1080p.high.r8unorm", "modes": ["smoke", "full"], "match": { "id": "1080p.high.r8unorm" }, "expectedCount": 1 },
+        { "id": "4k.low.r8unorm", "modes": ["smoke", "full"], "match": { "id": "4k.low.r8unorm" }, "expectedCount": 1 },
+        { "id": "4k.medium.r8unorm", "modes": ["smoke", "full"], "match": { "id": "4k.medium.r8unorm" }, "expectedCount": 1 },
+        { "id": "4k.high.r8unorm", "modes": ["smoke", "full"], "match": { "id": "4k.high.r8unorm" }, "expectedCount": 1 }
+      ]
+    }
+  },
+  "profiles": {
+    "apple-integrated": {
+      "tier": "required",
+      "enrolled": true,
+      "source": "Measured on Apple M4 Pro / Chrome 151 / Metal on 2026-08-09; runtime, sample-wall, and queue-wait ceilings are reviewed independently.",
+      "enrollment": {
+        "status": "enrolled",
+        "runnerLabels": ["self-hosted", "haiyue-performance", "apple-integrated"],
+        "cpuRunnerProfile": "apple-m4-pro-fixed",
+        "adapterFingerprint": "apple metal-3",
+        "browser": "Chrome 151 stable",
+        "driver": "Apple M4 Pro; Metal Supported; macOS 26.5.1 (25F80), arm64",
+        "operatingSystem": "macOS 26.5.1 (25F80), arm64",
+        "measuredHardware": "Apple M4 Pro, 20-core integrated GPU",
+        "reviewedAt": "2026-08-09"
+      },
+      "match": {
+        "nodePlatforms": ["darwin"],
+        "adapterPatterns": ["apple"]
+      },
+      "budgets": {
+        "render3d.real-frame": {
+          "interactive-256-1v": { "timing": 10, "sampleWall": 10, "queueWait": 6 },
+          "interactive-256-4v": { "timing": 14, "sampleWall": 14, "queueWait": 7 },
+          "interactive-1000-1v": { "timing": 7, "sampleWall": 10, "queueWait": 6 },
+          "interactive-1000-4v": { "timing": 12, "sampleWall": 14, "queueWait": 7 }
+        },
+        "render3d.planar-reflection": {
+          "interactive-single-mirror": 25,
+          "interactive-recursive-mirrors": 140,
+          "stress-10k-deep": 3000,
+          "stress-10k-deep-multiview": 3000
+        },
+        "ambient-occlusion.gpu-cost": {
+          "720p.low.r8unorm": { "gpu.occlusion": 3, "gpu.denoise": 4, "gpu.upscale": 5, "gpu.total": 10 },
+          "720p.medium.r8unorm": { "gpu.occlusion": 3, "gpu.denoise": 4, "gpu.upscale": 5, "gpu.total": 10 },
+          "720p.high.r8unorm": { "gpu.occlusion": 5, "gpu.denoise": 5, "gpu.upscale": 5, "gpu.total": 14 },
+          "1080p.low.r8unorm": { "gpu.occlusion": 4, "gpu.denoise": 5, "gpu.upscale": 5, "gpu.total": 12 },
+          "1080p.medium.r8unorm": { "gpu.occlusion": 4, "gpu.denoise": 5, "gpu.upscale": 5, "gpu.total": 12 },
+          "1080p.high.r8unorm": { "gpu.occlusion": 6, "gpu.denoise": 7, "gpu.upscale": 7, "gpu.total": 18 },
+          "4k.low.r8unorm": { "gpu.occlusion": 8, "gpu.denoise": 10, "gpu.upscale": 12, "gpu.total": 28 },
+          "4k.medium.r8unorm": { "gpu.occlusion": 10, "gpu.denoise": 12, "gpu.upscale": 14, "gpu.total": 34 },
+          "4k.high.r8unorm": { "gpu.occlusion": 12, "gpu.denoise": 15, "gpu.upscale": 18, "gpu.total": 42 }
+        }
+      }
+    },
+    "windows-integrated": {
+      "tier": "required",
+      "enrolled": false,
+      "source": "Product ceilings awaiting first reviewed Intel Iris Xe or AMD integrated hardware enrollment.",
+      "enrollment": {
+        "status": "pending-real-device",
+        "runnerLabels": ["self-hosted", "haiyue-performance", "windows-integrated"],
+        "adapterFingerprint": null,
+        "browser": null,
+        "driver": null,
+        "operatingSystem": null,
+        "budgetStatus": "provisional-product-ceilings-not-a-baseline",
+        "steps": [
+          "Use a local-console Windows 10 22H2 or newer self-hosted runner with an Intel Iris Xe/UHD or AMD Radeon integrated adapter and labels self-hosted, haiyue-performance, windows-integrated.",
+          "Set profile.enrolled=true and enrollment.status=enrolled, then record the exact adapter fingerprint emitted by WebGPU, stable Chrome version, Windows build, and display-driver version; do not use RDP, WARP, SwiftShader, or another software adapter.",
+          "Run node scripts/run-release-performance-candidate.mjs --profile windows-integrated from a clean revision, then validate with node scripts/check-release-performance-candidate.mjs --profile windows-integrated.",
+          "Review all three full-suite P50/P95 distributions and cohort noise before changing any provisional ceiling."
+        ]
+      },
+      "match": {
+        "nodePlatforms": ["win32"],
+        "adapterPatterns": ["intel|iris|uhd|radeon graphics"]
+      },
+      "budgets": {
+        "render3d.real-frame": {
+          "interactive-256-1v": { "timing": 20, "sampleWall": 30, "queueWait": 20 },
+          "interactive-256-4v": { "timing": 30, "sampleWall": 45, "queueWait": 25 },
+          "interactive-1000-1v": { "timing": 20, "sampleWall": 35, "queueWait": 25 },
+          "interactive-1000-4v": { "timing": 45, "sampleWall": 70, "queueWait": 35 }
+        },
+        "render3d.planar-reflection": {
+          "interactive-single-mirror": 50,
+          "interactive-recursive-mirrors": 280,
+          "stress-10k-deep": 6000,
+          "stress-10k-deep-multiview": 6000
+        },
+        "ambient-occlusion.gpu-cost": {
+          "720p.low.r8unorm": { "gpu.occlusion": 6, "gpu.denoise": 8, "gpu.upscale": 10, "gpu.total": 20 },
+          "720p.medium.r8unorm": { "gpu.occlusion": 6, "gpu.denoise": 8, "gpu.upscale": 10, "gpu.total": 20 },
+          "720p.high.r8unorm": { "gpu.occlusion": 10, "gpu.denoise": 10, "gpu.upscale": 10, "gpu.total": 28 },
+          "1080p.low.r8unorm": { "gpu.occlusion": 8, "gpu.denoise": 10, "gpu.upscale": 10, "gpu.total": 24 },
+          "1080p.medium.r8unorm": { "gpu.occlusion": 8, "gpu.denoise": 10, "gpu.upscale": 10, "gpu.total": 24 },
+          "1080p.high.r8unorm": { "gpu.occlusion": 12, "gpu.denoise": 14, "gpu.upscale": 14, "gpu.total": 36 },
+          "4k.low.r8unorm": { "gpu.occlusion": 16, "gpu.denoise": 20, "gpu.upscale": 24, "gpu.total": 56 },
+          "4k.medium.r8unorm": { "gpu.occlusion": 20, "gpu.denoise": 24, "gpu.upscale": 28, "gpu.total": 68 },
+          "4k.high.r8unorm": { "gpu.occlusion": 24, "gpu.denoise": 30, "gpu.upscale": 36, "gpu.total": 84 }
+        }
+      }
+    },
+    "windows-discrete": {
+      "tier": "required",
+      "enrolled": false,
+      "source": "Product ceilings awaiting first reviewed NVIDIA RTX 20-series or AMD RX 6000-series hardware enrollment.",
+      "enrollment": {
+        "status": "pending-real-device",
+        "runnerLabels": ["self-hosted", "haiyue-performance", "windows-discrete"],
+        "adapterFingerprint": null,
+        "browser": null,
+        "driver": null,
+        "operatingSystem": null,
+        "budgetStatus": "provisional-product-ceilings-not-a-baseline",
+        "steps": [
+          "Use a local-console Windows 10 22H2 or newer self-hosted runner with an NVIDIA RTX 20-series+ or AMD RX 6000-series+ adapter and labels self-hosted, haiyue-performance, windows-discrete.",
+          "Set profile.enrolled=true and enrollment.status=enrolled, then record the exact adapter fingerprint emitted by WebGPU, stable Chrome version, Windows build, and display-driver version; do not use RDP, WARP, SwiftShader, or another software adapter.",
+          "Run node scripts/run-release-performance-candidate.mjs --profile windows-discrete from a clean revision, then validate with node scripts/check-release-performance-candidate.mjs --profile windows-discrete.",
+          "Review all three full-suite P50/P95 distributions and cohort noise before changing any provisional ceiling."
+        ]
+      },
+      "match": {
+        "nodePlatforms": ["win32"],
+        "adapterPatterns": ["nvidia|geforce|rtx|radeon rx"]
+      },
+      "budgets": {
+        "render3d.real-frame": {
+          "interactive-256-1v": { "timing": 10, "sampleWall": 15, "queueWait": 10 },
+          "interactive-256-4v": { "timing": 15, "sampleWall": 25, "queueWait": 15 },
+          "interactive-1000-1v": { "timing": 10, "sampleWall": 18, "queueWait": 12 },
+          "interactive-1000-4v": { "timing": 25, "sampleWall": 40, "queueWait": 20 }
+        },
+        "render3d.planar-reflection": {
+          "interactive-single-mirror": 25,
+          "interactive-recursive-mirrors": 140,
+          "stress-10k-deep": 3000,
+          "stress-10k-deep-multiview": 3000
+        },
+        "ambient-occlusion.gpu-cost": {
+          "720p.low.r8unorm": { "gpu.occlusion": 4.5, "gpu.denoise": 6, "gpu.upscale": 7.5, "gpu.total": 15 },
+          "720p.medium.r8unorm": { "gpu.occlusion": 4.5, "gpu.denoise": 6, "gpu.upscale": 7.5, "gpu.total": 15 },
+          "720p.high.r8unorm": { "gpu.occlusion": 7.5, "gpu.denoise": 7.5, "gpu.upscale": 7.5, "gpu.total": 21 },
+          "1080p.low.r8unorm": { "gpu.occlusion": 6, "gpu.denoise": 7.5, "gpu.upscale": 7.5, "gpu.total": 18 },
+          "1080p.medium.r8unorm": { "gpu.occlusion": 6, "gpu.denoise": 7.5, "gpu.upscale": 7.5, "gpu.total": 18 },
+          "1080p.high.r8unorm": { "gpu.occlusion": 9, "gpu.denoise": 10.5, "gpu.upscale": 10.5, "gpu.total": 27 },
+          "4k.low.r8unorm": { "gpu.occlusion": 12, "gpu.denoise": 15, "gpu.upscale": 18, "gpu.total": 42 },
+          "4k.medium.r8unorm": { "gpu.occlusion": 15, "gpu.denoise": 18, "gpu.upscale": 21, "gpu.total": 51 },
+          "4k.high.r8unorm": { "gpu.occlusion": 18, "gpu.denoise": 22.5, "gpu.upscale": 27, "gpu.total": 63 }
+        }
+      }
+    },
+    "software-reference": {
+      "tier": "control",
+      "enrolled": true,
+      "source": "Non-release SwiftShader/LLVMpipe control budget for hosted CI correctness runs.",
+      "match": {
+        "nodePlatforms": ["linux"],
+        "adapterPatterns": ["swiftshader|llvmpipe|software|google"]
+      },
+      "budgets": {
+        "render3d.real-frame": {
+          "interactive-256-1v": { "timing": 100, "sampleWall": 150, "queueWait": 100 },
+          "interactive-256-4v": { "timing": 250, "sampleWall": 375, "queueWait": 250 },
+          "interactive-1000-1v": { "timing": 250, "sampleWall": 375, "queueWait": 250 },
+          "interactive-1000-4v": { "timing": 750, "sampleWall": 1125, "queueWait": 750 }
+        },
+        "render3d.planar-reflection": {
+          "interactive-single-mirror": 250,
+          "interactive-recursive-mirrors": 1500,
+          "stress-10k-deep": 18000,
+          "stress-10k-deep-multiview": 18000
+        },
+        "ambient-occlusion.gpu-cost": {
+          "720p.low.r8unorm": { "gpu.occlusion": 30, "gpu.denoise": 40, "gpu.upscale": 50, "gpu.total": 100 },
+          "720p.medium.r8unorm": { "gpu.occlusion": 30, "gpu.denoise": 40, "gpu.upscale": 50, "gpu.total": 100 },
+          "720p.high.r8unorm": { "gpu.occlusion": 50, "gpu.denoise": 50, "gpu.upscale": 50, "gpu.total": 140 },
+          "1080p.low.r8unorm": { "gpu.occlusion": 40, "gpu.denoise": 50, "gpu.upscale": 50, "gpu.total": 120 },
+          "1080p.medium.r8unorm": { "gpu.occlusion": 40, "gpu.denoise": 50, "gpu.upscale": 50, "gpu.total": 120 },
+          "1080p.high.r8unorm": { "gpu.occlusion": 60, "gpu.denoise": 70, "gpu.upscale": 70, "gpu.total": 180 },
+          "4k.low.r8unorm": { "gpu.occlusion": 80, "gpu.denoise": 100, "gpu.upscale": 120, "gpu.total": 280 },
+          "4k.medium.r8unorm": { "gpu.occlusion": 100, "gpu.denoise": 120, "gpu.upscale": 140, "gpu.total": 340 },
+          "4k.high.r8unorm": { "gpu.occlusion": 120, "gpu.denoise": 150, "gpu.upscale": 180, "gpu.total": 420 }
+        }
+      }
+    }
+  }
+}

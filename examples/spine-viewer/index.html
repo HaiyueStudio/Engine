@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - Spine Viewer</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: #10141c;
+      color: #d8e2f2;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background: #111722;
+    }
+    #panel {
+      position: fixed;
+      left: 16px;
+      top: 16px;
+      display: grid;
+      gap: 8px;
+      width: min(380px, calc(100vw - 32px));
+      max-height: calc(100vh - 32px);
+      overflow: auto;
+      padding: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      border-radius: 8px;
+      background: rgba(11, 17, 27, 0.86);
+      backdrop-filter: blur(10px);
+    }
+    h1 {
+      margin: 0;
+      color: #eef3ff;
+      font-size: 14px;
+      font-weight: 650;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+    label {
+      color: #93a4bd;
+      font-size: 12px;
+    }
+    input, select, button {
+      min-width: 0;
+      height: 30px;
+      border: 1px solid rgba(148, 163, 184, 0.32);
+      border-radius: 5px;
+      color: #e5e7eb;
+      background: #111827;
+      font: 12px system-ui, sans-serif;
+    }
+    input[type="range"] { accent-color: #73b7ff; }
+    button {
+      padding: 0 10px;
+      cursor: pointer;
+    }
+    button:hover { background: #1f2937; }
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .timeline {
+      display: grid;
+      grid-template-columns: 62px minmax(0, 1fr) 92px;
+      gap: 8px;
+      align-items: center;
+    }
+    .toggles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .toggle {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      height: 30px;
+      color: #d8e2f2;
+      font-size: 12px;
+    }
+    .toggle input {
+      width: 14px;
+      height: 14px;
+      accent-color: #73b7ff;
+    }
+    #layer-tree {
+      max-height: 220px;
+      overflow: auto;
+      padding: 6px 8px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 5px;
+      background: rgba(15, 23, 42, 0.62);
+      font: 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    #layer-tree details { margin: 2px 0; }
+    #layer-tree summary {
+      cursor: pointer;
+      color: #c6d3e6;
+    }
+    #layer-tree .slot {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      padding: 1px 0 1px 14px;
+      color: #91a3bd;
+    }
+    #layer-tree .attachment {
+      color: #67e8f9;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #time-label {
+      color: #aebbd0;
+      font: 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      text-align: right;
+      white-space: nowrap;
+    }
+    #status {
+      min-height: 18px;
+      color: #aebbd0;
+      font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      overflow-wrap: anywhere;
+    }
+    #result { display: none; }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <section id="panel">
+    <h1>Spine Viewer</h1>
+    <div class="actions">
+      <button id="sample-button" type="button">Sample</button>
+      <button id="folder-button" type="button">Folder</button>
+    </div>
+    <div class="row">
+      <label for="animation-select">Animation</label>
+      <select id="animation-select"></select>
+    </div>
+    <div class="row">
+      <label for="skin-select">Skin</label>
+      <select id="skin-select"></select>
+    </div>
+    <div class="row">
+      <label for="scale-input">Scale</label>
+      <input id="scale-input" type="range" min="0.1" max="3" step="0.05" value="1" />
+    </div>
+    <div class="row">
+      <label for="speed-input">Speed</label>
+      <input id="speed-input" type="range" min="0" max="3" step="0.05" value="1" />
+    </div>
+    <div class="row">
+      <label for="mix-input">Mix</label>
+      <input id="mix-input" type="range" min="0" max="2" step="0.05" value="0.2" />
+    </div>
+    <div class="toggles">
+      <label class="toggle"><input id="mesh-toggle" type="checkbox" /> Mesh</label>
+      <label class="toggle"><input id="bones-toggle" type="checkbox" /> Bones</label>
+    </div>
+    <div class="row">
+      <label for="timeline-input">Time</label>
+      <div class="timeline">
+        <button id="play-button" type="button">Pause</button>
+        <input id="timeline-input" type="range" min="0" max="1" step="0.001" value="0" />
+        <span id="time-label">0.000 / 0.000s</span>
+      </div>
+    </div>
+    <div id="layer-tree"></div>
+    <div id="status"></div>
+  </section>
+  <input id="folder-input" type="file" webkitdirectory directory multiple hidden />
+  <output id="result" aria-hidden="true"></output>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

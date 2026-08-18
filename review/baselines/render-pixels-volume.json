@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "fixture": "haiyue-ktx2-volume-storage-table-chrome-960x640",
+  "width": 960,
+  "height": 640,
+  "hash": "818a38ad4c3171203dd4758c5f2a3a70af365ea3137b70ffcbe222a52bc9944d",
+  "bytes": 152528,
+  "coverage": "storage-object-table,raymarch,bounds,volume-params"
+}

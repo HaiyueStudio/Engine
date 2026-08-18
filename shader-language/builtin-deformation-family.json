@@ -1,0 +1,17 @@
+{
+  "format": "haiyue-production-deformation-family",
+  "version": 1,
+  "id": "engine-deformation",
+  "abiVersion": 1,
+  "passes": [
+    { "id": "forward", "operation": "forward" },
+    { "id": "forward-skinned", "operation": "forward-skinned" },
+    { "id": "depth", "operation": "depth" },
+    { "id": "shadow", "operation": "shadow" },
+    { "id": "shadow-morph", "operation": "shadow-morph" },
+    { "id": "shadow-skinned", "operation": "shadow-skinned" },
+    { "id": "shadow-skinned-morph", "operation": "shadow-skinned-morph" },
+    { "id": "motion-vector", "operation": "motion-vector" },
+    { "id": "outline", "operation": "outline" }
+  ]
+}

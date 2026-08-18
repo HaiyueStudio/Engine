@@ -1,0 +1,108 @@
+{
+  "contractVersion": 1,
+  "phase": 10,
+  "status": "implemented",
+  "implementation": "atomic-production-deformation-pass-family-migration",
+  "packageStatus": "private-compiler-with-generated-production-artifacts",
+  "primaryTarget": "webgpu-wgsl",
+  "family": {
+    "id": "engine-deformation",
+    "path": "shader-language/builtin-deformation-family.json",
+    "sha256": "c94abc93a02c880aed91d2b179b980fc1f31264fa8807fadda198d08778025c4",
+    "abiVersion": 1,
+    "passCount": 9,
+    "artifactHash": "74c2af4f84273da0939c8a10322be6d89d201da1b781a59f7cb61aabc1bfa297",
+    "deformationModuleHash": "838a52b0431a0e60d82ce4505dcaba6c9f5c7a32520faf7f726a351cb73601ef"
+  },
+  "passes": [
+    "forward",
+    "forward-skinned",
+    "depth",
+    "shadow",
+    "shadow-morph",
+    "shadow-skinned",
+    "shadow-skinned-morph",
+    "motion-vector",
+    "outline"
+  ],
+  "abi": {
+    "deformationOrder": ["morph", "skin"],
+    "currentObjectPrefixBytes": 96,
+    "currentObjectPrefix": ["model", "morphWeights", "deformationFlags"],
+    "clippingBlockBytes": 144,
+    "clippingBlock": ["clippingPlanes[8]", "clippingMeta"],
+    "clippingStorageBinding": "group1-binding1-companion-table",
+    "currentSkinPhysicalGroup": 3,
+    "currentSkinBindings": ["currentJointMatrices", "skinJoints", "skinWeights"],
+    "historyObjectBytes": 240,
+    "historyObject": [
+      "currentModel",
+      "previousModel",
+      "previousViewProjection",
+      "currentMorphWeights",
+      "previousMorphWeights",
+      "deformationFlags"
+    ],
+    "historySkinBindings": [
+      "currentJointMatrices",
+      "previousJointMatrices",
+      "skinJoints",
+      "skinWeights"
+    ],
+    "historyReset": "previous-equals-current"
+  },
+  "productionMigrations": [
+    "Mesh3DRenderer.forward",
+    "DepthRenderer",
+    "ShadowMapRenderer",
+    "MotionVectorRenderer",
+    "OutlineMaskRenderer",
+    "PbrRenderer.deformation-feature-modules"
+  ],
+  "artifact": {
+    "formatVersion": 2,
+    "layoutOwner": "renderer",
+    "runtimeParsesWgsl": false,
+    "runtimeCompilesDsl": false
+  },
+  "inventory": {
+    "wgslSourceCount": 58,
+    "generatedSourceCount": 39,
+    "handwrittenSourceCount": 19,
+    "stage10GeneratedSourceCount": 11,
+    "replacedHandwrittenSourceCount": 9,
+    "retiredDuplicateGeneratedSourceCount": 2
+  },
+  "bundle": {
+    "deformationArtifactRawBytes": 132969,
+    "deformationArtifactGzipBytes": 7143,
+    "deformationArtifactGzipBudgetBytes": 7500,
+    "runtimeContainsCompiler": false
+  },
+  "evidence": {
+    "webgpuCompiledPassCount": 9,
+    "webgpuRendererLayoutCount": 30,
+    "webgpuPipelineLayoutCount": 9,
+    "outlineMorphSkinPixel": [255, 255, 255, 255],
+    "motionHistoryVelocityUv": [0.25, 0],
+    "webgpuValidationErrorCount": 0,
+    "unclassifiedFailureCount": 0
+  },
+  "publicApiChanges": [],
+  "apiBaselineUpdated": false,
+  "acceptance": [
+    "npm run shader-language:check",
+    "npm run shader-language:stage10:check",
+    "npm run verify:shader-language-stage10",
+    "npm test -w ./engine",
+    "npm run check:fast"
+  ],
+  "deferred": [
+    "production-pbr-lighting-migration",
+    "compute-ir-side-effects-and-production-migration",
+    "glsl-es300-codegen",
+    "webgl2-renderer-fallback",
+    "visual-shader-graph-editor",
+    "stable-public-shader-api"
+  ]
+}

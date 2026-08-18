@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 – Mesh Helpers</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #050510;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: monospace;
+    }
+    canvas { display: block; }
+
+    #ui {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      padding: 3px 8px;
+    }
+
+    button {
+      font-family: monospace;
+      font-size: 13px;
+      padding: 6px 14px;
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 6px;
+      background: rgba(0,0,0,0.55);
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      width: 200px;
+      text-align: left;
+    }
+    button:hover { background: rgba(255,255,255,0.1); }
+    button.active {
+      background: rgba(80,160,255,0.25);
+      border-color: rgba(80,160,255,0.6);
+      color: #fff;
+    }
+
+    #hint {
+      position: absolute;
+      bottom: 14px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+      text-align: center;
+    }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas" width="900" height="600"></canvas>
+
+  <div id="ui">
+    <div class="label">Switch mode:</div>
+    <button id="btn-aabb">1 · AABB</button>
+    <button id="btn-obb">2 · OBB</button>
+    <button id="btn-wire">3 · Wireframe</button>
+  </div>
+
+  <div id="hint">
+    1/2/3 = switch mode &nbsp;·&nbsp;
+    left drag = orbit &nbsp;·&nbsp; scroll = zoom
+  </div>
+
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

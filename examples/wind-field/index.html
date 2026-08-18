@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - 全球风场可视化</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: #020b13;
+      color: #e7f6f5;
+    }
+    .panel {
+      position: fixed;
+      top: 18px;
+      left: 18px;
+      width: min(340px, calc(100vw - 36px));
+      padding: 16px;
+      border: 1px solid rgba(121, 205, 207, 0.24);
+      border-radius: 12px;
+      background: linear-gradient(145deg, rgba(5, 23, 35, 0.92), rgba(5, 18, 29, 0.78));
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(12px);
+    }
+    .eyebrow {
+      color: #72c9c9;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 5px 0 4px;
+      font-size: 22px;
+      font-weight: 620;
+      letter-spacing: -0.02em;
+    }
+    .status {
+      display: block;
+      min-height: 18px;
+      color: #91aeb5;
+      font-size: 12px;
+    }
+    .controls {
+      display: grid;
+      gap: 11px;
+      margin-top: 16px;
+    }
+    .control {
+      display: grid;
+      grid-template-columns: 74px 1fr 48px;
+      align-items: center;
+      gap: 9px;
+      color: #c8dcdf;
+      font-size: 12px;
+    }
+    .control output { color: #70d1cf; text-align: right; font-variant-numeric: tabular-nums; }
+    input[type="range"] { width: 100%; accent-color: #54c4c4; cursor: pointer; }
+    .actions { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+    button {
+      min-width: 68px;
+      height: 32px;
+      padding: 0 13px;
+      border: 1px solid rgba(111, 202, 201, 0.3);
+      border-radius: 7px;
+      background: rgba(17, 57, 67, 0.62);
+      color: #e5f7f6;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    button:hover { background: rgba(26, 78, 88, 0.76); }
+    button[data-active="true"] { border-color: #f3a45d; color: #ffd3a6; }
+    .fps { margin-left: auto; color: #6c9299; font-size: 11px; font-variant-numeric: tabular-nums; }
+    .attribution {
+      margin: 13px 0 0;
+      color: #647f86;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+    a { color: #73bfc1; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .result { display: none; }
+    @media (max-width: 560px) {
+      .panel { top: 10px; left: 10px; width: calc(100vw - 20px); padding: 13px; }
+      h1 { font-size: 18px; }
+    }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas" aria-label="全球风场粒子可视化"></canvas>
+  <section class="panel" aria-label="风场控制面板">
+    <div class="eyebrow">Haiyue WebGPU Example</div>
+    <h1>全球风场</h1>
+    <output id="status" class="status">准备启动…</output>
+    <div class="controls">
+      <label class="control" for="speed">
+        <span>流动速度</span>
+        <input id="speed" type="range" min="0.10" max="1.20" step="0.01" />
+        <output id="speed-value">0.25×</output>
+      </label>
+      <label class="control" for="trail">
+        <span>轨迹保留</span>
+        <input id="trail" type="range" min="0.900" max="0.990" step="0.001" />
+        <output id="trail-value">96.5%</output>
+      </label>
+    </div>
+    <div class="actions">
+      <button id="pause" type="button">暂停</button>
+      <button id="reset" type="button">重置粒子</button>
+      <output id="fps" class="fps">-- FPS</output>
+    </div>
+    <p class="attribution">
+      数据：NCEP GFS，2016-11-20 00:00 UTC；海岸线：
+      <a href="https://www.naturalearthdata.com/" target="_blank" rel="noreferrer">Natural Earth</a>。
+      效果参考
+      <a href="https://github.com/mapbox/webgl-wind" target="_blank" rel="noreferrer">mapbox/webgl-wind</a>。
+      空格键可暂停或继续。
+    </p>
+    <output id="result" class="result" aria-live="polite"></output>
+  </section>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

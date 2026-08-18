@@ -1,0 +1,139 @@
+{
+  "contractVersion": 1,
+  "phase": 0,
+  "status": "accepted",
+  "canonicalRepresentation": "typed-ir",
+  "packageStatus": "standalone-specification",
+  "authoringFrontends": [
+    {
+      "id": "typescript-dsl",
+      "status": "planned"
+    },
+    {
+      "id": "shader-graph-json",
+      "status": "specified"
+    },
+    {
+      "id": "text-language",
+      "status": "deferred"
+    }
+  ],
+  "targets": [
+    {
+      "id": "webgpu-wgsl",
+      "status": "primary"
+    },
+    {
+      "id": "webgl2-glsl-es300",
+      "status": "feasibility-only"
+    }
+  ],
+  "capabilityProfiles": [
+    "webgpu-portable",
+    "webgpu-enhanced",
+    "webgl2-compatible"
+  ],
+  "logicalResourceSpaces": [
+    {
+      "id": "frame",
+      "webgpuGroup": 0,
+      "owner": "frame-runtime",
+      "graphAccess": "read-standard-semantics"
+    },
+    {
+      "id": "object",
+      "webgpuGroup": 1,
+      "owner": "object-runtime",
+      "graphAccess": "read-standard-semantics"
+    },
+    {
+      "id": "material",
+      "webgpuGroup": 2,
+      "owner": "material-instance",
+      "graphAccess": "declare-material-resources"
+    },
+    {
+      "id": "pass",
+      "webgpuGroup": 3,
+      "owner": "renderer-render-graph",
+      "graphAccess": "declare-requirements"
+    }
+  ],
+  "coordinateSpaces": [
+    "geometry-local",
+    "object",
+    "world",
+    "view",
+    "tangent",
+    "clip",
+    "screen"
+  ],
+  "materialSurfaceOutputs": [
+    "baseColor",
+    "opacity",
+    "normalTS",
+    "metallic",
+    "roughness",
+    "occlusion",
+    "emissive",
+    "transmission",
+    "thickness",
+    "clearcoat",
+    "clearcoatRoughness",
+    "clearcoatNormalTS",
+    "sheenColor",
+    "sheenRoughness"
+  ],
+  "variantClasses": [
+    "dynamic",
+    "specialization",
+    "capability"
+  ],
+  "pilots": [
+    {
+      "id": "pbr-composition",
+      "requiredPasses": [
+        "forward"
+      ]
+    },
+    {
+      "id": "deformation-pass-coherence",
+      "requiredPasses": [
+        "forward",
+        "depth",
+        "shadow",
+        "motion-vector",
+        "outline-selection"
+      ]
+    },
+    {
+      "id": "motion-blur-postprocess",
+      "requiredPasses": [
+        "motion-tile-max",
+        "motion-neighbor-max",
+        "motion-blur-resolve"
+      ]
+    }
+  ],
+  "deferredCapabilities": [
+    "text-language-parser",
+    "visual-shader-graph-editor",
+    "glsl-es300-codegen",
+    "webgl2-renderer-fallback",
+    "public-api"
+  ],
+  "requiredDocuments": [
+    "README.md",
+    "architecture.md",
+    "type-system-and-stages.md",
+    "material-surface.md",
+    "resource-abi.md",
+    "variants-and-capabilities.md",
+    "graph-format.md",
+    "escape-hatches.md",
+    "pilots.md",
+    "graph-v1.schema.json",
+    "reflection-v1.schema.json",
+    "pilot-pbr-composition.graph.json"
+  ]
+}

@@ -1,0 +1,409 @@
+{
+  "schemaVersion": 2,
+  "goal": "g02-correctness-browser-regression",
+  "candidateState": "all-required-evidence-passed",
+  "formalBaselineUpdated": false,
+  "baseHead": "58f00e44e3b490a2dd7a354b69d93f3cc8911053",
+  "browserMatrix": [
+    {
+      "id": "chrome-windows",
+      "status": "passed",
+      "nativeWebGpu": true,
+      "angleBackend": "d3d11",
+      "product": "Chrome/151.0.7922.138",
+      "os": "Windows 10 22H2 (10.0.19045)",
+      "adapter": "NVIDIA Pascal discrete GPU",
+      "unclassifiedFailureCount": 0,
+      "gpuValidationErrorCount": 0,
+      "ownerResidualCount": 0,
+      "replayCommands": [
+        "cmd /d /s /c \"set CHROME_PATH=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe&& set WEBGPU_ANGLE_BACKEND=d3d11&& set WEBGPU_REQUIRE_NATIVE=1&& set FOG_CANDIDATE_DIFF=1&& set FOG_CANDIDATE_DIR=artifacts/webgpu/fog-http-candidate&& npm run check:slow -- --content-tier=full\"",
+        "cmd /d /s /c \"set CHROME_PATH=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe&& set WEBGPU_ANGLE_BACKEND=d3d11&& set WEBGPU_REQUIRE_NATIVE=1&& node editor/test/run-release-lifecycle-browser-e2e.mjs\"",
+        "cmd /d /s /c \"set CHROME_PATH=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe&& set WEBGPU_ANGLE_BACKEND=d3d11&& set WEBGPU_REQUIRE_NATIVE=1&& node AnimationEditor/test/run-designer-integration-browser-e2e.mjs&& node AnimationEditor/test/run-native-3d-browser-e2e.mjs&& node voxelEditor/test/browser-smoke.mjs\""
+      ]
+    },
+    {
+      "id": "edge-windows",
+      "status": "passed",
+      "nativeWebGpu": true,
+      "angleBackend": "d3d11",
+      "product": "Edg/151.0.4129.86",
+      "os": "Windows 10 22H2 (10.0.19045)",
+      "adapter": "NVIDIA Pascal discrete GPU",
+      "unclassifiedFailureCount": 0,
+      "gpuValidationErrorCount": 0,
+      "ownerResidualCount": 0,
+      "replayCommands": [
+        "cmd /d /s /c \"set CHROME_PATH=C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe&& set WEBGPU_ANGLE_BACKEND=d3d11&& set WEBGPU_REQUIRE_NATIVE=1&& set FOG_CANDIDATE_DIFF=1&& set FOG_CANDIDATE_DIR=artifacts/webgpu/fog-http-candidate&& npm run check:slow -- --content-tier=full\"",
+        "cmd /d /s /c \"set CHROME_PATH=C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe&& set WEBGPU_ANGLE_BACKEND=d3d11&& set WEBGPU_REQUIRE_NATIVE=1&& node editor/test/run-release-lifecycle-browser-e2e.mjs\"",
+        "cmd /d /s /c \"set CHROME_PATH=C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe&& set WEBGPU_ANGLE_BACKEND=d3d11&& set WEBGPU_REQUIRE_NATIVE=1&& node AnimationEditor/test/run-designer-integration-browser-e2e.mjs&& node AnimationEditor/test/run-native-3d-browser-e2e.mjs&& node voxelEditor/test/browser-smoke.mjs\""
+      ]
+    }
+  ],
+  "deviceMatrix": [
+    {
+      "id": "windows-discrete",
+      "status": "passed",
+      "nativeWebGpu": true,
+      "angleBackend": "d3d11",
+      "product": "Chrome/151.0.7922.138 and Edg/151.0.4129.86",
+      "os": "Windows 10 22H2 (10.0.19045)",
+      "adapter": "NVIDIA Pascal discrete GPU",
+      "browserIds": ["chrome-windows", "edge-windows"],
+      "unclassifiedFailureCount": 0,
+      "gpuValidationErrorCount": 0,
+      "ownerResidualCount": 0,
+      "replayCommands": [
+        "npm run check:slow -- --content-tier=full",
+        "node editor/test/run-release-lifecycle-browser-e2e.mjs",
+        "npm run test:browser -w ./AnimationEditor",
+        "npm run test:browser -w ./voxelEditor"
+      ]
+    }
+  ],
+  "representativeCases": [
+    {
+      "id": "pbr",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node scripts/verify-pbr-example.mjs",
+      "provenance": {
+        "sourcePath": "examples/pbr-showcase/index.html",
+        "byteLength": 16680,
+        "sha256": "c28ab1eae60a2cbe53a7b5974a3172b4f590e82cd40aa38159fdc77f21b53c7b"
+      }
+    },
+    {
+      "id": "ambient-occlusion",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node scripts/verify-ambient-occlusion-example.mjs",
+      "provenance": {
+        "sourcePath": "examples/ambient-occlusion/index.html",
+        "byteLength": 3971,
+        "sha256": "404bd94e83c5e2233747885a4174327cd81df7620249079c6c4d417443ad217b"
+      }
+    },
+    {
+      "id": "planar-reflection",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node scripts/verify-webgpu-planar-reflection.mjs",
+      "provenance": {
+        "sourcePath": "scripts/webgpu-gate/planar-reflection-fixture.html",
+        "byteLength": 446,
+        "sha256": "bc6c1473c4294e64f00e5ab0126a4d9c9d9d8053797807a7416b90a7d364aa94"
+      }
+    },
+    {
+      "id": "multi-light-shadow",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node scripts/verify-webgpu-lighting-scaling-fixture.mjs --lights=128 --overlap=high --dynamic=1 --views=4 --resolution=720p --warmup=4 --samples=8 --gpu-samples=2",
+      "provenance": {
+        "sourcePath": "games/pad-simulator/scenes/billiards-3d-import.scene.json",
+        "byteLength": 363097,
+        "sha256": "9e7f393aba90a91a1a84a42be9583ce627bfa2a0ee996c0b843d21f9514ba007"
+      }
+    },
+    {
+      "id": "motion-blur",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node scripts/verify-motion-blur-example.mjs",
+      "provenance": {
+        "sourcePath": "examples/motion-blur/index.html",
+        "byteLength": 4985,
+        "sha256": "3774751ceb6106767c07172b21579999e80b59d96e89da0655dc87f407df12e0"
+      }
+    },
+    {
+      "id": "clipping",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node scripts/verify-clipping-planes-example.mjs",
+      "provenance": {
+        "sourcePath": "examples/clipping-planes/index.html",
+        "byteLength": 4484,
+        "sha256": "4810615163ee73ce73bf883fbe394c533bdb44b140634163340fff27171cbea3"
+      }
+    },
+    {
+      "id": "navigation",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node scripts/verify-navmesh-first-person-example.mjs",
+      "provenance": {
+        "sourcePath": "examples/navmesh-first-person/index.html",
+        "byteLength": 4192,
+        "sha256": "be21f6aa19cff957fd08d00e43ee76b48941434bf2048d2782a10f676e124add"
+      }
+    },
+    {
+      "id": "gltf-animation3d",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node scripts/verify-product-screenshot-regressions.mjs",
+      "provenance": {
+        "sourcePath": "examples/gltf-animation3d-crossfade/index.html",
+        "byteLength": 3596,
+        "sha256": "d327468045fe4c3fde95528c50379b588dbfa9b7224b2ba6e0b744c86f42979f"
+      }
+    },
+    {
+      "id": "spine",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node scripts/verify-product-screenshot-regressions.mjs",
+      "provenance": {
+        "sourcePath": "examples/spine-viewer/index.html",
+        "byteLength": 5184,
+        "sha256": "6f6f01dbf9eb67a15652926156b2498fb9be190e7a60401fb425c3ac8560fbdb"
+      }
+    },
+    {
+      "id": "hya-2d",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node AnimationEditor/test/run-designer-integration-browser-e2e.mjs",
+      "provenance": {
+        "sourcePath": "AnimationEditor/test/designer-integration-browser-e2e.html",
+        "byteLength": 20112,
+        "sha256": "1d752b0e605c4909f3643585502418f21d346f7af1d3e8b78558b02052a039fb"
+      }
+    },
+    {
+      "id": "hya-3d",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node AnimationEditor/test/run-native-3d-browser-e2e.mjs",
+      "provenance": {
+        "sourcePath": "AnimationEditor/test/native-3d-browser-e2e.html",
+        "byteLength": 16452,
+        "sha256": "c481a2d88af34551a011334354feb162f07abf0c1cb9df26ca7f2199cd9c53f3"
+      }
+    },
+    {
+      "id": "complete-game",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node scripts/verify-product-screenshot-regressions.mjs",
+      "provenance": {
+        "sourcePath": "games/match-3/index.html",
+        "byteLength": 4925,
+        "sha256": "a348ddab899401e4b1dcf0a442fdd2995e5d884754ad56e96ed18a2bc0bb8a99"
+      }
+    }
+  ],
+  "editorE2E": [
+    {
+      "id": "create-import-save-reopen-export-play",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 npm run test:e2e -w ./editor && WEBGPU_REQUIRE_NATIVE=1 node editor/test/run-release-lifecycle-browser-e2e.mjs",
+      "provenance": {
+        "sourcePath": "editor/test/run-release-lifecycle-browser-e2e.mjs",
+        "byteLength": 5273,
+        "sha256": "cad7f8cc3ee762e11351fd224b1f4940af802f9ac81015ddad006dc31e6dbec7"
+      }
+    },
+    {
+      "id": "optional-capability-failure",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node editor/test/run-release-lifecycle-browser-e2e.mjs",
+      "provenance": {
+        "sourcePath": "editor/test/fixtures/release-lifecycle-browser-e2e.html",
+        "byteLength": 6178,
+        "sha256": "18fe1c4141b14872f082ee2e8e6d26ada42e866836dd4b38391e83bf9a22e4cc"
+      }
+    },
+    {
+      "id": "resource-replacement",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node editor/test/run-release-lifecycle-browser-e2e.mjs",
+      "provenance": {
+        "sourcePath": "editor/test/fixtures/release-lifecycle-browser-e2e.html",
+        "byteLength": 6178,
+        "sha256": "18fe1c4141b14872f082ee2e8e6d26ada42e866836dd4b38391e83bf9a22e4cc"
+      }
+    },
+    {
+      "id": "teardown",
+      "status": "passed",
+      "browserId": "chrome-windows",
+      "transport": "http",
+      "replayCommand": "WEBGPU_REQUIRE_NATIVE=1 node editor/test/run-release-lifecycle-browser-e2e.mjs",
+      "provenance": {
+        "sourcePath": "editor/test/fixtures/release-lifecycle-browser-e2e.html",
+        "byteLength": 6178,
+        "sha256": "18fe1c4141b14872f082ee2e8e6d26ada42e866836dd4b38391e83bf9a22e4cc"
+      }
+    }
+  ],
+  "verification": [
+    {
+      "id": "targeted-policy",
+      "status": "passed",
+      "command": "node --test scripts/visual-regression/g02-browser-regression-policy.test.mjs"
+    },
+    {
+      "id": "check-fast",
+      "status": "passed",
+      "command": "npm run check:fast"
+    },
+    {
+      "id": "slow-smoke",
+      "status": "passed",
+      "command": "WEBGPU_REQUIRE_NATIVE=1 FOG_CANDIDATE_DIFF=1 FOG_CANDIDATE_DIR=artifacts/webgpu/fog-http-candidate npm run check:slow -- --content-tier=smoke"
+    },
+    {
+      "id": "slow-full",
+      "status": "passed",
+      "command": "WEBGPU_REQUIRE_NATIVE=1 FOG_CANDIDATE_DIFF=1 FOG_CANDIDATE_DIR=artifacts/webgpu/fog-http-candidate npm run check:slow -- --content-tier=full"
+    },
+    {
+      "id": "animation-editor-browser",
+      "status": "passed",
+      "command": "WEBGPU_REQUIRE_NATIVE=1 node AnimationEditor/scripts/verify-stage4-browser.mjs && WEBGPU_REQUIRE_NATIVE=1 node AnimationEditor/test/run-designer-integration-browser-e2e.mjs && WEBGPU_REQUIRE_NATIVE=1 node AnimationEditor/test/run-timeline-browser-interaction.mjs && WEBGPU_REQUIRE_NATIVE=1 node AnimationEditor/test/run-spritesheet-browser-e2e.mjs && WEBGPU_REQUIRE_NATIVE=1 node AnimationEditor/test/run-path-vector-browser-e2e.mjs && WEBGPU_REQUIRE_NATIVE=1 node AnimationEditor/test/run-particle-browser-e2e.mjs && WEBGPU_REQUIRE_NATIVE=1 node AnimationEditor/test/run-native-3d-browser-e2e.mjs && WEBGPU_REQUIRE_NATIVE=1 node AnimationEditor/test/run-source-import-browser-e2e.mjs && WEBGPU_REQUIRE_NATIVE=1 node AnimationEditor/test/run-state-machine-channel-browser-e2e.mjs"
+    },
+    {
+      "id": "voxel-editor-browser",
+      "status": "passed",
+      "command": "WEBGPU_REQUIRE_NATIVE=1 node voxelEditor/test/browser-smoke.mjs"
+    },
+    {
+      "id": "editor-release-lifecycle-browser",
+      "status": "passed",
+      "command": "WEBGPU_REQUIRE_NATIVE=1 node editor/test/run-release-lifecycle-browser-e2e.mjs"
+    }
+  ],
+  "aggregate": {
+    "unclassifiedFailureCount": 0,
+    "gpuValidationErrorCount": 0,
+    "ownerResidualCount": 0
+  },
+  "candidatePixelArtifacts": [
+    "artifacts/webgpu/fog-http-candidate/result.json",
+    "artifacts/webgpu/fog-http-candidate/distance.png",
+    "artifacts/webgpu/fog-http-candidate/height.png",
+    "artifacts/webgpu/fog-http-candidate/noFog.png",
+    "artifacts/webgpu/fog-http-candidate/disabled.png",
+    "artifacts/webgpu/fog-http-candidate/maxOpacityZero.png"
+  ],
+  "artifactChecks": [
+    {
+      "path": "artifacts/webgpu/lighting-scaling.json",
+      "assertions": [
+        { "path": "execution.status", "equals": "passed" },
+        { "path": "execution.validation.errorCount", "equals": 0 },
+        { "path": "execution.ownerCleanup.ownerResidual.value", "equals": 0 },
+        { "path": "failureSummary.unclassifiedFailureCount", "equals": 0 },
+        { "path": "browserDiagnostics.unclassifiedFailureCount", "equals": 0 },
+        { "path": "browserEvidence.nativeBackend", "equals": true }
+      ]
+    },
+    {
+      "path": "artifacts/webgpu/planar-reflection.json",
+      "assertions": [
+        { "path": "gate.status", "equals": "passed" },
+        { "path": "gate.pixelBaselineStatus", "equals": "passed" },
+        { "path": "browserDiagnostics.unclassifiedFailureCount", "equals": 0 },
+        { "path": "browserEvidence.nativeBackend", "equals": true }
+      ]
+    },
+    {
+      "path": "artifacts/webgpu/readback-churn-short.json",
+      "assertions": [
+        { "path": "gate.status", "equals": "passed" },
+        { "path": "churn.liveResourcesAfterDrain", "equals": 0 },
+        { "path": "churn.releasedOwnerResiduals", "equals": 0 },
+        { "path": "browserDiagnostics.unclassifiedFailureCount", "equals": 0 },
+        { "path": "browserEvidence.nativeBackend", "equals": true }
+      ]
+    },
+    {
+      "path": "artifacts/editor-e2e/create-save-export-play.json",
+      "assertions": [
+        { "path": "status", "equals": "passed" },
+        { "path": "save.containsCreatedEntity", "equals": true },
+        { "path": "export.hasRunnablePackage", "equals": true },
+        { "path": "play.lifecycleStarted", "equals": true }
+      ]
+    },
+    {
+      "path": "artifacts/editor-e2e/gltf-import-save-export-play.json",
+      "assertions": [
+        { "path": "status", "equals": "passed" },
+        { "path": "import.decodedPreview", "equals": true },
+        { "path": "export.installsGltfModelSystem", "equals": true },
+        { "path": "play.close.frameCleared", "equals": true }
+      ]
+    },
+    {
+      "path": "artifacts/editor-e2e/release-lifecycle-browser-e2e.json",
+      "assertions": [
+        { "path": "status", "equals": "passed" },
+        { "path": "reopen.cleanAfterReopen", "equals": true },
+        { "path": "lifecycle.optionalCapabilityFailure.retryPassed", "equals": true },
+        { "path": "lifecycle.resourceReplacement.addRemoveResidual", "equals": 0 },
+        { "path": "lifecycle.teardown.ownerResidualCount", "equals": 0 },
+        { "path": "lifecycle.gpuValidationErrors", "equals": 0 },
+        { "path": "lifecycle.unclassifiedFailureCount", "equals": 0 },
+        { "path": "lifecycle.browserEvidence.nativeBackend", "equals": true }
+      ]
+    },
+    {
+      "path": "artifacts/render-regression/character-animation.json",
+      "assertions": [
+        { "path": "status", "equals": "passed" }
+      ]
+    },
+    {
+      "path": "artifacts/render-regression/ambient-occlusion.json",
+      "assertions": [
+        { "path": "status", "equals": "passed" }
+      ]
+    },
+    {
+      "path": "artifacts/render-regression/multiple-directional-shadows.json",
+      "assertions": [
+        { "path": "status", "equals": "passed" }
+      ]
+    },
+    {
+      "path": "artifacts/render-regression/spine-animation.json",
+      "assertions": [
+        { "path": "status", "equals": "passed" }
+      ]
+    },
+    {
+      "path": "artifacts/render-regression/complete-game-match-3.json",
+      "assertions": [
+        { "path": "status", "equals": "passed" }
+      ]
+    },
+    {
+      "path": "artifacts/webgpu/fog-http-candidate/result.json",
+      "assertions": [
+        { "path": "baselineComparison.status", "oneOf": ["passed", "candidate-diff"] }
+      ]
+    }
+  ]
+}

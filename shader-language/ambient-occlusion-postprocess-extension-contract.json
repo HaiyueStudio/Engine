@@ -1,0 +1,75 @@
+{
+  "contractVersion": 1,
+  "status": "implemented",
+  "implementation": "stage8-builtin-postprocess-family-extension",
+  "basePhase": 8,
+  "moduleFamily": {
+    "format": "haiyue-builtin-postprocess-family",
+    "version": 1,
+    "path": "shader-language/builtin-postprocess-family.json",
+    "sha256": "d5f386cc6f34a182e432ce1f82b0cb0cd11c65570ffb06fb3fa98cef9f5ab160",
+    "operationCount": 14,
+    "addedOperations": ["ssao", "sao", "gtao", "ao-denoise", "ao-upscale"],
+    "algorithmOperations": ["ssao", "sao", "gtao"],
+    "supportOperations": ["ao-denoise", "ao-upscale"]
+  },
+  "artifact": {
+    "formatVersion": 2,
+    "artifactHash": "a84d2b41f649cddfd1a55417db5531237f38cc178a0175109cee2e83c5e23bf5",
+    "logicalPassGroup": 3,
+    "physicalPassGroup": 0,
+    "layoutOwner": "artifact"
+  },
+  "productionMigrations": ["SsaoPass", "SaoPass", "GtaoPass"],
+  "inventoryDelta": {
+    "wgslSourceCount": 5,
+    "generatedSourceCount": 5,
+    "handwrittenSourceCount": 0,
+    "builtinPostprocessGeneratedSourceCount": 5
+  },
+  "runtime": {
+    "sharedDepthNormalAbi": true,
+    "depthTextureFormat": "r32float",
+    "normalTextureFormat": "rgba16float",
+    "deliverySlice": "ambient-occlusion-only",
+    "depthSampling": "point",
+    "sampleRotation": "per-pixel-interleaved-gradient-noise",
+    "positionNormalLumaDenoise": "rotated-poisson-16",
+    "upscale": "half-resolution-depth-normal-aware-2x2",
+    "resolutionScale": 0.5,
+    "defaultScratchFormat": "r8unorm",
+    "comparisonScratchFormat": "r16float",
+    "renderPassCount": 3,
+    "runtimeParsesWgsl": false,
+    "runtimeCompilesDsl": false
+  },
+  "publicApiChanges": [
+    "AmbientOcclusionPassOptions",
+    "GtaoPass",
+    "SaoPass",
+    "SsaoPass"
+  ],
+  "evidence": {
+    "fixture": "ambient-occlusion-gtao-sao-ssao-chrome-570x640",
+    "algorithmCount": 3,
+    "sampleCount": 32,
+    "viewCount": 3,
+    "webgpuValidationErrorCount": 0,
+    "unclassifiedFailureCount": 0,
+    "aoOnlyOutputNonDegenerate": true,
+    "algorithmPixelsDistinct": true,
+    "silhouetteHaloGuard": true,
+    "depthQuantizationBandingGuard": true,
+    "narrowGapContrastGuard": true,
+    "gpuCostMatrix": "720p/1080p/4k x low/medium/high x r8unorm/r16float",
+    "gpuTimingPhases": ["occlusion", "denoise", "upscale"],
+    "scratchAccountingSeparatesRawAndWholePipeline": true
+  },
+  "acceptance": [
+    "npm run shader-language:check",
+    "npm run shader-language:stage8:check",
+    "npm run verify:ambient-occlusion",
+    "npm run verify:ambient-occlusion:performance",
+    "npm run check:fast"
+  ]
+}

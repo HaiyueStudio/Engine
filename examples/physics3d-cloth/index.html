@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 · 3D 布料模拟</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <link rel="stylesheet" href="../physics3d-example.css" />
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <aside class="panel">
+    <h1>3D 布料模拟</h1>
+    <p class="intro">布面由 108 个后端无关的刚体节点与结构/剪切弹簧组成，动态 Geometry3D 只负责绘制表面。</p>
+    <div class="badges"><span class="badge">108 bodies</span><span class="badge"><span id="constraint-count">0</span> springs</span><span class="badge">dynamic mesh</span></div>
+    <label class="row" for="wind"><span>风力</span><output id="wind-value">1.6</output></label>
+    <input id="wind" type="range" min="0" max="5" step="0.1" value="1.6" />
+    <button id="reset" type="button">重置布面</button>
+  </aside>
+  <div class="hint">布料会落到球形碰撞体上 · 调节风力观察形变</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

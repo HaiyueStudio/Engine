@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 – Viewport &amp; Scissor</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a12; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+
+    #wrap {
+      position: relative;
+      width: 900px;
+      height: 600px;
+    }
+    canvas { display: block; width: 900px; height: 600px; }
+
+    /* Pane labels */
+    .pane-label {
+      position: absolute;
+      font-family: monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,0.55);
+      pointer-events: none;
+      padding: 4px 6px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 3px;
+    }
+    #label-tl { top:   6px; left:   6px; }
+    #label-tr { top:   6px; left: 456px; }
+    #label-bl { top: 306px; left:   6px; }
+    #label-br { top: 306px; left: 456px; }
+
+    /* Crosshair divider lines drawn in CSS */
+    #divider-h, #divider-v {
+      position: absolute;
+      background: rgba(255,255,255,0.15);
+      pointer-events: none;
+    }
+    #divider-h { top: 299px; left: 0; width: 900px; height: 2px; }
+    #divider-v { top: 0; left: 449px; width: 2px; height: 600px; }
+
+    #hint {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    #canvas { touch-action: none; }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="canvas" width="900" height="600"></canvas>
+
+    <div class="pane-label" id="label-tl">FRONT  (perspective)</div>
+    <div class="pane-label" id="label-tr">TOP  (orthographic)</div>
+    <div class="pane-label" id="label-bl">SIDE  (orthographic)</div>
+    <div class="pane-label" id="label-br">FREE  (orbit control)</div>
+
+    <div id="divider-h"></div>
+    <div id="divider-v"></div>
+
+    <div id="hint">Bottom-right pane: left drag = orbit · scroll = zoom · right drag = pan</div>
+  </div>
+
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

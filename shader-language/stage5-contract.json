@@ -1,0 +1,96 @@
+{
+  "contractVersion": 1,
+  "phase": 5,
+  "status": "implemented",
+  "packageStatus": "private-workspace",
+  "implementation": "postprocess-typed-ir-motion-blur-pilot",
+  "primaryTarget": "webgpu-wgsl",
+  "deliverables": [
+    "postprocess-graph-v1-pass-resources",
+    "canonical-typed-ir-postprocess-region-v1",
+    "motion-tile-max-derived-pass",
+    "motion-neighbor-max-derived-pass",
+    "motion-blur-resolve-derived-pass",
+    "reflection-driven-pass-uniform-packing",
+    "signed-uv-velocity-abi",
+    "independent-shutter-and-intensity-controls",
+    "dynamic-split-and-velocity-heatmap-controls",
+    "stable-tile-neighbor-reconstruction",
+    "external-render-graph-pass-plans",
+    "explicit-unused-depth-resource-dce",
+    "production-reference-webgpu-pixel-parity",
+    "speed-response-and-determinism-pixel-gates",
+    "compiler-resource-ownership-contract"
+  ],
+  "graph": {
+    "path": "shader-language/pilot-motion-blur-postprocess.graph.json",
+    "programId": "pilot3.motion-blur",
+    "sha256": "967aa5e75e0f9fed3575ce01c3e17eca99f70322b204e1685c88f29eaaab0c91",
+    "canonicalHash": "bcf86dd8d974d52061e010f2700df013dbc850f922e7f8853217caad5a6b0f0b",
+    "typedModuleHash": "1c40f6b5a68dbc08aa464942931a2d05ef4d099437d03ca4cc0cfa41063c3f2d"
+  },
+  "pilot": {
+    "id": "motion-blur-postprocess",
+    "status": "passed",
+    "generatedReferenceMaximumChannelDelta": 0,
+    "disabledMaximumChannelDelta": 0,
+    "observedSlowMeanAbsoluteChannelDelta": 3.652,
+    "observedFastMeanAbsoluteChannelDelta": 14.314,
+    "minimumFastToSlowBlurRatio": 1.1,
+    "observedReconstructionChangedPixelRatio": 0.062,
+    "deterministicRepeatMaximumChannelDelta": 0,
+    "validationErrorCount": 0,
+    "unclassifiedFailureCount": 0
+  },
+  "passPlans": {
+    "centered": {
+      "passCount": 1,
+      "activeIntermediateTextureCount": 0,
+      "allocatedIntermediateTextureCount": 2
+    },
+    "tileNeighborMax": {
+      "passCount": 3,
+      "activeIntermediateTextureCount": 2,
+      "allocatedIntermediateTextureCount": 2
+    },
+    "compilerSchedulesPasses": false
+  },
+  "resourceOwnership": {
+    "compilerCreatesGpuResources": false,
+    "depthTextureAllocations": 0,
+    "ownerResidualAfterDestroy": 0
+  },
+  "variantPolicy": {
+    "specializationVariantCount": 0,
+    "pipelineCount": 3,
+    "dynamicParameters": [
+      "shutter-angle",
+      "intensity",
+      "max-blur-pixels",
+      "sample-count",
+      "display-mode",
+      "split-position"
+    ]
+  },
+  "productionMigrations": [],
+  "productionFirstFrameRegressionPercent": 0,
+  "productionFirstFrameEvidence": "Phase 5 remains a standalone compiler/WebGPU pilot; the production MotionBlurPass, RenderGraph scheduling, resources, and pre-generated shaders are unchanged.",
+  "releaseGateStatus": "standalone-webgpu-pilot-not-release-gating",
+  "deferred": [
+    "production-postprocess-runtime-adapter",
+    "production-motion-blur-shader-migration",
+    "production-pbr-and-deformation-migration",
+    "depth-aware-motion-reconstruction",
+    "generic-postprocess-node-registry",
+    "glsl-es300-codegen",
+    "visual-shader-graph-editor",
+    "stable-public-api"
+  ],
+  "acceptance": [
+    "npm run typecheck -w ./shader-language",
+    "npm test -w ./shader-language",
+    "npm run shader-language:check",
+    "npm run verify:shader-language-stage5",
+    "npm run verify:motion-blur"
+  ]
+}

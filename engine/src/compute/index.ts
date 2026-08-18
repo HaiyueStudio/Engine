@@ -1,0 +1,12 @@
+export { ComputePassBase } from './ComputePassBase';
+export type { ComputePassBaseOptions } from './ComputePassBase';
+export { ComputeKernel } from './ComputeKernel';
+export type { ComputeKernelOptions } from './ComputeKernel';
+export { GpuDrawCommandComputePass } from './GpuDrawCommandComputePass';
+export type { GpuDrawCommandBuffers } from './GpuDrawCommandComputePass';
+export { Mesh3DGpuCullComputePass } from './Mesh3DGpuCullComputePass';
+export type { Mesh3DGpuCullBuffers } from './Mesh3DGpuCullComputePass';
+export { GpuSortComputePass } from './GpuSortComputePass';
+export type { GpuSortableBuffers } from './GpuSortComputePass';
+export { TextureConvolutionProcessor, CONVOLUTION_KERNELS } from './TextureConvolutionProcessor';
+export type { ConvolutionKernelName, TextureConvolutionOptions, TextureConvolutionProcessOptions } from './TextureConvolutionProcessor';

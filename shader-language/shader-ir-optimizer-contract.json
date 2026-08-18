@@ -1,0 +1,31 @@
+{
+  "contractVersion": 1,
+  "optimizer": "typed-expression-ir-safe-fold-and-cse",
+  "numericSemantics": {
+    "f32": "round-each-typed-operation-and-reject-nan-infinity-negative-zero-folds",
+    "i32": "two-complement-wrap-with-exceptional-division-left-unfolded",
+    "u32": "modulo-2^32-with-zero-division-left-unfolded"
+  },
+  "canonicalIdentity": "optimization-normalized-and-source-metadata-independent",
+  "sourceMap": "primary-source-plus-deduplicated-source-aliases",
+  "cse": {
+    "key": ["operation", "typed-semantics", "allowed-stages", "operand-identity", "payload"],
+    "commutativeReordering": false,
+    "protectedOperations": ["texture-sample", "texture-sample-level", "derivative-x", "derivative-y"]
+  },
+  "costEvidenceSchema": "haiyue-shader-compilation-cost@1",
+  "costEvidence": [
+    "sourceBytes",
+    "irNodeCountBeforeOptimization",
+    "irReachableNodeCountBeforeOptimization",
+    "irNodeCountAfterOptimization",
+    "variantCount",
+    "pipelineCount",
+    "phaseMs"
+  ],
+  "productionScope": {
+    "compilerOwnedPbrFullSourceVariants": "not-reduced",
+    "productionArtifactPooling": "deferred",
+    "overrideSpecialization": "deferred"
+  }
+}

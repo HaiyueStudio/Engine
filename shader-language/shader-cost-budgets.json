@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "showcase": {
+    "maxSourceBytes": 5200,
+    "maxIrNodeCountBeforeOptimization": 64,
+    "maxIrNodeCountAfterOptimization": 60,
+    "maxVariantCount": 1,
+    "maxPipelineCount": 2,
+    "maxColdCompilationMs": 500
+  },
+  "production": {
+    "maxGeneratedWgslBytes": 328000,
+    "maxGeneratedWgslFiles": 66,
+    "maxVariantCount": 58,
+    "maxPipelineCount": 58,
+    "maxColdGenerationMs": 10000,
+    "growthBaseline": {
+      "generatedWgslBytes": 305504,
+      "generatedWgslFiles": 64,
+      "variantCount": 56,
+      "pipelineCount": 56
+    },
+    "maxGrowth": {
+      "generatedWgslBytes": 22500,
+      "generatedWgslFiles": 1,
+      "variantCount": 2,
+      "pipelineCount": 2
+    }
+  },
+  "dag": {
+    "maxShaderLanguageBuilds": 1,
+    "maxEngineBuilds": 1,
+    "maxExtensionsBuilds": 1,
+    "maxProductionGenerationRuns": 1
+  }
+}

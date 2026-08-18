@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Haiyue Typed Shader IR stage 2 WebGPU gate</title>
+  <style>
+    :root { color-scheme: dark; font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    body { margin: 0; padding: 24px; background: #101319; color: #d8e2f0; }
+    #progress { color: #8fb7ff; }
+    #result { white-space: pre-wrap; overflow-wrap: anywhere; }
+    #result[data-status="passed"] { color: #8de5ad; }
+    #result[data-status="failed"] { color: #ff9b9b; }
+  </style>
+</head>
+<body>
+  <div id="progress">building Typed IR…</div>
+  <pre id="result"></pre>
+  <script type="module" src="./shader-language-stage2-fixture.mjs"></script>
+</body>
+</html>

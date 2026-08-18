@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Haiyue 原生 3D 粒子</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #02040c; color: #edf7ff; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .panel { position: fixed; z-index: 2; top: 18px; left: 18px; width: min(360px, calc(100vw - 36px)); padding: 16px; border: 1px solid rgba(102,210,255,.2); border-radius: 14px; background: rgba(5,9,21,.84); box-shadow: 0 20px 60px rgba(0,0,0,.4); backdrop-filter: blur(16px); }
+    h1 { margin: 0 0 5px; font-size: 17px; }
+    .intro { margin: 0 0 14px; color: #899ab8; font-size: 11px; line-height: 1.55; }
+    .actions { display: flex; gap: 7px; }
+    button { flex: 1; padding: 7px 10px; border: 1px solid #293c61; border-radius: 8px; background: #101a32; color: #e9f4ff; cursor: pointer; }
+    button:hover, button.active { border-color: #62d5c0; background: #173047; }
+    button.primary { border-color: #69e7cb; background: #75efd4; color: #061510; font-weight: 700; }
+    .sliders { display: grid; gap: 10px; margin-top: 14px; padding-top: 13px; border-top: 1px solid rgba(87,111,153,.28); }
+    .slider { display: grid; grid-template-columns: 82px 1fr 48px; align-items: center; gap: 7px; color: #a8b7d0; font-size: 11px; }
+    .slider input { width: 100%; accent-color: #75efd4; }
+    output { color: #75efd4; text-align: right; font-variant-numeric: tabular-nums; }
+    .emitters { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 14px; }
+    .emitter { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 6px; padding: 8px; border: 1px solid rgba(69,91,132,.45); border-radius: 9px; background: rgba(9,17,36,.72); color: #c8d5e9; font-size: 11px; }
+    .emitter input { accent-color: #75efd4; } .emitter output { min-width: 28px; color: #7389aa; font-size: 10px; }
+    .dot { display: inline-block; width: 7px; height: 7px; margin-right: 4px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+    .fire { color: #ff8a32; } .fountain { color: #50dbff; } .sparks { color: #ff64cf; } .snow { color: #d9f2ff; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 12px; }
+    .metric { padding: 8px; border-radius: 8px; background: rgba(8,15,31,.8); text-align: center; }
+    .metric strong { display: block; color: #6fe0ff; font: 13px ui-monospace, SFMono-Regular, monospace; }
+    .metric span { color: #7083a3; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+    .hint { position: fixed; right: 18px; bottom: 16px; color: rgba(180,201,231,.5); font-size: 10px; }
+    #result { display: none; }
+    @media (max-width: 720px) { .panel { width: calc(100vw - 24px); top: 12px; left: 12px; } .hint { display: none; } }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="1100" height="700"></canvas>
+  <aside class="panel">
+    <h1>原生 WebGPU 3D 粒子</h1>
+    <p class="intro">Camera-facing billboard、深度测试、体积发射与每视图 TypedArray radix sort。拖拽旋转相机可检查遮挡和透明顺序。</p>
+    <div class="actions"><button id="pause" type="button">暂停</button><button id="restart" type="button">确定性重播</button><button id="burst" class="primary" type="button">触发 Burst</button></div>
+    <div class="sliders">
+      <label class="slider">发射倍率<input id="emission" type="range" min="0" max="2" step="0.05" value="1" /><output id="emission-value">1.00×</output></label>
+      <label class="slider">重力倍率<input id="gravity" type="range" min="0" max="2" step="0.05" value="1" /><output id="gravity-value">1.00×</output></label>
+    </div>
+    <div class="emitters">
+      <label class="emitter"><input id="toggle-fire" type="checkbox" checked /><span><i class="dot fire"></i>Fire</span><output id="count-fire">0</output></label>
+      <label class="emitter"><input id="toggle-fountain" type="checkbox" checked /><span><i class="dot fountain"></i>Fountain</span><output id="count-fountain">0</output></label>
+      <label class="emitter"><input id="toggle-sparks" type="checkbox" checked /><span><i class="dot sparks"></i>Sparks</span><output id="count-sparks">0</output></label>
+      <label class="emitter"><input id="toggle-snow" type="checkbox" checked /><span><i class="dot snow"></i>Sorted snow</span><output id="count-snow">0</output></label>
+    </div>
+    <div class="stats">
+      <div class="metric"><strong id="particle-count">0</strong><span>Particles</span></div>
+      <div class="metric"><strong id="sorted-count">0</strong><span>View sorted</span></div>
+      <div class="metric"><strong id="upload-bytes">0 B</strong><span>Frame upload</span></div>
+    </div>
+  </aside>
+  <div class="hint">拖拽 Orbit · 滚轮缩放 · Space 暂停 · R 重播 · B Burst</div>
+  <pre id="result" aria-hidden="true"></pre>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

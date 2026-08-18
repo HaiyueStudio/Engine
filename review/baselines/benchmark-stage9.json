@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 4,
+  "suiteVersion": "stage9-follow-up-v3",
+  "evidenceStatus": "invalidated-after-host-migration",
+  "formalBaseline": false,
+  "reason": "The historical Apple M4 Pro timing evidence was not present in the Windows workspace copy. This file preserves manifest scenario coverage without reconstructing or inventing measurements. Absolute budgets remain enforced by the benchmark suite; rendering release performance is decided by ADR 0073's portable cross-engine comparison.",
+  "declaredScenarioIds": [
+    "gpu-driven.mega-batch-build.8000",
+    "render-product.pbr-material-frame.4000"
+  ],
+  "results": [],
+  "identity": null,
+  "baselineCohort": null
+}

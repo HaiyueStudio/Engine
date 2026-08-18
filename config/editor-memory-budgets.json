@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "scenarios": {
+    "entities-50k": {
+      "parameters": {
+        "entityCount": 50000
+      },
+      "expected": {
+        "entityCount": 50000
+      },
+      "limits": {
+        "maxHeapDeltaBytes": 115343360,
+        "maxArrayBufferDeltaBytes": 4194304,
+        "maxRssDeltaBytes": 167772160,
+        "maxCleanupHeapResidualBytes": 8388608,
+        "maxCleanupArrayBufferResidualBytes": 1048576
+      }
+    },
+    "long-edit": {
+      "parameters": {
+        "operationCount": 20000,
+        "payloadBytes": 4096,
+        "historyLimit": 200
+      },
+      "expected": {
+        "retainedUndoCommands": 200
+      },
+      "limits": {
+        "maxHeapDeltaBytes": 4194304,
+        "maxArrayBufferDeltaBytes": 1310720,
+        "maxRssDeltaBytes": 50331648,
+        "maxCleanupHeapResidualBytes": 4194304,
+        "maxCleanupArrayBufferResidualBytes": 1048576
+      }
+    },
+    "resource-replacement": {
+      "parameters": {
+        "replacementCount": 10000,
+        "payloadCharacters": 16384
+      },
+      "expected": {
+        "retainedModels": 1
+      },
+      "limits": {
+        "maxHeapDeltaBytes": 4194304,
+        "maxArrayBufferDeltaBytes": 1048576,
+        "maxRssDeltaBytes": 33554432,
+        "maxCleanupHeapResidualBytes": 4194304,
+        "maxCleanupArrayBufferResidualBytes": 1048576
+      }
+    }
+  }
+}

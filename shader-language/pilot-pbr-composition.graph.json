@@ -1,0 +1,234 @@
+{
+  "format": "haiyue-shader-graph",
+  "version": 1,
+  "kind": "material",
+  "profile": "webgpu-portable",
+  "resources": [
+    {
+      "id": "material.albedoTexture",
+      "space": "material",
+      "kind": "texture-2d",
+      "valueType": "color4<f32>",
+      "frequency": "material",
+      "colorSpace": "srgb"
+    },
+    {
+      "id": "material.normalTexture",
+      "space": "material",
+      "kind": "texture-2d",
+      "valueType": "vec4<f32>",
+      "frequency": "material",
+      "colorSpace": "data"
+    },
+    {
+      "id": "material.surfaceSampler",
+      "space": "material",
+      "kind": "sampler",
+      "valueType": "sampler",
+      "frequency": "material"
+    },
+    {
+      "id": "material.noiseScale",
+      "space": "material",
+      "kind": "uniform",
+      "valueType": "f32",
+      "frequency": "material"
+    },
+    {
+      "id": "material.noiseStrength",
+      "space": "material",
+      "kind": "uniform",
+      "valueType": "f32",
+      "frequency": "material"
+    },
+    {
+      "id": "material.metallic",
+      "space": "material",
+      "kind": "uniform",
+      "valueType": "f32",
+      "frequency": "material"
+    },
+    {
+      "id": "material.roughness",
+      "space": "material",
+      "kind": "uniform",
+      "valueType": "f32",
+      "frequency": "material"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "distortedUv",
+      "type": "haiyue.uv.noise-distort",
+      "typeVersion": 1,
+      "inputs": {
+        "uv": {
+          "semantic": "geometry.uv0"
+        },
+        "position": {
+          "semantic": "geometry.position.world"
+        },
+        "scale": {
+          "resource": "material.noiseScale"
+        },
+        "strength": {
+          "resource": "material.noiseStrength"
+        }
+      }
+    },
+    {
+      "id": "albedoSample",
+      "type": "haiyue.texture.sample-2d",
+      "typeVersion": 1,
+      "inputs": {
+        "texture": {
+          "resource": "material.albedoTexture"
+        },
+        "sampler": {
+          "resource": "material.surfaceSampler"
+        },
+        "uv": {
+          "node": "distortedUv",
+          "output": "uv"
+        }
+      }
+    },
+    {
+      "id": "normalSample",
+      "type": "haiyue.texture.sample-2d",
+      "typeVersion": 1,
+      "inputs": {
+        "texture": {
+          "resource": "material.normalTexture"
+        },
+        "sampler": {
+          "resource": "material.surfaceSampler"
+        },
+        "uv": {
+          "node": "distortedUv",
+          "output": "uv"
+        }
+      }
+    },
+    {
+      "id": "normalTs",
+      "type": "haiyue.normal.decode-tangent",
+      "typeVersion": 1,
+      "inputs": {
+        "sample": {
+          "node": "normalSample",
+          "output": "color"
+        },
+        "scale": {
+          "literal": {
+            "type": "vec2<f32>",
+            "value": [
+              1,
+              1
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "heightGradient",
+      "type": "haiyue.color.world-height-gradient",
+      "typeVersion": 1,
+      "inputs": {
+        "position": {
+          "semantic": "geometry.position.world"
+        },
+        "lowColor": {
+          "literal": {
+            "type": "color3<f32>",
+            "value": [
+              0.12,
+              0.32,
+              0.92
+            ],
+            "colorSpace": "linear"
+          }
+        },
+        "highColor": {
+          "literal": {
+            "type": "color3<f32>",
+            "value": [
+              1,
+              0.62,
+              0.12
+            ],
+            "colorSpace": "linear"
+          }
+        },
+        "range": {
+          "literal": {
+            "type": "vec2<f32>",
+            "value": [
+              -1,
+              1
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "composedBaseColor",
+      "type": "haiyue.color.multiply",
+      "typeVersion": 1,
+      "inputs": {
+        "left": {
+          "node": "albedoSample",
+          "output": "rgbLinear"
+        },
+        "right": {
+          "node": "heightGradient",
+          "output": "color"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "baseColor": {
+      "node": "composedBaseColor",
+      "output": "color"
+    },
+    "opacity": {
+      "node": "albedoSample",
+      "output": "alpha"
+    },
+    "normalTS": {
+      "node": "normalTs",
+      "output": "normal"
+    },
+    "metallic": {
+      "resource": "material.metallic"
+    },
+    "roughness": {
+      "resource": "material.roughness"
+    },
+    "occlusion": {
+      "literal": {
+        "type": "f32",
+        "value": 1
+      }
+    },
+    "emissive": {
+      "literal": {
+        "type": "color3<f32>",
+        "value": [
+          0,
+          0,
+          0
+        ],
+        "colorSpace": "linear"
+      }
+    }
+  },
+  "sceneFeatures": [
+    "scene.fog"
+  ],
+  "metadata": {
+    "label": "Stage 0 PBR composition pilot",
+    "purpose": "contract-fixture"
+  }
+}

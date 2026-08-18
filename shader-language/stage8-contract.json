@@ -1,0 +1,93 @@
+{
+  "contractVersion": 1,
+  "phase": 8,
+  "status": "implemented",
+  "implementation": "builtin-postprocess-module-family-production-migration",
+  "packageStatus": "private-compiler-with-generated-production-artifacts",
+  "primaryTarget": "webgpu-wgsl",
+  "moduleFamily": {
+    "format": "haiyue-builtin-postprocess-family",
+    "version": 1,
+    "path": "shader-language/builtin-postprocess-family.json",
+    "sha256": "07141d83ac8742c0dfc9ed050bec596e5a74c2a7d431a4194985cbc00eb15569",
+    "operationCount": 9,
+    "operations": [
+      "present",
+      "grayscale",
+      "sobel",
+      "fxaa",
+      "gaussian-blur",
+      "outline-edge",
+      "outline-blur",
+      "outline-overlay",
+      "taa"
+    ]
+  },
+  "artifact": {
+    "formatVersion": 2,
+    "artifactHash": "89c49daa0cdf9f64119d7bba69624e639a9fe62ea1f84a279f6856c3f33316e1",
+    "logicalPassGroup": 3,
+    "physicalPassGroup": 0,
+    "layoutOwner": "artifact",
+    "runtimeParsesWgsl": false,
+    "runtimeCompilesDsl": false
+  },
+  "productionMigrations": [
+    "PostProcessRenderer.present",
+    "GrayscalePass",
+    "SobelPass",
+    "FxaaPass",
+    "GaussianBlurPass",
+    "OutlinePass.edge",
+    "OutlinePass.blur",
+    "OutlinePass.overlay",
+    "TaaPass"
+  ],
+  "inventory": {
+    "wgslSourceCount": 58,
+    "generatedSourceCount": 13,
+    "handwrittenSourceCount": 45,
+    "inlineShaderSiteCount": 2,
+    "escapeHatchCount": 4,
+    "builtinPostprocessGeneratedSourceCount": 10
+  },
+  "runtime": {
+    "productionPassesUseArtifactV2": true,
+    "uniformPackingUsesArtifactReflection": true,
+    "outlineWarmupDuplicatesModules": false,
+    "customPassRawWgslRetained": true,
+    "customPassUsesGeneratedFullscreenVertex": true,
+    "rendererSchedulingChanged": false,
+    "publicApiChanges": []
+  },
+  "evidence": {
+    "webgpuCompiledPassCount": 9,
+    "webgpuExpectedCenterPixel": [119, 119, 119, 255],
+    "webgpuMaximumChannelDelta": 1,
+    "webgpuValidationErrorCount": 0,
+    "unclassifiedFailureCount": 0,
+    "shaderModuleCount": 9,
+    "artifactLayoutCount": 9,
+    "pipelineLayoutCount": 9
+  },
+  "publicApiChanges": [],
+  "apiBaselineUpdated": false,
+  "acceptance": [
+    "npm run shader-language:check",
+    "npm run shader-language:stage8:check",
+    "npm run verify:shader-language-stage8",
+    "npm test -w ./engine",
+    "npm run check:fast"
+  ],
+  "deferred": [
+    "2d-ui-production-migration",
+    "simple-3d-production-migration",
+    "production-deformation-pass-migration",
+    "production-pbr-shader-migration",
+    "compute-ir-side-effects-and-production-migration",
+    "glsl-es300-codegen",
+    "webgl2-renderer-fallback",
+    "visual-shader-graph-editor",
+    "stable-public-shader-api"
+  ]
+}

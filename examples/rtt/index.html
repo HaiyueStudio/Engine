@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 – Render to Texture</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #08080f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: monospace;
+    }
+    canvas { display: block; }
+    #hint {
+      margin-top: 10px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+    }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas" width="900" height="600"></canvas>
+  <div id="hint">left drag = orbit · scroll = zoom · right drag = pan</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

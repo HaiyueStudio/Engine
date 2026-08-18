@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>海月 · Shader Language Lab</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    :root { color-scheme: dark; --bg: #050812; --panel: #0b1120; --panel-2: #0f172a; --line: #26324a; --muted: #8da0ba; --cyan: #45f2df; --pink: #ff4ea3; --amber: #ffc857; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; min-width: 320px; height: 100%; background: var(--bg); color: #edf5ff; font: 13px/1.45 Inter, ui-sans-serif, system-ui, sans-serif; }
+    body { overflow: hidden; }
+    button, input { font: inherit; }
+    .app { height: 100vh; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+    .header { min-height: 64px; display: flex; align-items: center; gap: 18px; padding: 10px 18px; border-bottom: 1px solid var(--line); background: #080d18ee; }
+    .brand { min-width: 240px; }
+    .eyebrow { margin: 0 0 2px; color: var(--cyan); font: 700 10px/1.2 ui-monospace, monospace; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: 19px; letter-spacing: -.02em; }
+    .header__description { max-width: 600px; margin: 0; color: var(--muted); font-size: 12px; }
+    .boundary { margin-left: auto; padding: 7px 10px; border: 1px solid #45f2df44; border-radius: 8px; color: #bffdf5; background: #45f2df0d; font: 11px/1.25 ui-monospace, monospace; white-space: nowrap; }
+    .workspace { min-height: 0; display: grid; grid-template-columns: minmax(650px, 1.55fr) minmax(420px, .95fr); }
+    .visual-lab { min-width: 0; min-height: 0; overflow: auto; padding: 14px; border-right: 1px solid var(--line); }
+    .backend-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; }
+    .backend-card { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #080d18; box-shadow: 0 12px 36px #0006; }
+    .backend-card__header { min-height: 50px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 11px; border-bottom: 1px solid var(--line); }
+    .backend-card__title { display: grid; gap: 2px; }
+    .backend-card__title strong { font-size: 12px; }
+    .backend-card__title span, .backend-status { color: var(--muted); font: 9px/1.2 ui-monospace, monospace; }
+    .backend-status[data-passed="true"] { color: var(--cyan); }
+    canvas { display: block; width: 100%; height: auto; aspect-ratio: 1; background: #03050b; image-rendering: auto; }
+    .difference-card canvas { background: #050817; }
+    .controls-and-evidence { display: grid; grid-template-columns: minmax(340px, 1fr) minmax(300px, .8fr); gap: 10px; margin-top: 10px; }
+    .panel { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+    .panel__header { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; border-bottom: 1px solid var(--line); }
+    .panel__header h2 { margin: 0; font-size: 12px; }
+    .parity-badge { padding: 4px 8px; border: 1px solid #ffc85755; border-radius: 999px; color: var(--amber); background: #ffc8570d; font: 10px/1 ui-monospace, monospace; }
+    .parity-badge[data-passed="true"] { border-color: #45f2df55; color: var(--cyan); background: #45f2df0d; }
+    .controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; padding: 12px 13px 14px; }
+    .control { display: grid; grid-template-columns: 86px minmax(80px, 1fr) 44px; align-items: center; gap: 7px; min-width: 0; color: #c7d5e8; font-size: 11px; }
+    .control input[type="range"] { min-width: 0; width: 100%; accent-color: var(--cyan); }
+    .control input[type="color"] { width: 100%; height: 24px; padding: 1px; border: 1px solid var(--line); border-radius: 5px; background: transparent; }
+    .control output { color: var(--cyan); text-align: right; font: 10px/1 ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+    .control--toggle { grid-template-columns: auto 1fr auto; }
+    .control--toggle input { accent-color: var(--cyan); }
+    .evidence-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); }
+    .evidence { min-width: 0; padding: 10px; background: var(--panel); }
+    .evidence span { display: block; color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+    .evidence strong { display: block; margin-top: 4px; overflow: hidden; color: #f5fbff; font: 12px/1.2 ui-monospace, monospace; text-overflow: ellipsis; white-space: nowrap; }
+    .section-title { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 22px 0 9px; }
+    .section-title h2 { margin: 0; font-size: 14px; }
+    .section-title p { margin: 2px 0 0; color: var(--muted); font-size: 10px; }
+    .pbr-lab { display: grid; grid-template-columns: minmax(300px, .85fr) minmax(390px, 1.15fr); overflow: hidden; }
+    .pbr-visual { position: relative; border-right: 1px solid var(--line); background: radial-gradient(circle at 50% 42%, #14203b, #03050c 72%); }
+    .pbr-visual canvas { max-height: 430px; object-fit: contain; }
+    .feature-chain { display: flex; flex-wrap: wrap; gap: 5px; padding: 12px 13px 4px; }
+    .feature-chip { padding: 4px 7px; border: 1px solid #45f2df35; border-radius: 999px; color: #b8fff6; background: #45f2df0a; font: 9px/1 ui-monospace, monospace; }
+    .pbr-lab .controls { grid-template-columns: 1fr; }
+    .pbr-evidence { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 10px 13px 13px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .pbr-evidence .evidence { border-right: 1px solid var(--line); }
+    .character-grid { display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)); gap: 8px; }
+    .character-pass { overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #070c16; }
+    .character-pass header { display: grid; gap: 2px; padding: 8px 9px; border-bottom: 1px solid var(--line); }
+    .character-pass strong { font-size: 10px; text-transform: uppercase; }
+    .character-pass span { color: var(--muted); font: 8px/1.2 ui-monospace, monospace; }
+    .character-pass canvas { aspect-ratio: 160 / 208; }
+    .character-summary { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); margin-top: 8px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    .character-summary .evidence { border-right: 1px solid var(--line); }
+    .inspector { min-width: 0; min-height: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr); background: #080d18; }
+    .program-tabs { display: grid; grid-template-columns: repeat(3, 1fr); padding: 7px; gap: 6px; border-bottom: 1px solid var(--line); background: #060a13; }
+    .program-tabs button { padding: 8px 6px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); background: #0b1220; cursor: pointer; font-size: 10px; }
+    .program-tabs button[data-active="true"] { border-color: #ff4ea366; color: #ffd3e8; background: #ff4ea30d; }
+    .tabs { display: grid; grid-template-columns: repeat(5, 1fr); border-bottom: 1px solid var(--line); }
+    .tabs button { min-width: 0; padding: 13px 6px; border: 0; border-right: 1px solid var(--line); color: var(--muted); background: transparent; cursor: pointer; font-size: 10px; }
+    .tabs button:last-child { border-right: 0; }
+    .tabs button[data-active="true"] { color: var(--cyan); background: #45f2df0b; box-shadow: inset 0 -2px var(--cyan); }
+    .inspector-content { min-height: 0; overflow: auto; padding: 12px; }
+    .composition-graph { display: grid; justify-items: stretch; gap: 4px; }
+    .graph-node { display: grid; grid-template-columns: 26px minmax(120px, .7fr) minmax(160px, 1fr); align-items: center; gap: 8px; width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; color: #dbe8f8; background: var(--panel-2); text-align: left; cursor: pointer; }
+    .graph-node:hover, .graph-node[data-selected="true"] { border-color: #45f2df88; background: #45f2df0d; }
+    .graph-node__index { color: #60738e; font: 9px/1 ui-monospace, monospace; }
+    .graph-node__label { font-size: 11px; }
+    .graph-node__operation { overflow: hidden; color: #96a9c3; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+    .graph-arrow { height: 10px; color: #50637d; text-align: center; line-height: 10px; }
+    .selection-detail { display: grid; gap: 5px; margin-top: 12px; padding: 11px; border: 1px solid #ff4ea344; border-radius: 8px; background: #ff4ea309; }
+    .selection-detail__eyebrow { color: var(--pink); font: 9px/1 ui-monospace, monospace; text-transform: uppercase; }
+    .selection-detail code, .selection-detail p { margin: 0; color: var(--muted); font-size: 10px; }
+    .inspector-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-bottom: 10px; }
+    .inspector-metric { min-width: 0; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+    .inspector-metric span { display: block; color: var(--muted); font-size: 9px; }
+    .inspector-metric strong { display: block; margin-top: 3px; overflow: hidden; font: 10px/1.2 ui-monospace, monospace; text-overflow: ellipsis; white-space: nowrap; }
+    .ir-entry-title { margin: 13px 0 6px; color: var(--cyan); font-size: 10px; text-transform: uppercase; }
+    .ir-row { display: grid; grid-template-columns: 42px minmax(100px, .8fr) minmax(130px, 1fr); gap: 7px; width: 100%; padding: 7px 8px; border: 0; border-bottom: 1px solid #1b2639; color: #d8e5f6; background: transparent; text-align: left; cursor: pointer; }
+    .ir-row:hover, .ir-row[data-selected="true"] { background: #45f2df0b; }
+    .ir-row__id, .ir-row__type { color: #7e91ac; font-size: 9px; }
+    .ir-row__operation { font-size: 10px; }
+    .ir-row__source { grid-column: 2 / -1; color: #536782; font: 8px/1.2 ui-monospace, monospace; }
+    .code-header { position: sticky; z-index: 2; top: -12px; display: flex; justify-content: space-between; gap: 8px; margin: -12px -12px 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); background: #080d18f2; }
+    .code-header span { overflow: hidden; color: var(--muted); font: 9px/1.2 ui-monospace, monospace; text-overflow: ellipsis; white-space: nowrap; }
+    .source-code { margin: 0; color: #c8d6e8; font: 9px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre; }
+    .source-line { display: grid; grid-template-columns: 34px minmax(max-content, 1fr); margin: 0 -6px; padding: 0 6px; }
+    .source-line[data-selected="true"] { color: #fff; background: #ff4ea31a; box-shadow: inset 2px 0 var(--pink); }
+    .source-line__number { color: #455873; text-align: right; padding-right: 9px; user-select: none; }
+    .abi-grid { display: grid; gap: 9px; }
+    .abi-card { overflow: auto; border: 1px solid var(--line); border-radius: 7px; }
+    .abi-card h3 { margin: 0; padding: 8px 9px; border-bottom: 1px solid var(--line); font-size: 10px; }
+    .abi-table { width: 100%; border-collapse: collapse; font: 8px/1.35 ui-monospace, monospace; }
+    .abi-table th, .abi-table td { padding: 6px 8px; border-bottom: 1px solid #1a2537; text-align: left; white-space: nowrap; }
+    .abi-table th { color: #71859f; font-weight: 500; }
+    #result { display: none; }
+    @media (max-width: 1250px) { .character-grid { grid-template-columns: repeat(3, minmax(140px, 1fr)); } .character-summary { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 1100px) { body { overflow: auto; } .app { height: auto; min-height: 100vh; } .workspace { grid-template-columns: 1fr; } .visual-lab { border-right: 0; } .inspector { min-height: 680px; border-top: 1px solid var(--line); } }
+    @media (max-width: 720px) { .header { align-items: flex-start; flex-wrap: wrap; } .boundary { margin-left: 0; } .workspace { display: block; } .backend-grid, .pbr-lab { grid-template-columns: 1fr; } .pbr-visual { border-right: 0; border-bottom: 1px solid var(--line); } .controls-and-evidence { grid-template-columns: 1fr; } .controls { grid-template-columns: 1fr; } .character-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body data-render-status="pending">
+  <main class="app">
+    <header class="header">
+      <div class="brand"><p class="eyebrow">Build-time compiler showcase</p><h1>Shader Language Lab</h1></div>
+      <p class="header__description">从模块组合、真实 PBR Material Graph，到同一角色的 forward/depth/shadow/motion/outline：页面只消费构建期 artifact，并把源码、ABI、像素与多 Pass 一致性同时暴露出来。</p>
+      <div class="boundary">compiler: build-time only<br />engine contract: WebGPU-only unchanged</div>
+    </header>
+    <div class="workspace">
+      <section class="visual-lab">
+        <div class="backend-grid">
+          <article class="backend-card">
+            <header class="backend-card__header"><div class="backend-card__title"><strong>WebGPU</strong><span>Generated WGSL</span></div><span id="webgpu-status" class="backend-status">initializing</span></header>
+            <canvas id="webgpu-canvas" aria-label="WebGPU generated WGSL output"></canvas>
+          </article>
+          <article class="backend-card">
+            <header class="backend-card__header"><div class="backend-card__title"><strong>WebGL2</strong><span>Generated GLSL ES 3.00</span></div><span id="webgl-status" class="backend-status">initializing</span></header>
+            <canvas id="webgl-canvas" aria-label="WebGL2 generated GLSL output"></canvas>
+          </article>
+          <article class="backend-card difference-card">
+            <header class="backend-card__header"><div class="backend-card__title"><strong>Difference ×32</strong><span>Black means exact</span></div><span id="parity-badge" class="parity-badge">waiting</span></header>
+            <canvas id="difference-canvas" aria-label="Amplified backend pixel difference"></canvas>
+          </article>
+        </div>
+
+        <div class="controls-and-evidence">
+          <section class="panel">
+            <header class="panel__header"><h2>Dynamic uniforms</h2><span class="backend-status" data-passed="true">pipeline key unchanged</span></header>
+            <div class="controls">
+              <label class="control control--toggle"><input id="animate" type="checkbox" /><span>Animate</span><output id="animate-value">running</output></label>
+              <label class="control"><span>Time</span><input id="time" type="range" min="0" max="6.28" step="0.01" value="0.72" /><output id="time-value">0.72</output></label>
+              <label class="control"><span>Wave scale</span><input id="noise-scale" type="range" min="2" max="48" step="0.5" value="24" /><output id="noise-scale-value">24.0</output></label>
+              <label class="control"><span>Distortion</span><input id="noise-strength" type="range" min="0" max="0.24" step="0.005" value="0.105" /><output id="noise-strength-value">0.105</output></label>
+              <label class="control"><span>Gradient bias</span><input id="gradient-bias" type="range" min="-0.5" max="0.5" step="0.01" value="0.02" /><output id="gradient-bias-value">0.02</output></label>
+              <label class="control"><span>Scanlines</span><input id="scan-strength" type="range" min="0" max="0.3" step="0.01" value="0.11" /><output id="scan-strength-value">0.11</output></label>
+              <label class="control"><span>Vignette</span><input id="vignette-strength" type="range" min="0" max="2.5" step="0.05" value="1.45" /><output id="vignette-strength-value">1.45</output></label>
+              <label class="control"><span>Tint A</span><input id="tint-a" type="color" value="#2efae5" /><output></output></label>
+              <label class="control"><span>Tint B</span><input id="tint-b" type="color" value="#ff29a8" /><output></output></label>
+            </div>
+          </section>
+          <section class="panel">
+            <header class="panel__header"><h2>Compiler & runtime evidence</h2></header>
+            <div class="evidence-grid">
+              <div class="evidence"><span>Canonical IR</span><strong id="canonical-hash">—</strong></div>
+              <div class="evidence"><span>WGSL hash</span><strong id="wgsl-hash">—</strong></div>
+              <div class="evidence"><span>GLSL hash</span><strong id="glsl-hash">—</strong></div>
+              <div class="evidence"><span>Typed IR nodes</span><strong id="node-count">—</strong></div>
+              <div class="evidence"><span>Resources</span><strong id="resource-count">—</strong></div>
+              <div class="evidence"><span>Pipelines</span><strong id="pipeline-count">—</strong></div>
+              <div class="evidence"><span>Max pixel delta</span><strong id="max-delta">—</strong></div>
+              <div class="evidence"><span>Mean delta</span><strong id="mean-delta">—</strong></div>
+              <div class="evidence"><span>Changed pixels</span><strong id="changed-ratio">—</strong></div>
+              <div class="evidence"><span>Uniform writes</span><strong id="uniform-writes">0</strong></div>
+              <div class="evidence"><span>Pipeline rebuilds</span><strong id="pipeline-rebuilds">0</strong></div>
+              <div class="evidence"><span>Runtime compiler</span><strong id="runtime-compiler">—</strong></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="section-title"><div><h2>真实 PBR Material Graph</h2><p>albedo + tangent-space normal + UV noise + height gradient + metallic/roughness + fog</p></div><span id="pbr-status" class="backend-status">initializing</span></div>
+        <section id="pbr-lab" class="panel pbr-lab">
+          <div class="pbr-visual"><canvas id="pbr-canvas" aria-label="Generated PBR material graph rendered on a sphere"></canvas></div>
+          <div>
+            <div class="feature-chain" aria-label="PBR composition chain">
+              <span class="feature-chip">UV noise</span><span class="feature-chip">albedo texture</span><span class="feature-chip">normal TS</span><span class="feature-chip">height gradient</span><span class="feature-chip">MaterialSurface</span><span class="feature-chip">GGX PBR</span><span class="feature-chip">fog</span>
+            </div>
+            <div class="controls">
+              <label class="control"><span>Metallic</span><input id="pbr-metallic" type="range" min="0" max="1" step="0.01" value="0.72" /><output id="pbr-metallic-value">0.72</output></label>
+              <label class="control"><span>Roughness</span><input id="pbr-roughness" type="range" min="0.04" max="1" step="0.01" value="0.26" /><output id="pbr-roughness-value">0.26</output></label>
+              <label class="control"><span>Noise scale</span><input id="pbr-noise-scale" type="range" min="0.5" max="18" step="0.5" value="7.5" /><output id="pbr-noise-scale-value">7.5</output></label>
+              <label class="control"><span>UV distortion</span><input id="pbr-noise-strength" type="range" min="0" max="0.2" step="0.005" value="0.075" /><output id="pbr-noise-strength-value">0.075</output></label>
+            </div>
+            <div class="pbr-evidence">
+              <div class="evidence"><span>Graph hash</span><strong id="pbr-graph-hash">—</strong></div>
+              <div class="evidence"><span>Visible pixels</span><strong id="pbr-visible">—</strong></div>
+              <div class="evidence"><span>Variants</span><strong id="pbr-variants">—</strong></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-title"><div><h2>真实 glTF 角色 · 五 Pass 一致性</h2><p>19-joint Animation3D + synthetic GPU morph；所有 Pass 共享 morph → skinning → displacement 与 history ABI</p></div><span id="character-status" class="backend-status">loading glTF</span></div>
+        <div id="character-lab" class="character-grid">
+          <article class="character-pass"><header><strong>Forward</strong><span data-pass-metric="forward">—</span></header><canvas data-character-pass="forward"></canvas></article>
+          <article class="character-pass"><header><strong>Depth</strong><span data-pass-metric="depth">—</span></header><canvas data-character-pass="depth"></canvas></article>
+          <article class="character-pass"><header><strong>Shadow</strong><span data-pass-metric="shadow">—</span></header><canvas data-character-pass="shadow"></canvas></article>
+          <article class="character-pass"><header><strong>Motion</strong><span data-pass-metric="motion-vector">—</span></header><canvas data-character-pass="motion-vector"></canvas></article>
+          <article class="character-pass"><header><strong>Outline</strong><span data-pass-metric="outline-selection">—</span></header><canvas data-character-pass="outline-selection"></canvas></article>
+        </div>
+        <div class="character-summary">
+          <div class="evidence"><span>Consistency</span><strong id="character-consistency">waiting</strong></div>
+          <div class="evidence"><span>Shared module</span><strong id="deformation-hash">—</strong></div>
+          <div class="evidence"><span>Silhouette mismatch</span><strong id="character-mismatch">—</strong></div>
+          <div class="evidence"><span>Uploads</span><strong id="character-uploads">—</strong></div>
+          <div class="evidence"><span>Motion delta</span><strong id="character-velocity">—</strong></div>
+          <div class="evidence"><span>Load state</span><strong id="load-state">starting…</strong></div>
+        </div>
+      </section>
+
+      <aside id="inspector" class="inspector">
+        <div class="program-tabs" role="tablist" aria-label="Shader program family">
+          <button type="button" data-inspector-program="portable">Portable IR</button>
+          <button type="button" data-inspector-program="pbr">PBR Graph</button>
+          <button type="button" data-inspector-program="character">Character 5 Pass</button>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Shader compiler inspector">
+          <button type="button" data-inspector-tab="composition">Composition</button>
+          <button type="button" data-inspector-tab="ir">Typed IR</button>
+          <button type="button" data-inspector-tab="wgsl">WGSL</button>
+          <button type="button" data-inspector-tab="glsl">GLSL</button>
+          <button type="button" data-inspector-tab="abi">ABI</button>
+        </div>
+        <div class="inspector-content" data-inspector-content></div>
+      </aside>
+    </div>
+  </main>
+  <pre id="result" aria-hidden="true"></pre>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

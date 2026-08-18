@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GPU Driven Instancing Prep</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #070b10; color: #d8e2f0; font-family: system-ui, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .panel {
+      position: fixed; left: 16px; top: 16px; width: 320px; padding: 12px;
+      background: rgba(8, 12, 18, 0.84); border: 1px solid rgba(180, 210, 255, 0.22);
+      border-radius: 8px; backdrop-filter: blur(12px);
+    }
+    .row { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin: 6px 0; font-size: 13px; }
+    .buttons { display: grid; gap: 8px; margin-bottom: 10px; }
+    .counts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+    button {
+      border: 1px solid rgba(180, 210, 255, 0.24); color: #d8e2f0; background: rgba(255,255,255,0.08);
+      border-radius: 6px; padding: 8px 10px; cursor: pointer; text-align: left;
+    }
+    button.active { background: #1e7f54; border-color: #47d18e; color: white; }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div class="panel">
+    <div class="buttons">
+      <button id="mode-none">No culling</button>
+      <button id="mode-cpu">CPU frustum culling</button>
+      <button id="mode-indirect">CPU frustum + indirect draw</button>
+      <button id="mode-gpu">GPU culling + indirect draw</button>
+    </div>
+    <div class="counts">
+      <button id="count-1000">1k</button>
+      <button id="count-10000">10k</button>
+      <button id="count-100000">100k</button>
+    </div>
+    <div id="stats"></div>
+  </div>
+  <script src="./bundle.js"></script>
+</body>
+</html>

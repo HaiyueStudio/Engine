@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - Normal Material</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #06070a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: monospace;
+    }
+    canvas { display: block; }
+
+    #ui {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    button {
+      width: 220px;
+      padding: 6px 14px;
+      border: 1px solid rgba(255,255,255,0.24);
+      border-radius: 6px;
+      background: rgba(0,0,0,0.55);
+      color: rgba(255,255,255,0.76);
+      font-family: monospace;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    button:hover { background: rgba(255,255,255,0.1); }
+    button.active {
+      background: rgba(80,180,255,0.24);
+      border-color: rgba(80,180,255,0.62);
+      color: #fff;
+    }
+
+    #hint {
+      position: absolute;
+      bottom: 14px;
+      color: rgba(255,255,255,0.28);
+      font-size: 11px;
+    }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas" width="900" height="600"></canvas>
+
+  <div id="ui">
+    <button id="btn-space" class="active">Normal Space: View</button>
+    <button id="btn-spin" class="active">Animation: On</button>
+  </div>
+
+  <div id="hint">
+    N = cycle normal space &nbsp;·&nbsp; Space = toggle animation
+    &nbsp;·&nbsp; left drag = orbit &nbsp;·&nbsp; scroll = zoom
+  </div>
+
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

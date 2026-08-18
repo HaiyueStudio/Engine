@@ -1,0 +1,138 @@
+{
+  "contractVersion": 1,
+  "phase": 3,
+  "status": "implemented",
+  "packageStatus": "private-workspace",
+  "implementation": "graph-v1-material-surface-pbr-pilot",
+  "primaryTarget": "webgpu-wgsl",
+  "deliverables": [
+    "untrusted-graph-v1-parser",
+    "exact-property-and-version-validation",
+    "classified-node-port-reference-cycle-diagnostics",
+    "builtin-node-registry-v1",
+    "graph-to-typed-ir-lowering",
+    "material-surface-v1-defaults-and-range-policy",
+    "metallic-roughness-pbr-lowering",
+    "tangent-normal-tbn-lowering",
+    "post-lighting-linear-fog",
+    "automatic-geometry-semantic-collection",
+    "varying-and-resource-reflection",
+    "reflection-driven-uniform-packer",
+    "source-boundary-preserving-expression-inlining",
+    "handwritten-reference-webgpu-pixel-gate",
+    "wgsl-gzip-comparison"
+  ],
+  "implementedGraphNodeTypes": [
+    "haiyue.uv.noise-distort@1",
+    "haiyue.texture.sample-2d@1",
+    "haiyue.normal.decode-tangent@1",
+    "haiyue.color.world-height-gradient@1",
+    "haiyue.color.multiply@1"
+  ],
+  "materialSurfaceVersion": 1,
+  "graphRootV1": {
+    "requiredFields": [
+      "format",
+      "version",
+      "kind",
+      "profile",
+      "resources",
+      "nodes",
+      "outputs"
+    ],
+    "optionalFields": [
+      "sceneFeatures",
+      "metadata"
+    ],
+    "unsupportedArchitectureFields": [
+      {
+        "field": "surface",
+        "currentOwner": "outputs"
+      },
+      {
+        "field": "lightingModel",
+        "currentOwner": "compiler-entrypoint"
+      },
+      {
+        "field": "coverage",
+        "currentOwner": "renderer-material-descriptor"
+      },
+      {
+        "field": "vertexDisplacement",
+        "currentOwner": "deformation-program-v1"
+      },
+      {
+        "field": "passRequirements",
+        "currentOwner": "compiler-reflection-and-render-graph"
+      }
+    ],
+    "materialLightingModelSelection": "compileMaterialGraphV1-fixed-metallic-roughness"
+  },
+  "surfaceSlotConsumption": {
+    "lightingModel": "metallic-roughness",
+    "loweringVersion": 1,
+    "consumed": [
+      "baseColor",
+      "opacity",
+      "normalTS",
+      "metallic",
+      "roughness",
+      "occlusion",
+      "emissive"
+    ],
+    "unsupportedWithDiagnostic": [
+      "transmission",
+      "thickness",
+      "clearcoat",
+      "clearcoatRoughness",
+      "clearcoatNormalTS",
+      "sheenColor",
+      "sheenRoughness"
+    ],
+    "diagnosticCode": "E_SHADER_SURFACE_UNSUPPORTED"
+  },
+  "sceneFeatures": [
+    "scene.fog"
+  ],
+  "pilot": {
+    "id": "pbr-composition",
+    "status": "passed",
+    "fixedCenterPixelRgba8": [26, 27, 39, 230],
+    "maximumPixelChannelDelta": 2,
+    "maximumMeanAbsoluteChannelDelta": 0.25,
+    "maximumGeneratedToReferenceGzipRatio": 1.15,
+    "specializationAxes": [],
+    "reservedSpecializationAxes": [
+      "clearcoat",
+      "transmission"
+    ],
+    "reachableSpecializationVariants": 1,
+    "maximumSpecializationVariants": 4,
+    "reachablePilotFamilyVariants": 1,
+    "maximumPilotFamilyVariants": 8,
+    "unclassifiedFailureCount": 0
+  },
+  "productionMigrations": [],
+  "productionFirstFrameRegressionPercent": 0,
+  "productionFirstFrameEvidence": "No production renderer source or runtime adapter is changed in phase 3.",
+  "releaseGateStatus": "standalone-webgpu-pilot-not-release-gating",
+  "deferred": [
+    "automatic-vertex-program-and-varying-codegen",
+    "custom-node-plugin-registry",
+    "aggregate-array-and-struct-expressions",
+    "control-flow-discard-and-storage-write",
+    "multi-pass-derivation",
+    "glsl-es300-codegen",
+    "runtime-renderer-adapter",
+    "production-pbr-migration",
+    "advanced-material-surface-lobes-in-graph-lowering",
+    "visual-shader-graph-editor",
+    "stable-public-api"
+  ],
+  "acceptance": [
+    "npm run typecheck -w ./shader-language",
+    "npm test -w ./shader-language",
+    "npm run shader-language:check",
+    "npm run verify:shader-language-stage3"
+  ]
+}

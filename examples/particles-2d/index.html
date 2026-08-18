@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Haiyue 原生 2D 粒子</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #030611; color: #eef7ff; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .grid {
+      position: fixed; inset: 0; pointer-events: none; opacity: .16;
+      background-image: linear-gradient(rgba(111,224,255,.18) 1px, transparent 1px), linear-gradient(90deg, rgba(111,224,255,.18) 1px, transparent 1px);
+      background-size: 48px 48px; mask-image: linear-gradient(to bottom, transparent, black 30%, black 75%, transparent);
+    }
+    .panel {
+      position: fixed; z-index: 2; top: 18px; left: 18px; width: min(350px, calc(100vw - 36px));
+      padding: 16px; border: 1px solid rgba(111,224,255,.22); border-radius: 14px;
+      background: rgba(5, 10, 24, .84); box-shadow: 0 18px 55px rgba(0,0,0,.32); backdrop-filter: blur(16px);
+    }
+    h1 { margin: 0 0 5px; font-size: 17px; }
+    .intro { margin: 0 0 14px; color: #8fa1c1; font-size: 11px; line-height: 1.5; }
+    .actions { display: flex; gap: 7px; }
+    button {
+      flex: 1; padding: 7px 10px; border: 1px solid #2b416b; border-radius: 8px;
+      background: #101d3b; color: #e9f4ff; cursor: pointer;
+    }
+    button:hover, button.active { border-color: #63d9bb; background: #17304a; }
+    button.primary { border-color: #62dcbc; background: #74f2ce; color: #061611; font-weight: 700; }
+    .sliders { display: grid; gap: 10px; margin-top: 14px; padding-top: 13px; border-top: 1px solid rgba(87,111,153,.28); }
+    .slider { display: grid; grid-template-columns: 88px 1fr 48px; align-items: center; gap: 7px; color: #a8b7d0; font-size: 11px; }
+    .slider input { width: 100%; accent-color: #74f2ce; }
+    output { color: #74f2ce; text-align: right; font-variant-numeric: tabular-nums; }
+    .emitters { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 14px; }
+    .emitter {
+      display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 7px;
+      padding: 8px; border: 1px solid rgba(69,91,132,.48); border-radius: 9px; background: rgba(9,17,36,.75);
+      color: #c8d5e9; font-size: 11px;
+    }
+    .emitter input { accent-color: #74f2ce; }
+    .emitter output { min-width: 28px; color: #7389aa; font-size: 10px; }
+    .dot { display: inline-block; width: 7px; height: 7px; margin-right: 4px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+    .fire { color: #ff8a32; } .fountain { color: #50dbff; } .confetti { color: #ff64c9; } .snow { color: #d9f2ff; }
+    .stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 12px;
+    }
+    .metric { padding: 8px; border-radius: 8px; background: rgba(8,15,31,.8); text-align: center; }
+    .metric strong { display: block; color: #6fe0ff; font: 13px ui-monospace, SFMono-Regular, monospace; }
+    .metric span { color: #7083a3; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+    .labels { position: fixed; inset: 0; pointer-events: none; color: rgba(204,222,245,.58); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+    .labels span { position: absolute; bottom: 15%; transform: translateX(-50%); text-shadow: 0 1px 5px #000; }
+    .labels span:nth-child(1) { left: 43%; }
+    .labels span:nth-child(2) { left: 62%; }
+    .labels span:nth-child(3) { left: 83%; }
+    .labels span:nth-child(4) { left: 88%; bottom: 45%; }
+    .hint { position: fixed; right: 18px; bottom: 16px; color: rgba(180,201,231,.45); font-size: 10px; }
+    #result { display: none; }
+    @media (max-width: 720px) {
+      .panel { width: calc(100vw - 24px); top: 12px; left: 12px; }
+      .labels, .hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="960" height="600"></canvas>
+  <div class="grid"></div>
+  <aside class="panel">
+    <h1>原生 WebGPU 2D 粒子</h1>
+    <p class="intro">固定容量 SoA 仿真与 instanced rendering。四组效果共享一个系统，没有逐粒子 JavaScript 对象分配。</p>
+    <div class="actions">
+      <button id="pause" type="button">暂停</button>
+      <button id="restart" type="button">确定性重播</button>
+      <button id="burst" class="primary" type="button">触发 Burst</button>
+    </div>
+    <div class="sliders">
+      <label class="slider">发射倍率<input id="emission" type="range" min="0" max="2" step="0.05" value="1" /><output id="emission-value">1.00×</output></label>
+      <label class="slider">重力倍率<input id="gravity" type="range" min="0" max="2" step="0.05" value="1" /><output id="gravity-value">1.00×</output></label>
+    </div>
+    <div class="emitters">
+      <label class="emitter"><input id="toggle-fire" type="checkbox" checked /><span><i class="dot fire"></i> Fire</span><output id="count-fire">0</output></label>
+      <label class="emitter"><input id="toggle-fountain" type="checkbox" checked /><span><i class="dot fountain"></i> Fountain</span><output id="count-fountain">0</output></label>
+      <label class="emitter"><input id="toggle-confetti" type="checkbox" checked /><span><i class="dot confetti"></i> Confetti</span><output id="count-confetti">0</output></label>
+      <label class="emitter"><input id="toggle-snow" type="checkbox" checked /><span><i class="dot snow"></i> Snow</span><output id="count-snow">0</output></label>
+    </div>
+    <div class="stats">
+      <div class="metric"><strong id="particle-count">0</strong><span>Particles</span></div>
+      <div class="metric"><strong id="emitter-count">0</strong><span>Emitters</span></div>
+      <div class="metric"><strong id="upload-bytes">0 B</strong><span>Frame upload</span></div>
+    </div>
+  </aside>
+  <div class="labels"><span>additive · circle</span><span>additive · box</span><span>normal · quads</span><span>normal · snow field</span></div>
+  <div class="hint">Space 暂停 · R 重播 · B Burst</div>
+  <pre id="result" aria-hidden="true"></pre>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

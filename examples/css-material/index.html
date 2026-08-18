@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - CssMaterial</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #070a0f;
+      color: #d8e2f2;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+    #ui {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 8px;
+      background: rgba(10,14,22,0.78);
+      backdrop-filter: blur(12px);
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 12px;
+      color: rgba(216,226,242,0.72);
+    }
+    input,
+    select {
+      height: 30px;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 5px;
+      padding: 0 8px;
+      background: #111722;
+      color: #edf4ff;
+      font: inherit;
+    }
+    input[type="range"] {
+      padding: 0;
+    }
+    #hint {
+      position: absolute;
+      left: 16px;
+      bottom: 14px;
+      color: rgba(216,226,242,0.42);
+      font-size: 11px;
+    }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div id="ui">
+    <div class="field">
+      <label for="text">Panel text</label>
+      <input id="text" value="CssMaterial" />
+    </div>
+    <div class="field">
+      <label for="font-size">Font size <span id="font-size-value">34</span>px</label>
+      <input id="font-size" type="range" min="18" max="56" value="34" />
+    </div>
+    <div class="field">
+      <label for="theme">Style preset</label>
+      <select id="theme">
+        <option value="blue">Blue glass</option>
+        <option value="amber">Amber card</option>
+        <option value="mono">Mono panel</option>
+      </select>
+    </div>
+  </div>
+  <div id="hint">left drag = orbit · scroll = zoom · edit controls to regenerate canvas textures</div>
+  <script src="./bundle.js"></script>
+</body>
+</html>

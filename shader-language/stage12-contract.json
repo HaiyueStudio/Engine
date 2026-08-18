@@ -1,0 +1,101 @@
+{
+  "contractVersion": 1,
+  "phase": 12,
+  "status": "implemented",
+  "implementation": "atomic-production-specialized-rendering-family-migration",
+  "packageStatus": "private-compiler-with-generated-production-artifacts",
+  "primaryTarget": "webgpu-wgsl",
+  "family": {
+    "id": "engine-specialized-rendering",
+    "path": "shader-language/builtin-specialized-rendering-family.json",
+    "sha256": "cd064f040a22bb3afd54e5841256efcb34790af7b4852d63ed89dc9b7515ee72",
+    "abiVersion": 1,
+    "passCount": 7,
+    "renderPassCount": 6,
+    "computePassCount": 1,
+    "artifactHash": "6f92c00eeac73db1a0719b22e8e07c42fb69de0dd58d0bc59bf45ac0df7bef1f",
+    "specializedModuleHash": "e58254ced41b58d62be3b93804a7633bcaa270d03d1064a773f62a4db8af1e3d"
+  },
+  "passes": [
+    "instanced-mesh3d",
+    "line3d",
+    "planar-mirror",
+    "volume",
+    "texture-convolution",
+    "mipmap",
+    "equirectangular-to-cube"
+  ],
+  "abi": {
+    "sceneFrameBytes": 272,
+    "instancedLightCapacity": 8,
+    "instancedLightBlockBytes": 528,
+    "lineRoundCapSegments": 8,
+    "lineVerticesPerSegment": 54,
+    "volumeObjectTable": "shared-storage-buffer",
+    "volumeObjectRecordBytes": 192,
+    "volumeClippingBlockBytes": 144,
+    "volumeClippingStorageBinding": "group1-binding1-companion-table",
+    "volumeClipping": "world-space-plane-test-per-raymarch-sample",
+    "convolutionParametersBytes": 64,
+    "convolutionStorageFormat": "rgba8unorm",
+    "rendererOwnedPassCount": 4,
+    "artifactOwnedPassCount": 3
+  },
+  "productionMigrations": [
+    "InstancedMesh3DRenderer",
+    "Line3DRenderer",
+    "PlanarMirrorRenderer",
+    "VolumeRenderer",
+    "TextureConvolutionProcessor",
+    "ImageTextureUpload.mipmap",
+    "EquirectangularReflectionMap"
+  ],
+  "artifact": {
+    "formatVersion": 2,
+    "runtimeParsesWgsl": false,
+    "runtimeCompilesDsl": false,
+    "runtimeComposesWgsl": false
+  },
+  "inventory": {
+    "wgslSourceCount": 60,
+    "generatedSourceCount": 54,
+    "handwrittenSourceCount": 6,
+    "stage12GeneratedSourceCount": 7,
+    "replacedHandwrittenSourceCount": 5,
+    "retiredInlineShaderSiteCount": 2
+  },
+  "bundle": {
+    "specializedRenderingArtifactRawBytes": 75897,
+    "specializedRenderingArtifactGzipBytes": 10206,
+    "specializedRenderingArtifactGzipBudgetBytes": 11500,
+    "runtimeContainsCompiler": false
+  },
+  "evidence": {
+    "webgpuCompiledPassCount": 7,
+    "webgpuRenderPassCount": 6,
+    "webgpuComputePassCount": 1,
+    "webgpuBindGroupLayoutCount": 12,
+    "webgpuPipelineLayoutCount": 7,
+    "mipmapPixel": [51, 102, 204, 255],
+    "identityConvolutionPixel": [25, 50, 75, 255],
+    "webgpuValidationErrorCount": 0,
+    "unclassifiedFailureCount": 0
+  },
+  "publicApiChanges": [],
+  "apiBaselineUpdated": false,
+  "acceptance": [
+    "npm run shader-language:check",
+    "npm run shader-language:stage12:check",
+    "npm run verify:shader-language-stage12",
+    "npm test -w ./engine",
+    "npm run check:fast"
+  ],
+  "deferred": [
+    "compute-family-migration",
+    "instanced-cull-and-sort-compute-migration",
+    "glsl-es300-codegen",
+    "webgl2-renderer-fallback",
+    "visual-shader-graph-editor",
+    "stable-public-shader-api"
+  ]
+}

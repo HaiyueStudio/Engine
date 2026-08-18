@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "goal": "g04-parameterized-renderer-core-correctness",
+  "sourceRevision": "9355da5",
+  "candidateRevision": "commit-containing-this-report",
+  "formalReleaseEvidence": false,
+  "injections": [
+    {
+      "id": "texture-result-after-destroy",
+      "owner": "Mesh3DRenderer/ParameterizedRendererCore",
+      "expectedLateWrites": 0,
+      "expectedReleases": 1,
+      "result": "pass",
+      "fixture": "engine/test/renderer-resource-lifecycle.test.mjs"
+    },
+    {
+      "id": "texture-source-replacement",
+      "owner": "material texture slot",
+      "expectedLateWrites": 0,
+      "result": "pass",
+      "guard": "owner AbortSignal plus source identity"
+    },
+    {
+      "id": "object-table-growth-before-submit",
+      "owner": "RendererObjectTable",
+      "expectedEarlyDestroys": 0,
+      "expectedPostSubmitDestroys": 1,
+      "result": "pass",
+      "fixture": "engine/test/renderer-resource-lifecycle.test.mjs"
+    },
+    {
+      "id": "device-recovery-view-owner",
+      "owner": "Render3DViewPreparation",
+      "expectedStaleFrameReferences": 0,
+      "result": "pass",
+      "fixture": "engine/test/render3d-architecture-owners.test.mjs"
+    },
+    {
+      "id": "nested-record",
+      "owner": "Render3DSystem",
+      "expectedScratchMutationsBeforeFailure": 0,
+      "result": "pass",
+      "fixture": "engine/test/render3d-architecture-owners.test.mjs"
+    }
+  ],
+  "gpuOwnerResidual": 0,
+  "notes": [
+    "Real WebGPU verification reported zero validation errors.",
+    "This diagnostic report is a G04 handoff artifact and is not formal release evidence."
+  ]
+}

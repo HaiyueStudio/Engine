@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Haiyue Production Material Lighting Family v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "id", "abiVersion", "passes"],
+  "properties": {
+    "format": { "const": "haiyue-production-material-lighting-family" },
+    "version": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$" },
+    "abiVersion": { "const": 1 },
+    "passes": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "operation"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$" },
+          "operation": {
+            "enum": [
+              "pbr",
+              "pbr-clearcoat",
+              "pbr-transmission",
+              "pbr-transmission-clearcoat",
+              "blinn-phong",
+              "toon"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

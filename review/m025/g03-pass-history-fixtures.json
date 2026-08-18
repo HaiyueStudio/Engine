@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "goal": "g03-render-scheduling-positive-contracts",
+  "formalReleaseEvidence": false,
+  "fixtures": [
+    {
+      "id": "pipeline-shared-compute-isolated",
+      "source": "engine/test/observability-stage7.test.mjs",
+      "plan": ["shared-render", "compute", "isolated-render"],
+      "actualHistory": [["render", true], ["compute", false], ["render", false]]
+    },
+    {
+      "id": "pipeline-target-load-store-sample-depth",
+      "source": "engine/test/observability-stage7.test.mjs",
+      "invariants": ["attachment-identity-split", "sample-count-split", "load-store-split", "structured-diagnostic-parity"]
+    },
+    {
+      "id": "multi-view-planar-mirror-rtt",
+      "source": "engine/test/planar-mirror.test.mjs",
+      "invariants": ["reflection-before-source-view", "deepest-bounce-first", "transient-lifetime-alias", "persistent-cache-retirement"]
+    },
+    {
+      "id": "directional-shadow-plan",
+      "source": "engine/test/render3d-gpu-driven-batch.test.mjs",
+      "invariants": ["scene-global-shadow-before-view", "single-shadow-pass-count", "view-local-batch-state"]
+    },
+    {
+      "id": "postprocess-pass-lifecycle",
+      "source": "engine/test/postprocess-lifecycle.test.mjs",
+      "invariants": ["scene-attachment-before-postprocess", "submission-safe-retirement", "view-size-isolation"]
+    }
+  ]
+}

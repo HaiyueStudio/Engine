@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - Raycast BVH</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      color: #d8e2f2;
+      background: #10141c;
+      font: 12px system-ui, sans-serif;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background: #05070b;
+    }
+    #panel {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      width: 360px;
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid #303746;
+      border-radius: 4px;
+      background: rgba(16, 20, 28, 0.88);
+    }
+    button {
+      height: 28px;
+      border: 1px solid #3d6fa8;
+      border-radius: 4px;
+      color: #eef3ff;
+      background: #255a91;
+      cursor: pointer;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 128px minmax(0, 1fr);
+      gap: 8px;
+    }
+    .label { color: #8fa7c8; }
+    .value { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div id="panel">
+    <button id="run">Run benchmark</button>
+    <div class="row"><div class="label">Triangles</div><div id="triangles" class="value">-</div></div>
+    <div class="row"><div class="label">Rays</div><div id="rays" class="value">-</div></div>
+    <div class="row"><div class="label">BVH on</div><div id="bvh-on" class="value">-</div></div>
+    <div class="row"><div class="label">BVH off</div><div id="bvh-off" class="value">-</div></div>
+    <div class="row"><div class="label">Speedup</div><div id="speedup" class="value">-</div></div>
+  </div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

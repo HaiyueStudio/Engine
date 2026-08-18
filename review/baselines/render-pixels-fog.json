@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "fixture": "haiyue-distance-height-fog-chrome-960x640",
+  "width": 960,
+  "height": 640,
+  "rendererValidation": [
+    "basic",
+    "pbr",
+    "blinn",
+    "instanced"
+  ],
+  "modes": {
+    "distance": {
+      "hash": "8746cac232027dbe8716b44b3632c620de126da7e292857087cb40c5a9a6b76a",
+      "bytes": 31608
+    },
+    "height": {
+      "hash": "b46f0696e3ca45ad48b1b632d8b89c9d0f559ba6c5e3e2d77271b66ffda5d84b",
+      "bytes": 37787
+    }
+  },
+  "noFogEquivalence": {
+    "noFog": {
+      "hash": "cd21008fafe69d0e681ecf3b6e29c17f38ea7e5b8399114d668d4497fbc8fe49",
+      "bytes": 8269
+    },
+    "disabled": {
+      "hash": "cd21008fafe69d0e681ecf3b6e29c17f38ea7e5b8399114d668d4497fbc8fe49",
+      "bytes": 8269
+    },
+    "maxOpacityZero": {
+      "hash": "cd21008fafe69d0e681ecf3b6e29c17f38ea7e5b8399114d668d4497fbc8fe49",
+      "bytes": 8269
+    }
+  }
+}

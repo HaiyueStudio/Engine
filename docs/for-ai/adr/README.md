@@ -1,0 +1,102 @@
+# Architecture Decision Records
+
+ADR 用于记录会长期约束多个包或多个工作流的设计决策。
+
+## 状态
+
+- Proposed：尚在讨论，不能作为实现依据。
+- Accepted：已接受，后续实现必须遵守。
+- Superseded：已被另一份 ADR 替代，保留用于解释历史。
+- Rejected：已否决。
+
+## 规则
+
+1. 文件名使用四位递增编号和短标题。
+2. Accepted ADR 不直接改写结论；方向变化时新建 ADR，并将旧 ADR 标记为 Superseded。
+3. ADR 记录“为什么”和约束，不替代具体 API 文档。
+4. 当前项目没有历史兼容负担。ADR 引起破坏式变更时，应在同一阶段全仓迁移，不保留旧 API 兼容层。
+
+## 索引
+
+- [0001：3D 优先的产品与技术方向](./0001-3d-first-product-direction.md)
+- [0002：统一包命名与发布边界](./0002-package-naming-and-release-boundaries.md)
+- [0003：公共 API 稳定性分层](./0003-api-stability-levels.md)
+- [0004：生命周期与资源所有权模型](./0004-lifecycle-and-resource-ownership.md)
+- [0005：场景与导出数据版本策略](./0005-data-format-versioning.md)
+- [0006：RenderPipeline pass 调度契约](./0006-render-pipeline-pass-contract.md)
+- [0007：海月品牌与包作用域](./0007-haiyue-brand-and-package-scope.md)
+- [0008：统一错误与不可信数据边界](./0008-error-and-untrusted-data-contract.md)
+- [0009：设备恢复与 GPU owner scope](./0009-device-recovery-and-owner-scopes.md)
+- [0010：Scene、插件与渲染边界](./0010-scene-plugin-render-boundaries.md)
+- [0011：编辑器状态、事件与工作流](./0011-editor-state-events-workflows.md)
+- [0012：可观测性、统计基准与真实渲染回归](./0012-observability-benchmarks-render-regression.md)
+- [0013：分层资产管线与受信任脚本 capability](./0013-asset-pipeline-and-trusted-script-capabilities.md)
+- [0014：RenderProfile、PBR 产品闭环与 manifest 交付契约](./0014-render-product-and-delivery-contract.md)
+- [0015：Scene 普通用户黄金路径与帧阶段契约](./0015-scene-golden-path.md)
+- [0016：Scene Render Environment 帧快照](./0016-scene-render-environment.md)
+- [0017：WGSL Shader Feature Composer](./0017-wgsl-feature-composer.md)
+- [0018：统一 Scene Frame Uniform ABI](./0018-scene-frame-uniform-abi.md)
+- [0019：Pipeline 异步编译与预热生命周期](./0019-pipeline-async-compilation-and-warmup.md)
+- [0020：PBR Clearcoat 能力与资产契约](./0020-pbr-clearcoat-capability.md)
+- [0021：灯光与阴影规模化由真实游戏基准驱动](./0021-benchmark-driven-lighting-shadow-scale.md)
+- [0022：BVH Mesh LOD 的资源与空间索引边界](./0022-bvh-mesh-lod.md)
+- [0023：稳定 API 边界重置](./0023-stable-api-boundary-reset.md)
+- [0024：MaterialDescriptor 与 glTF Extension Adapter 边界](./0024-material-descriptor-and-gltf-extension-adapters.md)
+- [0025：OrbitControl 使用归一化 viewport 输入区域](./0025-orbit-control-viewport-input-region.md)
+- [0026：World 逻辑帧与 FrameData 阶段修订分离](./0026-world-frame-phase-epoch.md)
+- [0027：RenderViewFamily 多视图执行模型](./0027-render-view-family-execution.md)
+- [0028：最多四个独立纹理层的 Toon 材质](./0028-four-layer-toon-material.md)
+- [0029：视图级时域抗锯齿与后处理帧上下文](./0029-temporal-antialiasing.md)
+- [0030：网页动效使用独立可扩展运行时中间格式](./0030-web-animation-intermediate-format.md)
+- [0031：动效 sprite、矢量路径与 alpha 合成运行时](./0031-animation-vector-and-compositing-runtime.md)
+- [0032：动效 text/audio 与引擎原生粒子边界](./0032-animation-media-and-engine-particles.md)
+- [0033：引擎原生 3D 粒子使用 view-local billboard 协议](./0033-native-3d-particle-runtime.md)
+- [0034：动态模糊使用按需的 view-local motion-vector buffer](./0034-view-local-motion-blur.md)
+- [0035：根稳定入口只保留 30 个黄金路径概念](./0035-root-golden-path-entrypoint.md)
+- [0036：地形 NavMesh 使用共享高度场与查询期代理净空](./0036-terrain-navmesh-and-dynamic-obstacles.md)
+- [0037：大型模块按运行时职责边界拆分](./0037-large-module-responsibility-boundaries.md)
+- [0038：2D 物理采用统一门面和可替换 Backend SPI](./0038-physics2d-backend-spi.md)
+- [0039：HYA 质量与性能由固定真实 Lottie 语料共同度量](./0039-hya-real-lottie-corpus.md)
+- [0040：3D 物理复用 Backend SPI 边界并采用 Rapier adapter](./0040-physics3d-backend-spi.md)
+- [0041：PBR Transmission 与 Volume 场景颜色路径](./0041-pbr-transmission-volume.md)
+- [0042：Animation3D 采用来源无关的 Clip/Pose/Mixer 公共契约](./0042-animation3d-public-contract.md)
+- [0043：异步 CSG 使用最小 Worker 门面与显式 Worker 失败语义](./0043-async-csg-worker-public-facade.md)
+- [0044：Engine、Editor、Player 与导出 Runtime 使用统一 WebGPU-only 兼容契约](./0044-webgpu-only-compatibility-contract.md)
+- [0045：逐三角形顶点分离采用非索引 Geometry3D 转换](./0045-non-indexed-triangle-separation.md)
+- [0046：经纬图反射在加载阶段转换为现有 cubemap 契约](./0046-equirectangular-reflection-map.md)
+- [0047：通用网格细分采用线性共享边中点转换](./0047-linear-triangle-subdivision.md)
+- [0048：通用网格简化采用受约束 QEM 边折叠](./0048-constrained-qem-geometry-simplification.md)
+- [0049：PBR 多方向光阴影使用固定容量 depth texture array](./0049-fixed-capacity-multi-directional-shadows.md)
+- [0050：Shader 组合采用 Typed IR 与多 Authoring Frontend](./0050-typed-shader-ir-and-authoring-frontends.md)
+- [0051：内置 Shader 使用构建期产物与私有 Runtime Adapter](./0051-build-time-shader-artifacts-and-runtime-adapter.md)
+- [0052：预编译 Shader Artifact V2 显式表达多 Group 与 Layout 所有权](./0052-precompiled-shader-artifact-v2-and-layout-ownership.md)
+- [0053：内置后处理采用 Module Family 与 Artifact V2 批量迁移](./0053-builtin-postprocess-module-family-and-production-migration.md)
+- [0054：2D/UI 与 simple-3D 采用 Module Family 生产迁移](./0054-2d-ui-simple3d-shader-module-family-migration.md)
+- [0055：Production Deformation 必须作为完整 Pass Family 原子迁移](./0055-atomic-production-deformation-pass-family.md)
+- [0056：Production Material Lighting 必须共享生成期 Family 与 ABI](./0056-atomic-production-material-lighting-family.md)
+- [0057：Specialized Rendering 与固定纹理 Utility 采用同一生成期 Family](./0057-specialized-rendering-family-and-fixed-texture-utilities.md)
+- [0058：Typed Compute 副作用与生产 Compute Family](./0058-typed-compute-effects-and-production-family.md)
+- [0059：GLSL ES 3.00 后端只验证 Typed IR 可移植性](./0059-glsl-es300-backend-feasibility-boundary.md)
+- [0060：AO 后处理采用共享 depth/normal 与算法 family](./0060-ambient-occlusion-postprocess-family.md)
+- [0061：Experimental 聚合入口拆为有预算的责任子路径](./0061-focused-experimental-entrypoints.md)
+- [0062：Material Graph 编译器只进入编辑器 Worker 能力](./0062-editor-material-graph-authoring-worker.md)
+- [0063：可选能力统一归入 Extensions Workspace](./0063-optional-capabilities-extensions-workspace.md)
+- [0064：NavMesh 局部表面采样与第一人称移动](./0064-navmesh-surface-holes-and-first-person-controls.md)
+- [0065：实体级多平面渲染裁剪](./0065-entity-multi-plane-render-clipping.md)
+- [0066：大型能力采用真实产品证据准入](./0066-evidence-driven-large-capability-admission.md)
+- [0067：原生 3D HYA 使用必需扩展与独立工程模式](./0067-native-3d-hya-extension-and-project-mode.md)
+- [0068：首发公共包、应用分发与版本边界](./0068-first-public-release-surface.md)
+- [0069：Node.js 支持范围为 22 及以上](./0069-nodejs-22-plus-support.md)
+- [0070：首批 Extensions 转正与只读 Diagnostics 门面](./0070-first-public-extensions-and-readonly-diagnostics.md)
+- [0071：第二批 Extensions 转正与 Feature Freeze 范围纠偏](./0071-second-public-extensions-and-feature-freeze-correction.md)
+- [0072：首发 Windows 最低支持 Windows 10 22H2](./0072-windows-10-first-release-support.md)
+- [0073：渲染性能改用同机跨引擎可移植证据](./0073-portable-cross-engine-performance-evidence.md)
+- [0074：0.1 发布候选前插入 Runtime Convergence](./0074-pre-release-runtime-convergence-sequencing.md)
+- [0075：Production Shader 收敛为单一生成事实源](./0075-production-shader-single-source-convergence.md)
+- [0076：RenderGraph 计划、RenderPipeline 执行与参数化 Renderer Core](./0076-render-plan-execution-and-parameterized-renderer-core.md)
+- [0077：Versioned WorkerChannel 与统一 Async Ownership](./0077-versioned-worker-channel-and-async-ownership.md)
+- [0078：Compute、GUI 数据布局与资源合同](./0078-compute-gui-data-and-resource-contracts.md)
+- [0079：SceneBatch/WASM 仅以真实收益证据保留](./0079-evidence-gated-scene-batch-and-wasm.md)
+- [0080：首发正确性按浏览器与真实硬件 WebGPU 验收](./0080-hardware-webgpu-browser-correctness-matrix.md)
+- [0081：0.1 首发浏览器支持收敛为 Windows](./0081-windows-first-0-1-browser-support.md)
+- [0082：HaiyueStudio 按产品边界拆分为多仓库](./0082-multi-repository-product-boundaries.md)

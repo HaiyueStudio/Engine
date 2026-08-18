@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 – MSAA Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; display: flex; align-items: center; justify-content: center; height: 100vh; }
+    canvas { display: block; width: 900px; height: 600px; }
+    .label {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      color: #eee;
+      font-family: monospace;
+      font-size: 13px;
+      background: rgba(0,0,0,0.6);
+      padding: 8px 12px;
+      border-radius: 4px;
+      pointer-events: none;
+    }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas" width="900" height="600"></canvas>
+  <div class="label" id="info">MSAA: OFF (1×)</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

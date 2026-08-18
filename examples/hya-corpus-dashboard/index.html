@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="HYA 真实 Lottie 素材的 fidelity、size、parse 与 first-frame 仪表盘" />
+  <title>HYA Lottie Corpus Dashboard</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main id="dashboard" class="dashboard">
+    <header class="hero">
+      <div>
+        <div class="eyebrow"><span class="pulse"></span> HAIYUE ANIMATION SPEC</div>
+        <h1>真实 Lottie 语料<br /><span>质量与性能仪表盘</span></h1>
+        <p>用固定上游提交、固定参考帧和同一套浏览器采样，分别观察 small 与 large 语料的 fidelity / size / HTTP delivery / parse / first-frame。</p>
+        <div id="report-meta" class="report-meta">正在读取报告…</div>
+      </div>
+      <div class="hero-actions">
+        <div id="corpus-count" class="corpus-count"></div>
+        <a id="source-revision" class="button button--quiet" href="#" target="_blank" rel="noreferrer">source</a>
+        <button id="export-json" class="button" type="button">导出 JSON</button>
+      </div>
+    </header>
+
+    <section class="kpi-grid" aria-label="核心指标">
+      <article id="kpi-fidelity" class="metric-card metric-card--mint">
+        <div class="metric-label">LEGACY MEDIAN FIDELITY</div><div class="metric-value">—</div><div class="metric-note">—</div>
+      </article>
+      <article id="kpi-size" class="metric-card metric-card--cyan">
+        <div class="metric-label">LEGACY GZIP BYTE SAVING</div><div class="metric-value">—</div><div class="metric-note">—</div>
+      </article>
+      <article id="kpi-parse" class="metric-card metric-card--violet">
+        <div class="metric-label">LEGACY PARSE SPEEDUP</div><div class="metric-value">—</div><div class="metric-note">—</div>
+      </article>
+      <article id="kpi-first-frame" class="metric-card metric-card--amber">
+        <div class="metric-label">LEGACY FIRST FRAME P50</div><div class="metric-value">—</div><div class="metric-note">—</div>
+      </article>
+    </section>
+
+    <section class="cohort-grid" aria-label="小素材与大型素材独立指标">
+      <article id="cohort-small" class="panel cohort-card">
+        <div class="cohort-label">LEGACY / SMALL</div>
+        <dl>
+          <div><dt>Fidelity</dt><dd class="cohort-fidelity">—</dd></div>
+          <div><dt>gzip saving</dt><dd class="cohort-size">—</dd></div>
+          <div><dt>Parse</dt><dd class="cohort-parse">—</dd></div>
+          <div><dt>HTTP p50</dt><dd class="cohort-network">—</dd></div>
+          <div><dt>First frame p50</dt><dd class="cohort-first-frame">—</dd></div>
+        </dl>
+      </article>
+      <article id="cohort-large" class="panel cohort-card cohort-card--large">
+        <div class="cohort-label">LARGE / DELIVERY</div>
+        <dl>
+          <div><dt>Fidelity</dt><dd class="cohort-fidelity">—</dd></div>
+          <div><dt>gzip saving</dt><dd class="cohort-size">—</dd></div>
+          <div><dt>Parse</dt><dd class="cohort-parse">—</dd></div>
+          <div><dt>HTTP p50</dt><dd class="cohort-network">—</dd></div>
+          <div><dt>First frame p50</dt><dd class="cohort-first-frame">—</dd></div>
+        </dl>
+      </article>
+    </section>
+
+    <section class="analysis-grid">
+      <article class="panel chart-panel">
+        <div class="panel-heading">
+          <div><span class="overline">TRADE-OFF MAP</span><h2>体积与视觉保真度</h2></div>
+          <div class="legend"><span class="supported"></span>目标支持 <span class="degraded"></span>降级 <span class="unsupported"></span>待支持</div>
+        </div>
+        <svg id="scatter" viewBox="0 0 760 280" role="img" aria-label="HYA gzip 体积比例与 fidelity 散点图"></svg>
+      </article>
+      <article class="panel methodology">
+        <span class="overline">MEASUREMENT CONTRACT</span>
+        <h2>同一次运行，五条证据链</h2>
+        <dl>
+          <div><dt>Fidelity</dt><dd>WebGPU 像素与固定 AE / lottie-web PNG 的 RGBA + alpha IoU 对比</dd></div>
+          <div><dt>Size</dt><dd>源 Lottie JSON 与生成 HYA 的 raw / gzip-9 字节</dd></div>
+          <div><dt>HTTP delivery</dt><dd>同源真实请求的 headers、流式 body、bytes 与 chunks</dd></div>
+          <div><dt>Parse</dt><dd>预热后的 source-to-runtime median / p95</dd></div>
+          <div><dt>First frame</dt><dd>热 adapter 下，从资源请求到 GPU 队列完成</dd></div>
+        </dl>
+      </article>
+    </section>
+
+    <section class="panel capability-panel">
+      <div class="panel-heading">
+        <div><span class="overline">CURRENT HEAD SUPPORT</span><h2>当前能力支持与完善路径</h2></div>
+        <p id="capability-meta">正在读取当前转换器能力…</p>
+      </div>
+      <div class="table-wrap">
+        <table class="capability-table">
+          <thead><tr><th>能力</th><th>当前状态</th><th>素材 / 出现</th><th>诊断</th><th>责任层</th><th>优先级</th><th>进一步完善</th></tr></thead>
+          <tbody id="capability-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel feature-panel">
+      <div class="panel-heading">
+        <div><span class="overline">FORMAL EVIDENCE ATTRIBUTION</span><h2>正式报告中的失败归因</h2></div>
+        <p>这里保持正式 fidelity/performance evidence 的原始 revision；上表独立展示当前 HEAD 支持情况，避免用旧性能报告覆盖新能力结论。</p>
+      </div>
+      <div class="table-wrap">
+        <table class="feature-table">
+          <thead><tr><th>特性</th><th>状态</th><th>素材 / 出现</th><th>受影响</th><th>诊断</th><th>干净率</th><th>平均 fidelity</th></tr></thead>
+          <tbody id="feature-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel corpus-panel">
+      <div class="panel-heading panel-heading--filters">
+        <div><span class="overline">PINNED CORPUS</span><h2>逐素材结果</h2></div>
+        <div class="filters">
+          <label class="search"><span>搜索</span><input id="search" type="search" placeholder="ID、名称或 feature" /></label>
+          <label><span>规模</span><select id="size-class-filter"><option value="all">全部</option><option value="small">Small / legacy</option><option value="large">Large</option></select></label>
+          <label><span>预期</span><select id="expectation-filter"><option value="all">全部</option><option value="supported">目标支持</option><option value="degraded">能力降级</option><option value="unsupported">待支持</option></select></label>
+          <label><span>分类</span><select id="category-filter"><option value="all">全部</option></select></label>
+          <output id="visible-count" aria-live="polite">—</output>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>素材</th><th>正式报告预期</th><th>Fidelity</th><th>gzip ratio</th><th>Parse</th><th>First frame</th><th>Coverage</th></tr></thead>
+          <tbody id="sample-rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <section id="benchmark-stage" class="benchmark-stage" aria-live="polite">
+    <div class="benchmark-card">
+      <span class="pulse"></span>
+      <h1>HYA browser benchmark</h1>
+      <p id="progress">正在启动 WebGPU…</p>
+      <canvas id="benchmark-canvas" width="80" height="80"></canvas>
+    </div>
+  </section>
+
+  <dialog id="sample-detail">
+    <div class="dialog-head">
+      <div><span class="overline">SAMPLE EVIDENCE</span><h2 id="detail-title"></h2><code id="detail-id"></code></div>
+      <button id="detail-close" type="button" aria-label="关闭">×</button>
+    </div>
+    <div id="detail-metrics" class="detail-metrics"></div>
+    <h3>固定参考帧</h3>
+    <div id="detail-frames" class="detail-frames"></div>
+    <h3>特性失败归因</h3>
+    <div id="detail-feature-failures" class="detail-feature-failures"></div>
+    <h3>转换诊断</h3>
+    <ul id="detail-diagnostics" class="detail-diagnostics"></ul>
+    <a id="detail-source" class="source-link" href="#" target="_blank" rel="noreferrer">查看固定上游 JSON ↗</a>
+  </dialog>
+
+  <div id="page-error" class="page-error" role="alert" hidden></div>
+  <pre id="result" aria-hidden="true"></pre>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

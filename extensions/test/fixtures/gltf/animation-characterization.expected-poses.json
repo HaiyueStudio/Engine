@@ -1,0 +1,58 @@
+{
+  "fixture": "animation-characterization.gltf",
+  "clips": [
+    {
+      "index": 0,
+      "name": "Take",
+      "time": 0.5,
+      "channels": [
+        ["translation", "LINEAR"],
+        ["rotation", "STEP"],
+        ["scale", "CUBICSPLINE"],
+        ["weights", "LINEAR"],
+        ["translation", "LINEAR"]
+      ],
+      "pose": {
+        "node": "AnimatedTRS",
+        "localMatrix": [
+          0, 1.5, 0, 0,
+          -2, 0, 0, 0,
+          0, 0, 2.5, 0,
+          2, 3, 4, 1
+        ],
+        "morphNode": "SkinnedMorph",
+        "morphWeights": [0.5, 0.5],
+        "skinJointMatrices": [
+          1, 0, 0, 0,
+          0, 1, 0, 0,
+          0, 0, 1, 0,
+          0, 0, 0, 1,
+          1, 0, 0, 0,
+          0, 1, 0, 0,
+          0, 0, 1, 0,
+          0, 1, 0, 1
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "name": "Take",
+      "time": 0.5,
+      "channels": [
+        ["translation", "STEP"]
+      ],
+      "missingChannels": ["rotation", "scale", "weights"],
+      "pose": {
+        "node": "AnimatedTRS",
+        "localMatrix": [
+          0, 1, 0, 0,
+          -1, 0, 0, 0,
+          0, 0, 1, 0,
+          1, 2, 3, 1
+        ],
+        "morphNode": "SkinnedMorph",
+        "morphWeights": [0.1, 0.2]
+      }
+    }
+  ]
+}

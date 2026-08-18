@@ -1,0 +1,31 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist-test",
+    "declaration": false,
+    "sourceMap": false,
+    "paths": {
+      "@haiyue/engine/*": ["../engine/dist/*.d.ts"],
+      "@haiyue/engine": ["../engine/dist/index.d.ts"]
+    },
+    "typeRoots": [
+      "../node_modules",
+      "../node_modules/@types",
+      "../engine/node_modules",
+      "../engine/node_modules/@types"
+    ],
+    "types": ["@webgpu/types"]
+  },
+  "include": [
+    "src/animation-state-machine/**/*.ts",
+    "src/animation/Animation2DStateMachine.ts",
+    "src/animation/Animation2DStateMachineVisualRuntime.ts",
+    "src/animation/AnimationAudioClip.ts",
+    "src/animation/HyaAnimation2DClipAdapter.ts",
+    "src/animation/AnimationTextRasterizer.ts",
+    "src/animation/runtime/mixer/**/*.ts",
+    "src/animation3d/**/*.ts",
+    "src/types/earcut.d.ts"
+  ]
+}

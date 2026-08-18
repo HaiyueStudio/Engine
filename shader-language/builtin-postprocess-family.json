@@ -1,0 +1,21 @@
+{
+  "format": "haiyue-builtin-postprocess-family",
+  "version": 1,
+  "id": "engine.postprocess-builtins",
+  "passes": [
+    { "id": "present", "operation": "present" },
+    { "id": "grayscale", "operation": "grayscale" },
+    { "id": "sobel", "operation": "sobel" },
+    { "id": "fxaa", "operation": "fxaa" },
+    { "id": "gaussian-blur", "operation": "gaussian-blur" },
+    { "id": "outline-edge", "operation": "outline-edge" },
+    { "id": "outline-blur", "operation": "outline-blur" },
+    { "id": "outline-overlay", "operation": "outline-overlay" },
+    { "id": "taa", "operation": "taa" },
+    { "id": "ssao", "operation": "ssao" },
+    { "id": "sao", "operation": "sao" },
+    { "id": "gtao", "operation": "gtao" },
+    { "id": "ao-denoise", "operation": "ao-denoise" },
+    { "id": "ao-upscale", "operation": "ao-upscale" }
+  ]
+}

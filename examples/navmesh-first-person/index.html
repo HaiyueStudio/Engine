@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Haiyue NavMesh Hole + First Person</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #071019; color: #effffb; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .panel { position: fixed; z-index: 3; top: 16px; left: 16px; width: min(390px, calc(100vw - 32px)); padding: 15px 16px; border: 1px solid rgba(94,235,203,.24); border-radius: 14px; background: rgba(5,15,22,.84); box-shadow: 0 24px 72px rgba(0,0,0,.42); backdrop-filter: blur(16px); pointer-events: none; }
+    h1 { margin: 0 0 6px; font-size: 17px; letter-spacing: .01em; }
+    .intro { margin: 0; color: #98b4b4; font-size: 10px; line-height: 1.6; }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-top: 12px; }
+    .metric { padding: 8px 5px; border-radius: 8px; background: rgba(13,31,38,.86); text-align: center; }
+    .metric strong { display: block; color: #73eed1; font: 11px ui-monospace, SFMono-Regular, monospace; }
+    .metric span { color: #66838a; font-size: 7px; text-transform: uppercase; letter-spacing: .08em; }
+    #message { min-height: 34px; margin-top: 10px; padding: 9px 10px; border-left: 2px solid #63dfc2; background: rgba(9,25,31,.78); color: #bfd4d0; font-size: 9px; line-height: 1.6; }
+    .keys { display: flex; gap: 10px; margin-top: 9px; color: #7f9da1; font-size: 8px; }
+    .keys b { color: #dceeea; }
+    #start { position: fixed; z-index: 4; inset: 0; margin: auto; width: 220px; height: 62px; border: 1px solid rgba(105,239,210,.7); border-radius: 14px; background: rgba(5,20,28,.9); color: #eafff9; font: 600 13px system-ui; cursor: pointer; box-shadow: 0 18px 60px rgba(0,0,0,.48); transition: opacity .18s; }
+    #start:hover { background: rgba(15,48,53,.94); }
+    #start.hidden { opacity: 0; pointer-events: none; }
+    .crosshair { position: fixed; z-index: 2; left: 50%; top: 50%; width: 18px; height: 18px; transform: translate(-50%,-50%); pointer-events: none; }
+    .crosshair::before, .crosshair::after { content: ''; position: absolute; background: rgba(226,255,248,.8); box-shadow: 0 0 6px rgba(70,244,204,.5); }
+    .crosshair::before { left: 8px; top: 2px; width: 2px; height: 14px; }
+    .crosshair::after { left: 2px; top: 8px; width: 14px; height: 2px; }
+    .note { position: fixed; right: 16px; bottom: 14px; color: rgba(207,232,228,.48); font-size: 9px; }
+    #result { display: none; }
+    @media (max-width: 680px) { .panel { top: 9px; left: 9px; width: calc(100vw - 18px); } .note { display: none; } }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="1280" height="760"></canvas>
+  <aside class="panel">
+    <h1>NavMesh · Hole & First Person</h1>
+    <p class="intro">红色圆环内没有局部导航表面：寻路会绕开，第一人称球体则会在进入后受重力穿过洞口。右侧五级台阶高于自动跨步阈值，需要跳跃。</p>
+    <div class="metrics">
+      <div class="metric"><strong id="lock">CLICK TO LOCK</strong><span>Pointer</span></div>
+      <div class="metric"><strong id="grounded">YES</strong><span>Grounded</span></div>
+      <div class="metric"><strong id="height">0.38</strong><span>Player Y</span></div>
+      <div class="metric"><strong id="falls">0</strong><span>Hole falls</span></div>
+    </div>
+    <div id="message">点击画面锁定鼠标，使用 WASD 移动。</div>
+    <div class="keys"><span><b>WASD</b> 移动</span><span><b>SPACE</b> 跳跃</span><span><b>SHIFT</b> 加速</span><span><b>ESC</b> 释放鼠标</span></div>
+  </aside>
+  <button id="start" type="button">点击进入第一人称控制</button>
+  <div class="crosshair" aria-hidden="true"></div>
+  <div class="note">单层 Y-up NavMesh：表面洞已支持；洞穴/叠层桥梁仍属于后续 polygon backend。</div>
+  <pre id="result" aria-hidden="true"></pre>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 2,
+  "fixture": "render3d.planar-reflection",
+  "policy": {
+    "hash": "diagnostic-only",
+    "nonBlackPixelsRelativeTolerance": 0.02,
+    "averageLuminanceTolerance": 1,
+    "sampleChannelTolerance": 2
+  },
+  "cases": {
+    "front-visible": {
+      "width": 320,
+      "height": 192,
+      "hash": "99ef2630",
+      "nonBlackPixels": 8239,
+      "averageLuminance": 11,
+      "samples": {
+        "center": [
+          25,
+          25,
+          25,
+          255
+        ],
+        "leftMirror": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "rightMirror": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "corner": [
+          0,
+          0,
+          0,
+          255
+        ]
+      },
+      "mirrorStats": {
+        "planned": 1,
+        "executed": 1,
+        "dropped": 0,
+        "rttPixels": 12288,
+        "maxDepth": 1,
+        "dropReasons": {
+          "invalid-camera": 0,
+          "back-facing": 0,
+          "outside-frustum": 0,
+          "too-distant": 0,
+          "below-min-pixels": 0,
+          "zero-contribution": 0,
+          "view-budget": 0,
+          "pixel-budget": 0,
+          "materialize-failed": 0
+        }
+      }
+    },
+    "recursive-deepest-first": {
+      "width": 320,
+      "height": 192,
+      "hash": "65504c6c",
+      "nonBlackPixels": 10849,
+      "averageLuminance": 11,
+      "samples": {
+        "center": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "leftMirror": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "rightMirror": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "corner": [
+          0,
+          0,
+          0,
+          255
+        ]
+      },
+      "mirrorStats": {
+        "planned": 10,
+        "executed": 10,
+        "dropped": 0,
+        "rttPixels": 53064,
+        "maxDepth": 5,
+        "dropReasons": {
+          "invalid-camera": 0,
+          "back-facing": 0,
+          "outside-frustum": 0,
+          "too-distant": 0,
+          "below-min-pixels": 0,
+          "zero-contribution": 0,
+          "view-budget": 0,
+          "pixel-budget": 0,
+          "materialize-failed": 0
+        }
+      }
+    },
+    "frustum-culled": {
+      "width": 320,
+      "height": 192,
+      "hash": "5b9850b0",
+      "nonBlackPixels": 6559,
+      "averageLuminance": 11,
+      "samples": {
+        "center": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "leftMirror": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "rightMirror": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "corner": [
+          0,
+          0,
+          0,
+          255
+        ]
+      },
+      "mirrorStats": {
+        "planned": 1,
+        "executed": 0,
+        "dropped": 1,
+        "rttPixels": 0,
+        "maxDepth": 0,
+        "dropReasons": {
+          "invalid-camera": 0,
+          "back-facing": 0,
+          "outside-frustum": 1,
+          "too-distant": 0,
+          "below-min-pixels": 0,
+          "zero-contribution": 0,
+          "view-budget": 0,
+          "pixel-budget": 0,
+          "materialize-failed": 0
+        }
+      }
+    },
+    "back-facing": {
+      "width": 320,
+      "height": 192,
+      "hash": "6c5663e0",
+      "nonBlackPixels": 8239,
+      "averageLuminance": 11,
+      "samples": {
+        "center": [
+          20,
+          20,
+          20,
+          255
+        ],
+        "leftMirror": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "rightMirror": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "corner": [
+          0,
+          0,
+          0,
+          255
+        ]
+      },
+      "mirrorStats": {
+        "planned": 1,
+        "executed": 0,
+        "dropped": 1,
+        "rttPixels": 0,
+        "maxDepth": 0,
+        "dropReasons": {
+          "invalid-camera": 0,
+          "back-facing": 1,
+          "outside-frustum": 0,
+          "too-distant": 0,
+          "below-min-pixels": 0,
+          "zero-contribution": 0,
+          "view-budget": 0,
+          "pixel-budget": 0,
+          "materialize-failed": 0
+        }
+      }
+    }
+  }
+}

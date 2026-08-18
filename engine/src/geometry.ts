@@ -1,0 +1,13 @@
+export * from './geometry/index';
+export { LineGeometry } from './geometry/LineGeometry';
+export { createPlane3D } from './geometry/PlaneGeometry';
+export type { PlaneGeometryOptions } from './geometry/PlaneGeometry';
+export { createCylinder3D } from './geometry/CylinderGeometry';
+export type { CylinderGeometryOptions } from './geometry/CylinderGeometry';
+export { createTorus3D } from './geometry/TorusGeometry';
+export type { TorusGeometryOptions } from './geometry/TorusGeometry';
+export { Geometry2D } from './geometry/Geometry2D';
+export { createCircle2D, createPolygon2D, createRect2D, createTriangle2D } from './geometry/Shapes2D';
+export type { CircleGeometry2DOptions, CustomPolygonOptions, RectGeometry2DOptions, RegularPolygonOptions, TriangleGeometry2DOptions } from './geometry/Shapes2D';
+export { createSVG2DMeshes } from './svg/SVGGeometry2D';
+export type { SVG2DMeshData, SVG2DOptions } from './svg/SVGGeometry2D';

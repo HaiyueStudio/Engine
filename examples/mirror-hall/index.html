@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 – Recursive Mirror Hall</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #040711; color: #eef4ff; font-family: Inter, system-ui, sans-serif; }
+    canvas { display: block; }
+    #panel {
+      position: absolute; top: 16px; left: 16px; width: 260px; padding: 14px;
+      border: 1px solid rgba(145, 187, 255, .2); border-radius: 11px;
+      background: rgba(7, 13, 27, .84); box-shadow: 0 16px 44px rgba(0, 0, 0, .36);
+      backdrop-filter: blur(14px);
+    }
+    h1 { margin: 0 0 5px; font-size: 17px; font-weight: 680; }
+    p { margin: 0 0 11px; color: rgba(224, 235, 255, .58); font-size: 11px; line-height: 1.5; }
+    .stat { display: flex; justify-content: space-between; padding: 7px 9px; margin-bottom: 10px; border-radius: 7px; background: rgba(91, 154, 255, .1); color: rgba(225, 237, 255, .68); font-size: 11px; }
+    .stat output { color: #fff; font-weight: 650; }
+    label { display: grid; grid-template-columns: 1fr 45px; align-items: center; gap: 7px; margin-top: 9px; font-size: 11px; color: rgba(224, 235, 255, .68); }
+    input { grid-column: 1 / -1; width: 100%; accent-color: #62a9ff; }
+    output { text-align: right; color: #fff; font-variant-numeric: tabular-nums; }
+    button {
+      width: 100%; margin-top: 12px; padding: 8px; border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 7px; color: rgba(235, 243, 255, .68); background: rgba(255, 255, 255, .05);
+      cursor: pointer; font-size: 11px;
+    }
+    button:hover { background: rgba(255, 255, 255, .1); }
+    button.active { color: #fff; border-color: rgba(94, 174, 255, .72); background: rgba(61, 139, 255, .22); }
+    #hint { position: absolute; bottom: 14px; width: 100%; text-align: center; color: rgba(235, 243, 255, .44); font-size: 11px; text-shadow: 0 1px 4px #000; }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas" width="1100" height="700"></canvas>
+  <aside id="panel">
+    <h1>Recursive Mirror Hall</h1>
+    <p>Two opposing mirrors render deepest-first. Every additional bounce reveals one more reflected copy of the room.</p>
+    <div class="stat"><span>Render views this frame</span><output id="view-count">0</output></div>
+    <div class="stat"><span>Planned / rendered / dropped</span><output id="mirror-plan">0 / 0 / 0</output></div>
+    <div class="stat"><span>Reflection target pixels</span><output id="rtt-pixels">0.00 MP</output></div>
+    <label>Reflection bounces <output id="bounces-value">5</output>
+      <input id="bounces" type="range" min="1" max="6" step="1" value="5" />
+    </label>
+    <label>Resolution per bounce <output id="resolution-value">72%</output>
+      <input id="resolution" type="range" min="0.4" max="1" step="0.04" value="0.72" />
+    </label>
+    <button id="toggle-animation" class="active">Animation enabled</button>
+  </aside>
+  <div id="hint">1–6 = reflection bounces · Space = pause · drag = orbit · scroll = zoom</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

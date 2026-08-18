@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "fixture": "webgpu-triangle-rgba8unorm-64x64",
+  "width": 64,
+  "height": 64,
+  "hash": "b61415c5",
+  "backgroundPixels": 2944,
+  "trianglePixels": 1152,
+  "center": [
+    64,
+    160,
+    224,
+    255
+  ],
+  "corner": [
+    16,
+    32,
+    48,
+    255
+  ],
+  "adapter": {
+    "vendor": "nvidia",
+    "architecture": "pascal",
+    "device": "",
+    "description": ""
+  },
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36"
+}

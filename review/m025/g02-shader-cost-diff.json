@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "goal": "g02-shader-single-source-artifact-convergence",
+  "budget": "shader-language/shader-cost-budgets.json",
+  "budgetChanged": false,
+  "status": "passed",
+  "production": {
+    "generatedWgslBytes": { "baseline": 305504, "current": 327019, "delta": 21515, "maximumGrowth": 22500 },
+    "generatedWgslFiles": { "baseline": 64, "current": 64, "delta": 0, "maximumGrowth": 1 },
+    "variantCount": { "baseline": 56, "current": 56, "delta": 0, "maximumGrowth": 2 },
+    "pipelineCount": { "baseline": 56, "current": 56, "delta": 0, "maximumGrowth": 2 }
+  },
+  "historicalBundleGzip": {
+    "stage10": { "baseline": 7143, "current": 7205, "delta": 62, "budget": 7500 },
+    "stage11": { "baseline": 14080, "current": 14130, "delta": 50, "budget": 15000 },
+    "stage12": { "baseline": 10206, "current": 10231, "delta": 25, "budget": 11500 },
+    "stage13": { "baseline": 3900, "current": 3900, "delta": 0, "budget": 4500 }
+  },
+  "sourceReport": "artifacts/shader-language/shader-cost.json",
+  "formalReleaseEvidence": false
+}

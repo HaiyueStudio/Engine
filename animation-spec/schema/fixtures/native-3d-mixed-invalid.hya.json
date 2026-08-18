@@ -1,0 +1,50 @@
+{
+  "document": {
+    "format": "haiyue-animation",
+  "version": "1.0",
+  "canvas": {
+    "width": 640,
+    "height": 360,
+    "coordinateSystem": "screen-y-down"
+  },
+  "duration": 1,
+  "nodes": [
+    {
+      "id": "forbidden-2d-node",
+      "components": [
+        {
+          "type": "shape2d",
+          "shape": "rect",
+          "size": [10, 10],
+          "fill": [1, 0, 0, 1]
+        }
+      ]
+    }
+  ],
+  "tracks": [],
+  "extensionsUsed": ["org.haiyue.animation-3d@1"],
+  "extensionsRequired": ["org.haiyue.animation-3d@1"],
+  "extensions": {
+    "org.haiyue.animation-3d@1": {
+      "format": "haiyue-animation-3d@1",
+      "mode": "native-3d",
+      "coordinateSystem": {
+        "handedness": "right",
+        "upAxis": "+y",
+        "forwardAxis": "-z",
+        "unit": "meter",
+        "angles": "radian",
+        "rotationStorage": "normalized-xyzw-quaternion"
+      },
+      "viewport": { "width": 640, "height": 360 },
+      "materials": [],
+      "nodes": [],
+      "clips": []
+    }
+  }
+  },
+  "expectedDiagnostic": {
+    "code": "E_ANIMATION_3D_MIXED_DIMENSIONS",
+    "path": "$.nodes"
+  }
+}

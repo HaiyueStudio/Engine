@@ -1,0 +1,53 @@
+{
+  "name": "@haiyue/shader-language",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Build-time typed shader IR, Material Graph compiler, and deterministic WGSL tooling for HaiyueStudio.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HaiyueStudio/Engine.git",
+    "directory": "shader-language"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "src/**/*"
+  ],
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./material-graph": {
+      "source": "./src/material-graph.ts",
+      "types": "./dist/material-graph.d.ts",
+      "import": "./dist/material-graph.js"
+    }
+  },
+  "scripts": {
+    "build": "node ../scripts/build-rollup-once.mjs",
+    "test": "node ../scripts/build-rollup-once.mjs && node --test --test-concurrency=1 \"test/**/*.test.mjs\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "rollup": "^4.0.0",
+    "tslib": "^2.6.0",
+    "typescript": "^5.2.0"
+  }
+}

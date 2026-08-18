@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Haiyue WebGPU Pixel Regression</title>
+<body><pre id="result">pending</pre></body>
+<script type="module">
+const result = document.querySelector('#result');
+try {
+  if (!navigator.gpu) throw new Error('WebGPU unavailable');
+  const adapter = await navigator.gpu.requestAdapter();
+  if (!adapter) throw new Error('WebGPU adapter unavailable');
+  const device = await adapter.requestDevice();
+  const width = 64;
+  const height = 64;
+  const texture = device.createTexture({
+    size: [width, height],
+    format: 'rgba8unorm',
+    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
+  });
+  const module = device.createShaderModule({ code: `
+    @vertex fn vs(@builtin(vertex_index) index: u32) -> @builtin(position) vec4f {
+      var positions = array<vec2f, 3>(vec2f(-0.75, -0.75), vec2f(0.75, -0.75), vec2f(0.0, 0.75));
+      return vec4f(positions[index], 0.0, 1.0);
+    }
+    @fragment fn fs() -> @location(0) vec4f { return vec4f(0.2509804, 0.6274510, 0.8784314, 1.0); }
+  ` });
+  const pipeline = device.createRenderPipeline({
+    layout: 'auto',
+    vertex: { module, entryPoint: 'vs' },
+    fragment: { module, entryPoint: 'fs', targets: [{ format: 'rgba8unorm' }] },
+    primitive: { topology: 'triangle-list' },
+  });
+  const readback = device.createBuffer({
+    size: width * height * 4,
+    usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+  });
+  const encoder = device.createCommandEncoder();
+  const pass = encoder.beginRenderPass({ colorAttachments: [{
+    view: texture.createView(),
+    clearValue: { r: 16 / 255, g: 32 / 255, b: 48 / 255, a: 1 },
+    loadOp: 'clear',
+    storeOp: 'store',
+  }] });
+  pass.setPipeline(pipeline);
+  pass.draw(3);
+  pass.end();
+  encoder.copyTextureToBuffer({ texture }, { buffer: readback, bytesPerRow: width * 4 }, [width, height]);
+  device.queue.submit([encoder.finish()]);
+  await readback.mapAsync(GPUMapMode.READ);
+  const pixels = new Uint8Array(readback.getMappedRange());
+  let hash = 0x811c9dc5;
+  let backgroundPixels = 0;
+  let trianglePixels = 0;
+  for (let offset = 0; offset < pixels.length; offset += 4) {
+    for (let channel = 0; channel < 4; channel++) {
+      hash ^= pixels[offset + channel];
+      hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+    if (pixels[offset] === 16 && pixels[offset + 1] === 32 && pixels[offset + 2] === 48 && pixels[offset + 3] === 255) backgroundPixels++;
+    if (pixels[offset] === 64 && pixels[offset + 1] === 160 && pixels[offset + 2] === 224 && pixels[offset + 3] === 255) trianglePixels++;
+  }
+  const payload = {
+    schemaVersion: 1,
+    fixture: 'webgpu-triangle-rgba8unorm-64x64',
+    width,
+    height,
+    hash: hash.toString(16).padStart(8, '0'),
+    backgroundPixels,
+    trianglePixels,
+    center: Array.from(pixels.slice(((32 * width) + 32) * 4, ((32 * width) + 32) * 4 + 4)),
+    corner: Array.from(pixels.slice(0, 4)),
+    adapter: {
+      vendor: adapter.info?.vendor ?? '',
+      architecture: adapter.info?.architecture ?? '',
+      device: adapter.info?.device ?? '',
+      description: adapter.info?.description ?? '',
+    },
+    userAgent: navigator.userAgent,
+  };
+  readback.unmap();
+  readback.destroy();
+  texture.destroy();
+  result.textContent = JSON.stringify(payload);
+  result.dataset.status = 'passed';
+} catch (error) {
+  result.textContent = JSON.stringify({ error: error instanceof Error ? error.message : String(error) });
+  result.dataset.status = 'failed';
+}
+</script>
+</html>

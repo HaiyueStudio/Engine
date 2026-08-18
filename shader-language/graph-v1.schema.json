@@ -1,0 +1,264 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haiyue.dev/schema/shader-graph-v1.schema.json",
+  "title": "Haiyue Shader Graph v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "kind",
+    "profile",
+    "resources",
+    "nodes",
+    "outputs"
+  ],
+  "properties": {
+    "format": {
+      "const": "haiyue-shader-graph"
+    },
+    "version": {
+      "const": 1
+    },
+    "kind": {
+      "enum": [
+        "material",
+        "postprocess",
+        "compute"
+      ]
+    },
+    "profile": {
+      "enum": [
+        "webgpu-portable",
+        "webgpu-enhanced",
+        "webgl2-compatible"
+      ]
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/resource"
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/value"
+      }
+    },
+    "sceneFeatures": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9.-]*$"
+      },
+      "uniqueItems": true
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "space",
+        "kind",
+        "valueType",
+        "frequency"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*(?:\\.[a-z][A-Za-z0-9]*)+$"
+        },
+        "space": {
+          "enum": [
+            "material",
+            "pass"
+          ]
+        },
+        "kind": {
+          "enum": [
+            "uniform",
+            "texture-2d",
+            "texture-cube",
+            "sampler",
+            "storage-read",
+            "storage-read-write"
+          ]
+        },
+        "valueType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "frequency": {
+          "enum": [
+            "material",
+            "draw",
+            "frame",
+            "pass"
+          ]
+        },
+        "colorSpace": {
+          "enum": [
+            "linear",
+            "srgb",
+            "data"
+          ]
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "typeVersion",
+        "inputs"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"
+        },
+        "type": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]*$"
+        },
+        "typeVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/value"
+          }
+        },
+        "metadata": {
+          "type": "object"
+        }
+      }
+    },
+    "value": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/literalValue"
+        },
+        {
+          "$ref": "#/$defs/nodeValue"
+        },
+        {
+          "$ref": "#/$defs/semanticValue"
+        },
+        {
+          "$ref": "#/$defs/resourceValue"
+        }
+      ]
+    },
+    "literalValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "literal"
+      ],
+      "properties": {
+        "literal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "minLength": 1
+            },
+            "value": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 16,
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              ]
+            },
+            "space": {
+              "type": "string"
+            },
+            "colorSpace": {
+              "enum": [
+                "linear",
+                "srgb",
+                "data"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "nodeValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "node",
+        "output"
+      ],
+      "properties": {
+        "node": {
+          "type": "string"
+        },
+        "output": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "semanticValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "semantic"
+      ],
+      "properties": {
+        "semantic": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z0-9]*(?:\\.[a-z][A-Za-z0-9]*)+$"
+        }
+      }
+    },
+    "resourceValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource"
+      ],
+      "properties": {
+        "resource": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

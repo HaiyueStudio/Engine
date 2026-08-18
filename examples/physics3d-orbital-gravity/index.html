@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 · 天体引力</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <link rel="stylesheet" href="../physics3d-example.css" />
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <aside class="panel">
+    <h1>天体引力</h1>
+    <p class="intro">零全局重力下，用 Physics3DGravitySource 和通用 force API 计算软化后的平方反比引力。</p>
+    <div class="badges"><span class="badge">inverse-square</span><span class="badge">multi-body</span><span class="badge">backend-neutral force</span></div>
+    <div class="metric"><span>模拟时间</span><output id="elapsed">0.0 s</output></div>
+    <button id="reset" type="button">重置轨道</button>
+  </aside>
+  <div class="hint">三颗行星具有不同轨道速度 · 可自由旋转视角</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

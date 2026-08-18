@@ -1,0 +1,12 @@
+{
+  "format": "haiyue-builtin-render-family",
+  "version": 1,
+  "id": "components-2d-ui",
+  "kind": "2d-ui",
+  "passes": [
+    { "id": "animation-2d", "operation": "animation-2d" },
+    { "id": "canvas-text-2d", "operation": "canvas-text-2d" },
+    { "id": "spine2d", "operation": "spine2d" },
+    { "id": "tilemap2d", "operation": "tilemap2d" }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "paths": {
+      "@haiyue/animation-spec": ["../animation-spec/dist/index.d.ts"],
+      "@haiyue/engine/*": ["../engine/dist/*.d.ts"],
+      "@haiyue/engine": ["../engine/dist/index.d.ts"]
+    },
+    "typeRoots": ["../node_modules", "../node_modules/@types", "../engine/node_modules", "../engine/node_modules/@types"],
+    "types": ["@webgpu/types"]
+  },
+  "include": ["src/**/*.ts"]
+}

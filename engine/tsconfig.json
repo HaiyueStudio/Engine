@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "declarationDir": "dist",
+    "outDir": "dist",
+    "rootDir": "src",
+    "importHelpers": true,
+    "experimentalDecorators": true,
+    "types": ["@webgpu/types"],
+    "paths": {
+      "box2d.ts/dist/box2d.umd.js": ["./src/types/box2d-umd.d.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

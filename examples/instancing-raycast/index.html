@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - Instancing Raycast</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #070b12;
+      height: 100vh;
+      overflow: hidden;
+      font-family: monospace;
+      color: rgba(226,232,240,0.72);
+    }
+    canvas {
+      display: block;
+      cursor: crosshair;
+    }
+    #info {
+      position: fixed;
+      left: 16px;
+      top: 16px;
+      z-index: 2;
+      padding: 8px 10px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 6px;
+      background: rgba(12, 18, 28, 0.82);
+      backdrop-filter: blur(8px);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div id="info">1000 instanced spheres · hover to recolor · drag = orbit</div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

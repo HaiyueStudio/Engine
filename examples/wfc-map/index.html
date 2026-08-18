@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wave Function Collapse Example</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #d8dde3;
+      color: #15202b;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      user-select: none;
+    }
+    canvas {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      touch-action: none;
+    }
+    #hud {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      display: grid;
+      grid-template-columns: auto auto auto;
+      gap: 8px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid rgba(26, 36, 48, 0.18);
+      border-radius: 7px;
+      background: rgba(244, 247, 250, 0.86);
+      box-shadow: 0 10px 28px rgba(30, 44, 60, 0.14);
+      backdrop-filter: blur(8px);
+    }
+    #hud span {
+      color: rgba(21, 32, 43, 0.72);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    #hud strong {
+      color: #15202b;
+      font-variant-numeric: tabular-nums;
+    }
+    button {
+      height: 30px;
+      border: 1px solid rgba(24, 38, 54, 0.22);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.72);
+      color: #15202b;
+      padding: 0 12px;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button:hover { background: rgba(255, 255, 255, 0.95); }
+    #status {
+      grid-column: 1 / -1;
+      color: rgba(21, 32, 43, 0.58);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="1280" height="720"></canvas>
+  <div id="hud">
+    <button id="generate">Generate</button>
+    <span>Seed <strong id="seed">0</strong></span>
+    <span>Backtracks <strong id="backtracks">0</strong></span>
+    <div id="status">Drag to orbit, wheel to zoom. Press R to generate another map.</div>
+  </div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

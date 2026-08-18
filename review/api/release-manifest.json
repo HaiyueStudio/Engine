@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "releaseId": "haiyue-0.1.0-first-public-release",
+  "releaseVersion": "0.1.0",
+  "releaseMatrix": "config/release-matrix.json",
+  "featureFreeze": {
+    "status": "active",
+    "classification": "refrozen-after-omitted-mature-capabilities",
+    "exceptions": "P0/P1 release blockers only"
+  },
+  "artifacts": [
+    {
+      "id": "engine-npm",
+      "kind": "npm-package",
+      "workspace": "engine",
+      "packageName": "@haiyue/engine",
+      "version": "0.1.0",
+      "entry": ".",
+      "supportTier": "stable",
+      "owner": "engine",
+      "verificationCommands": ["npm run api:check", "npm run verify:engine-package"],
+      "publishChannel": "npm-public-latest",
+      "rollbackUnit": "npm:@haiyue/engine@0.1.0"
+    },
+    {
+      "id": "animation-spec-npm",
+      "kind": "npm-package",
+      "workspace": "animation-spec",
+      "packageName": "@haiyue/animation-spec",
+      "version": "0.1.0",
+      "entry": ".",
+      "supportTier": "stable",
+      "owner": "animation-spec",
+      "verificationCommands": ["npm run api:check", "npm run verify:engine-package"],
+      "publishChannel": "npm-public-latest",
+      "rollbackUnit": "npm:@haiyue/animation-spec@0.1.0"
+    },
+    {
+      "id": "extensions-npm",
+      "kind": "npm-package",
+      "workspace": "extensions",
+      "packageName": "@haiyue/extensions",
+      "version": "0.1.0",
+      "entry": "./animation",
+      "supportTier": "stable-focused-subpaths",
+      "owner": "extensions",
+      "verificationCommands": ["npm run api:check", "npm run verify:engine-package"],
+      "publishChannel": "npm-public-latest",
+      "rollbackUnit": "npm:@haiyue/extensions@0.1.0"
+    },
+    {
+      "id": "scene-editor-static",
+      "kind": "static-web-app",
+      "workspace": "editor",
+      "version": "0.1.0",
+      "entry": "index.html",
+      "supportTier": "stable",
+      "owner": "scene-editor",
+      "verificationCommands": ["npm run release:artifact:check"],
+      "publishChannel": "immutable-static-deployment",
+      "rollbackUnit": "static:scene-editor:0.1.0"
+    },
+    {
+      "id": "animation-editor-static",
+      "kind": "static-web-app",
+      "workspace": "AnimationEditor",
+      "version": "0.1.0",
+      "entry": "index.html",
+      "supportTier": "stable",
+      "owner": "animation-editor",
+      "verificationCommands": ["npm run release:artifact:check"],
+      "publishChannel": "immutable-static-deployment",
+      "rollbackUnit": "static:animation-editor:0.1.0"
+    },
+    {
+      "id": "voxel-editor-pwa",
+      "kind": "pwa",
+      "workspace": "voxelEditor",
+      "version": "0.1.0",
+      "entry": "index.html",
+      "supportTier": "stable",
+      "owner": "voxel-editor",
+      "verificationCommands": ["npm run release:artifact:check"],
+      "publishChannel": "immutable-static-deployment",
+      "rollbackUnit": "pwa:voxel-editor:0.1.0"
+    },
+    {
+      "id": "voxel-editor-electron",
+      "kind": "electron-platform-set",
+      "workspace": "voxelEditor",
+      "version": "0.1.0",
+      "entry": "electron/main.cjs",
+      "supportTier": "preview-unsigned",
+      "owner": "voxel-editor",
+      "verificationCommands": ["npm run release:artifact:check"],
+      "publishChannel": "github-release-preview-attachment",
+      "rollbackUnit": "electron:voxel-editor:0.1.0"
+    },
+    {
+      "id": "examples-static-catalog",
+      "kind": "static-catalog",
+      "workspace": "examples",
+      "version": "0.1.0",
+      "entry": "index.html",
+      "supportTier": "supporting",
+      "owner": "examples",
+      "verificationCommands": ["npm run build:examples", "npm run examples:catalog:check"],
+      "publishChannel": "immutable-static-deployment",
+      "rollbackUnit": "static:examples:0.1.0"
+    },
+    {
+      "id": "games-static-catalog",
+      "kind": "static-catalog",
+      "workspace": "games",
+      "version": "0.1.0",
+      "entry": "index.html",
+      "supportTier": "supporting",
+      "owner": "games",
+      "verificationCommands": ["npm run build:games"],
+      "publishChannel": "immutable-static-deployment",
+      "rollbackUnit": "static:games:0.1.0"
+    }
+  ]
+}

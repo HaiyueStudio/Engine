@@ -1,0 +1,14 @@
+{
+  "format": "haiyue-builtin-render-family",
+  "version": 1,
+  "id": "engine-simple-3d",
+  "kind": "simple-3d",
+  "passes": [
+    { "id": "basic-material", "operation": "basic-material" },
+    { "id": "basic-material-skinned", "operation": "basic-material-skinned" },
+    { "id": "mesh-helper", "operation": "mesh-helper" },
+    { "id": "normal-material", "operation": "normal-material" },
+    { "id": "particle3d", "operation": "particle3d" },
+    { "id": "sky", "operation": "sky" }
+  ]
+}

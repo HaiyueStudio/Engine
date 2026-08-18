@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>海月 · PBR 材质实验室</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --panel: #07111fe8;
+      --surface: #10243b;
+      --border: #80c9ff52;
+      --accent: #77c8ff;
+      --muted: #8ca5bb;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #07111f; color: #dcecff; font: 12px/1.4 ui-monospace, monospace; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .panel {
+      position: fixed;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--panel);
+      box-shadow: 0 12px 36px #0008;
+      backdrop-filter: blur(14px);
+    }
+    #status-panel { top: 14px; left: 14px; width: 272px; padding: 13px; }
+    #inspector {
+      top: 12px;
+      right: 12px;
+      width: min(370px, calc(100vw - 24px));
+      max-height: calc(100vh - 24px);
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-color: #315471 transparent;
+    }
+    h1 { margin: 0 0 9px; font: 650 15px/1.2 system-ui; letter-spacing: .01em; }
+    h2 { margin: 0; font: 650 13px/1.2 system-ui; }
+    .status-row, .field { display: grid; grid-template-columns: minmax(112px, 1fr) minmax(0, 1.25fr); align-items: center; gap: 10px; min-height: 28px; }
+    .status-row { grid-template-columns: 1fr auto; min-height: 24px; }
+    .field > label, .field > span { color: #c2d3e2; }
+    .field output { min-width: 42px; text-align: right; color: var(--accent); font-variant-numeric: tabular-nums; }
+    .range { display: grid; grid-template-columns: minmax(0, 1fr) 46px; align-items: center; gap: 7px; }
+    .triple { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+    .triple input { width: 100%; }
+    .inline { display: flex; align-items: center; gap: 7px; }
+    .toolbar { position: sticky; top: 0; z-index: 2; padding: 12px; border-bottom: 1px solid var(--border); background: #07111ff3; }
+    .toolbar-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; }
+    .toolbar-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 7px; }
+    details { border-bottom: 1px solid #80c9ff25; }
+    details > summary { cursor: pointer; padding: 10px 12px; color: #e5f3ff; font: 600 12px system-ui; user-select: none; }
+    details > summary::marker { color: var(--accent); }
+    .group { display: grid; gap: 5px; padding: 0 12px 12px; }
+    .subhead { margin: 5px 0 0; color: var(--muted); font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
+    select, button, input[type="number"], input[type="color"] {
+      min-width: 0;
+      color: inherit;
+      border: 1px solid #80c9ff58;
+      border-radius: 5px;
+      background: var(--surface);
+      padding: 5px 7px;
+      font: inherit;
+    }
+    select { width: 100%; }
+    button { cursor: pointer; }
+    button:hover { border-color: var(--accent); background: #173554; }
+    input[type="range"] { width: 100%; accent-color: var(--accent); }
+    input[type="checkbox"] { accent-color: var(--accent); }
+    input[type="color"] { width: 100%; height: 28px; padding: 2px; cursor: pointer; }
+    input:disabled, select:disabled { opacity: .38; }
+    #degrade { margin-top: 7px; color: #f2c879; white-space: normal; }
+    .hint { margin-top: 7px; color: var(--muted); }
+    .texture-meta { color: var(--muted); font-size: 10px; }
+    @media (max-width: 760px) {
+      #status-panel { display: none; }
+      #inspector { width: min(340px, calc(100vw - 16px)); top: 8px; right: 8px; max-height: calc(100vh - 16px); }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <section id="status-panel" class="panel">
+    <h1>海月 PBR · metallic-roughness</h1>
+    <div class="status-row"><span>requested profile</span><b id="requested">gpu-driven</b></div>
+    <div class="status-row"><span>enabled profile</span><b id="enabled">—</b></div>
+    <div class="field"><label for="profile">runtime profile</label><select id="profile"><option>simple</option><option>batched</option><option selected>gpu-driven</option><option>diagnostic</option></select></div>
+    <div id="degrade"></div>
+    <div class="hint">拖动旋转 · 滚轮缩放 · 参数实时更新</div>
+  </section>
+
+  <aside id="inspector" class="panel" aria-label="PBR material inspector">
+    <div class="toolbar">
+      <div class="toolbar-title"><h2>PBR 材质实验室</h2><span id="target-summary">15 materials</span></div>
+      <div class="toolbar-grid">
+        <select id="material-target" aria-label="Material target">
+          <option value="all">全部球体</option>
+        </select>
+        <select id="variant" aria-label="Material variant">
+          <option value="">base</option>
+          <option value="moonlit">moonlit</option>
+          <option value="copper">copper</option>
+          <option value="custom" disabled>custom</option>
+        </select>
+        <button id="reset-material" type="button">重置</button>
+      </div>
+    </div>
+
+    <details open>
+      <summary>基础 PBR</summary>
+      <div class="group">
+        <div class="field"><label for="base-color">Base Color</label><input id="base-color" type="color" /></div>
+        <div class="field"><label for="base-alpha">Alpha</label><div class="range"><input id="base-alpha" type="range" min="0" max="1" step="0.01" /><output for="base-alpha"></output></div></div>
+        <div class="field"><label for="metallic">Metallic</label><div class="range"><input id="metallic" type="range" min="0" max="1" step="0.01" /><output for="metallic"></output></div></div>
+        <div class="field"><label for="roughness">Roughness</label><div class="range"><input id="roughness" type="range" min="0.04" max="1" step="0.01" /><output for="roughness"></output></div></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>表面细节与自发光</summary>
+      <div class="group">
+        <div class="field"><label for="normal-scale">Normal Scale</label><div class="range"><input id="normal-scale" type="range" min="0" max="4" step="0.01" /><output for="normal-scale"></output></div></div>
+        <div class="field"><label for="occlusion-strength">Occlusion</label><div class="range"><input id="occlusion-strength" type="range" min="0" max="1" step="0.01" /><output for="occlusion-strength"></output></div></div>
+        <div class="subhead">Emissive Factor · linear RGB</div>
+        <div class="field"><span>R / G / B</span><div class="triple"><input id="emissive-r" type="number" min="0" max="8" step="0.05" /><input id="emissive-g" type="number" min="0" max="8" step="0.05" /><input id="emissive-b" type="number" min="0" max="8" step="0.05" /></div></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>Clearcoat</summary>
+      <div class="group">
+        <div class="field"><label for="clearcoat-factor">Factor</label><div class="range"><input id="clearcoat-factor" type="range" min="0" max="1" step="0.01" /><output for="clearcoat-factor"></output></div></div>
+        <div class="field"><label for="clearcoat-roughness">Roughness</label><div class="range"><input id="clearcoat-roughness" type="range" min="0" max="1" step="0.01" /><output for="clearcoat-roughness"></output></div></div>
+        <div class="field"><label for="clearcoat-normal-scale">Normal Scale</label><div class="range"><input id="clearcoat-normal-scale" type="range" min="0" max="4" step="0.01" /><output for="clearcoat-normal-scale"></output></div></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>IOR 与 Specular</summary>
+      <div class="group">
+        <div class="field"><label for="ior">IOR</label><div class="range"><input id="ior" type="range" min="1" max="3" step="0.01" /><output for="ior"></output></div></div>
+        <div class="field"><label for="specular-factor">Specular Factor</label><div class="range"><input id="specular-factor" type="range" min="0" max="1" step="0.01" /><output for="specular-factor"></output></div></div>
+        <div class="subhead">Specular Color · linear RGB，允许大于 1</div>
+        <div class="field"><span>R / G / B</span><div class="triple"><input id="specular-r" type="number" min="0" max="4" step="0.05" /><input id="specular-g" type="number" min="0" max="4" step="0.05" /><input id="specular-b" type="number" min="0" max="4" step="0.05" /></div></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>Sheen</summary>
+      <div class="group">
+        <div class="subhead">Sheen Color · linear RGB</div>
+        <div class="field"><span>R / G / B</span><div class="triple"><input id="sheen-r" type="number" min="0" max="1" step="0.01" /><input id="sheen-g" type="number" min="0" max="1" step="0.01" /><input id="sheen-b" type="number" min="0" max="1" step="0.01" /></div></div>
+        <div class="field"><label for="sheen-roughness">Roughness</label><div class="range"><input id="sheen-roughness" type="range" min="0" max="1" step="0.01" /><output for="sheen-roughness"></output></div></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>Transmission 与 Volume</summary>
+      <div class="group">
+        <div class="field"><label for="transmission-factor">Transmission</label><div class="range"><input id="transmission-factor" type="range" min="0" max="1" step="0.01" /><output for="transmission-factor"></output></div></div>
+        <div class="field"><label for="thickness-factor">Thickness</label><div class="range"><input id="thickness-factor" type="range" min="0" max="5" step="0.01" /><output for="thickness-factor"></output></div></div>
+        <div class="field"><label for="attenuation-infinite">Infinite Distance</label><input id="attenuation-infinite" type="checkbox" /></div>
+        <div class="field"><label for="attenuation-distance">Attenuation Distance</label><div class="range"><input id="attenuation-distance" type="range" min="0.05" max="20" step="0.05" /><output for="attenuation-distance"></output></div></div>
+        <div class="subhead">Attenuation Color · linear RGB</div>
+        <div class="field"><span>R / G / B</span><div class="triple"><input id="attenuation-r" type="number" min="0" max="1" step="0.01" /><input id="attenuation-g" type="number" min="0" max="1" step="0.01" /><input id="attenuation-b" type="number" min="0" max="1" step="0.01" /></div></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>Alpha 与双面渲染</summary>
+      <div class="group">
+        <div class="field"><label for="alpha-mode">Alpha Mode</label><select id="alpha-mode"><option value="opaque">opaque</option><option value="mask">mask</option><option value="blend">blend</option></select></div>
+        <div class="field"><label for="alpha-cutoff">Alpha Cutoff</label><div class="range"><input id="alpha-cutoff" type="range" min="0" max="1" step="0.01" /><output for="alpha-cutoff"></output></div></div>
+        <div class="field"><label for="double-sided">Double Sided</label><input id="double-sided" type="checkbox" /></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>纹理、UV 与 Sampler</summary>
+      <div class="group">
+        <div class="field"><label for="texture-slot">Texture Slot</label><select id="texture-slot"></select></div>
+        <div id="texture-meta" class="texture-meta"></div>
+        <div class="field"><label for="texture-enabled">Procedural Texture</label><input id="texture-enabled" type="checkbox" /></div>
+        <div class="subhead">KHR_texture_transform</div>
+        <div class="field"><label for="texture-texcoord">UV Set</label><select id="texture-texcoord"><option value="0">TEXCOORD_0</option><option value="1">TEXCOORD_1</option></select></div>
+        <div class="field"><span>Offset X / Y</span><div class="triple"><input id="texture-offset-x" type="number" step="0.01" /><input id="texture-offset-y" type="number" step="0.01" /></div></div>
+        <div class="field"><label for="texture-rotation">Rotation · rad</label><input id="texture-rotation" type="number" step="0.01" /></div>
+        <div class="field"><span>Scale X / Y</span><div class="triple"><input id="texture-scale-x" type="number" step="0.01" /><input id="texture-scale-y" type="number" step="0.01" /></div></div>
+        <div class="subhead">GPUSamplerDescriptor</div>
+        <div class="field"><label for="sampler-override">Sampler Override</label><input id="sampler-override" type="checkbox" /></div>
+        <div class="field"><label for="sampler-address-u">Address U</label><select id="sampler-address-u" data-sampler><option>clamp-to-edge</option><option>repeat</option><option>mirror-repeat</option></select></div>
+        <div class="field"><label for="sampler-address-v">Address V</label><select id="sampler-address-v" data-sampler><option>clamp-to-edge</option><option>repeat</option><option>mirror-repeat</option></select></div>
+        <div class="field"><label for="sampler-mag">Mag Filter</label><select id="sampler-mag" data-sampler><option>linear</option><option>nearest</option></select></div>
+        <div class="field"><label for="sampler-min">Min Filter</label><select id="sampler-min" data-sampler><option>linear</option><option>nearest</option></select></div>
+        <div class="field"><label for="sampler-mipmap">Mipmap Filter</label><select id="sampler-mipmap" data-sampler><option>linear</option><option>nearest</option></select></div>
+        <div class="field"><label for="sampler-lod-min">LOD Min</label><input id="sampler-lod-min" data-sampler type="number" min="0" max="32" step="0.25" /></div>
+        <div class="field"><label for="sampler-lod-max">LOD Max</label><input id="sampler-lod-max" data-sampler type="number" min="0" max="32" step="0.25" /></div>
+        <div class="field"><label for="sampler-anisotropy">Max Anisotropy</label><input id="sampler-anisotropy" data-sampler type="number" min="1" max="16" step="1" /></div>
+      </div>
+    </details>
+
+    <details>
+      <summary>场景光照与阴影</summary>
+      <div class="group">
+        <div class="subhead">Directional Light</div>
+        <div class="field"><label for="sun-color">Color</label><input id="sun-color" type="color" /></div>
+        <div class="field"><label for="sun-intensity">Intensity</label><div class="range"><input id="sun-intensity" type="range" min="0" max="10" step="0.05" /><output for="sun-intensity"></output></div></div>
+        <div class="field"><span>Direction X / Y / Z</span><div class="triple"><input id="sun-direction-x" type="number" min="-2" max="2" step="0.05" /><input id="sun-direction-y" type="number" min="-2" max="2" step="0.05" /><input id="sun-direction-z" type="number" min="-2" max="2" step="0.05" /></div></div>
+        <div class="field"><label for="sun-cast-shadow">Cast Shadow</label><input id="sun-cast-shadow" type="checkbox" /></div>
+        <div class="field"><label for="shadow-map-size">Shadow Map</label><select id="shadow-map-size"><option value="512">512</option><option value="1024">1024</option><option value="2048">2048</option></select></div>
+        <div class="field"><label for="shadow-extent">Extent</label><input id="shadow-extent" type="number" min="1" max="60" step="0.5" /></div>
+        <div class="field"><label for="shadow-near">Near / Far</label><div class="triple"><input id="shadow-near" type="number" min="0.01" step="0.01" /><input id="shadow-far" type="number" min="1" step="1" /></div></div>
+        <div class="field"><label for="shadow-bias">Bias / Normal</label><div class="triple"><input id="shadow-bias" type="number" min="0" step="0.0001" /><input id="shadow-normal-bias" type="number" min="0" step="0.001" /></div></div>
+        <div class="subhead">Environment Light</div>
+        <div class="field"><label for="environment-intensity">Intensity</label><div class="range"><input id="environment-intensity" type="range" min="0" max="4" step="0.01" /><output for="environment-intensity"></output></div></div>
+        <div class="field"><label for="environment-rotation">Rotation · rad</label><div class="range"><input id="environment-rotation" type="range" min="-3.1416" max="3.1416" step="0.01" /><output for="environment-rotation"></output></div></div>
+        <div class="field"><label for="environment-diffuse">Diffuse Color</label><input id="environment-diffuse" type="color" /></div>
+        <div class="field"><label for="environment-specular">Specular Color</label><input id="environment-specular" type="color" /></div>
+      </div>
+    </details>
+  </aside>
+
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

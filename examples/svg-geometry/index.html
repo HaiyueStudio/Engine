@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 - SVG Geometry</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      height: 100vh;
+      overflow: hidden;
+      background: #e5e7eb;
+      color: rgba(226,232,240,0.72);
+      font-family: monospace;
+    }
+    canvas { display: block; }
+    #info {
+      position: fixed;
+      left: 16px;
+      top: 16px;
+      z-index: 2;
+      padding: 8px 10px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 6px;
+      background: rgba(12, 18, 28, 0.82);
+      backdrop-filter: blur(8px);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    #toolbar {
+      position: fixed;
+      left: 16px;
+      top: 70px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: min(460px, calc(100vw - 32px));
+      padding: 10px 12px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 6px;
+      background: rgba(12, 18, 28, 0.82);
+      backdrop-filter: blur(8px);
+      font-size: 12px;
+    }
+    button {
+      height: 30px;
+      padding: 0 12px;
+      border: 1px solid #334155;
+      border-radius: 5px;
+      background: #111827;
+      color: #e5edf8;
+      font: inherit;
+      cursor: pointer;
+    }
+    #file-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #9fb1c9;
+    }
+  </style>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div id="info">SVG elements are converted to Geometry2D meshes, not textures.</div>
+  <div id="toolbar">
+    <button id="upload-button" type="button">Upload SVG</button>
+    <span id="file-name">Built-in SVG</span>
+    <input id="upload-input" type="file" accept=".svg,image/svg+xml" hidden />
+  </div>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "format": "haiyue-animation-3d-contract",
+  "version": 1,
+  "extension": {
+    "id": "org.haiyue.animation-3d@1",
+    "payloadFormat": "haiyue-animation-3d@1",
+    "required": true,
+    "carrierFormat": "haiyue-animation",
+    "carrierVersion": "1.0",
+    "binaryWriteVersion": 2,
+    "binaryReadVersions": [1, 2],
+    "coreNodesPolicy": "must-be-empty",
+    "coreTracksPolicy": "must-be-empty"
+  },
+  "projects": {
+    "2d": {
+      "format": "haiyue-animation-editor-project@1",
+      "schemaVersion": 1,
+      "mode": "2d",
+      "coordinateSystem": "screen-y-down"
+    },
+    "3d": {
+      "format": "haiyue-animation-editor-project-3d@1",
+      "schemaVersion": 1,
+      "mode": "3d",
+      "coordinateSystem": "right-handed-y-up"
+    },
+    "mixedComposition": {
+      "policy": "reject",
+      "code": "E_PROJECT_MIXED_DIMENSIONS",
+      "path": "$.mode"
+    }
+  },
+  "coordinates": {
+    "handedness": "right",
+    "upAxis": "+y",
+    "forwardAxis": "-z",
+    "linearUnit": "meter",
+    "angles": "radian",
+    "rotationStorage": "normalized-xyzw-quaternion",
+    "timeUnit": "second"
+  },
+  "runtime": {
+    "ownerPackage": "@haiyue/extensions/animation3d",
+    "clipFormat": "haiyue-animation3d-clip@1",
+    "stateMachineFormat": "haiyue-animation3d-state-machine@1",
+    "bindingResolver": "Animation3DBindingResolver",
+    "mixer": "Animation3DMixer",
+    "modelAdapter": "@haiyue/extensions/gltf",
+    "particleComponent": "@haiyue/engine ParticleEmitter3D",
+    "engineRootExportChange": false
+  },
+  "bindings": {
+    "targets": ["node-id", "node-path", "slot"],
+    "paths": [
+      "transform.translation",
+      "transform.rotation",
+      "transform.scale",
+      "morph.weights",
+      "property"
+    ],
+    "interpolations": ["step", "linear", "cubic-spline"],
+    "materialComponent": "material3d",
+    "materialProperties": {
+      "baseColorFactor": { "valueType": "vec4", "valueSize": 4 },
+      "metallicFactor": { "valueType": "scalar", "valueSize": 1 },
+      "roughnessFactor": { "valueType": "scalar", "valueSize": 1 },
+      "emissiveFactor": { "valueType": "vec3", "valueSize": 3 },
+      "alphaCutoff": { "valueType": "scalar", "valueSize": 1 }
+    },
+    "cameraComponent": "camera3d",
+    "cameraProperties": {
+      "fovYRadians": { "valueType": "scalar", "valueSize": 1 },
+      "near": { "valueType": "scalar", "valueSize": 1 },
+      "far": { "valueType": "scalar", "valueSize": 1 },
+      "orthoHeight": { "valueType": "scalar", "valueSize": 1 }
+    }
+  },
+  "resources": {
+    "modelCoreType": "binary",
+    "modelMimeTypes": ["model/gltf-binary", "model/gltf+json"],
+    "deliveryUriSchemes": ["package-relative", "https", "data"],
+    "forbiddenDeliveryUriSchemes": ["blob", "file", "javascript"],
+    "packageAssetPath": "assets/<sha256>.<ext>",
+    "packageManifest": "manifest.json",
+    "packageDeterministic": true,
+    "dependencyReferences": "asset-id"
+  },
+  "degradation": [
+    {
+      "feature": "preview-only-editor-state",
+      "action": "strip",
+      "severity": "info"
+    },
+    {
+      "feature": "unsupported-renderable-or-channel",
+      "action": "reject",
+      "code": "E_ANIMATION_3D_UNSUPPORTED_FEATURE"
+    },
+    {
+      "feature": "mixed-2d-3d-carrier",
+      "action": "reject",
+      "code": "E_ANIMATION_3D_MIXED_DIMENSIONS"
+    },
+    {
+      "feature": "missing-required-3d-runtime",
+      "action": "reject",
+      "code": "E_ANIMATION_MISSING_EXTENSION"
+    },
+    {
+      "feature": "pseudo-3d-projection-fallback",
+      "action": "forbidden"
+    }
+  ],
+  "diagnostics": [
+    { "code": "E_ANIMATION_INVALID_BINARY", "path": "$", "meaning": "unknown-or-invalid-container-version" },
+    { "code": "E_ANIMATION_UNSUPPORTED_VERSION", "path": "$.version", "meaning": "unsupported-core-document-version" },
+    { "code": "E_ANIMATION_MISSING_EXTENSION", "path": "$.extensionsRequired", "meaning": "missing-or-unknown-required-extension-major" },
+    { "code": "E_ANIMATION_3D_INVALID_PAYLOAD", "path": "$.extensions.org.haiyue.animation-3d@1", "meaning": "invalid-3d-extension-payload" },
+    { "code": "E_ANIMATION_3D_MIXED_DIMENSIONS", "path": "$.nodes", "meaning": "2d-core-content-present-in-3d-carrier" },
+    { "code": "E_ANIMATION_3D_UNSUPPORTED_FEATURE", "path": "$.extensions.org.haiyue.animation-3d@1", "meaning": "recognized-but-unsupported-3d-feature" },
+    { "code": "E_ANIMATION_3D_UNKNOWN_RESOURCE", "path": "$.extensions.org.haiyue.animation-3d@1.nodes", "meaning": "missing-model-material-or-texture-reference" },
+    { "code": "E_ANIMATION_3D_BINDING_MISMATCH", "path": "$.extensions.org.haiyue.animation-3d@1.clips", "meaning": "binding-value-width-or-target-mismatch" },
+    { "code": "E_ANIMATION_3D_LIMIT_EXCEEDED", "path": "$.extensions.org.haiyue.animation-3d@1", "meaning": "3d-allocation-budget-exceeded" },
+    { "code": "E_PROJECT_INVALID_FORMAT", "path": "$.format", "meaning": "unknown-project-family" },
+    { "code": "E_PROJECT_UNSUPPORTED_VERSION", "path": "$.schemaVersion", "meaning": "unsupported-project-schema-version" },
+    { "code": "E_PROJECT_MIXED_DIMENSIONS", "path": "$.mode", "meaning": "mixed-project-mode-is-not-supported" }
+  ]
+}

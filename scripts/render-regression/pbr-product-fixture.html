@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Haiyue PBR Product Pixel Regression</title>
+<body><pre id="result">pending</pre></body>
+<script type="module">
+const result = document.querySelector('#result');
+try {
+  if (!navigator.gpu) throw new Error('WebGPU unavailable');
+  const adapter = await navigator.gpu.requestAdapter();
+  if (!adapter) throw new Error('WebGPU adapter unavailable');
+  const device = await adapter.requestDevice();
+  const width = 96;
+  const height = 64;
+  const texture = device.createTexture({
+    size: [width, height],
+    format: 'rgba8unorm',
+    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
+  });
+  const module = device.createShaderModule({ code: `
+    const PI = 3.14159265359;
+
+    @vertex fn vs(@builtin(vertex_index) index: u32) -> @builtin(position) vec4f {
+      var positions = array<vec2f, 3>(vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
+      return vec4f(positions[index], 0.0, 1.0);
+    }
+
+    fn distributionGGX(n: vec3f, h: vec3f, roughness: f32) -> f32 {
+      let a = roughness * roughness;
+      let a2 = a * a;
+      let nh = max(dot(n, h), 0.0);
+      let denominator = nh * nh * (a2 - 1.0) + 1.0;
+      return a2 / max(PI * denominator * denominator, 0.001);
+    }
+
+    fn geometrySchlickGGX(nv: f32, roughness: f32) -> f32 {
+      let r = roughness + 1.0;
+      let k = r * r / 8.0;
+      return nv / max(nv * (1.0 - k) + k, 0.001);
+    }
+
+    fn fresnelSchlick(cosTheta: f32, f0: vec3f) -> vec3f {
+      return f0 + (vec3f(1.0) - f0) * pow(1.0 - cosTheta, 5.0);
+    }
+
+    fn shadeSphere(p: vec2f, center: vec2f, metallic: f32, roughness: f32, albedo: vec3f) -> vec4f {
+      let q = (p - center) / vec2f(0.23, 0.34);
+      let radius2 = dot(q, q);
+      if (radius2 > 1.0) { return vec4f(-1.0); }
+      let n = normalize(vec3f(q, sqrt(max(0.0, 1.0 - radius2))));
+      let v = vec3f(0.0, 0.0, 1.0);
+      let l = normalize(vec3f(-0.45, 0.65, 0.7));
+      let h = normalize(v + l);
+      let nv = max(dot(n, v), 0.0);
+      let nl = max(dot(n, l), 0.0);
+      let f0 = mix(vec3f(0.04), albedo, vec3f(metallic));
+      let f = fresnelSchlick(max(dot(h, v), 0.0), f0);
+      let d = distributionGGX(n, h, roughness);
+      let g = geometrySchlickGGX(nv, roughness) * geometrySchlickGGX(nl, roughness);
+      let specular = d * g * f / max(4.0 * nv * nl, 0.001);
+      let diffuse = (vec3f(1.0) - f) * (1.0 - metallic) * albedo / PI;
+      let direct = (diffuse + specular) * vec3f(1.0, 0.91, 0.78) * nl * 2.4;
+      let environment = mix(vec3f(0.035, 0.075, 0.14) * albedo, vec3f(0.18, 0.31, 0.52) * f, vec3f(1.0 - roughness));
+      var color = direct + environment;
+      color = color / (color + vec3f(1.0));
+      color = pow(color, vec3f(1.0 / 2.2));
+      color = floor(clamp(color, vec3f(0.0), vec3f(1.0)) * 63.0 + 0.5) / 63.0;
+      return vec4f(color, 1.0);
+    }
+
+    @fragment fn fs(@builtin(position) position: vec4f) -> @location(0) vec4f {
+      let uv = position.xy / vec2f(96.0, 64.0);
+      let left = shadeSphere(uv, vec2f(0.29, 0.45), 0.0, 0.68, vec3f(0.22, 0.52, 0.92));
+      if (left.a > 0.0) { return left; }
+      let right = shadeSphere(uv, vec2f(0.70, 0.45), 0.92, 0.18, vec3f(0.92, 0.42, 0.16));
+      if (right.a > 0.0) { return right; }
+      let floorMask = select(0.0, 1.0, uv.y > 0.76);
+      let shadowShape = select(1.0, 0.34, uv.x > 0.31 && uv.x < 0.76 && uv.y > 0.78 && uv.y < 0.9);
+      let floorColor = vec3f(0.11, 0.16, 0.23) * shadowShape + vec3f(0.025, 0.045, 0.08);
+      let sky = mix(vec3f(0.025, 0.045, 0.08), vec3f(0.10, 0.19, 0.34), vec3f(uv.y));
+      return vec4f(mix(sky, floorColor, vec3f(floorMask)), 1.0);
+    }
+  ` });
+  const compilation = await module.getCompilationInfo();
+  const errors = compilation.messages.filter(message => message.type === 'error');
+  if (errors.length) throw new Error(errors.map(message => message.message).join('\n'));
+  const pipeline = device.createRenderPipeline({
+    layout: 'auto',
+    vertex: { module, entryPoint: 'vs' },
+    fragment: { module, entryPoint: 'fs', targets: [{ format: 'rgba8unorm' }] },
+  });
+  const bytesPerRow = 256 * Math.ceil((width * 4) / 256);
+  const readback = device.createBuffer({ size: bytesPerRow * height, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+  const encoder = device.createCommandEncoder();
+  const pass = encoder.beginRenderPass({ colorAttachments: [{
+    view: texture.createView(), clearValue: [0, 0, 0, 1], loadOp: 'clear', storeOp: 'store',
+  }] });
+  pass.setPipeline(pipeline);
+  pass.draw(3);
+  pass.end();
+  encoder.copyTextureToBuffer({ texture }, { buffer: readback, bytesPerRow }, [width, height]);
+  device.queue.submit([encoder.finish()]);
+  await readback.mapAsync(GPUMapMode.READ);
+  const mapped = new Uint8Array(readback.getMappedRange());
+  const pixels = new Uint8Array(width * height * 4);
+  for (let y = 0; y < height; y++) pixels.set(mapped.subarray(y * bytesPerRow, y * bytesPerRow + width * 4), y * width * 4);
+  let hash = 0x811c9dc5;
+  let spherePixels = 0;
+  let shadowPixels = 0;
+  for (let offset = 0; offset < pixels.length; offset += 4) {
+    for (let channel = 0; channel < 4; channel++) {
+      hash ^= pixels[offset + channel];
+      hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+    if (pixels[offset] > 48 && pixels[offset + 3] === 255) spherePixels++;
+  }
+  for (let y = 50; y < 58; y++) for (let x = 31; x < 72; x++) {
+    const offset = (y * width + x) * 4;
+    if (pixels[offset] < 25 && pixels[offset + 1] < 30) shadowPixels++;
+  }
+  const sample = (x, y) => Array.from(pixels.slice((y * width + x) * 4, (y * width + x) * 4 + 4));
+  const payload = {
+    schemaVersion: 1,
+    fixture: 'pbr-shadow-ibl-rgba8unorm-96x64',
+    width, height,
+    hash: hash.toString(16).padStart(8, '0'),
+    spherePixels,
+    shadowPixels,
+    dielectric: sample(28, 29),
+    metal: sample(67, 29),
+    shadow: sample(48, 54),
+    corner: sample(0, 0),
+    adapter: { vendor: adapter.info?.vendor ?? '', architecture: adapter.info?.architecture ?? '', device: adapter.info?.device ?? '', description: adapter.info?.description ?? '' },
+    userAgent: navigator.userAgent,
+  };
+  readback.unmap();
+  readback.destroy();
+  texture.destroy();
+  result.textContent = JSON.stringify(payload);
+  result.dataset.status = 'passed';
+} catch (error) {
+  result.textContent = JSON.stringify({ error: error instanceof Error ? error.message : String(error) });
+  result.dataset.status = 'failed';
+}
+</script>
+</html>

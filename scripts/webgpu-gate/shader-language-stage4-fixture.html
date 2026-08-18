@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Haiyue Shader Language stage 4 deformation pilot</title>
+  <style>
+    :root { color-scheme: dark; font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    body { margin: 0; padding: 24px; background: #101319; color: #d8e2f0; }
+    #progress { color: #8fb7ff; }
+    #result { white-space: pre-wrap; overflow-wrap: anywhere; }
+    #result[data-status="passed"] { color: #8de5ad; }
+    #result[data-status="failed"] { color: #ff9b9b; }
+  </style>
+</head>
+<body>
+  <div id="progress">loading real glTF Animation3D fixture…</div>
+  <pre id="result"></pre>
+  <script type="importmap">
+    {
+      "imports": {
+        "wgpu-matrix": "/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js",
+        "@haiyue/engine": "/engine/dist/index.js",
+        "@haiyue/engine/assets": "/engine/dist/assets.js",
+        "@haiyue/engine/components": "/engine/dist/components.js",
+        "@haiyue/engine/core": "/engine/dist/core.js",
+        "@haiyue/engine/ecs": "/engine/dist/ecs.js",
+        "@haiyue/engine/experimental": "/engine/dist/experimental.js",
+        "@haiyue/engine/experimental/async": "/engine/dist/experimental/async.js",
+        "@haiyue/engine/material": "/engine/dist/material.js"
+      }
+    }
+  </script>
+  <script type="module">
+    import('./shader-language-stage4-fixture.mjs').catch(error => {
+      const progress = document.querySelector('#progress');
+      const result = document.querySelector('#result');
+      progress.textContent = 'module import failed';
+      result.textContent = JSON.stringify({ error: `${error?.message ?? error}\n${error?.stack ?? ''}` });
+      result.dataset.status = 'failed';
+    });
+  </script>
+</body>
+</html>

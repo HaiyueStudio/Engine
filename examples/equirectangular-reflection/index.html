@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海月 · Equirectangular Reflection Map</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; color: #eef6ff; background: #02050c; font: 12px/1.45 Inter, ui-sans-serif, system-ui, sans-serif; }
+    canvas { display: block; }
+    #panel { position: fixed; top: 16px; left: 16px; width: min(320px, calc(100vw - 32px)); padding: 15px; border: 1px solid rgba(142, 204, 255, .2); border-radius: 12px; background: rgba(4, 10, 22, .84); box-shadow: 0 20px 55px rgba(0, 0, 0, .34); backdrop-filter: blur(16px); }
+    h1 { margin: 0; font-size: 17px; font-weight: 680; letter-spacing: -.01em; }
+    .subtitle { margin: 4px 0 12px; color: rgba(222, 235, 255, .58); font-size: 11px; }
+    #panorama-preview { width: 100%; height: auto; border: 1px solid rgba(255, 255, 255, .15); border-radius: 7px; }
+    .flow { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 7px 0 12px; color: rgba(218, 237, 255, .65); font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .flow strong { color: #9ed9ff; font-weight: 600; }
+    .control { margin-top: 10px; }
+    .line, .switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: rgba(232, 241, 255, .78); }
+    output { color: #fff; font-variant-numeric: tabular-nums; }
+    input[type="range"] { width: 100%; margin: 6px 0 0; accent-color: #5cb8ff; }
+    input[type="checkbox"] { width: 16px; height: 16px; accent-color: #5cb8ff; }
+    .note { margin: 12px 0 0; padding-top: 9px; border-top: 1px solid rgba(255, 255, 255, .1); color: rgba(222, 235, 255, .48); font-size: 10px; }
+    #legend { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); color: rgba(235, 243, 255, .68); text-shadow: 0 1px 5px #000; pointer-events: none; white-space: nowrap; }
+    #hint { position: fixed; right: 18px; bottom: 18px; color: rgba(231, 241, 255, .44); text-shadow: 0 1px 4px #000; }
+    #result { display: none; }
+    @media (max-width: 720px) { #hint, #legend { display: none; } }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <aside id="panel">
+    <h1>Equirectangular Reflection</h1>
+    <p class="subtitle">一张 Web 经纬图，在 GPU 上转换后直接进入现有 PBR cubemap 反射路径。</p>
+    <canvas id="panorama-preview" aria-label="2:1 equirectangular source preview"></canvas>
+    <div class="flow"><span>1024 × 512</span><strong>→ GPU →</strong><span>256² × 6</span></div>
+    <div class="control">
+      <div class="line"><label for="rotation">环境旋转</label><output id="rotation-value">0°</output></div>
+      <input id="rotation" type="range" min="-180" max="180" step="1" value="0" />
+    </div>
+    <div class="control">
+      <div class="line"><label for="intensity">反射强度</label><output id="intensity-value">1.30</output></div>
+      <input id="intensity" type="range" min="0" max="2.5" step="0.01" value="1.30" />
+    </div>
+    <label class="switch"><span>自动旋转环境</span><input id="animate" type="checkbox" /></label>
+    <p class="note">这是单 mip 反射图；高质量粗糙反射仍应使用 GGX 预过滤 cubemap。</p>
+  </aside>
+  <div id="legend">Chrome　·　Copper　·　Coated dielectric</div>
+  <div id="hint">拖动旋转 · 滚轮缩放</div>
+  <pre id="result" aria-hidden="true"></pre>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

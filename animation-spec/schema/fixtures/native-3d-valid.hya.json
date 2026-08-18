@@ -1,0 +1,284 @@
+{
+  "format": "haiyue-animation",
+  "version": "1.0",
+  "name": "Native 3D contract fixture",
+  "canvas": {
+    "width": 640,
+    "height": 360,
+    "coordinateSystem": "screen-y-down"
+  },
+  "duration": 2,
+  "frameRate": 30,
+  "endBehavior": "loop",
+  "resources": [
+    {
+      "id": "model:character",
+      "type": "binary",
+      "uri": "assets/character.glb",
+      "mimeType": "model/gltf-binary",
+      "integrity": "sha256-contract-character"
+    },
+    {
+      "id": "texture:spark",
+      "type": "image",
+      "uri": "assets/spark.png",
+      "mimeType": "image/png",
+      "integrity": "sha256-contract-spark",
+      "colorSpace": "srgb"
+    }
+  ],
+  "nodes": [],
+  "tracks": [],
+  "extensionsUsed": ["org.haiyue.animation-3d@1"],
+  "extensionsRequired": ["org.haiyue.animation-3d@1"],
+  "extensions": {
+    "org.haiyue.animation-3d@1": {
+      "format": "haiyue-animation-3d@1",
+      "mode": "native-3d",
+      "coordinateSystem": {
+        "handedness": "right",
+        "upAxis": "+y",
+        "forwardAxis": "-z",
+        "unit": "meter",
+        "angles": "radian",
+        "rotationStorage": "normalized-xyzw-quaternion"
+      },
+      "viewport": {
+        "width": 640,
+        "height": 360
+      },
+      "materials": [
+        {
+          "id": "material:hero",
+          "name": "Hero",
+          "baseColorFactor": [0.2, 0.55, 1, 1],
+          "metallicFactor": 0.1,
+          "roughnessFactor": 0.65,
+          "emissiveFactor": [0, 0, 0],
+          "alphaMode": "opaque",
+          "doubleSided": false
+        }
+      ],
+      "nodes": [
+        {
+          "id": "camera",
+          "name": "Camera",
+          "transform": {
+            "translation": [0, 1.5, 5],
+            "rotation": [0, 0, 0, 1],
+            "scale": [1, 1, 1]
+          },
+          "components": [
+            {
+              "id": "camera:main",
+              "kind": "camera3d",
+              "projection": {
+                "kind": "perspective",
+                "fovYRadians": 0.7853981633974483,
+                "near": 0.1,
+                "far": 100
+              }
+            }
+          ]
+        },
+        {
+          "id": "ground",
+          "name": "Ground",
+          "transform": {
+            "translation": [0, -1, 0],
+            "rotation": [0, 0, 0, 1],
+            "scale": [5, 0.1, 5]
+          },
+          "components": [
+            {
+              "id": "ground:mesh",
+              "kind": "primitive3d",
+              "primitive": "box",
+              "materialId": "material:hero"
+            }
+          ]
+        },
+        {
+          "id": "character",
+          "name": "Character",
+          "transform": {
+            "translation": [0, 0, 0],
+            "rotation": [0, 0, 0, 1],
+            "scale": [1, 1, 1]
+          },
+          "components": [
+            {
+              "id": "character:model",
+              "kind": "model3d",
+              "resource": "model:character",
+              "materialOverrides": [
+                {
+                  "slot": "Body",
+                  "materialId": "material:hero"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "sparks",
+          "name": "Sparks",
+          "parent": "character",
+          "transform": {
+            "translation": [0, 1, 0],
+            "rotation": [0, 0, 0, 1],
+            "scale": [1, 1, 1]
+          },
+          "components": [
+            {
+              "id": "sparks:emitter",
+              "kind": "particle3d",
+              "descriptor": {
+                "maxParticles": 256,
+                "emissionRate": 24,
+                "burst": 8,
+                "duration": 2,
+                "loop": true,
+                "seed": 1732584193,
+                "lifetime": [0.4, 0.8],
+                "speed": [0.5, 1.5],
+                "direction": [0, 1, 0],
+                "spread": 0.5,
+                "gravity": [0, -1, 0],
+                "startSize": [0.04, 0.08],
+                "endSize": [0, 0.02],
+                "rotation": [0, 6.283185307179586],
+                "angularVelocity": [-1, 1],
+                "startColor": [1, 0.8, 0.2, 1],
+                "endColor": [1, 0.1, 0, 0],
+                "shape": "sphere",
+                "shapeSize": [0.2, 0.2, 0.2],
+                "shapeRadius": 0.1,
+                "blendMode": "additive",
+                "textureResource": "texture:spark",
+                "radial": true,
+                "opacity": 1,
+                "depthTest": true,
+                "depthWrite": false,
+                "sortMode": "none"
+              }
+            }
+          ]
+        }
+      ],
+      "clips": [
+        {
+          "format": "haiyue-animation3d-clip@1",
+          "id": "clip:idle",
+          "name": "Idle",
+          "duration": 2,
+          "tracks": [
+            {
+              "id": "track:root-translation",
+              "binding": {
+                "id": "binding:root-translation",
+                "target": { "kind": "node-id", "nodeId": "character" },
+                "path": "transform.translation",
+                "valueType": "vec3",
+                "valueSize": 3
+              },
+              "interpolation": "linear",
+              "times": [0, 2],
+              "values": [0, 0, 0, 0, 0.05, 0]
+            },
+            {
+              "id": "track:spine-rotation",
+              "binding": {
+                "id": "binding:spine-rotation",
+                "target": { "kind": "node-path", "segments": ["character", "Armature", "Spine"] },
+                "path": "transform.rotation",
+                "valueType": "quaternion",
+                "valueSize": 4
+              },
+              "interpolation": "linear",
+              "times": [0, 2],
+              "values": [0, 0, 0, 1, 0, 0.043619387, 0, 0.999048222]
+            },
+            {
+              "id": "track:face-morph",
+              "binding": {
+                "id": "binding:face-morph",
+                "target": { "kind": "slot", "slot": "character:Face" },
+                "path": "morph.weights",
+                "valueType": "weights",
+                "valueSize": 2
+              },
+              "interpolation": "linear",
+              "times": [0, 1, 2],
+              "values": [0, 0, 0.5, 0.2, 0, 0]
+            },
+            {
+              "id": "track:material-color",
+              "binding": {
+                "id": "binding:material-color",
+                "target": { "kind": "slot", "slot": "material:hero" },
+                "path": "property",
+                "component": "material3d",
+                "property": "baseColorFactor",
+                "valueType": "vec4",
+                "valueSize": 4
+              },
+              "interpolation": "linear",
+              "times": [0, 2],
+              "values": [0.2, 0.55, 1, 1, 0.4, 0.7, 1, 1]
+            },
+            {
+              "id": "track:camera-fov",
+              "binding": {
+                "id": "binding:camera-fov",
+                "target": { "kind": "node-id", "nodeId": "camera" },
+                "path": "property",
+                "component": "camera3d",
+                "property": "fovYRadians",
+                "valueType": "scalar",
+                "valueSize": 1
+              },
+              "interpolation": "step",
+              "times": [0, 2],
+              "values": [0.7853981633974483, 0.8726646259971648]
+            }
+          ],
+          "events": []
+        }
+      ],
+      "stateMachine": {
+        "format": "haiyue-animation3d-state-machine@1",
+        "id": "machine:character",
+        "name": "Character",
+        "parameters": [],
+        "layers": [
+          {
+            "id": "layer:base",
+            "name": "Base",
+            "initialStateId": "state:idle",
+            "states": [
+              {
+                "id": "state:idle",
+                "name": "Idle",
+                "motion": { "kind": "clip", "clipId": "clip:idle" },
+                "loop": "repeat"
+              }
+            ],
+            "transitions": [],
+            "blendMode": "override",
+            "weight": 1,
+            "mask": {
+              "include": [
+                "binding:root-translation",
+                "binding:spine-rotation",
+                "binding:face-morph",
+                "binding:material-color",
+                "binding:camera-fov"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

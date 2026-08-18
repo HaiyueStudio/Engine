@@ -1,0 +1,121 @@
+{
+  "contractVersion": 1,
+  "phase": 9,
+  "status": "implemented",
+  "implementation": "2d-ui-and-simple-3d-module-family-production-migration",
+  "packageStatus": "private-compiler-with-generated-production-artifacts",
+  "primaryTarget": "webgpu-wgsl",
+  "families": [
+    {
+      "id": "engine-2d-ui",
+      "kind": "2d-ui",
+      "path": "shader-language/builtin-engine-2d-ui-family.json",
+      "sha256": "2768c13f32f1ca960adf210cea1840742213438ccffa50b32803ddb08d89d634",
+      "passCount": 7,
+      "artifactHash": "cc68ca549b6f26b0be050155bae3998d75b62e1e780b5698f8420100964f2012"
+    },
+    {
+      "id": "components-2d-ui",
+      "kind": "2d-ui",
+      "path": "shader-language/builtin-components-2d-ui-family.json",
+      "sha256": "a6366ad77efa2b76deca07eb87f6a62ed8f22407c5554fc709694d166964499c",
+      "passCount": 4,
+      "artifactHash": "16ea1e154dc97e70d112d84e6b5bf5515f95ba9cc10c238efc22f8971239137e"
+    },
+    {
+      "id": "engine-simple-3d",
+      "kind": "simple-3d",
+      "path": "shader-language/builtin-simple-3d-family.json",
+      "sha256": "0915a09aafb7192d4097cbd1c44d61677cc12bbf0dae5d7bc4f7791ef34d8264",
+      "passCount": 6,
+      "artifactHash": "9284915cc791110c4dee5638a3caf8ee74e6485f74debd82e81b5f5ea0fe7e4c"
+    }
+  ],
+  "artifact": {
+    "formatVersion": 2,
+    "passCount": 17,
+    "layoutOwner": "renderer",
+    "physicalBindGroupCount": 45,
+    "runtimeParsesWgsl": false,
+    "runtimeCompilesDsl": false
+  },
+  "productionMigrations": [
+    "Animation2DRenderSystem",
+    "CanvasText2DRenderSystem",
+    "Spine2DGpuRenderer",
+    "Tilemap2DRenderer",
+    "BitmapTextRenderer",
+    "GuiImageRenderer",
+    "GuiShapeRenderer",
+    "GuiTextRenderer",
+    "Mesh2DRenderer",
+    "Particle2DRenderSystem",
+    "RadialShadowRenderer",
+    "Mesh3DRenderer.basic",
+    "Mesh3DRenderer.basic-skinned",
+    "MeshHelperRenderer",
+    "NormalRenderer",
+    "Particle3DRenderSystem",
+    "SkyRenderer"
+  ],
+  "inventory": {
+    "wgslSourceCount": 58,
+    "generatedSourceCount": 30,
+    "handwrittenSourceCount": 28,
+    "inlineShaderSiteCount": 2,
+    "escapeHatchCount": 4,
+    "stage9GeneratedSourceCount": 17
+  },
+  "bundle": {
+    "engine2dUiArtifactRawBytes": 53787,
+    "engine2dUiArtifactGzipBytes": 4742,
+    "simple3dArtifactRawBytes": 79798,
+    "simple3dArtifactGzipBytes": 6718,
+    "engineArtifactGzipBytes": 11460,
+    "engineArtifactGzipBudgetBytes": 12000,
+    "componentsEvidenceArtifactGzipBytes": 2336,
+    "componentsPublicEntriesLoadEvidenceArtifact": false,
+    "runtimeContainsCompiler": false
+  },
+  "runtime": {
+    "enginePassesUseArtifactV2": true,
+    "componentsPassesUseGeneratedWgsl": true,
+    "componentsCrossesEnginePrivateBoundary": false,
+    "rendererSchedulingChanged": false,
+    "bindingAbiChanged": true,
+    "bindingAbiChange": "basic/normal object storage keeps its clipping companion table; Animation2D object uniforms add a bounded eight-entry source-neutral effect stack for tint/fill/opacity/color-matrix/blur/drop-shadow",
+    "vertexAbiChanged": true,
+    "vertexAbiChange": "basic/normal passes forward flat object index and world position for fragment clipping",
+    "publicApiChanges": []
+  },
+  "evidence": {
+    "webgpuCompiledFamilyCount": 3,
+    "webgpuCompiledPassCount": 17,
+    "webgpuRendererLayoutCount": 45,
+    "webgpuPipelineLayoutCount": 17,
+    "webgpuExpectedCenterPixel": [32, 191, 64, 255],
+    "webgpuExpectedAnimationEffectPixel": [255, 255, 0, 255],
+    "webgpuMaximumChannelDelta": 1,
+    "webgpuValidationErrorCount": 0,
+    "unclassifiedFailureCount": 0
+  },
+  "publicApiChanges": [],
+  "apiBaselineUpdated": false,
+  "acceptance": [
+    "npm run shader-language:check",
+    "npm run shader-language:stage9:check",
+    "npm run verify:shader-language-stage9",
+    "npm test -w ./engine",
+    "npm test -w ./extensions",
+    "npm run check:fast"
+  ],
+  "deferred": [
+    "production-deformation-pass-migration",
+    "production-pbr-shader-migration",
+    "compute-ir-side-effects-and-production-migration",
+    "glsl-es300-codegen",
+    "webgl2-renderer-fallback",
+    "visual-shader-graph-editor",
+    "stable-public-shader-api"
+  ]
+}

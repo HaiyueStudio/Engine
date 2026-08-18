@@ -1,0 +1,940 @@
+{
+  "schemaVersion": 2,
+  "corpus": "hya-lottie-real-v1",
+  "description": "Pinned, redistributable real Lottie files with fixed reference PNG frames. Legacy conformance samples and large browser-delivery samples are reported as separate cohorts.",
+  "source": {
+    "repository": "https://github.com/LottieFiles/test-files",
+    "revision": "ba025450fad1441f4194a62c69e00f1d5913a533",
+    "dataLicense": "CC0-1.0",
+    "toolingLicense": "MIT",
+    "rawBaseUrl": "https://raw.githubusercontent.com/LottieFiles/test-files/ba025450fad1441f4194a62c69e00f1d5913a533/data/"
+  },
+  "sources": {
+    "legacy": {
+      "repository": "https://github.com/LottieFiles/test-files",
+      "revision": "ba025450fad1441f4194a62c69e00f1d5913a533",
+      "dataLicense": "CC0-1.0",
+      "toolingLicense": "MIT",
+      "rawBaseUrl": "https://raw.githubusercontent.com/LottieFiles/test-files/ba025450fad1441f4194a62c69e00f1d5913a533/data/"
+    },
+    "airbnb-lottie-web": {
+      "repository": "https://github.com/airbnb/lottie-web",
+      "revision": "bede03d25d232826e0c9dca1733d542d8a7754fb",
+      "dataLicense": "MIT",
+      "toolingLicense": "MIT",
+      "rawBaseUrl": "https://raw.githubusercontent.com/airbnb/lottie-web/bede03d25d232826e0c9dca1733d542d8a7754fb/test/animations/"
+    },
+    "google-fonts": {
+      "repository": "https://github.com/google/fonts",
+      "revision": "2796410152d4f9524b68ed46e69c1b60f8e0f7c3",
+      "dataLicense": "OFL-1.1",
+      "toolingLicense": "Apache-2.0",
+      "rawBaseUrl": "https://raw.githubusercontent.com/google/fonts/2796410152d4f9524b68ed46e69c1b60f8e0f7c3/"
+    }
+  },
+  "referenceRenderer": {
+    "package": "lottie-web",
+    "version": "5.13.0",
+    "renderer": "canvas",
+    "license": "MIT",
+    "url": "https://unpkg.com/lottie-web@5.13.0/build/player/lottie_canvas.min.js",
+    "sha256": "85cdcc66cd1f4b079dba3205b85e34792a54683f6fc1ed4353efa6581019fa4a"
+  },
+  "entries": [
+    {
+      "id": "layers/solid-layer",
+      "title": "Solid Layer",
+      "category": "layers",
+      "features": [
+        "layers/solid"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "layers/solid-layer.json",
+        "sha256": "a47b40971befec6b9c5af0fbcc8b2a9f80e5e45d7bb37437e84144452460818f",
+        "bytes": 437
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 120
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "layers/solid-layer-00.png",
+          "sha256": "5ca415f34b3e96c98ee764ccfdb1b56890c6d67d2335c775972e737a1f187938",
+          "bytes": 289
+        }
+      ]
+    },
+    {
+      "id": "layers/null-parent",
+      "title": "Null Parent",
+      "category": "layers",
+      "features": [
+        "layers/null",
+        "layers/parent"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "layers/null-parent.json",
+        "sha256": "3c134582c2db920c2afaa5fe79387cc76a7c3787938ba18a73558933a281d97f",
+        "bytes": 3340
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 61
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "layers/null-parent-00.png",
+          "sha256": "23b0d4231271310ac2292eb9d7260b1c9cf2161730990686426397bbb6f9109c",
+          "bytes": 772
+        }
+      ]
+    },
+    {
+      "id": "layers/layer-order",
+      "title": "Layer Order",
+      "category": "layers",
+      "features": [
+        "layers"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "layers/layer-order.json",
+        "sha256": "e109881a46e97c17c56815228a50f4380dce06857bf3ab04d1ed26c93dbe433c",
+        "bytes": 753
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 120
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "layers/layer-order-00.png",
+          "sha256": "acce674e7cd66f795350e54d027fb0536ebf2712f95c2ec21cb7eb3517d42812",
+          "bytes": 343
+        }
+      ]
+    },
+    {
+      "id": "layers/mask",
+      "title": "Mask",
+      "category": "layers",
+      "features": [
+        "layers/mask"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "layers/mask.json",
+        "sha256": "ea3f222ae775bf7ac8cc3c07ac58d90d6ba0310af668a5c75b713422faa7febf",
+        "bytes": 4338
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 120
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "layers/mask-00.png",
+          "sha256": "21d93b7a5eb3cb0179f7c0b03a503e0ddc2be571f955f428542dd3bc3a29816b",
+          "bytes": 1492
+        }
+      ]
+    },
+    {
+      "id": "layers/matte-above",
+      "title": "Matte Above",
+      "category": "layers",
+      "features": [
+        "layers/matte"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "layers/matte-above.json",
+        "sha256": "5adbb2960e272fb37568788a116b7305ba59c52445628ff7119459fd7b5f78c6",
+        "bytes": 6186
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 61
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "layers/matte-above-00.png",
+          "sha256": "01f4f663e81ec4ac218594cc9c05ed54940810b1ab8fa0f392352e3ad6a62cae",
+          "bytes": 506
+        }
+      ]
+    },
+    {
+      "id": "layers/precomp",
+      "title": "Precomp",
+      "category": "layers",
+      "features": [
+        "layers/precomp"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "layers/precomp.json",
+        "sha256": "3efc95232b19fdf90775e240cecec5b78020fcc763edc2d89d9b231b85946a62",
+        "bytes": 3807
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 120
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "layers/precomp-00.png",
+          "sha256": "fd7fd72522244fb1464f56ee25788d945cb654ecb5772b2b40fd428a730705cf",
+          "bytes": 267
+        }
+      ]
+    },
+    {
+      "id": "shapes/ellipse",
+      "title": "Ellipse",
+      "category": "shapes",
+      "features": [
+        "shapes/ellipse"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "shapes/ellipse.json",
+        "sha256": "c18ac400f3d79368068cc857402efcc82f5577459da3189643465a7650312a1a",
+        "bytes": 2592
+      },
+      "animation": {
+        "width": 100,
+        "height": 50,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 120
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "shapes/ellipse-00.png",
+          "sha256": "ecf8b564a339f21c13498317446272b34586ebd6a3cde3121c35637e3a70cbf8",
+          "bytes": 991
+        }
+      ]
+    },
+    {
+      "id": "shapes/rectangle",
+      "title": "Rectangle",
+      "category": "shapes",
+      "features": [
+        "shapes/rectangle"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "shapes/rectangle.json",
+        "sha256": "365ff13259d294e07d701faeeabb2d6458f5228ce7adf74ddd3f0237c83fb13b",
+        "bytes": 2667
+      },
+      "animation": {
+        "width": 100,
+        "height": 50,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 120
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "shapes/rectangle-00.png",
+          "sha256": "f5b0778b14ffb28e81ba79573fe8a6a27ae42712d5f67e4b99eb76a520e73a64",
+          "bytes": 253
+        }
+      ]
+    },
+    {
+      "id": "shapes/bezier",
+      "title": "Bezier",
+      "category": "shapes",
+      "features": [
+        "shapes/path"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "shapes/bezier.json",
+        "sha256": "1ab9239b0f824a0f33b9ffa690158af94a61e749bfa0a72718ddc06d9fc5c47c",
+        "bytes": 8287
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 120
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "shapes/bezier-00.png",
+          "sha256": "ad2fda58ca4070e40691271cd2ea053119747febd3b5cf27fda723058ca39121",
+          "bytes": 1947
+        }
+      ]
+    },
+    {
+      "id": "shapes/star",
+      "title": "Star",
+      "category": "shapes",
+      "features": [
+        "shapes/star"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "shapes/star.json",
+        "sha256": "3a038227c8802459acf52d8ebd27d9a8630a992a322cb7e16056c1c748a1001c",
+        "bytes": 1203
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 120
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "shapes/star-00.png",
+          "sha256": "cf5cc0bcf5a53c82ccd45d2fb9e2c4533f3035e9bce9989258d74b39c2fdf406",
+          "bytes": 1656
+        }
+      ]
+    },
+    {
+      "id": "properties/position-linear",
+      "title": "Position Linear",
+      "category": "properties",
+      "features": [
+        "properties/position",
+        "animation/linear"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "properties/position-linear.json",
+        "sha256": "b589bbd33a58d6683e1f9113e63bd60923de94c2ce21bc25e0af5da57367ea3b",
+        "bytes": 1804
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 61
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "properties/position-linear-00.png",
+          "sha256": "6c9acd6ec9faf311c841e2e35ef58cf98fd437ce66c1d307629e3d361f332b03",
+          "bytes": 359
+        },
+        {
+          "frame": 15,
+          "referencePath": "properties/position-linear-15.png",
+          "sha256": "710c2aeab4a5e46e6a659b0ecf56dcd4c25153b690055072a0d721d85df91f09",
+          "bytes": 382
+        },
+        {
+          "frame": 60,
+          "referencePath": "properties/position-linear-60.png",
+          "sha256": "a93851f650c4c94f0275ba9bbaf15d9435601850ddfb1d02073b3e05293b4f7a",
+          "bytes": 349
+        }
+      ]
+    },
+    {
+      "id": "properties/position-ease",
+      "title": "Position Ease",
+      "category": "properties",
+      "features": [
+        "properties/position",
+        "animation/ease"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "properties/position-ease.json",
+        "sha256": "52b3548d7ed429fe799af5500224ec2849b1e2da080e39473cf684856aca5d47",
+        "bytes": 1796
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 61
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "properties/position-ease-00.png",
+          "sha256": "6c9acd6ec9faf311c841e2e35ef58cf98fd437ce66c1d307629e3d361f332b03",
+          "bytes": 359
+        },
+        {
+          "frame": 15,
+          "referencePath": "properties/position-ease-15.png",
+          "sha256": "3591edb2c3a2d35704568a0ca97c72a640a281c3e0bd257223a09cc3cab39842",
+          "bytes": 410
+        },
+        {
+          "frame": 60,
+          "referencePath": "properties/position-ease-60.png",
+          "sha256": "a93851f650c4c94f0275ba9bbaf15d9435601850ddfb1d02073b3e05293b4f7a",
+          "bytes": 349
+        }
+      ]
+    },
+    {
+      "id": "properties/scalar-linear",
+      "title": "Scalar Linear",
+      "category": "properties",
+      "features": [
+        "properties/scalar",
+        "animation/linear"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "properties/scalar-linear.json",
+        "sha256": "f3147a8a5ec867458aa35d58c58e5df6d6eafdb54299bf087d2ae624cabb4958",
+        "bytes": 3469
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 61
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "properties/scalar-linear-00.png",
+          "sha256": "ebd82dffd4e52102e05a350194837b48664874355a7ca004461929b0df9b0411",
+          "bytes": 699
+        },
+        {
+          "frame": 15,
+          "referencePath": "properties/scalar-linear-15.png",
+          "sha256": "97341df9d03e6b23446365c19adaa6ea1e3d2d99f52bed8cd7530d38c0b56808",
+          "bytes": 480
+        },
+        {
+          "frame": 30,
+          "referencePath": "properties/scalar-linear-30.png",
+          "sha256": "cb4513a4f74c48af79896044fd722ab31c96e6230e524b4c41cec5bbcdb3276e",
+          "bytes": 681
+        },
+        {
+          "frame": 60,
+          "referencePath": "properties/scalar-linear-60.png",
+          "sha256": "ebd82dffd4e52102e05a350194837b48664874355a7ca004461929b0df9b0411",
+          "bytes": 699
+        }
+      ]
+    },
+    {
+      "id": "transform/rotate",
+      "title": "Rotate",
+      "category": "transform",
+      "features": [
+        "transform/rotation"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "transform/rotate.json",
+        "sha256": "5b776345f116cb0953afed81c10225e2fe5662a3267bd036115e8c82988fbedb",
+        "bytes": 2976
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 120
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "transform/rotate-00.png",
+          "sha256": "6c61e7737d45836fba73a361f3f5bf400181e8d04cf479b69bbd43c9047d2e1d",
+          "bytes": 1246
+        }
+      ]
+    },
+    {
+      "id": "transform/scale",
+      "title": "Scale",
+      "category": "transform",
+      "features": [
+        "transform/scale"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "transform/scale.json",
+        "sha256": "8dbebfb7e3a13ab905d39889437d23b5d54c0b219d8dda874bc71d7a2bbbc715",
+        "bytes": 2974
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 120
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "transform/scale-00.png",
+          "sha256": "b88b39cc6d602b720b4757ff829b44555224337b950d1104da3cc237cb28b28b",
+          "bytes": 370
+        }
+      ]
+    },
+    {
+      "id": "shape-style/fill-opacity",
+      "title": "Fill Opacity",
+      "category": "shape-style",
+      "features": [
+        "shape-style/fill/opacity"
+      ],
+      "expectation": "supported",
+      "source": {
+        "path": "shape-style/fill-opacity.json",
+        "sha256": "a10e7a6b4d928925b8f87c9316b97e59d0babb9f2ae03632352897097b360f2e",
+        "bytes": 1088
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 120
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "shape-style/fill-opacity-00.png",
+          "sha256": "86775b7603faeead1255cb3e3c741bce779c19399f1d489878ea3161f481cf55",
+          "bytes": 326
+        }
+      ]
+    },
+    {
+      "id": "shape-style/stroke",
+      "title": "Stroke",
+      "category": "shape-style",
+      "features": [
+        "shape-style/stroke"
+      ],
+      "expectation": "degraded",
+      "source": {
+        "path": "shape-style/stroke.json",
+        "sha256": "cf2b021ce90033b8ae794c8fa9004b7cafee5bfbe10cc5dab3e62e261e701392",
+        "bytes": 10179
+      },
+      "animation": {
+        "width": 80,
+        "height": 80,
+        "frameRate": 60,
+        "inFrame": 0,
+        "outFrame": 120
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referencePath": "shape-style/stroke-00.png",
+          "sha256": "f3a52878f7eba987129ae36ce655353ca37d81bd281dcf0560162d455d6ddcd0",
+          "bytes": 2338
+        }
+      ]
+    },
+    {
+      "id": "large/bodymovin-showcase",
+      "title": "Bodymovin Showcase",
+      "category": "large-marketing",
+      "sizeClass": "large",
+      "features": [
+        "layers/precomp",
+        "animation/path",
+        "animation/path-topology",
+        "animation/fill",
+        "curves/complex"
+      ],
+      "expectation": "degraded",
+      "source": {
+        "sourceId": "airbnb-lottie-web",
+        "path": "bodymovin.json",
+        "sha256": "cc18ed3dbe96c632d1ad13cb8828b28ad0fea7bb95d2e8b194e91654724c9ea5",
+        "bytes": 1102932
+      },
+      "animation": {
+        "width": 1820,
+        "height": 275,
+        "frameRate": 30,
+        "inFrame": 0,
+        "outFrame": 103
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referenceKind": "lottie-web-canvas",
+          "referencePath": "references/large/bodymovin-f0000.png",
+          "sha256": "cee567f4ba4b8d9f4a823956a46eabe78988eedd86d6ebbfd8175d318d0764d8",
+          "bytes": 25507
+        },
+        {
+          "frame": 51,
+          "referenceKind": "lottie-web-canvas",
+          "referencePath": "references/large/bodymovin-f0051.png",
+          "sha256": "b3af9958bfe01ebc1d892069452a6bd56ecceee7d6aea1179f7f6ee1ed6db2e9",
+          "bytes": 40511
+        }
+      ]
+    },
+    {
+      "id": "large/navidad-marketing",
+      "title": "Navidad Marketing",
+      "category": "large-marketing",
+      "sizeClass": "large",
+      "features": [
+        "layers/precomp",
+        "timing/time-remap",
+        "animation/path-topology",
+        "composites/mask",
+        "curves/complex"
+      ],
+      "expectation": "unsupported",
+      "source": {
+        "sourceId": "airbnb-lottie-web",
+        "path": "navidad.json",
+        "sha256": "a9de1ec3290fb6998347fd53f62e99f1badeab07e388b45d2115a8e6f3333182",
+        "bytes": 1733805
+      },
+      "animation": {
+        "width": 1920,
+        "height": 1080,
+        "frameRate": 25,
+        "inFrame": 0,
+        "outFrame": 125
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referenceKind": "lottie-web-canvas",
+          "referencePath": "references/large/navidad-f0000.png",
+          "sha256": "e02cd2e04314ed3f49ec845c48f3f52298f332b02eeb1ed55c6878f0bcf4bc7d",
+          "bytes": 63137
+        },
+        {
+          "frame": 62,
+          "referenceKind": "lottie-web-canvas",
+          "referencePath": "references/large/navidad-f0062.png",
+          "sha256": "a1109d85d3ebb0a4f952411f3344f0525c76aa4030225426eb8b9b546b30a46c",
+          "bytes": 98350
+        }
+      ]
+    },
+    {
+      "id": "large/bm-ronda-effects",
+      "title": "BM Ronda Effects",
+      "category": "large-marketing",
+      "sizeClass": "large",
+      "features": [
+        "layers/precomp",
+        "effects/layer-effect",
+        "timing/time-stretch",
+        "animation/path-topology",
+        "curves/complex"
+      ],
+      "expectation": "unsupported",
+      "source": {
+        "sourceId": "airbnb-lottie-web",
+        "path": "bm_ronda.json",
+        "sha256": "f0e348e107d2ee6914ef7ee2f16dbc1a67475a5bc523ae43b700ed4f8f7a267b",
+        "bytes": 1841290
+      },
+      "animation": {
+        "width": 1920,
+        "height": 1080,
+        "frameRate": 29.9700012207031,
+        "inFrame": 0,
+        "outFrame": 371.00001511114
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referenceKind": "lottie-web-canvas",
+          "referencePath": "references/large/bm-ronda-f0000.png",
+          "sha256": "157e3dd319311bfed9c09becf279103e3b7f7a2dabbb9071540a357619848363",
+          "bytes": 54326
+        },
+        {
+          "frame": 185,
+          "referenceKind": "lottie-web-canvas",
+          "referencePath": "references/large/bm-ronda-f0185.png",
+          "sha256": "5bb1db9e978ecebda06a4a77d60753353bc827da68aa2219b70c29f71daf9008",
+          "bytes": 65692
+        }
+      ]
+    },
+    {
+      "id": "large/banner-ui-text",
+      "title": "Banner UI and Text",
+      "category": "large-ui-motion",
+      "sizeClass": "large",
+      "features": [
+        "layers/precomp",
+        "layers/text",
+        "text/font-resource",
+        "animation/text-document",
+        "animation/path"
+      ],
+      "expectation": "supported",
+      "source": {
+        "sourceId": "airbnb-lottie-web",
+        "path": "banner.json",
+        "sha256": "e18ddce5a70eadacedf3299ae8e9137546b1a1c3dad2fecd8d7c351f2ec9a39d",
+        "bytes": 195847
+      },
+      "resources": [
+        {
+          "kind": "font",
+          "sourceId": "google-fonts",
+          "uri": "fonts/montserrat-latin-v31.woff2",
+          "path": "fonts/montserrat-latin-v31.woff2",
+          "url": "https://fonts.gstatic.com/s/montserrat/v31/JTUSjIg1_i6t8kCHKm459WlhyyTh89Y.woff2",
+          "sha256": "6438d7b8ea9c7c3992d5e2fd2afdb1ff948570a3ef0bedae76247b51632960ba",
+          "bytes": 35508,
+          "mimeType": "font/woff2",
+          "license": {
+            "spdx": "OFL-1.1",
+            "url": "https://raw.githubusercontent.com/google/fonts/2796410152d4f9524b68ed46e69c1b60f8e0f7c3/ofl/montserrat/OFL.txt"
+          },
+          "fonts": [
+            {
+              "name": "Montserrat-Regular",
+              "family": "Montserrat",
+              "style": "normal",
+              "weight": 400,
+              "metrics": {
+                "unitsPerEm": 1000,
+                "ascent": 968,
+                "descent": -251,
+                "lineGap": 0,
+                "capHeight": 700,
+                "xHeight": 525
+              }
+            },
+            {
+              "name": "Montserrat-Bold",
+              "family": "Montserrat",
+              "style": "normal",
+              "weight": 700,
+              "metrics": {
+                "unitsPerEm": 1000,
+                "ascent": 968,
+                "descent": -251,
+                "lineGap": 0,
+                "capHeight": 700,
+                "xHeight": 538
+              }
+            }
+          ]
+        },
+        {
+          "kind": "font",
+          "sourceId": "google-fonts",
+          "uri": "fonts/varela-round-latin-v21.woff2",
+          "path": "fonts/varela-round-latin-v21.woff2",
+          "url": "https://fonts.gstatic.com/s/varelaround/v21/w8gdH283Tvk__Lua32TysjIfp8uPLdshZg.woff2",
+          "sha256": "2051818aecd1dbbecbee6f2d8c029dbb6c94c22b0026c76b1170c63f932d3181",
+          "bytes": 15884,
+          "mimeType": "font/woff2",
+          "license": {
+            "spdx": "OFL-1.1",
+            "url": "https://raw.githubusercontent.com/google/fonts/2796410152d4f9524b68ed46e69c1b60f8e0f7c3/ofl/varelaround/OFL.txt"
+          },
+          "fonts": [
+            {
+              "name": "VarelaRound-Regular",
+              "family": "Varela Round",
+              "style": "normal",
+              "weight": 400,
+              "metrics": {
+                "unitsPerEm": 1000,
+                "ascent": 918,
+                "descent": -286,
+                "lineGap": 0,
+                "capHeight": 698,
+                "xHeight": 510
+              }
+            }
+          ]
+        }
+      ],
+      "animation": {
+        "width": 970,
+        "height": 250,
+        "frameRate": 25,
+        "inFrame": 0,
+        "outFrame": 603
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referenceKind": "lottie-web-canvas",
+          "referencePath": "references/large/banner-f0000.png",
+          "sha256": "9133fc41fde5c1c9687218ffae3c0a2f98097ab1a6ea6d0aba7a33540e8855d9",
+          "bytes": 12764
+        },
+        {
+          "frame": 300,
+          "referenceKind": "lottie-web-canvas",
+          "referencePath": "references/large/banner-f0300.png",
+          "sha256": "837f7c50b36eab36fa6dd37562f224ff236c48bfaaaeac77c52e3e1ace39d60d",
+          "bytes": 22246
+        }
+      ]
+    },
+    {
+      "id": "large/footage-images-text",
+      "title": "Footage Images and Text",
+      "category": "large-ui-motion",
+      "sizeClass": "large",
+      "features": [
+        "layers/image",
+        "layers/text",
+        "resources/external-image",
+        "layers/data",
+        "expressions/text-document"
+      ],
+      "expectation": "degraded",
+      "source": {
+        "sourceId": "airbnb-lottie-web",
+        "path": "footage/data.json",
+        "sha256": "25a650998212b0497495d3d4bee00e21ac69c67213e79630e33525a27d1b7421",
+        "bytes": 25677
+      },
+      "resources": [
+        {
+          "uri": "images/img_0.jpg",
+          "path": "footage/images/img_0.jpg",
+          "sha256": "97457e86fd68d93d43a59fb6a995cd566aecfade5215ce8150c093550573271f",
+          "bytes": 14897
+        },
+        {
+          "uri": "images/img_1.jpg",
+          "path": "footage/images/img_1.jpg",
+          "sha256": "28ec4aa16f653048bdca2252b71d6d67fc5be10e291f73b188c88c1976edeaed",
+          "bytes": 157887
+        },
+        {
+          "uri": "images/footage_0.json",
+          "path": "footage/images/footage_0.json",
+          "sha256": "521e4811cc4633479570e1b17df528ecbc2a73b3c0c43ac8b3ca91cb9882cb9a",
+          "bytes": 2596
+        }
+      ],
+      "animation": {
+        "width": 720,
+        "height": 1280,
+        "frameRate": 30,
+        "inFrame": 0,
+        "outFrame": 360
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referenceKind": "lottie-web-canvas",
+          "referencePath": "references/large/footage-f0000.png",
+          "sha256": "2a9ff8ac206071b62192943c6a785e94681800b96eb673f73df3feb1d24ddf87",
+          "bytes": 540445
+        },
+        {
+          "frame": 180,
+          "referenceKind": "lottie-web-canvas",
+          "referencePath": "references/large/footage-f0180.png",
+          "sha256": "2a9ff8ac206071b62192943c6a785e94681800b96eb673f73df3feb1d24ddf87",
+          "bytes": 540445
+        }
+      ]
+    },
+    {
+      "id": "large/monster-mask-stress",
+      "title": "Monster Mask Stress",
+      "category": "large-marketing",
+      "sizeClass": "large",
+      "features": [
+        "layers/precomp",
+        "layers/solid",
+        "composites/mask",
+        "composites/stack-budget",
+        "animation/mask-expansion",
+        "animation/path-topology",
+        "curves/complex"
+      ],
+      "expectation": "degraded",
+      "source": {
+        "sourceId": "airbnb-lottie-web",
+        "path": "monster.json",
+        "sha256": "d04819241e9d6db3df8fd6977836e3c9a31af3ff6ef272595ee98ca4792f141c",
+        "bytes": 4713147
+      },
+      "animation": {
+        "width": 1280,
+        "height": 1024,
+        "frameRate": 30,
+        "inFrame": 0,
+        "outFrame": 292
+      },
+      "frames": [
+        {
+          "frame": 0,
+          "referenceKind": "lottie-web-canvas",
+          "referencePath": "references/large/monster-f0000.png",
+          "sha256": "1baf3e322723a2b77508790c0035f04426474f00e4fc33f797ac15a2980e7e9c",
+          "bytes": 29578
+        },
+        {
+          "frame": 146,
+          "referenceKind": "lottie-web-canvas",
+          "referencePath": "references/large/monster-f0146.png",
+          "sha256": "71bdfc46e87a81c74a9d4a67770fb7b93a62f210f834a8cfe8b94268eb04f2f9",
+          "bytes": 53807
+        }
+      ]
+    }
+  ]
+}

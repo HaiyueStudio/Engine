@@ -1,0 +1,97 @@
+{
+  "format": "haiyue-shader-graph",
+  "version": 1,
+  "kind": "postprocess",
+  "profile": "webgpu-portable",
+  "resources": [
+    {
+      "id": "pass.sourceColor",
+      "space": "pass",
+      "kind": "texture-2d",
+      "valueType": "texture_2d<f32>",
+      "frequency": "pass",
+      "colorSpace": "linear"
+    },
+    {
+      "id": "pass.depth",
+      "space": "pass",
+      "kind": "texture-2d",
+      "valueType": "texture_2d<f32>",
+      "frequency": "pass",
+      "colorSpace": "data"
+    },
+    {
+      "id": "pass.velocity",
+      "space": "pass",
+      "kind": "texture-2d",
+      "valueType": "texture_2d<f32>",
+      "frequency": "pass",
+      "colorSpace": "data"
+    },
+    {
+      "id": "pass.tileMax",
+      "space": "pass",
+      "kind": "texture-2d",
+      "valueType": "texture_2d<f32>",
+      "frequency": "pass",
+      "colorSpace": "data"
+    },
+    {
+      "id": "pass.neighborMax",
+      "space": "pass",
+      "kind": "texture-2d",
+      "valueType": "texture_2d<f32>",
+      "frequency": "pass",
+      "colorSpace": "data"
+    },
+    {
+      "id": "pass.linearSampler",
+      "space": "pass",
+      "kind": "sampler",
+      "valueType": "sampler",
+      "frequency": "pass"
+    },
+    {
+      "id": "pass.motionBlurParameters",
+      "space": "pass",
+      "kind": "uniform",
+      "valueType": "MotionBlurParams",
+      "frequency": "pass"
+    },
+    {
+      "id": "pass.motionTileParameters",
+      "space": "pass",
+      "kind": "uniform",
+      "valueType": "MotionTileMaxParams",
+      "frequency": "pass"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "motionBlur",
+      "type": "haiyue.postprocess.motion-blur",
+      "typeVersion": 1,
+      "inputs": {
+        "sourceColor": { "resource": "pass.sourceColor" },
+        "depth": { "resource": "pass.depth" },
+        "velocity": { "resource": "pass.velocity" },
+        "tileMax": { "resource": "pass.tileMax" },
+        "neighborMax": { "resource": "pass.neighborMax" },
+        "sampler": { "resource": "pass.linearSampler" },
+        "parameters": { "resource": "pass.motionBlurParameters" },
+        "tileParameters": { "resource": "pass.motionTileParameters" }
+      },
+      "metadata": {
+        "position": [120, 80],
+        "label": "Stable motion blur"
+      }
+    }
+  ],
+  "outputs": {
+    "color": { "node": "motionBlur", "output": "color" }
+  },
+  "sceneFeatures": [],
+  "metadata": {
+    "label": "Pilot 3 motion blur postprocess"
+  }
+}

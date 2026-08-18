@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "policy": "required browser correctness and the Windows discrete hardware boundary block release; all evidence requires native hardware WebGPU, while rendering performance is decided by the portable same-host cross-engine comparison",
+  "browsers": [
+    { "id": "chrome-macos", "channel": "stable", "os": "macOS 14+", "tier": "extended", "webgpu": "native" },
+    { "id": "chrome-windows", "channel": "stable", "os": "Windows 10 22H2+", "tier": "required", "webgpu": "native" },
+    { "id": "edge-windows", "channel": "stable", "os": "Windows 10 22H2+", "tier": "required", "webgpu": "native" },
+    { "id": "chrome-android", "channel": "stable", "os": "Android 13+", "tier": "extended", "webgpu": "native" },
+    { "id": "chromeos", "channel": "stable", "os": "ChromeOS current-1", "tier": "extended", "webgpu": "native" },
+    { "id": "safari-macos", "channel": "stable", "os": "macOS 26+", "tier": "extended", "webgpu": "native" }
+  ],
+  "deviceClasses": [
+    { "id": "windows-discrete", "examples": ["NVIDIA GeForce", "AMD Radeon RX"], "tier": "required", "purpose": "0.1 Windows hardware correctness boundary; not a fixed performance ranking host" },
+    { "id": "android-vulkan", "examples": ["Adreno 7xx", "Mali-G7xx"], "tier": "extended" }
+  ],
+  "requiredScenarios": [
+    "example:pbr-showcase",
+    "example:fog",
+    "example:gltf-viewer",
+    "example:gpu-driven-megabatch",
+    "example:mixed-scene",
+    "game:billiards-3d",
+    "game:sokoban-3d",
+    "editor:create-save-export-play",
+    "editor:animation-designer-integration",
+    "editor:voxel-editor-browser-smoke"
+  ],
+  "gates": {
+    "declarations": true,
+    "exports": true,
+    "treeShaking": true,
+    "bundleSize": { "engineEntryBytes": 180000, "editorStartupClosureGzipBytes": 175000 },
+    "manifestBuilds": true,
+    "errorDocumentation": true,
+    "changelog": true,
+    "pixelRegression": ["stage7-triangle", "stage9-pbr-shadow-ibl", "stage9-engine-pbr-showcase", "pbr-clearcoat-on-off", "fog-distance-height"],
+    "benchmarkBaseline": "review/baselines/benchmark-stage9.json",
+    "webgpuPerformanceBudgets": {
+      "releaseRole": "diagnostic-regression",
+      "config": "config/webgpu-performance-budgets.json",
+      "command": "npm run verify:device-performance",
+      "evidenceCommand": "npm run performance:evidence:check",
+      "requiredSuites": ["render3d.real-frame", "render3d.planar-reflection", "ambient-occlusion.gpu-cost"],
+      "artifactPattern": "artifacts/webgpu/performance/{deviceClass}/{suite}.json"
+    },
+    "crossEnginePerformance": {
+      "releaseRole": "blocking-portable-comparison",
+      "command": "npm run performance:compare:formal",
+      "candidateCommand": "npm run performance:compare:full",
+      "artifact": "artifacts/performance-comparison/formal.json",
+      "scene": "pbr-grid-v1",
+      "rankedBackend": "webgpu",
+      "requiredRankedEngines": ["haiyue", "three", "babylon", "playcanvas"],
+      "requiredInformationalEngines": ["galacean"],
+      "decision": "HaiYue must lead or be within 5% of the fastest eligible WebGPU competitor on the same host/browser run"
+    },
+    "gltfAssetBaseline": {
+      "command": "npm run verify:gltf-asset",
+      "fixture": "scripts/webgpu-gate/assets/stage11-dynamic-uv-character.gltf",
+      "budget": "review/baselines/webgpu-gltf-asset-stage11.json",
+      "artifact": "artifacts/webgpu/gltf-asset-first-frame.json",
+      "runner": "ci-slow Chrome/WebGPU"
+    },
+    "webgpuReadbackChurn": {
+      "short": {
+        "command": "npm run verify:webgpu-readback",
+        "frames": 120,
+        "runner": "ci-slow Chrome/WebGPU"
+      },
+      "long": {
+        "command": "npm run verify:webgpu-readback:long",
+        "frames": 1800,
+        "runner": "required Windows release host; ci-webgpu-long macos-15 Chrome/Metal provides extended coverage",
+        "artifact": "artifacts/webgpu/readback-churn-long.json"
+      }
+    }
+  }
+}

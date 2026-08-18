@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haiyue.dev/schemas/builtin-postprocess-family-v1.json",
+  "title": "Haiyue Builtin Postprocess Module Family v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "id", "passes"],
+  "properties": {
+    "format": { "const": "haiyue-builtin-postprocess-family" },
+    "version": { "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$" },
+    "passes": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "operation"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$" },
+          "operation": {
+            "enum": [
+              "present",
+              "grayscale",
+              "sobel",
+              "fxaa",
+              "gaussian-blur",
+              "outline-edge",
+              "outline-blur",
+              "outline-overlay",
+              "taa"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

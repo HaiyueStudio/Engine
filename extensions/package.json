@@ -1,0 +1,124 @@
+{
+  "name": "@haiyue/extensions",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Stable optional HaiYue runtimes for 2D/3D animation, glTF, Spine, tilemaps, text, tweening, and grids.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HaiyueStudio/Engine.git",
+    "directory": "extensions"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "test/fixtures/gltf/animation-characterization.gltf",
+    "src/**/*"
+  ],
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./gltf": {
+      "source": "./src/gltf.ts",
+      "types": "./dist/gltf.d.ts",
+      "import": "./dist/gltf.js"
+    },
+    "./experimental/gltf-worker": {
+      "source": "./src/experimental-gltf-worker.ts",
+      "types": "./dist/experimental-gltf-worker.d.ts",
+      "import": "./dist/experimental-gltf-worker.js"
+    },
+    "./experimental/spine-worker": {
+      "source": "./src/experimental-spine-worker.ts",
+      "types": "./dist/experimental-spine-worker.d.ts",
+      "import": "./dist/experimental-spine-worker.js"
+    },
+    "./spine": {
+      "source": "./src/spine.ts",
+      "types": "./dist/spine.d.ts",
+      "import": "./dist/spine.js"
+    },
+    "./tilemap": {
+      "source": "./src/tilemap.ts",
+      "types": "./dist/tilemap.d.ts",
+      "import": "./dist/tilemap.js"
+    },
+    "./canvas-text": {
+      "source": "./src/canvas-text.ts",
+      "types": "./dist/canvas-text.d.ts",
+      "import": "./dist/canvas-text.js"
+    },
+    "./tween": {
+      "source": "./src/tween.ts",
+      "types": "./dist/tween.d.ts",
+      "import": "./dist/tween.js"
+    },
+    "./grid": {
+      "source": "./src/grid.ts",
+      "types": "./dist/grid.d.ts",
+      "import": "./dist/grid.js"
+    },
+    "./animation": {
+      "source": "./src/animation.ts",
+      "types": "./dist/animation.d.ts",
+      "import": "./dist/animation.js"
+    },
+    "./hya-state-machine": {
+      "source": "./src/hya-state-machine.ts",
+      "types": "./dist/hya-state-machine.d.ts",
+      "import": "./dist/hya-state-machine.js"
+    },
+    "./animation3d": {
+      "source": "./src/animation3d.ts",
+      "types": "./dist/animation3d.d.ts",
+      "import": "./dist/animation3d.js"
+    },
+    "./gltf-animation3d": {
+      "source": "./src/gltf-animation3d.ts",
+      "types": "./dist/gltf-animation3d.d.ts",
+      "import": "./dist/gltf-animation3d.js"
+    }
+  },
+  "scripts": {
+    "build": "node ../scripts/build-rollup-once.mjs && node ../scripts/build-rollup-once.mjs rollup.worker.config.js",
+    "build:animation-runtime-tests": "node -e \"require('node:fs').rmSync('dist-test', { recursive: true, force: true })\" && tsc -p tsconfig.animation-runtime-tests.json",
+    "test": "npm run build && npm run build:animation-runtime-tests && node --test --test-concurrency=1 \"test/**/*.test.mjs\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.animation3d-type-tests.json && tsc -p tsconfig.animation-runtime-tests.json --noEmit"
+  },
+  "dependencies": {
+    "draco3dgltf": "^1.5.7",
+    "earcut": "^3.0.2",
+    "wgpu-matrix": "^3.0.0"
+  },
+  "peerDependencies": {
+    "@haiyue/animation-spec": ">=0.1.0 <0.2.0",
+    "@haiyue/engine": ">=0.1.0 <0.2.0"
+  },
+  "devDependencies": {
+    "@haiyue/animation-spec": "0.1.0",
+    "@haiyue/engine": "0.1.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@webgpu/types": "^0.1.40",
+    "rollup": "^4.0.0",
+    "tslib": "^2.6.0",
+    "typescript": "^5.2.0"
+  }
+}

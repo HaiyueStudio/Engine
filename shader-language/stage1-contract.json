@@ -1,0 +1,36 @@
+{
+  "contractVersion": 1,
+  "phase": 1,
+  "status": "implemented",
+  "packageStatus": "private-workspace",
+  "implementation": "composer-2-foundation",
+  "primaryTarget": "webgpu-wgsl",
+  "deliverables": [
+    "structured-shader-modules",
+    "deterministic-module-linker",
+    "isolated-physical-symbols",
+    "requires-provides-conflicts-validation",
+    "stage-aware-import-validation",
+    "symbolic-resource-allocation",
+    "generated-uniform-layout",
+    "specialization-variant-keys",
+    "reflection-v1",
+    "module-source-maps"
+  ],
+  "productionMigrations": [],
+  "deferred": [
+    "typed-expression-ir",
+    "coordinate-space-type-checking",
+    "material-surface-lowering",
+    "graph-v1-frontend",
+    "optimizer",
+    "glsl-es300-codegen",
+    "runtime-renderer-adapter",
+    "stable-public-api"
+  ],
+  "acceptance": [
+    "npm run typecheck -w ./shader-language",
+    "npm test -w ./shader-language",
+    "npm run shader-language:check"
+  ]
+}

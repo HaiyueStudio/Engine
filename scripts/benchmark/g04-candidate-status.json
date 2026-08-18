@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 2,
+  "goal": "g04-performance-device-readiness",
+  "updatedAt": "2026-08-15",
+  "candidateState": "portable-cross-engine-full-candidate-passed-formal-replay-required",
+  "formalBaselineUpdated": false,
+  "decisionContract": {
+    "adr": "docs/for-ai/adr/0073-portable-cross-engine-performance-evidence.md",
+    "scene": "pbr-grid-v1",
+    "rankedBackend": "webgpu",
+    "rankedEngines": ["haiyue", "three", "babylon", "playcanvas"],
+    "informationalEngines": ["galacean"],
+    "leadingTieRatio": 1.05,
+    "fixedHardwareRequired": false,
+    "nativeHardwareIdentityRecorded": true
+  },
+  "harness": {
+    "status": "passed",
+    "directory": "performance-comparison",
+    "candidatePath": "performance-comparison/data/local/latest.json",
+    "formalPath": "artifacts/performance-comparison/formal.json",
+    "candidateCommand": "npm run performance:compare:full",
+    "formalCommand": "npm run performance:compare:formal",
+    "policyTest": "npm run performance:compare:test",
+    "fullCohorts": 3,
+    "visualCapture": "independent Chrome process per adapter",
+    "formalRequirements": [
+      "clean revision",
+      "native WebGPU for all ranked engines",
+      "exact scene structural parity",
+      "five independent screenshot sanity captures",
+      "raw P50/P95 samples and complete cohort ordering",
+      "exact OS/browser/CPU/adapter/backend/dependency identity"
+    ]
+  },
+  "latestCandidate": {
+    "host": "Windows 10.0.19045",
+    "profile": "full",
+    "policy": "passed",
+    "haiyueMedianP50Ms": 1.1,
+    "fastestCompetitor": "three",
+    "fastestCompetitorMedianP50Ms": 3.2,
+    "robustCohortLead": true,
+    "visualAdaptersPassed": 5,
+    "resource": "performance-comparison/data/local/latest.json",
+    "formal": false,
+    "note": "Local ignored candidate only; values must be replayed from the frozen clean G07 revision."
+  },
+  "legacyDeviceProfiles": {
+    "role": "internal-regression-and-correctness-diagnostics",
+    "releaseBlockingByMissingHardware": false,
+    "profiles": ["apple-integrated", "windows-integrated", "windows-discrete"],
+    "note": "Existing absolute budgets and artifacts remain useful diagnostics but no longer require acquiring every named GPU for the rendering-performance release decision."
+  },
+  "handoff": {
+    "g07": [
+      "Freeze one clean revision and install the exact root lockfile.",
+      "Run npm run performance:compare:formal on any local-console native WebGPU host.",
+      "Review all five screenshots, raw samples, cohort order, backend identity and the leading-or-5%-tie decision.",
+      "Keep browser/device correctness, lifecycle, memory, pixel and product evidence separate from the portable performance ranking."
+    ]
+  }
+}

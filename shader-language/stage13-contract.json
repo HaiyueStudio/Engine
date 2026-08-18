@@ -1,0 +1,36 @@
+{
+  "contractVersion": 1,
+  "phase": 13,
+  "status": "implemented",
+  "implementation": "typed-compute-side-effects-and-atomic-production-migration",
+  "packageStatus": "private-compiler-with-generated-production-artifacts",
+  "primaryTarget": "webgpu-wgsl",
+  "family": {
+    "id": "engine-production-compute",
+    "path": "shader-language/builtin-compute-family.json",
+    "sha256": "08017749911b7d4fdcdfaa6b9af34e1fe12123f15d889392d2d3761705499737",
+    "abiVersion": 1,
+    "passCount": 5,
+    "artifactHash": "70c60d0986507390e66ef37aa242c1e3ac82fdaea7658ce14e4b19ebe37ef8bb",
+    "computeModuleHash": "224edd29cb3a5bf01c487e04e033918d52080c080ac656754d0a633b961894a6"
+  },
+  "passes": ["gpu-draw-command", "gpu-sort-bitonic", "instanced-cull", "instanced-depth-sort-key", "mesh3d-cull"],
+  "abi": {
+    "entryPoint": "cs_main",
+    "workgroupSize": [64, 1, 1],
+    "resourceAccessKinds": ["read", "read-write", "atomic-read-write"],
+    "effectKinds": ["store", "atomic-add"],
+    "dispatchSchedules": ["single", "bitonic-network"],
+    "artifactOwnedPassCount": 5
+  },
+  "productionMigrations": ["GpuDrawCommandComputePass", "GpuSortComputePass", "Mesh3DGpuCullComputePass", "InstancedMesh3DRenderer.cull", "InstancedMesh3DRenderer.depthSortKey"],
+  "artifact": { "formatVersion": 2, "runtimeParsesWgsl": false, "runtimeCompilesDsl": false, "runtimeComposesWgsl": false },
+  "inventory": { "wgslSourceCount": 60, "generatedSourceCount": 59, "handwrittenSourceCount": 1, "stage13GeneratedSourceCount": 5, "replacedHandwrittenSourceCount": 5 },
+  "bundle": { "computeArtifactRawBytes": 33400, "computeArtifactGzipBytes": 3900, "computeArtifactGzipBudgetBytes": 4500, "runtimeContainsCompiler": false },
+  "evidence": { "webgpuCompiledPassCount": 5, "webgpuExecutedPassCount": 3, "webgpuBindGroupLayoutCount": 5, "webgpuPipelineLayoutCount": 5, "webgpuValidationErrorCount": 0, "unclassifiedFailureCount": 0 },
+  "escapeHatches": ["ComputeKernel.rawWgsl", "CustomPass.rawWgsl", "WgslFeatureComposer.compatibility"],
+  "publicApiChanges": [],
+  "apiBaselineUpdated": false,
+  "acceptance": ["npm run shader-language:check", "npm run shader-language:stage13:check", "npm run verify:shader-language-stage13", "npm test -w ./engine", "npm run check:fast"],
+  "deferred": ["glsl-es300-codegen", "webgl2-renderer-fallback", "visual-shader-graph-editor", "stable-public-shader-api"]
+}
