@@ -1,6 +1,7 @@
 import { Mesh3D, Transform3D } from '@haiyue/engine/components';
 import type { Entity, World } from '@haiyue/engine/ecs';
 import type { Scene } from '@haiyue/engine/scene';
+import { mat4n } from 'wgpu-matrix';
 import type {
   RayDiagnostic,
   RayMatrix4,
@@ -317,15 +318,7 @@ function isHierarchyDisabled(entity: Entity): boolean {
 }
 
 function multiplyMatrix(a: ArrayLike<number>, b: ArrayLike<number>): number[] {
-  const result = new Array<number>(16).fill(0);
-  for (let column = 0; column < 4; column++) {
-    for (let row = 0; row < 4; row++) {
-      let value = 0;
-      for (let item = 0; item < 4; item++) value += a[item * 4 + row]! * b[column * 4 + item]!;
-      result[column * 4 + row] = value;
-    }
-  }
-  return result;
+  return mat4n.multiply(a, b);
 }
 
 function freezeMatrix(values: ArrayLike<number>): RayMatrix4 {

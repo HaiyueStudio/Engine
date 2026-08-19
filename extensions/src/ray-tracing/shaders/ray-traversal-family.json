@@ -1,0 +1,24 @@
+{
+  "format": "haiyue-ray-traversal-module-family",
+  "version": 1,
+  "id": "ray-traversal",
+  "accelerationAbiFingerprint": "fnv1a64:9fd4d41c38d10fa2",
+  "entryPoint": "cs_main",
+  "workgroupSize": [64, 1, 1],
+  "stackCapacity": 64,
+  "hitRecordBytes": 96,
+  "diagnosticBytes": 32,
+  "bindings": [
+    { "id": "pass.params", "binding": 0, "bufferType": "uniform", "minBindingSize": 32 },
+    { "id": "pass.rays", "binding": 1, "bufferType": "read-only-storage", "minBindingSize": 32 },
+    { "id": "pass.blasNodes", "binding": 2, "bufferType": "read-only-storage", "minBindingSize": 32 },
+    { "id": "pass.blasTable", "binding": 3, "bufferType": "read-only-storage", "minBindingSize": 16 },
+    { "id": "pass.tlasNodes", "binding": 4, "bufferType": "read-only-storage", "minBindingSize": 32 },
+    { "id": "pass.primitives", "binding": 5, "bufferType": "read-only-storage", "minBindingSize": 64 },
+    { "id": "pass.instances", "binding": 6, "bufferType": "read-only-storage", "minBindingSize": 144 },
+    { "id": "pass.hits", "binding": 7, "bufferType": "storage", "minBindingSize": 96 },
+    { "id": "pass.diagnostics", "binding": 8, "bufferType": "storage", "minBindingSize": 32 }
+  ],
+  "modes": { "closestHit": 0, "anyHit": 1 },
+  "overflowBehavior": "abort-ray-and-diagnostic"
+}

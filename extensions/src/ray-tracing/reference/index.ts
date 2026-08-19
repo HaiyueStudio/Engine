@@ -1,5 +1,7 @@
 /** GPU-independent ray/hit semantics used as the M04 correctness oracle. */
 
+import { mat4n, vec3n } from 'wgpu-matrix';
+
 export type RayVec3 = readonly [number, number, number];
 export type RayBarycentric = readonly [number, number, number];
 export type RayMatrix4 = readonly number[];
@@ -584,30 +586,18 @@ function normalize(value: RayVec3): RayVec3 {
 function negate(value: RayVec3): RayVec3 { return freezeVec3(-value[0], -value[1], -value[2]); }
 
 function transformPoint(matrix: readonly number[], value: RayVec3): RayVec3 {
-  const x = value[0]; const y = value[1]; const z = value[2];
-  const w = matrix[3]! * x + matrix[7]! * y + matrix[11]! * z + matrix[15]!;
-  const divisor = w === 0 ? 1 : w;
-  return freezeVec3(
-    (matrix[0]! * x + matrix[4]! * y + matrix[8]! * z + matrix[12]!) / divisor,
-    (matrix[1]! * x + matrix[5]! * y + matrix[9]! * z + matrix[13]!) / divisor,
-    (matrix[2]! * x + matrix[6]! * y + matrix[10]! * z + matrix[14]!) / divisor,
-  );
+  const transformed = vec3n.transformMat4(value, matrix);
+  return freezeVec3(transformed[0]!, transformed[1]!, transformed[2]!);
 }
 
 function transformVector(matrix: readonly number[], value: RayVec3): RayVec3 {
-  return freezeVec3(
-    matrix[0]! * value[0] + matrix[4]! * value[1] + matrix[8]! * value[2],
-    matrix[1]! * value[0] + matrix[5]! * value[1] + matrix[9]! * value[2],
-    matrix[2]! * value[0] + matrix[6]! * value[1] + matrix[10]! * value[2],
-  );
+  const transformed = vec3n.transformMat4Upper3x3(value, matrix);
+  return freezeVec3(transformed[0]!, transformed[1]!, transformed[2]!);
 }
 
-function transformNormal(matrix3: readonly number[], value: RayVec3): RayVec3 {
-  return freezeVec3(
-    matrix3[0]! * value[0] + matrix3[1]! * value[1] + matrix3[2]! * value[2],
-    matrix3[3]! * value[0] + matrix3[4]! * value[1] + matrix3[5]! * value[2],
-    matrix3[6]! * value[0] + matrix3[7]! * value[1] + matrix3[8]! * value[2],
-  );
+function transformNormal(matrix: readonly number[], value: RayVec3): RayVec3 {
+  const transformed = vec3n.transformMat4Upper3x3(value, matrix);
+  return freezeVec3(transformed[0]!, transformed[1]!, transformed[2]!);
 }
 
 function pointOnRay(ray: CanonicalRay, t: number): RayVec3 {
@@ -619,54 +609,17 @@ function pointOnRay(ray: CanonicalRay, t: number): RayVec3 {
 }
 
 function inverseTranspose3(matrix: readonly number[]): readonly number[] | null {
-  const a00 = matrix[0]!; const a01 = matrix[4]!; const a02 = matrix[8]!;
-  const a10 = matrix[1]!; const a11 = matrix[5]!; const a12 = matrix[9]!;
-  const a20 = matrix[2]!; const a21 = matrix[6]!; const a22 = matrix[10]!;
-  const c00 = a11 * a22 - a12 * a21;
-  const c01 = a12 * a20 - a10 * a22;
-  const c02 = a10 * a21 - a11 * a20;
-  const determinant = a00 * c00 + a01 * c01 + a02 * c02;
+  const determinant = mat4n.determinant(matrix);
   if (!Number.isFinite(determinant) || Math.abs(determinant) <= Number.EPSILON) return null;
-  const inverseDeterminant = 1 / determinant;
-  return Object.freeze([
-    c00 * inverseDeterminant,
-    c01 * inverseDeterminant,
-    c02 * inverseDeterminant,
-    (a02 * a21 - a01 * a22) * inverseDeterminant,
-    (a00 * a22 - a02 * a20) * inverseDeterminant,
-    (a01 * a20 - a00 * a21) * inverseDeterminant,
-    (a01 * a12 - a02 * a11) * inverseDeterminant,
-    (a02 * a10 - a00 * a12) * inverseDeterminant,
-    (a00 * a11 - a01 * a10) * inverseDeterminant,
-  ]);
+  const result = mat4n.transpose(mat4n.inverse(matrix));
+  return result.every(Number.isFinite) ? Object.freeze(result) : null;
 }
 
 function inverseMatrix4(matrix: readonly number[]): readonly number[] | null {
-  const augmented = Array.from({ length: 4 }, (_, row) => Array.from({ length: 8 }, (_, column) => (
-    column < 4 ? matrix[column * 4 + row]! : Number(column - 4 === row)
-  )));
-  for (let column = 0; column < 4; column++) {
-    let pivotRow = column;
-    for (let row = column + 1; row < 4; row++) {
-      if (Math.abs(augmented[row]![column]!) > Math.abs(augmented[pivotRow]![column]!)) pivotRow = row;
-    }
-    if (Math.abs(augmented[pivotRow]![column]!) <= Number.EPSILON) return null;
-    [augmented[column], augmented[pivotRow]] = [augmented[pivotRow]!, augmented[column]!];
-    const pivot = augmented[column]![column]!;
-    for (let item = 0; item < 8; item++) augmented[column]![item] = augmented[column]![item]! / pivot;
-    for (let row = 0; row < 4; row++) {
-      if (row === column) continue;
-      const factor = augmented[row]![column]!;
-      for (let item = 0; item < 8; item++) {
-        augmented[row]![item] = augmented[row]![item]! - factor * augmented[column]![item]!;
-      }
-    }
-  }
-  const inverse = new Array<number>(16);
-  for (let row = 0; row < 4; row++) {
-    for (let column = 0; column < 4; column++) inverse[column * 4 + row] = augmented[row]![column + 4]!;
-  }
-  return Object.freeze(inverse);
+  const determinant = mat4n.determinant(matrix);
+  if (!Number.isFinite(determinant) || Math.abs(determinant) <= Number.EPSILON) return null;
+  const inverse = mat4n.inverse(matrix);
+  return inverse.every(Number.isFinite) ? Object.freeze(inverse) : null;
 }
 
 function compareOptionalNumber(

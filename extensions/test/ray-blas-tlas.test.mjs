@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -13,6 +13,8 @@ import { extractRayTracingScene } from '../src/ray-tracing/scene/index.ts';
 
 const repositoryRoot = resolve(import.meta.dirname, '../..');
 const compiledRoot = mkdtempSync(join(tmpdir(), 'haiyue-ray-acceleration-'));
+mkdirSync(join(compiledRoot, 'node_modules'), { recursive: true });
+symlinkSync(resolve(repositoryRoot, 'node_modules/wgpu-matrix'), join(compiledRoot, 'node_modules/wgpu-matrix'), 'junction');
 process.on('exit', () => rmSync(compiledRoot, { recursive: true, force: true }));
 execFileSync(process.execPath, [
   resolve(repositoryRoot, 'node_modules/typescript/bin/tsc'),

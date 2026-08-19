@@ -1,3 +1,4 @@
+import { mat4n, vec3n } from 'wgpu-matrix';
 import type { RayMatrix4, RayVec3 } from '../reference/index.js';
 import type { RayBounds3 } from './types.js';
 
@@ -58,41 +59,16 @@ export function transformBounds(value: RayBounds3, matrix: RayMatrix4): RayBound
 }
 
 export function transformPoint(matrix: ArrayLike<number>, point: RayVec3): RayVec3 {
-  const x = point[0]; const y = point[1]; const z = point[2];
-  const w = matrix[3]! * x + matrix[7]! * y + matrix[11]! * z + matrix[15]!;
-  const divisor = w === 0 ? 1 : w;
-  return vec3(
-    (matrix[0]! * x + matrix[4]! * y + matrix[8]! * z + matrix[12]!) / divisor,
-    (matrix[1]! * x + matrix[5]! * y + matrix[9]! * z + matrix[13]!) / divisor,
-    (matrix[2]! * x + matrix[6]! * y + matrix[10]! * z + matrix[14]!) / divisor,
-  );
+  const transformed = vec3n.transformMat4(point, matrix);
+  return vec3(transformed[0]!, transformed[1]!, transformed[2]!);
 }
 
 export function inverseMatrix4(matrix: RayMatrix4): RayMatrix4 | null {
   if (matrix.length !== 16 || matrix.some(value => !Number.isFinite(value))) return null;
-  const rows = Array.from({ length: 4 }, (_, row) => Array.from({ length: 8 }, (_, column) => (
-    column < 4 ? matrix[column * 4 + row]! : Number(column - 4 === row)
-  )));
-  for (let column = 0; column < 4; column++) {
-    let pivotRow = column;
-    for (let row = column + 1; row < 4; row++) {
-      if (Math.abs(rows[row]![column]!) > Math.abs(rows[pivotRow]![column]!)) pivotRow = row;
-    }
-    if (Math.abs(rows[pivotRow]![column]!) <= Number.EPSILON) return null;
-    [rows[column], rows[pivotRow]] = [rows[pivotRow]!, rows[column]!];
-    const pivot = rows[column]![column]!;
-    for (let item = 0; item < 8; item++) rows[column]![item] = rows[column]![item]! / pivot;
-    for (let row = 0; row < 4; row++) {
-      if (row === column) continue;
-      const factor = rows[row]![column]!;
-      for (let item = 0; item < 8; item++) rows[row]![item] = rows[row]![item]! - factor * rows[column]![item]!;
-    }
-  }
-  const output = new Array<number>(16);
-  for (let row = 0; row < 4; row++) {
-    for (let column = 0; column < 4; column++) output[column * 4 + row] = rows[row]![column + 4]!;
-  }
-  return Object.freeze(output);
+  const determinant = mat4n.determinant(matrix);
+  if (!Number.isFinite(determinant) || Math.abs(determinant) <= Number.EPSILON) return null;
+  const output = mat4n.inverse(matrix);
+  return output.every(Number.isFinite) ? Object.freeze(output) : null;
 }
 
 export function outwardF32Min(value: number): number {
