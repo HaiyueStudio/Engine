@@ -65,7 +65,7 @@ let browser = null;
 if (!skipBrowser) {
   browser = await runChromeWebGpuFixture({
     root: ROOT,
-    fixture: 'examples/hya-corpus-dashboard/index.html',
+    fixture: 'examples/hya-lottie-corpus-dashboard/index.html',
     query: { benchmark: 1 },
     timeoutMs: 180_000,
   });
@@ -163,7 +163,7 @@ console.log(
 function buildDashboard() {
   const result = spawnSync(npmCommand(), npmArgs(['run', 'build', '-w', './examples']), {
     cwd: ROOT,
-    env: { ...process.env, EXAMPLE_FILTER: 'hya-corpus-dashboard' },
+    env: { ...process.env, EXAMPLE_FILTER: 'hya-lottie-corpus-dashboard' },
     encoding: 'utf8',
     stdio: 'pipe',
   });

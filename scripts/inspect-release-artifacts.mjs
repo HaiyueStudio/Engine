@@ -146,7 +146,7 @@ function runAppBuildRound(round) {
   runChecked(
     `HYA viewer/dashboard production build round ${round}`,
     process.execPath,
-    ['scripts/build-target.mjs', 'example:animation-spec', 'example:hya-corpus-dashboard'],
+    ['scripts/build-target.mjs', 'example:animation-spec', 'example:hya-lottie-corpus-dashboard'],
     180_000,
   );
   assembleHyaApps();
@@ -208,13 +208,13 @@ function assembleHyaApps() {
   const dashboardRoot = resolve(appArtifactRoot, 'hya-dashboard');
   rmSync(dashboardRoot, { recursive: true, force: true });
   copyPaths([
-    ['examples/hya-corpus-dashboard/index.html', 'examples/hya-corpus-dashboard/index.html'],
-    ['examples/hya-corpus-dashboard/styles.css', 'examples/hya-corpus-dashboard/styles.css'],
-    ['examples/hya-corpus-dashboard/bundle.js', 'examples/hya-corpus-dashboard/bundle.js'],
-    ['examples/hya-corpus-dashboard/report.json', 'examples/hya-corpus-dashboard/report.json'],
-    ['examples/hya-corpus-dashboard/capabilities.json', 'examples/hya-corpus-dashboard/capabilities.json'],
+    ['examples/hya-lottie-corpus-dashboard/index.html', 'examples/hya-lottie-corpus-dashboard/index.html'],
+    ['examples/hya-lottie-corpus-dashboard/styles.css', 'examples/hya-lottie-corpus-dashboard/styles.css'],
+    ['examples/hya-lottie-corpus-dashboard/bundle.js', 'examples/hya-lottie-corpus-dashboard/bundle.js'],
+    ['examples/hya-lottie-corpus-dashboard/report.json', 'examples/hya-lottie-corpus-dashboard/report.json'],
+    ['examples/hya-lottie-corpus-dashboard/capabilities.json', 'examples/hya-lottie-corpus-dashboard/capabilities.json'],
   ], dashboardRoot);
-  const report = JSON.parse(readFileSync(resolve(root, 'examples/hya-corpus-dashboard/report.json'), 'utf8'));
+  const report = JSON.parse(readFileSync(resolve(root, 'examples/hya-lottie-corpus-dashboard/report.json'), 'utf8'));
   const localReferences = [...new Set(report.samples.flatMap(sample => (
     (sample.frames ?? []).map(frame => frame.referenceUrl).filter(url => url.startsWith('/'))
   )))];
@@ -223,7 +223,7 @@ function assembleHyaApps() {
   }
   writeStaticManifest(dashboardRoot, {
     id: 'hya-dashboard',
-    entry: 'examples/hya-corpus-dashboard/index.html',
+    entry: 'examples/hya-lottie-corpus-dashboard/index.html',
     workers: [],
     maxJavaScriptGzipBytes: 700_000,
     localReferenceCount: localReferences.length,

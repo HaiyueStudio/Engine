@@ -20,8 +20,8 @@ export const BROWSER_INPUT_PATH = resolve(CACHE_ROOT, 'browser-input.json');
 export const NODE_RESULT_PATH = resolve(CACHE_ROOT, 'node-report.json');
 export const CANDIDATE_RESULT_PATH = resolve(CACHE_ROOT, 'candidate-report.json');
 export const RESULT_PATH = resolve(CORPUS_ROOT, 'results/latest.json');
-export const DASHBOARD_REPORT_PATH = resolve(ROOT, 'examples/hya-corpus-dashboard/report.json');
-export const CAPABILITY_SUPPORT_PATH = resolve(ROOT, 'examples/hya-corpus-dashboard/capabilities.json');
+export const DASHBOARD_REPORT_PATH = resolve(ROOT, 'examples/hya-lottie-corpus-dashboard/report.json');
+export const CAPABILITY_SUPPORT_PATH = resolve(ROOT, 'examples/hya-lottie-corpus-dashboard/capabilities.json');
 
 export function readCorpusManifest() {
   const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8'));

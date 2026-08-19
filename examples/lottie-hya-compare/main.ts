@@ -3,6 +3,7 @@ import { convertLottie, type LottieConversionDiagnostic } from '@haiyue/animatio
 import { Animation2DComponent, Animation2DRenderSystem, Animation2DSystem } from '@haiyue/extensions/animation';
 import { Camera2D, Entity, HaiyueEngine, Transform2D } from '@haiyue/engine';
 import lottie, { type AnimationItem } from 'lottie-web/build/player/lottie_light.js';
+import { ANIMATION_COMPARE_BACKGROUND_HEX, ANIMATION_COMPARE_CLEAR_COLOR } from '../animationCompareTheme';
 
 interface SampleEntry { id: string; title: string; file: string; license: string; source: string }
 interface Bounds { x: number; y: number; width: number; height: number }
@@ -10,12 +11,12 @@ interface Bounds { x: number; y: number; width: number; height: number }
 async function main(): Promise<void> {
   const canvas = query<HTMLCanvasElement>('#hya-canvas');
   const referenceHost = query<HTMLElement>('#reference-player');
-  const engine = new HaiyueEngine({ canvas, clearColor: { r: 0.018, g: 0.027, b: 0.063, a: 1 } });
+  const engine = new HaiyueEngine({ canvas, clearColor: ANIMATION_COMPARE_CLEAR_COLOR });
   await engine.init();
   const cameraEntity = new Entity('Lottie comparison camera');
   const camera = new Camera2D({ width: 512, height: 512, designWidth: 512, designHeight: 512, viewportMode: 'fit' });
   cameraEntity.addComponent(camera);
-  const scene = engine.createScene({ name: 'Lottie HYA comparison', camera: { type: '2d', entity: cameraEntity }, render3D: false, render2D: false, gui: false, pipelineLabel: 'LottieHyaCompare.render' });
+  const scene = engine.createScene({ name: 'Lottie HYA comparison', camera: { type: '2d', entity: cameraEntity }, view: { clearColor: ANIMATION_COMPARE_CLEAR_COLOR }, render3D: false, render2D: false, gui: false, pipelineLabel: 'LottieHyaCompare.render' });
   scene.addSystem(new Animation2DSystem({ priority: -10, assetManager: engine.assetManager! }), false);
   const renderer = new Animation2DRenderSystem(engine, cameraEntity, { loadOp: 'clear', maxMaskTargets: 16 });
   scene.addSystem(renderer);
@@ -55,7 +56,7 @@ async function main(): Promise<void> {
     const result = query<HTMLElement>('#result');
     if (!result.dataset.status && ready && player && reference && renderer.stats.visualCount > 0) {
       result.dataset.status = 'passed';
-      result.textContent = JSON.stringify({ status: 'passed', renderer: renderer.stats, officialPlayer: 'lottie-web', bounds, autoZoom });
+      result.textContent = JSON.stringify({ status: 'passed', renderer: renderer.stats, officialPlayer: 'lottie-web', comparisonBackground: ANIMATION_COMPARE_BACKGROUND_HEX, bounds, autoZoom });
     }
   });
 

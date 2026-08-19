@@ -60,7 +60,7 @@
       "ci": "smoke",
       "catalog": {
         "group": "assets-ui",
-        "order": 10
+        "order": 11
       }
     },
     {
@@ -72,7 +72,7 @@
       "screenshot": { "required": false, "baseline": null },
       "performance": null,
       "ci": "smoke",
-      "catalog": { "group": "assets-ui", "order": 11 }
+      "catalog": { "group": "assets-ui", "order": 12 }
     },
     {
       "id": "live2d-hya-compare",
@@ -83,7 +83,7 @@
       "screenshot": { "required": false, "baseline": null },
       "performance": null,
       "ci": "smoke",
-      "catalog": { "group": "assets-ui", "order": 12 }
+      "catalog": { "group": "assets-ui", "order": 13 }
     },
     {
       "id": "hya-state-machine",
@@ -107,7 +107,7 @@
       "ci": "smoke",
       "catalog": {
         "group": "assets-ui",
-        "order": 7
+        "order": 8
       }
     },
     {
@@ -135,13 +135,13 @@
       "ci": "smoke",
       "catalog": {
         "group": "assets-ui",
-        "order": 8
+        "order": 9
       }
     },
     {
-      "id": "hya-corpus-dashboard",
+      "id": "hya-lottie-corpus-dashboard",
       "title": "HYA Lottie Corpus Dashboard",
-      "entry": "hya-corpus-dashboard/main.ts",
+      "entry": "hya-lottie-corpus-dashboard/main.ts",
       "capabilities": [
         "animation-format",
         "lottie-conversion",
@@ -163,6 +163,39 @@
       "catalog": {
         "group": "assets-ui",
         "order": 5
+      }
+    },
+    {
+      "id": "hya-live2d-corpus-dashboard",
+      "title": "HYA Live2D Corpus Dashboard",
+      "entry": "hya-live2d-corpus-dashboard/main.ts",
+      "capabilities": [
+        "animation-format",
+        "live2d-cubism-import",
+        "licensed-asset-corpus",
+        "offline-conversion",
+        "deformable-mesh",
+        "timeline-scrubbing",
+        "binary-animation",
+        "webgpu",
+        "2d"
+      ],
+      "assets": [
+        "hya-live2d-corpus-dashboard/samples/manifest.json",
+        "hya-live2d-corpus-dashboard/samples/mascot.hya",
+        "hya-live2d-corpus-dashboard/samples/mascot.hydm",
+        "hya-live2d-corpus-dashboard/samples/mascot.png",
+        "hya-live2d-corpus-dashboard/samples/mascot.capture.json"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 6
       }
     },
     {
@@ -189,7 +222,7 @@
       "ci": "smoke",
       "catalog": {
         "group": "assets-ui",
-        "order": 9
+        "order": 10
       }
     },
     {
@@ -747,7 +780,7 @@
       "ci": "smoke",
       "catalog": {
         "group": "assets-ui",
-        "order": 6
+        "order": 7
       }
     },
     {

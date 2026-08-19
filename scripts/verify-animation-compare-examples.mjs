@@ -17,6 +17,7 @@ const [lottie, live2d] = await Promise.all([
 ]);
 assert.equal(lottie.status, 'passed');
 assert.equal(lottie.officialPlayer, 'lottie-web');
+assert.equal(lottie.comparisonBackground, '#050817');
 assert.ok(lottie.renderer.visualCount > 0);
 assert.ok(lottie.bounds.width > 0 && lottie.bounds.height > 0);
 assert.ok(lottie.bounds.width < 128 * 4 && lottie.bounds.height < 128 * 4, 'Lottie content bounds must stay near the 128x128 sample composition.');
@@ -24,6 +25,7 @@ assert.ok(lottie.autoZoom > 0.1, 'Automatic fitting must not collapse to its eme
 assert.equal(lottie.browserDiagnostics.unclassifiedFailureCount, 0);
 assert.equal(live2d.status, 'passed');
 assert.equal(live2d.reference, 'captured-mesh-fixture');
+assert.equal(live2d.comparisonBackground, lottie.comparisonBackground);
 assert.ok(live2d.hya.visualCount > 0);
 assert.ok(live2d.bounds.width > 0 && live2d.bounds.height > 0);
 assert.equal(live2d.browserDiagnostics.unclassifiedFailureCount, 0);

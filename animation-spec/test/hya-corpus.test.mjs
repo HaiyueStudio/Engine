@@ -12,7 +12,7 @@ import { entryFontMappings } from '../../scripts/hya-corpus/corpus.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(readFileSync(resolve(root, 'corpus/manifest.json'), 'utf8'));
 const report = JSON.parse(readFileSync(resolve(root, 'corpus/results/latest.json'), 'utf8'));
-const capabilitySnapshot = JSON.parse(readFileSync(resolve(root, '../examples/hya-corpus-dashboard/capabilities.json'), 'utf8'));
+const capabilitySnapshot = JSON.parse(readFileSync(resolve(root, '../examples/hya-lottie-corpus-dashboard/capabilities.json'), 'utf8'));
 
 test('real Lottie corpus is pinned, hashed, and deliberately includes capability gaps', () => {
   assert.equal(manifest.schemaVersion, 2);

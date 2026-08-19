@@ -54,9 +54,9 @@ npm run hya:dashboard:offline
 # 不覆盖正式 latest.json 或仪表盘报告
 node scripts/hya-corpus/run.mjs --offline --candidate
 
-# 查看 candidate，不覆盖 examples/hya-corpus-dashboard/report.json
+# 查看 candidate，不覆盖 examples/hya-lottie-corpus-dashboard/report.json
 # 在项目静态服务器下打开：
-# /examples/hya-corpus-dashboard/?report=/animation-spec/corpus/.cache/candidate-report.json
+# /examples/hya-lottie-corpus-dashboard/?report=/animation-spec/corpus/.cache/candidate-report.json
 
 # 只采集 size/parse/conversion，写入忽略的 .cache/node-report.json，
 # 不覆盖已提交的浏览器 fidelity/first-frame 基线
@@ -69,11 +69,11 @@ npm run hya:dashboard:node
 - `.cache/generated/`：本次转换生成的 `.hya`，不提交；
 - `.cache/candidate-report.json`：完整浏览器候选证据，不提交，也不覆盖正式基线；
 - `results/latest.json`：完整机器可读基线，提交；
-- `../../examples/hya-corpus-dashboard/report.json`：浏览器仪表盘使用的同一份报告，提交。
+- `../../examples/hya-lottie-corpus-dashboard/report.json`：浏览器仪表盘使用的同一份报告，提交。
 
-仪表盘源码位于 `examples/hya-corpus-dashboard`。报告 schema v3 增加多来源 provenance、small/large cohort 和浏览器 HTTP streaming 阶段；schema v2 正式历史报告仍可读取。点击特性行会筛出关联素材，素材详情保留 diagnostic code、影响级别、精确 JSON path 和网络阶段。正式证据只在统一集成时更新；`--candidate` 永远不会覆盖 `latest.json`。
+仪表盘源码位于 `examples/hya-lottie-corpus-dashboard`。报告 schema v3 增加多来源 provenance、small/large cohort 和浏览器 HTTP streaming 阶段；schema v2 正式历史报告仍可读取。点击特性行会筛出关联素材，素材详情保留 diagnostic code、影响级别、精确 JSON path 和网络阶段。正式证据只在统一集成时更新；`--candidate` 永远不会覆盖 `latest.json`。
 
-Dashboard 还会读取独立的 `examples/hya-corpus-dashboard/capabilities.json`：它只根据当前转换器在固定语料上的 diagnostics 生成能力支持矩阵，不携带或覆盖正式 fidelity/performance evidence。每个未完整支持的 feature 必须声明责任层、优先级和可执行完善路径；`layers/precomp` 的内部 merge-path/path 失败不能再反向污染 precomp 容器能力。
+Dashboard 还会读取独立的 `examples/hya-lottie-corpus-dashboard/capabilities.json`：它只根据当前转换器在固定语料上的 diagnostics 生成能力支持矩阵，不携带或覆盖正式 fidelity/performance evidence。每个未完整支持的 feature 必须声明责任层、优先级和可执行完善路径；`layers/precomp` 的内部 merge-path/path 失败不能再反向污染 precomp 容器能力。
 
 ```sh
 npm run hya:capabilities

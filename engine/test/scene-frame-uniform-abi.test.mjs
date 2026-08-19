@@ -236,7 +236,10 @@ test('FrameRingResource retires submitted generations and shrinks only after hys
   const queue = { onSubmittedWorkDone: () => queueDone };
   const context = {
     device: { queue },
-    afterSubmit: callback => afterSubmitCallbacks.push(callback),
+    afterSubmit(callback) {
+      assert.equal(this, context, 'afterSubmit preserves the RenderCommandContext receiver');
+      afterSubmitCallbacks.push(callback);
+    },
   };
   const ring = new FrameRingResource({
     label: 'test.frameRing',

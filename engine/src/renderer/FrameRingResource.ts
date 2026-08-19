@@ -214,9 +214,8 @@ export class FrameRingResource<T> {
       if (!this._retiring.delete(generation)) return;
       this._destroyGeneration(generation);
     };
-    const afterSubmit = context?.afterSubmit;
-    if (afterSubmit) {
-      afterSubmit(queue => waitForQueue(queue, retire));
+    if (context?.afterSubmit) {
+      context.afterSubmit(queue => waitForQueue(queue, retire));
       return;
     }
     const queue = context?.device.queue;

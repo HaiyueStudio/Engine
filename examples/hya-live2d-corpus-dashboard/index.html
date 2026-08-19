@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Live2D capture 转换为 HYA 的公开语料、运行时能力和许可边界仪表盘" />
+  <title>HYA Live2D Corpus Dashboard</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="dashboard">
+    <header class="hero">
+      <div>
+        <div class="eyebrow"><span class="pulse"></span> HAIYUE · LIVE2D DELIVERY PROFILE</div>
+        <h1>Live2D → HYA<br /><span>公开语料仪表盘</span></h1>
+        <p>观察许可安全的 clip-baked 转换结果：Cubism Core 只在构建工具侧求值，网页交付 HYA、HYDM 与纹理，不携带 Core、moc3 或 model3.json。</p>
+        <div id="report-meta" class="report-meta">正在读取 corpus…</div>
+      </div>
+      <div class="hero-status">
+        <span id="page-state">initializing</span>
+        <a href="../live2d-hya-compare/">打开 fidelity 对照 ↗</a>
+      </div>
+    </header>
+
+    <section class="metric-grid" aria-label="Corpus 核心指标">
+      <article id="metric-samples" class="metric"><div class="metric-label">BUNDLED PUBLIC SAMPLES</div><div class="metric-value">—</div><div class="metric-note">—</div></article>
+      <article id="metric-delivery" class="metric metric--cyan"><div class="metric-label">HYA + HYDM DELIVERY</div><div class="metric-value">—</div><div class="metric-note">—</div></article>
+      <article id="metric-frames" class="metric metric--violet"><div class="metric-label">CAPTURED FRAMES</div><div class="metric-value">—</div><div class="metric-note">—</div></article>
+      <article id="metric-drawables" class="metric metric--amber"><div class="metric-label">DRAWABLES</div><div class="metric-value">—</div><div class="metric-note">—</div></article>
+    </section>
+
+    <section class="evidence-grid">
+      <article class="panel preview-panel">
+        <div class="panel-heading"><div><span class="overline">RUNTIME EVIDENCE</span><h2>HYA / HaiYue WebGPU</h2></div><span class="runtime">deformable runtime · <b id="runtime-state">loading</b></span></div>
+        <div class="canvas-shell"><canvas id="preview-canvas" width="512" height="512"></canvas></div>
+        <div class="transport"><button id="play-pause" type="button">暂停</button><input id="timeline" type="range" min="0" max="2" step="0.001" value="0" aria-label="动画时间" /><output id="current-time">0.00 / 2.00s</output></div>
+      </article>
+      <article class="panel contract-panel">
+        <span class="overline">DELIVERY CONTRACT</span><h2>一次离线转换，网页只保留源无关运行时</h2>
+        <ol>
+          <li><strong>授权工具侧</strong><span>Cubism Core 求值参数、Motion 与 Physics。</span></li>
+          <li><strong>Capture</strong><span>固定 drawable 拓扑，逐帧记录顶点、透明度与渲染顺序。</span></li>
+          <li><strong>HYA delivery</strong><span>HYA 描述时间与资源，HYDM 存放紧凑变形数据。</span></li>
+          <li><strong>Web runtime</strong><span>HaiYue 通用 2D 动画系统播放；不加载 Live2D SDK。</span></li>
+        </ol>
+        <div class="license-note"><strong>许可边界</strong> 仓库只提交 HaiYue 自有 MIT fixture。Live2D 官方 sample 仅作为链接候选，必须由使用者接受对应许可后在本地采集。</div>
+      </article>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="panel-heading"><div><span class="overline">CURRENT PROFILE</span><h2>格式与运行时能力</h2></div><p>状态只描述当前公开 fixture 的覆盖，不把“未覆盖”误报为“不支持”。</p></div>
+      <div class="table-wrap"><table><thead><tr><th>能力</th><th>状态</th><th>实现与覆盖</th></tr></thead><tbody id="capability-rows"></tbody></table></div>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="panel-heading"><div><span class="overline">LICENSED CORPUS</span><h2>公开样本与许可隔离候选</h2></div><p>只有 bundled 行参与默认自动验证。</p></div>
+      <div class="table-wrap"><table><thead><tr><th>素材</th><th>许可</th><th>参考方式</th><th>状态</th></tr></thead><tbody id="sample-rows"></tbody></table></div>
+    </section>
+  </main>
+  <div id="page-error" class="page-error" role="alert" hidden></div>
+  <pre id="result" aria-hidden="true"></pre>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

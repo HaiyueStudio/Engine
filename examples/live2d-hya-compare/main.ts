@@ -4,6 +4,7 @@ import { convertCubismCaptureToHya, sampleCubismMotion3, type CubismDrawableCapt
 import { Animation2DComponent, Animation2DExtensionRegistry, Animation2DRenderSystem, Animation2DSystem } from '@haiyue/extensions/animation';
 import { createDeformableMesh2DRuntimeExtension } from '@haiyue/extensions/deformable-animation';
 import { Camera2D, Entity, HaiyueEngine, Transform2D } from '@haiyue/engine';
+import { ANIMATION_COMPARE_BACKGROUND_HEX, ANIMATION_COMPARE_CLEAR_COLOR } from '../animationCompareTheme';
 
 interface Bounds { x: number; y: number; width: number; height: number }
 interface ReferenceDrawable { positions: Float32Array; uvs: Float32Array; indices: Uint32Array; opacity: number; textureIndex: number; order: number; blendMode: string }
@@ -12,12 +13,12 @@ interface CoreSession { core: any; moc: any; model: any; motion: CubismMotion3 |
 async function main(): Promise<void> {
   const hyaCanvas = query<HTMLCanvasElement>('#hya-canvas');
   const referenceCanvas = query<HTMLCanvasElement>('#reference-canvas');
-  const engine = new HaiyueEngine({ canvas: hyaCanvas, clearColor: { r: 0.018, g: 0.027, b: 0.063, a: 1 } });
+  const engine = new HaiyueEngine({ canvas: hyaCanvas, clearColor: ANIMATION_COMPARE_CLEAR_COLOR });
   await engine.init();
   const cameraEntity = new Entity('Live2D comparison camera');
   const camera = new Camera2D({ width: 512, height: 512, designWidth: 512, designHeight: 512, viewportMode: 'fit' });
   cameraEntity.addComponent(camera);
-  const scene = engine.createScene({ name: 'Live2D HYA comparison', camera: { type: '2d', entity: cameraEntity }, render3D: false, render2D: false, gui: false, pipelineLabel: 'Live2DHyaCompare.render' });
+  const scene = engine.createScene({ name: 'Live2D HYA comparison', camera: { type: '2d', entity: cameraEntity }, view: { clearColor: ANIMATION_COMPARE_CLEAR_COLOR }, render3D: false, render2D: false, gui: false, pipelineLabel: 'Live2DHyaCompare.render' });
   scene.addSystem(new Animation2DSystem({ priority: -10, assetManager: engine.assetManager! }), false);
   const hyaRenderer = new Animation2DRenderSystem(engine, cameraEntity, { loadOp: 'clear', maxMaskTargets: 16 });
   scene.addSystem(hyaRenderer);
@@ -59,7 +60,7 @@ async function main(): Promise<void> {
     const result = query<HTMLElement>('#result');
     if (!result.dataset.status && hyaRenderer.stats.visualCount > 0) {
       result.dataset.status = 'passed';
-      result.textContent = JSON.stringify({ status: 'passed', hya: hyaRenderer.stats, reference: coreSession ? 'official-cubism-core' : 'captured-mesh-fixture', bounds, autoZoom });
+      result.textContent = JSON.stringify({ status: 'passed', hya: hyaRenderer.stats, reference: coreSession ? 'official-cubism-core' : 'captured-mesh-fixture', comparisonBackground: ANIMATION_COMPARE_BACKGROUND_HEX, bounds, autoZoom });
     }
   });
 
@@ -215,7 +216,7 @@ class ReferenceMeshRenderer {
   render(drawables: ReferenceDrawable[], images: ImageBitmap[], sourceWidth: number, sourceHeight: number, bounds: Bounds, view: { zoom: number; panX: number; panY: number }): void {
     const gl = this.gl; const width = Math.max(1, this.canvas.clientWidth); const height = Math.max(1, this.canvas.clientHeight);
     if (this.canvas.width !== width || this.canvas.height !== height) { this.canvas.width = width; this.canvas.height = height; }
-    gl.viewport(0, 0, width, height); gl.clearColor(0.018, 0.027, 0.063, 1); gl.clear(gl.COLOR_BUFFER_BIT); gl.useProgram(this.program); gl.enable(gl.BLEND);
+    gl.viewport(0, 0, width, height); gl.clearColor(ANIMATION_COMPARE_CLEAR_COLOR.r, ANIMATION_COMPARE_CLEAR_COLOR.g, ANIMATION_COMPARE_CLEAR_COLOR.b, ANIMATION_COMPARE_CLEAR_COLOR.a); gl.clear(gl.COLOR_BUFFER_BIT); gl.useProgram(this.program); gl.enable(gl.BLEND);
     const sourceAspect = sourceWidth / sourceHeight, displayAspect = width / height;
     const viewWidth = displayAspect > sourceAspect ? sourceHeight * displayAspect : sourceWidth;
     const viewHeight = displayAspect > sourceAspect ? sourceHeight : sourceWidth / displayAspect;

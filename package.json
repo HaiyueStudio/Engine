@@ -27,6 +27,7 @@
     "shader-language:check": "node shader-language/verify-stage0.mjs && npm run typecheck -w ./shader-language && npm test -w ./shader-language && node shader-language/scripts/check-stage14-boundary.mjs && node shader-language/scripts/verify-production-cache.mjs",
     "verify:motion-blur": "npm run build:engine && npm run build:target -- example:motion-blur && node scripts/verify-motion-blur-example.mjs",
     "verify:live2d-hya": "npm run build:target -- example:live2d-hya && node scripts/verify-live2d-hya-example.mjs",
+    "verify:hya-live2d-corpus": "npm run build:target -- example:hya-live2d-corpus-dashboard && node scripts/verify-live2d-corpus-dashboard.mjs",
     "verify:animation-compare": "npm run build:target -- example:lottie-hya-compare example:live2d-hya-compare && node scripts/verify-animation-compare-examples.mjs",
     "verify:render": "npm run verify:motion-blur",
     "verify:shader-language-stage4": "npm run build -w ./shader-language && npm run build -w ./engine && npm run build -w ./extensions && node scripts/verify-webgpu-shader-language-stage4.mjs",

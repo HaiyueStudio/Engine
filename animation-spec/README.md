@@ -124,7 +124,7 @@ node animation-spec/live2d/bin/hya-live2d-convert.mjs --input build/model.captur
 
 仓库中的 [`examples/animation-spec`](../examples/animation-spec/) 是可交互转换工作台：可以读取允许 CORS 的 Lottie URL 或直接粘贴 JSON，查看 diagnostics/HYA JSON、下载 `.hya`，并在 WebGPU 预览中播放、逐帧移动和拖动时间轴。
 
-真实素材质量与性能基线见 [`corpus/`](./corpus/) 和 [`examples/hya-corpus-dashboard`](../examples/hya-corpus-dashboard/)：固定许可明确的 Lottie/AE 参考帧，统一采集 fidelity、raw/gzip size、source-to-runtime parse、warm-adapter first-frame，以及按源 JSON path 建立的 feature 失败归因。运行 `npm run hya:dashboard` 会验证素材哈希、重新转换并通过 Chrome WebGPU 更新两处同源报告。
+真实素材质量与性能基线见 [`corpus/`](./corpus/) 和 [`examples/hya-lottie-corpus-dashboard`](../examples/hya-lottie-corpus-dashboard/)：固定许可明确的 Lottie/AE 参考帧，统一采集 fidelity、raw/gzip size、source-to-runtime parse、warm-adapter first-frame，以及按源 JSON path 建立的 feature 失败归因。运行 `npm run hya:dashboard` 会验证素材哈希、重新转换并通过 Chrome WebGPU 更新两处同源报告。
 
 ## v1 能力
 

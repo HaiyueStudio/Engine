@@ -99,7 +99,7 @@ test('default mounts expose runtime assets without exposing repository metadata'
     'application/vnd.haiyue.animation',
   );
   const dashboardReport = JSON.parse(await readFile(
-    new URL('../examples/hya-corpus-dashboard/report.json', import.meta.url),
+    new URL('../examples/hya-lottie-corpus-dashboard/report.json', import.meta.url),
     'utf8',
   ));
   const localReferences = dashboardReport.samples

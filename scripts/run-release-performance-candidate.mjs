@@ -134,7 +134,7 @@ async function runAppleSharedCandidates() {
   decorateArtifact(gltf);
 
   runWithRestoredSourceFiles(
-    ['examples/hya-corpus-dashboard/capabilities.json'],
+    ['examples/hya-lottie-corpus-dashboard/capabilities.json'],
     () => run('HYA network/parse/first-frame candidate', npmCommand(), npmArgs([
       'run', 'hya:dashboard', '--', '--candidate',
     ]), 1_800_000, candidateEnvironment),
