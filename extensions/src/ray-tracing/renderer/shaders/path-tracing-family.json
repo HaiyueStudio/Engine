@@ -1,0 +1,49 @@
+{
+  "format": "haiyue-ray-path-tracing-module-family",
+  "version": 1,
+  "id": "ray-path-tracing",
+  "accelerationAbiFingerprint": "fnv1a64:9fd4d41c38d10fa2",
+  "workgroupSize": [8, 8, 1],
+  "stackCapacity": 64,
+  "materialStride": 128,
+  "surfaceStride": 128,
+  "diagnosticBytes": 48,
+  "passes": [
+    {
+      "id": "ray-path-tracing",
+      "source": "extensions/src/ray-tracing/renderer/shaders/path-tracing.wgsl",
+      "entryPoint": "path_main",
+      "logicalGroup": 3,
+      "physicalGroup": 0,
+      "bindings": [
+        { "id": "pass.params", "binding": 0, "kind": "buffer", "bufferType": "uniform", "minBindingSize": 128 },
+        { "id": "pass.blasNodes", "binding": 1, "kind": "buffer", "bufferType": "read-only-storage", "minBindingSize": 32 },
+        { "id": "pass.blasTable", "binding": 2, "kind": "buffer", "bufferType": "read-only-storage", "minBindingSize": 16 },
+        { "id": "pass.tlasNodes", "binding": 3, "kind": "buffer", "bufferType": "read-only-storage", "minBindingSize": 32 },
+        { "id": "pass.primitives", "binding": 4, "kind": "buffer", "bufferType": "read-only-storage", "minBindingSize": 64 },
+        { "id": "pass.instances", "binding": 5, "kind": "buffer", "bufferType": "read-only-storage", "minBindingSize": 144 },
+        { "id": "pass.materials", "binding": 6, "kind": "buffer", "bufferType": "read-only-storage", "minBindingSize": 128 },
+        { "id": "pass.surfaces", "binding": 7, "kind": "buffer", "bufferType": "read-only-storage", "minBindingSize": 128 },
+        { "id": "pass.lights", "binding": 8, "kind": "buffer", "bufferType": "uniform", "minBindingSize": 512 },
+        { "id": "pass.diagnostics", "binding": 9, "kind": "buffer", "bufferType": "storage", "minBindingSize": 48 },
+        { "id": "pass.materialTextures", "binding": 10, "kind": "texture", "sampleType": "float", "viewDimension": "2d-array", "multisampled": false },
+        { "id": "pass.materialSampler", "binding": 11, "kind": "sampler", "samplerType": "filtering" },
+        { "id": "pass.environmentTexture", "binding": 12, "kind": "texture", "sampleType": "float", "viewDimension": "cube", "multisampled": false },
+        { "id": "pass.environmentSampler", "binding": 13, "kind": "sampler", "samplerType": "filtering" },
+        { "id": "pass.hdrOutput", "binding": 14, "kind": "storage-texture", "access": "write-only", "format": "rgba16float", "viewDimension": "2d" }
+      ]
+    },
+    {
+      "id": "ray-tone-mapping",
+      "source": "extensions/src/ray-tracing/renderer/shaders/tone-mapping.wgsl",
+      "entryPoint": "tone_main",
+      "logicalGroup": 3,
+      "physicalGroup": 0,
+      "bindings": [
+        { "id": "tone.params", "binding": 0, "kind": "buffer", "bufferType": "uniform", "minBindingSize": 128 },
+        { "id": "tone.hdrInput", "binding": 1, "kind": "texture", "sampleType": "unfilterable-float", "viewDimension": "2d", "multisampled": false },
+        { "id": "tone.output", "binding": 2, "kind": "storage-texture", "access": "write-only", "format": "rgba8unorm", "viewDimension": "2d" }
+      ]
+    }
+  ]
+}

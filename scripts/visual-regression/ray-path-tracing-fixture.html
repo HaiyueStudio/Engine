@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>HaiYue G05 PBR Path Tracing</title>
+  <style>html,body{margin:0;background:#111;color:#ddd;font:14px sans-serif}canvas{width:640px;height:360px;image-rendering:pixelated;display:block}pre{white-space:pre-wrap}</style>
+  <script type="importmap">
+  {"imports":{
+    "@haiyue/engine/components":"/engine/dist/components.js",
+    "@haiyue/engine/ecs":"/engine/dist/ecs.js",
+    "@haiyue/engine/experimental":"/engine/dist/experimental.js",
+    "@haiyue/engine/geometry":"/engine/dist/geometry.js",
+    "@haiyue/engine/lighting":"/engine/dist/lighting.js",
+    "@haiyue/engine/material":"/engine/dist/material.js",
+    "@haiyue/engine/scene":"/engine/dist/scene.js",
+    "wgpu-matrix":"/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+  }}
+  </script>
+</head>
+<body><canvas id="candidate" width="32" height="18"></canvas><div id="progress">starting</div><pre id="result"></pre><script type="module" src="./ray-path-tracing-fixture.mjs"></script></body>
+</html>
