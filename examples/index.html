@@ -127,6 +127,9 @@
       min-width: 0;
       min-height: 0;
       height: 100%;
+      display: grid;
+      grid-template-columns: minmax(260px, 24%) minmax(420px, 1fr);
+      overflow: hidden;
     }
 
     .sidebar {
@@ -188,12 +191,66 @@
       box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
     }
 
-    ge-tree {
+    .example-tree {
       width: 100%;
       height: 100%;
       min-height: 0;
       border: 0;
       background: #121822;
+      overflow: auto;
+      padding: 8px;
+    }
+
+    .tree-group {
+      margin: 0 0 5px;
+    }
+
+    .tree-group summary {
+      padding: 7px 8px;
+      color: #8598b2;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      user-select: none;
+    }
+
+    .tree-item {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 16px minmax(0, 1fr);
+      gap: 6px;
+      align-items: center;
+      padding: 7px 9px 7px 18px;
+      border: 0;
+      border-radius: 5px;
+      color: #aebdd1;
+      background: transparent;
+      text-align: left;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .tree-item:hover {
+      color: #eef4ff;
+      background: #1a2534;
+    }
+
+    .tree-item[aria-current="true"] {
+      color: #dbeafe;
+      background: rgba(37, 99, 235, 0.22);
+    }
+
+    .tree-item:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: -2px;
+    }
+
+    .tree-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .preview {
@@ -290,6 +347,10 @@
       .source-toggle-label {
         display: none;
       }
+
+      .shell {
+        grid-template-columns: minmax(220px, 36%) minmax(320px, 1fr);
+      }
     }
 
     @media (max-width: 1100px) {
@@ -323,16 +384,16 @@
       </button>
     </header>
 
-    <ge-split class="shell" direction="horizontal" ratio="0.24" min-first="260" min-second="420">
-      <aside class="sidebar" slot="first">
+    <div class="shell">
+      <aside class="sidebar">
         <div class="sidebar-header">
           <input id="example-search" class="search" type="search" placeholder="Search examples" autocomplete="off" />
           <div id="catalog-status" class="catalog-status" role="status" hidden></div>
         </div>
-        <ge-tree id="example-tree"></ge-tree>
+        <nav id="example-tree" class="example-tree" aria-label="Examples"></nav>
       </aside>
 
-      <section id="preview" class="preview" slot="second" data-source-visible="false">
+      <section id="preview" class="preview" data-source-visible="false">
         <div class="viewer-pane">
           <iframe id="viewer" title="Example preview" allow="camera; microphone; fullscreen; xr-spatial-tracking"></iframe>
         </div>
@@ -343,14 +404,11 @@
           <div id="source-editor" class="source-editor" data-state="idle">TypeScript source is hidden.</div>
         </aside>
       </section>
-    </ge-split>
+    </div>
   </main>
 
   <script type="module">
-    import { defineHaiyueUI } from '../ui/dist/index.js';
     import { loadExampleCatalogReport } from './catalog.js';
-
-    defineHaiyueUI();
 
     const tree = document.getElementById('example-tree');
     const viewer = document.getElementById('viewer');
@@ -368,6 +426,8 @@
     let activeNode = null;
     let sourceVisible = false;
     let sourceRequest = 0;
+    let treeData = [];
+    let selectedTreeId = null;
 
     let examples = [];
     try {
@@ -405,7 +465,49 @@
     const allNodes = flatten(examples);
     const defaultNode = allNodes.find(node => node.url);
 
-    tree.data = examples;
+    setTreeData(examples);
+
+    function setTreeData(data) {
+      treeData = data;
+      renderTree();
+    }
+
+    function setSelectedTreeId(id) {
+      selectedTreeId = id;
+      for (const item of tree.querySelectorAll('.tree-item')) {
+        item.setAttribute('aria-current', String(item.dataset.id === id));
+      }
+    }
+
+    function renderTree() {
+      const fragment = document.createDocumentFragment();
+      for (const group of treeData) {
+        const details = document.createElement('details');
+        details.className = 'tree-group';
+        details.open = group.expanded !== false;
+        const summary = document.createElement('summary');
+        summary.textContent = `${group.icon ? `${group.icon} ` : ''}${group.label}`;
+        details.append(summary);
+        for (const node of group.children ?? []) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'tree-item';
+          button.dataset.id = node.id;
+          button.setAttribute('aria-current', String(node.id === selectedTreeId));
+          const icon = document.createElement('span');
+          icon.textContent = node.icon ?? '•';
+          icon.setAttribute('aria-hidden', 'true');
+          const label = document.createElement('span');
+          label.className = 'tree-label';
+          label.textContent = node.label;
+          button.append(icon, label);
+          button.addEventListener('click', () => openNode(node));
+          details.append(button);
+        }
+        fragment.append(details);
+      }
+      tree.replaceChildren(fragment);
+    }
 
     function normalizeSearchText(value) {
       return value.trim().toLowerCase();
@@ -440,9 +542,10 @@
     }
 
     function updateTreeFilter() {
-      tree.data = filterExamples(search.value);
-      const selected = tree.selectedId && flatten(tree.data).some(node => node.id === tree.selectedId);
-      tree.selectedId = selected ? tree.selectedId : null;
+      const filtered = filterExamples(search.value);
+      const selected = selectedTreeId && flatten(filtered).some(node => node.id === selectedTreeId);
+      if (!selected) selectedTreeId = null;
+      setTreeData(filtered);
     }
 
     function openNode(node, updateHash = true) {
@@ -450,7 +553,7 @@
       activeNode = node;
       viewer.src = node.url;
       current.textContent = node.label;
-      tree.selectedId = node.id;
+      setSelectedTreeId(node.id);
       document.title = `${node.label} - 海月 Examples`;
       if (updateHash) history.replaceState(null, '', `#${encodeURIComponent(node.id)}`);
       if (sourceVisible) loadSource(node);
@@ -511,11 +614,6 @@
       if (visible) loadSource(activeNode);
       else sourceRequest++;
     }
-
-    tree.addEventListener('selection-change', event => {
-      const node = event.detail.node;
-      if (node?.url) openNode(node);
-    });
 
     search.addEventListener('input', updateTreeFilter);
     sourceToggle.addEventListener('click', () => setSourceVisible(!sourceVisible));

@@ -91,7 +91,6 @@ test('default mounts expose runtime assets without exposing repository metadata'
   assert.equal((await request(`${origin}/examples/`)).status, 200);
   assert.equal((await request(`${origin}/engine/dist/geometry.js`)).status, 200);
   assert.equal((await request(`${origin}/extensions/dist/gltf.js`)).status, 200);
-  assert.equal((await request(`${origin}/ui/dist/index.js`)).status, 200);
   assert.equal((await request(`${origin}/animation-spec/`)).status, 200);
   assert.equal((await request(`${origin}/animation-spec/viewer.html`)).status, 200);
   assert.equal((await request(`${origin}/animation-spec/samples/manifest.json`)).status, 200);

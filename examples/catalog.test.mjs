@@ -11,6 +11,13 @@ import { computeExampleSourceFingerprint } from './scripts/example-build-fingerp
 
 const manifest = JSON.parse(await readFile(new URL('./manifest.json', import.meta.url), 'utf8'));
 
+test('example shell is self-contained after the UI workspace split', async () => {
+  const source = await readFile(new URL('./index.html', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /ui\/dist|defineHaiyueUI|<ge-(?:tree|split)/u);
+  assert.match(source, /class="example-tree"/u);
+  assert.match(source, /function renderTree\(\)/u);
+});
+
 test('example catalog derives every group, label, order, and URL from manifest metadata', async () => {
   const catalog = createExampleCatalog(manifest);
   const entries = catalog.flatMap(group => group.children);

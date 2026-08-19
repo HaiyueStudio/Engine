@@ -15,7 +15,6 @@ const defaultMountDefinitions = [
   { prefix: '/examples', directory: resolve(repositoryRoot, 'examples') },
   { prefix: '/engine/dist', directory: resolve(repositoryRoot, 'engine/dist') },
   { prefix: '/extensions/dist', directory: resolve(repositoryRoot, 'extensions/dist') },
-  { prefix: '/ui/dist', directory: resolve(repositoryRoot, 'ui/dist') },
   { prefix: '/extensions/test/fixtures/gltf', directory: resolve(repositoryRoot, 'extensions/test/fixtures/gltf') },
   {
     prefix: '/scripts/webgpu-gate/assets/gltf-corpus',
