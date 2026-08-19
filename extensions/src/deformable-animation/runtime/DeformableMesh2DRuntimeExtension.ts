@@ -6,7 +6,7 @@ import {
   type ParsedDeformableMesh2DDrawable,
 } from '@haiyue/animation-spec/deformable2d';
 import { AnimationFormatError } from '@haiyue/animation-spec';
-import { Entity, Geometry2D } from '@haiyue/engine';
+import { Entity, Geometry2D, Transform2D } from '@haiyue/engine';
 import type { AssetHandle } from '@haiyue/engine/assets';
 import type {
   Animation2DExtensionContext,
@@ -47,7 +47,11 @@ export function createDeformableMesh2DRuntimeExtension(
 }
 
 class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
-  private readonly root = new Entity('HYA deformable mesh runtime');
+  // Keep an explicit transform at the extension boundary. TransformStore marks
+  // transform-less entities as non-transform parents, so two consecutive
+  // transform-less runtime nodes would otherwise drop the owning HYA model's
+  // world transform before it reaches the drawable entities.
+  private readonly root = new Entity('HYA deformable mesh runtime').addComponent(new Transform2D());
   private readonly controller = new AbortController();
   private readonly assetHandles: AssetHandle<unknown>[] = [];
   private readonly drawables: RuntimeDrawable[] = [];
@@ -139,7 +143,11 @@ class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
         try {
           textureHandles.push(await manager.loadTexture(resource.uri, {
             label: `DeformableMesh2D:${resource.id}`,
-            format: resource.colorSpace === 'linear' ? 'rgba8unorm' : 'rgba8unorm-srgb',
+            // AnimationVisual2D currently composites display-encoded 2D colors
+            // into an rgba8unorm canvas. An sRGB texture view would decode the
+            // authored bytes to linear values and make the result visibly dark.
+            // Preserve the source bytes here to match Canvas/WebGL Live2D output.
+            format: 'rgba8unorm',
             cacheKey: resource.integrity ?? resource.uri,
             signal: this.controller.signal,
           }));
