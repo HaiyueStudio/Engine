@@ -1,0 +1,28 @@
+{
+  "format": "haiyue-ray-denoise-module-family",
+  "version": 1,
+  "id": "ray-spatial-temporal-denoise",
+  "passes": [
+    {
+      "id": "ray-denoise-temporal", "source": "extensions/src/ray-tracing/denoise/shaders/temporal-denoise.wgsl", "entryPoint": "temporal_main", "logicalGroup": 3, "physicalGroup": 0,
+      "bindings": [
+        { "id": "denoise.params", "binding": 0, "kind": "buffer", "bufferType": "uniform", "minBindingSize": 64 },
+        { "id": "denoise.accumulation", "binding": 1, "kind": "texture", "sampleType": "unfilterable-float", "viewDimension": "2d", "multisampled": false },
+        { "id": "denoise.moments", "binding": 2, "kind": "texture", "sampleType": "unfilterable-float", "viewDimension": "2d", "multisampled": false },
+        { "id": "denoise.feature", "binding": 3, "kind": "texture", "sampleType": "unfilterable-float", "viewDimension": "2d", "multisampled": false },
+        { "id": "denoise.previous", "binding": 4, "kind": "texture", "sampleType": "unfilterable-float", "viewDimension": "2d", "multisampled": false },
+        { "id": "denoise.temporalOutput", "binding": 5, "kind": "storage-texture", "access": "write-only", "format": "rgba16float", "viewDimension": "2d" }
+      ]
+    },
+    {
+      "id": "ray-denoise-spatial", "source": "extensions/src/ray-tracing/denoise/shaders/spatial-denoise.wgsl", "entryPoint": "spatial_main", "logicalGroup": 3, "physicalGroup": 0,
+      "bindings": [
+        { "id": "denoise.params", "binding": 0, "kind": "buffer", "bufferType": "uniform", "minBindingSize": 64 },
+        { "id": "denoise.temporalInput", "binding": 1, "kind": "texture", "sampleType": "unfilterable-float", "viewDimension": "2d", "multisampled": false },
+        { "id": "denoise.moments", "binding": 2, "kind": "texture", "sampleType": "unfilterable-float", "viewDimension": "2d", "multisampled": false },
+        { "id": "denoise.feature", "binding": 3, "kind": "texture", "sampleType": "unfilterable-float", "viewDimension": "2d", "multisampled": false },
+        { "id": "denoise.spatialOutput", "binding": 4, "kind": "storage-texture", "access": "write-only", "format": "rgba16float", "viewDimension": "2d" }
+      ]
+    }
+  ]
+}

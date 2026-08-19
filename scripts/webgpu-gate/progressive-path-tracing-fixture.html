@@ -1,0 +1,14 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>HaiYue G06 Progressive Path Tracing</title>
+<style>html,body{margin:0;background:#10131a;color:#d7e0ef;font:14px system-ui}canvas{width:640px;height:360px;image-rendering:pixelated}pre{white-space:pre-wrap;margin:8px}</style>
+<script type="importmap">{"imports":{
+  "@haiyue/engine/components":"/engine/dist/components.js",
+  "@haiyue/engine/ecs":"/engine/dist/ecs.js",
+  "@haiyue/engine/geometry":"/engine/dist/geometry.js",
+  "@haiyue/engine/material":"/engine/dist/material.js",
+  "@haiyue/engine/lighting":"/engine/dist/lighting.js",
+  "@haiyue/engine/scene":"/engine/dist/scene.js",
+  "@haiyue/engine/experimental":"/engine/dist/experimental.js",
+  "wgpu-matrix":"/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+}}</script></head>
+<body><canvas id="candidate" width="32" height="18"></canvas><div id="progress">starting</div><pre id="result"></pre><script type="module" src="./progressive-path-tracing-fixture.mjs"></script></body></html>
