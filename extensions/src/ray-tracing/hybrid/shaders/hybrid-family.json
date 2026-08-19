@@ -1,0 +1,9 @@
+{
+  "format": "haiyue-ray-hybrid-module-family", "version": 1, "accelerationAbi": "fnv1a64:9fd4d41c38d10fa2",
+  "passes": [
+    { "id": "ray-hybrid-shadow", "source": "extensions/src/ray-tracing/hybrid/shaders/hybrid-effects.wgsl", "entryPoint": "shadow_main", "logicalGroup": 3, "physicalGroup": 0 },
+    { "id": "ray-hybrid-reflection", "source": "extensions/src/ray-tracing/hybrid/shaders/hybrid-effects.wgsl", "entryPoint": "reflection_main", "logicalGroup": 3, "physicalGroup": 0 },
+    { "id": "ray-hybrid-ao", "source": "extensions/src/ray-tracing/hybrid/shaders/hybrid-effects.wgsl", "entryPoint": "ao_main", "logicalGroup": 3, "physicalGroup": 0 },
+    { "id": "ray-hybrid-composite", "source": "extensions/src/ray-tracing/hybrid/shaders/hybrid-composite.wgsl", "entryPoint": "composite_main", "logicalGroup": 3, "physicalGroup": 0 }
+  ]
+}
