@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "rayTracing": {
-    "decision": "hold",
+    "decision": "prototype-approved",
     "evidencePath": "review/capabilities/ray-tracing-product-evidence.json",
     "minimumDeviceClassCount": 1,
     "acceptedReferenceKinds": [

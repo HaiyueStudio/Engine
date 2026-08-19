@@ -10,7 +10,7 @@ const policy = JSON.parse(await readFile(
 const hash = `sha256:${'a'.repeat(64)}`;
 
 test('all unproven P3 capabilities remain on hold without violations', () => {
-  const result = evaluateCapabilityAdmissionPolicy(policy);
+  const result = evaluateCapabilityAdmissionPolicy(policyWithRayTracingHold());
   assert.equal(result.rayTracing.status, 'hold');
   assert.equal(result.webgl2Fallback.status, 'hold');
   assert.equal(result.layeredNavMesh.status, 'hold');
@@ -49,7 +49,7 @@ test('each ray-tracing effect requires independent replay and reference evidence
 });
 
 test('real coverage demand can unlock only a WebGL2 prototype', () => {
-  const approved = structuredClone(policy);
+  const approved = policyWithRayTracingHold();
   approved.webgl2Fallback.decision = 'prototype-approved';
   const result = evaluateCapabilityAdmissionPolicy(approved, {
     webgl2Fallback: validWebGl2Evidence(),
@@ -68,14 +68,14 @@ test('synthetic coverage claims and unclassified failures cannot unlock WebGL2',
     mandatedTargetIds: [],
   };
   evidence.unclassifiedFailureCount = 1;
-  const result = evaluateCapabilityAdmissionPolicy(policy, { webgl2Fallback: evidence });
+  const result = evaluateCapabilityAdmissionPolicy(policyWithRayTracingHold(), { webgl2Fallback: evidence });
   assert.equal(result.webgl2Fallback.status, 'hold');
   assert.ok(result.webgl2Fallback.reasons.includes('target-coverage-demand-not-proven'));
   assert.ok(result.webgl2Fallback.reasons.includes('unclassified-failures-remain'));
 });
 
 test('a real overlapping-surface route unlocks only layered NavMesh', () => {
-  const approved = structuredClone(policy);
+  const approved = policyWithRayTracingHold();
   approved.layeredNavMesh.decision = 'prototype-approved';
   const result = evaluateCapabilityAdmissionPolicy(approved, {
     layeredNavMesh: validLayeredNavMeshEvidence(),
@@ -87,7 +87,7 @@ test('a real overlapping-surface route unlocks only layered NavMesh', () => {
 
 test('each clipping extension requires its own renderer-specific evidence', () => {
   for (const feature of ['caps', 'instanced', 'line', 'planarMirror']) {
-    const approved = structuredClone(policy);
+    const approved = policyWithRayTracingHold();
     approved.clippingExtensions[feature].decision = 'prototype-approved';
     const result = evaluateCapabilityAdmissionPolicy(approved, {
       clippingExtensions: { [feature]: validClippingEvidence(feature) },
@@ -101,7 +101,7 @@ test('each clipping extension requires its own renderer-specific evidence', () =
 });
 
 test('approval without complete evidence is a gate violation', () => {
-  const approved = structuredClone(policy);
+  const approved = policyWithRayTracingHold();
   approved.layeredNavMesh.decision = 'prototype-approved';
   const result = evaluateCapabilityAdmissionPolicy(approved);
   assert.deepEqual(result.violations, [
@@ -137,6 +137,12 @@ function validWebGl2Evidence() {
     contentManifestSha256: hash,
     unclassifiedFailureCount: 0,
   };
+}
+
+function policyWithRayTracingHold() {
+  const unproven = structuredClone(policy);
+  unproven.rayTracing.decision = 'hold';
+  return unproven;
 }
 
 function validRayTracingEvidence() {

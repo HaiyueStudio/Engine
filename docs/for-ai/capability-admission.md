@@ -8,7 +8,7 @@ M2.5 明确暂缓的能力与所需真实证据登记在 [`runtime-convergence/d
 
 | 能力 | 当前状态 | 独立证据 |
 | --- | --- | --- |
-| WebGPU compute ray tracing | hold | path tracing、ray shadow、ray reflection 与 ray AO 各自需要真实产品 scene/camera、当前路径 baseline 和独立 reference |
+| WebGPU compute ray tracing | prototype-approved | `Games@101833f` 的 gravity-maze 与 billiards-3d 已固定四类独立 deficit、clean replay、真实 WebGPU baseline 和人工批准 reference |
 | Forward+/Clustered | hold | 真实画面必须同时需要超过 8 盏灯；沿用 lighting policy |
 | CSM | hold | 长视距室外画面必须证明单 shadow map 无法兼顾近景质量和远景覆盖 |
 | WebGL2 fallback | hold | 产品覆盖率或强制目标平台必须证明 WebGPU-only 阻塞发布 |
