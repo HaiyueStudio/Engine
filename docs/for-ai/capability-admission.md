@@ -8,6 +8,7 @@ M2.5 明确暂缓的能力与所需真实证据登记在 [`runtime-convergence/d
 
 | 能力 | 当前状态 | 独立证据 |
 | --- | --- | --- |
+| WebGPU compute ray tracing | hold | path tracing、ray shadow、ray reflection 与 ray AO 各自需要真实产品 scene/camera、当前路径 baseline 和独立 reference |
 | Forward+/Clustered | hold | 真实画面必须同时需要超过 8 盏灯；沿用 lighting policy |
 | CSM | hold | 长视距室外画面必须证明单 shadow map 无法兼顾近景质量和远景覆盖 |
 | WebGL2 fallback | hold | 产品覆盖率或强制目标平台必须证明 WebGPU-only 阻塞发布 |
@@ -35,6 +36,15 @@ M2.5 明确暂缓的能力与所需真实证据登记在 [`runtime-convergence/d
 ### WebGL2 fallback
 
 需要至少 28 天、1000 个 session 的覆盖率数据且 WebGPU 不可用比例达到 5%，或存在明确的强制目标平台；还需要至少三个固定场景、两个设备类别以及 golden path、PBR、资产加载的最低 parity 范围。Shader Language 的 GLSL ES 300 后端可行性不能单独解锁 fallback。
+
+### WebGPU compute ray tracing
+
+Ray tracing 必须为 `path-tracing`、`hybrid-shadow`、`hybrid-reflection` 和 `hybrid-ao`
+分别登记一组真实产品 case。每组 case 固定 source product、scene、camera replay、scene hash、
+当前 raster/screen-space baseline 图像、独立 reference 图像和真实 device class，并证明当前路径确实
+无法表达登记的 deficit。相同 baseline/reference、示例性质的 synthetic triangle/ray workload、仅有
+性能推测或单纯功能愿望都不能解锁原型。完整 schema 与冻结的实现边界见
+[Ray tracing contracts](./ray-tracing/README.md)。
 
 ### 分层 NavMesh
 

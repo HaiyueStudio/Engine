@@ -14,6 +14,7 @@ const lighting = evaluateLightingArchitectureDecision(lightingPolicy, {
   csmEvidence: readOptional(lightingPolicy.csm.evidencePath),
 });
 const capabilities = evaluateCapabilityAdmissionPolicy(capabilityPolicy, {
+  rayTracing: readOptional(capabilityPolicy.rayTracing.evidencePath),
   webgl2Fallback: readOptional(capabilityPolicy.webgl2Fallback.evidencePath),
   layeredNavMesh: readOptional(capabilityPolicy.layeredNavMesh.evidencePath),
   clippingExtensions: Object.fromEntries(Object.entries(capabilityPolicy.clippingExtensions)
@@ -22,6 +23,7 @@ const capabilities = evaluateCapabilityAdmissionPolicy(capabilityPolicy, {
 
 log('Forward+/Clustered', lighting.forwardPlus.status, lighting.forwardPlus.reasons);
 log('CSM', lighting.csm.status, lighting.csm.reasons);
+log('WebGPU compute ray tracing', capabilities.rayTracing.status, capabilities.rayTracing.reasons);
 log('WebGL2 fallback', capabilities.webgl2Fallback.status, capabilities.webgl2Fallback.reasons);
 log('Layered NavMesh', capabilities.layeredNavMesh.status, capabilities.layeredNavMesh.reasons);
 for (const [feature, result] of Object.entries(capabilities.clippingExtensions)) {

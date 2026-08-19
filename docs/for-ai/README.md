@@ -18,6 +18,7 @@
 - [Performance workflow](./performance.md)
 - [灯光与阴影规模化基准协议](./lighting-shadow-scaling.md)
 - [大型能力准入](./capability-admission.md)
+- [Ray tracing contracts](./ray-tracing/README.md)
 - [Shader Language / Typed IR 阶段 13 实现与契约](../../shader-language/README.md)
 - [Release process](./release-process.md)
 - [从源码运行、贡献与验证](./contributing.md)

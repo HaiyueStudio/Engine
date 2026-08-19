@@ -101,3 +101,4 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0081：0.1 首发浏览器支持收敛为 Windows](./0081-windows-first-0-1-browser-support.md)
 - [0082：HaiyueStudio 按产品边界拆分为多仓库](./0082-multi-repository-product-boundaries.md)
 - [0083：Live2D 等可变形 2D 素材离线转换为来源无关 HYA](./0083-source-neutral-deformable-animation-delivery.md)
+- [0084：Ray tracing 使用可卸载的 WebGPU compute extension](./0084-webgpu-compute-ray-tracing-extension.md)

@@ -1,5 +1,39 @@
 {
   "schemaVersion": 1,
+  "rayTracing": {
+    "decision": "hold",
+    "evidencePath": "review/capabilities/ray-tracing-product-evidence.json",
+    "minimumDeviceClassCount": 1,
+    "acceptedReferenceKinds": [
+      "offline-path-traced",
+      "measured-ground-truth",
+      "product-art-direction-approved"
+    ],
+    "requiredEffectIds": [
+      "path-tracing",
+      "hybrid-shadow",
+      "hybrid-reflection",
+      "hybrid-ao"
+    ],
+    "acceptedDeficitKinds": {
+      "path-tracing": [
+        "multi-bounce-indirect-lighting",
+        "ground-truth-light-transport"
+      ],
+      "hybrid-shadow": [
+        "offscreen-occluder",
+        "shadow-map-resolution-or-coverage"
+      ],
+      "hybrid-reflection": [
+        "offscreen-reflector-or-reflected-object",
+        "non-planar-dynamic-reflection"
+      ],
+      "hybrid-ao": [
+        "offscreen-occluder",
+        "depth-discontinuity-or-thin-geometry"
+      ]
+    }
+  },
   "webgl2Fallback": {
     "decision": "hold",
     "evidencePath": "review/capabilities/webgl2-fallback-product-evidence.json",

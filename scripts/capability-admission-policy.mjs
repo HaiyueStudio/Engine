@@ -3,6 +3,7 @@ const CLIPPING_FEATURES = Object.freeze(['caps', 'instanced', 'line', 'planarMir
 
 export function evaluateCapabilityAdmissionPolicy(policy, inputs = {}) {
   validatePolicy(policy);
+  const rayTracing = evaluateRayTracing(policy.rayTracing, inputs.rayTracing);
   const clippingExtensions = Object.fromEntries(CLIPPING_FEATURES.map(feature => [
     feature,
     evaluateClippingExtension(
@@ -14,6 +15,7 @@ export function evaluateCapabilityAdmissionPolicy(policy, inputs = {}) {
   const webgl2Fallback = evaluateWebGl2Fallback(policy.webgl2Fallback, inputs.webgl2Fallback);
   const layeredNavMesh = evaluateLayeredNavMesh(policy.layeredNavMesh, inputs.layeredNavMesh);
   const violations = [
+    ...decisionMismatch('rayTracing', policy.rayTracing.decision, rayTracing),
     ...decisionMismatch('webgl2Fallback', policy.webgl2Fallback.decision, webgl2Fallback),
     ...decisionMismatch('layeredNavMesh', policy.layeredNavMesh.decision, layeredNavMesh),
     ...CLIPPING_FEATURES.flatMap(feature => decisionMismatch(
@@ -24,11 +26,78 @@ export function evaluateCapabilityAdmissionPolicy(policy, inputs = {}) {
   ];
   return {
     schemaVersion: 1,
+    rayTracing,
     webgl2Fallback,
     layeredNavMesh,
     clippingExtensions,
     violations,
   };
+}
+
+function evaluateRayTracing(policy, evidence) {
+  const reasons = [];
+  if (evidence?.format !== 'haiyue-ray-tracing-product-decision@1') {
+    reasons.push('ray-tracing-product-requirement-missing');
+  } else {
+    requireText(evidence.productRequirementId, 'product-requirement-id-missing', reasons);
+    requireSha256(evidence.contentManifestSha256, 'content-manifest-provenance-missing', reasons);
+    const cases = Array.isArray(evidence.cases) ? evidence.cases : [];
+    const casesByEffect = new Map();
+    const requiredEffectIds = new Set(policy.requiredEffectIds);
+    for (const productCase of cases) {
+      if (!nonEmpty(productCase?.effectId)) continue;
+      if (!requiredEffectIds.has(productCase.effectId)) {
+        reasons.push(`unexpected-effect-case:${productCase.effectId}`);
+        continue;
+      }
+      if (casesByEffect.has(productCase.effectId)) {
+        reasons.push(`duplicate-effect-case:${productCase.effectId}`);
+        continue;
+      }
+      casesByEffect.set(productCase.effectId, productCase);
+    }
+    for (const effectId of policy.requiredEffectIds) {
+      const productCase = casesByEffect.get(effectId);
+      if (!productCase) {
+        reasons.push(`required-effect-case-missing:${effectId}`);
+        continue;
+      }
+      validateRayTracingCase(effectId, policy, productCase, reasons);
+    }
+    classifyFailures(evidence, reasons);
+  }
+  return decisionResult(evidence, reasons);
+}
+
+function validateRayTracingCase(effectId, policy, productCase, reasons) {
+  requireText(productCase.sourceProduct, `source-product-missing:${effectId}`, reasons);
+  requireCommitSha(productCase.sourceRevision?.commitSha, `source-commit-missing:${effectId}`, reasons);
+  if (productCase.sourceRevision?.dirty !== false) reasons.push(`source-revision-not-clean:${effectId}`);
+  requireText(productCase.fixedSceneId, `fixed-scene-missing:${effectId}`, reasons);
+  requireText(productCase.fixedCameraReplayId, `fixed-camera-replay-missing:${effectId}`, reasons);
+  requireSha256(productCase.sceneSha256, `scene-provenance-missing:${effectId}`, reasons);
+  requireSha256(productCase.baselineImageSha256, `baseline-image-missing:${effectId}`, reasons);
+  requireSha256(productCase.referenceImageSha256, `reference-image-missing:${effectId}`, reasons);
+  if (productCase.baselineImageSha256 === productCase.referenceImageSha256) {
+    reasons.push(`reference-does-not-demonstrate-deficit:${effectId}`);
+  }
+  if (!policy.acceptedReferenceKinds.includes(productCase.referenceKind)) {
+    reasons.push(`unsupported-reference-kind:${effectId}`);
+  }
+  if (productCase.baselineDeficit?.currentPathFailed !== true) {
+    reasons.push(`current-render-path-deficit-not-proven:${effectId}`);
+  }
+  if (!policy.acceptedDeficitKinds[effectId].includes(productCase.baselineDeficit?.kind)) {
+    reasons.push(`unsupported-deficit-kind:${effectId}`);
+  }
+  if (uniqueStrings(productCase.deviceClasses).length < policy.minimumDeviceClassCount) {
+    reasons.push(`insufficient-device-classes:${effectId}`);
+  }
+  requireText(productCase.capture?.browser, `capture-browser-missing:${effectId}`, reasons);
+  requireText(productCase.capture?.browserVersion, `capture-browser-version-missing:${effectId}`, reasons);
+  requireText(productCase.capture?.backend, `capture-backend-missing:${effectId}`, reasons);
+  requireText(productCase.capture?.adapterName, `capture-adapter-missing:${effectId}`, reasons);
+  if (productCase.capture?.softwareAdapter !== false) reasons.push(`real-hardware-adapter-not-proven:${effectId}`);
 }
 
 function evaluateWebGl2Fallback(policy, evidence) {
@@ -146,6 +215,24 @@ function validatePolicy(policy) {
       throw new Error(`clippingExtensions.${feature} must declare accepted use cases.`);
     }
   }
+  validateEntry('rayTracing', policy.rayTracing);
+  if (!(policy.rayTracing.minimumDeviceClassCount > 0)) {
+    throw new Error('rayTracing must declare a positive device-class threshold.');
+  }
+  const requiredEffectIds = uniqueStrings(policy.rayTracing.requiredEffectIds);
+  if (requiredEffectIds.length === 0
+      || !Array.isArray(policy.rayTracing.requiredEffectIds)
+      || requiredEffectIds.length !== policy.rayTracing.requiredEffectIds.length) {
+    throw new Error('rayTracing requiredEffectIds must be unique non-empty strings.');
+  }
+  if (uniqueStrings(policy.rayTracing.acceptedReferenceKinds).length === 0) {
+    throw new Error('rayTracing must declare accepted reference kinds.');
+  }
+  for (const effectId of requiredEffectIds) {
+    if (uniqueStrings(policy.rayTracing.acceptedDeficitKinds?.[effectId]).length === 0) {
+      throw new Error(`rayTracing ${effectId} must declare accepted deficit kinds.`);
+    }
+  }
 }
 
 function validateEntry(name, entry) {
@@ -165,6 +252,10 @@ function requireText(value, reason, reasons) {
 
 function requireSha256(value, reason, reasons) {
   if (!/^sha256:[a-f\d]{64}$/i.test(value ?? '')) reasons.push(reason);
+}
+
+function requireCommitSha(value, reason, reasons) {
+  if (!/^[a-f\d]{40}$/i.test(value ?? '')) reasons.push(reason);
 }
 
 function uniqueStrings(value) {

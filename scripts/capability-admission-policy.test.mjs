@@ -11,6 +11,7 @@ const hash = `sha256:${'a'.repeat(64)}`;
 
 test('all unproven P3 capabilities remain on hold without violations', () => {
   const result = evaluateCapabilityAdmissionPolicy(policy);
+  assert.equal(result.rayTracing.status, 'hold');
   assert.equal(result.webgl2Fallback.status, 'hold');
   assert.equal(result.layeredNavMesh.status, 'hold');
   assert.deepEqual(
@@ -18,6 +19,33 @@ test('all unproven P3 capabilities remain on hold without violations', () => {
     ['hold', 'hold', 'hold', 'hold'],
   );
   assert.deepEqual(result.violations, []);
+});
+
+test('complete real-product cases can unlock only a ray-tracing prototype', () => {
+  const approved = structuredClone(policy);
+  approved.rayTracing.decision = 'prototype-approved';
+  const result = evaluateCapabilityAdmissionPolicy(approved, {
+    rayTracing: validRayTracingEvidence(),
+  });
+  assert.equal(result.rayTracing.status, 'eligible-for-prototype');
+  assert.equal(result.webgl2Fallback.status, 'hold');
+  assert.equal(result.layeredNavMesh.status, 'hold');
+  assert.deepEqual(result.violations, []);
+});
+
+test('each ray-tracing effect requires independent replay and reference evidence', () => {
+  const approved = structuredClone(policy);
+  approved.rayTracing.decision = 'prototype-approved';
+  const evidence = validRayTracingEvidence();
+  evidence.cases = evidence.cases.filter(productCase => productCase.effectId !== 'hybrid-reflection');
+  evidence.cases[0].referenceImageSha256 = evidence.cases[0].baselineImageSha256;
+  evidence.unclassifiedFailureCount = 1;
+  const result = evaluateCapabilityAdmissionPolicy(approved, { rayTracing: evidence });
+  assert.equal(result.rayTracing.status, 'hold');
+  assert.ok(result.rayTracing.reasons.includes('required-effect-case-missing:hybrid-reflection'));
+  assert.ok(result.rayTracing.reasons.includes('reference-does-not-demonstrate-deficit:path-tracing'));
+  assert.ok(result.rayTracing.reasons.includes('unclassified-failures-remain'));
+  assert.equal(result.violations.length, 1);
 });
 
 test('real coverage demand can unlock only a WebGL2 prototype', () => {
@@ -107,6 +135,42 @@ function validWebGl2Evidence() {
     deviceClasses: ['windows-integrated', 'android-mobile'],
     requiredParityAreas: ['golden-path', 'pbr', 'asset-loading'],
     contentManifestSha256: hash,
+    unclassifiedFailureCount: 0,
+  };
+}
+
+function validRayTracingEvidence() {
+  const referenceHash = `sha256:${'b'.repeat(64)}`;
+  return {
+    format: 'haiyue-ray-tracing-product-decision@1',
+    productRequirementId: 'studio-rendering-quality-001',
+    contentManifestSha256: hash,
+    cases: policy.rayTracing.requiredEffectIds.map(effectId => ({
+      effectId,
+      sourceProduct: `haiyue-product-${effectId}`,
+      sourceRevision: {
+        commitSha: 'c'.repeat(40),
+        dirty: false,
+      },
+      fixedSceneId: `${effectId}-scene-v1`,
+      fixedCameraReplayId: `${effectId}-camera-v1`,
+      sceneSha256: hash,
+      baselineImageSha256: hash,
+      referenceImageSha256: referenceHash,
+      referenceKind: 'offline-path-traced',
+      baselineDeficit: {
+        currentPathFailed: true,
+        kind: policy.rayTracing.acceptedDeficitKinds[effectId][0],
+      },
+      deviceClasses: ['windows-discrete'],
+      capture: {
+        browser: 'Chrome',
+        browserVersion: '140.0.0.0',
+        backend: 'D3D12',
+        adapterName: 'representative discrete GPU',
+        softwareAdapter: false,
+      },
+    })),
     unclassifiedFailureCount: 0,
   };
 }

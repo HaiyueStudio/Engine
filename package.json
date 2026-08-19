@@ -39,6 +39,7 @@
     "verify:shader-language-stage14": "node scripts/verify-shader-language-stage14-dag.mjs",
     "verify:shader-language-lab": "npm run shader-language:showcase:check && npm run build:target -- example:shader-language-lab && node scripts/verify-shader-language-lab-example.mjs",
     "verify:shader-language-character-material": "npm run shader-language:showcase:check && npm run build:target -- example:shader-language-character-material && node scripts/verify-shader-language-character-material-example.mjs",
+    "capability:admission:check": "node scripts/check-capability-admission.mjs",
     "pack:candidates": "node scripts/pack-repository-candidates.mjs"
   },
   "devDependencies": {
