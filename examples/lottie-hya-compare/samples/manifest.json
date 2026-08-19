@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "samples": [
+    { "id": "orbit-badge", "title": "Orbit Badge · 128×128", "file": "orbit-badge.json", "license": "MIT", "source": "HaiYue original test fixture" },
+    { "id": "wide-cards", "title": "Wide Cards · 1200×320", "file": "wide-cards.json", "license": "MIT", "source": "HaiYue original test fixture" }
+  ]
+}

@@ -32,6 +32,60 @@
       }
     },
     {
+      "id": "live2d-hya",
+      "title": "Live2D Cubism to HYA (Offline)",
+      "entry": "live2d-hya/main.ts",
+      "capabilities": [
+        "animation-format",
+        "live2d-cubism-import",
+        "offline-conversion",
+        "deformable-mesh",
+        "binary-animation",
+        "webgpu",
+        "2d"
+      ],
+      "assets": [
+        "live2d-hya/assets/mascot.hya",
+        "live2d-hya/assets/mascot.hydm",
+        "live2d-hya/assets/mascot.png",
+        "live2d-hya/assets/mascot.svg",
+        "live2d-hya/assets/mascot.capture.json",
+        "live2d-hya/assets/conversion-report.json"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 10
+      }
+    },
+    {
+      "id": "lottie-hya-compare",
+      "title": "Lottie → HYA Fidelity Compare",
+      "entry": "lottie-hya-compare/main.ts",
+      "capabilities": ["animation-format", "lottie-conversion", "fidelity-compare", "official-reference-player", "auto-bounds", "timeline-scrubbing", "webgpu", "2d"],
+      "assets": ["lottie-hya-compare/samples/manifest.json", "lottie-hya-compare/samples/orbit-badge.json", "lottie-hya-compare/samples/wide-cards.json"],
+      "screenshot": { "required": false, "baseline": null },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": { "group": "assets-ui", "order": 11 }
+    },
+    {
+      "id": "live2d-hya-compare",
+      "title": "Live2D → HYA Fidelity Compare",
+      "entry": "live2d-hya-compare/main.ts",
+      "capabilities": ["animation-format", "live2d-cubism-import", "fidelity-compare", "licensed-official-core-reference", "auto-bounds", "timeline-scrubbing", "deformable-mesh", "webgpu", "2d"],
+      "assets": ["live2d-hya-compare/samples/manifest.json", "live2d-hya-compare/samples/mascot.hya", "live2d-hya-compare/samples/mascot.hydm", "live2d-hya-compare/samples/mascot.png", "live2d-hya-compare/samples/mascot.capture.json"],
+      "screenshot": { "required": false, "baseline": null },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": { "group": "assets-ui", "order": 12 }
+    },
+    {
       "id": "hya-state-machine",
       "title": "HYA State Machine",
       "entry": "hya-state-machine/main.ts",

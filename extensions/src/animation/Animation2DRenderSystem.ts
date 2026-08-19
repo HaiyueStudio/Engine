@@ -237,7 +237,9 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   private pipelineLayout!: GPUPipelineLayout;
   private pipelines!: Map<string, GPURenderPipeline>;
   private readonly entityGpu = new Map<number, EntityGpu>();
-  private readonly geometryGpu = new Map<number, GeometryGpu>();
+  private readonly geometryGpu = new Map<string, GeometryGpu>();
+  private readonly explicitUvIds = new WeakMap<Float32Array, number>();
+  private nextExplicitUvId = 1;
   private textureBindGroups = new WeakMap<GPUTexture, GPUBindGroup>();
   private readonly maskTargets = new Map<string, MaskTarget>();
   private readonly effectTargets = new Map<string, EffectTarget>();
@@ -246,7 +248,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   private readonly sourceGroupPool: AnimationRenderItem[][] = [];
   private readonly activeMaskTargets = new Map<string, MaskTarget>();
   private readonly compositeBindGroups = new Map<string, GPUBindGroup>();
-  private readonly liveGeometryIds = new Set<number>();
+  private readonly liveGeometryIds = new Set<string>();
   private _visualCount = 0;
   private _maskTargetCount = 0;
   private _compositeLayerCount = 0;
@@ -745,10 +747,11 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
 
   private getGeometryGpu(visual: AnimationVisual2D): GeometryGpu {
     const geometry = visual.geometry;
-    let gpu = this.geometryGpu.get(geometry.id);
+    const key = this.geometryKey(visual);
+    let gpu = this.geometryGpu.get(key);
     if (gpu && gpu.version === geometry.version) return gpu;
     if (gpu) this.destroyGeometryGpu(gpu);
-    const vertices = buildVertices(geometry.positions);
+    const vertices = buildVertices(geometry.positions, visual.uvs);
     const device = requireEngineDevice(this.engine);
     const vertexBuffer = device.createBuffer({ size: vertices.byteLength, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
     device.queue.writeBuffer(vertexBuffer, 0, vertices as ArrayBufferView<ArrayBuffer>);
@@ -769,8 +772,18 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       indexFormat: geometry.indices instanceof Uint32Array ? 'uint32' : 'uint16',
       version: geometry.version,
     };
-    this.geometryGpu.set(geometry.id, gpu);
+    this.geometryGpu.set(key, gpu);
     return gpu;
+  }
+
+  private geometryKey(visual: AnimationVisual2D): string {
+    if (!visual.uvs) return `${visual.geometry.id}:derived`;
+    let uvId = this.explicitUvIds.get(visual.uvs);
+    if (uvId === undefined) {
+      uvId = this.nextExplicitUvId++;
+      this.explicitUvIds.set(visual.uvs, uvId);
+    }
+    return `${visual.geometry.id}:uv:${uvId}`;
   }
 
   private getTextureBindGroup(texture: GPUTexture): GPUBindGroup {
@@ -898,7 +911,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
 
   private sweepGeometryGpu(): void {
     this.liveGeometryIds.clear();
-    for (const item of this.items) this.liveGeometryIds.add(item.visual.geometry.id);
+    for (const item of this.items) this.liveGeometryIds.add(this.geometryKey(item.visual));
     for (const [id, gpu] of this.geometryGpu) if (!this.liveGeometryIds.has(id)) { this.destroyGeometryGpu(gpu); this.geometryGpu.delete(id); }
   }
 
@@ -996,7 +1009,7 @@ function effectKindCode(kind: AnimationVisual2D['effects'][number]['kind']): num
 
 function visualNodeKey(visual: AnimationVisual2D): string { return visual.nodeKey; }
 
-function buildVertices(positions: Float32Array): Float32Array {
+function buildVertices(positions: Float32Array, explicitUvs: Float32Array | null): Float32Array {
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   for (let i = 0; i < positions.length; i += 2) {
     const x = positions[i]!, y = positions[i + 1]!;
@@ -1008,7 +1021,8 @@ function buildVertices(positions: Float32Array): Float32Array {
   for (let source = 0, target = 0; source < positions.length; source += 2) {
     const x = positions[source]!, y = positions[source + 1]!;
     out[target++] = x; out[target++] = y;
-    out[target++] = (x - minX) / width; out[target++] = 1 - (y - minY) / height;
+    out[target++] = explicitUvs?.[source] ?? (x - minX) / width;
+    out[target++] = explicitUvs?.[source + 1] ?? 1 - (y - minY) / height;
   }
   return out;
 }

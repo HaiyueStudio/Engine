@@ -17,7 +17,25 @@ npm install @haiyue/animation-spec
 - `@haiyue/animation-spec`：HYA 类型、严格 parser、binary codec 和状态机数据。
 - `@haiyue/animation-spec/lottie`：离线/导入期 Lottie 转换和字体清单。
 - `@haiyue/animation-spec/native3d`：`org.haiyue.animation-3d@1` source-neutral 格式 parser/types。
+- `@haiyue/animation-spec/deformable2d`：通用可变形三角网格 sidecar codec 与格式 registry。
+- `@haiyue/animation-spec/live2d`：构建期 Cubism drawable capture、Motion3 sampling 与 HYA 转换；`./cubism` 是兼容别名。
 - `hya-convert`：Node.js 22+ CLI。
+- `hya-live2d-convert`：将已授权工具生成的 Cubism capture 转为 `.hya + .hydm + report`；旧的 `hya-cubism-convert` 仍可用。
+
+来源适配器按格式归档，基础 parser/codec 不依赖任何来源格式：
+
+```text
+animation-spec/
+├─ src/lottie/          Lottie 转换实现与 Merge Paths
+├─ lottie/bin/          Lottie CLI
+├─ lottie/samples/      Lottie 素材来源与许可说明
+├─ src/live2d/          Cubism capture / Motion3 转换实现
+├─ live2d/bin/          Live2D → HYA CLI
+├─ live2d/tools/        调用方提供 Core/模型的许可隔离工具
+└─ live2d/samples/      Live2D 素材来源与许可说明
+```
+
+`src/lottie.ts`、`src/live2d.ts` 只是稳定 package facade；`src/cubism.ts` 仅为旧入口兼容层。来源无关的 `deformable2d`、binary、parser、validation 和 schema 继续留在公共层。
 
 ```ts
 import { parseAnimation } from '@haiyue/animation-spec';
@@ -89,10 +107,20 @@ scene.addSystem(new Particle2DRenderSystem(engine, cameraEntity, { loadOp: 'load
 
 ```sh
 npm run build -w ./animation-spec
-node animation-spec/bin/hya-convert.mjs input-lottie.json output.hya
+node animation-spec/lottie/bin/hya-lottie-convert.mjs input-lottie.json output.hya
+node animation-spec/live2d/bin/hya-live2d-convert.mjs --input model.capture.json --output model.hya --strict
 ```
 
 JSON 用于调试和工具交换，`.hya` 用于网页交付。完整约束见 [SPECIFICATION.md](./SPECIFICATION.md)，机器可读约束见 [schema/animation.schema.json](./schema/animation.schema.json)。运行时 parser 仍是安全边界的最终校验器。
+
+Cubism 第一版采用 clip-baked profile：Core 只在用户许可范围内的构建工具中运行，最终网页只加载 HYA、HYDM、纹理和 `@haiyue/extensions/deformable-animation`。仓库示例使用 HaiYue 自有 deterministic capture fixture，不分发 Core、`.moc3` 或第三方模型。参数输入、Physics、motion sync、非 normal blend、multiply/screen color 和 culling 会进入结构化 fidelity report；`--strict` 会拒绝这些近似。
+
+仓库开发环境还提供许可隔离的 Core capture runner。调用方显式传入自己获得许可的 Core、model3 和可选 Motion3；runner 在临时 headless Chrome 中求值并删除临时 Core/`.moc3`，输出只包含 capture JSON 与复制出的纹理：
+
+```sh
+npm run cubism:capture -- --core /licensed/live2dcubismcore.min.js --model /project/model.model3.json --motion /project/idle.motion3.json --output build/model.capture.json --fps 30
+node animation-spec/live2d/bin/hya-live2d-convert.mjs --input build/model.capture.json --output build/model.hya --strict
+```
 
 仓库中的 [`examples/animation-spec`](../examples/animation-spec/) 是可交互转换工作台：可以读取允许 CORS 的 Lottie URL 或直接粘贴 JSON，查看 diagnostics/HYA JSON、下载 `.hya`，并在 WebGPU 预览中播放、逐帧移动和拖动时间轴。
 

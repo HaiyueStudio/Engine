@@ -10,6 +10,8 @@ export interface AnimationVisual2DOptions {
   instanceId: number;
   nodeId: string;
   order: number;
+  /** Optional explicit UV pairs for arbitrary textured triangle meshes. */
+  uvs?: Float32Array;
   sourceOnly?: boolean;
   composite?: Readonly<AnimationComposite>;
   texture?: GPUTexture | null;
@@ -48,7 +50,8 @@ export class AnimationVisual2D extends Component {
   readonly instanceId: number;
   readonly nodeId: string;
   readonly nodeKey: string;
-  readonly order: number;
+  order: number;
+  readonly uvs: Float32Array | null;
   readonly sourceOnly: boolean;
   readonly compositeLayers: readonly Readonly<AnimationCompositeLayer>[];
   readonly compositeKeys: readonly string[];
@@ -73,6 +76,10 @@ export class AnimationVisual2D extends Component {
     this.nodeId = options.nodeId;
     this.nodeKey = `${options.instanceId}:${options.nodeId}`;
     this.order = options.order;
+    if (options.uvs && options.uvs.length !== options.geometry.positions.length) {
+      throw new RangeError('AnimationVisual2D explicit UV count must match geometry positions.');
+    }
+    this.uvs = options.uvs ?? null;
     this.sourceOnly = options.sourceOnly ?? false;
     this.compositeLayers = Object.freeze(options.composite
       ? ('layers' in options.composite
@@ -97,6 +104,11 @@ export class AnimationVisual2D extends Component {
     if (this.texture === texture) return;
     this.texture = texture;
     this.revision++;
+  }
+
+  setOrder(order: number): void {
+    if (!Number.isSafeInteger(order)) throw new RangeError('AnimationVisual2D order must be a safe integer.');
+    this.order = order;
   }
 
   setTextureHandle(handle: AssetHandle<GPUTexture> | null): void {
@@ -133,6 +145,7 @@ export class AnimationVisual2D extends Component {
       instanceId: this.instanceId,
       nodeId: this.nodeId,
       order: this.order,
+      ...(this.uvs ? { uvs: this.uvs } : {}),
       sourceOnly: this.sourceOnly,
       ...(this.compositeLayers.length === 0 ? {} : { composite: { layers: this.compositeLayers } }),
       texture: this.texture,

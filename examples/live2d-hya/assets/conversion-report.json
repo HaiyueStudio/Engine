@@ -1,0 +1,17 @@
+{
+  "sourceFormat": "live2d-cubism-drawable-capture",
+  "profile": "clip-baked",
+  "frameCount": 25,
+  "drawableCount": 1,
+  "vertexCount": 169,
+  "textureCount": 1,
+  "unsupportedRuntimeFeatures": [
+    "parameterized-input",
+    "physics-runtime",
+    "motion-sync",
+    "multiply-screen-color",
+    "non-normal-blend",
+    "culling"
+  ],
+  "diagnostics": []
+}

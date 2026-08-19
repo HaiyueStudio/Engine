@@ -2,12 +2,12 @@
 
 import { readFile, writeFile } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
-import { encodeAnimationBinary } from '../dist/index.js';
-import { convertLottie } from '../dist/lottie.js';
+import { encodeAnimationBinary } from '../../dist/index.js';
+import { convertLottie } from '../../dist/lottie.js';
 
 const args = process.argv.slice(2);
 if (args.includes('--help') || args.length < 2) {
-  console.log('Usage: hya-convert <input.json> <output.hya|output.json> [--strict]');
+  console.log('Usage: hya-convert <input.json> <output.hya|output.json> [--strict] (alias: hya-lottie-convert)');
   process.exit(args.includes('--help') ? 0 : 1);
 }
 

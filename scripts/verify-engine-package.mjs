@@ -459,7 +459,7 @@ function runAllExportsConsumer(installed, packages) {
 }
 
 function runCliConsumer(installed) {
-  const cli = resolve(installed.root, 'node_modules/@haiyue/animation-spec/bin/hya-convert.mjs');
+  const cli = resolve(installed.root, 'node_modules/@haiyue/animation-spec/lottie/bin/hya-lottie-convert.mjs');
   if (process.platform === 'win32' && !existsSync(resolve(installed.root, 'node_modules/.bin/hya-convert.cmd'))) {
     return { status: 'failed', detail: 'hya-convert Windows command shim was not installed' };
   }

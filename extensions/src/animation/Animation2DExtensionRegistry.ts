@@ -4,6 +4,7 @@ import type {
   ParsedAnimation,
 } from '@haiyue/animation-spec';
 import type { Entity } from '@haiyue/engine';
+import type { AssetManager } from '@haiyue/engine/assets';
 
 export interface Animation2DExtensionContext {
   readonly animation: ParsedAnimation;
@@ -11,6 +12,12 @@ export interface Animation2DExtensionContext {
   readonly component: Readonly<AnimationComponent>;
   /** Anchor-adjusted parent for entities created by the extension. */
   readonly parent: Entity;
+  /** Shared runtime asset manager; absent hosts must reject resource-backed handlers. */
+  readonly assetManager?: AssetManager;
+  /** Stable identity separating multiple instances of the same HYA document. */
+  readonly instanceId: number;
+  /** Aborted before the owning animation hierarchy is destroyed. */
+  readonly signal: AbortSignal;
 }
 
 export interface Animation2DExtensionInstance {

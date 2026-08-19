@@ -6,6 +6,8 @@
     "declaration": false,
     "paths": {
       "@haiyue/animation-spec": ["../animation-spec/src/index.ts"],
+      "@haiyue/animation-spec/deformable2d": ["../animation-spec/src/deformable2d.ts"],
+      "@haiyue/animation-spec/live2d": ["../animation-spec/src/live2d.ts"],
       "@haiyue/animation-spec/lottie": ["../animation-spec/src/lottie.ts"],
       "@haiyue/extensions/animation": ["../extensions/src/animation.ts"],
       "@haiyue/extensions/canvas-text": ["../extensions/src/canvas-text.ts"],
@@ -13,6 +15,7 @@
       "@haiyue/extensions/experimental/gltf-worker": ["../extensions/src/experimental-gltf-worker.ts"],
       "@haiyue/extensions/gltf-animation3d": ["../extensions/src/gltf-animation3d.ts"],
       "@haiyue/extensions/hya-state-machine": ["../extensions/src/hya-state-machine.ts"],
+      "@haiyue/extensions/deformable-animation": ["../extensions/src/deformable-animation.ts"],
       "@haiyue/extensions/grid": ["../extensions/src/grid.ts"],
       "@haiyue/extensions/spine": ["../extensions/src/spine.ts"],
       "@haiyue/extensions/tilemap": ["../extensions/src/tilemap.ts"],

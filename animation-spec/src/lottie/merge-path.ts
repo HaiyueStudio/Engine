@@ -1,3 +1,4 @@
+// Lottie Merge Paths lowering uses polygon-clipping at conversion time only.
 // polygon-clipping publishes root declarations, but its ESM bundle subpath has
 // no adjacent .d.ts. Importing the ESM file avoids selecting the browser UMD
 // build while the public root types below keep the call surface checked.

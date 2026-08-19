@@ -80,6 +80,11 @@
       "types": "./dist/animation.d.ts",
       "import": "./dist/animation.js"
     },
+    "./deformable-animation": {
+      "source": "./src/deformable-animation.ts",
+      "types": "./dist/deformable-animation.d.ts",
+      "import": "./dist/deformable-animation.js"
+    },
     "./hya-state-machine": {
       "source": "./src/hya-state-machine.ts",
       "types": "./dist/hya-state-machine.d.ts",

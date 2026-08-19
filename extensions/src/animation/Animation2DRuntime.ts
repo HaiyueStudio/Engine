@@ -236,7 +236,15 @@ export class Animation2DRuntime {
             continue;
           }
           try {
-            const instance = handler.create({ animation: _animation, node, component, parent: content });
+            const instance = handler.create({
+              animation: _animation,
+              node,
+              component,
+              parent: content,
+              ...(this._assetManager ? { assetManager: this._assetManager } : {}),
+              instanceId: this._instanceId,
+              signal: this._abortController.signal,
+            });
             if (instance) {
               runtimeNode.extensions.push(instance);
               this._visualCount++;

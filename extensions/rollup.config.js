@@ -15,6 +15,7 @@ export default {
     tween: 'src/tween.ts',
     grid: 'src/grid.ts',
     animation: 'src/animation.ts',
+    'deformable-animation': 'src/deformable-animation.ts',
     'hya-state-machine': 'src/hya-state-machine.ts',
     animation3d: 'src/animation3d.ts',
     'gltf-animation3d': 'src/gltf-animation3d.ts',

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haiyue.dev/schemas/animation/deformable-mesh-2d-extension.schema.json",
+  "title": "HYA deformable mesh 2D component v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "dataResource", "textures"],
+  "properties": {
+    "type": { "const": "org.haiyue.deformable-mesh-2d@1" },
+    "dataResource": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "textures": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": { "type": "string", "minLength": 1, "maxLength": 256 }
+    }
+  }
+}

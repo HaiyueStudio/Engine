@@ -8,6 +8,7 @@ Optional runtime capabilities for `@haiyue/engine`.
 - `@haiyue/extensions/animation3d` — source-independent 3D clips, mixers, pose buffers, layers, masks, events, state machines, and the HYA adapter.
 - `@haiyue/extensions/gltf-animation3d` — adapts glTF clips to the source-independent Animation3D runtime.
 - `@haiyue/extensions/animation` — HYA Animation2D components, systems, loading, rendering, and state-machine integration.
+- `@haiyue/extensions/deformable-animation` — source-neutral HYA deformable-mesh sampling, dynamic geometry, texture and alpha-mask runtime; it has no Live2D/Cubism dependency.
 - `@haiyue/extensions/hya-state-machine` — the focused HYA 2D state-machine runtime.
 - `@haiyue/extensions/spine` — Spine component, render system, plugin, and the stable worker interface seam.
 - `@haiyue/extensions/tilemap` — Tilemap2D component, render system, and plugin.

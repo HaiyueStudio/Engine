@@ -21,10 +21,11 @@
     "@codemirror/state": "^6.7.1",
     "@codemirror/view": "^6.43.6",
     "@haiyue/animation-spec": "0.1.0",
-    "@haiyue/extensions": "0.1.0",
     "@haiyue/engine": "0.1.0",
+    "@haiyue/extensions": "0.1.0",
     "@lezer/highlight": "^1.2.3",
     "dat.gui": "^0.7.9",
+    "lottie-web": "^5.13.0",
     "pdfjs-dist": "^6.1.200",
     "wgpu-matrix": "^3.0.0"
   },

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "samples": [
+    {
+      "id": "haiyue-mascot-capture",
+      "title": "HaiYue Mascot Capture · MIT",
+      "hya": "mascot.hya",
+      "data": "mascot.hydm",
+      "texture": "mascot.png",
+      "license": "MIT",
+      "referenceMode": "captured-mesh"
+    }
+  ],
+  "externalOfficialSamples": [
+    {
+      "id": "live2d-mao",
+      "title": "Live2D Mao",
+      "model": "https://github.com/Live2D/CubismWebSamples/tree/develop/Samples/Resources/Mao",
+      "license": "Live2D Free Material License — explicit acceptance required",
+      "bundled": false
+    }
+  ]
+}

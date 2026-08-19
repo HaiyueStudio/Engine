@@ -23,7 +23,8 @@
   },
   "files": [
     "dist",
-    "bin",
+    "lottie/bin",
+    "live2d/bin",
     "schema",
     "LICENSE",
     "README.md",
@@ -32,7 +33,10 @@
     "src/**/*"
   ],
   "bin": {
-    "hya-convert": "./bin/hya-convert.mjs"
+    "hya-convert": "./lottie/bin/hya-lottie-convert.mjs",
+    "hya-lottie-convert": "./lottie/bin/hya-lottie-convert.mjs",
+    "hya-live2d-convert": "./live2d/bin/hya-live2d-convert.mjs",
+    "hya-cubism-convert": "./live2d/bin/hya-live2d-convert.mjs"
   },
   "exports": {
     ".": {
@@ -49,6 +53,21 @@
       "source": "./src/native3d.ts",
       "types": "./dist/native3d.d.ts",
       "import": "./dist/native3d.js"
+    },
+    "./deformable2d": {
+      "source": "./src/deformable2d.ts",
+      "types": "./dist/deformable2d.d.ts",
+      "import": "./dist/deformable2d.js"
+    },
+    "./cubism": {
+      "source": "./src/cubism.ts",
+      "types": "./dist/cubism.d.ts",
+      "import": "./dist/cubism.js"
+    },
+    "./live2d": {
+      "source": "./src/live2d.ts",
+      "types": "./dist/live2d.d.ts",
+      "import": "./dist/live2d.js"
     }
   },
   "scripts": {

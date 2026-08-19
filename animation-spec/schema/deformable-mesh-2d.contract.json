@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "format": "haiyue-deformable-mesh-2d-contract",
+  "version": 1,
+  "extension": {
+    "id": "org.haiyue.deformable-mesh-2d@1",
+    "required": true,
+    "dataFormat": "haiyue-deformable-mesh-2d",
+    "dataVersion": 1,
+    "mediaType": "application/vnd.haiyue.deformable-mesh-2d",
+    "binaryMagic": "HYDM",
+    "binaryVersion": "1.0",
+    "headerBytes": 32
+  },
+  "profile": {
+    "id": "clip-baked",
+    "coordinates": "screen-y-down",
+    "positions": "absolute-frame-major-float32",
+    "opacitySampling": "linear",
+    "positionSampling": "linear",
+    "renderOrderSampling": "step"
+  },
+  "limits": {
+    "maxInputBytes": 67108864,
+    "maxMetadataBytes": 4194304,
+    "maxDrawables": 4096,
+    "maxVertices": 2000000,
+    "maxFrames": 36000,
+    "maxMaskReferences": 32768,
+    "maxTextures": 32
+  },
+  "runtime": {
+    "ownerPackage": "@haiyue/extensions/deformable-animation",
+    "sourceRuntimeDependency": false,
+    "supportedBlendModes": ["normal"],
+    "supportedMasks": ["alpha"]
+  },
+  "diagnostics": [
+    "E_ANIMATION_INVALID_FORMAT",
+    "E_ANIMATION_LIMIT_EXCEEDED",
+    "E_CUBISM_CAPTURE_INVALID",
+    "E_CUBISM_TOPOLOGY_CHANGED",
+    "W_CUBISM_BLEND_APPROXIMATED",
+    "W_CUBISM_COLOR_APPROXIMATED",
+    "W_CUBISM_CULLING_IGNORED"
+  ]
+}

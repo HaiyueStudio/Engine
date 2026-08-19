@@ -70,7 +70,7 @@ function runFromTemporaryCheckout(snapshot) {
     refreshGitIndex(checkout);
     const postInstallStatus = git(checkout, ['status', '--porcelain']);
     if (postInstallStatus) {
-      const postInstallDiff = git(checkout, ['diff', '--', 'animation-spec/bin/hya-convert.mjs']);
+      const postInstallDiff = git(checkout, ['diff', '--', 'animation-spec/lottie/bin/hya-lottie-convert.mjs']);
       throw new Error(
         `Locked dependency installation changed the clean checkout:\n${postInstallStatus}`
         + `${postInstallDiff ? `\n${postInstallDiff}` : ''}`,
@@ -343,7 +343,7 @@ function refreshGitIndex(directory) {
 
 function normalizeWindowsWorkspaceBin(directory) {
   if (process.platform !== 'win32') return;
-  const path = 'animation-spec/bin/hya-convert.mjs';
+  const path = 'animation-spec/lottie/bin/hya-lottie-convert.mjs';
   const expected = git(directory, ['rev-parse', `HEAD:${path}`]);
   const actual = git(directory, ['hash-object', '--', path]);
   if (actual !== expected) {
