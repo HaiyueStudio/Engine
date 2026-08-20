@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
 import { runChromeWebGpuFixture } from './webgpu-gate/chrome-runner.mjs';
 import {
   compareVisualFingerprint,
@@ -18,6 +19,10 @@ for (const definition of PRODUCT_SCREENSHOT_CASES) {
     fixture: definition.fixture,
     query: definition.query,
     timeoutMs: 90_000,
+    mounts: [{
+      prefix: '/games',
+      directory: resolveStudioRepositoryPath('Games', 'games'),
+    }],
     visualCapture: { viewportWidth: 960, viewportHeight: 540, sampleWidth: 24, sampleHeight: 14 },
   });
   const capture = result.visualCapture;

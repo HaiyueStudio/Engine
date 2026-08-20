@@ -1,7 +1,7 @@
 # HaiyueStudio Engine
 
 WebGPU-first Engine repository. It owns the runtime, optional extensions, HYA animation specification,
-the build-time shader language, and manifest-backed engine examples.
+the build-time `shader-language/` workspace, and manifest-backed engine examples.
 
 ```bash
 npm ci

@@ -991,4 +991,4 @@ ScriptComponent.enableTrustedProject({
 - [`examples/shapes2d`](../../examples/shapes2d/)：2D Geometry、Material、混合与变换；
 - [`examples/box2d-collision`](../../examples/box2d-collision/)：2D 刚体与碰撞；
 - [`examples/box2d-mouse-drag`](../../examples/box2d-mouse-drag/)：Pointer 坐标转换、拾取和 Mouse Joint；
-- [`games/billiards`](../../games/billiards/)：更完整的 2D 物理游戏循环。
+- [`games/billiards`](../../../Games/games/billiards/)：更完整的 2D 物理游戏循环。

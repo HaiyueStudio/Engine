@@ -5,7 +5,7 @@
   "releaseMatrix": "config/release-matrix.json",
   "featureFreeze": {
     "status": "active",
-    "classification": "refrozen-after-omitted-mature-capabilities",
+    "classification": "capability-attributed-public-surface",
     "exceptions": "P0/P1 release blockers only"
   },
   "artifacts": [
@@ -47,6 +47,32 @@
       "verificationCommands": ["npm run api:check", "npm run verify:engine-package"],
       "publishChannel": "npm-public-latest",
       "rollbackUnit": "npm:@haiyue/extensions@0.1.0"
+    },
+    {
+      "id": "shader-language-npm",
+      "kind": "npm-package",
+      "workspace": "shader-language",
+      "packageName": "@haiyue/shader-language",
+      "version": "0.1.0",
+      "entry": ".",
+      "supportTier": "stable-build-tooling",
+      "owner": "shader-language",
+      "verificationCommands": ["npm run api:check", "npm run verify:engine-package", "npm run shader-language:check"],
+      "publishChannel": "npm-public-latest",
+      "rollbackUnit": "npm:@haiyue/shader-language@0.1.0"
+    },
+    {
+      "id": "ui-npm",
+      "kind": "npm-package",
+      "workspace": "ui",
+      "packageName": "@haiyue/ui",
+      "version": "0.1.1",
+      "entry": ".",
+      "supportTier": "stable-focused-subpaths",
+      "owner": "ui",
+      "verificationCommands": ["npm run api:check", "npm run verify:engine-package"],
+      "publishChannel": "npm-public-latest",
+      "rollbackUnit": "npm:@haiyue/ui@0.1.1"
     },
     {
       "id": "scene-editor-static",

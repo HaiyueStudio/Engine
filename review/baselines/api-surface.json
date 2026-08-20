@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "note": "Haiyue reviewed package facade baseline (2026-08-17). Engine root remains the exact ADR 0035 golden path; M2.5 adds reviewed experimental async and compute-ordering seams while stable growth still requires budget/ADR review.",
+  "note": "Haiyue reviewed capability-attributed public facade baseline (2026-08-20). Engine root remains the exact ADR 0035 golden path; new capabilities use focused stable or experimental entrypoints and require an attributed budget review.",
   "workspaceGraph": {
     "shader-language": {
       "name": "@haiyue/shader-language",
-      "private": true,
+      "private": false,
       "workspaceDependencies": []
     },
     "animation-spec": {
@@ -27,7 +27,7 @@
     },
     "ui": {
       "name": "@haiyue/ui",
-      "private": true,
+      "private": false,
       "workspaceDependencies": []
     },
     "editor": {
@@ -51,7 +51,7 @@
       ]
     },
     "games": {
-      "name": "@haiyue/games",
+      "name": "@haiyue/games-repository",
       "private": true,
       "workspaceDependencies": [
         "@haiyue/engine",
@@ -60,12 +60,1076 @@
     }
   },
   "packages": {
+    "@haiyue/shader-language": {
+      "workspace": "shader-language",
+      "private": false,
+      "entrypoints": {
+        ".": {
+          "source": "shader-language/src\\index.ts",
+          "exports": [
+            {
+              "name": "BUILTIN_POSTPROCESS_OPERATIONS",
+              "kind": "value"
+            },
+            {
+              "name": "BUILTIN_RENDER_FAMILY_KINDS",
+              "kind": "value"
+            },
+            {
+              "name": "BUILTIN_RENDER_OPERATIONS",
+              "kind": "value"
+            },
+            {
+              "name": "BuiltinPostprocessFamilyV1",
+              "kind": "type"
+            },
+            {
+              "name": "BuiltinPostprocessOperation",
+              "kind": "type"
+            },
+            {
+              "name": "BuiltinPostprocessPassV1",
+              "kind": "type"
+            },
+            {
+              "name": "BuiltinRenderFamilyKind",
+              "kind": "type"
+            },
+            {
+              "name": "BuiltinRenderFamilyPassV1",
+              "kind": "type"
+            },
+            {
+              "name": "BuiltinRenderFamilyV1",
+              "kind": "type"
+            },
+            {
+              "name": "BuiltinRenderOperation",
+              "kind": "type"
+            },
+            {
+              "name": "compileBuiltinPostprocessFamilyV1",
+              "kind": "value"
+            },
+            {
+              "name": "CompileBuiltinPostprocessFamilyV1Options",
+              "kind": "type"
+            },
+            {
+              "name": "compileBuiltinRenderFamilyV1",
+              "kind": "value"
+            },
+            {
+              "name": "CompileBuiltinRenderFamilyV1Options",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledBuiltinPostprocessFamilyV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledBuiltinPostprocessPassV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledBuiltinRenderFamilyV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledBuiltinRenderPassV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledDeformationPassFamilyV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledDeformationPassV1",
+              "kind": "type"
+            },
+            {
+              "name": "compileDeformationPassFamilyV1",
+              "kind": "value"
+            },
+            {
+              "name": "CompiledMaterialGraphV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledMotionBlurGraphV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledMotionBlurPassV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledMotionBlurPostProcessV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledProductionComputeFamilyV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledProductionComputePassV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledProductionDeformationFamilyV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledProductionDeformationPassV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledProductionMaterialLightingFamilyV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledProductionMaterialLightingPassV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledProductionSpecializedRenderingFamilyV1",
+              "kind": "type"
+            },
+            {
+              "name": "CompiledProductionSpecializedRenderingPassV1",
+              "kind": "type"
+            },
+            {
+              "name": "compileMaterialGraphV1",
+              "kind": "value"
+            },
+            {
+              "name": "CompileMaterialGraphV1Options",
+              "kind": "type"
+            },
+            {
+              "name": "compileMotionBlurGraphV1",
+              "kind": "value"
+            },
+            {
+              "name": "CompileMotionBlurGraphV1Options",
+              "kind": "type"
+            },
+            {
+              "name": "compileMotionBlurPostProcessV1",
+              "kind": "value"
+            },
+            {
+              "name": "CompileMotionBlurPostProcessV1Options",
+              "kind": "type"
+            },
+            {
+              "name": "compileProductionComputeFamilyV1",
+              "kind": "value"
+            },
+            {
+              "name": "CompileProductionComputeFamilyV1Options",
+              "kind": "type"
+            },
+            {
+              "name": "compileProductionDeformationFamilyV1",
+              "kind": "value"
+            },
+            {
+              "name": "CompileProductionDeformationFamilyV1Options",
+              "kind": "type"
+            },
+            {
+              "name": "compileProductionMaterialLightingFamilyV1",
+              "kind": "value"
+            },
+            {
+              "name": "CompileProductionMaterialLightingFamilyV1Options",
+              "kind": "type"
+            },
+            {
+              "name": "compileProductionSpecializedRenderingFamilyV1",
+              "kind": "value"
+            },
+            {
+              "name": "CompileProductionSpecializedRenderingFamilyV1Options",
+              "kind": "type"
+            },
+            {
+              "name": "compileShaderIrProgramToGlslEs300",
+              "kind": "value"
+            },
+            {
+              "name": "compileShaderIrProgramToWgsl",
+              "kind": "value"
+            },
+            {
+              "name": "ComposedShaderModules",
+              "kind": "type"
+            },
+            {
+              "name": "composeShaderModules",
+              "kind": "value"
+            },
+            {
+              "name": "ComposeShaderModulesOptions",
+              "kind": "type"
+            },
+            {
+              "name": "ComputeDispatchDomainV1",
+              "kind": "type"
+            },
+            {
+              "name": "ComputeDispatchIrV1",
+              "kind": "type"
+            },
+            {
+              "name": "ComputeDispatchScheduleV1",
+              "kind": "type"
+            },
+            {
+              "name": "ComputeEffectIrV1",
+              "kind": "type"
+            },
+            {
+              "name": "ComputeEffectKindV1",
+              "kind": "type"
+            },
+            {
+              "name": "ComputeResourceAccessV1",
+              "kind": "type"
+            },
+            {
+              "name": "ComputeResourceIrV1",
+              "kind": "type"
+            },
+            {
+              "name": "ComputeResourceKindV1",
+              "kind": "type"
+            },
+            {
+              "name": "computeShaderIrCanonicalHash",
+              "kind": "value"
+            },
+            {
+              "name": "createMotionBlurPrecompiledArtifactV2",
+              "kind": "value"
+            },
+            {
+              "name": "createPrecompiledShaderArtifactV2",
+              "kind": "value"
+            },
+            {
+              "name": "createShaderIrCanonicalForm",
+              "kind": "value"
+            },
+            {
+              "name": "defineDeformationProgramV1",
+              "kind": "value"
+            },
+            {
+              "name": "defineMotionBlurPostProcessProgramV1",
+              "kind": "value"
+            },
+            {
+              "name": "defineShaderIrProgram",
+              "kind": "value"
+            },
+            {
+              "name": "defineShaderModule",
+              "kind": "value"
+            },
+            {
+              "name": "defineTypedShaderModule",
+              "kind": "value"
+            },
+            {
+              "name": "DEFORMATION_PASS_KINDS",
+              "kind": "value"
+            },
+            {
+              "name": "DeformationHistoryAudit",
+              "kind": "type"
+            },
+            {
+              "name": "DeformationHistorySample",
+              "kind": "type"
+            },
+            {
+              "name": "DeformationHistorySnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "DeformationHistoryState",
+              "kind": "type"
+            },
+            {
+              "name": "DeformationHistoryTracker",
+              "kind": "value"
+            },
+            {
+              "name": "DeformationIrNode",
+              "kind": "type"
+            },
+            {
+              "name": "DeformationIrOperation",
+              "kind": "type"
+            },
+            {
+              "name": "DeformationPassKind",
+              "kind": "type"
+            },
+            {
+              "name": "DeformationPassReflection",
+              "kind": "type"
+            },
+            {
+              "name": "DeformationProgramV1",
+              "kind": "type"
+            },
+            {
+              "name": "DeformationProgramV1Definition",
+              "kind": "type"
+            },
+            {
+              "name": "DeformationVertexAttributeReflection",
+              "kind": "type"
+            },
+            {
+              "name": "DeformationVertexFormat",
+              "kind": "type"
+            },
+            {
+              "name": "formatShaderCompilationMessage",
+              "kind": "value"
+            },
+            {
+              "name": "genericShaderIrType",
+              "kind": "value"
+            },
+            {
+              "name": "mapGlslEs300SourceLocation",
+              "kind": "value"
+            },
+            {
+              "name": "mapShaderSourceLocation",
+              "kind": "value"
+            },
+            {
+              "name": "MATERIAL_SURFACE_V1_SLOTS",
+              "kind": "value"
+            },
+            {
+              "name": "MATERIAL_SURFACE_V1_TYPES",
+              "kind": "value"
+            },
+            {
+              "name": "MaterialSurfaceV1Slot",
+              "kind": "type"
+            },
+            {
+              "name": "MaterialSurfaceV1Values",
+              "kind": "type"
+            },
+            {
+              "name": "METALLIC_ROUGHNESS_PBR_V1_SURFACE_SUPPORT",
+              "kind": "value"
+            },
+            {
+              "name": "MOTION_BLUR_POSTPROCESS_PASSES",
+              "kind": "value"
+            },
+            {
+              "name": "MotionBlurDisplayMode",
+              "kind": "type"
+            },
+            {
+              "name": "MotionBlurPassPlan",
+              "kind": "type"
+            },
+            {
+              "name": "MotionBlurPassReflection",
+              "kind": "type"
+            },
+            {
+              "name": "MotionBlurPostProcessIrNode",
+              "kind": "type"
+            },
+            {
+              "name": "MotionBlurPostProcessIrOperation",
+              "kind": "type"
+            },
+            {
+              "name": "MotionBlurPostProcessPass",
+              "kind": "type"
+            },
+            {
+              "name": "MotionBlurPostProcessProgramV1",
+              "kind": "type"
+            },
+            {
+              "name": "MotionBlurPostProcessProgramV1Definition",
+              "kind": "type"
+            },
+            {
+              "name": "MotionBlurPostProcessResourceIds",
+              "kind": "type"
+            },
+            {
+              "name": "MotionBlurPrecompiledArtifactOptions",
+              "kind": "type"
+            },
+            {
+              "name": "MotionBlurReconstructionMode",
+              "kind": "type"
+            },
+            {
+              "name": "MotionBlurVariantPolicy",
+              "kind": "type"
+            },
+            {
+              "name": "NormalSineDisplacementV1",
+              "kind": "type"
+            },
+            {
+              "name": "OptimizedShaderIrProgram",
+              "kind": "type"
+            },
+            {
+              "name": "optimizeShaderIrProgram",
+              "kind": "value"
+            },
+            {
+              "name": "packShaderUniformBlock",
+              "kind": "value"
+            },
+            {
+              "name": "parseShaderGraphV1",
+              "kind": "value"
+            },
+            {
+              "name": "ParseShaderGraphV1Options",
+              "kind": "type"
+            },
+            {
+              "name": "parseShaderIrDataType",
+              "kind": "value"
+            },
+            {
+              "name": "PBR_PILOT_VARIANT_POLICY",
+              "kind": "value"
+            },
+            {
+              "name": "PrecompiledShaderArtifactV2",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderArtifactV2Definition",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderBindGroupV2",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderBindingLayoutV2",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderBindingV2",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderLayoutOwnerV2",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderPassV2",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderPassV2Definition",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderRenderTargetV2",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderSourceMapEntryV2",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderStage",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderStageEntriesV2",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderUniformBlockV2",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderUniformFieldV2",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderVaryingV2",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderVertexAttributeV2",
+              "kind": "type"
+            },
+            {
+              "name": "PrecompiledShaderVertexBufferV2",
+              "kind": "type"
+            },
+            {
+              "name": "PRODUCTION_COMPUTE_OPERATIONS",
+              "kind": "value"
+            },
+            {
+              "name": "PRODUCTION_DEFORMATION_OPERATIONS",
+              "kind": "value"
+            },
+            {
+              "name": "PRODUCTION_MATERIAL_LIGHTING_OPERATIONS",
+              "kind": "value"
+            },
+            {
+              "name": "PRODUCTION_SPECIALIZED_RENDERING_OPERATIONS",
+              "kind": "value"
+            },
+            {
+              "name": "ProductionComputeFamilyV1",
+              "kind": "type"
+            },
+            {
+              "name": "ProductionComputeOperation",
+              "kind": "type"
+            },
+            {
+              "name": "ProductionComputePassIrV1",
+              "kind": "type"
+            },
+            {
+              "name": "ProductionDeformationFamilyPassV1",
+              "kind": "type"
+            },
+            {
+              "name": "ProductionDeformationFamilyV1",
+              "kind": "type"
+            },
+            {
+              "name": "ProductionDeformationOperation",
+              "kind": "type"
+            },
+            {
+              "name": "ProductionMaterialLightingFamilyPassV1",
+              "kind": "type"
+            },
+            {
+              "name": "ProductionMaterialLightingFamilyV1",
+              "kind": "type"
+            },
+            {
+              "name": "ProductionMaterialLightingOperation",
+              "kind": "type"
+            },
+            {
+              "name": "ProductionSpecializedRenderingFamilyPassV1",
+              "kind": "type"
+            },
+            {
+              "name": "ProductionSpecializedRenderingFamilyV1",
+              "kind": "type"
+            },
+            {
+              "name": "ProductionSpecializedRenderingOperation",
+              "kind": "type"
+            },
+            {
+              "name": "sha256Hex",
+              "kind": "value"
+            },
+            {
+              "name": "SHADER_CAPABILITY_PROFILES",
+              "kind": "value"
+            },
+            {
+              "name": "SHADER_COLOR_SPACES",
+              "kind": "value"
+            },
+            {
+              "name": "SHADER_COORDINATE_SPACES",
+              "kind": "value"
+            },
+            {
+              "name": "SHADER_GRAPH_V1_OPTIONAL_ROOT_FIELDS",
+              "kind": "value"
+            },
+            {
+              "name": "SHADER_GRAPH_V1_REQUIRED_ROOT_FIELDS",
+              "kind": "value"
+            },
+            {
+              "name": "SHADER_GRAPH_V1_ROOT_FIELDS",
+              "kind": "value"
+            },
+            {
+              "name": "SHADER_GRAPH_V1_UNSUPPORTED_ROOT_FIELDS",
+              "kind": "value"
+            },
+            {
+              "name": "SHADER_IR_SCALAR_TYPES",
+              "kind": "value"
+            },
+            {
+              "name": "SHADER_RESOURCE_GROUPS",
+              "kind": "value"
+            },
+            {
+              "name": "SHADER_RESOURCE_SPACES",
+              "kind": "value"
+            },
+            {
+              "name": "SHADER_STAGES",
+              "kind": "value"
+            },
+            {
+              "name": "SHADER_TARGETS",
+              "kind": "value"
+            },
+            {
+              "name": "ShaderCapabilityProfile",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderColorSpace",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderCompilationCostEvidence",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderCompilationCostOptions",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderCompilationPhaseTimings",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderComposerError",
+              "kind": "value"
+            },
+            {
+              "name": "ShaderCoordinateSpace",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderDiagnostic",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderDiagnosticCode",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderEntryPointDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGeneratedSource",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGeneratedSourceSpan",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGraphKind",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGraphLiteralValueV1",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGraphNodeV1",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGraphNodeValueV1",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGraphResourceFrequency",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGraphResourceKind",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGraphResourceV1",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGraphResourceValueV1",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGraphSemanticValueV1",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGraphSourceLocation",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGraphV1",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderGraphValueV1",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrBuilder",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrDataType",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrDataTypeInfo",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrEntry",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrEntryDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrEntryInput",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrEntryInputBuiltin",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrEntryInputDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrEntryOutput",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrEntryOutputBuiltin",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrEntryOutputDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrGlslEs300Compilation",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrGlslEs300EntryCompilation",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrGlslEs300Options",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrGlslEs300SampledTexture",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrGlslEs300UniformBlock",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrInterpolation",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrMatrixType",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrNode",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrNodeOperation",
+              "kind": "type"
+            },
+            {
+              "name": "shaderIrOperationHasImplicitState",
+              "kind": "value"
+            },
+            {
+              "name": "ShaderIrOptimizationReport",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrProgram",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrProgramDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrScalarType",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrSemantic",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrSource",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrTextureSampleOptions",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrValue",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrValueType",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrValueTypeDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "shaderIrValueTypeKey",
+              "kind": "value"
+            },
+            {
+              "name": "shaderIrValueTypesEqual",
+              "kind": "value"
+            },
+            {
+              "name": "ShaderIrVectorType",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrVectorWidth",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrWgslCompilation",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderIrWgslResourceResolver",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderModule",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderModuleDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderReflection",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderResourceDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderResourceKind",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderResourceReflection",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderResourceSpace",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderSourceContext",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderSourceFactory",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderSourceLocation",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderSourceSpan",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderSpecializationDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderSpecializationType",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderSpecializationValue",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderStage",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderSymbolDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderSymbolImportDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderTarget",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderUniformBlockReflection",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderUniformFieldDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderUniformFieldReflection",
+              "kind": "type"
+            },
+            {
+              "name": "ShaderUniformValue",
+              "kind": "type"
+            },
+            {
+              "name": "shaderValueType",
+              "kind": "value"
+            },
+            {
+              "name": "ShaderVaryingReflection",
+              "kind": "type"
+            },
+            {
+              "name": "TypedShaderModule",
+              "kind": "type"
+            },
+            {
+              "name": "TypedShaderModuleDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "validateShaderIrProgram",
+              "kind": "value"
+            }
+          ]
+        },
+        "./material-graph": {
+          "source": "shader-language/src\\material-graph.ts",
+          "exports": [
+            {
+              "name": "compileMaterialGraphDocumentV1",
+              "kind": "value"
+            },
+            {
+              "name": "getMaterialGraphAuthoringCatalogV1",
+              "kind": "value"
+            },
+            {
+              "name": "getMaterialGraphSurfaceSlotsV1",
+              "kind": "value"
+            },
+            {
+              "name": "MATERIAL_GRAPH_ARTIFACT_FORMAT",
+              "kind": "value"
+            },
+            {
+              "name": "MATERIAL_GRAPH_SURFACE_SLOTS_V1",
+              "kind": "value"
+            },
+            {
+              "name": "MaterialGraphCompileDiagnostic",
+              "kind": "type"
+            },
+            {
+              "name": "MaterialGraphCompileResult",
+              "kind": "type"
+            },
+            {
+              "name": "MaterialGraphDeploymentArtifactV1",
+              "kind": "type"
+            },
+            {
+              "name": "MaterialGraphDocumentV1",
+              "kind": "type"
+            },
+            {
+              "name": "MaterialGraphLiteralValueV1",
+              "kind": "type"
+            },
+            {
+              "name": "MaterialGraphNodeDescriptorV1",
+              "kind": "type"
+            },
+            {
+              "name": "MaterialGraphNodePortV1",
+              "kind": "type"
+            },
+            {
+              "name": "MaterialGraphNodeV1",
+              "kind": "type"
+            },
+            {
+              "name": "MaterialGraphResourceV1",
+              "kind": "type"
+            },
+            {
+              "name": "MaterialGraphValueV1",
+              "kind": "type"
+            }
+          ]
+        }
+      }
+    },
     "@haiyue/animation-spec": {
       "workspace": "animation-spec",
       "private": false,
       "entrypoints": {
         ".": {
-          "source": "animation-spec\\src\\index.ts",
+          "source": "animation-spec/src\\index.ts",
           "exports": [
             {
               "name": "ANIMATION_FILE_EXTENSION",
@@ -417,8 +1481,203 @@
             }
           ]
         },
+        "./cubism": {
+          "source": "animation-spec/src\\cubism.ts",
+          "exports": [
+            {
+              "name": "convertCubismCaptureToHya",
+              "kind": "value"
+            },
+            {
+              "name": "CUBISM_DRAWABLE_CAPTURE_FORMAT",
+              "kind": "value"
+            },
+            {
+              "name": "CUBISM_DRAWABLE_CAPTURE_VERSION",
+              "kind": "value"
+            },
+            {
+              "name": "CubismCaptureConversionError",
+              "kind": "value"
+            },
+            {
+              "name": "CubismCaptureConversionOptions",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureConversionResult",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCapturedDrawable",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureDiagnostic",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureFrame",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureTexture",
+              "kind": "type"
+            },
+            {
+              "name": "CubismDrawableCapture",
+              "kind": "type"
+            },
+            {
+              "name": "CubismMotion3",
+              "kind": "type"
+            },
+            {
+              "name": "CubismMotion3Curve",
+              "kind": "type"
+            },
+            {
+              "name": "CubismMotion3Sample",
+              "kind": "type"
+            },
+            {
+              "name": "sampleCubismMotion3",
+              "kind": "value"
+            }
+          ]
+        },
+        "./deformable2d": {
+          "source": "animation-spec/src\\deformable2d.ts",
+          "exports": [
+            {
+              "name": "createDeformableMesh2DFormatHandler",
+              "kind": "value"
+            },
+            {
+              "name": "createDeformableMesh2DFormatRegistry",
+              "kind": "value"
+            },
+            {
+              "name": "decodeDeformableMesh2DData",
+              "kind": "value"
+            },
+            {
+              "name": "DEFORMABLE_MESH_2D_DATA_FORMAT",
+              "kind": "value"
+            },
+            {
+              "name": "DEFORMABLE_MESH_2D_DATA_VERSION",
+              "kind": "value"
+            },
+            {
+              "name": "DEFORMABLE_MESH_2D_EXTENSION_ID",
+              "kind": "value"
+            },
+            {
+              "name": "DeformableMesh2DBlendMode",
+              "kind": "type"
+            },
+            {
+              "name": "DeformableMesh2DComponent",
+              "kind": "type"
+            },
+            {
+              "name": "DeformableMesh2DDataSource",
+              "kind": "type"
+            },
+            {
+              "name": "DeformableMesh2DDrawableSource",
+              "kind": "type"
+            },
+            {
+              "name": "DeformableMesh2DParseLimits",
+              "kind": "type"
+            },
+            {
+              "name": "encodeDeformableMesh2DData",
+              "kind": "value"
+            },
+            {
+              "name": "isDeformableMesh2DBinary",
+              "kind": "value"
+            },
+            {
+              "name": "ParsedDeformableMesh2DData",
+              "kind": "type"
+            },
+            {
+              "name": "ParsedDeformableMesh2DDrawable",
+              "kind": "type"
+            }
+          ]
+        },
+        "./live2d": {
+          "source": "animation-spec/src\\live2d.ts",
+          "exports": [
+            {
+              "name": "convertCubismCaptureToHya",
+              "kind": "value"
+            },
+            {
+              "name": "CUBISM_DRAWABLE_CAPTURE_FORMAT",
+              "kind": "value"
+            },
+            {
+              "name": "CUBISM_DRAWABLE_CAPTURE_VERSION",
+              "kind": "value"
+            },
+            {
+              "name": "CubismCaptureConversionError",
+              "kind": "value"
+            },
+            {
+              "name": "CubismCaptureConversionOptions",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureConversionResult",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCapturedDrawable",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureDiagnostic",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureFrame",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureTexture",
+              "kind": "type"
+            },
+            {
+              "name": "CubismDrawableCapture",
+              "kind": "type"
+            },
+            {
+              "name": "CubismMotion3",
+              "kind": "type"
+            },
+            {
+              "name": "CubismMotion3Curve",
+              "kind": "type"
+            },
+            {
+              "name": "CubismMotion3Sample",
+              "kind": "type"
+            },
+            {
+              "name": "sampleCubismMotion3",
+              "kind": "value"
+            }
+          ]
+        },
         "./lottie": {
-          "source": "animation-spec\\src\\lottie.ts",
+          "source": "animation-spec/src\\lottie.ts",
           "exports": [
             {
               "name": "convertLottie",
@@ -459,7 +1718,7 @@
           ]
         },
         "./native3d": {
-          "source": "animation-spec\\src\\native3d.ts",
+          "source": "animation-spec/src\\native3d.ts",
           "exports": [
             {
               "name": "createNative3DAnimationExtensionHandler",
@@ -642,7 +1901,7 @@
       "private": false,
       "entrypoints": {
         ".": {
-          "source": "engine\\src\\index.ts",
+          "source": "engine/src\\index.ts",
           "exports": [
             {
               "name": "BasicMaterial",
@@ -767,7 +2026,7 @@
           ]
         },
         "./assets": {
-          "source": "engine\\src\\assets.ts",
+          "source": "engine/src\\assets.ts",
           "exports": [
             {
               "name": "ASSET_JOB_PRIORITY_VALUE",
@@ -856,7 +2115,7 @@
           ]
         },
         "./color": {
-          "source": "engine\\src\\color.ts",
+          "source": "engine/src\\color.ts",
           "exports": [
             {
               "name": "BuiltinColorSpace",
@@ -925,7 +2184,7 @@
           ]
         },
         "./components": {
-          "source": "engine\\src\\components.ts",
+          "source": "engine/src\\components.ts",
           "exports": [
             {
               "name": "BasisTransform3D",
@@ -1342,7 +2601,7 @@
           ]
         },
         "./compute": {
-          "source": "engine\\src\\compute.ts",
+          "source": "engine/src\\compute.ts",
           "exports": [
             {
               "name": "ComputeKernel",
@@ -1375,7 +2634,7 @@
           ]
         },
         "./controls": {
-          "source": "engine\\src\\controls.ts",
+          "source": "engine/src\\controls.ts",
           "exports": [
             {
               "name": "BoxSelectionControl",
@@ -1416,7 +2675,7 @@
           ]
         },
         "./core": {
-          "source": "engine\\src\\core.ts",
+          "source": "engine/src\\core.ts",
           "exports": [
             {
               "name": "AssetJobState",
@@ -1693,7 +2952,7 @@
           ]
         },
         "./diagnostics": {
-          "source": "engine\\src\\diagnostics.ts",
+          "source": "engine/src\\diagnostics.ts",
           "exports": [
             {
               "name": "EngineDiagnosticsSnapshot",
@@ -1746,7 +3005,7 @@
           ]
         },
         "./ecs": {
-          "source": "engine\\src\\ecs.ts",
+          "source": "engine/src\\ecs.ts",
           "exports": [
             {
               "name": "Component",
@@ -1839,7 +3098,7 @@
           ]
         },
         "./experimental": {
-          "source": "engine\\src\\experimental.ts",
+          "source": "engine/src\\experimental.ts",
           "exports": [
             {
               "name": "alignUp",
@@ -5016,7 +6275,7 @@
           ]
         },
         "./experimental/assets": {
-          "source": "engine\\src\\experimental\\assets.ts",
+          "source": "engine/src\\experimental\\assets.ts",
           "exports": [
             {
               "name": "AssetCacheBudget",
@@ -5173,7 +6432,7 @@
           ]
         },
         "./experimental/async": {
-          "source": "engine\\src\\experimental\\async.ts",
+          "source": "engine/src\\experimental\\async.ts",
           "exports": [
             {
               "name": "createAbortError",
@@ -5206,7 +6465,7 @@
           ]
         },
         "./experimental/diagnostics": {
-          "source": "engine\\src\\experimental\\diagnostics.ts",
+          "source": "engine/src\\experimental\\diagnostics.ts",
           "exports": [
             {
               "name": "createGPUResourceOwner",
@@ -5303,7 +6562,7 @@
           ]
         },
         "./experimental/gpu-driven": {
-          "source": "engine\\src\\experimental\\gpu-driven.ts",
+          "source": "engine/src\\experimental\\gpu-driven.ts",
           "exports": [
             {
               "name": "getRender3DGpuDrivenBatchBuffer",
@@ -5408,11 +6667,11 @@
           ]
         },
         "./experimental/ktx2-worker-runtime": {
-          "source": "engine\\src\\experimental\\ktx2-worker-runtime.ts",
+          "source": "engine/src\\experimental\\ktx2-worker-runtime.ts",
           "exports": []
         },
         "./experimental/renderer": {
-          "source": "engine\\src\\experimental\\renderer.ts",
+          "source": "engine/src\\experimental\\renderer.ts",
           "exports": [
             {
               "name": "BaseRenderer",
@@ -5621,7 +6880,7 @@
           ]
         },
         "./extension-authoring": {
-          "source": "engine\\src\\extension-authoring.ts",
+          "source": "engine/src\\extension-authoring.ts",
           "exports": [
             {
               "name": "alignUp4",
@@ -5682,7 +6941,7 @@
           ]
         },
         "./font": {
-          "source": "engine\\src\\font.ts",
+          "source": "engine/src\\font.ts",
           "exports": [
             {
               "name": "BitmapFontChar",
@@ -5739,7 +6998,7 @@
           ]
         },
         "./geometry": {
-          "source": "engine\\src\\geometry.ts",
+          "source": "engine/src\\geometry.ts",
           "exports": [
             {
               "name": "BoxGeometryOptions",
@@ -5956,7 +7215,7 @@
           ]
         },
         "./gui": {
-          "source": "engine\\src\\gui.ts",
+          "source": "engine/src\\gui.ts",
           "exports": [
             {
               "name": "containsPoint",
@@ -6237,7 +7496,7 @@
           ]
         },
         "./input": {
-          "source": "engine\\src\\input.ts",
+          "source": "engine/src\\input.ts",
           "exports": [
             {
               "name": "InputActionBindings",
@@ -6254,7 +7513,7 @@
           ]
         },
         "./lighting": {
-          "source": "engine\\src\\lighting.ts",
+          "source": "engine/src\\lighting.ts",
           "exports": [
             {
               "name": "AmbientLight",
@@ -6335,7 +7594,7 @@
           ]
         },
         "./material": {
-          "source": "engine\\src\\material.ts",
+          "source": "engine/src\\material.ts",
           "exports": [
             {
               "name": "BasicMaterial",
@@ -6616,7 +7875,7 @@
           ]
         },
         "./math": {
-          "source": "engine\\src\\math.ts",
+          "source": "engine/src\\math.ts",
           "exports": [
             {
               "name": "BoundingSphere",
@@ -6649,7 +7908,7 @@
           ]
         },
         "./navigation": {
-          "source": "engine\\src\\navigation.ts",
+          "source": "engine/src\\navigation.ts",
           "exports": [
             {
               "name": "NavMesh",
@@ -6690,7 +7949,7 @@
           ]
         },
         "./physics": {
-          "source": "engine\\src\\physics.ts",
+          "source": "engine/src\\physics.ts",
           "exports": [
             {
               "name": "Physics2DBody",
@@ -6843,7 +8102,7 @@
           ]
         },
         "./physics/backend": {
-          "source": "engine\\src\\physics\\backend.ts",
+          "source": "engine/src\\physics\\backend.ts",
           "exports": [
             {
               "name": "createBox2DPhysics2DBackend",
@@ -7024,7 +8283,7 @@
           ]
         },
         "./physics/components": {
-          "source": "engine\\src\\physics-components.ts",
+          "source": "engine/src\\physics-components.ts",
           "exports": [
             {
               "name": "Physics2DBody",
@@ -7081,7 +8340,7 @@
           ]
         },
         "./postprocess": {
-          "source": "engine\\src\\postprocess.ts",
+          "source": "engine/src\\postprocess.ts",
           "exports": [
             {
               "name": "AmbientOcclusionPassOptions",
@@ -7202,7 +8461,7 @@
           ]
         },
         "./rtt": {
-          "source": "engine\\src\\rtt.ts",
+          "source": "engine/src\\rtt.ts",
           "exports": [
             {
               "name": "RttEngine",
@@ -7227,7 +8486,7 @@
           ]
         },
         "./scene": {
-          "source": "engine\\src\\scene.ts",
+          "source": "engine/src\\scene.ts",
           "exports": [
             {
               "name": "isPipelineWarmupParticipant",
@@ -7296,7 +8555,7 @@
           ]
         },
         "./serialization": {
-          "source": "engine\\src\\serialization.ts",
+          "source": "engine/src\\serialization.ts",
           "exports": [
             {
               "name": "ComponentDeserializeContext",
@@ -7353,7 +8612,7 @@
           ]
         },
         "./systems": {
-          "source": "engine\\src\\systems.ts",
+          "source": "engine/src\\systems.ts",
           "exports": [
             {
               "name": "BitmapTextRenderSystem",
@@ -7522,7 +8781,7 @@
           ]
         },
         "./tween": {
-          "source": "engine\\src\\tween.ts",
+          "source": "engine/src\\tween.ts",
           "exports": [
             {
               "name": "Easing",
@@ -7609,7 +8868,7 @@
       "private": false,
       "entrypoints": {
         ".": {
-          "source": "extensions\\src\\index.ts",
+          "source": "extensions/src\\index.ts",
           "exports": [
             {
               "name": "RenderSystem2DBase",
@@ -7622,7 +8881,7 @@
           ]
         },
         "./animation": {
-          "source": "extensions\\src\\animation.ts",
+          "source": "extensions/src\\animation.ts",
           "exports": [
             {
               "name": "Animation2DComponent",
@@ -7731,7 +8990,7 @@
           ]
         },
         "./animation3d": {
-          "source": "extensions\\src\\animation3d.ts",
+          "source": "extensions/src\\animation3d.ts",
           "exports": [
             {
               "name": "Animation3DAction",
@@ -8036,7 +9295,7 @@
           ]
         },
         "./canvas-text": {
-          "source": "extensions\\src\\canvas-text.ts",
+          "source": "extensions/src\\canvas-text.ts",
           "exports": [
             {
               "name": "CanvasText2DRenderSystem",
@@ -8056,8 +9315,37 @@
             }
           ]
         },
+        "./deformable-animation": {
+          "source": "extensions/src\\deformable-animation.ts",
+          "exports": [
+            {
+              "name": "createDeformableMesh2DRuntimeExtension",
+              "kind": "value"
+            },
+            {
+              "name": "DeformableMesh2DRuntimeExtensionOptions",
+              "kind": "type"
+            },
+            {
+              "name": "DeformableMesh2DRuntimeState",
+              "kind": "type"
+            },
+            {
+              "name": "DeformableMesh2DRuntimeStatus",
+              "kind": "type"
+            },
+            {
+              "name": "DeformableMesh2DSample",
+              "kind": "type"
+            },
+            {
+              "name": "sampleDeformableMesh2DDrawable",
+              "kind": "value"
+            }
+          ]
+        },
         "./experimental/gltf-worker": {
-          "source": "extensions\\src\\experimental-gltf-worker.ts",
+          "source": "extensions/src\\experimental-gltf-worker.ts",
           "exports": [
             {
               "name": "createGltfAssetWorkerClientFromUrl",
@@ -8106,7 +9394,7 @@
           ]
         },
         "./experimental/spine-worker": {
-          "source": "extensions\\src\\experimental-spine-worker.ts",
+          "source": "extensions/src\\experimental-spine-worker.ts",
           "exports": [
             {
               "name": "createInlineSpineAssetWorkerClient",
@@ -8147,7 +9435,7 @@
           ]
         },
         "./gltf": {
-          "source": "extensions\\src\\gltf.ts",
+          "source": "extensions/src\\gltf.ts",
           "exports": [
             {
               "name": "applyGltfAnimationClip",
@@ -8364,7 +9652,7 @@
           ]
         },
         "./gltf-animation3d": {
-          "source": "extensions\\src\\gltf-animation3d.ts",
+          "source": "extensions/src\\gltf-animation3d.ts",
           "exports": [
             {
               "name": "createGltfAnimation3DClips",
@@ -8389,7 +9677,7 @@
           ]
         },
         "./grid": {
-          "source": "extensions\\src\\grid.ts",
+          "source": "extensions/src\\grid.ts",
           "exports": [
             {
               "name": "Grid2DComponent",
@@ -8402,7 +9690,7 @@
           ]
         },
         "./hya-state-machine": {
-          "source": "extensions\\src\\hya-state-machine.ts",
+          "source": "extensions/src\\hya-state-machine.ts",
           "exports": [
             {
               "name": "Animation2DStateMachineComponent",
@@ -8458,8 +9746,57 @@
             }
           ]
         },
+        "./ray-tracing": {
+          "source": "extensions/src\\ray-tracing.ts",
+          "exports": [
+            {
+              "name": "rayAcceleration",
+              "kind": "value"
+            },
+            {
+              "name": "rayDenoise",
+              "kind": "value"
+            },
+            {
+              "name": "rayHybrid",
+              "kind": "value"
+            },
+            {
+              "name": "rayLifecycle",
+              "kind": "value"
+            },
+            {
+              "name": "rayMaterial",
+              "kind": "value"
+            },
+            {
+              "name": "rayPathTracing",
+              "kind": "value"
+            },
+            {
+              "name": "rayReference",
+              "kind": "value"
+            },
+            {
+              "name": "raySampling",
+              "kind": "value"
+            },
+            {
+              "name": "rayScene",
+              "kind": "value"
+            },
+            {
+              "name": "rayTraversal",
+              "kind": "value"
+            },
+            {
+              "name": "rayWorker",
+              "kind": "value"
+            }
+          ]
+        },
         "./spine": {
-          "source": "extensions\\src\\spine.ts",
+          "source": "extensions/src\\spine.ts",
           "exports": [
             {
               "name": "createSpinePlugin",
@@ -8496,7 +9833,7 @@
           ]
         },
         "./tilemap": {
-          "source": "extensions\\src\\tilemap.ts",
+          "source": "extensions/src\\tilemap.ts",
           "exports": [
             {
               "name": "createTilemapPlugin",
@@ -8533,7 +9870,7 @@
           ]
         },
         "./tween": {
-          "source": "extensions\\src\\tween.ts",
+          "source": "extensions/src\\tween.ts",
           "exports": [
             {
               "name": "Tween2DComponent",
@@ -8565,11 +9902,15 @@
     },
     "@haiyue/ui": {
       "workspace": "ui",
-      "private": true,
+      "private": false,
       "entrypoints": {
         ".": {
-          "source": "ui\\src\\index.ts",
+          "source": "ui/src\\index.ts",
           "exports": [
+            {
+              "name": "defineButtonComponents",
+              "kind": "value"
+            },
             {
               "name": "defineCheckboxComponents",
               "kind": "value"
@@ -8588,6 +9929,10 @@
             },
             {
               "name": "defineHaiyueUI",
+              "kind": "value"
+            },
+            {
+              "name": "defineHistoryControlsComponents",
               "kind": "value"
             },
             {
@@ -8671,6 +10016,14 @@
               "kind": "type"
             },
             {
+              "name": "GEHistoryControls",
+              "kind": "value"
+            },
+            {
+              "name": "GEHistoryEntry",
+              "kind": "type"
+            },
+            {
               "name": "GEInput",
               "kind": "value"
             },
@@ -8733,6 +10086,275 @@
             {
               "name": "GETooltipPlacement",
               "kind": "type"
+            },
+            {
+              "name": "GETree",
+              "kind": "value"
+            },
+            {
+              "name": "GETreeDataChangeDetail",
+              "kind": "type"
+            },
+            {
+              "name": "GETreeDropPosition",
+              "kind": "type"
+            },
+            {
+              "name": "GETreeNode",
+              "kind": "value"
+            },
+            {
+              "name": "GETreeNodeContextMenuDetail",
+              "kind": "type"
+            },
+            {
+              "name": "GETreeNodeData",
+              "kind": "type"
+            },
+            {
+              "name": "GETreeSelectionChangeDetail",
+              "kind": "type"
+            }
+          ]
+        },
+        "./button": {
+          "source": "ui/src\\button.ts",
+          "exports": [
+            {
+              "name": "defineButtonComponents",
+              "kind": "value"
+            },
+            {
+              "name": "GEButton",
+              "kind": "value"
+            }
+          ]
+        },
+        "./checkbox": {
+          "source": "ui/src\\checkbox.ts",
+          "exports": [
+            {
+              "name": "defineCheckboxComponents",
+              "kind": "value"
+            },
+            {
+              "name": "GECheckbox",
+              "kind": "value"
+            },
+            {
+              "name": "GECheckboxChangeDetail",
+              "kind": "type"
+            }
+          ]
+        },
+        "./context-menu": {
+          "source": "ui/src\\context-menu.ts",
+          "exports": [
+            {
+              "name": "defineContextMenuComponents",
+              "kind": "value"
+            },
+            {
+              "name": "GEContextMenu",
+              "kind": "value"
+            },
+            {
+              "name": "GEContextMenuItem",
+              "kind": "type"
+            },
+            {
+              "name": "GEContextMenuSelectDetail",
+              "kind": "type"
+            }
+          ]
+        },
+        "./dialog": {
+          "source": "ui/src\\dialog.ts",
+          "exports": [
+            {
+              "name": "defineDialogComponents",
+              "kind": "value"
+            },
+            {
+              "name": "GEDialog",
+              "kind": "value"
+            },
+            {
+              "name": "GEDialogCloseDetail",
+              "kind": "type"
+            },
+            {
+              "name": "GEDialogCloseReason",
+              "kind": "type"
+            }
+          ]
+        },
+        "./dropdown": {
+          "source": "ui/src\\dropdown.ts",
+          "exports": [
+            {
+              "name": "defineDropdownComponents",
+              "kind": "value"
+            },
+            {
+              "name": "GEDropdown",
+              "kind": "value"
+            },
+            {
+              "name": "GEDropdownItem",
+              "kind": "type"
+            },
+            {
+              "name": "GEDropdownPlacement",
+              "kind": "type"
+            },
+            {
+              "name": "GEDropdownSelectDetail",
+              "kind": "type"
+            }
+          ]
+        },
+        "./history-controls": {
+          "source": "ui/src\\history-controls.ts",
+          "exports": [
+            {
+              "name": "defineHistoryControlsComponents",
+              "kind": "value"
+            },
+            {
+              "name": "GEHistoryControls",
+              "kind": "value"
+            },
+            {
+              "name": "GEHistoryEntry",
+              "kind": "type"
+            }
+          ]
+        },
+        "./input": {
+          "source": "ui/src\\input.ts",
+          "exports": [
+            {
+              "name": "defineInputComponents",
+              "kind": "value"
+            },
+            {
+              "name": "GEInput",
+              "kind": "value"
+            },
+            {
+              "name": "GEInputChangeDetail",
+              "kind": "type"
+            },
+            {
+              "name": "GEInputType",
+              "kind": "type"
+            }
+          ]
+        },
+        "./radio": {
+          "source": "ui/src\\radio.ts",
+          "exports": [
+            {
+              "name": "defineRadioComponents",
+              "kind": "value"
+            },
+            {
+              "name": "GERadio",
+              "kind": "value"
+            },
+            {
+              "name": "GERadioChangeDetail",
+              "kind": "type"
+            }
+          ]
+        },
+        "./select": {
+          "source": "ui/src\\select.ts",
+          "exports": [
+            {
+              "name": "defineSelectComponents",
+              "kind": "value"
+            },
+            {
+              "name": "GESelect",
+              "kind": "value"
+            },
+            {
+              "name": "GESelectChangeDetail",
+              "kind": "type"
+            },
+            {
+              "name": "GESelectOption",
+              "kind": "type"
+            }
+          ]
+        },
+        "./split": {
+          "source": "ui/src\\split.ts",
+          "exports": [
+            {
+              "name": "defineSplitComponents",
+              "kind": "value"
+            },
+            {
+              "name": "GESplit",
+              "kind": "value"
+            },
+            {
+              "name": "GESplitDirection",
+              "kind": "type"
+            },
+            {
+              "name": "GESplitRatioChangeDetail",
+              "kind": "type"
+            }
+          ]
+        },
+        "./tabs": {
+          "source": "ui/src\\tabs.ts",
+          "exports": [
+            {
+              "name": "defineTabsComponents",
+              "kind": "value"
+            },
+            {
+              "name": "GETabChangeDetail",
+              "kind": "type"
+            },
+            {
+              "name": "GETabOption",
+              "kind": "type"
+            },
+            {
+              "name": "GETabs",
+              "kind": "value"
+            }
+          ]
+        },
+        "./tooltip": {
+          "source": "ui/src\\tooltip.ts",
+          "exports": [
+            {
+              "name": "defineTooltipComponents",
+              "kind": "value"
+            },
+            {
+              "name": "GETooltip",
+              "kind": "value"
+            },
+            {
+              "name": "GETooltipPlacement",
+              "kind": "type"
+            }
+          ]
+        },
+        "./tree": {
+          "source": "ui/src\\tree.ts",
+          "exports": [
+            {
+              "name": "defineTreeComponents",
+              "kind": "value"
             },
             {
               "name": "GETree",

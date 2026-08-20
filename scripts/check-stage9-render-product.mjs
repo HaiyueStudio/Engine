@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const violations = [];
@@ -183,8 +184,9 @@ function validateExampleCatalog(manifest) {
 
 function discoverMainTargets(kind) {
   const result = new Set();
-  for (const entry of readdirSync(resolve(root, kind), { withFileTypes: true })) {
-    if (entry.isDirectory() && existsSync(resolve(root, kind, entry.name, 'main.ts'))) result.add(entry.name);
+  const directory = resolveLogicalPath(kind);
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if (entry.isDirectory() && existsSync(resolve(directory, entry.name, 'main.ts'))) result.add(entry.name);
   }
   return result;
 }
@@ -198,13 +200,28 @@ function walkSources(roots) {
       else if (/\.(ts|mjs)$/.test(entry.name)) result.push(relative(root, child));
     }
   };
-  for (const path of roots) visit(resolve(root, path));
+  for (const path of roots) visit(resolveLogicalPath(path));
   return result;
 }
 
-function source(path) { const absolute = resolve(root, path); requireFile(path); return existsSync(absolute) ? readFileSync(absolute, 'utf8') : ''; }
+function source(path) { const absolute = resolveLogicalPath(path); requireFile(path); return existsSync(absolute) ? readFileSync(absolute, 'utf8') : ''; }
 function json(path) { try { return JSON.parse(source(path)); } catch (error) { violations.push(`invalid JSON ${path}: ${error.message}`); return {}; } }
-function requireFile(path) { if (!existsSync(resolve(root, path)) || !statSync(resolve(root, path)).isFile()) violations.push(`missing ${path}`); }
+function requireFile(path) { const absolute = resolveLogicalPath(path); if (!existsSync(absolute) || !statSync(absolute).isFile()) violations.push(`missing ${path}`); }
+
+function resolveLogicalPath(path) {
+  if (path === 'games/rollup.config.js') return resolveStudioRepositoryPath('Games', 'rollup.config.js');
+  if (path === 'games') return resolveStudioRepositoryPath('Games', 'games');
+  if (path.startsWith('games/')) {
+    return resolveStudioRepositoryPath('Games', 'games', path.slice('games/'.length));
+  }
+  if (path.startsWith('editor/')) {
+    return resolveStudioRepositoryPath('Editor', 'editor', path.slice('editor/'.length));
+  }
+  if (path.startsWith('ui/')) {
+    return resolveStudioRepositoryPath('UI', path.slice('ui/'.length));
+  }
+  return resolve(root, path);
+}
 
 function parseModule(path) {
   return ts.createSourceFile(path, source(path), ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);

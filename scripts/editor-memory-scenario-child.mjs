@@ -2,7 +2,7 @@ const scenarioId = process.argv[2];
 const parameters = JSON.parse(process.argv[3] ?? '{}');
 if (typeof global.gc !== 'function') throw new Error('Editor memory scenarios require Node --expose-gc.');
 
-const editor = await import('../editor/dist-test/testing.js');
+const editor = await import('../../Editor/editor/dist-test/testing.js');
 const scenario = await runScenario(scenarioId, parameters, editor);
 process.stdout.write(`${JSON.stringify(scenario)}\n`);
 

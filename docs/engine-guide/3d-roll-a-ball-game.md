@@ -991,4 +991,4 @@ switchScene() + run()
 - [`examples/pbr-showcase`](../../examples/pbr-showcase/)：PBR、环境光、阴影和材质能力；
 - [`examples/orbit-control`](../../examples/orbit-control/)：相机旋转、平移、缩放和触摸输入；
 - [`examples/physics3d-collision`](../../examples/physics3d-collision/)：3D 刚体和碰撞；
-- [`games/sokoban-3d`](../../games/sokoban-3d/)：更完整的 3D 关卡游戏。
+- [`games/sokoban-3d`](../../../Games/games/sokoban-3d/)：更完整的 3D 关卡游戏。

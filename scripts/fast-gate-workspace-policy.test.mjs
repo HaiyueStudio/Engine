@@ -11,38 +11,34 @@ import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { MANDATORY_FAST_TEST_WORKSPACES } from './fast-gate-workspace-policy.mjs';
+import { MANDATORY_FAST_TEST_TARGETS } from './fast-gate-workspace-policy.mjs';
+import { requireStudioRepository } from './studio-repository-layout.mjs';
 
-const EXPECTED_WORKSPACES = [
-  './engine',
-  './animation-spec',
-  './extensions',
-  './ui',
-  './games',
-  './editor',
-  './AnimationEditor',
-  './voxelEditor',
+const EXPECTED_TARGETS = [
+  ['engine', 'Engine', ['test', '-w', './engine']],
+  ['animation-spec', 'Engine', ['test', '-w', './animation-spec']],
+  ['extensions', 'Engine', ['test', '-w', './extensions']],
+  ['ui', 'UI', ['test']],
+  ['games', 'Games', ['test']],
+  ['editor', 'Editor', ['test', '-w', './editor']],
+  ['AnimationEditor', 'Editor', ['test', '-w', './AnimationEditor']],
+  ['voxelEditor', 'Editor', ['test', '-w', './voxelEditor']],
 ];
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const runner = resolve(root, 'scripts/run-fast-workspace-tests.mjs');
 
 test('fast gate executes every mandatory workspace test through the production runner', () => {
-  assert.deepEqual(MANDATORY_FAST_TEST_WORKSPACES, EXPECTED_WORKSPACES);
+  assert.deepEqual(MANDATORY_FAST_TEST_TARGETS.map(value => [value.id, value.repository, [...value.npmArgs]]), EXPECTED_TARGETS);
   const result = runPolicyFixture();
   assert.equal(result.status, 0, result.stderr);
-  assert.deepEqual(result.calls, EXPECTED_WORKSPACES.map(workspace => (
-    ['test', '-w', workspace]
-  )));
+  assert.deepEqual(result.calls, EXPECTED_TARGETS.map(([, repository, args]) => ({ cwd: requireStudioRepository(repository).root, args })));
 });
 
 test('fast gate stops immediately and preserves a mandatory workspace failure', () => {
   const result = runPolicyFixture('./animation-spec');
   assert.equal(result.status, 7);
-  assert.deepEqual(result.calls, [
-    ['test', '-w', './engine'],
-    ['test', '-w', './animation-spec'],
-  ]);
+  assert.deepEqual(result.calls, EXPECTED_TARGETS.slice(0, 2).map(([, repository, args]) => ({ cwd: requireStudioRepository(repository).root, args })));
 });
 
 test('check:fast invokes the behavioral workspace runner', () => {
@@ -61,7 +57,7 @@ function runPolicyFixture(failingWorkspace = '') {
   const log = join(directory, 'calls.jsonl');
   writeFileSync(executable, `#!/usr/bin/env node
 import { appendFileSync } from 'node:fs';
-appendFileSync(process.env.FAST_GATE_POLICY_LOG, JSON.stringify(process.argv.slice(2)) + '\\n');
+appendFileSync(process.env.FAST_GATE_POLICY_LOG, JSON.stringify({ cwd: process.cwd(), args: process.argv.slice(2) }) + '\\n');
 if (process.argv.at(-1) === process.env.FAST_GATE_FAIL_WORKSPACE) process.exit(7);
 `);
   chmodSync(executable, 0o755);

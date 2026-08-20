@@ -13,8 +13,8 @@
 ## 首发应用边界
 
 - 本目录描述 Scene Editor：创建、保存、Play、调试和导出场景项目。
-- HYA 2D/原生 3D authoring 使用 [AnimationEditor 设计师指南](../../AnimationEditor/DESIGNER_GUIDE.md)。
-- Voxel Web/PWA 与 Electron preview 使用 [`voxelEditor/README.md`](../../voxelEditor/README.md)；Electron 首发仅为 unsigned preview。
+- HYA 2D/原生 3D authoring 使用 [AnimationEditor 设计师指南](../../../Editor/AnimationEditor/DESIGNER_GUIDE.md)。
+- Voxel Web/PWA 与 Electron preview 使用 [`voxelEditor/README.md`](../../../Editor/voxelEditor/README.md)；Electron 首发仅为 unsigned preview。
 - 三个应用都遵守同一 WebGPU-only compatibility contract；没有 WebGL2 fallback。浏览器和部署问题见[故障排查](../engine-guide/troubleshooting.md)，能力上限见[已知限制](../engine-guide/known-limitations.md)。
 
 ## 编辑器区域

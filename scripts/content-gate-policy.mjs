@@ -4,8 +4,8 @@ import { resolve } from 'node:path';
 export const CONTENT_TIERS = Object.freeze(['smoke', 'full']);
 
 const MANIFEST_SOURCES = Object.freeze([
-  Object.freeze({ directory: 'examples', kind: 'examples', prefix: 'example' }),
-  Object.freeze({ directory: 'games', kind: 'games', prefix: 'game' }),
+  Object.freeze({ repository: 'Engine', directory: 'examples', kind: 'examples', prefix: 'example' }),
+  Object.freeze({ repository: 'Games', directory: 'games', kind: 'games', prefix: 'game' }),
 ]);
 const CI_LABELS = new Set(['smoke', 'full', 'manual']);
 
@@ -37,7 +37,11 @@ export function resolveContentTier(argv) {
 export function loadContentManifests(root) {
   return MANIFEST_SOURCES.map(source => ({
     ...source,
-    manifest: JSON.parse(readFileSync(resolve(root, source.directory, 'manifest.json'), 'utf8')),
+    manifest: JSON.parse(readFileSync(resolve(
+      source.repository === 'Games' ? resolve(root, '../Games') : root,
+      source.directory,
+      'manifest.json',
+    ), 'utf8')),
   }));
 }
 

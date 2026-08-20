@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
@@ -466,7 +467,7 @@ for (const contract of contracts) {
 }
 
 for (const budget of ownerSizeBudgets) {
-  const lines = readFileSync(resolve(root, budget.path), 'utf8').split(/\r?\n/).length;
+  const lines = readFileSync(resolveContractPath(budget.path), 'utf8').split(/\r?\n/).length;
   if (lines > budget.maxLines) {
     failures.push(
       `${budget.path} grew to ${lines} lines (budget ${budget.maxLines}); assign the new responsibility before extending the orchestrator`,
@@ -482,8 +483,21 @@ if (failures.length > 0) {
 console.log('[responsibility-boundaries] render/voxel orchestration, glTF loading/runtime, resource, player, runtime export, KTX2, and pipeline ownership passed.');
 
 function parse(path) {
-  const content = readFileSync(resolve(root, path), 'utf8');
+  const content = readFileSync(resolveContractPath(path), 'utf8');
   return ts.createSourceFile(path, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+}
+
+function resolveContractPath(path) {
+  if (path.startsWith('editor/')) {
+    return resolveStudioRepositoryPath('Editor', 'editor', path.slice('editor/'.length));
+  }
+  if (path.startsWith('AnimationEditor/')) {
+    return resolveStudioRepositoryPath('Editor', 'AnimationEditor', path.slice('AnimationEditor/'.length));
+  }
+  if (path.startsWith('voxelEditor/')) {
+    return resolveStudioRepositoryPath('Editor', 'voxelEditor', path.slice('voxelEditor/'.length));
+  }
+  return resolve(root, path);
 }
 
 function dependencies(sourceFile) {

@@ -1,11 +1,26 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
+  "budgetPolicy": {
+    "model": "reviewed-capability-plus-growth-reserve",
+    "reviewedAt": "2026-08-20",
+    "requirements": [
+      "Measure a deterministic dist-only npm pack candidate before changing reviewed capacity.",
+      "Attribute new public entrypoints in config/public-api-capability-budgets.json.",
+      "Increase reviewed capacity only with capability, API, consumer, and bundle evidence.",
+      "Keep root and focused consumer closure budgets independent from total package capacity."
+    ]
+  },
   "publicPackages": {
     "@haiyue/engine": {
       "workspace": "engine",
-      "maxPackedBytes": 1900000,
-      "maxUnpackedBytes": 8200000,
-      "maxFileCount": 549,
+      "maxPackedBytes": 2100000,
+      "maxUnpackedBytes": 9000000,
+      "maxFileCount": 600,
+      "capacity": {
+        "reviewed": { "packedBytes": 1796536, "unpackedBytes": 7935566, "fileCount": 549 },
+        "growthReserve": { "packedBytes": 303464, "unpackedBytes": 1064434, "fileCount": 51 },
+        "capabilityBasis": "stable golden path plus focused ECS, scene, rendering, physics, compute, assets, diagnostics, and experimental runtime seams"
+      },
       "declaredFiles": [
         "README.md",
         "LICENSE",
@@ -22,9 +37,14 @@
     },
     "@haiyue/animation-spec": {
       "workspace": "animation-spec",
-      "maxPackedBytes": 105000,
-      "maxUnpackedBytes": 490000,
-      "maxFileCount": 31,
+      "maxPackedBytes": 125000,
+      "maxUnpackedBytes": 550000,
+      "maxFileCount": 40,
+      "capacity": {
+        "reviewed": { "packedBytes": 92227, "unpackedBytes": 343042, "fileCount": 31 },
+        "growthReserve": { "packedBytes": 32773, "unpackedBytes": 206958, "fileCount": 9 },
+        "capabilityBasis": "source-neutral HYA format, native 3D, deformable 2D, and offline Lottie/Cubism adapters"
+      },
       "declaredFiles": [
         "dist",
         "bin",
@@ -48,7 +68,61 @@
       "workspace": "extensions",
       "maxPackedBytes": 550000,
       "maxUnpackedBytes": 2500000,
-      "maxFileCount": 190,
+      "maxFileCount": 200,
+      "capacity": {
+        "reviewed": { "packedBytes": 377051, "unpackedBytes": 2024224, "fileCount": 176 },
+        "growthReserve": { "packedBytes": 172949, "unpackedBytes": 475776, "fileCount": 24 },
+        "capabilityBasis": "admitted optional animation, asset, text, tile, deformable, and experimental ray tracing runtimes"
+      },
+      "declaredFiles": [
+        "README.md",
+        "LICENSE",
+        "dist/**/*.js",
+        "dist/**/*.d.ts"
+      ],
+      "allowedFilePatterns": [
+        "package.json",
+        "README.md",
+        "LICENSE",
+        "dist/**/*.js",
+        "dist/**/*.d.ts"
+      ]
+    },
+    "@haiyue/shader-language": {
+      "workspace": "shader-language",
+      "maxPackedBytes": 175000,
+      "maxUnpackedBytes": 850000,
+      "maxFileCount": 85,
+      "capacity": {
+        "reviewed": { "packedBytes": 136901, "unpackedBytes": 668355, "fileCount": 70 },
+        "growthReserve": { "packedBytes": 38099, "unpackedBytes": 181645, "fileCount": 15 },
+        "capabilityBasis": "typed shader IR/compiler, generated WebGPU shader families, and focused material graph authoring"
+      },
+      "declaredFiles": [
+        "README.md",
+        "LICENSE",
+        "dist/**/*.js",
+        "dist/**/*.d.ts"
+      ],
+      "allowedFilePatterns": [
+        "package.json",
+        "README.md",
+        "LICENSE",
+        "dist/**/*.js",
+        "dist/**/*.d.ts"
+      ]
+    },
+    "@haiyue/ui": {
+      "workspace": "../UI",
+      "nodeImport": false,
+      "maxPackedBytes": 45000,
+      "maxUnpackedBytes": 230000,
+      "maxFileCount": 50,
+      "capacity": {
+        "reviewed": { "packedBytes": 31192, "unpackedBytes": 161256, "fileCount": 39 },
+        "growthReserve": { "packedBytes": 13808, "unpackedBytes": 68744, "fileCount": 11 },
+        "capabilityBasis": "dependency-free Web Components root registration plus focused component subpaths"
+      },
       "declaredFiles": [
         "README.md",
         "LICENSE",
@@ -65,9 +139,9 @@
     }
   },
   "tarball": {
-    "maxPackedBytes": 1900000,
-    "maxUnpackedBytes": 8200000,
-    "maxFileCount": 549,
+    "maxPackedBytes": 2100000,
+    "maxUnpackedBytes": 9000000,
+    "maxFileCount": 600,
     "filesWhitelist": [
       "README.md",
       "LICENSE",
@@ -243,6 +317,26 @@
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 9000,
       "requiredExports": ["Grid2DComponent"]
+    }
+  },
+  "shaderLanguageConsumers": {
+    "shader-language-material-graph": {
+      "fixture": "scripts/fixtures/engine-consumers/shader-language-material-graph.mjs",
+      "packageName": "@haiyue/shader-language",
+      "maxGzipBytes": 65000,
+      "requiredExports": [
+        "MATERIAL_GRAPH_ARTIFACT_FORMAT",
+        "compileMaterialGraphDocumentV1",
+        "getMaterialGraphAuthoringCatalogV1"
+      ]
+    }
+  },
+  "uiConsumers": {
+    "ui-button": {
+      "fixture": "scripts/fixtures/engine-consumers/ui-button.mjs",
+      "packageName": "@haiyue/ui",
+      "maxGzipBytes": 5000,
+      "requiredExports": ["GEButton", "defineButtonComponents"]
     }
   }
 }

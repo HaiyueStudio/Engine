@@ -24,7 +24,7 @@
 - 不支持同一 HYA composition 或 AnimationEditor 工程内的原生 mixed 2D/3D。引擎可以在普通场景组合 2D HUD 与 3D 世界，但这不是 HYA mixed composition。
 - Lottie 转换不是完整 Lottie fidelity 承诺。expression、未知插件/effect 以及其他未覆盖语义必须产生带 code 和 JSON path 的 diagnostic；strict 模式用于拒绝任何有损转换。
 - 状态机对 transform/opacity/visibility 等 pose channel 提供混合；audio、particle、animated path morph 或未知时间副作用必须遵守 capability registry，不能静默退化成静态内容。
-- SpriteSheet rotated/trimmed atlas、任意 audio cross-fade 和若干高级组合 authoring 仍会被 AnimationEditor 精确拒绝，具体以 [`CAPABILITY_MATRIX.md`](../../AnimationEditor/CAPABILITY_MATRIX.md) 为准。
+- SpriteSheet rotated/trimmed atlas、任意 audio cross-fade 和若干高级组合 authoring 仍会被 AnimationEditor 精确拒绝，具体以 [`CAPABILITY_MATRIX.md`](../../../Editor/AnimationEditor/CAPABILITY_MATRIX.md) 为准。
 
 ## API 与应用分发
 

@@ -5,13 +5,22 @@ import test from 'node:test';
 
 const root = resolve(import.meta.dirname, '..');
 
-test('source adapters expose focused lottie/live2d package facades', async () => {
+test('adapters expose focused dist-only lottie/live2d package facades', async () => {
   const packageJson = JSON.parse(await readFile(resolve(root, 'package.json'), 'utf8'));
-  assert.equal(packageJson.exports['./lottie'].source, './src/lottie.ts');
-  assert.equal(packageJson.exports['./live2d'].source, './src/live2d.ts');
-  assert.equal(packageJson.exports['./cubism'].source, './src/cubism.ts');
-  assert.equal(packageJson.bin['hya-lottie-convert'], './lottie/bin/hya-lottie-convert.mjs');
-  assert.equal(packageJson.bin['hya-live2d-convert'], './live2d/bin/hya-live2d-convert.mjs');
+  assert.deepEqual(packageJson.exports['./lottie'], {
+    types: './dist/lottie.d.ts',
+    import: './dist/lottie.js',
+  });
+  assert.deepEqual(packageJson.exports['./live2d'], {
+    types: './dist/live2d.d.ts',
+    import: './dist/live2d.js',
+  });
+  assert.deepEqual(packageJson.exports['./cubism'], {
+    types: './dist/cubism.d.ts',
+    import: './dist/cubism.js',
+  });
+  assert.equal(packageJson.bin['hya-lottie-convert'], './bin/hya-lottie-convert.mjs');
+  assert.equal(packageJson.bin['hya-live2d-convert'], './bin/hya-live2d-convert.mjs');
 
   await Promise.all([
     access(resolve(root, 'src/lottie/index.ts')),
@@ -19,6 +28,8 @@ test('source adapters expose focused lottie/live2d package facades', async () =>
     access(resolve(root, 'src/live2d/index.ts')),
     access(resolve(root, 'lottie/bin/hya-lottie-convert.mjs')),
     access(resolve(root, 'live2d/bin/hya-live2d-convert.mjs')),
+    access(resolve(root, 'bin/hya-lottie-convert.mjs')),
+    access(resolve(root, 'bin/hya-live2d-convert.mjs')),
   ]);
 });
 

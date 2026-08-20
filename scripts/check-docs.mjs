@@ -1,9 +1,12 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { STUDIO_REPOSITORIES, requireStudioRepository } from './studio-repository-layout.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const docsRoot = resolve(root, 'docs');
+const documentationRoots = Object.keys(STUDIO_REPOSITORIES)
+  .map(name => requireStudioRepository(name).root);
 const violations = [];
 const expectedRootEntries = new Set([
   'AGENTS.md',
@@ -37,7 +40,7 @@ validateMarkdownLinks(resolve(root, 'README.md'));
 for (const absolute of walkSources([
   resolve(root, 'engine/src'),
   resolve(root, 'extensions/src'),
-  resolve(root, 'editor/src'),
+  resolve(requireStudioRepository('Editor').root, 'editor/src'),
 ])) {
   const source = readFileSync(absolute, 'utf8');
   for (const match of source.matchAll(/docsPath:\s*['"]([^'"]+)['"]/g)) {
@@ -74,8 +77,8 @@ function validateMarkdownLinks(absolute) {
     }
 
     const target = resolve(dirname(absolute), decoded);
-    if (!isInsideRoot(target)) {
-      violations.push(`${relativeSource} links outside the repository: ${destination}`);
+    if (!isInsideDocumentationRoots(target)) {
+      violations.push(`${relativeSource} links outside the HaiyueStudio repositories: ${destination}`);
     } else if (!existsSync(target)) {
       violations.push(`${relativeSource} has a broken link: ${destination}`);
     }
@@ -91,9 +94,11 @@ function normalizeDestination(raw) {
   return value.split(/\s+/, 1)[0];
 }
 
-function isInsideRoot(path) {
-  const pathFromRoot = relative(root, path);
-  return pathFromRoot === '' || (!pathFromRoot.startsWith(`..${sep}`) && pathFromRoot !== '..');
+function isInsideDocumentationRoots(path) {
+  return documentationRoots.some(repositoryRoot => {
+    const pathFromRoot = relative(repositoryRoot, path);
+    return pathFromRoot === '' || (!pathFromRoot.startsWith(`..${sep}`) && pathFromRoot !== '..');
+  });
 }
 
 function walkMarkdown(directory) {

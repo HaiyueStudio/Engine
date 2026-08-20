@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const checkerPath = fileURLToPath(import.meta.url);
@@ -127,7 +128,7 @@ if (failures.length) {
 console.log('[stage8-asset-script] shared parsers, cancellable jobs, layered caches, upload budgets, capability declarations, hot reload, and script isolation passed.');
 
 function read(path) {
-  const absolute = resolve(root, path);
+  const absolute = resolveLogicalPath(path);
   if (!existsSync(absolute)) { failures.push(`missing ${path}`); return ''; }
   return readFileSync(absolute, 'utf8');
 }
@@ -140,7 +141,7 @@ function forbidPatterns(label, source, patterns) {
 }
 function collectText(paths) {
   let result = '';
-  for (const path of paths) walk(resolve(root, path));
+  for (const path of paths) walk(resolveLogicalPath(path));
   return result;
   function walk(absolute) {
     if (!existsSync(absolute)) return;
@@ -161,7 +162,7 @@ function collectText(paths) {
 
 function validateSerializedScripts(paths) {
   for (const directory of paths) {
-    const absoluteDirectory = resolve(root, directory);
+    const absoluteDirectory = resolveLogicalPath(directory);
     for (const name of readdirSync(absoluteDirectory)) {
       if (!name.endsWith('.json')) continue;
       const path = `${directory}/${name}`;
@@ -177,4 +178,14 @@ function validateSerializedScripts(paths) {
       }
     }
   }
+}
+
+function resolveLogicalPath(path) {
+  if (path.startsWith('editor/')) {
+    return resolveStudioRepositoryPath('Editor', 'editor', path.slice('editor/'.length));
+  }
+  if (path.startsWith('games/')) {
+    return resolveStudioRepositoryPath('Games', 'games', path.slice('games/'.length));
+  }
+  return resolve(root, path);
 }

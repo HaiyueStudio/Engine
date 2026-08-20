@@ -23,56 +23,47 @@
   },
   "files": [
     "dist",
-    "lottie/bin",
-    "live2d/bin",
+    "bin",
     "schema",
     "LICENSE",
     "README.md",
-    "SPECIFICATION.md",
-    "test/fixtures/basic-lottie.json",
-    "src/**/*"
+    "SPECIFICATION.md"
   ],
   "bin": {
-    "hya-convert": "./lottie/bin/hya-lottie-convert.mjs",
-    "hya-lottie-convert": "./lottie/bin/hya-lottie-convert.mjs",
-    "hya-live2d-convert": "./live2d/bin/hya-live2d-convert.mjs",
-    "hya-cubism-convert": "./live2d/bin/hya-live2d-convert.mjs"
+    "hya-convert": "./bin/hya-lottie-convert.mjs",
+    "hya-lottie-convert": "./bin/hya-lottie-convert.mjs",
+    "hya-live2d-convert": "./bin/hya-live2d-convert.mjs",
+    "hya-cubism-convert": "./bin/hya-live2d-convert.mjs"
   },
   "exports": {
     ".": {
-      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./lottie": {
-      "source": "./src/lottie.ts",
       "types": "./dist/lottie.d.ts",
       "import": "./dist/lottie.js"
     },
     "./native3d": {
-      "source": "./src/native3d.ts",
       "types": "./dist/native3d.d.ts",
       "import": "./dist/native3d.js"
     },
     "./deformable2d": {
-      "source": "./src/deformable2d.ts",
       "types": "./dist/deformable2d.d.ts",
       "import": "./dist/deformable2d.js"
     },
     "./cubism": {
-      "source": "./src/cubism.ts",
       "types": "./dist/cubism.d.ts",
       "import": "./dist/cubism.js"
     },
     "./live2d": {
-      "source": "./src/live2d.ts",
       "types": "./dist/live2d.d.ts",
       "import": "./dist/live2d.js"
     }
   },
   "scripts": {
-    "build": "node ../scripts/build-rollup-once.mjs",
-    "test": "node ../scripts/build-rollup-once.mjs && node --test --test-concurrency=1 \"test/**/*.test.mjs\"",
+    "build": "node ../scripts/build-rollup-once.mjs && rollup -c rollup.dts.config.js && node ../scripts/install-bundled-declarations.mjs animation-spec dist-declarations",
+    "test": "npm run build && node --test --test-concurrency=1 \"test/**/*.test.mjs\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "samples:generate": "node ../scripts/build-rollup-once.mjs && node scripts/generate-samples.mjs",
     "corpus:sync": "node ../scripts/hya-corpus/sync.mjs"

@@ -2,14 +2,18 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const violations = [];
 
-for (const kind of ['examples', 'games']) {
-  for (const entry of readdirSync(resolve(root, kind), { withFileTypes: true })) {
+for (const { kind, directory } of [
+  { kind: 'examples', directory: resolve(root, 'examples') },
+  { kind: 'games', directory: resolveStudioRepositoryPath('Games', 'games') },
+]) {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
-    const path = resolve(root, kind, entry.name, 'main.ts');
+    const path = resolve(directory, entry.name, 'main.ts');
     try {
       validateSource(path, readFileSync(path, 'utf8'));
     } catch (error) {

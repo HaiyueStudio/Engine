@@ -22,6 +22,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import {
   matchesPackageGlob,
+  validateCapabilityPackageBudgetConfig,
   validateEngineConsumerResult,
   validateEnginePackManifest,
 } from './engine-package-policy.mjs';
@@ -40,12 +41,17 @@ const reportPath = resolve(root, 'artifacts/release/public-packages.json');
 const legacyReportPath = resolve(root, 'artifacts/release/engine-package.json');
 const tarballOutputRoot = resolve(root, 'artifacts/release/npm');
 const errors = [];
+errors.push(...validateCapabilityPackageBudgetConfig(budget));
+let shaderLanguageBuildEvidence = null;
 let animationSpecBuildEvidence = null;
 let extensionsBuildEvidence = null;
+let uiBuildEvidence = null;
 
 try {
+  shaderLanguageBuildEvidence = buildPublicWorkspace('Shader Language', resolve(root, 'shader-language'));
   animationSpecBuildEvidence = buildAnimationSpec();
   extensionsBuildEvidence = buildExtensions();
+  uiBuildEvidence = buildPublicWorkspace('UI', resolve(root, '../UI'));
   rmSync(tarballOutputRoot, { recursive: true, force: true });
   mkdirSync(tarballOutputRoot, { recursive: true });
 
@@ -80,6 +86,13 @@ try {
     consumers.push(withoutConsumerCode(result));
     errors.push(...validateGenericConsumerResult(result, policy));
   }
+  for (const section of ['shaderLanguageConsumers', 'uiConsumers']) {
+    for (const [id, policy] of Object.entries(budget[section] ?? {})) {
+      const result = await bundleConsumer({ id, policy, installed, packageDirectories });
+      consumers.push(withoutConsumerCode(result));
+      errors.push(...validateGenericConsumerResult(result, policy));
+    }
+  }
 
   const runtimeChecks = {
     node: runNodeRuntimeConsumer(installed),
@@ -96,7 +109,7 @@ try {
     generatedAt: new Date().toISOString(),
     sourceState: readSourceState(),
     mode: releaseMode ? 'release' : 'development',
-    buildEvidence: { animationSpec: animationSpecBuildEvidence, extensions: extensionsBuildEvidence },
+    buildEvidence: { shaderLanguage: shaderLanguageBuildEvidence, animationSpec: animationSpecBuildEvidence, extensions: extensionsBuildEvidence, ui: uiBuildEvidence },
     packages: packedPackages.map(withoutPrivatePackFields),
     install: {
       manager: installed.manager,
@@ -404,6 +417,7 @@ function validateGenericConsumerResult(result, policy) {
   }
   const forbidden = ['@haiyue/shader-language', '@dimforge/rapier3d-compat', 'box2d.ts', 'AmbientOcclusionPass'];
   for (const marker of forbidden) {
+    if (marker === policy.packageName) continue;
     if (result.modules.some(moduleId => moduleId.includes(marker)) || result.code.includes(marker)) {
       errors.push(`${result.id} bundled unrelated ${marker}`);
     }
@@ -449,7 +463,9 @@ function runTypeScriptConsumer(installed) {
 }
 
 function runAllExportsConsumer(installed, packages) {
-  const specifiers = packages.flatMap(entry => Object.keys(entry.packageJson.exports ?? {}).map(subpath => (
+  const specifiers = packages
+    .filter(entry => budget.publicPackages[entry.name]?.nodeImport !== false)
+    .flatMap(entry => Object.keys(entry.packageJson.exports ?? {}).map(subpath => (
     subpath === '.' ? entry.name : `${entry.name}/${subpath.replace(/^\.\//, '')}`
   )));
   const script = resolve(installed.root, 'all-exports.mjs');
@@ -459,7 +475,7 @@ function runAllExportsConsumer(installed, packages) {
 }
 
 function runCliConsumer(installed) {
-  const cli = resolve(installed.root, 'node_modules/@haiyue/animation-spec/lottie/bin/hya-lottie-convert.mjs');
+  const cli = resolve(installed.root, 'node_modules/@haiyue/animation-spec/bin/hya-lottie-convert.mjs');
   if (process.platform === 'win32' && !existsSync(resolve(installed.root, 'node_modules/.bin/hya-convert.cmd'))) {
     return { status: 'failed', detail: 'hya-convert Windows command shim was not installed' };
   }
@@ -523,6 +539,23 @@ function buildExtensions() {
   assertCommand(result, 'Extensions one-shot production build');
   return {
     command: 'npm run build -w ./extensions',
+    durationMs: performance.now() - started,
+    maxDurationMs: 120_000,
+    exited: true,
+  };
+}
+
+function buildPublicWorkspace(label, workspace) {
+  const started = performance.now();
+  const result = spawnSync(npmCommand(), npmArgs(['run', 'build']), {
+    cwd: workspace,
+    stdio: 'inherit',
+    env: process.env,
+    timeout: 120_000,
+  });
+  assertCommand(result, `${label} one-shot production build`);
+  return {
+    command: `npm run build (${relative(root, workspace)})`,
     durationMs: performance.now() - started,
     maxDurationMs: 120_000,
     exited: true,

@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "model": "reviewed-capability-plus-growth-reserve",
+  "principles": [
+    "The Engine root is an exact golden path, not a capacity pool.",
+    "New capabilities use focused entrypoints and are classified stable or experimental before baseline promotion.",
+    "Reviewed symbol counts describe admitted capability scope; reserve absorbs implementation-shaped API growth but never bypasses API baseline review.",
+    "A capability addition must update its reviewed count, evidence, package measurement, and baseline in one reviewed change."
+  ],
+  "packages": {
+    "@haiyue/shader-language": {
+      "workspace": "shader-language",
+      "groups": [
+        {
+          "id": "typed-shader-compiler",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.15, "minimumSymbols": 3 },
+          "entrypoints": { ".": 247 }
+        },
+        {
+          "id": "material-graph-authoring",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.2, "minimumSymbols": 3 },
+          "entrypoints": { "./material-graph": 15 }
+        }
+      ]
+    },
+    "@haiyue/animation-spec": {
+      "workspace": "animation-spec",
+      "groups": [
+        {
+          "id": "source-neutral-animation-format",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.12, "minimumSymbols": 2 },
+          "entrypoints": { ".": 87, "./native3d": 43, "./deformable2d": 15 }
+        },
+        {
+          "id": "offline-source-adapters",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
+          "entrypoints": { "./cubism": 15, "./live2d": 15, "./lottie": 9 }
+        }
+      ]
+    },
+    "@haiyue/engine": {
+      "workspace": "engine",
+      "groups": [
+        {
+          "id": "golden-path",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0, "minimumSymbols": 0 },
+          "entrypoints": { ".": 30 }
+        },
+        {
+          "id": "runtime-foundations",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.1, "minimumSymbols": 2 },
+          "entrypoints": {
+            "./assets": 21,
+            "./core": 68,
+            "./diagnostics": 12,
+            "./ecs": 22,
+            "./extension-authoring": 14,
+            "./serialization": 13
+          }
+        },
+        {
+          "id": "scene-rendering",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.1, "minimumSymbols": 2 },
+          "entrypoints": {
+            "./color": 16,
+            "./components": 103,
+            "./controls": 9,
+            "./font": 13,
+            "./geometry": 53,
+            "./gui": 69,
+            "./input": 3,
+            "./lighting": 19,
+            "./material": 69,
+            "./math": 7,
+            "./navigation": 9,
+            "./postprocess": 29,
+            "./rtt": 5,
+            "./scene": 16,
+            "./systems": 41,
+            "./tween": 19
+          }
+        },
+        {
+          "id": "compute-and-physics",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.12, "minimumSymbols": 2 },
+          "entrypoints": {
+            "./compute": 7,
+            "./physics": 37,
+            "./physics/backend": 44,
+            "./physics/components": 13
+          }
+        },
+        {
+          "id": "experimental-runtime-seams",
+          "stability": "experimental",
+          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
+          "entrypoints": {
+            "./experimental": 793,
+            "./experimental/assets": 38,
+            "./experimental/async": 7,
+            "./experimental/diagnostics": 23,
+            "./experimental/gpu-driven": 25,
+            "./experimental/ktx2-worker-runtime": 0,
+            "./experimental/renderer": 51
+          }
+        }
+      ]
+    },
+    "@haiyue/extensions": {
+      "workspace": "extensions",
+      "groups": [
+        {
+          "id": "admitted-optional-runtimes",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
+          "entrypoints": {
+            "./animation": 26,
+            "./animation3d": 75,
+            "./canvas-text": 4,
+            "./deformable-animation": 6,
+            "./gltf": 53,
+            "./gltf-animation3d": 5,
+            "./grid": 2,
+            "./hya-state-machine": 13,
+            "./spine": 8,
+            "./tilemap": 8,
+            "./tween": 6
+          }
+        },
+        {
+          "id": "experimental-extension-infrastructure",
+          "stability": "experimental",
+          "growthReserve": { "ratio": 0.2, "minimumSymbols": 2 },
+          "entrypoints": {
+            ".": 2,
+            "./experimental/gltf-worker": 11,
+            "./experimental/spine-worker": 9
+          }
+        },
+        {
+          "id": "experimental-ray-tracing",
+          "stability": "experimental",
+          "growthReserve": { "ratio": 0.25, "minimumSymbols": 2 },
+          "entrypoints": { "./ray-tracing": 11 }
+        }
+      ]
+    },
+    "@haiyue/ui": {
+      "workspace": "ui",
+      "groups": [
+        {
+          "id": "component-registration-root",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
+          "entrypoints": { ".": 52 }
+        },
+        {
+          "id": "focused-web-components",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.2, "minimumSymbols": 1 },
+          "entrypoints": {
+            "./button": 2,
+            "./checkbox": 3,
+            "./context-menu": 4,
+            "./dialog": 4,
+            "./dropdown": 5,
+            "./history-controls": 3,
+            "./input": 4,
+            "./radio": 3,
+            "./select": 4,
+            "./split": 4,
+            "./tabs": 4,
+            "./tooltip": 3,
+            "./tree": 8
+          }
+        }
+      ]
+    }
+  }
+}

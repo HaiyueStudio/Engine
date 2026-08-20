@@ -1,0 +1,43 @@
+name: CI Portable Cross-Engine Performance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cross-engine-performance:
+    runs-on: [self-hosted, haiyue-performance]
+    timeout-minutes: 120
+    env:
+      WEBGPU_REQUIRE_NATIVE: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Validate portable comparison policy
+        run: npm run performance:compare:test
+
+      - name: Run clean full five-engine comparison
+        run: npm run performance:compare:formal
+
+      - name: Upload revision-bound comparison evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: cross-engine-performance
+          path: artifacts/performance-comparison/formal.json
+          if-no-files-found: error
+          retention-days: 30

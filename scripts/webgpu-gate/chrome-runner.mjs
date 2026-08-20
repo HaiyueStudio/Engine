@@ -26,10 +26,11 @@ export async function runChromeWebGpuFixture({
   acceptedStatuses = ['passed'],
   visualCapture = null,
   navigateAwayAfterResult = false,
+  mounts = [],
 }) {
   const chrome = process.env.CHROME_PATH ?? defaultChromePath();
   if (!existsSync(chrome)) throw new Error(`Chrome/WebGPU gate requires Chrome. Set CHROME_PATH (looked for ${chrome}).`);
-  const fixtureServer = await startHttpFixtureServer(root);
+  const fixtureServer = await startHttpFixtureServer(root, { mounts });
   try {
     const parameters = new URLSearchParams(Object.entries(query).map(([key, value]) => [key, String(value)]));
     const url = `${fixtureServer.origin}/${fixture}?${parameters}`;
@@ -49,9 +50,9 @@ export async function runChromeWebGpuFixture({
   }
 }
 
-export async function startHttpFixtureServer(root) {
+export async function startHttpFixtureServer(root, { mounts = [] } = {}) {
   const httpEvidence = createHttpEvidence();
-  const server = createStaticServer(root, httpEvidence);
+  const server = createStaticServer(root, httpEvidence, mounts);
   await new Promise((resolveListen, reject) => {
     server.once('error', reject);
     server.listen(0, '127.0.0.1', resolveListen);
@@ -75,19 +76,33 @@ export async function startHttpFixtureServer(root) {
   };
 }
 
-function createStaticServer(root, httpEvidence) {
+function createStaticServer(root, httpEvidence, mounts) {
   const normalizedRoot = resolve(root);
+  const normalizedMounts = [
+    { prefix: '', directory: normalizedRoot },
+    ...mounts.map(normalizeMount),
+  ].sort((left, right) => right.prefix.length - left.prefix.length);
   return createServer((request, response) => {
     try {
       const pathname = decodeURIComponent(new URL(request.url ?? '/', 'http://localhost').pathname);
-      const requested = resolve(normalizedRoot, `.${pathname}`);
-      if (requested !== normalizedRoot && !requested.startsWith(`${normalizedRoot}${sep}`)) {
+      const mount = normalizedMounts.find(candidate => (
+        candidate.prefix === ''
+        || pathname === candidate.prefix
+        || pathname.startsWith(`${candidate.prefix}/`)
+      ));
+      const relativePath = mount.prefix === '' ? pathname : pathname.slice(mount.prefix.length);
+      const requested = resolve(mount.directory, `.${relativePath}`);
+      if (requested !== mount.directory && !requested.startsWith(`${mount.directory}${sep}`)) {
         response.writeHead(403).end('Forbidden');
         return;
       }
       const path = statSync(requested).isDirectory() ? resolve(requested, 'index.html') : requested;
       const contents = readFileSync(path);
-      recordHttpEvidence(httpEvidence, normalizedRoot, path, contents);
+      const relativeSource = relative(mount.directory, path).split(sep).join('/');
+      const sourcePath = mount.prefix
+        ? `${mount.prefix.slice(1)}/${relativeSource}`
+        : relativeSource;
+      recordHttpEvidence(httpEvidence, sourcePath, contents);
       response.writeHead(200, {
         'content-type': contentType(path),
         'cache-control': 'no-store',
@@ -100,6 +115,18 @@ function createStaticServer(root, httpEvidence) {
       response.end('Not found');
     }
   });
+}
+
+function normalizeMount(mount) {
+  const prefix = String(mount?.prefix ?? '').replace(/\/$/u, '');
+  if (!prefix.startsWith('/') || prefix === '' || prefix.includes('..')) {
+    throw new Error(`Chrome fixture mount prefix must be an absolute URL segment: ${prefix}.`);
+  }
+  const directory = resolve(String(mount?.directory ?? ''));
+  if (!statSync(directory).isDirectory()) {
+    throw new Error(`Chrome fixture mount is not a directory: ${directory}.`);
+  }
+  return { prefix, directory };
 }
 
 async function runChrome(
@@ -133,6 +160,8 @@ async function runChrome(
   ], { stdio: ['ignore', 'pipe', 'pipe'] });
   child.stdout.resume();
   let stderr = '';
+  let completedResult = null;
+  let primaryError = null;
   child.stderr.setEncoding('utf8');
   child.stderr.on('data', chunk => { stderr += chunk; });
   try {
@@ -261,18 +290,22 @@ async function runChrome(
           + browserErrors.map(error => `[${error.kind}] ${error.message}`).join('\n'),
         );
       }
+      completedResult = result;
       return result;
     } finally {
       await cdp.call('Browser.close').catch(() => {});
       cdp.close();
     }
+  } catch (error) {
+    primaryError = error;
+    throw error;
   } finally {
     if (child.exitCode === null) {
+      await waitForChildExit(child, 5_000);
+    }
+    if (child.exitCode === null) {
       child.kill('SIGTERM');
-      await Promise.race([
-        new Promise(resolveExit => child.once('exit', resolveExit)),
-        new Promise(resolveTimeout => setTimeout(resolveTimeout, 2_000)),
-      ]);
+      await waitForChildExit(child, 5_000);
     }
     // Chrome helpers can outlive the browser process briefly and keep the
     // inherited pipes referenced even after Browser.close has completed.
@@ -282,20 +315,78 @@ async function runChrome(
     child.stderr.destroy();
     child.unref();
     try {
-      rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+      const cleanup = await removeChromeProfile(profile);
+      if (completedResult) completedResult.browserDiagnostics.profileCleanup = cleanup;
     } catch (error) {
-      console.warn(`[webgpu-gate] Could not remove temporary Chrome profile: ${error.message}`);
+      const cleanupError = new Error(
+        `Chrome/WebGPU fixture left a temporary profile residual: ${error.message}`,
+        { cause: error },
+      );
+      if (primaryError) {
+        throw new AggregateError(
+          [primaryError, cleanupError],
+          'Chrome/WebGPU fixture and temporary profile cleanup both failed.',
+        );
+      }
+      throw cleanupError;
     }
   }
+}
+
+export async function removeChromeProfile(profile, {
+  remove = rmSync,
+  maxAttempts = 100,
+  retryDelayMs = 100,
+} = {}) {
+  const startedAt = Date.now();
+  let lastError = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      remove(profile, { recursive: true, force: true });
+      return {
+        status: 'passed',
+        attempts: attempt,
+        durationMs: Date.now() - startedAt,
+      };
+    } catch (error) {
+      lastError = error;
+      if (!isRetryableProfileCleanupError(error) || attempt === maxAttempts) break;
+      await new Promise(resolveWait => setTimeout(resolveWait, retryDelayMs));
+    }
+  }
+  const error = new Error(
+    `Could not remove temporary Chrome profile after ${maxAttempts} attempts: ${lastError?.message ?? 'unknown error'}`,
+    { cause: lastError },
+  );
+  error.code = lastError?.code ?? 'CHROME_PROFILE_CLEANUP_FAILED';
+  throw error;
+}
+
+function isRetryableProfileCleanupError(error) {
+  return ['EBUSY', 'ENOTEMPTY', 'EPERM'].includes(error?.code);
+}
+
+function waitForChildExit(child, timeoutMs) {
+  if (child.exitCode !== null) return Promise.resolve(true);
+  return new Promise(resolveExit => {
+    const onExit = () => {
+      clearTimeout(timeout);
+      resolveExit(true);
+    };
+    const timeout = setTimeout(() => {
+      child.off('exit', onExit);
+      resolveExit(false);
+    }, timeoutMs);
+    child.once('exit', onExit);
+  });
 }
 
 function createHttpEvidence() {
   return { requestCount: 0, files: new Map() };
 }
 
-function recordHttpEvidence(evidence, root, path, contents) {
+function recordHttpEvidence(evidence, sourcePath, contents) {
   evidence.requestCount++;
-  const sourcePath = relative(root, path).split(sep).join('/');
   const existing = evidence.files.get(sourcePath);
   if (existing) {
     existing.requestCount++;

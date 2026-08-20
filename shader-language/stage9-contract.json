@@ -73,7 +73,7 @@
     "simple3dArtifactGzipBytes": 6718,
     "engineArtifactGzipBytes": 11460,
     "engineArtifactGzipBudgetBytes": 12000,
-    "componentsEvidenceArtifactGzipBytes": 2336,
+    "componentsEvidenceArtifactGzipBytes": 2334,
     "componentsPublicEntriesLoadEvidenceArtifact": false,
     "runtimeContainsCompiler": false
   },

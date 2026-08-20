@@ -25,17 +25,14 @@
     "README.md",
     "LICENSE",
     "dist/**/*.js",
-    "dist/**/*.d.ts",
-    "src/**/*"
+    "dist/**/*.d.ts"
   ],
   "exports": {
     ".": {
-      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./material-graph": {
-      "source": "./src/material-graph.ts",
       "types": "./dist/material-graph.d.ts",
       "import": "./dist/material-graph.js"
     }

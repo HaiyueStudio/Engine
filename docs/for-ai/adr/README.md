@@ -99,6 +99,7 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0079：SceneBatch/WASM 仅以真实收益证据保留](./0079-evidence-gated-scene-batch-and-wasm.md)
 - [0080：首发正确性按浏览器与真实硬件 WebGPU 验收](./0080-hardware-webgpu-browser-correctness-matrix.md)
 - [0081：0.1 首发浏览器支持收敛为 Windows](./0081-windows-first-0-1-browser-support.md)
-- [0082：HaiyueStudio 按产品边界拆分为多仓库](./0082-multi-repository-product-boundaries.md)
+- [0082：HaiyueStudio 按产品边界拆分为多仓库](../../../../milestones/docs/for-ai/adr/0082-multi-repository-product-boundaries.md)
 - [0083：Live2D 等可变形 2D 素材离线转换为来源无关 HYA](./0083-source-neutral-deformable-animation-delivery.md)
 - [0084：Ray tracing 使用可卸载的 WebGPU compute extension](./0084-webgpu-compute-ray-tracing-extension.md)
+- [0085：公共 API 与包体预算按已准入能力归因](./0085-capability-attributed-public-api-and-package-budgets.md)

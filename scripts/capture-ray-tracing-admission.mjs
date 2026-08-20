@@ -10,11 +10,14 @@ import {
 } from 'node:fs';
 import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  requireStudioRepository,
+  resolveStudioRepositoryPath,
+} from './studio-repository-layout.mjs';
 import { runChromeWebGpuFixture } from './webgpu-gate/chrome-runner.mjs';
 
 const engineRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const studioRoot = resolve(engineRoot, '..');
-const gamesRoot = resolve(studioRoot, 'Games');
+const gamesRoot = requireStudioRepository('Games').root;
 const outputRoot = resolve(engineRoot, 'review/capabilities/ray-tracing');
 const evidencePath = resolve(engineRoot, 'review/capabilities/ray-tracing-product-evidence.json');
 const gamesRevision = git(gamesRoot, ['rev-parse', 'HEAD']);
@@ -36,10 +39,14 @@ for (const definition of [
   { id: 'gravity-maze', viewport: { width: 1280, height: 720 } },
 ]) {
   const result = await runChromeWebGpuFixture({
-    root: studioRoot,
-    fixture: 'Engine/scripts/webgpu-gate/ray-tracing-admission-fixture.html',
+    root: engineRoot,
+    fixture: 'scripts/webgpu-gate/ray-tracing-admission-fixture.html',
     query: { game: definition.id },
     timeoutMs: 60_000,
+    mounts: [{
+      prefix: '/Games/games',
+      directory: resolveStudioRepositoryPath('Games', 'games'),
+    }],
     visualCapture: {
       viewportWidth: definition.viewport.width,
       viewportHeight: definition.viewport.height,
@@ -97,6 +104,7 @@ const evidence = {
     gamesRevision,
     gamesDirty: false,
     fixture: 'scripts/webgpu-gate/ray-tracing-admission-fixture.html',
+    contentMount: '/Games/games',
   },
   unclassifiedFailureCount: Object.values(captures)
     .reduce((sum, capture) => sum + capture.result.browserDiagnostics.unclassifiedFailureCount, 0),

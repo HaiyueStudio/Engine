@@ -19,7 +19,6 @@ const MIXED = await readJson(new URL('fixtures/native-3d-mixed-invalid.hya.json'
 test('native 3D focused facade exposes only the reviewed parser contract', async () => {
   const packageJson = await readJson(new URL('../package.json', import.meta.url));
   assert.deepEqual(packageJson.exports['./native3d'], {
-    source: './src/native3d.ts',
     types: './dist/native3d.d.ts',
     import: './dist/native3d.js',
   });

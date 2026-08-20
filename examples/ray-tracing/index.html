@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>海月 · WebGPU Ray Tracing</title>
+  <link rel="stylesheet" href="../example-fullscreen.css" />
+  <style>
+    :root { color-scheme: dark; font: 13px/1.5 Inter, ui-sans-serif, system-ui, sans-serif; background: #050811; color: #e8f3ff; }
+    body { margin: 0; min-height: 100vh; display: grid; grid-template-columns: minmax(280px, 360px) 1fr; background: radial-gradient(circle at 75% 20%, #13223d, #050811 58%); }
+    aside { padding: 28px; border-right: 1px solid #7dd3fc25; background: #07101ddd; backdrop-filter: blur(18px); }
+    main { min-width: 0; display: grid; place-items: center; padding: 30px; }
+    canvas { width: 100%; aspect-ratio: 16 / 9; border: 1px solid #7dd3fc3b; border-radius: 12px; background: #02040a; box-shadow: 0 30px 90px #000a; }
+    .eyebrow { color: #67e8f9; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; }
+    h1 { margin: 4px 0 8px; font-size: 24px; }
+    .muted { color: #91a4bc; }
+    label { display: grid; gap: 5px; margin: 14px 0; color: #b9c9db; }
+    select, input, button { border: 1px solid #67e8f944; border-radius: 7px; padding: 9px 10px; color: inherit; background: #0b1929; }
+    .control-heading { display: flex; justify-content: space-between; gap: 12px; }
+    output { color: #67e8f9; font-family: ui-monospace, monospace; }
+    button { width: 100%; margin-top: 8px; cursor: pointer; background: linear-gradient(135deg, #0e7490, #2563eb); font-weight: 700; }
+    button:disabled { cursor: wait; opacity: .55; }
+    progress { width: 100%; height: 8px; accent-color: #67e8f9; }
+    dl { display: grid; grid-template-columns: 1fr auto; gap: 7px 12px; margin-top: 18px; padding-top: 16px; border-top: 1px solid #7dd3fc20; }
+    dt { color: #8497ae; } dd { margin: 0; color: #dff8ff; font-family: ui-monospace, monospace; text-align: right; }
+    #diagnostics { min-height: 48px; margin-top: 14px; color: #9ed8e5; white-space: pre-wrap; font: 11px/1.45 ui-monospace, monospace; }
+    #result { display: none; }
+    @media (max-width: 760px) { body { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #7dd3fc25; } }
+  </style>
+</head>
+<body data-render-status="pending">
+  <aside>
+    <div class="eyebrow">Portable WebGPU compute</div>
+    <h1>Ray Tracing Lab</h1>
+    <p class="muted">Analytic sphere GPU traversal 与中型 PBR progressive path tracing 共用冻结的场景、BVH 和诊断契约。</p>
+    <label>场景<select id="scene"><option value="analytic">Small · Analytic reference</option><option value="material" selected>Medium · PBR material room</option></select></label>
+    <label>质量<select id="quality"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></label>
+    <label><span class="control-heading"><span>Pixel ratio</span><output id="pixel-ratio-value" for="pixel-ratio">1.00×</output></span><input id="pixel-ratio" type="range" min="0.25" max="2" step="0.25" value="1" /></label>
+    <label>视图<select id="view"><option value="denoised">Denoised</option><option value="raw">Raw</option><option value="variance">Variance</option><option value="history-age">History age</option><option value="feature">Feature</option></select></label>
+    <button id="render" type="button">Render</button>
+    <p id="status" class="muted">等待渲染</p>
+    <progress id="progress" max="1" value="0"></progress>
+    <dl><dt>Resolution</dt><dd id="resolution">—</dd><dt>Source</dt><dd id="source">—</dd><dt>Build</dt><dd id="build">—</dd><dt>GPU</dt><dd id="gpu">—</dd><dt>Peak memory</dt><dd id="memory">—</dd><dt>Resources</dt><dd id="resources">—</dd></dl>
+    <pre id="diagnostics"></pre>
+  </aside>
+  <main><canvas id="candidate"></canvas></main>
+  <pre id="result" aria-hidden="true"></pre>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

@@ -8,7 +8,7 @@
 | 使用 TypeScript 和引擎开发游戏 | [Engine Guide](./engine-guide/README.md) | 面向代码开发者的教程、功能指南和 recipes |
 | 查询类、接口、参数和错误码 | [API Reference](./api/README.md) | 只提供可查询的 API 事实，不承担教学职责 |
 | 理解架构、研发状态或参与项目维护 | [For AI & Maintainers](./for-ai/README.md) | 架构约束、ADR、模块边界、门禁和研发状态 |
-| 查看当前里程碑、Goal 和执行依赖 | [Milestones](../milestones/README.md) | 动态实施计划、并行边界和完成条件 |
+| 查看当前里程碑、Goal 和执行依赖 | [Milestones](../../milestones/README.md) | 动态实施计划、并行边界和完成条件 |
 
 ## 推荐学习路径
 
@@ -18,7 +18,7 @@
 - 判断是否受支持或准备 issue：阅读[已知限制](./engine-guide/known-limitations.md)和[故障排查](./engine-guide/troubleshooting.md)。
 - 已经知道类型名：直接进入 [API Reference](./api/README.md)，不要从教程反查完整签名。
 - 修改引擎或编辑器架构：先阅读 [For AI & Maintainers](./for-ai/README.md) 和相关 ADR。
-- 执行已规划阶段任务：先选择 [Milestones](../milestones/README.md) 中状态为 `ready` 的 Goal。
+- 执行已规划阶段任务：先选择 [Milestones](../../milestones/README.md) 中状态为 `ready` 的 Goal。
 - 从源码运行或贡献：阅读[贡献与验证](./for-ai/contributing.md)。
 
 ## 文档维护规则

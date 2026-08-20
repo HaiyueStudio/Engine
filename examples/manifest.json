@@ -1942,6 +1942,33 @@
         "group": "compute",
         "order": 1
       }
+    },
+    {
+      "id": "ray-tracing",
+      "title": "WebGPU Ray Tracing Lab",
+      "entry": "ray-tracing/main.ts",
+      "capabilities": [
+        "webgpu",
+        "compute-ray-tracing",
+        "analytic-primitive",
+        "blas-tlas",
+        "progressive-path-tracing",
+        "pbr-metallic-roughness",
+        "denoise",
+        "runtime-diagnostics",
+        "explicit-disposal"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "compute",
+        "order": 4
+      }
     }
   ],
   "catalog": {

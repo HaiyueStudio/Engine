@@ -3,8 +3,10 @@ import { dirname, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { npmArgs, npmCommand } from './npm-process.mjs';
+import { requireStudioRepository } from './studio-repository-layout.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const gamesRoot = requireStudioRepository('Games').root;
 const targets = process.argv.slice(2);
 
 if (targets.length === 0) {
@@ -20,20 +22,32 @@ for (const target of targets) {
   const definition = kind === 'example'
     ? {
         kind,
+        root,
         directory: 'examples',
+        manifestDirectory: resolve(root, 'examples'),
+        npmArguments: ['run', 'build', '-w', './examples'],
         filter: 'EXAMPLE_FILTER',
         manifestKind: 'examples',
         environment: { EXAMPLE_SKIP_SOURCE_VIEWER: '1' },
       }
     : kind === 'game'
-      ? { kind, directory: 'games', filter: 'GAME_FILTER', manifestKind: 'games', environment: {} }
+      ? {
+          kind,
+          root: gamesRoot,
+          directory: 'games',
+          manifestDirectory: resolve(gamesRoot, 'games'),
+          npmArguments: ['run', 'build'],
+          filter: 'GAME_FILTER',
+          manifestKind: 'games',
+          environment: {},
+        }
       : null;
 
   if (!definition || !name) {
     console.error(`Invalid target "${target}". Expected example:<name> or game:<name>.`);
     process.exit(2);
   }
-  const manifest = JSON.parse(readFileSync(resolve(root, definition.directory, 'manifest.json'), 'utf8'));
+  const manifest = JSON.parse(readFileSync(resolve(definition.manifestDirectory, 'manifest.json'), 'utf8'));
   if (manifest.kind !== definition.manifestKind || !manifest.entries.some(entry => entry.id === name)) {
     console.error(`Unknown ${kind} target "${name}".`);
     process.exit(1);
@@ -49,8 +63,8 @@ for (const target of targets) {
 
 for (const { definition, names } of batches.values()) {
   console.log(`\n[build-target] ${definition.manifestKind}: ${names.join(', ')}`);
-  const result = spawnSync(npmCommand(), npmArgs(['run', 'build', '-w', `./${definition.directory}`]), {
-    cwd: root,
+  const result = spawnSync(npmCommand(), npmArgs(definition.npmArguments), {
+    cwd: definition.root,
     env: {
       ...process.env,
       ...definition.environment,

@@ -1,3 +1,4 @@
+import terser from '@rollup/plugin-terser';
 import {
   cleanOutputDirectory,
   haiyueExternal,
@@ -15,6 +16,10 @@ export default {
     live2d: 'src/live2d.ts',
   },
   external: haiyueExternal({ packages: ['polygon-clipping'], includeMatrix: false }),
-  output: libraryOutput(),
-  plugins: [cleanOutputDirectory(), ...haiyuePlugins({ commonjsInterop: false })],
+  output: { ...libraryOutput(), compact: true },
+  plugins: [
+    cleanOutputDirectory(),
+    ...haiyuePlugins({ commonjsInterop: false }),
+    terser({ format: { comments: false } }),
+  ],
 };

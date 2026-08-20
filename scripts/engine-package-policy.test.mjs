@@ -1,10 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
   matchesPackageGlob,
+  validateCapabilityPackageBudgetConfig,
   validateEngineConsumerResult,
   validateEnginePackManifest,
 } from './engine-package-policy.mjs';
+
+test('package capacity is reviewed capability plus explicit growth reserve', () => {
+  const budget = JSON.parse(readFileSync(new URL('../config/engine-package-budget.json', import.meta.url), 'utf8'));
+  assert.deepEqual(validateCapabilityPackageBudgetConfig(budget), []);
+  assert.equal(budget.publicPackages['@haiyue/engine'].capacity.reviewed.fileCount, 549);
+  assert.ok(budget.publicPackages['@haiyue/engine'].maxFileCount > 549);
+  assert.ok(budget.publicPackages['@haiyue/animation-spec'].maxFileCount > 31);
+});
 
 test('package globs include nested release files without admitting source maps', () => {
   assert.equal(matchesPackageGlob('dist/index.js', 'dist/**/*.js'), true);
@@ -12,6 +22,29 @@ test('package globs include nested release files without admitting source maps',
   assert.equal(matchesPackageGlob('dist/index.d.ts', 'dist/**/*.d.ts'), true);
   assert.equal(matchesPackageGlob('dist/index.js.map', 'dist/**/*.js'), false);
   assert.equal(matchesPackageGlob('src/index.ts', 'dist/**/*.d.ts'), false);
+});
+
+test('public package manifests expose dist-only targets and never publish source trees', () => {
+  const workspaces = [
+    ['engine', new URL('../engine/package.json', import.meta.url)],
+    ['animation-spec', new URL('../animation-spec/package.json', import.meta.url)],
+    ['shader-language', new URL('../shader-language/package.json', import.meta.url)],
+    ['extensions', new URL('../extensions/package.json', import.meta.url)],
+    ['ui', new URL('../../UI/package.json', import.meta.url)],
+  ];
+  for (const [workspace, manifestUrl] of workspaces) {
+    const manifest = JSON.parse(readFileSync(manifestUrl, 'utf8'));
+    assert.ok(!(manifest.files ?? []).some(value => value.includes('src')), `${workspace} files`);
+    for (const [subpath, target] of Object.entries(manifest.exports ?? {})) {
+      if (typeof target === 'string') {
+        assert.ok(!target.includes('/src/'), `${workspace} ${subpath} string target`);
+        continue;
+      }
+      assert.equal(target?.source, undefined, `${workspace} ${subpath} source condition`);
+      assert.match(target?.types ?? '', /^\.\/dist\//u, `${workspace} ${subpath} types`);
+      assert.match(target?.import ?? '', /^\.\/dist\//u, `${workspace} ${subpath} import`);
+    }
+  }
 });
 
 test('pack policy rejects forbidden files and missing export targets', () => {

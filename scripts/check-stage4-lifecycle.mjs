@@ -3,6 +3,7 @@ import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const editorRoot = resolve(root, '../Editor/editor');
 const engineEntryPath = resolve(root, 'engine/src/core/Engine.ts');
 const failures = [];
 const requiredContracts = new Map([
@@ -19,10 +20,14 @@ const requiredContracts = new Map([
 ]);
 
 for (const [path, snippets] of requiredContracts) {
-  const source = readFileSync(resolve(root, path), 'utf8');
+  const source = readFileSync(resolveContract(path), 'utf8');
   for (const snippet of snippets) {
     if (!source.includes(snippet)) failures.push(`${path} is missing stage-4 contract: ${snippet}`);
   }
+}
+
+function resolveContract(path) {
+  return path.startsWith('editor/') ? resolve(editorRoot, path.slice('editor/'.length)) : resolve(root, path);
 }
 
 for (const file of walk(resolve(root, 'engine/src'))) {

@@ -23,11 +23,11 @@
 - [Release process](./release-process.md)
 - [从源码运行、贡献与验证](./contributing.md)
 - [文档维护约定](./documentation-conventions.md)
-- [Milestones 与 Goals](../../milestones/README.md)
+- [Milestones 与 Goals](../../../milestones/README.md)
 
 ## 当前研发状态
 
-结构化阶段目标、依赖和执行顺序以 [`milestones/`](../../milestones/README.md) 为准；尚未进入里程碑的候选事项保留在 [`todos/`](../../todos/)，评审结论、阶段基线和数值证据保留在 [`review/`](../../review/)。本目录只维护稳定的架构索引和约束，不复制会快速过期的 Goal 状态。
+结构化阶段目标、依赖和执行顺序以 [`milestones/`](../../../milestones/README.md) 为准；尚未进入里程碑的候选事项保留在 [`todos/`](../../../milestones/todos/)，评审结论、阶段基线和数值证据保留在 [`review/`](../../review/)。本目录只维护稳定的架构索引和约束，不复制会快速过期的 Goal 状态。
 
 开始修改前应同时检查：
 

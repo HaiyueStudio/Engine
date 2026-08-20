@@ -177,14 +177,14 @@ test('content tier CLI defaults to smoke and rejects ambiguous or unknown input'
   assert.throws(() => resolveContentTier(['--typo=full']), /Unknown check:slow argument/);
 });
 
-test('real manifests produce 45 smoke targets and 55 smoke-plus-full targets', () => {
+test('real manifests produce 50 smoke targets and 61 smoke-plus-full targets', () => {
   const smoke = createContentTargetPlan('smoke', manifests);
   const full = createContentTargetPlan('full', manifests);
-  assert.equal(smoke.targets.length, 45);
-  assert.deepEqual(smoke.selectedCounts, { smoke: 45, full: 0, manual: 0 });
-  assert.equal(full.targets.length, 55);
-  assert.deepEqual(full.selectedCounts, { smoke: 45, full: 10, manual: 0 });
-  assert.equal(full.manifestCounts.manual, 46);
+  assert.equal(smoke.targets.length, 50);
+  assert.deepEqual(smoke.selectedCounts, { smoke: 50, full: 0, manual: 0 });
+  assert.equal(full.targets.length, 61);
+  assert.deepEqual(full.selectedCounts, { smoke: 50, full: 11, manual: 0 });
+  assert.equal(full.manifestCounts.manual, 47);
 
   const expectedSmoke = manifestTargets(entry => entry.ci === 'smoke');
   const expectedFull = manifestTargets(entry => entry.ci === 'smoke' || entry.ci === 'full');

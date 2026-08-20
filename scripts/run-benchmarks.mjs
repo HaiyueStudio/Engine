@@ -3,6 +3,7 @@ import { cpus, freemem, tmpdir, totalmem } from 'node:os';
 import { dirname, relative, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { requireStudioRepository } from './studio-repository-layout.mjs';
 import { runStatisticalBenchmarks } from './benchmark/harness.mjs';
 import {
   aggregateBaselineCohortResults,
@@ -19,6 +20,7 @@ import {
 } from './benchmark/cpu-benchmark-policy.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const editorWorkspace = resolve(requireStudioRepository('Editor').root, 'editor');
 await main();
 
 async function main() {
@@ -208,7 +210,7 @@ function buildWorkspace(workspace, config = null) {
 
 function buildEditorTesting() {
   const result = spawnSync(process.execPath, [resolve(root, 'scripts/build-rollup-once.mjs'), 'rollup.test.config.js'], {
-    cwd: resolve(root, 'editor'),
+    cwd: editorWorkspace,
     stdio: 'inherit',
     timeout: 120_000,
   });

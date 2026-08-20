@@ -25,177 +25,142 @@
     "README.md",
     "LICENSE",
     "dist/**/*.js",
-    "dist/**/*.d.ts",
-    "src/**/*"
+    "dist/**/*.d.ts"
   ],
   "exports": {
     ".": {
-      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./core": {
-      "source": "./src/core.ts",
       "types": "./dist/core.d.ts",
       "import": "./dist/core.js"
     },
     "./assets": {
-      "source": "./src/assets.ts",
       "types": "./dist/assets.d.ts",
       "import": "./dist/assets.js"
     },
     "./diagnostics": {
-      "source": "./src/diagnostics.ts",
       "types": "./dist/diagnostics.d.ts",
       "import": "./dist/diagnostics.js"
     },
     "./extension-authoring": {
-      "source": "./src/extension-authoring.ts",
       "types": "./dist/extension-authoring.d.ts",
       "import": "./dist/extension-authoring.js"
     },
     "./ecs": {
-      "source": "./src/ecs.ts",
       "types": "./dist/ecs.d.ts",
       "import": "./dist/ecs.js"
     },
     "./components": {
-      "source": "./src/components.ts",
       "types": "./dist/components.d.ts",
       "import": "./dist/components.js"
     },
     "./geometry": {
-      "source": "./src/geometry.ts",
       "types": "./dist/geometry.d.ts",
       "import": "./dist/geometry.js"
     },
     "./material": {
-      "source": "./src/material.ts",
       "types": "./dist/material.d.ts",
       "import": "./dist/material.js"
     },
     "./experimental": {
-      "source": "./src/experimental.ts",
       "types": "./dist/experimental.d.ts",
       "import": "./dist/experimental.js"
     },
     "./experimental/assets": {
-      "source": "./src/experimental/assets.ts",
       "types": "./dist/experimental/assets.d.ts",
       "import": "./dist/experimental/assets.js"
     },
     "./experimental/async": {
-      "source": "./src/experimental/async.ts",
       "types": "./dist/experimental/async.d.ts",
       "import": "./dist/experimental/async.js"
     },
     "./experimental/ktx2-worker-runtime": {
-      "source": "./src/experimental/ktx2-worker-runtime.ts",
       "types": "./dist/experimental/ktx2-worker-runtime.d.ts",
       "import": "./dist/experimental/ktx2-worker-runtime.js"
     },
     "./experimental/diagnostics": {
-      "source": "./src/experimental/diagnostics.ts",
       "types": "./dist/experimental/diagnostics.d.ts",
       "import": "./dist/experimental/diagnostics.js"
     },
     "./experimental/gpu-driven": {
-      "source": "./src/experimental/gpu-driven.ts",
       "types": "./dist/experimental/gpu-driven.d.ts",
       "import": "./dist/experimental/gpu-driven.js"
     },
     "./experimental/renderer": {
-      "source": "./src/experimental/renderer.ts",
       "types": "./dist/experimental/renderer.d.ts",
       "import": "./dist/experimental/renderer.js"
     },
     "./systems": {
-      "source": "./src/systems.ts",
       "types": "./dist/systems.d.ts",
       "import": "./dist/systems.js"
     },
     "./physics": {
-      "source": "./src/physics.ts",
       "types": "./dist/physics.d.ts",
       "import": "./dist/physics.js"
     },
     "./physics/components": {
-      "source": "./src/physics-components.ts",
       "types": "./dist/physics-components.d.ts",
       "import": "./dist/physics-components.js"
     },
     "./physics/backend": {
-      "source": "./src/physics/backend.ts",
       "types": "./dist/physics/backend.d.ts",
       "import": "./dist/physics/backend.js"
     },
     "./postprocess": {
-      "source": "./src/postprocess.ts",
       "types": "./dist/postprocess.d.ts",
       "import": "./dist/postprocess.js"
     },
     "./gui": {
-      "source": "./src/gui.ts",
       "types": "./dist/gui.d.ts",
       "import": "./dist/gui.js"
     },
     "./compute": {
-      "source": "./src/compute.ts",
       "types": "./dist/compute.d.ts",
       "import": "./dist/compute.js"
     },
     "./scene": {
-      "source": "./src/scene.ts",
       "types": "./dist/scene.d.ts",
       "import": "./dist/scene.js"
     },
     "./input": {
-      "source": "./src/input.ts",
       "types": "./dist/input.d.ts",
       "import": "./dist/input.js"
     },
     "./controls": {
-      "source": "./src/controls.ts",
       "types": "./dist/controls.d.ts",
       "import": "./dist/controls.js"
     },
     "./tween": {
-      "source": "./src/tween.ts",
       "types": "./dist/tween.d.ts",
       "import": "./dist/tween.js"
     },
     "./rtt": {
-      "source": "./src/rtt.ts",
       "types": "./dist/rtt.d.ts",
       "import": "./dist/rtt.js"
     },
     "./font": {
-      "source": "./src/font.ts",
       "types": "./dist/font.d.ts",
       "import": "./dist/font.js"
     },
     "./color": {
-      "source": "./src/color.ts",
       "types": "./dist/color.d.ts",
       "import": "./dist/color.js"
     },
     "./lighting": {
-      "source": "./src/lighting.ts",
       "types": "./dist/lighting.d.ts",
       "import": "./dist/lighting.js"
     },
     "./math": {
-      "source": "./src/math.ts",
       "types": "./dist/math.d.ts",
       "import": "./dist/math.js"
     },
     "./serialization": {
-      "source": "./src/serialization.ts",
       "types": "./dist/serialization.d.ts",
       "import": "./dist/serialization.js"
     },
     "./navigation": {
-      "source": "./src/navigation.ts",
       "types": "./dist/navigation.d.ts",
       "import": "./dist/navigation.js"
     }

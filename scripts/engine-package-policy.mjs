@@ -75,6 +75,42 @@ export function validateEnginePackManifest({
   };
 }
 
+export function validateCapabilityPackageBudgetConfig(budget) {
+  const errors = [];
+  if (budget.schemaVersion !== 3
+    || budget.budgetPolicy?.model !== 'reviewed-capability-plus-growth-reserve') {
+    errors.push('public package budget must use the capability-attributed schemaVersion 3 model');
+  }
+  for (const [packageName, policy] of Object.entries(budget.publicPackages ?? {})) {
+    const reviewed = policy.capacity?.reviewed;
+    const reserve = policy.capacity?.growthReserve;
+    if (!reviewed || !reserve || !policy.capacity?.capabilityBasis) {
+      errors.push(`${packageName} is missing reviewed capacity, growth reserve, or capability basis`);
+      continue;
+    }
+    for (const [maximumField, reviewedField, reserveField] of [
+      ['maxPackedBytes', 'packedBytes', 'packedBytes'],
+      ['maxUnpackedBytes', 'unpackedBytes', 'unpackedBytes'],
+      ['maxFileCount', 'fileCount', 'fileCount'],
+    ]) {
+      const maximum = policy[maximumField];
+      const reviewedValue = reviewed[reviewedField];
+      const reserveValue = reserve[reserveField];
+      if (!Number.isInteger(maximum) || !Number.isInteger(reviewedValue) || !Number.isInteger(reserveValue)
+        || maximum < 1 || reviewedValue < 1 || reserveValue < 1 || maximum !== reviewedValue + reserveValue) {
+        errors.push(`${packageName} ${maximumField} must equal positive reviewed capacity plus positive growth reserve`);
+      }
+    }
+  }
+  const engine = budget.publicPackages?.['@haiyue/engine'];
+  if (engine && (budget.tarball?.maxPackedBytes !== engine.maxPackedBytes
+    || budget.tarball?.maxUnpackedBytes !== engine.maxUnpackedBytes
+    || budget.tarball?.maxFileCount !== engine.maxFileCount)) {
+    errors.push('legacy engine tarball limits must match the capability-attributed @haiyue/engine envelope');
+  }
+  return errors;
+}
+
 export function validateEngineConsumerResult(result, policy) {
   const errors = [];
   if (result.gzipBytes > policy.maxGzipBytes) {

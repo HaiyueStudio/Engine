@@ -8,10 +8,11 @@ import {
   statSync,
   writeFileSync,
 } from 'node:fs';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, extname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import JSZip from 'jszip';
+import { requireStudioRepository } from '../studio-repository-layout.mjs';
 import { runEditorBrowserScenario } from './browserDriver.mjs';
 import {
   EDITOR_LARGE_SCENE_BUDGETS,
@@ -19,6 +20,9 @@ import {
 import { createDeterministicEditorScene } from './largeSceneGenerator.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+const editorRepositoryRoot = requireStudioRepository('Editor').root;
+const editorRequire = createRequire(resolve(editorRepositoryRoot, 'editor/package.json'));
+const JSZip = editorRequire('jszip');
 const options = parseArguments(process.argv.slice(2));
 const artifactPath = resolve(
   root,
@@ -30,8 +34,8 @@ const baselinePath = resolve(
   options.baseline
     ?? 'artifacts/editor-e2e/large-scene-before.json',
 );
-const editorEntry = resolve(root, 'editor/index.html');
-const editorBundle = resolve(root, 'editor/dist/editor.js');
+const editorEntry = resolve(editorRepositoryRoot, 'editor/index.html');
+const editorBundle = resolve(editorRepositoryRoot, 'editor/dist/editor.js');
 const startedAt = Date.now();
 const HIERARCHY_DRAG_P95_MS = 50;
 const HIERARCHY_DRAG_SAMPLE_COUNT = 40;
@@ -108,7 +112,7 @@ async function runEntityCount(entityCount) {
 
   try {
     return await runEditorBrowserScenario({
-      root,
+      root: editorRepositoryRoot,
       route: 'editor/index.html',
       downloadDirectory,
       failureScreenshotPath,

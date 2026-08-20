@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const failures = [];
@@ -59,7 +60,9 @@ if (failures.length) {
 console.log('[stage7-observability] resources, passes, frame metrics, statistical benchmarks, pixel golden, and editor diagnostics passed.');
 
 function read(path) {
-  const absolute = resolve(root, path);
+  const absolute = path.startsWith('editor/')
+    ? resolveStudioRepositoryPath('Editor', 'editor', path.slice('editor/'.length))
+    : resolve(root, path);
   if (!existsSync(absolute)) { failures.push(`missing ${path}`); return ''; }
   return readFileSync(absolute, 'utf8');
 }

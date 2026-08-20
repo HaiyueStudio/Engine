@@ -4,9 +4,23 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const studioRoot = resolve(root, '..');
 const baselinePath = resolve(root, 'review/baselines/api-surface.json');
-const publicWorkspaceDirectories = ['animation-spec', 'engine', 'extensions', 'ui'];
+const candidatePath = resolve(root, 'artifacts/api/api-surface-candidate.json');
+const capabilityBudgetPath = resolve(root, 'config/public-api-capability-budgets.json');
+const capabilityBudgetPolicy = JSON.parse(readFileSync(capabilityBudgetPath, 'utf8'));
+const publicWorkspaceDirectories = ['shader-language', 'animation-spec', 'engine', 'extensions', 'ui'];
 const allWorkspaceDirectories = ['shader-language', 'animation-spec', 'engine', 'extensions', 'ui', 'editor', 'examples', 'games'];
+const workspaceRoots = new Map([
+  ['shader-language', resolve(root, 'shader-language')],
+  ['animation-spec', resolve(root, 'animation-spec')],
+  ['engine', resolve(root, 'engine')],
+  ['extensions', resolve(root, 'extensions')],
+  ['ui', resolve(studioRoot, 'UI')],
+  ['editor', resolve(studioRoot, 'Editor/editor')],
+  ['examples', resolve(root, 'examples')],
+  ['games', resolve(studioRoot, 'Games')],
+]);
 const mode = process.argv[2];
 const engineExperimentalOnlyExports = new Set([
   'AssetCacheBudget',
@@ -184,76 +198,10 @@ const stableMaterialProtocolExports = new Set([
   'MaterialRendererRegistration',
   'MaterialRendererRegistry',
 ]);
-const stableSurfaceBudgets = new Map([
-  // ADR 0035: the default entrypoint is an exact, intentionally small golden path.
-  ['.', 30],
-  ['./assets', 22],
-  // ADR 0070: immutable aggregate snapshots only; mutation remains experimental.
-  ['./diagnostics', 12],
-  // ADR 0071: narrow, stable SPI consumed by separately published render extensions.
-  ['./extension-authoring', 14],
-  ['./color', 16],
-  // ADR 0065: entity clipping adds one component, one capacity constant, and two focused contracts.
-  ['./components', 103],
-  ['./compute', 7],
-  // ADR 0064: FirstPersonControls adds one class and one options contract.
-  ['./controls', 9],
-  ['./core', 68],
-  ['./ecs', 22],
-  ['./font', 13],
-  // ADR 0043 + 0045 + 0047 + 0048: async CSG and focused triangle transforms.
-  ['./geometry', 53],
-  ['./gui', 69],
-  ['./input', 3],
-  // ADR 0046: one owned equirectangular-to-cubemap factory and its focused contracts.
-  ['./lighting', 19],
-  ['./material', 69],
-  ['./math', 7],
-  ['./navigation', 9],
-  ['./physics', 37],
-  // Backend-free component contract used by tools that must not evaluate a
-  // simulation backend while inspecting or serializing a scene.
-  ['./physics/components', 13],
-  ['./physics/backend', 44],
-  // ADR 0060: three focused AO passes plus their shared options contract.
-  ['./postprocess', 29],
-  ['./rtt', 5],
-  ['./scene', 16],
-  ['./serialization', 13],
-  ['./systems', 41],
-  ['./tween', 19],
-]);
-const experimentalSurfaceBudgets = new Map([
-  // Keep the compatibility aggregate bounded while new callers move to owned slices.
-  // ADR 0077/0078: shared WorkerChannel, compute ordering, and GUI layout parity seams.
-  ['./experimental', 793],
-  ['./experimental/assets', 40],
-  // ADR 0077 focused WorkerChannel and async primitives for extension consumers.
-  ['./experimental/async', 8],
-  // Side-effect-only module worker entry; it intentionally exports no symbols.
-  ['./experimental/ktx2-worker-runtime', 0],
-  ['./experimental/diagnostics', 32],
-  ['./experimental/gpu-driven', 32],
-  ['./experimental/renderer', 64],
-]);
-const extensionStableSurfaceBudgets = new Map([
-  // ADR 0070 + 0071: reviewed public extension batches.
-  ['./animation', 26],
-  ['./animation3d', 75],
-  ['./canvas-text', 4],
-  ['./gltf', 56],
-  ['./gltf-animation3d', 5],
-  ['./grid', 2],
-  ['./hya-state-machine', 13],
-  ['./spine', 8],
-  ['./tilemap', 8],
-  ['./tween', 6],
-]);
-const extensionExperimentalSurfaceBudgets = new Map([
-  ['.', 2],
-  ['./experimental/gltf-worker', 12],
-  ['./experimental/spine-worker', 10],
-]);
+const stableSurfaceBudgets = apiBudgetMap('@haiyue/engine', 'stable');
+const experimentalSurfaceBudgets = apiBudgetMap('@haiyue/engine', 'experimental');
+const extensionStableSurfaceBudgets = apiBudgetMap('@haiyue/extensions', 'stable');
+const extensionExperimentalSurfaceBudgets = apiBudgetMap('@haiyue/extensions', 'experimental');
 const rootOnlyForbiddenExports = new Set([
   'ComponentSerializationRegistry',
   'coreComponentSerializationRegistry',
@@ -293,12 +241,13 @@ const rootGoldenPathExports = new Set([
   'World',
 ]);
 
-if (mode !== '--check' && mode !== '--write') {
-  console.error('Usage: node scripts/api-surface.mjs --check|--write');
+if (mode !== '--check' && mode !== '--write' && mode !== '--candidate') {
+  console.error('Usage: node scripts/api-surface.mjs --check|--write|--candidate');
   process.exit(2);
 }
 
 const current = createSnapshot();
+assertCapabilityAttributedApiBudgets(current);
 assertApiStabilityBoundaries(current);
 const serialized = `${JSON.stringify(current, null, 2)}\n`;
 
@@ -306,6 +255,13 @@ if (mode === '--write') {
   mkdirSync(dirname(baselinePath), { recursive: true });
   writeFileSync(baselinePath, serialized);
   console.log(`[api-surface] Wrote ${relative(root, baselinePath)}.`);
+  process.exit(0);
+}
+
+if (mode === '--candidate') {
+  mkdirSync(dirname(candidatePath), { recursive: true });
+  writeFileSync(candidatePath, serialized);
+  console.log(`[api-surface] Wrote diagnostic candidate ${relative(root, candidatePath)} without changing the baseline.`);
   process.exit(0);
 }
 
@@ -326,7 +282,7 @@ console.log('[api-surface] Public API and workspace package graph match the base
 
 function createSnapshot() {
   const manifests = new Map(allWorkspaceDirectories.map(directory => {
-    const manifest = JSON.parse(readFileSync(resolve(root, directory, 'package.json'), 'utf8'));
+    const manifest = JSON.parse(readFileSync(resolve(workspaceRoots.get(directory), 'package.json'), 'utf8'));
     return [directory, manifest];
   }));
   const workspaceByName = new Map([...manifests].map(([directory, manifest]) => [manifest.name, directory]));
@@ -355,7 +311,7 @@ function createSnapshot() {
     for (const [exportPath, target] of packageEntrypoints(manifest)) {
       const source = sourceForTarget(directory, target);
       entrypoints[exportPath] = {
-        source: relative(root, source),
+        source: `${directory}/${relative(workspaceRoots.get(directory), source)}`,
         exports: collectExports(source),
       };
     }
@@ -368,10 +324,67 @@ function createSnapshot() {
 
   return {
     schemaVersion: 1,
-    note: 'Haiyue reviewed package facade baseline (2026-08-17). Engine root remains the exact ADR 0035 golden path; M2.5 adds reviewed experimental async and compute-ordering seams while stable growth still requires budget/ADR review.',
+    note: 'Haiyue reviewed capability-attributed public facade baseline (2026-08-20). Engine root remains the exact ADR 0035 golden path; new capabilities use focused stable or experimental entrypoints and require an attributed budget review.',
     workspaceGraph,
     packages,
   };
+}
+
+function apiBudgetMap(packageName, stability) {
+  const definition = capabilityBudgetPolicy.packages?.[packageName];
+  if (!definition) throw new Error(`Missing capability API budget for ${packageName}.`);
+  const result = new Map();
+  for (const group of definition.groups ?? []) {
+    if (group.stability !== stability) continue;
+    for (const [entrypoint, reviewedSymbols] of Object.entries(group.entrypoints ?? {})) {
+      const reserve = Math.max(
+        group.growthReserve?.minimumSymbols ?? 0,
+        Math.ceil(reviewedSymbols * (group.growthReserve?.ratio ?? 0)),
+      );
+      result.set(entrypoint, reviewedSymbols + reserve);
+    }
+  }
+  return result;
+}
+
+function assertCapabilityAttributedApiBudgets(snapshot) {
+  if (capabilityBudgetPolicy.schemaVersion !== 1
+    || capabilityBudgetPolicy.model !== 'reviewed-capability-plus-growth-reserve') {
+    throw new Error('Unsupported public API capability budget policy.');
+  }
+  const expectedPackages = Object.keys(snapshot.packages).sort();
+  const governedPackages = Object.keys(capabilityBudgetPolicy.packages ?? {}).sort();
+  if (JSON.stringify(expectedPackages) !== JSON.stringify(governedPackages)) {
+    throw new Error(`Public API capability package set mismatch: expected ${expectedPackages.join(', ')}, received ${governedPackages.join(', ')}.`);
+  }
+  for (const [packageName, api] of Object.entries(snapshot.packages)) {
+    const definition = capabilityBudgetPolicy.packages[packageName];
+    if (definition.workspace !== api.workspace) throw new Error(`${packageName} capability budget workspace mismatch.`);
+    const governed = new Map();
+    for (const group of definition.groups ?? []) {
+      if (!group.id || !['stable', 'experimental'].includes(group.stability)) throw new Error(`${packageName} has an invalid capability group.`);
+      const ratio = group.growthReserve?.ratio;
+      const minimum = group.growthReserve?.minimumSymbols;
+      if (!Number.isFinite(ratio) || ratio < 0 || !Number.isInteger(minimum) || minimum < 0) throw new Error(`${packageName}/${group.id} has an invalid growth reserve.`);
+      for (const [entrypoint, reviewedSymbols] of Object.entries(group.entrypoints ?? {})) {
+        if (governed.has(entrypoint)) throw new Error(`${packageName}${entrypoint} is assigned to multiple capability groups.`);
+        if (!Number.isInteger(reviewedSymbols) || reviewedSymbols < 0) throw new Error(`${packageName}${entrypoint} has an invalid reviewed symbol count.`);
+        governed.set(entrypoint, { group, reviewedSymbols });
+      }
+    }
+    const actualEntrypoints = Object.keys(api.entrypoints).sort();
+    const governedEntrypoints = [...governed.keys()].sort();
+    if (JSON.stringify(actualEntrypoints) !== JSON.stringify(governedEntrypoints)) {
+      throw new Error(`${packageName} capability entrypoints disagree with package exports.`);
+    }
+    for (const [entrypoint, entry] of Object.entries(api.entrypoints)) {
+      const { group, reviewedSymbols } = governed.get(entrypoint);
+      const maximum = reviewedSymbols + Math.max(group.growthReserve.minimumSymbols, Math.ceil(reviewedSymbols * group.growthReserve.ratio));
+      if (entry.exports.length > maximum) {
+        throw new Error(`${packageName}${entrypoint} exports ${entry.exports.length} symbols; capability budget is ${reviewedSymbols}+${maximum - reviewedSymbols}.`);
+      }
+    }
+  }
 }
 
 function assertApiStabilityBoundaries(snapshot) {
@@ -598,14 +611,17 @@ function visitTypeNode(node, onIdentifier) {
 function packageEntrypoints(manifest) {
   if (!manifest.exports) return [['.', manifest.module ?? manifest.main]];
   return Object.entries(manifest.exports)
-    .map(([key, value]) => [key, typeof value === 'string' ? value : value.import ?? value.default])
+    .filter(([key, value]) => key !== './package.json' && !(typeof value === 'string' && value.endsWith('package.json')))
+    .map(([key, value]) => [key, typeof value === 'string' ? value : value.source ?? value.import ?? value.default])
     .sort(([a], [b]) => a.localeCompare(b));
 }
 
 function sourceForTarget(directory, target) {
   if (typeof target !== 'string') throw new Error(`No import target found for ${directory}.`);
-  const relativeTarget = target.replace(/^(?:\.\/)?dist\//, '').replace(/\.js$/, '.ts');
-  const source = resolve(root, directory, 'src', relativeTarget);
+  const workspaceRoot = workspaceRoots.get(directory);
+  const source = target.startsWith('./src/')
+    ? resolve(workspaceRoot, target)
+    : resolve(workspaceRoot, 'src', target.replace(/^(?:\.\/)?dist\//, '').replace(/\.js$/, '.ts'));
   if (!existsSync(source)) throw new Error(`Cannot map ${directory}/${target} to ${relative(root, source)}.`);
   return source;
 }

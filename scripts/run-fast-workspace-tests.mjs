@@ -2,15 +2,16 @@ import { existsSync } from 'node:fs';
 import { dirname, extname, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { MANDATORY_FAST_TEST_WORKSPACES } from './fast-gate-workspace-policy.mjs';
+import { MANDATORY_FAST_TEST_TARGETS } from './fast-gate-workspace-policy.mjs';
+import { requireStudioRepository } from './studio-repository-layout.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-for (const workspace of MANDATORY_FAST_TEST_WORKSPACES) {
-  console.log(`\n[fast-gate] testing ${workspace}`);
-  const invocation = npmInvocation(['test', '-w', workspace]);
+for (const target of MANDATORY_FAST_TEST_TARGETS) {
+  console.log(`\n[fast-gate] testing ${target.repository}:${target.id}`);
+  const invocation = npmInvocation(target.npmArgs);
   const result = spawnSync(invocation.command, invocation.args, {
-    cwd: root,
+    cwd: requireStudioRepository(target.repository).root,
     stdio: 'inherit',
     env: process.env,
     shell: invocation.shell,

@@ -287,11 +287,11 @@ GameManager 在 Play 中读取 `player-canvas` 的实际显示尺寸，并重新
 
 仓库也保存了一份可直接打开的参考场景：
 
-- [`editor/scene-examples/tetris-starter.scene.json`](../../editor/scene-examples/tetris-starter.scene.json)
+- [`editor/scene-examples/tetris-starter.scene.json`](../../../Editor/editor/scene-examples/tetris-starter.scene.json)
 
 独立代码版 Tetris 位于：
 
-- [`games/tetris/main.ts`](../../games/tetris/main.ts)
+- [`games/tetris/main.ts`](../../../Games/games/tetris/main.ts)
 
 前者用于验证编辑器内容生产和运行时导出链路；后者适合对照不经过编辑器的直接引擎集成方式。
 

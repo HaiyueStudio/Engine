@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const packageDirectories = ['engine', 'extensions'];
@@ -12,6 +13,7 @@ const explicitAnyAdapters = new Map([
   ['extensions/src/spine/SpineSkeletonRuntime.ts', 'Dynamic third-party Spine JSON normalization adapter.'],
   ['editor/src/export/templates/runtimeDeserializationTemplate.ts', 'Generated runtime-scene deserialization adapter.'],
   ['editor/src/export/templates/runtimePlayerTemplate.ts', 'Generated trusted-script runtime API adapter.'],
+  ['examples/live2d-hya-compare/main.ts', 'Licensed Cubism Core is an optional browser global without public TypeScript declarations.'],
 ]);
 const publicFailurePaths = [
   'engine/src/core',
@@ -68,10 +70,10 @@ function checkExactOptionalProperties() {
 
 function checkExplicitAnySources() {
   for (const directory of sourceDirectories) {
-    const absolute = resolve(root, directory);
+    const absolute = resolveLogicalPath(directory);
     if (!existsSync(absolute)) continue;
     for (const file of walkTypeScriptFiles(absolute)) {
-      const path = relative(root, file);
+      const path = logicalPathFor(file);
       const anyNodes = findSyntax(file, node => node.kind === ts.SyntaxKind.AnyKeyword);
       const generatedAnyCount = path.startsWith('editor/src/export/')
         ? readFileSync(file, 'utf8').match(/\bany\b/g)?.length ?? 0
@@ -84,7 +86,7 @@ function checkExplicitAnySources() {
     }
   }
   for (const path of explicitAnyAdapters.keys()) {
-    if (!existsSync(resolve(root, path))) failures.push(`Registered any adapter no longer exists: ${path}.`);
+    if (!existsSync(resolveLogicalPath(path))) failures.push(`Registered any adapter no longer exists: ${path}.`);
   }
 }
 
@@ -108,7 +110,7 @@ function checkPublicDeclarations() {
 
 function checkPublicFailurePaths() {
   for (const path of publicFailurePaths) {
-    const absolute = resolve(root, path);
+    const absolute = resolveLogicalPath(path);
     const files = statSync(absolute).isDirectory() ? walkTypeScriptFiles(absolute) : [absolute];
     for (const file of files) {
       for (const node of findSyntax(file, isBareErrorFailure)) {
@@ -195,5 +197,37 @@ function parse(file) {
 function formatLocation(file, node) {
   const source = node.getSourceFile();
   const position = source.getLineAndCharacterOfPosition(node.getStart(source));
-  return `${relative(root, file)}:${position.line + 1}`;
+  return `${logicalPathFor(file)}:${position.line + 1}`;
+}
+
+function resolveLogicalPath(path) {
+  if (path.startsWith('editor/')) {
+    return resolveStudioRepositoryPath('Editor', 'editor', path.slice('editor/'.length));
+  }
+  if (path.startsWith('voxelEditor/')) {
+    return resolveStudioRepositoryPath('Editor', 'voxelEditor', path.slice('voxelEditor/'.length));
+  }
+  if (path.startsWith('ui/')) {
+    return resolveStudioRepositoryPath('UI', path.slice('ui/'.length));
+  }
+  if (path.startsWith('games/')) {
+    return resolveStudioRepositoryPath('Games', 'games', path.slice('games/'.length));
+  }
+  return resolve(root, path);
+}
+
+function logicalPathFor(file) {
+  const editorSourceRoot = resolveStudioRepositoryPath('Editor', 'editor');
+  const voxelEditorRoot = resolveStudioRepositoryPath('Editor', 'voxelEditor');
+  const uiRoot = resolveStudioRepositoryPath('UI');
+  const gamesRoot = resolveStudioRepositoryPath('Games', 'games');
+  if (file.startsWith(editorSourceRoot)) return normalize(`editor/${relative(editorSourceRoot, file)}`);
+  if (file.startsWith(voxelEditorRoot)) return normalize(`voxelEditor/${relative(voxelEditorRoot, file)}`);
+  if (file.startsWith(uiRoot)) return normalize(`ui/${relative(uiRoot, file)}`);
+  if (file.startsWith(gamesRoot)) return normalize(`games/${relative(gamesRoot, file)}`);
+  return normalize(relative(root, file));
+}
+
+function normalize(path) {
+  return path.replaceAll('\\', '/');
 }

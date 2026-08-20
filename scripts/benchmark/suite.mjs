@@ -36,6 +36,7 @@ import {
   setRender3DMeshRenderer,
   uploadPreparedKtx2Texture,
 } from '../../engine/dist/experimental.js';
+import { pathToFileURL } from 'node:url';
 import { MaterialRendererRegistry } from '../../engine/dist/material.js';
 import { RendererObjectTable } from '../../engine/dist/renderer.js';
 import { PbrMaterial } from '../../engine/dist/index.js';
@@ -47,6 +48,7 @@ import {
   benchmarkSpineVertexBuild,
   createSpineAnimationBenchmarkState,
 } from '../../extensions/dist/benchmark.js';
+import { resolveStudioRepositoryPath } from '../studio-repository-layout.mjs';
 import {
   createRealRendererBenchmarkScenario,
   destroyRealRendererBenchmarkScenario,
@@ -66,6 +68,10 @@ import {
   resolvePlanarReflectionStructuralBudgets,
   resolveRealRendererStructuralBudgets,
 } from './real-renderer-budgets.mjs';
+
+const editorTestingModuleUrl = pathToFileURL(
+  resolveStudioRepositoryPath('Editor', 'editor/dist-test/testing.js'),
+).href;
 
 // glTF's URL adapter uses the browser location only to resolve relative URLs.
 globalThis.window ??= { location: { href: 'http://benchmark.haiyue.local/' } };
@@ -147,7 +153,7 @@ function editorExportBinaryWriterCase(byteCount) {
       peakWorkingBytes: { max: byteCount * 5 },
     },
     async setup() {
-      const { BinaryWriter } = await import('../../editor/dist-test/testing.js');
+      const { BinaryWriter } = await import(editorTestingModuleUrl);
       return { BinaryWriter, source: new Float32Array(1024), metrics: null };
     },
     run(state) {
@@ -785,8 +791,8 @@ function editorPlayRestartImportChurnCase(count) {
       return state.serializations;
     },
     teardown(state) {
-      state.session.close();
-      globalThis.window = state.originalWindow;
+      state?.session?.close();
+      if (state && 'originalWindow' in state) globalThis.window = state.originalWindow;
     },
     metrics(state) {
       return {
@@ -1990,7 +1996,7 @@ function createTinyKtx2Payload() {
 }
 
 async function createEditorChurnState() {
-  const { PlaySession, RuntimeOwnershipScope } = await import('../../editor/dist-test/testing.js');
+  const { PlaySession, RuntimeOwnershipScope } = await import(editorTestingModuleUrl);
   const originalWindow = globalThis.window;
   const listeners = new Map();
   globalThis.window = {
