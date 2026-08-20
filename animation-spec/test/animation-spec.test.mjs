@@ -1188,6 +1188,33 @@ test('Lottie font inventory records substitutions, content hashes and measured m
   }]);
 });
 
+test('Lottie system-font fallback preserves weight and style inferred from source font metadata', () => {
+  const ks = {
+    a: { a: 0, k: [0, 0] }, p: { a: 0, k: [0, 0] },
+    s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 },
+  };
+  const source = {
+    fr: 30, ip: 0, op: 30, w: 100, h: 100,
+    fonts: { list: [{ fName: 'FuturaPT-DemiItalic', fFamily: 'Futura PT', fStyle: 'Demi Italic' }] },
+    layers: [{ ind: 1, ty: 5, ip: 0, op: 30, ks, t: { d: { k: [{ s: {
+      t: 'Fallback', s: 20, f: 'FuturaPT-DemiItalic', fc: [1, 1, 1], sz: [100, 30],
+    } }] } } }],
+  };
+  const fonts = inspectLottieFonts(source);
+  const converted = convertLottie(source);
+  const text = converted.document.nodes[0].components[0];
+  assert.equal(fonts[0].resolvedWeight, 600);
+  assert.equal(fonts[0].resolvedStyle, 'italic');
+  assert.equal(text.fontFamily, 'Futura PT');
+  assert.equal(text.fontWeight, 600);
+  assert.equal(text.fontStyle, 'italic');
+  assert.equal(text.fontResource, undefined);
+  assert.match(
+    converted.diagnostics.find(diagnostic => diagnostic.code === 'W_LOTTIE_FONT_SUBSTITUTION').message,
+    /original family, style and weight.*system fallback/,
+  );
+});
+
 test('Lottie converter expands nested precomps with parent opacity, time windows, start time and stretch', () => {
   const transform = (opacity, position = [0, 0]) => ({
     a: { a: 0, k: [0, 0] }, p: { a: 0, k: position },

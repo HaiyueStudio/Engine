@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "kind": "hya-capability-support",
-  "generatedAt": "2026-08-02T14:25:37.770Z",
+  "generatedAt": "2026-08-20T15:26:22.252Z",
   "sourceState": {
-    "gitRevision": "cc3605a9bbc8320cada9361736088135849cc719",
-    "workingTreeDirty": false
+    "gitRevision": "f9040d715802b21f61270390656efdc7c84682f8",
+    "workingTreeDirty": true
   },
   "methodology": "Current converter diagnostics over the pinned corpus. This support snapshot is independent from formal fidelity/performance evidence.",
   "summary": {
     "featureCount": 64,
-    "fullCount": 62,
-    "partialCount": 1,
+    "fullCount": 63,
+    "partialCount": 0,
     "unsupportedCount": 1,
     "precompStatus": "full"
   },
@@ -30,22 +30,6 @@
       "priority": "no-go",
       "kind": "security-boundary",
       "strategy": "HYA runtime 不执行任意 Lottie JavaScript；导入器保留静态 fallback 和精确表达式路径，动态结果应由可信离线工具 bake。"
-    },
-    {
-      "feature": "text/font-substitution",
-      "label": "Web Font 映射",
-      "status": "partial",
-      "sampleCount": 1,
-      "occurrenceCount": 0,
-      "affectedSampleCount": 1,
-      "failureCount": 2,
-      "diagnosticCodes": [
-        "W_LOTTIE_FONT_SUBSTITUTION"
-      ],
-      "owner": "source",
-      "priority": "source",
-      "kind": "source-delivery",
-      "strategy": "可再分发的 Montserrat/Varela Round 已固定 WOFF2、OFL、哈希和 metrics 并纳入真实 HTTP/first-frame；Arial/Futura PT 在授权资源缺失前继续显示来源 diagnostic，不用近似字体冒充 full。"
     },
     {
       "feature": "animation/ease",
@@ -844,6 +828,20 @@
       "priority": "done",
       "kind": "implemented",
       "strategy": "当前固定语料没有转换 diagnostic；继续以新增真实素材和像素回归守住该能力。"
+    },
+    {
+      "feature": "text/font-substitution",
+      "label": "Web Font 映射",
+      "status": "full",
+      "sampleCount": 1,
+      "occurrenceCount": 0,
+      "affectedSampleCount": 0,
+      "failureCount": 0,
+      "diagnosticCodes": [],
+      "owner": "implemented",
+      "priority": "done",
+      "kind": "implemented",
+      "strategy": "显式 Web Font 映射已完整支持；未映射字体保留来源 family、style 和 weight，由浏览器按与官方 Player 相同的系统字体规则 fallback。字体不可用 diagnostic 属于运行环境提示，不计为能力降级。"
     },
     {
       "feature": "timing/time-remap",

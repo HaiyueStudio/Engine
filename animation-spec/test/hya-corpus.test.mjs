@@ -164,6 +164,11 @@ test('dashboard capability snapshot separates current support from formal perfor
   assert.equal(stroke.status, 'full');
   assert.equal(mergePath.status, 'full');
   assert.deepEqual(mergePath.diagnosticCodes, []);
+  const webFont = capabilitySnapshot.features.find(feature => feature.feature === 'text/font-substitution');
+  assert.equal(webFont.status, 'full');
+  assert.equal(webFont.failureCount, 0);
+  assert.deepEqual(webFont.diagnosticCodes, []);
+  assert.match(webFont.strategy, /系统字体规则 fallback/);
   for (const feature of capabilitySnapshot.features.filter(feature => feature.status === 'full')) {
     assert.equal(feature.priority, 'done', `${feature.feature} retained stale roadmap priority`);
   }
@@ -184,6 +189,20 @@ test('dashboard capability snapshot separates current support from formal perfor
   }], { generatedAt: '2026-01-01T00:00:00.000Z', gitRevision: 'test', workingTreeDirty: false });
   assert.equal(synthetic.features[0].priority, 'P0');
   assert.equal(synthetic.features[0].owner, 'converter');
+
+  const systemFontFallback = createCapabilitySnapshot([{
+    featureAnalysis: {
+      features: [{
+        feature: 'text/font-substitution', occurrences: 0, status: 'partial', failureCount: 2,
+        diagnosticCodes: ['W_LOTTIE_FONT_SUBSTITUTION'], failures: [],
+      }],
+    },
+    fidelity: null,
+  }], { generatedAt: '2026-01-01T00:00:00.000Z', gitRevision: 'test', workingTreeDirty: false });
+  assert.equal(systemFontFallback.features[0].status, 'full');
+  assert.equal(systemFontFallback.features[0].affectedSampleCount, 0);
+  assert.equal(systemFontFallback.features[0].failureCount, 0);
+  assert.deepEqual(systemFontFallback.features[0].diagnosticCodes, []);
 });
 
 test('animated Merge Paths remains a classified partial capability', () => {

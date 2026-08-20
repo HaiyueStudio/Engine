@@ -570,7 +570,7 @@ export function inspectLottieFonts(
     const mapping: LottieWebFontMapping | undefined = typeof configured === 'string' ? { uri: configured } : configured;
     const authoredFamily = typeof entry.fFamily === 'string' && entry.fFamily ? entry.fFamily : entry.fName;
     const authoredStyle = typeof entry.fStyle === 'string' ? entry.fStyle : 'Regular';
-    const normalizedStyle = authoredStyle.toLowerCase();
+    const inferred = inferLottieFontMetadata(authoredStyle);
     return [Object.freeze({
       name: entry.fName,
       authoredFamily,
@@ -579,8 +579,8 @@ export function inspectLottieFonts(
       usageCount: usage.get(entry.fName) ?? 0,
       mapped: mapping !== undefined,
       resolvedFamily: mapping?.family ?? authoredFamily,
-      resolvedStyle: mapping?.style ?? (normalizedStyle.includes('italic') ? 'italic' as const : 'normal' as const),
-      resolvedWeight: mapping?.weight ?? (normalizedStyle.includes('bold') || normalizedStyle.includes('demi') ? 700 : 400),
+      resolvedStyle: mapping?.style ?? inferred.style,
+      resolvedWeight: mapping?.weight ?? inferred.weight,
       ...(mapping ? { uri: mapping.uri, mimeType: mapping.mimeType ?? 'font/woff2' } : {}),
       ...(mapping?.integrity === undefined ? {} : { integrity: mapping.integrity }),
       ...(mapping?.metrics === undefined ? {} : { metrics: Object.freeze({ ...mapping.metrics }) }),
@@ -605,12 +605,13 @@ function convertFonts(
     if (typeof entry.fName !== 'string' || !entry.fName) continue;
     const configured = options.fonts?.[entry.fName];
     const configuration = typeof configured === 'string' ? { uri: configured } : configured;
-    const authoredStyle = typeof entry.fStyle === 'string' ? entry.fStyle.toLowerCase() : '';
+    const authoredStyle = typeof entry.fStyle === 'string' ? entry.fStyle : 'Regular';
+    const inferred = inferLottieFontMetadata(authoredStyle);
     const descriptor: LottieFontDescriptor = {
       name: entry.fName,
       family: configuration?.family ?? (typeof entry.fFamily === 'string' && entry.fFamily ? entry.fFamily : entry.fName),
-      style: configuration?.style ?? (authoredStyle.includes('italic') ? 'italic' : 'normal'),
-      weight: configuration?.weight ?? (authoredStyle.includes('bold') ? 700 : 400),
+      style: configuration?.style ?? inferred.style,
+      weight: configuration?.weight ?? inferred.weight,
       ...(configuration ? { resourceId: `font:${entry.fName}` } : {}),
     };
     fonts.set(entry.fName, descriptor);
@@ -621,6 +622,25 @@ function convertFonts(
     });
   }
   return { fonts, resources };
+}
+
+function inferLottieFontMetadata(authoredStyle: string): {
+  readonly style: 'normal' | 'italic';
+  readonly weight: number;
+} {
+  const normalized = authoredStyle.toLowerCase().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const compact = normalized.replace(/\s+/g, '');
+  const style = normalized.includes('italic') || normalized.includes('oblique') ? 'italic' : 'normal';
+  let weight = 400;
+  if (/thin|hairline/.test(compact)) weight = 100;
+  else if (/extralight|ultralight/.test(compact)) weight = 200;
+  else if (/light/.test(compact)) weight = 300;
+  else if (/extrabold|ultrabold/.test(compact)) weight = 800;
+  else if (/semibold|demibold|demi/.test(compact)) weight = 600;
+  else if (/bold/.test(compact)) weight = 700;
+  else if (/black|heavy/.test(compact)) weight = 900;
+  else if (/medium/.test(compact)) weight = 500;
+  return { style, weight };
 }
 
 function convertAssets(
@@ -730,7 +750,7 @@ function convertTextDocument(
   const font = state.fonts.get(authoredFont);
   if (authoredFont && !font?.resourceId && !state.warnedFontSubstitutions.has(authoredFont)) {
     state.warnedFontSubstitutions.add(authoredFont);
-    warn(state, 'W_LOTTIE_FONT_SUBSTITUTION', `${path}.f`, `Font "${authoredFont}" has no mapped web-font resource; runtime fallback metrics may differ.`);
+    warn(state, 'W_LOTTIE_FONT_SUBSTITUTION', `${path}.f`, `Font "${authoredFont}" has no mapped web-font resource; the original family, style and weight are preserved and the browser may use a system fallback.`);
   }
   const fill = numberList(document.fc);
   const justification = typeof document.j === 'number' ? document.j : 2;

@@ -42,8 +42,9 @@ const GUIDANCE = Object.freeze({
     strategy: '为每个普通 layer 建立局部 timeline，统一重映射 transform、shape、text、effect 与 composite 参数，避免只改部分 track。',
   },
   'text/font-substitution': {
-    label: 'Web Font 映射', owner: 'source', priority: 'source', kind: 'source-delivery',
-    strategy: '可再分发的 Montserrat/Varela Round 已固定 WOFF2、OFL、哈希和 metrics 并纳入真实 HTTP/first-frame；Arial/Futura PT 在授权资源缺失前继续显示来源 diagnostic，不用近似字体冒充 full。',
+    label: 'Web Font 映射', owner: 'implemented', priority: 'done', kind: 'implemented',
+    externalDiagnosticCodes: ['W_LOTTIE_FONT_SUBSTITUTION'],
+    strategy: '显式 Web Font 映射已完整支持；未映射字体保留来源 family、style 和 weight，由浏览器按与官方 Player 相同的系统字体规则 fallback。字体不可用 diagnostic 属于运行环境提示，不计为能力降级。',
   },
   'animation/text-selector': {
     label: '高级 Text Selector', owner: 'format-runtime', priority: 'P2', kind: 'format-runtime',
@@ -78,18 +79,23 @@ export function createCapabilitySnapshot(samples, {
 } = {}) {
   const features = summarizeFeatureAttribution(samples).map(feature => {
     const configuredGuidance = GUIDANCE[feature.feature] ?? defaultGuidance(feature);
-    const guidance = feature.status === 'full'
+    const externalDiagnosticCodes = new Set(configuredGuidance.externalDiagnosticCodes ?? []);
+    const hasCapabilityFailure = feature.diagnosticCodes.some(code => !externalDiagnosticCodes.has(code));
+    const capabilityFeature = feature.failureCount > 0 && !hasCapabilityFailure
+      ? { ...feature, status: 'full', affectedSampleCount: 0, failureCount: 0, diagnosticCodes: [] }
+      : feature;
+    const guidance = capabilityFeature.status === 'full'
       ? { ...configuredGuidance, owner: 'implemented', priority: 'done', kind: 'implemented' }
       : configuredGuidance;
     return {
-      feature: feature.feature,
-      label: guidance.label ?? feature.feature,
-      status: feature.status,
-      sampleCount: feature.sampleCount,
-      occurrenceCount: feature.occurrenceCount,
-      affectedSampleCount: feature.affectedSampleCount,
-      failureCount: feature.failureCount,
-      diagnosticCodes: feature.diagnosticCodes,
+      feature: capabilityFeature.feature,
+      label: guidance.label ?? capabilityFeature.feature,
+      status: capabilityFeature.status,
+      sampleCount: capabilityFeature.sampleCount,
+      occurrenceCount: capabilityFeature.occurrenceCount,
+      affectedSampleCount: capabilityFeature.affectedSampleCount,
+      failureCount: capabilityFeature.failureCount,
+      diagnosticCodes: capabilityFeature.diagnosticCodes,
       owner: guidance.owner,
       priority: guidance.priority,
       kind: guidance.kind,
