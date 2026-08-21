@@ -51,6 +51,12 @@ test('Cubism capture converts to required HYA extension and binary round-trips w
   assert.deepEqual(parsed.extensionsRequired, ['org.haiyue.deformable-mesh-2d@1']);
   const data = decodeDeformableMesh2DData(converted.data);
   assert.deepEqual([...data.drawables[0].positions.slice(0, 6)], [128, 128, 138, 128, 128, 118]);
+  assert.deepEqual([...data.drawables[0].uvs], [0, 0, 1, 0, 0, 1]);
+
+  const cubismCoreCapture = captureFixture();
+  cubismCoreCapture.canvas.uvOrigin = 'bottom-left';
+  const normalized = decodeDeformableMesh2DData(convertCubismCaptureToHya(cubismCoreCapture, { strict: true }).data);
+  assert.deepEqual([...normalized.drawables[0].uvs], [0, 1, 1, 1, 0, 0]);
 });
 
 test('Cubism capture tolerates float32 opacity drift and clamps the encoded track', () => {

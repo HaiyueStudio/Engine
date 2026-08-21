@@ -10,7 +10,6 @@
     "physics-runtime",
     "motion-sync",
     "multiply-screen-color",
-    "non-normal-blend",
     "culling"
   ],
   "diagnostics": []

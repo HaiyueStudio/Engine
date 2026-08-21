@@ -50,6 +50,8 @@ export interface CubismDrawableCapture {
     readonly height: number;
     readonly pixelsPerUnit: number;
     readonly coordinateSystem: 'model-y-up';
+    /** Legacy captures omit this and are interpreted as top-left image UVs. */
+    readonly uvOrigin?: 'top-left' | 'bottom-left';
   };
   readonly duration: number;
   readonly frameRate: number;
@@ -141,7 +143,7 @@ export function convertCubismCaptureToHya(
       blendMode,
       culling: base.culling ?? false,
       masks: Object.freeze([...(base.masks ?? [])]),
-      uvs: new Float32Array(base.uvs),
+      uvs: normalizeCubismUvs(base.uvs, capture.canvas.uvOrigin ?? 'top-left'),
       indices: new Uint32Array(base.indices),
       positions,
       opacities,
@@ -214,6 +216,7 @@ function validateCaptureRoot(capture: CubismDrawableCapture, diagnostics: Cubism
   if (!capture || typeof capture !== 'object') { fail('Capture must be an object.', '$'); return; }
   if (capture.format !== CUBISM_DRAWABLE_CAPTURE_FORMAT || capture.version !== CUBISM_DRAWABLE_CAPTURE_VERSION) fail('Capture format/version is unsupported.', '$.format');
   if (!capture.canvas || capture.canvas.coordinateSystem !== 'model-y-up') fail('Capture coordinate system must be model-y-up.', '$.canvas.coordinateSystem');
+  if (capture.canvas?.uvOrigin !== undefined && capture.canvas.uvOrigin !== 'top-left' && capture.canvas.uvOrigin !== 'bottom-left') fail('UV origin must be top-left or bottom-left.', '$.canvas.uvOrigin');
   for (const [key, value] of [['width', capture.canvas?.width], ['height', capture.canvas?.height], ['pixelsPerUnit', capture.canvas?.pixelsPerUnit]] as const) if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) fail(`${key} must be positive and finite.`, `$.canvas.${key}`);
   if (!Number.isFinite(capture.duration) || capture.duration <= 0) fail('Duration must be positive and finite.', '$.duration');
   if (!Number.isFinite(capture.frameRate) || capture.frameRate <= 0) fail('Frame rate must be positive and finite.', '$.frameRate');
@@ -267,3 +270,11 @@ function sameTopology(a: CubismCapturedDrawable, b: CubismCapturedDrawable): boo
 function isNeutralMultiply(value: readonly number[] | undefined): boolean { return value === undefined || (value.length === 4 && value.every(component => component === 1)); }
 function isNeutralScreen(value: readonly number[] | undefined): boolean { return value === undefined || (value.length === 4 && value.every(component => component === 0)); }
 function clampUnitInterval(value: number): number { return Math.max(0, Math.min(1, value)); }
+function normalizeCubismUvs(source: readonly number[], origin: 'top-left' | 'bottom-left'): Float32Array {
+  const normalized = new Float32Array(source);
+  if (origin === 'top-left') return normalized;
+  for (let index = 0; index < source.length; index += 2) {
+    normalized[index + 1] = 1 - source[index + 1]!;
+  }
+  return normalized;
+}

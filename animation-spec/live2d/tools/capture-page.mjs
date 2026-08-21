@@ -66,7 +66,7 @@ async function capture() {
     format: 'live2d-cubism-drawable-capture', version: 1,
     name: model3.Name ?? model3.name ?? 'Cubism model',
     source: { kind: 'cubism-core-capture', model: modelUri, motion: motionUri ?? null, coreVersion: String(core.Version?.csmGetVersion?.() ?? 'unknown') },
-    canvas: { width: Number(canvas.CanvasWidth), height: Number(canvas.CanvasHeight), pixelsPerUnit, coordinateSystem: 'model-y-up' },
+    canvas: { width: Number(canvas.CanvasWidth), height: Number(canvas.CanvasHeight), pixelsPerUnit, coordinateSystem: 'model-y-up', uvOrigin: 'bottom-left' },
     duration, frameRate,
     textures: references.Textures.map((uri, index) => ({ id: `texture-${index}`, uri })),
     frames,

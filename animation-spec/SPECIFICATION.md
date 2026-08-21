@@ -97,7 +97,7 @@ Payload 包含 canonical Transform3D、perspective/orthographic camera、primiti
 
 ### 5.3 可变形 2D 网格必需扩展
 
-`org.haiyue.deformable-mesh-2d@1` 用于来源无关的稳定三角拓扑动画。组件引用一个 `binary` data resource 和有序的 `image` resources；二进制 resource 的 media type 为 `application/vnd.haiyue.deformable-mesh-2d`，payload format 为 `haiyue-deformable-mesh-2d@1`（`.hydm`）。格式包含 canvas、时间采样、每个 drawable 的静态 UV/index/mask 引用，以及 frame-major Float32 position/opacity/render-order 数据。
+`org.haiyue.deformable-mesh-2d@1` 用于来源无关的稳定三角拓扑动画。组件引用一个 `binary` data resource 和有序的 `image` resources；二进制 resource 的 media type 为 `application/vnd.haiyue.deformable-mesh-2d`，payload format 为 `haiyue-deformable-mesh-2d@1`（`.hydm`）。格式包含 canvas、时间采样、每个 drawable 的静态 UV/index/mask 引用，以及 frame-major Float32 position/opacity/render-order 数据。HYDM 的图片 UV 原点固定为左上；Cubism capture v1 通过可选 `canvas.uvOrigin` 声明来源，Core capture 写入 `bottom-left` 并在转换阶段只归一化一次，省略字段的旧 capture 按 `top-left` 保持兼容。
 
 宿主必须在创建 GPU owner 前校验 header/version、全部 byte range、预算、有限数、单调时间、顶点与索引范围、稳定 drawable id 和 mask 引用。v1 运行时执行线性顶点/透明度采样、step render order、alpha mask，以及 normal/additive/multiplicative blend；multiply/screen color、culling、参数化输入、Physics 和 motion sync 不得静默宣称精确支持。
 
