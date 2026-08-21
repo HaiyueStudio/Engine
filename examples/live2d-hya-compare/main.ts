@@ -1,6 +1,6 @@
 import { parseAnimation, type ParsedAnimation } from '@haiyue/animation-spec';
 import { createDeformableMesh2DFormatRegistry, decodeDeformableMesh2DData, type ParsedDeformableMesh2DData } from '@haiyue/animation-spec/deformable2d';
-import { convertCubismCaptureToHya, sampleCubismMotion3, type CubismDrawableCapture, type CubismMotion3 } from '@haiyue/animation-spec/live2d';
+import { CubismCaptureConversionError, convertCubismCaptureToHya, sampleCubismMotion3, type CubismDrawableCapture, type CubismMotion3 } from '@haiyue/animation-spec/live2d';
 import { Animation2DComponent, Animation2DExtensionRegistry, Animation2DRenderSystem, Animation2DSystem } from '@haiyue/extensions/animation';
 import { createDeformableMesh2DRuntimeExtension } from '@haiyue/extensions/deformable-animation';
 import { Camera2D, Entity, HaiyueEngine, Transform2D } from '@haiyue/engine';
@@ -8,7 +8,7 @@ import { ANIMATION_COMPARE_BACKGROUND_HEX, ANIMATION_COMPARE_CLEAR_COLOR } from 
 
 interface Bounds { x: number; y: number; width: number; height: number }
 interface ReferenceDrawable { positions: Float32Array; uvs: Float32Array; indices: Uint32Array; opacity: number; textureIndex: number; order: number; blendMode: string }
-interface CoreSession { core: any; moc: any; model: any; motion: CubismMotion3 | null; parameterDefaults: Float32Array; partDefaults: Float32Array; parameterIndex: Map<string, number>; partIndex: Map<string, number>; canvasWidth: number; canvasHeight: number; pixelsPerUnit: number; textures: ImageBitmap[] }
+interface CoreSession { core: any; moc: any; model: any; motion: CubismMotion3 | null; parameterDefaults: Float32Array; partDefaults: Float32Array; parameterIndex: Map<string, number>; partIndex: Map<string, number>; canvasWidth: number; canvasHeight: number; canvasOriginX: number; canvasOriginY: number; pixelsPerUnit: number; textures: ImageBitmap[] }
 
 async function main(): Promise<void> {
   const hyaCanvas = query<HTMLCanvasElement>('#hya-canvas');
@@ -111,8 +111,10 @@ async function main(): Promise<void> {
       partDefaults: Float32Array.from(model.parts.opacities),
       parameterIndex: new Map(Array.from(model.parameters.ids, (id: unknown, index: number) => [String(id), index])),
       partIndex: new Map(Array.from(model.parts.ids, (id: unknown, index: number) => [String(id), index])),
-      canvasWidth: Number(model.canvasinfo.CanvasWidth) * ppu,
-      canvasHeight: Number(model.canvasinfo.CanvasHeight) * ppu,
+      canvasWidth: Number(model.canvasinfo.CanvasWidth),
+      canvasHeight: Number(model.canvasinfo.CanvasHeight),
+      canvasOriginX: Number(model.canvasinfo.CanvasOriginX),
+      canvasOriginY: Number(model.canvasinfo.CanvasOriginY),
       pixelsPerUnit: ppu,
       textures,
     };
@@ -179,8 +181,8 @@ async function main(): Promise<void> {
     query<HTMLButtonElement>('#fit').addEventListener('click', () => { query<HTMLInputElement>('#zoom').value = '1'; query<HTMLInputElement>('#pan-x').value = '0'; query<HTMLInputElement>('#pan-y').value = '0'; applyView(); });
     const directory = query<HTMLInputElement>('#model-directory');
     query<HTMLButtonElement>('#choose-model').addEventListener('click', () => directory.click());
-    directory.addEventListener('change', () => { if (directory.files?.length) void loadLicensedDirectory(directory.files).catch(error => setStatus(error instanceof Error ? error.message : String(error), 'error')); });
-    query<HTMLButtonElement>('#bundled').addEventListener('click', () => void loadBundledSample().catch(error => setStatus(String(error), 'error')));
+    directory.addEventListener('change', () => { if (directory.files?.length) void loadLicensedDirectory(directory.files).catch(error => setStatus(formatLoadError(error), 'error')); });
+    query<HTMLButtonElement>('#bundled').addEventListener('click', () => void loadBundledSample().catch(error => setStatus(formatLoadError(error), 'error')));
   }
 
   function applyView(): void {
@@ -237,8 +239,9 @@ class ReferenceMeshRenderer {
 }
 
 function sampleBakedDrawables(data: ParsedDeformableMesh2DData, time: number): ReferenceDrawable[] { const frame = findFrame(data.times, time), next = Math.min(frame + 1, data.times.length - 1), progress = next === frame ? 0 : (time - data.times[frame]!) / (data.times[next]! - data.times[frame]!); return data.drawables.map(drawable => { const stride = drawable.vertexCount * 2, positions = new Float32Array(stride); for (let i = 0; i < stride; i++) positions[i] = mix(drawable.positions[frame * stride + i]!, drawable.positions[next * stride + i]!, progress); return { positions, uvs: drawable.uvs, indices: drawable.indices, opacity: mix(drawable.opacities[frame]!, drawable.opacities[next]!, progress), textureIndex: drawable.textureIndex, order: drawable.renderOrders[frame]!, blendMode: drawable.blendMode }; }); }
-function captureCoreReferenceDrawables(session: CoreSession): ReferenceDrawable[] { const d = session.model.drawables; return Array.from(d.ids, (_: unknown, index: number) => { const positions = new Float32Array(d.vertexPositions[index].length); for (let i = 0; i < positions.length; i += 2) { positions[i] = session.canvasWidth / 2 + d.vertexPositions[index][i] * session.pixelsPerUnit; positions[i + 1] = session.canvasHeight / 2 - d.vertexPositions[index][i + 1] * session.pixelsPerUnit; } const flags = d.constantFlags[index]; return { positions, uvs: Float32Array.from(d.vertexUvs[index]), indices: Uint32Array.from(d.indices[index]), opacity: d.opacities[index], textureIndex: d.textureIndices[index], order: d.renderOrders[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' : 'normal' }; }); }
-function captureCoreClip(session: CoreSession, textures: File[]): CubismDrawableCapture { const duration = session.motion?.Meta.Duration ?? 1, steps = Math.max(1, Math.ceil(duration * 30)), frames = []; for (let frame = 0; frame <= steps; frame++) { const time = duration * frame / steps; applyCoreMotion(session, time); const d = session.model.drawables, ids = Array.from(d.ids, String); frames.push({ time, drawables: ids.map((id, index) => { const flags = d.constantFlags[index]; return { id, textureIndex: d.textureIndices[index], renderOrder: d.renderOrders[index], opacity: d.opacities[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' as const : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' as const : 'normal' as const, culling: !session.core.Utils.hasIsDoubleSidedBit(flags), masks: Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!), positions: Array.from(d.vertexPositions[index]) as number[], uvs: Array.from(d.vertexUvs[index]) as number[], indices: Array.from(d.indices[index]) as number[] }; }) }); } return { format: 'live2d-cubism-drawable-capture', version: 1, name: 'Browser comparison capture', canvas: { width: session.canvasWidth, height: session.canvasHeight, pixelsPerUnit: session.pixelsPerUnit, coordinateSystem: 'model-y-up' }, duration, frameRate: steps / duration, textures: textures.map((file, index) => ({ id: `texture-${index}`, uri: file.name })), frames }; }
+function captureCoreReferenceDrawables(session: CoreSession): ReferenceDrawable[] { const d = session.model.drawables; return Array.from(d.ids, (_: unknown, index: number) => { const positions = new Float32Array(d.vertexPositions[index].length); for (let i = 0; i < positions.length; i += 2) { positions[i] = session.canvasOriginX + d.vertexPositions[index][i] * session.pixelsPerUnit; positions[i + 1] = session.canvasOriginY - d.vertexPositions[index][i + 1] * session.pixelsPerUnit; } const flags = d.constantFlags[index]; return { positions, uvs: Float32Array.from(d.vertexUvs[index]), indices: Uint32Array.from(d.indices[index]), opacity: d.opacities[index], textureIndex: d.textureIndices[index], order: d.renderOrders[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' : 'normal' }; }); }
+function captureCoreClip(session: CoreSession, textures: File[]): CubismDrawableCapture { const duration = session.motion?.Meta.Duration ?? 1, steps = Math.max(1, Math.ceil(duration * 30)), frames = []; for (let frame = 0; frame <= steps; frame++) { const time = duration * frame / steps; applyCoreMotion(session, time); const d = session.model.drawables, ids = Array.from(d.ids, String); frames.push({ time, drawables: ids.map((id, index) => { const flags = d.constantFlags[index]; return { id, textureIndex: d.textureIndices[index], renderOrder: d.renderOrders[index], opacity: d.opacities[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' as const : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' as const : 'normal' as const, culling: !session.core.Utils.hasIsDoubleSidedBit(flags), masks: Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!), positions: centerCorePositions(session, d.vertexPositions[index]), uvs: Array.from(d.vertexUvs[index]) as number[], indices: Array.from(d.indices[index]) as number[] }; }) }); } return { format: 'live2d-cubism-drawable-capture', version: 1, name: 'Browser comparison capture', canvas: { width: session.canvasWidth, height: session.canvasHeight, pixelsPerUnit: session.pixelsPerUnit, coordinateSystem: 'model-y-up' }, duration, frameRate: steps / duration, textures: textures.map((file, index) => ({ id: `texture-${index}`, uri: file.name })), frames }; }
+function centerCorePositions(session: CoreSession, source: ArrayLike<number>): number[] { const positions = Array.from(source); const offsetX = (session.canvasOriginX - session.canvasWidth / 2) / session.pixelsPerUnit, offsetY = (session.canvasHeight / 2 - session.canvasOriginY) / session.pixelsPerUnit; for (let index = 0; index < positions.length; index += 2) { positions[index]! += offsetX; positions[index + 1]! += offsetY; } return positions; }
 function applyCoreMotion(session: CoreSession, time: number): void { session.model.parameters.values.set(session.parameterDefaults); session.model.parts.opacities.set(session.partDefaults); if (session.motion) { const sample = sampleCubismMotion3(session.motion, time); for (const [id, value] of sample.parameters) { const index = session.parameterIndex.get(id); if (index !== undefined) session.model.parameters.values[index] = value; } for (const [id, value] of sample.partOpacities) { const index = session.partIndex.get(id); if (index !== undefined) session.model.parts.opacities[index] = value; } } session.model.update(); }
 function dataBounds(data: ParsedDeformableMesh2DData): Bounds { let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity; for (const drawable of data.drawables) for (let i = 0; i < drawable.positions.length; i += 2) { minX = Math.min(minX, drawable.positions[i]!); minY = Math.min(minY, drawable.positions[i + 1]!); maxX = Math.max(maxX, drawable.positions[i]!); maxY = Math.max(maxY, drawable.positions[i + 1]!); } return Number.isFinite(minX) ? { x: minX, y: minY, width: maxX - minX, height: maxY - minY } : { x: 0, y: 0, width: data.canvasWidth, height: data.canvasHeight }; }
 function findFrame(times: Float32Array, time: number): number { let index = 0; while (index + 1 < times.length && times[index + 1]! <= time) index++; return index; }
@@ -253,6 +256,11 @@ function mix(a: number, b: number, t: number): number { return a + (b - a) * cla
 function clamp(value: number, minimum: number, maximum: number): number { return Math.max(minimum, Math.min(maximum, value)); }
 function requireOk(response: Response): Response { if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.url}`); return response; }
 function setStatus(message: string, kind: string): void { const node = query<HTMLElement>('#status'); node.textContent = message; node.dataset.kind = kind; }
+function formatLoadError(error: unknown): string {
+  if (!(error instanceof CubismCaptureConversionError)) return error instanceof Error ? error.message : String(error);
+  const diagnostic = error.diagnostics.find(item => item.severity === 'error') ?? error.diagnostics[0];
+  return diagnostic ? `${error.message} ${diagnostic.code} ${diagnostic.path}: ${diagnostic.message}` : error.message;
+}
 function query<T extends Element>(selector: string): T { const element = document.querySelector<T>(selector); if (!element) throw new ReferenceError(`Missing ${selector}`); return element; }
 
 void main().catch(error => { const result = document.querySelector<HTMLElement>('#result'); if (result) { result.dataset.status = 'failed'; result.textContent = JSON.stringify({ status: 'failed', error: String(error) }); } console.error(error); });

@@ -10,6 +10,8 @@ import {
 export const CUBISM_DRAWABLE_CAPTURE_FORMAT = 'live2d-cubism-drawable-capture' as const;
 export const CUBISM_DRAWABLE_CAPTURE_VERSION = 1 as const;
 
+const CUBISM_UNIT_INTERVAL_EPSILON = 1e-6;
+
 export interface CubismCaptureTexture {
   readonly id: string;
   readonly uri: string;
@@ -125,7 +127,7 @@ export function convertCubismCaptureToHya(
         positions[targetOffset + valueIndex] = capture.canvas.width / 2 + frameDrawable.positions[valueIndex]! * capture.canvas.pixelsPerUnit;
         positions[targetOffset + valueIndex + 1] = capture.canvas.height / 2 - frameDrawable.positions[valueIndex + 1]! * capture.canvas.pixelsPerUnit;
       }
-      opacities[frameIndex] = frameDrawable.opacity;
+      opacities[frameIndex] = clampUnitInterval(frameDrawable.opacity);
       renderOrders[frameIndex] = frameDrawable.renderOrder;
     }
     const basePath = `$.frames[0].drawables[id=${JSON.stringify(base.id)}]`;
@@ -234,7 +236,7 @@ function validateCaptureRoot(capture: CubismDrawableCapture, diagnostics: Cubism
       ids.add(drawable.id);
       if (!Number.isSafeInteger(drawable.textureIndex) || drawable.textureIndex < 0 || drawable.textureIndex >= capture.textures.length) fail('Texture index is out of range.', `${path}.textureIndex`);
       if (!Number.isSafeInteger(drawable.renderOrder)) fail('Render order must be a safe integer.', `${path}.renderOrder`);
-      if (!Number.isFinite(drawable.opacity) || drawable.opacity < 0 || drawable.opacity > 1) fail('Opacity must be finite and inside [0, 1].', `${path}.opacity`);
+      if (!Number.isFinite(drawable.opacity) || drawable.opacity < -CUBISM_UNIT_INTERVAL_EPSILON || drawable.opacity > 1 + CUBISM_UNIT_INTERVAL_EPSILON) fail('Opacity must be finite and inside [0, 1], allowing only float32 capture drift.', `${path}.opacity`);
       if (!Array.isArray(drawable.positions) || drawable.positions.length < 6 || drawable.positions.length % 2 !== 0 || !drawable.positions.every(Number.isFinite)) fail('Positions require finite xy triples.', `${path}.positions`);
       if (!Array.isArray(drawable.uvs) || drawable.uvs.length !== drawable.positions.length || !drawable.uvs.every(Number.isFinite)) fail('UVs must match positions.', `${path}.uvs`);
       if (!Array.isArray(drawable.indices) || drawable.indices.length < 3 || drawable.indices.length % 3 !== 0 || !drawable.indices.every((value: number) => Number.isSafeInteger(value) && value >= 0 && value < drawable.positions.length / 2)) fail('Indices must contain in-range triangle triplets.', `${path}.indices`);
@@ -267,3 +269,4 @@ function sameTopology(a: CubismCapturedDrawable, b: CubismCapturedDrawable): boo
 
 function isNeutralMultiply(value: readonly number[] | undefined): boolean { return value === undefined || (value.length === 4 && value.every(component => component === 1)); }
 function isNeutralScreen(value: readonly number[] | undefined): boolean { return value === undefined || (value.length === 4 && value.every(component => component === 0)); }
+function clampUnitInterval(value: number): number { return Math.max(0, Math.min(1, value)); }

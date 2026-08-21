@@ -53,6 +53,19 @@ test('Cubism capture converts to required HYA extension and binary round-trips w
   assert.deepEqual([...data.drawables[0].positions.slice(0, 6)], [128, 128, 138, 128, 128, 118]);
 });
 
+test('Cubism capture tolerates float32 opacity drift and clamps the encoded track', () => {
+  const capture = captureFixture();
+  capture.frames[0].drawables[0].opacity = 1.0000001192092896;
+  capture.frames[1].drawables[0].opacity = -0.0000000596046448;
+  const converted = convertCubismCaptureToHya(capture, { strict: true });
+  const data = decodeDeformableMesh2DData(converted.data);
+  assert.deepEqual([...data.drawables[0].opacities], [1, 0]);
+
+  capture.frames[0].drawables[0].opacity = 1.001;
+  assert.throws(() => convertCubismCaptureToHya(capture), error => error instanceof CubismCaptureConversionError
+    && error.diagnostics.some(item => item.code === 'E_CUBISM_CAPTURE_INVALID' && item.path === '$.frames[0].drawables[0].opacity'));
+});
+
 test('strict conversion rejects approximations and topology changes have a stable diagnostic', () => {
   const warning = captureFixture();
   warning.frames[0].drawables[0].blendMode = 'additive';

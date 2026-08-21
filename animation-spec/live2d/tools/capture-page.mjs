@@ -37,6 +37,7 @@ async function capture() {
   const partDefaults = Float32Array.from(model.parts.opacities);
   const parameterIndex = new Map(Array.from(model.parameters.ids, (id, index) => [String(id), index]));
   const partIndex = new Map(Array.from(model.parts.ids, (id, index) => [String(id), index]));
+  const canvas = model.canvasinfo;
   const frames = [];
   progress.textContent = `capturing ${stepCount + 1} frames`;
   for (let frame = 0; frame <= stepCount; frame++) {
@@ -58,15 +59,14 @@ async function capture() {
       }
     }
     model.update();
-    frames.push({ time, drawables: captureDrawables(core, model, modelOpacity) });
+    frames.push({ time, drawables: captureDrawables(core, model, modelOpacity, canvas) });
   }
-  const canvas = model.canvasinfo;
   const pixelsPerUnit = Number(canvas.PixelsPerUnit);
   const captureResult = {
     format: 'live2d-cubism-drawable-capture', version: 1,
     name: model3.Name ?? model3.name ?? 'Cubism model',
     source: { kind: 'cubism-core-capture', model: modelUri, motion: motionUri ?? null, coreVersion: String(core.Version?.csmGetVersion?.() ?? 'unknown') },
-    canvas: { width: Number(canvas.CanvasWidth) * pixelsPerUnit, height: Number(canvas.CanvasHeight) * pixelsPerUnit, pixelsPerUnit, coordinateSystem: 'model-y-up' },
+    canvas: { width: Number(canvas.CanvasWidth), height: Number(canvas.CanvasHeight), pixelsPerUnit, coordinateSystem: 'model-y-up' },
     duration, frameRate,
     textures: references.Textures.map((uri, index) => ({ id: `texture-${index}`, uri })),
     frames,
@@ -77,7 +77,7 @@ async function capture() {
   return captureResult;
 }
 
-function captureDrawables(core, model, modelOpacity) {
+function captureDrawables(core, model, modelOpacity, canvas) {
   const drawables = model.drawables;
   const ids = Array.from(drawables.ids, String);
   return ids.map((id, index) => {
@@ -88,11 +88,23 @@ function captureDrawables(core, model, modelOpacity) {
       id, textureIndex: drawables.textureIndices[index], renderOrder: drawables.renderOrders[index],
       opacity: drawables.opacities[index] * modelOpacity, blendMode,
       culling: !core.Utils.hasIsDoubleSidedBit(constantFlags), masks,
-      positions: Array.from(drawables.vertexPositions[index]), uvs: Array.from(drawables.vertexUvs[index]), indices: Array.from(drawables.indices[index]),
+      positions: centerCorePositions(drawables.vertexPositions[index], canvas), uvs: Array.from(drawables.vertexUvs[index]), indices: Array.from(drawables.indices[index]),
       multiplyColor: colorAt(drawables.multiplyColors, index, [1, 1, 1, 1]),
       screenColor: colorAt(drawables.screenColors, index, [0, 0, 0, 0]),
     };
   });
+}
+
+function centerCorePositions(source, canvas) {
+  const positions = Array.from(source);
+  const pixelsPerUnit = Number(canvas.PixelsPerUnit);
+  const offsetX = (Number(canvas.CanvasOriginX) - Number(canvas.CanvasWidth) / 2) / pixelsPerUnit;
+  const offsetY = (Number(canvas.CanvasHeight) / 2 - Number(canvas.CanvasOriginY)) / pixelsPerUnit;
+  for (let index = 0; index < positions.length; index += 2) {
+    positions[index] += offsetX;
+    positions[index + 1] += offsetY;
+  }
+  return positions;
 }
 
 function colorAt(colors, index, fallback) {
