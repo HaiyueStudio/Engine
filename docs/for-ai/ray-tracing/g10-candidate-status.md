@@ -6,13 +6,13 @@
 
 | Repository | Accepted revision | State during formal capture |
 | --- | --- | --- |
-| Engine | 由两份正式 artifact 的 `revisionTuple.engine` 记录 | clean |
+| Engine | 由两份正式 artifact 的 Engine provenance 记录 | clean |
 | Editor | `829c676ae99900d3964c9cb8d9bbd91a5535a245` | clean |
 | Games | `86b657ed743598f674dbab1a7983017923f572cb` | clean |
-| UI | `72ef29ea322466ba4137410b880ddcc7e7e571` | clean |
+| UI | `72ef29ea322466ba4137410b880ddcc7e7d7e571` | clean |
 | milestones | `08708a280c9dcf190fb70fe713d6cb3120c95638` | clean |
 
-状态文档属于 Engine revision，因此不在文档正文中硬编码自身提交后的 Engine hash。最终 Engine revision 以 `artifacts/ray-tracing/g09-product-candidates.json` 和 `artifacts/ray-tracing-g10-review/manifest.json` 的相同 clean revision tuple 为唯一事实来源。正式证据使用 Node 22 生成，并由独立 formal validator 接受。
+状态文档属于 Engine revision，因此不在文档正文中硬编码自身提交后的 Engine hash。最终 Engine revision 以 `artifacts/ray-tracing/g09-product-candidates.json` 的 `evidence.engineRevision` 和 `artifacts/ray-tracing-g10-review/manifest.json` 的 Engine repository entry 为唯一事实来源；product artifact 同时记录 clean Games revision，review manifest 记录五个 clean repository revision。正式证据使用 Node 22 生成，并由独立 formal validator 接受。
 
 ## Accepted integration decisions
 
@@ -45,12 +45,12 @@
 - Ray example：Chrome/Edge analytic/material 固定 hash 一致；响应式门禁实测 CSS display size × `pixelRatio=0.5` 得到 `271x153`。交互默认值来自 `window.devicePixelRatio`，不再使用固定渲染分辨率；evidence mode 继续显式固定尺寸以保证可重放。
 - Gravity Maze evidence mode 在场景/源快照完成后只渲染一个确定性的 `after-update` raster frame，随后停止 Engine 并等待 GPU queue；连续两次 Node 22 capture 的六张图片逐图 hash 完全一致。Gravity Maze PNG hash 为 `ac226c72979ebed99777543651179946384871dc9f48a49af2b7133a10fdbe24`。
 - 产品候选：small analytic、medium material/light 和 Gravity Maze large-real-product 在 Chrome/Edge 均通过且 source/candidate hash 一致。Gravity Maze source 为 `0145dcc0…`、candidate 为 `4a31c3e1…`；0 未分类失败。
-- Bundle topology：Gravity Maze 默认 bundle 不含 ray tracing runtime；RT 仅存在于 opt-in chunk（354,633B）。
+- Bundle topology：Gravity Maze 默认 bundle 不含 ray tracing runtime；RT 仅存在于 opt-in chunk（354,771B）。
 
 ## Formal artifacts
 
 - `artifacts/ray-tracing/g09-product-candidates.json`：`haiyue-ray-product-candidate@1` formal artifact；验证 HTTP provenance、native backend、profile cleanup、像素/内存、跨浏览器确定性、bundle topology 和 clean revision tuple。
-- `artifacts/ray-tracing-g10-review/manifest.json`：G10 clean-revision review capture；记录逐图 hash、批准 receipt、Node 22 环境和相同 clean revision tuple。
+- `artifacts/ray-tracing-g10-review/manifest.json`：G10 clean-revision review capture；记录逐图 hash、批准 receipt、Node 22 环境和五个 clean repository revision，其中 Engine/Games 与 product artifact 一致。
 - `npm run ray-tracing:product-artifact:check -- --formal` 与 `npm run ray-tracing:g10:review:check -- --formal` 均通过。
 
 至此 M04 G10 的实现、产品集成、人工批准、正式 artifact 和验证闭环完成。artifacts 为本地可重建证据，不作为手工编辑的发布内容提交。
