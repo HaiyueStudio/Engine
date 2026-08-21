@@ -1,6 +1,6 @@
 import { parseAnimation, type ParsedAnimation } from '@haiyue/animation-spec';
 import { createDeformableMesh2DFormatRegistry, decodeDeformableMesh2DData, type ParsedDeformableMesh2DData } from '@haiyue/animation-spec/deformable2d';
-import { CubismCaptureConversionError, convertCubismCaptureToHya, sampleCubismMotion3, type CubismDrawableCapture, type CubismMotion3 } from '@haiyue/animation-spec/live2d';
+import { combineCubismCaptureClips, CubismCaptureConversionError, convertCubismCaptureToHya, listCubismModel3Motions, sampleCubismMotion3, type CubismDrawableCapture, type CubismModel3MotionReference, type CubismMotion3 } from '@haiyue/animation-spec/live2d';
 import { Animation2DComponent, Animation2DExtensionRegistry, Animation2DRenderSystem, Animation2DSystem } from '@haiyue/extensions/animation';
 import { createDeformableMesh2DRuntimeExtension } from '@haiyue/extensions/deformable-animation';
 import { Camera2D, Entity, HaiyueEngine, Transform2D } from '@haiyue/engine';
@@ -18,7 +18,10 @@ interface ReferenceDrawable {
   blendMode: 'normal' | 'additive' | 'multiplicative';
   masks: readonly string[];
 }
-interface CoreSession { core: any; moc: any; model: any; motion: CubismMotion3 | null; parameterDefaults: Float32Array; partDefaults: Float32Array; parameterIndex: Map<string, number>; partIndex: Map<string, number>; canvasWidth: number; canvasHeight: number; canvasOriginX: number; canvasOriginY: number; pixelsPerUnit: number; textures: ImageBitmap[] }
+interface LoadedCoreMotion extends CubismModel3MotionReference { readonly label: string; readonly motion: CubismMotion3 }
+interface CoreClipRange { readonly start: number; readonly duration: number; readonly frameCount: number }
+interface PlaybackAction { readonly id: string; readonly label: string; readonly range: CoreClipRange }
+interface CoreSession { core: any; moc: any; model: any; motion: CubismMotion3 | null; motions: readonly LoadedCoreMotion[]; selectedMotionId: string | null; clipRanges: ReadonlyMap<string, CoreClipRange>; textureFiles: readonly File[]; parameterDefaults: Float32Array; partDefaults: Float32Array; parameterIndex: Map<string, number>; partIndex: Map<string, number>; canvasWidth: number; canvasHeight: number; canvasOriginX: number; canvasOriginY: number; pixelsPerUnit: number; textures: ImageBitmap[] }
 
 async function main(): Promise<void> {
   const hyaCanvas = query<HTMLCanvasElement>('#hya-canvas');
@@ -49,10 +52,15 @@ async function main(): Promise<void> {
   let sourceHeight = 512;
   let duration = 2;
   let currentTime = 0;
+  let playbackOffset = 0;
   let playing = true;
   let lastTick = performance.now();
   let autoZoom = 1;
   let objectUrls: string[] = [];
+  let playbackActions: readonly PlaybackAction[] = [];
+  let selectedActionId: string | null = null;
+  let playerInstallCount = 0;
+  let smokeSwitchPending = new URLSearchParams(location.search).get('actionSmoke') === '1';
 
   bindControls();
   await loadBundledSample();
@@ -62,15 +70,20 @@ async function main(): Promise<void> {
     const delta = Math.min(0.1, (now - lastTick) / 1000);
     lastTick = now;
     if (playing && player) currentTime = (currentTime + delta) % duration;
-    player?.seek(currentTime);
+    player?.seek(playbackOffset + currentTime);
     drawReference();
     const timeline = query<HTMLInputElement>('#timeline');
     if (document.activeElement !== timeline) timeline.value = String(currentTime);
     query<HTMLOutputElement>('#time').textContent = `${currentTime.toFixed(2)} / ${duration.toFixed(2)}s`;
+    if (smokeSwitchPending && hyaRenderer.stats.visualCount > 0 && playbackActions.length > 1) {
+      smokeSwitchPending = false;
+      selectPlaybackAction(playbackActions[1]!.id);
+      return;
+    }
     const result = query<HTMLElement>('#result');
     if (!result.dataset.status && hyaRenderer.stats.visualCount > 0) {
       result.dataset.status = 'passed';
-      result.textContent = JSON.stringify({ status: 'passed', hya: hyaRenderer.stats, reference: coreSession ? 'official-cubism-core' : 'captured-mesh-fixture', comparisonBackground: ANIMATION_COMPARE_BACKGROUND_HEX, bounds, autoZoom });
+      result.textContent = JSON.stringify({ status: 'passed', hya: hyaRenderer.stats, reference: coreSession ? 'official-cubism-core' : 'captured-mesh-fixture', comparisonBackground: ANIMATION_COMPARE_BACKGROUND_HEX, bounds, autoZoom, actionCount: playbackActions.length, selectedActionId, playerInstallCount });
     }
   });
 
@@ -86,7 +99,14 @@ async function main(): Promise<void> {
     bakedData = decodeDeformableMesh2DData(data);
     replaceReferenceTextures([texture]);
     const parsed = parseAnimation(hya, { extensions: createDeformableMesh2DFormatRegistry() });
-    installHya(parsed);
+    const midpoint = parsed.duration / 2;
+    playbackActions = Object.freeze([
+      { id: 'sample:first', label: 'MIT Sample · 动作 A', range: { start: 0, duration: midpoint, frameCount: frameCountInRange(bakedData.times, 0, midpoint) } },
+      { id: 'sample:second', label: 'MIT Sample · 动作 B', range: { start: midpoint, duration: parsed.duration - midpoint, frameCount: frameCountInRange(bakedData.times, midpoint, parsed.duration) } },
+    ]);
+    selectedActionId = playbackActions[0]!.id;
+    updateActionSelector(playbackActions);
+    installHya(parsed, playbackActions[0]!.range.start, playbackActions[0]!.range.duration);
     configureFromData(bakedData);
     query<HTMLElement>('#reference-mode').textContent = 'Capture mesh reference';
     setStatus('默认 sample 已加载；选择本地 SDK runtime 目录可启用官方 Cubism Core 对照。', 'success');
@@ -101,6 +121,14 @@ async function main(): Promise<void> {
     const model3 = JSON.parse(await modelFile.text());
     const references = model3.FileReferences;
     if (!references?.Moc || !Array.isArray(references.Textures)) throw new Error('model3.json 缺少 Moc 或 Textures。');
+    const motionReferences = listCubismModel3Motions(references.Motions);
+    const groupCounts = new Map<string, number>();
+    for (const reference of motionReferences) groupCounts.set(reference.group, (groupCounts.get(reference.group) ?? 0) + 1);
+    const motions: LoadedCoreMotion[] = await Promise.all(motionReferences.map(async reference => ({
+      ...reference,
+      label: formatMotionLabel(reference, groupCounts.get(reference.group) ?? 1),
+      motion: JSON.parse(await requiredRelativeFile(fileMap, modelPath, reference.file).text()) as CubismMotion3,
+    })));
     await loadScript(query<HTMLInputElement>('#core-url').value);
     const core = (globalThis as any).Live2DCubismCore;
     if (!core?.Moc || !core?.Model) throw new Error('脚本没有提供 Live2DCubismCore。');
@@ -109,14 +137,17 @@ async function main(): Promise<void> {
     if (!moc) throw new Error('Cubism Core 拒绝了该 moc3。');
     const model = core.Model.fromMoc(moc);
     if (!model) { moc.release?.(); throw new Error('Cubism Core 无法创建模型。'); }
-    const motionReference = firstMotionReference(references.Motions);
-    const motion = motionReference ? JSON.parse(await requiredRelativeFile(fileMap, modelPath, motionReference).text()) as CubismMotion3 : null;
     const textureFiles: File[] = (references.Textures as string[]).map(path => requiredRelativeFile(fileMap, modelPath, path));
     const textures = await Promise.all(textureFiles.map((file: File) => createImageBitmap(file, { colorSpaceConversion: 'none' })));
     const ppu = Number(model.canvasinfo.PixelsPerUnit);
     disposeCoreSession();
+    const selectedMotion = motions[0] ?? null;
     coreSession = {
-      core, moc, model, motion,
+      core, moc, model, motion: selectedMotion?.motion ?? null,
+      motions,
+      selectedMotionId: selectedMotion?.id ?? null,
+      clipRanges: new Map(),
+      textureFiles,
       parameterDefaults: Float32Array.from(model.parameters.defaultValues),
       partDefaults: Float32Array.from(model.parts.opacities),
       parameterIndex: new Map(Array.from(model.parameters.ids, (id: unknown, index: number) => [String(id), index])),
@@ -128,12 +159,21 @@ async function main(): Promise<void> {
       pixelsPerUnit: ppu,
       textures,
     };
-    const capture = captureCoreClip(coreSession, textureFiles);
+    const actionSet = captureCoreActionSet(coreSession, textureFiles);
+    coreSession.clipRanges = actionSet.ranges;
+    playbackActions = Object.freeze(motions.map(motion => ({ id: motion.id, label: motion.label, range: actionSet.ranges.get(motion.id)! })));
+    selectedActionId = selectedMotion?.id ?? null;
+    updateActionSelector(playbackActions);
+    installCoreCapture(actionSet.capture, true);
+  }
+
+  function installCoreCapture(capture: CubismDrawableCapture, resetView: boolean): void {
+    if (!coreSession) throw new Error('Cubism Core 模型尚未加载。');
     const converted = convertCubismCaptureToHya(capture);
     releaseObjectUrls();
     const dataUrl = URL.createObjectURL(new Blob([converted.data], { type: 'application/vnd.haiyue.deformable-mesh-2d' }));
     objectUrls.push(dataUrl);
-    const textureUrls = textureFiles.map((file: File) => { const url = URL.createObjectURL(file); objectUrls.push(url); return url; });
+    const textureUrls = coreSession.textureFiles.map((file: File) => { const url = URL.createObjectURL(file); objectUrls.push(url); return url; });
     const resources = converted.document.resources ?? [];
     const imageResourceIds = resources.filter(resource => resource.type === 'image').map(resource => resource.id);
     const document = {
@@ -147,32 +187,65 @@ async function main(): Promise<void> {
     const parsed = parseAnimation(document, { extensions: createDeformableMesh2DFormatRegistry() });
     bakedData = decodeDeformableMesh2DData(converted.data);
     replaceReferenceTextures([]);
-    installHya(parsed);
-    configureFromData(bakedData);
+    const selectedRange = coreSession.selectedMotionId ? coreSession.clipRanges.get(coreSession.selectedMotionId) : undefined;
+    installHya(parsed, selectedRange?.start ?? 0, selectedRange?.duration ?? parsed.duration);
+    configureFromData(bakedData, resetView);
     query<HTMLElement>('#reference-mode').textContent = 'Official Cubism Core evaluator';
     const maskCount = bakedData.drawables.reduce((sum, drawable) => sum + drawable.masks.length, 0);
-    setStatus(`官方 Core 已加载 · ${bakedData.drawables.length} drawables · ${capture.frames.length} baked frames${maskCount ? ` · ${maskCount} 个 mask references` : ''}`, 'success');
+    const selectedMotion = coreSession.motions.find(item => item.id === coreSession?.selectedMotionId);
+    const motionSummary = selectedMotion ? ` · 动作：${selectedMotion.label}` : ' · 静态姿势（无 Motion3）';
+    setStatus(`官方 Core 已加载 · ${coreSession.motions.length} 个动作 · ${bakedData.drawables.length} drawables · ${capture.frames.length} baked frames${motionSummary}${maskCount ? ` · ${maskCount} 个 mask references` : ''}`, 'success');
   }
 
-  function installHya(animation: ParsedAnimation): void {
+  function installHya(animation: ParsedAnimation, clipStart = 0, clipDuration = animation.duration): void {
     if (playerEntity) scene.remove(playerEntity);
     modelTransform = new Transform2D();
     player = new Animation2DComponent(animation, { autoplay: false, loop: true, runtimeExtensions });
     playerEntity = new Entity('Compared HYA model').addComponent(modelTransform).addComponent(player);
     scene.add(playerEntity);
-    duration = animation.duration;
+    playerInstallCount++;
+    playbackOffset = clipStart;
+    duration = clipDuration;
     currentTime = 0;
     query<HTMLInputElement>('#timeline').max = String(duration);
+    query<HTMLInputElement>('#timeline').value = '0';
+    player.seek(playbackOffset);
   }
 
-  function configureFromData(data: ParsedDeformableMesh2DData): void {
+  function configureFromData(data: ParsedDeformableMesh2DData, resetView = true): void {
     sourceWidth = data.canvasWidth;
     sourceHeight = data.canvasHeight;
     bounds = dataBounds(data);
     autoZoom = clamp(0.82 * Math.min(sourceWidth / Math.max(1, bounds.width), sourceHeight / Math.max(1, bounds.height)), 0.1, 12);
     camera.setViewportFit({ designWidth: sourceWidth, designHeight: sourceHeight, viewportMode: 'fit' });
     camera.resize(hyaCanvas.clientWidth || hyaCanvas.width, hyaCanvas.clientHeight || hyaCanvas.height);
-    query<HTMLInputElement>('#zoom').value = '1'; query<HTMLInputElement>('#pan-x').value = '0'; query<HTMLInputElement>('#pan-y').value = '0'; applyView();
+    if (resetView) { query<HTMLInputElement>('#zoom').value = '1'; query<HTMLInputElement>('#pan-x').value = '0'; query<HTMLInputElement>('#pan-y').value = '0'; }
+    applyView();
+  }
+
+  function selectPlaybackAction(id: string): void {
+    const selected = playbackActions.find(action => action.id === id);
+    if (!selected || selectedActionId === selected.id) return;
+    if (coreSession) {
+      const motion = coreSession.motions.find(candidate => candidate.id === selected.id);
+      if (!motion) throw new Error(`动作“${selected.label}”没有对应的 Motion3。`);
+      coreSession.motion = motion.motion;
+      coreSession.selectedMotionId = motion.id;
+    }
+    selectedActionId = selected.id;
+    query<HTMLSelectElement>('#motion-select').value = selected.id;
+    playbackOffset = selected.range.start;
+    duration = selected.range.duration;
+    currentTime = 0;
+    const timeline = query<HTMLInputElement>('#timeline');
+    timeline.max = String(duration);
+    timeline.value = '0';
+    player?.seek(playbackOffset);
+    drawReference();
+    const result = query<HTMLElement>('#result');
+    delete result.dataset.status;
+    result.textContent = '';
+    setStatus(`动作已无缝切换：${selected.label} · 复用同一 HYA 实例与纹理 · ${selected.range.frameCount} clip frames`, 'success');
   }
 
   function drawReference(): void {
@@ -180,7 +253,7 @@ async function main(): Promise<void> {
       applyCoreMotion(coreSession, currentTime);
       referenceRenderer.render(captureCoreReferenceDrawables(coreSession), coreSession.textures, sourceWidth, sourceHeight, bounds, viewSettings());
     } else if (bakedData) {
-      referenceRenderer.render(sampleBakedDrawables(bakedData, currentTime), referenceTextures, sourceWidth, sourceHeight, bounds, viewSettings());
+      referenceRenderer.render(sampleBakedDrawables(bakedData, playbackOffset + currentTime), referenceTextures, sourceWidth, sourceHeight, bounds, viewSettings());
     }
   }
 
@@ -193,6 +266,19 @@ async function main(): Promise<void> {
     query<HTMLButtonElement>('#choose-model').addEventListener('click', () => directory.click());
     directory.addEventListener('change', () => { if (directory.files?.length) void loadLicensedDirectory(directory.files).catch(error => setStatus(formatLoadError(error), 'error')); });
     query<HTMLButtonElement>('#bundled').addEventListener('click', () => void loadBundledSample().catch(error => setStatus(formatLoadError(error), 'error')));
+    query<HTMLSelectElement>('#motion-select').addEventListener('change', event => { try { selectPlaybackAction((event.currentTarget as HTMLSelectElement).value); } catch (error) { setStatus(formatLoadError(error), 'error'); } });
+  }
+
+  function updateActionSelector(actions: readonly PlaybackAction[]): void {
+    const selector = query<HTMLSelectElement>('#motion-select');
+    selector.replaceChildren();
+    if (actions.length === 0) {
+      selector.append(new Option('静态姿势（无 Motion3）', ''));
+      selector.disabled = true;
+      return;
+    }
+    for (const action of actions) selector.append(new Option(action.label, action.id, false, action.id === selectedActionId));
+    selector.disabled = false;
   }
 
   function applyView(): void {
@@ -400,13 +486,26 @@ void main() {
 
 function sampleBakedDrawables(data: ParsedDeformableMesh2DData, time: number): ReferenceDrawable[] { const frame = findFrame(data.times, time), next = Math.min(frame + 1, data.times.length - 1), progress = next === frame ? 0 : (time - data.times[frame]!) / (data.times[next]! - data.times[frame]!); return data.drawables.map(drawable => { const stride = drawable.vertexCount * 2, positions = new Float32Array(stride); for (let i = 0; i < stride; i++) positions[i] = mix(drawable.positions[frame * stride + i]!, drawable.positions[next * stride + i]!, progress); return { id: drawable.id, positions, uvs: drawable.uvs, indices: drawable.indices, opacity: mix(drawable.opacities[frame]!, drawable.opacities[next]!, progress), textureIndex: drawable.textureIndex, order: drawable.renderOrders[frame]!, blendMode: drawable.blendMode, masks: drawable.masks }; }); }
 function captureCoreReferenceDrawables(session: CoreSession): ReferenceDrawable[] { const d = session.model.drawables, ids = Array.from(d.ids, String); return ids.map((id, index) => { const positions = new Float32Array(d.vertexPositions[index].length); for (let i = 0; i < positions.length; i += 2) { positions[i] = session.canvasOriginX + d.vertexPositions[index][i] * session.pixelsPerUnit; positions[i + 1] = session.canvasOriginY - d.vertexPositions[index][i + 1] * session.pixelsPerUnit; } const flags = d.constantFlags[index]; return { id, positions, uvs: normalizeCoreUvs(d.vertexUvs[index]), indices: Uint32Array.from(d.indices[index]), opacity: d.opacities[index], textureIndex: d.textureIndices[index], order: d.renderOrders[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' : 'normal', masks: Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!) }; }); }
-function captureCoreClip(session: CoreSession, textures: File[]): CubismDrawableCapture { const duration = session.motion?.Meta.Duration ?? 1, steps = Math.max(1, Math.ceil(duration * 30)), frames = []; for (let frame = 0; frame <= steps; frame++) { const time = duration * frame / steps; applyCoreMotion(session, time); const d = session.model.drawables, ids = Array.from(d.ids, String); frames.push({ time, drawables: ids.map((id, index) => { const flags = d.constantFlags[index]; return { id, textureIndex: d.textureIndices[index], renderOrder: d.renderOrders[index], opacity: d.opacities[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' as const : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' as const : 'normal' as const, culling: !session.core.Utils.hasIsDoubleSidedBit(flags), masks: Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!), positions: centerCorePositions(session, d.vertexPositions[index]), uvs: Array.from(d.vertexUvs[index]) as number[], indices: Array.from(d.indices[index]) as number[] }; }) }); } return { format: 'live2d-cubism-drawable-capture', version: 1, name: 'Browser comparison capture', canvas: { width: session.canvasWidth, height: session.canvasHeight, pixelsPerUnit: session.pixelsPerUnit, coordinateSystem: 'model-y-up', uvOrigin: 'bottom-left' }, duration, frameRate: steps / duration, textures: textures.map((file, index) => ({ id: `texture-${index}`, uri: file.name })), frames }; }
+function captureCoreActionSet(session: CoreSession, textures: readonly File[]): { readonly capture: CubismDrawableCapture; readonly ranges: ReadonlyMap<string, CoreClipRange> } {
+  if (session.motions.length === 0) return { capture: captureCoreClip(session, textures, null), ranges: new Map() };
+  const combined = combineCubismCaptureClips(session.motions.map(motion => ({
+    id: motion.id,
+    name: motion.label,
+    capture: captureCoreClip(session, textures, motion.motion),
+  })), { name: 'Browser comparison action set' });
+  return {
+    capture: combined.capture,
+    ranges: new Map(combined.clips.map(clip => [clip.id, clip])),
+  };
+}
+function captureCoreClip(session: CoreSession, textures: readonly File[], motion: CubismMotion3 | null = session.motion): CubismDrawableCapture { const duration = motion?.Meta.Duration ?? 1, steps = Math.max(1, Math.ceil(duration * 30)), frames = []; for (let frame = 0; frame <= steps; frame++) { const time = duration * frame / steps; applyCoreMotion(session, time, motion); const d = session.model.drawables, ids = Array.from(d.ids, String); frames.push({ time, drawables: ids.map((id, index) => { const flags = d.constantFlags[index]; return { id, textureIndex: d.textureIndices[index], renderOrder: d.renderOrders[index], opacity: d.opacities[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' as const : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' as const : 'normal' as const, culling: !session.core.Utils.hasIsDoubleSidedBit(flags), masks: Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!), positions: centerCorePositions(session, d.vertexPositions[index]), uvs: Array.from(d.vertexUvs[index]) as number[], indices: Array.from(d.indices[index]) as number[] }; }) }); } return { format: 'live2d-cubism-drawable-capture', version: 1, name: 'Browser comparison capture', canvas: { width: session.canvasWidth, height: session.canvasHeight, pixelsPerUnit: session.pixelsPerUnit, coordinateSystem: 'model-y-up', uvOrigin: 'bottom-left' }, duration, frameRate: steps / duration, textures: textures.map((file, index) => ({ id: `texture-${index}`, uri: file.name })), frames }; }
 function centerCorePositions(session: CoreSession, source: ArrayLike<number>): number[] { const positions = Array.from(source); const offsetX = (session.canvasOriginX - session.canvasWidth / 2) / session.pixelsPerUnit, offsetY = (session.canvasHeight / 2 - session.canvasOriginY) / session.pixelsPerUnit; for (let index = 0; index < positions.length; index += 2) { positions[index]! += offsetX; positions[index + 1]! += offsetY; } return positions; }
 function normalizeCoreUvs(source: ArrayLike<number>): Float32Array { const uvs = Float32Array.from(source); for (let index = 1; index < uvs.length; index += 2) uvs[index] = 1 - uvs[index]!; return uvs; }
-function applyCoreMotion(session: CoreSession, time: number): void { session.model.parameters.values.set(session.parameterDefaults); session.model.parts.opacities.set(session.partDefaults); if (session.motion) { const sample = sampleCubismMotion3(session.motion, time); for (const [id, value] of sample.parameters) { const index = session.parameterIndex.get(id); if (index !== undefined) session.model.parameters.values[index] = value; } for (const [id, value] of sample.partOpacities) { const index = session.partIndex.get(id); if (index !== undefined) session.model.parts.opacities[index] = value; } } session.model.update(); }
+function applyCoreMotion(session: CoreSession, time: number, motion: CubismMotion3 | null = session.motion): void { session.model.parameters.values.set(session.parameterDefaults); session.model.parts.opacities.set(session.partDefaults); if (motion) { const sample = sampleCubismMotion3(motion, time); for (const [id, value] of sample.parameters) { const index = session.parameterIndex.get(id); if (index !== undefined) session.model.parameters.values[index] = value; } for (const [id, value] of sample.partOpacities) { const index = session.partIndex.get(id); if (index !== undefined) session.model.parts.opacities[index] = value; } } session.model.update(); }
 function dataBounds(data: ParsedDeformableMesh2DData): Bounds { let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity; for (const drawable of data.drawables) for (let i = 0; i < drawable.positions.length; i += 2) { minX = Math.min(minX, drawable.positions[i]!); minY = Math.min(minY, drawable.positions[i + 1]!); maxX = Math.max(maxX, drawable.positions[i]!); maxY = Math.max(maxY, drawable.positions[i + 1]!); } return Number.isFinite(minX) ? { x: minX, y: minY, width: maxX - minX, height: maxY - minY } : { x: 0, y: 0, width: data.canvasWidth, height: data.canvasHeight }; }
+function frameCountInRange(times: Float32Array, start: number, end: number): number { let count = 0; for (const time of times) if (time >= start && time <= end) count++; return count; }
 function findFrame(times: Float32Array, time: number): number { let index = 0; while (index + 1 < times.length && times[index + 1]! <= time) index++; return index; }
-function firstMotionReference(motions: unknown): string | null { if (!motions || typeof motions !== 'object') return null; for (const entries of Object.values(motions as Record<string, unknown>)) if (Array.isArray(entries) && typeof entries[0]?.File === 'string') return entries[0].File; return null; }
+function formatMotionLabel(motion: CubismModel3MotionReference, groupCount: number): string { const filename = motion.file.replaceAll('\\', '/').split('/').pop()?.replace(/\.motion3\.json$/iu, '') ?? motion.file; return `${motion.group}${groupCount > 1 ? ` ${motion.index + 1}` : ''} · ${filename}`; }
 function requiredRelativeFile(files: Map<string, File>, modelPath: string, relative: string): File { const resolved = normalizePath(new URL(relative, `https://local/${modelPath}`).pathname.slice(1)); const file = files.get(resolved); if (!file) throw new Error(`模型目录缺少 ${relative}`); return file; }
 function normalizePath(value: string): string { return value.replaceAll('\\', '/').replace(/^\.\//u, ''); }
 async function loadBitmap(url: string): Promise<ImageBitmap> { return createImageBitmap(await fetch(url).then(requireOk).then(response => response.blob()), { colorSpaceConversion: 'none' }); }

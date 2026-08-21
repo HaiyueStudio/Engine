@@ -13,7 +13,7 @@ assert.equal(live2dBundle.includes('Live2D Proprietary Software License Agreemen
 
 const [lottie, live2d] = await Promise.all([
   runChromeWebGpuFixture({ root, fixture: 'examples/lottie-hya-compare/index.html', timeoutMs: 60_000, visualCapture: { viewportWidth: 1200, viewportHeight: 760, sampleWidth: 24, sampleHeight: 15 } }),
-  runChromeWebGpuFixture({ root, fixture: 'examples/live2d-hya-compare/index.html', timeoutMs: 60_000, visualCapture: { viewportWidth: 1200, viewportHeight: 760, sampleWidth: 24, sampleHeight: 15 } }),
+  runChromeWebGpuFixture({ root, fixture: 'examples/live2d-hya-compare/index.html', query: { actionSmoke: 1 }, timeoutMs: 60_000, visualCapture: { viewportWidth: 1200, viewportHeight: 760, sampleWidth: 24, sampleHeight: 15 } }),
 ]);
 assert.equal(lottie.status, 'passed');
 assert.equal(lottie.officialPlayer, 'lottie-web');
@@ -27,6 +27,9 @@ assert.equal(live2d.status, 'passed');
 assert.equal(live2d.reference, 'captured-mesh-fixture');
 assert.equal(live2d.comparisonBackground, lottie.comparisonBackground);
 assert.ok(live2d.hya.visualCount > 0);
+assert.equal(live2d.actionCount, 2);
+assert.equal(live2d.selectedActionId, 'sample:second');
+assert.equal(live2d.playerInstallCount, 1, 'Action switching must reuse the existing HYA player instance.');
 assert.ok(live2d.bounds.width > 0 && live2d.bounds.height > 0);
 assert.equal(live2d.browserDiagnostics.unclassifiedFailureCount, 0);
 for (const file of live2d.httpProvenance.files) assert.ok(!/live2dcubismcore|\.moc3|\.model3\.json/iu.test(file.sourcePath), `Default fixture unexpectedly requested ${file.sourcePath}`);

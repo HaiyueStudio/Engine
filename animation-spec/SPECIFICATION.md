@@ -101,7 +101,7 @@ Payload 包含 canonical Transform3D、perspective/orthographic camera、primiti
 
 宿主必须在创建 GPU owner 前校验 header/version、全部 byte range、预算、有限数、单调时间、顶点与索引范围、稳定 drawable id 和 mask 引用。v1 运行时执行线性顶点/透明度采样、step render order、alpha mask，以及 normal/additive/multiplicative blend；multiply/screen color、culling、参数化输入、Physics 和 motion sync 不得静默宣称精确支持。
 
-Live2D Cubism 是一个构建期 adapter，而不是 runtime 分支。许可允许的 Cubism Core 在工具侧把选定 clip 求值成 drawable capture，`@haiyue/animation-spec/live2d` 再转换为本扩展。`.moc3`、Core 和来源 SDK 不进入 HYA 或产品网页 bundle。完整架构边界见 ADR 0083。
+Live2D Cubism 是一个构建期 adapter，而不是 runtime 分支。工具可以通过 `model3.json#FileReferences.Motions` 枚举动作分组并让用户选择；许可允许的 Cubism Core 在工具侧把 Motion3 求值成 drawable capture，`@haiyue/animation-spec/live2d` 再转换为本扩展。单 clip 转换仍只写入一个 baked clip；需要运行时无缝切换的工具可以在构建期把同模型、同 topology 的多个动作串接为一个 HYA 时间域，并保存各动作的互不重叠时间区间。切换只改变播放器采样区间，不重建 drawable、纹理或来源 runtime。`.moc3`、Core 和来源 SDK 不进入 HYA 或产品网页 bundle。完整架构边界见 ADR 0083。
 
 组件 schema 与固定预算分别由 `schema/deformable-mesh-2d-extension.schema.json` 和 `schema/deformable-mesh-2d.contract.json` 声明；TypeScript codec 是 sidecar 二进制读写的可执行规范。
 

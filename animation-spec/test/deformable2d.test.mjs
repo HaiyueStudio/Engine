@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { encodeAnimationBinary, parseAnimation } from '../dist/index.js';
-import { convertCubismCaptureToHya, CubismCaptureConversionError, sampleCubismMotion3 } from '../dist/live2d.js';
+import { combineCubismCaptureClips, convertCubismCaptureToHya, CubismCaptureConversionError, listCubismModel3Motions, sampleCubismMotion3 } from '../dist/live2d.js';
 import { createDeformableMesh2DFormatRegistry, decodeDeformableMesh2DData, encodeDeformableMesh2DData } from '../dist/deformable2d.js';
 
 const CONTRACT = JSON.parse(await readFile(new URL('../schema/deformable-mesh-2d.contract.json', import.meta.url), 'utf8'));
@@ -103,6 +103,39 @@ test('Motion3 sampler supports linear, stepped, inverse-stepped and Cubism Bezie
   assert.ok(Math.abs(sampled.parameters.get('Bezier') - 0.5) < 0.0001);
   assert.equal(sampled.partOpacities.get('Step'), 0.25);
   assert.equal(sampled.modelOpacity, 0.8);
+});
+
+test('model3 motion groups flatten into stable selectable actions', () => {
+  const motions = listCubismModel3Motions({
+    Tap: [{ File: 'motions/tap-01.motion3.json', FadeInTime: 0.25 }, { File: 'motions/tap-02.motion3.json' }],
+    Idle: [{ File: 'motions/idle.motion3.json', Sound: 'sounds/idle.wav' }],
+  });
+  assert.deepEqual(motions, [
+    { id: 'Tap:0', group: 'Tap', index: 0, file: 'motions/tap-01.motion3.json', fadeInTime: 0.25 },
+    { id: 'Tap:1', group: 'Tap', index: 1, file: 'motions/tap-02.motion3.json' },
+    { id: 'Idle:0', group: 'Idle', index: 0, file: 'motions/idle.motion3.json', sound: 'sounds/idle.wav' },
+  ]);
+  assert.deepEqual(listCubismModel3Motions(undefined), []);
+  assert.throws(() => listCubismModel3Motions({ Tap: [{ FadeInTime: 0.2 }] }), /requires File/u);
+});
+
+test('Cubism action clips share one timeline while retaining non-overlapping playback ranges', () => {
+  const first = captureFixture();
+  const second = captureFixture();
+  second.frames[0].drawables[0].positions[0] = 20;
+  second.frames[1].drawables[0].positions[0] = 21;
+  const combined = combineCubismCaptureClips([
+    { id: 'idle', name: 'Idle', capture: first },
+    { id: 'tap', name: 'Tap', capture: second },
+  ], { interClipGap: 0.25 });
+  assert.deepEqual(combined.clips, [
+    { id: 'idle', name: 'Idle', start: 0, duration: 1, frameCount: 2 },
+    { id: 'tap', name: 'Tap', start: 1.25, duration: 1, frameCount: 2 },
+  ]);
+  assert.deepEqual(combined.capture.frames.map(frame => frame.time), [0, 1, 1.25, 2.25]);
+  assert.equal(combined.capture.duration, 2.25);
+  assert.equal(decodeDeformableMesh2DData(convertCubismCaptureToHya(combined.capture).data).times.length, 4);
+  assert.throws(() => combineCubismCaptureClips([{ id: 'idle', capture: first }, { id: 'idle', capture: second }]), /duplicated/u);
 });
 
 function dataFixture() {

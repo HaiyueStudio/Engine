@@ -4,6 +4,8 @@ This directory owns Live2D/Cubism-specific build tooling and license-isolated ca
 
 - `bin/hya-live2d-convert.mjs` — drawable capture to HYA/HYDM CLI.
 - `tools/capture-cubism.mjs` — headless build-time capture using a caller-supplied licensed Core/model.
+- `listCubismModel3Motions()` — source-only `model3.json` motion-group enumeration for action pickers and conversion tools.
+- `combineCubismCaptureClips()` — packs same-model baked actions into one timeline with stable, non-overlapping clip ranges for instance-preserving switching.
 - `samples/` — sample and license routing; Core, `.moc3`, and official models are not vendored.
 
 Capture v1 records `canvas.uvOrigin`. The licensed Cubism Core capture tool writes `bottom-left`; the converter normalizes it once to HYA's top-left image UV convention. Legacy and synthetic captures that omit the field retain their existing top-left interpretation.

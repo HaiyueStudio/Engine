@@ -8,8 +8,9 @@
     body { margin: 0; min-height: 100vh; background: #050817; color: #edf7ff; display: grid; grid-template-rows: auto 1fr auto; }
     header { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #1d3152; background: #071023; }
     h1 { margin: 0; font-size: 17px; } .tag { color: #70ead6; font: 800 9px ui-monospace, monospace; letter-spacing: .12em; }
-    button, input[type=text] { border: 1px solid #2d5371; border-radius: 7px; background: #10213c; color: #edf7ff; padding: 7px 10px; } button { cursor: pointer; }
+    button, input[type=text], select { border: 1px solid #2d5371; border-radius: 7px; background: #10213c; color: #edf7ff; padding: 7px 10px; } button { cursor: pointer; }
     .core { display: flex; gap: 7px; align-items: center; } #core-url { width: min(360px,30vw); font: 9px ui-monospace,monospace; }
+    .motion-picker { display: flex; align-items: center; gap: 6px; color: #91a7c4; font-size: 10px; } #motion-select { min-width: 190px; max-width: 260px; } #motion-select:disabled { opacity: .55; }
     #status { margin-left: auto; max-width: 38vw; color: #8fa7c5; font-size: 10px; } #status[data-kind=error] { color: #ff8297; } #status[data-kind=warning] { color: #ffd17c; }
     main { min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #1a2c4a; }
     .pane { min-width: 0; min-height: 0; position: relative; overflow: hidden; background: #050817; }
@@ -20,7 +21,7 @@
     .view { display: grid; grid-template-columns: repeat(3,minmax(100px,1fr)) auto 130px; gap: 12px; align-items: center; margin-top: 9px; }
     label { display: grid; grid-template-columns: auto 1fr; gap: 7px; align-items: center; color: #91a7c4; font-size: 10px; } input[type=range] { width: 100%; accent-color: #6ee7d2; }
     output { color: #b9cce4; font: 10px ui-monospace,monospace; } .notice { font-size: 9px; color: #657d9c; } #result, #model-directory { display: none; }
-    @media (max-width: 800px) { main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } #status,.core input { display: none; } .view { grid-template-columns: 1fr; } }
+    @media (max-width: 800px) { main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } #status,.core input { display: none; } .view { grid-template-columns: 1fr; } #motion-select { min-width: 140px; max-width: 45vw; } }
   </style>
 </head>
 <body>
@@ -28,6 +29,7 @@
     <span class="tag">LICENSED FIDELITY LAB</span><h1>Live2D → HYA 对照</h1>
     <button id="bundled" type="button">MIT Capture Sample</button>
     <div class="core"><input id="core-url" type="text" value="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js" aria-label="Cubism Core URL" /><button id="choose-model" type="button">选择已获许可模型目录</button><input id="model-directory" type="file" webkitdirectory multiple /></div>
+    <label class="motion-picker">动作<select id="motion-select" aria-label="Live2D 动作" disabled><option>正在读取动作…</option></select></label>
     <span id="status">准备中…</span>
   </header>
   <main>

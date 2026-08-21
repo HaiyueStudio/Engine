@@ -15,3 +15,7 @@ export type {
 } from './CubismCaptureConverter';
 export { sampleCubismMotion3 } from './Motion3Sampler';
 export type { CubismMotion3, CubismMotion3Curve, CubismMotion3Sample } from './Motion3Sampler';
+export { listCubismModel3Motions } from './Model3Motions';
+export type { CubismModel3MotionReference } from './Model3Motions';
+export { combineCubismCaptureClips } from './CubismCaptureSet';
+export type { CubismCaptureClipInput, CubismCaptureClipRange, CubismCaptureSet, CubismCaptureSetOptions } from './CubismCaptureSet';
