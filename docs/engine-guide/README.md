@@ -29,6 +29,7 @@
 - [NavMesh 与 RTS 寻路](./navigation.md)
 - [2D 物理与可替换后端](./physics-2d.md)
 - [3D 物理与 Rapier adapter](./physics-3d.md)
+- [游戏存档](./game-saves.md)
 - [Haiyue 0.1.0 首发候选说明](./release-notes-0.1.0.md)
 
 ## 可运行示例
@@ -46,5 +47,6 @@
 - `examples/consumer-walkthrough`：公共 Engine 安装后的渲染、资产、动画与释放黄金路径。
 - `examples/hya-samples`、`examples/hya-state-machine`：HYA Tween/SpriteSheet/Path/Particle 与单素材状态机。
 - `games/sokoban-3d`、`games/billiards`：完整 3D/2D 游戏工作流。
+- `Games/games/2048`：单槽 LocalStorage 自动存档的产品接入。
 
 能力是否进入 stable 以 [API stability](../for-ai/api-stability.md) 和发布包 exports 为准，不应根据源码目录推断公共 API。

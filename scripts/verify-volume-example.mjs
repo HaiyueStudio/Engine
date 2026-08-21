@@ -69,7 +69,11 @@ if (process.env.UPDATE_VOLUME_EXAMPLE_BASELINE === '1') {
       dirty: Boolean(git(['status', '--porcelain'])),
       browser: capture.browser,
       transport: 'http',
-      sources: [sourceRecord('examples/ktx2-volume/index.html'), sourceRecord('examples/ktx2-volume/bundle.js')],
+      sources: [
+        sourceRecord('examples/ktx2-volume/index.html'),
+        sourceRecord('examples/shared/engine.js'),
+        sourceRecord('examples/ktx2-volume/bundle.js'),
+      ],
     },
     baselineComparison: {
       status: mismatches.length === 0 ? 'passed' : 'candidate-diff',

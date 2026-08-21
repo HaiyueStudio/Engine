@@ -9,6 +9,8 @@ voxelEditor/release-electron/
 bundle.js
 bundle.js.map
 bundle.meta.json
+examples/shared/engine.js
+examples/shared/engine.js.map
 examples/page-turn-book/pdf.worker.min.mjs
 artifacts/
 animation-spec/corpus/.cache/

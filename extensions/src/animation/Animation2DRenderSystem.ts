@@ -370,7 +370,11 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       passEncoder.setBindGroup(0, this.cameraGpu.bindGroup);
       for (const entry of pending) {
         passEncoder.setPipeline(this.getPipeline(
-          outputFormat, context.view?.sampleCount ?? this.engine.msaaSamples, true, context.view?.reverseZ ?? this.engine.reverseZ,
+          outputFormat,
+          context.view?.sampleCount ?? this.engine.msaaSamples,
+          true,
+          context.view?.reverseZ ?? this.engine.reverseZ,
+          entry.item.visual.blendMode,
         ));
         this.draw(passEncoder, entry.item.entity, entry.item.visual, context, entry.composite, false);
         visualCount++;
@@ -488,9 +492,15 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     return { passEncoder: context.encoder.beginRenderPass(cloneRenderPassDescriptor(context.descriptor, 'load')), ownsPass: true };
   }
 
-  private getPipeline(format: GPUTextureFormat, sampleCount: 1 | 4, withDepth: boolean, reverseZ: boolean): GPURenderPipeline {
+  private getPipeline(
+    format: GPUTextureFormat,
+    sampleCount: 1 | 4,
+    withDepth: boolean,
+    reverseZ: boolean,
+    blendMode: AnimationVisual2D['blendMode'] = 'normal',
+  ): GPURenderPipeline {
     const depthFormat = withDepth ? this.engine.getDepthFormat(reverseZ) : 'none';
-    const key = `visual:${format}:${sampleCount}:${depthFormat}:${reverseZ ? 1 : 0}`;
+    const key = `visual:${format}:${sampleCount}:${depthFormat}:${reverseZ ? 1 : 0}:${blendMode}`;
     const cached = this.pipelines.get(key);
     if (cached) return cached;
     const pipeline = requireEngineDevice(this.engine).createRenderPipeline({
@@ -503,10 +513,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
           { shaderLocation: 1, offset: 8, format: 'float32x2' },
         ],
       }] },
-      fragment: { module: this.shader, entryPoint: 'fs_main', targets: [{ format, blend: {
-        color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha', operation: 'add' },
-        alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
-      } }] },
+      fragment: { module: this.shader, entryPoint: 'fs_main', targets: [{ format, blend: animationVisualBlendState(blendMode) }] },
       primitive: { topology: 'triangle-list', cullMode: 'none' },
       ...(withDepth ? { depthStencil: {
         format: depthFormat as GPUTextureFormat,
@@ -975,6 +982,21 @@ function externalImageSize(source: ImageBitmap | HTMLCanvasElement | HTMLImageEl
 
 function compareItems(a: AnimationRenderItem, b: AnimationRenderItem): number {
   return a.visual.instanceId - b.visual.instanceId || a.visual.order - b.visual.order || a.entity.id - b.entity.id;
+}
+
+function animationVisualBlendState(mode: AnimationVisual2D['blendMode']): GPUBlendState {
+  if (mode === 'additive') return {
+    color: { srcFactor: 'src-alpha', dstFactor: 'one', operation: 'add' },
+    alpha: { srcFactor: 'zero', dstFactor: 'one', operation: 'add' },
+  };
+  if (mode === 'multiplicative') return {
+    color: { srcFactor: 'dst', dstFactor: 'one-minus-src-alpha', operation: 'add' },
+    alpha: { srcFactor: 'zero', dstFactor: 'one', operation: 'add' },
+  };
+  return {
+    color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha', operation: 'add' },
+    alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
+  };
 }
 
 function orderSourceGroups(groups: ReadonlyMap<string, readonly AnimationRenderItem[]>): string[] {

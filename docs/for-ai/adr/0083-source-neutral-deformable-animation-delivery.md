@@ -34,9 +34,12 @@ Cubism Core 负责 `.moc3` 的参数到 drawable 顶点求值，且使用专有�
 - `@haiyue/extensions/animation` 仍是 experimental surface；新能力不进入 `@haiyue/engine` root。
 - 完整实时 Live2D 交互需要独立的 source-neutral parameterized deformation ADR，不能扩写本版本语义。
 
+## 2026-08-21 实现补充
+
+在不改变 sidecar major、capture profile 或来源无关边界的前提下，`blendMode` 既有枚举已由运行时完整消费。`normal`、`additive`、`multiplicative` 与 alpha mask 现在属于 v1 支持范围；第 7 条中的 non-normal blend 降级约束不再适用。multiply/screen color、culling、实时参数与 Physics 仍维持原边界和结构化诊断。
+
 ## 验证
 
 - Sidecar deterministic round-trip、unknown version、truncated/range/overflow、拓扑、mask/reference 和 limit tests。
 - Capture converter 的 coordinate normalization、Motion3 sampling、strict diagnostics 和 byte-exact tests。
 - Animation runtime seek/loop、mask/order、resource abort/destroy、无 Core bundle closure和真实 WebGPU example。
-

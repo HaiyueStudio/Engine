@@ -38,7 +38,11 @@ assert.deepEqual(
   normalizedHya(compareHya),
   'Offline and comparison HYA documents may differ only by relative resource directory.',
 );
-const result = await runChromeWebGpuFixture({ root: exampleRoot, fixture: 'index.html', timeoutMs: 60_000 });
+const result = await runChromeWebGpuFixture({
+  root,
+  fixture: 'examples/live2d-hya/index.html',
+  timeoutMs: 60_000,
+});
 assert.equal(result.status, 'passed');
 assert.equal(result.cubismRuntimeInBrowser, false);
 assert.equal(result.runtime.state, 'ready');

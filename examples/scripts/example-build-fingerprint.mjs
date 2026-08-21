@@ -2,6 +2,10 @@ import { createHash } from 'node:crypto';
 import { readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  SHARED_ENGINE_OUTPUT,
+  SHARED_ENGINE_TARGET,
+} from './shared-engine-bundle.mjs';
 
 const examplesDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const root = resolve(examplesDir, '..');
@@ -13,6 +17,10 @@ const IGNORED_DIRECTORIES = new Set([
 ]);
 const IGNORED_FILES = new Set([
   'bundle.js', 'bundle.js.map', 'bundle.meta.json',
+]);
+const IGNORED_OUTPUTS = new Set([
+  resolve(examplesDir, SHARED_ENGINE_OUTPUT),
+  resolve(examplesDir, `${SHARED_ENGINE_OUTPUT}.map`),
 ]);
 const SOURCE_ROOTS = [
   resolve(root, 'engine/src'),
@@ -72,10 +80,11 @@ export async function verifyExampleBuildFreshness({
   const currentFingerprint = fingerprint ?? await computeExampleSourceFingerprint();
   const failures = [];
   for (const target of targets) {
-    const directory = target === 'source-viewer'
-      ? resolve(examplesDir, 'source-viewer')
-      : resolve(examplesDir, target);
-    const bundlePath = resolve(directory, 'bundle.js');
+    const output = target === SHARED_ENGINE_TARGET
+      ? SHARED_ENGINE_OUTPUT
+      : `${target}/bundle.js`;
+    const bundlePath = resolve(examplesDir, output);
+    const directory = dirname(bundlePath);
     const metadataPath = resolve(directory, 'bundle.meta.json');
     let metadata;
     let bundle;
@@ -85,7 +94,7 @@ export async function verifyExampleBuildFreshness({
         readFile(bundlePath),
       ]);
     } catch {
-      failures.push(`${target}: bundle.js or bundle.meta.json is missing`);
+      failures.push(`${target}: ${output} or bundle.meta.json is missing`);
       continue;
     }
     const bundleHash = createHash('sha256').update(bundle).digest('hex');
@@ -113,6 +122,7 @@ async function collectFiles(directory, result) {
   for (const entry of entries) {
     if (entry.name.startsWith('.') || IGNORED_FILES.has(entry.name)) continue;
     const path = resolve(directory, entry.name);
+    if (IGNORED_OUTPUTS.has(path)) continue;
     if (entry.isDirectory()) {
       if (!IGNORED_DIRECTORIES.has(entry.name)) await collectFiles(path, result);
       continue;

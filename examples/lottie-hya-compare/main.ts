@@ -3,7 +3,7 @@ import { convertLottie, type LottieConversionDiagnostic } from '@haiyue/animatio
 import { Animation2DComponent, Animation2DRenderSystem, Animation2DSystem } from '@haiyue/extensions/animation';
 import { Camera2D, Entity, HaiyueEngine, Transform2D } from '@haiyue/engine';
 import lottie, { type AnimationItem } from 'lottie-web/build/player/lottie_light.js';
-import { ANIMATION_COMPARE_BACKGROUND_HEX, ANIMATION_COMPARE_CLEAR_COLOR } from '../animationCompareTheme';
+import { ANIMATION_COMPARE_BACKGROUND_HEX, ANIMATION_COMPARE_CLEAR_COLOR, resolveAnimationCompareZoom } from '../animationCompareTheme';
 
 interface SampleEntry { id: string; title: string; file: string; license: string; source: string }
 interface Bounds { x: number; y: number; width: number; height: number }
@@ -132,7 +132,7 @@ async function main(): Promise<void> {
 
   function applyView(): void {
     if (!modelTransform) return;
-    const zoom = autoZoom * Number(query<HTMLInputElement>('#zoom').value);
+    const zoom = resolveAnimationCompareZoom(autoZoom, Number(query<HTMLInputElement>('#zoom').value));
     const panX = Number(query<HTMLInputElement>('#pan-x').value);
     const panY = Number(query<HTMLInputElement>('#pan-y').value);
     const centerX = bounds.x + bounds.width / 2;

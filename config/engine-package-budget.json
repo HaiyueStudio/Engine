@@ -17,9 +17,9 @@
       "maxUnpackedBytes": 9000000,
       "maxFileCount": 600,
       "capacity": {
-        "reviewed": { "packedBytes": 1796536, "unpackedBytes": 7935566, "fileCount": 549 },
-        "growthReserve": { "packedBytes": 303464, "unpackedBytes": 1064434, "fileCount": 51 },
-        "capabilityBasis": "stable golden path plus focused ECS, scene, rendering, physics, compute, assets, diagnostics, and experimental runtime seams"
+        "reviewed": { "packedBytes": 1806568, "unpackedBytes": 7978044, "fileCount": 560 },
+        "growthReserve": { "packedBytes": 293432, "unpackedBytes": 1021956, "fileCount": 40 },
+        "capabilityBasis": "stable golden path plus focused ECS, scene, rendering, physics, compute, assets, diagnostics, game saves, and experimental runtime seams"
       },
       "declaredFiles": [
         "README.md",
@@ -166,6 +166,17 @@
         "Entity",
         "System",
         "World"
+      ],
+      "allowedGeneratedShaderArtifacts": []
+    },
+    "save-only": {
+      "fixture": "scripts/fixtures/engine-consumers/save-only.mjs",
+      "maxGzipBytes": 14000,
+      "requiredExports": [
+        "GameSaveService",
+        "LocalStorageSaveBackend",
+        "IndexedDbSaveBackend",
+        "validateGameSaveEnvelope"
       ],
       "allowedGeneratedShaderArtifacts": []
     },

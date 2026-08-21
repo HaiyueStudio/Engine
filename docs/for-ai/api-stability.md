@@ -32,6 +32,7 @@
 | `/scene` | Scene、公开配置与 pipeline warmup | preset 表、system plan、配置 normalization、RenderPipeline/Integration 与 registry/host 实现 |
 | `/systems` | 可直接装配的系统及其公开配置 | Render3D 内部 frame plan 与诊断快照 |
 | `/serialization` | 显式选择使用的序列化协议 | 默认根入口 re-export |
+| `/save` | 游戏无关的存档信封、校验、存储后端、checkpoint 与文件导入导出 | 游戏规则、账号云同步、浏览器无权管理的外部磁盘文件 |
 | `/experimental` | 旧调用方兼容聚合；冻结符号预算，不再作为新增能力默认入口 | experimental |
 | `/experimental/assets` | cache、scheduler、worker-first parser 与 KTX2 低层上传 | experimental |
 | `/experimental/diagnostics` | frame/GPU timing 与 GPU resource ownership 诊断 | experimental |

@@ -209,7 +209,7 @@ function renderCapabilityMatrix(capture: CubismDrawableCapture): void {
     ['Vertex animation', 'supported', `${capture.frames.length} 个采样帧，运行时线性插值`],
     ['Opacity & render order', 'supported', '每帧 opacity 与 renderOrder 保留'],
     ['Mask composition', masked > 0 ? 'supported' : 'not-covered', masked > 0 ? `${masked} 个 mask 引用` : '当前 MIT fixture 未覆盖'],
-    ['Additive / multiplicative blend', nonNormal > 0 ? 'approximated' : 'not-covered', nonNormal > 0 ? `${nonNormal} 个非 normal drawable` : '当前 MIT fixture 仅 normal blend'],
+    ['Additive / multiplicative blend', nonNormal > 0 ? 'supported' : 'not-covered', nonNormal > 0 ? `${nonNormal} 个非 normal drawable` : '当前 MIT fixture 仅 normal blend'],
     ['Cubism parameters / Physics', 'baked', '构建期由已授权 Cubism Core 求值；网页运行时不携带 Core'],
   ] as const;
   const body = required<HTMLTableSectionElement>('#capability-rows');

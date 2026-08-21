@@ -383,6 +383,14 @@ function stageCatalog(kind, destination) {
   for (const entry of readdirSync(sourceRoot, { withFileTypes: true })) {
     if (entry.isFile()) cpSync(resolve(sourceRoot, entry.name), resolve(destination, kind, entry.name));
   }
+  if (kind === 'examples') {
+    const sharedSource = resolve(sourceRoot, 'shared');
+    const sharedTarget = resolve(destination, kind, 'shared');
+    cpSync(sharedSource, sharedTarget, { recursive: true });
+    if (!existsSync(resolve(sharedTarget, 'engine.js'))) {
+      throw new Error('examples catalog is missing built shared/engine.js.');
+    }
+  }
   for (const directory of [...directories].sort()) {
     const source = resolve(sourceRoot, directory);
     const target = resolve(destination, kind, directory);

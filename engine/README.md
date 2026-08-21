@@ -61,6 +61,7 @@ engine.run();
 - `@haiyue/engine/material`：材质和来源无关的材质描述
 - `@haiyue/engine/postprocess`：后处理
 - `@haiyue/engine/physics`：可替换物理后端
+- `@haiyue/engine/save`：版本化游戏存档、校验、后端和文件导入导出
 - `@haiyue/engine/scene`、`/systems`、`/serialization`：场景装配、系统和显式序列化
 
 完整入口以 `package.json#exports` 和构建后的 `.d.ts` 为准；[API Reference](https://github.com/HypnosNova/HaiYue/tree/main/docs/api) 只提供索引，不复制 declaration。

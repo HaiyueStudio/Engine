@@ -7,3 +7,9 @@ export const ANIMATION_COMPARE_CLEAR_COLOR = Object.freeze({
   b: 23 / 255,
   a: 1,
 });
+
+/** Maps a uniform control range to fine low-end adjustment and fast high-end magnification. */
+export function resolveAnimationCompareZoom(autoZoom: number, controlValue: number): number {
+  const normalizedControl = Number.isFinite(controlValue) ? Math.max(0, controlValue) : 1;
+  return autoZoom * normalizedControl ** 2;
+}

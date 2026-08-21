@@ -20,4 +20,4 @@ npm run cubism:capture -- --core /licensed/live2dcubismcore.min.js --model /proj
 hya-live2d-convert --input build/model.capture.json --output build/model.hya --strict
 ```
 
-V1 deliberately bakes one clip. Parameter inputs, physics, motion sync, multiply/screen color, non-normal blending, and culling are reported as unsupported or approximated.
+V1 deliberately bakes one clip. Parameter inputs, physics, motion sync, multiply/screen color, and culling are reported as unsupported or approximated; normal/additive/multiplicative blend modes and alpha masks are preserved by the source-neutral runtime.

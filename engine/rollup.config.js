@@ -40,6 +40,7 @@ export default {
     lighting: 'src/lighting.ts',
     math: 'src/math.ts',
     serialization: 'src/serialization.ts',
+    save: 'src/save.ts',
     renderer: 'src/renderer.ts',
     navigation: 'src/navigation.ts',
     'internal/precompiled-shader-runtime': 'src/shader/PrecompiledShaderRuntime.ts',

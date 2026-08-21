@@ -195,6 +195,7 @@ class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
         instanceId: this.context.instanceId,
         nodeId,
         order: drawable.renderOrders[0]!,
+        blendMode: drawable.blendMode,
         sourceOnly,
         ...(composite ? { composite } : {}),
         textureHandle: textures[drawable.textureIndex]!,

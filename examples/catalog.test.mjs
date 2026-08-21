@@ -8,6 +8,14 @@ import {
   loadExampleCatalogReport,
 } from './catalog.js';
 import { computeExampleSourceFingerprint } from './scripts/example-build-fingerprint.mjs';
+import {
+  SHARED_ENGINE_GLOBAL,
+  SHARED_ENGINE_OUTPUT,
+  SHARED_ENGINE_TARGET,
+  sharedEngineEntrypoints,
+  sharedEngineGlobal,
+  sharedEngineLocalPackages,
+} from './scripts/shared-engine-bundle.mjs';
 
 const manifest = JSON.parse(await readFile(new URL('./manifest.json', import.meta.url), 'utf8'));
 
@@ -109,6 +117,35 @@ test('catalog omits groups emptied by invalid examples but keeps manifest struct
   assert.throws(() => createExampleCatalog(invalidGroups), /Invalid or duplicate catalog group/);
 });
 
+test('every example loads one shared Engine bundle before its own bundle', async () => {
+  const packageJson = JSON.parse(await readFile(new URL('../engine/package.json', import.meta.url), 'utf8'));
+  const expectedPackageIds = Object.keys(packageJson.exports).map(exportPath => (
+    exportPath === '.' ? packageJson.name : `${packageJson.name}/${exportPath.slice(2)}`
+  ));
+  assert.equal(SHARED_ENGINE_TARGET, 'shared-engine');
+  assert.equal(SHARED_ENGINE_OUTPUT, 'shared/engine.js');
+  assert.deepEqual(sharedEngineEntrypoints.map(entry => entry.packageId), expectedPackageIds);
+  assert.equal(new Set(sharedEngineEntrypoints.map(entry => entry.property)).size, sharedEngineEntrypoints.length);
+  for (const entry of sharedEngineEntrypoints) {
+    assert.equal(sharedEngineGlobal(entry.packageId), `${SHARED_ENGINE_GLOBAL}.${entry.property}`);
+    assert.equal(sharedEngineLocalPackages[entry.packageId], entry.input);
+    assert.match(entry.input.replaceAll('\\', '/'), /\/engine\/src\/.+\.ts$/u);
+  }
+
+  await Promise.all(manifest.entries.map(async entry => {
+    const html = await readFile(new URL(`./${entry.id}/index.html`, import.meta.url), 'utf8');
+    const sharedIndex = html.indexOf('<script src="../shared/engine.js"></script>');
+    const exampleIndex = html.search(/<script[^>]+src="\.\/bundle\.js(?:\?[^"}]*)?"/u);
+    if (exampleIndex < 0) {
+      assert.equal(entry.id, 'hya-samples', `${entry.id} must load its own bundle`);
+      assert.match(html, /animation-spec/u, 'the redirect-only HYA catalog entry must keep its explicit destination');
+      return;
+    }
+    assert.ok(sharedIndex >= 0, `${entry.id} must load the shared Engine bundle`);
+    assert.ok(exampleIndex > sharedIndex, `${entry.id} must load its own bundle after the shared Engine bundle`);
+  }));
+});
+
 test('example builds are content-addressed and dev watches every producing workspace', async () => {
   const [first, second, rollup, buildScript, watchScript, packageJson] = await Promise.all([
     computeExampleSourceFingerprint(),
@@ -123,10 +160,14 @@ test('example builds are content-addressed and dev watches every producing works
   assert.ok(first.inputCount > manifest.entries.length);
   assert.match(rollup, /exampleBuildMetadata\('source-viewer'\)/);
   assert.match(rollup, /exampleBuildMetadata\(entry\.id\)/);
+  assert.match(rollup, /exampleBuildMetadata\(SHARED_ENGINE_TARGET\)/);
+  assert.match(rollup, /isSharedEngineImport/);
   assert.match(buildScript, /verifyExampleBuildFreshness/);
   assert.match(buildScript, /runRollupOnce/);
   assert.match(buildScript, /EXAMPLE_SHELL_ONLY/);
   assert.match(buildScript, /EXAMPLE_SKIP_SOURCE_VIEWER/);
+  assert.match(buildScript, /EXAMPLE_SHARED_ONLY/);
+  assert.match(buildScript, /EXAMPLE_SKIP_SHARED_ENGINE/);
   assert.doesNotMatch(buildScript, /from 'node:child_process'/);
   assert.doesNotMatch(buildScript, /bundleCreated|stopAfterCreateTimer/);
   assert.match(watchScript, /rollup\.worker\.config\.js/);

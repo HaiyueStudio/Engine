@@ -62,7 +62,6 @@ export interface CubismCaptureDiagnostic {
   readonly code:
     | 'E_CUBISM_CAPTURE_INVALID'
     | 'E_CUBISM_TOPOLOGY_CHANGED'
-    | 'W_CUBISM_BLEND_APPROXIMATED'
     | 'W_CUBISM_COLOR_APPROXIMATED'
     | 'W_CUBISM_CULLING_IGNORED';
   readonly message: string;
@@ -133,8 +132,6 @@ export function convertCubismCaptureToHya(
     const basePath = `$.frames[0].drawables[id=${JSON.stringify(base.id)}]`;
     const blendMode = base.blendMode ?? 'normal';
     const samples = capture.frames.map(frame => frame.drawables.find(item => item.id === base.id)!).filter(Boolean);
-    const firstNonNormal = samples.find(item => (item.blendMode ?? 'normal') !== 'normal');
-    if (firstNonNormal) diagnostics.push({ severity: 'warning', code: 'W_CUBISM_BLEND_APPROXIMATED', message: `Blend mode "${firstNonNormal.blendMode}" is rendered as normal in v1.`, path: `${basePath}.blendMode` });
     if (samples.some(item => item.culling === true)) diagnostics.push({ severity: 'warning', code: 'W_CUBISM_CULLING_IGNORED', message: 'Drawable culling is disabled by the v1 2D renderer.', path: `${basePath}.culling` });
     if (samples.some(item => !isNeutralMultiply(item.multiplyColor) || !isNeutralScreen(item.screenColor))) diagnostics.push({ severity: 'warning', code: 'W_CUBISM_COLOR_APPROXIMATED', message: 'Non-neutral multiply/screen color is not represented by v1.', path: basePath });
     vertexCount += base.positions.length / 2;
@@ -205,7 +202,7 @@ export function convertCubismCaptureToHya(
       drawableCount: drawables.length,
       vertexCount,
       textureCount: capture.textures.length,
-      unsupportedRuntimeFeatures: Object.freeze(['parameterized-input', 'physics-runtime', 'motion-sync', 'multiply-screen-color', 'non-normal-blend', 'culling']),
+      unsupportedRuntimeFeatures: Object.freeze(['parameterized-input', 'physics-runtime', 'motion-sync', 'multiply-screen-color', 'culling']),
     }),
   });
 }

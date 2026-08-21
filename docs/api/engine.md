@@ -37,6 +37,7 @@ import { Render3DSystem } from '@haiyue/engine/systems';
 - `/scene`：Scene、公开配置和 pipeline warmup。
 - `/systems`：可装配的公开系统。
 - `/serialization`：显式选择的序列化协议。
+- `/save`：版本化游戏存档、校验、存储后端与文件导入导出。
 - `/font`：位图字体、SDF 字体构建与解析。
 - `/navigation`：地形 NavMesh、按代理半径寻路和动态圆形障碍。
 - `/experimental`：低层协议与诊断能力，不保证兼容。

@@ -11,8 +11,8 @@ for (const forbidden of ['Live2DCubismCore', 'Moc.fromArrayBuffer', '.moc3', '.m
 }
 
 const result = await runChromeWebGpuFixture({
-  root: exampleRoot,
-  fixture: 'index.html',
+  root,
+  fixture: 'examples/hya-live2d-corpus-dashboard/index.html',
   timeoutMs: 60_000,
   visualCapture: { viewportWidth: 1280, viewportHeight: 900, sampleWidth: 24, sampleHeight: 17 },
 });

@@ -32,7 +32,7 @@
   "runtime": {
     "ownerPackage": "@haiyue/extensions/deformable-animation",
     "sourceRuntimeDependency": false,
-    "supportedBlendModes": ["normal"],
+    "supportedBlendModes": ["normal", "additive", "multiplicative"],
     "supportedMasks": ["alpha"]
   },
   "diagnostics": [
@@ -40,7 +40,6 @@
     "E_ANIMATION_LIMIT_EXCEEDED",
     "E_CUBISM_CAPTURE_INVALID",
     "E_CUBISM_TOPOLOGY_CHANGED",
-    "W_CUBISM_BLEND_APPROXIMATED",
     "W_CUBISM_COLOR_APPROXIMATED",
     "W_CUBISM_CULLING_IGNORED"
   ]

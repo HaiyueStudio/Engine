@@ -4,10 +4,20 @@ import { CubismCaptureConversionError, convertCubismCaptureToHya, sampleCubismMo
 import { Animation2DComponent, Animation2DExtensionRegistry, Animation2DRenderSystem, Animation2DSystem } from '@haiyue/extensions/animation';
 import { createDeformableMesh2DRuntimeExtension } from '@haiyue/extensions/deformable-animation';
 import { Camera2D, Entity, HaiyueEngine, Transform2D } from '@haiyue/engine';
-import { ANIMATION_COMPARE_BACKGROUND_HEX, ANIMATION_COMPARE_CLEAR_COLOR } from '../animationCompareTheme';
+import { ANIMATION_COMPARE_BACKGROUND_HEX, ANIMATION_COMPARE_CLEAR_COLOR, resolveAnimationCompareZoom } from '../animationCompareTheme';
 
 interface Bounds { x: number; y: number; width: number; height: number }
-interface ReferenceDrawable { positions: Float32Array; uvs: Float32Array; indices: Uint32Array; opacity: number; textureIndex: number; order: number; blendMode: string }
+interface ReferenceDrawable {
+  id: string;
+  positions: Float32Array;
+  uvs: Float32Array;
+  indices: Uint32Array;
+  opacity: number;
+  textureIndex: number;
+  order: number;
+  blendMode: 'normal' | 'additive' | 'multiplicative';
+  masks: readonly string[];
+}
 interface CoreSession { core: any; moc: any; model: any; motion: CubismMotion3 | null; parameterDefaults: Float32Array; partDefaults: Float32Array; parameterIndex: Map<string, number>; partIndex: Map<string, number>; canvasWidth: number; canvasHeight: number; canvasOriginX: number; canvasOriginY: number; pixelsPerUnit: number; textures: ImageBitmap[] }
 
 async function main(): Promise<void> {
@@ -20,7 +30,7 @@ async function main(): Promise<void> {
   cameraEntity.addComponent(camera);
   const scene = engine.createScene({ name: 'Live2D HYA comparison', camera: { type: '2d', entity: cameraEntity }, view: { clearColor: ANIMATION_COMPARE_CLEAR_COLOR }, render3D: false, render2D: false, gui: false, pipelineLabel: 'Live2DHyaCompare.render' });
   scene.addSystem(new Animation2DSystem({ priority: -10, assetManager: engine.assetManager! }), false);
-  const hyaRenderer = new Animation2DRenderSystem(engine, cameraEntity, { loadOp: 'clear', maxMaskTargets: 16 });
+  const hyaRenderer = new Animation2DRenderSystem(engine, cameraEntity, { loadOp: 'clear', maxMaskTargets: 128 });
   scene.addSystem(hyaRenderer);
   engine.switchScene(scene);
   engine.run();
@@ -141,7 +151,7 @@ async function main(): Promise<void> {
     configureFromData(bakedData);
     query<HTMLElement>('#reference-mode').textContent = 'Official Cubism Core evaluator';
     const maskCount = bakedData.drawables.reduce((sum, drawable) => sum + drawable.masks.length, 0);
-    setStatus(`官方 Core 已加载 · ${bakedData.drawables.length} drawables · ${capture.frames.length} baked frames${maskCount ? ` · reference renderer 暂不合成 ${maskCount} 个 mask` : ''}`, maskCount ? 'warning' : 'success');
+    setStatus(`官方 Core 已加载 · ${bakedData.drawables.length} drawables · ${capture.frames.length} baked frames${maskCount ? ` · ${maskCount} 个 mask references` : ''}`, 'success');
   }
 
   function installHya(animation: ParsedAnimation): void {
@@ -193,7 +203,7 @@ async function main(): Promise<void> {
     modelTransform.setScale(zoom).setPosition(zoom * (sourceWidth / 2 - centerX) + panX, zoom * (centerY - sourceHeight / 2) - panY);
     query<HTMLOutputElement>('#view-value').textContent = `${zoom.toFixed(2)}× · ${panX.toFixed(0)}, ${panY.toFixed(0)}`;
   }
-  function viewSettings(): { zoom: number; panX: number; panY: number } { return { zoom: autoZoom * Number(query<HTMLInputElement>('#zoom').value), panX: Number(query<HTMLInputElement>('#pan-x').value), panY: Number(query<HTMLInputElement>('#pan-y').value) }; }
+  function viewSettings(): { zoom: number; panX: number; panY: number } { return { zoom: resolveAnimationCompareZoom(autoZoom, Number(query<HTMLInputElement>('#zoom').value)), panX: Number(query<HTMLInputElement>('#pan-x').value), panY: Number(query<HTMLInputElement>('#pan-y').value) }; }
   function replaceReferenceTextures(textures: ImageBitmap[]): void { for (const texture of referenceTextures) { referenceRenderer.releaseTexture(texture); texture.close(); } referenceTextures = textures; }
   function disposeCoreSession(): void { if (!coreSession) return; coreSession.model.release?.(); coreSession.moc.release?.(); for (const texture of coreSession.textures) { referenceRenderer.releaseTexture(texture); texture.close(); } coreSession = null; }
   function releaseObjectUrls(): void { for (const url of objectUrls) URL.revokeObjectURL(url); objectUrls = []; }
@@ -207,39 +217,189 @@ class ReferenceMeshRenderer {
   private readonly uv: number;
   private readonly uniforms: Record<string, WebGLUniformLocation>;
   private readonly textureCache = new WeakMap<ImageBitmap, WebGLTexture>();
+  private maskTexture: WebGLTexture | null = null;
+  private maskFramebuffer: WebGLFramebuffer | null = null;
+  private maskWidth = 0;
+  private maskHeight = 0;
+
   constructor(private readonly canvas: HTMLCanvasElement) {
     const gl = canvas.getContext('webgl2', { alpha: true, premultipliedAlpha: true });
     if (!gl) throw new Error('Reference view requires WebGL2.');
     this.gl = gl;
-    this.program = createProgram(gl, `#version 300 es\nin vec2 a_position;in vec2 a_uv;uniform vec2 u_center;uniform vec2 u_view;uniform vec2 u_pan;uniform float u_zoom;out vec2 v_uv;void main(){vec2 p=(a_position-u_center)*u_zoom+u_pan;gl_Position=vec4(2.0*p.x/u_view.x,-2.0*p.y/u_view.y,0,1);v_uv=a_uv;}`, `#version 300 es\nprecision mediump float;in vec2 v_uv;uniform sampler2D u_texture;uniform float u_opacity;out vec4 outColor;void main(){vec4 c=texture(u_texture,v_uv);outColor=vec4(c.rgb,c.a*u_opacity);}`);
-    this.position = gl.getAttribLocation(this.program, 'a_position'); this.uv = gl.getAttribLocation(this.program, 'a_uv');
-    this.uniforms = Object.fromEntries(['u_center', 'u_view', 'u_pan', 'u_zoom', 'u_opacity'].map(name => [name, requiredUniform(gl, this.program, name)]));
+    this.program = createProgram(gl, `#version 300 es
+in vec2 a_position;
+in vec2 a_uv;
+uniform vec2 u_center;
+uniform vec2 u_view;
+uniform vec2 u_pan;
+uniform float u_zoom;
+out vec2 v_uv;
+void main() {
+  vec2 p = (a_position - u_center) * u_zoom + u_pan;
+  gl_Position = vec4(2.0 * p.x / u_view.x, -2.0 * p.y / u_view.y, 0.0, 1.0);
+  v_uv = a_uv;
+}`, `#version 300 es
+precision mediump float;
+in vec2 v_uv;
+uniform sampler2D u_texture;
+uniform sampler2D u_mask;
+uniform vec2 u_target_size;
+uniform float u_opacity;
+uniform float u_use_mask;
+uniform float u_output_mask;
+out vec4 outColor;
+void main() {
+  vec4 color = texture(u_texture, v_uv);
+  float sourceAlpha = color.a * u_opacity;
+  if (u_output_mask > 0.5) {
+    outColor = vec4(sourceAlpha);
+    return;
   }
+  float maskCoverage = u_use_mask > 0.5
+    ? texture(u_mask, gl_FragCoord.xy / u_target_size).a
+    : 1.0;
+  float coverage = u_opacity * maskCoverage;
+  outColor = vec4(color.rgb * coverage, color.a * coverage);
+}`);
+    this.position = gl.getAttribLocation(this.program, 'a_position'); this.uv = gl.getAttribLocation(this.program, 'a_uv');
+    this.uniforms = Object.fromEntries([
+      'u_center', 'u_view', 'u_pan', 'u_zoom', 'u_target_size', 'u_opacity', 'u_use_mask', 'u_output_mask', 'u_texture', 'u_mask',
+    ].map(name => [name, requiredUniform(gl, this.program, name)]));
+  }
+
   render(drawables: ReferenceDrawable[], images: ImageBitmap[], sourceWidth: number, sourceHeight: number, bounds: Bounds, view: { zoom: number; panX: number; panY: number }): void {
     const gl = this.gl; const width = Math.max(1, this.canvas.clientWidth); const height = Math.max(1, this.canvas.clientHeight);
     if (this.canvas.width !== width || this.canvas.height !== height) { this.canvas.width = width; this.canvas.height = height; }
-    gl.viewport(0, 0, width, height); gl.clearColor(ANIMATION_COMPARE_CLEAR_COLOR.r, ANIMATION_COMPARE_CLEAR_COLOR.g, ANIMATION_COMPARE_CLEAR_COLOR.b, ANIMATION_COMPARE_CLEAR_COLOR.a); gl.clear(gl.COLOR_BUFFER_BIT); gl.useProgram(this.program); gl.enable(gl.BLEND);
+    this.ensureMaskTarget(width, height);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, width, height);
+    gl.clearColor(ANIMATION_COMPARE_CLEAR_COLOR.r, ANIMATION_COMPARE_CLEAR_COLOR.g, ANIMATION_COMPARE_CLEAR_COLOR.b, ANIMATION_COMPARE_CLEAR_COLOR.a);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(this.program);
+    gl.enable(gl.BLEND);
     const sourceAspect = sourceWidth / sourceHeight, displayAspect = width / height;
     const viewWidth = displayAspect > sourceAspect ? sourceHeight * displayAspect : sourceWidth;
     const viewHeight = displayAspect > sourceAspect ? sourceHeight : sourceWidth / displayAspect;
-    gl.uniform2f(this.uniforms.u_center!, bounds.x + bounds.width / 2, bounds.y + bounds.height / 2); gl.uniform2f(this.uniforms.u_view!, viewWidth, viewHeight); gl.uniform2f(this.uniforms.u_pan!, view.panX, view.panY); gl.uniform1f(this.uniforms.u_zoom!, view.zoom);
+    gl.uniform2f(this.uniforms.u_center!, bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+    gl.uniform2f(this.uniforms.u_view!, viewWidth, viewHeight);
+    gl.uniform2f(this.uniforms.u_pan!, view.panX, view.panY);
+    gl.uniform2f(this.uniforms.u_target_size!, width, height);
+    gl.uniform1f(this.uniforms.u_zoom!, view.zoom);
+    gl.uniform1i(this.uniforms.u_texture!, 0);
+    gl.uniform1i(this.uniforms.u_mask!, 1);
+    const byId = new Map(drawables.map(drawable => [drawable.id, drawable]));
     for (const drawable of [...drawables].sort((a, b) => a.order - b.order)) {
       const image = images[drawable.textureIndex]; if (!image || drawable.opacity <= 0) continue;
-      if (drawable.blendMode === 'additive') gl.blendFunc(gl.SRC_ALPHA, gl.ONE); else if (drawable.blendMode === 'multiplicative') gl.blendFunc(gl.DST_COLOR, gl.ONE_MINUS_SRC_ALPHA); else gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-      const positionBuffer = gl.createBuffer()!, uvBuffer = gl.createBuffer()!, indexBuffer = gl.createBuffer()!;
-      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer); gl.bufferData(gl.ARRAY_BUFFER, drawable.positions, gl.STREAM_DRAW); gl.enableVertexAttribArray(this.position); gl.vertexAttribPointer(this.position, 2, gl.FLOAT, false, 0, 0);
-      gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer); gl.bufferData(gl.ARRAY_BUFFER, drawable.uvs, gl.STATIC_DRAW); gl.enableVertexAttribArray(this.uv); gl.vertexAttribPointer(this.uv, 2, gl.FLOAT, false, 0, 0);
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, drawable.indices, gl.STATIC_DRAW); gl.bindTexture(gl.TEXTURE_2D, this.texture(image)); gl.uniform1f(this.uniforms.u_opacity!, drawable.opacity); gl.drawElements(gl.TRIANGLES, drawable.indices.length, gl.UNSIGNED_INT, 0);
-      gl.deleteBuffer(positionBuffer); gl.deleteBuffer(uvBuffer); gl.deleteBuffer(indexBuffer);
+      const usesMask = drawable.masks.length > 0 && this.renderMask(drawable.masks, byId, images, width, height);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.viewport(0, 0, width, height);
+      this.setBlendMode(drawable.blendMode);
+      this.drawDrawable(drawable, image, usesMask, false);
     }
   }
-  destroy(): void { this.gl.deleteProgram(this.program); }
+
+  destroy(): void {
+    this.gl.deleteProgram(this.program);
+    if (this.maskFramebuffer) this.gl.deleteFramebuffer(this.maskFramebuffer);
+    if (this.maskTexture) this.gl.deleteTexture(this.maskTexture);
+    this.maskFramebuffer = null;
+    this.maskTexture = null;
+  }
+
   releaseTexture(image: ImageBitmap): void { const texture = this.textureCache.get(image); if (!texture) return; this.gl.deleteTexture(texture); this.textureCache.delete(image); }
-  private texture(image: ImageBitmap): WebGLTexture { let texture = this.textureCache.get(image); if (texture) return texture; const gl = this.gl; texture = gl.createTexture()!; gl.bindTexture(gl.TEXTURE_2D, texture); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image); this.textureCache.set(image, texture); return texture; }
+
+  private renderMask(maskIds: readonly string[], byId: ReadonlyMap<string, ReferenceDrawable>, images: readonly ImageBitmap[], width: number, height: number): boolean {
+    const gl = this.gl;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.maskFramebuffer);
+    gl.viewport(0, 0, width, height);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    let rendered = false;
+    for (const id of maskIds) {
+      const mask = byId.get(id);
+      const image = mask ? images[mask.textureIndex] : undefined;
+      if (!mask || !image || mask.opacity <= 0) continue;
+      this.drawDrawable(mask, image, false, true);
+      rendered = true;
+    }
+    return rendered;
+  }
+
+  private drawDrawable(drawable: ReferenceDrawable, image: ImageBitmap, useMask: boolean, outputMask: boolean): void {
+    const gl = this.gl;
+    const positionBuffer = gl.createBuffer()!, uvBuffer = gl.createBuffer()!, indexBuffer = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, drawable.positions, gl.STREAM_DRAW);
+    gl.enableVertexAttribArray(this.position);
+    gl.vertexAttribPointer(this.position, 2, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, drawable.uvs, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(this.uv);
+    gl.vertexAttribPointer(this.uv, 2, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, drawable.indices, gl.STATIC_DRAW);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.texture(image));
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, useMask ? this.maskTexture : null);
+    gl.uniform1f(this.uniforms.u_opacity!, drawable.opacity);
+    gl.uniform1f(this.uniforms.u_use_mask!, useMask ? 1 : 0);
+    gl.uniform1f(this.uniforms.u_output_mask!, outputMask ? 1 : 0);
+    gl.drawElements(gl.TRIANGLES, drawable.indices.length, gl.UNSIGNED_INT, 0);
+    gl.deleteBuffer(positionBuffer);
+    gl.deleteBuffer(uvBuffer);
+    gl.deleteBuffer(indexBuffer);
+  }
+
+  private setBlendMode(mode: ReferenceDrawable['blendMode']): void {
+    const gl = this.gl;
+    if (mode === 'additive') gl.blendFuncSeparate(gl.ONE, gl.ONE, gl.ZERO, gl.ONE);
+    else if (mode === 'multiplicative') gl.blendFuncSeparate(gl.DST_COLOR, gl.ONE_MINUS_SRC_ALPHA, gl.ZERO, gl.ONE);
+    else gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  }
+
+  private ensureMaskTarget(width: number, height: number): void {
+    if (this.maskTexture && this.maskFramebuffer && this.maskWidth === width && this.maskHeight === height) return;
+    const gl = this.gl;
+    if (this.maskFramebuffer) gl.deleteFramebuffer(this.maskFramebuffer);
+    if (this.maskTexture) gl.deleteTexture(this.maskTexture);
+    this.maskTexture = gl.createTexture();
+    this.maskFramebuffer = gl.createFramebuffer();
+    if (!this.maskTexture || !this.maskFramebuffer) throw new Error('Reference renderer could not allocate its mask target.');
+    gl.bindTexture(gl.TEXTURE_2D, this.maskTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.maskFramebuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.maskTexture, 0);
+    if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) throw new Error('Reference renderer mask framebuffer is incomplete.');
+    this.maskWidth = width;
+    this.maskHeight = height;
+  }
+
+  private texture(image: ImageBitmap): WebGLTexture {
+    let texture = this.textureCache.get(image);
+    if (texture) return texture;
+    const gl = this.gl;
+    texture = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    this.textureCache.set(image, texture);
+    return texture;
+  }
 }
 
-function sampleBakedDrawables(data: ParsedDeformableMesh2DData, time: number): ReferenceDrawable[] { const frame = findFrame(data.times, time), next = Math.min(frame + 1, data.times.length - 1), progress = next === frame ? 0 : (time - data.times[frame]!) / (data.times[next]! - data.times[frame]!); return data.drawables.map(drawable => { const stride = drawable.vertexCount * 2, positions = new Float32Array(stride); for (let i = 0; i < stride; i++) positions[i] = mix(drawable.positions[frame * stride + i]!, drawable.positions[next * stride + i]!, progress); return { positions, uvs: drawable.uvs, indices: drawable.indices, opacity: mix(drawable.opacities[frame]!, drawable.opacities[next]!, progress), textureIndex: drawable.textureIndex, order: drawable.renderOrders[frame]!, blendMode: drawable.blendMode }; }); }
-function captureCoreReferenceDrawables(session: CoreSession): ReferenceDrawable[] { const d = session.model.drawables; return Array.from(d.ids, (_: unknown, index: number) => { const positions = new Float32Array(d.vertexPositions[index].length); for (let i = 0; i < positions.length; i += 2) { positions[i] = session.canvasOriginX + d.vertexPositions[index][i] * session.pixelsPerUnit; positions[i + 1] = session.canvasOriginY - d.vertexPositions[index][i + 1] * session.pixelsPerUnit; } const flags = d.constantFlags[index]; return { positions, uvs: Float32Array.from(d.vertexUvs[index]), indices: Uint32Array.from(d.indices[index]), opacity: d.opacities[index], textureIndex: d.textureIndices[index], order: d.renderOrders[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' : 'normal' }; }); }
+function sampleBakedDrawables(data: ParsedDeformableMesh2DData, time: number): ReferenceDrawable[] { const frame = findFrame(data.times, time), next = Math.min(frame + 1, data.times.length - 1), progress = next === frame ? 0 : (time - data.times[frame]!) / (data.times[next]! - data.times[frame]!); return data.drawables.map(drawable => { const stride = drawable.vertexCount * 2, positions = new Float32Array(stride); for (let i = 0; i < stride; i++) positions[i] = mix(drawable.positions[frame * stride + i]!, drawable.positions[next * stride + i]!, progress); return { id: drawable.id, positions, uvs: drawable.uvs, indices: drawable.indices, opacity: mix(drawable.opacities[frame]!, drawable.opacities[next]!, progress), textureIndex: drawable.textureIndex, order: drawable.renderOrders[frame]!, blendMode: drawable.blendMode, masks: drawable.masks }; }); }
+function captureCoreReferenceDrawables(session: CoreSession): ReferenceDrawable[] { const d = session.model.drawables, ids = Array.from(d.ids, String); return ids.map((id, index) => { const positions = new Float32Array(d.vertexPositions[index].length); for (let i = 0; i < positions.length; i += 2) { positions[i] = session.canvasOriginX + d.vertexPositions[index][i] * session.pixelsPerUnit; positions[i + 1] = session.canvasOriginY - d.vertexPositions[index][i + 1] * session.pixelsPerUnit; } const flags = d.constantFlags[index]; return { id, positions, uvs: Float32Array.from(d.vertexUvs[index]), indices: Uint32Array.from(d.indices[index]), opacity: d.opacities[index], textureIndex: d.textureIndices[index], order: d.renderOrders[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' : 'normal', masks: Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!) }; }); }
 function captureCoreClip(session: CoreSession, textures: File[]): CubismDrawableCapture { const duration = session.motion?.Meta.Duration ?? 1, steps = Math.max(1, Math.ceil(duration * 30)), frames = []; for (let frame = 0; frame <= steps; frame++) { const time = duration * frame / steps; applyCoreMotion(session, time); const d = session.model.drawables, ids = Array.from(d.ids, String); frames.push({ time, drawables: ids.map((id, index) => { const flags = d.constantFlags[index]; return { id, textureIndex: d.textureIndices[index], renderOrder: d.renderOrders[index], opacity: d.opacities[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' as const : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' as const : 'normal' as const, culling: !session.core.Utils.hasIsDoubleSidedBit(flags), masks: Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!), positions: centerCorePositions(session, d.vertexPositions[index]), uvs: Array.from(d.vertexUvs[index]) as number[], indices: Array.from(d.indices[index]) as number[] }; }) }); } return { format: 'live2d-cubism-drawable-capture', version: 1, name: 'Browser comparison capture', canvas: { width: session.canvasWidth, height: session.canvasHeight, pixelsPerUnit: session.pixelsPerUnit, coordinateSystem: 'model-y-up' }, duration, frameRate: steps / duration, textures: textures.map((file, index) => ({ id: `texture-${index}`, uri: file.name })), frames }; }
 function centerCorePositions(session: CoreSession, source: ArrayLike<number>): number[] { const positions = Array.from(source); const offsetX = (session.canvasOriginX - session.canvasWidth / 2) / session.pixelsPerUnit, offsetY = (session.canvasHeight / 2 - session.canvasOriginY) / session.pixelsPerUnit; for (let index = 0; index < positions.length; index += 2) { positions[index]! += offsetX; positions[index + 1]! += offsetY; } return positions; }
 function applyCoreMotion(session: CoreSession, time: number): void { session.model.parameters.values.set(session.parameterDefaults); session.model.parts.opacities.set(session.partDefaults); if (session.motion) { const sample = sampleCubismMotion3(session.motion, time); for (const [id, value] of sample.parameters) { const index = session.parameterIndex.get(id); if (index !== undefined) session.model.parameters.values[index] = value; } for (const [id, value] of sample.partOpacities) { const index = session.partIndex.get(id); if (index !== undefined) session.model.parts.opacities[index] = value; } } session.model.update(); }

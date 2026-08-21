@@ -17,6 +17,7 @@
 - [`@haiyue/extensions`](./extensions.md)
 - [`@haiyue/animation-spec`](./animation-spec.md)
 - [`@haiyue/engine/navigation`](./navigation.md)
+- [`@haiyue/engine/save`](./save.md)
 - [`@haiyue/engine/physics` 与 backend SPI](./physics.md)
 - [错误码](./errors/README.md)
 

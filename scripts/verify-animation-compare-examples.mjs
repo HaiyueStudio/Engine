@@ -12,8 +12,8 @@ assert.equal(lottieBundle.includes('_expression_function'), false, 'The official
 assert.equal(live2dBundle.includes('Live2D Proprietary Software License Agreement'), false, 'The optional comparison bundle must not vendor Cubism Core.');
 
 const [lottie, live2d] = await Promise.all([
-  runChromeWebGpuFixture({ root: resolve(root, 'examples/lottie-hya-compare'), fixture: 'index.html', timeoutMs: 60_000, visualCapture: { viewportWidth: 1200, viewportHeight: 760, sampleWidth: 24, sampleHeight: 15 } }),
-  runChromeWebGpuFixture({ root: resolve(root, 'examples/live2d-hya-compare'), fixture: 'index.html', timeoutMs: 60_000, visualCapture: { viewportWidth: 1200, viewportHeight: 760, sampleWidth: 24, sampleHeight: 15 } }),
+  runChromeWebGpuFixture({ root, fixture: 'examples/lottie-hya-compare/index.html', timeoutMs: 60_000, visualCapture: { viewportWidth: 1200, viewportHeight: 760, sampleWidth: 24, sampleHeight: 15 } }),
+  runChromeWebGpuFixture({ root, fixture: 'examples/live2d-hya-compare/index.html', timeoutMs: 60_000, visualCapture: { viewportWidth: 1200, viewportHeight: 760, sampleWidth: 24, sampleHeight: 15 } }),
 ]);
 assert.equal(lottie.status, 'passed');
 assert.equal(lottie.officialPlayer, 'lottie-web');

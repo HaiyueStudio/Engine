@@ -61,6 +61,7 @@
             "./diagnostics": 12,
             "./ecs": 22,
             "./extension-authoring": 14,
+            "./save": 35,
             "./serialization": 13
           }
         },

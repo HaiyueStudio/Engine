@@ -117,6 +117,10 @@ Everything else should prefer `engine.createScene()` unless the sample is intent
 
 The catalog remains manifest-driven; use target IDs instead of maintaining a second static example directory.
 
+Example builds emit the Engine runtime once at `examples/shared/engine.js`. Each example keeps only its own
+entry code and non-Engine capability code in `<example>/bundle.js`; the page loads the shared Engine bundle
+first. `build:target` and the examples watcher create or refresh the shared bundle automatically.
+
 - `consumer-walkthrough`: public Engine render, texture load, frame animation, and explicit disposal.
 - `shapes2d` / `pbr-showcase`: representative 2D and 3D rendering paths.
 - `gltf-animation3d-crossfade`: glTF skin/morph animation and cross-fade.

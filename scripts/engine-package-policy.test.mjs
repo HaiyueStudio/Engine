@@ -11,8 +11,8 @@ import {
 test('package capacity is reviewed capability plus explicit growth reserve', () => {
   const budget = JSON.parse(readFileSync(new URL('../config/engine-package-budget.json', import.meta.url), 'utf8'));
   assert.deepEqual(validateCapabilityPackageBudgetConfig(budget), []);
-  assert.equal(budget.publicPackages['@haiyue/engine'].capacity.reviewed.fileCount, 549);
-  assert.ok(budget.publicPackages['@haiyue/engine'].maxFileCount > 549);
+  assert.equal(budget.publicPackages['@haiyue/engine'].capacity.reviewed.fileCount, 560);
+  assert.ok(budget.publicPackages['@haiyue/engine'].maxFileCount > 560);
   assert.ok(budget.publicPackages['@haiyue/animation-spec'].maxFileCount > 31);
 });
 

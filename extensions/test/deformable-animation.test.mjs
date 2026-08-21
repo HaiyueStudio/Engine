@@ -33,7 +33,7 @@ test('deformable runtime preserves its owner transform chain and display-encoded
   const encoded = encodeDeformableMesh2DData({
     canvasWidth: 100, canvasHeight: 100, duration: 1, frameRate: 1, times: new Float32Array([0]),
     drawables: [{
-      id: 'mesh', textureIndex: 0, blendMode: 'normal', culling: false, masks: [],
+      id: 'mesh', textureIndex: 0, blendMode: 'additive', culling: false, masks: [],
       uvs: new Float32Array([0, 0, 1, 0, 0, 1]), indices: new Uint32Array([0, 1, 2]),
       positions: new Float32Array([0, 10, 20, 10, 0, 30]),
       opacities: new Float32Array([1]), renderOrders: new Float32Array([2]),
@@ -90,6 +90,7 @@ test('deformable runtime preserves its owner transform chain and display-encoded
   const runtimeRoot = parent.children[0];
   assert.ok(runtimeRoot.getComponent(Transform2D), 'runtime root must bridge the owning transform to drawable children');
   assert.equal(runtimeRoot.children.length, 1);
+  assert.equal(runtimeRoot.children[0].getComponent(Symbol.for('AnimationVisual2D')).blendMode, 'additive');
   assert.equal(textureOptions[0].format, 'rgba8unorm', 'sRGB source bytes must stay display encoded in the 2D compositor');
 
   instance.destroy();

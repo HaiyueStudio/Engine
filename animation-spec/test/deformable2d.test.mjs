@@ -13,7 +13,7 @@ test('deformable 2D machine-readable contract freezes the required extension and
   assert.equal(CONTRACT.extension.binaryMagic, 'HYDM');
   assert.equal(CONTRACT.profile.id, 'clip-baked');
   assert.equal(CONTRACT.runtime.sourceRuntimeDependency, false);
-  assert.deepEqual(CONTRACT.runtime.supportedBlendModes, ['normal']);
+  assert.deepEqual(CONTRACT.runtime.supportedBlendModes, ['normal', 'additive', 'multiplicative']);
   assert.equal(SCHEMA.properties.type.const, CONTRACT.extension.id);
   assert.equal(SCHEMA.properties.textures.maxItems, CONTRACT.limits.maxTextures);
 });
@@ -66,11 +66,20 @@ test('Cubism capture tolerates float32 opacity drift and clamps the encoded trac
     && error.diagnostics.some(item => item.code === 'E_CUBISM_CAPTURE_INVALID' && item.path === '$.frames[0].drawables[0].opacity'));
 });
 
-test('strict conversion rejects approximations and topology changes have a stable diagnostic', () => {
+test('Cubism conversion preserves non-normal blend modes while strict mode still rejects remaining approximations', () => {
+  const additive = captureFixture();
+  additive.frames[0].drawables[0].blendMode = 'additive';
+  additive.frames[1].drawables[0].blendMode = 'additive';
+  const converted = convertCubismCaptureToHya(additive, { strict: true });
+  assert.equal(decodeDeformableMesh2DData(converted.data).drawables[0].blendMode, 'additive');
+
   const warning = captureFixture();
-  warning.frames[0].drawables[0].blendMode = 'additive';
-  warning.frames[1].drawables[0].blendMode = 'additive';
-  assert.throws(() => convertCubismCaptureToHya(warning, { strict: true }), error => error instanceof CubismCaptureConversionError && error.diagnostics[0].code === 'W_CUBISM_BLEND_APPROXIMATED');
+  warning.frames[0].drawables[0].culling = true;
+  warning.frames[1].drawables[0].culling = true;
+  assert.throws(() => convertCubismCaptureToHya(warning, { strict: true }), error => error instanceof CubismCaptureConversionError && error.diagnostics[0].code === 'W_CUBISM_CULLING_IGNORED');
+});
+
+test('Cubism topology changes have a stable diagnostic', () => {
   const changed = captureFixture();
   changed.frames[1].drawables[0].uvs[0] = 0.5;
   assert.throws(() => convertCubismCaptureToHya(changed), error => error instanceof CubismCaptureConversionError && error.diagnostics.some(item => item.code === 'E_CUBISM_TOPOLOGY_CHANGED'));

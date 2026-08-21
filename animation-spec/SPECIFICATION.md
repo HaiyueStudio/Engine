@@ -99,7 +99,7 @@ Payload 包含 canonical Transform3D、perspective/orthographic camera、primiti
 
 `org.haiyue.deformable-mesh-2d@1` 用于来源无关的稳定三角拓扑动画。组件引用一个 `binary` data resource 和有序的 `image` resources；二进制 resource 的 media type 为 `application/vnd.haiyue.deformable-mesh-2d`，payload format 为 `haiyue-deformable-mesh-2d@1`（`.hydm`）。格式包含 canvas、时间采样、每个 drawable 的静态 UV/index/mask 引用，以及 frame-major Float32 position/opacity/render-order 数据。
 
-宿主必须在创建 GPU owner 前校验 header/version、全部 byte range、预算、有限数、单调时间、顶点与索引范围、稳定 drawable id 和 mask 引用。v1 运行时执行线性顶点/透明度采样与 step render order，并只承诺 normal alpha 和 alpha mask；additive/multiplicative、multiply/screen color、culling、参数化输入、Physics 和 motion sync 不得静默宣称精确支持。
+宿主必须在创建 GPU owner 前校验 header/version、全部 byte range、预算、有限数、单调时间、顶点与索引范围、稳定 drawable id 和 mask 引用。v1 运行时执行线性顶点/透明度采样、step render order、alpha mask，以及 normal/additive/multiplicative blend；multiply/screen color、culling、参数化输入、Physics 和 motion sync 不得静默宣称精确支持。
 
 Live2D Cubism 是一个构建期 adapter，而不是 runtime 分支。许可允许的 Cubism Core 在工具侧把选定 clip 求值成 drawable capture，`@haiyue/animation-spec/live2d` 再转换为本扩展。`.moc3`、Core 和来源 SDK 不进入 HYA 或产品网页 bundle。完整架构边界见 ADR 0083。
 

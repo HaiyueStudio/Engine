@@ -6,6 +6,10 @@ import {
   computeExampleSourceFingerprint,
   verifyExampleBuildFreshness,
 } from './example-build-fingerprint.mjs';
+import {
+  SHARED_ENGINE_OUTPUT,
+  SHARED_ENGINE_TARGET,
+} from './shared-engine-bundle.mjs';
 
 const examplesDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -27,6 +31,13 @@ if (missingDemos.length > 0) {
 
 const sourceFingerprint = await computeExampleSourceFingerprint();
 
+if (!shellOnly) {
+  await buildTarget('shared Engine bundle', {
+    EXAMPLE_FILTER: '',
+    EXAMPLE_SHARED_ONLY: '1',
+  }, SHARED_ENGINE_OUTPUT);
+}
+
 if (!skipSourceViewer) {
   await buildTarget('index source viewer', {
     EXAMPLE_FILTER: '',
@@ -39,6 +50,7 @@ if (!shellOnly) {
 }
 
 const targets = [
+  ...(shellOnly ? [] : [SHARED_ENGINE_TARGET]),
   ...(skipSourceViewer ? [] : ['source-viewer']),
   ...(shellOnly ? [] : demos),
 ];
@@ -54,6 +66,7 @@ async function buildDemo(demo) {
   await buildTarget(`example ${demo}`, {
     EXAMPLE_FILTER: demo,
     EXAMPLE_SKIP_SHELL: '1',
+    EXAMPLE_SKIP_SHARED_ENGINE: '1',
   }, `${demo}/bundle.js`);
 }
 

@@ -29,6 +29,7 @@ assert.equal(result.browserDiagnostics.unclassifiedFailureCount, 0);
 assert.ok(result.httpProvenance.requestCount >= 4);
 for (const required of [
   'examples/consumer-walkthrough/index.html',
+  'examples/shared/engine.js',
   'examples/consumer-walkthrough/bundle.js',
   'animation-spec/samples/assets/sprite1.png',
 ]) {

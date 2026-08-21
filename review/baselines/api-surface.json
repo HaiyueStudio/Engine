@@ -8485,6 +8485,151 @@
             }
           ]
         },
+        "./save": {
+          "source": "engine/src\\save.ts",
+          "exports": [
+            {
+              "name": "assertValidGameSaveEnvelope",
+              "kind": "value"
+            },
+            {
+              "name": "captureGameSaveThumbnail",
+              "kind": "value"
+            },
+            {
+              "name": "CaptureGameSaveThumbnailOptions",
+              "kind": "type"
+            },
+            {
+              "name": "computeGameSaveIntegrity",
+              "kind": "value"
+            },
+            {
+              "name": "downloadGameSaveFile",
+              "kind": "value"
+            },
+            {
+              "name": "GAME_SAVE_FORMAT",
+              "kind": "value"
+            },
+            {
+              "name": "GAME_SAVE_FORMAT_VERSION",
+              "kind": "value"
+            },
+            {
+              "name": "GameSaveBackend",
+              "kind": "type"
+            },
+            {
+              "name": "GameSaveBackendCapabilities",
+              "kind": "type"
+            },
+            {
+              "name": "GameSaveDataValidator",
+              "kind": "type"
+            },
+            {
+              "name": "GameSaveEnvelope",
+              "kind": "type"
+            },
+            {
+              "name": "GameSaveError",
+              "kind": "value"
+            },
+            {
+              "name": "GameSaveErrorCode",
+              "kind": "value"
+            },
+            {
+              "name": "GameSaveErrorOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GameSaveIntegrity",
+              "kind": "type"
+            },
+            {
+              "name": "GameSaveKind",
+              "kind": "type"
+            },
+            {
+              "name": "GameSaveOperation",
+              "kind": "type"
+            },
+            {
+              "name": "GameSaveService",
+              "kind": "value"
+            },
+            {
+              "name": "GameSaveServiceOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GameSaveSummary",
+              "kind": "type"
+            },
+            {
+              "name": "GameSaveThumbnail",
+              "kind": "type"
+            },
+            {
+              "name": "GameSaveValidationIssue",
+              "kind": "type"
+            },
+            {
+              "name": "GameSaveValidationOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GameSaveValidationResult",
+              "kind": "type"
+            },
+            {
+              "name": "ImportGameSaveOptions",
+              "kind": "type"
+            },
+            {
+              "name": "IndexedDbSaveBackend",
+              "kind": "value"
+            },
+            {
+              "name": "IndexedDbSaveBackendOptions",
+              "kind": "type"
+            },
+            {
+              "name": "LocalStorageSaveBackend",
+              "kind": "value"
+            },
+            {
+              "name": "LocalStorageSaveBackendOptions",
+              "kind": "type"
+            },
+            {
+              "name": "MemorySaveBackend",
+              "kind": "value"
+            },
+            {
+              "name": "parseGameSaveFile",
+              "kind": "value"
+            },
+            {
+              "name": "readGameSaveFile",
+              "kind": "value"
+            },
+            {
+              "name": "serializeGameSaveFile",
+              "kind": "value"
+            },
+            {
+              "name": "validateGameSaveEnvelope",
+              "kind": "value"
+            },
+            {
+              "name": "WriteGameSaveOptions",
+              "kind": "type"
+            }
+          ]
+        },
         "./scene": {
           "source": "engine/src\\scene.ts",
           "exports": [

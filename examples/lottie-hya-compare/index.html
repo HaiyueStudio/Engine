@@ -31,9 +31,9 @@
   </main>
   <footer>
     <div class="transport"><button id="play" type="button">暂停</button><input id="timeline" type="range" min="0" max="1" step="0.001" value="0" /><output id="time">0.00s</output><button id="fit" type="button">重新适配</button></div>
-    <div class="view"><label>缩放<input id="zoom" type="range" min="0.25" max="3" step="0.01" value="1" /></label><label>水平<input id="pan-x" type="range" min="-600" max="600" step="1" value="0" /></label><label>垂直<input id="pan-y" type="range" min="-400" max="400" step="1" value="0" /></label><output id="view-value">1.00×</output><span></span></div>
+    <div class="view"><label>缩放<input id="zoom" type="range" min="0.05" max="8" step="0.01" value="1" /></label><label>水平<input id="pan-x" type="range" min="-600" max="600" step="1" value="0" /></label><label>垂直<input id="pan-y" type="range" min="-400" max="400" step="1" value="0" /></label><output id="view-value">1.00×</output><span></span></div>
     <div id="diagnostics">等待转换</div>
   </footer>
-  <pre id="result"></pre><script type="module" src="./bundle.js"></script>
+  <pre id="result"></pre><script src="../shared/engine.js"></script><script type="module" src="./bundle.js"></script>
 </body>
 </html>

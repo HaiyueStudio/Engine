@@ -103,3 +103,4 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0083：Live2D 等可变形 2D 素材离线转换为来源无关 HYA](./0083-source-neutral-deformable-animation-delivery.md)
 - [0084：Ray tracing 使用可卸载的 WebGPU compute extension](./0084-webgpu-compute-ray-tracing-extension.md)
 - [0085：公共 API 与包体预算按已准入能力归因](./0085-capability-attributed-public-api-and-package-budgets.md)
+- [0086：游戏存档使用来源无关信封与可替换存储后端](./0086-game-save-envelope-and-storage-backends.md)

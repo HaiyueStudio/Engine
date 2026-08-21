@@ -160,6 +160,10 @@
       "types": "./dist/serialization.d.ts",
       "import": "./dist/serialization.js"
     },
+    "./save": {
+      "types": "./dist/save.d.ts",
+      "import": "./dist/save.js"
+    },
     "./navigation": {
       "types": "./dist/navigation.d.ts",
       "import": "./dist/navigation.js"
