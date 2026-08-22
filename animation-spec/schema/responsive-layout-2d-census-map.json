@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "format": "haiyue-responsive-layout-2d-census-map",
+  "version": 1,
+  "source": "M07 frozen text-layout-component-asset census",
+  "sourceSpecific": true,
+  "runtimePayloadSourceNeutral": true,
+  "objectMappings": {
+    "NestedArtboard": "artboards[] + component nodes", "Folder": "assets[kind=folder]", "ImageAsset": "assets[kind=image]", "FileAssetContents": "asset.source", "Text": "textBlocks[]", "TextValueRun": "textBlocks[].runs[]", "TextStylePaint": "textStyles[].fills/strokes", "FontAsset": "assets[kind=font]", "TextStyleAxis": "textStyles[].axes", "TextModifierRange": "textBlocks[].modifiers[].range", "TextModifierGroup": "textBlocks[].modifiers[kind=transform]", "TextVariationModifier": "textBlocks[].modifiers[].variables", "TextStyleFeature": "textStyles[].features", "LayoutComponentStyle": "artboards[].nodes[].style", "NestedArtboardLeaf": "component.fit/alignment", "NestedArtboardLayout": "component.sizing + node style", "NSlicerTileMode": "nSlice.tileModes[]", "NSlicer": "nSlice cuts", "AxisY": "nSlice.yCuts", "AxisX": "nSlice.xCuts", "NSlicedNode": "nodes[kind=n-slice]", "TextFollowPathModifier": "textBlocks[].modifiers[kind=follow-path]", "ArtboardComponentList": "nodes[kind=list]", "TextInput": "textBlocks[].input", "TextInputCursor": "text update cursor port", "TextInputText": "text update string port", "TextStyle": "textStyles[]", "TextInputSelection": "text update selection port", "TextInputSelectedText": "selection-derived glyph range", "ArtboardComponentListOverride": "list item identity/component replacement", "ManifestAsset": "assets[kind=manifest]", "BlobAsset": "assets[kind=blob]", "LayoutNodeStyle": "artboards[].nodes[].style sizing", "GridTrack": "style.gridColumns/gridRows", "LayoutParticipant": "artboards[].nodes[]", "GridItemPlacement": "style.gridPlacement", "TextStyleBackground": "textStyles[].background"
+  },
+  "propertyGroups": {
+    "NestedArtboard": ["artboardId", "dataBindPathIds", "isPaused", "speed", "quantize", "isStateful"],
+    "Asset": ["name"],
+    "FileAsset": ["assetId", "cdnUuid", "cdnBaseUrl"],
+    "DrawableAsset": ["height", "width"],
+    "FileAssetContents": ["bytes", "signature"],
+    "TextValueRun": ["text", "styleId"],
+    "TextStyle": ["fontSize", "fontAssetId", "lineHeight", "letterSpacing"],
+    "Text": ["alignValue", "sizingValue", "width", "height", "overflowValue", "originX", "originY", "paragraphSpacing", "originValue", "wrapValue", "verticalAlignValue", "fitFromBaseline", "textRunListSource", "verticalTrimValue", "verticalTrimTopValue", "verticalTrimBottomValue"],
+    "TextStyleAxis": ["axisValue", "tag"],
+    "TextModifierRange": ["unitsValue", "falloffFrom", "falloffTo", "offset", "typeValue", "modeValue", "modifyFrom", "clamp", "strength", "modifyTo", "runId"],
+    "TextVariationModifier": ["axisTag", "axisValue"],
+    "TextModifierGroup": ["x", "y", "opacity", "originX", "originY", "scaleX", "scaleY", "rotation", "modifierFlags"],
+    "TextStyleFeature": ["tag", "featureValue"],
+    "LayoutComponentStyle": ["gapHorizontal", "gapVertical", "borderLeft", "borderRight", "borderTop", "borderBottom", "marginLeft", "marginRight", "marginTop", "marginBottom", "paddingLeft", "paddingRight", "paddingTop", "paddingBottom", "positionLeft", "positionRight", "positionTop", "positionBottom", "flexBasis", "aspectRatio", "animationStyleType", "interpolationType", "interpolatorId", "interpolationTime", "positionTypeValue", "flexDirectionValue", "directionValue", "flexWrapValue", "overflowValue", "intrinsicallySizedValue", "borderLeftUnitsValue", "borderRightUnitsValue", "borderTopUnitsValue", "borderBottomUnitsValue", "marginLeftUnitsValue", "marginRightUnitsValue", "marginTopUnitsValue", "marginBottomUnitsValue", "paddingLeftUnitsValue", "paddingRightUnitsValue", "paddingTopUnitsValue", "paddingBottomUnitsValue", "positionLeftUnitsValue", "positionRightUnitsValue", "positionTopUnitsValue", "positionBottomUnitsValue", "gapHorizontalUnitsValue", "gapVerticalUnitsValue", "layoutAlignmentType", "linkCornerRadius", "cornerRadiusTL", "cornerRadiusTR", "cornerRadiusBL", "cornerRadiusBR", "flexBasisUnitsValue", "justifyItemsValue", "layoutTypeValue"],
+    "LayoutSizingStyle": ["maxWidth", "maxHeight", "minWidth", "minHeight", "displayValue", "widthUnitsValue", "heightUnitsValue", "minWidthUnitsValue", "minHeightUnitsValue", "maxWidthUnitsValue", "maxHeightUnitsValue", "layoutWidthScaleType", "layoutHeightScaleType", "justifySelfValue"],
+    "NestedArtboardLeaf": ["fit", "alignmentX", "alignmentY"],
+    "NestedArtboardLayout": ["instanceWidth", "instanceHeight", "instanceWidthUnitsValue", "instanceHeightUnitsValue", "instanceWidthScaleType", "instanceHeightScaleType"],
+    "NSlicerTileMode": ["patchIndex", "style"],
+    "Axis": ["offset", "normalized"],
+    "NSlicedNode": ["initialWidth", "initialHeight", "width", "height"],
+    "TextTargetModifier": ["targetId"],
+    "TextFollowPathModifier": ["radial", "orient", "start", "end", "strength", "offset"],
+    "ArtboardComponentList": ["listSource"],
+    "TextInput": ["text", "selectionRadius", "multiline"],
+    "ArtboardComponentListOverride": ["artboardId", "instanceWidth", "instanceHeight"],
+    "TextAsset": ["folderPath"],
+    "GridItemPlacement": ["gridColumn", "gridRow", "gridColumnSpan", "gridRowSpan"],
+    "LayoutNodeStyle": ["fractionalWidth", "fractionalHeight", "width", "height"],
+    "GridTrack": ["collection", "trackType", "trackValue", "trackMaxType", "trackMaxValue"],
+    "TextStyleBackground": ["cornerRadius"],
+    "ImageAsset": ["samplerFilter", "samplerWrapX", "samplerWrapY"]
+  },
+  "assetMappings": {
+    "Asset": "asset union", "Folder": "folder asset", "FileAsset": "asset source metadata", "DrawableAsset": "image dimensions", "ImageAsset": "image asset", "FileAssetContents": "embedded/referenced/hosted source", "FontAsset": "font asset with compiled metrics", "ManifestAsset": "manifest asset", "BlobAsset": "blob asset", "TextAsset": "text asset"
+  },
+  "counts": { "objects": 37, "properties": 182, "assets": 10 },
+  "unmapped": []
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "format": "haiyue-responsive-layout-2d-contract",
+  "version": 1,
+  "extension": "org.haiyue.layout-2d@1",
+  "sourceNeutral": true,
+  "sourceRuntimeDependency": false,
+  "coordinates": "screen-y-down",
+  "shaping": {
+    "stack": "haiyue-text-shaping@1",
+    "machineFontsAllowed": false,
+    "fontBytesAndIntegrityRequired": true,
+    "revisionFields": ["backendRevision", "unicodeVersion", "graphemeRevision", "bidiRevision"]
+  },
+  "evaluation": {
+    "passes": 2,
+    "explicitUpdatePorts": true,
+    "lateWritebackAfterAbort": false,
+    "componentTiming": ["simple", "remap", "mix"],
+    "scrollModes": ["clamped", "elastic", "infinite"],
+    "nSliceTileModes": ["stretch", "repeat", "mirror"]
+  },
+  "binary": {
+    "magic": "HYLA",
+    "major": 1,
+    "minor": 0,
+    "endianness": "little",
+    "headerBytes": 40,
+    "header": ["magic:u32", "major:u16", "minor:u16", "metadataOffset:u32", "metadataBytes:u32", "byteOffset:u32", "byteCount:u32", "totalBytes:u32", "flags:u32", "reserved0:u32", "reserved1:u32"],
+    "metadata": "utf8-json",
+    "bytePool": "embedded-assets-in-document-order",
+    "poolRanges": "canonical-no-alias-no-gap",
+    "alignment": 1
+  },
+  "limits": {
+    "maxInputBytes": 67108864,
+    "maxMetadataBytes": 4194304,
+    "maxAssets": 4096,
+    "maxAssetBytes": 268435456,
+    "maxTotalAssetBytes": 1073741824,
+    "maxArtboards": 8192,
+    "maxNodes": 250000,
+    "maxTextBytes": 33554432,
+    "maxGlyphs": 1000000,
+    "maxLines": 250000,
+    "maxLayoutPasses": 64,
+    "maxNestedDepth": 128,
+    "maxComponentInstances": 8192,
+    "maxListItems": 100000,
+    "maxVirtualizedWindow": 4096,
+    "maxNslicePatches": 1000000,
+    "maxGpuBytes": 536870912
+  },
+  "diagnostics": ["E_LAYOUT_FORMAT", "E_LAYOUT_LIMIT", "E_LAYOUT_NUMBER", "E_LAYOUT_REFERENCE", "E_LAYOUT_CYCLE", "E_LAYOUT_OSCILLATION", "E_LAYOUT_SHAPING", "E_LAYOUT_ASSET_INTEGRITY", "E_LAYOUT_BINARY"],
+  "networkPolicy": "host-explicit-deny-same-origin-or-allow-list",
+  "excludedGraphs": ["data-binding", "state-machine", "audio-playback", "script"],
+  "integration": { "publicExportOwner": "G13", "importAdapterOwner": "G10", "formalOracleOwner": "G11" }
+}

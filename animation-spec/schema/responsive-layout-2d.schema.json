@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haiyue.dev/schemas/animation/responsive-layout-2d.schema.json",
+  "title": "Source-neutral HYA responsive layout 2D v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "extension", "shaping", "assets", "textStyles", "textBlocks", "artboards", "instances"],
+  "properties": {
+    "format": { "const": "haiyue-responsive-layout-2d" },
+    "version": { "const": 1 },
+    "extension": { "const": "org.haiyue.layout-2d@1" },
+    "shaping": { "$ref": "#/$defs/shaping" },
+    "assets": { "type": "array", "maxItems": 4096, "items": { "$ref": "#/$defs/asset" } },
+    "textStyles": { "type": "array", "maxItems": 250000, "items": { "type": "object", "required": ["id", "fontAssets", "fontFamily", "fontWeight", "fontStyle", "fontSize", "lineHeight", "tracking", "alignment", "fills"] },
+    "textBlocks": { "type": "array", "maxItems": 250000, "items": { "type": "object", "required": ["id", "runs", "width", "height"] } },
+    "artboards": { "type": "array", "maxItems": 8192, "items": { "$ref": "#/$defs/artboard" } },
+    "instances": { "type": "array", "maxItems": 8192, "items": { "$ref": "#/$defs/instance" } }
+  },
+  "$defs": {
+    "id": { "type": "string", "minLength": 1, "maxLength": 1024 },
+    "positive": { "type": "number", "exclusiveMinimum": 0 },
+    "integrity": { "type": "string", "pattern": "^sha256-(?:[A-Za-z0-9+/]{43}=|[a-f0-9]{64})$" },
+    "shaping": { "type": "object", "additionalProperties": false, "required": ["stack", "backendRevision", "unicodeVersion", "graphemeRevision", "bidiRevision"], "properties": { "stack": { "const": "haiyue-text-shaping@1" }, "backendRevision": { "$ref": "#/$defs/id" }, "unicodeVersion": { "$ref": "#/$defs/id" }, "graphemeRevision": { "$ref": "#/$defs/id" }, "bidiRevision": { "$ref": "#/$defs/id" } } },
+    "source": { "oneOf": [
+      { "type": "object", "additionalProperties": false, "required": ["kind", "data", "integrity"], "properties": { "kind": { "const": "embedded" }, "data": { "type": "array", "maxItems": 268435456, "items": { "type": "integer", "minimum": 0, "maximum": 255 } }, "integrity": { "$ref": "#/$defs/integrity" } } },
+      { "type": "object", "additionalProperties": false, "required": ["kind", "uri", "integrity"], "properties": { "kind": { "const": "referenced" }, "uri": { "$ref": "#/$defs/id" }, "integrity": { "$ref": "#/$defs/integrity" } } },
+      { "type": "object", "additionalProperties": false, "required": ["kind", "slot", "integrity"], "properties": { "kind": { "const": "hosted" }, "slot": { "$ref": "#/$defs/id" }, "fallbackAsset": { "$ref": "#/$defs/id" }, "integrity": { "$ref": "#/$defs/integrity" } } }
+    ] },
+    "asset": { "type": "object", "required": ["id", "kind"], "properties": { "id": { "$ref": "#/$defs/id" }, "kind": { "enum": ["folder", "image", "font", "audio", "blob", "manifest", "text"] }, "source": { "$ref": "#/$defs/source" } } },
+    "node": { "type": "object", "additionalProperties": false, "required": ["id", "kind", "style"], "properties": { "id": { "$ref": "#/$defs/id" }, "parent": { "$ref": "#/$defs/id" }, "kind": { "enum": ["container", "leaf", "text", "image", "component", "list", "n-slice"] }, "style": { "type": "object" }, "visual": { "type": "object" }, "intrinsicSize": { "type": "array", "minItems": 2, "maxItems": 2 }, "text": { "$ref": "#/$defs/id" }, "asset": { "$ref": "#/$defs/id" }, "component": { "type": "object" }, "list": { "type": "object" }, "nSlice": { "type": "object" }, "scroll": { "type": "object" } } },
+    "artboard": { "type": "object", "additionalProperties": false, "required": ["id", "width", "height", "root", "nodes"], "properties": { "id": { "$ref": "#/$defs/id" }, "name": { "type": "string" }, "width": { "$ref": "#/$defs/positive" }, "height": { "$ref": "#/$defs/positive" }, "root": { "$ref": "#/$defs/id" }, "nodes": { "type": "array", "maxItems": 250000, "items": { "$ref": "#/$defs/node" } } } },
+    "instance": { "type": "object", "additionalProperties": false, "required": ["id", "artboard"], "properties": { "id": { "$ref": "#/$defs/id" }, "artboard": { "$ref": "#/$defs/id" }, "fit": { "enum": ["fill", "contain", "cover", "none", "scale-down"] }, "alignment": { "type": "array", "minItems": 2, "maxItems": 2 }, "transform": { "type": "array", "minItems": 6, "maxItems": 6 } } }
+  }
+}
