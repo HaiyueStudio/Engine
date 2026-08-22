@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "id": "rive-7.3-webgl2-2.40.0",
+  "status": "accepted",
+  "frozenAt": "2026-08-22",
+  "riveFormat": {
+    "fingerprint": "RIVE",
+    "major": 7,
+    "minor": 3,
+    "fullFidelityInputRule": "exact-major-and-minor",
+    "olderMinorRule": "outside-formal-denominator-until-a-version-fixture-proves-equivalence",
+    "newerMinorRule": "reject-before-object-materialization"
+  },
+  "editorExport": {
+    "mode": "for-runtime-riv",
+    "editorExporterRevision": "ee809ba7f032271dd7102f17afe3baf9d192435b",
+    "exporterSchemaRevision": "ee809ba7f032271dd7102f17afe3baf9d192435b",
+    "revisionSource": "the public runtime mirror .rive_head used to generate the 7.3 object/property schema",
+    "revisionIdentity": "rive-cloud-file-revision-id-plus-exported-bytes-sha256",
+    "rule": "Every formal corpus entry records its immutable Rive file revision id. An Editor app version or mutable share link is not a revision identity."
+  },
+  "runtimeSource": {
+    "repository": "https://github.com/rive-app/rive-runtime",
+    "publicCommit": "526625850eaf34fc1263d181808ffca10cae6ac1",
+    "riveHead": "ee809ba7f032271dd7102f17afe3baf9d192435b",
+    "sourceArchive": "https://codeload.github.com/rive-app/rive-runtime/zip/526625850eaf34fc1263d181808ffca10cae6ac1",
+    "sourceArchiveSha256": "67b05558f8d49a0568533e753501f2e1586160d088020d4f88158f10a537207f"
+  },
+  "officialOracle": {
+    "package": "@rive-app/webgl2",
+    "version": "2.40.0",
+    "publishedAt": "2026-08-14T16:02:32.643Z",
+    "gitHead": "1e9391880df1d501b98d165d2db89284025462eb",
+    "riveRuntimeHead": "ee809ba7f032271dd7102f17afe3baf9d192435b",
+    "alignmentRule": "The oracle gitHead .rive_head equals runtimeSource.riveHead.",
+    "npmShasumSha1": "b39759bede495ab60e72ac7a42ea5579eeecae5f",
+    "npmIntegrity": "sha512-SmMXHvmzevS+ByvR/E3mF7llzxdHRbeTy5el8qLHSLZMYkPjfceMJg3k7lxU9m/bZICWWOOuOk/Hgl1jz6whVA==",
+    "tarballSha256": "f458f5ceb8c677c0389cf237aa73cea9bad2f5b83555715b876dcc233cda6aaa",
+    "riveJsSha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+    "riveWasmSha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+    "fallbackWasmSha256": "4890ed4a506742587909e847376587d44ac13454d60f58790b1f6729f8648b49",
+    "oracleOnly": true
+  },
+  "sourceFeatureFlags": {
+    "WITH_RIVE_TEXT": true,
+    "WITH_RIVE_LAYOUT": true,
+    "WITH_RIVE_AUDIO": true,
+    "WITH_RIVE_SCRIPTING": true,
+    "RIVE_DECODERS": true,
+    "RIVE_PNG": true,
+    "RIVE_JPEG": true,
+    "RIVE_WEBP": true,
+    "RIVE_WEBGL": true
+  },
+  "rendererDecoderScriptingRevisions": {
+    "renderer": "rive-runtime@526625850eaf34fc1263d181808ffca10cae6ac1 plus @rive-app/webgl2@2.40.0 binary hashes",
+    "harfbuzz": "rive-app/harfbuzz@rive_13.1.1",
+    "sheenBidi": "Tehreer/SheenBidi@v2.6",
+    "yoga": "rive-app/yoga@rive_changes_v2_0_1_2_grid",
+    "miniaudio": "rive-app/miniaudio@rive_changes_5",
+    "luau": "luigi-rosso/luau@rive_0_733",
+    "libhydrogen": "luigi-rosso/libhydrogen@rive_0_2",
+    "libpng": "glennrp/libpng@libpng16 as observed upstream; oracle binary hash is authoritative",
+    "zlib": "madler/zlib@v1.3.1",
+    "libjpeg": "rive-app/libjpeg@v9f",
+    "libwebp": "webmproject/libwebp@v1.4.0"
+  },
+  "hyaTarget": {
+    "format": "haiyue-animation",
+    "version": "1.0",
+    "binaryFingerprint": "HYA1",
+    "neutralExtensionMajors": {
+      "vector": "org.haiyue.vector-shape@1",
+      "deformable": "org.haiyue.deformable-mesh-2d@2",
+      "layout": "org.haiyue.layout-2d@1",
+      "stateMachine": "org.haiyue.animation-state-machine@2",
+      "interaction": "org.haiyue.interaction@1",
+      "dataBinding": "org.haiyue.data-binding@1",
+      "semantics": "org.haiyue.semantics@1",
+      "audioEvents": "org.haiyue.audio-events@1",
+      "sandboxedScript": "org.haiyue.sandboxed-animation-script@1"
+    }
+  },
+  "upgradePolicy": {
+    "automaticRange": "none",
+    "requiredActions": [
+      "pin a new source archive and official oracle artifact hashes",
+      "regenerate runtime-census.json",
+      "classify every added or changed object, property, script symbol, and asset kind",
+      "add isolated and adversarial fixtures for every delta",
+      "rerun license, threat-model, browser-closure, oracle, accessibility, audio, and owner reviews",
+      "accept a superseding ADR or compatibility addendum"
+    ],
+    "releaseRule": "A tuple change is a reviewed compatibility change, never a semver range update."
+  }
+}

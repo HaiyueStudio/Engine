@@ -49,13 +49,22 @@ async function main(): Promise<void> {
 
   engine.switchScene(scene);
   engine.run();
+  const recoverySmoke = new URLSearchParams(location.search).get('recoverySmoke') === '1';
   let frameCount = 0;
   let validationFinished = false;
+  let recoveryFrame = -1;
   engine.on('after-update', () => {
     frameCount++;
     query<HTMLInputElement>('#timeline').value = String(player.currentTime);
     query<HTMLElement>('#time').textContent = `${player.currentTime.toFixed(2)}s`;
-    if (!validationFinished && runtimeStatus.state === 'ready' && frameCount >= 12) {
+    if (runtimeStatus.state === 'ready' && recoverySmoke && recoveryFrame < 0 && frameCount >= 12) {
+      renderer.suspendForDeviceLoss();
+      renderer.recoverGpuResource(engine.device, new AbortController().signal);
+      recoveryFrame = frameCount;
+      return;
+    }
+    const validationFrame = recoveryFrame < 0 ? 12 : recoveryFrame + 4;
+    if (!validationFinished && runtimeStatus.state === 'ready' && frameCount >= validationFrame) {
       validationFinished = true;
       void finishValidation();
     }
@@ -71,7 +80,7 @@ async function main(): Promise<void> {
     document.body.dataset.renderStatus = status;
     const result = query<HTMLElement>('#result');
     result.dataset.status = status;
-    result.textContent = JSON.stringify({ status, errors, source: animation.source, runtime: runtimeStatus, renderer: renderer.stats, cubismRuntimeInBrowser: false });
+    result.textContent = JSON.stringify({ status, errors, source: animation.source, runtime: runtimeStatus, renderer: renderer.stats, recoverySmoke: recoverySmoke && recoveryFrame >= 0, cubismRuntimeInBrowser: false });
   }
 }
 

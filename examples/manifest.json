@@ -1969,6 +1969,34 @@
         "group": "compute",
         "order": 4
       }
+    },
+    {
+      "id": "ray-tracing-orbit",
+      "title": "Interactive Progressive Ray Tracing",
+      "entry": "ray-tracing-orbit/main.ts",
+      "capabilities": [
+        "webgpu",
+        "compute-ray-tracing",
+        "orbit-controls",
+        "progressive-path-tracing",
+        "camera-history-reset",
+        "direct-gpu-presentation",
+        "responsive-pixel-ratio",
+        "pbr-metallic-roughness",
+        "denoise",
+        "explicit-disposal"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "compute",
+        "order": 5
+      }
     }
   ],
   "catalog": {

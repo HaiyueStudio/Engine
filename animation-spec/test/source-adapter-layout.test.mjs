@@ -19,6 +19,14 @@ test('adapters expose focused dist-only lottie/live2d package facades', async ()
     types: './dist/cubism.d.ts',
     import: './dist/cubism.js',
   });
+  assert.deepEqual(packageJson.exports['./conversion'], {
+    types: './dist/conversion.d.ts',
+    import: './dist/conversion.js',
+  });
+  assert.deepEqual(packageJson.exports['./live2d/clip-baked'], {
+    types: './dist/live2d/clip-baked.d.ts',
+    import: './dist/live2d/clip-baked.js',
+  });
   assert.equal(packageJson.bin['hya-lottie-convert'], './bin/hya-lottie-convert.mjs');
   assert.equal(packageJson.bin['hya-live2d-convert'], './bin/hya-live2d-convert.mjs');
 

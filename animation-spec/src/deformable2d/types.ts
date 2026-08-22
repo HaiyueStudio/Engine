@@ -11,6 +11,7 @@ export interface DeformableMesh2DComponent extends AnimationExtensionComponent {
 }
 
 export type DeformableMesh2DBlendMode = 'normal' | 'additive' | 'multiplicative';
+export type DeformableMesh2DMaskMode = 'alpha' | 'alpha-inverted';
 
 export interface DeformableMesh2DDrawableSource {
   readonly id: string;
@@ -18,6 +19,8 @@ export interface DeformableMesh2DDrawableSource {
   readonly blendMode: DeformableMesh2DBlendMode;
   readonly culling: boolean;
   readonly masks: readonly string[];
+  /** How the combined mask coverage is applied to this drawable. */
+  readonly maskMode?: DeformableMesh2DMaskMode;
   readonly uvs: Float32Array;
   readonly indices: Uint32Array;
   /** Absolute screen-y-down xy values, frame-major. */
@@ -37,6 +40,7 @@ export interface DeformableMesh2DDataSource {
 
 export interface ParsedDeformableMesh2DDrawable extends DeformableMesh2DDrawableSource {
   readonly vertexCount: number;
+  readonly maskMode: DeformableMesh2DMaskMode;
 }
 
 export interface ParsedDeformableMesh2DData {
@@ -59,4 +63,3 @@ export interface DeformableMesh2DParseLimits {
   readonly maxFrames?: number;
   readonly maxMaskReferences?: number;
 }
-

@@ -1,7 +1,16 @@
 import { dts } from 'rollup-plugin-dts';
 
-const entries = ['index', 'lottie', 'native3d', 'deformable2d', 'cubism', 'live2d'];
-const input = Object.fromEntries(entries.map(entry => [entry, `dist/${entry}.d.ts`]));
+const input = {
+  index: 'dist/index.d.ts',
+  lottie: 'dist/lottie.d.ts',
+  native3d: 'dist/native3d.d.ts',
+  deformable2d: 'dist/deformable2d.d.ts',
+  cubism: 'dist/cubism.d.ts',
+  live2d: 'dist/live2d.d.ts',
+  conversion: 'dist/conversion.d.ts',
+  'live2d/clip-baked': 'dist/live2d/clip-baked.d.ts',
+};
+const entries = Object.keys(input);
 const entryIds = new Set(Object.values(input).map(path => path.replaceAll('\\', '/')));
 
 export default {

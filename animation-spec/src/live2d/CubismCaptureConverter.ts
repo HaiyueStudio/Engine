@@ -28,6 +28,7 @@ export interface CubismCapturedDrawable {
   readonly blendMode?: 'normal' | 'additive' | 'multiplicative';
   readonly culling?: boolean;
   readonly masks?: readonly string[];
+  readonly invertedMask?: boolean;
   readonly positions: readonly number[];
   readonly uvs: readonly number[];
   readonly indices: readonly number[];
@@ -86,6 +87,11 @@ export interface CubismCaptureConversionResult {
     drawableCount: number;
     vertexCount: number;
     textureCount: number;
+    maskReferenceCount: number;
+    invertedMaskDrawableCount: number;
+    additiveDrawableCount: number;
+    multiplicativeDrawableCount: number;
+    emptyDrawableCount: number;
     unsupportedRuntimeFeatures: readonly string[];
   }>;
 }
@@ -109,11 +115,16 @@ export function convertCubismCaptureToHya(
   if (diagnostics.some(item => item.severity === 'error')) throw new CubismCaptureConversionError('Cubism drawable capture is invalid.', diagnostics);
   const first = capture.frames[0]!;
   const ordered = [...first.drawables].sort((a, b) => a.renderOrder - b.renderOrder || a.id.localeCompare(b.id));
+  const neutralIds = new Map(ordered.map((drawable, index) => [drawable.id, `drawable-${String(index).padStart(4, '0')}`] as const));
   const times = new Float32Array(capture.frames.map(frame => frame.time));
   const drawables: DeformableMesh2DDrawableSource[] = [];
   let vertexCount = 0;
+  let emptyDrawableCount = 0;
   for (const base of ordered) {
-    const positions = new Float32Array(capture.frames.length * base.positions.length);
+    const empty = base.positions.length === 0 || base.indices.length === 0;
+    if (empty) emptyDrawableCount++;
+    const positionStride = empty ? 6 : base.positions.length;
+    const positions = new Float32Array(capture.frames.length * positionStride);
     const opacities = new Float32Array(capture.frames.length);
     const renderOrders = new Float32Array(capture.frames.length);
     for (let frameIndex = 0; frameIndex < capture.frames.length; frameIndex++) {
@@ -123,12 +134,17 @@ export function convertCubismCaptureToHya(
         diagnostics.push({ severity: 'error', code: 'E_CUBISM_TOPOLOGY_CHANGED', message: `Drawable "${base.id}" changed or disappeared across capture frames.`, path });
         continue;
       }
-      const targetOffset = frameIndex * base.positions.length;
+      const targetOffset = frameIndex * positionStride;
+      if (empty) {
+        const x = capture.canvas.width / 2;
+        const y = capture.canvas.height / 2;
+        positions.set([x, y, x, y, x, y], targetOffset);
+      }
       for (let valueIndex = 0; valueIndex < frameDrawable.positions.length; valueIndex += 2) {
         positions[targetOffset + valueIndex] = capture.canvas.width / 2 + frameDrawable.positions[valueIndex]! * capture.canvas.pixelsPerUnit;
         positions[targetOffset + valueIndex + 1] = capture.canvas.height / 2 - frameDrawable.positions[valueIndex + 1]! * capture.canvas.pixelsPerUnit;
       }
-      opacities[frameIndex] = clampUnitInterval(frameDrawable.opacity);
+      opacities[frameIndex] = empty ? 0 : clampUnitInterval(frameDrawable.opacity);
       renderOrders[frameIndex] = frameDrawable.renderOrder;
     }
     const basePath = `$.frames[0].drawables[id=${JSON.stringify(base.id)}]`;
@@ -136,15 +152,16 @@ export function convertCubismCaptureToHya(
     const samples = capture.frames.map(frame => frame.drawables.find(item => item.id === base.id)!).filter(Boolean);
     if (samples.some(item => item.culling === true)) diagnostics.push({ severity: 'warning', code: 'W_CUBISM_CULLING_IGNORED', message: 'Drawable culling is disabled by the v1 2D renderer.', path: `${basePath}.culling` });
     if (samples.some(item => !isNeutralMultiply(item.multiplyColor) || !isNeutralScreen(item.screenColor))) diagnostics.push({ severity: 'warning', code: 'W_CUBISM_COLOR_APPROXIMATED', message: 'Non-neutral multiply/screen color is not represented by v1.', path: basePath });
-    vertexCount += base.positions.length / 2;
+    vertexCount += empty ? 3 : base.positions.length / 2;
     drawables.push({
-      id: base.id,
+      id: neutralIds.get(base.id)!,
       textureIndex: base.textureIndex,
       blendMode,
       culling: base.culling ?? false,
-      masks: Object.freeze([...(base.masks ?? [])]),
-      uvs: normalizeCubismUvs(base.uvs, capture.canvas.uvOrigin ?? 'top-left'),
-      indices: new Uint32Array(base.indices),
+      masks: Object.freeze((base.masks ?? []).map(mask => neutralIds.get(mask)!)),
+      maskMode: base.invertedMask === true ? 'alpha-inverted' : 'alpha',
+      uvs: empty ? new Float32Array([0, 0, 0, 0, 0, 0]) : normalizeCubismUvs(base.uvs, capture.canvas.uvOrigin ?? 'top-left'),
+      indices: empty ? new Uint32Array([0, 1, 2]) : new Uint32Array(base.indices),
       positions,
       opacities,
       renderOrders,
@@ -204,6 +221,11 @@ export function convertCubismCaptureToHya(
       drawableCount: drawables.length,
       vertexCount,
       textureCount: capture.textures.length,
+      maskReferenceCount: drawables.reduce((sum, drawable) => sum + drawable.masks.length, 0),
+      invertedMaskDrawableCount: drawables.filter(drawable => drawable.maskMode === 'alpha-inverted').length,
+      additiveDrawableCount: drawables.filter(drawable => drawable.blendMode === 'additive').length,
+      multiplicativeDrawableCount: drawables.filter(drawable => drawable.blendMode === 'multiplicative').length,
+      emptyDrawableCount,
       unsupportedRuntimeFeatures: Object.freeze(['parameterized-input', 'physics-runtime', 'motion-sync', 'multiply-screen-color', 'culling']),
     }),
   });
@@ -237,9 +259,12 @@ function validateCaptureRoot(capture: CubismDrawableCapture, diagnostics: Cubism
       if (!Number.isSafeInteger(drawable.textureIndex) || drawable.textureIndex < 0 || drawable.textureIndex >= capture.textures.length) fail('Texture index is out of range.', `${path}.textureIndex`);
       if (!Number.isSafeInteger(drawable.renderOrder)) fail('Render order must be a safe integer.', `${path}.renderOrder`);
       if (!Number.isFinite(drawable.opacity) || drawable.opacity < -CUBISM_UNIT_INTERVAL_EPSILON || drawable.opacity > 1 + CUBISM_UNIT_INTERVAL_EPSILON) fail('Opacity must be finite and inside [0, 1], allowing only float32 capture drift.', `${path}.opacity`);
-      if (!Array.isArray(drawable.positions) || drawable.positions.length < 6 || drawable.positions.length % 2 !== 0 || !drawable.positions.every(Number.isFinite)) fail('Positions require finite xy triples.', `${path}.positions`);
+      if (drawable.blendMode !== undefined && drawable.blendMode !== 'normal' && drawable.blendMode !== 'additive' && drawable.blendMode !== 'multiplicative') fail('Blend mode is unsupported.', `${path}.blendMode`);
+      if (drawable.invertedMask !== undefined && typeof drawable.invertedMask !== 'boolean') fail('invertedMask must be boolean when present.', `${path}.invertedMask`);
+      const empty = Array.isArray(drawable.positions) && Array.isArray(drawable.indices) && (drawable.positions.length === 0 || drawable.indices.length === 0);
+      if (!Array.isArray(drawable.positions) || (!empty && (drawable.positions.length < 6 || drawable.positions.length % 2 !== 0)) || !drawable.positions.every(Number.isFinite)) fail('Positions require either an empty Core placeholder or finite xy triples.', `${path}.positions`);
       if (!Array.isArray(drawable.uvs) || drawable.uvs.length !== drawable.positions.length || !drawable.uvs.every(Number.isFinite)) fail('UVs must match positions.', `${path}.uvs`);
-      if (!Array.isArray(drawable.indices) || drawable.indices.length < 3 || drawable.indices.length % 3 !== 0 || !drawable.indices.every((value: number) => Number.isSafeInteger(value) && value >= 0 && value < drawable.positions.length / 2)) fail('Indices must contain in-range triangle triplets.', `${path}.indices`);
+      if (!Array.isArray(drawable.indices) || (!empty && (drawable.indices.length < 3 || drawable.indices.length % 3 !== 0)) || !drawable.indices.every((value: number) => Number.isSafeInteger(value) && value >= 0 && (empty || value < drawable.positions.length / 2))) fail('Indices must contain in-range triangle triplets.', `${path}.indices`);
     }
   }
   const baseIds = new Set(capture.frames[0]!.drawables.map((item: CubismCapturedDrawable) => item.id));
@@ -264,7 +289,10 @@ function sameTopology(a: CubismCapturedDrawable, b: CubismCapturedDrawable): boo
     && a.indices.every((value, index) => value === b.indices[index])
     && a.uvs.every((value, index) => value === b.uvs[index])
     && aMasks.length === bMasks.length
-    && aMasks.every((value, index) => value === bMasks[index]);
+    && aMasks.every((value, index) => value === bMasks[index])
+    && (a.blendMode ?? 'normal') === (b.blendMode ?? 'normal')
+    && (a.culling ?? false) === (b.culling ?? false)
+    && (a.invertedMask ?? false) === (b.invertedMask ?? false);
 }
 
 function isNeutralMultiply(value: readonly number[] | undefined): boolean { return value === undefined || (value.length === 4 && value.every(component => component === 1)); }

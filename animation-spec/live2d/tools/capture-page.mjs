@@ -84,10 +84,12 @@ function captureDrawables(core, model, modelOpacity, canvas) {
     const constantFlags = drawables.constantFlags[index];
     const masks = Array.from(drawables.masks[index] ?? [], maskIndex => ids[maskIndex]);
     const blendMode = core.Utils.hasBlendAdditiveBit(constantFlags) ? 'additive' : core.Utils.hasBlendMultiplicativeBit(constantFlags) ? 'multiplicative' : 'normal';
+    const invertedMask = typeof core.Utils.hasIsInvertedMaskBit === 'function'
+      && core.Utils.hasIsInvertedMaskBit(constantFlags);
     return {
       id, textureIndex: drawables.textureIndices[index], renderOrder: drawables.renderOrders[index],
       opacity: drawables.opacities[index] * modelOpacity, blendMode,
-      culling: !core.Utils.hasIsDoubleSidedBit(constantFlags), masks,
+      culling: !core.Utils.hasIsDoubleSidedBit(constantFlags), masks, invertedMask,
       positions: centerCorePositions(drawables.vertexPositions[index], canvas), uvs: Array.from(drawables.vertexUvs[index]), indices: Array.from(drawables.indices[index]),
       multiplyColor: colorAt(drawables.multiplyColors, index, [1, 1, 1, 1]),
       screenColor: colorAt(drawables.screenColors, index, [0, 0, 0, 0]),

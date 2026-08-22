@@ -55,7 +55,7 @@ class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
   private readonly controller = new AbortController();
   private readonly assetHandles: AssetHandle<unknown>[] = [];
   private readonly drawables: RuntimeDrawable[] = [];
-  private readonly onOwnerAbort = (): void => this.controller.abort('animation-owner-destroyed');
+  private readonly onOwnerAbort = (): void => this.destroy();
   private state: DeformableMesh2DRuntimeState = 'loading';
   private lastTime = 0;
   private lastOpacity = 1;
@@ -68,6 +68,7 @@ class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
     context.parent.addChild(this.root);
     context.signal.addEventListener('abort', this.onOwnerAbort, { once: true });
     this.emitStatus();
+    if (context.signal.aborted) { this.destroy(); return; }
     void this.load();
   }
 
@@ -184,7 +185,7 @@ class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
         layers: drawable.masks.map((source, index) => ({
           kind: 'mask' as const,
           source: `mask:${source}`,
-          mode: 'alpha' as const,
+          mode: drawable.maskMode,
           operation: index === 0 ? 'add' as const : 'add' as const,
         })),
       } : undefined;

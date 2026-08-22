@@ -14,6 +14,8 @@ test('deformable 2D machine-readable contract freezes the required extension and
   assert.equal(CONTRACT.profile.id, 'clip-baked');
   assert.equal(CONTRACT.runtime.sourceRuntimeDependency, false);
   assert.deepEqual(CONTRACT.runtime.supportedBlendModes, ['normal', 'additive', 'multiplicative']);
+  assert.deepEqual(CONTRACT.runtime.supportedMasks, ['alpha', 'alpha-inverted']);
+  assert.equal(CONTRACT.extension.binaryVersion, '1.1');
   assert.equal(SCHEMA.properties.type.const, CONTRACT.extension.id);
   assert.equal(SCHEMA.properties.textures.maxItems, CONTRACT.limits.maxTextures);
 });
@@ -30,8 +32,26 @@ test('HYDM codec is deterministic, bounded and preserves frame-major mesh tracks
   assert.throws(() => decodeDeformableMesh2DData(first, { maxInputBytes: 8 }), /exceeds/);
   const unknownVersion = first.slice(0);
   new DataView(unknownVersion).setUint16(4, 2, true);
-  assert.throws(() => decodeDeformableMesh2DData(unknownVersion), /Unsupported sidecar version 2.0/);
+  assert.throws(() => decodeDeformableMesh2DData(unknownVersion), /Unsupported sidecar version 2.1/);
+  const unknownMinor = first.slice(0);
+  new DataView(unknownMinor).setUint16(6, 2, true);
+  assert.throws(() => decodeDeformableMesh2DData(unknownMinor), /Unsupported sidecar version 1.2/);
   assert.throws(() => decodeDeformableMesh2DData(first.slice(0, 40)), /outside the buffer|unaccounted bytes/);
+});
+
+test('HYDM 1.1 preserves inverted masks while 1.0 remains readable as normal alpha', () => {
+  const source = twoDrawableDataFixture();
+  source.drawables[0].masks = ['back'];
+  source.drawables[0].maskMode = 'alpha-inverted';
+  const encoded = encodeDeformableMesh2DData(source);
+  assert.equal(new DataView(encoded).getUint16(6, true), 1);
+  assert.equal(decodeDeformableMesh2DData(encoded).drawables[0].maskMode, 'alpha-inverted');
+
+  const legacy = rewriteHydmMetadata(encoded, metadata => {
+    for (const drawable of metadata.drawables) delete drawable.maskMode;
+  });
+  new DataView(legacy).setUint16(6, 0, true);
+  assert.equal(decodeDeformableMesh2DData(legacy).drawables[0].maskMode, 'alpha');
 });
 
 test('HYDM encoder rejects invalid indices, opacity and order before serialization', () => {
@@ -39,6 +59,31 @@ test('HYDM encoder rejects invalid indices, opacity and order before serializati
   assert.throws(() => encodeDeformableMesh2DData({ ...source, drawables: [{ ...source.drawables[0], indices: new Uint32Array([0, 1, 4]) }] }), /missing vertex/);
   assert.throws(() => encodeDeformableMesh2DData({ ...source, drawables: [{ ...source.drawables[0], opacities: new Float32Array([1, 2]) }] }), /Opacity/);
   assert.throws(() => encodeDeformableMesh2DData({ ...source, drawables: [{ ...source.drawables[0], renderOrders: new Float32Array([0, 0.5]) }] }), /safe integer/);
+  assert.throws(() => encodeDeformableMesh2DData({ ...source, drawables: [{ ...source.drawables[0], textureIndex: 32 }] }), /Texture index exceeds/);
+});
+
+test('HYDM rejects duplicate, cyclic, overlapping and unreferenced mask/pool data', () => {
+  const source = twoDrawableDataFixture();
+  assert.throws(() => encodeDeformableMesh2DData({
+    ...source,
+    drawables: source.drawables.map(drawable => ({ ...drawable, masks: drawable.id === 'front' ? ['back', 'back'] : [] })),
+  }), /unique/);
+  assert.throws(() => encodeDeformableMesh2DData({
+    ...source,
+    drawables: source.drawables.map(drawable => ({ ...drawable, masks: drawable.id === 'front' ? ['back'] : ['front'] })),
+  }), /cycle/);
+
+  const encoded = encodeDeformableMesh2DData(source);
+  const overlapping = rewriteHydmMetadata(encoded, metadata => {
+    metadata.drawables[0].positions = [...metadata.drawables[0].uvs];
+  });
+  assert.throws(() => decodeDeformableMesh2DData(overlapping), /overlap|unreferenced/);
+
+  const cyclic = rewriteHydmMetadata(encoded, metadata => {
+    metadata.drawables[0].masks = ['back'];
+    metadata.drawables[1].masks = ['front'];
+  });
+  assert.throws(() => decodeDeformableMesh2DData(cyclic), /cycle/);
 });
 
 test('Cubism capture converts to required HYA extension and binary round-trips with explicit registry', () => {
@@ -72,6 +117,27 @@ test('Cubism capture tolerates float32 opacity drift and clamps the encoded trac
     && error.diagnostics.some(item => item.code === 'E_CUBISM_CAPTURE_INVALID' && item.path === '$.frames[0].drawables[0].opacity'));
 });
 
+test('Cubism empty Core drawables normalize to invisible stable topology', () => {
+  const capture = captureFixture();
+  for (const frame of capture.frames) {
+    frame.drawables[0].positions = [];
+    frame.drawables[0].uvs = [];
+    frame.drawables[0].indices = [];
+  }
+  const converted = convertCubismCaptureToHya(capture, { strict: true });
+  const data = decodeDeformableMesh2DData(converted.data);
+  assert.equal(converted.report.emptyDrawableCount, 1);
+  assert.equal(data.drawables[0].vertexCount, 3);
+  assert.deepEqual([...data.drawables[0].indices], [0, 1, 2]);
+  assert.deepEqual([...data.drawables[0].opacities], [0, 0]);
+
+  const indexless = captureFixture();
+  for (const frame of indexless.frames) frame.drawables[0].indices = [];
+  const normalized = convertCubismCaptureToHya(indexless, { strict: true });
+  assert.equal(normalized.report.emptyDrawableCount, 1);
+  assert.deepEqual([...decodeDeformableMesh2DData(normalized.data).drawables[0].opacities], [0, 0]);
+});
+
 test('Cubism conversion preserves non-normal blend modes while strict mode still rejects remaining approximations', () => {
   const additive = captureFixture();
   additive.frames[0].drawables[0].blendMode = 'additive';
@@ -89,6 +155,13 @@ test('Cubism topology changes have a stable diagnostic', () => {
   const changed = captureFixture();
   changed.frames[1].drawables[0].uvs[0] = 0.5;
   assert.throws(() => convertCubismCaptureToHya(changed), error => error instanceof CubismCaptureConversionError && error.diagnostics.some(item => item.code === 'E_CUBISM_TOPOLOGY_CHANGED'));
+});
+
+test('Cubism constant drawable flags cannot change across baked frames', () => {
+  const changed = captureFixture();
+  changed.frames[1].drawables[0].blendMode = 'additive';
+  assert.throws(() => convertCubismCaptureToHya(changed), error => error instanceof CubismCaptureConversionError
+    && error.diagnostics.some(item => item.code === 'E_CUBISM_TOPOLOGY_CHANGED' && item.path.includes('frames[1]')));
 });
 
 test('Motion3 sampler supports linear, stepped, inverse-stepped and Cubism Bezier segments', () => {
@@ -149,6 +222,50 @@ function dataFixture() {
       opacities: new Float32Array([1, 0.5]), renderOrders: new Float32Array([0, 1]),
     }],
   };
+}
+
+function twoDrawableDataFixture() {
+  const first = dataFixture();
+  const clone = drawable => ({
+    ...drawable,
+    uvs: drawable.uvs.slice(),
+    indices: drawable.indices.slice(),
+    positions: drawable.positions.slice(),
+    opacities: drawable.opacities.slice(),
+    renderOrders: drawable.renderOrders.slice(),
+  });
+  return {
+    ...first,
+    drawables: [
+      { ...clone(first.drawables[0]), id: 'front', renderOrders: new Float32Array([1, 1]) },
+      { ...clone(first.drawables[0]), id: 'back', renderOrders: new Float32Array([0, 0]) },
+    ],
+  };
+}
+
+function rewriteHydmMetadata(buffer, mutate) {
+  const header = new DataView(buffer);
+  const metadataOffset = header.getUint32(8, true);
+  const metadataLength = header.getUint32(12, true);
+  const oldFloatOffset = header.getUint32(16, true);
+  const floatCount = header.getUint32(20, true);
+  const oldIndexOffset = header.getUint32(24, true);
+  const indexCount = header.getUint32(28, true);
+  const metadata = JSON.parse(new TextDecoder().decode(new Uint8Array(buffer, metadataOffset, metadataLength)));
+  mutate(metadata);
+  const bytes = new TextEncoder().encode(JSON.stringify(metadata));
+  const floatOffset = (32 + bytes.length + 3) & ~3;
+  const indexOffset = floatOffset + floatCount * 4;
+  const result = new ArrayBuffer(indexOffset + indexCount * 4);
+  const out = new DataView(result);
+  new Uint8Array(result, 0, 32).set(new Uint8Array(buffer, 0, 32));
+  out.setUint32(12, bytes.length, true);
+  out.setUint32(16, floatOffset, true);
+  out.setUint32(24, indexOffset, true);
+  new Uint8Array(result, 32, bytes.length).set(bytes);
+  new Uint8Array(result, floatOffset, floatCount * 4).set(new Uint8Array(buffer, oldFloatOffset, floatCount * 4));
+  new Uint8Array(result, indexOffset, indexCount * 4).set(new Uint8Array(buffer, oldIndexOffset, indexCount * 4));
+  return result;
 }
 
 function captureFixture() {

@@ -3,6 +3,7 @@ import {
   DEFORMABLE_MESH_2D_DATA_FORMAT,
   DEFORMABLE_MESH_2D_DATA_VERSION,
   type DeformableMesh2DBlendMode,
+  type DeformableMesh2DMaskMode,
   type DeformableMesh2DDataSource,
   type DeformableMesh2DDrawableSource,
   type DeformableMesh2DParseLimits,
@@ -21,6 +22,7 @@ const DEFAULT_LIMITS = Object.freeze({
   maxVertices: 2_000_000,
   maxFrames: 36_000,
   maxMaskReferences: 32_768,
+  maxTextures: 32,
 });
 
 type Range = readonly [number, number];
@@ -31,6 +33,7 @@ interface PackedDrawableMetadata {
   readonly blendMode: DeformableMesh2DBlendMode;
   readonly culling: boolean;
   readonly masks: readonly string[];
+  readonly maskMode: DeformableMesh2DMaskMode;
   readonly uvs: Range;
   readonly indices: Range;
   readonly positions: Range;
@@ -51,6 +54,8 @@ interface PackedMetadata {
 class PoolBuilder<T extends Float32Array | Uint32Array> {
   private count = 0;
   private readonly blocks: T[] = [];
+
+  get length(): number { return this.count; }
 
   add(values: T): Range {
     const range = [this.count, values.length] as const;
@@ -91,6 +96,7 @@ export function encodeDeformableMesh2DData(source: DeformableMesh2DDataSource): 
       blendMode: drawable.blendMode,
       culling: drawable.culling,
       masks: [...drawable.masks],
+      maskMode: drawable.maskMode ?? 'alpha',
       uvs: floats.add(drawable.uvs),
       indices: indices.add(drawable.indices),
       positions: floats.add(drawable.positions),
@@ -99,16 +105,21 @@ export function encodeDeformableMesh2DData(source: DeformableMesh2DDataSource): 
     })),
   };
   const metadataBytes = UTF8_ENCODER.encode(JSON.stringify(metadata));
-  const floatPool = floats.build(length => new Float32Array(length));
-  const indexPool = indices.build(length => new Uint32Array(length));
+  if (metadataBytes.byteLength > DEFAULT_LIMITS.maxMetadataBytes) limit(`Metadata exceeds ${DEFAULT_LIMITS.maxMetadataBytes} bytes.`, '$binary.metadata');
   const metadataOffset = HEADER_BYTES;
   const floatOffset = align4(metadataOffset + metadataBytes.byteLength);
-  const indexOffset = floatOffset + floatPool.byteLength;
-  const buffer = new ArrayBuffer(indexOffset + indexPool.byteLength);
+  const floatBytes = checkedBytes(floats.length, 4, '$binary.floats');
+  const indexBytes = checkedBytes(indices.length, 4, '$binary.indices');
+  const indexOffset = checkedAdd(floatOffset, floatBytes, '$binary.indices');
+  const outputBytes = checkedAdd(indexOffset, indexBytes, '$binary');
+  if (outputBytes > DEFAULT_LIMITS.maxInputBytes) limit(`Encoded output exceeds ${DEFAULT_LIMITS.maxInputBytes} bytes.`, '$binary');
+  const floatPool = floats.build(length => new Float32Array(length));
+  const indexPool = indices.build(length => new Uint32Array(length));
+  const buffer = new ArrayBuffer(outputBytes);
   const header = new DataView(buffer);
   header.setUint32(0, MAGIC, true);
   header.setUint16(4, 1, true);
-  header.setUint16(6, 0, true);
+  header.setUint16(6, 1, true);
   header.setUint32(8, metadataOffset, true);
   header.setUint32(12, metadataBytes.byteLength, true);
   header.setUint32(16, floatOffset, true);
@@ -132,7 +143,7 @@ export function decodeDeformableMesh2DData(
   if (header.getUint32(0, true) !== MAGIC) invalid('Magic must be HYDM.', '$binary.magic');
   const major = header.getUint16(4, true);
   const minor = header.getUint16(6, true);
-  if (major !== 1 || minor !== 0) invalid(`Unsupported sidecar version ${major}.${minor}.`, '$binary.version');
+  if (major !== 1 || minor > 1) invalid(`Unsupported sidecar version ${major}.${minor}.`, '$binary.version');
   const metadataOffset = header.getUint32(8, true);
   const metadataLength = header.getUint32(12, true);
   const floatOffset = header.getUint32(16, true);
@@ -154,7 +165,8 @@ export function decodeDeformableMesh2DData(
   } catch (error) {
     invalid(`Metadata JSON cannot be decoded: ${error instanceof Error ? error.message : String(error)}.`, '$binary.metadata');
   }
-  const metadata = parseMetadata(raw, resolved);
+  const metadata = parseMetadata(raw, resolved, minor);
+  validatePackedRanges(metadata, floatCount, indexCount);
   const floatPool = new Float32Array(buffer, floatOffset, floatCount);
   const indexPool = new Uint32Array(buffer, indexOffset, indexCount);
   ensureFinite(floatPool, '$binary.floats');
@@ -167,6 +179,7 @@ export function decodeDeformableMesh2DData(
     const path = `$.drawables[${index}]`;
     if (!item.id || ids.has(item.id)) invalid('Drawable id must be non-empty and unique.', `${path}.id`);
     ids.add(item.id);
+    if (item.textureIndex >= DEFAULT_LIMITS.maxTextures) limit(`Texture index exceeds ${DEFAULT_LIMITS.maxTextures - 1}.`, `${path}.textureIndex`);
     const uvs = floatRange(floatPool, item.uvs, `${path}.uvs`);
     if (uvs.length < 6 || (uvs.length & 1) !== 0) invalid('UVs require at least three xy pairs.', `${path}.uvs`);
     const vertexCount = uvs.length / 2;
@@ -188,12 +201,14 @@ export function decodeDeformableMesh2DData(
     }
     maskTotal += item.masks.length;
     if (maskTotal > resolved.maxMaskReferences) limit(`Mask reference count exceeds ${resolved.maxMaskReferences}.`, `${path}.masks`);
+    if (new Set(item.masks).size !== item.masks.length) invalid('Mask references must be unique per drawable.', `${path}.masks`);
     return Object.freeze({
       id: item.id,
       textureIndex: item.textureIndex,
       blendMode: item.blendMode,
       culling: item.culling,
       masks: Object.freeze([...item.masks]),
+      maskMode: item.maskMode,
       uvs,
       indices: drawableIndices,
       positions,
@@ -208,6 +223,7 @@ export function decodeDeformableMesh2DData(
       if (mask === drawables[index]!.id || !ids.has(mask)) invalid('Mask must reference a different existing drawable.', `$.drawables[${index}].masks[${maskIndex}]`);
     }
   }
+  validateMaskGraph(drawables);
   return Object.freeze({
     format: DEFORMABLE_MESH_2D_DATA_FORMAT,
     version: DEFORMABLE_MESH_2D_DATA_VERSION,
@@ -229,14 +245,26 @@ function validateSource(source: DeformableMesh2DDataSource): void {
   if (!(source.times instanceof Float32Array) || source.times.length === 0) invalid('Times must be a non-empty Float32Array.', '$.times');
   validateTimes(source.times, source.duration, DEFAULT_LIMITS.maxFrames);
   if (!Array.isArray(source.drawables) || source.drawables.length === 0) invalid('At least one drawable is required.', '$.drawables');
+  if (source.drawables.length > DEFAULT_LIMITS.maxDrawables) limit(`Drawable count exceeds ${DEFAULT_LIMITS.maxDrawables}.`, '$.drawables');
   const ids = new Set(source.drawables.map(item => item.id));
   if (ids.size !== source.drawables.length || ids.has('')) invalid('Drawable ids must be non-empty and unique.', '$.drawables');
-  for (let index = 0; index < source.drawables.length; index++) validateSourceDrawable(source.drawables[index]!, source.times.length, ids, index);
+  let vertexTotal = 0;
+  let maskTotal = 0;
+  for (let index = 0; index < source.drawables.length; index++) {
+    const drawable = source.drawables[index]!;
+    validateSourceDrawable(drawable, source.times.length, ids, index);
+    vertexTotal += drawable.uvs.length / 2;
+    maskTotal += drawable.masks.length;
+    if (vertexTotal > DEFAULT_LIMITS.maxVertices) limit(`Vertex count exceeds ${DEFAULT_LIMITS.maxVertices}.`, `$.drawables[${index}].uvs`);
+    if (maskTotal > DEFAULT_LIMITS.maxMaskReferences) limit(`Mask reference count exceeds ${DEFAULT_LIMITS.maxMaskReferences}.`, `$.drawables[${index}].masks`);
+  }
+  validateMaskGraph(source.drawables);
 }
 
 function validateSourceDrawable(drawable: DeformableMesh2DDrawableSource, frameCount: number, ids: ReadonlySet<string>, index: number): void {
   const path = `$.drawables[${index}]`;
   if (!Number.isSafeInteger(drawable.textureIndex) || drawable.textureIndex < 0) invalid('Texture index must be a non-negative safe integer.', `${path}.textureIndex`);
+  if (drawable.textureIndex >= DEFAULT_LIMITS.maxTextures) limit(`Texture index exceeds ${DEFAULT_LIMITS.maxTextures - 1}.`, `${path}.textureIndex`);
   if (!['normal', 'additive', 'multiplicative'].includes(drawable.blendMode)) invalid('Blend mode is unsupported.', `${path}.blendMode`);
   if (!(drawable.uvs instanceof Float32Array) || drawable.uvs.length < 6 || (drawable.uvs.length & 1) !== 0) invalid('UVs require at least three xy pairs.', `${path}.uvs`);
   if (!(drawable.indices instanceof Uint32Array) || drawable.indices.length < 3 || drawable.indices.length % 3 !== 0) invalid('Indices require Uint32 triangle triplets.', `${path}.indices`);
@@ -256,13 +284,15 @@ function validateSourceDrawable(drawable: DeformableMesh2DDrawableSource, frameC
     if (!Number.isSafeInteger(drawable.renderOrders[frameIndex])) invalid('Render order must be a safe integer.', `${path}.renderOrders[${frameIndex}]`);
   }
   if (!Array.isArray(drawable.masks)) invalid('Masks must be an array.', `${path}.masks`);
+  if (drawable.maskMode !== undefined && drawable.maskMode !== 'alpha' && drawable.maskMode !== 'alpha-inverted') invalid('Mask mode is unsupported.', `${path}.maskMode`);
+  if (new Set(drawable.masks).size !== drawable.masks.length) invalid('Mask references must be unique per drawable.', `${path}.masks`);
   for (let maskIndex = 0; maskIndex < drawable.masks.length; maskIndex++) {
     const mask = drawable.masks[maskIndex]!;
     if (!mask || mask === drawable.id || !ids.has(mask)) invalid('Mask must reference a different existing drawable.', `${path}.masks[${maskIndex}]`);
   }
 }
 
-function parseMetadata(value: unknown, limits: Required<DeformableMesh2DParseLimits>): PackedMetadata {
+function parseMetadata(value: unknown, limits: Required<DeformableMesh2DParseLimits>, minor: number): PackedMetadata {
   const root = record(value, '$');
   if (root.format !== DEFORMABLE_MESH_2D_DATA_FORMAT || root.version !== DEFORMABLE_MESH_2D_DATA_VERSION) invalid('Metadata format/version is unsupported.', '$.format');
   const canvas = numberPair(root.canvas, '$.canvas');
@@ -281,12 +311,16 @@ function parseMetadata(value: unknown, limits: Required<DeformableMesh2DParseLim
     times: range(root.times, '$.times'),
     drawables: drawablesRaw.map((entry, index) => {
       const item = record(entry, `$.drawables[${index}]`);
+      if (minor === 0 && item.maskMode !== undefined) invalid('HYDM 1.0 must not contain maskMode.', `$.drawables[${index}].maskMode`);
       return {
         id: string(item.id, `$.drawables[${index}].id`),
         textureIndex: nonNegativeInteger(item.textureIndex, `$.drawables[${index}].textureIndex`),
         blendMode: literal(item.blendMode, ['normal', 'additive', 'multiplicative'] as const, `$.drawables[${index}].blendMode`),
         culling: boolean(item.culling, `$.drawables[${index}].culling`),
         masks: array(item.masks, `$.drawables[${index}].masks`).map((mask, maskIndex) => string(mask, `$.drawables[${index}].masks[${maskIndex}]`)),
+        maskMode: minor === 0
+          ? 'alpha'
+          : literal(item.maskMode, ['alpha', 'alpha-inverted'] as const, `$.drawables[${index}].maskMode`),
         uvs: range(item.uvs, `$.drawables[${index}].uvs`),
         indices: range(item.indices, `$.drawables[${index}].indices`),
         positions: range(item.positions, `$.drawables[${index}].positions`),
@@ -338,12 +372,67 @@ function checkedBytes(count: number, stride: number, path: string): number {
   return bytes;
 }
 
+function checkedAdd(left: number, right: number, path: string): number {
+  const sum = left + right;
+  if (!Number.isSafeInteger(sum)) invalid('Byte offset overflows safe integer range.', path);
+  return sum;
+}
+
 function checkedRange(offset: number, length: number, total: number, path: string): void {
   if (offset > total || length > total - offset) invalid('Byte range is outside the buffer.', path);
 }
 
 function ensureFinite(values: Float32Array, path: string): void {
   for (let index = 0; index < values.length; index++) if (!Number.isFinite(values[index])) invalid('Float data must be finite.', `${path}[${index}]`);
+}
+
+function validatePackedRanges(metadata: PackedMetadata, floatCount: number, indexCount: number): void {
+  const floatRanges: { readonly range: Range; readonly path: string }[] = [{ range: metadata.times, path: '$.times' }];
+  const indexRanges: { readonly range: Range; readonly path: string }[] = [];
+  for (let index = 0; index < metadata.drawables.length; index++) {
+    const drawable = metadata.drawables[index]!;
+    const path = `$.drawables[${index}]`;
+    floatRanges.push(
+      { range: drawable.uvs, path: `${path}.uvs` },
+      { range: drawable.positions, path: `${path}.positions` },
+      { range: drawable.opacities, path: `${path}.opacities` },
+      { range: drawable.renderOrders, path: `${path}.renderOrders` },
+    );
+    indexRanges.push({ range: drawable.indices, path: `${path}.indices` });
+  }
+  validatePackedPool(floatRanges, floatCount, '$binary.floats');
+  validatePackedPool(indexRanges, indexCount, '$binary.indices');
+}
+
+function validatePackedPool(entries: readonly { readonly range: Range; readonly path: string }[], poolLength: number, poolPath: string): void {
+  const ordered = [...entries].sort((left, right) => left.range[0] - right.range[0] || left.range[1] - right.range[1]);
+  let cursor = 0;
+  for (const entry of ordered) {
+    validatePoolRange(entry.range, poolLength, entry.path);
+    if (entry.range[0] !== cursor) invalid(entry.range[0] < cursor ? 'Packed ranges overlap.' : 'Packed pool contains an unreferenced gap.', entry.path);
+    cursor = checkedAdd(entry.range[0], entry.range[1], entry.path);
+  }
+  if (cursor !== poolLength) invalid('Packed pool contains trailing unreferenced values.', poolPath);
+}
+
+function validateMaskGraph(drawables: readonly { readonly id: string; readonly masks: readonly string[] }[]): void {
+  const byId = new Map(drawables.map(drawable => [drawable.id, drawable] as const));
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+  const visit = (id: string, path: string): void => {
+    if (visiting.has(id)) invalid('Mask dependency graph contains a cycle.', path);
+    if (visited.has(id)) return;
+    visiting.add(id);
+    const drawable = byId.get(id);
+    if (drawable) {
+      for (let maskIndex = 0; maskIndex < drawable.masks.length; maskIndex++) {
+        visit(drawable.masks[maskIndex]!, `${path}.masks[${maskIndex}]`);
+      }
+    }
+    visiting.delete(id);
+    visited.add(id);
+  };
+  for (let index = 0; index < drawables.length; index++) visit(drawables[index]!.id, `$.drawables[${index}]`);
 }
 
 function align4(value: number): number { return (value + 3) & ~3; }

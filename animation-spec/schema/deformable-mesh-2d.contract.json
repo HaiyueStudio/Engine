@@ -9,7 +9,8 @@
     "dataVersion": 1,
     "mediaType": "application/vnd.haiyue.deformable-mesh-2d",
     "binaryMagic": "HYDM",
-    "binaryVersion": "1.0",
+    "binaryVersion": "1.1",
+    "compatibleBinaryVersions": ["1.0", "1.1"],
     "headerBytes": 32
   },
   "profile": {
@@ -33,7 +34,7 @@
     "ownerPackage": "@haiyue/extensions/deformable-animation",
     "sourceRuntimeDependency": false,
     "supportedBlendModes": ["normal", "additive", "multiplicative"],
-    "supportedMasks": ["alpha"]
+    "supportedMasks": ["alpha", "alpha-inverted"]
   },
   "diagnostics": [
     "E_ANIMATION_INVALID_FORMAT",

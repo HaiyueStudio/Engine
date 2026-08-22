@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "scope": "published HYA browser player, Editor exact-HYA preview, and exported application bundles",
+  "forbiddenPackages": [
+    "@rive-app/canvas",
+    "@rive-app/canvas-advanced",
+    "@rive-app/webgl",
+    "@rive-app/webgl2",
+    "@rive-app/webgl2-advanced",
+    "@rive-app/react-canvas",
+    "@rive-app/react-webgl2",
+    "@rive-app/react-webgl2-advanced",
+    "@rive-app/rive-wasm"
+  ],
+  "forbiddenFileGlobs": ["**/*.riv", "**/rive.wasm", "**/rive_fallback.wasm", "**/rive.js"],
+  "forbiddenStaticPatterns": [
+    "CoreRegistry::makeCoreInstance",
+    "kRuntimeHeaderFingerprint",
+    "@rive-app/webgl2",
+    "rive-runtime",
+    "RiveFile",
+    "luaopen_rive",
+    "WITH_RIVE_SCRIPTING"
+  ],
+  "forbiddenNetworkSuffixes": [".riv", "/rive.wasm", "/rive_fallback.wasm"],
+  "allowedBuildTimeLocations": [
+    "@haiyue/animation-spec/rive",
+    "tools/rive-import",
+    "review/oracles/rive"
+  ],
+  "exceptionPolicy": "No wildcard exceptions. A new exact pattern requires ADR 0087 review and must remain build-time only."
+}
+

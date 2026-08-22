@@ -13,7 +13,7 @@ for (const forbidden of ['Live2DCubismCore', 'Moc.fromArrayBuffer', '.moc3', '.m
 }
 assert.match(
   bundle,
-  /HYA deformable mesh runtime'\)\.addComponent\(new Transform2D\(\)\)/u,
+  /HYA deformable mesh runtime'\)\.addComponent\(new (?:[A-Za-z_$][\w$]*\.)?Transform2D\(\)\)/u,
   'The bundled deformable runtime must preserve the owner Transform2D chain.',
 );
 assert.match(
@@ -41,12 +41,14 @@ assert.deepEqual(
 const result = await runChromeWebGpuFixture({
   root,
   fixture: 'examples/live2d-hya/index.html',
+  query: { recoverySmoke: 1 },
   timeoutMs: 60_000,
 });
 assert.equal(result.status, 'passed');
 assert.equal(result.cubismRuntimeInBrowser, false);
 assert.equal(result.runtime.state, 'ready');
 assert.equal(result.runtime.drawableCount, 1);
+assert.equal(result.recoverySmoke, true, 'The renderer must rebuild its GPU owners after the recovery smoke cycle.');
 assert.ok(result.renderer.visualCount >= 1);
 assert.equal(result.browserDiagnostics.unclassifiedFailureCount, 0);
 console.log(JSON.stringify({ status: result.status, runtime: result.runtime, renderer: result.renderer, bundleBytes: Buffer.byteLength(bundle), browser: result.browserEvidence.product }, null, 2));

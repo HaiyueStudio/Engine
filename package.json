@@ -117,6 +117,7 @@
     "ray-tracing:g10:review:approve": "node scripts/visual-regression/approve-ray-g10-review.mjs",
     "ray-tracing:g10:review:check": "node scripts/visual-regression/validate-ray-g10-review.mjs",
     "ray-tracing:product-artifact:check": "node scripts/benchmark/validate-ray-product-candidate-artifact.mjs",
+    "ray-tracing:orbit-example:check": "node scripts/webgpu-gate/verify-ray-tracing-orbit-example.mjs",
     "pack:candidates": "node scripts/pack-repository-candidates.mjs"
   },
   "devDependencies": {

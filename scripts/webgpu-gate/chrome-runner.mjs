@@ -27,10 +27,11 @@ export async function runChromeWebGpuFixture({
   visualCapture = null,
   navigateAwayAfterResult = false,
   mounts = [],
+  crossOriginIsolation = true,
 }) {
   const chrome = process.env.CHROME_PATH ?? defaultChromePath();
   if (!existsSync(chrome)) throw new Error(`Chrome/WebGPU gate requires Chrome. Set CHROME_PATH (looked for ${chrome}).`);
-  const fixtureServer = await startHttpFixtureServer(root, { mounts });
+  const fixtureServer = await startHttpFixtureServer(root, { mounts, crossOriginIsolation });
   try {
     const parameters = new URLSearchParams(Object.entries(query).map(([key, value]) => [key, String(value)]));
     const url = `${fixtureServer.origin}/${fixture}?${parameters}`;
@@ -50,9 +51,9 @@ export async function runChromeWebGpuFixture({
   }
 }
 
-export async function startHttpFixtureServer(root, { mounts = [] } = {}) {
+export async function startHttpFixtureServer(root, { mounts = [], crossOriginIsolation = true } = {}) {
   const httpEvidence = createHttpEvidence();
-  const server = createStaticServer(root, httpEvidence, mounts);
+  const server = createStaticServer(root, httpEvidence, mounts, crossOriginIsolation);
   await new Promise((resolveListen, reject) => {
     server.once('error', reject);
     server.listen(0, '127.0.0.1', resolveListen);
@@ -76,7 +77,7 @@ export async function startHttpFixtureServer(root, { mounts = [] } = {}) {
   };
 }
 
-function createStaticServer(root, httpEvidence, mounts) {
+function createStaticServer(root, httpEvidence, mounts, crossOriginIsolation) {
   const normalizedRoot = resolve(root);
   const normalizedMounts = [
     { prefix: '', directory: normalizedRoot },
@@ -106,8 +107,10 @@ function createStaticServer(root, httpEvidence, mounts) {
       response.writeHead(200, {
         'content-type': contentType(path),
         'cache-control': 'no-store',
-        'cross-origin-opener-policy': 'same-origin',
-        'cross-origin-embedder-policy': 'require-corp',
+        ...(crossOriginIsolation ? {
+          'cross-origin-opener-policy': 'same-origin',
+          'cross-origin-embedder-policy': 'require-corp',
+        } : {}),
       });
       response.end(contents);
     } catch {

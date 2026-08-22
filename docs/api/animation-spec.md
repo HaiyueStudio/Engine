@@ -11,6 +11,8 @@ Animation Spec 定义面向 Web 加载与解析优化的可扩展动效中间格
 - `@haiyue/animation-spec`：`parseAnimation`、HYA binary encode/decode、扩展 registry 和状态机数据 contract。
 - `@haiyue/animation-spec/lottie`：`convertLottie`、`convertLottieDocument` 和 `inspectLottieFonts`；返回 diagnostics，不执行来源脚本。
 - `@haiyue/animation-spec/native3d`：`parseNative3DAnimation`、`parseNative3DAnimationPayload`、`createNative3DAnimationExtensionHandler` 和对应类型。
+- `@haiyue/animation-spec/conversion`：来源无关的离线转换 session、采样、诊断和原子输出 host contract。
+- `@haiyue/animation-spec/live2d/clip-baked`：注入已获许可 Cubism evaluator 的构建期 clip-baked adapter；不包含 Core、Framework 或页面播放器。
 - `hya-convert`：Node.js 22+ CLI，不是 browser export。
 
 HYA parse/codec 失败抛出 `AnimationFormatError`；调用方应记录 code/path，而不是按英文 message 分支。Lottie 转换的 fidelity 问题位于返回结果 `diagnostics`，每项包含 severity、code、path 和 message；`strict: true` 将 warning 作为交付阻断。Native 3D required extension 未注册或 payload 非法时必须在创建 runtime owner 前失败。

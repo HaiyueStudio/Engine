@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schemaVersion": 1,
+  "id": "m05-g01-cubism-corpus",
+  "sourceRepository": "https://github.com/Live2D/CubismWebSamples",
+  "tag": "5-r.5",
+  "revision": "ed1e0b714826d92469b9e51cacc3346f4e393f03",
+  "archive": {
+    "url": "https://github.com/Live2D/CubismWebSamples/archive/refs/tags/5-r.5.zip",
+    "sha256": "673d5cd0f6ca71e3f7ce1f0a96b2610271b16a1f8c0023e0aba6fb0377d3d68a"
+  },
+  "license": {
+    "id": "Live2D-Free-Material-License",
+    "agreement": "https://www.live2d.com/eula/live2d-free-material-license-agreement_en.html",
+    "sampleTerms": "https://www.live2d.com/eula/live2d-sample-model-terms_en.html",
+    "acceptanceRequired": true,
+    "redistributeSourceAssets": false
+  },
+  "hashAlgorithm": {
+    "name": "sha256-directory-v1",
+    "description": "Sort UTF-8 relative POSIX paths ordinally; for every file append path, TAB, lowercase file SHA-256, TAB, decimal byte length, LF; SHA-256 the UTF-8 manifest bytes including final LF."
+  },
+  "cases": [
+    {
+      "id": "live2d-haru-5-r5",
+      "root": "Samples/Resources/Haru",
+      "entry": "Haru.model3.json",
+      "fileCount": 47,
+      "aggregateSha256": "5abd8c53bc8c5e19ef124885868eb3d4dcc21e3a79b1f2e2bed90eaa78a4efdd",
+      "declaredFeatures": ["multiple-textures", "motions", "expressions", "physics", "pose", "user-data"],
+      "requiredFor": ["basic-deformation", "motion-expression-physics-recipe"],
+      "distribution": "local-only"
+    },
+    {
+      "id": "live2d-hiyori-5-r5",
+      "root": "Samples/Resources/Hiyori",
+      "entry": "Hiyori.model3.json",
+      "fileCount": 18,
+      "aggregateSha256": "7a0dbeab9f5790d925f73c60e0d533a2231a296bc090111081c469a2808c6ff2",
+      "declaredFeatures": ["multiple-textures", "motions", "expression", "physics", "pose", "user-data"],
+      "requiredFor": ["motion-expression-physics-recipe", "multi-texture"],
+      "distribution": "local-only"
+    },
+    {
+      "id": "live2d-mao-5-r5",
+      "root": "Samples/Resources/Mao",
+      "entry": "Mao.model3.json",
+      "fileCount": 22,
+      "aggregateSha256": "db95489ea846340a4a90739933dadbafb4dc894113d661088df621ffffca2f79",
+      "declaredFeatures": ["motions", "expressions", "physics", "pose"],
+      "requiredFor": ["feature-discovery", "mask-blend-observation-candidate"],
+      "distribution": "local-only"
+    }
+  ],
+  "featureObservationPolicy": {
+    "declaredFeaturesAreNotRuntimeCoverage": true,
+    "maskAndBlendStatus": "not-covered-until-captured",
+    "requiredObservationCounts": {
+      "maskReferences": 1,
+      "additiveDrawables": 1,
+      "multiplicativeDrawables": 1
+    }
+  }
+}

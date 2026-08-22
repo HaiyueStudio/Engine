@@ -39,6 +39,7 @@ export function sampleDeformableMesh2DDrawable(
 
 function findFrame(times: Float32Array, time: number): number {
   if (time <= times[0]!) return 0;
+  if (time >= times[times.length - 1]!) return times.length - 1;
   let low = 0;
   let high = times.length - 1;
   while (low + 1 < high) {
@@ -51,4 +52,3 @@ function findFrame(times: Float32Array, time: number): number {
 
 function mix(a: number, b: number, progress: number): number { return a + (b - a) * progress; }
 function clamp(value: number, minimum: number, maximum: number): number { return Math.max(minimum, Math.min(maximum, value)); }
-

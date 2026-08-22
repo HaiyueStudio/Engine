@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schemaVersion": 1,
+  "id": "m05-source-runtime-closure-deny-list",
+  "scopes": ["npm-tarball", "browser-bundle", "source-map", "hya-package", "browser-network", "ci-artifact", "ci-cache"],
+  "caseInsensitivePathPatterns": [
+    "live2dcubismcore",
+    "cubismcore",
+    "live2dcubismframework",
+    ".moc3",
+    ".model3.json",
+    ".motion3.json",
+    ".expression3.json",
+    ".physics3.json",
+    ".pose3.json",
+    ".cmo3",
+    ".wpk"
+  ],
+  "forbiddenRuntimePackages": [
+    "@framework/live2dcubismframework",
+    "live2dcubismcore"
+  ],
+  "allowedBuildTimePaths": [
+    "animation-spec/live2d/tools/**",
+    "animation-spec/src/live2d/**",
+    "animation-spec/src/conversion/**",
+    "animation-spec/live2d/README.md",
+    "docs/for-ai/deformable-animation/**"
+  ],
+  "exceptionPolicy": "Build-time source names may appear in adapter code, diagnostics, provenance and documentation. No exception permits source runtime bytes or source assets in playback deliverables."
+}

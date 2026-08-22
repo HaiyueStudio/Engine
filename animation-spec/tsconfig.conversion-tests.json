@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist-test",
+    "declaration": false,
+    "sourceMap": false,
+    "types": []
+  },
+  "include": ["src/conversion/**/*.ts", "src/live2d/**/*.ts"]
+}

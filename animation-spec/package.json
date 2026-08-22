@@ -59,11 +59,20 @@
     "./live2d": {
       "types": "./dist/live2d.d.ts",
       "import": "./dist/live2d.js"
+    },
+    "./conversion": {
+      "types": "./dist/conversion.d.ts",
+      "import": "./dist/conversion.js"
+    },
+    "./live2d/clip-baked": {
+      "types": "./dist/live2d/clip-baked.d.ts",
+      "import": "./dist/live2d/clip-baked.js"
     }
   },
   "scripts": {
     "build": "node ../scripts/build-rollup-once.mjs && rollup -c rollup.dts.config.js && node ../scripts/install-bundled-declarations.mjs animation-spec dist-declarations",
-    "test": "npm run build && node --test --test-concurrency=1 \"test/**/*.test.mjs\"",
+    "test": "npm run build && npm run build:conversion-tests && node --test --test-concurrency=1 \"test/**/*.test.mjs\"",
+    "build:conversion-tests": "node -e \"require('node:fs').rmSync('dist-test', { recursive: true, force: true })\" && tsc -p tsconfig.conversion-tests.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "samples:generate": "node ../scripts/build-rollup-once.mjs && node scripts/generate-samples.mjs",
     "corpus:sync": "node ../scripts/hya-corpus/sync.mjs"

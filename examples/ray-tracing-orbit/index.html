@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>海月 · Interactive Progressive Ray Tracing</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font: 13px/1.5 Inter, ui-sans-serif, system-ui, sans-serif;
+      background: #03050a;
+      color: #edf7ff;
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body {
+      display: grid;
+      grid-template-columns: minmax(280px, 340px) 1fr;
+      background: radial-gradient(circle at 76% 16%, #183354, #050913 48%, #020309);
+    }
+    aside {
+      z-index: 2;
+      overflow: auto;
+      padding: 26px;
+      border-right: 1px solid #79ddff25;
+      background: #07101de8;
+      backdrop-filter: blur(18px);
+    }
+    main { position: relative; min-width: 0; min-height: 0; padding: 18px; }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 1px solid #83dcff40;
+      border-radius: 14px;
+      background: #010208;
+      box-shadow: 0 32px 90px #000c;
+      cursor: grab;
+      touch-action: none;
+    }
+    canvas:active { cursor: grabbing; }
+    .eyebrow { color: #67e8f9; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; }
+    h1 { margin: 5px 0 8px; font-size: 23px; line-height: 1.15; }
+    .muted { color: #92a9bf; }
+    .hint {
+      margin: 16px 0;
+      padding: 11px 12px;
+      border: 1px solid #67e8f92c;
+      border-radius: 9px;
+      color: #b9d9e7;
+      background: #0a1a2a;
+    }
+    label { display: grid; gap: 5px; margin: 12px 0; color: #b9c9db; }
+    select, input, button {
+      border: 1px solid #67e8f944;
+      border-radius: 7px;
+      padding: 8px 9px;
+      color: inherit;
+      background: #0b1929;
+    }
+    .control-heading, .buttons { display: flex; justify-content: space-between; gap: 9px; }
+    output { color: #67e8f9; font-family: ui-monospace, monospace; }
+    button { flex: 1; cursor: pointer; font-weight: 700; }
+    button:hover { background: #12304a; }
+    progress { width: 100%; height: 7px; accent-color: #67e8f9; }
+    dl {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 7px 12px;
+      margin-top: 16px;
+      padding-top: 15px;
+      border-top: 1px solid #7dd3fc20;
+    }
+    dt { color: #8497ae; }
+    dd { margin: 0; color: #dff8ff; font-family: ui-monospace, monospace; text-align: right; }
+    #status { min-height: 2.8em; }
+    #diagnostics { color: #ffb4a7; white-space: pre-wrap; font: 11px/1.45 ui-monospace, monospace; }
+    #result { display: none; }
+    .badge {
+      position: absolute;
+      top: 32px;
+      right: 32px;
+      pointer-events: none;
+      padding: 7px 10px;
+      border: 1px solid #ffffff20;
+      border-radius: 999px;
+      background: #020713b8;
+      color: #b8dded;
+      backdrop-filter: blur(12px);
+    }
+    body[data-convergence="noisy"] .badge::before { content: "● NOISY · accumulating"; color: #fbbf24; }
+    body[data-convergence="refining"] .badge::before { content: "● REFINING"; color: #67e8f9; }
+    @media (max-width: 760px) {
+      body { grid-template-columns: 1fr; grid-template-rows: auto minmax(360px, 1fr); overflow: auto; }
+      aside { border-right: 0; border-bottom: 1px solid #79ddff25; }
+      main { min-height: 55vh; }
+    }
+  </style>
+</head>
+<body data-render-status="pending" data-convergence="noisy">
+  <aside>
+    <div class="eyebrow">WebGPU · live accumulation</div>
+    <h1>Interactive Ray Tracing</h1>
+    <p class="muted">每帧追加一个随机 path-tracing sample。画面会从噪点逐步收敛；OrbitControl 改变相机后，history 会以 camera 原因重置并重新清晰。</p>
+    <div class="hint">左键拖拽旋转 · 右键拖拽平移 · 滚轮缩放</div>
+    <label>
+      <span class="control-heading"><span>Pixel ratio</span><output id="pixel-ratio-value" for="pixel-ratio">1.00×</output></span>
+      <input id="pixel-ratio" type="range" min="0.25" max="2" step="0.25" value="1" />
+    </label>
+    <label>Path bounces
+      <select id="bounces"><option value="1">1 · Fast</option><option value="2" selected>2 · Balanced</option><option value="3">3 · Quality</option></select>
+    </label>
+    <label>View
+      <select id="view"><option value="raw" selected>Raw accumulation</option><option value="denoised">Denoised</option><option value="variance">Variance</option><option value="history-age">History age</option><option value="feature">Feature</option></select>
+    </label>
+    <label>Maximum samples
+      <select id="max-samples"><option value="64">64 spp</option><option value="256" selected>256 spp</option><option value="1024">1024 spp</option></select>
+    </label>
+    <div class="buttons"><button id="pause" type="button">暂停</button><button id="reset" type="button">重置累积</button></div>
+    <p id="status" class="muted">初始化…</p>
+    <progress id="progress" max="1" value="0"></progress>
+    <dl>
+      <dt>Resolution</dt><dd id="resolution">—</dd>
+      <dt>Samples</dt><dd id="samples">0 spp</dd>
+      <dt>Resets</dt><dd id="resets">0</dd>
+      <dt>Variance mean/max</dt><dd id="variance">—</dd>
+      <dt>Frame wall time</dt><dd id="frame-time">—</dd>
+      <dt>Peak memory</dt><dd id="memory">—</dd>
+    </dl>
+    <pre id="diagnostics"></pre>
+  </aside>
+  <main>
+    <canvas id="candidate"></canvas>
+    <div class="badge" aria-hidden="true"></div>
+  </main>
+  <pre id="result" aria-hidden="true"></pre>
+  <script src="../shared/engine.js"></script>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

@@ -38,6 +38,10 @@ Cubism Core 负责 `.moc3` 的参数到 drawable 顶点求值，且使用专有�
 
 在不改变 sidecar major、capture profile 或来源无关边界的前提下，`blendMode` 既有枚举已由运行时完整消费。`normal`、`additive`、`multiplicative` 与 alpha mask 现在属于 v1 支持范围；第 7 条中的 non-normal blend 降级约束不再适用。multiply/screen color、culling、实时参数与 Physics 仍维持原边界和结构化诊断。
 
+## 2026-08-22 Mask minor-version 补充
+
+HYDM 1.1 在 drawable metadata 增加来源无关的 `maskMode: alpha | alpha-inverted`。新版 decoder 继续读取 1.0，并把缺省值解释为 `alpha`；1.1 writer 总是显式写出 mode，使旧 decoder 对无法表达的 inverted mask 以 unknown minor version 失败，而不是静默按普通 mask 播放。该变化不引入 Cubism 命名或来源 runtime。
+
 ## 验证
 
 - Sidecar deterministic round-trip、unknown version、truncated/range/overflow、拓扑、mask/reference 和 limit tests。

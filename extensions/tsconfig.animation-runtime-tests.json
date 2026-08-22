@@ -25,6 +25,7 @@
     "src/animation/HyaAnimation2DClipAdapter.ts",
     "src/animation/AnimationTextRasterizer.ts",
     "src/animation/runtime/mixer/**/*.ts",
+    "src/deformable-animation/runtime/**/*.ts",
     "src/animation3d/**/*.ts",
     "src/types/earcut.d.ts"
   ]

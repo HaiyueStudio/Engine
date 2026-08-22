@@ -38,7 +38,7 @@
           "id": "offline-source-adapters",
           "stability": "stable",
           "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
-          "entrypoints": { "./cubism": 15, "./live2d": 15, "./lottie": 9 }
+          "entrypoints": { "./conversion": 19, "./cubism": 15, "./live2d": 15, "./live2d/clip-baked": 8, "./lottie": 9 }
         }
       ]
     },

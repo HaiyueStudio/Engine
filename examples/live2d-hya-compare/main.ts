@@ -7,6 +7,7 @@ import { Camera2D, Entity, HaiyueEngine, Transform2D } from '@haiyue/engine';
 import { ANIMATION_COMPARE_BACKGROUND_HEX, ANIMATION_COMPARE_CLEAR_COLOR, resolveAnimationCompareZoom } from '../animationCompareTheme';
 
 interface Bounds { x: number; y: number; width: number; height: number }
+interface FeatureCoverage { maskReferenceCount: number; invertedMaskDrawableCount: number; additiveDrawableCount: number; multiplicativeDrawableCount: number }
 interface ReferenceDrawable {
   id: string;
   positions: Float32Array;
@@ -17,6 +18,7 @@ interface ReferenceDrawable {
   order: number;
   blendMode: 'normal' | 'additive' | 'multiplicative';
   masks: readonly string[];
+  maskMode: 'alpha' | 'alpha-inverted';
 }
 interface LoadedCoreMotion extends CubismModel3MotionReference { readonly label: string; readonly motion: CubismMotion3 }
 interface CoreClipRange { readonly start: number; readonly duration: number; readonly frameCount: number }
@@ -60,10 +62,13 @@ async function main(): Promise<void> {
   let playbackActions: readonly PlaybackAction[] = [];
   let selectedActionId: string | null = null;
   let playerInstallCount = 0;
+  let featureCoverage: FeatureCoverage = { maskReferenceCount: 0, invertedMaskDrawableCount: 0, additiveDrawableCount: 0, multiplicativeDrawableCount: 0 };
   let smokeSwitchPending = new URLSearchParams(location.search).get('actionSmoke') === '1';
 
   bindControls();
   await loadBundledSample();
+  const localModel = localModelQuery();
+  if (localModel) await loadMountedModel(localModel.mount, localModel.files);
 
   engine.on('after-update', () => {
     const now = performance.now();
@@ -83,7 +88,7 @@ async function main(): Promise<void> {
     const result = query<HTMLElement>('#result');
     if (!result.dataset.status && hyaRenderer.stats.visualCount > 0) {
       result.dataset.status = 'passed';
-      result.textContent = JSON.stringify({ status: 'passed', hya: hyaRenderer.stats, reference: coreSession ? 'official-cubism-core' : 'captured-mesh-fixture', comparisonBackground: ANIMATION_COMPARE_BACKGROUND_HEX, bounds, autoZoom, actionCount: playbackActions.length, selectedActionId, playerInstallCount });
+      result.textContent = JSON.stringify({ status: 'passed', hya: hyaRenderer.stats, reference: coreSession ? 'official-cubism-core' : 'captured-mesh-fixture', comparisonBackground: ANIMATION_COMPARE_BACKGROUND_HEX, bounds, autoZoom, actionCount: playbackActions.length, selectedActionId, playerInstallCount, featureCoverage });
     }
   });
 
@@ -97,6 +102,7 @@ async function main(): Promise<void> {
       loadBitmap('./samples/mascot.png'),
     ]);
     bakedData = decodeDeformableMesh2DData(data);
+    featureCoverage = summarizeDeformableFeatures(bakedData);
     replaceReferenceTextures([texture]);
     const parsed = parseAnimation(hya, { extensions: createDeformableMesh2DFormatRegistry() });
     const midpoint = parsed.duration / 2;
@@ -112,7 +118,22 @@ async function main(): Promise<void> {
     setStatus('默认 sample 已加载；选择本地 SDK runtime 目录可启用官方 Cubism Core 对照。', 'success');
   }
 
-  async function loadLicensedDirectory(files: FileList): Promise<void> {
+  async function loadMountedModel(mount: string, paths: readonly string[]): Promise<void> {
+    const base = new URL(mount.endsWith('/') ? mount : `${mount}/`, location.href);
+    if (base.origin !== location.origin) throw new Error('Local model mount must use the comparison page origin.');
+    const files = await Promise.all(paths.map(async path => {
+      const normalized = normalizePath(path);
+      if (!normalized || normalized.startsWith('../') || normalized.includes('/../')) throw new Error(`Invalid local model path: ${path}`);
+      const response = await fetch(new URL(normalized, base));
+      requireOk(response);
+      const file = new File([await response.blob()], normalized.split('/').pop()!, { type: response.headers.get('content-type') ?? '' });
+      Object.defineProperty(file, 'webkitRelativePath', { value: `runtime/${normalized}` });
+      return file;
+    }));
+    await loadLicensedDirectory(files);
+  }
+
+  async function loadLicensedDirectory(files: FileList | readonly File[]): Promise<void> {
     setStatus('加载官方 Cubism Core 并读取本地模型…', 'working');
     const fileMap = new Map(Array.from(files, file => [normalizePath(file.webkitRelativePath || file.name), file]));
     const modelEntry = [...fileMap.entries()].find(([path]) => path.toLowerCase().endsWith('.model3.json'));
@@ -169,7 +190,16 @@ async function main(): Promise<void> {
 
   function installCoreCapture(capture: CubismDrawableCapture, resetView: boolean): void {
     if (!coreSession) throw new Error('Cubism Core 模型尚未加载。');
+    const result = query<HTMLElement>('#result');
+    delete result.dataset.status;
+    result.textContent = '';
     const converted = convertCubismCaptureToHya(capture);
+    featureCoverage = {
+      maskReferenceCount: converted.report.maskReferenceCount,
+      invertedMaskDrawableCount: converted.report.invertedMaskDrawableCount,
+      additiveDrawableCount: converted.report.additiveDrawableCount,
+      multiplicativeDrawableCount: converted.report.multiplicativeDrawableCount,
+    };
     releaseObjectUrls();
     const dataUrl = URL.createObjectURL(new Blob([converted.data], { type: 'application/vnd.haiyue.deformable-mesh-2d' }));
     objectUrls.push(dataUrl);
@@ -194,7 +224,8 @@ async function main(): Promise<void> {
     const maskCount = bakedData.drawables.reduce((sum, drawable) => sum + drawable.masks.length, 0);
     const selectedMotion = coreSession.motions.find(item => item.id === coreSession?.selectedMotionId);
     const motionSummary = selectedMotion ? ` · 动作：${selectedMotion.label}` : ' · 静态姿势（无 Motion3）';
-    setStatus(`官方 Core 已加载 · ${coreSession.motions.length} 个动作 · ${bakedData.drawables.length} drawables · ${capture.frames.length} baked frames${motionSummary}${maskCount ? ` · ${maskCount} 个 mask references` : ''}`, 'success');
+    const blendSummary = ` · additive ${featureCoverage.additiveDrawableCount} · multiplicative ${featureCoverage.multiplicativeDrawableCount}`;
+    setStatus(`官方 Core 已加载 · ${coreSession.motions.length} 个动作 · ${bakedData.drawables.length} drawables · ${capture.frames.length} baked frames${motionSummary}${maskCount ? ` · ${maskCount} 个 mask references` : ''}${blendSummary}`, 'success');
   }
 
   function installHya(animation: ParsedAnimation, clipStart = 0, clipDuration = animation.duration): void {
@@ -332,6 +363,7 @@ uniform sampler2D u_mask;
 uniform vec2 u_target_size;
 uniform float u_opacity;
 uniform float u_use_mask;
+uniform float u_invert_mask;
 uniform float u_output_mask;
 out vec4 outColor;
 void main() {
@@ -344,12 +376,13 @@ void main() {
   float maskCoverage = u_use_mask > 0.5
     ? texture(u_mask, gl_FragCoord.xy / u_target_size).a
     : 1.0;
+  if (u_use_mask > 0.5 && u_invert_mask > 0.5) maskCoverage = 1.0 - maskCoverage;
   float coverage = u_opacity * maskCoverage;
   outColor = vec4(color.rgb * coverage, color.a * coverage);
 }`);
     this.position = gl.getAttribLocation(this.program, 'a_position'); this.uv = gl.getAttribLocation(this.program, 'a_uv');
     this.uniforms = Object.fromEntries([
-      'u_center', 'u_view', 'u_pan', 'u_zoom', 'u_target_size', 'u_opacity', 'u_use_mask', 'u_output_mask', 'u_texture', 'u_mask',
+      'u_center', 'u_view', 'u_pan', 'u_zoom', 'u_target_size', 'u_opacity', 'u_use_mask', 'u_invert_mask', 'u_output_mask', 'u_texture', 'u_mask',
     ].map(name => [name, requiredUniform(gl, this.program, name)]));
   }
 
@@ -431,6 +464,7 @@ void main() {
     gl.bindTexture(gl.TEXTURE_2D, useMask ? this.maskTexture : null);
     gl.uniform1f(this.uniforms.u_opacity!, drawable.opacity);
     gl.uniform1f(this.uniforms.u_use_mask!, useMask ? 1 : 0);
+    gl.uniform1f(this.uniforms.u_invert_mask!, useMask && drawable.maskMode === 'alpha-inverted' ? 1 : 0);
     gl.uniform1f(this.uniforms.u_output_mask!, outputMask ? 1 : 0);
     gl.drawElements(gl.TRIANGLES, drawable.indices.length, gl.UNSIGNED_INT, 0);
     gl.deleteBuffer(positionBuffer);
@@ -484,8 +518,8 @@ void main() {
   }
 }
 
-function sampleBakedDrawables(data: ParsedDeformableMesh2DData, time: number): ReferenceDrawable[] { const frame = findFrame(data.times, time), next = Math.min(frame + 1, data.times.length - 1), progress = next === frame ? 0 : (time - data.times[frame]!) / (data.times[next]! - data.times[frame]!); return data.drawables.map(drawable => { const stride = drawable.vertexCount * 2, positions = new Float32Array(stride); for (let i = 0; i < stride; i++) positions[i] = mix(drawable.positions[frame * stride + i]!, drawable.positions[next * stride + i]!, progress); return { id: drawable.id, positions, uvs: drawable.uvs, indices: drawable.indices, opacity: mix(drawable.opacities[frame]!, drawable.opacities[next]!, progress), textureIndex: drawable.textureIndex, order: drawable.renderOrders[frame]!, blendMode: drawable.blendMode, masks: drawable.masks }; }); }
-function captureCoreReferenceDrawables(session: CoreSession): ReferenceDrawable[] { const d = session.model.drawables, ids = Array.from(d.ids, String); return ids.map((id, index) => { const positions = new Float32Array(d.vertexPositions[index].length); for (let i = 0; i < positions.length; i += 2) { positions[i] = session.canvasOriginX + d.vertexPositions[index][i] * session.pixelsPerUnit; positions[i + 1] = session.canvasOriginY - d.vertexPositions[index][i + 1] * session.pixelsPerUnit; } const flags = d.constantFlags[index]; return { id, positions, uvs: normalizeCoreUvs(d.vertexUvs[index]), indices: Uint32Array.from(d.indices[index]), opacity: d.opacities[index], textureIndex: d.textureIndices[index], order: d.renderOrders[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' : 'normal', masks: Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!) }; }); }
+function sampleBakedDrawables(data: ParsedDeformableMesh2DData, time: number): ReferenceDrawable[] { const frame = findFrame(data.times, time), next = Math.min(frame + 1, data.times.length - 1), progress = next === frame ? 0 : (time - data.times[frame]!) / (data.times[next]! - data.times[frame]!); return data.drawables.map(drawable => { const stride = drawable.vertexCount * 2, positions = new Float32Array(stride); for (let i = 0; i < stride; i++) positions[i] = mix(drawable.positions[frame * stride + i]!, drawable.positions[next * stride + i]!, progress); return { id: drawable.id, positions, uvs: drawable.uvs, indices: drawable.indices, opacity: mix(drawable.opacities[frame]!, drawable.opacities[next]!, progress), textureIndex: drawable.textureIndex, order: drawable.renderOrders[frame]!, blendMode: drawable.blendMode, masks: drawable.masks, maskMode: drawable.maskMode }; }); }
+function captureCoreReferenceDrawables(session: CoreSession): ReferenceDrawable[] { const d = session.model.drawables, ids = Array.from(d.ids, String); return ids.map((id, index) => { const positions = new Float32Array(d.vertexPositions[index].length); for (let i = 0; i < positions.length; i += 2) { positions[i] = session.canvasOriginX + d.vertexPositions[index][i] * session.pixelsPerUnit; positions[i + 1] = session.canvasOriginY - d.vertexPositions[index][i + 1] * session.pixelsPerUnit; } const flags = d.constantFlags[index]; return { id, positions, uvs: normalizeCoreUvs(d.vertexUvs[index]), indices: Uint32Array.from(d.indices[index]), opacity: d.opacities[index], textureIndex: d.textureIndices[index], order: d.renderOrders[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' : 'normal', masks: Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!), maskMode: coreInvertedMask(session.core, flags) ? 'alpha-inverted' : 'alpha' }; }); }
 function captureCoreActionSet(session: CoreSession, textures: readonly File[]): { readonly capture: CubismDrawableCapture; readonly ranges: ReadonlyMap<string, CoreClipRange> } {
   if (session.motions.length === 0) return { capture: captureCoreClip(session, textures, null), ranges: new Map() };
   const combined = combineCubismCaptureClips(session.motions.map(motion => ({
@@ -498,16 +532,19 @@ function captureCoreActionSet(session: CoreSession, textures: readonly File[]): 
     ranges: new Map(combined.clips.map(clip => [clip.id, clip])),
   };
 }
-function captureCoreClip(session: CoreSession, textures: readonly File[], motion: CubismMotion3 | null = session.motion): CubismDrawableCapture { const duration = motion?.Meta.Duration ?? 1, steps = Math.max(1, Math.ceil(duration * 30)), frames = []; for (let frame = 0; frame <= steps; frame++) { const time = duration * frame / steps; applyCoreMotion(session, time, motion); const d = session.model.drawables, ids = Array.from(d.ids, String); frames.push({ time, drawables: ids.map((id, index) => { const flags = d.constantFlags[index]; return { id, textureIndex: d.textureIndices[index], renderOrder: d.renderOrders[index], opacity: d.opacities[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' as const : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' as const : 'normal' as const, culling: !session.core.Utils.hasIsDoubleSidedBit(flags), masks: Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!), positions: centerCorePositions(session, d.vertexPositions[index]), uvs: Array.from(d.vertexUvs[index]) as number[], indices: Array.from(d.indices[index]) as number[] }; }) }); } return { format: 'live2d-cubism-drawable-capture', version: 1, name: 'Browser comparison capture', canvas: { width: session.canvasWidth, height: session.canvasHeight, pixelsPerUnit: session.pixelsPerUnit, coordinateSystem: 'model-y-up', uvOrigin: 'bottom-left' }, duration, frameRate: steps / duration, textures: textures.map((file, index) => ({ id: `texture-${index}`, uri: file.name })), frames }; }
+function captureCoreClip(session: CoreSession, textures: readonly File[], motion: CubismMotion3 | null = session.motion): CubismDrawableCapture { const duration = motion?.Meta.Duration ?? 1, steps = Math.max(1, Math.ceil(duration * 30)), frames = []; for (let frame = 0; frame <= steps; frame++) { const time = duration * frame / steps; applyCoreMotion(session, time, motion); const d = session.model.drawables, ids = Array.from(d.ids, String); frames.push({ time, drawables: ids.map((id, index) => { const flags = d.constantFlags[index]; return { id, textureIndex: d.textureIndices[index], renderOrder: d.renderOrders[index], opacity: d.opacities[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' as const : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' as const : 'normal' as const, culling: !session.core.Utils.hasIsDoubleSidedBit(flags), masks: Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!), invertedMask: coreInvertedMask(session.core, flags), positions: centerCorePositions(session, d.vertexPositions[index]), uvs: Array.from(d.vertexUvs[index]) as number[], indices: Array.from(d.indices[index]) as number[] }; }) }); } return { format: 'live2d-cubism-drawable-capture', version: 1, name: 'Browser comparison capture', canvas: { width: session.canvasWidth, height: session.canvasHeight, pixelsPerUnit: session.pixelsPerUnit, coordinateSystem: 'model-y-up', uvOrigin: 'bottom-left' }, duration, frameRate: steps / duration, textures: textures.map((file, index) => ({ id: `texture-${index}`, uri: file.name })), frames }; }
+function coreInvertedMask(core: any, flags: number): boolean { return typeof core.Utils.hasIsInvertedMaskBit === 'function' && core.Utils.hasIsInvertedMaskBit(flags); }
 function centerCorePositions(session: CoreSession, source: ArrayLike<number>): number[] { const positions = Array.from(source); const offsetX = (session.canvasOriginX - session.canvasWidth / 2) / session.pixelsPerUnit, offsetY = (session.canvasHeight / 2 - session.canvasOriginY) / session.pixelsPerUnit; for (let index = 0; index < positions.length; index += 2) { positions[index]! += offsetX; positions[index + 1]! += offsetY; } return positions; }
 function normalizeCoreUvs(source: ArrayLike<number>): Float32Array { const uvs = Float32Array.from(source); for (let index = 1; index < uvs.length; index += 2) uvs[index] = 1 - uvs[index]!; return uvs; }
 function applyCoreMotion(session: CoreSession, time: number, motion: CubismMotion3 | null = session.motion): void { session.model.parameters.values.set(session.parameterDefaults); session.model.parts.opacities.set(session.partDefaults); if (motion) { const sample = sampleCubismMotion3(motion, time); for (const [id, value] of sample.parameters) { const index = session.parameterIndex.get(id); if (index !== undefined) session.model.parameters.values[index] = value; } for (const [id, value] of sample.partOpacities) { const index = session.partIndex.get(id); if (index !== undefined) session.model.parts.opacities[index] = value; } } session.model.update(); }
 function dataBounds(data: ParsedDeformableMesh2DData): Bounds { let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity; for (const drawable of data.drawables) for (let i = 0; i < drawable.positions.length; i += 2) { minX = Math.min(minX, drawable.positions[i]!); minY = Math.min(minY, drawable.positions[i + 1]!); maxX = Math.max(maxX, drawable.positions[i]!); maxY = Math.max(maxY, drawable.positions[i + 1]!); } return Number.isFinite(minX) ? { x: minX, y: minY, width: maxX - minX, height: maxY - minY } : { x: 0, y: 0, width: data.canvasWidth, height: data.canvasHeight }; }
+function summarizeDeformableFeatures(data: ParsedDeformableMesh2DData): FeatureCoverage { return { maskReferenceCount: data.drawables.reduce((sum, drawable) => sum + drawable.masks.length, 0), invertedMaskDrawableCount: data.drawables.filter(drawable => drawable.maskMode === 'alpha-inverted').length, additiveDrawableCount: data.drawables.filter(drawable => drawable.blendMode === 'additive').length, multiplicativeDrawableCount: data.drawables.filter(drawable => drawable.blendMode === 'multiplicative').length }; }
 function frameCountInRange(times: Float32Array, start: number, end: number): number { let count = 0; for (const time of times) if (time >= start && time <= end) count++; return count; }
 function findFrame(times: Float32Array, time: number): number { let index = 0; while (index + 1 < times.length && times[index + 1]! <= time) index++; return index; }
 function formatMotionLabel(motion: CubismModel3MotionReference, groupCount: number): string { const filename = motion.file.replaceAll('\\', '/').split('/').pop()?.replace(/\.motion3\.json$/iu, '') ?? motion.file; return `${motion.group}${groupCount > 1 ? ` ${motion.index + 1}` : ''} · ${filename}`; }
 function requiredRelativeFile(files: Map<string, File>, modelPath: string, relative: string): File { const resolved = normalizePath(new URL(relative, `https://local/${modelPath}`).pathname.slice(1)); const file = files.get(resolved); if (!file) throw new Error(`模型目录缺少 ${relative}`); return file; }
 function normalizePath(value: string): string { return value.replaceAll('\\', '/').replace(/^\.\//u, ''); }
+function localModelQuery(): { mount: string; files: readonly string[] } | null { const parameters = new URLSearchParams(location.search), mount = parameters.get('localModelMount'), encoded = parameters.get('localModelFiles'); if (!mount || !encoded) return null; const files = encoded.split('|').map(value => normalizePath(value)).filter(Boolean); if (files.length === 0) throw new Error('Local model query did not list files.'); return { mount, files }; }
 async function loadBitmap(url: string): Promise<ImageBitmap> { return createImageBitmap(await fetch(url).then(requireOk).then(response => response.blob()), { colorSpaceConversion: 'none' }); }
 function loadScript(src: string): Promise<void> { if ((globalThis as any).Live2DCubismCore) return Promise.resolve(); return new Promise((resolve, reject) => { const script = document.createElement('script'); script.src = src; script.onload = () => resolve(); script.onerror = () => reject(new Error(`无法加载 Cubism Core：${src}`)); document.head.append(script); }); }
 function createProgram(gl: WebGL2RenderingContext, vertex: string, fragment: string): WebGLProgram { const compile = (type: number, source: string) => { const shader = gl.createShader(type)!; gl.shaderSource(shader, source); gl.compileShader(shader); if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader) ?? 'Shader compile failed'); return shader; }; const program = gl.createProgram()!; gl.attachShader(program, compile(gl.VERTEX_SHADER, vertex)); gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fragment)); gl.linkProgram(program); if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program) ?? 'Program link failed'); return program; }
@@ -523,4 +560,4 @@ function formatLoadError(error: unknown): string {
 }
 function query<T extends Element>(selector: string): T { const element = document.querySelector<T>(selector); if (!element) throw new ReferenceError(`Missing ${selector}`); return element; }
 
-void main().catch(error => { const result = document.querySelector<HTMLElement>('#result'); if (result) { result.dataset.status = 'failed'; result.textContent = JSON.stringify({ status: 'failed', error: String(error) }); } console.error(error); });
+void main().catch(error => { const result = document.querySelector<HTMLElement>('#result'); if (result) { result.dataset.status = 'failed'; result.textContent = JSON.stringify({ status: 'failed', error: formatLoadError(error) }); } console.error(error); });

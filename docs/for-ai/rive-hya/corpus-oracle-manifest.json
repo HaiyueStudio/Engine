@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "compatibilityTupleId": "rive-7.3-webgl2-2.40.0",
+  "status": "contract-frozen-content-acquisition-owned-by-g11",
+  "productCases": [
+    {
+      "id": "animation-editor-component-import",
+      "product": "HaiYue AnimationEditor",
+      "workflow": "import, inspect diagnostics, reimport, save, reopen, export, and exact-HYA preview a responsive interactive component",
+      "requiredFamilies": ["text-layout-component-asset", "timeline-state-machine", "data-interaction-accessibility"]
+    },
+    {
+      "id": "game-hud-data-driven",
+      "product": "HaiYue game runtime",
+      "workflow": "bind health, inventory list, localization, focus, keyboard/gamepad, sound, and reduced motion without a Rive runtime in the shipped page",
+      "requiredFamilies": ["data-interaction-accessibility", "audio-event", "text-layout-component-asset"]
+    },
+    {
+      "id": "brand-loader-vector-rig",
+      "product": "HaiYue exported web application",
+      "workflow": "play a high-detail vector/mesh/constraint loader under resize and device loss with deterministic first frame",
+      "requiredFamilies": ["vector-paint-composite", "rig-mesh-constraint", "timeline-state-machine"]
+    },
+    {
+      "id": "scripted-custom-control",
+      "product": "HaiYue sandboxed animation extension",
+      "workflow": "run Luau protocols and validated custom WGSL with hard CPU, memory, output, binding, and GPU budgets",
+      "requiredFamilies": ["scripting-custom-rendering"]
+    }
+  ],
+  "minimumCorpus": {
+    "featureIsolatedPerObjectFamily": 1,
+    "propertyBoundaryPerPropertyFamily": 2,
+    "realProductAssets": 4,
+    "combinedStressAssets": 3,
+    "adversarialAssets": 24,
+    "formatVersionFixtures": ["7.2-reject-outside-denominator", "7.3-accept", "7.4-reject", "8.0-reject"]
+  },
+  "requiredAssetMetadata": [
+    "id",
+    "kind",
+    "sourceUrlOrInternalAssetId",
+    "riveCloudFileRevisionId",
+    "rivSha256",
+    "externalAssetSha256s",
+    "licenseId",
+    "licenseEvidence",
+    "allowedUses",
+    "featureFamilies",
+    "objectKeys",
+    "propertyKeys",
+    "scriptSymbols",
+    "fixtureOwner",
+    "oracleTraceId"
+  ],
+  "formalAssets": [],
+  "oracle": {
+    "package": "@rive-app/webgl2@2.40.0",
+    "clock": "externally stepped fixed monotonic microseconds",
+    "requiredTraceChannels": [
+      "pixels",
+      "geometryAndDrawOrder",
+      "stateMachineState",
+      "dataValues",
+      "events",
+      "pointerKeyboardGamepadFocus",
+      "resizeAndDpr",
+      "audioSchedule",
+      "semanticTreeAndActions",
+      "resourceReplacement",
+      "errorsAndOwners"
+    ]
+  },
+  "browserDeviceMatrix": [
+    {
+      "id": "windows-10-integrated",
+      "os": "Windows 10 22H2",
+      "gpuClass": "integrated Intel-class",
+      "browsers": ["Chrome stable", "Edge stable"],
+      "required": true
+    },
+    {
+      "id": "windows-11-discrete",
+      "os": "Windows 11 current",
+      "gpuClass": "discrete NVIDIA-or-AMD-class",
+      "browsers": ["Chrome stable", "Edge stable"],
+      "required": true
+    }
+  ],
+  "acquisitionGate": "G11 may add formalAssets only when every metadata field and redistribution right is present. Empty formalAssets is not release evidence."
+}
+

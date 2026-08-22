@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-live2d-local-corpus-candidate",
+  "revision": "working-tree",
+  "dirty": true,
+  "formalEvidence": false,
+  "sampleCount": 3,
+  "samples": [
+    {
+      "id": "hibiki_ja",
+      "sourcePolicy": "caller-supplied-local-only",
+      "runtimeDirectoryHash": "sha256-2b68b52431a1ef9f29cf2d5a56bd67c53dd931a9fbef999cc6ed80a4b8c729d3",
+      "fileCount": 21,
+      "sourceBytes": 4181607,
+      "featureCoverage": {
+        "maskReferenceCount": 0,
+        "invertedMaskDrawableCount": 0,
+        "additiveDrawableCount": 0,
+        "multiplicativeDrawableCount": 0
+      },
+      "drawables": 58,
+      "maskTargets": 0,
+      "browser": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      },
+      "browserDiagnostics": {
+        "consoleErrorCount": 0,
+        "exceptionCount": 0,
+        "unclassifiedFailureCount": 0,
+        "profileCleanup": {
+          "status": "passed",
+          "attempts": 1,
+          "durationMs": 139
+        }
+      },
+      "requestedProjectFiles": [
+        "examples/live2d-hya-compare/bundle.js",
+        "examples/live2d-hya-compare/index.html",
+        "examples/live2d-hya-compare/samples/mascot.hya",
+        "examples/live2d-hya-compare/samples/mascot.hydm",
+        "examples/live2d-hya-compare/samples/mascot.png",
+        "examples/shared/engine.js"
+      ]
+    },
+    {
+      "id": "miku_free",
+      "sourcePolicy": "caller-supplied-local-only",
+      "runtimeDirectoryHash": "sha256-0258e3f65e7e3aaf9b4da9912d186b2a5959e221017aed58f2440932793335e2",
+      "fileCount": 13,
+      "sourceBytes": 4519848,
+      "featureCoverage": {
+        "maskReferenceCount": 0,
+        "invertedMaskDrawableCount": 0,
+        "additiveDrawableCount": 0,
+        "multiplicativeDrawableCount": 0
+      },
+      "drawables": 88,
+      "maskTargets": 0,
+      "browser": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      },
+      "browserDiagnostics": {
+        "consoleErrorCount": 0,
+        "exceptionCount": 0,
+        "unclassifiedFailureCount": 0,
+        "profileCleanup": {
+          "status": "passed",
+          "attempts": 1,
+          "durationMs": 401
+        }
+      },
+      "requestedProjectFiles": [
+        "examples/live2d-hya-compare/bundle.js",
+        "examples/live2d-hya-compare/index.html",
+        "examples/live2d-hya-compare/samples/mascot.hya",
+        "examples/live2d-hya-compare/samples/mascot.hydm",
+        "examples/live2d-hya-compare/samples/mascot.png",
+        "examples/shared/engine.js"
+      ]
+    },
+    {
+      "id": "miku_pro",
+      "sourcePolicy": "caller-supplied-local-only",
+      "runtimeDirectoryHash": "sha256-9cf8f77656174326913377c981fe37df89e05391112901b9249ab7a680c7c030",
+      "fileCount": 13,
+      "sourceBytes": 4577030,
+      "featureCoverage": {
+        "maskReferenceCount": 0,
+        "invertedMaskDrawableCount": 0,
+        "additiveDrawableCount": 0,
+        "multiplicativeDrawableCount": 0
+      },
+      "drawables": 110,
+      "maskTargets": 0,
+      "browser": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      },
+      "browserDiagnostics": {
+        "consoleErrorCount": 0,
+        "exceptionCount": 0,
+        "unclassifiedFailureCount": 0,
+        "profileCleanup": {
+          "status": "passed",
+          "attempts": 1,
+          "durationMs": 443
+        }
+      },
+      "requestedProjectFiles": [
+        "examples/live2d-hya-compare/bundle.js",
+        "examples/live2d-hya-compare/index.html",
+        "examples/live2d-hya-compare/samples/mascot.hya",
+        "examples/live2d-hya-compare/samples/mascot.hydm",
+        "examples/live2d-hya-compare/samples/mascot.png",
+        "examples/shared/engine.js"
+      ]
+    }
+  ],
+  "totals": {
+    "maskReferenceCount": 0,
+    "invertedMaskDrawableCount": 0,
+    "additiveDrawableCount": 0,
+    "multiplicativeDrawableCount": 0
+  }
+}

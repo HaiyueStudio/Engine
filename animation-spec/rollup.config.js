@@ -14,6 +14,8 @@ export default {
     deformable2d: 'src/deformable2d.ts',
     cubism: 'src/cubism.ts',
     live2d: 'src/live2d.ts',
+    conversion: 'src/conversion.ts',
+    'live2d/clip-baked': 'src/live2d/clip-baked.ts',
   },
   external: haiyueExternal({ packages: ['polygon-clipping'], includeMatrix: false }),
   output: { ...libraryOutput(), compact: true },
