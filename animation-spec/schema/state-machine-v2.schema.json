@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haiyue.dev/schema/state-machine-v2.schema.json",
+  "title": "HaiYue source-neutral animation state machine v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "extension", "channels", "clips", "stateMachines"],
+  "properties": {
+    "format": { "const": "haiyue-animation-state-machine@2" },
+    "extension": { "const": "org.haiyue.animation-state-machine@2" },
+    "channels": { "type": "array", "items": { "$ref": "#/$defs/channel" }, "maxItems": 1000000 },
+    "clips": { "type": "array", "items": { "$ref": "#/$defs/clip" }, "maxItems": 10000 },
+    "stateMachines": { "type": "array", "items": { "$ref": "#/$defs/machine" }, "maxItems": 10000 },
+    "components": { "type": "array", "items": { "$ref": "#/$defs/component" }, "maxItems": 8192 }
+  },
+  "$defs": {
+    "id": { "type": "string", "minLength": 1, "maxLength": 1024 },
+    "finite": { "type": "number" },
+    "value": { "oneOf": [{ "type": "number" }, { "type": "boolean" }, { "type": "string" }, { "type": "null" }, { "type": "array", "items": { "type": "number" } }, { "type": "object" }] },
+    "channel": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "target", "path", "family", "valueKind", "policy"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" }, "target": { "$ref": "#/$defs/id" }, "path": { "$ref": "#/$defs/id" },
+        "family": { "enum": ["transform", "paint-path", "rig", "text-layout", "resource-data", "visibility-order", "event-audio-script"] },
+        "valueKind": { "enum": ["number", "vector", "color", "boolean", "string", "id", "integer", "unsigned", "callback"] },
+        "valueSize": { "type": "integer", "minimum": 1 }, "numericMode": { "enum": ["linear", "angle-radians"] }, "defaultValue": { "$ref": "#/$defs/value" },
+        "policy": { "enum": ["override", "additive", "discrete", "ownership"] }, "effectKind": { "enum": ["event", "audio", "script"] }
+      }
+    },
+    "interpolation": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["kind"], "properties": { "kind": { "enum": ["linear", "hold"] } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "controls"], "properties": { "kind": { "const": "cubic-ease" }, "controls": { "type": "array", "prefixItems": [{ "type": "number", "minimum": 0, "maximum": 1 }, { "type": "number" }, { "type": "number", "minimum": 0, "maximum": 1 }, { "type": "number" }], "minItems": 4, "maxItems": 4 } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "outTangent", "inTangent"], "properties": { "kind": { "const": "cubic-value" }, "outTangent": { "type": "array", "items": { "type": "number" } }, "inTangent": { "type": "array", "items": { "type": "number" } } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "easing", "amplitude", "period"], "properties": { "kind": { "const": "elastic" }, "easing": { "enum": ["in", "out", "in-out"] }, "amplitude": { "type": "number", "minimum": 0 }, "period": { "type": "number", "exclusiveMinimum": 0 } } }
+      ]
+    },
+    "key": { "type": "object", "additionalProperties": false, "required": ["time", "value"], "properties": { "time": { "type": "number", "minimum": 0 }, "value": { "$ref": "#/$defs/value" }, "interpolation": { "$ref": "#/$defs/interpolation" } } },
+    "track": { "type": "object", "additionalProperties": false, "required": ["id", "channel", "keys"], "properties": { "id": { "$ref": "#/$defs/id" }, "channel": { "$ref": "#/$defs/id" }, "keys": { "type": "array", "items": { "$ref": "#/$defs/key" }, "minItems": 1 } } },
+    "clip": { "type": "object", "additionalProperties": false, "required": ["id", "duration", "tracks"], "properties": { "id": { "$ref": "#/$defs/id" }, "name": { "type": "string" }, "duration": { "type": "number", "minimum": 0 }, "fps": { "type": "number", "exclusiveMinimum": 0 }, "quantize": { "type": "boolean" }, "workArea": { "type": "object", "additionalProperties": false, "required": ["start", "end"], "properties": { "start": { "type": "number", "minimum": 0 }, "end": { "type": "number", "minimum": 0 } } }, "tracks": { "type": "array", "items": { "$ref": "#/$defs/track" } } } },
+    "motion": {
+      "type": "object", "required": ["kind"],
+      "properties": { "kind": { "enum": ["clip", "blend-1d", "blend-2d", "blend-additive", "nested"] }, "clip": { "$ref": "#/$defs/id" }, "component": { "$ref": "#/$defs/id" }, "input": { "$ref": "#/$defs/id" }, "inputX": { "$ref": "#/$defs/id" }, "inputY": { "$ref": "#/$defs/id" }, "algorithm": { "enum": ["cartesian", "directional"] }, "base": { "$ref": "#/$defs/motion" }, "children": { "type": "array", "minItems": 1 }, "speed": { "type": "number" }, "speedInput": { "$ref": "#/$defs/id" }, "playback": { "enum": ["one-shot", "loop", "ping-pong"] }, "timeRemapInput": { "$ref": "#/$defs/id" }, "mixInput": { "$ref": "#/$defs/id" }, "playingInput": { "$ref": "#/$defs/id" }, "inputBindings": { "type": "object", "additionalProperties": { "$ref": "#/$defs/id" } } }
+    },
+    "input": { "type": "object", "additionalProperties": false, "required": ["id", "type"], "properties": { "id": { "$ref": "#/$defs/id" }, "type": { "enum": ["number", "integer", "boolean", "trigger"] }, "defaultValue": { "oneOf": [{ "type": "number" }, { "type": "boolean" }] } } },
+    "condition": { "type": "object", "required": ["kind"], "properties": { "kind": { "enum": ["input", "trigger", "observable", "custom"] }, "input": { "$ref": "#/$defs/id" }, "protocol": { "$ref": "#/$defs/id" }, "port": { "$ref": "#/$defs/id" }, "comparator": { "enum": ["equal", "not-equal", "greater", "greater-or-equal", "less", "less-or-equal"] }, "value": { "$ref": "#/$defs/value" }, "arguments": { "type": "object" } } },
+    "effect": { "type": "object", "additionalProperties": false, "required": ["channel", "phase"], "properties": { "channel": { "$ref": "#/$defs/id" }, "phase": { "enum": ["start", "complete"] }, "payload": { "$ref": "#/$defs/value" } } },
+    "state": { "type": "object", "additionalProperties": false, "required": ["id", "motion"], "properties": { "id": { "$ref": "#/$defs/id" }, "motion": { "$ref": "#/$defs/motion" }, "entryEffects": { "type": "array", "items": { "$ref": "#/$defs/effect" } }, "exitEffects": { "type": "array", "items": { "$ref": "#/$defs/effect" } } } },
+    "transition": { "type": "object", "additionalProperties": false, "required": ["id", "from", "to", "conditionGroups", "duration"], "properties": { "id": { "$ref": "#/$defs/id" }, "from": { "$ref": "#/$defs/id" }, "to": { "$ref": "#/$defs/id" }, "conditionGroups": { "type": "array", "items": { "type": "array", "items": { "$ref": "#/$defs/condition" }, "minItems": 1 } }, "exitTime": { "type": "number", "minimum": 0 }, "randomWeight": { "type": "number", "minimum": 0, "maximum": 1 }, "pauseWhenExiting": { "type": "boolean" }, "duration": { "type": "number", "minimum": 0 }, "destinationOffset": { "type": "number", "minimum": 0 }, "interruption": { "enum": ["none", "source", "destination", "source-then-destination", "destination-then-source"] }, "exitMotion": { "$ref": "#/$defs/motion" }, "interpolation": { "$ref": "#/$defs/interpolation" }, "effects": { "type": "array", "items": { "$ref": "#/$defs/effect" } } } },
+    "layer": { "type": "object", "additionalProperties": false, "required": ["id", "order", "states", "transitions"], "properties": { "id": { "$ref": "#/$defs/id" }, "order": { "type": "integer" }, "weight": { "type": "number", "minimum": 0, "maximum": 1 }, "weightInput": { "$ref": "#/$defs/id" }, "mode": { "enum": ["override", "additive"] }, "mask": { "type": "object", "properties": { "include": { "type": "array", "items": { "$ref": "#/$defs/id" } }, "exclude": { "type": "array", "items": { "$ref": "#/$defs/id" } } }, "additionalProperties": false }, "states": { "type": "array", "items": { "$ref": "#/$defs/state" }, "minItems": 1 }, "transitions": { "type": "array", "items": { "$ref": "#/$defs/transition" }, "minItems": 1 } } },
+    "machine": { "type": "object", "additionalProperties": false, "required": ["id", "inputs", "layers"], "properties": { "id": { "$ref": "#/$defs/id" }, "inputs": { "type": "array", "items": { "$ref": "#/$defs/input" } }, "layers": { "type": "array", "items": { "$ref": "#/$defs/layer" }, "minItems": 1 } } },
+    "component": { "type": "object", "additionalProperties": false, "required": ["id", "target", "source", "playback"], "properties": { "id": { "$ref": "#/$defs/id" }, "target": { "$ref": "#/$defs/id" }, "source": { "oneOf": [{ "type": "object", "additionalProperties": false, "required": ["kind", "clip"], "properties": { "kind": { "const": "clip" }, "clip": { "$ref": "#/$defs/id" } } }, { "type": "object", "additionalProperties": false, "required": ["kind", "machine"], "properties": { "kind": { "const": "state-machine" }, "machine": { "$ref": "#/$defs/id" } } }] }, "playback": { "enum": ["simple", "remap", "mix", "state-machine"] }, "exposedInputs": { "type": "array", "items": { "$ref": "#/$defs/id" } }, "exposedEvents": { "type": "array", "items": { "$ref": "#/$defs/id" } } } }
+  }
+}

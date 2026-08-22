@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "extension": "org.haiyue.animation-state-machine@2",
+  "format": "haiyue-animation-state-machine@2",
+  "sourceNeutral": true,
+  "time": {
+    "unit": "finite-seconds",
+    "seek": "reset-snapshot-and-replay",
+    "sameTimestampOrder": ["layer-order", "action-order", "track-order", "key-order"],
+    "playback": ["one-shot", "loop", "ping-pong"],
+    "speed": "finite-positive-zero-or-negative",
+    "remap": "absolute-local-seconds",
+    "angle": "shortest-signed-arc-radians"
+  },
+  "interpolation": {
+    "continuous": ["linear", "cubic-ease", "cubic-value", "elastic"],
+    "discrete": ["hold"],
+    "valueKinds": ["number", "vector", "color", "boolean", "string", "id", "integer", "unsigned", "callback"]
+  },
+  "channelFamilies": {
+    "transform": { "policies": ["override", "additive"], "transition": "blend" },
+    "paint-path": { "policies": ["override", "additive", "discrete"], "transition": "blend-or-select" },
+    "rig": { "policies": ["override", "additive", "discrete"], "transition": "blend-or-select" },
+    "text-layout": { "policies": ["override", "additive", "discrete"], "transition": "blend-or-select" },
+    "resource-data": { "policies": ["override", "additive", "discrete", "ownership"], "transition": "transfer-owner" },
+    "visibility-order": { "policies": ["discrete"], "transition": "stable-priority-select" },
+    "event-audio-script": { "policies": ["ownership"], "transition": "exactly-once-transaction" }
+  },
+  "stateGraph": {
+    "pseudoStates": ["@entry", "@any", "@exit"],
+    "motions": ["clip", "blend-1d", "blend-2d", "blend-additive", "nested"],
+    "transitionPriority": "declaration-order",
+    "conditionNormalForm": "OR-of-AND-groups",
+    "triggerConsumption": "selected-and-committed-transition-only",
+    "features": ["exit-time", "pause-when-exiting", "duration", "interpolation", "destination-offset", "interruption-metadata", "deterministic-random-weight"]
+  },
+  "ports": {
+    "observableAndCustomCondition": { "transaction": ["begin", "invoke", "commit", "rollback"], "commit": "infallible", "implementationOwner": "external-capability" },
+    "sideEffect": { "transaction": ["begin", "invoke", "commit", "rollback"], "commit": "atomic-and-infallible", "missingPort": "structured-error", "delivery": "exactly-once-per-occurrence", "lifecycle": ["pause", "resume", "reset", "stop", "dispose"] },
+    "resourceOwnership": { "transaction": ["begin", "transfer", "commit", "rollback"], "commit": "atomic-and-infallible", "missingPort": "structured-error", "release": ["restore-default", "reset", "dispose"] },
+    "nested": { "ownership": "component-instance", "lifecycle": ["create", "reset", "pause", "resume", "stop", "dispose"] }
+  },
+  "census": {
+    "map": "state-machine-v2-census-map.json",
+    "objectCount": 59,
+    "propertyCount": 75,
+    "solutions": {
+      "keyed-properties": "typed-channel-and-track",
+      "linear-animation-work-area-quantize": "timeline-clip",
+      "cubic-and-elastic-interpolators": "timeline-interpolation",
+      "entry-any-exit-and-layer-state": "state-graph",
+      "direct-and-1d-blends": "blend-additive-and-blend-1d",
+      "blend-transition-exit-animation": "transition-exit-motion",
+      "nested-animation-input-remap-mix-playing": "nested-motion-and-component-owner",
+      "value-property-focus-and-custom-comparators": "transactional-observable-condition-port",
+      "fire-event-trigger-focus-actions": "transactional-side-effect-channel",
+      "random-weight": "seeded-rollback-safe-runtime-rng"
+    }
+  },
+  "migration": {
+    "from": "haiyue-animation-state-machine@1",
+    "execution": "normalize-to-v2-before-runtime",
+    "noSecondSampler": true,
+    "parentTrackPolicy": "compiler-supplied-or-explicit-warning"
+  }
+}
