@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import assert from 'node:assert/strict';
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { relative, resolve, sep } from 'node:path';
 import { runChromeWebGpuFixture } from './webgpu-gate/chrome-runner.mjs';
@@ -18,15 +19,36 @@ for (let index = 0; index < models.length; index++) {
     root,
     fixture: 'examples/live2d-hya-compare/index.html',
     query: {
+      // Reuse the comparison page's deterministic parity-evidence mode: both
+      // renderers pause and seek to one second before the result is published.
+      fixture: 'mask-parity',
       localModelMount: prefix,
       localModelFiles: files.join('|'),
     },
     mounts: [{ prefix, directory }],
     crossOriginIsolation: false,
     timeoutMs: 180_000,
-    visualCapture: { viewportWidth: 1440, viewportHeight: 900, sampleWidth: 32, sampleHeight: 20 },
+    visualCapture: {
+      viewportWidth: 1440,
+      viewportHeight: 900,
+      sampleWidth: 32,
+      sampleHeight: 20,
+      compareSelectors: ['#hya-canvas', '#reference-canvas'],
+      compareInsetTop: 52,
+    },
   });
   if (result.reference !== 'official-cubism-core') throw new Error(`Model ${directory} did not reach the official Core evaluator.`);
+  const surfaceReadback = result.visualCapture?.regionParity;
+  assert.ok(surfaceReadback, `Model ${directory} did not produce paired Chrome surface readback.`);
+  const paritySummary = JSON.stringify(surfaceReadback);
+  if (result.featureCoverage.maskReferenceCount > 0) {
+    // Real models contain much longer antialiased silhouettes than the compact
+    // synthetic fixture. Keep a bounded outlier ceiling while mean/ratio remain
+    // the primary parity signals for composition or atlas regressions.
+    assert.ok(surfaceReadback.maxChannelError <= 224, `Model ${directory} max-channel error regressed: ${paritySummary}.`);
+    assert.ok(surfaceReadback.meanAbsoluteError <= 1, `Model ${directory} mean surface error regressed: ${paritySummary}.`);
+    assert.ok(surfaceReadback.mismatchRatio <= 0.025, `Model ${directory} mismatch ratio regressed: ${paritySummary}.`);
+  }
   samples.push({
     id: directory.split(/[\\/]/u).slice(-2, -1)[0] ?? `model-${index + 1}`,
     sourcePolicy: 'caller-supplied-local-only',
@@ -36,6 +58,8 @@ for (let index = 0; index < models.length; index++) {
     featureCoverage: result.featureCoverage,
     drawables: result.hya.visualCount,
     maskTargets: result.hya.maskTargetCount,
+    sampledAt: result.sampledAt,
+    surfaceReadback,
     browser: {
       product: result.browserEvidence.product,
       userAgent: result.browserEvidence.userAgent,

@@ -3,6 +3,7 @@ import type { AnimationExtensionComponent } from '../types';
 export const DEFORMABLE_MESH_2D_EXTENSION_ID = 'org.haiyue.deformable-mesh-2d@1' as const;
 export const DEFORMABLE_MESH_2D_DATA_FORMAT = 'haiyue-deformable-mesh-2d' as const;
 export const DEFORMABLE_MESH_2D_DATA_VERSION = 1 as const;
+export const DEFORMABLE_MESH_2D_MAX_MASK_REFERENCES = 32_768 as const;
 
 export interface DeformableMesh2DComponent extends AnimationExtensionComponent {
   readonly type: typeof DEFORMABLE_MESH_2D_EXTENSION_ID;

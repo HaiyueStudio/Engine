@@ -32,7 +32,12 @@ interface RuntimeDrawable {
   readonly source: ParsedDeformableMesh2DDrawable;
   readonly geometry: Geometry2D;
   readonly positions: Float32Array;
-  readonly visuals: readonly AnimationVisual2D[];
+  readonly visuals: AnimationVisual2D[];
+}
+
+interface RuntimeMaskGroup {
+  readonly id: string;
+  readonly sources: readonly string[];
 }
 
 export function createDeformableMesh2DRuntimeExtension(
@@ -80,7 +85,10 @@ class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
       const sample = sampleDeformableMesh2DDrawable(this.data!.times, item.source, timeSeconds, item.positions);
       item.geometry.markDirty();
       for (const visual of item.visuals) {
-        visual.color[3] = sample.opacity * opacity;
+        // Cubism's setup-mask pass samples the source mesh texture alpha but
+        // deliberately ignores drawable/model opacity. Keep the main visual's
+        // sampled opacity while mask-only clones remain fully contributing.
+        visual.color[3] = visual.sourceOnly ? 1 : sample.opacity * opacity;
         visual.setOrder(sample.renderOrder);
         visual.revision++;
       }
@@ -176,20 +184,33 @@ class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
   }
 
   private createVisuals(data: ParsedDeformableMesh2DData, textures: readonly AssetHandle<GPUTexture>[]): void {
-    const maskSources = new Set(data.drawables.flatMap(drawable => drawable.masks));
-    for (const drawable of data.drawables) {
-      const positions = new Float32Array(drawable.vertexCount * 2);
-      sampleDeformableMesh2DDrawable(data.times, drawable, this.lastTime, positions);
-      const geometry = new Geometry2D(positions, drawable.indices);
-      const composite = drawable.masks.length > 0 ? {
-        layers: drawable.masks.map((source, index) => ({
+    const maskGroups = createRuntimeMaskGroups(data.drawables);
+    const groupByKey = new Map(maskGroups.map(group => [maskGroupKey(group.sources), group]));
+    const runtimeById = new Map<string, RuntimeDrawable>();
+    const compositeFor = (drawable: ParsedDeformableMesh2DDrawable) => {
+      if (drawable.masks.length === 0) return undefined;
+      const group = groupByKey.get(maskGroupKey(drawable.masks));
+      if (!group) throw new AnimationFormatError('E_ANIMATION_INVALID_FORMAT', 'Drawable mask group could not be resolved.', `$.drawables[id=${JSON.stringify(drawable.id)}].masks`);
+      return {
+        layers: [{
           kind: 'mask' as const,
-          source: `mask:${source}`,
+          source: group.id,
           mode: drawable.maskMode,
-          operation: index === 0 ? 'add' as const : 'add' as const,
-        })),
-      } : undefined;
-      const createVisual = (sourceOnly: boolean, nodeId: string): AnimationVisual2D => new AnimationVisual2D({
+          operation: 'add' as const,
+        }],
+      };
+    };
+    const createVisual = (
+      drawable: ParsedDeformableMesh2DDrawable,
+      geometry: Geometry2D,
+      sourceOnly: boolean,
+      nodeId: string,
+    ): AnimationVisual2D => {
+      // A Cubism drawable used as a mask source is rendered directly into the
+      // clipping buffer. Its own clipping context must not recursively affect
+      // that setup-mask pass.
+      const composite = sourceOnly ? undefined : compositeFor(drawable);
+      return new AnimationVisual2D({
         geometry,
         uvs: drawable.uvs,
         color: [1, 1, 1, 1],
@@ -202,20 +223,49 @@ class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
         textureHandle: textures[drawable.textureIndex]!,
         requiresTexture: true,
       });
-      const visuals: AnimationVisual2D[] = [];
-      const visible = createVisual(false, `draw:${drawable.id}`);
+    };
+
+    for (const drawable of data.drawables) {
+      const positions = new Float32Array(drawable.vertexCount * 2);
+      sampleDeformableMesh2DDrawable(data.times, drawable, this.lastTime, positions);
+      const geometry = new Geometry2D(positions, drawable.indices);
+      const visible = createVisual(drawable, geometry, false, `draw:${drawable.id}`);
       this.root.addChild(new Entity(`Drawable ${drawable.id}`).addComponent(visible));
-      visuals.push(visible);
-      if (maskSources.has(drawable.id)) {
-        const mask = createVisual(true, `mask:${drawable.id}`);
-        this.root.addChild(new Entity(`Mask ${drawable.id}`).addComponent(mask));
-        visuals.push(mask);
+      const runtime = { source: drawable, geometry, positions, visuals: [visible] };
+      runtimeById.set(drawable.id, runtime);
+      this.drawables.push(runtime);
+    }
+
+    for (const group of maskGroups) {
+      for (const sourceId of group.sources) {
+        const runtime = runtimeById.get(sourceId);
+        if (!runtime) throw new AnimationFormatError('E_ANIMATION_INVALID_FORMAT', 'Mask group references a missing drawable.', `$.drawables[id=${JSON.stringify(sourceId)}]`);
+        const mask = createVisual(runtime.source, runtime.geometry, true, group.id);
+        this.root.addChild(new Entity(`Mask group ${group.id} source ${sourceId}`).addComponent(mask));
+        runtime.visuals.push(mask);
       }
-      this.drawables.push({ source: drawable, geometry, positions, visuals: Object.freeze(visuals) });
     }
   }
 
   private emitStatus(error?: string): void {
     this.options.onStatus?.(Object.freeze({ state: this.state, drawableCount: this.drawables.length, ...(error ? { error } : {}) }));
   }
+}
+
+function createRuntimeMaskGroups(drawables: readonly ParsedDeformableMesh2DDrawable[]): readonly RuntimeMaskGroup[] {
+  const groups = new Map<string, RuntimeMaskGroup>();
+  for (const drawable of drawables) {
+    if (drawable.masks.length === 0) continue;
+    const sources = Object.freeze([...drawable.masks].sort((left, right) => left.localeCompare(right)));
+    const key = maskGroupKey(sources);
+    if (!groups.has(key)) groups.set(key, Object.freeze({ id: `mask-group:${key}`, sources }));
+  }
+  return Object.freeze([...groups.values()]);
+}
+
+function maskGroupKey(sources: readonly string[]): string {
+  return [...sources]
+    .sort((left, right) => left.localeCompare(right))
+    .map(source => `${source.length}:${source}`)
+    .join('|');
 }

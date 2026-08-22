@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-live2d-mask-composition-candidate",
+  "goal": "m05/g10-mask-composition-parity",
+  "revision": "529ea5d6b47da19abc5c6efc94dd14e23e3ef7c7",
+  "dirty": true,
+  "formalEvidence": false,
+  "status": "passed",
+  "oracle": {
+    "cubismWebSamplesTag": "5-r.5",
+    "cubismWebFrameworkRevision": "d4da0aa07e47d2c1e4f5fa7ea6047861ea5e5d0b"
+  },
+  "fixture": {
+    "id": "mask-composition-parity",
+    "license": "MIT",
+    "captureSha256": "4c42a57534e37247b0e012c562333501ffdf56977f67d702f8b1638d561460b9",
+    "hyaSha256": "9fa3c7c1c2d483e1f5c420ce6cc70bd40cb53f1ad91cc6d82e23d9a5ccd8584d",
+    "hydmSha256": "eac983bc15005ea122505f4454c0c75d0d82e0849c5100c3d0c227e8ca5dffdb",
+    "textureSha256": "b1c368220630bc239dfcf51ae7048769a560e6e3429246dc5475dd9ab641a6db",
+    "conversionReportSha256": "abffe53d1f9efb43faa11117c9ab2b0e4a5ea37b517b5e971b400ed38656dcc2",
+    "featureCoverage": {
+      "maskReferenceCount": 5,
+      "invertedMaskDrawableCount": 1,
+      "maskTargetCount": 2,
+      "dynamicMaskVertices": true,
+      "dynamicSourceOpacity": true,
+      "dynamicSourceVisibility": true,
+      "visibleMaskSources": true,
+      "textureAlpha": true
+    },
+    "conversionDiagnosticCount": 0
+  },
+  "browser": {
+    "product": "Chrome/151.0.7922.170",
+    "angleBackend": "d3d11",
+    "nativeBackend": true,
+    "sampledAtSeconds": 1,
+    "surfaceReadback": {
+      "width": 599,
+      "height": 479,
+      "maxChannelError": 167,
+      "meanAbsoluteError": 0.623097,
+      "mismatchPixelCount": 4973,
+      "mismatchRatio": 0.017332,
+      "thresholds": {
+        "maxChannelError": 180,
+        "meanAbsoluteError": 1,
+        "mismatchRatio": 0.025
+      }
+    },
+    "webgpuTextureReadback": {
+      "format": "rgba8unorm",
+      "copyTextureToBuffer": true,
+      "caseCount": 8,
+      "maximumByteError": 0,
+      "strictValidation": true
+    },
+    "lifecycle": {
+      "maskActionSwitchWithoutPlayerReplacement": true,
+      "loopBoundary": true,
+      "resizeMaskPixelsBefore": 674474,
+      "resizeMaskPixelsAfter": 636138,
+      "rendererRecovery": true,
+      "resourceReplacement": true,
+      "multiViewKeysCollisionFree": true
+    },
+    "unclassifiedFailureCount": 0,
+    "cubismRuntimeRequested": false
+  },
+  "focusedValidation": [
+    { "command": "npm run typecheck -w ./animation-spec", "status": "passed" },
+    { "command": "npm run typecheck -w ./extensions", "status": "passed" },
+    { "command": "node --test animation-spec/test/deformable2d.test.mjs", "status": "passed", "tests": 17 },
+    { "command": "node --test extensions/test/deformable-animation.test.mjs", "status": "passed", "tests": 13 },
+    { "command": "node scripts/verify-animation-compare-examples.mjs", "status": "passed" },
+    { "command": "node scripts/webgpu-gate/verify-deformable-mask-composition.mjs", "status": "passed", "cases": 8 },
+    { "command": "node scripts/verify-live2d-local-corpus.mjs --model <hibiki> --model <miku_free> --model <miku_pro> --model <rice>", "status": "passed", "observedMaskReferenceCount": 19, "observedInvertedMaskDrawableCount": 5 },
+    { "command": "npm run check:boundaries", "status": "passed" },
+    { "command": "npm run api:check", "status": "blocked-infrastructure", "detail": "Split workspace is missing D:/HaiyueStudio/UI/src/themes/haiyue-dark.css before API snapshot comparison." }
+  ],
+  "realModelAcceptance": {
+    "requiredMaskReferenceCount": 1,
+    "model": "Rice Glassfield - PRO",
+    "copyrightOwner": "Live2D Inc.",
+    "usageScope": "caller-supplied local validation only",
+    "rawAssetCommitted": false,
+    "licenseEvidence": [
+      "https://www.live2d.com/en/learn/sample/rice-glassfield/",
+      "https://www.live2d.com/eula/live2d-sample-model-terms_en.html",
+      "caller-supplied Rice package ReadMe.txt"
+    ],
+    "runtimeDirectoryHash": "sha256-082dea795bfef18b5598f38d40cdadcaee54827146fdec596ecf4ee4e31eedc1",
+    "observedMaskReferenceCount": 19,
+    "observedInvertedMaskDrawableCount": 5,
+    "observedMaskTargetCount": 8,
+    "observedDrawableCount": 178,
+    "sampledAtSeconds": 1,
+    "surfaceReadback": {
+      "width": 719,
+      "height": 694,
+      "maxChannelError": 182,
+      "meanAbsoluteError": 0.21977,
+      "mismatchPixelCount": 3453,
+      "mismatchRatio": 0.00692,
+      "thresholds": {
+        "maxChannelError": 224,
+        "meanAbsoluteError": 1,
+        "mismatchRatio": 0.025
+      }
+    },
+    "unclassifiedFailureCount": 0,
+    "source": "review/candidates/live2d-local-corpus-candidate.json",
+    "status": "passed"
+  },
+  "g11Handoff": {
+    "maskPassBlend": "fixed-normal-alpha-union",
+    "targetFormat": "rgba8unorm",
+    "targetClear": [0, 0, 0, 0],
+    "unresolvedCodePaths": []
+  }
+}

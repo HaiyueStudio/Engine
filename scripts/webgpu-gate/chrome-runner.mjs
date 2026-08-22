@@ -426,6 +426,10 @@ async function captureVisual(cdp, options) {
   if (!pngBase64) throw new Error('Chrome returned an empty visual-regression screenshot.');
   const sampleWidth = options.sampleWidth ?? 24;
   const sampleHeight = options.sampleHeight ?? 14;
+  const compareSelectors = Array.isArray(options.compareSelectors) && options.compareSelectors.length === 2
+    ? options.compareSelectors
+    : null;
+  const compareInsetTop = Math.max(0, options.compareInsetTop ?? 0);
   const expression = `(async () => {
     const image = new Image();
     image.src = ${JSON.stringify(`data:image/png;base64,${pngBase64}`)};
@@ -452,7 +456,7 @@ async function captureVisual(cdp, options) {
       }
     }
     const count = canvas.width * canvas.height;
-    return {
+    const result = {
       sampleWidth: canvas.width,
       sampleHeight: canvas.height,
       signature,
@@ -460,6 +464,51 @@ async function captureVisual(cdp, options) {
       darkRatio: Number((dark / count).toFixed(4)),
       brightRatio: Number((bright / count).toFixed(4)),
     };
+    const compareSelectors = ${JSON.stringify(compareSelectors)};
+    if (compareSelectors) {
+      const insetTop = ${compareInsetTop};
+      const rects = compareSelectors.map(selector => {
+        const node = document.querySelector(selector);
+        if (!node) throw new Error('Visual comparison selector is missing: ' + selector);
+        const rect = node.getBoundingClientRect();
+        return { x: Math.floor(rect.left), y: Math.floor(rect.top + insetTop), width: Math.floor(rect.width), height: Math.floor(rect.height - insetTop) };
+      });
+      const width = Math.max(1, Math.min(rects[0].width, rects[1].width));
+      const height = Math.max(1, Math.min(rects[0].height, rects[1].height));
+      const readRegion = rect => {
+        const target = document.createElement('canvas'); target.width = width; target.height = height;
+        const targetContext = target.getContext('2d', { willReadFrequently: true });
+        targetContext.drawImage(image, rect.x, rect.y, width, height, 0, 0, width, height);
+        return targetContext.getImageData(0, 0, width, height).data;
+      };
+      const left = readRegion(rects[0]);
+      const right = readRegion(rects[1]);
+      let maxChannelError = 0;
+      let absoluteError = 0;
+      let mismatchPixelCount = 0;
+      for (let offset = 0; offset < left.length; offset += 4) {
+        let pixelError = 0;
+        for (let channel = 0; channel < 3; channel++) {
+          const error = Math.abs(left[offset + channel] - right[offset + channel]);
+          maxChannelError = Math.max(maxChannelError, error);
+          pixelError = Math.max(pixelError, error);
+          absoluteError += error;
+        }
+        if (pixelError > 8) mismatchPixelCount++;
+      }
+      const pixelCount = width * height;
+      result.regionParity = {
+        selectors: compareSelectors,
+        insetTop,
+        width,
+        height,
+        maxChannelError,
+        meanAbsoluteError: Number((absoluteError / (pixelCount * 3)).toFixed(6)),
+        mismatchPixelCount,
+        mismatchRatio: Number((mismatchPixelCount / pixelCount).toFixed(6)),
+      };
+    }
+    return result;
   })()`;
   const fingerprint = await cdp.call('Runtime.evaluate', {
     expression,

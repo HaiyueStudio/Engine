@@ -20,7 +20,8 @@ import {
 } from '../utils/render2dGpu';
 import animation2dWgsl from '../shaders/generated/2d-ui-animation-2d.generated.wgsl';
 import { AnimationVisual2D } from './AnimationVisual2D';
-import type { AnimationCompositeLayer } from '@haiyue/animation-spec';
+import { AnimationFormatError, type AnimationCompositeLayer } from '@haiyue/animation-spec';
+import { animationMaskCompositeKey, animationMaskTargetKey, assertAnimationMaskBudget } from './AnimationMaskBudget';
 
 export interface Animation2DRenderSystemOptions extends RenderSystem2DBaseOptions {
   /** Bounds view-sized alpha targets used by masks and mattes. */
@@ -315,6 +316,16 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       group.push(item);
     }
 
+    const viewKey = context.view?.key ?? 'default';
+    assertAnimationMaskBudget({
+      groupCount: this.sourceItems.size,
+      maxGroupCount: this.maxMaskTargets,
+      width: context.view?.target.width ?? this.engine.width,
+      height: context.view?.target.height ?? this.engine.height,
+      maxTextureDimension2D: context.device.limits.maxTextureDimension2D,
+      viewKey,
+    });
+
     const maskTargets = this.activeMaskTargets;
     maskTargets.clear();
     let maskPixels = 0;
@@ -326,15 +337,14 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     let effectPixels = 0;
     for (const sourceKey of orderSourceGroups(this.sourceItems)) {
       const sources = this.sourceItems.get(sourceKey)!;
-      if (maskCount >= this.maxMaskTargets) break;
-      const targetKey = `${context.view?.key ?? 'default'}:${sourceKey}`;
+      const targetKey = animationMaskTargetKey(viewKey, sourceKey);
       const target = this.getMaskTarget(targetKey, context, frame);
       maskPixels += target.width * target.height;
       maskCount++;
       let initialized = false;
       for (const source of sources) {
-        const resolved = this.resolveCompositeBindGroup(source.visual, maskTargets, context.view?.key ?? 'default');
-        if (!resolved) { droppedCompositeCount++; continue; }
+        const resolved = this.resolveCompositeBindGroup(source.visual, maskTargets, viewKey);
+        if (!resolved) throw unresolvedCompositeError(source.visual, viewKey);
         compositeLayerCount += source.visual.compositeLayers.length;
         const effectTarget = source.visual.effects.length > 0 && !context.passEncoder
           ? this.renderEffectStack(source, context, resolved, frame)
@@ -392,8 +402,8 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     for (const item of this.items) {
       const { visual } = item;
       if (visual.sourceOnly) continue;
-      const resolved = this.resolveCompositeBindGroup(visual, maskTargets, context.view?.key ?? 'default');
-      if (!resolved) { droppedCompositeCount++; continue; }
+      const resolved = this.resolveCompositeBindGroup(visual, maskTargets, viewKey);
+      if (!resolved) throw unresolvedCompositeError(visual, viewKey);
       compositeLayerCount += visual.compositeLayers.length;
       if (visual.effects.length > 0 && !context.passEncoder) {
         const effectTarget = this.renderEffectStack(item, context, resolved, frame);
@@ -821,7 +831,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       if (!target) return null;
       resolved.push(target);
     }
-    const key = `${viewKey}:${visual.compositeKeys.join('|')}`;
+    const key = animationMaskCompositeKey(viewKey, visual.compositeKeys);
     let bindGroup = this.compositeBindGroups.get(key);
     if (!bindGroup) {
       bindGroup = this.createCompositeBindGroup(resolved.map(target => target.texture));
@@ -1030,6 +1040,14 @@ function effectKindCode(kind: AnimationVisual2D['effects'][number]['kind']): num
 }
 
 function visualNodeKey(visual: AnimationVisual2D): string { return visual.nodeKey; }
+
+function unresolvedCompositeError(visual: AnimationVisual2D, viewKey: string): AnimationFormatError {
+  return new AnimationFormatError(
+    'E_ANIMATION_INVALID_FORMAT',
+    `Composite target for visual "${visual.nodeId}" could not be resolved in view "${viewKey}".`,
+    `$runtime.visuals[${JSON.stringify(visual.nodeId)}].composite`,
+  );
+}
 
 function buildVertices(positions: Float32Array, explicitUvs: Float32Array | null): Float32Array {
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;

@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { animationMaskCompositeKey, animationMaskTargetKey, assertAnimationMaskBudget } from '../dist-test/animation/AnimationMaskBudget.js';
+import { cubismMaskCoverage } from '../dist-test/deformable-animation/runtime/DeformableMaskComposition.js';
 import {
   DEFORMABLE_MESH_2D_EXTENSION_ID,
   decodeDeformableMesh2DData,
@@ -169,6 +171,69 @@ test('deformable runtime preserves its owner transform chain and display-encoded
   assert.equal(parent.children.length, 0);
 });
 
+test('deformable runtime reuses one combined target for shared multi-source alpha and inverted masks', async () => {
+  const encoded = sharedMaskGroupData();
+  const parent = new Entity('shared mask owner');
+  const controller = new AbortController();
+  const { instance, ready } = createRuntime({ encoded, parent, signal: controller.signal });
+  assert.deepEqual(await ready, { state: 'ready', drawableCount: 4 });
+
+  const runtimeRoot = parent.children[0];
+  const visuals = runtimeRoot.children.map(child => child.getComponent(Symbol.for('AnimationVisual2D')));
+  const mainVisuals = visuals.filter(visual => !visual.sourceOnly);
+  const maskSources = visuals.filter(visual => visual.sourceOnly);
+  assert.equal(mainVisuals.length, 4, 'mask source drawables must remain visible in the main scene');
+  assert.equal(maskSources.length, 2, 'one shared two-source group must not duplicate a target per consumer');
+  assert.equal(new Set(maskSources.map(visual => visual.nodeId)).size, 1, 'both sources must render into one stable group identity');
+
+  const alpha = mainVisuals.find(visual => visual.nodeId === 'draw:masked-alpha');
+  const inverted = mainVisuals.find(visual => visual.nodeId === 'draw:masked-inverted');
+  assert.equal(alpha.compositeLayers.length, 1);
+  assert.equal(inverted.compositeLayers.length, 1);
+  assert.equal(alpha.compositeLayers[0].source, inverted.compositeLayers[0].source);
+  assert.equal(alpha.compositeLayers[0].mode, 'alpha');
+  assert.equal(inverted.compositeLayers[0].mode, 'alpha-inverted');
+
+  instance.apply(0, 0.5);
+  const maskAMain = mainVisuals.find(visual => visual.nodeId === 'draw:mask-a');
+  const maskASource = maskSources.find(visual => visual.geometry === maskAMain.geometry);
+  assert.equal(maskAMain.color[3], 0.125, 'mask source remains visible in the main pass with sampled drawable/model opacity');
+  assert.equal(maskASource.color[3], 1, 'Cubism setup-mask contribution must ignore drawable/model opacity');
+  assert.equal(maskASource.compositeLayers.length, 0, 'Cubism setup-mask contribution must ignore the source drawable clipping context');
+  instance.destroy();
+});
+
+test('mask allocation budgets fail with structured group, texture and pixel diagnostics', () => {
+  const base = { groupCount: 2, maxGroupCount: 2, width: 64, height: 32, maxTextureDimension2D: 4096, maxPixels: 4096, viewKey: 'fixture' };
+  assert.doesNotThrow(() => assertAnimationMaskBudget(base));
+  assert.throws(
+    () => assertAnimationMaskBudget({ ...base, groupCount: 3 }),
+    error => error.code === 'E_ANIMATION_LIMIT_EXCEEDED' && error.path.endsWith('.maskGroups'),
+  );
+  assert.throws(
+    () => assertAnimationMaskBudget({ ...base, width: 4097 }),
+    error => error.code === 'E_ANIMATION_LIMIT_EXCEEDED' && error.path.endsWith('.maskTexture'),
+  );
+  assert.throws(
+    () => assertAnimationMaskBudget({ ...base, maxPixels: 4095 }),
+    error => error.code === 'E_ANIMATION_LIMIT_EXCEEDED' && error.path.endsWith('.maskPixels'),
+  );
+});
+
+test('mask target and composite identities are collision-free across views', () => {
+  assert.notEqual(animationMaskTargetKey('view:a', 'source'), animationMaskTargetKey('view', 'a:source'));
+  assert.notEqual(animationMaskCompositeKey('view:a', ['one', 'two']), animationMaskCompositeKey('view', ['a:one', 'two']));
+  assert.equal(animationMaskTargetKey('view', 'source'), animationMaskTargetKey('view', 'source'));
+});
+
+test('CPU mask oracle matches Cubism remaining-coverage composition for single, multi-source and inverted masks', () => {
+  assert.equal(cubismMaskCoverage([0.25]), 0.25);
+  assert.equal(cubismMaskCoverage([0.25, 0.5]), 0.625);
+  assert.equal(cubismMaskCoverage([0.25, 0.5], true), 0.375);
+  assert.equal(cubismMaskCoverage([0.25, 0.5]), 1 - ((1 - 0.25) * (1 - 0.5)));
+  assert.throws(() => cubismMaskCoverage([1.01]), /inside \[0, 1\]/);
+});
+
 test('deformable runtime samples geometry and order in place across random seek', async () => {
   const encoded = deformableData({
     times: new Float32Array([0, 1]),
@@ -207,6 +272,29 @@ test('owner abort destroys a ready runtime and releases every asset exactly once
   assert.deepEqual(releases, { data: 1, texture: 1 });
   instance.destroy();
   assert.deepEqual(releases, { data: 1, texture: 1 });
+});
+
+test('deformable model replacement releases the old mask runtime before installing a fresh owner', async () => {
+  const parent = new Entity('replacement owner');
+  const firstReleases = { data: 0, texture: 0 };
+  const first = createRuntime({ encoded: sharedMaskGroupData(), parent, signal: new AbortController().signal, releases: firstReleases });
+  assert.equal((await first.ready).state, 'ready');
+  const oldRoot = parent.children[0];
+  assert.ok(oldRoot.children.some(child => child.getComponent(Symbol.for('AnimationVisual2D'))?.sourceOnly));
+  first.instance.destroy();
+  assert.deepEqual(firstReleases, { data: 1, texture: 1 });
+  assert.equal(parent.children.length, 0);
+
+  const secondReleases = { data: 0, texture: 0 };
+  const second = createRuntime({ encoded: sharedMaskGroupData(), parent, signal: new AbortController().signal, releases: secondReleases });
+  assert.equal((await second.ready).state, 'ready');
+  assert.equal(parent.children.length, 1);
+  assert.notEqual(parent.children[0], oldRoot);
+  assert.equal(parent.children[0].children.filter(child => child.getComponent(Symbol.for('AnimationVisual2D'))?.sourceOnly).length, 2);
+  second.instance.destroy();
+  second.instance.destroy();
+  assert.deepEqual(secondReleases, { data: 1, texture: 1 });
+  assert.equal(parent.children.length, 0);
 });
 
 test('late data completion after owner abort cannot write back and releases its handle', async () => {
@@ -274,6 +362,41 @@ function deformableData(overrides = {}) {
       opacities: overrides.opacities ?? new Float32Array([1]),
       renderOrders: overrides.renderOrders ?? new Float32Array([2]),
     }],
+  });
+}
+
+function sharedMaskGroupData() {
+  const geometry = {
+    uvs: new Float32Array([0, 0, 1, 0, 0, 1]),
+    indices: new Uint32Array([0, 1, 2]),
+    positions: new Float32Array([0, 10, 20, 10, 0, 30]),
+    renderOrders: new Float32Array([0]),
+  };
+  const drawable = (id, order, opacity, masks = [], maskMode = 'alpha') => ({
+    id,
+    textureIndex: 0,
+    blendMode: 'normal',
+    culling: false,
+    masks,
+    maskMode,
+    uvs: geometry.uvs.slice(),
+    indices: geometry.indices.slice(),
+    positions: geometry.positions.slice(),
+    opacities: new Float32Array([opacity]),
+    renderOrders: new Float32Array([order]),
+  });
+  return encodeDeformableMesh2DData({
+    canvasWidth: 100,
+    canvasHeight: 100,
+    duration: 1,
+    frameRate: 1,
+    times: new Float32Array([0]),
+    drawables: [
+      drawable('mask-a', 0, 0.25),
+      drawable('mask-b', 1, 0.5),
+      drawable('masked-alpha', 2, 1, ['mask-b', 'mask-a']),
+      drawable('masked-inverted', 3, 1, ['mask-a', 'mask-b'], 'alpha-inverted'),
+    ],
   });
 }
 

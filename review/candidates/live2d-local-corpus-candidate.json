@@ -4,7 +4,7 @@
   "revision": "working-tree",
   "dirty": true,
   "formalEvidence": false,
-  "sampleCount": 3,
+  "sampleCount": 4,
   "samples": [
     {
       "id": "hibiki_ja",
@@ -20,6 +20,20 @@
       },
       "drawables": 58,
       "maskTargets": 0,
+      "sampledAt": 1,
+      "surfaceReadback": {
+        "selectors": [
+          "#hya-canvas",
+          "#reference-canvas"
+        ],
+        "insetTop": 52,
+        "width": 719,
+        "height": 694,
+        "maxChannelError": 185,
+        "meanAbsoluteError": 0.939006,
+        "mismatchPixelCount": 15089,
+        "mismatchRatio": 0.030239
+      },
       "browser": {
         "product": "Chrome/151.0.7922.170",
         "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
@@ -34,15 +48,15 @@
         "profileCleanup": {
           "status": "passed",
           "attempts": 1,
-          "durationMs": 139
+          "durationMs": 147
         }
       },
       "requestedProjectFiles": [
         "examples/live2d-hya-compare/bundle.js",
         "examples/live2d-hya-compare/index.html",
-        "examples/live2d-hya-compare/samples/mascot.hya",
-        "examples/live2d-hya-compare/samples/mascot.hydm",
-        "examples/live2d-hya-compare/samples/mascot.png",
+        "examples/live2d-hya-compare/samples/mask-parity.hya",
+        "examples/live2d-hya-compare/samples/mask-parity.hydm",
+        "examples/live2d-hya-compare/samples/mask-parity.png",
         "examples/shared/engine.js"
       ]
     },
@@ -60,6 +74,20 @@
       },
       "drawables": 88,
       "maskTargets": 0,
+      "sampledAt": 1,
+      "surfaceReadback": {
+        "selectors": [
+          "#hya-canvas",
+          "#reference-canvas"
+        ],
+        "insetTop": 52,
+        "width": 719,
+        "height": 694,
+        "maxChannelError": 195,
+        "meanAbsoluteError": 1.274978,
+        "mismatchPixelCount": 20928,
+        "mismatchRatio": 0.041941
+      },
       "browser": {
         "product": "Chrome/151.0.7922.170",
         "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
@@ -74,15 +102,15 @@
         "profileCleanup": {
           "status": "passed",
           "attempts": 1,
-          "durationMs": 401
+          "durationMs": 246
         }
       },
       "requestedProjectFiles": [
         "examples/live2d-hya-compare/bundle.js",
         "examples/live2d-hya-compare/index.html",
-        "examples/live2d-hya-compare/samples/mascot.hya",
-        "examples/live2d-hya-compare/samples/mascot.hydm",
-        "examples/live2d-hya-compare/samples/mascot.png",
+        "examples/live2d-hya-compare/samples/mask-parity.hya",
+        "examples/live2d-hya-compare/samples/mask-parity.hydm",
+        "examples/live2d-hya-compare/samples/mask-parity.png",
         "examples/shared/engine.js"
       ]
     },
@@ -100,6 +128,20 @@
       },
       "drawables": 110,
       "maskTargets": 0,
+      "sampledAt": 1,
+      "surfaceReadback": {
+        "selectors": [
+          "#hya-canvas",
+          "#reference-canvas"
+        ],
+        "insetTop": 52,
+        "width": 719,
+        "height": 694,
+        "maxChannelError": 176,
+        "meanAbsoluteError": 1.458947,
+        "mismatchPixelCount": 24121,
+        "mismatchRatio": 0.04834
+      },
       "browser": {
         "product": "Chrome/151.0.7922.170",
         "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
@@ -114,23 +156,77 @@
         "profileCleanup": {
           "status": "passed",
           "attempts": 1,
-          "durationMs": 443
+          "durationMs": 497
         }
       },
       "requestedProjectFiles": [
         "examples/live2d-hya-compare/bundle.js",
         "examples/live2d-hya-compare/index.html",
-        "examples/live2d-hya-compare/samples/mascot.hya",
-        "examples/live2d-hya-compare/samples/mascot.hydm",
-        "examples/live2d-hya-compare/samples/mascot.png",
+        "examples/live2d-hya-compare/samples/mask-parity.hya",
+        "examples/live2d-hya-compare/samples/mask-parity.hydm",
+        "examples/live2d-hya-compare/samples/mask-parity.png",
+        "examples/shared/engine.js"
+      ]
+    },
+    {
+      "id": "rice_en",
+      "sourcePolicy": "caller-supplied-local-only",
+      "runtimeDirectoryHash": "sha256-082dea795bfef18b5598f38d40cdadcaee54827146fdec596ecf4ee4e31eedc1",
+      "fileCount": 10,
+      "sourceBytes": 3152965,
+      "featureCoverage": {
+        "maskReferenceCount": 19,
+        "invertedMaskDrawableCount": 5,
+        "additiveDrawableCount": 21,
+        "multiplicativeDrawableCount": 0
+      },
+      "drawables": 178,
+      "maskTargets": 8,
+      "sampledAt": 1,
+      "surfaceReadback": {
+        "selectors": [
+          "#hya-canvas",
+          "#reference-canvas"
+        ],
+        "insetTop": 52,
+        "width": 719,
+        "height": 694,
+        "maxChannelError": 182,
+        "meanAbsoluteError": 0.21977,
+        "mismatchPixelCount": 3453,
+        "mismatchRatio": 0.00692
+      },
+      "browser": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      },
+      "browserDiagnostics": {
+        "consoleErrorCount": 0,
+        "exceptionCount": 0,
+        "unclassifiedFailureCount": 0,
+        "profileCleanup": {
+          "status": "passed",
+          "attempts": 1,
+          "durationMs": 327
+        }
+      },
+      "requestedProjectFiles": [
+        "examples/live2d-hya-compare/bundle.js",
+        "examples/live2d-hya-compare/index.html",
+        "examples/live2d-hya-compare/samples/mask-parity.hya",
+        "examples/live2d-hya-compare/samples/mask-parity.hydm",
+        "examples/live2d-hya-compare/samples/mask-parity.png",
         "examples/shared/engine.js"
       ]
     }
   ],
   "totals": {
-    "maskReferenceCount": 0,
-    "invertedMaskDrawableCount": 0,
-    "additiveDrawableCount": 0,
+    "maskReferenceCount": 19,
+    "invertedMaskDrawableCount": 5,
+    "additiveDrawableCount": 21,
     "multiplicativeDrawableCount": 0
   }
 }

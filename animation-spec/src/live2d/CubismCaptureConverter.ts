@@ -1,6 +1,7 @@
 import type { AnimationDocument, AnimationImageResource } from '../types';
 import {
   DEFORMABLE_MESH_2D_EXTENSION_ID,
+  DEFORMABLE_MESH_2D_MAX_MASK_REFERENCES,
   encodeDeformableMesh2DData,
   type DeformableMesh2DComponent,
   type DeformableMesh2DDataSource,
@@ -10,7 +11,10 @@ import {
 export const CUBISM_DRAWABLE_CAPTURE_FORMAT = 'live2d-cubism-drawable-capture' as const;
 export const CUBISM_DRAWABLE_CAPTURE_VERSION = 1 as const;
 
-const CUBISM_UNIT_INTERVAL_EPSILON = 1e-6;
+// Core can expose small unit-interval overshoots from extended interpolation
+// (Rice ships 1.0000499486923218). The official normalized render target clamps
+// them, so the source-neutral track does the same while rejecting material drift.
+const CUBISM_UNIT_INTERVAL_EPSILON = 1e-4;
 
 export interface CubismCaptureTexture {
   readonly id: string;
@@ -25,6 +29,8 @@ export interface CubismCapturedDrawable {
   readonly textureIndex: number;
   readonly renderOrder: number;
   readonly opacity: number;
+  /** Cubism Core dynamic visibility flag for the sampled frame. */
+  readonly visible?: boolean;
   readonly blendMode?: 'normal' | 'additive' | 'multiplicative';
   readonly culling?: boolean;
   readonly masks?: readonly string[];
@@ -64,6 +70,7 @@ export interface CubismCaptureDiagnostic {
   readonly severity: 'warning' | 'error';
   readonly code:
     | 'E_CUBISM_CAPTURE_INVALID'
+    | 'E_CUBISM_MASK_BUDGET_EXCEEDED'
     | 'E_CUBISM_TOPOLOGY_CHANGED'
     | 'W_CUBISM_COLOR_APPROXIMATED'
     | 'W_CUBISM_CULLING_IGNORED';
@@ -144,7 +151,7 @@ export function convertCubismCaptureToHya(
         positions[targetOffset + valueIndex] = capture.canvas.width / 2 + frameDrawable.positions[valueIndex]! * capture.canvas.pixelsPerUnit;
         positions[targetOffset + valueIndex + 1] = capture.canvas.height / 2 - frameDrawable.positions[valueIndex + 1]! * capture.canvas.pixelsPerUnit;
       }
-      opacities[frameIndex] = empty ? 0 : clampUnitInterval(frameDrawable.opacity);
+      opacities[frameIndex] = empty || frameDrawable.visible === false ? 0 : clampUnitInterval(frameDrawable.opacity);
       renderOrders[frameIndex] = frameDrawable.renderOrder;
     }
     const basePath = `$.frames[0].drawables[id=${JSON.stringify(base.id)}]`;
@@ -258,9 +265,13 @@ function validateCaptureRoot(capture: CubismDrawableCapture, diagnostics: Cubism
       ids.add(drawable.id);
       if (!Number.isSafeInteger(drawable.textureIndex) || drawable.textureIndex < 0 || drawable.textureIndex >= capture.textures.length) fail('Texture index is out of range.', `${path}.textureIndex`);
       if (!Number.isSafeInteger(drawable.renderOrder)) fail('Render order must be a safe integer.', `${path}.renderOrder`);
-      if (!Number.isFinite(drawable.opacity) || drawable.opacity < -CUBISM_UNIT_INTERVAL_EPSILON || drawable.opacity > 1 + CUBISM_UNIT_INTERVAL_EPSILON) fail('Opacity must be finite and inside [0, 1], allowing only float32 capture drift.', `${path}.opacity`);
+      if (!Number.isFinite(drawable.opacity) || drawable.opacity < -CUBISM_UNIT_INTERVAL_EPSILON || drawable.opacity > 1 + CUBISM_UNIT_INTERVAL_EPSILON) fail(`Opacity ${String(drawable.opacity)} must be finite and inside [0, 1], allowing only bounded Core interpolation/float32 drift.`, `${path}.opacity`);
+      if (drawable.visible !== undefined && typeof drawable.visible !== 'boolean') fail('visible must be boolean when present.', `${path}.visible`);
       if (drawable.blendMode !== undefined && drawable.blendMode !== 'normal' && drawable.blendMode !== 'additive' && drawable.blendMode !== 'multiplicative') fail('Blend mode is unsupported.', `${path}.blendMode`);
       if (drawable.invertedMask !== undefined && typeof drawable.invertedMask !== 'boolean') fail('invertedMask must be boolean when present.', `${path}.invertedMask`);
+      if (drawable.masks !== undefined && (!Array.isArray(drawable.masks) || drawable.masks.some((mask: unknown) => typeof mask !== 'string' || mask.length === 0))) fail('Masks must contain non-empty drawable ids.', `${path}.masks`);
+      if (Array.isArray(drawable.masks) && new Set(drawable.masks).size !== drawable.masks.length) fail('Mask references must be unique per drawable.', `${path}.masks`);
+      if (drawable.invertedMask === true && (drawable.masks?.length ?? 0) === 0) fail('An inverted mask flag requires at least one mask reference.', `${path}.invertedMask`);
       const empty = Array.isArray(drawable.positions) && Array.isArray(drawable.indices) && (drawable.positions.length === 0 || drawable.indices.length === 0);
       if (!Array.isArray(drawable.positions) || (!empty && (drawable.positions.length < 6 || drawable.positions.length % 2 !== 0)) || !drawable.positions.every(Number.isFinite)) fail('Positions require either an empty Core placeholder or finite xy triples.', `${path}.positions`);
       if (!Array.isArray(drawable.uvs) || drawable.uvs.length !== drawable.positions.length || !drawable.uvs.every(Number.isFinite)) fail('UVs must match positions.', `${path}.uvs`);
@@ -271,12 +282,55 @@ function validateCaptureRoot(capture: CubismDrawableCapture, diagnostics: Cubism
   for (let frameIndex = 1; frameIndex < capture.frames.length; frameIndex++) {
     if (capture.frames[frameIndex]!.drawables.length !== baseIds.size || capture.frames[frameIndex]!.drawables.some((item: CubismCapturedDrawable) => !baseIds.has(item.id))) fail('Drawable population must stay stable across frames.', `$.frames[${frameIndex}].drawables`);
   }
-  for (let drawableIndex = 0; drawableIndex < capture.frames[0]!.drawables.length; drawableIndex++) {
-    for (let maskIndex = 0; maskIndex < (capture.frames[0]!.drawables[drawableIndex]!.masks?.length ?? 0); maskIndex++) {
-      const mask = capture.frames[0]!.drawables[drawableIndex]!.masks![maskIndex]!;
-      if (mask === capture.frames[0]!.drawables[drawableIndex]!.id || !baseIds.has(mask)) fail('Mask must reference another captured drawable.', `$.frames[0].drawables[${drawableIndex}].masks[${maskIndex}]`);
+  const firstDrawables = capture.frames[0]!.drawables;
+  let maskReferenceCount = 0;
+  for (let drawableIndex = 0; drawableIndex < firstDrawables.length; drawableIndex++) {
+    const drawable = firstDrawables[drawableIndex]!;
+    maskReferenceCount += drawable.masks?.length ?? 0;
+    if (maskReferenceCount > DEFORMABLE_MESH_2D_MAX_MASK_REFERENCES) {
+      diagnostics.push({
+        severity: 'error',
+        code: 'E_CUBISM_MASK_BUDGET_EXCEEDED',
+        message: `Mask reference count exceeds ${DEFORMABLE_MESH_2D_MAX_MASK_REFERENCES}.`,
+        path: `$.frames[0].drawables[${drawableIndex}].masks`,
+      });
+      break;
+    }
+    for (let maskIndex = 0; maskIndex < (drawable.masks?.length ?? 0); maskIndex++) {
+      const mask = drawable.masks![maskIndex]!;
+      if (mask === drawable.id || !baseIds.has(mask)) fail('Mask must reference another captured drawable.', `$.frames[0].drawables[${drawableIndex}].masks[${maskIndex}]`);
     }
   }
+  validateCaptureMaskGraph(firstDrawables, diagnostics);
+}
+
+function validateCaptureMaskGraph(drawables: readonly CubismCapturedDrawable[], diagnostics: CubismCaptureDiagnostic[]): void {
+  const byId = new Map(drawables.map((drawable, index) => [drawable.id, { drawable, index }] as const));
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+  const visit = (id: string): boolean => {
+    if (visited.has(id)) return false;
+    const entry = byId.get(id);
+    if (!entry) return false;
+    if (visiting.has(id)) return true;
+    visiting.add(id);
+    for (let maskIndex = 0; maskIndex < (entry.drawable.masks?.length ?? 0); maskIndex++) {
+      const mask = entry.drawable.masks![maskIndex]!;
+      if (visit(mask)) {
+        diagnostics.push({
+          severity: 'error',
+          code: 'E_CUBISM_CAPTURE_INVALID',
+          message: 'Mask dependency graph contains a cycle.',
+          path: `$.frames[0].drawables[${entry.index}].masks[${maskIndex}]`,
+        });
+        return true;
+      }
+    }
+    visiting.delete(id);
+    visited.add(id);
+    return false;
+  };
+  for (const drawable of drawables) if (visit(drawable.id)) return;
 }
 
 function sameTopology(a: CubismCapturedDrawable, b: CubismCapturedDrawable): boolean {

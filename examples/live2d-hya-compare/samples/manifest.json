@@ -9,6 +9,18 @@
       "texture": "mascot.png",
       "license": "MIT",
       "referenceMode": "captured-mesh"
+    },
+    {
+      "id": "mask-composition-parity",
+      "title": "Mask Composition Parity · MIT",
+      "hya": "mask-parity.hya",
+      "data": "mask-parity.hydm",
+      "texture": "mask-parity.png",
+      "capture": "mask-parity.capture.json",
+      "conversionReport": "mask-parity-conversion-report.json",
+      "license": "MIT",
+      "referenceMode": "captured-mesh",
+      "features": ["single-source-mask", "multi-source-union", "inverted-mask", "dynamic-mask-vertices", "dynamic-source-opacity", "dynamic-source-visibility", "visible-mask-source", "texture-alpha"]
     }
   ],
   "externalOfficialSamples": [

@@ -2,6 +2,7 @@ export {
   DEFORMABLE_MESH_2D_DATA_FORMAT,
   DEFORMABLE_MESH_2D_DATA_VERSION,
   DEFORMABLE_MESH_2D_EXTENSION_ID,
+  DEFORMABLE_MESH_2D_MAX_MASK_REFERENCES,
 } from './types';
 export type {
   DeformableMesh2DBlendMode,
@@ -21,4 +22,3 @@ export {
   createDeformableMesh2DFormatHandler,
   createDeformableMesh2DFormatRegistry,
 } from './extension';
-

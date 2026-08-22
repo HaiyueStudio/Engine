@@ -79,7 +79,7 @@
       "title": "Live2D → HYA Fidelity Compare",
       "entry": "live2d-hya-compare/main.ts",
       "capabilities": ["animation-format", "live2d-cubism-import", "fidelity-compare", "licensed-official-core-reference", "auto-bounds", "timeline-scrubbing", "deformable-mesh", "webgpu", "2d"],
-      "assets": ["live2d-hya-compare/samples/manifest.json", "live2d-hya-compare/samples/mascot.hya", "live2d-hya-compare/samples/mascot.hydm", "live2d-hya-compare/samples/mascot.png", "live2d-hya-compare/samples/mascot.capture.json"],
+      "assets": ["live2d-hya-compare/samples/manifest.json", "live2d-hya-compare/samples/mascot.hya", "live2d-hya-compare/samples/mascot.hydm", "live2d-hya-compare/samples/mascot.png", "live2d-hya-compare/samples/mascot.capture.json", "live2d-hya-compare/samples/mask-parity.hya", "live2d-hya-compare/samples/mask-parity.hydm", "live2d-hya-compare/samples/mask-parity.png", "live2d-hya-compare/samples/mask-parity.capture.json", "live2d-hya-compare/samples/mask-parity-conversion-report.json"],
       "screenshot": { "required": false, "baseline": null },
       "performance": null,
       "ci": "smoke",

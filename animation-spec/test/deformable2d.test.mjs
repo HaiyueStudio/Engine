@@ -104,10 +104,44 @@ test('Cubism capture converts to required HYA extension and binary round-trips w
   assert.deepEqual([...normalized.drawables[0].uvs], [0, 1, 1, 1, 0, 0]);
 });
 
-test('Cubism capture tolerates float32 opacity drift and clamps the encoded track', () => {
+test('Cubism capture preserves shared multi-source mask groups and applies inversion to the combined group', () => {
+  const capture = multiMaskCaptureFixture();
+  const converted = convertCubismCaptureToHya(capture, { strict: true });
+  const data = decodeDeformableMesh2DData(converted.data);
+  assert.equal(converted.report.maskReferenceCount, 4);
+  assert.equal(converted.report.invertedMaskDrawableCount, 1);
+  assert.deepEqual([...data.drawables[2].masks], ['drawable-0000', 'drawable-0001']);
+  assert.deepEqual([...data.drawables[3].masks], ['drawable-0001', 'drawable-0000']);
+  assert.equal(data.drawables[2].maskMode, 'alpha');
+  assert.equal(data.drawables[3].maskMode, 'alpha-inverted');
+});
+
+test('Cubism capture classifies invalid mask graphs before HYDM encoding', () => {
+  const duplicate = multiMaskCaptureFixture();
+  for (const frame of duplicate.frames) frame.drawables[2].masks = ['mask-a', 'mask-a'];
+  assert.throws(() => convertCubismCaptureToHya(duplicate), error => error instanceof CubismCaptureConversionError
+    && error.diagnostics.some(item => item.code === 'E_CUBISM_CAPTURE_INVALID'
+      && item.path === '$.frames[0].drawables[2].masks'));
+
+  const cyclic = multiMaskCaptureFixture();
+  for (const frame of cyclic.frames) frame.drawables[0].masks = ['masked-alpha'];
+  assert.throws(() => convertCubismCaptureToHya(cyclic), error => error instanceof CubismCaptureConversionError
+    && error.diagnostics.some(item => item.code === 'E_CUBISM_CAPTURE_INVALID'
+      && item.message.includes('cycle')
+      && item.path.includes('frames[0]')));
+
+  const meaninglessInversion = captureFixture();
+  for (const frame of meaninglessInversion.frames) frame.drawables[0].invertedMask = true;
+  assert.throws(() => convertCubismCaptureToHya(meaninglessInversion), error => error instanceof CubismCaptureConversionError
+    && error.diagnostics.some(item => item.path === '$.frames[0].drawables[0].invertedMask'));
+});
+
+test('Cubism capture tolerates bounded Core opacity overshoot and clamps the encoded track', () => {
   const capture = captureFixture();
-  capture.frames[0].drawables[0].opacity = 1.0000001192092896;
-  capture.frames[1].drawables[0].opacity = -0.0000000596046448;
+  // Rice's official extended-interpolation sample exposes this exact upper
+  // overshoot through Cubism Core at its initial pose.
+  capture.frames[0].drawables[0].opacity = 1.0000499486923218;
+  capture.frames[1].drawables[0].opacity = -0.0000499486923218;
   const converted = convertCubismCaptureToHya(capture, { strict: true });
   const data = decodeDeformableMesh2DData(converted.data);
   assert.deepEqual([...data.drawables[0].opacities], [1, 0]);
@@ -115,6 +149,19 @@ test('Cubism capture tolerates float32 opacity drift and clamps the encoded trac
   capture.frames[0].drawables[0].opacity = 1.001;
   assert.throws(() => convertCubismCaptureToHya(capture), error => error instanceof CubismCaptureConversionError
     && error.diagnostics.some(item => item.code === 'E_CUBISM_CAPTURE_INVALID' && item.path === '$.frames[0].drawables[0].opacity'));
+});
+
+test('Cubism dynamic visibility suppresses only the baked main-pass opacity', () => {
+  const capture = captureFixture();
+  capture.frames[0].drawables[0].visible = false;
+  capture.frames[1].drawables[0].visible = true;
+  capture.frames[1].drawables[0].opacity = 0.5;
+  const converted = convertCubismCaptureToHya(capture, { strict: true });
+  assert.deepEqual([...decodeDeformableMesh2DData(converted.data).drawables[0].opacities], [0, 0.5]);
+
+  capture.frames[0].drawables[0].visible = 'yes';
+  assert.throws(() => convertCubismCaptureToHya(capture), error => error instanceof CubismCaptureConversionError
+    && error.diagnostics.some(item => item.path === '$.frames[0].drawables[0].visible'));
 });
 
 test('Cubism empty Core drawables normalize to invisible stable topology', () => {
@@ -278,5 +325,38 @@ function captureFixture() {
     format: 'live2d-cubism-drawable-capture', version: 1, canvas: { width: 256, height: 256, pixelsPerUnit: 1, coordinateSystem: 'model-y-up' },
     duration: 1, frameRate: 1, textures: [{ id: 'texture', uri: 'texture.png' }],
     frames: [{ time: 0, drawables: [drawable(0)] }, { time: 1, drawables: [drawable(1)] }],
+  };
+}
+
+function multiMaskCaptureFixture() {
+  const drawable = (id, renderOrder, masks = [], invertedMask = false, offset = 0) => ({
+    id,
+    textureIndex: 0,
+    renderOrder,
+    opacity: 1,
+    blendMode: 'normal',
+    culling: false,
+    masks,
+    invertedMask,
+    positions: [offset, 0, 10 + offset, 0, offset, 10],
+    uvs: [0, 0, 1, 0, 0, 1],
+    indices: [0, 1, 2],
+    multiplyColor: [1, 1, 1, 1],
+    screenColor: [0, 0, 0, 0],
+  });
+  const frame = time => ({ time, drawables: [
+    drawable('mask-a', 0, [], false, time),
+    drawable('mask-b', 1, [], false, 4 + time),
+    drawable('masked-alpha', 2, ['mask-a', 'mask-b'], false, time),
+    drawable('masked-inverted', 3, ['mask-b', 'mask-a'], true, time),
+  ] });
+  return {
+    format: 'live2d-cubism-drawable-capture',
+    version: 1,
+    canvas: { width: 256, height: 256, pixelsPerUnit: 1, coordinateSystem: 'model-y-up' },
+    duration: 1,
+    frameRate: 1,
+    textures: [{ id: 'texture', uri: 'texture.png' }],
+    frames: [frame(0), frame(1)],
   };
 }

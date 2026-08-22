@@ -63,7 +63,26 @@ async function main(): Promise<void> {
   let selectedActionId: string | null = null;
   let playerInstallCount = 0;
   let featureCoverage: FeatureCoverage = { maskReferenceCount: 0, invertedMaskDrawableCount: 0, additiveDrawableCount: 0, multiplicativeDrawableCount: 0 };
-  let smokeSwitchPending = new URLSearchParams(location.search).get('actionSmoke') === '1';
+  const queryParameters = new URLSearchParams(location.search);
+  const bundledFixtureId = queryParameters.get('fixture') === 'mask-parity' ? 'mask-parity' : 'mascot';
+  let smokeSwitchPending = queryParameters.get('actionSmoke') === '1';
+  const resizeSmokeRequested = bundledFixtureId === 'mask-parity' && queryParameters.get('resizeSmoke') === '1';
+  const recoverySmokeRequested = bundledFixtureId === 'mask-parity' && queryParameters.get('recoverySmoke') === '1';
+  const loopSmokeRequested = bundledFixtureId === 'mask-parity' && queryParameters.get('loopSmoke') === '1';
+  const maskActionSmokeRequested = bundledFixtureId === 'mask-parity' && queryParameters.get('maskActionSmoke') === '1';
+  let parityEvidencePending = bundledFixtureId === 'mask-parity';
+  let parityEvidenceScheduled = false;
+  let lifecycleFrame = 0;
+  let preResizeMaskPixels = 0;
+  let resizeApplied = false;
+  let resizeVerified = !resizeSmokeRequested;
+  let recoveryAppliedAt = -1;
+  let recoveryVerified = !recoverySmokeRequested;
+  let loopApplied = false;
+  let loopVerified = !loopSmokeRequested;
+  let maskActionStage = 0;
+  let maskActionStageFrame = -1;
+  let maskActionVerified = !maskActionSmokeRequested;
 
   bindControls();
   await loadBundledSample();
@@ -71,6 +90,7 @@ async function main(): Promise<void> {
   if (localModel) await loadMountedModel(localModel.mount, localModel.files);
 
   engine.on('after-update', () => {
+    lifecycleFrame++;
     const now = performance.now();
     const delta = Math.min(0.1, (now - lastTick) / 1000);
     lastTick = now;
@@ -85,21 +105,101 @@ async function main(): Promise<void> {
       selectPlaybackAction(playbackActions[1]!.id);
       return;
     }
+    if (bundledFixtureId === 'mask-parity' && hyaRenderer.stats.maskTargetCount > 0) {
+      if (maskActionSmokeRequested && !maskActionVerified) {
+        if (maskActionStage === 0) {
+          selectPlaybackAction(playbackActions[1]!.id);
+          maskActionStage = 1;
+          maskActionStageFrame = lifecycleFrame;
+          return;
+        }
+        if (maskActionStage === 1 && lifecycleFrame >= maskActionStageFrame + 3) {
+          if (selectedActionId !== playbackActions[1]!.id || playerInstallCount !== 1 || hyaRenderer.stats.maskTargetCount !== 2) return;
+          selectPlaybackAction(playbackActions[0]!.id);
+          maskActionStage = 2;
+          maskActionStageFrame = lifecycleFrame;
+          return;
+        }
+        if (maskActionStage === 2 && lifecycleFrame >= maskActionStageFrame + 3) {
+          if (selectedActionId !== playbackActions[0]!.id || playerInstallCount !== 1 || hyaRenderer.stats.maskTargetCount !== 2) return;
+          maskActionVerified = true;
+        }
+      }
+      if (loopSmokeRequested && !loopApplied) {
+        currentTime = Math.max(0, duration - 0.01);
+        lastTick = performance.now() - 100;
+        playing = true;
+        loopApplied = true;
+        return;
+      }
+      if (loopApplied && !loopVerified) {
+        if (currentTime >= 0.2 || hyaRenderer.stats.maskTargetCount !== 2) return;
+        playing = false;
+        loopVerified = true;
+      }
+      if (resizeSmokeRequested && !resizeApplied) {
+        preResizeMaskPixels = hyaRenderer.stats.maskPixels;
+        hyaCanvas.style.height = 'calc(100% - 32px)';
+        referenceCanvas.style.height = 'calc(100% - 32px)';
+        engine.resizeToDisplaySize(true);
+        camera.resize(hyaCanvas.clientWidth || hyaCanvas.width, hyaCanvas.clientHeight || hyaCanvas.height);
+        resizeApplied = true;
+        return;
+      }
+      if (resizeApplied && !resizeVerified) {
+        if (hyaRenderer.stats.maskPixels === preResizeMaskPixels) return;
+        resizeVerified = true;
+      }
+      if (recoverySmokeRequested && recoveryAppliedAt < 0) {
+        hyaRenderer.suspendForDeviceLoss();
+        hyaRenderer.recoverGpuResource(engine.device, new AbortController().signal);
+        recoveryAppliedAt = lifecycleFrame;
+        return;
+      }
+      if (recoveryAppliedAt >= 0 && !recoveryVerified) {
+        if (lifecycleFrame < recoveryAppliedAt + 3 || hyaRenderer.stats.maskTargetCount !== 2) return;
+        recoveryVerified = true;
+      }
+    }
     const result = query<HTMLElement>('#result');
-    if (!result.dataset.status && hyaRenderer.stats.visualCount > 0) {
-      result.dataset.status = 'passed';
-      result.textContent = JSON.stringify({ status: 'passed', hya: hyaRenderer.stats, reference: coreSession ? 'official-cubism-core' : 'captured-mesh-fixture', comparisonBackground: ANIMATION_COMPARE_BACKGROUND_HEX, bounds, autoZoom, actionCount: playbackActions.length, selectedActionId, playerInstallCount, featureCoverage });
+    if (!result.dataset.status && lifecycleFrame > 180 && (!maskActionVerified || !loopVerified || !resizeVerified || !recoveryVerified)) {
+      result.dataset.status = 'failed';
+      result.textContent = JSON.stringify({ status: 'failed', reason: 'mask-lifecycle-smoke-timeout', lifecycleFrame, maskActionStage, maskActionVerified, loopApplied, loopVerified, resizeApplied, resizeVerified, recoveryAppliedAt, recoveryVerified, preResizeMaskPixels, currentMaskPixels: hyaRenderer.stats.maskPixels, hya: hyaRenderer.stats });
+      return;
+    }
+    if (!result.dataset.status && hyaRenderer.stats.visualCount > 0 && maskActionVerified && loopVerified && resizeVerified && recoveryVerified) {
+      if (parityEvidencePending && !parityEvidenceScheduled) {
+        parityEvidenceScheduled = true;
+        playing = false;
+        currentTime = Math.min(1, duration);
+        player?.seek(playbackOffset + currentTime);
+        drawReference();
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          drawReference();
+          parityEvidencePending = false;
+          publishResult();
+        }));
+      } else if (!parityEvidencePending) {
+        publishResult();
+      }
     }
   });
 
+  function publishResult(): void {
+    const result = query<HTMLElement>('#result');
+    if (result.dataset.status) return;
+    result.dataset.status = 'passed';
+    result.textContent = JSON.stringify({ status: 'passed', fixtureId: bundledFixtureId, hya: hyaRenderer.stats, reference: coreSession ? 'official-cubism-core' : 'captured-mesh-fixture', comparisonBackground: ANIMATION_COMPARE_BACKGROUND_HEX, bounds, autoZoom, actionCount: playbackActions.length, selectedActionId, playerInstallCount, featureCoverage, sampledAt: parityEvidenceScheduled ? currentTime : undefined, maskActionSmoke: maskActionSmokeRequested && maskActionVerified, loopSmoke: loopSmokeRequested && loopVerified, resizeSmoke: resizeSmokeRequested && resizeVerified, preResizeMaskPixels: resizeSmokeRequested ? preResizeMaskPixels : undefined, postResizeMaskPixels: resizeSmokeRequested ? hyaRenderer.stats.maskPixels : undefined, recoverySmoke: recoverySmokeRequested && recoveryVerified });
+  }
+
   async function loadBundledSample(): Promise<void> {
-    setStatus('加载仓库内 MIT capture fixture…', 'working');
+    setStatus(`加载仓库内 MIT ${bundledFixtureId} capture fixture…`, 'working');
     disposeCoreSession();
     releaseObjectUrls();
     const [hya, data, texture] = await Promise.all([
-      fetch('./samples/mascot.hya').then(requireOk).then(response => response.arrayBuffer()),
-      fetch('./samples/mascot.hydm').then(requireOk).then(response => response.arrayBuffer()),
-      loadBitmap('./samples/mascot.png'),
+      fetch(`./samples/${bundledFixtureId}.hya`).then(requireOk).then(response => response.arrayBuffer()),
+      fetch(`./samples/${bundledFixtureId}.hydm`).then(requireOk).then(response => response.arrayBuffer()),
+      loadBitmap(`./samples/${bundledFixtureId}.png`),
     ]);
     bakedData = decodeDeformableMesh2DData(data);
     featureCoverage = summarizeDeformableFeatures(bakedData);
@@ -107,8 +207,8 @@ async function main(): Promise<void> {
     const parsed = parseAnimation(hya, { extensions: createDeformableMesh2DFormatRegistry() });
     const midpoint = parsed.duration / 2;
     playbackActions = Object.freeze([
-      { id: 'sample:first', label: 'MIT Sample · 动作 A', range: { start: 0, duration: midpoint, frameCount: frameCountInRange(bakedData.times, 0, midpoint) } },
-      { id: 'sample:second', label: 'MIT Sample · 动作 B', range: { start: midpoint, duration: parsed.duration - midpoint, frameCount: frameCountInRange(bakedData.times, midpoint, parsed.duration) } },
+      { id: 'sample:first', label: `MIT ${bundledFixtureId} · 动作 A`, range: { start: 0, duration: midpoint, frameCount: frameCountInRange(bakedData.times, 0, midpoint) } },
+      { id: 'sample:second', label: `MIT ${bundledFixtureId} · 动作 B`, range: { start: midpoint, duration: parsed.duration - midpoint, frameCount: frameCountInRange(bakedData.times, midpoint, parsed.duration) } },
     ]);
     selectedActionId = playbackActions[0]!.id;
     updateActionSelector(playbackActions);
@@ -370,7 +470,9 @@ void main() {
   vec4 color = texture(u_texture, v_uv);
   float sourceAlpha = color.a * u_opacity;
   if (u_output_mask > 0.5) {
-    outColor = vec4(sourceAlpha);
+    // Cubism setup-mask uses texture alpha only; drawable/model opacity and
+    // dynamic visibility affect the main pass, not clipping coverage.
+    outColor = vec4(color.a);
     return;
   }
   float maskCoverage = u_use_mask > 0.5
@@ -438,7 +540,7 @@ void main() {
     for (const id of maskIds) {
       const mask = byId.get(id);
       const image = mask ? images[mask.textureIndex] : undefined;
-      if (!mask || !image || mask.opacity <= 0) continue;
+      if (!mask || !image) continue;
       this.drawDrawable(mask, image, false, true);
       rendered = true;
     }
@@ -519,7 +621,28 @@ void main() {
 }
 
 function sampleBakedDrawables(data: ParsedDeformableMesh2DData, time: number): ReferenceDrawable[] { const frame = findFrame(data.times, time), next = Math.min(frame + 1, data.times.length - 1), progress = next === frame ? 0 : (time - data.times[frame]!) / (data.times[next]! - data.times[frame]!); return data.drawables.map(drawable => { const stride = drawable.vertexCount * 2, positions = new Float32Array(stride); for (let i = 0; i < stride; i++) positions[i] = mix(drawable.positions[frame * stride + i]!, drawable.positions[next * stride + i]!, progress); return { id: drawable.id, positions, uvs: drawable.uvs, indices: drawable.indices, opacity: mix(drawable.opacities[frame]!, drawable.opacities[next]!, progress), textureIndex: drawable.textureIndex, order: drawable.renderOrders[frame]!, blendMode: drawable.blendMode, masks: drawable.masks, maskMode: drawable.maskMode }; }); }
-function captureCoreReferenceDrawables(session: CoreSession): ReferenceDrawable[] { const d = session.model.drawables, ids = Array.from(d.ids, String); return ids.map((id, index) => { const positions = new Float32Array(d.vertexPositions[index].length); for (let i = 0; i < positions.length; i += 2) { positions[i] = session.canvasOriginX + d.vertexPositions[index][i] * session.pixelsPerUnit; positions[i + 1] = session.canvasOriginY - d.vertexPositions[index][i + 1] * session.pixelsPerUnit; } const flags = d.constantFlags[index]; return { id, positions, uvs: normalizeCoreUvs(d.vertexUvs[index]), indices: Uint32Array.from(d.indices[index]), opacity: d.opacities[index], textureIndex: d.textureIndices[index], order: d.renderOrders[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' : 'normal', masks: Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!), maskMode: coreInvertedMask(session.core, flags) ? 'alpha-inverted' : 'alpha' }; }); }
+function captureCoreReferenceDrawables(session: CoreSession): ReferenceDrawable[] {
+  const d = session.model.drawables, ids = Array.from(d.ids, String);
+  return ids.map((id, index) => {
+    const positions = new Float32Array(d.vertexPositions[index].length);
+    for (let i = 0; i < positions.length; i += 2) {
+      positions[i] = session.canvasOriginX + d.vertexPositions[index][i] * session.pixelsPerUnit;
+      positions[i + 1] = session.canvasOriginY - d.vertexPositions[index][i + 1] * session.pixelsPerUnit;
+    }
+    const flags = d.constantFlags[index];
+    const masks = Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!);
+    return {
+      id, positions, uvs: normalizeCoreUvs(d.vertexUvs[index]), indices: Uint32Array.from(d.indices[index]),
+      opacity: coreDrawableVisible(session.core, d, index) ? d.opacities[index] : 0,
+      textureIndex: d.textureIndices[index], order: d.renderOrders[index],
+      blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' : 'normal',
+      masks,
+      // Old Core data can retain an unused inverted bit on an unmasked
+      // drawable. Official rendering has no mask operation to invert there.
+      maskMode: masks.length > 0 && coreInvertedMask(session.core, flags) ? 'alpha-inverted' : 'alpha',
+    };
+  });
+}
 function captureCoreActionSet(session: CoreSession, textures: readonly File[]): { readonly capture: CubismDrawableCapture; readonly ranges: ReadonlyMap<string, CoreClipRange> } {
   if (session.motions.length === 0) return { capture: captureCoreClip(session, textures, null), ranges: new Map() };
   const combined = combineCubismCaptureClips(session.motions.map(motion => ({
@@ -532,8 +655,38 @@ function captureCoreActionSet(session: CoreSession, textures: readonly File[]): 
     ranges: new Map(combined.clips.map(clip => [clip.id, clip])),
   };
 }
-function captureCoreClip(session: CoreSession, textures: readonly File[], motion: CubismMotion3 | null = session.motion): CubismDrawableCapture { const duration = motion?.Meta.Duration ?? 1, steps = Math.max(1, Math.ceil(duration * 30)), frames = []; for (let frame = 0; frame <= steps; frame++) { const time = duration * frame / steps; applyCoreMotion(session, time, motion); const d = session.model.drawables, ids = Array.from(d.ids, String); frames.push({ time, drawables: ids.map((id, index) => { const flags = d.constantFlags[index]; return { id, textureIndex: d.textureIndices[index], renderOrder: d.renderOrders[index], opacity: d.opacities[index], blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' as const : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' as const : 'normal' as const, culling: !session.core.Utils.hasIsDoubleSidedBit(flags), masks: Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!), invertedMask: coreInvertedMask(session.core, flags), positions: centerCorePositions(session, d.vertexPositions[index]), uvs: Array.from(d.vertexUvs[index]) as number[], indices: Array.from(d.indices[index]) as number[] }; }) }); } return { format: 'live2d-cubism-drawable-capture', version: 1, name: 'Browser comparison capture', canvas: { width: session.canvasWidth, height: session.canvasHeight, pixelsPerUnit: session.pixelsPerUnit, coordinateSystem: 'model-y-up', uvOrigin: 'bottom-left' }, duration, frameRate: steps / duration, textures: textures.map((file, index) => ({ id: `texture-${index}`, uri: file.name })), frames }; }
+function captureCoreClip(session: CoreSession, textures: readonly File[], motion: CubismMotion3 | null = session.motion): CubismDrawableCapture {
+  const duration = motion?.Meta.Duration ?? 1, steps = Math.max(1, Math.ceil(duration * 30)), frames = [];
+  for (let frame = 0; frame <= steps; frame++) {
+    const time = duration * frame / steps;
+    applyCoreMotion(session, time, motion);
+    const d = session.model.drawables, ids = Array.from(d.ids, String);
+    frames.push({
+      time,
+      drawables: ids.map((id, index) => {
+        const flags = d.constantFlags[index];
+        const masks = Array.from(d.masks[index] ?? [], (mask: number) => ids[mask]!);
+        return {
+          id, textureIndex: d.textureIndices[index], renderOrder: d.renderOrders[index], opacity: d.opacities[index],
+          visible: coreDrawableVisible(session.core, d, index),
+          blendMode: session.core.Utils.hasBlendAdditiveBit(flags) ? 'additive' as const : session.core.Utils.hasBlendMultiplicativeBit(flags) ? 'multiplicative' as const : 'normal' as const,
+          culling: !session.core.Utils.hasIsDoubleSidedBit(flags), masks,
+          invertedMask: masks.length > 0 && coreInvertedMask(session.core, flags),
+          positions: centerCorePositions(session, d.vertexPositions[index]),
+          uvs: Array.from(d.vertexUvs[index]) as number[], indices: Array.from(d.indices[index]) as number[],
+        };
+      }),
+    });
+  }
+  return {
+    format: 'live2d-cubism-drawable-capture', version: 1, name: 'Browser comparison capture',
+    canvas: { width: session.canvasWidth, height: session.canvasHeight, pixelsPerUnit: session.pixelsPerUnit, coordinateSystem: 'model-y-up', uvOrigin: 'bottom-left' },
+    duration, frameRate: steps / duration,
+    textures: textures.map((file, index) => ({ id: `texture-${index}`, uri: file.name })), frames,
+  };
+}
 function coreInvertedMask(core: any, flags: number): boolean { return typeof core.Utils.hasIsInvertedMaskBit === 'function' && core.Utils.hasIsInvertedMaskBit(flags); }
+function coreDrawableVisible(core: any, drawables: any, index: number): boolean { return typeof core.Utils.hasIsVisibleBit !== 'function' || core.Utils.hasIsVisibleBit(drawables.dynamicFlags[index]); }
 function centerCorePositions(session: CoreSession, source: ArrayLike<number>): number[] { const positions = Array.from(source); const offsetX = (session.canvasOriginX - session.canvasWidth / 2) / session.pixelsPerUnit, offsetY = (session.canvasHeight / 2 - session.canvasOriginY) / session.pixelsPerUnit; for (let index = 0; index < positions.length; index += 2) { positions[index]! += offsetX; positions[index + 1]! += offsetY; } return positions; }
 function normalizeCoreUvs(source: ArrayLike<number>): Float32Array { const uvs = Float32Array.from(source); for (let index = 1; index < uvs.length; index += 2) uvs[index] = 1 - uvs[index]!; return uvs; }
 function applyCoreMotion(session: CoreSession, time: number, motion: CubismMotion3 | null = session.motion): void { session.model.parameters.values.set(session.parameterDefaults); session.model.parts.opacities.set(session.partDefaults); if (motion) { const sample = sampleCubismMotion3(motion, time); for (const [id, value] of sample.parameters) { const index = session.parameterIndex.get(id); if (index !== undefined) session.model.parameters.values[index] = value; } for (const [id, value] of sample.partOpacities) { const index = session.partIndex.get(id); if (index !== undefined) session.model.parts.opacities[index] = value; } } session.model.update(); }

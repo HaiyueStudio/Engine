@@ -2,6 +2,7 @@ import { AnimationFormatError } from '../errors';
 import {
   DEFORMABLE_MESH_2D_DATA_FORMAT,
   DEFORMABLE_MESH_2D_DATA_VERSION,
+  DEFORMABLE_MESH_2D_MAX_MASK_REFERENCES,
   type DeformableMesh2DBlendMode,
   type DeformableMesh2DMaskMode,
   type DeformableMesh2DDataSource,
@@ -21,7 +22,7 @@ const DEFAULT_LIMITS = Object.freeze({
   maxDrawables: 4096,
   maxVertices: 2_000_000,
   maxFrames: 36_000,
-  maxMaskReferences: 32_768,
+  maxMaskReferences: DEFORMABLE_MESH_2D_MAX_MASK_REFERENCES,
   maxTextures: 32,
 });
 
