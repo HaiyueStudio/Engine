@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "format": "haiyue-vector-visual-contract",
+  "version": 1,
+  "dataFormat": "haiyue-vector-visual",
+  "dataVersion": 1,
+  "sourceNeutral": true,
+  "sourceRuntimeDependency": false,
+  "coordinates": "screen-y-down",
+  "topologyPolicies": ["stable", "discrete"],
+  "paintOrder": "array-order",
+  "compositeOrder": "clip-depth-first-then-paint-order",
+  "customPathExecution": "external-only",
+  "limits": {
+    "maxNodes": 4096,
+    "maxPathsPerNode": 64,
+    "maxCommands": 1000000,
+    "maxValues": 8000000,
+    "maxKeyframes": 36000,
+    "maxGradientStops": 256,
+    "maxPaintsPerNode": 64,
+    "maxEffectsPerGroup": 32,
+    "maxEffectGroupsPerNode": 32,
+    "maxClipNodes": 4096,
+    "maxClipDepth": 64,
+    "maxVertices": 2000000,
+    "maxIndices": 6000000,
+    "maxDashEntries": 256,
+    "maxFeather": 4096,
+    "maxOffscreenPixels": 268435456,
+    "maxImagePixels": 268435456
+  },
+  "diagnostics": [
+    "E_VECTOR_FORMAT",
+    "E_VECTOR_LIMIT",
+    "E_VECTOR_NUMBER",
+    "E_VECTOR_REFERENCE",
+    "E_VECTOR_TOPOLOGY",
+    "E_VECTOR_CYCLE"
+  ],
+  "integration": {
+    "publicExportOwner": "G13",
+    "importAdapterOwner": "G12",
+    "scriptPortOwner": "G09",
+    "formalOracleOwner": "G11"
+  }
+}

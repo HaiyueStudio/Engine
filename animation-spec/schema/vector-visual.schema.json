@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haiyue.dev/schemas/animation/vector-visual.schema.json",
+  "title": "Source-neutral HYA vector visual document v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "width", "height", "nodes"],
+  "properties": {
+    "format": { "const": "haiyue-vector-visual" },
+    "version": { "const": 1 },
+    "width": { "$ref": "#/$defs/positive" },
+    "height": { "$ref": "#/$defs/positive" },
+    "duration": { "$ref": "#/$defs/nonNegative" },
+    "resources": { "type": "array", "items": { "$ref": "#/$defs/imageResource" } },
+    "nodes": { "type": "array", "maxItems": 4096, "items": { "$ref": "#/$defs/node" } },
+    "clips": { "type": "array", "maxItems": 4096, "items": { "$ref": "#/$defs/clip" } }
+  },
+  "$defs": {
+    "finite": { "type": "number" },
+    "positive": { "type": "number", "exclusiveMinimum": 0 },
+    "nonNegative": { "type": "number", "minimum": 0 },
+    "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "vec2": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/finite" } },
+    "color": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+    "blend": { "enum": ["normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity", "add", "subtract"] },
+    "source": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["kind", "color"], "properties": { "kind": { "const": "solid" }, "color": { "$ref": "#/$defs/color" } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "start", "end", "stops"], "properties": { "kind": { "const": "linear-gradient" }, "start": { "$ref": "#/$defs/vec2" }, "end": { "$ref": "#/$defs/vec2" }, "stops": { "$ref": "#/$defs/stops" }, "colorSpace": { "$ref": "#/$defs/colorSpace" } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "center", "radius", "stops"], "properties": { "kind": { "const": "radial-gradient" }, "center": { "$ref": "#/$defs/vec2" }, "radius": { "$ref": "#/$defs/positive" }, "focal": { "$ref": "#/$defs/vec2" }, "stops": { "$ref": "#/$defs/stops" }, "colorSpace": { "$ref": "#/$defs/colorSpace" } } }
+      ]
+    },
+    "colorSpace": { "enum": ["srgb", "display-p3", "linear-srgb"] },
+    "stops": { "type": "array", "minItems": 2, "maxItems": 256, "items": { "type": "object", "additionalProperties": false, "required": ["offset", "color"], "properties": { "offset": { "type": "number", "minimum": 0, "maximum": 1 }, "color": { "$ref": "#/$defs/color" } } } },
+    "paintCommon": { "type": "object", "properties": { "opacity": { "type": "number", "minimum": 0, "maximum": 1 }, "blendMode": { "$ref": "#/$defs/blend" }, "visible": { "type": "boolean" } } },
+    "paint": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["kind", "source"], "properties": { "kind": { "const": "fill" }, "source": { "$ref": "#/$defs/source" }, "fillRule": { "enum": ["nonzero", "evenodd"] }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 }, "blendMode": { "$ref": "#/$defs/blend" }, "visible": { "type": "boolean" } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "source", "width"], "properties": { "kind": { "const": "stroke" }, "source": { "$ref": "#/$defs/source" }, "width": { "$ref": "#/$defs/nonNegative" }, "cap": { "enum": ["butt", "round", "square"] }, "join": { "enum": ["miter", "round", "bevel"] }, "miterLimit": { "type": "number", "minimum": 1 }, "dash": { "type": "array", "maxItems": 256, "items": { "$ref": "#/$defs/positive" } }, "dashOffset": { "$ref": "#/$defs/finite" }, "dashUnits": { "enum": ["absolute", "path-percent"] }, "trim": { "$ref": "#/$defs/trim" }, "transformMode": { "enum": ["scale", "fixed"] }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 }, "blendMode": { "$ref": "#/$defs/blend" }, "visible": { "type": "boolean" } } }
+      ]
+    },
+    "trim": { "type": "object", "additionalProperties": false, "required": ["start", "end"], "properties": { "start": { "type": "number", "minimum": 0, "maximum": 1 }, "end": { "type": "number", "minimum": 0, "maximum": 1 }, "offset": { "$ref": "#/$defs/finite" }, "mode": { "enum": ["simultaneous", "individual"] } } },
+    "pathFrame": { "type": "object", "additionalProperties": false, "required": ["time", "commands", "values"], "properties": { "time": { "$ref": "#/$defs/finite" }, "commands": { "type": "string", "pattern": "^[MLHVQCZ]+$" }, "values": { "type": "array", "items": { "$ref": "#/$defs/finite" } } } },
+    "mesh": { "type": "object", "additionalProperties": false, "required": ["positions", "uvs", "indices"], "properties": { "positions": { "type": "array", "maxItems": 4000000, "items": { "$ref": "#/$defs/finite" } }, "uvs": { "type": "array", "maxItems": 4000000, "items": { "$ref": "#/$defs/finite" } }, "indices": { "type": "array", "maxItems": 6000000, "items": { "type": "integer", "minimum": 0 } } } },
+    "geometry": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["kind", "commands", "values"], "properties": { "kind": { "const": "path" }, "commands": { "type": "string", "pattern": "^[MLHVQCZ]+$" }, "values": { "type": "array", "items": { "$ref": "#/$defs/finite" } }, "fillRule": { "enum": ["nonzero", "evenodd"] }, "isHole": { "type": "boolean" }, "topologyPolicy": { "enum": ["stable", "discrete"] }, "frames": { "type": "array", "maxItems": 36000, "items": { "$ref": "#/$defs/pathFrame" } } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "cx", "cy", "rx", "ry"], "properties": { "kind": { "const": "ellipse" }, "cx": { "$ref": "#/$defs/finite" }, "cy": { "$ref": "#/$defs/finite" }, "rx": { "$ref": "#/$defs/nonNegative" }, "ry": { "$ref": "#/$defs/nonNegative" } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "x", "y", "width", "height"], "properties": { "kind": { "const": "rectangle" }, "x": { "$ref": "#/$defs/finite" }, "y": { "$ref": "#/$defs/finite" }, "width": { "$ref": "#/$defs/nonNegative" }, "height": { "$ref": "#/$defs/nonNegative" }, "radii": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "$ref": "#/$defs/nonNegative" } } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "cx", "cy", "radius", "points"], "properties": { "kind": { "const": "polygon" }, "cx": { "$ref": "#/$defs/finite" }, "cy": { "$ref": "#/$defs/finite" }, "radius": { "$ref": "#/$defs/nonNegative" }, "points": { "type": "integer", "minimum": 3 }, "rotation": { "$ref": "#/$defs/finite" }, "cornerRadius": { "$ref": "#/$defs/nonNegative" } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "cx", "cy", "outerRadius", "innerRadius", "points"], "properties": { "kind": { "const": "star" }, "cx": { "$ref": "#/$defs/finite" }, "cy": { "$ref": "#/$defs/finite" }, "outerRadius": { "$ref": "#/$defs/nonNegative" }, "innerRadius": { "$ref": "#/$defs/nonNegative" }, "points": { "type": "integer", "minimum": 3 }, "rotation": { "$ref": "#/$defs/finite" }, "cornerRadius": { "$ref": "#/$defs/nonNegative" } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "points"], "properties": { "kind": { "const": "triangle" }, "points": { "type": "array", "minItems": 6, "maxItems": 6, "items": { "$ref": "#/$defs/finite" } }, "cornerRadius": { "$ref": "#/$defs/nonNegative" } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "resource", "x", "y", "width", "height"], "properties": { "kind": { "const": "image" }, "resource": { "$ref": "#/$defs/id" }, "x": { "$ref": "#/$defs/finite" }, "y": { "$ref": "#/$defs/finite" }, "width": { "$ref": "#/$defs/nonNegative" }, "height": { "$ref": "#/$defs/nonNegative" }, "crop": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "$ref": "#/$defs/nonNegative" } }, "fit": { "enum": ["fill", "contain", "cover", "none", "scale-down"] }, "alignment": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": -1, "maximum": 1 } }, "mesh": { "$ref": "#/$defs/mesh" } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "source", "x", "y", "width", "height", "sourceSize", "xCuts", "yCuts"], "properties": { "kind": { "const": "n-slice" }, "source": { "oneOf": [{ "type": "object", "additionalProperties": false, "required": ["kind", "resource"], "properties": { "kind": { "const": "image" }, "resource": { "$ref": "#/$defs/id" } } }, { "type": "object", "additionalProperties": false, "required": ["kind", "node"], "properties": { "kind": { "const": "node" }, "node": { "$ref": "#/$defs/id" } } }] }, "x": { "$ref": "#/$defs/finite" }, "y": { "$ref": "#/$defs/finite" }, "width": { "$ref": "#/$defs/nonNegative" }, "height": { "$ref": "#/$defs/nonNegative" }, "sourceSize": { "$ref": "#/$defs/vec2" }, "xCuts": { "type": "array", "items": { "$ref": "#/$defs/positive" } }, "yCuts": { "type": "array", "items": { "$ref": "#/$defs/positive" } } } }
+      ]
+    },
+    "effect": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["kind", "radiusX", "radiusY"], "properties": { "kind": { "const": "feather" }, "radiusX": { "type": "number", "minimum": 0, "maximum": 4096 }, "radiusY": { "type": "number", "minimum": 0, "maximum": 4096 }, "offsetX": { "$ref": "#/$defs/finite" }, "offsetY": { "$ref": "#/$defs/finite" }, "inner": { "type": "boolean" }, "space": { "enum": ["local", "world"] } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "value"], "properties": { "kind": { "const": "opacity" }, "value": { "type": "number", "minimum": 0, "maximum": 1 } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "values"], "properties": { "kind": { "const": "color-matrix" }, "values": { "type": "array", "minItems": 20, "maxItems": 20, "items": { "$ref": "#/$defs/finite" } } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "radiusX", "radiusY"], "properties": { "kind": { "const": "blur" }, "radiusX": { "type": "number", "minimum": 0, "maximum": 4096 }, "radiusY": { "type": "number", "minimum": 0, "maximum": 4096 } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "offsetX", "offsetY", "blur", "color"], "properties": { "kind": { "const": "drop-shadow" }, "offsetX": { "$ref": "#/$defs/finite" }, "offsetY": { "$ref": "#/$defs/finite" }, "blur": { "type": "number", "minimum": 0, "maximum": 4096 }, "color": { "$ref": "#/$defs/color" } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "port", "inputs", "execution"], "properties": { "kind": { "const": "custom-path-port" }, "port": { "$ref": "#/$defs/id" }, "inputs": { "type": "object", "additionalProperties": { "type": ["number", "boolean", "string"] } }, "execution": { "const": "external-only" } } }
+      ]
+    },
+    "effectGroup": { "type": "object", "additionalProperties": false, "required": ["id", "effects"], "properties": { "id": { "$ref": "#/$defs/id" }, "target": { "$ref": "#/$defs/id" }, "blendMode": { "$ref": "#/$defs/blend" }, "effects": { "type": "array", "maxItems": 32, "items": { "$ref": "#/$defs/effect" } } } },
+    "node": { "type": "object", "additionalProperties": false, "required": ["id", "drawOrder", "geometries", "paints"], "properties": { "id": { "$ref": "#/$defs/id" }, "name": { "type": "string", "maxLength": 4096 }, "visible": { "type": "boolean" }, "solo": { "type": "boolean" }, "drawOrder": { "$ref": "#/$defs/finite" }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 }, "transform": { "type": "array", "minItems": 6, "maxItems": 6, "items": { "$ref": "#/$defs/finite" } }, "geometries": { "type": "array", "maxItems": 64, "items": { "$ref": "#/$defs/geometry" } }, "paints": { "type": "array", "maxItems": 64, "items": { "$ref": "#/$defs/paint" } }, "effectGroups": { "type": "array", "maxItems": 32, "items": { "$ref": "#/$defs/effectGroup" } }, "clips": { "type": "array", "items": { "$ref": "#/$defs/id" } } } },
+    "clip": { "type": "object", "additionalProperties": false, "required": ["id", "source"], "properties": { "id": { "$ref": "#/$defs/id" }, "source": { "$ref": "#/$defs/id" }, "operation": { "enum": ["add", "subtract", "intersect", "difference"] }, "inverted": { "type": "boolean" }, "fillRule": { "enum": ["nonzero", "evenodd"] }, "children": { "type": "array", "items": { "$ref": "#/$defs/id" } } } },
+    "imageResource": { "type": "object", "additionalProperties": false, "required": ["id", "kind", "width", "height", "source"], "properties": { "id": { "$ref": "#/$defs/id" }, "kind": { "const": "image" }, "width": { "$ref": "#/$defs/positive" }, "height": { "$ref": "#/$defs/positive" }, "source": { "oneOf": [{ "type": "object", "additionalProperties": false, "required": ["kind", "resource"], "properties": { "kind": { "enum": ["embedded", "referenced"] }, "resource": { "$ref": "#/$defs/id" } } }, { "type": "object", "additionalProperties": false, "required": ["kind", "slot"], "properties": { "kind": { "const": "hosted-replacement" }, "slot": { "$ref": "#/$defs/id" }, "fallback": { "$ref": "#/$defs/id" } } }] }, "colorSpace": { "$ref": "#/$defs/colorSpace" }, "filter": { "enum": ["nearest", "linear"] }, "wrapX": { "enum": ["clamp", "repeat", "mirror-repeat"] }, "wrapY": { "enum": ["clamp", "repeat", "mirror-repeat"] } } }
+  }
+}
