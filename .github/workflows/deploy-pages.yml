@@ -1,0 +1,111 @@
+name: Deploy GitHub Pages
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Signed annotated release tag to publish (for example v0.1.0)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - name: Checkout governed deployment tooling
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: main
+          path: automation
+          persist-credentials: false
+
+      - name: Checkout immutable release tag
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          ref: ${{ inputs.release_tag }}
+          path: release
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify annotated tag and GitHub signature
+        shell: bash
+        working-directory: release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          TAG_SHA="$(git rev-parse "${RELEASE_TAG}^{tag}")"
+          TAG_COMMIT="$(git rev-list -n 1 "${RELEASE_TAG}")"
+          test "${TAG_COMMIT}" = "$(git rev-parse HEAD)"
+          TAG_JSON="$(curl --fail-with-body --silent --show-error \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/git/tags/${TAG_SHA}")"
+          TAG_JSON="${TAG_JSON}" node --input-type=module -e \
+            "const tag = JSON.parse(process.env.TAG_JSON); if (tag.verification.verified !== true) throw new Error('Release tag signature is not GitHub-verified.');"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version-file: release/.node-version
+          cache: npm
+          cache-dependency-path: release/package-lock.json
+
+      - name: Install release dependencies
+        working-directory: release
+        run: npm ci
+
+      - name: Build release foundations
+        env:
+          PAGES_SOURCE_ROOT: ${{ github.workspace }}/release
+        run: node automation/scripts/release-ci-bootstrap.mjs --pages-examples
+
+      - name: Build and validate examples catalog
+        working-directory: release
+        run: |
+          npm run build:examples
+          npm run examples:catalog:check
+
+      - name: Assemble immutable examples site
+        env:
+          PAGES_SOURCE_ROOT: ${{ github.workspace }}/release
+          PAGES_OUTPUT_ROOT: ${{ github.workspace }}/automation/artifacts/pages-release
+          PAGES_RELEASE_TAG: ${{ inputs.release_tag }}
+        run: node automation/scripts/assemble-pages-release.mjs
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: automation/artifacts/pages-release
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@decdde0ac072f6db7b846693aeb66d213a3b5175 # v4

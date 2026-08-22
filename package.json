@@ -64,6 +64,7 @@
     "build:extensions": "npm run build -w ./extensions",
     "build:examples": "npm run build -w ./examples",
     "examples:catalog:check": "node --test examples/catalog.test.mjs",
+    "pages:examples:assemble": "node scripts/assemble-pages-release.mjs",
     "cubism:capture": "node animation-spec/live2d/tools/capture-cubism.mjs",
     "build:target": "node scripts/build-target.mjs",
     "shader-language:showcase:check": "npm run build -w ./shader-language && node shader-language/scripts/generate-showcase-example.mjs",
