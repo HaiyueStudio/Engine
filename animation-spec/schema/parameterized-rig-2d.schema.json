@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haiyue.dev/schemas/animation/parameterized-rig-2d.schema.json",
+  "title": "Source-neutral HYA parameterized deformable rig 2D v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "version", "extension", "width", "height", "parameters", "rigs", "instances"],
+  "properties": {
+    "format": { "const": "haiyue-parameterized-rig-2d" },
+    "version": { "const": 2 },
+    "extension": { "const": "org.haiyue.deformable-mesh-2d@2" },
+    "width": { "$ref": "#/$defs/positive" },
+    "height": { "$ref": "#/$defs/positive" },
+    "duration": { "$ref": "#/$defs/nonNegative" },
+    "parameters": { "type": "array", "maxItems": 250000, "items": { "$ref": "#/$defs/parameter" } },
+    "rigs": { "type": "array", "maxItems": 1024, "items": { "$ref": "#/$defs/rig" } },
+    "instances": { "type": "array", "maxItems": 8192, "items": { "$ref": "#/$defs/instance" } }
+  },
+  "$defs": {
+    "finite": { "type": "number" },
+    "positive": { "type": "number", "exclusiveMinimum": 0 },
+    "nonNegative": { "type": "number", "minimum": 0 },
+    "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "vec2": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/finite" } },
+    "color": { "type": "array", "minItems": 4, "maxItems": 4, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
+    "transform": { "type": "object", "additionalProperties": false, "required": ["x", "y", "rotation", "scaleX", "scaleY"], "properties": { "x": { "$ref": "#/$defs/finite" }, "y": { "$ref": "#/$defs/finite" }, "rotation": { "$ref": "#/$defs/finite" }, "scaleX": { "$ref": "#/$defs/finite" }, "scaleY": { "$ref": "#/$defs/finite" }, "skew": { "$ref": "#/$defs/finite" } } },
+    "parameter": { "type": "object", "additionalProperties": false, "required": ["id", "default", "min", "max"], "properties": { "id": { "$ref": "#/$defs/id" }, "default": { "$ref": "#/$defs/finite" }, "min": { "$ref": "#/$defs/finite" }, "max": { "$ref": "#/$defs/finite" } } },
+    "bone": { "type": "object", "additionalProperties": false, "required": ["id", "length", "bind", "inverseBind"], "properties": { "id": { "$ref": "#/$defs/id" }, "parent": { "$ref": "#/$defs/id" }, "length": { "$ref": "#/$defs/nonNegative" }, "bind": { "$ref": "#/$defs/transform" }, "inverseBind": { "type": "array", "minItems": 6, "maxItems": 6, "items": { "$ref": "#/$defs/finite" } } } },
+    "mesh": { "type": "object", "additionalProperties": false, "required": ["id", "positions", "uvs", "indices", "influenceOffsets", "jointIndices", "weights"], "properties": { "id": { "$ref": "#/$defs/id" }, "positions": { "type": "array", "maxItems": 10000000, "items": { "$ref": "#/$defs/finite" } }, "uvs": { "type": "array", "maxItems": 10000000, "items": { "$ref": "#/$defs/finite" } }, "indices": { "type": "array", "maxItems": 15000000, "items": { "type": "integer", "minimum": 0 } }, "influenceOffsets": { "type": "array", "maxItems": 5000001, "items": { "type": "integer", "minimum": 0 } }, "jointIndices": { "type": "array", "maxItems": 40000000, "items": { "type": "integer", "minimum": 0 } }, "weights": { "type": "array", "maxItems": 40000000, "items": { "$ref": "#/$defs/nonNegative" } } } },
+    "drawable": { "type": "object", "additionalProperties": false, "required": ["id", "mesh", "drawOrder"], "properties": { "id": { "$ref": "#/$defs/id" }, "mesh": { "$ref": "#/$defs/id" }, "texture": { "$ref": "#/$defs/id" }, "visible": { "type": "boolean" }, "solo": { "type": "boolean" }, "drawOrder": { "$ref": "#/$defs/finite" }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 }, "blendMode": { "enum": ["normal", "additive", "multiplicative"] }, "culling": { "type": "boolean" }, "multiplyColor": { "$ref": "#/$defs/color" }, "screenColor": { "$ref": "#/$defs/color" }, "masks": { "type": "array", "items": { "$ref": "#/$defs/id" } }, "maskMode": { "enum": ["alpha", "alpha-inverted"] } } },
+    "path": { "type": "object", "additionalProperties": false, "required": ["id", "points"], "properties": { "id": { "$ref": "#/$defs/id" }, "points": { "type": "array", "minItems": 4, "maxItems": 10000000, "items": { "$ref": "#/$defs/finite" } }, "closed": { "type": "boolean" } } },
+    "physics": { "type": "object", "additionalProperties": false, "required": ["kind", "friction", "speedMultiplier"], "properties": { "kind": { "enum": ["clamped", "elastic"] }, "friction": { "$ref": "#/$defs/nonNegative" }, "speedMultiplier": { "$ref": "#/$defs/nonNegative" }, "elasticFactor": { "$ref": "#/$defs/nonNegative" }, "threshold": { "$ref": "#/$defs/nonNegative" } } },
+    "constraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "order", "strength", "constrained"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" }, "kind": { "enum": ["ik", "distance", "transform", "translation", "scale", "rotation", "follow-path", "scroll", "scrollbar"] }, "order": { "$ref": "#/$defs/finite" }, "enabled": { "type": "boolean" }, "strength": { "type": "number", "minimum": 0, "maximum": 1 }, "constrained": { "$ref": "#/$defs/id" }, "sourceSpace": { "enum": ["local", "world"] }, "destinationSpace": { "enum": ["local", "world"] },
+        "target": { "$ref": "#/$defs/id" }, "chainLength": { "type": "integer", "minimum": 1 }, "invertDirection": { "type": "boolean" }, "iterations": { "type": "integer", "minimum": 1, "maximum": 128 }, "tolerance": { "$ref": "#/$defs/positive" }, "nonConvergence": { "enum": ["error", "clamp"] }, "distance": { "$ref": "#/$defs/finite" }, "distanceEnd": { "$ref": "#/$defs/finite" }, "mode": { "enum": ["exact", "minimum", "maximum"] }, "copyFactor": { "$ref": "#/$defs/finite" }, "copyFactorY": { "$ref": "#/$defs/finite" }, "offset": { "anyOf": [{ "$ref": "#/$defs/finite" }, { "$ref": "#/$defs/transform" }] }, "min": { "anyOf": [{ "$ref": "#/$defs/finite" }, { "$ref": "#/$defs/transform" }] }, "max": { "anyOf": [{ "$ref": "#/$defs/finite" }, { "$ref": "#/$defs/transform" }] }, "offsetX": { "$ref": "#/$defs/finite" }, "offsetY": { "$ref": "#/$defs/finite" }, "minX": { "$ref": "#/$defs/finite" }, "maxX": { "$ref": "#/$defs/finite" }, "minY": { "$ref": "#/$defs/finite" }, "maxY": { "$ref": "#/$defs/finite" }, "limitSpace": { "enum": ["local", "world"] }, "path": { "$ref": "#/$defs/id" }, "orient": { "type": "boolean" },
+        "axis": { "enum": ["x", "y", "both"] }, "offsetParameterX": { "$ref": "#/$defs/id" }, "offsetParameterY": { "$ref": "#/$defs/id" }, "percentParameterX": { "$ref": "#/$defs/id" }, "percentParameterY": { "$ref": "#/$defs/id" }, "indexParameter": { "$ref": "#/$defs/id" }, "velocityParameterX": { "$ref": "#/$defs/id" }, "velocityParameterY": { "$ref": "#/$defs/id" }, "activeParameter": { "$ref": "#/$defs/id" }, "viewport": { "$ref": "#/$defs/vec2" }, "content": { "$ref": "#/$defs/vec2" }, "infinite": { "type": "boolean" }, "virtualize": { "type": "boolean" }, "virtualizeBuffer": { "$ref": "#/$defs/nonNegative" }, "interactive": { "type": "boolean" }, "threshold": { "$ref": "#/$defs/nonNegative" }, "dragMultiplier": { "$ref": "#/$defs/nonNegative" }, "snap": { "$ref": "#/$defs/positive" }, "physics": { "$ref": "#/$defs/physics" }, "scrollConstraint": { "$ref": "#/$defs/id" }, "autoSize": { "type": "boolean" }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "ik" } } }, "then": { "required": ["target", "chainLength"] } },
+        { "if": { "properties": { "kind": { "const": "distance" } } }, "then": { "required": ["target", "distance"] } },
+        { "if": { "properties": { "kind": { "enum": ["transform", "translation", "scale", "rotation"] } } }, "then": { "required": ["target"] } },
+        { "if": { "properties": { "kind": { "const": "follow-path" } } }, "then": { "required": ["path", "distance"] } },
+        { "if": { "properties": { "kind": { "const": "scroll" } } }, "then": { "required": ["axis", "viewport", "content"] } },
+        { "if": { "properties": { "kind": { "const": "scrollbar" } } }, "then": { "required": ["scrollConstraint"] } }
+      ]
+    },
+    "driverTarget": { "type": "object", "additionalProperties": false, "required": ["kind", "id", "property"], "properties": { "kind": { "enum": ["bone", "constraint", "drawable"] }, "id": { "$ref": "#/$defs/id" }, "property": { "enum": ["x", "y", "rotation", "scaleX", "scaleY", "skew", "strength", "distance", "offset", "opacity", "drawOrder", "visibility"] } } },
+    "driver": { "type": "object", "additionalProperties": false, "required": ["id", "parameter", "input", "output", "target"], "properties": { "id": { "$ref": "#/$defs/id" }, "parameter": { "$ref": "#/$defs/id" }, "input": { "$ref": "#/$defs/vec2" }, "output": { "$ref": "#/$defs/vec2" }, "clamp": { "type": "boolean" }, "mode": { "enum": ["replace", "add"] }, "target": { "$ref": "#/$defs/driverTarget" } } },
+    "joystick": { "type": "object", "additionalProperties": false, "required": ["id", "center", "size"], "properties": { "id": { "$ref": "#/$defs/id" }, "xParameter": { "$ref": "#/$defs/id" }, "yParameter": { "$ref": "#/$defs/id" }, "center": { "$ref": "#/$defs/vec2" }, "size": { "$ref": "#/$defs/vec2" }, "origin": { "$ref": "#/$defs/vec2" }, "handleDrawable": { "$ref": "#/$defs/id" }, "invertX": { "type": "boolean" }, "invertY": { "type": "boolean" } } },
+    "rig": { "type": "object", "additionalProperties": false, "required": ["id", "bones", "meshes", "drawables"], "properties": { "id": { "$ref": "#/$defs/id" }, "bones": { "type": "array", "items": { "$ref": "#/$defs/bone" } }, "meshes": { "type": "array", "items": { "$ref": "#/$defs/mesh" } }, "drawables": { "type": "array", "items": { "$ref": "#/$defs/drawable" } }, "constraints": { "type": "array", "items": { "$ref": "#/$defs/constraint" } }, "paths": { "type": "array", "items": { "$ref": "#/$defs/path" } }, "drivers": { "type": "array", "items": { "$ref": "#/$defs/driver" } }, "joysticks": { "type": "array", "items": { "$ref": "#/$defs/joystick" } } } },
+    "instance": { "type": "object", "additionalProperties": false, "required": ["id", "rig"], "properties": { "id": { "$ref": "#/$defs/id" }, "rig": { "$ref": "#/$defs/id" }, "parentInstance": { "$ref": "#/$defs/id" }, "parentBone": { "$ref": "#/$defs/id" }, "transform": { "$ref": "#/$defs/transform" }, "parameterMap": { "type": "object", "additionalProperties": { "$ref": "#/$defs/id" } } } }
+  }
+}

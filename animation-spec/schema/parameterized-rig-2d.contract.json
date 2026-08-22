@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "format": "haiyue-parameterized-rig-2d-contract",
+  "version": 2,
+  "extension": "org.haiyue.deformable-mesh-2d@2",
+  "sourceNeutral": true,
+  "sourceRuntimeDependency": false,
+  "compatibleLegacyExtension": "org.haiyue.deformable-mesh-2d@1",
+  "legacySemanticsChanged": false,
+  "coordinates": "screen-y-down",
+  "evaluation": {
+    "canonicalStatePerCall": true,
+    "constraintOrder": "order-then-id",
+    "parameterMix": "normalized-override-then-additive",
+    "skinning": "world-bone-times-inverse-bind",
+    "variableInfluenceCount": true,
+    "closedPathDistance": "positive-modulo-total-length",
+    "followPathDistanceEnd": "optional-span-end-controls-orientation",
+    "translationLimitSpace": "convert-source-to-limit-space-clamp-then-convert-to-destination",
+    "drawablePaintOutput": ["texture", "opacity", "blendMode", "culling", "multiplyColor", "screenColor", "masks", "maskMode", "visibility", "drawOrder"],
+    "interactiveStateBakedToClips": false
+  },
+  "compilerLowering": {
+    "cubicWeights": "normalize control-handle influences into the standard variable-count CSR skinning arrays",
+    "listFollowPath": "lower each evaluated list span to distance plus distanceEnd without retaining source runtime objects"
+  },
+  "binary": {
+    "magic": "HYRG",
+    "major": 2,
+    "minor": 0,
+    "endianness": "little",
+    "headerBytes": 40,
+    "header": ["magic:u32", "major:u16", "minor:u16", "metadataOffset:u32", "metadataBytes:u32", "floatOffset:u32", "floatCount:u32", "indexOffset:u32", "indexCount:u32", "totalBytes:u32", "flags:u32"],
+    "metadata": "utf8-json",
+    "floatPool": "contiguous-float32",
+    "indexPool": "contiguous-uint32",
+    "poolRanges": "canonical-no-alias-no-gap",
+    "alignment": 4
+  },
+  "limits": {
+    "maxInputBytes": 67108864,
+    "maxMetadataBytes": 4194304,
+    "maxRigs": 1024,
+    "maxInstances": 8192,
+    "maxBones": 65536,
+    "maxMeshes": 16384,
+    "maxDrawables": 1000000,
+    "maxVertices": 5000000,
+    "maxIndices": 15000000,
+    "maxInfluences": 40000000,
+    "maxInfluencesPerVertex": 32,
+    "maxConstraints": 250000,
+    "maxConstraintIterations": 128,
+    "maxPaths": 65536,
+    "maxPathPoints": 5000000,
+    "maxParameters": 250000,
+    "maxDrivers": 1000000,
+    "maxNestingDepth": 128,
+    "maxGpuBytes": 536870912
+  },
+  "diagnostics": ["E_RIG_FORMAT", "E_RIG_LIMIT", "E_RIG_NUMBER", "E_RIG_REFERENCE", "E_RIG_CYCLE", "E_RIG_WEIGHT", "E_RIG_DEGENERATE", "E_RIG_NON_CONVERGENCE", "E_RIG_BINARY"],
+  "integration": { "publicExportOwner": "G13", "importAdapterOwner": "G10", "formalOracleOwner": "G11" }
+}
