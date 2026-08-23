@@ -77,7 +77,8 @@ for (let index = 0; index < models.length; index++) {
   const paritySummary = JSON.stringify(surfaceReadback);
   const requiresCompositionParity = result.featureCoverage.maskReferenceCount > 0
     || result.featureCoverage.additiveDrawableCount > 0
-    || result.featureCoverage.multiplicativeDrawableCount > 0;
+    || result.featureCoverage.multiplicativeDrawableCount > 0
+    || result.featureCoverage.cullingDrawableCount > 0;
   if (requiresCompositionParity) {
     // Real models contain much longer antialiased silhouettes than the compact
     // synthetic fixture. Keep a bounded outlier ceiling while mean/ratio remain
@@ -161,7 +162,8 @@ const report = {
     invertedMaskDrawableCount: totals.invertedMaskDrawableCount + sample.featureCoverage.invertedMaskDrawableCount,
     additiveDrawableCount: totals.additiveDrawableCount + sample.featureCoverage.additiveDrawableCount,
     multiplicativeDrawableCount: totals.multiplicativeDrawableCount + sample.featureCoverage.multiplicativeDrawableCount,
-  }), { maskReferenceCount: 0, invertedMaskDrawableCount: 0, additiveDrawableCount: 0, multiplicativeDrawableCount: 0 }),
+    cullingDrawableCount: totals.cullingDrawableCount + sample.featureCoverage.cullingDrawableCount,
+  }), { maskReferenceCount: 0, invertedMaskDrawableCount: 0, additiveDrawableCount: 0, multiplicativeDrawableCount: 0, cullingDrawableCount: 0 }),
 };
 const json = `${JSON.stringify(report, null, 2)}\n`;
 if (output) writeFileSync(resolve(output), json);

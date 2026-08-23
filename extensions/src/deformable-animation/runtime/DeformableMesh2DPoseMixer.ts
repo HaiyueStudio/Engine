@@ -1,5 +1,5 @@
 import type { ParsedDeformableMesh2DData } from '@haiyue/animation-spec/deformable2d';
-import { sampleDeformableMesh2DDrawable } from './DeformableMesh2DSampler.js';
+import { sampleDeformableMesh2DDrawable, sampleDeformableMesh2DDrawableColors } from './DeformableMesh2DSampler.js';
 
 export type DeformableMesh2DBlendPolicy = 'override' | 'additive';
 
@@ -31,7 +31,7 @@ export class DeformableMesh2DPoseError extends Error {
   }
 }
 
-/** Compact reusable pose storage. Colors are neutral in HYDM v1 but are kept in the port for a future ABI revision. */
+/** Compact reusable pose storage for HYDM geometry, opacity, drawable color and discrete channels. */
 export class DeformableMesh2DPoseBuffer {
   readonly topology: string;
   readonly positions: readonly Float32Array[];
@@ -125,6 +125,7 @@ export function sampleDeformableMesh2DPose(
   }
   for (let index = 0; index < data.drawables.length; index++) {
     const sampled = sampleDeformableMesh2DDrawable(data.times, data.drawables[index]!, time, output.positions[index]!);
+    sampleDeformableMesh2DDrawableColors(data.drawables[index]!, sampled, output.multiplyColors, output.screenColors, index * 4);
     output.opacities[index] = sampled.opacity;
     output.visibilities[index] = sampled.opacity > 0 ? 1 : 0;
     output.renderOrders[index] = sampled.renderOrder;

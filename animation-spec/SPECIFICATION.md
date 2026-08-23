@@ -97,9 +97,9 @@ Payload 包含 canonical Transform3D、perspective/orthographic camera、primiti
 
 ### 5.3 可变形 2D 网格必需扩展
 
-`org.haiyue.deformable-mesh-2d@1` 用于来源无关的稳定三角拓扑动画。组件引用一个 `binary` data resource 和有序的 `image` resources；二进制 resource 的 media type 为 `application/vnd.haiyue.deformable-mesh-2d`，payload format 为 `haiyue-deformable-mesh-2d@1`（`.hydm`）。格式包含 canvas、时间采样、每个 drawable 的静态 UV/index/mask 引用，以及 frame-major Float32 position/opacity/render-order 数据。HYDM 的图片 UV 原点固定为左上；Cubism capture v1 通过可选 `canvas.uvOrigin` 声明来源，Core capture 写入 `bottom-left` 并在转换阶段只归一化一次，省略字段的旧 capture 按 `top-left` 保持兼容。
+`org.haiyue.deformable-mesh-2d@1` 用于来源无关的稳定三角拓扑动画。组件引用一个 `binary` data resource 和有序的 `image` resources；二进制 resource 的 media type 为 `application/vnd.haiyue.deformable-mesh-2d`，payload format 为 `haiyue-deformable-mesh-2d@1`（`.hydm`）。格式包含 canvas、时间采样、每个 drawable 的静态 UV/index/mask 引用，以及 frame-major Float32 position/opacity/render-order 数据。HYDM 1.2 可选保存 frame-major multiply/screen RGBA，每帧各 4 个值并使用线性采样；neutral RGB 分别为 `[1,1,1]` 与 `[0,0,0]`，alpha 只 round-trip、不参与 Cubism drawable color 计算。全默认轨道可以省略并继续写 HYDM 1.1；1.0/1.1 缺失轨道按 `[1,1,1,1]` / `[0,0,0,0]` 求值。HYDM 的图片 UV 原点固定为左上；Cubism capture v1 通过可选 `canvas.uvOrigin` 声明来源，Core capture 写入 `bottom-left` 并在转换阶段只归一化一次，省略字段的旧 capture 按 `top-left` 保持兼容。
 
-宿主必须在创建 GPU owner 前校验 header/version、全部 byte range、预算、有限数、单调时间、顶点与索引范围、稳定 drawable id 和 mask 引用。v1 运行时执行线性顶点/透明度采样、step render order、alpha mask，以及 normal/additive/multiplicative blend；multiply/screen color、culling、参数化输入、Physics 和 motion sync 不得静默宣称精确支持。
+宿主必须在创建 GPU owner 前校验 header/version、全部 byte range、预算、有限数、单调时间、顶点与索引范围、稳定 drawable id 和 mask 引用。v1 通用 sampler 执行线性顶点/透明度/multiply-screen color 采样、step render order、alpha mask，以及 normal/additive/multiplicative blend；当前 WebGPU drawable color 合成由后续 runtime parity Goal 接线，culling、参数化输入、Physics 和 motion sync 不得静默宣称精确支持。
 
 Live2D Cubism 是一个构建期 adapter，而不是 runtime 分支。工具可以通过 `model3.json#FileReferences.Motions` 枚举动作分组并让用户选择；许可允许的 Cubism Core 在工具侧把 Motion3 求值成 drawable capture，`@haiyue/animation-spec/live2d` 再转换为本扩展。单 clip 转换仍只写入一个 baked clip；需要运行时无缝切换的工具可以在构建期把同模型、同 topology 的多个动作串接为一个 HYA 时间域，并保存各动作的互不重叠时间区间。切换只改变播放器采样区间，不重建 drawable、纹理或来源 runtime。`.moc3`、Core 和来源 SDK 不进入 HYA 或产品网页 bundle。完整架构边界见 ADR 0083。
 

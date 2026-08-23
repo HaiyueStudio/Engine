@@ -14,6 +14,7 @@
 ## 包入口
 
 - [`@haiyue/engine`](./engine.md)
+- [`@haiyue/engine/geometry`](./geometry.md)
 - [`@haiyue/extensions`](./extensions.md)
 - [`@haiyue/animation-spec`](./animation-spec.md)
 - [`@haiyue/engine/navigation`](./navigation.md)

@@ -7,7 +7,7 @@ import { Camera2D, Entity, HaiyueEngine, Transform2D } from '@haiyue/engine';
 import { ANIMATION_COMPARE_BACKGROUND_HEX, ANIMATION_COMPARE_CLEAR_COLOR, resolveAnimationCompareZoom } from '../animationCompareTheme';
 
 interface Bounds { x: number; y: number; width: number; height: number }
-interface FeatureCoverage { maskReferenceCount: number; invertedMaskDrawableCount: number; additiveDrawableCount: number; multiplicativeDrawableCount: number }
+interface FeatureCoverage { maskReferenceCount: number; invertedMaskDrawableCount: number; additiveDrawableCount: number; multiplicativeDrawableCount: number; cullingDrawableCount: number; multiplyColorDrawableCount: number; screenColorDrawableCount: number }
 interface ReferenceDrawable {
   id: string;
   positions: Float32Array;
@@ -19,6 +19,8 @@ interface ReferenceDrawable {
   blendMode: 'normal' | 'additive' | 'multiplicative';
   masks: readonly string[];
   maskMode: 'alpha' | 'alpha-inverted';
+  multiplyColor: readonly [number, number, number, number];
+  screenColor: readonly [number, number, number, number];
 }
 interface LoadedCoreMotion extends CubismModel3MotionReference { readonly label: string; readonly motion: CubismMotion3 }
 interface CoreClipRange { readonly start: number; readonly duration: number; readonly frameCount: number }
@@ -65,7 +67,7 @@ async function main(): Promise<void> {
   let bakedFrameCount = 0;
   let bakedFrameTimes: readonly number[] = [];
   let conversionDiagnostics: readonly { readonly severity: string; readonly code: string; readonly path: string }[] = [];
-  let featureCoverage: FeatureCoverage = { maskReferenceCount: 0, invertedMaskDrawableCount: 0, additiveDrawableCount: 0, multiplicativeDrawableCount: 0 };
+  let featureCoverage: FeatureCoverage = { maskReferenceCount: 0, invertedMaskDrawableCount: 0, additiveDrawableCount: 0, multiplicativeDrawableCount: 0, cullingDrawableCount: 0, multiplyColorDrawableCount: 0, screenColorDrawableCount: 0 };
   const queryParameters = new URLSearchParams(location.search);
   const localEvidenceMode = queryParameters.get('localEvidence') === '1';
   const mountedCoreUrl = queryParameters.get('coreUrl');
@@ -327,6 +329,9 @@ async function main(): Promise<void> {
       invertedMaskDrawableCount: converted.report.invertedMaskDrawableCount,
       additiveDrawableCount: converted.report.additiveDrawableCount,
       multiplicativeDrawableCount: converted.report.multiplicativeDrawableCount,
+      cullingDrawableCount: capture.frames[0]?.drawables.filter(drawable => drawable.culling === true).length ?? 0,
+      multiplyColorDrawableCount: capture.frames[0]?.drawables.filter(drawable => drawable.multiplyColor?.slice(0, 3).some((value, index) => value !== 1)).length ?? 0,
+      screenColorDrawableCount: capture.frames[0]?.drawables.filter(drawable => drawable.screenColor?.slice(0, 3).some(value => value !== 0)).length ?? 0,
     };
     releaseObjectUrls();
     const dataUrl = URL.createObjectURL(new Blob([converted.data], { type: 'application/vnd.haiyue.deformable-mesh-2d' }));
@@ -352,7 +357,7 @@ async function main(): Promise<void> {
     const maskCount = bakedData.drawables.reduce((sum, drawable) => sum + drawable.masks.length, 0);
     const selectedMotion = coreSession.motions.find(item => item.id === coreSession?.selectedMotionId);
     const motionSummary = selectedMotion ? ` · 动作：${selectedMotion.label}` : ' · 静态姿势（无 Motion3）';
-    const blendSummary = ` · additive ${featureCoverage.additiveDrawableCount} · multiplicative ${featureCoverage.multiplicativeDrawableCount}`;
+    const blendSummary = ` · additive ${featureCoverage.additiveDrawableCount} · multiplicative ${featureCoverage.multiplicativeDrawableCount} · culling ${featureCoverage.cullingDrawableCount}`;
     setStatus(`官方 Core 已加载 · ${coreSession.motions.length} 个动作 · ${bakedData.drawables.length} drawables · ${capture.frames.length} baked frames${motionSummary}${maskCount ? ` · ${maskCount} 个 mask references` : ''}${blendSummary}`, 'success');
   }
 
@@ -495,6 +500,8 @@ uniform float u_opacity;
 uniform float u_use_mask;
 uniform float u_invert_mask;
 uniform float u_output_mask;
+uniform vec4 u_multiply_color;
+uniform vec4 u_screen_color;
 out vec4 outColor;
 void main() {
   vec4 color = texture(u_texture, v_uv);
@@ -505,6 +512,8 @@ void main() {
     outColor = vec4(color.a);
     return;
   }
+  color.rgb = color.rgb * u_multiply_color.rgb;
+  color.rgb = color.rgb + u_screen_color.rgb * color.a - color.rgb * u_screen_color.rgb;
   float maskCoverage = u_use_mask > 0.5
     ? texture(u_mask, gl_FragCoord.xy / u_target_size).a
     : 1.0;
@@ -514,7 +523,7 @@ void main() {
 }`);
     this.position = gl.getAttribLocation(this.program, 'a_position'); this.uv = gl.getAttribLocation(this.program, 'a_uv');
     this.uniforms = Object.fromEntries([
-      'u_center', 'u_view', 'u_pan', 'u_zoom', 'u_target_size', 'u_opacity', 'u_use_mask', 'u_invert_mask', 'u_output_mask', 'u_texture', 'u_mask',
+      'u_center', 'u_view', 'u_pan', 'u_zoom', 'u_target_size', 'u_opacity', 'u_use_mask', 'u_invert_mask', 'u_output_mask', 'u_multiply_color', 'u_screen_color', 'u_texture', 'u_mask',
     ].map(name => [name, requiredUniform(gl, this.program, name)]));
   }
 
@@ -598,6 +607,8 @@ void main() {
     gl.uniform1f(this.uniforms.u_use_mask!, useMask ? 1 : 0);
     gl.uniform1f(this.uniforms.u_invert_mask!, useMask && drawable.maskMode === 'alpha-inverted' ? 1 : 0);
     gl.uniform1f(this.uniforms.u_output_mask!, outputMask ? 1 : 0);
+    gl.uniform4fv(this.uniforms.u_multiply_color!, drawable.multiplyColor);
+    gl.uniform4fv(this.uniforms.u_screen_color!, drawable.screenColor);
     gl.drawElements(gl.TRIANGLES, drawable.indices.length, gl.UNSIGNED_INT, 0);
     gl.deleteBuffer(positionBuffer);
     gl.deleteBuffer(uvBuffer);
@@ -650,7 +661,20 @@ void main() {
   }
 }
 
-function sampleBakedDrawables(data: ParsedDeformableMesh2DData, time: number): ReferenceDrawable[] { const frame = findFrame(data.times, time), next = Math.min(frame + 1, data.times.length - 1), progress = next === frame ? 0 : (time - data.times[frame]!) / (data.times[next]! - data.times[frame]!); return data.drawables.map(drawable => { const stride = drawable.vertexCount * 2, positions = new Float32Array(stride); for (let i = 0; i < stride; i++) positions[i] = mix(drawable.positions[frame * stride + i]!, drawable.positions[next * stride + i]!, progress); return { id: drawable.id, positions, uvs: drawable.uvs, indices: drawable.indices, opacity: mix(drawable.opacities[frame]!, drawable.opacities[next]!, progress), textureIndex: drawable.textureIndex, order: drawable.renderOrders[frame]!, blendMode: drawable.blendMode, masks: drawable.masks, maskMode: drawable.maskMode }; }); }
+function sampleBakedDrawables(data: ParsedDeformableMesh2DData, time: number): ReferenceDrawable[] {
+  const frame = findFrame(data.times, time), next = Math.min(frame + 1, data.times.length - 1), progress = next === frame ? 0 : (time - data.times[frame]!) / (data.times[next]! - data.times[frame]!);
+  return data.drawables.map(drawable => {
+    const stride = drawable.vertexCount * 2, positions = new Float32Array(stride);
+    for (let i = 0; i < stride; i++) positions[i] = mix(drawable.positions[frame * stride + i]!, drawable.positions[next * stride + i]!, progress);
+    return {
+      id: drawable.id, positions, uvs: drawable.uvs, indices: drawable.indices,
+      opacity: mix(drawable.opacities[frame]!, drawable.opacities[next]!, progress), textureIndex: drawable.textureIndex,
+      order: drawable.renderOrders[frame]!, blendMode: drawable.blendMode, masks: drawable.masks, maskMode: drawable.maskMode,
+      multiplyColor: sampleDrawableColor(drawable.multiplyColors, frame, next, progress, [1, 1, 1, 1]),
+      screenColor: sampleDrawableColor(drawable.screenColors, frame, next, progress, [0, 0, 0, 0]),
+    };
+  });
+}
 function captureCoreReferenceDrawables(session: CoreSession): ReferenceDrawable[] {
   const d = session.model.drawables, ids = Array.from(d.ids, String);
   return ids.map((id, index) => {
@@ -670,6 +694,8 @@ function captureCoreReferenceDrawables(session: CoreSession): ReferenceDrawable[
       // Old Core data can retain an unused inverted bit on an unmasked
       // drawable. Official rendering has no mask operation to invert there.
       maskMode: masks.length > 0 && coreInvertedMask(session.core, flags) ? 'alpha-inverted' : 'alpha',
+      multiplyColor: coreDrawableColor(d.multiplyColors, index, [1, 1, 1, 1]),
+      screenColor: coreDrawableColor(d.screenColors, index, [0, 0, 0, 0]),
     };
   });
 }
@@ -708,12 +734,15 @@ function captureCoreClip(session: CoreSession, textures: readonly File[], motion
           invertedMask: masks.length > 0 && coreInvertedMask(session.core, flags),
           positions: centerCorePositions(session, d.vertexPositions[index]),
           uvs: Array.from(d.vertexUvs[index]) as number[], indices: Array.from(d.indices[index]) as number[],
+          multiplyColor: coreDrawableColor(d.multiplyColors, index, [1, 1, 1, 1]),
+          screenColor: coreDrawableColor(d.screenColors, index, [0, 0, 0, 0]),
         };
       }),
     });
   }
   return {
     format: 'live2d-cubism-drawable-capture', version: 1, name: 'Browser comparison capture',
+    capabilities: { drawableColors: session.model.drawables.multiplyColors && session.model.drawables.screenColors ? 'captured' : 'unavailable' },
     canvas: { width: session.canvasWidth, height: session.canvasHeight, pixelsPerUnit: session.pixelsPerUnit, coordinateSystem: 'model-y-up', uvOrigin: 'bottom-left' },
     duration, frameRate: Math.max(1 / duration, (times.length - 1) / duration),
     textures: textures.map((file, index) => ({ id: `texture-${index}`, uri: file.name })), frames,
@@ -735,7 +764,14 @@ function centerCorePositions(session: CoreSession, source: ArrayLike<number>): n
 function normalizeCoreUvs(source: ArrayLike<number>): Float32Array { const uvs = Float32Array.from(source); for (let index = 1; index < uvs.length; index += 2) uvs[index] = 1 - uvs[index]!; return uvs; }
 function applyCoreMotion(session: CoreSession, time: number, motion: CubismMotion3 | null = session.motion): void { session.model.parameters.values.set(session.parameterDefaults); session.model.parts.opacities.set(session.partDefaults); if (motion) { const sample = sampleCubismMotion3(motion, time); for (const [id, value] of sample.parameters) { const index = session.parameterIndex.get(id); if (index !== undefined) session.model.parameters.values[index] = value; } for (const [id, value] of sample.partOpacities) { const index = session.partIndex.get(id); if (index !== undefined) session.model.parts.opacities[index] = value; } } session.model.update(); }
 function dataBounds(data: ParsedDeformableMesh2DData): Bounds { let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity; for (const drawable of data.drawables) for (let i = 0; i < drawable.positions.length; i += 2) { minX = Math.min(minX, drawable.positions[i]!); minY = Math.min(minY, drawable.positions[i + 1]!); maxX = Math.max(maxX, drawable.positions[i]!); maxY = Math.max(maxY, drawable.positions[i + 1]!); } return Number.isFinite(minX) ? { x: minX, y: minY, width: maxX - minX, height: maxY - minY } : { x: 0, y: 0, width: data.canvasWidth, height: data.canvasHeight }; }
-function summarizeDeformableFeatures(data: ParsedDeformableMesh2DData): FeatureCoverage { return { maskReferenceCount: data.drawables.reduce((sum, drawable) => sum + drawable.masks.length, 0), invertedMaskDrawableCount: data.drawables.filter(drawable => drawable.maskMode === 'alpha-inverted').length, additiveDrawableCount: data.drawables.filter(drawable => drawable.blendMode === 'additive').length, multiplicativeDrawableCount: data.drawables.filter(drawable => drawable.blendMode === 'multiplicative').length }; }
+function summarizeDeformableFeatures(data: ParsedDeformableMesh2DData): FeatureCoverage { return { maskReferenceCount: data.drawables.reduce((sum, drawable) => sum + drawable.masks.length, 0), invertedMaskDrawableCount: data.drawables.filter(drawable => drawable.maskMode === 'alpha-inverted').length, additiveDrawableCount: data.drawables.filter(drawable => drawable.blendMode === 'additive').length, multiplicativeDrawableCount: data.drawables.filter(drawable => drawable.blendMode === 'multiplicative').length, cullingDrawableCount: data.drawables.filter(drawable => drawable.culling).length, multiplyColorDrawableCount: data.drawables.filter(drawable => drawable.multiplyColors !== undefined).length, screenColorDrawableCount: data.drawables.filter(drawable => drawable.screenColors !== undefined).length }; }
+function sampleDrawableColor(track: Float32Array | undefined, frame: number, next: number, progress: number, fallback: readonly [number, number, number, number]): [number, number, number, number] { return [0, 1, 2, 3].map(index => mix(track?.[frame * 4 + index] ?? fallback[index]!, track?.[next * 4 + index] ?? fallback[index]!, progress)) as [number, number, number, number]; }
+function coreDrawableColor(source: any, index: number, fallback: readonly [number, number, number, number]): [number, number, number, number] {
+  if (!source) return [...fallback];
+  const nested = source[index];
+  const value = nested && typeof nested !== 'number' ? nested : source.subarray?.(index * 4, index * 4 + 4) ?? source.slice?.(index * 4, index * 4 + 4);
+  return value?.length >= 4 ? [Number(value[0]), Number(value[1]), Number(value[2]), Number(value[3])] : [...fallback];
+}
 function frameCountInRange(times: Float32Array, start: number, end: number): number { let count = 0; for (const time of times) if (time >= start && time <= end) count++; return count; }
 function findFrame(times: Float32Array, time: number): number { let index = 0; while (index + 1 < times.length && times[index + 1]! <= time) index++; return index; }
 function formatMotionLabel(motion: CubismModel3MotionReference, groupCount: number): string { const filename = motion.file.replaceAll('\\', '/').split('/').pop()?.replace(/\.motion3\.json$/iu, '') ?? motion.file; return `${motion.group}${groupCount > 1 ? ` ${motion.index + 1}` : ''} · ${filename}`; }

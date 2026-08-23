@@ -10,6 +10,8 @@ export { createBox3D } from './BoxGeometry';
 export type { BoxGeometryOptions } from './BoxGeometry';
 export { createRoundedBox3D } from './RoundedBoxGeometry';
 export type { RoundedBoxGeometryOptions } from './RoundedBoxGeometry';
+export { createPathExtrusion3D } from './PathExtrusionGeometry';
+export type { PathExtrusionGeometryOptions, PathExtrusionPoint } from './PathExtrusionGeometry';
 export { createSphere3D } from './SphereGeometry';
 export type { SphereGeometryOptions } from './SphereGeometry';
 export { createCone3D } from './ConeGeometry';

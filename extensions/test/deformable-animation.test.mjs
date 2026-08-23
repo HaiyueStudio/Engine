@@ -17,6 +17,7 @@ import {
   createDeformableMesh2DRuntimeExtension,
   sampleDeformableMesh2DDrawable,
 } from '../dist/deformable-animation.js';
+import { sampleDeformableMesh2DDrawableColors } from '../dist-test/deformable-animation/runtime/DeformableMesh2DSampler.js';
 import {
   DeformableMesh2DClipMixer,
   DeformableMesh2DPoseBuffer,
@@ -72,6 +73,8 @@ test('deformable sampler interpolates positions and opacity, flips screen Y, and
       uvs: new Float32Array([0, 0, 1, 0, 0, 1]), indices: new Uint32Array([0, 1, 2]),
       positions: new Float32Array([0, 10, 20, 10, 0, 30, 10, 20, 30, 20, 10, 40]),
       opacities: new Float32Array([1, 0]), renderOrders: new Float32Array([2, 9]),
+      multiplyColors: new Float32Array([1, 1, 1, 1, 0.5, 0.75, 1, 0.5]),
+      screenColors: new Float32Array([0, 0, 0, 0, 0.2, 0.4, 0.6, 0.8]),
     }],
   }));
   const target = new Float32Array(6);
@@ -80,6 +83,11 @@ test('deformable sampler interpolates positions and opacity, flips screen Y, and
   assert.equal(sample.opacity, 0.5);
   assert.equal(sample.renderOrder, 2);
   assert.equal(sample.progress, 0.5);
+  const multiply = new Float32Array(4);
+  const screen = new Float32Array(4);
+  sampleDeformableMesh2DDrawableColors(data.drawables[0], sample, multiply, screen);
+  assertFloatArrayClose(multiply, [0.75, 0.875, 1, 0.75]);
+  assertFloatArrayClose(screen, [0.1, 0.2, 0.3, 0.4]);
 });
 
 test('deformable clip mixer cross-fades two ranges on one retained pose with deterministic discrete winners', () => {
@@ -119,10 +127,14 @@ test('deformable pose port handles looping, missing channels, additive vertices,
     positions: new Float32Array([0, 10, 20, 10, 0, 30, 10, 20, 30, 20, 10, 40]),
     opacities: new Float32Array([1, 0.5]),
     renderOrders: new Float32Array([2, 9]),
+    multiplyColors: new Float32Array([1, 1, 1, 1, 0.5, 0.75, 1, 0.5]),
+    screenColors: new Float32Array([0, 0, 0, 0, 0.2, 0.4, 0.6, 0.8]),
   }));
   const pose = new DeformableMesh2DPoseBuffer(data);
   sampleDeformableMesh2DPose(data, 0.5, pose);
   assert.deepEqual([...pose.positions[0]], [5, -15, 25, -15, 5, -35]);
+  assertFloatArrayClose(pose.multiplyColors, [0.75, 0.875, 1, 0.75]);
+  assertFloatArrayClose(pose.screenColors, [0.1, 0.2, 0.3, 0.4]);
   const mixer = new DeformableMesh2DClipMixer(data);
   const onlyVertices = new Set(['vertices']);
   mixer.evaluate([{ id: 'loop', clip: { id: 'loop', start: 0, duration: 1 }, time: 1.5, weight: 1, channels: onlyVertices }]);
@@ -130,6 +142,13 @@ test('deformable pose port handles looping, missing channels, additive vertices,
   assert.equal(mixer.output.renderOrders[0], 2, 'missing discrete channel retains the reference winner');
   mixer.evaluate([{ id: 'add', clip: { id: 'add', start: 0, duration: 1, loop: false }, time: 1, weight: 0.5, blend: 'additive', channels: onlyVertices }]);
   assert.deepEqual([...mixer.output.positions[0]], [5, -15, 25, -15, 5, -35]);
+  const onlyColor = new Set(['color']);
+  mixer.evaluate([{ id: 'color-override', clip: { id: 'color', start: 0, duration: 1, loop: false }, time: 1, weight: 0.5, channels: onlyColor }]);
+  assertFloatArrayClose(mixer.output.multiplyColors, [0.75, 0.875, 1, 0.75]);
+  assertFloatArrayClose(mixer.output.screenColors, [0.1, 0.2, 0.3, 0.4]);
+  mixer.evaluate([{ id: 'color-add', clip: { id: 'color-add', start: 0, duration: 1, loop: false }, time: 1, weight: 0.5, blend: 'additive', channels: onlyColor }]);
+  assertFloatArrayClose(mixer.output.multiplyColors, [0.75, 0.875, 1, 0.75]);
+  assertFloatArrayClose(mixer.output.screenColors, [0.1, 0.2, 0.3, 0.4]);
   assert.throws(() => mixer.evaluate([{ id: 'bad-add', clip: { id: 'bad', start: 0, duration: 1 }, time: 0, weight: 1, blend: 'additive' }]), error => error instanceof DeformableMesh2DPoseError && error.code === 'E_DEFORMABLE_POSE_ADDITIVE_DISCRETE');
   const incompatible = decodeDeformableMesh2DData(encodeDeformableMesh2DData({
     canvasWidth: 100, canvasHeight: 100, duration: 1, frameRate: 1, times: new Float32Array([0]),
@@ -409,8 +428,15 @@ function deformableData(overrides = {}) {
       positions: overrides.positions ?? new Float32Array([0, 10, 20, 10, 0, 30]),
       opacities: overrides.opacities ?? new Float32Array([1]),
       renderOrders: overrides.renderOrders ?? new Float32Array([2]),
+      ...(overrides.multiplyColors === undefined ? {} : { multiplyColors: overrides.multiplyColors }),
+      ...(overrides.screenColors === undefined ? {} : { screenColors: overrides.screenColors }),
     }],
   });
+}
+
+function assertFloatArrayClose(actual, expected, tolerance = 1e-6) {
+  assert.equal(actual.length, expected.length);
+  for (let index = 0; index < expected.length; index++) assert.ok(Math.abs(actual[index] - expected[index]) <= tolerance, `index ${index}: ${actual[index]} != ${expected[index]}`);
 }
 
 function sharedMaskGroupData() {

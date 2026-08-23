@@ -89,7 +89,7 @@ function createBlendParityCapture() {
     x - 256, 256 - y - height,
     x + width - 256, 256 - y - height,
   ];
-  const drawable = ({ id, textureIndex, order, positions, opacity = 1, masks = [], blendMode = 'normal' }) => ({
+  const drawable = ({ id, textureIndex, order, positions, opacity = 1, masks = [], blendMode = 'normal', multiplyColor = [1, 1, 1, 1], screenColor = [0, 0, 0, 0] }) => ({
     id,
     textureIndex,
     renderOrder: order,
@@ -102,21 +102,21 @@ function createBlendParityCapture() {
     positions,
     uvs: [0, 0, 1, 0, 0, 1, 1, 1],
     indices: [0, 1, 2, 2, 1, 3],
-    multiplyColor: [1, 1, 1, 1],
-    screenColor: [0, 0, 0, 0],
+    multiplyColor,
+    screenColor,
   });
   const frame = (time, shift, reversed) => ({ time, drawables: [
-    drawable({ id: 'mask-source', textureIndex: 1, order: 0, positions: quad(112 + shift, 96, 288, 320), opacity: 0 }),
+    drawable({ id: 'mask-source', textureIndex: 1, order: 0, positions: quad(112 + shift, 96, 288, 320), opacity: 0, multiplyColor: [0.15, 0.3, 0.45, 0.2], screenColor: [0.7, 0.5, 0.25, 0.9] }),
     drawable({ id: 'background', textureIndex: 1, order: 1, positions: quad(48, 64, 416, 384), opacity: 0.92 }),
-    drawable({ id: 'normal', textureIndex: 0, order: 2, positions: quad(72 + shift, 136, 152, 224), opacity: reversed ? 0.42 : 0.72 }),
-    drawable({ id: 'additive', textureIndex: 0, order: reversed ? 4 : 3, positions: quad(180 - shift, 120, 152, 256), opacity: reversed ? 0.8 : 0.55, masks: ['mask-source'], blendMode: 'additive' }),
-    drawable({ id: 'multiplicative', textureIndex: 0, order: reversed ? 3 : 4, positions: quad(288 + shift, 136, 152, 224), opacity: reversed ? 0.5 : 0.78, masks: ['mask-source'], blendMode: 'multiplicative' }),
+    drawable({ id: 'normal', textureIndex: 0, order: 2, positions: quad(72 + shift, 136, 152, 224), opacity: reversed ? 0.42 : 0.72, multiplyColor: reversed ? [0.35, 0.8, 0.55, 0.1] : [0.8, 0.5, 0.9, 0.9], screenColor: reversed ? [0.4, 0.1, 0.3, 1] : [0.1, 0.25, 0.05, 0] }),
+    drawable({ id: 'additive', textureIndex: 0, order: reversed ? 4 : 3, positions: quad(180 - shift, 120, 152, 256), opacity: reversed ? 0.8 : 0.55, masks: ['mask-source'], blendMode: 'additive', multiplyColor: reversed ? [0.7, 0.4, 0.9, 1] : [0.45, 0.85, 0.65, 0], screenColor: reversed ? [0.05, 0.3, 0.2, 0] : [0.25, 0.05, 0.35, 1] }),
+    drawable({ id: 'multiplicative', textureIndex: 0, order: reversed ? 3 : 4, positions: quad(288 + shift, 136, 152, 224), opacity: reversed ? 0.5 : 0.78, masks: ['mask-source'], blendMode: 'multiplicative', multiplyColor: reversed ? [0.9, 0.55, 0.3, 0.25] : [0.6, 0.75, 0.4, 0.75], screenColor: reversed ? [0.2, 0.35, 0.05, 0.8] : [0.05, 0.15, 0.3, 0.2] }),
   ] });
   return {
     format: 'live2d-cubism-drawable-capture',
     version: 1,
     name: 'Synthetic Cubism premultiplied blend parity fixture',
-    source: { license: 'MIT', purpose: 'G11 normal/additive/multiplicative browser parity' },
+    source: { license: 'MIT', purpose: 'G11/G15 blend and drawable-color browser parity' },
     canvas: { width: 512, height: 512, pixelsPerUnit: 1, coordinateSystem: 'model-y-up', uvOrigin: 'top-left' },
     duration: 2,
     frameRate: 1,

@@ -15,7 +15,10 @@ test('deformable 2D machine-readable contract freezes the required extension and
   assert.equal(CONTRACT.runtime.sourceRuntimeDependency, false);
   assert.deepEqual(CONTRACT.runtime.supportedBlendModes, ['normal', 'additive', 'multiplicative']);
   assert.deepEqual(CONTRACT.runtime.supportedMasks, ['alpha', 'alpha-inverted']);
-  assert.equal(CONTRACT.extension.binaryVersion, '1.1');
+  assert.deepEqual(CONTRACT.runtime.sampledDrawableColors, ['multiply', 'screen']);
+  assert.deepEqual(CONTRACT.runtime.renderedDrawableColors, []);
+  assert.equal(CONTRACT.runtime.renderedDrawableColorsGoal, 'm05-g15-drawable-color-runtime-parity');
+  assert.equal(CONTRACT.extension.binaryVersion, '1.2');
   assert.equal(SCHEMA.properties.type.const, CONTRACT.extension.id);
   assert.equal(SCHEMA.properties.textures.maxItems, CONTRACT.limits.maxTextures);
 });
@@ -34,8 +37,8 @@ test('HYDM codec is deterministic, bounded and preserves frame-major mesh tracks
   new DataView(unknownVersion).setUint16(4, 2, true);
   assert.throws(() => decodeDeformableMesh2DData(unknownVersion), /Unsupported sidecar version 2.1/);
   const unknownMinor = first.slice(0);
-  new DataView(unknownMinor).setUint16(6, 2, true);
-  assert.throws(() => decodeDeformableMesh2DData(unknownMinor), /Unsupported sidecar version 1.2/);
+  new DataView(unknownMinor).setUint16(6, 3, true);
+  assert.throws(() => decodeDeformableMesh2DData(unknownMinor), /Unsupported sidecar version 1.3/);
   assert.throws(() => decodeDeformableMesh2DData(first.slice(0, 40)), /outside the buffer|unaccounted bytes/);
 });
 
@@ -52,6 +55,45 @@ test('HYDM 1.1 preserves inverted masks while 1.0 remains readable as normal alp
   });
   new DataView(legacy).setUint16(6, 0, true);
   assert.equal(decodeDeformableMesh2DData(legacy).drawables[0].maskMode, 'alpha');
+  assert.equal(decodeDeformableMesh2DData(legacy).drawables[0].multiplyColors, undefined);
+  assert.equal(decodeDeformableMesh2DData(encoded).drawables[0].screenColors, undefined);
+});
+
+test('HYDM 1.2 preserves frame-major drawable colors and elides exact neutral tracks', () => {
+  const source = dataFixture();
+  source.drawables[0].multiplyColors = new Float32Array([1, 1, 1, 1, 0.5, 0.6, 0.7, 0.8]);
+  source.drawables[0].screenColors = new Float32Array([0, 0, 0, 0, 0.1, 0.2, 0.3, 0.4]);
+  const first = encodeDeformableMesh2DData(source);
+  const second = encodeDeformableMesh2DData(source);
+  assert.equal(new DataView(first).getUint16(6, true), 2);
+  assert.deepEqual(new Uint8Array(first), new Uint8Array(second));
+  const parsed = decodeDeformableMesh2DData(first).drawables[0];
+  assert.deepEqual([...parsed.multiplyColors], [...source.drawables[0].multiplyColors]);
+  assert.deepEqual([...parsed.screenColors], [...source.drawables[0].screenColors]);
+
+  const neutral = dataFixture();
+  neutral.drawables[0].multiplyColors = new Float32Array([1, 1, 1, 1, 1, 1, 1, 1]);
+  neutral.drawables[0].screenColors = new Float32Array(8);
+  const elided = encodeDeformableMesh2DData(neutral);
+  assert.equal(new DataView(elided).getUint16(6, true), 1);
+  assert.equal(decodeDeformableMesh2DData(elided).drawables[0].multiplyColors, undefined);
+  assert.equal(decodeDeformableMesh2DData(elided).drawables[0].screenColors, undefined);
+});
+
+test('HYDM drawable color ranges reject malformed length, overlap, NaN and out-of-range input', () => {
+  const source = dataFixture();
+  source.drawables[0].multiplyColors = new Float32Array([1, 1, 1, 1, 0.5, 0.5, 0.5, 1]);
+  source.drawables[0].screenColors = new Float32Array([0, 0, 0, 0, 0.25, 0.25, 0.25, 0]);
+  const encoded = encodeDeformableMesh2DData(source);
+  const short = rewriteHydmMetadata(encoded, metadata => { metadata.drawables[0].multiplyColors[1]--; });
+  assert.throws(() => decodeDeformableMesh2DData(short), /four values per frame/u);
+  const overlap = rewriteHydmMetadata(encoded, metadata => { metadata.drawables[0].screenColors = [...metadata.drawables[0].multiplyColors]; });
+  assert.throws(() => decodeDeformableMesh2DData(overlap), /overlap/u);
+  assert.throws(() => encodeDeformableMesh2DData({ ...source, drawables: [{ ...source.drawables[0], multiplyColors: new Float32Array([1, 1, 1]) }] }), /four Float32 values per frame/u);
+  const nan = source.drawables[0].multiplyColors.slice(); nan[4] = Number.NaN;
+  assert.throws(() => encodeDeformableMesh2DData({ ...source, drawables: [{ ...source.drawables[0], multiplyColors: nan }] }), /finite/u);
+  const high = source.drawables[0].screenColors.slice(); high[4] = 1.01;
+  assert.throws(() => encodeDeformableMesh2DData({ ...source, drawables: [{ ...source.drawables[0], screenColors: high }] }), /inside \[0, 1\]/u);
 });
 
 test('HYDM encoder rejects invalid indices, opacity and order before serialization', () => {
@@ -152,6 +194,63 @@ test('Cubism capture tolerates bounded Core opacity overshoot and clamps the enc
     && error.diagnostics.some(item => item.code === 'E_CUBISM_CAPTURE_INVALID' && item.path === '$.frames[0].drawables[0].opacity'));
 });
 
+test('Cubism capture preserves dynamic multiply/screen RGBA in strict mode with separate feature attribution', () => {
+  const capture = captureFixture();
+  capture.capabilities = { drawableColors: 'captured' };
+  capture.frames[0].drawables[0].multiplyColor = [1, 0.75, 0.5, 0.25];
+  capture.frames[1].drawables[0].screenColor = [0.1, 0.2, 0.3, 0.4];
+  const converted = convertCubismCaptureToHya(capture, { strict: true });
+  assert.equal(converted.diagnostics.length, 0);
+  assert.equal(converted.report.multiplyColorDrawableCount, 1);
+  assert.equal(converted.report.screenColorDrawableCount, 1);
+  assert.equal(converted.report.multiplyColorDrawableFrameCount, 1);
+  assert.equal(converted.report.screenColorDrawableFrameCount, 1);
+  assert.equal(converted.report.unsupportedRuntimeFeatures.includes('multiply-screen-color'), false);
+  const data = decodeDeformableMesh2DData(converted.data);
+  assert.equal(new DataView(converted.data).getUint16(6, true), 2);
+  assertFloatArrayClose(data.drawables[0].multiplyColors, [1, 0.75, 0.5, 0.25, 1, 1, 1, 1]);
+  assertFloatArrayClose(data.drawables[0].screenColors, [0, 0, 0, 0, 0.1, 0.2, 0.3, 0.4]);
+
+  const alphaOnly = captureFixture();
+  alphaOnly.capabilities = { drawableColors: 'captured' };
+  alphaOnly.frames[1].drawables[0].multiplyColor = [1, 1, 1, 0.25];
+  alphaOnly.frames[1].drawables[0].screenColor = [0, 0, 0, 0.75];
+  const alphaOnlyResult = convertCubismCaptureToHya(alphaOnly, { strict: true });
+  assert.equal(alphaOnlyResult.report.multiplyColorDrawableCount, 0, 'Cubism color feature attribution is RGB-only.');
+  assert.equal(alphaOnlyResult.report.screenColorDrawableCount, 0, 'Cubism color feature attribution is RGB-only.');
+  assert.equal(new DataView(alphaOnlyResult.data).getUint16(6, true), 2, 'Non-default alpha must still round-trip.');
+  const alphaOnlyData = decodeDeformableMesh2DData(alphaOnlyResult.data);
+  assert.equal(alphaOnlyData.drawables[0].multiplyColors[7], 0.25);
+  assert.equal(alphaOnlyData.drawables[0].screenColors[7], 0.75);
+});
+
+test('Cubism drawable color capability classifies unavailable and invalid capture paths', () => {
+  const unavailable = captureFixture();
+  unavailable.capabilities = { drawableColors: 'unavailable' };
+  const normal = convertCubismCaptureToHya(unavailable);
+  assert.equal(normal.diagnostics[0].code, 'W_CUBISM_DRAWABLE_COLOR_UNAVAILABLE');
+  assert.throws(() => convertCubismCaptureToHya(unavailable, { strict: true }), error => error instanceof CubismCaptureConversionError
+    && error.diagnostics.some(item => item.code === 'W_CUBISM_DRAWABLE_COLOR_UNAVAILABLE' && item.path === '$.capabilities.drawableColors'));
+
+  const missing = captureFixture();
+  missing.capabilities = { drawableColors: 'captured' };
+  delete missing.frames[1].drawables[0].screenColor;
+  assert.throws(() => convertCubismCaptureToHya(missing), error => error instanceof CubismCaptureConversionError
+    && error.diagnostics.some(item => item.code === 'E_CUBISM_DRAWABLE_COLOR_INVALID' && item.path === '$.frames[1].drawables[0].screenColor'));
+
+  const invalid = captureFixture();
+  invalid.frames[0].drawables[0].multiplyColor = [1.001, 1, 1, 1];
+  assert.throws(() => convertCubismCaptureToHya(invalid), error => error instanceof CubismCaptureConversionError
+    && error.diagnostics.some(item => item.code === 'E_CUBISM_DRAWABLE_COLOR_INVALID' && item.path === '$.frames[0].drawables[0].multiplyColor'));
+});
+
+test('official Core capture page records drawable color arrays and capability availability', async () => {
+  const source = await readFile(new URL('../live2d/tools/capture-page.mjs', import.meta.url), 'utf8');
+  assert.match(source, /drawables\.multiplyColors/u);
+  assert.match(source, /drawables\.screenColors/u);
+  assert.match(source, /drawableColors:.*captured.*unavailable/u);
+});
+
 test('Cubism dynamic visibility suppresses only the baked main-pass opacity', () => {
   const capture = captureFixture();
   capture.frames[0].drawables[0].visible = false;
@@ -210,10 +309,12 @@ test('Cubism conversion preserves non-normal blend modes while strict mode still
     && error.diagnostics.some(item => item.code === 'E_CUBISM_CAPTURE_INVALID'
       && item.path === '$.frames[0].drawables[0].blendMode'));
 
-  const warning = captureFixture();
-  warning.frames[0].drawables[0].culling = true;
-  warning.frames[1].drawables[0].culling = true;
-  assert.throws(() => convertCubismCaptureToHya(warning, { strict: true }), error => error instanceof CubismCaptureConversionError && error.diagnostics[0].code === 'W_CUBISM_CULLING_IGNORED');
+  const culled = captureFixture();
+  culled.frames[0].drawables[0].culling = true;
+  culled.frames[1].drawables[0].culling = true;
+  const culledResult = convertCubismCaptureToHya(culled, { strict: true });
+  assert.equal(decodeDeformableMesh2DData(culledResult.data).drawables[0].culling, true);
+  assert.equal(culledResult.report.unsupportedRuntimeFeatures.includes('culling'), false);
 });
 
 test('Cubism topology changes have a stable diagnostic', () => {
@@ -226,6 +327,10 @@ test('Cubism constant drawable flags cannot change across baked frames', () => {
   const changed = captureFixture();
   changed.frames[1].drawables[0].blendMode = 'additive';
   assert.throws(() => convertCubismCaptureToHya(changed), error => error instanceof CubismCaptureConversionError
+    && error.diagnostics.some(item => item.code === 'E_CUBISM_TOPOLOGY_CHANGED' && item.path.includes('frames[1]')));
+  const changedCulling = captureFixture();
+  changedCulling.frames[1].drawables[0].culling = true;
+  assert.throws(() => convertCubismCaptureToHya(changedCulling), error => error instanceof CubismCaptureConversionError
     && error.diagnostics.some(item => item.code === 'E_CUBISM_TOPOLOGY_CHANGED' && item.path.includes('frames[1]')));
 });
 
@@ -331,6 +436,11 @@ function rewriteHydmMetadata(buffer, mutate) {
   new Uint8Array(result, floatOffset, floatCount * 4).set(new Uint8Array(buffer, oldFloatOffset, floatCount * 4));
   new Uint8Array(result, indexOffset, indexCount * 4).set(new Uint8Array(buffer, oldIndexOffset, indexCount * 4));
   return result;
+}
+
+function assertFloatArrayClose(actual, expected, tolerance = 1e-6) {
+  assert.equal(actual.length, expected.length);
+  for (let index = 0; index < expected.length; index++) assert.ok(Math.abs(actual[index] - expected[index]) <= tolerance, `index ${index}: ${actual[index]} != ${expected[index]}`);
 }
 
 function captureFixture() {

@@ -63,6 +63,8 @@ assert.equal(live2dBlend.status, 'passed');
 assert.equal(live2dBlend.fixtureId, 'blend-parity');
 assert.equal(live2dBlend.featureCoverage.additiveDrawableCount, 1);
 assert.equal(live2dBlend.featureCoverage.multiplicativeDrawableCount, 1);
+assert.equal(live2dBlend.featureCoverage.multiplyColorDrawableCount, 4);
+assert.equal(live2dBlend.featureCoverage.screenColorDrawableCount, 4);
 assert.equal(live2dBlend.featureCoverage.maskReferenceCount, 2);
 assert.equal(live2dBlend.hya.droppedCompositeCount, 0);
 assert.equal(live2dBlend.selectedActionId, 'sample:second');

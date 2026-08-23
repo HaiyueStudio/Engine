@@ -9,8 +9,8 @@
     "dataVersion": 1,
     "mediaType": "application/vnd.haiyue.deformable-mesh-2d",
     "binaryMagic": "HYDM",
-    "binaryVersion": "1.1",
-    "compatibleBinaryVersions": ["1.0", "1.1"],
+    "binaryVersion": "1.2",
+    "compatibleBinaryVersions": ["1.0", "1.1", "1.2"],
     "headerBytes": 32
   },
   "profile": {
@@ -19,6 +19,13 @@
     "positions": "absolute-frame-major-float32",
     "opacitySampling": "linear",
     "positionSampling": "linear",
+    "multiplyColorSampling": "linear-frame-major-rgba",
+    "screenColorSampling": "linear-frame-major-rgba",
+    "drawableColorNeutralRgb": {
+      "multiply": [1, 1, 1],
+      "screen": [0, 0, 0]
+    },
+    "drawableColorAlphaUsage": "preserved-not-rendered",
     "renderOrderSampling": "step"
   },
   "limits": {
@@ -34,14 +41,18 @@
     "ownerPackage": "@haiyue/extensions/deformable-animation",
     "sourceRuntimeDependency": false,
     "supportedBlendModes": ["normal", "additive", "multiplicative"],
-    "supportedMasks": ["alpha", "alpha-inverted"]
+    "supportedMasks": ["alpha", "alpha-inverted"],
+    "sampledDrawableColors": ["multiply", "screen"],
+    "renderedDrawableColors": [],
+    "renderedDrawableColorsGoal": "m05-g15-drawable-color-runtime-parity"
   },
   "diagnostics": [
     "E_ANIMATION_INVALID_FORMAT",
     "E_ANIMATION_LIMIT_EXCEEDED",
     "E_CUBISM_CAPTURE_INVALID",
     "E_CUBISM_TOPOLOGY_CHANGED",
-    "W_CUBISM_COLOR_APPROXIMATED",
+    "E_CUBISM_DRAWABLE_COLOR_INVALID",
+    "W_CUBISM_DRAWABLE_COLOR_UNAVAILABLE",
     "W_CUBISM_CULLING_IGNORED"
   ]
 }

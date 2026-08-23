@@ -42,6 +42,10 @@ Cubism Core 负责 `.moc3` 的参数到 drawable 顶点求值，且使用专有�
 
 HYDM 1.1 在 drawable metadata 增加来源无关的 `maskMode: alpha | alpha-inverted`。新版 decoder 继续读取 1.0，并把缺省值解释为 `alpha`；1.1 writer 总是显式写出 mode，使旧 decoder 对无法表达的 inverted mask 以 unknown minor version 失败，而不是静默按普通 mask 播放。该变化不引入 Cubism 命名或来源 runtime。
 
+## 2026-08-23 Drawable fidelity 补充
+
+HYDM 1.2 的逐帧 multiply/screen RGBA 已接入通用 `AnimationVisual2D` retained uniform；RGB 按冻结的 premultiplied multiply、alpha-aware screen、drawable opacity、mask coverage、framebuffer blend 顺序执行，通道 A 只保留在 pose 中。静态 culling 作为来源无关 visual pipeline 状态，以 CCW front face 在 main、mask source 与 effect source 统一执行。两项均不引入来源 runtime、Live2D component 或连续值 pipeline variant；第 7 条中的 multiply/screen color 与 culling 降级约束不再适用，真实 corpus 晋升仍由 M05 G16 负责。
+
 ## 验证
 
 - Sidecar deterministic round-trip、unknown version、truncated/range/overflow、拓扑、mask/reference 和 limit tests。

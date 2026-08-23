@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-live2d-local-corpus-candidate",
+  "revision": "1cc8efe8da2960a0fa82bf905a4fbf02a694329e",
+  "dirty": true,
+  "formalEvidence": false,
+  "core": {
+    "sourcePolicy": "official-cdn",
+    "url": "https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js",
+    "transport": "network"
+  },
+  "sampleCount": 1,
+  "samples": [
+    {
+      "id": "rice-culling",
+      "sourcePolicy": "caller-supplied-local-only",
+      "runtimeDirectoryHash": "sha256-082dea795bfef18b5598f38d40cdadcaee54827146fdec596ecf4ee4e31eedc1",
+      "fileCount": 10,
+      "sourceBytes": 3152965,
+      "sourceEntry": "rice_pro_t03.model3.json",
+      "sourceFiles": [
+        {
+          "path": "motions/idle.motion3.json",
+          "byteLength": 10165,
+          "sha256": "b15a5ba6d59f7369b2b44f960f809c588921d008317d9f15f8a7c66eed0b3fba"
+        },
+        {
+          "path": "motions/mtn_01.motion3.json",
+          "byteLength": 22819,
+          "sha256": "1bbbb3b91c5574d04cee312b02e1e89d12e6c155f39b8b4816654daf6658c27d"
+        },
+        {
+          "path": "motions/mtn_02.motion3.json",
+          "byteLength": 13541,
+          "sha256": "9db0c12a957829078987e0fb7352681a5064c663d4c27366529272f579d3973b"
+        },
+        {
+          "path": "motions/mtn_03.motion3.json",
+          "byteLength": 21062,
+          "sha256": "5b2d1910a114fae8c86e8589506872681a233448c11d7694f0faa819325ebe7b"
+        },
+        {
+          "path": "rice_pro_t03.2048/texture_00.png",
+          "byteLength": 1061518,
+          "sha256": "9930643898aeea3a5f11f06933e79a217b64fbec80c06158f512e85454ea60ea"
+        },
+        {
+          "path": "rice_pro_t03.2048/texture_01.png",
+          "byteLength": 1505136,
+          "sha256": "d80053659ecb2eab98269ade228253034827b8744db1fcb67843acbcc37906de"
+        },
+        {
+          "path": "rice_pro_t03.cdi3.json",
+          "byteLength": 13259,
+          "sha256": "74f113b14d96620ec9747f44a32abbc98563e01b0c1f1a540f8c5641f970ffdf"
+        },
+        {
+          "path": "rice_pro_t03.moc3",
+          "byteLength": 479104,
+          "sha256": "be56f2d656d279d8db9fe302ec744fa5992ff884b2ebb233f202772d5dd7e4dc"
+        },
+        {
+          "path": "rice_pro_t03.model3.json",
+          "byteLength": 848,
+          "sha256": "92f09386b0f64266c73498c515d3a92af1eb87275c4daf58494e641ad821ef7e"
+        },
+        {
+          "path": "rice_pro_t03.physics3.json",
+          "byteLength": 25513,
+          "sha256": "72f3c854bf00b551bd379785975571c88239b2da9e6db42a9935bcf4a9f2fa3d"
+        }
+      ],
+      "coreVersion": 83951616,
+      "evidenceRecipe": {
+        "profile": "clip-baked-reference-times",
+        "motionId": "Idle:0",
+        "motionFile": "motions/idle.motion3.json",
+        "bakedFrameTimes": [
+          0,
+          1,
+          4
+        ],
+        "referenceTimes": [
+          1
+        ]
+      },
+      "conversionDiagnostics": [],
+      "featureCoverage": {
+        "maskReferenceCount": 19,
+        "invertedMaskDrawableCount": 5,
+        "additiveDrawableCount": 21,
+        "multiplicativeDrawableCount": 0,
+        "cullingDrawableCount": 9
+      },
+      "observedBlendModes": [
+        "normal",
+        "additive"
+      ],
+      "drawables": 178,
+      "bakedFrameCount": 3,
+      "maskTargets": 8,
+      "sampledAt": 1,
+      "recoverySmoke": true,
+      "comparisonConfiguration": {
+        "viewportMode": "fit",
+        "fitPolicy": "bounds-centered-auto-zoom",
+        "fitFill": 0.82,
+        "userZoom": 1,
+        "pan": [
+          0,
+          0
+        ],
+        "resolvedZoom": 0.9509157355499183,
+        "synchronizedViews": true,
+        "canvas": [
+          719,
+          746
+        ],
+        "targetFormat": "rgba8unorm",
+        "textureColorSpaceConversion": "none",
+        "alphaMode": "premultiplied",
+        "antialias": false
+      },
+      "surfaceReadback": {
+        "width": 719,
+        "height": 694,
+        "maxChannelError": 198,
+        "meanAbsoluteError": 0.378991,
+        "mismatchPixelCount": 7667,
+        "mismatchRatio": 0.015365,
+        "onePixelSpatialTolerance": {
+          "maxChannelError": 97,
+          "meanAbsoluteError": 0.155346,
+          "mismatchPixelCount": 8107,
+          "mismatchRatio": 0.008123
+        },
+        "stableInterior": {
+          "pixelCount": 482204,
+          "coverageRatio": 0.966368,
+          "maxChannelError": 8,
+          "meanAbsoluteError": 0.000109,
+          "mismatchPixelCount": 0,
+          "mismatchRatio": 0
+        }
+      },
+      "browser": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "angleBackend": "d3d11",
+        "nativeBackend": true,
+        "gpuAdapter": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "device": "",
+          "description": ""
+        }
+      },
+      "browserDiagnostics": {
+        "consoleErrorCount": 0,
+        "exceptionCount": 0,
+        "unclassifiedFailureCount": 0,
+        "profileCleanup": {
+          "status": "passed",
+          "attempts": 1,
+          "durationMs": 280
+        }
+      },
+      "requestedProjectFiles": [
+        "examples/live2d-hya-compare/bundle.js",
+        "examples/live2d-hya-compare/index.html",
+        "examples/live2d-hya-compare/samples/mask-parity.hya",
+        "examples/live2d-hya-compare/samples/mask-parity.hydm",
+        "examples/live2d-hya-compare/samples/mask-parity.png",
+        "examples/shared/engine.js"
+      ]
+    }
+  ],
+  "totals": {
+    "maskReferenceCount": 19,
+    "invertedMaskDrawableCount": 5,
+    "additiveDrawableCount": 21,
+    "multiplicativeDrawableCount": 0,
+    "cullingDrawableCount": 9
+  }
+}

@@ -7049,6 +7049,10 @@
               "kind": "value"
             },
             {
+              "name": "createPathExtrusion3D",
+              "kind": "value"
+            },
+            {
               "name": "createPlane3D",
               "kind": "value"
             },
@@ -7155,6 +7159,14 @@
             {
               "name": "LineGeometry",
               "kind": "value"
+            },
+            {
+              "name": "PathExtrusionGeometryOptions",
+              "kind": "type"
+            },
+            {
+              "name": "PathExtrusionPoint",
+              "kind": "type"
             },
             {
               "name": "PlaneGeometryOptions",

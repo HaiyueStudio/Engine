@@ -7,6 +7,10 @@ import type { AnimationTextRasterizer } from './AnimationTextRasterizer';
 export interface AnimationVisual2DOptions {
   geometry: Geometry2D;
   color: readonly [number, number, number, number];
+  /** Drawable-local multiply tint. Alpha is retained for pose parity but is not rendered. */
+  multiplyColor?: readonly [number, number, number, number];
+  /** Drawable-local alpha-aware screen tint. Alpha is retained for pose parity but is not rendered. */
+  screenColor?: readonly [number, number, number, number];
   instanceId: number;
   nodeId: string;
   order: number;
@@ -14,6 +18,8 @@ export interface AnimationVisual2DOptions {
   blendMode?: AnimationVisual2DBlendMode;
   /** Declares whether filtered source texels are already premultiplied. */
   textureAlphaMode?: AnimationVisual2DTextureAlphaMode;
+  /** Source-neutral back-face culling. False draws both triangle faces. */
+  culling?: boolean;
   /** Optional explicit UV pairs for arbitrary textured triangle meshes. */
   uvs?: Float32Array;
   sourceOnly?: boolean;
@@ -60,6 +66,7 @@ export class AnimationVisual2D extends Component {
   order: number;
   readonly blendMode: AnimationVisual2DBlendMode;
   readonly textureAlphaMode: AnimationVisual2DTextureAlphaMode;
+  readonly culling: boolean;
   readonly uvs: Float32Array | null;
   readonly sourceOnly: boolean;
   readonly compositeLayers: readonly Readonly<AnimationCompositeLayer>[];
@@ -70,6 +77,8 @@ export class AnimationVisual2D extends Component {
   readonly compositeMode: AnimationCompositeMode | undefined;
   readonly uvRect: [number, number, number, number];
   readonly color: [number, number, number, number];
+  readonly multiplyColor: [number, number, number, number];
+  readonly screenColor: [number, number, number, number];
   texture: GPUTexture | null;
   textureHandle: AssetHandle<GPUTexture> | null;
   readonly textMaterial: AnimationTextRasterizer | null;
@@ -87,6 +96,14 @@ export class AnimationVisual2D extends Component {
     this.order = options.order;
     this.blendMode = options.blendMode ?? 'normal';
     this.textureAlphaMode = options.textureAlphaMode ?? 'straight';
+    if (options.culling !== undefined && typeof options.culling !== 'boolean') {
+      throw new AnimationVisual2DConfigurationError(
+        'E_ANIMATION_2D_CULLING_INVALID',
+        'AnimationVisual2D culling must be boolean when present.',
+        '$.culling',
+      );
+    }
+    this.culling = options.culling ?? false;
     if (options.uvs && options.uvs.length !== options.geometry.positions.length) {
       throw new RangeError('AnimationVisual2D explicit UV count must match geometry positions.');
     }
@@ -103,6 +120,8 @@ export class AnimationVisual2D extends Component {
     this.compositeMode = this.compositeLayers[0]?.mode;
     this.uvRect = [...(options.uvRect ?? [0, 0, 1, 1])];
     this.color = [...options.color];
+    this.multiplyColor = drawableColor(options.multiplyColor ?? [1, 1, 1, 1], 'multiplyColor');
+    this.screenColor = drawableColor(options.screenColor ?? [0, 0, 0, 0], 'screenColor');
     this.texture = options.texture ?? null;
     this.textureHandle = options.textureHandle ?? null;
     this.textMaterial = options.textMaterial ?? null;
@@ -137,6 +156,21 @@ export class AnimationVisual2D extends Component {
     this.revision++;
   }
 
+  /** Updates caller-owned drawable color state without replacing visual or GPU owners. */
+  setDrawableColors(
+    multiplyColor: readonly [number, number, number, number] | Float32Array,
+    screenColor: readonly [number, number, number, number] | Float32Array,
+  ): void {
+    assertDrawableColor(multiplyColor, 'multiplyColor');
+    assertDrawableColor(screenColor, 'screenColor');
+    let changed = false;
+    for (let index = 0; index < 4; index++) {
+      if (this.multiplyColor[index] !== multiplyColor[index]) { this.multiplyColor[index] = multiplyColor[index]!; changed = true; }
+      if (this.screenColor[index] !== screenColor[index]) { this.screenColor[index] = screenColor[index]!; changed = true; }
+    }
+    if (changed) this.revision++;
+  }
+
   setCompositeExpansion(index: number, value: number): void {
     const layer = this.compositeLayers[index];
     if (!layer || layer.expansion === value) return;
@@ -153,11 +187,14 @@ export class AnimationVisual2D extends Component {
     return new AnimationVisual2D({
       geometry: this.geometry,
       color: this.color,
+      multiplyColor: this.multiplyColor,
+      screenColor: this.screenColor,
       instanceId: this.instanceId,
       nodeId: this.nodeId,
       order: this.order,
       blendMode: this.blendMode,
       textureAlphaMode: this.textureAlphaMode,
+      culling: this.culling,
       ...(this.uvs ? { uvs: this.uvs } : {}),
       sourceOnly: this.sourceOnly,
       ...(this.compositeLayers.length === 0 ? {} : { composite: { layers: this.compositeLayers } }),
@@ -176,4 +213,120 @@ export class AnimationVisual2D extends Component {
       effects: this.effects.map(effect => ({ kind: effect.kind, values: new Float32Array(effect.values) })),
     });
   }
+}
+
+export class AnimationVisual2DConfigurationError extends TypeError {
+  constructor(
+    readonly code:
+      | 'E_ANIMATION_2D_CULLING_INVALID'
+      | 'E_ANIMATION_2D_MULTIPLY_COLOR_INVALID'
+      | 'E_ANIMATION_2D_SCREEN_COLOR_INVALID',
+    message: string,
+    readonly path: string,
+  ) {
+    super(message);
+    this.name = 'AnimationVisual2DConfigurationError';
+  }
+}
+
+export interface AnimationDrawableColorPixelInput {
+  readonly texture: readonly [number, number, number, number];
+  readonly textureAlphaMode?: AnimationVisual2DTextureAlphaMode;
+  readonly baseColor?: readonly [number, number, number, number];
+  readonly multiplyColor?: readonly [number, number, number, number];
+  readonly screenColor?: readonly [number, number, number, number];
+  readonly coverage?: number;
+  /** Mask setup intentionally ignores drawable tint RGB. */
+  readonly outputMask?: boolean;
+}
+
+/** CPU oracle for the premultiplied fragment emitted before framebuffer compositing. */
+export function composeAnimationDrawableColorPixel(input: AnimationDrawableColorPixelInput): [number, number, number, number] {
+  const texture = drawableColor(input.texture, 'texture');
+  const baseColor = drawableColor(input.baseColor ?? [1, 1, 1, 1], 'baseColor');
+  const multiplyColor = drawableColor(input.multiplyColor ?? [1, 1, 1, 1], 'multiplyColor');
+  const screenColor = drawableColor(input.screenColor ?? [0, 0, 0, 0], 'screenColor');
+  const coverage = input.coverage ?? 1;
+  if (!Number.isFinite(coverage) || coverage < 0 || coverage > 1) throw new RangeError('Animation drawable coverage must be finite and within [0, 1].');
+  const alpha = texture[3];
+  const premultiplied = input.textureAlphaMode === 'premultiplied'
+    ? [texture[0], texture[1], texture[2]]
+    : [texture[0] * alpha, texture[1] * alpha, texture[2] * alpha];
+  if (!input.outputMask) {
+    for (let index = 0; index < 3; index++) {
+      const multiplied = premultiplied[index]! * multiplyColor[index]!;
+      premultiplied[index] = multiplied + screenColor[index]! * alpha - multiplied * screenColor[index]!;
+    }
+  }
+  return [
+    premultiplied[0]! * baseColor[0] * baseColor[3] * coverage,
+    premultiplied[1]! * baseColor[1] * baseColor[3] * coverage,
+    premultiplied[2]! * baseColor[2] * baseColor[3] * coverage,
+    alpha * baseColor[3] * coverage,
+  ];
+}
+
+function drawableColor(
+  value: readonly [number, number, number, number] | Float32Array,
+  kind: 'multiplyColor' | 'screenColor' | 'texture' | 'baseColor',
+): [number, number, number, number] {
+  assertDrawableColor(value, kind);
+  return [value[0]!, value[1]!, value[2]!, value[3]!];
+}
+
+function assertDrawableColor(
+  value: readonly [number, number, number, number] | Float32Array,
+  kind: 'multiplyColor' | 'screenColor' | 'texture' | 'baseColor',
+): void {
+  let valid = value.length === 4;
+  for (let index = 0; valid && index < 4; index++) {
+    const channel = value[index];
+    valid = Number.isFinite(channel) && channel! >= 0 && channel! <= 1;
+  }
+  if (valid) return;
+  if (kind === 'multiplyColor' || kind === 'screenColor') {
+    throw new AnimationVisual2DConfigurationError(
+      kind === 'multiplyColor' ? 'E_ANIMATION_2D_MULTIPLY_COLOR_INVALID' : 'E_ANIMATION_2D_SCREEN_COLOR_INVALID',
+      `AnimationVisual2D ${kind} must contain four finite values within [0, 1].`,
+      `$.${kind}`,
+    );
+  }
+  throw new RangeError(`Animation drawable ${kind} must contain four finite values within [0, 1].`);
+}
+
+export class Animation2DPipelineCreationError extends Error {
+  readonly code = 'E_ANIMATION_2D_PIPELINE_CREATION_FAILED' as const;
+  readonly path = '$runtime.animation2D.pipeline' as const;
+
+  constructor(readonly pipelineKey: string, readonly cause: unknown) {
+    super(`Animation2D render pipeline creation failed for ${pipelineKey}.`);
+    this.name = 'Animation2DPipelineCreationError';
+  }
+}
+
+export function createAnimation2DPipeline<T>(pipelineKey: string, create: () => T): T {
+  try {
+    return create();
+  } catch (cause) {
+    throw new Animation2DPipelineCreationError(pipelineKey, cause);
+  }
+}
+
+/**
+ * Source-neutral 2D front faces are CCW in clip space. WebGPU normalizes the
+ * viewport convention for front-face classification; callers must not add an
+ * extra framebuffer-Y inversion. Real model/world reflections still reverse it.
+ */
+export const ANIMATION_2D_WEBGPU_FRONT_FACE = 'ccw' as const;
+
+export function animation2DCullingPrimitive(culling: boolean): GPUPrimitiveState {
+  return {
+    topology: 'triangle-list',
+    frontFace: ANIMATION_2D_WEBGPU_FRONT_FACE,
+    cullMode: culling ? 'back' : 'none',
+  };
+}
+
+export function animation2DCullingPipelineKey(culling: boolean): string {
+  return culling ? `back:${ANIMATION_2D_WEBGPU_FRONT_FACE}` : `none:${ANIMATION_2D_WEBGPU_FRONT_FACE}`;
 }

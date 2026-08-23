@@ -37,6 +37,37 @@ export function sampleDeformableMesh2DDrawable(
   });
 }
 
+/** Samples optional HYDM 1.2 RGBA tracks into caller-owned pose storage without allocating. */
+export function sampleDeformableMesh2DDrawableColors(
+  drawable: ParsedDeformableMesh2DDrawable,
+  sample: DeformableMesh2DSample,
+  targetMultiplyColors: Float32Array,
+  targetScreenColors: Float32Array,
+  targetOffset = 0,
+): void {
+  if (!Number.isSafeInteger(targetOffset) || targetOffset < 0 || targetOffset + 4 > targetMultiplyColors.length || targetOffset + 4 > targetScreenColors.length) {
+    throw new RangeError('Deformable color sample target requires four writable values.');
+  }
+  sampleColorTrack(drawable.multiplyColors, sample, targetMultiplyColors, targetOffset, [1, 1, 1, 1]);
+  sampleColorTrack(drawable.screenColors, sample, targetScreenColors, targetOffset, [0, 0, 0, 0]);
+}
+
+function sampleColorTrack(
+  track: Float32Array | undefined,
+  sample: DeformableMesh2DSample,
+  target: Float32Array,
+  targetOffset: number,
+  fallback: readonly [number, number, number, number],
+): void {
+  const startOffset = sample.frame * 4;
+  const nextOffset = sample.nextFrame * 4;
+  for (let index = 0; index < 4; index++) {
+    const start = track?.[startOffset + index] ?? fallback[index]!;
+    const next = track?.[nextOffset + index] ?? fallback[index]!;
+    target[targetOffset + index] = mix(start, next, sample.progress);
+  }
+}
+
 function findFrame(times: Float32Array, time: number): number {
   if (time <= times[0]!) return 0;
   if (time >= times[times.length - 1]!) return times.length - 1;

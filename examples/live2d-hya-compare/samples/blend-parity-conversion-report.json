@@ -11,13 +11,15 @@
     "invertedMaskDrawableCount": 0,
     "additiveDrawableCount": 1,
     "multiplicativeDrawableCount": 1,
+    "multiplyColorDrawableCount": 4,
+    "screenColorDrawableCount": 4,
+    "multiplyColorDrawableFrameCount": 12,
+    "screenColorDrawableFrameCount": 12,
     "emptyDrawableCount": 0,
     "unsupportedRuntimeFeatures": [
       "parameterized-input",
       "physics-runtime",
-      "motion-sync",
-      "multiply-screen-color",
-      "culling"
+      "motion-sync"
     ]
   }
 }

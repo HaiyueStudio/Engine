@@ -28,6 +28,10 @@ export interface DeformableMesh2DDrawableSource {
   readonly positions: Float32Array;
   readonly opacities: Float32Array;
   readonly renderOrders: Float32Array;
+  /** Optional frame-major RGBA. Missing values use [1, 1, 1, 1]. */
+  readonly multiplyColors?: Float32Array;
+  /** Optional frame-major RGBA. Missing values use [0, 0, 0, 0]. */
+  readonly screenColors?: Float32Array;
 }
 
 export interface DeformableMesh2DDataSource {

@@ -52,6 +52,10 @@ export interface CubismDrawableCapture {
   readonly version: typeof CUBISM_DRAWABLE_CAPTURE_VERSION;
   readonly name?: string;
   readonly source?: Readonly<Record<string, unknown>>;
+  readonly capabilities?: Readonly<{
+    /** New Core capture tools set this explicitly; omitted legacy captures remain compatible. */
+    readonly drawableColors?: 'captured' | 'unavailable';
+  }>;
   readonly canvas: {
     readonly width: number;
     readonly height: number;
@@ -72,8 +76,8 @@ export interface CubismCaptureDiagnostic {
     | 'E_CUBISM_CAPTURE_INVALID'
     | 'E_CUBISM_MASK_BUDGET_EXCEEDED'
     | 'E_CUBISM_TOPOLOGY_CHANGED'
-    | 'W_CUBISM_COLOR_APPROXIMATED'
-    | 'W_CUBISM_CULLING_IGNORED';
+    | 'E_CUBISM_DRAWABLE_COLOR_INVALID'
+    | 'W_CUBISM_DRAWABLE_COLOR_UNAVAILABLE';
   readonly message: string;
   readonly path: string;
 }
@@ -98,6 +102,10 @@ export interface CubismCaptureConversionResult {
     invertedMaskDrawableCount: number;
     additiveDrawableCount: number;
     multiplicativeDrawableCount: number;
+    multiplyColorDrawableCount: number;
+    screenColorDrawableCount: number;
+    multiplyColorDrawableFrameCount: number;
+    screenColorDrawableFrameCount: number;
     emptyDrawableCount: number;
     unsupportedRuntimeFeatures: readonly string[];
   }>;
@@ -134,6 +142,8 @@ export function convertCubismCaptureToHya(
     const positions = new Float32Array(capture.frames.length * positionStride);
     const opacities = new Float32Array(capture.frames.length);
     const renderOrders = new Float32Array(capture.frames.length);
+    const multiplyColors = new Float32Array(capture.frames.length * 4);
+    const screenColors = new Float32Array(capture.frames.length * 4);
     for (let frameIndex = 0; frameIndex < capture.frames.length; frameIndex++) {
       const frameDrawable = capture.frames[frameIndex]!.drawables.find(item => item.id === base.id);
       const path = `$.frames[${frameIndex}].drawables[id=${JSON.stringify(base.id)}]`;
@@ -153,12 +163,11 @@ export function convertCubismCaptureToHya(
       }
       opacities[frameIndex] = empty || frameDrawable.visible === false ? 0 : clampUnitInterval(frameDrawable.opacity);
       renderOrders[frameIndex] = frameDrawable.renderOrder;
+      writeColor(multiplyColors, frameIndex * 4, frameDrawable.multiplyColor, [1, 1, 1, 1]);
+      writeColor(screenColors, frameIndex * 4, frameDrawable.screenColor, [0, 0, 0, 0]);
     }
     const basePath = `$.frames[0].drawables[id=${JSON.stringify(base.id)}]`;
     const blendMode = base.blendMode ?? 'normal';
-    const samples = capture.frames.map(frame => frame.drawables.find(item => item.id === base.id)!).filter(Boolean);
-    if (samples.some(item => item.culling === true)) diagnostics.push({ severity: 'warning', code: 'W_CUBISM_CULLING_IGNORED', message: 'Drawable culling is disabled by the v1 2D renderer.', path: `${basePath}.culling` });
-    if (samples.some(item => !isNeutralMultiply(item.multiplyColor) || !isNeutralScreen(item.screenColor))) diagnostics.push({ severity: 'warning', code: 'W_CUBISM_COLOR_APPROXIMATED', message: 'Non-neutral multiply/screen color is not represented by v1.', path: basePath });
     vertexCount += empty ? 3 : base.positions.length / 2;
     drawables.push({
       id: neutralIds.get(base.id)!,
@@ -172,6 +181,8 @@ export function convertCubismCaptureToHya(
       positions,
       opacities,
       renderOrders,
+      multiplyColors,
+      screenColors,
     });
   }
   if (diagnostics.some(item => item.severity === 'error') || (options.strict && diagnostics.length > 0)) {
@@ -232,8 +243,12 @@ export function convertCubismCaptureToHya(
       invertedMaskDrawableCount: drawables.filter(drawable => drawable.maskMode === 'alpha-inverted').length,
       additiveDrawableCount: drawables.filter(drawable => drawable.blendMode === 'additive').length,
       multiplicativeDrawableCount: drawables.filter(drawable => drawable.blendMode === 'multiplicative').length,
+      multiplyColorDrawableCount: countDrawableColorTracks(capture, 'multiplyColor', isNeutralMultiply),
+      screenColorDrawableCount: countDrawableColorTracks(capture, 'screenColor', isNeutralScreen),
+      multiplyColorDrawableFrameCount: countDrawableColorFrames(capture, 'multiplyColor', isNeutralMultiply),
+      screenColorDrawableFrameCount: countDrawableColorFrames(capture, 'screenColor', isNeutralScreen),
       emptyDrawableCount,
-      unsupportedRuntimeFeatures: Object.freeze(['parameterized-input', 'physics-runtime', 'motion-sync', 'multiply-screen-color', 'culling']),
+      unsupportedRuntimeFeatures: Object.freeze(['parameterized-input', 'physics-runtime', 'motion-sync']),
     }),
   });
 }
@@ -244,6 +259,9 @@ function validateCaptureRoot(capture: CubismDrawableCapture, diagnostics: Cubism
   };
   if (!capture || typeof capture !== 'object') { fail('Capture must be an object.', '$'); return; }
   if (capture.format !== CUBISM_DRAWABLE_CAPTURE_FORMAT || capture.version !== CUBISM_DRAWABLE_CAPTURE_VERSION) fail('Capture format/version is unsupported.', '$.format');
+  const drawableColorCapability = capture.capabilities?.drawableColors;
+  if (drawableColorCapability !== undefined && drawableColorCapability !== 'captured' && drawableColorCapability !== 'unavailable') fail('Drawable color capability must be captured or unavailable.', '$.capabilities.drawableColors');
+  if (drawableColorCapability === 'unavailable') diagnostics.push({ severity: 'warning', code: 'W_CUBISM_DRAWABLE_COLOR_UNAVAILABLE', message: 'The evaluator does not expose drawable multiply/screen color arrays; neutral fallback is used.', path: '$.capabilities.drawableColors' });
   if (!capture.canvas || capture.canvas.coordinateSystem !== 'model-y-up') fail('Capture coordinate system must be model-y-up.', '$.canvas.coordinateSystem');
   if (capture.canvas?.uvOrigin !== undefined && capture.canvas.uvOrigin !== 'top-left' && capture.canvas.uvOrigin !== 'bottom-left') fail('UV origin must be top-left or bottom-left.', '$.canvas.uvOrigin');
   for (const [key, value] of [['width', capture.canvas?.width], ['height', capture.canvas?.height], ['pixelsPerUnit', capture.canvas?.pixelsPerUnit]] as const) if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) fail(`${key} must be positive and finite.`, `$.canvas.${key}`);
@@ -271,6 +289,8 @@ function validateCaptureRoot(capture: CubismDrawableCapture, diagnostics: Cubism
       if (drawable.invertedMask !== undefined && typeof drawable.invertedMask !== 'boolean') fail('invertedMask must be boolean when present.', `${path}.invertedMask`);
       if (drawable.masks !== undefined && (!Array.isArray(drawable.masks) || drawable.masks.some((mask: unknown) => typeof mask !== 'string' || mask.length === 0))) fail('Masks must contain non-empty drawable ids.', `${path}.masks`);
       if (drawable.invertedMask === true && (drawable.masks?.length ?? 0) === 0) fail('An inverted mask flag requires at least one mask reference.', `${path}.invertedMask`);
+      validateCapturedColor(drawable.multiplyColor, drawableColorCapability === 'captured', `${path}.multiplyColor`, diagnostics);
+      validateCapturedColor(drawable.screenColor, drawableColorCapability === 'captured', `${path}.screenColor`, diagnostics);
       const empty = Array.isArray(drawable.positions) && Array.isArray(drawable.indices) && (drawable.positions.length === 0 || drawable.indices.length === 0);
       if (!Array.isArray(drawable.positions) || (!empty && (drawable.positions.length < 6 || drawable.positions.length % 2 !== 0)) || !drawable.positions.every(Number.isFinite)) fail('Positions require either an empty Core placeholder or finite xy triples.', `${path}.positions`);
       if (!Array.isArray(drawable.uvs) || drawable.uvs.length !== drawable.positions.length || !drawable.uvs.every(Number.isFinite)) fail('UVs must match positions.', `${path}.uvs`);
@@ -348,8 +368,30 @@ function sameTopology(a: CubismCapturedDrawable, b: CubismCapturedDrawable): boo
     && (a.invertedMask ?? false) === (b.invertedMask ?? false);
 }
 
-function isNeutralMultiply(value: readonly number[] | undefined): boolean { return value === undefined || (value.length === 4 && value.every(component => component === 1)); }
-function isNeutralScreen(value: readonly number[] | undefined): boolean { return value === undefined || (value.length === 4 && value.every(component => component === 0)); }
+function isNeutralMultiply(value: readonly number[] | undefined): boolean { return value === undefined || (value.length === 4 && value[0] === 1 && value[1] === 1 && value[2] === 1); }
+function isNeutralScreen(value: readonly number[] | undefined): boolean { return value === undefined || (value.length === 4 && value[0] === 0 && value[1] === 0 && value[2] === 0); }
+function validateCapturedColor(value: readonly number[] | undefined, required: boolean, path: string, diagnostics: CubismCaptureDiagnostic[]): void {
+  if (value === undefined) {
+    if (required) diagnostics.push({ severity: 'error', code: 'E_CUBISM_DRAWABLE_COLOR_INVALID', message: 'Captured drawable color is missing.', path });
+    return;
+  }
+  if (!Array.isArray(value) || value.length !== 4 || value.some(component => !Number.isFinite(component) || component < -CUBISM_UNIT_INTERVAL_EPSILON || component > 1 + CUBISM_UNIT_INTERVAL_EPSILON)) {
+    diagnostics.push({ severity: 'error', code: 'E_CUBISM_DRAWABLE_COLOR_INVALID', message: 'Drawable color must contain four finite values inside [0, 1], allowing only bounded Core float32 drift.', path });
+  }
+}
+function writeColor(target: Float32Array, offset: number, value: readonly number[] | undefined, fallback: readonly [number, number, number, number]): void {
+  for (let index = 0; index < 4; index++) target[offset + index] = clampUnitInterval(value?.[index] ?? fallback[index]!);
+}
+function countDrawableColorTracks(capture: CubismDrawableCapture, field: 'multiplyColor' | 'screenColor', neutral: (value: readonly number[] | undefined) => boolean): number {
+  const ids = new Set<string>();
+  for (const frame of capture.frames) for (const drawable of frame.drawables) if (!neutral(drawable[field])) ids.add(drawable.id);
+  return ids.size;
+}
+function countDrawableColorFrames(capture: CubismDrawableCapture, field: 'multiplyColor' | 'screenColor', neutral: (value: readonly number[] | undefined) => boolean): number {
+  let count = 0;
+  for (const frame of capture.frames) for (const drawable of frame.drawables) if (!neutral(drawable[field])) count++;
+  return count;
+}
 function clampUnitInterval(value: number): number { return Math.max(0, Math.min(1, value)); }
 function normalizeCubismUvs(source: readonly number[], origin: 'top-left' | 'bottom-left'): Float32Array {
   const normalized = new Float32Array(source);

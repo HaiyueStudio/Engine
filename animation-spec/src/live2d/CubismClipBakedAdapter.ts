@@ -47,7 +47,7 @@ export interface CubismBuildTimeEvaluator {
   readonly version: string;
   readonly duration: number;
   readonly keyTimes?: readonly number[];
-  readonly capabilities: Readonly<{ motion: boolean; expression: boolean; physics: boolean; pose: boolean }>;
+  readonly capabilities: Readonly<{ motion: boolean; expression: boolean; physics: boolean; pose: boolean; drawableColors?: boolean }>;
   evaluate(
     time: number,
     recipe: CubismClipBakedRecipe,
@@ -84,7 +84,7 @@ export interface CubismClipBakedConversionOptions {
 /** License-isolated adapter: the evaluator owns Core/Framework, while this module only sees captured drawables. */
 export class CubismClipBakedAdapter implements OfflineConversionAdapter<CubismClipBakedSource, CubismCaptureFrame> {
   readonly id = 'live2d-cubism-clip-baked';
-  readonly version = '1.0.0';
+  readonly version = '1.1.0';
 
   async open(source: CubismClipBakedSource, recipe: OfflineConversionRecipe, context: { readonly signal: AbortSignal; readonly assets: ReadonlyMap<string, OfflineConversionResolvedAsset> }): Promise<OfflineConversionSession<CubismCaptureFrame>> {
     const typedRecipe = recipe as CubismClipBakedRecipe;
@@ -99,23 +99,35 @@ export class CubismClipBakedAdapter implements OfflineConversionAdapter<CubismCl
     requireCapability(source, typedRecipe.expression !== undefined, 'expression', diagnostics);
     requireCapability(source, typedRecipe.physics === true, 'physics', diagnostics);
     requireCapability(source, typedRecipe.pose === true, 'pose', diagnostics);
+    if (source.evaluator.capabilities.drawableColors === false) diagnostics.push(warning('W_CUBISM_DRAWABLE_COLOR_UNAVAILABLE', 'Evaluator does not expose drawable multiply/screen colors; neutral fallback is used.', '$.evaluator.capabilities.drawableColors'));
     const seenDiagnostics = new Set(diagnostics.map(item => `${item.code}\0${item.path}`));
+    const multiplyColorDrawables = new Set<string>();
+    const screenColorDrawables = new Set<string>();
+    const features: Record<string, number | boolean | string> = {
+      motion: typedRecipe.motion === undefined ? false : true,
+      expression: typedRecipe.expression === undefined ? false : true,
+      physics: typedRecipe.physics === true,
+      pose: typedRecipe.pose === true,
+      textureCount: source.textures.length,
+      drawableColorCapture: source.evaluator.capabilities.drawableColors === false ? 'unavailable' : source.evaluator.capabilities.drawableColors === true ? 'captured' : 'legacy-unspecified',
+      multiplyColorDrawableCount: 0,
+      screenColorDrawableCount: 0,
+      multiplyColorDrawableFrameCount: 0,
+      screenColorDrawableFrameCount: 0,
+    };
     return {
       duration: typedRecipe.duration ?? source.evaluator.duration,
       ...(source.evaluator.keyTimes === undefined ? {} : { keyTimes: source.evaluator.keyTimes }),
       sourceVersion: source.sourceVersion,
       evaluatorVersion: `${source.coreVersion}+${source.evaluator.version}`,
       diagnostics,
-      features: {
-        motion: typedRecipe.motion === undefined ? false : true,
-        expression: typedRecipe.expression === undefined ? false : true,
-        physics: typedRecipe.physics === true,
-        pose: typedRecipe.pose === true,
-        textureCount: source.textures.length,
-      },
+      features,
       async evaluate(time, signal) {
         const frame = await source.evaluator.evaluate((typedRecipe.start ?? 0) + time, typedRecipe, CUBISM_CLIP_BAKED_UPDATE_ORDER, signal);
-        inspectFrame(frame, diagnostics, seenDiagnostics, time);
+        const diagnosticStart = diagnostics.length;
+        inspectFrame(frame, diagnostics, seenDiagnostics, time, source.evaluator.capabilities.drawableColors === true, features, multiplyColorDrawables, screenColorDrawables);
+        const frameError = diagnostics.slice(diagnosticStart).find(item => item.severity === 'error');
+        if (frameError) throw new OfflineConversionError('E_CUBISM_DRAWABLE_COLOR_INVALID', frameError.message, frameError.path);
         return frame;
       },
       close: () => source.evaluator.close(),
@@ -185,6 +197,8 @@ export const CUBISM_CAPTURE_FRAME_OPERATIONS: OfflineConversionFrameOperations<C
           ...drawable,
           opacity: mix(drawable.opacity, next.opacity, progress),
           positions: Object.freeze(drawable.positions.map((value, valueIndex) => mix(value, next.positions[valueIndex]!, progress))),
+          multiplyColor: interpolateColor(drawable.multiplyColor, next.multiplyColor, progress, [1, 1, 1, 1]),
+          screenColor: interpolateColor(drawable.screenColor, next.screenColor, progress, [0, 0, 0, 0]),
           renderOrder: progress < 0.5 ? drawable.renderOrder : next.renderOrder,
         });
       })),
@@ -198,6 +212,8 @@ export const CUBISM_CAPTURE_FRAME_OPERATIONS: OfflineConversionFrameOperations<C
       const right = interpolated.drawables[drawableIndex]!;
       maximum = Math.max(maximum, Math.abs(left.opacity - right.opacity));
       for (let index = 0; index < left.positions.length; index++) maximum = Math.max(maximum, Math.abs(left.positions[index]! - right.positions[index]!));
+      maximum = Math.max(maximum, colorError(left.multiplyColor, right.multiplyColor, [1, 1, 1, 1]));
+      maximum = Math.max(maximum, colorError(left.screenColor, right.screenColor, [0, 0, 0, 0]));
     }
     return maximum;
   },
@@ -208,11 +224,13 @@ export const CUBISM_CAPTURE_FRAME_OPERATIONS: OfflineConversionFrameOperations<C
         ...drawable,
         opacity: quantize(drawable.opacity, step),
         positions: Object.freeze(drawable.positions.map(value => quantize(value, step))),
+        ...(drawable.multiplyColor === undefined ? {} : { multiplyColor: quantizeColor(drawable.multiplyColor, step) }),
+        ...(drawable.screenColor === undefined ? {} : { screenColor: quantizeColor(drawable.screenColor, step) }),
       }))),
     });
   },
   dirtyChannels(previous, current) {
-    if (!previous) return Object.freeze(current.drawables.flatMap((_, index) => [`drawable/${index}/vertices`, `drawable/${index}/opacity`, `drawable/${index}/order`]));
+    if (!previous) return Object.freeze(current.drawables.flatMap((_, index) => [`drawable/${index}/vertices`, `drawable/${index}/opacity`, `drawable/${index}/color`, `drawable/${index}/order`]));
     assertCompatibleFrames(previous, current);
     const dirty: string[] = [];
     for (let index = 0; index < current.drawables.length; index++) {
@@ -220,6 +238,7 @@ export const CUBISM_CAPTURE_FRAME_OPERATIONS: OfflineConversionFrameOperations<C
       const after = current.drawables[index]!;
       if (before.positions.some((value, valueIndex) => value !== after.positions[valueIndex])) dirty.push(`drawable/${index}/vertices`);
       if (before.opacity !== after.opacity) dirty.push(`drawable/${index}/opacity`);
+      if (!sameColor(before.multiplyColor, after.multiplyColor, [1, 1, 1, 1]) || !sameColor(before.screenColor, after.screenColor, [0, 0, 0, 0])) dirty.push(`drawable/${index}/color`);
       if (before.renderOrder !== after.renderOrder) dirty.push(`drawable/${index}/order`);
     }
     return Object.freeze(dirty);
@@ -239,12 +258,31 @@ function requireCapability(source: CubismClipBakedSource, required: boolean, cap
   if (required && !source.evaluator.capabilities[capability]) diagnostics.push(error('E_CUBISM_RECIPE_CAPABILITY_MISSING', `Evaluator does not support requested ${capability} baking.`, `$.recipe.${capability}`));
 }
 
-function inspectFrame(frame: CubismCaptureFrame, diagnostics: OfflineConversionDiagnostic[], seen: Set<string>, time: number): void {
+function inspectFrame(
+  frame: CubismCaptureFrame,
+  diagnostics: OfflineConversionDiagnostic[],
+  seen: Set<string>,
+  time: number,
+  drawableColorsRequired: boolean,
+  features: Record<string, number | boolean | string>,
+  multiplyColorDrawables: Set<string>,
+  screenColorDrawables: Set<string>,
+): void {
   for (let index = 0; index < frame.drawables.length; index++) {
     const drawable = frame.drawables[index]!;
-    if (drawable.culling === true) addDiagnostic(diagnostics, seen, warning('W_CUBISM_CULLING_IGNORED', 'Drawable culling is not represented by HYDM v1.', `$.frames[time=${time}].drawables[${index}].culling`));
-    if (!neutral(drawable.multiplyColor, 1) || !neutral(drawable.screenColor, 0)) addDiagnostic(diagnostics, seen, warning('W_CUBISM_COLOR_APPROXIMATED', 'Multiply/screen color is not represented by HYDM v1.', `$.frames[time=${time}].drawables[${index}]`));
+    inspectColor(drawable.multiplyColor, drawableColorsRequired, `$.frames[time=${time}].drawables[${index}].multiplyColor`, diagnostics, seen);
+    inspectColor(drawable.screenColor, drawableColorsRequired, `$.frames[time=${time}].drawables[${index}].screenColor`, diagnostics, seen);
+    if (!neutralRgb(drawable.multiplyColor, 1)) {
+      multiplyColorDrawables.add(drawable.id);
+      features.multiplyColorDrawableFrameCount = Number(features.multiplyColorDrawableFrameCount) + 1;
+    }
+    if (!neutralRgb(drawable.screenColor, 0)) {
+      screenColorDrawables.add(drawable.id);
+      features.screenColorDrawableFrameCount = Number(features.screenColorDrawableFrameCount) + 1;
+    }
   }
+  features.multiplyColorDrawableCount = multiplyColorDrawables.size;
+  features.screenColorDrawableCount = screenColorDrawables.size;
 }
 
 function assertCompatibleFrames(left: CubismCaptureFrame, right: CubismCaptureFrame): void {
@@ -267,6 +305,29 @@ function safeOutputPath(value: string): string {
 function addDiagnostic(target: OfflineConversionDiagnostic[], seen: Set<string>, diagnostic: OfflineConversionDiagnostic): void { const key = `${diagnostic.code}\0${diagnostic.path}`; if (!seen.has(key)) { seen.add(key); target.push(diagnostic); } }
 function error(code: string, message: string, path: string): OfflineConversionDiagnostic { return Object.freeze({ severity: 'error', code, message, path }); }
 function warning(code: string, message: string, path: string): OfflineConversionDiagnostic { return Object.freeze({ severity: 'warning', code, message, path }); }
-function neutral(value: readonly number[] | undefined, expected: number): boolean { return value === undefined || (value.length === 4 && value.every(component => component === expected)); }
+function inspectColor(value: readonly number[] | undefined, required: boolean, path: string, diagnostics: OfflineConversionDiagnostic[], seen: Set<string>): void {
+  if (value === undefined) {
+    if (required) addDiagnostic(diagnostics, seen, error('E_CUBISM_DRAWABLE_COLOR_INVALID', 'Evaluator declared drawable color support but omitted a color.', path));
+    return;
+  }
+  if (value.length !== 4 || value.some(component => !Number.isFinite(component) || component < -1e-4 || component > 1 + 1e-4)) addDiagnostic(diagnostics, seen, error('E_CUBISM_DRAWABLE_COLOR_INVALID', 'Drawable color must contain four finite values inside [0, 1].', path));
+}
+function interpolateColor(left: readonly number[] | undefined, right: readonly number[] | undefined, progress: number, fallback: readonly [number, number, number, number]): readonly [number, number, number, number] {
+  return Object.freeze([0, 1, 2, 3].map(index => mix(left?.[index] ?? fallback[index]!, right?.[index] ?? fallback[index]!, progress))) as unknown as readonly [number, number, number, number];
+}
+function colorError(left: readonly number[] | undefined, right: readonly number[] | undefined, fallback: readonly [number, number, number, number]): number {
+  let maximum = 0;
+  for (let index = 0; index < 4; index++) maximum = Math.max(maximum, Math.abs((left?.[index] ?? fallback[index]!) - (right?.[index] ?? fallback[index]!)));
+  return maximum;
+}
+function quantizeColor(value: readonly [number, number, number, number], step: number): readonly [number, number, number, number] {
+  return Object.freeze(value.map(component => clamp(quantize(component, step), 0, 1))) as unknown as readonly [number, number, number, number];
+}
+function sameColor(left: readonly number[] | undefined, right: readonly number[] | undefined, fallback: readonly [number, number, number, number]): boolean {
+  for (let index = 0; index < 4; index++) if ((left?.[index] ?? fallback[index]) !== (right?.[index] ?? fallback[index])) return false;
+  return true;
+}
+function neutralRgb(value: readonly number[] | undefined, expected: number): boolean { return value === undefined || (value.length === 4 && value[0] === expected && value[1] === expected && value[2] === expected); }
 function mix(left: number, right: number, progress: number): number { return left + (right - left) * progress; }
 function quantize(value: number, step: number): number { return Math.round(value / step) * step; }
+function clamp(value: number, minimum: number, maximum: number): number { return Math.max(minimum, Math.min(maximum, value)); }

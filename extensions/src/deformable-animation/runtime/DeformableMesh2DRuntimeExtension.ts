@@ -14,7 +14,7 @@ import type {
   Animation2DExtensionInstance,
 } from '../../animation/Animation2DExtensionRegistry';
 import { AnimationVisual2D } from '../../animation/AnimationVisual2D';
-import { sampleDeformableMesh2DDrawable } from './DeformableMesh2DSampler';
+import { sampleDeformableMesh2DDrawable, sampleDeformableMesh2DDrawableColors } from './DeformableMesh2DSampler';
 
 export type DeformableMesh2DRuntimeState = 'loading' | 'ready' | 'error' | 'destroyed';
 
@@ -32,6 +32,8 @@ interface RuntimeDrawable {
   readonly source: ParsedDeformableMesh2DDrawable;
   readonly geometry: Geometry2D;
   readonly positions: Float32Array;
+  readonly multiplyColor: Float32Array;
+  readonly screenColor: Float32Array;
   readonly visuals: AnimationVisual2D[];
 }
 
@@ -83,12 +85,14 @@ class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
     if (this.state !== 'ready') return;
     for (const item of this.drawables) {
       const sample = sampleDeformableMesh2DDrawable(this.data!.times, item.source, timeSeconds, item.positions);
+      sampleDeformableMesh2DDrawableColors(item.source, sample, item.multiplyColor, item.screenColor);
       item.geometry.markDirty();
       for (const visual of item.visuals) {
         // Cubism's setup-mask pass samples the source mesh texture alpha but
         // deliberately ignores drawable/model opacity. Keep the main visual's
         // sampled opacity while mask-only clones remain fully contributing.
         visual.color[3] = visual.sourceOnly ? 1 : sample.opacity * opacity;
+        visual.setDrawableColors(item.multiplyColor, item.screenColor);
         visual.setOrder(sample.renderOrder);
         visual.revision++;
       }
@@ -222,6 +226,7 @@ class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
         order: drawable.renderOrders[0]!,
         blendMode: drawable.blendMode,
         textureAlphaMode: 'premultiplied',
+        culling: drawable.culling,
         sourceOnly,
         ...(composite ? { composite } : {}),
         textureHandle: textures[drawable.textureIndex]!,
@@ -235,7 +240,14 @@ class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
       const geometry = new Geometry2D(positions, drawable.indices);
       const visible = createVisual(drawable, geometry, false, `draw:${drawable.id}`);
       this.root.addChild(new Entity(`Drawable ${drawable.id}`).addComponent(visible));
-      const runtime = { source: drawable, geometry, positions, visuals: [visible] };
+      const runtime = {
+        source: drawable,
+        geometry,
+        positions,
+        multiplyColor: new Float32Array(4),
+        screenColor: new Float32Array(4),
+        visuals: [visible],
+      };
       runtimeById.set(drawable.id, runtime);
       this.drawables.push(runtime);
     }

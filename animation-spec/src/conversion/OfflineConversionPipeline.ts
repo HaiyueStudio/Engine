@@ -136,6 +136,7 @@ export class OfflineConversionError extends Error {
     | 'E_CUBISM_DEPENDENCY_MISSING'
     | 'E_CUBISM_RUNTIME_INPUT_UNBAKED'
     | 'E_CUBISM_RECIPE_CAPABILITY_MISSING'
+    | 'E_CUBISM_DRAWABLE_COLOR_INVALID'
     | 'E_CUBISM_WPK_UNSUPPORTED';
   readonly path: string;
 
@@ -365,6 +366,7 @@ function sourceErrorCode(code: string): OfflineConversionError['code'] {
     'E_CUBISM_DEPENDENCY_MISSING',
     'E_CUBISM_RUNTIME_INPUT_UNBAKED',
     'E_CUBISM_RECIPE_CAPABILITY_MISSING',
+    'E_CUBISM_DRAWABLE_COLOR_INVALID',
     'E_CUBISM_WPK_UNSUPPORTED',
   ].includes(code) ? code as OfflineConversionError['code'] : 'E_CONVERSION_STRICT_DIAGNOSTIC';
 }

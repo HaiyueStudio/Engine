@@ -1,0 +1,58 @@
+{
+  "schema": "haiyue-deformable-drawable-color-candidate@1",
+  "formalEvidence": false,
+  "goal": "M05-G15",
+  "profile": "clip-baked",
+  "sourceNeutral": true,
+  "oracle": {
+    "reference": "Live2D/CubismWebFramework develop Shaders/WebGL/fragshadersrcpremultipliedalpha.frag",
+    "order": [
+      "premultiplied-texture-sample",
+      "multiply-rgb",
+      "alpha-aware-screen-rgb",
+      "base-color-and-drawable-opacity",
+      "mask-coverage",
+      "framebuffer-blend"
+    ],
+    "tintAlphaParticipates": false,
+    "maskSetupConsumesTintRgb": false,
+    "colorSpaceBoundary": "display-encoded-rgba8unorm"
+  },
+  "generatedShaderReadback": {
+    "browser": "Chrome 151.0.7922.170",
+    "backend": "native-d3d11",
+    "caseCount": 11,
+    "passCount": 3,
+    "recoveryPassCount": 1,
+    "maximumChannelError": 1,
+    "pipelineCount": 4,
+    "stablePipelineCache": true,
+    "stableRetainedResourceCount": true,
+    "unclassifiedFailureCount": 0
+  },
+  "pairedSurface": {
+    "fixture": "MIT blend-parity capture",
+    "reference": "frozen WebGL mesh renderer using the official color formula",
+    "sampledAtSeconds": 1,
+    "multiplyColorDrawableCount": 4,
+    "screenColorDrawableCount": 4,
+    "additiveDrawableCount": 1,
+    "multiplicativeDrawableCount": 1,
+    "maskReferenceCount": 2,
+    "maximumChannelError": 2,
+    "meanAbsoluteError": 0.011979,
+    "mismatchRatio": 0,
+    "playerInstallCount": 1,
+    "deviceRecovery": true,
+    "unclassifiedFailureCount": 0
+  },
+  "g16Handoff": {
+    "implementationStatus": "candidate-passed",
+    "realCorpusCoverage": "not-covered",
+    "required": [
+      "licensed non-neutral multiply model observation",
+      "licensed non-neutral screen model observation",
+      "clean-revision official/HYA replay"
+    ]
+  }
+}

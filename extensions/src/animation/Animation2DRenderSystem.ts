@@ -19,7 +19,12 @@ import {
   type Camera2DGpu,
 } from '../utils/render2dGpu';
 import animation2dWgsl from '../shaders/generated/2d-ui-animation-2d.generated.wgsl';
-import { AnimationVisual2D } from './AnimationVisual2D';
+import {
+  AnimationVisual2D,
+  animation2DCullingPipelineKey,
+  animation2DCullingPrimitive,
+  createAnimation2DPipeline,
+} from './AnimationVisual2D';
 import { AnimationFormatError, type AnimationCompositeLayer } from '@haiyue/animation-spec';
 import { animationMaskCompositeKey, animationMaskTargetKey, assertAnimationMaskBudget } from './AnimationMaskBudget';
 import { animationBlendFragmentEntryPoint, animationBlendState } from './AnimationBlendMode';
@@ -85,7 +90,11 @@ interface AnimationRenderItem {
 
 const SHADER = animation2dWgsl;
 const MAX_COMPOSITE_LAYERS = 8;
-const COMPOSITE_PARAMS_OFFSET = 28;
+const MULTIPLY_COLOR_OFFSET = 20;
+const SCREEN_COLOR_OFFSET = 24;
+const PARAMS_OFFSET = 28;
+const UV_RECT_OFFSET = 32;
+const COMPOSITE_PARAMS_OFFSET = 36;
 const COMPOSITE_EXPANSION_OFFSET = COMPOSITE_PARAMS_OFFSET + MAX_COMPOSITE_LAYERS * 4;
 const GRADIENT_PARAMS_OFFSET = COMPOSITE_EXPANSION_OFFSET + MAX_COMPOSITE_LAYERS;
 const GRADIENT_GEOMETRY_OFFSET = GRADIENT_PARAMS_OFFSET + 4;
@@ -359,7 +368,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
           pass.setPipeline(this.getPresentPipeline('rgba8unorm', 1, false, false));
           this.drawEffectResult(pass, source.entity, effectTarget.texture);
         } else {
-          pass.setPipeline(this.getPipeline('rgba8unorm', 1, false, false, 'normal', source.visual.textureAlphaMode));
+          pass.setPipeline(this.getPipeline('rgba8unorm', 1, false, false, 'normal', source.visual.textureAlphaMode, source.visual.culling));
           this.draw(pass, source.entity, source.visual, context, resolved, true);
         }
         pass.end();
@@ -387,6 +396,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
           context.view?.reverseZ ?? this.engine.reverseZ,
           entry.item.visual.blendMode,
           entry.item.visual.textureAlphaMode,
+          entry.item.visual.culling,
         ));
         this.draw(passEncoder, entry.item.entity, entry.item.visual, context, entry.composite, false);
         visualCount++;
@@ -511,12 +521,13 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     reverseZ: boolean,
     blendMode: AnimationVisual2D['blendMode'] = 'normal',
     textureAlphaMode: AnimationVisual2D['textureAlphaMode'] = 'straight',
+    culling = false,
   ): GPURenderPipeline {
     const depthFormat = withDepth ? this.engine.getDepthFormat(reverseZ) : 'none';
-    const key = `visual:${format}:${sampleCount}:${depthFormat}:${reverseZ ? 1 : 0}:${blendMode}:${textureAlphaMode}`;
+    const key = `visual:${format}:${sampleCount}:${depthFormat}:${reverseZ ? 1 : 0}:${blendMode}:${textureAlphaMode}:${animation2DCullingPipelineKey(culling)}`;
     const cached = this.pipelines.get(key);
     if (cached) return cached;
-    const pipeline = requireEngineDevice(this.engine).createRenderPipeline({
+    const pipeline = createAnimation2DPipeline(key, () => requireEngineDevice(this.engine).createRenderPipeline({
       label: `Animation2D.pipeline:${key}`,
       layout: this.pipelineLayout,
       vertex: { module: this.shader, entryPoint: 'vs_main', buffers: [{
@@ -531,14 +542,14 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
         entryPoint: animationBlendFragmentEntryPoint(blendMode, textureAlphaMode),
         targets: [{ format, blend: animationBlendState(blendMode) }],
       },
-      primitive: { topology: 'triangle-list', cullMode: 'none' },
+      primitive: animation2DCullingPrimitive(culling),
       ...(withDepth ? { depthStencil: {
         format: depthFormat as GPUTextureFormat,
         depthWriteEnabled: false,
         depthCompare: 'always' as const,
       } } : {}),
       multisample: { count: sampleCount },
-    });
+    }));
     this.pipelines.set(key, pipeline);
     return pipeline;
   }
@@ -593,11 +604,13 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     const object = this.getEntityGpu(entity);
     object.data.set(this.getWorldMatrix2D(entity, context), 0);
     object.data.set(visual.color, 16);
-    object.data[20] = visual.compositeLayers.length;
-    object.data[21] = outputMask ? 1 : 0;
-    object.data[22] = Math.min(MAX_EFFECTS, visual.effects.length);
-    object.data[23] = 0;
-    object.data.set(visual.uvRect, 24);
+    object.data.set(visual.multiplyColor, MULTIPLY_COLOR_OFFSET);
+    object.data.set(visual.screenColor, SCREEN_COLOR_OFFSET);
+    object.data[PARAMS_OFFSET] = visual.compositeLayers.length;
+    object.data[PARAMS_OFFSET + 1] = outputMask ? 1 : 0;
+    object.data[PARAMS_OFFSET + 2] = Math.min(MAX_EFFECTS, visual.effects.length);
+    object.data[PARAMS_OFFSET + 3] = 0;
+    object.data.set(visual.uvRect, UV_RECT_OFFSET);
     object.data.fill(0, COMPOSITE_PARAMS_OFFSET);
     for (let index = 0; index < visual.compositeLayers.length; index++) {
       const layer = visual.compositeLayers[index]!;
@@ -662,7 +675,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       }],
     });
     applyViewport(sourcePass, context);
-    sourcePass.setPipeline(this.getPipeline('rgba8unorm', 1, false, false, 'normal', item.visual.textureAlphaMode));
+    sourcePass.setPipeline(this.getPipeline('rgba8unorm', 1, false, false, 'normal', item.visual.textureAlphaMode, item.visual.culling));
     sourcePass.setBindGroup(0, this.cameraGpu.bindGroup);
     this.draw(sourcePass, item.entity, item.visual, context, compositeBindGroup, false);
     sourcePass.end();

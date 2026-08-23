@@ -106,7 +106,7 @@ function definitions(): Readonly<Record<BuiltinRenderOperation, RenderDefinition
   return Object.freeze({
     'animation-2d': definition(animation2d, [
       group('frame', 0, [camera()]),
-      group('object', 1, [uniform('object.animation2d', 0, VERTEX_FRAGMENT, 1264)]),
+      group('object', 1, [uniform('object.animation2d', 0, VERTEX_FRAGMENT, 1296)]),
       textureGroup(2, 'material.baseTexture', 'material.baseSampler'),
       group('pass', 3, [
         ...Array.from({ length: 8 }, (_, index) => texture(`pass.compositeTexture${index}`, index)),
@@ -114,20 +114,22 @@ function definitions(): Readonly<Record<BuiltinRenderOperation, RenderDefinition
       ]),
     ], [
       block('frame.camera', 64, [matrix('viewProj', 0)]),
-      block('object.animation2d', 1264, [
+      block('object.animation2d', 1296, [
         matrix('model', 0), field('color', 'vec4<f32>', 64, 16),
-        field('params', 'vec4<f32>', 80, 16), field('uvRect', 'vec4<f32>', 96, 16),
-        field('compositeParams', 'array<vec4<f32>, 8>', 112, 128),
-        field('compositeExpansion0', 'vec4<f32>', 240, 16),
-        field('compositeExpansion1', 'vec4<f32>', 256, 16),
-        field('gradientParams', 'vec4<f32>', 272, 16),
-        field('gradientGeometry', 'vec4<f32>', 288, 16),
-        field('gradientColors', 'array<vec4<f32>, 8>', 304, 128),
-        field('gradientOffsets0', 'vec4<f32>', 432, 16),
-        field('gradientOffsets1', 'vec4<f32>', 448, 16),
-        field('effectKinds0', 'vec4<f32>', 464, 16),
-        field('effectKinds1', 'vec4<f32>', 480, 16),
-        field('effectData', 'array<EffectData, 8>', 496, 768),
+        field('multiplyColor', 'vec4<f32>', 80, 16),
+        field('screenColor', 'vec4<f32>', 96, 16),
+        field('params', 'vec4<f32>', 112, 16), field('uvRect', 'vec4<f32>', 128, 16),
+        field('compositeParams', 'array<vec4<f32>, 8>', 144, 128),
+        field('compositeExpansion0', 'vec4<f32>', 272, 16),
+        field('compositeExpansion1', 'vec4<f32>', 288, 16),
+        field('gradientParams', 'vec4<f32>', 304, 16),
+        field('gradientGeometry', 'vec4<f32>', 320, 16),
+        field('gradientColors', 'array<vec4<f32>, 8>', 336, 128),
+        field('gradientOffsets0', 'vec4<f32>', 464, 16),
+        field('gradientOffsets1', 'vec4<f32>', 480, 16),
+        field('effectKinds0', 'vec4<f32>', 496, 16),
+        field('effectKinds1', 'vec4<f32>', 512, 16),
+        field('effectData', 'array<EffectData, 8>', 528, 768),
       ]),
     ], [quad2d], [uvVarying, varying('TEXCOORD_1', 1, 'vec2<f32>')], ['texture-sample'], ['alpha-blend', 'ordered-composite-stack', 'ordered-effect-stack']),
     'bitmap-text': definition(bitmapText, [

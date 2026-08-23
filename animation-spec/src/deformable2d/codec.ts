@@ -40,6 +40,8 @@ interface PackedDrawableMetadata {
   readonly positions: Range;
   readonly opacities: Range;
   readonly renderOrders: Range;
+  readonly multiplyColors?: Range;
+  readonly screenColors?: Range;
 }
 
 interface PackedMetadata {
@@ -84,14 +86,15 @@ export function encodeDeformableMesh2DData(source: DeformableMesh2DDataSource): 
   validateSource(source);
   const floats = new PoolBuilder<Float32Array>();
   const indices = new PoolBuilder<Uint32Array>();
-  const metadata: PackedMetadata = {
-    format: DEFORMABLE_MESH_2D_DATA_FORMAT,
-    version: DEFORMABLE_MESH_2D_DATA_VERSION,
-    canvas: [source.canvasWidth, source.canvasHeight],
-    duration: source.duration,
-    frameRate: source.frameRate,
-    times: floats.add(source.times),
-    drawables: source.drawables.map(drawable => ({
+  const times = floats.add(source.times);
+  const drawables = source.drawables.map(drawable => {
+    const multiplyColors = shouldStoreColorTrack(drawable.multiplyColors, [1, 1, 1, 1])
+      ? floats.add(drawable.multiplyColors!)
+      : undefined;
+    const screenColors = shouldStoreColorTrack(drawable.screenColors, [0, 0, 0, 0])
+      ? floats.add(drawable.screenColors!)
+      : undefined;
+    return {
       id: drawable.id,
       textureIndex: drawable.textureIndex,
       blendMode: drawable.blendMode,
@@ -103,7 +106,19 @@ export function encodeDeformableMesh2DData(source: DeformableMesh2DDataSource): 
       positions: floats.add(drawable.positions),
       opacities: floats.add(drawable.opacities),
       renderOrders: floats.add(drawable.renderOrders),
-    })),
+      ...(multiplyColors === undefined ? {} : { multiplyColors }),
+      ...(screenColors === undefined ? {} : { screenColors }),
+    };
+  });
+  const minor = drawables.some(drawable => drawable.multiplyColors !== undefined || drawable.screenColors !== undefined) ? 2 : 1;
+  const metadata: PackedMetadata = {
+    format: DEFORMABLE_MESH_2D_DATA_FORMAT,
+    version: DEFORMABLE_MESH_2D_DATA_VERSION,
+    canvas: [source.canvasWidth, source.canvasHeight],
+    duration: source.duration,
+    frameRate: source.frameRate,
+    times,
+    drawables,
   };
   const metadataBytes = UTF8_ENCODER.encode(JSON.stringify(metadata));
   if (metadataBytes.byteLength > DEFAULT_LIMITS.maxMetadataBytes) limit(`Metadata exceeds ${DEFAULT_LIMITS.maxMetadataBytes} bytes.`, '$binary.metadata');
@@ -120,7 +135,7 @@ export function encodeDeformableMesh2DData(source: DeformableMesh2DDataSource): 
   const header = new DataView(buffer);
   header.setUint32(0, MAGIC, true);
   header.setUint16(4, 1, true);
-  header.setUint16(6, 1, true);
+  header.setUint16(6, minor, true);
   header.setUint32(8, metadataOffset, true);
   header.setUint32(12, metadataBytes.byteLength, true);
   header.setUint32(16, floatOffset, true);
@@ -144,7 +159,7 @@ export function decodeDeformableMesh2DData(
   if (header.getUint32(0, true) !== MAGIC) invalid('Magic must be HYDM.', '$binary.magic');
   const major = header.getUint16(4, true);
   const minor = header.getUint16(6, true);
-  if (major !== 1 || minor > 1) invalid(`Unsupported sidecar version ${major}.${minor}.`, '$binary.version');
+  if (major !== 1 || minor > 2) invalid(`Unsupported sidecar version ${major}.${minor}.`, '$binary.version');
   const metadataOffset = header.getUint32(8, true);
   const metadataLength = header.getUint32(12, true);
   const floatOffset = header.getUint32(16, true);
@@ -190,7 +205,11 @@ export function decodeDeformableMesh2DData(
     if (positions.length !== times.length * uvs.length) invalid('Position count must equal frameCount * vertexCount * 2.', `${path}.positions`);
     const opacities = floatRange(floatPool, item.opacities, `${path}.opacities`);
     const renderOrders = floatRange(floatPool, item.renderOrders, `${path}.renderOrders`);
+    const multiplyColors = item.multiplyColors === undefined ? undefined : floatRange(floatPool, item.multiplyColors, `${path}.multiplyColors`);
+    const screenColors = item.screenColors === undefined ? undefined : floatRange(floatPool, item.screenColors, `${path}.screenColors`);
     if (opacities.length !== times.length || renderOrders.length !== times.length) invalid('Opacity and render-order tracks require one value per frame.', path);
+    if (multiplyColors !== undefined) validateColorTrack(multiplyColors, times.length, `${path}.multiplyColors`);
+    if (screenColors !== undefined) validateColorTrack(screenColors, times.length, `${path}.screenColors`);
     for (let valueIndex = 0; valueIndex < opacities.length; valueIndex++) {
       if (opacities[valueIndex]! < 0 || opacities[valueIndex]! > 1) invalid('Opacity must stay inside [0, 1].', `${path}.opacities[${valueIndex}]`);
       if (!Number.isSafeInteger(renderOrders[valueIndex])) invalid('Render order must be a safe integer.', `${path}.renderOrders[${valueIndex}]`);
@@ -214,6 +233,8 @@ export function decodeDeformableMesh2DData(
       positions,
       opacities,
       renderOrders,
+      ...(multiplyColors === undefined ? {} : { multiplyColors }),
+      ...(screenColors === undefined ? {} : { screenColors }),
       vertexCount,
     });
   });
@@ -271,6 +292,8 @@ function validateSourceDrawable(drawable: DeformableMesh2DDrawableSource, frameC
   if (!(drawable.positions instanceof Float32Array) || drawable.positions.length !== frameCount * drawable.uvs.length) invalid('Positions do not match frame and vertex counts.', `${path}.positions`);
   if (!(drawable.opacities instanceof Float32Array) || drawable.opacities.length !== frameCount) invalid('Opacities require one value per frame.', `${path}.opacities`);
   if (!(drawable.renderOrders instanceof Float32Array) || drawable.renderOrders.length !== frameCount) invalid('Render orders require one value per frame.', `${path}.renderOrders`);
+  if (drawable.multiplyColors !== undefined) validateSourceColorTrack(drawable.multiplyColors, frameCount, `${path}.multiplyColors`);
+  if (drawable.screenColors !== undefined) validateSourceColorTrack(drawable.screenColors, frameCount, `${path}.screenColors`);
   ensureFinite(drawable.uvs, `${path}.uvs`);
   ensureFinite(drawable.positions, `${path}.positions`);
   ensureFinite(drawable.opacities, `${path}.opacities`);
@@ -311,6 +334,7 @@ function parseMetadata(value: unknown, limits: Required<DeformableMesh2DParseLim
     drawables: drawablesRaw.map((entry, index) => {
       const item = record(entry, `$.drawables[${index}]`);
       if (minor === 0 && item.maskMode !== undefined) invalid('HYDM 1.0 must not contain maskMode.', `$.drawables[${index}].maskMode`);
+      if (minor < 2 && (item.multiplyColors !== undefined || item.screenColors !== undefined)) invalid(`HYDM 1.${minor} must not contain drawable color tracks.`, `$.drawables[${index}]`);
       return {
         id: string(item.id, `$.drawables[${index}].id`),
         textureIndex: nonNegativeInteger(item.textureIndex, `$.drawables[${index}].textureIndex`),
@@ -325,6 +349,8 @@ function parseMetadata(value: unknown, limits: Required<DeformableMesh2DParseLim
         positions: range(item.positions, `$.drawables[${index}].positions`),
         opacities: range(item.opacities, `$.drawables[${index}].opacities`),
         renderOrders: range(item.renderOrders, `$.drawables[${index}].renderOrders`),
+        ...(minor < 2 || item.multiplyColors === undefined ? {} : { multiplyColors: range(item.multiplyColors, `$.drawables[${index}].multiplyColors`) }),
+        ...(minor < 2 || item.screenColors === undefined ? {} : { screenColors: range(item.screenColors, `$.drawables[${index}].screenColors`) }),
       };
     }),
   };
@@ -388,6 +414,7 @@ function ensureFinite(values: Float32Array, path: string): void {
 function validatePackedRanges(metadata: PackedMetadata, floatCount: number, indexCount: number): void {
   const floatRanges: { readonly range: Range; readonly path: string }[] = [{ range: metadata.times, path: '$.times' }];
   const indexRanges: { readonly range: Range; readonly path: string }[] = [];
+  const expectedColorValues = checkedProduct(metadata.times[1], 4, '$.times');
   for (let index = 0; index < metadata.drawables.length; index++) {
     const drawable = metadata.drawables[index]!;
     const path = `$.drawables[${index}]`;
@@ -397,6 +424,14 @@ function validatePackedRanges(metadata: PackedMetadata, floatCount: number, inde
       { range: drawable.opacities, path: `${path}.opacities` },
       { range: drawable.renderOrders, path: `${path}.renderOrders` },
     );
+    if (drawable.multiplyColors !== undefined) {
+      if (drawable.multiplyColors[1] !== expectedColorValues) invalid('Multiply-color track requires four values per frame.', `${path}.multiplyColors`);
+      floatRanges.push({ range: drawable.multiplyColors, path: `${path}.multiplyColors` });
+    }
+    if (drawable.screenColors !== undefined) {
+      if (drawable.screenColors[1] !== expectedColorValues) invalid('Screen-color track requires four values per frame.', `${path}.screenColors`);
+      floatRanges.push({ range: drawable.screenColors, path: `${path}.screenColors` });
+    }
     indexRanges.push({ range: drawable.indices, path: `${path}.indices` });
   }
   validatePackedPool(floatRanges, floatCount, '$binary.floats');
@@ -435,6 +470,26 @@ function validateMaskGraph(drawables: readonly { readonly id: string; readonly m
 }
 
 function align4(value: number): number { return (value + 3) & ~3; }
+function checkedProduct(left: number, right: number, path: string): number { const product = left * right; if (!Number.isSafeInteger(product)) invalid('Value count overflows safe integer range.', path); return product; }
+function shouldStoreColorTrack(values: Float32Array | undefined, defaults: readonly [number, number, number, number]): boolean {
+  if (values === undefined) return false;
+  for (let index = 0; index < values.length; index++) if (values[index] !== defaults[index & 3]) return true;
+  return false;
+}
+function validateSourceColorTrack(values: Float32Array, frameCount: number, path: string): void {
+  if (!(values instanceof Float32Array) || values.length !== checkedProduct(frameCount, 4, path)) invalid('Drawable color track requires four Float32 values per frame.', path);
+  validateUnitColorValues(values, path);
+}
+function validateColorTrack(values: Float32Array, frameCount: number, path: string): void {
+  if (values.length !== checkedProduct(frameCount, 4, path)) invalid('Drawable color track requires four values per frame.', path);
+  validateUnitColorValues(values, path);
+}
+function validateUnitColorValues(values: Float32Array, path: string): void {
+  for (let index = 0; index < values.length; index++) {
+    const value = values[index]!;
+    if (!Number.isFinite(value) || value < 0 || value > 1) invalid('Drawable color values must be finite and inside [0, 1].', `${path}[${index}]`);
+  }
+}
 function positive(value: number, path: string): void { if (!Number.isFinite(value) || value <= 0) invalid('Expected a positive finite number.', path); }
 function positiveLimit(value: number | undefined, fallback: number, label: string): number { const result = value ?? fallback; if (!Number.isSafeInteger(result) || result < 1) throw new RangeError(`${label} must be a positive safe integer.`); return result; }
 function record(value: unknown, path: string): Record<string, unknown> { if (!value || typeof value !== 'object' || Array.isArray(value)) invalid('Expected an object.', path); return value as Record<string, unknown>; }

@@ -62,7 +62,7 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
                 "kind": "buffer",
                 "bufferType": "uniform",
                 "hasDynamicOffset": false,
-                "minBindingSize": 1264
+                "minBindingSize": 1296
               }
             }
           ]
@@ -241,7 +241,7 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
         {
           "id": "object.animation2d",
           "alignment": 16,
-          "byteSize": 1264,
+          "byteSize": 1296,
           "fields": [
             {
               "name": "model",
@@ -257,81 +257,93 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
               "size": 16
             },
             {
-              "name": "params",
+              "name": "multiplyColor",
               "type": "vec4<f32>",
               "offset": 80,
               "size": 16
             },
             {
-              "name": "uvRect",
+              "name": "screenColor",
               "type": "vec4<f32>",
               "offset": 96,
               "size": 16
             },
             {
+              "name": "params",
+              "type": "vec4<f32>",
+              "offset": 112,
+              "size": 16
+            },
+            {
+              "name": "uvRect",
+              "type": "vec4<f32>",
+              "offset": 128,
+              "size": 16
+            },
+            {
               "name": "compositeParams",
               "type": "array<vec4<f32>, 8>",
-              "offset": 112,
+              "offset": 144,
               "size": 128
             },
             {
               "name": "compositeExpansion0",
               "type": "vec4<f32>",
-              "offset": 240,
+              "offset": 272,
               "size": 16
             },
             {
               "name": "compositeExpansion1",
               "type": "vec4<f32>",
-              "offset": 256,
+              "offset": 288,
               "size": 16
             },
             {
               "name": "gradientParams",
               "type": "vec4<f32>",
-              "offset": 272,
+              "offset": 304,
               "size": 16
             },
             {
               "name": "gradientGeometry",
               "type": "vec4<f32>",
-              "offset": 288,
+              "offset": 320,
               "size": 16
             },
             {
               "name": "gradientColors",
               "type": "array<vec4<f32>, 8>",
-              "offset": 304,
+              "offset": 336,
               "size": 128
             },
             {
               "name": "gradientOffsets0",
               "type": "vec4<f32>",
-              "offset": 432,
+              "offset": 464,
               "size": 16
             },
             {
               "name": "gradientOffsets1",
               "type": "vec4<f32>",
-              "offset": 448,
+              "offset": 480,
               "size": 16
             },
             {
               "name": "effectKinds0",
               "type": "vec4<f32>",
-              "offset": 464,
+              "offset": 496,
               "size": 16
             },
             {
               "name": "effectKinds1",
               "type": "vec4<f32>",
-              "offset": 480,
+              "offset": 512,
               "size": 16
             },
             {
               "name": "effectData",
               "type": "array<EffectData, 8>",
-              "offset": 496,
+              "offset": 528,
               "size": 768
             }
           ]
@@ -390,10 +402,10 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
           "sourceId": "builtin.animation-2d",
           "sourceName": "shader-language/builtin-components-2d-ui-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 253
+          "generatedEndLine": 266
         }
       ],
-      "canonicalHash": "5246aa99a67a8525aa1806220105c644d692285ff8ac4b68ea6cc7787f8fc556"
+      "canonicalHash": "0f2a34f837fc979a85de250e19b843c31c4f75cf996f13a7a476ceb476e83b95"
     },
     "canvas-text-2d": {
       "id": "canvas-text-2d",
@@ -863,5 +875,5 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
       "canonicalHash": "4d1ef60104af17bdb6c837bbdb67640c96abf7533f156510de4da5240c8c388e"
     }
   },
-  "artifactHash": "6c915174385e5f36dd095bb698d4cff2846441456daaeea820b364f399191097"
+  "artifactHash": "d79b9084aa1f60c7b4ca7fd70395b82a02009cd3df88fc60201a5d41bf579ad5"
 } as const;

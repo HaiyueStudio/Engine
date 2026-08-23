@@ -35,6 +35,9 @@ test('Cubism clip-baked adapter evaluates the frozen recipe order and emits stan
   assert.equal(result.report.features.expression, true);
   assert.equal(result.report.features.physics, true);
   assert.equal(result.report.features.pose, true);
+  assert.equal(result.report.features.drawableColorCapture, 'captured');
+  assert.equal(result.report.features.multiplyColorDrawableCount, 0);
+  assert.equal(result.report.adapter.version, '1.1.0');
   assert.equal(result.report.unclassifiedFailureCount, 0);
   const hya = result.artifacts.find(item => item.path === 'model.hya');
   const hydm = result.artifacts.find(item => item.path === 'model.hydm');
@@ -67,22 +70,71 @@ test('Cubism adapter classifies unsupported containers, missing recipe capabilit
   await assert.rejects(runCubismClipBakedConversion({ ...base, source: wpk, host: wpkHost, sourceBytes: wpkHost.assets.get('model.model3.json'), recipe: { id: 'wpk', clip: 'idle' } }), error => error instanceof OfflineConversionError && error.code === 'E_CUBISM_WPK_UNSUPPORTED');
 });
 
-test('Cubism strict conversion rejects unrepresented color/culling and rolls back output', async () => {
+test('Cubism strict conversion preserves represented culling and commits output', async () => {
   const source = cubismSource({ async evaluate(time) { const frame = captureFrame(time); frame.drawables[0].culling = true; return frame; } });
   const host = memoryHost(source);
-  await assert.rejects(runCubismClipBakedConversion({
+  const result = await runCubismClipBakedConversion({
     source, sourceBytes: host.assets.get('model.model3.json'), host, recipe: { id: 'strict', clip: 'idle' },
     sampling: { tolerance: 0.1, quantizationStep: 0.01 }, mode: 'strict',
+  });
+  const hydm = result.artifacts.find(item => item.path === 'model.hydm');
+  assert.equal(decodeDeformableMesh2DData(hydm.bytes.buffer).drawables[0].culling, true);
+  assert.equal(host.transactions[0].committed, 1);
+  assert.equal(host.transactions[0].rolledBack, 0);
+});
+
+test('Cubism adaptive sampling attributes nonlinear drawable colors and emits HYDM 1.2', async () => {
+  const source = cubismSource({
+    keyTimes: [],
+    async evaluate(time) {
+      const frame = captureFrame(time);
+      frame.drawables[0].positions = [0, 0, 1, 0, 0, 1];
+      const pulse = 4 * time * (1 - time);
+      frame.drawables[0].multiplyColor = [1 - pulse, 1, 1, 0.25 + pulse * 0.5];
+      frame.drawables[0].screenColor = [0, pulse, 0, pulse];
+      return frame;
+    },
+  });
+  const host = memoryHost(source);
+  const result = await runCubismClipBakedConversion({
+    source, sourceBytes: host.assets.get('model.model3.json'), host, recipe: { id: 'color', clip: 'idle' },
+    sampling: { tolerance: 0.01, quantizationStep: 1 / 1024, maxDepth: 8 }, mode: 'strict',
+  });
+  assert.ok(result.times.length > 2, 'color error alone must refine the endpoint interval');
+  assert.ok([...result.times].some(time => Math.abs(time - 0.5) < 1e-6));
+  assert.equal(result.report.features.multiplyColorDrawableCount, 1);
+  assert.equal(result.report.features.screenColorDrawableCount, 1);
+  assert.ok(result.report.features.multiplyColorDrawableFrameCount > 0);
+  assert.ok(result.report.sampling.dirtyChannelCount > 0);
+  const hydm = result.artifacts.find(item => item.path === 'model.hydm');
+  assert.equal(new DataView(hydm.bytes.buffer, hydm.bytes.byteOffset, hydm.bytes.byteLength).getUint16(6, true), 2);
+  const data = decodeDeformableMesh2DData(hydm.bytes.buffer.slice(hydm.bytes.byteOffset, hydm.bytes.byteOffset + hydm.bytes.byteLength));
+  const middle = [...data.times].findIndex(time => Math.abs(time - 0.5) < 1e-6);
+  assert.ok(Math.abs(data.drawables[0].multiplyColors[middle * 4] - 0) < 1e-6);
+  assert.ok(Math.abs(data.drawables[0].screenColors[middle * 4 + 1] - 1) < 1e-6);
+});
+
+test('Cubism evaluator color capability rejects missing RGBA with a stable code and classifies unavailable Core APIs', async () => {
+  const missingSource = cubismSource({ async evaluate(time) { const frame = captureFrame(time); delete frame.drawables[0].screenColor; return frame; } });
+  const missingHost = memoryHost(missingSource);
+  await assert.rejects(runCubismClipBakedConversion({
+    source: missingSource, sourceBytes: missingHost.assets.get('model.model3.json'), host: missingHost, recipe: { id: 'missing-color', clip: 'idle' },
+    sampling: { tolerance: 0.1, quantizationStep: 0.01 }, mode: 'normal',
+  }), error => error instanceof OfflineConversionError && error.code === 'E_CUBISM_DRAWABLE_COLOR_INVALID' && error.path.endsWith('.screenColor'));
+
+  const unavailableSource = cubismSource({ capabilities: { motion: true, expression: true, physics: true, pose: true, drawableColors: false } });
+  const unavailableHost = memoryHost(unavailableSource);
+  await assert.rejects(runCubismClipBakedConversion({
+    source: unavailableSource, sourceBytes: unavailableHost.assets.get('model.model3.json'), host: unavailableHost, recipe: { id: 'unavailable-color', clip: 'idle' },
+    sampling: { tolerance: 0.1, quantizationStep: 0.01 }, mode: 'strict',
   }), error => error instanceof OfflineConversionError && error.code === 'E_CONVERSION_STRICT_DIAGNOSTIC');
-  assert.equal(host.transactions[0].committed, 0);
-  assert.equal(host.transactions[0].rolledBack, 1);
-  assert.equal(host.transactions[0].staged.size, 0);
+  assert.equal(unavailableHost.transactions[0].rolledBack, 1);
 });
 
 function cubismSource(overrides = {}) {
   const evaluator = {
     version: 'fixture-evaluator@1', duration: 1, keyTimes: [0.5],
-    capabilities: { motion: true, expression: true, physics: true, pose: true },
+    capabilities: { motion: true, expression: true, physics: true, pose: true, drawableColors: true },
     async evaluate(time) { return captureFrame(time); }, close() {},
     ...overrides,
   };

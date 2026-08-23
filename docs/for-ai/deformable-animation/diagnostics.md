@@ -19,8 +19,12 @@
 | `E_CUBISM_RECIPE_CAPABILITY_MISSING` | error | `$.recipe.*` | recipe 请求的 Motion/Expression/Physics/Pose 能力未由 caller-supplied evaluator 声明；始终失败 |
 | `E_CUBISM_RUNTIME_INPUT_UNBAKED` | error | `$.recipe.runtimeInputs[*]` | lip-sync、eye/look、MotionSync 或外部参数仍要求运行时输入；clip-baked 始终失败 |
 | `E_CUBISM_WPK_UNSUPPORTED` | error | `$.entry` | 输入是 WPK/`.cmo3` 等非 canonical 容器；要求授权预处理后的 runtime asset set |
-| `W_CUBISM_COLOR_APPROXIMATED` | warning | drawable path | non-neutral multiply/screen color 未进入 v1 payload；strict 失败 |
-| `W_CUBISM_CULLING_IGNORED` | warning | drawable `.culling` | v1 2D renderer 不执行 culling；strict 失败 |
+| `E_CUBISM_DRAWABLE_COLOR_INVALID` | error | capture/evaluator drawable color path | evaluator 声明支持颜色后缺失 RGBA，或 RGBA 长度、finite、0–1 范围无效；始终失败 |
+| `W_CUBISM_DRAWABLE_COLOR_UNAVAILABLE` | warning | `$.capabilities.drawableColors` / `$.evaluator.capabilities.drawableColors` | Core/evaluator 未提供 multiply/screen arrays，按旧文件 neutral 值继续；strict 失败 |
+| `E_ANIMATION_2D_CULLING_INVALID` | error | `$.culling` | 通用 visual 收到非布尔 culling；始终失败 |
+| `E_ANIMATION_2D_MULTIPLY_COLOR_INVALID` | error | `$.multiplyColor` | 通用 visual multiply tuple 长度、finite 或 `[0,1]` 范围无效；uniform 写入前失败 |
+| `E_ANIMATION_2D_SCREEN_COLOR_INVALID` | error | `$.screenColor` | 通用 visual screen tuple 长度、finite 或 `[0,1]` 范围无效；uniform 写入前失败 |
+| `E_ANIMATION_2D_PIPELINE_CREATION_FAILED` | error | `$runtime.animation2D.pipeline` | WebGPU visual pipeline 创建失败；保留完整有限状态 key 与底层 cause |
 
 ## Reserved classified gaps
 

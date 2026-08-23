@@ -8,6 +8,8 @@ struct CameraUniforms {
 struct ObjectUniforms {
   model : mat4x4<f32>,
   color : vec4<f32>,
+  multiplyColor : vec4<f32>,
+  screenColor : vec4<f32>,
   params : vec4<f32>, // x: composite layer count, y: output offscreen source
   uvRect : vec4<f32>,
   compositeParams : array<vec4<f32>, 8>, // mode, operation, feather x/y
@@ -222,8 +224,19 @@ fn fs_present(input : EffectVertexOutput) -> @location(0) vec4<f32> {
 }
 
 fn animation_color(input : VertexOutput, premultipliedTexture : bool) -> vec4<f32> {
-  var base = textureSample(baseTexture, baseSampler, input.uv) * object.color;
-  if (object.gradientParams.x > 0.5) { base = gradient_color(input.localPosition) * object.color; }
+  var source = textureSample(baseTexture, baseSampler, input.uv);
+  var sourcePremultiplied = premultipliedTexture;
+  if (object.gradientParams.x > 0.5) {
+    source = gradient_color(input.localPosition);
+    sourcePremultiplied = false;
+  }
+  if (!sourcePremultiplied) { source = vec4<f32>(source.rgb * source.a, source.a); }
+  // Frozen Cubism drawable-color order. Tint alpha is pose metadata only.
+  // Setup-mask rendering skips both RGB operations so mask coverage is tint-independent.
+  if (object.params.y < 0.5) {
+    source = vec4<f32>(source.rgb * object.multiplyColor.rgb, source.a);
+    source = vec4<f32>(source.rgb + object.screenColor.rgb * source.a - source.rgb * object.screenColor.rgb, source.a);
+  }
   var coverage = 1.0;
   if (object.params.x > 0.5) {
     let uv = input.clipPos.xy / vec2<f32>(textureDimensions(compositeTexture0));
@@ -237,8 +250,8 @@ fn animation_color(input : VertexOutput, premultipliedTexture : bool) -> vec4<f3
     if (object.params.x > 6.5) { coverage = combine_coverage(coverage, filtered_coverage(compositeTexture6, uv, object.compositeParams[6], object.compositeExpansion1.z), object.compositeParams[6].y); }
     if (object.params.x > 7.5) { coverage = combine_coverage(coverage, filtered_coverage(compositeTexture7, uv, object.compositeParams[7], object.compositeExpansion1.w), object.compositeParams[7].y); }
   }
-  let premultiply = select(base.a, object.color.a, premultipliedTexture) * coverage;
-  return vec4<f32>(base.rgb * premultiply, base.a * coverage);
+  let alpha = source.a * object.color.a;
+  return vec4<f32>(source.rgb * object.color.rgb * object.color.a * coverage, alpha * coverage);
 }
 
 @fragment
