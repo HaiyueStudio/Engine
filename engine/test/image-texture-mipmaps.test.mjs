@@ -143,6 +143,26 @@ test('texture cache identity includes image format and mip policy while equivale
   linear.release();
 });
 
+test('texture cache identity and upload destination preserve the requested alpha representation', async () => {
+  ensureGpuConstants();
+  const log = [];
+  const manager = new AssetManager(createMipmapDevice(log));
+  const source = { width: 4, height: 4 };
+  const [straight, premultipliedA, premultipliedB] = await Promise.all([
+    manager.loadTexture(source, { format: 'rgba8unorm', premultipliedAlpha: false }),
+    manager.loadTexture(source, { format: 'rgba8unorm', premultipliedAlpha: true }),
+    manager.loadTexture(source, { format: 'rgba8unorm', premultipliedAlpha: true }),
+  ]);
+  assert.notEqual(straight.value, premultipliedA.value);
+  assert.equal(premultipliedA.value, premultipliedB.value);
+  const copies = log.filter(entry => entry[0] === 'copyExternalImageToTexture');
+  assert.equal(copies.length, 2);
+  assert.deepEqual(copies.map(entry => entry[2].premultipliedAlpha).sort(), [false, true]);
+  straight.release();
+  premultipliedA.release();
+  premultipliedB.release();
+});
+
 test('logical texture cache keys de-duplicate temporary source identities without merging color spaces', async () => {
   ensureGpuConstants();
   const log = [];

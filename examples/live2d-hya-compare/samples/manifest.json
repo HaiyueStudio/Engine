@@ -21,6 +21,18 @@
       "license": "MIT",
       "referenceMode": "captured-mesh",
       "features": ["single-source-mask", "multi-source-union", "inverted-mask", "dynamic-mask-vertices", "dynamic-source-opacity", "dynamic-source-visibility", "visible-mask-source", "texture-alpha"]
+    },
+    {
+      "id": "blend-composition-parity",
+      "title": "Premultiplied Blend Composition Parity · MIT",
+      "hya": "blend-parity.hya",
+      "data": "blend-parity.hydm",
+      "textures": ["blend-parity-a.png", "blend-parity-b.png"],
+      "capture": "blend-parity.capture.json",
+      "conversionReport": "blend-parity-conversion-report.json",
+      "license": "MIT",
+      "referenceMode": "captured-mesh",
+      "features": ["normal-blend", "additive-blend", "multiplicative-blend", "premultiplied-alpha", "texture-alpha", "drawable-opacity", "mask-coverage", "draw-order", "multiple-textures", "action-switching"]
     }
   ],
   "externalOfficialSamples": [

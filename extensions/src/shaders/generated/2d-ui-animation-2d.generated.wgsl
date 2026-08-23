@@ -221,8 +221,7 @@ fn fs_present(input : EffectVertexOutput) -> @location(0) vec4<f32> {
   return textureSampleLevel(baseTexture, baseSampler, input.uv, 0.0);
 }
 
-@fragment
-fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
+fn animation_color(input : VertexOutput, premultipliedTexture : bool) -> vec4<f32> {
   var base = textureSample(baseTexture, baseSampler, input.uv) * object.color;
   if (object.gradientParams.x > 0.5) { base = gradient_color(input.localPosition) * object.color; }
   var coverage = 1.0;
@@ -238,5 +237,16 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
     if (object.params.x > 6.5) { coverage = combine_coverage(coverage, filtered_coverage(compositeTexture6, uv, object.compositeParams[6], object.compositeExpansion1.z), object.compositeParams[6].y); }
     if (object.params.x > 7.5) { coverage = combine_coverage(coverage, filtered_coverage(compositeTexture7, uv, object.compositeParams[7], object.compositeExpansion1.w), object.compositeParams[7].y); }
   }
-  return vec4<f32>(base.rgb, base.a * coverage);
+  let premultiply = select(base.a, object.color.a, premultipliedTexture) * coverage;
+  return vec4<f32>(base.rgb * premultiply, base.a * coverage);
+}
+
+@fragment
+fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
+  return animation_color(input, false);
+}
+
+@fragment
+fn fs_main_premultiplied_texture(input : VertexOutput) -> @location(0) vec4<f32> {
+  return animation_color(input, true);
 }

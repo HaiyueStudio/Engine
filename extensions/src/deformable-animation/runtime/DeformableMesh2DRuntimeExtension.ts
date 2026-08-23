@@ -157,6 +157,9 @@ class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
             // authored bytes to linear values and make the result visibly dark.
             // Preserve the source bytes here to match Canvas/WebGL Live2D output.
             format: 'rgba8unorm',
+            // Cubism 5.2-and-earlier blend factors and linear texture filtering
+            // both operate on premultiplied texels.
+            premultipliedAlpha: true,
             cacheKey: resource.integrity ?? resource.uri,
             signal: this.controller.signal,
           }));
@@ -218,6 +221,7 @@ class DeformableMesh2DRuntimeInstance implements Animation2DExtensionInstance {
         nodeId,
         order: drawable.renderOrders[0]!,
         blendMode: drawable.blendMode,
+        textureAlphaMode: 'premultiplied',
         sourceOnly,
         ...(composite ? { composite } : {}),
         textureHandle: textures[drawable.textureIndex]!,

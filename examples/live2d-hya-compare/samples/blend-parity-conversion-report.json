@@ -1,0 +1,23 @@
+{
+  "diagnostics": [],
+  "report": {
+    "sourceFormat": "live2d-cubism-drawable-capture",
+    "profile": "clip-baked",
+    "frameCount": 3,
+    "drawableCount": 5,
+    "vertexCount": 20,
+    "textureCount": 2,
+    "maskReferenceCount": 2,
+    "invertedMaskDrawableCount": 0,
+    "additiveDrawableCount": 1,
+    "multiplicativeDrawableCount": 1,
+    "emptyDrawableCount": 0,
+    "unsupportedRuntimeFeatures": [
+      "parameterized-input",
+      "physics-runtime",
+      "motion-sync",
+      "multiply-screen-color",
+      "culling"
+    ]
+  }
+}

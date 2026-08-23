@@ -202,7 +202,6 @@ export function decodeDeformableMesh2DData(
     }
     maskTotal += item.masks.length;
     if (maskTotal > resolved.maxMaskReferences) limit(`Mask reference count exceeds ${resolved.maxMaskReferences}.`, `${path}.masks`);
-    if (new Set(item.masks).size !== item.masks.length) invalid('Mask references must be unique per drawable.', `${path}.masks`);
     return Object.freeze({
       id: item.id,
       textureIndex: item.textureIndex,
@@ -286,7 +285,6 @@ function validateSourceDrawable(drawable: DeformableMesh2DDrawableSource, frameC
   }
   if (!Array.isArray(drawable.masks)) invalid('Masks must be an array.', `${path}.masks`);
   if (drawable.maskMode !== undefined && drawable.maskMode !== 'alpha' && drawable.maskMode !== 'alpha-inverted') invalid('Mask mode is unsupported.', `${path}.maskMode`);
-  if (new Set(drawable.masks).size !== drawable.masks.length) invalid('Mask references must be unique per drawable.', `${path}.masks`);
   for (let maskIndex = 0; maskIndex < drawable.masks.length; maskIndex++) {
     const mask = drawable.masks[maskIndex]!;
     if (!mask || mask === drawable.id || !ids.has(mask)) invalid('Mask must reference a different existing drawable.', `${path}.masks[${maskIndex}]`);

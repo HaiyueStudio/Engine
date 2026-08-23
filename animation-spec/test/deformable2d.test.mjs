@@ -62,12 +62,13 @@ test('HYDM encoder rejects invalid indices, opacity and order before serializati
   assert.throws(() => encodeDeformableMesh2DData({ ...source, drawables: [{ ...source.drawables[0], textureIndex: 32 }] }), /Texture index exceeds/);
 });
 
-test('HYDM rejects duplicate, cyclic, overlapping and unreferenced mask/pool data', () => {
+test('HYDM preserves repeated mask contributions and rejects cyclic, overlapping and unreferenced data', () => {
   const source = twoDrawableDataFixture();
-  assert.throws(() => encodeDeformableMesh2DData({
+  const repeated = encodeDeformableMesh2DData({
     ...source,
     drawables: source.drawables.map(drawable => ({ ...drawable, masks: drawable.id === 'front' ? ['back', 'back'] : [] })),
-  }), /unique/);
+  });
+  assert.deepEqual([...decodeDeformableMesh2DData(repeated).drawables.find(drawable => drawable.id === 'front').masks], ['back', 'back']);
   assert.throws(() => encodeDeformableMesh2DData({
     ...source,
     drawables: source.drawables.map(drawable => ({ ...drawable, masks: drawable.id === 'front' ? ['back'] : ['front'] })),
@@ -116,12 +117,12 @@ test('Cubism capture preserves shared multi-source mask groups and applies inver
   assert.equal(data.drawables[3].maskMode, 'alpha-inverted');
 });
 
-test('Cubism capture classifies invalid mask graphs before HYDM encoding', () => {
-  const duplicate = multiMaskCaptureFixture();
-  for (const frame of duplicate.frames) frame.drawables[2].masks = ['mask-a', 'mask-a'];
-  assert.throws(() => convertCubismCaptureToHya(duplicate), error => error instanceof CubismCaptureConversionError
-    && error.diagnostics.some(item => item.code === 'E_CUBISM_CAPTURE_INVALID'
-      && item.path === '$.frames[0].drawables[2].masks'));
+test('Cubism capture preserves repeated mask contributions and classifies invalid mask graphs before HYDM encoding', () => {
+  const repeated = multiMaskCaptureFixture();
+  for (const frame of repeated.frames) frame.drawables[2].masks = ['mask-a', 'mask-a'];
+  const repeatedResult = convertCubismCaptureToHya(repeated, { strict: true });
+  assert.equal(repeatedResult.report.maskReferenceCount, 4);
+  assert.deepEqual([...decodeDeformableMesh2DData(repeatedResult.data).drawables[2].masks], ['drawable-0000', 'drawable-0000']);
 
   const cyclic = multiMaskCaptureFixture();
   for (const frame of cyclic.frames) frame.drawables[0].masks = ['masked-alpha'];
@@ -191,6 +192,23 @@ test('Cubism conversion preserves non-normal blend modes while strict mode still
   additive.frames[1].drawables[0].blendMode = 'additive';
   const converted = convertCubismCaptureToHya(additive, { strict: true });
   assert.equal(decodeDeformableMesh2DData(converted.data).drawables[0].blendMode, 'additive');
+  assert.equal(converted.report.additiveDrawableCount, 1);
+  assert.equal(converted.report.multiplicativeDrawableCount, 0);
+
+  const multiplicative = captureFixture();
+  multiplicative.frames[0].drawables[0].blendMode = 'multiplicative';
+  multiplicative.frames[1].drawables[0].blendMode = 'multiplicative';
+  const multiplied = convertCubismCaptureToHya(multiplicative, { strict: true });
+  assert.equal(decodeDeformableMesh2DData(multiplied.data).drawables[0].blendMode, 'multiplicative');
+  assert.equal(multiplied.report.additiveDrawableCount, 0);
+  assert.equal(multiplied.report.multiplicativeDrawableCount, 1);
+
+  const unknown = captureFixture();
+  unknown.frames[0].drawables[0].blendMode = 'overlay';
+  unknown.frames[1].drawables[0].blendMode = 'overlay';
+  assert.throws(() => convertCubismCaptureToHya(unknown), error => error instanceof CubismCaptureConversionError
+    && error.diagnostics.some(item => item.code === 'E_CUBISM_CAPTURE_INVALID'
+      && item.path === '$.frames[0].drawables[0].blendMode'));
 
   const warning = captureFixture();
   warning.frames[0].drawables[0].culling = true;

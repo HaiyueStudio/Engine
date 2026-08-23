@@ -20,6 +20,12 @@ assert.equal(result.status, 'passed');
 assert.equal(result.corpus, 'hya-live2d-public-v1');
 assert.equal(result.bundledSamples, 1);
 assert.ok(result.licenseGatedCandidates >= 1);
+assert.equal(result.licensedEvidenceSamples, 2);
+assert.equal(result.featureStatusKind, 'haiyue-live2d-dashboard-feature-status');
+assert.deepEqual(result.implementationStates, ['degraded', 'supported', 'unsupported']);
+assert.deepEqual(result.coverageStates, ['covered', 'not-applicable', 'not-covered']);
+assert.ok(result.capabilityDetailCount >= 9, 'Every capability must expose drill-down evidence.');
+assert.match(result.missingLocalAssetMessage, /许可/u);
 assert.equal(result.cubismRuntimeInBrowser, false);
 assert.equal(result.runtime.state, 'ready');
 assert.equal(result.runtime.drawableCount, result.metrics.drawableCount);
@@ -27,11 +33,17 @@ assert.ok(result.renderer.visualCount >= 1);
 assert.ok(result.metrics.frameCount > 1);
 assert.ok(result.metrics.hyaBytes > 0 && result.metrics.sidecarBytes > 0 && result.metrics.textureBytes > 0);
 assert.equal(result.browserDiagnostics.unclassifiedFailureCount, 0);
+for (const file of result.httpProvenance.files) {
+  assert.ok(!/live2dcubismcore|cubismcore|\.moc3|\.model3\.json|\.motion3\.json|\.physics3\.json|\.pose3\.json/iu.test(file.sourcePath), `Public dashboard requested licensed source/runtime file ${file.sourcePath}.`);
+}
 
 console.log(JSON.stringify({
   status: result.status,
   corpus: result.corpus,
   bundledSamples: result.bundledSamples,
+  licensedEvidenceSamples: result.licensedEvidenceSamples,
+  implementationStates: result.implementationStates,
+  coverageStates: result.coverageStates,
   runtime: result.runtime,
   metrics: result.metrics,
   bundleBytes: Buffer.byteLength(bundle),

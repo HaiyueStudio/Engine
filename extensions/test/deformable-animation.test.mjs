@@ -3,6 +3,11 @@ import test from 'node:test';
 import { animationMaskCompositeKey, animationMaskTargetKey, assertAnimationMaskBudget } from '../dist-test/animation/AnimationMaskBudget.js';
 import { cubismMaskCoverage } from '../dist-test/deformable-animation/runtime/DeformableMaskComposition.js';
 import {
+  animationBlendFragmentEntryPoint,
+  animationBlendState,
+  composeAnimationBlendPixel,
+} from '../dist-test/animation/AnimationBlendMode.js';
+import {
   DEFORMABLE_MESH_2D_EXTENSION_ID,
   decodeDeformableMesh2DData,
   encodeDeformableMesh2DData,
@@ -18,6 +23,46 @@ import {
   DeformableMesh2DPoseError,
   sampleDeformableMesh2DPose,
 } from '../dist-test/deformable-animation/runtime/DeformableMesh2DPoseMixer.js';
+
+test('Cubism premultiplied blend contract covers normal, additive and multiplicative alpha semantics', () => {
+  assert.deepEqual(animationBlendState('normal'), {
+    color: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
+    alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
+  });
+  assert.deepEqual(animationBlendState('additive'), {
+    color: { srcFactor: 'one', dstFactor: 'one', operation: 'add' },
+    alpha: { srcFactor: 'zero', dstFactor: 'one', operation: 'add' },
+  });
+  assert.deepEqual(animationBlendState('multiplicative'), {
+    color: { srcFactor: 'dst', dstFactor: 'one-minus-src-alpha', operation: 'add' },
+    alpha: { srcFactor: 'zero', dstFactor: 'one', operation: 'add' },
+  });
+  assert.equal(animationBlendFragmentEntryPoint('normal'), 'fs_main');
+  assert.equal(animationBlendFragmentEntryPoint('additive'), 'fs_main');
+  assert.equal(animationBlendFragmentEntryPoint('multiplicative'), 'fs_main');
+  assert.equal(animationBlendFragmentEntryPoint('normal', 'premultiplied'), 'fs_main_premultiplied_texture');
+  assert.equal(animationBlendFragmentEntryPoint('additive', 'premultiplied'), 'fs_main_premultiplied_texture');
+  assert.equal(animationBlendFragmentEntryPoint('multiplicative', 'premultiplied'), 'fs_main_premultiplied_texture');
+
+  const source = [0.8, 0.25, 0.5, 0.5];
+  const destination = [0.2, 0.4, 0.6, 0.75];
+  const common = { source, destination, opacity: 0.5, coverage: 0.5 };
+  assertPixelClose(composeAnimationBlendPixel({ ...common, mode: 'normal' }), [0.275, 0.38125, 0.5875, 0.78125]);
+  assertPixelClose(composeAnimationBlendPixel({ ...common, mode: 'additive' }), [0.3, 0.43125, 0.6625, 0.75]);
+  assertPixelClose(composeAnimationBlendPixel({ ...common, mode: 'multiplicative' }), [0.195, 0.3625, 0.5625, 0.75]);
+  assert.deepEqual(
+    composeAnimationBlendPixel({ ...common, coverage: 0, mode: 'multiplicative' }),
+    destination,
+    'outside a Cubism mask must preserve the destination exactly',
+  );
+});
+
+function assertPixelClose(actual, expected) {
+  assert.equal(actual.length, expected.length);
+  for (let index = 0; index < expected.length; index++) {
+    assert.ok(Math.abs(actual[index] - expected[index]) <= 1e-12, `channel ${index}: ${actual[index]} != ${expected[index]}`);
+  }
+}
 
 test('deformable sampler interpolates positions and opacity, flips screen Y, and steps render order', () => {
   const data = decodeDeformableMesh2DData(encodeDeformableMesh2DData({
@@ -156,7 +201,9 @@ test('deformable runtime preserves its owner transform chain and display-encoded
   assert.equal(runtimeRoot.children.length, 1);
   const visual = runtimeRoot.children[0].getComponent(Symbol.for('AnimationVisual2D'));
   assert.equal(visual.blendMode, 'additive');
+  assert.equal(visual.textureAlphaMode, 'premultiplied');
   assert.equal(textureOptions[0].format, 'rgba8unorm', 'sRGB source bytes must stay display encoded in the 2D compositor');
+  assert.equal(textureOptions[0].premultipliedAlpha, true, 'Cubism filtering must operate on premultiplied texels');
 
   const geometryId = visual.geometry.id;
   const initialRevision = visual.revision;
@@ -228,6 +275,7 @@ test('mask target and composite identities are collision-free across views', () 
 
 test('CPU mask oracle matches Cubism remaining-coverage composition for single, multi-source and inverted masks', () => {
   assert.equal(cubismMaskCoverage([0.25]), 0.25);
+  assert.equal(cubismMaskCoverage([0.25, 0.25]), 0.4375, 'repeated Core mask references must contribute repeatedly');
   assert.equal(cubismMaskCoverage([0.25, 0.5]), 0.625);
   assert.equal(cubismMaskCoverage([0.25, 0.5], true), 0.375);
   assert.equal(cubismMaskCoverage([0.25, 0.5]), 1 - ((1 - 0.25) * (1 - 0.5)));

@@ -18,8 +18,35 @@ import { Camera2D, Entity, HaiyueEngine, Transform2D } from '@haiyue/engine';
 
 interface CorpusManifest {
   readonly schemaVersion: number;
+  readonly featureStatus: string;
   readonly samples: readonly CorpusManifestSample[];
   readonly externalOfficialSamples: readonly ExternalSample[];
+}
+
+interface DashboardFeatureStatus {
+  readonly schemaVersion: number;
+  readonly kind: 'haiyue-live2d-dashboard-feature-status';
+  readonly generatedFrom: { readonly manifestId: string; readonly candidateRevision: string; readonly formalEvidence: boolean };
+  readonly features: readonly DashboardFeature[];
+  readonly licensedSamples: readonly DashboardLicensedSample[];
+  readonly missingLocalAssetMessage: string;
+}
+
+interface DashboardFeature {
+  readonly id: string;
+  readonly title: string;
+  readonly implementationStatus: 'supported' | 'degraded' | 'unsupported';
+  readonly coverageStatus: 'covered' | 'not-covered' | 'not-applicable';
+  readonly detail: string;
+}
+
+interface DashboardLicensedSample {
+  readonly id: string;
+  readonly title: string;
+  readonly implementationEvidence: string;
+  readonly coverageStatus: 'covered';
+  readonly observations: Readonly<Record<string, number>>;
+  readonly localOnly: true;
 }
 
 interface CorpusManifestSample {
@@ -42,6 +69,7 @@ interface ExternalSample {
 
 interface LoadedCorpus {
   readonly manifest: CorpusManifest;
+  readonly featureStatus: DashboardFeatureStatus;
   readonly capture: CubismDrawableCapture;
   readonly captureBytes: number;
   readonly hyaBytes: ArrayBuffer;
@@ -62,8 +90,8 @@ async function main(): Promise<void> {
   if (!sample) throw new Error('Live2D corpus manifest contains no bundled sample.');
 
   renderCorpusSummary(corpus, meshData.drawables.length, meshData.times.length);
-  renderCapabilityMatrix(corpus.capture);
-  renderCorpusRows(corpus.manifest, sample);
+  renderCapabilityMatrix(corpus.featureStatus);
+  renderCorpusRows(corpus.manifest, corpus.featureStatus, sample);
 
   const canvas = required<HTMLCanvasElement>('#preview-canvas');
   const engine = new HaiyueEngine({
@@ -144,6 +172,12 @@ async function main(): Promise<void> {
       corpus: 'hya-live2d-public-v1',
       bundledSamples: corpus.manifest.samples.length,
       licenseGatedCandidates: corpus.manifest.externalOfficialSamples.length,
+      licensedEvidenceSamples: corpus.featureStatus.licensedSamples.length,
+      featureStatusKind: corpus.featureStatus.kind,
+      implementationStates: [...new Set(corpus.featureStatus.features.map(feature => feature.implementationStatus))].sort(),
+      coverageStates: [...new Set(corpus.featureStatus.features.map(feature => feature.coverageStatus))].sort(),
+      capabilityDetailCount: corpus.featureStatus.features.length,
+      missingLocalAssetMessage: corpus.featureStatus.missingLocalAssetMessage,
       runtime: runtimeStatus,
       renderer: renderer.stats,
       metrics: {
@@ -167,21 +201,24 @@ async function main(): Promise<void> {
 }
 
 async function loadCorpus(): Promise<LoadedCorpus> {
-  const [manifest, captureResponse, hyaBytes, dataBytes, textureBytes] = await Promise.all([
-    fetchJson<CorpusManifest>(`${SAMPLE_ROOT}/manifest.json`),
+  const manifest = await fetchJson<CorpusManifest>(`${SAMPLE_ROOT}/manifest.json`);
+  if (manifest.schemaVersion !== 1 || typeof manifest.featureStatus !== 'string' || !Array.isArray(manifest.samples) || !Array.isArray(manifest.externalOfficialSamples)) {
+    throw new Error('Live2D corpus manifest format is invalid.');
+  }
+  const [featureStatus, captureResponse, hyaBytes, dataBytes, textureBytes] = await Promise.all([
+    fetchJson<DashboardFeatureStatus>(`${SAMPLE_ROOT}/${manifest.featureStatus}`),
     fetch(`${SAMPLE_ROOT}/mascot.capture.json`, { cache: 'no-store' }),
     fetchBytes(`${SAMPLE_ROOT}/mascot.hya`),
     fetchBytes(`${SAMPLE_ROOT}/mascot.hydm`),
     fetchBytes(`${SAMPLE_ROOT}/mascot.png`),
   ]);
-  if (manifest.schemaVersion !== 1 || !Array.isArray(manifest.samples) || !Array.isArray(manifest.externalOfficialSamples)) {
-    throw new Error('Live2D corpus manifest format is invalid.');
-  }
+  if (featureStatus.schemaVersion !== 1 || featureStatus.kind !== 'haiyue-live2d-dashboard-feature-status' || !Array.isArray(featureStatus.features) || !Array.isArray(featureStatus.licensedSamples)) throw new Error('Live2D feature status format is invalid.');
   if (!captureResponse.ok) throw new Error(`Capture request failed with HTTP ${captureResponse.status}.`);
   const captureText = await captureResponse.text();
   const capture = JSON.parse(captureText) as CubismDrawableCapture;
   return {
     manifest,
+    featureStatus,
     capture,
     captureBytes: new TextEncoder().encode(captureText).byteLength,
     hyaBytes,
@@ -193,41 +230,33 @@ async function loadCorpus(): Promise<LoadedCorpus> {
 function renderCorpusSummary(corpus: LoadedCorpus, drawableCount: number, frameCount: number): void {
   const runtimeBytes = corpus.hyaBytes.byteLength + corpus.dataBytes.byteLength;
   const saving = corpus.captureBytes > 0 ? 1 - runtimeBytes / corpus.captureBytes : 0;
-  setMetric('metric-samples', String(corpus.manifest.samples.length), `${corpus.manifest.externalOfficialSamples.length} 个许可隔离候选`);
+  setMetric('metric-samples', String(corpus.manifest.samples.length), `${corpus.featureStatus.licensedSamples.length} 个本地真实 evidence case`);
   setMetric('metric-delivery', formatBytes(runtimeBytes), `HYA + HYDM，比 capture 少 ${formatPercent(saving)}`);
   setMetric('metric-frames', String(frameCount), `${corpus.capture.duration.toFixed(2)}s · ${corpus.capture.frameRate.toFixed(0)} fps`);
   setMetric('metric-drawables', String(drawableCount), `${countVertices(corpus.capture)} vertices / frame`);
-  required('#report-meta').textContent = `hya-live2d-public-v1 · MIT fixture · ${formatBytes(corpus.textureBytes.byteLength)} texture · source capture ${formatBytes(corpus.captureBytes)}`;
+  required('#report-meta').textContent = `hya-live2d-public-v1 · ${corpus.featureStatus.generatedFrom.manifestId} · dirty candidate ${corpus.featureStatus.generatedFrom.candidateRevision} · ${formatBytes(corpus.textureBytes.byteLength)} public texture`;
 }
 
-function renderCapabilityMatrix(capture: CubismDrawableCapture): void {
-  const drawables = capture.frames.flatMap(frame => frame.drawables);
-  const masked = drawables.filter(drawable => (drawable.masks?.length ?? 0) > 0).length;
-  const nonNormal = drawables.filter(drawable => drawable.blendMode !== 'normal').length;
-  const rows = [
-    ['Drawable topology', 'supported', '固定 drawable / UV / index 拓扑进入 HYDM sidecar'],
-    ['Vertex animation', 'supported', `${capture.frames.length} 个采样帧，运行时线性插值`],
-    ['Opacity & render order', 'supported', '每帧 opacity 与 renderOrder 保留'],
-    ['Mask composition', masked > 0 ? 'supported' : 'not-covered', masked > 0 ? `${masked} 个 mask 引用` : '当前 MIT fixture 未覆盖'],
-    ['Additive / multiplicative blend', nonNormal > 0 ? 'supported' : 'not-covered', nonNormal > 0 ? `${nonNormal} 个非 normal drawable` : '当前 MIT fixture 仅 normal blend'],
-    ['Cubism parameters / Physics', 'baked', '构建期由已授权 Cubism Core 求值；网页运行时不携带 Core'],
-  ] as const;
+function renderCapabilityMatrix(status: DashboardFeatureStatus): void {
   const body = required<HTMLTableSectionElement>('#capability-rows');
-  for (const [feature, status, detail] of rows) {
+  for (const feature of status.features) {
     const row = document.createElement('tr');
-    row.innerHTML = `<td><strong>${escapeHtml(feature)}</strong></td><td><span class="status status--${status}">${escapeHtml(status)}</span></td><td>${escapeHtml(detail)}</td>`;
+    row.dataset.featureId = feature.id;
+    row.innerHTML = `<td><strong>${escapeHtml(feature.title)}</strong><code>${escapeHtml(feature.id)}</code></td><td><span class="status status--${feature.implementationStatus}">${escapeHtml(feature.implementationStatus)}</span></td><td><span class="status status--${feature.coverageStatus}">${escapeHtml(feature.coverageStatus)}</span></td><td><details><summary>查看证据</summary><span>${escapeHtml(feature.detail)}</span></details></td>`;
     body.append(row);
   }
 }
 
-function renderCorpusRows(manifest: CorpusManifest, bundled: CorpusManifestSample): void {
+function renderCorpusRows(manifest: CorpusManifest, status: DashboardFeatureStatus, bundled: CorpusManifestSample): void {
   const body = required<HTMLTableSectionElement>('#sample-rows');
   const bundledRow = document.createElement('tr');
   bundledRow.innerHTML = `<td><div class="sample"><img src="${SAMPLE_ROOT}/${encodeURIComponent(bundled.texture)}" alt="" /><span><strong>${escapeHtml(bundled.title)}</strong><code>${escapeHtml(bundled.id)}</code></span></div></td><td>${escapeHtml(bundled.license)}</td><td>${escapeHtml(bundled.referenceMode)}</td><td><span class="status status--loading" data-sample-state>loading</span></td>`;
   body.append(bundledRow);
   for (const sample of manifest.externalOfficialSamples) {
+    const evidence = status.licensedSamples.find(candidate => candidate.id === sample.id);
+    const observations = evidence ? Object.entries(evidence.observations).filter(([, count]) => count > 0).map(([feature, count]) => `${feature}=${count}`).join(' · ') : '等待本地验证';
     const row = document.createElement('tr');
-    row.innerHTML = `<td><div class="sample"><span><strong><a href="${escapeHtml(sample.model)}" target="_blank" rel="noreferrer">${escapeHtml(sample.title)} ↗</a></strong><code>${escapeHtml(sample.id)}</code></span></div></td><td>${escapeHtml(sample.license)}</td><td>official model candidate</td><td><span class="status status--license-gated">license-gated</span></td>`;
+    row.innerHTML = `<td><div class="sample"><span><strong><a href="${escapeHtml(sample.model)}" target="_blank" rel="noreferrer">${escapeHtml(sample.title)} ↗</a></strong><code>${escapeHtml(sample.id)}</code></span></div></td><td>${escapeHtml(sample.license)}</td><td><details><summary>本地官方 Core 对照</summary><span>${escapeHtml(observations)}</span><small>${escapeHtml(status.missingLocalAssetMessage)}</small></details></td><td><span class="status status--${evidence ? 'covered' : 'license-gated'}">${evidence ? 'covered · local-only' : 'license-gated'}</span></td>`;
     body.append(row);
   }
 }

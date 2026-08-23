@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "featureStatus": "feature-status.json",
   "samples": [
     {
       "id": "haiyue-mascot-capture",
@@ -13,9 +14,16 @@
   ],
   "externalOfficialSamples": [
     {
-      "id": "live2d-mao",
-      "title": "Live2D Mao",
-      "model": "https://github.com/Live2D/CubismWebSamples/tree/develop/Samples/Resources/Mao",
+      "id": "rice-glassfield-pro",
+      "title": "Rice Glassfield - PRO",
+      "model": "https://www.live2d.com/en/learn/sample/rice-glassfield/",
+      "license": "Live2D Sample Model Terms — explicit acceptance required",
+      "bundled": false
+    },
+    {
+      "id": "niziiro-mao",
+      "title": "Niziiro Mao",
+      "model": "https://github.com/Live2D/CubismWebSamples/tree/5-r.5/Samples/Resources/Mao",
       "license": "Live2D Free Material License — explicit acceptance required",
       "bundled": false
     }

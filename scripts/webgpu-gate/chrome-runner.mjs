@@ -471,7 +471,10 @@ async function captureVisual(cdp, options) {
         const node = document.querySelector(selector);
         if (!node) throw new Error('Visual comparison selector is missing: ' + selector);
         const rect = node.getBoundingClientRect();
-        return { x: Math.floor(rect.left), y: Math.floor(rect.top + insetTop), width: Math.floor(rect.width), height: Math.floor(rect.height - insetTop) };
+        // Preserve fractional CSS origins for split panes. Independently
+        // flooring each half-width panel introduces an artificial half-pixel
+        // translation before the two surfaces are compared.
+        return { x: rect.left, y: rect.top + insetTop, width: Math.floor(rect.width), height: Math.floor(rect.height - insetTop) };
       });
       const width = Math.max(1, Math.min(rects[0].width, rects[1].width));
       const height = Math.max(1, Math.min(rects[0].height, rects[1].height));
@@ -484,28 +487,130 @@ async function captureVisual(cdp, options) {
       const left = readRegion(rects[0]);
       const right = readRegion(rects[1]);
       let maxChannelError = 0;
+      let maxErrorLocation = null;
       let absoluteError = 0;
       let mismatchPixelCount = 0;
       for (let offset = 0; offset < left.length; offset += 4) {
         let pixelError = 0;
         for (let channel = 0; channel < 3; channel++) {
           const error = Math.abs(left[offset + channel] - right[offset + channel]);
-          maxChannelError = Math.max(maxChannelError, error);
+          if (error > maxChannelError) {
+            maxChannelError = error;
+            const pixelIndex = offset / 4;
+            maxErrorLocation = {
+              x: pixelIndex % width,
+              y: Math.floor(pixelIndex / width),
+              channel,
+              left: left[offset + channel],
+              right: right[offset + channel],
+            };
+          }
           pixelError = Math.max(pixelError, error);
           absoluteError += error;
         }
         if (pixelError > 8) mismatchPixelCount++;
       }
       const pixelCount = width * height;
+      const spatialComparison = (source, target) => {
+        let maximumError = 0;
+        let absoluteError = 0;
+        let mismatchPixelCount = 0;
+        for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+          const sourceOffset = (y * width + x) * 4;
+          let bestMaximum = Infinity;
+          let bestAbsolute = Infinity;
+          for (let candidateY = Math.max(0, y - 1); candidateY <= Math.min(height - 1, y + 1); candidateY++) {
+            for (let candidateX = Math.max(0, x - 1); candidateX <= Math.min(width - 1, x + 1); candidateX++) {
+              const targetOffset = (candidateY * width + candidateX) * 4;
+              let candidateMaximum = 0;
+              let candidateAbsolute = 0;
+              for (let channel = 0; channel < 3; channel++) {
+                const error = Math.abs(source[sourceOffset + channel] - target[targetOffset + channel]);
+                candidateMaximum = Math.max(candidateMaximum, error);
+                candidateAbsolute += error;
+              }
+              if (candidateMaximum < bestMaximum || (candidateMaximum === bestMaximum && candidateAbsolute < bestAbsolute)) {
+                bestMaximum = candidateMaximum;
+                bestAbsolute = candidateAbsolute;
+              }
+            }
+          }
+          maximumError = Math.max(maximumError, bestMaximum);
+          absoluteError += bestAbsolute;
+          if (bestMaximum > 8) mismatchPixelCount++;
+        }
+        return { maximumError, absoluteError, mismatchPixelCount };
+      };
+      const forwardSpatial = spatialComparison(left, right);
+      const reverseSpatial = spatialComparison(right, left);
+      const localVariation = (pixels, x, y) => {
+        const centerOffset = (y * width + x) * 4;
+        let variation = 0;
+        for (let candidateY = Math.max(0, y - 1); candidateY <= Math.min(height - 1, y + 1); candidateY++) {
+          for (let candidateX = Math.max(0, x - 1); candidateX <= Math.min(width - 1, x + 1); candidateX++) {
+            const offset = (candidateY * width + candidateX) * 4;
+            for (let channel = 0; channel < 3; channel++) variation = Math.max(variation, Math.abs(pixels[centerOffset + channel] - pixels[offset + channel]));
+          }
+        }
+        return variation;
+      };
+      let interiorPixelCount = 0;
+      let interiorMaximumError = 0;
+      let interiorAbsoluteError = 0;
+      let interiorMismatchPixelCount = 0;
+      for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+        if (localVariation(left, x, y) > 8 || localVariation(right, x, y) > 8) continue;
+        interiorPixelCount++;
+        const offset = (y * width + x) * 4;
+        let pixelError = 0;
+        for (let channel = 0; channel < 3; channel++) {
+          const error = Math.abs(left[offset + channel] - right[offset + channel]);
+          pixelError = Math.max(pixelError, error);
+          interiorMaximumError = Math.max(interiorMaximumError, error);
+          interiorAbsoluteError += error;
+        }
+        if (pixelError > 8) interiorMismatchPixelCount++;
+      }
+      const neighborhood = (pixels, center) => {
+        if (!center) return [];
+        const values = [];
+        for (let y = Math.max(0, center.y - 1); y <= Math.min(height - 1, center.y + 1); y++) {
+          for (let x = Math.max(0, center.x - 1); x <= Math.min(width - 1, center.x + 1); x++) {
+            const offset = (y * width + x) * 4;
+            values.push({ x, y, rgba: Array.from(pixels.slice(offset, offset + 4)) });
+          }
+        }
+        return values;
+      };
       result.regionParity = {
         selectors: compareSelectors,
+        sourceRects: rects,
         insetTop,
         width,
         height,
         maxChannelError,
+        maxErrorLocation,
+        maxErrorNeighborhood: {
+          left: neighborhood(left, maxErrorLocation),
+          right: neighborhood(right, maxErrorLocation),
+        },
         meanAbsoluteError: Number((absoluteError / (pixelCount * 3)).toFixed(6)),
         mismatchPixelCount,
         mismatchRatio: Number((mismatchPixelCount / pixelCount).toFixed(6)),
+        onePixelSpatialTolerance: {
+          maxChannelError: Math.max(forwardSpatial.maximumError, reverseSpatial.maximumError),
+          meanAbsoluteError: Number(((forwardSpatial.absoluteError + reverseSpatial.absoluteError) / (pixelCount * 6)).toFixed(6)),
+          mismatchPixelCount: forwardSpatial.mismatchPixelCount + reverseSpatial.mismatchPixelCount,
+          mismatchRatio: Number(((forwardSpatial.mismatchPixelCount + reverseSpatial.mismatchPixelCount) / (pixelCount * 2)).toFixed(6)),
+        },
+        stableInterior: {
+          pixelCount: interiorPixelCount,
+          coverageRatio: Number((interiorPixelCount / pixelCount).toFixed(6)),
+          maxChannelError: interiorMaximumError,
+          meanAbsoluteError: Number((interiorAbsoluteError / Math.max(1, interiorPixelCount * 3)).toFixed(6)),
+          mismatchPixelCount: interiorMismatchPixelCount,
+          mismatchRatio: Number((interiorMismatchPixelCount / Math.max(1, interiorPixelCount)).toFixed(6)),
+        },
       };
     }
     return result;

@@ -8,10 +8,10 @@
 | Frame-major vertex position 与 opacity | v1 required | candidate | HaiYue mascot | G02/G03 验收 |
 | Step render order、visibility via opacity | v1 required | candidate | HaiYue mascot | G03 验收 |
 | Multiple textures | v1 required | candidate | 官方本地 case 待跑 | G07 |
-| Alpha mask references | v1 candidate | candidate | `not-covered` | G10/G12；不能提前标记 supported |
+| Alpha mask references / inverted mask | v1 required | supported | `covered`：Rice `19/5`、Mao `65/10` | G10/G12 complete；数字分别为 mask references / inverted consumers |
 | `normal` drawable blend | v1 required | candidate | HaiYue mascot | G03 |
-| `additive` drawable blend | v1 candidate | candidate | `not-covered` | G11/G12 |
-| `multiplicative` drawable blend | v1 candidate | candidate | `not-covered` | G11/G12 |
+| `additive` drawable blend | v1 required | supported | `covered`：Rice `21`、Mao `15` | G11/G12 complete |
+| `multiplicative` drawable blend | v1 required | supported | `covered`：Mao `8` | G11/G12 complete |
 | Motion3 Linear/Bezier/Stepped/InverseStepped sampling | capture recipe | complete | synthetic sampler + local Miku action set | G06 complete；更多正式 corpus 归 G07 |
 | 多动作枚举、同实例 clip range 与 cross-fade pose | runtime pose port | complete | focused mixer + Chrome action smoke | G04 complete；公共 state-machine facade 由 G09 接线 |
 | Adaptive sampling、quantization 与 dirty-channel attribution | internal conversion contract | complete | analytic deformation | G05 complete；HYDM v1 仍使用 dense frame pool |
@@ -38,3 +38,7 @@
 2. `covered` 要求许可明确的真实 source、固定 revision/hash、官方 evaluator reference、同时间/viewport/color 配置的 HYA GPU readback和零未分类失败。
 3. Dashboard 的 `not-covered` 必须保留到实际 feature observation count 大于零；不得根据代码枚举直接改成 `supported`。
 4. normal 模式只能对已分类、可定位的有损项给 warning；strict 模式对任何未支持或超过误差的语义失败。
+
+G12 的机器可验证事实源是 `animation-spec/corpus/deformable2d/feature-corpus-manifest.json` 与
+`review/candidates/live2d-mask-blend-corpus-candidate.json`。官方 Rice/Mao 原始模型仅由调用者在本地提供，
+不会进入 Git、npm 包或公开示例。

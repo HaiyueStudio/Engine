@@ -32,6 +32,7 @@ export function uploadImageTexture(
   format: GPUTextureFormat,
   mipmaps: TextureMipmapMode,
   label?: string,
+  premultipliedAlpha = false,
 ): ImageTextureUploadResult {
   const width = Math.max(1, isHtmlImageElement(source) ? source.naturalWidth || source.width : source.width);
   const height = Math.max(1, isHtmlImageElement(source) ? source.naturalHeight || source.height : source.height);
@@ -54,7 +55,7 @@ export function uploadImageTexture(
     format,
     usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
   });
-  device.queue.copyExternalImageToTexture({ source }, { texture }, [width, height]);
+  device.queue.copyExternalImageToTexture({ source }, { texture, premultipliedAlpha }, [width, height]);
   if (mipLevelCount > 1) generateMipChain(device, texture, format, mipLevelCount, label);
   return {
     texture,

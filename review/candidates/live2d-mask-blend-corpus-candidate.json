@@ -1,0 +1,642 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-live2d-mask-blend-corpus-candidate",
+  "goal": "m05/g12-mask-blend-corpus-acceptance",
+  "status": "passed",
+  "revision": "1217284cc4622f0885161dc5e933ae92674d9d02",
+  "dirty": false,
+  "formalEvidence": false,
+  "manifest": {
+    "id": "m05-g12-mask-blend-corpus",
+    "sha256": "f858c8506734625c9d292cf0c7380eddf6677bc96981ebf8c874e5657ff2e5d2"
+  },
+  "oracle": {
+    "cubismWebSamplesTag": "5-r.5",
+    "cubismWebSamplesRevision": "ed1e0b714826d92469b9e51cacc3346f4e393f03",
+    "cubismWebFrameworkRevision": "d4da0aa07e47d2c1e4f5fa7ea6047861ea5e5d0b",
+    "adapterPackage": "@haiyue/animation-spec@0.1.0",
+    "captureFormat": "live2d-cubism-drawable-capture@1",
+    "cubismCoreVersion": 83951616,
+    "coreVersionSource": "runtime-report"
+  },
+  "referenceConfiguration": {
+    "profile": "clip-baked-reference-times",
+    "referenceTimes": [
+      1
+    ],
+    "viewport": [
+      719,
+      694
+    ],
+    "clearColor": "#050817",
+    "targetFormat": "rgba8unorm",
+    "textureColorSpaceConversion": "none",
+    "textureAlphaMode": "premultiplied",
+    "webglAntialias": false,
+    "fitTransform": {
+      "viewportMode": "fit",
+      "policy": "bounds-centered-auto-zoom",
+      "fill": 0.82,
+      "userZoom": 1,
+      "pan": [
+        0,
+        0
+      ],
+      "canvas": [
+        719,
+        746
+      ],
+      "synchronizedViews": true
+    },
+    "thresholds": {
+      "maxChannelError": 224,
+      "meanAbsoluteError": 1,
+      "mismatchRatio": 0.025
+    }
+  },
+  "core": {
+    "sourcePolicy": "official-cdn",
+    "url": "https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js",
+    "transport": "network",
+    "version": 83951616
+  },
+  "samples": [
+    {
+      "id": "rice-glassfield-pro",
+      "title": "Rice Glassfield - PRO",
+      "sourcePolicy": "caller-supplied-local-only",
+      "rawAssetCommitted": false,
+      "license": {
+        "id": "Live2D-Sample-Model-Terms",
+        "url": "https://www.live2d.com/eula/live2d-sample-model-terms_en.html",
+        "acceptanceRequired": true
+      },
+      "source": {
+        "url": "https://www.live2d.com/en/learn/sample/rice-glassfield/",
+        "revisionKind": "runtime-directory-sha256",
+        "revision": "sha256-082dea795bfef18b5598f38d40cdadcaee54827146fdec596ecf4ee4e31eedc1",
+        "entry": "rice_pro_t03.model3.json",
+        "aggregateSha256": "2d5dc2f4f32a87567a044bc8540c3957198106a915aaec9580c2659e6dad2616",
+        "runtimeDirectoryHash": "sha256-082dea795bfef18b5598f38d40cdadcaee54827146fdec596ecf4ee4e31eedc1",
+        "fileCount": 10,
+        "sourceBytes": 3152965
+      },
+      "recipe": {
+        "motionId": "Idle:0",
+        "motionFile": "motions/idle.motion3.json",
+        "bakedFrameTimes": [
+          0,
+          1,
+          4
+        ],
+        "referenceTimes": [
+          1
+        ]
+      },
+      "observations": {
+        "drawableCount": 178,
+        "maskReferenceCount": 19,
+        "invertedMaskDrawableCount": 5,
+        "additiveDrawableCount": 21,
+        "multiplicativeDrawableCount": 0
+      },
+      "maskTargetCount": 8,
+      "coreVersion": 83951616,
+      "browser": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "angleBackend": "d3d11",
+        "nativeBackend": true,
+        "gpuAdapter": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "device": "",
+          "description": ""
+        }
+      },
+      "surfaceReadback": {
+        "width": 719,
+        "height": 694,
+        "maxChannelError": 198,
+        "meanAbsoluteError": 0.378991,
+        "mismatchPixelCount": 7667,
+        "mismatchRatio": 0.015365,
+        "onePixelSpatialTolerance": {
+          "maxChannelError": 97,
+          "meanAbsoluteError": 0.155346,
+          "mismatchPixelCount": 8107,
+          "mismatchRatio": 0.008123
+        },
+        "stableInterior": {
+          "pixelCount": 482204,
+          "coverageRatio": 0.966368,
+          "maxChannelError": 8,
+          "meanAbsoluteError": 0.000109,
+          "mismatchPixelCount": 0,
+          "mismatchRatio": 0
+        }
+      },
+      "recoverySmoke": true,
+      "comparisonConfiguration": {
+        "viewportMode": "fit",
+        "fitPolicy": "bounds-centered-auto-zoom",
+        "fitFill": 0.82,
+        "userZoom": 1,
+        "pan": [
+          0,
+          0
+        ],
+        "resolvedZoom": 0.9509157355499183,
+        "synchronizedViews": true,
+        "canvas": [
+          719,
+          746
+        ],
+        "targetFormat": "rgba8unorm",
+        "textureColorSpaceConversion": "none",
+        "alphaMode": "premultiplied",
+        "antialias": false
+      },
+      "conversionDiagnostics": [
+        {
+          "severity": "warning",
+          "code": "W_CUBISM_CULLING_IGNORED",
+          "path": "$.frames[0].drawables[id=\"ArtMesh163\"].culling"
+        },
+        {
+          "severity": "warning",
+          "code": "W_CUBISM_CULLING_IGNORED",
+          "path": "$.frames[0].drawables[id=\"ArtMesh162\"].culling"
+        },
+        {
+          "severity": "warning",
+          "code": "W_CUBISM_CULLING_IGNORED",
+          "path": "$.frames[0].drawables[id=\"ArtMesh161\"].culling"
+        },
+        {
+          "severity": "warning",
+          "code": "W_CUBISM_CULLING_IGNORED",
+          "path": "$.frames[0].drawables[id=\"ArtMesh160\"].culling"
+        },
+        {
+          "severity": "warning",
+          "code": "W_CUBISM_CULLING_IGNORED",
+          "path": "$.frames[0].drawables[id=\"ArtMesh164\"].culling"
+        },
+        {
+          "severity": "warning",
+          "code": "W_CUBISM_CULLING_IGNORED",
+          "path": "$.frames[0].drawables[id=\"ArtMesh170\"].culling"
+        },
+        {
+          "severity": "warning",
+          "code": "W_CUBISM_CULLING_IGNORED",
+          "path": "$.frames[0].drawables[id=\"ArtMesh171\"].culling"
+        },
+        {
+          "severity": "warning",
+          "code": "W_CUBISM_CULLING_IGNORED",
+          "path": "$.frames[0].drawables[id=\"ArtMesh168\"].culling"
+        },
+        {
+          "severity": "warning",
+          "code": "W_CUBISM_CULLING_IGNORED",
+          "path": "$.frames[0].drawables[id=\"ArtMesh169\"].culling"
+        }
+      ],
+      "fileInventoryVerified": true,
+      "unclassifiedFailureCount": 0
+    },
+    {
+      "id": "niziiro-mao",
+      "title": "Niziiro Mao",
+      "sourcePolicy": "caller-supplied-local-only",
+      "rawAssetCommitted": false,
+      "license": {
+        "id": "Live2D-Free-Material-License-and-Sample-Terms",
+        "url": "https://www.live2d.com/eula/live2d-sample-model-terms_en.html",
+        "acceptanceRequired": true
+      },
+      "source": {
+        "url": "https://github.com/Live2D/CubismWebSamples/tree/5-r.5/Samples/Resources/Mao",
+        "revisionKind": "git-commit",
+        "revision": "ed1e0b714826d92469b9e51cacc3346f4e393f03",
+        "entry": "Mao.model3.json",
+        "aggregateSha256": "db95489ea846340a4a90739933dadbafb4dc894113d661088df621ffffca2f79",
+        "runtimeDirectoryHash": "sha256-1add506bf80e04816f438c36a50d93a4916568dfad8f88daff56e3a75dec5bc9",
+        "fileCount": 22,
+        "sourceBytes": 4321713
+      },
+      "recipe": {
+        "motionId": "Idle:0",
+        "motionFile": "motions/mtn_01.motion3.json",
+        "bakedFrameTimes": [
+          0,
+          1,
+          5.57
+        ],
+        "referenceTimes": [
+          1
+        ]
+      },
+      "observations": {
+        "drawableCount": 262,
+        "maskReferenceCount": 65,
+        "invertedMaskDrawableCount": 10,
+        "additiveDrawableCount": 15,
+        "multiplicativeDrawableCount": 8
+      },
+      "maskTargetCount": 16,
+      "coreVersion": 83951616,
+      "browser": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "angleBackend": "d3d11",
+        "nativeBackend": true,
+        "gpuAdapter": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "device": "",
+          "description": ""
+        }
+      },
+      "surfaceReadback": {
+        "width": 719,
+        "height": 694,
+        "maxChannelError": 180,
+        "meanAbsoluteError": 0.346908,
+        "mismatchPixelCount": 6506,
+        "mismatchRatio": 0.013038,
+        "onePixelSpatialTolerance": {
+          "maxChannelError": 145,
+          "meanAbsoluteError": 0.152207,
+          "mismatchPixelCount": 7972,
+          "mismatchRatio": 0.007988
+        },
+        "stableInterior": {
+          "pixelCount": 485177,
+          "coverageRatio": 0.972326,
+          "maxChannelError": 8,
+          "meanAbsoluteError": 0.0015,
+          "mismatchPixelCount": 0,
+          "mismatchRatio": 0
+        }
+      },
+      "recoverySmoke": true,
+      "comparisonConfiguration": {
+        "viewportMode": "fit",
+        "fitPolicy": "bounds-centered-auto-zoom",
+        "fitFill": 0.82,
+        "userZoom": 1,
+        "pan": [
+          0,
+          0
+        ],
+        "resolvedZoom": 0.38848582903232226,
+        "synchronizedViews": true,
+        "canvas": [
+          719,
+          746
+        ],
+        "targetFormat": "rgba8unorm",
+        "textureColorSpaceConversion": "none",
+        "alphaMode": "premultiplied",
+        "antialias": false
+      },
+      "conversionDiagnostics": [],
+      "fileInventoryVerified": true,
+      "unclassifiedFailureCount": 0
+    }
+  ],
+  "totals": {
+    "maskReferenceCount": 84,
+    "invertedMaskDrawableCount": 15,
+    "additiveDrawableCount": 36,
+    "multiplicativeDrawableCount": 8
+  },
+  "features": [
+    {
+      "id": "drawable-topology",
+      "title": "Drawable topology / vertex animation",
+      "implementationStatus": "supported",
+      "coverageStatus": "covered",
+      "detail": "MIT fixture and licensed Core captures"
+    },
+    {
+      "id": "normal-blend",
+      "title": "Normal drawable blend",
+      "implementationStatus": "supported",
+      "coverageStatus": "covered",
+      "detail": "MIT fixture plus both licensed samples"
+    },
+    {
+      "id": "mask-composition",
+      "title": "Mask composition",
+      "implementationStatus": "supported",
+      "coverageStatus": "covered",
+      "detail": "84 observed mask contributions"
+    },
+    {
+      "id": "inverted-mask",
+      "title": "Inverted mask",
+      "implementationStatus": "supported",
+      "coverageStatus": "covered",
+      "detail": "15 observed consumers"
+    },
+    {
+      "id": "additive-blend",
+      "title": "Additive drawable blend",
+      "implementationStatus": "supported",
+      "coverageStatus": "covered",
+      "detail": "36 observed drawables"
+    },
+    {
+      "id": "multiplicative-blend",
+      "title": "Multiplicative drawable blend",
+      "implementationStatus": "supported",
+      "coverageStatus": "covered",
+      "detail": "8 observed drawables"
+    },
+    {
+      "id": "multiply-screen-color",
+      "title": "Multiply / screen drawable color",
+      "implementationStatus": "degraded",
+      "coverageStatus": "not-covered",
+      "detail": "v1 diagnoses non-neutral tint and strict conversion fails"
+    },
+    {
+      "id": "culling",
+      "title": "Drawable culling",
+      "implementationStatus": "unsupported",
+      "coverageStatus": "not-covered",
+      "detail": "payload is retained but v1 renderer does not execute culling"
+    },
+    {
+      "id": "runtime-parameters",
+      "title": "Runtime parameters / lip-sync / look input",
+      "implementationStatus": "unsupported",
+      "coverageStatus": "not-applicable",
+      "detail": "outside the clip-baked profile"
+    }
+  ],
+  "featureEvidence": [
+    {
+      "id": "mask-composition",
+      "status": "passed",
+      "sampleIds": [
+        "rice-glassfield-pro",
+        "niziiro-mao"
+      ],
+      "referenceTimes": [
+        1
+      ],
+      "observationCount": 84,
+      "diagnosticAttribution": {
+        "codes": [],
+        "paths": [],
+        "unclassifiedFailureCount": 0
+      },
+      "structuralMetrics": {
+        "drawables": 440,
+        "maskTargets": 24
+      },
+      "pixelMetrics": [
+        {
+          "sampleId": "rice-glassfield-pro",
+          "time": 1,
+          "maxChannelError": 198,
+          "meanAbsoluteError": 0.378991,
+          "mismatchRatio": 0.015365
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "time": 1,
+          "maxChannelError": 180,
+          "meanAbsoluteError": 0.346908,
+          "mismatchRatio": 0.013038
+        }
+      ],
+      "gpuValidation": {
+        "nativeBackend": true,
+        "deviceRecovery": true,
+        "adapters": [
+          {
+            "sampleId": "rice-glassfield-pro",
+            "vendor": "nvidia",
+            "architecture": "pascal",
+            "device": "",
+            "description": ""
+          },
+          {
+            "sampleId": "niziiro-mao",
+            "vendor": "nvidia",
+            "architecture": "pascal",
+            "device": "",
+            "description": ""
+          }
+        ]
+      },
+      "runtimeClosure": {
+        "sourceRuntimeRequested": false,
+        "sourceAssetRequested": false
+      }
+    },
+    {
+      "id": "inverted-mask",
+      "status": "passed",
+      "sampleIds": [
+        "rice-glassfield-pro",
+        "niziiro-mao"
+      ],
+      "referenceTimes": [
+        1
+      ],
+      "observationCount": 15,
+      "diagnosticAttribution": {
+        "codes": [],
+        "paths": [],
+        "unclassifiedFailureCount": 0
+      },
+      "structuralMetrics": {
+        "drawables": 440,
+        "maskTargets": 24
+      },
+      "pixelMetrics": [
+        {
+          "sampleId": "rice-glassfield-pro",
+          "time": 1,
+          "maxChannelError": 198,
+          "meanAbsoluteError": 0.378991,
+          "mismatchRatio": 0.015365
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "time": 1,
+          "maxChannelError": 180,
+          "meanAbsoluteError": 0.346908,
+          "mismatchRatio": 0.013038
+        }
+      ],
+      "gpuValidation": {
+        "nativeBackend": true,
+        "deviceRecovery": true,
+        "adapters": [
+          {
+            "sampleId": "rice-glassfield-pro",
+            "vendor": "nvidia",
+            "architecture": "pascal",
+            "device": "",
+            "description": ""
+          },
+          {
+            "sampleId": "niziiro-mao",
+            "vendor": "nvidia",
+            "architecture": "pascal",
+            "device": "",
+            "description": ""
+          }
+        ]
+      },
+      "runtimeClosure": {
+        "sourceRuntimeRequested": false,
+        "sourceAssetRequested": false
+      }
+    },
+    {
+      "id": "additive-blend",
+      "status": "passed",
+      "sampleIds": [
+        "rice-glassfield-pro",
+        "niziiro-mao"
+      ],
+      "referenceTimes": [
+        1
+      ],
+      "observationCount": 36,
+      "diagnosticAttribution": {
+        "codes": [],
+        "paths": [],
+        "unclassifiedFailureCount": 0
+      },
+      "structuralMetrics": {
+        "drawables": 440,
+        "maskTargets": 24
+      },
+      "pixelMetrics": [
+        {
+          "sampleId": "rice-glassfield-pro",
+          "time": 1,
+          "maxChannelError": 198,
+          "meanAbsoluteError": 0.378991,
+          "mismatchRatio": 0.015365
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "time": 1,
+          "maxChannelError": 180,
+          "meanAbsoluteError": 0.346908,
+          "mismatchRatio": 0.013038
+        }
+      ],
+      "gpuValidation": {
+        "nativeBackend": true,
+        "deviceRecovery": true,
+        "adapters": [
+          {
+            "sampleId": "rice-glassfield-pro",
+            "vendor": "nvidia",
+            "architecture": "pascal",
+            "device": "",
+            "description": ""
+          },
+          {
+            "sampleId": "niziiro-mao",
+            "vendor": "nvidia",
+            "architecture": "pascal",
+            "device": "",
+            "description": ""
+          }
+        ]
+      },
+      "runtimeClosure": {
+        "sourceRuntimeRequested": false,
+        "sourceAssetRequested": false
+      }
+    },
+    {
+      "id": "multiplicative-blend",
+      "status": "passed",
+      "sampleIds": [
+        "niziiro-mao"
+      ],
+      "referenceTimes": [
+        1
+      ],
+      "observationCount": 8,
+      "diagnosticAttribution": {
+        "codes": [],
+        "paths": [],
+        "unclassifiedFailureCount": 0
+      },
+      "structuralMetrics": {
+        "drawables": 262,
+        "maskTargets": 16
+      },
+      "pixelMetrics": [
+        {
+          "sampleId": "niziiro-mao",
+          "time": 1,
+          "maxChannelError": 180,
+          "meanAbsoluteError": 0.346908,
+          "mismatchRatio": 0.013038
+        }
+      ],
+      "gpuValidation": {
+        "nativeBackend": true,
+        "deviceRecovery": true,
+        "adapters": [
+          {
+            "sampleId": "niziiro-mao",
+            "vendor": "nvidia",
+            "architecture": "pascal",
+            "device": "",
+            "description": ""
+          }
+        ]
+      },
+      "runtimeClosure": {
+        "sourceRuntimeRequested": false,
+        "sourceAssetRequested": false
+      }
+    }
+  ],
+  "unclassifiedFailureCount": 0,
+  "runtimeClosure": {
+    "cubismRuntimeInProjectRequests": false,
+    "sourceAssetRequests": false
+  },
+  "g07Handoff": {
+    "status": "ready",
+    "manifestId": "m05-g12-mask-blend-corpus",
+    "sampleIds": [
+      "rice-glassfield-pro",
+      "niziiro-mao"
+    ],
+    "requiredObservationCounts": {
+      "maskReferenceCount": 84,
+      "invertedMaskDrawableCount": 15,
+      "additiveDrawableCount": 36,
+      "multiplicativeDrawableCount": 8
+    },
+    "consumerContract": "read candidate samples/features without redefining feature taxonomy"
+  },
+  "g09Handoff": {
+    "status": "clean-candidate-ready-for-human-baseline-review"
+  },
+  "bundledFileInventory": {
+    "status": "passed",
+    "fileCount": 4
+  }
+}

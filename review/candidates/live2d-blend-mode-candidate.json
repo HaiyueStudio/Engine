@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-live2d-blend-mode-candidate",
+  "goal": "m05/g11-blend-mode-parity",
+  "revision": "a97e1b0d45575b2c1b95628b059730d8b387eef3",
+  "dirty": true,
+  "formalEvidence": false,
+  "status": "passed",
+  "oracle": {
+    "cubismWebSamplesTag": "5-r.5",
+    "cubismWebFrameworkRevision": "d4da0aa07e47d2c1e4f5fa7ea6047861ea5e5d0b",
+    "textureAlpha": "premultiplied",
+    "targetFormat": "rgba8unorm",
+    "sourceColorSpaceConversion": "none"
+  },
+  "semantics": {
+    "normal": {
+      "color": ["one", "one-minus-src-alpha", "add"],
+      "alpha": ["one", "one-minus-src-alpha", "add"]
+    },
+    "additive": {
+      "color": ["one", "one", "add"],
+      "alpha": ["zero", "one", "add"]
+    },
+    "multiplicative": {
+      "color": ["dst", "one-minus-src-alpha", "add"],
+      "alpha": ["zero", "one", "add"]
+    }
+  },
+  "fixture": {
+    "id": "blend-parity",
+    "license": "MIT",
+    "captureSha256": "554d48fb6cd9e4f139ecd0aec795df5c36bf4c7997b010072e13a42ddd0b07ab",
+    "hyaSha256": "f3e18c0b61e0303fccaf7e274e7d5638ff5ebc053333e7481601d629f77d7c37",
+    "hydmSha256": "3e526a4961dbe037ddc62bc27c9b9fe7bd03fb0192ee3beff7bd556c80fdf439",
+    "textureSha256": [
+      "e84e2eb558506b16eb663fcb5e0f058aa3d0fcac33fb9be482ee04173e452bfd",
+      "e7e079fe69a0e61f0b8a913f017ed86dc75ae7ab785433ff42cb560f92d17278"
+    ],
+    "conversionReportSha256": "143718915df4dcd3f4aca11c589b754137ea39c7db70a4bc9915462b163056c6",
+    "featureCoverage": {
+      "drawableCount": 5,
+      "textureCount": 2,
+      "maskReferenceCount": 2,
+      "additiveDrawableCount": 1,
+      "multiplicativeDrawableCount": 1,
+      "semiTransparentTexture": true,
+      "drawableOpacity": true,
+      "foregroundBackgroundOrder": true,
+      "actionSwitch": true
+    },
+    "conversionDiagnosticCount": 0
+  },
+  "browser": {
+    "product": "Chrome/151.0.7922.170",
+    "angleBackend": "d3d11",
+    "nativeBackend": true,
+    "surfaceReadback": {
+      "width": 600,
+      "height": 511,
+      "maxChannelError": 2,
+      "meanAbsoluteError": 0.013899,
+      "mismatchPixelCount": 0,
+      "mismatchRatio": 0
+    },
+    "webgpuTextureReadback": {
+      "format": "rgba8unorm",
+      "copyTextureToBuffer": true,
+      "caseCount": 15,
+      "maximumByteError": 1,
+      "authoredStraightTexel": [96, 40, 180, 48],
+      "strictValidation": true
+    },
+    "lifecycle": {
+      "actionSwitchWithoutPlayerReplacement": true,
+      "playerInstallCount": 1,
+      "rendererRecovery": true
+    },
+    "unclassifiedFailureCount": 0,
+    "cubismRuntimeRequested": false
+  },
+  "realModelAcceptance": {
+    "additive": {
+      "status": "passed",
+      "model": "Rice Glassfield - PRO",
+      "copyrightOwner": "Live2D Inc.",
+      "usageScope": "caller-supplied local validation only",
+      "rawAssetCommitted": false,
+      "runtimeDirectoryHash": "sha256-082dea795bfef18b5598f38d40cdadcaee54827146fdec596ecf4ee4e31eedc1",
+      "observedDrawableCount": 178,
+      "observedMaskReferenceCount": 19,
+      "observedInvertedMaskDrawableCount": 5,
+      "observedAdditiveDrawableCount": 21,
+      "observedMultiplicativeDrawableCount": 0,
+      "sampledAtSeconds": 1,
+      "surfaceReadback": {
+        "width": 719,
+        "height": 694,
+        "maxChannelError": 179,
+        "meanAbsoluteError": 0.183182,
+        "mismatchPixelCount": 3377,
+        "mismatchRatio": 0.006768,
+        "stableInteriorMaxChannelError": 2
+      },
+      "unclassifiedFailureCount": 0,
+      "licenseEvidence": [
+        "https://www.live2d.com/en/learn/sample/rice-glassfield/",
+        "https://www.live2d.com/eula/live2d-sample-model-terms_en.html",
+        "caller-supplied Rice package ReadMe.txt"
+      ]
+    },
+    "multiplicative": {
+      "status": "passed",
+      "model": "Niziiro Mao",
+      "copyrightOwner": "Live2D Inc.",
+      "usageScope": "caller-supplied local validation only",
+      "rawAssetCommitted": false,
+      "runtimeDirectoryHash": "sha256-1add506bf80e04816f438c36a50d93a4916568dfad8f88daff56e3a75dec5bc9",
+      "fileCount": 22,
+      "sourceBytes": 4321713,
+      "observedDrawableCount": 262,
+      "observedMaskReferenceCount": 65,
+      "observedInvertedMaskDrawableCount": 10,
+      "observedAdditiveDrawableCount": 15,
+      "observedMultiplicativeDrawableCount": 8,
+      "bakedFrameCount": 3,
+      "sampledAtSeconds": 1,
+      "surfaceReadback": {
+        "width": 719,
+        "height": 694,
+        "maxChannelError": 180,
+        "meanAbsoluteError": 0.346908,
+        "mismatchPixelCount": 6506,
+        "mismatchRatio": 0.013038,
+        "stableInteriorMaxChannelError": 8
+      },
+      "unclassifiedFailureCount": 0,
+      "licenseEvidence": [
+        "https://www.live2d.com/en/learn/sample/niziiro-mao/",
+        "https://www.live2d.com/eula/live2d-sample-model-terms_en.html",
+        "https://github.com/Live2D/CubismWebSamples/tree/develop/Samples/Resources/Mao"
+      ]
+    }
+  },
+  "focusedValidation": [
+    { "command": "npm run typecheck -w ./engine", "status": "passed" },
+    { "command": "node --test engine/test/image-texture-mipmaps.test.mjs", "status": "passed", "tests": 6 },
+    { "command": "npm run typecheck -w ./animation-spec", "status": "passed" },
+    { "command": "npm test -w ./animation-spec", "status": "passed", "tests": 107 },
+    { "command": "npm run typecheck -w ./extensions", "status": "passed" },
+    { "command": "node --test extensions/test/deformable-animation.test.mjs", "status": "passed", "tests": 14 },
+    { "command": "npm run build -w ./engine", "status": "passed" },
+    { "command": "npm run build -w ./animation-spec", "status": "passed" },
+    { "command": "npm run build -w ./shader-language", "status": "passed" },
+    { "command": "npm run build -w ./extensions", "status": "passed" },
+    { "command": "npm run typecheck -w ./examples", "status": "passed" },
+    { "command": "npm run build:target -- example:live2d-hya-compare", "status": "passed" },
+    { "command": "node scripts/verify-deformable-blend-composition.mjs", "status": "passed", "cases": 15 },
+    { "command": "node scripts/verify-animation-compare-examples.mjs", "status": "passed" },
+    { "command": "node scripts/verify-live2d-local-corpus.mjs --model <rice-runtime>", "status": "passed-prior-run-current-tree" },
+    { "command": "node scripts/verify-live2d-local-corpus.mjs --model <mao-runtime>", "status": "passed", "observedMultiplicativeDrawableCount": 8 }
+  ],
+  "offlineReplay": {
+    "command": "node scripts/verify-live2d-local-corpus.mjs --model <licensed-runtime> --core <official-sdk-live2dcubismcore.min.js>",
+    "corePolicy": "caller-supplied-local-official-sdk-only",
+    "sameOriginMount": true,
+    "rawCoreCommitted": false,
+    "status": "passed-with-official-cdn-core"
+  },
+  "g12Handoff": {
+    "status": "ready",
+    "resolvedModes": ["normal", "additive", "multiplicative"],
+    "realObservedModes": ["normal", "additive", "multiplicative"],
+    "unresolvedRequirements": []
+  }
+}

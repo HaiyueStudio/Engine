@@ -34,7 +34,7 @@ Consequences:
 
 ## Validation and budgets
 
-Capture validation runs before HYDM encoding and classifies missing references, self references, duplicate references, cycles, reference overflow, invalid dynamic visibility, and cross-frame identity/topology changes. Inverted masks without a source are invalid.
+Capture validation runs before HYDM encoding and classifies missing references, self references, cycles, reference overflow, invalid dynamic visibility, and cross-frame identity/topology changes. Inverted masks without a source are invalid. A mask list is an ordered contribution list rather than a set: repeated references are preserved because the official renderer composites each occurrence and antialiased coverage is therefore not idempotent. Capture reads only the first `drawables.maskCounts[index]` entries from the Core mask-index view.
 
 At the Cubism Core adapter boundary, bounded opacity overshoot from Core interpolation is clamped into `[0, 1]` before HYDM encoding. The official Rice initial pose exposes `1.0000499486923218`; the accepted bound is `1e-4`, while material drift such as `1.001` remains invalid. Old Core data may also retain an inverted-mask constant bit on a drawable with no mask references. The adapter omits that semantically inactive bit; the source-neutral capture validator continues to reject an inverted mask without a source.
 

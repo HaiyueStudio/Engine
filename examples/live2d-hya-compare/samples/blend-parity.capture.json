@@ -1,0 +1,826 @@
+{
+  "format": "live2d-cubism-drawable-capture",
+  "version": 1,
+  "name": "Synthetic Cubism premultiplied blend parity fixture",
+  "source": {
+    "license": "MIT",
+    "purpose": "G11 normal/additive/multiplicative browser parity"
+  },
+  "canvas": {
+    "width": 512,
+    "height": 512,
+    "pixelsPerUnit": 1,
+    "coordinateSystem": "model-y-up",
+    "uvOrigin": "top-left"
+  },
+  "duration": 2,
+  "frameRate": 1,
+  "textures": [
+    {
+      "id": "blend-foreground",
+      "uri": "samples/blend-parity-a.png",
+      "width": 64,
+      "height": 64
+    },
+    {
+      "id": "blend-background",
+      "uri": "samples/blend-parity-b.png",
+      "width": 64,
+      "height": 64
+    }
+  ],
+  "frames": [
+    {
+      "time": 0,
+      "drawables": [
+        {
+          "id": "mask-source",
+          "textureIndex": 1,
+          "renderOrder": 0,
+          "opacity": 0,
+          "visible": true,
+          "blendMode": "normal",
+          "culling": false,
+          "masks": [],
+          "invertedMask": false,
+          "positions": [
+            -144,
+            160,
+            144,
+            160,
+            -144,
+            -160,
+            144,
+            -160
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "background",
+          "textureIndex": 1,
+          "renderOrder": 1,
+          "opacity": 0.92,
+          "visible": true,
+          "blendMode": "normal",
+          "culling": false,
+          "masks": [],
+          "invertedMask": false,
+          "positions": [
+            -208,
+            192,
+            208,
+            192,
+            -208,
+            -192,
+            208,
+            -192
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "normal",
+          "textureIndex": 0,
+          "renderOrder": 2,
+          "opacity": 0.72,
+          "visible": true,
+          "blendMode": "normal",
+          "culling": false,
+          "masks": [],
+          "invertedMask": false,
+          "positions": [
+            -184,
+            120,
+            -32,
+            120,
+            -184,
+            -104,
+            -32,
+            -104
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "additive",
+          "textureIndex": 0,
+          "renderOrder": 3,
+          "opacity": 0.55,
+          "visible": true,
+          "blendMode": "additive",
+          "culling": false,
+          "masks": [
+            "mask-source"
+          ],
+          "invertedMask": false,
+          "positions": [
+            -76,
+            136,
+            76,
+            136,
+            -76,
+            -120,
+            76,
+            -120
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "multiplicative",
+          "textureIndex": 0,
+          "renderOrder": 4,
+          "opacity": 0.78,
+          "visible": true,
+          "blendMode": "multiplicative",
+          "culling": false,
+          "masks": [
+            "mask-source"
+          ],
+          "invertedMask": false,
+          "positions": [
+            32,
+            120,
+            184,
+            120,
+            32,
+            -104,
+            184,
+            -104
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "time": 1,
+      "drawables": [
+        {
+          "id": "mask-source",
+          "textureIndex": 1,
+          "renderOrder": 0,
+          "opacity": 0,
+          "visible": true,
+          "blendMode": "normal",
+          "culling": false,
+          "masks": [],
+          "invertedMask": false,
+          "positions": [
+            -116,
+            160,
+            172,
+            160,
+            -116,
+            -160,
+            172,
+            -160
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "background",
+          "textureIndex": 1,
+          "renderOrder": 1,
+          "opacity": 0.92,
+          "visible": true,
+          "blendMode": "normal",
+          "culling": false,
+          "masks": [],
+          "invertedMask": false,
+          "positions": [
+            -208,
+            192,
+            208,
+            192,
+            -208,
+            -192,
+            208,
+            -192
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "normal",
+          "textureIndex": 0,
+          "renderOrder": 2,
+          "opacity": 0.42,
+          "visible": true,
+          "blendMode": "normal",
+          "culling": false,
+          "masks": [],
+          "invertedMask": false,
+          "positions": [
+            -156,
+            120,
+            -4,
+            120,
+            -156,
+            -104,
+            -4,
+            -104
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "additive",
+          "textureIndex": 0,
+          "renderOrder": 4,
+          "opacity": 0.8,
+          "visible": true,
+          "blendMode": "additive",
+          "culling": false,
+          "masks": [
+            "mask-source"
+          ],
+          "invertedMask": false,
+          "positions": [
+            -104,
+            136,
+            48,
+            136,
+            -104,
+            -120,
+            48,
+            -120
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "multiplicative",
+          "textureIndex": 0,
+          "renderOrder": 3,
+          "opacity": 0.5,
+          "visible": true,
+          "blendMode": "multiplicative",
+          "culling": false,
+          "masks": [
+            "mask-source"
+          ],
+          "invertedMask": false,
+          "positions": [
+            60,
+            120,
+            212,
+            120,
+            60,
+            -104,
+            212,
+            -104
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "time": 2,
+      "drawables": [
+        {
+          "id": "mask-source",
+          "textureIndex": 1,
+          "renderOrder": 0,
+          "opacity": 0,
+          "visible": true,
+          "blendMode": "normal",
+          "culling": false,
+          "masks": [],
+          "invertedMask": false,
+          "positions": [
+            -144,
+            160,
+            144,
+            160,
+            -144,
+            -160,
+            144,
+            -160
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "background",
+          "textureIndex": 1,
+          "renderOrder": 1,
+          "opacity": 0.92,
+          "visible": true,
+          "blendMode": "normal",
+          "culling": false,
+          "masks": [],
+          "invertedMask": false,
+          "positions": [
+            -208,
+            192,
+            208,
+            192,
+            -208,
+            -192,
+            208,
+            -192
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "normal",
+          "textureIndex": 0,
+          "renderOrder": 2,
+          "opacity": 0.72,
+          "visible": true,
+          "blendMode": "normal",
+          "culling": false,
+          "masks": [],
+          "invertedMask": false,
+          "positions": [
+            -184,
+            120,
+            -32,
+            120,
+            -184,
+            -104,
+            -32,
+            -104
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "additive",
+          "textureIndex": 0,
+          "renderOrder": 3,
+          "opacity": 0.55,
+          "visible": true,
+          "blendMode": "additive",
+          "culling": false,
+          "masks": [
+            "mask-source"
+          ],
+          "invertedMask": false,
+          "positions": [
+            -76,
+            136,
+            76,
+            136,
+            -76,
+            -120,
+            76,
+            -120
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "id": "multiplicative",
+          "textureIndex": 0,
+          "renderOrder": 4,
+          "opacity": 0.78,
+          "visible": true,
+          "blendMode": "multiplicative",
+          "culling": false,
+          "masks": [
+            "mask-source"
+          ],
+          "invertedMask": false,
+          "positions": [
+            32,
+            120,
+            184,
+            120,
+            32,
+            -104,
+            184,
+            -104
+          ],
+          "uvs": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1
+          ],
+          "indices": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "multiplyColor": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "screenColor": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -12,6 +12,8 @@ export interface AnimationVisual2DOptions {
   order: number;
   /** Source-neutral draw blend used by deformable meshes and other authored visuals. */
   blendMode?: AnimationVisual2DBlendMode;
+  /** Declares whether filtered source texels are already premultiplied. */
+  textureAlphaMode?: AnimationVisual2DTextureAlphaMode;
   /** Optional explicit UV pairs for arbitrary textured triangle meshes. */
   uvs?: Float32Array;
   sourceOnly?: boolean;
@@ -27,6 +29,7 @@ export interface AnimationVisual2DOptions {
 }
 
 export type AnimationVisual2DBlendMode = 'normal' | 'additive' | 'multiplicative';
+export type AnimationVisual2DTextureAlphaMode = 'straight' | 'premultiplied';
 
 export interface AnimationVisualGradient {
   kind: 'linear' | 'radial';
@@ -56,6 +59,7 @@ export class AnimationVisual2D extends Component {
   readonly nodeKey: string;
   order: number;
   readonly blendMode: AnimationVisual2DBlendMode;
+  readonly textureAlphaMode: AnimationVisual2DTextureAlphaMode;
   readonly uvs: Float32Array | null;
   readonly sourceOnly: boolean;
   readonly compositeLayers: readonly Readonly<AnimationCompositeLayer>[];
@@ -82,6 +86,7 @@ export class AnimationVisual2D extends Component {
     this.nodeKey = `${options.instanceId}:${options.nodeId}`;
     this.order = options.order;
     this.blendMode = options.blendMode ?? 'normal';
+    this.textureAlphaMode = options.textureAlphaMode ?? 'straight';
     if (options.uvs && options.uvs.length !== options.geometry.positions.length) {
       throw new RangeError('AnimationVisual2D explicit UV count must match geometry positions.');
     }
@@ -152,6 +157,7 @@ export class AnimationVisual2D extends Component {
       nodeId: this.nodeId,
       order: this.order,
       blendMode: this.blendMode,
+      textureAlphaMode: this.textureAlphaMode,
       ...(this.uvs ? { uvs: this.uvs } : {}),
       sourceOnly: this.sourceOnly,
       ...(this.compositeLayers.length === 0 ? {} : { composite: { layers: this.compositeLayers } }),

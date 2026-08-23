@@ -270,7 +270,6 @@ function validateCaptureRoot(capture: CubismDrawableCapture, diagnostics: Cubism
       if (drawable.blendMode !== undefined && drawable.blendMode !== 'normal' && drawable.blendMode !== 'additive' && drawable.blendMode !== 'multiplicative') fail('Blend mode is unsupported.', `${path}.blendMode`);
       if (drawable.invertedMask !== undefined && typeof drawable.invertedMask !== 'boolean') fail('invertedMask must be boolean when present.', `${path}.invertedMask`);
       if (drawable.masks !== undefined && (!Array.isArray(drawable.masks) || drawable.masks.some((mask: unknown) => typeof mask !== 'string' || mask.length === 0))) fail('Masks must contain non-empty drawable ids.', `${path}.masks`);
-      if (Array.isArray(drawable.masks) && new Set(drawable.masks).size !== drawable.masks.length) fail('Mask references must be unique per drawable.', `${path}.masks`);
       if (drawable.invertedMask === true && (drawable.masks?.length ?? 0) === 0) fail('An inverted mask flag requires at least one mask reference.', `${path}.invertedMask`);
       const empty = Array.isArray(drawable.positions) && Array.isArray(drawable.indices) && (drawable.positions.length === 0 || drawable.indices.length === 0);
       if (!Array.isArray(drawable.positions) || (!empty && (drawable.positions.length < 6 || drawable.positions.length % 2 !== 0)) || !drawable.positions.every(Number.isFinite)) fail('Positions require either an empty Core placeholder or finite xy triples.', `${path}.positions`);

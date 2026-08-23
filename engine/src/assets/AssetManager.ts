@@ -21,6 +21,8 @@ export interface TextureAssetOptions {
   format?: GPUTextureFormat;
   /** Ordinary images default to `none`; compressed textures always use their source mip chain. */
   mipmaps?: TextureMipmapMode;
+  /** Stores filtered texels as premultiplied alpha for renderers whose blend contract requires it. */
+  premultipliedAlpha?: boolean;
   /**
    * Stable logical identity for sources whose runtime URL/object identity is temporary.
    * The manager still separates ordinary textures by format and mip policy.
@@ -258,16 +260,17 @@ export class AssetManager {
     }
     const format = options.format ?? this._options.texture?.format ?? 'rgba8unorm';
     const mipmaps = options.mipmaps ?? this._options.texture?.mipmaps ?? 'none';
-    const key = this._textureKey(source, format, mipmaps, options.cacheKey);
+    const premultipliedAlpha = options.premultipliedAlpha ?? this._options.texture?.premultipliedAlpha ?? false;
+    const key = this._textureKey(source, format, mipmaps, premultipliedAlpha, options.cacheKey);
     const label = options.label ?? key;
-    const create = (signal: AbortSignal) => this._createTexture(source, format, mipmaps, label, signal, key);
+    const create = (signal: AbortSignal) => this._createTexture(source, format, mipmaps, premultipliedAlpha, label, signal, key);
     return this.load(key, signal => create(signal!), texture => this._destroyTexture(texture), {
       signal: options.signal,
       recovery: {
         label,
         source: typeof source === 'string'
-          ? { kind: 'url-texture', url: source, format, mipmaps }
-          : { kind: 'image-source', source, format, mipmaps },
+          ? { kind: 'url-texture', url: source, format, mipmaps, premultipliedAlpha }
+          : { kind: 'image-source', source, format, mipmaps, premultipliedAlpha },
         load: create,
       },
     });
@@ -615,23 +618,26 @@ export class AssetManager {
     source: TextureAssetSource,
     format: GPUTextureFormat,
     mipmaps: TextureMipmapMode,
+    premultipliedAlpha: boolean,
     cacheKey?: string,
   ): string {
     if (isCompressedTextureSource(source)) return `texture:compressed:${source.type}:${source.src}`;
-    if (cacheKey !== undefined) return `texture:identity:${format}:${mipmaps}:${cacheKey}`;
-    if (typeof source === 'string') return `texture:url:${format}:${mipmaps}:${source}`;
+    const alphaMode = premultipliedAlpha ? 'premultiplied' : 'straight';
+    if (cacheKey !== undefined) return `texture:identity:${format}:${mipmaps}:${alphaMode}:${cacheKey}`;
+    if (typeof source === 'string') return `texture:url:${format}:${mipmaps}:${alphaMode}:${source}`;
     let identity = this._objectKeys.get(source);
     if (!identity) {
       identity = String(++this._nextObjectKey);
       this._objectKeys.set(source, identity);
     }
-    return `texture:object:${format}:${mipmaps}:${identity}`;
+    return `texture:object:${format}:${mipmaps}:${alphaMode}:${identity}`;
   }
 
   private async _createTexture(
     source: TextureAssetSource,
     format: GPUTextureFormat,
     mipmaps: TextureMipmapMode,
+    premultipliedAlpha: boolean,
     label: string,
     signal: AbortSignal,
     key: string,
@@ -660,7 +666,7 @@ export class AssetManager {
       this._throwIfAborted(signal, key);
       const record = this._records.get(key);
       record?.job?.setPhase('uploading');
-      return this._createTextureFromImageSource(imageSource, format, mipmaps, label, record?.scope ?? null);
+      return this._createTextureFromImageSource(imageSource, format, mipmaps, premultipliedAlpha, label, record?.scope ?? null);
     } finally {
       if (closeBitmap) (imageSource as ImageBitmap).close();
     }
@@ -670,10 +676,11 @@ export class AssetManager {
     source: ImageBitmap | HTMLCanvasElement | HTMLImageElement,
     format: GPUTextureFormat,
     mipmaps: TextureMipmapMode,
+    premultipliedAlpha: boolean,
     label: string,
     scope: GPUResourceScope | null,
   ): GPUTexture {
-    const upload = uploadImageTexture(this._device, source, format, mipmaps, label);
+    const upload = uploadImageTexture(this._device, source, format, mipmaps, label, premultipliedAlpha);
     const texture = upload.texture;
     if (scope) scope.trackTexture(texture, `AssetManager.texture:${format}:${mipmaps}`, upload.estimatedBytes);
     else this._tracker?.trackTexture(texture, `AssetManager.texture:${format}:${mipmaps}`, upload.estimatedBytes);
@@ -742,7 +749,9 @@ async function decodeTextureBlob(
   if (typeof createImageBitmap === 'function') {
     try {
       return {
-        source: await createImageBitmap(blob, { colorSpaceConversion: 'none' }),
+        // Keep runtime texture bytes straight-alpha. Blend-specific shaders
+        // perform the one explicit premultiplication before compositing.
+        source: await createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' }),
         closeBitmap: true,
       };
     } catch (error) {

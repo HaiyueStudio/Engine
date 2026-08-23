@@ -79,7 +79,7 @@
       "title": "Live2D → HYA Fidelity Compare",
       "entry": "live2d-hya-compare/main.ts",
       "capabilities": ["animation-format", "live2d-cubism-import", "fidelity-compare", "licensed-official-core-reference", "auto-bounds", "timeline-scrubbing", "deformable-mesh", "webgpu", "2d"],
-      "assets": ["live2d-hya-compare/samples/manifest.json", "live2d-hya-compare/samples/mascot.hya", "live2d-hya-compare/samples/mascot.hydm", "live2d-hya-compare/samples/mascot.png", "live2d-hya-compare/samples/mascot.capture.json", "live2d-hya-compare/samples/mask-parity.hya", "live2d-hya-compare/samples/mask-parity.hydm", "live2d-hya-compare/samples/mask-parity.png", "live2d-hya-compare/samples/mask-parity.capture.json", "live2d-hya-compare/samples/mask-parity-conversion-report.json"],
+      "assets": ["live2d-hya-compare/samples/manifest.json", "live2d-hya-compare/samples/mascot.hya", "live2d-hya-compare/samples/mascot.hydm", "live2d-hya-compare/samples/mascot.png", "live2d-hya-compare/samples/mascot.capture.json", "live2d-hya-compare/samples/mask-parity.hya", "live2d-hya-compare/samples/mask-parity.hydm", "live2d-hya-compare/samples/mask-parity.png", "live2d-hya-compare/samples/mask-parity.capture.json", "live2d-hya-compare/samples/mask-parity-conversion-report.json", "live2d-hya-compare/samples/blend-parity.hya", "live2d-hya-compare/samples/blend-parity.hydm", "live2d-hya-compare/samples/blend-parity-a.png", "live2d-hya-compare/samples/blend-parity-b.png", "live2d-hya-compare/samples/blend-parity.capture.json", "live2d-hya-compare/samples/blend-parity-conversion-report.json"],
       "screenshot": { "required": false, "baseline": null },
       "performance": null,
       "ci": "smoke",
@@ -182,6 +182,7 @@
       ],
       "assets": [
         "hya-live2d-corpus-dashboard/samples/manifest.json",
+        "hya-live2d-corpus-dashboard/samples/feature-status.json",
         "hya-live2d-corpus-dashboard/samples/mascot.hya",
         "hya-live2d-corpus-dashboard/samples/mascot.hydm",
         "hya-live2d-corpus-dashboard/samples/mascot.png",

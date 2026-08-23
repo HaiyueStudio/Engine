@@ -22,6 +22,7 @@
     "src/animation/Animation2DStateMachine.ts",
     "src/animation/Animation2DStateMachineVisualRuntime.ts",
     "src/animation/AnimationMaskBudget.ts",
+    "src/animation/AnimationBlendMode.ts",
     "src/animation/AnimationAudioClip.ts",
     "src/animation/HyaAnimation2DClipAdapter.ts",
     "src/animation/AnimationTextRasterizer.ts",

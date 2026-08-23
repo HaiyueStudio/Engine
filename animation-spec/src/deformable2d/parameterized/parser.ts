@@ -101,7 +101,7 @@ function validateDrawable(value: unknown, path: string, ids: Set<string>, meshId
 }
 
 function validateMaskGraph(values: unknown[], ids: Set<string>, path: string, maxDepth: number): void {
-  const masks = new Map<string, string[]>(); values.forEach((value, index) => { const drawable = object(value, `${path}.drawables[${index}]`); const refs = optionalArray(drawable.masks, `${path}.drawables[${index}].masks`) as string[]; for (const ref of refs) if (!ids.has(ref) || ref === drawable.id) fail('E_RIG_REFERENCE', `${path}.drawables[${index}].masks`, `invalid mask ${ref}`); if (new Set(refs).size !== refs.length) fail('E_RIG_REFERENCE', `${path}.drawables[${index}].masks`, 'mask references must be unique'); masks.set(drawable.id as string, refs); });
+  const masks = new Map<string, string[]>(); values.forEach((value, index) => { const drawable = object(value, `${path}.drawables[${index}]`); const refs = optionalArray(drawable.masks, `${path}.drawables[${index}].masks`) as string[]; for (const ref of refs) if (!ids.has(ref) || ref === drawable.id) fail('E_RIG_REFERENCE', `${path}.drawables[${index}].masks`, `invalid mask ${ref}`); masks.set(drawable.id as string, refs); });
   const states = new Map<string, 1 | 2>(); const visit = (id: string, depth: number): void => { if (depth > maxDepth) fail('E_RIG_LIMIT', `${path}.drawables`, `mask depth exceeds ${maxDepth}`); if (states.get(id) === 1) fail('E_RIG_CYCLE', `${path}.drawables`, `mask cycle includes ${id}`); if (states.get(id) === 2) return; states.set(id, 1); for (const child of masks.get(id) ?? []) visit(child, depth + 1); states.set(id, 2); }; for (const id of ids) visit(id, 1);
 }
 

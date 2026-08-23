@@ -82,7 +82,7 @@ function captureDrawables(core, model, modelOpacity, canvas) {
   const ids = Array.from(drawables.ids, String);
   return ids.map((id, index) => {
     const constantFlags = drawables.constantFlags[index];
-    const masks = Array.from(drawables.masks[index] ?? [], maskIndex => ids[maskIndex]);
+    const masks = coreDrawableMaskIds(drawables, ids, index);
     const blendMode = core.Utils.hasBlendAdditiveBit(constantFlags) ? 'additive' : core.Utils.hasBlendMultiplicativeBit(constantFlags) ? 'multiplicative' : 'normal';
     const invertedMask = typeof core.Utils.hasIsInvertedMaskBit === 'function'
       && core.Utils.hasIsInvertedMaskBit(constantFlags);
@@ -95,6 +95,17 @@ function captureDrawables(core, model, modelOpacity, canvas) {
       screenColor: colorAt(drawables.screenColors, index, [0, 0, 0, 0]),
     };
   });
+}
+
+function coreDrawableMaskIds(drawables, ids, drawableIndex) {
+  const source = drawables.masks[drawableIndex] ?? [];
+  // Cubism Core publishes the semantic count separately. Do not consume stale
+  // values that can remain in the backing mask-index view beyond this count.
+  const count = Number(drawables.maskCounts?.[drawableIndex] ?? source.length);
+  if (!Number.isInteger(count) || count < 0 || count > source.length) {
+    throw new Error(`Cubism drawable ${drawableIndex} has an invalid mask count ${count}.`);
+  }
+  return Array.from({ length: count }, (_, index) => ids[Number(source[index])]);
 }
 
 function centerCorePositions(source, canvas) {

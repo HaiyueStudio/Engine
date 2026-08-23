@@ -22,6 +22,7 @@ import animation2dWgsl from '../shaders/generated/2d-ui-animation-2d.generated.w
 import { AnimationVisual2D } from './AnimationVisual2D';
 import { AnimationFormatError, type AnimationCompositeLayer } from '@haiyue/animation-spec';
 import { animationMaskCompositeKey, animationMaskTargetKey, assertAnimationMaskBudget } from './AnimationMaskBudget';
+import { animationBlendFragmentEntryPoint, animationBlendState } from './AnimationBlendMode';
 
 export interface Animation2DRenderSystemOptions extends RenderSystem2DBaseOptions {
   /** Bounds view-sized alpha targets used by masks and mattes. */
@@ -358,7 +359,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
           pass.setPipeline(this.getPresentPipeline('rgba8unorm', 1, false, false));
           this.drawEffectResult(pass, source.entity, effectTarget.texture);
         } else {
-          pass.setPipeline(this.getPipeline('rgba8unorm', 1, false, false));
+          pass.setPipeline(this.getPipeline('rgba8unorm', 1, false, false, 'normal', source.visual.textureAlphaMode));
           this.draw(pass, source.entity, source.visual, context, resolved, true);
         }
         pass.end();
@@ -385,6 +386,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
           true,
           context.view?.reverseZ ?? this.engine.reverseZ,
           entry.item.visual.blendMode,
+          entry.item.visual.textureAlphaMode,
         ));
         this.draw(passEncoder, entry.item.entity, entry.item.visual, context, entry.composite, false);
         visualCount++;
@@ -508,9 +510,10 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     withDepth: boolean,
     reverseZ: boolean,
     blendMode: AnimationVisual2D['blendMode'] = 'normal',
+    textureAlphaMode: AnimationVisual2D['textureAlphaMode'] = 'straight',
   ): GPURenderPipeline {
     const depthFormat = withDepth ? this.engine.getDepthFormat(reverseZ) : 'none';
-    const key = `visual:${format}:${sampleCount}:${depthFormat}:${reverseZ ? 1 : 0}:${blendMode}`;
+    const key = `visual:${format}:${sampleCount}:${depthFormat}:${reverseZ ? 1 : 0}:${blendMode}:${textureAlphaMode}`;
     const cached = this.pipelines.get(key);
     if (cached) return cached;
     const pipeline = requireEngineDevice(this.engine).createRenderPipeline({
@@ -523,7 +526,11 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
           { shaderLocation: 1, offset: 8, format: 'float32x2' },
         ],
       }] },
-      fragment: { module: this.shader, entryPoint: 'fs_main', targets: [{ format, blend: animationVisualBlendState(blendMode) }] },
+      fragment: {
+        module: this.shader,
+        entryPoint: animationBlendFragmentEntryPoint(blendMode, textureAlphaMode),
+        targets: [{ format, blend: animationBlendState(blendMode) }],
+      },
       primitive: { topology: 'triangle-list', cullMode: 'none' },
       ...(withDepth ? { depthStencil: {
         format: depthFormat as GPUTextureFormat,
@@ -655,7 +662,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       }],
     });
     applyViewport(sourcePass, context);
-    sourcePass.setPipeline(this.getPipeline('rgba8unorm', 1, false, false));
+    sourcePass.setPipeline(this.getPipeline('rgba8unorm', 1, false, false, 'normal', item.visual.textureAlphaMode));
     sourcePass.setBindGroup(0, this.cameraGpu.bindGroup);
     this.draw(sourcePass, item.entity, item.visual, context, compositeBindGroup, false);
     sourcePass.end();
@@ -992,21 +999,6 @@ function externalImageSize(source: ImageBitmap | HTMLCanvasElement | HTMLImageEl
 
 function compareItems(a: AnimationRenderItem, b: AnimationRenderItem): number {
   return a.visual.instanceId - b.visual.instanceId || a.visual.order - b.visual.order || a.entity.id - b.entity.id;
-}
-
-function animationVisualBlendState(mode: AnimationVisual2D['blendMode']): GPUBlendState {
-  if (mode === 'additive') return {
-    color: { srcFactor: 'src-alpha', dstFactor: 'one', operation: 'add' },
-    alpha: { srcFactor: 'zero', dstFactor: 'one', operation: 'add' },
-  };
-  if (mode === 'multiplicative') return {
-    color: { srcFactor: 'dst', dstFactor: 'one-minus-src-alpha', operation: 'add' },
-    alpha: { srcFactor: 'zero', dstFactor: 'one', operation: 'add' },
-  };
-  return {
-    color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha', operation: 'add' },
-    alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
-  };
 }
 
 function orderSourceGroups(groups: ReadonlyMap<string, readonly AnimationRenderItem[]>): string[] {
