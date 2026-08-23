@@ -44,6 +44,9 @@ for (const [browser, path] of browsers) {
     || JSON.stringify(result.initialSampleCounts) !== JSON.stringify(expectedInitial)
     || JSON.stringify(result.postOrbitSampleCounts) !== JSON.stringify(expectedPostOrbit)
     || !result.cameraResetReasons?.includes('camera')
+    || result.manualResetRace?.staleSampleDiscarded !== true
+    || result.manualResetRace?.nextSampleCount !== 1
+    || !result.manualResetRace?.resetReasons?.includes('explicit')
     || result.convergence?.improved !== true
     || !(result.convergence.lateMeanDelta < result.convergence.earlyMeanDelta)
     || result.liveResourceCount < 1
@@ -57,13 +60,14 @@ for (const [browser, path] of browsers) {
     initialSampleCounts: result.initialSampleCounts,
     postOrbitSampleCounts: result.postOrbitSampleCounts,
     cameraResetReasons: result.cameraResetReasons,
+    manualResetRace: result.manualResetRace,
     convergence: result.convergence,
     liveResourceCount: result.liveResourceCount,
     browserEvidence: result.browserEvidence,
     browserDiagnostics: result.browserDiagnostics,
     httpProvenance: result.httpProvenance,
   });
-  console.log('[ray-orbit-example:' + browser + '] progressive convergence and camera reset passed.');
+  console.log('[ray-orbit-example:' + browser + '] progressive convergence, camera reset, and manual-reset race passed.');
 }
 
 console.log(JSON.stringify({ status: 'passed', browsers: evidence }, null, 2));

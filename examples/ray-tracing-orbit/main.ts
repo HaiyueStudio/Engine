@@ -190,7 +190,11 @@ async function runInteractiveLoop(active: Runtime): Promise<void> {
     }
     const revisionAtStart = interaction.mutationRevision;
     const startedAt = performance.now();
-    const rendered = await renderOne(active, false);
+    const rendered = await renderOne(active, false, 'discard-stale');
+    if (!rendered) {
+      await nextAnimationFrame();
+      continue;
+    }
     if (revisionAtStart === interaction.mutationRevision) interaction.mutationRevision = 0;
     updateMetrics(rendered, performance.now() - startedAt);
     if (!interaction.published && rendered.statistics.sampleCount >= 8) {
@@ -256,6 +260,22 @@ async function runEvidence(active: Runtime): Promise<void> {
       uncapturedErrors: active.uncapturedErrors,
     }));
   }
+  const pendingBeforeManualReset = renderOne(active, false, 'discard-stale');
+  active.progressive.reset('explicit');
+  const discardedBeforeManualReset = await pendingBeforeManualReset;
+  if (discardedBeforeManualReset !== null) {
+    throw new Error('RAY_ORBIT_MANUAL_RESET_DID_NOT_DISCARD_STALE_SAMPLE');
+  }
+  const afterManualReset = await renderOne(active, false);
+  if (
+    afterManualReset.statistics.sampleCount !== 1
+    || !afterManualReset.statistics.lastReset?.reasons.includes('explicit')
+  ) {
+    throw new Error('RAY_ORBIT_MANUAL_RESET_FAILED:' + JSON.stringify({
+      sampleCount: afterManualReset.statistics.sampleCount,
+      lastReset: afterManualReset.statistics.lastReset,
+    }));
+  }
   publish('passed', {
     schemaVersion: 1,
     suite: 'ray-tracing-orbit-example',
@@ -268,6 +288,11 @@ async function runEvidence(active: Runtime): Promise<void> {
     initialSampleCounts: initialCounts,
     postOrbitSampleCounts: postOrbitCounts,
     cameraResetReasons: cameraReset.reasons,
+    manualResetRace: {
+      staleSampleDiscarded: true,
+      nextSampleCount: afterManualReset.statistics.sampleCount,
+      resetReasons: afterManualReset.statistics.lastReset?.reasons ?? [],
+    },
     convergence: {
       earlyMeanDelta,
       lateMeanDelta,
@@ -279,7 +304,17 @@ async function runEvidence(active: Runtime): Promise<void> {
   setStatus('证据通过 · 相机重置后重新收敛');
 }
 
-async function renderOne(active: Runtime, readback: boolean): Promise<ProgressiveResult> {
+function renderOne(active: Runtime, readback: boolean): Promise<ProgressiveResult>;
+function renderOne(
+  active: Runtime,
+  readback: boolean,
+  stalePolicy: 'discard-stale',
+): Promise<ProgressiveResult | null>;
+async function renderOne(
+  active: Runtime,
+  readback: boolean,
+  stalePolicy: 'fail' | 'discard-stale' = 'fail',
+): Promise<ProgressiveResult | null> {
   if (active.disposed) throw new DOMException('Ray orbit example disposed.', 'AbortError');
   const resolution = resolveResolution(active.device);
   active.presenter.resize(resolution.width, resolution.height);
@@ -307,6 +342,7 @@ async function renderOne(active: Runtime, readback: boolean): Promise<Progressiv
     readback,
   });
   if (rendered.status !== 'ok' || !rendered.outputTexture) {
+    if (stalePolicy === 'discard-stale' && isExpectedStaleSample(rendered)) return null;
     throw new Error(formatDiagnostics(rendered.diagnostics));
   }
   if (active.uncapturedErrors.length > 0) {
@@ -316,6 +352,12 @@ async function renderOne(active: Runtime, readback: boolean): Promise<Progressiv
   query<HTMLElement>('#resolution').textContent =
     resolution.width + ' × ' + resolution.height + ' · ' + resolution.pixelRatio.toFixed(2) + '×';
   return rendered;
+}
+
+function isExpectedStaleSample(rendered: ProgressiveResult): boolean {
+  const errors = rendered.diagnostics.filter(diagnostic => diagnostic.severity === 'error');
+  return errors.length > 0
+    && errors.every(diagnostic => diagnostic.code === 'RAY_PROGRESSIVE_STALE_SAMPLE');
 }
 
 function installPageControls(): void {
