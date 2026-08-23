@@ -1,0 +1,23 @@
+export const G09_SCRIPT_CENSUS_CONTRACT = Object.freeze({
+  family: 'scripting-custom-rendering',
+  goal: 'g09-sandboxed-scripting-custom-rendering',
+  objectCount: 16,
+  propertyCount: 11,
+  moduleCount: 48,
+  symbolCount: 349,
+  assetCount: 2,
+  objectIdentitySha256: '866b5622156f5c54a05b87fbae4232ae49d927ff1f4849c81ccb253693a01c6c',
+  propertyIdentitySha256: '3f30de76bc91151ef6d6fe80376cc5227ff156e388936daa0245e27a1477b651',
+  moduleIdentitySha256: 'ea9eb6dfb887fa04c2c6847b6bfdacb9f0884c90deb5e33f680b1e2b14ae73bf',
+  symbolIdentitySha256: '0a05cd0222ebd8d6304adc13f14871e355035eeab35728d644d853bd462aab49',
+  assetIdentitySha256: '547cf39bd88b6ba2bdce66262d643586b638f2ec2b938ccaa54e25996a86fdd9',
+  sourceRevisionSha256: 'b99f06310ba0e09c3402dd2be37d8447dd63ee980e7d42dd7396e26117cea661',
+  solutions: Object.freeze([
+    'portable-closed-instruction-artifact',
+    'killable-worker-owner',
+    'typed-capability-handles',
+    'bounded-path-and-canvas-command-output',
+    'independent-wgsl-module-and-binding-validation',
+    'owned-pipeline-cache-and-device-recovery',
+  ]),
+});
