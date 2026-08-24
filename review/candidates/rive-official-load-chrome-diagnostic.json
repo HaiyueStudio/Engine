@@ -1,0 +1,3779 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-rive-official-load-diagnostic",
+  "formalEvidence": false,
+  "generatedAt": "2026-08-24T13:50:49.688Z",
+  "engineRevision": "07524b6f2ce6cbb13511c7c410585aa05cb8720c",
+  "engineDirty": true,
+  "browser": "chrome",
+  "oracle": {
+    "package": "@rive-app/webgl2@2.40.0",
+    "riveJsSha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+    "riveWasmSha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32"
+  },
+  "browserEvidence": [
+    {
+      "path": "tests/unit_tests/assets/double_library_with_image.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Fdouble_library_with_image.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/ik_over_distance_constraint.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Fik_over_distance_constraint.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/animated_cubic_participant.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fanimated_cubic_participant.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/animated_participant.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fanimated_participant.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/constrained_participant.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fconstrained_participant.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/display_none_participant.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fdisplay_none_participant.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/fixed_participant.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Ffixed_participant.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/grid_2x2.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fgrid_2x2.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/grid_auto_rows.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fgrid_auto_rows.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/grid_participant.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fgrid_participant.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/grid_track_types.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fgrid_track_types.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/group_participant.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fgroup_participant.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/hug_participant.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fhug_participant.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/list_in_group_joins_layout.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Flist_in_group_joins_layout.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/nested_artboard_stack.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fnested_artboard_stack.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/nested_group_participant.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fnested_group_participant.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/scroll_participant.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fscroll_participant.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/solo_participant.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fsolo_participant.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/stack.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fstack.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/stack_participant.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fstack_participant.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/styled_flex.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fstyled_flex.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/transform_offset.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Ftransform_offset.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout_grid_stack.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout_grid_stack.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/library_export_animation_test.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flibrary_export_animation_test.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/library_export_state_machine_test.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flibrary_export_state_machine_test.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/library_export_test.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flibrary_export_test.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/library_scope_edge_test.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flibrary_scope_edge_test.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/library_with_image.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flibrary_with_image.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/nested_library_scope_test.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Fnested_library_scope_test.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/text_style_background.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Ftext_style_background.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    }
+  ],
+  "resultCount": 31,
+  "loadedCount": 30,
+  "rejectedCount": 0,
+  "browserGateFailedCount": 1,
+  "ownerResidual": 0,
+  "results": [
+    {
+      "path": "tests/unit_tests/assets/double_library_with_image.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/double_library_with_image.riv",
+            "status": "loaded",
+            "byteLength": 749,
+            "fetchAndLoadMs": 8.709999918937683,
+            "loadMs": 4.919999957084656,
+            "totalMs": 161.20499992370605,
+            "artboards": [
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              },
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7336,
+                  "sha256": "2aaee4ed125b5bf8e13a18599540edd86d346b124ae23ca34293d242f38443f6"
+                }
+              },
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7336,
+                  "sha256": "2aaee4ed125b5bf8e13a18599540edd86d346b124ae23ca34293d242f38443f6"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Fdouble_library_with_image.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 92
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/double_library_with_image.riv",
+              "byteLength": 749,
+              "sha256": "a11cac0f7453147eef9d5a387472ab3235868f404354fe8e44e0a89b2b729162",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/focus_bounds_moving_host.riv",
+      "status": "browser-gate-failed",
+      "error": "Chrome/WebGPU fixture raised unclassified browser errors:\n[console.error] Aborted()"
+    },
+    {
+      "path": "tests/unit_tests/assets/ik_over_distance_constraint.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/ik_over_distance_constraint.riv",
+            "status": "loaded",
+            "byteLength": 191,
+            "fetchAndLoadMs": 6.865000009536743,
+            "loadMs": 3.305000066757202,
+            "totalMs": 57.27499997615814,
+            "artboards": [
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Fik_over_distance_constraint.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 91
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/ik_over_distance_constraint.riv",
+              "byteLength": 191,
+              "sha256": "365b2bf2799d9e7ee03699af7bd2152eb8ccdb8a1bcb21162c790bb7b06eee2f",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/animated_cubic_participant.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/animated_cubic_participant.riv",
+            "status": "loaded",
+            "byteLength": 225,
+            "fetchAndLoadMs": 7.394999980926514,
+            "loadMs": 3.7950000762939453,
+            "totalMs": 60.769999980926514,
+            "artboards": [
+              {
+                "name": "Cubic Animated Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fanimated_cubic_participant.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 89
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/animated_cubic_participant.riv",
+              "byteLength": 225,
+              "sha256": "877569d0b8b5ab58e697371fd43be3c033685cd3583a0f712b59f5858ba20a17",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/animated_participant.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/animated_participant.riv",
+            "status": "loaded",
+            "byteLength": 192,
+            "fetchAndLoadMs": 8.84500002861023,
+            "loadMs": 4.4049999713897705,
+            "totalMs": 61.7700001001358,
+            "artboards": [
+              {
+                "name": "Animated Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fanimated_participant.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 93
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/animated_participant.riv",
+              "byteLength": 192,
+              "sha256": "eb10bb90842825da31b0e459c71a16cea05719935e01dd0200a2bd9bb2809d5d",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/constrained_participant.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/constrained_participant.riv",
+            "status": "loaded",
+            "byteLength": 206,
+            "fetchAndLoadMs": 34.38499999046326,
+            "loadMs": 6.825000047683716,
+            "totalMs": 115.16999995708466,
+            "artboards": [
+              {
+                "name": "Constrained Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fconstrained_participant.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 100
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/constrained_participant.riv",
+              "byteLength": 206,
+              "sha256": "a75a05c15e81d1d2e7d7ae85a0c1ec5f2593ce602b8ed183eed4e7784f6d421f",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/display_none_participant.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/display_none_participant.riv",
+            "status": "loaded",
+            "byteLength": 203,
+            "fetchAndLoadMs": 11.235000014305115,
+            "loadMs": 7.169999957084656,
+            "totalMs": 80.23000001907349,
+            "artboards": [
+              {
+                "name": "Display Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fdisplay_none_participant.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 106
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/display_none_participant.riv",
+              "byteLength": 203,
+              "sha256": "83c6314ec74e5066c55e2d9388a0612838380e2038d09d1888f484c4bc8ded6c",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/fixed_participant.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/fixed_participant.riv",
+            "status": "loaded",
+            "byteLength": 173,
+            "fetchAndLoadMs": 8.870000004768372,
+            "loadMs": 4.4700000286102295,
+            "totalMs": 68.25499999523163,
+            "artboards": [
+              {
+                "name": "Fixed Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Ffixed_participant.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 117
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/fixed_participant.riv",
+              "byteLength": 173,
+              "sha256": "d529a662869547d15a2343c4b9d4445b7f242d24356ec842588029953f7fa242",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/grid_2x2.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/grid_2x2.riv",
+            "status": "loaded",
+            "byteLength": 375,
+            "fetchAndLoadMs": 10.615000009536743,
+            "loadMs": 5.245000004768372,
+            "totalMs": 74.54500007629395,
+            "artboards": [
+              {
+                "name": "Grid Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 400,
+                  "maxY": 400
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fgrid_2x2.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 89
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/grid_2x2.riv",
+              "byteLength": 375,
+              "sha256": "ee808d602a44eb506cc08deba89e2de99caef718627f19e6e98956e81ea83faf",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/grid_auto_rows.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/grid_auto_rows.riv",
+            "status": "loaded",
+            "byteLength": 469,
+            "fetchAndLoadMs": 7.975000023841858,
+            "loadMs": 3.4950000047683716,
+            "totalMs": 71.33500003814697,
+            "artboards": [
+              {
+                "name": "Auto Rows Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 400,
+                  "maxY": 400
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fgrid_auto_rows.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 103
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/grid_auto_rows.riv",
+              "byteLength": 469,
+              "sha256": "8e79c43f35c7e16cbf49ed0b3613e77e7d3f69dba91ef41201838f771e0703fc",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/grid_participant.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/grid_participant.riv",
+            "status": "loaded",
+            "byteLength": 262,
+            "fetchAndLoadMs": 8.664999961853027,
+            "loadMs": 4.455000042915344,
+            "totalMs": 64.55999994277954,
+            "artboards": [
+              {
+                "name": "Grid Participant Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fgrid_participant.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 93
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/grid_participant.riv",
+              "byteLength": 262,
+              "sha256": "39b13e68ee2989784217bdf16165c7f6715642df61df3aa860dfc02d48ed1e84",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/grid_track_types.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/grid_track_types.riv",
+            "status": "loaded",
+            "byteLength": 387,
+            "fetchAndLoadMs": 8.710000038146973,
+            "loadMs": 4.134999990463257,
+            "totalMs": 68.875,
+            "artboards": [
+              {
+                "name": "Track Types Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fgrid_track_types.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 118
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/grid_track_types.riv",
+              "byteLength": 387,
+              "sha256": "23c89f128f73a85b8e9d3b1eabbf95d7b8105d2b0979f959afc7374728a98b05",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/group_participant.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/group_participant.riv",
+            "status": "loaded",
+            "byteLength": 188,
+            "fetchAndLoadMs": 14.985000014305115,
+            "loadMs": 5.080000042915344,
+            "totalMs": 76.55499994754791,
+            "artboards": [
+              {
+                "name": "Group Participant Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fgroup_participant.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 95
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/group_participant.riv",
+              "byteLength": 188,
+              "sha256": "39840066719da317c266095bf27aa9ce13a430e646cd5a86de33775f30213f27",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/hug_participant.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/hug_participant.riv",
+            "status": "loaded",
+            "byteLength": 211,
+            "fetchAndLoadMs": 10.649999976158142,
+            "loadMs": 4.495000004768372,
+            "totalMs": 69.58000004291534,
+            "artboards": [
+              {
+                "name": "Hug Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 100,
+                  "maxY": 100
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fhug_participant.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 75
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/hug_participant.riv",
+              "byteLength": 211,
+              "sha256": "0af0188466f50b7c3925a5074f7ed14d86a9ff5a7fa0a1d9c3732765cdf2439a",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/list_in_group_joins_layout.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/list_in_group_joins_layout.riv",
+            "status": "loaded",
+            "byteLength": 160,
+            "fetchAndLoadMs": 10.490000009536743,
+            "loadMs": 3.8000000715255737,
+            "totalMs": 72.12999999523163,
+            "artboards": [
+              {
+                "name": "List In Group Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Flist_in_group_joins_layout.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 89
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/list_in_group_joins_layout.riv",
+              "byteLength": 160,
+              "sha256": "41a5f6e341b2bb08c33b147ffd58a08d4d896c7c88e56d770f3eedb4c22a5bc9",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/nested_artboard_stack.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/nested_artboard_stack.riv",
+            "status": "loaded",
+            "byteLength": 332,
+            "fetchAndLoadMs": 9.419999957084656,
+            "loadMs": 5.324999928474426,
+            "totalMs": 90.31499993801117,
+            "artboards": [
+              {
+                "name": "TwoNested",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              },
+              {
+                "name": "MixedStack",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              },
+              {
+                "name": "Item",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 40,
+                  "maxY": 40
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fnested_artboard_stack.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 86
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/nested_artboard_stack.riv",
+              "byteLength": 332,
+              "sha256": "f38f01477bf7c20383c709080019eb34c0b19550a94f16707ae552ebaf1128a8",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/nested_group_participant.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/nested_group_participant.riv",
+            "status": "loaded",
+            "byteLength": 255,
+            "fetchAndLoadMs": 10.910000085830688,
+            "loadMs": 5.860000014305115,
+            "totalMs": 72.4300000667572,
+            "artboards": [
+              {
+                "name": "Nested Group Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fnested_group_participant.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 87
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/nested_group_participant.riv",
+              "byteLength": 255,
+              "sha256": "a053a2fff417d1a6b5cd1881a9bbddb2e5bd083abd183ebcf3fdc1295535b28a",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/scroll_participant.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/scroll_participant.riv",
+            "status": "loaded",
+            "byteLength": 252,
+            "fetchAndLoadMs": 9.495000004768372,
+            "loadMs": 4.520000100135803,
+            "totalMs": 70.4449999332428,
+            "artboards": [
+              {
+                "name": "Scroll Participant Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fscroll_participant.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 74
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/scroll_participant.riv",
+              "byteLength": 252,
+              "sha256": "947f21a0b7ac50cb9bf15df34380b7a162219663cec6e262501f9d7959aee20e",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/solo_participant.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/solo_participant.riv",
+            "status": "loaded",
+            "byteLength": 205,
+            "fetchAndLoadMs": 9.174999952316284,
+            "loadMs": 5.034999966621399,
+            "totalMs": 69.33500003814697,
+            "artboards": [
+              {
+                "name": "Solo Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fsolo_participant.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 80
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/solo_participant.riv",
+              "byteLength": 205,
+              "sha256": "563aee63cf2470cf4eb56c152c698450fe6240cf4d7d68e32bf97c592260651d",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/stack.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/stack.riv",
+            "status": "loaded",
+            "byteLength": 256,
+            "fetchAndLoadMs": 10.15500009059906,
+            "loadMs": 4.395000100135803,
+            "totalMs": 69.63999998569489,
+            "artboards": [
+              {
+                "name": "Stack Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 400,
+                  "maxY": 400
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fstack.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 93
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/stack.riv",
+              "byteLength": 256,
+              "sha256": "e32a430711df3538b032d2a78e2ff25990db8ab6dd5dd4a25fb244acd1edc9e3",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/stack_participant.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/stack_participant.riv",
+            "status": "loaded",
+            "byteLength": 178,
+            "fetchAndLoadMs": 13.424999952316284,
+            "loadMs": 6.754999995231628,
+            "totalMs": 87.84999990463257,
+            "artboards": [
+              {
+                "name": "Participant Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fstack_participant.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 94
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/stack_participant.riv",
+              "byteLength": 178,
+              "sha256": "4693b63499749ee3cb8b80bd95ebe6df0e1bffc9a82de225c3e843e8c2609400",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/styled_flex.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/styled_flex.riv",
+            "status": "loaded",
+            "byteLength": 265,
+            "fetchAndLoadMs": 10.745000004768372,
+            "loadMs": 3.915000081062317,
+            "totalMs": 78.58499991893768,
+            "artboards": [
+              {
+                "name": "Styled Flex Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fstyled_flex.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 87
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/styled_flex.riv",
+              "byteLength": 265,
+              "sha256": "13e79bd1cba28909ff0ce1e718fe815348e6ed397b1522790b1e7dc95ab7baee",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/transform_offset.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/transform_offset.riv",
+            "status": "loaded",
+            "byteLength": 196,
+            "fetchAndLoadMs": 11.93999993801117,
+            "loadMs": 4.449999928474426,
+            "totalMs": 73.95499992370605,
+            "artboards": [
+              {
+                "name": "Layout Offset Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Ftransform_offset.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 87
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/transform_offset.riv",
+              "byteLength": 196,
+              "sha256": "fdbfb14e5aee19354bbc8fef7f51b19545d8cc95728cd5051f0895a3a2565602",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout_grid_stack.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout_grid_stack.riv",
+            "status": "loaded",
+            "byteLength": 899305,
+            "fetchAndLoadMs": 22.34500002861023,
+            "loadMs": 14.475000023841858,
+            "totalMs": 255.23500001430511,
+            "artboards": [
+              {
+                "name": "GridWithLayouts",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 53953,
+                  "sha256": "909e0a8d52c7539c678521fc633b2a4cf0b53e45d79187e6549d3e889975ac59"
+                }
+              },
+              {
+                "name": "StackWithLayouts",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 43360,
+                  "sha256": "bf019d19c040e96d72f0482f2bc71e5bb046d745eaf776751920859bee380827"
+                }
+              },
+              {
+                "name": "GridWithLayoutsSizeChanging",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 101256,
+                  "sha256": "e7c306f4a0faa6351aa83096e2bae92606c6f273fa9a831adb2c7d4ea8c875e6"
+                }
+              },
+              {
+                "name": "GridWithLayoutsSpan",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 103760,
+                  "sha256": "57e5f9fdd90dc6fcfea2a2d525b101dc1113cb13caed8c359dcb50fce2e7c364"
+                }
+              },
+              {
+                "name": "GridWithLayoutsSizeSpanChanging",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 100962,
+                  "sha256": "82553c22fd5f22348c8f5a50e5c8b638064f8e8e48469abdbe196d6f29937dc1"
+                }
+              },
+              {
+                "name": "GridWithLayoutParticipants",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 127980,
+                  "sha256": "73bd457f66451141fb41beb94c45b2f4281c8a6339cbd05c1ac58c2d60f78b26"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout_grid_stack.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 71
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout_grid_stack.riv",
+              "byteLength": 899305,
+              "sha256": "9b4d1c56735f16928396e079d39e62815dce7586842ac9dfd5937a4dca231724",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/library_export_animation_test.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/library_export_animation_test.riv",
+            "status": "loaded",
+            "byteLength": 132,
+            "fetchAndLoadMs": 7.554999947547913,
+            "loadMs": 4.039999961853027,
+            "totalMs": 168.63499999046326,
+            "artboards": [
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 1920,
+                  "maxY": 1080
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 36000,
+                  "sha256": "d34890d56095573a91f7a452ebdd22be20a61055063454217564aeabd6af129d"
+                }
+              },
+              {
+                "name": "LA parent",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                },
+                "animationCount": 1,
+                "animations": [
+                  "LA Rocket"
+                ],
+                "stateMachineCount": 0,
+                "stateMachines": [],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flibrary_export_animation_test.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 72
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/library_export_animation_test.riv",
+              "byteLength": 132,
+              "sha256": "74a1aed74b6e62d1bf821b52fb69d8d3a8dc9217dcb6285ba63840b04116291e",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/library_export_state_machine_test.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/library_export_state_machine_test.riv",
+            "status": "loaded",
+            "byteLength": 127,
+            "fetchAndLoadMs": 8.879999995231628,
+            "loadMs": 4.049999952316284,
+            "totalMs": 172.7699999809265,
+            "artboards": [
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 1920,
+                  "maxY": 1080
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 36000,
+                  "sha256": "d34890d56095573a91f7a452ebdd22be20a61055063454217564aeabd6af129d"
+                }
+              },
+              {
+                "name": "SM parent",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "SM Rocket",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flibrary_export_state_machine_test.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 80
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/library_export_state_machine_test.riv",
+              "byteLength": 127,
+              "sha256": "3f573e562e57b33742677ac2f380f0fb6c770f93f21211d69fbfbf289900791a",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/library_export_test.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/library_export_test.riv",
+            "status": "loaded",
+            "byteLength": 112,
+            "fetchAndLoadMs": 8.554999947547913,
+            "loadMs": 4.394999980926514,
+            "totalMs": 172.0199999809265,
+            "artboards": [
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 1920,
+                  "maxY": 1080
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 36000,
+                  "sha256": "d34890d56095573a91f7a452ebdd22be20a61055063454217564aeabd6af129d"
+                }
+              },
+              {
+                "name": "Rocket",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 512,
+                  "maxY": 513
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flibrary_export_test.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 73
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/library_export_test.riv",
+              "byteLength": 112,
+              "sha256": "7d1382ec66eddfac3e5e4f9dd0401e12ff4efae8ad73217528f762f80536d804",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/library_scope_edge_test.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/library_scope_edge_test.riv",
+            "status": "loaded",
+            "byteLength": 87,
+            "fetchAndLoadMs": 13.535000085830688,
+            "loadMs": 8.665000081062317,
+            "totalMs": 194.84500002861023,
+            "artboards": [
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 1920,
+                  "maxY": 1080
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 36000,
+                  "sha256": "d34890d56095573a91f7a452ebdd22be20a61055063454217564aeabd6af129d"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flibrary_scope_edge_test.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 86
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/library_scope_edge_test.riv",
+              "byteLength": 87,
+              "sha256": "dbf15a9574a6ae1338b55f18dea3e541b8f7606560ca9815463dcbf7592070aa",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/library_with_image.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/library_with_image.riv",
+            "status": "loaded",
+            "byteLength": 387,
+            "fetchAndLoadMs": 14.379999995231628,
+            "loadMs": 6.310000061988831,
+            "totalMs": 227.66999995708466,
+            "artboards": [
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              },
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7336,
+                  "sha256": "2aaee4ed125b5bf8e13a18599540edd86d346b124ae23ca34293d242f38443f6"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flibrary_with_image.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 102
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/library_with_image.riv",
+              "byteLength": 387,
+              "sha256": "a3bc3816717292fa1e5594c49e61022459dff40a101d4b8bfaf4836ca70c4b5e",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/nested_library_scope_test.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/nested_library_scope_test.riv",
+            "status": "loaded",
+            "byteLength": 102,
+            "fetchAndLoadMs": 12.534999966621399,
+            "loadMs": 7.190000057220459,
+            "totalMs": 189.81499993801117,
+            "artboards": [
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 1920,
+                  "maxY": 1080
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 36000,
+                  "sha256": "d34890d56095573a91f7a452ebdd22be20a61055063454217564aeabd6af129d"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Fnested_library_scope_test.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 87
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/nested_library_scope_test.riv",
+              "byteLength": 102,
+              "sha256": "97f405c854714dba746428c73554d7f8951ab9e1cf8537661d93c332e7090f37",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/text_style_background.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/text_style_background.riv",
+            "status": "loaded",
+            "byteLength": 1287851,
+            "fetchAndLoadMs": 26.8400000333786,
+            "loadMs": 13.02999997138977,
+            "totalMs": 216.57500004768372,
+            "artboards": [
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 10509,
+                  "sha256": "fadbd12836bd0a0616ab8cfe4e6c2fd026eb20ee57e4dea1613820759bc1552a"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Ftext_style_background.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 76
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 5543,
+              "sha256": "6320d46b985793122e5a69e392ce7adc17926be500129451a342910005e3d539",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/text_style_background.riv",
+              "byteLength": 1287851,
+              "sha256": "1ffdb33251da4ccd7713555d7fb1f1216326cd52fb7fd1d6206b72471ea9080c",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,473 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-rive-g11-candidate",
+  "goal": "m07/g11-corpus-version-fidelity-performance",
+  "status": "incomplete",
+  "blockers": [
+    "missing isolated formal asset for import-neutral-ir",
+    "missing isolated formal asset for vector-paint-composite",
+    "missing isolated formal asset for rig-mesh-constraint",
+    "missing isolated formal asset for text-layout-component-asset",
+    "missing isolated formal asset for timeline-state-machine",
+    "missing isolated formal asset for data-interaction-accessibility",
+    "missing isolated formal asset for audio-event",
+    "missing isolated formal asset for scripting-custom-rendering",
+    "missing real product asset for animation-editor-component-import",
+    "missing real product asset for game-hud-data-driven",
+    "missing real product asset for brand-loader-vector-rig",
+    "missing real product asset for scripted-custom-control",
+    "formal manifest status: expected candidate-ready, received acquisition-incomplete",
+    "formalAssets is empty",
+    "real product asset count is below minimum",
+    "combined stress asset count is below minimum",
+    "objectKeys has 288 uncovered frozen census keys",
+    "propertyKeys has 611 uncovered frozen census keys",
+    "scriptModuleKeys has 48 uncovered frozen census keys",
+    "scriptSymbolKeys has 349 uncovered frozen census keys",
+    "assetTypeKeys has 14 uncovered frozen census keys",
+    "official @rive-app/webgl2@2.40.0 differential traces have not been captured",
+    "the two required Windows browser/device classes have not supplied full-workload evidence",
+    "packed player, browser bundle, source map, and network closure scans have not been run",
+    "frozen upstream 7.3 fixtures cover only 48/288 object keys and 92/611 property keys",
+    "all 45 rive-wasm oracle-repository examples are outside the frozen .riv 7.3 denominator",
+    "3 official-loaded 7.3 fixtures are rejected by the HYA importer",
+    "1 7.3 fixture triggers an official-oracle browser gate failure",
+    "Chrome and Edge diagnostics were captured on only one unclassified local device, not the two required formal device classes"
+  ],
+  "tupleId": "rive-7.3-webgl2-2.40.0",
+  "generatedAt": "2026-08-24T13:56:53.181Z",
+  "engineRevision": "07524b6f2ce6cbb13511c7c410585aa05cb8720c",
+  "engineDirty": true,
+  "nodeVersion": "v24.19.0",
+  "evidenceClass": "dirty-worktree-diagnostic",
+  "corpus": {
+    "manifest": "animation-spec/corpus/rive/rive-g11-corpus-manifest.json",
+    "manifestSha256": "13cdb23362bd778e9e7a42a55be8d1bce604215076946b68ee3d8f8cdc81b4d0",
+    "censusSha256": "ba93ed7d3eb6ba9b2b08d2da0bdfc9be02082209d8f0967542a93916717408fe",
+    "formalAssetCount": 0,
+    "realProductAssetCount": 0,
+    "combinedStressAssetCount": 0,
+    "adversarialCaseCount": 28
+  },
+  "coverage": {
+    "objectTypes": 288,
+    "propertyKeys": 611,
+    "scriptModules": 48,
+    "scriptSymbols": 349,
+    "assetTypes": 14,
+    "uncoveredObjects": 288,
+    "uncoveredProperties": 611,
+    "uncoveredScriptModules": 48,
+    "uncoveredScriptSymbols": 349,
+    "uncoveredAssets": 14,
+    "unclassifiedFailureCount": 0
+  },
+  "traceArtifacts": [],
+  "devices": [],
+  "performance": {
+    "fullWorkload": false,
+    "assets": []
+  },
+  "security": {
+    "cases": [
+      {
+        "id": "invalid-fingerprint",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_INVALID_FINGERPRINT",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "truncated-header",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_TRUNCATED",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "varuint-overflow",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_VARINT_OVERFLOW",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "toc-unknown-key",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "toc-duplicate-key",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_TOC_INVALID",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "toc-field-type-conflict",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_TOC_INVALID",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "unknown-object",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_UNKNOWN_OBJECT",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "unknown-property",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "unsupported-property",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_UNSUPPORTED_PROPERTY",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "invalid-parent",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_REFERENCE_INVALID",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "reference-cycle",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_REFERENCE_CYCLE",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "reference-depth-bomb",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "object-count-bomb",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "property-count-bomb",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "nested-list-expansion",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "decompression-bomb",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "private-network-asset",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_ASSET_URL_POLICY",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "asset-hash-mismatch",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_ASSET_INTEGRITY",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "infinite-luau",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "promise-storm",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "script-output-amplification",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "invalid-wgsl-binding",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_SHADER_BINDING",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "expensive-wgsl",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_SHADER_BUDGET",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "event-recursion",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "abort-reimport-race",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_ABORTED",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "late-result-after-dispose",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_ABORTED",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "device-loss",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_SHADER_BUDGET",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      },
+      {
+        "id": "audio-voice-flood",
+        "status": "not-run",
+        "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "observedDiagnostic": null,
+        "ownerResidual": null,
+        "peakMemoryBytes": null,
+        "cpuMs": null
+      }
+    ]
+  },
+  "browserClosure": {
+    "officialOracleBuildTimeOnly": true,
+    "unclassifiedFailureCount": 0,
+    "scans": [
+      {
+        "name": "packedPlayerTarball",
+        "status": "not-run",
+        "reason": "Formal corpus, converted HYA package, and browser workload are not yet available.",
+        "sha256": null,
+        "forbiddenPackageCount": null,
+        "forbiddenFileCount": null,
+        "forbiddenStaticPatternCount": null,
+        "forbiddenNetworkCount": null,
+        "rawRivCount": null
+      },
+      {
+        "name": "browserBundle",
+        "status": "not-run",
+        "reason": "Formal corpus, converted HYA package, and browser workload are not yet available.",
+        "sha256": null,
+        "forbiddenPackageCount": null,
+        "forbiddenFileCount": null,
+        "forbiddenStaticPatternCount": null,
+        "forbiddenNetworkCount": null,
+        "rawRivCount": null
+      },
+      {
+        "name": "sourceMap",
+        "status": "not-run",
+        "reason": "Formal corpus, converted HYA package, and browser workload are not yet available.",
+        "sha256": null,
+        "forbiddenPackageCount": null,
+        "forbiddenFileCount": null,
+        "forbiddenStaticPatternCount": null,
+        "forbiddenNetworkCount": null,
+        "rawRivCount": null
+      },
+      {
+        "name": "networkRequests",
+        "status": "not-run",
+        "reason": "Formal corpus, converted HYA package, and browser workload are not yet available.",
+        "sha256": null,
+        "forbiddenPackageCount": null,
+        "forbiddenFileCount": null,
+        "forbiddenStaticPatternCount": null,
+        "forbiddenNetworkCount": null,
+        "rawRivCount": null
+      }
+    ]
+  },
+  "licenses": {
+    "assets": []
+  },
+  "diagnosticFindings": {
+    "formalEvidence": false,
+    "runtimeInventory": {
+      "path": "review/candidates/rive-runtime-7-3-diagnostic-inventory.json",
+      "sha256": "92e5dd6cd98a31a0df24f8fadee9c16b2871f2982da466a9bf9d34f535cc5319",
+      "assets": 423,
+      "accepted": 27,
+      "coveredObjectKeys": 48,
+      "coveredPropertyKeys": 92,
+      "unclassifiedFailureCount": 0
+    },
+    "oracleRepositoryInventory": {
+      "path": "review/candidates/rive-upstream-diagnostic-inventory.json",
+      "sha256": "425b801402cdfe90afcc554d7dcb2efbe329bfb950f76277fb4cfa872a94b711",
+      "assets": 45,
+      "accepted": 0,
+      "rejectedMinor": 45,
+      "unclassifiedFailureCount": 0
+    },
+    "officialLoadMatrix": {
+      "path": "review/candidates/rive-official-load-chrome-diagnostic.json",
+      "sha256": "bd65cbe6a6e60fcdd79080e71ce53ab0be34a4215d1782c6c44b44436332ad31",
+      "loaded": 30,
+      "browserGateFailed": 1,
+      "ownerResidual": 0
+    },
+    "edgeLoadMatrix": {
+      "path": "review/candidates/rive-official-load-edge-diagnostic.json",
+      "sha256": "0fd952a74e01f228be981459edffa27cd41de06f6466e87d559e0ac123854d1a",
+      "loaded": 30,
+      "browserGateFailed": 1,
+      "ownerResidual": 0
+    },
+    "observedBrowsers": [
+      "chrome",
+      "edge"
+    ],
+    "formalDeviceClassCount": 0,
+    "crossBrowserPixelHashDifferenceCount": 0,
+    "coveredObjectKeys": 48,
+    "coveredPropertyKeys": 92,
+    "importerOracleDivergenceCount": 3,
+    "oracleBrowserGateFailureCount": 1,
+    "redCaseCount": 4,
+    "redCases": [
+      {
+        "id": "importer-reject:tests/unit_tests/assets/layout/scroll_participant.riv",
+        "sourcePath": "tests/unit_tests/assets/layout/scroll_participant.riv",
+        "rivSha256": "947f21a0b7ac50cb9bf15df34380b7a162219663cec6e262501f9d7959aee20e",
+        "owner": "g02-riv-import-neutral-ir",
+        "official": "loaded",
+        "hya": {
+          "status": "rejected",
+          "code": "E_RIVE_REFERENCE_INVALID",
+          "path": "$.riv.objects[typeKey=525][index=1]"
+        }
+      },
+      {
+        "id": "importer-reject:tests/unit_tests/assets/layout_grid_stack.riv",
+        "sourcePath": "tests/unit_tests/assets/layout_grid_stack.riv",
+        "rivSha256": "9b4d1c56735f16928396e079d39e62815dce7586842ac9dfd5937a4dca231724",
+        "owner": "g02-riv-import-neutral-ir",
+        "official": "loaded",
+        "hya": {
+          "status": "rejected",
+          "code": "E_RIVE_REFERENCE_INVALID",
+          "path": "$.riv.objects[typeKey=437][index=6]"
+        }
+      },
+      {
+        "id": "importer-reject:tests/unit_tests/assets/nested_library_scope_test.riv",
+        "sourcePath": "tests/unit_tests/assets/nested_library_scope_test.riv",
+        "rivSha256": "97f405c854714dba746428c73554d7f8951ab9e1cf8537661d93c332e7090f37",
+        "owner": "g02-riv-import-neutral-ir",
+        "official": "loaded",
+        "hya": {
+          "status": "rejected",
+          "code": "E_RIVE_REFERENCE_INVALID",
+          "path": "$.riv.assets[id=0].contents"
+        }
+      },
+      {
+        "id": "official-oracle-failure:tests/unit_tests/assets/focus_bounds_moving_host.riv",
+        "sourcePath": "tests/unit_tests/assets/focus_bounds_moving_host.riv",
+        "owner": "g11-corpus-version-fidelity-performance",
+        "official": {
+          "status": "browser-gate-failed",
+          "error": "Chrome/WebGPU fixture raised unclassified browser errors:\n[console.error] Aborted()"
+        },
+        "hya": "import-accepted"
+      }
+    ]
+  }
+}

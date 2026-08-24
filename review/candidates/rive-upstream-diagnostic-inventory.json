@@ -1,0 +1,480 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-rive-upstream-diagnostic-inventory",
+  "formalEvidence": false,
+  "formalDisqualifier": "No Rive Cloud file revision identity or per-content/transitive asset rights record.",
+  "generatedAt": "2026-08-24T13:43:28.051Z",
+  "engineRevision": "07524b6f2ce6cbb13511c7c410585aa05cb8720c",
+  "engineDirty": true,
+  "source": {
+    "id": "rive-wasm-oracle-githead-examples",
+    "repository": "https://github.com/rive-app/rive-wasm",
+    "revision": "1e9391880df1d501b98d165d2db89284025462eb",
+    "archiveSha256": "0e0e27771a1bcd8d7f7f5d3c3f1e54c5c063948c4ebf41786978e1d9ca83e71a",
+    "licenseId": "MIT",
+    "licenseSha256": "8a1efa755d19446b51a18e1c15f6308728da0b36283c4d38050698ad6954b69a"
+  },
+  "totals": {
+    "assets": 45,
+    "accepted": 0,
+    "rejected": 45,
+    "rejectedByCode": {
+      "E_RIVE_FORMAT_MINOR_UNSUPPORTED": 45
+    },
+    "coveredObjectKeys": 0,
+    "coveredPropertyKeys": 0,
+    "unclassifiedFailureCount": 0
+  },
+  "assets": [
+    {
+      "path": "js/examples/_frameworks/layout_example/assets/layout_test.riv",
+      "byteLength": 809041,
+      "sha256": "fb7658892c7adf974b35229c9255c40dbf0897114d5dfc6828a575e309931778",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/neostream-events/neostreamv2.riv",
+      "byteLength": 893517,
+      "sha256": "70f84f9518a7e9b9dc114380b1462242a9f3327ace5223e25a8cbf4da2a83cab",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/nested_inputs/assets/runtime_nested_inputs.riv",
+      "byteLength": 829,
+      "sha256": "9dc01b9e224ff551d6974810ffa3da6b9b8e68ccb96b052a92d97f07b95f6cfc",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/nested_text_runs/assets/runtime_nested_text_runs.riv",
+      "byteLength": 806323,
+      "sha256": "53d0d988a7d0097344d901691fbfb4e3808cf4103f0903836fbad33e39e13981",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/out_of_band_example/asset_load_check.riv",
+      "byteLength": 194243,
+      "sha256": "ae97cb72505ef242c89c818461cfb5d8cf7f14b36a6acef42b91c2860bbdb3e3",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/out_of_band_example/assets/ping_pong_audio_demo.riv",
+      "byteLength": 811626,
+      "sha256": "f90749b3e03cac78da2a6dd96cba4b4e3c7c17edb257c81ce710baab0219f6e4",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/parcel_example_canvas/ball.riv",
+      "byteLength": 1535740,
+      "sha256": "fc528ee6da313fc8dedf3ea72ac00a5a31e12b942e7e522cba32556a50e629db",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/parcel_example_canvas/birb.riv",
+      "byteLength": 411989,
+      "sha256": "384a6e3ecc20ae6bff7a77e58e04c97c40fb2a72df22cc8724e96a94d795838b",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/parcel_example_canvas/jigsaw.riv",
+      "byteLength": 47603,
+      "sha256": "63c9aca7b161bf272121cae5ecc76867e1a738fc4c48f6d60184f0580d19f737",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/parcel_example_canvas/look.riv",
+      "byteLength": 14794,
+      "sha256": "c5cba2b19b3d77dc6df85de5fc80097ac6dd20b4947e2776f1e8088ed7d741c7",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/parcel_example_canvas/nested_default.riv",
+      "byteLength": 1172,
+      "sha256": "581989d79bd549ce9a7abea508b0acd7b9533e4499afbb395110d69675ef46df",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/parcel_example_canvas/rating_animation.riv",
+      "byteLength": 16229,
+      "sha256": "cb67c07896fa35da41a976b61499277ef2b009d6d8858c11bd671c0df5bc9630",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/parcel_example_canvas/string.riv",
+      "byteLength": 3177,
+      "sha256": "7ef35be1be307c209747cca8145569a3b932c452263364bc3e4ba11c70d84c0e",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/parcel_example_canvas/switch_event_example.riv",
+      "byteLength": 9218,
+      "sha256": "9b9c68b6319e5a186f99bb94ba5b3001f8a272cc3a4fd6a688e67b8bdf7310b4",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/parcel_example_canvas/tape.riv",
+      "byteLength": 116767,
+      "sha256": "5e5e43e962de83e538cee36f7191005d18b149d92206bbabbe0e070e9feb37b2",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/parcel_example_canvas/text_test_2.riv",
+      "byteLength": 808303,
+      "sha256": "4f585d061f007af14a92b5c911c7db4dcc22d75a162264fdf541bff9c6a29be0",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/parcel_example_canvas/truck.riv",
+      "byteLength": 19760,
+      "sha256": "631cd4c477cdbeaa7e69399aa4641b6abaf2f3f9da88f1206348a47d313d43cb",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/spotify-player-app/static/digital_music_player.riv",
+      "byteLength": 37633,
+      "sha256": "c75414cd36e992c6013c003701a00286287e60aca309570a6a1746cb2d773d78",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/examples/_frameworks/vite_canvas_centered/fallback-fonts-3.riv",
+      "byteLength": 53255,
+      "sha256": "a0a8f2b6aeabb2918610f6f48fc1fa8c101bb37517848e8b117215da6c67a5e6",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/test/assets/audio_test.riv",
+      "byteLength": 26367,
+      "sha256": "0a1e5cbc1fdeb990dc10c157c85182fdca9dc2a732af845745e5aa4fafdcd7ae",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/test/assets/data_bind_runtime_test.riv",
+      "byteLength": 806309,
+      "sha256": "59b04c026829e41140e3ac37cd9c75fcac303886689999e79fb5baf04c066b39",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/test/assets/data_binding_lists.riv",
+      "byteLength": 123201,
+      "sha256": "4c534c4b8033dba6fff83ccb4c1b2a935637a77094d2f6f7dcd91b7c8e641232",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/test/assets/embedded_png_asset.riv",
+      "byteLength": 505,
+      "sha256": "2e063b9eacd6afae618888eb7fc6ccfc38cd738920bb69e1affb6d1c83fc2e47",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/test/assets/fallback_fonts_test.riv",
+      "byteLength": 53255,
+      "sha256": "a0a8f2b6aeabb2918610f6f48fc1fa8c101bb37517848e8b117215da6c67a5e6",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/test/assets/global_view_models_test.riv",
+      "byteLength": 879591,
+      "sha256": "5c2474c4f14d9fafacd366a846da52571a132abd7b1d3c17ef4c481353ef4de3",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/test/assets/hosted_png_asset.riv",
+      "byteLength": 253,
+      "sha256": "a827cdb0e25d5d07cb8cbe36a921d775ea9ca7dc466a90e2b2ed5c65d307d852",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/test/assets/list_add_instance_at_test.riv",
+      "byteLength": 475,
+      "sha256": "0e25d2a5d862a3660abc8756a6a50ede3def94e42f6f7d93c68a58f3dc760c49",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/test/assets/referenced_font_asset.riv",
+      "byteLength": 247,
+      "sha256": "150875dd32466aa9e83a226ff3695e285825e1e732fa1aff7ce2e845affa61ea",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/test/assets/referenced_png_asset.riv",
+      "byteLength": 189,
+      "sha256": "ced21888b937955e7d9f1c3ca9eafa42aded4f4b54f1eb93127b3759c7ba8488",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "js/test/assets/runtime_nested_text_runs.riv",
+      "byteLength": 806323,
+      "sha256": "53d0d988a7d0097344d901691fbfb4e3808cf4103f0903836fbad33e39e13981",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/centaur_game/centaur.riv",
+      "byteLength": 46302,
+      "sha256": "8fc833d1a98ebf803521375e570b4dbcd36e15c79c45eab4e411421392f2f764",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/layout_example/layout_test.riv",
+      "byteLength": 809041,
+      "sha256": "fb7658892c7adf974b35229c9255c40dbf0897114d5dfc6828a575e309931778",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/out_of_band_example/asset_load_check.riv",
+      "byteLength": 195222,
+      "sha256": "503db35f2f17765412e2246b514fd904dd3ba8cec72b0792a61f0af144928260",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/out_of_band_example/foo.riv",
+      "byteLength": 400,
+      "sha256": "d0678806729fd0eda86fb3e294e3c96354ecc9718a18d2983ea5aab3d2eeeb3c",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/parcel_example/ball.riv",
+      "byteLength": 1535740,
+      "sha256": "fc528ee6da313fc8dedf3ea72ac00a5a31e12b942e7e522cba32556a50e629db",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/parcel_example/birb.riv",
+      "byteLength": 411989,
+      "sha256": "384a6e3ecc20ae6bff7a77e58e04c97c40fb2a72df22cc8724e96a94d795838b",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/parcel_example/hero-v6.riv",
+      "byteLength": 73024,
+      "sha256": "6decd34d993512b8e99a2b016eedc1c9c38136aaed70af8daf1af595344c1081",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/parcel_example/look.riv",
+      "byteLength": 14794,
+      "sha256": "c5cba2b19b3d77dc6df85de5fc80097ac6dd20b4947e2776f1e8088ed7d741c7",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/parcel_example/message_icon.riv",
+      "byteLength": 1102,
+      "sha256": "4ee907219db4d70dd1c635523ba5f7ce261926d1528d26f04032f7f29a6b8a7b",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/parcel_example/rating_animation.riv",
+      "byteLength": 16229,
+      "sha256": "cb67c07896fa35da41a976b61499277ef2b009d6d8858c11bd671c0df5bc9630",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/parcel_example/switch_event_example.riv",
+      "byteLength": 9218,
+      "sha256": "9b9c68b6319e5a186f99bb94ba5b3001f8a272cc3a4fd6a688e67b8bdf7310b4",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/parcel_example/tape.riv",
+      "byteLength": 116767,
+      "sha256": "5e5e43e962de83e538cee36f7191005d18b149d92206bbabbe0e070e9feb37b2",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/parcel_example/text_test_2.riv",
+      "byteLength": 808303,
+      "sha256": "4f585d061f007af14a92b5c911c7db4dcc22d75a162264fdf541bff9c6a29be0",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/parcel_example/text_wizard.riv",
+      "byteLength": 811545,
+      "sha256": "2762b64833c894425e35508ae29bdc89a25ce2c6efa551a20524c1f9cb6f5255",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    },
+    {
+      "path": "wasm/examples/parcel_example/truck.riv",
+      "byteLength": 19760,
+      "sha256": "631cd4c477cdbeaa7e69399aa4641b6abaf2f3f9da88f1206348a47d313d43cb",
+      "result": {
+        "status": "rejected",
+        "code": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+        "path": "$.riv.header.minor"
+      }
+    }
+  ]
+}

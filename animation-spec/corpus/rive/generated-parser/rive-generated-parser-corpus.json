@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-rive-generated-parser-corpus",
+  "generator": "scripts/hya-corpus/rive-generate-parser-corpus.mjs@1",
+  "tupleId": "rive-7.3-webgl2-2.40.0",
+  "cases": [
+    {
+      "id": "7.2-reject-outside-denominator",
+      "suite": "version",
+      "path": "animation-spec/corpus/rive/generated-parser/version/7.2-reject-outside-denominator.riv",
+      "byteLength": 8,
+      "sha256": "9e3ea7bd396c48513c20f3c56b5d01e7f11bffc2f4d3b7d5ff0343ed3cf14faa",
+      "expected": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+      "options": {}
+    },
+    {
+      "id": "7.3-accept",
+      "suite": "version",
+      "path": "animation-spec/corpus/rive/generated-parser/version/7.3-accept.riv",
+      "byteLength": 8,
+      "sha256": "694f4fdec949d6fe36139af17e0c24eaeb7d85802246c7d5b211236099476c30",
+      "expected": "accepted",
+      "options": {}
+    },
+    {
+      "id": "7.4-reject",
+      "suite": "version",
+      "path": "animation-spec/corpus/rive/generated-parser/version/7.4-reject.riv",
+      "byteLength": 8,
+      "sha256": "c87335e81843cf884f3797c7dc07707c8cf4395777094cd006680ee80b20e21c",
+      "expected": "E_RIVE_FORMAT_MINOR_UNSUPPORTED",
+      "options": {}
+    },
+    {
+      "id": "8.0-reject",
+      "suite": "version",
+      "path": "animation-spec/corpus/rive/generated-parser/version/8.0-reject.riv",
+      "byteLength": 8,
+      "sha256": "a989de25620407d07f76ddf8ce1f225fb78c946e1ab62cb63cdab3e561288918",
+      "expected": "E_RIVE_FORMAT_MAJOR_UNSUPPORTED",
+      "options": {}
+    },
+    {
+      "id": "invalid-fingerprint",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/invalid-fingerprint.riv",
+      "byteLength": 4,
+      "sha256": "bcc85c758a6679b1320e33ccb3336fa5dfdb0d65f08dda4ba65aea753e8f7c0b",
+      "expected": "E_RIVE_INVALID_FINGERPRINT",
+      "options": {}
+    },
+    {
+      "id": "truncated-header",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/truncated-header.riv",
+      "byteLength": 4,
+      "sha256": "fde83e7b84fef451065ad4d2131590b357f36432a6caf520bd1799c60cbc29c9",
+      "expected": "E_RIVE_TRUNCATED",
+      "options": {}
+    },
+    {
+      "id": "varuint-overflow",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/varuint-overflow.riv",
+      "byteLength": 14,
+      "sha256": "2f8167e35ed4c477d64fa6e4d34768b2214fb5bd855de5de3991f3b23dfc98a2",
+      "expected": "E_RIVE_VARINT_OVERFLOW",
+      "options": {}
+    },
+    {
+      "id": "toc-unknown-key",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/toc-unknown-key.riv",
+      "byteLength": 15,
+      "sha256": "69c912935a0090d79b3fa398f85227c9e6b45da117795a82e9ec6ccf3d956bbf",
+      "expected": "E_RIVE_UNKNOWN_PROPERTY",
+      "options": {}
+    },
+    {
+      "id": "toc-duplicate-key",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/toc-duplicate-key.riv",
+      "byteLength": 14,
+      "sha256": "b587f568cc883705eb72ff7b478d32b831e70e1df05b1106ce364110cb3af458",
+      "expected": "E_RIVE_TOC_INVALID",
+      "options": {}
+    },
+    {
+      "id": "toc-field-type-conflict",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/toc-field-type-conflict.riv",
+      "byteLength": 13,
+      "sha256": "9f748fae708056bfbff5e03b87df2d6f52f0a4dde206b16d6257613a813e17c6",
+      "expected": "E_RIVE_TOC_INVALID",
+      "options": {}
+    },
+    {
+      "id": "unknown-object",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/unknown-object.riv",
+      "byteLength": 12,
+      "sha256": "cbea1b072c41170168a7f08ac2826fd5e6ed1ddbb2f05cbd8f53406a147e0d2c",
+      "expected": "E_RIVE_UNKNOWN_OBJECT",
+      "options": {}
+    },
+    {
+      "id": "unknown-property",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/unknown-property.riv",
+      "byteLength": 13,
+      "sha256": "96fd93edd71ddd364c558fa1d9266cc538379b66769dcf8e94bd69304978a253",
+      "expected": "E_RIVE_UNKNOWN_PROPERTY",
+      "options": {}
+    },
+    {
+      "id": "unsupported-property",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/unsupported-property.riv",
+      "byteLength": 11,
+      "sha256": "c12f55fc072321a06650c001240f072a046797f334f0328efe1ace0a80920dfa",
+      "expected": "E_RIVE_UNSUPPORTED_PROPERTY",
+      "options": {}
+    },
+    {
+      "id": "invalid-parent",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/invalid-parent.riv",
+      "byteLength": 14,
+      "sha256": "90812b8aa54c588d3e94c8a4a90e3f5b8a9645a91121c43056fdcd777255120b",
+      "expected": "E_RIVE_REFERENCE_INVALID",
+      "options": {}
+    },
+    {
+      "id": "reference-cycle",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/reference-cycle.riv",
+      "byteLength": 18,
+      "sha256": "12b4f3cd59d1f4dc7a5dfe2283d25b4e092a11a09e37fb298f67fee508280c64",
+      "expected": "E_RIVE_REFERENCE_CYCLE",
+      "options": {}
+    },
+    {
+      "id": "reference-depth-bomb",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/reference-depth-bomb.riv",
+      "byteLength": 38,
+      "sha256": "c77804263d4fafe72d6f5f27991889e0abf2250c16e0cf1ff3376ee95c933be6",
+      "expected": "E_RIVE_LIMIT_EXCEEDED",
+      "options": {
+        "limits": {
+          "referenceDepth": 3
+        }
+      }
+    },
+    {
+      "id": "object-count-bomb",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/object-count-bomb.riv",
+      "byteLength": 12,
+      "sha256": "0381baea0b717cb0a96a9dff12644fead711229741477c4a4c5f39fdabe60484",
+      "expected": "E_RIVE_LIMIT_EXCEEDED",
+      "options": {
+        "limits": {
+          "objects": 1
+        }
+      }
+    },
+    {
+      "id": "property-count-bomb",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/property-count-bomb.riv",
+      "byteLength": 18,
+      "sha256": "5737f4a35253e127ff98401b4e3eb7b2ce86363c015fb22b318627a852f825f6",
+      "expected": "E_RIVE_LIMIT_EXCEEDED",
+      "options": {
+        "limits": {
+          "propertyAssignments": 1
+        }
+      }
+    },
+    {
+      "id": "nested-list-expansion",
+      "suite": "security",
+      "path": "animation-spec/corpus/rive/generated-parser/security/nested-list-expansion.riv",
+      "byteLength": 18,
+      "sha256": "edb085e327a725d29f631098b8939b1f30d93ebe029631f58f715daa3848f31c",
+      "expected": "E_RIVE_LIMIT_EXCEEDED",
+      "options": {
+        "limits": {
+          "listItems": 3
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-rive-g11-corpus",
+  "id": "rive-7.3-full-fidelity-g11-v1",
+  "status": "acquisition-incomplete",
+  "compatibilityTuple": {
+    "id": "rive-7.3-webgl2-2.40.0",
+    "path": "docs/for-ai/rive-hya/compatibility-tuple.json",
+    "sha256": "45fe82a35bc951f1518e31207ea14cf9ec6540dba77ac3c1f6a97bf54eb7ff0b",
+    "format": { "major": 7, "minor": 3 },
+    "runtimeCommit": "526625850eaf34fc1263d181808ffca10cae6ac1",
+    "editorExporterRevision": "ee809ba7f032271dd7102f17afe3baf9d192435b"
+  },
+  "census": {
+    "path": "docs/for-ai/rive-hya/runtime-census.json",
+    "sha256": "ba93ed7d3eb6ba9b2b08d2da0bdfc9be02082209d8f0967542a93916717408fe",
+    "byteLength": 547012,
+    "counts": {
+      "objectTypes": 288,
+      "propertyKeys": 611,
+      "scriptModules": 48,
+      "scriptSymbols": 349,
+      "assetTypes": 14,
+      "serializedAssetTypes": 9,
+      "unclassifiedObjects": 0,
+      "unclassifiedProperties": 0,
+      "unclassifiedScripts": 0,
+      "unclassifiedAssets": 0
+    }
+  },
+  "g01CorpusContract": {
+    "path": "docs/for-ai/rive-hya/corpus-oracle-manifest.json",
+    "sha256": "37ef84fccf83c6940e3529cfebbb8e7b86336ef8b5cccd2c747af409420a21f7"
+  },
+  "oracle": {
+    "package": "@rive-app/webgl2",
+    "version": "2.40.0",
+    "gitHead": "1e9391880df1d501b98d165d2db89284025462eb",
+    "tarballSha256": "f458f5ceb8c677c0389cf237aa73cea9bad2f5b83555715b876dcc233cda6aaa",
+    "riveJsSha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+    "riveWasmSha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+    "clock": "externally-stepped-integer-microseconds",
+    "traceChannels": [
+      "pixels",
+      "geometryAndDrawOrder",
+      "stateMachineState",
+      "dataValues",
+      "events",
+      "pointerKeyboardGamepadFocus",
+      "resizeAndDpr",
+      "audioSchedule",
+      "semanticTreeAndActions",
+      "resourceReplacement",
+      "errorsAndOwners"
+    ]
+  },
+  "featureSuites": [
+    { "id": "import-neutral-ir", "goal": "g02-riv-import-neutral-ir", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
+    { "id": "vector-paint-composite", "goal": "g03-vector-paint-composite-parity", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
+    { "id": "rig-mesh-constraint", "goal": "g04-rig-mesh-constraint-parity", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
+    { "id": "text-layout-component-asset", "goal": "g05-text-layout-component-asset-parity", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
+    { "id": "timeline-state-machine", "goal": "g06-timeline-state-machine-parity", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
+    { "id": "data-interaction-accessibility", "goal": "g07-data-interaction-accessibility-parity", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
+    { "id": "audio-event", "goal": "g08-audio-event-runtime", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
+    { "id": "scripting-custom-rendering", "goal": "g09-sandboxed-scripting-custom-rendering", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 }
+  ],
+  "productCases": [
+    { "id": "animation-editor-component-import", "requiredFamilies": ["text-layout-component-asset", "timeline-state-machine", "data-interaction-accessibility"] },
+    { "id": "game-hud-data-driven", "requiredFamilies": ["data-interaction-accessibility", "audio-event", "text-layout-component-asset"] },
+    { "id": "brand-loader-vector-rig", "requiredFamilies": ["vector-paint-composite", "rig-mesh-constraint", "timeline-state-machine"] },
+    { "id": "scripted-custom-control", "requiredFamilies": ["scripting-custom-rendering"] }
+  ],
+  "versionCases": [
+    { "id": "7.2-reject-outside-denominator", "major": 7, "minor": 2, "expected": "E_RIVE_FORMAT_MINOR_UNSUPPORTED" },
+    { "id": "7.3-accept", "major": 7, "minor": 3, "expected": "accepted" },
+    { "id": "7.4-reject", "major": 7, "minor": 4, "expected": "E_RIVE_FORMAT_MINOR_UNSUPPORTED" },
+    { "id": "8.0-reject", "major": 8, "minor": 0, "expected": "E_RIVE_FORMAT_MAJOR_UNSUPPORTED" }
+  ],
+  "generatedParserCorpus": {
+    "path": "animation-spec/corpus/rive/generated-parser/rive-generated-parser-corpus.json",
+    "sha256": "68c6cc1ef57ead94e50984f0a32eca4dc7e2815b342c9027e822f06cadcb1c25",
+    "byteLength": 6856,
+    "caseCount": 19,
+    "generator": "scripts/hya-corpus/rive-generate-parser-corpus.mjs@1"
+  },
+  "securityCases": [
+    { "id": "invalid-fingerprint", "class": "parser", "expected": "E_RIVE_INVALID_FINGERPRINT" },
+    { "id": "truncated-header", "class": "parser", "expected": "E_RIVE_TRUNCATED" },
+    { "id": "varuint-overflow", "class": "parser", "expected": "E_RIVE_VARINT_OVERFLOW" },
+    { "id": "toc-unknown-key", "class": "parser", "expected": "E_RIVE_UNKNOWN_PROPERTY" },
+    { "id": "toc-duplicate-key", "class": "parser", "expected": "E_RIVE_TOC_INVALID" },
+    { "id": "toc-field-type-conflict", "class": "parser", "expected": "E_RIVE_TOC_INVALID" },
+    { "id": "unknown-object", "class": "parser", "expected": "E_RIVE_UNKNOWN_OBJECT" },
+    { "id": "unknown-property", "class": "parser", "expected": "E_RIVE_UNKNOWN_PROPERTY" },
+    { "id": "unsupported-property", "class": "parser", "expected": "E_RIVE_UNSUPPORTED_PROPERTY" },
+    { "id": "invalid-parent", "class": "graph", "expected": "E_RIVE_REFERENCE_INVALID" },
+    { "id": "reference-cycle", "class": "graph", "expected": "E_RIVE_REFERENCE_CYCLE" },
+    { "id": "reference-depth-bomb", "class": "graph", "expected": "E_RIVE_LIMIT_EXCEEDED" },
+    { "id": "object-count-bomb", "class": "expansion", "expected": "E_RIVE_LIMIT_EXCEEDED" },
+    { "id": "property-count-bomb", "class": "expansion", "expected": "E_RIVE_LIMIT_EXCEEDED" },
+    { "id": "nested-list-expansion", "class": "expansion", "expected": "E_RIVE_LIMIT_EXCEEDED" },
+    { "id": "decompression-bomb", "class": "asset", "expected": "E_RIVE_LIMIT_EXCEEDED" },
+    { "id": "private-network-asset", "class": "asset", "expected": "E_RIVE_ASSET_URL_POLICY" },
+    { "id": "asset-hash-mismatch", "class": "asset", "expected": "E_RIVE_ASSET_INTEGRITY" },
+    { "id": "infinite-luau", "class": "script", "expected": "E_RIVE_SCRIPT_BUDGET" },
+    { "id": "promise-storm", "class": "script", "expected": "E_RIVE_SCRIPT_BUDGET" },
+    { "id": "script-output-amplification", "class": "script", "expected": "E_RIVE_SCRIPT_BUDGET" },
+    { "id": "invalid-wgsl-binding", "class": "shader", "expected": "E_RIVE_SHADER_BINDING" },
+    { "id": "expensive-wgsl", "class": "shader", "expected": "E_RIVE_SHADER_BUDGET" },
+    { "id": "event-recursion", "class": "event", "expected": "E_RIVE_SCRIPT_BUDGET" },
+    { "id": "abort-reimport-race", "class": "lifecycle", "expected": "E_RIVE_ABORTED" },
+    { "id": "late-result-after-dispose", "class": "lifecycle", "expected": "E_RIVE_ABORTED" },
+    { "id": "device-loss", "class": "lifecycle", "expected": "E_RIVE_SHADER_BUDGET" },
+    { "id": "audio-voice-flood", "class": "audio", "expected": "E_RIVE_LIMIT_EXCEEDED" }
+  ],
+  "minimums": {
+    "realProductAssets": 4,
+    "combinedStressAssets": 3,
+    "adversarialCases": 24,
+    "requiredDeviceClasses": 2,
+    "requiredBrowsersPerDevice": ["chrome", "edge"]
+  },
+  "diagnosticUpstreamSources": [
+    {
+      "id": "rive-runtime-frozen-source-tests",
+      "sourceUrl": "https://codeload.github.com/rive-app/rive-runtime/zip/526625850eaf34fc1263d181808ffca10cae6ac1",
+      "revisionKind": "git-commit",
+      "revision": "526625850eaf34fc1263d181808ffca10cae6ac1",
+      "archiveSha256": "67b05558f8d49a0568533e753501f2e1586160d088020d4f88158f10a537207f",
+      "license": {
+        "id": "MIT",
+        "copyright": "Copyright (c) 2020-2021 Rive",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/526625850eaf34fc1263d181808ffca10cae6ac1/LICENSE",
+        "sha256": "fa43eb0d7fbf66f9504182d92dd097311278bb80111a5bf1403c366d6a403144"
+      },
+      "formalEligible": false,
+      "disqualifier": "Runtime unit fixtures are feature diagnostics, not the four admitted real-product cases, and lack a Rive Cloud file revision identity and per-content/transitive asset rights record."
+    },
+    {
+      "id": "rive-wasm-oracle-githead-examples",
+      "sourceUrl": "https://codeload.github.com/rive-app/rive-wasm/zip/1e9391880df1d501b98d165d2db89284025462eb",
+      "revisionKind": "git-commit",
+      "revision": "1e9391880df1d501b98d165d2db89284025462eb",
+      "archiveSha256": "0e0e27771a1bcd8d7f7f5d3c3f1e54c5c063948c4ebf41786978e1d9ca83e71a",
+      "license": {
+        "id": "MIT",
+        "copyright": "Copyright (c) 2020-2021 Rive",
+        "evidence": "https://github.com/rive-app/rive-wasm/blob/1e9391880df1d501b98d165d2db89284025462eb/LICENSE",
+        "sha256": "8a1efa755d19446b51a18e1c15f6308728da0b36283c4d38050698ad6954b69a"
+      },
+      "formalEligible": false,
+      "disqualifier": "Repository examples have immutable Git bytes and a repository license but no Rive Cloud file revision identity or per-content/transitive asset rights record required by G01."
+    }
+  ],
+  "formalAssets": [],
+  "browserRuntimeDenyList": {
+    "path": "docs/for-ai/rive-hya/browser-runtime-deny-list.json",
+    "sha256": "73c1e71ea6af08c68d1a0892f097321b1cb7495d832f67e73a90f62fd72c9c7c"
+  },
+  "formalAdmissionRule": "Every census key must be covered by an admitted licensed asset and every required trace/device/security/closure result must pass. Empty formalAssets is always a blocker."
+}
