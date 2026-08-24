@@ -19,6 +19,7 @@ function incompleteCandidate() {
     nodeVersion: 'v22.18.0',
     evidenceClass: 'dirty-worktree-diagnostic',
     corpus: { manifestSha256: HASH, censusSha256: HASH },
+    workloadPlan: { id: 'rive-7-3-full-web-workload-v1', path: 'animation-spec/corpus/rive/rive-g11-workload-plan.json', sha256: HASH },
     coverage: {
       objectTypes: 288,
       propertyKeys: 611,
@@ -48,6 +49,7 @@ function incompleteCandidate() {
         forbiddenStaticPatternCount: 0,
         forbiddenNetworkCount: 0,
         rawRivCount: 0,
+        evidence: { path: `review/candidates/${name}.json`, sha256: HASH, byteLength: 16 },
       })),
     },
     licenses: { assets: [] },

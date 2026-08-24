@@ -35,19 +35,24 @@
     "Chrome and Edge diagnostics were captured on only one unclassified local device, not the two required formal device classes"
   ],
   "tupleId": "rive-7.3-webgl2-2.40.0",
-  "generatedAt": "2026-08-24T13:56:53.181Z",
-  "engineRevision": "07524b6f2ce6cbb13511c7c410585aa05cb8720c",
+  "generatedAt": "2026-08-24T14:44:45.618Z",
+  "engineRevision": "0c5de57c61ec12c7b9041d04b57c884af9e60118",
   "engineDirty": true,
   "nodeVersion": "v24.19.0",
   "evidenceClass": "dirty-worktree-diagnostic",
   "corpus": {
     "manifest": "animation-spec/corpus/rive/rive-g11-corpus-manifest.json",
-    "manifestSha256": "13cdb23362bd778e9e7a42a55be8d1bce604215076946b68ee3d8f8cdc81b4d0",
+    "manifestSha256": "5400ee1b8864d37eed30f6a53bfae58000b460e7dee3893ebf227a23e052be78",
     "censusSha256": "ba93ed7d3eb6ba9b2b08d2da0bdfc9be02082209d8f0967542a93916717408fe",
     "formalAssetCount": 0,
     "realProductAssetCount": 0,
     "combinedStressAssetCount": 0,
     "adversarialCaseCount": 28
+  },
+  "workloadPlan": {
+    "id": "rive-7-3-full-web-workload-v1",
+    "path": "animation-spec/corpus/rive/rive-g11-workload-plan.json",
+    "sha256": "381e7442f7eabb55be243cd00d5cc653f5295c9b4f1818dc6c49f0296f00b46b"
   },
   "coverage": {
     "objectTypes": 288,
@@ -72,255 +77,619 @@
     "cases": [
       {
         "id": "invalid-fingerprint",
-        "status": "not-run",
+        "class": "parser",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_INVALID_FINGERPRINT",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_INVALID_FINGERPRINT",
+        "underlyingDiagnostic": "E_RIVE_INVALID_FINGERPRINT",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 6.164299999999912,
+        "peakMemoryBytes": 57296872,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "truncated-header",
-        "status": "not-run",
+        "class": "parser",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_TRUNCATED",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_TRUNCATED",
+        "underlyingDiagnostic": "E_RIVE_TRUNCATED",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.4535000000000764,
+        "peakMemoryBytes": 40925032,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "varuint-overflow",
-        "status": "not-run",
+        "class": "parser",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_VARINT_OVERFLOW",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_VARINT_OVERFLOW",
+        "underlyingDiagnostic": "E_RIVE_VARINT_OVERFLOW",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.27760000000000673,
+        "peakMemoryBytes": 40940544,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "toc-unknown-key",
-        "status": "not-run",
+        "class": "parser",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
+        "underlyingDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.29189999999994143,
+        "peakMemoryBytes": 40967816,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "toc-duplicate-key",
-        "status": "not-run",
+        "class": "parser",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_TOC_INVALID",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_TOC_INVALID",
+        "underlyingDiagnostic": "E_RIVE_TOC_INVALID",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.2641999999999598,
+        "peakMemoryBytes": 41035512,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "toc-field-type-conflict",
-        "status": "not-run",
+        "class": "parser",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_TOC_INVALID",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_TOC_INVALID",
+        "underlyingDiagnostic": "E_RIVE_TOC_INVALID",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.27099999999995816,
+        "peakMemoryBytes": 41039160,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "unknown-object",
-        "status": "not-run",
+        "class": "parser",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_UNKNOWN_OBJECT",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_UNKNOWN_OBJECT",
+        "underlyingDiagnostic": "E_RIVE_UNKNOWN_OBJECT",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.27509999999995216,
+        "peakMemoryBytes": 41025464,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "unknown-property",
-        "status": "not-run",
+        "class": "parser",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
+        "underlyingDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.282100000000014,
+        "peakMemoryBytes": 41043088,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "unsupported-property",
-        "status": "not-run",
+        "class": "parser",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_UNSUPPORTED_PROPERTY",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_UNSUPPORTED_PROPERTY",
+        "underlyingDiagnostic": "E_RIVE_UNSUPPORTED_PROPERTY",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.29099999999994,
+        "peakMemoryBytes": 41115144,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "invalid-parent",
-        "status": "not-run",
+        "class": "graph",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_REFERENCE_INVALID",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_REFERENCE_INVALID",
+        "underlyingDiagnostic": "E_RIVE_REFERENCE_INVALID",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.9442000000000235,
+        "peakMemoryBytes": 41167648,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "reference-cycle",
-        "status": "not-run",
+        "class": "graph",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_REFERENCE_CYCLE",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_REFERENCE_CYCLE",
+        "underlyingDiagnostic": "E_RIVE_REFERENCE_CYCLE",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.4700000000000273,
+        "peakMemoryBytes": 41204488,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "reference-depth-bomb",
-        "status": "not-run",
+        "class": "graph",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.8451000000000022,
+        "peakMemoryBytes": 41313464,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "object-count-bomb",
-        "status": "not-run",
+        "class": "expansion",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.31340000000000146,
+        "peakMemoryBytes": 41344112,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "property-count-bomb",
-        "status": "not-run",
+        "class": "expansion",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.342899999999986,
+        "peakMemoryBytes": 41366192,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "nested-list-expansion",
-        "status": "not-run",
+        "class": "expansion",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.31920000000002346,
+        "peakMemoryBytes": 41386496,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-generated-parser",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "decompression-bomb",
-        "status": "not-run",
+        "class": "asset",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.4007000000000289,
+        "peakMemoryBytes": 41420424,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-asset-byte-budget",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "private-network-asset",
-        "status": "not-run",
+        "class": "asset",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_ASSET_URL_POLICY",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_ASSET_URL_POLICY",
+        "underlyingDiagnostic": "E_RIVE_ASSET_URL_POLICY",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 1.273900000000026,
+        "peakMemoryBytes": 41501888,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-hosted-url-policy",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "asset-hash-mismatch",
-        "status": "not-run",
+        "class": "asset",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_ASSET_INTEGRITY",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_ASSET_INTEGRITY",
+        "underlyingDiagnostic": "E_RIVE_ASSET_INTEGRITY",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.47450000000003456,
+        "peakMemoryBytes": 41749808,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g02-asset-integrity",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "infinite-luau",
-        "status": "not-run",
+        "class": "script",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+        "underlyingDiagnostic": "E_SCRIPT_TIMEOUT",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 1.7240000000000464,
+        "peakMemoryBytes": 41751032,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g09-portable-vm-instruction-budget",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "promise-storm",
-        "status": "not-run",
+        "class": "script",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+        "underlyingDiagnostic": "E_SCRIPT_EVENT_BUDGET",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.5769999999999982,
+        "peakMemoryBytes": 41761552,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g09-portable-vm-promise-budget",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "script-output-amplification",
-        "status": "not-run",
+        "class": "script",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+        "underlyingDiagnostic": "E_SCRIPT_EVENT_BUDGET",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.2644000000000233,
+        "peakMemoryBytes": 41805224,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g09-portable-vm-output-budget",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "invalid-wgsl-binding",
-        "status": "not-run",
+        "class": "shader",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_SHADER_BINDING",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_SHADER_BINDING",
+        "underlyingDiagnostic": "E_SHADER_BINDING",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 1.1502000000000407,
+        "peakMemoryBytes": 41921952,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g09-wgsl-binding-validator",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "expensive-wgsl",
-        "status": "not-run",
+        "class": "shader",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_SHADER_BUDGET",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_SHADER_BUDGET",
+        "underlyingDiagnostic": "E_SHADER_BUDGET",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 0.0804000000000542,
+        "peakMemoryBytes": 41928368,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g09-wgsl-source-budget",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "event-recursion",
-        "status": "not-run",
+        "class": "event",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+        "underlyingDiagnostic": "E_INTERACTION_RUNTIME_LIMIT",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 7.778300000000058,
+        "peakMemoryBytes": 43336680,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g07-interaction-recursion-budget",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "abort-reimport-race",
-        "status": "not-run",
+        "class": "lifecycle",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_ABORTED",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_ABORTED",
+        "underlyingDiagnostic": "E_SCRIPT_ABORTED",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 4.230799999999931,
+        "peakMemoryBytes": 43554216,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g09-owner-replace-generation",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "late-result-after-dispose",
-        "status": "not-run",
+        "class": "lifecycle",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_ABORTED",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_ABORTED",
+        "underlyingDiagnostic": "E_SCRIPT_DISPOSED",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 1.928199999999947,
+        "peakMemoryBytes": 43672432,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g09-owner-dispose-generation",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "device-loss",
-        "status": "not-run",
+        "class": "lifecycle",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_SHADER_BUDGET",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_SHADER_BUDGET",
+        "underlyingDiagnostic": "E_SHADER_DEVICE_LOST",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 2.0396999999999252,
+        "peakMemoryBytes": 44055824,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g09-custom-shader-device-loss",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       },
       {
         "id": "audio-voice-flood",
-        "status": "not-run",
+        "class": "audio",
+        "status": "passed",
         "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
-        "observedDiagnostic": null,
-        "ownerResidual": null,
-        "peakMemoryBytes": null,
-        "cpuMs": null
+        "observedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+        "underlyingDiagnostic": "E_AUDIO_RUNTIME_LIMIT",
+        "freshOwner": true,
+        "ownerResidual": 0,
+        "cpuMs": 3.8302999999999656,
+        "peakMemoryBytes": 44164192,
+        "limits": {
+          "cpuMs": 60000,
+          "peakMemoryBytes": 1073741824
+        },
+        "runner": "g08-audio-voice-budget",
+        "evidence": {
+          "path": "review/candidates/rive-g11-security-diagnostic.json",
+          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
+          "byteLength": 15136
+        }
       }
     ]
   },

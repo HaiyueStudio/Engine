@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, statSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
+import { validateRiveWorkloadPlan, validateRiveWorkloadScenario } from './rive-workload-contract.mjs';
 
 export const RIVE_G11_CORPUS_KIND = 'haiyue-rive-g11-corpus';
 export const RIVE_G11_TUPLE_ID = 'rive-7.3-webgl2-2.40.0';
@@ -57,8 +58,11 @@ export function validateRiveCorpusManifest(manifest, census, {
   validatePinnedFile(manifest?.g01CorpusContract, 'G01 corpus contract', root);
   validatePinnedFile(manifest?.browserRuntimeDenyList, 'browser runtime deny list', root);
   validatePinnedFile(manifest?.generatedParserCorpus, 'generated parser corpus', root);
+  validatePinnedFile(manifest?.workloadPlan, 'workload plan', root);
   equal(manifest?.generatedParserCorpus?.caseCount, 19, 'generated parser corpus case count');
   equal(manifest?.generatedParserCorpus?.generator, 'scripts/hya-corpus/rive-generate-parser-corpus.mjs@1', 'generated parser corpus generator');
+  equal(manifest?.workloadPlan?.contract, 'haiyue-rive-g11-workload-plan@1', 'workload plan contract');
+  const workloadPlan = readWorkloadPlan(manifest?.workloadPlan, root, violations);
 
   equal(census?.compatibilityTupleId, RIVE_G11_TUPLE_ID, 'census tuple id');
   for (const [key, value] of Object.entries(census?.totals ?? {})) {
@@ -134,7 +138,7 @@ export function validateRiveCorpusManifest(manifest, census, {
     scriptSymbolKeys: new Set(), assetTypeKeys: new Set(),
   };
   for (const [index, asset] of assets.entries()) {
-    validateFormalAsset(asset, `formalAssets[${index}]`, coverage, securityIds, root, violations);
+    validateFormalAsset(asset, `formalAssets[${index}]`, coverage, securityIds, root, workloadPlan, violations);
   }
 
   const expectedCoverage = censusCoverage(census);
@@ -219,7 +223,7 @@ export function validateRiveCorpusManifest(manifest, census, {
   }
 }
 
-function validateFormalAsset(asset, path, coverage, securityIds, root, violations) {
+function validateFormalAsset(asset, path, coverage, securityIds, root, workloadPlan, violations) {
   if (!ID.test(asset?.id ?? '')) violations.push(`${path}.id is invalid`);
   if (!['feature-isolated', 'property-boundary', 'real-product', 'combined-stress', 'adversarial'].includes(asset?.kind)) {
     violations.push(`${path}.kind is invalid`);
@@ -260,9 +264,44 @@ function validateFormalAsset(asset, path, coverage, securityIds, root, violation
   addCoverage(coverage.assetTypeKeys, asset?.assetTypeKeys, `${path}.assetTypeKeys`, value => Number.isSafeInteger(value), violations);
   requiredString(asset?.fixtureOwner, `${path}.fixtureOwner`, violations);
   requiredString(asset?.oracleTraceId, `${path}.oracleTraceId`, violations);
+  const scenario = asset?.workloadScenario;
+  requiredString(scenario?.path, `${path}.workloadScenario.path`, violations);
+  if (!SHA256.test(scenario?.sha256 ?? '')) violations.push(`${path}.workloadScenario.sha256 is invalid`);
+  if (!Number.isSafeInteger(scenario?.byteLength) || scenario.byteLength < 1) violations.push(`${path}.workloadScenario.byteLength is invalid`);
+  if (root && typeof scenario?.path === 'string') {
+    validateAssetFile(root, scenario, `${path}.workloadScenario`, violations);
+    const scenarioPath = safeResolve(root, scenario.path, `${path}.workloadScenario.path`, violations);
+    if (scenarioPath && workloadPlan) {
+      try {
+        const value = JSON.parse(readFileSync(scenarioPath, 'utf8'));
+        const result = validateRiveWorkloadScenario(value, workloadPlan, {
+          expectedAssetId: asset.id,
+          expectedRivSha256: riv?.sha256,
+        });
+        if (result.status !== 'passed') violations.push(...result.violations.map(value => `${path}.workloadScenario: ${value}`));
+      } catch (error) {
+        violations.push(`${path}.workloadScenario cannot be parsed: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+  }
   if (asset?.kind === 'real-product') requiredString(asset?.productCaseId, `${path}.productCaseId`, violations);
   if (asset?.kind === 'adversarial' && !securityIds.has(asset?.securityCaseId)) {
     violations.push(`${path}.securityCaseId is not declared`);
+  }
+}
+
+function readWorkloadPlan(reference, root, violations) {
+  if (!root || typeof reference?.path !== 'string') return null;
+  const path = safeResolve(root, reference.path, 'workload plan path', violations);
+  if (!path) return null;
+  try {
+    const plan = JSON.parse(readFileSync(path, 'utf8'));
+    const result = validateRiveWorkloadPlan(plan);
+    if (result.status !== 'passed') violations.push(...result.violations.map(value => `workload plan: ${value}`));
+    return plan;
+  } catch (error) {
+    violations.push(`workload plan cannot be parsed: ${error instanceof Error ? error.message : String(error)}`);
+    return null;
   }
 }
 

@@ -83,6 +83,12 @@
     "caseCount": 19,
     "generator": "scripts/hya-corpus/rive-generate-parser-corpus.mjs@1"
   },
+  "workloadPlan": {
+    "path": "animation-spec/corpus/rive/rive-g11-workload-plan.json",
+    "sha256": "381e7442f7eabb55be243cd00d5cc653f5295c9b4f1818dc6c49f0296f00b46b",
+    "byteLength": 2351,
+    "contract": "haiyue-rive-g11-workload-plan@1"
+  },
   "securityCases": [
     { "id": "invalid-fingerprint", "class": "parser", "expected": "E_RIVE_INVALID_FINGERPRINT" },
     { "id": "truncated-header", "class": "parser", "expected": "E_RIVE_TRUNCATED" },

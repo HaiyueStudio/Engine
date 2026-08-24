@@ -1,0 +1,506 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-rive-g11-security-workload",
+  "tupleId": "rive-7.3-webgl2-2.40.0",
+  "status": "passed",
+  "evidenceClass": "dirty-worktree-diagnostic",
+  "generatedAt": "2026-08-24T14:42:58.426Z",
+  "engineRevision": "0c5de57c61ec12c7b9041d04b57c884af9e60118",
+  "engineDirty": true,
+  "nodeVersion": "v24.19.0",
+  "manifestSha256": "5400ee1b8864d37eed30f6a53bfae58000b460e7dee3893ebf227a23e052be78",
+  "runner": {
+    "id": "scripts/benchmark/rive-g11-run-security.mjs@1",
+    "importer": "animation-spec/dist-test/conversion/rive-ir/index.js",
+    "sourceNeutralRuntimeDrivers": [
+      "g07-interaction",
+      "g08-audio",
+      "g09-script-wgsl"
+    ]
+  },
+  "unclassifiedFailureCount": 0,
+  "cases": [
+    {
+      "id": "invalid-fingerprint",
+      "class": "parser",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_INVALID_FINGERPRINT",
+      "observedDiagnostic": "E_RIVE_INVALID_FINGERPRINT",
+      "underlyingDiagnostic": "E_RIVE_INVALID_FINGERPRINT",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 6.164299999999912,
+      "peakMemoryBytes": 57296872,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "truncated-header",
+      "class": "parser",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_TRUNCATED",
+      "observedDiagnostic": "E_RIVE_TRUNCATED",
+      "underlyingDiagnostic": "E_RIVE_TRUNCATED",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.4535000000000764,
+      "peakMemoryBytes": 40925032,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "varuint-overflow",
+      "class": "parser",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_VARINT_OVERFLOW",
+      "observedDiagnostic": "E_RIVE_VARINT_OVERFLOW",
+      "underlyingDiagnostic": "E_RIVE_VARINT_OVERFLOW",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.27760000000000673,
+      "peakMemoryBytes": 40940544,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "toc-unknown-key",
+      "class": "parser",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
+      "observedDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
+      "underlyingDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.29189999999994143,
+      "peakMemoryBytes": 40967816,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "toc-duplicate-key",
+      "class": "parser",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_TOC_INVALID",
+      "observedDiagnostic": "E_RIVE_TOC_INVALID",
+      "underlyingDiagnostic": "E_RIVE_TOC_INVALID",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.2641999999999598,
+      "peakMemoryBytes": 41035512,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "toc-field-type-conflict",
+      "class": "parser",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_TOC_INVALID",
+      "observedDiagnostic": "E_RIVE_TOC_INVALID",
+      "underlyingDiagnostic": "E_RIVE_TOC_INVALID",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.27099999999995816,
+      "peakMemoryBytes": 41039160,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "unknown-object",
+      "class": "parser",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_UNKNOWN_OBJECT",
+      "observedDiagnostic": "E_RIVE_UNKNOWN_OBJECT",
+      "underlyingDiagnostic": "E_RIVE_UNKNOWN_OBJECT",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.27509999999995216,
+      "peakMemoryBytes": 41025464,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "unknown-property",
+      "class": "parser",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
+      "observedDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
+      "underlyingDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.282100000000014,
+      "peakMemoryBytes": 41043088,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "unsupported-property",
+      "class": "parser",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_UNSUPPORTED_PROPERTY",
+      "observedDiagnostic": "E_RIVE_UNSUPPORTED_PROPERTY",
+      "underlyingDiagnostic": "E_RIVE_UNSUPPORTED_PROPERTY",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.29099999999994,
+      "peakMemoryBytes": 41115144,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "invalid-parent",
+      "class": "graph",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_REFERENCE_INVALID",
+      "observedDiagnostic": "E_RIVE_REFERENCE_INVALID",
+      "underlyingDiagnostic": "E_RIVE_REFERENCE_INVALID",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.9442000000000235,
+      "peakMemoryBytes": 41167648,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "reference-cycle",
+      "class": "graph",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_REFERENCE_CYCLE",
+      "observedDiagnostic": "E_RIVE_REFERENCE_CYCLE",
+      "underlyingDiagnostic": "E_RIVE_REFERENCE_CYCLE",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.4700000000000273,
+      "peakMemoryBytes": 41204488,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "reference-depth-bomb",
+      "class": "graph",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "observedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.8451000000000022,
+      "peakMemoryBytes": 41313464,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "object-count-bomb",
+      "class": "expansion",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "observedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.31340000000000146,
+      "peakMemoryBytes": 41344112,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "property-count-bomb",
+      "class": "expansion",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "observedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.342899999999986,
+      "peakMemoryBytes": 41366192,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "nested-list-expansion",
+      "class": "expansion",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "observedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.31920000000002346,
+      "peakMemoryBytes": 41386496,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-generated-parser"
+    },
+    {
+      "id": "decompression-bomb",
+      "class": "asset",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "observedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.4007000000000289,
+      "peakMemoryBytes": 41420424,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-asset-byte-budget"
+    },
+    {
+      "id": "private-network-asset",
+      "class": "asset",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_ASSET_URL_POLICY",
+      "observedDiagnostic": "E_RIVE_ASSET_URL_POLICY",
+      "underlyingDiagnostic": "E_RIVE_ASSET_URL_POLICY",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 1.273900000000026,
+      "peakMemoryBytes": 41501888,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-hosted-url-policy"
+    },
+    {
+      "id": "asset-hash-mismatch",
+      "class": "asset",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_ASSET_INTEGRITY",
+      "observedDiagnostic": "E_RIVE_ASSET_INTEGRITY",
+      "underlyingDiagnostic": "E_RIVE_ASSET_INTEGRITY",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.47450000000003456,
+      "peakMemoryBytes": 41749808,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g02-asset-integrity"
+    },
+    {
+      "id": "infinite-luau",
+      "class": "script",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+      "observedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+      "underlyingDiagnostic": "E_SCRIPT_TIMEOUT",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 1.7240000000000464,
+      "peakMemoryBytes": 41751032,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g09-portable-vm-instruction-budget"
+    },
+    {
+      "id": "promise-storm",
+      "class": "script",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+      "observedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+      "underlyingDiagnostic": "E_SCRIPT_EVENT_BUDGET",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.5769999999999982,
+      "peakMemoryBytes": 41761552,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g09-portable-vm-promise-budget"
+    },
+    {
+      "id": "script-output-amplification",
+      "class": "script",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+      "observedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+      "underlyingDiagnostic": "E_SCRIPT_EVENT_BUDGET",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.2644000000000233,
+      "peakMemoryBytes": 41805224,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g09-portable-vm-output-budget"
+    },
+    {
+      "id": "invalid-wgsl-binding",
+      "class": "shader",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_SHADER_BINDING",
+      "observedDiagnostic": "E_RIVE_SHADER_BINDING",
+      "underlyingDiagnostic": "E_SHADER_BINDING",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 1.1502000000000407,
+      "peakMemoryBytes": 41921952,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g09-wgsl-binding-validator"
+    },
+    {
+      "id": "expensive-wgsl",
+      "class": "shader",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_SHADER_BUDGET",
+      "observedDiagnostic": "E_RIVE_SHADER_BUDGET",
+      "underlyingDiagnostic": "E_SHADER_BUDGET",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 0.0804000000000542,
+      "peakMemoryBytes": 41928368,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g09-wgsl-source-budget"
+    },
+    {
+      "id": "event-recursion",
+      "class": "event",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+      "observedDiagnostic": "E_RIVE_SCRIPT_BUDGET",
+      "underlyingDiagnostic": "E_INTERACTION_RUNTIME_LIMIT",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 7.778300000000058,
+      "peakMemoryBytes": 43336680,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g07-interaction-recursion-budget"
+    },
+    {
+      "id": "abort-reimport-race",
+      "class": "lifecycle",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_ABORTED",
+      "observedDiagnostic": "E_RIVE_ABORTED",
+      "underlyingDiagnostic": "E_SCRIPT_ABORTED",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 4.230799999999931,
+      "peakMemoryBytes": 43554216,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g09-owner-replace-generation"
+    },
+    {
+      "id": "late-result-after-dispose",
+      "class": "lifecycle",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_ABORTED",
+      "observedDiagnostic": "E_RIVE_ABORTED",
+      "underlyingDiagnostic": "E_SCRIPT_DISPOSED",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 1.928199999999947,
+      "peakMemoryBytes": 43672432,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g09-owner-dispose-generation"
+    },
+    {
+      "id": "device-loss",
+      "class": "lifecycle",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_SHADER_BUDGET",
+      "observedDiagnostic": "E_RIVE_SHADER_BUDGET",
+      "underlyingDiagnostic": "E_SHADER_DEVICE_LOST",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 2.0396999999999252,
+      "peakMemoryBytes": 44055824,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g09-custom-shader-device-loss"
+    },
+    {
+      "id": "audio-voice-flood",
+      "class": "audio",
+      "status": "passed",
+      "expectedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "observedDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
+      "underlyingDiagnostic": "E_AUDIO_RUNTIME_LIMIT",
+      "freshOwner": true,
+      "ownerResidual": 0,
+      "cpuMs": 3.8302999999999656,
+      "peakMemoryBytes": 44164192,
+      "limits": {
+        "cpuMs": 60000,
+        "peakMemoryBytes": 1073741824
+      },
+      "runner": "g08-audio-voice-budget"
+    }
+  ],
+  "summary": {
+    "total": 28,
+    "passed": 28,
+    "failed": 0,
+    "notRun": 0
+  }
+}

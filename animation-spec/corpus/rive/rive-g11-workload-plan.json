@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-rive-g11-workload-plan",
+  "id": "rive-7-3-full-web-workload-v1",
+  "compatibilityTupleId": "rive-7.3-webgl2-2.40.0",
+  "traceContract": "haiyue-rive-oracle-differential-trace@2",
+  "scenarioContract": "haiyue-rive-workload-scenario@1",
+  "requiredTraceChannels": [
+    "pixels",
+    "geometryAndDrawOrder",
+    "stateMachineState",
+    "dataValues",
+    "events",
+    "pointerKeyboardGamepadFocus",
+    "resizeAndDpr",
+    "audioSchedule",
+    "semanticTreeAndActions",
+    "resourceReplacement",
+    "errorsAndOwners"
+  ],
+  "requiredActionKinds": [
+    "initialize",
+    "seek",
+    "data-mutation",
+    "pointer",
+    "keyboard",
+    "gamepad",
+    "focus",
+    "resize",
+    "resource-replacement",
+    "semantic-action",
+    "reduced-motion"
+  ],
+  "requiredLifecyclePaths": [
+    "normal",
+    "abort",
+    "reimport",
+    "project-close",
+    "device-loss",
+    "late-result"
+  ],
+  "viewportMatrix": [
+    { "id": "desktop-1x", "width": 1280, "height": 720, "dpr": 1 },
+    { "id": "desktop-2x", "width": 800, "height": 600, "dpr": 2 },
+    { "id": "mobile-3x", "width": 390, "height": 844, "dpr": 3 }
+  ],
+  "clock": {
+    "unit": "integer-microseconds",
+    "minimumSteps": 16,
+    "minimumDurationMicros": 2000000,
+    "strictlyIncreasing": true,
+    "replayCount": 2
+  },
+  "measurement": {
+    "workload": "full",
+    "cachePolicy": "fresh-owner-no-store-per-sample",
+    "compression": "gzip-9-per-file",
+    "warmupIterations": 5,
+    "measuredIterations": 30,
+    "frameSampleCount": 120,
+    "networkIncludesExternalAssets": true,
+    "queueCompletionRequired": true,
+    "energySourceRequired": true,
+    "metrics": [
+      "rawBytes",
+      "gzipBytes",
+      "networkBytes",
+      "networkMs",
+      "parseMs",
+      "firstFrameMs",
+      "cpuFrameMs",
+      "gpuFrameMs",
+      "peakMemoryBytes",
+      "settleMs",
+      "energyMj"
+    ]
+  },
+  "browserDeviceMatrix": [
+    { "deviceClass": "windows-10-integrated", "browsers": ["chrome", "edge"] },
+    { "deviceClass": "windows-11-discrete", "browsers": ["chrome", "edge"] }
+  ],
+  "formalRules": {
+    "sameCleanRevision": true,
+    "sameMachineOfficialAndHya": true,
+    "freshOwnerPerReplay": true,
+    "consoleErrorsAllowed": 0,
+    "exceptionsAllowed": 0,
+    "ownerResidualAllowed": 0,
+    "unclassifiedFailuresAllowed": 0
+  }
+}

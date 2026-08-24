@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { validateRiveOracleTrace } from '../hya-corpus/rive-oracle-trace-contract.mjs';
 
 export const RIVE_G11_CANDIDATE_KIND = 'haiyue-rive-g11-candidate';
@@ -23,6 +24,8 @@ export function validateRiveG11Candidate(candidate, {
   expectedManifestSha256 = null,
   manifest = null,
   tracesByPath = null,
+  workloadPlan = null,
+  artifactBytesByPath = null,
 } = {}) {
   const violations = [];
   equal(candidate?.schemaVersion, RIVE_G11_CANDIDATE_VERSION, 'schemaVersion');
@@ -44,6 +47,14 @@ export function validateRiveG11Candidate(candidate, {
   match(candidate?.corpus?.manifestSha256, SHA256, 'corpus manifest hash');
   match(candidate?.corpus?.censusSha256, SHA256, 'census hash');
   if (expectedManifestSha256) equal(candidate?.corpus?.manifestSha256, expectedManifestSha256, 'expected corpus manifest hash');
+  requiredString(candidate?.workloadPlan?.id, 'workload plan id');
+  requiredString(candidate?.workloadPlan?.path, 'workload plan path');
+  match(candidate?.workloadPlan?.sha256, SHA256, 'workload plan hash');
+  if (manifest?.workloadPlan) {
+    equal(candidate?.workloadPlan?.id, workloadPlan?.id, 'expected workload plan id');
+    equal(candidate?.workloadPlan?.path, manifest.workloadPlan.path, 'expected workload plan path');
+    equal(candidate?.workloadPlan?.sha256, manifest.workloadPlan.sha256, 'expected workload plan hash');
+  }
 
   const coverage = candidate?.coverage;
   for (const [key, expected] of Object.entries({
@@ -65,6 +76,8 @@ export function validateRiveG11Candidate(candidate, {
     if (!['chrome', 'edge'].includes(reference?.browser)) violations.push(`trace ${index} browser is invalid`);
     requiredString(reference?.path, `trace ${index} path`);
     match(reference?.sha256, SHA256, `trace ${index} hash`);
+    positiveInteger(reference?.byteLength, `trace ${index} byte length`);
+    validateEvidenceBytes(reference, `trace ${index}`, formal);
     const key = `${reference?.assetId}:${reference?.deviceClass}:${reference?.browser}`;
     if (seenTraceKeys.has(key)) violations.push(`duplicate trace ${key}`);
     seenTraceKeys.add(key);
@@ -73,6 +86,8 @@ export function validateRiveG11Candidate(candidate, {
         formal,
         expectedRevision: candidate.engineRevision,
         expectedManifestSha256: candidate.corpus.manifestSha256,
+        workloadPlan,
+        artifactBytesByPath,
       });
       if (result.status !== 'passed') violations.push(`trace ${reference.path} failed: ${result.violations.join('; ')}`);
     } else if (formal) violations.push(`trace artifact is unavailable for validation: ${String(reference.path)}`);
@@ -103,12 +118,26 @@ export function validateRiveG11Candidate(candidate, {
   const metricIds = new Set();
   for (const item of metrics) {
     requiredString(item?.assetId, 'performance asset id');
-    if (metricIds.has(item?.assetId)) violations.push(`duplicate performance asset ${String(item?.assetId)}`);
-    metricIds.add(item?.assetId);
+    if (!REQUIRED_DEVICE_MATRIX.has(item?.deviceClass)) violations.push(`${String(item?.assetId)} performance device class is invalid`);
+    if (!['chrome', 'edge'].includes(item?.browser)) violations.push(`${String(item?.assetId)} performance browser is invalid`);
+    const metricKey = `${item?.assetId}:${item?.deviceClass}:${item?.browser}`;
+    if (metricIds.has(metricKey)) violations.push(`duplicate performance sample ${metricKey}`);
+    metricIds.add(metricKey);
+    requiredString(item?.tracePath, `${metricKey} trace path`);
+    match(item?.traceSha256, SHA256, `${metricKey} trace hash`);
+    equal(item?.tracePath, traceReferences.find(value => value.assetId === item?.assetId && value.deviceClass === item?.deviceClass && value.browser === item?.browser)?.path, `${metricKey} trace identity`);
     for (const metric of METRICS) nonnegativeNumber(item?.official?.[metric], `${String(item?.assetId)} official ${metric}`);
     for (const metric of METRICS) nonnegativeNumber(item?.hya?.[metric], `${String(item?.assetId)} HYA ${metric}`);
+    for (const side of ['official', 'hya']) {
+      positiveInteger(item?.measurement?.[side]?.warmupIterations, `${metricKey} ${side} warmup iterations`);
+      positiveInteger(item?.measurement?.[side]?.measuredIterations, `${metricKey} ${side} measured iterations`);
+      positiveInteger(item?.measurement?.[side]?.frameSampleCount, `${metricKey} ${side} frame sample count`);
+      requiredString(item?.measurement?.[side]?.energySource, `${metricKey} ${side} energy source`);
+      equal(item?.measurement?.[side]?.queueCompleted, true, `${metricKey} ${side} queue completion`);
+    }
     equal(item?.sameMachine, true, `${String(item?.assetId)} same-machine comparison`);
     equal(item?.sameRevision, true, `${String(item?.assetId)} same-revision comparison`);
+    equal(item?.sameActionStream, true, `${String(item?.assetId)} same-action-stream comparison`);
   }
   equal(candidate?.performance?.fullWorkload, formal ? true : candidate?.performance?.fullWorkload, 'performance workload identity');
 
@@ -120,11 +149,21 @@ export function validateRiveG11Candidate(candidate, {
     securityIds.add(result?.id);
     if (!['passed', 'failed', 'not-run'].includes(result?.status)) violations.push(`${String(result?.id)} security status is invalid`);
     requiredString(result?.expectedDiagnostic, `${String(result?.id)} expected diagnostic`);
+    const declared = manifest?.securityCases?.find(value => value.id === result?.id);
+    if (declared) equal(result?.class, declared.class, `${String(result?.id)} security class`);
     if (result?.status === 'passed') {
       equal(result?.observedDiagnostic, result.expectedDiagnostic, `${String(result?.id)} diagnostic`);
+      requiredString(result?.underlyingDiagnostic, `${String(result?.id)} underlying diagnostic`);
       equal(result?.ownerResidual, 0, `${String(result?.id)} owner residual`);
       nonnegativeNumber(result?.peakMemoryBytes, `${String(result?.id)} peak memory`);
       nonnegativeNumber(result?.cpuMs, `${String(result?.id)} CPU time`);
+      positiveInteger(result?.limits?.peakMemoryBytes, `${String(result?.id)} memory limit`);
+      positiveNumber(result?.limits?.cpuMs, `${String(result?.id)} CPU limit`);
+      if (result?.peakMemoryBytes > result?.limits?.peakMemoryBytes) violations.push(`${String(result?.id)} peak memory exceeded its evidence limit`);
+      if (result?.cpuMs > result?.limits?.cpuMs) violations.push(`${String(result?.id)} CPU time exceeded its evidence limit`);
+      equal(result?.freshOwner, true, `${String(result?.id)} fresh owner`);
+      requiredString(result?.runner, `${String(result?.id)} runner`);
+      validateEvidenceReference(result?.evidence, `${String(result?.id)} security evidence`, formal);
     }
   }
   if (manifest) {
@@ -144,6 +183,7 @@ export function validateRiveG11Candidate(candidate, {
         if (formal) violations.push(`${name} closure scan was not run`);
       } else {
         match(scan?.sha256, SHA256, `${name} scan hash`);
+        validateEvidenceReference(scan?.evidence, `${name} closure evidence`, formal);
         equal(scan?.forbiddenPackageCount, 0, `${name} forbidden package count`);
         equal(scan?.forbiddenFileCount, 0, `${name} forbidden file count`);
         equal(scan?.forbiddenStaticPatternCount, 0, `${name} forbidden static pattern count`);
@@ -212,7 +252,16 @@ export function validateRiveG11Candidate(candidate, {
     if (manifest && traceReferences.length < manifest.formalAssets.length * 4) {
       violations.push('formal trace population does not cover every asset on both devices and browsers');
     }
-    if (metrics.length < (manifest?.formalAssets?.length ?? 1)) violations.push('performance population is incomplete');
+    for (const asset of manifest?.formalAssets ?? []) {
+      for (const [deviceClass, browsers] of REQUIRED_DEVICE_MATRIX) {
+        for (const browser of browsers) {
+          const key = `${asset.id}:${deviceClass}:${browser}`;
+          if (!metricIds.has(key)) violations.push(`missing performance sample ${key}`);
+          if (!seenTraceKeys.has(key)) violations.push(`missing differential trace ${key}`);
+        }
+      }
+    }
+    if (metrics.length < (manifest?.formalAssets?.length ?? 1) * 4) violations.push('performance population is incomplete');
     if (securityResults.some(value => value?.status !== 'passed')) violations.push('security corpus contains a non-passing case');
     equal(findings?.redCaseCount ?? 0, 0, 'formal diagnostic red case count');
     equal(findings?.formalDeviceClassCount ?? 0, 2, 'formal diagnostic device class count');
@@ -235,6 +284,25 @@ export function validateRiveG11Candidate(candidate, {
     equal(report?.consoleErrorCount, 0, `${deviceId}:${report?.browser} console errors`);
     equal(report?.exceptionCount, 0, `${deviceId}:${report?.browser} exceptions`);
     equal(report?.unclassifiedFailureCount, 0, `${deviceId}:${report?.browser} unclassified failures`);
+    validateEvidenceReference(report?.evidence, `${deviceId}:${report?.browser} browser evidence`, formal);
+  }
+
+  function validateEvidenceReference(reference, label, requireBytes) {
+    requiredString(reference?.path, `${label} path`);
+    match(reference?.sha256, SHA256, `${label} hash`);
+    positiveInteger(reference?.byteLength, `${label} byte length`);
+    validateEvidenceBytes(reference, label, requireBytes);
+  }
+
+  function validateEvidenceBytes(reference, label, requireBytes) {
+    const value = artifactBytesByPath?.get(reference?.path);
+    if (!value) {
+      if (requireBytes) violations.push(`${label} bytes are unavailable`);
+      return;
+    }
+    const bytes = Buffer.isBuffer(value) ? value : Buffer.from(value.buffer, value.byteOffset, value.byteLength);
+    equal(bytes.byteLength, reference?.byteLength, `${label} byte length`);
+    equal(createHash('sha256').update(bytes).digest('hex'), reference?.sha256, `${label} content hash`);
   }
 
   function equal(actual, expected, label) {
@@ -251,5 +319,11 @@ export function validateRiveG11Candidate(candidate, {
   }
   function nonnegativeNumber(actual, label) {
     if (!Number.isFinite(actual) || actual < 0) violations.push(`${label} must be a finite non-negative number`);
+  }
+  function positiveNumber(actual, label) {
+    if (!Number.isFinite(actual) || actual <= 0) violations.push(`${label} must be a finite positive number`);
+  }
+  function positiveInteger(actual, label) {
+    if (!Number.isSafeInteger(actual) || actual < 1) violations.push(`${label} must be a positive safe integer`);
   }
 }

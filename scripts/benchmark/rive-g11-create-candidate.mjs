@@ -5,6 +5,7 @@ import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateRiveCorpusManifest } from '../hya-corpus/rive-corpus-contract.mjs';
 import { validateRiveG11Candidate } from './rive-g11-candidate-contract.mjs';
+import { validateRiveG11SecurityReport } from './rive-g11-security-contract.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const manifestPath = resolve(root, 'animation-spec/corpus/rive/rive-g11-corpus-manifest.json');
@@ -14,6 +15,8 @@ const manifestBytes = readFileSync(manifestPath);
 const manifest = JSON.parse(manifestBytes.toString('utf8'));
 const censusBytes = readFileSync(resolve(root, manifest.census.path));
 const census = JSON.parse(censusBytes.toString('utf8'));
+const workloadPlanBytes = readFileSync(resolve(root, manifest.workloadPlan.path));
+const workloadPlan = JSON.parse(workloadPlanBytes.toString('utf8'));
 const diagnosticCorpus = validateRiveCorpusManifest(manifest, census, { root });
 if (diagnosticCorpus.status !== 'passed') {
   throw new Error(`Cannot create G11 candidate from an invalid corpus contract:\n- ${diagnosticCorpus.violations.join('\n- ')}`);
@@ -22,6 +25,7 @@ const formalCorpus = validateRiveCorpusManifest(manifest, census, { formal: true
 const revision = git(['rev-parse', 'HEAD']);
 const dirty = git(['status', '--porcelain']).length > 0;
 const diagnosticFindings = readDiagnosticFindings();
+const securityEvidence = readSecurityEvidence(revision, manifestBytes);
 const blockers = [
   ...formalCorpus.violations,
   'official @rive-app/webgl2@2.40.0 differential traces have not been captured',
@@ -58,6 +62,11 @@ const candidate = {
     combinedStressAssetCount: diagnosticCorpus.summary.combinedStressAssetCount,
     adversarialCaseCount: diagnosticCorpus.summary.adversarialCaseCount,
   },
+  workloadPlan: {
+    id: workloadPlan.id,
+    path: manifest.workloadPlan.path,
+    sha256: hash(workloadPlanBytes),
+  },
   coverage: {
     objectTypes: census.totals.objectTypes,
     propertyKeys: census.totals.propertyKeys,
@@ -75,8 +84,12 @@ const candidate = {
   devices: [],
   performance: { fullWorkload: false, assets: [] },
   security: {
-    cases: manifest.securityCases.map(value => ({
+    cases: securityEvidence ? securityEvidence.report.cases.map(value => ({
+      ...value,
+      evidence: securityEvidence.reference,
+    })) : manifest.securityCases.map(value => ({
       id: value.id,
+      class: value.class,
       status: 'not-run',
       expectedDiagnostic: value.expected,
       observedDiagnostic: null,
@@ -107,6 +120,7 @@ const contract = validateRiveG11Candidate(candidate, {
   expectedEngineRevision: revision,
   expectedManifestSha256: candidate.corpus.manifestSha256,
   manifest,
+  workloadPlan,
 });
 if (contract.status !== 'passed') {
   throw new Error(`Generated G11 diagnostic candidate violates its contract:\n- ${contract.violations.join('\n- ')}`);
@@ -202,6 +216,26 @@ function readDiagnosticFindings() {
         hya: 'import-accepted',
       })),
     ],
+  };
+}
+
+function readSecurityEvidence(expectedRevision, currentManifestBytes) {
+  const path = resolve(root, 'review/candidates/rive-g11-security-diagnostic.json');
+  if (!existsSync(path)) return null;
+  const bytes = readFileSync(path);
+  const report = JSON.parse(bytes.toString('utf8'));
+  const validation = validateRiveG11SecurityReport(report, manifest, {
+    expectedRevision,
+    expectedManifestSha256: hash(currentManifestBytes),
+  });
+  if (validation.status !== 'passed') throw new Error(`G11 security evidence is invalid:\n- ${validation.violations.join('\n- ')}`);
+  return {
+    report,
+    reference: {
+      path: relative(root, path).split('\\').join('/'),
+      sha256: hash(bytes),
+      byteLength: bytes.byteLength,
+    },
   };
 }
 

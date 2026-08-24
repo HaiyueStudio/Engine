@@ -3,6 +3,10 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, extname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { gunzipSync } from 'node:zlib';
+
+const MAX_ARCHIVE_EXPANDED_BYTES = 512 * 1024 * 1024;
+const MAX_ARCHIVE_ENTRIES = 100_000;
 
 export function scanRiveBrowserClosure({ denyList, artifacts }) {
   const scans = [];
@@ -33,7 +37,10 @@ export function scanRiveBrowserClosure({ denyList, artifacts }) {
 
 function scanFiles(artifact, denyList) {
   const paths = statSync(artifact.path).isDirectory() ? walk(artifact.path) : [artifact.path];
-  const files = paths.map(path => ({ path, relative: statSync(artifact.path).isDirectory() ? relative(artifact.path, path).split('\\').join('/') : basename(path), bytes: readFileSync(path) }));
+  const directory = statSync(artifact.path).isDirectory();
+  const physicalFiles = paths.map(path => ({ path, relative: directory ? relative(artifact.path, path).split('\\').join('/') : basename(path), bytes: readFileSync(path) }));
+  const archiveErrors = [];
+  const files = physicalFiles.flatMap(file => expandArchive(file, archiveErrors));
   const fileMatches = [];
   const packageMatches = [];
   const staticMatches = [];
@@ -58,20 +65,103 @@ function scanFiles(artifact, denyList) {
     digest.update(`${file.relative}\0${file.bytes.byteLength}\0`);
     digest.update(file.bytes);
   }
-  const failed = fileMatches.length + packageMatches.length + staticMatches.length + rawRivCount > 0;
+  const failed = fileMatches.length + packageMatches.length + staticMatches.length + rawRivCount + archiveErrors.length > 0;
   return {
     name: artifact.name,
     status: failed ? 'failed' : 'passed',
     sha256: digest.digest('hex'),
     fileCount: files.length,
     byteLength: files.reduce((total, file) => total + file.bytes.byteLength, 0),
+    physicalByteLength: physicalFiles.reduce((total, file) => total + file.bytes.byteLength, 0),
+    archiveErrorCount: archiveErrors.length,
     forbiddenPackageCount: packageMatches.length,
     forbiddenFileCount: fileMatches.length,
     forbiddenStaticPatternCount: staticMatches.length,
     forbiddenNetworkCount: 0,
     rawRivCount,
-    matches: { packages: packageMatches, files: fileMatches, staticPatterns: staticMatches, network: [] },
+    matches: { packages: packageMatches, files: fileMatches, staticPatterns: staticMatches, network: [], archiveErrors },
   };
+}
+
+function expandArchive(file, errors) {
+  if (!/\.(?:tgz|tar\.gz)$/iu.test(file.relative)) return [file];
+  try {
+    const tar = gunzipSync(file.bytes, { maxOutputLength: MAX_ARCHIVE_EXPANDED_BYTES });
+    return parseTar(tar, file);
+  } catch (error) {
+    errors.push({ path: file.relative, message: boundedMessage(error) });
+    return [];
+  }
+}
+
+function parseTar(tar, archive) {
+  const files = [];
+  let offset = 0;
+  let pendingPath = null;
+  while (offset + 512 <= tar.byteLength) {
+    const header = tar.subarray(offset, offset + 512);
+    offset += 512;
+    if (header.every(value => value === 0)) break;
+    const size = tarOctal(header.subarray(124, 136));
+    if (!Number.isSafeInteger(size) || size < 0 || offset + size > tar.byteLength) throw new Error('tar entry size is invalid');
+    const type = String.fromCharCode(header[156] || 48);
+    const body = tar.subarray(offset, offset + size);
+    offset += Math.ceil(size / 512) * 512;
+    const headerPath = tarPath(header);
+    if (type === 'x') {
+      pendingPath = parsePaxPath(body) ?? pendingPath;
+      continue;
+    }
+    if (type === 'L') {
+      pendingPath = nullTerminated(body);
+      continue;
+    }
+    const path = pendingPath ?? headerPath;
+    pendingPath = null;
+    if (type === '5') continue;
+    if (!['0', '\0'].includes(type)) throw new Error(`unsupported tar entry type ${JSON.stringify(type)} for ${path}`);
+    validateArchivePath(path);
+    if (files.length >= MAX_ARCHIVE_ENTRIES) throw new Error(`tar entry count exceeds ${MAX_ARCHIVE_ENTRIES}`);
+    files.push({ path: archive.path, relative: `${archive.relative}!/${path}`, bytes: Buffer.from(body) });
+  }
+  if (files.length === 0) throw new Error('tar archive contains no regular files');
+  return files;
+}
+
+function tarPath(header) {
+  const name = nullTerminated(header.subarray(0, 100));
+  const prefix = nullTerminated(header.subarray(345, 500));
+  return prefix ? `${prefix}/${name}` : name;
+}
+
+function tarOctal(bytes) {
+  const value = nullTerminated(bytes).trim().replace(/^0+/u, '');
+  if (value === '') return 0;
+  if (!/^[0-7]+$/u.test(value)) return Number.NaN;
+  return Number.parseInt(value, 8);
+}
+
+function parsePaxPath(bytes) {
+  const text = bytes.toString('utf8');
+  for (const line of text.split('\n')) {
+    const separator = line.indexOf(' ');
+    const assignment = separator >= 0 ? line.slice(separator + 1) : line;
+    if (assignment.startsWith('path=')) return assignment.slice(5);
+  }
+  return null;
+}
+
+function nullTerminated(bytes) {
+  const end = bytes.indexOf(0);
+  return bytes.subarray(0, end < 0 ? bytes.byteLength : end).toString('utf8');
+}
+
+function validateArchivePath(path) {
+  if (!path || path.includes('\\') || path.startsWith('/') || /^[A-Za-z]:/u.test(path) || path.split('/').includes('..')) throw new Error(`unsafe tar entry path ${JSON.stringify(path)}`);
+}
+
+function boundedMessage(error) {
+  return String(error instanceof Error ? error.message : error).replace(/[\r\n]+/gu, ' ').slice(0, 256);
 }
 
 function scanNetwork(artifact, denyList) {
