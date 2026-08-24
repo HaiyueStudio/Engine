@@ -3,7 +3,7 @@ name: Deploy GitHub Pages (CI)
 on:
   push:
     branches:
-      - main
+      - master
 
 permissions:
   contents: read
