@@ -2,12 +2,15 @@
   "schemaVersion": 1,
   "kind": "haiyue-rive-g11-corpus",
   "id": "rive-7.3-full-fidelity-g11-v1",
-  "status": "acquisition-incomplete",
+  "status": "formal-inputs-admitted-evidence-incomplete",
   "compatibilityTuple": {
     "id": "rive-7.3-webgl2-2.40.0",
     "path": "docs/for-ai/rive-hya/compatibility-tuple.json",
-    "sha256": "45fe82a35bc951f1518e31207ea14cf9ec6540dba77ac3c1f6a97bf54eb7ff0b",
-    "format": { "major": 7, "minor": 3 },
+    "sha256": "f2695835b96755c561a935cf00cac47096c37b5d516af0aae34e2282fba02984",
+    "format": {
+      "major": 7,
+      "minor": 3
+    },
     "runtimeCommit": "526625850eaf34fc1263d181808ffca10cae6ac1",
     "editorExporterRevision": "ee809ba7f032271dd7102f17afe3baf9d192435b"
   },
@@ -30,7 +33,7 @@
   },
   "g01CorpusContract": {
     "path": "docs/for-ai/rive-hya/corpus-oracle-manifest.json",
-    "sha256": "37ef84fccf83c6940e3529cfebbb8e7b86336ef8b5cccd2c747af409420a21f7"
+    "sha256": "b19a7364cfb854c1dffbe80fc1c63cf62639a013bcb1ab1139217c2bfadbe754"
   },
   "oracle": {
     "package": "@rive-app/webgl2",
@@ -55,26 +58,112 @@
     ]
   },
   "featureSuites": [
-    { "id": "import-neutral-ir", "goal": "g02-riv-import-neutral-ir", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
-    { "id": "vector-paint-composite", "goal": "g03-vector-paint-composite-parity", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
-    { "id": "rig-mesh-constraint", "goal": "g04-rig-mesh-constraint-parity", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
-    { "id": "text-layout-component-asset", "goal": "g05-text-layout-component-asset-parity", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
-    { "id": "timeline-state-machine", "goal": "g06-timeline-state-machine-parity", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
-    { "id": "data-interaction-accessibility", "goal": "g07-data-interaction-accessibility-parity", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
-    { "id": "audio-event", "goal": "g08-audio-event-runtime", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 },
-    { "id": "scripting-custom-rendering", "goal": "g09-sandboxed-scripting-custom-rendering", "minimumIsolatedFixtures": 1, "minimumPropertyBoundaryFixtures": 2 }
+    {
+      "id": "import-neutral-ir",
+      "goal": "g02-riv-import-neutral-ir",
+      "minimumIsolatedFixtures": 1,
+      "minimumPropertyBoundaryFixtures": 2
+    },
+    {
+      "id": "vector-paint-composite",
+      "goal": "g03-vector-paint-composite-parity",
+      "minimumIsolatedFixtures": 1,
+      "minimumPropertyBoundaryFixtures": 2
+    },
+    {
+      "id": "rig-mesh-constraint",
+      "goal": "g04-rig-mesh-constraint-parity",
+      "minimumIsolatedFixtures": 1,
+      "minimumPropertyBoundaryFixtures": 2
+    },
+    {
+      "id": "text-layout-component-asset",
+      "goal": "g05-text-layout-component-asset-parity",
+      "minimumIsolatedFixtures": 1,
+      "minimumPropertyBoundaryFixtures": 2
+    },
+    {
+      "id": "timeline-state-machine",
+      "goal": "g06-timeline-state-machine-parity",
+      "minimumIsolatedFixtures": 1,
+      "minimumPropertyBoundaryFixtures": 2
+    },
+    {
+      "id": "data-interaction-accessibility",
+      "goal": "g07-data-interaction-accessibility-parity",
+      "minimumIsolatedFixtures": 1,
+      "minimumPropertyBoundaryFixtures": 2
+    },
+    {
+      "id": "audio-event",
+      "goal": "g08-audio-event-runtime",
+      "minimumIsolatedFixtures": 1,
+      "minimumPropertyBoundaryFixtures": 2
+    },
+    {
+      "id": "scripting-custom-rendering",
+      "goal": "g09-sandboxed-scripting-custom-rendering",
+      "minimumIsolatedFixtures": 1,
+      "minimumPropertyBoundaryFixtures": 2
+    }
   ],
   "productCases": [
-    { "id": "animation-editor-component-import", "requiredFamilies": ["text-layout-component-asset", "timeline-state-machine", "data-interaction-accessibility"] },
-    { "id": "game-hud-data-driven", "requiredFamilies": ["data-interaction-accessibility", "audio-event", "text-layout-component-asset"] },
-    { "id": "brand-loader-vector-rig", "requiredFamilies": ["vector-paint-composite", "rig-mesh-constraint", "timeline-state-machine"] },
-    { "id": "scripted-custom-control", "requiredFamilies": ["scripting-custom-rendering"] }
+    {
+      "id": "animation-editor-component-import",
+      "requiredFamilies": [
+        "text-layout-component-asset",
+        "timeline-state-machine",
+        "data-interaction-accessibility"
+      ]
+    },
+    {
+      "id": "game-hud-data-driven",
+      "requiredFamilies": [
+        "data-interaction-accessibility",
+        "audio-event",
+        "text-layout-component-asset"
+      ]
+    },
+    {
+      "id": "brand-loader-vector-rig",
+      "requiredFamilies": [
+        "vector-paint-composite",
+        "rig-mesh-constraint",
+        "timeline-state-machine"
+      ]
+    },
+    {
+      "id": "scripted-custom-control",
+      "requiredFamilies": [
+        "scripting-custom-rendering"
+      ]
+    }
   ],
   "versionCases": [
-    { "id": "7.2-reject-outside-denominator", "major": 7, "minor": 2, "expected": "E_RIVE_FORMAT_MINOR_UNSUPPORTED" },
-    { "id": "7.3-accept", "major": 7, "minor": 3, "expected": "accepted" },
-    { "id": "7.4-reject", "major": 7, "minor": 4, "expected": "E_RIVE_FORMAT_MINOR_UNSUPPORTED" },
-    { "id": "8.0-reject", "major": 8, "minor": 0, "expected": "E_RIVE_FORMAT_MAJOR_UNSUPPORTED" }
+    {
+      "id": "7.2-reject-outside-denominator",
+      "major": 7,
+      "minor": 2,
+      "expected": "E_RIVE_FORMAT_MINOR_UNSUPPORTED"
+    },
+    {
+      "id": "7.3-accept",
+      "major": 7,
+      "minor": 3,
+      "expected": "accepted"
+    },
+    {
+      "id": "7.4-reject",
+      "major": 7,
+      "minor": 4,
+      "expected": "E_RIVE_FORMAT_MINOR_UNSUPPORTED"
+    },
+    {
+      "id": "8.0-reject",
+      "major": 8,
+      "minor": 0,
+      "expected": "E_RIVE_FORMAT_MAJOR_UNSUPPORTED"
+    }
   ],
   "generatedParserCorpus": {
     "path": "animation-spec/corpus/rive/generated-parser/rive-generated-parser-corpus.json",
@@ -85,46 +174,161 @@
   },
   "workloadPlan": {
     "path": "animation-spec/corpus/rive/rive-g11-workload-plan.json",
-    "sha256": "a2cff13a9671d0aa9001c2a33f57ddb93ff76950a17e15269302991a7ad17696",
-    "byteLength": 2874,
+    "sha256": "6f2eade7b097a1f298f83de5eac6abb6de6fe3b410ca6a1e81720b958a7e59ff",
+    "byteLength": 3075,
     "contract": "haiyue-rive-g11-workload-plan@1"
   },
   "securityCases": [
-    { "id": "invalid-fingerprint", "class": "parser", "expected": "E_RIVE_INVALID_FINGERPRINT" },
-    { "id": "truncated-header", "class": "parser", "expected": "E_RIVE_TRUNCATED" },
-    { "id": "varuint-overflow", "class": "parser", "expected": "E_RIVE_VARINT_OVERFLOW" },
-    { "id": "toc-unknown-key", "class": "parser", "expected": "E_RIVE_UNKNOWN_PROPERTY" },
-    { "id": "toc-duplicate-key", "class": "parser", "expected": "E_RIVE_TOC_INVALID" },
-    { "id": "toc-field-type-conflict", "class": "parser", "expected": "E_RIVE_TOC_INVALID" },
-    { "id": "unknown-object", "class": "parser", "expected": "E_RIVE_UNKNOWN_OBJECT" },
-    { "id": "unknown-property", "class": "parser", "expected": "E_RIVE_UNKNOWN_PROPERTY" },
-    { "id": "unsupported-property", "class": "parser", "expected": "E_RIVE_UNSUPPORTED_PROPERTY" },
-    { "id": "invalid-parent", "class": "graph", "expected": "E_RIVE_REFERENCE_INVALID" },
-    { "id": "reference-cycle", "class": "graph", "expected": "E_RIVE_REFERENCE_CYCLE" },
-    { "id": "reference-depth-bomb", "class": "graph", "expected": "E_RIVE_LIMIT_EXCEEDED" },
-    { "id": "object-count-bomb", "class": "expansion", "expected": "E_RIVE_LIMIT_EXCEEDED" },
-    { "id": "property-count-bomb", "class": "expansion", "expected": "E_RIVE_LIMIT_EXCEEDED" },
-    { "id": "nested-list-expansion", "class": "expansion", "expected": "E_RIVE_LIMIT_EXCEEDED" },
-    { "id": "decompression-bomb", "class": "asset", "expected": "E_RIVE_LIMIT_EXCEEDED" },
-    { "id": "private-network-asset", "class": "asset", "expected": "E_RIVE_ASSET_URL_POLICY" },
-    { "id": "asset-hash-mismatch", "class": "asset", "expected": "E_RIVE_ASSET_INTEGRITY" },
-    { "id": "infinite-luau", "class": "script", "expected": "E_RIVE_SCRIPT_BUDGET" },
-    { "id": "promise-storm", "class": "script", "expected": "E_RIVE_SCRIPT_BUDGET" },
-    { "id": "script-output-amplification", "class": "script", "expected": "E_RIVE_SCRIPT_BUDGET" },
-    { "id": "invalid-wgsl-binding", "class": "shader", "expected": "E_RIVE_SHADER_BINDING" },
-    { "id": "expensive-wgsl", "class": "shader", "expected": "E_RIVE_SHADER_BUDGET" },
-    { "id": "event-recursion", "class": "event", "expected": "E_RIVE_SCRIPT_BUDGET" },
-    { "id": "abort-reimport-race", "class": "lifecycle", "expected": "E_RIVE_ABORTED" },
-    { "id": "late-result-after-dispose", "class": "lifecycle", "expected": "E_RIVE_ABORTED" },
-    { "id": "device-loss", "class": "lifecycle", "expected": "E_RIVE_SHADER_BUDGET" },
-    { "id": "audio-voice-flood", "class": "audio", "expected": "E_RIVE_LIMIT_EXCEEDED" }
+    {
+      "id": "invalid-fingerprint",
+      "class": "parser",
+      "expected": "E_RIVE_INVALID_FINGERPRINT"
+    },
+    {
+      "id": "truncated-header",
+      "class": "parser",
+      "expected": "E_RIVE_TRUNCATED"
+    },
+    {
+      "id": "varuint-overflow",
+      "class": "parser",
+      "expected": "E_RIVE_VARINT_OVERFLOW"
+    },
+    {
+      "id": "toc-unknown-key",
+      "class": "parser",
+      "expected": "E_RIVE_UNKNOWN_PROPERTY"
+    },
+    {
+      "id": "toc-duplicate-key",
+      "class": "parser",
+      "expected": "E_RIVE_TOC_INVALID"
+    },
+    {
+      "id": "toc-field-type-conflict",
+      "class": "parser",
+      "expected": "E_RIVE_TOC_INVALID"
+    },
+    {
+      "id": "unknown-object",
+      "class": "parser",
+      "expected": "E_RIVE_UNKNOWN_OBJECT"
+    },
+    {
+      "id": "unknown-property",
+      "class": "parser",
+      "expected": "E_RIVE_UNKNOWN_PROPERTY"
+    },
+    {
+      "id": "unsupported-property",
+      "class": "parser",
+      "expected": "E_RIVE_UNSUPPORTED_PROPERTY"
+    },
+    {
+      "id": "invalid-parent",
+      "class": "graph",
+      "expected": "E_RIVE_REFERENCE_INVALID"
+    },
+    {
+      "id": "reference-cycle",
+      "class": "graph",
+      "expected": "E_RIVE_REFERENCE_CYCLE"
+    },
+    {
+      "id": "reference-depth-bomb",
+      "class": "graph",
+      "expected": "E_RIVE_LIMIT_EXCEEDED"
+    },
+    {
+      "id": "object-count-bomb",
+      "class": "expansion",
+      "expected": "E_RIVE_LIMIT_EXCEEDED"
+    },
+    {
+      "id": "property-count-bomb",
+      "class": "expansion",
+      "expected": "E_RIVE_LIMIT_EXCEEDED"
+    },
+    {
+      "id": "nested-list-expansion",
+      "class": "expansion",
+      "expected": "E_RIVE_LIMIT_EXCEEDED"
+    },
+    {
+      "id": "decompression-bomb",
+      "class": "asset",
+      "expected": "E_RIVE_LIMIT_EXCEEDED"
+    },
+    {
+      "id": "private-network-asset",
+      "class": "asset",
+      "expected": "E_RIVE_ASSET_URL_POLICY"
+    },
+    {
+      "id": "asset-hash-mismatch",
+      "class": "asset",
+      "expected": "E_RIVE_ASSET_INTEGRITY"
+    },
+    {
+      "id": "infinite-luau",
+      "class": "script",
+      "expected": "E_RIVE_SCRIPT_BUDGET"
+    },
+    {
+      "id": "promise-storm",
+      "class": "script",
+      "expected": "E_RIVE_SCRIPT_BUDGET"
+    },
+    {
+      "id": "script-output-amplification",
+      "class": "script",
+      "expected": "E_RIVE_SCRIPT_BUDGET"
+    },
+    {
+      "id": "invalid-wgsl-binding",
+      "class": "shader",
+      "expected": "E_RIVE_SHADER_BINDING"
+    },
+    {
+      "id": "expensive-wgsl",
+      "class": "shader",
+      "expected": "E_RIVE_SHADER_BUDGET"
+    },
+    {
+      "id": "event-recursion",
+      "class": "event",
+      "expected": "E_RIVE_SCRIPT_BUDGET"
+    },
+    {
+      "id": "abort-reimport-race",
+      "class": "lifecycle",
+      "expected": "E_RIVE_ABORTED"
+    },
+    {
+      "id": "late-result-after-dispose",
+      "class": "lifecycle",
+      "expected": "E_RIVE_ABORTED"
+    },
+    {
+      "id": "device-loss",
+      "class": "lifecycle",
+      "expected": "E_RIVE_SHADER_BUDGET"
+    },
+    {
+      "id": "audio-voice-flood",
+      "class": "audio",
+      "expected": "E_RIVE_LIMIT_EXCEEDED"
+    }
   ],
   "minimums": {
     "realProductAssets": 4,
     "combinedStressAssets": 3,
     "adversarialCases": 24,
     "requiredDeviceClasses": 2,
-    "requiredBrowsersPerDevice": ["chrome", "edge"]
+    "requiredBrowsersPerDevice": [
+      "chrome",
+      "edge"
+    ]
   },
   "diagnosticUpstreamSources": [
     {
@@ -140,7 +344,7 @@
         "sha256": "fa43eb0d7fbf66f9504182d92dd097311278bb80111a5bf1403c366d6a403144"
       },
       "formalEligible": false,
-      "disqualifier": "Runtime unit fixtures are feature diagnostics, not the four admitted real-product cases, and lack a Rive Cloud file revision identity and per-content/transitive asset rights record."
+      "disqualifier": "The aggregate runtime test archive is an inventory source, not a formal asset by implication. Individual official .riv paths require explicit immutable identity, content metadata and workload/trace admission."
     },
     {
       "id": "rive-wasm-oracle-githead-examples",
@@ -155,13 +359,1256 @@
         "sha256": "8a1efa755d19446b51a18e1c15f6308728da0b36283c4d38050698ad6954b69a"
       },
       "formalEligible": false,
-      "disqualifier": "Repository examples have immutable Git bytes and a repository license but no Rive Cloud file revision identity or per-content/transitive asset rights record required by G01."
+      "disqualifier": "The aggregate examples archive is an inventory source, not a formal asset by implication. Individual official .riv paths require explicit immutable identity, content metadata and workload/trace admission."
     }
   ],
-  "formalAssets": [],
+  "officialAssetSources": [
+    {
+      "id": "official-game-menu-ad-police-files",
+      "repository": "https://github.com/rive-app/rive-runtime",
+      "commit": "3f4047a85f11fecfde8c4d906c0c1654aa12b015",
+      "path": "tests/unit_tests/assets/game_menu_ad_police_files.riv",
+      "sourceUrl": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/game_menu_ad_police_files.riv",
+      "downloadUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/game_menu_ad_police_files.riv",
+      "sha256": "19c7306dbaa741d1d4e3ce7239b98c3a40943f07f1260a92851f2e558fd6e9f5",
+      "byteLength": 4806420,
+      "format": {
+        "major": 7,
+        "minor": 3
+      },
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "sha256": "fa43eb0d7fbf66f9504182d92dd097311278bb80111a5bf1403c366d6a403144"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "formalEligible": true,
+      "evidenceRole": "large multi-artboard animation/state-machine product-like stress input"
+    },
+    {
+      "id": "official-inventory-demo-v2",
+      "repository": "https://github.com/rive-app/rive-runtime",
+      "commit": "3f4047a85f11fecfde8c4d906c0c1654aa12b015",
+      "path": "tests/unit_tests/assets/inventory_demo_test_v2.riv",
+      "sourceUrl": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/inventory_demo_test_v2.riv",
+      "downloadUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/inventory_demo_test_v2.riv",
+      "sha256": "6ff18f16bc96efe5fa7027bf5f149c55d722f5894f6f28083548d65ec40ca9cf",
+      "byteLength": 394478,
+      "format": {
+        "major": 7,
+        "minor": 3
+      },
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "sha256": "fa43eb0d7fbf66f9504182d92dd097311278bb80111a5bf1403c366d6a403144"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "formalEligible": true,
+      "evidenceRole": "large data/layout/component inventory input"
+    },
+    {
+      "id": "official-joystick-databound-keyframe",
+      "repository": "https://github.com/rive-app/rive-runtime",
+      "commit": "3f4047a85f11fecfde8c4d906c0c1654aa12b015",
+      "path": "tests/unit_tests/assets/joystick_databound_keyframe_test.riv",
+      "sourceUrl": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/joystick_databound_keyframe_test.riv",
+      "downloadUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/joystick_databound_keyframe_test.riv",
+      "sha256": "ca3e052d533a32143279f8e035f95ca53461a4f5d5fdf782bd0e63332bbe2c63",
+      "byteLength": 708,
+      "format": {
+        "major": 7,
+        "minor": 3
+      },
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "sha256": "fa43eb0d7fbf66f9504182d92dd097311278bb80111a5bf1403c366d6a403144"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "formalEligible": true,
+      "evidenceRole": "small data-bound keyframe and state-machine input"
+    },
+    {
+      "id": "official-grid-placement-bound",
+      "repository": "https://github.com/rive-app/rive-runtime",
+      "commit": "3f4047a85f11fecfde8c4d906c0c1654aa12b015",
+      "path": "tests/unit_tests/assets/layout/grid_placement_bound.riv",
+      "sourceUrl": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/layout/grid_placement_bound.riv",
+      "downloadUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/layout/grid_placement_bound.riv",
+      "sha256": "02dca529414c584c38e7c438e501e276d89337588d9042381120d330784380d0",
+      "byteLength": 385,
+      "format": {
+        "major": 7,
+        "minor": 3
+      },
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "sha256": "fa43eb0d7fbf66f9504182d92dd097311278bb80111a5bf1403c366d6a403144"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "formalEligible": true,
+      "evidenceRole": "minimal grid placement and data-bound layout input"
+    },
+    {
+      "id": "official-eight-planets-grid",
+      "repository": "https://github.com/rive-app/rive-runtime",
+      "commit": "3f4047a85f11fecfde8c4d906c0c1654aa12b015",
+      "path": "tests/unit_tests/assets/layoutstest_8-planets-grid.riv",
+      "sourceUrl": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/layoutstest_8-planets-grid.riv",
+      "downloadUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/layoutstest_8-planets-grid.riv",
+      "sha256": "aa42cd7baac6d5a67c1e8f5804c354d2ea9f0583678f1f037f33f9221a8ce8c0",
+      "byteLength": 310228,
+      "format": {
+        "major": 7,
+        "minor": 3
+      },
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "sha256": "fa43eb0d7fbf66f9504182d92dd097311278bb80111a5bf1403c366d6a403144"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "formalEligible": true,
+      "evidenceRole": "multi-artboard grid/layout/state-machine stress input"
+    },
+    {
+      "id": "official-text-fit",
+      "repository": "https://github.com/rive-app/rive-runtime",
+      "commit": "3f4047a85f11fecfde8c4d906c0c1654aa12b015",
+      "path": "tests/unit_tests/assets/text_fit_test.riv",
+      "sourceUrl": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/text_fit_test.riv",
+      "downloadUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/text_fit_test.riv",
+      "sha256": "540cfae6ba78a81518525af17a8d09e4cd50131dcbd9e584832c2468f24fbcd3",
+      "byteLength": 877874,
+      "format": {
+        "major": 7,
+        "minor": 3
+      },
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "sha256": "fa43eb0d7fbf66f9504182d92dd097311278bb80111a5bf1403c366d6a403144"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "formalEligible": true,
+      "evidenceRole": "text fit/layout/state-machine input"
+    },
+    {
+      "id": "official-text-style-background",
+      "repository": "https://github.com/rive-app/rive-runtime",
+      "commit": "3f4047a85f11fecfde8c4d906c0c1654aa12b015",
+      "path": "tests/unit_tests/assets/text_style_background.riv",
+      "sourceUrl": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/text_style_background.riv",
+      "downloadUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/text_style_background.riv",
+      "sha256": "1ffdb33251da4ccd7713555d7fb1f1216326cd52fb7fd1d6206b72471ea9080c",
+      "byteLength": 1287851,
+      "format": {
+        "major": 7,
+        "minor": 3
+      },
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "sha256": "fa43eb0d7fbf66f9504182d92dd097311278bb80111a5bf1403c366d6a403144"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "formalEligible": true,
+      "evidenceRole": "positive exact-7.3 text-style import input"
+    },
+    {
+      "id": "official-double-library-with-image",
+      "repository": "https://github.com/rive-app/rive-runtime",
+      "commit": "3f4047a85f11fecfde8c4d906c0c1654aa12b015",
+      "path": "tests/unit_tests/assets/double_library_with_image.riv",
+      "sourceUrl": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/double_library_with_image.riv",
+      "downloadUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/double_library_with_image.riv",
+      "sha256": "a11cac0f7453147eef9d5a387472ab3235868f404354fe8e44e0a89b2b729162",
+      "byteLength": 749,
+      "format": {
+        "major": 7,
+        "minor": 3
+      },
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "sha256": "fa43eb0d7fbf66f9504182d92dd097311278bb80111a5bf1403c366d6a403144"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "formalEligible": true,
+      "evidenceRole": "positive exact-7.3 library/image import input"
+    }
+  ],
+  "formalAssets": [
+    {
+      "id": "official-game-menu-ad-police-files",
+      "kind": "combined-stress",
+      "sourceIdentity": {
+        "kind": "official-git",
+        "officialAssetSourceId": "official-game-menu-ad-police-files"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "riv": {
+        "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/game_menu_ad_police_files.riv",
+        "sha256": "19c7306dbaa741d1d4e3ce7239b98c3a40943f07f1260a92851f2e558fd6e9f5",
+        "byteLength": 4806420
+      },
+      "externalAssets": [],
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "visibility": "public-redistributable",
+        "attribution": "Rive official runtime fixture tests/unit_tests/assets/game_menu_ad_police_files.riv; MIT; commit 3f4047a85f11fecfde8c4d906c0c1654aa12b015.",
+        "allowedUses": {
+          "import": true,
+          "modificationAndDerivative": true,
+          "automatedOracleExecution": true,
+          "ciStorage": true,
+          "screenshotAndAudioEvidence": true,
+          "hyaRedistribution": true
+        }
+      },
+      "featureFamilies": [
+        "timeline-state-machine",
+        "data-interaction-accessibility"
+      ],
+      "objectKeys": [],
+      "propertyKeys": [],
+      "scriptModuleKeys": [],
+      "scriptSymbolKeys": [],
+      "assetTypeKeys": [],
+      "fixtureOwner": "g02-riv-import-neutral-ir",
+      "oracleTraceId": "official-game-menu-ad-police-files-differential-v2",
+      "officialOracleEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-chrome-diagnostic.json",
+        "sha256": "f78e48fac80c47baa7f4ff4ebf99f2210b4a1b14a28c399eb884dc766deb2b54",
+        "byteLength": 98503,
+        "resultSelector": "results[path=tests/unit_tests/assets/game_menu_ad_police_files.riv]"
+      },
+      "officialOracleCrossBrowserEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-edge-diagnostic.json",
+        "sha256": "5b74c73aa15fbd333aa3f1f91d79d8502f091ef05d45bcb9355091db3ba781d9",
+        "byteLength": 98666,
+        "resultSelector": "results[path=tests/unit_tests/assets/game_menu_ad_police_files.riv]"
+      },
+      "featureCoverageEvidence": {
+        "status": "blocked-by-strict-import",
+        "path": "review/candidates/rive-official-7-3-input-inventory-diagnostic.json",
+        "sha256": "41461aaa0c34af816dcde8e1ba2310459a8ce9883bcbe04c0525cb9507af54ca",
+        "byteLength": 14818,
+        "resultSelector": "assets[path=tests/unit_tests/assets/game_menu_ad_police_files.riv]"
+      },
+      "workloadScenario": {
+        "path": "animation-spec/corpus/rive/workloads/official-game-menu-ad-police-files.json",
+        "sha256": "62132a53084009eff537d666587cd63f1671d9432b730a9f4de118224fef3c44",
+        "byteLength": 9690,
+        "sourceInputBinding": "harness-no-source-input"
+      },
+      "admissionResult": {
+        "status": "formal-red-import-failure",
+        "diagnostic": "E_RIVE_UNKNOWN_OBJECT",
+        "path": "$.riv.objects[typeKey=526][index=33]",
+        "blocker": "HaiYue strict import rejects this input before HYA evaluation; the red result is retained as formal-input admission evidence."
+      }
+    },
+    {
+      "id": "official-inventory-demo-v2",
+      "kind": "combined-stress",
+      "sourceIdentity": {
+        "kind": "official-git",
+        "officialAssetSourceId": "official-inventory-demo-v2"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "riv": {
+        "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/inventory_demo_test_v2.riv",
+        "sha256": "6ff18f16bc96efe5fa7027bf5f149c55d722f5894f6f28083548d65ec40ca9cf",
+        "byteLength": 394478
+      },
+      "externalAssets": [],
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "visibility": "public-redistributable",
+        "attribution": "Rive official runtime fixture tests/unit_tests/assets/inventory_demo_test_v2.riv; MIT; commit 3f4047a85f11fecfde8c4d906c0c1654aa12b015.",
+        "allowedUses": {
+          "import": true,
+          "modificationAndDerivative": true,
+          "automatedOracleExecution": true,
+          "ciStorage": true,
+          "screenshotAndAudioEvidence": true,
+          "hyaRedistribution": true
+        }
+      },
+      "featureFamilies": [
+        "text-layout-component-asset",
+        "timeline-state-machine",
+        "data-interaction-accessibility"
+      ],
+      "objectKeys": [],
+      "propertyKeys": [],
+      "scriptModuleKeys": [],
+      "scriptSymbolKeys": [],
+      "assetTypeKeys": [],
+      "fixtureOwner": "g02-riv-import-neutral-ir",
+      "oracleTraceId": "official-inventory-demo-v2-differential-v2",
+      "officialOracleEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-chrome-diagnostic.json",
+        "sha256": "f78e48fac80c47baa7f4ff4ebf99f2210b4a1b14a28c399eb884dc766deb2b54",
+        "byteLength": 98503,
+        "resultSelector": "results[path=tests/unit_tests/assets/inventory_demo_test_v2.riv]"
+      },
+      "officialOracleCrossBrowserEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-edge-diagnostic.json",
+        "sha256": "5b74c73aa15fbd333aa3f1f91d79d8502f091ef05d45bcb9355091db3ba781d9",
+        "byteLength": 98666,
+        "resultSelector": "results[path=tests/unit_tests/assets/inventory_demo_test_v2.riv]"
+      },
+      "featureCoverageEvidence": {
+        "status": "blocked-by-strict-import",
+        "path": "review/candidates/rive-official-7-3-input-inventory-diagnostic.json",
+        "sha256": "41461aaa0c34af816dcde8e1ba2310459a8ce9883bcbe04c0525cb9507af54ca",
+        "byteLength": 14818,
+        "resultSelector": "assets[path=tests/unit_tests/assets/inventory_demo_test_v2.riv]"
+      },
+      "workloadScenario": {
+        "path": "animation-spec/corpus/rive/workloads/official-inventory-demo-v2.json",
+        "sha256": "58f4c47ad2b85cf0d5f38d20125e1ef7ce3961e09120ade5d49a7941808aa599",
+        "byteLength": 9680,
+        "sourceInputBinding": "harness-no-source-input"
+      },
+      "admissionResult": {
+        "status": "formal-red-import-failure",
+        "diagnostic": "E_RIVE_UNKNOWN_PROPERTY",
+        "path": "$.riv.header.toc",
+        "blocker": "HaiYue strict import rejects this input before HYA evaluation; the red result is retained as formal-input admission evidence."
+      }
+    },
+    {
+      "id": "official-joystick-databound-keyframe",
+      "kind": "feature-isolated",
+      "sourceIdentity": {
+        "kind": "official-git",
+        "officialAssetSourceId": "official-joystick-databound-keyframe"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "riv": {
+        "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/joystick_databound_keyframe_test.riv",
+        "sha256": "ca3e052d533a32143279f8e035f95ca53461a4f5d5fdf782bd0e63332bbe2c63",
+        "byteLength": 708
+      },
+      "externalAssets": [],
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "visibility": "public-redistributable",
+        "attribution": "Rive official runtime fixture tests/unit_tests/assets/joystick_databound_keyframe_test.riv; MIT; commit 3f4047a85f11fecfde8c4d906c0c1654aa12b015.",
+        "allowedUses": {
+          "import": true,
+          "modificationAndDerivative": true,
+          "automatedOracleExecution": true,
+          "ciStorage": true,
+          "screenshotAndAudioEvidence": true,
+          "hyaRedistribution": true
+        }
+      },
+      "featureFamilies": [
+        "rig-mesh-constraint"
+      ],
+      "objectKeys": [
+        1,
+        2,
+        3,
+        7,
+        18,
+        20,
+        23,
+        25,
+        26,
+        30,
+        31,
+        53,
+        57,
+        61,
+        62,
+        63,
+        64,
+        65,
+        114,
+        126,
+        148,
+        420,
+        431,
+        435,
+        437,
+        442,
+        447
+      ],
+      "propertyKeys": [
+        4,
+        5,
+        7,
+        8,
+        13,
+        14,
+        20,
+        21,
+        37,
+        40,
+        51,
+        53,
+        55,
+        67,
+        68,
+        70,
+        138,
+        149,
+        151,
+        196,
+        224,
+        225,
+        236,
+        240,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        312,
+        313,
+        494,
+        554,
+        557,
+        566,
+        575,
+        583,
+        586,
+        588,
+        613,
+        614,
+        615,
+        616,
+        617,
+        618,
+        619,
+        620,
+        625,
+        626
+      ],
+      "scriptModuleKeys": [],
+      "scriptSymbolKeys": [],
+      "assetTypeKeys": [],
+      "fixtureOwner": "g11-corpus-version-fidelity-performance",
+      "oracleTraceId": "official-joystick-databound-keyframe-differential-v2",
+      "officialOracleEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-chrome-diagnostic.json",
+        "sha256": "f78e48fac80c47baa7f4ff4ebf99f2210b4a1b14a28c399eb884dc766deb2b54",
+        "byteLength": 98503,
+        "resultSelector": "results[path=tests/unit_tests/assets/joystick_databound_keyframe_test.riv]"
+      },
+      "officialOracleCrossBrowserEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-edge-diagnostic.json",
+        "sha256": "5b74c73aa15fbd333aa3f1f91d79d8502f091ef05d45bcb9355091db3ba781d9",
+        "byteLength": 98666,
+        "resultSelector": "results[path=tests/unit_tests/assets/joystick_databound_keyframe_test.riv]"
+      },
+      "featureCoverageEvidence": {
+        "status": "captured",
+        "path": "review/candidates/rive-official-7-3-input-inventory-diagnostic.json",
+        "sha256": "41461aaa0c34af816dcde8e1ba2310459a8ce9883bcbe04c0525cb9507af54ca",
+        "byteLength": 14818,
+        "resultSelector": "assets[path=tests/unit_tests/assets/joystick_databound_keyframe_test.riv]"
+      },
+      "workloadScenario": {
+        "path": "animation-spec/corpus/rive/workloads/official-joystick-databound-keyframe.json",
+        "sha256": "eaec962028e206a20cc77c1510372cf6c70cfe134897a0f172714329b838db8d",
+        "byteLength": 9672,
+        "sourceInputBinding": "harness-no-source-input"
+      },
+      "admissionResult": {
+        "status": "workload-recorded-trace-blocked",
+        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+      }
+    },
+    {
+      "id": "official-grid-placement-bound",
+      "kind": "feature-isolated",
+      "sourceIdentity": {
+        "kind": "official-git",
+        "officialAssetSourceId": "official-grid-placement-bound"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "riv": {
+        "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/layout/grid_placement_bound.riv",
+        "sha256": "02dca529414c584c38e7c438e501e276d89337588d9042381120d330784380d0",
+        "byteLength": 385
+      },
+      "externalAssets": [],
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "visibility": "public-redistributable",
+        "attribution": "Rive official runtime fixture tests/unit_tests/assets/layout/grid_placement_bound.riv; MIT; commit 3f4047a85f11fecfde8c4d906c0c1654aa12b015.",
+        "allowedUses": {
+          "import": true,
+          "modificationAndDerivative": true,
+          "automatedOracleExecution": true,
+          "ciStorage": true,
+          "screenshotAndAudioEvidence": true,
+          "hyaRedistribution": true
+        }
+      },
+      "featureFamilies": [
+        "text-layout-component-asset"
+      ],
+      "objectKeys": [
+        1,
+        23,
+        409,
+        420,
+        431,
+        435,
+        437,
+        442,
+        447,
+        1058,
+        1068
+      ],
+      "propertyKeys": [
+        4,
+        5,
+        7,
+        8,
+        196,
+        494,
+        554,
+        557,
+        566,
+        583,
+        586,
+        588,
+        613,
+        614,
+        615,
+        616,
+        617,
+        618,
+        619,
+        620,
+        625,
+        626,
+        655,
+        656,
+        1047,
+        1059,
+        1061,
+        1062,
+        1063
+      ],
+      "scriptModuleKeys": [],
+      "scriptSymbolKeys": [],
+      "assetTypeKeys": [],
+      "fixtureOwner": "g11-corpus-version-fidelity-performance",
+      "oracleTraceId": "official-grid-placement-bound-differential-v2",
+      "officialOracleEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-chrome-diagnostic.json",
+        "sha256": "f78e48fac80c47baa7f4ff4ebf99f2210b4a1b14a28c399eb884dc766deb2b54",
+        "byteLength": 98503,
+        "resultSelector": "results[path=tests/unit_tests/assets/layout/grid_placement_bound.riv]"
+      },
+      "officialOracleCrossBrowserEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-edge-diagnostic.json",
+        "sha256": "5b74c73aa15fbd333aa3f1f91d79d8502f091ef05d45bcb9355091db3ba781d9",
+        "byteLength": 98666,
+        "resultSelector": "results[path=tests/unit_tests/assets/layout/grid_placement_bound.riv]"
+      },
+      "featureCoverageEvidence": {
+        "status": "captured",
+        "path": "review/candidates/rive-official-7-3-input-inventory-diagnostic.json",
+        "sha256": "41461aaa0c34af816dcde8e1ba2310459a8ce9883bcbe04c0525cb9507af54ca",
+        "byteLength": 14818,
+        "resultSelector": "assets[path=tests/unit_tests/assets/layout/grid_placement_bound.riv]"
+      },
+      "workloadScenario": {
+        "path": "animation-spec/corpus/rive/workloads/official-grid-placement-bound.json",
+        "sha256": "25006f9f7b21e48ffc29d8599910e861605fa55b467fd07c413548760ec9ae8d",
+        "byteLength": 9711,
+        "sourceInputBinding": "harness-no-source-input"
+      },
+      "admissionResult": {
+        "status": "workload-recorded-trace-blocked",
+        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+      }
+    },
+    {
+      "id": "official-eight-planets-grid",
+      "kind": "combined-stress",
+      "sourceIdentity": {
+        "kind": "official-git",
+        "officialAssetSourceId": "official-eight-planets-grid"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "riv": {
+        "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/layoutstest_8-planets-grid.riv",
+        "sha256": "aa42cd7baac6d5a67c1e8f5804c354d2ea9f0583678f1f037f33f9221a8ce8c0",
+        "byteLength": 310228
+      },
+      "externalAssets": [],
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "visibility": "public-redistributable",
+        "attribution": "Rive official runtime fixture tests/unit_tests/assets/layoutstest_8-planets-grid.riv; MIT; commit 3f4047a85f11fecfde8c4d906c0c1654aa12b015.",
+        "allowedUses": {
+          "import": true,
+          "modificationAndDerivative": true,
+          "automatedOracleExecution": true,
+          "ciStorage": true,
+          "screenshotAndAudioEvidence": true,
+          "hyaRedistribution": true
+        }
+      },
+      "featureFamilies": [
+        "text-layout-component-asset",
+        "timeline-state-machine",
+        "data-interaction-accessibility"
+      ],
+      "objectKeys": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        16,
+        17,
+        18,
+        19,
+        20,
+        22,
+        23,
+        24,
+        25,
+        26,
+        28,
+        30,
+        31,
+        34,
+        35,
+        37,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        52,
+        53,
+        56,
+        57,
+        59,
+        61,
+        62,
+        63,
+        64,
+        65,
+        70,
+        71,
+        87,
+        89,
+        92,
+        95,
+        106,
+        114,
+        117,
+        123,
+        124,
+        134,
+        135,
+        137,
+        141,
+        144,
+        147,
+        409,
+        420,
+        435,
+        437,
+        448,
+        449,
+        450,
+        451,
+        452,
+        521,
+        525
+      ],
+      "propertyKeys": [
+        4,
+        5,
+        7,
+        8,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        20,
+        21,
+        23,
+        24,
+        25,
+        26,
+        32,
+        33,
+        34,
+        35,
+        37,
+        38,
+        39,
+        41,
+        42,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        53,
+        55,
+        57,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        116,
+        117,
+        119,
+        120,
+        121,
+        122,
+        125,
+        127,
+        128,
+        129,
+        138,
+        140,
+        149,
+        151,
+        152,
+        155,
+        156,
+        157,
+        158,
+        160,
+        172,
+        173,
+        188,
+        196,
+        197,
+        198,
+        203,
+        204,
+        212,
+        224,
+        225,
+        227,
+        228,
+        236,
+        237,
+        239,
+        268,
+        272,
+        274,
+        279,
+        287,
+        288,
+        289,
+        292,
+        296,
+        349,
+        350,
+        366,
+        367,
+        390,
+        494,
+        498,
+        499,
+        501,
+        502,
+        503,
+        512,
+        513,
+        514,
+        515,
+        516,
+        518,
+        538,
+        554,
+        557,
+        566,
+        590,
+        591,
+        598,
+        604,
+        606,
+        607,
+        608,
+        613,
+        614,
+        615,
+        616,
+        617,
+        618,
+        619,
+        620,
+        625,
+        626,
+        627,
+        628,
+        631,
+        632,
+        640,
+        655,
+        656,
+        663,
+        667,
+        668,
+        722,
+        726
+      ],
+      "scriptModuleKeys": [],
+      "scriptSymbolKeys": [],
+      "assetTypeKeys": [],
+      "fixtureOwner": "g11-corpus-version-fidelity-performance",
+      "oracleTraceId": "official-eight-planets-grid-differential-v2",
+      "officialOracleEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-chrome-diagnostic.json",
+        "sha256": "f78e48fac80c47baa7f4ff4ebf99f2210b4a1b14a28c399eb884dc766deb2b54",
+        "byteLength": 98503,
+        "resultSelector": "results[path=tests/unit_tests/assets/layoutstest_8-planets-grid.riv]"
+      },
+      "officialOracleCrossBrowserEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-edge-diagnostic.json",
+        "sha256": "5b74c73aa15fbd333aa3f1f91d79d8502f091ef05d45bcb9355091db3ba781d9",
+        "byteLength": 98666,
+        "resultSelector": "results[path=tests/unit_tests/assets/layoutstest_8-planets-grid.riv]"
+      },
+      "featureCoverageEvidence": {
+        "status": "captured",
+        "path": "review/candidates/rive-official-7-3-input-inventory-diagnostic.json",
+        "sha256": "41461aaa0c34af816dcde8e1ba2310459a8ce9883bcbe04c0525cb9507af54ca",
+        "byteLength": 14818,
+        "resultSelector": "assets[path=tests/unit_tests/assets/layoutstest_8-planets-grid.riv]"
+      },
+      "workloadScenario": {
+        "path": "animation-spec/corpus/rive/workloads/official-eight-planets-grid.json",
+        "sha256": "6523f3e47e485c967e17e3185016c495d73d4e2f17fa623b19319aac53937b3b",
+        "byteLength": 9812,
+        "sourceInputBinding": "state-machine-input"
+      },
+      "admissionResult": {
+        "status": "workload-recorded-trace-blocked",
+        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+      }
+    },
+    {
+      "id": "official-text-fit",
+      "kind": "property-boundary",
+      "sourceIdentity": {
+        "kind": "official-git",
+        "officialAssetSourceId": "official-text-fit"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "riv": {
+        "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/text_fit_test.riv",
+        "sha256": "540cfae6ba78a81518525af17a8d09e4cd50131dcbd9e584832c2468f24fbcd3",
+        "byteLength": 877874
+      },
+      "externalAssets": [],
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "visibility": "public-redistributable",
+        "attribution": "Rive official runtime fixture tests/unit_tests/assets/text_fit_test.riv; MIT; commit 3f4047a85f11fecfde8c4d906c0c1654aa12b015.",
+        "allowedUses": {
+          "import": true,
+          "modificationAndDerivative": true,
+          "automatedOracleExecution": true,
+          "ciStorage": true,
+          "screenshotAndAudioEvidence": true,
+          "hyaRedistribution": true
+        }
+      },
+      "featureFamilies": [
+        "text-layout-component-asset"
+      ],
+      "objectKeys": [
+        1,
+        18,
+        20,
+        23,
+        25,
+        26,
+        30,
+        31,
+        53,
+        57,
+        61,
+        62,
+        63,
+        64,
+        65,
+        106,
+        134,
+        135,
+        137,
+        141,
+        144,
+        409,
+        420,
+        435,
+        437
+      ],
+      "propertyKeys": [
+        4,
+        5,
+        7,
+        8,
+        13,
+        14,
+        37,
+        40,
+        51,
+        53,
+        55,
+        57,
+        67,
+        68,
+        70,
+        138,
+        149,
+        151,
+        196,
+        203,
+        204,
+        212,
+        236,
+        268,
+        272,
+        274,
+        279,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        371,
+        494,
+        557,
+        566,
+        583,
+        598,
+        607,
+        608,
+        613,
+        614,
+        615,
+        616,
+        617,
+        618,
+        619,
+        620,
+        625,
+        626,
+        655
+      ],
+      "scriptModuleKeys": [],
+      "scriptSymbolKeys": [],
+      "assetTypeKeys": [],
+      "fixtureOwner": "g11-corpus-version-fidelity-performance",
+      "oracleTraceId": "official-text-fit-differential-v2",
+      "officialOracleEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-chrome-diagnostic.json",
+        "sha256": "f78e48fac80c47baa7f4ff4ebf99f2210b4a1b14a28c399eb884dc766deb2b54",
+        "byteLength": 98503,
+        "resultSelector": "results[path=tests/unit_tests/assets/text_fit_test.riv]"
+      },
+      "officialOracleCrossBrowserEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-edge-diagnostic.json",
+        "sha256": "5b74c73aa15fbd333aa3f1f91d79d8502f091ef05d45bcb9355091db3ba781d9",
+        "byteLength": 98666,
+        "resultSelector": "results[path=tests/unit_tests/assets/text_fit_test.riv]"
+      },
+      "featureCoverageEvidence": {
+        "status": "captured",
+        "path": "review/candidates/rive-official-7-3-input-inventory-diagnostic.json",
+        "sha256": "41461aaa0c34af816dcde8e1ba2310459a8ce9883bcbe04c0525cb9507af54ca",
+        "byteLength": 14818,
+        "resultSelector": "assets[path=tests/unit_tests/assets/text_fit_test.riv]"
+      },
+      "workloadScenario": {
+        "path": "animation-spec/corpus/rive/workloads/official-text-fit.json",
+        "sha256": "92e7c66bdda443d1ec8a096ddda61d472f3de80d3fdf1af3bee5d6e2049d828d",
+        "byteLength": 9632,
+        "sourceInputBinding": "harness-no-source-input"
+      },
+      "admissionResult": {
+        "status": "workload-recorded-trace-blocked",
+        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+      }
+    },
+    {
+      "id": "official-text-style-background",
+      "kind": "property-boundary",
+      "sourceIdentity": {
+        "kind": "official-git",
+        "officialAssetSourceId": "official-text-style-background"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "riv": {
+        "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/text_style_background.riv",
+        "sha256": "1ffdb33251da4ccd7713555d7fb1f1216326cd52fb7fd1d6206b72471ea9080c",
+        "byteLength": 1287851
+      },
+      "externalAssets": [],
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "visibility": "public-redistributable",
+        "attribution": "Rive official runtime fixture tests/unit_tests/assets/text_style_background.riv; MIT; commit 3f4047a85f11fecfde8c4d906c0c1654aa12b015.",
+        "allowedUses": {
+          "import": true,
+          "modificationAndDerivative": true,
+          "automatedOracleExecution": true,
+          "ciStorage": true,
+          "screenshotAndAudioEvidence": true,
+          "hyaRedistribution": true
+        }
+      },
+      "featureFamilies": [
+        "vector-paint-composite",
+        "text-layout-component-asset"
+      ],
+      "objectKeys": [
+        1,
+        18,
+        20,
+        23,
+        24,
+        106,
+        134,
+        135,
+        137,
+        141,
+        1069
+      ],
+      "propertyKeys": [
+        4,
+        5,
+        7,
+        8,
+        37,
+        203,
+        204,
+        212,
+        268,
+        272,
+        279,
+        1071
+      ],
+      "scriptModuleKeys": [],
+      "scriptSymbolKeys": [],
+      "assetTypeKeys": [],
+      "fixtureOwner": "g11-corpus-version-fidelity-performance",
+      "oracleTraceId": "official-text-style-background-differential-v2",
+      "officialOracleEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-chrome-diagnostic.json",
+        "sha256": "f78e48fac80c47baa7f4ff4ebf99f2210b4a1b14a28c399eb884dc766deb2b54",
+        "byteLength": 98503,
+        "resultSelector": "results[path=tests/unit_tests/assets/text_style_background.riv]"
+      },
+      "officialOracleCrossBrowserEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-edge-diagnostic.json",
+        "sha256": "5b74c73aa15fbd333aa3f1f91d79d8502f091ef05d45bcb9355091db3ba781d9",
+        "byteLength": 98666,
+        "resultSelector": "results[path=tests/unit_tests/assets/text_style_background.riv]"
+      },
+      "featureCoverageEvidence": {
+        "status": "captured",
+        "path": "review/candidates/rive-official-7-3-input-inventory-diagnostic.json",
+        "sha256": "41461aaa0c34af816dcde8e1ba2310459a8ce9883bcbe04c0525cb9507af54ca",
+        "byteLength": 14818,
+        "resultSelector": "assets[path=tests/unit_tests/assets/text_style_background.riv]"
+      },
+      "workloadScenario": {
+        "path": "animation-spec/corpus/rive/workloads/official-text-style-background.json",
+        "sha256": "141ab79ede8df85a634c626bafcf22658793e2f4c581ed81d9ab5e2df8e51e4c",
+        "byteLength": 9705,
+        "sourceInputBinding": "harness-no-source-input"
+      },
+      "admissionResult": {
+        "status": "workload-recorded-trace-blocked",
+        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+      }
+    },
+    {
+      "id": "official-double-library-with-image",
+      "kind": "feature-isolated",
+      "sourceIdentity": {
+        "kind": "official-git",
+        "officialAssetSourceId": "official-double-library-with-image"
+      },
+      "storagePolicy": "remote-hash-pinned-no-vendoring",
+      "riv": {
+        "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/double_library_with_image.riv",
+        "sha256": "a11cac0f7453147eef9d5a387472ab3235868f404354fe8e44e0a89b2b729162",
+        "byteLength": 749
+      },
+      "externalAssets": [],
+      "license": {
+        "id": "MIT",
+        "evidence": "https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/LICENSE",
+        "visibility": "public-redistributable",
+        "attribution": "Rive official runtime fixture tests/unit_tests/assets/double_library_with_image.riv; MIT; commit 3f4047a85f11fecfde8c4d906c0c1654aa12b015.",
+        "allowedUses": {
+          "import": true,
+          "modificationAndDerivative": true,
+          "automatedOracleExecution": true,
+          "ciStorage": true,
+          "screenshotAndAudioEvidence": true,
+          "hyaRedistribution": true
+        }
+      },
+      "featureFamilies": [
+        "text-layout-component-asset"
+      ],
+      "objectKeys": [
+        1,
+        23,
+        92,
+        100,
+        105,
+        106
+      ],
+      "propertyKeys": [
+        4,
+        5,
+        7,
+        8,
+        13,
+        14,
+        197,
+        203,
+        204,
+        206,
+        212
+      ],
+      "scriptModuleKeys": [],
+      "scriptSymbolKeys": [],
+      "assetTypeKeys": [],
+      "fixtureOwner": "g11-corpus-version-fidelity-performance",
+      "oracleTraceId": "official-double-library-with-image-differential-v2",
+      "officialOracleEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-chrome-diagnostic.json",
+        "sha256": "f78e48fac80c47baa7f4ff4ebf99f2210b4a1b14a28c399eb884dc766deb2b54",
+        "byteLength": 98503,
+        "resultSelector": "results[path=tests/unit_tests/assets/double_library_with_image.riv]"
+      },
+      "officialOracleCrossBrowserEvidence": {
+        "status": "loaded",
+        "path": "review/candidates/rive-official-7-3-load-edge-diagnostic.json",
+        "sha256": "5b74c73aa15fbd333aa3f1f91d79d8502f091ef05d45bcb9355091db3ba781d9",
+        "byteLength": 98666,
+        "resultSelector": "results[path=tests/unit_tests/assets/double_library_with_image.riv]"
+      },
+      "featureCoverageEvidence": {
+        "status": "captured",
+        "path": "review/candidates/rive-official-7-3-input-inventory-diagnostic.json",
+        "sha256": "41461aaa0c34af816dcde8e1ba2310459a8ce9883bcbe04c0525cb9507af54ca",
+        "byteLength": 14818,
+        "resultSelector": "assets[path=tests/unit_tests/assets/double_library_with_image.riv]"
+      },
+      "workloadScenario": {
+        "path": "animation-spec/corpus/rive/workloads/official-double-library-with-image.json",
+        "sha256": "855dc68103d6810eda24aabce7ceb0ec765dbc37e6cb15bd187105f21cab022e",
+        "byteLength": 9713,
+        "sourceInputBinding": "harness-no-source-input"
+      },
+      "admissionResult": {
+        "status": "workload-recorded-trace-blocked",
+        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+      }
+    }
+  ],
   "browserRuntimeDenyList": {
     "path": "docs/for-ai/rive-hya/browser-runtime-deny-list.json",
     "sha256": "73c1e71ea6af08c68d1a0892f097321b1cb7495d832f67e73a90f62fd72c9c7c"
   },
-  "formalAdmissionRule": "Every census key must be covered by an admitted licensed asset and every required trace/device/security/closure result must pass. Empty formalAssets is always a blocker."
+  "formalAdmissionRule": "Every census key must be covered by an admitted licensed asset and every required trace/device/security/closure result must pass. An officialAssetSources entry proves immutable input identity and eligibility only. A formalAssets entry records admission, workload and current red/green result; any entry that is not trace-ready, any uncovered census key and any missing validated oracle/HYA artifact remains a blocker."
 }

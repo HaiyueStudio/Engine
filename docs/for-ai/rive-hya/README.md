@@ -11,7 +11,7 @@
 5. [diagnostic-catalog.md](./diagnostic-catalog.md)：strict 失败协议。
 6. [threat-model.md](./threat-model.md) 与 [license-matrix.md](./license-matrix.md)：不可信执行与内容权利边界。
 7. [dependency-boundary.md](./dependency-boundary.md) 与 [browser-runtime-deny-list.json](./browser-runtime-deny-list.json)：包边界和浏览器闭包。
-8. [corpus-oracle-manifest.json](./corpus-oracle-manifest.json) 与 [evidence-plan.md](./evidence-plan.md)：产品 case、corpus、oracle 和设备证据。
+8. [corpus-oracle-manifest.json](./corpus-oracle-manifest.json)、[official-asset-sources.md](./official-asset-sources.md) 与 [evidence-plan.md](./evidence-plan.md)：产品 case、官方远程输入、corpus、oracle 和设备证据。
 9. [g01-acceptance.md](./g01-acceptance.md)：G01 的逐项审查结论。
 
 `tools/` 只保存 census 的可复现生成器；生成结果本身受兼容 tuple 和 source digest 约束。
@@ -29,4 +29,10 @@
 - interactive、data binding、layout、event、audio、semantics、resource replacement、Luau 与 WGSL 不能用像素 baking 替代。
 - 未知或不支持的 object/property/script/asset 在 strict 模式失败；不采用官方 runtime 的 unknown-field/no-op 宽松行为。
 - HYA 和公共 runtime 不暴露 Rive type/property id；`.riv`、官方 parser/renderer、Luau VM 与 Rive source class 不进入浏览器播放闭包。
-- 任何没有 license provenance、Rive file revision、source bytes SHA-256 和 oracle trace 的 corpus 文件都不是正式证据。
+- 任何没有 license provenance、不可变 source identity、source bytes SHA-256 和 oracle trace 的 corpus 输入都不是正式证据。source identity 可以是 Rive Cloud file revision，也可以是官方 `rive-app` 仓库的 commit + path；后者只临时下载并验 hash，不把 `.riv` 放入 HaiYue 仓库。
+
+## G02/G10 follow-up execution boundary
+
+- `convertRivBytesToHya` 是 raw `.riv` 的 build-time production orchestration：先执行 G02 strict import，再调用带 adapter/evaluator revision SHA-256 的 capability evaluator，最后让 G10 重新校验 Neutral IR hash、tuple、100% object/property coverage、G03–G09 sidecar parser 与 HYA binary round-trip。runner 不提供“空文档即支持”的默认 evaluator。
+- `scripts/hya-corpus/rive-run-differential-trace.mjs` 只接受 revision-pinned native `@rive-app/webgl2@2.40.0`/WebGL2 与 `haiyue-exact-hya`/WebGPU capture adapter。11 个 channel 的 comparison 由 `rive-oracle-channel-contract.mjs` 从原始 capture 和 RGBA bytes 重算，capture adapter 不能直接提交通过结论。
+- 当前 8 个官方输入中 6 个通过 G02 import；另两个触发 accepted exporter schema 之外的 key `526`/`565`。支持它们需要 G01 compatibility addendum 与新 census/oracle 对齐，不属于 G02 层级修复。

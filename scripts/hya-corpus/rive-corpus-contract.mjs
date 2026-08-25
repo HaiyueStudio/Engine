@@ -39,6 +39,10 @@ const REQUIRED_LICENSE_USES = Object.freeze([
 const VISIBILITIES = Object.freeze([
   'public-redistributable', 'internal-evidence-only', 'local-never-upload',
 ]);
+const STORAGE_POLICIES = Object.freeze([
+  'repository-pinned', 'remote-hash-pinned-no-vendoring', 'local-never-upload',
+]);
+const OFFICIAL_RIVE_REPOSITORY = 'https://github.com/rive-app/rive-runtime';
 
 export function validateRiveCorpusManifest(manifest, census, {
   formal = false,
@@ -131,6 +135,11 @@ export function validateRiveCorpusManifest(manifest, census, {
     string(source?.disqualifier, `${String(source?.id)} formal disqualifier`);
   }
 
+  const officialSources = list(manifest?.officialAssetSources, 'official asset sources');
+  const officialSourceIds = uniqueValues(officialSources, 'id', 'official asset source', violations);
+  const officialSourcesById = new Map(officialSources.map(value => [value?.id, value]));
+  for (const source of officialSources) validateOfficialAssetSource(source, violations);
+
   const assets = list(manifest?.formalAssets, 'formal assets');
   uniqueValues(assets, 'id', 'formal asset', violations);
   const coverage = {
@@ -138,7 +147,7 @@ export function validateRiveCorpusManifest(manifest, census, {
     scriptSymbolKeys: new Set(), assetTypeKeys: new Set(),
   };
   for (const [index, asset] of assets.entries()) {
-    validateFormalAsset(asset, `formalAssets[${index}]`, coverage, securityIds, root, workloadPlan, violations);
+    validateFormalAsset(asset, `formalAssets[${index}]`, coverage, securityIds, root, workloadPlan, officialSourcesById, formal, violations);
   }
 
   const expectedCoverage = censusCoverage(census);
@@ -185,6 +194,7 @@ export function validateRiveCorpusManifest(manifest, census, {
     violations: Object.freeze(violations),
     summary: Object.freeze({
       formalAssetCount: assets.length,
+      officialAssetSourceCount: officialSourceIds.size,
       realProductAssetCount: realProduct.length,
       combinedStressAssetCount: combinedStress.length,
       isolatedAssetCount: isolated.length,
@@ -223,15 +233,39 @@ export function validateRiveCorpusManifest(manifest, census, {
   }
 }
 
-function validateFormalAsset(asset, path, coverage, securityIds, root, workloadPlan, violations) {
+function validateFormalAsset(asset, path, coverage, securityIds, root, workloadPlan, officialSourcesById, formal, violations) {
   if (!ID.test(asset?.id ?? '')) violations.push(`${path}.id is invalid`);
   if (!['feature-isolated', 'property-boundary', 'real-product', 'combined-stress', 'adversarial'].includes(asset?.kind)) {
     violations.push(`${path}.kind is invalid`);
   }
-  requiredString(asset?.sourceUrlOrInternalAssetId, `${path}.sourceUrlOrInternalAssetId`, violations);
-  if (!REVISION.test(asset?.riveCloudFileRevisionId ?? '')) violations.push(`${path}.riveCloudFileRevisionId is invalid`);
+  const sourceIdentity = asset?.sourceIdentity;
+  if (sourceIdentity?.kind === 'official-git') {
+    requiredString(sourceIdentity?.officialAssetSourceId, `${path}.sourceIdentity.officialAssetSourceId`, violations);
+    const officialSource = officialSourcesById.get(sourceIdentity?.officialAssetSourceId);
+    if (!officialSource) {
+      violations.push(`${path}.sourceIdentity.officialAssetSourceId is not declared`);
+    } else {
+      if (asset?.riv?.sourceUrl !== officialSource.downloadUrl) violations.push(`${path}.riv.sourceUrl does not match official source`);
+      if (asset?.riv?.sha256 !== officialSource.sha256) violations.push(`${path}.riv.sha256 does not match official source`);
+      if (asset?.riv?.byteLength !== officialSource.byteLength) violations.push(`${path}.riv.byteLength does not match official source`);
+    }
+    if (asset?.storagePolicy !== 'remote-hash-pinned-no-vendoring') {
+      violations.push(`${path}.storagePolicy must forbid vendoring for an official Git source`);
+    }
+  } else if (sourceIdentity?.kind === 'rive-cloud') {
+    requiredString(asset?.sourceUrlOrInternalAssetId, `${path}.sourceUrlOrInternalAssetId`, violations);
+    if (!REVISION.test(sourceIdentity?.riveCloudFileRevisionId ?? '')) {
+      violations.push(`${path}.sourceIdentity.riveCloudFileRevisionId is invalid`);
+    }
+  } else {
+    violations.push(`${path}.sourceIdentity.kind is invalid`);
+  }
+  if (!STORAGE_POLICIES.includes(asset?.storagePolicy)) violations.push(`${path}.storagePolicy is invalid`);
   const riv = asset?.riv;
-  requiredString(riv?.path, `${path}.riv.path`, violations);
+  if (typeof riv?.path !== 'string' && typeof riv?.sourceUrl !== 'string') {
+    violations.push(`${path}.riv requires path or sourceUrl`);
+  }
+  if (typeof riv?.sourceUrl === 'string') validateHttpsUrl(riv.sourceUrl, `${path}.riv.sourceUrl`, violations);
   if (!SHA256.test(riv?.sha256 ?? '')) violations.push(`${path}.riv.sha256 is invalid`);
   if (!Number.isSafeInteger(riv?.byteLength) || riv.byteLength < 8) violations.push(`${path}.riv.byteLength is invalid`);
   if (root && typeof riv?.path === 'string') validateAssetFile(root, riv, `${path}.riv`, violations);
@@ -264,6 +298,22 @@ function validateFormalAsset(asset, path, coverage, securityIds, root, workloadP
   addCoverage(coverage.assetTypeKeys, asset?.assetTypeKeys, `${path}.assetTypeKeys`, value => Number.isSafeInteger(value), violations);
   requiredString(asset?.fixtureOwner, `${path}.fixtureOwner`, violations);
   requiredString(asset?.oracleTraceId, `${path}.oracleTraceId`, violations);
+  equalEvidenceStatus(asset?.officialOracleEvidence?.status, ['loaded'], `${path}.officialOracleEvidence.status`, violations);
+  requiredString(asset?.officialOracleEvidence?.resultSelector, `${path}.officialOracleEvidence.resultSelector`, violations);
+  equalEvidenceStatus(asset?.officialOracleCrossBrowserEvidence?.status, ['loaded'], `${path}.officialOracleCrossBrowserEvidence.status`, violations);
+  requiredString(asset?.officialOracleCrossBrowserEvidence?.resultSelector, `${path}.officialOracleCrossBrowserEvidence.resultSelector`, violations);
+  equalEvidenceStatus(asset?.featureCoverageEvidence?.status, ['captured', 'blocked-by-strict-import'], `${path}.featureCoverageEvidence.status`, violations);
+  requiredString(asset?.featureCoverageEvidence?.resultSelector, `${path}.featureCoverageEvidence.resultSelector`, violations);
+  for (const [value, label] of [
+    [asset?.officialOracleEvidence, `${path}.officialOracleEvidence`],
+    [asset?.officialOracleCrossBrowserEvidence, `${path}.officialOracleCrossBrowserEvidence`],
+    [asset?.featureCoverageEvidence, `${path}.featureCoverageEvidence`],
+  ]) {
+    requiredString(value?.path, `${label}.path`, violations);
+    if (!SHA256.test(value?.sha256 ?? '')) violations.push(`${label}.sha256 is invalid`);
+    if (!Number.isSafeInteger(value?.byteLength) || value.byteLength < 1) violations.push(`${label}.byteLength is invalid`);
+    if (root && typeof value?.path === 'string') validateAssetFile(root, value, label, violations);
+  }
   const scenario = asset?.workloadScenario;
   requiredString(scenario?.path, `${path}.workloadScenario.path`, violations);
   if (!SHA256.test(scenario?.sha256 ?? '')) violations.push(`${path}.workloadScenario.sha256 is invalid`);
@@ -287,6 +337,51 @@ function validateFormalAsset(asset, path, coverage, securityIds, root, workloadP
   if (asset?.kind === 'real-product') requiredString(asset?.productCaseId, `${path}.productCaseId`, violations);
   if (asset?.kind === 'adversarial' && !securityIds.has(asset?.securityCaseId)) {
     violations.push(`${path}.securityCaseId is not declared`);
+  }
+  const admissionStatus = asset?.admissionResult?.status;
+  if (!['trace-ready', 'workload-recorded-trace-blocked', 'formal-red-import-failure'].includes(admissionStatus)) {
+    violations.push(`${path}.admissionResult.status is invalid`);
+  }
+  if (admissionStatus === 'formal-red-import-failure') {
+    if (!/^E_RIVE_[A-Z0-9_]+$/u.test(asset?.admissionResult?.diagnostic ?? '')) violations.push(`${path}.admissionResult.diagnostic is invalid`);
+    requiredString(asset?.admissionResult?.path, `${path}.admissionResult.path`, violations);
+  }
+  if (formal && admissionStatus !== 'trace-ready') violations.push(`${path} is not trace-ready`);
+}
+
+function equalEvidenceStatus(actual, expected, label, violations) {
+  if (!expected.includes(actual)) violations.push(`${label} is invalid`);
+}
+
+function validateOfficialAssetSource(source, violations) {
+  const label = `official asset source ${String(source?.id)}`;
+  if (!ID.test(source?.id ?? '')) violations.push(`${label} id is invalid`);
+  if (source?.repository !== OFFICIAL_RIVE_REPOSITORY) violations.push(`${label} repository is not the frozen official repository`);
+  if (!/^[a-f0-9]{40}$/u.test(source?.commit ?? '')) violations.push(`${label} commit is invalid`);
+  if (typeof source?.path !== 'string' || source.path.includes('\\') || source.path.startsWith('/') || source.path.split('/').includes('..') || !source.path.endsWith('.riv')) {
+    violations.push(`${label} path must be a relative POSIX .riv path`);
+  }
+  const expectedSourceUrl = `${OFFICIAL_RIVE_REPOSITORY}/blob/${String(source?.commit)}/${String(source?.path)}`;
+  const expectedDownloadUrl = `https://raw.githubusercontent.com/rive-app/rive-runtime/${String(source?.commit)}/${String(source?.path)}`;
+  if (source?.sourceUrl !== expectedSourceUrl) violations.push(`${label} sourceUrl is not immutable`);
+  if (source?.downloadUrl !== expectedDownloadUrl) violations.push(`${label} downloadUrl is not immutable`);
+  if (!SHA256.test(source?.sha256 ?? '')) violations.push(`${label} sha256 is invalid`);
+  if (!Number.isSafeInteger(source?.byteLength) || source.byteLength < 8) violations.push(`${label} byteLength is invalid`);
+  if (source?.format?.major !== 7 || source?.format?.minor !== 3) violations.push(`${label} format must be 7.3`);
+  if (source?.license?.id !== 'MIT') violations.push(`${label} license id must be MIT`);
+  const expectedLicenseEvidence = `${OFFICIAL_RIVE_REPOSITORY}/blob/${String(source?.commit)}/LICENSE`;
+  if (source?.license?.evidence !== expectedLicenseEvidence) violations.push(`${label} license evidence is not immutable`);
+  if (!SHA256.test(source?.license?.sha256 ?? '')) violations.push(`${label} license hash is invalid`);
+  if (source?.storagePolicy !== 'remote-hash-pinned-no-vendoring') violations.push(`${label} storage policy is invalid`);
+  if (source?.formalEligible !== true) violations.push(`${label} formal eligibility must be explicit`);
+}
+
+function validateHttpsUrl(value, label, violations) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:') violations.push(`${label} must use HTTPS`);
+  } catch {
+    violations.push(`${label} is invalid`);
   }
 }
 

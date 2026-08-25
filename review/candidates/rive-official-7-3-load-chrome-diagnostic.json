@@ -1,0 +1,2975 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-rive-official-load-diagnostic",
+  "formalEvidence": false,
+  "generatedAt": "2026-08-25T06:46:54.400Z",
+  "engineRevision": "fc74623b0ffe642411eb293fd4df1fe30e2199b6",
+  "engineDirty": true,
+  "browser": "chrome",
+  "oracle": {
+    "package": "@rive-app/webgl2@2.40.0",
+    "riveJsSha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+    "riveWasmSha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32"
+  },
+  "browserEvidence": [
+    {
+      "path": "tests/unit_tests/assets/double_library_with_image.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.174",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Fdouble_library_with_image.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/game_menu_ad_police_files.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.174",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Fgame_menu_ad_police_files.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/inventory_demo_test_v2.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.174",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Finventory_demo_test_v2.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/joystick_databound_keyframe_test.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.174",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Fjoystick_databound_keyframe_test.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/grid_placement_bound.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.174",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fgrid_placement_bound.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layoutstest_8-planets-grid.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.174",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayoutstest_8-planets-grid.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/text_fit_test.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.174",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Ftext_fit_test.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/text_style_background.riv",
+      "evidence": {
+        "product": "Chrome/151.0.7922.174",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Ftext_style_background.riv",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      }
+    }
+  ],
+  "resultCount": 8,
+  "loadedCount": 8,
+  "rejectedCount": 0,
+  "browserGateFailedCount": 0,
+  "ownerResidual": 0,
+  "results": [
+    {
+      "path": "tests/unit_tests/assets/double_library_with_image.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/double_library_with_image.riv",
+            "status": "loaded",
+            "byteLength": 749,
+            "fetchAndLoadMs": 12.169999957084656,
+            "loadMs": 7.534999966621399,
+            "totalMs": 209.5900000333786,
+            "artboards": [
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              },
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7336,
+                  "sha256": "2aaee4ed125b5bf8e13a18599540edd86d346b124ae23ca34293d242f38443f6"
+                }
+              },
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7336,
+                  "sha256": "2aaee4ed125b5bf8e13a18599540edd86d346b124ae23ca34293d242f38443f6"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.174",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Fdouble_library_with_image.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 108
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 6157,
+              "sha256": "9e1d00e9ede0bd1a9ea718dbc12d5284f3c62002954f9079067931c18d746480",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/double_library_with_image.riv",
+              "byteLength": 749,
+              "sha256": "a11cac0f7453147eef9d5a387472ab3235868f404354fe8e44e0a89b2b729162",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/game_menu_ad_police_files.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/game_menu_ad_police_files.riv",
+            "status": "loaded",
+            "byteLength": 4806420,
+            "fetchAndLoadMs": 86.83000004291534,
+            "loadMs": 41.355000019073486,
+            "totalMs": 509.15500009059906,
+            "artboards": [
+              {
+                "name": "ListMain",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 1080,
+                  "maxY": 1080
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 57507,
+                  "sha256": "26fcd346d0b11f74afbff8b79cfd15c0e7cb6191dcbae449bf25ae7ecb3cbd5f"
+                }
+              },
+              {
+                "name": "pfp 2",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 120,
+                  "maxY": 120
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 393161,
+                  "sha256": "ccf5604db4e129b2fe8afbf1eed3facebe1e2ebf5d54bb01ddc89cfac65a59d8"
+                }
+              },
+              {
+                "name": "pfp 3",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 120,
+                  "maxY": 120
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 366440,
+                  "sha256": "868a3146e7c3e1609bcc3fae815f5bbbeb03f6172643b181f0032ca21d917ff4"
+                }
+              },
+              {
+                "name": "pfp 4",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 120,
+                  "maxY": 120
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 361983,
+                  "sha256": "2c72c891ad5bccd4d5c3b229a85b96f972084409cdcca0f38156358376f857a9"
+                }
+              },
+              {
+                "name": "pfp 5",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 120,
+                  "maxY": 120
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 300044,
+                  "sha256": "ad623a71f4783a6556be0d7617dde158b7ee8ee12db151fe9964700c192f6191"
+                }
+              },
+              {
+                "name": "pfp 6",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 120,
+                  "maxY": 120
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 312032,
+                  "sha256": "64cdbdf8df3965032892b3b83c10275d321da560a5107e359ae3c18f25819f80"
+                }
+              },
+              {
+                "name": "pfp 7",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 120,
+                  "maxY": 120
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 356594,
+                  "sha256": "16ad0bc438df9289108796185b30e5f6978af09f14fcb921e1cb5dd0b34755c1"
+                }
+              },
+              {
+                "name": "pfp 8",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 120,
+                  "maxY": 120
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 356711,
+                  "sha256": "8ecbaead63b7f107fe0a742e4438bc2ac159e139973b618d7a922b8573796531"
+                }
+              },
+              {
+                "name": "pfp 1",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 120,
+                  "maxY": 120
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 338124,
+                  "sha256": "58de7d59094776911713c1a15c79015f424915ef3c43d54a9ac4493495e73147"
+                }
+              },
+              {
+                "name": "ListItem",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 272.03125,
+                  "maxY": 26.396484375
+                },
+                "animationCount": 8,
+                "animations": [
+                  "NEW_off",
+                  "NEW_on",
+                  "hover_OFF",
+                  "hover_ON",
+                  "idle",
+                  "click",
+                  "click_closed",
+                  "click_open"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "idle",
+                      "click_closed"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 14853,
+                  "sha256": "09c743b749852e6b3cd05a6a6cdd9f05b848970455875faaa0a6b0a609d6a196"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.174",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Fgame_menu_ad_police_files.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 139
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 6157,
+              "sha256": "9e1d00e9ede0bd1a9ea718dbc12d5284f3c62002954f9079067931c18d746480",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/game_menu_ad_police_files.riv",
+              "byteLength": 4806420,
+              "sha256": "19c7306dbaa741d1d4e3ce7239b98c3a40943f07f1260a92851f2e558fd6e9f5",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/inventory_demo_test_v2.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/inventory_demo_test_v2.riv",
+            "status": "loaded",
+            "byteLength": 394478,
+            "fetchAndLoadMs": 99.27999997138977,
+            "loadMs": 88.40499997138977,
+            "totalMs": 1337.5950000286102,
+            "artboards": [
+              {
+                "name": "Inventory",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 1920,
+                  "maxY": 1080
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 89877,
+                  "sha256": "61b0ba5638f18d186d0a619cce70c17e5cbfb06b61843e849466decfd4a7ca4e"
+                }
+              },
+              {
+                "name": "Coin",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 43,
+                  "maxY": 43
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 23074,
+                  "sha256": "0608ac1485abef2905403d9b61f5ddb8d064728bb21eb4188e0b737557fb2cba"
+                }
+              },
+              {
+                "name": "Info",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 320,
+                  "maxY": 28
+                },
+                "animationCount": 1,
+                "animations": [
+                  "On"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "On"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 19030,
+                  "sha256": "f181b8bdd3e2c6f01919faac173f446dd53a1a36de21120679baf13816bc6510"
+                }
+              },
+              {
+                "name": "CategoryIcon",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 16,
+                  "maxY": 16
+                },
+                "animationCount": 8,
+                "animations": [
+                  "Ammo",
+                  "Shield",
+                  "Weapon",
+                  "Tool",
+                  "Quick Use",
+                  "Mioscellaneous",
+                  "Medical Supplies",
+                  "Key"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 19554,
+                  "sha256": "71db389a6430449399c80ef9fbd397d5c84327124b48f9116ee1d6425092de2a"
+                }
+              },
+              {
+                "name": "ItemDrag",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 95,
+                  "maxY": 95
+                },
+                "animationCount": 6,
+                "animations": [
+                  "X4",
+                  "X1",
+                  "Activate",
+                  "Deactivated",
+                  "ValueNovisible",
+                  "Value Visible"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Motion",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 178869,
+                  "sha256": "56867a7df9baca0d5652b0f70fc9b1ada2198a8eb39544fa77ff055890ec0367"
+                }
+              },
+              {
+                "name": "Item Imagen",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 312,
+                  "maxY": 245
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 52610,
+                  "sha256": "cd32b0b6be37c3ad7396be1f112e2ab01f8293465b9de74c7ec6be78593f20c7"
+                }
+              },
+              {
+                "name": "BackpackBackground",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 621,
+                  "maxY": 908
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 102234,
+                  "sha256": "1a9a503224195c45e258183362c0536b15b72c52237fca3366e5e7e148145370"
+                }
+              },
+              {
+                "name": "Icon Ammo",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 41,
+                  "maxY": 41
+                },
+                "animationCount": 6,
+                "animations": [
+                  "LightBottom",
+                  "LightTop",
+                  "LightOff",
+                  "Pressed",
+                  "Hover",
+                  "Idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Idle"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 58367,
+                  "sha256": "0dd0efa29a7a6455f4d7821a0593b43bc1daef8e20e94c15dd2f112110e5e59c"
+                }
+              },
+              {
+                "name": "LoadItemA",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 320,
+                  "maxY": 220
+                },
+                "animationCount": 3,
+                "animations": [
+                  "loader",
+                  "Loading",
+                  "Selecttion on"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Loading"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7435,
+                  "sha256": "5225fd764d43216d3e4fd5ffa3521d5cde69b4b6da1e0ccff95718be5cc3f83c"
+                }
+              },
+              {
+                "name": "ItemLoader",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 188,
+                  "maxY": 34
+                },
+                "animationCount": 3,
+                "animations": [
+                  "Loaded",
+                  "Bit",
+                  "Load"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Load",
+                      "Bit"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7584,
+                  "sha256": "89d6ca5a9a1566d148b2e1eb770ae3379e7e1534a716ae4b8b7be700980fa892"
+                }
+              },
+              {
+                "name": "LoadItemB",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 155,
+                  "maxY": 95
+                },
+                "animationCount": 6,
+                "animations": [
+                  "ValueNovisible",
+                  "Valuevisible",
+                  "Loaded",
+                  "Loading",
+                  "Warning off",
+                  "Warning on"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Warning off",
+                      "Loading"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7741,
+                  "sha256": "c3ff67278151deee6bfc846b6321bf03fe851be48bb00a8e98b9d9f270ebf992"
+                }
+              },
+              {
+                "name": "Badge",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 79,
+                  "maxY": 97
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 92949,
+                  "sha256": "64645b88b2920683d762f731ec669c07e799e228511294865dfe945c4aa59217"
+                }
+              },
+              {
+                "name": "Top Data",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 538.63671875,
+                  "maxY": 32
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 10972,
+                  "sha256": "dd144bc77e9af25c725732f28eef6135d1f88c3b3f5a34aeee155f9be9b076c8"
+                }
+              },
+              {
+                "name": "Data content",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 166.826171875,
+                  "maxY": 32
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 12451,
+                  "sha256": "858df3ac45beb9c41aca0542e7b5d43765ec07fc9b555a6ca143a0cbe8a19f7c"
+                }
+              },
+              {
+                "name": "Credits",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 124.984375,
+                  "maxY": 32
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 13951,
+                  "sha256": "bf28e5e116790cdaa3ad61ac2594179a38633cbbd37dcdee19a662c18b3ba79a"
+                }
+              },
+              {
+                "name": "BackpackMedical",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 410,
+                  "maxY": 605
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 10049,
+                  "sha256": "b8e0d9061fa2f9d5188399f4ae03f610f53e6d3ab7447abe2174918d0becb38e"
+                }
+              },
+              {
+                "name": "LoadItem",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 95,
+                  "maxY": 95
+                },
+                "animationCount": 8,
+                "animations": [
+                  "X4",
+                  "X1",
+                  "Loader",
+                  "Loading",
+                  "valueNovisible",
+                  "ValueVisible",
+                  "Warning off",
+                  "Warning on"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Warning off",
+                      "Loading"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 8079,
+                  "sha256": "c1d0b526fdcd451048ddd9b8b96aee5283d7d82aef2e96e07a5efe85a02a914a"
+                }
+              },
+              {
+                "name": "Equipment",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 320,
+                  "maxY": 605
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7927,
+                  "sha256": "6990e086e79bb43de15441e5007b5078cef031ec09a791fd9edd1b0f4f292aac"
+                }
+              },
+              {
+                "name": "MenuGrid",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 515,
+                  "maxY": 788
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 9827,
+                  "sha256": "3c8fd7e9b2d57fad1c05f7d740c4f9c84ebe1a46ed440e34e3bb025979bde9c2"
+                }
+              },
+              {
+                "name": "ItemGrid",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 438,
+                  "maxY": 712
+                },
+                "animationCount": 4,
+                "animations": [
+                  "Stop",
+                  "Works",
+                  "Scroll Bar no Visible",
+                  "Scroll Bar Visible"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 95398,
+                  "sha256": "b80497cfbb0f31d051c352a01f82e78cf0db2455c93206a8f13fd0eb9624ae45"
+                }
+              },
+              {
+                "name": "EquipmentTileA",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 320,
+                  "maxY": 220
+                },
+                "animationCount": 7,
+                "animations": [
+                  "AddOff",
+                  "AddOn",
+                  "Warning",
+                  "NoWarning",
+                  "Selecttion on",
+                  "Selection off",
+                  "Idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Selection off"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 95339,
+                  "sha256": "b00109ce2879ce14f7a1c33735d08b76c426471b918dba38f911b25615165e24"
+                }
+              },
+              {
+                "name": "Icon Key",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 41,
+                  "maxY": 41
+                },
+                "animationCount": 6,
+                "animations": [
+                  "LightBottom",
+                  "LightTop",
+                  "LightOff",
+                  "Pressed",
+                  "Hover",
+                  "Idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Idle"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 47683,
+                  "sha256": "e864fd5906c944ca834a4324259d06785a42ac5bda64bb8614b174f2be9eeb32"
+                }
+              },
+              {
+                "name": "Icon Medical Supplies",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 41,
+                  "maxY": 41
+                },
+                "animationCount": 6,
+                "animations": [
+                  "LightBottom",
+                  "LightTop",
+                  "LightOff",
+                  "Pressed",
+                  "Hover",
+                  "Idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Idle"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 59085,
+                  "sha256": "e0b3cfe7f8245b3137baa797ee091daa4fad9277add09f880fe903d508eabfcf"
+                }
+              },
+              {
+                "name": "Icon Mis",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 41,
+                  "maxY": 41
+                },
+                "animationCount": 6,
+                "animations": [
+                  "LightBottom",
+                  "LightTop",
+                  "LightOff",
+                  "Pressed",
+                  "Hover",
+                  "Idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Idle"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 54113,
+                  "sha256": "9dc6d88ac68152f2767fc299c841b9500ecd0a59695ea54d74fa60c637959f6b"
+                }
+              },
+              {
+                "name": "Icon QuickUse",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 41,
+                  "maxY": 41
+                },
+                "animationCount": 6,
+                "animations": [
+                  "LightBottom",
+                  "LightTop",
+                  "LightOff",
+                  "Pressed",
+                  "Hover",
+                  "Idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Idle"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 61636,
+                  "sha256": "e8d5c112d9be7cbe9c2b6367ba668ec5eaec41477d38612e996b98313df9bc0c"
+                }
+              },
+              {
+                "name": "EquipmentTileB",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 155,
+                  "maxY": 95
+                },
+                "animationCount": 7,
+                "animations": [
+                  "AddOff",
+                  "AddOn",
+                  "NoWarning",
+                  "Warning",
+                  "Selection off",
+                  "Selected on",
+                  "Idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Idle",
+                      "Selection off"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 96282,
+                  "sha256": "c48a030e473bc4367df3f724c699743e4a931d31d94346ab309775e67c8b4a3b"
+                }
+              },
+              {
+                "name": "BackPackMedicalItem",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 95,
+                  "maxY": 95
+                },
+                "animationCount": 11,
+                "animations": [
+                  "AddOff",
+                  "AddOn",
+                  "Opacity 100",
+                  "Opacity 0",
+                  "x4",
+                  "x2",
+                  "NoWarning",
+                  "Warning",
+                  "Selection off",
+                  "Selected on",
+                  "Idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Selection off",
+                      "NoWarning"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 152685,
+                  "sha256": "52243fb332ac2d66959e6b1248ffcb34ee834ba35e4a9ec7bf61e4d6d3819172"
+                }
+              },
+              {
+                "name": "CategoryMenuIcon",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 41,
+                  "maxY": 41
+                },
+                "animationCount": 3,
+                "animations": [
+                  "Pressed",
+                  "Hover",
+                  "idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "idle"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 61534,
+                  "sha256": "6fa7f51a3c96000d174a8db933992246d112f8db348a9f91595ecc0145703566"
+                }
+              },
+              {
+                "name": "Icon All",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 41,
+                  "maxY": 41
+                },
+                "animationCount": 5,
+                "animations": [
+                  "LightBottom",
+                  "LightOff",
+                  "Selected",
+                  "Hover",
+                  "Idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Idle"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 38040,
+                  "sha256": "a53217042e967c2b2157d13a157229d2b8a303e37edded4b6ee3c157b00c5a99"
+                }
+              },
+              {
+                "name": "Icon Shield",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 41,
+                  "maxY": 41
+                },
+                "animationCount": 7,
+                "animations": [
+                  "LightBottom",
+                  "LightTop",
+                  "LightBottom",
+                  "LightOff",
+                  "Selected",
+                  "hover",
+                  "idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "idle"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 48566,
+                  "sha256": "bec667714c8c59e37c5c7453636c7966d4ece87e0bf824369b96c6b52ad70565"
+                }
+              },
+              {
+                "name": "Icon Tool",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 41,
+                  "maxY": 41
+                },
+                "animationCount": 6,
+                "animations": [
+                  "LightBottom",
+                  "LightTop",
+                  "LightOff",
+                  "Pressed",
+                  "Hover",
+                  "Idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Idle"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 46593,
+                  "sha256": "a493a0803cec3b8e9e135921a2bdcb87c6fbb3456282f6ac9a794c106c24098c"
+                }
+              },
+              {
+                "name": "Icon Weapon",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 41,
+                  "maxY": 41
+                },
+                "animationCount": 6,
+                "animations": [
+                  "LightBottom",
+                  "LighTop",
+                  "LightOff",
+                  "Pressed",
+                  "Hover",
+                  "Idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Idle"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 38368,
+                  "sha256": "46502da60b406c13ba89fd9c8dd2d3d690cd92bab622a5bc9414f2fe7622b52c"
+                }
+              },
+              {
+                "name": "IconGrid",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 0,
+                  "maxY": 0
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              },
+              {
+                "name": "Item",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 95,
+                  "maxY": 95
+                },
+                "animationCount": 6,
+                "animations": [
+                  "Activate",
+                  "Deactivated",
+                  "ValueNovisible",
+                  "Value Visible",
+                  "Selected",
+                  "Idle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Motion",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Idle"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 52187,
+                  "sha256": "2a28fbca615e9643d5a03bb4ae1bcbcd021691723eeec7f8c676916f754527ad"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.174",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Finventory_demo_test_v2.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 153
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 6157,
+              "sha256": "9e1d00e9ede0bd1a9ea718dbc12d5284f3c62002954f9079067931c18d746480",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/inventory_demo_test_v2.riv",
+              "byteLength": 394478,
+              "sha256": "6ff18f16bc96efe5fa7027bf5f149c55d722f5894f6f28083548d65ec40ca9cf",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/joystick_databound_keyframe_test.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/joystick_databound_keyframe_test.riv",
+            "status": "loaded",
+            "byteLength": 708,
+            "fetchAndLoadMs": 14.68500006198883,
+            "loadMs": 7.6549999713897705,
+            "totalMs": 190.69000005722046,
+            "artboards": [
+              {
+                "name": "Main",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 3,
+                "animations": [
+                  "joystickAnim",
+                  "yAnim",
+                  "xAnim"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "joystickAnim"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 39156,
+                  "sha256": "087292f57551a0d0f5032ad80c2949c43e1d6ffe66da4ab4f3d29ba1d1ac9bc6"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.174",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Fjoystick_databound_keyframe_test.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 87
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 6157,
+              "sha256": "9e1d00e9ede0bd1a9ea718dbc12d5284f3c62002954f9079067931c18d746480",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/joystick_databound_keyframe_test.riv",
+              "byteLength": 708,
+              "sha256": "ca3e052d533a32143279f8e035f95ca53461a4f5d5fdf782bd0e63332bbe2c63",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layout/grid_placement_bound.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layout/grid_placement_bound.riv",
+            "status": "loaded",
+            "byteLength": 385,
+            "fetchAndLoadMs": 9.670000076293945,
+            "loadMs": 4.695000052452087,
+            "totalMs": 69.42000007629395,
+            "artboards": [
+              {
+                "name": "Grid Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 100
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 7105,
+                  "sha256": "4243b2a7981029d649c4c91ec648480bdb1007cc7b4745ed76921dbbcc4f2a4f"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.174",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayout%2Fgrid_placement_bound.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 102
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 6157,
+              "sha256": "9e1d00e9ede0bd1a9ea718dbc12d5284f3c62002954f9079067931c18d746480",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layout/grid_placement_bound.riv",
+              "byteLength": 385,
+              "sha256": "02dca529414c584c38e7c438e501e276d89337588d9042381120d330784380d0",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/layoutstest_8-planets-grid.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/layoutstest_8-planets-grid.riv",
+            "status": "loaded",
+            "byteLength": 310228,
+            "fetchAndLoadMs": 37.33500003814697,
+            "loadMs": 31.31000006198883,
+            "totalMs": 876.414999961853,
+            "artboards": [
+              {
+                "name": "Planets-Main",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 4377,
+                  "maxY": 1574
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 53608,
+                  "sha256": "83bb279a720166d55c8f6d8c09ca095319b0ac15a45ace16670f43771e007e07"
+                }
+              },
+              {
+                "name": "Planets-OneLayout",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 791,
+                  "maxY": 800
+                },
+                "animationCount": 12,
+                "animations": [
+                  "Pluto",
+                  "Empty",
+                  "Mecury",
+                  "Venus",
+                  "Earth",
+                  "Mars",
+                  "Jupiter",
+                  "Saturn",
+                  "Uranus",
+                  "PaddingExpand",
+                  "PaddingDefault",
+                  "Neptune"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "ForGridPlanet",
+                    "inputCount": 2,
+                    "inputs": [
+                      {
+                        "name": "Planets",
+                        "type": "number"
+                      },
+                      {
+                        "name": "PlanetsIn",
+                        "type": "boolean"
+                      }
+                    ],
+                    "changedStates": [
+                      "PaddingDefault"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 52626,
+                  "sha256": "3886a7997ac9f9f57fd66e1a213e97741277ba5365c58649f629c5842b5e0e02"
+                }
+              },
+              {
+                "name": "All-Planets",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 10,
+                "animations": [
+                  "Empty",
+                  "Pluto",
+                  "Neptune",
+                  "Uranus",
+                  "Saturn",
+                  "Jupiter",
+                  "Mars",
+                  "Earth",
+                  "Venus",
+                  "Mercury"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Planets",
+                    "inputCount": 1,
+                    "inputs": [
+                      {
+                        "name": "Planets",
+                        "type": "number"
+                      }
+                    ],
+                    "changedStates": [
+                      "Mercury"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 22289,
+                  "sha256": "bcc1d37e6211a74e4091e46a5d4f95d9d56a2b83b54b79137d14a89520aae4d0"
+                }
+              },
+              {
+                "name": "Neptune",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 6,
+                "animations": [
+                  "Float",
+                  "NeptuneIn",
+                  "NeptuneOut",
+                  "NeptuneDefault",
+                  "NeptuneIdle",
+                  "LoopIce"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "SolarSystem",
+                    "inputCount": 1,
+                    "inputs": [
+                      {
+                        "name": "Neptune",
+                        "type": "boolean"
+                      }
+                    ],
+                    "changedStates": [
+                      "NeptuneDefault",
+                      "LoopIce",
+                      "Float"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 166184,
+                  "sha256": "7294d4302638bb108ed9e1dc177db1860ad284e732a4daf30833f5349ac005de"
+                }
+              },
+              {
+                "name": "Jupiter",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 7,
+                "animations": [
+                  "Float",
+                  "JupiterIn",
+                  "JupiterOut",
+                  "JupiterDefault",
+                  "JupiterIDle",
+                  "RayLoop",
+                  "StormLoop"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "SolarSystem",
+                    "inputCount": 1,
+                    "inputs": [
+                      {
+                        "name": "Jupiter",
+                        "type": "boolean"
+                      }
+                    ],
+                    "changedStates": [
+                      "JupiterDefault",
+                      "StormLoop",
+                      "Float"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 113028,
+                  "sha256": "49d50782727805ec1da3bfd39d6234b396de6536424bb4a80132c6de8798c423"
+                }
+              },
+              {
+                "name": "Venus",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 5,
+                "animations": [
+                  "Float",
+                  "VenusDefault",
+                  "VenusIn",
+                  "VenusIdle",
+                  "VenusOut"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Venus",
+                    "inputCount": 1,
+                    "inputs": [
+                      {
+                        "name": "Venus",
+                        "type": "boolean"
+                      }
+                    ],
+                    "changedStates": [
+                      "VenusDefault",
+                      "Float"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 68003,
+                  "sha256": "d8a59d3b94f67e6f27a49419896b2c3b565dcd1f4046333843a09d3bfc9c0543"
+                }
+              },
+              {
+                "name": "Pluto",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 6,
+                "animations": [
+                  "Float",
+                  "PlutoIdle2",
+                  "PlutoOut",
+                  "PlutoIdle",
+                  "PlutoIn",
+                  "PlutoDefault"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Pluto",
+                    "inputCount": 1,
+                    "inputs": [
+                      {
+                        "name": "Pluto",
+                        "type": "boolean"
+                      }
+                    ],
+                    "changedStates": [
+                      "Float",
+                      "PlutoDefault"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 26294,
+                  "sha256": "10056dc17e2bc22565b2b8c9acd00fa4a1036f14d4d7deb513d7e10d19693a90"
+                }
+              },
+              {
+                "name": "Earth",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 6,
+                "animations": [
+                  "Float",
+                  "EarthIdle",
+                  "EarthIn",
+                  "EarthOut",
+                  "EarthDefault",
+                  "EarthLoop"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Earth",
+                    "inputCount": 1,
+                    "inputs": [
+                      {
+                        "name": "Earth",
+                        "type": "boolean"
+                      }
+                    ],
+                    "changedStates": [
+                      "EarthLoop",
+                      "EarthDefault",
+                      "Float"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 152558,
+                  "sha256": "cf38f8651a0f1de77ecb1a4e9960e4e5013757f48f5351d32ef99bbffeeceb77"
+                }
+              },
+              {
+                "name": "Uranus",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 6,
+                "animations": [
+                  "Float",
+                  "UranusIn",
+                  "UranusIdle",
+                  "UranusOut",
+                  "UranusDefault",
+                  "LoopUraRings"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "SolarSystem",
+                    "inputCount": 1,
+                    "inputs": [
+                      {
+                        "name": "Uranus",
+                        "type": "boolean"
+                      }
+                    ],
+                    "changedStates": [
+                      "UranusDefault",
+                      "Float"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 43042,
+                  "sha256": "567a72e0843f6e13e2b7f3458685d69f7d287ddf956e9814501cc91855ceff9d"
+                }
+              },
+              {
+                "name": "Mars",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 6,
+                "animations": [
+                  "Float",
+                  "LoopRovers",
+                  "MarsIdle",
+                  "MarsOut",
+                  "MarsDefault",
+                  "MarsIn"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Mars",
+                    "inputCount": 1,
+                    "inputs": [
+                      {
+                        "name": "Mars",
+                        "type": "boolean"
+                      }
+                    ],
+                    "changedStates": [
+                      "MarsDefault",
+                      "LoopRovers",
+                      "Float"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 39732,
+                  "sha256": "fad5f288923c2ef8a0323b587f792eb2de98a050f09e7795e14c0d5724d75a3a"
+                }
+              },
+              {
+                "name": "Rover Anim 3",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 240.86207580566406,
+                  "maxY": 231.09625244140625
+                },
+                "animationCount": 3,
+                "animations": [
+                  "Flashlight",
+                  "CamAnim",
+                  "RovAnim"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "RovAnim",
+                      "CamAnim",
+                      "Flashlight"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 18620,
+                  "sha256": "fed35312d846c2dbbb8c5c11fded5689762b56642073d1597a2e4eb8e94197dd"
+                }
+              },
+              {
+                "name": "Saturn",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 5,
+                "animations": [
+                  "Float",
+                  "SaturnIn",
+                  "SaturnOut",
+                  "SaturnDefault",
+                  "SaturnIdle"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Saturn",
+                    "inputCount": 1,
+                    "inputs": [
+                      {
+                        "name": "Saturn",
+                        "type": "boolean"
+                      }
+                    ],
+                    "changedStates": [
+                      "SaturnDefault",
+                      "Float"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 190769,
+                  "sha256": "999e74f9b612681e087003dcff6f559a13083fa4c9073de65411b2bc2c805ae7"
+                }
+              },
+              {
+                "name": "Mercury",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 200,
+                  "maxY": 200
+                },
+                "animationCount": 5,
+                "animations": [
+                  "Timeline 1",
+                  "MercuryDefault",
+                  "MercuryIn",
+                  "MercuryIdle",
+                  "MercuryOut"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Mercury",
+                    "inputCount": 1,
+                    "inputs": [
+                      {
+                        "name": "Mercury",
+                        "type": "boolean"
+                      }
+                    ],
+                    "changedStates": [
+                      "MercuryDefault",
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 29517,
+                  "sha256": "94cfa6330d01475e71e0c794747f3fd6a34286aa8003c0e4c309f5f9128000ce"
+                }
+              },
+              {
+                "name": "Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 2385,
+                  "maxY": 2385
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 50017,
+                  "sha256": "b44788818ad96e228e69917265f852a17389d4424cc8abc05efd1f71d207b85e"
+                }
+              },
+              {
+                "name": "MercuryDescription",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Mercury"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Mercury"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 23445,
+                  "sha256": "024bbef894b99b16408323a6a90a4fe5fd57f475389146b055f44787eef018f8"
+                }
+              },
+              {
+                "name": "Planets-OneLayout 2",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 791,
+                  "maxY": 800
+                },
+                "animationCount": 12,
+                "animations": [
+                  "Empty",
+                  "Mecury",
+                  "Venus",
+                  "Earth",
+                  "Mars",
+                  "Jupiter",
+                  "Saturn",
+                  "Uranus",
+                  "Neptune",
+                  "Pluto",
+                  "PaddingExpand",
+                  "PaddingDefault"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "ForGridPlanet",
+                    "inputCount": 2,
+                    "inputs": [
+                      {
+                        "name": "Planets",
+                        "type": "number"
+                      },
+                      {
+                        "name": "PlanetsIn",
+                        "type": "boolean"
+                      }
+                    ],
+                    "changedStates": [
+                      "PaddingDefault",
+                      "Mecury"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 52626,
+                  "sha256": "3886a7997ac9f9f57fd66e1a213e97741277ba5365c58649f629c5842b5e0e02"
+                }
+              },
+              {
+                "name": "TestScroll",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 2380,
+                  "maxY": 998
+                },
+                "animationCount": 2,
+                "animations": [
+                  "Timeline 2",
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 1,
+                    "inputs": [
+                      {
+                        "name": "Size",
+                        "type": "boolean"
+                      }
+                    ],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 46829,
+                  "sha256": "17d445cc2eb636861065216cab5295a765dddfcdb27bb18cf98c7e33f7dccd52"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.174",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Flayoutstest_8-planets-grid.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 95
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 6157,
+              "sha256": "9e1d00e9ede0bd1a9ea718dbc12d5284f3c62002954f9079067931c18d746480",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/layoutstest_8-planets-grid.riv",
+              "byteLength": 310228,
+              "sha256": "aa42cd7baac6d5a67c1e8f5804c354d2ea9f0583678f1f037f33f9221a8ce8c0",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/text_fit_test.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/text_fit_test.riv",
+            "status": "loaded",
+            "byteLength": 877874,
+            "fetchAndLoadMs": 19.819999933242798,
+            "loadMs": 11.409999966621399,
+            "totalMs": 196.5699999332428,
+            "artboards": [
+              {
+                "name": "Main",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 1,
+                "animations": [
+                  "Timeline 1"
+                ],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "State Machine 1",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [
+                      "Timeline 1"
+                    ],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 33055,
+                  "sha256": "dffbe4f40af8a96bf8e36904f8f90b42692985e9d09be96ca61518f15c65ea17"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.174",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Ftext_fit_test.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 96
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 6157,
+              "sha256": "9e1d00e9ede0bd1a9ea718dbc12d5284f3c62002954f9079067931c18d746480",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/text_fit_test.riv",
+              "byteLength": 877874,
+              "sha256": "540cfae6ba78a81518525af17a8d09e4cd50131dcbd9e584832c2468f24fbcd3",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "tests/unit_tests/assets/text_style_background.riv",
+      "status": "completed",
+      "result": {
+        "status": "passed",
+        "oracle": "@rive-app/webgl2@2.40.0",
+        "resultCount": 1,
+        "loadedCount": 1,
+        "rejectedCount": 0,
+        "ownerResidual": 0,
+        "results": [
+          {
+            "path": "tests/unit_tests/assets/text_style_background.riv",
+            "status": "loaded",
+            "byteLength": 1287851,
+            "fetchAndLoadMs": 30.55999994277954,
+            "loadMs": 12.309999942779541,
+            "totalMs": 196.2150000333786,
+            "artboards": [
+              {
+                "name": "My Artboard",
+                "bounds": {
+                  "minX": 0,
+                  "minY": 0,
+                  "maxX": 500,
+                  "maxY": 500
+                },
+                "animationCount": 0,
+                "animations": [],
+                "stateMachineCount": 1,
+                "stateMachines": [
+                  {
+                    "name": "Auto Generated State Machine",
+                    "inputCount": 0,
+                    "inputs": [],
+                    "changedStates": [],
+                    "events": []
+                  }
+                ],
+                "pixels": {
+                  "byteLength": 10509,
+                  "sha256": "fadbd12836bd0a0616ab8cfe4e6c2fd026eb20ee57e4dea1613820759bc1552a"
+                }
+              }
+            ]
+          }
+        ],
+        "browserEvidence": {
+          "product": "Chrome/151.0.7922.174",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:<port>/scripts/hya-corpus/rive-oracle-load-fixture.html?assets=tests%2Funit_tests%2Fassets%2Ftext_style_background.riv",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 104
+          }
+        },
+        "httpProvenance": {
+          "transport": "http",
+          "requestCount": 5,
+          "uniqueFileCount": 5,
+          "files": [
+            {
+              "sourcePath": "oracle/rive.js",
+              "byteLength": 410642,
+              "sha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "oracle/rive.wasm",
+              "byteLength": 1997075,
+              "sha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.html",
+              "byteLength": 346,
+              "sha256": "15f107ab882aa682fb71be1c644441bd5ce26e6ec2b3401d5088fd512888c30c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "scripts/hya-corpus/rive-oracle-load-fixture.mjs",
+              "byteLength": 6157,
+              "sha256": "9e1d00e9ede0bd1a9ea718dbc12d5284f3c62002954f9079067931c18d746480",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "source/tests/unit_tests/assets/text_style_background.riv",
+              "byteLength": 1287851,
+              "sha256": "1ffdb33251da4ccd7713555d7fb1f1216326cd52fb7fd1d6206b72471ea9080c",
+              "requestCount": 1
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

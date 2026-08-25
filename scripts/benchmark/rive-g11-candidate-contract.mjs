@@ -211,6 +211,9 @@ export function validateRiveG11Candidate(candidate, {
   const findings = candidate?.diagnosticFindings;
   if (findings !== null && findings !== undefined) {
     equal(findings?.formalEvidence, false, 'diagnostic findings evidence class');
+    if (findings?.officialInputAdmission) {
+      validateEvidenceReference(findings.officialInputAdmission, 'official input admission evidence', formal);
+    }
     match(findings?.runtimeInventory?.sha256, SHA256, 'runtime diagnostic inventory hash');
     match(findings?.officialLoadMatrix?.sha256, SHA256, 'official diagnostic matrix hash');
     nonnegativeInteger(findings?.coveredObjectKeys, 'diagnostic covered object keys');

@@ -12,12 +12,13 @@ const census = JSON.parse(readFileSync(resolve(root, manifest.census.path), 'utf
 test('G11 corpus diagnostic contract binds the frozen tuple, census, policy hashes and threat classes', () => {
   const result = validateRiveCorpusManifest(manifest, census, { root });
   assert.equal(result.status, 'passed', result.violations.join('\n'));
-  assert.equal(result.summary.formalAssetCount, 0);
+  assert.equal(result.summary.formalAssetCount, 8);
+  assert.equal(result.summary.officialAssetSourceCount, 8);
   assert.equal(result.summary.adversarialCaseCount, 28);
   assert.equal(manifest.diagnosticUpstreamSources.length, 2);
   assert.deepEqual(result.summary.uncovered, {
-    objectKeys: 288,
-    propertyKeys: 611,
+    objectKeys: 274,
+    propertyKeys: 595,
     scriptModuleKeys: 48,
     scriptSymbolKeys: 349,
     assetTypeKeys: 14,
@@ -32,10 +33,53 @@ test('diagnostic upstream repositories cannot become formal assets by implicatio
   assert.ok(result.violations.some(value => value.includes('formal eligibility')));
 });
 
-test('formal corpus validation refuses empty or incomplete licensed evidence', () => {
+test('official repository inputs require immutable paths, hashes and no-vendoring policy', () => {
+  const changed = structuredClone(manifest);
+  changed.officialAssetSources[0].downloadUrl = 'https://raw.githubusercontent.com/rive-app/rive-runtime/main/example.riv';
+  changed.officialAssetSources[0].storagePolicy = 'repository-pinned';
+  const result = validateRiveCorpusManifest(changed, census, { root });
+  assert.equal(result.status, 'failed');
+  assert.ok(result.violations.some(value => value.includes('downloadUrl is not immutable')));
+  assert.ok(result.violations.some(value => value.includes('storage policy is invalid')));
+});
+
+test('an official Git formal asset identity does not require Cloud revision or a checked-in riv path', () => {
+  const changed = structuredClone(manifest);
+  const source = changed.officialAssetSources[0];
+  changed.formalAssets.push({
+    id: 'official-remote-contract-probe',
+    kind: 'feature-isolated',
+    sourceIdentity: { kind: 'official-git', officialAssetSourceId: source.id },
+    storagePolicy: 'remote-hash-pinned-no-vendoring',
+    riv: { sourceUrl: source.downloadUrl, sha256: source.sha256, byteLength: source.byteLength },
+    externalAssets: [],
+    license: {
+      id: 'MIT',
+      evidence: source.license.evidence,
+      visibility: 'public-redistributable',
+      attribution: 'Rive runtime official fixture, MIT',
+      allowedUses: Object.fromEntries([
+        'import', 'modificationAndDerivative', 'automatedOracleExecution', 'ciStorage',
+        'screenshotAndAudioEvidence', 'hyaRedistribution',
+      ].map(key => [key, true])),
+    },
+    featureFamilies: ['import-neutral-ir'],
+    objectKeys: [], propertyKeys: [], scriptModuleKeys: [], scriptSymbolKeys: [], assetTypeKeys: [],
+    fixtureOwner: 'G11',
+    oracleTraceId: 'contract-probe',
+    workloadScenario: {},
+  });
+  const result = validateRiveCorpusManifest(changed, census, { root });
+  assert.equal(result.status, 'failed');
+  assert.ok(result.violations.some(value => value.includes('workloadScenario')));
+  assert.ok(!result.violations.some(value => value.includes('riveCloudFileRevisionId')));
+  assert.ok(!result.violations.some(value => value.includes('.riv.path')));
+});
+
+test('formal corpus validation refuses admitted inputs whose traces or full coverage are incomplete', () => {
   const result = validateRiveCorpusManifest(manifest, census, { formal: true, root });
   assert.equal(result.status, 'failed');
-  assert.ok(result.violations.includes('formalAssets is empty'));
+  assert.ok(result.violations.some(value => value.includes('is not trace-ready')));
   assert.ok(result.violations.some(value => value.includes('uncovered frozen census keys')));
   assert.ok(result.violations.some(value => value.includes('missing real product asset')));
 });

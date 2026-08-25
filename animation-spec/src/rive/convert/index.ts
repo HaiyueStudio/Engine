@@ -4,6 +4,7 @@ export { sampleBakedTracks } from './adaptive-sampler.js';
 export { compileRiveNeutralPlan } from './compiler.js';
 export type { CompiledRiveConversion, CompiledRiveFile } from './compiler.js';
 export { convertRiveToHya } from './convert.js';
+export { convertRivBytesToHya } from './pipeline.js';
 export { RiveConversionError } from './diagnostics.js';
 export { assembleRivePackage, decodeRiveHyaArchive, encodeRiveHyaArchive, prepareRiveAssets } from './package.js';
 export type { AssembledRivePackage, PreparedPackageAsset, PreparedRiveAssets } from './package.js';
@@ -17,6 +18,9 @@ export {
 export type {
   ConvertRiveToHyaInput,
   ConvertRiveToHyaOptions,
+  ConvertRivBytesToHyaOptions,
+  RiveCapabilityEvaluationRequest,
+  RiveCapabilityEvaluator,
   RiveBakedTrackPlan,
   RiveBakingObservables,
   RiveCapabilityArtifact,

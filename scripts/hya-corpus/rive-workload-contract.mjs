@@ -54,6 +54,9 @@ export function validateRiveWorkloadPlan(plan) {
   equal(plan?.compatibilityTupleId, 'rive-7.3-webgl2-2.40.0', 'tuple id');
   equal(plan?.traceContract, 'haiyue-rive-oracle-differential-trace@2', 'trace contract');
   equal(plan?.scenarioContract, 'haiyue-rive-workload-scenario@1', 'scenario contract');
+  equal(plan?.selectionPolicy?.artboard, 'required-existing-name', 'artboard selection policy');
+  equal(plan?.selectionPolicy?.animation, 'existing-name-or-null-when-the-selected-artboard-has-no-animation', 'animation selection policy');
+  equal(plan?.selectionPolicy?.stateMachine, 'required-existing-name', 'state-machine selection policy');
   exactSet(plan?.requiredTraceChannels, CHANNELS, 'required trace channels');
   exactSet(plan?.requiredActionKinds, ACTION_KINDS, 'required action kinds');
   exactSet(plan?.requiredLifecyclePaths, LIFECYCLE_PATHS, 'required lifecycle paths');
@@ -150,7 +153,9 @@ export function validateRiveWorkloadScenario(scenario, plan, { expectedAssetId =
   if (expectedRivSha256) equal(scenario?.rivSha256, expectedRivSha256, 'expected RIV hash');
   equal(scenario?.compatibilityTupleId, plan?.compatibilityTupleId, 'tuple id');
   exactKeys(scenario?.selection, ['artboard', 'animation', 'stateMachine'], 'selection');
-  for (const key of ['artboard', 'animation', 'stateMachine']) requiredString(scenario?.selection?.[key], `selection ${key}`);
+  requiredString(scenario?.selection?.artboard, 'selection artboard');
+  if (scenario?.selection?.animation !== null) requiredString(scenario?.selection?.animation, 'selection animation');
+  requiredString(scenario?.selection?.stateMachine, 'selection stateMachine');
   if (!isBoundedJson(scenario?.initialData) || Array.isArray(scenario?.initialData) || scenario?.initialData === null) violations.push('initial data must be a bounded JSON object');
   const resources = array(scenario?.initialResources, 'initial resources');
   const resourceIds = new Set();

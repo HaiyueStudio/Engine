@@ -1,0 +1,436 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-rive-workload-scenario",
+  "id": "official-inventory-demo-v2-full-workload",
+  "assetId": "official-inventory-demo-v2",
+  "rivSha256": "6ff18f16bc96efe5fa7027bf5f149c55d722f5894f6f28083548d65ec40ca9cf",
+  "compatibilityTupleId": "rive-7.3-webgl2-2.40.0",
+  "selection": {
+    "artboard": "Inventory",
+    "animation": "Timeline 1",
+    "stateMachine": "State Machine 1"
+  },
+  "initialData": {
+    "harnessProbe": {
+      "value": 0
+    },
+    "sourceStateMachineInput": null
+  },
+  "initialResources": [
+    {
+      "id": "harness-empty-resource",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "revision": "sha256-empty-v1",
+      "mimeType": "application/octet-stream",
+      "byteLength": 0
+    }
+  ],
+  "clockStepsMicros": [
+    0,
+    125000,
+    250000,
+    375000,
+    500000,
+    625000,
+    750000,
+    875000,
+    1000000,
+    1125000,
+    1250000,
+    1375000,
+    1500000,
+    1625000,
+    1750000,
+    1875000,
+    2000000
+  ],
+  "actions": [
+    {
+      "id": "action-initialize",
+      "kind": "initialize",
+      "atMicros": 0,
+      "payload": {
+        "viewportId": "desktop-1x",
+        "reducedMotion": false
+      },
+      "expectedChannels": [
+        "pixels",
+        "geometryAndDrawOrder",
+        "stateMachineState",
+        "dataValues",
+        "events",
+        "pointerKeyboardGamepadFocus",
+        "resizeAndDpr",
+        "audioSchedule",
+        "semanticTreeAndActions",
+        "resourceReplacement",
+        "errorsAndOwners"
+      ]
+    },
+    {
+      "id": "action-resize-desktop-2x",
+      "kind": "resize",
+      "atMicros": 125000,
+      "payload": {
+        "viewportId": "desktop-2x"
+      },
+      "expectedChannels": [
+        "resizeAndDpr"
+      ]
+    },
+    {
+      "id": "action-resize-mobile-3x",
+      "kind": "resize",
+      "atMicros": 250000,
+      "payload": {
+        "viewportId": "mobile-3x"
+      },
+      "expectedChannels": [
+        "resizeAndDpr"
+      ]
+    },
+    {
+      "id": "action-seek",
+      "kind": "seek",
+      "atMicros": 375000,
+      "payload": {
+        "timeMicros": 1500000
+      },
+      "expectedChannels": [
+        "pixels",
+        "geometryAndDrawOrder",
+        "stateMachineState",
+        "events",
+        "audioSchedule"
+      ]
+    },
+    {
+      "id": "action-data",
+      "kind": "data-mutation",
+      "atMicros": 500000,
+      "payload": {
+        "operation": "set",
+        "path": "harnessProbe.value",
+        "value": 1
+      },
+      "expectedChannels": [
+        "dataValues"
+      ]
+    },
+    {
+      "id": "action-pointer-down",
+      "kind": "pointer",
+      "atMicros": 625000,
+      "payload": {
+        "phase": "down",
+        "x": 960,
+        "y": 540,
+        "pointerId": 1,
+        "buttons": 1
+      },
+      "expectedChannels": [
+        "pointerKeyboardGamepadFocus"
+      ]
+    },
+    {
+      "id": "action-pointer-move",
+      "kind": "pointer",
+      "atMicros": 750000,
+      "payload": {
+        "phase": "move",
+        "x": 961,
+        "y": 541,
+        "pointerId": 1,
+        "buttons": 1
+      },
+      "expectedChannels": [
+        "pointerKeyboardGamepadFocus"
+      ]
+    },
+    {
+      "id": "action-pointer-up",
+      "kind": "pointer",
+      "atMicros": 875000,
+      "payload": {
+        "phase": "up",
+        "x": 962,
+        "y": 542,
+        "pointerId": 1,
+        "buttons": 0
+      },
+      "expectedChannels": [
+        "pointerKeyboardGamepadFocus"
+      ]
+    },
+    {
+      "id": "action-pointer-exit",
+      "kind": "pointer",
+      "atMicros": 1000000,
+      "payload": {
+        "phase": "exit",
+        "x": 963,
+        "y": 543,
+        "pointerId": 1,
+        "buttons": 0
+      },
+      "expectedChannels": [
+        "pointerKeyboardGamepadFocus"
+      ]
+    },
+    {
+      "id": "action-keyboard-down",
+      "kind": "keyboard",
+      "atMicros": 1125000,
+      "payload": {
+        "phase": "down",
+        "code": "Enter",
+        "key": "Enter",
+        "repeat": false,
+        "modifiers": {
+          "alt": false,
+          "ctrl": false,
+          "meta": false,
+          "shift": false
+        }
+      },
+      "expectedChannels": [
+        "pointerKeyboardGamepadFocus"
+      ]
+    },
+    {
+      "id": "action-keyboard-up",
+      "kind": "keyboard",
+      "atMicros": 1250000,
+      "payload": {
+        "phase": "up",
+        "code": "Enter",
+        "key": "Enter",
+        "repeat": false,
+        "modifiers": {
+          "alt": false,
+          "ctrl": false,
+          "meta": false,
+          "shift": false
+        }
+      },
+      "expectedChannels": [
+        "pointerKeyboardGamepadFocus"
+      ]
+    },
+    {
+      "id": "action-gamepad-connect",
+      "kind": "gamepad",
+      "atMicros": 1375000,
+      "payload": {
+        "operation": "connect",
+        "index": 0,
+        "axes": [
+          0,
+          0
+        ],
+        "buttons": [
+          0
+        ]
+      },
+      "expectedChannels": [
+        "pointerKeyboardGamepadFocus"
+      ]
+    },
+    {
+      "id": "action-gamepad-sample",
+      "kind": "gamepad",
+      "atMicros": 1500000,
+      "payload": {
+        "operation": "sample",
+        "index": 0,
+        "axes": [
+          0,
+          0
+        ],
+        "buttons": [
+          1
+        ]
+      },
+      "expectedChannels": [
+        "pointerKeyboardGamepadFocus"
+      ]
+    },
+    {
+      "id": "action-gamepad-disconnect",
+      "kind": "gamepad",
+      "atMicros": 1625000,
+      "payload": {
+        "operation": "disconnect",
+        "index": 0,
+        "axes": [
+          0,
+          0
+        ],
+        "buttons": [
+          0
+        ]
+      },
+      "expectedChannels": [
+        "pointerKeyboardGamepadFocus"
+      ]
+    },
+    {
+      "id": "action-focus-request",
+      "kind": "focus",
+      "atMicros": 1750000,
+      "payload": {
+        "operation": "request",
+        "target": "artboard:Inventory"
+      },
+      "expectedChannels": [
+        "pointerKeyboardGamepadFocus"
+      ]
+    },
+    {
+      "id": "action-focus-next",
+      "kind": "focus",
+      "atMicros": 1750000,
+      "payload": {
+        "operation": "next"
+      },
+      "expectedChannels": [
+        "pointerKeyboardGamepadFocus"
+      ]
+    },
+    {
+      "id": "action-focus-previous",
+      "kind": "focus",
+      "atMicros": 1750000,
+      "payload": {
+        "operation": "previous"
+      },
+      "expectedChannels": [
+        "pointerKeyboardGamepadFocus"
+      ]
+    },
+    {
+      "id": "action-focus-clear",
+      "kind": "focus",
+      "atMicros": 1750000,
+      "payload": {
+        "operation": "clear"
+      },
+      "expectedChannels": [
+        "pointerKeyboardGamepadFocus"
+      ]
+    },
+    {
+      "id": "action-resource-applied",
+      "kind": "resource-replacement",
+      "atMicros": 1750000,
+      "payload": {
+        "resourceId": "harness-empty-resource",
+        "outcome": "applied",
+        "expectedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "replacementSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "revision": "sha256-empty-v1"
+      },
+      "expectedChannels": [
+        "resourceReplacement"
+      ]
+    },
+    {
+      "id": "action-resource-missing",
+      "kind": "resource-replacement",
+      "atMicros": 1875000,
+      "payload": {
+        "resourceId": "harness-missing-resource",
+        "outcome": "missing",
+        "expectedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "replacementSha256": null,
+        "revision": "missing-v1"
+      },
+      "expectedChannels": [
+        "resourceReplacement"
+      ]
+    },
+    {
+      "id": "action-resource-integrity",
+      "kind": "resource-replacement",
+      "atMicros": 1875000,
+      "payload": {
+        "resourceId": "harness-empty-resource",
+        "outcome": "integrity-failure",
+        "expectedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "replacementSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+        "revision": "invalid-v1"
+      },
+      "expectedChannels": [
+        "resourceReplacement"
+      ]
+    },
+    {
+      "id": "action-semantic-tap",
+      "kind": "semantic-action",
+      "atMicros": 1875000,
+      "payload": {
+        "target": "artboard:Inventory",
+        "action": "tap"
+      },
+      "expectedChannels": [
+        "semanticTreeAndActions"
+      ]
+    },
+    {
+      "id": "action-semantic-increase",
+      "kind": "semantic-action",
+      "atMicros": 1875000,
+      "payload": {
+        "target": "artboard:Inventory",
+        "action": "increase"
+      },
+      "expectedChannels": [
+        "semanticTreeAndActions"
+      ]
+    },
+    {
+      "id": "action-semantic-decrease",
+      "kind": "semantic-action",
+      "atMicros": 1875000,
+      "payload": {
+        "target": "artboard:Inventory",
+        "action": "decrease"
+      },
+      "expectedChannels": [
+        "semanticTreeAndActions"
+      ]
+    },
+    {
+      "id": "action-semantic-focus",
+      "kind": "semantic-action",
+      "atMicros": 1875000,
+      "payload": {
+        "target": "artboard:Inventory",
+        "action": "focus"
+      },
+      "expectedChannels": [
+        "semanticTreeAndActions"
+      ]
+    },
+    {
+      "id": "action-reduced-motion",
+      "kind": "reduced-motion",
+      "atMicros": 2000000,
+      "payload": {
+        "enabled": true
+      },
+      "expectedChannels": [
+        "semanticTreeAndActions"
+      ]
+    }
+  ],
+  "lifecyclePaths": [
+    "normal",
+    "abort",
+    "reimport",
+    "project-close",
+    "device-loss",
+    "late-result"
+  ],
+  "replayCount": 2
+}

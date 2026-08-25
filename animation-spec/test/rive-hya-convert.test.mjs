@@ -53,6 +53,69 @@ test('G10 emits byte-exact package and independently playable binary HYA', async
   assert.equal(archiveText.includes('SecretRiveSourceType'), false, 'source registry names must not enter the runtime package');
 });
 
+test('G10 production pipeline executes raw RIV import and a revision-pinned capability evaluator', async () => {
+  const descriptor = {
+    adapterId: 'g10-empty-artboard-adapter', adapterRevisionSha256: 'a'.repeat(64),
+    evaluatorId: 'g10-empty-artboard-evaluator', evaluatorRevisionSha256: 'b'.repeat(64), optionsRevision: 'strict-v1',
+  };
+  const evaluator = {
+    descriptor,
+    async evaluate(request) {
+      assert.equal(request.imported.report.input.major, 7);
+      assert.deepEqual(request.imported.report.registryCoverage.encounteredObjectTypeKeys, [1]);
+      const object = request.imported.ir.objects[0];
+      return {
+        format: 'haiyue-rive-neutral-capability-evaluation', version: 1,
+        inputIrSha256: request.inputIrSha256, tuple: descriptor,
+        baseDocument: {
+          format: 'haiyue-animation', version: '1.0',
+          canvas: { width: 1, height: 1, coordinateSystem: 'screen-y-down' }, duration: 1,
+          nodes: [{ id: object.id }],
+        },
+        artifacts: [],
+        coverage: [{ objectId: object.id, propertyIds: [], capability: 'hya-core', representation: 'native-semantic' }],
+        bakedTracks: [], assets: [],
+        featureLedger: [{ feature: 'core.empty-artboard', capability: 'hya-core', representation: 'native-semantic', count: 1 }],
+        classification: { unclassifiedObjects: 0, unclassifiedProperties: 0, unclassifiedAssets: 0, unclassifiedScripts: 0 },
+      };
+    },
+  };
+  const result = await converter.convertRivBytesToHya(minimalRiv(), { capabilityEvaluator: evaluator });
+  assert.equal(result.report.coverage.objects, 1);
+  assert.equal(result.report.coverage.properties, 0);
+  assert.equal(result.report.tuple.evaluatorId, descriptor.evaluatorId);
+  assert.equal(parseAnimation(result.hyaBytes.buffer.slice(result.hyaBytes.byteOffset, result.hyaBytes.byteOffset + result.hyaBytes.byteLength)).nodes[0].id, 'object:00000000');
+});
+
+test('G10 production pipeline rejects evaluator tuple substitution', async () => {
+  const descriptor = {
+    adapterId: 'adapter', adapterRevisionSha256: 'a'.repeat(64), evaluatorId: 'evaluator', evaluatorRevisionSha256: 'b'.repeat(64), optionsRevision: 'v1',
+  };
+  const evaluator = {
+    descriptor,
+    async evaluate(request) {
+      return {
+        format: 'haiyue-rive-neutral-capability-evaluation', version: 1, inputIrSha256: request.inputIrSha256,
+        tuple: { ...descriptor, evaluatorId: 'substituted' },
+        baseDocument: { format: 'haiyue-animation', version: '1.0', canvas: { width: 1, height: 1, coordinateSystem: 'screen-y-down' }, duration: 0, nodes: [] },
+        artifacts: [], coverage: [], bakedTracks: [], assets: [], featureLedger: [],
+        classification: { unclassifiedObjects: 0, unclassifiedProperties: 0, unclassifiedAssets: 0, unclassifiedScripts: 0 },
+      };
+    },
+  };
+  await assert.rejects(converter.convertRivBytesToHya(minimalRiv(false), { capabilityEvaluator: evaluator }), error => error.code === 'E_RIVE_CONVERT_FORMAT' && /tuple/u.test(error.message));
+});
+
+test('G10 production pipeline classifies an unstructured evaluator failure', async () => {
+  const descriptor = {
+    adapterId: 'adapter', adapterRevisionSha256: 'a'.repeat(64), evaluatorId: 'evaluator', evaluatorRevisionSha256: 'b'.repeat(64), optionsRevision: 'v1',
+  };
+  await assert.rejects(
+    converter.convertRivBytesToHya(minimalRiv(false), { capabilityEvaluator: { descriptor, async evaluate() { throw new Error('provider failed'); } } }),
+    error => error.code === 'E_RIVE_CONVERT_INTERNAL' && error.path === '$.options.capabilityEvaluator.evaluate',
+  );
+});
+
 test('G10 validates a versioned visual sidecar and keeps it in the deterministic package', async () => {
   const input = await fixture({
     artifacts: [{
@@ -276,6 +339,10 @@ function baseDocument(overrides = {}) {
 
 function allObservables(value) {
   return { input: value, data: value, layoutResize: value, event: value, audio: value, semantics: value, script: value, resourceReplacement: value, stateExposure: value };
+}
+
+function minimalRiv(withArtboard = true) {
+  return new Uint8Array([82, 73, 86, 69, 7, 3, 0, 0, ...(withArtboard ? [1, 0] : [])]);
 }
 
 function capabilityDocuments() {

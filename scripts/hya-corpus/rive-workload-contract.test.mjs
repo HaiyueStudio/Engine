@@ -37,6 +37,13 @@ test('full scenario binds every observable channel to an ordered action stream',
   assert.equal(result.status, 'passed', result.violations.join('\n'));
 });
 
+test('a static official artboard records an explicit null animation selection', () => {
+  const scenario = validScenario();
+  scenario.selection.animation = null;
+  const result = validateRiveWorkloadScenario(scenario, plan, { expectedAssetId: 'fixture', expectedRivSha256: HASH });
+  assert.equal(result.status, 'passed', result.violations.join('\n'));
+});
+
 test('scenario cannot hide a missing input channel or lifecycle path', () => {
   const scenario = validScenario();
   scenario.actions = scenario.actions.filter(action => action.kind !== 'gamepad');

@@ -5,6 +5,11 @@
   "compatibilityTupleId": "rive-7.3-webgl2-2.40.0",
   "traceContract": "haiyue-rive-oracle-differential-trace@2",
   "scenarioContract": "haiyue-rive-workload-scenario@1",
+  "selectionPolicy": {
+    "artboard": "required-existing-name",
+    "animation": "existing-name-or-null-when-the-selected-artboard-has-no-animation",
+    "stateMachine": "required-existing-name"
+  },
   "requiredTraceChannels": [
     "pixels",
     "geometryAndDrawOrder",

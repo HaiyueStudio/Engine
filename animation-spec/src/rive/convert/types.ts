@@ -1,4 +1,4 @@
-import type { RiveNeutralImportResult } from '../import/types.js';
+import type { ImportFrozenRivOptions, RiveNeutralImportResult } from '../import/types.js';
 import type { AnimationDocument, AnimationTrackProperty } from '../../types.js';
 
 export const RIVE_HYA_PACKAGE_FORMAT = 'haiyue-rive-hya-package' as const;
@@ -176,6 +176,25 @@ export interface ConvertRiveToHyaOptions {
 export interface ConvertRiveToHyaInput {
   readonly imported: RiveNeutralImportResult;
   readonly evaluation: RiveNeutralCapabilityEvaluation;
+}
+
+export interface RiveCapabilityEvaluationRequest {
+  /** Owned copy of the untrusted source bytes. Available only at the build-time adapter boundary. */
+  readonly rivBytes: Uint8Array;
+  readonly imported: RiveNeutralImportResult;
+  readonly inputIrSha256: string;
+}
+
+export interface RiveCapabilityEvaluator {
+  readonly descriptor: RiveConversionTuple;
+  evaluate(request: RiveCapabilityEvaluationRequest, signal: AbortSignal): Promise<RiveNeutralCapabilityEvaluation>;
+}
+
+export interface ConvertRivBytesToHyaOptions {
+  readonly capabilityEvaluator: RiveCapabilityEvaluator;
+  readonly signal?: AbortSignal;
+  readonly importer?: Omit<ImportFrozenRivOptions, 'signal'>;
+  readonly conversion?: Omit<ConvertRiveToHyaOptions, 'signal'>;
 }
 
 export interface RivePackageFileEntry { readonly path: string; readonly mediaType: string; readonly byteLength: number; readonly sha256: string; }

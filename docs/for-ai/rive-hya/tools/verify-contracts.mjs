@@ -70,13 +70,16 @@ for (const contract of Object.values(census.familyContracts)) {
   invariant(goals.has(contract.goal), `Census family owner is not a milestone goal: ${contract.goal}`);
 }
 invariant(goals.get('g01-compatibility-license-security-contracts')?.status === 'complete', 'G01 milestone status is not complete.');
-invariant(goals.get('g02-riv-import-neutral-ir')?.status === 'ready', 'G02 milestone status is not ready.');
+invariant(goals.get('g02-riv-import-neutral-ir')?.status === 'complete', 'G02 milestone status is not complete.');
 
 invariant(denyList.forbiddenPackages.includes('@rive-app/webgl2'), 'Oracle package is not denied from browser closure.');
 invariant(denyList.forbiddenFileGlobs.includes('**/*.riv'), 'Raw .riv is not denied from browser closure.');
 invariant(corpus.productCases.length >= 4, 'At least four product cases are required.');
 invariant(corpus.minimumCorpus.adversarialAssets >= 24, 'Adversarial corpus floor regressed.');
 invariant(corpus.requiredAssetMetadata.includes('licenseEvidence'), 'Corpus license evidence is not required.');
+invariant(corpus.requiredAssetMetadata.includes('sourceIdentity'), 'Corpus immutable source identity is not required.');
+invariant(corpus.requiredAssetMetadata.includes('storagePolicy'), 'Corpus storage policy is not required.');
+invariant(compatibility.officialRepositoryAssetIdentity.storagePolicy === 'remote-hash-pinned-no-vendoring', 'Official repository inputs must not be vendored.');
 
 console.log(JSON.stringify({
   tuple: compatibility.id,

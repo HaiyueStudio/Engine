@@ -16,6 +16,8 @@ M07 is admitted for four real HaiYue workflows frozen in [`corpus-oracle-manifes
 
 G11 owns content acquisition. `formalAssets` is intentionally empty at G01 and cannot be treated as release evidence；G01 freezes the schema, minimum counts and admission rules so later work cannot choose an easier corpus after implementation。
 
+Official `rive-app` repository fixtures listed in [`official-asset-sources.md`](./official-asset-sources.md) are admissible remote inputs without copying their `.riv` bytes into this repository. A formal run materializes the exact commit/path URL in ephemeral storage, verifies byte length and SHA-256 before parsing, records source/license attribution, and removes the temporary input after the owner closes. The link and hash establish input identity only；the formal result still requires the complete frozen oracle/HYA workload and validated artifacts. Red results remain in the denominator。
+
 ## Oracle trace protocol
 
 Each case records：
@@ -69,4 +71,3 @@ One candidate report binds a clean Engine revision, packed package hashes, Edito
 - license/provenance/attribution inventory。
 
 Smoke/diagnostic runs never replace formal evidence。Formal evidence requires the full workload, required real devices, current clean revision and artifact validator。
-

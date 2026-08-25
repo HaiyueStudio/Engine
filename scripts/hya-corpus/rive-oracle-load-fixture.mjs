@@ -41,9 +41,21 @@ try {
             liveOwners++;
             try {
               instance.advanceAndApply(0);
+              const inputs = [];
+              for (let inputIndex = 0; inputIndex < instance.inputCount(); inputIndex++) {
+                const input = instance.input(inputIndex);
+                inputs.push({
+                  name: input.name,
+                  type: input.type === runtime.SMIInput.bool ? 'boolean'
+                    : input.type === runtime.SMIInput.number ? 'number'
+                      : input.type === runtime.SMIInput.trigger ? 'trigger' : 'unknown',
+                  ...(input.value === undefined ? {} : { value: input.value }),
+                });
+              }
               stateMachines.push({
                 name: definition.name,
-                inputCount: instance.inputCount(),
+                inputCount: inputs.length,
+                inputs,
                 changedStates: collect(instance.stateChangedCount(), item => instance.stateChangedNameByIndex(item)),
                 events: collect(instance.reportedEventCount(), item => instance.reportedEventAt(item)?.name ?? null),
               });

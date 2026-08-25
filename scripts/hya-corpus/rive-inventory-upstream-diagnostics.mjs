@@ -27,6 +27,12 @@ const expectedSources = new Map([
     archiveSha256: '67b05558f8d49a0568533e753501f2e1586160d088020d4f88158f10a537207f',
     licenseSha256: 'fa43eb0d7fbf66f9504182d92dd097311278bb80111a5bf1403c366d6a403144',
   }],
+  ['rive-runtime-official-7-3-evidence-inputs', {
+    repository: 'https://github.com/rive-app/rive-runtime',
+    revision: '3f4047a85f11fecfde8c4d906c0c1654aa12b015',
+    archiveSha256: '021a49ed83ddda9a5e476d8c3a165c0eb44960e6719e751f4711b6b8befe1062',
+    licenseSha256: 'fa43eb0d7fbf66f9504182d92dd097311278bb80111a5bf1403c366d6a403144',
+  }],
 ]);
 const expected = expectedSources.get(sourceId);
 if (!expected) throw new Error(`Unknown diagnostic upstream source ${sourceId}.`);
@@ -73,6 +79,7 @@ for (const path of paths) {
       status: 'rejected',
       code: error instanceof rive.RiveImportError ? error.code : 'E_RIVE_UNCLASSIFIED_DIAGNOSTIC',
       path: error instanceof rive.RiveImportError ? error.path : '$',
+      ...(error instanceof rive.RiveImportError ? { context: error.context } : {}),
     };
   }
   assets.push(record);
@@ -87,7 +94,7 @@ const report = {
   schemaVersion: 1,
   kind: 'haiyue-rive-upstream-diagnostic-inventory',
   formalEvidence: false,
-  formalDisqualifier: 'No Rive Cloud file revision identity or per-content/transitive asset rights record.',
+  formalDisqualifier: 'This aggregate inventory sweep is diagnostic. An individual official path becomes eligible only through an explicit immutable source entry plus a formal workload and validated oracle/HYA artifacts.',
   generatedAt: new Date().toISOString(),
   engineRevision: revision,
   engineDirty: dirty,

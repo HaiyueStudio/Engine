@@ -229,7 +229,7 @@ export function readFrozenRiv(
       if (hierarchy) validateHierarchy(hierarchy, limits, context);
       hierarchy = [];
     }
-    if (source.lineage.includes('Component')) {
+    if (source.lineage.includes('Component') && !isRootScopedComponent(source)) {
       if (!hierarchy) {
         throw new RiveImportError('E_RIVE_REFERENCE_INVALID', 'Component appears outside an artboard hierarchy.', `$.riv.objects[typeKey=${typeKey}][index=${sourceObjectIndex}]`, objectContext);
       }
@@ -252,6 +252,15 @@ export function readFrozenRiv(
       listItems: counts.listItems,
     }),
   });
+}
+
+function isRootScopedComponent(source: FrozenObjectRecord): boolean {
+  // View-model aggregates and scroll-physics definitions are serialized in
+  // file-level sections before the first artboard. Their historical Component
+  // inheritance does not make them members of an artboard hierarchy.
+  return source.lineage.includes('ViewModelInstance')
+    || source.lineage.includes('ViewModelInstanceValue')
+    || source.lineage.includes('ScrollPhysics');
 }
 
 function readProperty(

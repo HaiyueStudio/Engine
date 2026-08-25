@@ -39,8 +39,8 @@
   "requiredAssetMetadata": [
     "id",
     "kind",
-    "sourceUrlOrInternalAssetId",
-    "riveCloudFileRevisionId",
+    "sourceIdentity",
+    "storagePolicy",
     "rivSha256",
     "externalAssetSha256s",
     "licenseId",
@@ -87,6 +87,9 @@
       "required": true
     }
   ],
-  "acquisitionGate": "G11 may add formalAssets only when every metadata field and redistribution right is present. Empty formalAssets is not release evidence."
+  "sourceIdentityModes": {
+    "rive-cloud": "Rive Cloud file revision id plus exported bytes SHA-256; mutable share links and Editor versions are insufficient.",
+    "official-git": "Official rive-app repository plus 40-character commit, repository path, immutable source/download URLs, byte length, bytes SHA-256 and repository license evidence. Inputs are fetched into ephemeral storage and are never vendored in HaiYue repositories."
+  },
+  "acquisitionGate": "G11 may add formalAssets only when every metadata field and applicable content right is present. Official rive-app Git inputs may rely on immutable commit/path/hash/license attribution and do not require a Rive Cloud revision. A source link proves input identity, not parity: every formal result still requires frozen oracle/HYA traces, device metadata and artifact validation. Empty formalAssets is not release evidence."
 }
-

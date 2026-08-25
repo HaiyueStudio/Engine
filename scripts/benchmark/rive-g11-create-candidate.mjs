@@ -113,7 +113,15 @@ const candidate = {
       rawRivCount: null,
     })),
   },
-  licenses: { assets: [] },
+  licenses: {
+    assets: manifest.formalAssets.map(asset => ({
+      assetId: asset.id,
+      licenseId: asset.license.id,
+      evidence: asset.license.evidence,
+      rightsComplete: Object.values(asset.license.allowedUses).every(value => value === true),
+      transitiveAssetsComplete: asset.externalAssets.length === 0,
+    })),
+  },
   diagnosticFindings,
 };
 const contract = validateRiveG11Candidate(candidate, {
@@ -137,10 +145,11 @@ function hash(bytes) {
 }
 
 function readDiagnosticFindings() {
-  const inventoryPath = resolve(root, 'review/candidates/rive-runtime-7-3-diagnostic-inventory.json');
+  const inventoryPath = resolve(root, 'review/candidates/rive-official-7-3-input-inventory-diagnostic.json');
   const wasmInventoryPath = resolve(root, 'review/candidates/rive-upstream-diagnostic-inventory.json');
-  const oraclePath = resolve(root, 'review/candidates/rive-official-load-chrome-diagnostic.json');
-  const edgePath = resolve(root, 'review/candidates/rive-official-load-edge-diagnostic.json');
+  const oraclePath = resolve(root, 'review/candidates/rive-official-7-3-load-chrome-diagnostic.json');
+  const edgePath = resolve(root, 'review/candidates/rive-official-7-3-load-edge-diagnostic.json');
+  const admissionPath = resolve(root, 'review/candidates/rive-official-7-3-admission-diagnostic.json');
   if (!existsSync(inventoryPath) || !existsSync(oraclePath)) return null;
   const inventoryBytes = readFileSync(inventoryPath);
   const oracleBytes = readFileSync(oraclePath);
@@ -150,6 +159,7 @@ function readDiagnosticFindings() {
   const oracle = JSON.parse(oracleBytes.toString('utf8'));
   const edgeBytes = existsSync(edgePath) ? readFileSync(edgePath) : null;
   const edge = edgeBytes ? JSON.parse(edgeBytes.toString('utf8')) : null;
+  const admissionBytes = existsSync(admissionPath) ? readFileSync(admissionPath) : null;
   const officialLoaded = new Set((oracle.results ?? [])
     .filter(value => value.status === 'completed' && value.result?.loadedCount === 1)
     .map(value => value.path));
@@ -160,6 +170,11 @@ function readDiagnosticFindings() {
   const gateFailures = (oracle.results ?? []).filter(value => value.status === 'browser-gate-failed');
   return {
     formalEvidence: false,
+    officialInputAdmission: admissionBytes ? {
+      path: relative(root, admissionPath).split('\\').join('/'),
+      sha256: hash(admissionBytes),
+      byteLength: admissionBytes.byteLength,
+    } : null,
     runtimeInventory: {
       path: relative(root, inventoryPath).split('\\').join('/'),
       sha256: hash(inventoryBytes),

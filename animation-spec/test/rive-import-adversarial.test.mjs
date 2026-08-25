@@ -61,6 +61,24 @@ test('reference range, hierarchy cycles, and depth bombs are exact failures', as
   await assert.rejects(importFrozenRiv(riv(chain), { limits: { referenceDepth: 3 } }), code('E_RIVE_LIMIT_EXCEEDED'));
 });
 
+test('accepts file-level view-model/scroll-physics objects without weakening component hierarchy checks', async () => {
+  const result = await importFrozenRiv(riv([
+    object(437, [field(4, str('root model'))]),
+    object(442),
+    object(449),
+    object(525),
+    object(1),
+  ]));
+  assert.equal(result.ir.dataModels.length, 3);
+  assert.equal(result.ir.constraints.length, 0);
+  assert.deepEqual(result.report.registryCoverage.encounteredObjectTypeKeys, [1, 437, 442, 449, 525]);
+
+  await assert.rejects(
+    importFrozenRiv(riv([object(2)])),
+    error => error.code === 'E_RIVE_REFERENCE_INVALID' && /outside an artboard hierarchy/u.test(error.message),
+  );
+});
+
 test('object/property/list budgets fire before the next materialization', async () => {
   await assert.rejects(importFrozenRiv(riv([object(1), object(2)]), { limits: { objects: 1 } }), code('E_RIVE_LIMIT_EXCEEDED'));
   await assert.rejects(importFrozenRiv(riv([object(1, [field(4, str('a')), field(7, u32(0))])]), { limits: { propertyAssignments: 1 } }), code('E_RIVE_LIMIT_EXCEEDED'));

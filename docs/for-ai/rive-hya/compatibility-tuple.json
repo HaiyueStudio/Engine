@@ -19,6 +19,14 @@
     "revisionIdentity": "rive-cloud-file-revision-id-plus-exported-bytes-sha256",
     "rule": "Every formal corpus entry records its immutable Rive file revision id. An Editor app version or mutable share link is not a revision identity."
   },
+  "officialRepositoryAssetIdentity": {
+    "organization": "rive-app",
+    "repository": "https://github.com/rive-app/rive-runtime",
+    "revisionKind": "git-commit-plus-path",
+    "requiredFields": ["repository", "commit", "path", "sourceUrl", "downloadUrl", "sha256", "byteLength", "license"],
+    "storagePolicy": "remote-hash-pinned-no-vendoring",
+    "rule": "An official repository .riv may be a formal input when its rive-app repository, 40-character commit, path, immutable URLs, byte length, SHA-256 and license evidence are pinned. The source bytes are fetched into ephemeral storage and hash-verified for a run; they are not committed to HaiYue repositories."
+  },
   "runtimeSource": {
     "repository": "https://github.com/rive-app/rive-runtime",
     "publicCommit": "526625850eaf34fc1263d181808ffca10cae6ac1",

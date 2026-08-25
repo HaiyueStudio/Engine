@@ -26,6 +26,7 @@ The [official Rive runtime documentation](https://rive.app/docs/runtimes/getting
 | Content | Default rights | Formal corpus / output rule |
 | --- | --- | --- |
 | self-owned `.riv` | project owner copyright | record owner approval, Rive file revision id, bytes SHA-256, allowed internal/public uses |
+| official `rive-app` repository `.riv` | exact official repository commit/path and repository license evidence | eligible as a formal remote input under the accepted G11 policy；record immutable human/download URLs, byte length, SHA-256, MIT attribution and transitive assets；fetch to ephemeral storage and do not commit source bytes |
 | Rive Marketplace/Community file | [Marketplace documentation](https://rive.app/docs/community/marketplace-overview) and [Terms §D.6](https://rive.app/docs/legal/terms-of-service) identify Community files as CC BY 4.0 | record creator, title, immutable source URL/revision, CC BY 4.0, attribution text and modification/conversion notice; validate embedded third-party assets separately |
 | private/team Rive file | no rights granted to HaiYue merely by access | require owner authorization; never publish fixture/evidence bytes without explicit redistribution right |
 | font | font EULA/OFL/Apache/etc. file-specific | embedding, subsetting, conversion and redistribution rights all recorded; OFL Reserved Font Name and notice obligations preserved; otherwise internal-only |
@@ -53,6 +54,7 @@ Missing or conflicting evidence yields `E_RIVE_ASSET_LICENSE`. It cannot be down
 ## Accepted policy
 
 - G01 may use the fixed official package/source as build-time research/oracle under MIT。
+- Exact official `rive-app` repository fixtures may be formal evidence inputs when commit/path/URLs/hash/license attribution are pinned；the repository stores only metadata and run artifacts, not `.riv` source bytes。
 - M07 does not vendor or ship official Rive code at G01；future vendoring requires exact dependency commits and aggregated notices。
 - Marketplace material is eligible only with CC BY 4.0 attribution and per-asset transitive review；self-owned corpus is preferred for product and adversarial evidence。
 - No corpus/output license is inferred from successful download, Editor access, runtime export entitlement or a hosted URL。
