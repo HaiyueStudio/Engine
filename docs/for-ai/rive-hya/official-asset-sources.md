@@ -13,7 +13,7 @@
 
 ## Exact 7.3 catalog
 
-| Input | Bytes / SHA-256 | Intended evidence role |
+| Input | Bytes / SHA-256 | Intended evidence roles |
 | --- | --- | --- |
 | [`game_menu_ad_police_files.riv`](https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/game_menu_ad_police_files.riv) | `4,806,420` / `19c7306dbaa741d1d4e3ce7239b98c3a40943f07f1260a92851f2e558fd6e9f5` | large multi-artboard animation/state-machine product-like stress |
 | [`inventory_demo_test_v2.riv`](https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/inventory_demo_test_v2.riv) | `394,478` / `6ff18f16bc96efe5fa7027bf5f149c55d722f5894f6f28083548d65ec40ca9cf` | data/layout/component inventory combination |
@@ -24,10 +24,10 @@
 | [`text_style_background.riv`](https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/text_style_background.riv) | `1,287,851` / `1ffdb33251da4ccd7713555d7fb1f1216326cd52fb7fd1d6206b72471ea9080c` | positive text-style import control |
 | [`double_library_with_image.riv`](https://github.com/rive-app/rive-runtime/blob/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/double_library_with_image.riv) | `749` / `a11cac0f7453147eef9d5a387472ab3235868f404354fe8e44e0a89b2b729162` | positive library/image import control |
 
-每项的机器可读 `downloadUrl`、格式、许可与 storage policy 由 [`rive-g11-corpus-manifest.json`](../../../animation-spec/corpus/rive/rive-g11-corpus-manifest.json) 固定。文档链接用于人工溯源，不是 runner 使用的 mutable 输入。
+每项的机器可读 `downloadUrl`、格式、许可、storage policy 与 `evidenceRoles` 由 [`rive-g11-corpus-manifest.json`](../../../animation-spec/corpus/rive/rive-g11-corpus-manifest.json) 固定。一个素材可同时承担 feature、product、combined-stress 或 property-boundary role；role 不复制 `.riv`，也不减少素材 × 设备 × 浏览器的正式 trace 分母。文档链接用于人工溯源，不是 runner 使用的 mutable 输入。
 
 ## Current diagnostic observation
 
-2026-08-25 的 Chrome 与 Edge 非正式筛查中，上述 8 个输入均可由冻结 official WebGL2 oracle 加载，两个浏览器的 owner residual 均为 0。G02 follow-up 修复了 file-level `ViewModelInstance` aggregate 与 `ScrollPhysics` 被误纳入 artboard component hierarchy 的问题，当前 importer 接受 6 项。剩余两项仍严格拒绝：`game_menu_ad_police_files.riv` 使用冻结 registry 不存在的 object key `526`，`inventory_demo_test_v2.riv` 的 ToC 使用后续 `ViewModelPropertyViewModel.viewModelReferenceId` property key `565`。这两项来自 `.rive_head=584f66bc955f9f163c2b11158e46063c91f01535` 的较新 runtime commit，而 accepted tuple 固定 `.rive_head=ee809ba7f032271dd7102f17afe3baf9d192435b`；在 G01 compatibility addendum 被接受前不得把 schema drift 当作普通 G02 字段补丁。
+2026-08-25 的 Chrome 与 Edge 非正式筛查中，上述 8 个输入均可由冻结 official WebGL2 oracle 加载，两个浏览器的 owner residual 均为 0。G01 compatibility addendum 与 G02 importer follow-up 已显式分类 runtime-null object `526`、property `565`、file-level `ViewModelInstance` aggregate 与 `ScrollPhysics` hierarchy，当前 importer 接受 8 项且未分类失败为 0。
 
-8 项已经进入 G11 `formalAssets` 输入分母，并各自绑定完整 workload scenario、官方浏览器 load/selection/首帧记录、importer feature coverage 或严格失败 diagnostic。G10 follow-up 已提供 raw `.riv` → G02 import → revision-pinned capability evaluator → validated HYA package 的 production pipeline；G11 也已有调用 native official WebGL2 / exact-HYA WebGPU capture adapters、保存每个 channel 原始 bytes 并由 validator 重算 comparison 的 v2 runner。它们仍全部标记为 `not trace-ready`：当前还没有 admitted full-fidelity evaluator 与两端 native capture adapter 完成这些 workload，且当前机器不满足 Node 22、clean revision 和两类物理设备要求。详见 [`rive-official-7-3-admission-diagnostic.json`](../../../review/candidates/rive-official-7-3-admission-diagnostic.json) 与 [`rive-g11-candidate.json`](../../../review/candidates/rive-g11-candidate.json)。
+8 项已经进入 G11 `formalAssets` 输入分母并承担 19 个独立 role，覆盖 8/8 feature family、4/4 product case 与 3 个 combined-stress witness。每项都绑定完整 workload scenario、官方浏览器 load/selection/首帧记录与 importer feature coverage。G10 pipeline 与 G11 v2 runner 通过 [`haiyue-rive-production-adapter@1`](./production-differential-adapter.md) 连接 revision-pinned capability、native official WebGL2 和 exact-HYA WebGPU 可执行宿主，并由 validator 重算全部 channel comparison。它们仍全部标记为 `not trace-ready`：仓库当前没有配置完成这些 workload 的三个 native host，且本机不是 Node 22 clean revision，也不能同时代表两类物理设备。机器可读缺口来自 [`rive-g11-evidence-index.json`](../../../review/candidates/rive-g11-evidence-index.json) 与 [`rive-g11-candidate.json`](../../../review/candidates/rive-g11-candidate.json)。

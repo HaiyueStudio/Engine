@@ -47,6 +47,14 @@ export function validateRiveG11Candidate(candidate, {
   match(candidate?.corpus?.manifestSha256, SHA256, 'corpus manifest hash');
   match(candidate?.corpus?.censusSha256, SHA256, 'census hash');
   if (expectedManifestSha256) equal(candidate?.corpus?.manifestSha256, expectedManifestSha256, 'expected corpus manifest hash');
+  if (manifest) {
+    const roles = (manifest.formalAssets ?? []).flatMap(value => value.evidenceRoles ?? []);
+    equal(candidate?.corpus?.formalAssetCount, manifest.formalAssets?.length ?? 0, 'formal asset count');
+    equal(candidate?.corpus?.evidenceRoleCount, roles.length, 'evidence role count');
+    equal(candidate?.corpus?.realProductWitnessCount, roles.filter(value => value.kind === 'product-witness').length, 'real product witness count');
+    equal(candidate?.corpus?.combinedStressWitnessCount, roles.filter(value => value.kind === 'combined-stress').length, 'combined stress witness count');
+    equal(candidate?.corpus?.featureWitnessCount, roles.filter(value => value.kind === 'feature-witness').length, 'feature witness count');
+  }
   requiredString(candidate?.workloadPlan?.id, 'workload plan id');
   requiredString(candidate?.workloadPlan?.path, 'workload plan path');
   match(candidate?.workloadPlan?.sha256, SHA256, 'workload plan hash');

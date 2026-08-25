@@ -42,6 +42,9 @@ const VISIBILITIES = Object.freeze([
 const STORAGE_POLICIES = Object.freeze([
   'repository-pinned', 'remote-hash-pinned-no-vendoring', 'local-never-upload',
 ]);
+const EVIDENCE_ROLE_KINDS = Object.freeze([
+  'feature-witness', 'property-boundary', 'product-witness', 'combined-stress', 'adversarial',
+]);
 const OFFICIAL_RIVE_REPOSITORY = 'https://github.com/rive-app/rive-runtime';
 
 export function validateRiveCorpusManifest(manifest, census, {
@@ -87,6 +90,8 @@ export function validateRiveCorpusManifest(manifest, census, {
     }
     equal(census?.familyContracts?.[suite?.id]?.goal, suite?.goal, `${suite?.id} Goal owner`);
   }
+  positiveInteger(manifest?.minimums?.realProductWitnesses, 'real product witness minimum');
+  positiveInteger(manifest?.minimums?.combinedStressWitnesses, 'combined stress witness minimum');
 
   const versions = list(manifest?.versionCases, 'version cases');
   equal(versions.length, EXPECTED_VERSION_CASES.length, 'version case count');
@@ -143,12 +148,13 @@ export function validateRiveCorpusManifest(manifest, census, {
 
   const assets = list(manifest?.formalAssets, 'formal assets');
   uniqueValues(assets, 'id', 'formal asset', violations);
+  const productCasesById = new Map((manifest?.productCases ?? []).map(value => [value?.id, value]));
   const coverage = {
     objectKeys: new Set(), propertyKeys: new Set(), scriptModuleKeys: new Set(),
     scriptSymbolKeys: new Set(), assetTypeKeys: new Set(), featureFamilies: new Set(),
   };
   for (const [index, asset] of assets.entries()) {
-    validateFormalAsset(asset, `formalAssets[${index}]`, coverage, securityIds, root, workloadPlan, officialSourcesById, formal, violations);
+    validateFormalAsset(asset, `formalAssets[${index}]`, coverage, securityIds, root, workloadPlan, officialSourcesById, productCasesById, formal, violations);
   }
 
   const allowedCoverage = sourceCensusCoverage(census);
@@ -166,24 +172,25 @@ export function validateRiveCorpusManifest(manifest, census, {
   }
   const uncoveredBehavioralFeatureFamilies = EXPECTED_FAMILIES.filter(value => !coverage.featureFamilies.has(value));
 
-  const realProduct = assets.filter(value => value?.kind === 'real-product');
-  const combinedStress = assets.filter(value => value?.kind === 'combined-stress');
-  const isolated = assets.filter(value => value?.kind === 'feature-isolated');
+  const evidenceRoles = assets.flatMap(asset => (asset?.evidenceRoles ?? []).map(role => ({ asset, role })));
+  const productWitnesses = evidenceRoles.filter(value => value.role?.kind === 'product-witness');
+  const combinedStressWitnesses = evidenceRoles.filter(value => value.role?.kind === 'combined-stress');
+  const featureWitnesses = evidenceRoles.filter(value => value.role?.kind === 'feature-witness');
   for (const family of EXPECTED_FAMILIES) {
-    if (!isolated.some(value => value?.featureFamilies?.length === 1 && value.featureFamilies[0] === family)) {
-      if (formal) violations.push(`missing isolated formal asset for ${family}`);
+    if (!featureWitnesses.some(value => value.role?.featureFamily === family)) {
+      if (formal) violations.push(`missing formal feature witness for ${family}`);
     }
   }
   for (const product of manifest?.productCases ?? []) {
-    if (!realProduct.some(value => value?.productCaseId === product.id)) {
-      if (formal) violations.push(`missing real product asset for ${product.id}`);
+    if (!productWitnesses.some(value => value.role?.productCaseId === product.id)) {
+      if (formal) violations.push(`missing formal product witness for ${product.id}`);
     }
   }
   if (formal) {
     equal(manifest?.status, 'candidate-ready', 'formal manifest status');
     if (assets.length === 0) violations.push('formalAssets is empty');
-    if (realProduct.length < manifest.minimums.realProductAssets) violations.push('real product asset count is below minimum');
-    if (combinedStress.length < manifest.minimums.combinedStressAssets) violations.push('combined stress asset count is below minimum');
+    if (productWitnesses.length < manifest.minimums.realProductWitnesses) violations.push('real product witness count is below minimum');
+    if (combinedStressWitnesses.length < manifest.minimums.combinedStressWitnesses) violations.push('combined stress witness count is below minimum');
     for (const [key, values] of Object.entries(uncovered)) {
       if (values.length > 0) violations.push(`${key} has ${values.length} uncovered binary-evidence keys`);
     }
@@ -201,9 +208,10 @@ export function validateRiveCorpusManifest(manifest, census, {
     summary: Object.freeze({
       formalAssetCount: assets.length,
       officialAssetSourceCount: officialSourceIds.size,
-      realProductAssetCount: realProduct.length,
-      combinedStressAssetCount: combinedStress.length,
-      isolatedAssetCount: isolated.length,
+      evidenceRoleCount: evidenceRoles.length,
+      realProductWitnessCount: productWitnesses.length,
+      combinedStressWitnessCount: combinedStressWitnesses.length,
+      featureWitnessCount: featureWitnesses.length,
       adversarialCaseCount: securityCases.length,
       uncovered: Object.freeze(Object.fromEntries(Object.entries(uncovered).map(([key, values]) => [key, values.length]))),
       sourceAttribution: Object.freeze({
@@ -248,7 +256,7 @@ export function validateRiveCorpusManifest(manifest, census, {
   }
 }
 
-function validateFormalAsset(asset, path, coverage, securityIds, root, workloadPlan, officialSourcesById, formal, violations) {
+function validateFormalAsset(asset, path, coverage, securityIds, root, workloadPlan, officialSourcesById, productCasesById, formal, violations) {
   if (!ID.test(asset?.id ?? '')) violations.push(`${path}.id is invalid`);
   if (!['feature-isolated', 'property-boundary', 'real-product', 'combined-stress', 'adversarial'].includes(asset?.kind)) {
     violations.push(`${path}.kind is invalid`);
@@ -307,6 +315,9 @@ function validateFormalAsset(asset, path, coverage, securityIds, root, workloadP
     violations.push(`${path}.featureFamilies contains an invalid family`);
   }
   for (const family of families) coverage.featureFamilies.add(family);
+  const roles = array(asset?.evidenceRoles, `${path}.evidenceRoles`, violations);
+  uniqueValues(roles, 'id', `${path} evidence role`, violations);
+  if (roles.length === 0) violations.push(`${path}.evidenceRoles must not be empty`);
   addCoverage(coverage.objectKeys, asset?.objectKeys, `${path}.objectKeys`, value => Number.isSafeInteger(value), violations);
   addCoverage(coverage.propertyKeys, asset?.propertyKeys, `${path}.propertyKeys`, value => Number.isSafeInteger(value), violations);
   addCoverage(coverage.scriptModuleKeys, asset?.scriptModuleKeys, `${path}.scriptModuleKeys`, value => typeof value === 'string', violations);
@@ -334,13 +345,14 @@ function validateFormalAsset(asset, path, coverage, securityIds, root, workloadP
   requiredString(scenario?.path, `${path}.workloadScenario.path`, violations);
   if (!SHA256.test(scenario?.sha256 ?? '')) violations.push(`${path}.workloadScenario.sha256 is invalid`);
   if (!Number.isSafeInteger(scenario?.byteLength) || scenario.byteLength < 1) violations.push(`${path}.workloadScenario.byteLength is invalid`);
+  let scenarioValue = null;
   if (root && typeof scenario?.path === 'string') {
     validateAssetFile(root, scenario, `${path}.workloadScenario`, violations);
     const scenarioPath = safeResolve(root, scenario.path, `${path}.workloadScenario.path`, violations);
     if (scenarioPath && workloadPlan) {
       try {
-        const value = JSON.parse(readFileSync(scenarioPath, 'utf8'));
-        const result = validateRiveWorkloadScenario(value, workloadPlan, {
+        scenarioValue = JSON.parse(readFileSync(scenarioPath, 'utf8'));
+        const result = validateRiveWorkloadScenario(scenarioValue, workloadPlan, {
           expectedAssetId: asset.id,
           expectedRivSha256: riv?.sha256,
         });
@@ -349,6 +361,12 @@ function validateFormalAsset(asset, path, coverage, securityIds, root, workloadP
         violations.push(`${path}.workloadScenario cannot be parsed: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
+  }
+  const scenarioActionKinds = scenarioValue
+    ? new Set((scenarioValue.actions ?? []).map(value => value?.kind))
+    : null;
+  for (const [index, role] of roles.entries()) {
+    validateEvidenceRole(role, `${path}.evidenceRoles[${index}]`, families, scenarioActionKinds, workloadPlan, productCasesById, violations);
   }
   if (asset?.kind === 'real-product') requiredString(asset?.productCaseId, `${path}.productCaseId`, violations);
   if (asset?.kind === 'adversarial' && !securityIds.has(asset?.securityCaseId)) {
@@ -367,6 +385,32 @@ function validateFormalAsset(asset, path, coverage, securityIds, root, workloadP
 
 function equalEvidenceStatus(actual, expected, label, violations) {
   if (!expected.includes(actual)) violations.push(`${label} is invalid`);
+}
+
+function validateEvidenceRole(role, path, assetFamilies, scenarioActionKinds, workloadPlan, productCasesById, violations) {
+  if (!ID.test(role?.id ?? '')) violations.push(`${path}.id is invalid`);
+  if (!EVIDENCE_ROLE_KINDS.includes(role?.kind)) violations.push(`${path}.kind is invalid`);
+  const actionKinds = array(role?.actionKinds, `${path}.actionKinds`, violations);
+  if (actionKinds.length === 0) violations.push(`${path}.actionKinds must not be empty`);
+  const requiredActionKinds = new Set(workloadPlan?.requiredActionKinds ?? []);
+  for (const actionKind of actionKinds) {
+    if (!requiredActionKinds.has(actionKind)) violations.push(`${path}.actionKinds contains undeclared action kind ${String(actionKind)}`);
+    else if (scenarioActionKinds && !scenarioActionKinds.has(actionKind)) violations.push(`${path}.actionKinds is not exercised by the pinned scenario: ${actionKind}`);
+  }
+  if (new Set(actionKinds).size !== actionKinds.length) violations.push(`${path}.actionKinds contains duplicates`);
+
+  if (role?.kind === 'feature-witness') {
+    if (!EXPECTED_FAMILIES.includes(role?.featureFamily)) violations.push(`${path}.featureFamily is invalid`);
+    else if (!assetFamilies.includes(role.featureFamily)) violations.push(`${path}.featureFamily is not attributed to the asset`);
+  }
+  if (role?.kind === 'product-witness') {
+    const product = productCasesById.get(role?.productCaseId);
+    if (!product) violations.push(`${path}.productCaseId is not declared`);
+    else {
+      const missingFamilies = (product.requiredFamilies ?? []).filter(value => !assetFamilies.includes(value));
+      if (missingFamilies.length > 0) violations.push(`${path} lacks required product families: ${missingFamilies.join(', ')}`);
+    }
+  }
 }
 
 function validateOfficialAssetSource(source, violations) {

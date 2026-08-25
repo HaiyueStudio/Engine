@@ -47,8 +47,8 @@
   "minimumCorpus": {
     "behavioralWitnessPerFeatureFamily": 1,
     "propertyBoundaryPerBinaryPropertyFamily": 2,
-    "realProductAssets": 4,
-    "combinedStressAssets": 3,
+    "realProductWitnesses": 4,
+    "combinedStressWitnesses": 3,
     "adversarialAssets": 24,
     "formatVersionFixtures": ["7.2-reject-outside-denominator", "7.3-accept", "7.4-reject", "8.0-reject"]
   },
@@ -63,6 +63,7 @@
     "licenseEvidence",
     "allowedUses",
     "featureFamilies",
+    "evidenceRoles",
     "objectKeys",
     "propertyKeys",
     "scriptSymbols",
@@ -107,5 +108,5 @@
     "rive-cloud": "Rive Cloud file revision id plus exported bytes SHA-256; mutable share links and Editor versions are insufficient.",
     "official-git": "Official rive-app repository plus 40-character commit, repository path, immutable source/download URLs, byte length, bytes SHA-256 and repository license evidence. Inputs are fetched into ephemeral storage and are never vendored in HaiYue repositories."
   },
-  "acquisitionGate": "G11 may add formalAssets only when every metadata field and applicable content right is present. Official rive-app Git inputs may rely on immutable commit/path/hash/license attribution and do not require a Rive Cloud revision. A source link proves input identity, not parity: every formal result still requires frozen oracle/HYA traces, device metadata and artifact validation. Empty formalAssets is not release evidence."
+  "acquisitionGate": "G11 may add formalAssets only when every metadata field and applicable content right is present. One immutable official asset may carry multiple independently named evidence roles when its attributed feature families and pinned workload actions satisfy each role; roles never reduce the trace/device matrix. Official rive-app Git inputs may rely on immutable commit/path/hash/license attribution and do not require a Rive Cloud revision. A source link proves input identity, not parity: every formal result still requires frozen oracle/HYA traces, device metadata and artifact validation. Empty formalAssets is not release evidence."
 }

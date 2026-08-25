@@ -21,6 +21,18 @@ const census = JSON.parse(readFileSync(resolve(root, manifest.census.path)));
 const binaryAssetTypeKeys = new Set(census.assets
   .filter(value => value.binaryEvidenceEligible === true)
   .map(value => value.typeKey));
+const familyOrder = [
+  'import-neutral-ir',
+  'vector-paint-composite',
+  'rig-mesh-constraint',
+  'text-layout-component-asset',
+  'timeline-state-machine',
+  'data-interaction-accessibility',
+  'audio-event',
+  'scripting-custom-rendering',
+];
+const objectFamilyByKey = new Map(census.objects.map(value => [value.typeKey, value.family]));
+const propertyFamilyByKey = new Map(census.properties.map(value => [value.key, value.family]));
 const planBytes = readFileSync(planPath);
 const plan = JSON.parse(planBytes);
 const inventoryBytes = readFileSync(inventoryPath);
@@ -121,7 +133,7 @@ for (const source of manifest.officialAssetSources) {
     differentialTrace: {
       status: 'not-run',
       blocker: accepted
-        ? 'The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload.'
+        ? 'The production raw-RIV pipeline, executable adapter bridge and v2 differential orchestration exist, but no configured revision-pinned full-fidelity evaluator plus native official/HYA capture hosts has completed this workload.'
         : 'HaiYue strict import rejects this input before HYA evaluation; the red result is retained as formal-input admission evidence.',
     },
   });
@@ -174,17 +186,34 @@ function selectArtboard(artboards) {
 
 function formalAsset(asset, source) {
   const profiles = {
-    'official-game-menu-ad-police-files': { kind: 'combined-stress', featureFamilies: ['timeline-state-machine', 'data-interaction-accessibility'] },
-    'official-inventory-demo-v2': { kind: 'combined-stress', featureFamilies: ['text-layout-component-asset', 'timeline-state-machine', 'data-interaction-accessibility'] },
-    'official-joystick-databound-keyframe': { kind: 'feature-isolated', featureFamilies: ['rig-mesh-constraint'] },
-    'official-grid-placement-bound': { kind: 'feature-isolated', featureFamilies: ['text-layout-component-asset'] },
-    'official-eight-planets-grid': { kind: 'combined-stress', featureFamilies: ['text-layout-component-asset', 'timeline-state-machine', 'data-interaction-accessibility'] },
-    'official-text-fit': { kind: 'property-boundary', featureFamilies: ['text-layout-component-asset'] },
-    'official-text-style-background': { kind: 'property-boundary', featureFamilies: ['vector-paint-composite', 'text-layout-component-asset'] },
-    'official-double-library-with-image': { kind: 'feature-isolated', featureFamilies: ['text-layout-component-asset'] },
+    'official-game-menu-ad-police-files': {
+      kind: 'combined-stress',
+      roles: [
+        featureRole('import-neutral-ir'), featureRole('audio-event'), featureRole('timeline-state-machine'),
+        featureRole('data-interaction-accessibility'), productRole('game-hud-data-driven'), combinedRole('game-menu'),
+      ],
+    },
+    'official-inventory-demo-v2': {
+      kind: 'combined-stress',
+      roles: [
+        featureRole('text-layout-component-asset'), featureRole('scripting-custom-rendering'),
+        productRole('animation-editor-component-import'), productRole('scripted-custom-control'), combinedRole('inventory'),
+      ],
+    },
+    'official-joystick-databound-keyframe': { kind: 'feature-isolated', roles: [featureRole('rig-mesh-constraint')] },
+    'official-grid-placement-bound': { kind: 'feature-isolated', roles: [propertyRole('grid-layout')] },
+    'official-eight-planets-grid': {
+      kind: 'combined-stress', roles: [productRole('brand-loader-vector-rig'), combinedRole('planets')],
+    },
+    'official-text-fit': { kind: 'property-boundary', roles: [propertyRole('text-fit')] },
+    'official-text-style-background': {
+      kind: 'property-boundary', roles: [featureRole('vector-paint-composite'), propertyRole('text-style-background')],
+    },
+    'official-double-library-with-image': { kind: 'feature-isolated', roles: [propertyRole('library-image')] },
   };
   const profile = required(profiles[asset.id], `admission profile ${asset.id}`);
   const accepted = asset.hyaImport.status === 'accepted';
+  const featureFamilies = deriveFeatureFamilies(asset.featureCoverage);
   return {
     id: asset.id,
     kind: profile.kind,
@@ -206,7 +235,8 @@ function formalAsset(asset, source) {
         hyaRedistribution: true,
       },
     },
-    featureFamilies: profile.featureFamilies,
+    featureFamilies,
+    evidenceRoles: profile.roles,
     objectKeys: asset.featureCoverage.objectKeys,
     propertyKeys: asset.featureCoverage.propertyKeys,
     scriptModuleKeys: [],
@@ -240,6 +270,49 @@ function formalAsset(asset, source) {
       blocker: asset.differentialTrace.blocker,
     },
   };
+}
+
+function deriveFeatureFamilies(coverage) {
+  const families = new Set([
+    ...(coverage.objectKeys ?? []).map(value => objectFamilyByKey.get(value)),
+    ...(coverage.propertyKeys ?? []).map(value => propertyFamilyByKey.get(value)),
+  ].filter(Boolean));
+  return familyOrder.filter(value => families.has(value));
+}
+
+function featureRole(featureFamily) {
+  const actionKindsByFamily = {
+    'import-neutral-ir': ['initialize'],
+    'vector-paint-composite': ['initialize', 'seek'],
+    'rig-mesh-constraint': ['seek', 'pointer'],
+    'text-layout-component-asset': ['initialize', 'resize'],
+    'timeline-state-machine': ['initialize', 'seek', 'data-mutation'],
+    'data-interaction-accessibility': ['data-mutation', 'pointer', 'keyboard', 'gamepad', 'focus', 'semantic-action'],
+    'audio-event': ['initialize', 'seek', 'data-mutation'],
+    'scripting-custom-rendering': ['initialize', 'data-mutation', 'resource-replacement', 'semantic-action'],
+  };
+  return { id: `feature-${featureFamily}`, kind: 'feature-witness', featureFamily, actionKinds: actionKindsByFamily[featureFamily] };
+}
+
+function productRole(productCaseId) {
+  return {
+    id: `product-${productCaseId}`,
+    kind: 'product-witness',
+    productCaseId,
+    actionKinds: ['initialize', 'seek', 'data-mutation', 'pointer', 'keyboard', 'gamepad', 'focus', 'resize', 'resource-replacement', 'semantic-action', 'reduced-motion'],
+  };
+}
+
+function combinedRole(id) {
+  return {
+    id: `combined-${id}`,
+    kind: 'combined-stress',
+    actionKinds: ['initialize', 'seek', 'data-mutation', 'pointer', 'keyboard', 'gamepad', 'focus', 'resize', 'resource-replacement', 'semantic-action', 'reduced-motion'],
+  };
+}
+
+function propertyRole(id) {
+  return { id: `property-${id}`, kind: 'property-boundary', actionKinds: ['initialize', 'seek', 'resize'] };
 }
 
 function pointerProbe(bounds) {

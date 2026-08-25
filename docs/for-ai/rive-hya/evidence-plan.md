@@ -7,11 +7,11 @@ M07 is admitted for four real HaiYue workflows frozen in [`corpus-oracle-manifes
 ## Corpus layers
 
 1. `format-version`：7.2/7.3/7.4/8.0, malformed header/ToC/varints and unknown keys。
-2. `feature-isolated`：each census family and every object/property mapping rule；shared property keys use boundary/easing/animation fixtures。
+2. `feature-witness` evidence role：each census family and every object/property mapping rule；one immutable official asset may carry several independently named roles, and shared property keys use boundary/easing/animation roles。
 3. `script-api`：all 48 modules/349 symbols 的 source owner/classification ledger，以及覆盖八个 feature family 的 allowed/forbidden capability probe 与 typed protocol results；module/symbol 名称不是 `.riv` wire coverage。
 4. `asset`：embedded/referenced/hosted font/image/audio/blob/script/shader plus replacement, missing, corrupt, license and URL cases。
 5. `adversarial`：cycles, graph/decompression/list/event explosion, malicious font/media, infinite Luau, promise storm, output amplification, invalid/expensive WGSL, abort/device loss/late result。
-6. `real-product`：the four frozen workflows with immutable Rive revision, bytes hashes, license provenance and transitive assets。
+6. `product-witness` evidence role：the four frozen workflows with immutable Rive revision, bytes hashes, license provenance and transitive assets；a product role does not require a duplicate `.riv` when an admitted official asset covers its required families and actions。
 7. `combined-stress`：layout + data list + nested component + text + audio + interaction + script under resize/seek/reimport。
 
 G11 owns content acquisition. `formalAssets` is intentionally empty at G01 and cannot be treated as release evidence；G01 freezes the schema, minimum counts and admission rules so later work cannot choose an easier corpus after implementation。

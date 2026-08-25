@@ -14,6 +14,10 @@ test('G11 corpus diagnostic contract binds the frozen tuple, census, policy hash
   assert.equal(result.status, 'passed', result.violations.join('\n'));
   assert.equal(result.summary.formalAssetCount, 8);
   assert.equal(result.summary.officialAssetSourceCount, 8);
+  assert.equal(result.summary.evidenceRoleCount, 19);
+  assert.equal(result.summary.realProductWitnessCount, 4);
+  assert.equal(result.summary.combinedStressWitnessCount, 3);
+  assert.equal(result.summary.featureWitnessCount, 8);
   assert.equal(result.summary.adversarialCaseCount, 28);
   assert.equal(manifest.diagnosticUpstreamSources.length, 2);
   assert.deepEqual(result.summary.uncovered, {
@@ -26,8 +30,8 @@ test('G11 corpus diagnostic contract binds the frozen tuple, census, policy hash
   assert.deepEqual(result.summary.sourceAttribution, { scriptModuleKeys: 0, scriptSymbolKeys: 0 });
   assert.deepEqual(result.summary.behavioral, {
     featureFamilies: 8,
-    coveredFeatureFamilies: 5,
-    uncoveredFeatureFamilies: 3,
+    coveredFeatureFamilies: 8,
+    uncoveredFeatureFamilies: 0,
   });
 });
 
@@ -70,6 +74,7 @@ test('an official Git formal asset identity does not require Cloud revision or a
       ].map(key => [key, true])),
     },
     featureFamilies: ['import-neutral-ir'],
+    evidenceRoles: [{ id: 'feature-import-neutral-ir', kind: 'feature-witness', featureFamily: 'import-neutral-ir', actionKinds: ['initialize'] }],
     objectKeys: [], propertyKeys: [], scriptModuleKeys: [], scriptSymbolKeys: [], assetTypeKeys: [],
     fixtureOwner: 'G11',
     oracleTraceId: 'contract-probe',
@@ -87,8 +92,28 @@ test('formal corpus validation refuses admitted inputs whose traces or full cove
   assert.equal(result.status, 'failed');
   assert.ok(result.violations.some(value => value.includes('is not trace-ready')));
   assert.ok(result.violations.some(value => value.includes('uncovered binary-evidence keys')));
-  assert.ok(result.violations.some(value => value.includes('uncovered feature families')));
-  assert.ok(result.violations.some(value => value.includes('missing real product asset')));
+  assert.ok(!result.violations.some(value => value.includes('missing formal feature witness')));
+  assert.ok(!result.violations.some(value => value.includes('missing formal product witness')));
+});
+
+test('one official asset may satisfy multiple independent evidence roles', () => {
+  const result = validateRiveCorpusManifest(manifest, census, { root });
+  const gameMenu = manifest.formalAssets.find(value => value.id === 'official-game-menu-ad-police-files');
+  assert.ok(gameMenu.evidenceRoles.length > 1);
+  assert.ok(gameMenu.evidenceRoles.some(value => value.kind === 'feature-witness'));
+  assert.ok(gameMenu.evidenceRoles.some(value => value.kind === 'product-witness'));
+  assert.ok(gameMenu.evidenceRoles.some(value => value.kind === 'combined-stress'));
+  assert.equal(result.status, 'passed', result.violations.join('\n'));
+});
+
+test('evidence roles must name exercised actions and product families attributed to that asset', () => {
+  const changed = structuredClone(manifest);
+  changed.formalAssets[0].evidenceRoles[0].actionKinds.push('not-an-action');
+  changed.formalAssets[0].featureFamilies = ['import-neutral-ir'];
+  const result = validateRiveCorpusManifest(changed, census, { root });
+  assert.equal(result.status, 'failed');
+  assert.ok(result.violations.some(value => value.includes('undeclared action kind')));
+  assert.ok(result.violations.some(value => value.includes('lacks required product families')));
 });
 
 test('source-only properties and asset bases cannot be claimed as serialized asset coverage', () => {

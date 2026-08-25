@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-rive-g11-evidence-index",
+  "status": "collecting",
+  "tupleId": "rive-7.3-webgl2-2.40.0",
+  "engineRevision": null,
+  "corpusManifestSha256": null,
+  "workloadPlanSha256": null,
+  "traceArtifacts": [],
+  "devices": [],
+  "performance": {
+    "fullWorkload": false,
+    "assets": []
+  },
+  "browserClosure": {
+    "officialOracleBuildTimeOnly": true,
+    "unclassifiedFailureCount": 0,
+    "scans": [
+      {
+        "name": "packedPlayerTarball",
+        "status": "not-run",
+        "reason": "No clean-revision production differential package has completed the formal matrix."
+      },
+      {
+        "name": "browserBundle",
+        "status": "not-run",
+        "reason": "No clean-revision production differential browser bundle has completed the formal matrix."
+      },
+      {
+        "name": "sourceMap",
+        "status": "not-run",
+        "reason": "No clean-revision production differential source map has completed the formal matrix."
+      },
+      {
+        "name": "networkRequests",
+        "status": "not-run",
+        "reason": "No clean-revision production differential network capture has completed the formal matrix."
+      }
+    ]
+  },
+  "formalRunAttempts": []
+}
+

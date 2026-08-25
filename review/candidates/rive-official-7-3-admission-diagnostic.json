@@ -4,14 +4,14 @@
   "status": "blocked-before-differential-trace",
   "formalEvidence": false,
   "evidenceClass": "dirty-worktree-diagnostic",
-  "generatedAt": "2026-08-25T08:41:39.127Z",
-  "engineRevision": "59b2a951d62e86b564a0d0f529c6a4765dbaad5e",
+  "generatedAt": "2026-08-25T10:49:18.006Z",
+  "engineRevision": "9ae9590aae9851a9e8e2cf504c73438a5f6dcdb0",
   "engineDirty": true,
   "nodeVersion": "v24.19.0",
   "corpusManifest": {
     "path": "animation-spec/corpus/rive/rive-g11-corpus-manifest.json",
-    "sha256": "967362806398e5c0de93bb3a186b97e496803e155fdabfb45f0fd1a3a64ca8b8",
-    "byteLength": 60960
+    "sha256": "8b46d3b5a4754584049f9e0c3ab7f2d41db358ff1a9b617bc00e0e52fee4e099",
+    "byteLength": 68281
   },
   "workloadPlan": {
     "path": "animation-spec/corpus/rive/rive-g11-workload-plan.json",
@@ -311,7 +311,7 @@
       },
       "differentialTrace": {
         "status": "not-run",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "blocker": "The production raw-RIV pipeline, executable adapter bridge and v2 differential orchestration exist, but no configured revision-pinned full-fidelity evaluator plus native official/HYA capture hosts has completed this workload."
       }
     },
     {
@@ -668,7 +668,7 @@
       },
       "differentialTrace": {
         "status": "not-run",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "blocker": "The production raw-RIV pipeline, executable adapter bridge and v2 differential orchestration exist, but no configured revision-pinned full-fidelity evaluator plus native official/HYA capture hosts has completed this workload."
       }
     },
     {
@@ -819,7 +819,7 @@
       },
       "differentialTrace": {
         "status": "not-run",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "blocker": "The production raw-RIV pipeline, executable adapter bridge and v2 differential orchestration exist, but no configured revision-pinned full-fidelity evaluator plus native official/HYA capture hosts has completed this workload."
       }
     },
     {
@@ -932,7 +932,7 @@
       },
       "differentialTrace": {
         "status": "not-run",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "blocker": "The production raw-RIV pipeline, executable adapter bridge and v2 differential orchestration exist, but no configured revision-pinned full-fidelity evaluator plus native official/HYA capture hosts has completed this workload."
       }
     },
     {
@@ -1264,7 +1264,7 @@
       },
       "differentialTrace": {
         "status": "not-run",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "blocker": "The production raw-RIV pipeline, executable adapter bridge and v2 differential orchestration exist, but no configured revision-pinned full-fidelity evaluator plus native official/HYA capture hosts has completed this workload."
       }
     },
     {
@@ -1417,7 +1417,7 @@
       },
       "differentialTrace": {
         "status": "not-run",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "blocker": "The production raw-RIV pipeline, executable adapter bridge and v2 differential orchestration exist, but no configured revision-pinned full-fidelity evaluator plus native official/HYA capture hosts has completed this workload."
       }
     },
     {
@@ -1516,7 +1516,7 @@
       },
       "differentialTrace": {
         "status": "not-run",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "blocker": "The production raw-RIV pipeline, executable adapter bridge and v2 differential orchestration exist, but no configured revision-pinned full-fidelity evaluator plus native official/HYA capture hosts has completed this workload."
       }
     },
     {
@@ -1609,7 +1609,7 @@
       },
       "differentialTrace": {
         "status": "not-run",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "blocker": "The production raw-RIV pipeline, executable adapter bridge and v2 differential orchestration exist, but no configured revision-pinned full-fidelity evaluator plus native official/HYA capture hosts has completed this workload."
       }
     }
   ]

@@ -107,3 +107,4 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0087：Rive 以不可信 build-time source 转换为来源无关 HYA](./0087-rive-hya-source-neutral-full-fidelity.md)
 - [0088：修正 Rive 7.3 property census 并显式冻结 runtime-null object](./0088-rive-7-3-census-and-runtime-null-object-addendum.md)
 - [0089：Rive coverage 分离 source census、binary evidence 与 behavioral evidence](./0089-rive-coverage-evidence-eligibility-addendum.md)
+- [0090：Rive 正式素材使用多 evidence role 与 revision-pinned production adapter](./0090-rive-evidence-roles-and-production-adapter-boundary.md)

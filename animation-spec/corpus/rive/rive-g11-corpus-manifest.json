@@ -62,8 +62,8 @@
   },
   "g01CorpusContract": {
     "path": "docs/for-ai/rive-hya/corpus-oracle-manifest.json",
-    "sha256": "6a0f11c6f644743480ccb35111ce2f715f9cb40e29bea9c88cda336390d663d3",
-    "byteLength": 4749
+    "sha256": "0f6c690ed5bff4ed0a35cd794bbffb2a5460559c98ec73e575c98153893ba19a",
+    "byteLength": 4987
   },
   "oracle": {
     "package": "@rive-app/webgl2",
@@ -351,8 +351,8 @@
     }
   ],
   "minimums": {
-    "realProductAssets": 4,
-    "combinedStressAssets": 3,
+    "realProductWitnesses": 4,
+    "combinedStressWitnesses": 3,
     "adversarialCases": 24,
     "requiredDeviceClasses": 2,
     "requiredBrowsersPerDevice": [
@@ -600,8 +600,90 @@
         }
       },
       "featureFamilies": [
+        "import-neutral-ir",
+        "vector-paint-composite",
+        "text-layout-component-asset",
         "timeline-state-machine",
-        "data-interaction-accessibility"
+        "data-interaction-accessibility",
+        "audio-event"
+      ],
+      "evidenceRoles": [
+        {
+          "id": "feature-import-neutral-ir",
+          "kind": "feature-witness",
+          "featureFamily": "import-neutral-ir",
+          "actionKinds": [
+            "initialize"
+          ]
+        },
+        {
+          "id": "feature-audio-event",
+          "kind": "feature-witness",
+          "featureFamily": "audio-event",
+          "actionKinds": [
+            "initialize",
+            "seek",
+            "data-mutation"
+          ]
+        },
+        {
+          "id": "feature-timeline-state-machine",
+          "kind": "feature-witness",
+          "featureFamily": "timeline-state-machine",
+          "actionKinds": [
+            "initialize",
+            "seek",
+            "data-mutation"
+          ]
+        },
+        {
+          "id": "feature-data-interaction-accessibility",
+          "kind": "feature-witness",
+          "featureFamily": "data-interaction-accessibility",
+          "actionKinds": [
+            "data-mutation",
+            "pointer",
+            "keyboard",
+            "gamepad",
+            "focus",
+            "semantic-action"
+          ]
+        },
+        {
+          "id": "product-game-hud-data-driven",
+          "kind": "product-witness",
+          "productCaseId": "game-hud-data-driven",
+          "actionKinds": [
+            "initialize",
+            "seek",
+            "data-mutation",
+            "pointer",
+            "keyboard",
+            "gamepad",
+            "focus",
+            "resize",
+            "resource-replacement",
+            "semantic-action",
+            "reduced-motion"
+          ]
+        },
+        {
+          "id": "combined-game-menu",
+          "kind": "combined-stress",
+          "actionKinds": [
+            "initialize",
+            "seek",
+            "data-mutation",
+            "pointer",
+            "keyboard",
+            "gamepad",
+            "focus",
+            "resize",
+            "resource-replacement",
+            "semantic-action",
+            "reduced-motion"
+          ]
+        }
       ],
       "objectKeys": [
         1,
@@ -869,9 +951,88 @@
         }
       },
       "featureFamilies": [
+        "import-neutral-ir",
+        "vector-paint-composite",
+        "rig-mesh-constraint",
         "text-layout-component-asset",
         "timeline-state-machine",
-        "data-interaction-accessibility"
+        "data-interaction-accessibility",
+        "scripting-custom-rendering"
+      ],
+      "evidenceRoles": [
+        {
+          "id": "feature-text-layout-component-asset",
+          "kind": "feature-witness",
+          "featureFamily": "text-layout-component-asset",
+          "actionKinds": [
+            "initialize",
+            "resize"
+          ]
+        },
+        {
+          "id": "feature-scripting-custom-rendering",
+          "kind": "feature-witness",
+          "featureFamily": "scripting-custom-rendering",
+          "actionKinds": [
+            "initialize",
+            "data-mutation",
+            "resource-replacement",
+            "semantic-action"
+          ]
+        },
+        {
+          "id": "product-animation-editor-component-import",
+          "kind": "product-witness",
+          "productCaseId": "animation-editor-component-import",
+          "actionKinds": [
+            "initialize",
+            "seek",
+            "data-mutation",
+            "pointer",
+            "keyboard",
+            "gamepad",
+            "focus",
+            "resize",
+            "resource-replacement",
+            "semantic-action",
+            "reduced-motion"
+          ]
+        },
+        {
+          "id": "product-scripted-custom-control",
+          "kind": "product-witness",
+          "productCaseId": "scripted-custom-control",
+          "actionKinds": [
+            "initialize",
+            "seek",
+            "data-mutation",
+            "pointer",
+            "keyboard",
+            "gamepad",
+            "focus",
+            "resize",
+            "resource-replacement",
+            "semantic-action",
+            "reduced-motion"
+          ]
+        },
+        {
+          "id": "combined-inventory",
+          "kind": "combined-stress",
+          "actionKinds": [
+            "initialize",
+            "seek",
+            "data-mutation",
+            "pointer",
+            "keyboard",
+            "gamepad",
+            "focus",
+            "resize",
+            "resource-replacement",
+            "semantic-action",
+            "reduced-motion"
+          ]
+        }
       ],
       "objectKeys": [
         1,
@@ -1227,7 +1388,23 @@
         }
       },
       "featureFamilies": [
-        "rig-mesh-constraint"
+        "import-neutral-ir",
+        "vector-paint-composite",
+        "rig-mesh-constraint",
+        "text-layout-component-asset",
+        "timeline-state-machine",
+        "data-interaction-accessibility"
+      ],
+      "evidenceRoles": [
+        {
+          "id": "feature-rig-mesh-constraint",
+          "kind": "feature-witness",
+          "featureFamily": "rig-mesh-constraint",
+          "actionKinds": [
+            "seek",
+            "pointer"
+          ]
+        }
       ],
       "objectKeys": [
         1,
@@ -1377,7 +1554,20 @@
         }
       },
       "featureFamilies": [
-        "text-layout-component-asset"
+        "import-neutral-ir",
+        "text-layout-component-asset",
+        "data-interaction-accessibility"
+      ],
+      "evidenceRoles": [
+        {
+          "id": "property-grid-layout",
+          "kind": "property-boundary",
+          "actionKinds": [
+            "initialize",
+            "seek",
+            "resize"
+          ]
+        }
       ],
       "objectKeys": [
         1,
@@ -1489,9 +1679,49 @@
         }
       },
       "featureFamilies": [
+        "import-neutral-ir",
+        "vector-paint-composite",
+        "rig-mesh-constraint",
         "text-layout-component-asset",
         "timeline-state-machine",
         "data-interaction-accessibility"
+      ],
+      "evidenceRoles": [
+        {
+          "id": "product-brand-loader-vector-rig",
+          "kind": "product-witness",
+          "productCaseId": "brand-loader-vector-rig",
+          "actionKinds": [
+            "initialize",
+            "seek",
+            "data-mutation",
+            "pointer",
+            "keyboard",
+            "gamepad",
+            "focus",
+            "resize",
+            "resource-replacement",
+            "semantic-action",
+            "reduced-motion"
+          ]
+        },
+        {
+          "id": "combined-planets",
+          "kind": "combined-stress",
+          "actionKinds": [
+            "initialize",
+            "seek",
+            "data-mutation",
+            "pointer",
+            "keyboard",
+            "gamepad",
+            "focus",
+            "resize",
+            "resource-replacement",
+            "semantic-action",
+            "reduced-motion"
+          ]
+        }
       ],
       "objectKeys": [
         1,
@@ -1813,7 +2043,22 @@
         }
       },
       "featureFamilies": [
-        "text-layout-component-asset"
+        "import-neutral-ir",
+        "vector-paint-composite",
+        "text-layout-component-asset",
+        "timeline-state-machine",
+        "data-interaction-accessibility"
+      ],
+      "evidenceRoles": [
+        {
+          "id": "property-text-fit",
+          "kind": "property-boundary",
+          "actionKinds": [
+            "initialize",
+            "seek",
+            "resize"
+          ]
+        }
       ],
       "objectKeys": [
         1,
@@ -1965,8 +2210,29 @@
         }
       },
       "featureFamilies": [
+        "import-neutral-ir",
         "vector-paint-composite",
         "text-layout-component-asset"
+      ],
+      "evidenceRoles": [
+        {
+          "id": "feature-vector-paint-composite",
+          "kind": "feature-witness",
+          "featureFamily": "vector-paint-composite",
+          "actionKinds": [
+            "initialize",
+            "seek"
+          ]
+        },
+        {
+          "id": "property-text-style-background",
+          "kind": "property-boundary",
+          "actionKinds": [
+            "initialize",
+            "seek",
+            "resize"
+          ]
+        }
       ],
       "objectKeys": [
         1,
@@ -2064,7 +2330,20 @@
         }
       },
       "featureFamilies": [
+        "import-neutral-ir",
+        "vector-paint-composite",
         "text-layout-component-asset"
+      ],
+      "evidenceRoles": [
+        {
+          "id": "property-library-image",
+          "kind": "property-boundary",
+          "actionKinds": [
+            "initialize",
+            "seek",
+            "resize"
+          ]
+        }
       ],
       "objectKeys": [
         1,

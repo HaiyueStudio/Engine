@@ -5,18 +5,23 @@ import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateRiveCorpusManifest } from '../hya-corpus/rive-corpus-contract.mjs';
 import { validateRiveG11Candidate } from './rive-g11-candidate-contract.mjs';
+import { validateRiveG11EvidenceIndex } from './rive-g11-evidence-index-contract.mjs';
 import { validateRiveG11SecurityReport } from './rive-g11-security-contract.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const manifestPath = resolve(root, 'animation-spec/corpus/rive/rive-g11-corpus-manifest.json');
 const outputArgument = process.argv.find(value => value.startsWith('--out='));
 const outputPath = resolve(root, outputArgument?.slice('--out='.length) ?? 'review/candidates/rive-g11-candidate.json');
+const evidenceIndexArgument = process.argv.find(value => value.startsWith('--evidence-index='));
+const evidenceIndexPath = resolve(root, evidenceIndexArgument?.slice('--evidence-index='.length) ?? 'review/candidates/rive-g11-evidence-index.json');
 const manifestBytes = readFileSync(manifestPath);
 const manifest = JSON.parse(manifestBytes.toString('utf8'));
 const censusBytes = readFileSync(resolve(root, manifest.census.path));
 const census = JSON.parse(censusBytes.toString('utf8'));
 const workloadPlanBytes = readFileSync(resolve(root, manifest.workloadPlan.path));
 const workloadPlan = JSON.parse(workloadPlanBytes.toString('utf8'));
+const evidenceIndexBytes = readFileSync(evidenceIndexPath);
+const evidenceIndex = JSON.parse(evidenceIndexBytes.toString('utf8'));
 const diagnosticCorpus = validateRiveCorpusManifest(manifest, census, { root });
 if (diagnosticCorpus.status !== 'passed') {
   throw new Error(`Cannot create G11 candidate from an invalid corpus contract:\n- ${diagnosticCorpus.violations.join('\n- ')}`);
@@ -24,41 +29,56 @@ if (diagnosticCorpus.status !== 'passed') {
 const formalCorpus = validateRiveCorpusManifest(manifest, census, { formal: true, root });
 const revision = git(['rev-parse', 'HEAD']);
 const dirty = git(['status', '--porcelain']).length > 0;
+const artifactBytesByPath = readEvidenceArtifactBytes(evidenceIndex);
+const tracesByPath = new Map((evidenceIndex.traceArtifacts ?? []).flatMap(reference => {
+  const bytes = artifactBytesByPath.get(reference.path);
+  return bytes ? [[reference.path, JSON.parse(bytes.toString('utf8'))]] : [];
+}));
+const evidenceIndexValidation = validateRiveG11EvidenceIndex(evidenceIndex, {
+  expectedEngineRevision: revision,
+  expectedManifestSha256: hash(manifestBytes),
+  expectedWorkloadPlanSha256: hash(workloadPlanBytes),
+  artifactBytesByPath,
+});
 const diagnosticFindings = readDiagnosticFindings();
 const securityEvidence = readSecurityEvidence(revision, manifestBytes);
-const blockers = [
-  ...formalCorpus.violations,
-  'official @rive-app/webgl2@2.40.0 differential traces have not been captured',
-  'the two required Windows browser/device classes have not supplied full-workload evidence',
-  'packed player, browser bundle, source map, and network closure scans have not been run',
-  ...(diagnosticFindings ? [
-    ...(diagnosticFindings.importerOracleDivergenceCount > 0
-      ? [`${diagnosticFindings.importerOracleDivergenceCount} official-loaded 7.3 fixtures are rejected by the HYA importer`]
-      : []),
-    ...(diagnosticFindings.oracleBrowserGateFailureCount > 0
-      ? [`${diagnosticFindings.oracleBrowserGateFailureCount} 7.3 fixture triggers an official-oracle browser gate failure`]
-      : []),
-  ] : []),
-];
+const securityCases = securityEvidence?.validation.status === 'passed'
+  ? securityEvidence.report.cases.map(value => ({ ...value, evidence: securityEvidence.reference }))
+  : manifest.securityCases.map(value => ({
+    id: value.id, class: value.class, status: 'not-run', expectedDiagnostic: value.expected,
+    observedDiagnostic: null, ownerResidual: null, peakMemoryBytes: null, cpuMs: null,
+  }));
+const blockers = deriveBlockers({
+  evidenceIndex, evidenceIndexValidation, formalCorpus, manifest, workloadPlan, dirty,
+  diagnosticFindings, securityCases, securityEvidence, tracesByPath,
+});
+/* Every blocker below is derived from a checked contract or an observed artifact. */
 const candidate = {
   schemaVersion: 1,
   kind: 'haiyue-rive-g11-candidate',
   goal: 'm07/g11-corpus-version-fidelity-performance',
-  status: 'incomplete',
-  blockers: [...new Set(blockers)],
+  status: blockers.length === 0 ? 'passed' : 'incomplete',
+  blockers,
   tupleId: manifest.compatibilityTuple.id,
   generatedAt: new Date().toISOString(),
   engineRevision: revision,
   engineDirty: dirty,
   nodeVersion: process.version,
   evidenceClass: dirty ? 'dirty-worktree-diagnostic' : 'clean-revision-candidate',
+  evidenceIndex: {
+    path: relative(root, evidenceIndexPath).split('\\').join('/'),
+    sha256: hash(evidenceIndexBytes),
+    byteLength: evidenceIndexBytes.byteLength,
+  },
   corpus: {
     manifest: relative(root, manifestPath).split('\\').join('/'),
     manifestSha256: hash(manifestBytes),
     censusSha256: hash(censusBytes),
     formalAssetCount: diagnosticCorpus.summary.formalAssetCount,
-    realProductAssetCount: diagnosticCorpus.summary.realProductAssetCount,
-    combinedStressAssetCount: diagnosticCorpus.summary.combinedStressAssetCount,
+    evidenceRoleCount: diagnosticCorpus.summary.evidenceRoleCount,
+    realProductWitnessCount: diagnosticCorpus.summary.realProductWitnessCount,
+    combinedStressWitnessCount: diagnosticCorpus.summary.combinedStressWitnessCount,
+    featureWitnessCount: diagnosticCorpus.summary.featureWitnessCount,
     adversarialCaseCount: diagnosticCorpus.summary.adversarialCaseCount,
   },
   workloadPlan: {
@@ -94,39 +114,11 @@ const candidate = {
       attributedScriptSymbols: diagnosticCorpus.summary.sourceAttribution.scriptSymbolKeys,
     },
   },
-  traceArtifacts: [],
-  devices: [],
-  performance: { fullWorkload: false, assets: [] },
-  security: {
-    cases: securityEvidence ? securityEvidence.report.cases.map(value => ({
-      ...value,
-      evidence: securityEvidence.reference,
-    })) : manifest.securityCases.map(value => ({
-      id: value.id,
-      class: value.class,
-      status: 'not-run',
-      expectedDiagnostic: value.expected,
-      observedDiagnostic: null,
-      ownerResidual: null,
-      peakMemoryBytes: null,
-      cpuMs: null,
-    })),
-  },
-  browserClosure: {
-    officialOracleBuildTimeOnly: true,
-    unclassifiedFailureCount: 0,
-    scans: ['packedPlayerTarball', 'browserBundle', 'sourceMap', 'networkRequests'].map(name => ({
-      name,
-      status: 'not-run',
-      reason: 'Formal corpus, converted HYA package, and browser workload are not yet available.',
-      sha256: null,
-      forbiddenPackageCount: null,
-      forbiddenFileCount: null,
-      forbiddenStaticPatternCount: null,
-      forbiddenNetworkCount: null,
-      rawRivCount: null,
-    })),
-  },
+  traceArtifacts: evidenceIndex.traceArtifacts,
+  devices: evidenceIndex.devices,
+  performance: evidenceIndex.performance,
+  security: { cases: securityCases },
+  browserClosure: evidenceIndex.browserClosure,
   licenses: {
     assets: manifest.formalAssets.map(asset => ({
       assetId: asset.id,
@@ -143,12 +135,14 @@ const contract = validateRiveG11Candidate(candidate, {
   expectedManifestSha256: candidate.corpus.manifestSha256,
   manifest,
   workloadPlan,
+  tracesByPath,
+  artifactBytesByPath,
 });
 if (contract.status !== 'passed') {
   throw new Error(`Generated G11 diagnostic candidate violates its contract:\n- ${contract.violations.join('\n- ')}`);
 }
 writeFileSync(outputPath, `${JSON.stringify(candidate, null, 2)}\n`);
-console.log(`[rive-g11] incomplete diagnostic candidate written to ${relative(root, outputPath)} with ${candidate.blockers.length} blockers.`);
+console.log(`[rive-g11] ${candidate.status} candidate written to ${relative(root, outputPath)} with ${candidate.blockers.length} blockers.`);
 
 function git(args) {
   return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim();
@@ -156,6 +150,66 @@ function git(args) {
 
 function hash(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
+}
+
+function readEvidenceArtifactBytes(index) {
+  const references = [
+    ...(index.traceArtifacts ?? []),
+    ...(index.devices ?? []).flatMap(value => (value.browsers ?? []).map(browser => browser.evidence).filter(Boolean)),
+    ...(index.browserClosure?.scans ?? []).map(value => value.evidence).filter(Boolean),
+  ];
+  const output = new Map();
+  for (const reference of references) {
+    const path = resolve(root, reference.path);
+    const candidateRelative = relative(root, path);
+    if (candidateRelative === '..' || candidateRelative.startsWith('../') || candidateRelative.startsWith('..\\')) {
+      throw new Error(`Evidence artifact escapes Engine root: ${reference.path}`);
+    }
+    if (existsSync(path)) output.set(reference.path, readFileSync(path));
+  }
+  return output;
+}
+
+function deriveBlockers({ evidenceIndex, evidenceIndexValidation, formalCorpus, manifest, workloadPlan, dirty, diagnosticFindings, securityCases, securityEvidence, tracesByPath }) {
+  const values = [
+    ...formalCorpus.violations,
+    ...evidenceIndexValidation.violations.map(value => `evidence index: ${value}`),
+  ];
+  if (dirty) values.push('formal evidence requires a clean Engine revision');
+  if (!/^v22\./u.test(process.version)) values.push(`formal evidence requires Node.js 22; observed ${process.version}`);
+
+  const expectedKeys = new Set(manifest.formalAssets.flatMap(asset => workloadPlan.browserDeviceMatrix.flatMap(device => (
+    device.browsers.map(browser => `${asset.id}:${device.deviceClass}:${browser}`)
+  ))));
+  const traceKeys = new Set((evidenceIndex.traceArtifacts ?? []).map(value => `${value.assetId}:${value.deviceClass}:${value.browser}`));
+  const missingTraces = [...expectedKeys].filter(value => !traceKeys.has(value));
+  if (missingTraces.length > 0) values.push(`${missingTraces.length}/${expectedKeys.size} required production differential traces are missing`);
+  const failedTraces = [...tracesByPath.values()].filter(value => value?.status !== 'passed');
+  if (failedTraces.length > 0) values.push(`${failedTraces.length} production differential traces are non-passing`);
+
+  const deviceIds = new Set((evidenceIndex.devices ?? []).map(value => value.id));
+  const missingDevices = workloadPlan.browserDeviceMatrix.map(value => value.deviceClass).filter(value => !deviceIds.has(value));
+  if (missingDevices.length > 0) values.push(`required physical device evidence is missing: ${missingDevices.join(', ')}`);
+
+  const metricKeys = new Set((evidenceIndex.performance?.assets ?? []).map(value => `${value.assetId}:${value.deviceClass}:${value.browser}`));
+  const missingMetrics = [...expectedKeys].filter(value => !metricKeys.has(value));
+  if (missingMetrics.length > 0) values.push(`${missingMetrics.length}/${expectedKeys.size} full-workload performance samples are missing`);
+  if (evidenceIndex.performance?.fullWorkload !== true) values.push('full-workload performance identity has not been completed');
+
+  const nonPassingSecurity = securityCases.filter(value => value.status !== 'passed');
+  if (securityEvidence && securityEvidence.validation.status !== 'passed') {
+    values.push(`security evidence is stale or invalid: ${securityEvidence.validation.violations.join('; ')}`);
+  }
+  if (nonPassingSecurity.length > 0) values.push(`${nonPassingSecurity.length}/${securityCases.length} security cases are not passing`);
+
+  for (const scan of evidenceIndex.browserClosure?.scans ?? []) {
+    if (scan.status !== 'passed') values.push(`${scan.name} browser-closure scan is ${scan.status}`);
+  }
+  if ((evidenceIndex.browserClosure?.unclassifiedFailureCount ?? 0) !== 0) values.push('browser closure contains unclassified failures');
+  if (diagnosticFindings?.importerOracleDivergenceCount > 0) values.push(`${diagnosticFindings.importerOracleDivergenceCount} official-loaded 7.3 fixtures are rejected by the HYA importer`);
+  if (diagnosticFindings?.oracleBrowserGateFailureCount > 0) values.push(`${diagnosticFindings.oracleBrowserGateFailureCount} official fixture triggers an oracle browser gate failure`);
+  if (evidenceIndex.status !== 'complete') values.push('formal evidence index remains collecting');
+  return [...new Set(values)];
 }
 
 function readDiagnosticFindings() {
@@ -257,9 +311,9 @@ function readSecurityEvidence(expectedRevision, currentManifestBytes) {
     expectedRevision,
     expectedManifestSha256: hash(currentManifestBytes),
   });
-  if (validation.status !== 'passed') throw new Error(`G11 security evidence is invalid:\n- ${validation.violations.join('\n- ')}`);
   return {
     report,
+    validation,
     reference: {
       path: relative(root, path).split('\\').join('/'),
       sha256: hash(bytes),
