@@ -49,4 +49,4 @@ Setup-mask pass 跳过第 2/3 步并只由纹理 alpha 生成 coverage；非中�
 
 - 官方 Mao runtime hash `sha256-1add506b…dec5bc9` 在 `Idle:0 / 1s` 实测 54 个 non-neutral multiply drawable-frame 和 38 个 non-neutral screen drawable-frame；代表值分别是 `ArtMesh82=[0.980392,1,0.427451,1]`、`ArtMesh194=[1,0.454902,0.513726,1]`。
 - 同一资源、pose/time、viewport、fit、背景、alpha 和 texture/color 配置下，官方 Core/HYA surface readback 的 max channel error `180`、mean absolute error `0.346908`、mismatch ratio `0.013038`，均通过冻结阈值；device recovery 通过且 `unclassifiedFailureCount=0`。
-- 机器可验证 recipe、许可、文件 hash、逐 drawable path 与颜色 observation 位于 G16 manifest/candidate。原始 Mao 模型、纹理、Core 和 pixel reference 不分发，正式 baseline 仍由 G09 人工批准。
+- 机器可验证 recipe、许可、文件 hash、逐 drawable path 与颜色 observation 位于 G16 manifest/candidate。原始 Mao 模型、纹理、Core 和 pixel reference 不分发；G09 已在 `review/m05-live2d-pixel-baseline-approval-2026-08-25.md` 对候选精确字节和 producing revisions 完成人工批准。
