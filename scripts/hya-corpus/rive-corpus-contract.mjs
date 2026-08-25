@@ -92,6 +92,7 @@ export function validateRiveCorpusManifest(manifest, census, {
   }
   positiveInteger(manifest?.minimums?.realProductWitnesses, 'real product witness minimum');
   positiveInteger(manifest?.minimums?.combinedStressWitnesses, 'combined stress witness minimum');
+  equal(manifest?.minimums?.requiredPhysicalDevices, 2, 'required physical device count');
 
   const versions = list(manifest?.versionCases, 'version cases');
   equal(versions.length, EXPECTED_VERSION_CASES.length, 'version case count');

@@ -6,8 +6,8 @@ export const RIVE_WORKLOAD_SCENARIO_VERSION = 1;
 const HASH = /^[a-f0-9]{64}$/u;
 const ID = /^[a-z0-9][a-z0-9-]*$/u;
 const DEVICE_MATRIX = Object.freeze(new Map([
-  ['windows-10-integrated', ['chrome', 'edge']],
-  ['windows-11-discrete', ['chrome', 'edge']],
+  ['windows-10-plus-device-a', ['chrome', 'edge']],
+  ['windows-10-plus-device-b', ['chrome', 'edge']],
 ]));
 const CHANNELS = Object.freeze([
   'pixels', 'geometryAndDrawOrder', 'stateMachineState', 'dataValues', 'events',
@@ -112,6 +112,9 @@ export function validateRiveWorkloadPlan(plan) {
     if (!expected) violations.push(`unknown device class ${String(entry?.deviceClass)}`);
     if (seenDevices.has(entry?.deviceClass)) violations.push(`duplicate device class ${String(entry?.deviceClass)}`);
     seenDevices.add(entry?.deviceClass);
+    equal(entry?.minimumWindowsMajor, 10, `${String(entry?.deviceClass)} minimum Windows major`);
+    equal(entry?.physicalDevice, true, `${String(entry?.deviceClass)} physical device policy`);
+    equal(entry?.gpuClass, 'any-physical', `${String(entry?.deviceClass)} GPU policy`);
     exactSet(entry?.browsers, expected ?? [], `${String(entry?.deviceClass)} browsers`);
   }
   for (const device of DEVICE_MATRIX.keys()) if (!seenDevices.has(device)) violations.push(`missing device class ${device}`);

@@ -34,7 +34,7 @@ test('differential runner executes both native adapters and recomputes every cha
     officialAdapter: adapter('@rive-app/webgl2@2.40.0', 'webgl2', 'official', calls),
     hyaAdapter: adapter('haiyue-exact-hya', 'webgpu', 'hya', calls),
     environment: {
-      deviceClass: 'windows-11-discrete', browser: 'chrome', browserVersion: '140', os: 'Windows 11', osBuild: 'fixture', gpu: 'native fixture', machineIdSha256: 'c'.repeat(64),
+      deviceClass: 'windows-10-plus-device-a', physicalDevice: true, browser: 'chrome', browserVersion: '140', os: 'Windows 11', osBuild: 'fixture', gpu: 'native fixture', machineIdSha256: 'c'.repeat(64),
       officialBackend: 'webgl2', hyaBackend: 'webgpu', nativeBackend: true,
       adapter: { vendor: 'fixture', architecture: 'discrete', device: 'fixture', description: 'test-owned native adapter descriptor' },
       dpr: 1, viewport: [800, 600], audioSampleRate: 48000, fonts: [], externalAssets: [],

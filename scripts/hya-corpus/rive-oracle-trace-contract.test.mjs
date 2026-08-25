@@ -67,7 +67,7 @@ function validTrace() {
       tuple: { id: 'rive-7.3-webgl2-2.40.0', oraclePackage: '@rive-app/webgl2@2.40.0', riveJsSha256: 'f'.repeat(64), riveWasmSha256: '0'.repeat(64) },
       assetId: 'fixture', rivSha256: RIV_HASH,
       environment: {
-        deviceClass: 'windows-10-integrated', browser: 'chrome', browserVersion: '140.0.0.0', os: 'Windows 10 22H2', osBuild: '19045',
+        deviceClass: 'windows-10-plus-device-a', physicalDevice: true, browser: 'chrome', browserVersion: '140.0.0.0', os: 'Windows 10 22H2', osBuild: '19045',
         gpu: 'Intel integrated fixture', machineIdSha256: 'd'.repeat(64), officialBackend: 'webgl2', hyaBackend: 'webgpu', nativeBackend: true,
         adapter: { vendor: 'Intel', architecture: 'integrated', device: 'fixture', description: 'fixture adapter' },
         dpr: 1, viewport: [800, 600], audioSampleRate: 48000, fonts: [], externalAssets: [],
@@ -100,6 +100,17 @@ test('oracle trace v2 binds every observable to artifact bytes and the full work
   const { trace, artifactBytesByPath } = validTrace();
   const result = validateRiveOracleTrace(trace, { formal: true, expectedRevision: REVISION, expectedManifestSha256: 'a'.repeat(64), workloadPlan, artifactBytesByPath });
   assert.equal(result.status, 'passed', result.violations.join('\n'));
+});
+
+test('formal device policy accepts any physical GPU on Windows 10+ and rejects older Windows', () => {
+  const accepted = validTrace();
+  accepted.trace.environment.gpu = 'Any physical GPU';
+  accepted.trace.environment.adapter.architecture = 'unspecified-physical';
+  const acceptedResult = validateRiveOracleTrace(accepted.trace, { formal: true, expectedRevision: REVISION, expectedManifestSha256: 'a'.repeat(64), workloadPlan, artifactBytesByPath: accepted.artifactBytesByPath });
+  assert.equal(acceptedResult.status, 'passed', acceptedResult.violations.join('\n'));
+  accepted.trace.environment.os = 'Windows 9';
+  const rejectedResult = validateRiveOracleTrace(accepted.trace, { workloadPlan, artifactBytesByPath: accepted.artifactBytesByPath });
+  assert.ok(rejectedResult.violations.some(value => value.includes('Windows 10 or later')));
 });
 
 test('structural parity cannot be hidden by a passing pixel score', () => {

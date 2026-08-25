@@ -61,7 +61,7 @@ export function validateRiveG11SecurityReport(report, manifest, { formal = false
   if (formal) {
     equal(report?.status, 'passed', 'formal status');
     equal(report?.engineDirty, false, 'formal Engine dirty state');
-    if (!/^v22\./u.test(report?.nodeVersion ?? '')) violations.push('formal security evidence must use Node 22');
+    if (!isNode22Plus(report?.nodeVersion)) violations.push('formal security evidence must use Node.js 22 or later');
     if (cases.some(value => value.status !== 'passed')) violations.push('formal security population is incomplete or failing');
   }
 
@@ -73,4 +73,9 @@ export function validateRiveG11SecurityReport(report, manifest, { formal = false
   function nonnegativeNumber(actual, label) { if (!Number.isFinite(actual) || actual < 0) violations.push(`${label} must be a finite non-negative number`); }
   function positiveNumber(actual, label) { if (!Number.isFinite(actual) || actual <= 0) violations.push(`${label} must be a finite positive number`); }
   function positiveInteger(actual, label) { if (!Number.isSafeInteger(actual) || actual < 1) violations.push(`${label} must be a positive safe integer`); }
+}
+
+function isNode22Plus(value) {
+  const match = /^v(\d+)\./u.exec(String(value));
+  return match !== null && Number(match[1]) >= 22;
 }

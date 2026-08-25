@@ -62,8 +62,8 @@
   },
   "g01CorpusContract": {
     "path": "docs/for-ai/rive-hya/corpus-oracle-manifest.json",
-    "sha256": "0f6c690ed5bff4ed0a35cd794bbffb2a5460559c98ec73e575c98153893ba19a",
-    "byteLength": 4987
+    "sha256": "844fffbc011383cb01f318f32533ab9659ef06042ce442889271262e7bae592e",
+    "byteLength": 5108
   },
   "oracle": {
     "package": "@rive-app/webgl2",
@@ -204,8 +204,8 @@
   },
   "workloadPlan": {
     "path": "animation-spec/corpus/rive/rive-g11-workload-plan.json",
-    "sha256": "6f2eade7b097a1f298f83de5eac6abb6de6fe3b410ca6a1e81720b958a7e59ff",
-    "byteLength": 3075,
+    "sha256": "c63d6d46cf22f5a1721c897a27acef06308ac6e08c2f87df956c85b12d13f965",
+    "byteLength": 3241,
     "contract": "haiyue-rive-g11-workload-plan@1"
   },
   "securityCases": [
@@ -354,7 +354,7 @@
     "realProductWitnesses": 4,
     "combinedStressWitnesses": 3,
     "adversarialCases": 24,
-    "requiredDeviceClasses": 2,
+    "requiredPhysicalDevices": 2,
     "requiredBrowsersPerDevice": [
       "chrome",
       "edge"

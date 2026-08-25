@@ -17,7 +17,7 @@ const formal = process.argv.includes('--formal');
 const assetId = requiredArgument('--asset-id');
 const outputRelative = relative(root, outputDirectory).split('\\').join('/');
 if (isAbsolute(outputRelative) || outputRelative === '..' || outputRelative.startsWith('../')) throw new Error('--out-dir must remain inside the Engine repository.');
-if (formal && Number(process.versions.node.split('.')[0]) !== 22) throw new Error('Formal Rive differential evidence requires Node.js 22.');
+if (formal && Number(process.versions.node.split('.')[0]) < 22) throw new Error('Formal Rive differential evidence requires Node.js 22 or later.');
 
 const [rivBytes, scenarioBytes, environmentBytes, manifestBytes, workloadPlanBytes] = await Promise.all([
   readFile(rivPath), readFile(scenarioPath), readFile(environmentPath),

@@ -17,12 +17,11 @@
     "propertyKeys has 292 uncovered binary-evidence keys",
     "assetTypeKeys has 4 uncovered binary-evidence keys",
     "formal evidence requires a clean Engine revision",
-    "formal evidence requires Node.js 22; observed v24.19.0",
     "32/32 required production differential traces are missing",
-    "required physical device evidence is missing: windows-10-integrated, windows-11-discrete",
+    "required physical device evidence is missing: windows-10-plus-device-a, windows-10-plus-device-b",
     "32/32 full-workload performance samples are missing",
     "full-workload performance identity has not been completed",
-    "security evidence is stale or invalid: expected Engine revision: expected 9ae9590aae9851a9e8e2cf504c73438a5f6dcdb0, received 59b2a951d62e86b564a0d0f529c6a4765dbaad5e; expected manifest hash: expected 8b46d3b5a4754584049f9e0c3ab7f2d41db358ff1a9b617bc00e0e52fee4e099, received 967362806398e5c0de93bb3a186b97e496803e155fdabfb45f0fd1a3a64ca8b8",
+    "security evidence is stale or invalid: expected Engine revision: expected 4c947d2c36fc47ba6fa38ae65cf532dcf606cb27, received 59b2a951d62e86b564a0d0f529c6a4765dbaad5e; expected manifest hash: expected 63f0605133690899d330e7ca962f936d40a6fcce7352457072709f64bbae8017, received 967362806398e5c0de93bb3a186b97e496803e155fdabfb45f0fd1a3a64ca8b8",
     "28/28 security cases are not passing",
     "packedPlayerTarball browser-closure scan is not-run",
     "browserBundle browser-closure scan is not-run",
@@ -31,8 +30,8 @@
     "formal evidence index remains collecting"
   ],
   "tupleId": "rive-7.3-webgl2-2.40.0",
-  "generatedAt": "2026-08-25T10:49:18.405Z",
-  "engineRevision": "9ae9590aae9851a9e8e2cf504c73438a5f6dcdb0",
+  "generatedAt": "2026-08-25T11:45:27.326Z",
+  "engineRevision": "4c947d2c36fc47ba6fa38ae65cf532dcf606cb27",
   "engineDirty": true,
   "nodeVersion": "v24.19.0",
   "evidenceClass": "dirty-worktree-diagnostic",
@@ -43,7 +42,7 @@
   },
   "corpus": {
     "manifest": "animation-spec/corpus/rive/rive-g11-corpus-manifest.json",
-    "manifestSha256": "8b46d3b5a4754584049f9e0c3ab7f2d41db358ff1a9b617bc00e0e52fee4e099",
+    "manifestSha256": "63f0605133690899d330e7ca962f936d40a6fcce7352457072709f64bbae8017",
     "censusSha256": "cbcacf03d028071c2df7440d3fe423088660797a8155baf40889e5b6a14adad8",
     "formalAssetCount": 8,
     "evidenceRoleCount": 19,
@@ -55,7 +54,7 @@
   "workloadPlan": {
     "id": "rive-7-3-full-web-workload-v1",
     "path": "animation-spec/corpus/rive/rive-g11-workload-plan.json",
-    "sha256": "6f2eade7b097a1f298f83de5eac6abb6de6fe3b410ca6a1e81720b958a7e59ff"
+    "sha256": "c63d6d46cf22f5a1721c897a27acef06308ac6e08c2f87df956c85b12d13f965"
   },
   "coverage": {
     "contractRevision": 2,
@@ -465,7 +464,7 @@
     "formalEvidence": false,
     "officialInputAdmission": {
       "path": "review/candidates/rive-official-7-3-admission-diagnostic.json",
-      "sha256": "1c770a7412103cc4cddf3475abb39cccc4b800999d6cd9fbf7c5a9c0c8c670d9",
+      "sha256": "4a170432eebbee160b3960888b6385ffdc1db04bb6444c0bd3c96e05af455d30",
       "byteLength": 38435
     },
     "runtimeInventory": {

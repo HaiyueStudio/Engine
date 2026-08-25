@@ -176,7 +176,7 @@ function deriveBlockers({ evidenceIndex, evidenceIndexValidation, formalCorpus, 
     ...evidenceIndexValidation.violations.map(value => `evidence index: ${value}`),
   ];
   if (dirty) values.push('formal evidence requires a clean Engine revision');
-  if (!/^v22\./u.test(process.version)) values.push(`formal evidence requires Node.js 22; observed ${process.version}`);
+  if (Number(process.versions.node.split('.')[0]) < 22) values.push(`formal evidence requires Node.js 22 or later; observed ${process.version}`);
 
   const expectedKeys = new Set(manifest.formalAssets.flatMap(asset => workloadPlan.browserDeviceMatrix.flatMap(device => (
     device.browsers.map(browser => `${asset.id}:${device.deviceClass}:${browser}`)

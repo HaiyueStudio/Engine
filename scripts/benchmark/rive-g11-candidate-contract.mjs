@@ -7,8 +7,8 @@ export const RIVE_G11_CANDIDATE_VERSION = 1;
 const SHA256 = /^[a-f0-9]{64}$/u;
 const REVISION = /^[a-f0-9]{40}$/u;
 const REQUIRED_DEVICE_MATRIX = Object.freeze(new Map([
-  ['windows-10-integrated', ['chrome', 'edge']],
-  ['windows-11-discrete', ['chrome', 'edge']],
+  ['windows-10-plus-device-a', ['chrome', 'edge']],
+  ['windows-10-plus-device-b', ['chrome', 'edge']],
 ]));
 const METRICS = Object.freeze([
   'rawBytes', 'gzipBytes', 'networkBytes', 'networkMs', 'parseMs', 'firstFrameMs',
@@ -116,13 +116,18 @@ export function validateRiveG11Candidate(candidate, {
 
   const devices = Array.isArray(candidate?.devices) ? candidate.devices : [];
   const seenDevices = new Set();
+  const seenMachineIds = new Set();
   for (const device of devices) {
     const requiredBrowsers = REQUIRED_DEVICE_MATRIX.get(device?.id);
     if (!requiredBrowsers) violations.push(`unknown device class ${String(device?.id)}`);
     if (seenDevices.has(device?.id)) violations.push(`duplicate device class ${String(device?.id)}`);
     seenDevices.add(device?.id);
     for (const key of ['os', 'gpuClass', 'machineIdSha256']) requiredString(device?.[key], `${String(device?.id)} ${key}`);
+    if (!isWindows10Plus(device?.os)) violations.push(`${String(device?.id)} must run Windows 10 or later`);
+    equal(device?.physicalDevice, true, `${String(device?.id)} physical device identity`);
     match(device?.machineIdSha256, SHA256, `${String(device?.id)} machine identity`);
+    if (seenMachineIds.has(device?.machineIdSha256)) violations.push('formal device slots must use distinct physical machines');
+    seenMachineIds.add(device?.machineIdSha256);
     const browsers = Array.isArray(device?.browsers) ? device.browsers : [];
     for (const browser of requiredBrowsers ?? []) {
       const report = browsers.find(value => value?.browser === browser);
@@ -269,7 +274,7 @@ export function validateRiveG11Candidate(candidate, {
     equal(candidate?.status, 'passed', 'formal candidate status');
     equal(candidate?.blockers?.length, 0, 'formal blocker count');
     equal(candidate?.engineDirty, false, 'formal Engine dirty state');
-    if (!/^v22\./u.test(candidate?.nodeVersion ?? '')) violations.push('formal evidence must use Node 22');
+    if (!isNode22Plus(candidate?.nodeVersion)) violations.push('formal evidence must use Node.js 22 or later');
     equal(coverage?.sourceCensus?.unclassifiedFailureCount, 0, 'formal source census unclassified failures');
     for (const key of ['uncoveredObjects', 'uncoveredProperties', 'uncoveredAssets']) {
       equal(coverage?.binaryEvidence?.[key], 0, `formal binary evidence ${key}`);
@@ -353,4 +358,14 @@ export function validateRiveG11Candidate(candidate, {
   function positiveInteger(actual, label) {
     if (!Number.isSafeInteger(actual) || actual < 1) violations.push(`${label} must be a positive safe integer`);
   }
+}
+
+function isNode22Plus(value) {
+  const match = /^v(\d+)\./u.exec(String(value));
+  return match !== null && Number(match[1]) >= 22;
+}
+
+function isWindows10Plus(value) {
+  const match = /^Windows\s+(\d+)(?:\D|$)/iu.exec(String(value));
+  return match !== null && Number(match[1]) >= 10;
 }

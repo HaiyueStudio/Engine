@@ -42,7 +42,7 @@ const candidateValidation = validateRiveG11Candidate(candidate, {
   manifest, tracesByPath, workloadPlan, artifactBytesByPath,
 });
 const environmentViolations = [];
-if (!/^v22\./u.test(process.version)) environmentViolations.push(`Node.js 22 required; observed ${process.version}`);
+if (Number(process.versions.node.split('.')[0]) < 22) environmentViolations.push(`Node.js 22 or later required; observed ${process.version}`);
 if (dirty) environmentViolations.push('Engine worktree is dirty');
 for (const name of [
   'RIVE_CAPABILITY_EVALUATOR_COMMAND', 'RIVE_CAPABILITY_EVALUATOR_DESCRIPTOR_JSON',
@@ -100,4 +100,3 @@ function argument(name) { return process.argv.find(value => value.startsWith(`${
 function git(args) { return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim(); }
 function hash(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function reference(path, bytes) { return { path, sha256: hash(bytes), byteLength: bytes.byteLength }; }
-

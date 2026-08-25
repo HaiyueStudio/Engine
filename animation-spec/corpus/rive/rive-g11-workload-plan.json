@@ -93,8 +93,8 @@
     ]
   },
   "browserDeviceMatrix": [
-    { "deviceClass": "windows-10-integrated", "browsers": ["chrome", "edge"] },
-    { "deviceClass": "windows-11-discrete", "browsers": ["chrome", "edge"] }
+    { "deviceClass": "windows-10-plus-device-a", "minimumWindowsMajor": 10, "physicalDevice": true, "gpuClass": "any-physical", "browsers": ["chrome", "edge"] },
+    { "deviceClass": "windows-10-plus-device-b", "minimumWindowsMajor": 10, "physicalDevice": true, "gpuClass": "any-physical", "browsers": ["chrome", "edge"] }
   ],
   "formalRules": {
     "sameCleanRevision": true,

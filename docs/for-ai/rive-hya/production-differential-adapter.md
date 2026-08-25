@@ -14,9 +14,10 @@ bridge 拒绝 descriptor substitution、重复 artifact path、cycle、abort 后
 
 正式收集顺序：
 
-1. 在 Node 22、clean Engine revision 上配置三个 host。
+1. 在 Node.js 22 或更高版本、clean Engine revision 上配置三个 host。
 2. 每台要求的物理设备分别运行 `rive-run-differential-trace.mjs --formal`，把 trace、设备、性能和 closure 引用合并进 `review/candidates/rive-g11-evidence-index.json`。
 3. 运行 `npm run rive:g11:candidate`；generator 只从 formal corpus、evidence index 和实际 artifact bytes 派生 blocker。
-4. 运行 `npm run rive:g11:formal-closure`。只有 index 绑定同一 revision/manifest/workload、32 条 trace 与性能样本、28 个 security case、4 项 closure scan 和全部 corpus coverage 均通过时，记录才是 `formalEvidence: true`。
+4. 两个设备 slot 均可使用任意 GPU，但必须是两台不同的 Windows 10 或更高版本物理机器；每台运行 Chrome 与 Edge。
+5. 运行 `npm run rive:g11:formal-closure`。只有 index 绑定同一 revision/manifest/workload、32 条 trace 与性能样本、28 个 security case、4 项 closure scan 和全部 corpus coverage 均通过时，记录才是 `formalEvidence: true`。
 
 当前仓库中的 `rive-g11-formal-closure-attempt.json` 是失败尝试记录，不是 baseline。

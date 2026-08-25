@@ -14,7 +14,7 @@ const SHA256 = /^[a-f0-9]{64}$/u;
 const REVISION = /^[a-f0-9]{40}$/u;
 const REQUIRED_CHANNELS = riveWorkloadTraceChannels();
 const METRICS = riveWorkloadMetricNames();
-const DEVICE_CLASSES = Object.freeze(['windows-10-integrated', 'windows-11-discrete']);
+const DEVICE_CLASSES = Object.freeze(['windows-10-plus-device-a', 'windows-10-plus-device-b']);
 
 export const RIVE_ORACLE_PIXEL_THRESHOLDS = Object.freeze({
   maxChannelDelta: 2 / 255,
@@ -59,6 +59,8 @@ export function validateRiveOracleTrace(trace, {
   const environment = trace?.environment;
   for (const key of ['deviceClass', 'browser', 'browserVersion', 'os', 'osBuild', 'gpu', 'machineIdSha256']) requiredString(environment?.[key], `environment ${key}`);
   if (!DEVICE_CLASSES.includes(environment?.deviceClass)) violations.push('device class is outside the formal matrix');
+  if (!isWindows10Plus(environment?.os)) violations.push('physical device OS must be Windows 10 or later');
+  equal(environment?.physicalDevice, true, 'physical device identity');
   if (!['chrome', 'edge'].includes(environment?.browser)) violations.push('browser must be chrome or edge');
   match(environment?.machineIdSha256, SHA256, 'machine identity');
   equal(environment?.officialBackend, 'webgl2', 'official backend');
@@ -210,4 +212,9 @@ function stableJson(value) {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
   if (value && typeof value === 'object') return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(',')}}`;
   return JSON.stringify(value);
+}
+
+function isWindows10Plus(value) {
+  const match = /^Windows\s+(\d+)(?:\D|$)/iu.exec(String(value));
+  return match !== null && Number(match[1]) >= 10;
 }

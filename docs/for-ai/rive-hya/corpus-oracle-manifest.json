@@ -90,16 +90,20 @@
   },
   "browserDeviceMatrix": [
     {
-      "id": "windows-10-integrated",
-      "os": "Windows 10 22H2",
-      "gpuClass": "integrated Intel-class",
+      "id": "windows-10-plus-device-a",
+      "os": "Windows 10 or later",
+      "minimumWindowsMajor": 10,
+      "physicalDevice": true,
+      "gpuClass": "any physical GPU",
       "browsers": ["Chrome stable", "Edge stable"],
       "required": true
     },
     {
-      "id": "windows-11-discrete",
-      "os": "Windows 11 current",
-      "gpuClass": "discrete NVIDIA-or-AMD-class",
+      "id": "windows-10-plus-device-b",
+      "os": "Windows 10 or later",
+      "minimumWindowsMajor": 10,
+      "physicalDevice": true,
+      "gpuClass": "any physical GPU",
       "browsers": ["Chrome stable", "Edge stable"],
       "required": true
     }

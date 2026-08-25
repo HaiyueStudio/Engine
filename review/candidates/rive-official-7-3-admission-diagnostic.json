@@ -4,19 +4,19 @@
   "status": "blocked-before-differential-trace",
   "formalEvidence": false,
   "evidenceClass": "dirty-worktree-diagnostic",
-  "generatedAt": "2026-08-25T10:49:18.006Z",
-  "engineRevision": "9ae9590aae9851a9e8e2cf504c73438a5f6dcdb0",
+  "generatedAt": "2026-08-25T11:45:26.615Z",
+  "engineRevision": "4c947d2c36fc47ba6fa38ae65cf532dcf606cb27",
   "engineDirty": true,
   "nodeVersion": "v24.19.0",
   "corpusManifest": {
     "path": "animation-spec/corpus/rive/rive-g11-corpus-manifest.json",
-    "sha256": "8b46d3b5a4754584049f9e0c3ab7f2d41db358ff1a9b617bc00e0e52fee4e099",
-    "byteLength": 68281
+    "sha256": "63f0605133690899d330e7ca962f936d40a6fcce7352457072709f64bbae8017",
+    "byteLength": 68283
   },
   "workloadPlan": {
     "path": "animation-spec/corpus/rive/rive-g11-workload-plan.json",
-    "sha256": "6f2eade7b097a1f298f83de5eac6abb6de6fe3b410ca6a1e81720b958a7e59ff",
-    "byteLength": 3075
+    "sha256": "c63d6d46cf22f5a1721c897a27acef06308ac6e08c2f87df956c85b12d13f965",
+    "byteLength": 3241
   },
   "officialLoadRun": {
     "path": "review/candidates/rive-official-7-3-load-chrome-diagnostic.json",

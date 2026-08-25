@@ -84,6 +84,16 @@ test('the same incomplete candidate can never pass the formal contract', () => {
   assert.ok(result.violations.some(value => value.includes('missing required device class')));
 });
 
+test('formal Rive evidence accepts every Node.js major at or above 22', () => {
+  const candidate = incompleteCandidate();
+  candidate.nodeVersion = 'v24.19.0';
+  const accepted = validateRiveG11Candidate(candidate, { formal: true, manifest: { formalAssets: [], securityCases: [] } });
+  assert.ok(!accepted.violations.some(value => value.includes('Node.js 22 or later')));
+  candidate.nodeVersion = 'v21.7.3';
+  const rejected = validateRiveG11Candidate(candidate, { formal: true, manifest: { formalAssets: [], securityCases: [] } });
+  assert.ok(rejected.violations.some(value => value.includes('Node.js 22 or later')));
+});
+
 test('Rive runtime, raw RIV or network leakage fails even diagnostic candidate validation', () => {
   const candidate = incompleteCandidate();
   candidate.browserClosure.scans[1].forbiddenPackageCount = 1;
