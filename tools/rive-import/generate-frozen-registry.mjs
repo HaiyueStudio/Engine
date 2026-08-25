@@ -50,7 +50,11 @@ for (const path of await collectHeaders(generatedRoot)) {
 
 const registryWireKinds = new Map();
 let pendingRegistryProperties = [];
-for (const line of registrySource.split(/\r?\n/)) {
+// Generated CoreRegistry occasionally wraps after `Base::`. Normalizing only
+// that token boundary keeps the line-oriented wire-kind scan deterministic
+// while ensuring wrapped and unwrapped case labels have identical meaning.
+const normalizedRegistrySource = registrySource.replace(/::\s+/g, '::');
+for (const line of normalizedRegistrySource.split(/\r?\n/)) {
   const caseMatch = line.match(/case\s+(\w+)Base::(\w+)PropertyKey:/);
   if (caseMatch) pendingRegistryProperties.push(`${caseMatch[1]}.${caseMatch[2]}`);
   const returnMatch = line.match(/return\s+Core(Uint|Int|Bool|String|Bytes|Double|Color)Type::id;/);

@@ -315,10 +315,11 @@ async function fixture(overrides = {}, irOverrides = {}) {
   const report = {
     schema: 'haiyue-rive-neutral-import-report', version: 1, compatibility: {},
     input: { sha256: '1'.repeat(64), byteLength: 8, fingerprint: 'RIVE', major: 7, minor: 3, fileId: 1 },
-    counts: { objects: 1, propertyAssignments: 1, strings: 0, textBytes: 0, embeddedBytes: 0, listItems: 0, resolvedAssets: 0 },
-    registryCoverage: { declaredObjectTypes: 288, declaredPropertyKeys: 611, encounteredObjectTypeKeys: [42], encounteredPropertyKeys: [7], notSerializedRegistryPropertyKeys: [], unclassifiedObjects: 0, unclassifiedProperties: 0, unclassifiedAssets: 0, unclassifiedScripts: 0 },
+    counts: { objects: 1, runtimeNullObjects: 0, propertyAssignments: 1, strings: 0, textBytes: 0, embeddedBytes: 0, listItems: 0, resolvedAssets: 0 },
+    registryCoverage: { declaredObjectTypes: 288, declaredPropertyKeys: 618, encounteredObjectTypeKeys: [42], encounteredPropertyKeys: [7], notSerializedRegistryPropertyKeys: [], unclassifiedObjects: 0, unclassifiedProperties: 0, unclassifiedAssets: 0, unclassifiedScripts: 0 },
     toc: [],
     objects: [{ neutralObjectId: 'object:00000000', sourceObjectIndex: 0, sourceTypeKey: 42, sourceName: 'SecretRiveSourceType', sourceFamily: 'Core', properties: [{ sourcePropertyKey: 7, sourceName: 'secretRiveProperty', sourceOwner: 'SecretRiveSourceType', wireKind: 'double', status: 'consumed', neutralFieldIds: ['field:00000000:000000'] }] }],
+    runtimeNullObjects: [],
     evaluator: { used: true, adapterId: 'fixture' }, diagnostics: [],
   };
   const evaluation = {
@@ -403,7 +404,7 @@ function runLocaleProcess(environment) {
     const irBytes=e.encode(JSON.stringify(ir)+'\\n');
     const digest=async b=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b)),x=>x.toString(16).padStart(2,'0')).join('');
     const inputIrSha256=await digest(irBytes), z='0'.repeat(64);
-    const report={schema:'haiyue-rive-neutral-import-report',version:1,compatibility:{},input:{sha256:'1'.repeat(64),byteLength:8,fingerprint:'RIVE',major:7,minor:3,fileId:1},counts:{objects:0,propertyAssignments:0,strings:0,textBytes:0,embeddedBytes:0,listItems:0,resolvedAssets:0},registryCoverage:{declaredObjectTypes:288,declaredPropertyKeys:611,encounteredObjectTypeKeys:[],encounteredPropertyKeys:[],notSerializedRegistryPropertyKeys:[],unclassifiedObjects:0,unclassifiedProperties:0,unclassifiedAssets:0,unclassifiedScripts:0},toc:[],objects:[],evaluator:{used:true,adapterId:'fixture'},diagnostics:[]};
+    const report={schema:'haiyue-rive-neutral-import-report',version:1,compatibility:{},input:{sha256:'1'.repeat(64),byteLength:8,fingerprint:'RIVE',major:7,minor:3,fileId:1},counts:{objects:0,runtimeNullObjects:0,propertyAssignments:0,strings:0,textBytes:0,embeddedBytes:0,listItems:0,resolvedAssets:0},registryCoverage:{declaredObjectTypes:288,declaredPropertyKeys:618,encounteredObjectTypeKeys:[],encounteredPropertyKeys:[],notSerializedRegistryPropertyKeys:[],unclassifiedObjects:0,unclassifiedProperties:0,unclassifiedAssets:0,unclassifiedScripts:0},toc:[],objects:[],runtimeNullObjects:[],evaluator:{used:true,adapterId:'fixture'},diagnostics:[]};
     const evaluation={format:'haiyue-rive-neutral-capability-evaluation',version:1,inputIrSha256,tuple:{adapterId:'locale-adapter',adapterRevisionSha256:z,evaluatorId:'locale-evaluator',evaluatorRevisionSha256:z,optionsRevision:'v1'},baseDocument:{format:'haiyue-animation',version:'1.0',canvas:{width:1,height:1,coordinateSystem:'screen-y-down'},duration:1,nodes:[]},artifacts:[],coverage:[],bakedTracks:[],assets:[],featureLedger:[],classification:{unclassifiedObjects:0,unclassifiedProperties:0,unclassifiedAssets:0,unclassifiedScripts:0}};
     const result=await c.convertRiveToHya({imported:{ir,report,irBytes,reportBytes:e.encode('{}\\n')},evaluation});
     process.stdout.write(result.report.output.packageSha256);

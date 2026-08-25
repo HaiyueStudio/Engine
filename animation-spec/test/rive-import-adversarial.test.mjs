@@ -51,6 +51,27 @@ test('random unknown object ids and property ids can never become no-ops', async
   await assert.rejects(importFrozenRiv(riv([object(1, [field(70, [])])])), code('E_RIVE_UNSUPPORTED_PROPERTY'));
 });
 
+test('only accepted runtime-null object 526 is consumed, budgeted, and reported without entering neutral IR', async () => {
+  const result = await importFrozenRiv(riv([
+    object(526, [field(565, vu(9)), field(65000, vu(12))]),
+    object(1),
+  ], 7, 3, [{ key: 65000, type: 0 }]));
+  assert.equal(result.report.counts.objects, 1);
+  assert.equal(result.report.counts.runtimeNullObjects, 1);
+  assert.equal(result.ir.objects.length, 1);
+  assert.deepEqual(result.report.runtimeNullObjects, [{
+    sourceObjectIndex: 0,
+    sourceTypeKey: 526,
+    status: 'consumed-runtime-null',
+    sourcePropertyKeys: [565, 65000],
+  }]);
+  assert.equal(JSON.stringify(result.ir).includes('65000'), false);
+  await assert.rejects(
+    importFrozenRiv(riv([object(526), object(1)]), { limits: { objects: 1 } }),
+    code('E_RIVE_LIMIT_EXCEEDED'),
+  );
+});
+
 test('reference range, hierarchy cycles, and depth bombs are exact failures', async () => {
   await assert.rejects(importFrozenRiv(riv([object(1), object(2, [field(5, vu(99))])])), code('E_RIVE_REFERENCE_INVALID'));
   await assert.rejects(importFrozenRiv(riv([

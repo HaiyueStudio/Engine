@@ -105,3 +105,5 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0085：公共 API 与包体预算按已准入能力归因](./0085-capability-attributed-public-api-and-package-budgets.md)
 - [0086：游戏存档使用来源无关信封与可替换存储后端](./0086-game-save-envelope-and-storage-backends.md)
 - [0087：Rive 以不可信 build-time source 转换为来源无关 HYA](./0087-rive-hya-source-neutral-full-fidelity.md)
+- [0088：修正 Rive 7.3 property census 并显式冻结 runtime-null object](./0088-rive-7-3-census-and-runtime-null-object-addendum.md)
+- [0089：Rive coverage 分离 source census、binary evidence 与 behavioral evidence](./0089-rive-coverage-evidence-eligibility-addendum.md)

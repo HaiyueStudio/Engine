@@ -65,6 +65,8 @@ for (const path of paths) {
     record.result = {
       status: 'accepted',
       objects: imported.report.counts.objects,
+      runtimeNullObjects: imported.report.counts.runtimeNullObjects,
+      runtimeNullObjectKeys: imported.report.runtimeNullObjects.map(value => value.sourceTypeKey),
       propertyAssignments: imported.report.counts.propertyAssignments,
       objectKeys: imported.report.registryCoverage.encounteredObjectTypeKeys,
       propertyKeys: imported.report.registryCoverage.encounteredPropertyKeys,
@@ -125,7 +127,7 @@ if (outputArgument) {
 console.log(
   `[rive-corpus] upstream diagnostics: assets=${report.totals.assets}, accepted=${report.totals.accepted}, `
   + `rejected=${report.totals.rejected}, objects=${report.totals.coveredObjectKeys}/288, `
-  + `properties=${report.totals.coveredPropertyKeys}/611, unclassified=${report.totals.unclassifiedFailureCount}.`,
+  + `properties=${report.totals.coveredPropertyKeys}/618, unclassified=${report.totals.unclassifiedFailureCount}.`,
 );
 
 function walk(directory) {

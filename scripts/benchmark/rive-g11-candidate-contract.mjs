@@ -57,16 +57,29 @@ export function validateRiveG11Candidate(candidate, {
   }
 
   const coverage = candidate?.coverage;
+  equal(coverage?.contractRevision, 2, 'coverage contract revision');
   for (const [key, expected] of Object.entries({
     objectTypes: 288,
-    propertyKeys: 611,
+    propertyKeys: 618,
     scriptModules: 48,
     scriptSymbols: 349,
     assetTypes: 14,
-  })) equal(coverage?.[key], expected, `coverage ${key}`);
-  for (const key of ['uncoveredObjects', 'uncoveredProperties', 'uncoveredScriptModules', 'uncoveredScriptSymbols', 'uncoveredAssets', 'unclassifiedFailureCount']) {
-    nonnegativeInteger(coverage?.[key], `coverage ${key}`);
+  })) equal(coverage?.sourceCensus?.[key], expected, `source census ${key}`);
+  nonnegativeInteger(coverage?.sourceCensus?.unclassifiedFailureCount, 'source census unclassified failures');
+  for (const [key, expected] of Object.entries({ objectTypes: 288, propertyKeys: 565, assetTypes: 9 })) {
+    equal(coverage?.binaryEvidence?.[key], expected, `binary evidence ${key}`);
   }
+  for (const key of ['uncoveredObjects', 'uncoveredProperties', 'uncoveredAssets']) {
+    nonnegativeInteger(coverage?.binaryEvidence?.[key], `binary evidence ${key}`);
+  }
+  for (const [key, expected] of Object.entries({ featureFamilies: 8, scriptModules: 48, scriptSymbols: 349 })) {
+    equal(coverage?.behavioralEvidence?.[key], expected, `behavioral evidence ${key}`);
+  }
+  for (const key of ['uncoveredFeatureFamilies', 'unclassifiedScriptCapabilities', 'attributedScriptModules', 'attributedScriptSymbols']) {
+    nonnegativeInteger(coverage?.behavioralEvidence?.[key], `behavioral evidence ${key}`);
+  }
+  if ((coverage?.behavioralEvidence?.attributedScriptModules ?? 0) > 48) violations.push('behavioral attributed script modules exceed source census');
+  if ((coverage?.behavioralEvidence?.attributedScriptSymbols ?? 0) > 349) violations.push('behavioral attributed script symbols exceed source census');
 
   const traceReferences = Array.isArray(candidate?.traceArtifacts) ? candidate.traceArtifacts : [];
   const seenTraceKeys = new Set();
@@ -249,9 +262,12 @@ export function validateRiveG11Candidate(candidate, {
     equal(candidate?.blockers?.length, 0, 'formal blocker count');
     equal(candidate?.engineDirty, false, 'formal Engine dirty state');
     if (!/^v22\./u.test(candidate?.nodeVersion ?? '')) violations.push('formal evidence must use Node 22');
-    for (const key of ['uncoveredObjects', 'uncoveredProperties', 'uncoveredScriptModules', 'uncoveredScriptSymbols', 'uncoveredAssets', 'unclassifiedFailureCount']) {
-      equal(coverage?.[key], 0, `formal coverage ${key}`);
+    equal(coverage?.sourceCensus?.unclassifiedFailureCount, 0, 'formal source census unclassified failures');
+    for (const key of ['uncoveredObjects', 'uncoveredProperties', 'uncoveredAssets']) {
+      equal(coverage?.binaryEvidence?.[key], 0, `formal binary evidence ${key}`);
     }
+    equal(coverage?.behavioralEvidence?.uncoveredFeatureFamilies, 0, 'formal behavioral feature-family coverage');
+    equal(coverage?.behavioralEvidence?.unclassifiedScriptCapabilities, 0, 'formal behavioral script classification');
     if (manifest && traceReferences.length < manifest.formalAssets.length * 4) {
       violations.push('formal trace population does not cover every asset on both devices and browsers');
     }

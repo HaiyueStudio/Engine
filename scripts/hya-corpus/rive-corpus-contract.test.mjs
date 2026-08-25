@@ -17,11 +17,17 @@ test('G11 corpus diagnostic contract binds the frozen tuple, census, policy hash
   assert.equal(result.summary.adversarialCaseCount, 28);
   assert.equal(manifest.diagnosticUpstreamSources.length, 2);
   assert.deepEqual(result.summary.uncovered, {
-    objectKeys: 274,
-    propertyKeys: 595,
-    scriptModuleKeys: 48,
-    scriptSymbolKeys: 349,
-    assetTypeKeys: 14,
+    objectKeys: 151,
+    propertyKeys: 292,
+    scriptModuleKeys: 0,
+    scriptSymbolKeys: 0,
+    assetTypeKeys: 4,
+  });
+  assert.deepEqual(result.summary.sourceAttribution, { scriptModuleKeys: 0, scriptSymbolKeys: 0 });
+  assert.deepEqual(result.summary.behavioral, {
+    featureFamilies: 8,
+    coveredFeatureFamilies: 5,
+    uncoveredFeatureFamilies: 3,
   });
 });
 
@@ -80,8 +86,19 @@ test('formal corpus validation refuses admitted inputs whose traces or full cove
   const result = validateRiveCorpusManifest(manifest, census, { formal: true, root });
   assert.equal(result.status, 'failed');
   assert.ok(result.violations.some(value => value.includes('is not trace-ready')));
-  assert.ok(result.violations.some(value => value.includes('uncovered frozen census keys')));
+  assert.ok(result.violations.some(value => value.includes('uncovered binary-evidence keys')));
+  assert.ok(result.violations.some(value => value.includes('uncovered feature families')));
   assert.ok(result.violations.some(value => value.includes('missing real product asset')));
+});
+
+test('source-only properties and asset bases cannot be claimed as serialized asset coverage', () => {
+  const changed = structuredClone(manifest);
+  changed.formalAssets[0].propertyKeys.push(9);
+  changed.formalAssets[0].assetTypeKeys.push(99);
+  const result = validateRiveCorpusManifest(changed, census, { root });
+  assert.equal(result.status, 'failed');
+  assert.ok(result.violations.some(value => value.includes('propertyKeys contains 1 keys outside')));
+  assert.ok(result.violations.some(value => value.includes('assetTypeKeys contains 1 keys outside')));
 });
 
 test('a changed frozen source file hash is detected before corpus evidence can run', () => {

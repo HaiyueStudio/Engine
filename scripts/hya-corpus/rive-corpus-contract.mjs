@@ -75,6 +75,7 @@ export function validateRiveCorpusManifest(manifest, census, {
   for (const key of ['unclassifiedObjects', 'unclassifiedProperties', 'unclassifiedScripts', 'unclassifiedAssets']) {
     equal(census?.totals?.[key], 0, `census ${key}`);
   }
+  validateCoverageModel(manifest?.coverageModel, census, violations);
 
   const suites = list(manifest?.featureSuites, 'feature suites');
   const suiteFamilies = uniqueValues(suites, 'id', 'feature suite', violations);
@@ -144,24 +145,26 @@ export function validateRiveCorpusManifest(manifest, census, {
   uniqueValues(assets, 'id', 'formal asset', violations);
   const coverage = {
     objectKeys: new Set(), propertyKeys: new Set(), scriptModuleKeys: new Set(),
-    scriptSymbolKeys: new Set(), assetTypeKeys: new Set(),
+    scriptSymbolKeys: new Set(), assetTypeKeys: new Set(), featureFamilies: new Set(),
   };
   for (const [index, asset] of assets.entries()) {
     validateFormalAsset(asset, `formalAssets[${index}]`, coverage, securityIds, root, workloadPlan, officialSourcesById, formal, violations);
   }
 
-  const expectedCoverage = censusCoverage(census);
+  const allowedCoverage = sourceCensusCoverage(census);
+  const expectedCoverage = binaryEvidenceCoverage(census);
   const uncovered = Object.fromEntries(Object.entries(expectedCoverage).map(([key, expected]) => [
     key,
     [...expected].filter(value => !coverage[key].has(value)),
   ]));
-  const extra = Object.fromEntries(Object.entries(expectedCoverage).map(([key, expected]) => [
+  const extra = Object.fromEntries(Object.entries(allowedCoverage).map(([key, expected]) => [
     key,
     [...coverage[key]].filter(value => !expected.has(value)),
   ]));
   for (const [key, values] of Object.entries(extra)) {
     if (values.length > 0) violations.push(`${key} contains ${values.length} keys outside the frozen census`);
   }
+  const uncoveredBehavioralFeatureFamilies = EXPECTED_FAMILIES.filter(value => !coverage.featureFamilies.has(value));
 
   const realProduct = assets.filter(value => value?.kind === 'real-product');
   const combinedStress = assets.filter(value => value?.kind === 'combined-stress');
@@ -182,7 +185,10 @@ export function validateRiveCorpusManifest(manifest, census, {
     if (realProduct.length < manifest.minimums.realProductAssets) violations.push('real product asset count is below minimum');
     if (combinedStress.length < manifest.minimums.combinedStressAssets) violations.push('combined stress asset count is below minimum');
     for (const [key, values] of Object.entries(uncovered)) {
-      if (values.length > 0) violations.push(`${key} has ${values.length} uncovered frozen census keys`);
+      if (values.length > 0) violations.push(`${key} has ${values.length} uncovered binary-evidence keys`);
+    }
+    if (uncoveredBehavioralFeatureFamilies.length > 0) {
+      violations.push(`behavioralFeatureFamilies has ${uncoveredBehavioralFeatureFamilies.length} uncovered feature families`);
     }
   }
 
@@ -200,6 +206,15 @@ export function validateRiveCorpusManifest(manifest, census, {
       isolatedAssetCount: isolated.length,
       adversarialCaseCount: securityCases.length,
       uncovered: Object.freeze(Object.fromEntries(Object.entries(uncovered).map(([key, values]) => [key, values.length]))),
+      sourceAttribution: Object.freeze({
+        scriptModuleKeys: coverage.scriptModuleKeys.size,
+        scriptSymbolKeys: coverage.scriptSymbolKeys.size,
+      }),
+      behavioral: Object.freeze({
+        featureFamilies: EXPECTED_FAMILIES.length,
+        coveredFeatureFamilies: coverage.featureFamilies.size,
+        uncoveredFeatureFamilies: uncoveredBehavioralFeatureFamilies.length,
+      }),
       unclassifiedFailureCount: 0,
     }),
   });
@@ -291,6 +306,7 @@ function validateFormalAsset(asset, path, coverage, securityIds, root, workloadP
   if (families.length === 0 || families.some(value => !EXPECTED_FAMILIES.includes(value))) {
     violations.push(`${path}.featureFamilies contains an invalid family`);
   }
+  for (const family of families) coverage.featureFamilies.add(family);
   addCoverage(coverage.objectKeys, asset?.objectKeys, `${path}.objectKeys`, value => Number.isSafeInteger(value), violations);
   addCoverage(coverage.propertyKeys, asset?.propertyKeys, `${path}.propertyKeys`, value => Number.isSafeInteger(value), violations);
   addCoverage(coverage.scriptModuleKeys, asset?.scriptModuleKeys, `${path}.scriptModuleKeys`, value => typeof value === 'string', violations);
@@ -413,14 +429,47 @@ function validateAssetFile(root, file, label, violations) {
   }
 }
 
-function censusCoverage(census) {
+function sourceCensusCoverage(census) {
   return {
     objectKeys: new Set((census?.objects ?? []).map(value => value.typeKey)),
-    propertyKeys: new Set((census?.properties ?? []).map(value => value.key)),
+    propertyKeys: new Set((census?.properties ?? []).filter(value => value.binaryEvidenceEligible === true).map(value => value.key)),
     scriptModuleKeys: new Set((census?.scripts?.modules ?? []).map(scriptKey)),
     scriptSymbolKeys: new Set((census?.scripts?.symbols ?? []).map(scriptKey)),
-    assetTypeKeys: new Set((census?.assets ?? []).map(value => value.typeKey)),
+    assetTypeKeys: new Set((census?.assets ?? []).filter(value => value.binaryEvidenceEligible === true).map(value => value.typeKey)),
   };
+}
+
+function binaryEvidenceCoverage(census) {
+  return {
+    objectKeys: new Set((census?.objects ?? []).filter(value => value.binaryEvidenceEligible === true).map(value => value.typeKey)),
+    propertyKeys: new Set((census?.properties ?? []).filter(value => value.binaryEvidenceEligible === true).map(value => value.key)),
+    scriptModuleKeys: new Set(),
+    scriptSymbolKeys: new Set(),
+    assetTypeKeys: new Set((census?.assets ?? []).filter(value => value.binaryEvidenceEligible === true).map(value => value.typeKey)),
+  };
+}
+
+function validateCoverageModel(model, census, violations) {
+  const equalValue = (actual, expected, label) => {
+    if (actual !== expected) violations.push(`${label}: expected ${String(expected)}, received ${String(actual)}`);
+  };
+  equalValue(model?.contractRevision, 2, 'coverage model revision');
+  for (const key of ['objectTypes', 'propertyKeys', 'scriptModules', 'scriptSymbols', 'assetTypes']) {
+    equalValue(model?.sourceCensus?.[key], census?.totals?.[key], `source census ${key}`);
+  }
+  equalValue(model?.sourceCensus?.unclassifiedFailureCount, 0, 'source census unclassified failures');
+  equalValue(model?.binaryEvidence?.objectTypes, census?.coverageEvidenceModel?.binaryEvidence?.objectTypes, 'binary evidence object types');
+  equalValue(model?.binaryEvidence?.propertyKeys, census?.coverageEvidenceModel?.binaryEvidence?.propertyKeys, 'binary evidence property keys');
+  equalValue(model?.binaryEvidence?.assetTypes, census?.coverageEvidenceModel?.binaryEvidence?.assetTypes, 'binary evidence asset types');
+  const runtimeNullKeys = model?.binaryEvidence?.runtimeNullObjectKeys;
+  if (!Array.isArray(runtimeNullKeys) || runtimeNullKeys.length !== 1 || runtimeNullKeys[0] !== 526) {
+    violations.push('binary evidence runtime-null object keys do not match the accepted tuple');
+  }
+  equalValue(model?.behavioralEvidence?.featureFamilies, EXPECTED_FAMILIES.length, 'behavioral evidence feature families');
+  equalValue(model?.behavioralEvidence?.scriptModules, census?.totals?.scriptModules, 'behavioral evidence script modules');
+  equalValue(model?.behavioralEvidence?.scriptSymbols, census?.totals?.scriptSymbols, 'behavioral evidence script symbols');
+  equalValue(model?.behavioralEvidence?.scriptRegistrationKeysAreWireKeys, false, 'script registration wire-key policy');
+  requiredString(model?.diagnosticInventoryPolicy, 'diagnostic inventory policy', violations);
 }
 
 function scriptKey(value) {

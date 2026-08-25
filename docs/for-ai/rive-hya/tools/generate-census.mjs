@@ -101,10 +101,10 @@ function ownership(family, status, kind) {
 
 const registry = readFileSync(registryPath, 'utf8');
 const registeredBases = new Set(
-  [...registry.matchAll(/case\s+(\w+Base)::typeKey:/g)].map(match => match[1]),
+  [...registry.matchAll(/case\s+(\w+Base)::\s*typeKey:/g)].map(match => match[1]),
 );
 const propertyMembers = new Set(
-  [...registry.matchAll(/case\s+(\w+Base)::(\w+)PropertyKey:/g)].map(match => `${match[1]}::${match[2]}`),
+  [...registry.matchAll(/case\s+(\w+Base)::\s*(\w+)PropertyKey:/g)].map(match => `${match[1]}::${match[2]}`),
 );
 
 const headerFiles = filesUnder(generatedRoot, path => path.endsWith('_base.hpp'));
@@ -117,7 +117,11 @@ for (const headerPath of headerFiles) {
   const baseName = classMatch[1];
   const sourcePath = posix(relative(sourceRoot, headerPath));
   const properties = [...source.matchAll(/static\s+(?:const|constexpr)\s+uint16_t\s+(\w+)PropertyKey\s*=\s*(\d+)\s*;/g)]
-    .map(match => ({ name: match[1], key: Number(match[2]) }));
+    .map(match => ({
+      name: match[1],
+      key: Number(match[2]),
+      serialized: new RegExp(`case\\s+${match[1]}PropertyKey:`).test(source),
+    }));
   typesByBase.set(baseName, {
     baseName,
     name: baseName.slice(0, -4),
@@ -139,6 +143,8 @@ const objects = [...registeredBases].map(baseName => {
     baseName,
     extends: type.extends,
     source: type.sourcePath,
+    evidenceClass: 'binary-object-key',
+    binaryEvidenceEligible: true,
     ...ownership(family, status, 'object'),
   };
 }).sort((a, b) => a.typeKey - b.typeKey || a.name.localeCompare(b.name));
@@ -156,6 +162,9 @@ const properties = [...propertyMembers].map(member => {
     owner: type.name,
     ownerBase: baseName,
     source: type.sourcePath,
+    serialized: property.serialized,
+    evidenceClass: property.serialized ? 'binary-property-key' : 'source-census-only',
+    binaryEvidenceEligible: property.serialized,
     ...ownership(family, status, 'property'),
   };
 }).sort((a, b) => a.key - b.key || a.owner.localeCompare(b.owner) || a.name.localeCompare(b.name));
@@ -173,7 +182,14 @@ for (const filePath of luaFiles) {
   const source = readFileSync(filePath, 'utf8');
   const sourcePath = posix(relative(sourceRoot, filePath));
   for (const match of source.matchAll(/\bint\s+(luaopen_[A-Za-z0-9_]+)\s*\(/g)) {
-    scriptModules.push({ name: match[1], source: sourcePath });
+    scriptModules.push({
+      name: match[1],
+      source: sourcePath,
+      evidenceClass: 'behavioral-capability',
+      binaryEvidenceEligible: false,
+      behavioralEvidenceEligible: true,
+      ...ownership('scripting-custom-rendering', 'missing', 'script'),
+    });
   }
   const names = new Set();
   for (const match of source.matchAll(/\{\s*"([A-Za-z_][A-Za-z0-9_.:]*)"\s*,/g)) names.add(match[1]);
@@ -182,6 +198,9 @@ for (const filePath of luaFiles) {
     scriptSymbols.push({
       name,
       source: sourcePath,
+      evidenceClass: 'behavioral-capability',
+      binaryEvidenceEligible: false,
+      behavioralEvidenceEligible: true,
       ...ownership('scripting-custom-rendering', 'missing', 'script'),
     });
   }
@@ -201,6 +220,8 @@ const assets = [...typesByBase.values()]
       extends: type.extends,
       source: type.sourcePath,
       serialized: registeredBases.has(type.baseName),
+      evidenceClass: registeredBases.has(type.baseName) ? 'binary-asset-type' : 'source-census-only',
+      binaryEvidenceEligible: registeredBases.has(type.baseName),
       ...ownership(family, status, 'object'),
     };
   })
@@ -209,7 +230,8 @@ const sourceInputs = [registryPath, ...headerFiles, ...luaFiles].sort();
 const sourceDigest = sha256(sourceInputs.map(path => `${posix(relative(sourceRoot, path))}\0${sha256(readFileSync(path))}`).join('\n'));
 const unclassifiedObjects = objects.filter(item => !item.family || !item.goal || !item.diagnostic || !item.fixtureOwner);
 const unclassifiedProperties = properties.filter(item => !item.family || !item.goal || !item.diagnostic || !item.fixtureOwner);
-const unclassifiedScripts = scriptSymbols.filter(item => !item.family || !item.goal || !item.diagnostic || !item.fixtureOwner);
+const unclassifiedScripts = [...scriptModules, ...scriptSymbols]
+  .filter(item => !item.family || !item.goal || !item.diagnostic || !item.fixtureOwner);
 const unclassifiedAssets = assets.filter(item => !item.family || !item.goal || !item.diagnostic || !item.fixtureOwner);
 
 const census = {
@@ -226,14 +248,37 @@ const census = {
   totals: {
     objectTypes: objects.length,
     propertyKeys: properties.length,
+    serializedPropertyKeys: properties.filter(item => item.serialized).length,
+    sourceOnlyPropertyKeys: properties.filter(item => !item.serialized).length,
     scriptModules: scriptModules.length,
     scriptSymbols: scriptSymbols.length,
     assetTypes: assets.length,
     serializedAssetTypes: assets.filter(item => item.serialized).length,
+    sourceOnlyAssetTypes: assets.filter(item => !item.serialized).length,
     unclassifiedObjects: unclassifiedObjects.length,
     unclassifiedProperties: unclassifiedProperties.length,
     unclassifiedScripts: unclassifiedScripts.length,
     unclassifiedAssets: unclassifiedAssets.length,
+  },
+  coverageEvidenceModel: {
+    contractRevision: 2,
+    sourceCensus: {
+      rule: 'Every frozen registry/source definition remains classified, including entries that cannot occur as serialized .riv keys.',
+      requiredForClassificationClosure: true,
+      requiredAsFormalAssetWireCoverage: false,
+    },
+    binaryEvidence: {
+      rule: 'Only registry-instantiable object keys, generated deserialize property cases, and registry-instantiable asset types are eligible for .riv encounter coverage.',
+      objectTypes: objects.length,
+      propertyKeys: properties.filter(item => item.serialized).length,
+      assetTypes: assets.filter(item => item.serialized).length,
+    },
+    behavioralEvidence: {
+      rule: 'Luau registration modules and symbols are source capabilities, not .riv wire keys; formal closure requires feature-family behavior probes and differential traces instead of raw-key encounter claims.',
+      scriptModules: scriptModules.length,
+      scriptSymbols: scriptSymbols.length,
+      featureFamilies: Object.keys(familyContracts).length,
+    },
   },
   statusVocabulary: ['full', 'partial', 'missing'],
   familyContracts,

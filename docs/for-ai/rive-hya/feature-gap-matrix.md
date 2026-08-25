@@ -9,13 +9,15 @@
 | import-neutral-ir | 8 partial | 8 full + 33 partial | 基础 canvas/node/transform 可表达；无 `.riv` reader、multi-artboard/import IR | G02 |
 | vector-paint-composite | 29 partial | 19 full + 58 partial | path、solid/gradient、stroke、morph、trim/round 有基础；effects/feather/multi-paint/composite 不完整 | G03 |
 | rig-mesh-constraint | 22 partial | 8 full + 84 partial | sampled deformable pose 可播放；参数化 bones/weights/joystick/constraints 不完整 | G04 |
-| text-layout-component-asset | 20 partial + 17 missing | 14 full + 57 partial + 111 missing | 基础 text/image/font resource 有；Rive shaping、layout、nested components、asset replacement 不完整 | G05 |
-| timeline-state-machine | 59 partial | 75 partial | typed inputs/layers/basic blend 有；完整 property animation/listener/transition semantics 不完整 | G06 |
-| data-interaction-accessibility | 115 missing | 131 missing | 无 View Model/list/converter/listener/input/focus/semantic tree 通用 ABI | G07 |
+| text-layout-component-asset | 20 partial + 17 missing | 14 full + 57 partial + 115 missing | 基础 text/image/font resource 有；Rive shaping、layout、nested components、asset replacement 不完整 | G05 |
+| timeline-state-machine | 59 partial | 77 partial | typed inputs/layers/basic blend 有；完整 property animation/listener/transition semantics 不完整 | G06 |
+| data-interaction-accessibility | 115 missing | 132 missing | 无 View Model/list/converter/listener/input/focus/semantic tree 通用 ABI | G07 |
 | audio-event | 2 partial | 2 partial | 基础 audio component 有；sample-accurate event/clock/voice/owner 不完整 | G08 |
 | scripting-custom-rendering | 16 missing | 11 missing | trusted-project JS 与 shader-language 不能承载不可信 Rive scripts；无 sandbox protocol | G09 |
 
 此外 census 记录 48 个 Luau registration module、349 个注册 symbol 和 14 个 `generated/assets/` type definition（其中 9 个进入 `CoreRegistry` 可序列化 object）；它们都拥有 diagnostic 与 fixture owner，未分类计数为 0。View Model/bindable asset references 仍在完整 object/property census 中，但不重复计入 file asset type 汇总。
+
+按 ADR 0089，source classification 与正式素材 coverage 分开：618 个 property 中 565 个具有 generated `deserialize` case，14 个 asset definition 中 9 个可实例化；只有这些 binary-eligible key 进入 `.riv` encounter denominator。48/349 script registration 项通过本表的 scripting capability mapping、正式 workload 与 security/differential trace闭合，不作为 wire key 计数。
 
 `full` 只表示当前 HYA 能完整表达一个孤立 property 的值域/插值，例如常见 transform、opacity、部分 paint scalar；它不把所属 Rive object 自动升级为完整支持。object 仍为 `partial`，直到其全部 properties、依赖关系和 runtime observable 通过 oracle。
 
@@ -23,7 +25,7 @@
 
 ### File、Artboard 与 Component
 
-- `RIVE` header、ToC field typing、7.3 exact gate、unknown object/property early rejection。
+- `RIVE` header、ToC field typing、7.3 exact gate、unknown object/property early rejection；tuple 逐 key接受的 runtime-null object 必须完整消费、预算并独立报告，不能 materialize。
 - 多 Artboard、default artboard/state machine、Component/nested instance、simple/remap/mix、动态 Artboard property。
 - fit/alignment/intrinsic size、instance recursion、late asset/reference resolution 与唯一 owner。
 - 完整 `NeutralAnimationIR@1` inventory；source type/property key 只在 provenance side table。

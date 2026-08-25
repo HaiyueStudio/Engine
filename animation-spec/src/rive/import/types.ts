@@ -120,6 +120,13 @@ export interface RiveObjectVisit {
   readonly properties: readonly RivePropertyVisit[];
 }
 
+export interface RiveRuntimeNullObjectVisit {
+  readonly sourceObjectIndex: number;
+  readonly sourceTypeKey: 526;
+  readonly status: 'consumed-runtime-null';
+  readonly sourcePropertyKeys: readonly number[];
+}
+
 export interface RiveImportReport {
   readonly schema: 'haiyue-rive-neutral-import-report';
   readonly version: 1;
@@ -134,6 +141,7 @@ export interface RiveImportReport {
   }>;
   readonly counts: Readonly<{
     objects: number;
+    runtimeNullObjects: number;
     propertyAssignments: number;
     strings: number;
     textBytes: number;
@@ -143,7 +151,7 @@ export interface RiveImportReport {
   }>;
   readonly registryCoverage: Readonly<{
     declaredObjectTypes: 288;
-    declaredPropertyKeys: 611;
+    declaredPropertyKeys: 618;
     encounteredObjectTypeKeys: readonly number[];
     encounteredPropertyKeys: readonly number[];
     notSerializedRegistryPropertyKeys: readonly number[];
@@ -154,6 +162,7 @@ export interface RiveImportReport {
   }>;
   readonly toc: readonly Readonly<{ sourcePropertyKey: number; fieldType: 0 | 1 | 2 | 3; status: 'consumed-type-declaration' }>[];
   readonly objects: readonly RiveObjectVisit[];
+  readonly runtimeNullObjects: readonly RiveRuntimeNullObjectVisit[];
   readonly evaluator: Readonly<{ used: boolean; adapterId?: string; evidenceSha256?: string }>;
   readonly diagnostics: readonly [];
 }

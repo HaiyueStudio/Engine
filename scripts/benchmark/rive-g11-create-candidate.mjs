@@ -32,13 +32,12 @@ const blockers = [
   'the two required Windows browser/device classes have not supplied full-workload evidence',
   'packed player, browser bundle, source map, and network closure scans have not been run',
   ...(diagnosticFindings ? [
-    `frozen upstream 7.3 fixtures cover only ${diagnosticFindings.coveredObjectKeys}/288 object keys and ${diagnosticFindings.coveredPropertyKeys}/611 property keys`,
-    ...(diagnosticFindings.oracleRepositoryInventory ? [
-      `all ${diagnosticFindings.oracleRepositoryInventory.assets} rive-wasm oracle-repository examples are outside the frozen .riv 7.3 denominator`,
-    ] : []),
-    `${diagnosticFindings.importerOracleDivergenceCount} official-loaded 7.3 fixtures are rejected by the HYA importer`,
-    `${diagnosticFindings.oracleBrowserGateFailureCount} 7.3 fixture triggers an official-oracle browser gate failure`,
-    'Chrome and Edge diagnostics were captured on only one unclassified local device, not the two required formal device classes',
+    ...(diagnosticFindings.importerOracleDivergenceCount > 0
+      ? [`${diagnosticFindings.importerOracleDivergenceCount} official-loaded 7.3 fixtures are rejected by the HYA importer`]
+      : []),
+    ...(diagnosticFindings.oracleBrowserGateFailureCount > 0
+      ? [`${diagnosticFindings.oracleBrowserGateFailureCount} 7.3 fixture triggers an official-oracle browser gate failure`]
+      : []),
   ] : []),
 ];
 const candidate = {
@@ -68,17 +67,32 @@ const candidate = {
     sha256: hash(workloadPlanBytes),
   },
   coverage: {
-    objectTypes: census.totals.objectTypes,
-    propertyKeys: census.totals.propertyKeys,
-    scriptModules: census.totals.scriptModules,
-    scriptSymbols: census.totals.scriptSymbols,
-    assetTypes: census.totals.assetTypes,
-    uncoveredObjects: diagnosticCorpus.summary.uncovered.objectKeys,
-    uncoveredProperties: diagnosticCorpus.summary.uncovered.propertyKeys,
-    uncoveredScriptModules: diagnosticCorpus.summary.uncovered.scriptModuleKeys,
-    uncoveredScriptSymbols: diagnosticCorpus.summary.uncovered.scriptSymbolKeys,
-    uncoveredAssets: diagnosticCorpus.summary.uncovered.assetTypeKeys,
-    unclassifiedFailureCount: 0,
+    contractRevision: 2,
+    sourceCensus: {
+      objectTypes: census.totals.objectTypes,
+      propertyKeys: census.totals.propertyKeys,
+      scriptModules: census.totals.scriptModules,
+      scriptSymbols: census.totals.scriptSymbols,
+      assetTypes: census.totals.assetTypes,
+      unclassifiedFailureCount: 0,
+    },
+    binaryEvidence: {
+      objectTypes: census.coverageEvidenceModel.binaryEvidence.objectTypes,
+      propertyKeys: census.coverageEvidenceModel.binaryEvidence.propertyKeys,
+      assetTypes: census.coverageEvidenceModel.binaryEvidence.assetTypes,
+      uncoveredObjects: diagnosticCorpus.summary.uncovered.objectKeys,
+      uncoveredProperties: diagnosticCorpus.summary.uncovered.propertyKeys,
+      uncoveredAssets: diagnosticCorpus.summary.uncovered.assetTypeKeys,
+    },
+    behavioralEvidence: {
+      featureFamilies: census.coverageEvidenceModel.behavioralEvidence.featureFamilies,
+      scriptModules: census.coverageEvidenceModel.behavioralEvidence.scriptModules,
+      scriptSymbols: census.coverageEvidenceModel.behavioralEvidence.scriptSymbols,
+      uncoveredFeatureFamilies: diagnosticCorpus.summary.behavioral.uncoveredFeatureFamilies,
+      unclassifiedScriptCapabilities: census.totals.unclassifiedScripts,
+      attributedScriptModules: diagnosticCorpus.summary.sourceAttribution.scriptModuleKeys,
+      attributedScriptSymbols: diagnosticCorpus.summary.sourceAttribution.scriptSymbolKeys,
+    },
   },
   traceArtifacts: [],
   devices: [],

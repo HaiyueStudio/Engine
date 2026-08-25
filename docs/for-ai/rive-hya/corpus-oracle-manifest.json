@@ -2,6 +2,22 @@
   "schemaVersion": 1,
   "compatibilityTupleId": "rive-7.3-webgl2-2.40.0",
   "status": "contract-frozen-content-acquisition-owned-by-g11",
+  "coverageEvidenceModel": {
+    "contractRevision": 2,
+    "sourceCensus": {
+      "counts": { "objectTypes": 288, "propertyKeys": 618, "scriptModules": 48, "scriptSymbols": 349, "assetTypes": 14 },
+      "closure": "Every entry is classified and owner-mapped; source-only entries are not required to occur in .riv bytes."
+    },
+    "binaryEvidence": {
+      "counts": { "objectTypes": 288, "propertyKeys": 565, "assetTypes": 9 },
+      "eligibility": "CoreRegistry-instantiable object/asset keys and generated deserialize property cases only."
+    },
+    "behavioralEvidence": {
+      "featureFamilies": 8,
+      "scriptRegistrationKeysAreWireKeys": false,
+      "closure": "Feature-family workloads and differential/security traces cover script behavior; module/symbol names remain source attribution."
+    }
+  },
   "productCases": [
     {
       "id": "animation-editor-component-import",
@@ -29,8 +45,8 @@
     }
   ],
   "minimumCorpus": {
-    "featureIsolatedPerObjectFamily": 1,
-    "propertyBoundaryPerPropertyFamily": 2,
+    "behavioralWitnessPerFeatureFamily": 1,
+    "propertyBoundaryPerBinaryPropertyFamily": 2,
     "realProductAssets": 4,
     "combinedStressAssets": 3,
     "adversarialAssets": 24,

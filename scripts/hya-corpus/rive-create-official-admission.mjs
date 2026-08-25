@@ -17,6 +17,10 @@ const emptySha256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b785
 
 let manifestBytes = readFileSync(manifestPath);
 const manifest = JSON.parse(manifestBytes);
+const census = JSON.parse(readFileSync(resolve(root, manifest.census.path)));
+const binaryAssetTypeKeys = new Set(census.assets
+  .filter(value => value.binaryEvidenceEligible === true)
+  .map(value => value.typeKey));
 const planBytes = readFileSync(planPath);
 const plan = JSON.parse(planBytes);
 const inventoryBytes = readFileSync(inventoryPath);
@@ -93,15 +97,21 @@ for (const source of manifest.officialAssetSources) {
       selectedStateMachineInputs: selected.stateMachine.inputs ?? [],
       artboardCount: oracleAsset.artboards.length,
     },
-    hyaImport: accepted ? { status: 'accepted' } : {
+    hyaImport: accepted ? {
+      status: 'accepted',
+      runtimeNullObjects: inventoryAsset.result.runtimeNullObjects ?? 0,
+      runtimeNullObjectKeys: inventoryAsset.result.runtimeNullObjectKeys ?? [],
+    } : {
       status: 'rejected', code: inventoryAsset.result?.code, path: inventoryAsset.result?.path,
       owner: 'g02-riv-import-neutral-ir',
     },
     featureCoverage: accepted ? {
       status: 'captured', objectKeys: inventoryAsset.result.objectKeys,
-      propertyKeys: inventoryAsset.result.propertyKeys, categories: inventoryAsset.result.categories,
+      propertyKeys: inventoryAsset.result.propertyKeys,
+      assetTypeKeys: inventoryAsset.result.objectKeys.filter(value => binaryAssetTypeKeys.has(value)),
+      categories: inventoryAsset.result.categories,
     } : {
-      status: 'blocked-by-strict-import', objectKeys: [], propertyKeys: [],
+      status: 'blocked-by-strict-import', objectKeys: [], propertyKeys: [], assetTypeKeys: [],
       blocker: `${inventoryAsset.result?.code} at ${inventoryAsset.result?.path}`,
     },
     workloadScenario: {
@@ -201,7 +211,7 @@ function formalAsset(asset, source) {
     propertyKeys: asset.featureCoverage.propertyKeys,
     scriptModuleKeys: [],
     scriptSymbolKeys: [],
-    assetTypeKeys: [],
+    assetTypeKeys: asset.featureCoverage.assetTypeKeys,
     fixtureOwner: accepted ? 'g11-corpus-version-fidelity-performance' : 'g02-riv-import-neutral-ir',
     oracleTraceId: `${asset.id}-differential-v2`,
     officialOracleEvidence: {

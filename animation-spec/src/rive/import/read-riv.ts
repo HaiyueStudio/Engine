@@ -13,6 +13,7 @@ import type {
   RiveImportLimits,
   RiveObjectVisit,
   RivePropertyVisit,
+  RiveRuntimeNullObjectVisit,
 } from './types.js';
 
 const OBJECT_BY_KEY = new Map(FROZEN_OBJECTS.map(object => [object.typeKey, object]));
@@ -47,6 +48,7 @@ export interface ParsedRiv {
   readonly fileId: number;
   readonly toc: readonly Readonly<{ sourcePropertyKey: number; fieldType: 0 | 1 | 2 | 3; status: 'consumed-type-declaration' }>[];
   readonly objects: readonly ParsedObject[];
+  readonly runtimeNullObjects: readonly RiveRuntimeNullObjectVisit[];
   readonly estimatedWorkingSetBytes: number;
   readonly counts: Readonly<{
     propertyAssignments: number;
@@ -104,10 +106,6 @@ export function readFrozenRiv(
   for (;;) {
     const key = reader.readVarUint('$.riv.header.toc.propertyKey', 0xffff);
     if (key === 0) break;
-    const property = PROPERTY_BY_KEY.get(key);
-    if (!property) {
-      throw new RiveImportError('E_RIVE_UNKNOWN_PROPERTY', 'ToC property is outside the frozen 7.3 registry.', '$.riv.header.toc', { ...context, propertyKey: key });
-    }
     if (tocSeen.has(key)) {
       throw new RiveImportError('E_RIVE_TOC_INVALID', 'ToC contains a duplicate property key.', '$.riv.header.toc', { ...context, propertyKey: key });
     }
@@ -121,13 +119,16 @@ export function readFrozenRiv(
     for (let slot = 0; slot < 4 && index + slot < tocKeys.length; slot++) {
       const key = tocKeys[index + slot]!;
       const fieldType = ((packed >>> (slot * 2)) & 3) as 0 | 1 | 2 | 3;
-      const property = PROPERTY_BY_KEY.get(key)!;
-      if (fieldType !== EXPECTED_TOC_TYPE[property.wireKind]) {
+      const property = PROPERTY_BY_KEY.get(key);
+      if (property && fieldType !== EXPECTED_TOC_TYPE[property.wireKind]) {
         throw new RiveImportError('E_RIVE_TOC_INVALID', 'ToC field type conflicts with the frozen registry.', '$.riv.header.toc.fieldTypes', { ...context, propertyKey: key });
       }
       toc.push(Object.freeze({ sourcePropertyKey: key, fieldType, status: 'consumed-type-declaration' }));
     }
   }
+  const tocFieldTypeByKey = new Map(toc.map(entry => [entry.sourcePropertyKey, entry.fieldType]));
+  const unknownTocKeys = new Set(tocKeys.filter(key => !PROPERTY_BY_KEY.has(key)));
+  const consumedRuntimeNullTocKeys = new Set<number>();
 
   const counts: MutableCounts = {
     propertyAssignments: 0,
@@ -138,6 +139,8 @@ export function readFrozenRiv(
     workingSetBytes: bytes.byteLength * 2,
   };
   const objects: ParsedObject[] = [];
+  const runtimeNullObjects: RiveRuntimeNullObjectVisit[] = [];
+  let sourceObjectCount = 0;
   let hierarchy: HierarchyObject[] | undefined;
   let artboardInstances = 0;
   let vertices = 0;
@@ -145,11 +148,24 @@ export function readFrozenRiv(
   let drawItems = 0;
 
   while (!reader.reachedEnd) {
-    assertBudget(objects.length + 1, limits.objects, 'objects', '$.riv.objects', context);
-    const sourceObjectIndex = objects.length;
+    assertBudget(sourceObjectCount + 1, limits.objects, 'objects', '$.riv.objects', context);
+    const sourceObjectIndex = sourceObjectCount++;
     const typeKey = reader.readVarUint(`$.riv.objects[index=${sourceObjectIndex}].typeKey`, 0xffff);
     const source = OBJECT_BY_KEY.get(typeKey);
     if (!source) {
+      if (typeKey === 526) {
+        runtimeNullObjects.push(readRuntimeNullObject(
+          reader,
+          sourceObjectIndex,
+          typeKey,
+          tocFieldTypeByKey,
+          consumedRuntimeNullTocKeys,
+          limits,
+          counts,
+          context,
+        ));
+        continue;
+      }
       throw new RiveImportError('E_RIVE_UNKNOWN_OBJECT', 'Object type is outside the frozen 7.3 registry.', `$.riv.objects[typeKey=${typeKey}][index=${sourceObjectIndex}]`, { ...context, objectKey: typeKey });
     }
     if (source.name.includes('NestedArtboard') || source.name.includes('ArtboardInstance')) {
@@ -238,11 +254,17 @@ export function readFrozenRiv(
     }
   }
   if (hierarchy) validateHierarchy(hierarchy, limits, context);
+  for (const key of unknownTocKeys) {
+    if (!consumedRuntimeNullTocKeys.has(key)) {
+      throw new RiveImportError('E_RIVE_UNKNOWN_PROPERTY', 'ToC property outside the frozen registry was not confined to an accepted runtime-null object.', '$.riv.header.toc', { ...context, propertyKey: key });
+    }
+  }
 
   return Object.freeze({
     fileId,
     toc: Object.freeze(toc),
     objects: Object.freeze(objects),
+    runtimeNullObjects: Object.freeze(runtimeNullObjects),
     estimatedWorkingSetBytes: counts.workingSetBytes,
     counts: Object.freeze({
       propertyAssignments: counts.propertyAssignments,
@@ -252,6 +274,84 @@ export function readFrozenRiv(
       listItems: counts.listItems,
     }),
   });
+}
+
+function readRuntimeNullObject(
+  reader: RivBinaryReader,
+  sourceObjectIndex: number,
+  typeKey: 526,
+  tocFieldTypeByKey: ReadonlyMap<number, 0 | 1 | 2 | 3>,
+  consumedRuntimeNullTocKeys: Set<number>,
+  limits: RiveImportLimits,
+  counts: MutableCounts,
+  context: RiveImportDiagnosticContext,
+): RiveRuntimeNullObjectVisit {
+  const objectContext = Object.freeze({ ...context, objectKey: typeKey });
+  reader.setContext(objectContext);
+  const sourcePropertyKeys: number[] = [];
+  for (;;) {
+    const propertyPath = `$.riv.objects[typeKey=${typeKey}][index=${sourceObjectIndex}].properties`;
+    const propertyKey = reader.readVarUint(propertyPath, 0xffff);
+    if (propertyKey === 0) break;
+    counts.propertyAssignments++;
+    assertBudget(counts.propertyAssignments, limits.propertyAssignments, 'propertyAssignments', '$.riv.objects', objectContext);
+    const property = PROPERTY_BY_KEY.get(propertyKey);
+    const tocFieldType = tocFieldTypeByKey.get(propertyKey);
+    if (!property && tocFieldType === undefined) {
+      throw new RiveImportError('E_RIVE_UNKNOWN_PROPERTY', 'Runtime-null object property has no frozen registry or ToC wire type.', propertyPath, { ...objectContext, propertyKey });
+    }
+    if (!property) consumedRuntimeNullTocKeys.add(propertyKey);
+    const propertyContext = Object.freeze({ ...objectContext, propertyKey });
+    reader.setContext(propertyContext);
+    skipRuntimeNullProperty(reader, property?.wireKind, tocFieldType, `${propertyPath}[key=${propertyKey}]`, limits, counts, propertyContext);
+    sourcePropertyKeys.push(propertyKey);
+    assertBudget(counts.workingSetBytes, limits.decodedWorkingSetBytes, 'decodedWorkingSetBytes', propertyPath, propertyContext);
+  }
+  counts.workingSetBytes += 128 + sourcePropertyKeys.length * 16;
+  assertBudget(counts.workingSetBytes, limits.decodedWorkingSetBytes, 'decodedWorkingSetBytes', `$.riv.objects[typeKey=${typeKey}][index=${sourceObjectIndex}]`, objectContext);
+  return Object.freeze({
+    sourceObjectIndex,
+    sourceTypeKey: typeKey,
+    status: 'consumed-runtime-null',
+    sourcePropertyKeys: Object.freeze(sourcePropertyKeys),
+  });
+}
+
+function skipRuntimeNullProperty(
+  reader: RivBinaryReader,
+  wireKind: FrozenPropertyRecord['wireKind'] | undefined,
+  tocFieldType: 0 | 1 | 2 | 3 | undefined,
+  path: string,
+  limits: RiveImportLimits,
+  counts: MutableCounts,
+  context: RiveImportDiagnosticContext,
+): void {
+  const effectiveKind = wireKind ?? (tocFieldType === 0 ? 'uint' : tocFieldType === 1 ? 'bytes' : tocFieldType === 2 ? 'double' : 'color');
+  switch (effectiveKind) {
+    case 'uint':
+    case 'int': reader.readVarUint(path, 0xffff_ffff); break;
+    case 'bool': {
+      const value = reader.readByte(path);
+      if (value > 1) throw new RiveImportError('E_RIVE_TOC_INVALID', 'Boolean payload must be 0 or 1.', path, context);
+      break;
+    }
+    case 'string': {
+      const value = reader.readString(path, limits.stringBytes);
+      counts.strings++;
+      counts.textBytes += value.byteLength;
+      counts.workingSetBytes += value.byteLength * 3;
+      assertBudget(counts.textBytes, limits.totalTextBytes, 'totalTextBytes', path, context);
+      break;
+    }
+    case 'bytes': {
+      const value = reader.readLengthPrefixedBytes(path, limits.oneAssetBytes);
+      counts.embeddedBytes += value.byteLength;
+      counts.workingSetBytes += value.byteLength;
+      break;
+    }
+    case 'double': reader.readFloat32(path); break;
+    case 'color': reader.readUint32(path); break;
+  }
 }
 
 function isRootScopedComponent(source: FrozenObjectRecord): boolean {

@@ -25,9 +25,9 @@ M07 要把 Rive runtime `.riv` 资产转换为 HYA。当前 HYA 1.0 已有节点
 
 ### 2. 完整性由生成 census 定义
 
-[`runtime-census.json`](../rive-hya/runtime-census.json) 由冻结 source 的 `CoreRegistry`、generated headers 和 Lua registration source 机械生成。本 tuple 包含 288 个可实例化 runtime object、611 个唯一 runtime property key、48 个 Lua registration module、349 个注册 symbol 和 14 个 `generated/assets/` type definition（其中 9 个进入 `CoreRegistry` 可序列化 object）。View Model/bindable asset references 仍作为普通 object/property 逐项登记，不重复计入 file asset 汇总。
+[`runtime-census.json`](../rive-hya/runtime-census.json) 由冻结 source 的 `CoreRegistry`、generated headers 和 Lua registration source 机械生成。经 [ADR 0088](./0088-rive-7-3-census-and-runtime-null-object-addendum.md) 修正后，本 tuple 包含 288 个可实例化 runtime object、618 个唯一 runtime property key、48 个 Lua registration module、349 个注册 symbol 和 14 个 `generated/assets/` type definition（其中 9 个进入 `CoreRegistry` 可序列化 object）。View Model/bindable asset references 仍作为普通 object/property 逐项登记，不重复计入 file asset 汇总。ADR 0088 另冻结一个不进入 runtime graph 的逐 key `runtime-null` object；它不计入可实例化 object census。
 
-每项必须拥有：family、当前 HYA `full|partial|missing`、实现 Goal、strict diagnostic 和 fixture owner。生成器对重复 key 或未分类条目失败。reader 遇到 census 之外的 object/property/script/asset 必须在 materialization/执行之前失败，不能静默跳过。
+每项必须拥有：family、当前 HYA `full|partial|missing`、实现 Goal、strict diagnostic 和 fixture owner。生成器对重复 key 或未分类条目失败。reader 遇到 census 之外的 object/property/script/asset 必须在 materialization/执行之前失败；唯一例外是 compatibility tuple 逐 key接受的 `runtime-null` object，它必须完整消费、计数和报告但不 materialize，不能扩展成任意 unknown 跳过。
 
 ### 3. 三个兼容 profile
 

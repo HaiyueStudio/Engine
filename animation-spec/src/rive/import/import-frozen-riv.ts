@@ -31,7 +31,7 @@ const EXPECTED_EVALUATOR_FLAGS = Object.freeze({
 
 interface AssetCandidate {
   readonly object: ParsedObject;
-  readonly request: RiveAssetRequest;
+  request: RiveAssetRequest;
   embedded?: Uint8Array;
 }
 
@@ -155,10 +155,10 @@ function buildReport(
     schema: 'haiyue-rive-neutral-import-report', version: 1,
     compatibility: FROZEN_REGISTRY_IDENTITY,
     input: Object.freeze({ sha256: inputSha256, byteLength, fingerprint: 'RIVE', major: 7, minor: 3, fileId: parsed.fileId }),
-    counts: Object.freeze({ objects: parsed.objects.length, ...parsed.counts, resolvedAssets: ir.resolvedResources.length }),
+    counts: Object.freeze({ objects: parsed.objects.length, runtimeNullObjects: parsed.runtimeNullObjects.length, ...parsed.counts, resolvedAssets: ir.resolvedResources.length }),
     registryCoverage: Object.freeze({
       declaredObjectTypes: 288,
-      declaredPropertyKeys: 611,
+      declaredPropertyKeys: 618,
       encounteredObjectTypeKeys: Object.freeze([...new Set(parsed.objects.map(object => object.source.typeKey))].sort((a, b) => a - b)),
       encounteredPropertyKeys: Object.freeze([...new Set(parsed.objects.flatMap(object => object.properties.map(property => property.source.key)))].sort((a, b) => a - b)),
       notSerializedRegistryPropertyKeys: Object.freeze(FROZEN_PROPERTIES.filter(property => !property.serialized).map(property => property.key).sort((a, b) => a - b)),
@@ -166,6 +166,7 @@ function buildReport(
     }),
     toc: parsed.toc,
     objects: Object.freeze(parsed.objects.map(object => object.visit)),
+    runtimeNullObjects: parsed.runtimeNullObjects,
     evaluator,
     diagnostics: Object.freeze([] as []),
   });
@@ -203,10 +204,21 @@ async function resolveAssets(
     }
   }
   assertLimit(candidates.filter(candidate => !candidate.embedded).length, limits.externalAssets, 'externalAssets', '$.riv.assets', context);
+  // Match BackboardImporter::addFileAsset's EDITOR BUG 4204 recovery: retain
+  // the first serialized id and deterministically assign later collisions the
+  // next unused id in file order.
   const ids = new Set<number>();
+  let nextAssetId = 1;
   for (const candidate of candidates) {
-    if (ids.has(candidate.request.assetId)) throw assetError('E_RIVE_REFERENCE_INVALID', 'Asset id is duplicated.', candidate.request, context);
-    ids.add(candidate.request.assetId);
+    let assetId = candidate.request.assetId;
+    if (ids.has(assetId)) {
+      while (ids.has(nextAssetId)) nextAssetId++;
+      assetId = nextAssetId++;
+      candidate.request = Object.freeze({ ...candidate.request, assetId });
+    } else if (assetId >= nextAssetId) {
+      nextAssetId = assetId + 1;
+    }
+    ids.add(assetId);
   }
   const manifest = manifestMap(options.assetManifest ?? [], context);
   const allowedHostedOrigins = Object.freeze([...(options.allowedHostedOrigins ?? [])]);

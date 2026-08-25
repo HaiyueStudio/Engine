@@ -42,6 +42,13 @@ const riv = (objects = [], { major = 7, minor = 3, toc = [] } = {}) => {
 };
 const field = (key, payload) => [...vu(key), ...payload];
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
+const evaluatorDescriptor = {
+  adapterId: 'fixture-oracle', package: '@rive-app/webgl2', version: '2.40.0',
+  riveJsSha256: 'd25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714',
+  riveWasmSha256: '87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32',
+  enforcesDecodedBudgets: true,
+  buildFlags: { WITH_RIVE_TEXT: true, WITH_RIVE_LAYOUT: true, WITH_RIVE_AUDIO: true, WITH_RIVE_SCRIPTING: true, RIVE_DECODERS: true, RIVE_PNG: true, RIVE_JPEG: true, RIVE_WEBP: true, RIVE_WEBGL: true },
+};
 
 function assertCode(error, code) {
   assert.ok(error instanceof RiveImportError);
@@ -50,9 +57,13 @@ function assertCode(error, code) {
 }
 
 test('frozen registry is complete, unique, immutable, and reverse-covered', () => {
-  assert.deepEqual(FROZEN_RIVE_REGISTRY_COUNTS, { objects: 288, properties: 611 });
+  assert.deepEqual(FROZEN_RIVE_REGISTRY_COUNTS, { objects: 288, properties: 618 });
   assert.equal(new Set(FROZEN_OBJECTS.map(item => item.typeKey)).size, 288);
-  assert.equal(new Set(FROZEN_PROPERTIES.map(item => item.key)).size, 611);
+  assert.equal(new Set(FROZEN_PROPERTIES.map(item => item.key)).size, 618);
+  assert.deepEqual(
+    [565, 677, 856, 861, 862, 863, 978].filter(key => FROZEN_PROPERTIES.some(property => property.key === key)),
+    [565, 677, 856, 861, 862, 863, 978],
+  );
   for (const property of FROZEN_PROPERTIES) {
     assert.ok(!property.serialized || FROZEN_OBJECTS.some(object => object.lineage.includes(property.owner)), `${property.owner}.${property.name}`);
   }
@@ -77,6 +88,7 @@ test('reader consumes every wire kind and emits immutable neutral IR plus exhaus
   assert.equal(result.ir.version, 1);
   assert.equal(result.ir.artboards.length, 1);
   assert.equal(result.report.counts.objects, 6);
+  assert.equal(result.report.counts.runtimeNullObjects, 0);
   assert.equal(result.report.counts.propertyAssignments, 7);
   assert.equal(result.report.counts.listItems, 3);
   assert.deepEqual(result.report.diagnostics, []);
@@ -120,6 +132,27 @@ test('embedded resource is hashed and associated without a resolver', async () =
   assert.equal(result.ir.resolvedResources[0].contentSha256, digest(new Uint8Array([9, 8, 7])));
 });
 
+test('duplicate file asset ids use the frozen official importer recovery in file order', async () => {
+  const bytes = riv([
+    object(105, [field(203, str('first.png')), field(204, vu(0))]),
+    object(106, [field(212, blob([1]))]),
+    object(105, [field(203, str('second.png')), field(204, vu(0))]),
+    object(106, [field(212, blob([2]))]),
+  ]);
+  const evaluatorAssetIds = [];
+  const result = await importFrozenRiv(bytes, {
+    evaluator: {
+      descriptor: evaluatorDescriptor,
+      async evaluate(_bytes, assets) {
+        evaluatorAssetIds.push(...assets.map(asset => asset.assetId));
+        return { evidence: { recovered: true } };
+      },
+    },
+  });
+  assert.deepEqual(evaluatorAssetIds, [0, 1]);
+  assert.equal(result.ir.resolvedResources.length, 2);
+});
+
 test('asset missing, hosted policy, and hash mismatch are exact failures with no result', async () => {
   const bytes = riv([object(105, [field(203, str('remote.png')), field(204, vu(4)), field(362, str('https://assets.example/rive'))])]);
   const expected = new Uint8Array([1]);
@@ -151,13 +184,7 @@ test('abort and timeout wait for late resolver cleanup and never return a partia
 
 test('official evaluator is injected, pinned, plain-data hashed, and absent from package dependencies', async () => {
   const bytes = riv([object(105, [field(204, vu(9))]), object(106, [field(212, blob([4, 2]))])]);
-  const descriptor = {
-    adapterId: 'fixture-oracle', package: '@rive-app/webgl2', version: '2.40.0',
-    riveJsSha256: 'd25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714',
-    riveWasmSha256: '87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32',
-    enforcesDecodedBudgets: true,
-    buildFlags: { WITH_RIVE_TEXT: true, WITH_RIVE_LAYOUT: true, WITH_RIVE_AUDIO: true, WITH_RIVE_SCRIPTING: true, RIVE_DECODERS: true, RIVE_PNG: true, RIVE_JPEG: true, RIVE_WEBP: true, RIVE_WEBGL: true },
-  };
+  const descriptor = evaluatorDescriptor;
   let handoff;
   const result = await importFrozenRiv(bytes, { evaluator: { descriptor, async evaluate(_bytes, assets, limits, signal) { handoff = { assets, limits, signal }; return { evidence: { b: 2, a: 1 } }; } } });
   assert.equal(result.report.evaluator.used, true);

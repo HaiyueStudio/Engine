@@ -8,7 +8,7 @@ M07 is admitted for four real HaiYue workflows frozen in [`corpus-oracle-manifes
 
 1. `format-version`：7.2/7.3/7.4/8.0, malformed header/ToC/varints and unknown keys。
 2. `feature-isolated`：each census family and every object/property mapping rule；shared property keys use boundary/easing/animation fixtures。
-3. `script-api`：all 48 modules/349 symbols, allowed/forbidden capabilities and typed protocol results。
+3. `script-api`：all 48 modules/349 symbols 的 source owner/classification ledger，以及覆盖八个 feature family 的 allowed/forbidden capability probe 与 typed protocol results；module/symbol 名称不是 `.riv` wire coverage。
 4. `asset`：embedded/referenced/hosted font/image/audio/blob/script/shader plus replacement, missing, corrupt, license and URL cases。
 5. `adversarial`：cycles, graph/decompression/list/event explosion, malicious font/media, infinite Luau, promise storm, output amplification, invalid/expensive WGSL, abort/device loss/late result。
 6. `real-product`：the four frozen workflows with immutable Rive revision, bytes hashes, license provenance and transitive assets。
@@ -34,7 +34,9 @@ The official oracle may render/load successfully while HaiYue strict import fail
 
 | Channel | Formal comparison |
 | --- | --- |
-| object/property coverage | exact key sets；unclassified/missing fixture owner = 0 |
+| source census coverage | 288/618/48/349/14 全量 owner/classification；unclassified/missing fixture owner = 0 |
+| binary evidence coverage | exact 288 object / 565 serialized property / 9 serialized asset key sets |
+| behavioral evidence coverage | 八个 feature family workload；script registration 由 capability/security trace而不是 wire-key encounter证明 |
 | transforms/geometry/layout | stable topology/order；finite values；absolute error ≤ `1e-4` canvas unit after normalized coordinate conversion |
 | colors/paint | semantic paint/blend/clip structure exact；normalized channel error ≤ `1/1024` before rasterization |
 | pixels | same device/browser fixed DPR；max channel delta ≤ `2/255`, changed pixels ≤ `0.1%`, SSIM ≥ `0.9995`；any structural/state difference fails regardless of score |
