@@ -9,10 +9,10 @@ import { tmpdir } from 'node:os';
 import { performance } from 'node:perf_hooks';
 import { parseAnimation } from '../../animation-spec/dist/index.js';
 import { createDeformableMesh2DFormatRegistry, decodeDeformableMesh2DData } from '../../animation-spec/dist/deformable2d.js';
-import { OfflineConversionError } from '../../animation-spec/dist/conversion.js';
 import { CUBISM_CAPTURE_FRAME_OPERATIONS, runCubismClipBakedConversion } from '../../animation-spec/dist/live2d/clip-baked.js';
 import { runChromeWebGpuFixture } from '../webgpu-gate/chrome-runner.mjs';
 import { G07_CANDIDATE_KIND, validateG07Candidate, validateG07Manifest } from './deformable2d-g07-candidate-contract.mjs';
+import { buildCubismFrameworkEvaluator } from '../../animation-spec/live2d/tools/build-framework-evaluator.mjs';
 
 const root = resolve(import.meta.dirname, '../..');
 const manifestPath = resolve(root, 'animation-spec/corpus/deformable2d/fidelity-performance-corpus-manifest.json');
@@ -25,9 +25,10 @@ const repository = repositoryEvidence(root);
 const temporaryRoot = mkdtempSync(resolve(tmpdir(), 'haiyue-g07-'));
 
 try {
-  const coreBytes = args.core ? readFileSync(resolve(args.core)) : Buffer.from(await fetchRequired(manifest.oracle.coreUrl));
-  assertCore(coreBytes);
+  const coreBytes = args.core ? readFileSync(resolve(args.core)) : null;
+  if (coreBytes) assertCore(coreBytes);
   prepareCaptureFixture(temporaryRoot, coreBytes);
+  await buildCubismFrameworkEvaluator({ frameworkRoot: args.frameworkRoot, output: resolve(temporaryRoot, 'framework-evaluator.js'), version: args.frameworkVersion });
   const samples = [];
   for (const expected of manifest.samples) {
     const directory = resolve(args.models.get(expected.id) ?? missingModel(expected.id));
@@ -47,6 +48,7 @@ try {
       title: expected.title,
       source: { runtimeDirectoryHash: sourceEvidence.runtimeDirectoryHash, fileCount: sourceEvidence.fileCount, rawBytes: sourceEvidence.rawBytes, gzipBytes: sourceEvidence.gzipBytes },
       recipe: expected.recipe,
+      captureProvenance: capture.source.coreProvenance,
       featureCoverage: inspectFeatureCoverage(capture),
       diagnostics: [...capture.g07Diagnostics, ...converted.result.report.diagnostics],
       conversion: {
@@ -70,8 +72,8 @@ try {
     });
   }
 
-  const fullRecipeBlockers = await verifyFullRecipeNoGo(args.models.get('niziiro-mao'), manifest.samples.find(sample => sample.id === 'niziiro-mao'), temporaryRoot);
   const neutralRuntime = await runNeutralFixture(temporaryRoot, manifest);
+  const capturedCore = samples[0].captureProvenance;
   const candidate = {
     schemaVersion: 1,
     kind: G07_CANDIDATE_KIND,
@@ -82,8 +84,8 @@ try {
     manifest: { id: manifest.id, sha256: sha256(manifestBytes) },
     oracle: {
       coreVersion: manifest.oracle.coreVersion,
-      coreByteLength: coreBytes.byteLength,
-      coreSha256: sha256(coreBytes),
+      coreByteLength: capturedCore.byteLength,
+      coreSha256: capturedCore.sha256,
       captureFormat: manifest.oracle.captureFormat,
       evaluatorCapabilities: manifest.oracle.frameworkCapability,
     },
@@ -92,10 +94,10 @@ try {
     samples,
     neutralRuntime,
     verdict: {
-      status: 'no-go',
+      status: 'go',
       owner: 'M05-G09',
-      reason: 'The pinned official Core evaluator proves Motion and drawable output, but the official Framework evaluation path for Expression + Physics + Pose is not integrated.',
-      blockers: fullRecipeBlockers,
+      reason: 'The pinned official Core and same-release Framework evaluator executed every frozen Motion/Expression/Physics/Pose recipe.',
+      blockers: [],
     },
     summary: summarize(samples),
     unclassifiedFailureCount: 0,
@@ -108,23 +110,26 @@ try {
 }
 
 function parseArguments(values) {
-  const parsed = { models: new Map(), core: null, fidelityReport: null, output: 'review/candidates/deformable2d-g07-candidate.json' };
+  const parsed = { models: new Map(), core: null, frameworkRoot: null, frameworkVersion: null, fidelityReport: null, output: 'review/candidates/deformable2d-g07-candidate.json' };
   for (let index = 0; index < values.length; index++) {
     const argument = values[index];
     if (argument === '--model') { const [id, ...rest] = required(values, ++index, argument).split('='); parsed.models.set(id, rest.join('=')); }
     else if (argument === '--core') parsed.core = required(values, ++index, argument);
+    else if (argument === '--framework-root') parsed.frameworkRoot = required(values, ++index, argument);
+    else if (argument === '--framework-version') parsed.frameworkVersion = required(values, ++index, argument);
     else if (argument === '--fidelity-report') parsed.fidelityReport = required(values, ++index, argument);
     else if (argument === '--out') parsed.output = required(values, ++index, argument);
     else throw new Error(`Unknown argument ${argument}.`);
   }
   if (!parsed.fidelityReport) throw new Error('--fidelity-report is required.');
+  if (!parsed.frameworkRoot || !parsed.frameworkVersion) throw new Error('--framework-root and --framework-version are required.');
   return parsed;
 }
 
 function prepareCaptureFixture(directory, coreBytes) {
   cpSync(resolve(root, 'animation-spec/live2d/tools/capture-page.html'), resolve(directory, 'capture-page.html'));
   cpSync(resolve(root, 'animation-spec/live2d/tools/capture-page.mjs'), resolve(directory, 'capture-page.mjs'));
-  writeFileSync(resolve(directory, 'live2dcubismcore.min.js'), coreBytes);
+  if (coreBytes) writeFileSync(resolve(directory, 'live2dcubismcore.min.js'), coreBytes);
 }
 
 async function captureOfficialCore(workRoot, modelRoot, expected) {
@@ -134,6 +139,11 @@ async function captureOfficialCore(workRoot, modelRoot, expected) {
     query: {
       model: `/__model/${expected.source.entry}`,
       motion: `/__model/${expected.recipe.motionFile}`,
+      framework: '1',
+      ...(!args.core ? { core: manifest.oracle.coreUrl } : {}),
+      ...(expected.recipe.expression ? { expression: `/__model/${expected.recipe.expression}` } : {}),
+      ...(expected.recipe.physics ? { physics: `/__model/${expected.recipe.physicsFile}` } : {}),
+      ...(expected.recipe.pose ? { pose: `/__model/${expected.recipe.poseFile}` } : {}),
       fps: manifest.methodology.captureFrameRate,
     },
     mounts: [{ prefix: '/__model', directory: modelRoot }],
@@ -141,6 +151,12 @@ async function captureOfficialCore(workRoot, modelRoot, expected) {
   });
   if (!result.capture) throw new Error(`${expected.id} official Core capture returned no payload.`);
   if (result.capture.source.coreVersion !== String(manifest.oracle.coreVersion)) throw new Error(`${expected.id} Core version drifted: ${result.capture.source.coreVersion}.`);
+  if (result.capture.source.coreProvenance?.byteLength !== manifest.oracle.coreByteLength || result.capture.source.coreProvenance?.sha256 !== manifest.oracle.coreSha256) throw new Error(`${expected.id} Core bytes drifted from the frozen oracle.`);
+  if (result.capture.source.frameworkVersion !== args.frameworkVersion) throw new Error(`${expected.id} Framework version provenance drifted.`);
+  for (const capability of ['motion', 'expression', 'physics', 'pose']) {
+    const requested = capability === 'motion' ? Boolean(expected.recipe.motionFile) : Boolean(expected.recipe[capability]);
+    if (requested !== Boolean(result.capture.capabilities?.[capability])) throw new Error(`${expected.id} ${capability} execution capability drifted.`);
+  }
   let unusedInvertedFlagCount = 0;
   for (const frame of result.capture.frames) for (const drawable of frame.drawables) {
     if (drawable.invertedMask === true && drawable.masks.length === 0) {
@@ -168,7 +184,7 @@ async function convertSample(directory, expected, capture, sampling) {
     version: 'official-core-dense-linear-oracle@1',
     duration: capture.duration,
     keyTimes: capture.frames.map(frame => frame.time),
-    capabilities: { motion: true, expression: false, physics: false, pose: false, drawableColors: capture.capabilities?.drawableColors === 'captured' },
+    capabilities: { motion: capture.capabilities.motion, expression: capture.capabilities.expression, physics: capture.capabilities.physics, pose: capture.capabilities.pose, drawableColors: capture.capabilities?.drawableColors === 'captured' },
     async evaluate(time) { evaluationCount++; return sampleCapture(capture, time); },
     close() {},
   };
@@ -184,56 +200,12 @@ async function convertSample(directory, expected, capture, sampling) {
   const result = await runCubismClipBakedConversion({
     source,
     sourceBytes: readFileSync(resolve(directory, expected.source.entry)),
-    recipe: { id: `${expected.id}-motion`, clip: expected.recipe.motionId, motion: expected.recipe.motionFile, duration: capture.duration },
+    recipe: { id: `${expected.id}-recipe`, clip: expected.recipe.motionId, motion: expected.recipe.motionFile, duration: capture.duration, ...(expected.recipe.expression ? { expression: expected.recipe.expression } : {}), ...(expected.recipe.physics ? { physics: true } : {}), ...(expected.recipe.pose ? { pose: true } : {}) },
     host,
     sampling,
     mode: 'strict',
   });
   return { result, evaluator, source, host, evaluationCount, converterMs: performance.now() - started };
-}
-
-async function verifyFullRecipeNoGo(directoryInput, expected, workRoot) {
-  const directory = resolve(directoryInput ?? missingModel('niziiro-mao'));
-  const capture = await captureOfficialCore(workRoot, directory, expected);
-  const converted = await createSourceOnly(directory, expected, capture);
-  const blockers = [];
-  for (const capability of ['expression', 'physics', 'pose']) {
-    const requested = capability === 'expression' ? { expression: expected.recipe.expression } : { [capability]: true };
-    try {
-      await runCubismClipBakedConversion({
-        source: converted.source, sourceBytes: readFileSync(resolve(directory, expected.source.entry)), host: converted.host,
-        recipe: { id: `mao-${capability}-recipe`, clip: expected.recipe.motionId, motion: expected.recipe.motionFile, duration: capture.duration, ...requested },
-        sampling: manifest.methodology.sampling, mode: 'strict',
-      });
-      throw new Error(`Mao ${capability} recipe unexpectedly passed without an official Framework evaluator.`);
-    } catch (error) {
-      if (!(error instanceof OfflineConversionError) || error.code !== 'E_CUBISM_RECIPE_CAPABILITY_MISSING' || error.path !== `$.recipe.${capability}`) throw error;
-      blockers.push({
-      sampleId: expected.id,
-      capability,
-      code: 'E_CUBISM_RECIPE_CAPABILITY_MISSING',
-      path: `$.recipe.${capability}`,
-      owner: 'official-framework-evaluator',
-      message: `Pinned evaluator does not execute ${capability}; G09 must remain no-go until the official Framework path is integrated and rerun.`,
-      });
-    }
-  }
-  return blockers;
-}
-
-async function createSourceOnly(directory, expected, capture) {
-  const allFiles = listFiles(directory);
-  const model3 = JSON.parse(readFileSync(resolve(directory, expected.source.entry), 'utf8'));
-  return {
-    source: {
-      entry: expected.source.entry, name: expected.title, sourceVersion: expected.source.runtimeDirectoryHash,
-      coreVersion: String(manifest.oracle.coreVersion), canvas: capture.canvas, frameRate: capture.frameRate,
-      textures: model3.FileReferences.Textures.map((uri, index) => ({ id: `texture-${index}`, uri, integrity: `sha256-${sha256(readFileSync(resolve(directory, uri)))}` })),
-      dependencies: allFiles.filter(path => path !== expected.source.entry).map(uri => ({ uri, integrity: `sha256-${sha256(readFileSync(resolve(directory, uri)))}` })),
-      evaluator: { version: 'official-core-motion-only@1', duration: capture.duration, keyTimes: capture.frames.map(frame => frame.time), capabilities: { motion: true, expression: false, physics: false, pose: false, drawableColors: true }, async evaluate(time) { return sampleCapture(capture, time); }, close() {} },
-    },
-    host: fileHost(directory),
-  };
 }
 
 function sampleCapture(capture, time) {
@@ -421,7 +393,6 @@ function summarize(samples) { return { sampleCount: samples.length, pixelFidelit
 
 function repositoryEvidence(directory) { const revision = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: directory, encoding: 'utf8' }).trim(); const dirty = execFileSync('git', ['status', '--porcelain=v1', '--untracked-files=all'], { cwd: directory, encoding: 'utf8' }).trim().length > 0; return { revision, dirty }; }
 function assertCore(bytes) { if (bytes.byteLength !== manifest.oracle.coreByteLength || sha256(bytes) !== manifest.oracle.coreSha256) throw new Error('Official Cubism Core bytes do not match the frozen oracle.'); }
-async function fetchRequired(url) { const response = await fetch(url, { cache: 'no-store' }); if (!response.ok) throw new Error(`${url} returned HTTP ${response.status}.`); return response.arrayBuffer(); }
 function listFiles(directory) { const files = []; const visit = current => { for (const entry of readdirSync(current, { withFileTypes: true })) { const path = resolve(current, entry.name); if (entry.isDirectory()) visit(path); else if (entry.isFile()) files.push(relative(directory, path).split(sep).join('/')); } }; visit(directory); return files.sort((left, right) => left.localeCompare(right)); }
 function resolveSafe(rootPath, uri) { const target = resolve(rootPath, uri); if (target !== rootPath && !target.startsWith(`${rootPath}${sep}`)) throw new Error(`Asset escapes source root: ${uri}.`); return target; }
 function exactBuffer(bytes) { return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength); }

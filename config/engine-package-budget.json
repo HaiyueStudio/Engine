@@ -39,10 +39,10 @@
       "workspace": "animation-spec",
       "maxPackedBytes": 125000,
       "maxUnpackedBytes": 550000,
-      "maxFileCount": 40,
+      "maxFileCount": 50,
       "capacity": {
-        "reviewed": { "packedBytes": 92227, "unpackedBytes": 343042, "fileCount": 31 },
-        "growthReserve": { "packedBytes": 32773, "unpackedBytes": 206958, "fileCount": 9 },
+        "reviewed": { "packedBytes": 119038, "unpackedBytes": 464495, "fileCount": 47 },
+        "growthReserve": { "packedBytes": 5962, "unpackedBytes": 85505, "fileCount": 3 },
         "capabilityBasis": "source-neutral HYA format, native 3D, deformable 2D, and offline Lottie/Cubism adapters"
       },
       "declaredFiles": [
@@ -115,26 +115,29 @@
     "@haiyue/ui": {
       "workspace": "../UI",
       "nodeImport": false,
-      "maxPackedBytes": 45000,
-      "maxUnpackedBytes": 230000,
-      "maxFileCount": 50,
+      "maxPackedBytes": 55000,
+      "maxUnpackedBytes": 280000,
+      "maxFileCount": 60,
       "capacity": {
-        "reviewed": { "packedBytes": 31192, "unpackedBytes": 161256, "fileCount": 39 },
-        "growthReserve": { "packedBytes": 13808, "unpackedBytes": 68744, "fileCount": 11 },
+        "reviewed": { "packedBytes": 48827, "unpackedBytes": 246442, "fileCount": 49 },
+        "growthReserve": { "packedBytes": 6173, "unpackedBytes": 33558, "fileCount": 11 },
         "capabilityBasis": "dependency-free Web Components root registration plus focused component subpaths"
       },
+      "sideEffects": ["./themes/*.css"],
       "declaredFiles": [
         "README.md",
         "LICENSE",
         "dist/**/*.js",
-        "dist/**/*.d.ts"
+        "dist/**/*.d.ts",
+        "themes/*.css"
       ],
       "allowedFilePatterns": [
         "package.json",
         "README.md",
         "LICENSE",
         "dist/**/*.js",
-        "dist/**/*.d.ts"
+        "dist/**/*.d.ts",
+        "themes/*.css"
       ]
     }
   },
@@ -254,6 +257,25 @@
         "parseNative3DAnimation",
         "parseNative3DAnimationPayload"
       ]
+    },
+    "animation-spec-live2d": {
+      "fixture": "scripts/fixtures/engine-consumers/animation-spec-live2d.mjs",
+      "packageName": "@haiyue/animation-spec",
+      "maxGzipBytes": 45000,
+      "requiredExports": [
+        "CUBISM_CAPTURE_FRAME_OPERATIONS",
+        "CUBISM_CLIP_BAKED_UPDATE_ORDER",
+        "CubismClipBakedAdapter",
+        "runCubismClipBakedConversion"
+      ],
+      "forbiddenStaticTokens": [
+        "Live2DCubismCore",
+        "CubismFramework",
+        "CubismExpressionMotion",
+        "CubismPhysics",
+        "CubismPose",
+        "Moc.fromArrayBuffer"
+      ]
     }
   },
   "extensionConsumers": {
@@ -271,6 +293,26 @@
         "Animation3DMixer",
         "Animation3DPoseBuffer",
         "Animation3DStateMachineController"
+      ]
+    },
+    "extensions-deformable-animation": {
+      "fixture": "scripts/fixtures/engine-consumers/extensions-deformable-animation.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 90000,
+      "requiredExports": [
+        "createDeformableMesh2DRuntimeExtension",
+        "sampleDeformableMesh2DDrawable"
+      ],
+      "forbiddenStaticTokens": [
+        "Live2DCubismCore",
+        "CubismFramework",
+        "CubismExpressionMotion",
+        "CubismPhysics",
+        "CubismPose",
+        "Moc.fromArrayBuffer",
+        ".moc3",
+        ".model3.json",
+        ".wpk"
       ]
     },
     "extensions-gltf": {
@@ -347,7 +389,7 @@
       "fixture": "scripts/fixtures/engine-consumers/ui-button.mjs",
       "packageName": "@haiyue/ui",
       "maxGzipBytes": 5000,
-      "requiredExports": ["GEButton", "defineButtonComponents"]
+      "requiredExports": ["HYButton", "defineButtonComponents"]
     }
   }
 }

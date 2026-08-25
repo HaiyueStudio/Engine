@@ -19,10 +19,11 @@
     "captureFormat": "live2d-cubism-drawable-capture@1",
     "frameworkCapability": {
       "motion": true,
-      "expression": false,
-      "physics": false,
-      "pose": false,
-      "diagnosticCode": "E_CUBISM_RECIPE_CAPABILITY_MISSING"
+      "expression": true,
+      "physics": true,
+      "pose": true,
+      "implementation": "caller-supplied official CubismWebFramework",
+      "testedTag": "5-r.4"
     }
   },
   "methodology": {
@@ -102,13 +103,14 @@
         "acceptanceRequired": true
       },
       "distribution": { "rawAssets": false, "derivedStatistics": true, "pixelReferences": false },
-      "role": ["basic-mesh-texture", "motion", "physics-source-present"],
+      "role": ["basic-mesh-texture", "motion", "physics"],
       "recipe": {
         "motionId": "Idle:0",
         "motionFile": "motions/miku_idle.motion3.json",
         "duration": 5.433,
         "expression": null,
-        "physics": false,
+        "physics": true,
+        "physicsFile": "miku.physics3.json",
         "pose": false,
         "referenceTimes": [1]
       },
@@ -171,7 +173,9 @@
         "duration": 5.57,
         "expression": "expressions/exp_01.exp3.json",
         "physics": true,
+        "physicsFile": "Mao.physics3.json",
         "pose": true,
+        "poseFile": "Mao.pose3.json",
         "referenceTimes": [1]
       },
       "requiredFiles": [
@@ -192,7 +196,7 @@
   },
   "replay": {
     "fidelityReportCommand": "node scripts/verify-live2d-local-corpus.mjs --model hatsune-miku-free=<miku-runtime> --evidence-action hatsune-miku-free=Idle:0 --evidence-time hatsune-miku-free=1 --skip-recovery-smoke hatsune-miku-free --model rice-glassfield-pro=<rice-runtime> --evidence-action rice-glassfield-pro=Tap%40Body:0 --evidence-time rice-glassfield-pro=0.75 --model niziiro-mao=<mao-runtime> --evidence-action niziiro-mao=Idle:0 --evidence-time niziiro-mao=1 --out <temporary-fidelity-report.json>",
-    "candidateCommand": "node scripts/benchmark/run-deformable2d-g07.mjs --model hatsune-miku-free=<miku-runtime> --model rice-glassfield-pro=<rice-runtime> --model niziiro-mao=<mao-runtime> --fidelity-report <temporary-fidelity-report.json> --out <temporary-g07-candidate.json>",
+    "candidateCommand": "node scripts/benchmark/run-deformable2d-g07.mjs --framework-root <official-CubismWebFramework-5-r.4> --framework-version 5-r.4 --model hatsune-miku-free=<miku-runtime> --model rice-glassfield-pro=<rice-runtime> --model niziiro-mao=<mao-runtime> --fidelity-report <temporary-fidelity-report.json> --out <temporary-g07-candidate.json>",
     "validatorCommand": "node scripts/benchmark/validate-deformable2d-g07-candidate.mjs review/candidates/deformable2d-g07-candidate.json"
   }
 }

@@ -35,8 +35,11 @@ export function validateG07Manifest(manifest) {
   }
   const mao = manifest.samples.find(sample => sample.id === 'niziiro-mao');
   assert.ok(mao.recipe.expression && mao.recipe.physics && mao.recipe.pose, 'Mao must freeze the full expression/physics/pose recipe.');
-  assert.equal(manifest.oracle?.frameworkCapability?.expression, false);
-  assert.equal(manifest.oracle?.frameworkCapability?.diagnosticCode, 'E_CUBISM_RECIPE_CAPABILITY_MISSING');
+  assert.deepEqual(
+    ['motion', 'expression', 'physics', 'pose'].map(capability => manifest.oracle?.frameworkCapability?.[capability]),
+    [true, true, true, true],
+  );
+  assert.match(manifest.oracle?.frameworkCapability?.testedTag ?? '', /^5-r\.\d+$/u);
   assert.equal(manifest.neutralRuntimeFixture?.required, true);
   return manifest;
 }
@@ -67,10 +70,8 @@ export function validateG07Candidate(candidate, manifest, { requireClean = true 
   assert.equal(candidate.neutralRuntime?.artifactForbiddenTokenCount, 0);
   assert.equal(candidate.neutralRuntime?.lifecycleResiduals, 0);
 
-  assert.equal(candidate.verdict?.status, 'no-go', 'Current official evaluator capability gap must produce an explicit no-go.');
-  assert.ok(candidate.verdict.blockers?.some(blocker => blocker.sampleId === 'niziiro-mao'
-    && blocker.code === 'E_CUBISM_RECIPE_CAPABILITY_MISSING'
-    && ['$.recipe.expression', '$.recipe.physics', '$.recipe.pose'].includes(blocker.path)));
+  assert.equal(candidate.verdict?.status, 'go', 'The official Framework evaluator must execute every frozen recipe capability.');
+  assert.deepEqual(candidate.verdict?.blockers, []);
   assert.equal(candidate.summary?.sampleCount, 3);
   assert.equal(candidate.summary?.pixelFidelitySampleCount, 3);
   assert.equal(candidate.summary?.structuralFidelitySampleCount, 3);

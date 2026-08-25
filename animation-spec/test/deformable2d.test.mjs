@@ -249,6 +249,11 @@ test('official Core capture page records drawable color arrays and capability av
   assert.match(source, /drawables\.multiplyColors/u);
   assert.match(source, /drawables\.screenColors/u);
   assert.match(source, /drawableColors:.*captured.*unavailable/u);
+  assert.match(source, /CubismExpressionMotion/u);
+  assert.match(source, /CubismPhysics/u);
+  assert.match(source, /CubismPose/u);
+  assert.match(source, /motionQueue\?\.doUpdateMotion\(model, time\)[\s\S]*expressionQueue\?\.doUpdateMotion\(model, time\)[\s\S]*applyConstantInputs[\s\S]*physics\?\.evaluate[\s\S]*pose\?\.updateParameters[\s\S]*model\.update\(\)/u);
+  assert.match(source, /recipeAssets[\s\S]*sha256/u);
 });
 
 test('Cubism dynamic visibility suppresses only the baked main-pass opacity', () => {

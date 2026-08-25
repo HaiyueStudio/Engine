@@ -1481,11 +1481,108 @@
             }
           ]
         },
+        "./conversion": {
+          "source": "animation-spec/src\\conversion.ts",
+          "exports": [
+            {
+              "name": "OfflineConversionAdapter",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionAdapterContext",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionArtifact",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionAssetRequest",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionDiagnostic",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionEncodeInput",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionError",
+              "kind": "value"
+            },
+            {
+              "name": "OfflineConversionFrameOperations",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionHost",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionMode",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionPipelineOptions",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionPipelineResult",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionRecipe",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionReport",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionResolvedAsset",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionSamplingOptions",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionSession",
+              "kind": "type"
+            },
+            {
+              "name": "OfflineConversionTransaction",
+              "kind": "type"
+            },
+            {
+              "name": "runOfflineConversion",
+              "kind": "value"
+            },
+            {
+              "name": "stableStringify",
+              "kind": "value"
+            }
+          ]
+        },
         "./cubism": {
           "source": "animation-spec/src\\cubism.ts",
           "exports": [
             {
+              "name": "combineCubismCaptureClips",
+              "kind": "value"
+            },
+            {
               "name": "convertCubismCaptureToHya",
+              "kind": "value"
+            },
+            {
+              "name": "CUBISM_CAPTURE_FRAME_OPERATIONS",
+              "kind": "value"
+            },
+            {
+              "name": "CUBISM_CLIP_BAKED_UPDATE_ORDER",
               "kind": "value"
             },
             {
@@ -1495,6 +1592,18 @@
             {
               "name": "CUBISM_DRAWABLE_CAPTURE_VERSION",
               "kind": "value"
+            },
+            {
+              "name": "CubismBuildTimeEvaluator",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureClipInput",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureClipRange",
+              "kind": "type"
             },
             {
               "name": "CubismCaptureConversionError",
@@ -1521,11 +1630,39 @@
               "kind": "type"
             },
             {
+              "name": "CubismCaptureSet",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureSetOptions",
+              "kind": "type"
+            },
+            {
               "name": "CubismCaptureTexture",
               "kind": "type"
             },
             {
+              "name": "CubismClipBakedAdapter",
+              "kind": "value"
+            },
+            {
+              "name": "CubismClipBakedConversionOptions",
+              "kind": "type"
+            },
+            {
+              "name": "CubismClipBakedRecipe",
+              "kind": "type"
+            },
+            {
+              "name": "CubismClipBakedSource",
+              "kind": "type"
+            },
+            {
               "name": "CubismDrawableCapture",
+              "kind": "type"
+            },
+            {
+              "name": "CubismModel3MotionReference",
               "kind": "type"
             },
             {
@@ -1539,6 +1676,14 @@
             {
               "name": "CubismMotion3Sample",
               "kind": "type"
+            },
+            {
+              "name": "listCubismModel3Motions",
+              "kind": "value"
+            },
+            {
+              "name": "runCubismClipBakedConversion",
+              "kind": "value"
             },
             {
               "name": "sampleCubismMotion3",
@@ -1571,6 +1716,10 @@
             },
             {
               "name": "DEFORMABLE_MESH_2D_EXTENSION_ID",
+              "kind": "value"
+            },
+            {
+              "name": "DEFORMABLE_MESH_2D_MAX_MASK_REFERENCES",
               "kind": "value"
             },
             {
@@ -1615,7 +1764,19 @@
           "source": "animation-spec/src\\live2d.ts",
           "exports": [
             {
+              "name": "combineCubismCaptureClips",
+              "kind": "value"
+            },
+            {
               "name": "convertCubismCaptureToHya",
+              "kind": "value"
+            },
+            {
+              "name": "CUBISM_CAPTURE_FRAME_OPERATIONS",
+              "kind": "value"
+            },
+            {
+              "name": "CUBISM_CLIP_BAKED_UPDATE_ORDER",
               "kind": "value"
             },
             {
@@ -1625,6 +1786,18 @@
             {
               "name": "CUBISM_DRAWABLE_CAPTURE_VERSION",
               "kind": "value"
+            },
+            {
+              "name": "CubismBuildTimeEvaluator",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureClipInput",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureClipRange",
+              "kind": "type"
             },
             {
               "name": "CubismCaptureConversionError",
@@ -1651,11 +1824,39 @@
               "kind": "type"
             },
             {
+              "name": "CubismCaptureSet",
+              "kind": "type"
+            },
+            {
+              "name": "CubismCaptureSetOptions",
+              "kind": "type"
+            },
+            {
               "name": "CubismCaptureTexture",
               "kind": "type"
             },
             {
+              "name": "CubismClipBakedAdapter",
+              "kind": "value"
+            },
+            {
+              "name": "CubismClipBakedConversionOptions",
+              "kind": "type"
+            },
+            {
+              "name": "CubismClipBakedRecipe",
+              "kind": "type"
+            },
+            {
+              "name": "CubismClipBakedSource",
+              "kind": "type"
+            },
+            {
               "name": "CubismDrawableCapture",
+              "kind": "type"
+            },
+            {
+              "name": "CubismModel3MotionReference",
               "kind": "type"
             },
             {
@@ -1671,7 +1872,52 @@
               "kind": "type"
             },
             {
+              "name": "listCubismModel3Motions",
+              "kind": "value"
+            },
+            {
+              "name": "runCubismClipBakedConversion",
+              "kind": "value"
+            },
+            {
               "name": "sampleCubismMotion3",
+              "kind": "value"
+            }
+          ]
+        },
+        "./live2d/clip-baked": {
+          "source": "animation-spec/src\\live2d\\clip-baked.ts",
+          "exports": [
+            {
+              "name": "CUBISM_CAPTURE_FRAME_OPERATIONS",
+              "kind": "value"
+            },
+            {
+              "name": "CUBISM_CLIP_BAKED_UPDATE_ORDER",
+              "kind": "value"
+            },
+            {
+              "name": "CubismBuildTimeEvaluator",
+              "kind": "type"
+            },
+            {
+              "name": "CubismClipBakedAdapter",
+              "kind": "value"
+            },
+            {
+              "name": "CubismClipBakedConversionOptions",
+              "kind": "type"
+            },
+            {
+              "name": "CubismClipBakedRecipe",
+              "kind": "type"
+            },
+            {
+              "name": "CubismClipBakedSource",
+              "kind": "type"
+            },
+            {
+              "name": "runCubismClipBakedConversion",
               "kind": "value"
             }
           ]
@@ -10065,6 +10311,14 @@
           "source": "ui/src\\index.ts",
           "exports": [
             {
+              "name": "calculateVirtualListRange",
+              "kind": "value"
+            },
+            {
+              "name": "defineBorderBeamComponents",
+              "kind": "value"
+            },
+            {
               "name": "defineButtonComponents",
               "kind": "value"
             },
@@ -10078,6 +10332,10 @@
             },
             {
               "name": "defineDialogComponents",
+              "kind": "value"
+            },
+            {
+              "name": "defineDrawerComponents",
               "kind": "value"
             },
             {
@@ -10097,7 +10355,15 @@
               "kind": "value"
             },
             {
+              "name": "defineNotificationComponents",
+              "kind": "value"
+            },
+            {
               "name": "defineRadioComponents",
+              "kind": "value"
+            },
+            {
+              "name": "defineRangeComponents",
               "kind": "value"
             },
             {
@@ -10121,156 +10387,265 @@
               "kind": "value"
             },
             {
-              "name": "GEButton",
+              "name": "defineVirtualListComponents",
               "kind": "value"
             },
             {
-              "name": "GECheckbox",
+              "name": "HYBorderBeam",
               "kind": "value"
             },
             {
-              "name": "GECheckboxChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "GEContextMenu",
+              "name": "HYButton",
               "kind": "value"
             },
             {
-              "name": "GEContextMenuItem",
-              "kind": "type"
-            },
-            {
-              "name": "GEContextMenuSelectDetail",
-              "kind": "type"
-            },
-            {
-              "name": "GEDialog",
+              "name": "HYCheckbox",
               "kind": "value"
             },
             {
-              "name": "GEDialogCloseDetail",
+              "name": "HYCheckboxChangeDetail",
               "kind": "type"
             },
             {
-              "name": "GEDialogCloseReason",
-              "kind": "type"
-            },
-            {
-              "name": "GEDropdown",
+              "name": "HYContextMenu",
               "kind": "value"
             },
             {
-              "name": "GEDropdownItem",
+              "name": "HYContextMenuItem",
               "kind": "type"
             },
             {
-              "name": "GEDropdownPlacement",
+              "name": "HYContextMenuSelectDetail",
               "kind": "type"
             },
             {
-              "name": "GEDropdownSelectDetail",
-              "kind": "type"
-            },
-            {
-              "name": "GEHistoryControls",
+              "name": "HYDialog",
               "kind": "value"
             },
             {
-              "name": "GEHistoryEntry",
+              "name": "HYDialogCloseDetail",
               "kind": "type"
             },
             {
-              "name": "GEInput",
+              "name": "HYDialogCloseReason",
+              "kind": "type"
+            },
+            {
+              "name": "HYDrawer",
               "kind": "value"
             },
             {
-              "name": "GEInputChangeDetail",
+              "name": "HYDrawerCloseDetail",
               "kind": "type"
             },
             {
-              "name": "GEInputType",
+              "name": "HYDrawerCloseReason",
               "kind": "type"
             },
             {
-              "name": "GERadio",
+              "name": "HYDrawerPlacement",
+              "kind": "type"
+            },
+            {
+              "name": "HYDropdown",
               "kind": "value"
             },
             {
-              "name": "GERadioChangeDetail",
+              "name": "HYDropdownItem",
               "kind": "type"
             },
             {
-              "name": "GESelect",
+              "name": "HYDropdownPlacement",
+              "kind": "type"
+            },
+            {
+              "name": "HYDropdownSelectDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYHistoryControls",
               "kind": "value"
             },
             {
-              "name": "GESelectChangeDetail",
+              "name": "HYHistoryEntry",
               "kind": "type"
             },
             {
-              "name": "GESelectOption",
-              "kind": "type"
-            },
-            {
-              "name": "GESplit",
+              "name": "HYInput",
               "kind": "value"
             },
             {
-              "name": "GESplitDirection",
+              "name": "HYInputChangeDetail",
               "kind": "type"
             },
             {
-              "name": "GESplitRatioChangeDetail",
+              "name": "HYInputType",
               "kind": "type"
             },
             {
-              "name": "GETabChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "GETabOption",
-              "kind": "type"
-            },
-            {
-              "name": "GETabs",
+              "name": "HYNotification",
               "kind": "value"
             },
             {
-              "name": "GETooltip",
+              "name": "HYNotificationCloseDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYNotificationCloseReason",
+              "kind": "type"
+            },
+            {
+              "name": "HYNotificationMethodOptions",
+              "kind": "type"
+            },
+            {
+              "name": "HYNotificationOpenDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYNotificationOptions",
+              "kind": "type"
+            },
+            {
+              "name": "HYNotificationPlacement",
+              "kind": "type"
+            },
+            {
+              "name": "HYNotificationType",
+              "kind": "type"
+            },
+            {
+              "name": "HYRadio",
               "kind": "value"
             },
             {
-              "name": "GETooltipPlacement",
+              "name": "HYRadioChangeDetail",
               "kind": "type"
             },
             {
-              "name": "GETree",
+              "name": "HYRange",
               "kind": "value"
             },
             {
-              "name": "GETreeDataChangeDetail",
+              "name": "HYRangeChangeDetail",
               "kind": "type"
             },
             {
-              "name": "GETreeDropPosition",
+              "name": "HYRangeHandle",
               "kind": "type"
             },
             {
-              "name": "GETreeNode",
+              "name": "HYRangeValue",
+              "kind": "type"
+            },
+            {
+              "name": "HYSelect",
               "kind": "value"
             },
             {
-              "name": "GETreeNodeContextMenuDetail",
+              "name": "HYSelectChangeDetail",
               "kind": "type"
             },
             {
-              "name": "GETreeNodeData",
+              "name": "HYSelectOption",
               "kind": "type"
             },
             {
-              "name": "GETreeSelectionChangeDetail",
+              "name": "HYSplit",
+              "kind": "value"
+            },
+            {
+              "name": "HYSplitDirection",
               "kind": "type"
+            },
+            {
+              "name": "HYSplitRatioChangeDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYTabChangeDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYTabOption",
+              "kind": "type"
+            },
+            {
+              "name": "HYTabs",
+              "kind": "value"
+            },
+            {
+              "name": "HYTooltip",
+              "kind": "value"
+            },
+            {
+              "name": "HYTooltipPlacement",
+              "kind": "type"
+            },
+            {
+              "name": "HYTree",
+              "kind": "value"
+            },
+            {
+              "name": "HYTreeDataChangeDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYTreeDropPosition",
+              "kind": "type"
+            },
+            {
+              "name": "HYTreeNode",
+              "kind": "value"
+            },
+            {
+              "name": "HYTreeNodeContextMenuDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYTreeNodeData",
+              "kind": "type"
+            },
+            {
+              "name": "HYTreeSelectionChangeDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYVirtualList",
+              "kind": "value"
+            },
+            {
+              "name": "HYVirtualListAlign",
+              "kind": "type"
+            },
+            {
+              "name": "HYVirtualListItemClickDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYVirtualListItemRenderer",
+              "kind": "type"
+            },
+            {
+              "name": "HYVirtualListRange",
+              "kind": "type"
+            },
+            {
+              "name": "HYVirtualListRangeChangeDetail",
+              "kind": "type"
+            }
+          ]
+        },
+        "./border-beam": {
+          "source": "ui/src\\border-beam.ts",
+          "exports": [
+            {
+              "name": "defineBorderBeamComponents",
+              "kind": "value"
+            },
+            {
+              "name": "HYBorderBeam",
+              "kind": "value"
             }
           ]
         },
@@ -10282,7 +10657,7 @@
               "kind": "value"
             },
             {
-              "name": "GEButton",
+              "name": "HYButton",
               "kind": "value"
             }
           ]
@@ -10295,11 +10670,11 @@
               "kind": "value"
             },
             {
-              "name": "GECheckbox",
+              "name": "HYCheckbox",
               "kind": "value"
             },
             {
-              "name": "GECheckboxChangeDetail",
+              "name": "HYCheckboxChangeDetail",
               "kind": "type"
             }
           ]
@@ -10312,15 +10687,15 @@
               "kind": "value"
             },
             {
-              "name": "GEContextMenu",
+              "name": "HYContextMenu",
               "kind": "value"
             },
             {
-              "name": "GEContextMenuItem",
+              "name": "HYContextMenuItem",
               "kind": "type"
             },
             {
-              "name": "GEContextMenuSelectDetail",
+              "name": "HYContextMenuSelectDetail",
               "kind": "type"
             }
           ]
@@ -10333,15 +10708,40 @@
               "kind": "value"
             },
             {
-              "name": "GEDialog",
+              "name": "HYDialog",
               "kind": "value"
             },
             {
-              "name": "GEDialogCloseDetail",
+              "name": "HYDialogCloseDetail",
               "kind": "type"
             },
             {
-              "name": "GEDialogCloseReason",
+              "name": "HYDialogCloseReason",
+              "kind": "type"
+            }
+          ]
+        },
+        "./drawer": {
+          "source": "ui/src\\drawer.ts",
+          "exports": [
+            {
+              "name": "defineDrawerComponents",
+              "kind": "value"
+            },
+            {
+              "name": "HYDrawer",
+              "kind": "value"
+            },
+            {
+              "name": "HYDrawerCloseDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYDrawerCloseReason",
+              "kind": "type"
+            },
+            {
+              "name": "HYDrawerPlacement",
               "kind": "type"
             }
           ]
@@ -10354,19 +10754,19 @@
               "kind": "value"
             },
             {
-              "name": "GEDropdown",
+              "name": "HYDropdown",
               "kind": "value"
             },
             {
-              "name": "GEDropdownItem",
+              "name": "HYDropdownItem",
               "kind": "type"
             },
             {
-              "name": "GEDropdownPlacement",
+              "name": "HYDropdownPlacement",
               "kind": "type"
             },
             {
-              "name": "GEDropdownSelectDetail",
+              "name": "HYDropdownSelectDetail",
               "kind": "type"
             }
           ]
@@ -10379,11 +10779,11 @@
               "kind": "value"
             },
             {
-              "name": "GEHistoryControls",
+              "name": "HYHistoryControls",
               "kind": "value"
             },
             {
-              "name": "GEHistoryEntry",
+              "name": "HYHistoryEntry",
               "kind": "type"
             }
           ]
@@ -10396,15 +10796,56 @@
               "kind": "value"
             },
             {
-              "name": "GEInput",
+              "name": "HYInput",
               "kind": "value"
             },
             {
-              "name": "GEInputChangeDetail",
+              "name": "HYInputChangeDetail",
               "kind": "type"
             },
             {
-              "name": "GEInputType",
+              "name": "HYInputType",
+              "kind": "type"
+            }
+          ]
+        },
+        "./notification": {
+          "source": "ui/src\\notification.ts",
+          "exports": [
+            {
+              "name": "defineNotificationComponents",
+              "kind": "value"
+            },
+            {
+              "name": "HYNotification",
+              "kind": "value"
+            },
+            {
+              "name": "HYNotificationCloseDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYNotificationCloseReason",
+              "kind": "type"
+            },
+            {
+              "name": "HYNotificationMethodOptions",
+              "kind": "type"
+            },
+            {
+              "name": "HYNotificationOpenDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYNotificationOptions",
+              "kind": "type"
+            },
+            {
+              "name": "HYNotificationPlacement",
+              "kind": "type"
+            },
+            {
+              "name": "HYNotificationType",
               "kind": "type"
             }
           ]
@@ -10417,11 +10858,36 @@
               "kind": "value"
             },
             {
-              "name": "GERadio",
+              "name": "HYRadio",
               "kind": "value"
             },
             {
-              "name": "GERadioChangeDetail",
+              "name": "HYRadioChangeDetail",
+              "kind": "type"
+            }
+          ]
+        },
+        "./range": {
+          "source": "ui/src\\range.ts",
+          "exports": [
+            {
+              "name": "defineRangeComponents",
+              "kind": "value"
+            },
+            {
+              "name": "HYRange",
+              "kind": "value"
+            },
+            {
+              "name": "HYRangeChangeDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYRangeHandle",
+              "kind": "type"
+            },
+            {
+              "name": "HYRangeValue",
               "kind": "type"
             }
           ]
@@ -10434,15 +10900,15 @@
               "kind": "value"
             },
             {
-              "name": "GESelect",
+              "name": "HYSelect",
               "kind": "value"
             },
             {
-              "name": "GESelectChangeDetail",
+              "name": "HYSelectChangeDetail",
               "kind": "type"
             },
             {
-              "name": "GESelectOption",
+              "name": "HYSelectOption",
               "kind": "type"
             }
           ]
@@ -10455,15 +10921,15 @@
               "kind": "value"
             },
             {
-              "name": "GESplit",
+              "name": "HYSplit",
               "kind": "value"
             },
             {
-              "name": "GESplitDirection",
+              "name": "HYSplitDirection",
               "kind": "type"
             },
             {
-              "name": "GESplitRatioChangeDetail",
+              "name": "HYSplitRatioChangeDetail",
               "kind": "type"
             }
           ]
@@ -10476,15 +10942,15 @@
               "kind": "value"
             },
             {
-              "name": "GETabChangeDetail",
+              "name": "HYTabChangeDetail",
               "kind": "type"
             },
             {
-              "name": "GETabOption",
+              "name": "HYTabOption",
               "kind": "type"
             },
             {
-              "name": "GETabs",
+              "name": "HYTabs",
               "kind": "value"
             }
           ]
@@ -10497,11 +10963,11 @@
               "kind": "value"
             },
             {
-              "name": "GETooltip",
+              "name": "HYTooltip",
               "kind": "value"
             },
             {
-              "name": "GETooltipPlacement",
+              "name": "HYTooltipPlacement",
               "kind": "type"
             }
           ]
@@ -10514,31 +10980,68 @@
               "kind": "value"
             },
             {
-              "name": "GETree",
+              "name": "HYTree",
               "kind": "value"
             },
             {
-              "name": "GETreeDataChangeDetail",
+              "name": "HYTreeDataChangeDetail",
               "kind": "type"
             },
             {
-              "name": "GETreeDropPosition",
+              "name": "HYTreeDropPosition",
               "kind": "type"
             },
             {
-              "name": "GETreeNode",
+              "name": "HYTreeNode",
               "kind": "value"
             },
             {
-              "name": "GETreeNodeContextMenuDetail",
+              "name": "HYTreeNodeContextMenuDetail",
               "kind": "type"
             },
             {
-              "name": "GETreeNodeData",
+              "name": "HYTreeNodeData",
               "kind": "type"
             },
             {
-              "name": "GETreeSelectionChangeDetail",
+              "name": "HYTreeSelectionChangeDetail",
+              "kind": "type"
+            }
+          ]
+        },
+        "./virtual-list": {
+          "source": "ui/src\\virtual-list.ts",
+          "exports": [
+            {
+              "name": "calculateVirtualListRange",
+              "kind": "value"
+            },
+            {
+              "name": "defineVirtualListComponents",
+              "kind": "value"
+            },
+            {
+              "name": "HYVirtualList",
+              "kind": "value"
+            },
+            {
+              "name": "HYVirtualListAlign",
+              "kind": "type"
+            },
+            {
+              "name": "HYVirtualListItemClickDetail",
+              "kind": "type"
+            },
+            {
+              "name": "HYVirtualListItemRenderer",
+              "kind": "type"
+            },
+            {
+              "name": "HYVirtualListRange",
+              "kind": "type"
+            },
+            {
+              "name": "HYVirtualListRangeChangeDetail",
               "kind": "type"
             }
           ]

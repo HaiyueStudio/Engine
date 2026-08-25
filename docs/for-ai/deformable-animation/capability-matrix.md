@@ -19,7 +19,7 @@
 | Multiply drawable color | HYDM 1.2 drawable RGBA channel | supported | `covered`：Mao `54` 个非中性 drawable-frame（`Idle:0`，1s） | G13/G15/G16 complete；代表 `ArtMesh82=[0.980392,1,0.427451,1]` |
 | Screen drawable color | HYDM 1.2 drawable RGBA channel | supported | `covered`：Mao `38` 个非中性 drawable-frame（`Idle:0`，1s） | G13/G15/G16 complete；代表 `ArtMesh194=[1,0.454902,0.513726,1]` |
 | Drawable culling | HYDM static back-face flag | supported | `covered`：Rice `9` 个非退化且镜像翻转绕序的 drawable（`Tap@Body:0`，0.75s） | G14/G16 complete；代表 `ArtMesh161` 从 23 CCW 翻为 23 CW |
-| Expression/Pose/Physics build-time composition | clip-baked evaluator recipe | candidate | synthetic controlled evaluator | G06 complete；调用者必须提供许可合规且声明 capability 的 Core/Framework evaluator，正式真实覆盖归 G07 |
+| Expression/Pose/Physics build-time composition | clip-baked evaluator recipe | supported | `covered`：Miku Motion+Physics；Mao Motion+Expression+Physics+Pose | G09 evaluator complete；官方 Core `5.1.0` + 同代 Framework `5-r.4`，固定更新顺序与输入 hash |
 | Runtime parameter、lip-sync、eye/look input、MotionSync | 不属于 clip-baked | unsupported | 不适用 | 需要独立 parameterized ADR |
 | Cubism deformer/glue/parameter graph authoring | 不属于 runtime IR | unsupported | 不适用 | 不进入 M05 |
 | WPK / `.cmo3` 输入或无损回写 | 非 canonical | unsupported | 不适用 | 不逆向、不解密 |
@@ -45,3 +45,8 @@ G12 的 mask/blend 机器事实源是 `animation-spec/corpus/deformable2d/featur
 `animation-spec/corpus/deformable2d/drawable-color-culling-corpus-manifest.json` 与
 `review/candidates/live2d-drawable-color-culling-corpus-candidate.json`。官方 Rice/Mao 原始模型仅由调用者在本地提供，
 不会进入 Git、npm 包或公开示例。
+
+Framework evaluator 的可复现机器证据由 `fidelity-performance-corpus-manifest.json` 与
+`run-deformable2d-g07.mjs` 生成。当前三模型重放为 `verdict=go`、三项 WebGPU playback 全通过、
+结构最大误差 `0`、浏览器 forbidden request / lifecycle residual / unclassified failure 均为 `0`；
+dirty worktree candidate 只作为实现验收，正式 baseline 仍要求 clean revision 与人工许可/像素复核。

@@ -38,7 +38,7 @@
           "id": "offline-source-adapters",
           "stability": "stable",
           "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
-          "entrypoints": { "./conversion": 19, "./cubism": 15, "./live2d": 15, "./live2d/clip-baked": 8, "./lottie": 9 }
+          "entrypoints": { "./conversion": 19, "./cubism": 30, "./live2d": 30, "./live2d/clip-baked": 8, "./lottie": 9 }
         }
       ]
     },
@@ -161,26 +161,31 @@
           "id": "component-registration-root",
           "stability": "stable",
           "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
-          "entrypoints": { ".": 52 }
+          "entrypoints": { ".": 81 }
         },
         {
           "id": "focused-web-components",
           "stability": "stable",
           "growthReserve": { "ratio": 0.2, "minimumSymbols": 1 },
           "entrypoints": {
+            "./border-beam": 2,
             "./button": 2,
             "./checkbox": 3,
             "./context-menu": 4,
             "./dialog": 4,
+            "./drawer": 5,
             "./dropdown": 5,
             "./history-controls": 3,
             "./input": 4,
+            "./notification": 9,
             "./radio": 3,
+            "./range": 5,
             "./select": 4,
             "./split": 4,
             "./tabs": 4,
             "./tooltip": 3,
-            "./tree": 8
+            "./tree": 8,
+            "./virtual-list": 8
           }
         }
       ]

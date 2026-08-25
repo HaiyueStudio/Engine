@@ -22,8 +22,8 @@ assert.equal(result.bundledSamples, 1);
 assert.ok(result.licenseGatedCandidates >= 1);
 assert.equal(result.licensedEvidenceSamples, 2);
 assert.equal(result.featureStatusKind, 'haiyue-live2d-dashboard-feature-status');
-assert.deepEqual(result.implementationStates, ['degraded', 'supported', 'unsupported']);
-assert.deepEqual(result.coverageStates, ['covered', 'not-applicable', 'not-covered']);
+assert.deepEqual(result.implementationStates, ['supported', 'unsupported']);
+assert.deepEqual(result.coverageStates, ['covered', 'not-applicable']);
 for (const featureId of ['drawable-culling', 'multiply-color', 'screen-color']) {
   assert.ok(result.coveredFeatureIds.includes(featureId), `${featureId} must be independently supported and covered.`);
 }

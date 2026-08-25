@@ -1,1 +1,1 @@
-export { defineButtonComponents, GEButton } from '@haiyue/ui/button';
+export { defineButtonComponents, HYButton } from '@haiyue/ui/button';

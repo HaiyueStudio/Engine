@@ -16,7 +16,7 @@ test('G07 manifest freezes the licensed three-model population and full workload
   assert.deepEqual(manifest.samples.map(sample => sample.id), G07_REQUIRED_MODELS);
 });
 
-test('G07 candidate accepts complete no-go evidence and rejects missing metrics', () => {
+test('G07 candidate accepts complete Framework-backed evidence and rejects missing metrics', () => {
   const candidate = fixtureCandidate();
   validateG07Candidate(candidate, manifest);
   const incomplete = structuredClone(candidate);
@@ -47,7 +47,7 @@ function fixtureCandidate() {
       package: { rawBytes: 1000, gzipBytes: 800 }, runtime: { ...structuredClone(runtime), browser: { nativeBackend: true } },
     })),
     neutralRuntime: { id: manifest.neutralRuntimeFixture.id, playbackPassed: true, cubismRuntimeInBrowser: false, forbiddenRequestCount: 0, artifactForbiddenTokenCount: 0, lifecycleResiduals: 0 },
-    verdict: { status: 'no-go', blockers: [{ sampleId: 'niziiro-mao', code: 'E_CUBISM_RECIPE_CAPABILITY_MISSING', path: '$.recipe.expression' }] },
+    verdict: { status: 'go', blockers: [] },
     summary: { sampleCount: 3, pixelFidelitySampleCount: 3, structuralFidelitySampleCount: 3, runtimePlaybackSampleCount: 3, sourceRawBytes: 10, sourceGzipBytes: 9, hyaPackageRawBytes: 8, hyaPackageGzipBytes: 7 },
     unclassifiedFailureCount: 0,
   };

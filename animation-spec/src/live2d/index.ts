@@ -19,3 +19,15 @@ export { listCubismModel3Motions } from './Model3Motions';
 export type { CubismModel3MotionReference } from './Model3Motions';
 export { combineCubismCaptureClips } from './CubismCaptureSet';
 export type { CubismCaptureClipInput, CubismCaptureClipRange, CubismCaptureSet, CubismCaptureSetOptions } from './CubismCaptureSet';
+export {
+  CUBISM_CAPTURE_FRAME_OPERATIONS,
+  CUBISM_CLIP_BAKED_UPDATE_ORDER,
+  CubismClipBakedAdapter,
+  runCubismClipBakedConversion,
+} from './CubismClipBakedAdapter';
+export type {
+  CubismBuildTimeEvaluator,
+  CubismClipBakedConversionOptions,
+  CubismClipBakedRecipe,
+  CubismClipBakedSource,
+} from './CubismClipBakedAdapter';

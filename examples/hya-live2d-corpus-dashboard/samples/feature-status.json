@@ -73,9 +73,9 @@
     {
       "id": "source-evaluation",
       "title": "Expression / Pose / Physics source evaluation",
-      "implementationStatus": "degraded",
-      "coverageStatus": "not-covered",
-      "detail": "clip-baked evaluator coverage remains recipe-dependent"
+      "implementationStatus": "supported",
+      "coverageStatus": "covered",
+      "detail": "Official Cubism Framework 5-r.4 executes the frozen update order for Miku and Mao"
     },
     {
       "id": "runtime-parameters",
@@ -89,13 +89,21 @@
     {
       "id": "niziiro-mao",
       "title": "Niziiro Mao",
-      "implementationEvidence": "official-core-vs-hya",
+      "implementationEvidence": "official-framework-vs-hya",
       "coverageStatus": "covered",
       "observations": {
+        "drawableCount": 262,
+        "maskReferenceCount": 65,
+        "invertedMaskDrawableCount": 10,
+        "additiveDrawableCount": 15,
+        "multiplicativeDrawableCount": 8,
         "nonNeutralMultiplyDrawableFrameCount": 54,
         "nonNeutralScreenDrawableFrameCount": 38,
         "cullingDrawableCount": 0,
-        "mirroredCullingDrawableFrameCount": 0
+        "mirroredCullingDrawableFrameCount": 0,
+        "expressionExecuted": true,
+        "physicsExecuted": true,
+        "poseExecuted": true
       },
       "localOnly": true
     },
@@ -105,6 +113,11 @@
       "implementationEvidence": "official-core-vs-hya",
       "coverageStatus": "covered",
       "observations": {
+        "drawableCount": 178,
+        "maskReferenceCount": 19,
+        "invertedMaskDrawableCount": 5,
+        "additiveDrawableCount": 21,
+        "multiplicativeDrawableCount": 0,
         "nonNeutralMultiplyDrawableFrameCount": 0,
         "nonNeutralScreenDrawableFrameCount": 0,
         "cullingDrawableCount": 9,
@@ -113,5 +126,5 @@
       "localOnly": true
     }
   ],
-  "missingLocalAssetMessage": "官方模型与 Cubism Core 不随页面发布。请接受 Live2D 许可并运行本地 G16 verifier 重放证据。"
+  "missingLocalAssetMessage": "官方模型、Cubism Core 与 Framework 不随页面发布。请接受 Live2D 对应许可并在本地运行 verifier 重放证据。"
 }

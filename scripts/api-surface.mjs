@@ -613,6 +613,7 @@ function packageEntrypoints(manifest) {
   return Object.entries(manifest.exports)
     .filter(([key, value]) => key !== './package.json' && !(typeof value === 'string' && value.endsWith('package.json')))
     .map(([key, value]) => [key, typeof value === 'string' ? value : value.source ?? value.import ?? value.default])
+    .filter(([, target]) => typeof target === 'string' && /\.(?:[cm]?js|tsx?)$/u.test(target))
     .sort(([a], [b]) => a.localeCompare(b));
 }
 

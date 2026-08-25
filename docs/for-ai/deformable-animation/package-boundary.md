@@ -14,7 +14,9 @@
 
 `@haiyue/engine` root 和 `@haiyue/extensions` root 不增加 Live2D API。播放能力只从 focused subpath lazy load；格式包不依赖 Engine、DOM、WebGPU 或 Editor。
 
-G05/G06 的 framework 与 evaluator adapter 由 G09 以 focused subpath 转正。`conversion` 保持来源无关，`live2d/clip-baked` 只公开 build-time evaluator 注入边界；二者都不能让 Core/Framework 或来源播放器进入 npm/runtime closure。
+G05/G06 的 evaluator adapter 已由 G09 通过 `@haiyue/animation-spec/live2d` 与兼容 focused subpath
+`@haiyue/animation-spec/live2d/clip-baked` 转正。`conversion` 保持来源无关，两个 Live2D 入口只公开
+build-time evaluator 注入边界；Core/Framework 由调用者提供，只进入临时 capture 目录，不能进入 npm/runtime closure。
 
 ## Integrity and provenance ownership
 

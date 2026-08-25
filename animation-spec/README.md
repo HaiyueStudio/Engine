@@ -113,13 +113,19 @@ node animation-spec/live2d/bin/hya-live2d-convert.mjs --input model.capture.json
 
 JSON 用于调试和工具交换，`.hya` 用于网页交付。完整约束见 [SPECIFICATION.md](./SPECIFICATION.md)，机器可读约束见 [schema/animation.schema.json](./schema/animation.schema.json)。运行时 parser 仍是安全边界的最终校验器。
 
-Cubism 第一版采用 clip-baked profile：Core 只在用户许可范围内的构建工具中运行，最终网页只加载 HYA、HYDM、纹理和 `@haiyue/extensions/deformable-animation`。仓库示例使用 HaiYue 自有 deterministic capture fixture，不分发 Core、`.moc3` 或第三方模型。参数输入、Physics、motion sync、非 normal blend、multiply/screen color 和 culling 会进入结构化 fidelity report；`--strict` 会拒绝这些近似。
+Cubism 采用 clip-baked profile：Core/Framework 只在用户许可范围内的构建工具中运行，最终网页只加载 HYA、HYDM、纹理和 `@haiyue/extensions/deformable-animation`。仓库示例使用 HaiYue 自有 deterministic capture fixture，不分发 Core、Framework、`.moc3` 或第三方模型。Motion、Expression、常量参数输入、Physics 与 Pose 按 `reset → motion → expression → inputs → physics → pose → model.update` 离线求值；mask、normal/additive/multiplicative、multiply/screen color 与 culling 进入 source-neutral HYA。仍需运行时变化的 lip-sync、eye/look、MotionSync 或外部参数会精确失败。
 
-仓库开发环境还提供许可隔离的 Core capture runner。调用方显式传入自己获得许可的 Core、model3 和可选 Motion3；runner 在临时 headless Chrome 中求值并删除临时 Core/`.moc3`，输出只包含 capture JSON 与复制出的纹理：
+仓库开发环境还提供许可隔离的 Core/Framework capture runner。调用方显式传入自己获得许可的 Core、官方 Framework checkout、model3 和配方文件；runner 在临时 headless Chrome 中求值并删除临时 Core/Framework/`.moc3`，输出只包含带 SHA-256 provenance 的 capture JSON 与复制出的纹理：
 
 ```sh
 npm run cubism:capture -- --core /licensed/live2dcubismcore.min.js --model /project/model.model3.json --motion /project/idle.motion3.json --output build/model.capture.json --fps 30
 node animation-spec/live2d/bin/hya-live2d-convert.mjs --input build/model.capture.json --output build/model.hya --strict
+```
+
+完整 Framework 配方示例：
+
+```sh
+npm run cubism:capture -- --core /licensed/live2dcubismcore.min.js --framework-root /official/CubismWebFramework-5-r.4 --framework-version 5-r.4 --model /project/model.model3.json --motion /project/idle.motion3.json --expression /project/smile.exp3.json --physics /project/model.physics3.json --pose /project/model.pose3.json --output build/model.capture.json --fps 30
 ```
 
 仓库中的 [`examples/animation-spec`](../examples/animation-spec/) 是可交互转换工作台：可以读取允许 CORS 的 Lottie URL 或直接粘贴 JSON，查看 diagnostics/HYA JSON、下载 `.hya`，并在 WebGPU 预览中播放、逐帧移动和拖动时间轴。

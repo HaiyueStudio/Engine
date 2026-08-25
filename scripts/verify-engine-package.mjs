@@ -196,8 +196,8 @@ function packPublicPackage({ packageName, policy }) {
 
   const firstDirectory = resolve(temporaryRoot, 'packed-a', slug(packageName));
   const secondDirectory = resolve(temporaryRoot, 'packed-b', slug(packageName));
-  const firstManifest = npmPackManifest({ cwd: staging, destination: firstDirectory });
-  const secondManifest = npmPackManifest({ cwd: staging, destination: secondDirectory });
+  const firstManifest = npmPackManifest({ cwd: staging, destination: firstDirectory, ignoreScripts: true });
+  const secondManifest = npmPackManifest({ cwd: staging, destination: secondDirectory, ignoreScripts: true });
   const firstTarball = resolve(firstDirectory, firstManifest.filename);
   const secondTarball = resolve(secondDirectory, secondManifest.filename);
   const firstSha256 = sha256File(firstTarball);
@@ -263,7 +263,10 @@ function validatePublicPackageManifest({ packageName, manifest, packageJson, pol
   if (packageJson.name !== packageName) errors.push(`${packageName} tarball declares name ${packageJson.name}`);
   if (packageJson.private !== false) errors.push(`${packageName} must declare private=false`);
   if (packageJson.type !== 'module') errors.push(`${packageName} must declare type=module`);
-  if (packageJson.sideEffects !== false) errors.push(`${packageName} must declare sideEffects=false`);
+  const expectedSideEffects = policy.sideEffects ?? false;
+  if (JSON.stringify(packageJson.sideEffects) !== JSON.stringify(expectedSideEffects)) {
+    errors.push(`${packageName} sideEffects disagrees with the candidate budget`);
+  }
   if (JSON.stringify(packageJson.files ?? []) !== JSON.stringify(policy.declaredFiles)) {
     errors.push(`${packageName} package files whitelist disagrees with the candidate budget`);
   }
@@ -422,6 +425,9 @@ function validateGenericConsumerResult(result, policy) {
       errors.push(`${result.id} bundled unrelated ${marker}`);
     }
   }
+  for (const marker of policy.forbiddenStaticTokens ?? []) {
+    if (result.code.includes(marker)) errors.push(`${result.id} bundled forbidden static token ${marker}`);
+  }
   if (result.imports.length > 0 || result.dynamicImports.length > 0) {
     errors.push(`${result.id} emitted unresolved imports: ${[...result.imports, ...result.dynamicImports].join(', ')}`);
   }
@@ -495,10 +501,11 @@ function commandCheck(result, label) {
   return { status: 'passed', detail: (result.stdout || '').trim() || `${label} passed` };
 }
 
-function npmPackManifest({ cwd, destination, dryRun = false }) {
+function npmPackManifest({ cwd, destination, dryRun = false, ignoreScripts = false }) {
   mkdirSync(destination, { recursive: true });
   const args = ['pack', '--json', '--pack-destination', destination];
   if (dryRun) args.push('--dry-run');
+  if (ignoreScripts) args.push('--ignore-scripts');
   const result = spawnSync(npmCommand(), npmArgs(args), {
     cwd,
     encoding: 'utf8',
@@ -506,9 +513,22 @@ function npmPackManifest({ cwd, destination, dryRun = false }) {
     timeout: 120_000,
   });
   assertCommand(result, `npm pack ${relative(root, cwd)}`);
-  const manifest = JSON.parse(result.stdout)[0];
+  const manifest = parseNpmJsonOutput(result.stdout)[0];
   if (!manifest?.filename || !Array.isArray(manifest.files)) throw new Error(`npm pack returned an invalid manifest for ${cwd}.`);
   return manifest;
+}
+
+function parseNpmJsonOutput(stdout) {
+  const starts = [...stdout.matchAll(/^[\t ]*\[/gmu)].map(match => match.index ?? 0).reverse();
+  for (const start of starts) {
+    try {
+      const parsed = JSON.parse(stdout.slice(start));
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      // npm lifecycle scripts may write arbitrary stdout before the final --json payload.
+    }
+  }
+  throw new Error('npm pack did not return a parseable JSON manifest.');
 }
 
 function buildAnimationSpec() {
