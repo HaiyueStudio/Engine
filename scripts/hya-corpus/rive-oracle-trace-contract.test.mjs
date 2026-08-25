@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { riveWorkloadActionKinds, riveWorkloadLifecyclePaths } from './rive-workload-contract.mjs';
 import { requiredRiveOracleTraceChannels, validateRiveOracleTrace } from './rive-oracle-trace-contract.mjs';
+import { createRiveFullWorkloadScenario } from './rive-workload-scenario-builder.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const workloadPlan = JSON.parse(readFileSync(resolve(root, 'animation-spec/corpus/rive/rive-g11-workload-plan.json'), 'utf8'));
@@ -15,15 +15,17 @@ const PAYLOAD = Buffer.from('{"samples":[0,1]}\n');
 const PAYLOAD_HASH = createHash('sha256').update(PAYLOAD).digest('hex');
 
 function validScenario() {
-  const channels = requiredRiveOracleTraceChannels();
-  const clockStepsMicros = Array.from({ length: 17 }, (_, index) => index * 125_000);
-  return {
-    schemaVersion: 1, kind: 'haiyue-rive-workload-scenario', id: 'fixture-full-scenario', assetId: 'fixture', rivSha256: RIV_HASH,
-    compatibilityTupleId: 'rive-7.3-webgl2-2.40.0', selection: { artboard: 'Main', animation: 'Idle', stateMachine: 'Machine' },
-    initialData: {}, initialResources: [], clockStepsMicros,
-    actions: riveWorkloadActionKinds().map((kind, index) => ({ id: `action-${index}`, kind, atMicros: clockStepsMicros[index], payload: {}, expectedChannels: index === 0 ? channels : [channels[index % channels.length]] })),
-    lifecyclePaths: riveWorkloadLifecyclePaths(), replayCount: 2,
-  };
+  return createRiveFullWorkloadScenario(workloadPlan, {
+    id: 'fixture-full-scenario', assetId: 'fixture', rivSha256: RIV_HASH,
+    selection: { artboard: 'Main', animation: 'Idle', stateMachine: 'Machine' }, initialData: {}, initialResources: [],
+    probe: {
+      dataMutation: { operation: 'set', path: 'hud.health', value: 75 },
+      pointer: { x: 32, y: 48, deltaX: 1, deltaY: 0, pointerId: 1, buttons: 1 },
+      keyboard: { code: 'Enter', key: 'Enter' }, gamepad: { index: 0, axes: [0, 0], buttons: [1] },
+      focusTarget: 'primary-control', semanticTarget: 'primary-control',
+      resource: { resourceId: 'hero', missingResourceId: 'missing', expectedSha256: 'a'.repeat(64), invalidSha256: 'd'.repeat(64), appliedRevision: 'hero-r2', missingRevision: 'missing-r1', integrityRevision: 'hero-bad' },
+    },
+  });
 }
 
 function validTrace() {

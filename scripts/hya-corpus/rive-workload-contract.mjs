@@ -25,6 +25,26 @@ const METRICS = Object.freeze([
   'rawBytes', 'gzipBytes', 'networkBytes', 'networkMs', 'parseMs', 'firstFrameMs',
   'cpuFrameMs', 'gpuFrameMs', 'peakMemoryBytes', 'settleMs', 'energyMj',
 ]);
+const POINTER_PHASES = Object.freeze(['down', 'move', 'up', 'exit']);
+const KEYBOARD_PHASES = Object.freeze(['down', 'up']);
+const GAMEPAD_OPERATIONS = Object.freeze(['connect', 'sample', 'disconnect']);
+const FOCUS_OPERATIONS = Object.freeze(['request', 'next', 'previous', 'clear']);
+const RESOURCE_REPLACEMENT_OUTCOMES = Object.freeze(['applied', 'missing', 'integrity-failure']);
+const SEMANTIC_ACTIONS = Object.freeze(['tap', 'increase', 'decrease', 'focus']);
+const REDUCED_MOTION_STATES = Object.freeze([false, true]);
+const ACTION_REQUIRED_CHANNELS = Object.freeze({
+  initialize: CHANNELS,
+  seek: ['pixels', 'geometryAndDrawOrder', 'stateMachineState', 'events', 'audioSchedule'],
+  'data-mutation': ['dataValues'],
+  pointer: ['pointerKeyboardGamepadFocus'],
+  keyboard: ['pointerKeyboardGamepadFocus'],
+  gamepad: ['pointerKeyboardGamepadFocus'],
+  focus: ['pointerKeyboardGamepadFocus'],
+  resize: ['resizeAndDpr'],
+  'resource-replacement': ['resourceReplacement'],
+  'semantic-action': ['semanticTreeAndActions'],
+  'reduced-motion': ['semanticTreeAndActions'],
+});
 
 export function validateRiveWorkloadPlan(plan) {
   const violations = [];
@@ -37,6 +57,17 @@ export function validateRiveWorkloadPlan(plan) {
   exactSet(plan?.requiredTraceChannels, CHANNELS, 'required trace channels');
   exactSet(plan?.requiredActionKinds, ACTION_KINDS, 'required action kinds');
   exactSet(plan?.requiredLifecyclePaths, LIFECYCLE_PATHS, 'required lifecycle paths');
+  const actionCoverage = plan?.actionCoverage;
+  equal(actionCoverage?.payloadContractVersion, 1, 'action payload contract version');
+  equal(actionCoverage?.unknownFields, 'reject', 'action payload unknown-field policy');
+  equal(actionCoverage?.allViewportIds, true, 'action viewport coverage');
+  exactSet(actionCoverage?.pointerPhases, POINTER_PHASES, 'pointer phase coverage');
+  exactSet(actionCoverage?.keyboardPhases, KEYBOARD_PHASES, 'keyboard phase coverage');
+  exactSet(actionCoverage?.gamepadOperations, GAMEPAD_OPERATIONS, 'gamepad operation coverage');
+  exactSet(actionCoverage?.focusOperations, FOCUS_OPERATIONS, 'focus operation coverage');
+  exactSet(actionCoverage?.resourceReplacementOutcomes, RESOURCE_REPLACEMENT_OUTCOMES, 'resource replacement coverage');
+  exactSet(actionCoverage?.semanticActions, SEMANTIC_ACTIONS, 'semantic action coverage');
+  exactSet(actionCoverage?.reducedMotionStates, REDUCED_MOTION_STATES, 'reduced motion coverage');
 
   const viewports = array(plan?.viewportMatrix, 'viewport matrix');
   if (viewports.length < 3) violations.push('viewport matrix must contain at least three entries');
@@ -118,15 +149,20 @@ export function validateRiveWorkloadScenario(scenario, plan, { expectedAssetId =
   match(scenario?.rivSha256, HASH, 'RIV hash');
   if (expectedRivSha256) equal(scenario?.rivSha256, expectedRivSha256, 'expected RIV hash');
   equal(scenario?.compatibilityTupleId, plan?.compatibilityTupleId, 'tuple id');
+  exactKeys(scenario?.selection, ['artboard', 'animation', 'stateMachine'], 'selection');
   for (const key of ['artboard', 'animation', 'stateMachine']) requiredString(scenario?.selection?.[key], `selection ${key}`);
-  plainObject(scenario?.initialData, 'initial data');
+  if (!isBoundedJson(scenario?.initialData) || Array.isArray(scenario?.initialData) || scenario?.initialData === null) violations.push('initial data must be a bounded JSON object');
   const resources = array(scenario?.initialResources, 'initial resources');
   const resourceIds = new Set();
   for (const resource of resources) {
+    exactKeys(resource, ['id', 'sha256', 'revision', 'mimeType', 'byteLength'], 'initial resource');
     requiredString(resource?.id, 'resource id');
     if (resourceIds.has(resource?.id)) violations.push(`duplicate resource ${String(resource?.id)}`);
     resourceIds.add(resource?.id);
     match(resource?.sha256, HASH, `${String(resource?.id)} resource hash`);
+    requiredString(resource?.revision, `${String(resource?.id)} resource revision`);
+    requiredString(resource?.mimeType, `${String(resource?.id)} resource media type`);
+    nonnegativeInteger(resource?.byteLength, `${String(resource?.id)} resource bytes`);
   }
 
   const steps = array(scenario?.clockStepsMicros, 'clock steps');
@@ -140,7 +176,12 @@ export function validateRiveWorkloadScenario(scenario, plan, { expectedAssetId =
   const actionIds = new Set();
   const observedKinds = new Set();
   const observedChannels = new Set();
+  const payloadCoverage = {
+    viewports: new Set(), pointerPhases: new Set(), keyboardPhases: new Set(), gamepadOperations: new Set(),
+    focusOperations: new Set(), resourceReplacementOutcomes: new Set(), semanticActions: new Set(), reducedMotionStates: new Set(),
+  };
   for (const [index, action] of actions.entries()) {
+    exactKeys(action, ['id', 'kind', 'atMicros', 'payload', 'expectedChannels'], `action ${index}`);
     id(action?.id, `action ${index} id`);
     if (actionIds.has(action?.id)) violations.push(`duplicate action ${String(action?.id)}`);
     actionIds.add(action?.id);
@@ -148,26 +189,144 @@ export function validateRiveWorkloadScenario(scenario, plan, { expectedAssetId =
     else observedKinds.add(action.kind);
     if (!steps.includes(action?.atMicros)) violations.push(`action ${index} is not bound to a clock step`);
     if (index > 0 && action.atMicros < actions[index - 1].atMicros) violations.push('actions are not ordered');
-    plainObject(action?.payload, `action ${index} payload`);
+    if (!action?.payload || typeof action.payload !== 'object' || Array.isArray(action.payload)) violations.push(`action ${index} payload must be an object`);
+    else validateActionPayload(action, index, payloadCoverage);
     const channels = array(action?.expectedChannels, `action ${index} expected channels`);
     if (channels.length === 0) violations.push(`action ${index} has no expected channels`);
+    if (new Set(channels).size !== channels.length) violations.push(`action ${index} repeats an expected channel`);
     for (const channel of channels) {
       if (!CHANNELS.includes(channel)) violations.push(`action ${index} contains unknown channel ${String(channel)}`);
       else observedChannels.add(channel);
     }
+    for (const channel of ACTION_REQUIRED_CHANNELS[action?.kind] ?? []) if (!channels.includes(channel)) violations.push(`action ${index} must exercise ${channel}`);
   }
+  if (actions[0]?.kind !== 'initialize') violations.push('first action must initialize the workload');
   for (const kind of ACTION_KINDS) if (!observedKinds.has(kind)) violations.push(`missing action kind ${kind}`);
   for (const channel of CHANNELS) if (!observedChannels.has(channel)) violations.push(`scenario does not exercise trace channel ${channel}`);
+  exactSet([...payloadCoverage.viewports], plan?.viewportMatrix?.map(value => value.id) ?? [], 'scenario viewport action coverage');
+  exactSet([...payloadCoverage.pointerPhases], plan?.actionCoverage?.pointerPhases ?? [], 'scenario pointer phase coverage');
+  exactSet([...payloadCoverage.keyboardPhases], plan?.actionCoverage?.keyboardPhases ?? [], 'scenario keyboard phase coverage');
+  exactSet([...payloadCoverage.gamepadOperations], plan?.actionCoverage?.gamepadOperations ?? [], 'scenario gamepad operation coverage');
+  exactSet([...payloadCoverage.focusOperations], plan?.actionCoverage?.focusOperations ?? [], 'scenario focus operation coverage');
+  exactSet([...payloadCoverage.resourceReplacementOutcomes], plan?.actionCoverage?.resourceReplacementOutcomes ?? [], 'scenario resource replacement coverage');
+  exactSet([...payloadCoverage.semanticActions], plan?.actionCoverage?.semanticActions ?? [], 'scenario semantic action coverage');
+  exactSet([...payloadCoverage.reducedMotionStates], plan?.actionCoverage?.reducedMotionStates ?? [], 'scenario reduced motion coverage');
   exactSet(scenario?.lifecyclePaths, LIFECYCLE_PATHS, 'lifecycle paths');
   if (!Number.isSafeInteger(scenario?.replayCount) || scenario.replayCount < Number(plan?.clock?.replayCount ?? Infinity)) violations.push('scenario replay count is below the plan minimum');
 
   return result('haiyue-rive-workload-scenario@1', violations);
 
+  function validateActionPayload(action, index, coverage) {
+    const payload = action.payload;
+    const label = `action ${index} payload`;
+    switch (action.kind) {
+      case 'initialize':
+        exactKeys(payload, ['viewportId', 'reducedMotion'], label);
+        viewport(payload.viewportId, label, coverage);
+        boolean(payload.reducedMotion, `${label} reducedMotion`);
+        if (typeof payload.reducedMotion === 'boolean') coverage.reducedMotionStates.add(payload.reducedMotion);
+        if (action.atMicros !== 0) violations.push(`${label} initialize must occur at zero`);
+        return;
+      case 'seek':
+        exactKeys(payload, ['timeMicros'], label);
+        if (!Number.isSafeInteger(payload.timeMicros) || payload.timeMicros < 0 || payload.timeMicros > (steps.at(-1) ?? 0)) violations.push(`${label} timeMicros is invalid`);
+        return;
+      case 'data-mutation':
+        validateDataMutation(payload, label);
+        return;
+      case 'pointer':
+        exactKeys(payload, ['phase', 'x', 'y', 'pointerId', 'buttons'], label);
+        enumeration(payload.phase, POINTER_PHASES, `${label} phase`, coverage.pointerPhases);
+        finite(payload.x, `${label} x`); finite(payload.y, `${label} y`);
+        nonnegativeInteger(payload.pointerId, `${label} pointerId`); nonnegativeInteger(payload.buttons, `${label} buttons`);
+        return;
+      case 'keyboard':
+        exactKeys(payload, ['phase', 'code', 'key', 'repeat', 'modifiers'], label);
+        enumeration(payload.phase, KEYBOARD_PHASES, `${label} phase`, coverage.keyboardPhases);
+        requiredString(payload.code, `${label} code`); requiredString(payload.key, `${label} key`); boolean(payload.repeat, `${label} repeat`);
+        exactKeys(payload.modifiers, ['alt', 'ctrl', 'meta', 'shift'], `${label} modifiers`);
+        for (const key of ['alt', 'ctrl', 'meta', 'shift']) boolean(payload.modifiers?.[key], `${label} modifiers ${key}`);
+        return;
+      case 'gamepad':
+        exactKeys(payload, ['operation', 'index', 'axes', 'buttons'], label);
+        enumeration(payload.operation, GAMEPAD_OPERATIONS, `${label} operation`, coverage.gamepadOperations);
+        nonnegativeInteger(payload.index, `${label} index`);
+        finiteArray(payload.axes, -1, 1, `${label} axes`); finiteArray(payload.buttons, 0, 1, `${label} buttons`);
+        return;
+      case 'focus':
+        exactKeys(payload, payload.operation === 'request' ? ['operation', 'target'] : ['operation'], label);
+        enumeration(payload.operation, FOCUS_OPERATIONS, `${label} operation`, coverage.focusOperations);
+        if (payload.operation === 'request') requiredString(payload.target, `${label} target`);
+        return;
+      case 'resize':
+        exactKeys(payload, ['viewportId'], label);
+        viewport(payload.viewportId, label, coverage);
+        return;
+      case 'resource-replacement':
+        exactKeys(payload, ['resourceId', 'outcome', 'expectedSha256', 'replacementSha256', 'revision'], label);
+        requiredString(payload.resourceId, `${label} resourceId`); requiredString(payload.revision, `${label} revision`);
+        enumeration(payload.outcome, RESOURCE_REPLACEMENT_OUTCOMES, `${label} outcome`, coverage.resourceReplacementOutcomes);
+        match(payload.expectedSha256, HASH, `${label} expected hash`);
+        if (payload.outcome === 'missing') {
+          if (payload.replacementSha256 !== null) violations.push(`${label} missing outcome requires a null replacement hash`);
+        } else {
+          match(payload.replacementSha256, HASH, `${label} replacement hash`);
+          if (payload.outcome === 'applied' && payload.expectedSha256 !== payload.replacementSha256) violations.push(`${label} applied hashes must match`);
+          if (payload.outcome === 'integrity-failure' && payload.expectedSha256 === payload.replacementSha256) violations.push(`${label} integrity-failure hashes must differ`);
+        }
+        return;
+      case 'semantic-action':
+        exactKeys(payload, ['target', 'action'], label);
+        requiredString(payload.target, `${label} target`);
+        enumeration(payload.action, SEMANTIC_ACTIONS, `${label} action`, coverage.semanticActions);
+        return;
+      case 'reduced-motion':
+        exactKeys(payload, ['enabled'], label);
+        boolean(payload.enabled, `${label} enabled`);
+        if (typeof payload.enabled === 'boolean') coverage.reducedMotionStates.add(payload.enabled);
+        return;
+      default:
+        return;
+    }
+  }
+
+  function validateDataMutation(payload, label) {
+    const operation = payload.operation;
+    const keys = operation === 'set' ? ['operation', 'path', 'value']
+      : operation === 'trigger' ? ['operation', 'path']
+        : operation === 'insert' ? ['operation', 'path', 'index', 'value']
+          : operation === 'remove' ? ['operation', 'path', 'index']
+            : operation === 'swap' ? ['operation', 'path', 'index', 'otherIndex']
+              : ['operation', 'path'];
+    exactKeys(payload, keys, label);
+    enumeration(operation, ['set', 'trigger', 'insert', 'remove', 'swap'], `${label} operation`);
+    requiredString(payload.path, `${label} path`);
+    if (['insert', 'remove', 'swap'].includes(operation)) nonnegativeInteger(payload.index, `${label} index`);
+    if (operation === 'swap') nonnegativeInteger(payload.otherIndex, `${label} otherIndex`);
+    if (['set', 'insert'].includes(operation) && !isBoundedJson(payload.value)) violations.push(`${label} value is not bounded JSON`);
+  }
+
+  function viewport(value, label, coverage) {
+    if (!(plan?.viewportMatrix ?? []).some(item => item.id === value)) violations.push(`${label} viewportId is unknown`);
+    else coverage.viewports.add(value);
+  }
+  function exactKeys(value, expected, label) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) { violations.push(`${label} must be an object`); return; }
+    const actual = Object.keys(value).sort(); const ordered = [...expected].sort();
+    if (actual.length !== ordered.length || actual.some((key, keyIndex) => key !== ordered[keyIndex])) violations.push(`${label} fields do not match the frozen contract`);
+  }
+  function enumeration(value, expected, label, observed) { if (!expected.includes(value)) violations.push(`${label} is invalid`); else observed?.add(value); }
+  function boolean(value, label) { if (typeof value !== 'boolean') violations.push(`${label} must be boolean`); }
+  function finite(value, label) { if (!Number.isFinite(value)) violations.push(`${label} must be finite`); }
+  function nonnegativeInteger(value, label) { if (!Number.isSafeInteger(value) || value < 0) violations.push(`${label} must be a non-negative safe integer`); }
+  function finiteArray(value, minimum, maximum, label) {
+    if (!Array.isArray(value) || value.some(item => !Number.isFinite(item) || item < minimum || item > maximum)) violations.push(`${label} is invalid`);
+  }
+
   function equal(actual, expected, label) { if (actual !== expected) violations.push(`${label}: expected ${String(expected)}, received ${String(actual)}`); }
   function id(value, label) { if (typeof value !== 'string' || !ID.test(value)) violations.push(`${label} is invalid`); }
   function match(value, expression, label) { if (typeof value !== 'string' || !expression.test(value)) violations.push(`${label} is invalid`); }
   function requiredString(value, label) { if (typeof value !== 'string' || value.trim().length === 0) violations.push(`${label} is missing`); }
-  function plainObject(value, label) { if (!value || typeof value !== 'object' || Array.isArray(value)) violations.push(`${label} must be an object`); }
   function array(value, label) { if (!Array.isArray(value)) { violations.push(`${label} must be an array`); return []; } return value; }
   function exactSet(actual, expected, label) {
     const values = array(actual, label);
@@ -183,4 +342,16 @@ export function riveWorkloadMetricNames() { return METRICS; }
 
 function result(contract, violations) {
   return Object.freeze({ schemaVersion: 1, contract, status: violations.length === 0 ? 'passed' : 'failed', violations: Object.freeze(violations) });
+}
+
+function isBoundedJson(value, depth = 0, state = { nodes: 0 }) {
+  state.nodes++;
+  if (state.nodes > 1_024 || depth > 16) return false;
+  if (value === null || typeof value === 'boolean') return true;
+  if (typeof value === 'string') return value.length <= 65_536;
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (Array.isArray(value)) return value.length <= 1_024 && value.every(item => isBoundedJson(item, depth + 1, state));
+  if (!value || typeof value !== 'object' || Object.getPrototypeOf(value) !== Object.prototype) return false;
+  const entries = Object.entries(value);
+  return entries.length <= 1_024 && entries.every(([key, item]) => key.length <= 512 && isBoundedJson(item, depth + 1, state));
 }

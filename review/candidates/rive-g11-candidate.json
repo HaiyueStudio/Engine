@@ -35,14 +35,14 @@
     "Chrome and Edge diagnostics were captured on only one unclassified local device, not the two required formal device classes"
   ],
   "tupleId": "rive-7.3-webgl2-2.40.0",
-  "generatedAt": "2026-08-24T14:44:45.618Z",
-  "engineRevision": "0c5de57c61ec12c7b9041d04b57c884af9e60118",
+  "generatedAt": "2026-08-25T00:01:20.551Z",
+  "engineRevision": "59530c1fbfd5775a23bafad99c3748d06857b5ae",
   "engineDirty": true,
   "nodeVersion": "v24.19.0",
   "evidenceClass": "dirty-worktree-diagnostic",
   "corpus": {
     "manifest": "animation-spec/corpus/rive/rive-g11-corpus-manifest.json",
-    "manifestSha256": "5400ee1b8864d37eed30f6a53bfae58000b460e7dee3893ebf227a23e052be78",
+    "manifestSha256": "734c6339feaaae96ea341bbf3360a69a932477827c64769b7d15bf465302a744",
     "censusSha256": "ba93ed7d3eb6ba9b2b08d2da0bdfc9be02082209d8f0967542a93916717408fe",
     "formalAssetCount": 0,
     "realProductAssetCount": 0,
@@ -52,7 +52,7 @@
   "workloadPlan": {
     "id": "rive-7-3-full-web-workload-v1",
     "path": "animation-spec/corpus/rive/rive-g11-workload-plan.json",
-    "sha256": "381e7442f7eabb55be243cd00d5cc653f5295c9b4f1818dc6c49f0296f00b46b"
+    "sha256": "a2cff13a9671d0aa9001c2a33f57ddb93ff76950a17e15269302991a7ad17696"
   },
   "coverage": {
     "objectTypes": 288,
@@ -84,8 +84,8 @@
         "underlyingDiagnostic": "E_RIVE_INVALID_FINGERPRINT",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 6.164299999999912,
-        "peakMemoryBytes": 57296872,
+        "cpuMs": 2.861499999999978,
+        "peakMemoryBytes": 52179728,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -93,8 +93,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -106,8 +106,8 @@
         "underlyingDiagnostic": "E_RIVE_TRUNCATED",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.4535000000000764,
-        "peakMemoryBytes": 40925032,
+        "cpuMs": 0.5923000000000229,
+        "peakMemoryBytes": 52199296,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -115,8 +115,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -128,8 +128,8 @@
         "underlyingDiagnostic": "E_RIVE_VARINT_OVERFLOW",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.27760000000000673,
-        "peakMemoryBytes": 40940544,
+        "cpuMs": 0.5588999999999942,
+        "peakMemoryBytes": 52214848,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -137,8 +137,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -150,8 +150,8 @@
         "underlyingDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.29189999999994143,
-        "peakMemoryBytes": 40967816,
+        "cpuMs": 0.6494000000000142,
+        "peakMemoryBytes": 52242120,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -159,8 +159,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -172,8 +172,8 @@
         "underlyingDiagnostic": "E_RIVE_TOC_INVALID",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.2641999999999598,
-        "peakMemoryBytes": 41035512,
+        "cpuMs": 0.6428999999998268,
+        "peakMemoryBytes": 52266088,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -181,8 +181,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -194,8 +194,8 @@
         "underlyingDiagnostic": "E_RIVE_TOC_INVALID",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.27099999999995816,
-        "peakMemoryBytes": 41039160,
+        "cpuMs": 0.6077999999999975,
+        "peakMemoryBytes": 52282000,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -203,8 +203,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -216,8 +216,8 @@
         "underlyingDiagnostic": "E_RIVE_UNKNOWN_OBJECT",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.27509999999995216,
-        "peakMemoryBytes": 41025464,
+        "cpuMs": 0.6070999999999458,
+        "peakMemoryBytes": 52299768,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -225,8 +225,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -238,8 +238,8 @@
         "underlyingDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.282100000000014,
-        "peakMemoryBytes": 41043088,
+        "cpuMs": 0.5962000000001808,
+        "peakMemoryBytes": 52317392,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -247,8 +247,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -260,8 +260,8 @@
         "underlyingDiagnostic": "E_RIVE_UNSUPPORTED_PROPERTY",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.29099999999994,
-        "peakMemoryBytes": 41115144,
+        "cpuMs": 0.4756999999999607,
+        "peakMemoryBytes": 52379040,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -269,8 +269,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -282,8 +282,8 @@
         "underlyingDiagnostic": "E_RIVE_REFERENCE_INVALID",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.9442000000000235,
-        "peakMemoryBytes": 41167648,
+        "cpuMs": 1.5183999999999287,
+        "peakMemoryBytes": 52441952,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -291,8 +291,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -304,8 +304,8 @@
         "underlyingDiagnostic": "E_RIVE_REFERENCE_CYCLE",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.4700000000000273,
-        "peakMemoryBytes": 41204488,
+        "cpuMs": 1.1230000000000473,
+        "peakMemoryBytes": 52478792,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -313,8 +313,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -326,8 +326,8 @@
         "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.8451000000000022,
-        "peakMemoryBytes": 41313464,
+        "cpuMs": 1.4222999999999502,
+        "peakMemoryBytes": 52587752,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -335,8 +335,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -348,8 +348,8 @@
         "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.31340000000000146,
-        "peakMemoryBytes": 41344112,
+        "cpuMs": 0.4934000000000651,
+        "peakMemoryBytes": 52618488,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -357,8 +357,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -370,8 +370,8 @@
         "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.342899999999986,
-        "peakMemoryBytes": 41366192,
+        "cpuMs": 0.5574000000001433,
+        "peakMemoryBytes": 52640568,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -379,8 +379,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -392,8 +392,8 @@
         "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.31920000000002346,
-        "peakMemoryBytes": 41386496,
+        "cpuMs": 0.8054999999999382,
+        "peakMemoryBytes": 52660872,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -401,8 +401,8 @@
         "runner": "g02-generated-parser",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -414,8 +414,8 @@
         "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.4007000000000289,
-        "peakMemoryBytes": 41420424,
+        "cpuMs": 0.9964999999999691,
+        "peakMemoryBytes": 52694800,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -423,8 +423,8 @@
         "runner": "g02-asset-byte-budget",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -436,8 +436,8 @@
         "underlyingDiagnostic": "E_RIVE_ASSET_URL_POLICY",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 1.273900000000026,
-        "peakMemoryBytes": 41501888,
+        "cpuMs": 2.501700000000028,
+        "peakMemoryBytes": 52776264,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -445,8 +445,8 @@
         "runner": "g02-hosted-url-policy",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -458,8 +458,8 @@
         "underlyingDiagnostic": "E_RIVE_ASSET_INTEGRITY",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.47450000000003456,
-        "peakMemoryBytes": 41749808,
+        "cpuMs": 0.6014999999999873,
+        "peakMemoryBytes": 52858496,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -467,8 +467,8 @@
         "runner": "g02-asset-integrity",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -480,8 +480,8 @@
         "underlyingDiagnostic": "E_SCRIPT_TIMEOUT",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 1.7240000000000464,
-        "peakMemoryBytes": 41751032,
+        "cpuMs": 2.4891000000000076,
+        "peakMemoryBytes": 52982616,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -489,8 +489,8 @@
         "runner": "g09-portable-vm-instruction-budget",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -502,8 +502,8 @@
         "underlyingDiagnostic": "E_SCRIPT_EVENT_BUDGET",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.5769999999999982,
-        "peakMemoryBytes": 41761552,
+        "cpuMs": 0.7569999999998345,
+        "peakMemoryBytes": 53035928,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -511,8 +511,8 @@
         "runner": "g09-portable-vm-promise-budget",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -524,8 +524,8 @@
         "underlyingDiagnostic": "E_SCRIPT_EVENT_BUDGET",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.2644000000000233,
-        "peakMemoryBytes": 41805224,
+        "cpuMs": 0.37740000000007967,
+        "peakMemoryBytes": 53079600,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -533,8 +533,8 @@
         "runner": "g09-portable-vm-output-budget",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -546,8 +546,8 @@
         "underlyingDiagnostic": "E_SHADER_BINDING",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 1.1502000000000407,
-        "peakMemoryBytes": 41921952,
+        "cpuMs": 1.5851000000000113,
+        "peakMemoryBytes": 53196328,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -555,8 +555,8 @@
         "runner": "g09-wgsl-binding-validator",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -568,8 +568,8 @@
         "underlyingDiagnostic": "E_SHADER_BUDGET",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 0.0804000000000542,
-        "peakMemoryBytes": 41928368,
+        "cpuMs": 0.11560000000008586,
+        "peakMemoryBytes": 53202744,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -577,8 +577,8 @@
         "runner": "g09-wgsl-source-budget",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -590,8 +590,8 @@
         "underlyingDiagnostic": "E_INTERACTION_RUNTIME_LIMIT",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 7.778300000000058,
-        "peakMemoryBytes": 43336680,
+        "cpuMs": 11.905700000000024,
+        "peakMemoryBytes": 54610952,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -599,8 +599,8 @@
         "runner": "g07-interaction-recursion-budget",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -612,8 +612,8 @@
         "underlyingDiagnostic": "E_SCRIPT_ABORTED",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 4.230799999999931,
-        "peakMemoryBytes": 43554216,
+        "cpuMs": 5.680799999999863,
+        "peakMemoryBytes": 54828528,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -621,8 +621,8 @@
         "runner": "g09-owner-replace-generation",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -634,8 +634,8 @@
         "underlyingDiagnostic": "E_SCRIPT_DISPOSED",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 1.928199999999947,
-        "peakMemoryBytes": 43672432,
+        "cpuMs": 2.899499999999989,
+        "peakMemoryBytes": 54946656,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -643,8 +643,8 @@
         "runner": "g09-owner-dispose-generation",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -656,8 +656,8 @@
         "underlyingDiagnostic": "E_SHADER_DEVICE_LOST",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 2.0396999999999252,
-        "peakMemoryBytes": 44055824,
+        "cpuMs": 4.070100000000139,
+        "peakMemoryBytes": 55101936,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -665,8 +665,8 @@
         "runner": "g09-custom-shader-device-loss",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       },
       {
@@ -678,8 +678,8 @@
         "underlyingDiagnostic": "E_AUDIO_RUNTIME_LIMIT",
         "freshOwner": true,
         "ownerResidual": 0,
-        "cpuMs": 3.8302999999999656,
-        "peakMemoryBytes": 44164192,
+        "cpuMs": 7.570100000000139,
+        "peakMemoryBytes": 55438408,
         "limits": {
           "cpuMs": 60000,
           "peakMemoryBytes": 1073741824
@@ -687,8 +687,8 @@
         "runner": "g08-audio-voice-budget",
         "evidence": {
           "path": "review/candidates/rive-g11-security-diagnostic.json",
-          "sha256": "0a57d4b667fcbe5ed4e5b37b8f295b448db11e191cf4ae9e2679522fee3bbac5",
-          "byteLength": 15136
+          "sha256": "50ee5dc4b5300fbddf3aeee6350b40e7b84368f270ec2fdbbc5f92e7238c5ccf",
+          "byteLength": 15134
         }
       }
     ]

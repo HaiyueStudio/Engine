@@ -4,42 +4,27 @@ import test from 'node:test';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  riveWorkloadActionKinds,
-  riveWorkloadLifecyclePaths,
-  riveWorkloadTraceChannels,
   validateRiveWorkloadPlan,
   validateRiveWorkloadScenario,
 } from './rive-workload-contract.mjs';
+import { createRiveFullWorkloadScenario } from './rive-workload-scenario-builder.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const plan = JSON.parse(readFileSync(resolve(root, 'animation-spec/corpus/rive/rive-g11-workload-plan.json'), 'utf8'));
 const HASH = 'a'.repeat(64);
 
 function validScenario() {
-  const steps = Array.from({ length: 17 }, (_, index) => index * 125_000);
-  const channels = riveWorkloadTraceChannels();
-  const actions = riveWorkloadActionKinds().map((kind, index) => ({
-    id: `action-${index}`,
-    kind,
-    atMicros: steps[index],
-    payload: {},
-    expectedChannels: index === 0 ? channels : [channels[index % channels.length]],
-  }));
-  return {
-    schemaVersion: 1,
-    kind: 'haiyue-rive-workload-scenario',
-    id: 'fixture-full-scenario',
-    assetId: 'fixture',
-    rivSha256: HASH,
-    compatibilityTupleId: 'rive-7.3-webgl2-2.40.0',
+  return createRiveFullWorkloadScenario(plan, {
+    id: 'fixture-full-scenario', assetId: 'fixture', rivSha256: HASH,
     selection: { artboard: 'Main', animation: 'Idle', stateMachine: 'Machine' },
-    initialData: {},
-    initialResources: [],
-    clockStepsMicros: steps,
-    actions,
-    lifecyclePaths: riveWorkloadLifecyclePaths(),
-    replayCount: 2,
-  };
+    initialData: {}, initialResources: [], probe: {
+      dataMutation: { operation: 'set', path: 'hud.health', value: 75 },
+      pointer: { x: 32, y: 48, deltaX: 1, deltaY: 0, pointerId: 1, buttons: 1 },
+      keyboard: { code: 'Enter', key: 'Enter' }, gamepad: { index: 0, axes: [0, 0], buttons: [1] },
+      focusTarget: 'primary-control', semanticTarget: 'primary-control',
+      resource: { resourceId: 'hero', missingResourceId: 'missing', expectedSha256: HASH, invalidSha256: 'b'.repeat(64), appliedRevision: 'hero-r2', missingRevision: 'missing-r1', integrityRevision: 'hero-bad' },
+    },
+  });
 }
 
 test('checked-in Rive workload plan freezes the full device, action, lifecycle and metric population', () => {
@@ -68,4 +53,15 @@ test('scenario timestamps must use the frozen integer-microsecond clock', () => 
   const result = validateRiveWorkloadScenario(scenario, plan);
   assert.equal(result.status, 'failed');
   assert.ok(result.violations.some(value => value.includes('strictly increasing')));
+});
+
+test('scenario cannot claim action coverage with empty or ambiguous payloads', () => {
+  const scenario = validScenario();
+  scenario.actions.find(action => action.kind === 'pointer').payload = {};
+  scenario.actions.find(action => action.kind === 'resource-replacement').payload.replacementSha256 = 'b'.repeat(64);
+  const result = validateRiveWorkloadScenario(scenario, plan);
+  assert.equal(result.status, 'failed');
+  assert.ok(result.violations.some(value => value.includes('payload fields')));
+  assert.ok(result.violations.some(value => value.includes('applied hashes must match')));
+  assert.ok(result.violations.some(value => value.includes('pointer phase coverage')));
 });

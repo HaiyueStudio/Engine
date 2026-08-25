@@ -31,6 +31,18 @@
     "semantic-action",
     "reduced-motion"
   ],
+  "actionCoverage": {
+    "payloadContractVersion": 1,
+    "unknownFields": "reject",
+    "allViewportIds": true,
+    "pointerPhases": ["down", "move", "up", "exit"],
+    "keyboardPhases": ["down", "up"],
+    "gamepadOperations": ["connect", "sample", "disconnect"],
+    "focusOperations": ["request", "next", "previous", "clear"],
+    "resourceReplacementOutcomes": ["applied", "missing", "integrity-failure"],
+    "semanticActions": ["tap", "increase", "decrease", "focus"],
+    "reducedMotionStates": [false, true]
+  },
   "requiredLifecyclePaths": [
     "normal",
     "abort",
