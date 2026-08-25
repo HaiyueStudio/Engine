@@ -28,6 +28,15 @@ for (const reference of candidate.traceArtifacts ?? []) {
   traces.set(reference.path, trace);
   artifactBytesByPath.set(reference.path, bytes);
   for (const path of traceArtifactPaths(trace)) artifactBytesByPath.set(path, readFileSync(safePath(path)));
+  for (const capture of [trace?.official, trace?.hya]) {
+    const pixels = capture?.channels?.pixels;
+    if (!pixels?.path) continue;
+    const artifact = JSON.parse(artifactBytesByPath.get(pixels.path).toString('utf8'));
+    for (const sample of artifact?.samples ?? []) {
+      const path = sample?.value?.rgba?.path;
+      if (path && !artifactBytesByPath.has(path)) artifactBytesByPath.set(path, readFileSync(safePath(path)));
+    }
+  }
 }
 for (const path of candidateEvidencePaths(candidate)) artifactBytesByPath.set(path, readFileSync(safePath(path)));
 const validation = validateRiveG11Candidate(candidate, {

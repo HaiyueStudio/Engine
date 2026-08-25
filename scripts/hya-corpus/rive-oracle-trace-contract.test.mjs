@@ -5,14 +5,13 @@ import test from 'node:test';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { requiredRiveOracleTraceChannels, validateRiveOracleTrace } from './rive-oracle-trace-contract.mjs';
+import { createRiveOracleChannelComparison } from './rive-oracle-channel-contract.mjs';
 import { createRiveFullWorkloadScenario } from './rive-workload-scenario-builder.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const workloadPlan = JSON.parse(readFileSync(resolve(root, 'animation-spec/corpus/rive/rive-g11-workload-plan.json'), 'utf8'));
 const REVISION = 'b'.repeat(40);
 const RIV_HASH = 'c'.repeat(64);
-const PAYLOAD = Buffer.from('{"samples":[0,1]}\n');
-const PAYLOAD_HASH = createHash('sha256').update(PAYLOAD).digest('hex');
 
 function validScenario() {
   return createRiveFullWorkloadScenario(workloadPlan, {
@@ -32,19 +31,30 @@ function validTrace() {
   const artifactBytesByPath = new Map();
   const scenario = validScenario();
   const scenarioBytes = Buffer.from(`${JSON.stringify(scenario, null, 2)}\n`);
+  const scenarioSha256 = createHash('sha256').update(scenarioBytes).digest('hex');
   const scenarioPath = 'review/candidates/rive-traces/fixture/scenario.json';
   artifactBytesByPath.set(scenarioPath, scenarioBytes);
-  const reference = path => {
-    artifactBytesByPath.set(path, PAYLOAD);
-    return { path, sha256: PAYLOAD_HASH, byteLength: PAYLOAD.byteLength, mediaType: 'application/json' };
-  };
-  const captureChannels = prefix => Object.fromEntries(requiredRiveOracleTraceChannels().map(name => [name, {
-    ...reference(`review/candidates/rive-traces/fixture/${prefix}-${name}.json`), sampleCount: scenario.clockStepsMicros.length, normalization: `haiyue-rive-${name}@1`,
-  }]));
-  const comparisons = Object.fromEntries(requiredRiveOracleTraceChannels().map(name => [name, {
-    status: 'passed', differenceCount: 0, artifact: reference(`review/candidates/rive-traces/fixture/comparison-${name}.json`),
-    ...(name === 'pixels' ? { maxChannelDelta: 0, changedPixelRatio: 0, ssim: 1 } : {}),
-  }]));
+  const officialChannels = {}; const hyaChannels = {}; const comparisons = {};
+  for (const channel of requiredRiveOracleTraceChannels()) {
+    const officialCapture = capture(channel, '@rive-app/webgl2@2.40.0', 'official');
+    const hyaCapture = capture(channel, 'haiyue-exact-hya', 'hya');
+    const generated = createRiveOracleChannelComparison({
+      channel, officialCapture, hyaCapture,
+      officialPath: `review/candidates/rive-traces/fixture/official-${channel}.json`,
+      hyaPath: `review/candidates/rive-traces/fixture/hya-${channel}.json`,
+      comparisonPath: `review/candidates/rive-traces/fixture/comparison-${channel}.json`,
+      artifactBytesByPath, scenario, scenarioSha256, assetId: 'fixture', rivSha256: RIV_HASH,
+    });
+    artifactBytesByPath.set(generated.officialReference.path, generated.officialBytes);
+    artifactBytesByPath.set(generated.hyaReference.path, generated.hyaBytes);
+    artifactBytesByPath.set(generated.comparisonReference.path, generated.comparisonBytes);
+    officialChannels[channel] = { ...generated.officialReference, sampleCount: officialCapture.samples.length, normalization: officialCapture.normalization };
+    hyaChannels[channel] = { ...generated.hyaReference, sampleCount: hyaCapture.samples.length, normalization: hyaCapture.normalization };
+    comparisons[channel] = {
+      status: generated.comparison.status, differenceCount: generated.comparison.differenceCount, artifact: generated.comparisonReference,
+      ...(channel === 'pixels' ? { maxChannelDelta: generated.comparison.maxChannelDelta, changedPixelRatio: generated.comparison.changedPixelRatio, ssim: generated.comparison.ssim } : {}),
+    };
+  }
   const metrics = Object.fromEntries(workloadPlan.measurement.metrics.map(name => [name, 1]));
   const lifecycle = scenario.lifecyclePaths.map(path => ({ path, status: 'passed', ownerResidual: 0 }));
   const measurement = { warmupIterations: 5, measuredIterations: 30, frameSampleCount: 120, queueCompleted: true, energySource: 'fixture-meter' };
@@ -62,13 +72,28 @@ function validTrace() {
         adapter: { vendor: 'Intel', architecture: 'integrated', device: 'fixture', description: 'fixture adapter' },
         dpr: 1, viewport: [800, 600], audioSampleRate: 48000, fonts: [], externalAssets: [],
       },
-      scenarioArtifact: { path: scenarioPath, sha256: createHash('sha256').update(scenarioBytes).digest('hex'), byteLength: scenarioBytes.byteLength, mediaType: 'application/json' },
+      scenarioArtifact: { path: scenarioPath, sha256: scenarioSha256, byteLength: scenarioBytes.byteLength, mediaType: 'application/json' },
       scenario,
-      official: { runtime: '@rive-app/webgl2@2.40.0', freshOwnerPerReplay: true, replayCount: 2, channels: captureChannels('official'), metrics, measurement, diagnostics: [], lifecycle, ownerResidual: 0 },
-      hya: { runtime: 'haiyue-exact-hya', freshOwnerPerReplay: true, replayCount: 2, channels: captureChannels('hya'), metrics, measurement, diagnostics: [], lifecycle, ownerResidual: 0 },
+      official: { runtime: '@rive-app/webgl2@2.40.0', freshOwnerPerReplay: true, replayCount: 2, channels: officialChannels, metrics, measurement, diagnostics: [], lifecycle, ownerResidual: 0 },
+      hya: { runtime: 'haiyue-exact-hya', freshOwnerPerReplay: true, replayCount: 2, channels: hyaChannels, metrics, measurement, diagnostics: [], lifecycle, ownerResidual: 0 },
       comparison: { channels: comparisons, structuralDifferenceCount: 0, unclassifiedFailureCount: 0, deterministicReplay: true, sameActionStream: true, sameMachine: true, sameRevision: true },
     },
   };
+
+  function capture(channel, runtime, label) {
+    let value = { channel, normalized: true };
+    if (channel === 'pixels') {
+      const bytes = Buffer.from([0, 0, 0, 255, 255, 255, 255, 255]);
+      const path = `review/candidates/rive-traces/fixture/${label}.rgba`;
+      artifactBytesByPath.set(path, bytes);
+      value = { width: 2, height: 1, dpr: 1, rgba: { path, sha256: createHash('sha256').update(bytes).digest('hex'), byteLength: bytes.byteLength, mediaType: 'application/octet-stream' } };
+    }
+    const samples = [];
+    for (let replayIndex = 0; replayIndex < scenario.replayCount; replayIndex++) for (const atMicros of scenario.clockStepsMicros) samples.push({
+      replayIndex, atMicros, actionIds: scenario.actions.filter(action => action.atMicros === atMicros).map(action => action.id), value,
+    });
+    return { schemaVersion: 1, kind: 'haiyue-rive-normalized-channel-capture', channel, runtime, assetId: 'fixture', rivSha256: RIV_HASH, scenarioSha256, normalization: `haiyue-rive-${channel}@1`, replayCount: scenario.replayCount, samples };
+  }
 }
 
 test('oracle trace v2 binds every observable to artifact bytes and the full workload', () => {
@@ -106,4 +131,18 @@ test('trace rejects an inline action stream that differs from the pinned scenari
   const result = validateRiveOracleTrace(trace, { workloadPlan, artifactBytesByPath });
   assert.equal(result.status, 'failed');
   assert.ok(result.violations.some(value => value.includes('inline scenario differs')));
+});
+
+test('trace recomputation exposes a normalized capture that differs from its comparison claim', () => {
+  const { trace, artifactBytesByPath } = validTrace();
+  const reference = trace.hya.channels.dataValues;
+  const artifact = JSON.parse(artifactBytesByPath.get(reference.path).toString('utf8'));
+  artifact.samples[0].value = { channel: 'dataValues', normalized: false };
+  const bytes = Buffer.from(`${JSON.stringify(artifact)}\n`);
+  artifactBytesByPath.set(reference.path, bytes);
+  reference.sha256 = createHash('sha256').update(bytes).digest('hex');
+  reference.byteLength = bytes.byteLength;
+  const result = validateRiveOracleTrace(trace, { formal: true, workloadPlan, artifactBytesByPath });
+  assert.equal(result.status, 'failed');
+  assert.ok(result.violations.some(value => value.includes('validator recomputation') || value.includes('recomputed status')));
 });

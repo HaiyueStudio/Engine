@@ -5,6 +5,7 @@ import {
   validateRiveWorkloadPlan,
   validateRiveWorkloadScenario,
 } from './rive-workload-contract.mjs';
+import { validateRiveOracleChannelEvidence } from './rive-oracle-channel-contract.mjs';
 
 export const RIVE_ORACLE_TRACE_KIND = 'haiyue-rive-oracle-differential-trace';
 export const RIVE_ORACLE_TRACE_VERSION = 2;
@@ -90,18 +91,44 @@ export function validateRiveOracleTrace(trace, {
   validateCapture('official', trace?.official, scenario, { formal, artifactBytesByPath });
   validateCapture('hya', trace?.hya, scenario, { formal, artifactBytesByPath });
   const comparisons = trace?.comparison?.channels;
+  let recomputedStructuralDifferences = 0;
   for (const channel of REQUIRED_CHANNELS) {
     const result = comparisons?.[channel];
     equal(result?.status, 'passed', `${channel} comparison status`);
     if (!Number.isInteger(result?.differenceCount) || result.differenceCount < 0) violations.push(`${channel} differenceCount is invalid`);
     if (channel !== 'pixels') equal(result?.differenceCount, 0, `${channel} difference count`);
     validateArtifactReference(result?.artifact, `${channel} comparison artifact`, { formal, artifactBytesByPath, mediaType: 'application/json' });
+    if (formal || artifactBytesByPath) {
+      const channelEvidence = validateRiveOracleChannelEvidence({
+        channel,
+        officialReference: trace?.official?.channels?.[channel],
+        hyaReference: trace?.hya?.channels?.[channel],
+        comparisonReference: result?.artifact,
+        artifactBytesByPath,
+        scenario,
+        scenarioSha256: scenarioArtifact?.sha256,
+        assetId: trace?.assetId,
+        rivSha256: trace?.rivSha256,
+        formal,
+      });
+      if (channelEvidence.status !== 'passed') violations.push(...channelEvidence.violations.map(value => `${channel} evidence: ${value}`));
+      if (channelEvidence.recomputed) {
+        equal(result?.status, channelEvidence.recomputed.status, `${channel} recomputed status`);
+        equal(result?.differenceCount, channelEvidence.recomputed.differenceCount, `${channel} recomputed difference count`);
+        if (channel === 'pixels') {
+          equal(result?.maxChannelDelta, channelEvidence.recomputed.maxChannelDelta, 'pixels recomputed max channel delta');
+          equal(result?.changedPixelRatio, channelEvidence.recomputed.changedPixelRatio, 'pixels recomputed changed ratio');
+          equal(result?.ssim, channelEvidence.recomputed.ssim, 'pixels recomputed SSIM');
+        } else recomputedStructuralDifferences += channelEvidence.recomputed.differenceCount;
+      }
+    }
   }
   const pixels = comparisons?.pixels;
   if (!Number.isFinite(pixels?.maxChannelDelta) || pixels.maxChannelDelta > RIVE_ORACLE_PIXEL_THRESHOLDS.maxChannelDelta) violations.push('pixel max channel delta exceeds threshold');
   if (!Number.isFinite(pixels?.changedPixelRatio) || pixels.changedPixelRatio > RIVE_ORACLE_PIXEL_THRESHOLDS.changedPixelRatio) violations.push('pixel changed ratio exceeds threshold');
   if (!Number.isFinite(pixels?.ssim) || pixels.ssim < RIVE_ORACLE_PIXEL_THRESHOLDS.minimumSsim) violations.push('pixel SSIM is below threshold');
   equal(trace?.comparison?.structuralDifferenceCount, 0, 'structural difference count');
+  if (formal || artifactBytesByPath) equal(trace?.comparison?.structuralDifferenceCount, recomputedStructuralDifferences, 'recomputed structural difference count');
   equal(trace?.comparison?.unclassifiedFailureCount, 0, 'unclassified failure count');
   equal(trace?.comparison?.deterministicReplay, true, 'deterministic replay');
   equal(trace?.comparison?.sameActionStream, true, 'action stream identity');
@@ -126,7 +153,8 @@ export function validateRiveOracleTrace(trace, {
     for (const channel of REQUIRED_CHANNELS) {
       const item = capture?.channels?.[channel];
       validateArtifactReference(item, `${label} ${channel}`, artifactOptions);
-      if (!Number.isSafeInteger(item?.sampleCount) || item.sampleCount < (scenarioValue?.clockStepsMicros?.length ?? 1)) violations.push(`${label} ${channel} sample population is incomplete`);
+      const expectedSamples = Number(scenarioValue?.replayCount ?? 0) * Number(scenarioValue?.clockStepsMicros?.length ?? 0);
+      if (!Number.isSafeInteger(item?.sampleCount) || item.sampleCount !== expectedSamples) violations.push(`${label} ${channel} sample population is incomplete`);
       requiredString(item?.normalization, `${label} ${channel} normalization`);
     }
     for (const metric of METRICS) nonnegativeNumber(capture?.metrics?.[metric], `${label} ${metric}`);
