@@ -1,0 +1,3107 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-live2d-drawable-fidelity-corpus-candidate",
+  "goal": "M05-G16",
+  "formalEvidence": false,
+  "revision": "41ae2b4c44f6d523b2cd458675f8bc07929f1e25",
+  "dirty": false,
+  "manifest": {
+    "id": "m05-g16-drawable-color-culling-corpus",
+    "sha256": "9e13454f9c71ddd83629cc25a836fc3156741516dec5895c4b3cb8189174a37f",
+    "sourceManifestId": "m05-g12-mask-blend-corpus",
+    "sourceManifestSha256": "f858c8506734625c9d292cf0c7380eddf6677bc96981ebf8c874e5657ff2e5d2"
+  },
+  "oracle": {
+    "cubismWebSamplesTag": "5-r.5",
+    "cubismWebSamplesRevision": "ed1e0b714826d92469b9e51cacc3346f4e393f03",
+    "cubismWebFrameworkRevision": "d4da0aa07e47d2c1e4f5fa7ea6047861ea5e5d0b",
+    "adapterPackage": "@haiyue/animation-spec@0.1.0",
+    "captureFormat": "live2d-cubism-drawable-capture@1",
+    "cubismCoreVersion": 83951616,
+    "cubismCoreUrl": "https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js",
+    "cubismCoreByteLength": 207155,
+    "cubismCoreSha256": "25ae938cb4fe282ce189b357bcc97e603d1e1f7ec78bf04150d401c23cdc792f"
+  },
+  "referenceConfiguration": {
+    "viewport": [
+      719,
+      694
+    ],
+    "canvas": [
+      719,
+      746
+    ],
+    "clearColor": "#050817",
+    "targetFormat": "rgba8unorm",
+    "textureColorSpaceConversion": "none",
+    "textureAlphaMode": "premultiplied",
+    "webglAntialias": false,
+    "viewportMode": "fit",
+    "fitPolicy": "bounds-centered-auto-zoom",
+    "fitFill": 0.82,
+    "userZoom": 1,
+    "pan": [
+      0,
+      0
+    ],
+    "synchronizedViews": true,
+    "thresholds": {
+      "maxChannelError": 224,
+      "meanAbsoluteError": 1,
+      "mismatchRatio": 0.025
+    }
+  },
+  "core": {
+    "sourcePolicy": "official-cdn",
+    "url": "https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js",
+    "byteLength": 207155,
+    "sha256": "25ae938cb4fe282ce189b357bcc97e603d1e1f7ec78bf04150d401c23cdc792f",
+    "transport": "network"
+  },
+  "adapter": {
+    "package": "@haiyue/animation-spec@0.1.0",
+    "aggregateSha256": "26828d4d0ee63bc0f98c32b1012ba1d3f30a1e0718ec76cedd4ffbbad70d6ce6",
+    "files": [
+      {
+        "path": "animation-spec/src/live2d/CubismCaptureConverter.ts",
+        "byteLength": 23253,
+        "sha256": "b17b7b695249ba2dc78a21093ae6765be7fbb8f59da68623165627cfdaf6b8d7"
+      },
+      {
+        "path": "animation-spec/src/live2d/CubismClipBakedAdapter.ts",
+        "byteLength": 19568,
+        "sha256": "b98adc41445d1ec857fc6f98a7534c1be59f4f28541773463ec6b1c2d9da537f"
+      },
+      {
+        "path": "examples/live2d-hya-compare/main.ts",
+        "byteLength": 61396,
+        "sha256": "a17f04cb9d526e340bfd23524bb6ce550e418ad6efcaaa4e66d3fa550e62004c"
+      }
+    ]
+  },
+  "samples": [
+    {
+      "id": "niziiro-mao",
+      "title": "Niziiro Mao",
+      "source": {
+        "url": "https://github.com/Live2D/CubismWebSamples/tree/5-r.5/Samples/Resources/Mao",
+        "revision": "ed1e0b714826d92469b9e51cacc3346f4e393f03",
+        "runtimeDirectoryHash": "sha256-1add506bf80e04816f438c36a50d93a4916568dfad8f88daff56e3a75dec5bc9",
+        "fileCount": 22,
+        "sourceBytes": 4321713,
+        "entry": "Mao.model3.json"
+      },
+      "license": {
+        "id": "Live2D-Free-Material-License-and-Sample-Terms",
+        "url": "https://www.live2d.com/eula/live2d-sample-model-terms_en.html",
+        "acceptanceRequired": true
+      },
+      "distribution": {
+        "rawAssets": false,
+        "derivedStatistics": true,
+        "pixelReferences": false
+      },
+      "recipe": {
+        "motionId": "Idle:0",
+        "motionFile": "motions/mtn_01.motion3.json",
+        "bakedFrameTimes": [
+          0,
+          1,
+          5.57
+        ],
+        "referenceTimes": [
+          1
+        ]
+      },
+      "featureCoverage": {
+        "maskReferenceCount": 65,
+        "invertedMaskDrawableCount": 10,
+        "additiveDrawableCount": 15,
+        "multiplicativeDrawableCount": 8,
+        "cullingDrawableCount": 0,
+        "multiplyColorDrawableCount": 54,
+        "screenColorDrawableCount": 38
+      },
+      "observations": {
+        "multiplyColor": [
+          {
+            "drawableId": "ArtMesh82",
+            "drawableIndex": 146,
+            "path": "$.frames[1].drawables[146].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.9803921580314636,
+              1,
+              0.4274509847164154,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh85",
+            "drawableIndex": 147,
+            "path": "$.frames[1].drawables[147].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.9803921580314636,
+              1,
+              0.4274509847164154,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh88",
+            "drawableIndex": 155,
+            "path": "$.frames[1].drawables[155].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.27843138575553894,
+              1,
+              0.8549019694328308,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh92",
+            "drawableIndex": 156,
+            "path": "$.frames[1].drawables[156].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.27843138575553894,
+              1,
+              0.8549019694328308,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh94",
+            "drawableIndex": 157,
+            "path": "$.frames[1].drawables[157].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.27843138575553894,
+              1,
+              0.8549019694328308,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh93",
+            "drawableIndex": 158,
+            "path": "$.frames[1].drawables[158].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.27843138575553894,
+              1,
+              0.8549019694328308,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh89",
+            "drawableIndex": 159,
+            "path": "$.frames[1].drawables[159].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.2666666805744171,
+              0.9215686321258545,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh90",
+            "drawableIndex": 160,
+            "path": "$.frames[1].drawables[160].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.3843137323856354,
+              1,
+              0.843137264251709,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh86",
+            "drawableIndex": 161,
+            "path": "$.frames[1].drawables[161].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              1,
+              0.8352941274642944,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh87",
+            "drawableIndex": 162,
+            "path": "$.frames[1].drawables[162].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              1,
+              0.8352941274642944,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh116",
+            "drawableIndex": 163,
+            "path": "$.frames[1].drawables[163].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh115",
+            "drawableIndex": 164,
+            "path": "$.frames[1].drawables[164].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh114",
+            "drawableIndex": 165,
+            "path": "$.frames[1].drawables[165].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh113",
+            "drawableIndex": 166,
+            "path": "$.frames[1].drawables[166].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh110",
+            "drawableIndex": 169,
+            "path": "$.frames[1].drawables[169].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh107",
+            "drawableIndex": 172,
+            "path": "$.frames[1].drawables[172].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh83",
+            "drawableIndex": 175,
+            "path": "$.frames[1].drawables[175].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh84",
+            "drawableIndex": 176,
+            "path": "$.frames[1].drawables[176].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh104",
+            "drawableIndex": 177,
+            "path": "$.frames[1].drawables[177].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh63",
+            "drawableIndex": 178,
+            "path": "$.frames[1].drawables[178].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh64",
+            "drawableIndex": 179,
+            "path": "$.frames[1].drawables[179].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh65",
+            "drawableIndex": 180,
+            "path": "$.frames[1].drawables[180].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh66",
+            "drawableIndex": 181,
+            "path": "$.frames[1].drawables[181].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh67",
+            "drawableIndex": 182,
+            "path": "$.frames[1].drawables[182].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh71",
+            "drawableIndex": 191,
+            "path": "$.frames[1].drawables[191].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              1,
+              0.6666666865348816,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh72",
+            "drawableIndex": 192,
+            "path": "$.frames[1].drawables[192].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.2980392277240753,
+              0.6745098233222961,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh73",
+            "drawableIndex": 193,
+            "path": "$.frames[1].drawables[193].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.8901960849761963,
+              0.5333333611488342,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh74",
+            "drawableIndex": 194,
+            "path": "$.frames[1].drawables[194].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.9843137264251709,
+              0.615686297416687,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh24",
+            "drawableIndex": 195,
+            "path": "$.frames[1].drawables[195].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.5372549295425415,
+              0.45490196347236633,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh25",
+            "drawableIndex": 196,
+            "path": "$.frames[1].drawables[196].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.43529412150382996,
+              0.40784314274787903,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh26",
+            "drawableIndex": 197,
+            "path": "$.frames[1].drawables[197].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.4745098352432251,
+              1,
+              0.8627451062202454,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh103",
+            "drawableIndex": 198,
+            "path": "$.frames[1].drawables[198].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.4274509847164154,
+              0.46666666865348816,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh75",
+            "drawableIndex": 199,
+            "path": "$.frames[1].drawables[199].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.843137264251709,
+              1,
+              0.40784314274787903,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh102",
+            "drawableIndex": 200,
+            "path": "$.frames[1].drawables[200].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.364705890417099,
+              0.3843137323856354,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh101",
+            "drawableIndex": 201,
+            "path": "$.frames[1].drawables[201].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.30980393290519714,
+              0.30980393290519714,
+              0.30980393290519714,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh100",
+            "drawableIndex": 202,
+            "path": "$.frames[1].drawables[202].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.4000000059604645,
+              0.4000000059604645,
+              0.4000000059604645,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh99",
+            "drawableIndex": 203,
+            "path": "$.frames[1].drawables[203].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.27843138575553894,
+              0.27843138575553894,
+              0.27843138575553894,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh196",
+            "drawableIndex": 237,
+            "path": "$.frames[1].drawables[237].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh138",
+            "drawableIndex": 238,
+            "path": "$.frames[1].drawables[238].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.9019607901573181,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh167",
+            "drawableIndex": 239,
+            "path": "$.frames[1].drawables[239].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.9019607901573181,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh168",
+            "drawableIndex": 240,
+            "path": "$.frames[1].drawables[240].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.95686274766922,
+              0.5529412031173706,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh169",
+            "drawableIndex": 241,
+            "path": "$.frames[1].drawables[241].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.686274528503418,
+              0.1882352977991104,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh170",
+            "drawableIndex": 242,
+            "path": "$.frames[1].drawables[242].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.772549033164978,
+              0.27843138575553894,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh171",
+            "drawableIndex": 243,
+            "path": "$.frames[1].drawables[243].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.8588235378265381,
+              0.27843138575553894,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh186",
+            "drawableIndex": 244,
+            "path": "$.frames[1].drawables[244].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.8588235378265381,
+              0.27843138575553894,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh214",
+            "drawableIndex": 245,
+            "path": "$.frames[1].drawables[245].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.686274528503418,
+              0.1882352977991104,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh212",
+            "drawableIndex": 246,
+            "path": "$.frames[1].drawables[246].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.95686274766922,
+              0.5529412031173706,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh211",
+            "drawableIndex": 247,
+            "path": "$.frames[1].drawables[247].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.9019607901573181,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh210",
+            "drawableIndex": 248,
+            "path": "$.frames[1].drawables[248].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.9019607901573181,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh195",
+            "drawableIndex": 249,
+            "path": "$.frames[1].drawables[249].multiplyColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.772549033164978,
+              0.27843138575553894,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh198",
+            "drawableIndex": 258,
+            "path": "$.frames[1].drawables[258].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh209",
+            "drawableIndex": 259,
+            "path": "$.frames[1].drawables[259].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh300",
+            "drawableIndex": 260,
+            "path": "$.frames[1].drawables[260].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0.7098039388656616,
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh301",
+            "drawableIndex": 261,
+            "path": "$.frames[1].drawables[261].multiplyColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0,
+              0,
+              1
+            ]
+          }
+        ],
+        "screenColor": [
+          {
+            "drawableId": "ArtMesh194",
+            "drawableIndex": 138,
+            "path": "$.frames[1].drawables[138].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.45490196347236633,
+              0.5137255191802979,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh193",
+            "drawableIndex": 139,
+            "path": "$.frames[1].drawables[139].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.45490196347236633,
+              0.5137255191802979,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh192",
+            "drawableIndex": 140,
+            "path": "$.frames[1].drawables[140].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.45490196347236633,
+              0.5137255191802979,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh191",
+            "drawableIndex": 141,
+            "path": "$.frames[1].drawables[141].screenColor",
+            "time": 1,
+            "rgba": [
+              0,
+              0.9921568632125854,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh190",
+            "drawableIndex": 142,
+            "path": "$.frames[1].drawables[142].screenColor",
+            "time": 1,
+            "rgba": [
+              0.25882354378700256,
+              0.9960784316062927,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh189",
+            "drawableIndex": 143,
+            "path": "$.frames[1].drawables[143].screenColor",
+            "time": 1,
+            "rgba": [
+              0.25882354378700256,
+              0.9960784316062927,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh185",
+            "drawableIndex": 148,
+            "path": "$.frames[1].drawables[148].screenColor",
+            "time": 1,
+            "rgba": [
+              0.4274509847164154,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh184",
+            "drawableIndex": 149,
+            "path": "$.frames[1].drawables[149].screenColor",
+            "time": 1,
+            "rgba": [
+              0.4274509847164154,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh143",
+            "drawableIndex": 150,
+            "path": "$.frames[1].drawables[150].screenColor",
+            "time": 1,
+            "rgba": [
+              0.4274509847164154,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh142",
+            "drawableIndex": 151,
+            "path": "$.frames[1].drawables[151].screenColor",
+            "time": 1,
+            "rgba": [
+              0.4274509847164154,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh141",
+            "drawableIndex": 152,
+            "path": "$.frames[1].drawables[152].screenColor",
+            "time": 1,
+            "rgba": [
+              0.4274509847164154,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh140",
+            "drawableIndex": 153,
+            "path": "$.frames[1].drawables[153].screenColor",
+            "time": 1,
+            "rgba": [
+              0.4274509847164154,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh117",
+            "drawableIndex": 154,
+            "path": "$.frames[1].drawables[154].screenColor",
+            "time": 1,
+            "rgba": [
+              0.4274509847164154,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh116",
+            "drawableIndex": 163,
+            "path": "$.frames[1].drawables[163].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh115",
+            "drawableIndex": 164,
+            "path": "$.frames[1].drawables[164].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh114",
+            "drawableIndex": 165,
+            "path": "$.frames[1].drawables[165].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh113",
+            "drawableIndex": 166,
+            "path": "$.frames[1].drawables[166].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh110",
+            "drawableIndex": 169,
+            "path": "$.frames[1].drawables[169].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh107",
+            "drawableIndex": 172,
+            "path": "$.frames[1].drawables[172].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh83",
+            "drawableIndex": 175,
+            "path": "$.frames[1].drawables[175].screenColor",
+            "time": 1,
+            "rgba": [
+              0.43529412150382996,
+              0.9921568632125854,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh84",
+            "drawableIndex": 176,
+            "path": "$.frames[1].drawables[176].screenColor",
+            "time": 1,
+            "rgba": [
+              0.43529412150382996,
+              0.9921568632125854,
+              1,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh104",
+            "drawableIndex": 177,
+            "path": "$.frames[1].drawables[177].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.239215686917305,
+              0.729411780834198,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh63",
+            "drawableIndex": 178,
+            "path": "$.frames[1].drawables[178].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.239215686917305,
+              0.729411780834198,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh64",
+            "drawableIndex": 179,
+            "path": "$.frames[1].drawables[179].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.239215686917305,
+              0.729411780834198,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh65",
+            "drawableIndex": 180,
+            "path": "$.frames[1].drawables[180].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.239215686917305,
+              0.729411780834198,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh66",
+            "drawableIndex": 181,
+            "path": "$.frames[1].drawables[181].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.239215686917305,
+              0.729411780834198,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh67",
+            "drawableIndex": 182,
+            "path": "$.frames[1].drawables[182].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.239215686917305,
+              0.729411780834198,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh299",
+            "drawableIndex": 250,
+            "path": "$.frames[1].drawables[250].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.95686274766922,
+              0.6627451181411743,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh298",
+            "drawableIndex": 251,
+            "path": "$.frames[1].drawables[251].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.843137264251709,
+              0.5058823823928833,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh297",
+            "drawableIndex": 252,
+            "path": "$.frames[1].drawables[252].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.9803921580314636,
+              0.843137264251709,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh216",
+            "drawableIndex": 253,
+            "path": "$.frames[1].drawables[253].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.8627451062202454,
+              0.5647059082984924,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh217",
+            "drawableIndex": 254,
+            "path": "$.frames[1].drawables[254].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.8666666746139526,
+              0.6352941393852234,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh294",
+            "drawableIndex": 255,
+            "path": "$.frames[1].drawables[255].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.9764705896377563,
+              0.8235294222831726,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh295",
+            "drawableIndex": 256,
+            "path": "$.frames[1].drawables[256].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.95686274766922,
+              0.6627451181411743,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh296",
+            "drawableIndex": 257,
+            "path": "$.frames[1].drawables[257].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.843137264251709,
+              0.46666666865348816,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh198",
+            "drawableIndex": 258,
+            "path": "$.frames[1].drawables[258].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.7843137383460999,
+              0.22745098173618317,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh209",
+            "drawableIndex": 259,
+            "path": "$.frames[1].drawables[259].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.7843137383460999,
+              0.22745098173618317,
+              1
+            ]
+          },
+          {
+            "drawableId": "ArtMesh301",
+            "drawableIndex": 261,
+            "path": "$.frames[1].drawables[261].screenColor",
+            "time": 1,
+            "rgba": [
+              1,
+              0.3686274588108063,
+              0.3686274588108063,
+              1
+            ]
+          }
+        ],
+        "culling": []
+      },
+      "conversionDiagnostics": [],
+      "surfaceReadback": {
+        "width": 719,
+        "height": 694,
+        "maxChannelError": 180,
+        "meanAbsoluteError": 0.346908,
+        "mismatchPixelCount": 6506,
+        "mismatchRatio": 0.013038,
+        "onePixelSpatialTolerance": {
+          "maxChannelError": 145,
+          "meanAbsoluteError": 0.152207,
+          "mismatchPixelCount": 7972,
+          "mismatchRatio": 0.007988
+        },
+        "stableInterior": {
+          "pixelCount": 485177,
+          "coverageRatio": 0.972326,
+          "maxChannelError": 8,
+          "meanAbsoluteError": 0.0015,
+          "mismatchPixelCount": 0,
+          "mismatchRatio": 0
+        }
+      },
+      "browser": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "angleBackend": "d3d11",
+        "nativeBackend": true,
+        "gpuAdapter": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "device": "",
+          "description": ""
+        }
+      },
+      "browserDiagnostics": {
+        "consoleErrorCount": 0,
+        "exceptionCount": 0,
+        "unclassifiedFailureCount": 0,
+        "profileCleanup": {
+          "status": "passed",
+          "attempts": 1,
+          "durationMs": 273
+        }
+      },
+      "recoverySmoke": true
+    },
+    {
+      "id": "rice-glassfield-pro",
+      "title": "Rice Glassfield - PRO",
+      "source": {
+        "url": "https://www.live2d.com/en/learn/sample/rice-glassfield/",
+        "revision": "sha256-082dea795bfef18b5598f38d40cdadcaee54827146fdec596ecf4ee4e31eedc1",
+        "runtimeDirectoryHash": "sha256-082dea795bfef18b5598f38d40cdadcaee54827146fdec596ecf4ee4e31eedc1",
+        "fileCount": 10,
+        "sourceBytes": 3152965,
+        "entry": "rice_pro_t03.model3.json"
+      },
+      "license": {
+        "id": "Live2D-Sample-Model-Terms",
+        "url": "https://www.live2d.com/eula/live2d-sample-model-terms_en.html",
+        "acceptanceRequired": true
+      },
+      "distribution": {
+        "rawAssets": false,
+        "derivedStatistics": true,
+        "pixelReferences": false
+      },
+      "recipe": {
+        "motionId": "Tap%40Body:0",
+        "motionFile": "motions/mtn_02.motion3.json",
+        "bakedFrameTimes": [
+          0,
+          0.75,
+          1,
+          5
+        ],
+        "referenceTimes": [
+          0.75
+        ]
+      },
+      "featureCoverage": {
+        "maskReferenceCount": 19,
+        "invertedMaskDrawableCount": 5,
+        "additiveDrawableCount": 21,
+        "multiplicativeDrawableCount": 0,
+        "cullingDrawableCount": 9,
+        "multiplyColorDrawableCount": 0,
+        "screenColorDrawableCount": 0
+      },
+      "observations": {
+        "multiplyColor": [],
+        "screenColor": [],
+        "culling": [
+          {
+            "drawableId": "ArtMesh161",
+            "drawableIndex": 138,
+            "path": "$.frames[1].drawables[138].culling",
+            "time": 0.75,
+            "triangleCount": 23,
+            "sourceWinding": {
+              "ccw": 23,
+              "cw": 0,
+              "degenerate": 0
+            },
+            "mirroredXWinding": {
+              "ccw": 0,
+              "cw": 23,
+              "degenerate": 0
+            },
+            "mirrorFlipsWinding": true
+          },
+          {
+            "drawableId": "ArtMesh160",
+            "drawableIndex": 139,
+            "path": "$.frames[1].drawables[139].culling",
+            "time": 0.75,
+            "triangleCount": 22,
+            "sourceWinding": {
+              "ccw": 21,
+              "cw": 0,
+              "degenerate": 1
+            },
+            "mirroredXWinding": {
+              "ccw": 0,
+              "cw": 21,
+              "degenerate": 1
+            },
+            "mirrorFlipsWinding": true
+          },
+          {
+            "drawableId": "ArtMesh162",
+            "drawableIndex": 140,
+            "path": "$.frames[1].drawables[140].culling",
+            "time": 0.75,
+            "triangleCount": 23,
+            "sourceWinding": {
+              "ccw": 23,
+              "cw": 0,
+              "degenerate": 0
+            },
+            "mirroredXWinding": {
+              "ccw": 0,
+              "cw": 23,
+              "degenerate": 0
+            },
+            "mirrorFlipsWinding": true
+          },
+          {
+            "drawableId": "ArtMesh164",
+            "drawableIndex": 141,
+            "path": "$.frames[1].drawables[141].culling",
+            "time": 0.75,
+            "triangleCount": 33,
+            "sourceWinding": {
+              "ccw": 11,
+              "cw": 19,
+              "degenerate": 3
+            },
+            "mirroredXWinding": {
+              "ccw": 19,
+              "cw": 11,
+              "degenerate": 3
+            },
+            "mirrorFlipsWinding": true
+          },
+          {
+            "drawableId": "ArtMesh168",
+            "drawableIndex": 146,
+            "path": "$.frames[1].drawables[146].culling",
+            "time": 0.75,
+            "triangleCount": 33,
+            "sourceWinding": {
+              "ccw": 33,
+              "cw": 0,
+              "degenerate": 0
+            },
+            "mirroredXWinding": {
+              "ccw": 0,
+              "cw": 33,
+              "degenerate": 0
+            },
+            "mirrorFlipsWinding": true
+          },
+          {
+            "drawableId": "ArtMesh169",
+            "drawableIndex": 147,
+            "path": "$.frames[1].drawables[147].culling",
+            "time": 0.75,
+            "triangleCount": 33,
+            "sourceWinding": {
+              "ccw": 33,
+              "cw": 0,
+              "degenerate": 0
+            },
+            "mirroredXWinding": {
+              "ccw": 0,
+              "cw": 33,
+              "degenerate": 0
+            },
+            "mirrorFlipsWinding": true
+          },
+          {
+            "drawableId": "ArtMesh170",
+            "drawableIndex": 148,
+            "path": "$.frames[1].drawables[148].culling",
+            "time": 0.75,
+            "triangleCount": 18,
+            "sourceWinding": {
+              "ccw": 3,
+              "cw": 12,
+              "degenerate": 3
+            },
+            "mirroredXWinding": {
+              "ccw": 12,
+              "cw": 3,
+              "degenerate": 3
+            },
+            "mirrorFlipsWinding": true
+          },
+          {
+            "drawableId": "ArtMesh171",
+            "drawableIndex": 149,
+            "path": "$.frames[1].drawables[149].culling",
+            "time": 0.75,
+            "triangleCount": 18,
+            "sourceWinding": {
+              "ccw": 18,
+              "cw": 0,
+              "degenerate": 0
+            },
+            "mirroredXWinding": {
+              "ccw": 0,
+              "cw": 18,
+              "degenerate": 0
+            },
+            "mirrorFlipsWinding": true
+          },
+          {
+            "drawableId": "ArtMesh163",
+            "drawableIndex": 157,
+            "path": "$.frames[1].drawables[157].culling",
+            "time": 0.75,
+            "triangleCount": 23,
+            "sourceWinding": {
+              "ccw": 0,
+              "cw": 23,
+              "degenerate": 0
+            },
+            "mirroredXWinding": {
+              "ccw": 23,
+              "cw": 0,
+              "degenerate": 0
+            },
+            "mirrorFlipsWinding": true
+          }
+        ]
+      },
+      "conversionDiagnostics": [],
+      "surfaceReadback": {
+        "width": 719,
+        "height": 694,
+        "maxChannelError": 179,
+        "meanAbsoluteError": 0.303789,
+        "mismatchPixelCount": 6246,
+        "mismatchRatio": 0.012517,
+        "onePixelSpatialTolerance": {
+          "maxChannelError": 99,
+          "meanAbsoluteError": 0.131201,
+          "mismatchPixelCount": 6906,
+          "mismatchRatio": 0.00692
+        },
+        "stableInterior": {
+          "pixelCount": 485592,
+          "coverageRatio": 0.973158,
+          "maxChannelError": 7,
+          "meanAbsoluteError": 0.000086,
+          "mismatchPixelCount": 0,
+          "mismatchRatio": 0
+        }
+      },
+      "browser": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "angleBackend": "d3d11",
+        "nativeBackend": true,
+        "gpuAdapter": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "device": "",
+          "description": ""
+        }
+      },
+      "browserDiagnostics": {
+        "consoleErrorCount": 0,
+        "exceptionCount": 0,
+        "unclassifiedFailureCount": 0,
+        "profileCleanup": {
+          "status": "passed",
+          "attempts": 1,
+          "durationMs": 237
+        }
+      },
+      "recoverySmoke": true
+    }
+  ],
+  "totals": {
+    "nonNeutralMultiplyDrawableFrameCount": 54,
+    "nonNeutralScreenDrawableFrameCount": 38,
+    "cullingDrawableCount": 9,
+    "nondegenerateCullingDrawableFrameCount": 9,
+    "mirroredCullingDrawableFrameCount": 9
+  },
+  "features": [
+    {
+      "id": "multiply-color",
+      "status": "passed",
+      "sampleIds": [
+        "niziiro-mao"
+      ],
+      "observationCount": 54,
+      "observations": [
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh82",
+          "drawableIndex": 146,
+          "path": "$.frames[1].drawables[146].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.9803921580314636,
+            1,
+            0.4274509847164154,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh85",
+          "drawableIndex": 147,
+          "path": "$.frames[1].drawables[147].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.9803921580314636,
+            1,
+            0.4274509847164154,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh88",
+          "drawableIndex": 155,
+          "path": "$.frames[1].drawables[155].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.27843138575553894,
+            1,
+            0.8549019694328308,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh92",
+          "drawableIndex": 156,
+          "path": "$.frames[1].drawables[156].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.27843138575553894,
+            1,
+            0.8549019694328308,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh94",
+          "drawableIndex": 157,
+          "path": "$.frames[1].drawables[157].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.27843138575553894,
+            1,
+            0.8549019694328308,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh93",
+          "drawableIndex": 158,
+          "path": "$.frames[1].drawables[158].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.27843138575553894,
+            1,
+            0.8549019694328308,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh89",
+          "drawableIndex": 159,
+          "path": "$.frames[1].drawables[159].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.2666666805744171,
+            0.9215686321258545,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh90",
+          "drawableIndex": 160,
+          "path": "$.frames[1].drawables[160].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.3843137323856354,
+            1,
+            0.843137264251709,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh86",
+          "drawableIndex": 161,
+          "path": "$.frames[1].drawables[161].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            1,
+            0.8352941274642944,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh87",
+          "drawableIndex": 162,
+          "path": "$.frames[1].drawables[162].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            1,
+            0.8352941274642944,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh116",
+          "drawableIndex": 163,
+          "path": "$.frames[1].drawables[163].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh115",
+          "drawableIndex": 164,
+          "path": "$.frames[1].drawables[164].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh114",
+          "drawableIndex": 165,
+          "path": "$.frames[1].drawables[165].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh113",
+          "drawableIndex": 166,
+          "path": "$.frames[1].drawables[166].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh110",
+          "drawableIndex": 169,
+          "path": "$.frames[1].drawables[169].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh107",
+          "drawableIndex": 172,
+          "path": "$.frames[1].drawables[172].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh83",
+          "drawableIndex": 175,
+          "path": "$.frames[1].drawables[175].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh84",
+          "drawableIndex": 176,
+          "path": "$.frames[1].drawables[176].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh104",
+          "drawableIndex": 177,
+          "path": "$.frames[1].drawables[177].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh63",
+          "drawableIndex": 178,
+          "path": "$.frames[1].drawables[178].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh64",
+          "drawableIndex": 179,
+          "path": "$.frames[1].drawables[179].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh65",
+          "drawableIndex": 180,
+          "path": "$.frames[1].drawables[180].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh66",
+          "drawableIndex": 181,
+          "path": "$.frames[1].drawables[181].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh67",
+          "drawableIndex": 182,
+          "path": "$.frames[1].drawables[182].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh71",
+          "drawableIndex": 191,
+          "path": "$.frames[1].drawables[191].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            1,
+            0.6666666865348816,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh72",
+          "drawableIndex": 192,
+          "path": "$.frames[1].drawables[192].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.2980392277240753,
+            0.6745098233222961,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh73",
+          "drawableIndex": 193,
+          "path": "$.frames[1].drawables[193].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.8901960849761963,
+            0.5333333611488342,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh74",
+          "drawableIndex": 194,
+          "path": "$.frames[1].drawables[194].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.9843137264251709,
+            0.615686297416687,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh24",
+          "drawableIndex": 195,
+          "path": "$.frames[1].drawables[195].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.5372549295425415,
+            0.45490196347236633,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh25",
+          "drawableIndex": 196,
+          "path": "$.frames[1].drawables[196].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.43529412150382996,
+            0.40784314274787903,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh26",
+          "drawableIndex": 197,
+          "path": "$.frames[1].drawables[197].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.4745098352432251,
+            1,
+            0.8627451062202454,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh103",
+          "drawableIndex": 198,
+          "path": "$.frames[1].drawables[198].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.4274509847164154,
+            0.46666666865348816,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh75",
+          "drawableIndex": 199,
+          "path": "$.frames[1].drawables[199].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.843137264251709,
+            1,
+            0.40784314274787903,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh102",
+          "drawableIndex": 200,
+          "path": "$.frames[1].drawables[200].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.364705890417099,
+            0.3843137323856354,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh101",
+          "drawableIndex": 201,
+          "path": "$.frames[1].drawables[201].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.30980393290519714,
+            0.30980393290519714,
+            0.30980393290519714,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh100",
+          "drawableIndex": 202,
+          "path": "$.frames[1].drawables[202].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.4000000059604645,
+            0.4000000059604645,
+            0.4000000059604645,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh99",
+          "drawableIndex": 203,
+          "path": "$.frames[1].drawables[203].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.27843138575553894,
+            0.27843138575553894,
+            0.27843138575553894,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh196",
+          "drawableIndex": 237,
+          "path": "$.frames[1].drawables[237].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh138",
+          "drawableIndex": 238,
+          "path": "$.frames[1].drawables[238].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.9019607901573181,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh167",
+          "drawableIndex": 239,
+          "path": "$.frames[1].drawables[239].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.9019607901573181,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh168",
+          "drawableIndex": 240,
+          "path": "$.frames[1].drawables[240].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.95686274766922,
+            0.5529412031173706,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh169",
+          "drawableIndex": 241,
+          "path": "$.frames[1].drawables[241].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.686274528503418,
+            0.1882352977991104,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh170",
+          "drawableIndex": 242,
+          "path": "$.frames[1].drawables[242].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.772549033164978,
+            0.27843138575553894,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh171",
+          "drawableIndex": 243,
+          "path": "$.frames[1].drawables[243].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.8588235378265381,
+            0.27843138575553894,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh186",
+          "drawableIndex": 244,
+          "path": "$.frames[1].drawables[244].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.8588235378265381,
+            0.27843138575553894,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh214",
+          "drawableIndex": 245,
+          "path": "$.frames[1].drawables[245].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.686274528503418,
+            0.1882352977991104,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh212",
+          "drawableIndex": 246,
+          "path": "$.frames[1].drawables[246].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.95686274766922,
+            0.5529412031173706,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh211",
+          "drawableIndex": 247,
+          "path": "$.frames[1].drawables[247].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.9019607901573181,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh210",
+          "drawableIndex": 248,
+          "path": "$.frames[1].drawables[248].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.9019607901573181,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh195",
+          "drawableIndex": 249,
+          "path": "$.frames[1].drawables[249].multiplyColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.772549033164978,
+            0.27843138575553894,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh198",
+          "drawableIndex": 258,
+          "path": "$.frames[1].drawables[258].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh209",
+          "drawableIndex": 259,
+          "path": "$.frames[1].drawables[259].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh300",
+          "drawableIndex": 260,
+          "path": "$.frames[1].drawables[260].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0.7098039388656616,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh301",
+          "drawableIndex": 261,
+          "path": "$.frames[1].drawables[261].multiplyColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ],
+      "pixelMetrics": [
+        {
+          "sampleId": "niziiro-mao",
+          "time": 1,
+          "width": 719,
+          "height": 694,
+          "maxChannelError": 180,
+          "meanAbsoluteError": 0.346908,
+          "mismatchPixelCount": 6506,
+          "mismatchRatio": 0.013038,
+          "onePixelSpatialTolerance": {
+            "maxChannelError": 145,
+            "meanAbsoluteError": 0.152207,
+            "mismatchPixelCount": 7972,
+            "mismatchRatio": 0.007988
+          },
+          "stableInterior": {
+            "pixelCount": 485177,
+            "coverageRatio": 0.972326,
+            "maxChannelError": 8,
+            "meanAbsoluteError": 0.0015,
+            "mismatchPixelCount": 0,
+            "mismatchRatio": 0
+          }
+        }
+      ],
+      "gpuValidation": {
+        "nativeBackend": true,
+        "deviceRecovery": true,
+        "adapters": [
+          {
+            "sampleId": "niziiro-mao",
+            "vendor": "nvidia",
+            "architecture": "pascal",
+            "device": "",
+            "description": ""
+          }
+        ]
+      },
+      "diagnosticAttribution": {
+        "codes": [],
+        "paths": [],
+        "unclassifiedFailureCount": 0
+      },
+      "runtimeClosure": {
+        "sourceRuntimeRequested": false,
+        "sourceAssetRequested": false
+      }
+    },
+    {
+      "id": "screen-color",
+      "status": "passed",
+      "sampleIds": [
+        "niziiro-mao"
+      ],
+      "observationCount": 38,
+      "observations": [
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh194",
+          "drawableIndex": 138,
+          "path": "$.frames[1].drawables[138].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.45490196347236633,
+            0.5137255191802979,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh193",
+          "drawableIndex": 139,
+          "path": "$.frames[1].drawables[139].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.45490196347236633,
+            0.5137255191802979,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh192",
+          "drawableIndex": 140,
+          "path": "$.frames[1].drawables[140].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.45490196347236633,
+            0.5137255191802979,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh191",
+          "drawableIndex": 141,
+          "path": "$.frames[1].drawables[141].screenColor",
+          "time": 1,
+          "rgba": [
+            0,
+            0.9921568632125854,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh190",
+          "drawableIndex": 142,
+          "path": "$.frames[1].drawables[142].screenColor",
+          "time": 1,
+          "rgba": [
+            0.25882354378700256,
+            0.9960784316062927,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh189",
+          "drawableIndex": 143,
+          "path": "$.frames[1].drawables[143].screenColor",
+          "time": 1,
+          "rgba": [
+            0.25882354378700256,
+            0.9960784316062927,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh185",
+          "drawableIndex": 148,
+          "path": "$.frames[1].drawables[148].screenColor",
+          "time": 1,
+          "rgba": [
+            0.4274509847164154,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh184",
+          "drawableIndex": 149,
+          "path": "$.frames[1].drawables[149].screenColor",
+          "time": 1,
+          "rgba": [
+            0.4274509847164154,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh143",
+          "drawableIndex": 150,
+          "path": "$.frames[1].drawables[150].screenColor",
+          "time": 1,
+          "rgba": [
+            0.4274509847164154,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh142",
+          "drawableIndex": 151,
+          "path": "$.frames[1].drawables[151].screenColor",
+          "time": 1,
+          "rgba": [
+            0.4274509847164154,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh141",
+          "drawableIndex": 152,
+          "path": "$.frames[1].drawables[152].screenColor",
+          "time": 1,
+          "rgba": [
+            0.4274509847164154,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh140",
+          "drawableIndex": 153,
+          "path": "$.frames[1].drawables[153].screenColor",
+          "time": 1,
+          "rgba": [
+            0.4274509847164154,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh117",
+          "drawableIndex": 154,
+          "path": "$.frames[1].drawables[154].screenColor",
+          "time": 1,
+          "rgba": [
+            0.4274509847164154,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh116",
+          "drawableIndex": 163,
+          "path": "$.frames[1].drawables[163].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh115",
+          "drawableIndex": 164,
+          "path": "$.frames[1].drawables[164].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh114",
+          "drawableIndex": 165,
+          "path": "$.frames[1].drawables[165].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh113",
+          "drawableIndex": 166,
+          "path": "$.frames[1].drawables[166].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh110",
+          "drawableIndex": 169,
+          "path": "$.frames[1].drawables[169].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh107",
+          "drawableIndex": 172,
+          "path": "$.frames[1].drawables[172].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh83",
+          "drawableIndex": 175,
+          "path": "$.frames[1].drawables[175].screenColor",
+          "time": 1,
+          "rgba": [
+            0.43529412150382996,
+            0.9921568632125854,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh84",
+          "drawableIndex": 176,
+          "path": "$.frames[1].drawables[176].screenColor",
+          "time": 1,
+          "rgba": [
+            0.43529412150382996,
+            0.9921568632125854,
+            1,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh104",
+          "drawableIndex": 177,
+          "path": "$.frames[1].drawables[177].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.239215686917305,
+            0.729411780834198,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh63",
+          "drawableIndex": 178,
+          "path": "$.frames[1].drawables[178].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.239215686917305,
+            0.729411780834198,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh64",
+          "drawableIndex": 179,
+          "path": "$.frames[1].drawables[179].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.239215686917305,
+            0.729411780834198,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh65",
+          "drawableIndex": 180,
+          "path": "$.frames[1].drawables[180].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.239215686917305,
+            0.729411780834198,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh66",
+          "drawableIndex": 181,
+          "path": "$.frames[1].drawables[181].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.239215686917305,
+            0.729411780834198,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh67",
+          "drawableIndex": 182,
+          "path": "$.frames[1].drawables[182].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.239215686917305,
+            0.729411780834198,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh299",
+          "drawableIndex": 250,
+          "path": "$.frames[1].drawables[250].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.95686274766922,
+            0.6627451181411743,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh298",
+          "drawableIndex": 251,
+          "path": "$.frames[1].drawables[251].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.843137264251709,
+            0.5058823823928833,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh297",
+          "drawableIndex": 252,
+          "path": "$.frames[1].drawables[252].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.9803921580314636,
+            0.843137264251709,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh216",
+          "drawableIndex": 253,
+          "path": "$.frames[1].drawables[253].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.8627451062202454,
+            0.5647059082984924,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh217",
+          "drawableIndex": 254,
+          "path": "$.frames[1].drawables[254].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.8666666746139526,
+            0.6352941393852234,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh294",
+          "drawableIndex": 255,
+          "path": "$.frames[1].drawables[255].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.9764705896377563,
+            0.8235294222831726,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh295",
+          "drawableIndex": 256,
+          "path": "$.frames[1].drawables[256].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.95686274766922,
+            0.6627451181411743,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh296",
+          "drawableIndex": 257,
+          "path": "$.frames[1].drawables[257].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.843137264251709,
+            0.46666666865348816,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh198",
+          "drawableIndex": 258,
+          "path": "$.frames[1].drawables[258].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.7843137383460999,
+            0.22745098173618317,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh209",
+          "drawableIndex": 259,
+          "path": "$.frames[1].drawables[259].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.7843137383460999,
+            0.22745098173618317,
+            1
+          ]
+        },
+        {
+          "sampleId": "niziiro-mao",
+          "drawableId": "ArtMesh301",
+          "drawableIndex": 261,
+          "path": "$.frames[1].drawables[261].screenColor",
+          "time": 1,
+          "rgba": [
+            1,
+            0.3686274588108063,
+            0.3686274588108063,
+            1
+          ]
+        }
+      ],
+      "pixelMetrics": [
+        {
+          "sampleId": "niziiro-mao",
+          "time": 1,
+          "width": 719,
+          "height": 694,
+          "maxChannelError": 180,
+          "meanAbsoluteError": 0.346908,
+          "mismatchPixelCount": 6506,
+          "mismatchRatio": 0.013038,
+          "onePixelSpatialTolerance": {
+            "maxChannelError": 145,
+            "meanAbsoluteError": 0.152207,
+            "mismatchPixelCount": 7972,
+            "mismatchRatio": 0.007988
+          },
+          "stableInterior": {
+            "pixelCount": 485177,
+            "coverageRatio": 0.972326,
+            "maxChannelError": 8,
+            "meanAbsoluteError": 0.0015,
+            "mismatchPixelCount": 0,
+            "mismatchRatio": 0
+          }
+        }
+      ],
+      "gpuValidation": {
+        "nativeBackend": true,
+        "deviceRecovery": true,
+        "adapters": [
+          {
+            "sampleId": "niziiro-mao",
+            "vendor": "nvidia",
+            "architecture": "pascal",
+            "device": "",
+            "description": ""
+          }
+        ]
+      },
+      "diagnosticAttribution": {
+        "codes": [],
+        "paths": [],
+        "unclassifiedFailureCount": 0
+      },
+      "runtimeClosure": {
+        "sourceRuntimeRequested": false,
+        "sourceAssetRequested": false
+      }
+    },
+    {
+      "id": "drawable-culling",
+      "status": "passed",
+      "sampleIds": [
+        "rice-glassfield-pro"
+      ],
+      "observationCount": 9,
+      "observations": [
+        {
+          "sampleId": "rice-glassfield-pro",
+          "drawableId": "ArtMesh161",
+          "drawableIndex": 138,
+          "path": "$.frames[1].drawables[138].culling",
+          "time": 0.75,
+          "triangleCount": 23,
+          "sourceWinding": {
+            "ccw": 23,
+            "cw": 0,
+            "degenerate": 0
+          },
+          "mirroredXWinding": {
+            "ccw": 0,
+            "cw": 23,
+            "degenerate": 0
+          },
+          "mirrorFlipsWinding": true
+        },
+        {
+          "sampleId": "rice-glassfield-pro",
+          "drawableId": "ArtMesh160",
+          "drawableIndex": 139,
+          "path": "$.frames[1].drawables[139].culling",
+          "time": 0.75,
+          "triangleCount": 22,
+          "sourceWinding": {
+            "ccw": 21,
+            "cw": 0,
+            "degenerate": 1
+          },
+          "mirroredXWinding": {
+            "ccw": 0,
+            "cw": 21,
+            "degenerate": 1
+          },
+          "mirrorFlipsWinding": true
+        },
+        {
+          "sampleId": "rice-glassfield-pro",
+          "drawableId": "ArtMesh162",
+          "drawableIndex": 140,
+          "path": "$.frames[1].drawables[140].culling",
+          "time": 0.75,
+          "triangleCount": 23,
+          "sourceWinding": {
+            "ccw": 23,
+            "cw": 0,
+            "degenerate": 0
+          },
+          "mirroredXWinding": {
+            "ccw": 0,
+            "cw": 23,
+            "degenerate": 0
+          },
+          "mirrorFlipsWinding": true
+        },
+        {
+          "sampleId": "rice-glassfield-pro",
+          "drawableId": "ArtMesh164",
+          "drawableIndex": 141,
+          "path": "$.frames[1].drawables[141].culling",
+          "time": 0.75,
+          "triangleCount": 33,
+          "sourceWinding": {
+            "ccw": 11,
+            "cw": 19,
+            "degenerate": 3
+          },
+          "mirroredXWinding": {
+            "ccw": 19,
+            "cw": 11,
+            "degenerate": 3
+          },
+          "mirrorFlipsWinding": true
+        },
+        {
+          "sampleId": "rice-glassfield-pro",
+          "drawableId": "ArtMesh168",
+          "drawableIndex": 146,
+          "path": "$.frames[1].drawables[146].culling",
+          "time": 0.75,
+          "triangleCount": 33,
+          "sourceWinding": {
+            "ccw": 33,
+            "cw": 0,
+            "degenerate": 0
+          },
+          "mirroredXWinding": {
+            "ccw": 0,
+            "cw": 33,
+            "degenerate": 0
+          },
+          "mirrorFlipsWinding": true
+        },
+        {
+          "sampleId": "rice-glassfield-pro",
+          "drawableId": "ArtMesh169",
+          "drawableIndex": 147,
+          "path": "$.frames[1].drawables[147].culling",
+          "time": 0.75,
+          "triangleCount": 33,
+          "sourceWinding": {
+            "ccw": 33,
+            "cw": 0,
+            "degenerate": 0
+          },
+          "mirroredXWinding": {
+            "ccw": 0,
+            "cw": 33,
+            "degenerate": 0
+          },
+          "mirrorFlipsWinding": true
+        },
+        {
+          "sampleId": "rice-glassfield-pro",
+          "drawableId": "ArtMesh170",
+          "drawableIndex": 148,
+          "path": "$.frames[1].drawables[148].culling",
+          "time": 0.75,
+          "triangleCount": 18,
+          "sourceWinding": {
+            "ccw": 3,
+            "cw": 12,
+            "degenerate": 3
+          },
+          "mirroredXWinding": {
+            "ccw": 12,
+            "cw": 3,
+            "degenerate": 3
+          },
+          "mirrorFlipsWinding": true
+        },
+        {
+          "sampleId": "rice-glassfield-pro",
+          "drawableId": "ArtMesh171",
+          "drawableIndex": 149,
+          "path": "$.frames[1].drawables[149].culling",
+          "time": 0.75,
+          "triangleCount": 18,
+          "sourceWinding": {
+            "ccw": 18,
+            "cw": 0,
+            "degenerate": 0
+          },
+          "mirroredXWinding": {
+            "ccw": 0,
+            "cw": 18,
+            "degenerate": 0
+          },
+          "mirrorFlipsWinding": true
+        },
+        {
+          "sampleId": "rice-glassfield-pro",
+          "drawableId": "ArtMesh163",
+          "drawableIndex": 157,
+          "path": "$.frames[1].drawables[157].culling",
+          "time": 0.75,
+          "triangleCount": 23,
+          "sourceWinding": {
+            "ccw": 0,
+            "cw": 23,
+            "degenerate": 0
+          },
+          "mirroredXWinding": {
+            "ccw": 23,
+            "cw": 0,
+            "degenerate": 0
+          },
+          "mirrorFlipsWinding": true
+        }
+      ],
+      "pixelMetrics": [
+        {
+          "sampleId": "rice-glassfield-pro",
+          "time": 0.75,
+          "width": 719,
+          "height": 694,
+          "maxChannelError": 179,
+          "meanAbsoluteError": 0.303789,
+          "mismatchPixelCount": 6246,
+          "mismatchRatio": 0.012517,
+          "onePixelSpatialTolerance": {
+            "maxChannelError": 99,
+            "meanAbsoluteError": 0.131201,
+            "mismatchPixelCount": 6906,
+            "mismatchRatio": 0.00692
+          },
+          "stableInterior": {
+            "pixelCount": 485592,
+            "coverageRatio": 0.973158,
+            "maxChannelError": 7,
+            "meanAbsoluteError": 0.000086,
+            "mismatchPixelCount": 0,
+            "mismatchRatio": 0
+          }
+        }
+      ],
+      "gpuValidation": {
+        "nativeBackend": true,
+        "deviceRecovery": true,
+        "adapters": [
+          {
+            "sampleId": "rice-glassfield-pro",
+            "vendor": "nvidia",
+            "architecture": "pascal",
+            "device": "",
+            "description": ""
+          }
+        ]
+      },
+      "diagnosticAttribution": {
+        "codes": [],
+        "paths": [],
+        "unclassifiedFailureCount": 0
+      },
+      "runtimeClosure": {
+        "sourceRuntimeRequested": false,
+        "sourceAssetRequested": false
+      }
+    }
+  ],
+  "runtimeClosure": {
+    "sourceRuntimeRequested": false,
+    "sourceAssetRequested": false,
+    "forbiddenRequestCount": 0
+  },
+  "unclassifiedFailureCount": 0,
+  "handoff": {
+    "consumers": [
+      "M05-G07",
+      "M05-G09"
+    ],
+    "baselinePromotionOwner": "M05-G09"
+  }
+}

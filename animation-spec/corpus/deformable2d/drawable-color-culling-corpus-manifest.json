@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-deformable2d-drawable-color-culling-corpus",
+  "id": "m05-g16-drawable-color-culling-corpus",
+  "hashAlgorithm": "sha256",
+  "sourceManifest": {
+    "path": "animation-spec/corpus/deformable2d/feature-corpus-manifest.json",
+    "id": "m05-g12-mask-blend-corpus",
+    "sha256": "f858c8506734625c9d292cf0c7380eddf6677bc96981ebf8c874e5657ff2e5d2"
+  },
+  "oracle": {
+    "cubismWebSamplesTag": "5-r.5",
+    "cubismWebSamplesRevision": "ed1e0b714826d92469b9e51cacc3346f4e393f03",
+    "cubismWebFrameworkRevision": "d4da0aa07e47d2c1e4f5fa7ea6047861ea5e5d0b",
+    "adapterPackage": "@haiyue/animation-spec@0.1.0",
+    "captureFormat": "live2d-cubism-drawable-capture@1",
+    "cubismCoreVersion": 83951616,
+    "cubismCoreUrl": "https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js",
+    "cubismCoreByteLength": 207155,
+    "cubismCoreSha256": "25ae938cb4fe282ce189b357bcc97e603d1e1f7ec78bf04150d401c23cdc792f"
+  },
+  "referenceConfiguration": {
+    "viewport": [719, 694],
+    "canvas": [719, 746],
+    "clearColor": "#050817",
+    "targetFormat": "rgba8unorm",
+    "textureColorSpaceConversion": "none",
+    "textureAlphaMode": "premultiplied",
+    "webglAntialias": false,
+    "viewportMode": "fit",
+    "fitPolicy": "bounds-centered-auto-zoom",
+    "fitFill": 0.82,
+    "userZoom": 1,
+    "pan": [0, 0],
+    "synchronizedViews": true,
+    "thresholds": {
+      "maxChannelError": 224,
+      "meanAbsoluteError": 1,
+      "mismatchRatio": 0.025
+    }
+  },
+  "requiredFeatures": {
+    "nonNeutralMultiplyDrawableFrameCount": 1,
+    "nonNeutralScreenDrawableFrameCount": 1,
+    "cullingDrawableCount": 1,
+    "nondegenerateCullingDrawableFrameCount": 1,
+    "mirroredCullingDrawableFrameCount": 1
+  },
+  "samples": [
+    {
+      "id": "niziiro-mao",
+      "title": "Niziiro Mao",
+      "sourcePolicy": "caller-supplied-local-only",
+      "source": {
+        "url": "https://github.com/Live2D/CubismWebSamples/tree/5-r.5/Samples/Resources/Mao",
+        "revision": "ed1e0b714826d92469b9e51cacc3346f4e393f03",
+        "runtimeDirectoryHash": "sha256-1add506bf80e04816f438c36a50d93a4916568dfad8f88daff56e3a75dec5bc9",
+        "fileCount": 22,
+        "sourceBytes": 4321713,
+        "entry": "Mao.model3.json"
+      },
+      "license": {
+        "id": "Live2D-Free-Material-License-and-Sample-Terms",
+        "url": "https://www.live2d.com/eula/live2d-sample-model-terms_en.html",
+        "acceptanceRequired": true
+      },
+      "distribution": {
+        "rawAssets": false,
+        "derivedStatistics": true,
+        "pixelReferences": false
+      },
+      "recipe": {
+        "motionId": "Idle:0",
+        "motionFile": "motions/mtn_01.motion3.json",
+        "bakedFrameTimes": [0, 1, 5.57],
+        "referenceTimes": [1]
+      },
+      "expectedObservations": {
+        "nonNeutralMultiplyDrawableFrameCount": 54,
+        "nonNeutralScreenDrawableFrameCount": 38,
+        "multiplyRepresentative": {
+          "drawableId": "ArtMesh82",
+          "rgba": [0.980392, 1, 0.427451, 1]
+        },
+        "screenRepresentative": {
+          "drawableId": "ArtMesh194",
+          "rgba": [1, 0.454902, 0.513726, 1]
+        }
+      },
+      "requiredFiles": [
+        { "path": "Mao.model3.json", "byteLength": 1699, "sha256": "d5fb29f93ef3cf3eba96b5aa9538eca063abbebee81a8d2dbeecea0cef4fecba" },
+        { "path": "Mao.moc3", "byteLength": 879680, "sha256": "ad5195b39e35e0da8ba0c825ad9cc2d60571502007f6f7d4f00963b768bb90d8" },
+        { "path": "Mao.2048/texture_00.png", "byteLength": 3130953, "sha256": "0b97283d69e62d346bcca25f8a91a5dd477f2e668ad9801b15fa7f108631c624" },
+        { "path": "motions/mtn_01.motion3.json", "byteLength": 27661, "sha256": "4a17c9b0b4ffd42ee5b8386cba0ae18916953ac693d79f44cd831bf5d59877f6" }
+      ]
+    },
+    {
+      "id": "rice-glassfield-pro",
+      "title": "Rice Glassfield - PRO",
+      "sourcePolicy": "caller-supplied-local-only",
+      "source": {
+        "url": "https://www.live2d.com/en/learn/sample/rice-glassfield/",
+        "revision": "sha256-082dea795bfef18b5598f38d40cdadcaee54827146fdec596ecf4ee4e31eedc1",
+        "runtimeDirectoryHash": "sha256-082dea795bfef18b5598f38d40cdadcaee54827146fdec596ecf4ee4e31eedc1",
+        "fileCount": 10,
+        "sourceBytes": 3152965,
+        "entry": "rice_pro_t03.model3.json"
+      },
+      "license": {
+        "id": "Live2D-Sample-Model-Terms",
+        "url": "https://www.live2d.com/eula/live2d-sample-model-terms_en.html",
+        "acceptanceRequired": true
+      },
+      "distribution": {
+        "rawAssets": false,
+        "derivedStatistics": true,
+        "pixelReferences": false
+      },
+      "recipe": {
+        "motionId": "Tap%40Body:0",
+        "motionFile": "motions/mtn_02.motion3.json",
+        "bakedFrameTimes": [0, 0.75, 1, 5],
+        "referenceTimes": [0.75]
+      },
+      "expectedObservations": {
+        "cullingDrawableCount": 9,
+        "nondegenerateCullingDrawableFrameCount": 9,
+        "mirroredCullingDrawableFrameCount": 9,
+        "cullingRepresentative": {
+          "drawableId": "ArtMesh161",
+          "sourceWinding": { "ccw": 23, "cw": 0, "degenerate": 0 },
+          "mirroredXWinding": { "ccw": 0, "cw": 23, "degenerate": 0 }
+        }
+      },
+      "requiredFiles": [
+        { "path": "rice_pro_t03.model3.json", "byteLength": 848, "sha256": "92f09386b0f64266c73498c515d3a92af1eb87275c4daf58494e641ad821ef7e" },
+        { "path": "rice_pro_t03.moc3", "byteLength": 479104, "sha256": "be56f2d656d279d8db9fe302ec744fa5992ff884b2ebb233f202772d5dd7e4dc" },
+        { "path": "rice_pro_t03.2048/texture_00.png", "byteLength": 1061518, "sha256": "9930643898aeea3a5f11f06933e79a217b64fbec80c06158f512e85454ea60ea" },
+        { "path": "rice_pro_t03.2048/texture_01.png", "byteLength": 1505136, "sha256": "d80053659ecb2eab98269ade228253034827b8744db1fcb67843acbcc37906de" },
+        { "path": "motions/mtn_02.motion3.json", "byteLength": 13541, "sha256": "9db0c12a957829078987e0fb7352681a5064c663d4c27366529272f579d3973b" }
+      ]
+    }
+  ],
+  "replay": {
+    "localReportCommand": "node scripts/verify-live2d-local-corpus.mjs --model niziiro-mao=<mao-directory> --evidence-action niziiro-mao=Idle:0 --evidence-time niziiro-mao=1 --model rice-glassfield-pro=<rice-directory> --evidence-action rice-glassfield-pro=Tap%40Body:0 --evidence-time rice-glassfield-pro=0.75 --out review/candidates/live2d-drawable-color-culling-local-report.json",
+    "candidateCommand": "node scripts/verify-live2d-drawable-fidelity-corpus.mjs --manifest animation-spec/corpus/deformable2d/drawable-color-culling-corpus-manifest.json --report review/candidates/live2d-drawable-color-culling-local-report.json --out review/candidates/live2d-drawable-color-culling-corpus-candidate.json --dashboard-out examples/hya-live2d-corpus-dashboard/samples/feature-status.json"
+  }
+}

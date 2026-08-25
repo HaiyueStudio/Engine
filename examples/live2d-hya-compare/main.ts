@@ -8,6 +8,10 @@ import { ANIMATION_COMPARE_BACKGROUND_HEX, ANIMATION_COMPARE_CLEAR_COLOR, resolv
 
 interface Bounds { x: number; y: number; width: number; height: number }
 interface FeatureCoverage { maskReferenceCount: number; invertedMaskDrawableCount: number; additiveDrawableCount: number; multiplicativeDrawableCount: number; cullingDrawableCount: number; multiplyColorDrawableCount: number; screenColorDrawableCount: number }
+interface DrawableColorObservation { readonly drawableId: string; readonly drawableIndex: number; readonly path: string; readonly time: number; readonly rgba: readonly [number, number, number, number] }
+interface DrawableCullingObservation { readonly drawableId: string; readonly drawableIndex: number; readonly path: string; readonly time: number; readonly triangleCount: number; readonly sourceWinding: TriangleWinding; readonly mirroredXWinding: TriangleWinding; readonly mirrorFlipsWinding: boolean }
+interface TriangleWinding { readonly ccw: number; readonly cw: number; readonly degenerate: number }
+interface FeatureObservations { readonly multiplyColor: readonly DrawableColorObservation[]; readonly screenColor: readonly DrawableColorObservation[]; readonly culling: readonly DrawableCullingObservation[] }
 interface ReferenceDrawable {
   id: string;
   positions: Float32Array;
@@ -68,8 +72,11 @@ async function main(): Promise<void> {
   let bakedFrameTimes: readonly number[] = [];
   let conversionDiagnostics: readonly { readonly severity: string; readonly code: string; readonly path: string }[] = [];
   let featureCoverage: FeatureCoverage = { maskReferenceCount: 0, invertedMaskDrawableCount: 0, additiveDrawableCount: 0, multiplicativeDrawableCount: 0, cullingDrawableCount: 0, multiplyColorDrawableCount: 0, screenColorDrawableCount: 0 };
+  let featureObservations: FeatureObservations = { multiplyColor: [], screenColor: [], culling: [] };
   const queryParameters = new URLSearchParams(location.search);
   const localEvidenceMode = queryParameters.get('localEvidence') === '1';
+  const requestedEvidenceActionId = queryParameters.get('evidenceActionId');
+  const requestedEvidenceTime = optionalEvidenceTime(queryParameters.get('evidenceTime'));
   const mountedCoreUrl = queryParameters.get('coreUrl');
   if (mountedCoreUrl) {
     const resolvedCoreUrl = new URL(mountedCoreUrl, location.href);
@@ -190,7 +197,7 @@ async function main(): Promise<void> {
       if (parityEvidencePending && !parityEvidenceScheduled) {
         parityEvidenceScheduled = true;
         playing = false;
-        currentTime = Math.min(1, duration);
+        currentTime = Math.min(requestedEvidenceTime ?? 1, duration);
         player?.seek(playbackOffset + currentTime);
         drawReference();
         requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -212,7 +219,7 @@ async function main(): Promise<void> {
     const view = viewSettings();
     const adapterInfo = engine.adapter?.info;
     const gpuAdapter = adapterInfo ? { vendor: String(adapterInfo.vendor ?? ''), architecture: String(adapterInfo.architecture ?? ''), device: String(adapterInfo.device ?? ''), description: String(adapterInfo.description ?? '') } : null;
-    result.textContent = JSON.stringify({ status: 'passed', fixtureId: bundledFixtureId, hya: hyaRenderer.stats, reference: coreSession ? 'official-cubism-core' : 'captured-mesh-fixture', coreVersion: coreSession ? Number(coreSession.core.Version?.csmGetVersion?.() ?? 0) : undefined, gpuAdapter, comparisonBackground: ANIMATION_COMPARE_BACKGROUND_HEX, comparisonConfiguration: { viewportMode: 'fit', fitPolicy: 'bounds-centered-auto-zoom', fitFill: 0.82, userZoom: Number(query<HTMLInputElement>('#zoom').value), pan: [view.panX, view.panY], resolvedZoom: view.zoom, synchronizedViews: true, canvas: [hyaCanvas.width, hyaCanvas.height], targetFormat: 'rgba8unorm', textureColorSpaceConversion: 'none', alphaMode: 'premultiplied', antialias: false }, bounds, autoZoom, actionCount: playbackActions.length, selectedActionId, selectedMotionFile: selectedMotion?.file, playerInstallCount, bakedFrameCount, bakedFrameTimes, conversionDiagnostics, localEvidenceMode, featureCoverage, sampledAt: parityEvidenceScheduled ? currentTime : undefined, maskActionSmoke: maskActionSmokeRequested && maskActionVerified, loopSmoke: loopSmokeRequested && loopVerified, resizeSmoke: resizeSmokeRequested && resizeVerified, preResizeMaskPixels: resizeSmokeRequested ? preResizeMaskPixels : undefined, postResizeMaskPixels: resizeSmokeRequested ? hyaRenderer.stats.maskPixels : undefined, recoverySmoke: recoverySmokeRequested && recoveryVerified, expectedMaskTargetCount });
+    result.textContent = JSON.stringify({ status: 'passed', fixtureId: bundledFixtureId, hya: hyaRenderer.stats, reference: coreSession ? 'official-cubism-core' : 'captured-mesh-fixture', coreVersion: coreSession ? Number(coreSession.core.Version?.csmGetVersion?.() ?? 0) : undefined, gpuAdapter, comparisonBackground: ANIMATION_COMPARE_BACKGROUND_HEX, comparisonConfiguration: { viewportMode: 'fit', fitPolicy: 'bounds-centered-auto-zoom', fitFill: 0.82, userZoom: Number(query<HTMLInputElement>('#zoom').value), pan: [view.panX, view.panY], resolvedZoom: view.zoom, synchronizedViews: true, canvas: [hyaCanvas.width, hyaCanvas.height], targetFormat: 'rgba8unorm', textureColorSpaceConversion: 'none', alphaMode: 'premultiplied', antialias: false }, bounds, autoZoom, actionCount: playbackActions.length, selectedActionId, selectedMotionFile: selectedMotion?.file, playerInstallCount, bakedFrameCount, bakedFrameTimes, conversionDiagnostics, localEvidenceMode, featureCoverage, featureObservations, sampledAt: parityEvidenceScheduled ? currentTime : undefined, maskActionSmoke: maskActionSmokeRequested && maskActionVerified, loopSmoke: loopSmokeRequested && loopVerified, resizeSmoke: resizeSmokeRequested && resizeVerified, preResizeMaskPixels: resizeSmokeRequested ? preResizeMaskPixels : undefined, postResizeMaskPixels: resizeSmokeRequested ? hyaRenderer.stats.maskPixels : undefined, recoverySmoke: recoverySmokeRequested && recoveryVerified, expectedMaskTargetCount });
   }
 
   async function loadBundledSample(): Promise<void> {
@@ -288,7 +295,9 @@ async function main(): Promise<void> {
     const textures = await Promise.all(textureFiles.map((file: File) => createImageBitmap(file, { colorSpaceConversion: 'none', premultiplyAlpha: 'premultiply' })));
     const ppu = Number(model.canvasinfo.PixelsPerUnit);
     disposeCoreSession();
-    const capturedMotions = localEvidenceMode ? motions.slice(0, 1) : motions;
+    const requestedMotion = requestedEvidenceActionId ? motions.find(motion => motion.id === requestedEvidenceActionId) : undefined;
+    if (requestedEvidenceActionId && !requestedMotion) throw new Error(`Evidence action ${requestedEvidenceActionId} was not found in the selected model.`);
+    const capturedMotions = localEvidenceMode ? (requestedMotion ? [requestedMotion] : motions.slice(0, 1)) : motions;
     const selectedMotion = capturedMotions[0] ?? null;
     coreSession = {
       core, moc, model, motion: selectedMotion?.motion ?? null,
@@ -307,7 +316,7 @@ async function main(): Promise<void> {
       pixelsPerUnit: ppu,
       textures,
     };
-    const actionSet = captureCoreActionSet(coreSession, textureFiles, localEvidenceMode);
+    const actionSet = captureCoreActionSet(coreSession, textureFiles, localEvidenceMode, requestedEvidenceTime === undefined ? [] : [requestedEvidenceTime]);
     coreSession.clipRanges = actionSet.ranges;
     playbackActions = Object.freeze(capturedMotions.map(motion => ({ id: motion.id, label: motion.label, range: actionSet.ranges.get(motion.id)! })));
     selectedActionId = selectedMotion?.id ?? null;
@@ -333,6 +342,7 @@ async function main(): Promise<void> {
       multiplyColorDrawableCount: capture.frames[0]?.drawables.filter(drawable => drawable.multiplyColor?.slice(0, 3).some((value, index) => value !== 1)).length ?? 0,
       screenColorDrawableCount: capture.frames[0]?.drawables.filter(drawable => drawable.screenColor?.slice(0, 3).some(value => value !== 0)).length ?? 0,
     };
+    featureObservations = observeCaptureFeatures(capture, requestedEvidenceTime ?? Math.min(1, capture.duration));
     releaseObjectUrls();
     const dataUrl = URL.createObjectURL(new Blob([converted.data], { type: 'application/vnd.haiyue.deformable-mesh-2d' }));
     objectUrls.push(dataUrl);
@@ -699,23 +709,23 @@ function captureCoreReferenceDrawables(session: CoreSession): ReferenceDrawable[
     };
   });
 }
-function captureCoreActionSet(session: CoreSession, textures: readonly File[], evidenceMode = false): { readonly capture: CubismDrawableCapture; readonly ranges: ReadonlyMap<string, CoreClipRange> } {
-  if (session.motions.length === 0) return { capture: captureCoreClip(session, textures, null, evidenceMode), ranges: new Map() };
+function captureCoreActionSet(session: CoreSession, textures: readonly File[], evidenceMode = false, evidenceTimes: readonly number[] = []): { readonly capture: CubismDrawableCapture; readonly ranges: ReadonlyMap<string, CoreClipRange> } {
+  if (session.motions.length === 0) return { capture: captureCoreClip(session, textures, null, evidenceMode, evidenceTimes), ranges: new Map() };
   const combined = combineCubismCaptureClips(session.motions.map(motion => ({
     id: motion.id,
     name: motion.label,
-    capture: captureCoreClip(session, textures, motion.motion, evidenceMode),
+    capture: captureCoreClip(session, textures, motion.motion, evidenceMode, evidenceTimes),
   })), { name: 'Browser comparison action set' });
   return {
     capture: combined.capture,
     ranges: new Map(combined.clips.map(clip => [clip.id, clip])),
   };
 }
-function captureCoreClip(session: CoreSession, textures: readonly File[], motion: CubismMotion3 | null = session.motion, evidenceMode = false): CubismDrawableCapture {
+function captureCoreClip(session: CoreSession, textures: readonly File[], motion: CubismMotion3 | null = session.motion, evidenceMode = false, evidenceTimes: readonly number[] = []): CubismDrawableCapture {
   const duration = motion?.Meta.Duration ?? 1;
   const steps = Math.max(1, Math.ceil(duration * 30));
   const times = evidenceMode
-    ? [...new Set([0, Math.min(1, duration), duration])].sort((left, right) => left - right)
+    ? [...new Set([0, Math.min(1, duration), duration, ...evidenceTimes.map(time => clamp(time, 0, duration))])].sort((left, right) => left - right)
     : Array.from({ length: steps + 1 }, (_, frame) => duration * frame / steps);
   const frames = [];
   for (const time of times) {
@@ -771,6 +781,77 @@ function coreDrawableColor(source: any, index: number, fallback: readonly [numbe
   const nested = source[index];
   const value = nested && typeof nested !== 'number' ? nested : source.subarray?.(index * 4, index * 4 + 4) ?? source.slice?.(index * 4, index * 4 + 4);
   return value?.length >= 4 ? [Number(value[0]), Number(value[1]), Number(value[2]), Number(value[3])] : [...fallback];
+}
+function observeCaptureFeatures(capture: CubismDrawableCapture, requestedTime: number): FeatureObservations {
+  const frameIndex = nearestCaptureFrame(capture, requestedTime);
+  const frame = capture.frames[frameIndex];
+  if (!frame) return { multiplyColor: [], screenColor: [], culling: [] };
+  const multiplyColor: DrawableColorObservation[] = [];
+  const screenColor: DrawableColorObservation[] = [];
+  const culling: DrawableCullingObservation[] = [];
+  frame.drawables.forEach((drawable, drawableIndex) => {
+    const multiply = tuple4(drawable.multiplyColor, [1, 1, 1, 1]);
+    const screen = tuple4(drawable.screenColor, [0, 0, 0, 0]);
+    const basePath = `$.frames[${frameIndex}].drawables[${drawableIndex}]`;
+    if (multiply.slice(0, 3).some((value, channel) => Math.abs(value - 1) > 1e-6)) {
+      multiplyColor.push(Object.freeze({ drawableId: drawable.id, drawableIndex, path: `${basePath}.multiplyColor`, time: frame.time, rgba: multiply }));
+    }
+    if (screen.slice(0, 3).some(value => Math.abs(value) > 1e-6)) {
+      screenColor.push(Object.freeze({ drawableId: drawable.id, drawableIndex, path: `${basePath}.screenColor`, time: frame.time, rgba: screen }));
+    }
+    if (drawable.culling === true) {
+      const sourceWinding = countTriangleWinding(drawable.positions, drawable.indices);
+      const mirroredXWinding = Object.freeze({ ccw: sourceWinding.cw, cw: sourceWinding.ccw, degenerate: sourceWinding.degenerate });
+      culling.push(Object.freeze({
+        drawableId: drawable.id,
+        drawableIndex,
+        path: `${basePath}.culling`,
+        time: frame.time,
+        triangleCount: drawable.indices.length / 3,
+        sourceWinding,
+        mirroredXWinding,
+        mirrorFlipsWinding: sourceWinding.ccw + sourceWinding.cw > 0
+          && sourceWinding.ccw === mirroredXWinding.cw
+          && sourceWinding.cw === mirroredXWinding.ccw,
+      }));
+    }
+  });
+  return Object.freeze({ multiplyColor: Object.freeze(multiplyColor), screenColor: Object.freeze(screenColor), culling: Object.freeze(culling) });
+}
+function nearestCaptureFrame(capture: CubismDrawableCapture, requestedTime: number): number {
+  let nearest = 0;
+  let distance = Infinity;
+  capture.frames.forEach((frame, index) => {
+    const candidate = Math.abs(frame.time - requestedTime);
+    if (candidate < distance) { nearest = index; distance = candidate; }
+  });
+  if (distance > 1e-5) throw new Error(`Evidence time ${requestedTime} is absent from the baked capture.`);
+  return nearest;
+}
+function countTriangleWinding(positions: readonly number[], indices: readonly number[]): TriangleWinding {
+  let ccw = 0;
+  let cw = 0;
+  let degenerate = 0;
+  for (let index = 0; index < indices.length; index += 3) {
+    const a = indices[index]! * 2;
+    const b = indices[index + 1]! * 2;
+    const c = indices[index + 2]! * 2;
+    const area = (positions[b]! - positions[a]!) * (positions[c + 1]! - positions[a + 1]!)
+      - (positions[b + 1]! - positions[a + 1]!) * (positions[c]! - positions[a]!);
+    if (area > 1e-9) ccw++;
+    else if (area < -1e-9) cw++;
+    else degenerate++;
+  }
+  return Object.freeze({ ccw, cw, degenerate });
+}
+function tuple4(value: readonly number[] | undefined, fallback: readonly [number, number, number, number]): readonly [number, number, number, number] {
+  return value && value.length >= 4 ? [Number(value[0]), Number(value[1]), Number(value[2]), Number(value[3])] : [...fallback];
+}
+function optionalEvidenceTime(value: string | null): number | undefined {
+  if (value === null) return undefined;
+  const time = Number(value);
+  if (!Number.isFinite(time) || time < 0) throw new Error(`Evidence time must be a non-negative finite number, received ${value}.`);
+  return time;
 }
 function frameCountInRange(times: Float32Array, start: number, end: number): number { let count = 0; for (const time of times) if (time >= start && time <= end) count++; return count; }
 function findFrame(times: Float32Array, time: number): number { let index = 0; while (index + 1 < times.length && times[index + 1]! <= time) index++; return index; }

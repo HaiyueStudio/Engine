@@ -7,7 +7,7 @@ import { runChromeWebGpuFixture } from './webgpu-gate/chrome-runner.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const repository = readRepositoryEvidence(root);
-const { models, output, core } = parseArguments(process.argv.slice(2));
+const { models, output, core, evidenceActions, evidenceTimes, skipRecoverySmokes } = parseArguments(process.argv.slice(2));
 if (models.length === 0) throw new Error('Pass at least one licensed runtime directory with --model <directory>.');
 const coreFile = core ? resolve(core) : null;
 if (coreFile && (!existsSync(coreFile) || !statSync(coreFile).isFile())) throw new Error(`Cubism Core path is not a file: ${coreFile}`);
@@ -16,6 +16,13 @@ if (coreFile && !/^live2dcubismcore(?:\.min)?\.js$/iu.test(basename(coreFile))) 
 }
 const corePrefix = '/__licensed_cubism_core';
 const coreUrl = coreFile ? `${corePrefix}/${encodeURIComponent(basename(coreFile))}` : null;
+const officialCoreUrl = 'https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js';
+const coreEvidence = coreFile ? fileEvidence(coreFile) : await remoteFileEvidence(officialCoreUrl);
+const adapterEvidence = createAdapterEvidence(root, [
+  'animation-spec/src/live2d/CubismCaptureConverter.ts',
+  'animation-spec/src/live2d/CubismClipBakedAdapter.ts',
+  'examples/live2d-hya-compare/main.ts',
+]);
 
 const samples = [];
 for (let index = 0; index < models.length; index++) {
@@ -25,6 +32,8 @@ for (let index = 0; index < models.length; index++) {
   const files = listFiles(directory);
   if (!files.some(path => path.toLowerCase().endsWith('.model3.json'))) throw new Error(`Model directory has no .model3.json: ${directory}`);
   const prefix = `/__licensed_live2d_${index}`;
+  const evidenceActionId = evidenceActions.get(modelInput.id);
+  const evidenceTime = evidenceTimes.get(modelInput.id);
   const result = await runChromeWebGpuFixture({
     root,
     fixture: 'examples/live2d-hya-compare/index.html',
@@ -33,9 +42,11 @@ for (let index = 0; index < models.length; index++) {
       // renderers pause and seek to one second before the result is published.
       fixture: 'mask-parity',
       localEvidence: 1,
-      recoverySmoke: 1,
+      ...(!skipRecoverySmokes.has(modelInput.id) ? { recoverySmoke: 1 } : {}),
       localModelMount: prefix,
       localModelFiles: files.join('|'),
+      ...(evidenceActionId ? { evidenceActionId } : {}),
+      ...(evidenceTime === undefined ? {} : { evidenceTime }),
       ...(coreUrl ? { coreUrl } : {}),
     },
     mounts: [
@@ -54,6 +65,8 @@ for (let index = 0; index < models.length; index++) {
     },
   });
   if (result.reference !== 'official-cubism-core') throw new Error(`Model ${directory} did not reach the official Core evaluator.`);
+  if (evidenceActionId && result.selectedActionId !== evidenceActionId) throw new Error(`Model ${directory} selected ${result.selectedActionId}; expected evidence action ${evidenceActionId}.`);
+  if (evidenceTime !== undefined && Math.abs(result.sampledAt - evidenceTime) > 1e-5) throw new Error(`Model ${directory} sampled at ${result.sampledAt}; expected ${evidenceTime}.`);
   assert.deepEqual(result.comparisonConfiguration?.canvas, [719, 746], `Model ${directory} comparison canvas drifted.`);
   assert.equal(result.comparisonBackground, '#050817', `Model ${directory} comparison background drifted.`);
   assert.deepEqual({
@@ -78,7 +91,9 @@ for (let index = 0; index < models.length; index++) {
   const requiresCompositionParity = result.featureCoverage.maskReferenceCount > 0
     || result.featureCoverage.additiveDrawableCount > 0
     || result.featureCoverage.multiplicativeDrawableCount > 0
-    || result.featureCoverage.cullingDrawableCount > 0;
+    || result.featureCoverage.cullingDrawableCount > 0
+    || result.featureObservations.multiplyColor.length > 0
+    || result.featureObservations.screenColor.length > 0;
   if (requiresCompositionParity) {
     // Real models contain much longer antialiased silhouettes than the compact
     // synthetic fixture. Keep a bounded outlier ceiling while mean/ratio remain
@@ -112,6 +127,7 @@ for (let index = 0; index < models.length; index++) {
     },
     conversionDiagnostics: result.conversionDiagnostics,
     featureCoverage: result.featureCoverage,
+    featureObservations: result.featureObservations,
     observedBlendModes: ['normal',
       ...(result.featureCoverage.additiveDrawableCount > 0 ? ['additive'] : []),
       ...(result.featureCoverage.multiplicativeDrawableCount > 0 ? ['multiplicative'] : []),
@@ -147,14 +163,17 @@ const report = {
   core: coreFile ? {
     sourcePolicy: 'caller-supplied-local-official-sdk-only',
     fileName: basename(coreFile),
-    byteLength: statSync(coreFile).size,
-    sha256: createHash('sha256').update(readFileSync(coreFile)).digest('hex'),
+    byteLength: coreEvidence.byteLength,
+    sha256: coreEvidence.sha256,
     transport: 'same-origin-test-mount',
   } : {
     sourcePolicy: 'official-cdn',
-    url: 'https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js',
+    url: officialCoreUrl,
+    byteLength: coreEvidence.byteLength,
+    sha256: coreEvidence.sha256,
     transport: 'network',
   },
+  adapter: adapterEvidence,
   sampleCount: samples.length,
   samples,
   totals: samples.reduce((totals, sample) => ({
@@ -163,7 +182,11 @@ const report = {
     additiveDrawableCount: totals.additiveDrawableCount + sample.featureCoverage.additiveDrawableCount,
     multiplicativeDrawableCount: totals.multiplicativeDrawableCount + sample.featureCoverage.multiplicativeDrawableCount,
     cullingDrawableCount: totals.cullingDrawableCount + sample.featureCoverage.cullingDrawableCount,
-  }), { maskReferenceCount: 0, invertedMaskDrawableCount: 0, additiveDrawableCount: 0, multiplicativeDrawableCount: 0, cullingDrawableCount: 0 }),
+    nonNeutralMultiplyDrawableFrameCount: totals.nonNeutralMultiplyDrawableFrameCount + sample.featureObservations.multiplyColor.length,
+    nonNeutralScreenDrawableFrameCount: totals.nonNeutralScreenDrawableFrameCount + sample.featureObservations.screenColor.length,
+    nondegenerateCullingDrawableFrameCount: totals.nondegenerateCullingDrawableFrameCount + sample.featureObservations.culling.filter(observation => observation.sourceWinding.ccw + observation.sourceWinding.cw > 0).length,
+    mirroredCullingDrawableFrameCount: totals.mirroredCullingDrawableFrameCount + sample.featureObservations.culling.filter(observation => observation.mirrorFlipsWinding).length,
+  }), { maskReferenceCount: 0, invertedMaskDrawableCount: 0, additiveDrawableCount: 0, multiplicativeDrawableCount: 0, cullingDrawableCount: 0, nonNeutralMultiplyDrawableFrameCount: 0, nonNeutralScreenDrawableFrameCount: 0, nondegenerateCullingDrawableFrameCount: 0, mirroredCullingDrawableFrameCount: 0 }),
 };
 const json = `${JSON.stringify(report, null, 2)}\n`;
 if (output) writeFileSync(resolve(output), json);
@@ -178,15 +201,33 @@ function readRepositoryEvidence(repositoryRoot) {
 }
 
 function parseArguments(args) {
-  const parsed = { models: [], output: null, core: null };
+  const parsed = { models: [], output: null, core: null, evidenceActions: new Map(), evidenceTimes: new Map(), skipRecoverySmokes: new Set() };
   for (let index = 0; index < args.length; index++) {
     const argument = args[index];
     if (argument === '--model') parsed.models.push(parseModelInput(requireValue(args, ++index, '--model')));
     else if (argument === '--out') parsed.output = requireValue(args, ++index, '--out');
     else if (argument === '--core') parsed.core = requireValue(args, ++index, '--core');
+    else if (argument === '--evidence-action') setModelOption(parsed.evidenceActions, requireValue(args, ++index, '--evidence-action'), '--evidence-action', value => value);
+    else if (argument === '--evidence-time') setModelOption(parsed.evidenceTimes, requireValue(args, ++index, '--evidence-time'), '--evidence-time', value => {
+      const time = Number(value);
+      if (!Number.isFinite(time) || time < 0) throw new Error(`--evidence-time requires a non-negative finite time, received ${value}.`);
+      return time;
+    });
+    else if (argument === '--skip-recovery-smoke') parsed.skipRecoverySmokes.add(requireValue(args, ++index, '--skip-recovery-smoke'));
     else throw new Error(`Unknown argument ${argument}.`);
   }
+  const modelIds = new Set(parsed.models.map(model => model.id).filter(Boolean));
+  for (const id of [...parsed.evidenceActions.keys(), ...parsed.evidenceTimes.keys(), ...parsed.skipRecoverySmokes]) if (!modelIds.has(id)) throw new Error(`Evidence option references unknown or unnamed model id ${id}.`);
   return parsed;
+}
+
+function setModelOption(target, input, option, convert) {
+  const separator = input.indexOf('=');
+  if (separator < 1 || separator === input.length - 1) throw new Error(`${option} requires <model-id>=<value>.`);
+  const id = input.slice(0, separator);
+  if (!/^[a-z0-9][a-z0-9-]*$/u.test(id)) throw new Error(`${option} model id is invalid: ${id}.`);
+  if (target.has(id)) throw new Error(`${option} repeats model id ${id}.`);
+  target.set(id, convert(input.slice(separator + 1)));
 }
 
 function parseModelInput(value) {
@@ -223,6 +264,26 @@ function directoryHash(directory, files) {
     hash.update(path).update('\0').update(String(bytes.byteLength)).update('\0').update(bytes);
   }
   return `sha256-${hash.digest('hex')}`;
+}
+
+function fileEvidence(path) {
+  const bytes = readFileSync(path);
+  return Object.freeze({ byteLength: bytes.byteLength, sha256: createHash('sha256').update(bytes).digest('hex') });
+}
+
+async function remoteFileEvidence(url) {
+  const response = await fetch(url, { cache: 'no-store' });
+  if (!response.ok) throw new Error(`Cubism Core request failed with HTTP ${response.status}.`);
+  const bytes = Buffer.from(await response.arrayBuffer());
+  return Object.freeze({ byteLength: bytes.byteLength, sha256: createHash('sha256').update(bytes).digest('hex') });
+}
+
+function createAdapterEvidence(repositoryRoot, paths) {
+  const files = paths.map(path => ({ path, ...fileEvidence(resolve(repositoryRoot, path)) }));
+  const aggregateSha256 = createHash('sha256')
+    .update(files.map(file => `${file.path}\0${file.byteLength}\0${file.sha256}\n`).join(''))
+    .digest('hex');
+  return Object.freeze({ package: '@haiyue/animation-spec@0.1.0', aggregateSha256, files: Object.freeze(files) });
 }
 
 function summarizeSurfaceReadback(value) {

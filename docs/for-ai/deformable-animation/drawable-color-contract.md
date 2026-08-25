@@ -1,6 +1,6 @@
 # Deformable drawable color contract
 
-状态：HYDM 1.2 contract/conversion + WebGPU runtime accepted candidate（M05 G13/G15）
+状态：HYDM 1.2 contract/conversion + WebGPU runtime + licensed corpus accepted candidate（M05 G13/G15/G16）
 
 ## 语义
 
@@ -45,6 +45,8 @@ Setup-mask pass 跳过第 2/3 步并只由纹理 alpha 生成 coverage；非中�
 - CPU oracle、generated-shader `rgba8unorm` readback 覆盖 neutral、multiply、screen、组合、透明边缘、opacity、普通/反相/多 source mask、三种 blend、culling、动作切换、resize 和 device recovery；最大误差为 1/255。
 - MIT paired fixture 在相同 texture bytes、time、viewport、背景、预乘和 color configuration 下比较 WebGPU HYA 与冻结 WebGL reference：4 个 multiply 与 4 个 screen drawable，最大误差 2/255、mean absolute error 0.011979、mismatch ratio 0。
 
-## G16 handoff
+## G16 corpus acceptance
 
-G15 不晋升真实 corpus。G16 必须找到许可明确且实际观察到 non-neutral multiply/screen 的模型，用同一公式和 gate 重放；synthetic paired fixture 只能证明实现 candidate，不能替代真实 feature coverage。
+- 官方 Mao runtime hash `sha256-1add506b…dec5bc9` 在 `Idle:0 / 1s` 实测 54 个 non-neutral multiply drawable-frame 和 38 个 non-neutral screen drawable-frame；代表值分别是 `ArtMesh82=[0.980392,1,0.427451,1]`、`ArtMesh194=[1,0.454902,0.513726,1]`。
+- 同一资源、pose/time、viewport、fit、背景、alpha 和 texture/color 配置下，官方 Core/HYA surface readback 的 max channel error `180`、mean absolute error `0.346908`、mismatch ratio `0.013038`，均通过冻结阈值；device recovery 通过且 `unclassifiedFailureCount=0`。
+- 机器可验证 recipe、许可、文件 hash、逐 drawable path 与颜色 observation 位于 G16 manifest/candidate。原始 Mao 模型、纹理、Core 和 pixel reference 不分发，正式 baseline 仍由 G09 人工批准。

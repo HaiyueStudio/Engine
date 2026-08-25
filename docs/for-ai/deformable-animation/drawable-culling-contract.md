@@ -23,9 +23,10 @@
 - 未知 visual culling 抛出 `E_ANIMATION_2D_CULLING_INVALID`；pipeline 创建失败包装为 `E_ANIMATION_2D_PIPELINE_CREATION_FAILED`，并携带 `$runtime.animation2D.pipeline` 与完整 pipeline key。
 - Shared GPU owner 销毁/device replacement 会清空 pipeline map；runtime destroy/abort 继续幂等释放 data、texture 与 mask clones。
 
-## 验证与 G15 handoff
+## 验证与 G16 corpus acceptance
 
 - `extensions/test/deformable-culling.test.mjs`：CPU winding oracle、两态 key、非法值、pipeline error、main/mask clone、seek/loop 与 destroy 生命周期。
 - `scripts/verify-deformable-culling.mjs`：真实 Chrome/D3D11 WebGPU texture readback，覆盖 CW/CCW、culling on/off、单/双轴反射、normal/additive/multiplicative、main/mask、多 view、resize、有限 cache 与新 device recovery。
-- `review/candidates/live2d-culling-rice-candidate.json`：caller-supplied Rice runtime hash `sha256-082dea…eedc1` 观察到 9 个 `culling=true` drawables；官方 Core/HYA 在 1 秒同帧重放无 conversion warning，mean absolute error `0.378991`、mismatch ratio `0.015365`，并通过 recovery smoke。该 dirty-revision candidate 不是正式 baseline，G16 负责正式晋升。
-- G15 可以在此静态 pipeline 维度上增加 drawable-color uniform/shader，不得改变 `culling` ABI、front-face、mask source 传播或 pipeline key 的 culling 部分。
+- 早期 `review/candidates/live2d-culling-rice-candidate.json` 只证明 Rice 有 9 个 `culling=true` drawables；其 1 秒 pose 全部退化，因此不能单独证明正反面裁剪。
+- G16 在相同 Rice runtime hash `sha256-082dea…eedc1` 上固定 `Tap@Body:0 / 0.75s`：9 个 culling drawable 都有非退化三角形并在水平镜像后翻转绕序。代表 `ArtMesh161` 为 source `23 CCW / 0 CW / 0 degenerate`，mirror `0 CCW / 23 CW / 0 degenerate`。
+- 同配置官方 Core/HYA surface readback 的 max channel error `179`、mean absolute error `0.303789`、mismatch ratio `0.012517`；recovery 通过且无未分类失败。机器可验证 recipe、许可、文件 hash、逐 drawable path/winding 位于 G16 manifest/candidate，正式 baseline 仍由 G09 批准。

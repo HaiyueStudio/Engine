@@ -2,7 +2,7 @@
 
 This dashboard is the license-safe Live2D counterpart to `hya-lottie-corpus-dashboard`.
 It renders the checked-in HaiYue-owned MIT drawable-capture fixture through the
-source-neutral HYA + HYDM runtime. Its capability table consumes the G12
+source-neutral HYA + HYDM runtime. Its capability table consumes the G16
 validator-generated `samples/feature-status.json` and keeps implementation
 status separate from licensed-corpus coverage.
 
@@ -17,13 +17,17 @@ Replay the licensed feature candidate after building the comparison example:
 
 ```bash
 node scripts/verify-live2d-local-corpus.mjs \
-  --model rice-glassfield-pro=<rice-runtime-directory> \
   --model niziiro-mao=<mao-runtime-directory> \
-  --out review/candidates/live2d-local-corpus-candidate.json
-node scripts/verify-live2d-feature-corpus.mjs \
-  --manifest animation-spec/corpus/deformable2d/feature-corpus-manifest.json \
-  --report review/candidates/live2d-local-corpus-candidate.json \
-  --out review/candidates/live2d-mask-blend-corpus-candidate.json \
+  --evidence-action niziiro-mao=Idle:0 \
+  --evidence-time niziiro-mao=1 \
+  --model rice-glassfield-pro=<rice-runtime-directory> \
+  --evidence-action rice-glassfield-pro=Tap%40Body:0 \
+  --evidence-time rice-glassfield-pro=0.75 \
+  --out review/candidates/live2d-drawable-color-culling-local-report.json
+node scripts/verify-live2d-drawable-fidelity-corpus.mjs \
+  --manifest animation-spec/corpus/deformable2d/drawable-color-culling-corpus-manifest.json \
+  --report review/candidates/live2d-drawable-color-culling-local-report.json \
+  --out review/candidates/live2d-drawable-color-culling-corpus-candidate.json \
   --dashboard-out examples/hya-live2d-corpus-dashboard/samples/feature-status.json
 ```
 

@@ -1,0 +1,4300 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-deformable2d-g07-fidelity-performance-candidate",
+  "goal": "M05-G07",
+  "formalEvidence": false,
+  "revision": "5836c9828bc00187ca1e77a159b7cf55000de3f2",
+  "dirty": false,
+  "manifest": {
+    "id": "m05-g07-fidelity-performance-corpus",
+    "sha256": "83f664700477356db2b33107eb939a590f9d12c62ee23f5b24b5ef8f1cc181f1"
+  },
+  "oracle": {
+    "coreVersion": 83951616,
+    "coreByteLength": 207155,
+    "coreSha256": "25ae938cb4fe282ce189b357bcc97e603d1e1f7ec78bf04150d401c23cdc792f",
+    "captureFormat": "live2d-cubism-drawable-capture@1",
+    "evaluatorCapabilities": {
+      "motion": true,
+      "expression": false,
+      "physics": false,
+      "pose": false,
+      "diagnosticCode": "E_CUBISM_RECIPE_CAPABILITY_MISSING"
+    }
+  },
+  "environment": {
+    "node": "v24.19.0",
+    "platform": "win32",
+    "arch": "x64",
+    "browser": {
+      "product": "Chrome/151.0.7922.170",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "url": "http://127.0.0.1:61530/playback.html?",
+      "angleBackend": "d3d11",
+      "nativeBackend": true
+    }
+  },
+  "methodology": {
+    "workload": "full",
+    "captureFrameRate": 12,
+    "sampling": {
+      "tolerance": 0.01,
+      "quantizationStep": 0.0009765625,
+      "maxDepth": 10,
+      "evaluationConcurrency": 4
+    },
+    "structuralTolerance": {
+      "maxPositionOpacityColorError": 0.011,
+      "renderOrderMismatchCount": 0
+    },
+    "referenceConfiguration": {
+      "referenceTimes": [
+        1
+      ],
+      "viewport": [
+        719,
+        694
+      ],
+      "canvas": [
+        719,
+        746
+      ],
+      "clearColor": "#050817",
+      "targetFormat": "rgba8unorm",
+      "textureColorSpaceConversion": "none",
+      "textureAlphaMode": "premultiplied",
+      "webglAntialias": false,
+      "viewportMode": "fit",
+      "fitPolicy": "bounds-centered-auto-zoom",
+      "fitFill": 0.82,
+      "userZoom": 1,
+      "pan": [
+        0,
+        0
+      ],
+      "synchronizedViews": true,
+      "pixelThresholds": {
+        "maxChannelError": 224,
+        "meanAbsoluteError": 1,
+        "mismatchRatio": 0.025
+      },
+      "silhouetteSpatialTolerancePixels": 1
+    },
+    "compression": "gzip-9-per-file",
+    "cachePolicy": "cache-disabled-cold-load-followed-by-one-warm-steady-run",
+    "runtimeFrames": 120,
+    "runtimeIncludes": [
+      "HYA",
+      "HYDM",
+      "textures",
+      "HaiYue neutral playback bundle"
+    ],
+    "runtimeExcludes": [
+      "Cubism Core",
+      "Cubism Framework",
+      "model3",
+      "moc3",
+      "motion3",
+      "exp3",
+      "physics3",
+      "pose3"
+    ],
+    "converterCostReportedSeparately": true,
+    "absoluteMillisecondsRole": "cross-host-diagnostic"
+  },
+  "samples": [
+    {
+      "id": "hatsune-miku-free",
+      "title": "Hatsune Miku FREE",
+      "source": {
+        "runtimeDirectoryHash": "sha256-0258e3f65e7e3aaf9b4da9912d186b2a5959e221017aed58f2440932793335e2",
+        "fileCount": 13,
+        "rawBytes": 4519848,
+        "gzipBytes": 4310750
+      },
+      "recipe": {
+        "motionId": "Idle:0",
+        "motionFile": "motions/miku_idle.motion3.json",
+        "duration": 5.433,
+        "expression": null,
+        "physics": false,
+        "pose": false,
+        "referenceTimes": [
+          1
+        ]
+      },
+      "featureCoverage": {
+        "drawableCount": 88,
+        "textureCount": 1,
+        "maskReferenceCount": 0,
+        "invertedMaskDrawableCount": 0,
+        "additiveDrawableCount": 0,
+        "multiplicativeDrawableCount": 0,
+        "cullingDrawableCount": 0,
+        "dynamicRenderOrderDrawableCount": 28,
+        "nonNeutralMultiplyDrawableFrameCount": 0,
+        "nonNeutralScreenDrawableFrameCount": 0
+      },
+      "diagnostics": [],
+      "conversion": {
+        "converterMs": 438.2983000000004,
+        "bakedFrameCount": 133,
+        "evaluationCount": 133,
+        "sampling": {
+          "tolerance": 0.01,
+          "quantizationStep": 0.0009765625,
+          "maxDepth": 10,
+          "frameCount": 133,
+          "dirtyChannelCount": 9152
+        },
+        "nodeParse": {
+          "iterations": 30,
+          "p50Ms": 0.04980000000068685,
+          "p95Ms": 0.13229999999930442
+        }
+      },
+      "structuralFidelity": {
+        "denseFrameCount": 67,
+        "drawableCount": 88,
+        "maxError": 0.00048828125,
+        "renderOrderMismatchCount": 0,
+        "tolerance": {
+          "maxPositionOpacityColorError": 0.011,
+          "renderOrderMismatchCount": 0
+        }
+      },
+      "pixelFidelity": {
+        "reference": "official-cubism-core-same-version",
+        "sampledAt": 1,
+        "comparisonConfiguration": {
+          "viewportMode": "fit",
+          "fitPolicy": "bounds-centered-auto-zoom",
+          "fitFill": 0.82,
+          "userZoom": 1,
+          "pan": [
+            0,
+            0
+          ],
+          "resolvedZoom": 0.82983504248871,
+          "synchronizedViews": true,
+          "canvas": [
+            719,
+            746
+          ],
+          "targetFormat": "rgba8unorm",
+          "textureColorSpaceConversion": "none",
+          "alphaMode": "premultiplied",
+          "antialias": false
+        },
+        "surfaceReadback": {
+          "width": 719,
+          "height": 694,
+          "maxChannelError": 161,
+          "meanAbsoluteError": 0.934519,
+          "mismatchPixelCount": 18800,
+          "mismatchRatio": 0.037676,
+          "onePixelSpatialTolerance": {
+            "maxChannelError": 140,
+            "meanAbsoluteError": 0.428385,
+            "mismatchPixelCount": 20107,
+            "mismatchRatio": 0.020148
+          },
+          "stableInterior": {
+            "pixelCount": 437266,
+            "coverageRatio": 0.876309,
+            "maxChannelError": 13,
+            "meanAbsoluteError": 0.033226,
+            "mismatchPixelCount": 5,
+            "mismatchRatio": 0.000011
+          }
+        },
+        "acceptedReadback": {
+          "maxChannelError": 140,
+          "meanAbsoluteError": 0.428385,
+          "mismatchPixelCount": 20107,
+          "mismatchRatio": 0.020148
+        },
+        "spatialTolerancePixels": 1
+      },
+      "package": {
+        "rawBytes": 6676407,
+        "gzipBytes": 4842638,
+        "fileCount": 3
+      },
+      "runtime": {
+        "status": "passed",
+        "network": {
+          "totalBytes": 10027636,
+          "packageRawBytes": 6676407,
+          "requestCount": 106,
+          "uniqueFileCount": 106,
+          "files": [
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/binary-BaiwDHsx.js",
+              "byteLength": 72545,
+              "sha256": "bbd4ed98f9f8c2efdf413fcc5a77108dfdd42cad5e4bd13f1596fb38dffc63c6",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/codec-CCkQOBim.js",
+              "byteLength": 15405,
+              "sha256": "be348d69c2e43037fcddcc51f0671f0316506f7eeff78addf9ed91193d6347f5",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/errors-Bzs3GOD9.js",
+              "byteLength": 188,
+              "sha256": "3999a050e897dfbad8990bc9d8a124a6f2064932ad60cb1e2037e69c1ef34b96",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/extensions-DxL4AxOC.js",
+              "byteLength": 806,
+              "sha256": "78d5f45439b718ed4531b4e80033ad63027c36f40258d74e50f98f77e7ecd4d9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/types-DW9eOlMG.js",
+              "byteLength": 192,
+              "sha256": "3409f3470061fcdf0fcdb2e4e493d2aec9e205212fbfffef7a38aeffa13bcb3f",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/deformable2d.js",
+              "byteLength": 1214,
+              "sha256": "618ccbd9b130466ce31cdecb4952c4b61e5d0c59262b7ebf59fc7874da5b88fc",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/index.js",
+              "byteLength": 1458,
+              "sha256": "525c1f5e5ed0f559ac4c44f7e4402edb8eb7188548cf3b122930060fa1273c5c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/align-BPmoUMBR.js",
+              "byteLength": 312,
+              "sha256": "f7c6c62e415ac0695d81277ef4e46e0bd536686be4117f4491ee2b286b89e250",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+              "byteLength": 1568,
+              "sha256": "843e370458d25854f17210a6ac95b3afec64529e8aa689f01d7fb3ff0ebb3f43",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/AssetParser-BT55VvTe.js",
+              "byteLength": 2904,
+              "sha256": "3a1c7d9def1cae0ebd0ec074834726fc034ea4024695b59807d96a0279f9aefd",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/assets-ijdP7ezJ.js",
+              "byteLength": 38096,
+              "sha256": "c84ad813bf2124fd9b3b666b5b10fc2e35a344284be2542384ad27c58a498d1a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/AssetUploadScheduler-v9a8vCxA.js",
+              "byteLength": 10113,
+              "sha256": "a7f297c309ffe7063784b41815c72b64a460d1489eae5269de2db2ce05520aa0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BaseRenderer-BPEPEE9n.js",
+              "byteLength": 8605,
+              "sha256": "982c8cc28cdda14c52a6ad5f0345ec9e165c0c2bbf97cfe1ab661177dbdf731b",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BasicMaterial-DQyhoOri.js",
+              "byteLength": 4629,
+              "sha256": "5f0acb868decfbe01ee6ef933d9bbb447f5f8679a4c1fa49065bf5ba45a5da2d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BitmapFontBuilder-C06uZ7Uf.js",
+              "byteLength": 3522,
+              "sha256": "4446503543bc869ac9392ac48967bf844aeb29348c5ebc94b8e3d7802c1e169c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BitmapText-BR-jsEuP.js",
+              "byteLength": 1378,
+              "sha256": "0d5a55db31b7a69335a58352ac6d88d5369e10e056f274b714a6cb4ba530ac77",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BuiltinRenderShader-4o-Hd2hR.js",
+              "byteLength": 953,
+              "sha256": "225c97c51ea114788b2b0412cbbb5a11062f66187659def32f8a9fcbef267ec0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BuiltinSpecializedRenderingShader-CWsuNVNG.js",
+              "byteLength": 802,
+              "sha256": "a8b7acc667696c6e22059f2dc547a15eae7a0be8befe70993cd0ee66e018ea06",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BvhLod3D-CrDMn2hg.js",
+              "byteLength": 5947,
+              "sha256": "3d93767f54b45f88fba199714168dfb05fd73401d0dc8c3a6cfe140285e3873c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Camera3D-V7M71MBL.js",
+              "byteLength": 7545,
+              "sha256": "c6052f2ab1568225016bb13ce3e2b2f6a6cafd777101d40432df5981090853a5",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/CartesianTransform3D-D8am4JDK.js",
+              "byteLength": 6067,
+              "sha256": "babd0ceb30beb2b8d67f27e6d9b36f5854154e3ebf2e563030c90cd7c0931e54",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ClippingPlanes-CMq5GScg.js",
+              "byteLength": 4625,
+              "sha256": "e7ab5ded624eee06c2324a1e980bf38121dbb85e7bf14c7f5c9e3fc24748e7a9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ColorSRGB-DkovSzkA.js",
+              "byteLength": 4365,
+              "sha256": "c6102958a7e65d5e0c0aa80af9ebfc953d08199814088fa04b990790f2c01000",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Component-Du0fittL.js",
+              "byteLength": 5010,
+              "sha256": "685f63bc79b39ad0d3913d99d52d5cb2dabcc00b0ff716e39fe433923f53af33",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/constants-Do1J_v-k.js",
+              "byteLength": 188,
+              "sha256": "bbeb0c6e0d36fe3f6cc271cbeb5a997b08a922c9dadf0a54fbde908ede75d848",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/CssMaterial-B5KTUx2i.js",
+              "byteLength": 11613,
+              "sha256": "1442de959ff4ab3f76f46b12f3c0f106702bc692586c1f64e1235f74394d0ea1",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Engine-DLT2SbI_.js",
+              "byteLength": 56911,
+              "sha256": "7bdc79a7c97a5a1892ec54175f43b3f4a7407e0bf4e50067506c3e8eb4003821",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/EngineDiagnosticsAccess-SXWvpo8N.js",
+              "byteLength": 785,
+              "sha256": "83ef06a54945d6f5801917bbef2dd210786a075a89f2e020c9afe162de8e9ff9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+              "byteLength": 10324,
+              "sha256": "320dbdc121cdf5fcf2b540235114047757bc5f4d2f5af142b6775b778c499cc9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Entity-D-_UAiw1.js",
+              "byteLength": 24569,
+              "sha256": "4d9bfea1c61042d887deb748e5ecb2857059e786fe70222b6fb5da2c26afa8d0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Frustum-BAnnJrL_.js",
+              "byteLength": 11397,
+              "sha256": "425828a59f979c61fabdacca0c4a28358f989e5a06f271a99407518e1343db79",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Geometry2D-D7SVMQoB.js",
+              "byteLength": 3341,
+              "sha256": "6e53d9db99363a44c421a9c4db42d46ba9b7a03becfa2f44b357565d5114eced",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Global-Ny7k6KJK.js",
+              "byteLength": 1074,
+              "sha256": "cb9476d924e852917be05bd4ca28900c0f3c3ed1d3409b31a08806646da448e4",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "byteLength": 25387,
+              "sha256": "84a037a8d103a39c7e8ef6adf1a3000a26b5bd9ebce9f98e4234097d04bd2e5a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/GuiSystem-D-uLKmPT.js",
+              "byteLength": 127189,
+              "sha256": "5d9216386689600fdfb4e018d15feace7eeeac1e34f62b3f7336f59910710a75",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/hierarchy-CZkgLn-Q.js",
+              "byteLength": 1012,
+              "sha256": "9873bcd2267676559b2434745666376ee688e66646061373fec307fd486f5dd3",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/IEngine-BWIJHt_0.js",
+              "byteLength": 925,
+              "sha256": "6248980d2d17d2f337c1a2ca0e1d0561e6918c95b6a997ad3500729a895577ff",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ImageTextureUpload-COYtgW6A.js",
+              "byteLength": 5577,
+              "sha256": "f6e5194c0687164a989870e0e132d1234b1192dbd974d416f75152b46e610e6b",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Ktx2TextureLoader-BEb-GLxa.js",
+              "byteLength": 296135,
+              "sha256": "f6cbedcba2390e864bd793096a16823a667e23c0fa0417509ba01353f39f171d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Line3D-BYKGrwU7.js",
+              "byteLength": 4071,
+              "sha256": "08cf0bab942eecce7da83274476814a5dcd7c29428716d86afeda7cfdd05e68a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Material2D-bYP1LiBS.js",
+              "byteLength": 1103,
+              "sha256": "b3000c6260f10f3412fae6140356a9bc0632d71ba40895111c9e3b0f5625e9aa",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/MaterialRegistryBase-DngXOQhW.js",
+              "byteLength": 3422,
+              "sha256": "a23e68cc20442811427ddd0c4a0326381ea265675090e4ba0db2271b834725b0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/MaterialRendererRegistry-DxB-MXl6.js",
+              "byteLength": 40283,
+              "sha256": "7186d7e003ae33278de99b92a2c553469a4ed53079f0e5cc17368d3da5319d13",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/materialValidation-Cz4AbnBy.js",
+              "byteLength": 22831,
+              "sha256": "0ef64ca912261373994d03d6d430e06fca154c3d4c5b5c05284918021d1ac82d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Mesh2D-DfykuQgt.js",
+              "byteLength": 9330,
+              "sha256": "114b9a8b3622cf1265ad7f99f0e6c481df57ca747d0cfaa085ce911686ed98b4",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Mesh2DRenderer-CnDAaPW-.js",
+              "byteLength": 18658,
+              "sha256": "30b865ba63ae1dc864566c4e35b668fc5822fc1900d146b6691e230737c8baee",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Mesh2DRenderSystem-C5xg9j1-.js",
+              "byteLength": 6420,
+              "sha256": "232ac943c4e5053e4e6d97cf1acb6c629ff9d62c50b84573098a3ed2fa540f49",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Mesh3D-B9Ev34fG.js",
+              "byteLength": 2399,
+              "sha256": "097b6fae01fd1323d40d18d7ec6529c6f8bc20afeb1ce387825ccc0ed64a6303",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/MeshHelper-BUZ7aJWK.js",
+              "byteLength": 10455,
+              "sha256": "22654fac2e8f95418260fb1639de578ee07a899b0242d478a03c8a3a05567c82",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/OrbitControl-dZCAmOUY.js",
+              "byteLength": 8928,
+              "sha256": "2c9373004898c6a449268ad65be0b6d87726302852a43f6b02468fef89cf6ad9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ParticleEmitter3D-qTvZwiEl.js",
+              "byteLength": 31711,
+              "sha256": "b6c8804918e3b88270889652e6a43b5265a432abca21bcd41a9c2b55774f700e",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Physics2DTo3DTransformSync-DJYQr2KX.js",
+              "byteLength": 1554,
+              "sha256": "cce72238a0eb8b190a17f156c56d938cc264ec6ec6221bbd9996cad86b260c90",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PipelineWarmup-DqYBVQLM.js",
+              "byteLength": 15759,
+              "sha256": "1ffe77cf140aff41712079138bcd63885fb9af57681be5ff4544dfd0b16c0298",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PlanarMirrorMaterial-BA2aOBJa.js",
+              "byteLength": 2560,
+              "sha256": "3057be12fd0da262a36c9f8365d7be880a3b0965b19480f79469bf70e1481472",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PlaneGeometry-BYjs1rC7.js",
+              "byteLength": 5583,
+              "sha256": "aa45cfef25ef07994bd9a37bb55038c899fea1b2762c71c1045a171742506d53",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PointLight-CPweOrQl.js",
+              "byteLength": 11443,
+              "sha256": "5fc9129dc7a6e2d8c21114dc850e6762e9a8ad8430a86c67a6639ed921277197",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PostProcessSceneTextureStore-C6AZrc-u.js",
+              "byteLength": 18787,
+              "sha256": "d887c35d2424309333abce772aee154f2e271a3ae734e4d24d41dde47dddd4d1",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Render3DSystem-BLLDyXkH.js",
+              "byteLength": 344046,
+              "sha256": "7ca49f2a76173c9baafd4bc3e265382dea07c6b2ab746c1f872f718865904c67",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/RenderCommandContext-DKkw5eBA.js",
+              "byteLength": 32540,
+              "sha256": "3d43be0e2bbb0fe073d89c9369b7ce8ef046c6f14479bc9c66d91e468228f09c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/RendererCacheMap-C3xi123s.js",
+              "byteLength": 30521,
+              "sha256": "9cc5fbd9c86094c864e09a4b0af6eff278a1f90039acde5cd33897d74865f692",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/RttEngine-DLvXxLbn.js",
+              "byteLength": 8621,
+              "sha256": "6b77cd05ca1f31145a4407c4f044557079aad5aa940e118c21a45a2a95009d32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Scene-B67DqOUp.js",
+              "byteLength": 39949,
+              "sha256": "764129ee723d9f7ebd7506d40aa9383f70785cc12fedc720dcc70c0227d7196f",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ScriptComponent-BTvBkGqy.js",
+              "byteLength": 34762,
+              "sha256": "add90caa9a0173491cd1e22fd6e809fdf497eb65dcfaca202051831a01dee135",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ScriptResource-CZbhMvn8.js",
+              "byteLength": 8077,
+              "sha256": "bcb03b2a1a9e92f886ee74864d6b72e285357288ace803fb053bd6d7fdb69024",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Sky-CMwO4Q6R.js",
+              "byteLength": 2654,
+              "sha256": "1e287ffd6f0b7bea685af2dbb3f807b85272a9a1a4511d38bf67e3a409bf61da",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/SpatialIndexService-CY805Aih.js",
+              "byteLength": 56693,
+              "sha256": "4c685a41cb8b870282867a6dcd5de4f925c14d10416b5aa5e259615a00a6c8a8",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/SphericalTransform3D-DpXtwAeG.js",
+              "byteLength": 5687,
+              "sha256": "5563706701c966dd7d7e4f755914e06d7c1c8383cd890506eba771ab903e5be0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/SVGGeometry2D-PkBLpLEw.js",
+              "byteLength": 121456,
+              "sha256": "1e41cea9d729c951d2d98dafbe00e4b215b135942c6b29d20c64cf3590c5af8e",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/System-CIIb_ci6.js",
+              "byteLength": 3406,
+              "sha256": "84f2bcb7f7b93635bdf95ec307bcc41953268deefbff368da1a57892331af27c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Transform2D-BQcy9yW6.js",
+              "byteLength": 5218,
+              "sha256": "98b0fd783baf9f5545ed2224990915d2057a4580a5b7df5bb0ab5a222d060d30",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Transform3D-ClwzR-VK.js",
+              "byteLength": 4432,
+              "sha256": "e422baa0b4c244895e54867d56a07e820f183cdb2f0c82562b7189290a8ffbf9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/TransparentMegaBatch-NjW-cBZK.js",
+              "byteLength": 324399,
+              "sha256": "af0c52c752eba32655ef5ad0bd71b460f806091876fb9ff0e087d14b0dea755a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/VolumeMaterial-D17RCtMZ.js",
+              "byteLength": 6685,
+              "sha256": "3d7fa1d916bc4d054230333065b0929b5a503c9f9d4b82c87c13a9c0e71f5284",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/World-NSjwM1ON.js",
+              "byteLength": 59239,
+              "sha256": "b8dd487d854eb913c7bac3361358b43c8d842d8984b1814d0305bb96dfa1a4e7",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/WorldResourceCleanup-CSTul4-x.js",
+              "byteLength": 892,
+              "sha256": "d22ecd6960a36ab7707a70bb5999c7c87123688c0787e301cffaa72f50607f48",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/color.js",
+              "byteLength": 8426,
+              "sha256": "332d043fe4bad5a9de29162bbd977be746dd8ebdc57b12d253858928d550dd22",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/components.js",
+              "byteLength": 2394,
+              "sha256": "16f075bcdac3a5961d67c8e7d3f0c07de65cdc2d02de3d94c303bb6fdbaf7d58",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/diagnostics.js",
+              "byteLength": 2016,
+              "sha256": "4584d6d67b97235f40b72c4ef30b63d3a13b55d174ab452fa5cfb14677e2eef8",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/ecs.js",
+              "byteLength": 795,
+              "sha256": "2c4329e5a75fa2b7dc607804d8fe34265140376b25b95db542a909943bb256e7",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/experimental/diagnostics.js",
+              "byteLength": 4502,
+              "sha256": "371e96e91d7bb2428e7bf706a9f391b857a331365e4131c1fa0ef2eabc8ab9e1",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/experimental/renderer.js",
+              "byteLength": 31218,
+              "sha256": "8b637ee3c57b8b087e07c76d4451e12441fe10a8c778df369d1a65749435f579",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/extension-authoring.js",
+              "byteLength": 1261,
+              "sha256": "15759fd56cd90edf4f93b5c4fc5d13960f513aaca8de316ceb70ee91b931b424",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/geometry.js",
+              "byteLength": 78080,
+              "sha256": "2c51847470b4a8b615ae561250acaf8265831114e80137c6080ccc03a3aae7e7",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/index.js",
+              "byteLength": 3937,
+              "sha256": "60509beda9643e30735426e86af3a95c3ed09cf1b919f0fa88b8f46bef0d53dc",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/input.js",
+              "byteLength": 3818,
+              "sha256": "fe114fc7ac9e07841d8f7ca830160df4b0ab620a256463a7099bed70544f5781",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/2d-ui-shader-artifact.js",
+              "byteLength": 53787,
+              "sha256": "d9719d72ec89cce1029e843de072884453b52f993a46d6474ec463b4b3569894",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/compute-shader-artifact.js",
+              "byteLength": 33400,
+              "sha256": "477d0cfce36f516f486551f3f2fd0a51b48b4668e49d25d34c96ca89f95fe4b5",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/deformation-shader-artifact.js",
+              "byteLength": 138109,
+              "sha256": "80d0703c77972fcce91f36e78d50d92ca12e95650c8d7cfbbfd2280e57c323af",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/material-lighting-shader-artifact.js",
+              "byteLength": 205125,
+              "sha256": "31b767d173b3a8bc9581d136774a70b167d8a383fbda098de884de981b640d20",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/postprocess-shader-artifact.js",
+              "byteLength": 60064,
+              "sha256": "5cbc27d937c15a07caa1bc94c6884e79f358360a8dc1c0e062bdd222d8296ff8",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/precompiled-shader-runtime.js",
+              "byteLength": 9197,
+              "sha256": "10419c3b3ddadf276d8fbd7debccfdaa86300d37c02a60a5025fc13cde9f81d3",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/simple3d-shader-artifact.js",
+              "byteLength": 43650,
+              "sha256": "25bd7ab5c123970c449efd1b5c387e943c2b9d13bc17f7bf7a4561c46390e439",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/specialized-rendering-shader-artifact.js",
+              "byteLength": 76467,
+              "sha256": "1ef1314961b54cefb4828286a62908c966880aa73cd2432327fb0af298259cd5",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/animation.js",
+              "byteLength": 57934,
+              "sha256": "bdbd48245ac56c0de871b62efb97237274ca18ada8bf24a657d4891f5c9412a2",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/2d-ui-animation-2d.generated-6HyEQbuq.js",
+              "byteLength": 13588,
+              "sha256": "b3cf9d0326b4b3c4daa7cc36700139be336e8a51014e324cc75c53f0871fcdf0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/Animation2DStateMachine-DvRpvrZ0.js",
+              "byteLength": 139046,
+              "sha256": "637f12b16110e4b99f803ad110d8db4d66658173596d5d1e4ac4e5c25a03d815",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/AnimationStateMachineController-4sKaqh9E.js",
+              "byteLength": 61628,
+              "sha256": "285b7b33a3b46e2ceccd32924e42d7525ef1a6c69134c17513082a3c225a2838",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/AnimationVisual2D-8y3qp0_U.js",
+              "byteLength": 8935,
+              "sha256": "3c79905b94a2eade0e1582e0e7e670e6fb4eafdbcabfa74b6ddfb2e73387caa2",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/RenderSystem2DBase-DDT61dAu.js",
+              "byteLength": 8981,
+              "sha256": "9f37ff0b375f9b1bc1db3f04eca641fdc67f26b42afded6a00140e2755ed455d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/deformable-animation.js",
+              "byteLength": 15608,
+              "sha256": "aeb27981bf50797972f0145ae55667f831a50102b33e3f423023d9a67298097d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js",
+              "byteLength": 199533,
+              "sha256": "32cdefcfe7b340710c242b0982316d5af501bb81ccdc3744f57bd0b2acd4e400",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "deformable2d-g07-playback-fixture.mjs",
+              "byteLength": 9408,
+              "sha256": "4538a361d9e4d3b4170edaaa90320b432134b8fd95f329a1644de0f1da601467",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "miku.2048/texture_00.png",
+              "byteLength": 4227639,
+              "sha256": "9771e2d36462c6446330e721248bcbf9a393239ceaae8e0ee616b5b21a57ae20",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "model.hya",
+              "byteLength": 608,
+              "sha256": "1dbab145f2cbec0bd6b984940749d628fe6f9f0cb3bbd88d8b61211a28984792",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "model.hydm",
+              "byteLength": 2448160,
+              "sha256": "3386ce6aa8ea722a204407893e8656b3e8d2adbc44810e4419352dd8dc8c9c8a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "playback.html",
+              "byteLength": 1072,
+              "sha256": "642d2b763993ba8408d344be4c6bf75994009cb18dbf9af67ed7b917b6f1fd9b",
+              "requestCount": 1
+            }
+          ]
+        },
+        "parseMs": 2.4049999713897705,
+        "coldFirstFrameMs": 274.93499994277954,
+        "warmFirstFrameMs": 22.90499997138977,
+        "steady": {
+          "frameCount": 120,
+          "cpuUpdateRenderP50Ms": 6.914999961853027,
+          "cpuUpdateRenderP95Ms": 8.459999918937683,
+          "uploadBytes": 21389760,
+          "gpuFrameP50Ms": null,
+          "gpuFrameP95Ms": null,
+          "gpuQueueCompletionP50Ms": 5.490000009536743,
+          "gpuQueueCompletionP95Ms": 9.884999990463257,
+          "gpuQueueCompletionSamples": 8
+        },
+        "gpuMemory": {
+          "estimatedBytes": 19100968,
+          "peakEstimatedBytes": 19100968
+        },
+        "peakProcessMemoryBytes": 13950060,
+        "memorySamples": [
+          {
+            "label": "baseline",
+            "bytes": 7422060,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-20",
+            "bytes": 13804813,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-40",
+            "bytes": 13804813,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-60",
+            "bytes": 13859272,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-80",
+            "bytes": 13859272,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-100",
+            "bytes": 13859272,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-120",
+            "bytes": 13950060,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "steady-complete",
+            "bytes": 13950060,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-140",
+            "bytes": 13950060,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-160",
+            "bytes": 13950060,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-180",
+            "bytes": 13950060,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-200",
+            "bytes": 13950060,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          }
+        ],
+        "runtime": {
+          "state": "ready",
+          "drawableCount": 88
+        },
+        "renderer": {
+          "visualCount": 88,
+          "maskTargetCount": 0,
+          "compositeLayerCount": 0,
+          "droppedCompositeCount": 0,
+          "maskPixels": 0,
+          "effectTargetCount": 0,
+          "droppedEffectCount": 0,
+          "effectPixels": 0
+        },
+        "browser": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:61530/playback.html?",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "allocationSampling": {
+          "kind": "chrome-v8-allocation-sampling",
+          "samplingInterval": 32768,
+          "sampledBytes": 90106408,
+          "sampleCount": 2725,
+          "top": [
+            {
+              "functionName": "_track",
+              "url": "http://127.0.0.1:61530/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 350,
+              "sampledBytes": 20258884,
+              "samples": 616
+            },
+            {
+              "functionName": "buildVertices",
+              "url": "http://127.0.0.1:61530/__repo/extensions/dist/animation.js",
+              "lineNumber": 1119,
+              "sampledBytes": 12620312,
+              "samples": 385
+            },
+            {
+              "functionName": "getResources",
+              "url": "http://127.0.0.1:61530/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 299,
+              "sampledBytes": 8250200,
+              "samples": 251
+            },
+            {
+              "functionName": "next",
+              "url": "",
+              "lineNumber": 0,
+              "sampledBytes": 5967880,
+              "samples": 182
+            },
+            {
+              "functionName": "getPipeline",
+              "url": "http://127.0.0.1:61530/__repo/extensions/dist/animation.js",
+              "lineNumber": 612,
+              "sampledBytes": 5736544,
+              "samples": 175
+            },
+            {
+              "functionName": "_instrumentDestroy",
+              "url": "http://127.0.0.1:61530/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 407,
+              "sampledBytes": 3319052,
+              "samples": 101
+            },
+            {
+              "functionName": "getGeometryGpu",
+              "url": "http://127.0.0.1:61530/__repo/extensions/dist/animation.js",
+              "lineNumber": 852,
+              "sampledBytes": 2884928,
+              "samples": 88
+            },
+            {
+              "functionName": "add",
+              "url": "",
+              "lineNumber": 0,
+              "sampledBytes": 2385060,
+              "samples": 68
+            },
+            {
+              "functionName": "set",
+              "url": "",
+              "lineNumber": 0,
+              "sampledBytes": 2357404,
+              "samples": 60
+            },
+            {
+              "functionName": "record",
+              "url": "http://127.0.0.1:61530/__repo/extensions/dist/animation.js",
+              "lineNumber": 395,
+              "sampledBytes": 1836468,
+              "samples": 56
+            },
+            {
+              "functionName": "apply",
+              "url": "http://127.0.0.1:61530/__repo/extensions/dist/deformable-animation.js",
+              "lineNumber": 103,
+              "sampledBytes": 1671840,
+              "samples": 51
+            },
+            {
+              "functionName": "sampleDeformableMesh2DDrawable",
+              "url": "http://127.0.0.1:61530/__repo/extensions/dist/deformable-animation.js",
+              "lineNumber": 7,
+              "sampledBytes": 1671564,
+              "samples": 51
+            },
+            {
+              "functionName": "trackBuffer",
+              "url": "http://127.0.0.1:61530/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 224,
+              "sampledBytes": 1606416,
+              "samples": 49
+            },
+            {
+              "functionName": "sweepGeometryGpu",
+              "url": "http://127.0.0.1:61530/__repo/extensions/dist/animation.js",
+              "lineNumber": 1021,
+              "sampledBytes": 1507968,
+              "samples": 46
+            },
+            {
+              "functionName": "geometryKey",
+              "url": "http://127.0.0.1:61530/__repo/extensions/dist/animation.js",
+              "lineNumber": 885,
+              "sampledBytes": 1507880,
+              "samples": 46
+            },
+            {
+              "functionName": "getEntry",
+              "url": "http://127.0.0.1:61530/__repo/engine/dist/chunks/World-NSjwM1ON.js",
+              "lineNumber": 140,
+              "sampledBytes": 1477440,
+              "samples": 45
+            },
+            {
+              "functionName": "get",
+              "url": "",
+              "lineNumber": 0,
+              "sampledBytes": 1378944,
+              "samples": 42
+            },
+            {
+              "functionName": "releaseEntityGpuEntriesNotIn",
+              "url": "http://127.0.0.1:61530/__repo/extensions/dist/chunks/RenderSystem2DBase-DDT61dAu.js",
+              "lineNumber": 198,
+              "sampledBytes": 1278480,
+              "samples": 39
+            },
+            {
+              "functionName": "getEntityGpu",
+              "url": "http://127.0.0.1:61530/__repo/extensions/dist/animation.js",
+              "lineNumber": 785,
+              "sampledBytes": 786800,
+              "samples": 24
+            },
+            {
+              "functionName": "value",
+              "url": "http://127.0.0.1:61530/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 452,
+              "sampledBytes": 753972,
+              "samples": 23
+            }
+          ]
+        },
+        "visualCapture": {
+          "sampleWidth": 24,
+          "sampleHeight": 24,
+          "meanRgb": [
+            4.955,
+            7.953,
+            22.899
+          ],
+          "darkRatio": 1,
+          "brightRatio": 0
+        },
+        "cubismRuntimeInBrowser": false,
+        "forbiddenRequestCount": 0,
+        "lifecycle": {
+          "resourcesBeforeDestroy": 369,
+          "resourcesAfterDestroy": 0,
+          "releasedOwnerResiduals": 0,
+          "ownersAfterDestroy": 0,
+          "cachesAfterDestroy": 1
+        },
+        "diagnostics": [
+          {
+            "severity": "warning",
+            "code": "W_G07_GPU_TIMESTAMP_UNAVAILABLE",
+            "path": "$.runtime.steady.gpuFrameP50Ms",
+            "message": "Engine timestamp-query output was unavailable; GPU queue-completion latency is recorded as the explicit fallback metric."
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "id": "rice-glassfield-pro",
+      "title": "Rice Glassfield - PRO",
+      "source": {
+        "runtimeDirectoryHash": "sha256-082dea795bfef18b5598f38d40cdadcaee54827146fdec596ecf4ee4e31eedc1",
+        "fileCount": 10,
+        "rawBytes": 3152965,
+        "gzipBytes": 2729179
+      },
+      "recipe": {
+        "motionId": "Tap%40Body:0",
+        "motionFile": "motions/mtn_02.motion3.json",
+        "duration": 5,
+        "expression": null,
+        "physics": false,
+        "pose": false,
+        "referenceTimes": [
+          0.75
+        ]
+      },
+      "featureCoverage": {
+        "drawableCount": 178,
+        "textureCount": 2,
+        "maskReferenceCount": 19,
+        "invertedMaskDrawableCount": 5,
+        "additiveDrawableCount": 21,
+        "multiplicativeDrawableCount": 0,
+        "cullingDrawableCount": 9,
+        "dynamicRenderOrderDrawableCount": 121,
+        "nonNeutralMultiplyDrawableFrameCount": 0,
+        "nonNeutralScreenDrawableFrameCount": 0
+      },
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "W_G07_UNUSED_INVERTED_MASK_FLAG_NORMALIZED",
+          "path": "$.frames[*].drawables[*].invertedMask",
+          "message": "122 Core inverted bits without mask references were normalized to false before strict source-neutral conversion."
+        }
+      ],
+      "conversion": {
+        "converterMs": 748.907900000002,
+        "bakedFrameCount": 121,
+        "evaluationCount": 121,
+        "sampling": {
+          "tolerance": 0.01,
+          "quantizationStep": 0.0009765625,
+          "maxDepth": 10,
+          "frameCount": 121,
+          "dirtyChannelCount": 15888
+        },
+        "nodeParse": {
+          "iterations": 30,
+          "p50Ms": 0.046300000001792796,
+          "p95Ms": 0.09050000000206637
+        }
+      },
+      "structuralFidelity": {
+        "denseFrameCount": 61,
+        "drawableCount": 178,
+        "maxError": 0.0004883036017559739,
+        "renderOrderMismatchCount": 0,
+        "tolerance": {
+          "maxPositionOpacityColorError": 0.011,
+          "renderOrderMismatchCount": 0
+        }
+      },
+      "pixelFidelity": {
+        "reference": "official-cubism-core-same-version",
+        "sampledAt": 0.75,
+        "comparisonConfiguration": {
+          "viewportMode": "fit",
+          "fitPolicy": "bounds-centered-auto-zoom",
+          "fitFill": 0.82,
+          "userZoom": 1,
+          "pan": [
+            0,
+            0
+          ],
+          "resolvedZoom": 0.7962992666167412,
+          "synchronizedViews": true,
+          "canvas": [
+            719,
+            746
+          ],
+          "targetFormat": "rgba8unorm",
+          "textureColorSpaceConversion": "none",
+          "alphaMode": "premultiplied",
+          "antialias": false
+        },
+        "surfaceReadback": {
+          "width": 719,
+          "height": 694,
+          "maxChannelError": 179,
+          "meanAbsoluteError": 0.303789,
+          "mismatchPixelCount": 6246,
+          "mismatchRatio": 0.012517,
+          "onePixelSpatialTolerance": {
+            "maxChannelError": 99,
+            "meanAbsoluteError": 0.131201,
+            "mismatchPixelCount": 6906,
+            "mismatchRatio": 0.00692
+          },
+          "stableInterior": {
+            "pixelCount": 485592,
+            "coverageRatio": 0.973158,
+            "maxChannelError": 7,
+            "meanAbsoluteError": 0.000086,
+            "mismatchPixelCount": 0,
+            "mismatchRatio": 0
+          }
+        },
+        "acceptedReadback": {
+          "maxChannelError": 99,
+          "meanAbsoluteError": 0.131201,
+          "mismatchPixelCount": 6906,
+          "mismatchRatio": 0.00692
+        },
+        "spatialTolerancePixels": 1
+      },
+      "package": {
+        "rawBytes": 7214226,
+        "gzipBytes": 3252358,
+        "fileCount": 4
+      },
+      "runtime": {
+        "status": "passed",
+        "network": {
+          "totalBytes": 10565455,
+          "packageRawBytes": 7214226,
+          "requestCount": 107,
+          "uniqueFileCount": 107,
+          "files": [
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/binary-BaiwDHsx.js",
+              "byteLength": 72545,
+              "sha256": "bbd4ed98f9f8c2efdf413fcc5a77108dfdd42cad5e4bd13f1596fb38dffc63c6",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/codec-CCkQOBim.js",
+              "byteLength": 15405,
+              "sha256": "be348d69c2e43037fcddcc51f0671f0316506f7eeff78addf9ed91193d6347f5",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/errors-Bzs3GOD9.js",
+              "byteLength": 188,
+              "sha256": "3999a050e897dfbad8990bc9d8a124a6f2064932ad60cb1e2037e69c1ef34b96",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/extensions-DxL4AxOC.js",
+              "byteLength": 806,
+              "sha256": "78d5f45439b718ed4531b4e80033ad63027c36f40258d74e50f98f77e7ecd4d9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/types-DW9eOlMG.js",
+              "byteLength": 192,
+              "sha256": "3409f3470061fcdf0fcdb2e4e493d2aec9e205212fbfffef7a38aeffa13bcb3f",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/deformable2d.js",
+              "byteLength": 1214,
+              "sha256": "618ccbd9b130466ce31cdecb4952c4b61e5d0c59262b7ebf59fc7874da5b88fc",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/index.js",
+              "byteLength": 1458,
+              "sha256": "525c1f5e5ed0f559ac4c44f7e4402edb8eb7188548cf3b122930060fa1273c5c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/align-BPmoUMBR.js",
+              "byteLength": 312,
+              "sha256": "f7c6c62e415ac0695d81277ef4e46e0bd536686be4117f4491ee2b286b89e250",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+              "byteLength": 1568,
+              "sha256": "843e370458d25854f17210a6ac95b3afec64529e8aa689f01d7fb3ff0ebb3f43",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/AssetParser-BT55VvTe.js",
+              "byteLength": 2904,
+              "sha256": "3a1c7d9def1cae0ebd0ec074834726fc034ea4024695b59807d96a0279f9aefd",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/assets-ijdP7ezJ.js",
+              "byteLength": 38096,
+              "sha256": "c84ad813bf2124fd9b3b666b5b10fc2e35a344284be2542384ad27c58a498d1a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/AssetUploadScheduler-v9a8vCxA.js",
+              "byteLength": 10113,
+              "sha256": "a7f297c309ffe7063784b41815c72b64a460d1489eae5269de2db2ce05520aa0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BaseRenderer-BPEPEE9n.js",
+              "byteLength": 8605,
+              "sha256": "982c8cc28cdda14c52a6ad5f0345ec9e165c0c2bbf97cfe1ab661177dbdf731b",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BasicMaterial-DQyhoOri.js",
+              "byteLength": 4629,
+              "sha256": "5f0acb868decfbe01ee6ef933d9bbb447f5f8679a4c1fa49065bf5ba45a5da2d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BitmapFontBuilder-C06uZ7Uf.js",
+              "byteLength": 3522,
+              "sha256": "4446503543bc869ac9392ac48967bf844aeb29348c5ebc94b8e3d7802c1e169c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BitmapText-BR-jsEuP.js",
+              "byteLength": 1378,
+              "sha256": "0d5a55db31b7a69335a58352ac6d88d5369e10e056f274b714a6cb4ba530ac77",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BuiltinRenderShader-4o-Hd2hR.js",
+              "byteLength": 953,
+              "sha256": "225c97c51ea114788b2b0412cbbb5a11062f66187659def32f8a9fcbef267ec0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BuiltinSpecializedRenderingShader-CWsuNVNG.js",
+              "byteLength": 802,
+              "sha256": "a8b7acc667696c6e22059f2dc547a15eae7a0be8befe70993cd0ee66e018ea06",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BvhLod3D-CrDMn2hg.js",
+              "byteLength": 5947,
+              "sha256": "3d93767f54b45f88fba199714168dfb05fd73401d0dc8c3a6cfe140285e3873c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Camera3D-V7M71MBL.js",
+              "byteLength": 7545,
+              "sha256": "c6052f2ab1568225016bb13ce3e2b2f6a6cafd777101d40432df5981090853a5",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/CartesianTransform3D-D8am4JDK.js",
+              "byteLength": 6067,
+              "sha256": "babd0ceb30beb2b8d67f27e6d9b36f5854154e3ebf2e563030c90cd7c0931e54",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ClippingPlanes-CMq5GScg.js",
+              "byteLength": 4625,
+              "sha256": "e7ab5ded624eee06c2324a1e980bf38121dbb85e7bf14c7f5c9e3fc24748e7a9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ColorSRGB-DkovSzkA.js",
+              "byteLength": 4365,
+              "sha256": "c6102958a7e65d5e0c0aa80af9ebfc953d08199814088fa04b990790f2c01000",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Component-Du0fittL.js",
+              "byteLength": 5010,
+              "sha256": "685f63bc79b39ad0d3913d99d52d5cb2dabcc00b0ff716e39fe433923f53af33",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/constants-Do1J_v-k.js",
+              "byteLength": 188,
+              "sha256": "bbeb0c6e0d36fe3f6cc271cbeb5a997b08a922c9dadf0a54fbde908ede75d848",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/CssMaterial-B5KTUx2i.js",
+              "byteLength": 11613,
+              "sha256": "1442de959ff4ab3f76f46b12f3c0f106702bc692586c1f64e1235f74394d0ea1",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Engine-DLT2SbI_.js",
+              "byteLength": 56911,
+              "sha256": "7bdc79a7c97a5a1892ec54175f43b3f4a7407e0bf4e50067506c3e8eb4003821",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/EngineDiagnosticsAccess-SXWvpo8N.js",
+              "byteLength": 785,
+              "sha256": "83ef06a54945d6f5801917bbef2dd210786a075a89f2e020c9afe162de8e9ff9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+              "byteLength": 10324,
+              "sha256": "320dbdc121cdf5fcf2b540235114047757bc5f4d2f5af142b6775b778c499cc9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Entity-D-_UAiw1.js",
+              "byteLength": 24569,
+              "sha256": "4d9bfea1c61042d887deb748e5ecb2857059e786fe70222b6fb5da2c26afa8d0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Frustum-BAnnJrL_.js",
+              "byteLength": 11397,
+              "sha256": "425828a59f979c61fabdacca0c4a28358f989e5a06f271a99407518e1343db79",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Geometry2D-D7SVMQoB.js",
+              "byteLength": 3341,
+              "sha256": "6e53d9db99363a44c421a9c4db42d46ba9b7a03becfa2f44b357565d5114eced",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Global-Ny7k6KJK.js",
+              "byteLength": 1074,
+              "sha256": "cb9476d924e852917be05bd4ca28900c0f3c3ed1d3409b31a08806646da448e4",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "byteLength": 25387,
+              "sha256": "84a037a8d103a39c7e8ef6adf1a3000a26b5bd9ebce9f98e4234097d04bd2e5a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/GuiSystem-D-uLKmPT.js",
+              "byteLength": 127189,
+              "sha256": "5d9216386689600fdfb4e018d15feace7eeeac1e34f62b3f7336f59910710a75",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/hierarchy-CZkgLn-Q.js",
+              "byteLength": 1012,
+              "sha256": "9873bcd2267676559b2434745666376ee688e66646061373fec307fd486f5dd3",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/IEngine-BWIJHt_0.js",
+              "byteLength": 925,
+              "sha256": "6248980d2d17d2f337c1a2ca0e1d0561e6918c95b6a997ad3500729a895577ff",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ImageTextureUpload-COYtgW6A.js",
+              "byteLength": 5577,
+              "sha256": "f6e5194c0687164a989870e0e132d1234b1192dbd974d416f75152b46e610e6b",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Ktx2TextureLoader-BEb-GLxa.js",
+              "byteLength": 296135,
+              "sha256": "f6cbedcba2390e864bd793096a16823a667e23c0fa0417509ba01353f39f171d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Line3D-BYKGrwU7.js",
+              "byteLength": 4071,
+              "sha256": "08cf0bab942eecce7da83274476814a5dcd7c29428716d86afeda7cfdd05e68a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Material2D-bYP1LiBS.js",
+              "byteLength": 1103,
+              "sha256": "b3000c6260f10f3412fae6140356a9bc0632d71ba40895111c9e3b0f5625e9aa",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/MaterialRegistryBase-DngXOQhW.js",
+              "byteLength": 3422,
+              "sha256": "a23e68cc20442811427ddd0c4a0326381ea265675090e4ba0db2271b834725b0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/MaterialRendererRegistry-DxB-MXl6.js",
+              "byteLength": 40283,
+              "sha256": "7186d7e003ae33278de99b92a2c553469a4ed53079f0e5cc17368d3da5319d13",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/materialValidation-Cz4AbnBy.js",
+              "byteLength": 22831,
+              "sha256": "0ef64ca912261373994d03d6d430e06fca154c3d4c5b5c05284918021d1ac82d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Mesh2D-DfykuQgt.js",
+              "byteLength": 9330,
+              "sha256": "114b9a8b3622cf1265ad7f99f0e6c481df57ca747d0cfaa085ce911686ed98b4",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Mesh2DRenderer-CnDAaPW-.js",
+              "byteLength": 18658,
+              "sha256": "30b865ba63ae1dc864566c4e35b668fc5822fc1900d146b6691e230737c8baee",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Mesh2DRenderSystem-C5xg9j1-.js",
+              "byteLength": 6420,
+              "sha256": "232ac943c4e5053e4e6d97cf1acb6c629ff9d62c50b84573098a3ed2fa540f49",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Mesh3D-B9Ev34fG.js",
+              "byteLength": 2399,
+              "sha256": "097b6fae01fd1323d40d18d7ec6529c6f8bc20afeb1ce387825ccc0ed64a6303",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/MeshHelper-BUZ7aJWK.js",
+              "byteLength": 10455,
+              "sha256": "22654fac2e8f95418260fb1639de578ee07a899b0242d478a03c8a3a05567c82",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/OrbitControl-dZCAmOUY.js",
+              "byteLength": 8928,
+              "sha256": "2c9373004898c6a449268ad65be0b6d87726302852a43f6b02468fef89cf6ad9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ParticleEmitter3D-qTvZwiEl.js",
+              "byteLength": 31711,
+              "sha256": "b6c8804918e3b88270889652e6a43b5265a432abca21bcd41a9c2b55774f700e",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Physics2DTo3DTransformSync-DJYQr2KX.js",
+              "byteLength": 1554,
+              "sha256": "cce72238a0eb8b190a17f156c56d938cc264ec6ec6221bbd9996cad86b260c90",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PipelineWarmup-DqYBVQLM.js",
+              "byteLength": 15759,
+              "sha256": "1ffe77cf140aff41712079138bcd63885fb9af57681be5ff4544dfd0b16c0298",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PlanarMirrorMaterial-BA2aOBJa.js",
+              "byteLength": 2560,
+              "sha256": "3057be12fd0da262a36c9f8365d7be880a3b0965b19480f79469bf70e1481472",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PlaneGeometry-BYjs1rC7.js",
+              "byteLength": 5583,
+              "sha256": "aa45cfef25ef07994bd9a37bb55038c899fea1b2762c71c1045a171742506d53",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PointLight-CPweOrQl.js",
+              "byteLength": 11443,
+              "sha256": "5fc9129dc7a6e2d8c21114dc850e6762e9a8ad8430a86c67a6639ed921277197",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PostProcessSceneTextureStore-C6AZrc-u.js",
+              "byteLength": 18787,
+              "sha256": "d887c35d2424309333abce772aee154f2e271a3ae734e4d24d41dde47dddd4d1",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Render3DSystem-BLLDyXkH.js",
+              "byteLength": 344046,
+              "sha256": "7ca49f2a76173c9baafd4bc3e265382dea07c6b2ab746c1f872f718865904c67",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/RenderCommandContext-DKkw5eBA.js",
+              "byteLength": 32540,
+              "sha256": "3d43be0e2bbb0fe073d89c9369b7ce8ef046c6f14479bc9c66d91e468228f09c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/RendererCacheMap-C3xi123s.js",
+              "byteLength": 30521,
+              "sha256": "9cc5fbd9c86094c864e09a4b0af6eff278a1f90039acde5cd33897d74865f692",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/RttEngine-DLvXxLbn.js",
+              "byteLength": 8621,
+              "sha256": "6b77cd05ca1f31145a4407c4f044557079aad5aa940e118c21a45a2a95009d32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Scene-B67DqOUp.js",
+              "byteLength": 39949,
+              "sha256": "764129ee723d9f7ebd7506d40aa9383f70785cc12fedc720dcc70c0227d7196f",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ScriptComponent-BTvBkGqy.js",
+              "byteLength": 34762,
+              "sha256": "add90caa9a0173491cd1e22fd6e809fdf497eb65dcfaca202051831a01dee135",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ScriptResource-CZbhMvn8.js",
+              "byteLength": 8077,
+              "sha256": "bcb03b2a1a9e92f886ee74864d6b72e285357288ace803fb053bd6d7fdb69024",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Sky-CMwO4Q6R.js",
+              "byteLength": 2654,
+              "sha256": "1e287ffd6f0b7bea685af2dbb3f807b85272a9a1a4511d38bf67e3a409bf61da",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/SpatialIndexService-CY805Aih.js",
+              "byteLength": 56693,
+              "sha256": "4c685a41cb8b870282867a6dcd5de4f925c14d10416b5aa5e259615a00a6c8a8",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/SphericalTransform3D-DpXtwAeG.js",
+              "byteLength": 5687,
+              "sha256": "5563706701c966dd7d7e4f755914e06d7c1c8383cd890506eba771ab903e5be0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/SVGGeometry2D-PkBLpLEw.js",
+              "byteLength": 121456,
+              "sha256": "1e41cea9d729c951d2d98dafbe00e4b215b135942c6b29d20c64cf3590c5af8e",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/System-CIIb_ci6.js",
+              "byteLength": 3406,
+              "sha256": "84f2bcb7f7b93635bdf95ec307bcc41953268deefbff368da1a57892331af27c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Transform2D-BQcy9yW6.js",
+              "byteLength": 5218,
+              "sha256": "98b0fd783baf9f5545ed2224990915d2057a4580a5b7df5bb0ab5a222d060d30",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Transform3D-ClwzR-VK.js",
+              "byteLength": 4432,
+              "sha256": "e422baa0b4c244895e54867d56a07e820f183cdb2f0c82562b7189290a8ffbf9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/TransparentMegaBatch-NjW-cBZK.js",
+              "byteLength": 324399,
+              "sha256": "af0c52c752eba32655ef5ad0bd71b460f806091876fb9ff0e087d14b0dea755a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/VolumeMaterial-D17RCtMZ.js",
+              "byteLength": 6685,
+              "sha256": "3d7fa1d916bc4d054230333065b0929b5a503c9f9d4b82c87c13a9c0e71f5284",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/World-NSjwM1ON.js",
+              "byteLength": 59239,
+              "sha256": "b8dd487d854eb913c7bac3361358b43c8d842d8984b1814d0305bb96dfa1a4e7",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/WorldResourceCleanup-CSTul4-x.js",
+              "byteLength": 892,
+              "sha256": "d22ecd6960a36ab7707a70bb5999c7c87123688c0787e301cffaa72f50607f48",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/color.js",
+              "byteLength": 8426,
+              "sha256": "332d043fe4bad5a9de29162bbd977be746dd8ebdc57b12d253858928d550dd22",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/components.js",
+              "byteLength": 2394,
+              "sha256": "16f075bcdac3a5961d67c8e7d3f0c07de65cdc2d02de3d94c303bb6fdbaf7d58",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/diagnostics.js",
+              "byteLength": 2016,
+              "sha256": "4584d6d67b97235f40b72c4ef30b63d3a13b55d174ab452fa5cfb14677e2eef8",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/ecs.js",
+              "byteLength": 795,
+              "sha256": "2c4329e5a75fa2b7dc607804d8fe34265140376b25b95db542a909943bb256e7",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/experimental/diagnostics.js",
+              "byteLength": 4502,
+              "sha256": "371e96e91d7bb2428e7bf706a9f391b857a331365e4131c1fa0ef2eabc8ab9e1",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/experimental/renderer.js",
+              "byteLength": 31218,
+              "sha256": "8b637ee3c57b8b087e07c76d4451e12441fe10a8c778df369d1a65749435f579",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/extension-authoring.js",
+              "byteLength": 1261,
+              "sha256": "15759fd56cd90edf4f93b5c4fc5d13960f513aaca8de316ceb70ee91b931b424",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/geometry.js",
+              "byteLength": 78080,
+              "sha256": "2c51847470b4a8b615ae561250acaf8265831114e80137c6080ccc03a3aae7e7",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/index.js",
+              "byteLength": 3937,
+              "sha256": "60509beda9643e30735426e86af3a95c3ed09cf1b919f0fa88b8f46bef0d53dc",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/input.js",
+              "byteLength": 3818,
+              "sha256": "fe114fc7ac9e07841d8f7ca830160df4b0ab620a256463a7099bed70544f5781",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/2d-ui-shader-artifact.js",
+              "byteLength": 53787,
+              "sha256": "d9719d72ec89cce1029e843de072884453b52f993a46d6474ec463b4b3569894",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/compute-shader-artifact.js",
+              "byteLength": 33400,
+              "sha256": "477d0cfce36f516f486551f3f2fd0a51b48b4668e49d25d34c96ca89f95fe4b5",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/deformation-shader-artifact.js",
+              "byteLength": 138109,
+              "sha256": "80d0703c77972fcce91f36e78d50d92ca12e95650c8d7cfbbfd2280e57c323af",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/material-lighting-shader-artifact.js",
+              "byteLength": 205125,
+              "sha256": "31b767d173b3a8bc9581d136774a70b167d8a383fbda098de884de981b640d20",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/postprocess-shader-artifact.js",
+              "byteLength": 60064,
+              "sha256": "5cbc27d937c15a07caa1bc94c6884e79f358360a8dc1c0e062bdd222d8296ff8",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/precompiled-shader-runtime.js",
+              "byteLength": 9197,
+              "sha256": "10419c3b3ddadf276d8fbd7debccfdaa86300d37c02a60a5025fc13cde9f81d3",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/simple3d-shader-artifact.js",
+              "byteLength": 43650,
+              "sha256": "25bd7ab5c123970c449efd1b5c387e943c2b9d13bc17f7bf7a4561c46390e439",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/specialized-rendering-shader-artifact.js",
+              "byteLength": 76467,
+              "sha256": "1ef1314961b54cefb4828286a62908c966880aa73cd2432327fb0af298259cd5",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/animation.js",
+              "byteLength": 57934,
+              "sha256": "bdbd48245ac56c0de871b62efb97237274ca18ada8bf24a657d4891f5c9412a2",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/2d-ui-animation-2d.generated-6HyEQbuq.js",
+              "byteLength": 13588,
+              "sha256": "b3cf9d0326b4b3c4daa7cc36700139be336e8a51014e324cc75c53f0871fcdf0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/Animation2DStateMachine-DvRpvrZ0.js",
+              "byteLength": 139046,
+              "sha256": "637f12b16110e4b99f803ad110d8db4d66658173596d5d1e4ac4e5c25a03d815",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/AnimationStateMachineController-4sKaqh9E.js",
+              "byteLength": 61628,
+              "sha256": "285b7b33a3b46e2ceccd32924e42d7525ef1a6c69134c17513082a3c225a2838",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/AnimationVisual2D-8y3qp0_U.js",
+              "byteLength": 8935,
+              "sha256": "3c79905b94a2eade0e1582e0e7e670e6fb4eafdbcabfa74b6ddfb2e73387caa2",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/RenderSystem2DBase-DDT61dAu.js",
+              "byteLength": 8981,
+              "sha256": "9f37ff0b375f9b1bc1db3f04eca641fdc67f26b42afded6a00140e2755ed455d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/deformable-animation.js",
+              "byteLength": 15608,
+              "sha256": "aeb27981bf50797972f0145ae55667f831a50102b33e3f423023d9a67298097d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js",
+              "byteLength": 199533,
+              "sha256": "32cdefcfe7b340710c242b0982316d5af501bb81ccdc3744f57bd0b2acd4e400",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "deformable2d-g07-playback-fixture.mjs",
+              "byteLength": 9408,
+              "sha256": "4538a361d9e4d3b4170edaaa90320b432134b8fd95f329a1644de0f1da601467",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "model.hya",
+              "byteLength": 748,
+              "sha256": "f1ec7a3415a35aec214c0bdfae283e2a11633bd3ee32dd90b60369bb4bee3bee",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "model.hydm",
+              "byteLength": 4646824,
+              "sha256": "7330f92db2d3a3e1eb32712cb31fd9ffe769e47b94eee843514a20df512e88c6",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "playback.html",
+              "byteLength": 1072,
+              "sha256": "642d2b763993ba8408d344be4c6bf75994009cb18dbf9af67ed7b917b6f1fd9b",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "rice_pro_t03.2048/texture_00.png",
+              "byteLength": 1061518,
+              "sha256": "9930643898aeea3a5f11f06933e79a217b64fbec80c06158f512e85454ea60ea",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "rice_pro_t03.2048/texture_01.png",
+              "byteLength": 1505136,
+              "sha256": "d80053659ecb2eab98269ade228253034827b8744db1fcb67843acbcc37906de",
+              "requestCount": 1
+            }
+          ]
+        },
+        "parseMs": 5.830000042915344,
+        "coldFirstFrameMs": 343.6100000143051,
+        "warmFirstFrameMs": 27.195000052452087,
+        "steady": {
+          "frameCount": 120,
+          "cpuUpdateRenderP50Ms": 10.06499993801117,
+          "cpuUpdateRenderP95Ms": 13.34000015258789,
+          "uploadBytes": 45582240,
+          "gpuFrameP50Ms": null,
+          "gpuFrameP95Ms": null,
+          "gpuQueueCompletionP50Ms": 8.919999957084656,
+          "gpuQueueCompletionP95Ms": 9.384999990463257,
+          "gpuQueueCompletionSamples": 8
+        },
+        "gpuMemory": {
+          "estimatedBytes": 53243756,
+          "peakEstimatedBytes": 53243756
+        },
+        "peakProcessMemoryBytes": 16892536,
+        "memorySamples": [
+          {
+            "label": "baseline",
+            "bytes": 7422060,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-20",
+            "bytes": 16744512,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-40",
+            "bytes": 16744512,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-60",
+            "bytes": 16744512,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-80",
+            "bytes": 16820920,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-100",
+            "bytes": 16820920,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-120",
+            "bytes": 16892536,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "steady-complete",
+            "bytes": 16892536,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-140",
+            "bytes": 16892536,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-160",
+            "bytes": 16892536,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-180",
+            "bytes": 16892536,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          }
+        ],
+        "runtime": {
+          "state": "ready",
+          "drawableCount": 178
+        },
+        "renderer": {
+          "visualCount": 178,
+          "maskTargetCount": 8,
+          "compositeLayerCount": 12,
+          "droppedCompositeCount": 0,
+          "maskPixels": 4290992,
+          "effectTargetCount": 0,
+          "droppedEffectCount": 0,
+          "effectPixels": 0
+        },
+        "browser": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:61797/playback.html?",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "allocationSampling": {
+          "kind": "chrome-v8-allocation-sampling",
+          "samplingInterval": 32768,
+          "sampledBytes": 154294572,
+          "sampleCount": 4636,
+          "top": [
+            {
+              "functionName": "_track",
+              "url": "http://127.0.0.1:61797/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 350,
+              "sampledBytes": 37397540,
+              "samples": 1137
+            },
+            {
+              "functionName": "buildVertices",
+              "url": "http://127.0.0.1:61797/__repo/extensions/dist/animation.js",
+              "lineNumber": 1119,
+              "sampledBytes": 23502700,
+              "samples": 717
+            },
+            {
+              "functionName": "getPipeline",
+              "url": "http://127.0.0.1:61797/__repo/extensions/dist/animation.js",
+              "lineNumber": 612,
+              "sampledBytes": 13802668,
+              "samples": 421
+            },
+            {
+              "functionName": "getResources",
+              "url": "http://127.0.0.1:61797/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 299,
+              "sampledBytes": 12807324,
+              "samples": 389
+            },
+            {
+              "functionName": "next",
+              "url": "",
+              "lineNumber": 0,
+              "sampledBytes": 9542852,
+              "samples": 291
+            },
+            {
+              "functionName": "set",
+              "url": "",
+              "lineNumber": 0,
+              "sampledBytes": 5177232,
+              "samples": 108
+            },
+            {
+              "functionName": "record",
+              "url": "http://127.0.0.1:61797/__repo/extensions/dist/animation.js",
+              "lineNumber": 395,
+              "sampledBytes": 4396700,
+              "samples": 134
+            },
+            {
+              "functionName": "add",
+              "url": "",
+              "lineNumber": 0,
+              "sampledBytes": 4005520,
+              "samples": 113
+            },
+            {
+              "functionName": "getGeometryGpu",
+              "url": "http://127.0.0.1:61797/__repo/extensions/dist/animation.js",
+              "lineNumber": 852,
+              "sampledBytes": 3606052,
+              "samples": 110
+            },
+            {
+              "functionName": "_instrumentDestroy",
+              "url": "http://127.0.0.1:61797/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 407,
+              "sampledBytes": 2924988,
+              "samples": 89
+            },
+            {
+              "functionName": "getEntry",
+              "url": "http://127.0.0.1:61797/__repo/engine/dist/chunks/World-NSjwM1ON.js",
+              "lineNumber": 140,
+              "sampledBytes": 2757888,
+              "samples": 84
+            },
+            {
+              "functionName": "sampleDeformableMesh2DDrawable",
+              "url": "http://127.0.0.1:61797/__repo/extensions/dist/deformable-animation.js",
+              "lineNumber": 7,
+              "sampledBytes": 2720392,
+              "samples": 83
+            },
+            {
+              "functionName": "sweepGeometryGpu",
+              "url": "http://127.0.0.1:61797/__repo/extensions/dist/animation.js",
+              "lineNumber": 1021,
+              "sampledBytes": 2655276,
+              "samples": 81
+            },
+            {
+              "functionName": "geometryKey",
+              "url": "http://127.0.0.1:61797/__repo/extensions/dist/animation.js",
+              "lineNumber": 885,
+              "sampledBytes": 2163552,
+              "samples": 66
+            },
+            {
+              "functionName": "releaseEntityGpuEntriesNotIn",
+              "url": "http://127.0.0.1:61797/__repo/extensions/dist/chunks/RenderSystem2DBase-DDT61dAu.js",
+              "lineNumber": 198,
+              "sampledBytes": 2130908,
+              "samples": 65
+            },
+            {
+              "functionName": "value",
+              "url": "http://127.0.0.1:61797/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 135,
+              "sampledBytes": 2098192,
+              "samples": 64
+            },
+            {
+              "functionName": "get",
+              "url": "",
+              "lineNumber": 0,
+              "sampledBytes": 1510048,
+              "samples": 46
+            },
+            {
+              "functionName": "apply",
+              "url": "http://127.0.0.1:61797/__repo/extensions/dist/deformable-animation.js",
+              "lineNumber": 103,
+              "sampledBytes": 1409604,
+              "samples": 43
+            },
+            {
+              "functionName": "_instrumentRenderPass",
+              "url": "http://127.0.0.1:61797/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 491,
+              "sampledBytes": 1180300,
+              "samples": 36
+            },
+            {
+              "functionName": "draw",
+              "url": "http://127.0.0.1:61797/__repo/extensions/dist/animation.js",
+              "lineNumber": 682,
+              "sampledBytes": 1147448,
+              "samples": 35
+            }
+          ]
+        },
+        "visualCapture": {
+          "sampleWidth": 24,
+          "sampleHeight": 24,
+          "meanRgb": [
+            4.955,
+            7.953,
+            22.899
+          ],
+          "darkRatio": 1,
+          "brightRatio": 0
+        },
+        "cubismRuntimeInBrowser": false,
+        "forbiddenRequestCount": 0,
+        "lifecycle": {
+          "resourcesBeforeDestroy": 781,
+          "resourcesAfterDestroy": 0,
+          "releasedOwnerResiduals": 0,
+          "ownersAfterDestroy": 0,
+          "cachesAfterDestroy": 1
+        },
+        "diagnostics": [
+          {
+            "severity": "warning",
+            "code": "W_G07_GPU_TIMESTAMP_UNAVAILABLE",
+            "path": "$.runtime.steady.gpuFrameP50Ms",
+            "message": "Engine timestamp-query output was unavailable; GPU queue-completion latency is recorded as the explicit fallback metric."
+          }
+        ],
+        "errors": []
+      }
+    },
+    {
+      "id": "niziiro-mao",
+      "title": "Niziiro Mao",
+      "source": {
+        "runtimeDirectoryHash": "sha256-1add506bf80e04816f438c36a50d93a4916568dfad8f88daff56e3a75dec5bc9",
+        "fileCount": 22,
+        "rawBytes": 4321713,
+        "gzipBytes": 3543075
+      },
+      "recipe": {
+        "motionId": "Idle:0",
+        "motionFile": "motions/mtn_01.motion3.json",
+        "duration": 5.57,
+        "expression": "expressions/exp_01.exp3.json",
+        "physics": true,
+        "pose": true,
+        "referenceTimes": [
+          1
+        ]
+      },
+      "featureCoverage": {
+        "drawableCount": 262,
+        "textureCount": 1,
+        "maskReferenceCount": 65,
+        "invertedMaskDrawableCount": 10,
+        "additiveDrawableCount": 15,
+        "multiplicativeDrawableCount": 8,
+        "cullingDrawableCount": 0,
+        "dynamicRenderOrderDrawableCount": 0,
+        "nonNeutralMultiplyDrawableFrameCount": 3851,
+        "nonNeutralScreenDrawableFrameCount": 2584
+      },
+      "diagnostics": [],
+      "conversion": {
+        "converterMs": 1340.9958000000042,
+        "bakedFrameCount": 135,
+        "evaluationCount": 135,
+        "sampling": {
+          "tolerance": 0.01,
+          "quantizationStep": 0.0009765625,
+          "maxDepth": 10,
+          "frameCount": 135,
+          "dirtyChannelCount": 22266
+        },
+        "nodeParse": {
+          "iterations": 30,
+          "p50Ms": 0.02810000000317814,
+          "p95Ms": 0.03989999999612337
+        }
+      },
+      "structuralFidelity": {
+        "denseFrameCount": 68,
+        "drawableCount": 262,
+        "maxError": 0.0004882812316076568,
+        "renderOrderMismatchCount": 0,
+        "tolerance": {
+          "maxPositionOpacityColorError": 0.011,
+          "renderOrderMismatchCount": 0
+        }
+      },
+      "pixelFidelity": {
+        "reference": "official-cubism-core-same-version",
+        "sampledAt": 1,
+        "comparisonConfiguration": {
+          "viewportMode": "fit",
+          "fitPolicy": "bounds-centered-auto-zoom",
+          "fitFill": 0.82,
+          "userZoom": 1,
+          "pan": [
+            0,
+            0
+          ],
+          "resolvedZoom": 0.38848582903232226,
+          "synchronizedViews": true,
+          "canvas": [
+            719,
+            746
+          ],
+          "targetFormat": "rgba8unorm",
+          "textureColorSpaceConversion": "none",
+          "alphaMode": "premultiplied",
+          "antialias": false
+        },
+        "surfaceReadback": {
+          "width": 719,
+          "height": 694,
+          "maxChannelError": 180,
+          "meanAbsoluteError": 0.346908,
+          "mismatchPixelCount": 6506,
+          "mismatchRatio": 0.013038,
+          "onePixelSpatialTolerance": {
+            "maxChannelError": 145,
+            "meanAbsoluteError": 0.152207,
+            "mismatchPixelCount": 7972,
+            "mismatchRatio": 0.007988
+          },
+          "stableInterior": {
+            "pixelCount": 485177,
+            "coverageRatio": 0.972326,
+            "maxChannelError": 8,
+            "meanAbsoluteError": 0.0015,
+            "mismatchPixelCount": 0,
+            "mismatchRatio": 0
+          }
+        },
+        "acceptedReadback": {
+          "maxChannelError": 145,
+          "meanAbsoluteError": 0.152207,
+          "mismatchPixelCount": 7972,
+          "mismatchRatio": 0.007988
+        },
+        "spatialTolerancePixels": 1
+      },
+      "package": {
+        "rawBytes": 10812749,
+        "gzipBytes": 4705200,
+        "fileCount": 3
+      },
+      "runtime": {
+        "status": "passed",
+        "network": {
+          "totalBytes": 14163978,
+          "packageRawBytes": 10812749,
+          "requestCount": 106,
+          "uniqueFileCount": 106,
+          "files": [
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/binary-BaiwDHsx.js",
+              "byteLength": 72545,
+              "sha256": "bbd4ed98f9f8c2efdf413fcc5a77108dfdd42cad5e4bd13f1596fb38dffc63c6",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/codec-CCkQOBim.js",
+              "byteLength": 15405,
+              "sha256": "be348d69c2e43037fcddcc51f0671f0316506f7eeff78addf9ed91193d6347f5",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/errors-Bzs3GOD9.js",
+              "byteLength": 188,
+              "sha256": "3999a050e897dfbad8990bc9d8a124a6f2064932ad60cb1e2037e69c1ef34b96",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/extensions-DxL4AxOC.js",
+              "byteLength": 806,
+              "sha256": "78d5f45439b718ed4531b4e80033ad63027c36f40258d74e50f98f77e7ecd4d9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/chunks/types-DW9eOlMG.js",
+              "byteLength": 192,
+              "sha256": "3409f3470061fcdf0fcdb2e4e493d2aec9e205212fbfffef7a38aeffa13bcb3f",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/deformable2d.js",
+              "byteLength": 1214,
+              "sha256": "618ccbd9b130466ce31cdecb4952c4b61e5d0c59262b7ebf59fc7874da5b88fc",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/animation-spec/dist/index.js",
+              "byteLength": 1458,
+              "sha256": "525c1f5e5ed0f559ac4c44f7e4402edb8eb7188548cf3b122930060fa1273c5c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/align-BPmoUMBR.js",
+              "byteLength": 312,
+              "sha256": "f7c6c62e415ac0695d81277ef4e46e0bd536686be4117f4491ee2b286b89e250",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+              "byteLength": 1568,
+              "sha256": "843e370458d25854f17210a6ac95b3afec64529e8aa689f01d7fb3ff0ebb3f43",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/AssetParser-BT55VvTe.js",
+              "byteLength": 2904,
+              "sha256": "3a1c7d9def1cae0ebd0ec074834726fc034ea4024695b59807d96a0279f9aefd",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/assets-ijdP7ezJ.js",
+              "byteLength": 38096,
+              "sha256": "c84ad813bf2124fd9b3b666b5b10fc2e35a344284be2542384ad27c58a498d1a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/AssetUploadScheduler-v9a8vCxA.js",
+              "byteLength": 10113,
+              "sha256": "a7f297c309ffe7063784b41815c72b64a460d1489eae5269de2db2ce05520aa0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BaseRenderer-BPEPEE9n.js",
+              "byteLength": 8605,
+              "sha256": "982c8cc28cdda14c52a6ad5f0345ec9e165c0c2bbf97cfe1ab661177dbdf731b",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BasicMaterial-DQyhoOri.js",
+              "byteLength": 4629,
+              "sha256": "5f0acb868decfbe01ee6ef933d9bbb447f5f8679a4c1fa49065bf5ba45a5da2d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BitmapFontBuilder-C06uZ7Uf.js",
+              "byteLength": 3522,
+              "sha256": "4446503543bc869ac9392ac48967bf844aeb29348c5ebc94b8e3d7802c1e169c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BitmapText-BR-jsEuP.js",
+              "byteLength": 1378,
+              "sha256": "0d5a55db31b7a69335a58352ac6d88d5369e10e056f274b714a6cb4ba530ac77",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BuiltinRenderShader-4o-Hd2hR.js",
+              "byteLength": 953,
+              "sha256": "225c97c51ea114788b2b0412cbbb5a11062f66187659def32f8a9fcbef267ec0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BuiltinSpecializedRenderingShader-CWsuNVNG.js",
+              "byteLength": 802,
+              "sha256": "a8b7acc667696c6e22059f2dc547a15eae7a0be8befe70993cd0ee66e018ea06",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/BvhLod3D-CrDMn2hg.js",
+              "byteLength": 5947,
+              "sha256": "3d93767f54b45f88fba199714168dfb05fd73401d0dc8c3a6cfe140285e3873c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Camera3D-V7M71MBL.js",
+              "byteLength": 7545,
+              "sha256": "c6052f2ab1568225016bb13ce3e2b2f6a6cafd777101d40432df5981090853a5",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/CartesianTransform3D-D8am4JDK.js",
+              "byteLength": 6067,
+              "sha256": "babd0ceb30beb2b8d67f27e6d9b36f5854154e3ebf2e563030c90cd7c0931e54",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ClippingPlanes-CMq5GScg.js",
+              "byteLength": 4625,
+              "sha256": "e7ab5ded624eee06c2324a1e980bf38121dbb85e7bf14c7f5c9e3fc24748e7a9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ColorSRGB-DkovSzkA.js",
+              "byteLength": 4365,
+              "sha256": "c6102958a7e65d5e0c0aa80af9ebfc953d08199814088fa04b990790f2c01000",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Component-Du0fittL.js",
+              "byteLength": 5010,
+              "sha256": "685f63bc79b39ad0d3913d99d52d5cb2dabcc00b0ff716e39fe433923f53af33",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/constants-Do1J_v-k.js",
+              "byteLength": 188,
+              "sha256": "bbeb0c6e0d36fe3f6cc271cbeb5a997b08a922c9dadf0a54fbde908ede75d848",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/CssMaterial-B5KTUx2i.js",
+              "byteLength": 11613,
+              "sha256": "1442de959ff4ab3f76f46b12f3c0f106702bc692586c1f64e1235f74394d0ea1",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Engine-DLT2SbI_.js",
+              "byteLength": 56911,
+              "sha256": "7bdc79a7c97a5a1892ec54175f43b3f4a7407e0bf4e50067506c3e8eb4003821",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/EngineDiagnosticsAccess-SXWvpo8N.js",
+              "byteLength": 785,
+              "sha256": "83ef06a54945d6f5801917bbef2dd210786a075a89f2e020c9afe162de8e9ff9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+              "byteLength": 10324,
+              "sha256": "320dbdc121cdf5fcf2b540235114047757bc5f4d2f5af142b6775b778c499cc9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Entity-D-_UAiw1.js",
+              "byteLength": 24569,
+              "sha256": "4d9bfea1c61042d887deb748e5ecb2857059e786fe70222b6fb5da2c26afa8d0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Frustum-BAnnJrL_.js",
+              "byteLength": 11397,
+              "sha256": "425828a59f979c61fabdacca0c4a28358f989e5a06f271a99407518e1343db79",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Geometry2D-D7SVMQoB.js",
+              "byteLength": 3341,
+              "sha256": "6e53d9db99363a44c421a9c4db42d46ba9b7a03becfa2f44b357565d5114eced",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Global-Ny7k6KJK.js",
+              "byteLength": 1074,
+              "sha256": "cb9476d924e852917be05bd4ca28900c0f3c3ed1d3409b31a08806646da448e4",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "byteLength": 25387,
+              "sha256": "84a037a8d103a39c7e8ef6adf1a3000a26b5bd9ebce9f98e4234097d04bd2e5a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/GuiSystem-D-uLKmPT.js",
+              "byteLength": 127189,
+              "sha256": "5d9216386689600fdfb4e018d15feace7eeeac1e34f62b3f7336f59910710a75",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/hierarchy-CZkgLn-Q.js",
+              "byteLength": 1012,
+              "sha256": "9873bcd2267676559b2434745666376ee688e66646061373fec307fd486f5dd3",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/IEngine-BWIJHt_0.js",
+              "byteLength": 925,
+              "sha256": "6248980d2d17d2f337c1a2ca0e1d0561e6918c95b6a997ad3500729a895577ff",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ImageTextureUpload-COYtgW6A.js",
+              "byteLength": 5577,
+              "sha256": "f6e5194c0687164a989870e0e132d1234b1192dbd974d416f75152b46e610e6b",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Ktx2TextureLoader-BEb-GLxa.js",
+              "byteLength": 296135,
+              "sha256": "f6cbedcba2390e864bd793096a16823a667e23c0fa0417509ba01353f39f171d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Line3D-BYKGrwU7.js",
+              "byteLength": 4071,
+              "sha256": "08cf0bab942eecce7da83274476814a5dcd7c29428716d86afeda7cfdd05e68a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Material2D-bYP1LiBS.js",
+              "byteLength": 1103,
+              "sha256": "b3000c6260f10f3412fae6140356a9bc0632d71ba40895111c9e3b0f5625e9aa",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/MaterialRegistryBase-DngXOQhW.js",
+              "byteLength": 3422,
+              "sha256": "a23e68cc20442811427ddd0c4a0326381ea265675090e4ba0db2271b834725b0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/MaterialRendererRegistry-DxB-MXl6.js",
+              "byteLength": 40283,
+              "sha256": "7186d7e003ae33278de99b92a2c553469a4ed53079f0e5cc17368d3da5319d13",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/materialValidation-Cz4AbnBy.js",
+              "byteLength": 22831,
+              "sha256": "0ef64ca912261373994d03d6d430e06fca154c3d4c5b5c05284918021d1ac82d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Mesh2D-DfykuQgt.js",
+              "byteLength": 9330,
+              "sha256": "114b9a8b3622cf1265ad7f99f0e6c481df57ca747d0cfaa085ce911686ed98b4",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Mesh2DRenderer-CnDAaPW-.js",
+              "byteLength": 18658,
+              "sha256": "30b865ba63ae1dc864566c4e35b668fc5822fc1900d146b6691e230737c8baee",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Mesh2DRenderSystem-C5xg9j1-.js",
+              "byteLength": 6420,
+              "sha256": "232ac943c4e5053e4e6d97cf1acb6c629ff9d62c50b84573098a3ed2fa540f49",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Mesh3D-B9Ev34fG.js",
+              "byteLength": 2399,
+              "sha256": "097b6fae01fd1323d40d18d7ec6529c6f8bc20afeb1ce387825ccc0ed64a6303",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/MeshHelper-BUZ7aJWK.js",
+              "byteLength": 10455,
+              "sha256": "22654fac2e8f95418260fb1639de578ee07a899b0242d478a03c8a3a05567c82",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/OrbitControl-dZCAmOUY.js",
+              "byteLength": 8928,
+              "sha256": "2c9373004898c6a449268ad65be0b6d87726302852a43f6b02468fef89cf6ad9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ParticleEmitter3D-qTvZwiEl.js",
+              "byteLength": 31711,
+              "sha256": "b6c8804918e3b88270889652e6a43b5265a432abca21bcd41a9c2b55774f700e",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Physics2DTo3DTransformSync-DJYQr2KX.js",
+              "byteLength": 1554,
+              "sha256": "cce72238a0eb8b190a17f156c56d938cc264ec6ec6221bbd9996cad86b260c90",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PipelineWarmup-DqYBVQLM.js",
+              "byteLength": 15759,
+              "sha256": "1ffe77cf140aff41712079138bcd63885fb9af57681be5ff4544dfd0b16c0298",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PlanarMirrorMaterial-BA2aOBJa.js",
+              "byteLength": 2560,
+              "sha256": "3057be12fd0da262a36c9f8365d7be880a3b0965b19480f79469bf70e1481472",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PlaneGeometry-BYjs1rC7.js",
+              "byteLength": 5583,
+              "sha256": "aa45cfef25ef07994bd9a37bb55038c899fea1b2762c71c1045a171742506d53",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PointLight-CPweOrQl.js",
+              "byteLength": 11443,
+              "sha256": "5fc9129dc7a6e2d8c21114dc850e6762e9a8ad8430a86c67a6639ed921277197",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/PostProcessSceneTextureStore-C6AZrc-u.js",
+              "byteLength": 18787,
+              "sha256": "d887c35d2424309333abce772aee154f2e271a3ae734e4d24d41dde47dddd4d1",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Render3DSystem-BLLDyXkH.js",
+              "byteLength": 344046,
+              "sha256": "7ca49f2a76173c9baafd4bc3e265382dea07c6b2ab746c1f872f718865904c67",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/RenderCommandContext-DKkw5eBA.js",
+              "byteLength": 32540,
+              "sha256": "3d43be0e2bbb0fe073d89c9369b7ce8ef046c6f14479bc9c66d91e468228f09c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/RendererCacheMap-C3xi123s.js",
+              "byteLength": 30521,
+              "sha256": "9cc5fbd9c86094c864e09a4b0af6eff278a1f90039acde5cd33897d74865f692",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/RttEngine-DLvXxLbn.js",
+              "byteLength": 8621,
+              "sha256": "6b77cd05ca1f31145a4407c4f044557079aad5aa940e118c21a45a2a95009d32",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Scene-B67DqOUp.js",
+              "byteLength": 39949,
+              "sha256": "764129ee723d9f7ebd7506d40aa9383f70785cc12fedc720dcc70c0227d7196f",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ScriptComponent-BTvBkGqy.js",
+              "byteLength": 34762,
+              "sha256": "add90caa9a0173491cd1e22fd6e809fdf497eb65dcfaca202051831a01dee135",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/ScriptResource-CZbhMvn8.js",
+              "byteLength": 8077,
+              "sha256": "bcb03b2a1a9e92f886ee74864d6b72e285357288ace803fb053bd6d7fdb69024",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Sky-CMwO4Q6R.js",
+              "byteLength": 2654,
+              "sha256": "1e287ffd6f0b7bea685af2dbb3f807b85272a9a1a4511d38bf67e3a409bf61da",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/SpatialIndexService-CY805Aih.js",
+              "byteLength": 56693,
+              "sha256": "4c685a41cb8b870282867a6dcd5de4f925c14d10416b5aa5e259615a00a6c8a8",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/SphericalTransform3D-DpXtwAeG.js",
+              "byteLength": 5687,
+              "sha256": "5563706701c966dd7d7e4f755914e06d7c1c8383cd890506eba771ab903e5be0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/SVGGeometry2D-PkBLpLEw.js",
+              "byteLength": 121456,
+              "sha256": "1e41cea9d729c951d2d98dafbe00e4b215b135942c6b29d20c64cf3590c5af8e",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/System-CIIb_ci6.js",
+              "byteLength": 3406,
+              "sha256": "84f2bcb7f7b93635bdf95ec307bcc41953268deefbff368da1a57892331af27c",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Transform2D-BQcy9yW6.js",
+              "byteLength": 5218,
+              "sha256": "98b0fd783baf9f5545ed2224990915d2057a4580a5b7df5bb0ab5a222d060d30",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/Transform3D-ClwzR-VK.js",
+              "byteLength": 4432,
+              "sha256": "e422baa0b4c244895e54867d56a07e820f183cdb2f0c82562b7189290a8ffbf9",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/TransparentMegaBatch-NjW-cBZK.js",
+              "byteLength": 324399,
+              "sha256": "af0c52c752eba32655ef5ad0bd71b460f806091876fb9ff0e087d14b0dea755a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/VolumeMaterial-D17RCtMZ.js",
+              "byteLength": 6685,
+              "sha256": "3d7fa1d916bc4d054230333065b0929b5a503c9f9d4b82c87c13a9c0e71f5284",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/World-NSjwM1ON.js",
+              "byteLength": 59239,
+              "sha256": "b8dd487d854eb913c7bac3361358b43c8d842d8984b1814d0305bb96dfa1a4e7",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/chunks/WorldResourceCleanup-CSTul4-x.js",
+              "byteLength": 892,
+              "sha256": "d22ecd6960a36ab7707a70bb5999c7c87123688c0787e301cffaa72f50607f48",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/color.js",
+              "byteLength": 8426,
+              "sha256": "332d043fe4bad5a9de29162bbd977be746dd8ebdc57b12d253858928d550dd22",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/components.js",
+              "byteLength": 2394,
+              "sha256": "16f075bcdac3a5961d67c8e7d3f0c07de65cdc2d02de3d94c303bb6fdbaf7d58",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/diagnostics.js",
+              "byteLength": 2016,
+              "sha256": "4584d6d67b97235f40b72c4ef30b63d3a13b55d174ab452fa5cfb14677e2eef8",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/ecs.js",
+              "byteLength": 795,
+              "sha256": "2c4329e5a75fa2b7dc607804d8fe34265140376b25b95db542a909943bb256e7",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/experimental/diagnostics.js",
+              "byteLength": 4502,
+              "sha256": "371e96e91d7bb2428e7bf706a9f391b857a331365e4131c1fa0ef2eabc8ab9e1",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/experimental/renderer.js",
+              "byteLength": 31218,
+              "sha256": "8b637ee3c57b8b087e07c76d4451e12441fe10a8c778df369d1a65749435f579",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/extension-authoring.js",
+              "byteLength": 1261,
+              "sha256": "15759fd56cd90edf4f93b5c4fc5d13960f513aaca8de316ceb70ee91b931b424",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/geometry.js",
+              "byteLength": 78080,
+              "sha256": "2c51847470b4a8b615ae561250acaf8265831114e80137c6080ccc03a3aae7e7",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/index.js",
+              "byteLength": 3937,
+              "sha256": "60509beda9643e30735426e86af3a95c3ed09cf1b919f0fa88b8f46bef0d53dc",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/input.js",
+              "byteLength": 3818,
+              "sha256": "fe114fc7ac9e07841d8f7ca830160df4b0ab620a256463a7099bed70544f5781",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/2d-ui-shader-artifact.js",
+              "byteLength": 53787,
+              "sha256": "d9719d72ec89cce1029e843de072884453b52f993a46d6474ec463b4b3569894",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/compute-shader-artifact.js",
+              "byteLength": 33400,
+              "sha256": "477d0cfce36f516f486551f3f2fd0a51b48b4668e49d25d34c96ca89f95fe4b5",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/deformation-shader-artifact.js",
+              "byteLength": 138109,
+              "sha256": "80d0703c77972fcce91f36e78d50d92ca12e95650c8d7cfbbfd2280e57c323af",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/material-lighting-shader-artifact.js",
+              "byteLength": 205125,
+              "sha256": "31b767d173b3a8bc9581d136774a70b167d8a383fbda098de884de981b640d20",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/postprocess-shader-artifact.js",
+              "byteLength": 60064,
+              "sha256": "5cbc27d937c15a07caa1bc94c6884e79f358360a8dc1c0e062bdd222d8296ff8",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/precompiled-shader-runtime.js",
+              "byteLength": 9197,
+              "sha256": "10419c3b3ddadf276d8fbd7debccfdaa86300d37c02a60a5025fc13cde9f81d3",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/simple3d-shader-artifact.js",
+              "byteLength": 43650,
+              "sha256": "25bd7ab5c123970c449efd1b5c387e943c2b9d13bc17f7bf7a4561c46390e439",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/engine/dist/internal/specialized-rendering-shader-artifact.js",
+              "byteLength": 76467,
+              "sha256": "1ef1314961b54cefb4828286a62908c966880aa73cd2432327fb0af298259cd5",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/animation.js",
+              "byteLength": 57934,
+              "sha256": "bdbd48245ac56c0de871b62efb97237274ca18ada8bf24a657d4891f5c9412a2",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/2d-ui-animation-2d.generated-6HyEQbuq.js",
+              "byteLength": 13588,
+              "sha256": "b3cf9d0326b4b3c4daa7cc36700139be336e8a51014e324cc75c53f0871fcdf0",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/Animation2DStateMachine-DvRpvrZ0.js",
+              "byteLength": 139046,
+              "sha256": "637f12b16110e4b99f803ad110d8db4d66658173596d5d1e4ac4e5c25a03d815",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/AnimationStateMachineController-4sKaqh9E.js",
+              "byteLength": 61628,
+              "sha256": "285b7b33a3b46e2ceccd32924e42d7525ef1a6c69134c17513082a3c225a2838",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/AnimationVisual2D-8y3qp0_U.js",
+              "byteLength": 8935,
+              "sha256": "3c79905b94a2eade0e1582e0e7e670e6fb4eafdbcabfa74b6ddfb2e73387caa2",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/chunks/RenderSystem2DBase-DDT61dAu.js",
+              "byteLength": 8981,
+              "sha256": "9f37ff0b375f9b1bc1db3f04eca641fdc67f26b42afded6a00140e2755ed455d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/extensions/dist/deformable-animation.js",
+              "byteLength": 15608,
+              "sha256": "aeb27981bf50797972f0145ae55667f831a50102b33e3f423023d9a67298097d",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "__repo/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js",
+              "byteLength": 199533,
+              "sha256": "32cdefcfe7b340710c242b0982316d5af501bb81ccdc3744f57bd0b2acd4e400",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "deformable2d-g07-playback-fixture.mjs",
+              "byteLength": 9408,
+              "sha256": "4538a361d9e4d3b4170edaaa90320b432134b8fd95f329a1644de0f1da601467",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "Mao.2048/texture_00.png",
+              "byteLength": 3130953,
+              "sha256": "0b97283d69e62d346bcca25f8a91a5dd477f2e668ad9801b15fa7f108631c624",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "model.hya",
+              "byteLength": 604,
+              "sha256": "9a240f40f570ed0f77dfe1ef0ca4126693fd14f06bb25e84a07abbff002672bc",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "model.hydm",
+              "byteLength": 7681192,
+              "sha256": "f05ecaaa3cda559261df0c680ea107516ff7893cafcb14e2539f189ec99d436a",
+              "requestCount": 1
+            },
+            {
+              "sourcePath": "playback.html",
+              "byteLength": 1072,
+              "sha256": "642d2b763993ba8408d344be4c6bf75994009cb18dbf9af67ed7b917b6f1fd9b",
+              "requestCount": 1
+            }
+          ]
+        },
+        "parseMs": 2.3200000524520874,
+        "coldFirstFrameMs": 318.6050000190735,
+        "warmFirstFrameMs": 45.46000003814697,
+        "steady": {
+          "frameCount": 120,
+          "cpuUpdateRenderP50Ms": 13.68500006198883,
+          "cpuUpdateRenderP95Ms": 21.834999918937683,
+          "uploadBytes": 70593120,
+          "gpuFrameP50Ms": null,
+          "gpuFrameP95Ms": null,
+          "gpuQueueCompletionP50Ms": 15.740000009536743,
+          "gpuQueueCompletionP95Ms": 17.360000014305115,
+          "gpuQueueCompletionSamples": 8
+        },
+        "gpuMemory": {
+          "estimatedBytes": 53838932,
+          "peakEstimatedBytes": 53838932
+        },
+        "peakProcessMemoryBytes": 21091849,
+        "memorySamples": [
+          {
+            "label": "baseline",
+            "bytes": 7422060,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-20",
+            "bytes": 20534369,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-40",
+            "bytes": 20595397,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-60",
+            "bytes": 20595397,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-80",
+            "bytes": 21091849,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-100",
+            "bytes": 21091849,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-120",
+            "bytes": 20666829,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "steady-complete",
+            "bytes": 20666829,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          },
+          {
+            "label": "frame-140",
+            "bytes": 20666829,
+            "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+          }
+        ],
+        "runtime": {
+          "state": "ready",
+          "drawableCount": 262
+        },
+        "renderer": {
+          "visualCount": 262,
+          "maskTargetCount": 16,
+          "compositeLayerCount": 37,
+          "droppedCompositeCount": 0,
+          "maskPixels": 8581984,
+          "effectTargetCount": 0,
+          "droppedEffectCount": 0,
+          "effectPixels": 0
+        },
+        "browser": {
+          "product": "Chrome/151.0.7922.170",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:62089/playback.html?",
+          "angleBackend": "d3d11",
+          "nativeBackend": true
+        },
+        "allocationSampling": {
+          "kind": "chrome-v8-allocation-sampling",
+          "samplingInterval": 32768,
+          "sampledBytes": 199657468,
+          "sampleCount": 6003,
+          "top": [
+            {
+              "functionName": "_track",
+              "url": "http://127.0.0.1:62089/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 350,
+              "sampledBytes": 47429972,
+              "samples": 1442
+            },
+            {
+              "functionName": "buildVertices",
+              "url": "http://127.0.0.1:62089/__repo/extensions/dist/animation.js",
+              "lineNumber": 1119,
+              "sampledBytes": 29272956,
+              "samples": 893
+            },
+            {
+              "functionName": "getPipeline",
+              "url": "http://127.0.0.1:62089/__repo/extensions/dist/animation.js",
+              "lineNumber": 612,
+              "sampledBytes": 20983900,
+              "samples": 640
+            },
+            {
+              "functionName": "getResources",
+              "url": "http://127.0.0.1:62089/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 299,
+              "sampledBytes": 16981724,
+              "samples": 513
+            },
+            {
+              "functionName": "next",
+              "url": "",
+              "lineNumber": 0,
+              "sampledBytes": 9607836,
+              "samples": 293
+            },
+            {
+              "functionName": "add",
+              "url": "",
+              "lineNumber": 0,
+              "sampledBytes": 6833420,
+              "samples": 184
+            },
+            {
+              "functionName": "set",
+              "url": "",
+              "lineNumber": 0,
+              "sampledBytes": 5839172,
+              "samples": 132
+            },
+            {
+              "functionName": "record",
+              "url": "http://127.0.0.1:62089/__repo/extensions/dist/animation.js",
+              "lineNumber": 395,
+              "sampledBytes": 5678604,
+              "samples": 173
+            },
+            {
+              "functionName": "getGeometryGpu",
+              "url": "http://127.0.0.1:62089/__repo/extensions/dist/animation.js",
+              "lineNumber": 852,
+              "sampledBytes": 4425580,
+              "samples": 135
+            },
+            {
+              "functionName": "getEntry",
+              "url": "http://127.0.0.1:62089/__repo/engine/dist/chunks/World-NSjwM1ON.js",
+              "lineNumber": 140,
+              "sampledBytes": 4268160,
+              "samples": 130
+            },
+            {
+              "functionName": "sweepGeometryGpu",
+              "url": "http://127.0.0.1:62089/__repo/extensions/dist/animation.js",
+              "lineNumber": 1021,
+              "sampledBytes": 3770088,
+              "samples": 115
+            },
+            {
+              "functionName": "_instrumentRenderPass",
+              "url": "http://127.0.0.1:62089/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 491,
+              "sampledBytes": 3311404,
+              "samples": 101
+            },
+            {
+              "functionName": "sampleDeformableMesh2DDrawable",
+              "url": "http://127.0.0.1:62089/__repo/extensions/dist/deformable-animation.js",
+              "lineNumber": 7,
+              "sampledBytes": 3310328,
+              "samples": 101
+            },
+            {
+              "functionName": "_instrumentDestroy",
+              "url": "http://127.0.0.1:62089/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 407,
+              "sampledBytes": 2991780,
+              "samples": 91
+            },
+            {
+              "functionName": "releaseEntityGpuEntriesNotIn",
+              "url": "http://127.0.0.1:62089/__repo/extensions/dist/chunks/RenderSystem2DBase-DDT61dAu.js",
+              "lineNumber": 198,
+              "sampledBytes": 2623008,
+              "samples": 80
+            },
+            {
+              "functionName": "value",
+              "url": "http://127.0.0.1:62089/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+              "lineNumber": 135,
+              "sampledBytes": 2360448,
+              "samples": 72
+            },
+            {
+              "functionName": "geometryKey",
+              "url": "http://127.0.0.1:62089/__repo/extensions/dist/animation.js",
+              "lineNumber": 885,
+              "sampledBytes": 2360260,
+              "samples": 72
+            },
+            {
+              "functionName": "get",
+              "url": "",
+              "lineNumber": 0,
+              "sampledBytes": 2167280,
+              "samples": 66
+            },
+            {
+              "functionName": "draw",
+              "url": "http://127.0.0.1:62089/__repo/extensions/dist/animation.js",
+              "lineNumber": 682,
+              "sampledBytes": 2098184,
+              "samples": 64
+            },
+            {
+              "functionName": "apply",
+              "url": "http://127.0.0.1:62089/__repo/extensions/dist/deformable-animation.js",
+              "lineNumber": 103,
+              "sampledBytes": 1540756,
+              "samples": 47
+            }
+          ]
+        },
+        "visualCapture": {
+          "sampleWidth": 24,
+          "sampleHeight": 24,
+          "meanRgb": [
+            4.955,
+            7.953,
+            22.899
+          ],
+          "darkRatio": 1,
+          "brightRatio": 0
+        },
+        "cubismRuntimeInBrowser": false,
+        "forbiddenRequestCount": 0,
+        "lifecycle": {
+          "resourcesBeforeDestroy": 1188,
+          "resourcesAfterDestroy": 0,
+          "releasedOwnerResiduals": 0,
+          "ownersAfterDestroy": 0,
+          "cachesAfterDestroy": 1
+        },
+        "diagnostics": [
+          {
+            "severity": "warning",
+            "code": "W_G07_GPU_TIMESTAMP_UNAVAILABLE",
+            "path": "$.runtime.steady.gpuFrameP50Ms",
+            "message": "Engine timestamp-query output was unavailable; GPU queue-completion latency is recorded as the explicit fallback metric."
+          }
+        ],
+        "errors": []
+      }
+    }
+  ],
+  "neutralRuntime": {
+    "id": "g07-minimal-fake-source-adapter",
+    "adapter": {
+      "id": "live2d-cubism-clip-baked",
+      "version": "1.1.0",
+      "sourceVersion": "sha256-fake-source-adapter",
+      "evaluatorVersion": "fake-evaluator-no-core+minimal-fake-source@1"
+    },
+    "playbackPassed": true,
+    "cubismRuntimeInBrowser": false,
+    "forbiddenRequestCount": 0,
+    "artifactForbiddenTokenCount": 0,
+    "lifecycleResiduals": 0,
+    "runtime": {
+      "status": "passed",
+      "network": {
+        "totalBytes": 3356718,
+        "packageRawBytes": 5489,
+        "requestCount": 106,
+        "uniqueFileCount": 106,
+        "files": [
+          {
+            "sourcePath": "__repo/animation-spec/dist/chunks/binary-BaiwDHsx.js",
+            "byteLength": 72545,
+            "sha256": "bbd4ed98f9f8c2efdf413fcc5a77108dfdd42cad5e4bd13f1596fb38dffc63c6",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/animation-spec/dist/chunks/codec-CCkQOBim.js",
+            "byteLength": 15405,
+            "sha256": "be348d69c2e43037fcddcc51f0671f0316506f7eeff78addf9ed91193d6347f5",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/animation-spec/dist/chunks/errors-Bzs3GOD9.js",
+            "byteLength": 188,
+            "sha256": "3999a050e897dfbad8990bc9d8a124a6f2064932ad60cb1e2037e69c1ef34b96",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/animation-spec/dist/chunks/extensions-DxL4AxOC.js",
+            "byteLength": 806,
+            "sha256": "78d5f45439b718ed4531b4e80033ad63027c36f40258d74e50f98f77e7ecd4d9",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/animation-spec/dist/chunks/types-DW9eOlMG.js",
+            "byteLength": 192,
+            "sha256": "3409f3470061fcdf0fcdb2e4e493d2aec9e205212fbfffef7a38aeffa13bcb3f",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/animation-spec/dist/deformable2d.js",
+            "byteLength": 1214,
+            "sha256": "618ccbd9b130466ce31cdecb4952c4b61e5d0c59262b7ebf59fc7874da5b88fc",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/animation-spec/dist/index.js",
+            "byteLength": 1458,
+            "sha256": "525c1f5e5ed0f559ac4c44f7e4402edb8eb7188548cf3b122930060fa1273c5c",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/align-BPmoUMBR.js",
+            "byteLength": 312,
+            "sha256": "f7c6c62e415ac0695d81277ef4e46e0bd536686be4117f4491ee2b286b89e250",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+            "byteLength": 1568,
+            "sha256": "843e370458d25854f17210a6ac95b3afec64529e8aa689f01d7fb3ff0ebb3f43",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/AssetParser-BT55VvTe.js",
+            "byteLength": 2904,
+            "sha256": "3a1c7d9def1cae0ebd0ec074834726fc034ea4024695b59807d96a0279f9aefd",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/assets-ijdP7ezJ.js",
+            "byteLength": 38096,
+            "sha256": "c84ad813bf2124fd9b3b666b5b10fc2e35a344284be2542384ad27c58a498d1a",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/AssetUploadScheduler-v9a8vCxA.js",
+            "byteLength": 10113,
+            "sha256": "a7f297c309ffe7063784b41815c72b64a460d1489eae5269de2db2ce05520aa0",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/BaseRenderer-BPEPEE9n.js",
+            "byteLength": 8605,
+            "sha256": "982c8cc28cdda14c52a6ad5f0345ec9e165c0c2bbf97cfe1ab661177dbdf731b",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/BasicMaterial-DQyhoOri.js",
+            "byteLength": 4629,
+            "sha256": "5f0acb868decfbe01ee6ef933d9bbb447f5f8679a4c1fa49065bf5ba45a5da2d",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/BitmapFontBuilder-C06uZ7Uf.js",
+            "byteLength": 3522,
+            "sha256": "4446503543bc869ac9392ac48967bf844aeb29348c5ebc94b8e3d7802c1e169c",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/BitmapText-BR-jsEuP.js",
+            "byteLength": 1378,
+            "sha256": "0d5a55db31b7a69335a58352ac6d88d5369e10e056f274b714a6cb4ba530ac77",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/BuiltinRenderShader-4o-Hd2hR.js",
+            "byteLength": 953,
+            "sha256": "225c97c51ea114788b2b0412cbbb5a11062f66187659def32f8a9fcbef267ec0",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/BuiltinSpecializedRenderingShader-CWsuNVNG.js",
+            "byteLength": 802,
+            "sha256": "a8b7acc667696c6e22059f2dc547a15eae7a0be8befe70993cd0ee66e018ea06",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/BvhLod3D-CrDMn2hg.js",
+            "byteLength": 5947,
+            "sha256": "3d93767f54b45f88fba199714168dfb05fd73401d0dc8c3a6cfe140285e3873c",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Camera3D-V7M71MBL.js",
+            "byteLength": 7545,
+            "sha256": "c6052f2ab1568225016bb13ce3e2b2f6a6cafd777101d40432df5981090853a5",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/CartesianTransform3D-D8am4JDK.js",
+            "byteLength": 6067,
+            "sha256": "babd0ceb30beb2b8d67f27e6d9b36f5854154e3ebf2e563030c90cd7c0931e54",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/ClippingPlanes-CMq5GScg.js",
+            "byteLength": 4625,
+            "sha256": "e7ab5ded624eee06c2324a1e980bf38121dbb85e7bf14c7f5c9e3fc24748e7a9",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/ColorSRGB-DkovSzkA.js",
+            "byteLength": 4365,
+            "sha256": "c6102958a7e65d5e0c0aa80af9ebfc953d08199814088fa04b990790f2c01000",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Component-Du0fittL.js",
+            "byteLength": 5010,
+            "sha256": "685f63bc79b39ad0d3913d99d52d5cb2dabcc00b0ff716e39fe433923f53af33",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/constants-Do1J_v-k.js",
+            "byteLength": 188,
+            "sha256": "bbeb0c6e0d36fe3f6cc271cbeb5a997b08a922c9dadf0a54fbde908ede75d848",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/CssMaterial-B5KTUx2i.js",
+            "byteLength": 11613,
+            "sha256": "1442de959ff4ab3f76f46b12f3c0f106702bc692586c1f64e1235f74394d0ea1",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Engine-DLT2SbI_.js",
+            "byteLength": 56911,
+            "sha256": "7bdc79a7c97a5a1892ec54175f43b3f4a7407e0bf4e50067506c3e8eb4003821",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/EngineDiagnosticsAccess-SXWvpo8N.js",
+            "byteLength": 785,
+            "sha256": "83ef06a54945d6f5801917bbef2dd210786a075a89f2e020c9afe162de8e9ff9",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+            "byteLength": 10324,
+            "sha256": "320dbdc121cdf5fcf2b540235114047757bc5f4d2f5af142b6775b778c499cc9",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Entity-D-_UAiw1.js",
+            "byteLength": 24569,
+            "sha256": "4d9bfea1c61042d887deb748e5ecb2857059e786fe70222b6fb5da2c26afa8d0",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Frustum-BAnnJrL_.js",
+            "byteLength": 11397,
+            "sha256": "425828a59f979c61fabdacca0c4a28358f989e5a06f271a99407518e1343db79",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Geometry2D-D7SVMQoB.js",
+            "byteLength": 3341,
+            "sha256": "6e53d9db99363a44c421a9c4db42d46ba9b7a03becfa2f44b357565d5114eced",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Global-Ny7k6KJK.js",
+            "byteLength": 1074,
+            "sha256": "cb9476d924e852917be05bd4ca28900c0f3c3ed1d3409b31a08806646da448e4",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+            "byteLength": 25387,
+            "sha256": "84a037a8d103a39c7e8ef6adf1a3000a26b5bd9ebce9f98e4234097d04bd2e5a",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/GuiSystem-D-uLKmPT.js",
+            "byteLength": 127189,
+            "sha256": "5d9216386689600fdfb4e018d15feace7eeeac1e34f62b3f7336f59910710a75",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/hierarchy-CZkgLn-Q.js",
+            "byteLength": 1012,
+            "sha256": "9873bcd2267676559b2434745666376ee688e66646061373fec307fd486f5dd3",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/IEngine-BWIJHt_0.js",
+            "byteLength": 925,
+            "sha256": "6248980d2d17d2f337c1a2ca0e1d0561e6918c95b6a997ad3500729a895577ff",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/ImageTextureUpload-COYtgW6A.js",
+            "byteLength": 5577,
+            "sha256": "f6e5194c0687164a989870e0e132d1234b1192dbd974d416f75152b46e610e6b",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Ktx2TextureLoader-BEb-GLxa.js",
+            "byteLength": 296135,
+            "sha256": "f6cbedcba2390e864bd793096a16823a667e23c0fa0417509ba01353f39f171d",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Line3D-BYKGrwU7.js",
+            "byteLength": 4071,
+            "sha256": "08cf0bab942eecce7da83274476814a5dcd7c29428716d86afeda7cfdd05e68a",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Material2D-bYP1LiBS.js",
+            "byteLength": 1103,
+            "sha256": "b3000c6260f10f3412fae6140356a9bc0632d71ba40895111c9e3b0f5625e9aa",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/MaterialRegistryBase-DngXOQhW.js",
+            "byteLength": 3422,
+            "sha256": "a23e68cc20442811427ddd0c4a0326381ea265675090e4ba0db2271b834725b0",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/MaterialRendererRegistry-DxB-MXl6.js",
+            "byteLength": 40283,
+            "sha256": "7186d7e003ae33278de99b92a2c553469a4ed53079f0e5cc17368d3da5319d13",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/materialValidation-Cz4AbnBy.js",
+            "byteLength": 22831,
+            "sha256": "0ef64ca912261373994d03d6d430e06fca154c3d4c5b5c05284918021d1ac82d",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Mesh2D-DfykuQgt.js",
+            "byteLength": 9330,
+            "sha256": "114b9a8b3622cf1265ad7f99f0e6c481df57ca747d0cfaa085ce911686ed98b4",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Mesh2DRenderer-CnDAaPW-.js",
+            "byteLength": 18658,
+            "sha256": "30b865ba63ae1dc864566c4e35b668fc5822fc1900d146b6691e230737c8baee",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Mesh2DRenderSystem-C5xg9j1-.js",
+            "byteLength": 6420,
+            "sha256": "232ac943c4e5053e4e6d97cf1acb6c629ff9d62c50b84573098a3ed2fa540f49",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Mesh3D-B9Ev34fG.js",
+            "byteLength": 2399,
+            "sha256": "097b6fae01fd1323d40d18d7ec6529c6f8bc20afeb1ce387825ccc0ed64a6303",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/MeshHelper-BUZ7aJWK.js",
+            "byteLength": 10455,
+            "sha256": "22654fac2e8f95418260fb1639de578ee07a899b0242d478a03c8a3a05567c82",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/OrbitControl-dZCAmOUY.js",
+            "byteLength": 8928,
+            "sha256": "2c9373004898c6a449268ad65be0b6d87726302852a43f6b02468fef89cf6ad9",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/ParticleEmitter3D-qTvZwiEl.js",
+            "byteLength": 31711,
+            "sha256": "b6c8804918e3b88270889652e6a43b5265a432abca21bcd41a9c2b55774f700e",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Physics2DTo3DTransformSync-DJYQr2KX.js",
+            "byteLength": 1554,
+            "sha256": "cce72238a0eb8b190a17f156c56d938cc264ec6ec6221bbd9996cad86b260c90",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/PipelineWarmup-DqYBVQLM.js",
+            "byteLength": 15759,
+            "sha256": "1ffe77cf140aff41712079138bcd63885fb9af57681be5ff4544dfd0b16c0298",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/PlanarMirrorMaterial-BA2aOBJa.js",
+            "byteLength": 2560,
+            "sha256": "3057be12fd0da262a36c9f8365d7be880a3b0965b19480f79469bf70e1481472",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/PlaneGeometry-BYjs1rC7.js",
+            "byteLength": 5583,
+            "sha256": "aa45cfef25ef07994bd9a37bb55038c899fea1b2762c71c1045a171742506d53",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/PointLight-CPweOrQl.js",
+            "byteLength": 11443,
+            "sha256": "5fc9129dc7a6e2d8c21114dc850e6762e9a8ad8430a86c67a6639ed921277197",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/PostProcessSceneTextureStore-C6AZrc-u.js",
+            "byteLength": 18787,
+            "sha256": "d887c35d2424309333abce772aee154f2e271a3ae734e4d24d41dde47dddd4d1",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Render3DSystem-BLLDyXkH.js",
+            "byteLength": 344046,
+            "sha256": "7ca49f2a76173c9baafd4bc3e265382dea07c6b2ab746c1f872f718865904c67",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/RenderCommandContext-DKkw5eBA.js",
+            "byteLength": 32540,
+            "sha256": "3d43be0e2bbb0fe073d89c9369b7ce8ef046c6f14479bc9c66d91e468228f09c",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/RendererCacheMap-C3xi123s.js",
+            "byteLength": 30521,
+            "sha256": "9cc5fbd9c86094c864e09a4b0af6eff278a1f90039acde5cd33897d74865f692",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/RttEngine-DLvXxLbn.js",
+            "byteLength": 8621,
+            "sha256": "6b77cd05ca1f31145a4407c4f044557079aad5aa940e118c21a45a2a95009d32",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Scene-B67DqOUp.js",
+            "byteLength": 39949,
+            "sha256": "764129ee723d9f7ebd7506d40aa9383f70785cc12fedc720dcc70c0227d7196f",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/ScriptComponent-BTvBkGqy.js",
+            "byteLength": 34762,
+            "sha256": "add90caa9a0173491cd1e22fd6e809fdf497eb65dcfaca202051831a01dee135",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/ScriptResource-CZbhMvn8.js",
+            "byteLength": 8077,
+            "sha256": "bcb03b2a1a9e92f886ee74864d6b72e285357288ace803fb053bd6d7fdb69024",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Sky-CMwO4Q6R.js",
+            "byteLength": 2654,
+            "sha256": "1e287ffd6f0b7bea685af2dbb3f807b85272a9a1a4511d38bf67e3a409bf61da",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/SpatialIndexService-CY805Aih.js",
+            "byteLength": 56693,
+            "sha256": "4c685a41cb8b870282867a6dcd5de4f925c14d10416b5aa5e259615a00a6c8a8",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/SphericalTransform3D-DpXtwAeG.js",
+            "byteLength": 5687,
+            "sha256": "5563706701c966dd7d7e4f755914e06d7c1c8383cd890506eba771ab903e5be0",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/SVGGeometry2D-PkBLpLEw.js",
+            "byteLength": 121456,
+            "sha256": "1e41cea9d729c951d2d98dafbe00e4b215b135942c6b29d20c64cf3590c5af8e",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/System-CIIb_ci6.js",
+            "byteLength": 3406,
+            "sha256": "84f2bcb7f7b93635bdf95ec307bcc41953268deefbff368da1a57892331af27c",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Transform2D-BQcy9yW6.js",
+            "byteLength": 5218,
+            "sha256": "98b0fd783baf9f5545ed2224990915d2057a4580a5b7df5bb0ab5a222d060d30",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/Transform3D-ClwzR-VK.js",
+            "byteLength": 4432,
+            "sha256": "e422baa0b4c244895e54867d56a07e820f183cdb2f0c82562b7189290a8ffbf9",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/TransparentMegaBatch-NjW-cBZK.js",
+            "byteLength": 324399,
+            "sha256": "af0c52c752eba32655ef5ad0bd71b460f806091876fb9ff0e087d14b0dea755a",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/VolumeMaterial-D17RCtMZ.js",
+            "byteLength": 6685,
+            "sha256": "3d7fa1d916bc4d054230333065b0929b5a503c9f9d4b82c87c13a9c0e71f5284",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/World-NSjwM1ON.js",
+            "byteLength": 59239,
+            "sha256": "b8dd487d854eb913c7bac3361358b43c8d842d8984b1814d0305bb96dfa1a4e7",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/chunks/WorldResourceCleanup-CSTul4-x.js",
+            "byteLength": 892,
+            "sha256": "d22ecd6960a36ab7707a70bb5999c7c87123688c0787e301cffaa72f50607f48",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/color.js",
+            "byteLength": 8426,
+            "sha256": "332d043fe4bad5a9de29162bbd977be746dd8ebdc57b12d253858928d550dd22",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/components.js",
+            "byteLength": 2394,
+            "sha256": "16f075bcdac3a5961d67c8e7d3f0c07de65cdc2d02de3d94c303bb6fdbaf7d58",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/diagnostics.js",
+            "byteLength": 2016,
+            "sha256": "4584d6d67b97235f40b72c4ef30b63d3a13b55d174ab452fa5cfb14677e2eef8",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/ecs.js",
+            "byteLength": 795,
+            "sha256": "2c4329e5a75fa2b7dc607804d8fe34265140376b25b95db542a909943bb256e7",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/experimental/diagnostics.js",
+            "byteLength": 4502,
+            "sha256": "371e96e91d7bb2428e7bf706a9f391b857a331365e4131c1fa0ef2eabc8ab9e1",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/experimental/renderer.js",
+            "byteLength": 31218,
+            "sha256": "8b637ee3c57b8b087e07c76d4451e12441fe10a8c778df369d1a65749435f579",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/extension-authoring.js",
+            "byteLength": 1261,
+            "sha256": "15759fd56cd90edf4f93b5c4fc5d13960f513aaca8de316ceb70ee91b931b424",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/geometry.js",
+            "byteLength": 78080,
+            "sha256": "2c51847470b4a8b615ae561250acaf8265831114e80137c6080ccc03a3aae7e7",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/index.js",
+            "byteLength": 3937,
+            "sha256": "60509beda9643e30735426e86af3a95c3ed09cf1b919f0fa88b8f46bef0d53dc",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/input.js",
+            "byteLength": 3818,
+            "sha256": "fe114fc7ac9e07841d8f7ca830160df4b0ab620a256463a7099bed70544f5781",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/internal/2d-ui-shader-artifact.js",
+            "byteLength": 53787,
+            "sha256": "d9719d72ec89cce1029e843de072884453b52f993a46d6474ec463b4b3569894",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/internal/compute-shader-artifact.js",
+            "byteLength": 33400,
+            "sha256": "477d0cfce36f516f486551f3f2fd0a51b48b4668e49d25d34c96ca89f95fe4b5",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/internal/deformation-shader-artifact.js",
+            "byteLength": 138109,
+            "sha256": "80d0703c77972fcce91f36e78d50d92ca12e95650c8d7cfbbfd2280e57c323af",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/internal/material-lighting-shader-artifact.js",
+            "byteLength": 205125,
+            "sha256": "31b767d173b3a8bc9581d136774a70b167d8a383fbda098de884de981b640d20",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/internal/postprocess-shader-artifact.js",
+            "byteLength": 60064,
+            "sha256": "5cbc27d937c15a07caa1bc94c6884e79f358360a8dc1c0e062bdd222d8296ff8",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/internal/precompiled-shader-runtime.js",
+            "byteLength": 9197,
+            "sha256": "10419c3b3ddadf276d8fbd7debccfdaa86300d37c02a60a5025fc13cde9f81d3",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/internal/simple3d-shader-artifact.js",
+            "byteLength": 43650,
+            "sha256": "25bd7ab5c123970c449efd1b5c387e943c2b9d13bc17f7bf7a4561c46390e439",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/engine/dist/internal/specialized-rendering-shader-artifact.js",
+            "byteLength": 76467,
+            "sha256": "1ef1314961b54cefb4828286a62908c966880aa73cd2432327fb0af298259cd5",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/extensions/dist/animation.js",
+            "byteLength": 57934,
+            "sha256": "bdbd48245ac56c0de871b62efb97237274ca18ada8bf24a657d4891f5c9412a2",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/extensions/dist/chunks/2d-ui-animation-2d.generated-6HyEQbuq.js",
+            "byteLength": 13588,
+            "sha256": "b3cf9d0326b4b3c4daa7cc36700139be336e8a51014e324cc75c53f0871fcdf0",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/extensions/dist/chunks/Animation2DStateMachine-DvRpvrZ0.js",
+            "byteLength": 139046,
+            "sha256": "637f12b16110e4b99f803ad110d8db4d66658173596d5d1e4ac4e5c25a03d815",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/extensions/dist/chunks/AnimationStateMachineController-4sKaqh9E.js",
+            "byteLength": 61628,
+            "sha256": "285b7b33a3b46e2ceccd32924e42d7525ef1a6c69134c17513082a3c225a2838",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/extensions/dist/chunks/AnimationVisual2D-8y3qp0_U.js",
+            "byteLength": 8935,
+            "sha256": "3c79905b94a2eade0e1582e0e7e670e6fb4eafdbcabfa74b6ddfb2e73387caa2",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/extensions/dist/chunks/RenderSystem2DBase-DDT61dAu.js",
+            "byteLength": 8981,
+            "sha256": "9f37ff0b375f9b1bc1db3f04eca641fdc67f26b42afded6a00140e2755ed455d",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/extensions/dist/deformable-animation.js",
+            "byteLength": 15608,
+            "sha256": "aeb27981bf50797972f0145ae55667f831a50102b33e3f423023d9a67298097d",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "__repo/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js",
+            "byteLength": 199533,
+            "sha256": "32cdefcfe7b340710c242b0982316d5af501bb81ccdc3744f57bd0b2acd4e400",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "deformable2d-g07-playback-fixture.mjs",
+            "byteLength": 9408,
+            "sha256": "4538a361d9e4d3b4170edaaa90320b432134b8fd95f329a1644de0f1da601467",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "model.hya",
+            "byteLength": 564,
+            "sha256": "35e9353cea9784399ec913cd08b28e8f33f8aab2185690b5be6fb77de578cd9a",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "model.hydm",
+            "byteLength": 568,
+            "sha256": "7c4ec73f0c091525bc11b846c55b3ad91a7b33131b10841b37e3dcc5dcd3c133",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "playback.html",
+            "byteLength": 1072,
+            "sha256": "642d2b763993ba8408d344be4c6bf75994009cb18dbf9af67ed7b917b6f1fd9b",
+            "requestCount": 1
+          },
+          {
+            "sourcePath": "texture.png",
+            "byteLength": 4357,
+            "sha256": "b1c368220630bc239dfcf51ae7048769a560e6e3429246dc5475dd9ab641a6db",
+            "requestCount": 1
+          }
+        ]
+      },
+      "parseMs": 5.830000042915344,
+      "coldFirstFrameMs": 190.61500000953674,
+      "warmFirstFrameMs": 20.25499999523163,
+      "steady": {
+        "frameCount": 120,
+        "cpuUpdateRenderP50Ms": 1.1200000047683716,
+        "cpuUpdateRenderP95Ms": 1.659999966621399,
+        "uploadBytes": 170400,
+        "gpuFrameP50Ms": null,
+        "gpuFrameP95Ms": null,
+        "gpuQueueCompletionP50Ms": 4.745000004768372,
+        "gpuQueueCompletionP95Ms": 5.415000081062317,
+        "gpuQueueCompletionSamples": 8
+      },
+      "gpuMemory": {
+        "estimatedBytes": 3195500,
+        "peakEstimatedBytes": 3195500
+      },
+      "peakProcessMemoryBytes": 11120944,
+      "memorySamples": [
+        {
+          "label": "baseline",
+          "bytes": 7422060,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-20",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-40",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-60",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-80",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-100",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-120",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "steady-complete",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-140",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-160",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-180",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-200",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-220",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-240",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-260",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-280",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-300",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-320",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-340",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-360",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-380",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-400",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-420",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-440",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-460",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-480",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        },
+        {
+          "label": "frame-500",
+          "bytes": 11120944,
+          "source": "measureUserAgentSpecificMemory-or-heap-fallback"
+        }
+      ],
+      "runtime": {
+        "state": "ready",
+        "drawableCount": 1
+      },
+      "renderer": {
+        "visualCount": 1,
+        "maskTargetCount": 0,
+        "compositeLayerCount": 0,
+        "droppedCompositeCount": 0,
+        "maskPixels": 0,
+        "effectTargetCount": 0,
+        "droppedEffectCount": 0,
+        "effectPixels": 0
+      },
+      "browser": {
+        "product": "Chrome/151.0.7922.170",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+        "platform": "Win32",
+        "url": "http://127.0.0.1:62331/playback.html?",
+        "angleBackend": "d3d11",
+        "nativeBackend": true
+      },
+      "allocationSampling": {
+        "kind": "chrome-v8-allocation-sampling",
+        "samplingInterval": 32768,
+        "sampledBytes": 12170016,
+        "sampleCount": 369,
+        "top": [
+          {
+            "functionName": "next",
+            "url": "",
+            "lineNumber": 0,
+            "sampledBytes": 1639288,
+            "samples": 50
+          },
+          {
+            "functionName": "getResources",
+            "url": "http://127.0.0.1:62331/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+            "lineNumber": 299,
+            "sampledBytes": 951052,
+            "samples": 29
+          },
+          {
+            "functionName": "(V8 API)",
+            "url": "",
+            "lineNumber": 0,
+            "sampledBytes": 817232,
+            "samples": 23
+          },
+          {
+            "functionName": "getDebugSnapshot",
+            "url": "http://127.0.0.1:62331/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+            "lineNumber": 322,
+            "sampledBytes": 426204,
+            "samples": 13
+          },
+          {
+            "functionName": "captureSourceDescriptor",
+            "url": "http://127.0.0.1:62331/__repo/engine/dist/chunks/RenderCommandContext-DKkw5eBA.js",
+            "lineNumber": 200,
+            "sampledBytes": 393648,
+            "samples": 12
+          },
+          {
+            "functionName": "entries",
+            "url": "",
+            "lineNumber": 0,
+            "sampledBytes": 360608,
+            "samples": 11
+          },
+          {
+            "functionName": "getEngineDiagnosticsSnapshot",
+            "url": "http://127.0.0.1:62331/__repo/engine/dist/diagnostics.js",
+            "lineNumber": 25,
+            "sampledBytes": 360592,
+            "samples": 11
+          },
+          {
+            "functionName": "getPipeline",
+            "url": "http://127.0.0.1:62331/__repo/extensions/dist/animation.js",
+            "lineNumber": 612,
+            "sampledBytes": 360584,
+            "samples": 11
+          },
+          {
+            "functionName": "_instrumentCounterMethod",
+            "url": "http://127.0.0.1:62331/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+            "lineNumber": 505,
+            "sampledBytes": 327880,
+            "samples": 10
+          },
+          {
+            "functionName": "snapshot",
+            "url": "http://127.0.0.1:62331/__repo/engine/dist/experimental/diagnostics.js",
+            "lineNumber": 121,
+            "sampledBytes": 295136,
+            "samples": 9
+          },
+          {
+            "functionName": "values",
+            "url": "",
+            "lineNumber": 0,
+            "sampledBytes": 295056,
+            "samples": 9
+          },
+          {
+            "functionName": "_instrumentDestroy",
+            "url": "http://127.0.0.1:62331/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+            "lineNumber": 407,
+            "sampledBytes": 262600,
+            "samples": 8
+          },
+          {
+            "functionName": "record",
+            "url": "http://127.0.0.1:62331/__repo/extensions/dist/animation.js",
+            "lineNumber": 395,
+            "sampledBytes": 196796,
+            "samples": 6
+          },
+          {
+            "functionName": "_instrumentCommandEncoder",
+            "url": "http://127.0.0.1:62331/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+            "lineNumber": 469,
+            "sampledBytes": 196708,
+            "samples": 6
+          },
+          {
+            "functionName": "Float32Array",
+            "url": "",
+            "lineNumber": 0,
+            "sampledBytes": 164108,
+            "samples": 5
+          },
+          {
+            "functionName": "map",
+            "url": "",
+            "lineNumber": 0,
+            "sampledBytes": 164072,
+            "samples": 5
+          },
+          {
+            "functionName": "apply",
+            "url": "http://127.0.0.1:62331/__repo/extensions/dist/chunks/Animation2DStateMachine-DvRpvrZ0.js",
+            "lineNumber": 2148,
+            "sampledBytes": 163960,
+            "samples": 5
+          },
+          {
+            "functionName": "(anonymous)",
+            "url": "http://127.0.0.1:62331/__repo/engine/dist/chunks/GPUResourceTracker-CciHL9Gn.js",
+            "lineNumber": 320,
+            "sampledBytes": 163916,
+            "samples": 5
+          },
+          {
+            "functionName": "emit",
+            "url": "http://127.0.0.1:62331/__repo/engine/dist/chunks/GuiSystem-D-uLKmPT.js",
+            "lineNumber": 68,
+            "sampledBytes": 163912,
+            "samples": 5
+          },
+          {
+            "functionName": "measure",
+            "url": "http://127.0.0.1:62331/__repo/engine/dist/experimental/diagnostics.js",
+            "lineNumber": 49,
+            "sampledBytes": 163860,
+            "samples": 5
+          }
+        ]
+      },
+      "visualCapture": {
+        "sampleWidth": 24,
+        "sampleHeight": 24,
+        "meanRgb": [
+          4.955,
+          7.953,
+          22.899
+        ],
+        "darkRatio": 1,
+        "brightRatio": 0
+      },
+      "cubismRuntimeInBrowser": false,
+      "forbiddenRequestCount": 0,
+      "lifecycle": {
+        "resourcesBeforeDestroy": 21,
+        "resourcesAfterDestroy": 0,
+        "releasedOwnerResiduals": 0,
+        "ownersAfterDestroy": 0,
+        "cachesAfterDestroy": 1
+      },
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "W_G07_GPU_TIMESTAMP_UNAVAILABLE",
+          "path": "$.runtime.steady.gpuFrameP50Ms",
+          "message": "Engine timestamp-query output was unavailable; GPU queue-completion latency is recorded as the explicit fallback metric."
+        }
+      ],
+      "errors": []
+    }
+  },
+  "verdict": {
+    "status": "no-go",
+    "owner": "M05-G09",
+    "reason": "The pinned official Core evaluator proves Motion and drawable output, but the official Framework evaluation path for Expression + Physics + Pose is not integrated.",
+    "blockers": [
+      {
+        "sampleId": "niziiro-mao",
+        "capability": "expression",
+        "code": "E_CUBISM_RECIPE_CAPABILITY_MISSING",
+        "path": "$.recipe.expression",
+        "owner": "official-framework-evaluator",
+        "message": "Pinned evaluator does not execute expression; G09 must remain no-go until the official Framework path is integrated and rerun."
+      },
+      {
+        "sampleId": "niziiro-mao",
+        "capability": "physics",
+        "code": "E_CUBISM_RECIPE_CAPABILITY_MISSING",
+        "path": "$.recipe.physics",
+        "owner": "official-framework-evaluator",
+        "message": "Pinned evaluator does not execute physics; G09 must remain no-go until the official Framework path is integrated and rerun."
+      },
+      {
+        "sampleId": "niziiro-mao",
+        "capability": "pose",
+        "code": "E_CUBISM_RECIPE_CAPABILITY_MISSING",
+        "path": "$.recipe.pose",
+        "owner": "official-framework-evaluator",
+        "message": "Pinned evaluator does not execute pose; G09 must remain no-go until the official Framework path is integrated and rerun."
+      }
+    ]
+  },
+  "summary": {
+    "sampleCount": 3,
+    "pixelFidelitySampleCount": 3,
+    "structuralFidelitySampleCount": 3,
+    "runtimePlaybackSampleCount": 3,
+    "sourceRawBytes": 11994526,
+    "sourceGzipBytes": 10583004,
+    "hyaPackageRawBytes": 24703382,
+    "hyaPackageGzipBytes": 12800196,
+    "totalNetworkBytes": 34757069,
+    "peakProcessMemoryBytes": 21091849,
+    "peakGpuMemoryBytes": 53838932
+  },
+  "unclassifiedFailureCount": 0
+}

@@ -176,6 +176,10 @@ async function main(): Promise<void> {
       featureStatusKind: corpus.featureStatus.kind,
       implementationStates: [...new Set(corpus.featureStatus.features.map(feature => feature.implementationStatus))].sort(),
       coverageStates: [...new Set(corpus.featureStatus.features.map(feature => feature.coverageStatus))].sort(),
+      coveredFeatureIds: corpus.featureStatus.features
+        .filter(feature => feature.implementationStatus === 'supported' && feature.coverageStatus === 'covered')
+        .map(feature => feature.id)
+        .sort(),
       capabilityDetailCount: corpus.featureStatus.features.length,
       missingLocalAssetMessage: corpus.featureStatus.missingLocalAssetMessage,
       runtime: runtimeStatus,
@@ -212,7 +216,7 @@ async function loadCorpus(): Promise<LoadedCorpus> {
     fetchBytes(`${SAMPLE_ROOT}/mascot.hydm`),
     fetchBytes(`${SAMPLE_ROOT}/mascot.png`),
   ]);
-  if (featureStatus.schemaVersion !== 1 || featureStatus.kind !== 'haiyue-live2d-dashboard-feature-status' || !Array.isArray(featureStatus.features) || !Array.isArray(featureStatus.licensedSamples)) throw new Error('Live2D feature status format is invalid.');
+  if (![1, 2].includes(featureStatus.schemaVersion) || featureStatus.kind !== 'haiyue-live2d-dashboard-feature-status' || !Array.isArray(featureStatus.features) || !Array.isArray(featureStatus.licensedSamples)) throw new Error('Live2D feature status format is invalid.');
   if (!captureResponse.ok) throw new Error(`Capture request failed with HTTP ${captureResponse.status}.`);
   const captureText = await captureResponse.text();
   const capture = JSON.parse(captureText) as CubismDrawableCapture;
@@ -234,7 +238,7 @@ function renderCorpusSummary(corpus: LoadedCorpus, drawableCount: number, frameC
   setMetric('metric-delivery', formatBytes(runtimeBytes), `HYA + HYDM，比 capture 少 ${formatPercent(saving)}`);
   setMetric('metric-frames', String(frameCount), `${corpus.capture.duration.toFixed(2)}s · ${corpus.capture.frameRate.toFixed(0)} fps`);
   setMetric('metric-drawables', String(drawableCount), `${countVertices(corpus.capture)} vertices / frame`);
-  required('#report-meta').textContent = `hya-live2d-public-v1 · ${corpus.featureStatus.generatedFrom.manifestId} · dirty candidate ${corpus.featureStatus.generatedFrom.candidateRevision} · ${formatBytes(corpus.textureBytes.byteLength)} public texture`;
+  required('#report-meta').textContent = `hya-live2d-public-v1 · ${corpus.featureStatus.generatedFrom.manifestId} · candidate ${corpus.featureStatus.generatedFrom.candidateRevision} · formalEvidence=${corpus.featureStatus.generatedFrom.formalEvidence} · ${formatBytes(corpus.textureBytes.byteLength)} public texture`;
 }
 
 function renderCapabilityMatrix(status: DashboardFeatureStatus): void {

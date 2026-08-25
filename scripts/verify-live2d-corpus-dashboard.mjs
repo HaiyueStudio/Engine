@@ -24,6 +24,9 @@ assert.equal(result.licensedEvidenceSamples, 2);
 assert.equal(result.featureStatusKind, 'haiyue-live2d-dashboard-feature-status');
 assert.deepEqual(result.implementationStates, ['degraded', 'supported', 'unsupported']);
 assert.deepEqual(result.coverageStates, ['covered', 'not-applicable', 'not-covered']);
+for (const featureId of ['drawable-culling', 'multiply-color', 'screen-color']) {
+  assert.ok(result.coveredFeatureIds.includes(featureId), `${featureId} must be independently supported and covered.`);
+}
 assert.ok(result.capabilityDetailCount >= 9, 'Every capability must expose drill-down evidence.');
 assert.match(result.missingLocalAssetMessage, /许可/u);
 assert.equal(result.cubismRuntimeInBrowser, false);
@@ -44,6 +47,7 @@ console.log(JSON.stringify({
   licensedEvidenceSamples: result.licensedEvidenceSamples,
   implementationStates: result.implementationStates,
   coverageStates: result.coverageStates,
+  coveredFeatureIds: result.coveredFeatureIds,
   runtime: result.runtime,
   metrics: result.metrics,
   bundleBytes: Buffer.byteLength(bundle),

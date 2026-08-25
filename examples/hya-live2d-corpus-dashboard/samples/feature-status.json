@@ -1,9 +1,9 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "kind": "haiyue-live2d-dashboard-feature-status",
   "generatedFrom": {
-    "manifestId": "m05-g12-mask-blend-corpus",
-    "candidateRevision": "1217284cc4622f0885161dc5e933ae92674d9d02",
+    "manifestId": "m05-g16-drawable-color-culling-corpus",
+    "candidateRevision": "41ae2b4c44f6d523b2cd458675f8bc07929f1e25",
     "formalEvidence": false
   },
   "features": [
@@ -19,49 +19,63 @@
       "title": "Normal drawable blend",
       "implementationStatus": "supported",
       "coverageStatus": "covered",
-      "detail": "MIT fixture plus both licensed samples"
+      "detail": "MIT fixture plus licensed samples"
     },
     {
       "id": "mask-composition",
       "title": "Mask composition",
       "implementationStatus": "supported",
       "coverageStatus": "covered",
-      "detail": "84 observed mask contributions"
+      "detail": "Rice and Mao reference captures"
     },
     {
       "id": "inverted-mask",
       "title": "Inverted mask",
       "implementationStatus": "supported",
       "coverageStatus": "covered",
-      "detail": "15 observed consumers"
+      "detail": "Rice and Mao reference captures"
     },
     {
       "id": "additive-blend",
       "title": "Additive drawable blend",
       "implementationStatus": "supported",
       "coverageStatus": "covered",
-      "detail": "36 observed drawables"
+      "detail": "Rice and Mao reference captures"
     },
     {
       "id": "multiplicative-blend",
       "title": "Multiplicative drawable blend",
       "implementationStatus": "supported",
       "coverageStatus": "covered",
-      "detail": "8 observed drawables"
+      "detail": "Mao reference capture"
     },
     {
-      "id": "multiply-screen-color",
-      "title": "Multiply / screen drawable color",
+      "id": "multiply-color",
+      "title": "Multiply drawable color",
+      "implementationStatus": "supported",
+      "coverageStatus": "covered",
+      "detail": "54 observed drawable-frames"
+    },
+    {
+      "id": "screen-color",
+      "title": "Screen drawable color",
+      "implementationStatus": "supported",
+      "coverageStatus": "covered",
+      "detail": "38 observed drawable-frames"
+    },
+    {
+      "id": "drawable-culling",
+      "title": "Drawable culling",
+      "implementationStatus": "supported",
+      "coverageStatus": "covered",
+      "detail": "9 non-degenerate mirrored drawable-frames"
+    },
+    {
+      "id": "source-evaluation",
+      "title": "Expression / Pose / Physics source evaluation",
       "implementationStatus": "degraded",
       "coverageStatus": "not-covered",
-      "detail": "v1 diagnoses non-neutral tint and strict conversion fails"
-    },
-    {
-      "id": "culling",
-      "title": "Drawable culling",
-      "implementationStatus": "unsupported",
-      "coverageStatus": "not-covered",
-      "detail": "payload is retained but v1 renderer does not execute culling"
+      "detail": "clip-baked evaluator coverage remains recipe-dependent"
     },
     {
       "id": "runtime-parameters",
@@ -73,33 +87,31 @@
   ],
   "licensedSamples": [
     {
-      "id": "rice-glassfield-pro",
-      "title": "Rice Glassfield - PRO",
-      "implementationEvidence": "official-core-vs-hya",
-      "coverageStatus": "covered",
-      "observations": {
-        "drawableCount": 178,
-        "maskReferenceCount": 19,
-        "invertedMaskDrawableCount": 5,
-        "additiveDrawableCount": 21,
-        "multiplicativeDrawableCount": 0
-      },
-      "localOnly": true
-    },
-    {
       "id": "niziiro-mao",
       "title": "Niziiro Mao",
       "implementationEvidence": "official-core-vs-hya",
       "coverageStatus": "covered",
       "observations": {
-        "drawableCount": 262,
-        "maskReferenceCount": 65,
-        "invertedMaskDrawableCount": 10,
-        "additiveDrawableCount": 15,
-        "multiplicativeDrawableCount": 8
+        "nonNeutralMultiplyDrawableFrameCount": 54,
+        "nonNeutralScreenDrawableFrameCount": 38,
+        "cullingDrawableCount": 0,
+        "mirroredCullingDrawableFrameCount": 0
+      },
+      "localOnly": true
+    },
+    {
+      "id": "rice-glassfield-pro",
+      "title": "Rice Glassfield - PRO",
+      "implementationEvidence": "official-core-vs-hya",
+      "coverageStatus": "covered",
+      "observations": {
+        "nonNeutralMultiplyDrawableFrameCount": 0,
+        "nonNeutralScreenDrawableFrameCount": 0,
+        "cullingDrawableCount": 9,
+        "mirroredCullingDrawableFrameCount": 9
       },
       "localOnly": true
     }
   ],
-  "missingLocalAssetMessage": "官方模型不会随页面发布。请接受 Live2D 对应许可并在本地运行 feature-corpus verifier 以重放证据。"
+  "missingLocalAssetMessage": "官方模型与 Cubism Core 不随页面发布。请接受 Live2D 许可并运行本地 G16 verifier 重放证据。"
 }

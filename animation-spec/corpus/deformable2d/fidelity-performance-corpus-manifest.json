@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-deformable2d-fidelity-performance-corpus",
+  "id": "m05-g07-fidelity-performance-corpus",
+  "goal": "M05-G07",
+  "hashAlgorithm": "sha256",
+  "populationPolicy": {
+    "requiredModelIds": ["hatsune-miku-free", "rice-glassfield-pro", "niziiro-mao"],
+    "sampleCount": 3,
+    "licensedAssetsBundled": false,
+    "derivedEvidenceOnly": true
+  },
+  "oracle": {
+    "implementation": "Live2D Cubism Core for Web",
+    "coreUrl": "https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js",
+    "coreVersion": 83951616,
+    "coreByteLength": 207155,
+    "coreSha256": "25ae938cb4fe282ce189b357bcc97e603d1e1f7ec78bf04150d401c23cdc792f",
+    "captureFormat": "live2d-cubism-drawable-capture@1",
+    "frameworkCapability": {
+      "motion": true,
+      "expression": false,
+      "physics": false,
+      "pose": false,
+      "diagnosticCode": "E_CUBISM_RECIPE_CAPABILITY_MISSING"
+    }
+  },
+  "methodology": {
+    "workload": "full",
+    "captureFrameRate": 12,
+    "sampling": {
+      "tolerance": 0.01,
+      "quantizationStep": 0.0009765625,
+      "maxDepth": 10,
+      "evaluationConcurrency": 4
+    },
+    "structuralTolerance": {
+      "maxPositionOpacityColorError": 0.011,
+      "renderOrderMismatchCount": 0
+    },
+    "referenceConfiguration": {
+      "referenceTimes": [1],
+      "viewport": [719, 694],
+      "canvas": [719, 746],
+      "clearColor": "#050817",
+      "targetFormat": "rgba8unorm",
+      "textureColorSpaceConversion": "none",
+      "textureAlphaMode": "premultiplied",
+      "webglAntialias": false,
+      "viewportMode": "fit",
+      "fitPolicy": "bounds-centered-auto-zoom",
+      "fitFill": 0.82,
+      "userZoom": 1,
+      "pan": [0, 0],
+      "synchronizedViews": true,
+      "pixelThresholds": {
+        "maxChannelError": 224,
+        "meanAbsoluteError": 1,
+        "mismatchRatio": 0.025
+      },
+      "silhouetteSpatialTolerancePixels": 1
+    },
+    "compression": "gzip-9-per-file",
+    "cachePolicy": "cache-disabled-cold-load-followed-by-one-warm-steady-run",
+    "runtimeFrames": 120,
+    "runtimeIncludes": ["HYA", "HYDM", "textures", "HaiYue neutral playback bundle"],
+    "runtimeExcludes": ["Cubism Core", "Cubism Framework", "model3", "moc3", "motion3", "exp3", "physics3", "pose3"],
+    "converterCostReportedSeparately": true,
+    "absoluteMillisecondsRole": "cross-host-diagnostic"
+  },
+  "requiredMetrics": [
+    "featureCoverage",
+    "diagnosticAttribution",
+    "pixelFidelity",
+    "structuralFidelity",
+    "rawBytes",
+    "gzipBytes",
+    "totalNetworkBytes",
+    "parseMs",
+    "warmFirstFrameMs",
+    "steadyUpdateRenderMs",
+    "uploadBytes",
+    "gpuMemoryBytes",
+    "peakProcessMemoryBytes",
+    "lifecycleResiduals"
+  ],
+  "samples": [
+    {
+      "id": "hatsune-miku-free",
+      "title": "Hatsune Miku FREE",
+      "sourcePolicy": "caller-supplied-local-only",
+      "source": {
+        "url": "https://www.live2d.com/en/learn/sample/hatsune-miku/",
+        "runtimeDirectoryHash": "sha256-0258e3f65e7e3aaf9b4da9912d186b2a5959e221017aed58f2440932793335e2",
+        "fileCount": 13,
+        "sourceBytes": 4519848,
+        "entry": "miku.model3.json"
+      },
+      "license": {
+        "id": "Live2D-Free-Material-License-and-Sample-Terms-plus-Hatsune-Miku-Guidelines",
+        "url": "https://www.live2d.com/en/learn/sample/model-terms/",
+        "acceptanceRequired": true
+      },
+      "distribution": { "rawAssets": false, "derivedStatistics": true, "pixelReferences": false },
+      "role": ["basic-mesh-texture", "motion", "physics-source-present"],
+      "recipe": {
+        "motionId": "Idle:0",
+        "motionFile": "motions/miku_idle.motion3.json",
+        "duration": 5.433,
+        "expression": null,
+        "physics": false,
+        "pose": false,
+        "referenceTimes": [1]
+      },
+      "requiredFiles": [
+        { "path": "miku.model3.json", "byteLength": 989, "sha256": "1973065dd0aad526341855653c01a0bdc6ba99ffe4b993a43cec4ad251f3bf60" },
+        { "path": "miku.moc3", "byteLength": 207552, "sha256": "099e80bbf571daf3ba400b216b8d8b01fd8f307dbed0ad836d6876bbec7b3370" },
+        { "path": "miku.2048/texture_00.png", "byteLength": 4227639, "sha256": "9771e2d36462c6446330e721248bcbf9a393239ceaae8e0ee616b5b21a57ae20" },
+        { "path": "miku.physics3.json", "byteLength": 6412, "sha256": "af68b366ff284ac7d9c46be295f42c4452a08c5944ef2183ef54ddbfc3d3faf4" },
+        { "path": "motions/miku_idle.motion3.json", "byteLength": 16368, "sha256": "5f7f4d438060411cd3db6080baf0d80b04d5910deb964af14e21f50a8004e715" }
+      ]
+    },
+    {
+      "id": "rice-glassfield-pro",
+      "title": "Rice Glassfield - PRO",
+      "sourcePolicy": "caller-supplied-local-only",
+      "source": {
+        "url": "https://www.live2d.com/en/learn/sample/rice-glassfield/",
+        "runtimeDirectoryHash": "sha256-082dea795bfef18b5598f38d40cdadcaee54827146fdec596ecf4ee4e31eedc1",
+        "fileCount": 10,
+        "sourceBytes": 3152965,
+        "entry": "rice_pro_t03.model3.json"
+      },
+      "license": { "id": "Live2D-Sample-Model-Terms", "url": "https://www.live2d.com/en/learn/sample/model-terms/", "acceptanceRequired": true },
+      "distribution": { "rawAssets": false, "derivedStatistics": true, "pixelReferences": false },
+      "role": ["multi-texture", "composite-mask", "inverted-mask", "additive", "dynamic-order", "drawable-culling"],
+      "recipe": {
+        "motionId": "Tap%40Body:0",
+        "motionFile": "motions/mtn_02.motion3.json",
+        "duration": 5,
+        "expression": null,
+        "physics": false,
+        "pose": false,
+        "referenceTimes": [0.75]
+      },
+      "requiredFiles": [
+        { "path": "rice_pro_t03.model3.json", "byteLength": 848, "sha256": "92f09386b0f64266c73498c515d3a92af1eb87275c4daf58494e641ad821ef7e" },
+        { "path": "rice_pro_t03.moc3", "byteLength": 479104, "sha256": "be56f2d656d279d8db9fe302ec744fa5992ff884b2ebb233f202772d5dd7e4dc" },
+        { "path": "rice_pro_t03.2048/texture_00.png", "byteLength": 1061518, "sha256": "9930643898aeea3a5f11f06933e79a217b64fbec80c06158f512e85454ea60ea" },
+        { "path": "rice_pro_t03.2048/texture_01.png", "byteLength": 1505136, "sha256": "d80053659ecb2eab98269ade228253034827b8744db1fcb67843acbcc37906de" },
+        { "path": "motions/mtn_02.motion3.json", "byteLength": 13541, "sha256": "9db0c12a957829078987e0fb7352681a5064c663d4c27366529272f579d3973b" }
+      ]
+    },
+    {
+      "id": "niziiro-mao",
+      "title": "Niziiro Mao",
+      "sourcePolicy": "caller-supplied-local-only",
+      "source": {
+        "url": "https://www.live2d.com/en/learn/sample/niziiro-mao/",
+        "runtimeDirectoryHash": "sha256-1add506bf80e04816f438c36a50d93a4916568dfad8f88daff56e3a75dec5bc9",
+        "fileCount": 22,
+        "sourceBytes": 4321713,
+        "entry": "Mao.model3.json"
+      },
+      "license": { "id": "Live2D-Free-Material-License-and-Sample-Terms", "url": "https://www.live2d.com/en/learn/sample/model-terms/", "acceptanceRequired": true },
+      "distribution": { "rawAssets": false, "derivedStatistics": true, "pixelReferences": false },
+      "role": ["composite-mask", "inverted-mask", "additive", "multiplicative", "multiply-color", "screen-color", "motion-expression-physics-pose"],
+      "recipe": {
+        "motionId": "Idle:0",
+        "motionFile": "motions/mtn_01.motion3.json",
+        "duration": 5.57,
+        "expression": "expressions/exp_01.exp3.json",
+        "physics": true,
+        "pose": true,
+        "referenceTimes": [1]
+      },
+      "requiredFiles": [
+        { "path": "Mao.model3.json", "byteLength": 1699, "sha256": "d5fb29f93ef3cf3eba96b5aa9538eca063abbebee81a8d2dbeecea0cef4fecba" },
+        { "path": "Mao.moc3", "byteLength": 879680, "sha256": "ad5195b39e35e0da8ba0c825ad9cc2d60571502007f6f7d4f00963b768bb90d8" },
+        { "path": "Mao.2048/texture_00.png", "byteLength": 3130953, "sha256": "0b97283d69e62d346bcca25f8a91a5dd477f2e668ad9801b15fa7f108631c624" },
+        { "path": "Mao.physics3.json", "byteLength": 21838, "sha256": "27de73695ca6418a84953a0b2776e78160f9d0b988521e9bbfa02ff913f20a6d" },
+        { "path": "Mao.pose3.json", "byteLength": 254, "sha256": "efac160eccb7183ee6555d4e53a739042e1c55b92f59a99c2e4bed8e73a5ab91" },
+        { "path": "expressions/exp_01.exp3.json", "byteLength": 1981, "sha256": "afbe54559e428acdaf43190d1c497792048c35ed37979f33d9a37c70181ddf5b" },
+        { "path": "motions/mtn_01.motion3.json", "byteLength": 27661, "sha256": "4a17c9b0b4ffd42ee5b8386cba0ae18916953ac693d79f44cd831bf5d59877f6" }
+      ]
+    }
+  ],
+  "neutralRuntimeFixture": {
+    "id": "g07-minimal-fake-source-adapter",
+    "required": true,
+    "forbiddenRuntimeTokens": ["Live2DCubismCore", ".moc3", ".model3.json", ".motion3.json", ".exp3.json", ".physics3.json", ".pose3.json"]
+  },
+  "replay": {
+    "fidelityReportCommand": "node scripts/verify-live2d-local-corpus.mjs --model hatsune-miku-free=<miku-runtime> --evidence-action hatsune-miku-free=Idle:0 --evidence-time hatsune-miku-free=1 --skip-recovery-smoke hatsune-miku-free --model rice-glassfield-pro=<rice-runtime> --evidence-action rice-glassfield-pro=Tap%40Body:0 --evidence-time rice-glassfield-pro=0.75 --model niziiro-mao=<mao-runtime> --evidence-action niziiro-mao=Idle:0 --evidence-time niziiro-mao=1 --out <temporary-fidelity-report.json>",
+    "candidateCommand": "node scripts/benchmark/run-deformable2d-g07.mjs --model hatsune-miku-free=<miku-runtime> --model rice-glassfield-pro=<rice-runtime> --model niziiro-mao=<mao-runtime> --fidelity-report <temporary-fidelity-report.json> --out <temporary-g07-candidate.json>",
+    "validatorCommand": "node scripts/benchmark/validate-deformable2d-g07-candidate.mjs review/candidates/deformable2d-g07-candidate.json"
+  }
+}
