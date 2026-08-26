@@ -4,6 +4,7 @@ import type {
   AnimationTextDocumentKeyframe,
   AnimationVectorValueTrack,
 } from '@haiyue/animation-spec';
+import { evaluateSafeExpression } from '@haiyue/animation-spec';
 
 type TextTexture = HTMLCanvasElement | ImageBitmap;
 
@@ -45,10 +46,11 @@ export class AnimationTextRasterizer {
   private updating = false;
   private updateToken = 0;
   private readonly animated: boolean;
+  private readonly expressionData = new Map<string, unknown>();
 
   constructor(readonly component: Readonly<AnimationText2DComponent>) {
     this.canvas = typeof document === 'undefined' ? null : document.createElement('canvas');
-    this.animated = (component.documents?.length ?? 0) > 1
+    this.animated = component.expression !== undefined || (component.documents?.length ?? 0) > 1
       || (component.animators ?? []).some(animator => hasAnimatedAnimator(animator));
     void this.updateTexture();
   }
@@ -62,6 +64,12 @@ export class AnimationTextRasterizer {
   }
 
   invalidateFont(): void {
+    this.dirty = true;
+    void this.updateTexture();
+  }
+
+  setExpressionData(resource: string, value: unknown): void {
+    this.expressionData.set(resource, value);
     this.dirty = true;
     void this.updateTexture();
   }
@@ -96,7 +104,7 @@ export class AnimationTextRasterizer {
 
   private draw(canvas: HTMLCanvasElement, time: number): void {
     const component = this.component;
-    const document = resolveDocument(component, time);
+    const document = resolveDocument(component, time, this.expressionData);
     const dpr = Math.max(1, Math.min(4, component.resolutionScale ?? 2));
     const width = Math.max(1, Math.ceil(component.size[0]));
     const height = Math.max(1, Math.ceil(component.size[1]));
@@ -154,13 +162,17 @@ export class AnimationTextRasterizer {
   }
 }
 
-function resolveDocument(component: Readonly<AnimationText2DComponent>, time: number): ResolvedTextDocument {
+function resolveDocument(
+  component: Readonly<AnimationText2DComponent>,
+  time: number,
+  expressionData: ReadonlyMap<string, unknown>,
+): ResolvedTextDocument {
   let keyframe: Readonly<AnimationTextDocumentKeyframe> | undefined;
   for (const candidate of component.documents ?? []) {
     if (candidate.time > time) break;
     keyframe = candidate;
   }
-  return {
+  const resolved: ResolvedTextDocument = {
     text: keyframe?.text ?? component.text,
     fontFamily: keyframe?.fontFamily ?? component.fontFamily ?? 'sans-serif',
     fontSize: keyframe?.fontSize ?? component.fontSize ?? 28,
@@ -171,6 +183,18 @@ function resolveDocument(component: Readonly<AnimationText2DComponent>, time: nu
     textAlign: keyframe?.textAlign ?? component.textAlign ?? 'center',
     color: keyframe?.color ?? component.color,
   };
+  if (component.expression) {
+    try {
+      resolved.text = evaluateSafeExpression(component.expression, {
+        time,
+        text: resolved.text,
+        data: expressionData,
+      });
+    } catch {
+      // The authored/keyframed document is the deterministic permissive-mode fallback.
+    }
+  }
+  return resolved;
 }
 
 function resolveGlyphState(

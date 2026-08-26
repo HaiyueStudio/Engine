@@ -60,6 +60,16 @@ export type {
 } from './types';
 export { AnimationFormatError } from './errors';
 export type { AnimationFormatErrorCode } from './errors';
+export {
+  HYA_SAFE_EXPRESSION_VERSION,
+  evaluateSafeExpression,
+  safeExpressionDataResources,
+} from './expression';
+export type {
+  AnimationSafeExpressionContext,
+  AnimationSafeExpressionInstruction,
+  AnimationSafeExpressionProgram,
+} from './expression';
 export { AnimationExtensionRegistry, extensionIdFromComponentType, validateExtensionId } from './extensions';
 export type { AnimationExtensionHandler, AnimationExtensionValidationContext } from './extensions';
 export { parseAnimation } from './parser';

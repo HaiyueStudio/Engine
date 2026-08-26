@@ -1296,6 +1296,18 @@
               "kind": "type"
             },
             {
+              "name": "AnimationSafeExpressionContext",
+              "kind": "type"
+            },
+            {
+              "name": "AnimationSafeExpressionInstruction",
+              "kind": "type"
+            },
+            {
+              "name": "AnimationSafeExpressionProgram",
+              "kind": "type"
+            },
+            {
               "name": "AnimationShape2DComponent",
               "kind": "type"
             },
@@ -1376,7 +1388,15 @@
               "kind": "value"
             },
             {
+              "name": "evaluateSafeExpression",
+              "kind": "value"
+            },
+            {
               "name": "extensionIdFromComponentType",
+              "kind": "value"
+            },
+            {
+              "name": "HYA_SAFE_EXPRESSION_VERSION",
               "kind": "value"
             },
             {
@@ -1473,6 +1493,10 @@
             },
             {
               "name": "parseHyaStateMachineExtension",
+              "kind": "value"
+            },
+            {
+              "name": "safeExpressionDataResources",
               "kind": "value"
             },
             {
@@ -3691,6 +3715,10 @@
               "kind": "type"
             },
             {
+              "name": "canonicalSimulationState",
+              "kind": "value"
+            },
+            {
               "name": "CanvasTextComponent",
               "kind": "value"
             },
@@ -4147,6 +4175,14 @@
               "kind": "type"
             },
             {
+              "name": "DeterministicRandom",
+              "kind": "value"
+            },
+            {
+              "name": "DeterministicSeed",
+              "kind": "type"
+            },
+            {
               "name": "DeviceRecoveryPhase",
               "kind": "type"
             },
@@ -4303,6 +4339,26 @@
               "kind": "type"
             },
             {
+              "name": "FixedStepAdvanceResult",
+              "kind": "type"
+            },
+            {
+              "name": "FixedStepCallback",
+              "kind": "type"
+            },
+            {
+              "name": "FixedStepClock",
+              "kind": "value"
+            },
+            {
+              "name": "FixedStepClockOptions",
+              "kind": "type"
+            },
+            {
+              "name": "FixedStepTick",
+              "kind": "type"
+            },
+            {
               "name": "Fog",
               "kind": "value"
             },
@@ -4381,6 +4437,10 @@
             {
               "name": "FxaaPass",
               "kind": "value"
+            },
+            {
+              "name": "GamepadAxisBinding",
+              "kind": "type"
             },
             {
               "name": "GaussianBlurPass",
@@ -4855,6 +4915,10 @@
               "kind": "type"
             },
             {
+              "name": "hashSimulationState",
+              "kind": "value"
+            },
+            {
               "name": "HelperMode",
               "kind": "type"
             },
@@ -4879,7 +4943,19 @@
               "kind": "value"
             },
             {
+              "name": "InputActionBinding",
+              "kind": "type"
+            },
+            {
               "name": "InputActionBindings",
+              "kind": "type"
+            },
+            {
+              "name": "InputActionMap",
+              "kind": "value"
+            },
+            {
+              "name": "InputActionMapDescriptor",
               "kind": "type"
             },
             {
@@ -4887,8 +4963,16 @@
               "kind": "type"
             },
             {
+              "name": "InputActionValue",
+              "kind": "type"
+            },
+            {
               "name": "InputMap",
               "kind": "value"
+            },
+            {
+              "name": "InputReplayV1",
+              "kind": "type"
             },
             {
               "name": "inspectKtx2Texture",
@@ -5851,6 +5935,58 @@
               "kind": "type"
             },
             {
+              "name": "ReplayActionEvent",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayActionPhase",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayActionState",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayInputController",
+              "kind": "value"
+            },
+            {
+              "name": "ReplayInputControllerOptions",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayInputEvent",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayInputEventInput",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayInputSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayInputSource",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayPointerEvent",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayPointerPhase",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayPointerState",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayResetEvent",
+              "kind": "type"
+            },
+            {
               "name": "requireEngineCanvas",
               "kind": "value"
             },
@@ -6171,6 +6307,10 @@
               "kind": "value"
             },
             {
+              "name": "SimulationStateValue",
+              "kind": "type"
+            },
+            {
               "name": "Sky",
               "kind": "value"
             },
@@ -6213,6 +6353,10 @@
             {
               "name": "SphericalTransform3D",
               "kind": "value"
+            },
+            {
+              "name": "StandardGamepadSnapshot",
+              "kind": "type"
             },
             {
               "name": "SVG2DMeshData",
@@ -7122,6 +7266,131 @@
             {
               "name": "SceneFrameGpuBinding",
               "kind": "value"
+            }
+          ]
+        },
+        "./experimental/simulation": {
+          "source": "engine/src\\experimental\\simulation.ts",
+          "exports": [
+            {
+              "name": "canonicalSimulationState",
+              "kind": "value"
+            },
+            {
+              "name": "DeterministicRandom",
+              "kind": "value"
+            },
+            {
+              "name": "DeterministicSeed",
+              "kind": "type"
+            },
+            {
+              "name": "FixedStepAdvanceResult",
+              "kind": "type"
+            },
+            {
+              "name": "FixedStepCallback",
+              "kind": "type"
+            },
+            {
+              "name": "FixedStepClock",
+              "kind": "value"
+            },
+            {
+              "name": "FixedStepClockOptions",
+              "kind": "type"
+            },
+            {
+              "name": "FixedStepTick",
+              "kind": "type"
+            },
+            {
+              "name": "GamepadAxisBinding",
+              "kind": "type"
+            },
+            {
+              "name": "hashSimulationState",
+              "kind": "value"
+            },
+            {
+              "name": "InputActionBinding",
+              "kind": "type"
+            },
+            {
+              "name": "InputActionMap",
+              "kind": "value"
+            },
+            {
+              "name": "InputActionMapDescriptor",
+              "kind": "type"
+            },
+            {
+              "name": "InputActionValue",
+              "kind": "type"
+            },
+            {
+              "name": "InputReplayV1",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayActionEvent",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayActionPhase",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayActionState",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayInputController",
+              "kind": "value"
+            },
+            {
+              "name": "ReplayInputControllerOptions",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayInputEvent",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayInputEventInput",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayInputSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayInputSource",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayPointerEvent",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayPointerPhase",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayPointerState",
+              "kind": "type"
+            },
+            {
+              "name": "ReplayResetEvent",
+              "kind": "type"
+            },
+            {
+              "name": "SimulationStateValue",
+              "kind": "type"
+            },
+            {
+              "name": "StandardGamepadSnapshot",
+              "kind": "type"
             }
           ]
         },

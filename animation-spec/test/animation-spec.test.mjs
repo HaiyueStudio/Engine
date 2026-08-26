@@ -8,6 +8,7 @@ import {
   HYA_STATE_MACHINE_CHANNEL_REGISTRY,
   HYA_STATE_MACHINE_EXTENSION_ID,
   encodeAnimationBinary,
+  evaluateSafeExpression,
   isAnimationBinary,
   parseAnimation,
   parseHyaStateMachineExtension,
@@ -1134,7 +1135,7 @@ test('Lottie animated text keeps font resources, document keys and deterministic
   assert.deepEqual(Array.from(decoded.nodes[0].components[0].animators[0].opacityTrack.values), [0, 1]);
 });
 
-test('Lottie data layers retain binary provenance while text expressions remain an explicit no-execute diagnostic', () => {
+test('Lottie data layers lower text expressions to verified HYA IR without retaining source code', () => {
   const ks = {
     a: { a: 0, k: [0, 0] }, p: { a: 0, k: [0, 0] },
     s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 },
@@ -1161,11 +1162,95 @@ test('Lottie data layers retain binary provenance while text expressions remain 
   });
   assert.ok(converted.document.extensionsUsed.includes('org.haiyue.data-layer@1'));
   assert.equal(converted.diagnostics.some(diagnostic => diagnostic.code === 'W_LOTTIE_UNSUPPORTED_LAYER'), false);
-  assert.deepEqual(converted.diagnostics.filter(diagnostic => diagnostic.code === 'W_LOTTIE_TEXT_EXPRESSION').map(diagnostic => diagnostic.path), [
-    '$.layers[1].t.d.x',
-  ]);
+  assert.equal(converted.diagnostics.some(diagnostic => diagnostic.code === 'W_LOTTIE_TEXT_EXPRESSION'), false);
+  const expression = converted.document.nodes.find(node => node.id === 'layer:2').components[0].expression;
+  assert.equal(evaluateSafeExpression(expression, { time: 0, text: '18°', data: { weather: { temp: 21 } } }), '21');
+  assert.equal(JSON.stringify(expression).includes('thisComp'), false);
   const decoded = parseAnimation(encodeAnimationBinary(converted.document));
   assert.deepEqual(decoded.nodes.find(node => node.id === 'layer:1').extensions, dataNode.extensions);
+  assert.equal(evaluateSafeExpression(decoded.nodes.find(node => node.id === 'layer:2').components[0].expression, {
+    time: 0, text: '18°', data: { weather: { temp: 22 } },
+  }), '22');
+});
+
+test('Lottie text expression compiler supports bounded math, formatting and Bodymovin data selectors', () => {
+  const ks = {
+    a: { a: 0, k: [0, 0] }, p: { a: 0, k: [0, 0] },
+    s: { a: 0, k: [100, 100] }, r: { a: 0, k: 0 }, o: { a: 0, k: 100 },
+  };
+  const expression = "var $bm_rt; $bm_rt = $bm_sum((thisComp.layer('weather.json')('Data')('Outline')('current')('feels_like') - 273.15).toFixed(2), ' \\xB0C');";
+  const converted = convertLottie({
+    fr: 30, ip: 0, op: 30, w: 320, h: 180,
+    assets: [{ id: 'weather', t: 3, p: 'weather.json' }],
+    layers: [
+      { ind: 1, ty: 15, nm: 'weather.json', refId: 'weather', ip: 0, op: 30, ks },
+      { ind: 2, ty: 5, ip: 0, op: 30, ks, t: { d: {
+        x: expression,
+        k: [{ s: { t: 'fallback', s: 24, fc: [1, 1, 1], sz: [200, 40] } }],
+      } } },
+    ],
+  }, { strict: true });
+  const program = converted.document.nodes.find(node => node.id === 'layer:2').components[0].expression;
+  assert.equal(evaluateSafeExpression(program, {
+    time: 0,
+    text: 'fallback',
+    data: { weather: { current: { feels_like: 291.14 } } },
+  }), '17.99 °C');
+  const conditionalDocument = convertLottie({
+    fr: 30, ip: 0, op: 60, w: 100, h: 40,
+    layers: [{ ind: 1, ty: 5, ip: 0, op: 60, ks, t: { d: {
+      x: '$bm_rt = time < 1 ? "early" : "late";',
+      k: [{ s: { t: 'fallback', s: 20, fc: [1, 1, 1], sz: [100, 30] } }],
+    } } }],
+  }, { strict: true }).document;
+  const conditional = conditionalDocument.nodes[0].components[0].expression;
+  assert.equal(evaluateSafeExpression(conditional, { time: 0.5, text: 'fallback' }), 'early');
+  assert.equal(evaluateSafeExpression(conditional, { time: 1.5, text: 'fallback' }), 'late');
+  const decodedConditional = parseAnimation(encodeAnimationBinary(conditionalDocument)).nodes[0].components[0].expression;
+  assert.equal(evaluateSafeExpression(decodedConditional, { time: 0.5, text: 'fallback' }), 'early');
+});
+
+test('Lottie text expression compiler rejects host access and preserves the authored fallback', () => {
+  const converted = convertLottie({
+    fr: 30, ip: 0, op: 30, w: 100, h: 50,
+    layers: [{ ind: 1, ty: 5, ip: 0, op: 30, t: { d: {
+      x: '$bm_rt = globalThis.fetch("https://example.com");',
+      k: [{ s: { t: 'safe fallback', s: 20, f: 'sans-serif', fc: [1, 1, 1], sz: [100, 30] } }],
+    } } }],
+  });
+  const text = converted.document.nodes[0].components[0];
+  assert.equal(text.text, 'safe fallback');
+  assert.equal(text.expression, undefined);
+  assert.match(converted.diagnostics.find(diagnostic => diagnostic.code === 'W_LOTTIE_TEXT_EXPRESSION').message, /not available|Unknown/);
+});
+
+test('HYA safe expression verifier rejects unknown opcodes, stack underflow and missing data resources', () => {
+  const base = {
+    format: ANIMATION_FORMAT, version: ANIMATION_VERSION,
+    canvas: { width: 100, height: 50, coordinateSystem: 'screen-y-down' }, duration: 1,
+    nodes: [{ id: 'text', components: [{
+      type: 'text2d', text: 'fallback', size: [100, 30], color: [1, 1, 1, 1],
+      expression: { version: 1, result: 'text', localCount: 0, instructions: [{ op: 'return' }] },
+    }] }],
+  };
+  assert.throws(() => parseAnimation(base), error => error.path.endsWith('.expression.instructions[0]'));
+  const missingData = structuredClone(base);
+  missingData.nodes[0].components[0].expression.instructions = [
+    { op: 'data', resource: 'missing', path: ['value'] }, { op: 'return' },
+  ];
+  assert.throws(() => parseAnimation(missingData), error => /missing data resource/.test(error.message));
+  const unknown = structuredClone(base);
+  unknown.nodes[0].components[0].expression.instructions = [{ op: 'eval', source: 'globalThis' }, { op: 'return' }];
+  assert.throws(() => parseAnimation(unknown), error => /Unknown safe expression opcode/.test(error.message));
+  const bomb = structuredClone(base);
+  bomb.nodes[0].components[0].expression.instructions = Array.from({ length: 257 }, () => ({ op: 'constant', value: 1 }));
+  assert.throws(() => parseAnimation(bomb), error => /1–256 instructions/.test(error.message));
+  const prototypePath = structuredClone(base);
+  prototypePath.resources = [{ id: 'data', type: 'binary', uri: 'data.json', mimeType: 'application/json' }];
+  prototypePath.nodes[0].components[0].expression.instructions = [
+    { op: 'data', resource: 'data', path: ['__proto__'] }, { op: 'return' },
+  ];
+  assert.throws(() => parseAnimation(prototypePath), error => /invalid or unsafe/.test(error.message));
 });
 
 test('Lottie font inventory records substitutions, content hashes and measured metrics', () => {

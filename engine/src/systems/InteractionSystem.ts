@@ -52,6 +52,8 @@ export interface InteractionSystemOptions {
   spatialLeafSize?: number;
   /** Keep raycasting hover every frame at the last pointer position. Defaults to false. */
   continuousHover?: boolean;
+  /** Bind native canvas pointer listeners. Disable when a deterministic host injects input. Defaults to true. */
+  bindCanvas?: boolean;
 }
 
 /**
@@ -111,6 +113,7 @@ export class InteractionSystem extends System {
   spatialIndex: boolean;
   spatialLeafSize: number;
   continuousHover: boolean;
+  readonly bindsCanvasInput: boolean;
 
   constructor(engine: IEngine, cameraEntity: Entity, options: InteractionSystemOptions = {}) {
     super({ all: [Mesh3D] });
@@ -121,8 +124,9 @@ export class InteractionSystem extends System {
     this.spatialIndex = options.spatialIndex ?? true;
     this.spatialLeafSize = Math.max(1, options.spatialLeafSize ?? 8);
     this.continuousHover = options.continuousHover ?? false;
+    this.bindsCanvasInput = options.bindCanvas ?? true;
     this.name = 'InteractionSystem';
-    this._bindCanvas();
+    if (this.bindsCanvasInput) this._bindCanvas();
   }
 
   // ── Canvas event binding ─────────────────────────────────────────────────

@@ -67,3 +67,36 @@ test('randomized text selector permutation is stable for the same imported seed'
     else globalThis.document = previousDocument;
   }
 });
+
+test('text rasterizer evaluates verified expression data and never receives source script', async () => {
+  const previousDocument = globalThis.document;
+  const draws = [];
+  const context = {
+    setTransform() {}, clearRect() {}, fillRect() {}, save() {}, restore() {}, rotate() {}, scale() {}, translate() {},
+    measureText: () => ({ width: 10 }),
+    fillText(glyph) { draws.push(glyph); },
+    font: '', textBaseline: 'alphabetic', textAlign: 'left', fillStyle: '', globalAlpha: 1,
+  };
+  globalThis.document = { createElement: () => ({ width: 0, height: 0, getContext: () => context }) };
+  try {
+    const rasterizer = new AnimationTextRasterizer({
+      type: 'text2d', text: 'fallback', size: [200, 40], color: [1, 1, 1, 1], fontSize: 10,
+      textAlign: 'left', verticalAlign: 'top',
+      expression: {
+        version: 1, result: 'text', localCount: 0,
+        instructions: [
+          { op: 'data', resource: 'weather', path: ['timezone'] },
+          { op: 'return' },
+        ],
+      },
+    });
+    draws.length = 0;
+    rasterizer.setExpressionData('weather', { timezone: 'Asia/Shanghai' });
+    await rasterizer.updateTexture();
+    assert.equal(draws.join(''), 'Asia/Shanghai');
+    rasterizer.destroy();
+  } finally {
+    if (previousDocument === undefined) delete globalThis.document;
+    else globalThis.document = previousDocument;
+  }
+});

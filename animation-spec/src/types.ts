@@ -80,6 +80,8 @@ export interface AnimationText2DComponent {
   documents?: readonly AnimationTextDocumentKeyframe[];
   /** Ordered per-character animators evaluated after deterministic grapheme shaping. */
   animators?: readonly AnimationTextAnimator[];
+  /** Verified source-neutral program evaluated as a pure Text Document input. */
+  expression?: import('./expression').AnimationSafeExpressionProgram;
 }
 
 export interface AnimationTextDocumentKeyframe {

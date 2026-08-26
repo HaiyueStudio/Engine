@@ -28,6 +28,7 @@ import {
   transformStaticPath,
   translationMatrix,
 } from './merge-path';
+import { compileLottieTextExpression, LottieTextExpressionCompileError } from './expression';
 
 export interface LottieConversionDiagnostic {
   readonly severity: 'warning' | 'error';
@@ -308,11 +309,16 @@ export function convertLottie(
     try {
       const retainedLayerIndices = collectRetainedLayerIndices(layerList, context.listPath);
       const layerIds = new Map<number, string>();
+      const dataLayerResourcesByName = new Map<string, string>();
       for (let index = 0; index < layerList.length; index++) {
         const layer = object(layerList[index]);
         const layerIndex = integer(layer.ind ?? index + 1, `${context.listPath}[${index}].ind`);
         if (!retainedLayerIndices.has(layerIndex)) continue;
         layerIds.set(layerIndex, `${context.idPrefix}layer:${layerIndex}`);
+        if (layer.ty === 15 && typeof layer.nm === 'string' && typeof layer.refId === 'string'
+          && resources.some(resource => resource.id === layer.refId && resource.type === 'binary')) {
+          dataLayerResourcesByName.set(layer.nm, layer.refId);
+        }
       }
 
       for (let sourceIndex = layerList.length - 1; sourceIndex >= 0; sourceIndex--) {
@@ -433,7 +439,7 @@ export function convertLottie(
           continue;
         }
         if (type === 5) {
-          const text = convertText(layer.t, path, context.compositionWidth, state, tint);
+          const text = convertText(layer.t, path, context.compositionWidth, state, tint, dataLayerResourcesByName);
           nodes.push(text ? { ...baseNode, components: [text] } : baseNode);
           nodes.push(...composite.nodes);
           if (!text) state.skippedLayerCount++;
@@ -688,11 +694,28 @@ function collectReferencedAssetIds(
   return result;
 }
 
-function convertText(value: unknown, path: string, canvasWidth: number, state: ConversionState, tint: LottieTintEffect | null): AnimationComponent | null {
+function convertText(
+  value: unknown,
+  path: string,
+  canvasWidth: number,
+  state: ConversionState,
+  tint: LottieTintEffect | null,
+  dataLayerResourcesByName: ReadonlyMap<string, string>,
+): AnimationComponent | null {
   const textRoot = object(value);
   const textExpression = object(textRoot.d).x;
+  let expression: AnimationText2DComponent['expression'];
   if (typeof textExpression === 'string' && textExpression.trim().length > 0) {
-    warn(state, 'W_LOTTIE_TEXT_EXPRESSION', `${path}.t.d.x`, 'Text document expressions are preserved as a precise diagnostic; HYA does not execute source scripts at runtime.');
+    try {
+      expression = compileLottieTextExpression(textExpression, {
+        resolveDataLayer: name => dataLayerResourcesByName.get(name),
+      });
+    } catch (error) {
+      const detail = error instanceof LottieTextExpressionCompileError
+        ? `${error.message} (source offset ${error.offset})`
+        : error instanceof Error ? error.message : String(error);
+      warn(state, 'W_LOTTIE_TEXT_EXPRESSION', `${path}.t.d.x`, `Text document expression could not be lowered to safe HYA IR: ${detail}`);
+    }
   }
   const keyframes = list(object(textRoot.d).k).map(object);
   const documents: AnimationTextDocumentKeyframe[] = [];
@@ -735,6 +758,7 @@ function convertText(value: unknown, path: string, canvasWidth: number, state: C
     verticalAlign: 'middle', color: first.color ?? [1, 1, 1, 1],
     ...(documents.length > 1 ? { documents } : {}),
     ...(animators.length > 0 ? { animators } : {}),
+    ...(expression ? { expression } : {}),
   } satisfies AnimationText2DComponent;
 }
 

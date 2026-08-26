@@ -30,6 +30,7 @@ function createCanvasMock() {
       const listener = listeners.get(type);
       if (listener) listener({ clientX, clientY });
     },
+    listenerCount() { return listeners.size; },
   };
 }
 
@@ -51,6 +52,17 @@ function createWorldWithCamera() {
   world.addEntity(camera);
   return { world, camera };
 }
+
+test('InteractionSystem can expose raycast without binding native canvas input', () => {
+  const canvas = createCanvasMock();
+  const engine = { ...createMockEngine(), canvas };
+  const { camera } = createWorldWithCamera();
+  const system = new InteractionSystem(engine, camera, { bindCanvas: false });
+  assert.equal(system.bindsCanvasInput, false);
+  assert.equal(canvas.listenerCount(), 0);
+  system.destroy();
+  assert.equal(canvas.listenerCount(), 0);
+});
 
 test('InteractionSystem only updates hover when pointer state changes by default', () => {
   const canvas = createCanvasMock();

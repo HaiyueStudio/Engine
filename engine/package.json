@@ -92,6 +92,10 @@
       "types": "./dist/experimental/renderer.d.ts",
       "import": "./dist/experimental/renderer.js"
     },
+    "./experimental/simulation": {
+      "types": "./dist/experimental/simulation.d.ts",
+      "import": "./dist/experimental/simulation.js"
+    },
     "./systems": {
       "types": "./dist/systems.d.ts",
       "import": "./dist/systems.js"

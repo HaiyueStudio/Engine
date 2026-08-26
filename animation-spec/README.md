@@ -143,7 +143,7 @@ npm run cubism:capture -- --core /licensed/live2dcubismcore.min.js --framework-r
 | vector paint / stroke | 内建 `org.haiyue.vector-shape@1` | solid/linear/radial gradient、动态 color/opacity/width、dash | 保留同一 shape stack 的多 paint、fill rule、gradient 与 dash |
 | ordered mask stack | 单节点最多 8 层，可嵌套 | add/subtract/intersect/difference、alpha/luma/inverted、feather/animated expansion | 是；超 8 层分解为有序 coverage node，动画 feather 仍精确诊断 |
 | track matte | 是 | 支持嵌套 composite graph | alpha/luma 及 inverted，可与 mask stack 组合 |
-| canvas text | 是 | 动态 document、web font、tracking、确定性 grapheme shaping、字符 animator/range selector | 静态与动画 text document；character/排除空格/word/line、easing、smoothness、确定性 random selector；expression 精确诊断 |
+| canvas text | 是 | 动态 document、web font、tracking、确定性 grapheme shaping、字符 animator/range selector、Safe Expression | 静态与动画 text document；character/排除空格/word/line、easing、smoothness、确定性 random selector；受限数学/字符串/Data Layer text expression |
 | ordered visual effects | 是，最多 8 项 | tint/fill/opacity/color-matrix/blur/drop-shadow，单视图复用一对 ping-pong target | 静态与动画参数；未知 AE effect/plugin 不静默近似 |
 | deterministic particle2d | 是 | 是，引擎原生 SoA simulation + WebGPU instancing | 不适用 |
 | timeline audio | 是 | 是，HTML media 与 composition time 同步 | audio layer |
@@ -155,7 +155,7 @@ npm run cubism:capture -- --core /licensed/live2dcubismcore.min.js --framework-r
 
 转换器必须返回结构化 diagnostics。默认模式允许能力降级，`strict` 模式用于流水线阻止任何有损转换。
 
-转换器同时识别新版 Lottie 的显式 `a: 1` 和旧 Bodymovin 仅以 `k[].t/s/e` 表达的关键帧。后者不再被误判为静态数组。position 的空间 Bézier `to/ti` 与 temporal easing 分开编码；trim-path、round-corners 以有序、来源无关的 path modifier 执行。path morph 会统一为 cubic command topology，并在顶点数变化时用 de Casteljau 曲线细分保持关键帧几何；Merge Paths mode 1 的多个动画 operand 会按素材帧率 bake 为同一 compound morph。文字 document、font mapping、tracking，以及包含 character/排除空格/word/line、easing、smoothness、稳定随机种子的 range selector 都保存在 HYA ABI 中。type 15 data layer 作为 `binary` resource 和非视觉 `org.haiyue.data-layer@1` 节点扩展保留。动画 mask feather、动画 boolean Merge Paths、非 normal layer blend、skew、radial highlight、repeater、expression selector、text expression 与未知 effect/plugin 仍返回带精确 JSON path 的 diagnostics，不会静默丢失或执行源脚本。
+转换器同时识别新版 Lottie 的显式 `a: 1` 和旧 Bodymovin 仅以 `k[].t/s/e` 表达的关键帧。后者不再被误判为静态数组。position 的空间 Bézier `to/ti` 与 temporal easing 分开编码；trim-path、round-corners 以有序、来源无关的 path modifier 执行。path morph 会统一为 cubic command topology，并在顶点数变化时用 de Casteljau 曲线细分保持关键帧几何；Merge Paths mode 1 的多个动画 operand 会按素材帧率 bake 为同一 compound morph。文字 document、font mapping、tracking，以及包含 character/排除空格/word/line、easing、smoothness、稳定随机种子的 range selector 都保存在 HYA ABI 中。type 15 data layer 作为 `binary` resource 和非视觉 `org.haiyue.data-layer@1` 节点扩展保留。Text Document Expression 的安全子集在转换期经 AST 白名单检查后编译为无后向跳转、定额的 HYA Safe Expression IR；支持数学、条件、字符串格式化及固定 Data Layer 只读路径，Web runtime 不接收原始脚本。动画 mask feather、动画 boolean Merge Paths、非 normal layer blend、skew、radial highlight、repeater、expression selector、超出安全子集的 text expression 与未知 effect/plugin 仍返回带精确 JSON path 的 diagnostics，不会静默丢失或执行源脚本。
 
 `org.haiyue.vector-shape@1` 是来源无关的内建视觉组件，不是 Lottie 私有运行时分支。它把 path topology、可选 morph track、solid/gradient fill 或 stroke paint，以及按数组顺序执行的 trim/round modifier 编进 HYA Float32 pool；paint opacity 独立于颜色 alpha，避免动画 opacity 被重复相乘。Lottie animated path 坐标会量化到 1/64 canvas unit，最大源误差为 1/128 unit；转换器同时设置 `morphRelative`，让 morph track 保存相对初始 values 的 delta，运行时采样后再还原绝对坐标，从而避免重复坐标破坏 gzip 交付效率。旧 HYA v1/v2 容器和既有普通 `path2d`、`org.haiyue.vector-stroke@1`、`org.haiyue.vector-path-morph@1` 数据继续可读。
 

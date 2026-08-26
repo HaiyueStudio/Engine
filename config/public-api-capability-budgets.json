@@ -104,13 +104,14 @@
           "stability": "experimental",
           "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
           "entrypoints": {
-            "./experimental": 793,
+            "./experimental": 823,
             "./experimental/assets": 38,
             "./experimental/async": 7,
             "./experimental/diagnostics": 23,
             "./experimental/gpu-driven": 25,
             "./experimental/ktx2-worker-runtime": 0,
-            "./experimental/renderer": 51
+            "./experimental/renderer": 51,
+            "./experimental/simulation": 30
           }
         }
       ]

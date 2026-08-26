@@ -63,8 +63,8 @@ const GUIDANCE = Object.freeze({
     strategy: 'type 15 作为来源无关 binary data resource 与非视觉 node extension 保留，不把它错误地当作图片或未知可视 layer。',
   },
   'expressions/text-document': {
-    label: 'Text Document Expression', owner: 'product-security', priority: 'no-go', kind: 'security-boundary',
-    strategy: 'HYA runtime 不执行任意 Lottie JavaScript；导入器保留静态 fallback 和精确表达式路径，动态结果应由可信离线工具 bake。',
+    label: 'Text Document Expression', owner: 'format-runtime', priority: 'done', kind: 'implemented',
+    strategy: '转换器把受支持的直线数学、字符串格式化和静态 Data Layer 读取编译为有界、可验证的 HYA Safe Expression IR；runtime 不接收或执行原始 JavaScript，超出白名单的语义保留静态 fallback 和精确路径。',
   },
   'conversion/no-renderable-shape': {
     label: '无可渲染 Shape', owner: 'diagnostics', priority: 'derived', kind: 'derived',

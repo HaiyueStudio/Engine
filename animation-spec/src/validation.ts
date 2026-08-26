@@ -20,6 +20,7 @@ import {
   type ParsedAnimation,
   type ParsedAnimationTrack,
 } from './types';
+import { parseSafeExpressionProgram, safeExpressionDataResources } from './expression';
 import {
   HYA_STATE_MACHINE_EXTENSION_ID,
 } from './state-machine';
@@ -188,7 +189,11 @@ export function finalizeParsedAnimation(
   }
   const hasResourceReferences = fields.nodes.some(node => node.components?.some(component => (
     component.type === 'sprite2d' || component.type === 'particle2d' || component.type === 'audio'
-      || (component.type === 'text2d' && component.fontResource !== undefined)
+      || (component.type === 'text2d' && (() => {
+        const text = component as AnimationText2DComponent;
+        return text.fontResource !== undefined || text.expression !== undefined
+          || text.documents?.some(document => document.fontResource !== undefined) === true;
+      })())
   )));
   const resourceIds = hasResourceReferences ? new Set(fields.resources.map(resource => resource.id)) : undefined;
   const resourcesById = hasResourceReferences ? new Map(fields.resources.map(resource => [resource.id, resource])) : undefined;
@@ -241,6 +246,14 @@ export function finalizeParsedAnimation(
           }
           if (resourcesById!.get(fontResource)?.type !== 'binary') {
             fail(`Text font resource "${fontResource}" must have type "binary".`, `$.nodes[${index}].components[${componentIndex}].fontResource`);
+          }
+        }
+        for (const dataResource of text.expression ? safeExpressionDataResources(text.expression) : []) {
+          const resourcePath = `$.nodes[${index}].components[${componentIndex}].expression`;
+          if (!resourceIds!.has(dataResource)) fail(`Text expression references missing data resource "${dataResource}".`, resourcePath);
+          const resource = resourcesById!.get(dataResource);
+          if (resource?.type !== 'binary' || !/^application\/json(?:$|;)/i.test(resource.mimeType ?? '')) {
+            fail(`Text expression data resource "${dataResource}" must be JSON binary data.`, resourcePath);
           }
         }
       }
@@ -525,6 +538,7 @@ function parseComponent(
     if (resolutionScale !== undefined && resolutionScale > 4) fail('resolutionScale must be at most 4.', `${path}.resolutionScale`);
     const documents = component.documents === undefined ? undefined : parseTextDocuments(component.documents, `${path}.documents`);
     const animators = component.animators === undefined ? undefined : parseTextAnimators(component.animators, `${path}.animators`, options.copyFloatData === true);
+    const expression = component.expression === undefined ? undefined : parseSafeExpressionProgram(component.expression, `${path}.expression`);
     if (documents) for (const document of documents) countBudget('text', document.text.length);
     return Object.freeze({
       type,
@@ -546,6 +560,7 @@ function parseComponent(
       ...(resolutionScale !== undefined ? { resolutionScale } : {}),
       ...(documents ? { documents } : {}),
       ...(animators ? { animators } : {}),
+      ...(expression ? { expression } : {}),
     });
   }
   if (type === 'particle2d') {

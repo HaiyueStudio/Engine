@@ -2,6 +2,7 @@ import {
   ANIMATION_VECTOR_SHAPE_EXTENSION_ID,
   AnimationFormatError,
   HYA_STATE_MACHINE_EXTENSION_ID,
+  safeExpressionDataResources,
   type AnimationAudioComponent,
   type AnimationComponent,
   type AnimationComposite,
@@ -113,6 +114,11 @@ export class Animation2DRuntime {
     readonly rasterizers: Set<AnimationTextRasterizer>;
   }>();
   private readonly _fontFaces: FontFace[] = [];
+  private readonly _expressionDataLoads = new Map<string, {
+    state: 'loading' | 'loaded' | 'failed';
+    readonly rasterizers: Set<AnimationTextRasterizer>;
+    value?: unknown;
+  }>();
   private readonly _instanceId = nextRuntimeInstanceId++;
   private _visualCount = 0;
   private _unsupportedComponentCount = 0;
@@ -387,6 +393,7 @@ export class Animation2DRuntime {
     }
     this._fontFaces.length = 0;
     this._fontLoads.clear();
+    this._expressionDataLoads.clear();
     for (const node of this._nodes) {
       for (const visual of node.visuals) visual.textRasterizer?.destroy();
       for (const audio of node.audio) audio.destroy();
@@ -464,6 +471,69 @@ export class Animation2DRuntime {
       this._loadTexture(deferred.component.resource, handle => visual.component.setTextureHandle(handle));
     } else if (deferred.component.type === 'text2d' && visual.runtime.textRasterizer) {
       this._loadTextFonts(deferred.component, visual.runtime.textRasterizer);
+      this._loadTextExpressionData(deferred.component, visual.runtime.textRasterizer);
+    }
+  }
+
+  private _loadTextExpressionData(
+    component: Readonly<AnimationText2DComponent>,
+    rasterizer: AnimationTextRasterizer,
+  ): void {
+    if (!component.expression) return;
+    for (const resourceId of safeExpressionDataResources(component.expression)) {
+      const existing = this._expressionDataLoads.get(resourceId);
+      if (existing) {
+        if (existing.state === 'loaded') rasterizer.setExpressionData(resourceId, existing.value);
+        else if (existing.state === 'loading') existing.rasterizers.add(rasterizer);
+        continue;
+      }
+      const resource = this._animation.resources.find(candidate => candidate.id === resourceId);
+      if (!resource || resource.type !== 'binary' || !/^application\/json(?:$|;)/i.test(resource.mimeType ?? '') || !this._assetManager) {
+        this._expressionDataLoads.set(resourceId, { state: 'failed', rasterizers: new Set() });
+        this._failedResourceCount++;
+        continue;
+      }
+      const load = { state: 'loading' as const, rasterizers: new Set([rasterizer]) };
+      this._expressionDataLoads.set(resourceId, load);
+      this._pendingResourceCount++;
+      let retainedHandle: AssetHandle<unknown> | null = null;
+      void this._assetManager.load<unknown>(
+        `Animation2D.expression-data:${resource.integrity ?? resource.uri}`,
+        async signal => {
+          const response = await fetch(resource.uri, signal ? { signal } : {});
+          if (!response.ok) throw new Error(`Expression data request failed with HTTP ${response.status}.`);
+          const declaredLength = Number(response.headers.get('content-length') ?? 0);
+          if (declaredLength > 1024 * 1024) throw new Error('Expression data exceeds the 1 MiB limit.');
+          const bytes = await response.arrayBuffer();
+          if (bytes.byteLength > 1024 * 1024) throw new Error('Expression data exceeds the 1 MiB limit.');
+          return JSON.parse(new TextDecoder().decode(bytes)) as unknown;
+        },
+        () => {},
+        { signal: this._abortController.signal },
+      ).then(handle => {
+        retainedHandle = handle;
+        if (this._destroyed) { handle.release(); return; }
+        this._assetHandles.push(handle);
+        retainedHandle = null;
+        const current = this._expressionDataLoads.get(resourceId);
+        if (!current) return;
+        current.state = 'loaded';
+        current.value = handle.value;
+        for (const target of current.rasterizers) target.setExpressionData(resourceId, handle.value);
+        current.rasterizers.clear();
+      }).catch(() => {
+        retainedHandle?.release();
+        if (!this._destroyed) {
+          const current = this._expressionDataLoads.get(resourceId);
+          if (current) {
+            current.state = 'failed';
+            current.rasterizers.clear();
+          }
+          this._failedResourceCount++;
+        }
+      }).finally(() => {
+        this._pendingResourceCount = Math.max(0, this._pendingResourceCount - 1);
+      });
     }
   }
 

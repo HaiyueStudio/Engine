@@ -428,6 +428,7 @@ function encodeTextComponent(
       document.color ?? 0,
     ]) ?? 0,
     component.animators?.map(animator => encodeTextAnimator(animator, floats)) ?? 0,
+    component.expression ?? 0,
   ];
 }
 
@@ -919,6 +920,7 @@ function decodeComponent(
           decodeTextAnimator(animator, floatPool, `${path}[18][${index}]`)
         )),
       }),
+      ...(component.length < 20 || component[19] === 0 ? {} : { expression: component[19] }),
     }, validationPath, options, countBudget);
   }
   if (code === 7) {

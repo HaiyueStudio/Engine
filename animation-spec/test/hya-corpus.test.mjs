@@ -398,8 +398,8 @@ test('data layers and text expressions are attributed independently with no uncl
   const analysis = analyzeLottieFeatures(source, conversion.diagnostics);
   assert.equal(analysis.features.find(feature => feature.feature === 'layers/data')?.status, 'full');
   const expression = analysis.features.find(feature => feature.feature === 'expressions/text-document');
-  assert.equal(expression?.status, 'unsupported');
-  assert.deepEqual(expression?.diagnosticCodes, ['W_LOTTIE_TEXT_EXPRESSION']);
+  assert.equal(expression?.status, 'full');
+  assert.deepEqual(expression?.diagnosticCodes, []);
   assert.equal(analysis.features.some(feature => feature.feature === 'layers/unknown'), false);
   assert.equal(analysis.unclassifiedFailureCount, 0);
 });

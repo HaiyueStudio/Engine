@@ -1,36 +1,20 @@
 {
   "schemaVersion": 1,
   "kind": "hya-capability-support",
-  "generatedAt": "2026-08-20T15:26:22.252Z",
+  "generatedAt": "2026-08-26T13:27:58.001Z",
   "sourceState": {
-    "gitRevision": "f9040d715802b21f61270390656efdc7c84682f8",
+    "gitRevision": "704db3e6ed13db1bd8ed2b9922d8bb00612ec15f",
     "workingTreeDirty": true
   },
   "methodology": "Current converter diagnostics over the pinned corpus. This support snapshot is independent from formal fidelity/performance evidence.",
   "summary": {
     "featureCount": 64,
-    "fullCount": 63,
+    "fullCount": 64,
     "partialCount": 0,
-    "unsupportedCount": 1,
+    "unsupportedCount": 0,
     "precompStatus": "full"
   },
   "features": [
-    {
-      "feature": "expressions/text-document",
-      "label": "Text Document Expression",
-      "status": "unsupported",
-      "sampleCount": 1,
-      "occurrenceCount": 3,
-      "affectedSampleCount": 1,
-      "failureCount": 3,
-      "diagnosticCodes": [
-        "W_LOTTIE_TEXT_EXPRESSION"
-      ],
-      "owner": "product-security",
-      "priority": "no-go",
-      "kind": "security-boundary",
-      "strategy": "HYA runtime 不执行任意 Lottie JavaScript；导入器保留静态 fallback 和精确表达式路径，动态结果应由可信离线工具 bake。"
-    },
     {
       "feature": "animation/ease",
       "label": "animation/ease",
@@ -394,6 +378,20 @@
       "priority": "done",
       "kind": "implemented",
       "strategy": "当前固定语料没有转换 diagnostic；继续以新增真实素材和像素回归守住该能力。"
+    },
+    {
+      "feature": "expressions/text-document",
+      "label": "Text Document Expression",
+      "status": "full",
+      "sampleCount": 1,
+      "occurrenceCount": 3,
+      "affectedSampleCount": 0,
+      "failureCount": 0,
+      "diagnosticCodes": [],
+      "owner": "implemented",
+      "priority": "done",
+      "kind": "implemented",
+      "strategy": "转换器把受支持的直线数学、字符串格式化和静态 Data Layer 读取编译为有界、可验证的 HYA Safe Expression IR；runtime 不接收或执行原始 JavaScript，超出白名单的语义保留静态 fallback 和精确路径。"
     },
     {
       "feature": "layers",
