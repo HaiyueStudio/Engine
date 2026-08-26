@@ -108,4 +108,4 @@ jobs:
     steps:
       - name: Deploy GitHub Pages artifact
         id: deployment
-        uses: actions/deploy-pages@decdde0ac072f6db7b846693aeb66d213a3b5175 # v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
