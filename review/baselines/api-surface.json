@@ -2825,6 +2825,10 @@
               "kind": "type"
             },
             {
+              "name": "ScriptRuntimeInputApi",
+              "kind": "type"
+            },
+            {
               "name": "ScriptRuntimeReadApi",
               "kind": "type"
             },
@@ -6256,6 +6260,10 @@
             },
             {
               "name": "ScriptRuntimeErrorEvent",
+              "kind": "type"
+            },
+            {
+              "name": "ScriptRuntimeInputApi",
               "kind": "type"
             },
             {

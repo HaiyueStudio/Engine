@@ -187,7 +187,10 @@ test('script capability contract is minimum-by-default and declarations share it
   const fullDeclarations = generateScriptRuntimeDeclarations(SCRIPT_CAPABILITIES);
   for (const capability of SCRIPT_CAPABILITIES) assert.match(fullDeclarations, new RegExp(`readonly ${capability}:`));
   assert.equal(SCRIPT_RUNTIME_COMPLETION_PATHS.includes('api.debug.addDisposer'), true);
+  assert.equal(SCRIPT_RUNTIME_COMPLETION_PATHS.includes('api.input.interactions'), true);
   assert.match(declarations, /addDisposer\(/);
+  assert.match(declarations, /value\(action: string\): number/);
+  assert.match(declarations, /interactions\(\): readonly/);
 });
 
 test('script failure disables only the failing component and reports source identity', () => {

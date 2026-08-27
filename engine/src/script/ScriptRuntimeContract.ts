@@ -51,11 +51,26 @@ export interface ScriptRuntimeDebugApi {
   setInterval(callback: () => void, delayMs?: number): ScriptDisposer;
 }
 
+export interface ScriptRuntimeInputApi {
+  isPressed(action: string): boolean;
+  wasPressed(action: string): boolean;
+  wasReleased(action: string): boolean;
+  isKeyPressed(code: string): boolean;
+  wasKeyPressed(code: string): boolean;
+  wasKeyReleased(code: string): boolean;
+  value(action: string): number;
+  action(action: string): Readonly<{ action: string; value: number; pressed: boolean; down: boolean; up: boolean }>;
+  pointer(pointerId?: number): Readonly<{ pointerId: number; x: number; y: number; deltaX: number; deltaY: number; buttons: readonly number[]; wheelX: number; wheelY: number; dragging: boolean }>;
+  events(): readonly unknown[];
+  interactions(): readonly unknown[];
+  snapshot(): unknown;
+}
+
 export interface ScriptRuntimeApi {
   readonly read?: ScriptRuntimeReadApi;
   readonly scene?: ScriptRuntimeSceneApi;
   readonly asset?: ScriptRuntimeAssetApi;
-  readonly input?: typeof KeyboardComponent;
+  readonly input?: ScriptRuntimeInputApi;
   readonly physics?: Readonly<Record<string, unknown>>;
   readonly debug?: ScriptRuntimeDebugApi;
 }
@@ -72,7 +87,7 @@ export const SCRIPT_RUNTIME_CONTRACT: readonly ScriptRuntimeContractEntry[] = Ob
   { name: 'read', defaultEnabled: true, declarationType: 'HaiyueScriptReadApi', completionPaths: ['api.read.data', 'api.read.find', 'api.read.findAll', 'api.read.findByComponent', 'api.read.components', 'api.read.canvas'] },
   { name: 'scene', defaultEnabled: false, declarationType: 'HaiyueScriptSceneApi', completionPaths: ['api.scene.createEntity', 'api.scene.destroy', 'api.scene.spawnPrefab', 'api.scene.addComponent', 'api.scene.setText'] },
   { name: 'asset', defaultEnabled: false, declarationType: 'HaiyueScriptAssetApi', completionPaths: ['api.asset.findPrefab', 'api.asset.load'] },
-  { name: 'input', defaultEnabled: true, declarationType: 'typeof KeyboardComponent', completionPaths: ['api.input.isPressed', 'api.input.wasPressed', 'api.input.wasReleased'] },
+  { name: 'input', defaultEnabled: true, declarationType: 'HaiyueScriptInputApi', completionPaths: ['api.input.isPressed', 'api.input.wasPressed', 'api.input.wasReleased', 'api.input.value', 'api.input.action', 'api.input.pointer', 'api.input.events', 'api.input.interactions', 'api.input.snapshot'] },
   {
     name: 'physics',
     defaultEnabled: false,
@@ -100,6 +115,22 @@ export const DEFAULT_SCRIPT_CAPABILITIES: readonly ScriptCapabilityName[] = Obje
 export const SCRIPT_RUNTIME_COMPLETION_PATHS: readonly string[] = Object.freeze(
   SCRIPT_RUNTIME_CONTRACT.flatMap(entry => entry.completionPaths),
 );
+
+const EMPTY_POINTER = Object.freeze({ pointerId: 1, x: 0, y: 0, deltaX: 0, deltaY: 0, buttons: Object.freeze([]) as readonly number[], wheelX: 0, wheelY: 0, dragging: false });
+export const DEFAULT_SCRIPT_INPUT_API: ScriptRuntimeInputApi = Object.freeze({
+  isPressed: (action: string) => KeyboardComponent.isPressed(action),
+  wasPressed: (action: string) => KeyboardComponent.wasPressed(action),
+  wasReleased: (action: string) => KeyboardComponent.wasReleased(action),
+  isKeyPressed: (code: string) => KeyboardComponent.isKeyPressed(code),
+  wasKeyPressed: (code: string) => KeyboardComponent.wasKeyPressed(code),
+  wasKeyReleased: (code: string) => KeyboardComponent.wasKeyReleased(code),
+  value: (action: string) => KeyboardComponent.isPressed(action) ? 1 : 0,
+  action: (action: string) => Object.freeze({ action, value: KeyboardComponent.isPressed(action) ? 1 : 0, pressed: KeyboardComponent.isPressed(action), down: KeyboardComponent.wasPressed(action), up: KeyboardComponent.wasReleased(action) }),
+  pointer: (pointerId = 1) => pointerId === 1 ? EMPTY_POINTER : Object.freeze({ ...EMPTY_POINTER, pointerId }),
+  events: () => Object.freeze([]),
+  interactions: () => Object.freeze([]),
+  snapshot: () => KeyboardComponent.snapshot(),
+});
 
 export function filterScriptRuntimeApi(
   api: ScriptRuntimeApi,
@@ -141,7 +172,6 @@ export function generateScriptRuntimeDeclarations(
     .join('\n');
   return `// Generated from @haiyue/engine SCRIPT_RUNTIME_CONTRACT. Do not hand edit.
 import type { Component, Entity, System } from '@haiyue/engine';
-import type { KeyboardComponent } from '@haiyue/engine/components';
 
 interface HaiyueScriptReadApi {
   data(entity?: Entity | number | string | null): Record<string, unknown> | null;
@@ -176,6 +206,20 @@ interface HaiyueScriptDebugApi {
   listen(target: EventTarget, type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): () => void;
   setTimeout(callback: () => void, delayMs?: number): () => void;
   setInterval(callback: () => void, delayMs?: number): () => void;
+}
+interface HaiyueScriptInputApi {
+  isPressed(action: string): boolean;
+  wasPressed(action: string): boolean;
+  wasReleased(action: string): boolean;
+  isKeyPressed(code: string): boolean;
+  wasKeyPressed(code: string): boolean;
+  wasKeyReleased(code: string): boolean;
+  value(action: string): number;
+  action(action: string): Readonly<{ action: string; value: number; pressed: boolean; down: boolean; up: boolean }>;
+  pointer(pointerId?: number): Readonly<{ pointerId: number; x: number; y: number; deltaX: number; deltaY: number; buttons: readonly number[]; wheelX: number; wheelY: number; dragging: boolean }>;
+  events(): readonly unknown[];
+  interactions(): readonly Readonly<{ tick: number; type: 'hover' | 'click' | 'move' | 'down' | 'up' | 'drag' | 'wheel' | 'cancel'; entityId: string; pointerId: number; distance: number; point: readonly number[]; normal: readonly number[] }>[];
+  snapshot(): unknown;
 }
 interface HaiyueScriptRuntimeApi {
 ${capabilityFields}

@@ -4,10 +4,10 @@ import type { World } from '../ecs/World';
 import type { ScriptResource } from '../script/ScriptResource';
 import { EngineError, EngineErrorCode, ErrorDomain, ErrorRecovery } from '../core/EngineError';
 import { DataComponent } from './DataComponent';
-import { KeyboardComponent } from './KeyboardComponent';
 import {
   createScriptDebugApi,
   DEFAULT_SCRIPT_CAPABILITIES,
+  DEFAULT_SCRIPT_INPUT_API,
   filterScriptRuntimeApi,
   type ScriptCapabilityName,
   type ScriptRuntimeApi,
@@ -327,7 +327,7 @@ export class ScriptComponent extends ComponentWithData<Required<ScriptComponentS
         pointer: Object.freeze({}),
         engine: Object.freeze({}),
       }),
-      input: KeyboardComponent,
+      input: DEFAULT_SCRIPT_INPUT_API,
       debug: createScriptDebugApi(this._scope, this._createConsole()),
     };
     const extended = ScriptComponent._runtimeApiFactory?.(baseApi, context) ?? baseApi;

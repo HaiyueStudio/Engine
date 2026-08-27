@@ -47,7 +47,7 @@ export type {
   ScriptSourceMapResolver,
 } from './ScriptComponent';
 export { DEFAULT_SCRIPT_CAPABILITIES, generateScriptRuntimeDeclarations, SCRIPT_CAPABILITIES, SCRIPT_RUNTIME_COMPLETION_PATHS, SCRIPT_RUNTIME_CONTRACT } from '../script/ScriptRuntimeContract';
-export type { ScriptCapabilityName, ScriptRuntimeApi, ScriptRuntimeAssetApi, ScriptRuntimeContractEntry, ScriptRuntimeDebugApi, ScriptRuntimeReadApi, ScriptRuntimeSceneApi } from '../script/ScriptRuntimeContract';
+export type { ScriptCapabilityName, ScriptRuntimeApi, ScriptRuntimeAssetApi, ScriptRuntimeContractEntry, ScriptRuntimeDebugApi, ScriptRuntimeInputApi, ScriptRuntimeReadApi, ScriptRuntimeSceneApi } from '../script/ScriptRuntimeContract';
 export { ScriptExecutionScope } from '../script/ScriptExecutionScope';
 export type { ScriptDisposer } from '../script/ScriptExecutionScope';
 export { Physics2DTo3DTransformSync } from './Physics2DTo3DTransformSync';
