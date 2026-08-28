@@ -1,7 +1,8 @@
-import { box2d, type B2Body, type B2Fixture, type B2Joint } from './Box2D';
+import { box2d, type B2Body, type B2Contact, type B2Fixture, type B2Joint } from './Box2D';
 import type {
   MutablePhysics2DBodyTransform,
   MutablePhysics2DVector,
+  Physics2DAabbQueryDesc,
   Physics2DBackend,
   Physics2DBackendBodyDesc,
   Physics2DBackendColliderDesc,
@@ -10,7 +11,10 @@ import type {
   Physics2DBackendWorldOptions,
   Physics2DBodyHandle,
   Physics2DCapabilities,
+  Physics2DContactEvent,
   Physics2DJointHandle,
+  Physics2DRayCastDesc,
+  Physics2DRayHit,
   Physics2DVectorLike,
   Physics2DWorldDriver,
 } from './Physics2DBackend';
@@ -22,7 +26,9 @@ const BOX2D_CAPABILITIES: Physics2DCapabilities = Object.freeze({
   jointTypes: Object.freeze(['revolute', 'distance'] as const),
   continuousCollision: true,
   pointQuery: true,
-  contactEvents: false,
+  rayCast: true,
+  shapeQuery: true,
+  contactEvents: true,
 });
 
 interface JointRecord {
@@ -52,8 +58,13 @@ class Box2DPhysics2DWorld implements Physics2DWorldDriver {
   private readonly mouseGroundBody: B2Body;
   private readonly bodies = new Map<Physics2DBodyHandle, B2Body>();
   private readonly bodyHandles = new Map<B2Body, Physics2DBodyHandle>();
+  private readonly bodySensors = new Map<Physics2DBodyHandle, boolean>();
   private readonly joints = new Map<Physics2DJointHandle, JointRecord>();
+  private readonly contactEvents: Physics2DContactEvent[] = [];
   private readonly queryPointScratch = new box2d.b2Vec2();
+  private readonly rayStartScratch = new box2d.b2Vec2();
+  private readonly rayEndScratch = new box2d.b2Vec2();
+  private readonly queryAabbScratch = new box2d.b2AABB();
   private readonly mouseTargetScratch = new box2d.b2Vec2();
   private nextBodyHandle = 1;
   private nextJointHandle = 1;
@@ -62,6 +73,11 @@ class Box2DPhysics2DWorld implements Physics2DWorldDriver {
   constructor(options: Physics2DBackendWorldOptions) {
     this.world = new box2d.b2World(new box2d.b2Vec2(options.gravityX, options.gravityY));
     this.mouseGroundBody = this.world.CreateBody(new box2d.b2BodyDef());
+    const owner = this;
+    this.world.SetContactListener(new class extends box2d.b2ContactListener {
+      override BeginContact(contact: B2Contact): void { owner.captureContact(contact, true); }
+      override EndContact(contact: B2Contact): void { owner.captureContact(contact, false); }
+    }());
   }
 
   setGravity(x: number, y: number): void {
@@ -83,6 +99,7 @@ class Box2DPhysics2DWorld implements Physics2DWorldDriver {
     const handle = this.nextBodyHandle++ as Physics2DBodyHandle;
     this.bodies.set(handle, body);
     this.bodyHandles.set(body, handle);
+    this.bodySensors.set(handle, false);
     return handle;
   }
 
@@ -110,6 +127,7 @@ class Box2DPhysics2DWorld implements Physics2DWorldDriver {
     }
     this.world.DestroyBody(body);
     this.bodyHandles.delete(body);
+    this.bodySensors.delete(handle);
     this.bodies.delete(handle);
   }
 
@@ -137,6 +155,7 @@ class Box2DPhysics2DWorld implements Physics2DWorldDriver {
     definition.filter.maskBits = desc.maskBits;
     definition.filter.groupIndex = desc.groupIndex;
     body.CreateFixture(definition);
+    this.bodySensors.set(handle, desc.isSensor);
     return true;
   }
 
@@ -232,6 +251,47 @@ class Box2DPhysics2DWorld implements Physics2DWorldDriver {
     });
   }
 
+  castRay(desc: Physics2DRayCastDesc): Physics2DRayHit | null {
+    const length = Math.hypot(desc.direction.x, desc.direction.y);
+    if (!(length > 0) || !(desc.maxDistance > 0)) return null;
+    const dx = desc.direction.x / length;
+    const dy = desc.direction.y / length;
+    this.rayStartScratch.Set(desc.origin.x, desc.origin.y);
+    this.rayEndScratch.Set(desc.origin.x + dx * desc.maxDistance, desc.origin.y + dy * desc.maxDistance);
+    let result: Physics2DRayHit | null = null;
+    this.world.RayCast(null, this.rayStartScratch, this.rayEndScratch, (fixture: B2Fixture, point, normal, fraction) => {
+      if (!matchesFilter(fixture, desc.categoryBits, desc.maskBits)) return -1;
+      const body = this.bodyHandles.get(fixture.GetBody());
+      if (body === undefined) return -1;
+      result = {
+        body,
+        distance: desc.maxDistance * fraction,
+        point: { x: point.x, y: point.y },
+        normal: { x: normal.x, y: normal.y },
+      };
+      return fraction;
+    });
+    return result;
+  }
+
+  queryAabb(desc: Physics2DAabbQueryDesc, visitor: (body: Physics2DBodyHandle) => boolean): void {
+    if (desc.maximum.x < desc.minimum.x || desc.maximum.y < desc.minimum.y) return;
+    this.queryAabbScratch.lowerBound.Set(desc.minimum.x, desc.minimum.y);
+    this.queryAabbScratch.upperBound.Set(desc.maximum.x, desc.maximum.y);
+    const visited = new Set<Physics2DBodyHandle>();
+    this.world.QueryAABB(null, this.queryAabbScratch, (fixture: B2Fixture) => {
+      if (!matchesFilter(fixture, desc.categoryBits, desc.maskBits)) return true;
+      const body = this.bodyHandles.get(fixture.GetBody());
+      if (body === undefined || visited.has(body)) return true;
+      visited.add(body);
+      return visitor(body);
+    });
+  }
+
+  drainContactEvents(visitor: (event: Physics2DContactEvent) => void): void {
+    for (const event of this.contactEvents.splice(0)) visitor(event);
+  }
+
   createJoint(desc: Physics2DBackendJointDesc): Physics2DJointHandle | null {
     const bodyA = this.bodies.get(desc.bodyA);
     const bodyB = this.bodies.get(desc.bodyB);
@@ -318,7 +378,23 @@ class Box2DPhysics2DWorld implements Physics2DWorldDriver {
     for (const handle of [...this.joints.keys()]) this.destroyJoint(handle);
     for (const handle of [...this.bodies.keys()]) this.destroyBody(handle);
     this.world.DestroyBody(this.mouseGroundBody);
+    this.contactEvents.length = 0;
+    this.bodySensors.clear();
     this.destroyed = true;
+  }
+
+  private captureContact(contact: B2Contact, started: boolean): void {
+    const fixtureA = contact.GetFixtureA();
+    const fixtureB = contact.GetFixtureB();
+    const bodyA = this.bodyHandles.get(fixtureA.GetBody());
+    const bodyB = this.bodyHandles.get(fixtureB.GetBody());
+    if (bodyA === undefined || bodyB === undefined || bodyA === bodyB) return;
+    this.contactEvents.push(Object.freeze({
+      bodyA: bodyA < bodyB ? bodyA : bodyB,
+      bodyB: bodyA < bodyB ? bodyB : bodyA,
+      started,
+      sensor: fixtureA.IsSensor() || fixtureB.IsSensor(),
+    }));
   }
 
   private storeJoint(
@@ -334,6 +410,11 @@ class Box2DPhysics2DWorld implements Physics2DWorldDriver {
   private assertAlive(): void {
     if (this.destroyed) throw new Error('Cannot use a destroyed Box2D physics world.');
   }
+}
+
+function matchesFilter(fixture: B2Fixture, categoryBits = 0xffff, maskBits = 0xffff): boolean {
+  const filter = fixture.GetFilterData();
+  return (filter.categoryBits & maskBits) !== 0 && (categoryBits & filter.maskBits) !== 0;
 }
 
 function toBox2DBodyType(type: Physics2DBodyType): number {

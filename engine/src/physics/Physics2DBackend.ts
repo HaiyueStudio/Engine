@@ -30,7 +30,38 @@ export interface Physics2DCapabilities {
   readonly jointTypes: readonly Physics2DJointType[];
   readonly continuousCollision: boolean;
   readonly pointQuery: boolean;
+  readonly rayCast: boolean;
+  readonly shapeQuery: boolean;
   readonly contactEvents: boolean;
+}
+
+export interface Physics2DRayCastDesc {
+  readonly origin: Physics2DVectorLike;
+  readonly direction: Physics2DVectorLike;
+  readonly maxDistance: number;
+  readonly categoryBits?: number;
+  readonly maskBits?: number;
+}
+
+export interface Physics2DRayHit {
+  readonly body: Physics2DBodyHandle;
+  readonly distance: number;
+  readonly point: MutablePhysics2DVector;
+  readonly normal: MutablePhysics2DVector;
+}
+
+export interface Physics2DAabbQueryDesc {
+  readonly minimum: Physics2DVectorLike;
+  readonly maximum: Physics2DVectorLike;
+  readonly categoryBits?: number;
+  readonly maskBits?: number;
+}
+
+export interface Physics2DContactEvent {
+  readonly bodyA: Physics2DBodyHandle;
+  readonly bodyB: Physics2DBodyHandle;
+  readonly started: boolean;
+  readonly sensor: boolean;
 }
 
 /** All lengths in backend descriptors are expressed in physics-world units (meters). */
@@ -135,6 +166,9 @@ export interface Physics2DWorldDriver {
   applyBodyAngularImpulse(handle: Physics2DBodyHandle, impulse: number, wake: boolean): boolean;
 
   queryPoint(x: number, y: number, visitor: (body: Physics2DBodyHandle) => boolean): void;
+  castRay(desc: Physics2DRayCastDesc): Physics2DRayHit | null;
+  queryAabb(desc: Physics2DAabbQueryDesc, visitor: (body: Physics2DBodyHandle) => boolean): void;
+  drainContactEvents(visitor: (event: Physics2DContactEvent) => void): void;
 
   createJoint(desc: Physics2DBackendJointDesc): Physics2DJointHandle | null;
   createMouseJoint(desc: Physics2DBackendMouseJointDesc): Physics2DJointHandle | null;
@@ -152,4 +186,3 @@ export interface Physics2DBackend {
   readonly capabilities: Physics2DCapabilities;
   createWorld(options: Physics2DBackendWorldOptions): Physics2DWorldDriver;
 }
-

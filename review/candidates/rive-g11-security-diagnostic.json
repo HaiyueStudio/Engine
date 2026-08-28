@@ -4,11 +4,11 @@
   "tupleId": "rive-7.3-webgl2-2.40.0",
   "status": "passed",
   "evidenceClass": "dirty-worktree-diagnostic",
-  "generatedAt": "2026-08-25T08:41:46.974Z",
-  "engineRevision": "59b2a951d62e86b564a0d0f529c6a4765dbaad5e",
+  "generatedAt": "2026-08-27T23:43:48.880Z",
+  "engineRevision": "10a21e64b32315bf88ed48066d806071e0f17bf0",
   "engineDirty": true,
   "nodeVersion": "v24.19.0",
-  "manifestSha256": "967362806398e5c0de93bb3a186b97e496803e155fdabfb45f0fd1a3a64ca8b8",
+  "manifestSha256": "53bbc5003dbe24618ca287e8fb2eff045e8465ffde364f95a74ab7a7438c1d17",
   "runner": {
     "id": "scripts/benchmark/rive-g11-run-security.mjs@1",
     "importer": "animation-spec/dist-test/conversion/rive-ir/index.js",
@@ -29,8 +29,8 @@
       "underlyingDiagnostic": "E_RIVE_INVALID_FINGERPRINT",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 3.2660000000000764,
-      "peakMemoryBytes": 42795664,
+      "cpuMs": 8.76260000000002,
+      "peakMemoryBytes": 63159688,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -46,8 +46,8 @@
       "underlyingDiagnostic": "E_RIVE_TRUNCATED",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.7342000000001008,
-      "peakMemoryBytes": 42815064,
+      "cpuMs": 1.4418000000000575,
+      "peakMemoryBytes": 47954376,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -63,8 +63,8 @@
       "underlyingDiagnostic": "E_RIVE_VARINT_OVERFLOW",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.501299999999901,
-      "peakMemoryBytes": 42830576,
+      "cpuMs": 0.49250000000006366,
+      "peakMemoryBytes": 47969888,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -80,8 +80,8 @@
       "underlyingDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.5777000000000498,
-      "peakMemoryBytes": 42862704,
+      "cpuMs": 0.6005999999999858,
+      "peakMemoryBytes": 48002016,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -97,8 +97,8 @@
       "underlyingDiagnostic": "E_RIVE_TOC_INVALID",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.488399999999956,
-      "peakMemoryBytes": 43022136,
+      "cpuMs": 0.42630000000008295,
+      "peakMemoryBytes": 48081328,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -114,8 +114,8 @@
       "underlyingDiagnostic": "E_RIVE_TOC_INVALID",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.3911000000000513,
-      "peakMemoryBytes": 42902240,
+      "cpuMs": 0.3549000000000433,
+      "peakMemoryBytes": 48041552,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -131,8 +131,8 @@
       "underlyingDiagnostic": "E_RIVE_UNKNOWN_OBJECT",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.4173999999998159,
-      "peakMemoryBytes": 42919232,
+      "cpuMs": 0.3949999999999818,
+      "peakMemoryBytes": 48058544,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -148,8 +148,8 @@
       "underlyingDiagnostic": "E_RIVE_UNKNOWN_PROPERTY",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.43479999999999563,
-      "peakMemoryBytes": 42937632,
+      "cpuMs": 0.5230999999998858,
+      "peakMemoryBytes": 48076944,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -165,8 +165,8 @@
       "underlyingDiagnostic": "E_RIVE_UNSUPPORTED_PROPERTY",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.4134999999998854,
-      "peakMemoryBytes": 43125736,
+      "cpuMs": 0.5269000000000688,
+      "peakMemoryBytes": 48165216,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -182,8 +182,8 @@
       "underlyingDiagnostic": "E_RIVE_REFERENCE_INVALID",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 1.485400000000027,
-      "peakMemoryBytes": 43133656,
+      "cpuMs": 1.8076000000000931,
+      "peakMemoryBytes": 48201688,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -199,8 +199,8 @@
       "underlyingDiagnostic": "E_RIVE_REFERENCE_CYCLE",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.7380999999998039,
-      "peakMemoryBytes": 43101720,
+      "cpuMs": 0.9306000000001404,
+      "peakMemoryBytes": 48239304,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -216,8 +216,8 @@
       "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 1.2566000000001623,
-      "peakMemoryBytes": 43377024,
+      "cpuMs": 1.3886999999999716,
+      "peakMemoryBytes": 48352304,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -233,8 +233,8 @@
       "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.49050000000011096,
-      "peakMemoryBytes": 43246288,
+      "cpuMs": 0.4473000000000411,
+      "peakMemoryBytes": 48383808,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -250,8 +250,8 @@
       "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.5283999999999196,
-      "peakMemoryBytes": 43269160,
+      "cpuMs": 0.46349999999983993,
+      "peakMemoryBytes": 48406680,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -267,8 +267,8 @@
       "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.6174000000000888,
-      "peakMemoryBytes": 43290256,
+      "cpuMs": 0.4115999999999076,
+      "peakMemoryBytes": 48427776,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -284,8 +284,8 @@
       "underlyingDiagnostic": "E_RIVE_LIMIT_EXCEEDED",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.7475999999999203,
-      "peakMemoryBytes": 43324976,
+      "cpuMs": 0.5476000000001022,
+      "peakMemoryBytes": 48462496,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -301,8 +301,8 @@
       "underlyingDiagnostic": "E_RIVE_ASSET_URL_POLICY",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 2.0597000000000207,
-      "peakMemoryBytes": 43407688,
+      "cpuMs": 1.3602999999998246,
+      "peakMemoryBytes": 48545240,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -318,8 +318,8 @@
       "underlyingDiagnostic": "E_RIVE_ASSET_INTEGRITY",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.6231999999999971,
-      "peakMemoryBytes": 43472560,
+      "cpuMs": 0.5937999999998738,
+      "peakMemoryBytes": 48610112,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -335,8 +335,8 @@
       "underlyingDiagnostic": "E_SCRIPT_TIMEOUT",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 2.490199999999959,
-      "peakMemoryBytes": 43614224,
+      "cpuMs": 1.796100000000024,
+      "peakMemoryBytes": 48751920,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -352,8 +352,8 @@
       "underlyingDiagnostic": "E_SCRIPT_EVENT_BUDGET",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.7924000000000433,
-      "peakMemoryBytes": 43668248,
+      "cpuMs": 0.5697000000000116,
+      "peakMemoryBytes": 48805808,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -369,8 +369,8 @@
       "underlyingDiagnostic": "E_SCRIPT_EVENT_BUDGET",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.44010000000002947,
-      "peakMemoryBytes": 43711920,
+      "cpuMs": 0.28490000000010696,
+      "peakMemoryBytes": 48849480,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -386,8 +386,8 @@
       "underlyingDiagnostic": "E_SHADER_BINDING",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 2.420900000000074,
-      "peakMemoryBytes": 43828648,
+      "cpuMs": 1.2458000000001448,
+      "peakMemoryBytes": 48966208,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -403,8 +403,8 @@
       "underlyingDiagnostic": "E_SHADER_BUDGET",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 0.17280000000005202,
-      "peakMemoryBytes": 43835064,
+      "cpuMs": 0.10590000000001965,
+      "peakMemoryBytes": 48972640,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -420,8 +420,8 @@
       "underlyingDiagnostic": "E_INTERACTION_RUNTIME_LIMIT",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 12.801899999999932,
-      "peakMemoryBytes": 45241168,
+      "cpuMs": 9.865600000000086,
+      "peakMemoryBytes": 50380920,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -437,8 +437,8 @@
       "underlyingDiagnostic": "E_SCRIPT_ABORTED",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 6.095299999999952,
-      "peakMemoryBytes": 45458288,
+      "cpuMs": 5.156999999999925,
+      "peakMemoryBytes": 50598136,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -454,8 +454,8 @@
       "underlyingDiagnostic": "E_SCRIPT_DISPOSED",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 2.7544000000000324,
-      "peakMemoryBytes": 45576416,
+      "cpuMs": 4.844499999999925,
+      "peakMemoryBytes": 50716264,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -471,8 +471,8 @@
       "underlyingDiagnostic": "E_SHADER_DEVICE_LOST",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 3.1072999999998956,
-      "peakMemoryBytes": 45731856,
+      "cpuMs": 2.8661000000001877,
+      "peakMemoryBytes": 50871592,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824
@@ -488,8 +488,8 @@
       "underlyingDiagnostic": "E_AUDIO_RUNTIME_LIMIT",
       "freshOwner": true,
       "ownerResidual": 0,
-      "cpuMs": 5.665700000000015,
-      "peakMemoryBytes": 46068768,
+      "cpuMs": 5.086700000000064,
+      "peakMemoryBytes": 51208256,
       "limits": {
         "cpuMs": 60000,
         "peakMemoryBytes": 1073741824

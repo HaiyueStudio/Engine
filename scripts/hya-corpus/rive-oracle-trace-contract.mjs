@@ -36,6 +36,13 @@ export function validateRiveOracleTrace(trace, {
   equal(trace?.tuple?.oraclePackage, '@rive-app/webgl2@2.40.0', 'oracle package');
   match(trace?.tuple?.riveJsSha256, SHA256, 'oracle JS hash');
   match(trace?.tuple?.riveWasmSha256, SHA256, 'oracle WASM hash');
+  validateCapabilityDescriptor(trace?.adapters?.capabilityEvaluator, 'capability evaluator descriptor');
+  validateCaptureDescriptor(trace?.adapters?.officialCapture, {
+    label: 'official capture descriptor', runtime: '@rive-app/webgl2@2.40.0', backend: 'webgl2',
+  });
+  validateCaptureDescriptor(trace?.adapters?.hyaCapture, {
+    label: 'HYA capture descriptor', runtime: 'haiyue-exact-hya', backend: 'webgpu',
+  });
   match(trace?.corpusManifestSha256, SHA256, 'corpus manifest hash');
   if (expectedManifestSha256) equal(trace?.corpusManifestSha256, expectedManifestSha256, 'expected corpus manifest hash');
   match(trace?.workloadPlanSha256, SHA256, 'workload plan hash');
@@ -66,6 +73,9 @@ export function validateRiveOracleTrace(trace, {
   equal(environment?.officialBackend, 'webgl2', 'official backend');
   equal(environment?.hyaBackend, 'webgpu', 'HYA backend');
   equal(environment?.nativeBackend, true, 'native backend');
+  if (typeof environment?.browserLogCaptured !== 'boolean') violations.push('browser log capture identity is missing');
+  nonnegativeInteger(environment?.consoleErrorCount, 'console error count');
+  nonnegativeInteger(environment?.exceptionCount, 'exception count');
   for (const key of ['vendor', 'architecture', 'device', 'description']) requiredString(environment?.adapter?.[key], `adapter ${key}`);
   if (!Number.isFinite(environment?.dpr) || environment.dpr <= 0) violations.push('DPR must be positive');
   if (!Array.isArray(environment?.viewport) || environment.viewport.length !== 2 || environment.viewport.some(value => !Number.isSafeInteger(value) || value < 1)) violations.push('viewport must contain two positive safe integers');
@@ -143,6 +153,9 @@ export function validateRiveOracleTrace(trace, {
     equal(trace?.evidenceClass, 'clean-device-candidate', 'formal evidence class');
     equal(trace?.engineDirty, false, 'formal Engine dirty state');
     equal(trace?.status, 'passed', 'formal trace status');
+    equal(environment?.browserLogCaptured, true, 'formal browser log capture');
+    equal(environment?.consoleErrorCount, 0, 'formal console error count');
+    equal(environment?.exceptionCount, 0, 'formal exception count');
     if (!artifactBytesByPath) violations.push('formal trace artifact bytes were not supplied');
   }
 
@@ -177,6 +190,27 @@ export function validateRiveOracleTrace(trace, {
       }
     }
   }
+  function validateCapabilityDescriptor(value, label) {
+    const keys = ['adapterId', 'adapterRevisionSha256', 'evaluatorId', 'evaluatorRevisionSha256', 'optionsRevision'];
+    exactObjectKeys(value, keys, label);
+    for (const key of ['adapterId', 'evaluatorId', 'optionsRevision']) requiredString(value?.[key], `${label} ${key}`);
+    match(value?.adapterRevisionSha256, SHA256, `${label} adapter revision`);
+    match(value?.evaluatorRevisionSha256, SHA256, `${label} evaluator revision`);
+  }
+  function validateCaptureDescriptor(value, { label, runtime, backend }) {
+    const keys = ['id', 'revisionSha256', 'runtime', 'backend', 'nativeBackend'];
+    exactObjectKeys(value, keys, label);
+    requiredString(value?.id, `${label} id`);
+    match(value?.revisionSha256, SHA256, `${label} revision`);
+    equal(value?.runtime, runtime, `${label} runtime`);
+    equal(value?.backend, backend, `${label} backend`);
+    equal(value?.nativeBackend, true, `${label} native backend`);
+  }
+  function exactObjectKeys(value, expected, label) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) { violations.push(`${label} is missing`); return; }
+    const actual = Object.keys(value).sort(); const sortedExpected = [...expected].sort();
+    if (stableJson(actual) !== stableJson(sortedExpected)) violations.push(`${label} fields do not match the production protocol`);
+  }
 
   function validateArtifactReference(reference, label, { formal: requireBytes, artifactBytesByPath: bytesByPath, mediaType } = {}) {
     requiredString(reference?.path, `${label} path`);
@@ -197,6 +231,7 @@ export function validateRiveOracleTrace(trace, {
   function match(actual, expression, label) { if (typeof actual !== 'string' || !expression.test(actual)) violations.push(`${label} is invalid`); }
   function requiredString(actual, label) { if (typeof actual !== 'string' || actual.trim().length === 0) violations.push(`${label} is missing`); }
   function positiveInteger(actual, label) { if (!Number.isSafeInteger(actual) || actual < 1) violations.push(`${label} must be a positive safe integer`); }
+  function nonnegativeInteger(actual, label) { if (!Number.isSafeInteger(actual) || actual < 0) violations.push(`${label} must be a non-negative safe integer`); }
   function nonnegativeNumber(actual, label) { if (!Number.isFinite(actual) || actual < 0) violations.push(`${label} must be a finite non-negative number`); }
 }
 

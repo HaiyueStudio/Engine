@@ -1,10 +1,10 @@
 import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import { validateRiveG11SecurityReport } from './rive-g11-security-contract.mjs';
+import { assertFormalRepositoryIdentity, captureRepositoryIdentity } from '../formal-evidence/repository-identity.mjs';
 import { audioEventFixture, audioResolver, FakeAudioBackend, loadG08Modules } from '../../extensions/test/audio-event-parity-fixture.mjs';
 import { dataBindingFixture, interactionFixture, loadG07Modules } from '../../extensions/test/data-binding-parity-fixture.mjs';
 import { capabilityTracePort, deferred, invocation, loadG09Modules, loopbackWorker, programFixture, runtimeLimits, shaderFixture } from '../../extensions/test/animation-script-parity-fixture.mjs';
@@ -15,8 +15,10 @@ const output = resolve(root, argument('--out') ?? 'review/candidates/rive-g11-se
 const manifestBytes = readFileSync(resolve(root, 'animation-spec/corpus/rive/rive-g11-corpus-manifest.json'));
 const manifest = JSON.parse(manifestBytes.toString('utf8'));
 const generated = JSON.parse(readFileSync(resolve(root, manifest.generatedParserCorpus.path), 'utf8'));
-const revision = git(['rev-parse', 'HEAD']);
-const dirty = git(['status', '--porcelain']).length > 0;
+const repositoryStart = captureRepositoryIdentity(root);
+if (formal) assertFormalRepositoryIdentity(repositoryStart, repositoryStart, { label: 'Engine' });
+const revision = repositoryStart.revision;
+const dirty = repositoryStart.dirty;
 const importer = await import(new URL('../../animation-spec/dist-test/conversion/rive-ir/index.js', import.meta.url).href);
 const [{ runtime: scriptRuntime }, g07, g08] = await Promise.all([loadG09Modules(), loadG07Modules(), loadG08Modules()]);
 const implementations = createImplementations({ importer, scriptRuntime, g07, g08 });
@@ -60,6 +62,8 @@ if (validation.status !== 'passed') {
   const unclassified = cases.filter(value => value.underlyingDiagnostic === 'unclassified').map(value => value.id);
   throw new Error(`G11 security report failed ${validation.mode} validation:\n- ${validation.violations.join('\n- ')}${unclassified.length ? `\n- unclassified cases: ${unclassified.join(', ')}` : ''}`);
 }
+if (formal) assertFormalRepositoryIdentity(repositoryStart, captureRepositoryIdentity(root), { label: 'Engine' });
+mkdirSync(dirname(output), { recursive: true });
 writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`);
 console.log(`[rive-g11-security] passed=${summary.passed}/${summary.total}, failed=${summary.failed}, not-run=${summary.notRun}; wrote ${relative(root, output)}.`);
 
@@ -235,5 +239,4 @@ function fakeDevice(lost) {
 }
 async function waitFor(predicate, timeoutMs = 1_000) { const deadline = Date.now() + timeoutMs; while (!predicate()) { if (Date.now() > deadline) throw new Error('security case timed out'); await new Promise(resolvePromise => setTimeout(resolvePromise, 1)); } }
 function sha256(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
-function git(args) { return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim(); }
 function argument(name) { return process.argv.find(value => value.startsWith(`${name}=`))?.slice(name.length + 1); }

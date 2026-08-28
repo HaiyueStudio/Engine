@@ -20,6 +20,18 @@ declare module 'box2d.ts/dist/box2d.umd.js' {
     TestPoint(point: b2Vec2): boolean;
     GetBody(): b2Body;
     GetNext(): b2Fixture | null;
+    IsSensor(): boolean;
+    GetFilterData(): { categoryBits: number; maskBits: number; groupIndex: number };
+  }
+
+  export class b2Contact {
+    GetFixtureA(): b2Fixture;
+    GetFixtureB(): b2Fixture;
+  }
+
+  export class b2ContactListener {
+    BeginContact(contact: b2Contact): void;
+    EndContact(contact: b2Contact): void;
   }
 
   export class b2Body {
@@ -108,10 +120,16 @@ declare module 'box2d.ts/dist/box2d.umd.js' {
     DestroyJoint(joint: b2Joint): void;
     SetGravity(gravity: b2Vec2): void;
     QueryPointAABB(aabb: null, point: b2Vec2, callback: (fixture: b2Fixture) => boolean): void;
+    QueryAABB(callback: null, aabb: b2AABB, fn: (fixture: b2Fixture) => boolean): void;
+    RayCast(callback: null, point1: b2Vec2, point2: b2Vec2, fn: (fixture: b2Fixture, point: b2Vec2, normal: b2Vec2, fraction: number) => number): void;
+    SetContactListener(listener: b2ContactListener): void;
     Step(timeStep: number, velocityIterations: number, positionIterations: number): void;
   }
 
-  export class b2AABB {}
+  export class b2AABB {
+    lowerBound: b2Vec2;
+    upperBound: b2Vec2;
+  }
 
   export const b2BodyType: {
     readonly b2_staticBody: number;

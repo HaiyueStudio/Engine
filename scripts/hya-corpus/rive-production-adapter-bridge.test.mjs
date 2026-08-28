@@ -1,10 +1,19 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, resolve } from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 import {
   createProductionCapabilityEvaluator,
   createProductionCaptureAdapter,
   invokeProductionHost,
+  productionAdapterFromEnvironment,
+  verifyProductionAdapterEnvironment,
 } from './rive-production-adapter-bridge.mjs';
+
+const root = dirname(fileURLToPath(import.meta.url));
 
 const capabilityDescriptor = Object.freeze({
   adapterId: 'haiyue-rive-native-adapter',
@@ -64,3 +73,55 @@ test('production bridge rejects a host that changes its descriptor identity', as
   await assert.rejects(adapter.capture({}), /descriptor differs/u);
 });
 
+test('repository production gateway preflights immutable provider bytes and executes capability requests', async t => {
+  const temporary = mkdtempSync(resolve(tmpdir(), 'rive-production-provider-'));
+  t.after(() => rmSync(temporary, { recursive: true, force: true }));
+  const providerPath = resolve(temporary, 'provider.mjs');
+  writeFileSync(providerPath, "console.log('provider loaded'); export async function evaluate(request) { return { echo: request.bytes }; }\n");
+  const gatewayPath = resolve(root, 'rive-production-host.mjs');
+  const descriptor = {
+    adapterId: 'haiyue-rive-production-host', adapterRevisionSha256: hash(readFileSync(gatewayPath)),
+    evaluatorId: 'fixture-capability-provider', evaluatorRevisionSha256: hash(readFileSync(providerPath)),
+    optionsRevision: 'rive-7.3-production-v1',
+  };
+  const environment = {
+    RIVE_CAPABILITY_EVALUATOR_COMMAND: process.execPath,
+    RIVE_CAPABILITY_EVALUATOR_ARGS_JSON: JSON.stringify([gatewayPath, '--kind=capability', `--provider=${providerPath}`]),
+    RIVE_CAPABILITY_EVALUATOR_DESCRIPTOR_JSON: JSON.stringify(descriptor),
+  };
+  const identity = await verifyProductionAdapterEnvironment('capability', environment);
+  assert.equal(identity.identity.ready, true);
+  assert.equal(identity.identity.evaluatorRevisionSha256, descriptor.evaluatorRevisionSha256);
+  const evaluator = productionAdapterFromEnvironment('capability', environment);
+  const result = await evaluator.evaluate({ bytes: new Uint8Array([9, 8, 7]) }, new AbortController().signal);
+  assert.deepEqual([...result.echo], [9, 8, 7]);
+
+  const changed = { ...environment, RIVE_CAPABILITY_EVALUATOR_DESCRIPTOR_JSON: JSON.stringify({ ...descriptor, evaluatorRevisionSha256: 'f'.repeat(64) }) };
+  await assert.rejects(verifyProductionAdapterEnvironment('capability', changed), /exited with 1.*provider bytes/us);
+});
+
+test('repository production gateway preserves capture artifacts and attests the requested browser environment', async t => {
+  const temporary = mkdtempSync(resolve(tmpdir(), 'rive-production-capture-provider-'));
+  t.after(() => rmSync(temporary, { recursive: true, force: true }));
+  const providerPath = resolve(temporary, 'provider.mjs');
+  writeFileSync(providerPath, `export async function capture(request) {
+    return { environment: request.environment, channels: {}, artifactBytesByPath: new Map([['capture.rgba', new Uint8Array([1, 2, 3, 4])]]) };
+  }\n`);
+  const gatewayPath = resolve(root, 'rive-production-host.mjs');
+  const descriptor = {
+    id: 'fixture-official-capture', revisionSha256: hash(readFileSync(providerPath)),
+    runtime: '@rive-app/webgl2@2.40.0', backend: 'webgl2', nativeBackend: true,
+  };
+  const environment = {
+    RIVE_OFFICIAL_CAPTURE_COMMAND: process.execPath,
+    RIVE_OFFICIAL_CAPTURE_ARGS_JSON: JSON.stringify([gatewayPath, '--kind=official', `--provider=${providerPath}`]),
+    RIVE_OFFICIAL_CAPTURE_DESCRIPTOR_JSON: JSON.stringify(descriptor),
+  };
+  const adapter = productionAdapterFromEnvironment('official', environment);
+  const browserEnvironment = { browser: 'chrome', browserVersion: '151.0.0.0', os: 'Windows 11' };
+  const capture = await adapter.capture({ environment: browserEnvironment });
+  assert.deepEqual(capture.environment, browserEnvironment);
+  assert.deepEqual([...capture.artifactBytesByPath.get('capture.rgba')], [1, 2, 3, 4]);
+});
+
+function hash(bytes) { return createHash('sha256').update(bytes).digest('hex'); }

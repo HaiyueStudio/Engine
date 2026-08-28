@@ -22,7 +22,7 @@ Official `rive-app` repository fixtures listed in [`official-asset-sources.md`](
 
 Each case records：
 
-- tuple/oracle package hashes, asset/revision/resource hashes, browser/device, viewport/DPR, fonts and audio sample rate；
+- tuple/oracle package hashes、三个 production adapter revision descriptor、asset/revision/resource hashes、由 official/HYA capture 共同确认的 browser/device、viewport/DPR、fonts 和 audio sample rate；
 - exact artboard/animation/state-machine selection and initial data/resource instances；
 - integer-microsecond clock steps and ordered input/data/resize/resource/semantic actions；
 - official runtime and HYA traces from fresh owners with identical action stream；
@@ -54,10 +54,10 @@ Tolerance changes require review and cannot be made in the same change that prom
 
 Formal first-release evidence follows the existing Windows-first support policy：
 
-- Windows 10 22H2, integrated Intel-class GPU, Chrome stable and Edge stable；
-- current Windows 11, discrete NVIDIA-or-AMD-class GPU, Chrome stable and Edge stable。
+- `windows-10-plus-device-a`：任意 Windows 10 或更高版本物理机器与真实 GPU，Chrome stable 和 Edge stable；
+- `windows-10-plus-device-b`：另一台任意 Windows 10 或更高版本物理机器与真实 GPU，Chrome stable 和 Edge stable。
 
-Both require WebGL2 official oracle and WebGPU HYA runtime, audio output/schedule capture, keyboard/gamepad/focus, accessibility bridge and resize/DPR coverage。Other platforms may provide diagnostic evidence but do not expand the Accepted claim without a tuple addendum。
+两台机器的 `machineIdSha256` 必须不同；不再要求指定集显/独显类别。两者都要求 WebGL2 official oracle 和 WebGPU HYA runtime、浏览器日志采集且 console error/exception 为 0、audio output/schedule capture、keyboard/gamepad/focus、accessibility bridge 和 resize/DPR coverage。正式 Node runner 接受任意 Node.js major `>=22`。其他平台可提供 diagnostic evidence，但不扩展 Accepted claim。
 
 ## Reports and gates
 
@@ -73,3 +73,5 @@ One candidate report binds a clean Engine revision, packed package hashes, Edito
 - license/provenance/attribution inventory。
 
 Smoke/diagnostic runs never replace formal evidence。Formal evidence requires the full workload, required real devices, current clean revision and artifact validator。
+
+正式执行把 trace、security、browser closure、index、candidate 与 closure-attempt 写入 Git 已忽略的 `artifacts/rive-g11-formal/`。这样写 artifact 不会改变被测 source revision 或 clean-worktree 身份；最终记录通过 SHA-256/byte length 绑定实际 bytes，不能用受跟踪的 diagnostic candidate 替代。需要长期留存时，应把整个目录作为不可变 CI/review artifact 上传，并以报告内的 `engineRevision` 作为被测 revision。

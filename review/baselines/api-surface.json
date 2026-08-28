@@ -8499,6 +8499,10 @@
               "kind": "type"
             },
             {
+              "name": "Physics2DContactEvent",
+              "kind": "type"
+            },
+            {
               "name": "Physics2DJoint",
               "kind": "value"
             },
@@ -8508,6 +8512,14 @@
             },
             {
               "name": "Physics2DJointType",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DRaycastResult",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DResourceSnapshot",
               "kind": "type"
             },
             {
@@ -8583,6 +8595,10 @@
               "kind": "type"
             },
             {
+              "name": "Physics3DContactEvent",
+              "kind": "type"
+            },
+            {
               "name": "Physics3DDragOptions",
               "kind": "type"
             },
@@ -8620,6 +8636,10 @@
             },
             {
               "name": "Physics3DRaycastResult",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DResourceSnapshot",
               "kind": "type"
             },
             {

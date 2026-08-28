@@ -10,13 +10,20 @@
     },
     "binaryEvidence": {
       "counts": { "objectTypes": 288, "propertyKeys": 565, "assetTypes": 9 },
-      "eligibility": "CoreRegistry-instantiable object/asset keys and generated deserialize property cases only."
+      "eligibility": "CoreRegistry-instantiable object/asset keys and generated deserialize property cases only.",
+      "closure": "A repository-pinned HaiYue-owned deterministic format-7.3 .riv corpus must be replayed through readFrozenRiv and encounter every eligible key. Official product assets remain required for behavioral evidence but need not collectively contain every wire key."
     },
     "behavioralEvidence": {
       "featureFamilies": 8,
       "scriptRegistrationKeysAreWireKeys": false,
       "closure": "Feature-family workloads and differential/security traces cover script behavior; module/symbol names remain source attribution."
     }
+  },
+  "binaryCoverageCorpus": {
+    "required": true,
+    "sourceIdentity": "haiyue-owned-deterministic-generator",
+    "requiredBindings": ["generator revision", "fixture SHA-256", "fixture byte length", "format 7.3", "frozen registry identity", "parser replay result"],
+    "behavioralEvidence": false
   },
   "productCases": [
     {
@@ -112,5 +119,5 @@
     "rive-cloud": "Rive Cloud file revision id plus exported bytes SHA-256; mutable share links and Editor versions are insufficient.",
     "official-git": "Official rive-app repository plus 40-character commit, repository path, immutable source/download URLs, byte length, bytes SHA-256 and repository license evidence. Inputs are fetched into ephemeral storage and are never vendored in HaiYue repositories."
   },
-  "acquisitionGate": "G11 may add formalAssets only when every metadata field and applicable content right is present. One immutable official asset may carry multiple independently named evidence roles when its attributed feature families and pinned workload actions satisfy each role; roles never reduce the trace/device matrix. Official rive-app Git inputs may rely on immutable commit/path/hash/license attribution and do not require a Rive Cloud revision. A source link proves input identity, not parity: every formal result still requires frozen oracle/HYA traces, device metadata and artifact validation. Empty formalAssets is not release evidence."
+  "acquisitionGate": "G11 may add formalAssets only when every metadata field and applicable content right is present. One immutable official asset may carry multiple independently named evidence roles when its attributed feature families and pinned workload actions satisfy each role; roles never reduce the trace/device matrix. Official rive-app Git inputs may rely on immutable commit/path/hash/license attribution and do not require a Rive Cloud revision. The owned binaryCoverageCorpus proves wire encounter only and cannot satisfy a behavioral witness, product case, differential trace, or performance row. A source link proves input identity, not parity: every formal result still requires frozen oracle/HYA traces, device metadata and artifact validation. Empty formalAssets is not release evidence."
 }

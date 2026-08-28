@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import test from 'node:test';
 import { gzipSync } from 'node:zlib';
-import { scanRiveBrowserClosure } from './rive-browser-closure-scan.mjs';
+import { scanRiveBrowserClosure, validateRiveBrowserClosureReport } from './rive-browser-closure-scan.mjs';
 
 const denyList = {
   forbiddenPackages: ['@rive-app/webgl2'],
@@ -130,3 +130,58 @@ test('closure scan fails closed for unsafe packed player paths', () => {
   assert.equal(result.scans[0].archiveErrorCount, 1);
   assert.match(result.scans[0].matches.archiveErrors[0].message, /unsafe tar entry path/u);
 });
+
+test('formal closure report requires clean Node 22+ evidence and all four passing scans', () => {
+  const accepted = validateRiveBrowserClosureReport(closureReport(), {
+    formal: true,
+    expectedRevision: 'a'.repeat(40),
+  });
+  assert.equal(accepted.status, 'passed', accepted.violations.join('\n'));
+
+  const dirty = closureReport();
+  dirty.engineDirty = true;
+  dirty.evidenceClass = 'dirty-worktree-diagnostic';
+  dirty.formalEvidence = false;
+  const dirtyResult = validateRiveBrowserClosureReport(dirty, { formal: true });
+  assert.equal(dirtyResult.status, 'failed');
+  assert.ok(dirtyResult.violations.some(value => value.includes('formal Engine dirty state')));
+
+  const oldNode = closureReport();
+  oldNode.nodeVersion = 'v21.7.3';
+  const oldNodeResult = validateRiveBrowserClosureReport(oldNode, { formal: true });
+  assert.ok(oldNodeResult.violations.some(value => value.includes('Node.js 22 or later')));
+
+  const incomplete = closureReport();
+  incomplete.status = 'incomplete';
+  incomplete.formalEvidence = false;
+  incomplete.scans[3] = { name: 'networkRequests', status: 'not-run', reason: 'network capture missing' };
+  const incompleteResult = validateRiveBrowserClosureReport(incomplete, { formal: true });
+  assert.ok(incompleteResult.violations.some(value => value.includes('networkRequests formal status')));
+});
+
+function closureReport() {
+  return {
+    schemaVersion: 1,
+    kind: 'haiyue-rive-browser-closure-scan',
+    status: 'passed',
+    formalEvidence: true,
+    generatedAt: '2026-08-27T00:00:00.000Z',
+    engineRevision: 'a'.repeat(40),
+    engineDirty: false,
+    evidenceClass: 'clean-revision-candidate',
+    nodeVersion: 'v24.19.0',
+    denyListSha256: 'b'.repeat(64),
+    officialOracleBuildTimeOnly: true,
+    unclassifiedFailureCount: 0,
+    scans: ['packedPlayerTarball', 'browserBundle', 'sourceMap', 'networkRequests'].map(name => ({
+      name,
+      status: 'passed',
+      sha256: 'c'.repeat(64),
+      forbiddenPackageCount: 0,
+      forbiddenFileCount: 0,
+      forbiddenStaticPatternCount: 0,
+      forbiddenNetworkCount: 0,
+      rawRivCount: 0,
+    })),
+  };
+}

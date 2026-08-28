@@ -18,10 +18,13 @@ G11 原契约把 `feature-isolated`、`real-product`、`combined-stress` 当成�
 3. 正式 minimum 改为 witness count：8 个 feature witness、4 个 product witness、3 个 combined-stress witness。legacy `kind` 仅保留输入历史分类，不再决定这些 minimum。
 4. production adapter 采用 `haiyue-rive-production-adapter@1` 可执行宿主协议。三类宿主都必须返回与调用完全相同的 revision descriptor；二进制以有界字节字段传输，超时、输出上限、abort、重复 artifact path 和 descriptor 改写均为硬失败。
 5. candidate generator 只从 `rive-g11-evidence-index.json`、真实 artifact bytes 和 formal corpus validator 派生 blocker。不得用固定字符串代替 trace/device/performance/closure 缺口，也不得把 collecting index 晋升为正式证据。
+6. 每条 differential trace 必须保存 capability evaluator、official capture 与 HYA capture 的完整 revision descriptor。official/HYA capture host 还必须各自返回实际执行的 browser/device environment；两端与请求环境任一不一致都在写 trace 前失败。
+7. 仓库提供通用 `rive-production-host.mjs` gateway。gateway 的 capability descriptor 同时绑定 gateway bytes 与 evaluator provider bytes；capture descriptor 绑定对应 provider bytes。provider 改动而 descriptor/config 未重生成时，`identity` 握手失败。
+8. formal closure 不能把六个非空环境字符串当作 host 已配置。它必须实际执行三类 host 的 `identity` operation，核对 kind、descriptor 和 revision；可用 `RIVE_PRODUCTION_HOST_CONFIG_PATH` 指向由仓库生成器创建的单一配置文件。
 
 ## 后果
 
 - 当前 8 个官方素材承担 19 个 role，并覆盖 8/8 feature family、4/4 product case 与 3 个 combined-stress witness；没有新增或 vendoring `.riv`。
 - production bridge 完成并不等于 native host 或 parity 已通过。缺少 host、Node 22、clean revision、任一物理设备或任一 trace 时，正式闭环仍失败。
+- gateway/provider hash 与 identity preflight 只证明实际调用的是指定 host bytes；provider 仍必须实现真实 full-fidelity capability evaluation 或 native browser capture，不能返回 mock/echo channel 数据。
 - evidence index 可由两台设备分别积累，但 `complete` 必须绑定同一 Engine revision、manifest hash 和 workload plan hash；candidate validator 会重新读取并散列所有引用 artifact。
-

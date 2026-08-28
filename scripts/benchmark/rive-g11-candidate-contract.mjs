@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
 import { validateRiveOracleTrace } from '../hya-corpus/rive-oracle-trace-contract.mjs';
+import { validateRiveG11SecurityReport } from './rive-g11-security-contract.mjs';
+import { validateRiveBrowserClosureReport } from './rive-browser-closure-scan.mjs';
 
 export const RIVE_G11_CANDIDATE_KIND = 'haiyue-rive-g11-candidate';
 export const RIVE_G11_CANDIDATE_VERSION = 1;
@@ -63,6 +65,7 @@ export function validateRiveG11Candidate(candidate, {
     equal(candidate?.workloadPlan?.path, manifest.workloadPlan.path, 'expected workload plan path');
     equal(candidate?.workloadPlan?.sha256, manifest.workloadPlan.sha256, 'expected workload plan hash');
   }
+  validateEvidenceReference(candidate?.evidenceIndex, 'evidence index', formal);
 
   const coverage = candidate?.coverage;
   equal(coverage?.contractRevision, 2, 'coverage contract revision');
@@ -197,6 +200,26 @@ export function validateRiveG11Candidate(candidate, {
       if (!securityIds.has(expected.id)) violations.push(`missing security result ${expected.id}`);
     }
   }
+  if (formal) {
+    const references = new Map(securityResults
+      .filter(value => value?.status === 'passed' && typeof value?.evidence?.path === 'string')
+      .map(value => [value.evidence.path, value.evidence]));
+    for (const [path, reference] of references) {
+      const bytes = artifactBytesByPath?.get(path);
+      if (!bytes) continue;
+      try {
+        const report = JSON.parse(new TextDecoder().decode(bytes));
+        const result = validateRiveG11SecurityReport(report, manifest, {
+          formal: true,
+          expectedRevision: candidate.engineRevision,
+          expectedManifestSha256: candidate.corpus.manifestSha256,
+        });
+        if (result.status !== 'passed') violations.push(`security evidence ${reference.path} failed formal validation: ${result.violations.join('; ')}`);
+      } catch (error) {
+        violations.push(`security evidence ${reference.path} cannot be parsed: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+  }
 
   const closureScans = Array.isArray(candidate?.browserClosure?.scans) ? candidate.browserClosure.scans : [];
   for (const name of CLOSURE_SCANS) {
@@ -216,6 +239,22 @@ export function validateRiveG11Candidate(candidate, {
         equal(scan?.forbiddenNetworkCount, 0, `${name} forbidden network count`);
         equal(scan?.rawRivCount, 0, `${name} raw RIV count`);
         if (formal) equal(scan?.status, 'passed', `${name} formal scan status`);
+      }
+    }
+  }
+  if (formal) {
+    const references = new Map(closureScans
+      .filter(value => value?.status === 'passed' && typeof value?.evidence?.path === 'string')
+      .map(value => [value.evidence.path, value.evidence]));
+    for (const [path, reference] of references) {
+      const bytes = artifactBytesByPath?.get(path);
+      if (!bytes) continue;
+      try {
+        const report = JSON.parse(new TextDecoder().decode(bytes));
+        const result = validateRiveBrowserClosureReport(report, { formal: true, expectedRevision: candidate.engineRevision });
+        if (result.status !== 'passed') violations.push(`browser closure evidence ${reference.path} failed formal validation: ${result.violations.join('; ')}`);
+      } catch (error) {
+        violations.push(`browser closure evidence ${reference.path} cannot be parsed: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
   }
@@ -240,8 +279,8 @@ export function validateRiveG11Candidate(candidate, {
     if (findings?.officialInputAdmission) {
       validateEvidenceReference(findings.officialInputAdmission, 'official input admission evidence', formal);
     }
-    match(findings?.runtimeInventory?.sha256, SHA256, 'runtime diagnostic inventory hash');
-    match(findings?.officialLoadMatrix?.sha256, SHA256, 'official diagnostic matrix hash');
+    validateEvidenceReference(findings?.runtimeInventory, 'runtime diagnostic inventory', formal);
+    validateEvidenceReference(findings?.officialLoadMatrix, 'official diagnostic matrix', formal);
     nonnegativeInteger(findings?.coveredObjectKeys, 'diagnostic covered object keys');
     nonnegativeInteger(findings?.coveredPropertyKeys, 'diagnostic covered property keys');
     nonnegativeInteger(findings?.importerOracleDivergenceCount, 'importer/oracle divergence count');
@@ -254,13 +293,13 @@ export function validateRiveG11Candidate(candidate, {
     );
     equal(findings?.runtimeInventory?.unclassifiedFailureCount, 0, 'runtime inventory unclassified failures');
     if (findings?.oracleRepositoryInventory) {
-      match(findings.oracleRepositoryInventory.sha256, SHA256, 'oracle repository inventory hash');
+      validateEvidenceReference(findings.oracleRepositoryInventory, 'oracle repository inventory', formal);
       equal(findings.oracleRepositoryInventory.accepted, 0, 'oracle repository frozen-minor accepted count');
       equal(findings.oracleRepositoryInventory.unclassifiedFailureCount, 0, 'oracle repository inventory unclassified failures');
     }
     equal(findings?.officialLoadMatrix?.ownerResidual, 0, 'official load matrix owner residual');
     if (findings?.edgeLoadMatrix) {
-      match(findings.edgeLoadMatrix.sha256, SHA256, 'Edge diagnostic matrix hash');
+      validateEvidenceReference(findings.edgeLoadMatrix, 'Edge diagnostic matrix', formal);
       equal(findings.edgeLoadMatrix.ownerResidual, 0, 'Edge load matrix owner residual');
       nonnegativeInteger(findings?.crossBrowserPixelHashDifferenceCount, 'cross-browser pixel hash difference count');
     }
@@ -312,6 +351,7 @@ export function validateRiveG11Candidate(candidate, {
     equal(report?.nativeBackend, true, `${deviceId}:${report?.browser} native backend`);
     equal(report?.officialBackend, 'webgl2', `${deviceId}:${report?.browser} official backend`);
     equal(report?.hyaBackend, 'webgpu', `${deviceId}:${report?.browser} HYA backend`);
+    equal(report?.browserLogCaptured, true, `${deviceId}:${report?.browser} browser log capture`);
     equal(report?.fullWorkload, true, `${deviceId}:${report?.browser} full workload`);
     equal(report?.consoleErrorCount, 0, `${deviceId}:${report?.browser} console errors`);
     equal(report?.exceptionCount, 0, `${deviceId}:${report?.browser} exceptions`);

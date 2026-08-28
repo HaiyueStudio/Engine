@@ -4,11 +4,14 @@
   "contractRevision": 3,
   "status": "accepted",
   "frozenAt": "2026-08-22",
-  "amendedAt": "2026-08-25",
+  "amendedAt": "2026-08-27",
   "acceptedDecisions": [
     "docs/for-ai/adr/0087-rive-hya-source-neutral-full-fidelity.md",
     "docs/for-ai/adr/0088-rive-7-3-census-and-runtime-null-object-addendum.md",
-    "docs/for-ai/adr/0089-rive-coverage-evidence-eligibility-addendum.md"
+    "docs/for-ai/adr/0089-rive-coverage-evidence-eligibility-addendum.md",
+    "docs/for-ai/adr/0090-rive-evidence-roles-and-production-adapter-boundary.md",
+    "docs/for-ai/adr/0091-rive-formal-runtime-and-windows-device-policy.md",
+    "docs/for-ai/adr/0092-rive-generated-binary-coverage-and-behavioral-assets.md"
   ],
   "riveFormat": {
     "fingerprint": "RIVE",
@@ -65,7 +68,9 @@
       "objectTypes": 288,
       "propertyKeys": 565,
       "assetTypes": 9,
-      "runtimeNullObjectKeys": [526]
+      "runtimeNullObjectKeys": [526],
+      "closureSource": "pinned HaiYue-owned generated format-7.3 .riv bytes replayed through readFrozenRiv",
+      "cannotReplace": ["official behavioral witness", "production differential trace", "physical-device performance evidence"]
     },
     "behavioralEvidence": {
       "featureFamilies": 8,

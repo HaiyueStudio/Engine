@@ -1,12 +1,14 @@
 import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, extname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gunzipSync } from 'node:zlib';
+import { assertFormalRepositoryIdentity, captureRepositoryIdentity } from '../formal-evidence/repository-identity.mjs';
 
 const MAX_ARCHIVE_EXPANDED_BYTES = 512 * 1024 * 1024;
 const MAX_ARCHIVE_ENTRIES = 100_000;
+const HASH = /^[a-f0-9]{64}$/u;
+const CLOSURE_SCANS = Object.freeze(['packedPlayerTarball', 'browserBundle', 'sourceMap', 'networkRequests']);
 
 export function scanRiveBrowserClosure({ denyList, artifacts }) {
   const scans = [];
@@ -33,6 +35,56 @@ export function scanRiveBrowserClosure({ denyList, artifacts }) {
     unclassifiedFailureCount: 0,
     scans: Object.freeze(scans),
   });
+}
+
+export function validateRiveBrowserClosureReport(report, { formal = false, expectedRevision = null } = {}) {
+  const violations = [];
+  equal(report?.schemaVersion, 1, 'schemaVersion');
+  equal(report?.kind, 'haiyue-rive-browser-closure-scan', 'kind');
+  if (!['passed', 'failed', 'incomplete'].includes(report?.status)) violations.push('status is invalid');
+  if (typeof report?.formalEvidence !== 'boolean') violations.push('formalEvidence must be boolean');
+  if (!Number.isFinite(Date.parse(report?.generatedAt ?? ''))) violations.push('generatedAt is invalid');
+  if (!/^[a-f0-9]{40}$/u.test(report?.engineRevision ?? '')) violations.push('Engine revision is invalid');
+  if (expectedRevision) equal(report?.engineRevision, expectedRevision, 'expected Engine revision');
+  if (typeof report?.engineDirty !== 'boolean') violations.push('Engine dirty identity is missing');
+  equal(report?.evidenceClass, report?.engineDirty ? 'dirty-worktree-diagnostic' : 'clean-revision-candidate', 'evidence class');
+  if (typeof report?.nodeVersion !== 'string' || !/^v\d+\./u.test(report.nodeVersion)) violations.push('Node version identity is missing');
+  if (!HASH.test(report?.denyListSha256 ?? '')) violations.push('deny-list hash is invalid');
+  equal(report?.officialOracleBuildTimeOnly, true, 'official oracle build-time boundary');
+  equal(report?.unclassifiedFailureCount, 0, 'unclassified failure count');
+  if (!Array.isArray(report?.scans)) violations.push('scans must be an array');
+  const scans = Array.isArray(report?.scans) ? report.scans : [];
+  const names = new Set();
+  for (const scan of scans) {
+    if (names.has(scan?.name)) violations.push(`duplicate closure scan ${String(scan?.name)}`);
+    names.add(scan?.name);
+    if (!CLOSURE_SCANS.includes(scan?.name)) violations.push(`unknown closure scan ${String(scan?.name)}`);
+    if (!['passed', 'failed', 'not-run'].includes(scan?.status)) violations.push(`${String(scan?.name)} status is invalid`);
+    if (scan?.status === 'not-run') {
+      if (typeof scan?.reason !== 'string' || scan.reason.trim() === '') violations.push(`${String(scan?.name)} not-run reason is missing`);
+      continue;
+    }
+    if (!HASH.test(scan?.sha256 ?? '')) violations.push(`${String(scan?.name)} artifact hash is invalid`);
+    for (const key of ['forbiddenPackageCount', 'forbiddenFileCount', 'forbiddenStaticPatternCount', 'forbiddenNetworkCount', 'rawRivCount']) {
+      nonnegativeInteger(scan?.[key], `${String(scan?.name)} ${key}`);
+      if (scan?.status === 'passed') equal(scan?.[key], 0, `${String(scan?.name)} ${key}`);
+    }
+  }
+  for (const name of CLOSURE_SCANS) if (!names.has(name)) violations.push(`missing closure scan ${name}`);
+  const failed = scans.some(scan => scan?.status === 'failed');
+  const notRun = scans.some(scan => scan?.status === 'not-run');
+  equal(report?.status, failed ? 'failed' : notRun ? 'incomplete' : 'passed', 'derived closure status');
+  if (formal) {
+    equal(report?.formalEvidence, true, 'formal evidence identity');
+    equal(report?.engineDirty, false, 'formal Engine dirty state');
+    if (Number(String(report?.nodeVersion).replace(/^v/u, '').split('.')[0]) < 22) violations.push('formal closure evidence requires Node.js 22 or later');
+    equal(report?.status, 'passed', 'formal closure status');
+    for (const name of CLOSURE_SCANS) equal(scans.find(value => value.name === name)?.status, 'passed', `${name} formal status`);
+  }
+  return Object.freeze({ schemaVersion: 1, contract: 'haiyue-rive-browser-closure-scan@1', mode: formal ? 'formal' : 'diagnostic', status: violations.length === 0 ? 'passed' : 'failed', violations: Object.freeze(violations) });
+
+  function equal(actual, expected, label) { if (actual !== expected) violations.push(`${label}: expected ${String(expected)}, received ${String(actual)}`); }
+  function nonnegativeInteger(actual, label) { if (!Number.isSafeInteger(actual) || actual < 0) violations.push(`${label} is invalid`); }
 }
 
 function scanFiles(artifact, denyList) {
@@ -221,6 +273,10 @@ function walk(directory) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+  const formal = process.argv.includes('--formal');
+  if (formal && Number(process.versions.node.split('.')[0]) < 22) throw new Error('Formal Rive browser closure requires Node.js 22 or later.');
+  const repositoryStart = captureRepositoryIdentity(root);
+  if (formal) assertFormalRepositoryIdentity(repositoryStart, repositoryStart, { label: 'Engine' });
   const denyPath = resolve(root, 'docs/for-ai/rive-hya/browser-runtime-deny-list.json');
   const denyBytes = readFileSync(denyPath);
   const denyList = JSON.parse(denyBytes.toString('utf8'));
@@ -234,17 +290,30 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     denyList,
     artifacts: definitions.map(([name, argument]) => ({ name, path: readArgument(argument) ? resolve(readArgument(argument)) : null })),
   });
+  const failed = closure.scans.filter(value => value.status === 'failed');
+  const notRun = closure.scans.filter(value => value.status === 'not-run');
   const report = {
     schemaVersion: 1,
     kind: 'haiyue-rive-browser-closure-scan',
+    status: failed.length > 0 ? 'failed' : notRun.length > 0 ? 'incomplete' : 'passed',
+    formalEvidence: formal && failed.length === 0 && notRun.length === 0,
     generatedAt: new Date().toISOString(),
-    engineRevision: execFileSync('git', ['-C', root, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+    engineRevision: repositoryStart.revision,
+    engineDirty: repositoryStart.dirty,
+    evidenceClass: repositoryStart.dirty ? 'dirty-worktree-diagnostic' : 'clean-revision-candidate',
+    nodeVersion: process.version,
     denyListSha256: createHash('sha256').update(denyBytes).digest('hex'),
     ...closure,
   };
+  const validation = validateRiveBrowserClosureReport(report, { formal, expectedRevision: repositoryStart.revision });
+  if (validation.status !== 'passed') throw new Error(`Rive browser closure report failed ${validation.mode} validation:\n- ${validation.violations.join('\n- ')}`);
+  if (formal) assertFormalRepositoryIdentity(repositoryStart, captureRepositoryIdentity(root), { label: 'Engine' });
   const output = readArgument('--out');
-  if (output) writeFileSync(resolve(root, output), `${JSON.stringify(report, null, 2)}\n`);
-  const failed = report.scans.filter(value => value.status === 'failed');
+  if (output) {
+    const outputPath = resolve(root, output);
+    mkdirSync(dirname(outputPath), { recursive: true });
+    writeFileSync(outputPath, `${JSON.stringify(report, null, 2)}\n`);
+  }
   console.log(`[rive-closure] passed=${report.scans.filter(value => value.status === 'passed').length}, failed=${failed.length}, not-run=${report.scans.filter(value => value.status === 'not-run').length}.`);
   if (failed.length > 0) throw new Error(`Rive browser closure contains forbidden material: ${failed.map(value => value.name).join(', ')}.`);
 }

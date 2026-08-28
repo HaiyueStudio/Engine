@@ -42,6 +42,25 @@ test('CartesianTransform3D preserves TRS and anchor matrix semantics', () => {
   assert.deepEqual(Array.from(transform.localMatrix.slice(12, 15)), [9, 19, 29]);
 });
 
+test('CartesianTransform3D keeps semantic fields aligned after runtime matrix write-back', () => {
+  const source = new CartesianTransform3D({
+    position: [4, 5, 6],
+    rotation: [0.25, -0.5, 0.75],
+    scale: [2, 3, 4],
+    anchor: [1, 2, 3],
+  });
+  const target = new CartesianTransform3D({ anchor: [1, 2, 3] });
+
+  target.setMatrix(source.localMatrix);
+
+  for (let index = 0; index < 3; index++) {
+    assert.ok(Math.abs(target.position[index] - source.position[index]) < 1e-5);
+    assert.ok(Math.abs(target.rotation[index] - source.rotation[index]) < 1e-5);
+    assert.ok(Math.abs(target.scale[index] - source.scale[index]) < 1e-5);
+  }
+  assert.deepEqual(Array.from(target.localMatrix), Array.from(source.localMatrix));
+});
+
 test('SphericalTransform3D keeps eye position and local matrix translation aligned', () => {
   const transform = new SphericalTransform3D({
     radius: 5,

@@ -9,7 +9,7 @@
 | Requirement | Result | Evidence |
 | --- | --- | --- |
 | format/runtime/Editor export/features/renderer/decoder/script revisions | pass | `compatibility-tuple.json` 固定 7.3、source/public/internal heads、npm/WASM hashes、per-file Editor revision identity、flags/dependency tags 和 upgrade policy |
-| generated object/property/script/asset census | pass | `runtime-census.json`：source 288/618/48/349/14；binary eligible 288/565/9；unclassified 0；generator deterministic；ADR 0088 修复 7 个 wrapped property case，ADR 0089 冻结 evidence eligibility |
+| generated object/property/script/asset census | pass | `runtime-census.json`：source 288/618/48/349/14；binary eligible 288/565/9；unclassified 0；generator deterministic；ADR 0088 修复 7 个 wrapped property case，ADR 0089 冻结 evidence eligibility，ADR 0092 要求自有 7.3 wire fixture parser replay 与官方 behavioral evidence 分责 |
 | profiles and no semantic baking | pass | ADR 0087 + feature matrix 固定 `visual-baked`/`native-semantic`/`full-fidelity` eligibility |
 | Accepted source-neutral ABI | pass | ADR 0087 固定 IR、semantics、neutral extension majors、budgets、package boundary |
 | license matrix | pass | runtime/dependencies/content/Marketplace/self-owned/hosted/derived evidence 均有 decision 与 manifest rule |

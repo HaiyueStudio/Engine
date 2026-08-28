@@ -1,23 +1,30 @@
 import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { runRiveDifferentialTrace } from './rive-differential-trace-runner.mjs';
+import { assertFormalRepositoryIdentity, captureRepositoryIdentity } from '../formal-evidence/repository-identity.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const rivPath = requiredPath('--riv');
 const scenarioPath = requiredPath('--scenario');
 const outputDirectory = requiredPath('--out-dir');
 const environmentPath = requiredPath('--environment');
-const evaluator = await loadExport(requiredPath('--capability-evaluator'), 'capabilityEvaluator');
-const officialAdapter = await loadExport(requiredPath('--official-capture-adapter'), 'officialCaptureAdapter');
-const hyaAdapter = await loadExport(requiredPath('--hya-capture-adapter'), 'hyaCaptureAdapter');
+const evaluatorPath = requiredPath('--capability-evaluator');
+const officialAdapterPath = requiredPath('--official-capture-adapter');
+const hyaAdapterPath = requiredPath('--hya-capture-adapter');
 const formal = process.argv.includes('--formal');
 const assetId = requiredArgument('--asset-id');
 const outputRelative = relative(root, outputDirectory).split('\\').join('/');
 if (isAbsolute(outputRelative) || outputRelative === '..' || outputRelative.startsWith('../')) throw new Error('--out-dir must remain inside the Engine repository.');
 if (formal && Number(process.versions.node.split('.')[0]) < 22) throw new Error('Formal Rive differential evidence requires Node.js 22 or later.');
+const repositoryStart = captureRepositoryIdentity(root);
+if (formal) assertFormalRepositoryIdentity(repositoryStart, repositoryStart, { label: 'Engine' });
+const [evaluator, officialAdapter, hyaAdapter] = await Promise.all([
+  loadExport(evaluatorPath, 'capabilityEvaluator'),
+  loadExport(officialAdapterPath, 'officialCaptureAdapter'),
+  loadExport(hyaAdapterPath, 'hyaCaptureAdapter'),
+]);
 
 const [rivBytes, scenarioBytes, environmentBytes, manifestBytes, workloadPlanBytes] = await Promise.all([
   readFile(rivPath), readFile(scenarioPath), readFile(environmentPath),
@@ -30,7 +37,7 @@ const expected = manifest.formalAssets.find(value => value.id === assetId);
 if (!expected) throw new Error(`Asset ${assetId} is not admitted in formalAssets.`);
 const rivSha256 = hash(rivBytes);
 if (expected.riv.sha256 !== rivSha256 || expected.riv.byteLength !== rivBytes.byteLength) throw new Error(`RIV identity mismatch for ${assetId}.`);
-const revision = git(['rev-parse', 'HEAD']); const engineDirty = git(['status', '--porcelain']).length > 0;
+const revision = repositoryStart.revision; const engineDirty = repositoryStart.dirty;
 const conversionModule = await import(pathToFileURL(resolve(root, 'animation-spec/dist-test/rive/convert/index.js')).href);
 const result = await runRiveDifferentialTrace({
   assetId, rivSha256, rivBytes: new Uint8Array(rivBytes), scenario, scenarioBytes,
@@ -45,6 +52,7 @@ const result = await runRiveDifferentialTrace({
   engineRevision: revision, engineDirty, generatedAt: new Date().toISOString(),
   evidenceClass: formal ? 'clean-device-candidate' : 'diagnostic', formal,
 });
+if (formal) assertFormalRepositoryIdentity(repositoryStart, captureRepositoryIdentity(root), { label: 'Engine' });
 await mkdir(outputDirectory, { recursive: true });
 for (const [path, bytes] of result.artifactBytesByPath) {
   const target = resolve(root, path); const targetRelative = relative(root, target);
@@ -65,4 +73,3 @@ async function loadExport(path, name) {
 function requiredPath(name) { return resolve(requiredArgument(name)); }
 function requiredArgument(name) { const value = process.argv.find(item => item.startsWith(`${name}=`))?.slice(name.length + 1); if (!value) throw new Error(`${name} is required.`); return value; }
 function hash(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
-function git(args) { return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim(); }

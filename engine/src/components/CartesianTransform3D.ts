@@ -1,6 +1,6 @@
 import { Transform3D } from './Transform3D';
 import { mat4, vec3 } from 'wgpu-matrix';
-import type { Vec3 } from 'wgpu-matrix';
+import type { Mat4, Vec3 } from 'wgpu-matrix';
 import { UniqueCheckType } from '../ecs/Component';
 import { requiredVec3Array } from '../math/arrayAccess';
 
@@ -127,6 +127,49 @@ export class CartesianTransform3D extends Transform3D {
   setAnchor(x: number, y: number, z: number): this {
     vec3.set(x, y, z, this._anchor);
     this._rebuildMatrix();
+    return this;
+  }
+
+  /**
+   * Replaces the local matrix while keeping the Cartesian editing projection in
+   * sync. Runtime systems such as physics write matrices directly; without this
+   * override, `position`, `rotation`, and `scale` would keep returning stale
+   * authoring values even though the rendered transform had moved.
+   */
+  override setMatrix(matrix: Mat4): this {
+    super.setMatrix(matrix);
+    const m = this._localMatrix;
+    const sx = Math.hypot(m[0] ?? 1, m[1] ?? 0, m[2] ?? 0) || 1;
+    const sy = Math.hypot(m[4] ?? 0, m[5] ?? 1, m[6] ?? 0) || 1;
+    const sz = Math.hypot(m[8] ?? 0, m[9] ?? 0, m[10] ?? 1) || 1;
+    vec3.set(sx, sy, sz, this._scale);
+
+    const r00 = (m[0] ?? 1) / sx;
+    const r10 = (m[1] ?? 0) / sx;
+    const r20 = (m[2] ?? 0) / sx;
+    const r11 = (m[5] ?? 1) / sy;
+    const r02 = (m[8] ?? 0) / sz;
+    const r12 = (m[9] ?? 0) / sz;
+    const r22 = (m[10] ?? 1) / sz;
+    const x = Math.asin(Math.max(-1, Math.min(1, -r12)));
+    const cosineX = Math.cos(x);
+    const y = Math.abs(cosineX) > 1e-6
+      ? Math.atan2(r02, r22)
+      : Math.atan2(-r20, r00);
+    const z = Math.abs(cosineX) > 1e-6 ? Math.atan2(r10, r11) : 0;
+    vec3.set(x, y, z, this._rotation);
+
+    // Cartesian position names the pre-anchor origin. The matrix translation is
+    // the post-anchor origin, so restore R * anchor before exposing it.
+    const ax = this._anchor[0], ay = this._anchor[1], az = this._anchor[2];
+    const r01 = (m[4] ?? 0) / sy;
+    const r21 = (m[6] ?? 0) / sy;
+    vec3.set(
+      (m[12] ?? 0) + r00 * ax + r01 * ay + r02 * az,
+      (m[13] ?? 0) + r10 * ax + r11 * ay + r12 * az,
+      (m[14] ?? 0) + r20 * ax + r21 * ay + r22 * az,
+      this._position,
+    );
     return this;
   }
 

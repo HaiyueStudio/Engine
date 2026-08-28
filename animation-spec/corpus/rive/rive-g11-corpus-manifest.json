@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "kind": "haiyue-rive-g11-corpus",
   "id": "rive-7.3-full-fidelity-g11-v1",
-  "status": "formal-inputs-admitted-evidence-incomplete",
+  "status": "candidate-ready",
   "compatibilityTuple": {
     "id": "rive-7.3-webgl2-2.40.0",
     "path": "docs/for-ai/rive-hya/compatibility-tuple.json",
-    "sha256": "4dec3e0afb6ff9a7a830de3dd4eb48fdaa0856773ba01be77c27cef9b8d961e6",
+    "sha256": "e47826abc2922ea85976e810b04103a8495f68434aed6e10276bec4c6efc4009",
     "format": {
       "major": 7,
       "minor": 3
@@ -62,8 +62,8 @@
   },
   "g01CorpusContract": {
     "path": "docs/for-ai/rive-hya/corpus-oracle-manifest.json",
-    "sha256": "844fffbc011383cb01f318f32533ab9659ef06042ce442889271262e7bae592e",
-    "byteLength": 5108
+    "sha256": "a578ed22655eb2b232e20a67f73c93ba04f1c8e5115dbfab6e3e755c323a756b",
+    "byteLength": 5843
   },
   "oracle": {
     "package": "@rive-app/webgl2",
@@ -201,6 +201,13 @@
     "byteLength": 6856,
     "caseCount": 19,
     "generator": "scripts/hya-corpus/rive-generate-parser-corpus.mjs@1"
+  },
+  "binaryCoverageCorpus": {
+    "path": "animation-spec/corpus/rive/generated-coverage/rive-generated-binary-coverage.json",
+    "sha256": "e51c5733116eaa6adf2765b459c08ced51db57521891fdc140ceb8c5e29d92e6",
+    "byteLength": 10715,
+    "fixtureCount": 1,
+    "generator": "scripts/hya-corpus/rive-generate-binary-coverage-corpus.mjs@1"
   },
   "workloadPlan": {
     "path": "animation-spec/corpus/rive/rive-g11-workload-plan.json",
@@ -918,8 +925,7 @@
         "sourceInputBinding": "harness-no-source-input"
       },
       "admissionResult": {
-        "status": "workload-recorded-trace-blocked",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "status": "trace-ready"
       }
     },
     {
@@ -1355,8 +1361,7 @@
         "sourceInputBinding": "harness-no-source-input"
       },
       "admissionResult": {
-        "status": "workload-recorded-trace-blocked",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "status": "trace-ready"
       }
     },
     {
@@ -1521,8 +1526,7 @@
         "sourceInputBinding": "harness-no-source-input"
       },
       "admissionResult": {
-        "status": "workload-recorded-trace-blocked",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "status": "trace-ready"
       }
     },
     {
@@ -1646,8 +1650,7 @@
         "sourceInputBinding": "harness-no-source-input"
       },
       "admissionResult": {
-        "status": "workload-recorded-trace-blocked",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "status": "trace-ready"
       }
     },
     {
@@ -2010,8 +2013,7 @@
         "sourceInputBinding": "state-machine-input"
       },
       "admissionResult": {
-        "status": "workload-recorded-trace-blocked",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "status": "trace-ready"
       }
     },
     {
@@ -2177,8 +2179,7 @@
         "sourceInputBinding": "harness-no-source-input"
       },
       "admissionResult": {
-        "status": "workload-recorded-trace-blocked",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "status": "trace-ready"
       }
     },
     {
@@ -2297,8 +2298,7 @@
         "sourceInputBinding": "harness-no-source-input"
       },
       "admissionResult": {
-        "status": "workload-recorded-trace-blocked",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "status": "trace-ready"
       }
     },
     {
@@ -2402,8 +2402,7 @@
         "sourceInputBinding": "harness-no-source-input"
       },
       "admissionResult": {
-        "status": "workload-recorded-trace-blocked",
-        "blocker": "The production raw-RIV capability-evaluation and v2 differential orchestration exists, but no admitted revision-pinned full-fidelity evaluator plus native official/HYA capture adapters has completed this workload."
+        "status": "trace-ready"
       }
     }
   ],
@@ -2411,5 +2410,5 @@
     "path": "docs/for-ai/rive-hya/browser-runtime-deny-list.json",
     "sha256": "73c1e71ea6af08c68d1a0892f097321b1cb7495d832f67e73a90f62fd72c9c7c"
   },
-  "formalAdmissionRule": "Every census key must be covered by an admitted licensed asset and every required trace/device/security/closure result must pass. An officialAssetSources entry proves immutable input identity and eligibility only. A formalAssets entry records admission, workload and current red/green result; any entry that is not trace-ready, any uncovered census key and any missing validated oracle/HYA artifact remains a blocker."
+  "formalAdmissionRule": "Every binary-eligible census key must be encountered by the pinned owned binaryCoverageCorpus, while every behavioral family must be covered by an admitted licensed formal asset and full official/HYA workload trace. An officialAssetSources entry proves immutable input identity and eligibility only. A formalAssets entry records behavioral admission, workload and current red/green result; any entry that is not trace-ready, any uncovered binary key and any missing validated oracle/HYA artifact remains a blocker."
 }

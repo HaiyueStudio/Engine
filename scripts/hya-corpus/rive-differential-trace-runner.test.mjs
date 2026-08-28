@@ -27,18 +27,31 @@ test('differential runner executes both native adapters and recomputes every cha
     },
   });
   const calls = [];
+  const environment = {
+    deviceClass: 'windows-10-plus-device-a', physicalDevice: true, browser: 'chrome', browserVersion: '140', os: 'Windows 11', osBuild: 'fixture', gpu: 'native fixture', machineIdSha256: 'c'.repeat(64),
+    officialBackend: 'webgl2', hyaBackend: 'webgpu', nativeBackend: true,
+    browserLogCaptured: true, consoleErrorCount: 0, exceptionCount: 0,
+    adapter: { vendor: 'fixture', architecture: 'discrete', device: 'fixture', description: 'test-owned native adapter descriptor' },
+    dpr: 1, viewport: [800, 600], audioSampleRate: 48000, fonts: [], externalAssets: [],
+  };
   const result = await runRiveDifferentialTrace({
     assetId: 'runner-asset', rivSha256, rivBytes, scenario,
     scenarioPath: 'review/candidates/rive-traces/runner/scenario.json', artifactPrefix: 'review/candidates/rive-traces/runner',
-    convert: async bytes => { calls.push(`convert:${bytes.byteLength}`); return { hyaBytes: new Uint8Array([1]), packageBytes: new Uint8Array([2]) }; },
+    convert: async bytes => {
+      calls.push(`convert:${bytes.byteLength}`);
+      return {
+        hyaBytes: new Uint8Array([1]), packageBytes: new Uint8Array([2]),
+        report: {
+          tuple: {
+            adapterId: 'fixture-adapter', adapterRevisionSha256: '4'.repeat(64), evaluatorId: 'fixture-evaluator',
+            evaluatorRevisionSha256: '5'.repeat(64), optionsRevision: 'rive-7.3-production-v1',
+          },
+        },
+      };
+    },
     officialAdapter: adapter('@rive-app/webgl2@2.40.0', 'webgl2', 'official', calls),
     hyaAdapter: adapter('haiyue-exact-hya', 'webgpu', 'hya', calls),
-    environment: {
-      deviceClass: 'windows-10-plus-device-a', physicalDevice: true, browser: 'chrome', browserVersion: '140', os: 'Windows 11', osBuild: 'fixture', gpu: 'native fixture', machineIdSha256: 'c'.repeat(64),
-      officialBackend: 'webgl2', hyaBackend: 'webgpu', nativeBackend: true,
-      adapter: { vendor: 'fixture', architecture: 'discrete', device: 'fixture', description: 'test-owned native adapter descriptor' },
-      dpr: 1, viewport: [800, 600], audioSampleRate: 48000, fonts: [], externalAssets: [],
-    },
+    environment,
     workloadPlan, workloadPlanSha256: hash(workloadPlanBytes), corpusManifestSha256: 'd'.repeat(64),
     tuple: { id: 'rive-7.3-webgl2-2.40.0', oraclePackage: '@rive-app/webgl2@2.40.0', riveJsSha256: 'e'.repeat(64), riveWasmSha256: 'f'.repeat(64) },
     engineRevision: '1'.repeat(40), engineDirty: true, generatedAt: '2026-08-25T00:00:00.000Z', evidenceClass: 'diagnostic', formal: false,
@@ -46,6 +59,10 @@ test('differential runner executes both native adapters and recomputes every cha
   assert.deepEqual(calls, [`convert:${rivBytes.byteLength}`, 'official:riv', 'hya:hya-package']);
   assert.equal(result.trace.status, 'passed');
   assert.equal(result.validation.status, 'passed', result.validation.violations.join('\n'));
+  assert.equal(result.trace.adapters.capabilityEvaluator.evaluatorId, 'fixture-evaluator');
+  assert.equal(result.trace.adapters.officialCapture.runtime, '@rive-app/webgl2@2.40.0');
+  assert.equal(result.trace.adapters.hyaCapture.backend, 'webgpu');
+  assert.deepEqual(result.trace.environment, environment);
   assert.equal(Object.keys(result.trace.comparison.channels).length, requiredRiveOracleTraceChannels().length);
   assert.ok(result.artifactBytesByPath.has('review/candidates/rive-traces/runner/comparison-pixels.json'));
 });
@@ -76,6 +93,7 @@ function adapter(runtime, backend, label, calls) {
         };
       }
       return {
+        environment: structuredClone(request.environment),
         channels, artifactBytesByPath: new Map([[pixelPath, pixelBytes]]), freshOwnerPerReplay: true,
         metrics: Object.fromEntries(workloadPlan.measurement.metrics.map(name => [name, 1])),
         measurement: { warmupIterations: 1, measuredIterations: 1, frameSampleCount: 1, queueCompleted: true, energySource: 'test-meter' },

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, relative, resolve } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateRiveCorpusManifest } from '../hya-corpus/rive-corpus-contract.mjs';
 import { validateRiveG11Candidate } from './rive-g11-candidate-contract.mjs';
@@ -9,11 +9,13 @@ import { validateRiveG11EvidenceIndex } from './rive-g11-evidence-index-contract
 import { validateRiveG11SecurityReport } from './rive-g11-security-contract.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const manifestPath = resolve(root, 'animation-spec/corpus/rive/rive-g11-corpus-manifest.json');
+const manifestPath = safePath('animation-spec/corpus/rive/rive-g11-corpus-manifest.json');
 const outputArgument = process.argv.find(value => value.startsWith('--out='));
-const outputPath = resolve(root, outputArgument?.slice('--out='.length) ?? 'review/candidates/rive-g11-candidate.json');
+const outputPath = safePath(outputArgument?.slice('--out='.length) ?? 'review/candidates/rive-g11-candidate.json');
 const evidenceIndexArgument = process.argv.find(value => value.startsWith('--evidence-index='));
-const evidenceIndexPath = resolve(root, evidenceIndexArgument?.slice('--evidence-index='.length) ?? 'review/candidates/rive-g11-evidence-index.json');
+const evidenceIndexPath = safePath(evidenceIndexArgument?.slice('--evidence-index='.length) ?? 'review/candidates/rive-g11-evidence-index.json');
+const securityArgument = process.argv.find(value => value.startsWith('--security='));
+const securityPath = safePath(securityArgument?.slice('--security='.length) ?? 'review/candidates/rive-g11-security-diagnostic.json');
 const manifestBytes = readFileSync(manifestPath);
 const manifest = JSON.parse(manifestBytes.toString('utf8'));
 const censusBytes = readFileSync(resolve(root, manifest.census.path));
@@ -38,10 +40,10 @@ const evidenceIndexValidation = validateRiveG11EvidenceIndex(evidenceIndex, {
   expectedEngineRevision: revision,
   expectedManifestSha256: hash(manifestBytes),
   expectedWorkloadPlanSha256: hash(workloadPlanBytes),
-  artifactBytesByPath,
+  artifactBytesByPath, manifest, workloadPlan,
 });
 const diagnosticFindings = readDiagnosticFindings();
-const securityEvidence = readSecurityEvidence(revision, manifestBytes);
+const securityEvidence = readSecurityEvidence(revision, manifestBytes, securityPath);
 const securityCases = securityEvidence?.validation.status === 'passed'
   ? securityEvidence.report.cases.map(value => ({ ...value, evidence: securityEvidence.reference }))
   : manifest.securityCases.map(value => ({
@@ -141,6 +143,7 @@ const contract = validateRiveG11Candidate(candidate, {
 if (contract.status !== 'passed') {
   throw new Error(`Generated G11 diagnostic candidate violates its contract:\n- ${contract.violations.join('\n- ')}`);
 }
+mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, `${JSON.stringify(candidate, null, 2)}\n`);
 console.log(`[rive-g11] ${candidate.status} candidate written to ${relative(root, outputPath)} with ${candidate.blockers.length} blockers.`);
 
@@ -246,6 +249,7 @@ function readDiagnosticFindings() {
     runtimeInventory: {
       path: relative(root, inventoryPath).split('\\').join('/'),
       sha256: hash(inventoryBytes),
+      byteLength: inventoryBytes.byteLength,
       assets: inventory.totals.assets,
       accepted: inventory.totals.accepted,
       coveredObjectKeys: inventory.totals.coveredObjectKeys,
@@ -255,6 +259,7 @@ function readDiagnosticFindings() {
     oracleRepositoryInventory: wasmInventory ? {
       path: relative(root, wasmInventoryPath).split('\\').join('/'),
       sha256: hash(wasmInventoryBytes),
+      byteLength: wasmInventoryBytes.byteLength,
       assets: wasmInventory.totals.assets,
       accepted: wasmInventory.totals.accepted,
       rejectedMinor: wasmInventory.totals.rejectedByCode?.E_RIVE_FORMAT_MINOR_UNSUPPORTED ?? 0,
@@ -263,6 +268,7 @@ function readDiagnosticFindings() {
     officialLoadMatrix: {
       path: relative(root, oraclePath).split('\\').join('/'),
       sha256: hash(oracleBytes),
+      byteLength: oracleBytes.byteLength,
       loaded: oracle.loadedCount,
       browserGateFailed: oracle.browserGateFailedCount,
       ownerResidual: oracle.ownerResidual,
@@ -270,6 +276,7 @@ function readDiagnosticFindings() {
     edgeLoadMatrix: edge ? {
       path: relative(root, edgePath).split('\\').join('/'),
       sha256: hash(edgeBytes),
+      byteLength: edgeBytes.byteLength,
       loaded: edge.loadedCount,
       browserGateFailed: edge.browserGateFailedCount,
       ownerResidual: edge.ownerResidual,
@@ -302,8 +309,7 @@ function readDiagnosticFindings() {
   };
 }
 
-function readSecurityEvidence(expectedRevision, currentManifestBytes) {
-  const path = resolve(root, 'review/candidates/rive-g11-security-diagnostic.json');
+function readSecurityEvidence(expectedRevision, currentManifestBytes, path) {
   if (!existsSync(path)) return null;
   const bytes = readFileSync(path);
   const report = JSON.parse(bytes.toString('utf8'));
@@ -333,4 +339,13 @@ function crossBrowserPixelHashDifferences(chrome, edge) {
     if (JSON.stringify(chromeHashes) !== JSON.stringify(edgeHashes)) differences++;
   }
   return differences;
+}
+
+function safePath(value) {
+  if (typeof value !== 'string' || value.includes('\\') || value.startsWith('/') || /^[A-Za-z]:/u.test(value)) {
+    throw new Error(`Path must be relative POSIX: ${String(value)}`);
+  }
+  const path = resolve(root, value);
+  if (path !== root && !path.startsWith(`${root}${sep}`)) throw new Error(`Path escapes Engine root: ${value}`);
+  return path;
 }

@@ -10,6 +10,7 @@ import type {
   Physics2DBackend,
   Physics2DBackendBodyDesc,
   Physics2DBackendColliderDesc,
+  Physics2DContactEvent as Physics2DBackendContactEvent,
   Physics2DBackendDistanceJointDesc,
   Physics2DBackendRevoluteJointDesc,
   Physics2DBodyHandle,
@@ -48,6 +49,30 @@ export interface Physics2DMouseJointOptions {
 
 export type Physics2DBodyRef = Physics2DBody | Physics2DBodyHandle;
 
+export interface Physics2DContactEvent {
+  readonly tick: number;
+  readonly phase: 'enter' | 'stay' | 'exit';
+  readonly kind: 'collision' | 'trigger';
+  readonly entityA: Entity;
+  readonly entityB: Entity;
+}
+
+export interface Physics2DRaycastResult {
+  readonly entity: Entity;
+  readonly body: Physics2DBody;
+  readonly distance: number;
+  readonly point: readonly [number, number];
+  readonly normal: readonly [number, number];
+}
+
+export interface Physics2DResourceSnapshot {
+  readonly backendId: string;
+  readonly bodies: number;
+  readonly colliders: number;
+  readonly joints: number;
+  readonly activeContacts: number;
+}
+
 const DEFAULT_GRAVITY: [number, number] = [0, -980];
 
 export class Physics2DSystem extends System {
@@ -70,6 +95,8 @@ export class Physics2DSystem extends System {
   private readonly jointSignatures = new Map<Physics2DJoint, string>();
   private readonly activeBodies = new Set<Physics2DBody>();
   private readonly activeJoints = new Set<Physics2DJoint>();
+  private readonly contactPairs = new Map<string, Readonly<{ entityA: Entity; entityB: Entity; sensor: boolean }>>();
+  private contactEvents: readonly Physics2DContactEvent[] = Object.freeze([]);
   private readonly staleBodies: Physics2DBody[] = [];
   private readonly staleJoints: Physics2DJoint[] = [];
   private readonly transformScratch: MutablePhysics2DBodyTransform = { x: 0, y: 0, angle: 0 };
@@ -86,6 +113,7 @@ export class Physics2DSystem extends System {
     allowSleep: true,
   };
   private accumulator = 0;
+  private physicsTick = 0;
 
   constructor(options: Physics2DSystemOptions = {}) {
     super({ any: [Physics2DBody, Physics2DJoint] });
@@ -228,6 +256,60 @@ export class Physics2DSystem extends System {
     return result;
   }
 
+  castRay(
+    origin: readonly [number, number],
+    direction: readonly [number, number],
+    maxDistance = 100_000,
+    filter: Readonly<{ categoryBits?: number; maskBits?: number }> = {},
+  ): Physics2DRaycastResult | null {
+    if (!this.capabilities.rayCast) return null;
+    const hit = this.physicsWorld.castRay({
+      origin: { x: origin[0] / this.pixelsPerMeter, y: origin[1] / this.pixelsPerMeter },
+      direction: { x: direction[0], y: direction[1] },
+      maxDistance: maxDistance / this.pixelsPerMeter,
+      ...(filter.categoryBits === undefined ? {} : { categoryBits: filter.categoryBits }),
+      ...(filter.maskBits === undefined ? {} : { maskBits: filter.maskBits }),
+    });
+    if (!hit) return null;
+    const entity = this.bodyHandleEntities.get(hit.body);
+    const body = entity?.getComponent(Physics2DBody);
+    if (!entity || !body) return null;
+    return Object.freeze({
+      entity,
+      body,
+      distance: hit.distance * this.pixelsPerMeter,
+      point: Object.freeze([hit.point.x * this.pixelsPerMeter, hit.point.y * this.pixelsPerMeter] as [number, number]),
+      normal: Object.freeze([hit.normal.x, hit.normal.y] as [number, number]),
+    });
+  }
+
+  queryAabb(
+    minimum: readonly [number, number],
+    maximum: readonly [number, number],
+    options: Readonly<{ categoryBits?: number; maskBits?: number; limit?: number }> = {},
+  ): readonly Entity[] {
+    if (!this.capabilities.shapeQuery) return Object.freeze([]);
+    const limit = Math.max(1, Math.min(1_000, Math.floor(options.limit ?? 256)));
+    const entities = new Map<number, Entity>();
+    this.physicsWorld.queryAabb({
+      minimum: { x: minimum[0] / this.pixelsPerMeter, y: minimum[1] / this.pixelsPerMeter },
+      maximum: { x: maximum[0] / this.pixelsPerMeter, y: maximum[1] / this.pixelsPerMeter },
+      ...(options.categoryBits === undefined ? {} : { categoryBits: options.categoryBits }),
+      ...(options.maskBits === undefined ? {} : { maskBits: options.maskBits }),
+    }, handle => {
+      const entity = this.bodyHandleEntities.get(handle);
+      if (entity) entities.set(entity.id, entity);
+      return entities.size < limit;
+    });
+    return Object.freeze([...entities.values()].sort((left, right) => left.id - right.id));
+  }
+
+  events(): readonly Physics2DContactEvent[] { return this.contactEvents; }
+
+  resourceSnapshot(): Physics2DResourceSnapshot {
+    return Object.freeze({ backendId: this.backendId, bodies: this.bodyHandles.size, colliders: this.fixtureSignatures.size, joints: this.jointHandles.size, activeContacts: this.contactPairs.size });
+  }
+
   createMouseJoint(
     body: Physics2DBodyRef,
     target: [number, number],
@@ -260,6 +342,7 @@ export class Physics2DSystem extends System {
 
   override update(world: World, _time: number, delta: number): this {
     if (this.disabled) return this;
+    this.contactEvents = Object.freeze([]);
     this.syncBodies(world);
     this.syncJoints(world);
 
@@ -268,6 +351,7 @@ export class Physics2DSystem extends System {
     let steps = 0;
     while (this.accumulator >= this.fixedTimeStep && steps < this.maxSubSteps) {
       this.physicsWorld.step(this.fixedTimeStep, this.velocityIterations, this.positionIterations);
+      this.captureContactStep();
       this.accumulator -= this.fixedTimeStep;
       steps++;
     }
@@ -290,6 +374,8 @@ export class Physics2DSystem extends System {
     this.jointSignatures.clear();
     this.activeBodies.clear();
     this.activeJoints.clear();
+    this.contactPairs.clear();
+    this.contactEvents = Object.freeze([]);
     this.staleBodies.length = 0;
     this.staleJoints.length = 0;
     return super.destroy();
@@ -528,7 +614,45 @@ export class Physics2DSystem extends System {
   private resolveHandle(body: Physics2DBodyRef): Physics2DBodyHandle | null {
     return typeof body === 'number' ? body : this.bodyHandles.get(body) ?? null;
   }
+
+  private captureContactStep(): void {
+    this.physicsTick += 1;
+    if (!this.capabilities.contactEvents) { this.contactEvents = Object.freeze([]); return; }
+    const entered = new Set<string>();
+    const output: Physics2DContactEvent[] = [...this.contactEvents];
+    this.physicsWorld.drainContactEvents((event: Physics2DBackendContactEvent) => {
+      const key = contactKey(event.bodyA, event.bodyB);
+      if (event.started) {
+        if (this.contactPairs.has(key)) return;
+        const entityA = this.bodyHandleEntities.get(event.bodyA);
+        const entityB = this.bodyHandleEntities.get(event.bodyB);
+        if (!entityA || !entityB) return;
+        this.contactPairs.set(key, Object.freeze({ entityA, entityB, sensor: event.sensor }));
+        entered.add(key);
+        output.push(contactEvent(this.physicsTick, 'enter', entityA, entityB, event.sensor));
+      } else {
+        const active = this.contactPairs.get(key);
+        if (!active) return;
+        this.contactPairs.delete(key);
+        output.push(contactEvent(this.physicsTick, 'exit', active.entityA, active.entityB, active.sensor));
+      }
+    });
+    for (const [key, active] of this.contactPairs) {
+      if (!entered.has(key)) output.push(contactEvent(this.physicsTick, 'stay', active.entityA, active.entityB, active.sensor));
+    }
+    output.sort(compareContactEvents);
+    this.contactEvents = Object.freeze(output.slice(-1_024));
+  }
 }
+
+function contactKey(bodyA: Physics2DBodyHandle, bodyB: Physics2DBodyHandle): string { return `${bodyA}:${bodyB}`; }
+function contactEvent(tick: number, phase: Physics2DContactEvent['phase'], entityA: Entity, entityB: Entity, sensor: boolean): Physics2DContactEvent {
+  return Object.freeze({ tick, phase, kind: sensor ? 'trigger' : 'collision', entityA, entityB });
+}
+function compareContactEvents(left: Physics2DContactEvent, right: Physics2DContactEvent): number {
+  return left.tick - right.tick || left.entityA.id - right.entityA.id || left.entityB.id - right.entityB.id || phaseOrder(left.phase) - phaseOrder(right.phase);
+}
+function phaseOrder(value: Physics2DContactEvent['phase']): number { return value === 'enter' ? 0 : value === 'stay' ? 1 : 2; }
 
 function fixtureSignature(body: Physics2DBody): string {
   return [

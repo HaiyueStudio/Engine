@@ -17,11 +17,13 @@ import type {
   Physics3DBackendWorldOptions,
   Physics3DBodyHandle,
   Physics3DCapabilities,
+  Physics3DContactEvent,
   Physics3DDragHandle,
   Physics3DJointHandle,
   Physics3DQuaternionLike,
   Physics3DRayCastDesc,
   Physics3DRayHit,
+  Physics3DShapeQueryDesc,
   Physics3DVectorLike,
   Physics3DWorldDriver,
 } from './Physics3DBackend';
@@ -33,6 +35,8 @@ const RAPIER_3D_CAPABILITIES: Physics3DCapabilities = Object.freeze({
   jointTypes: Object.freeze(['fixed', 'spherical', 'revolute', 'prismatic', 'spring', 'rope'] as const),
   continuousCollision: true,
   rayCast: true,
+  shapeQuery: true,
+  contactEvents: true,
   forceAtPoint: true,
   dragConstraint: true,
 });
@@ -106,8 +110,11 @@ class RapierPhysics3DWorld implements Physics3DWorldDriver {
   private readonly bodyAllowSleep = new Map<Physics3DBodyHandle, boolean>();
   private readonly bodyHandlesByNative = new Map<number, Physics3DBodyHandle>();
   private readonly colliders = new Map<Physics3DBodyHandle, Collider>();
+  private readonly bodyHandlesByCollider = new Map<number, Physics3DBodyHandle>();
   private readonly joints = new Map<Physics3DJointHandle, JointRecord>();
   private readonly drags = new Map<Physics3DDragHandle, DragRecord>();
+  private readonly eventQueue: InstanceType<RapierApi['EventQueue']>;
+  private readonly contactEvents: Physics3DContactEvent[] = [];
   private nextBodyHandle = 1;
   private nextJointHandle = 1;
   private nextDragHandle = 1;
@@ -115,6 +122,7 @@ class RapierPhysics3DWorld implements Physics3DWorldDriver {
 
   constructor(options: Physics3DBackendWorldOptions) {
     this.world = new RAPIER.World(copyVector(options.gravity));
+    this.eventQueue = new RAPIER.EventQueue(true);
     this.world.numSolverIterations = Math.max(1, Math.floor(options.solverIterations));
   }
 
@@ -190,6 +198,8 @@ class RapierPhysics3DWorld implements Physics3DWorldDriver {
     for (const [dragHandle, record] of this.drags) {
       if (record.body === handle) this.drags.delete(dragHandle);
     }
+    const collider = this.colliders.get(handle);
+    if (collider) this.bodyHandlesByCollider.delete(collider.handle);
     this.colliders.delete(handle);
     this.bodyHandlesByNative.delete(body.handle);
     this.bodyAllowSleep.delete(handle);
@@ -201,15 +211,20 @@ class RapierPhysics3DWorld implements Physics3DWorldDriver {
     const body = this.bodies.get(handle);
     if (!body?.isValid()) return false;
     const previous = this.colliders.get(handle);
-    if (previous?.isValid()) this.world.removeCollider(previous, true);
+    if (previous?.isValid()) {
+      this.bodyHandlesByCollider.delete(previous.handle);
+      this.world.removeCollider(previous, true);
+    }
     const definition = colliderDesc(desc)
       .setDensity(Math.max(0, desc.density))
       .setFriction(Math.max(0, desc.friction))
       .setRestitution(Math.max(0, Math.min(1, desc.restitution)))
       .setSensor(desc.isSensor)
+      .setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
       .setCollisionGroups(interactionGroups(desc.categoryBits, desc.maskBits));
     const collider = this.world.createCollider(definition, body);
     this.colliders.set(handle, collider);
+    this.bodyHandlesByCollider.set(collider.handle, handle);
     return true;
   }
 
@@ -356,6 +371,24 @@ class RapierPhysics3DWorld implements Physics3DWorldDriver {
     };
   }
 
+  queryShape(desc: Physics3DShapeQueryDesc, visitor: (body: Physics3DBodyHandle) => boolean): void {
+    const groups = desc.categoryBits === undefined && desc.maskBits === undefined
+      ? undefined
+      : interactionGroups(desc.categoryBits ?? 0xffff, desc.maskBits ?? 0xffff);
+    const shape = queryShape(desc);
+    const visited = new Set<Physics3DBodyHandle>();
+    this.world.intersectionsWithShape(copyVector(desc.position), copyQuaternion(desc.rotation), shape, (collider) => {
+      const body = this.bodyHandlesByCollider.get(collider.handle);
+      if (body === undefined || visited.has(body)) return true;
+      visited.add(body);
+      return visitor(body);
+    }, undefined, groups);
+  }
+
+  drainContactEvents(visitor: (event: Physics3DContactEvent) => void): void {
+    for (const event of this.contactEvents.splice(0)) visitor(event);
+  }
+
   createJoint(desc: Physics3DBackendJointDesc): Physics3DJointHandle | null {
     const bodyA = this.bodies.get(desc.bodyA);
     const bodyB = this.bodies.get(desc.bodyB);
@@ -413,7 +446,20 @@ class RapierPhysics3DWorld implements Physics3DWorldDriver {
   step(timeStep: number): void {
     this.applyDragForces();
     this.world.timestep = timeStep;
-    this.world.step();
+    this.world.step(this.eventQueue);
+    this.eventQueue.drainCollisionEvents((colliderA, colliderB, started) => {
+      const bodyA = this.bodyHandlesByCollider.get(colliderA);
+      const bodyB = this.bodyHandlesByCollider.get(colliderB);
+      if (bodyA === undefined || bodyB === undefined || bodyA === bodyB) return;
+      const first = bodyA < bodyB ? bodyA : bodyB;
+      const second = bodyA < bodyB ? bodyB : bodyA;
+      this.contactEvents.push(Object.freeze({
+        bodyA: first,
+        bodyB: second,
+        started,
+        sensor: (this.colliders.get(first)?.isSensor() ?? false) || (this.colliders.get(second)?.isSensor() ?? false),
+      }));
+    });
     this.resetTransientForces();
   }
 
@@ -423,6 +469,9 @@ class RapierPhysics3DWorld implements Physics3DWorldDriver {
     for (const handle of [...this.joints.keys()]) this.destroyJoint(handle);
     for (const handle of [...this.bodies.keys()]) this.destroyBody(handle);
     this.world.free();
+    this.eventQueue.free();
+    this.bodyHandlesByCollider.clear();
+    this.contactEvents.length = 0;
     this.destroyed = true;
   }
 
@@ -469,6 +518,17 @@ class RapierPhysics3DWorld implements Physics3DWorldDriver {
   private assertAlive(): void {
     if (this.destroyed) throw new Error('Cannot use a destroyed Rapier 3D physics world.');
   }
+}
+
+function queryShape(desc: Physics3DShapeQueryDesc): InstanceType<RapierApi['Shape']> {
+  if (desc.shape === 'sphere') return new RAPIER.Ball(Math.max(0.0001, desc.radius));
+  if (desc.shape === 'capsule') return new RAPIER.Capsule(Math.max(0, desc.halfHeight), Math.max(0.0001, desc.radius));
+  if (desc.shape === 'cylinder') return new RAPIER.Cylinder(Math.max(0.0001, desc.halfHeight), Math.max(0.0001, desc.radius));
+  return new RAPIER.Cuboid(
+    Math.max(0.0001, desc.width * 0.5),
+    Math.max(0.0001, desc.height * 0.5),
+    Math.max(0.0001, desc.depth * 0.5),
+  );
 }
 
 function rigidBodyDesc(type: Physics3DBodyType): InstanceType<typeof RAPIER.RigidBodyDesc> {

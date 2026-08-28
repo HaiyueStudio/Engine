@@ -17,10 +17,14 @@ export async function runRiveDifferentialTrace(options) {
     scenario: options.scenario,
     scenarioSha256,
     artifactPrefix: options.artifactPrefix,
+    environment: options.environment,
     signal: options.signal,
   });
   const official = await options.officialAdapter.capture(Object.freeze({ ...request, runtimeInput: Object.freeze({ kind: 'riv', bytes: Uint8Array.from(options.rivBytes) }) }));
   const hya = await options.hyaAdapter.capture(Object.freeze({ ...request, runtimeInput: Object.freeze({ kind: 'hya-package', hyaBytes: Uint8Array.from(conversion.hyaBytes), packageBytes: Uint8Array.from(conversion.packageBytes) }) }));
+  validateCaptureEnvironment(official.environment, options.environment, 'official');
+  validateCaptureEnvironment(hya.environment, options.environment, 'HYA');
+  if (stableJson(official.environment) !== stableJson(hya.environment)) throw new Error('Official and HYA capture environments differ.');
   mergeArtifacts(artifactBytesByPath, official.artifactBytesByPath, 'official');
   mergeArtifacts(artifactBytesByPath, hya.artifactBytesByPath, 'hya');
 
@@ -73,9 +77,14 @@ export async function runRiveDifferentialTrace(options) {
     workloadPlanId: options.workloadPlan.id,
     workloadPlanSha256: options.workloadPlanSha256,
     tuple: options.tuple,
+    adapters: {
+      capabilityEvaluator: conversion.report?.tuple,
+      officialCapture: options.officialAdapter.descriptor,
+      hyaCapture: options.hyaAdapter.descriptor,
+    },
     assetId: options.assetId,
     rivSha256: options.rivSha256,
-    environment: options.environment,
+    environment: official.environment,
     scenarioArtifact: reference(options.scenarioPath, scenarioBytes, 'application/json'),
     scenario: options.scenario,
     official: captureSummary('@rive-app/webgl2@2.40.0', official, officialChannels, options.scenario.replayCount),
@@ -107,6 +116,11 @@ function validateAdapter(adapter, runtime, backend, label) {
     || typeof descriptor?.id !== 'string' || !HASH.test(descriptor?.revisionSha256 ?? '')) {
     throw new TypeError(`${label} descriptor is not a revision-pinned native ${runtime}/${backend} adapter.`);
   }
+}
+
+function validateCaptureEnvironment(actual, expected, label) {
+  if (!actual || typeof actual !== 'object' || Array.isArray(actual)) throw new TypeError(`${label} capture environment is missing.`);
+  if (stableJson(actual) !== stableJson(expected)) throw new Error(`${label} capture environment differs from the requested physical browser environment.`);
 }
 
 function mergeArtifacts(target, source, label) {

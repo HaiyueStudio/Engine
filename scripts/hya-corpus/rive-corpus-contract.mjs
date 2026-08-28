@@ -65,9 +65,12 @@ export function validateRiveCorpusManifest(manifest, census, {
   validatePinnedFile(manifest?.g01CorpusContract, 'G01 corpus contract', root);
   validatePinnedFile(manifest?.browserRuntimeDenyList, 'browser runtime deny list', root);
   validatePinnedFile(manifest?.generatedParserCorpus, 'generated parser corpus', root);
+  validatePinnedFile(manifest?.binaryCoverageCorpus, 'binary coverage corpus', root);
   validatePinnedFile(manifest?.workloadPlan, 'workload plan', root);
   equal(manifest?.generatedParserCorpus?.caseCount, 19, 'generated parser corpus case count');
   equal(manifest?.generatedParserCorpus?.generator, 'scripts/hya-corpus/rive-generate-parser-corpus.mjs@1', 'generated parser corpus generator');
+  equal(manifest?.binaryCoverageCorpus?.fixtureCount, 1, 'binary coverage corpus fixture count');
+  equal(manifest?.binaryCoverageCorpus?.generator, 'scripts/hya-corpus/rive-generate-binary-coverage-corpus.mjs@1', 'binary coverage corpus generator');
   equal(manifest?.workloadPlan?.contract, 'haiyue-rive-g11-workload-plan@1', 'workload plan contract');
   const workloadPlan = readWorkloadPlan(manifest?.workloadPlan, root, violations);
 
@@ -150,16 +153,17 @@ export function validateRiveCorpusManifest(manifest, census, {
   const assets = list(manifest?.formalAssets, 'formal assets');
   uniqueValues(assets, 'id', 'formal asset', violations);
   const productCasesById = new Map((manifest?.productCases ?? []).map(value => [value?.id, value]));
+  const expectedCoverage = binaryEvidenceCoverage(census);
+  const generatedCoverage = readBinaryCoverageCorpus(manifest?.binaryCoverageCorpus, root, expectedCoverage, violations);
   const coverage = {
-    objectKeys: new Set(), propertyKeys: new Set(), scriptModuleKeys: new Set(),
-    scriptSymbolKeys: new Set(), assetTypeKeys: new Set(), featureFamilies: new Set(),
+    objectKeys: new Set(generatedCoverage.objectKeys), propertyKeys: new Set(generatedCoverage.propertyKeys), scriptModuleKeys: new Set(),
+    scriptSymbolKeys: new Set(), assetTypeKeys: new Set(generatedCoverage.assetTypeKeys), featureFamilies: new Set(),
   };
   for (const [index, asset] of assets.entries()) {
     validateFormalAsset(asset, `formalAssets[${index}]`, coverage, securityIds, root, workloadPlan, officialSourcesById, productCasesById, formal, violations);
   }
 
   const allowedCoverage = sourceCensusCoverage(census);
-  const expectedCoverage = binaryEvidenceCoverage(census);
   const uncovered = Object.fromEntries(Object.entries(expectedCoverage).map(([key, expected]) => [
     key,
     [...expected].filter(value => !coverage[key].has(value)),
@@ -208,6 +212,7 @@ export function validateRiveCorpusManifest(manifest, census, {
     violations: Object.freeze(violations),
     summary: Object.freeze({
       formalAssetCount: assets.length,
+      binaryCoverageFixtureCount: generatedCoverage.fixtureCount,
       officialAssetSourceCount: officialSourceIds.size,
       evidenceRoleCount: evidenceRoles.length,
       realProductWitnessCount: productWitnesses.length,
@@ -458,6 +463,37 @@ function readWorkloadPlan(reference, root, violations) {
   } catch (error) {
     violations.push(`workload plan cannot be parsed: ${error instanceof Error ? error.message : String(error)}`);
     return null;
+  }
+}
+
+function readBinaryCoverageCorpus(reference, root, expected, violations) {
+  const empty = { fixtureCount: 0, objectKeys: [], propertyKeys: [], assetTypeKeys: [] };
+  if (!root || typeof reference?.path !== 'string') return empty;
+  const path = safeResolve(root, reference.path, 'binary coverage corpus path', violations);
+  if (!path) return empty;
+  try {
+    const corpus = JSON.parse(readFileSync(path, 'utf8'));
+    if (corpus?.schemaVersion !== 1) violations.push('binary coverage corpus schemaVersion is invalid');
+    if (corpus?.kind !== 'haiyue-rive-generated-binary-coverage-corpus') violations.push('binary coverage corpus kind is invalid');
+    if (corpus?.tupleId !== RIVE_G11_TUPLE_ID) violations.push('binary coverage corpus tuple is invalid');
+    if (corpus?.generator !== reference.generator) violations.push('binary coverage corpus generator does not match manifest');
+    if (corpus?.registryIdentity?.compatibilityTupleId !== RIVE_G11_TUPLE_ID) violations.push('binary coverage registry identity is invalid');
+    const fixture = corpus?.fixture;
+    validateAssetFile(root, fixture, 'binary coverage fixture', violations);
+    if (fixture?.format?.major !== 7 || fixture?.format?.minor !== 3) violations.push('binary coverage fixture format must be 7.3');
+    if (fixture?.license?.id !== 'MIT' || fixture?.license?.owner !== 'HaiyueStudio' || fixture?.license?.allowedUse !== 'binary-wire-coverage') {
+      violations.push('binary coverage fixture license is invalid');
+    }
+    const objectKeys = array(corpus?.coverage?.objectKeys, 'binary coverage objectKeys', violations);
+    const propertyKeys = array(corpus?.coverage?.propertyKeys, 'binary coverage propertyKeys', violations);
+    const assetTypeKeys = array(corpus?.coverage?.assetTypeKeys, 'binary coverage assetTypeKeys', violations);
+    exactSet(new Set(objectKeys), [...expected.objectKeys], 'binary coverage objectKeys', violations);
+    exactSet(new Set(propertyKeys), [...expected.propertyKeys], 'binary coverage propertyKeys', violations);
+    exactSet(new Set(assetTypeKeys), [...expected.assetTypeKeys], 'binary coverage assetTypeKeys', violations);
+    return { fixtureCount: fixture ? 1 : 0, objectKeys, propertyKeys, assetTypeKeys };
+  } catch (error) {
+    violations.push(`binary coverage corpus cannot be parsed: ${error instanceof Error ? error.message : String(error)}`);
+    return empty;
   }
 }
 

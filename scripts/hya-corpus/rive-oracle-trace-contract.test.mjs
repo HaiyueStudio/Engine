@@ -65,10 +65,23 @@ function validTrace() {
       generatedAt: '2026-08-24T00:00:00.000Z', engineRevision: REVISION, engineDirty: false, corpusManifestSha256: 'a'.repeat(64),
       workloadPlanId: workloadPlan.id, workloadPlanSha256: 'e'.repeat(64),
       tuple: { id: 'rive-7.3-webgl2-2.40.0', oraclePackage: '@rive-app/webgl2@2.40.0', riveJsSha256: 'f'.repeat(64), riveWasmSha256: '0'.repeat(64) },
+      adapters: {
+        capabilityEvaluator: {
+          adapterId: 'fixture-adapter', adapterRevisionSha256: '1'.repeat(64), evaluatorId: 'fixture-evaluator',
+          evaluatorRevisionSha256: '2'.repeat(64), optionsRevision: 'rive-7.3-production-v1',
+        },
+        officialCapture: {
+          id: 'fixture-official', revisionSha256: '3'.repeat(64), runtime: '@rive-app/webgl2@2.40.0', backend: 'webgl2', nativeBackend: true,
+        },
+        hyaCapture: {
+          id: 'fixture-hya', revisionSha256: '4'.repeat(64), runtime: 'haiyue-exact-hya', backend: 'webgpu', nativeBackend: true,
+        },
+      },
       assetId: 'fixture', rivSha256: RIV_HASH,
       environment: {
         deviceClass: 'windows-10-plus-device-a', physicalDevice: true, browser: 'chrome', browserVersion: '140.0.0.0', os: 'Windows 10 22H2', osBuild: '19045',
         gpu: 'Intel integrated fixture', machineIdSha256: 'd'.repeat(64), officialBackend: 'webgl2', hyaBackend: 'webgpu', nativeBackend: true,
+        browserLogCaptured: true, consoleErrorCount: 0, exceptionCount: 0,
         adapter: { vendor: 'Intel', architecture: 'integrated', device: 'fixture', description: 'fixture adapter' },
         dpr: 1, viewport: [800, 600], audioSampleRate: 48000, fonts: [], externalAssets: [],
       },
@@ -113,6 +126,17 @@ test('formal device policy accepts any physical GPU on Windows 10+ and rejects o
   assert.ok(rejectedResult.violations.some(value => value.includes('Windows 10 or later')));
 });
 
+test('trace binds all three revision-pinned production adapter descriptors', () => {
+  const { trace, artifactBytesByPath } = validTrace();
+  trace.adapters.officialCapture.revisionSha256 = 'not-a-hash';
+  trace.adapters.hyaCapture.backend = 'webgl2';
+  delete trace.adapters.capabilityEvaluator.optionsRevision;
+  const result = validateRiveOracleTrace(trace, { workloadPlan, artifactBytesByPath });
+  assert.ok(result.violations.some(value => value.includes('official capture descriptor revision')));
+  assert.ok(result.violations.some(value => value.includes('HYA capture descriptor backend')));
+  assert.ok(result.violations.some(value => value.includes('capability evaluator descriptor fields')));
+});
+
 test('structural parity cannot be hidden by a passing pixel score', () => {
   const { trace } = validTrace();
   trace.comparison.structuralDifferenceCount = 1;
@@ -134,6 +158,18 @@ test('formal traces reject missing bytes, dirty revisions, residual owners and t
   assert.ok(result.violations.some(value => value.includes('formal Engine dirty state')));
   assert.ok(result.violations.some(value => value.includes('HYA owner residual')));
   assert.ok(result.violations.some(value => value.includes('SSIM')));
+});
+
+test('formal traces require captured browser logs with zero console errors and exceptions', () => {
+  const { trace, artifactBytesByPath } = validTrace();
+  trace.environment.browserLogCaptured = false;
+  trace.environment.consoleErrorCount = 1;
+  trace.environment.exceptionCount = 1;
+  const result = validateRiveOracleTrace(trace, { formal: true, workloadPlan, artifactBytesByPath });
+  assert.equal(result.status, 'failed');
+  assert.ok(result.violations.some(value => value.includes('formal browser log capture')));
+  assert.ok(result.violations.some(value => value.includes('formal console error count')));
+  assert.ok(result.violations.some(value => value.includes('formal exception count')));
 });
 
 test('trace rejects an inline action stream that differs from the pinned scenario artifact', () => {

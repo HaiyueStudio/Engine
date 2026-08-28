@@ -109,3 +109,4 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0089：Rive coverage 分离 source census、binary evidence 与 behavioral evidence](./0089-rive-coverage-evidence-eligibility-addendum.md)
 - [0090：Rive 正式素材使用多 evidence role 与 revision-pinned production adapter](./0090-rive-evidence-roles-and-production-adapter-boundary.md)
 - [0091：Rive 正式证据接受 Node.js 22+ 与任意 Windows 10+ 物理设备](./0091-rive-formal-runtime-and-windows-device-policy.md)
+- [0092：Rive binary wire coverage 与官方 behavioral evidence 分离](./0092-rive-generated-binary-coverage-and-behavioral-assets.md)

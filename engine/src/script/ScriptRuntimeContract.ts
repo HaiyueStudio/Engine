@@ -66,12 +66,31 @@ export interface ScriptRuntimeInputApi {
   snapshot(): unknown;
 }
 
+export interface ScriptRuntimePhysicsApi {
+  status(): unknown;
+  body(target?: Entity | number | string): unknown;
+  getMass(target?: Entity | number | string): number | null;
+  getVelocity(target?: Entity | number | string): unknown;
+  events(): readonly unknown[];
+  grounded(target?: Entity | number | string): boolean;
+  setVelocity(target: Entity | number | string, velocity: unknown): boolean;
+  setAngularVelocity(target: Entity | number | string, velocity: unknown): boolean;
+  applyForce(target: Entity | number | string, force: unknown): boolean;
+  applyImpulse(target: Entity | number | string, impulse: unknown): boolean;
+  wake(target: Entity | number | string, awake?: boolean): boolean;
+  teleport(target: Entity | number | string, position: unknown): boolean;
+  stop(target: Entity | number | string): boolean;
+  hitTest(point: unknown): unknown | null;
+  raycast(dimension: '2d' | '3d', origin: unknown, direction: unknown, maxDistance?: number): unknown | null;
+  overlap(dimension: '2d' | '3d', center: unknown, size: unknown, limit?: number): readonly string[];
+}
+
 export interface ScriptRuntimeApi {
   readonly read?: ScriptRuntimeReadApi;
   readonly scene?: ScriptRuntimeSceneApi;
   readonly asset?: ScriptRuntimeAssetApi;
   readonly input?: ScriptRuntimeInputApi;
-  readonly physics?: Readonly<Record<string, unknown>>;
+  readonly physics?: ScriptRuntimePhysicsApi;
   readonly debug?: ScriptRuntimeDebugApi;
 }
 
@@ -91,7 +110,7 @@ export const SCRIPT_RUNTIME_CONTRACT: readonly ScriptRuntimeContractEntry[] = Ob
   {
     name: 'physics',
     defaultEnabled: false,
-    declarationType: 'Readonly<Record<string, unknown>>',
+    declarationType: 'HaiyueScriptPhysicsApi',
     completionPaths: [
       'api.physics.body',
       'api.physics.hitTest',
@@ -103,6 +122,12 @@ export const SCRIPT_RUNTIME_CONTRACT: readonly ScriptRuntimeContractEntry[] = Ob
       'api.physics.setAngularVelocity',
       'api.physics.teleport',
       'api.physics.stop',
+      'api.physics.status',
+      'api.physics.events',
+      'api.physics.grounded',
+      'api.physics.wake',
+      'api.physics.raycast',
+      'api.physics.overlap',
     ],
   },
   { name: 'debug', defaultEnabled: true, declarationType: 'HaiyueScriptDebugApi', completionPaths: ['api.debug.console', 'api.debug.listen', 'api.debug.setTimeout', 'api.debug.setInterval', 'api.debug.addDisposer'] },
@@ -220,6 +245,24 @@ interface HaiyueScriptInputApi {
   events(): readonly unknown[];
   interactions(): readonly Readonly<{ tick: number; type: 'hover' | 'click' | 'move' | 'down' | 'up' | 'drag' | 'wheel' | 'cancel'; entityId: string; pointerId: number; distance: number; point: readonly number[]; normal: readonly number[] }>[];
   snapshot(): unknown;
+}
+interface HaiyueScriptPhysicsApi {
+  status(): unknown;
+  body(target?: Entity | number | string): unknown;
+  getMass(target?: Entity | number | string): number | null;
+  getVelocity(target?: Entity | number | string): unknown;
+  events(): readonly unknown[];
+  grounded(target?: Entity | number | string): boolean;
+  setVelocity(target: Entity | number | string, velocity: unknown): boolean;
+  setAngularVelocity(target: Entity | number | string, velocity: unknown): boolean;
+  applyForce(target: Entity | number | string, force: unknown): boolean;
+  applyImpulse(target: Entity | number | string, impulse: unknown): boolean;
+  wake(target: Entity | number | string, awake?: boolean): boolean;
+  teleport(target: Entity | number | string, position: unknown): boolean;
+  stop(target: Entity | number | string): boolean;
+  hitTest(point: unknown): unknown | null;
+  raycast(dimension: '2d' | '3d', origin: unknown, direction: unknown, maxDistance?: number): unknown | null;
+  overlap(dimension: '2d' | '3d', center: unknown, size: unknown, limit?: number): readonly string[];
 }
 interface HaiyueScriptRuntimeApi {
 ${capabilityFields}

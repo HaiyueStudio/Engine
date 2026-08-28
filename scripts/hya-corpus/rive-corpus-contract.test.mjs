@@ -13,6 +13,7 @@ test('G11 corpus diagnostic contract binds the frozen tuple, census, policy hash
   const result = validateRiveCorpusManifest(manifest, census, { root });
   assert.equal(result.status, 'passed', result.violations.join('\n'));
   assert.equal(result.summary.formalAssetCount, 8);
+  assert.equal(result.summary.binaryCoverageFixtureCount, 1);
   assert.equal(result.summary.officialAssetSourceCount, 8);
   assert.equal(result.summary.evidenceRoleCount, 19);
   assert.equal(result.summary.realProductWitnessCount, 4);
@@ -21,11 +22,11 @@ test('G11 corpus diagnostic contract binds the frozen tuple, census, policy hash
   assert.equal(result.summary.adversarialCaseCount, 28);
   assert.equal(manifest.diagnosticUpstreamSources.length, 2);
   assert.deepEqual(result.summary.uncovered, {
-    objectKeys: 151,
-    propertyKeys: 292,
+    objectKeys: 0,
+    propertyKeys: 0,
     scriptModuleKeys: 0,
     scriptSymbolKeys: 0,
-    assetTypeKeys: 4,
+    assetTypeKeys: 0,
   });
   assert.deepEqual(result.summary.sourceAttribution, { scriptModuleKeys: 0, scriptSymbolKeys: 0 });
   assert.deepEqual(result.summary.behavioral, {
@@ -87,13 +88,20 @@ test('an official Git formal asset identity does not require Cloud revision or a
   assert.ok(!result.violations.some(value => value.includes('.riv.path')));
 });
 
-test('formal corpus validation refuses admitted inputs whose traces or full coverage are incomplete', () => {
+test('formal corpus validation accepts trace-ready behavioral inputs after generated binary coverage closes', () => {
   const result = validateRiveCorpusManifest(manifest, census, { formal: true, root });
+  assert.equal(result.status, 'passed', result.violations.join('\n'));
+  assert.deepEqual(result.summary.uncovered, {
+    objectKeys: 0, propertyKeys: 0, scriptModuleKeys: 0, scriptSymbolKeys: 0, assetTypeKeys: 0,
+  });
+});
+
+test('binary coverage corpus cannot change without updating its immutable manifest identity', () => {
+  const changed = structuredClone(manifest);
+  changed.binaryCoverageCorpus.sha256 = '0'.repeat(64);
+  const result = validateRiveCorpusManifest(changed, census, { root });
   assert.equal(result.status, 'failed');
-  assert.ok(result.violations.some(value => value.includes('is not trace-ready')));
-  assert.ok(result.violations.some(value => value.includes('uncovered binary-evidence keys')));
-  assert.ok(!result.violations.some(value => value.includes('missing formal feature witness')));
-  assert.ok(!result.violations.some(value => value.includes('missing formal product witness')));
+  assert.ok(result.violations.some(value => value.includes('binary coverage corpus file hash')));
 });
 
 test('one official asset may satisfy multiple independent evidence roles', () => {

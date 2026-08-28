@@ -45,8 +45,30 @@ export interface Physics3DCapabilities {
   readonly jointTypes: readonly Physics3DJointType[];
   readonly continuousCollision: boolean;
   readonly rayCast: boolean;
+  readonly shapeQuery: boolean;
+  readonly contactEvents: boolean;
   readonly forceAtPoint: boolean;
   readonly dragConstraint: boolean;
+}
+
+export interface Physics3DShapeQueryDesc {
+  readonly shape: Physics3DShapeType;
+  readonly position: Physics3DVectorLike;
+  readonly rotation: Physics3DQuaternionLike;
+  readonly width: number;
+  readonly height: number;
+  readonly depth: number;
+  readonly radius: number;
+  readonly halfHeight: number;
+  readonly categoryBits?: number;
+  readonly maskBits?: number;
+}
+
+export interface Physics3DContactEvent {
+  readonly bodyA: Physics3DBodyHandle;
+  readonly bodyB: Physics3DBodyHandle;
+  readonly started: boolean;
+  readonly sensor: boolean;
 }
 
 export interface Physics3DBackendBodyDesc {
@@ -200,6 +222,8 @@ export interface Physics3DWorldDriver {
   applyBodyAngularImpulse(handle: Physics3DBodyHandle, impulse: Physics3DVectorLike, wake: boolean): boolean;
 
   castRay(desc: Physics3DRayCastDesc): Physics3DRayHit | null;
+  queryShape(desc: Physics3DShapeQueryDesc, visitor: (body: Physics3DBodyHandle) => boolean): void;
+  drainContactEvents(visitor: (event: Physics3DContactEvent) => void): void;
 
   createJoint(desc: Physics3DBackendJointDesc): Physics3DJointHandle | null;
   hasJoint(handle: Physics3DJointHandle): boolean;

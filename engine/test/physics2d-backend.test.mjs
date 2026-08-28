@@ -164,6 +164,36 @@ test('default Box2D adapter is controlled through the unified system API', () =>
   assert.equal(transform.rotation, 0.75);
 });
 
+test('Box2D exposes deterministic trigger phases, ray/AABB queries and bounded resource counts', () => {
+  const physics = new Physics2DSystem({ gravity: [0, 0], pixelsPerMeter: 100, fixedTimeStep: 1 / 60, maxSubSteps: 1 });
+  const world = new World('box2d-g07-events');
+  world.addSystem(physics);
+  const zone = new Entity('finish-zone');
+  zone.addComponent(new Transform2D({ x: 0, y: 0 }));
+  zone.addComponent(new Physics2DBody({ type: 'static', shape: 'box', width: 100, height: 100, isSensor: true }));
+  world.addEntity(zone);
+  const racer = new Entity('racer');
+  const racerBody = new Physics2DBody({ type: 'dynamic', shape: 'circle', radius: 20, allowSleep: false });
+  racer.addComponent(new Transform2D({ x: 0, y: 0 }));
+  racer.addComponent(racerBody);
+  world.addEntity(racer);
+
+  world.update(0, 0);
+  world.update(1000 / 60, 1000 / 60);
+  assert.deepEqual(physics.events().map(event => [event.phase, event.kind, event.entityA.name, event.entityB.name]), [['enter', 'trigger', 'finish-zone', 'racer']]);
+  world.update(2000 / 60, 1000 / 60);
+  assert.deepEqual(physics.events().map(event => event.phase), ['stay']);
+  assert.equal(physics.castRay([-200, 0], [1, 0], 500)?.entity, zone);
+  assert.deepEqual(physics.queryAabb([-30, -30], [30, 30]).map(entity => entity.name), ['finish-zone', 'racer']);
+  assert.deepEqual(physics.resourceSnapshot(), { backendId: 'box2d', bodies: 2, colliders: 2, joints: 0, activeContacts: 1 });
+
+  physics.teleportBody(racerBody, 500, 0);
+  world.update(3000 / 60, 1000 / 60);
+  assert.deepEqual(physics.events().map(event => event.phase), ['exit']);
+  physics.destroy();
+  assert.deepEqual(physics.resourceSnapshot(), { backendId: 'box2d', bodies: 0, colliders: 0, joints: 0, activeContacts: 0 });
+});
+
 test('joint components keep only opaque handles and recreate changed descriptions', () => {
   const log = [];
   const recording = createRecordingBackend(log);

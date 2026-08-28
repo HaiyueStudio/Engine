@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { Transform3D } from '../dist/components.js';
+import { CartesianTransform3D, Transform3D } from '../dist/components.js';
 import { Entity, World } from '../dist/ecs.js';
 import {
   Physics3DBody,
@@ -303,7 +303,7 @@ test('Rapier adapter simulates a falling sphere and resolves ground contact', as
   world.addEntity(ground);
 
   const ball = new Entity('ball');
-  const ballTransform = transformAt(0, 3, 0);
+  const ballTransform = new CartesianTransform3D({ position: [0, 3, 0] });
   const ballBody = new Physics3DBody({
     type: 'dynamic',
     shape: 'sphere',
@@ -320,9 +320,41 @@ test('Rapier adapter simulates a falling sphere and resolves ground contact', as
   assert.equal(physics.hasBody(ballBody), true);
   assert.ok(ballTransform.localMatrix[13] > 0.45);
   assert.ok(ballTransform.localMatrix[13] < 0.56);
+  assert.ok(ballTransform.position[1] > 0.45);
+  assert.ok(ballTransform.position[1] < 0.56);
   const hit = physics.castRay([0, 5, 0], [0, -1, 0], 10);
   assert.equal(hit?.entity, ball);
   physics.destroy();
+});
+
+test('Rapier exposes deterministic trigger phases, shape queries and teardown counts', async () => {
+  const backend = await createRapierPhysics3DBackend();
+  const physics = new Physics3DSystem({ backend, gravity: [0, 0, 0], fixedTimeStep: 1 / 60, maxSubSteps: 1 });
+  const world = new World('rapier-g07-events');
+  world.addSystem(physics);
+  const target = new Entity('target');
+  target.addComponent(transformAt(0, 0, 0));
+  target.addComponent(new Physics3DBody({ type: 'static', shape: 'box', width: 2, height: 2, depth: 2, isSensor: true }));
+  world.addEntity(target);
+  const projectile = new Entity('projectile');
+  const projectileBody = new Physics3DBody({ type: 'dynamic', shape: 'sphere', radius: 0.25, allowSleep: false });
+  projectile.addComponent(transformAt(0, 0, 0));
+  projectile.addComponent(projectileBody);
+  world.addEntity(projectile);
+
+  world.update(0, 0);
+  world.update(1000 / 60, 1000 / 60);
+  assert.deepEqual(physics.events().map(event => [event.phase, event.kind, event.entityA.name, event.entityB.name]), [['enter', 'trigger', 'target', 'projectile']]);
+  world.update(2000 / 60, 1000 / 60);
+  assert.deepEqual(physics.events().map(event => event.phase), ['stay']);
+  assert.deepEqual(physics.queryShape({ type: 'sphere', position: [0, 0, 0], radius: 1 }).map(entity => entity.name), ['target', 'projectile']);
+  assert.deepEqual(physics.resourceSnapshot(), { backendId: 'rapier3d', bodies: 2, colliders: 2, joints: 0, activeContacts: 1 });
+
+  physics.teleportBody(projectileBody, [5, 0, 0]);
+  world.update(3000 / 60, 1000 / 60);
+  assert.deepEqual(physics.events().map(event => event.phase), ['exit']);
+  physics.destroy();
+  assert.deepEqual(physics.resourceSnapshot(), { backendId: 'rapier3d', bodies: 0, colliders: 0, joints: 0, activeContacts: 0 });
 });
 
 test('Rapier adapter creates every advertised joint and applies drag forces', async () => {
