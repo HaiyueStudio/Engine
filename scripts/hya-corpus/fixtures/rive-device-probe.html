@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Rive formal device probe</title>
+<body>
+  <div id="progress">probing</div>
+  <pre id="result"></pre>
+  <script type="module">
+    const result = document.querySelector('#result');
+    try {
+      if (!navigator.gpu) throw new Error('WebGPU is unavailable.');
+      const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
+      if (!adapter) throw new Error('A native WebGPU adapter is unavailable.');
+      const info = adapter.info ?? {};
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl2');
+      if (!gl) throw new Error('WebGL2 is unavailable.');
+      const debug = gl.getExtension('WEBGL_debug_renderer_info');
+      const value = {
+        status: 'passed',
+        webgpu: {
+          vendor: String(info.vendor || 'browser-withheld'),
+          architecture: String(info.architecture || 'browser-withheld'),
+          device: String(info.device || 'browser-withheld'),
+          description: String(info.description || 'browser-withheld'),
+        },
+        webgl2: {
+          vendor: String(debug ? gl.getParameter(debug.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR)),
+          renderer: String(debug ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)),
+        },
+        dpr: devicePixelRatio,
+        viewport: [innerWidth, innerHeight],
+      };
+      result.dataset.status = 'passed';
+      result.textContent = JSON.stringify(value);
+    } catch (error) {
+      result.dataset.status = 'failed';
+      result.textContent = JSON.stringify({ status: 'failed', error: String(error?.stack || error) });
+    }
+  </script>
+</body>
+</html>

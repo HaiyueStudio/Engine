@@ -7,6 +7,7 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { assertFormalRepositoryIdentity, captureRepositoryIdentity } from '../formal-evidence/repository-identity.mjs';
 import { resolveProductionAdapterEnvironment, verifyProductionAdapterEnvironment } from './rive-production-adapter-bridge.mjs';
+import { buildRiveConversionRuntime } from './rive-build-conversion-runtime.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -57,6 +58,7 @@ export function validateDeviceMatrixEnvironment(environment, { deviceClass, brow
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (Number(process.versions.node.split('.')[0]) < 22) throw new Error(`Formal Rive device matrix requires Node.js 22 or later; observed ${process.version}.`);
+  await buildRiveConversionRuntime();
   const repositoryStart = captureRepositoryIdentity(root);
   assertFormalRepositoryIdentity(repositoryStart, repositoryStart, { label: 'Engine' });
   const deviceClass = required(argument('--device-class'), '--device-class');
@@ -75,29 +77,39 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const frozenEnvironmentPath = resolve(temporaryDirectory, 'environment.json');
   await writeFile(frozenEnvironmentPath, `${JSON.stringify(environment, null, 2)}\n`);
   const materialized = [];
+  const failures = [];
   try {
     for (const asset of manifest.formalAssets ?? []) materialized.push(await materializeFormalRiveAsset(asset, { temporaryDirectory, sourceDirectory }));
     for (const [index, input] of materialized.entries()) {
       const asset = manifest.formalAssets.find(value => value.id === input.assetId);
       console.log(`[rive-device-matrix] ${index + 1}/${materialized.length} ${asset.id} on ${deviceClass}/${browser}`);
-      await run(process.execPath, [
-        resolve(root, 'scripts/hya-corpus/rive-run-differential-trace.mjs'),
-        `--riv=${input.path}`,
-        `--scenario=${resolve(root, asset.workloadScenario.path)}`,
-        `--out-dir=${resolve(outputRoot, asset.id)}`,
-        `--environment=${frozenEnvironmentPath}`,
-        `--capability-evaluator=${resolve(root, 'scripts/hya-corpus/rive-production-capability-evaluator.mjs')}`,
-        `--official-capture-adapter=${resolve(root, 'scripts/hya-corpus/rive-production-official-capture-adapter.mjs')}`,
-        `--hya-capture-adapter=${resolve(root, 'scripts/hya-corpus/rive-production-hya-capture-adapter.mjs')}`,
-        `--asset-id=${asset.id}`,
-        '--formal',
-      ], { ...process.env, ...productionEnvironment, RIVE_PRODUCTION_HOST_CONFIG_PATH: hostConfigPath });
+      try {
+        await run(process.execPath, [
+          resolve(root, 'scripts/hya-corpus/rive-run-differential-trace.mjs'),
+          `--riv=${input.path}`,
+          `--scenario=${resolve(root, asset.workloadScenario.path)}`,
+          `--out-dir=${resolve(outputRoot, asset.id)}`,
+          `--environment=${frozenEnvironmentPath}`,
+          `--capability-evaluator=${resolve(root, 'scripts/hya-corpus/rive-production-capability-evaluator.mjs')}`,
+          `--official-capture-adapter=${resolve(root, 'scripts/hya-corpus/rive-production-official-capture-adapter.mjs')}`,
+          `--hya-capture-adapter=${resolve(root, 'scripts/hya-corpus/rive-production-hya-capture-adapter.mjs')}`,
+          `--asset-id=${asset.id}`,
+          '--formal',
+        ], { ...process.env, ...productionEnvironment, RIVE_PRODUCTION_HOST_CONFIG_PATH: hostConfigPath });
+      } catch (error) {
+        failures.push({ assetId: asset.id, error: error instanceof Error ? error.message : String(error) });
+        console.error(`[rive-device-matrix] ${asset.id} failed formal admission; continuing the fixed matrix.`);
+      }
     }
   } finally {
     await rm(temporaryDirectory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     assertFormalRepositoryIdentity(repositoryStart, captureRepositoryIdentity(root), { label: 'Engine' });
   }
-  console.log(`[rive-device-matrix] completed ${materialized.length}/${manifest.formalAssets.length} traces for ${deviceClass}/${browser}; inputs removed.`);
+  console.log(`[rive-device-matrix] attempted ${materialized.length}/${manifest.formalAssets.length} traces for ${deviceClass}/${browser}; failed=${failures.length}; inputs removed.`);
+  if (failures.length > 0) {
+    for (const failure of failures) console.error(`[rive-device-matrix] ${failure.assetId}: ${failure.error}`);
+    process.exitCode = 1;
+  }
 }
 
 function run(command, args, environment) {

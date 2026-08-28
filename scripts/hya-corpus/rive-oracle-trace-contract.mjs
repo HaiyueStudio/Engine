@@ -178,8 +178,10 @@ export function validateRiveOracleTrace(trace, {
     positiveInteger(capture?.measurement?.frameSampleCount, `${label} frame sample count`);
     equal(capture?.measurement?.queueCompleted, true, `${label} queue completion`);
     requiredString(capture?.measurement?.energySource, `${label} energy source`);
+    if (formal && String(capture?.measurement?.energySource ?? '').startsWith('unavailable:')) violations.push(`${label} formal energy source is unavailable`);
     if (!Array.isArray(capture?.diagnostics)) violations.push(`${label} diagnostics must be an array`);
     if ((capture?.diagnostics ?? []).some(value => value?.classification === 'unclassified')) violations.push(`${label} contains an unclassified diagnostic`);
+    if (formal && (capture?.diagnostics ?? []).some(value => ['oracle-proxy', 'metric-unavailable'].includes(value?.classification))) violations.push(`${label} contains a formal-admission blocker diagnostic`);
     const lifecycle = Array.isArray(capture?.lifecycle) ? capture.lifecycle : [];
     for (const path of scenarioValue?.lifecyclePaths ?? []) {
       const item = lifecycle.find(value => value?.path === path);

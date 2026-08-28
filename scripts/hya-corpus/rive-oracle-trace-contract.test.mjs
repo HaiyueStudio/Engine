@@ -172,6 +172,16 @@ test('formal traces require captured browser logs with zero console errors and e
   assert.ok(result.violations.some(value => value.includes('formal exception count')));
 });
 
+test('formal traces reject unavailable energy and proxy oracles', () => {
+  const { trace, artifactBytesByPath } = validTrace();
+  trace.official.measurement.energySource = 'unavailable: fixture meter absent';
+  trace.hya.diagnostics = [{ classification: 'oracle-proxy', channel: 'geometryAndDrawOrder' }];
+  const result = validateRiveOracleTrace(trace, { formal: true, workloadPlan, artifactBytesByPath });
+  assert.equal(result.status, 'failed');
+  assert.ok(result.violations.some(value => value.includes('formal energy source is unavailable')));
+  assert.ok(result.violations.some(value => value.includes('formal-admission blocker diagnostic')));
+});
+
 test('trace rejects an inline action stream that differs from the pinned scenario artifact', () => {
   const { trace, artifactBytesByPath } = validTrace();
   trace.scenario.actions[0].payload = { tampered: true };

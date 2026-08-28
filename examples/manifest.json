@@ -108,6 +108,17 @@
       "catalog": { "group": "assets-ui", "order": 15 }
     },
     {
+      "id": "rive-production-capture",
+      "title": "Rive G11 Native Capture Host",
+      "entry": "rive-production-capture/main.ts",
+      "capabilities": ["formal-evidence", "webgl2", "webgpu", "exact-hya"],
+      "assets": [],
+      "screenshot": { "required": false, "baseline": null },
+      "performance": null,
+      "ci": "manual",
+      "catalog": { "group": "assets-ui", "order": 16 }
+    },
+    {
       "id": "hya-state-machine",
       "title": "HYA State Machine",
       "entry": "hya-state-machine/main.ts",

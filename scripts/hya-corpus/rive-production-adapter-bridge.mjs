@@ -165,6 +165,7 @@ function validateCaptureDescriptor(value) {
 }
 
 export function encodeProductionWireValue(value, seen = new Set()) {
+  if (value === undefined) return { $haiyueUndefined: true };
   if (value instanceof Uint8Array) return { $haiyueBytesBase64: Buffer.from(value.buffer, value.byteOffset, value.byteLength).toString('base64') };
   if (value instanceof Map) return { $haiyueMap: [...value].map(([key, item]) => [key, encodeProductionWireValue(item, seen)]) };
   if (Array.isArray(value)) return value.map(item => encodeProductionWireValue(item, seen));
@@ -179,6 +180,7 @@ export function encodeProductionWireValue(value, seen = new Set()) {
 export function decodeProductionWireValue(value) {
   if (Array.isArray(value)) return value.map(decodeProductionWireValue);
   if (!value || typeof value !== 'object') return value;
+  if (Object.keys(value).length === 1 && value.$haiyueUndefined === true) return undefined;
   if (Object.keys(value).length === 1 && typeof value.$haiyueBytesBase64 === 'string') return Uint8Array.from(Buffer.from(value.$haiyueBytesBase64, 'base64'));
   if (Object.keys(value).length === 1 && Array.isArray(value.$haiyueMap)) return new Map(value.$haiyueMap.map(([key, item]) => [key, decodeProductionWireValue(item)]));
   return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, decodeProductionWireValue(item)]));

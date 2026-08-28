@@ -144,19 +144,25 @@ function captureSummary(runtime, capture, channels, replayCount) {
   };
 }
 
-function captureIsDeterministic(channels, scenario) {
+export function captureIsDeterministic(channels, scenario) {
   for (const channel of requiredRiveOracleTraceChannels()) {
     const samples = channels[channel]?.samples ?? [];
     for (let clockIndex = 0; clockIndex < scenario.clockStepsMicros.length; clockIndex++) {
       const baseline = samples[clockIndex];
       for (let replayIndex = 1; replayIndex < scenario.replayCount; replayIndex++) {
         const candidate = samples[replayIndex * scenario.clockStepsMicros.length + clockIndex];
-        if (stableJson(baseline?.value) !== stableJson(candidate?.value)
+        if (stableJson(deterministicValue(channel, baseline?.value)) !== stableJson(deterministicValue(channel, candidate?.value))
           || stableJson(baseline?.actionIds) !== stableJson(candidate?.actionIds)) return false;
       }
     }
   }
   return true;
+}
+
+function deterministicValue(channel, value) {
+  if (channel !== 'pixels' || !value?.rgba || typeof value.rgba !== 'object') return value;
+  const { path: _replaySpecificPath, ...contentIdentity } = value.rgba;
+  return { ...value, rgba: contentIdentity };
 }
 
 function reference(path, bytes, mediaType) {

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Rive G11 native capture host</title>
+  <style>html,body{margin:0;background:transparent}canvas{display:block}#sample{display:none}pre{white-space:pre-wrap}</style>
+  <script src="/node_modules/@rive-app/webgl2/rive.js"></script>
+</head>
+<body>
+  <canvas id="runtime" tabindex="0"></canvas>
+  <canvas id="sample" width="64" height="64"></canvas>
+  <pre id="progress">boot</pre>
+  <pre id="result"></pre>
+  <script src="../shared/engine.js"></script>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import { runRiveDifferentialTrace } from './rive-differential-trace-runner.mjs';
+import { captureIsDeterministic, runRiveDifferentialTrace } from './rive-differential-trace-runner.mjs';
 import { requiredRiveOracleTraceChannels } from './rive-oracle-trace-contract.mjs';
 import { createRiveFullWorkloadScenario } from './rive-workload-scenario-builder.mjs';
 
@@ -65,6 +65,19 @@ test('differential runner executes both native adapters and recomputes every cha
   assert.deepEqual(result.trace.environment, environment);
   assert.equal(Object.keys(result.trace.comparison.channels).length, requiredRiveOracleTraceChannels().length);
   assert.ok(result.artifactBytesByPath.has('review/candidates/rive-traces/runner/comparison-pixels.json'));
+});
+
+test('deterministic replay compares pixel content identity rather than replay-specific artifact paths', () => {
+  const scenario = { replayCount: 2, clockStepsMicros: [0] };
+  const channels = Object.fromEntries(requiredRiveOracleTraceChannels().map(channel => [channel, {
+    samples: [0, 1].map(replayIndex => ({
+      replayIndex, atMicros: 0, actionIds: [],
+      value: channel === 'pixels'
+        ? { width: 1, height: 1, dpr: 1, rgba: { path: `capture-r${replayIndex}.rgba`, sha256: 'a'.repeat(64), byteLength: 4, mediaType: 'application/octet-stream' } }
+        : { normalized: channel },
+    })),
+  }]));
+  assert.equal(captureIsDeterministic(channels, scenario), true);
 });
 
 function adapter(runtime, backend, label, calls) {

@@ -123,6 +123,9 @@
     "rive:g11:host-config": "node scripts/hya-corpus/rive-create-production-host-config.mjs",
     "rive:g11:host-preflight": "node scripts/hya-corpus/rive-production-host-preflight.mjs",
     "rive:g11:device-matrix": "node scripts/hya-corpus/rive-run-device-matrix.mjs",
+    "rive:g11:player-closure": "node scripts/benchmark/rive-g11-build-player-closure.mjs",
+    "rive:g11:build-conversion-runtime": "node scripts/hya-corpus/rive-build-conversion-runtime.mjs",
+    "rive:g11:device-environment": "node scripts/hya-corpus/rive-create-device-environment.mjs",
     "rive:examples:data": "node scripts/hya-corpus/rive-generate-example-data.mjs",
     "rive:examples:verify": "node scripts/verify-rive-examples.mjs",
     "rive:g11:candidate": "node scripts/benchmark/rive-g11-create-candidate.mjs",
@@ -133,6 +136,7 @@
   "devDependencies": {
     "@babylonjs/core": "9.21.2",
     "@galacean/engine": "1.6.13",
+    "@rive-app/webgl2": "2.40.0",
     "@rollup/plugin-terser": "1.0.0",
     "playcanvas": "2.21.4",
     "rollup-plugin-dts": "6.5.1",

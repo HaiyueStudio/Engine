@@ -8,10 +8,19 @@ import { fileURLToPath } from 'node:url';
 import {
   createProductionCapabilityEvaluator,
   createProductionCaptureAdapter,
+  decodeProductionWireValue,
+  encodeProductionWireValue,
   invokeProductionHost,
   productionAdapterFromEnvironment,
   verifyProductionAdapterEnvironment,
 } from './rive-production-adapter-bridge.mjs';
+
+test('production wire preserves explicit undefined fields required by exact-key contracts', () => {
+  const input = { capability: 'hya-core', artifactId: undefined };
+  const roundTrip = decodeProductionWireValue(JSON.parse(JSON.stringify(encodeProductionWireValue(input))));
+  assert.deepEqual(Object.keys(roundTrip).sort(), ['artifactId', 'capability']);
+  assert.equal(roundTrip.artifactId, undefined);
+});
 
 const root = dirname(fileURLToPath(import.meta.url));
 
