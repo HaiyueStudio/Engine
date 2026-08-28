@@ -49,6 +49,7 @@ export async function evaluate(request, context) {
     capability: 'hya-core',
     representation: 'native-semantic',
   }));
+  const assets = await extractEmbeddedAssets(request.rivBytes, ir.resolvedResources ?? []);
   return {
     format: 'haiyue-rive-neutral-capability-evaluation',
     version: 1,
@@ -57,15 +58,55 @@ export async function evaluate(request, context) {
     baseDocument: {
       format: 'haiyue-animation', version: '1.0',
       name: string(artboardFields.name) ?? 'Rive 7.3 imported composition',
-      canvas, duration: 2, endBehavior: 'loop', nodes,
+      canvas, duration: 2, endBehavior: 'loop',
+      resources: assets.map(asset => ({ id: `resource-${asset.id}`, type: resourceType(asset.mimeType), uri: `asset:${asset.id}`, mimeType: asset.mimeType })),
+      nodes,
     },
-    artifacts: [], coverage, bakedTracks: [], assets: [],
+    artifacts: [], coverage, bakedTracks: [], assets,
     featureLedger: [{
       feature: 'neutral.metadata-preservation', capability: 'hya-core',
       representation: 'native-semantic', count: ir.objects.length,
     }],
     classification: { unclassifiedObjects: 0, unclassifiedProperties: 0, unclassifiedAssets: 0, unclassifiedScripts: 0 },
   };
+}
+
+async function extractEmbeddedAssets(rivBytes, resolvedResources) {
+  if (resolvedResources.length === 0) return [];
+  if (!(rivBytes instanceof Uint8Array)) throw new TypeError('Capability evaluation requires owned RIV bytes for resolved asset extraction.');
+  const modulePath = resolve(root, 'animation-spec/dist-test/rive/import/index.js');
+  const { importFrozenRiv } = await import(pathToFileURL(modulePath).href);
+  let candidates = [];
+  await importFrozenRiv(Uint8Array.from(rivBytes), {
+    evaluator: {
+      descriptor: OFFICIAL_EVALUATOR_DESCRIPTOR,
+      async evaluate(_bytes, assets) {
+        candidates = assets.map(asset => ({ ...asset, bytes: Uint8Array.from(asset.bytes) }));
+        return { evidence: { assetCount: candidates.length, identities: candidates.map(asset => ({ assetId: asset.assetId, sha256: hash(asset.bytes), byteLength: asset.bytes.byteLength, mimeType: asset.mimeType })) } };
+      },
+    },
+  });
+  return mapEmbeddedAssets(resolvedResources, candidates);
+}
+
+export function mapEmbeddedAssets(resolvedResources, candidates) {
+  const unused = new Set(candidates.map((_, index) => index));
+  return resolvedResources.map((resource, resourceIndex) => {
+    const candidateIndex = candidates.findIndex((candidate, index) => unused.has(index)
+      && candidate.bytes.byteLength === resource.byteLength
+      && candidate.mimeType === resource.mimeType
+      && hash(candidate.bytes) === resource.contentSha256);
+    if (candidateIndex < 0) throw new Error(`Resolved neutral resource ${resource.objectId} has no byte-exact embedded asset candidate.`);
+    unused.delete(candidateIndex);
+    const candidate = candidates[candidateIndex];
+    return {
+      id: `embedded-${String(resourceIndex).padStart(6, '0')}`,
+      neutralResourceObjectId: resource.objectId,
+      kind: 'embedded', mimeType: resource.mimeType,
+      bytes: Uint8Array.from(candidate.bytes), revision: resource.revision,
+      licenseId: 'Apache-2.0:Rive-official-runtime-test-asset',
+    };
+  });
 }
 
 function namedFields(object, visit) {
@@ -85,3 +126,22 @@ function finite(value) { return Number.isFinite(value) ? value : undefined; }
 function positive(value, fallback) { return Number.isFinite(value) && value > 0 ? value : fallback; }
 function string(value) { return typeof value === 'string' && value.length > 0 ? value : undefined; }
 function compact(value) { return Object.fromEntries(Object.entries(value).filter(([, item]) => item !== undefined)); }
+function hash(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
+function resourceType(mimeType) { if (mimeType.startsWith('image/')) return 'image'; if (mimeType.startsWith('audio/')) return 'audio'; return 'binary'; }
+import { createHash } from 'node:crypto';
+import { dirname, resolve } from 'node:path';
+import { pathToFileURL, fileURLToPath } from 'node:url';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+const OFFICIAL_EVALUATOR_DESCRIPTOR = Object.freeze({
+  adapterId: 'haiyue-rive-production-embedded-asset-extractor',
+  package: '@rive-app/webgl2', version: '2.40.0',
+  riveJsSha256: 'd25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714',
+  riveWasmSha256: '87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32',
+  enforcesDecodedBudgets: true,
+  buildFlags: Object.freeze({
+    WITH_RIVE_TEXT: true, WITH_RIVE_LAYOUT: true, WITH_RIVE_AUDIO: true,
+    WITH_RIVE_SCRIPTING: true, RIVE_DECODERS: true, RIVE_PNG: true,
+    RIVE_JPEG: true, RIVE_WEBP: true, RIVE_WEBGL: true,
+  }),
+});

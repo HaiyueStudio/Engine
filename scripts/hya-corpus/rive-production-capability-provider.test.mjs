@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import test from 'node:test';
-import { evaluate } from './rive-production-capability-provider.mjs';
+import { evaluate, mapEmbeddedAssets } from './rive-production-capability-provider.mjs';
 
 test('production capability provider preserves all neutral fields and maps core canvas/transform values', async () => {
   const descriptor = { adapterId: 'adapter', adapterRevisionSha256: 'a'.repeat(64), evaluatorId: 'evaluator', evaluatorRevisionSha256: 'b'.repeat(64), optionsRevision: 'v1' };
@@ -27,4 +28,16 @@ test('production capability provider preserves all neutral fields and maps core 
   assert.deepEqual(result.baseDocument.nodes[0].extensions.neutralFields, Object.fromEntries(properties.map(value => [value.id, value.value])));
   assert.equal(result.coverage[0].propertyIds.length, 3);
   assert.equal(result.tuple, descriptor);
+});
+
+test('production capability provider maps resolved resources to byte-exact embedded assets', () => {
+  const bytes = new Uint8Array([1, 2, 3]);
+  const sha256 = createHash('sha256').update(bytes).digest('hex');
+  const assets = mapEmbeddedAssets([
+    { objectId: 'object:00000001', contentSha256: sha256, byteLength: 3, mimeType: 'image/png', revision: `embedded:${sha256}` },
+  ], [{ assetId: 7, bytes, mimeType: 'image/png' }]);
+  assert.equal(assets.length, 1);
+  assert.equal(assets[0].neutralResourceObjectId, 'object:00000001');
+  assert.deepEqual(assets[0].bytes, bytes);
+  assert.match(assets[0].licenseId, /Apache-2.0/u);
 });

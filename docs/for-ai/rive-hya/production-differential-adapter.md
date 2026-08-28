@@ -14,7 +14,7 @@ bridge 拒绝 descriptor substitution、重复 artifact path、cycle、abort 后
 
 仓库内 `rive-production-host.mjs` 是通用 stdin/stdout gateway。capability provider 导出 `evaluate(request, context)`；official/HYA provider 导出 `capture(request, context)`。provider 必须是设备侧实际 full-fidelity evaluator 或 native browser capture 实现，不能使用同一份 mock channel 填充两端。gateway 的 identity 握手把 capability adapter revision 绑定到 gateway bytes、evaluator revision 绑定到 provider bytes，并把 capture revision 绑定到各自 provider bytes。
 
-仓库现已提供三个实际设备入口：`rive-production-capability-provider.mjs` 将全部 Neutral IR 字段保存在 HYA core metadata 并映射 canvas/transform，两个 capture provider 分别启动固定的官方 WebGL2 和 exact-HYA WebGPU 页面。capture 入口还固定 common host、页面 bundle、shared Engine 以及官方 JS/WASM 的内容哈希；任一传递依赖变化都会在 browser 启动前失败。可用以下命令生成单一 host 配置：
+仓库现已提供三个实际设备入口：`rive-production-capability-provider.mjs` 将全部 Neutral IR 字段保存在 HYA core metadata、映射 canvas/transform，并通过 importer 的受预算 official-evaluator 钩子重新取得已校验 embedded asset bytes，按 Neutral resource 的 SHA-256/长度/MIME 精确映射到 HYA package；两个 capture provider 分别启动固定的官方 WebGL2 和 exact-HYA WebGPU 页面。capture 入口还固定 common host、页面 bundle、shared Engine 以及官方 JS/WASM 的内容哈希；任一传递依赖变化都会在 browser 启动前失败。可用以下命令生成单一 host 配置：
 
 ```powershell
 npm run rive:g11:host-config -- --capability-provider=scripts/hya-corpus/rive-production-capability-provider.mjs --official-provider=scripts/hya-corpus/rive-production-official-provider.mjs --hya-provider=scripts/hya-corpus/rive-production-hya-provider.mjs --out=artifacts/rive-g11-formal/host-config.json
