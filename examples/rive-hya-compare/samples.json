@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "kind": "haiyue-rive-hya-compare-samples",
+  "compatibilityTupleId": "rive-7.3-webgl2-2.40.0",
+  "oracle": {
+    "package": "@rive-app/webgl2@2.40.0",
+    "riveJsSha256": "d25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714",
+    "riveWasmSha256": "87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32"
+  },
+  "samples": [
+    {
+      "id": "official-game-menu-ad-police-files",
+      "title": "Game Menu Ad Police Files",
+      "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/game_menu_ad_police_files.riv",
+      "sha256": "19c7306dbaa741d1d4e3ce7239b98c3a40943f07f1260a92851f2e558fd6e9f5",
+      "byteLength": 4806420,
+      "selection": {
+        "artboard": "ListMain",
+        "animation": "Timeline 1",
+        "stateMachine": "State Machine 1"
+      },
+      "featureFamilies": [
+        "audio-event",
+        "data-interaction-accessibility",
+        "import-neutral-ir",
+        "timeline-state-machine"
+      ],
+      "evidenceRoles": [
+        "feature-import-neutral-ir",
+        "feature-audio-event",
+        "feature-timeline-state-machine",
+        "feature-data-interaction-accessibility",
+        "product-game-hud-data-driven",
+        "combined-game-menu"
+      ]
+    },
+    {
+      "id": "official-inventory-demo-v2",
+      "title": "Inventory Demo V2",
+      "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/inventory_demo_test_v2.riv",
+      "sha256": "6ff18f16bc96efe5fa7027bf5f149c55d722f5894f6f28083548d65ec40ca9cf",
+      "byteLength": 394478,
+      "selection": {
+        "artboard": "Inventory",
+        "animation": "Timeline 1",
+        "stateMachine": "State Machine 1"
+      },
+      "featureFamilies": [
+        "scripting-custom-rendering",
+        "text-layout-component-asset"
+      ],
+      "evidenceRoles": [
+        "feature-text-layout-component-asset",
+        "feature-scripting-custom-rendering",
+        "product-animation-editor-component-import",
+        "product-scripted-custom-control",
+        "combined-inventory"
+      ]
+    },
+    {
+      "id": "official-joystick-databound-keyframe",
+      "title": "Joystick Databound Keyframe",
+      "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/joystick_databound_keyframe_test.riv",
+      "sha256": "ca3e052d533a32143279f8e035f95ca53461a4f5d5fdf782bd0e63332bbe2c63",
+      "byteLength": 708,
+      "selection": {
+        "artboard": "Main",
+        "animation": "joystickAnim",
+        "stateMachine": "State Machine 1"
+      },
+      "featureFamilies": [
+        "rig-mesh-constraint"
+      ],
+      "evidenceRoles": [
+        "feature-rig-mesh-constraint"
+      ]
+    },
+    {
+      "id": "official-grid-placement-bound",
+      "title": "Grid Placement Bound",
+      "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/layout/grid_placement_bound.riv",
+      "sha256": "02dca529414c584c38e7c438e501e276d89337588d9042381120d330784380d0",
+      "byteLength": 385,
+      "selection": {
+        "artboard": "Grid Artboard",
+        "animation": null,
+        "stateMachine": "Auto Generated State Machine"
+      },
+      "featureFamilies": [],
+      "evidenceRoles": [
+        "property-grid-layout"
+      ]
+    },
+    {
+      "id": "official-eight-planets-grid",
+      "title": "Eight Planets Grid",
+      "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/layoutstest_8-planets-grid.riv",
+      "sha256": "aa42cd7baac6d5a67c1e8f5804c354d2ea9f0583678f1f037f33f9221a8ce8c0",
+      "byteLength": 310228,
+      "selection": {
+        "artboard": "Planets-OneLayout",
+        "animation": "Pluto",
+        "stateMachine": "ForGridPlanet"
+      },
+      "featureFamilies": [],
+      "evidenceRoles": [
+        "product-brand-loader-vector-rig",
+        "combined-planets"
+      ]
+    },
+    {
+      "id": "official-text-fit",
+      "title": "Text Fit",
+      "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/text_fit_test.riv",
+      "sha256": "540cfae6ba78a81518525af17a8d09e4cd50131dcbd9e584832c2468f24fbcd3",
+      "byteLength": 877874,
+      "selection": {
+        "artboard": "Main",
+        "animation": "Timeline 1",
+        "stateMachine": "State Machine 1"
+      },
+      "featureFamilies": [],
+      "evidenceRoles": [
+        "property-text-fit"
+      ]
+    },
+    {
+      "id": "official-text-style-background",
+      "title": "Text Style Background",
+      "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/text_style_background.riv",
+      "sha256": "1ffdb33251da4ccd7713555d7fb1f1216326cd52fb7fd1d6206b72471ea9080c",
+      "byteLength": 1287851,
+      "selection": {
+        "artboard": "My Artboard",
+        "animation": null,
+        "stateMachine": "Auto Generated State Machine"
+      },
+      "featureFamilies": [
+        "vector-paint-composite"
+      ],
+      "evidenceRoles": [
+        "feature-vector-paint-composite",
+        "property-text-style-background"
+      ]
+    },
+    {
+      "id": "official-double-library-with-image",
+      "title": "Double Library With Image",
+      "sourceUrl": "https://raw.githubusercontent.com/rive-app/rive-runtime/3f4047a85f11fecfde8c4d906c0c1654aa12b015/tests/unit_tests/assets/double_library_with_image.riv",
+      "sha256": "a11cac0f7453147eef9d5a387472ab3235868f404354fe8e44e0a89b2b729162",
+      "byteLength": 749,
+      "selection": {
+        "artboard": "My Artboard",
+        "animation": null,
+        "stateMachine": "Auto Generated State Machine"
+      },
+      "featureFamilies": [],
+      "evidenceRoles": [
+        "property-library-image"
+      ]
+    }
+  ]
+}

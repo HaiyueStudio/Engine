@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rive → HYA Feature Corpus</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header>
+    <div class="brand"><span>RIVE 7.3 · MACHINE-READABLE CENSUS</span><h1>Rive → HYA Feature Corpus</h1><p>逐条展示冻结 runtime census 的 object、property、asset 与 Luau API 支持状态。</p></div>
+    <a href="../rive-hya-compare/index.html">打开左右渲染对照 →</a>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="summary-grid">
+        <article><span>全部条目</span><strong id="total-count">—</strong><small>source census</small></article>
+        <article class="full"><span>完整</span><strong id="full-count">—</strong><small>isolated value semantics</small></article>
+        <article class="partial"><span>部分</span><strong id="partial-count">—</strong><small>dependency/parity pending</small></article>
+        <article class="missing"><span>缺失</span><strong id="missing-count">—</strong><small>stable failure today</small></article>
+      </div>
+      <div id="source-meta" class="source-meta">读取 census…</div>
+    </section>
+    <section>
+      <div class="section-head"><div><span>8 FEATURE FAMILIES</span><h2>能力族总览</h2></div><p>family 状态来自冻结 owner contract；数字为该族逐条 census 分布。</p></div>
+      <div id="family-grid" class="family-grid"></div>
+    </section>
+    <section class="corpus-section">
+      <div class="section-head"><div><span>COMPLETE LEDGER</span><h2>完整特性清单</h2></div><output id="visible-count">—</output></div>
+      <div class="filters">
+        <input id="search" type="search" placeholder="搜索名称、owner、source、diagnostic、goal…" />
+        <select id="kind" aria-label="条目类型"><option value="all">全部类型</option></select>
+        <select id="family" aria-label="能力族"><option value="all">全部能力族</option></select>
+        <select id="status-filter" aria-label="支持状态"><option value="all">全部状态</option><option value="full">完整</option><option value="partial">部分</option><option value="missing">缺失</option></select>
+        <label><input id="binary-only" type="checkbox" /> 仅 binary-eligible</label>
+      </div>
+      <div class="table-shell">
+        <table>
+          <thead><tr><th>Feature</th><th>类型 / Key</th><th>Family</th><th>HYA</th><th>证据</th><th>Owner / Goal</th><th>Diagnostic</th></tr></thead>
+          <tbody id="feature-rows"></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="notes">
+      <h2>如何理解状态</h2>
+      <p><strong>完整</strong>只表示该孤立 property 的值域/插值可完整表达，不自动把所属 Rive object 升级为 full fidelity。<strong>部分</strong>表示已有中立表达或 runtime 基础，但依赖关系、交互或 oracle parity 尚未闭环。<strong>缺失</strong>必须产生稳定 diagnostic，不能静默忽略。</p>
+      <p>binary coverage 与 behavioral evidence 分开：288 object、565 serialized property、9 serialized asset type 由生成的 7.3 RIV 闭合；48 module 与 349 symbol 通过安全与 differential workload 验证，不冒充 wire key。</p>
+    </section>
+  </main>
+  <pre id="result"></pre>
+  <script src="../shared/engine.js"></script>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

@@ -59,9 +59,13 @@ for (const [path, bytes] of result.artifactBytesByPath) {
   if (isAbsolute(targetRelative) || targetRelative === '..' || targetRelative.startsWith(`..${process.platform === 'win32' ? '\\' : '/'}`)) throw new Error(`Artifact escaped repository: ${path}`);
   await mkdir(dirname(target), { recursive: true }); await writeFile(target, bytes);
 }
+await writeFile(resolve(outputDirectory, 'animation.hya'), result.conversion.hyaBytes);
+await writeFile(resolve(outputDirectory, 'animation.hyapkg'), result.conversion.packageBytes);
+await writeFile(resolve(outputDirectory, 'conversion-manifest.json'), result.conversion.manifestBytes);
+await writeFile(resolve(outputDirectory, 'conversion-report.json'), result.conversion.reportBytes);
 await writeFile(resolve(outputDirectory, 'trace.json'), `${JSON.stringify(result.trace, null, 2)}\n`);
 await writeFile(resolve(outputDirectory, 'validation.json'), `${JSON.stringify(result.validation, null, 2)}\n`);
-console.log(`[rive-differential] ${assetId}: trace=${result.trace.status}, validation=${result.validation.status}, artifacts=${result.artifactBytesByPath.size + 2}.`);
+console.log(`[rive-differential] ${assetId}: trace=${result.trace.status}, validation=${result.validation.status}, artifacts=${result.artifactBytesByPath.size + 6}.`);
 if (result.validation.status !== 'passed') process.exitCode = 1;
 
 async function loadExport(path, name) {

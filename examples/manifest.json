@@ -86,6 +86,28 @@
       "catalog": { "group": "assets-ui", "order": 13 }
     },
     {
+      "id": "rive-hya-compare",
+      "title": "Rive → HYA Fidelity Compare",
+      "entry": "rive-hya-compare/main.ts",
+      "capabilities": ["animation-format", "rive-7.3-import", "fidelity-compare", "official-reference-player", "hash-pinned-remote-assets", "webgl2", "webgpu", "2d"],
+      "assets": ["rive-hya-compare/samples.json", "rive-hya-compare/styles.css"],
+      "screenshot": { "required": false, "baseline": null },
+      "performance": null,
+      "ci": "manual",
+      "catalog": { "group": "assets-ui", "order": 14 }
+    },
+    {
+      "id": "rive-feature-corpus",
+      "title": "Rive → HYA Feature Corpus",
+      "entry": "rive-feature-corpus/main.ts",
+      "capabilities": ["animation-format", "rive-7.3-census", "feature-coverage", "capability-dashboard", "source-provenance", "2d"],
+      "assets": ["rive-feature-corpus/corpus.json", "rive-feature-corpus/styles.css"],
+      "screenshot": { "required": false, "baseline": null },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": { "group": "assets-ui", "order": 15 }
+    },
+    {
       "id": "hya-state-machine",
       "title": "HYA State Machine",
       "entry": "hya-state-machine/main.ts",

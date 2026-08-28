@@ -14,6 +14,8 @@
 8. [corpus-oracle-manifest.json](./corpus-oracle-manifest.json)、[official-asset-sources.md](./official-asset-sources.md) 与 [evidence-plan.md](./evidence-plan.md)：产品 case、官方远程输入、corpus、oracle 和设备证据。
 9. [g01-acceptance.md](./g01-acceptance.md)：G01 的逐项审查结论。
 
+可执行视图：`examples/rive-feature-corpus` 把完整 1317 条 census 投影成可搜索页面；`examples/rive-hya-compare` 在右侧运行固定 hash 的官方 WebGL2 oracle，并只在左侧输入的 HYA 与 conversion report 同时绑定当前 RIV/HYA SHA-256 后才显示 HaiYue WebGPU 结果。两者的数据均由 `npm run rive:examples:data` 从本目录 census 与正式 corpus manifest 生成。
+
 `tools/` 只保存 census 的可复现生成器；生成结果本身受兼容 tuple 和 source digest 约束。
 
 ## 冻结结论

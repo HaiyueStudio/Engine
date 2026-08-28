@@ -126,9 +126,14 @@ first. `build:target` and the examples watcher create or refresh the shared bund
 - `gltf-animation3d-crossfade`: glTF skin/morph animation and cross-fade.
 - `hya-samples`: manifest-backed Tween/transform, SpriteSheet, Path, and Particle HYA fixtures.
 - `hya-state-machine`: one-asset clips, parameters, transitions, and cross-fade.
+- `rive-hya-compare`: hash-pinned official Rive WebGL2 on the right and a report-bound HYA/WebGPU candidate on the left; no mock fallback.
+- `rive-feature-corpus`: searchable 1,317-row projection of the frozen Rive object/property/asset/Luau census and current HYA support status.
 - `game:sokoban-3d` and `game:billiards`: complete game workflows from `games/manifest.json`.
 
 ```bash
 npm run build:target -- example:consumer-walkthrough example:hya-samples example:hya-state-machine
 npm run build:target -- example:gltf-animation3d-crossfade game:sokoban-3d
+npm run rive:examples:data
+npm run build:target -- example:rive-feature-corpus example:rive-hya-compare
+npm run rive:examples:verify
 ```

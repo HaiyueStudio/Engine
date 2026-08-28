@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rive → HYA Fidelity Compare</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header>
+    <div><span class="eyebrow">RIVE 7.3 · FIDELITY LAB</span><h1>官方 Rive 与 HYA 左右对照</h1></div>
+    <label class="sample-label">官方素材<select id="sample" aria-label="官方 Rive 素材"></select></label>
+    <button id="reload" type="button">重新加载</button>
+    <span id="status" data-kind="working">初始化中…</span>
+  </header>
+  <main>
+    <section class="pane pane--hya">
+      <div class="pane-head"><div><span>LEFT</span><h2>HaiYue HYA · WebGPU</h2></div><strong id="hya-state" data-status="missing">等待转换产物</strong></div>
+      <canvas id="hya-canvas" width="800" height="640"></canvas>
+      <div id="hya-empty" class="empty-state">
+        <strong>这里不使用 mock。</strong>
+        <p>选择同一 RIV 转换得到的 <code>animation.hya</code> 与 <code>conversion-report.json</code>，页面会校验报告中的 RIV/HYA SHA-256 后播放。</p>
+      </div>
+    </section>
+    <section class="pane pane--official">
+      <div class="pane-head"><div><span>RIGHT</span><h2>官方 @rive-app/webgl2@2.40.0</h2></div><strong id="official-state" data-status="working">校验并加载</strong></div>
+      <canvas id="official-canvas" width="800" height="640"></canvas>
+    </section>
+  </main>
+  <footer>
+    <div class="controls">
+      <button id="play" type="button">暂停两端</button>
+      <button id="restart" type="button">从头开始</button>
+      <label class="file-button">载入 HYA + report<input id="hya-files" type="file" accept=".hya,.json,application/json" multiple /></label>
+      <input id="hya-url" type="url" placeholder="animation.hya URL（同目录需有 conversion-report.json）" />
+      <button id="load-hya-url" type="button">载入 URL</button>
+    </div>
+    <div class="identity">
+      <span id="source-identity">RIV —</span>
+      <span id="selection">selection —</span>
+      <a id="source-link" href="#" target="_blank" rel="noreferrer">官方来源</a>
+      <a href="../rive-feature-corpus/index.html">查看完整 feature corpus →</a>
+    </div>
+    <pre id="diagnostics">等待素材</pre>
+  </footer>
+  <pre id="result"></pre>
+  <script src="https://unpkg.com/@rive-app/webgl2@2.40.0/rive.js" integrity="sha256-0l1XWI9jOCtmKgC1S3MWT33NpldZ38+hAJkx06GuFxQ=" crossorigin="anonymous"></script>
+  <script src="../shared/engine.js"></script>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

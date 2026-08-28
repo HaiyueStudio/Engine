@@ -123,6 +123,8 @@
     "rive:g11:host-config": "node scripts/hya-corpus/rive-create-production-host-config.mjs",
     "rive:g11:host-preflight": "node scripts/hya-corpus/rive-production-host-preflight.mjs",
     "rive:g11:device-matrix": "node scripts/hya-corpus/rive-run-device-matrix.mjs",
+    "rive:examples:data": "node scripts/hya-corpus/rive-generate-example-data.mjs",
+    "rive:examples:verify": "node scripts/verify-rive-examples.mjs",
     "rive:g11:candidate": "node scripts/benchmark/rive-g11-create-candidate.mjs",
     "rive:g11:index": "node scripts/benchmark/rive-g11-evidence-index-builder.mjs",
     "rive:g11:validate": "node scripts/benchmark/validate-rive-g11-candidate.mjs",

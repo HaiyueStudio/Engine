@@ -87,6 +87,8 @@ GitHub Pages catalog 会展示当前发布版本中可公开运行的示例，�
 - [glTF Viewer](https://haiyuestudio.github.io/Engine/examples/#gltf-viewer)
 - [Lottie → HYA 对比](https://haiyuestudio.github.io/Engine/examples/#lottie-hya-compare)
 - [Live2D → HYA 对比](https://haiyuestudio.github.io/Engine/examples/#live2d-hya-compare)
+- [Rive → HYA 左右渲染对比](https://haiyuestudio.github.io/Engine/examples/#rive-hya-compare)
+- [Rive → HYA Feature Corpus](https://haiyuestudio.github.io/Engine/examples/#rive-feature-corpus)
 
 在线站点由 [GitHub Pages 工作流](./.github/workflows/deploy-pages.yml)从人工选择并验证签名的 release tag 构建；它不会提交 `dist/` 或 examples bundle 到源码分支。仓库管理员首次使用时需在 GitHub 的 **Settings → Pages → Build and deployment** 中选择 **GitHub Actions**，然后运行 `Deploy GitHub Pages` 工作流。
 
