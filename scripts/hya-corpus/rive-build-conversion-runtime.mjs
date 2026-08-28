@@ -20,6 +20,14 @@ export async function buildRiveConversionRuntime() {
   return resolve(output, 'rive/convert/index.js');
 }
 
+export async function buildRiveProductionCaptureFixture() {
+  await run(process.execPath, [resolve(root, 'examples/scripts/build-examples.mjs')], {
+    EXAMPLE_FILTER: 'rive-production-capture',
+    EXAMPLE_SKIP_SOURCE_VIEWER: '1',
+  });
+  return resolve(root, 'examples/rive-production-capture/bundle.js');
+}
+
 async function addJsExtensions(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const path = resolve(directory, entry.name);
@@ -34,9 +42,9 @@ async function addJsExtensions(directory) {
   }
 }
 
-function run(command, args) {
+function run(command, args, environment = {}) {
   return new Promise((resolveRun, rejectRun) => {
-    const child = spawn(command, args, { cwd: root, stdio: 'inherit', windowsHide: true, shell: false });
+    const child = spawn(command, args, { cwd: root, env: { ...process.env, ...environment }, stdio: 'inherit', windowsHide: true, shell: false });
     child.once('error', rejectRun);
     child.once('exit', code => code === 0 ? resolveRun() : rejectRun(new Error(`Conversion runtime build exited with ${String(code)}.`)));
   });

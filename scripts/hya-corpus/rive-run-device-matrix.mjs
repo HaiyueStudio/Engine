@@ -7,7 +7,7 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { assertFormalRepositoryIdentity, captureRepositoryIdentity } from '../formal-evidence/repository-identity.mjs';
 import { resolveProductionAdapterEnvironment, verifyProductionAdapterEnvironment } from './rive-production-adapter-bridge.mjs';
-import { buildRiveConversionRuntime } from './rive-build-conversion-runtime.mjs';
+import { buildRiveConversionRuntime, buildRiveProductionCaptureFixture } from './rive-build-conversion-runtime.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -59,6 +59,7 @@ export function validateDeviceMatrixEnvironment(environment, { deviceClass, brow
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (Number(process.versions.node.split('.')[0]) < 22) throw new Error(`Formal Rive device matrix requires Node.js 22 or later; observed ${process.version}.`);
   await buildRiveConversionRuntime();
+  await buildRiveProductionCaptureFixture();
   const repositoryStart = captureRepositoryIdentity(root);
   assertFormalRepositoryIdentity(repositoryStart, repositoryStart, { label: 'Engine' });
   const deviceClass = required(argument('--device-class'), '--device-class');

@@ -125,6 +125,7 @@
     "rive:g11:device-matrix": "node scripts/hya-corpus/rive-run-device-matrix.mjs",
     "rive:g11:player-closure": "node scripts/benchmark/rive-g11-build-player-closure.mjs",
     "rive:g11:build-conversion-runtime": "node scripts/hya-corpus/rive-build-conversion-runtime.mjs",
+    "rive:g11:build-capture-fixture": "node -e \"import('./scripts/hya-corpus/rive-build-conversion-runtime.mjs').then(m=>m.buildRiveProductionCaptureFixture())\"",
     "rive:g11:device-environment": "node scripts/hya-corpus/rive-create-device-environment.mjs",
     "rive:examples:data": "node scripts/hya-corpus/rive-generate-example-data.mjs",
     "rive:examples:verify": "node scripts/verify-rive-examples.mjs",
