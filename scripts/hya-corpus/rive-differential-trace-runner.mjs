@@ -21,7 +21,15 @@ export async function runRiveDifferentialTrace(options) {
     signal: options.signal,
   });
   const official = await options.officialAdapter.capture(Object.freeze({ ...request, runtimeInput: Object.freeze({ kind: 'riv', bytes: Uint8Array.from(options.rivBytes) }) }));
-  const hya = await options.hyaAdapter.capture(Object.freeze({ ...request, runtimeInput: Object.freeze({ kind: 'hya-package', hyaBytes: Uint8Array.from(conversion.hyaBytes), packageBytes: Uint8Array.from(conversion.packageBytes) }) }));
+  const hya = await options.hyaAdapter.capture(Object.freeze({
+    ...request,
+    runtimeInput: Object.freeze({
+      kind: 'hya-package',
+      hyaBytes: Uint8Array.from(conversion.hyaBytes),
+      packageBytes: Uint8Array.from(conversion.packageBytes),
+      sourceRivBytes: Uint8Array.from(options.rivBytes),
+    }),
+  }));
   validateCaptureEnvironment(official.environment, options.environment, 'official');
   validateCaptureEnvironment(hya.environment, options.environment, 'HYA');
   if (stableJson(official.environment) !== stableJson(hya.environment)) throw new Error('Official and HYA capture environments differ.');

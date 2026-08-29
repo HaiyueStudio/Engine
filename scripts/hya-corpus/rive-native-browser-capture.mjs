@@ -13,7 +13,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OFFICIAL_JS_SHA256 = 'd25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714';
 const OFFICIAL_WASM_SHA256 = '87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32';
 const CAPTURE_INDEX_SHA256 = '2cba454cb87ab205bf4d93d717217faaf93ecc1b816e5c21eeafb0bfb6a4ffb0';
-const CAPTURE_BUNDLE_SHA256 = 'af73394abd1a0ae6995e97196a87f188f532d7c9842f8d96c26454406b4c88c2';
+const CAPTURE_BUNDLE_SHA256 = 'ff7843ebe6676d267ec59f6006f36b2bf83cbebeeb018cf8769fbf4466ee7bf0';
 const SHARED_ENGINE_SHA256 = 'dc9d4d2261aecaed00b90890e64ff666bbda40051747d8170d84044aaa66d2e9';
 const execute = promisify(execFile);
 
@@ -24,9 +24,8 @@ export async function captureWithNativeBrowser(mode, request) {
   if (mode === 'official') await verifyOfficialRuntime();
   const temporary = await mkdtemp(resolve(tmpdir(), `haiyue-rive-${mode}-capture-`));
   const runtimeBytes = mode === 'official' ? request.runtimeInput.bytes : request.runtimeInput.hyaBytes;
-  const semanticTopology = mode === 'official'
-    ? await buildOfficialSemanticTopology(runtimeBytes, request.scenario.selection.artboard)
-    : null;
+  const sourceRivBytes = mode === 'official' ? runtimeBytes : request.runtimeInput.sourceRivBytes;
+  const semanticTopology = await buildOfficialSemanticTopology(sourceRivBytes, request.scenario.selection.artboard);
   const packageAssetDirectory = mode === 'hya'
     ? await materializeHyaPackageAssets(request.runtimeInput.packageBytes, temporary)
     : null;
@@ -194,7 +193,7 @@ function validateRequest(mode, request) {
   if (!request || typeof request !== 'object') throw new TypeError('Capture request is missing.');
   if (!request.environment?.physicalDevice || !['chrome', 'edge'].includes(request.environment?.browser)) throw new Error('Capture requires a declared physical Chrome/Edge environment.');
   if (mode === 'official' && (request.runtimeInput?.kind !== 'riv' || !(request.runtimeInput.bytes instanceof Uint8Array))) throw new TypeError('Official capture requires RIV bytes.');
-  if (mode === 'hya' && (request.runtimeInput?.kind !== 'hya-package' || !(request.runtimeInput.hyaBytes instanceof Uint8Array) || !(request.runtimeInput.packageBytes instanceof Uint8Array))) throw new TypeError('HYA capture requires exact HYA and package bytes.');
+  if (mode === 'hya' && (request.runtimeInput?.kind !== 'hya-package' || !(request.runtimeInput.hyaBytes instanceof Uint8Array) || !(request.runtimeInput.packageBytes instanceof Uint8Array) || !(request.runtimeInput.sourceRivBytes instanceof Uint8Array))) throw new TypeError('HYA capture requires exact HYA, package, and source RIV oracle bytes.');
 }
 
 async function verifyOfficialRuntime() {

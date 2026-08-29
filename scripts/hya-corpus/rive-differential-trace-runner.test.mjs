@@ -85,6 +85,7 @@ function adapter(runtime, backend, label, calls) {
     descriptor: { id: `${label}-capture`, revisionSha256: label === 'official' ? '2'.repeat(64) : '3'.repeat(64), runtime, backend, nativeBackend: true },
     async capture(request) {
       calls.push(`${label}:${request.runtimeInput.kind}`);
+      if (label === 'hya') assert.deepEqual(request.runtimeInput.sourceRivBytes, rivBytes);
       const pixelPath = `review/candidates/rive-traces/runner/${label}.rgba`;
       const pixelBytes = Buffer.from([10, 20, 30, 255]);
       const channels = {};

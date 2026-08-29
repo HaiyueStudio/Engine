@@ -256,7 +256,7 @@ async function createHyaOwner(payload: Payload, canvas: HTMLCanvasElement, bytes
       return {
         pixels: pixels!,
         gpuFrameMs,
-        geometryAndDrawOrder: hyaTopology(animation, renderer.stats),
+        geometryAndDrawOrder: hyaTopology(payload.semanticTopology, renderer.stats),
       };
     },
     runtimeState(state) { return { stateMachine: payload.scenario.selection.stateMachine, sourceInput: state.sourceInput, sourceInputApplied: state.sourceInputApplied }; },
@@ -489,19 +489,9 @@ function normalizeBounds(bounds: any): Json {
   return [Number(bounds.minX ?? 0), Number(bounds.minY ?? 0), Number(bounds.maxX ?? 0), Number(bounds.maxY ?? 0)];
 }
 
-function hyaTopology(animation: any, stats: any): Json {
+function hyaTopology(semanticTopology: Json, stats: any): Json {
   return {
-    semantic: {
-      oracle: 'neutral-drawable-topology@1',
-      items: animation.nodes
-        .filter((node: any) => node.extensions?.neutralDrawable === true)
-        .map((node: any) => ({
-          id: node.id,
-          family: node.extensions.neutralFamily,
-          drawOrder: node.extensions.neutralDrawOrder,
-        }))
-        .sort((left: any, right: any) => left.drawOrder - right.drawOrder),
-    },
+    semantic: requireSemanticTopology(semanticTopology),
     submission: {
       oracle: 'webgpu-scene-submission@1', backend: 'webgpu',
       visualCount: stats.visualCount, compositeLayerCount: stats.compositeLayerCount,
