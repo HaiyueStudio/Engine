@@ -20,7 +20,8 @@ interface Sample {
 }
 interface SampleManifest { oracle: { package: string; riveJsSha256: string; riveWasmSha256: string }; samples: Sample[] }
 interface ConversionReport { input?: { rivSha256?: string }; output?: { hyaSha256?: string }; featureLedger?: unknown[]; diagnostics?: unknown[] }
-interface AutomaticConversionResponse { status: 'passed' | 'failed'; assetId?: string; hyaBase64?: string; report?: ConversionReport; error?: string }
+interface AutomaticConversionAsset { path: string; mimeType: string; sha256: string; byteLength: number; base64: string }
+interface AutomaticConversionResponse { status: 'passed' | 'failed'; assetId?: string; hyaBase64?: string; assets?: AutomaticConversionAsset[]; report?: ConversionReport; error?: string }
 interface OfficialRiveInstance {
   cleanup(): void; play(): void; pause(): void;
   reset(options?: Record<string, unknown>): void; resizeDrawingSurfaceToCanvas(): void;
@@ -66,6 +67,7 @@ async function main(): Promise<void> {
   let official: OfficialRiveInstance | null = null;
   let hyaEntity: Entity | null = null;
   let hyaPlayer: Animation2DComponent | null = null;
+  let hyaAssetUrls: string[] = [];
   let activeRivBytes: ArrayBuffer | null = null;
   let conversionAbort: AbortController | null = null;
   let playing = true;
@@ -113,7 +115,7 @@ async function main(): Promise<void> {
   };
 
   const installHya = async (
-    hyaBytes: ArrayBuffer, report: ConversionReport, label: string,
+    hyaBytes: ArrayBuffer, report: ConversionReport, label: string, packagedAssets?: readonly AutomaticConversionAsset[],
     expected?: { generation: number; assetId: string; signal: AbortSignal },
   ): Promise<void> => {
     if (expected && (expected.generation !== generation || expected.assetId !== activeSample.id || expected.signal.aborted)) return;
@@ -128,8 +130,16 @@ async function main(): Promise<void> {
       extensionRegistry.register({ id });
       runtimeExtensions.register({ id, create() {} });
     }
-    const animation = parseAnimation(hyaBytes, { extensions: extensionRegistry });
+    const parsed = parseAnimation(hyaBytes, { extensions: extensionRegistry });
+    const materialized = await materializePackageResources(parsed, packagedAssets, expected?.signal);
+    if (expected && (expected.generation !== generation || expected.assetId !== activeSample.id || expected.signal.aborted)) {
+      materialized.urls.forEach(url => URL.revokeObjectURL(url));
+      return;
+    }
+    const animation = materialized.animation;
     if (hyaEntity) scene.remove(hyaEntity);
+    hyaAssetUrls.forEach(url => URL.revokeObjectURL(url));
+    hyaAssetUrls = materialized.urls;
     hyaPlayer = new Animation2DComponent(animation, { autoplay: playing, loop: true, runtimeExtensions });
     hyaEntity = new Entity(`Rive HYA: ${label}`).addComponent(new Transform2D()).addComponent(hyaPlayer);
     scene.add(hyaEntity);
@@ -155,12 +165,14 @@ async function main(): Promise<void> {
     if (result.assetId !== sample.id) throw new Error('自动转换响应的素材身份不匹配。');
     if (token !== generation || signal.aborted) return;
     const hya = decodeBase64(result.hyaBase64);
-    await installHya(hya.buffer, result.report, `${sample.id} · automatic`, { generation: token, assetId: sample.id, signal });
+    await installHya(hya.buffer, result.report, `${sample.id} · automatic`, result.assets ?? [], { generation: token, assetId: sample.id, signal });
   };
 
   function clearHya(): void {
     if (hyaEntity) scene.remove(hyaEntity);
     hyaEntity = null; hyaPlayer = null;
+    hyaAssetUrls.forEach(url => URL.revokeObjectURL(url));
+    hyaAssetUrls = [];
     query('#hya-empty').removeAttribute('hidden');
     setPaneState('hya', '等待转换产物', 'missing');
   }
@@ -267,6 +279,39 @@ function automaticConversionEndpoints(assetId: string): URL[] {
 
 function isLoopback(hostname: string): boolean {
   return hostname === '127.0.0.1' || hostname === 'localhost' || hostname === '[::1]';
+}
+
+async function materializePackageResources(
+  animation: ParsedAnimation,
+  assets: readonly AutomaticConversionAsset[] | undefined,
+  signal?: AbortSignal,
+): Promise<{ animation: ParsedAnimation; urls: string[] }> {
+  const urls: string[] = [];
+  try {
+    const uriByPath = new Map<string, string>();
+    for (const asset of assets ?? []) {
+      if (signal?.aborted) throw signal.reason;
+      if (!/^assets\/[0-9a-f]{64}$/u.test(asset.path) || asset.path !== `assets/${asset.sha256}`) {
+        throw new Error(`转换资源路径不符合 content-addressed 约束：${asset.path}`);
+      }
+      const bytes = decodeBase64(asset.base64);
+      if (bytes.byteLength !== asset.byteLength) throw new Error(`转换资源长度不匹配：${asset.path}`);
+      const actual = await sha256(bytes.buffer);
+      if (actual !== asset.sha256) throw new Error(`转换资源 SHA-256 不匹配：${asset.path}`);
+      if (uriByPath.has(asset.path)) throw new Error(`转换响应包含重复资源：${asset.path}`);
+      const url = URL.createObjectURL(new Blob([bytes], { type: asset.mimeType }));
+      urls.push(url); uriByPath.set(asset.path, url);
+    }
+    const resources = animation.resources.map(resource => {
+      const uri = uriByPath.get(resource.uri);
+      if (!uri && assets !== undefined && resource.uri.startsWith('assets/')) throw new Error(`转换响应缺少 HYA 包内资源：${resource.uri}`);
+      return uri ? Object.freeze({ ...resource, uri }) : resource;
+    });
+    return { animation: Object.freeze({ ...animation, resources: Object.freeze(resources) }), urls };
+  } catch (error) {
+    urls.forEach(url => URL.revokeObjectURL(url));
+    throw error;
+  }
 }
 
 function createOfficialPlayer(module: OfficialRiveModule, canvas: HTMLCanvasElement, bytes: ArrayBuffer, sample: Sample, autoplay: boolean): Promise<OfficialRiveInstance> {

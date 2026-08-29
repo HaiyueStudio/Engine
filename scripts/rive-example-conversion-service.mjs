@@ -37,11 +37,30 @@ export async function convertOfficialRiveExample(assetId, input, signal = new Ab
       return evaluateProductionCapabilities(request, { descriptor });
     },
   });
-  return conversion.convertRivBytesToHya(Uint8Array.from(input), {
+  const result = await conversion.convertRivBytesToHya(Uint8Array.from(input), {
     capabilityEvaluator,
     selection: scenario.selection,
     signal,
   });
+  const files = conversion.decodeRiveHyaArchive(result.packageBytes, {
+    maxPackageBytes: result.packageBytes.byteLength,
+    maxPackageFiles: result.manifest.files.length + 1,
+  });
+  const filesByPath = new Map(files.map(file => [file.path, file]));
+  const embeddedAssets = result.manifest.assets.filter(asset => asset.kind === 'embedded').map(asset => {
+    const file = filesByPath.get(asset.path);
+    if (!file || file.bytes.byteLength !== asset.byteLength || sha256(file.bytes) !== asset.sha256) {
+      throw new Error(`Converted package asset ${asset.path} failed its manifest identity.`);
+    }
+    return Object.freeze({
+      path: asset.path,
+      mimeType: asset.mimeType,
+      sha256: asset.sha256,
+      byteLength: asset.byteLength,
+      bytes: file.bytes,
+    });
+  });
+  return Object.freeze({ ...result, embeddedAssets: Object.freeze(embeddedAssets) });
 }
 
 export async function handleRiveExampleConversionRequest(request, response) {
@@ -76,6 +95,13 @@ export async function handleRiveExampleConversionRequest(request, response) {
       status: 'passed',
       assetId,
       hyaBase64: Buffer.from(result.hyaBytes).toString('base64'),
+      assets: result.embeddedAssets.map(asset => ({
+        path: asset.path,
+        mimeType: asset.mimeType,
+        sha256: asset.sha256,
+        byteLength: asset.byteLength,
+        base64: Buffer.from(asset.bytes).toString('base64'),
+      })),
       report: result.report,
     }, cors);
   } catch (error) {
