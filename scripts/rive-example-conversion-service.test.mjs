@@ -18,8 +18,31 @@ test('Rive example conversion route accepts POST only', async () => {
   );
   assert.equal(handled, true);
   assert.equal(response.status, 405);
-  assert.equal(response.headers.Allow, 'POST');
+  assert.equal(response.headers.Allow, 'POST, OPTIONS');
   assert.deepEqual(JSON.parse(response.body), { status: 'failed', error: 'Method not allowed.' });
+});
+
+test('Rive example conversion route permits loopback Live Server preflight', async () => {
+  const response = captureResponse();
+  const input = request('/api/rive-hya-compare/convert/official-inventory-demo-v2', 'OPTIONS');
+  input.headers.origin = 'http://127.0.0.1:5500';
+  input.headers.host = '127.0.0.1:8080';
+  const handled = await handleRiveExampleConversionRequest(input, response);
+  assert.equal(handled, true);
+  assert.equal(response.status, 204);
+  assert.equal(response.headers['Access-Control-Allow-Origin'], 'http://127.0.0.1:5500');
+  assert.equal(response.headers['Access-Control-Allow-Methods'], 'POST, OPTIONS');
+});
+
+test('Rive example conversion route rejects non-loopback cross-origin requests', async () => {
+  const response = captureResponse();
+  const input = request('/api/rive-hya-compare/convert/official-inventory-demo-v2', 'OPTIONS');
+  input.headers.origin = 'https://untrusted.example';
+  input.headers.host = '127.0.0.1:8080';
+  const handled = await handleRiveExampleConversionRequest(input, response);
+  assert.equal(handled, true);
+  assert.equal(response.status, 403);
+  assert.match(JSON.parse(response.body).error, /restricted/u);
 });
 
 test('Rive example conversion route rejects bytes without a formal asset identity', async () => {

@@ -47,8 +47,23 @@ export async function convertOfficialRiveExample(assetId, input, signal = new Ab
 export async function handleRiveExampleConversionRequest(request, response) {
   const url = new URL(request.url ?? '/', 'http://localhost');
   if (!url.pathname.startsWith(routePrefix)) return false;
+  const cors = conversionCorsHeaders(request);
+  if (request.headers.origin && cors === null) {
+    sendJson(response, 403, { status: 'failed', error: 'Cross-origin Rive conversion is restricted to the same origin or loopback development origins.' });
+    return true;
+  }
+  if (request.method === 'OPTIONS') {
+    response.writeHead(204, {
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Cache-Control': 'no-store',
+      ...cors,
+    });
+    response.end();
+    return true;
+  }
   if (request.method !== 'POST') {
-    sendJson(response, 405, { status: 'failed', error: 'Method not allowed.' }, { Allow: 'POST' });
+    sendJson(response, 405, { status: 'failed', error: 'Method not allowed.' }, { Allow: 'POST, OPTIONS', ...cors });
     return true;
   }
   const controller = new AbortController();
@@ -62,12 +77,23 @@ export async function handleRiveExampleConversionRequest(request, response) {
       assetId,
       hyaBase64: Buffer.from(result.hyaBytes).toString('base64'),
       report: result.report,
-    });
+    }, cors);
   } catch (error) {
     const status = error instanceof RangeError || error instanceof TypeError ? 400 : 422;
-    sendJson(response, status, { status: 'failed', error: error instanceof Error ? error.message : String(error) });
+    sendJson(response, status, { status: 'failed', error: error instanceof Error ? error.message : String(error) }, cors);
   }
   return true;
+}
+
+function conversionCorsHeaders(request) {
+  const origin = request.headers.origin;
+  if (!origin) return {};
+  let parsed;
+  try { parsed = new URL(origin); } catch { return null; }
+  const sameHost = parsed.host === request.headers.host;
+  const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(parsed.hostname);
+  if (!sameHost && !loopback) return null;
+  return { 'Access-Control-Allow-Origin': origin, Vary: 'Origin' };
 }
 
 async function loadManifest() {

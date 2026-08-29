@@ -145,10 +145,7 @@ async function main(): Promise<void> {
   const convertAndInstall = async (sample: Sample, rivBytes: ArrayBuffer, token: number, signal: AbortSignal): Promise<void> => {
     setPaneState('hya', 'production pipeline 转换中…', 'working');
     setStatus(`正在把 ${sample.title} 转换为 HYA…`, 'working');
-    const response = await fetch(`/api/rive-hya-compare/convert/${encodeURIComponent(sample.id)}`, {
-      method: 'POST', body: rivBytes.slice(0), signal, cache: 'no-store',
-      headers: { 'content-type': 'application/octet-stream' },
-    });
+    const response = await requestAutomaticConversion(sample.id, rivBytes, signal);
     let result: AutomaticConversionResponse;
     try { result = await response.json() as AutomaticConversionResponse; }
     catch { throw new Error(`自动转换服务返回 HTTP ${response.status}，且响应不是 JSON。`); }
@@ -223,6 +220,53 @@ async function main(): Promise<void> {
       renderer: hyaPlayer ? renderer.stats : null,
     });
   }
+}
+
+async function requestAutomaticConversion(assetId: string, rivBytes: ArrayBuffer, signal: AbortSignal): Promise<Response> {
+  const endpoints = automaticConversionEndpoints(assetId);
+  const failures: string[] = [];
+  for (let index = 0; index < endpoints.length; index++) {
+    const endpoint = endpoints[index]!;
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST', body: rivBytes.slice(0), signal, cache: 'no-store',
+        headers: { 'content-type': 'application/octet-stream' },
+      });
+      if ((response.status === 404 || response.status === 405) && index + 1 < endpoints.length) {
+        failures.push(`${endpoint.origin}: HTTP ${response.status}`);
+        continue;
+      }
+      if (response.status === 404 || response.status === 405) {
+        throw new Error(`该地址是纯静态服务器，未提供 production converter（HTTP ${response.status}）。`);
+      }
+      return response;
+    } catch (error) {
+      if (signal.aborted) throw error;
+      failures.push(`${endpoint.origin}: ${error instanceof Error ? error.message : String(error)}`);
+      if (index + 1 < endpoints.length) continue;
+    }
+  }
+  throw new Error(
+    `无法连接 Rive production converter。请在 Engine 目录运行 `
+    + '`npm run preview:target -- example:rive-hya-compare`，'
+    + `服务地址应为 http://127.0.0.1:8080。${failures.length > 0 ? ` (${failures.join('; ')})` : ''}`,
+  );
+}
+
+function automaticConversionEndpoints(assetId: string): URL[] {
+  const path = `/api/rive-hya-compare/convert/${encodeURIComponent(assetId)}`;
+  const configured = new URLSearchParams(location.search).get('converter');
+  if (configured) return [new URL(path, new URL(configured, location.href))];
+  const sameOrigin = new URL(path, location.origin);
+  if (!isLoopback(location.hostname)) return [sameOrigin];
+  const converterOrigin = new URL(`${location.protocol}//${location.hostname}:8080`);
+  const converter = new URL(path, converterOrigin);
+  if (location.port === '5500' || location.port === '5501') return [converter];
+  return converter.href === sameOrigin.href ? [sameOrigin] : [sameOrigin, converter];
+}
+
+function isLoopback(hostname: string): boolean {
+  return hostname === '127.0.0.1' || hostname === 'localhost' || hostname === '[::1]';
 }
 
 function createOfficialPlayer(module: OfficialRiveModule, canvas: HTMLCanvasElement, bytes: ArrayBuffer, sample: Sample, autoplay: boolean): Promise<OfficialRiveInstance> {
