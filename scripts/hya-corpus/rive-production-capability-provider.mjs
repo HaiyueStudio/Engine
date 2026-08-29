@@ -255,16 +255,17 @@ function sniffMimeType(bytes, sourceName, fallback) {
 
 function applySimpleLayoutTransforms(hierarchy) {
   const entries = hierarchy.entries;
-  for (const entry of entries.filter(value => value.sourceName === 'LayoutComponent')) {
+  for (const entry of entries.filter(value => value.nodeEligible !== false && value.sourceName === 'LayoutComponent')) {
     const style = localEntry(entries, entry, entry.fields.styleId);
     if (style?.sourceName === 'LayoutComponentStyle') {
       if (Number.isFinite(style.fields.positionLeft)) entry.fields.x = style.fields.positionLeft;
       if (Number.isFinite(style.fields.positionTop)) entry.fields.y = style.fields.positionTop;
     }
   }
-  for (const parent of entries.filter(value => value.sourceName === 'LayoutComponent' || value.sourceName === 'Artboard')) {
+  for (const parent of entries.filter(value => value.nodeEligible !== false && (value.sourceName === 'LayoutComponent' || value.sourceName === 'Artboard'))) {
     const style = localEntry(entries, parent, parent.fields.styleId);
     const children = entries.filter(value => value.scopeKey === parent.scopeKey
+      && value.nodeEligible !== false
       && value.transformTarget === true
       && value.fields.parentId === parent.componentIndex
       && value.sourceName !== 'LayoutComponentStyle');
@@ -762,6 +763,7 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
       const parentStyle = parent ? localEntry(entries, parent, parent.fields.styleId) : null;
       const gap = finite(parentStyle?.fields.gapVertical) ?? 0;
       for (let index = 0; index < listPlan.items.length; index++) {
+        const item = listPlan.items[index];
         await expand(
           listPlan.templateArtboardId,
           `${host.objectId}::list-${String(index).padStart(6, '0')}::`,
@@ -769,8 +771,9 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
           new Set([artboardObjectId]),
           1,
           {
-            rootY: index * (templateHeight * scale + gap), rootScale: scale,
-            dynamicNestedArtboardIndex: listPlan.items[index].artboardIndex,
+            rootY: index * (listPlan.itemHeight * scale + gap), rootScale: scale,
+            dynamicNestedArtboardIndex: item.artboardIndex,
+            viewModelValues: item.values,
           },
           undefined,
         );
@@ -784,7 +787,9 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
     if (ancestry.has(targetArtboardId)) throw new Error(`Nested artboard cycle includes ${targetArtboardId}.`);
     const nextAncestry = new Set(ancestry); nextAncestry.add(targetArtboardId);
     const local = await buildComponentHierarchy(report, objects, targetArtboardId);
-    await applySelectedAnimationOverrides(local, report, objects, targetArtboardId, activeAnimation);
+    await applySelectedAnimationOverrides(local, report, objects, targetArtboardId, activeAnimation, options.viewModelValues);
+    applyViewModelText(local, options.viewModelValues);
+    applyDisplaySelection(local);
     applySoloSelection(local);
     const idByLocal = new Map(local.entries.map(entry => [entry.objectId, prefix ? `${prefix}${entry.objectId}` : entry.objectId]));
     const clones = local.entries.map(entry => ({
@@ -831,7 +836,7 @@ function nestedAnimationName(hierarchy, nestedArtboardObjectId, report, objects,
   return animations[driver.fields.animationId];
 }
 
-export async function applySelectedAnimationOverrides(hierarchy, report, objects, artboardObjectId, selectedAnimation) {
+export async function applySelectedAnimationOverrides(hierarchy, report, objects, artboardObjectId, selectedAnimation, viewModelValues) {
   const modulePath = resolve(root, 'animation-spec/dist-test/rive/import/generated/frozen-registry.js');
   const { FROZEN_PROPERTIES } = await import(pathToFileURL(modulePath).href);
   const propertyNames = new Map(FROZEN_PROPERTIES.map(value => [value.key, value.name]));
@@ -865,6 +870,7 @@ export async function applySelectedAnimationOverrides(hierarchy, report, objects
     }
   }
   const names = initialStateAnimationNames(records, animations);
+  names.push(...boundAnimationNames(animations, viewModelValues));
   if (typeof selectedAnimation === 'string' && animations.some(value => value.name === selectedAnimation)) names.push(selectedAnimation);
   const applied = [];
   for (const name of [...new Set(names)]) {
@@ -895,7 +901,9 @@ function initialStateAnimationNames(records, animations) {
   return names;
 
   function finishLayer() {
-    const target = Number.isSafeInteger(entryTarget) ? states[entryTarget] : null;
+    const target = Number.isSafeInteger(entryTarget)
+      ? states[entryTarget]
+      : states.find(record => record.visit.sourceName === 'AnimationState');
     if (target?.visit.sourceName === 'AnimationState') {
       const name = animations[target.fields.animationId]?.name;
       if (name) names.push(name);
@@ -904,27 +912,72 @@ function initialStateAnimationNames(records, animations) {
   }
 }
 
-export function applySoloSelection(hierarchy) {
-  const byParent = new Map();
-  for (const entry of hierarchy.entries) {
-    const parentId = Number.isSafeInteger(entry.fields.parentId) ? entry.fields.parentId : null;
-    if (parentId === null) continue;
-    const children = byParent.get(parentId) ?? [];
-    children.push(entry); byParent.set(parentId, children);
+function boundAnimationNames(animations, values) {
+  if (!values) return [];
+  const byLowerName = new Map(animations.map(animation => [animation.name.toLowerCase(), animation.name]));
+  const names = [];
+  for (const [property, value] of Object.entries(values)) {
+    if (typeof value !== 'boolean') continue;
+    const base = property.replace(/_tag$/iu, '');
+    const candidates = property.toLowerCase() === 'click_open'
+      ? [value ? 'click_open' : 'click_closed']
+      : [`${base}_${value ? 'on' : 'off'}`.toLowerCase()];
+    for (const candidate of candidates) {
+      const name = byLowerName.get(candidate);
+      if (name) names.push(name);
+    }
   }
+  return names;
+}
+
+function applyViewModelText(hierarchy, values) {
+  if (!values) return;
+  const strings = Object.entries(values).filter(([, value]) => typeof value === 'string');
+  for (const entry of hierarchy.entries.filter(value => value.sourceName === 'TextValueRun')) {
+    const authored = typeof entry.fields.text === 'string' ? entry.fields.text : '';
+    let replacement;
+    if (/^--0+$/u.test(authored)) replacement = strings.find(([name]) => /(?:^|_)id$/iu.test(name))?.[1];
+    else replacement = strings.find(([name]) => normalizeBindingName(name) === normalizeBindingName(authored))?.[1];
+    if (typeof replacement === 'string') entry.fields.text = replacement;
+  }
+}
+
+function normalizeBindingName(value) { return value.toLowerCase().replace(/[^a-z0-9]+/gu, ''); }
+
+function applyDisplaySelection(hierarchy) {
+  const byParent = componentChildren(hierarchy.entries);
+  for (const style of hierarchy.entries.filter(value => value.sourceName === 'LayoutComponentStyle' && value.fields.displayValue === 1)) {
+    const owner = hierarchy.entries.find(value => value.componentIndex === style.fields.parentId);
+    if (owner) disableComponentSubtree(owner, byParent);
+  }
+}
+
+export function applySoloSelection(hierarchy) {
+  const byParent = componentChildren(hierarchy.entries);
   for (const solo of hierarchy.entries.filter(value => value.sourceName === 'Solo')) {
     const active = Number.isSafeInteger(solo.fields.activeComponentId) ? solo.fields.activeComponentId : null;
     if (active === null) continue;
     for (const child of byParent.get(solo.componentIndex) ?? []) {
       if (child.componentIndex === active) continue;
-      disableSubtree(child);
+      disableComponentSubtree(child, byParent);
     }
   }
+}
 
-  function disableSubtree(entry) {
-    entry.nodeEligible = false;
-    for (const child of byParent.get(entry.componentIndex) ?? []) disableSubtree(child);
+function componentChildren(entries) {
+  const byParent = new Map();
+  for (const entry of entries) {
+    const parentId = Number.isSafeInteger(entry.fields.parentId) ? entry.fields.parentId : null;
+    if (parentId === null) continue;
+    const children = byParent.get(parentId) ?? [];
+    children.push(entry); byParent.set(parentId, children);
   }
+  return byParent;
+}
+
+function disableComponentSubtree(entry, byParent) {
+  entry.nodeEligible = false;
+  for (const child of byParent.get(entry.componentIndex) ?? []) disableComponentSubtree(child, byParent);
 }
 
 function isFiniteColor(value) {
@@ -943,19 +996,52 @@ function componentListPlan(report, objects, artboardObjectIds, selectedArtboardI
   if (!Number.isSafeInteger(itemViewModelId)) return null;
   const template = records.find(value => value.visit.sourceName === 'Artboard' && value.fields.viewModelId === itemViewModelId);
   if (!template) return null;
+  const templateRecords = selectedArtboardVisits(report, template.visit.neutralObjectId).map(visit => ({ visit, fields: namedFields(objects.get(visit.neutralObjectId), visit) }));
+  const itemHeight = commonPositiveValue(templateRecords.filter(value => value.visit.sourceName === 'LayoutComponent').map(value => value.fields.height), positive(template.fields.height, 1));
+  const modelStart = records.findIndex(value => value.visit.sourceName === 'ViewModel' && value.fields.name === namedViewModel(records, itemViewModelId)?.fields.name);
+  const modelEnd = records.findIndex((value, index) => index > modelStart && value.visit.sourceName === 'ViewModel');
+  const propertyNames = records.slice(modelStart + 1, modelEnd < 0 ? records.length : modelEnd)
+    .filter(value => value.visit.sourceName.startsWith('ViewModelProperty'))
+    .map(value => string(value.fields.name));
   const instances = [];
   let current = null;
   for (const record of records) {
     if (record.visit.sourceName === 'ViewModelInstance') {
-      current = record.fields.viewModelId === itemViewModelId ? { artboardIndex: undefined } : null;
+      current = record.fields.viewModelId === itemViewModelId ? { artboardIndex: undefined, values: Object.create(null) } : null;
       if (current) instances.push(current);
-    } else if (current && record.visit.sourceName === 'ViewModelInstanceArtboard' && Number.isSafeInteger(record.fields.propertyValue)) {
-      current.artboardIndex = record.fields.propertyValue;
+    } else if (current && record.visit.sourceName.startsWith('ViewModelInstance')) {
+      const propertyId = record.fields.viewModelPropertyId;
+      const propertyName = Number.isSafeInteger(propertyId) ? propertyNames[propertyId] : undefined;
+      const value = viewModelInstanceValue(record);
+      if (propertyName && value !== undefined) current.values[propertyName] = value;
+      if (record.visit.sourceName === 'ViewModelInstanceArtboard' && Number.isSafeInteger(value)) current.artboardIndex = value;
     }
   }
   const planned = items.map(item => instances[item.fields.viewModelInstanceId]).filter(value => value && Number.isSafeInteger(value.artboardIndex));
   if (planned.length === 0) return null;
-  return { templateArtboardId: template.visit.neutralObjectId, items: planned, artboardObjectIds };
+  return { templateArtboardId: template.visit.neutralObjectId, itemHeight, items: planned, artboardObjectIds };
+}
+
+function namedViewModel(records, viewModelId) {
+  return records.filter(value => value.visit.sourceName === 'ViewModel')[viewModelId];
+}
+
+function viewModelInstanceValue(record) {
+  if (record.fields.propertyValue !== undefined) return record.fields.propertyValue;
+  if (record.visit.sourceName.endsWith('Boolean')) return false;
+  if (record.visit.sourceName.endsWith('Number')) return 0;
+  if (record.visit.sourceName.endsWith('String')) return '';
+  return undefined;
+}
+
+function commonPositiveValue(values, fallback) {
+  const counts = new Map();
+  for (const value of values) {
+    if (!(Number.isFinite(value) && value > 0)) continue;
+    const key = Math.round(value * 1000) / 1000;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return [...counts.entries()].sort((left, right) => right[1] - left[1] || left[0] - right[0])[0]?.[0] ?? fallback;
 }
 
 async function buildComponentHierarchy(report, objects, artboardObjectId) {
@@ -1131,6 +1217,7 @@ function handle(x, y, rotation, distance) {
 }
 
 function vectorPaint(entry, owned, children) {
+  if (entry.fields.isVisible === false) return null;
   const sourceEntry = owned.find(value => ['SolidColor', 'LinearGradient', 'RadialGradient'].includes(value.sourceName));
   const source = paintSource(sourceEntry, sourceEntry ? childEntries(children, sourceEntry) : []);
   if (source.kind === 'solid' && source.color[3] <= 0) return null;

@@ -1319,10 +1319,10 @@ export const MATERIAL_LIGHTING_SHADER_ARTIFACT = {
           "sourceId": "material-lighting.blinn-phong",
           "sourceName": "shader-language/builtin-material-lighting-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 177
+          "generatedEndLine": 179
         }
       ],
-      "canonicalHash": "55baf70f7b88aeee076878a6f0dc3ddeab8b7841dc977bbc89a790e39722f3d0"
+      "canonicalHash": "48b339c093c165f0c824cea693313f2df2e57ab8cc3c6ed9e6d3821f5a4948a3"
     },
     "toon": {
       "id": "toon",
@@ -1795,5 +1795,5 @@ export const MATERIAL_LIGHTING_SHADER_ARTIFACT = {
       "canonicalHash": "9ec2dd98ec767b5d10b98a4921fd80581d712854685ec9acb56decd0b3629a0d"
     }
   },
-  "artifactHash": "802aa96192740aaf4ead88683aaeb38c960f88aff7367ef0233b0b0ea9355e05"
+  "artifactHash": "b35f4d09b857a6714be37d15b73e0c5373d2998d412f60cfb5ca2db1a18ff2b2"
 } as const satisfies PrecompiledShaderArtifactV2;

@@ -104,9 +104,14 @@ async function runFixture() {
   if (lightingModuleHashes.size !== 1) throw new Error(`Pass family contains ${lightingModuleHashes.size} lighting module hashes`);
   if (deformationModuleHashes.size !== 1) throw new Error(`Pass family contains ${deformationModuleHashes.size} deformation module hashes`);
 
-  const litPixel = await renderBlinnPixel(device, runtimes.get('blinn-phong'), false);
-  const fogPixel = await renderBlinnPixel(device, runtimes.get('blinn-phong'), true);
-  assertPixel(litPixel, [255, 0, 0, 255], 1, 'Blinn ambient lighting');
+  const litPixel = await renderBlinnPixel(device, runtimes.get('blinn-phong'));
+  const fogPixel = await renderBlinnPixel(device, runtimes.get('blinn-phong'), { fogEnabled: true });
+  const lowAmbientPixel = await renderBlinnPixel(device, runtimes.get('blinn-phong'), {
+    ambient: [0.03, 0.03, 0.03, 1],
+    lightIntensity: 0.72,
+  });
+  assertPixel(litPixel, [186, 0, 0, 255], 1, 'Blinn tone-mapped ambient lighting');
+  assertPixel(lowAmbientPixel, [44, 44, 44, 255], 1, 'Blinn low-intensity ambient display encoding');
   assertPixel(fogPixel, [0, 0, 255, 255], 1, 'post-lighting fog');
 
   const validationError = await device.popErrorScope();
@@ -128,12 +133,17 @@ async function runFixture() {
     validationErrorCount: 0,
     unclassifiedFailureCount: 0,
     litPixel,
+    lowAmbientPixel,
     fogPixel,
     cache: counts,
   };
 }
 
-async function renderBlinnPixel(device, materialized, fogEnabled) {
+async function renderBlinnPixel(
+  device,
+  materialized,
+  { fogEnabled = false, ambient = [1, 0, 0, 1], lightIntensity = 1 } = {},
+) {
   if (!materialized) throw new Error('Blinn runtime is missing');
   const { runtime, layouts } = materialized;
   const sceneData = sceneFrameData(8, 8);
@@ -145,14 +155,14 @@ async function renderBlinnPixel(device, materialized, fogEnabled) {
   objectData.set(identity(), 0);
   objectData.set(identity(), 16);
   const materialData = new Float32Array(16);
-  materialData.set([1, 0, 0, 1], 0);
+  materialData.set(ambient, 0);
   materialData.set([1, 0, 0, 1], 4);
   materialData.set([0, 0, 0, 1], 8);
   materialData[12] = 32;
   const lightsData = new ArrayBuffer(528);
   new Uint32Array(lightsData)[0] = 1;
   new Uint32Array(lightsData)[4] = 0;
-  new Float32Array(lightsData).set([1, 1, 1, 1], 8);
+  new Float32Array(lightsData).set([1, 1, 1, lightIntensity], 8);
 
   const sceneBuffer = buffer(device, sceneData, GPUBufferUsage.UNIFORM);
   const objectBuffer = buffer(device, objectData, GPUBufferUsage.STORAGE);

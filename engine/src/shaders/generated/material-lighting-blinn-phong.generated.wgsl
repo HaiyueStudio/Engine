@@ -172,5 +172,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     }
   }
 
-  return vec4<f32>(applyFog(outColor, sceneFrame.fog, sceneFrame.eyePosition.xyz, in.worldPos), material.diffuse.a);
+  let mapped = outColor / (outColor + vec3<f32>(1.0));
+  let displayColor = pow(mapped, vec3<f32>(1.0 / 2.2));
+  return vec4<f32>(applyFog(displayColor, sceneFrame.fog, sceneFrame.eyePosition.xyz, in.worldPos), material.diffuse.a);
 }

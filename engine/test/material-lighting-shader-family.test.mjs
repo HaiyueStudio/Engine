@@ -42,7 +42,9 @@ test('Blinn and Toon share the eight-light and post-lighting Fog contract', () =
   const toon = passes.get('toon');
   assert.match(blinn, /array<LightData, 8u>/);
   assert.match(toon, /array<LightData, 8u>/);
-  assert.match(blinn, /applyFog\(outColor/);
+  assert.match(blinn, /let mapped = outColor \/ \(outColor \+ vec3<f32>\(1\.0\)\)/);
+  assert.match(blinn, /let displayColor = pow\(mapped, vec3<f32>\(1\.0 \/ 2\.2\)\)/);
+  assert.match(blinn, /applyFog\(displayColor/);
   assert.match(toon, /applyFog\(color/);
   assert.match(toon, /array<DirectionalShadowData, 1u>/);
 });
