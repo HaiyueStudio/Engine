@@ -4763,6 +4763,26 @@
               "kind": "type"
             },
             {
+              "name": "GuiModal",
+              "kind": "value"
+            },
+            {
+              "name": "GuiModalCloseHandler",
+              "kind": "type"
+            },
+            {
+              "name": "GuiModalCloseReason",
+              "kind": "type"
+            },
+            {
+              "name": "GuiModalHandler",
+              "kind": "type"
+            },
+            {
+              "name": "GuiModalOptions",
+              "kind": "type"
+            },
+            {
               "name": "GuiPointerEvent",
               "kind": "type"
             },
@@ -7866,6 +7886,26 @@
             },
             {
               "name": "GuiLength",
+              "kind": "type"
+            },
+            {
+              "name": "GuiModal",
+              "kind": "value"
+            },
+            {
+              "name": "GuiModalCloseHandler",
+              "kind": "type"
+            },
+            {
+              "name": "GuiModalCloseReason",
+              "kind": "type"
+            },
+            {
+              "name": "GuiModalHandler",
+              "kind": "type"
+            },
+            {
+              "name": "GuiModalOptions",
               "kind": "type"
             },
             {

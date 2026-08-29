@@ -13,6 +13,7 @@ import {
   GuiInput,
   GuiLabel,
   type GuiLabelTextAlign,
+  GuiModal,
   GuiProgress,
   GuiRadio,
   GuiRoot,
@@ -32,6 +33,7 @@ export type GuiSerializedElementType =
   | 'element'
   | 'button'
   | 'label'
+  | 'modal'
   | 'input'
   | 'checkbox'
   | 'switch'
@@ -96,7 +98,7 @@ export function deserializeGuiRoot(data: unknown, options: GuiDeserializeOptions
     theme: serialized.theme,
   });
   root.root.children.length = 0;
-  for (const child of rootElement.children) root.add(child);
+  for (const child of [...rootElement.children]) root.add(child);
   return root;
 }
 
@@ -115,7 +117,9 @@ export function serializeGuiElement(element: GuiElement): GuiSerializedElement {
   };
   const props = serializeElementProps(element);
   if (Object.keys(props).length > 0) serialized.props = props;
-  if (element.children.length > 0) serialized.children = element.children.map(serializeGuiElement);
+  if (!(element instanceof GuiModal) && element.children.length > 0) {
+    serialized.children = element.children.map(serializeGuiElement);
+  }
   return serialized;
 }
 
@@ -214,6 +218,19 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
         autoWidth: booleanProp(props.autoWidth, false),
       });
     }
+    case 'modal':
+      return new GuiModal({
+        ...base,
+        title: stringProp(props.title, ''),
+        message: stringProp(props.message, ''),
+        confirmText: stringProp(props.confirmText, 'Confirm'),
+        cancelText: stringProp(props.cancelText, 'Cancel'),
+        showCloseButton: booleanProp(props.showCloseButton, true),
+        showConfirmButton: booleanProp(props.showConfirmButton, true),
+        showCancelButton: booleanProp(props.showCancelButton, true),
+        closeOnBackdrop: booleanProp(props.closeOnBackdrop, false),
+        backdropColor: stringProp(props.backdropColor, 'rgba(15,23,42,0.48)'),
+      });
     case 'input':
       return new GuiInput({
         ...base,
@@ -294,6 +311,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
 }
 
 function getSerializedElementType(element: GuiElement): GuiSerializedElementType {
+  if (element instanceof GuiModal) return 'modal';
   if (element instanceof GuiButton) return 'button';
   if (element instanceof GuiLabel) return 'label';
   if (element instanceof GuiInput) return 'input';
@@ -310,6 +328,19 @@ function getSerializedElementType(element: GuiElement): GuiSerializedElementType
 }
 
 function serializeElementProps(element: GuiElement): Record<string, unknown> {
+  if (element instanceof GuiModal) {
+    return {
+      title: element.title,
+      message: element.message,
+      confirmText: element.confirmText,
+      cancelText: element.cancelText,
+      showCloseButton: element.showCloseButton,
+      showConfirmButton: element.showConfirmButton,
+      showCancelButton: element.showCancelButton,
+      closeOnBackdrop: element.closeOnBackdrop,
+      backdropColor: element.backdropColor,
+    };
+  }
   if (element instanceof GuiButton) return { text: element.text, variant: element.variant };
   if (element instanceof GuiLabel) {
     return {
@@ -461,12 +492,12 @@ function treeNodesProp(value: unknown): GuiTreeNode<GuiSerializedValue>[] {
 
 const GUI_ELEMENT_TYPES = new Set<GuiSerializedElementType>([
   'element', 'button', 'label', 'input', 'checkbox', 'switch', 'radio', 'slider',
-  'progress', 'select', 'tree', 'tooltip', 'image',
+  'progress', 'select', 'tree', 'tooltip', 'image', 'modal',
 ]);
 
-const STRING_PROPS = new Set(['text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId']);
+const STRING_PROPS = new Set(['text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId', 'title', 'message', 'confirmText', 'cancelText', 'backdropColor']);
 const NUMBER_PROPS = new Set(['fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
-const BOOLEAN_PROPS = new Set(['autoWidth', 'readOnly', 'checked', 'showText']);
+const BOOLEAN_PROPS = new Set(['autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
 
 function validateProps(type: GuiSerializedElementType, value: unknown, path: string): void {
   const props = recordAt(value, path);

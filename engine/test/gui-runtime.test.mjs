@@ -8,12 +8,15 @@ import {
   GuiImage,
   GuiImageBatch,
   GuiLabel,
+  GuiModal,
   GuiRoot,
   GuiSelect,
   GuiTextBatch,
   measureGuiTextWidth,
   parseGuiColor,
   serializeGuiRoot,
+  hitTestGui,
+  World,
 } from '../dist/experimental.js';
 
 test('parseGuiColor supports hex, rgb, hsl, and named colors', () => {
@@ -82,6 +85,17 @@ test('GUI serialization round-trips root theme, layout, controls, and image sour
   panel.add(new GuiLabel({ id: 'status', text: 'Ready', fontSize: 18, textAlign: 'right', autoWidth: true, x: 8, y: 48 }));
   panel.add(new GuiSelect({ id: 'quality', value: 'high', options: [{ label: 'High', value: 'high' }] }));
   panel.add(new GuiImage({ id: 'icon', sourceKey: 'icons/play', uv: [0, 0, 0.5, 0.5], tint: 'cyan' }));
+  root.add(new GuiModal({
+    id: 'confirm-modal',
+    width: 420,
+    height: 230,
+    title: 'Confirm move',
+    message: 'This action cannot be undone.',
+    confirmText: 'Continue',
+    cancelText: 'Back',
+    showCloseButton: false,
+    closeOnBackdrop: true,
+  }));
 
   const serialized = serializeGuiRoot(root);
   const restored = deserializeGuiRoot(serialized, {
@@ -110,6 +124,52 @@ test('GUI serialization round-trips root theme, layout, controls, and image sour
   assert.equal(restoredIcon.sourceKey, 'icons/play');
   assert.deepEqual(restoredIcon.uv, [0, 0, 0.5, 0.5]);
   assert.deepEqual(restoredIcon.source, { key: 'icons/play' });
+  const restoredModal = restored.findById('confirm-modal');
+  assert.ok(restoredModal instanceof GuiModal);
+  assert.equal(restoredModal.title, 'Confirm move');
+  assert.equal(restoredModal.message, 'This action cannot be undone.');
+  assert.equal(restoredModal.confirmText, 'Continue');
+  assert.equal(restoredModal.cancelText, 'Back');
+  assert.equal(restoredModal.showCloseButton, false);
+  assert.equal(restoredModal.closeOnBackdrop, true);
+  assert.equal(restoredModal.children.length, 5);
+});
+
+test('GuiModal lays out configurable actions, invokes callbacks, and wins hit testing across roots', () => {
+  let confirmed = 0;
+  let closedReason = null;
+  const modalRoot = new GuiRoot();
+  const modal = modalRoot.add(new GuiModal({
+    width: 400,
+    height: 220,
+    title: 'Delete save?',
+    message: 'The current save will be removed.',
+    showCancelButton: false,
+    visible: true,
+    onConfirm: () => { confirmed++; },
+    onClose: reason => { closedReason = reason; },
+  }));
+  const laterRoot = new GuiRoot();
+  laterRoot.add(new GuiButton({ x: 0, y: 0, width: '100%', height: '100%', text: 'Behind modal' }));
+  modalRoot.layout(800, 600);
+  laterRoot.layout(800, 600);
+
+  assert.deepEqual(modal.dialogRect, { x: 200, y: 190, width: 400, height: 220 });
+  assert.equal(modal.cancelButton.visible, false);
+  assert.equal(
+    hitTestGui(
+      new World('GuiModalHitTest'),
+      new Set([modalRoot, laterRoot]),
+      modal.confirmButton.rect.x + 4,
+      modal.confirmButton.rect.y + 4,
+    ),
+    modal.confirmButton,
+  );
+
+  modal.close('confirm');
+  assert.equal(modal.visible, false);
+  assert.equal(confirmed, 1);
+  assert.equal(closedReason, 'confirm');
 });
 
 function createTestFont() {

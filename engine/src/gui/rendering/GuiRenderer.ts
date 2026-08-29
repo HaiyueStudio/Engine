@@ -7,6 +7,7 @@ import { GuiElement } from '../components/GuiElement';
 import { GuiInput } from '../components/GuiInput';
 import { GuiImage } from '../components/GuiImage';
 import { GuiLabel } from '../components/GuiLabel';
+import { GuiModal } from '../components/GuiModal';
 import { GuiProgress } from '../components/GuiProgress';
 import { GuiRadio } from '../components/GuiRadio';
 import { GuiRoot } from '../components/GuiRoot';
@@ -36,6 +37,9 @@ interface GuiRootRenderCache {
   popupTextBatch: GuiTextBatch;
   imageBatch: GuiImageBatch;
   popupImageBatch: GuiImageBatch;
+  modalBatch: GuiBatch;
+  modalTextBatch: GuiTextBatch;
+  modalImageBatch: GuiImageBatch;
 }
 
 export class GuiRenderer {
@@ -61,10 +65,14 @@ export class GuiRenderer {
   private currentPopupBatch = this.popupBatch;
   private currentPopupTextBatch = this.popupTextBatch;
   private currentImageBatch = this.imageBatch;
+  private currentModalBatch = this.batch;
+  private currentModalTextBatch = this.textBatch;
+  private currentModalImageBatch = this.imageBatch;
 
   constructor() {
     this.registerElementRenderer(GuiButton, (element, theme) => this.addButton(element, theme));
     this.registerElementRenderer(GuiLabel, (element, theme) => this.addLabel(element, theme));
+    this.registerElementRenderer(GuiModal, (element, theme) => this.addModal(element, theme));
     this.registerElementRenderer(GuiInput, (element, theme) => this.addInput(element, theme));
     this.registerElementRenderer(GuiSelect, (element, theme) => this.addSelect(element, theme));
     this.registerElementRenderer(GuiTooltip, (element, theme) => this.addTooltip(element, theme));
@@ -166,6 +174,11 @@ export class GuiRenderer {
       this.imageRenderer.render(passEncoder, cache.popupImageBatch);
       if (this.defaultFont) this.textRenderer.render(passEncoder, cache.popupTextBatch, this.defaultFont);
     }
+    for (const cache of this.activeRootCaches) {
+      this.shapeRenderer.render(passEncoder, cache.modalBatch);
+      this.imageRenderer.render(passEncoder, cache.modalImageBatch);
+      if (this.defaultFont) this.textRenderer.render(passEncoder, cache.modalTextBatch, this.defaultFont);
+    }
   }
 
   private prepareRootCaches(roots: GuiRoot[]): void {
@@ -193,6 +206,9 @@ export class GuiRenderer {
       popupTextBatch: new GuiTextBatch(),
       imageBatch: new GuiImageBatch(),
       popupImageBatch: new GuiImageBatch(),
+      modalBatch: new GuiBatch(),
+      modalTextBatch: new GuiTextBatch(),
+      modalImageBatch: new GuiImageBatch(),
     };
     this.rootCaches.set(root, cache);
     return cache;
@@ -205,18 +221,27 @@ export class GuiRenderer {
     cache.popupTextBatch.clear();
     cache.imageBatch.clear();
     cache.popupImageBatch.clear();
+    cache.modalBatch.clear();
+    cache.modalTextBatch.clear();
+    cache.modalImageBatch.clear();
     this.currentBatch = cache.batch;
     this.currentTextBatch = cache.textBatch;
     this.currentPopupBatch = cache.popupBatch;
     this.currentPopupTextBatch = cache.popupTextBatch;
     this.currentImageBatch = cache.imageBatch;
+    this.currentModalBatch = cache.modalBatch;
+    this.currentModalTextBatch = cache.modalTextBatch;
+    this.currentModalImageBatch = cache.modalImageBatch;
     this.collectElement(root.root, root.theme);
     cache.batch.rebuild();
     cache.popupBatch.rebuild();
     cache.imageBatch.rebuild();
     cache.popupImageBatch.rebuild();
+    cache.modalBatch.rebuild();
+    cache.modalImageBatch.rebuild();
     if (this.defaultFont) cache.textBatch.rebuild(this.defaultFont);
     if (this.defaultFont) cache.popupTextBatch.rebuild(this.defaultFont);
+    if (this.defaultFont) cache.modalTextBatch.rebuild(this.defaultFont);
     this.resetCurrentBatches();
   }
 
@@ -227,12 +252,18 @@ export class GuiRenderer {
     this.textRenderer.releaseBatch(cache.popupTextBatch);
     this.imageRenderer.releaseBatch(cache.imageBatch);
     this.imageRenderer.releaseBatch(cache.popupImageBatch);
+    this.shapeRenderer.releaseBatch(cache.modalBatch);
+    this.textRenderer.releaseBatch(cache.modalTextBatch);
+    this.imageRenderer.releaseBatch(cache.modalImageBatch);
     cache.batch.clear({ releaseVertexData: true });
     cache.popupBatch.clear({ releaseVertexData: true });
     cache.textBatch.clear();
     cache.popupTextBatch.clear();
     cache.imageBatch.clear();
     cache.popupImageBatch.clear();
+    cache.modalBatch.clear({ releaseVertexData: true });
+    cache.modalTextBatch.clear();
+    cache.modalImageBatch.clear();
   }
 
   private resetCurrentBatches(): void {
@@ -241,10 +272,27 @@ export class GuiRenderer {
     this.currentPopupBatch = this.popupBatch;
     this.currentPopupTextBatch = this.popupTextBatch;
     this.currentImageBatch = this.imageBatch;
+    this.currentModalBatch = this.batch;
+    this.currentModalTextBatch = this.textBatch;
+    this.currentModalImageBatch = this.imageBatch;
   }
 
   private collectElement(element: GuiElement, theme: GuiTheme): void {
     if (!element.visible) return;
+    if (element instanceof GuiModal) {
+      const previousBatch = this.currentBatch;
+      const previousTextBatch = this.currentTextBatch;
+      const previousImageBatch = this.currentImageBatch;
+      this.currentBatch = this.currentModalBatch;
+      this.currentTextBatch = this.currentModalTextBatch;
+      this.currentImageBatch = this.currentModalImageBatch;
+      this.addElementShapes(element, theme);
+      for (const child of element.children) this.collectElement(child, theme);
+      this.currentBatch = previousBatch;
+      this.currentTextBatch = previousTextBatch;
+      this.currentImageBatch = previousImageBatch;
+      return;
+    }
     this.addElementShapes(element, theme);
     for (const child of element.children) this.collectElement(child, theme);
   }
@@ -358,6 +406,31 @@ export class GuiRenderer {
       wrap: false,
       clip: label.rect,
     });
+  }
+
+  private addModal(modal: GuiModal, theme: GuiTheme): void {
+    const opacity = modal.style.opacity ?? 1;
+    this.addRect(
+      modal.rect.x,
+      modal.rect.y,
+      modal.rect.width,
+      modal.rect.height,
+      0,
+      withAlpha(colorToRgba(modal.backdropColor, 'rgba(15,23,42,0.48)'), opacity),
+    );
+    const rect = modal.dialogRect;
+    const radius = modal.style.radius ?? theme.radius;
+    const border = colorToRgba(modal.style.borderColor, theme.colors.border);
+    const background = colorToRgba(modal.style.backgroundColor, theme.colors.surface);
+    this.addRect(rect.x, rect.y, rect.width, rect.height, radius, withAlpha(border, opacity));
+    this.addRect(
+      rect.x + 1,
+      rect.y + 1,
+      Math.max(0, rect.width - 2),
+      Math.max(0, rect.height - 2),
+      Math.max(0, radius - 1),
+      withAlpha(background, opacity),
+    );
   }
 
   private addInput(input: GuiInput, theme: GuiTheme): void {
