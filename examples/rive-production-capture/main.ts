@@ -10,6 +10,13 @@ const CHANNELS = [
 ] as const;
 const SAMPLE_WIDTH = 64;
 const SAMPLE_HEIGHT = 64;
+const HYA_FORMAT_EXTENSIONS = [
+  'org.haiyue.vector-shape@1',
+  'org.haiyue.vector-stroke@1',
+  'org.haiyue.vector-path-morph@1',
+  'org.haiyue.animation-state-machine@2',
+  'org.haiyue.data-binding@1',
+] as const;
 type Channel = typeof CHANNELS[number];
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
@@ -197,7 +204,7 @@ async function createOfficialOwner(payload: Payload, canvas: HTMLCanvasElement, 
 
 async function createHyaOwner(payload: Payload, canvas: HTMLCanvasElement, bytes: ArrayBuffer): Promise<RuntimeOwner> {
   const extensionRegistry = new AnimationExtensionRegistry();
-  for (const id of ['org.haiyue.vector-shape@1', 'org.haiyue.vector-stroke@1', 'org.haiyue.vector-path-morph@1']) extensionRegistry.register({ id });
+  for (const id of HYA_FORMAT_EXTENSIONS) extensionRegistry.register({ id });
   const animation = parseAnimation(bytes.slice(0), { extensions: extensionRegistry });
   const runtimeExtensions = new Animation2DExtensionRegistry();
   for (const id of ['org.haiyue.vector-shape@1', 'org.haiyue.vector-stroke@1', 'org.haiyue.vector-path-morph@1']) runtimeExtensions.register({ id, create() {} });
