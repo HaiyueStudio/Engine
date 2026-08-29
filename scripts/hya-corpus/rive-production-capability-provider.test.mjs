@@ -12,7 +12,7 @@ test('production capability provider preserves all neutral fields and maps core 
   ];
   const object = { id: 'object:00000000', family: 'structure', properties };
   const visit = {
-    neutralObjectId: object.id,
+    neutralObjectId: object.id, sourceName: 'Artboard', sourceTypeKey: 1,
     properties: [
       { sourceName: 'width', neutralFieldIds: [properties[0].id] },
       { sourceName: 'height', neutralFieldIds: [properties[1].id] },

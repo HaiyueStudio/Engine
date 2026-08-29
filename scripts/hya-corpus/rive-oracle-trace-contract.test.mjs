@@ -193,6 +193,16 @@ test('formal traces reject unavailable energy and proxy oracles', () => {
   assert.ok(result.violations.some(value => value.includes('formal-admission blocker diagnostic')));
 });
 
+test('formal traces require positive GPU timestamp-query evidence', () => {
+  const { trace, artifactBytesByPath } = validTrace();
+  trace.hya.metrics.gpuFrameMs = 0;
+  trace.hya.measurement.gpuTimestampSampleCount = 0;
+  const result = validateRiveOracleTrace(trace, { formal: true, expectedRevision: REVISION, expectedManifestSha256: 'a'.repeat(64), workloadPlan, artifactBytesByPath });
+  assert.equal(result.status, 'failed');
+  assert.ok(result.violations.some(value => value.includes('positive timestamp-query measurement')));
+  assert.ok(result.violations.some(value => value.includes('GPU timestamp sample count')));
+});
+
 test('trace rejects an inline action stream that differs from the pinned scenario artifact', () => {
   const { trace, artifactBytesByPath } = validTrace();
   trace.scenario.actions[0].payload = { tampered: true };

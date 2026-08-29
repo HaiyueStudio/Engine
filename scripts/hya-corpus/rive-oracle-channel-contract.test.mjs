@@ -68,6 +68,29 @@ test('pixel evidence binds raw RGBA bytes and recomputes frozen thresholds', () 
   assert.ok(result.recomputed.maxChannelDelta > 2 / 255);
 });
 
+test('pixel evidence treats in-tolerance rounding consistently and rejects transparent proxy frames', () => {
+  const artifactBytesByPath = new Map();
+  const officialRgba = Buffer.from([40, 40, 40, 255, 116, 116, 116, 255]);
+  const hyaRgba = Buffer.from(officialRgba); hyaRgba[0] += 2;
+  const generated = assemble(
+    'pixels',
+    capture('pixels', '@rive-app/webgl2@2.40.0', () => pixelValue('tolerant-official', officialRgba, artifactBytesByPath)),
+    capture('pixels', 'haiyue-exact-hya', () => pixelValue('tolerant-hya', hyaRgba, artifactBytesByPath)),
+    artifactBytesByPath,
+  );
+  assert.equal(generated.comparison.status, 'passed');
+  assert.equal(generated.comparison.maxChannelDelta, 2 / 255);
+  assert.equal(generated.comparison.changedPixelRatio, 0);
+
+  const transparentArtifacts = new Map(); const transparent = Buffer.alloc(8);
+  assert.throws(() => assemble(
+    'pixels',
+    capture('pixels', '@rive-app/webgl2@2.40.0', () => pixelValue('blank-official', transparent, transparentArtifacts)),
+    capture('pixels', 'haiyue-exact-hya', () => pixelValue('blank-hya', transparent, transparentArtifacts)),
+    transparentArtifacts,
+  ), /framebuffer is fully transparent/u);
+});
+
 function capture(channel, runtime, value) {
   const samples = [];
   for (let replayIndex = 0; replayIndex < scenario.replayCount; replayIndex++) {

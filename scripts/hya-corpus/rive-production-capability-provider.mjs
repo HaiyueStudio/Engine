@@ -19,16 +19,27 @@ export async function evaluate(request, context) {
     height: positive(artboardFields.height, 600),
     coordinateSystem: 'screen-y-down',
   };
-  const hierarchy = await buildComponentHierarchy(report, objects);
-  const nodeSet = new Set(ir.nodes);
-  const drawableOrder = new Map((ir.drawables ?? []).map((id, index) => [id, index]));
+  const hierarchy = await buildComponentHierarchy(report, objects, artboard?.object?.id);
+  applySimpleLayoutTransforms(hierarchy);
+  const assets = annotateEmbeddedAssets(
+    await extractEmbeddedAssets(request.rivBytes, ir.resolvedResources ?? []),
+    report,
+    objects,
+  );
+  const resourceByAssetIndex = createResourceByAssetIndex(report, assets);
+  const selectedNodeIds = new Set(hierarchy.entries.map(value => value.objectId));
+  const selectedNodeOrder = ir.nodes.filter(id => selectedNodeIds.has(id));
+  const selectedDrawables = (ir.drawables ?? []).filter(id => selectedNodeIds.has(id));
+  const drawableOrder = new Map(selectedDrawables.map((id, index) => [id, index]));
   const vectorComponents = compileVectorComponents(hierarchy, objects, visits);
+  const textComponents = compileTextComponents(hierarchy, resourceByAssetIndex);
   const timeline = await compileCoreTimeline(hierarchy, report, objects);
-  const nodes = ir.nodes.map(id => {
+  const hierarchyByObjectId = new Map(hierarchy.entries.map(value => [value.objectId, value]));
+  const nodes = selectedNodeOrder.map(id => {
     const object = objects.get(id);
     const visit = visits.get(id);
     if (!object || !visit) throw new Error(`Neutral node ${id} is absent from the imported object ledger.`);
-    const fields = namedFields(object, visit);
+    const fields = hierarchyByObjectId.get(id)?.fields ?? namedFields(object, visit);
     const parent = hierarchy.parentNodeByObjectId.get(id);
     const transform = compact({
       position: pair(fields.x, fields.y),
@@ -41,7 +52,7 @@ export async function evaluate(request, context) {
       name: string(fields.name),
       parent,
       transform: Object.keys(transform).length > 0 ? transform : undefined,
-      components: vectorComponents.get(id),
+      components: [...(vectorComponents.get(id) ?? []), ...(textComponents.get(id) ?? [])],
       extensions: {
         neutralFamily: object.family,
         neutralFields: Object.fromEntries(object.properties.map(property => [property.id, property.value])),
@@ -51,13 +62,13 @@ export async function evaluate(request, context) {
     });
   });
   const hasVectorVisuals = vectorComponents.size > 0;
+  const hasTextVisuals = textComponents.size > 0;
   const coverage = ir.objects.map(object => ({
     objectId: object.id,
     propertyIds: object.properties.map(property => property.id),
     capability: 'hya-core',
     representation: 'native-semantic',
   }));
-  const assets = await extractEmbeddedAssets(request.rivBytes, ir.resolvedResources ?? []);
   return {
     format: 'haiyue-rive-neutral-capability-evaluation',
     version: 1,
@@ -67,7 +78,10 @@ export async function evaluate(request, context) {
       format: 'haiyue-animation', version: '1.0',
       name: string(artboardFields.name) ?? 'Rive 7.3 imported composition',
       canvas, duration: timeline.duration, endBehavior: 'loop',
-      resources: assets.map(asset => ({ id: `resource-${asset.id}`, type: resourceType(asset.mimeType), uri: `asset:${asset.id}`, mimeType: asset.mimeType })),
+      resources: assets.map(asset => compact({
+        id: `resource-${asset.id}`, type: resourceType(asset.detectedMimeType ?? asset.mimeType), uri: `asset:${asset.id}`, mimeType: asset.detectedMimeType ?? asset.mimeType,
+        width: asset.width, height: asset.height,
+      })),
       nodes,
       ...(timeline.tracks.length > 0 ? { tracks: timeline.tracks } : {}),
       ...((timeline.clips.length > 0 || timeline.stateMachines.length > 0) ? {
@@ -81,13 +95,16 @@ export async function evaluate(request, context) {
         extensionsRequired: ['org.haiyue.vector-shape@1'],
       } : {}),
     },
-    artifacts: [], coverage, bakedTracks: [], assets,
+    artifacts: [], coverage, bakedTracks: [], assets: assets.map(publicAsset),
     featureLedger: [{
       feature: 'neutral.metadata-preservation', capability: 'hya-core',
       representation: 'native-semantic', count: ir.objects.length,
     }, ...(hasVectorVisuals ? [{
       feature: 'vector.executable-core', capability: 'hya-core',
       representation: 'native-semantic', count: [...vectorComponents.values()].reduce((sum, value) => sum + value.length, 0),
+    }] : []), ...(hasTextVisuals ? [{
+      feature: 'text-layout.executable-core', capability: 'hya-core',
+      representation: 'native-semantic', count: [...textComponents.values()].reduce((sum, value) => sum + value.length, 0),
     }] : []), ...(timeline.tracks.length > 0 ? [{
       feature: 'timeline.executable-core', capability: 'hya-core',
       representation: 'native-semantic', count: timeline.tracks.length,
@@ -147,12 +164,119 @@ function namedFields(object, visit) {
   return output;
 }
 
+function annotateEmbeddedAssets(assets, report, objects) {
+  const visits = new Map(report.objects.map(value => [value.neutralObjectId, value]));
+  return assets.map(asset => {
+    const visit = visits.get(asset.neutralResourceObjectId);
+    const fields = namedFields(objects.get(asset.neutralResourceObjectId), visit);
+    const detectedMimeType = sniffMimeType(asset.bytes, visit?.sourceName, asset.mimeType);
+    return {
+      ...asset, detectedMimeType,
+      ...((visit?.sourceName === 'ImageAsset' && positive(fields.width, 0) > 0 && positive(fields.height, 0) > 0)
+        ? { width: fields.width, height: fields.height }
+        : {}),
+      sourceName: visit?.sourceName,
+      sourceAssetName: string(fields.name),
+    };
+  });
+}
+
+function publicAsset(asset) {
+  const { width: _width, height: _height, detectedMimeType: _detectedMimeType, sourceName: _sourceName, sourceAssetName: _sourceAssetName, ...value } = asset;
+  return value;
+}
+
+function createResourceByAssetIndex(report, assets) {
+  const byObjectId = new Map(assets.map(asset => [asset.neutralResourceObjectId, asset]));
+  const output = new Map(); let assetIndex = 0;
+  for (const visit of report.objects) {
+    if (!['FontAsset', 'ImageAsset', 'AudioAsset'].includes(visit.sourceName)) continue;
+    const asset = byObjectId.get(visit.neutralObjectId);
+    if (asset) output.set(assetIndex, { ...asset, resourceId: `resource-${asset.id}` });
+    assetIndex++;
+  }
+  return output;
+}
+
+function sniffMimeType(bytes, sourceName, fallback) {
+  const value = bytes instanceof Uint8Array ? bytes : new Uint8Array();
+  const ascii = (start, length) => Buffer.from(value.subarray(start, start + length)).toString('ascii');
+  if (value.length >= 8 && value[0] === 0x89 && ascii(1, 3) === 'PNG') return 'image/png';
+  if (value.length >= 3 && value[0] === 0xff && value[1] === 0xd8 && value[2] === 0xff) return 'image/jpeg';
+  if (value.length >= 12 && ascii(0, 4) === 'RIFF' && ascii(8, 4) === 'WEBP') return 'image/webp';
+  if (value.length >= 4 && ascii(0, 4) === 'OTTO') return 'font/otf';
+  if (value.length >= 4 && value[0] === 0 && value[1] === 1 && value[2] === 0 && value[3] === 0) return 'font/ttf';
+  if (value.length >= 4 && ['wOFF', 'wOF2'].includes(ascii(0, 4))) return ascii(0, 4) === 'wOF2' ? 'font/woff2' : 'font/woff';
+  if (value.length >= 4 && ascii(0, 4) === 'OggS') return 'audio/ogg';
+  if (value.length >= 3 && ascii(0, 3) === 'ID3') return 'audio/mpeg';
+  if (value.length >= 12 && ascii(0, 4) === 'RIFF' && ascii(8, 4) === 'WAVE') return 'audio/wav';
+  if (sourceName === 'FontAsset') return 'font/ttf';
+  if (sourceName === 'AudioAsset') return 'audio/mpeg';
+  return fallback;
+}
+
+function applySimpleLayoutTransforms(hierarchy) {
+  const entries = hierarchy.entries;
+  for (const entry of entries.filter(value => value.sourceName === 'LayoutComponent')) {
+    const style = Number.isSafeInteger(entry.fields.styleId) ? entries[entry.fields.styleId] : null;
+    if (style?.sourceName === 'LayoutComponentStyle') {
+      if (Number.isFinite(style.fields.positionLeft)) entry.fields.x = style.fields.positionLeft;
+      if (Number.isFinite(style.fields.positionTop)) entry.fields.y = style.fields.positionTop;
+    }
+  }
+  for (const parent of entries.filter(value => value.sourceName === 'LayoutComponent' || value.sourceName === 'Artboard')) {
+    const style = Number.isSafeInteger(parent.fields.styleId) ? entries[parent.fields.styleId] : null;
+    const children = entries.filter(value => value.sourceName === 'LayoutComponent' && value.fields.parentId === parent.componentIndex);
+    let cursor = 0; const row = style?.fields.flexDirectionValue === 1;
+    const gap = row ? finite(style?.fields.gapHorizontal) ?? 0 : finite(style?.fields.gapVertical) ?? 0;
+    for (const child of children) {
+      if (!Number.isFinite(child.fields.x)) child.fields.x = row ? cursor : 0;
+      if (!Number.isFinite(child.fields.y)) child.fields.y = row ? 0 : cursor;
+      cursor += (row ? positive(child.fields.width, 0) : positive(child.fields.height, 0)) + gap;
+    }
+  }
+}
+
+function compileTextComponents(hierarchy, resourceByAssetIndex) {
+  const output = new Map(); const entries = hierarchy.entries;
+  const children = new Map();
+  for (const entry of entries) {
+    const values = children.get(entry.fields.parentId) ?? []; values.push(entry); children.set(entry.fields.parentId, values);
+  }
+  for (const text of entries.filter(value => value.sourceName === 'Text')) {
+    const owned = children.get(text.componentIndex) ?? [];
+    const run = owned.find(value => value.sourceName === 'TextValueRun');
+    const style = owned.find(value => value.sourceName === 'TextStylePaint');
+    const parent = Number.isSafeInteger(text.fields.parentId) ? entries[text.fields.parentId] : null;
+    const width = positive(text.fields.width, positive(parent?.fields.width, 1));
+    const height = positive(text.fields.height, positive(parent?.fields.height, Math.max(1, positive(style?.fields.fontSize, 16) * 1.2)));
+    const font = Number.isSafeInteger(style?.fields.fontAssetId) ? resourceByAssetIndex.get(style.fields.fontAssetId) : null;
+    const fill = (children.get(style?.componentIndex) ?? []).find(value => value.sourceName === 'Fill');
+    const source = fill ? (children.get(fill.componentIndex) ?? []).find(value => value.sourceName === 'SolidColor') : null;
+    const axis = (children.get(style?.componentIndex) ?? []).find(value => value.sourceName === 'TextStyleAxis');
+    const component = compact({
+      type: 'text2d', text: typeof run?.fields.text === 'string' ? run.fields.text : '',
+      size: [width, height], position: [width / 2, height / 2],
+      fontFamily: font?.sourceAssetName, fontSize: positive(style?.fields.fontSize, 16),
+      fontWeight: Number.isFinite(axis?.fields.axisValue) ? axis.fields.axisValue : 400,
+      fontResource: font?.resourceId,
+      lineHeight: positive(style?.fields.lineHeight, positive(style?.fields.fontSize, 16) * 1.2),
+      tracking: finite(style?.fields.letterSpacing) ?? 0,
+      textAlign: ['left', 'center', 'right'][text.fields.alignValue ?? 0] ?? 'left',
+      verticalAlign: 'top', color: color(source?.fields.colorValue, [0, 0, 0, 1]),
+      resolutionScale: 2,
+    });
+    output.set(text.objectId, [component]);
+  }
+  return output;
+}
+
 async function compileCoreTimeline(hierarchy, report, objects) {
   const modulePath = resolve(root, 'animation-spec/dist-test/rive/import/generated/frozen-registry.js');
   const { FROZEN_PROPERTIES } = await import(pathToFileURL(modulePath).href);
   const propertyNames = new Map(FROZEN_PROPERTIES.map(value => [value.key, value.name]));
   const componentByIndex = new Map(hierarchy.entries.map(value => [value.componentIndex, value]));
-  const records = report.objects.map(visit => ({
+  const records = selectedArtboardVisits(report, hierarchy.artboardObjectId).map(visit => ({
     visit,
     object: objects.get(visit.neutralObjectId),
     fields: namedFields(objects.get(visit.neutralObjectId), visit),
@@ -355,18 +479,17 @@ function curveAt(curve, time, fallback) {
   return keys.at(-1).value;
 }
 
-async function buildComponentHierarchy(report, objects) {
+async function buildComponentHierarchy(report, objects, artboardObjectId) {
   const modulePath = resolve(root, 'animation-spec/dist-test/rive/import/generated/frozen-registry.js');
   const { FROZEN_OBJECTS } = await import(pathToFileURL(modulePath).href);
   const registry = new Map(FROZEN_OBJECTS.map(value => [value.typeKey, value]));
   const componentIndexByObjectId = new Map();
   const parentNodeByObjectId = new Map();
   const entries = [];
-  let local = [];
-  for (const visit of report.objects) {
+  const local = [];
+  for (const visit of selectedArtboardVisits(report, artboardObjectId)) {
     const source = registry.get(visit.sourceTypeKey);
     if (!source?.lineage.includes('Component') || isRootScopedComponent(source)) continue;
-    if (visit.sourceName === 'Artboard') local = [];
     if (local.length === 0 && visit.sourceName !== 'Artboard') continue;
     const object = objects.get(visit.neutralObjectId);
     const fields = namedFields(object, visit);
@@ -381,7 +504,14 @@ async function buildComponentHierarchy(report, objects) {
       if (parent && parent.sourceName !== 'Artboard') parentNodeByObjectId.set(entry.objectId, parent.objectId);
     }
   }
-  return { entries, componentIndexByObjectId, parentNodeByObjectId };
+  return { artboardObjectId, entries, componentIndexByObjectId, parentNodeByObjectId };
+}
+
+function selectedArtboardVisits(report, artboardObjectId) {
+  const start = report.objects.findIndex(value => value.neutralObjectId === artboardObjectId && value.sourceName === 'Artboard');
+  if (start < 0) return [];
+  const next = report.objects.findIndex((value, index) => index > start && value.sourceName === 'Artboard');
+  return report.objects.slice(start, next < 0 ? report.objects.length : next);
 }
 
 function isRootScopedComponent(source) {

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
@@ -13,8 +13,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OFFICIAL_JS_SHA256 = 'd25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714';
 const OFFICIAL_WASM_SHA256 = '87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32';
 const CAPTURE_INDEX_SHA256 = '11dc25f5cf6b85d9f61f2ef46ec84924c94c81b677cae09bc303bc02345585e5';
-const CAPTURE_BUNDLE_SHA256 = '7cc57a6c9e905ff729650163abad830c366e242d8ec9700e57fd83e16c0b7506';
-const SHARED_ENGINE_SHA256 = '9f33901d1a00b44418460b6ae5ce6386ddf49801d190f2d9efa854cb409885c3';
+const CAPTURE_BUNDLE_SHA256 = 'e8fa1415bdb53c2ac308af8e34eb317f31aecd3716a75389615a22361cdd2b2a';
+const SHARED_ENGINE_SHA256 = 'ec089fea7d86884f172b3bee7ae7f0bc14a93a431a5325222ea6fbc671075276';
 const execute = promisify(execFile);
 
 export async function captureWithNativeBrowser(mode, request) {
@@ -25,7 +25,10 @@ export async function captureWithNativeBrowser(mode, request) {
   const temporary = await mkdtemp(resolve(tmpdir(), `haiyue-rive-${mode}-capture-`));
   const runtimeBytes = mode === 'official' ? request.runtimeInput.bytes : request.runtimeInput.hyaBytes;
   const semanticTopology = mode === 'official'
-    ? await buildOfficialSemanticTopology(runtimeBytes)
+    ? await buildOfficialSemanticTopology(runtimeBytes, request.scenario.selection.artboard)
+    : null;
+  const packageAssetDirectory = mode === 'hya'
+    ? await materializeHyaPackageAssets(request.runtimeInput.packageBytes, temporary)
     : null;
   const payload = {
     mode,
@@ -50,7 +53,10 @@ export async function captureWithNativeBrowser(mode, request) {
       fixture: 'examples/rive-production-capture/index.html',
       timeoutMs: 10 * 60_000,
       acceptedStatuses: ['passed'],
-      mounts: [{ prefix: '/capture-input', directory: temporary }],
+      mounts: [
+        { prefix: '/capture-input', directory: temporary },
+        ...(packageAssetDirectory ? [{ prefix: '/examples/rive-production-capture/assets', directory: packageAssetDirectory }] : []),
+      ],
       crossOriginIsolation: true,
     });
     const capture = browserResult.capture;
@@ -84,20 +90,54 @@ export async function captureWithNativeBrowser(mode, request) {
   }
 }
 
-async function buildOfficialSemanticTopology(rivBytes) {
+async function materializeHyaPackageAssets(packageBytes, temporary) {
+  const modulePath = resolve(root, 'animation-spec/dist-test/rive/convert/package.js');
+  if (!existsSync(modulePath)) throw new Error('HYA package decoder is unavailable for native capture.');
+  const { decodeRiveHyaArchive } = await import(`${pathToFileURL(modulePath).href}?capture-package=${hash(packageBytes)}`);
+  const files = decodeRiveHyaArchive(Uint8Array.from(packageBytes), { maxPackageBytes: 512 * 1024 * 1024, maxPackageFiles: 4096 });
+  const directory = resolve(temporary, 'assets'); await mkdir(directory, { recursive: true });
+  for (const file of files) {
+    if (!file.path.startsWith('assets/')) continue;
+    const name = file.path.slice('assets/'.length);
+    if (!/^[a-f0-9]{64}$/u.test(name)) throw new Error(`HYA capture rejected non-content-addressed asset path ${file.path}.`);
+    await writeFile(resolve(directory, name), file.bytes);
+  }
+  return directory;
+}
+
+async function buildOfficialSemanticTopology(rivBytes, artboardName) {
   const modulePath = resolve(root, 'animation-spec/dist-test/rive/import/index.js');
   if (!existsSync(modulePath)) throw new Error('Frozen Rive import runtime is unavailable for the topology oracle.');
   const { importFrozenRiv } = await import(`${pathToFileURL(modulePath).href}?topology=${hash(rivBytes)}`);
   const imported = await importFrozenRiv(Uint8Array.from(rivBytes));
   const objects = new Map(imported.ir.objects.map(value => [value.id, value]));
+  const selectedIds = selectedArtboardObjectIds(imported, artboardName, objects);
   return {
     oracle: 'neutral-drawable-topology@1',
-    items: imported.ir.drawables.map((id, drawOrder) => ({
+    items: imported.ir.drawables.filter(id => selectedIds.has(id)).map((id, drawOrder) => ({
       id,
       family: objects.get(id)?.family ?? 'unknown',
       drawOrder,
     })),
   };
+}
+
+function selectedArtboardObjectIds(imported, artboardName, objects) {
+  let collecting = false; let found = false;
+  const ids = new Set();
+  for (const visit of imported.report.objects) {
+    if (visit.sourceName === 'Artboard') {
+      if (collecting) break;
+      const object = objects.get(visit.neutralObjectId);
+      const nameProperty = visit.properties.find(value => value.sourceName === 'name');
+      const nameField = object?.properties.find(value => nameProperty?.neutralFieldIds?.includes(value.id));
+      collecting = nameField?.value?.value === artboardName;
+      found ||= collecting;
+    }
+    if (collecting) ids.add(visit.neutralObjectId);
+  }
+  if (!found) throw new Error(`Topology oracle could not resolve selected artboard ${String(artboardName)}.`);
+  return ids;
 }
 
 async function startNvidiaEnergySampler() {
@@ -154,7 +194,7 @@ function validateRequest(mode, request) {
   if (!request || typeof request !== 'object') throw new TypeError('Capture request is missing.');
   if (!request.environment?.physicalDevice || !['chrome', 'edge'].includes(request.environment?.browser)) throw new Error('Capture requires a declared physical Chrome/Edge environment.');
   if (mode === 'official' && (request.runtimeInput?.kind !== 'riv' || !(request.runtimeInput.bytes instanceof Uint8Array))) throw new TypeError('Official capture requires RIV bytes.');
-  if (mode === 'hya' && (request.runtimeInput?.kind !== 'hya-package' || !(request.runtimeInput.hyaBytes instanceof Uint8Array))) throw new TypeError('HYA capture requires exact HYA bytes.');
+  if (mode === 'hya' && (request.runtimeInput?.kind !== 'hya-package' || !(request.runtimeInput.hyaBytes instanceof Uint8Array) || !(request.runtimeInput.packageBytes instanceof Uint8Array))) throw new TypeError('HYA capture requires exact HYA and package bytes.');
 }
 
 async function verifyOfficialRuntime() {

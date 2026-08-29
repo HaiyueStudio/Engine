@@ -221,6 +221,7 @@ async function createHyaOwner(payload: Payload, canvas: HTMLCanvasElement, bytes
   const player = new Animation2DComponent(animation, { autoplay: false, loop: true, runtimeExtensions });
   scene.add(new Entity('Rive formal HYA animation').addComponent(new Transform2D()).addComponent(player));
   engine.switchScene(scene);
+  let resourcesSettled = false;
   return {
     kind: 'hya',
     async resize(width, height, dpr) { setCanvasViewport(canvas, width, height); engine.devicePixelRatio = dpr; camera.resize(width, height); await frames(2); },
@@ -232,6 +233,16 @@ async function createHyaOwner(payload: Payload, canvas: HTMLCanvasElement, bytes
         payload.scenario.selection.stateMachine,
         micros / 1_000_000,
       ));
+      if (!resourcesSettled) {
+        await settleHyaResources(engine, player);
+        resourcesSettled = true;
+        player.seek(selectedHyaTime(
+          animation,
+          payload.scenario.selection.animation,
+          payload.scenario.selection.stateMachine,
+          micros / 1_000_000,
+        ));
+      }
       const pixels = await runOneEngineFrame(engine, true);
       await engine.device.queue.onSubmittedWorkDone();
       const diagnostics = measureGpu ? await waitForGpuDiagnostics(engine) : null;
@@ -245,6 +256,22 @@ async function createHyaOwner(payload: Payload, canvas: HTMLCanvasElement, bytes
     async loseDevice() { engine.device.destroy(); await frames(2); return true; },
     async cleanup() { engine.destroy(); await frames(1); },
   };
+}
+
+async function settleHyaResources(engine: HaiyueEngine, player: Animation2DComponent): Promise<void> {
+  for (let attempt = 0; attempt < 120; attempt++) {
+    await runOneEngineFrame(engine);
+    await engine.device.queue.onSubmittedWorkDone();
+    const stats = player.runtimeStats;
+    if (stats.failedResourceCount > 0) throw new Error(`HYA resource settlement failed for ${stats.failedResourceCount} resource(s).`);
+    if (stats.pendingResourceCount === 0) {
+      await frames(2);
+      await runOneEngineFrame(engine);
+      return;
+    }
+    await frames(1);
+  }
+  throw new Error(`HYA resource settlement did not complete: ${JSON.stringify(player.runtimeStats)}.`);
 }
 
 function selectedHyaTime(animation: any, name: unknown, stateMachineName: unknown, seconds: number): number {
