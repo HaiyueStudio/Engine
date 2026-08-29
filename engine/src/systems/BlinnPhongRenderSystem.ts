@@ -8,6 +8,9 @@ import { Render3DSystem } from './Render3DSystem';
 import type { InternalMaterialRenderContext, MaterialRenderContext } from '../renderer/MaterialRendererRegistry';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 
+/**
+ * @deprecated Configure Render3DSystem instead. BlinnPhongMaterial support is enabled by default.
+ */
 export interface BlinnPhongRenderSystemOptions {
   priority?: number;
   render3DSystem?: Render3DSystem | null;
@@ -17,6 +20,10 @@ function getInternalContext(context: MaterialRenderContext<BlinnPhongMaterial>) 
   return context as InternalMaterialRenderContext<BlinnPhongMaterial>;
 }
 
+/**
+ * @deprecated BlinnPhongMaterial is rendered by Render3DSystem's default material registry.
+ * Register only Render3DSystem for Mesh3D rendering.
+ */
 export class BlinnPhongRenderSystem extends System {
   private engine: IEngine;
 

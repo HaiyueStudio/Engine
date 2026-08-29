@@ -10,7 +10,7 @@ import {
   NormalMaterial,
   VolumeMaterial,
 } from '../dist/material.js';
-import { BlinnPhongRenderSystem, Render3DSystem } from '../dist/systems.js';
+import { Render3DSystem } from '../dist/systems.js';
 import {
   BasicMaterial,
   Camera3D,
@@ -1285,8 +1285,7 @@ test('Render3DSystem forwards GPU-driven batch context to compatible non-Basic m
     reverseZ: false,
     msaaSamples: 1,
   });
-  const blinnPhong = new BlinnPhongRenderSystem(engine, null, { render3DSystem: render3D });
-  blinnPhong._requireRenderer = () => ({
+  render3D._requireBlinnPhongRenderer = () => ({
     updateCamera() {},
     updateLights() {},
     prepareObjects() {},

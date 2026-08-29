@@ -4,7 +4,6 @@ import { Camera3D } from '@haiyue/engine';
 import { SphericalTransform3D } from '@haiyue/engine';
 import { CartesianTransform3D } from '@haiyue/engine';
 import { Mesh3D } from '@haiyue/engine';
-import { BlinnPhongRenderSystem } from '@haiyue/engine/systems';
 import { BlinnPhongMaterial } from '@haiyue/engine/material';
 import { ColorSRGB } from '@haiyue/engine';
 import { AmbientLight } from '@haiyue/engine/lighting';
@@ -64,11 +63,6 @@ async function main() {
   const orbitCtl = new OrbitControl(canvas, spherical, {
     minRadius: 4, maxRadius: 60, rotateSpeed: 0.8,
   });
-
-  // ── Render system ──────────────────────────────────────────────────────────
-  const render3DSystem = scene.render3DSystem!;
-  const blinnPhong = new BlinnPhongRenderSystem(engine, camEntity, { priority: -1, render3DSystem });
-  scene.addSystem(blinnPhong);
 
   // ── Geometries (shared) ────────────────────────────────────────────────────
   const geoBox    = createBox3D({ width: 1.2, height: 1.2, depth: 1.2 });

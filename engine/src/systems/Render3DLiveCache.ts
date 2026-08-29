@@ -11,6 +11,7 @@ const LIVE_OUTLINE = 1 << 4;
 const LIVE_VOLUME = 1 << 5;
 const LIVE_PBR = 1 << 6;
 const LIVE_MOTION = 1 << 7;
+const LIVE_BLINN_PHONG = 1 << 8;
 const MARKER_SWEEP_INTERVAL = 120;
 
 interface LiveFrameMarker {
@@ -34,6 +35,9 @@ export class Render3DLiveCache {
   readonly basicEntities = this.ids(this.entityMarkers, LIVE_BASIC);
   readonly basicGeometries = this.ids(this.geometryMarkers, LIVE_BASIC);
   readonly basicMaterials = this.ids(this.materialMarkers, LIVE_BASIC);
+  readonly blinnPhongEntities = this.ids(this.entityMarkers, LIVE_BLINN_PHONG);
+  readonly blinnPhongGeometries = this.ids(this.geometryMarkers, LIVE_BLINN_PHONG);
+  readonly blinnPhongMaterials = this.ids(this.materialMarkers, LIVE_BLINN_PHONG);
   readonly depthEntities = this.ids(this.entityMarkers, LIVE_DEPTH);
   readonly depthGeometries = this.ids(this.geometryMarkers, LIVE_DEPTH);
   readonly depthMaterials = this.ids(this.materialMarkers, LIVE_DEPTH);

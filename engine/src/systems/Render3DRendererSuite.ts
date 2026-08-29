@@ -1,5 +1,6 @@
 import type { IEngine } from '../core/IEngine';
 import { DepthRenderer } from '../renderer/DepthRenderer';
+import { BlinnPhongRenderer } from '../renderer/BlinnPhongRenderer';
 import { Mesh3DRenderer } from '../renderer/Mesh3DRenderer';
 import { NormalRenderer } from '../renderer/NormalRenderer';
 import { PbrRenderer } from '../renderer/PbrRenderer';
@@ -13,6 +14,9 @@ export interface Render3DRendererCacheLiveness {
   basicEntities: LiveIdSet;
   basicGeometries: LiveIdSet;
   basicMaterials: LiveIdSet;
+  blinnPhongEntities: LiveIdSet;
+  blinnPhongGeometries: LiveIdSet;
+  blinnPhongMaterials: LiveIdSet;
   depthEntities: LiveIdSet;
   depthGeometries: LiveIdSet;
   depthMaterials: LiveIdSet;
@@ -37,6 +41,7 @@ export interface Render3DRendererCacheLiveness {
 export class Render3DRendererSuite {
   private _basic: Mesh3DRenderer | null = null;
   private _basicPrepared = false;
+  private _blinnPhong: BlinnPhongRenderer | null = null;
   private _depth: DepthRenderer | null = null;
   private _normal: NormalRenderer | null = null;
   private _volume: VolumeRenderer | null = null;
@@ -52,6 +57,10 @@ export class Render3DRendererSuite {
 
   get pbr(): PbrRenderer | null {
     return this._pbr;
+  }
+
+  get blinnPhong(): BlinnPhongRenderer | null {
+    return this._blinnPhong;
   }
 
   get depth(): DepthRenderer | null {
@@ -94,6 +103,14 @@ export class Render3DRendererSuite {
       this._pbr.prepare(this.engine);
     }
     return this._pbr;
+  }
+
+  requireBlinnPhong(): BlinnPhongRenderer {
+    if (!this._blinnPhong) {
+      this._blinnPhong = new BlinnPhongRenderer();
+      this._blinnPhong.prepare(this.engine);
+    }
+    return this._blinnPhong;
   }
 
   requireShadow(): ShadowMapRenderer {
@@ -149,6 +166,11 @@ export class Render3DRendererSuite {
     basic.msaaSamples = msaaSamples;
     basic.contributePipelineWarmup(plan);
 
+    const blinnPhong = this.requireBlinnPhong();
+    blinnPhong.reverseZ = reverseZ;
+    blinnPhong.msaaSamples = msaaSamples;
+    blinnPhong.contributePipelineWarmup(plan);
+
     const pbr = this.requirePbr();
     pbr.reverseZ = reverseZ;
     pbr.msaaSamples = msaaSamples;
@@ -176,6 +198,7 @@ export class Render3DRendererSuite {
 
   releaseStaleCaches(live: Render3DRendererCacheLiveness): void {
     releaseRendererCaches(this._basic, live.basicEntities, live.basicGeometries, live.basicMaterials);
+    releaseRendererCaches(this._blinnPhong, live.blinnPhongEntities, live.blinnPhongGeometries, live.blinnPhongMaterials);
     releaseRendererCaches(this._depth, live.depthEntities, live.depthGeometries, live.depthMaterials);
     releaseRendererCaches(this._normal, live.normalEntities, live.normalGeometries, live.normalMaterials);
     releaseRendererCaches(this._volume, live.volumeEntities, live.volumeGeometries, live.volumeMaterials);
@@ -184,6 +207,7 @@ export class Render3DRendererSuite {
 
   suspendForDeviceLoss(): void {
     this._basic?.destroy();
+    this._blinnPhong?.destroy();
     this._depth?.destroy();
     this._normal?.destroy();
     this._volume?.destroy();
@@ -192,6 +216,7 @@ export class Render3DRendererSuite {
     this._shadow?.destroy();
     this._basic = null;
     this._basicPrepared = false;
+    this._blinnPhong = null;
     this._depth = null;
     this._normal = null;
     this._volume = null;

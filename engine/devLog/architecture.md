@@ -69,8 +69,8 @@
 │  └──────────┘  └──────────┘  └──────────────────┘   │
 ├─────────────────────────────────────────────────────┤
 │              System 层 (渲染逻辑编排)                  │
-│  Render3DSystem / BlinnPhongRenderSystem /            │
-│  Render2DSystem / InteractionSystem / ...             │
+│  Render3DSystem / Render2DSystem /                     │
+│  InteractionSystem / ...                              │
 ├─────────────────────────────────────────────────────┤
 │              Renderer 层 (WebGPU 调用封装)             │
 │  Mesh3DRenderer / BlinnPhongRenderer / ...            │
@@ -216,8 +216,7 @@ interface IEngine {
 
 | 系统 | 查询条件 | 职责 |
 |------|----------|------|
-| `Render3DSystem` | `Mesh3D` | 3D 基础材质渲染 + 深度渲染 + 辅助线 + 后处理 + 视锥裁剪 |
-| `BlinnPhongRenderSystem` | `Mesh3D` + `BlinnPhongMaterial` | Blinn-Phong 光照渲染 |
+| `Render3DSystem` | `Mesh3D` | 统一调度 Basic、Blinn-Phong、PBR 等 3D 材质渲染器，并负责深度渲染、辅助线、后处理和视锥裁剪 |
 | `Render2DSystem` | `Mesh3D` + `BasicMaterial` | 2D 渲染（使用 3D 管线 + 正交相机） |
 | `Mesh2DRenderSystem` | `Mesh2D` | 2D 专用管线渲染 |
 | `BitmapTextRenderSystem` | `BitmapText` | 位图文字渲染 |
@@ -244,11 +243,11 @@ interface IEngine {
 System (逻辑编排)          Renderer (GPU 调用)
 ─────────────────          ──────────────────
 Render3DSystem  ──────►    Mesh3DRenderer
+                          BlinnPhongRenderer
+                          PbrRenderer
                           DepthRenderer
                           MeshHelperRenderer
                           PostProcessRenderer
-
-BlinnPhongRenderSystem ─► BlinnPhongRenderer
 
 Mesh2DRenderSystem ───►    Mesh2DRenderer
 
@@ -330,7 +329,7 @@ LightComponent (抽象基类, UniqueSymbol = 'LightComponent')
 └── PointLight        # 点光源 (type='point', 含 range 衰减)
 ```
 
-灯光数据通过 `BlinnPhongRenderSystem` 收集所有实体的 `LightComponent`，打包为 UBO 上传到 GPU。最多支持 8 盏灯。
+灯光数据由 `Render3DSystem` 在调度需要光照的材质渲染器时收集并上传；`BlinnPhongRenderer` 会将场景中的 `LightComponent` 打包为 UBO。最多支持 8 盏灯。
 
 ---
 

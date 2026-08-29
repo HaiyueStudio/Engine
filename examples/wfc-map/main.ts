@@ -1,6 +1,5 @@
 import { AmbientLight } from '@haiyue/engine/lighting';
 import { BlinnPhongMaterial } from '@haiyue/engine/material';
-import { BlinnPhongRenderSystem, Render3DSystem } from '@haiyue/engine/systems';
 import { Camera3D, CartesianTransform3D, DirectionalLight, Entity, Mesh3D, OrbitControl, Scene, SphericalTransform3D, HaiyueEngine, World, createBox3D, createPlane3D, createSphere3D } from '@haiyue/engine';
 
 type Direction = 0 | 1 | 2 | 3;
@@ -316,8 +315,6 @@ class WfcMapGame {
     });
     this.world = this.scene.world;
     this.setupLights();
-    const render3DSystem = this.scene.render3DSystem as Render3DSystem;
-    this.scene.addSystem(new BlinnPhongRenderSystem(this.engine, this.cameraEntity, { priority: -1, render3DSystem }));
 
     document.getElementById('generate')!.addEventListener('click', () => this.generateNext());
     window.addEventListener('keydown', (event) => {

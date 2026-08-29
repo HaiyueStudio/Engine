@@ -267,6 +267,9 @@ export class Render3DSystem extends System {
   private readonly _liveBasicEntities = this._liveCaches.basicEntities;
   private readonly _liveBasicGeometries = this._liveCaches.basicGeometries;
   private readonly _liveBasicMaterials = this._liveCaches.basicMaterials;
+  private readonly _liveBlinnPhongEntities = this._liveCaches.blinnPhongEntities;
+  private readonly _liveBlinnPhongGeometries = this._liveCaches.blinnPhongGeometries;
+  private readonly _liveBlinnPhongMaterials = this._liveCaches.blinnPhongMaterials;
   private readonly _liveDepthEntities = this._liveCaches.depthEntities;
   private readonly _liveDepthGeometries = this._liveCaches.depthGeometries;
   private readonly _liveDepthMaterials = this._liveCaches.depthMaterials;
@@ -465,6 +468,7 @@ export class Render3DSystem extends System {
     this._planarMirrorManager = new PlanarMirrorManager(this.engine, options.planarMirrorPlanner);
     registerDefaultMaterialRenderers(this.materialRenderers, {
       basic: () => this._requireBasicRenderer(),
+      blinnPhong: () => this._requireBlinnPhongRenderer(),
       pbr: () => this._requirePbrRenderer(),
       depth: () => this._requireDepthRenderer(),
       normal: () => this._requireNormalRenderer(),
@@ -1141,6 +1145,7 @@ export class Render3DSystem extends System {
 
   /** @internal Override seams retained for deterministic renderer contract tests. */
   private _requireBasicRenderer() { return this._renderers.requireBasic(); }
+  private _requireBlinnPhongRenderer() { return this._renderers.requireBlinnPhong(); }
   private _requirePbrRenderer() { return this._renderers.requirePbr(); }
   private _requireShadowRenderer() { return this._renderers.requireShadow(); }
   private _requireDepthRenderer() { return this._renderers.requireDepth(); }
@@ -1171,6 +1176,9 @@ export class Render3DSystem extends System {
       basicEntities: this._liveBasicEntities,
       basicGeometries: this._liveBasicGeometries,
       basicMaterials: this._liveBasicMaterials,
+      blinnPhongEntities: this._liveBlinnPhongEntities,
+      blinnPhongGeometries: this._liveBlinnPhongGeometries,
+      blinnPhongMaterials: this._liveBlinnPhongMaterials,
       depthEntities: this._liveDepthEntities,
       depthGeometries: this._liveDepthGeometries,
       depthMaterials: this._liveDepthMaterials,

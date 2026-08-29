@@ -4,6 +4,7 @@ import {
   Material2D,
   Material2DRendererRegistry,
   BasicMaterial,
+  BlinnPhongMaterial,
   DepthMaterial,
   NormalMaterial,
   Entity,
@@ -151,6 +152,7 @@ test('Render3DSystem can selectively skip default material renderers', () => {
   const render3D = new Render3DSystem(engine, camera, {
     registerDefaultMaterialRenderers: {
       basic: false,
+      blinnPhong: false,
       depth: true,
       normal: true,
       volume: false,
@@ -158,8 +160,17 @@ test('Render3DSystem can selectively skip default material renderers', () => {
   });
 
   assert.equal(render3D.materialRenderers.resolve(new BasicMaterial()), null);
+  assert.equal(render3D.materialRenderers.resolve(new BlinnPhongMaterial()), null);
   assert.equal(typeof render3D.materialRenderers.resolve(new DepthMaterial())?.renderBatch, 'function');
   assert.equal(typeof render3D.materialRenderers.resolve(new NormalMaterial())?.renderBatch, 'function');
+});
+
+test('Render3DSystem dispatches BlinnPhongMaterial through its default material registry', () => {
+  const render3D = new Render3DSystem(createMockEngine(), new Entity('Camera'));
+
+  const registration = render3D.materialRenderers.resolve(new BlinnPhongMaterial());
+  assert.equal(typeof registration?.renderItem, 'function');
+  assert.equal(typeof registration?.renderBatch, 'function');
 });
 
 test('assertPluginDependencies reports missing plugin dependencies with EngineError', () => {

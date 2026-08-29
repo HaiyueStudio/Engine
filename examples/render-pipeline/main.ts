@@ -2,13 +2,12 @@ import {
   AmbientLight,
   BasicMaterial,
   BlinnPhongMaterial,
-  BlinnPhongRenderSystem,
   Camera3D,
   CartesianTransform3D,
   ColorSRGB,
   DirectionalLight,
   Entity,
-  GuiButton,
+  GuiLabel,
   GuiRoot,
   GuiSystem,
   Mesh3D,
@@ -93,23 +92,22 @@ async function main() {
   world.addEntity(sun);
 
   const render3D = new Render3DSystem(engine, cameraEntity, { loadOp: 'clear', priority: 0 });
-  const blinnPhong = new BlinnPhongRenderSystem(engine, cameraEntity, { priority: -1, render3DSystem: render3D });
   const guiEntity = new Entity('Pipeline HUD');
   const guiRoot = new GuiRoot();
-  guiRoot.add(new GuiButton({
+  guiRoot.add(new GuiLabel({
     id: 'pipeline-label',
     x: 18,
     y: 18,
     width: 370,
     height: 32,
-    text: 'RenderPipeline.execute(): Render3D + BlinnPhong + GUI',
+    text: 'RenderPipeline.execute(): Render3D material dispatch + GUI',
+    textAlign: 'center',
   }));
   guiEntity.addComponent(guiRoot);
   world.addEntity(guiEntity);
 
   const guiSystem = new GuiSystem(engine, { loadOp: 'load' });
   world.addSystem(render3D);
-  world.addSystem(blinnPhong);
   world.addSystem(guiSystem);
 
   const renderIntegration = new RenderIntegration(engine, { label: 'RenderPipelineExample.update' });

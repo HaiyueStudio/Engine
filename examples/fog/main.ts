@@ -1,5 +1,5 @@
 import { BlinnPhongMaterial, InstancedMaterial } from '@haiyue/engine/material';
-import { BlinnPhongRenderSystem, InstancedMesh3DRenderSystem } from '@haiyue/engine/systems';
+import { InstancedMesh3DRenderSystem } from '@haiyue/engine/systems';
 import { BasicMaterial, Camera3D, CartesianTransform3D, DirectionalLight, Entity, HaiyueEngine, Mesh3D, OrbitControl, PbrMaterial, SphericalTransform3D, createBox3D, createPlane3D, createSphere3D } from '@haiyue/engine';
 import { Fog } from '@haiyue/engine/lighting';
 import { InstancedMesh3D } from '@haiyue/engine/components';
@@ -67,11 +67,6 @@ async function main(): Promise<void> {
     world.addEntity(fogEntity);
   }
 
-  const render3DSystem = scene.render3DSystem!;
-  scene.addSystem(new BlinnPhongRenderSystem(engine, camera, {
-    priority: -1,
-    render3DSystem,
-  }));
   const instancedRenderSystem = new InstancedMesh3DRenderSystem(engine, camera, {
     loadOp: 'load',
   });

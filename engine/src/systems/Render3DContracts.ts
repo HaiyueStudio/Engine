@@ -32,6 +32,7 @@ export interface Render3DSystemOptions {
 /** Selects which built-in material adapters are installed into a registry. */
 export interface DefaultMaterialRendererOptions {
   basic?: boolean;
+  blinnPhong?: boolean;
   pbr?: boolean;
   depth?: boolean;
   normal?: boolean;

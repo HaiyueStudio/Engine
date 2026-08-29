@@ -1,4 +1,5 @@
 import { BasicMaterial } from '../material/BasicMaterial';
+import { BlinnPhongMaterial } from '../material/BlinnPhongMaterial';
 import { DepthMaterial } from '../material/DepthMaterial';
 import type { Material } from '../material/Material';
 import { NormalMaterial } from '../material/NormalMaterial';
@@ -13,6 +14,7 @@ import type {
 } from '../renderer/MaterialRendererRegistry';
 import { MaterialRendererRegistry } from '../renderer/MaterialRendererRegistry';
 import type { DepthRenderer } from '../renderer/DepthRenderer';
+import type { BlinnPhongRenderer } from '../renderer/BlinnPhongRenderer';
 import { supportsBasicSortedInstanceBatching, type Mesh3DRenderer } from '../renderer/Mesh3DRenderer';
 import type { NormalRenderer } from '../renderer/NormalRenderer';
 import type { PbrRenderer } from '../renderer/PbrRenderer';
@@ -23,6 +25,7 @@ import type { Render3DLiveCache } from './Render3DLiveCache';
 
 export interface DefaultRendererAccess {
   basic(): Mesh3DRenderer;
+  blinnPhong(): BlinnPhongRenderer;
   pbr(): PbrRenderer;
   depth(): DepthRenderer;
   normal(): NormalRenderer;
@@ -43,7 +46,8 @@ export function registerDefaultMaterialRenderers(
 ): void {
     if (options === false) return;
     const enabled: Required<DefaultMaterialRendererOptions> = {
-      basic: true,
+    basic: true,
+    blinnPhong: true,
       pbr: true,
       depth: true,
       normal: true,
@@ -51,7 +55,7 @@ export function registerDefaultMaterialRenderers(
       planarMirror: true,
       ...(typeof options === 'object' ? options : {}),
     };
-    if (enabled.basic) {
+  if (enabled.basic) {
       registry.register<BasicMaterial>({
         materialType: BasicMaterial,
         shadowCullMode: material => material.cullMode,
@@ -136,6 +140,52 @@ export function registerDefaultMaterialRenderers(
             false,
             firstBatchIndex,
           );
+        },
+      });
+    }
+    if (enabled.blinnPhong) {
+      registry.register<BlinnPhongMaterial>({
+        materialType: BlinnPhongMaterial,
+        isTransparent: material => material.blending !== 'none',
+        transparentDepthSort: material => material.blending !== 'none',
+        beginView: context => {
+          const renderer = access.blinnPhong();
+          renderer.reverseZ = context.reverseZ;
+          renderer.msaaSamples = context.msaaSamples;
+          renderer.updateCamera(context.sceneFrameUniforms, context.commandContext);
+          renderer.updateLights(context.sceneEnvironment.pbrLights);
+        },
+        prepareObjects: (context, items, first, count, firstBatchIndex) => {
+          access.blinnPhong().prepareObjects(
+            items,
+            first,
+            count,
+            firstBatchIndex,
+            context.gpuDrivenBatchBuffer,
+          );
+        },
+        flushUploads: () => access.blinnPhong().flushUploads(),
+        endView: () => access.blinnPhong().endView(),
+        renderItem: context => {
+          const renderer = access.blinnPhong();
+          access.live.blinnPhongEntities.add(context.entityId);
+          access.live.blinnPhongGeometries.add(context.geometry.id);
+          access.live.blinnPhongMaterials.add(context.material.id);
+          renderer.render(context.passEncoder, context.entityId, context.geometry, context.material, context.worldMatrix, {
+            gpuDrivenBatch: getGpuDrivenBatch(context),
+          }, context.clippingPlanes);
+        },
+        renderBatch: (context, items, first, count, batchBuffer) => {
+          const renderer = access.blinnPhong();
+          const end = Math.min(items.length, first + count);
+          for (let index = first; index < end; index++) {
+            const item = items[index];
+            if (!item?.geometry || !item.material) continue;
+            access.live.blinnPhongEntities.add(item.entityId);
+            access.live.blinnPhongGeometries.add(item.geometry.id);
+            access.live.blinnPhongMaterials.add(item.material.id);
+          }
+          renderer.renderBatch(context.passEncoder, items, first, count, batchBuffer);
         },
       });
     }
