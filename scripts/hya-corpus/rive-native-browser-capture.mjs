@@ -14,7 +14,7 @@ const OFFICIAL_JS_SHA256 = 'd25d57588f63382b662a00b54b73164f7dcda65759dfcfa10099
 const OFFICIAL_WASM_SHA256 = '87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32';
 const CAPTURE_INDEX_SHA256 = '11dc25f5cf6b85d9f61f2ef46ec84924c94c81b677cae09bc303bc02345585e5';
 const CAPTURE_BUNDLE_SHA256 = 'e8fa1415bdb53c2ac308af8e34eb317f31aecd3716a75389615a22361cdd2b2a';
-const SHARED_ENGINE_SHA256 = 'ec089fea7d86884f172b3bee7ae7f0bc14a93a431a5325222ea6fbc671075276';
+const SHARED_ENGINE_SHA256 = '9f33901d1a00b44418460b6ae5ce6386ddf49801d190f2d9efa854cb409885c3';
 const execute = promisify(execFile);
 
 export async function captureWithNativeBrowser(mode, request) {
