@@ -33,7 +33,7 @@
     "TextFollowPathModifier": ["radial", "orient", "start", "end", "strength", "offset"],
     "ArtboardComponentList": ["listSource"],
     "TextInput": ["text", "selectionRadius", "multiline"],
-    "ArtboardComponentListOverride": ["artboardId", "instanceWidth", "instanceHeight"],
+    "ArtboardComponentListOverride": ["artboardId", "instanceWidth", "instanceHeight", "instanceWidthUnitsValue", "instanceHeightUnitsValue", "instanceWidthScaleType", "instanceHeightScaleType"],
     "TextAsset": ["folderPath"],
     "GridItemPlacement": ["gridColumn", "gridRow", "gridColumnSpan", "gridRowSpan"],
     "LayoutNodeStyle": ["fractionalWidth", "fractionalHeight", "width", "height"],
@@ -44,6 +44,6 @@
   "assetMappings": {
     "Asset": "asset union", "Folder": "folder asset", "FileAsset": "asset source metadata", "DrawableAsset": "image dimensions", "ImageAsset": "image asset", "FileAssetContents": "embedded/referenced/hosted source", "FontAsset": "font asset with compiled metrics", "ManifestAsset": "manifest asset", "BlobAsset": "blob asset", "TextAsset": "text asset"
   },
-  "counts": { "objects": 37, "properties": 182, "assets": 10 },
+  "counts": { "objects": 37, "properties": 186, "assets": 10 },
   "unmapped": []
 }

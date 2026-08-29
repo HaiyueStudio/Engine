@@ -38,6 +38,7 @@ export async function convertRivBytesToHya(
     rivBytes: Uint8Array.from(rivBytes),
     imported,
     inputIrSha256,
+    ...(options.selection === undefined ? {} : { selection: Object.freeze({ ...options.selection }) }),
   }, signal);
   throwIfAborted(signal);
   validateEvaluationIdentity(evaluation, options.capabilityEvaluator, inputIrSha256);

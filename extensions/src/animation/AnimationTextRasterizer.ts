@@ -122,13 +122,26 @@ export class AnimationTextRasterizer {
     const padding = Math.max(0, component.padding ?? 0);
     const contentWidth = Math.max(1, width - padding * 2);
     const contentHeight = Math.max(1, height - padding * 2);
-    context.font = `${document.fontStyle} ${document.fontWeight} ${document.fontSize}px ${quoteFont(document.fontFamily)}`;
+    let fontSize = document.fontSize;
+    let lineHeight = document.lineHeight;
+    let tracking = document.tracking;
+    context.font = `${document.fontStyle} ${document.fontWeight} ${fontSize}px ${quoteFont(document.fontFamily)}`;
     context.textBaseline = 'alphabetic';
     context.textAlign = 'left';
-    const lines = document.text.split(/\r?\n/).map(splitGraphemes);
+    let lines = layoutTextLines(context, document.text, contentWidth, component.wrap ?? 'none', tracking);
+    if (component.fit === 'shrink' && lines.length > 0) {
+      const measuredWidth = Math.max(...lines.map(line => measuredLineWidth(context, line, tracking)), 1);
+      const measuredHeight = Math.max(1, lines.length * lineHeight);
+      const scale = Math.min(1, contentWidth / measuredWidth, contentHeight / measuredHeight);
+      fontSize *= scale;
+      lineHeight *= scale;
+      tracking *= scale;
+      context.font = `${document.fontStyle} ${document.fontWeight} ${fontSize}px ${quoteFont(document.fontFamily)}`;
+      lines = layoutTextLines(context, document.text, contentWidth, component.wrap ?? 'none', tracking);
+    }
     const animators = component.animators ?? [];
     const selectorPlans = animators.map(animator => createSelectorIndexPlan(lines, animator));
-    const lineHeight = Math.max(1, document.lineHeight);
+    lineHeight = Math.max(1, lineHeight);
     const textHeight = lines.length * lineHeight;
     let top = padding;
     const vertical = component.verticalAlign ?? 'middle';
@@ -138,11 +151,14 @@ export class AnimationTextRasterizer {
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
       const line = lines[lineIndex]!;
       const advances = line.map(glyph => context.measureText(glyph).width);
-      const baseWidth = advances.reduce((sum, advance) => sum + advance, 0) + Math.max(0, line.length - 1) * document.tracking;
+      const baseWidth = advances.reduce((sum, advance) => sum + advance, 0) + Math.max(0, line.length - 1) * tracking;
       let x = padding;
       if (document.textAlign === 'center') x += Math.max(0, (contentWidth - baseWidth) / 2);
       else if (document.textAlign === 'right') x += Math.max(0, contentWidth - baseWidth);
-      const baseline = top + lineIndex * lineHeight + document.fontSize;
+      const baseline = top + lineIndex * lineHeight + fontSize;
+      if (component.lineBackground) {
+        drawLineBackground(context, component.lineBackground, x, baseline - fontSize, baseWidth, lineHeight);
+      }
       for (let glyphIndex = 0; glyphIndex < line.length; glyphIndex++, globalIndex++) {
         const glyph = line[glyphIndex]!;
         const advance = advances[glyphIndex] ?? 0;
@@ -156,10 +172,81 @@ export class AnimationTextRasterizer {
         context.fillStyle = cssColor(state.color);
         context.fillText(glyph, -advance / 2, 0);
         context.restore();
-        x += advance + document.tracking + state.tracking;
+        x += advance + tracking + state.tracking;
       }
     }
   }
+}
+
+function layoutTextLines(
+  context: CanvasRenderingContext2D,
+  text: string,
+  width: number,
+  wrap: 'none' | 'word',
+  tracking: number,
+): string[][] {
+  if (wrap === 'none') return text.split(/\r?\n/).map(splitGraphemes);
+  const output: string[][] = [];
+  for (const paragraph of text.split(/\r?\n/)) {
+    const words = paragraph.match(/\S+\s*/gu) ?? [''];
+    let line: string[] = [];
+    for (const word of words) {
+      const glyphs = splitGraphemes(word);
+      const candidate = [...line, ...glyphs];
+      if (line.length > 0 && measuredLineWidth(context, candidate, tracking) > width) {
+        output.push(line);
+        line = glyphs;
+      } else line = candidate;
+    }
+    output.push(line);
+  }
+  return output;
+}
+
+function measuredLineWidth(context: CanvasRenderingContext2D, line: readonly string[], tracking: number): number {
+  return line.reduce((sum, glyph) => sum + context.measureText(glyph).width, 0)
+    + Math.max(0, line.length - 1) * tracking;
+}
+
+function drawLineBackground(
+  context: CanvasRenderingContext2D,
+  background: NonNullable<Readonly<AnimationText2DComponent>['lineBackground']>,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): void {
+  const padding = Math.max(0, background.padding ?? 0);
+  const strokeWidth = Math.max(0, background.strokeWidth ?? 0);
+  const left = x - padding;
+  const top = y - padding;
+  const decoratedWidth = Math.max(0, width + padding * 2);
+  const decoratedHeight = Math.max(0, height + padding * 2);
+  const radius = Math.min(Math.max(0, background.cornerRadius ?? 0), decoratedWidth / 2, decoratedHeight / 2);
+  context.save();
+  roundedRect(context, left, top, decoratedWidth, decoratedHeight, radius);
+  context.fillStyle = cssColor(background.fill);
+  context.fill();
+  if (background.stroke && strokeWidth > 0) {
+    context.strokeStyle = cssColor(background.stroke);
+    context.lineWidth = strokeWidth;
+    context.stroke();
+  }
+  context.restore();
+}
+
+function roundedRect(context: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number): void {
+  context.beginPath();
+  context.moveTo(x + radius, y);
+  context.lineTo(x + width - radius, y);
+  context.quadraticCurveTo(x + width, y, x + width, y + radius);
+  context.lineTo(x + width, y + height - radius);
+  context.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  context.lineTo(x + radius, y + height);
+  context.quadraticCurveTo(x, y + height, x, y + height - radius);
+  context.lineTo(x, y + radius);
+  context.quadraticCurveTo(x, y, x + radius, y);
+  context.closePath();
 }
 
 function resolveDocument(

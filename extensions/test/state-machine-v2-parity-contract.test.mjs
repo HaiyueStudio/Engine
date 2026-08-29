@@ -58,7 +58,7 @@ test('frozen timeline/state census map is byte-for-byte synchronized with the ac
   assert.equal(map.compatibilityTupleId, census.compatibilityTupleId);
   assert.deepEqual(map.objects, census.objects.filter(entry => entry.family === family).map(entry => ({ typeKey: entry.typeKey, name: entry.name })));
   assert.deepEqual(map.properties, census.properties.filter(entry => entry.family === family).map(entry => ({ key: entry.key, owner: entry.owner, name: entry.name })));
-  assert.equal(map.objects.length, 59); assert.equal(map.properties.length, 75);
+  assert.equal(map.objects.length, 59); assert.equal(map.properties.length, 77);
   const [schema, contract] = await Promise.all([
     readFile(path.join(workspace, 'animation-spec/schema/state-machine-v2.schema.json'), 'utf8').then(JSON.parse),
     readFile(path.join(workspace, 'animation-spec/schema/state-machine-v2.contract.json'), 'utf8').then(JSON.parse),

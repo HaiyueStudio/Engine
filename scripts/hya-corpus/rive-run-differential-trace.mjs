@@ -42,7 +42,11 @@ const conversionModule = await import(pathToFileURL(resolve(root, 'animation-spe
 const result = await runRiveDifferentialTrace({
   assetId, rivSha256, rivBytes: new Uint8Array(rivBytes), scenario, scenarioBytes,
   scenarioPath: `${outputRelative}/scenario.json`, artifactPrefix: outputRelative,
-  convert: (bytes, signal) => conversionModule.convertRivBytesToHya(bytes, { capabilityEvaluator: evaluator, signal }),
+  convert: (bytes, signal) => conversionModule.convertRivBytesToHya(bytes, {
+    capabilityEvaluator: evaluator,
+    selection: scenario.selection,
+    signal,
+  }),
   officialAdapter, hyaAdapter, environment, workloadPlan,
   workloadPlanSha256: hash(workloadPlanBytes), corpusManifestSha256: hash(manifestBytes),
   tuple: {

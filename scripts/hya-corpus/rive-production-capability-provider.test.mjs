@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import { evaluate, mapEmbeddedAssets } from './rive-production-capability-provider.mjs';
+import { parseHyaStateMachineV2 } from '../../animation-spec/dist-test/state-machine-v2/parser.js';
+import { parseHyaDataBinding } from '../../animation-spec/dist-test/data-binding/parser.js';
 
 test('production capability provider preserves all neutral fields and maps core canvas/transform values', async () => {
   const descriptor = { adapterId: 'adapter', adapterRevisionSha256: 'a'.repeat(64), evaluatorId: 'evaluator', evaluatorRevisionSha256: 'b'.repeat(64), optionsRevision: 'v1' };
@@ -40,4 +42,77 @@ test('production capability provider maps resolved resources to byte-exact embed
   assert.equal(assets[0].neutralResourceObjectId, 'object:00000001');
   assert.deepEqual(assets[0].bytes, bytes);
   assert.match(assets[0].licenseId, /Apache-2.0/u);
+});
+
+test('production capability provider binds the requested artboard before compiling the HYA canvas', async () => {
+  const descriptor = { adapterId: 'adapter', adapterRevisionSha256: 'a'.repeat(64), evaluatorId: 'evaluator', evaluatorRevisionSha256: 'b'.repeat(64), optionsRevision: 'selection-v1' };
+  const artboard = (index, name, width) => {
+    const id = `object:${String(index).padStart(8, '0')}`;
+    const properties = [
+      { id: `field:${String(index).padStart(8, '0')}:000000`, value: { type: 'string', value: name } },
+      { id: `field:${String(index).padStart(8, '0')}:000001`, value: { type: 'number', value: width } },
+      { id: `field:${String(index).padStart(8, '0')}:000002`, value: { type: 'number', value: 100 } },
+    ];
+    return {
+      object: { id, family: 'structure', properties },
+      visit: {
+        neutralObjectId: id, sourceName: 'Artboard', sourceTypeKey: 1,
+        properties: [
+          { sourceName: 'name', neutralFieldIds: [properties[0].id] },
+          { sourceName: 'width', neutralFieldIds: [properties[1].id] },
+          { sourceName: 'height', neutralFieldIds: [properties[2].id] },
+        ],
+      },
+    };
+  };
+  const first = artboard(0, 'First', 100); const selected = artboard(1, 'Selected', 640);
+  const result = await evaluate({
+    inputIrSha256: 'c'.repeat(64), selection: { artboard: 'Selected' },
+    imported: {
+      ir: { objects: [first.object, selected.object], artboards: [first.object.id, selected.object.id], nodes: [first.object.id, selected.object.id] },
+      report: { objects: [first.visit, selected.visit] },
+    },
+  }, { descriptor });
+  assert.equal(result.baseDocument.name, 'Selected');
+  assert.deepEqual(result.baseDocument.canvas, { width: 640, height: 100, coordinateSystem: 'screen-y-down' });
+  assert.deepEqual(result.baseDocument.nodes.map(node => node.id), [selected.object.id]);
+});
+
+test('production capability provider emits parser-valid executable state-machine and data-binding artifacts', async () => {
+  const descriptor = { adapterId: 'adapter', adapterRevisionSha256: 'a'.repeat(64), evaluatorId: 'evaluator', evaluatorRevisionSha256: 'b'.repeat(64), optionsRevision: 'capability-sidecars-v1' };
+  const row = (index, sourceName, fields = {}) => {
+    const id = `object:${String(index).padStart(8, '0')}`;
+    const properties = Object.entries(fields).map(([name, value], propertyIndex) => ({
+      id: `field:${String(index).padStart(8, '0')}:${String(propertyIndex).padStart(6, '0')}`,
+      value: { type: typeof value === 'string' ? 'string' : typeof value === 'boolean' ? 'boolean' : 'number', value },
+      name,
+    }));
+    return {
+      object: { id, family: 'structure', properties: properties.map(({ name: _name, ...property }) => property) },
+      visit: {
+        neutralObjectId: id, sourceName, sourceTypeKey: index + 1,
+        properties: properties.map(property => ({ sourceName: property.name, neutralFieldIds: [property.id] })),
+      },
+    };
+  };
+  const rows = [
+    row(0, 'Artboard', { name: 'Main', width: 320, height: 180 }),
+    row(1, 'ViewModel', { name: 'Model' }),
+    row(2, 'ViewModelInstanceString', { propertyValue: 'bound text' }),
+    row(3, 'StateMachine', { name: 'Machine' }),
+    row(4, 'StateMachineBool', { name: 'Enabled', value: true }),
+  ];
+  const result = await evaluate({
+    inputIrSha256: 'c'.repeat(64),
+    imported: {
+      ir: { objects: rows.map(value => value.object), artboards: [rows[0].object.id], nodes: [rows[0].object.id] },
+      report: { objects: rows.map(value => value.visit) },
+    },
+  }, { descriptor });
+  const state = result.artifacts.find(value => value.capability === 'state-machine');
+  const data = result.artifacts.find(value => value.capability === 'data-binding');
+  assert.equal(parseHyaStateMachineV2(state.document).stateMachines[0].inputs[0].defaultValue, true);
+  assert.equal(parseHyaDataBinding(data.document).instances[0].values['neutral-000001'], 'bound text');
+  assert.equal(result.coverage.find(value => value.objectId === rows[3].object.id).artifactId, state.id);
+  assert.equal(result.coverage.find(value => value.objectId === rows[1].object.id).artifactId, data.id);
 });

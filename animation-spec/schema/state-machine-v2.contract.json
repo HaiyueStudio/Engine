@@ -43,7 +43,7 @@
   "census": {
     "map": "state-machine-v2-census-map.json",
     "objectCount": 59,
-    "propertyCount": 75,
+    "propertyCount": 77,
     "solutions": {
       "keyed-properties": "typed-channel-and-track",
       "linear-animation-work-area-quantize": "timeline-clip",

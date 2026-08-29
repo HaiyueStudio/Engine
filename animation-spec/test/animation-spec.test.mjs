@@ -487,7 +487,11 @@ test('parser validates bounded text, particle and audio core components', () => 
     nodes: [{
       id: 'media',
       components: [
-        { type: 'text2d', text: 'Hello', size: [160, 40], color: [1, 1, 1, 1], fontSize: 24 },
+        {
+          type: 'text2d', text: 'Hello', size: [160, 40], color: [1, 1, 1, 1], fontSize: 24,
+          fit: 'shrink', wrap: 'word',
+          lineBackground: { fill: [0, 1, 0, 1], stroke: [1, 0, 1, 1], strokeWidth: 2, cornerRadius: 8, padding: 3 },
+        },
         {
           type: 'particle2d', resource: 'dot', maxParticles: 128, emissionRate: 30, burst: 4,
           lifetime: [0.5, 1], speed: [10, 20], angle: [-1, 1], gravity: [0, 20],
@@ -501,7 +505,11 @@ test('parser validates bounded text, particle and audio core components', () => 
   };
   const parsed = parseAnimation(source);
   assert.deepEqual(parsed.nodes[0].components.map(component => component.type), ['text2d', 'particle2d', 'audio']);
-  assert.equal(parseAnimation(encodeAnimationBinary(source)).nodes[0].components[1].maxParticles, 128);
+  const roundTrip = parseAnimation(encodeAnimationBinary(source));
+  assert.equal(roundTrip.nodes[0].components[0].fit, 'shrink');
+  assert.equal(roundTrip.nodes[0].components[0].wrap, 'word');
+  assert.deepEqual(roundTrip.nodes[0].components[0].lineBackground, source.nodes[0].components[0].lineBackground);
+  assert.equal(roundTrip.nodes[0].components[1].maxParticles, 128);
   assert.throws(() => parseAnimation(source, { maxTextCharacters: 4 }), /text characters/);
   assert.throws(() => parseAnimation(source, { maxParticleCapacity: 127 }), /particle capacity/);
   assert.throws(() => parseAnimation({

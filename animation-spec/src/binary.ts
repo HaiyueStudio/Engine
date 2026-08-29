@@ -429,6 +429,17 @@ function encodeTextComponent(
     ]) ?? 0,
     component.animators?.map(animator => encodeTextAnimator(animator, floats)) ?? 0,
     component.expression ?? 0,
+    [
+      component.fit === 'shrink' ? 1 : 0,
+      component.wrap === 'word' ? 1 : 0,
+      component.lineBackground ? [
+        component.lineBackground.fill,
+        component.lineBackground.stroke ?? 0,
+        component.lineBackground.strokeWidth ?? 0,
+        component.lineBackground.cornerRadius ?? 0,
+        component.lineBackground.padding ?? 0,
+      ] : 0,
+    ],
   ];
 }
 
@@ -921,6 +932,7 @@ function decodeComponent(
         )),
       }),
       ...(component.length < 20 || component[19] === 0 ? {} : { expression: component[19] }),
+      ...(component.length < 21 ? {} : decodeTextLayoutFields(component[20], `${path}[20]`)),
     }, validationPath, options, countBudget);
   }
   if (code === 7) {
@@ -946,6 +958,28 @@ function decodeOptionalStringField(
 ): Record<string, unknown> {
   const decoded = optionalIndexedString(strings, value, path);
   return decoded === undefined ? {} : { [key]: decoded };
+}
+
+function decodeTextLayoutFields(value: unknown, path: string): Record<string, unknown> {
+  const fields = compactArray(value, path);
+  if (fields.length < 3) invalidBinary(`Compact text layout fields are truncated at ${path}.`);
+  const background = fields[2] === 0 ? undefined : compactArray(fields[2], `${path}[2]`);
+  if (background !== undefined && background.length < 5) {
+    invalidBinary(`Compact text line background is truncated at ${path}[2].`);
+  }
+  return {
+    ...(fields[0] === 1 ? { fit: 'shrink' } : {}),
+    ...(fields[1] === 1 ? { wrap: 'word' } : {}),
+    ...(background === undefined ? {} : {
+      lineBackground: {
+        fill: background[0],
+        ...(background[1] === 0 ? {} : { stroke: background[1] }),
+        ...(background[2] === 0 ? {} : { strokeWidth: background[2] }),
+        ...(background[3] === 0 ? {} : { cornerRadius: background[3] }),
+        ...(background[4] === 0 ? {} : { padding: background[4] }),
+      },
+    }),
+  };
 }
 
 function decodeFontWeightField(value: unknown, strings: readonly string[], path: string): Record<string, unknown> {

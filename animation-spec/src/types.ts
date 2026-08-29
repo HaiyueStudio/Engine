@@ -75,6 +75,12 @@ export interface AnimationText2DComponent {
   color: readonly [number, number, number, number];
   backgroundColor?: readonly [number, number, number, number];
   padding?: number;
+  /** Optional per-line decoration used by shaped text runs. */
+  lineBackground?: AnimationTextLineBackground;
+  /** Deterministically reduce the authored size until the shaped block fits. */
+  fit?: 'none' | 'shrink';
+  /** Optional wrapping performed before fit evaluation. */
+  wrap?: 'none' | 'word';
   resolutionScale?: number;
   /** Step-keyed source-neutral text documents. The first entry may start after zero. */
   documents?: readonly AnimationTextDocumentKeyframe[];
@@ -82,6 +88,14 @@ export interface AnimationText2DComponent {
   animators?: readonly AnimationTextAnimator[];
   /** Verified source-neutral program evaluated as a pure Text Document input. */
   expression?: import('./expression').AnimationSafeExpressionProgram;
+}
+
+export interface AnimationTextLineBackground {
+  readonly fill: readonly [number, number, number, number];
+  readonly stroke?: readonly [number, number, number, number];
+  readonly strokeWidth?: number;
+  readonly cornerRadius?: number;
+  readonly padding?: number;
 }
 
 export interface AnimationTextDocumentKeyframe {

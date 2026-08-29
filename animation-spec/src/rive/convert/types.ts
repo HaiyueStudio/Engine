@@ -183,6 +183,8 @@ export interface RiveCapabilityEvaluationRequest {
   readonly rivBytes: Uint8Array;
   readonly imported: RiveNeutralImportResult;
   readonly inputIrSha256: string;
+  /** Optional composition selected by the importing product. It remains inside the build-time adapter boundary. */
+  readonly selection?: Readonly<{ readonly artboard?: string; readonly animation?: string; readonly stateMachine?: string }>;
 }
 
 export interface RiveCapabilityEvaluator {
@@ -192,6 +194,7 @@ export interface RiveCapabilityEvaluator {
 
 export interface ConvertRivBytesToHyaOptions {
   readonly capabilityEvaluator: RiveCapabilityEvaluator;
+  readonly selection?: RiveCapabilityEvaluationRequest['selection'];
   readonly signal?: AbortSignal;
   readonly importer?: Omit<ImportFrozenRivOptions, 'signal'>;
   readonly conversion?: Omit<ConvertRiveToHyaOptions, 'signal'>;

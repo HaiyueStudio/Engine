@@ -68,6 +68,6 @@ test('published layout schema, binary contract and frozen census are complete an
   const mappedProperties = Object.entries(mapping.propertyGroups).flatMap(([owner, names]) => names.map(name => `${owner}.${name}`)).sort();
   const expectedAssets = census.assets.filter(entry => entry.family === family).map(entry => entry.name).sort();
   assert.deepEqual(mappedObjects, expectedObjects); assert.deepEqual(mappedProperties, expectedProperties); assert.deepEqual(Object.keys(mapping.assetMappings).sort(), expectedAssets);
-  assert.deepEqual(mapping.counts, { objects: 37, properties: 182, assets: 10 }); assert.deepEqual(mapping.unmapped, []);
+  assert.deepEqual(mapping.counts, { objects: 37, properties: 186, assets: 10 }); assert.deepEqual(mapping.unmapped, []);
   assert.doesNotMatch(`${schemaText}\n${contractText}`, /\brive\b/i);
 });

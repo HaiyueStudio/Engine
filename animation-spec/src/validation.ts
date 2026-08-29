@@ -557,6 +557,9 @@ function parseComponent(
       ...(component.verticalAlign !== undefined ? { verticalAlign: literal(component.verticalAlign, ['top', 'middle', 'bottom'] as const, `${path}.verticalAlign`) } : {}),
       ...(component.backgroundColor !== undefined ? { backgroundColor: color(component.backgroundColor, `${path}.backgroundColor`) } : {}),
       ...(component.padding !== undefined ? { padding: nonNegativeNumber(component.padding, `${path}.padding`) } : {}),
+      ...(component.lineBackground !== undefined ? { lineBackground: textLineBackground(component.lineBackground, `${path}.lineBackground`) } : {}),
+      ...(component.fit !== undefined ? { fit: literal(component.fit, ['none', 'shrink'] as const, `${path}.fit`) } : {}),
+      ...(component.wrap !== undefined ? { wrap: literal(component.wrap, ['none', 'word'] as const, `${path}.wrap`) } : {}),
       ...(resolutionScale !== undefined ? { resolutionScale } : {}),
       ...(documents ? { documents } : {}),
       ...(animators ? { animators } : {}),
@@ -1190,6 +1193,17 @@ function color(value: unknown, path: string): readonly [number, number, number, 
     unitNumber(values[0], `${path}[0]`), unitNumber(values[1], `${path}[1]`),
     unitNumber(values[2], `${path}[2]`), unitNumber(values[3], `${path}[3]`),
   ] as [number, number, number, number]);
+}
+
+function textLineBackground(value: unknown, path: string) {
+  const background = record(value, path);
+  return Object.freeze({
+    fill: color(background.fill, `${path}.fill`),
+    ...(background.stroke === undefined ? {} : { stroke: color(background.stroke, `${path}.stroke`) }),
+    ...(background.strokeWidth === undefined ? {} : { strokeWidth: nonNegativeNumber(background.strokeWidth, `${path}.strokeWidth`) }),
+    ...(background.cornerRadius === undefined ? {} : { cornerRadius: nonNegativeNumber(background.cornerRadius, `${path}.cornerRadius`) }),
+    ...(background.padding === undefined ? {} : { padding: nonNegativeNumber(background.padding, `${path}.padding`) }),
+  });
 }
 
 function unitVec3(value: unknown, path: string): readonly [number, number, number] {
