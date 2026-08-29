@@ -232,7 +232,13 @@ async function createHyaOwner(payload: Payload, canvas: HTMLCanvasElement, bytes
   return {
     kind: 'hya',
     async resize(width, height, dpr) { setCanvasViewport(canvas, width, height); engine.devicePixelRatio = dpr; camera.resize(width, height); await frames(2); },
-    async apply(action) { dispatchDomAction(canvas, action); },
+    async apply(action, state) {
+      dispatchDomAction(canvas, action);
+      if (action.kind === 'data-mutation' && action.payload.path.startsWith('stateMachine.')) {
+        state.sourceInput = action.payload.value ?? null;
+        state.sourceInputApplied = true;
+      }
+    },
     async renderAt(micros, measureGpu = false) {
       player.seek(selectedHyaTime(
         animation,
@@ -283,7 +289,7 @@ async function settleHyaResources(engine: HaiyueEngine, player: Animation2DCompo
 
 function selectedHyaTime(animation: any, name: unknown, stateMachineName: unknown, seconds: number): number {
   const clips = animation.extensions?.['org.haiyue.rive-animation-clips@1']?.clips;
-  if (!Array.isArray(clips) || typeof name !== 'string') return seconds;
+  if (!Array.isArray(clips)) return seconds;
   const stateMachines = animation.extensions?.['org.haiyue.rive-state-machines@1']?.stateMachines;
   const stateMachine = Array.isArray(stateMachines) && typeof stateMachineName === 'string'
     ? stateMachines.find((value: any) => value?.name === stateMachineName)
@@ -292,6 +298,7 @@ function selectedHyaTime(animation: any, name: unknown, stateMachineName: unknow
     const initialClip = clips.find((value: any) => value?.name === stateMachine.initialAnimation);
     if (initialClip && Number.isFinite(initialClip.start)) return initialClip.start;
   }
+  if (typeof name !== 'string') return seconds;
   const clip = clips.find((value: any) => value?.name === name);
   if (!clip || !Number.isFinite(clip.start) || !Number.isFinite(clip.duration) || clip.duration <= 0) return seconds;
   return clip.start + ((seconds % clip.duration) + clip.duration) % clip.duration;

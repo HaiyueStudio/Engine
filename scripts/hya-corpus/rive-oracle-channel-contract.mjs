@@ -77,6 +77,7 @@ export function validateRiveOracleChannelEvidence({
         else if (!isBoundedJson(sample.value)) violations.push(`${label} sample ${sampleIndex - 1} value is not bounded JSON`);
       }
     }
+    if (channel === 'pixels') validatePixelPopulation(samples, label);
     if (channel === 'geometryAndDrawOrder') validateGeometryPopulation(samples, runtime, label);
   }
 
@@ -95,9 +96,18 @@ export function validateRiveOracleChannelEvidence({
     const bytes = asBytes(supplied);
     equal(bytes.byteLength, reference?.byteLength, `${label} RGBA supplied byte length`);
     equal(createHash('sha256').update(bytes).digest('hex'), reference?.sha256, `${label} RGBA content hash`);
+  }
+
+  function validatePixelPopulation(samples, label) {
+    if (isStructuralOnlyTransparentFixture()) return;
     let occupiedPixels = 0;
-    for (let offset = 3; offset < bytes.byteLength; offset += 4) occupiedPixels += bytes[offset] === 0 ? 0 : 1;
-    if (occupiedPixels === 0 && !isStructuralOnlyTransparentFixture()) violations.push(`${label} framebuffer is fully transparent`);
+    for (const sample of samples) {
+      const supplied = artifactBytesByPath?.get(sample?.value?.rgba?.path);
+      if (!supplied) continue;
+      const bytes = asBytes(supplied);
+      for (let offset = 3; offset < bytes.byteLength; offset += 4) occupiedPixels += bytes[offset] === 0 ? 0 : 1;
+    }
+    if (occupiedPixels === 0) violations.push(`${label} framebuffer population is fully transparent across all samples`);
   }
 
   function validateGeometryValue(value, runtime, label) {

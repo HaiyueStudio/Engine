@@ -88,7 +88,15 @@ test('pixel evidence treats in-tolerance rounding consistently and rejects trans
     capture('pixels', '@rive-app/webgl2@2.40.0', () => pixelValue('blank-official', transparent, transparentArtifacts)),
     capture('pixels', 'haiyue-exact-hya', () => pixelValue('blank-hya', transparent, transparentArtifacts)),
     transparentArtifacts,
-  ), /framebuffer is fully transparent/u);
+  ), /framebuffer population is fully transparent/u);
+
+  const mixedArtifacts = new Map();
+  assert.doesNotThrow(() => assemble(
+    'pixels',
+    capture('pixels', '@rive-app/webgl2@2.40.0', ({ atMicros }) => pixelValue(`mixed-official-${atMicros}`, atMicros === 0 ? transparent : officialRgba, mixedArtifacts)),
+    capture('pixels', 'haiyue-exact-hya', ({ atMicros }) => pixelValue(`mixed-hya-${atMicros}`, atMicros === 0 ? transparent : officialRgba, mixedArtifacts)),
+    mixedArtifacts,
+  ));
 });
 
 test('the hash-pinned structural-only grid fixture permits transparent pixels but forbids visual submission', () => {
