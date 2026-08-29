@@ -3,6 +3,7 @@ import { System } from '../../ecs/System';
 import { World } from '../../ecs/World';
 import { GuiElement } from '../components/GuiElement';
 import { GuiInput } from '../components/GuiInput';
+import { GuiLabel, setGuiLabelMeasuredTextWidth } from '../components/GuiLabel';
 import { GuiRadio } from '../components/GuiRadio';
 import { GuiRoot } from '../components/GuiRoot';
 import { GuiSelect } from '../components/GuiSelect';
@@ -450,15 +451,27 @@ export class GuiSystem extends System {
 
   private prepareRoots(world: World, width = this.engine.displayWidth, height = this.engine.displayHeight): void {
     this.roots.clear();
+    this.renderer.prepare(this.engine);
     const entities = this.entitySet.get(world);
     if (entities) for (const entity of entities) {
       const root = entity.getComponent(GuiRoot);
       if (!root) continue;
+      this.measureAutoWidthLabels(root.root, root.theme.fontSize);
       root.layout(width, height);
       if (root.root.dirty) GuiRadio.rebuildGroupRegistry(root.root);
       else GuiRadio.ensureGroupRegistry(root.root);
       this.roots.add(root);
     }
+  }
+
+  private measureAutoWidthLabels(element: GuiElement, themeFontSize: number): void {
+    if (element instanceof GuiLabel && element.autoWidth) {
+      setGuiLabelMeasuredTextWidth(
+        element,
+        this.renderer.measureTextWidth(element.text, element.fontSize ?? themeFontSize),
+      );
+    }
+    for (const child of element.children) this.measureAutoWidthLabels(child, themeFontSize);
   }
 
   private dispatchPendingEvents(world: World): void {

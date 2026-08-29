@@ -287,18 +287,25 @@ export class GuiRenderer {
   private addButton(button: GuiButton, theme: GuiTheme): void {
     const radius = button.style.radius ?? theme.radius;
     const border = colorToRgba(button.style.borderColor, button.focused ? theme.colors.primary : theme.colors.border);
-    const surface = button.variant === 'primary'
+    const baseSurface = button.variant === 'primary'
       ? theme.colors.primary
       : button.variant === 'danger'
         ? theme.colors.danger
-        : button.pressed
-          ? theme.colors.active
-          : button.hovered
-            ? theme.colors.hover
-            : theme.colors.surface;
+        : theme.colors.surface;
+    const surface = button.pressed
+      ? theme.colors.active
+      : button.hovered
+        ? theme.colors.hover
+        : baseSurface;
+    const background = button.hovered
+      ? button.style.hoverBackgroundColor ?? button.style.backgroundColor
+      : button.style.backgroundColor;
+    const textColor = button.hovered
+      ? button.style.hoverColor ?? button.style.color
+      : button.style.color;
     this.addRect(button.rect.x, button.rect.y, button.rect.width, button.rect.height, radius, border);
-    this.addRect(button.rect.x + 1, button.rect.y + 1, button.rect.width - 2, button.rect.height - 2, Math.max(0, radius - 1), withAlpha(colorToRgba(button.style.backgroundColor, surface), button.disabled ? 0.45 : 1));
-    this.addCenteredText(button.text, button.rect.x + 8, button.rect.y, button.rect.width - 16, button.rect.height, theme.fontSize, colorToRgba(theme.colors.text, theme.colors.text));
+    this.addRect(button.rect.x + 1, button.rect.y + 1, button.rect.width - 2, button.rect.height - 2, Math.max(0, radius - 1), withAlpha(colorToRgba(background, surface), button.disabled ? 0.45 : 1));
+    this.addCenteredText(button.text, button.rect.x + 8, button.rect.y, button.rect.width - 16, button.rect.height, theme.fontSize, colorToRgba(textColor, theme.colors.text));
   }
 
   private addLabel(label: GuiLabel, theme: GuiTheme): void {
@@ -615,6 +622,18 @@ export class GuiRenderer {
       return;
     }
     const textWidth = measureGuiTextWidth(text, this.defaultFont, fontSize);
-    this.addText(text, x + Math.max(0, (width - textWidth) * 0.5), y, width, height, fontSize, color);
+    const textX = x + Math.max(0, (width - textWidth) * 0.5);
+    this.currentTextBatch.addText({
+      text,
+      x: textX,
+      y,
+      width: Math.max(0, x + width - textX),
+      height,
+      fontSize,
+      color,
+      multiline: false,
+      wrap: false,
+      clip: { x, y, width, height },
+    });
   }
 }

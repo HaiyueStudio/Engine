@@ -53,7 +53,8 @@ async function main() {
     height: 36,
     text: 'Engine GUI controls',
     fontSize: 24,
-    style: { color: '#93c5fd' },
+    autoWidth: true,
+    style: { color: '#93c5fd', padding: 4 },
   }));
 
   let clicks = 0;
@@ -64,6 +65,7 @@ async function main() {
     width: 120,
     height: 36,
     text: 'Button',
+    style: { hoverBackgroundColor: '#3b82f6', hoverColor: '#ffffff' },
     onClick: () => {
       clicks += 1;
       clicksEl.textContent = String(clicks);

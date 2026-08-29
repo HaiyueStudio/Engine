@@ -19,8 +19,10 @@ export interface GuiRect {
 
 export interface GuiStyle {
   backgroundColor?: string;
+  hoverBackgroundColor?: string;
   borderColor?: string;
   color?: string;
+  hoverColor?: string;
   opacity?: number;
   radius?: number;
   padding?: number;

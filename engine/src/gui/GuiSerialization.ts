@@ -211,6 +211,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
         text: stringProp(props.text, ''),
         ...(fontSize === undefined ? {} : { fontSize }),
         textAlign: textAlignProp(props.textAlign),
+        autoWidth: booleanProp(props.autoWidth, false),
       });
     }
     case 'input':
@@ -315,6 +316,7 @@ function serializeElementProps(element: GuiElement): Record<string, unknown> {
       text: element.text,
       ...(element.fontSize === undefined ? {} : { fontSize: element.fontSize }),
       textAlign: element.textAlign,
+      autoWidth: element.autoWidth,
     };
   }
   if (element instanceof GuiInput) return { value: element.value, placeholder: element.placeholder, readOnly: element.readOnly };
@@ -464,7 +466,7 @@ const GUI_ELEMENT_TYPES = new Set<GuiSerializedElementType>([
 
 const STRING_PROPS = new Set(['text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId']);
 const NUMBER_PROPS = new Set(['fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
-const BOOLEAN_PROPS = new Set(['readOnly', 'checked', 'showText']);
+const BOOLEAN_PROPS = new Set(['autoWidth', 'readOnly', 'checked', 'showText']);
 
 function validateProps(type: GuiSerializedElementType, value: unknown, path: string): void {
   const props = recordAt(value, path);
@@ -553,7 +555,7 @@ function validateScalar(value: unknown, path: string): void {
 function validateStyle(value: unknown, path: string): void {
   const style = recordAt(value, path);
   for (const [key, item] of Object.entries(style)) {
-    if (key === 'backgroundColor' || key === 'borderColor' || key === 'color') {
+    if (key === 'backgroundColor' || key === 'hoverBackgroundColor' || key === 'borderColor' || key === 'color' || key === 'hoverColor') {
       if (typeof item !== 'string') invalidGuiData(`GUI style ${key} must be a string.`, `${path}.${key}`);
     } else if (key === 'opacity' || key === 'radius' || key === 'padding') {
       if (typeof item !== 'number' || !Number.isFinite(item)) invalidGuiData(`GUI style ${key} must be a finite number.`, `${path}.${key}`);
