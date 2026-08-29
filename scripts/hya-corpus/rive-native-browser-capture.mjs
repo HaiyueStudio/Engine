@@ -13,7 +13,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OFFICIAL_JS_SHA256 = 'd25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714';
 const OFFICIAL_WASM_SHA256 = '87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32';
 const CAPTURE_INDEX_SHA256 = '2cba454cb87ab205bf4d93d717217faaf93ecc1b816e5c21eeafb0bfb6a4ffb0';
-const CAPTURE_BUNDLE_SHA256 = 'a97ceec9843998588d2f7ff987494a9685a3ac86cafe92307c4f5729d7af71d6';
+const CAPTURE_BUNDLE_SHA256 = 'af73394abd1a0ae6995e97196a87f188f532d7c9842f8d96c26454406b4c88c2';
 const SHARED_ENGINE_SHA256 = 'dc9d4d2261aecaed00b90890e64ff666bbda40051747d8170d84044aaa66d2e9';
 const execute = promisify(execFile);
 

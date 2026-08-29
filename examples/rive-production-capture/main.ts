@@ -207,7 +207,7 @@ async function createHyaOwner(payload: Payload, canvas: HTMLCanvasElement, bytes
   for (const id of HYA_FORMAT_EXTENSIONS) extensionRegistry.register({ id });
   const animation = parseAnimation(bytes.slice(0), { extensions: extensionRegistry });
   const runtimeExtensions = new Animation2DExtensionRegistry();
-  for (const id of ['org.haiyue.vector-shape@1', 'org.haiyue.vector-stroke@1', 'org.haiyue.vector-path-morph@1']) runtimeExtensions.register({ id, create() {} });
+  for (const id of HYA_FORMAT_EXTENSIONS) runtimeExtensions.register({ id, create() {} });
   setCanvasViewport(canvas, animation.canvas.width, animation.canvas.height);
   const engine = new HaiyueEngine({ canvas, clearColor: { r: 0, g: 0, b: 0, a: 0 }, alphaMode: 'premultiplied', devicePixelRatio: 1, timestampQuery: true, renderProfile: 'diagnostic', diagnostics: { enabled: true } });
   await engine.init();
