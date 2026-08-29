@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
-import { evaluate, mapEmbeddedAssets } from './rive-production-capability-provider.mjs';
+import {
+  applySelectedAnimationOverrides,
+  applySoloSelection,
+  evaluate,
+  mapEmbeddedAssets,
+  vertexPath,
+} from './rive-production-capability-provider.mjs';
+import { FROZEN_PROPERTIES } from '../../animation-spec/dist-test/rive/import/generated/frozen-registry.js';
 import { parseHyaStateMachineV2 } from '../../animation-spec/dist-test/state-machine-v2/parser.js';
 import { parseHyaDataBinding } from '../../animation-spec/dist-test/data-binding/parser.js';
 
@@ -115,4 +122,59 @@ test('production capability provider emits parser-valid executable state-machine
   assert.equal(parseHyaDataBinding(data.document).instances[0].values['neutral-000001'], 'bound text');
   assert.equal(result.coverage.find(value => value.objectId === rows[3].object.id).artifactId, state.id);
   assert.equal(result.coverage.find(value => value.objectId === rows[1].object.id).artifactId, data.id);
+});
+
+test('selected animation initializes Solo activeComponentId before inactive subtrees are removed', async () => {
+  const activeComponentId = FROZEN_PROPERTIES.find(value => value.name === 'activeComponentId')?.key;
+  assert.equal(typeof activeComponentId, 'number');
+  const row = (index, sourceName, fields = {}) => {
+    const id = `object:${String(index).padStart(8, '0')}`;
+    const properties = Object.entries(fields).map(([name, value], fieldIndex) => ({
+      id: `field:${String(index).padStart(8, '0')}:${String(fieldIndex).padStart(6, '0')}`,
+      value: { type: typeof value === 'string' ? 'string' : 'number', value }, name,
+    }));
+    return {
+      id,
+      object: { id, family: 'structure', properties: properties.map(({ name: _name, ...property }) => property) },
+      visit: { neutralObjectId: id, sourceName, sourceTypeKey: index + 1, properties: properties.map(property => ({ sourceName: property.name, neutralFieldIds: [property.id] })) },
+    };
+  };
+  const rows = [
+    row(0, 'Artboard', { name: 'Main' }),
+    row(1, 'Solo', { activeComponentId: 2 }),
+    row(2, 'NestedArtboard', { parentId: 1, name: 'first' }),
+    row(3, 'NestedArtboard', { parentId: 1, name: 'selected' }),
+    row(4, 'LinearAnimation', { name: 'Select second' }),
+    row(5, 'KeyedObject', { objectId: 1 }),
+    row(6, 'KeyedProperty', { propertyKey: activeComponentId }),
+    row(7, 'KeyFrameId', { value: 3 }),
+  ];
+  const hierarchy = {
+    entries: rows.slice(0, 4).map((rowValue, componentIndex) => ({
+      componentIndex, objectId: rowValue.id, sourceName: rowValue.visit.sourceName,
+      fields: Object.fromEntries(rowValue.visit.properties.map(property => {
+        const field = rowValue.object.properties.find(value => value.id === property.neutralFieldIds[0]);
+        return [property.sourceName, field.value.value];
+      })), nodeEligible: true,
+    })),
+  };
+  const objects = new Map(rows.map(value => [value.id, value.object]));
+  const report = { objects: rows.map(value => value.visit) };
+
+  await applySelectedAnimationOverrides(hierarchy, report, objects, rows[0].id, 'Select second');
+  applySoloSelection(hierarchy);
+
+  assert.equal(hierarchy.entries[1].fields.activeComponentId, 3);
+  assert.equal(hierarchy.entries[2].nodeEligible, false);
+  assert.equal(hierarchy.entries[3].nodeEligible, true);
+  assert.deepEqual(hierarchy.selectedAnimationsApplied, ['Select second']);
+});
+
+test('Rive cubic vertices retain incoming and outgoing handles in HYA path commands', () => {
+  const path = vertexPath([
+    { sourceName: 'CubicDetachedVertex', fields: { x: 0, y: 0, outRotation: 0, outDistance: 10 } },
+    { sourceName: 'CubicDetachedVertex', fields: { x: 100, y: 0, inRotation: Math.PI, inDistance: 20 } },
+  ], false);
+  assert.equal(path.commands, 'MC');
+  assert.deepEqual(path.values.map(value => Math.round(value)), [0, 0, 10, 0, 80, 0, 100, 0]);
 });

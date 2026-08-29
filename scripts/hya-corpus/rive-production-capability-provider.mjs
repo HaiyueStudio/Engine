@@ -21,7 +21,13 @@ export async function evaluate(request, context) {
     height: positive(artboardFields.height, 600),
     coordinateSystem: 'screen-y-down',
   };
-  const hierarchy = await buildExpandedComponentHierarchy(report, objects, ir.artboards, artboard.object.id);
+  const hierarchy = await buildExpandedComponentHierarchy(
+    report,
+    objects,
+    ir.artboards,
+    artboard.object.id,
+    request.selection?.animation,
+  );
   applySimpleLayoutTransforms(hierarchy);
   const assets = annotateEmbeddedAssets(
     await extractEmbeddedAssets(request.rivBytes, ir.resolvedResources ?? []),
@@ -739,11 +745,11 @@ function curveAt(curve, time, fallback) {
   return keys.at(-1).value;
 }
 
-async function buildExpandedComponentHierarchy(report, objects, artboardObjectIds, artboardObjectId) {
+async function buildExpandedComponentHierarchy(report, objects, artboardObjectIds, artboardObjectId, selectedAnimation) {
   const entries = [];
   const parentNodeByObjectId = new Map();
   const artboardIndex = new Map(artboardObjectIds.map((id, index) => [index, id]));
-  await expand(artboardObjectId, '', undefined, new Set(), 0, {});
+  await expand(artboardObjectId, '', undefined, new Set(), 0, {}, selectedAnimation);
   const listPlan = componentListPlan(report, objects, artboardObjectIds, artboardObjectId);
   if (listPlan) {
     const hosts = entries.filter(value => value.instanceDepth === 0 && value.sourceName === 'ArtboardComponentList');
@@ -766,17 +772,20 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
             rootY: index * (templateHeight * scale + gap), rootScale: scale,
             dynamicNestedArtboardIndex: listPlan.items[index].artboardIndex,
           },
+          undefined,
         );
       }
     }
   }
   return { artboardObjectId, entries, parentNodeByObjectId };
 
-  async function expand(targetArtboardId, prefix, hostId, ancestry, depth, options) {
+  async function expand(targetArtboardId, prefix, hostId, ancestry, depth, options, activeAnimation) {
     if (depth > 128) throw new Error('Nested artboard depth exceeded 128.');
     if (ancestry.has(targetArtboardId)) throw new Error(`Nested artboard cycle includes ${targetArtboardId}.`);
     const nextAncestry = new Set(ancestry); nextAncestry.add(targetArtboardId);
     const local = await buildComponentHierarchy(report, objects, targetArtboardId);
+    await applySelectedAnimationOverrides(local, report, objects, targetArtboardId, activeAnimation);
+    applySoloSelection(local);
     const idByLocal = new Map(local.entries.map(entry => [entry.objectId, prefix ? `${prefix}${entry.objectId}` : entry.objectId]));
     const clones = local.entries.map(entry => ({
       ...entry,
@@ -796,16 +805,130 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
       const localParent = local.parentNodeByObjectId.get(clone.sourceObjectId);
       const parent = localParent ? idByLocal.get(localParent) : clone.sourceName === 'Artboard' ? hostId : undefined;
       if (parent) parentNodeByObjectId.set(clone.objectId, parent);
-      if (!NESTED_ARTBOARD_TYPES.has(clone.sourceName)) continue;
+      if (clone.nodeEligible === false || !NESTED_ARTBOARD_TYPES.has(clone.sourceName)) continue;
       const nestedIndex = Number.isSafeInteger(clone.fields.artboardId)
         ? clone.fields.artboardId
         : options.dynamicNestedArtboardIndex;
       if (!Number.isSafeInteger(nestedIndex)) continue;
       const nestedArtboardId = artboardIndex.get(nestedIndex);
       if (!nestedArtboardId) continue;
-      await expand(nestedArtboardId, `${clone.objectId}::`, clone.objectId, nextAncestry, depth + 1, {});
+      const nestedAnimation = nestedAnimationName(local, clone.sourceObjectId, report, objects, nestedArtboardId, activeAnimation);
+      await expand(nestedArtboardId, `${clone.objectId}::`, clone.objectId, nextAncestry, depth + 1, {}, nestedAnimation);
     }
   }
+}
+
+function nestedAnimationName(hierarchy, nestedArtboardObjectId, report, objects, targetArtboardId, inheritedAnimation) {
+  const host = hierarchy.entries.find(value => value.objectId === nestedArtboardObjectId);
+  if (!host) return undefined;
+  const drivers = hierarchy.entries.filter(value => value.fields.parentId === host.componentIndex);
+  const driver = drivers.find(value => value.sourceName === 'NestedSimpleAnimation' || value.sourceName === 'NestedRemapAnimation');
+  if (!driver && drivers.some(value => value.sourceName === 'NestedStateMachine')) return inheritedAnimation;
+  if (!Number.isSafeInteger(driver?.fields.animationId)) return undefined;
+  const animations = selectedArtboardVisits(report, targetArtboardId)
+    .filter(value => value.sourceName === 'LinearAnimation')
+    .map(value => string(namedFields(objects.get(value.neutralObjectId), value).name));
+  return animations[driver.fields.animationId];
+}
+
+export async function applySelectedAnimationOverrides(hierarchy, report, objects, artboardObjectId, selectedAnimation) {
+  const modulePath = resolve(root, 'animation-spec/dist-test/rive/import/generated/frozen-registry.js');
+  const { FROZEN_PROPERTIES } = await import(pathToFileURL(modulePath).href);
+  const propertyNames = new Map(FROZEN_PROPERTIES.map(value => [value.key, value.name]));
+  const records = selectedArtboardVisits(report, artboardObjectId).map(visit => ({
+    visit,
+    fields: namedFields(objects.get(visit.neutralObjectId), visit),
+  }));
+  const animations = []; let animation = null; let targetIndex = null; let property = null;
+  for (const record of records) {
+    const name = record.visit.sourceName;
+    if (name === 'LinearAnimation') {
+      animation = { name: string(record.fields.name) ?? `animation-${animations.length}`, values: [] };
+      animations.push(animation); targetIndex = null; property = null;
+      continue;
+    }
+    if (!animation) continue;
+    if (name === 'KeyedObject') {
+      targetIndex = Number.isSafeInteger(record.fields.objectId) ? record.fields.objectId : null;
+      property = null;
+      continue;
+    }
+    if (name === 'KeyedProperty') {
+      property = propertyNames.get(record.fields.propertyKey) ?? null;
+      continue;
+    }
+    if (!/^KeyFrame(?:Double|Id|Uint|Bool|Color)$/u.test(name) || targetIndex === null || !property) continue;
+    const value = record.fields.value;
+    if (typeof value !== 'number' && typeof value !== 'boolean' && !isFiniteColor(value)) continue;
+    if (!animation.values.some(entry => entry.targetIndex === targetIndex && entry.property === property)) {
+      animation.values.push({ targetIndex, property, value });
+    }
+  }
+  const names = initialStateAnimationNames(records, animations);
+  if (typeof selectedAnimation === 'string' && animations.some(value => value.name === selectedAnimation)) names.push(selectedAnimation);
+  const applied = [];
+  for (const name of [...new Set(names)]) {
+    const selected = animations.find(value => value.name === name);
+    if (!selected) continue;
+    for (const entry of selected.values) {
+      const target = hierarchy.entries.find(value => value.componentIndex === entry.targetIndex);
+      if (!target) continue;
+      target.fields[entry.property] = Array.isArray(entry.value) ? [...entry.value] : entry.value;
+    }
+    applied.push(name);
+  }
+  if (applied.length > 0) hierarchy.selectedAnimationsApplied = applied;
+}
+
+function initialStateAnimationNames(records, animations) {
+  const names = []; let states = []; let entryIndex = -1; let entryTarget = null;
+  for (const record of records) {
+    if (record.visit.sourceName === 'StateMachineLayer') finishLayer();
+    if (['ExitState', 'AnyState', 'EntryState', 'AnimationState'].includes(record.visit.sourceName)) {
+      states.push(record);
+      if (record.visit.sourceName === 'EntryState') entryIndex = states.length - 1;
+    } else if (record.visit.sourceName === 'StateTransition' && entryIndex >= 0 && entryTarget === null) {
+      entryTarget = record.fields.stateToId;
+    }
+  }
+  finishLayer();
+  return names;
+
+  function finishLayer() {
+    const target = Number.isSafeInteger(entryTarget) ? states[entryTarget] : null;
+    if (target?.visit.sourceName === 'AnimationState') {
+      const name = animations[target.fields.animationId]?.name;
+      if (name) names.push(name);
+    }
+    states = []; entryIndex = -1; entryTarget = null;
+  }
+}
+
+export function applySoloSelection(hierarchy) {
+  const byParent = new Map();
+  for (const entry of hierarchy.entries) {
+    const parentId = Number.isSafeInteger(entry.fields.parentId) ? entry.fields.parentId : null;
+    if (parentId === null) continue;
+    const children = byParent.get(parentId) ?? [];
+    children.push(entry); byParent.set(parentId, children);
+  }
+  for (const solo of hierarchy.entries.filter(value => value.sourceName === 'Solo')) {
+    const active = Number.isSafeInteger(solo.fields.activeComponentId) ? solo.fields.activeComponentId : null;
+    if (active === null) continue;
+    for (const child of byParent.get(solo.componentIndex) ?? []) {
+      if (child.componentIndex === active) continue;
+      disableSubtree(child);
+    }
+  }
+
+  function disableSubtree(entry) {
+    entry.nodeEligible = false;
+    for (const child of byParent.get(entry.componentIndex) ?? []) disableSubtree(child);
+  }
+}
+
+function isFiniteColor(value) {
+  return Array.isArray(value) && value.length === 4 && value.every(component => Number.isFinite(component));
 }
 
 const NESTED_ARTBOARD_TYPES = new Set(['NestedArtboard', 'NestedArtboardLayout', 'NestedArtboardLeaf']);
@@ -958,8 +1081,53 @@ function vectorPath(entry, owned) {
   }
   const vertices = owned.filter(value => /Vertex$/u.test(value.sourceName));
   if (vertices.length < 2) return null;
-  const values = vertices.flatMap(value => [finite(value.fields.x) ?? 0, finite(value.fields.y) ?? 0]);
-  return { commands: `M${'L'.repeat(vertices.length - 1)}${f.isClosed === false ? '' : 'Z'}`, values };
+  return vertexPath(vertices, f.isClosed !== false);
+}
+
+export function vertexPath(vertices, closed) {
+  const points = vertices.map(vertexHandles);
+  const values = [points[0].x, points[0].y];
+  let commands = 'M';
+  const segmentCount = closed ? points.length : points.length - 1;
+  for (let index = 0; index < segmentCount; index++) {
+    const left = points[index];
+    const right = points[(index + 1) % points.length];
+    if (left.out || right.in) {
+      const controlLeft = left.out ?? [left.x, left.y];
+      const controlRight = right.in ?? [right.x, right.y];
+      commands += 'C';
+      values.push(controlLeft[0], controlLeft[1], controlRight[0], controlRight[1], right.x, right.y);
+    } else {
+      commands += 'L';
+      values.push(right.x, right.y);
+    }
+  }
+  if (closed) commands += 'Z';
+  return { commands, values };
+}
+
+function vertexHandles(vertex) {
+  const fields = vertex.fields;
+  const x = finite(fields.x) ?? 0; const y = finite(fields.y) ?? 0;
+  if (vertex.sourceName === 'StraightVertex') return { x, y, in: null, out: null };
+  if (vertex.sourceName === 'CubicDetachedVertex') return {
+    x, y,
+    in: handle(x, y, finite(fields.inRotation) ?? Math.PI, finite(fields.inDistance) ?? 0),
+    out: handle(x, y, finite(fields.outRotation) ?? 0, finite(fields.outDistance) ?? 0),
+  };
+  const rotation = finite(fields.rotation) ?? 0;
+  const inDistance = finite(fields.inDistance) ?? finite(fields.distance) ?? 0;
+  const outDistance = finite(fields.outDistance) ?? finite(fields.distance) ?? 0;
+  return {
+    x, y,
+    in: handle(x, y, rotation + Math.PI, inDistance),
+    out: handle(x, y, rotation, outDistance),
+  };
+}
+
+function handle(x, y, rotation, distance) {
+  if (!(distance > 0)) return null;
+  return [x + Math.cos(rotation) * distance, y + Math.sin(rotation) * distance];
 }
 
 function vectorPaint(entry, owned, children) {

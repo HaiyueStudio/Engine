@@ -89,7 +89,7 @@
       "id": "rive-hya-compare",
       "title": "Rive → HYA Fidelity Compare",
       "entry": "rive-hya-compare/main.ts",
-      "capabilities": ["animation-format", "rive-7.3-import", "fidelity-compare", "official-reference-player", "hash-pinned-remote-assets", "webgl2", "webgpu", "2d"],
+      "capabilities": ["animation-format", "rive-7.3-import", "automatic-production-conversion", "fidelity-compare", "official-reference-player", "hash-pinned-remote-assets", "webgl2", "webgpu", "2d"],
       "assets": ["rive-hya-compare/samples.json", "rive-hya-compare/styles.css"],
       "screenshot": { "required": false, "baseline": null },
       "performance": null,

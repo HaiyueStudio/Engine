@@ -67,6 +67,7 @@
     "pages:examples:assemble": "node scripts/assemble-pages-release.mjs",
     "cubism:capture": "node animation-spec/live2d/tools/capture-cubism.mjs",
     "build:target": "node scripts/build-target.mjs",
+    "preview:target": "node scripts/preview-target.mjs",
     "shader-language:showcase:check": "npm run build -w ./shader-language && node shader-language/scripts/generate-showcase-example.mjs",
     "shader-language:stage6:check": "npm run build -w ./shader-language && node shader-language/scripts/generate-motion-blur-production.mjs",
     "shader-language:stage7:check": "npm run build -w ./shader-language && npm run build -w ./engine && node shader-language/scripts/generate-production-shaders.mjs && node --test engine/test/precompiled-shader-runtime-v2.test.mjs",

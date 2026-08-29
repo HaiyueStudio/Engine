@@ -5,6 +5,7 @@ import { createServer as createHttpsServer } from 'node:https';
 import { networkInterfaces } from 'node:os';
 import { dirname, extname, isAbsolute, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { handleRiveExampleConversionRequest } from './rive-example-conversion-service.mjs';
 
 const scriptPath = fileURLToPath(import.meta.url);
 const repositoryRoot = resolve(dirname(scriptPath), '..');
@@ -127,6 +128,7 @@ export async function createExamplesServer({ protocol = 'https', certificate, pr
 export function createStaticHandler(mounts) {
   return async (request, response) => {
     try {
+      if (await handleRiveExampleConversionRequest(request, response)) return;
       if (request.method !== 'GET' && request.method !== 'HEAD') {
         sendText(response, 405, 'Method not allowed', { Allow: 'GET, HEAD' });
         return;

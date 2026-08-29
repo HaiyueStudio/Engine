@@ -18,8 +18,8 @@
       <div class="pane-head"><div><span>LEFT</span><h2>HaiYue HYA · WebGPU</h2></div><strong id="hya-state" data-status="missing">等待转换产物</strong></div>
       <canvas id="hya-canvas" width="800" height="640"></canvas>
       <div id="hya-empty" class="empty-state">
-        <strong>这里不使用 mock。</strong>
-        <p>选择同一 RIV 转换得到的 <code>animation.hya</code> 与 <code>conversion-report.json</code>，页面会校验报告中的 RIV/HYA SHA-256 后播放。</p>
+        <strong>切换素材后自动转换。</strong>
+        <p>页面先校验官方 RIV，再由同源示例服务调用 production importer/evaluator/compiler 生成 HYA。纯静态托管没有转换服务时，仍可手工载入已生成产物。</p>
       </div>
     </section>
     <section class="pane pane--official">
@@ -31,6 +31,7 @@
     <div class="controls">
       <button id="play" type="button">暂停两端</button>
       <button id="restart" type="button">从头开始</button>
+      <button id="auto-convert" type="button">重新自动转换</button>
       <label class="file-button">载入 HYA + report<input id="hya-files" type="file" accept=".hya,.json,application/json" multiple /></label>
       <input id="hya-url" type="url" placeholder="animation.hya URL（同目录需有 conversion-report.json）" />
       <button id="load-hya-url" type="button">载入 URL</button>
