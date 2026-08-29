@@ -8,6 +8,9 @@ export const RIVE_ORACLE_PIXEL_ALGORITHM = 'global-rgba-ssim-tolerant-change@2';
 const HASH = /^[a-f0-9]{64}$/u;
 const PIXEL_THRESHOLDS = Object.freeze({ maxChannelDelta: 2 / 255, changedPixelRatio: 0.001, minimumSsim: 0.9995 });
 const PIXEL_CHANGE_DELTA = Math.round(PIXEL_THRESHOLDS.maxChannelDelta * 255);
+const STRUCTURAL_ONLY_TRANSPARENT_FIXTURES = Object.freeze(new Map([
+  ['official-grid-placement-bound', '02dca529414c584c38e7c438e501e276d89337588d9042381120d330784380d0'],
+]));
 
 export function validateRiveOracleChannelEvidence({
   channel,
@@ -94,7 +97,7 @@ export function validateRiveOracleChannelEvidence({
     equal(createHash('sha256').update(bytes).digest('hex'), reference?.sha256, `${label} RGBA content hash`);
     let occupiedPixels = 0;
     for (let offset = 3; offset < bytes.byteLength; offset += 4) occupiedPixels += bytes[offset] === 0 ? 0 : 1;
-    if (occupiedPixels === 0) violations.push(`${label} framebuffer is fully transparent`);
+    if (occupiedPixels === 0 && !isStructuralOnlyTransparentFixture()) violations.push(`${label} framebuffer is fully transparent`);
   }
 
   function validateGeometryValue(value, runtime, label) {
@@ -141,7 +144,14 @@ export function validateRiveOracleChannelEvidence({
     const submitted = runtime === '@rive-app/webgl2@2.40.0'
       ? samples.reduce((sum, sample) => sum + (sample?.value?.topology?.submission?.draws?.length ?? 0), 0)
       : samples.reduce((sum, sample) => sum + Number(sample?.value?.topology?.submission?.visualCount ?? 0), 0);
-    if (submitted <= 0) violations.push(`${label} topology oracle did not observe a native draw submission`);
+    if (isStructuralOnlyTransparentFixture()) {
+      if (semantics.some(item => item?.family !== 'structure')) violations.push(`${label} structural-only fixture contains a rasterizable semantic drawable`);
+      if (submitted !== 0) violations.push(`${label} structural-only fixture unexpectedly submitted a native visual`);
+    } else if (submitted <= 0) violations.push(`${label} topology oracle did not observe a native draw submission`);
+  }
+
+  function isStructuralOnlyTransparentFixture() {
+    return STRUCTURAL_ONLY_TRANSPARENT_FIXTURES.get(assetId) === rivSha256;
   }
 
   function compareCaptures(officialCapture, hyaCapture, identity) {

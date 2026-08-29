@@ -91,6 +91,40 @@ test('pixel evidence treats in-tolerance rounding consistently and rejects trans
   ), /framebuffer is fully transparent/u);
 });
 
+test('the hash-pinned structural-only grid fixture permits transparent pixels but forbids visual submission', () => {
+  const assetId = 'official-grid-placement-bound';
+  const rivSha256 = '02dca529414c584c38e7c438e501e276d89337588d9042381120d330784380d0';
+  const transparentArtifacts = new Map(); const transparent = Buffer.alloc(8);
+  const officialPixels = capture('pixels', '@rive-app/webgl2@2.40.0', () => pixelValue('grid-official', transparent, transparentArtifacts));
+  const hyaPixels = capture('pixels', 'haiyue-exact-hya', () => pixelValue('grid-hya', transparent, transparentArtifacts));
+  bindCaptureIdentity(officialPixels, assetId, rivSha256); bindCaptureIdentity(hyaPixels, assetId, rivSha256);
+  assert.equal(createRiveOracleChannelComparison({
+    channel: 'pixels', officialCapture: officialPixels, hyaCapture: hyaPixels,
+    officialPath: 'evidence/grid-pixels-official.json', hyaPath: 'evidence/grid-pixels-hya.json', comparisonPath: 'evidence/grid-pixels-comparison.json',
+    artifactBytesByPath: transparentArtifacts, scenario, scenarioSha256, assetId, rivSha256,
+  }).comparison.status, 'passed');
+
+  const topology = {
+    semantic: { oracle: 'neutral-drawable-topology@1', items: [
+      { id: 'artboard', family: 'structure', drawOrder: 0 },
+      { id: 'layout-a', family: 'structure', drawOrder: 1 },
+      { id: 'layout-b', family: 'structure', drawOrder: 2 },
+    ] },
+  };
+  const officialGeometry = capture('geometryAndDrawOrder', '@rive-app/webgl2@2.40.0', () => ({
+    artboard: 'Main', viewport: 'desktop-1x', topology: { ...topology, submission: { oracle: 'native-render-command-stream@1', backend: 'webgl2', artboardBounds: [0, 0, 100, 100], draws: [] } },
+  }));
+  const hyaGeometry = capture('geometryAndDrawOrder', 'haiyue-exact-hya', () => ({
+    artboard: 'Main', viewport: 'desktop-1x', topology: { ...topology, submission: { oracle: 'webgpu-scene-submission@1', backend: 'webgpu', visualCount: 0, compositeLayerCount: 0, maskTargetCount: 0, effectTargetCount: 0 } },
+  }));
+  bindCaptureIdentity(officialGeometry, assetId, rivSha256); bindCaptureIdentity(hyaGeometry, assetId, rivSha256);
+  assert.equal(createRiveOracleChannelComparison({
+    channel: 'geometryAndDrawOrder', officialCapture: officialGeometry, hyaCapture: hyaGeometry,
+    officialPath: 'evidence/grid-geometry-official.json', hyaPath: 'evidence/grid-geometry-hya.json', comparisonPath: 'evidence/grid-geometry-comparison.json',
+    artifactBytesByPath: new Map(), scenario, scenarioSha256, assetId, rivSha256,
+  }).comparison.status, 'passed');
+});
+
 function capture(channel, runtime, value) {
   const samples = [];
   for (let replayIndex = 0; replayIndex < scenario.replayCount; replayIndex++) {
@@ -118,5 +152,6 @@ function pixelValue(label, bytes, artifactBytesByPath) {
   artifactBytesByPath.set(path, bytes);
   return { width: 2, height: 1, dpr: 1, rgba: { path, sha256: createHash('sha256').update(bytes).digest('hex'), byteLength: bytes.byteLength, mediaType: 'application/octet-stream' } };
 }
+function bindCaptureIdentity(captureValue, assetId, rivSha256) { captureValue.assetId = assetId; captureValue.rivSha256 = rivSha256; }
 function jsonBytes(value) { return Buffer.from(`${JSON.stringify(value)}\n`); }
 function jsonReference(path, bytes) { return { path, sha256: createHash('sha256').update(bytes).digest('hex'), byteLength: bytes.byteLength, mediaType: 'application/json' }; }

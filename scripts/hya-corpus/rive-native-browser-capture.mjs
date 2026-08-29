@@ -12,7 +12,7 @@ import { runChromeWebGpuFixture } from '../webgpu-gate/chrome-runner.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OFFICIAL_JS_SHA256 = 'd25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714';
 const OFFICIAL_WASM_SHA256 = '87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32';
-const CAPTURE_INDEX_SHA256 = '11dc25f5cf6b85d9f61f2ef46ec84924c94c81b677cae09bc303bc02345585e5';
+const CAPTURE_INDEX_SHA256 = '2cba454cb87ab205bf4d93d717217faaf93ecc1b816e5c21eeafb0bfb6a4ffb0';
 const CAPTURE_BUNDLE_SHA256 = 'a6db59345aeb9356c03f6d800d50a68057483aec6a37ffda8b2cb1f656dd6803';
 const SHARED_ENGINE_SHA256 = 'ec089fea7d86884f172b3bee7ae7f0bc14a93a431a5325222ea6fbc671075276';
 const execute = promisify(execFile);
