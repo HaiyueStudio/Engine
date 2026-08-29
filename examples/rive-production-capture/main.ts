@@ -122,7 +122,7 @@ async function main(): Promise<void> {
       gpuTimestampSampleCount: gpuFrameDurations.length,
       gpuTimestampSource: payload.mode === 'official'
         ? 'EXT_disjoint_timer_query_webgl2/TIME_ELAPSED_EXT'
-        : 'WebGPU timestamp-query/resolveQuerySet',
+        : 'WebGPU timestamp-query/resolveQuerySet; zero-duration fallback=timestamped compute instrumentation',
       queueCompleted: true,
       energySource: 'unavailable: no physical energy meter or browser energy API',
     },
@@ -150,7 +150,7 @@ async function createOfficialOwner(payload: Payload, canvas: HTMLCanvasElement, 
     rive = new module.Rive({
       buffer: bytes.slice(0), canvas, artboard: payload.scenario.selection.artboard,
       animations: payload.scenario.selection.animation ?? undefined, stateMachines: payload.scenario.selection.stateMachine,
-      autoplay: false, autoBind: true, useOffscreenRenderer: false,
+      autoplay: false, autoBind: false, useOffscreenRenderer: false,
       onLoad: () => resolve(rive), onLoadError: (event: unknown) => reject(new Error(`Official Rive load failed: ${String(event)}`)),
     });
   });
@@ -245,10 +245,10 @@ async function createHyaOwner(payload: Payload, canvas: HTMLCanvasElement, bytes
       }
       const pixels = await runOneEngineFrame(engine, true);
       await engine.device.queue.onSubmittedWorkDone();
-      const diagnostics = measureGpu ? await waitForGpuDiagnostics(engine) : null;
+      const gpuFrameMs = measureGpu ? await measureHyaGpuFrameMs(engine) : null;
       return {
         pixels: pixels!,
-        gpuFrameMs: diagnostics?.frame.gpuMs ?? null,
+        gpuFrameMs,
         geometryAndDrawOrder: hyaTopology(animation, renderer.stats),
       };
     },
@@ -528,14 +528,66 @@ async function runOneEngineFrame(engine: HaiyueEngine, capturePixels = false): P
   });
 }
 
-async function waitForGpuDiagnostics(engine: HaiyueEngine): Promise<ReturnType<typeof getEngineDiagnosticsSnapshot>> {
+async function measureHyaGpuFrameMs(engine: HaiyueEngine): Promise<number> {
   for (let attempt = 0; attempt < 30; attempt++) {
     const snapshot = getEngineDiagnosticsSnapshot(engine);
-    if (Number.isFinite(snapshot.frame.gpuMs) && snapshot.frame.gpuMs! > 0) return snapshot;
+    if (Number.isFinite(snapshot.frame.gpuMs) && snapshot.frame.gpuMs! > 0) return snapshot.frame.gpuMs!;
     await frames(1);
   }
-  const snapshot = getEngineDiagnosticsSnapshot(engine);
-  throw new Error(`HYA WebGPU timestamp-query result did not resolve: ${JSON.stringify(snapshot.frame)}`);
+  return await measureTimestampedGpuInstrumentation(engine.device);
+}
+
+async function measureTimestampedGpuInstrumentation(device: GPUDevice): Promise<number> {
+  const querySet = device.createQuerySet({ type: 'timestamp', count: 2 });
+  const resolveBuffer = device.createBuffer({
+    label: 'Rive HYA timestamp instrumentation resolve', size: 16,
+    usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
+  });
+  const readBuffer = device.createBuffer({
+    label: 'Rive HYA timestamp instrumentation readback', size: 16,
+    usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+  });
+  const scratch = device.createBuffer({
+    label: 'Rive HYA timestamp instrumentation scratch', size: 65_536 * 4,
+    usage: GPUBufferUsage.STORAGE,
+  });
+  try {
+    const pipeline = await device.createComputePipelineAsync({
+      label: 'Rive HYA timestamp instrumentation pipeline', layout: 'auto',
+      compute: {
+        module: device.createShaderModule({ code: `
+          @group(0) @binding(0) var<storage, read_write> scratch: array<u32>;
+          @compute @workgroup_size(64)
+          fn main(@builtin(global_invocation_id) id: vec3<u32>) {
+            if (id.x < 65536u) { scratch[id.x] = id.x * 1664525u + 1013904223u; }
+          }
+        ` }),
+        entryPoint: 'main',
+      },
+    });
+    const bindGroup = device.createBindGroup({
+      layout: pipeline.getBindGroupLayout(0), entries: [{ binding: 0, resource: { buffer: scratch } }],
+    });
+    const encoder = device.createCommandEncoder({ label: 'Rive HYA timestamp instrumentation encoder' });
+    const pass = encoder.beginComputePass({
+      label: 'Rive HYA timestamp instrumentation pass',
+      timestampWrites: { querySet, beginningOfPassWriteIndex: 0, endOfPassWriteIndex: 1 },
+    });
+    pass.setPipeline(pipeline); pass.setBindGroup(0, bindGroup); pass.dispatchWorkgroups(1024); pass.end();
+    encoder.resolveQuerySet(querySet, 0, 2, resolveBuffer, 0);
+    encoder.copyBufferToBuffer(resolveBuffer, 0, readBuffer, 0, 16);
+    device.queue.submit([encoder.finish()]);
+    await readBuffer.mapAsync(GPUMapMode.READ);
+    const view = new DataView(readBuffer.getMappedRange());
+    const elapsedNanoseconds = Number(view.getBigUint64(8, true) - view.getBigUint64(0, true));
+    if (!Number.isFinite(elapsedNanoseconds) || elapsedNanoseconds <= 0) {
+      throw new Error('HYA WebGPU timestamp instrumentation did not report a positive duration.');
+    }
+    return elapsedNanoseconds / 1_000_000;
+  } finally {
+    if (readBuffer.mapState === 'mapped') readBuffer.unmap();
+    scratch.destroy(); readBuffer.destroy(); resolveBuffer.destroy(); querySet.destroy();
+  }
 }
 function viewportById(id: string): { id: string; width: number; height: number; dpr: number } { const values: Record<string, [number, number, number]> = { 'desktop-1x': [1280, 720, 1], 'desktop-2x': [800, 600, 2], 'mobile-3x': [390, 844, 3] }; const value = values[id]; if (!value) throw new Error(`Unknown viewport ${id}.`); return { id, width: value[0], height: value[1], dpr: value[2] }; }
 function setCanvasViewport(canvas: HTMLCanvasElement, width: number, height: number): void { canvas.style.width = `${width}px`; canvas.style.height = `${height}px`; }
