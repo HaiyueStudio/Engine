@@ -19,13 +19,17 @@ export async function evaluate(request, context) {
     height: positive(artboardFields.height, 600),
     coordinateSystem: 'screen-y-down',
   };
+  const hierarchy = await buildComponentHierarchy(report, objects);
   const nodeSet = new Set(ir.nodes);
+  const drawableOrder = new Map((ir.drawables ?? []).map((id, index) => [id, index]));
+  const vectorComponents = compileVectorComponents(hierarchy, objects, visits);
+  const timeline = await compileCoreTimeline(hierarchy, report, objects);
   const nodes = ir.nodes.map(id => {
     const object = objects.get(id);
     const visit = visits.get(id);
     if (!object || !visit) throw new Error(`Neutral node ${id} is absent from the imported object ledger.`);
     const fields = namedFields(object, visit);
-    const parent = parentId(fields.parentId, objects, nodeSet);
+    const parent = hierarchy.parentNodeByObjectId.get(id);
     const transform = compact({
       position: pair(fields.x, fields.y),
       rotation: finite(fields.rotation),
@@ -37,12 +41,16 @@ export async function evaluate(request, context) {
       name: string(fields.name),
       parent,
       transform: Object.keys(transform).length > 0 ? transform : undefined,
+      components: vectorComponents.get(id),
       extensions: {
         neutralFamily: object.family,
         neutralFields: Object.fromEntries(object.properties.map(property => [property.id, property.value])),
+        neutralDrawable: drawableOrder.has(id),
+        ...(drawableOrder.has(id) ? { neutralDrawOrder: drawableOrder.get(id) } : {}),
       },
     });
   });
+  const hasVectorVisuals = vectorComponents.size > 0;
   const coverage = ir.objects.map(object => ({
     objectId: object.id,
     propertyIds: object.properties.map(property => property.id),
@@ -58,15 +66,32 @@ export async function evaluate(request, context) {
     baseDocument: {
       format: 'haiyue-animation', version: '1.0',
       name: string(artboardFields.name) ?? 'Rive 7.3 imported composition',
-      canvas, duration: 2, endBehavior: 'loop',
+      canvas, duration: timeline.duration, endBehavior: 'loop',
       resources: assets.map(asset => ({ id: `resource-${asset.id}`, type: resourceType(asset.mimeType), uri: `asset:${asset.id}`, mimeType: asset.mimeType })),
       nodes,
+      ...(timeline.tracks.length > 0 ? { tracks: timeline.tracks } : {}),
+      ...((timeline.clips.length > 0 || timeline.stateMachines.length > 0) ? {
+        extensions: {
+          ...(timeline.clips.length > 0 ? { 'org.haiyue.rive-animation-clips@1': { clips: timeline.clips } } : {}),
+          ...(timeline.stateMachines.length > 0 ? { 'org.haiyue.rive-state-machines@1': { stateMachines: timeline.stateMachines } } : {}),
+        },
+      } : {}),
+      ...(hasVectorVisuals ? {
+        extensionsUsed: ['org.haiyue.vector-shape@1'],
+        extensionsRequired: ['org.haiyue.vector-shape@1'],
+      } : {}),
     },
     artifacts: [], coverage, bakedTracks: [], assets,
     featureLedger: [{
       feature: 'neutral.metadata-preservation', capability: 'hya-core',
       representation: 'native-semantic', count: ir.objects.length,
-    }],
+    }, ...(hasVectorVisuals ? [{
+      feature: 'vector.executable-core', capability: 'hya-core',
+      representation: 'native-semantic', count: [...vectorComponents.values()].reduce((sum, value) => sum + value.length, 0),
+    }] : []), ...(timeline.tracks.length > 0 ? [{
+      feature: 'timeline.executable-core', capability: 'hya-core',
+      representation: 'native-semantic', count: timeline.tracks.length,
+    }] : [])],
     classification: { unclassifiedObjects: 0, unclassifiedProperties: 0, unclassifiedAssets: 0, unclassifiedScripts: 0 },
   };
 }
@@ -117,10 +142,352 @@ function namedFields(object, visit) {
     const value = property.neutralFieldIds?.length === 1 ? byId.get(property.neutralFieldIds[0]) : undefined;
     if (value && 'value' in value) output[property.sourceName] = value.value;
     else if (value?.type === 'color') output[property.sourceName] = value.rgba;
+    else if (value?.type === 'bytes') output[property.sourceName] = value;
   }
   return output;
 }
-function parentId(value, objects, nodes) { if (!Number.isSafeInteger(value) || value < 0) return undefined; const id = `object:${String(value).padStart(8, '0')}`; return objects.has(id) && nodes.has(id) ? id : undefined; }
+
+async function compileCoreTimeline(hierarchy, report, objects) {
+  const modulePath = resolve(root, 'animation-spec/dist-test/rive/import/generated/frozen-registry.js');
+  const { FROZEN_PROPERTIES } = await import(pathToFileURL(modulePath).href);
+  const propertyNames = new Map(FROZEN_PROPERTIES.map(value => [value.key, value.name]));
+  const componentByIndex = new Map(hierarchy.entries.map(value => [value.componentIndex, value]));
+  const records = report.objects.map(visit => ({
+    visit,
+    object: objects.get(visit.neutralObjectId),
+    fields: namedFields(objects.get(visit.neutralObjectId), visit),
+  }));
+  const animations = [];
+  let animation = null; let target = null; let property = null; let lastKey = null;
+  for (const record of records) {
+    const name = record.visit.sourceName;
+    if (name === 'LinearAnimation') {
+      animation = { name: string(record.fields.name) ?? `animation-${animations.length}`, fields: record.fields, curves: [] };
+      animations.push(animation); target = null; property = null; lastKey = null; continue;
+    }
+    if (!animation) continue;
+    if (name === 'KeyedObject') {
+      target = componentByIndex.get(record.fields.objectId) ?? null; property = null; lastKey = null; continue;
+    }
+    if (name === 'KeyedProperty') {
+      property = propertyNames.get(record.fields.propertyKey) ?? null;
+      if (target && property) { animation.curves.push({ target, property, keys: [] }); }
+      lastKey = null; continue;
+    }
+    if (/^KeyFrame(?:Double|Id|Bool|Color)$/u.test(name) && target && property) {
+      const curve = animation.curves.at(-1);
+      if (!curve || curve.target !== target || curve.property !== property) continue;
+      const value = record.fields.value;
+      if (!Number.isFinite(value)) continue;
+      lastKey = { frame: Number.isFinite(record.fields.frame) ? record.fields.frame : 0, value };
+      curve.keys.push(lastKey); continue;
+    }
+    if (name === 'DataBindContext' && lastKey) lastKey.binding = record.fields.sourcePathIds;
+  }
+  for (const item of animations) {
+    item.fps = positive(item.fields.fps, 60);
+    const maximumFrame = item.curves.flatMap(curve => curve.keys).reduce((maximum, key) => Math.max(maximum, key.frame), 0);
+    item.frameDuration = positive(item.fields.duration, Math.max(1, maximumFrame || 60));
+    item.duration = item.frameDuration / item.fps;
+    for (const curve of item.curves) for (const key of curve.keys) key.time = key.frame / item.fps;
+  }
+  lowerStaticJoystickRemaps(animations, hierarchy);
+  lowerJoystickAnimationRemaps(animations);
+  const clips = []; let cursor = 0;
+  for (const item of animations) { item.start = cursor; clips.push({ name: item.name, start: cursor, duration: item.duration }); cursor += item.duration; }
+  const tracksByBinding = new Map();
+  for (const item of animations) {
+    const grouped = new Map();
+    for (const curve of item.curves) {
+      const propertyName = coreTrackProperty(curve.property);
+      if (!propertyName || curve.keys.length === 0 || !curve.target?.objectId || curve.target.transformTarget !== true) continue;
+      const key = `${curve.target.objectId}\0${propertyName}`;
+      const group = grouped.get(key) ?? { target: curve.target, property: propertyName, curves: new Map() };
+      group.curves.set(curve.property, curve); grouped.set(key, group);
+    }
+    for (const group of grouped.values()) {
+      const times = [...new Set([...group.curves.values()].flatMap(curve => curve.keys.map(key => key.frame / item.fps)))].sort((left, right) => left - right);
+      if (times.length === 1) times.push(item.duration);
+      const values = [];
+      for (const time of times) values.push(...coreTrackValue(group, time));
+      const binding = `${group.target.objectId}\0${group.property}`;
+      const size = group.property === 'position' || group.property === 'scale' ? 2 : 1;
+      let track = tracksByBinding.get(binding);
+      if (!track) {
+        track = { node: group.target.objectId, property: group.property, interpolation: 'linear', times: [0], values: coreTrackBase(group) };
+        tracksByBinding.set(binding, track);
+      }
+      if (item.start > track.times.at(-1) + 1e-6) {
+        const previous = track.values.slice(-size);
+        track.times.push(item.start - 1e-6); track.values.push(...previous);
+      }
+      for (let index = 0; index < times.length; index++) {
+        let at = item.start + times[index];
+        if (index === times.length - 1 && times[index] >= item.duration && item.start + item.duration < Math.max(2, cursor || 2)) at -= 1e-6;
+        const sample = values.slice(index * size, index * size + size);
+        const last = track.times.at(-1);
+        if (Math.abs(last - at) <= 1e-9) track.values.splice(track.values.length - size, size, ...sample);
+        else { track.times.push(at); track.values.push(...sample); }
+      }
+    }
+  }
+  return {
+    duration: Math.max(2, cursor || 2), clips, tracks: [...tracksByBinding.values()],
+    stateMachines: compilePausedStateMachineEntries(records, animations),
+  };
+}
+
+function lowerStaticJoystickRemaps(animations, hierarchy) {
+  for (const joystick of hierarchy.entries.filter(value => value.sourceName === 'Joystick')) {
+    const handle = Number.isSafeInteger(joystick.fields.handleSourceId)
+      ? hierarchy.entries.find(value => value.componentIndex === joystick.fields.handleSourceId)
+      : null;
+    const axes = handle ? joystickAxesFromHandle(joystick.fields, handle.fields) : {
+      x: finite(joystick.fields.x) ?? 0,
+      y: finite(joystick.fields.y) ?? 0,
+    };
+    for (const [axis, idField, flag] of [['x', 'xId', 1], ['y', 'yId', 2]]) {
+      const drivenId = joystick.fields[idField];
+      const driven = Number.isSafeInteger(drivenId) ? animations[drivenId] : null;
+      if (!driven) continue;
+      const inverted = (Number(joystick.fields.joystickFlags ?? 0) & flag) !== 0;
+      const normalized = Math.max(0, Math.min(1, ((inverted ? -axes[axis] : axes[axis]) + 1) / 2));
+      for (const curve of driven.curves) {
+        if (!coreTrackProperty(curve.property) || curve.keys.length === 0 || curve.target?.transformTarget !== true) continue;
+        curve.target.fields[curve.property] = curveAt(curve, normalized * driven.duration, curve.keys[0].value);
+      }
+    }
+  }
+}
+
+function joystickAxesFromHandle(joystick, handle) {
+  const width = positive(joystick.width, 100); const height = positive(joystick.height, 100);
+  const left = (finite(joystick.posX) ?? 0) - width * (finite(joystick.originX) ?? 0.5);
+  const top = (finite(joystick.posY) ?? 0) - height * (finite(joystick.originY) ?? 0.5);
+  return {
+    x: ((finite(handle.x) ?? 0) - left) * 2 / width - 1,
+    y: ((finite(handle.y) ?? 0) - top) * 2 / height - 1,
+  };
+}
+
+function lowerJoystickAnimationRemaps(animations) {
+  for (const animation of animations) {
+    const driverCurves = animation.curves.filter(curve => curve.target?.sourceName === 'Joystick' && (curve.property === 'x' || curve.property === 'y'));
+    for (const driver of driverCurves) {
+      const axis = driver.property;
+      const drivenId = axis === 'x' ? driver.target.fields.xId : driver.target.fields.yId;
+      const driven = Number.isSafeInteger(drivenId) ? animations[drivenId] : null;
+      if (!driven) continue;
+      const flag = axis === 'x' ? 1 : 2;
+      const inverted = (Number(driver.target.fields.joystickFlags ?? 0) & flag) !== 0;
+      for (const drivenCurve of driven.curves) {
+        if (!coreTrackProperty(drivenCurve.property) || drivenCurve.keys.length === 0) continue;
+        animation.curves.push({
+          target: drivenCurve.target,
+          property: drivenCurve.property,
+          keys: driver.keys.map(key => {
+            const normalized = Math.max(0, Math.min(1, ((inverted ? -key.value : key.value) + 1) / 2));
+            return { frame: key.frame, time: key.time, value: curveAt(drivenCurve, normalized * driven.duration, drivenCurve.keys[0].value) };
+          }),
+        });
+      }
+    }
+  }
+}
+
+function compilePausedStateMachineEntries(records, animations) {
+  const output = []; let machine = null; let states = []; let entryIndex = -1; let entryTarget = null;
+  for (const record of records) {
+    if (record.visit.sourceName === 'StateMachine') {
+      if (machine) finish();
+      machine = { name: string(record.fields.name) ?? `state-machine-${output.length}` }; states = []; entryIndex = -1; entryTarget = null;
+    } else if (!machine) continue;
+    else if (record.visit.sourceName === 'StateMachineLayer') {
+      states = []; entryIndex = -1; entryTarget = null;
+    } else if (['ExitState', 'AnyState', 'EntryState', 'AnimationState'].includes(record.visit.sourceName)) {
+      states.push(record); if (record.visit.sourceName === 'EntryState') entryIndex = states.length - 1;
+    } else if (record.visit.sourceName === 'StateTransition' && entryIndex >= 0) {
+      entryTarget = record.fields.stateToId;
+    }
+  }
+  if (machine) finish();
+  return output;
+  function finish() {
+    const target = Number.isSafeInteger(entryTarget) ? states[entryTarget] : null;
+    if (target?.visit.sourceName === 'AnimationState') machine.initialAnimation = animations[target.fields.animationId]?.name;
+    if (machine?.initialAnimation) output.push({ name: machine.name, initialAnimation: machine.initialAnimation, paused: true });
+  }
+}
+
+function coreTrackProperty(value) {
+  if (value === 'x' || value === 'y') return 'position';
+  if (value === 'scaleX' || value === 'scaleY') return 'scale';
+  if (value === 'rotation') return 'rotation';
+  if (value === 'opacity') return 'opacity';
+  return null;
+}
+
+function coreTrackValue(group, time) {
+  const base = group.target.fields;
+  if (group.property === 'position') return [curveAt(group.curves.get('x'), time, finite(base.x) ?? 0), curveAt(group.curves.get('y'), time, finite(base.y) ?? 0)];
+  if (group.property === 'scale') return [curveAt(group.curves.get('scaleX'), time, finite(base.scaleX) ?? 1), curveAt(group.curves.get('scaleY'), time, finite(base.scaleY) ?? 1)];
+  return [curveAt(group.curves.get(group.property), time, group.property === 'opacity' ? finite(base.opacity) ?? 1 : finite(base.rotation) ?? 0)];
+}
+
+function coreTrackBase(group) {
+  const base = group.target.fields;
+  if (group.property === 'position') return [finite(base.x) ?? 0, finite(base.y) ?? 0];
+  if (group.property === 'scale') return [finite(base.scaleX) ?? 1, finite(base.scaleY) ?? 1];
+  return [group.property === 'opacity' ? finite(base.opacity) ?? 1 : finite(base.rotation) ?? 0];
+}
+
+function curveAt(curve, time, fallback) {
+  if (!curve?.keys?.length) return fallback;
+  const keys = curve.keys;
+  if (time <= keys[0].time) return keys[0].value;
+  for (let index = 1; index < keys.length; index++) {
+    const right = keys[index]; const left = keys[index - 1];
+    if (time <= right.time) {
+      const span = Math.max(1e-9, right.time - left.time);
+      return left.value + (right.value - left.value) * ((time - left.time) / span);
+    }
+  }
+  return keys.at(-1).value;
+}
+
+async function buildComponentHierarchy(report, objects) {
+  const modulePath = resolve(root, 'animation-spec/dist-test/rive/import/generated/frozen-registry.js');
+  const { FROZEN_OBJECTS } = await import(pathToFileURL(modulePath).href);
+  const registry = new Map(FROZEN_OBJECTS.map(value => [value.typeKey, value]));
+  const componentIndexByObjectId = new Map();
+  const parentNodeByObjectId = new Map();
+  const entries = [];
+  let local = [];
+  for (const visit of report.objects) {
+    const source = registry.get(visit.sourceTypeKey);
+    if (!source?.lineage.includes('Component') || isRootScopedComponent(source)) continue;
+    if (visit.sourceName === 'Artboard') local = [];
+    if (local.length === 0 && visit.sourceName !== 'Artboard') continue;
+    const object = objects.get(visit.neutralObjectId);
+    const fields = namedFields(object, visit);
+    const componentIndex = local.length;
+    const entry = {
+      componentIndex, objectId: visit.neutralObjectId, sourceName: visit.sourceName,
+      transformTarget: source.lineage.includes('TransformComponent'), fields, visit,
+    };
+    local.push(entry); entries.push(entry); componentIndexByObjectId.set(entry.objectId, componentIndex);
+    if (componentIndex > 0) {
+      const parent = local[Number.isSafeInteger(fields.parentId) ? fields.parentId : 0];
+      if (parent && parent.sourceName !== 'Artboard') parentNodeByObjectId.set(entry.objectId, parent.objectId);
+    }
+  }
+  return { entries, componentIndexByObjectId, parentNodeByObjectId };
+}
+
+function isRootScopedComponent(source) {
+  return source.lineage.includes('ViewModelInstance') || source.lineage.includes('ViewModelInstanceValue') || source.lineage.includes('ScrollPhysics');
+}
+
+function compileVectorComponents(hierarchy) {
+  const output = new Map();
+  const children = new Map();
+  for (const entry of hierarchy.entries) {
+    const parent = Number.isSafeInteger(entry.fields.parentId) ? entry.fields.parentId : 0;
+    const values = children.get(parent) ?? []; values.push(entry); children.set(parent, values);
+  }
+  for (const shape of hierarchy.entries.filter(value => value.sourceName === 'Shape')) {
+    const owned = children.get(shape.componentIndex) ?? [];
+    const geometries = owned.filter(value => VECTOR_GEOMETRY_TYPES.has(value.sourceName));
+    const paints = owned.filter(value => value.sourceName === 'Fill' || value.sourceName === 'Stroke');
+    const components = [];
+    for (const geometry of geometries) {
+      const path = vectorPath(geometry, children.get(geometry.componentIndex) ?? []);
+      if (!path) continue;
+      for (const paint of paints) {
+        const style = vectorPaint(paint, children.get(paint.componentIndex) ?? [], children);
+        if (!style) continue;
+        components.push({ type: 'org.haiyue.vector-shape@1', ...path, ...style });
+      }
+    }
+    if (components.length > 0) output.set(shape.objectId, components);
+  }
+  for (const artboard of hierarchy.entries.filter(value => value.sourceName === 'Artboard')) {
+    const paints = (children.get(artboard.componentIndex) ?? []).filter(value => value.sourceName === 'Fill' || value.sourceName === 'Stroke');
+    const width = positive(artboard.fields.width, 800); const height = positive(artboard.fields.height, 600);
+    const components = paints.flatMap(paint => {
+      const style = vectorPaint(paint, children.get(paint.componentIndex) ?? [], children);
+      return style ? [{ type: 'org.haiyue.vector-shape@1', commands: 'MLLLZ', values: [0, 0, width, 0, width, height, 0, height], ...style }] : [];
+    });
+    if (components.length > 0) output.set(artboard.objectId, components);
+  }
+  return output;
+}
+
+const VECTOR_GEOMETRY_TYPES = new Set(['Rectangle', 'Ellipse', 'Triangle', 'Polygon', 'Star', 'PointsPath', 'ListPath']);
+
+function vectorPath(entry, owned) {
+  const f = entry.fields;
+  const x = finite(f.x) ?? finite(f.originX) ?? 0; const y = finite(f.y) ?? finite(f.originY) ?? 0;
+  const width = Math.max(0, finite(f.width) ?? 0); const height = Math.max(0, finite(f.height) ?? 0);
+  if (entry.sourceName === 'Rectangle') {
+    const left = x - width / 2; const top = y - height / 2; const right = left + width; const bottom = top + height;
+    return { commands: 'MLLLZ', values: [left, top, right, top, right, bottom, left, bottom] };
+  }
+  if (entry.sourceName === 'Ellipse') {
+    const rx = width / 2; const ry = height / 2; const k = 0.5522847498307936;
+    return { commands: 'MCCCCZ', values: [x + rx, y, x + rx, y + k * ry, x + k * rx, y + ry, x, y + ry, x - k * rx, y + ry, x - rx, y + k * ry, x - rx, y, x - rx, y - k * ry, x - k * rx, y - ry, x, y - ry, x + k * rx, y - ry, x + rx, y - k * ry, x + rx, y] };
+  }
+  if (entry.sourceName === 'Triangle') {
+    return { commands: 'MLLZ', values: [x, y - height / 2, x + width / 2, y + height / 2, x - width / 2, y + height / 2] };
+  }
+  if (entry.sourceName === 'Polygon' || entry.sourceName === 'Star') {
+    const points = Math.max(3, Math.min(256, Math.floor(f.points ?? 5))); const values = [];
+    const inner = entry.sourceName === 'Star' ? Math.max(0, Math.min(1, finite(f.innerRadius) ?? 0.5)) : 1;
+    const count = entry.sourceName === 'Star' ? points * 2 : points;
+    for (let index = 0; index < count; index++) {
+      const angle = -Math.PI / 2 + index * Math.PI * 2 / count; const radius = Math.min(width, height) / 2 * (index % 2 === 1 ? inner : 1);
+      values.push(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius);
+    }
+    return { commands: `M${'L'.repeat(count - 1)}Z`, values };
+  }
+  const vertices = owned.filter(value => /Vertex$/u.test(value.sourceName));
+  if (vertices.length < 2) return null;
+  const values = vertices.flatMap(value => [finite(value.fields.x) ?? 0, finite(value.fields.y) ?? 0]);
+  return { commands: `M${'L'.repeat(vertices.length - 1)}${f.isClosed === false ? '' : 'Z'}`, values };
+}
+
+function vectorPaint(entry, owned, children) {
+  const sourceEntry = owned.find(value => ['SolidColor', 'LinearGradient', 'RadialGradient'].includes(value.sourceName));
+  const source = paintSource(sourceEntry, sourceEntry ? children.get(sourceEntry.componentIndex) ?? [] : []);
+  if (source.kind === 'solid' && source.color[3] <= 0) return null;
+  if (entry.sourceName === 'Fill') return { fill: { ...source, opacity: 1 }, fillRule: entry.fields.fillRule === 1 ? 'evenodd' : 'nonzero' };
+  return {
+    stroke: {
+      color: source.kind === 'solid' ? source.color : [1, 1, 1, 1],
+      ...(source.kind === 'solid' ? {} : { gradient: source }),
+      width: Math.max(0.001, finite(entry.fields.thickness) ?? 1),
+      lineCap: ['butt', 'round', 'square'][entry.fields.cap ?? 0] ?? 'butt',
+      lineJoin: ['miter', 'round', 'bevel'][entry.fields.join ?? 0] ?? 'miter',
+      miterLimit: 4,
+    },
+  };
+}
+
+function paintSource(entry, owned) {
+  if (!entry || entry.sourceName === 'SolidColor') return { kind: 'solid', color: color(entry?.fields.colorValue, RIVE_DEFAULT_PAINT_COLOR) };
+  const stops = owned.filter(value => value.sourceName === 'GradientStop').map(value => ({ offset: Math.max(0, Math.min(1, finite(value.fields.position) ?? 0)), color: color(value.fields.colorValue, [0, 0, 0, 1]) }));
+  const normalizedStops = (stops.length >= 2 ? stops : [{ offset: 0, color: [0, 0, 0, 1] }, { offset: 1, color: [1, 1, 1, 1] }]).flatMap(stop => [stop.offset, ...stop.color]);
+  if (entry.sourceName === 'RadialGradient') return { kind: 'radial-gradient', start: [finite(entry.fields.startX) ?? 0, finite(entry.fields.startY) ?? 0], end: [finite(entry.fields.endX) ?? 1, finite(entry.fields.endY) ?? 0], stops: normalizedStops };
+  return { kind: 'linear-gradient', start: [finite(entry.fields.startX) ?? 0, finite(entry.fields.startY) ?? 0], end: [finite(entry.fields.endX) ?? 1, finite(entry.fields.endY) ?? 0], stops: normalizedStops };
+}
+
+// Rive 7.3's serialized SolidColor omits colorValue when it is the schema
+// default. Preserve that default instead of treating an omitted field as black.
+const RIVE_DEFAULT_PAINT_COLOR = Object.freeze([116 / 255, 116 / 255, 116 / 255, 1]);
+
+function color(value, fallback) {
+  return Array.isArray(value) && value.length === 4 ? value.map(component => Math.max(0, Math.min(1, Number(component)))) : fallback;
+}
 function pair(left, right) { return Number.isFinite(left) && Number.isFinite(right) ? [left, right] : undefined; }
 function finite(value) { return Number.isFinite(value) ? value : undefined; }
 function positive(value, fallback) { return Number.isFinite(value) && value > 0 ? value : fallback; }

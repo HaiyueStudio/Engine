@@ -115,6 +115,7 @@ export class RenderTargetManager implements RenderViewTarget {
       device,
       format,
       alphaMode: this._options.alphaMode,
+      usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
     });
     this.resizeToDisplaySize(true);
   }

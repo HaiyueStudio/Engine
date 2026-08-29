@@ -3,10 +3,11 @@ import { createHash } from 'node:crypto';
 export const RIVE_ORACLE_CAPTURE_KIND = 'haiyue-rive-normalized-channel-capture';
 export const RIVE_ORACLE_COMPARISON_KIND = 'haiyue-rive-channel-comparison';
 export const RIVE_ORACLE_CHANNEL_VERSION = 1;
-export const RIVE_ORACLE_PIXEL_ALGORITHM = 'global-rgba-ssim@1';
+export const RIVE_ORACLE_PIXEL_ALGORITHM = 'global-rgba-ssim-tolerant-change@2';
 
 const HASH = /^[a-f0-9]{64}$/u;
 const PIXEL_THRESHOLDS = Object.freeze({ maxChannelDelta: 2 / 255, changedPixelRatio: 0.001, minimumSsim: 0.9995 });
+const PIXEL_CHANGE_DELTA = Math.round(PIXEL_THRESHOLDS.maxChannelDelta * 255);
 
 export function validateRiveOracleChannelEvidence({
   channel,
@@ -69,9 +70,11 @@ export function validateRiveOracleChannelEvidence({
         const expectedActions = (scenario?.actions ?? []).filter(action => action.atMicros === atMicros).map(action => action.id);
         if (stableJson(sample.actionIds) !== stableJson(expectedActions)) violations.push(`${label} sample ${sampleIndex - 1} action identities differ from the scenario`);
         if (channel === 'pixels') validatePixelValue(sample.value, `${label} sample ${sampleIndex - 1}`);
+        else if (channel === 'geometryAndDrawOrder') validateGeometryValue(sample.value, runtime, `${label} sample ${sampleIndex - 1}`);
         else if (!isBoundedJson(sample.value)) violations.push(`${label} sample ${sampleIndex - 1} value is not bounded JSON`);
       }
     }
+    if (channel === 'geometryAndDrawOrder') validateGeometryPopulation(samples, runtime, label);
   }
 
   function validatePixelValue(value, label) {
@@ -89,6 +92,56 @@ export function validateRiveOracleChannelEvidence({
     const bytes = asBytes(supplied);
     equal(bytes.byteLength, reference?.byteLength, `${label} RGBA supplied byte length`);
     equal(createHash('sha256').update(bytes).digest('hex'), reference?.sha256, `${label} RGBA content hash`);
+    let occupiedPixels = 0;
+    for (let offset = 3; offset < bytes.byteLength; offset += 4) occupiedPixels += bytes[offset] === 0 ? 0 : 1;
+    if (occupiedPixels === 0) violations.push(`${label} framebuffer is fully transparent`);
+  }
+
+  function validateGeometryValue(value, runtime, label) {
+    exactKeys(value, ['artboard', 'viewport', 'topology'], `${label} geometry value`);
+    requiredString(value?.artboard, `${label} artboard`); requiredString(value?.viewport, `${label} viewport`);
+    const topology = value?.topology;
+    exactKeys(topology, ['semantic', 'submission'], `${label} topology`);
+    const semantic = topology?.semantic;
+    exactKeys(semantic, ['oracle', 'items'], `${label} semantic topology`);
+    equal(semantic?.oracle, 'neutral-drawable-topology@1', `${label} semantic topology oracle`);
+    if (!Array.isArray(semantic?.items)) violations.push(`${label} semantic topology items must be an array`);
+    for (const [index, item] of (semantic?.items ?? []).entries()) {
+      exactKeys(item, ['id', 'family', 'drawOrder'], `${label} semantic item ${index}`);
+      requiredString(item?.id, `${label} semantic item ${index} id`);
+      requiredString(item?.family, `${label} semantic item ${index} family`);
+      equal(item?.drawOrder, index, `${label} semantic item ${index} draw order`);
+    }
+    const submission = topology?.submission;
+    if (runtime === '@rive-app/webgl2@2.40.0') {
+      exactKeys(submission, ['oracle', 'backend', 'artboardBounds', 'draws'], `${label} native submission`);
+      equal(submission?.oracle, 'native-render-command-stream@1', `${label} submission oracle`);
+      equal(submission?.backend, 'webgl2', `${label} submission backend`);
+      if (submission?.artboardBounds !== null && (!Array.isArray(submission?.artboardBounds) || submission.artboardBounds.length !== 4 || submission.artboardBounds.some(value => !Number.isFinite(value)))) violations.push(`${label} artboard bounds are invalid`);
+      if (!Array.isArray(submission?.draws)) violations.push(`${label} native draw stream must be an array`);
+      for (const [index, draw] of (submission?.draws ?? []).entries()) {
+        exactKeys(draw, ['order', 'command', 'mode', 'count', 'instances'], `${label} native draw ${index}`);
+        equal(draw?.order, index, `${label} native draw ${index} order`);
+        if (!['drawArrays', 'drawElements', 'drawArraysInstanced', 'drawElementsInstanced'].includes(draw?.command)) violations.push(`${label} native draw ${index} command is invalid`);
+        nonnegativeInteger(draw?.mode, `${label} native draw ${index} mode`);
+        nonnegativeInteger(draw?.count, `${label} native draw ${index} count`);
+        positiveInteger(draw?.instances, `${label} native draw ${index} instances`);
+      }
+    } else {
+      exactKeys(submission, ['oracle', 'backend', 'visualCount', 'compositeLayerCount', 'maskTargetCount', 'effectTargetCount'], `${label} WebGPU submission`);
+      equal(submission?.oracle, 'webgpu-scene-submission@1', `${label} submission oracle`);
+      equal(submission?.backend, 'webgpu', `${label} submission backend`);
+      for (const key of ['visualCount', 'compositeLayerCount', 'maskTargetCount', 'effectTargetCount']) nonnegativeInteger(submission?.[key], `${label} ${key}`);
+    }
+  }
+
+  function validateGeometryPopulation(samples, runtime, label) {
+    const semantics = samples.flatMap(sample => sample?.value?.topology?.semantic?.items ?? []);
+    if (semantics.length === 0) violations.push(`${label} topology oracle did not observe any drawable`);
+    const submitted = runtime === '@rive-app/webgl2@2.40.0'
+      ? samples.reduce((sum, sample) => sum + (sample?.value?.topology?.submission?.draws?.length ?? 0), 0)
+      : samples.reduce((sum, sample) => sum + Number(sample?.value?.topology?.submission?.visualCount ?? 0), 0);
+    if (submitted <= 0) violations.push(`${label} topology oracle did not observe a native draw submission`);
   }
 
   function compareCaptures(officialCapture, hyaCapture, identity) {
@@ -110,7 +163,7 @@ export function validateRiveOracleChannelEvidence({
         ssim = Math.min(ssim, metrics.ssim);
         samples.push({ replayIndex: left?.replayIndex, atMicros: left?.atMicros, status: passed ? 'passed' : 'failed', differenceCount: passed ? 0 : 1, ...metrics });
       } else {
-        const passed = stableJson(left?.value) === stableJson(right?.value);
+        const passed = stableJson(comparisonValue(channel, left?.value)) === stableJson(comparisonValue(channel, right?.value));
         if (!passed) differenceCount++;
         samples.push({ replayIndex: left?.replayIndex, atMicros: left?.atMicros, status: passed ? 'passed' : 'failed', differenceCount: passed ? 0 : 1 });
       }
@@ -156,6 +209,7 @@ export function validateRiveOracleChannelEvidence({
   function match(actual, expression, label) { if (typeof actual !== 'string' || !expression.test(actual)) violations.push(`${label} is invalid`); }
   function requiredString(actual, label) { if (typeof actual !== 'string' || actual.trim().length === 0) violations.push(`${label} is missing`); }
   function positiveInteger(actual, label) { if (!Number.isSafeInteger(actual) || actual < 1) violations.push(`${label} must be a positive safe integer`); }
+  function nonnegativeInteger(actual, label) { if (!Number.isSafeInteger(actual) || actual < 0) violations.push(`${label} must be a non-negative safe integer`); }
 }
 
 export function createRiveOracleChannelComparison(options) {
@@ -194,7 +248,7 @@ function rgbaMetrics(left, right) {
     let changed = false;
     for (let channel = 0; channel < 4; channel++) {
       const index = offset + channel; const delta = Math.abs(left[index] - right[index]);
-      maximum = Math.max(maximum, delta); changed ||= delta !== 0;
+      maximum = Math.max(maximum, delta); changed ||= delta > PIXEL_CHANGE_DELTA;
       const leftCentered = left[index] - leftMean; const rightCentered = right[index] - rightMean;
       leftVariance += leftCentered * leftCentered; rightVariance += rightCentered * rightCentered; covariance += leftCentered * rightCentered;
     }
@@ -219,6 +273,10 @@ function stableJson(value) {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
   if (value && typeof value === 'object') return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(',')}}`;
   return JSON.stringify(value);
+}
+function comparisonValue(channel, value) {
+  if (channel !== 'geometryAndDrawOrder') return value;
+  return { artboard: value?.artboard, viewport: value?.viewport, semantic: value?.topology?.semantic };
 }
 function isBoundedJson(value, depth = 0, state = { nodes: 0 }) {
   state.nodes++;

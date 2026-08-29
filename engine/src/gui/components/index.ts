@@ -3,6 +3,8 @@ export { GuiRoot } from './GuiRoot';
 export type { GuiRootOptions } from './GuiRoot';
 export { GuiButton } from './GuiButton';
 export type { GuiButtonOptions } from './GuiButton';
+export { GuiLabel } from './GuiLabel';
+export type { GuiLabelOptions, GuiLabelTextAlign } from './GuiLabel';
 export { GuiCheckbox } from './GuiCheckbox';
 export type { GuiCheckboxOptions } from './GuiCheckbox';
 export { GuiSwitch } from './GuiSwitch';

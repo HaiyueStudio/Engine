@@ -11,6 +11,8 @@ import {
   GuiImage,
   type GuiImageSource,
   GuiInput,
+  GuiLabel,
+  type GuiLabelTextAlign,
   GuiProgress,
   GuiRadio,
   GuiRoot,
@@ -29,6 +31,7 @@ export type GuiSerializedValue = string | number | boolean | null;
 export type GuiSerializedElementType =
   | 'element'
   | 'button'
+  | 'label'
   | 'input'
   | 'checkbox'
   | 'switch'
@@ -201,6 +204,15 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
   switch (data.type) {
     case 'button':
       return new GuiButton({ ...base, text: stringProp(props.text, 'Button'), variant: variantProp(props.variant) });
+    case 'label': {
+      const fontSize = optionalNumberProp(props.fontSize);
+      return new GuiLabel({
+        ...base,
+        text: stringProp(props.text, ''),
+        ...(fontSize === undefined ? {} : { fontSize }),
+        textAlign: textAlignProp(props.textAlign),
+      });
+    }
     case 'input':
       return new GuiInput({
         ...base,
@@ -282,6 +294,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
 
 function getSerializedElementType(element: GuiElement): GuiSerializedElementType {
   if (element instanceof GuiButton) return 'button';
+  if (element instanceof GuiLabel) return 'label';
   if (element instanceof GuiInput) return 'input';
   if (element instanceof GuiSwitch) return 'switch';
   if (element instanceof GuiCheckbox) return 'checkbox';
@@ -297,6 +310,13 @@ function getSerializedElementType(element: GuiElement): GuiSerializedElementType
 
 function serializeElementProps(element: GuiElement): Record<string, unknown> {
   if (element instanceof GuiButton) return { text: element.text, variant: element.variant };
+  if (element instanceof GuiLabel) {
+    return {
+      text: element.text,
+      ...(element.fontSize === undefined ? {} : { fontSize: element.fontSize }),
+      textAlign: element.textAlign,
+    };
+  }
   if (element instanceof GuiInput) return { value: element.value, placeholder: element.placeholder, readOnly: element.readOnly };
   if (element instanceof GuiSwitch) return { checked: element.checked, label: element.label };
   if (element instanceof GuiCheckbox) return { checked: element.checked, label: element.label };
@@ -371,6 +391,10 @@ function numberProp(value: unknown, fallback: number): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
+function optionalNumberProp(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
 function booleanProp(value: unknown, fallback: boolean): boolean {
   return typeof value === 'boolean' ? value : fallback;
 }
@@ -385,6 +409,10 @@ function scalarProp(value: unknown, fallback: GuiSerializedValue): GuiSerialized
 
 function variantProp(value: unknown): 'default' | 'primary' | 'danger' {
   return value === 'primary' || value === 'danger' ? value : 'default';
+}
+
+function textAlignProp(value: unknown): GuiLabelTextAlign {
+  return value === 'center' || value === 'right' ? value : 'left';
 }
 
 function placementProp(value: unknown): GuiTooltipPlacement {
@@ -430,12 +458,12 @@ function treeNodesProp(value: unknown): GuiTreeNode<GuiSerializedValue>[] {
 }
 
 const GUI_ELEMENT_TYPES = new Set<GuiSerializedElementType>([
-  'element', 'button', 'input', 'checkbox', 'switch', 'radio', 'slider',
+  'element', 'button', 'label', 'input', 'checkbox', 'switch', 'radio', 'slider',
   'progress', 'select', 'tree', 'tooltip', 'image',
 ]);
 
-const STRING_PROPS = new Set(['text', 'variant', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId']);
-const NUMBER_PROPS = new Set(['min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
+const STRING_PROPS = new Set(['text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId']);
+const NUMBER_PROPS = new Set(['fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
 const BOOLEAN_PROPS = new Set(['readOnly', 'checked', 'showText']);
 
 function validateProps(type: GuiSerializedElementType, value: unknown, path: string): void {
@@ -447,6 +475,9 @@ function validateProps(type: GuiSerializedElementType, value: unknown, path: str
       else if (typeof prop !== 'string') invalidGuiData(`GUI ${key} must be a string.`, propPath);
       if (key === 'variant' && prop !== 'default' && prop !== 'primary' && prop !== 'danger') {
         invalidGuiData('GUI button variant is invalid.', propPath, { receivedVariant: prop });
+      }
+      if (key === 'textAlign' && prop !== 'left' && prop !== 'center' && prop !== 'right') {
+        invalidGuiData('GUI label text alignment is invalid.', propPath, { receivedTextAlign: prop });
       }
       if (key === 'placement' && prop !== 'top' && prop !== 'right' && prop !== 'bottom' && prop !== 'left') {
         invalidGuiData('GUI tooltip placement is invalid.', propPath, { receivedPlacement: prop });

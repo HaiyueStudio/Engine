@@ -7,6 +7,7 @@ import {
   GuiElement,
   GuiImage,
   GuiImageBatch,
+  GuiLabel,
   GuiRoot,
   GuiSelect,
   GuiTextBatch,
@@ -71,6 +72,7 @@ test('GUI serialization round-trips root theme, layout, controls, and image sour
   const root = new GuiRoot({ id: 'hud', theme: { fontSize: 16, colors: { primary: '#ff00ff' } } });
   const panel = root.add(new GuiElement({ id: 'panel', x: '10%', y: 12, width: 240, height: 120, style: { backgroundColor: 'rgb(10 20 30)' } }));
   panel.add(new GuiButton({ id: 'apply', text: 'Apply', variant: 'primary', x: 8, y: 8 }));
+  panel.add(new GuiLabel({ id: 'status', text: 'Ready', fontSize: 18, textAlign: 'right', x: 8, y: 48 }));
   panel.add(new GuiSelect({ id: 'quality', value: 'high', options: [{ label: 'High', value: 'high' }] }));
   panel.add(new GuiImage({ id: 'icon', sourceKey: 'icons/play', uv: [0, 0, 0.5, 0.5], tint: 'cyan' }));
 
@@ -87,6 +89,12 @@ test('GUI serialization round-trips root theme, layout, controls, and image sour
   assert.ok(restoredPanel instanceof GuiElement);
   assert.deepEqual(restoredPanel.getLayoutOptions(), { x: '10%', y: 12, width: 240, height: 120 });
   assert.ok(restored.findById('apply') instanceof GuiButton);
+  const restoredLabel = restored.findById('status');
+  assert.ok(restoredLabel instanceof GuiLabel);
+  assert.equal(restoredLabel.text, 'Ready');
+  assert.equal(restoredLabel.fontSize, 18);
+  assert.equal(restoredLabel.textAlign, 'right');
+  assert.equal(restoredLabel.disabled, true);
   assert.ok(restoredIcon instanceof GuiImage);
   assert.equal(restoredIcon.sourceKey, 'icons/play');
   assert.deepEqual(restoredIcon.uv, [0, 0, 0.5, 0.5]);

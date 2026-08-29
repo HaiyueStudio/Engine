@@ -96,7 +96,9 @@ function adapter(runtime, backend, label, calls) {
             actionIds: request.scenario.actions.filter(action => action.atMicros === atMicros).map(action => action.id),
             value: channel === 'pixels'
               ? { width: 1, height: 1, dpr: 1, rgba: { path: pixelPath, sha256: hash(pixelBytes), byteLength: pixelBytes.byteLength, mediaType: 'application/octet-stream' } }
-              : { normalized: channel },
+              : channel === 'geometryAndDrawOrder'
+                ? geometryValue(runtime)
+                : { normalized: channel },
           });
         }
         channels[channel] = {
@@ -109,9 +111,22 @@ function adapter(runtime, backend, label, calls) {
         environment: structuredClone(request.environment),
         channels, artifactBytesByPath: new Map([[pixelPath, pixelBytes]]), freshOwnerPerReplay: true,
         metrics: Object.fromEntries(workloadPlan.measurement.metrics.map(name => [name, 1])),
-        measurement: { warmupIterations: 1, measuredIterations: 1, frameSampleCount: 1, queueCompleted: true, energySource: 'test-meter' },
+        measurement: { warmupIterations: 1, measuredIterations: 1, frameSampleCount: 1, gpuTimestampSampleCount: 1, gpuTimestampSource: 'test-query', queueCompleted: true, energySource: 'test-meter' },
         diagnostics: [], lifecycle: request.scenario.lifecyclePaths.map(path => ({ path, status: 'passed', ownerResidual: 0 })), ownerResidual: 0,
       };
+    },
+  };
+}
+
+function geometryValue(runtime) {
+  const semantic = { oracle: 'neutral-drawable-topology@1', items: [{ id: 'object:00000001', family: 'vector-graphics', drawOrder: 0 }] };
+  return {
+    artboard: 'Main', viewport: 'desktop-1x',
+    topology: {
+      semantic,
+      submission: runtime === '@rive-app/webgl2@2.40.0'
+        ? { oracle: 'native-render-command-stream@1', backend: 'webgl2', artboardBounds: [0, 0, 1, 1], draws: [{ order: 0, command: 'drawArrays', mode: 4, count: 3, instances: 1 }] }
+        : { oracle: 'webgpu-scene-submission@1', backend: 'webgpu', visualCount: 1, compositeLayerCount: 0, maskTargetCount: 0, effectTargetCount: 0 },
     },
   };
 }

@@ -6,6 +6,7 @@ import { GuiCheckbox } from '../components/GuiCheckbox';
 import { GuiElement } from '../components/GuiElement';
 import { GuiInput } from '../components/GuiInput';
 import { GuiImage } from '../components/GuiImage';
+import { GuiLabel } from '../components/GuiLabel';
 import { GuiProgress } from '../components/GuiProgress';
 import { GuiRadio } from '../components/GuiRadio';
 import { GuiRoot } from '../components/GuiRoot';
@@ -63,6 +64,7 @@ export class GuiRenderer {
 
   constructor() {
     this.registerElementRenderer(GuiButton, (element, theme) => this.addButton(element, theme));
+    this.registerElementRenderer(GuiLabel, (element, theme) => this.addLabel(element, theme));
     this.registerElementRenderer(GuiInput, (element, theme) => this.addInput(element, theme));
     this.registerElementRenderer(GuiSelect, (element, theme) => this.addSelect(element, theme));
     this.registerElementRenderer(GuiTooltip, (element, theme) => this.addTooltip(element, theme));
@@ -297,6 +299,58 @@ export class GuiRenderer {
     this.addRect(button.rect.x, button.rect.y, button.rect.width, button.rect.height, radius, border);
     this.addRect(button.rect.x + 1, button.rect.y + 1, button.rect.width - 2, button.rect.height - 2, Math.max(0, radius - 1), withAlpha(colorToRgba(button.style.backgroundColor, surface), button.disabled ? 0.45 : 1));
     this.addCenteredText(button.text, button.rect.x + 8, button.rect.y, button.rect.width - 16, button.rect.height, theme.fontSize, colorToRgba(theme.colors.text, theme.colors.text));
+  }
+
+  private addLabel(label: GuiLabel, theme: GuiTheme): void {
+    const opacity = label.style.opacity ?? 1;
+    const radius = label.style.radius ?? theme.radius;
+    const border = label.style.borderColor;
+    const background = label.style.backgroundColor;
+    const inset = border ? 1 : 0;
+    if (border) {
+      this.addRect(
+        label.rect.x,
+        label.rect.y,
+        label.rect.width,
+        label.rect.height,
+        radius,
+        withAlpha(colorToRgba(border, theme.colors.border), opacity),
+      );
+    }
+    if (background || border) {
+      this.addRect(
+        label.rect.x + inset,
+        label.rect.y + inset,
+        Math.max(0, label.rect.width - inset * 2),
+        Math.max(0, label.rect.height - inset * 2),
+        Math.max(0, radius - inset),
+        withAlpha(colorToRgba(background, theme.colors.surface), opacity),
+      );
+    }
+
+    const padding = label.style.padding ?? 0;
+    const x = label.rect.x + padding;
+    const width = Math.max(0, label.rect.width - padding * 2);
+    const fontSize = label.fontSize ?? theme.fontSize;
+    let textX = x;
+    if (this.defaultFont && label.textAlign !== 'left') {
+      const textWidth = measureGuiTextWidth(label.text, this.defaultFont, fontSize);
+      textX = label.textAlign === 'center'
+        ? x + Math.max(0, (width - textWidth) * 0.5)
+        : x + Math.max(0, width - textWidth);
+    }
+    this.currentTextBatch.addText({
+      text: label.text,
+      x: textX,
+      y: label.rect.y,
+      width: Math.max(0, x + width - textX),
+      height: label.rect.height,
+      fontSize,
+      color: withAlpha(colorToRgba(label.style.color, theme.colors.text), opacity),
+      multiline: false,
+      wrap: false,
+      clip: label.rect,
+    });
   }
 
   private addInput(input: GuiInput, theme: GuiTheme): void {

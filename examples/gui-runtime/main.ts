@@ -3,6 +3,7 @@ import {
   GuiButton,
   GuiCheckbox,
   GuiInput,
+  GuiLabel,
   GuiProgress,
   GuiRadio,
   GuiRoot,
@@ -43,6 +44,17 @@ async function main() {
   guiEntity.addComponent(guiRoot);
   scene.add(guiEntity);
   const guiSystem = scene.guiSystem!;
+
+  guiRoot.add(new GuiLabel({
+    id: 'heading',
+    x: 24,
+    y: 150,
+    width: 300,
+    height: 36,
+    text: 'Engine GUI controls',
+    fontSize: 24,
+    style: { color: '#93c5fd' },
+  }));
 
   let clicks = 0;
   const button = guiRoot.add(new GuiButton({

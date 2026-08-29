@@ -57,7 +57,7 @@ function validTrace() {
   }
   const metrics = Object.fromEntries(workloadPlan.measurement.metrics.map(name => [name, 1]));
   const lifecycle = scenario.lifecyclePaths.map(path => ({ path, status: 'passed', ownerResidual: 0 }));
-  const measurement = { warmupIterations: 5, measuredIterations: 30, frameSampleCount: 120, queueCompleted: true, energySource: 'fixture-meter' };
+  const measurement = { warmupIterations: 5, measuredIterations: 30, frameSampleCount: 120, gpuTimestampSampleCount: 30, gpuTimestampSource: 'fixture-query', queueCompleted: true, energySource: 'fixture-meter' };
   return {
     artifactBytesByPath,
     trace: {
@@ -100,6 +100,17 @@ function validTrace() {
       const path = `review/candidates/rive-traces/fixture/${label}.rgba`;
       artifactBytesByPath.set(path, bytes);
       value = { width: 2, height: 1, dpr: 1, rgba: { path, sha256: createHash('sha256').update(bytes).digest('hex'), byteLength: bytes.byteLength, mediaType: 'application/octet-stream' } };
+    } else if (channel === 'geometryAndDrawOrder') {
+      const semantic = { oracle: 'neutral-drawable-topology@1', items: [{ id: 'object:00000001', family: 'vector-graphics', drawOrder: 0 }] };
+      value = {
+        artboard: 'Main', viewport: 'desktop-1x',
+        topology: {
+          semantic,
+          submission: runtime === '@rive-app/webgl2@2.40.0'
+            ? { oracle: 'native-render-command-stream@1', backend: 'webgl2', artboardBounds: [0, 0, 800, 600], draws: [{ order: 0, command: 'drawElements', mode: 4, count: 6, instances: 1 }] }
+            : { oracle: 'webgpu-scene-submission@1', backend: 'webgpu', visualCount: 1, compositeLayerCount: 0, maskTargetCount: 0, effectTargetCount: 0 },
+        },
+      };
     }
     const samples = [];
     for (let replayIndex = 0; replayIndex < scenario.replayCount; replayIndex++) for (const atMicros of scenario.clockStepsMicros) samples.push({

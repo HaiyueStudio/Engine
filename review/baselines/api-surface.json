@@ -4747,6 +4747,18 @@
               "kind": "type"
             },
             {
+              "name": "GuiLabel",
+              "kind": "value"
+            },
+            {
+              "name": "GuiLabelOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLabelTextAlign",
+              "kind": "type"
+            },
+            {
               "name": "GuiLength",
               "kind": "type"
             },
@@ -7838,6 +7850,18 @@
             },
             {
               "name": "GuiInputOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLabel",
+              "kind": "value"
+            },
+            {
+              "name": "GuiLabelOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLabelTextAlign",
               "kind": "type"
             },
             {

@@ -173,9 +173,12 @@ export function validateRiveOracleTrace(trace, {
       requiredString(item?.normalization, `${label} ${channel} normalization`);
     }
     for (const metric of METRICS) nonnegativeNumber(capture?.metrics?.[metric], `${label} ${metric}`);
+    if (!Number.isFinite(capture?.metrics?.gpuFrameMs) || capture.metrics.gpuFrameMs <= 0) violations.push(`${label} gpuFrameMs must be a positive timestamp-query measurement`);
     positiveInteger(capture?.measurement?.warmupIterations, `${label} warmup iterations`);
     positiveInteger(capture?.measurement?.measuredIterations, `${label} measured iterations`);
     positiveInteger(capture?.measurement?.frameSampleCount, `${label} frame sample count`);
+    equal(capture?.measurement?.gpuTimestampSampleCount, capture?.measurement?.measuredIterations, `${label} GPU timestamp sample count`);
+    requiredString(capture?.measurement?.gpuTimestampSource, `${label} GPU timestamp source`);
     equal(capture?.measurement?.queueCompleted, true, `${label} queue completion`);
     requiredString(capture?.measurement?.energySource, `${label} energy source`);
     if (formal && String(capture?.measurement?.energySource ?? '').startsWith('unavailable:')) violations.push(`${label} formal energy source is unavailable`);

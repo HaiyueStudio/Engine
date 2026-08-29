@@ -5,7 +5,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import { runChromeWebGpuFixture } from '../webgpu-gate/chrome-runner.mjs';
 
@@ -13,8 +13,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OFFICIAL_JS_SHA256 = 'd25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714';
 const OFFICIAL_WASM_SHA256 = '87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32';
 const CAPTURE_INDEX_SHA256 = '11dc25f5cf6b85d9f61f2ef46ec84924c94c81b677cae09bc303bc02345585e5';
-const CAPTURE_BUNDLE_SHA256 = '682f105b7933c4bf21cf75be4736cd47785720d38321b975492098193fe5e3f7';
-const SHARED_ENGINE_SHA256 = '8a053c5469e4926909ef85e7f422d47f6aaa21df1583caf45270b1807257d188';
+const CAPTURE_BUNDLE_SHA256 = '7cc57a6c9e905ff729650163abad830c366e242d8ec9700e57fd83e16c0b7506';
+const SHARED_ENGINE_SHA256 = '9f33901d1a00b44418460b6ae5ce6386ddf49801d190f2d9efa854cb409885c3';
 const execute = promisify(execFile);
 
 export async function captureWithNativeBrowser(mode, request) {
@@ -24,6 +24,9 @@ export async function captureWithNativeBrowser(mode, request) {
   if (mode === 'official') await verifyOfficialRuntime();
   const temporary = await mkdtemp(resolve(tmpdir(), `haiyue-rive-${mode}-capture-`));
   const runtimeBytes = mode === 'official' ? request.runtimeInput.bytes : request.runtimeInput.hyaBytes;
+  const semanticTopology = mode === 'official'
+    ? await buildOfficialSemanticTopology(runtimeBytes)
+    : null;
   const payload = {
     mode,
     assetId: request.assetId,
@@ -32,6 +35,7 @@ export async function captureWithNativeBrowser(mode, request) {
     artifactPrefix: request.artifactPrefix,
     scenario: request.scenario,
     environment: request.environment,
+    semanticTopology,
   };
   const previousChromePath = process.env.CHROME_PATH;
   process.env.CHROME_PATH = browserPath(request.environment.browser);
@@ -78,6 +82,22 @@ export async function captureWithNativeBrowser(mode, request) {
     else process.env.CHROME_PATH = previousChromePath;
     await rm(temporary, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   }
+}
+
+async function buildOfficialSemanticTopology(rivBytes) {
+  const modulePath = resolve(root, 'animation-spec/dist-test/rive/import/index.js');
+  if (!existsSync(modulePath)) throw new Error('Frozen Rive import runtime is unavailable for the topology oracle.');
+  const { importFrozenRiv } = await import(`${pathToFileURL(modulePath).href}?topology=${hash(rivBytes)}`);
+  const imported = await importFrozenRiv(Uint8Array.from(rivBytes));
+  const objects = new Map(imported.ir.objects.map(value => [value.id, value]));
+  return {
+    oracle: 'neutral-drawable-topology@1',
+    items: imported.ir.drawables.map((id, drawOrder) => ({
+      id,
+      family: objects.get(id)?.family ?? 'unknown',
+      drawOrder,
+    })),
+  };
 }
 
 async function startNvidiaEnergySampler() {
