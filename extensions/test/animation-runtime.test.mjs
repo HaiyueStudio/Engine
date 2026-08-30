@@ -105,6 +105,26 @@ test('Animation2DSystem instantiates shape nodes, samples tracks and releases ge
   assert.equal(player.runtimeStats.nodeCount, 0);
 });
 
+test('Animation2DComponent applies and clears interactive node overrides after authored tracks', () => {
+  const world = new World('Interactive overrides');
+  const player = new Animation2DComponent(animationFixture(), { autoplay: false });
+  const owner = new Entity('Player').addComponent(new Transform2D()).addComponent(player);
+  world.addEntity(owner); world.addSystem(new Animation2DSystem()); world.update(0, 0);
+
+  player.setNodeOverride('box', { position: [30, 40], opacity: 0.75 });
+  world.update(0, 0);
+  const box = owner.children[0].children[0];
+  const transform = box.getComponent(Transform2D);
+  const visual = box.children[0].children[0].getComponent(Symbol.for('AnimationVisual2D'));
+  assert.deepEqual([transform.x, transform.y], [30, -40]);
+  assert.ok(Math.abs(visual.color[3] - 0.75) < 1e-6);
+
+  player.clearNodeOverride('box'); world.update(0, 0);
+  assert.deepEqual([transform.x, transform.y], [10, -20]);
+  assert.ok(Math.abs(visual.color[3] - 0.4) < 1e-6);
+  assert.throws(() => player.setNodeOverride('missing', { opacity: 1 }), /does not exist/u);
+});
+
 test('Animation2D runtime samples spatial position curves without flattening them to endpoint lerps', () => {
   const animation = parseAnimation({
     ...animationFixture(),

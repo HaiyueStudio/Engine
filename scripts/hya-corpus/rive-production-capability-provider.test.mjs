@@ -7,6 +7,7 @@ import {
   applySelectedAnimationOverrides,
   applySoloSelection,
   applyViewModelText,
+  compileComponentListInteractionDocument,
   evaluate,
   mapEmbeddedAssets,
   textWrapMode,
@@ -15,6 +16,7 @@ import {
 import { FROZEN_PROPERTIES } from '../../animation-spec/dist-test/rive/import/generated/frozen-registry.js';
 import { parseHyaStateMachineV2 } from '../../animation-spec/dist-test/state-machine-v2/parser.js';
 import { parseHyaDataBinding } from '../../animation-spec/dist-test/data-binding/parser.js';
+import { parseHyaInteraction } from '../../animation-spec/dist-test/interaction/parser.js';
 
 test('production capability provider preserves all neutral fields and maps core canvas/transform values', async () => {
   const descriptor = { adapterId: 'adapter', adapterRevisionSha256: 'a'.repeat(64), evaluatorId: 'evaluator', evaluatorRevisionSha256: 'b'.repeat(64), optionsRevision: 'v1' };
@@ -128,6 +130,30 @@ test('production capability provider emits parser-valid executable state-machine
   assert.equal(result.coverage.find(value => value.objectId === rows[1].object.id).artifactId, data.id);
 });
 
+test('component-list interaction sidecar carries hover, click, audio and four executable row states', () => {
+  const root = 'list::idle::root';
+  const hierarchy = {
+    entries: [{ objectId: root, fields: { x: 140, y: 355, scaleX: 1, scaleY: 1 } }],
+    parentNodeByObjectId: new Map(),
+    componentLists: [{ host: 'list-host', rows: [{
+      index: 0, sourceIndex: 0, baseX: 0, baseY: 0, collapsedHeight: 27, expandedHeight: 259, hitWidth: 272,
+      nodes: { idle: root, hover: 'list::hover::root', open: 'list::open::root', openHover: 'list::openHover::root' },
+    }] }],
+  };
+  const records = [
+    { visit: { sourceName: 'AudioEvent' }, fields: { name: 'open_01', assetId: 1 } },
+    { visit: { sourceName: 'AudioEvent' }, fields: { name: 'click_01', assetId: 2 } },
+  ];
+  const document = parseHyaInteraction(compileComponentListInteractionDocument(hierarchy, records, new Map([
+    [1, { resourceId: 'resource-hover' }], [2, { resourceId: 'resource-click' }],
+  ])));
+  assert.deepEqual(document.targets[0].transform, [1, 0, 0, 1, 140, 355]);
+  assert.deepEqual(document.listeners.map(listener => listener.event), ['pointer-enter', 'pointer-exit', 'click']);
+  assert.equal(document.listeners[0].actions[0].arguments.openHoverNode, 'list::openHover::root');
+  assert.equal(document.listeners[0].actions[1].target, 'resource-hover');
+  assert.equal(document.listeners[2].actions[1].target, 'resource-click');
+});
+
 test('selected animation initializes Solo activeComponentId before inactive subtrees are removed', async () => {
   const activeComponentId = FROZEN_PROPERTIES.find(value => value.name === 'activeComponentId')?.key;
   assert.equal(typeof activeComponentId, 'number');
@@ -172,6 +198,33 @@ test('selected animation initializes Solo activeComponentId before inactive subt
   assert.equal(hierarchy.entries[2].nodeEligible, false);
   assert.equal(hierarchy.entries[3].nodeEligible, true);
   assert.deepEqual(hierarchy.selectedAnimationsApplied, ['Select second']);
+});
+
+test('selected animation preserves omitted zero-valued Rive keyframes', async () => {
+  const displayValue = FROZEN_PROPERTIES.find(value => value.name === 'displayValue')?.key;
+  assert.equal(typeof displayValue, 'number');
+  const rows = [
+    { id: 'root', sourceName: 'Artboard', fields: { name: 'Main' } },
+    { id: 'style', sourceName: 'LayoutComponentStyle', fields: { displayValue: 1 } },
+    { id: 'animation', sourceName: 'LinearAnimation', fields: { name: 'open' } },
+    { id: 'target', sourceName: 'KeyedObject', fields: { objectId: 1 } },
+    { id: 'property', sourceName: 'KeyedProperty', fields: { propertyKey: displayValue } },
+    { id: 'key', sourceName: 'KeyFrameUint', fields: {} },
+  ];
+  const objects = new Map(rows.map((row, index) => [row.id, {
+    id: row.id, family: 'structure', properties: Object.entries(row.fields).map(([name, value], fieldIndex) => ({
+      id: `field:${index}:${fieldIndex}`, value: { type: typeof value === 'string' ? 'string' : 'number', value }, name,
+    })).map(({ name: _name, ...value }) => value),
+  }]));
+  const report = { objects: rows.map((row, index) => ({
+    neutralObjectId: row.id, sourceName: row.sourceName, sourceTypeKey: index + 1,
+    properties: Object.keys(row.fields).map((name, fieldIndex) => ({ sourceName: name, neutralFieldIds: [`field:${index}:${fieldIndex}`] })),
+  })) };
+  const hierarchy = { entries: rows.slice(0, 2).map((row, componentIndex) => ({ componentIndex, objectId: row.id, sourceName: row.sourceName, fields: { ...row.fields } })) };
+
+  await applySelectedAnimationOverrides(hierarchy, report, objects, 'root', 'open');
+
+  assert.equal(hierarchy.entries[1].fields.displayValue, 0);
 });
 
 test('view-model text replacement only changes runs with an authored data binding', () => {

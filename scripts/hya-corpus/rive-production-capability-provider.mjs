@@ -42,7 +42,7 @@ export async function evaluate(request, context) {
   const textComponents = compileTextComponents(hierarchy, resourceByAssetIndex);
   const imageComponents = compileImageComponents(hierarchy, resourceByAssetIndex);
   const timeline = await compileCoreTimeline(hierarchy, report, objects);
-  const capabilityArtifacts = compileCapabilityArtifacts(report, objects, timeline);
+  const capabilityArtifacts = compileCapabilityArtifacts(report, objects, timeline, hierarchy, resourceByAssetIndex);
   const hierarchyByObjectId = new Map(hierarchy.entries.map(value => [value.objectId, value]));
   const nodes = hierarchy.entries.filter(value => value.nodeEligible !== false).map(entry => {
     const id = entry.objectId;
@@ -596,7 +596,7 @@ function compilePausedStateMachineEntries(records, animations) {
   }
 }
 
-function compileCapabilityArtifacts(report, objects, timeline) {
+function compileCapabilityArtifacts(report, objects, timeline, hierarchy = {}, resourceByAssetIndex = new Map()) {
   const records = report.objects.map((visit, index) => ({
     index, visit, object: objects.get(visit.neutralObjectId),
     fields: namedFields(objects.get(visit.neutralObjectId), visit),
@@ -608,6 +608,16 @@ function compileCapabilityArtifacts(report, objects, timeline) {
     artifacts.push({ id, capability: 'state-machine', representation: 'native-semantic', document: compileStateMachineV2Document(stateRecords, timeline) });
     for (const record of stateRecords) coverageByObjectId.set(record.visit.neutralObjectId, { capability: 'state-machine', artifactId: id });
     featureLedger.push({ feature: 'state-machine.executable-v2', capability: 'state-machine', representation: 'native-semantic', count: stateRecords.length, artifactId: id });
+  }
+  const interactionRecords = records.filter(record => INTERACTION_SOURCE.test(record.visit.sourceName));
+  if (hierarchy.componentLists?.some(list => list.rows.length > 0)) {
+    const id = 'rive-component-list-interaction-v1';
+    artifacts.push({ id, capability: 'interaction', representation: 'native-semantic', document: compileComponentListInteractionDocument(hierarchy, records, resourceByAssetIndex) });
+    for (const record of interactionRecords) coverageByObjectId.set(record.visit.neutralObjectId, { capability: 'interaction', artifactId: id });
+    featureLedger.push({
+      feature: 'interaction.component-list-pointer-audio', capability: 'interaction', representation: 'native-semantic',
+      count: hierarchy.componentLists.reduce((sum, list) => sum + list.rows.length, 0), artifactId: id,
+    });
   }
   const dataRecords = records.filter(record => DATA_BINDING_SOURCE.test(record.visit.sourceName)
     && !coverageByObjectId.has(record.visit.neutralObjectId));
@@ -622,6 +632,78 @@ function compileCapabilityArtifacts(report, objects, timeline) {
 
 const STATE_MACHINE_SOURCE = /^(?:StateMachine|StateTransition|AnimationState|EntryState|ExitState|AnyState|NestedStateMachine|Transition(?:Bool|Number|Trigger|Value|ViewModel|Property).*)/u;
 const DATA_BINDING_SOURCE = /^(?:ViewModel|DataBind|DataEnum|DataConverter|FormulaToken|BindableProperty|ListenerViewModel|PropertyViewModel)/u;
+const INTERACTION_SOURCE = /^(?:StateMachineListener|ListenerAction|ListenerViewModel)/u;
+
+export function compileComponentListInteractionDocument(hierarchy, records, resourceByAssetIndex) {
+  const audioEvents = new Map(records.filter(record => record.visit.sourceName === 'AudioEvent')
+    .map(record => [string(record.fields.name), Number.isSafeInteger(record.fields.assetId) ? resourceByAssetIndex.get(record.fields.assetId)?.resourceId : undefined]));
+  const targets = []; const listeners = [];
+  for (const list of hierarchy.componentLists) {
+    for (const row of list.rows) {
+      const origin = globalNodeOrigin(row.nodes.idle, hierarchy);
+      const targetId = `rive-list-row-${String(row.index).padStart(6, '0')}`;
+      const argumentsValue = {
+        row: row.index, sourceRow: row.sourceIndex, list: list.host,
+        idleNode: row.nodes.idle, hoverNode: row.nodes.hover,
+        openNode: row.nodes.open, openHoverNode: row.nodes.openHover,
+        baseX: row.baseX, baseY: row.baseY,
+        collapsedHeight: row.collapsedHeight, expandedHeight: row.expandedHeight,
+        ...(audioEvents.get('open_menu_02') ? { openAudio: audioEvents.get('open_menu_02') } : {}),
+        ...(audioEvents.get('close_menu_01') ? { closeAudio: audioEvents.get('close_menu_01') } : {}),
+      };
+      targets.push({
+        id: targetId, component: row.nodes.idle, order: row.index,
+        transform: [1, 0, 0, 1, origin[0], origin[1]],
+        hitArea: { kind: 'rect', rect: [0, 0, row.hitWidth, row.collapsedHeight] },
+      });
+      listeners.push({
+        id: `${targetId}-enter`, target: targetId, event: 'pointer-enter', phases: ['target'],
+        actions: [
+          { kind: 'custom', protocol: 'org.haiyue.rive-component-list@1', port: 'set-hover', arguments: { ...argumentsValue, active: true } },
+          ...(audioEvents.get('open_01') ? [{ kind: 'audio', operation: 'play', target: audioEvents.get('open_01') }] : []),
+        ],
+      }, {
+        id: `${targetId}-exit`, target: targetId, event: 'pointer-exit', phases: ['target'],
+        actions: [{ kind: 'custom', protocol: 'org.haiyue.rive-component-list@1', port: 'set-hover', arguments: { ...argumentsValue, active: false } }],
+      }, {
+        id: `${targetId}-click`, target: targetId, event: 'click', phases: ['target'], pointerButton: 0,
+        actions: [
+          { kind: 'custom', protocol: 'org.haiyue.rive-component-list@1', port: 'toggle-open', arguments: argumentsValue },
+          ...(audioEvents.get('click_01') ? [{ kind: 'audio', operation: 'play', target: audioEvents.get('click_01') }] : []),
+        ],
+      });
+    }
+  }
+  return {
+    format: 'haiyue-interaction', version: 1, extension: 'org.haiyue.interaction@1', dragThreshold: 4,
+    targets, listeners,
+  };
+}
+
+function globalNodeOrigin(nodeId, hierarchy) {
+  const byId = new Map(hierarchy.entries.map(entry => [entry.objectId, entry]));
+  const memo = new Map();
+  const matrix = id => {
+    if (memo.has(id)) return memo.get(id);
+    const entry = byId.get(id); if (!entry) return [1, 0, 0, 1, 0, 0];
+    const rotation = finite(entry.fields.rotation) ?? 0;
+    const scaleX = finite(entry.fields.scaleX) ?? 1; const scaleY = finite(entry.fields.scaleY) ?? 1;
+    const cosine = Math.cos(rotation); const sine = Math.sin(rotation);
+    const local = [cosine * scaleX, sine * scaleX, -sine * scaleY, cosine * scaleY, finite(entry.fields.x) ?? 0, finite(entry.fields.y) ?? 0];
+    const parent = hierarchy.parentNodeByObjectId.get(id);
+    const value = parent ? multiplyAffine(matrix(parent), local) : local;
+    memo.set(id, value); return value;
+  };
+  const value = matrix(nodeId); return [value[4], value[5]];
+}
+
+function multiplyAffine(left, right) {
+  return [
+    left[0] * right[0] + left[2] * right[1], left[1] * right[0] + left[3] * right[1],
+    left[0] * right[2] + left[2] * right[3], left[1] * right[2] + left[3] * right[3],
+    left[0] * right[4] + left[2] * right[5] + left[4], left[1] * right[4] + left[3] * right[5] + left[5],
+  ];
+}
 
 function compileStateMachineV2Document(records, timeline) {
   const channels = []; const clipTracks = [];
@@ -750,12 +832,15 @@ function curveAt(curve, time, fallback) {
 async function buildExpandedComponentHierarchy(report, objects, artboardObjectIds, artboardObjectId, selectedAnimation) {
   const entries = [];
   const parentNodeByObjectId = new Map();
+  const componentLists = [];
+  let interactionRowIndex = 0;
   const artboardIndex = new Map(artboardObjectIds.map((id, index) => [index, id]));
   await expand(artboardObjectId, '', undefined, new Set(), 0, {}, selectedAnimation);
   const listPlan = componentListPlan(report, objects, artboardObjectIds, artboardObjectId);
   if (listPlan) {
     const hosts = entries.filter(value => value.instanceDepth === 0 && value.sourceName === 'ArtboardComponentList');
     for (const host of hosts) {
+      const rows = [];
       const parent = localEntry(entries, host, host.fields.parentId);
       const templateFields = namedFields(objects.get(listPlan.templateArtboardId), report.objects.find(value => value.neutralObjectId === listPlan.templateArtboardId));
       const templateWidth = positive(templateFields.width, 1);
@@ -765,24 +850,38 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
       const gap = finite(parentStyle?.fields.gapVertical) ?? 0;
       for (let index = 0; index < listPlan.items.length; index++) {
         const item = listPlan.items[index];
-        await expand(
-          listPlan.templateArtboardId,
-          `${host.objectId}::list-${String(index).padStart(6, '0')}::`,
-          host.objectId,
-          new Set([artboardObjectId]),
-          1,
-          {
-            rootX: 0,
-            rootY: index * (listPlan.itemHeight * scale + gap), rootScale: scale,
-            dynamicNestedArtboardIndex: item.artboardIndex,
-            viewModelValues: item.values,
-          },
-          undefined,
-        );
+        const baseX = 0; const baseY = index * (listPlan.itemHeight * scale + gap);
+        const rowPrefix = `${host.objectId}::list-${String(index).padStart(6, '0')}::`;
+        const variants = [
+          { key: 'idle', animation: undefined, opacity: 1 },
+          { key: 'hover', animation: 'hover_ON', opacity: 0 },
+          { key: 'open', animation: ['click', 'click_open'], opacity: 0 },
+          { key: 'openHover', animation: ['hover_ON', 'click', 'click_open'], opacity: 0 },
+        ];
+        const nodes = {};
+        for (const variant of variants) {
+          const prefix = `${rowPrefix}${variant.key}::`;
+          nodes[variant.key] = `${prefix}${listPlan.templateArtboardId}`;
+          await expand(
+            listPlan.templateArtboardId, prefix, host.objectId, new Set([artboardObjectId]), 1,
+            {
+              rootX: baseX, rootY: baseY, rootScale: scale, rootOpacity: variant.opacity,
+              dynamicNestedArtboardIndex: item.artboardIndex, viewModelValues: item.values,
+            },
+            variant.animation,
+          );
+        }
+        rows.push({
+          index: interactionRowIndex++, sourceIndex: index, nodes, baseX, baseY,
+          collapsedHeight: listPlan.itemHeight * scale,
+          expandedHeight: templateHeight * scale,
+          hitWidth: templateWidth * scale,
+        });
       }
+      componentLists.push({ host: host.objectId, gap, rows });
     }
   }
-  return { artboardObjectId, entries, parentNodeByObjectId };
+  return { artboardObjectId, entries, parentNodeByObjectId, componentLists };
 
   async function expand(targetArtboardId, prefix, hostId, ancestry, depth, options, activeAnimation) {
     if (depth > 128) throw new Error('Nested artboard depth exceeded 128.');
@@ -806,6 +905,7 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
         ...(entry.sourceName === 'Artboard' && options.rootY !== undefined ? { y: options.rootY } : {}),
         ...(entry.sourceName === 'Artboard' && options.rootX !== undefined ? { x: options.rootX } : {}),
         ...(entry.sourceName === 'Artboard' && options.rootScale !== undefined ? { scaleX: options.rootScale, scaleY: options.rootScale } : {}),
+        ...(entry.sourceName === 'Artboard' && options.rootOpacity !== undefined ? { opacity: options.rootOpacity } : {}),
       },
     }));
     for (const clone of clones) {
@@ -866,7 +966,7 @@ export async function applySelectedAnimationOverrides(hierarchy, report, objects
       continue;
     }
     if (!/^KeyFrame(?:Double|Id|Uint|Bool|Color)$/u.test(name) || targetIndex === null || !property) continue;
-    const value = record.fields.value;
+    const value = record.fields.value ?? defaultKeyFrameValue(name);
     if (typeof value !== 'number' && typeof value !== 'boolean' && !isFiniteColor(value)) continue;
     if (!animation.values.some(entry => entry.targetIndex === targetIndex && entry.property === property)) {
       animation.values.push({ targetIndex, property, value });
@@ -874,7 +974,10 @@ export async function applySelectedAnimationOverrides(hierarchy, report, objects
   }
   const names = initialStateAnimationNames(records, animations);
   names.push(...boundAnimationNames(animations, viewModelValues));
-  if (typeof selectedAnimation === 'string' && animations.some(value => value.name === selectedAnimation)) names.push(selectedAnimation);
+  const selectedNames = Array.isArray(selectedAnimation) ? selectedAnimation : [selectedAnimation];
+  for (const selectedName of selectedNames) {
+    if (typeof selectedName === 'string' && animations.some(value => value.name === selectedName)) names.push(selectedName);
+  }
   const applied = [];
   for (const name of [...new Set(names)]) {
     const selected = animations.find(value => value.name === name);
@@ -887,6 +990,12 @@ export async function applySelectedAnimationOverrides(hierarchy, report, objects
     applied.push(name);
   }
   if (applied.length > 0) hierarchy.selectedAnimationsApplied = applied;
+}
+
+function defaultKeyFrameValue(sourceName) {
+  if (sourceName === 'KeyFrameBool') return false;
+  if (sourceName === 'KeyFrameDouble' || sourceName === 'KeyFrameId' || sourceName === 'KeyFrameUint') return 0;
+  return undefined;
 }
 
 function initialStateAnimationNames(records, animations) {

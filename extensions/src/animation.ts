@@ -1,5 +1,7 @@
 export { Animation2DComponent } from './animation/Animation2DComponent';
-export type { Animation2DComponentOptions, Animation2DRuntimeStats } from './animation/Animation2DComponent';
+export type { Animation2DComponentOptions, Animation2DNodeOverride, Animation2DRuntimeStats } from './animation/Animation2DComponent';
+export { InteractionRuntime } from './animation/interaction/InteractionRuntime';
+export type { InteractionActionPort, InteractionGeometryPort, RoutedInteractionEvent, RuntimeInteractionAction, RuntimeInteractionDocument } from './animation/interaction/runtime-types';
 export { Animation2DSystem } from './animation/Animation2DSystem';
 export type { Animation2DSystemOptions } from './animation/Animation2DSystem';
 export { Animation2DRenderSystem } from './animation/Animation2DRenderSystem';

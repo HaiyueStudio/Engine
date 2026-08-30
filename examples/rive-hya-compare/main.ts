@@ -1,5 +1,8 @@
 import { AnimationExtensionRegistry, parseAnimation, type ParsedAnimation } from '@haiyue/animation-spec';
-import { Animation2DComponent, Animation2DExtensionRegistry, Animation2DRenderSystem, Animation2DSystem } from '@haiyue/extensions/animation';
+import {
+  Animation2DComponent, Animation2DExtensionRegistry, Animation2DRenderSystem, Animation2DSystem, InteractionRuntime,
+  type RuntimeInteractionAction, type RuntimeInteractionDocument,
+} from '@haiyue/extensions/animation';
 import { Camera2D, Entity, HaiyueEngine, Transform2D } from '@haiyue/engine';
 
 const WASM_URL = 'https://unpkg.com/@rive-app/webgl2@2.40.0/rive.wasm';
@@ -11,7 +14,9 @@ const HYA_FORMAT_EXTENSIONS = [
   'org.haiyue.vector-path-morph@1',
   'org.haiyue.animation-state-machine@2',
   'org.haiyue.data-binding@1',
+  'org.haiyue.interaction@1',
 ] as const;
+const RIVE_COMPONENT_LIST_PROTOCOL = 'org.haiyue.rive-component-list@1';
 
 interface Sample {
   id: string; title: string; sourceUrl: string; sha256: string; byteLength: number;
@@ -22,6 +27,12 @@ interface SampleManifest { oracle: { package: string; riveJsSha256: string; rive
 interface ConversionReport { input?: { rivSha256?: string }; output?: { hyaSha256?: string }; featureLedger?: unknown[]; diagnostics?: unknown[] }
 interface AutomaticConversionAsset { path: string; mimeType: string; sha256: string; byteLength: number; base64: string }
 interface AutomaticConversionResponse { status: 'passed' | 'failed'; assetId?: string; hyaBase64?: string; assets?: AutomaticConversionAsset[]; report?: ConversionReport; error?: string }
+interface RiveListActionArguments {
+  row: number; sourceRow: number; list: string;
+  idleNode: string; hoverNode: string; openNode: string; openHoverNode: string;
+  baseX: number; baseY: number; collapsedHeight: number; expandedHeight: number;
+  openAudio?: string; closeAudio?: string; active?: boolean;
+}
 interface OfficialRiveInstance {
   cleanup(): void; play(): void; pause(): void;
   reset(options?: Record<string, unknown>): void; resizeDrawingSurfaceToCanvas(): void;
@@ -70,8 +81,109 @@ async function main(): Promise<void> {
   let hyaAssetUrls: string[] = [];
   let activeRivBytes: ArrayBuffer | null = null;
   let conversionAbort: AbortController | null = null;
+  let hyaInteraction: InteractionRuntime | null = null;
+  let hyaAudioContext: AudioContext | null = null;
+  let hyaAudioResources = new Map<string, string>();
+  let hyaAudioBuffers = new Map<string, Promise<AudioBuffer>>();
+  const listRows = new Map<number, { descriptor: RiveListActionArguments; hover: boolean; open: boolean }>();
+  const interactionTargetShift = new Map<string, number>();
   let playing = true;
   let generation = 0;
+
+  const playHyaAudio = (resourceId: string): void => {
+    const uri = hyaAudioResources.get(resourceId); if (!uri) return;
+    const context = hyaAudioContext ??= new AudioContext();
+    let buffer = hyaAudioBuffers.get(resourceId);
+    if (!buffer) {
+      buffer = fetch(uri).then(requireOk).then(response => response.arrayBuffer()).then(bytes => context.decodeAudioData(bytes));
+      hyaAudioBuffers.set(resourceId, buffer);
+    }
+    void Promise.all([context.resume(), buffer]).then(([, decoded]) => {
+      const source = context.createBufferSource(); source.buffer = decoded; source.connect(context.destination); source.start();
+      hyaCanvas.dataset.lastAudioEvent = resourceId;
+    }).catch(() => { /* Browser autoplay policy may defer audio until the first pointer press. */ });
+  };
+
+  const applyListRows = (): void => {
+    if (!hyaPlayer) return;
+    interactionTargetShift.clear();
+    const groups = new Map<string, Array<{ descriptor: RiveListActionArguments; hover: boolean; open: boolean }>>();
+    for (const state of listRows.values()) {
+      const values = groups.get(state.descriptor.list) ?? []; values.push(state); groups.set(state.descriptor.list, values);
+    }
+    for (const values of groups.values()) {
+      let shift = 0;
+      for (const state of values.sort((left, right) => left.descriptor.sourceRow - right.descriptor.sourceRow)) {
+        const descriptor = state.descriptor;
+        const selected = state.open ? (state.hover ? descriptor.openHoverNode : descriptor.openNode)
+          : (state.hover ? descriptor.hoverNode : descriptor.idleNode);
+        for (const nodeId of [descriptor.idleNode, descriptor.hoverNode, descriptor.openNode, descriptor.openHoverNode]) {
+          hyaPlayer.setNodeOverride(nodeId, { position: [descriptor.baseX, descriptor.baseY + shift], opacity: nodeId === selected ? 1 : 0 });
+        }
+        interactionTargetShift.set(`rive-list-row-${String(descriptor.row).padStart(6, '0')}`, shift);
+        if (state.open) shift += Math.max(0, descriptor.expandedHeight - descriptor.collapsedHeight);
+      }
+    }
+    hyaCanvas.dataset.interactionState = JSON.stringify([...listRows.values()]
+      .sort((left, right) => left.descriptor.row - right.descriptor.row)
+      .map(state => ({ row: state.descriptor.row, hover: state.hover, open: state.open })));
+  };
+
+  const resetHyaInteraction = (): void => {
+    hyaInteraction?.dispose(); hyaInteraction = null;
+    listRows.clear(); interactionTargetShift.clear(); hyaAudioResources.clear(); hyaAudioBuffers.clear();
+    delete hyaCanvas.dataset.interactionState;
+    delete hyaCanvas.dataset.lastAudioEvent;
+  };
+
+  const setupHyaInteraction = (animation: ParsedAnimation): void => {
+    resetHyaInteraction();
+    const document = animation.extensions['org.haiyue.interaction@1'] as RuntimeInteractionDocument | undefined;
+    if (!document) return;
+    hyaAudioResources = new Map(animation.resources.filter(resource => resource.type === 'audio').map(resource => [resource.id, resource.uri]));
+    for (const listener of document.listeners) {
+      for (const action of listener.actions) {
+        const descriptor = riveListActionArguments(action);
+        if (descriptor && !listRows.has(descriptor.row)) listRows.set(descriptor.row, { descriptor, hover: false, open: false });
+      }
+    }
+    hyaInteraction = new InteractionRuntime(document, {
+      geometryPort: { matrix: target => [1, 0, 0, 1, 0, interactionTargetShift.get(target) ?? 0] },
+      actionPort: {
+        begin() {}, commit() {}, rollback() {},
+        invoke(action) {
+          if (action.kind === 'audio' && action.operation === 'play' && typeof action.target === 'string') {
+            playHyaAudio(action.target); return;
+          }
+          const descriptor = riveListActionArguments(action); if (!descriptor) return;
+          const state = listRows.get(descriptor.row); if (!state) return;
+          if (action.port === 'set-hover') state.hover = descriptor.active === true;
+          else if (action.port === 'toggle-open') {
+            state.open = !state.open;
+            const resource = state.open ? descriptor.openAudio : descriptor.closeAudio;
+            if (resource) playHyaAudio(resource);
+          }
+          applyListRows();
+        },
+      },
+    });
+    applyListRows();
+  };
+
+  const hyaPoint = (event: PointerEvent): readonly [number, number] => {
+    const rect = hyaCanvas.getBoundingClientRect();
+    const width = hyaPlayer?.animation.canvas.width ?? 1; const height = hyaPlayer?.animation.canvas.height ?? 1;
+    const scale = Math.min(rect.width / width, rect.height / height);
+    const offsetX = (rect.width - width * scale) / 2; const offsetY = (rect.height - height * scale) / 2;
+    return [(event.clientX - rect.left - offsetX) / scale, (event.clientY - rect.top - offsetY) / scale];
+  };
+  hyaCanvas.addEventListener('pointermove', event => hyaInteraction?.dispatchPointer({ kind: 'move', pointerId: event.pointerId, point: hyaPoint(event) }));
+  hyaCanvas.addEventListener('pointerdown', event => {
+    void (hyaAudioContext ??= new AudioContext()).resume();
+    hyaInteraction?.dispatchPointer({ kind: 'down', pointerId: event.pointerId, point: hyaPoint(event), button: event.button });
+  });
+  hyaCanvas.addEventListener('pointerup', event => hyaInteraction?.dispatchPointer({ kind: 'up', pointerId: event.pointerId, point: hyaPoint(event), button: event.button }));
+  hyaCanvas.addEventListener('pointerleave', event => hyaInteraction?.dispatchPointer({ kind: 'move', pointerId: event.pointerId, point: [-1e9, -1e9] }));
 
   const loadOfficial = async (sample: Sample): Promise<void> => {
     const token = ++generation;
@@ -143,6 +255,7 @@ async function main(): Promise<void> {
     hyaPlayer = new Animation2DComponent(animation, { autoplay: playing, loop: true, runtimeExtensions });
     hyaEntity = new Entity(`Rive HYA: ${label}`).addComponent(new Transform2D()).addComponent(hyaPlayer);
     scene.add(hyaEntity);
+    setupHyaInteraction(animation);
     camera.setViewportFit({ designWidth: animation.canvas.width, designHeight: animation.canvas.height, viewportMode: 'fit' });
     camera.resize(engine.displayWidth, engine.displayHeight);
     query('#hya-empty').setAttribute('hidden', '');
@@ -169,6 +282,7 @@ async function main(): Promise<void> {
   };
 
   function clearHya(): void {
+    resetHyaInteraction();
     if (hyaEntity) scene.remove(hyaEntity);
     hyaEntity = null; hyaPlayer = null;
     hyaAssetUrls.forEach(url => URL.revokeObjectURL(url));
@@ -196,6 +310,8 @@ async function main(): Promise<void> {
   query<HTMLButtonElement>('#restart').addEventListener('click', () => {
     official?.reset({ artboard: activeSample.selection.artboard, animations: activeSample.selection.animation ?? undefined, stateMachines: activeSample.selection.stateMachine, autoplay: playing, autoBind: true });
     hyaPlayer?.seek(0); if (playing) hyaPlayer?.play();
+    for (const state of listRows.values()) { state.hover = false; state.open = false; }
+    applyListRows();
   });
   query<HTMLInputElement>('#hya-files').addEventListener('change', event => {
     const files = [...(event.currentTarget as HTMLInputElement).files ?? []];
@@ -217,7 +333,7 @@ async function main(): Promise<void> {
 
   const resize = new ResizeObserver(() => { official?.resizeDrawingSurfaceToCanvas(); camera.resize(engine.displayWidth, engine.displayHeight); });
   resize.observe(officialCanvas); resize.observe(hyaCanvas);
-  window.addEventListener('beforeunload', () => { conversionAbort?.abort(); resize.disconnect(); official?.cleanup(); engine.destroy(); }, { once: true });
+  window.addEventListener('beforeunload', () => { conversionAbort?.abort(); resetHyaInteraction(); void hyaAudioContext?.close(); resize.disconnect(); official?.cleanup(); engine.destroy(); }, { once: true });
   await loadOfficial(activeSample);
 
   function updateResult(): void {
@@ -279,6 +395,16 @@ function automaticConversionEndpoints(assetId: string): URL[] {
 
 function isLoopback(hostname: string): boolean {
   return hostname === '127.0.0.1' || hostname === 'localhost' || hostname === '[::1]';
+}
+
+function riveListActionArguments(action: RuntimeInteractionAction): RiveListActionArguments | null {
+  if (action.kind !== 'custom' || action.protocol !== RIVE_COMPONENT_LIST_PROTOCOL || !action.arguments || typeof action.arguments !== 'object') return null;
+  const value = action.arguments as Record<string, unknown>;
+  const numbers = ['row', 'sourceRow', 'baseX', 'baseY', 'collapsedHeight', 'expandedHeight'] as const;
+  const strings = ['list', 'idleNode', 'hoverNode', 'openNode', 'openHoverNode'] as const;
+  if (numbers.some(key => typeof value[key] !== 'number' || !Number.isFinite(value[key]))) return null;
+  if (strings.some(key => typeof value[key] !== 'string' || value[key].length === 0)) return null;
+  return value as unknown as RiveListActionArguments;
 }
 
 async function materializePackageResources(

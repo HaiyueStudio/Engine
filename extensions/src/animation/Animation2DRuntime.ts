@@ -24,7 +24,7 @@ import { Entity, Geometry2D, Transform2D } from '@haiyue/engine';
 import { ParticleEmitter2D } from '@haiyue/engine/components';
 import { createRect2D } from '@haiyue/engine/geometry';
 import type { AssetHandle, AssetManager } from '@haiyue/engine/assets';
-import type { Animation2DRuntimeStats } from './Animation2DComponent.js';
+import type { Animation2DNodeOverride, Animation2DRuntimeStats } from './Animation2DComponent.js';
 import type { Animation2DExtensionInstance, Animation2DExtensionRegistry } from './Animation2DExtensionRegistry.js';
 import {
   applyVectorPathModifiers,
@@ -150,6 +150,7 @@ export class Animation2DRuntime {
     private readonly _animation: ParsedAnimation,
     runtimeExtensions?: Animation2DExtensionRegistry,
     private readonly _assetManager?: AssetManager,
+    private readonly _nodeOverrides: ReadonlyMap<string, Animation2DNodeOverride> = new Map(),
   ) {
     for (const id of _animation.extensionsRequired) {
       if (id === HYA_STATE_MACHINE_EXTENSION_ID) continue;
@@ -319,6 +320,10 @@ export class Animation2DRuntime {
       node.transform.setScale(node.initialScaleX, node.initialScaleY);
       node.opacity = node.initialOpacity;
       for (const track of this._tracksByNode.get(node.source.id) ?? []) this._applyTrack(node, track, time);
+      const override = this._nodeOverrides.get(node.source.id);
+      if (override?.position) node.transform.setPosition(override.position[0], -override.position[1]);
+      if (override?.opacity !== undefined) node.opacity = override.opacity;
+      if (override?.enabled !== undefined) node.entity.disabled = !override.enabled;
     }
     for (const node of this._nodes) {
       const opacity = this._resolveOpacity(node);

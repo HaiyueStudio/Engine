@@ -13,6 +13,15 @@ export interface Animation2DComponentOptions {
   runtimeExtensions?: Animation2DExtensionRegistry;
 }
 
+export interface Animation2DNodeOverride {
+  /** Local node position in the HYA canvas coordinate system (screen-y-down). */
+  readonly position?: readonly [number, number];
+  /** Runtime opacity replacement in the inclusive 0..1 range. */
+  readonly opacity?: number;
+  /** Overrides authored/timeline visibility while present. */
+  readonly enabled?: boolean;
+}
+
 export interface Animation2DRuntimeStats {
   readonly nodeCount: number;
   readonly visualCount: number;
@@ -36,6 +45,7 @@ export class Animation2DComponent extends Component {
   currentTime: number;
   completed = false;
   readonly runtimeExtensions: Animation2DExtensionRegistry | undefined;
+  readonly _nodeOverrides = new Map<string, Animation2DNodeOverride>();
   _runtime: Animation2DRuntime | null = null;
   _needsApply = true;
   _forceParticleSeek = false;
@@ -94,6 +104,40 @@ export class Animation2DComponent extends Component {
     return this;
   }
 
+  setNodeOverride(nodeId: string, override: Animation2DNodeOverride): this {
+    if (!this.animation.nodes.some(node => node.id === nodeId)) throw new ReferenceError(`Animation node "${nodeId}" does not exist.`);
+    const position = override.position;
+    if (position && (position.length !== 2 || position.some(value => !Number.isFinite(value)))) {
+      throw new RangeError('Animation2D node override position must contain two finite values.');
+    }
+    if (override.opacity !== undefined && (!Number.isFinite(override.opacity) || override.opacity < 0 || override.opacity > 1)) {
+      throw new RangeError('Animation2D node override opacity must be within 0..1.');
+    }
+    if (override.enabled !== undefined && typeof override.enabled !== 'boolean') {
+      throw new TypeError('Animation2D node override enabled must be boolean.');
+    }
+    this._nodeOverrides.set(nodeId, Object.freeze({
+      ...(position ? { position: Object.freeze([position[0], position[1]] as const) } : {}),
+      ...(override.opacity === undefined ? {} : { opacity: override.opacity }),
+      ...(override.enabled === undefined ? {} : { enabled: override.enabled }),
+    }));
+    this._needsApply = true;
+    return this;
+  }
+
+  clearNodeOverride(nodeId: string): this {
+    if (this._nodeOverrides.delete(nodeId)) this._needsApply = true;
+    return this;
+  }
+
+  clearNodeOverrides(): this {
+    if (this._nodeOverrides.size > 0) {
+      this._nodeOverrides.clear();
+      this._needsApply = true;
+    }
+    return this;
+  }
+
   onEntityRemoveComponent(_entity: Entity, component: Component): void {
     if (component === this) this._disposeRuntime();
   }
@@ -111,6 +155,7 @@ export class Animation2DComponent extends Component {
       ...(this.runtimeExtensions ? { runtimeExtensions: this.runtimeExtensions } : {}),
     });
     clone.disabled = this.disabled;
+    for (const [nodeId, override] of this._nodeOverrides) clone.setNodeOverride(nodeId, override);
     return clone;
   }
 

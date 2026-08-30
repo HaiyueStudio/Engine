@@ -44,7 +44,7 @@ export class Animation2DSystem extends System {
       return;
     }
     if (component.completed && component.animation.endBehavior === 'destroy' && !component.playing) return;
-    component._runtime ??= new Animation2DRuntime(entity, component.animation, component.runtimeExtensions, this._assetManager);
+    component._runtime ??= new Animation2DRuntime(entity, component.animation, component.runtimeExtensions, this._assetManager, component._nodeOverrides);
     if (component.playing && delta > 0 && component.speed > 0) {
       component.currentTime += delta * 0.001 * component.speed;
       if (component.currentTime >= component.animation.duration) {
