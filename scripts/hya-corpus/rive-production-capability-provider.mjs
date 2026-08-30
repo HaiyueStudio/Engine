@@ -253,7 +253,7 @@ function sniffMimeType(bytes, sourceName, fallback) {
   return fallback;
 }
 
-function applySimpleLayoutTransforms(hierarchy) {
+export function applySimpleLayoutTransforms(hierarchy) {
   const entries = hierarchy.entries;
   for (const entry of entries.filter(value => value.nodeEligible !== false && value.sourceName === 'LayoutComponent')) {
     const style = localEntry(entries, entry, entry.fields.styleId);
@@ -381,8 +381,9 @@ function compileTextComponents(hierarchy, resourceByAssetIndex) {
     const backgroundStroke = backgroundChildren.find(value => value.sourceName === 'Stroke');
     const backgroundFillSource = backgroundFill ? childEntries(children, backgroundFill).find(value => value.sourceName === 'SolidColor') : null;
     const backgroundStrokeSource = backgroundStroke ? childEntries(children, backgroundStroke).find(value => value.sourceName === 'SolidColor') : null;
+    const textValue = runs.map(value => typeof value.fields.text === 'string' ? value.fields.text : '').join('');
     const component = compact({
-      type: 'text2d', text: runs.map(value => typeof value.fields.text === 'string' ? value.fields.text : '').join(''),
+      type: 'text2d', text: textValue,
       size: [width, height], position: [width / 2, height / 2],
       fontFamily: font?.sourceAssetName, fontSize: authoredFontSize,
       fontWeight: Number.isFinite(axis?.fields.axisValue) ? axis.fields.axisValue : 400,
@@ -402,7 +403,7 @@ function compileTextComponents(hierarchy, resourceByAssetIndex) {
         }),
       } : {}),
       fit: text.fields.overflowValue === 5 ? 'shrink' : undefined,
-      wrap: text.fields.wrapValue === 1 ? 'word' : undefined,
+      wrap: textWrapMode(textValue, width, authoredFontSize, text.fields.wrapValue),
       resolutionScale: 4,
     });
     output.set(text.objectId, [component]);
@@ -771,6 +772,7 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
           new Set([artboardObjectId]),
           1,
           {
+            rootX: 0,
             rootY: index * (listPlan.itemHeight * scale + gap), rootScale: scale,
             dynamicNestedArtboardIndex: item.artboardIndex,
             viewModelValues: item.values,
@@ -788,9 +790,10 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
     const nextAncestry = new Set(ancestry); nextAncestry.add(targetArtboardId);
     const local = await buildComponentHierarchy(report, objects, targetArtboardId);
     await applySelectedAnimationOverrides(local, report, objects, targetArtboardId, activeAnimation, options.viewModelValues);
-    applyViewModelText(local, options.viewModelValues);
+    applyViewModelText(local, options.viewModelValues, report);
     applyDisplaySelection(local);
     applySoloSelection(local);
+    if (options.viewModelValues) applyComponentListLayout(local);
     const idByLocal = new Map(local.entries.map(entry => [entry.objectId, prefix ? `${prefix}${entry.objectId}` : entry.objectId]));
     const clones = local.entries.map(entry => ({
       ...entry,
@@ -930,10 +933,17 @@ function boundAnimationNames(animations, values) {
   return names;
 }
 
-function applyViewModelText(hierarchy, values) {
+export function applyViewModelText(hierarchy, values, report) {
   if (!values) return;
+  const boundTextObjectIds = new Set();
+  for (let index = 1; index < report.objects.length; index++) {
+    if (report.objects[index].sourceName === 'DataBindContext') {
+      boundTextObjectIds.add(report.objects[index - 1].neutralObjectId);
+    }
+  }
   const strings = Object.entries(values).filter(([, value]) => typeof value === 'string');
-  for (const entry of hierarchy.entries.filter(value => value.sourceName === 'TextValueRun')) {
+  for (const entry of hierarchy.entries.filter(value => value.sourceName === 'TextValueRun'
+    && boundTextObjectIds.has(value.sourceObjectId ?? value.objectId))) {
     const authored = typeof entry.fields.text === 'string' ? entry.fields.text : '';
     let replacement;
     if (/^--0+$/u.test(authored)) replacement = strings.find(([name]) => /(?:^|_)id$/iu.test(name))?.[1];
@@ -943,6 +953,53 @@ function applyViewModelText(hierarchy, values) {
 }
 
 function normalizeBindingName(value) { return value.toLowerCase().replace(/[^a-z0-9]+/gu, ''); }
+
+export function applyComponentListLayout(hierarchy) {
+  const entries = hierarchy.entries;
+  const byParent = componentChildren(entries);
+  for (const parent of entries.filter(value => value.nodeEligible !== false && value.sourceName === 'LayoutComponent')) {
+    const children = (byParent.get(parent.componentIndex) ?? [])
+      .filter(value => value.nodeEligible !== false && value.sourceName === 'LayoutComponent');
+    if (children.length < 2) continue;
+    const height = finite(children[0].fields.height);
+    if (height === undefined || !children.every(child => Math.abs((finite(child.fields.height) ?? Number.NaN) - height) < 1e-6)) continue;
+    const style = localEntry(entries, parent, parent.fields.styleId);
+    if (style?.sourceName === 'LayoutComponentStyle') style.fields.flexDirectionValue = 1;
+  }
+  for (const layout of [...entries].reverse().filter(value => value.nodeEligible !== false && value.sourceName === 'LayoutComponent')) {
+    const style = localEntry(entries, layout, layout.fields.styleId);
+    if (style?.fields.intrinsicallySizedValue !== true) continue;
+    const children = (byParent.get(layout.componentIndex) ?? []).filter(value => value.nodeEligible !== false);
+    const childLayouts = children.filter(value => value.sourceName === 'LayoutComponent');
+    const textWidths = children.filter(value => value.sourceName === 'Text').map(text => intrinsicTextWidth(text, entries, byParent));
+    const gap = finite(style.fields.gapHorizontal) ?? 0;
+    const row = style.fields.flexDirectionValue === 1;
+    const layoutWidth = childLayouts.length === 0 ? 0 : row
+      ? childLayouts.reduce((sum, child) => sum + positive(child.fields.width, 0), 0) + gap * (childLayouts.length - 1)
+      : Math.max(...childLayouts.map(child => positive(child.fields.width, 0)));
+    const contentWidth = Math.max(layoutWidth, ...textWidths, 0);
+    if (contentWidth > 0) {
+      layout.fields.width = contentWidth + (finite(style.fields.paddingLeft) ?? 0) + (finite(style.fields.paddingRight) ?? 0);
+    }
+  }
+}
+
+function intrinsicTextWidth(text, entries, byParent) {
+  const runs = (byParent.get(text.componentIndex) ?? []).filter(value => value.nodeEligible !== false && value.sourceName === 'TextValueRun');
+  return runs.reduce((sum, run) => {
+    const style = localEntry(entries, text, run.fields.styleId);
+    const fontSize = positive(style?.fields.fontSize, 12);
+    return sum + textAdvance(typeof run.fields.text === 'string' ? run.fields.text : '', fontSize);
+  }, 0);
+}
+
+export function textWrapMode(value, width, fontSize, wrapValue) {
+  return wrapValue === 1 || textAdvance(value, fontSize) > width ? 'word' : undefined;
+}
+
+function textAdvance(value, fontSize) {
+  return [...value].reduce((sum, character) => sum + fontSize * (/^[\u0000-\u00ff]$/u.test(character) ? 0.6 : 1), 0);
+}
 
 function applyDisplaySelection(hierarchy) {
   const byParent = componentChildren(hierarchy.entries);

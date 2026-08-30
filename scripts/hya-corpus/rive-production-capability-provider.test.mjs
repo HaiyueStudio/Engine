@@ -2,10 +2,14 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
 import {
+  applyComponentListLayout,
+  applySimpleLayoutTransforms,
   applySelectedAnimationOverrides,
   applySoloSelection,
+  applyViewModelText,
   evaluate,
   mapEmbeddedAssets,
+  textWrapMode,
   vertexPath,
 } from './rive-production-capability-provider.mjs';
 import { FROZEN_PROPERTIES } from '../../animation-spec/dist-test/rive/import/generated/frozen-registry.js';
@@ -168,6 +172,55 @@ test('selected animation initializes Solo activeComponentId before inactive subt
   assert.equal(hierarchy.entries[2].nodeEligible, false);
   assert.equal(hierarchy.entries[3].nodeEligible, true);
   assert.deepEqual(hierarchy.selectedAnimationsApplied, ['Select second']);
+});
+
+test('view-model text replacement only changes runs with an authored data binding', () => {
+  const hierarchy = { entries: [
+    { objectId: 'label', sourceObjectId: 'label', sourceName: 'TextValueRun', fields: { text: 'CASE ID:' } },
+    { objectId: 'value', sourceObjectId: 'value', sourceName: 'TextValueRun', fields: { text: '--000' } },
+  ] };
+  const report = { objects: [
+    { neutralObjectId: 'label', sourceName: 'TextValueRun' },
+    { neutralObjectId: 'value', sourceName: 'TextValueRun' },
+    { neutralObjectId: 'binding', sourceName: 'DataBindContext' },
+  ] };
+
+  applyViewModelText(hierarchy, { case_id: '--001' }, report);
+
+  assert.equal(hierarchy.entries[0].fields.text, 'CASE ID:');
+  assert.equal(hierarchy.entries[1].fields.text, '--001');
+});
+
+test('component-list rows use intrinsic text widths before flex placement', () => {
+  const hierarchy = { entries: [
+    { componentIndex: 0, scopeKey: 'scope', sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { width: 200, height: 20, styleId: 1 } },
+    { componentIndex: 1, scopeKey: 'scope', sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 0, intrinsicallySizedValue: true } },
+    { componentIndex: 2, scopeKey: 'scope', sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 100, height: 20, styleId: 4 } },
+    { componentIndex: 3, scopeKey: 'scope', sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 100, height: 20, styleId: 5 } },
+    { componentIndex: 4, scopeKey: 'scope', sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 2, intrinsicallySizedValue: true } },
+    { componentIndex: 5, scopeKey: 'scope', sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 3, intrinsicallySizedValue: true } },
+    { componentIndex: 6, scopeKey: 'scope', sourceName: 'Text', nodeEligible: true, transformTarget: true, fields: { parentId: 2 } },
+    { componentIndex: 7, scopeKey: 'scope', sourceName: 'TextValueRun', nodeEligible: true, transformTarget: false, fields: { parentId: 6, text: 'NEW', styleId: 8 } },
+    { componentIndex: 8, scopeKey: 'scope', sourceName: 'TextStylePaint', nodeEligible: true, transformTarget: false, fields: { parentId: 6, fontSize: 20 } },
+    { componentIndex: 9, scopeKey: 'scope', sourceName: 'Text', nodeEligible: true, transformTarget: true, fields: { parentId: 3 } },
+    { componentIndex: 10, scopeKey: 'scope', sourceName: 'TextValueRun', nodeEligible: true, transformTarget: false, fields: { parentId: 9, text: '--001', styleId: 11 } },
+    { componentIndex: 11, scopeKey: 'scope', sourceName: 'TextStylePaint', nodeEligible: true, transformTarget: false, fields: { parentId: 9, fontSize: 20 } },
+  ] };
+
+  applyComponentListLayout(hierarchy);
+  applySimpleLayoutTransforms(hierarchy);
+
+  assert.equal(hierarchy.entries[1].fields.flexDirectionValue, 1);
+  assert.equal(hierarchy.entries[2].fields.width, 36);
+  assert.equal(hierarchy.entries[3].fields.width, 60);
+  assert.deepEqual([hierarchy.entries[2].fields.x, hierarchy.entries[2].fields.y], [0, 0]);
+  assert.deepEqual([hierarchy.entries[3].fields.x, hierarchy.entries[3].fields.y], [36, 0]);
+});
+
+test('text wider than its authored box receives deterministic word wrapping', () => {
+  assert.equal(textWrapMode('short', 100, 12), undefined);
+  assert.equal(textWrapMode('A long dossier description that exceeds its box', 100, 12), 'word');
+  assert.equal(textWrapMode('forced', 1000, 12, 1), 'word');
 });
 
 test('Rive cubic vertices retain incoming and outgoing handles in HYA path commands', () => {
