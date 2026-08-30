@@ -29,6 +29,7 @@ export async function evaluate(request, context) {
     request.selection?.animation,
   );
   applySimpleLayoutTransforms(hierarchy);
+  finalizeComponentListMetrics(hierarchy);
   const assets = annotateEmbeddedAssets(
     await extractEmbeddedAssets(request.rivBytes, ir.resolvedResources ?? []),
     report,
@@ -262,39 +263,113 @@ export function applySimpleLayoutTransforms(hierarchy) {
       if (Number.isFinite(style.fields.positionTop)) entry.fields.y = style.fields.positionTop;
     }
   }
+  resolveHugLayoutSizes(entries);
   for (const parent of entries.filter(value => value.nodeEligible !== false && (value.sourceName === 'LayoutComponent' || value.sourceName === 'Artboard'))) {
+    const componentListScope = typeof parent.scopeKey === 'string' && parent.scopeKey.includes('::list-');
     const style = localEntry(entries, parent, parent.fields.styleId);
     const children = entries.filter(value => value.scopeKey === parent.scopeKey
       && value.nodeEligible !== false
       && value.transformTarget === true
       && value.fields.parentId === parent.componentIndex
-      && value.sourceName !== 'LayoutComponentStyle');
+      && (componentListScope ? value.sourceName === 'LayoutComponent' : value.sourceName !== 'LayoutComponentStyle'));
     if (style?.fields.layoutTypeValue === 1) {
       applyGridLayout(entries, parent, style, children);
       continue;
     }
-    const row = style?.fields.flexDirectionValue === 1;
+    const row = componentListScope ? rowLayout(style) : style?.fields.flexDirectionValue === 1;
     const wrap = style?.fields.flexWrapValue === 1;
     const gap = row ? finite(style?.fields.gapHorizontal) ?? 0 : finite(style?.fields.gapVertical) ?? 0;
     const leading = row ? finite(style?.fields.paddingLeft) ?? 0 : finite(style?.fields.paddingTop) ?? 0;
     const crossLeading = row ? finite(style?.fields.paddingTop) ?? 0 : finite(style?.fields.paddingLeft) ?? 0;
     const available = Math.max(0, (row ? positive(parent.fields.width, 0) : positive(parent.fields.height, 0))
       - leading - (row ? finite(style?.fields.paddingRight) ?? 0 : finite(style?.fields.paddingBottom) ?? 0));
+    const crossAvailable = Math.max(0, (row ? positive(parent.fields.height, 0) : positive(parent.fields.width, 0))
+      - crossLeading - (row ? finite(style?.fields.paddingBottom) ?? 0 : finite(style?.fields.paddingRight) ?? 0));
+    if (componentListScope) applyFillLayout(entries, children, row, available, crossAvailable, gap);
     const used = children.reduce((sum, child) => sum + (row ? positive(child.fields.width, 0) : positive(child.fields.height, 0)), 0)
       + Math.max(0, children.length - 1) * gap;
     const justify = Number(style?.fields.justifyContentValue ?? style?.fields.justifyItemsValue ?? 0);
     let cursor = leading + (justify === 1 ? Math.max(0, available - used) / 2 : justify === 2 ? Math.max(0, available - used) : 0);
     let crossCursor = crossLeading; let lineExtent = 0;
     for (const child of children) {
+      const childStyle = componentListScope ? localEntry(entries, child, child.fields.styleId) : null;
+      if (componentListScope && childStyle?.fields.positionTypeValue === 1) continue;
+      const marginLeading = componentListScope ? (row ? finite(childStyle?.fields.marginLeft) ?? 0 : finite(childStyle?.fields.marginTop) ?? 0) : 0;
+      const marginTrailing = componentListScope ? (row ? finite(childStyle?.fields.marginRight) ?? 0 : finite(childStyle?.fields.marginBottom) ?? 0) : 0;
+      const marginCross = componentListScope ? (row ? finite(childStyle?.fields.marginTop) ?? 0 : finite(childStyle?.fields.marginLeft) ?? 0) : 0;
       const childExtent = row ? positive(child.fields.width, 0) : positive(child.fields.height, 0);
       const crossExtent = row ? positive(child.fields.height, 0) : positive(child.fields.width, 0);
-      if (wrap && cursor > leading && cursor + childExtent > leading + available) {
+      if (wrap && cursor > leading && cursor + marginLeading + childExtent + marginTrailing > leading + available) {
         cursor = leading; crossCursor += lineExtent + (row ? finite(style?.fields.gapVertical) ?? 0 : finite(style?.fields.gapHorizontal) ?? 0); lineExtent = 0;
       }
-      if (!Number.isFinite(child.fields.x)) child.fields.x = row ? cursor : crossCursor;
-      if (!Number.isFinite(child.fields.y)) child.fields.y = row ? crossCursor : cursor;
-      cursor += childExtent + gap; lineExtent = Math.max(lineExtent, crossExtent);
+      cursor += marginLeading;
+      if (componentListScope || !Number.isFinite(child.fields.x)) child.fields.x = row ? cursor : crossCursor + marginCross;
+      if (componentListScope || !Number.isFinite(child.fields.y)) child.fields.y = row ? crossCursor + marginCross : cursor;
+      cursor += childExtent + marginTrailing + gap; lineExtent = Math.max(lineExtent, crossExtent + marginCross);
     }
+  }
+}
+
+function resolveHugLayoutSizes(entries) {
+  for (let pass = 0; pass < 2; pass++) {
+    for (const layout of [...entries].reverse().filter(value => value.nodeEligible !== false
+      && value.sourceName === 'LayoutComponent'
+      && typeof value.scopeKey === 'string'
+      && value.scopeKey.includes('::list-'))) {
+      const style = localEntry(entries, layout, layout.fields.styleId);
+      if (style?.fields.intrinsicallySizedValue !== true) continue;
+      const children = entries.filter(value => value.scopeKey === layout.scopeKey
+        && value.nodeEligible !== false
+        && value.sourceName === 'LayoutComponent'
+        && value.fields.parentId === layout.componentIndex);
+      if (children.length === 0) continue;
+      const row = rowLayout(style);
+      const gap = row ? finite(style.fields.gapHorizontal) ?? 0 : finite(style.fields.gapVertical) ?? 0;
+      const width = row
+        ? children.reduce((sum, child) => sum + positive(child.fields.width, 0), 0) + gap * Math.max(0, children.length - 1)
+        : Math.max(...children.map(child => positive(child.fields.width, 0)));
+      const height = row
+        ? Math.max(...children.map(child => positive(child.fields.height, 0)))
+        : children.reduce((sum, child) => sum + positive(child.fields.height, 0), 0) + gap * Math.max(0, children.length - 1);
+      if (width > 0) {
+        const requestedWidth = width + (finite(style.fields.paddingLeft) ?? 0) + (finite(style.fields.paddingRight) ?? 0);
+        const parent = localEntry(entries, layout, layout.fields.parentId);
+        const parentStyle = parent ? localEntry(entries, parent, parent.fields.styleId) : null;
+        const parentContentWidth = parent
+          ? positive(parent.fields.width, requestedWidth)
+            - (finite(parentStyle?.fields.paddingLeft) ?? 0)
+            - (finite(parentStyle?.fields.paddingRight) ?? 0)
+            - (finite(style.fields.marginLeft) ?? 0)
+            - (finite(style.fields.marginRight) ?? 0)
+          : requestedWidth;
+        layout.fields.width = Math.max(0, Math.min(requestedWidth, parentContentWidth));
+      }
+      if (height > 0) layout.fields.height = height + (finite(style.fields.paddingTop) ?? 0) + (finite(style.fields.paddingBottom) ?? 0);
+    }
+  }
+}
+
+function rowLayout(style) {
+  if (style?.fields.flexDirectionValue === 1 || style?.fields.flexDirectionValue === 2) return true;
+  return finite(style?.fields.gapHorizontal) !== undefined && finite(style?.fields.gapVertical) === undefined;
+}
+
+function applyFillLayout(entries, children, row, available, crossAvailable, gap) {
+  const dimensions = row
+    ? { extent: 'width', cross: 'height', scale: 'layoutWidthScaleType', crossScale: 'layoutHeightScaleType', fraction: 'fractionalWidth' }
+    : { extent: 'height', cross: 'width', scale: 'layoutHeightScaleType', crossScale: 'layoutWidthScaleType', fraction: 'fractionalHeight' };
+  const fill = children.filter(child => localEntry(entries, child, child.fields.styleId)?.fields[dimensions.scale] === 1);
+  const fixed = children.filter(child => !fill.includes(child))
+    .reduce((sum, child) => sum + positive(child.fields[dimensions.extent], 0), 0);
+  const remaining = Math.max(0, available - fixed - Math.max(0, children.length - 1) * gap);
+  const totalFraction = fill.reduce((sum, child) => sum + positive(child.fields[dimensions.fraction], 1), 0);
+  for (const child of fill) {
+    const fraction = positive(child.fields[dimensions.fraction], 1);
+    child.fields[dimensions.extent] = totalFraction > 0 ? remaining * fraction / totalFraction : 0;
+  }
+  for (const child of children) {
+    const childStyle = localEntry(entries, child, child.fields.styleId);
+    if (childStyle?.fields[dimensions.crossScale] === 1) child.fields[dimensions.cross] = crossAvailable;
   }
 }
 
@@ -349,7 +424,7 @@ function localEntry(entries, owner, componentIndex) {
 function componentScopeKey(scopeKey, componentIndex) { return `${scopeKey}\0${componentIndex}`; }
 function childEntries(children, entry) { return children.get(componentScopeKey(entry.scopeKey, entry.componentIndex)) ?? []; }
 
-function compileTextComponents(hierarchy, resourceByAssetIndex) {
+export function compileTextComponents(hierarchy, resourceByAssetIndex) {
   const output = new Map(); const entries = hierarchy.entries;
   const children = new Map();
   for (const entry of entries) {
@@ -365,10 +440,15 @@ function compileTextComponents(hierarchy, resourceByAssetIndex) {
       ? referencedStyle
       : owned.find(value => value.sourceName === 'TextStylePaint');
     const parent = localEntry(entries, text, text.fields.parentId);
-    const width = positive(text.fields.width, positive(parent?.fields.width, 1));
+    const authoredWidth = positive(text.fields.width, positive(parent?.fields.width, 1));
+    const parentWidth = parent?.sourceName === 'LayoutComponent' ? positive(parent.fields.width, authoredWidth) : authoredWidth;
+    const width = Math.min(authoredWidth, parentWidth);
     // Rive's frozen TextStyle schema defaults an omitted fontSize to 12.
     const authoredFontSize = positive(style?.fields.fontSize, 12);
-    const height = positive(text.fields.height, positive(parent?.fields.height, Math.max(1, authoredFontSize * 1.2)));
+    const authoredHeight = positive(text.fields.height, positive(parent?.fields.height, Math.max(1, authoredFontSize * 1.2)));
+    const parentHeight = parent?.sourceName === 'LayoutComponent' ? positive(parent.fields.height, authoredHeight) : authoredHeight;
+    const height = Math.min(authoredHeight, parentHeight);
+    const fontSize = Math.min(authoredFontSize, height);
     const font = Number.isSafeInteger(style?.fields.fontAssetId) ? resourceByAssetIndex.get(style.fields.fontAssetId) : null;
     const styleChildren = style ? childEntries(children, style) : [];
     const fill = styleChildren.find(value => value.sourceName === 'Fill');
@@ -385,10 +465,10 @@ function compileTextComponents(hierarchy, resourceByAssetIndex) {
     const component = compact({
       type: 'text2d', text: textValue,
       size: [width, height], position: [width / 2, height / 2],
-      fontFamily: font?.sourceAssetName, fontSize: authoredFontSize,
+      fontFamily: font?.sourceAssetName, fontSize,
       fontWeight: Number.isFinite(axis?.fields.axisValue) ? axis.fields.axisValue : 400,
       fontResource: font?.resourceId,
-      lineHeight: positive(style?.fields.lineHeight, authoredFontSize),
+      lineHeight: Math.min(positive(style?.fields.lineHeight, authoredFontSize), height),
       tracking: finite(style?.fields.letterSpacing) ?? 0,
       textAlign: ['left', 'center', 'right'][text.fields.alignValue ?? 0] ?? 'left',
       verticalAlign: ['top', 'middle', 'bottom'][text.fields.verticalAlignValue ?? 0] ?? 'top',
@@ -402,8 +482,8 @@ function compileTextComponents(hierarchy, resourceByAssetIndex) {
           padding: 0,
         }),
       } : {}),
-      fit: text.fields.overflowValue === 5 ? 'shrink' : undefined,
-      wrap: textWrapMode(textValue, width, authoredFontSize, text.fields.wrapValue),
+      fit: text.fields.overflowValue === 5 || fontSize < authoredFontSize ? 'shrink' : undefined,
+      wrap: textWrapMode(textValue, width, fontSize, text.fields.wrapValue),
       resolutionScale: 4,
     });
     output.set(text.objectId, [component]);
@@ -660,7 +740,7 @@ export function compileComponentListInteractionDocument(hierarchy, records, reso
         id: `${targetId}-enter`, target: targetId, event: 'pointer-enter', phases: ['target'],
         actions: [
           { kind: 'custom', protocol: 'org.haiyue.rive-component-list@1', port: 'set-hover', arguments: { ...argumentsValue, active: true } },
-          ...(audioEvents.get('open_01') ? [{ kind: 'audio', operation: 'play', target: audioEvents.get('open_01') }] : []),
+          ...(audioEvents.get('click_01') ? [{ kind: 'audio', operation: 'play', target: audioEvents.get('click_01') }] : []),
         ],
       }, {
         id: `${targetId}-exit`, target: targetId, event: 'pointer-exit', phases: ['target'],
@@ -668,8 +748,8 @@ export function compileComponentListInteractionDocument(hierarchy, records, reso
       }, {
         id: `${targetId}-click`, target: targetId, event: 'click', phases: ['target'], pointerButton: 0,
         actions: [
+          ...(audioEvents.get('open_01') ? [{ kind: 'audio', operation: 'play', target: audioEvents.get('open_01') }] : []),
           { kind: 'custom', protocol: 'org.haiyue.rive-component-list@1', port: 'toggle-open', arguments: argumentsValue },
-          ...(audioEvents.get('click_01') ? [{ kind: 'audio', operation: 'play', target: audioEvents.get('click_01') }] : []),
         ],
       });
     }
@@ -678,6 +758,19 @@ export function compileComponentListInteractionDocument(hierarchy, records, reso
     format: 'haiyue-interaction', version: 1, extension: 'org.haiyue.interaction@1', dragThreshold: 4,
     targets, listeners,
   };
+}
+
+export function finalizeComponentListMetrics(hierarchy) {
+  for (const list of hierarchy.componentLists ?? []) {
+    for (const row of list.rows ?? []) {
+      const root = hierarchy.entries.find(entry => entry.objectId === row.nodes.open);
+      if (!root) continue;
+      const content = hierarchy.entries.find(entry => entry.sourceName === 'LayoutComponent'
+        && hierarchy.parentNodeByObjectId.get(entry.objectId) === root.objectId);
+      const contentHeight = positive(content?.fields.height, 0) * positive(root.fields.scaleY, 1);
+      if (contentHeight > row.expandedHeight) row.expandedHeight = contentHeight;
+    }
+  }
 }
 
 function globalNodeOrigin(nodeId, hierarchy) {
@@ -1081,14 +1174,25 @@ export function applyComponentListLayout(hierarchy) {
     const children = (byParent.get(layout.componentIndex) ?? []).filter(value => value.nodeEligible !== false);
     const childLayouts = children.filter(value => value.sourceName === 'LayoutComponent');
     const textWidths = children.filter(value => value.sourceName === 'Text').map(text => intrinsicTextWidth(text, entries, byParent));
-    const gap = finite(style.fields.gapHorizontal) ?? 0;
-    const row = style.fields.flexDirectionValue === 1;
+    const textHeights = children.filter(value => value.sourceName === 'Text').map(text => Math.min(
+      positive(text.fields.height, positive(layout.fields.height, 0)),
+      positive(layout.fields.height, Number.POSITIVE_INFINITY),
+    ));
+    const row = rowLayout(style);
+    const gap = row ? finite(style.fields.gapHorizontal) ?? 0 : finite(style.fields.gapVertical) ?? 0;
     const layoutWidth = childLayouts.length === 0 ? 0 : row
       ? childLayouts.reduce((sum, child) => sum + positive(child.fields.width, 0), 0) + gap * (childLayouts.length - 1)
       : Math.max(...childLayouts.map(child => positive(child.fields.width, 0)));
+    const layoutHeight = childLayouts.length === 0 ? 0 : row
+      ? Math.max(...childLayouts.map(child => positive(child.fields.height, 0)))
+      : childLayouts.reduce((sum, child) => sum + positive(child.fields.height, 0), 0) + gap * (childLayouts.length - 1);
     const contentWidth = Math.max(layoutWidth, ...textWidths, 0);
+    const contentHeight = Math.max(layoutHeight, ...textHeights, 0);
     if (contentWidth > 0) {
       layout.fields.width = contentWidth + (finite(style.fields.paddingLeft) ?? 0) + (finite(style.fields.paddingRight) ?? 0);
+    }
+    if (contentHeight > 0) {
+      layout.fields.height = contentHeight + (finite(style.fields.paddingTop) ?? 0) + (finite(style.fields.paddingBottom) ?? 0);
     }
   }
 }

@@ -7,8 +7,10 @@ import {
   applySelectedAnimationOverrides,
   applySoloSelection,
   applyViewModelText,
+  compileTextComponents,
   compileComponentListInteractionDocument,
   evaluate,
+  finalizeComponentListMetrics,
   mapEmbeddedAssets,
   textWrapMode,
   vertexPath,
@@ -143,15 +145,34 @@ test('component-list interaction sidecar carries hover, click, audio and four ex
   const records = [
     { visit: { sourceName: 'AudioEvent' }, fields: { name: 'open_01', assetId: 1 } },
     { visit: { sourceName: 'AudioEvent' }, fields: { name: 'click_01', assetId: 2 } },
+    { visit: { sourceName: 'AudioEvent' }, fields: { name: 'open_menu_02', assetId: 3 } },
+    { visit: { sourceName: 'AudioEvent' }, fields: { name: 'close_menu_01', assetId: 4 } },
   ];
   const document = parseHyaInteraction(compileComponentListInteractionDocument(hierarchy, records, new Map([
-    [1, { resourceId: 'resource-hover' }], [2, { resourceId: 'resource-click' }],
+    [1, { resourceId: 'resource-main-click' }], [2, { resourceId: 'resource-hover' }],
+    [3, { resourceId: 'resource-open' }], [4, { resourceId: 'resource-close' }],
   ])));
   assert.deepEqual(document.targets[0].transform, [1, 0, 0, 1, 140, 355]);
   assert.deepEqual(document.listeners.map(listener => listener.event), ['pointer-enter', 'pointer-exit', 'click']);
   assert.equal(document.listeners[0].actions[0].arguments.openHoverNode, 'list::openHover::root');
   assert.equal(document.listeners[0].actions[1].target, 'resource-hover');
-  assert.equal(document.listeners[2].actions[1].target, 'resource-click');
+  assert.equal(document.listeners[2].actions[0].target, 'resource-main-click');
+  assert.equal(document.listeners[2].actions[1].arguments.openAudio, 'resource-open');
+  assert.equal(document.listeners[2].actions[1].arguments.closeAudio, 'resource-close');
+});
+
+test('component-list expanded metrics use the post-layout open variant height', () => {
+  const root = { objectId: 'open-root', sourceName: 'Artboard', fields: { scaleY: 0.5 } };
+  const content = { objectId: 'open-content', sourceName: 'LayoutComponent', fields: { height: 582 } };
+  const row = { nodes: { open: root.objectId }, expandedHeight: 259 };
+  const hierarchy = {
+    entries: [root, content], componentLists: [{ rows: [row] }],
+    parentNodeByObjectId: new Map([[content.objectId, root.objectId]]),
+  };
+
+  finalizeComponentListMetrics(hierarchy);
+
+  assert.equal(row.expandedHeight, 291);
 });
 
 test('selected animation initializes Solo activeComponentId before inactive subtrees are removed', async () => {
@@ -268,6 +289,59 @@ test('component-list rows use intrinsic text widths before flex placement', () =
   assert.equal(hierarchy.entries[3].fields.width, 60);
   assert.deepEqual([hierarchy.entries[2].fields.x, hierarchy.entries[2].fields.y], [0, 0]);
   assert.deepEqual([hierarchy.entries[3].fields.x, hierarchy.entries[3].fields.y], [36, 0]);
+});
+
+test('responsive layout infers an authored horizontal-gap row and resolves hug height', () => {
+  const scopeKey = 'host::list-000000::open::artboard';
+  const hierarchy = { entries: [
+    { componentIndex: 0, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { width: 10, height: 10, styleId: 1 } },
+    { componentIndex: 1, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 0, gapHorizontal: 10, paddingLeft: 5, paddingRight: 5, paddingTop: 2, paddingBottom: 2, intrinsicallySizedValue: true } },
+    { componentIndex: 2, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 40, height: 30, styleId: 4 } },
+    { componentIndex: 3, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 60, height: 20, styleId: 5 } },
+    { componentIndex: 4, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 2 } },
+    { componentIndex: 5, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 3 } },
+  ] };
+
+  applyComponentListLayout(hierarchy);
+  applySimpleLayoutTransforms(hierarchy);
+
+  assert.deepEqual([hierarchy.entries[0].fields.width, hierarchy.entries[0].fields.height], [120, 34]);
+  assert.deepEqual([hierarchy.entries[2].fields.x, hierarchy.entries[2].fields.y], [5, 2]);
+  assert.deepEqual([hierarchy.entries[3].fields.x, hierarchy.entries[3].fields.y], [55, 2]);
+});
+
+test('responsive layout distributes fill ratios inside the parent content box', () => {
+  const scopeKey = 'host::list-000000::open::artboard';
+  const hierarchy = { entries: [
+    { componentIndex: 0, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { width: 210, height: 40, styleId: 1 } },
+    { componentIndex: 1, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 0, flexDirectionValue: 1, gapHorizontal: 10 } },
+    { componentIndex: 2, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 1, height: 20, fractionalWidth: 1, styleId: 4 } },
+    { componentIndex: 3, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 1, height: 20, fractionalWidth: 2, styleId: 5 } },
+    { componentIndex: 4, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 2, layoutWidthScaleType: 1 } },
+    { componentIndex: 5, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 3, layoutWidthScaleType: 1 } },
+  ] };
+
+  applySimpleLayoutTransforms(hierarchy);
+
+  assert.ok(Math.abs(hierarchy.entries[2].fields.width - 200 / 3) < 1e-9);
+  assert.ok(Math.abs(hierarchy.entries[3].fields.width - 400 / 3) < 1e-9);
+  assert.ok(Math.abs(hierarchy.entries[3].fields.x - (200 / 3 + 10)) < 1e-9);
+});
+
+test('text compilation shrinks oversized type and clips it to its layout box', () => {
+  const hierarchy = { entries: [
+    { componentIndex: 0, scopeKey: 'scope', objectId: 'layout', sourceName: 'LayoutComponent', fields: { width: 90, height: 27 } },
+    { componentIndex: 1, scopeKey: 'scope', objectId: 'text', sourceName: 'Text', fields: { parentId: 0, width: 300, height: 60 } },
+    { componentIndex: 2, scopeKey: 'scope', objectId: 'run', sourceName: 'TextValueRun', fields: { parentId: 1, text: 'NAME:', styleId: 3 } },
+    { componentIndex: 3, scopeKey: 'scope', objectId: 'style', sourceName: 'TextStylePaint', fields: { parentId: 1, fontSize: 50, lineHeight: 50 } },
+  ] };
+
+  const component = compileTextComponents(hierarchy, new Map()).get('text')[0];
+
+  assert.deepEqual(component.size, [90, 27]);
+  assert.equal(component.fontSize, 27);
+  assert.equal(component.lineHeight, 27);
+  assert.equal(component.fit, 'shrink');
 });
 
 test('text wider than its authored box receives deterministic word wrapping', () => {
