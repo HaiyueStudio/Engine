@@ -359,7 +359,7 @@ export function applySimpleLayoutTransforms(hierarchy) {
 export function resolveNestedLeafFitTransforms(hierarchy) {
   const entries = hierarchy.entries ?? [];
   const byId = new Map(entries.map(entry => [entry.objectId, entry]));
-  for (const root of entries.filter(entry => entry.sourceName === 'Artboard' && (entry.instanceDepth ?? 0) > 1)) {
+  for (const root of entries.filter(entry => entry.sourceName === 'Artboard' && (entry.instanceDepth ?? 0) > 0)) {
     const leaf = byId.get(hierarchy.parentNodeByObjectId?.get(root.objectId));
     if (leaf?.sourceName !== 'NestedArtboardLeaf') continue;
     const host = byId.get(hierarchy.parentNodeByObjectId?.get(leaf.objectId));

@@ -705,7 +705,7 @@ test('nested leaf refits after flex layout resolves the final host box', () => {
     entries: [
       { objectId: 'host', sourceName: 'LayoutComponent', fields: { width: 707, height: 716 } },
       { objectId: 'leaf', sourceName: 'NestedArtboardLeaf', fields: { fit: 1 } },
-      { objectId: 'nested-root', sourceName: 'Artboard', instanceDepth: 2, fields: { width: 500, height: 500, scaleX: 1.62, scaleY: 1.62 } },
+      { objectId: 'nested-root', sourceName: 'Artboard', instanceDepth: 1, fields: { width: 500, height: 500, scaleX: 1.62, scaleY: 1.62 } },
     ],
     parentNodeByObjectId: new Map([['leaf', 'host'], ['nested-root', 'leaf']]),
   };
