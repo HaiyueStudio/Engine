@@ -30,8 +30,10 @@ interface AutomaticConversionResponse { status: 'passed' | 'failed'; assetId?: s
 interface RiveListActionArguments {
   row: number; sourceRow: number; list: string;
   idleNode: string; hoverNode: string; openNode: string; openHoverNode: string;
-  baseX: number; baseY: number; collapsedHeight: number; expandedHeight: number;
-  openAudio?: string; closeAudio?: string; active?: boolean;
+  expandedNode: string; expandedHoverNode: string;
+  baseX: number; baseY: number; collapsedHeight: number; openHeight: number; expandedHeight: number;
+  hoverAudio?: string; hoverGain?: number; clickAudio?: string; clickGain?: number;
+  openAudio?: string; openGain?: number; closeAudio?: string; closeGain?: number; active?: boolean;
 }
 interface OfficialRiveInstance {
   cleanup(): void; play(): void; pause(): void;
@@ -74,7 +76,9 @@ async function main(): Promise<void> {
 
   const sampleSelect = query<HTMLSelectElement>('#sample');
   for (const sample of manifest.samples) sampleSelect.add(new Option(sample.title, sample.id));
-  let activeSample = manifest.samples[0]!;
+  const requestedSampleId = new URLSearchParams(location.search).get('sample');
+  let activeSample = manifest.samples.find(sample => sample.id === requestedSampleId) ?? manifest.samples[0]!;
+  sampleSelect.value = activeSample.id;
   let official: OfficialRiveInstance | null = null;
   let hyaEntity: Entity | null = null;
   let hyaPlayer: Animation2DComponent | null = null;
@@ -84,8 +88,10 @@ async function main(): Promise<void> {
   let hyaInteraction: InteractionRuntime | null = null;
   let hyaAudioContext: AudioContext | null = null;
   let hyaAudioResources = new Map<string, string>();
+  let hyaAudioGains = new Map<string, number>();
   let hyaAudioBuffers = new Map<string, Promise<AudioBuffer>>();
-  const listRows = new Map<number, { descriptor: RiveListActionArguments; hover: boolean; open: boolean }>();
+  const listRows = new Map<number, { descriptor: RiveListActionArguments; hover: boolean; open: boolean; expanded: boolean }>();
+  const listTargetRows = new Map<string, number>();
   const interactionTargetShift = new Map<string, number>();
   let playing = true;
   let generation = 0;
@@ -99,7 +105,10 @@ async function main(): Promise<void> {
       hyaAudioBuffers.set(resourceId, buffer);
     }
     void Promise.all([context.resume(), buffer]).then(([, decoded]) => {
-      const source = context.createBufferSource(); source.buffer = decoded; source.connect(context.destination); source.start();
+      const source = context.createBufferSource(); const gain = context.createGain();
+      source.buffer = decoded;
+      gain.gain.setValueAtTime(hyaAudioGains.get(resourceId) ?? 1, context.currentTime);
+      source.connect(gain); gain.connect(context.destination); source.start();
       hyaCanvas.dataset.lastAudioEvent = resourceId;
     }).catch(() => { /* Browser autoplay policy may defer audio until the first pointer press. */ });
   };
@@ -107,7 +116,7 @@ async function main(): Promise<void> {
   const applyListRows = (): void => {
     if (!hyaPlayer) return;
     interactionTargetShift.clear();
-    const groups = new Map<string, Array<{ descriptor: RiveListActionArguments; hover: boolean; open: boolean }>>();
+    const groups = new Map<string, Array<{ descriptor: RiveListActionArguments; hover: boolean; open: boolean; expanded: boolean }>>();
     for (const state of listRows.values()) {
       const values = groups.get(state.descriptor.list) ?? []; values.push(state); groups.set(state.descriptor.list, values);
     }
@@ -115,23 +124,31 @@ async function main(): Promise<void> {
       let shift = 0;
       for (const state of values.sort((left, right) => left.descriptor.sourceRow - right.descriptor.sourceRow)) {
         const descriptor = state.descriptor;
-        const selected = state.open ? (state.hover ? descriptor.openHoverNode : descriptor.openNode)
-          : (state.hover ? descriptor.hoverNode : descriptor.idleNode);
-        for (const nodeId of [descriptor.idleNode, descriptor.hoverNode, descriptor.openNode, descriptor.openHoverNode]) {
+        const selected = state.expanded
+          ? (state.hover ? descriptor.expandedHoverNode : descriptor.expandedNode)
+          : state.open ? (state.hover ? descriptor.openHoverNode : descriptor.openNode)
+            : (state.hover ? descriptor.hoverNode : descriptor.idleNode);
+        for (const nodeId of [
+          descriptor.idleNode, descriptor.hoverNode, descriptor.openNode, descriptor.openHoverNode,
+          descriptor.expandedNode, descriptor.expandedHoverNode,
+        ]) {
           hyaPlayer.setNodeOverride(nodeId, { position: [descriptor.baseX, descriptor.baseY + shift], opacity: nodeId === selected ? 1 : 0 });
         }
         interactionTargetShift.set(`rive-list-row-${String(descriptor.row).padStart(6, '0')}`, shift);
-        if (state.open) shift += Math.max(0, descriptor.expandedHeight - descriptor.collapsedHeight);
+        if (state.open) {
+          const activeHeight = state.expanded ? descriptor.expandedHeight : descriptor.openHeight;
+          shift += Math.max(0, activeHeight - descriptor.collapsedHeight);
+        }
       }
     }
     hyaCanvas.dataset.interactionState = JSON.stringify([...listRows.values()]
       .sort((left, right) => left.descriptor.row - right.descriptor.row)
-      .map(state => ({ row: state.descriptor.row, hover: state.hover, open: state.open })));
+      .map(state => ({ row: state.descriptor.row, hover: state.hover, open: state.open, expanded: state.expanded })));
   };
 
   const resetHyaInteraction = (): void => {
     hyaInteraction?.dispose(); hyaInteraction = null;
-    listRows.clear(); interactionTargetShift.clear(); hyaAudioResources.clear(); hyaAudioBuffers.clear();
+    listRows.clear(); listTargetRows.clear(); interactionTargetShift.clear(); hyaAudioResources.clear(); hyaAudioGains.clear(); hyaAudioBuffers.clear();
     delete hyaCanvas.dataset.interactionState;
     delete hyaCanvas.dataset.lastAudioEvent;
   };
@@ -144,11 +161,41 @@ async function main(): Promise<void> {
     for (const listener of document.listeners) {
       for (const action of listener.actions) {
         const descriptor = riveListActionArguments(action);
-        if (descriptor && !listRows.has(descriptor.row)) listRows.set(descriptor.row, { descriptor, hover: false, open: false });
+        if (descriptor) {
+          registerAudioGain(descriptor.hoverAudio, descriptor.hoverGain);
+          registerAudioGain(descriptor.clickAudio, descriptor.clickGain);
+          registerAudioGain(descriptor.openAudio, descriptor.openGain);
+          registerAudioGain(descriptor.closeAudio, descriptor.closeGain);
+          if (!listRows.has(descriptor.row)) listRows.set(descriptor.row, { descriptor, hover: false, open: false, expanded: false });
+          listTargetRows.set(listener.target, descriptor.row);
+        }
       }
     }
-    hyaInteraction = new InteractionRuntime(document, {
-      geometryPort: { matrix: target => [1, 0, 0, 1, 0, interactionTargetShift.get(target) ?? 0] },
+    const listTargetRects = new Map<string, readonly [number, number, number, number]>();
+    const runtimeDocument: RuntimeInteractionDocument = {
+      ...document,
+      targets: document.targets.map(target => {
+        if (!listTargetRows.has(target.id) || target.hitArea.kind !== 'rect' || !Array.isArray(target.hitArea.rect)) return target;
+        const rect = target.hitArea.rect.map(Number);
+        if (rect.length !== 4 || rect.some(value => !Number.isFinite(value))) return target;
+        listTargetRects.set(target.id, [rect[0]!, rect[1]!, rect[2]!, rect[3]!]);
+        return { ...target, hitArea: { kind: 'geometry', port: 'rive-list-row-stage' } };
+      }),
+    };
+    hyaInteraction = new InteractionRuntime(runtimeDocument, {
+      geometryPort: {
+        matrix: target => [1, 0, 0, 1, 0, interactionTargetShift.get(target) ?? 0],
+        containsGeometry(port, target, point) {
+          if (port !== 'rive-list-row-stage') return false;
+          const row = listTargetRows.get(target); const state = row === undefined ? undefined : listRows.get(row);
+          const rect = listTargetRects.get(target);
+          if (!state || !rect) return false;
+          const height = state.expanded ? state.descriptor.expandedHeight
+            : state.open ? state.descriptor.openHeight : state.descriptor.collapsedHeight;
+          return point[0] >= rect[0] && point[1] >= rect[1]
+            && point[0] <= rect[0] + rect[2] && point[1] <= rect[1] + height;
+        },
+      },
       actionPort: {
         begin() {}, commit() {}, rollback() {},
         invoke(action) {
@@ -158,8 +205,19 @@ async function main(): Promise<void> {
           const descriptor = riveListActionArguments(action); if (!descriptor) return;
           const state = listRows.get(descriptor.row); if (!state) return;
           if (action.port === 'set-hover') state.hover = descriptor.active === true;
-          else if (action.port === 'toggle-open') {
+          else if (action.port === 'advance-open') {
+            let resource: string | undefined;
+            if (!state.open) {
+              state.open = true; state.expanded = false; resource = descriptor.clickAudio;
+            } else if (!state.expanded) {
+              state.expanded = true; resource = descriptor.openAudio;
+            } else {
+              state.open = false; state.expanded = false; resource = descriptor.closeAudio;
+            }
+            if (resource) playHyaAudio(resource);
+          } else if (action.port === 'toggle-open') {
             state.open = !state.open;
+            state.expanded = state.open;
             const resource = state.open ? descriptor.openAudio : descriptor.closeAudio;
             if (resource) playHyaAudio(resource);
           }
@@ -168,6 +226,10 @@ async function main(): Promise<void> {
       },
     });
     applyListRows();
+
+    function registerAudioGain(resourceId: string | undefined, gain: number | undefined): void {
+      if (resourceId && Number.isFinite(gain)) hyaAudioGains.set(resourceId, gain!);
+    }
   };
 
   const hyaPoint = (event: PointerEvent): readonly [number, number] => {
@@ -293,7 +355,10 @@ async function main(): Promise<void> {
 
   sampleSelect.addEventListener('change', () => {
     const sample = manifest.samples.find(value => value.id === sampleSelect.value);
-    if (sample) void loadOfficial(sample).catch(showError);
+    if (sample) {
+      const url = new URL(location.href); url.searchParams.set('sample', sample.id); history.replaceState(null, '', url);
+      void loadOfficial(sample).catch(showError);
+    }
   });
   query<HTMLButtonElement>('#reload').addEventListener('click', () => void loadOfficial(activeSample).catch(showError));
   query<HTMLButtonElement>('#auto-convert').addEventListener('click', () => {
@@ -404,7 +469,12 @@ function riveListActionArguments(action: RuntimeInteractionAction): RiveListActi
   const strings = ['list', 'idleNode', 'hoverNode', 'openNode', 'openHoverNode'] as const;
   if (numbers.some(key => typeof value[key] !== 'number' || !Number.isFinite(value[key]))) return null;
   if (strings.some(key => typeof value[key] !== 'string' || value[key].length === 0)) return null;
-  return value as unknown as RiveListActionArguments;
+  const expandedNode = typeof value.expandedNode === 'string' && value.expandedNode.length > 0 ? value.expandedNode : value.openNode;
+  const expandedHoverNode = typeof value.expandedHoverNode === 'string' && value.expandedHoverNode.length > 0
+    ? value.expandedHoverNode : value.openHoverNode;
+  const openHeight = typeof value.openHeight === 'number' && Number.isFinite(value.openHeight)
+    ? value.openHeight : value.collapsedHeight;
+  return { ...value, expandedNode, expandedHoverNode, openHeight } as unknown as RiveListActionArguments;
 }
 
 async function materializePackageResources(

@@ -18,13 +18,14 @@ const compiled = fixtures.map(value => compileBuiltinRenderFamilyV1(value.source
   sourceSha256: value.hash,
 }));
 
-test('stage 9 compiles three deterministic delivery slices covering exactly seventeen passes', () => {
+test('current stage 9 families retain the historical seventeen passes plus indexed sprite', () => {
   const second = fixtures.map(value => compileBuiltinRenderFamilyV1(value.source, {
     sourcePath: value.path,
     sourceSha256: value.hash,
   }));
   assert.equal(compiled.length, 3);
-  assert.equal(compiled.reduce((sum, value) => sum + Object.keys(value.passes).length, 0), 17);
+  assert.equal(compiled.reduce((sum, value) => sum + Object.keys(value.passes).length, 0), 18);
+  assert.ok(compiled[1].passes['indexed-sprite']);
   assert.deepEqual(
     compiled.map(value => value.artifact.artifactHash),
     second.map(value => value.artifact.artifactHash),

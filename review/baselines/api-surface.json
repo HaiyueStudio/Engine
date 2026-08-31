@@ -10108,7 +10108,7 @@
             }
           ]
         },
-        "./experimental/gltf-worker": {
+      "./experimental/gltf-worker": {
           "source": "extensions/src\\experimental-gltf-worker.ts",
           "exports": [
             {
@@ -10155,9 +10155,74 @@
               "name": "prepareGltfGeometryPayloads",
               "kind": "value"
             }
-          ]
-        },
-        "./experimental/spine-worker": {
+        ]
+      },
+      "./experimental/indexed-sprite": {
+        "source": "extensions/src\\experimental-indexed-sprite.ts",
+        "exports": [
+          {
+            "name": "DEFAULT_INDEXED_SPRITE_ATLAS_LIMITS",
+            "kind": "value"
+          },
+          {
+            "name": "IndexedSpriteAtlasLayout",
+            "kind": "type"
+          },
+          {
+            "name": "IndexedSpriteAtlasLimits",
+            "kind": "type"
+          },
+          {
+            "name": "IndexedSpriteAtlasPage",
+            "kind": "type"
+          },
+          {
+            "name": "IndexedSpriteAtlasPlacement",
+            "kind": "type"
+          },
+          {
+            "name": "IndexedSpriteBlend",
+            "kind": "type"
+          },
+          {
+            "name": "IndexedSpriteDrawCommand",
+            "kind": "type"
+          },
+          {
+            "name": "IndexedSpritePaletteDescriptor",
+            "kind": "type"
+          },
+          {
+            "name": "IndexedSpritePlaneDescriptor",
+            "kind": "type"
+          },
+          {
+            "name": "IndexedSpritePlaneFormat",
+            "kind": "type"
+          },
+          {
+            "name": "IndexedSpriteRenderer",
+            "kind": "value"
+          },
+          {
+            "name": "IndexedSpriteRendererOptions",
+            "kind": "type"
+          },
+          {
+            "name": "IndexedSpriteRendererStats",
+            "kind": "type"
+          },
+          {
+            "name": "IndexedSpriteSampling",
+            "kind": "type"
+          },
+          {
+            "name": "prepareIndexedSpriteAtlas",
+            "kind": "value"
+          }
+        ]
+      },
+      "./experimental/spine-worker": {
           "source": "extensions/src\\experimental-spine-worker.ts",
           "exports": [
             {

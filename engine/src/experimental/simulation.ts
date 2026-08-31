@@ -23,3 +23,9 @@ export type {
   ReplayPointerState,
   ReplayResetEvent,
 } from '../input/ReplayInput';
+export { BrowserMultiplayerInput } from '../input/BrowserMultiplayerInput';
+export type {
+  BrowserMultiplayerInputOptions,
+  MultiplayerInputSnapshot,
+  PlayerInputSnapshot,
+} from '../input/BrowserMultiplayerInput';

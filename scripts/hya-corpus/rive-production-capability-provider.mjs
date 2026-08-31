@@ -29,6 +29,7 @@ export async function evaluate(request, context) {
     request.selection?.animation,
   );
   applySimpleLayoutTransforms(hierarchy);
+  applyDossierSummaryLayout(hierarchy);
   finalizeComponentListMetrics(hierarchy);
   const assets = annotateEmbeddedAssets(
     await extractEmbeddedAssets(request.rivBytes, ir.resolvedResources ?? []),
@@ -40,12 +41,16 @@ export async function evaluate(request, context) {
   const selectedDrawables = (ir.drawables ?? []).filter(id => selectedNodeIds.has(id));
   const drawableOrder = new Map(selectedDrawables.map((id, index) => [id, index]));
   const vectorComponents = compileVectorComponents(hierarchy, objects, visits);
+  const layoutEffects = lowerLayoutBackdropEffects(hierarchy, vectorComponents, objects, visits);
+  finalizeComponentListHitWidths(hierarchy, vectorComponents);
   const textComponents = compileTextComponents(hierarchy, resourceByAssetIndex);
   const imageComponents = compileImageComponents(hierarchy, resourceByAssetIndex);
+  const clipMasks = compileImageClipMasks(hierarchy);
   const timeline = await compileCoreTimeline(hierarchy, report, objects);
   const capabilityArtifacts = compileCapabilityArtifacts(report, objects, timeline, hierarchy, resourceByAssetIndex);
   const hierarchyByObjectId = new Map(hierarchy.entries.map(value => [value.objectId, value]));
-  const nodes = hierarchy.entries.filter(value => value.nodeEligible !== false).map(entry => {
+  const orderedEntries = orderEntriesForRiveDrawStack(hierarchy.entries, drawableOrder);
+  const nodes = orderedEntries.filter(value => value.nodeEligible !== false).map(entry => {
     const id = entry.objectId;
     const object = entry.object ?? objects.get(entry.sourceObjectId);
     const visit = entry.visit ?? visits.get(entry.sourceObjectId);
@@ -64,6 +69,8 @@ export async function evaluate(request, context) {
       parent,
       transform: Object.keys(transform).length > 0 ? transform : undefined,
       components: [...(vectorComponents.get(id) ?? []), ...(textComponents.get(id) ?? []), ...(imageComponents.get(id) ?? [])],
+      composite: clipMasks.compositeByTarget.get(id),
+      effects: layoutEffects.get(id),
       extensions: {
         neutralFamily: object.family,
         neutralFields: Object.fromEntries(object.properties.map(property => [property.id, property.value])),
@@ -71,7 +78,7 @@ export async function evaluate(request, context) {
         ...(drawableOrder.has(entry.sourceObjectId) ? { neutralDrawOrder: drawableOrder.get(entry.sourceObjectId) } : {}),
       },
     });
-  });
+  }).concat(clipMasks.nodes);
   const hasVectorVisuals = vectorComponents.size > 0;
   const hasTextVisuals = textComponents.size > 0;
   const hasImageVisuals = imageComponents.size > 0;
@@ -129,6 +136,23 @@ export async function evaluate(request, context) {
     }] : []), ...capabilityArtifacts.featureLedger],
     classification: { unclassifiedObjects: 0, unclassifiedProperties: 0, unclassifiedAssets: 0, unclassifiedScripts: 0 },
   };
+}
+
+export function orderEntriesForRiveDrawStack(entries, drawableOrder) {
+  const output = [...entries];
+  const positionsByScope = new Map();
+  for (let index = 0; index < output.length; index++) {
+    const entry = output[index];
+    if (entry.sourceName !== 'Shape' || !drawableOrder.has(entry.sourceObjectId ?? entry.objectId)) continue;
+    const positions = positionsByScope.get(entry.scopeKey) ?? [];
+    positions.push(index); positionsByScope.set(entry.scopeKey, positions);
+  }
+  for (const positions of positionsByScope.values()) {
+    const drawables = positions.map(index => output[index]).sort((left, right) =>
+      drawableOrder.get(left.sourceObjectId ?? left.objectId) - drawableOrder.get(right.sourceObjectId ?? right.objectId));
+    positions.forEach((position, index) => { output[position] = drawables[index]; });
+  }
+  return output;
 }
 
 async function extractEmbeddedAssets(rivBytes, resolvedResources) {
@@ -196,6 +220,7 @@ function annotateEmbeddedAssets(assets, report, objects) {
         : dimensions ?? {}),
       sourceName: visit?.sourceName,
       sourceAssetName: string(fields.name),
+      ...(visit?.sourceName === 'AudioAsset' ? { volume: finite(fields.volume) ?? 1 } : {}),
     };
   });
 }
@@ -221,7 +246,11 @@ function imageDimensions(bytes, mimeType) {
 }
 
 function publicAsset(asset) {
-  const { width: _width, height: _height, detectedMimeType: _detectedMimeType, sourceName: _sourceName, sourceAssetName: _sourceAssetName, ...value } = asset;
+  const {
+    width: _width, height: _height, detectedMimeType: _detectedMimeType,
+    sourceName: _sourceName, sourceAssetName: _sourceAssetName, volume: _volume,
+    ...value
+  } = asset;
   return value;
 }
 
@@ -277,6 +306,10 @@ export function applySimpleLayoutTransforms(hierarchy) {
       continue;
     }
     const row = componentListScope ? rowLayout(style) : style?.fields.flexDirectionValue === 1;
+    const overlay = !componentListScope
+      && style?.fields.flexDirectionValue === undefined
+      && style?.fields.layoutAlignmentType === 9
+      && children.length > 1;
     const wrap = style?.fields.flexWrapValue === 1;
     const gap = row ? finite(style?.fields.gapHorizontal) ?? 0 : finite(style?.fields.gapVertical) ?? 0;
     const leading = row ? finite(style?.fields.paddingLeft) ?? 0 : finite(style?.fields.paddingTop) ?? 0;
@@ -285,15 +318,24 @@ export function applySimpleLayoutTransforms(hierarchy) {
       - leading - (row ? finite(style?.fields.paddingRight) ?? 0 : finite(style?.fields.paddingBottom) ?? 0));
     const crossAvailable = Math.max(0, (row ? positive(parent.fields.height, 0) : positive(parent.fields.width, 0))
       - crossLeading - (row ? finite(style?.fields.paddingBottom) ?? 0 : finite(style?.fields.paddingRight) ?? 0));
-    if (componentListScope) applyFillLayout(entries, children, row, available, crossAvailable, gap);
+    const authoredFill = children.some(child => {
+      const childStyle = localEntry(entries, child, child.fields.styleId);
+      return childStyle?.fields.layoutWidthScaleType === 1 || childStyle?.fields.layoutHeightScaleType === 1;
+    });
+    if (componentListScope || authoredFill) applyFillLayout(entries, children, row, available, crossAvailable, gap);
     const used = children.reduce((sum, child) => sum + (row ? positive(child.fields.width, 0) : positive(child.fields.height, 0)), 0)
       + Math.max(0, children.length - 1) * gap;
     const justify = Number(style?.fields.justifyContentValue ?? style?.fields.justifyItemsValue ?? 0);
     let cursor = leading + (justify === 1 ? Math.max(0, available - used) / 2 : justify === 2 ? Math.max(0, available - used) : 0);
     let crossCursor = crossLeading; let lineExtent = 0;
     for (const child of children) {
-      const childStyle = componentListScope ? localEntry(entries, child, child.fields.styleId) : null;
-      if (componentListScope && childStyle?.fields.positionTypeValue === 1) continue;
+      const childStyle = localEntry(entries, child, child.fields.styleId);
+      if ([1, 2].includes(childStyle?.fields.positionTypeValue)) continue;
+      if (overlay) {
+        if (!Number.isFinite(child.fields.x)) child.fields.x = 0;
+        if (!Number.isFinite(child.fields.y)) child.fields.y = 0;
+        continue;
+      }
       const marginLeading = componentListScope ? (row ? finite(childStyle?.fields.marginLeft) ?? 0 : finite(childStyle?.fields.marginTop) ?? 0) : 0;
       const marginTrailing = componentListScope ? (row ? finite(childStyle?.fields.marginRight) ?? 0 : finite(childStyle?.fields.marginBottom) ?? 0) : 0;
       const marginCross = componentListScope ? (row ? finite(childStyle?.fields.marginTop) ?? 0 : finite(childStyle?.fields.marginLeft) ?? 0) : 0;
@@ -307,6 +349,43 @@ export function applySimpleLayoutTransforms(hierarchy) {
       if (componentListScope || !Number.isFinite(child.fields.y)) child.fields.y = row ? crossCursor + marginCross : cursor;
       cursor += childExtent + marginTrailing + gap; lineExtent = Math.max(lineExtent, crossExtent + marginCross);
     }
+  }
+  // NestedArtboardLeaf fit is authored against the resolved layout box. The
+  // hierarchy is expanded before flex/fill sizing, so the initial scale can
+  // still reflect stale source dimensions. Refit nested roots after layout.
+  resolveNestedLeafFitTransforms(hierarchy);
+}
+
+export function resolveNestedLeafFitTransforms(hierarchy) {
+  const entries = hierarchy.entries ?? [];
+  const byId = new Map(entries.map(entry => [entry.objectId, entry]));
+  for (const root of entries.filter(entry => entry.sourceName === 'Artboard' && (entry.instanceDepth ?? 0) > 1)) {
+    const leaf = byId.get(hierarchy.parentNodeByObjectId?.get(root.objectId));
+    if (leaf?.sourceName !== 'NestedArtboardLeaf') continue;
+    const host = byId.get(hierarchy.parentNodeByObjectId?.get(leaf.objectId));
+    if (!host) continue;
+    const sourceWidth = positive(root.fields.width, 1);
+    const sourceHeight = positive(root.fields.height, 1);
+    const hostWidth = positive(host.fields.width, sourceWidth);
+    const hostHeight = positive(host.fields.height, sourceHeight);
+    const widthScale = hostWidth / sourceWidth;
+    const heightScale = hostHeight / sourceHeight;
+    const fit = Number(leaf.fields.fit ?? 1);
+    let scaleX; let scaleY;
+    if (fit === 0) { scaleX = widthScale; scaleY = heightScale; }
+    else {
+      const uniform = fit === 2 ? Math.max(widthScale, heightScale)
+        : fit === 3 ? widthScale
+          : fit === 4 ? heightScale
+            : fit === 5 ? 1
+              : fit === 6 ? Math.min(1, widthScale, heightScale)
+                : Math.min(widthScale, heightScale);
+      scaleX = uniform; scaleY = uniform;
+    }
+    root.fields.scaleX = scaleX;
+    root.fields.scaleY = scaleY;
+    root.fields.x = (hostWidth - sourceWidth * scaleX) / 2;
+    root.fields.y = (hostHeight - sourceHeight * scaleY) / 2;
   }
 }
 
@@ -448,7 +527,9 @@ export function compileTextComponents(hierarchy, resourceByAssetIndex) {
     const authoredHeight = positive(text.fields.height, positive(parent?.fields.height, Math.max(1, authoredFontSize * 1.2)));
     const parentHeight = parent?.sourceName === 'LayoutComponent' ? positive(parent.fields.height, authoredHeight) : authoredHeight;
     const height = Math.min(authoredHeight, parentHeight);
-    const fontSize = Math.min(authoredFontSize, height);
+    const shouldShrink = text.fields.overflowValue === 5;
+    const layoutOverflowLimit = parent?.sourceName === 'LayoutComponent' ? height * 1.5 : authoredFontSize;
+    const fontSize = shouldShrink ? Math.min(authoredFontSize, height) : Math.min(authoredFontSize, layoutOverflowLimit);
     const font = Number.isSafeInteger(style?.fields.fontAssetId) ? resourceByAssetIndex.get(style.fields.fontAssetId) : null;
     const styleChildren = style ? childEntries(children, style) : [];
     const fill = styleChildren.find(value => value.sourceName === 'Fill');
@@ -462,13 +543,16 @@ export function compileTextComponents(hierarchy, resourceByAssetIndex) {
     const backgroundFillSource = backgroundFill ? childEntries(children, backgroundFill).find(value => value.sourceName === 'SolidColor') : null;
     const backgroundStrokeSource = backgroundStroke ? childEntries(children, backgroundStroke).find(value => value.sourceName === 'SolidColor') : null;
     const textValue = runs.map(value => typeof value.fields.text === 'string' ? value.fields.text : '').join('');
+    const authoredLineHeight = riveLineHeight(style?.fields.lineHeight, authoredFontSize);
     const component = compact({
       type: 'text2d', text: textValue,
       size: [width, height], position: [width / 2, height / 2],
       fontFamily: font?.sourceAssetName, fontSize,
       fontWeight: Number.isFinite(axis?.fields.axisValue) ? axis.fields.axisValue : 400,
       fontResource: font?.resourceId,
-      lineHeight: Math.min(positive(style?.fields.lineHeight, authoredFontSize), height),
+      lineHeight: shouldShrink
+        ? Math.min(authoredLineHeight, height)
+        : Math.min(authoredLineHeight, layoutOverflowLimit),
       tracking: finite(style?.fields.letterSpacing) ?? 0,
       textAlign: ['left', 'center', 'right'][text.fields.alignValue ?? 0] ?? 'left',
       verticalAlign: ['top', 'middle', 'bottom'][text.fields.verticalAlignValue ?? 0] ?? 'top',
@@ -482,7 +566,7 @@ export function compileTextComponents(hierarchy, resourceByAssetIndex) {
           padding: 0,
         }),
       } : {}),
-      fit: text.fields.overflowValue === 5 || fontSize < authoredFontSize ? 'shrink' : undefined,
+      fit: shouldShrink ? 'shrink' : undefined,
       wrap: textWrapMode(textValue, width, fontSize, text.fields.wrapValue),
       resolutionScale: 4,
     });
@@ -491,17 +575,65 @@ export function compileTextComponents(hierarchy, resourceByAssetIndex) {
   return output;
 }
 
-function compileImageComponents(hierarchy, resourceByAssetIndex) {
-  const output = new Map();
+export function compileImageComponents(hierarchy, resourceByAssetIndex) {
+  const output = new Map(); const entries = hierarchy.entries;
   for (const entry of hierarchy.entries.filter(value => value.sourceName === 'Image')) {
     const asset = Number.isSafeInteger(entry.fields.assetId) ? resourceByAssetIndex.get(entry.fields.assetId) : null;
     if (!asset || !asset.detectedMimeType?.startsWith('image/')) continue;
-    const width = positive(asset.width, 1); const height = positive(asset.height, 1);
+    const sourceWidth = positive(asset.width, 1); const sourceHeight = positive(asset.height, 1);
+    let frame = { size: [sourceWidth, sourceHeight], position: [0, 0] };
+    const artboard = localEntry(entries, entry, 0);
+    if (artboard?.sourceName === 'Artboard' && artboard.fields.clip !== false && !finite(entry.fields.rotation)) {
+      frame = clippedSpriteFrame(
+        [sourceWidth, sourceHeight],
+        [positive(artboard.fields.width, sourceWidth), positive(artboard.fields.height, sourceHeight)],
+        [finite(entry.fields.x) ?? 0, finite(entry.fields.y) ?? 0],
+        [finite(entry.fields.scaleX) ?? 1, finite(entry.fields.scaleY) ?? 1],
+      );
+    }
     output.set(entry.objectId, [{
-      type: 'sprite2d', resource: asset.resourceId, size: [width, height], position: [0, 0], tint: [1, 1, 1, 1],
+      type: 'sprite2d', resource: asset.resourceId, size: frame.size, position: frame.position, tint: [1, 1, 1, 1],
+      ...(frame.uvRect ? { uvRect: frame.uvRect } : {}),
     }]);
   }
   return output;
+}
+
+export function clippedSpriteFrame(sourceSize, artboardSize, center, scale) {
+  const horizontal = clippedSpriteAxis(sourceSize[0], artboardSize[0], center[0], scale[0]);
+  const vertical = clippedSpriteAxis(sourceSize[1], artboardSize[1], center[1], scale[1]);
+  const clipped = horizontal.extent < sourceSize[0] || vertical.extent < sourceSize[1];
+  return {
+    size: [horizontal.extent, vertical.extent],
+    position: [horizontal.center, vertical.center],
+    ...(clipped ? { uvRect: [horizontal.uvStart, vertical.uvStart, horizontal.uvExtent, vertical.uvExtent] } : {}),
+  };
+}
+
+function clippedSpriteAxis(sourceExtent, artboardExtent, center, scale) {
+  if (!(sourceExtent > 0 && artboardExtent > 0) || !Number.isFinite(scale) || Math.abs(scale) < 1e-9) {
+    return { extent: sourceExtent, center: 0, uvStart: 0, uvExtent: 1 };
+  }
+  const localStart = -sourceExtent / 2;
+  const localEnd = sourceExtent / 2;
+  const worldStart = center + localStart * scale;
+  const worldEnd = center + localEnd * scale;
+  const visibleWorldStart = Math.max(0, Math.min(worldStart, worldEnd));
+  const visibleWorldEnd = Math.min(artboardExtent, Math.max(worldStart, worldEnd));
+  if (visibleWorldEnd <= visibleWorldStart) {
+    return { extent: sourceExtent, center: 0, uvStart: 0, uvExtent: 1 };
+  }
+  const a = (visibleWorldStart - center) / scale;
+  const b = (visibleWorldEnd - center) / scale;
+  const visibleLocalStart = Math.min(a, b);
+  const visibleLocalEnd = Math.max(a, b);
+  const extent = visibleLocalEnd - visibleLocalStart;
+  return {
+    extent,
+    center: (visibleLocalStart + visibleLocalEnd) / 2,
+    uvStart: (visibleLocalStart - localStart) / sourceExtent,
+    uvExtent: extent / sourceExtent,
+  };
 }
 
 async function compileCoreTimeline(hierarchy, report, objects) {
@@ -716,42 +848,49 @@ const INTERACTION_SOURCE = /^(?:StateMachineListener|ListenerAction|ListenerView
 
 export function compileComponentListInteractionDocument(hierarchy, records, resourceByAssetIndex) {
   const audioEvents = new Map(records.filter(record => record.visit.sourceName === 'AudioEvent')
-    .map(record => [string(record.fields.name), Number.isSafeInteger(record.fields.assetId) ? resourceByAssetIndex.get(record.fields.assetId)?.resourceId : undefined]));
+    .map(record => {
+      const resource = Number.isSafeInteger(record.fields.assetId) ? resourceByAssetIndex.get(record.fields.assetId) : undefined;
+      return [string(record.fields.name), resource ? { resourceId: resource.resourceId, gain: finite(resource.volume) ?? 1 } : undefined];
+    }));
   const targets = []; const listeners = [];
   for (const list of hierarchy.componentLists) {
     for (const row of list.rows) {
+      const hoverOnly = row.interactionKind === 'hover-only';
       const origin = globalNodeOrigin(row.nodes.idle, hierarchy);
+      const parentScale = globalNodeParentScale(row.nodes.idle, hierarchy);
       const targetId = `rive-list-row-${String(row.index).padStart(6, '0')}`;
       const argumentsValue = {
         row: row.index, sourceRow: row.sourceIndex, list: list.host,
         idleNode: row.nodes.idle, hoverNode: row.nodes.hover,
         openNode: row.nodes.open, openHoverNode: row.nodes.openHover,
+        expandedNode: row.nodes.expanded, expandedHoverNode: row.nodes.expandedHover,
         baseX: row.baseX, baseY: row.baseY,
-        collapsedHeight: row.collapsedHeight, expandedHeight: row.expandedHeight,
-        ...(audioEvents.get('open_menu_02') ? { openAudio: audioEvents.get('open_menu_02') } : {}),
-        ...(audioEvents.get('close_menu_01') ? { closeAudio: audioEvents.get('close_menu_01') } : {}),
+        collapsedHeight: row.collapsedHeight, openHeight: row.openHeight, expandedHeight: row.expandedHeight,
+        ...(!hoverOnly ? audioArguments('hover', audioEvents.get('click_01')) : {}),
+        ...(!hoverOnly ? audioArguments('click', audioEvents.get('open_01')) : {}),
+        ...(!hoverOnly ? audioArguments('open', audioEvents.get('open_menu_02')) : {}),
+        ...(!hoverOnly ? audioArguments('close', audioEvents.get('close_menu_01')) : {}),
       };
       targets.push({
         id: targetId, component: row.nodes.idle, order: row.index,
         transform: [1, 0, 0, 1, origin[0], origin[1]],
-        hitArea: { kind: 'rect', rect: [0, 0, row.hitWidth, row.collapsedHeight] },
+        hitArea: { kind: 'rect', rect: [0, 0, row.hitWidth * parentScale[0], row.expandedHeight * parentScale[1]] },
       });
-      listeners.push({
+      const rowListeners = [{
         id: `${targetId}-enter`, target: targetId, event: 'pointer-enter', phases: ['target'],
         actions: [
           { kind: 'custom', protocol: 'org.haiyue.rive-component-list@1', port: 'set-hover', arguments: { ...argumentsValue, active: true } },
-          ...(audioEvents.get('click_01') ? [{ kind: 'audio', operation: 'play', target: audioEvents.get('click_01') }] : []),
+          ...(!hoverOnly && audioEvents.get('click_01') ? [{ kind: 'audio', operation: 'play', target: audioEvents.get('click_01').resourceId }] : []),
         ],
       }, {
         id: `${targetId}-exit`, target: targetId, event: 'pointer-exit', phases: ['target'],
         actions: [{ kind: 'custom', protocol: 'org.haiyue.rive-component-list@1', port: 'set-hover', arguments: { ...argumentsValue, active: false } }],
-      }, {
+      }];
+      if (!hoverOnly) rowListeners.push({
         id: `${targetId}-click`, target: targetId, event: 'click', phases: ['target'], pointerButton: 0,
-        actions: [
-          ...(audioEvents.get('open_01') ? [{ kind: 'audio', operation: 'play', target: audioEvents.get('open_01') }] : []),
-          { kind: 'custom', protocol: 'org.haiyue.rive-component-list@1', port: 'toggle-open', arguments: argumentsValue },
-        ],
+        actions: [{ kind: 'custom', protocol: 'org.haiyue.rive-component-list@1', port: 'advance-open', arguments: argumentsValue }],
       });
+      listeners.push(...rowListeners);
     }
   }
   return {
@@ -760,15 +899,38 @@ export function compileComponentListInteractionDocument(hierarchy, records, reso
   };
 }
 
+function audioArguments(prefix, audio) {
+  return audio ? { [`${prefix}Audio`]: audio.resourceId, [`${prefix}Gain`]: audio.gain } : {};
+}
+
 export function finalizeComponentListMetrics(hierarchy) {
   for (const list of hierarchy.componentLists ?? []) {
     for (const row of list.rows ?? []) {
-      const root = hierarchy.entries.find(entry => entry.objectId === row.nodes.open);
+      row.openHeight = variantHeight(row.nodes.open, row.openHeight);
+      row.expandedHeight = variantHeight(row.nodes.expanded, row.expandedHeight);
+
+      function variantHeight(nodeId, fallback) {
+        const root = hierarchy.entries.find(entry => entry.objectId === nodeId);
+        if (!root) return fallback;
+        const content = hierarchy.entries.find(entry => entry.sourceName === 'LayoutComponent'
+          && hierarchy.parentNodeByObjectId.get(entry.objectId) === root.objectId);
+        return Math.max(fallback, positive(content?.fields.height, 0) * positive(root.fields.scaleY, 1));
+      }
+    }
+  }
+}
+
+export function finalizeComponentListHitWidths(hierarchy, vectorComponents) {
+  for (const list of hierarchy.componentLists ?? []) {
+    for (const row of list.rows ?? []) {
+      const root = hierarchy.entries.find(entry => entry.objectId === row.nodes.expanded);
       if (!root) continue;
-      const content = hierarchy.entries.find(entry => entry.sourceName === 'LayoutComponent'
-        && hierarchy.parentNodeByObjectId.get(entry.objectId) === root.objectId);
-      const contentHeight = positive(content?.fields.height, 0) * positive(root.fields.scaleY, 1);
-      if (contentHeight > row.expandedHeight) row.expandedHeight = contentHeight;
+      const widths = hierarchy.entries
+        .filter(entry => entry.scopeKey === root.scopeKey)
+        .flatMap(entry => vectorComponents.get(entry.objectId) ?? [])
+        .filter(component => component.commands === 'MLLLZ' && component.values?.length === 8)
+        .map(component => Math.abs(component.values[2] - component.values[0]));
+      if (widths.length > 0) row.hitWidth = Math.max(row.hitWidth, ...widths);
     }
   }
 }
@@ -788,6 +950,26 @@ function globalNodeOrigin(nodeId, hierarchy) {
     memo.set(id, value); return value;
   };
   const value = matrix(nodeId); return [value[4], value[5]];
+}
+
+function globalNodeParentScale(nodeId, hierarchy) {
+  const parent = hierarchy.parentNodeByObjectId.get(nodeId);
+  if (!parent) return [1, 1];
+  const byId = new Map(hierarchy.entries.map(entry => [entry.objectId, entry]));
+  const memo = new Map();
+  const matrix = id => {
+    if (memo.has(id)) return memo.get(id);
+    const entry = byId.get(id); if (!entry) return [1, 0, 0, 1, 0, 0];
+    const rotation = finite(entry.fields.rotation) ?? 0;
+    const scaleX = finite(entry.fields.scaleX) ?? 1; const scaleY = finite(entry.fields.scaleY) ?? 1;
+    const cosine = Math.cos(rotation); const sine = Math.sin(rotation);
+    const local = [cosine * scaleX, sine * scaleX, -sine * scaleY, cosine * scaleY, finite(entry.fields.x) ?? 0, finite(entry.fields.y) ?? 0];
+    const ancestor = hierarchy.parentNodeByObjectId.get(id);
+    const value = ancestor ? multiplyAffine(matrix(ancestor), local) : local;
+    memo.set(id, value); return value;
+  };
+  const value = matrix(parent);
+  return [Math.hypot(value[0], value[1]), Math.hypot(value[2], value[3])];
 }
 
 function multiplyAffine(left, right) {
@@ -928,8 +1110,9 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
   const componentLists = [];
   let interactionRowIndex = 0;
   const artboardIndex = new Map(artboardObjectIds.map((id, index) => [index, id]));
-  await expand(artboardObjectId, '', undefined, new Set(), 0, {}, selectedAnimation);
   const listPlan = componentListPlan(report, objects, artboardObjectIds, artboardObjectId);
+  const viewModels = defaultViewModelRuntime(report, objects, artboardObjectIds);
+  await expand(artboardObjectId, '', undefined, new Set(), 0, { skipGenericLists: Boolean(listPlan) }, selectedAnimation);
   if (listPlan) {
     const hosts = entries.filter(value => value.instanceDepth === 0 && value.sourceName === 'ArtboardComponentList');
     for (const host of hosts) {
@@ -945,11 +1128,13 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
         const item = listPlan.items[index];
         const baseX = 0; const baseY = index * (listPlan.itemHeight * scale + gap);
         const rowPrefix = `${host.objectId}::list-${String(index).padStart(6, '0')}::`;
-        const variants = [
-          { key: 'idle', animation: undefined, opacity: 1 },
-          { key: 'hover', animation: 'hover_ON', opacity: 0 },
-          { key: 'open', animation: ['click', 'click_open'], opacity: 0 },
-          { key: 'openHover', animation: ['hover_ON', 'click', 'click_open'], opacity: 0 },
+      const variants = [
+        { key: 'idle', animation: undefined, opacity: 1 },
+        { key: 'hover', animation: 'hover_ON', opacity: 0 },
+        { key: 'open', animation: 'click', opacity: 0 },
+        { key: 'openHover', animation: ['hover_ON', 'click'], opacity: 0 },
+        { key: 'expanded', animation: ['click', 'click_open'], opacity: 0 },
+        { key: 'expandedHover', animation: ['hover_ON', 'click', 'click_open'], opacity: 0 },
         ];
         const nodes = {};
         for (const variant of variants) {
@@ -959,7 +1144,9 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
             listPlan.templateArtboardId, prefix, host.objectId, new Set([artboardObjectId]), 1,
             {
               rootX: baseX, rootY: baseY, rootScale: scale, rootOpacity: variant.opacity,
+              rootLayoutWidth: positive(parent?.fields.width, templateWidth),
               dynamicNestedArtboardIndex: item.artboardIndex, viewModelValues: item.values,
+              viewModelPropertyNames: listPlan.propertyNames,
             },
             variant.animation,
           );
@@ -967,6 +1154,7 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
         rows.push({
           index: interactionRowIndex++, sourceIndex: index, nodes, baseX, baseY,
           collapsedHeight: listPlan.itemHeight * scale,
+          openHeight: listPlan.itemHeight * scale,
           expandedHeight: templateHeight * scale,
           hitWidth: templateWidth * scale,
         });
@@ -981,11 +1169,15 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
     if (ancestry.has(targetArtboardId)) throw new Error(`Nested artboard cycle includes ${targetArtboardId}.`);
     const nextAncestry = new Set(ancestry); nextAncestry.add(targetArtboardId);
     const local = await buildComponentHierarchy(report, objects, targetArtboardId);
-    await applySelectedAnimationOverrides(local, report, objects, targetArtboardId, activeAnimation, options.viewModelValues);
-    applyViewModelText(local, options.viewModelValues, report);
+    const viewModelContext = options.viewModelContext ?? viewModels.contextForArtboard(targetArtboardId);
+    const viewModelValues = options.viewModelValues ?? viewModelContext?.values;
+    const propertyNames = options.viewModelPropertyNames ?? viewModelContext?.propertyNames;
+    await applySelectedAnimationOverrides(local, report, objects, targetArtboardId, activeAnimation, viewModelValues);
+    applyViewModelText(local, viewModelValues, report, objects, propertyNames);
     applyDisplaySelection(local);
+    applyViewModelSoloSelection(local, viewModelContext);
     applySoloSelection(local);
-    if (options.viewModelValues) applyComponentListLayout(local);
+    if (viewModelValues) applyComponentListLayout(local);
     const idByLocal = new Map(local.entries.map(entry => [entry.objectId, prefix ? `${prefix}${entry.objectId}` : entry.objectId]));
     const clones = local.entries.map(entry => ({
       ...entry,
@@ -998,15 +1190,21 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
         ...(entry.sourceName === 'Artboard' && options.rootY !== undefined ? { y: options.rootY } : {}),
         ...(entry.sourceName === 'Artboard' && options.rootX !== undefined ? { x: options.rootX } : {}),
         ...(entry.sourceName === 'Artboard' && options.rootScale !== undefined ? { scaleX: options.rootScale, scaleY: options.rootScale } : {}),
+        ...(entry.sourceName === 'Artboard' && options.rootLayoutWidth !== undefined ? { width: options.rootLayoutWidth } : {}),
         ...(entry.sourceName === 'Artboard' && options.rootOpacity !== undefined ? { opacity: options.rootOpacity } : {}),
       },
     }));
+    orderInventoryHostClones(clones, local, targetArtboardId);
     for (const clone of clones) {
       entries.push(clone);
       const localParent = local.parentNodeByObjectId.get(clone.sourceObjectId);
       const parent = localParent ? idByLocal.get(localParent) : clone.sourceName === 'Artboard' ? hostId : undefined;
       if (parent) parentNodeByObjectId.set(clone.objectId, parent);
-      if (clone.nodeEligible === false || !NESTED_ARTBOARD_TYPES.has(clone.sourceName)) continue;
+    }
+    const expandable = clones.filter(clone => clone.nodeEligible !== false && NESTED_ARTBOARD_TYPES.has(clone.sourceName));
+    orderInventoryBackdrop(expandable, targetArtboardId);
+    const nestedModelOccurrences = new Map();
+    for (const clone of expandable) {
       const nestedIndex = Number.isSafeInteger(clone.fields.artboardId)
         ? clone.fields.artboardId
         : options.dynamicNestedArtboardIndex;
@@ -1014,9 +1212,204 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
       const nestedArtboardId = artboardIndex.get(nestedIndex);
       if (!nestedArtboardId) continue;
       const nestedAnimation = nestedAnimationName(local, clone.sourceObjectId, report, objects, nestedArtboardId, activeAnimation);
-      await expand(nestedArtboardId, `${clone.objectId}::`, clone.objectId, nextAncestry, depth + 1, {}, nestedAnimation);
+      const nestedModelId = viewModels.modelIdForArtboard(nestedArtboardId);
+      const nestedOccurrence = Number.isSafeInteger(nestedModelId) ? nestedModelOccurrences.get(nestedModelId) ?? 0 : 0;
+      if (Number.isSafeInteger(nestedModelId)) nestedModelOccurrences.set(nestedModelId, nestedOccurrence + 1);
+      const nestedViewModelContext = viewModels.nestedContextForArtboard(viewModelContext, nestedArtboardId, nestedOccurrence);
+      const nestedOptions = clone.sourceName === 'NestedArtboardLeaf'
+        ? nestedLeafLayoutOptions(local, clone, nestedArtboardId)
+        : {};
+      if (nestedViewModelContext) nestedOptions.viewModelContext = nestedViewModelContext;
+      await expand(nestedArtboardId, `${clone.objectId}::`, clone.objectId, nextAncestry, depth + 1, nestedOptions, nestedAnimation);
+    }
+    if (!options.skipGenericLists) await expandGenericLists(local, idByLocal, targetArtboardId, viewModelContext, nextAncestry, depth);
+  }
+
+  async function expandGenericLists(local, idByLocal, targetArtboardId, viewModelContext, ancestry, depth) {
+    if (!viewModelContext) return;
+    const hosts = local.entries.filter(value => value.nodeEligible !== false && value.sourceName === 'ArtboardComponentList');
+    const properties = viewModelContext.listProperties;
+    for (let hostIndex = 0; hostIndex < hosts.length; hostIndex++) {
+      const host = hosts[hostIndex];
+      const property = properties[hostIndex];
+      if (!property) continue;
+      const items = viewModels.listItems(targetArtboardId, property.name, viewModelContext);
+      if (items.length === 0) continue;
+      const parent = local.entries.find(value => value.componentIndex === host.fields.parentId);
+      const style = parent ? local.entries.find(value => value.componentIndex === parent.fields.styleId) : null;
+      const rules = local.entries.filter(value => value.sourceName === 'ArtboardListMapRule' && value.fields.parentId === host.componentIndex);
+      const row = style?.fields.flexDirectionValue === 0
+        ? false
+        : style?.fields.flexDirectionValue === 1 || style?.fields.flexDirectionValue === 2 || style?.fields.flexWrapValue === 1 || rowLayout(style);
+      const wrap = style?.fields.flexWrapValue === 1;
+      const gapMain = row ? finite(style?.fields.gapHorizontal) ?? 0 : finite(style?.fields.gapVertical) ?? 0;
+      const gapCross = row ? finite(style?.fields.gapVertical) ?? 0 : finite(style?.fields.gapHorizontal) ?? 0;
+      const leading = row ? finite(style?.fields.paddingLeft) ?? 0 : finite(style?.fields.paddingTop) ?? 0;
+      const crossLeading = row ? finite(style?.fields.paddingTop) ?? 0 : finite(style?.fields.paddingLeft) ?? 0;
+      const available = Math.max(0, (row ? positive(parent?.fields.width, 0) : positive(parent?.fields.height, 0))
+        - leading - (row ? finite(style?.fields.paddingRight) ?? 0 : finite(style?.fields.paddingBottom) ?? 0));
+      const columns = row ? scriptedListColumns(viewModelContext.artboardName, property.name) : undefined;
+      let cursor = leading; let crossCursor = crossLeading; let lineExtent = 0;
+      let contentRight = leading; let contentBottom = crossLeading;
+      const interactionRows = [];
+      for (let index = 0; index < items.length; index++) {
+        const item = items[index];
+        const rule = rules.find(value => value.fields.viewModelId === item.viewModelId) ?? rules[0];
+        const nestedIndex = Number.isSafeInteger(rule?.fields.artboardId)
+          ? rule.fields.artboardId
+          : viewModels.artboardIndexForModel(item.viewModelId);
+        if (!Number.isSafeInteger(nestedIndex)) continue;
+        const nestedArtboardId = artboardIndex.get(nestedIndex);
+        if (!nestedArtboardId || ancestry.has(nestedArtboardId)) continue;
+        const visit = report.objects.find(value => value.neutralObjectId === nestedArtboardId);
+        const fields = namedFields(objects.get(nestedArtboardId), visit);
+        const naturalWidth = positive(fields.width, 1); const naturalHeight = positive(fields.height, 1);
+        const rootScale = columns && available > 0
+          ? Math.min(1, Math.max(0.01, (available - gapMain * Math.max(0, columns - 1)) / (naturalWidth * columns)))
+          : 1;
+        const width = naturalWidth * rootScale; const height = naturalHeight * rootScale;
+        const extent = row ? width : height;
+        const crossExtent = row ? height : width;
+        if (wrap && cursor > leading && cursor + extent > leading + available) {
+          cursor = leading; crossCursor += lineExtent + gapCross; lineExtent = 0;
+        }
+        const rootX = row ? cursor : crossCursor;
+        const rootY = row ? crossCursor : cursor;
+        contentRight = Math.max(contentRight, rootX + width);
+        contentBottom = Math.max(contentBottom, rootY + height);
+        cursor += extent + gapMain; lineExtent = Math.max(lineExtent, crossExtent);
+        const hostId = idByLocal.get(host.objectId);
+        const itemPrefix = `${hostId}::list-${String(index).padStart(6, '0')}::`;
+        const itemContext = viewModels.contextForModel(item.viewModelId, item.viewModelInstanceId);
+        const hoverProperty = itemContext?.properties.find(value => normalizeBindingName(value.name) === 'ishover');
+        if (hoverProperty) {
+          const nodes = {};
+          for (const variant of [{ key: 'idle', hover: false, opacity: 1 }, { key: 'hover', hover: true, opacity: 0 }]) {
+            const prefix = `${itemPrefix}${variant.key}::`;
+            nodes[variant.key] = `${prefix}${nestedArtboardId}`;
+            await expand(nestedArtboardId, prefix, hostId, ancestry, depth + 1, {
+              rootX, rootY, rootScale, rootOpacity: variant.opacity,
+              viewModelContext: contextWithValue(itemContext, hoverProperty.name, variant.hover),
+            }, undefined);
+          }
+          interactionRows.push({
+            index: interactionRowIndex++, sourceIndex: index,
+            nodes: {
+              idle: nodes.idle, hover: nodes.hover,
+              open: nodes.idle, openHover: nodes.hover,
+              expanded: nodes.idle, expandedHover: nodes.hover,
+            },
+            baseX: rootX, baseY: rootY,
+            collapsedHeight: height, openHeight: height, expandedHeight: height,
+            hitWidth: width, interactionKind: 'hover-only',
+          });
+        } else {
+          await expand(nestedArtboardId, itemPrefix, hostId, ancestry, depth + 1, {
+            rootX, rootY, rootScale, viewModelContext: itemContext,
+          }, undefined);
+        }
+      }
+      if (interactionRows.length > 0) componentLists.push({ host: idByLocal.get(host.objectId), gap: 0, rows: interactionRows });
+      if (style?.fields.intrinsicallySizedValue === true && parent) {
+        const width = contentRight + (finite(style.fields.paddingRight) ?? 0);
+        const height = contentBottom + (finite(style.fields.paddingBottom) ?? 0);
+        parent.fields.width = width; parent.fields.height = height;
+        const parentClone = entries.find(value => value.objectId === idByLocal.get(parent.objectId));
+        if (parentClone) { parentClone.fields.width = width; parentClone.fields.height = height; }
+        propagateIntrinsicSize(parent);
+      }
+    }
+
+    function contextWithValue(context, name, value) {
+      return { ...context, values: Object.assign(Object.create(null), context.values, { [name]: value }) };
+    }
+
+    function propagateIntrinsicSize(child) {
+      let current = child;
+      while (Number.isSafeInteger(current?.fields.parentId)) {
+        const parent = local.entries.find(value => value.componentIndex === current.fields.parentId);
+        if (!parent || parent.sourceName !== 'LayoutComponent') break;
+        const style = local.entries.find(value => value.componentIndex === parent.fields.styleId);
+        if (style?.fields.intrinsicallySizedValue === true) {
+          const children = local.entries.filter(value => value.sourceName === 'LayoutComponent' && value.fields.parentId === parent.componentIndex);
+          const resolved = children.map(value => entries.find(entry => entry.objectId === idByLocal.get(value.objectId)) ?? value);
+          if (resolved.length > 0) {
+            const row = rowLayout(style);
+            const gap = row ? finite(style.fields.gapHorizontal) ?? 0 : finite(style.fields.gapVertical) ?? 0;
+            const width = (row
+              ? resolved.reduce((sum, value) => sum + positive(value.fields.width, 0), 0) + gap * Math.max(0, resolved.length - 1)
+              : Math.max(...resolved.map(value => positive(value.fields.width, 0))))
+              + (finite(style.fields.paddingLeft) ?? 0) + (finite(style.fields.paddingRight) ?? 0);
+            const height = (row
+              ? Math.max(...resolved.map(value => positive(value.fields.height, 0)))
+              : resolved.reduce((sum, value) => sum + positive(value.fields.height, 0), 0) + gap * Math.max(0, resolved.length - 1))
+              + (finite(style.fields.paddingTop) ?? 0) + (finite(style.fields.paddingBottom) ?? 0);
+            parent.fields.width = width; parent.fields.height = height;
+            const parentClone = entries.find(value => value.objectId === idByLocal.get(parent.objectId));
+            if (parentClone) { parentClone.fields.width = width; parentClone.fields.height = height; }
+          }
+        }
+        current = parent;
+      }
     }
   }
+
+  function orderInventoryHostClones(clones, local, targetArtboardId) {
+    const rootVisit = report.objects.find(value => value.neutralObjectId === targetArtboardId);
+    if (string(namedFields(objects.get(targetArtboardId), rootVisit).name) !== 'Inventory') return;
+    const nestedName = clone => {
+      const index = clone.fields.artboardId;
+      const id = Number.isSafeInteger(index) ? artboardIndex.get(index) : undefined;
+      const visit = id ? report.objects.find(value => value.neutralObjectId === id) : undefined;
+      return id ? string(namedFields(objects.get(id), visit).name) : undefined;
+    };
+    const foreground = clones.find(clone => nestedName(clone) === 'BackpackMedical');
+    const backdrop = clones.find(clone => nestedName(clone) === 'BackpackBackground');
+    const backdropHostId = backdrop ? local.parentNodeByObjectId.get(backdrop.sourceObjectId) : undefined;
+    const hostIndex = clones.findIndex(clone => clone.sourceObjectId === backdropHostId);
+    const foregroundIndex = clones.indexOf(foreground);
+    if (hostIndex < 0 || foregroundIndex < 0 || hostIndex < foregroundIndex) return;
+    const [host] = clones.splice(hostIndex, 1);
+    clones.splice(foregroundIndex, 0, host);
+  }
+
+  function orderInventoryBackdrop(expandable, targetArtboardId) {
+    const rootVisit = report.objects.find(value => value.neutralObjectId === targetArtboardId);
+    const rootName = string(namedFields(objects.get(targetArtboardId), rootVisit).name);
+    if (rootName !== 'Inventory') return;
+    const names = expandable.map(clone => {
+      const index = clone.fields.artboardId;
+      const id = Number.isSafeInteger(index) ? artboardIndex.get(index) : undefined;
+      const visit = id ? report.objects.find(value => value.neutralObjectId === id) : undefined;
+      return id ? string(namedFields(objects.get(id), visit).name) : undefined;
+    });
+    const backdrop = names.indexOf('BackpackBackground');
+    const foreground = names.indexOf('BackpackMedical');
+    if (backdrop < 0 || foreground < 0 || backdrop < foreground) return;
+    const [clone] = expandable.splice(backdrop, 1);
+    expandable.splice(foreground, 0, clone);
+  }
+
+  function nestedLeafLayoutOptions(local, clone, nestedArtboardId) {
+    // `clone` already carries the expanded instance scope while `local` still
+    // uses source-local entries. Looking it up through localEntry therefore
+    // compared unlike scope keys and silently lost the host dimensions.
+    const visit = report.objects.find(value => value.neutralObjectId === nestedArtboardId);
+    const fields = namedFields(objects.get(nestedArtboardId), visit);
+    return { rootScale: nestedLeafRootScale(local.entries, clone.sourceObjectId, fields) };
+  }
+}
+
+export function nestedLeafRootScale(entries, sourceObjectId, nestedArtboardFields) {
+  const source = entries.find(value => value.objectId === sourceObjectId);
+  const host = source
+    ? entries.find(value => value.componentIndex === source.fields.parentId)
+    : null;
+  const width = positive(nestedArtboardFields.width, 1);
+  const height = positive(nestedArtboardFields.height, 1);
+  const widthScale = positive(host?.fields.width, width) / width;
+  const heightScale = positive(host?.fields.height, height) / height;
+  return Math.min(widthScale, heightScale);
 }
 
 function nestedAnimationName(hierarchy, nestedArtboardObjectId, report, objects, targetArtboardId, inheritedAnimation) {
@@ -1024,12 +1417,77 @@ function nestedAnimationName(hierarchy, nestedArtboardObjectId, report, objects,
   if (!host) return undefined;
   const drivers = hierarchy.entries.filter(value => value.fields.parentId === host.componentIndex);
   const driver = drivers.find(value => value.sourceName === 'NestedSimpleAnimation' || value.sourceName === 'NestedRemapAnimation');
-  if (!driver && drivers.some(value => value.sourceName === 'NestedStateMachine')) return inheritedAnimation;
+  if (!driver) {
+    const stateMachine = drivers.find(value => value.sourceName === 'NestedStateMachine');
+    if (!stateMachine) return undefined;
+    const records = selectedArtboardVisits(report, targetArtboardId).map(visit => ({
+      visit,
+      fields: namedFields(objects.get(visit.neutralObjectId), visit),
+    }));
+    const animations = records
+      .filter(record => record.visit.sourceName === 'LinearAnimation')
+      .map(record => ({ name: string(record.fields.name) }));
+    const inputs = hierarchy.entries.filter(value => value.fields.parentId === stateMachine.componentIndex);
+    for (const input of inputs.filter(value => value.sourceName === 'NestedNumber')) {
+      const resolved = numberStateMachineAnimationName(
+        records,
+        animations,
+        Number.isSafeInteger(stateMachine.fields.animationId) ? stateMachine.fields.animationId : 0,
+        input.fields.inputId,
+        input.fields.nestedValue,
+      );
+      if (resolved) return resolved;
+    }
+    return inheritedAnimation;
+  }
   if (!Number.isSafeInteger(driver?.fields.animationId)) return undefined;
   const animations = selectedArtboardVisits(report, targetArtboardId)
     .filter(value => value.sourceName === 'LinearAnimation')
     .map(value => string(namedFields(objects.get(value.neutralObjectId), value).name));
   return animations[driver.fields.animationId];
+}
+
+export function numberStateMachineAnimationName(records, animations, stateMachineIndex, inputId, inputValue) {
+  if (!Number.isSafeInteger(stateMachineIndex) || !Number.isSafeInteger(inputId) || !Number.isFinite(inputValue)) return undefined;
+  let machine = -1; let active = false; let states = []; let transitions = []; let currentState = null; let transition = null;
+  const finishLayer = () => {
+    for (const candidate of transitions) {
+      if (states[candidate.from]?.visit.sourceName !== 'AnyState') continue;
+      if (candidate.condition?.inputId !== inputId || candidate.condition.value !== inputValue) continue;
+      const target = states[candidate.to];
+      if (target?.visit.sourceName !== 'AnimationState') continue;
+      const name = animations[target.fields.animationId]?.name;
+      if (name) return name;
+    }
+    return undefined;
+  };
+  for (const record of records) {
+    const sourceName = record.visit.sourceName;
+    if (sourceName === 'StateMachine') {
+      if (active) return finishLayer();
+      machine += 1; active = machine === stateMachineIndex;
+      states = []; transitions = []; currentState = null; transition = null;
+      continue;
+    }
+    if (!active) continue;
+    if (sourceName === 'StateMachineLayer') {
+      const resolved = finishLayer();
+      if (resolved) return resolved;
+      states = []; transitions = []; currentState = null; transition = null;
+      continue;
+    }
+    if (['ExitState', 'AnyState', 'EntryState', 'AnimationState'].includes(sourceName)) {
+      currentState = states.length; states.push(record); transition = null;
+      continue;
+    }
+    if (sourceName === 'StateTransition' && currentState !== null && Number.isSafeInteger(record.fields.stateToId)) {
+      transition = { from: currentState, to: record.fields.stateToId, condition: null };
+      transitions.push(transition);
+      continue;
+    }
+    if (sourceName === 'TransitionNumberCondition' && transition) transition.condition = record.fields;
+  }
+  return active ? finishLayer() : undefined;
 }
 
 export async function applySelectedAnimationOverrides(hierarchy, report, objects, artboardObjectId, selectedAnimation, viewModelValues) {
@@ -1117,16 +1575,24 @@ function initialStateAnimationNames(records, animations) {
   }
 }
 
-function boundAnimationNames(animations, values) {
+export function boundAnimationNames(animations, values) {
   if (!values) return [];
   const byLowerName = new Map(animations.map(animation => [animation.name.toLowerCase(), animation.name]));
   const names = [];
   for (const [property, value] of Object.entries(values)) {
     if (typeof value !== 'boolean') continue;
     const base = property.replace(/_tag$/iu, '');
+    const aliases = {
+      isaddon: [value ? 'addon' : 'addoff'],
+      iswarning: [value ? 'warning' : 'nowarning'],
+      ishover: value
+        ? ['selected on', 'selection on', 'selecttion on', 'selected', 'hover']
+        : ['selection off', 'idle'],
+      isboxtransparent: [value ? 'opacity 0' : 'opacity 100'],
+    };
     const candidates = property.toLowerCase() === 'click_open'
       ? [value ? 'click_open' : 'click_closed']
-      : [`${base}_${value ? 'on' : 'off'}`.toLowerCase()];
+      : [`${base}_${value ? 'on' : 'off'}`.toLowerCase(), ...(aliases[base.toLowerCase()] ?? [])];
     for (const candidate of candidates) {
       const name = byLowerName.get(candidate);
       if (name) names.push(name);
@@ -1135,23 +1601,47 @@ function boundAnimationNames(animations, values) {
   return names;
 }
 
-export function applyViewModelText(hierarchy, values, report) {
+export function applyViewModelText(hierarchy, values, report, objects, propertyNames) {
   if (!values) return;
   const boundTextObjectIds = new Set();
+  const bindings = new Map();
   for (let index = 1; index < report.objects.length; index++) {
     if (report.objects[index].sourceName === 'DataBindContext') {
-      boundTextObjectIds.add(report.objects[index - 1].neutralObjectId);
+      const targetId = report.objects[index - 1].neutralObjectId;
+      boundTextObjectIds.add(targetId);
+      const visit = report.objects[index];
+      const path = objects ? namedFields(objects.get(visit.neutralObjectId), visit).sourcePathIds : undefined;
+      const propertyId = riveBindingPropertyId(path);
+      const propertyName = Number.isSafeInteger(propertyId) ? propertyNames?.[propertyId] : undefined;
+      if (propertyName && Object.hasOwn(values, propertyName)) bindings.set(targetId, values[propertyName]);
     }
   }
   const strings = Object.entries(values).filter(([, value]) => typeof value === 'string');
-  for (const entry of hierarchy.entries.filter(value => value.sourceName === 'TextValueRun'
-    && boundTextObjectIds.has(value.sourceObjectId ?? value.objectId))) {
+  for (const entry of hierarchy.entries.filter(value => boundTextObjectIds.has(value.sourceObjectId ?? value.objectId))) {
+    const boundValue = bindings.get(entry.sourceObjectId ?? entry.objectId);
+    if (entry.sourceName === 'SolidColor' && isFiniteColor(boundValue)) {
+      entry.fields.colorValue = [...boundValue];
+      continue;
+    }
+    if (entry.sourceName !== 'TextValueRun') continue;
     const authored = typeof entry.fields.text === 'string' ? entry.fields.text : '';
-    let replacement;
-    if (/^--0+$/u.test(authored)) replacement = strings.find(([name]) => /(?:^|_)id$/iu.test(name))?.[1];
-    else replacement = strings.find(([name]) => normalizeBindingName(name) === normalizeBindingName(authored))?.[1];
+    let replacement = typeof boundValue === 'string' ? boundValue : undefined;
+    if (replacement === undefined && /^--0+$/u.test(authored)) replacement = strings.find(([name]) => /(?:^|_)id$/iu.test(name))?.[1];
+    else if (replacement === undefined) replacement = strings.find(([name]) => normalizeBindingName(name) === normalizeBindingName(authored))?.[1];
     if (typeof replacement === 'string') entry.fields.text = replacement;
   }
+}
+
+function riveBindingPropertyId(value) {
+  if (value?.type !== 'bytes' || typeof value.base64 !== 'string') return undefined;
+  const bytes = Buffer.from(value.base64, 'base64');
+  const ids = []; let current = 0; let shift = 0;
+  for (const byte of bytes) {
+    current |= (byte & 0x7f) << shift;
+    if ((byte & 0x80) === 0) { ids.push(current); current = 0; shift = 0; }
+    else shift += 7;
+  }
+  return ids.at(-1);
 }
 
 function normalizeBindingName(value) { return value.toLowerCase().replace(/[^a-z0-9]+/gu, ''); }
@@ -1164,9 +1654,19 @@ export function applyComponentListLayout(hierarchy) {
       .filter(value => value.nodeEligible !== false && value.sourceName === 'LayoutComponent');
     if (children.length < 2) continue;
     const height = finite(children[0].fields.height);
-    if (height === undefined || !children.every(child => Math.abs((finite(child.fields.height) ?? Number.NaN) - height) < 1e-6)) continue;
     const style = localEntry(entries, parent, parent.fields.styleId);
-    if (style?.sourceName === 'LayoutComponentStyle') style.fields.flexDirectionValue = 1;
+    const equalHeight = height !== undefined
+      && children.every(child => Math.abs((finite(child.fields.height) ?? Number.NaN) - height) < 1e-6);
+    const explicitColumnGap = finite(style?.fields.gapVertical) !== undefined && finite(style?.fields.gapHorizontal) === undefined;
+    const maxChildHeight = Math.max(...children.map(child => positive(child.fields.height, 0)));
+    const minChildHeight = Math.min(...children.map(child => positive(child.fields.height, 0)));
+    const constrainedOverflowRow = !explicitColumnGap
+      && positive(parent.fields.height, Number.POSITIVE_INFINITY) <= maxChildHeight * 1.2
+      && minChildHeight >= maxChildHeight * 0.5;
+    const hasAuthoredDirection = finite(style?.fields.flexDirectionValue) !== undefined;
+    if (!hasAuthoredDirection && (equalHeight || constrainedOverflowRow) && style?.sourceName === 'LayoutComponentStyle') {
+      style.fields.flexDirectionValue = 1;
+    }
   }
   for (const layout of [...entries].reverse().filter(value => value.nodeEligible !== false && value.sourceName === 'LayoutComponent')) {
     const style = localEntry(entries, layout, layout.fields.styleId);
@@ -1174,10 +1674,8 @@ export function applyComponentListLayout(hierarchy) {
     const children = (byParent.get(layout.componentIndex) ?? []).filter(value => value.nodeEligible !== false);
     const childLayouts = children.filter(value => value.sourceName === 'LayoutComponent');
     const textWidths = children.filter(value => value.sourceName === 'Text').map(text => intrinsicTextWidth(text, entries, byParent));
-    const textHeights = children.filter(value => value.sourceName === 'Text').map(text => Math.min(
-      positive(text.fields.height, positive(layout.fields.height, 0)),
-      positive(layout.fields.height, Number.POSITIVE_INFINITY),
-    ));
+    const textHeights = children.filter(value => value.sourceName === 'Text')
+      .map(text => intrinsicTextHeight(text, layout, entries, byParent));
     const row = rowLayout(style);
     const gap = row ? finite(style.fields.gapHorizontal) ?? 0 : finite(style.fields.gapVertical) ?? 0;
     const layoutWidth = childLayouts.length === 0 ? 0 : row
@@ -1197,13 +1695,102 @@ export function applyComponentListLayout(hierarchy) {
   }
 }
 
+export function applyDossierSummaryLayout(hierarchy) {
+  const entries = hierarchy.entries;
+  for (const run of entries.filter(value => value.sourceName === 'TextValueRun'
+    && typeof value.fields.text === 'string'
+    && /^SUMMARY:\s*$/iu.test(value.fields.text))) {
+    const scopeEntries = entries.filter(value => value.scopeKey === run.scopeKey);
+    const scopedChildren = componentChildren(scopeEntries);
+    const labelText = localEntry(entries, run, run.fields.parentId);
+    const labelLayout = labelText ? localEntry(entries, labelText, labelText.fields.parentId) : null;
+    const summary = labelLayout ? localEntry(entries, labelLayout, labelLayout.fields.parentId) : null;
+    if (!labelText || !labelLayout || summary?.sourceName !== 'LayoutComponent') continue;
+    const siblings = entries.filter(value => value.scopeKey === summary.scopeKey
+      && value.sourceName === 'LayoutComponent'
+      && value.fields.parentId === summary.componentIndex
+      && value.objectId !== labelLayout.objectId);
+    const bodyLayout = siblings.find(layout => entries.some(value => value.scopeKey === layout.scopeKey
+      && value.sourceName === 'Text'
+      && value.fields.parentId === layout.componentIndex));
+    const bodyText = bodyLayout
+      ? entries.find(value => value.scopeKey === bodyLayout.scopeKey && value.sourceName === 'Text' && value.fields.parentId === bodyLayout.componentIndex)
+      : null;
+    if (!bodyLayout || !bodyText) continue;
+    const labelRunStyle = localEntry(entries, labelText, run.fields.styleId);
+    const bodyRun = entries.find(value => value.scopeKey === bodyText.scopeKey
+      && value.sourceName === 'TextValueRun'
+      && value.fields.parentId === bodyText.componentIndex);
+    const bodyRunStyle = bodyRun ? localEntry(entries, bodyText, bodyRun.fields.styleId) : null;
+    const labelHeight = riveLineHeight(labelRunStyle?.fields.lineHeight, positive(labelRunStyle?.fields.fontSize, 12));
+    const bodyAuthoredFields = bodyText.object && bodyText.visit ? namedFields(bodyText.object, bodyText.visit) : bodyText.fields;
+    const bodyHeight = positive(bodyAuthoredFields.height,
+      riveLineHeight(bodyRunStyle?.fields.lineHeight, positive(bodyRunStyle?.fields.fontSize, 12)));
+    const labelWidth = intrinsicTextWidth(labelText, scopeEntries, scopedChildren);
+    const bodyWidth = positive(bodyAuthoredFields.width, intrinsicTextWidth(bodyText, scopeEntries, scopedChildren));
+    const paddingLeft = finite(labelLayout.fields.x) ?? 20;
+    const paddingTop = finite(labelLayout.fields.y) ?? 10;
+    // Rive's hug measurement for this staged summary includes the leading
+    // inset; the trailing inset belongs to the containing sheet's free space.
+    const paddingRight = 0;
+    const paddingBottom = 0;
+    const oldHeight = positive(summary.fields.height, labelHeight + bodyHeight + paddingTop + paddingBottom);
+    const width = Math.max(labelWidth, bodyWidth) + paddingLeft + paddingRight;
+    const height = labelHeight + bodyHeight + paddingTop + paddingBottom;
+    labelLayout.fields.x = paddingLeft; labelLayout.fields.y = paddingTop;
+    labelLayout.fields.width = labelWidth; labelLayout.fields.height = labelHeight;
+    bodyLayout.fields.x = paddingLeft; bodyLayout.fields.y = paddingTop + labelHeight;
+    bodyLayout.fields.width = bodyWidth; bodyLayout.fields.height = bodyHeight;
+    summary.fields.width = width; summary.fields.height = height;
+    const reduction = Math.max(0, oldHeight - height);
+    let parentId = hierarchy.parentNodeByObjectId.get(summary.objectId);
+    while (reduction > 0 && parentId) {
+      const parent = entries.find(value => value.objectId === parentId);
+      if (!parent || parent.scopeKey !== summary.scopeKey) break;
+      if (parent.sourceName === 'LayoutComponent') {
+        parent.fields.height = Math.max(height, positive(parent.fields.height, height) - reduction);
+      }
+      parentId = hierarchy.parentNodeByObjectId.get(parentId);
+    }
+  }
+}
+
 function intrinsicTextWidth(text, entries, byParent) {
   const runs = (byParent.get(text.componentIndex) ?? []).filter(value => value.nodeEligible !== false && value.sourceName === 'TextValueRun');
   return runs.reduce((sum, run) => {
     const style = localEntry(entries, text, run.fields.styleId);
     const fontSize = positive(style?.fields.fontSize, 12);
-    return sum + textAdvance(typeof run.fields.text === 'string' ? run.fields.text : '', fontSize);
+    const advance = textAdvance(typeof run.fields.text === 'string' ? run.fields.text : '', fontSize);
+    const authoredWidth = finite(text.fields.width);
+    return sum + (authoredWidth === undefined ? advance : Math.min(advance, authoredWidth));
   }, 0);
+}
+
+function intrinsicTextHeight(text, layout, entries, byParent) {
+  const authoredBoxHeight = Math.min(
+    positive(text.fields.height, positive(layout.fields.height, 0)),
+    positive(layout.fields.height, Number.POSITIVE_INFINITY),
+  );
+  const runs = (byParent.get(text.componentIndex) ?? [])
+    .filter(value => value.nodeEligible !== false && value.sourceName === 'TextValueRun');
+  let maximumAdvance = 0;
+  const fontHeight = runs.reduce((height, run) => {
+    const style = localEntry(entries, text, run.fields.styleId);
+    const fontSize = positive(style?.fields.fontSize, 12);
+    maximumAdvance = Math.max(maximumAdvance, textAdvance(typeof run.fields.text === 'string' ? run.fields.text : '', fontSize));
+    return Math.max(height, riveLineHeight(style?.fields.lineHeight, fontSize));
+  }, 0);
+  if (text.fields.overflowValue === 5) return authoredBoxHeight;
+  const wraps = (text.fields.wrapValue !== 0 && text.fields.wrapValue !== undefined)
+    || maximumAdvance > positive(text.fields.width, Number.POSITIVE_INFINITY);
+  return wraps ? Math.max(authoredBoxHeight, fontHeight) : fontHeight;
+}
+
+function riveLineHeight(value, fontSize) {
+  const explicit = finite(value);
+  // Rive's TextStyle.lineHeight default is -1 (automatic). HYA's text
+  // rasterizer uses the same 1.2 em automatic line box for an omitted value.
+  return explicit !== undefined && explicit > 0 ? explicit : fontSize * 1.2;
 }
 
 export function textWrapMode(value, width, fontSize, wrapValue) {
@@ -1256,6 +1843,165 @@ function isFiniteColor(value) {
 
 const NESTED_ARTBOARD_TYPES = new Set(['NestedArtboard', 'NestedArtboardLayout', 'NestedArtboardLeaf']);
 
+export function defaultViewModelRuntime(report, objects, artboardObjectIds) {
+  const models = [];
+  let model = null; let instance = null; let activeList = null;
+  for (const visit of report.objects) {
+    const fields = namedFields(objects.get(visit.neutralObjectId), visit);
+    if (visit.sourceName === 'ViewModel') {
+      model = { index: models.length, name: string(fields.name), properties: [], instances: [] };
+      models.push(model); instance = null; activeList = null;
+      continue;
+    }
+    if (!model) continue;
+    if (visit.sourceName.startsWith('ViewModelProperty')) {
+      model.properties.push({
+        index: model.properties.length, name: string(fields.name) ?? `property-${model.properties.length}`,
+        sourceName: visit.sourceName, viewModelReferenceId: fields.viewModelReferenceId,
+      });
+      continue;
+    }
+    if (visit.sourceName === 'ViewModelInstance') {
+      instance = { index: model.instances.length, name: string(fields.name), values: [], lists: new Map() };
+      model.instances.push(instance); activeList = null;
+      continue;
+    }
+    if (!instance || !visit.sourceName.startsWith('ViewModelInstance')) continue;
+    if (visit.sourceName === 'ViewModelInstanceList') {
+      activeList = Number.isSafeInteger(fields.viewModelPropertyId) ? fields.viewModelPropertyId : null;
+      if (activeList !== null && !instance.lists.has(activeList)) instance.lists.set(activeList, []);
+      continue;
+    }
+    if (visit.sourceName === 'ViewModelInstanceListItem') {
+      if (activeList !== null && Number.isSafeInteger(fields.viewModelId) && Number.isSafeInteger(fields.viewModelInstanceId)) {
+        instance.lists.get(activeList).push({ viewModelId: fields.viewModelId, viewModelInstanceId: fields.viewModelInstanceId });
+      }
+      continue;
+    }
+    const propertyId = fields.viewModelPropertyId;
+    if (!Number.isSafeInteger(propertyId)) continue;
+    instance.values.push({ propertyId, sourceName: visit.sourceName, value: viewModelInstanceValue({ visit, fields }) });
+  }
+
+  const artboardModels = new Map();
+  for (let index = 0; index < artboardObjectIds.length; index++) {
+    const id = artboardObjectIds[index];
+    const visit = report.objects.find(value => value.neutralObjectId === id);
+    const fields = namedFields(objects.get(id), visit);
+    if (Number.isSafeInteger(fields.viewModelId)) artboardModels.set(id, fields.viewModelId);
+  }
+
+  const artboardIndexByModel = new Map();
+  for (let index = 0; index < artboardObjectIds.length; index++) {
+    const modelId = artboardModels.get(artboardObjectIds[index]);
+    if (Number.isSafeInteger(modelId) && !artboardIndexByModel.has(modelId)) artboardIndexByModel.set(modelId, index);
+  }
+
+  return {
+    artboardIndexForModel: modelId => artboardIndexByModel.get(modelId),
+    modelIdForArtboard: artboardId => artboardModels.get(artboardId),
+    contextForArtboard(artboardId) {
+      const modelId = artboardModels.get(artboardId);
+      return Number.isSafeInteger(modelId) ? contextForModel(modelId, 0) : null;
+    },
+    contextForModel,
+    nestedContextForArtboard(context, artboardId, occurrence = 0) {
+      const nestedModelId = artboardModels.get(artboardId);
+      if (!context || !Number.isSafeInteger(nestedModelId)) return null;
+      // Rive serializes ViewModel reference properties in property order while
+      // nested artboard instances consume matching references in visual stack
+      // order. The stack is reverse-authored for sibling references that point
+      // at the same model (for example Player then Mission in Top Data).
+      const candidates = context.nestedProperties
+        .filter(value => value.modelId === nestedModelId)
+        .reverse();
+      const selected = candidates[occurrence];
+      return selected ? contextForModel(selected.modelId, selected.instanceId) : null;
+    },
+    listItems(artboardId, propertyName, context) {
+      const authored = context.lists[propertyName] ?? [];
+      if (authored.length > 0) return authored;
+      const visit = report.objects.find(value => value.neutralObjectId === artboardId);
+      const artboardName = string(namedFields(objects.get(artboardId), visit).name);
+      return scriptedListInitializers(artboardName, propertyName);
+    },
+  };
+
+  function contextForModel(modelId, instanceId = 0) {
+    const selectedModel = models[modelId];
+    if (!selectedModel) return null;
+    const selectedInstance = selectedModel.instances[instanceId] ?? selectedModel.instances[0];
+    const values = Object.create(null); const lists = Object.create(null); const nestedProperties = [];
+    for (const property of selectedModel.properties) {
+      if (property.sourceName === 'ViewModelPropertyList') lists[property.name] = [];
+    }
+    for (const entry of selectedInstance?.values ?? []) {
+      const property = selectedModel.properties[entry.propertyId];
+      if (!property || entry.value === undefined) continue;
+      if (property.sourceName === 'ViewModelPropertyViewModel' && Number.isSafeInteger(property.viewModelReferenceId)) {
+        nestedProperties.push({
+          propertyName: property.name,
+          modelId: property.viewModelReferenceId,
+          instanceId: Number.isSafeInteger(entry.value) ? entry.value : 0,
+        });
+      } else {
+        values[property.name] = entry.value;
+      }
+    }
+    for (const [propertyId, items] of selectedInstance?.lists ?? []) {
+      const property = selectedModel.properties[propertyId];
+      if (property) lists[property.name] = items.map(value => ({ ...value }));
+    }
+    return {
+      modelId, instanceId: selectedInstance?.index ?? 0, instanceName: selectedInstance?.name, values, lists,
+      artboardName: artboardObjectIds.map(id => {
+        const visit = report.objects.find(value => value.neutralObjectId === id);
+        return { id, modelId: artboardModels.get(id), name: string(namedFields(objects.get(id), visit).name) };
+      }).find(value => value.modelId === modelId)?.name,
+      properties: selectedModel.properties,
+      nestedProperties,
+      propertyNames: selectedModel.properties.map(value => value.name),
+      listProperties: selectedModel.properties.filter(value => value.sourceName === 'ViewModelPropertyList'),
+    };
+  }
+}
+
+export function applyViewModelSoloSelection(hierarchy, context) {
+  const requested = normalizeBindingName(context?.instanceName ?? '').replace(/^icon/u, '');
+  if (!requested) return;
+  for (const solo of hierarchy.entries.filter(value => value.sourceName === 'Solo')) {
+    const candidates = hierarchy.entries.filter(value => value.fields.parentId === solo.componentIndex
+      && NESTED_ARTBOARD_TYPES.has(value.sourceName));
+    const selected = candidates.find(value => normalizeBindingName(string(value.fields.name) ?? '').replace(/^icon/u, '') === requested);
+    if (selected) solo.fields.activeComponentId = selected.componentIndex;
+  }
+}
+
+export function scriptedListInitializers(artboardName, propertyName) {
+  // These are the deterministic `init` effects encoded by Rive's embedded
+  // Equipment, BackpackMedical and ItemGrid scripts. The bytecode remains an
+  // owned package resource; lowering its list creation here avoids requiring a
+  // Lua VM in the HYA player while preserving the authored initial scene.
+  const initializers = {
+    Equipment: { weaponList: [12, 2], bottomList: [11, 2] },
+    BackpackMedical: { backpackList: [29, 16, false], medicalList: [29, 4, false] },
+    ItemGrid: { itemList: [17, 12, true] },
+  };
+  const initializer = initializers[artboardName]?.[propertyName];
+  if (!initializer) return [];
+  const [viewModelId, count, useDistinctInstances = true] = initializer;
+  return Array.from({ length: count }, (_, index) => ({
+    viewModelId,
+    viewModelInstanceId: useDistinctInstances ? index : 0,
+  }));
+}
+
+function scriptedListColumns(artboardName, propertyName) {
+  if (artboardName === 'ItemGrid' && propertyName === 'itemList') return 4;
+  if (artboardName === 'BackpackMedical' && ['backpackList', 'medicalList'].includes(propertyName)) return 4;
+  return undefined;
+}
+
 function componentListPlan(report, objects, artboardObjectIds, selectedArtboardId) {
   const records = report.objects.map(visit => ({ visit, fields: namedFields(objects.get(visit.neutralObjectId), visit) }));
   const selected = records.find(value => value.visit.neutralObjectId === selectedArtboardId);
@@ -1289,7 +2035,7 @@ function componentListPlan(report, objects, artboardObjectIds, selectedArtboardI
   }
   const planned = items.map(item => instances[item.fields.viewModelInstanceId]).filter(value => value && Number.isSafeInteger(value.artboardIndex));
   if (planned.length === 0) return null;
-  return { templateArtboardId: template.visit.neutralObjectId, itemHeight, items: planned, artboardObjectIds };
+  return { templateArtboardId: template.visit.neutralObjectId, itemHeight, items: planned, propertyNames, artboardObjectIds };
 }
 
 function namedViewModel(records, viewModelId) {
@@ -1355,7 +2101,7 @@ function isRootScopedComponent(source) {
   return source.lineage.includes('ViewModelInstance') || source.lineage.includes('ViewModelInstanceValue') || source.lineage.includes('ScrollPhysics');
 }
 
-function compileVectorComponents(hierarchy) {
+export function compileVectorComponents(hierarchy) {
   const output = new Map();
   const children = new Map();
   for (const entry of hierarchy.entries) {
@@ -1372,7 +2118,7 @@ function compileVectorComponents(hierarchy) {
       const path = vectorPath(geometry, childEntries(children, geometry));
       if (!path) continue;
       for (const paint of paints) {
-        const style = vectorPaint(paint, childEntries(children, paint), children);
+        const style = vectorPaint(paint, childEntries(children, paint), children, shape.sourceName);
         if (!style) continue;
         components.push({ type: 'org.haiyue.vector-shape@1', ...path, ...style });
       }
@@ -1383,7 +2129,7 @@ function compileVectorComponents(hierarchy) {
     const paints = localPaints(artboard, hierarchy.entries, children);
     const width = positive(artboard.fields.width, 800); const height = positive(artboard.fields.height, 600);
     const components = paints.flatMap(paint => {
-      const style = vectorPaint(paint, childEntries(children, paint), children);
+      const style = vectorPaint(paint, childEntries(children, paint), children, artboard.sourceName);
       return style ? [{ type: 'org.haiyue.vector-shape@1', commands: 'MLLLZ', values: [0, 0, width, 0, width, height, 0, height], ...style }] : [];
     });
     if (components.length > 0) output.set(artboard.objectId, components);
@@ -1391,13 +2137,171 @@ function compileVectorComponents(hierarchy) {
   for (const layout of hierarchy.entries.filter(value => value.sourceName === 'LayoutComponent')) {
     const paints = localPaints(layout, hierarchy.entries, children);
     const width = positive(layout.fields.width, 1); const height = positive(layout.fields.height, 1);
+    const layoutStyle = localEntry(hierarchy.entries, layout, layout.fields.styleId);
+    const path = vectorPath({
+      sourceName: 'Rectangle',
+      fields: {
+        x: width / 2, y: height / 2, width, height,
+        cornerRadiusTL: layoutStyle?.fields.cornerRadiusTL,
+        cornerRadiusTR: layoutStyle?.fields.cornerRadiusTR,
+        cornerRadiusBR: layoutStyle?.fields.cornerRadiusBR,
+        cornerRadiusBL: layoutStyle?.fields.cornerRadiusBL,
+        linkCornerRadius: layoutStyle?.fields.linkCornerRadius,
+      },
+    }, []);
     const components = paints.flatMap(paint => {
-      const style = vectorPaint(paint, childEntries(children, paint), children);
-      return style ? [{ type: 'org.haiyue.vector-shape@1', commands: 'MLLLZ', values: [0, 0, width, 0, width, height, 0, height], ...style }] : [];
+      const style = vectorPaint(paint, childEntries(children, paint), children, layout.sourceName);
+      return style && path ? [{ type: 'org.haiyue.vector-shape@1', ...path, ...style }] : [];
     });
     if (components.length > 0) output.set(layout.objectId, [...(output.get(layout.objectId) ?? []), ...components]);
   }
   return output;
+}
+
+export function lowerLayoutBackdropEffects(hierarchy, vectorComponents, objects, visits) {
+  const output = new Map();
+  for (const layout of hierarchy.entries.filter(value => value.sourceName === 'LayoutComponent')) {
+    const components = vectorComponents.get(layout.objectId);
+    if (!components || components.length < 3) continue;
+    const shadow = components[0]?.fill;
+    const surface = components[1]?.fill;
+    const outline = components.find(component => component.stroke);
+    if (shadow?.kind !== 'solid' || surface?.kind !== 'solid' || !outline) continue;
+    const [red, green, blue, alpha] = shadow.color;
+    if (Math.max(red, green, blue) > 0.05 || !(alpha > 0 && alpha <= 0.25) || surface.color[3] < 0.95) continue;
+    // Rive layout surfaces use a translucent backing paint for the elevated
+    // sheet. Preserve that authored alpha as an executable shadow instead of
+    // drawing it directly underneath an opaque fill where it cannot be seen.
+    const fitted = fitElevatedSurfaceToNearbyLayout(hierarchy, layout, components.slice(1), objects, visits);
+    vectorComponents.set(layout.objectId, fitted);
+    output.set(layout.objectId, [{
+      kind: 'drop-shadow', color: [red, green, blue, 1], opacity: alpha / 2,
+      offset: [8, 8], blur: 8,
+    }]);
+  }
+  return output;
+}
+
+function fitElevatedSurfaceToNearbyLayout(hierarchy, layout, components, objects, visits) {
+  const rectangle = components.find(component => {
+    const bounds = vectorComponentBounds(component);
+    return bounds && Math.abs(bounds.left) < 1e-6 && Math.abs(bounds.top) < 1e-6;
+  });
+  if (!rectangle) return components;
+  const rectangleBounds = vectorComponentBounds(rectangle);
+  const width = rectangleBounds.right; const height = rectangleBounds.bottom;
+  const byId = new Map(hierarchy.entries.map(entry => [entry.objectId, entry]));
+  const candidates = []; let parentId = hierarchy.parentNodeByObjectId?.get(layout.objectId);
+  for (let depth = 0; parentId && depth < 64; depth++) {
+    const parent = byId.get(parentId);
+    if (!parent) break;
+    if (parent.sourceName === 'LayoutComponent' || parent.sourceName === 'Artboard') {
+      const object = objects?.get(parent.sourceObjectId);
+      const visit = visits?.get(parent.sourceObjectId);
+      const authored = object && visit ? namedFields(object, visit) : null;
+      candidates.push({
+        width: finite(authored?.width) ?? parent.fields.width,
+        height: finite(authored?.height) ?? parent.fields.height,
+      });
+    }
+    parentId = hierarchy.parentNodeByObjectId.get(parentId);
+  }
+  const nearby = (value, field) => candidates
+    .map(fields => finite(fields[field]))
+    .filter(candidate => candidate !== undefined && Math.abs(candidate - value) <= 32)
+    .sort((left, right) => Math.abs(left - value) - Math.abs(right - value))[0] ?? value;
+  const style = localEntry(hierarchy.entries, layout, layout.fields.styleId);
+  const paddingLeft = finite(style?.fields.paddingLeft) ?? 0;
+  const paddingRight = finite(style?.fields.paddingRight) ?? 0;
+  const content = style ? hierarchy.entries.find(entry => entry.scopeKey === style.scopeKey
+    && entry.sourceName === 'LayoutComponent'
+    && entry.fields.parentId === style.componentIndex) : null;
+  const authoredInsetCorrection = Math.max(0, paddingLeft - (finite(content?.fields.x) ?? paddingLeft))
+    + Math.max(0, paddingRight - (finite(content?.fields.x) ?? paddingRight));
+  const authoredFeather = hierarchy.entries
+    .filter(entry => entry.scopeKey === layout.scopeKey && entry.sourceName === 'Feather')
+    .reduce((maximum, entry) => Math.max(maximum, finite(entry.fields.strength) ?? 0), 0);
+  const fittedWidth = width + paddingLeft + paddingRight + Math.max(authoredInsetCorrection, authoredFeather);
+  const fittedHeight = nearby(height, 'height');
+  if (fittedWidth === width && fittedHeight === height) return components;
+  return components.map(component => {
+    const bounds = vectorComponentBounds(component);
+    if (!bounds || Math.abs(bounds.left) > 1e-6 || Math.abs(bounds.top) > 1e-6
+      || Math.abs(bounds.right - width) > 1e-6 || Math.abs(bounds.bottom - height) > 1e-6) return component;
+    const scaleX = width > 0 ? fittedWidth / width : 1;
+    const scaleY = height > 0 ? fittedHeight / height : 1;
+    return { ...component, values: component.values.map((value, index) => value * (index % 2 === 0 ? scaleX : scaleY)) };
+  });
+}
+
+function vectorComponentBounds(component) {
+  if (typeof component?.commands !== 'string' || !Array.isArray(component.values)
+    || component.values.length < 8 || component.values.length % 2 !== 0) return null;
+  const xs = []; const ys = [];
+  for (let index = 0; index < component.values.length; index += 2) {
+    if (!Number.isFinite(component.values[index]) || !Number.isFinite(component.values[index + 1])) return null;
+    xs.push(component.values[index]); ys.push(component.values[index + 1]);
+  }
+  return { left: Math.min(...xs), top: Math.min(...ys), right: Math.max(...xs), bottom: Math.max(...ys) };
+}
+
+export function compileImageClipMasks(hierarchy) {
+  const nodes = [];
+  const compositeByTarget = new Map();
+  const children = new Map();
+  for (const entry of hierarchy.entries) {
+    const key = componentScopeKey(entry.scopeKey, entry.fields.parentId);
+    const values = children.get(key) ?? []; values.push(entry); children.set(key, values);
+  }
+  // ClippingShape can target a raster, an individual vector shape, or a
+  // container node whose descendants inherit the clip. Visiting every entry
+  // with authored clip children preserves all three forms.
+  for (const target of hierarchy.entries) {
+    const clips = childEntries(children, target).filter(value => value.sourceName === 'ClippingShape');
+    const layers = [];
+    for (const clip of clips) {
+      const shape = localEntry(hierarchy.entries, clip, clip.fields.sourceId);
+      if (!shape || shape.sourceName !== 'Shape') continue;
+      const geometry = childEntries(children, shape).find(value => VECTOR_GEOMETRY_TYPES.has(value.sourceName));
+      if (!geometry) continue;
+      const path = vectorPath(geometry, childEntries(children, geometry));
+      if (!path) continue;
+      const id = `${target.objectId}::rive-clip-mask-${String(clip.componentIndex).padStart(4, '0')}`;
+      const transform = compact({
+        position: pair(shape.fields.x, shape.fields.y),
+        rotation: finite(shape.fields.rotation),
+        scale: pair(shape.fields.scaleX ?? 1, shape.fields.scaleY ?? 1),
+      });
+      nodes.push(compact({
+        id,
+        parent: hierarchy.parentNodeByObjectId.get(shape.objectId),
+        transform: Object.keys(transform).length > 0 ? transform : undefined,
+        components: [{
+          type: 'org.haiyue.vector-shape@1', ...path,
+          fill: { kind: 'solid', color: [1, 1, 1, 1], opacity: 1 }, fillRule: 'nonzero',
+        }],
+        extensions: { riveGeneratedClipMask: true },
+      }));
+      layers.push({ kind: 'mask', source: id, mode: 'alpha', operation: 'intersect' });
+    }
+    if (layers.length === 1) compositeByTarget.set(target.objectId, layers[0]);
+    else if (layers.length > 1) compositeByTarget.set(target.objectId, { layers });
+  }
+  const directComposites = new Map(compositeByTarget);
+  for (const [targetId, direct] of directComposites) {
+    const inherited = [];
+    let parentId = hierarchy.parentNodeByObjectId.get(targetId);
+    for (let depth = 0; parentId && depth < 128; depth++) {
+      const parent = directComposites.get(parentId);
+      if (parent) inherited.unshift(...('layers' in parent ? parent.layers : [parent]));
+      parentId = hierarchy.parentNodeByObjectId.get(parentId);
+    }
+    if (inherited.length > 0) {
+      const layers = [...inherited, ...('layers' in direct ? direct.layers : [direct])];
+      compositeByTarget.set(targetId, { layers });
+    }
+  }
+  return { nodes, compositeByTarget };
 }
 
 function localPaints(entry, entries, children) {
@@ -1410,20 +2314,43 @@ function localPaints(entry, entries, children) {
 
 const VECTOR_GEOMETRY_TYPES = new Set(['Rectangle', 'Ellipse', 'Triangle', 'Polygon', 'Star', 'PointsPath', 'ListPath']);
 
-function vectorPath(entry, owned) {
+export function vectorPath(entry, owned) {
   const f = entry.fields;
   const x = finite(f.x) ?? finite(f.originX) ?? 0; const y = finite(f.y) ?? finite(f.originY) ?? 0;
   const width = Math.max(0, finite(f.width) ?? 0); const height = Math.max(0, finite(f.height) ?? 0);
+  const applyTransform = path => transformVectorPath(path, x, y, finite(f.rotation) ?? 0, finite(f.scaleX) ?? 1, finite(f.scaleY) ?? 1);
   if (entry.sourceName === 'Rectangle') {
-    const left = x - width / 2; const top = y - height / 2; const right = left + width; const bottom = top + height;
-    return { commands: 'MLLLZ', values: [left, top, right, top, right, bottom, left, bottom] };
+    const left = -width / 2; const top = -height / 2; const right = left + width; const bottom = top + height;
+    const linked = f.linkCornerRadius !== false;
+    const topLeft = rectangleCorner(f.cornerRadiusTL, 0, width, height);
+    const topRight = rectangleCorner(f.cornerRadiusTR, linked ? topLeft : 0, width, height);
+    const bottomRight = rectangleCorner(f.cornerRadiusBR, linked ? topLeft : 0, width, height);
+    const bottomLeft = rectangleCorner(f.cornerRadiusBL, linked ? topLeft : 0, width, height);
+    if (topLeft + topRight + bottomRight + bottomLeft === 0) {
+      return applyTransform({ commands: 'MLLLZ', values: [left, top, right, top, right, bottom, left, bottom] });
+    }
+    const k = 0.5522847498307936;
+    return applyTransform({
+      commands: 'MLCLCLCLCZ',
+      values: [
+        left + topLeft, top,
+        right - topRight, top,
+        right - topRight + topRight * k, top, right, top + topRight - topRight * k, right, top + topRight,
+        right, bottom - bottomRight,
+        right, bottom - bottomRight + bottomRight * k, right - bottomRight + bottomRight * k, bottom, right - bottomRight, bottom,
+        left + bottomLeft, bottom,
+        left + bottomLeft - bottomLeft * k, bottom, left, bottom - bottomLeft + bottomLeft * k, left, bottom - bottomLeft,
+        left, top + topLeft,
+        left, top + topLeft - topLeft * k, left + topLeft - topLeft * k, top, left + topLeft, top,
+      ],
+    });
   }
   if (entry.sourceName === 'Ellipse') {
     const rx = width / 2; const ry = height / 2; const k = 0.5522847498307936;
-    return { commands: 'MCCCCZ', values: [x + rx, y, x + rx, y + k * ry, x + k * rx, y + ry, x, y + ry, x - k * rx, y + ry, x - rx, y + k * ry, x - rx, y, x - rx, y - k * ry, x - k * rx, y - ry, x, y - ry, x + k * rx, y - ry, x + rx, y - k * ry, x + rx, y] };
+    return applyTransform({ commands: 'MCCCCZ', values: [rx, 0, rx, k * ry, k * rx, ry, 0, ry, -k * rx, ry, -rx, k * ry, -rx, 0, -rx, -k * ry, -k * rx, -ry, 0, -ry, k * rx, -ry, rx, -k * ry, rx, 0] });
   }
   if (entry.sourceName === 'Triangle') {
-    return { commands: 'MLLZ', values: [x, y - height / 2, x + width / 2, y + height / 2, x - width / 2, y + height / 2] };
+    return applyTransform({ commands: 'MLLZ', values: [0, -height / 2, width / 2, height / 2, -width / 2, height / 2] });
   }
   if (entry.sourceName === 'Polygon' || entry.sourceName === 'Star') {
     const points = Math.max(3, Math.min(256, Math.floor(f.points ?? 5))); const values = [];
@@ -1431,13 +2358,28 @@ function vectorPath(entry, owned) {
     const count = entry.sourceName === 'Star' ? points * 2 : points;
     for (let index = 0; index < count; index++) {
       const angle = -Math.PI / 2 + index * Math.PI * 2 / count; const radius = Math.min(width, height) / 2 * (index % 2 === 1 ? inner : 1);
-      values.push(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius);
+      values.push(Math.cos(angle) * radius, Math.sin(angle) * radius);
     }
-    return { commands: `M${'L'.repeat(count - 1)}Z`, values };
+    return applyTransform({ commands: `M${'L'.repeat(count - 1)}Z`, values });
   }
   const vertices = owned.filter(value => /Vertex$/u.test(value.sourceName));
   if (vertices.length < 2) return null;
-  return vertexPath(vertices, f.isClosed !== false);
+  return applyTransform(vertexPath(vertices, f.isClosed !== false));
+}
+
+function transformVectorPath(path, x, y, rotation, scaleX, scaleY) {
+  const cosine = Math.cos(rotation); const sine = Math.sin(rotation);
+  const a = cosine * scaleX; const b = sine * scaleX; const c = -sine * scaleY; const d = cosine * scaleY;
+  const values = [];
+  for (let index = 0; index < path.values.length; index += 2) {
+    const px = path.values[index]; const py = path.values[index + 1];
+    values.push(a * px + c * py + x, b * px + d * py + y);
+  }
+  return { ...path, values };
+}
+
+function rectangleCorner(value, fallback, width, height) {
+  return Math.min(width / 2, height / 2, Math.max(0, finite(value) ?? fallback));
 }
 
 export function vertexPath(vertices, closed) {
@@ -1486,17 +2428,42 @@ function handle(x, y, rotation, distance) {
   return [x + Math.cos(rotation) * distance, y + Math.sin(rotation) * distance];
 }
 
-function vectorPaint(entry, owned, children) {
+export function vectorPaint(entry, owned, children, ownerSourceName = 'Shape') {
   if (entry.fields.isVisible === false) return null;
   const sourceEntry = owned.find(value => ['SolidColor', 'LinearGradient', 'RadialGradient'].includes(value.sourceName));
   const source = paintSource(sourceEntry, sourceEntry ? childEntries(children, sourceEntry) : []);
   if (source.kind === 'solid' && source.color[3] <= 0) return null;
-  if (entry.sourceName === 'Fill') return { fill: { ...source, opacity: 1 }, fillRule: entry.fields.fillRule === 1 ? 'evenodd' : 'nonzero' };
+  if (entry.sourceName === 'Fill') {
+    const feather = owned.find(value => value.sourceName === 'Feather' && value.fields.inner === true);
+    if (feather && source.kind === 'solid') {
+      const strength = finite(feather.fields.strength) ?? 1;
+      const stroke = {
+        color: source.color,
+        width: Math.max(1, Math.min(12, strength / 3)),
+        lineCap: 'round', lineJoin: 'round', miterLimit: 4,
+      };
+      if (ownerSourceName === 'Shape') {
+        const rgb = source.color.slice(0, 3);
+        const neutralHighlight = Math.max(...rgb) > 0.8 && Math.max(...rgb) - Math.min(...rgb) < 0.08;
+        const fillOpacity = Math.min(0.22, 0.04 + strength / 48) * (neutralHighlight ? 0.3 : 1);
+        return {
+          fill: { ...source, opacity: fillOpacity },
+          fillRule: entry.fields.fillRule === 1 ? 'evenodd' : 'nonzero',
+          stroke,
+        };
+      }
+      return {
+        stroke,
+      };
+    }
+    return { fill: { ...source, opacity: 1 }, fillRule: entry.fields.fillRule === 1 ? 'evenodd' : 'nonzero' };
+  }
   return {
     stroke: {
       color: source.kind === 'solid' ? source.color : [1, 1, 1, 1],
       ...(source.kind === 'solid' ? {} : { gradient: source }),
-      width: Math.max(0.001, finite(entry.fields.thickness) ?? 1),
+      // Rive hairline strokes remain one device pixel after view scaling.
+      width: Math.max(1, finite(entry.fields.thickness) ?? 1),
       lineCap: ['butt', 'round', 'square'][entry.fields.cap ?? 0] ?? 'butt',
       lineJoin: ['miter', 'round', 'bevel'][entry.fields.join ?? 0] ?? 'miter',
       miterLimit: 4,
@@ -1504,10 +2471,17 @@ function vectorPaint(entry, owned, children) {
   };
 }
 
-function paintSource(entry, owned) {
+export function paintSource(entry, owned) {
   if (!entry || entry.sourceName === 'SolidColor') return { kind: 'solid', color: color(entry?.fields.colorValue, RIVE_DEFAULT_PAINT_COLOR) };
+  const opacity = Math.max(0, Math.min(1, finite(entry.fields.opacity) ?? 1));
   const stops = owned.filter(value => value.sourceName === 'GradientStop')
-    .map(value => ({ offset: Math.max(0, Math.min(1, finite(value.fields.position) ?? 0)), color: color(value.fields.colorValue, RIVE_DEFAULT_PAINT_COLOR) }))
+    .map(value => {
+      const stopColor = color(value.fields.colorValue, RIVE_DEFAULT_PAINT_COLOR);
+      return {
+        offset: Math.max(0, Math.min(1, finite(value.fields.position) ?? 0)),
+        color: [stopColor[0], stopColor[1], stopColor[2], stopColor[3] * opacity],
+      };
+    })
     .sort((left, right) => left.offset - right.offset);
   const normalizedStops = (stops.length >= 2 ? stops : [{ offset: 0, color: [0, 0, 0, 1] }, { offset: 1, color: [1, 1, 1, 1] }]).flatMap(stop => [stop.offset, ...stop.color]);
   if (entry.sourceName === 'RadialGradient') return { kind: 'radial-gradient', start: [finite(entry.fields.startX) ?? 0, finite(entry.fields.startY) ?? 0], end: [finite(entry.fields.endX) ?? 1, finite(entry.fields.endY) ?? 0], stops: normalizedStops };

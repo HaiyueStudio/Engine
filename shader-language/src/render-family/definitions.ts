@@ -12,6 +12,7 @@ import canvasText2d from './stdlib/2d-ui/canvas-text-2d.wgsl';
 import guiImage from './stdlib/2d-ui/gui-image.wgsl';
 import guiShape from './stdlib/2d-ui/gui-shape.wgsl';
 import guiText from './stdlib/2d-ui/gui-text.wgsl';
+import indexedSprite from './stdlib/2d-ui/indexed-sprite.wgsl';
 import mesh2d from './stdlib/2d-ui/mesh2d.wgsl';
 import particle2d from './stdlib/2d-ui/particle2d.wgsl';
 import radialShadow from './stdlib/2d-ui/radial-shadow.wgsl';
@@ -174,6 +175,16 @@ function definitions(): Readonly<Record<BuiltinRenderOperation, RenderDefinition
       group('frame', 0, [uniform('frame.viewport', 0, VERTEX, 16)]),
       group('material', 1, [texture('material.fontTexture', 0), sampler('material.fontSampler', 1)]),
     ], [viewportBlock()], [guiBuffer()], guiVaryings(true), ['texture-sample', 'discard'], ['screen-space-clip']),
+    'indexed-sprite': definition(indexedSprite, [
+      group('frame', 0, [uniform('frame.viewport', 0, VERTEX, 16), storage('frame.instances', 1, VERTEX)]),
+      group('material', 1, [
+        uintTexture('material.indexAtlas', 0), texture('material.colorAtlas', 1),
+        texture('material.paletteBank', 2), sampler('material.colorSampler', 3),
+      ]),
+    ], [viewportBlock()], [], [
+      varying('TEXCOORD_0', 0, 'vec2<f32>'), flatVarying('UV_RECT', 1, 'vec4<f32>'),
+      flatVarying('SPRITE_META', 2, 'vec4<u32>'), flatVarying('COLOR_0', 3, 'vec4<f32>'),
+    ], ['storage-buffer', 'texture-load', 'texture-sample', 'instancing'], ['indexed-palette-bank', 'truecolor-atlas', 'alpha-blend']),
     mesh2d: definition(mesh2d, [
       group('frame', 0, [camera()]),
       group('object', 1, [storage('object.table', 0, VERTEX)]),
@@ -344,6 +355,13 @@ function storage(id: string, binding: number, visibility: readonly ShaderStage[]
 
 function texture(id: string, binding: number): PrecompiledShaderBindingV2 {
   return Object.freeze({ id, binding, visibility: FRAGMENT, layout: FLOAT_TEXTURE });
+}
+
+function uintTexture(id: string, binding: number): PrecompiledShaderBindingV2 {
+  return Object.freeze({
+    id, binding, visibility: FRAGMENT,
+    layout: Object.freeze({ kind: 'texture' as const, sampleType: 'uint' as const, viewDimension: '2d' as const, multisampled: false }),
+  });
 }
 
 function sampler(id: string, binding: number): PrecompiledShaderBindingV2 {

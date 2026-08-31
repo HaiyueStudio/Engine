@@ -28,4 +28,22 @@ engine.installPlugin(createGltfPlugin());
 
 The package root remains a minimal experimental authoring base. Worker transport and low-level parsing are explicitly available from `@haiyue/extensions/experimental/gltf-worker` and `@haiyue/extensions/experimental/spine-worker`; they may change without stable-API compatibility guarantees.
 
+The source-neutral indexed-sprite renderer is available from `@haiyue/extensions/experimental/indexed-sprite`. It stores index planes and palette rows separately, so changing a palette does not duplicate sprite pixels. It also accepts RGB/RGBA planes, batches atlas pages, supports nearest or palette-aware linear filtering, and owns bounded upload/recovery/disposal:
+
+```ts
+import { IndexedSpriteRenderer } from '@haiyue/extensions/experimental/indexed-sprite';
+
+const renderer = new IndexedSpriteRenderer(device, [{
+  id: 'idle-0', width: 2, height: 2, format: 'indexed8',
+  pixels: new Uint8Array([0, 1, 1, 0]),
+}], [{
+  id: 'default', colorCount: 2,
+  rgba: new Uint8Array([0, 0, 0, 0, 255, 255, 255, 255]),
+}], { targetFormat: navigator.gpu.getPreferredCanvasFormat() });
+
+renderer.uploadAll();
+renderer.render(pass, [{ spriteId: 'idle-0', paletteId: 'default', x: 320, y: 180 }], 1280, 720);
+renderer.dispose();
+```
+
 WebGPU is required by the runtime; there is no WebGL fallback.

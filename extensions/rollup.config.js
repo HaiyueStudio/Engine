@@ -21,6 +21,7 @@ export default {
     'gltf-animation3d': 'src/gltf-animation3d.ts',
     'experimental-gltf-worker': 'src/experimental-gltf-worker.ts',
     'experimental-spine-worker': 'src/experimental-spine-worker.ts',
+    'experimental-indexed-sprite': 'src/experimental-indexed-sprite.ts',
     'ray-tracing': 'src/ray-tracing.ts',
     benchmark: 'src/benchmark.ts',
     'internal/2d-ui-shader-artifact': 'src/shaders/generated/2d-ui-artifact.generated.ts',

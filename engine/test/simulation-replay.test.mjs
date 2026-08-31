@@ -49,8 +49,25 @@ test('fixed clock pause, exact step and retained backlog never use wall-clock ti
   const first = clock.advance(100, step => ticks.push(step.tick));
   assert.equal(first.ticks, 2);
   assert.ok(first.backlogTicks >= 3);
+  assert.equal(first.renderAlpha, 1);
+  assert.equal(first.droppedMs, 0);
   clock.advance(0, step => ticks.push(step.tick));
   assert.deepEqual(ticks, [1, 2, 3, 4]);
+});
+
+test('fixed clock bounds a pathological stall and reports discarded wall time without changing tick time', () => {
+  const clock = new FixedStepClock({ tickRateHz: 60, maxSubSteps: 3, maxBacklogTicks: 6 });
+  const ticks = [];
+  const stalled = clock.advance(10_000, step => ticks.push(step));
+  assert.equal(stalled.ticks, 3);
+  assert.equal(stalled.backlogTicks, 6);
+  assert.equal(stalled.renderAlpha, 1);
+  assert.ok(stalled.droppedMs > 9_000);
+  assert.equal(stalled.totalDroppedMs, stalled.droppedMs);
+  assert.deepEqual(ticks.map(step => step.tick), [1, 2, 3]);
+  assert.deepEqual(ticks.map(step => step.timeMs), ticks.map(step => step.tick * (1_000 / 60)));
+  clock.reset();
+  assert.equal(clock.totalDroppedMs, 0);
 });
 
 test('blur, disconnect, stop and restart clear held action and pointer input idempotently', () => {

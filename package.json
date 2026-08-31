@@ -120,6 +120,7 @@
     "ray-tracing:g10:review:check": "node scripts/visual-regression/validate-ray-g10-review.mjs",
     "ray-tracing:product-artifact:check": "node scripts/benchmark/validate-ray-product-candidate-artifact.mjs",
     "ray-tracing:orbit-example:check": "node scripts/webgpu-gate/verify-ray-tracing-orbit-example.mjs",
+    "mugen-indexed-sprite:check": "npm run build -w ./extensions && node scripts/webgpu-gate/verify-indexed-sprite.mjs",
     "pack:candidates": "node scripts/pack-repository-candidates.mjs",
     "rive:g11:host-config": "node scripts/hya-corpus/rive-create-production-host-config.mjs",
     "rive:g11:host-preflight": "node scripts/hya-corpus/rive-production-host-preflight.mjs",

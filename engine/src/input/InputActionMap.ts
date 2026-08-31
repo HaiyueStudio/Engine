@@ -64,6 +64,19 @@ export class InputActionMap {
     return Object.freeze([...this._bindings].filter(([, binding]) => binding.pointerButtons?.includes(button)).map(([action]) => action));
   }
 
+  actionNames(): readonly string[] {
+    return Object.freeze([...this._bindings.keys()].sort());
+  }
+
+  sampleKeyboard(codes: Iterable<string>): readonly InputActionValue[] {
+    const held = codes instanceof Set ? codes : new Set(codes);
+    const values: InputActionValue[] = [];
+    for (const [action, binding] of this._bindings) {
+      if (binding.keys?.some(code => held.has(code))) values.push(Object.freeze({ action, value: 1 }));
+    }
+    return Object.freeze(values);
+  }
+
   sampleGamepad(gamepad: StandardGamepadSnapshot | null): readonly InputActionValue[] {
     if (!gamepad?.connected) return Object.freeze([]);
     const values: InputActionValue[] = [];

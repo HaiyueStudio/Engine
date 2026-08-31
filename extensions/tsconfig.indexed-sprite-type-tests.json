@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "typeRoots": [
+      "../node_modules",
+      "../node_modules/@types"
+    ],
+    "types": ["@webgpu/types"]
+  },
+  "include": [
+    "src/types/wgsl.d.ts",
+    "src/indexed-sprite/**/*.ts",
+    "src/experimental-indexed-sprite.ts",
+    "type-tests/indexed-sprite-contract.type-test.ts"
+  ]
+}

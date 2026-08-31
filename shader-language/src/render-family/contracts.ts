@@ -11,6 +11,7 @@ export const BUILTIN_RENDER_OPERATIONS = {
     'gui-image',
     'gui-shape',
     'gui-text',
+    'indexed-sprite',
     'mesh2d',
     'particle2d',
     'radial-shadow',

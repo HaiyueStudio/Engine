@@ -144,6 +144,7 @@
           "entrypoints": {
             ".": 2,
             "./experimental/gltf-worker": 11,
+            "./experimental/indexed-sprite": 15,
             "./experimental/spine-worker": 9
           }
         },

@@ -3,7 +3,6 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { buildRiveConversionRuntime } from './hya-corpus/rive-build-conversion-runtime.mjs';
-import { evaluate as evaluateProductionCapabilities } from './hya-corpus/rive-production-capability-provider.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const manifestPath = resolve(root, 'animation-spec/corpus/rive/rive-g11-corpus-manifest.json');
@@ -12,6 +11,8 @@ const routePrefix = '/api/rive-hya-compare/convert/';
 const maximumRequestBytes = 64 * 1024 * 1024;
 let runtimePromise;
 let manifestPromise;
+let providerModulePromise;
+let loadedProviderRevision;
 
 export async function convertOfficialRiveExample(assetId, input, signal = new AbortController().signal) {
   if (!(input instanceof Uint8Array)) throw new TypeError('Rive example conversion input must be Uint8Array.');
@@ -23,7 +24,9 @@ export async function convertOfficialRiveExample(assetId, input, signal = new Ab
   }
   const scenario = JSON.parse(await readFile(resolve(root, asset.workloadScenario.path), 'utf8'));
   const conversion = await loadConversionRuntime();
-  const providerRevision = sha256(await readFile(providerPath));
+  const providerBytes = await readFile(providerPath);
+  const providerRevision = sha256(providerBytes);
+  const evaluateProductionCapabilities = await loadCapabilityProvider(providerRevision);
   const descriptor = Object.freeze({
     adapterId: 'haiyue-rive-example-production-evaluator',
     adapterRevisionSha256: providerRevision,
@@ -130,6 +133,18 @@ async function loadManifest() {
 async function loadConversionRuntime() {
   runtimePromise ??= buildRiveConversionRuntime().then(path => import(`${pathToFileURL(path).href}?example-converter=1`));
   return runtimePromise;
+}
+
+async function loadCapabilityProvider(providerRevision) {
+  if (loadedProviderRevision !== providerRevision || !providerModulePromise) {
+    loadedProviderRevision = providerRevision;
+    providerModulePromise = import(`${pathToFileURL(providerPath).href}?revision=${providerRevision}`)
+      .then(module => {
+        if (typeof module.evaluate !== 'function') throw new TypeError('Rive production capability provider must export evaluate().');
+        return module.evaluate;
+      });
+  }
+  return providerModulePromise;
 }
 
 function readBoundedRequest(request, maximumBytes) {

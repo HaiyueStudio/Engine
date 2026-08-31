@@ -638,13 +638,13 @@ test('animated composite expansion samples into runtime-owned layer data', () =>
   assert.equal(visual.compositeLayers[0].expansion, 2);
 });
 
-test('sprite loader uses the shared asset manager and releases its retained handle', async () => {
+test('sprite loader preserves encoded 2D color on the unorm presentation path and releases its retained handle', async () => {
   let released = 0;
   const texture = {};
   const assetManager = {
     async loadTexture(uri, options) {
       assert.equal(uri, '/sprite.png');
-      assert.equal(options.format, 'rgba8unorm-srgb');
+      assert.equal(options.format, 'rgba8unorm');
       return { key: uri, value: texture, release: () => { released++; } };
     },
   };

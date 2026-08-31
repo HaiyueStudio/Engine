@@ -433,7 +433,11 @@ export class Animation2DRuntime {
     try {
       request = this._assetManager.loadTexture(resource.uri, {
         label: `Animation2D:${resource.id}`,
-        format: resource.colorSpace === 'linear' ? 'rgba8unorm' : 'rgba8unorm-srgb',
+        // Animation2D composites encoded RGB values directly into the browser's
+        // unorm presentation surface, matching Canvas2D and the official Rive
+        // WebGL renderer. An -srgb texture view would linearize samples in
+        // hardware and make ordinary WebP/PNG sprites substantially too dark.
+        format: 'rgba8unorm',
         cacheKey: resource.integrity ?? resource.uri,
         signal: this._abortController.signal,
       });
