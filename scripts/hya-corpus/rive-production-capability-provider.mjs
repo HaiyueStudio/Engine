@@ -2113,10 +2113,12 @@ export function compileVectorComponents(hierarchy) {
     const owned = childEntries(children, shape);
     const geometries = owned.filter(value => VECTOR_GEOMETRY_TYPES.has(value.sourceName));
     const paints = owned.filter(value => value.sourceName === 'Fill' || value.sourceName === 'Stroke');
+    const paths = geometries
+      .map(geometry => vectorPath(geometry, childEntries(children, geometry)))
+      .filter(Boolean);
+    const path = compoundVectorPath(paths);
     const components = [];
-    for (const geometry of geometries) {
-      const path = vectorPath(geometry, childEntries(children, geometry));
-      if (!path) continue;
+    if (path) {
       for (const paint of paints) {
         const style = vectorPaint(paint, childEntries(children, paint), children, shape.sourceName);
         if (!style) continue;
@@ -2156,6 +2158,18 @@ export function compileVectorComponents(hierarchy) {
     if (components.length > 0) output.set(layout.objectId, [...(output.get(layout.objectId) ?? []), ...components]);
   }
   return output;
+}
+
+export function compoundVectorPath(paths) {
+  if (paths.length === 0) return null;
+  // A Rive Shape owns one or more paths and applies each ShapePaint to their
+  // combined topology. Keeping them as one HYA path is essential for nonzero
+  // winding: inner contours such as an alert icon's stem and dot then cut out
+  // of the enclosing triangle instead of being painted over in the same color.
+  return {
+    commands: paths.map(path => path.commands).join(''),
+    values: paths.flatMap(path => path.values),
+  };
 }
 
 export function lowerLayoutBackdropEffects(hierarchy, vectorComponents, objects, visits) {

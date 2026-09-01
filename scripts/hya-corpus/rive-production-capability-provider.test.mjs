@@ -14,6 +14,7 @@ import {
   compileImageClipMasks,
   compileImageComponents,
   compileVectorComponents,
+  compoundVectorPath,
   compileTextComponents,
   compileComponentListInteractionDocument,
   defaultViewModelRuntime,
@@ -898,6 +899,31 @@ test('Rive cubic vertices retain incoming and outgoing handles in HYA path comma
   ], false);
   assert.equal(path.commands, 'MC');
   assert.deepEqual(path.values.map(value => Math.round(value)), [0, 0, 10, 0, 80, 0, 100, 0]);
+});
+
+test('Rive shape paths remain one compound path so nonzero inner contours become holes', () => {
+  const scopeKey = 'compound';
+  const entries = [
+    { objectId: 'shape', componentIndex: 1, scopeKey, sourceName: 'Shape', fields: { parentId: 0 } },
+    { objectId: 'outer', componentIndex: 2, scopeKey, sourceName: 'PointsPath', fields: { parentId: 1, isClosed: true } },
+    { objectId: 'outer-a', componentIndex: 3, scopeKey, sourceName: 'StraightVertex', fields: { parentId: 2, x: 0, y: 0 } },
+    { objectId: 'outer-b', componentIndex: 4, scopeKey, sourceName: 'StraightVertex', fields: { parentId: 2, x: 40, y: 80 } },
+    { objectId: 'outer-c', componentIndex: 5, scopeKey, sourceName: 'StraightVertex', fields: { parentId: 2, x: -40, y: 80 } },
+    { objectId: 'stem', componentIndex: 6, scopeKey, sourceName: 'PointsPath', fields: { parentId: 1, isClosed: true } },
+    { objectId: 'stem-a', componentIndex: 7, scopeKey, sourceName: 'StraightVertex', fields: { parentId: 6, x: -3, y: 20 } },
+    { objectId: 'stem-b', componentIndex: 8, scopeKey, sourceName: 'StraightVertex', fields: { parentId: 6, x: -3, y: 55 } },
+    { objectId: 'stem-c', componentIndex: 9, scopeKey, sourceName: 'StraightVertex', fields: { parentId: 6, x: 3, y: 55 } },
+    { objectId: 'stem-d', componentIndex: 10, scopeKey, sourceName: 'StraightVertex', fields: { parentId: 6, x: 3, y: 20 } },
+    { objectId: 'fill', componentIndex: 11, scopeKey, sourceName: 'Fill', fields: { parentId: 1 } },
+    { objectId: 'color', componentIndex: 12, scopeKey, sourceName: 'SolidColor', fields: { parentId: 11, colorValue: [0, 0, 0, 1] } },
+  ];
+
+  const components = compileVectorComponents({ entries }).get('shape');
+
+  assert.equal(components.length, 1);
+  assert.equal([...components[0].commands].filter(command => command === 'M').length, 2);
+  assert.equal(components[0].fillRule, 'nonzero');
+  assert.deepEqual(compoundVectorPath([]), null);
 });
 
 test('vector geometry retains its authored local translation, rotation and scale', () => {
