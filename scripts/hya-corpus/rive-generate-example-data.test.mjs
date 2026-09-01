@@ -24,4 +24,11 @@ test('Rive example data is a deterministic projection of the frozen census and f
   assert.equal(actualSamples.samples.length, 8);
   assert.equal(new Set(actualCorpus.records.map(value => `${value.kind}:${value.key}`)).size, actualCorpus.recordCount);
   assert.deepEqual(new Set(actualCorpus.records.map(value => value.hyaStatus)), new Set(['full', 'partial', 'missing']));
+  for (const name of ['NestedArtboard', 'NestedArtboardLeaf', 'NestedArtboardLayout', 'StateMachineListenerSingle', 'ListenerBoolChange']) {
+    assert.equal(actualCorpus.records.find(value => value.kind === 'object' && value.name === name)?.hyaStatus, 'partial');
+  }
+  assert.deepEqual(actualSamples.samples.find(value => value.id === 'official-eight-planets-grid')?.featureFamilies, [
+    'data-interaction-accessibility', 'import-neutral-ir', 'rig-mesh-constraint',
+    'text-layout-component-asset', 'timeline-state-machine', 'vector-paint-composite',
+  ]);
 });

@@ -17,6 +17,7 @@ const HYA_FORMAT_EXTENSIONS = [
   'org.haiyue.interaction@1',
 ] as const;
 const RIVE_COMPONENT_LIST_PROTOCOL = 'org.haiyue.rive-component-list@1';
+const RIVE_STATE_MACHINE_HOVER_PROTOCOL = 'org.haiyue.rive-state-machine-hover@1';
 
 interface Sample {
   id: string; title: string; sourceUrl: string; sha256: string; byteLength: number;
@@ -34,6 +35,9 @@ interface RiveListActionArguments {
   baseX: number; baseY: number; collapsedHeight: number; openHeight: number; expandedHeight: number;
   hoverAudio?: string; hoverGain?: number; clickAudio?: string; clickGain?: number;
   openAudio?: string; openGain?: number; closeAudio?: string; closeGain?: number; active?: boolean;
+}
+interface RiveStateMachineHoverArguments {
+  idleNode: string; hoverNode: string; active: boolean;
 }
 interface OfficialRiveInstance {
   cleanup(): void; play(): void; pause(): void;
@@ -93,6 +97,7 @@ async function main(): Promise<void> {
   const listRows = new Map<number, { descriptor: RiveListActionArguments; hover: boolean; open: boolean; expanded: boolean }>();
   const listTargetRows = new Map<string, number>();
   const interactionTargetShift = new Map<string, number>();
+  const stateMachineHoverStates = new Map<string, RiveStateMachineHoverArguments>();
   let playing = true;
   let generation = 0;
 
@@ -149,8 +154,10 @@ async function main(): Promise<void> {
   const resetHyaInteraction = (): void => {
     hyaInteraction?.dispose(); hyaInteraction = null;
     listRows.clear(); listTargetRows.clear(); interactionTargetShift.clear(); hyaAudioResources.clear(); hyaAudioGains.clear(); hyaAudioBuffers.clear();
+    stateMachineHoverStates.clear();
     delete hyaCanvas.dataset.interactionState;
     delete hyaCanvas.dataset.lastAudioEvent;
+    delete hyaCanvas.dataset.stateMachineHover;
   };
 
   const setupHyaInteraction = (animation: ParsedAnimation): void => {
@@ -169,6 +176,8 @@ async function main(): Promise<void> {
           if (!listRows.has(descriptor.row)) listRows.set(descriptor.row, { descriptor, hover: false, open: false, expanded: false });
           listTargetRows.set(listener.target, descriptor.row);
         }
+        const hover = riveStateMachineHoverArguments(action);
+        if (hover) stateMachineHoverStates.set(hover.idleNode, { ...hover, active: false });
       }
     }
     const listTargetRects = new Map<string, readonly [number, number, number, number]>();
@@ -202,6 +211,17 @@ async function main(): Promise<void> {
           if (action.kind === 'audio' && action.operation === 'play' && typeof action.target === 'string') {
             playHyaAudio(action.target); return;
           }
+          const hover = riveStateMachineHoverArguments(action);
+          if (hover) {
+            const state = stateMachineHoverStates.get(hover.idleNode) ?? hover;
+            state.active = hover.active;
+            stateMachineHoverStates.set(hover.idleNode, state);
+            hyaPlayer?.setNodeOverride(hover.idleNode, { opacity: hover.active ? 0 : 1 });
+            hyaPlayer?.setNodeOverride(hover.hoverNode, { opacity: hover.active ? 1 : 0 });
+            if (hover.active) { hyaPlayer?.seek(0); if (playing) hyaPlayer?.play(); }
+            hyaCanvas.dataset.stateMachineHover = hover.active ? 'active' : 'idle';
+            return;
+          }
           const descriptor = riveListActionArguments(action); if (!descriptor) return;
           const state = listRows.get(descriptor.row); if (!state) return;
           if (action.port === 'set-hover') state.hover = descriptor.active === true;
@@ -226,6 +246,10 @@ async function main(): Promise<void> {
       },
     });
     applyListRows();
+    for (const state of stateMachineHoverStates.values()) {
+      hyaPlayer?.setNodeOverride(state.idleNode, { opacity: 1 });
+      hyaPlayer?.setNodeOverride(state.hoverNode, { opacity: 0 });
+    }
 
     function registerAudioGain(resourceId: string | undefined, gain: number | undefined): void {
       if (resourceId && Number.isFinite(gain)) hyaAudioGains.set(resourceId, gain!);
@@ -377,6 +401,11 @@ async function main(): Promise<void> {
     hyaPlayer?.seek(0); if (playing) hyaPlayer?.play();
     for (const state of listRows.values()) { state.hover = false; state.open = false; }
     applyListRows();
+    for (const state of stateMachineHoverStates.values()) {
+      state.active = false;
+      hyaPlayer?.setNodeOverride(state.idleNode, { opacity: 1 });
+      hyaPlayer?.setNodeOverride(state.hoverNode, { opacity: 0 });
+    }
   });
   query<HTMLInputElement>('#hya-files').addEventListener('change', event => {
     const files = [...(event.currentTarget as HTMLInputElement).files ?? []];
@@ -475,6 +504,16 @@ function riveListActionArguments(action: RuntimeInteractionAction): RiveListActi
   const openHeight = typeof value.openHeight === 'number' && Number.isFinite(value.openHeight)
     ? value.openHeight : value.collapsedHeight;
   return { ...value, expandedNode, expandedHoverNode, openHeight } as unknown as RiveListActionArguments;
+}
+
+function riveStateMachineHoverArguments(action: RuntimeInteractionAction): RiveStateMachineHoverArguments | null {
+  if (action.kind !== 'custom' || action.protocol !== RIVE_STATE_MACHINE_HOVER_PROTOCOL
+    || !action.arguments || typeof action.arguments !== 'object') return null;
+  const value = action.arguments as Record<string, unknown>;
+  if (typeof value.idleNode !== 'string' || value.idleNode.length === 0
+    || typeof value.hoverNode !== 'string' || value.hoverNode.length === 0
+    || typeof value.active !== 'boolean') return null;
+  return value as unknown as RiveStateMachineHoverArguments;
 }
 
 async function materializePackageResources(

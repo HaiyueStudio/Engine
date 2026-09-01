@@ -35,6 +35,7 @@
     250000,
     375000,
     500000,
+    562500,
     625000,
     750000,
     875000,
@@ -119,6 +120,25 @@
       },
       "expectedChannels": [
         "dataValues"
+      ]
+    },
+    {
+      "id": "action-pointer-enter",
+      "kind": "pointer",
+      "atMicros": 562500,
+      "payload": {
+        "phase": "move",
+        "x": 395.5,
+        "y": 400,
+        "pointerId": 1,
+        "buttons": 0
+      },
+      "expectedChannels": [
+        "pixels",
+        "geometryAndDrawOrder",
+        "stateMachineState",
+        "events",
+        "pointerKeyboardGamepadFocus"
       ]
     },
     {

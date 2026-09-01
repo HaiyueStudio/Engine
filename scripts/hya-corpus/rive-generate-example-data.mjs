@@ -61,7 +61,10 @@ export function buildRiveCompareManifest(corpusManifest, workloadByPath) {
         sha256: asset.riv.sha256,
         byteLength: asset.riv.byteLength,
         selection: workload.selection,
-        featureFamilies: [...new Set(asset.evidenceRoles.map(value => value.featureFamily).filter(Boolean))].sort(),
+        featureFamilies: [...new Set([
+          ...(asset.featureFamilies ?? []),
+          ...asset.evidenceRoles.map(value => value.featureFamily).filter(Boolean),
+        ])].sort(),
         evidenceRoles: asset.evidenceRoles.map(value => value.id),
       };
     }),

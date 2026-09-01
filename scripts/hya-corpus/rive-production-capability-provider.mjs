@@ -27,6 +27,7 @@ export async function evaluate(request, context) {
     ir.artboards,
     artboard.object.id,
     request.selection?.animation,
+    request.selection?.stateMachine,
   );
   applySimpleLayoutTransforms(hierarchy);
   applyDossierSummaryLayout(hierarchy);
@@ -640,6 +641,9 @@ async function compileCoreTimeline(hierarchy, report, objects) {
   const modulePath = resolve(root, 'animation-spec/dist-test/rive/import/generated/frozen-registry.js');
   const { FROZEN_PROPERTIES } = await import(pathToFileURL(modulePath).href);
   const propertyNames = new Map(FROZEN_PROPERTIES.map(value => [value.key, value.name]));
+  if (hierarchy.animationScopes?.length > 0) {
+    return compileScopedAnimationTimeline(hierarchy, report, objects, propertyNames);
+  }
   const componentByIndex = new Map(hierarchy.entries.filter(value => value.instanceDepth === 0).map(value => [value.componentIndex, value]));
   const records = selectedArtboardVisits(report, hierarchy.artboardObjectId).map(visit => ({
     visit,
@@ -724,6 +728,106 @@ async function compileCoreTimeline(hierarchy, report, objects) {
     duration: Math.max(2, cursor || 2), clips, tracks: [...tracksByBinding.values()],
     stateMachines: compilePausedStateMachineEntries(records, animations),
   };
+}
+
+function compileScopedAnimationTimeline(hierarchy, report, objects, propertyNames) {
+  const duration = 6;
+  const tracksByBinding = new Map(); const clips = [];
+  for (const scope of hierarchy.animationScopes) {
+    const records = selectedArtboardVisits(report, scope.artboardObjectId).map(visit => ({
+      visit, fields: namedFields(objects.get(visit.neutralObjectId), visit),
+    }));
+    const animations = parseTimelineAnimations(records, scope.nodeByComponentIndex, propertyNames);
+    const byName = new Map(animations.map(value => [value.name, value]));
+    for (const name of scope.parallel) {
+      const animation = byName.get(name); if (!animation) continue;
+      clips.push({ name: `${name} · ${scope.artboardObjectId}`, start: 0, duration: animation.duration });
+      appendRepeated(animation, 0, duration);
+    }
+    let cursor = 0;
+    for (let index = 0; index < scope.sequence.length; index++) {
+      const animation = byName.get(scope.sequence[index]); if (!animation) continue;
+      clips.push({ name: `${animation.name} · ${scope.artboardObjectId}`, start: cursor, duration: animation.duration });
+      if (index === scope.sequence.length - 1) appendRepeated(animation, cursor, duration);
+      else { appendAnimation(animation, cursor, Math.min(duration, cursor + animation.duration)); cursor += animation.duration; }
+    }
+  }
+  for (const track of tracksByBinding.values()) {
+    const size = track.property === 'position' || track.property === 'scale' ? 2 : 1;
+    const pairs = track.times.map((time, index) => ({ time, value: track.values.slice(index * size, index * size + size) }))
+      .sort((left, right) => left.time - right.time);
+    track.times = []; track.values = [];
+    for (const pair of pairs) {
+      if (track.times.length > 0 && Math.abs(track.times.at(-1) - pair.time) <= 1e-8) {
+        track.values.splice(track.values.length - size, size, ...pair.value);
+      } else { track.times.push(pair.time); track.values.push(...pair.value); }
+    }
+  }
+  return { duration, clips, tracks: [...tracksByBinding.values()], stateMachines: [] };
+
+  function appendRepeated(animation, start, end) {
+    const cycle = Math.max(1 / animation.fps, animation.duration);
+    for (let at = start; at < end - 1e-8; at += cycle) appendAnimation(animation, at, Math.min(end, at + cycle));
+  }
+  function appendAnimation(animation, start, end) {
+    for (const group of timelineAnimationGroups(animation)) {
+      const times = [...new Set([...group.curves.values()].flatMap(curve => curve.keys.map(key => key.time)))].sort((a, b) => a - b);
+      if (times.length === 0) continue;
+      if (times[0] > 0) times.unshift(0);
+      if (times.at(-1) < animation.duration) times.push(animation.duration);
+      const clippedTimes = times.filter(time => start + time <= end + 1e-8);
+      if (clippedTimes.length === 0 || start + clippedTimes.at(-1) < end - 1e-8) clippedTimes.push(end - start);
+      const binding = `${group.target.objectId}\0${group.property}`;
+      const track = tracksByBinding.get(binding) ?? {
+        node: group.target.objectId, property: group.property, interpolation: 'linear', times: [], values: [],
+      };
+      tracksByBinding.set(binding, track);
+      for (const time of clippedTimes) {
+        track.times.push(Math.max(0, Math.min(duration, start + time)));
+        track.values.push(...coreTrackValue(group, Math.min(animation.duration, time)));
+      }
+    }
+  }
+}
+
+function parseTimelineAnimations(records, componentByIndex, propertyNames) {
+  const animations = []; let animation = null; let target = null; let property = null;
+  for (const record of records) {
+    const source = record.visit.sourceName;
+    if (source === 'LinearAnimation') {
+      animation = {
+        name: string(record.fields.name) ?? `animation-${animations.length}`,
+        fps: positive(record.fields.fps, 60), frameDuration: positive(record.fields.duration, 60), curves: [],
+      };
+      animation.duration = animation.frameDuration / animation.fps;
+      animations.push(animation); target = null; property = null;
+    } else if (!animation) continue;
+    else if (source === 'KeyedObject') {
+      target = componentByIndex.get(record.fields.objectId) ?? null; property = null;
+    } else if (source === 'KeyedProperty') {
+      property = propertyNames.get(record.fields.propertyKey) ?? null;
+      if (target && property) animation.curves.push({ target, property, keys: [] });
+    } else if (/^KeyFrame(?:Double|Id|Bool|Color)$/u.test(source) && target && property) {
+      const value = record.fields.value; if (!Number.isFinite(value)) continue;
+      const curve = animation.curves.at(-1);
+      if (curve?.target !== target || curve?.property !== property) continue;
+      const frame = Number.isFinite(record.fields.frame) ? record.fields.frame : 0;
+      curve.keys.push({ frame, time: frame / animation.fps, value });
+    }
+  }
+  return animations;
+}
+
+function timelineAnimationGroups(animation) {
+  const grouped = new Map();
+  for (const curve of animation.curves) {
+    const property = coreTrackProperty(curve.property);
+    if (!property || curve.keys.length === 0 || curve.target?.transformTarget !== true) continue;
+    const key = `${curve.target.objectId}\0${property}`;
+    const group = grouped.get(key) ?? { target: curve.target, property, curves: new Map() };
+    group.curves.set(curve.property, curve); grouped.set(key, group);
+  }
+  return [...grouped.values()];
 }
 
 function lowerStaticJoystickRemaps(animations, hierarchy) {
@@ -819,7 +923,7 @@ function compileCapabilityArtifacts(report, objects, timeline, hierarchy = {}, r
     const id = 'rive-state-machine-v2';
     artifacts.push({ id, capability: 'state-machine', representation: 'native-semantic', document: compileStateMachineV2Document(stateRecords, timeline) });
     for (const record of stateRecords) coverageByObjectId.set(record.visit.neutralObjectId, { capability: 'state-machine', artifactId: id });
-    featureLedger.push({ feature: 'state-machine.executable-v2', capability: 'state-machine', representation: 'native-semantic', count: stateRecords.length, artifactId: id });
+    featureLedger.push({ feature: 'state-machine.metadata-projection-v2', capability: 'state-machine', representation: 'native-semantic', count: stateRecords.length, artifactId: id });
   }
   const interactionRecords = records.filter(record => INTERACTION_SOURCE.test(record.visit.sourceName));
   if (hierarchy.componentLists?.some(list => list.rows.length > 0)) {
@@ -829,6 +933,15 @@ function compileCapabilityArtifacts(report, objects, timeline, hierarchy = {}, r
     featureLedger.push({
       feature: 'interaction.component-list-pointer-audio', capability: 'interaction', representation: 'native-semantic',
       count: hierarchy.componentLists.reduce((sum, list) => sum + list.rows.length, 0), artifactId: id,
+    });
+  }
+  if (hierarchy.hoverStates?.length > 0) {
+    const id = 'rive-state-machine-hover-interaction-v1';
+    artifacts.push({ id, capability: 'interaction', representation: 'native-semantic', document: compileStateMachineHoverInteractionDocument(hierarchy) });
+    for (const record of interactionRecords) coverageByObjectId.set(record.visit.neutralObjectId, { capability: 'interaction', artifactId: id });
+    featureLedger.push({
+      feature: 'interaction.state-machine-listener-hover', capability: 'interaction', representation: 'native-semantic',
+      count: hierarchy.hoverStates.length, artifactId: id,
     });
   }
   const dataRecords = records.filter(record => DATA_BINDING_SOURCE.test(record.visit.sourceName)
@@ -892,6 +1005,34 @@ export function compileComponentListInteractionDocument(hierarchy, records, reso
       });
       listeners.push(...rowListeners);
     }
+  }
+  return {
+    format: 'haiyue-interaction', version: 1, extension: 'org.haiyue.interaction@1', dragThreshold: 4,
+    targets, listeners,
+  };
+}
+
+export function compileStateMachineHoverInteractionDocument(hierarchy) {
+  const targets = []; const listeners = [];
+  for (const [index, state] of hierarchy.hoverStates.entries()) {
+    const targetId = `rive-state-machine-hover-${String(index).padStart(6, '0')}`;
+    const origin = globalNodeOrigin(state.hitNode, hierarchy);
+    const parentScale = globalNodeParentScale(state.hitNode, hierarchy);
+    const width = positive(state.width, 1) * parentScale[0];
+    const height = positive(state.height, 1) * parentScale[1];
+    const args = { idleNode: state.idleNode, hoverNode: state.hoverNode };
+    targets.push({
+      id: targetId, component: state.hitNode, order: index,
+      transform: [1, 0, 0, 1, origin[0], origin[1]],
+      hitArea: { kind: 'rect', rect: [0, 0, width, height] },
+    });
+    listeners.push({
+      id: `${targetId}-enter`, target: targetId, event: 'pointer-enter', phases: ['target'],
+      actions: [{ kind: 'custom', protocol: 'org.haiyue.rive-state-machine-hover@1', port: 'set-hover', arguments: { ...args, active: true } }],
+    }, {
+      id: `${targetId}-exit`, target: targetId, event: 'pointer-exit', phases: ['target'],
+      actions: [{ kind: 'custom', protocol: 'org.haiyue.rive-state-machine-hover@1', port: 'set-hover', arguments: { ...args, active: false } }],
+    });
   }
   return {
     format: 'haiyue-interaction', version: 1, extension: 'org.haiyue.interaction@1', dragThreshold: 4,
@@ -1104,15 +1245,140 @@ function curveAt(curve, time, fallback) {
   return keys.at(-1).value;
 }
 
-async function buildExpandedComponentHierarchy(report, objects, artboardObjectIds, artboardObjectId, selectedAnimation) {
+export function rivePointerHoverProfile(records, animations, selectedStateMachine) {
+  const listeners = [];
+  for (let index = 0; index < records.length; index++) {
+    const record = records[index];
+    if (record.visit.sourceName !== 'StateMachineListenerSingle') continue;
+    const action = records.slice(index + 1).find(candidate =>
+      candidate.visit.sourceName === 'ListenerBoolChange'
+      || candidate.visit.sourceName === 'StateMachineListenerSingle');
+    if (action?.visit.sourceName !== 'ListenerBoolChange') continue;
+    listeners.push({
+      targetId: record.fields.targetId,
+      exit: record.fields.listenerTypeValue === 1,
+      inputId: action.fields.inputId,
+      value: action.fields.value === undefined ? true : action.fields.value === true || action.fields.value === 1,
+    });
+  }
+  const pair = listeners.find(listener => !listener.exit && listeners.some(candidate =>
+    candidate.exit && candidate.targetId === listener.targetId && candidate.inputId === listener.inputId));
+  if (!pair || !Number.isSafeInteger(pair.targetId) || !Number.isSafeInteger(pair.inputId)) return undefined;
+
+  const machines = []; let machine = null; let layer = null; let currentState = null; let transition = null;
+  for (const record of records) {
+    const source = record.visit.sourceName;
+    if (source === 'StateMachine') {
+      machine = { name: string(record.fields.name), inputs: [], layers: [] };
+      machines.push(machine); layer = null; currentState = null; transition = null;
+    } else if (!machine) continue;
+    else if (source === 'StateMachineBool' || source === 'StateMachineNumber' || source === 'StateMachineTrigger') {
+      machine.inputs.push({ type: source, name: string(record.fields.name) });
+    } else if (source === 'StateMachineLayer') {
+      layer = { states: [], transitions: [] }; machine.layers.push(layer); currentState = null; transition = null;
+    } else if (layer && ['ExitState', 'AnyState', 'EntryState', 'AnimationState'].includes(source)) {
+      currentState = layer.states.length; layer.states.push(record); transition = null;
+    } else if (layer && source === 'StateTransition' && currentState !== null && Number.isSafeInteger(record.fields.stateToId)) {
+      transition = { from: currentState, to: record.fields.stateToId, condition: null };
+      layer.transitions.push(transition);
+    } else if (transition && source === 'TransitionBoolCondition') {
+      const authored = record.fields.value ?? record.fields.opValue;
+      transition.condition = {
+        kind: 'boolean', inputId: record.fields.inputId,
+        value: record.fields.value !== undefined
+          ? authored === true || authored === 1
+          : record.fields.opValue !== 1,
+      };
+    } else if (transition && /^Transition.+Condition$/u.test(source)) {
+      transition.condition = { kind: 'other', inputId: record.fields.inputId };
+    }
+  }
+  const candidates = machines.filter(value => value.inputs[pair.inputId]?.type === 'StateMachineBool');
+  const selected = selectedStateMachine
+    ? candidates.find(value => value.name === selectedStateMachine)
+    : candidates[0];
+  if (!selected) return undefined;
+  const parallelAnimations = []; let idleAnimations = []; let hoverAnimations = [];
+  for (const candidate of selected.layers) {
+    const entry = candidate.states.findIndex(state => state.visit.sourceName === 'EntryState');
+    const entryTransition = candidate.transitions.find(value => value.from === entry);
+    const initialIndex = entryTransition?.to ?? candidate.states.findIndex(state => state.visit.sourceName === 'AnimationState');
+    const initialName = animationName(candidate.states[initialIndex]);
+    const boolTransitions = candidate.transitions.filter(value => value.condition?.kind === 'boolean' && value.condition.inputId === pair.inputId);
+    if (boolTransitions.length === 0) {
+      if (initialName && !candidate.transitions.some(value => value.condition)) parallelAnimations.push(initialName);
+      continue;
+    }
+    if (initialName) idleAnimations = [initialName];
+    const enter = boolTransitions.find(value => value.condition.value === pair.value) ?? boolTransitions[0];
+    const leave = boolTransitions.find(value => value.condition.value !== pair.value);
+    hoverAnimations = transitionSequence(candidate, enter);
+    const leaveAnimations = transitionSequence(candidate, leave);
+    if (leaveAnimations.length > 0) idleAnimations = [...leaveAnimations, ...idleAnimations];
+  }
+  if (hoverAnimations.length === 0) return undefined;
+  return {
+    machine: selected.name, targetId: pair.targetId, inputId: pair.inputId,
+    idleAnimations: [...new Set(idleAnimations)], hoverAnimations: [...new Set(hoverAnimations)],
+    parallelAnimations: [...new Set(parallelAnimations)],
+  };
+
+  function animationName(state) {
+    if (state?.visit.sourceName !== 'AnimationState' || !Number.isSafeInteger(state.fields.animationId)) return undefined;
+    return animations[state.fields.animationId]?.name;
+  }
+  function transitionSequence(candidate, first) {
+    if (!first) return [];
+    const output = []; const visited = new Set(); let stateIndex = first.to;
+    while (Number.isSafeInteger(stateIndex) && !visited.has(stateIndex) && output.length < 8) {
+      visited.add(stateIndex);
+      const name = animationName(candidate.states[stateIndex]); if (name) output.push(name);
+      const next = candidate.transitions.find(value => value.from === stateIndex && !value.condition);
+      stateIndex = next?.to;
+    }
+    return output;
+  }
+}
+
+function rivePointerHoverProfileForArtboard(report, objects, artboardObjectId, selectedStateMachine) {
+  const records = selectedArtboardVisits(report, artboardObjectId).map(visit => ({
+    visit, fields: namedFields(objects.get(visit.neutralObjectId), visit),
+  }));
+  const animations = records.filter(record => record.visit.sourceName === 'LinearAnimation')
+    .map(record => ({ name: string(record.fields.name) }));
+  return rivePointerHoverProfile(records, animations, selectedStateMachine);
+}
+
+async function buildExpandedComponentHierarchy(report, objects, artboardObjectIds, artboardObjectId, selectedAnimation, selectedStateMachine) {
   const entries = [];
   const parentNodeByObjectId = new Map();
   const componentLists = [];
+  const animationScopes = [];
+  const hoverCandidates = [];
   let interactionRowIndex = 0;
   const artboardIndex = new Map(artboardObjectIds.map((id, index) => [index, id]));
   const listPlan = componentListPlan(report, objects, artboardObjectIds, artboardObjectId);
   const viewModels = defaultViewModelRuntime(report, objects, artboardObjectIds);
-  await expand(artboardObjectId, '', undefined, new Set(), 0, { skipGenericLists: Boolean(listPlan) }, selectedAnimation);
+  const rootHoverProfile = listPlan
+    ? undefined
+    : rivePointerHoverProfileForArtboard(report, objects, artboardObjectId, selectedStateMachine);
+  let hoverStates = [];
+  if (rootHoverProfile) {
+    const idlePrefix = 'rive-sm-idle::'; const hoverPrefix = 'rive-sm-hover::';
+    await expand(artboardObjectId, idlePrefix, undefined, new Set(), 0, {
+      skipGenericLists: Boolean(listPlan), rootOpacity: 1, hoverVariant: false, lowerStateMachineHover: true,
+    }, selectedAnimation);
+    await expand(artboardObjectId, hoverPrefix, undefined, new Set(), 0, {
+      skipGenericLists: Boolean(listPlan), rootOpacity: 0, hoverVariant: true, lowerStateMachineHover: true,
+    }, selectedAnimation);
+    const hit = hoverCandidates.filter(value => value.variant === false).sort((left, right) => right.depth - left.depth)[0];
+    if (hit) hoverStates = [{
+      idleNode: `${idlePrefix}${artboardObjectId}`, hoverNode: `${hoverPrefix}${artboardObjectId}`,
+      hitNode: hit.scopeRoot, width: hit.width, height: hit.height,
+    }];
+  } else {
+    await expand(artboardObjectId, '', undefined, new Set(), 0, { skipGenericLists: Boolean(listPlan) }, selectedAnimation);
+  }
   if (listPlan) {
     const hosts = entries.filter(value => value.instanceDepth === 0 && value.sourceName === 'ArtboardComponentList');
     for (const host of hosts) {
@@ -1162,7 +1428,7 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
       componentLists.push({ host: host.objectId, gap, rows });
     }
   }
-  return { artboardObjectId, entries, parentNodeByObjectId, componentLists };
+  return { artboardObjectId, entries, parentNodeByObjectId, componentLists, animationScopes, hoverStates };
 
   async function expand(targetArtboardId, prefix, hostId, ancestry, depth, options, activeAnimation) {
     if (depth > 128) throw new Error('Nested artboard depth exceeded 128.');
@@ -1172,7 +1438,17 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
     const viewModelContext = options.viewModelContext ?? viewModels.contextForArtboard(targetArtboardId);
     const viewModelValues = options.viewModelValues ?? viewModelContext?.values;
     const propertyNames = options.viewModelPropertyNames ?? viewModelContext?.propertyNames;
-    await applySelectedAnimationOverrides(local, report, objects, targetArtboardId, activeAnimation, viewModelValues);
+    const hoverProfile = options.lowerStateMachineHover
+      ? rivePointerHoverProfileForArtboard(report, objects, targetArtboardId)
+      : undefined;
+    const profileAnimations = hoverProfile
+      ? (options.hoverVariant ? hoverProfile.hoverAnimations : hoverProfile.idleAnimations)
+      : [];
+    await applySelectedAnimationOverrides(
+      local, report, objects, targetArtboardId,
+      [...(Array.isArray(activeAnimation) ? activeAnimation : [activeAnimation]), ...profileAnimations].filter(value => typeof value === 'string'),
+      viewModelValues,
+    );
     applyViewModelText(local, viewModelValues, report, objects, propertyNames);
     applyDisplaySelection(local);
     applyViewModelSoloSelection(local, viewModelContext);
@@ -1194,6 +1470,25 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
         ...(entry.sourceName === 'Artboard' && options.rootOpacity !== undefined ? { opacity: options.rootOpacity } : {}),
       },
     }));
+    const scopeRoot = idByLocal.get(targetArtboardId);
+    if (hoverProfile && scopeRoot) {
+      const rootFields = clones.find(clone => clone.objectId === scopeRoot)?.fields ?? {};
+      hoverCandidates.push({
+        variant: options.hoverVariant === true, depth, scopeRoot,
+        width: positive(rootFields.width, 1), height: positive(rootFields.height, 1),
+      });
+    }
+    const runtimeSequence = hoverProfile
+      ? (options.hoverVariant ? hoverProfile.hoverAnimations : [])
+      : [];
+    const runtimeParallel = hoverProfile?.parallelAnimations ?? [];
+    if (runtimeSequence.length > 0 || runtimeParallel.length > 0) {
+      animationScopes.push({
+        artboardObjectId: targetArtboardId,
+        nodeByComponentIndex: new Map(clones.map(clone => [clone.componentIndex, clone])),
+        sequence: runtimeSequence, parallel: runtimeParallel,
+      });
+    }
     orderInventoryHostClones(clones, local, targetArtboardId);
     for (const clone of clones) {
       entries.push(clone);
@@ -1219,6 +1514,8 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
       const nestedOptions = clone.sourceName === 'NestedArtboardLeaf'
         ? nestedLeafLayoutOptions(local, clone, nestedArtboardId)
         : {};
+      nestedOptions.hoverVariant = options.hoverVariant === true;
+      nestedOptions.lowerStateMachineHover = options.lowerStateMachineHover === true;
       if (nestedViewModelContext) nestedOptions.viewModelContext = nestedViewModelContext;
       await expand(nestedArtboardId, `${clone.objectId}::`, clone.objectId, nextAncestry, depth + 1, nestedOptions, nestedAnimation);
     }

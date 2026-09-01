@@ -17,6 +17,7 @@ import {
   compoundVectorPath,
   compileTextComponents,
   compileComponentListInteractionDocument,
+  compileStateMachineHoverInteractionDocument,
   defaultViewModelRuntime,
   evaluate,
   finalizeComponentListMetrics,
@@ -28,6 +29,7 @@ import {
   orderEntriesForRiveDrawStack,
   paintSource,
   resolveNestedLeafFitTransforms,
+  rivePointerHoverProfile,
   scriptedListInitializers,
   textWrapMode,
   vectorPath,
@@ -286,6 +288,42 @@ test('generic component-list hover rows emit pointer hover without dossier click
   assert.equal(document.listeners[0].actions.length, 1);
   assert.equal(document.listeners[0].actions[0].port, 'set-hover');
   assert.equal(document.listeners[0].actions[0].arguments.hoverAudio, undefined);
+});
+
+test('Rive pointer listeners lower boolean state-machine enter and exit animation paths', () => {
+  const record = (sourceName, fields = {}) => ({ visit: { sourceName }, fields });
+  const records = [
+    record('StateMachine', { name: 'Planet' }), record('StateMachineBool', { name: 'Hovered' }),
+    record('StateMachineLayer', { name: 'float' }), record('EntryState'), record('StateTransition', { stateToId: 1 }),
+    record('AnimationState', { animationId: 0 }),
+    record('StateMachineLayer', { name: 'interaction' }), record('EntryState'), record('StateTransition', { stateToId: 3 }),
+    record('ExitState'), record('AnimationState', { animationId: 1 }), record('StateTransition', { stateToId: 3 }),
+    record('TransitionBoolCondition', { inputId: 0, opValue: 1 }),
+    record('AnimationState', { animationId: 2 }), record('StateTransition', { stateToId: 2 }),
+    record('TransitionBoolCondition', { inputId: 0 }),
+    record('StateMachineListenerSingle', { targetId: 7 }), record('ListenerBoolChange', { inputId: 0 }),
+    record('StateMachineListenerSingle', { targetId: 7, listenerTypeValue: 1 }), record('ListenerBoolChange', { inputId: 0, value: 0 }),
+  ];
+  const profile = rivePointerHoverProfile(records, [{ name: 'Float' }, { name: 'Expanded' }, { name: 'Default' }], 'Planet');
+  assert.deepEqual(profile, {
+    machine: 'Planet', targetId: 7, inputId: 0,
+    idleAnimations: ['Default'], hoverAnimations: ['Expanded'], parallelAnimations: ['Float'],
+  });
+});
+
+test('state-machine hover sidecar toggles pre-expanded HYA roots over the authored artboard hit area', () => {
+  const idle = 'idle-root'; const hover = 'hover-root'; const hit = 'planet-root';
+  const hierarchy = {
+    entries: [{ objectId: hit, fields: { x: 10, y: 20, scaleX: 1, scaleY: 1 } }],
+    parentNodeByObjectId: new Map(),
+    hoverStates: [{ idleNode: idle, hoverNode: hover, hitNode: hit, width: 200, height: 180 }],
+  };
+  const document = parseHyaInteraction(compileStateMachineHoverInteractionDocument(hierarchy));
+  assert.deepEqual(document.targets[0].transform, [1, 0, 0, 1, 10, 20]);
+  assert.deepEqual(document.targets[0].hitArea.rect, [0, 0, 200, 180]);
+  assert.deepEqual(document.listeners.map(listener => listener.event), ['pointer-enter', 'pointer-exit']);
+  assert.equal(document.listeners[0].actions[0].protocol, 'org.haiyue.rive-state-machine-hover@1');
+  assert.deepEqual(document.listeners.map(listener => listener.actions[0].arguments.active), [true, false]);
 });
 
 test('Rive isHover binding resolves the authored inventory animation aliases', () => {

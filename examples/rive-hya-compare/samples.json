@@ -23,7 +23,9 @@
         "audio-event",
         "data-interaction-accessibility",
         "import-neutral-ir",
-        "timeline-state-machine"
+        "text-layout-component-asset",
+        "timeline-state-machine",
+        "vector-paint-composite"
       ],
       "evidenceRoles": [
         "feature-import-neutral-ir",
@@ -46,8 +48,13 @@
         "stateMachine": "State Machine 1"
       },
       "featureFamilies": [
+        "data-interaction-accessibility",
+        "import-neutral-ir",
+        "rig-mesh-constraint",
         "scripting-custom-rendering",
-        "text-layout-component-asset"
+        "text-layout-component-asset",
+        "timeline-state-machine",
+        "vector-paint-composite"
       ],
       "evidenceRoles": [
         "feature-text-layout-component-asset",
@@ -69,7 +76,12 @@
         "stateMachine": "State Machine 1"
       },
       "featureFamilies": [
-        "rig-mesh-constraint"
+        "data-interaction-accessibility",
+        "import-neutral-ir",
+        "rig-mesh-constraint",
+        "text-layout-component-asset",
+        "timeline-state-machine",
+        "vector-paint-composite"
       ],
       "evidenceRoles": [
         "feature-rig-mesh-constraint"
@@ -86,7 +98,11 @@
         "animation": null,
         "stateMachine": "Auto Generated State Machine"
       },
-      "featureFamilies": [],
+      "featureFamilies": [
+        "data-interaction-accessibility",
+        "import-neutral-ir",
+        "text-layout-component-asset"
+      ],
       "evidenceRoles": [
         "property-grid-layout"
       ]
@@ -102,7 +118,14 @@
         "animation": "Pluto",
         "stateMachine": "ForGridPlanet"
       },
-      "featureFamilies": [],
+      "featureFamilies": [
+        "data-interaction-accessibility",
+        "import-neutral-ir",
+        "rig-mesh-constraint",
+        "text-layout-component-asset",
+        "timeline-state-machine",
+        "vector-paint-composite"
+      ],
       "evidenceRoles": [
         "product-brand-loader-vector-rig",
         "combined-planets"
@@ -119,7 +142,13 @@
         "animation": "Timeline 1",
         "stateMachine": "State Machine 1"
       },
-      "featureFamilies": [],
+      "featureFamilies": [
+        "data-interaction-accessibility",
+        "import-neutral-ir",
+        "text-layout-component-asset",
+        "timeline-state-machine",
+        "vector-paint-composite"
+      ],
       "evidenceRoles": [
         "property-text-fit"
       ]
@@ -136,6 +165,8 @@
         "stateMachine": "Auto Generated State Machine"
       },
       "featureFamilies": [
+        "import-neutral-ir",
+        "text-layout-component-asset",
         "vector-paint-composite"
       ],
       "evidenceRoles": [
@@ -154,7 +185,11 @@
         "animation": null,
         "stateMachine": "Auto Generated State Machine"
       },
-      "featureFamilies": [],
+      "featureFamilies": [
+        "import-neutral-ir",
+        "text-layout-component-asset",
+        "vector-paint-composite"
+      ],
       "evidenceRoles": [
         "property-library-image"
       ]

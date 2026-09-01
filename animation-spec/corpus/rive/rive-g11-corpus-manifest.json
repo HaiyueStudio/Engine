@@ -16,7 +16,7 @@
   },
   "census": {
     "path": "docs/for-ai/rive-hya/runtime-census.json",
-    "sha256": "cbcacf03d028071c2df7440d3fe423088660797a8155baf40889e5b6a14adad8",
+    "sha256": "a216eff4fcef3cd894e4da0d1638e5707d039337bb4bcffaf536b744ce2e2fdb",
     "byteLength": 710335,
     "counts": {
       "objectTypes": 288,
@@ -2008,8 +2008,8 @@
       },
       "workloadScenario": {
         "path": "animation-spec/corpus/rive/workloads/official-eight-planets-grid.json",
-        "sha256": "6523f3e47e485c967e17e3185016c495d73d4e2f17fa623b19319aac53937b3b",
-        "byteLength": 9812,
+        "sha256": "14a9521eaaf52a44b0fa513aa9c3d21f98cd714c57f958ac67c9843d94a46645",
+        "byteLength": 10231,
         "sourceInputBinding": "state-machine-input"
       },
       "admissionResult": {

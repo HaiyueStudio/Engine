@@ -6,7 +6,7 @@
     "repository": "https://github.com/rive-app/rive-runtime",
     "publicCommit": "526625850eaf34fc1263d181808ffca10cae6ac1",
     "riveHead": "ee809ba7f032271dd7102f17afe3baf9d192435b",
-    "censusSha256": "cbcacf03d028071c2df7440d3fe423088660797a8155baf40889e5b6a14adad8"
+    "censusSha256": "a216eff4fcef3cd894e4da0d1638e5707d039337bb4bcffaf536b744ce2e2fdb"
   },
   "totals": {
     "objectTypes": 288,
@@ -58,8 +58,8 @@
       "status": "partial",
       "total": 233,
       "full": 14,
-      "partial": 85,
-      "missing": 134
+      "partial": 88,
+      "missing": 131
     },
     "timeline-state-machine": {
       "goal": "g06-timeline-state-machine-parity",
@@ -74,8 +74,8 @@
       "status": "missing",
       "total": 247,
       "full": 0,
-      "partial": 0,
-      "missing": 247
+      "partial": 6,
+      "missing": 241
     },
     "audio-event": {
       "goal": "g08-audio-event-runtime",
@@ -924,7 +924,7 @@
       "evidenceClass": "binary-object-key",
       "binaryEvidenceEligible": true,
       "family": "text-layout-component-asset",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g05-text-layout-component-asset-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_OBJECT"
     },
@@ -1067,7 +1067,7 @@
       "evidenceClass": "binary-object-key",
       "binaryEvidenceEligible": true,
       "family": "data-interaction-accessibility",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g07-data-interaction-accessibility-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_OBJECT"
     },
@@ -1093,7 +1093,7 @@
       "evidenceClass": "binary-object-key",
       "binaryEvidenceEligible": true,
       "family": "data-interaction-accessibility",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g07-data-interaction-accessibility-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_OBJECT"
     },
@@ -1860,7 +1860,7 @@
       "evidenceClass": "binary-object-key",
       "binaryEvidenceEligible": true,
       "family": "text-layout-component-asset",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g05-text-layout-component-asset-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_OBJECT"
     },
@@ -1873,7 +1873,7 @@
       "evidenceClass": "binary-object-key",
       "binaryEvidenceEligible": true,
       "family": "text-layout-component-asset",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g05-text-layout-component-asset-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_OBJECT"
     },
@@ -6202,7 +6202,7 @@
       "binaryEvidenceEligible": true,
       "serialized": true,
       "family": "data-interaction-accessibility",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g07-data-interaction-accessibility-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_PROPERTY"
     },
@@ -6216,7 +6216,7 @@
       "binaryEvidenceEligible": true,
       "serialized": true,
       "family": "data-interaction-accessibility",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g07-data-interaction-accessibility-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_PROPERTY"
     },
@@ -6230,7 +6230,7 @@
       "binaryEvidenceEligible": true,
       "serialized": true,
       "family": "data-interaction-accessibility",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g07-data-interaction-accessibility-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_PROPERTY"
     },
@@ -6244,7 +6244,7 @@
       "binaryEvidenceEligible": true,
       "serialized": true,
       "family": "data-interaction-accessibility",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g07-data-interaction-accessibility-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_PROPERTY"
     },

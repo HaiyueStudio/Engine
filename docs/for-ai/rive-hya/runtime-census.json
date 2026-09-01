@@ -975,7 +975,7 @@
       "evidenceClass": "binary-object-key",
       "binaryEvidenceEligible": true,
       "family": "text-layout-component-asset",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g05-text-layout-component-asset-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_OBJECT",
       "fixtureOwner": "g05-text-layout-component-asset-parity"
@@ -1129,7 +1129,7 @@
       "evidenceClass": "binary-object-key",
       "binaryEvidenceEligible": true,
       "family": "data-interaction-accessibility",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g07-data-interaction-accessibility-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_OBJECT",
       "fixtureOwner": "g07-data-interaction-accessibility-parity"
@@ -1157,7 +1157,7 @@
       "evidenceClass": "binary-object-key",
       "binaryEvidenceEligible": true,
       "family": "data-interaction-accessibility",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g07-data-interaction-accessibility-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_OBJECT",
       "fixtureOwner": "g07-data-interaction-accessibility-parity"
@@ -1983,7 +1983,7 @@
       "evidenceClass": "binary-object-key",
       "binaryEvidenceEligible": true,
       "family": "text-layout-component-asset",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g05-text-layout-component-asset-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_OBJECT",
       "fixtureOwner": "g05-text-layout-component-asset-parity"
@@ -1997,7 +1997,7 @@
       "evidenceClass": "binary-object-key",
       "binaryEvidenceEligible": true,
       "family": "text-layout-component-asset",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g05-text-layout-component-asset-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_OBJECT",
       "fixtureOwner": "g05-text-layout-component-asset-parity"
@@ -6648,7 +6648,7 @@
       "evidenceClass": "binary-property-key",
       "binaryEvidenceEligible": true,
       "family": "data-interaction-accessibility",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g07-data-interaction-accessibility-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_PROPERTY",
       "fixtureOwner": "g07-data-interaction-accessibility-parity"
@@ -6663,7 +6663,7 @@
       "evidenceClass": "binary-property-key",
       "binaryEvidenceEligible": true,
       "family": "data-interaction-accessibility",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g07-data-interaction-accessibility-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_PROPERTY",
       "fixtureOwner": "g07-data-interaction-accessibility-parity"
@@ -6678,7 +6678,7 @@
       "evidenceClass": "binary-property-key",
       "binaryEvidenceEligible": true,
       "family": "data-interaction-accessibility",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g07-data-interaction-accessibility-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_PROPERTY",
       "fixtureOwner": "g07-data-interaction-accessibility-parity"
@@ -6693,7 +6693,7 @@
       "evidenceClass": "binary-property-key",
       "binaryEvidenceEligible": true,
       "family": "data-interaction-accessibility",
-      "hyaStatus": "missing",
+      "hyaStatus": "partial",
       "goal": "g07-data-interaction-accessibility-parity",
       "diagnostic": "E_RIVE_UNSUPPORTED_PROPERTY",
       "fixtureOwner": "g07-data-interaction-accessibility-parity"

@@ -44,6 +44,16 @@ test('a static official artboard records an explicit null animation selection', 
   assert.equal(result.status, 'passed', result.violations.join('\n'));
 });
 
+test('Eight Planets workload observes hover before any pointer button is pressed', () => {
+  const scenario = JSON.parse(readFileSync(resolve(root, 'animation-spec/corpus/rive/workloads/official-eight-planets-grid.json'), 'utf8'));
+  const enter = scenario.actions.find(action => action.id === 'action-pointer-enter');
+  const down = scenario.actions.find(action => action.id === 'action-pointer-down');
+  assert.deepEqual({ phase: enter?.payload.phase, buttons: enter?.payload.buttons }, { phase: 'move', buttons: 0 });
+  assert.ok(enter.atMicros < down.atMicros);
+  assert.ok(enter.expectedChannels.includes('stateMachineState'));
+  assert.ok(enter.expectedChannels.includes('pixels'));
+});
+
 test('scenario cannot hide a missing input channel or lifecycle path', () => {
   const scenario = validScenario();
   scenario.actions = scenario.actions.filter(action => action.kind !== 'gamepad');
