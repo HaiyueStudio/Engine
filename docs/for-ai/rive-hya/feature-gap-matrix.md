@@ -56,9 +56,9 @@
 - entry/exit/any、single/1D/direct/additive blend、layer order、exit time/pause、ordered conditions/comparators、focus/listener actions。
 - fixed timestamp ordering、seek/settle determinism、event emission exactly-once 和 per-channel ownership/mixing。
 
-当前的官方 Eight Planets 有界回归已支持 pointer boolean listener、启用 work area 的时间轴裁剪、入场后循环 idle、拓扑稳定 vertex/path morph，以及由已解析 nested-fit 倍率降级出的 hover scale。pointer exit 会切回 idle tree 并将时间轴归零，重新 enter 会重播入场。上述能力只覆盖该素材命中的确定性子图；通用 flex reflow、拓扑变化 path、任意 condition/blend/interruption 与其他 listener 类型仍属缺口，因此本族不升级为 `full`。
+当前的官方 Eight Planets 有界回归已支持 pointer boolean listener、启用 work area 的时间轴裁剪、入场后循环 idle、独立 exit tail、拓扑稳定 vertex/path morph，以及由已解析 nested-fit 倍率降级出的 hover scale。pointer exit 会先执行 `NeptuneOut → NeptuneDefault`，完成缩小和位置复位后才切回 idle tree；重新 enter 会重播入场。上述能力只覆盖该素材命中的确定性子图；通用 flex reflow、拓扑变化 path、任意 condition/blend/interruption 与其他 listener 类型仍属缺口，因此本族不升级为 `full`。
 
-播放器现可声明非零 `loopStartTime`：首轮从 0 播放，一次性入场结束后只循环尾部 idle 区间。Eight Planets 同时消费父 boolean transition 的 `200 ms` duration，并以垂直中心补偿将 nested-fit 放大降级为仅向右扩张；这不等同于实现通用 transition blending 或 Yoga reflow。
+播放器现可声明 `loopStartTime` 与 `loopEndTime`：首轮从 0 播放，只循环中间的 idle 区间，并保留 loop end 后的 exit tail 供交互离开时单次执行。Eight Planets 同时消费父 boolean transition 的 `200 ms` duration，并以垂直中心补偿将 nested-fit 放大/缩小降级为仅沿水平方向展开和回收；`PointsPath` 轮廓 morph 以源动画帧率采样并使用 step hold，避免显示刷新之间额外平滑。这不等同于实现通用 transition blending 或 Yoga reflow。
 
 ### Data、interaction、events 与 accessibility
 

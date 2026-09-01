@@ -47,11 +47,12 @@ export class Animation2DSystem extends System {
     component._runtime ??= new Animation2DRuntime(entity, component.animation, component.runtimeExtensions, this._assetManager, component._nodeOverrides);
     if (component.playing && delta > 0 && component.speed > 0) {
       component.currentTime += delta * 0.001 * component.speed;
-      if (component.currentTime >= component.animation.duration) {
+      const playbackEnd = component.loop ? component.loopEndTime : component.animation.duration;
+      if (component.currentTime >= playbackEnd) {
         if (component.loop) {
-          const loopDuration = component.animation.duration - component.loopStartTime;
+          const loopDuration = component.loopEndTime - component.loopStartTime;
           component.currentTime = component.loopStartTime
-            + ((component.currentTime - component.animation.duration) % loopDuration);
+            + ((component.currentTime - component.loopEndTime) % loopDuration);
           component._forceParticleSeek = true;
         } else {
           component.currentTime = component.animation.duration;

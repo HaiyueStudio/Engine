@@ -39,6 +39,9 @@ interface RiveListActionArguments {
 interface RiveStateMachineHoverArguments {
   idleNode: string; hoverNode: string; idleNodes?: string[]; hoverNodes?: string[]; active: boolean;
 }
+interface RiveAnimationPlaybackSegments {
+  loopStart: number; loopEnd: number; exitStart: number; exitDuration: number;
+}
 interface OfficialRiveInstance {
   cleanup(): void; play(): void; pause(): void;
   reset(options?: Record<string, unknown>): void; resizeDrawingSurfaceToCanvas(): void;
@@ -98,6 +101,8 @@ async function main(): Promise<void> {
   const listTargetRows = new Map<string, number>();
   const interactionTargetShift = new Map<string, number>();
   const stateMachineHoverStates = new Map<string, RiveStateMachineHoverArguments>();
+  let hyaPlaybackSegments: RiveAnimationPlaybackSegments | null = null;
+  let hyaHoverExitTimer: number | undefined;
   let playing = true;
   let generation = 0;
 
@@ -152,6 +157,8 @@ async function main(): Promise<void> {
   };
 
   const resetHyaInteraction = (): void => {
+    if (hyaHoverExitTimer !== undefined) window.clearTimeout(hyaHoverExitTimer);
+    hyaHoverExitTimer = undefined;
     hyaInteraction?.dispose(); hyaInteraction = null;
     listRows.clear(); listTargetRows.clear(); interactionTargetShift.clear(); hyaAudioResources.clear(); hyaAudioGains.clear(); hyaAudioBuffers.clear();
     stateMachineHoverStates.clear();
@@ -216,17 +223,38 @@ async function main(): Promise<void> {
             const state = stateMachineHoverStates.get(hover.idleNode) ?? hover;
             state.active = hover.active;
             stateMachineHoverStates.set(hover.idleNode, state);
-            for (const node of hover.idleNodes ?? [hover.idleNode]) {
-              hyaPlayer?.setNodeOverride(node, { opacity: hover.active ? 0 : 1 });
+            if (hyaHoverExitTimer !== undefined) window.clearTimeout(hyaHoverExitTimer);
+            hyaHoverExitTimer = undefined;
+            if (hover.active) {
+              setStateMachineHoverVisibility(state, true);
+              if (hyaPlayer) hyaPlayer.loop = true;
+              hyaPlayer?.seek(0); if (playing) hyaPlayer?.play();
+              hyaCanvas.dataset.stateMachineHover = 'active';
+            } else if (playing && hyaPlayer && hyaPlaybackSegments?.exitDuration) {
+              // Keep the hover tree visible while its authored Out animation shrinks
+              // and returns the planet. The loop boundary prevents normal idle
+              // playback from entering this tail on its own.
+              setStateMachineHoverVisibility(state, true);
+              hyaPlayer.loop = false;
+              hyaPlayer.seek(hyaPlaybackSegments.exitStart).play();
+              hyaCanvas.dataset.stateMachineHover = 'exiting';
+              const exitMilliseconds = Math.ceil(hyaPlaybackSegments.exitDuration * 1000);
+              hyaHoverExitTimer = window.setTimeout(() => {
+                hyaHoverExitTimer = undefined;
+                if (state.active) return;
+                setStateMachineHoverVisibility(state, false);
+                if (hyaPlayer) {
+                  hyaPlayer.loop = true; hyaPlayer.seek(0);
+                  if (playing) hyaPlayer.play(); else hyaPlayer.pause();
+                }
+                hyaCanvas.dataset.stateMachineHover = 'idle';
+              }, exitMilliseconds);
+            } else {
+              setStateMachineHoverVisibility(state, false);
+              if (hyaPlayer) hyaPlayer.loop = true;
+              hyaPlayer?.seek(0); if (playing) hyaPlayer?.play();
+              hyaCanvas.dataset.stateMachineHover = 'idle';
             }
-            for (const node of hover.hoverNodes ?? [hover.hoverNode]) {
-              hyaPlayer?.setNodeOverride(node, { opacity: hover.active ? 1 : 0 });
-            }
-            // The lowered hover tree owns the enter/idle timeline. Rewind on both
-            // edges so leaving restores the authored idle tree immediately and a
-            // later re-entry always starts with the scale/rotation entrance.
-            hyaPlayer?.seek(0); if (playing) hyaPlayer?.play();
-            hyaCanvas.dataset.stateMachineHover = hover.active ? 'active' : 'idle';
             return;
           }
           const descriptor = riveListActionArguments(action); if (!descriptor) return;
@@ -260,6 +288,11 @@ async function main(): Promise<void> {
 
     function registerAudioGain(resourceId: string | undefined, gain: number | undefined): void {
       if (resourceId && Number.isFinite(gain)) hyaAudioGains.set(resourceId, gain!);
+    }
+
+    function setStateMachineHoverVisibility(state: RiveStateMachineHoverArguments, active: boolean): void {
+      for (const node of state.idleNodes ?? [state.idleNode]) hyaPlayer?.setNodeOverride(node, { opacity: active ? 0 : 1 });
+      for (const node of state.hoverNodes ?? [state.hoverNode]) hyaPlayer?.setNodeOverride(node, { opacity: active ? 1 : 0 });
     }
   };
 
@@ -321,6 +354,9 @@ async function main(): Promise<void> {
   };
 
   const resetStateMachineHover = (): void => {
+    if (hyaHoverExitTimer !== undefined) window.clearTimeout(hyaHoverExitTimer);
+    hyaHoverExitTimer = undefined;
+    if (hyaPlayer) hyaPlayer.loop = true;
     for (const state of stateMachineHoverStates.values()) {
       state.active = false;
       for (const node of state.idleNodes ?? [state.idleNode]) hyaPlayer?.setNodeOverride(node, { opacity: 1 });
@@ -365,10 +401,12 @@ async function main(): Promise<void> {
     if (hyaEntity) scene.remove(hyaEntity);
     hyaAssetUrls.forEach(url => URL.revokeObjectURL(url));
     hyaAssetUrls = materialized.urls;
+    hyaPlaybackSegments = riveAnimationPlaybackSegments(animation);
     hyaPlayer = new Animation2DComponent(animation, {
       autoplay: playing,
       loop: true,
-      loopStartTime: riveAnimationLoopStart(animation),
+      loopStartTime: hyaPlaybackSegments.loopStart,
+      loopEndTime: hyaPlaybackSegments.loopEnd,
       runtimeExtensions,
     });
     hyaEntity = new Entity(`Rive HYA: ${label}`).addComponent(new Transform2D()).addComponent(hyaPlayer);
@@ -403,7 +441,7 @@ async function main(): Promise<void> {
   function clearHya(): void {
     resetHyaInteraction();
     if (hyaEntity) scene.remove(hyaEntity);
-    hyaEntity = null; hyaPlayer = null;
+    hyaEntity = null; hyaPlayer = null; hyaPlaybackSegments = null;
     hyaAssetUrls.forEach(url => URL.revokeObjectURL(url));
     hyaAssetUrls = [];
     query('#hya-empty').removeAttribute('hidden');
@@ -547,13 +585,22 @@ function riveStateMachineHoverArguments(action: RuntimeInteractionAction): RiveS
   return value as unknown as RiveStateMachineHoverArguments;
 }
 
-function riveAnimationLoopStart(animation: ParsedAnimation): number {
+function riveAnimationPlaybackSegments(animation: ParsedAnimation): RiveAnimationPlaybackSegments {
   const value = animation.extensions['org.haiyue.rive-animation-clips@1'];
-  if (!value || typeof value !== 'object') return 0;
-  const loopStart = (value as Record<string, unknown>).loopStart;
-  return typeof loopStart === 'number' && Number.isFinite(loopStart) && loopStart > 0 && loopStart < animation.duration
-    ? loopStart
-    : 0;
+  const fields = value && typeof value === 'object' ? value as Record<string, unknown> : {};
+  const candidateLoopStart = fields.loopStart;
+  const loopStart = typeof candidateLoopStart === 'number' && Number.isFinite(candidateLoopStart)
+    && candidateLoopStart >= 0 && candidateLoopStart < animation.duration ? candidateLoopStart : 0;
+  const candidateLoopEnd = fields.loopEnd;
+  const loopEnd = typeof candidateLoopEnd === 'number' && Number.isFinite(candidateLoopEnd)
+    && candidateLoopEnd > loopStart && candidateLoopEnd <= animation.duration ? candidateLoopEnd : animation.duration;
+  const candidateExitStart = fields.exitStart;
+  const exitStart = typeof candidateExitStart === 'number' && Number.isFinite(candidateExitStart)
+    && candidateExitStart >= loopEnd && candidateExitStart < animation.duration ? candidateExitStart : animation.duration;
+  const candidateExitDuration = fields.exitDuration;
+  const exitDuration = typeof candidateExitDuration === 'number' && Number.isFinite(candidateExitDuration)
+    ? Math.max(0, Math.min(candidateExitDuration, animation.duration - exitStart)) : animation.duration - exitStart;
+  return { loopStart, loopEnd, exitStart, exitDuration };
 }
 
 async function materializePackageResources(

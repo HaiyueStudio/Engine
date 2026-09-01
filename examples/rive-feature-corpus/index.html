@@ -45,7 +45,7 @@
       <h2>如何理解状态</h2>
       <p><strong>完整</strong>只表示该孤立 property 的值域/插值可完整表达，不自动把所属 Rive object 升级为 full fidelity。<strong>部分</strong>表示已有中立表达或 runtime 基础，但依赖关系、交互或 oracle parity 尚未闭环。<strong>缺失</strong>必须产生稳定 diagnostic，不能静默忽略。</p>
       <p>binary coverage 与 behavioral evidence 分开：288 object、565 serialized property、9 serialized asset type 由生成的 7.3 RIV 闭合；48 module 与 349 symbol 通过安全与 differential workload 验证，不冒充 wire key。</p>
-      <p>官方 Eight Planets 回归已覆盖 pointer boolean hover、work area、一次性入场＋尾段循环、父 transition duration、拓扑稳定 vertex/path morph 与 resolved nested-fit hover scale；这些条目仍标为<strong>部分</strong>，因为通用 flex reflow、拓扑变化 path、任意状态混合/中断和其他 listener 尚未闭环。</p>
+      <p>官方 Eight Planets 回归已覆盖 pointer boolean hover、work area、一次性入场＋有界 idle 循环＋独立退出尾段、父 transition duration、按源帧 step hold 的 PointsPath 轮廓、拓扑稳定 vertex/path morph 与 resolved nested-fit hover scale；这些条目仍标为<strong>部分</strong>，因为通用 flex reflow、拓扑变化 path、任意状态混合/中断和其他 listener 尚未闭环。</p>
     </section>
   </main>
   <pre id="result"></pre>

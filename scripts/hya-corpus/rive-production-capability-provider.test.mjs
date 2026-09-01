@@ -35,6 +35,7 @@ import {
   responsiveHoverScaleFactor,
   responsiveHoverVerticalCompensation,
   rivePointerHoverProfile,
+  scopedTimelineSegments,
   scriptedListInitializers,
   textWrapMode,
   vectorPath,
@@ -65,6 +66,24 @@ test('animation work areas crop and rebase authored keyframes', () => {
     [0, 0, 1],
     [60, 1, 2],
   ]);
+});
+
+test('scoped hover timelines preserve an exit tail outside the repeated idle range', () => {
+  const byName = new Map([
+    ['NeptuneIn', { duration: 1 }],
+    ['NeptuneIdle', { duration: 6 }],
+    ['NeptuneOut', { duration: 1 }],
+    ['NeptuneDefault', { duration: 1 / 60 }],
+  ]);
+  const segments = scopedTimelineSegments({
+    sequence: ['NeptuneIn', 'NeptuneIdle'],
+    exitSequence: ['NeptuneOut', 'NeptuneDefault'],
+    parallel: [],
+  }, byName);
+  assert.deepEqual({ ...segments, duration: undefined }, {
+    loopStart: 1, loopEnd: 7, exitStart: 7, exitDuration: 61 / 60, duration: undefined,
+  });
+  assert.ok(Math.abs(segments.duration - 481 / 60) < 1e-12);
 });
 
 test('responsive nested hover inherits its fitted ancestor magnification', () => {

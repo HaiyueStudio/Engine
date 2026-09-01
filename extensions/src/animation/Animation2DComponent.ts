@@ -10,6 +10,8 @@ export interface Animation2DComponentOptions {
   loop?: boolean;
   /** Seconds from which playback repeats after the first complete pass. */
   loopStartTime?: number;
+  /** Exclusive end of the repeated range; later timeline content remains available for an exit pass. */
+  loopEndTime?: number;
   speed?: number;
   startTime?: number;
   runtimeExtensions?: Animation2DExtensionRegistry;
@@ -44,6 +46,7 @@ export class Animation2DComponent extends Component {
   playing: boolean;
   loop: boolean;
   readonly loopStartTime: number;
+  readonly loopEndTime: number;
   speed: number;
   currentTime: number;
   completed = false;
@@ -59,6 +62,7 @@ export class Animation2DComponent extends Component {
     this.playing = options.autoplay ?? true;
     this.loop = options.loop ?? this.animation.endBehavior === 'loop';
     this.loopStartTime = normalizeLoopStartTime(options.loopStartTime ?? 0, this.animation.duration);
+    this.loopEndTime = normalizeLoopEndTime(options.loopEndTime ?? this.animation.duration, this.loopStartTime, this.animation.duration);
     this.speed = finiteSpeed(options.speed ?? 1);
     this.currentTime = clampTime(options.startTime ?? 0, this.animation.duration);
     this.runtimeExtensions = options.runtimeExtensions;
@@ -155,6 +159,7 @@ export class Animation2DComponent extends Component {
       autoplay: this.playing,
       loop: this.loop,
       loopStartTime: this.loopStartTime,
+      loopEndTime: this.loopEndTime,
       speed: this.speed,
       startTime: this.currentTime,
       ...(this.runtimeExtensions ? { runtimeExtensions: this.runtimeExtensions } : {}),
@@ -187,6 +192,13 @@ function clampTime(value: number, duration: number): number {
 function normalizeLoopStartTime(value: number, duration: number): number {
   if (!Number.isFinite(value) || value < 0 || value >= duration) {
     throw new RangeError('Animation2DComponent loopStartTime must be finite, non-negative, and less than duration.');
+  }
+  return value;
+}
+
+function normalizeLoopEndTime(value: number, loopStartTime: number, duration: number): number {
+  if (!Number.isFinite(value) || value <= loopStartTime || value > duration) {
+    throw new RangeError('Animation2DComponent loopEndTime must be finite, greater than loopStartTime, and no greater than duration.');
   }
   return value;
 }

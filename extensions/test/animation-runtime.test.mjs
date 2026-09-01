@@ -106,9 +106,9 @@ test('Animation2DSystem instantiates shape nodes, samples tracks and releases ge
 });
 
 test('Animation2DComponent plays its entrance once and loops only the configured tail range', () => {
-  const animation = parseAnimation({ ...animationFixture(), duration: 3 });
+  const animation = parseAnimation({ ...animationFixture(), duration: 4 });
   const world = new World('Partial loop');
-  const player = new Animation2DComponent(animation, { loop: true, loopStartTime: 1 });
+  const player = new Animation2DComponent(animation, { loop: true, loopStartTime: 1, loopEndTime: 3 });
   const owner = new Entity('Player').addComponent(new Transform2D()).addComponent(player);
   world.addEntity(owner); world.addSystem(new Animation2DSystem());
 
@@ -116,7 +116,17 @@ test('Animation2DComponent plays its entrance once and loops only the configured
 
   assert.equal(player.currentTime, 1.5);
   assert.equal(player.clone().loopStartTime, 1);
-  assert.throws(() => new Animation2DComponent(animation, { loopStartTime: 3 }), /less than duration/u);
+  assert.equal(player.clone().loopEndTime, 3);
+  assert.throws(() => new Animation2DComponent(animation, { loopStartTime: 4 }), /less than duration/u);
+  assert.throws(() => new Animation2DComponent(animation, { loopStartTime: 1, loopEndTime: 1 }), /greater than loopStartTime/u);
+
+  player.loop = false;
+  player.seek(3);
+  world.update(3500, 500);
+  assert.equal(player.currentTime, 3.5, 'non-looping playback can enter the authored exit tail');
+  world.update(4000, 500);
+  assert.equal(player.currentTime, 4);
+  assert.equal(player.completed, true);
 });
 
 test('Animation2DComponent applies and clears interactive node overrides after authored tracks', () => {

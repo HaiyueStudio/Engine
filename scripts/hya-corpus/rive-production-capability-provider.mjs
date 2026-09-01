@@ -114,6 +114,10 @@ export async function evaluate(request, context) {
             'org.haiyue.rive-animation-clips@1': {
               clips: timeline.clips,
               ...(timeline.loopStart > 0 ? { loopStart: timeline.loopStart } : {}),
+              ...(timeline.loopEnd > timeline.loopStart ? { loopEnd: timeline.loopEnd } : {}),
+              ...(timeline.exitStart >= timeline.loopEnd && timeline.exitDuration > 0
+                ? { exitStart: timeline.exitStart, exitDuration: timeline.exitDuration }
+                : {}),
             },
           } : {}),
           ...(timeline.stateMachines.length > 0 ? { 'org.haiyue.rive-state-machines@1': { stateMachines: timeline.stateMachines } } : {}),
@@ -744,12 +748,14 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
       visit, fields: namedFields(objects.get(visit.neutralObjectId), visit),
     }));
     const animations = parseTimelineAnimations(records, scope.nodeByComponentIndex, propertyNames);
-    return { scope, animations, byName: new Map(animations.map(value => [value.name, value])) };
+    const byName = new Map(animations.map(value => [value.name, value]));
+    return { scope, animations, byName, segments: scopedTimelineSegments(scope, byName) };
   });
-  const duration = Math.max(2, ...preparedScopes.map(({ scope, byName }) => scopedTimelineDuration(scope, byName)));
+  const duration = Math.max(2, ...preparedScopes.map(({ segments }) => segments.duration));
   const tracksByBinding = new Map(); const clips = [];
-  const loopStarts = [];
-  for (const { scope, byName } of preparedScopes) {
+  const playbackSegments = [];
+  for (const { scope, byName, segments } of preparedScopes) {
+    if (segments.loopEnd > segments.loopStart) playbackSegments.push(segments);
     for (const name of scope.parallel) {
       const animation = byName.get(name); if (!animation) continue;
       clips.push({ name: `${name} · ${scope.artboardObjectId}`, start: 0, duration: animation.duration });
@@ -760,10 +766,17 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
       const animation = byName.get(scope.sequence[index]); if (!animation) continue;
       clips.push({ name: `${animation.name} · ${scope.artboardObjectId}`, start: cursor, duration: animation.duration });
       if (index === scope.sequence.length - 1) {
-        loopStarts.push(cursor);
-        appendRepeated(animation, cursor, duration);
+        appendAnimation(animation, cursor, Math.min(duration, cursor + animation.duration));
+        cursor += animation.duration;
       }
       else { appendAnimation(animation, cursor, Math.min(duration, cursor + animation.duration)); cursor += animation.duration; }
+    }
+    cursor = segments.exitStart;
+    for (const name of scope.exitSequence ?? []) {
+      const animation = byName.get(name); if (!animation) continue;
+      clips.push({ name: `${animation.name} · ${scope.artboardObjectId}`, start: cursor, duration: animation.duration });
+      appendAnimation(animation, cursor, Math.min(duration, cursor + animation.duration));
+      cursor += animation.duration;
     }
     const entrance = byName.get(scope.sequence[0]);
     const responsiveScale = entrance && /In$/iu.test(entrance.name)
@@ -782,8 +795,11 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
         const scaleY = finite(scopeRoot.fields.scaleY) ?? 1;
         tracksByBinding.set(binding, {
           node: scopeRoot.objectId, property: 'scale', interpolation: 'linear',
-          times: [0, motionDuration],
-          values: [scaleX, scaleY, scaleX * responsiveScale, scaleY * responsiveScale],
+          times: [0, motionDuration, segments.exitStart, Math.min(duration, segments.exitStart + motionDuration)],
+          values: [
+            scaleX, scaleY, scaleX * responsiveScale, scaleY * responsiveScale,
+            scaleX * responsiveScale, scaleY * responsiveScale, scaleX, scaleY,
+          ],
         });
       }
       const positionBinding = `${scopeRoot.objectId}\0position`;
@@ -793,7 +809,8 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
         const verticalCompensation = responsiveHoverVerticalCompensation(scopeRoot, responsiveScale);
         tracksByBinding.set(positionBinding, {
           node: scopeRoot.objectId, property: 'position', interpolation: 'linear',
-          times: [0, motionDuration], values: [x, y, x, y + verticalCompensation],
+          times: [0, motionDuration, segments.exitStart, Math.min(duration, segments.exitStart + motionDuration)],
+          values: [x, y, x, y + verticalCompensation, x, y + verticalCompensation, x, y],
         });
       }
     }
@@ -809,9 +826,13 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
       } else { track.times.push(pair.time); track.values.push(...pair.value); }
     }
   }
+  const activeSegments = playbackSegments.sort((left, right) => right.loopEnd - left.loopEnd)[0];
   return {
     duration, clips, tracks: [...tracksByBinding.values()], stateMachines: [],
-    loopStart: loopStarts.length > 0 ? Math.max(...loopStarts) : 0,
+    loopStart: activeSegments?.loopStart ?? 0,
+    loopEnd: activeSegments?.loopEnd ?? duration,
+    exitStart: activeSegments?.exitStart ?? duration,
+    exitDuration: activeSegments ? Math.max(0, duration - activeSegments.exitStart) : 0,
   };
 
   function appendRepeated(animation, start, end) {
@@ -848,10 +869,14 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
   }
 }
 
-function scopedTimelineDuration(scope, byName) {
-  const sequenceDuration = scope.sequence.reduce((sum, name) => sum + (byName.get(name)?.duration ?? 0), 0);
+export function scopedTimelineSegments(scope, byName) {
+  const sequence = scope.sequence.map(name => byName.get(name)).filter(Boolean);
+  const loopStart = sequence.slice(0, -1).reduce((sum, animation) => sum + animation.duration, 0);
+  const loopEnd = loopStart + (sequence.at(-1)?.duration ?? 0);
+  const exitStart = loopEnd;
+  const exitDuration = (scope.exitSequence ?? []).reduce((sum, name) => sum + (byName.get(name)?.duration ?? 0), 0);
   const parallelDuration = Math.max(0, ...scope.parallel.map(name => byName.get(name)?.duration ?? 0));
-  return Math.max(sequenceDuration, parallelDuration);
+  return { loopStart, loopEnd, exitStart, exitDuration, duration: Math.max(loopEnd + exitDuration, parallelDuration) };
 }
 
 function responsiveHoverTransitionSeconds(hierarchy, scope, report, objects) {
@@ -1008,6 +1033,7 @@ async function attachScopedVectorMorphs(vectorComponents, hierarchy, report, obj
     const entries = [...scope.nodeByComponentIndex.values()];
     const byIndex = new Map(entries.map(entry => [entry.componentIndex, entry]));
     const shapeSchedules = new Map();
+    const frameHeldShapes = new Set();
     for (const schedule of schedules) {
       for (const curve of schedule.animation.curves) {
         if (!curve.keys.length || !isVectorGeometryEntry(curve.target)) continue;
@@ -1016,6 +1042,7 @@ async function attachScopedVectorMorphs(vectorComponents, hierarchy, report, obj
         const values = shapeSchedules.get(shape) ?? [];
         if (!values.includes(schedule)) values.push(schedule);
         shapeSchedules.set(shape, values);
+        if (curve.target.sourceName === 'PointsPath') frameHeldShapes.add(shape);
       }
     }
     for (const [shape, relevant] of shapeSchedules) {
@@ -1037,7 +1064,10 @@ async function attachScopedVectorMorphs(vectorComponents, hierarchy, report, obj
       const valueSize = components[0].values.length;
       const first = values.slice(0, valueSize);
       if (!values.some((value, index) => Math.abs(value - first[index % valueSize]) > 1e-6)) continue;
-      const morph = { times, values, valueSize, interpolation: 'linear' };
+      // Rive evaluates authored point-path deformation at the animation frame cadence.
+      // Holding each sampled polygon until the next sample preserves the deliberately
+      // stepped/jittered silhouette instead of smoothing it between display refreshes.
+      const morph = { times, values, valueSize, interpolation: frameHeldShapes.has(shape) ? 'step' : 'linear' };
       vectorComponents.set(shape.objectId, components.map(component => ({ ...component, morph })));
     }
   }
@@ -1053,11 +1083,19 @@ function scopedAnimationSchedules(scope, animations, duration) {
   let cursor = 0;
   for (let index = 0; index < scope.sequence.length && cursor < duration - 1e-8; index++) {
     const animation = byName.get(scope.sequence[index]); if (!animation) continue;
-    if (index === scope.sequence.length - 1) repeat(animation, cursor, duration);
+    if (index === scope.sequence.length - 1) {
+      output.push({ animation, start: cursor, end: Math.min(duration, cursor + animation.duration) });
+      cursor += animation.duration;
+    }
     else {
       output.push({ animation, start: cursor, end: Math.min(duration, cursor + animation.duration) });
       cursor += animation.duration;
     }
+  }
+  for (const name of scope.exitSequence ?? []) {
+    const animation = byName.get(name); if (!animation || cursor >= duration - 1e-8) continue;
+    output.push({ animation, start: cursor, end: Math.min(duration, cursor + animation.duration) });
+    cursor += animation.duration;
   }
   return output;
 
@@ -1825,12 +1863,13 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
     const runtimeSequence = hoverProfile
       ? (options.hoverVariant ? hoverProfile.hoverAnimations : [])
       : [];
+    const runtimeExitSequence = hoverProfile && options.hoverVariant ? hoverProfile.idleAnimations : [];
     const runtimeParallel = hoverProfile?.parallelAnimations ?? [];
-    if (runtimeSequence.length > 0 || runtimeParallel.length > 0) {
+    if (runtimeSequence.length > 0 || runtimeExitSequence.length > 0 || runtimeParallel.length > 0) {
       animationScopes.push({
         artboardObjectId: targetArtboardId,
         nodeByComponentIndex: new Map(clones.map(clone => [clone.componentIndex, clone])),
-        sequence: runtimeSequence, parallel: runtimeParallel,
+        sequence: runtimeSequence, exitSequence: runtimeExitSequence, parallel: runtimeParallel,
       });
     }
     orderInventoryHostClones(clones, local, targetArtboardId);
