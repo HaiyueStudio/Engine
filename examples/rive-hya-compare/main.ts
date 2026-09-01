@@ -329,6 +329,9 @@ async function main(): Promise<void> {
   const synchronizePlayers = (): void => {
     if (!official || !hyaPlayer) return;
     official.reset({ artboard: activeSample.selection.artboard, animations: activeSample.selection.animation ?? undefined, stateMachines: activeSample.selection.stateMachine, autoplay: playing, autoBind: true });
+    // Rive 2.40 reset rebuilds the state-machine instances but does not re-register
+    // their canvas pointer listeners. play() is the public path that restores them.
+    if (playing) official.play();
     hyaPlayer.seek(0); if (playing) hyaPlayer.play();
     resetStateMachineHover();
   };
