@@ -8,6 +8,8 @@ import type { Animation2DExtensionRegistry } from './Animation2DExtensionRegistr
 export interface Animation2DComponentOptions {
   autoplay?: boolean;
   loop?: boolean;
+  /** Seconds from which playback repeats after the first complete pass. */
+  loopStartTime?: number;
   speed?: number;
   startTime?: number;
   runtimeExtensions?: Animation2DExtensionRegistry;
@@ -41,6 +43,7 @@ export class Animation2DComponent extends Component {
   readonly animation: ParsedAnimation;
   playing: boolean;
   loop: boolean;
+  readonly loopStartTime: number;
   speed: number;
   currentTime: number;
   completed = false;
@@ -55,6 +58,7 @@ export class Animation2DComponent extends Component {
     this.animation = isParsed(source) ? source : parseAnimation(source);
     this.playing = options.autoplay ?? true;
     this.loop = options.loop ?? this.animation.endBehavior === 'loop';
+    this.loopStartTime = normalizeLoopStartTime(options.loopStartTime ?? 0, this.animation.duration);
     this.speed = finiteSpeed(options.speed ?? 1);
     this.currentTime = clampTime(options.startTime ?? 0, this.animation.duration);
     this.runtimeExtensions = options.runtimeExtensions;
@@ -150,6 +154,7 @@ export class Animation2DComponent extends Component {
     const clone = new Animation2DComponent(this.animation, {
       autoplay: this.playing,
       loop: this.loop,
+      loopStartTime: this.loopStartTime,
       speed: this.speed,
       startTime: this.currentTime,
       ...(this.runtimeExtensions ? { runtimeExtensions: this.runtimeExtensions } : {}),
@@ -177,4 +182,11 @@ function finiteSpeed(value: number): number {
 function clampTime(value: number, duration: number): number {
   if (!Number.isFinite(value)) throw new RangeError('Animation2DComponent time must be finite.');
   return Math.max(0, Math.min(duration, value));
+}
+
+function normalizeLoopStartTime(value: number, duration: number): number {
+  if (!Number.isFinite(value) || value < 0 || value >= duration) {
+    throw new RangeError('Animation2DComponent loopStartTime must be finite, non-negative, and less than duration.');
+  }
+  return value;
 }

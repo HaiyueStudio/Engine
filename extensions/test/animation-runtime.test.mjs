@@ -105,6 +105,20 @@ test('Animation2DSystem instantiates shape nodes, samples tracks and releases ge
   assert.equal(player.runtimeStats.nodeCount, 0);
 });
 
+test('Animation2DComponent plays its entrance once and loops only the configured tail range', () => {
+  const animation = parseAnimation({ ...animationFixture(), duration: 3 });
+  const world = new World('Partial loop');
+  const player = new Animation2DComponent(animation, { loop: true, loopStartTime: 1 });
+  const owner = new Entity('Player').addComponent(new Transform2D()).addComponent(player);
+  world.addEntity(owner); world.addSystem(new Animation2DSystem());
+
+  world.update(0, 3500);
+
+  assert.equal(player.currentTime, 1.5);
+  assert.equal(player.clone().loopStartTime, 1);
+  assert.throws(() => new Animation2DComponent(animation, { loopStartTime: 3 }), /less than duration/u);
+});
+
 test('Animation2DComponent applies and clears interactive node overrides after authored tracks', () => {
   const world = new World('Interactive overrides');
   const player = new Animation2DComponent(animationFixture(), { autoplay: false });

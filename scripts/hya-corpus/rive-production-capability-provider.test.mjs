@@ -9,6 +9,7 @@ import {
   applySoloSelection,
   applyViewModelText,
   applyViewModelSoloSelection,
+  booleanTransitionDurationSeconds,
   boundAnimationNames,
   clippedSpriteFrame,
   compileImageClipMasks,
@@ -32,6 +33,7 @@ import {
   paintSource,
   resolveNestedLeafFitTransforms,
   responsiveHoverScaleFactor,
+  responsiveHoverVerticalCompensation,
   rivePointerHoverProfile,
   scriptedListInitializers,
   textWrapMode,
@@ -66,7 +68,7 @@ test('animation work areas crop and rebase authored keyframes', () => {
 });
 
 test('responsive nested hover inherits its fitted ancestor magnification', () => {
-  const root = { objectId: 'planet', sourceName: 'Artboard', fields: {} };
+  const root = { objectId: 'planet', sourceName: 'Artboard', fields: { height: 500 } };
   const fitted = { objectId: 'grid', sourceName: 'Artboard', fields: { scaleX: 1.414, scaleY: 1.414 } };
   const hierarchy = {
     entries: [root, fitted],
@@ -74,6 +76,11 @@ test('responsive nested hover inherits its fitted ancestor magnification', () =>
   };
   const scope = { nodeByComponentIndex: new Map([[0, root]]) };
   assert.equal(responsiveHoverScaleFactor(hierarchy, scope), 1.414);
+  assert.ok(Math.abs(responsiveHoverVerticalCompensation(root, 1.414) + 103.5) < 1e-9);
+  assert.equal(booleanTransitionDurationSeconds([
+    { visit: { sourceName: 'StateTransition' }, fields: { duration: 200 } },
+    { visit: { sourceName: 'TransitionBoolCondition' }, fields: { inputId: 1 } },
+  ]), 0.2);
 });
 
 test('embedded inventory scripts lower their deterministic initial component lists', () => {

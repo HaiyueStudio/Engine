@@ -110,7 +110,12 @@ export async function evaluate(request, context) {
       ...(timeline.tracks.length > 0 ? { tracks: timeline.tracks } : {}),
       ...((timeline.clips.length > 0 || timeline.stateMachines.length > 0) ? {
         extensions: {
-          ...(timeline.clips.length > 0 ? { 'org.haiyue.rive-animation-clips@1': { clips: timeline.clips } } : {}),
+          ...(timeline.clips.length > 0 ? {
+            'org.haiyue.rive-animation-clips@1': {
+              clips: timeline.clips,
+              ...(timeline.loopStart > 0 ? { loopStart: timeline.loopStart } : {}),
+            },
+          } : {}),
           ...(timeline.stateMachines.length > 0 ? { 'org.haiyue.rive-state-machines@1': { stateMachines: timeline.stateMachines } } : {}),
         },
       } : {}),
@@ -734,14 +739,17 @@ async function compileCoreTimeline(hierarchy, report, objects) {
 }
 
 function compileScopedAnimationTimeline(hierarchy, report, objects, propertyNames) {
-  const duration = 6;
-  const tracksByBinding = new Map(); const clips = [];
-  for (const scope of hierarchy.animationScopes) {
+  const preparedScopes = hierarchy.animationScopes.map(scope => {
     const records = selectedArtboardVisits(report, scope.artboardObjectId).map(visit => ({
       visit, fields: namedFields(objects.get(visit.neutralObjectId), visit),
     }));
     const animations = parseTimelineAnimations(records, scope.nodeByComponentIndex, propertyNames);
-    const byName = new Map(animations.map(value => [value.name, value]));
+    return { scope, animations, byName: new Map(animations.map(value => [value.name, value])) };
+  });
+  const duration = Math.max(2, ...preparedScopes.map(({ scope, byName }) => scopedTimelineDuration(scope, byName)));
+  const tracksByBinding = new Map(); const clips = [];
+  const loopStarts = [];
+  for (const { scope, byName } of preparedScopes) {
     for (const name of scope.parallel) {
       const animation = byName.get(name); if (!animation) continue;
       clips.push({ name: `${name} · ${scope.artboardObjectId}`, start: 0, duration: animation.duration });
@@ -751,7 +759,10 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
     for (let index = 0; index < scope.sequence.length; index++) {
       const animation = byName.get(scope.sequence[index]); if (!animation) continue;
       clips.push({ name: `${animation.name} · ${scope.artboardObjectId}`, start: cursor, duration: animation.duration });
-      if (index === scope.sequence.length - 1) appendRepeated(animation, cursor, duration);
+      if (index === scope.sequence.length - 1) {
+        loopStarts.push(cursor);
+        appendRepeated(animation, cursor, duration);
+      }
       else { appendAnimation(animation, cursor, Math.min(duration, cursor + animation.duration)); cursor += animation.duration; }
     }
     const entrance = byName.get(scope.sequence[0]);
@@ -760,14 +771,29 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
       : undefined;
     const scopeRoot = scope.nodeByComponentIndex.get(0);
     if (scopeRoot && responsiveScale && responsiveScale > 1 + 1e-6) {
+      const motionDuration = Math.min(
+        duration,
+        entrance.duration,
+        responsiveHoverTransitionSeconds(hierarchy, scope, report, objects) ?? entrance.duration,
+      );
       const binding = `${scopeRoot.objectId}\0scale`;
       if (!tracksByBinding.has(binding)) {
         const scaleX = finite(scopeRoot.fields.scaleX) ?? 1;
         const scaleY = finite(scopeRoot.fields.scaleY) ?? 1;
         tracksByBinding.set(binding, {
           node: scopeRoot.objectId, property: 'scale', interpolation: 'linear',
-          times: [0, Math.min(duration, entrance.duration)],
+          times: [0, motionDuration],
           values: [scaleX, scaleY, scaleX * responsiveScale, scaleY * responsiveScale],
+        });
+      }
+      const positionBinding = `${scopeRoot.objectId}\0position`;
+      if (!tracksByBinding.has(positionBinding)) {
+        const x = finite(scopeRoot.fields.x) ?? 0;
+        const y = finite(scopeRoot.fields.y) ?? 0;
+        const verticalCompensation = responsiveHoverVerticalCompensation(scopeRoot, responsiveScale);
+        tracksByBinding.set(positionBinding, {
+          node: scopeRoot.objectId, property: 'position', interpolation: 'linear',
+          times: [0, motionDuration], values: [x, y, x, y + verticalCompensation],
         });
       }
     }
@@ -783,7 +809,10 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
       } else { track.times.push(pair.time); track.values.push(...pair.value); }
     }
   }
-  return { duration, clips, tracks: [...tracksByBinding.values()], stateMachines: [] };
+  return {
+    duration, clips, tracks: [...tracksByBinding.values()], stateMachines: [],
+    loopStart: loopStarts.length > 0 ? Math.max(...loopStarts) : 0,
+  };
 
   function appendRepeated(animation, start, end) {
     const cycle = Math.max(1 / animation.fps, animation.duration);
@@ -817,6 +846,48 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
       }
     }
   }
+}
+
+function scopedTimelineDuration(scope, byName) {
+  const sequenceDuration = scope.sequence.reduce((sum, name) => sum + (byName.get(name)?.duration ?? 0), 0);
+  const parallelDuration = Math.max(0, ...scope.parallel.map(name => byName.get(name)?.duration ?? 0));
+  return Math.max(sequenceDuration, parallelDuration);
+}
+
+function responsiveHoverTransitionSeconds(hierarchy, scope, report, objects) {
+  const root = scope?.nodeByComponentIndex?.get(0);
+  if (!root?.objectId) return undefined;
+  const byId = new Map(hierarchy.entries.map(entry => [entry.objectId, entry]));
+  let parentId = hierarchy.parentNodeByObjectId?.get(root.objectId);
+  for (let depth = 0; parentId && depth < 128; depth++) {
+    const parent = byId.get(parentId); if (!parent) break;
+    if (parent.sourceName === 'Artboard' && parent.sourceObjectId) {
+      const records = selectedArtboardVisits(report, parent.sourceObjectId).map(visit => ({
+        visit, fields: namedFields(objects.get(visit.neutralObjectId), visit),
+      }));
+      const duration = booleanTransitionDurationSeconds(records);
+      if (duration !== undefined) return duration;
+    }
+    parentId = hierarchy.parentNodeByObjectId.get(parentId);
+  }
+  return undefined;
+}
+
+export function booleanTransitionDurationSeconds(records) {
+  let transition;
+  for (const record of records) {
+    if (record.visit?.sourceName === 'StateTransition') transition = record;
+    else if (record.visit?.sourceName === 'TransitionBoolCondition' && transition) {
+      const milliseconds = finite(transition.fields?.duration);
+      if (milliseconds !== undefined && milliseconds > 0 && milliseconds <= 60_000) return milliseconds / 1000;
+    }
+  }
+  return undefined;
+}
+
+export function responsiveHoverVerticalCompensation(root, scale) {
+  const height = positive(root?.fields?.height, 0);
+  return height > 0 && Number.isFinite(scale) ? -height * (scale - 1) / 2 : 0;
 }
 
 export function responsiveHoverScaleFactor(hierarchy, scope) {

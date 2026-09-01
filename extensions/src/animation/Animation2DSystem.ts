@@ -49,7 +49,9 @@ export class Animation2DSystem extends System {
       component.currentTime += delta * 0.001 * component.speed;
       if (component.currentTime >= component.animation.duration) {
         if (component.loop) {
-          component.currentTime %= component.animation.duration;
+          const loopDuration = component.animation.duration - component.loopStartTime;
+          component.currentTime = component.loopStartTime
+            + ((component.currentTime - component.animation.duration) % loopDuration);
           component._forceParticleSeek = true;
         } else {
           component.currentTime = component.animation.duration;

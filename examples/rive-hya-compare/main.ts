@@ -365,7 +365,12 @@ async function main(): Promise<void> {
     if (hyaEntity) scene.remove(hyaEntity);
     hyaAssetUrls.forEach(url => URL.revokeObjectURL(url));
     hyaAssetUrls = materialized.urls;
-    hyaPlayer = new Animation2DComponent(animation, { autoplay: playing, loop: true, runtimeExtensions });
+    hyaPlayer = new Animation2DComponent(animation, {
+      autoplay: playing,
+      loop: true,
+      loopStartTime: riveAnimationLoopStart(animation),
+      runtimeExtensions,
+    });
     hyaEntity = new Entity(`Rive HYA: ${label}`).addComponent(new Transform2D()).addComponent(hyaPlayer);
     scene.add(hyaEntity);
     setupHyaInteraction(animation);
@@ -540,6 +545,15 @@ function riveStateMachineHoverArguments(action: RuntimeInteractionAction): RiveS
     if (nodes !== undefined && (!Array.isArray(nodes) || nodes.some(node => typeof node !== 'string' || node.length === 0))) return null;
   }
   return value as unknown as RiveStateMachineHoverArguments;
+}
+
+function riveAnimationLoopStart(animation: ParsedAnimation): number {
+  const value = animation.extensions['org.haiyue.rive-animation-clips@1'];
+  if (!value || typeof value !== 'object') return 0;
+  const loopStart = (value as Record<string, unknown>).loopStart;
+  return typeof loopStart === 'number' && Number.isFinite(loopStart) && loopStart > 0 && loopStart < animation.duration
+    ? loopStart
+    : 0;
 }
 
 async function materializePackageResources(
