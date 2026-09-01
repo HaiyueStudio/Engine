@@ -48,6 +48,7 @@ export async function evaluate(request, context) {
   const imageComponents = compileImageComponents(hierarchy, resourceByAssetIndex);
   const clipMasks = compileImageClipMasks(hierarchy);
   const timeline = await compileCoreTimeline(hierarchy, report, objects);
+  await attachScopedVectorMorphs(vectorComponents, hierarchy, report, objects, timeline.duration);
   const capabilityArtifacts = compileCapabilityArtifacts(report, objects, timeline, hierarchy, resourceByAssetIndex);
   const hierarchyByObjectId = new Map(hierarchy.entries.map(value => [value.objectId, value]));
   const orderedEntries = orderEntriesForRiveDrawStack(hierarchy.entries, drawableOrder);
@@ -753,6 +754,23 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
       if (index === scope.sequence.length - 1) appendRepeated(animation, cursor, duration);
       else { appendAnimation(animation, cursor, Math.min(duration, cursor + animation.duration)); cursor += animation.duration; }
     }
+    const entrance = byName.get(scope.sequence[0]);
+    const responsiveScale = entrance && /In$/iu.test(entrance.name)
+      ? responsiveHoverScaleFactor(hierarchy, scope)
+      : undefined;
+    const scopeRoot = scope.nodeByComponentIndex.get(0);
+    if (scopeRoot && responsiveScale && responsiveScale > 1 + 1e-6) {
+      const binding = `${scopeRoot.objectId}\0scale`;
+      if (!tracksByBinding.has(binding)) {
+        const scaleX = finite(scopeRoot.fields.scaleX) ?? 1;
+        const scaleY = finite(scopeRoot.fields.scaleY) ?? 1;
+        tracksByBinding.set(binding, {
+          node: scopeRoot.objectId, property: 'scale', interpolation: 'linear',
+          times: [0, Math.min(duration, entrance.duration)],
+          values: [scaleX, scaleY, scaleX * responsiveScale, scaleY * responsiveScale],
+        });
+      }
+    }
   }
   for (const track of tracksByBinding.values()) {
     const size = track.property === 'position' || track.property === 'scale' ? 2 : 1;
@@ -801,6 +819,28 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
   }
 }
 
+export function responsiveHoverScaleFactor(hierarchy, scope) {
+  const root = scope?.nodeByComponentIndex?.get(0);
+  if (!root?.objectId) return undefined;
+  const byId = new Map(hierarchy.entries.map(entry => [entry.objectId, entry]));
+  let parentId = hierarchy.parentNodeByObjectId?.get(root.objectId);
+  for (let depth = 0; parentId && depth < 128; depth++) {
+    const parent = byId.get(parentId); if (!parent) break;
+    if (parent.sourceName === 'Artboard') {
+      const scaleX = positive(parent.fields.scaleX, 1);
+      const scaleY = positive(parent.fields.scaleY, 1);
+      const uniform = Math.min(scaleX, scaleY);
+      // A nested state-machine artboard inside a responsively fitted ancestor
+      // inherits that ancestor's content magnification when its intrinsic
+      // bounds expand. HYA has no per-frame flex solver, so lower the resolved
+      // authored magnification into an ordinary executable scale track.
+      if (uniform > 1 + 1e-6 && uniform <= 4) return uniform;
+    }
+    parentId = hierarchy.parentNodeByObjectId.get(parentId);
+  }
+  return undefined;
+}
+
 function parseTimelineAnimations(records, componentByIndex, propertyNames) {
   const animations = []; let animation = null; let target = null; let property = null;
   const artboardSourceIndex = records[0]?.visit.sourceObjectIndex ?? 0;
@@ -818,6 +858,9 @@ function parseTimelineAnimations(records, componentByIndex, propertyNames) {
       animation = {
         name: string(record.fields.name) ?? `animation-${animations.length}`,
         fps: positive(record.fields.fps, 60), frameDuration: positive(record.fields.duration, 60), curves: [],
+        enableWorkArea: record.fields.enableWorkArea === true,
+        workStartFrame: finite(record.fields.workStart) ?? 0,
+        workEndFrame: finite(record.fields.workEnd),
       };
       animation.duration = animation.frameDuration / animation.fps;
       animations.push(animation); target = null; property = null;
@@ -828,7 +871,7 @@ function parseTimelineAnimations(records, componentByIndex, propertyNames) {
       property = propertyNames.get(record.fields.propertyKey) ?? null;
       if (target && property) animation.curves.push({ target, property, keys: [] });
     } else if (/^KeyFrame(?:Double|Id|Bool|Color)$/u.test(source) && target && property) {
-      const value = record.fields.value; if (!Number.isFinite(value)) continue;
+      const value = record.fields.value ?? defaultKeyFrameValue(source); if (!Number.isFinite(value)) continue;
       const curve = animation.curves.at(-1);
       if (curve?.target !== target || curve?.property !== property) continue;
       const frame = Number.isFinite(record.fields.frame) ? record.fields.frame : 0;
@@ -840,7 +883,167 @@ function parseTimelineAnimations(records, componentByIndex, propertyNames) {
       });
     }
   }
-  return animations;
+  return animations.map(normalizeAnimationWorkArea);
+}
+
+export function normalizeAnimationWorkArea(animation) {
+  const fps = positive(animation.fps, 60);
+  const frameDuration = positive(animation.frameDuration, fps);
+  const startFrame = animation.enableWorkArea === true
+    ? Math.max(0, Math.min(frameDuration, finite(animation.workStartFrame) ?? 0))
+    : 0;
+  const requestedEnd = animation.enableWorkArea === true
+    ? finite(animation.workEndFrame) ?? frameDuration
+    : frameDuration;
+  const endFrame = Math.max(startFrame, Math.min(frameDuration, requestedEnd));
+  const startTime = startFrame / fps;
+  const endTime = endFrame / fps;
+  const duration = Math.max(1 / fps, endTime - startTime);
+  const curves = animation.curves.map(curve => {
+    if (!curve.keys.length) return curve;
+    const sourceKeys = [...curve.keys].sort((left, right) => left.time - right.time);
+    const startValue = curveAt({ keys: sourceKeys }, startTime, sourceKeys[0].value);
+    const endValue = curveAt({ keys: sourceKeys }, endTime, sourceKeys.at(-1).value);
+    const startSource = [...sourceKeys].reverse().find(key => key.time <= startTime) ?? sourceKeys[0];
+    const keys = [{ ...startSource, frame: 0, time: 0, value: startValue }];
+    for (const key of sourceKeys) {
+      if (key.time <= startTime + 1e-9 || key.time >= endTime - 1e-9) continue;
+      const time = key.time - startTime;
+      keys.push({ ...key, frame: time * fps, time });
+    }
+    const last = keys.at(-1);
+    if (Math.abs(last.time - duration) <= 1e-9) {
+      keys[keys.length - 1] = { ...last, frame: duration * fps, time: duration, value: endValue };
+    } else {
+      keys.push({ ...sourceKeys.at(-1), frame: duration * fps, time: duration, value: endValue });
+    }
+    return { ...curve, keys };
+  });
+  return { ...animation, duration, workArea: { start: startTime, end: endTime }, curves };
+}
+
+async function attachScopedVectorMorphs(vectorComponents, hierarchy, report, objects, duration) {
+  if (!hierarchy.animationScopes?.length || vectorComponents.size === 0) return;
+  const modulePath = resolve(root, 'animation-spec/dist-test/rive/import/generated/frozen-registry.js');
+  const { FROZEN_PROPERTIES } = await import(pathToFileURL(modulePath).href);
+  const propertyNames = new Map(FROZEN_PROPERTIES.map(value => [value.key, value.name]));
+  for (const scope of hierarchy.animationScopes) {
+    const records = selectedArtboardVisits(report, scope.artboardObjectId).map(visit => ({
+      visit, fields: namedFields(objects.get(visit.neutralObjectId), visit),
+    }));
+    const animations = parseTimelineAnimations(records, scope.nodeByComponentIndex, propertyNames);
+    const schedules = scopedAnimationSchedules(scope, animations, duration);
+    if (schedules.length === 0) continue;
+    const entries = [...scope.nodeByComponentIndex.values()];
+    const byIndex = new Map(entries.map(entry => [entry.componentIndex, entry]));
+    const shapeSchedules = new Map();
+    for (const schedule of schedules) {
+      for (const curve of schedule.animation.curves) {
+        if (!curve.keys.length || !isVectorGeometryEntry(curve.target)) continue;
+        const shape = owningShape(curve.target, byIndex);
+        if (!shape || !vectorComponents.has(shape.objectId)) continue;
+        const values = shapeSchedules.get(shape) ?? [];
+        if (!values.includes(schedule)) values.push(schedule);
+        shapeSchedules.set(shape, values);
+      }
+    }
+    for (const [shape, relevant] of shapeSchedules) {
+      const components = vectorComponents.get(shape.objectId);
+      const commands = components?.[0]?.commands;
+      if (!components?.length || typeof commands !== 'string') continue;
+      const frameRate = Math.max(1, Math.min(60, ...relevant.map(value => value.animation.fps)));
+      const frameCount = Math.max(1, Math.ceil(duration * frameRate));
+      const times = []; const values = []; let topologyStable = true;
+      for (let frame = 0; frame <= frameCount; frame++) {
+        const time = Math.min(duration, frame / frameRate);
+        const path = sampledShapePath(shape, entries, relevant, time);
+        if (!path || path.commands !== commands || path.values.length !== components[0].values.length) {
+          topologyStable = false; break;
+        }
+        times.push(time); values.push(...path.values);
+      }
+      if (!topologyStable || times.length < 2) continue;
+      const valueSize = components[0].values.length;
+      const first = values.slice(0, valueSize);
+      if (!values.some((value, index) => Math.abs(value - first[index % valueSize]) > 1e-6)) continue;
+      const morph = { times, values, valueSize, interpolation: 'linear' };
+      vectorComponents.set(shape.objectId, components.map(component => ({ ...component, morph })));
+    }
+  }
+}
+
+function scopedAnimationSchedules(scope, animations, duration) {
+  const byName = new Map(animations.map(animation => [animation.name, animation]));
+  const output = [];
+  for (const name of scope.parallel) {
+    const animation = byName.get(name); if (!animation) continue;
+    repeat(animation, 0, duration);
+  }
+  let cursor = 0;
+  for (let index = 0; index < scope.sequence.length && cursor < duration - 1e-8; index++) {
+    const animation = byName.get(scope.sequence[index]); if (!animation) continue;
+    if (index === scope.sequence.length - 1) repeat(animation, cursor, duration);
+    else {
+      output.push({ animation, start: cursor, end: Math.min(duration, cursor + animation.duration) });
+      cursor += animation.duration;
+    }
+  }
+  return output;
+
+  function repeat(animation, start, end) {
+    const cycle = Math.max(1 / animation.fps, animation.duration);
+    for (let at = start; at < end - 1e-8; at += cycle) {
+      output.push({ animation, start: at, end: Math.min(end, at + cycle) });
+    }
+  }
+}
+
+function isVectorGeometryEntry(entry) {
+  return entry && (VECTOR_GEOMETRY_TYPES.has(entry.sourceName) || /Vertex$/u.test(entry.sourceName));
+}
+
+function owningShape(entry, byIndex) {
+  let current = entry; const visited = new Set();
+  for (let depth = 0; current && depth < 128; depth++) {
+    if (current.sourceName === 'Shape') return current;
+    const parent = current.fields.parentId;
+    if (!Number.isSafeInteger(parent) || visited.has(parent)) return undefined;
+    visited.add(parent); current = byIndex.get(parent);
+  }
+  return undefined;
+}
+
+function sampledShapePath(shape, entries, schedules, time) {
+  const descendants = new Set(); const pending = [shape.componentIndex];
+  while (pending.length > 0) {
+    const parent = pending.pop();
+    for (const entry of entries) {
+      if (entry.fields.parentId !== parent || descendants.has(entry.componentIndex)) continue;
+      descendants.add(entry.componentIndex); pending.push(entry.componentIndex);
+    }
+  }
+  const fieldsByIndex = new Map([...descendants].map(index => {
+    const entry = entries.find(value => value.componentIndex === index);
+    return [index, { ...entry.fields }];
+  }));
+  for (const schedule of schedules) {
+    if (time < schedule.start - 1e-8 || time > schedule.end + 1e-8) continue;
+    const localTime = Math.max(0, Math.min(schedule.animation.duration, time - schedule.start));
+    for (const curve of schedule.animation.curves) {
+      const fields = fieldsByIndex.get(curve.target?.componentIndex);
+      if (!fields || !curve.keys.length) continue;
+      fields[curve.property] = curveAt(curve, localTime, finite(fields[curve.property]) ?? curve.keys[0].value);
+    }
+  }
+  const clones = new Map(entries.filter(entry => descendants.has(entry.componentIndex)).map(entry => [
+    entry.componentIndex, { ...entry, fields: fieldsByIndex.get(entry.componentIndex) },
+  ]));
+  const geometries = [...clones.values()].filter(entry => entry.fields.parentId === shape.componentIndex && VECTOR_GEOMETRY_TYPES.has(entry.sourceName));
+  const paths = geometries.map(geometry => vectorPath(
+    geometry,
+    [...clones.values()].filter(entry => entry.fields.parentId === geometry.componentIndex),
+  )).filter(Boolean);
+  return compoundVectorPath(paths);
 }
 
 function timelineAnimationGroups(animation) {
@@ -1512,7 +1715,7 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
       ? rivePointerHoverProfileForArtboard(report, objects, targetArtboardId)
       : undefined;
     const profileAnimations = hoverProfile
-      ? (options.hoverVariant ? hoverProfile.hoverAnimations : hoverProfile.idleAnimations)
+      ? (options.hoverVariant ? hoverProfile.hoverAnimations : [])
       : [];
     await applySelectedAnimationOverrides(
       local, report, objects, targetArtboardId,

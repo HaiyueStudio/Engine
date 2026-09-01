@@ -222,7 +222,10 @@ async function main(): Promise<void> {
             for (const node of hover.hoverNodes ?? [hover.hoverNode]) {
               hyaPlayer?.setNodeOverride(node, { opacity: hover.active ? 1 : 0 });
             }
-            if (hover.active) { hyaPlayer?.seek(0); if (playing) hyaPlayer?.play(); }
+            // The lowered hover tree owns the enter/idle timeline. Rewind on both
+            // edges so leaving restores the authored idle tree immediately and a
+            // later re-entry always starts with the scale/rotation entrance.
+            hyaPlayer?.seek(0); if (playing) hyaPlayer?.play();
             hyaCanvas.dataset.stateMachineHover = hover.active ? 'active' : 'idle';
             return;
           }

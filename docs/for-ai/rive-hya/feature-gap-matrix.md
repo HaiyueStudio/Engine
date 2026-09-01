@@ -56,6 +56,8 @@
 - entry/exit/any、single/1D/direct/additive blend、layer order、exit time/pause、ordered conditions/comparators、focus/listener actions。
 - fixed timestamp ordering、seek/settle determinism、event emission exactly-once 和 per-channel ownership/mixing。
 
+当前的官方 Eight Planets 有界回归已支持 pointer boolean listener、启用 work area 的时间轴裁剪、入场后循环 idle、拓扑稳定 vertex/path morph，以及由已解析 nested-fit 倍率降级出的 hover scale。pointer exit 会切回 idle tree 并将时间轴归零，重新 enter 会重播入场。上述能力只覆盖该素材命中的确定性子图；通用 flex reflow、拓扑变化 path、任意 condition/blend/interruption 与其他 listener 类型仍属缺口，因此本族不升级为 `full`。
+
 ### Data、interaction、events 与 accessibility
 
 - View Model number/bool/trigger/string/enum/color、nested VM、list、asset/artboard、default instance/global context。

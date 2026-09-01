@@ -26,10 +26,12 @@ import {
   lowerLayoutBackdropEffects,
   mapEmbeddedAssets,
   nestedLeafRootScale,
+  normalizeAnimationWorkArea,
   numberStateMachineAnimationName,
   orderEntriesForRiveDrawStack,
   paintSource,
   resolveNestedLeafFitTransforms,
+  responsiveHoverScaleFactor,
   rivePointerHoverProfile,
   scriptedListInitializers,
   textWrapMode,
@@ -41,6 +43,38 @@ import { FROZEN_PROPERTIES } from '../../animation-spec/dist-test/rive/import/ge
 import { parseHyaStateMachineV2 } from '../../animation-spec/dist-test/state-machine-v2/parser.js';
 import { parseHyaDataBinding } from '../../animation-spec/dist-test/data-binding/parser.js';
 import { parseHyaInteraction } from '../../animation-spec/dist-test/interaction/parser.js';
+
+test('animation work areas crop and rebase authored keyframes', () => {
+  const animation = normalizeAnimationWorkArea({
+    name: 'enter', fps: 60, frameDuration: 360, enableWorkArea: true,
+    workStartFrame: 60, workEndFrame: 120,
+    curves: [{
+      target: { objectId: 'node' }, property: 'scaleX',
+      keys: [
+        { frame: 0, time: 0, value: 0, interpolationType: 1 },
+        { frame: 180, time: 3, value: 3, interpolationType: 1 },
+        { frame: 360, time: 6, value: 6, interpolationType: 1 },
+      ],
+    }],
+  });
+  assert.equal(animation.duration, 1);
+  assert.deepEqual(animation.workArea, { start: 1, end: 2 });
+  assert.deepEqual(animation.curves[0].keys.map(key => [key.frame, key.time, key.value]), [
+    [0, 0, 1],
+    [60, 1, 2],
+  ]);
+});
+
+test('responsive nested hover inherits its fitted ancestor magnification', () => {
+  const root = { objectId: 'planet', sourceName: 'Artboard', fields: {} };
+  const fitted = { objectId: 'grid', sourceName: 'Artboard', fields: { scaleX: 1.414, scaleY: 1.414 } };
+  const hierarchy = {
+    entries: [root, fitted],
+    parentNodeByObjectId: new Map([['planet', 'grid']]),
+  };
+  const scope = { nodeByComponentIndex: new Map([[0, root]]) };
+  assert.equal(responsiveHoverScaleFactor(hierarchy, scope), 1.414);
+});
 
 test('embedded inventory scripts lower their deterministic initial component lists', () => {
   assert.deepEqual(scriptedListInitializers('Equipment', 'weaponList'), [
