@@ -18,6 +18,7 @@ import {
   compileTextComponents,
   compileComponentListInteractionDocument,
   compileStateMachineHoverInteractionDocument,
+  curveAt,
   defaultViewModelRuntime,
   evaluate,
   finalizeComponentListMetrics,
@@ -311,10 +312,28 @@ test('Rive pointer listeners lower boolean state-machine enter and exit animatio
   });
 });
 
+test('Rive cubic keyframes retain their authored easing during timeline sampling', () => {
+  const curve = { keys: [
+    { time: 0, value: 0, interpolationType: 2, easing: [0.42, 0, 1, 1] },
+    { time: 1, value: 1 },
+  ] };
+
+  const value = curveAt(curve, 0.5, 0);
+
+  assert.ok(value > 0.31 && value < 0.32);
+});
+
 test('state-machine hover sidecar toggles pre-expanded HYA roots over the authored artboard hit area', () => {
-  const idle = 'idle-root'; const hover = 'hover-root'; const hit = 'planet-root';
+  const idle = 'rive-sm-idle::root'; const hover = 'rive-sm-hover::root'; const hit = 'rive-sm-idle::planet-root';
+  const idleOrphan = 'rive-sm-idle::orphan'; const hoverOrphan = 'rive-sm-hover::orphan';
   const hierarchy = {
-    entries: [{ objectId: hit, fields: { x: 10, y: 20, scaleX: 1, scaleY: 1 } }],
+    entries: [
+      { objectId: idle, nodeEligible: true, fields: {} },
+      { objectId: idleOrphan, nodeEligible: true, fields: {} },
+      { objectId: hover, nodeEligible: true, fields: {} },
+      { objectId: hoverOrphan, nodeEligible: true, fields: {} },
+      { objectId: hit, nodeEligible: true, fields: { x: 10, y: 20, scaleX: 1, scaleY: 1 } },
+    ],
     parentNodeByObjectId: new Map(),
     hoverStates: [{ idleNode: idle, hoverNode: hover, hitNode: hit, width: 200, height: 180 }],
   };
@@ -323,6 +342,8 @@ test('state-machine hover sidecar toggles pre-expanded HYA roots over the author
   assert.deepEqual(document.targets[0].hitArea.rect, [0, 0, 200, 180]);
   assert.deepEqual(document.listeners.map(listener => listener.event), ['pointer-enter', 'pointer-exit']);
   assert.equal(document.listeners[0].actions[0].protocol, 'org.haiyue.rive-state-machine-hover@1');
+  assert.deepEqual(document.listeners[0].actions[0].arguments.idleNodes, [idle, idleOrphan, hit]);
+  assert.deepEqual(document.listeners[0].actions[0].arguments.hoverNodes, [hover, hoverOrphan]);
   assert.deepEqual(document.listeners.map(listener => listener.actions[0].arguments.active), [true, false]);
 });
 
@@ -611,6 +632,20 @@ test('root layout fill sizing resolves authored percent units against the canvas
   assert.deepEqual([hierarchy.entries[1].fields.width, hierarchy.entries[1].fields.height], [791, 800]);
   assert.deepEqual([hierarchy.entries[3].fields.width, hierarchy.entries[3].fields.height], [707, 716]);
   assert.deepEqual([hierarchy.entries[3].fields.x, hierarchy.entries[3].fields.y], [42, 42]);
+});
+
+test('layout padding does not translate a nested-artboard leaf out of its host', () => {
+  const scopeKey = 'root:planet';
+  const hierarchy = { entries: [
+    { componentIndex: 0, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { width: 810, height: 1849, styleId: 1 } },
+    { componentIndex: 1, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 0, paddingLeft: 500, paddingRight: 500, paddingTop: 500, paddingBottom: 500 } },
+    { componentIndex: 2, scopeKey, sourceName: 'NestedArtboardLeaf', nodeEligible: true, transformTarget: true, fields: { parentId: 0, artboardId: 2, fit: 1 } },
+  ], parentNodeByObjectId: new Map() };
+
+  applySimpleLayoutTransforms(hierarchy);
+
+  assert.equal(hierarchy.entries[2].fields.x, undefined);
+  assert.equal(hierarchy.entries[2].fields.y, undefined);
 });
 
 test('root-aligned Rive layout layers overlap instead of accumulating off-canvas', () => {

@@ -37,7 +37,7 @@ interface RiveListActionArguments {
   openAudio?: string; openGain?: number; closeAudio?: string; closeGain?: number; active?: boolean;
 }
 interface RiveStateMachineHoverArguments {
-  idleNode: string; hoverNode: string; active: boolean;
+  idleNode: string; hoverNode: string; idleNodes?: string[]; hoverNodes?: string[]; active: boolean;
 }
 interface OfficialRiveInstance {
   cleanup(): void; play(): void; pause(): void;
@@ -216,8 +216,12 @@ async function main(): Promise<void> {
             const state = stateMachineHoverStates.get(hover.idleNode) ?? hover;
             state.active = hover.active;
             stateMachineHoverStates.set(hover.idleNode, state);
-            hyaPlayer?.setNodeOverride(hover.idleNode, { opacity: hover.active ? 0 : 1 });
-            hyaPlayer?.setNodeOverride(hover.hoverNode, { opacity: hover.active ? 1 : 0 });
+            for (const node of hover.idleNodes ?? [hover.idleNode]) {
+              hyaPlayer?.setNodeOverride(node, { opacity: hover.active ? 0 : 1 });
+            }
+            for (const node of hover.hoverNodes ?? [hover.hoverNode]) {
+              hyaPlayer?.setNodeOverride(node, { opacity: hover.active ? 1 : 0 });
+            }
             if (hover.active) { hyaPlayer?.seek(0); if (playing) hyaPlayer?.play(); }
             hyaCanvas.dataset.stateMachineHover = hover.active ? 'active' : 'idle';
             return;
@@ -247,8 +251,8 @@ async function main(): Promise<void> {
     });
     applyListRows();
     for (const state of stateMachineHoverStates.values()) {
-      hyaPlayer?.setNodeOverride(state.idleNode, { opacity: 1 });
-      hyaPlayer?.setNodeOverride(state.hoverNode, { opacity: 0 });
+      for (const node of state.idleNodes ?? [state.idleNode]) hyaPlayer?.setNodeOverride(node, { opacity: 1 });
+      for (const node of state.hoverNodes ?? [state.hoverNode]) hyaPlayer?.setNodeOverride(node, { opacity: 0 });
     }
 
     function registerAudioGain(resourceId: string | undefined, gain: number | undefined): void {
@@ -310,6 +314,23 @@ async function main(): Promise<void> {
     setStatus(hyaPlayer ? '两端均已加载，可视觉对照' : '官方端已加载；正在自动转换 HYA', hyaPlayer ? 'success' : 'working');
     updateResult();
     await automaticConversion;
+    synchronizePlayers();
+  };
+
+  const resetStateMachineHover = (): void => {
+    for (const state of stateMachineHoverStates.values()) {
+      state.active = false;
+      for (const node of state.idleNodes ?? [state.idleNode]) hyaPlayer?.setNodeOverride(node, { opacity: 1 });
+      for (const node of state.hoverNodes ?? [state.hoverNode]) hyaPlayer?.setNodeOverride(node, { opacity: 0 });
+    }
+    delete hyaCanvas.dataset.stateMachineHover;
+  };
+
+  const synchronizePlayers = (): void => {
+    if (!official || !hyaPlayer) return;
+    official.reset({ artboard: activeSample.selection.artboard, animations: activeSample.selection.animation ?? undefined, stateMachines: activeSample.selection.stateMachine, autoplay: playing, autoBind: true });
+    hyaPlayer.seek(0); if (playing) hyaPlayer.play();
+    resetStateMachineHover();
   };
 
   const installHya = async (
@@ -342,6 +363,7 @@ async function main(): Promise<void> {
     hyaEntity = new Entity(`Rive HYA: ${label}`).addComponent(new Transform2D()).addComponent(hyaPlayer);
     scene.add(hyaEntity);
     setupHyaInteraction(animation);
+    synchronizePlayers();
     camera.setViewportFit({ designWidth: animation.canvas.width, designHeight: animation.canvas.height, viewportMode: 'fit' });
     camera.resize(engine.displayWidth, engine.displayHeight);
     query('#hya-empty').setAttribute('hidden', '');
@@ -397,15 +419,9 @@ async function main(): Promise<void> {
     query<HTMLButtonElement>('#play').textContent = playing ? '暂停两端' : '播放两端';
   });
   query<HTMLButtonElement>('#restart').addEventListener('click', () => {
-    official?.reset({ artboard: activeSample.selection.artboard, animations: activeSample.selection.animation ?? undefined, stateMachines: activeSample.selection.stateMachine, autoplay: playing, autoBind: true });
-    hyaPlayer?.seek(0); if (playing) hyaPlayer?.play();
+    synchronizePlayers();
     for (const state of listRows.values()) { state.hover = false; state.open = false; }
     applyListRows();
-    for (const state of stateMachineHoverStates.values()) {
-      state.active = false;
-      hyaPlayer?.setNodeOverride(state.idleNode, { opacity: 1 });
-      hyaPlayer?.setNodeOverride(state.hoverNode, { opacity: 0 });
-    }
   });
   query<HTMLInputElement>('#hya-files').addEventListener('change', event => {
     const files = [...(event.currentTarget as HTMLInputElement).files ?? []];
@@ -513,6 +529,10 @@ function riveStateMachineHoverArguments(action: RuntimeInteractionAction): RiveS
   if (typeof value.idleNode !== 'string' || value.idleNode.length === 0
     || typeof value.hoverNode !== 'string' || value.hoverNode.length === 0
     || typeof value.active !== 'boolean') return null;
+  for (const key of ['idleNodes', 'hoverNodes'] as const) {
+    const nodes = value[key];
+    if (nodes !== undefined && (!Array.isArray(nodes) || nodes.some(node => typeof node !== 'string' || node.length === 0))) return null;
+  }
   return value as unknown as RiveStateMachineHoverArguments;
 }
 

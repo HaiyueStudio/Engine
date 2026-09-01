@@ -301,7 +301,9 @@ export function applySimpleLayoutTransforms(hierarchy) {
       && value.nodeEligible !== false
       && value.transformTarget === true
       && value.fields.parentId === parent.componentIndex
-      && (componentListScope ? value.sourceName === 'LayoutComponent' : value.sourceName !== 'LayoutComponentStyle'));
+      && (componentListScope
+        ? value.sourceName === 'LayoutComponent'
+        : value.sourceName !== 'LayoutComponentStyle' && value.sourceName !== 'NestedArtboardLeaf'));
     if (style?.fields.layoutTypeValue === 1) {
       applyGridLayout(entries, parent, style, children);
       continue;
@@ -771,7 +773,16 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
   }
   function appendAnimation(animation, start, end) {
     for (const group of timelineAnimationGroups(animation)) {
-      const times = [...new Set([...group.curves.values()].flatMap(curve => curve.keys.map(key => key.time)))].sort((a, b) => a - b);
+      const times = [...new Set([...group.curves.values()].flatMap(curve => curve.keys.map(key => key.time)))];
+      if ([...group.curves.values()].some(curve => curve.keys.some(key => key.interpolationType === 2 && key.easing))) {
+        const sampleStep = 1 / Math.max(60, animation.fps);
+        for (let time = 0; time < animation.duration - 1e-8; time += sampleStep) times.push(time);
+        times.push(animation.duration);
+      }
+      times.sort((a, b) => a - b);
+      for (let index = times.length - 1; index > 0; index--) {
+        if (Math.abs(times[index] - times[index - 1]) <= 1e-8) times.splice(index, 1);
+      }
       if (times.length === 0) continue;
       if (times[0] > 0) times.unshift(0);
       if (times.at(-1) < animation.duration) times.push(animation.duration);
@@ -792,6 +803,15 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
 
 function parseTimelineAnimations(records, componentByIndex, propertyNames) {
   const animations = []; let animation = null; let target = null; let property = null;
+  const artboardSourceIndex = records[0]?.visit.sourceObjectIndex ?? 0;
+  const interpolators = new Map(records
+    .filter(record => ['CubicEaseInterpolator', 'CubicInterpolator'].includes(record.visit.sourceName))
+    .map(record => [record.visit.sourceObjectIndex - artboardSourceIndex, [
+      finite(record.fields.x1) ?? 0.42,
+      finite(record.fields.y1) ?? 0,
+      finite(record.fields.x2) ?? 0.58,
+      finite(record.fields.y2) ?? 1,
+    ]]));
   for (const record of records) {
     const source = record.visit.sourceName;
     if (source === 'LinearAnimation') {
@@ -812,7 +832,12 @@ function parseTimelineAnimations(records, componentByIndex, propertyNames) {
       const curve = animation.curves.at(-1);
       if (curve?.target !== target || curve?.property !== property) continue;
       const frame = Number.isFinite(record.fields.frame) ? record.fields.frame : 0;
-      curve.keys.push({ frame, time: frame / animation.fps, value });
+      const easing = interpolators.get(record.fields.interpolatorId);
+      curve.keys.push({
+        frame, time: frame / animation.fps, value,
+        interpolationType: Number(record.fields.interpolationType ?? 1),
+        ...(easing?.every(Number.isFinite) ? { easing } : {}),
+      });
     }
   }
   return animations;
@@ -1014,13 +1039,22 @@ export function compileComponentListInteractionDocument(hierarchy, records, reso
 
 export function compileStateMachineHoverInteractionDocument(hierarchy) {
   const targets = []; const listeners = [];
+  const runtimeNodes = new Set(hierarchy.entries
+    .filter(entry => entry.nodeEligible !== false)
+    .map(entry => entry.objectId));
   for (const [index, state] of hierarchy.hoverStates.entries()) {
     const targetId = `rive-state-machine-hover-${String(index).padStart(6, '0')}`;
     const origin = globalNodeOrigin(state.hitNode, hierarchy);
     const parentScale = globalNodeParentScale(state.hitNode, hierarchy);
     const width = positive(state.width, 1) * parentScale[0];
     const height = positive(state.height, 1) * parentScale[1];
-    const args = { idleNode: state.idleNode, hoverNode: state.hoverNode };
+    const idleNodes = variantRuntimeRoots('rive-sm-idle::');
+    const hoverNodes = variantRuntimeRoots('rive-sm-hover::');
+    const args = {
+      idleNode: state.idleNode, hoverNode: state.hoverNode,
+      ...(idleNodes.length > 1 ? { idleNodes } : {}),
+      ...(hoverNodes.length > 1 ? { hoverNodes } : {}),
+    };
     targets.push({
       id: targetId, component: state.hitNode, order: index,
       transform: [1, 0, 0, 1, origin[0], origin[1]],
@@ -1038,6 +1072,16 @@ export function compileStateMachineHoverInteractionDocument(hierarchy) {
     format: 'haiyue-interaction', version: 1, extension: 'org.haiyue.interaction@1', dragThreshold: 4,
     targets, listeners,
   };
+
+  function variantRuntimeRoots(prefix) {
+    return hierarchy.entries
+      .filter(entry => entry.nodeEligible !== false && entry.objectId.startsWith(prefix))
+      .filter(entry => {
+        const parent = hierarchy.parentNodeByObjectId.get(entry.objectId);
+        return !parent || !runtimeNodes.has(parent) || !parent.startsWith(prefix);
+      })
+      .map(entry => entry.objectId);
+  }
 }
 
 function audioArguments(prefix, audio) {
@@ -1231,7 +1275,7 @@ function coreTrackBase(group) {
   return [group.property === 'opacity' ? finite(base.opacity) ?? 1 : finite(base.rotation) ?? 0];
 }
 
-function curveAt(curve, time, fallback) {
+export function curveAt(curve, time, fallback) {
   if (!curve?.keys?.length) return fallback;
   const keys = curve.keys;
   if (time <= keys[0].time) return keys[0].value;
@@ -1239,10 +1283,36 @@ function curveAt(curve, time, fallback) {
     const right = keys[index]; const left = keys[index - 1];
     if (time <= right.time) {
       const span = Math.max(1e-9, right.time - left.time);
-      return left.value + (right.value - left.value) * ((time - left.time) / span);
+      const linearProgress = (time - left.time) / span;
+      const progress = left.interpolationType === 0
+        ? 0
+        : left.interpolationType === 2 && left.easing
+          ? cubicBezierProgress(linearProgress, left.easing)
+          : linearProgress;
+      return left.value + (right.value - left.value) * progress;
     }
   }
   return keys.at(-1).value;
+}
+
+function cubicBezierProgress(progress, easing) {
+  const [x1, y1, x2, y2] = easing;
+  const x = Math.max(0, Math.min(1, progress));
+  let lower = 0; let upper = 1; let parameter = x;
+  for (let iteration = 0; iteration < 16; iteration++) {
+    const estimate = cubicBezierCoordinate(parameter, x1, x2);
+    if (Math.abs(estimate - x) <= 1e-7) break;
+    if (estimate < x) lower = parameter; else upper = parameter;
+    parameter = (lower + upper) / 2;
+  }
+  return cubicBezierCoordinate(parameter, y1, y2);
+}
+
+function cubicBezierCoordinate(parameter, first, second) {
+  const inverse = 1 - parameter;
+  return 3 * inverse * inverse * parameter * first
+    + 3 * inverse * parameter * parameter * second
+    + parameter * parameter * parameter;
 }
 
 export function rivePointerHoverProfile(records, animations, selectedStateMachine) {
