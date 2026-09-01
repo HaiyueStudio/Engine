@@ -150,7 +150,7 @@ export function orderEntriesForRiveDrawStack(entries, drawableOrder) {
   }
   for (const positions of positionsByScope.values()) {
     const drawables = positions.map(index => output[index]).sort((left, right) =>
-      drawableOrder.get(left.sourceObjectId ?? left.objectId) - drawableOrder.get(right.sourceObjectId ?? right.objectId));
+      drawableOrder.get(right.sourceObjectId ?? right.objectId) - drawableOrder.get(left.sourceObjectId ?? left.objectId));
     positions.forEach((position, index) => { output[position] = drawables[index]; });
   }
   return output;

@@ -688,7 +688,7 @@ test('shape feather keeps a bounded translucent fill while layout feather remain
   assert.equal(vectorPaint(fill, [solid, feather], new Map(), 'LayoutComponent').stroke.width, 2);
 });
 
-test('Rive drawable stack preserves painter order inside each expanded artboard scope', () => {
+test('Rive front-to-back drawable ledger is reversed into painter order inside each expanded artboard scope', () => {
   const entries = [
     { objectId: 'root-a', sourceObjectId: 'root-a', sourceName: 'Artboard', scopeKey: 'a' },
     { objectId: 'a-front', sourceObjectId: 'front', sourceName: 'Shape', scopeKey: 'a' },
@@ -699,7 +699,7 @@ test('Rive drawable stack preserves painter order inside each expanded artboard 
   ];
   const ordered = orderEntriesForRiveDrawStack(entries, new Map([['front', 1], ['back', 2]]));
   assert.deepEqual(ordered.map(value => value.objectId), [
-    'root-a', 'a-front', 'a-layout', 'a-back', 'b-front', 'b-back',
+    'root-a', 'a-back', 'a-layout', 'a-front', 'b-back', 'b-front',
   ]);
 });
 
