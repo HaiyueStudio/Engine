@@ -655,6 +655,9 @@ function parseComponent(
       type,
       commands,
       values,
+      ...(component.blendMode === undefined ? {} : {
+        blendMode: literal(component.blendMode, ['normal', 'additive', 'multiplicative', 'screen'] as const, `${path}.blendMode`),
+      }),
       ...(morph ? { morph } : {}),
       ...(component.morphRelative === true ? { morphRelative: true } : {}),
       ...(fill ? { fill } : {}),

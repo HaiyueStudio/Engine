@@ -34,7 +34,7 @@ export interface AnimationVisual2DOptions {
   effects?: readonly AnimationVisualEffect[];
 }
 
-export type AnimationVisual2DBlendMode = 'normal' | 'additive' | 'multiplicative';
+export type AnimationVisual2DBlendMode = 'normal' | 'additive' | 'multiplicative' | 'screen';
 export type AnimationVisual2DTextureAlphaMode = 'straight' | 'premultiplied';
 
 export interface AnimationVisualGradient {

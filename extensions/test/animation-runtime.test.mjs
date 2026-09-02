@@ -448,6 +448,7 @@ test('source-neutral vector shape runtime animates morph, color and opacity on o
     ...animationFixture(),
     nodes: [{ id: 'vector', components: [{
       type: 'org.haiyue.vector-shape@1', commands: 'MLLLZ', values: [0, 0, 20, 0, 20, 20, 0, 20],
+      blendMode: 'screen',
       morph: {
         times: [0, 1], valueSize: 8, interpolation: 'linear',
         values: [0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 10, 0, 0, 0, 0, 0],
@@ -471,6 +472,7 @@ test('source-neutral vector shape runtime animates morph, color and opacity on o
   player.seek(0.5);
   world.update(500, 0);
   assert.equal(visual.geometry, geometry);
+  assert.equal(visual.blendMode, 'screen');
   assert.equal(geometry.version, 2, 'initial sampled pose and midpoint update reuse the same geometry object');
   assert.ok(Math.abs(visual.color[0] - 0.5) < 1e-5);
   assert.ok(Math.abs(visual.color[1] - 0.5) < 1e-5);

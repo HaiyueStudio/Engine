@@ -922,6 +922,9 @@ function createCoreVisual(
     ...(component.type === 'sprite2d' ? { requiresTexture: true, uvRect: component.uvRect ?? [0, 0, 1, 1] } : {}),
     ...(component.type === 'text2d' ? { requiresTexture: true, textMaterial } : {}),
     ...(gradient ? { gradient } : {}),
+    ...(component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID && component.blendMode
+      ? { blendMode: component.blendMode }
+      : {}),
     ...(effects?.length ? { effects: createVisualEffects(effects, 0) } : {}),
   });
   const initialStyleAlpha = component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID

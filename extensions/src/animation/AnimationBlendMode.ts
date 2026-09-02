@@ -1,4 +1,4 @@
-export type AnimationBlendMode = 'normal' | 'additive' | 'multiplicative';
+export type AnimationBlendMode = 'normal' | 'additive' | 'multiplicative' | 'screen';
 export type AnimationTextureAlphaMode = 'straight' | 'premultiplied';
 
 export interface AnimationBlendPixelInput {
@@ -20,6 +20,10 @@ export function animationBlendState(mode: AnimationBlendMode): GPUBlendState {
   if (mode === 'multiplicative') return {
     color: { srcFactor: 'dst', dstFactor: 'one-minus-src-alpha', operation: 'add' },
     alpha: { srcFactor: 'zero', dstFactor: 'one', operation: 'add' },
+  };
+  if (mode === 'screen') return {
+    color: { srcFactor: 'one', dstFactor: 'one-minus-src', operation: 'add' },
+    alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
   };
   return {
     color: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
@@ -55,6 +59,12 @@ export function composeAnimationBlendPixel(input: AnimationBlendPixelInput): rea
     clamp01(source[1] * destination[1] + destination[1] * (1 - sourceAlpha)),
     clamp01(source[2] * destination[2] + destination[2] * (1 - sourceAlpha)),
     destination[3],
+  ];
+  if (input.mode === 'screen') return [
+    clamp01(source[0] + destination[0] * (1 - source[0])),
+    clamp01(source[1] + destination[1] * (1 - source[1])),
+    clamp01(source[2] + destination[2] * (1 - source[2])),
+    clamp01(sourceAlpha + destination[3] * (1 - sourceAlpha)),
   ];
   return [
     clamp01(source[0] + destination[0] * (1 - sourceAlpha)),

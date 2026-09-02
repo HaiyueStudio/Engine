@@ -25,7 +25,7 @@ import {
   sampleDeformableMesh2DPose,
 } from '../dist-test/deformable-animation/runtime/DeformableMesh2DPoseMixer.js';
 
-test('Cubism premultiplied blend contract covers normal, additive and multiplicative alpha semantics', () => {
+test('animation premultiplied blend contract covers normal, additive, multiplicative and screen semantics', () => {
   assert.deepEqual(animationBlendState('normal'), {
     color: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
     alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
@@ -38,9 +38,14 @@ test('Cubism premultiplied blend contract covers normal, additive and multiplica
     color: { srcFactor: 'dst', dstFactor: 'one-minus-src-alpha', operation: 'add' },
     alpha: { srcFactor: 'zero', dstFactor: 'one', operation: 'add' },
   });
+  assert.deepEqual(animationBlendState('screen'), {
+    color: { srcFactor: 'one', dstFactor: 'one-minus-src', operation: 'add' },
+    alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
+  });
   assert.equal(animationBlendFragmentEntryPoint('normal'), 'fs_main');
   assert.equal(animationBlendFragmentEntryPoint('additive'), 'fs_main');
   assert.equal(animationBlendFragmentEntryPoint('multiplicative'), 'fs_main');
+  assert.equal(animationBlendFragmentEntryPoint('screen'), 'fs_main');
   assert.equal(animationBlendFragmentEntryPoint('normal', 'premultiplied'), 'fs_main_premultiplied_texture');
   assert.equal(animationBlendFragmentEntryPoint('additive', 'premultiplied'), 'fs_main_premultiplied_texture');
   assert.equal(animationBlendFragmentEntryPoint('multiplicative', 'premultiplied'), 'fs_main_premultiplied_texture');
@@ -51,6 +56,7 @@ test('Cubism premultiplied blend contract covers normal, additive and multiplica
   assertPixelClose(composeAnimationBlendPixel({ ...common, mode: 'normal' }), [0.275, 0.38125, 0.5875, 0.78125]);
   assertPixelClose(composeAnimationBlendPixel({ ...common, mode: 'additive' }), [0.3, 0.43125, 0.6625, 0.75]);
   assertPixelClose(composeAnimationBlendPixel({ ...common, mode: 'multiplicative' }), [0.195, 0.3625, 0.5625, 0.75]);
+  assertPixelClose(composeAnimationBlendPixel({ ...common, mode: 'screen' }), [0.28, 0.41875, 0.625, 0.78125]);
   assert.deepEqual(
     composeAnimationBlendPixel({ ...common, coverage: 0, mode: 'multiplicative' }),
     destination,

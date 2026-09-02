@@ -267,6 +267,8 @@ export interface AnimationVectorShapeComponent {
   readonly type: typeof ANIMATION_VECTOR_SHAPE_EXTENSION_ID;
   readonly commands: string;
   readonly values: readonly number[] | Float32Array;
+  /** Drawable-level compositing retained from source vector runtimes. */
+  readonly blendMode?: 'normal' | 'additive' | 'multiplicative' | 'screen';
   readonly morph?: AnimationVectorValueTrack;
   /** When true, morph samples are added component-wise to `values`. */
   readonly morphRelative?: boolean;

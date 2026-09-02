@@ -32,10 +32,14 @@ import {
   orderEntriesForRiveDrawStack,
   paintSource,
   resolveNestedLeafFitTransforms,
+  riveKeyFrameInterpolationType,
+  responsiveHoverHorizontalCompensation,
   responsiveHoverScaleFactor,
   responsiveHoverVerticalCompensation,
   rivePointerHoverProfile,
   scopedTimelineSegments,
+  timelineCurvesInterpolation,
+  timelineGroupInterpolation,
   scriptedListInitializers,
   textWrapMode,
   vectorPath,
@@ -87,7 +91,7 @@ test('scoped hover timelines preserve an exit tail outside the repeated idle ran
 });
 
 test('responsive nested hover inherits its fitted ancestor magnification', () => {
-  const root = { objectId: 'planet', sourceName: 'Artboard', fields: { height: 500 } };
+  const root = { objectId: 'planet', sourceName: 'Artboard', fields: { width: 500, height: 500 } };
   const fitted = { objectId: 'grid', sourceName: 'Artboard', fields: { scaleX: 1.414, scaleY: 1.414 } };
   const hierarchy = {
     entries: [root, fitted],
@@ -95,11 +99,34 @@ test('responsive nested hover inherits its fitted ancestor magnification', () =>
   };
   const scope = { nodeByComponentIndex: new Map([[0, root]]) };
   assert.equal(responsiveHoverScaleFactor(hierarchy, scope), 1.414);
+  assert.ok(Math.abs(responsiveHoverHorizontalCompensation(root, 1.414) - 51.75) < 1e-9);
   assert.ok(Math.abs(responsiveHoverVerticalCompensation(root, 1.414) + 103.5) < 1e-9);
   assert.equal(booleanTransitionDurationSeconds([
     { visit: { sourceName: 'StateTransition' }, fields: { duration: 200 } },
     { visit: { sourceName: 'TransitionBoolCondition' }, fields: { inputId: 1 } },
   ]), 0.2);
+});
+
+test('authored STEP keyframes remain discrete in HYA core tracks', () => {
+  assert.equal(riveKeyFrameInterpolationType(undefined), 0);
+  assert.equal(riveKeyFrameInterpolationType(1), 1);
+  assert.equal(timelineGroupInterpolation({ curves: new Map([['rotation', { keys: [
+    { time: 0, interpolationType: 0 },
+    { time: 0.5, interpolationType: 0 },
+    { time: 1, interpolationType: 0 },
+  ] }]]) }), 'step');
+  assert.equal(timelineGroupInterpolation({ curves: new Map([['rotation', { keys: [
+    { time: 0, interpolationType: 1 },
+    { time: 1, interpolationType: 1 },
+  ] }]]) }), 'linear');
+  assert.equal(timelineCurvesInterpolation([
+    { keys: [{ time: 0, interpolationType: 0 }] },
+    { keys: [{ time: 0, interpolationType: 0 }, { time: 1, interpolationType: 0 }] },
+  ]), 'step', 'static geometry curves do not erase a real Hold segment');
+  assert.equal(timelineCurvesInterpolation([
+    { keys: [{ time: 0, interpolationType: 0 }, { time: 1, interpolationType: 0 }] },
+    { keys: [{ time: 0, interpolationType: 1 }, { time: 1, interpolationType: 1 }] },
+  ]), 'linear', 'ordinary geometry deformation stays continuous');
 });
 
 test('embedded inventory scripts lower their deterministic initial component lists', () => {
@@ -921,6 +948,35 @@ test('Rive container clipping applies an inherited alpha mask to its subtree', (
     { kind: 'mask', source: 'face::rive-clip-mask-0002', mode: 'alpha', operation: 'intersect' },
     { kind: 'mask', source: 'eye::rive-clip-mask-0006', mode: 'alpha', operation: 'intersect' },
   ] });
+});
+
+test('Rive rounded layout clipping lowers clip=true and propagates it to descendants', () => {
+  const entries = [
+    { objectId: 'layout', componentIndex: 1, sourceName: 'LayoutComponent', scopeKey: 'grid', fields: { width: 300, height: 200, x: 20, y: 30, clip: true, styleId: 2 } },
+    { objectId: 'style', componentIndex: 2, sourceName: 'LayoutComponentStyle', scopeKey: 'grid', fields: { cornerRadiusTL: 24 } },
+    { objectId: 'planet', componentIndex: 3, sourceName: 'Shape', scopeKey: 'grid', fields: { parentId: 1 } },
+  ];
+  const result = compileImageClipMasks({
+    entries,
+    parentNodeByObjectId: new Map([['layout', 'root'], ['planet', 'layout']]),
+  });
+  assert.equal(result.nodes.length, 1);
+  assert.equal(result.nodes[0].parent, 'root');
+  assert.deepEqual(result.nodes[0].transform.position, [20, 30]);
+  assert.equal(result.nodes[0].components[0].commands, 'MLCLCLCLCZ');
+  assert.deepEqual(result.compositeByTarget.get('planet'), {
+    kind: 'mask', source: 'layout::rive-layout-clip-mask', mode: 'alpha', operation: 'intersect',
+  });
+});
+
+test('Rive screen drawable blend is preserved on executable vector paints', () => {
+  const components = compileVectorComponents({ entries: [
+    { objectId: 'vapor', componentIndex: 1, sourceName: 'Shape', scopeKey: 'planet', fields: { blendModeValue: 14 } },
+    { objectId: 'ellipse', componentIndex: 2, sourceName: 'Ellipse', scopeKey: 'planet', fields: { parentId: 1, width: 20, height: 10 } },
+    { objectId: 'fill', componentIndex: 3, sourceName: 'Fill', scopeKey: 'planet', fields: { parentId: 1 } },
+    { objectId: 'color', componentIndex: 4, sourceName: 'SolidColor', scopeKey: 'planet', fields: { parentId: 3, colorValue: [0.5, 0.5, 0.5, 1] } },
+  ] });
+  assert.equal(components.get('vapor')[0].blendMode, 'screen');
 });
 
 test('layout backing paint lowers to a visible drop shadow behind the opaque surface', () => {

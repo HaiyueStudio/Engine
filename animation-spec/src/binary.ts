@@ -376,6 +376,9 @@ function encodeComponent(
       component.tolerance ?? -1,
       component.modifiers ? component.modifiers.map(modifier => encodeVectorModifier(modifier, floats)) : 0,
       component.morphRelative === true ? 1 : 0,
+      component.blendMode === undefined
+        ? -1
+        : ['normal', 'additive', 'multiplicative', 'screen'].indexOf(component.blendMode),
     ];
   }
   if (component.type === 'sprite2d') return encodeSpriteComponent(
@@ -899,6 +902,9 @@ function decodeComponent(
         )),
       }),
       ...(component.length < 10 || component[9] !== 1 ? {} : { morphRelative: true }),
+      ...(component.length < 11 || component[10] === -1 ? {} : {
+        blendMode: indexedLiteral(['normal', 'additive', 'multiplicative', 'screen'] as const, component[10], `${path}[10]`),
+      }),
     }, validationPath, options, countBudget);
   }
   if (code === 6) {

@@ -7,7 +7,7 @@
 | Family | Runtime objects | Properties | 当前 HYA | Owner |
 | --- | ---: | ---: | --- | --- |
 | import-neutral-ir | 8 partial | 8 full + 33 partial | 基础 canvas/node/transform 可表达；无 `.riv` reader、multi-artboard/import IR | G02 |
-| vector-paint-composite | 29 partial | 19 full + 58 partial | path、solid/gradient、stroke、morph、trim/round 有基础；effects/feather/multi-paint/composite 不完整 | G03 |
+| vector-paint-composite | 29 partial | 19 full + 58 partial | path、solid/gradient、stroke、morph、trim/round、screen blend 与 layout clip 有基础；effects/feather/multi-paint/其余 blend/composite 不完整 | G03 |
 | rig-mesh-constraint | 22 partial | 8 full + 84 partial | sampled deformable pose 可播放；参数化 bones/weights/joystick/constraints 不完整 | G04 |
 | text-layout-component-asset | 20 partial + 17 missing | 14 full + 57 partial + 115 missing | 基础 text/image/font resource 有；Rive shaping、layout、nested components、asset replacement 不完整 | G05 |
 | timeline-state-machine | 59 partial | 77 partial | typed inputs/layers/basic blend 有；完整 property animation/listener/transition semantics 不完整 | G06 |
@@ -56,9 +56,9 @@
 - entry/exit/any、single/1D/direct/additive blend、layer order、exit time/pause、ordered conditions/comparators、focus/listener actions。
 - fixed timestamp ordering、seek/settle determinism、event emission exactly-once 和 per-channel ownership/mixing。
 
-当前的官方 Eight Planets 有界回归已支持 pointer boolean listener、启用 work area 的时间轴裁剪、入场后循环 idle、独立 exit tail、拓扑稳定 vertex/path morph，以及由已解析 nested-fit 倍率降级出的 hover scale。pointer exit 会先执行 `NeptuneOut → NeptuneDefault`，完成缩小和位置复位后才切回 idle tree；重新 enter 会重播入场。上述能力只覆盖该素材命中的确定性子图；通用 flex reflow、拓扑变化 path、任意 condition/blend/interruption 与其他 listener 类型仍属缺口，因此本族不升级为 `full`。
+当前的官方 Eight Planets 有界回归已支持 pointer boolean listener、启用 work area 的时间轴裁剪、入场后循环 idle、独立 exit tail、拓扑稳定 vertex/path morph、Rive Hold/STEP 关键帧、LayoutComponent 圆角裁剪、Drawable screen blend，以及由已解析 nested-fit 倍率降级出的 hover scale。pointer exit 会先执行 `NeptuneOut → NeptuneDefault`，完成缩小和位置复位后才切回 idle tree；重新 enter 会重播入场。上述能力只覆盖该素材命中的确定性子图；通用 flex reflow、拓扑变化 path、其余 blend mode、任意 condition/blend/interruption 与其他 listener 类型仍属缺口，因此本族不升级为 `full`。
 
-播放器现可声明 `loopStartTime` 与 `loopEndTime`：首轮从 0 播放，只循环中间的 idle 区间，并保留 loop end 后的 exit tail 供交互离开时单次执行。Eight Planets 同时消费父 boolean transition 的 `200 ms` duration，并以垂直中心补偿将 nested-fit 放大/缩小降级为仅沿水平方向展开和回收；`PointsPath` 轮廓 morph 以源动画帧率采样并使用 step hold，避免显示刷新之间额外平滑。这不等同于实现通用 transition blending 或 Yoga reflow。
+播放器现可声明 `loopStartTime` 与 `loopEndTime`：首轮从 0 播放，只循环中间的 idle 区间，并保留 loop end 后的 exit tail 供交互离开时单次执行。Eight Planets 同时消费父 boolean transition 的 `200 ms` duration，并以 resolved nested-fit scale、垂直中心补偿和扣除运行时缩放自带位移后的剩余水平锚点补偿还原放大/缩小。省略 `interpolationType` 的 Rive keyframe 按 schema 默认 Hold 生成 HYA STEP track，轮廓因此保留逐段跳转节奏；普通 vertex/path morph 仍连续插值。`LayoutComponent.clip=true` 会生成继承到子树的圆角 alpha mask，Vapor 的 Rive screen blend 则由 WebGPU 固定混合执行。这不等同于实现通用 transition blending、所有 blend mode 或 Yoga reflow。
 
 ### Data、interaction、events 与 accessibility
 

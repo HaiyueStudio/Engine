@@ -363,6 +363,7 @@ test('HYA v2 round-trips ordered composite stacks and animated vector paints', (
         ] },
         components: [{
           type: 'org.haiyue.vector-shape@1', commands: 'MLLLZ', values: [0, 0, 40, 0, 40, 40, 0, 40],
+          blendMode: 'screen',
           morph: {
             times: [0, 2], valueSize: 8, interpolation: 'linear',
             values: [0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0],
@@ -391,6 +392,7 @@ test('HYA v2 round-trips ordered composite stacks and animated vector paints', (
   assert.equal(vector.values.buffer, binary);
   assert.equal(vector.morph.values.buffer, binary);
   assert.equal(vector.morphRelative, true);
+  assert.equal(vector.blendMode, 'screen');
   assert.equal(vector.fill.opacity, 0.75);
   assert.deepEqual(Array.from(vector.fill.opacityTrack.values), [0.75, 0.25]);
 });

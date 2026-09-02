@@ -684,7 +684,12 @@ async function compileCoreTimeline(hierarchy, report, objects) {
       if (!curve || curve.target !== target || curve.property !== property) continue;
       const value = record.fields.value;
       if (!Number.isFinite(value)) continue;
-      lastKey = { frame: Number.isFinite(record.fields.frame) ? record.fields.frame : 0, value };
+      lastKey = {
+        frame: Number.isFinite(record.fields.frame) ? record.fields.frame : 0,
+        value,
+        // Rive's serialized default is Hold (0); linear keys explicitly store 1.
+        interpolationType: riveKeyFrameInterpolationType(record.fields.interpolationType),
+      };
       curve.keys.push(lastKey); continue;
     }
     if (name === 'DataBindContext' && lastKey) lastKey.binding = record.fields.sourcePathIds;
@@ -719,7 +724,7 @@ async function compileCoreTimeline(hierarchy, report, objects) {
       const size = group.property === 'position' || group.property === 'scale' ? 2 : 1;
       let track = tracksByBinding.get(binding);
       if (!track) {
-        track = { node: group.target.objectId, property: group.property, interpolation: 'linear', times: [0], values: coreTrackBase(group) };
+        track = { node: group.target.objectId, property: group.property, interpolation: timelineGroupInterpolation(group), times: [0], values: coreTrackBase(group) };
         tracksByBinding.set(binding, track);
       }
       if (item.start > track.times.at(-1) + 1e-6) {
@@ -806,11 +811,17 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
       if (!tracksByBinding.has(positionBinding)) {
         const x = finite(scopeRoot.fields.x) ?? 0;
         const y = finite(scopeRoot.fields.y) ?? 0;
+        const horizontalCompensation = responsiveHoverHorizontalCompensation(scopeRoot, responsiveScale);
         const verticalCompensation = responsiveHoverVerticalCompensation(scopeRoot, responsiveScale);
         tracksByBinding.set(positionBinding, {
           node: scopeRoot.objectId, property: 'position', interpolation: 'linear',
           times: [0, motionDuration, segments.exitStart, Math.min(duration, segments.exitStart + motionDuration)],
-          values: [x, y, x, y + verticalCompensation, x, y + verticalCompensation, x, y],
+          values: [
+            x, y,
+            x + horizontalCompensation, y + verticalCompensation,
+            x + horizontalCompensation, y + verticalCompensation,
+            x, y,
+          ],
         });
       }
     }
@@ -857,9 +868,15 @@ function compileScopedAnimationTimeline(hierarchy, report, objects, propertyName
       const clippedTimes = times.filter(time => start + time <= end + 1e-8);
       if (clippedTimes.length === 0 || start + clippedTimes.at(-1) < end - 1e-8) clippedTimes.push(end - start);
       const binding = `${group.target.objectId}\0${group.property}`;
+      const interpolation = timelineGroupInterpolation(group);
       const track = tracksByBinding.get(binding) ?? {
-        node: group.target.objectId, property: group.property, interpolation: 'linear', times: [], values: [],
+        node: group.target.objectId, property: group.property, interpolation, times: [], values: [],
       };
+      // Core tracks carry one interpolation mode. When a source binding mixes
+      // discrete and continuous animation blocks, preserving the authored
+      // discrete cadence is the only choice that does not invent in-between
+      // poses for STEP keys.
+      if (interpolation === 'step') track.interpolation = 'step';
       tracksByBinding.set(binding, track);
       for (const time of clippedTimes) {
         track.times.push(Math.max(0, Math.min(duration, start + time)));
@@ -913,6 +930,27 @@ export function booleanTransitionDurationSeconds(records) {
 export function responsiveHoverVerticalCompensation(root, scale) {
   const height = positive(root?.fields?.height, 0);
   return height > 0 && Number.isFinite(scale) ? -height * (scale - 1) / 2 : 0;
+}
+
+export function responsiveHoverHorizontalCompensation(root, scale) {
+  const width = positive(root?.fields?.width, 0);
+  // The runtime's local-origin scaling already supplies half of the visual
+  // rightward shift. Lower only the remaining anchor delta from nested fit.
+  return width > 0 && Number.isFinite(scale) ? width * (scale - 1) / 4 : 0;
+}
+
+export function timelineGroupInterpolation(group) {
+  const curves = group?.curves instanceof Map ? [...group.curves.values()] : [];
+  return timelineCurvesInterpolation(curves);
+}
+
+export function timelineCurvesInterpolation(curves) {
+  const segmentKeys = curves.flatMap(curve => curve.keys.slice(0, -1));
+  return segmentKeys.length > 0 && segmentKeys.every(key => key.interpolationType === 0) ? 'step' : 'linear';
+}
+
+export function riveKeyFrameInterpolationType(value) {
+  return Number.isFinite(value) ? Number(value) : 0;
 }
 
 export function responsiveHoverScaleFactor(hierarchy, scope) {
@@ -974,7 +1012,9 @@ function parseTimelineAnimations(records, componentByIndex, propertyNames) {
       const easing = interpolators.get(record.fields.interpolatorId);
       curve.keys.push({
         frame, time: frame / animation.fps, value,
-        interpolationType: Number(record.fields.interpolationType ?? 1),
+        // InterpolatingKeyFrame omits its schema-default Hold value. Linear
+        // and cubic keys serialize 1 and 2 respectively.
+        interpolationType: riveKeyFrameInterpolationType(record.fields.interpolationType),
         ...(easing?.every(Number.isFinite) ? { easing } : {}),
       });
     }
@@ -1033,7 +1073,7 @@ async function attachScopedVectorMorphs(vectorComponents, hierarchy, report, obj
     const entries = [...scope.nodeByComponentIndex.values()];
     const byIndex = new Map(entries.map(entry => [entry.componentIndex, entry]));
     const shapeSchedules = new Map();
-    const frameHeldShapes = new Set();
+    const morphCurves = new Map();
     for (const schedule of schedules) {
       for (const curve of schedule.animation.curves) {
         if (!curve.keys.length || !isVectorGeometryEntry(curve.target)) continue;
@@ -1042,7 +1082,8 @@ async function attachScopedVectorMorphs(vectorComponents, hierarchy, report, obj
         const values = shapeSchedules.get(shape) ?? [];
         if (!values.includes(schedule)) values.push(schedule);
         shapeSchedules.set(shape, values);
-        if (curve.target.sourceName === 'PointsPath') frameHeldShapes.add(shape);
+        const curves = morphCurves.get(shape) ?? [];
+        curves.push(curve); morphCurves.set(shape, curves);
       }
     }
     for (const [shape, relevant] of shapeSchedules) {
@@ -1064,10 +1105,10 @@ async function attachScopedVectorMorphs(vectorComponents, hierarchy, report, obj
       const valueSize = components[0].values.length;
       const first = values.slice(0, valueSize);
       if (!values.some((value, index) => Math.abs(value - first[index % valueSize]) > 1e-6)) continue;
-      // Rive evaluates authored point-path deformation at the animation frame cadence.
-      // Holding each sampled polygon until the next sample preserves the deliberately
-      // stepped/jittered silhouette instead of smoothing it between display refreshes.
-      const morph = { times, values, valueSize, interpolation: frameHeldShapes.has(shape) ? 'step' : 'linear' };
+      // Preserve Hold only when every contributing geometry curve is authored as
+      // Hold. Ordinary point-path deformation remains continuous; discrete shape
+      // rotation such as LoopIce is already carried by its STEP transform track.
+      const morph = { times, values, valueSize, interpolation: timelineCurvesInterpolation(morphCurves.get(shape) ?? []) };
       vectorComponents.set(shape.objectId, components.map(component => ({ ...component, morph })));
     }
   }
@@ -2802,7 +2843,10 @@ export function compileVectorComponents(hierarchy) {
       for (const paint of paints) {
         const style = vectorPaint(paint, childEntries(children, paint), children, shape.sourceName);
         if (!style) continue;
-        components.push({ type: 'org.haiyue.vector-shape@1', ...path, ...style });
+        components.push({
+          type: 'org.haiyue.vector-shape@1', ...path, ...style,
+          ...riveVectorBlendMode(shape.fields.blendModeValue),
+        });
       }
     }
     if (components.length > 0) output.set(shape.objectId, components);
@@ -2953,6 +2997,40 @@ export function compileImageClipMasks(hierarchy) {
   for (const target of hierarchy.entries) {
     const clips = childEntries(children, target).filter(value => value.sourceName === 'ClippingShape');
     const layers = [];
+    if (target.sourceName === 'LayoutComponent' && target.fields.clip === true) {
+      const width = positive(target.fields.width, 0); const height = positive(target.fields.height, 0);
+      const style = localEntry(hierarchy.entries, target, target.fields.styleId);
+      const path = width > 0 && height > 0 ? vectorPath({
+        sourceName: 'Rectangle',
+        fields: {
+          x: width / 2, y: height / 2, width, height,
+          cornerRadiusTL: style?.fields.cornerRadiusTL,
+          cornerRadiusTR: style?.fields.cornerRadiusTR,
+          cornerRadiusBR: style?.fields.cornerRadiusBR,
+          cornerRadiusBL: style?.fields.cornerRadiusBL,
+          linkCornerRadius: style?.fields.linkCornerRadius,
+        },
+      }, []) : null;
+      if (path) {
+        const id = `${target.objectId}::rive-layout-clip-mask`;
+        const transform = compact({
+          position: pair(target.fields.x, target.fields.y),
+          rotation: finite(target.fields.rotation),
+          scale: pair(target.fields.scaleX ?? 1, target.fields.scaleY ?? 1),
+        });
+        nodes.push(compact({
+          id,
+          parent: hierarchy.parentNodeByObjectId.get(target.objectId),
+          transform: Object.keys(transform).length > 0 ? transform : undefined,
+          components: [{
+            type: 'org.haiyue.vector-shape@1', ...path,
+            fill: { kind: 'solid', color: [1, 1, 1, 1], opacity: 1 }, fillRule: 'nonzero',
+          }],
+          extensions: { riveGeneratedLayoutClipMask: true },
+        }));
+        layers.push({ kind: 'mask', source: id, mode: 'alpha', operation: 'intersect' });
+      }
+    }
     for (const clip of clips) {
       const shape = localEntry(hierarchy.entries, clip, clip.fields.sourceId);
       if (!shape || shape.sourceName !== 'Shape') continue;
@@ -2982,7 +3060,9 @@ export function compileImageClipMasks(hierarchy) {
     else if (layers.length > 1) compositeByTarget.set(target.objectId, { layers });
   }
   const directComposites = new Map(compositeByTarget);
-  for (const [targetId, direct] of directComposites) {
+  for (const target of hierarchy.entries) {
+    const targetId = target.objectId;
+    const direct = directComposites.get(targetId);
     const inherited = [];
     let parentId = hierarchy.parentNodeByObjectId.get(targetId);
     for (let depth = 0; parentId && depth < 128; depth++) {
@@ -2991,8 +3071,9 @@ export function compileImageClipMasks(hierarchy) {
       parentId = hierarchy.parentNodeByObjectId.get(parentId);
     }
     if (inherited.length > 0) {
-      const layers = [...inherited, ...('layers' in direct ? direct.layers : [direct])];
-      compositeByTarget.set(targetId, { layers });
+      const own = direct ? ('layers' in direct ? direct.layers : [direct]) : [];
+      const layers = [...inherited, ...own];
+      compositeByTarget.set(targetId, layers.length === 1 ? layers[0] : { layers });
     }
   }
   return { nodes, compositeByTarget };
@@ -3180,6 +3261,12 @@ export function paintSource(entry, owned) {
   const normalizedStops = (stops.length >= 2 ? stops : [{ offset: 0, color: [0, 0, 0, 1] }, { offset: 1, color: [1, 1, 1, 1] }]).flatMap(stop => [stop.offset, ...stop.color]);
   if (entry.sourceName === 'RadialGradient') return { kind: 'radial-gradient', start: [finite(entry.fields.startX) ?? 0, finite(entry.fields.startY) ?? 0], end: [finite(entry.fields.endX) ?? 1, finite(entry.fields.endY) ?? 0], stops: normalizedStops };
   return { kind: 'linear-gradient', start: [finite(entry.fields.startX) ?? 0, finite(entry.fields.startY) ?? 0], end: [finite(entry.fields.endX) ?? 1, finite(entry.fields.endY) ?? 0], stops: normalizedStops };
+}
+
+function riveVectorBlendMode(value) {
+  // Rive serializes Skia's blend-mode ordinal; 14 is screen. HYA executes it
+  // directly instead of baking the source gray into the output color.
+  return value === 14 ? { blendMode: 'screen' } : {};
 }
 
 // Rive 7.3's serialized SolidColor omits colorValue when it is the schema
