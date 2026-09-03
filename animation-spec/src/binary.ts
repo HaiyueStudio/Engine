@@ -433,7 +433,7 @@ function encodeTextComponent(
     component.animators?.map(animator => encodeTextAnimator(animator, floats)) ?? 0,
     component.expression ?? 0,
     [
-      component.fit === 'shrink' ? 1 : 0,
+      component.fit === 'scale' ? 1 : component.fit === 'font-size' ? 2 : 0,
       component.wrap === 'word' ? 1 : 0,
       component.lineBackground ? [
         component.lineBackground.fill,
@@ -442,7 +442,29 @@ function encodeTextComponent(
         component.lineBackground.cornerRadius ?? 0,
         component.lineBackground.padding ?? 0,
       ] : 0,
+      component.paragraphSpacing ?? 0,
+      encodeOptionalVectorTrack(component.paragraphSpacingTrack, floats),
+      component.overflow === undefined ? -1 : ['visible', 'hidden', 'clip', 'ellipsis'].indexOf(component.overflow),
+      component.fitFromBaseline === undefined ? -1 : component.fitFromBaseline ? 1 : 0,
     ],
+    component.styleRuns?.map(run => [
+      run.start, run.end,
+      strings.add(run.fontFamily), run.fontSize ?? 0,
+      encodeFontWeight(run.fontWeight, strings),
+      run.fontStyle === undefined ? -1 : run.fontStyle === 'normal' ? 0 : 1,
+      strings.add(run.fontResource), run.lineHeight ?? 0, run.tracking ?? null,
+      run.color ?? 0,
+      run.lineBackground ? [
+        run.lineBackground.fill,
+        run.lineBackground.stroke ?? 0,
+        run.lineBackground.strokeWidth ?? 0,
+        run.lineBackground.cornerRadius ?? 0,
+        run.lineBackground.padding ?? 0,
+      ] : 0,
+      encodeOptionalVectorTrack(run.fontSizeTrack, floats),
+      encodeOptionalVectorTrack(run.lineHeightTrack, floats),
+      encodeOptionalVectorTrack(run.trackingTrack, floats),
+    ]) ?? 0,
   ];
 }
 
@@ -938,7 +960,12 @@ function decodeComponent(
         )),
       }),
       ...(component.length < 20 || component[19] === 0 ? {} : { expression: component[19] }),
-      ...(component.length < 21 ? {} : decodeTextLayoutFields(component[20], `${path}[20]`)),
+      ...(component.length < 21 ? {} : decodeTextLayoutFields(component[20], floatPool, `${path}[20]`)),
+      ...(component.length < 22 || component[21] === 0 ? {} : {
+        styleRuns: compactArray(component[21], `${path}[21]`).map((run, index) => (
+          decodeTextStyleRun(run, strings, floatPool, `${path}[21][${index}]`)
+        )),
+      }),
     }, validationPath, options, countBudget);
   }
   if (code === 7) {
@@ -966,16 +993,22 @@ function decodeOptionalStringField(
   return decoded === undefined ? {} : { [key]: decoded };
 }
 
-function decodeTextLayoutFields(value: unknown, path: string): Record<string, unknown> {
+function decodeTextLayoutFields(value: unknown, floatPool: Float32Array, path: string): Record<string, unknown> {
   const fields = compactArray(value, path);
   if (fields.length < 3) invalidBinary(`Compact text layout fields are truncated at ${path}.`);
   const background = fields[2] === 0 ? undefined : compactArray(fields[2], `${path}[2]`);
   if (background !== undefined && background.length < 5) {
     invalidBinary(`Compact text line background is truncated at ${path}[2].`);
   }
+  const overflowIndex = fields.length < 6 || fields[5] === -1 ? -1 : finiteInteger(fields[5], `${path}[5]`);
+  if (overflowIndex > 3) invalidBinary(`Compact text overflow is invalid at ${path}[5].`);
   return {
-    ...(fields[0] === 1 ? { fit: 'shrink' } : {}),
+    ...(fields[0] === 1 ? { fit: 'scale' } : fields[0] === 2 ? { fit: 'font-size' } : {}),
     ...(fields[1] === 1 ? { wrap: 'word' } : {}),
+    ...(fields.length < 4 || fields[3] === 0 ? {} : { paragraphSpacing: fields[3] }),
+    ...(fields.length < 5 ? {} : decodeVectorTrackField(fields, 4, 'paragraphSpacingTrack', floatPool, path)),
+    ...(overflowIndex < 0 ? {} : { overflow: ['visible', 'hidden', 'clip', 'ellipsis'][overflowIndex] }),
+    ...(fields.length < 7 || fields[6] === -1 ? {} : { fitFromBaseline: fields[6] === 1 }),
     ...(background === undefined ? {} : {
       lineBackground: {
         fill: background[0],
@@ -985,6 +1018,39 @@ function decodeTextLayoutFields(value: unknown, path: string): Record<string, un
         ...(background[4] === 0 ? {} : { padding: background[4] }),
       },
     }),
+  };
+}
+
+function decodeTextStyleRun(value: unknown, strings: readonly string[], floatPool: Float32Array, path: string): Record<string, unknown> {
+  const run = compactArray(value, path);
+  if (run.length < 11) invalidBinary(`Compact text style run is truncated at ${path}.`);
+  const background = run[10] === 0 ? undefined : compactArray(run[10], `${path}[10]`);
+  if (background !== undefined && background.length < 5) {
+    invalidBinary(`Compact text style run background is truncated at ${path}[10].`);
+  }
+  return {
+    start: run[0],
+    end: run[1],
+    ...decodeOptionalStringField(run[2], 'fontFamily', strings, `${path}[2]`),
+    ...(run[3] === 0 ? {} : { fontSize: run[3] }),
+    ...decodeFontWeightField(run[4], strings, `${path}[4]`),
+    ...(run[5] === -1 ? {} : { fontStyle: indexedLiteral(['normal', 'italic'] as const, run[5], `${path}[5]`) }),
+    ...decodeOptionalStringField(run[6], 'fontResource', strings, `${path}[6]`),
+    ...(run[7] === 0 ? {} : { lineHeight: run[7] }),
+    ...(run[8] === null ? {} : { tracking: run[8] }),
+    ...(run[9] === 0 ? {} : { color: run[9] }),
+    ...(background === undefined ? {} : {
+      lineBackground: {
+        fill: background[0],
+        ...(background[1] === 0 ? {} : { stroke: background[1] }),
+        ...(background[2] === 0 ? {} : { strokeWidth: background[2] }),
+        ...(background[3] === 0 ? {} : { cornerRadius: background[3] }),
+        ...(background[4] === 0 ? {} : { padding: background[4] }),
+      },
+    }),
+    ...(run.length < 12 ? {} : decodeVectorTrackField(run, 11, 'fontSizeTrack', floatPool, path)),
+    ...(run.length < 13 ? {} : decodeVectorTrackField(run, 12, 'lineHeightTrack', floatPool, path)),
+    ...(run.length < 14 ? {} : decodeVectorTrackField(run, 13, 'trackingTrack', floatPool, path)),
   };
 }
 

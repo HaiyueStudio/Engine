@@ -403,10 +403,10 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
           "sourceId": "builtin.animation-2d",
           "sourceName": "shader-language/builtin-components-2d-ui-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 266
+          "generatedEndLine": 295
         }
       ],
-      "canonicalHash": "0f2a34f837fc979a85de250e19b843c31c4f75cf996f13a7a476ceb476e83b95"
+      "canonicalHash": "bfc05c7caf732ca525ac27c6b7b7a8915c37d0a750bbb6d0261217b1edada26e"
     },
     "canvas-text-2d": {
       "id": "canvas-text-2d",
@@ -718,6 +718,24 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
           "location": 3,
           "type": "vec4<f32>",
           "interpolation": "flat"
+        },
+        {
+          "semantic": "COLOR_MATRIX_0",
+          "location": 4,
+          "type": "vec4<f32>",
+          "interpolation": "flat"
+        },
+        {
+          "semantic": "COLOR_MATRIX_1",
+          "location": 5,
+          "type": "vec4<f32>",
+          "interpolation": "flat"
+        },
+        {
+          "semantic": "COLOR_MATRIX_2",
+          "location": 6,
+          "type": "vec4<f32>",
+          "interpolation": "flat"
         }
       ],
       "renderTargets": [
@@ -735,17 +753,18 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
       "passRequirements": [
         "indexed-palette-bank",
         "truecolor-atlas",
-        "alpha-blend"
+        "alpha-blend",
+        "rgb-affine-color-matrix"
       ],
       "sourceMap": [
         {
           "sourceId": "builtin.indexed-sprite",
           "sourceName": "shader-language/builtin-components-2d-ui-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 112
+          "generatedEndLine": 129
         }
       ],
-      "canonicalHash": "608d244df34cfc6ceda58a7c900472da425f9db0bbad5aa4d418bdc5ad228544"
+      "canonicalHash": "922becd3e6153801d9de6a87d94d4d8bdde460dfaa73c1327c651942768f35d1"
     },
     "spine2d": {
       "id": "spine2d",
@@ -1052,5 +1071,5 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
       "canonicalHash": "4d1ef60104af17bdb6c837bbdb67640c96abf7533f156510de4da5240c8c388e"
     }
   },
-  "artifactHash": "51ba72be2c62bf011a4f5c2f0c87dde90c767fdfa796a77694083f405b536933"
+  "artifactHash": "aa797734c68546113ce049e6a09c6b380b9cf113b6fc6f36b4855c54b4438376"
 } as const;

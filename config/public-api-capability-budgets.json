@@ -75,7 +75,7 @@
             "./controls": 9,
             "./font": 13,
             "./geometry": 53,
-            "./gui": 70,
+            "./gui": 71,
             "./input": 3,
             "./lighting": 19,
             "./material": 69,
@@ -111,7 +111,8 @@
             "./experimental/gpu-driven": 25,
             "./experimental/ktx2-worker-runtime": 0,
             "./experimental/renderer": 51,
-            "./experimental/simulation": 30
+            "./experimental/simulation": 30,
+            "./experimental/audio": 5
           }
         }
       ]
@@ -124,7 +125,7 @@
           "stability": "stable",
           "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
           "entrypoints": {
-            "./animation": 26,
+            "./animation": 33,
             "./animation3d": 75,
             "./canvas-text": 4,
             "./deformable-animation": 6,

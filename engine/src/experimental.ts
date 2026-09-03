@@ -78,6 +78,7 @@ export type { AssetJobState, DeviceRecoveryPhase, DeviceRecoveryProgress, Engine
 export { InputMap } from './input/InputMap';
 export type { InputActionBindings, InputActionSnapshot } from './input/InputMap';
 export * from './experimental/simulation';
+export * from './experimental/audio';
 
 // GUI
 export * from './gui';

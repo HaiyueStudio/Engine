@@ -1,5 +1,5 @@
 export type AnimationBlendMode = 'normal' | 'additive' | 'multiplicative' | 'screen';
-export type AnimationTextureAlphaMode = 'straight' | 'premultiplied';
+export type AnimationTextureAlphaMode = 'straight' | 'premultiplied' | 'rive-text';
 
 export interface AnimationBlendPixelInput {
   /** Straight-alpha display-encoded source sample after drawable tinting. */
@@ -34,8 +34,9 @@ export function animationBlendState(mode: AnimationBlendMode): GPUBlendState {
 export function animationBlendFragmentEntryPoint(
   mode: AnimationBlendMode,
   textureAlphaMode: AnimationTextureAlphaMode = 'straight',
-): 'fs_main' | 'fs_main_premultiplied_texture' {
+): 'fs_main' | 'fs_main_premultiplied_texture' | 'fs_main_rive_text' {
   void mode;
+  if (textureAlphaMode === 'rive-text') return 'fs_main_rive_text';
   return textureAlphaMode === 'premultiplied' ? 'fs_main_premultiplied_texture' : 'fs_main';
 }
 

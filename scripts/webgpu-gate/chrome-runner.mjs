@@ -148,6 +148,10 @@ async function runChrome(
   const profile = mkdtempSync(resolve(tmpdir(), 'haiyue-webgpu-gate-'));
   const child = spawn(binary, [
     '--headless=new',
+    // Evidence captures exercise real audio scheduling, but a headless gate
+    // must never emit sound through the user's desktop output device.
+    '--mute-audio',
+    '--autoplay-policy=no-user-gesture-required',
     '--no-sandbox',
     '--disable-gpu-sandbox',
     '--enable-unsafe-webgpu',
@@ -723,6 +727,7 @@ function connectCdp(url, defaultCallTimeoutMs) {
 function contentType(path) {
   switch (extname(path)) {
     case '.html': return 'text/html; charset=utf-8';
+    case '.css': return 'text/css; charset=utf-8';
     case '.js':
     case '.mjs': return 'text/javascript; charset=utf-8';
     case '.json': return 'application/json; charset=utf-8';

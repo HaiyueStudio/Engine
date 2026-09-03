@@ -77,10 +77,19 @@ export interface AnimationText2DComponent {
   padding?: number;
   /** Optional per-line decoration used by shaped text runs. */
   lineBackground?: AnimationTextLineBackground;
-  /** Deterministically reduce the authored size until the shaped block fits. */
-  fit?: 'none' | 'shrink';
+  /** Rive-compatible overflow fitting: scale the shaped block or search an integer top font size. */
+  fit?: 'none' | 'scale' | 'font-size';
+  /** Behavior for shaped lines outside the authored box when fitting is disabled. */
+  overflow?: 'visible' | 'hidden' | 'clip' | 'ellipsis';
+  /** Preserve the first baseline while applying `fit: 'scale'`. */
+  fitFromBaseline?: boolean;
   /** Optional wrapping performed before fit evaluation. */
   wrap?: 'none' | 'word';
+  /** Additional canvas units inserted after an authored paragraph break. */
+  paragraphSpacing?: number;
+  paragraphSpacingTrack?: AnimationVectorValueTrack;
+  /** UTF-16 ranges carrying source text-run styling overrides. */
+  styleRuns?: readonly AnimationTextStyleRun[];
   resolutionScale?: number;
   /** Step-keyed source-neutral text documents. The first entry may start after zero. */
   documents?: readonly AnimationTextDocumentKeyframe[];
@@ -88,6 +97,25 @@ export interface AnimationText2DComponent {
   animators?: readonly AnimationTextAnimator[];
   /** Verified source-neutral program evaluated as a pure Text Document input. */
   expression?: import('./expression').AnimationSafeExpressionProgram;
+}
+
+export interface AnimationTextStyleRun {
+  /** Inclusive UTF-16 offset into the component text. */
+  readonly start: number;
+  /** Exclusive UTF-16 offset into the component text. */
+  readonly end: number;
+  readonly fontFamily?: string;
+  readonly fontSize?: number;
+  readonly fontSizeTrack?: AnimationVectorValueTrack;
+  readonly fontWeight?: string | number;
+  readonly fontStyle?: 'normal' | 'italic';
+  readonly fontResource?: string;
+  readonly lineHeight?: number;
+  readonly lineHeightTrack?: AnimationVectorValueTrack;
+  readonly tracking?: number;
+  readonly trackingTrack?: AnimationVectorValueTrack;
+  readonly color?: readonly [number, number, number, number];
+  readonly lineBackground?: AnimationTextLineBackground;
 }
 
 export interface AnimationTextLineBackground {

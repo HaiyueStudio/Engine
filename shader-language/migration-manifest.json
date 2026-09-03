@@ -47,6 +47,7 @@
       "sources": [
         "extensions/src/shaders/generated/2d-ui-animation-2d.generated.wgsl",
         "extensions/src/shaders/generated/2d-ui-canvas-text-2d.generated.wgsl",
+        "extensions/src/shaders/generated/2d-ui-indexed-sprite.generated.wgsl",
         "extensions/src/shaders/generated/2d-ui-spine2d.generated.wgsl",
         "extensions/src/shaders/generated/2d-ui-tilemap2d.generated.wgsl",
         "engine/src/shaders/generated/2d-ui-bitmap-text.generated.wgsl",

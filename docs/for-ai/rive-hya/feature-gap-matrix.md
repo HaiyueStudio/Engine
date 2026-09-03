@@ -34,6 +34,7 @@
 
 - procedural paths 的所有可动画参数、多 fill/stroke、有序 effect group、fill rule、blend、clip 与 draw rule。
 - gradient stop/transform/opacity、dash/trim、feather、image mesh、N-slice、solo/draw-order。
+- `official-inventory-demo-v2` 已在 production lowering 中保留 gradient opacity，并把带 inner Feather 的 gradient 限制到边缘带；但 HYA vector paint 还没有每个 fill 的 signed-distance feather，backpack shell 仍只能使用 gradient stroke 近似。因此该素材的 paint blocker 和本族 `partial` 状态均未关闭。
 - custom path effect 只能通过 G09 sandboxed protocol；不得直接注入 renderer。
 - `visual-baked` 仅可用于无任何 runtime observable 的纯视觉局部，并保留误差/采样 attribution。
 
@@ -49,6 +50,8 @@
 - Yoga-equivalent row/column/grid、absolute/relative、hug/fill、min/max、gap/padding/alignment、overflow、reflow animation。
 - scroll physics/snap/bar/virtualization/carousel、responsive resize、N-slice 和 nested component sizing。
 - embedded/referenced/hosted font/image/blob/text/manifest assets；hash、MIME、CORS/URL policy、replacement identity 与 disposal。
+
+当前定向 differential 中，`official-text-fit` 的 shaping、word wrap、`scale`/`font-size` fit、overflow 与自定义行高已在诊断环境达到 pixel validator `passed`（最大通道差 `1/255`、changed pixel ratio `0`、SSIM `0.9999994597`）。`official-text-style-background` 的多 style run、字体 outline、joined background bounds 与 painter order 已对齐，但每帧仍有 `3–6` 个字形边缘采样像素不同（最大通道差 `104/255`、最高 changed pixel ratio `0.00146484375`），所以 text family 继续保持 `partial`；该结果也不能替代 clean revision 的正式设备 trace。
 
 ### Timeline、state machine 与 mixing
 

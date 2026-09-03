@@ -112,6 +112,7 @@ export class Animation2DRuntime {
   private readonly _fontLoads = new Map<string, {
     state: 'loading' | 'loaded' | 'failed';
     readonly rasterizers: Set<AnimationTextRasterizer>;
+    data?: ArrayBuffer;
   }>();
   private readonly _fontFaces: FontFace[] = [];
   private readonly _expressionDataLoads = new Map<string, {
@@ -560,6 +561,12 @@ export class Animation2DRuntime {
         style: document.fontStyle ?? component.fontStyle ?? 'normal',
         weight: document.fontWeight ?? component.fontWeight ?? 400,
       } : null),
+      ...(component.styleRuns ?? []).map(run => run.fontResource ? {
+        resource: run.fontResource,
+        family: run.fontFamily ?? component.fontFamily ?? 'sans-serif',
+        style: run.fontStyle ?? component.fontStyle ?? 'normal',
+        weight: run.fontWeight ?? component.fontWeight ?? 400,
+      } : null),
     ].filter((value): value is NonNullable<typeof value> => value !== null);
     for (const descriptor of descriptors) this._loadFont(descriptor, rasterizer);
   }
@@ -571,7 +578,9 @@ export class Animation2DRuntime {
     const key = `${descriptor.resource}:${descriptor.family}:${descriptor.style}:${descriptor.weight}`;
     const existing = this._fontLoads.get(key);
     if (existing) {
-      if (existing.state === 'loaded') rasterizer.invalidateFont();
+      if (existing.state === 'loaded' && existing.data) {
+        rasterizer.setFontData(descriptor.family, descriptor.style, descriptor.weight, existing.data);
+      }
       else if (existing.state === 'loading') existing.rasterizers.add(rasterizer);
       return;
     }
@@ -611,7 +620,10 @@ export class Animation2DRuntime {
       const current = this._fontLoads.get(key);
       if (current) {
         current.state = 'loaded';
-        for (const target of current.rasterizers) target.invalidateFont();
+        current.data = handle.value;
+        for (const target of current.rasterizers) {
+          target.setFontData(descriptor.family, descriptor.style, descriptor.weight, handle.value);
+        }
         current.rasterizers.clear();
       }
     }).catch(() => {
@@ -920,7 +932,14 @@ function createCoreVisual(
     sourceOnly: sourceGroup !== undefined,
     ...(composite ? { composite } : {}),
     ...(component.type === 'sprite2d' ? { requiresTexture: true, uvRect: component.uvRect ?? [0, 0, 1, 1] } : {}),
-    ...(component.type === 'text2d' ? { requiresTexture: true, textMaterial } : {}),
+    ...(component.type === 'text2d' ? {
+      requiresTexture: true,
+      textMaterial,
+      // Canvas glyph coverage must stay premultiplied through the generated
+      // mip chain. Averaging straight-alpha transparent texels and multiplying
+      // afterwards squares edge coverage and visibly softens small text.
+      textureAlphaMode: 'rive-text' as const,
+    } : {}),
     ...(gradient ? { gradient } : {}),
     ...(component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID && component.blendMode
       ? { blendMode: component.blendMode }

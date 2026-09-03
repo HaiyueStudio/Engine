@@ -491,7 +491,17 @@ test('parser validates bounded text, particle and audio core components', () => 
       components: [
         {
           type: 'text2d', text: 'Hello', size: [160, 40], color: [1, 1, 1, 1], fontSize: 24,
-          fit: 'shrink', wrap: 'word',
+          fit: 'font-size', overflow: 'clip', fitFromBaseline: true, wrap: 'word',
+          paragraphSpacing: 12,
+          paragraphSpacingTrack: { times: [0, 1], values: [12, 24], valueSize: 1, interpolation: 'linear' },
+          styleRuns: [
+            {
+              start: 0, end: 2, fontSize: 18, lineHeight: 22, color: [1, 0, 0, 1],
+              fontSizeTrack: { times: [0, 1], values: [18, 20], valueSize: 1, interpolation: 'linear' },
+              lineHeightTrack: { times: [0, 1], values: [22, 25], valueSize: 1, interpolation: 'linear' },
+            },
+            { start: 2, end: 5, fontWeight: 700, tracking: 1.5, color: [0, 0, 1, 1] },
+          ],
           lineBackground: { fill: [0, 1, 0, 1], stroke: [1, 0, 1, 1], strokeWidth: 2, cornerRadius: 8, padding: 3 },
         },
         {
@@ -508,8 +518,13 @@ test('parser validates bounded text, particle and audio core components', () => 
   const parsed = parseAnimation(source);
   assert.deepEqual(parsed.nodes[0].components.map(component => component.type), ['text2d', 'particle2d', 'audio']);
   const roundTrip = parseAnimation(encodeAnimationBinary(source));
-  assert.equal(roundTrip.nodes[0].components[0].fit, 'shrink');
+  assert.equal(roundTrip.nodes[0].components[0].fit, 'font-size');
+  assert.equal(roundTrip.nodes[0].components[0].overflow, 'clip');
+  assert.equal(roundTrip.nodes[0].components[0].fitFromBaseline, true);
   assert.equal(roundTrip.nodes[0].components[0].wrap, 'word');
+  assert.equal(roundTrip.nodes[0].components[0].paragraphSpacing, 12);
+  assert.deepEqual(Array.from(roundTrip.nodes[0].components[0].paragraphSpacingTrack.values), [12, 24]);
+  assert.deepEqual(Array.from(roundTrip.nodes[0].components[0].styleRuns[0].lineHeightTrack.values), [22, 25]);
   assert.deepEqual(roundTrip.nodes[0].components[0].lineBackground, source.nodes[0].components[0].lineBackground);
   assert.equal(roundTrip.nodes[0].components[1].maxParticles, 128);
   assert.throws(() => parseAnimation(source, { maxTextCharacters: 4 }), /text characters/);

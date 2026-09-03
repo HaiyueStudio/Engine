@@ -16,6 +16,7 @@ export default {
     'experimental/gpu-driven': 'src/experimental/gpu-driven.ts',
     'experimental/renderer': 'src/experimental/renderer.ts',
     'experimental/simulation': 'src/experimental/simulation.ts',
+    'experimental/audio': 'src/experimental/audio.ts',
     core: 'src/core.ts',
     assets: 'src/assets.ts',
     diagnostics: 'src/diagnostics.ts',

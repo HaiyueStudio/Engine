@@ -96,6 +96,10 @@
       "types": "./dist/experimental/simulation.d.ts",
       "import": "./dist/experimental/simulation.js"
     },
+    "./experimental/audio": {
+      "types": "./dist/experimental/audio.d.ts",
+      "import": "./dist/experimental/audio.js"
+    },
     "./systems": {
       "types": "./dist/systems.d.ts",
       "import": "./dist/systems.js"

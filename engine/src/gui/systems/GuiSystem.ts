@@ -39,10 +39,20 @@ interface CachedCanvasRect {
   top: number;
 }
 
+export interface GuiFontOptions {
+  readonly chars?: string;
+  readonly fontSize?: number;
+  readonly fontFamily?: string;
+  readonly padding?: number;
+  readonly atlasSize?: number;
+}
+
 export interface GuiSystemOptions {
   preventDefault?: boolean;
   /** 'clear' resets the canvas; 'load' composites GUI on top of earlier render systems. Defaults to 'load'. */
   loadOp?: 'clear' | 'load';
+  /** Optional runtime bitmap-font atlas. Include every glyph used by this GUI. */
+  font?: GuiFontOptions;
 }
 
 export class GuiSystem extends System {
@@ -59,7 +69,8 @@ export class GuiSystem extends System {
   private hovered: GuiElement | null = null;
   private pressed: GuiElement | null = null;
   private roots = new Set<GuiRoot>();
-  private renderer = new GuiRenderer();
+  private renderer: GuiRenderer;
+  private readonly font: GuiFontOptions;
   private disposed = false;
   private composing = false;
   loadOp: 'clear' | 'load';
@@ -78,6 +89,8 @@ export class GuiSystem extends System {
     this.engine = engine;
     this.preventDefault = options.preventDefault ?? true;
     this.loadOp = options.loadOp ?? 'load';
+    this.font = Object.freeze({ ...options.font });
+    this.renderer = new GuiRenderer(this.font);
     this.recoveryLabel = `${this.name}:${this.id}`;
     this.unregisterRecovery = engine.registerDeviceRecoveryParticipant?.(this) ?? null;
     this.bindCanvas();
@@ -109,7 +122,7 @@ export class GuiSystem extends System {
 
   recoverGpuResource(_device: GPUDevice, signal: AbortSignal): void {
     if (signal.aborted) throw signal.reason;
-    this.renderer = new GuiRenderer();
+    this.renderer = new GuiRenderer(this.font);
   }
 
   private bindCanvas(): void {

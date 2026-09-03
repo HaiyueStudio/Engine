@@ -76,6 +76,8 @@ export interface IndexedSpriteDrawCommand {
   readonly rotationRadians?: number;
   readonly opacity?: number;
   readonly tint?: readonly [number, number, number, number];
+  /** Row-major RGB affine transform: three vec4 rows containing rgb coefficients and additive bias. */
+  readonly colorMatrix?: readonly [number, number, number, number, number, number, number, number, number, number, number, number];
   readonly flipX?: boolean;
   readonly flipY?: boolean;
   readonly sampling?: IndexedSpriteSampling;

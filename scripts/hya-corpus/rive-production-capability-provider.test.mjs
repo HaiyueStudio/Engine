@@ -25,8 +25,11 @@ import {
   finalizeComponentListMetrics,
   finalizeComponentListHitWidths,
   lowerLayoutBackdropEffects,
+  localPaints,
   mapEmbeddedAssets,
+  nestedAnimationName,
   nestedLeafRootScale,
+  resolveComponentParents,
   normalizeAnimationWorkArea,
   numberStateMachineAnimationName,
   orderEntriesForRiveDrawStack,
@@ -41,15 +44,62 @@ import {
   timelineCurvesInterpolation,
   timelineGroupInterpolation,
   scriptedListInitializers,
+  syncNestedLayoutArtboardSize,
   textWrapMode,
   vectorPath,
   vertexPath,
   vectorPaint,
 } from './rive-production-capability-provider.mjs';
+
+test('component hierarchy resolves forward parents without shifting sparse CoreContext indices', () => {
+  const parents = resolveComponentParents([
+    { objectId: 'root', componentIndex: 0, fields: {} },
+    { objectId: 'child', componentIndex: 2, fields: { parentId: 4 } },
+    { objectId: 'forward-parent', componentIndex: 4, fields: { parentId: 0 } },
+  ]);
+  assert.equal(parents.get('child'), 'forward-parent');
+  assert.equal(parents.get('forward-parent'), 'root');
+});
 import { FROZEN_PROPERTIES } from '../../animation-spec/dist-test/rive/import/generated/frozen-registry.js';
 import { parseHyaStateMachineV2 } from '../../animation-spec/dist-test/state-machine-v2/parser.js';
 import { parseHyaDataBinding } from '../../animation-spec/dist-test/data-binding/parser.js';
 import { parseHyaInteraction } from '../../animation-spec/dist-test/interaction/parser.js';
+
+test('nested state machines do not inherit a same-named parent simple animation', () => {
+  const artboardId = 'object:00000010';
+  const animationId = 'object:00000011';
+  const animationNameField = 'field:00000011:000000';
+  const hierarchy = {
+    entries: [
+      { objectId: 'nested-host', componentIndex: 4, fields: {} },
+      { objectId: 'nested-machine', sourceName: 'NestedStateMachine', fields: { parentId: 4, animationId: 0 } },
+    ],
+  };
+  const report = { objects: [
+    { neutralObjectId: artboardId, sourceName: 'Artboard', properties: [] },
+    {
+      neutralObjectId: animationId,
+      sourceName: 'LinearAnimation',
+      properties: [{ sourceName: 'name', neutralFieldIds: [animationNameField] }],
+    },
+  ] };
+  const objects = new Map([
+    [artboardId, { id: artboardId, properties: [] }],
+    [animationId, {
+      id: animationId,
+      properties: [{ id: animationNameField, value: { type: 'string', value: 'Timeline 1' } }],
+    }],
+  ]);
+
+  assert.equal(nestedAnimationName(
+    hierarchy,
+    'nested-host',
+    report,
+    objects,
+    artboardId,
+    'Timeline 1',
+  ), undefined);
+});
 
 test('animation work areas crop and rebase authored keyframes', () => {
   const animation = normalizeAnimationWorkArea({
@@ -620,7 +670,7 @@ test('component-list rows use intrinsic text widths before flex placement', () =
   applyComponentListLayout(hierarchy);
   applySimpleLayoutTransforms(hierarchy);
 
-  assert.equal(hierarchy.entries[1].fields.flexDirectionValue, 1);
+  assert.equal(hierarchy.entries[1].fields.flexDirectionValue, 2);
   assert.equal(hierarchy.entries[2].fields.width, 36);
   assert.equal(hierarchy.entries[3].fields.width, 60);
   assert.deepEqual([hierarchy.entries[2].fields.x, hierarchy.entries[2].fields.y], [0, 0]);
@@ -651,7 +701,7 @@ test('component-list infers a constrained overflow row for risk value and icon g
 
   applyComponentListLayout(hierarchy);
 
-  assert.equal(hierarchy.entries[1].fields.flexDirectionValue, 1);
+  assert.equal(hierarchy.entries[1].fields.flexDirectionValue, 2);
 });
 
 test('component-list keeps dissimilar header and expanded detail heights in a column', () => {
@@ -690,7 +740,7 @@ test('responsive layout distributes fill ratios inside the parent content box', 
   const scopeKey = 'host::list-000000::open::artboard';
   const hierarchy = { entries: [
     { componentIndex: 0, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { width: 210, height: 40, styleId: 1 } },
-    { componentIndex: 1, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 0, flexDirectionValue: 1, gapHorizontal: 10 } },
+    { componentIndex: 1, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 0, flexDirectionValue: 2, gapHorizontal: 10 } },
     { componentIndex: 2, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 1, height: 20, fractionalWidth: 1, styleId: 4 } },
     { componentIndex: 3, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 1, height: 20, fractionalWidth: 2, styleId: 5 } },
     { componentIndex: 4, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 2, layoutWidthScaleType: 1 } },
@@ -699,9 +749,44 @@ test('responsive layout distributes fill ratios inside the parent content box', 
 
   applySimpleLayoutTransforms(hierarchy);
 
-  assert.ok(Math.abs(hierarchy.entries[2].fields.width - 200 / 3) < 1e-9);
-  assert.ok(Math.abs(hierarchy.entries[3].fields.width - 400 / 3) < 1e-9);
-  assert.ok(Math.abs(hierarchy.entries[3].fields.x - (200 / 3 + 10)) < 1e-9);
+  assert.ok(Math.abs(hierarchy.entries[2].fields.width - (200 / 3)) < 1e-9);
+  assert.ok(Math.abs(hierarchy.entries[3].fields.width - (400 / 3)) < 1e-9);
+  assert.ok(Math.abs(hierarchy.entries[3].fields.x - (10 + 200 / 3)) < 1e-9);
+});
+
+test('Rive auto flex basis measures nested hug content instead of stale resolved sizes', () => {
+  const scopeKey = 'root:intrinsic-flex';
+  const hierarchy = { entries: [
+    { componentIndex: 0, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { width: 400, height: 100, styleId: 1 } },
+    { componentIndex: 1, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 0, flexDirectionValue: 2 } },
+    { componentIndex: 2, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 900, height: 100, fractionalWidth: 1, styleId: 3 } },
+    { componentIndex: 3, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 2, layoutWidthScaleType: 1 } },
+    { componentIndex: 4, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 2, width: 100, height: 40, styleId: 5 } },
+    { componentIndex: 5, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 4, intrinsicallySizedValue: true, layoutWidthScaleType: 2 } },
+    { componentIndex: 6, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 700, height: 100, fractionalWidth: 1, styleId: 7 } },
+    { componentIndex: 7, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 6, layoutWidthScaleType: 1 } },
+    { componentIndex: 8, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 6, width: 200, height: 40, styleId: 9 } },
+    { componentIndex: 9, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 8, intrinsicallySizedValue: true, layoutWidthScaleType: 2 } },
+  ] };
+
+  applySimpleLayoutTransforms(hierarchy);
+
+  assert.deepEqual([hierarchy.entries[2].fields.width, hierarchy.entries[6].fields.width], [150, 250]);
+  assert.equal(hierarchy.entries[6].fields.x, 150);
+});
+
+test('Rive flex layout applies authored margins and nine-way alignment', () => {
+  const scopeKey = 'root:aligned';
+  const hierarchy = { entries: [
+    { componentIndex: 0, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { width: 300, height: 200, styleId: 1 } },
+    { componentIndex: 1, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 0, flexDirectionValue: 2, layoutAlignmentType: 8 } },
+    { componentIndex: 2, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 100, height: 50, styleId: 3 } },
+    { componentIndex: 3, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 2, marginLeft: 10, marginRight: 20, marginTop: 5, marginBottom: 15 } },
+  ] };
+
+  applySimpleLayoutTransforms(hierarchy);
+
+  assert.deepEqual([hierarchy.entries[2].fields.x, hierarchy.entries[2].fields.y], [180, 135]);
 });
 
 test('root layout fill sizing resolves authored percent units against the canvas', () => {
@@ -721,6 +806,24 @@ test('root layout fill sizing resolves authored percent units against the canvas
   assert.deepEqual([hierarchy.entries[3].fields.x, hierarchy.entries[3].fields.y], [42, 42]);
 });
 
+test('Rive percent layout sizes resolve against the parent and text does not enter flex flow', () => {
+  const scopeKey = 'root:text-fit';
+  const hierarchy = { entries: [
+    { componentIndex: 0, scopeKey, sourceName: 'Artboard', nodeEligible: true, transformTarget: true, fields: { width: 500, height: 500, styleId: 1 } },
+    { componentIndex: 1, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 0 } },
+    { componentIndex: 2, scopeKey, sourceName: 'Text', nodeEligible: true, transformTarget: true, fields: { parentId: 0, x: 12, y: 264.5, width: 463.754, height: 216.42 } },
+    { componentIndex: 3, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 500, height: 50, styleId: 4 } },
+    { componentIndex: 4, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 3, heightUnitsValue: 2 } },
+    { componentIndex: 5, scopeKey, sourceName: 'Text', nodeEligible: true, transformTarget: true, fields: { parentId: 3, x: 94, y: 50, width: 188, height: 100 } },
+  ] };
+
+  applySimpleLayoutTransforms(hierarchy);
+
+  assert.deepEqual([hierarchy.entries[3].fields.x, hierarchy.entries[3].fields.y], [0, 0]);
+  assert.equal(hierarchy.entries[3].fields.height, 250);
+  assert.deepEqual([hierarchy.entries[5].fields.x, hierarchy.entries[5].fields.y], [94, 50]);
+});
+
 test('layout padding does not translate a nested-artboard leaf out of its host', () => {
   const scopeKey = 'root:planet';
   const hierarchy = { entries: [
@@ -735,7 +838,46 @@ test('layout padding does not translate a nested-artboard leaf out of its host',
   assert.equal(hierarchy.entries[2].fields.y, undefined);
 });
 
-test('root-aligned Rive layout layers overlap instead of accumulating off-canvas', () => {
+test('nested artboard layout reflows at its resolved host size without scaling', () => {
+  const rootScope = 'root:inventory';
+  const nestedScope = 'nested:equipment';
+  const hierarchy = { entries: [
+    { objectId: 'host', componentIndex: 0, scopeKey: rootScope, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { width: 510, height: 640 } },
+    { objectId: 'nested', componentIndex: 1, scopeKey: rootScope, sourceName: 'NestedArtboardLayout', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 510, height: 640 } },
+    { objectId: 'artboard', componentIndex: 0, scopeKey: nestedScope, sourceName: 'Artboard', instanceDepth: 1, nodeEligible: true, transformTarget: true, fields: { width: 786, height: 264, x: 12, y: 20, scaleX: 0.5, scaleY: 0.5 } },
+    { objectId: 'content', componentIndex: 1, scopeKey: nestedScope, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 786, height: 264, styleId: 2 } },
+    { objectId: 'content-style', componentIndex: 2, scopeKey: nestedScope, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 1, layoutWidthScaleType: 1, layoutHeightScaleType: 1 } },
+  ], parentNodeByObjectId: new Map([
+    ['nested', 'host'],
+    ['artboard', 'nested'],
+    ['content', 'artboard'],
+    ['content-style', 'content'],
+  ]) };
+
+  assert.equal(syncNestedLayoutArtboardSize(hierarchy, hierarchy.entries[2]), true);
+  assert.deepEqual(hierarchy.entries[2].fields, { width: 510, height: 640, x: 0, y: 0, scaleX: 1, scaleY: 1 });
+  applySimpleLayoutTransforms(hierarchy);
+  assert.deepEqual([hierarchy.entries[3].fields.width, hierarchy.entries[3].fields.height], [510, 640]);
+});
+
+test('nested artboard layout participates in Yoga flow and intrinsic sizing', () => {
+  const scopeKey = 'root:inventory-equipment';
+  const hierarchy = { entries: [
+    { objectId: 'host', componentIndex: 0, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { width: 464, height: 707, styleId: 1 } },
+    { objectId: 'host-style', componentIndex: 1, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 0, intrinsicallySizedValue: true, layoutAlignmentType: 4 } },
+    { objectId: 'equipment', componentIndex: 2, scopeKey, sourceName: 'NestedArtboardLayout', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 320, height: 605 } },
+  ], parentNodeByObjectId: new Map([
+    ['host-style', 'host'],
+    ['equipment', 'host'],
+  ]) };
+
+  applySimpleLayoutTransforms(hierarchy);
+
+  assert.deepEqual([hierarchy.entries[0].fields.width, hierarchy.entries[0].fields.height], [320, 605]);
+  assert.deepEqual([hierarchy.entries[2].fields.x, hierarchy.entries[2].fields.y], [0, 0]);
+});
+
+test('Rive default flex direction is a row even when omitted from the file', () => {
   const scopeKey = 'root:inventory';
   const hierarchy = { entries: [
     { componentIndex: 0, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { width: 1920, height: 1080, styleId: 1 } },
@@ -747,7 +889,24 @@ test('root-aligned Rive layout layers overlap instead of accumulating off-canvas
 
   applySimpleLayoutTransforms(hierarchy);
 
-  assert.deepEqual(hierarchy.entries.slice(2).map(entry => [entry.fields.x, entry.fields.y]), [[0, 0], [0, 0], [0, 0]]);
+  assert.deepEqual(hierarchy.entries.slice(2).map(entry => [entry.fields.x, entry.fields.y]), [[0, 0], [689, 0], [1153, 0]]);
+});
+
+test('Rive ignores serialized layout offsets whose Yoga unit is undefined', () => {
+  const scopeKey = 'root:layout-offset';
+  const hierarchy = { entries: [
+    { componentIndex: 0, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { width: 400, height: 100, styleId: 1 } },
+    { componentIndex: 1, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 0 } },
+    { componentIndex: 2, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 100, height: 100, styleId: 3 } },
+    { componentIndex: 3, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 2, positionLeft: 900, positionTop: 700 } },
+    { componentIndex: 4, scopeKey, sourceName: 'LayoutComponent', nodeEligible: true, transformTarget: true, fields: { parentId: 0, width: 100, height: 100, styleId: 5 } },
+    { componentIndex: 5, scopeKey, sourceName: 'LayoutComponentStyle', nodeEligible: true, transformTarget: false, fields: { parentId: 4, positionLeft: 50, positionLeftUnitsValue: 1, positionTop: 25, positionTopUnitsValue: 2 } },
+  ] };
+
+  applySimpleLayoutTransforms(hierarchy);
+
+  assert.deepEqual([hierarchy.entries[2].fields.x, hierarchy.entries[2].fields.y], [0, 0]);
+  assert.deepEqual([hierarchy.entries[4].fields.x, hierarchy.entries[4].fields.y], [150, 25]);
 });
 
 test('Rive gradient opacity multiplies every authored stop alpha', () => {
@@ -771,8 +930,45 @@ test('shape feather keeps a bounded translucent fill while layout feather remain
     stroke: { color: [0, 1, 0.5, 1], width: 2, lineCap: 'round', lineJoin: 'round', miterLimit: 4 },
   });
   const white = { sourceName: 'SolidColor', fields: { colorValue: [1, 1, 1, 0.6] } };
-  assert.equal(vectorPaint(fill, [white, feather], new Map(), 'Shape').fill.opacity, 0.0495);
+  assert.deepEqual(vectorPaint(fill, [white, feather], new Map(), 'Shape'), {
+    stroke: { color: [1, 1, 1, 0.6], width: 2, lineCap: 'round', lineJoin: 'round', miterLimit: 4 },
+  });
   assert.equal(vectorPaint(fill, [solid, feather], new Map(), 'LayoutComponent').stroke.width, 2);
+});
+
+test('neutral inner feather remains an edge highlight without washing out a shell gradient', () => {
+  const fill = { sourceName: 'Fill', fields: {} };
+  const solid = { sourceName: 'SolidColor', fields: { colorValue: [1, 1, 1, 0.6] } };
+  const feather = { sourceName: 'Feather', fields: { inner: true, strength: 12 } };
+
+  assert.deepEqual(vectorPaint(fill, [solid, feather], new Map(), 'Shape'), {
+    stroke: {
+      color: [1, 1, 1, 0.6], width: 4,
+      lineCap: 'round', lineJoin: 'round', miterLimit: 4,
+    },
+  });
+});
+
+test('gradient inner feather is bounded to an executable edge band', () => {
+  const fill = { sourceName: 'Fill', fields: {} };
+  const gradient = { sourceName: 'LinearGradient', scopeKey: 'scope', componentIndex: 7, fields: { startX: 0, startY: 0, endX: 0, endY: 100, opacity: 0.5 } };
+  const stops = [
+    { sourceName: 'GradientStop', fields: { position: 0, colorValue: [1, 1, 1, 1] } },
+    { sourceName: 'GradientStop', fields: { position: 1, colorValue: [1, 1, 1, 0] } },
+  ];
+  const feather = { sourceName: 'Feather', fields: { inner: true, strength: 38 } };
+  const children = new Map([[`scope\0${gradient.componentIndex}`, stops]]);
+
+  assert.deepEqual(vectorPaint(fill, [gradient, feather], children, 'Shape'), {
+    stroke: {
+      color: [1, 1, 1, 1],
+      gradient: {
+        kind: 'linear-gradient', start: [0, 0], end: [0, 100],
+        stops: [0, 1, 1, 1, 0.5, 1, 1, 1, 1, 0],
+      },
+      width: 38, lineCap: 'round', lineJoin: 'round', miterLimit: 4,
+    },
+  });
 });
 
 test('Rive front-to-back drawable ledger is reversed into painter order inside each expanded artboard scope', () => {
@@ -790,6 +986,15 @@ test('Rive front-to-back drawable ledger is reversed into painter order inside e
   ]);
 });
 
+test('Rive shape paint stacks are reversed into HYA painter order exactly once', () => {
+  const shape = { componentIndex: 1, scopeKey: 'scope', fields: {} };
+  const back = { componentIndex: 2, scopeKey: 'scope', sourceName: 'Fill', fields: { parentId: 1 } };
+  const middle = { componentIndex: 3, scopeKey: 'scope', sourceName: 'Fill', fields: { parentId: 1 } };
+  const front = { componentIndex: 4, scopeKey: 'scope', sourceName: 'Stroke', fields: { parentId: 1 } };
+  const children = new Map([[`scope\0${shape.componentIndex}`, [back, middle, front]]]);
+  assert.deepEqual(localPaints(shape, [shape, back, middle, front], children).map(value => value.componentIndex), [4, 3, 2]);
+});
+
 test('text compilation only shrinks oversized type for an authored fit overflow mode', () => {
   const hierarchy = { entries: [
     { componentIndex: 0, scopeKey: 'scope', objectId: 'layout', sourceName: 'LayoutComponent', fields: { width: 90, height: 27 } },
@@ -803,7 +1008,7 @@ test('text compilation only shrinks oversized type for an authored fit overflow 
   assert.deepEqual(component.size, [90, 27]);
   assert.equal(component.fontSize, 27);
   assert.equal(component.lineHeight, 27);
-  assert.equal(component.fit, 'shrink');
+  assert.equal(component.fit, 'font-size');
 });
 
 test('text compilation preserves controlled Rive overflow without a second runtime shrink', () => {
@@ -821,7 +1026,7 @@ test('text compilation preserves controlled Rive overflow without a second runti
   assert.equal(component.fit, undefined);
 });
 
-test('text compilation resolves Rive automatic line height to the HYA 1.2 em line box', () => {
+test('text compilation preserves Rive automatic line height for font-metric resolution', () => {
   const hierarchy = { entries: [
     { componentIndex: 0, scopeKey: 'scope', objectId: 'layout', sourceName: 'LayoutComponent', fields: { width: 200, height: 40 } },
     { componentIndex: 1, scopeKey: 'scope', objectId: 'text', sourceName: 'Text', fields: { parentId: 0, width: 200, height: 40 } },
@@ -831,7 +1036,34 @@ test('text compilation resolves Rive automatic line height to the HYA 1.2 em lin
 
   const component = compileTextComponents(hierarchy, new Map()).get('text')[0];
 
-  assert.equal(component.lineHeight, 14.399999999999999);
+  assert.equal(component.lineHeight, undefined);
+  assert.equal(component.styleRuns[0].lineHeight, undefined);
+});
+
+test('text compilation preserves authored style runs and glyph-line backgrounds', () => {
+  const hierarchy = { entries: [
+    { componentIndex: 0, scopeKey: 'scope', objectId: 'text', sourceName: 'Text', fields: { width: 240, height: 80, paragraphSpacing: 9 } },
+    { componentIndex: 1, scopeKey: 'scope', objectId: 'run-a', sourceName: 'TextValueRun', fields: { parentId: 0, text: 'Alpha ', styleId: 3 } },
+    { componentIndex: 2, scopeKey: 'scope', objectId: 'run-b', sourceName: 'TextValueRun', fields: { parentId: 0, text: 'Beta', styleId: 4 } },
+    { componentIndex: 3, scopeKey: 'scope', objectId: 'style-a', sourceName: 'TextStylePaint', fields: { parentId: 0, fontSize: 20, lineHeight: 24, letterSpacing: 1 } },
+    { componentIndex: 4, scopeKey: 'scope', objectId: 'style-b', sourceName: 'TextStylePaint', fields: { parentId: 0, fontSize: 12, lineHeight: 16, letterSpacing: 2 } },
+    { componentIndex: 5, scopeKey: 'scope', objectId: 'background', sourceName: 'TextStyleBackground', fields: { parentId: 4, cornerRadius: 3 } },
+    { componentIndex: 6, scopeKey: 'scope', sourceName: 'Fill', fields: { parentId: 5 } },
+    { componentIndex: 7, scopeKey: 'scope', sourceName: 'SolidColor', fields: { parentId: 6, colorValue: [0.2, 0.4, 0.6, 0.8] } },
+  ] };
+
+  const component = compileTextComponents(hierarchy, new Map()).get('text')[0];
+
+  assert.equal(component.text, 'Alpha Beta');
+  assert.equal(component.paragraphSpacing, 9);
+  assert.deepEqual(component.styleRuns.map(run => [run.start, run.end, run.fontSize, run.lineHeight, run.tracking]), [
+    [0, 6, 20, 24, 1], [6, 10, 12, 16, 2],
+  ]);
+  assert.deepEqual(component.styleRuns[1].lineBackground, {
+    fill: [0.2, 0.4, 0.6, 0.8], cornerRadius: 3, padding: 0,
+  });
+  assert.deepEqual(component.styleRuns[0].color, [0, 0, 0, 0]);
+  assert.deepEqual(component.styleRuns[1].color, [0, 0, 0, 0]);
 });
 
 test('clipped image preserves the authored off-center crop and sprite placement', () => {

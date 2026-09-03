@@ -13,6 +13,9 @@ struct SpriteInstance {
   rotation_opacity: vec4f,
   metadata: vec4u,
   tint: vec4f,
+  color_matrix_0: vec4f,
+  color_matrix_1: vec4f,
+  color_matrix_2: vec4f,
 }
 
 struct VertexOutput {
@@ -21,6 +24,9 @@ struct VertexOutput {
   @location(1) @interpolate(flat) uv_rect: vec4f,
   @location(2) @interpolate(flat) size_palette_flags: vec4u,
   @location(3) @interpolate(flat) tint_opacity: vec4f,
+  @location(4) @interpolate(flat) color_matrix_0: vec4f,
+  @location(5) @interpolate(flat) color_matrix_1: vec4f,
+  @location(6) @interpolate(flat) color_matrix_2: vec4f,
 }
 
 @group(0) @binding(0) var<uniform> viewport: ViewportUniforms;
@@ -56,7 +62,18 @@ fn vs_main(@builtin(vertex_index) vertex_index: u32, @builtin(instance_index) in
   output.uv_rect = instance.uv_rect;
   output.size_palette_flags = vec4u(u32(instance.size_axis.x), u32(instance.size_axis.y), instance.metadata.x, instance.metadata.y);
   output.tint_opacity = vec4f(instance.tint.rgb, instance.tint.a * instance.rotation_opacity.z);
+  output.color_matrix_0 = instance.color_matrix_0;
+  output.color_matrix_1 = instance.color_matrix_1;
+  output.color_matrix_2 = instance.color_matrix_2;
   return output;
+}
+
+fn apply_color_matrix(color: vec4f, input: VertexOutput) -> vec4f {
+  let rgb = vec3f(
+    dot(input.color_matrix_0.xyz, color.rgb) + input.color_matrix_0.w,
+    dot(input.color_matrix_1.xyz, color.rgb) + input.color_matrix_1.w,
+    dot(input.color_matrix_2.xyz, color.rgb) + input.color_matrix_2.w);
+  return vec4f(clamp(rgb, vec3f(0.0), vec3f(1.0)), color.a) * input.tint_opacity;
 }
 
 fn palette_color(index: u32, row: u32) -> vec4f {
@@ -103,9 +120,9 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4f {
   let flags = input.size_palette_flags.w;
   if ((flags & 1u) != 0u) {
     if ((flags & 2u) != 0u) {
-      return indexed_linear(input) * input.tint_opacity;
+      return apply_color_matrix(indexed_linear(input), input);
     }
-    return indexed_nearest(input) * input.tint_opacity;
+    return apply_color_matrix(indexed_nearest(input), input);
   }
-  return color_sample(input) * input.tint_opacity;
+  return apply_color_matrix(color_sample(input), input);
 }

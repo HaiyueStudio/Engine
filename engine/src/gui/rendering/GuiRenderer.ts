@@ -27,6 +27,14 @@ import { requiredItemAt } from '../../math/arrayAccess';
 import { GuiImageRenderer } from './GuiImageRenderer';
 import type { PipelineWarmupPlan } from '../../renderer/PipelineWarmup';
 
+interface GuiRendererFontOptions {
+  readonly chars?: string;
+  readonly fontSize?: number;
+  readonly fontFamily?: string;
+  readonly padding?: number;
+  readonly atlasSize?: number;
+}
+
 type GuiElementConstructor<T extends GuiElement = GuiElement> = new (...args: never[]) => T;
 type GuiElementRenderer<T extends GuiElement = GuiElement> = (element: T, theme: GuiTheme) => void;
 
@@ -68,8 +76,10 @@ export class GuiRenderer {
   private currentModalBatch = this.batch;
   private currentModalTextBatch = this.textBatch;
   private currentModalImageBatch = this.imageBatch;
+  private readonly fontOptions: GuiRendererFontOptions;
 
-  constructor() {
+  constructor(fontOptions: GuiRendererFontOptions = {}) {
+    this.fontOptions = Object.freeze({ ...fontOptions });
     this.registerElementRenderer(GuiButton, (element, theme) => this.addButton(element, theme));
     this.registerElementRenderer(GuiLabel, (element, theme) => this.addLabel(element, theme));
     this.registerElementRenderer(GuiModal, (element, theme) => this.addModal(element, theme));
@@ -97,11 +107,11 @@ export class GuiRenderer {
       this.textRenderer.prepare(engine);
       this.imageRenderer.prepare(engine);
       this.defaultFont = buildBitmapFont({
-      chars: ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~年月日今天周一二三四五六重置旋转翻',
-      fontSize: 32,
-      fontFamily: 'sans-serif',
-      padding: 4,
-      atlasSize: 512,
+      chars: this.fontOptions.chars ?? ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~年月日今天周一二三四五六重置旋转翻',
+      fontSize: this.fontOptions.fontSize ?? 32,
+      fontFamily: this.fontOptions.fontFamily ?? 'sans-serif',
+      padding: this.fontOptions.padding ?? 4,
+      atlasSize: this.fontOptions.atlasSize ?? 512,
       }).data;
       this.preparedDevice = engine.device;
       this.prepared = true;

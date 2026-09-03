@@ -192,7 +192,8 @@ export function finalizeParsedAnimation(
       || (component.type === 'text2d' && (() => {
         const text = component as AnimationText2DComponent;
         return text.fontResource !== undefined || text.expression !== undefined
-          || text.documents?.some(document => document.fontResource !== undefined) === true;
+          || text.documents?.some(document => document.fontResource !== undefined) === true
+          || text.styleRuns?.some(run => run.fontResource !== undefined) === true;
       })())
   )));
   const resourceIds = hasResourceReferences ? new Set(fields.resources.map(resource => resource.id)) : undefined;
@@ -238,7 +239,11 @@ export function finalizeParsedAnimation(
       if (component.type === 'text2d') {
         const text = component as AnimationText2DComponent;
         validateTextTrackDurations(text, `$.nodes[${index}].components[${componentIndex}]`, fields.duration);
-        const fontResources = [text.fontResource, ...(text.documents?.map(document => document.fontResource) ?? [])]
+        const fontResources = [
+          text.fontResource,
+          ...(text.documents?.map(document => document.fontResource) ?? []),
+          ...(text.styleRuns?.map(run => run.fontResource) ?? []),
+        ]
           .filter((resource): resource is string => resource !== undefined);
         for (const fontResource of fontResources) {
           if (!resourceIds!.has(fontResource)) {
@@ -356,6 +361,15 @@ function validateTextTrackDurations(
   const lastDocument = documents[documents.length - 1];
   if (lastDocument && lastDocument.time > Math.max(duration, Math.fround(duration))) {
     fail('Text document time exceeds the composition duration.', `${path}.documents[${documents.length - 1}].time`);
+  }
+  checkOwnerTrackDurations(component, path, ['paragraphSpacingTrack'], duration);
+  for (let index = 0; index < (component.styleRuns?.length ?? 0); index++) {
+    checkOwnerTrackDurations(
+      component.styleRuns![index]!,
+      `${path}.styleRuns[${index}]`,
+      ['fontSizeTrack', 'lineHeightTrack', 'trackingTrack'],
+      duration,
+    );
   }
   for (let index = 0; index < (component.animators?.length ?? 0); index++) {
     const animator = component.animators![index]!;
@@ -538,6 +552,9 @@ function parseComponent(
     if (resolutionScale !== undefined && resolutionScale > 4) fail('resolutionScale must be at most 4.', `${path}.resolutionScale`);
     const documents = component.documents === undefined ? undefined : parseTextDocuments(component.documents, `${path}.documents`);
     const animators = component.animators === undefined ? undefined : parseTextAnimators(component.animators, `${path}.animators`, options.copyFloatData === true);
+    const styleRuns = component.styleRuns === undefined ? undefined : parseTextStyleRuns(
+      component.styleRuns, component.text.length, `${path}.styleRuns`, options.copyFloatData === true,
+    );
     const expression = component.expression === undefined ? undefined : parseSafeExpressionProgram(component.expression, `${path}.expression`);
     if (documents) for (const document of documents) countBudget('text', document.text.length);
     return Object.freeze({
@@ -558,8 +575,13 @@ function parseComponent(
       ...(component.backgroundColor !== undefined ? { backgroundColor: color(component.backgroundColor, `${path}.backgroundColor`) } : {}),
       ...(component.padding !== undefined ? { padding: nonNegativeNumber(component.padding, `${path}.padding`) } : {}),
       ...(component.lineBackground !== undefined ? { lineBackground: textLineBackground(component.lineBackground, `${path}.lineBackground`) } : {}),
-      ...(component.fit !== undefined ? { fit: literal(component.fit, ['none', 'shrink'] as const, `${path}.fit`) } : {}),
+      ...(component.fit !== undefined ? { fit: literal(component.fit, ['none', 'scale', 'font-size'] as const, `${path}.fit`) } : {}),
+      ...(component.overflow !== undefined ? { overflow: literal(component.overflow, ['visible', 'hidden', 'clip', 'ellipsis'] as const, `${path}.overflow`) } : {}),
+      ...(component.fitFromBaseline !== undefined ? { fitFromBaseline: booleanValue(component.fitFromBaseline, `${path}.fitFromBaseline`) } : {}),
       ...(component.wrap !== undefined ? { wrap: literal(component.wrap, ['none', 'word'] as const, `${path}.wrap`) } : {}),
+      ...(component.paragraphSpacing !== undefined ? { paragraphSpacing: nonNegativeNumber(component.paragraphSpacing, `${path}.paragraphSpacing`) } : {}),
+      ...parseVectorTrackField(component, 'paragraphSpacingTrack', path, 1, options.copyFloatData === true),
+      ...(styleRuns ? { styleRuns } : {}),
       ...(resolutionScale !== undefined ? { resolutionScale } : {}),
       ...(documents ? { documents } : {}),
       ...(animators ? { animators } : {}),
@@ -671,6 +693,37 @@ function parseComponent(
   const handler = options.extensions?.get(extensionIdFromComponentType(type)!);
   handler?.validateComponent?.(component, extensionContext(type, path));
   return Object.freeze({ ...component, type });
+}
+
+function parseTextStyleRuns(value: unknown, textLength: number, path: string, copy: boolean) {
+  const runs = array(value, path);
+  if (runs.length < 1 || runs.length > 4_096) fail('Text styleRuns must contain 1–4096 entries.', path);
+  let previousEnd = 0;
+  return Object.freeze(runs.map((value, index) => {
+    const runPath = `${path}[${index}]`;
+    const run = record(value, runPath);
+    const start = boundedInteger(run.start, 0, textLength, `${runPath}.start`);
+    const end = boundedInteger(run.end, 0, textLength, `${runPath}.end`);
+    if (end <= start) fail('Text style run end must be greater than start.', `${runPath}.end`);
+    if (start < previousEnd) fail('Text style runs must be ordered and non-overlapping.', `${runPath}.start`);
+    previousEnd = end;
+    return Object.freeze({
+      start,
+      end,
+      ...(run.fontFamily === undefined ? {} : { fontFamily: nonEmptyString(run.fontFamily, `${runPath}.fontFamily`) }),
+      ...(run.fontSize === undefined ? {} : { fontSize: positiveNumber(run.fontSize, `${runPath}.fontSize`) }),
+      ...parseVectorTrackField(run, 'fontSizeTrack', runPath, 1, copy),
+      ...(run.fontWeight === undefined ? {} : { fontWeight: fontWeight(run.fontWeight, `${runPath}.fontWeight`) }),
+      ...(run.fontStyle === undefined ? {} : { fontStyle: literal(run.fontStyle, ['normal', 'italic'] as const, `${runPath}.fontStyle`) }),
+      ...(run.fontResource === undefined ? {} : { fontResource: nonEmptyString(run.fontResource, `${runPath}.fontResource`) }),
+      ...(run.lineHeight === undefined ? {} : { lineHeight: positiveNumber(run.lineHeight, `${runPath}.lineHeight`) }),
+      ...parseVectorTrackField(run, 'lineHeightTrack', runPath, 1, copy),
+      ...(run.tracking === undefined ? {} : { tracking: finiteNumber(run.tracking, `${runPath}.tracking`) }),
+      ...parseVectorTrackField(run, 'trackingTrack', runPath, 1, copy),
+      ...(run.color === undefined ? {} : { color: color(run.color, `${runPath}.color`) }),
+      ...(run.lineBackground === undefined ? {} : { lineBackground: textLineBackground(run.lineBackground, `${runPath}.lineBackground`) }),
+    });
+  }));
 }
 
 function parseTextDocuments(value: unknown, path: string) {

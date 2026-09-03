@@ -49,6 +49,7 @@ test('animation premultiplied blend contract covers normal, additive, multiplica
   assert.equal(animationBlendFragmentEntryPoint('normal', 'premultiplied'), 'fs_main_premultiplied_texture');
   assert.equal(animationBlendFragmentEntryPoint('additive', 'premultiplied'), 'fs_main_premultiplied_texture');
   assert.equal(animationBlendFragmentEntryPoint('multiplicative', 'premultiplied'), 'fs_main_premultiplied_texture');
+  assert.equal(animationBlendFragmentEntryPoint('normal', 'rive-text'), 'fs_main_rive_text');
 
   const source = [0.8, 0.25, 0.5, 0.5];
   const destination = [0.2, 0.4, 0.6, 0.75];

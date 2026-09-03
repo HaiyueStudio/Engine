@@ -48,6 +48,7 @@ export async function evaluate(request, context) {
   const imageComponents = compileImageComponents(hierarchy, resourceByAssetIndex);
   const clipMasks = compileImageClipMasks(hierarchy);
   const timeline = await compileCoreTimeline(hierarchy, report, objects);
+  await attachTextLayoutTracks(textComponents, hierarchy, report, objects, timeline.duration);
   await attachScopedVectorMorphs(vectorComponents, hierarchy, report, objects, timeline.duration);
   const capabilityArtifacts = compileCapabilityArtifacts(report, objects, timeline, hierarchy, resourceByAssetIndex);
   const hierarchyByObjectId = new Map(hierarchy.entries.map(value => [value.objectId, value]));
@@ -296,77 +297,167 @@ function sniffMimeType(bytes, sourceName, fallback) {
 
 export function applySimpleLayoutTransforms(hierarchy) {
   const entries = hierarchy.entries;
+  const entryByObjectId = new Map(entries.map(entry => [entry.objectId, entry]));
+  const relativeOffsets = new Map();
   for (const entry of entries.filter(value => value.nodeEligible !== false && value.sourceName === 'LayoutComponent')) {
     const style = localEntry(entries, entry, entry.fields.styleId);
     if (style?.sourceName === 'LayoutComponentStyle') {
-      if (Number.isFinite(style.fields.positionLeft)) entry.fields.x = style.fields.positionLeft;
-      if (Number.isFinite(style.fields.positionTop)) entry.fields.y = style.fields.positionTop;
+      const parent = localEntry(entries, entry, entry.fields.parentId);
+      const x = resolveLayoutPosition(
+        style.fields.positionLeft, style.fields.positionLeftUnitsValue,
+        style.fields.positionRight, style.fields.positionRightUnitsValue,
+        positive(parent?.fields.width, 0), positive(entry.fields.width, 0),
+      );
+      const y = resolveLayoutPosition(
+        style.fields.positionTop, style.fields.positionTopUnitsValue,
+        style.fields.positionBottom, style.fields.positionBottomUnitsValue,
+        positive(parent?.fields.height, 0), positive(entry.fields.height, 0),
+      );
+      if ((style.fields.positionTypeValue ?? 1) === 2) {
+        if (x !== undefined) entry.fields.x = x;
+        if (y !== undefined) entry.fields.y = y;
+      } else if (x !== undefined || y !== undefined) {
+        relativeOffsets.set(entry, [x ?? 0, y ?? 0]);
+      }
     }
   }
+  resolvePercentLayoutSizes(entries);
   resolveHugLayoutSizes(entries);
   for (const parent of entries.filter(value => value.nodeEligible !== false && (value.sourceName === 'LayoutComponent' || value.sourceName === 'Artboard'))) {
+    syncNestedLayoutArtboardSize(hierarchy, parent, entryByObjectId);
     const componentListScope = typeof parent.scopeKey === 'string' && parent.scopeKey.includes('::list-');
     const style = localEntry(entries, parent, parent.fields.styleId);
     const children = entries.filter(value => value.scopeKey === parent.scopeKey
       && value.nodeEligible !== false
       && value.transformTarget === true
       && value.fields.parentId === parent.componentIndex
-      && (componentListScope
-        ? value.sourceName === 'LayoutComponent'
-        : value.sourceName !== 'LayoutComponentStyle' && value.sourceName !== 'NestedArtboardLeaf'));
+      // Layout-mode nested artboards expose their referenced artboard's Yoga
+      // node directly. Leaf/node instances retain their authored transform and
+      // do not advance the flex cursor.
+      && LAYOUT_PARTICIPANT_TYPES.has(value.sourceName));
     if (style?.fields.layoutTypeValue === 1) {
       applyGridLayout(entries, parent, style, children);
       continue;
     }
-    const row = componentListScope ? rowLayout(style) : style?.fields.flexDirectionValue === 1;
-    const overlay = !componentListScope
-      && style?.fields.flexDirectionValue === undefined
-      && style?.fields.layoutAlignmentType === 9
-      && children.length > 1;
+    const direction = flexDirection(style);
+    const row = direction === 2 || direction === 3;
+    const reverse = direction === 1 || direction === 3;
     const wrap = style?.fields.flexWrapValue === 1;
-    const gap = row ? finite(style?.fields.gapHorizontal) ?? 0 : finite(style?.fields.gapVertical) ?? 0;
-    const leading = row ? finite(style?.fields.paddingLeft) ?? 0 : finite(style?.fields.paddingTop) ?? 0;
-    const crossLeading = row ? finite(style?.fields.paddingTop) ?? 0 : finite(style?.fields.paddingLeft) ?? 0;
-    const available = Math.max(0, (row ? positive(parent.fields.width, 0) : positive(parent.fields.height, 0))
-      - leading - (row ? finite(style?.fields.paddingRight) ?? 0 : finite(style?.fields.paddingBottom) ?? 0));
-    const crossAvailable = Math.max(0, (row ? positive(parent.fields.height, 0) : positive(parent.fields.width, 0))
-      - crossLeading - (row ? finite(style?.fields.paddingBottom) ?? 0 : finite(style?.fields.paddingRight) ?? 0));
+    const parentWidth = positive(parent.fields.width, 0);
+    const parentHeight = positive(parent.fields.height, 0);
+    const padding = layoutEdges(style, 'padding', parentWidth, parentHeight);
+    const border = layoutEdges(style, 'border', parentWidth, parentHeight);
+    const gap = row
+      ? layoutLength(style?.fields.gapHorizontal, style?.fields.gapHorizontalUnitsValue, parentWidth)
+      : layoutLength(style?.fields.gapVertical, style?.fields.gapVerticalUnitsValue, parentHeight);
+    const leading = row ? padding.left + border.left : padding.top + border.top;
+    const trailing = row ? padding.right + border.right : padding.bottom + border.bottom;
+    const crossLeading = row ? padding.top + border.top : padding.left + border.left;
+    const crossTrailing = row ? padding.bottom + border.bottom : padding.right + border.right;
+    const available = Math.max(0, (row ? parentWidth : parentHeight) - leading - trailing);
+    const crossAvailable = Math.max(0, (row ? parentHeight : parentWidth) - crossLeading - crossTrailing);
     const authoredFill = children.some(child => {
-      const childStyle = localEntry(entries, child, child.fields.styleId);
+      const childStyle = layoutParticipantStyle(entries, child);
       return childStyle?.fields.layoutWidthScaleType === 1 || childStyle?.fields.layoutHeightScaleType === 1;
     });
-    if (componentListScope || authoredFill) applyFillLayout(entries, children, row, available, crossAvailable, gap);
-    const used = children.reduce((sum, child) => sum + (row ? positive(child.fields.width, 0) : positive(child.fields.height, 0)), 0)
-      + Math.max(0, children.length - 1) * gap;
-    const justify = Number(style?.fields.justifyContentValue ?? style?.fields.justifyItemsValue ?? 0);
-    let cursor = leading + (justify === 1 ? Math.max(0, available - used) / 2 : justify === 2 ? Math.max(0, available - used) : 0);
+    const flowChildren = children.filter(child => layoutParticipantStyle(entries, child)?.fields.positionTypeValue !== 2);
+    if (componentListScope || authoredFill) applyFillLayout(entries, flowChildren, row, available, crossAvailable, gap);
+    const metrics = flowChildren.map(child => childLayoutMetrics(entries, child, row, parentWidth, parentHeight));
+    const used = metrics.reduce((sum, metric) => sum + metric.mainBefore + metric.extent + metric.mainAfter, 0)
+      + Math.max(0, flowChildren.length - 1) * gap;
+    const alignment = layoutAlignment(style, row);
+    const remaining = Math.max(0, available - used);
+    const between = alignment.main === 'space-between' && flowChildren.length > 1 ? remaining / (flowChildren.length - 1) : 0;
+    let cursor = leading + (alignment.main === 'center' ? remaining / 2 : alignment.main === 'end' ? remaining : 0);
     let crossCursor = crossLeading; let lineExtent = 0;
-    for (const child of children) {
-      const childStyle = localEntry(entries, child, child.fields.styleId);
-      if ([1, 2].includes(childStyle?.fields.positionTypeValue)) continue;
-      if (overlay) {
-        if (!Number.isFinite(child.fields.x)) child.fields.x = 0;
-        if (!Number.isFinite(child.fields.y)) child.fields.y = 0;
-        continue;
+    const ordered = reverse ? [...flowChildren].reverse() : flowChildren;
+    for (const child of ordered) {
+      const metric = childLayoutMetrics(entries, child, row, parentWidth, parentHeight);
+      if (wrap && cursor > leading && cursor + metric.mainBefore + metric.extent + metric.mainAfter > leading + available) {
+        const crossGap = row
+          ? layoutLength(style?.fields.gapVertical, style?.fields.gapVerticalUnitsValue, parentHeight)
+          : layoutLength(style?.fields.gapHorizontal, style?.fields.gapHorizontalUnitsValue, parentWidth);
+        cursor = leading; crossCursor += lineExtent + crossGap; lineExtent = 0;
       }
-      const marginLeading = componentListScope ? (row ? finite(childStyle?.fields.marginLeft) ?? 0 : finite(childStyle?.fields.marginTop) ?? 0) : 0;
-      const marginTrailing = componentListScope ? (row ? finite(childStyle?.fields.marginRight) ?? 0 : finite(childStyle?.fields.marginBottom) ?? 0) : 0;
-      const marginCross = componentListScope ? (row ? finite(childStyle?.fields.marginTop) ?? 0 : finite(childStyle?.fields.marginLeft) ?? 0) : 0;
-      const childExtent = row ? positive(child.fields.width, 0) : positive(child.fields.height, 0);
-      const crossExtent = row ? positive(child.fields.height, 0) : positive(child.fields.width, 0);
-      if (wrap && cursor > leading && cursor + marginLeading + childExtent + marginTrailing > leading + available) {
-        cursor = leading; crossCursor += lineExtent + (row ? finite(style?.fields.gapVertical) ?? 0 : finite(style?.fields.gapHorizontal) ?? 0); lineExtent = 0;
-      }
-      cursor += marginLeading;
-      if (componentListScope || !Number.isFinite(child.fields.x)) child.fields.x = row ? cursor : crossCursor + marginCross;
-      if (componentListScope || !Number.isFinite(child.fields.y)) child.fields.y = row ? crossCursor + marginCross : cursor;
-      cursor += childExtent + marginTrailing + gap; lineExtent = Math.max(lineExtent, crossExtent + marginCross);
+      cursor += metric.mainBefore;
+      const freeCross = Math.max(0, crossAvailable - metric.crossBefore - metric.crossAfter - metric.crossExtent);
+      const crossOffset = alignment.cross === 'center' ? freeCross / 2 : alignment.cross === 'end' ? freeCross : 0;
+      const offset = relativeOffsets.get(child) ?? [0, 0];
+      child.fields.x = (row ? cursor : crossCursor + metric.crossBefore + crossOffset) + offset[0];
+      child.fields.y = (row ? crossCursor + metric.crossBefore + crossOffset : cursor) + offset[1];
+      cursor += metric.extent + metric.mainAfter + gap + between;
+      lineExtent = Math.max(lineExtent, metric.crossBefore + metric.crossExtent + metric.crossAfter);
     }
   }
   // NestedArtboardLeaf fit is authored against the resolved layout box. The
   // hierarchy is expanded before flex/fill sizing, so the initial scale can
   // still reflect stale source dimensions. Refit nested roots after layout.
   resolveNestedLeafFitTransforms(hierarchy);
+}
+
+export function syncNestedLayoutArtboardSize(hierarchy, artboard, entryByObjectId = new Map((hierarchy.entries ?? []).map(entry => [entry.objectId, entry]))) {
+  if (artboard?.sourceName !== 'Artboard' || !(artboard.instanceDepth > 0)) return false;
+  const nested = entryByObjectId.get(hierarchy.parentNodeByObjectId?.get(artboard.objectId));
+  if (nested?.sourceName !== 'NestedArtboardLayout') return false;
+  const host = entryByObjectId.get(hierarchy.parentNodeByObjectId?.get(nested.objectId));
+  if (host?.sourceName !== 'LayoutComponent') return false;
+  // Layout-mode components do not scale their source artboard. Rive changes
+  // the nested artboard's viewport to the Yoga-resolved host box and lets its
+  // own layouts reflow at scale 1. Synchronize immediately before this scope's
+  // layout pass, after the parent scope has finished flex/fill sizing.
+  artboard.fields.width = positive(nested.fields.width, positive(artboard.fields.width, 1));
+  artboard.fields.height = positive(nested.fields.height, positive(artboard.fields.height, 1));
+  artboard.fields.x = 0;
+  artboard.fields.y = 0;
+  artboard.fields.scaleX = 1;
+  artboard.fields.scaleY = 1;
+  return true;
+}
+
+function resolveLayoutPosition(start, startUnits, end, endUnits, parentExtent, ownExtent) {
+  const startValue = resolveYogaLength(start, startUnits, parentExtent);
+  if (startValue !== undefined) return startValue;
+  const endValue = resolveYogaLength(end, endUnits, parentExtent);
+  return endValue === undefined ? undefined : parentExtent - ownExtent - endValue;
+}
+
+function resolveYogaLength(value, units, parentExtent) {
+  if (!Number.isFinite(value)) return undefined;
+  // YGUnitUndefined=0, Point=1, Percent=2, Auto=3. Rive can retain a stale
+  // numeric position while its unit is Undefined; Yoga deliberately ignores
+  // that number, so treating it as points displaces nested layouts twice.
+  if (units === 1) return value;
+  if (units === 2) return parentExtent * value / 100;
+  return undefined;
+}
+
+function resolvePercentLayoutSizes(entries) {
+  const percentSizes = entries
+    .filter(value => value.nodeEligible !== false && LAYOUT_PARTICIPANT_TYPES.has(value.sourceName))
+    .map(entry => {
+      const style = layoutParticipantStyle(entries, entry);
+      return {
+        entry,
+        width: style?.fields.widthUnitsValue === 2 ? finite(entry.fields.width) : undefined,
+        height: style?.fields.heightUnitsValue === 2 ? finite(entry.fields.height) : undefined,
+      };
+    })
+    .filter(value => value.width !== undefined || value.height !== undefined);
+  // Resolve root-to-leaf percentages without replacing the authored percent
+  // used by a later pass. Two nested percentage layouts therefore converge
+  // even when neutral object order is not parent-first.
+  for (let pass = 0; pass < Math.max(1, percentSizes.length); pass++) {
+    for (const size of percentSizes) {
+      const parent = localEntry(entries, size.entry, size.entry.fields.parentId);
+      if (!parent) continue;
+      if (size.width !== undefined) {
+        size.entry.fields.width = positive(parent.fields.width, 0) * size.width / 100;
+      }
+      if (size.height !== undefined) {
+        size.entry.fields.height = positive(parent.fields.height, 0) * size.height / 100;
+      }
+    }
+  }
 }
 
 export function resolveNestedLeafFitTransforms(hierarchy) {
@@ -407,13 +498,16 @@ function resolveHugLayoutSizes(entries) {
     for (const layout of [...entries].reverse().filter(value => value.nodeEligible !== false
       && value.sourceName === 'LayoutComponent'
       && typeof value.scopeKey === 'string'
-      && value.scopeKey.includes('::list-'))) {
+      && (value.scopeKey.includes('::list-') || entries.some(child => child.scopeKey === value.scopeKey
+        && child.sourceName === 'NestedArtboardLayout'
+        && child.fields.parentId === value.componentIndex)))) {
       const style = localEntry(entries, layout, layout.fields.styleId);
       if (style?.fields.intrinsicallySizedValue !== true) continue;
       const children = entries.filter(value => value.scopeKey === layout.scopeKey
         && value.nodeEligible !== false
-        && value.sourceName === 'LayoutComponent'
-        && value.fields.parentId === layout.componentIndex);
+        && LAYOUT_PARTICIPANT_TYPES.has(value.sourceName)
+        && value.fields.parentId === layout.componentIndex
+        && layoutParticipantStyle(entries, value)?.fields.positionTypeValue !== 2);
       if (children.length === 0) continue;
       const row = rowLayout(style);
       const gap = row ? finite(style.fields.gapHorizontal) ?? 0 : finite(style.fields.gapVertical) ?? 0;
@@ -442,27 +536,166 @@ function resolveHugLayoutSizes(entries) {
 }
 
 function rowLayout(style) {
-  if (style?.fields.flexDirectionValue === 1 || style?.fields.flexDirectionValue === 2) return true;
-  return finite(style?.fields.gapHorizontal) !== undefined && finite(style?.fields.gapVertical) === undefined;
+  // Rive forwards the serialized value directly to Yoga. Its frozen runtime
+  // defaults to YGFlexDirectionRow (2); 0/1 are column/column-reverse and 3 is
+  // row-reverse. Missing fields therefore must not be interpreted as column.
+  const direction = Number.isFinite(style?.fields.flexDirectionValue)
+    ? style.fields.flexDirectionValue
+    : 2;
+  return direction === 2 || direction === 3;
+}
+
+function flexDirection(style) {
+  const direction = Number.isFinite(style?.fields.flexDirectionValue)
+    ? style.fields.flexDirectionValue
+    : 2;
+  return direction >= 0 && direction <= 3 ? direction : 2;
+}
+
+function layoutLength(value, units, parentExtent) {
+  if (!Number.isFinite(value)) return 0;
+  // For box-model values the Rive editor normally authors Point/Percent units.
+  // Preserve the historical point fallback for old files which predate the
+  // unit property, while an explicit Undefined unit follows Yoga and is zero.
+  if (units === undefined) return value;
+  return resolveYogaLength(value, units, parentExtent) ?? 0;
+}
+
+function layoutEdges(style, prefix, width, height) {
+  return {
+    left: layoutLength(style?.fields[`${prefix}Left`], style?.fields[`${prefix}LeftUnitsValue`], width),
+    right: layoutLength(style?.fields[`${prefix}Right`], style?.fields[`${prefix}RightUnitsValue`], width),
+    top: layoutLength(style?.fields[`${prefix}Top`], style?.fields[`${prefix}TopUnitsValue`], height),
+    bottom: layoutLength(style?.fields[`${prefix}Bottom`], style?.fields[`${prefix}BottomUnitsValue`], height),
+  };
+}
+
+function layoutAlignment(style, row) {
+  const value = Number.isFinite(style?.fields.layoutAlignmentType) ? style.fields.layoutAlignmentType : 0;
+  if (value >= 9 && value <= 11) {
+    return { main: 'space-between', cross: value === 9 ? 'start' : value === 10 ? 'center' : 'end' };
+  }
+  const horizontal = value % 3 === 0 ? 'start' : value % 3 === 1 ? 'center' : 'end';
+  const vertical = value < 3 ? 'start' : value < 6 ? 'center' : 'end';
+  return row ? { main: horizontal, cross: vertical } : { main: vertical, cross: horizontal };
+}
+
+function childLayoutMetrics(entries, child, row, parentWidth, parentHeight) {
+  const childStyle = layoutParticipantStyle(entries, child);
+  const margin = layoutEdges(childStyle, 'margin', parentWidth, parentHeight);
+  return {
+    extent: row ? positive(child.fields.width, 0) : positive(child.fields.height, 0),
+    crossExtent: row ? positive(child.fields.height, 0) : positive(child.fields.width, 0),
+    mainBefore: row ? margin.left : margin.top,
+    mainAfter: row ? margin.right : margin.bottom,
+    crossBefore: row ? margin.top : margin.left,
+    crossAfter: row ? margin.bottom : margin.right,
+  };
+}
+
+function intrinsicLayoutExtent(entries, layout, row, visited = new Set()) {
+  const key = componentScopeKey(layout.scopeKey, layout.componentIndex);
+  if (visited.has(key)) return 0;
+  visited.add(key);
+  const style = layoutParticipantStyle(entries, layout);
+  const children = entries.filter(value => value.scopeKey === layout.scopeKey
+    && value.nodeEligible !== false
+    && LAYOUT_PARTICIPANT_TYPES.has(value.sourceName)
+    && value.fields.parentId === layout.componentIndex
+    && layoutParticipantStyle(entries, value)?.fields.positionTypeValue !== 2);
+  if (children.length === 0) {
+    // Rive installs a measure function only on legacy/hug leaves. Their
+    // serialized extent is the last intrinsic result and is therefore a valid
+    // source measurement. A non-hug leaf without a participant measures zero.
+    const scale = row ? style?.fields.layoutWidthScaleType : style?.fields.layoutHeightScaleType;
+    return (scale ?? 0) === 1 && style?.fields.intrinsicallySizedValue !== true
+      ? 0
+      : positive(layout.fields[row ? 'width' : 'height'], 0);
+  }
+  const childRow = rowLayout(style);
+  const width = positive(layout.fields.width, 0);
+  const height = positive(layout.fields.height, 0);
+  const padding = layoutEdges(style, 'padding', width, height);
+  const border = layoutEdges(style, 'border', width, height);
+  const leading = row ? padding.left + border.left : padding.top + border.top;
+  const trailing = row ? padding.right + border.right : padding.bottom + border.bottom;
+  const gap = row
+    ? layoutLength(style?.fields.gapHorizontal, style?.fields.gapHorizontalUnitsValue, width)
+    : layoutLength(style?.fields.gapVertical, style?.fields.gapVerticalUnitsValue, height);
+  const extents = children.map(child => {
+    const childStyle = layoutParticipantStyle(entries, child);
+    const scale = row ? childStyle?.fields.layoutWidthScaleType : childStyle?.fields.layoutHeightScaleType;
+    const margin = layoutEdges(childStyle, 'margin', width, height);
+    const content = (scale ?? 0) === 0
+      ? positive(child.fields[row ? 'width' : 'height'], 0)
+      : intrinsicLayoutExtent(entries, child, row, visited);
+    return content + (row ? margin.left + margin.right : margin.top + margin.bottom);
+  });
+  visited.delete(key);
+  const content = childRow === row
+    ? extents.reduce((sum, extent) => sum + extent, 0) + Math.max(0, extents.length - 1) * gap
+    : Math.max(0, ...extents);
+  return leading + content + trailing;
 }
 
 function applyFillLayout(entries, children, row, available, crossAvailable, gap) {
   const dimensions = row
     ? { extent: 'width', cross: 'height', scale: 'layoutWidthScaleType', crossScale: 'layoutHeightScaleType', fraction: 'fractionalWidth' }
     : { extent: 'height', cross: 'width', scale: 'layoutHeightScaleType', crossScale: 'layoutWidthScaleType', fraction: 'fractionalHeight' };
-  const fill = children.filter(child => localEntry(entries, child, child.fields.styleId)?.fields[dimensions.scale] === 1);
-  const fixed = children.filter(child => !fill.includes(child))
-    .reduce((sum, child) => sum + positive(child.fields[dimensions.extent], 0), 0);
-  const remaining = Math.max(0, available - fixed - Math.max(0, children.length - 1) * gap);
-  const totalFraction = fill.reduce((sum, child) => sum + positive(child.fields[dimensions.fraction], 1), 0);
-  for (const child of fill) {
-    const fraction = positive(child.fields[dimensions.fraction], 1);
-    child.fields[dimensions.extent] = totalFraction > 0 ? remaining * fraction / totalFraction : 0;
+  const parentWidth = row ? available : crossAvailable;
+  const parentHeight = row ? crossAvailable : available;
+  const items = children.map(child => {
+    const style = layoutParticipantStyle(entries, child);
+    const margin = layoutEdges(style, 'margin', parentWidth, parentHeight);
+    return {
+      child,
+      style,
+      fill: style?.fields[dimensions.scale] === 1,
+      fraction: positive(child.fields[dimensions.fraction], 1),
+      // YGUnitAuto asks Yoga to measure the layout subtree. Serialized
+      // LayoutComponent width/height are the editor's last resolved result,
+      // not an authored flex basis, so derive the intrinsic content extent.
+      basis: style?.fields.flexBasisUnitsValue === 1 || style?.fields.flexBasisUnitsValue === 2
+        ? resolveYogaLength(style.fields.flexBasis, style.fields.flexBasisUnitsValue, available) ?? 0
+        : intrinsicLayoutExtent(entries, child, row),
+      margin: row ? margin.left + margin.right : margin.top + margin.bottom,
+    };
+  });
+  const occupied = items.reduce((sum, item) => sum + item.basis + item.margin, 0)
+    + Math.max(0, items.length - 1) * gap;
+  const free = available - occupied;
+  const fill = items.filter(item => item.fill);
+  if (free >= 0) {
+    const totalGrow = fill.reduce((sum, item) => sum + item.fraction, 0);
+    for (const item of items) item.child.fields[dimensions.extent] = item.fill && totalGrow > 0
+      ? item.basis + free * item.fraction / totalGrow
+      : item.basis;
+  } else {
+    const totalShrink = fill.reduce((sum, item) => sum + item.fraction * item.basis, 0);
+    for (const item of items) item.child.fields[dimensions.extent] = item.fill && totalShrink > 0
+      ? Math.max(0, item.basis + free * item.fraction * item.basis / totalShrink)
+      : item.basis;
   }
   for (const child of children) {
-    const childStyle = localEntry(entries, child, child.fields.styleId);
-    if (childStyle?.fields[dimensions.crossScale] === 1) child.fields[dimensions.cross] = crossAvailable;
+    const childStyle = layoutParticipantStyle(entries, child);
+    if (childStyle?.fields[dimensions.crossScale] === 1) {
+      const margin = layoutEdges(childStyle, 'margin', parentWidth, parentHeight);
+      child.fields[dimensions.cross] = Math.max(0, crossAvailable - (row ? margin.top + margin.bottom : margin.left + margin.right));
+    }
   }
+}
+
+const LAYOUT_PARTICIPANT_TYPES = new Set(['LayoutComponent', 'NestedArtboardLayout']);
+
+function layoutParticipantStyle(entries, entry) {
+  if (entry?.sourceName !== 'NestedArtboardLayout') return localEntry(entries, entry, entry?.fields.styleId);
+  return { fields: {
+    widthUnitsValue: entry.fields.instanceWidthUnitsValue ?? 1,
+    heightUnitsValue: entry.fields.instanceHeightUnitsValue ?? 1,
+    layoutWidthScaleType: entry.fields.instanceWidthScaleType ?? 0,
+    layoutHeightScaleType: entry.fields.instanceHeightScaleType ?? 0,
+    intrinsicallySizedValue: entry.fields.instanceWidthScaleType === 2 || entry.fields.instanceHeightScaleType === 2,
+  } };
 }
 
 function applyGridLayout(entries, parent, style, children) {
@@ -526,61 +759,88 @@ export function compileTextComponents(hierarchy, resourceByAssetIndex) {
   for (const text of entries.filter(value => value.sourceName === 'Text')) {
     const owned = childEntries(children, text);
     const runs = owned.filter(value => value.sourceName === 'TextValueRun');
-    const run = runs[0];
-    const referencedStyle = run ? localEntry(entries, text, run.fields.styleId) : null;
-    const style = referencedStyle?.sourceName === 'TextStylePaint'
-      ? referencedStyle
-      : owned.find(value => value.sourceName === 'TextStylePaint');
+    const defaultStyle = owned.find(value => value.sourceName === 'TextStylePaint');
+    const styleForRun = run => {
+      const referenced = localEntry(entries, text, run?.fields.styleId);
+      const style = referenced?.sourceName === 'TextStylePaint' ? referenced : defaultStyle;
+      const authoredFontSize = positive(style?.fields.fontSize, 12);
+      const font = Number.isSafeInteger(style?.fields.fontAssetId) ? resourceByAssetIndex.get(style.fields.fontAssetId) : null;
+      const styleChildren = style ? childEntries(children, style) : [];
+      const fill = styleChildren.find(value => value.sourceName === 'Fill');
+      const source = fill ? childEntries(children, fill).find(value => value.sourceName === 'SolidColor') : null;
+      const axes = styleChildren.filter(value => value.sourceName === 'TextStyleAxis');
+      const axis = axes.find(value => value.fields.tag === 2003265652) ?? axes[0];
+      const background = styleChildren.find(value => value.sourceName === 'TextStyleBackground');
+      const backgroundChildren = background ? childEntries(children, background) : [];
+      const backgroundFill = backgroundChildren.find(value => value.sourceName === 'Fill');
+      const backgroundStroke = backgroundChildren.find(value => value.sourceName === 'Stroke');
+      const backgroundFillSource = backgroundFill ? childEntries(children, backgroundFill).find(value => value.sourceName === 'SolidColor') : null;
+      const backgroundStrokeSource = backgroundStroke ? childEntries(children, backgroundStroke).find(value => value.sourceName === 'SolidColor') : null;
+      return compact({
+        fontFamily: font?.sourceAssetName,
+        fontSize: authoredFontSize,
+        fontWeight: Number.isFinite(axis?.fields.axisValue) ? axis.fields.axisValue : 400,
+        fontResource: font?.resourceId,
+        // Omitted/-1 is Rive's automatic font-metric line height. Preserve
+        // that distinction instead of baking an approximate 1.2em value.
+        lineHeight: positive(style?.fields.lineHeight, undefined),
+        tracking: finite(style?.fields.letterSpacing) ?? 0,
+        // TextStylePaint has no implicit foreground paint. The serialized
+        // default color belongs to an existing SolidColor; inventing it when
+        // the style owns only a background makes glyphs appear that the Rive
+        // renderer intentionally leaves transparent.
+        color: fill ? color(source?.fields.colorValue, RIVE_DEFAULT_PAINT_COLOR) : [0, 0, 0, 0],
+        ...(background ? {
+          lineBackground: compact({
+            fill: color(backgroundFillSource?.fields.colorValue, RIVE_DEFAULT_PAINT_COLOR),
+            stroke: backgroundStroke ? color(backgroundStrokeSource?.fields.colorValue, RIVE_DEFAULT_PAINT_COLOR) : undefined,
+            strokeWidth: backgroundStroke ? Math.max(0, finite(backgroundStroke.fields.thickness) ?? 1) : undefined,
+            cornerRadius: Math.max(0, finite(background.fields.cornerRadius) ?? 0),
+            padding: 0,
+          }),
+        } : {}),
+      });
+    };
+    const baseStyle = styleForRun(runs[0]);
     const parent = localEntry(entries, text, text.fields.parentId);
     const authoredWidth = positive(text.fields.width, positive(parent?.fields.width, 1));
     const parentWidth = parent?.sourceName === 'LayoutComponent' ? positive(parent.fields.width, authoredWidth) : authoredWidth;
     const width = Math.min(authoredWidth, parentWidth);
-    // Rive's frozen TextStyle schema defaults an omitted fontSize to 12.
-    const authoredFontSize = positive(style?.fields.fontSize, 12);
+    const authoredFontSize = baseStyle.fontSize;
     const authoredHeight = positive(text.fields.height, positive(parent?.fields.height, Math.max(1, authoredFontSize * 1.2)));
     const parentHeight = parent?.sourceName === 'LayoutComponent' ? positive(parent.fields.height, authoredHeight) : authoredHeight;
     const height = Math.min(authoredHeight, parentHeight);
-    const shouldShrink = text.fields.overflowValue === 5;
+    const fit = text.fields.overflowValue === 4 ? 'scale'
+      : text.fields.overflowValue === 5 ? 'font-size' : undefined;
     const layoutOverflowLimit = parent?.sourceName === 'LayoutComponent' ? height * 1.5 : authoredFontSize;
-    const fontSize = shouldShrink ? Math.min(authoredFontSize, height) : Math.min(authoredFontSize, layoutOverflowLimit);
-    const font = Number.isSafeInteger(style?.fields.fontAssetId) ? resourceByAssetIndex.get(style.fields.fontAssetId) : null;
-    const styleChildren = style ? childEntries(children, style) : [];
-    const fill = styleChildren.find(value => value.sourceName === 'Fill');
-    const source = fill ? childEntries(children, fill).find(value => value.sourceName === 'SolidColor') : null;
-    const axes = styleChildren.filter(value => value.sourceName === 'TextStyleAxis');
-    const axis = axes.find(value => value.fields.tag === 2003265652) ?? axes[0];
-    const background = styleChildren.find(value => value.sourceName === 'TextStyleBackground');
-    const backgroundChildren = background ? childEntries(children, background) : [];
-    const backgroundFill = backgroundChildren.find(value => value.sourceName === 'Fill');
-    const backgroundStroke = backgroundChildren.find(value => value.sourceName === 'Stroke');
-    const backgroundFillSource = backgroundFill ? childEntries(children, backgroundFill).find(value => value.sourceName === 'SolidColor') : null;
-    const backgroundStrokeSource = backgroundStroke ? childEntries(children, backgroundStroke).find(value => value.sourceName === 'SolidColor') : null;
+    const fallbackFontSize = fit ? Math.min(authoredFontSize, height) : Math.min(authoredFontSize, layoutOverflowLimit);
+    const fallbackLineHeight = baseStyle.lineHeight === undefined ? undefined
+      : fit ? Math.min(baseStyle.lineHeight, height)
+        : Math.min(baseStyle.lineHeight, layoutOverflowLimit);
+    let textOffset = 0;
+    const styleRuns = runs.map(run => {
+      const runText = typeof run.fields.text === 'string' ? run.fields.text : '';
+      const start = textOffset; textOffset += runText.length;
+      return { start, end: textOffset, ...styleForRun(run) };
+    }).filter(run => run.end > run.start);
     const textValue = runs.map(value => typeof value.fields.text === 'string' ? value.fields.text : '').join('');
-    const authoredLineHeight = riveLineHeight(style?.fields.lineHeight, authoredFontSize);
     const component = compact({
       type: 'text2d', text: textValue,
       size: [width, height], position: [width / 2, height / 2],
-      fontFamily: font?.sourceAssetName, fontSize,
-      fontWeight: Number.isFinite(axis?.fields.axisValue) ? axis.fields.axisValue : 400,
-      fontResource: font?.resourceId,
-      lineHeight: shouldShrink
-        ? Math.min(authoredLineHeight, height)
-        : Math.min(authoredLineHeight, layoutOverflowLimit),
-      tracking: finite(style?.fields.letterSpacing) ?? 0,
+      ...baseStyle,
+      fontSize: fallbackFontSize,
+      lineHeight: fallbackLineHeight,
       textAlign: ['left', 'center', 'right'][text.fields.alignValue ?? 0] ?? 'left',
       verticalAlign: ['top', 'middle', 'bottom'][text.fields.verticalAlignValue ?? 0] ?? 'top',
-      color: color(source?.fields.colorValue, RIVE_DEFAULT_PAINT_COLOR),
-      ...(background ? {
-        lineBackground: compact({
-          fill: color(backgroundFillSource?.fields.colorValue, RIVE_DEFAULT_PAINT_COLOR),
-          stroke: backgroundStroke ? color(backgroundStrokeSource?.fields.colorValue, RIVE_DEFAULT_PAINT_COLOR) : undefined,
-          strokeWidth: backgroundStroke ? Math.max(0, finite(backgroundStroke.fields.thickness) ?? 1) : undefined,
-          cornerRadius: Math.max(0, finite(background.fields.cornerRadius) ?? 0),
-          padding: 0,
-        }),
-      } : {}),
-      fit: shouldShrink ? 'shrink' : undefined,
-      wrap: textWrapMode(textValue, width, fontSize, text.fields.wrapValue),
+      fit,
+      overflow: ['visible', 'hidden', 'clip', 'ellipsis'][text.fields.overflowValue] ?? undefined,
+      fitFromBaseline: text.fields.fitFromBaseline === true ? true : undefined,
+      wrap: textWrapMode(textValue, width, authoredFontSize, text.fields.wrapValue),
+      paragraphSpacing: Math.max(0, finite(text.fields.paragraphSpacing) ?? 0),
+      styleRuns,
+      // Keep the text atlas at the runtime's maximum supported scale. The
+      // formal capture is normalized after compositing, so lowering the atlas
+      // resolution changes glyph coverage before the shared downsample step.
       resolutionScale: 4,
     });
     output.set(text.objectId, [component]);
@@ -1110,6 +1370,97 @@ async function attachScopedVectorMorphs(vectorComponents, hierarchy, report, obj
       // rotation such as LoopIce is already carried by its STEP transform track.
       const morph = { times, values, valueSize, interpolation: timelineCurvesInterpolation(morphCurves.get(shape) ?? []) };
       vectorComponents.set(shape.objectId, components.map(component => ({ ...component, morph })));
+    }
+  }
+}
+
+async function attachTextLayoutTracks(textComponents, hierarchy, report, objects, duration) {
+  if (textComponents.size === 0) return;
+  const modulePath = resolve(root, 'animation-spec/dist-test/rive/import/generated/frozen-registry.js');
+  const { FROZEN_PROPERTIES } = await import(pathToFileURL(modulePath).href);
+  const propertyNames = new Map(FROZEN_PROPERTIES.map(value => [value.key, value.name]));
+  const scopes = hierarchy.animationScopes?.length > 0
+    ? hierarchy.animationScopes
+    : [{
+        artboardObjectId: hierarchy.artboardObjectId,
+        nodeByComponentIndex: new Map(hierarchy.entries.filter(value => value.instanceDepth === 0).map(value => [value.componentIndex, value])),
+        sequence: [], parallel: [], exitSequence: [],
+      }];
+  const children = new Map();
+  for (const entry of hierarchy.entries) {
+    const key = componentScopeKey(entry.scopeKey, entry.fields.parentId);
+    const values = children.get(key) ?? []; values.push(entry); children.set(key, values);
+  }
+  const styleRunOwners = new Map();
+  for (const text of hierarchy.entries.filter(value => value.sourceName === 'Text')) {
+    const component = textComponents.get(text.objectId)?.[0];
+    if (component?.type !== 'text2d' || !component.styleRuns?.length) continue;
+    const valueRuns = childEntries(children, text).filter(value => value.sourceName === 'TextValueRun');
+    for (let index = 0; index < valueRuns.length; index++) {
+      const styleId = valueRuns[index].fields.styleId;
+      if (!Number.isSafeInteger(styleId) || !component.styleRuns[index]) continue;
+      const key = `${text.scopeKey}\0${styleId}`;
+      const owners = styleRunOwners.get(key) ?? [];
+      owners.push(component.styleRuns[index]); styleRunOwners.set(key, owners);
+    }
+  }
+  const bindings = new Map();
+  for (const scope of scopes) {
+    const records = selectedArtboardVisits(report, scope.artboardObjectId).map(visit => ({
+      visit, fields: namedFields(objects.get(visit.neutralObjectId), visit),
+    }));
+    const animations = parseTimelineAnimations(records, scope.nodeByComponentIndex, propertyNames);
+    let schedules;
+    if (hierarchy.animationScopes?.length > 0) schedules = scopedAnimationSchedules(scope, animations, duration);
+    else {
+      let cursor = 0;
+      schedules = animations.map(animation => {
+        const start = cursor; cursor += animation.duration;
+        return { animation, start, end: Math.min(duration, cursor) };
+      });
+    }
+    for (const schedule of schedules) {
+      for (const curve of schedule.animation.curves) {
+        if (curve.keys.length === 0) continue;
+        if (curve.property === 'paragraphSpacing' && curve.target?.sourceName === 'Text') {
+          const component = textComponents.get(curve.target.objectId)?.[0];
+          if (component?.type === 'text2d') addBinding(component, 'paragraphSpacingTrack', curve, schedule);
+          continue;
+        }
+        const trackField = curve.property === 'lineHeight' ? 'lineHeightTrack'
+          : curve.property === 'letterSpacing' ? 'trackingTrack'
+            : curve.property === 'fontSize' ? 'fontSizeTrack' : null;
+        if (!trackField || curve.target?.sourceName !== 'TextStylePaint') continue;
+        const owners = styleRunOwners.get(`${curve.target.scopeKey}\0${curve.target.componentIndex}`) ?? [];
+        for (const owner of owners) addBinding(owner, trackField, curve, schedule);
+      }
+    }
+  }
+  for (const { owner, field, samples } of bindings.values()) {
+    samples.sort((left, right) => left.time - right.time);
+    const times = []; const values = [];
+    for (const sample of samples) {
+      if (times.length > 0 && Math.abs(times.at(-1) - sample.time) <= 1e-8) values[values.length - 1] = sample.value;
+      else { times.push(sample.time); values.push(sample.value); }
+    }
+    owner[field] = { times, values, valueSize: 1, interpolation: 'linear' };
+  }
+
+  function addBinding(owner, field, curve, schedule) {
+    const key = `${curve.target.objectId}\0${field}\0${owner.start ?? 'component'}`;
+    const binding = bindings.get(key) ?? { owner, field, samples: [] };
+    bindings.set(key, binding);
+    const localEnd = Math.max(0, schedule.end - schedule.start);
+    const localTimes = [0, ...curve.keys.map(item => item.time).filter(time => time > 0 && time < localEnd), localEnd];
+    if (curve.keys.some(key => key.interpolationType === 2 && key.easing)) {
+      for (let time = 1 / Math.max(60, schedule.animation.fps); time < localEnd; time += 1 / Math.max(60, schedule.animation.fps)) localTimes.push(time);
+    }
+    localTimes.sort((left, right) => left - right);
+    for (const localTime of localTimes) {
+      binding.samples.push({
+        time: Math.max(0, Math.min(duration, schedule.start + localTime)),
+        value: curveAt(curve, Math.min(curve.keys.at(-1).time, localTime), curve.keys[0].value),
+      });
     }
   }
 }
@@ -1886,6 +2237,9 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
       instanceDepth: depth,
       fields: {
         ...entry.fields,
+        ...(entry.sourceName === 'NestedArtboardLayout'
+          ? nestedLayoutDimensions(entry, options.dynamicNestedArtboardIndex)
+          : {}),
         ...(entry.sourceName === 'Artboard' && options.rootY !== undefined ? { y: options.rootY } : {}),
         ...(entry.sourceName === 'Artboard' && options.rootX !== undefined ? { x: options.rootX } : {}),
         ...(entry.sourceName === 'Artboard' && options.rootScale !== undefined ? { scaleX: options.rootScale, scaleY: options.rootScale } : {}),
@@ -1946,6 +2300,21 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
     if (!options.skipGenericLists) await expandGenericLists(local, idByLocal, targetArtboardId, viewModelContext, nextAncestry, depth);
   }
 
+  function nestedLayoutDimensions(entry, dynamicNestedArtboardIndex) {
+    const nestedIndex = Number.isSafeInteger(entry.fields.artboardId)
+      ? entry.fields.artboardId
+      : dynamicNestedArtboardIndex;
+    const nestedArtboardId = Number.isSafeInteger(nestedIndex) ? artboardIndex.get(nestedIndex) : undefined;
+    const visit = nestedArtboardId ? report.objects.find(value => value.neutralObjectId === nestedArtboardId) : undefined;
+    const source = namedFields(nestedArtboardId ? objects.get(nestedArtboardId) : undefined, visit);
+    const width = finite(entry.fields.instanceWidth);
+    const height = finite(entry.fields.instanceHeight);
+    return {
+      width: width !== undefined && width >= 0 ? width : positive(source.width, 1),
+      height: height !== undefined && height >= 0 ? height : positive(source.height, 1),
+    };
+  }
+
   async function expandGenericLists(local, idByLocal, targetArtboardId, viewModelContext, ancestry, depth) {
     if (!viewModelContext) return;
     const hosts = local.entries.filter(value => value.nodeEligible !== false && value.sourceName === 'ArtboardComponentList');
@@ -1959,9 +2328,7 @@ async function buildExpandedComponentHierarchy(report, objects, artboardObjectId
       const parent = local.entries.find(value => value.componentIndex === host.fields.parentId);
       const style = parent ? local.entries.find(value => value.componentIndex === parent.fields.styleId) : null;
       const rules = local.entries.filter(value => value.sourceName === 'ArtboardListMapRule' && value.fields.parentId === host.componentIndex);
-      const row = style?.fields.flexDirectionValue === 0
-        ? false
-        : style?.fields.flexDirectionValue === 1 || style?.fields.flexDirectionValue === 2 || style?.fields.flexWrapValue === 1 || rowLayout(style);
+      const row = rowLayout(style);
       const wrap = style?.fields.flexWrapValue === 1;
       const gapMain = row ? finite(style?.fields.gapHorizontal) ?? 0 : finite(style?.fields.gapVertical) ?? 0;
       const gapCross = row ? finite(style?.fields.gapVertical) ?? 0 : finite(style?.fields.gapHorizontal) ?? 0;
@@ -2133,7 +2500,7 @@ export function nestedLeafRootScale(entries, sourceObjectId, nestedArtboardField
   return Math.min(widthScale, heightScale);
 }
 
-function nestedAnimationName(hierarchy, nestedArtboardObjectId, report, objects, targetArtboardId, inheritedAnimation) {
+export function nestedAnimationName(hierarchy, nestedArtboardObjectId, report, objects, targetArtboardId, inheritedAnimation) {
   const host = hierarchy.entries.find(value => value.objectId === nestedArtboardObjectId);
   if (!host) return undefined;
   const drivers = hierarchy.entries.filter(value => value.fields.parentId === host.componentIndex);
@@ -2159,7 +2526,11 @@ function nestedAnimationName(hierarchy, nestedArtboardObjectId, report, objects,
       );
       if (resolved) return resolved;
     }
-    return inheritedAnimation;
+    // A nested state machine owns its playback selection. Propagating the
+    // parent's selected simple animation by name can select an unrelated,
+    // same-named animation in the nested artboard and overwrite its entry
+    // pose. The nested machine's authored entry states are applied separately.
+    return undefined;
   }
   if (!Number.isSafeInteger(driver?.fields.animationId)) return undefined;
   const animations = selectedArtboardVisits(report, targetArtboardId)
@@ -2386,7 +2757,7 @@ export function applyComponentListLayout(hierarchy) {
       && minChildHeight >= maxChildHeight * 0.5;
     const hasAuthoredDirection = finite(style?.fields.flexDirectionValue) !== undefined;
     if (!hasAuthoredDirection && (equalHeight || constrainedOverflowRow) && style?.sourceName === 'LayoutComponentStyle') {
-      style.fields.flexDirectionValue = 1;
+      style.fields.flexDirectionValue = 2;
     }
   }
   for (const layout of [...entries].reverse().filter(value => value.nodeEligible !== false && value.sourceName === 'LayoutComponent')) {
@@ -2788,27 +3159,44 @@ async function buildComponentHierarchy(report, objects, artboardObjectId) {
   const componentIndexByObjectId = new Map();
   const parentNodeByObjectId = new Map();
   const entries = [];
-  const local = [];
+  const componentSlots = [];
   for (const visit of selectedArtboardVisits(report, artboardObjectId)) {
     const source = registry.get(visit.sourceTypeKey);
-    if (!source?.lineage.includes('Component') || isRootScopedComponent(source)) continue;
-    if (local.length === 0 && visit.sourceName !== 'Artboard') continue;
+    if (!source?.lineage.includes('Component')) continue;
+    // parentId addresses the full CoreContext component array. Keep a slot
+    // even for root-scoped records which are intentionally not emitted, or
+    // every later parent/style reference would be shifted.
+    const componentIndex = componentSlots.length;
+    componentSlots.push(null);
+    if (isRootScopedComponent(source)) continue;
+    if (entries.length === 0 && visit.sourceName !== 'Artboard') continue;
     const object = objects.get(visit.neutralObjectId);
     const fields = namedFields(object, visit);
-    const componentIndex = local.length;
     if (visit.sourceName === 'Artboard') { fields.x = 0; fields.y = 0; fields.rotation = 0; fields.scaleX = 1; fields.scaleY = 1; }
     const entry = {
       componentIndex, objectId: visit.neutralObjectId, sourceName: visit.sourceName,
       sourceObjectId: visit.neutralObjectId, transformTarget: source.lineage.includes('TransformComponent'),
       fields, visit, object, nodeEligible: true,
     };
-    local.push(entry); entries.push(entry); componentIndexByObjectId.set(entry.objectId, componentIndex);
-    if (componentIndex > 0) {
-      const parent = local[Number.isSafeInteger(fields.parentId) ? fields.parentId : 0];
-      if (parent) parentNodeByObjectId.set(entry.objectId, parent.objectId);
-    }
+    componentSlots[componentIndex] = entry;
+    entries.push(entry); componentIndexByObjectId.set(entry.objectId, componentIndex);
   }
+  // Parent references may point forward (paint sources in particular do so in
+  // official 7.3 files), therefore hierarchy construction must be two-pass.
+  for (const [child, parent] of resolveComponentParents(entries)) parentNodeByObjectId.set(child, parent);
   return { artboardObjectId, entries, componentIndexByObjectId, parentNodeByObjectId };
+}
+
+export function resolveComponentParents(entries) {
+  const byIndex = new Map(entries.map(entry => [entry.componentIndex, entry]));
+  const output = new Map();
+  for (const entry of entries) {
+    if (entry.componentIndex === 0) continue;
+    const parentIndex = Number.isSafeInteger(entry.fields.parentId) ? entry.fields.parentId : 0;
+    const parent = byIndex.get(parentIndex);
+    if (parent) output.set(entry.objectId, parent.objectId);
+  }
+  return output;
 }
 
 function selectedArtboardVisits(report, artboardObjectId) {
@@ -3079,12 +3467,15 @@ export function compileImageClipMasks(hierarchy) {
   return { nodes, compositeByTarget };
 }
 
-function localPaints(entry, entries, children) {
+export function localPaints(entry, entries, children) {
   const style = localEntry(entries, entry, entry.fields.styleId);
   return [
     ...childEntries(children, entry),
     ...(style ? childEntries(children, style) : []),
-  ].filter(value => value.scopeKey === entry.scopeKey && (value.sourceName === 'Fill' || value.sourceName === 'Stroke'));
+  ].filter(value => value.scopeKey === entry.scopeKey && (value.sourceName === 'Fill' || value.sourceName === 'Stroke'))
+    // Rive stores a shape's paint list front-to-back. HYA components are
+    // consumed in painter order, so the list must be reversed exactly once.
+    .reverse();
 }
 
 const VECTOR_GEOMETRY_TYPES = new Set(['Rectangle', 'Ellipse', 'Triangle', 'Polygon', 'Star', 'PointsPath', 'ListPath']);
@@ -3210,16 +3601,37 @@ export function vectorPaint(entry, owned, children, ownerSourceName = 'Shape') {
   if (source.kind === 'solid' && source.color[3] <= 0) return null;
   if (entry.sourceName === 'Fill') {
     const feather = owned.find(value => value.sourceName === 'Feather' && value.fields.inner === true);
-    if (feather && source.kind === 'solid') {
+    if (feather) {
       const strength = finite(feather.fields.strength) ?? 1;
+      if (source.kind !== 'solid') {
+        // Rive applies an inner Feather to the paint coverage, not to the
+        // geometry. HYA's vector core does not yet expose a per-fill signed
+        // distance channel, but a gradient stroke preserves the same authored
+        // paint coordinates while bounding the coverage to the feather band.
+        // This is materially closer than filling the complete shape (which
+        // stretches shell highlights through the entire interior).
+        return {
+          stroke: {
+            color: [1, 1, 1, 1],
+            gradient: source,
+            width: Math.max(1, Math.min(64, strength)),
+            lineCap: 'round', lineJoin: 'round', miterLimit: 4,
+          },
+        };
+      }
+      const rgb = source.color.slice(0, 3);
+      const neutralHighlight = Math.max(...rgb) > 0.8 && Math.max(...rgb) - Math.min(...rgb) < 0.08;
       const stroke = {
         color: source.color,
         width: Math.max(1, Math.min(12, strength / 3)),
         lineCap: 'round', lineJoin: 'round', miterLimit: 4,
       };
       if (ownerSourceName === 'Shape') {
-        const rgb = source.color.slice(0, 3);
-        const neutralHighlight = Math.max(...rgb) > 0.8 && Math.max(...rgb) - Math.min(...rgb) < 0.08;
+        // A neutral inner feather is commonly used as a shell highlight or
+        // separator. A uniform translucent fill brightens the entire surface
+        // and destroys the authored gradient; retain only its edge proxy until
+        // the vector renderer has a per-paint signed-distance feather.
+        if (neutralHighlight) return { stroke };
         const fillOpacity = Math.min(0.22, 0.04 + strength / 48) * (neutralHighlight ? 0.3 : 1);
         return {
           fill: { ...source, opacity: fillOpacity },

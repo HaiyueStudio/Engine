@@ -223,15 +223,19 @@ test('G10 waits for a late evaluator result, then returns an exact abort without
     }],
   });
   const controller = new AbortController(); let lateResolved = false;
+  let markExtremaStarted;
+  const extremaStarted = new Promise(resolve => { markExtremaStarted = resolve; });
   const evaluator = {
     async extrema(requests) {
+      markExtremaStarted();
       await new Promise(resolve => setTimeout(resolve, 10)); lateResolved = true;
       return requests.map(request => ({ ...request, times: [] }));
     },
     async sample(requests) { return requests.map(({ trackId, time }) => ({ trackId, time, value: [time] })); },
   };
   const pending = converter.convertRiveToHya(input, { evaluator, signal: controller.signal });
-  setTimeout(() => controller.abort('late-result-test'), 0);
+  await extremaStarted;
+  controller.abort('late-result-test');
   await assert.rejects(pending, error => error.code === 'E_RIVE_CONVERT_ABORTED');
   assert.equal(lateResolved, true);
 });

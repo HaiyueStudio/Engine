@@ -73,14 +73,16 @@ test('renderer batches commands, performs bounded uploads, recovers, and dispose
   assert.ok(firstGpu.textureWrites.every(value => value.layout.bytesPerRow % 256 === 0));
 
   const pass = fakePass();
+  const colorMatrix = [1, 0, 0, .1, 0, .5, 0, .2, 0, 0, .25, .3];
   const stats = renderer.render(pass, [
-    { spriteId: 'indexed', paletteId: 'main', x: 10, y: 10, priority: 1 },
+    { spriteId: 'indexed', paletteId: 'main', x: 10, y: 10, priority: 1, colorMatrix },
     { spriteId: 'indexed', paletteId: 'main', x: 20, y: 10, priority: 1 },
     { spriteId: 'color', x: 30, y: 10, priority: 2, blend: 'additive', sampling: 'linear' },
   ], 1280, 720);
   assert.equal(stats.drawCommands, 3);
   assert.equal(stats.drawCalls, 2);
   assert.deepEqual(pass.draws.map(value => [value.instanceCount, value.firstInstance]), [[2, 0], [1, 2]]);
+  const packedInstances = new Float32Array(firstGpu.bufferWrites.at(-2).data.buffer); assert.deepEqual([...packedInstances.slice(24, 36)], colorMatrix.map(Math.fround));
 
   const replacement = fakeDevice();
   const oldTextures = [...firstGpu.textures];
@@ -105,6 +107,7 @@ test('renderer validates draw references and indexed palette selection', () => {
   assert.throws(() => renderer.render(fakePass(), [{ spriteId: 'missing', x: 0, y: 0 }], 1920, 1080), /unknown sprite/);
   assert.throws(() => renderer.render(fakePass(), [{ spriteId: 'indexed', x: 0, y: 0 }], 1920, 1080), /paletteId/);
   assert.throws(() => renderer.render(fakePass(), [{ spriteId: 'indexed', paletteId: 'main', x: 0, y: 0, opacity: 2 }], 1920, 1080), /opacity/);
+  assert.throws(() => renderer.render(fakePass(), [{ spriteId: 'indexed', paletteId: 'main', x: 0, y: 0, colorMatrix: [1, 2] }], 1920, 1080), /twelve values/);
   renderer.dispose();
 });
 

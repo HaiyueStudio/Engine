@@ -42,6 +42,17 @@ test('Chrome fixture server rejects unsafe mount prefixes', async () => {
   );
 });
 
+test('Chrome fixture server serves stylesheets with a browser-applicable MIME type', async context => {
+  const temporaryRoot = mkdtempSync(resolve(tmpdir(), 'haiyue-chrome-css-'));
+  context.after(() => rmSync(temporaryRoot, { recursive: true, force: true }));
+  writeFileSync(resolve(temporaryRoot, 'fixture.css'), 'body { color: red; }');
+  const server = await startHttpFixtureServer(temporaryRoot);
+  context.after(() => server.close());
+  const response = await fetch(`${server.origin}/fixture.css`);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('content-type'), 'text/css; charset=utf-8');
+});
+
 test('Chrome profile cleanup retries transient Windows locks and reports attempts', async () => {
   let attempts = 0;
   const result = await removeChromeProfile('ignored-test-profile', {

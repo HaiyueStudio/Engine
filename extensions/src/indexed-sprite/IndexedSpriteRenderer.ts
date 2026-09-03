@@ -13,7 +13,7 @@ import {
   type IndexedSpriteSampling,
 } from './contracts';
 
-const INSTANCE_BYTES = 96;
+const INSTANCE_BYTES = 144;
 const INSTANCE_WORDS = INSTANCE_BYTES / 4;
 
 interface GpuPage {
@@ -273,6 +273,9 @@ export class IndexedSpriteRenderer {
     uints[offset + 18] = 0; uints[offset + 19] = 0;
     const tint = command.tint ?? [1, 1, 1, 1];
     for (let index = 0; index < 4; index++) { const value = tint[index]!; if (!Number.isFinite(value)) throw new RangeError('Indexed sprite tint must be finite.'); floats[offset + 20 + index] = value; }
+    const colorMatrix = command.colorMatrix ?? [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0];
+    if (colorMatrix.length !== 12) throw new RangeError('Indexed sprite colorMatrix must contain twelve values.');
+    for (let index = 0; index < 12; index++) { const value = colorMatrix[index]!; if (!Number.isFinite(value)) throw new RangeError('Indexed sprite colorMatrix must be finite.'); floats[offset + 24 + index] = value; }
   }
 
   #destroyGpuResources(): void {

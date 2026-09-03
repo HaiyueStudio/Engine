@@ -184,7 +184,8 @@ function definitions(): Readonly<Record<BuiltinRenderOperation, RenderDefinition
     ], [viewportBlock()], [], [
       varying('TEXCOORD_0', 0, 'vec2<f32>'), flatVarying('UV_RECT', 1, 'vec4<f32>'),
       flatVarying('SPRITE_META', 2, 'vec4<u32>'), flatVarying('COLOR_0', 3, 'vec4<f32>'),
-    ], ['storage-buffer', 'texture-load', 'texture-sample', 'instancing'], ['indexed-palette-bank', 'truecolor-atlas', 'alpha-blend']),
+      flatVarying('COLOR_MATRIX_0', 4, 'vec4<f32>'), flatVarying('COLOR_MATRIX_1', 5, 'vec4<f32>'), flatVarying('COLOR_MATRIX_2', 6, 'vec4<f32>'),
+    ], ['storage-buffer', 'texture-load', 'texture-sample', 'instancing'], ['indexed-palette-bank', 'truecolor-atlas', 'alpha-blend', 'rgb-affine-color-matrix']),
     mesh2d: definition(mesh2d, [
       group('frame', 0, [camera()]),
       group('object', 1, [storage('object.table', 0, VERTEX)]),

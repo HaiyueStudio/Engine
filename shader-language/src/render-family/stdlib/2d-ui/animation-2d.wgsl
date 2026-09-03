@@ -133,19 +133,23 @@ fn gradient_color(position : vec2<f32>) -> vec4<f32> {
   if (object.gradientParams.x > 1.5) { progress = length(position - start) / max(length(delta), 1e-6); }
   progress = clamp(progress, 0.0, 1.0);
   var previousOffset = gradient_offset(0);
-  var previousColor = object.gradientColors[0];
+  var previousColor = vec4<f32>(
+    object.gradientColors[0].rgb * object.gradientColors[0].a,
+    object.gradientColors[0].a
+  );
   for (var index = 1; index < 8; index++) {
     if (f32(index) >= object.gradientParams.y) { break; }
     let nextOffset = gradient_offset(index);
-    let nextColor = object.gradientColors[index];
+    let straightNextColor = object.gradientColors[index];
+    let nextColor = vec4<f32>(straightNextColor.rgb * straightNextColor.a, straightNextColor.a);
     if (progress <= nextOffset) {
       let local = clamp((progress - previousOffset) / max(nextOffset - previousOffset, 1e-6), 0.0, 1.0);
-      return mix(previousColor, nextColor, local) * vec4<f32>(1.0, 1.0, 1.0, object.gradientParams.z);
+      return mix(previousColor, nextColor, local) * object.gradientParams.z;
     }
     previousOffset = nextOffset;
     previousColor = nextColor;
   }
-  return previousColor * vec4<f32>(1.0, 1.0, 1.0, object.gradientParams.z);
+  return previousColor * object.gradientParams.z;
 }
 
 fn effect_kind(index : u32) -> f32 {
@@ -220,12 +224,32 @@ fn fs_present(input : EffectVertexOutput) -> @location(0) vec4<f32> {
   return textureSampleLevel(baseTexture, baseSampler, input.uv, 0.0);
 }
 
-fn animation_color(input : VertexOutput, premultipliedTexture : bool) -> vec4<f32> {
-  var source = textureSample(baseTexture, baseSampler, input.uv);
+fn rive_text_texel(uv : vec2<f32>) -> vec4<f32> {
+  let dimensions = vec2<i32>(textureDimensions(baseTexture, 0));
+  let coordinate = clamp(vec2<i32>(floor(uv * vec2<f32>(dimensions))), vec2<i32>(0), dimensions - vec2<i32>(1));
+  return textureLoad(baseTexture, coordinate, 0);
+}
+
+fn rive_text_sample(input : VertexOutput) -> vec4<f32> {
+  // ANGLE's four-sample rotated grid is the observable anti-aliasing contract
+  // of the pinned WebGL2 oracle. Sample the high-resolution Canvas atlas at
+  // the same four sub-pixel locations instead of continuously filtering its
+  // coverage through a mip chain.
+  let dx = dpdx(input.uv);
+  let dy = dpdy(input.uv);
+  var color = rive_text_texel(input.uv + dx * -0.125 + dy * -0.375);
+  color += rive_text_texel(input.uv + dx * 0.375 + dy * -0.125);
+  color += rive_text_texel(input.uv + dx * -0.375 + dy * 0.125);
+  color += rive_text_texel(input.uv + dx * 0.125 + dy * 0.375);
+  return color * 0.25;
+}
+
+fn animation_color(input : VertexOutput, premultipliedTexture : bool, riveText : bool) -> vec4<f32> {
+  var source = select(textureSample(baseTexture, baseSampler, input.uv), rive_text_sample(input), riveText);
   var sourcePremultiplied = premultipliedTexture;
   if (object.gradientParams.x > 0.5) {
     source = gradient_color(input.localPosition);
-    sourcePremultiplied = false;
+    sourcePremultiplied = true;
   }
   if (!sourcePremultiplied) { source = vec4<f32>(source.rgb * source.a, source.a); }
   // Frozen Cubism drawable-color order. Tint alpha is pose metadata only.
@@ -253,10 +277,15 @@ fn animation_color(input : VertexOutput, premultipliedTexture : bool) -> vec4<f3
 
 @fragment
 fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
-  return animation_color(input, false);
+  return animation_color(input, false, false);
 }
 
 @fragment
 fn fs_main_premultiplied_texture(input : VertexOutput) -> @location(0) vec4<f32> {
-  return animation_color(input, true);
+  return animation_color(input, true, false);
+}
+
+@fragment
+fn fs_main_rive_text(input : VertexOutput) -> @location(0) vec4<f32> {
+  return animation_color(input, true, true);
 }

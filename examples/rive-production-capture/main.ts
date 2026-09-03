@@ -16,6 +16,7 @@ const HYA_FORMAT_EXTENSIONS = [
   'org.haiyue.vector-path-morph@1',
   'org.haiyue.animation-state-machine@2',
   'org.haiyue.data-binding@1',
+  'org.haiyue.interaction@1',
 ] as const;
 type Channel = typeof CHANNELS[number];
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
@@ -157,14 +158,24 @@ async function createOfficialOwner(payload: Payload, canvas: HTMLCanvasElement, 
     rive = new module.Rive({
       buffer: bytes.slice(0), canvas, artboard: payload.scenario.selection.artboard,
       animations: payload.scenario.selection.animation ?? undefined, stateMachines: payload.scenario.selection.stateMachine,
+      // Bind authored defaults after load, once we can distinguish an artboard
+      // that actually owns a ViewModel from an ordinary artboard. Passing
+      // autoBind=true calls bind() unconditionally in @rive-app/webgl2@2.40.0;
+      // files without a linked ViewModel then emit console errors and cannot
+      // become formal evidence even though their framebuffer is valid.
       autoplay: false, autoBind: false, useOffscreenRenderer: false,
-      onLoad: () => resolve(rive), onLoadError: (event: unknown) => reject(new Error(`Official Rive load failed: ${String(event)}`)),
+      onLoad: () => {
+        try { bindAuthoredDefaultViewModels(rive); resolve(rive); }
+        catch (error) { reject(error); }
+      },
+      onLoadError: (event: unknown) => reject(new Error(`Official Rive load failed: ${String(event)}`)),
     });
   });
   const gl = canvas.getContext('webgl2');
   if (!gl) throw new Error('Official Rive WebGL2 context is unavailable after load.');
   const timer = new WebGl2GpuTimer(gl);
   const inputs = instance.stateMachineInputs(payload.scenario.selection.stateMachine) ?? [];
+  let resourcesSettled = false;
   return {
     kind: 'official',
     async resize(width, height, dpr) { setCanvasViewport(canvas, width, height); instance.resizeDrawingSurfaceToCanvas(dpr); await frames(2); },
@@ -177,6 +188,21 @@ async function createOfficialOwner(payload: Payload, canvas: HTMLCanvasElement, 
     },
     async renderAt(micros, measureGpu = false) {
       if (payload.scenario.selection.animation) instance.animator.scrub([payload.scenario.selection.animation], micros / 1_000_000);
+      if (!resourcesSettled) {
+        // onLoad means the file/artboard exists, but the first draw can still
+        // compile WebGL programs and publish embedded font/image resources.
+        // Warm the same logical time without recording it so fresh owners have
+        // byte-stable first evidence frames and text is compared only after its
+        // official resource path has settled.
+        for (let attempt = 0; attempt < 3; attempt++) {
+          instance._needsRedraw = true;
+          instance.draw(performance.now());
+          gl.finish();
+          await frames(1);
+        }
+        resourcesSettled = true;
+        if (payload.scenario.selection.animation) instance.animator.scrub([payload.scenario.selection.animation], micros / 1_000_000);
+      }
       instance._needsRedraw = true;
       const draws: Json[] = [];
       const restoreDrawTrace = traceWebGlDraws(gl, draws);
@@ -200,6 +226,29 @@ async function createOfficialOwner(payload: Payload, canvas: HTMLCanvasElement, 
     async loseDevice() { const gl = canvas.getContext('webgl2'); const extension = gl?.getExtension('WEBGL_lose_context'); if (!extension) return false; extension.loseContext(); await frames(2); extension.restoreContext(); await frames(2); return true; },
     async cleanup() { instance.cleanup(); await frames(1); },
   };
+}
+
+function bindAuthoredDefaultViewModels(instance: any): void {
+  // defaultViewModel() delegates to the low-level lookup that logs an error
+  // when the file has no ViewModel definitions at all. Guard that call with
+  // the metadata count so ordinary text/vector fixtures remain console-clean.
+  if (!(Number(instance.viewModelCount) > 0)) return;
+  const main = instance.defaultViewModel?.() ?? null;
+  const globalNames = typeof instance.globalViewModelNames === 'function'
+    ? instance.globalViewModelNames() as string[]
+    : [];
+  const hasAuthoredViewModel = main !== null || globalNames.length > 0;
+  if (!hasAuthoredViewModel) return;
+
+  const mainDefault = main?.defaultInstance?.() ?? null;
+  if (mainDefault) instance.setViewModelInstance(mainDefault);
+  for (const name of globalNames) {
+    const globalDefault = instance.viewModelByName?.(name)?.defaultInstance?.() ?? null;
+    if (globalDefault) instance.setGlobalViewModelInstance(name, globalDefault);
+  }
+  // Match the pinned runtime's autoBind behavior, but only for files whose
+  // metadata proves that a main or global ViewModel exists.
+  instance.bind();
 }
 
 async function createHyaOwner(payload: Payload, canvas: HTMLCanvasElement, bytes: ArrayBuffer): Promise<RuntimeOwner> {

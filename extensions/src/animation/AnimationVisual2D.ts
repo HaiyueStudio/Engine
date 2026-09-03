@@ -35,7 +35,7 @@ export interface AnimationVisual2DOptions {
 }
 
 export type AnimationVisual2DBlendMode = 'normal' | 'additive' | 'multiplicative' | 'screen';
-export type AnimationVisual2DTextureAlphaMode = 'straight' | 'premultiplied';
+export type AnimationVisual2DTextureAlphaMode = 'straight' | 'premultiplied' | 'rive-text';
 
 export interface AnimationVisualGradient {
   kind: 'linear' | 'radial';
@@ -249,7 +249,7 @@ export function composeAnimationDrawableColorPixel(input: AnimationDrawableColor
   const coverage = input.coverage ?? 1;
   if (!Number.isFinite(coverage) || coverage < 0 || coverage > 1) throw new RangeError('Animation drawable coverage must be finite and within [0, 1].');
   const alpha = texture[3];
-  const premultiplied = input.textureAlphaMode === 'premultiplied'
+  const premultiplied = input.textureAlphaMode === 'premultiplied' || input.textureAlphaMode === 'rive-text'
     ? [texture[0], texture[1], texture[2]]
     : [texture[0] * alpha, texture[1] * alpha, texture[2] * alpha];
   if (!input.outputMask) {

@@ -55,6 +55,7 @@ interface EntityGpu {
   externalVersion: number;
   externalWidth: number;
   externalHeight: number;
+  externalMipLevelCount: number;
   externalBindGroup: GPUBindGroup | null;
 }
 
@@ -89,6 +90,30 @@ interface AnimationRenderItem {
 }
 
 const SHADER = animation2dWgsl;
+const TEXT_MIPMAP_SHADER = /* wgsl */ `
+struct VertexOutput {
+  @builtin(position) position: vec4f,
+  @location(0) uv: vec2f,
+}
+
+@group(0) @binding(0) var sourceTexture: texture_2d<f32>;
+@group(0) @binding(1) var sourceSampler: sampler;
+
+@vertex
+fn vertexMain(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
+  let positions = array(vec2f(-1.0, -1.0), vec2f(3.0, -1.0), vec2f(-1.0, 3.0));
+  let uvs = array(vec2f(0.0, 1.0), vec2f(2.0, 1.0), vec2f(0.0, -1.0));
+  var output: VertexOutput;
+  output.position = vec4f(positions[vertexIndex], 0.0, 1.0);
+  output.uv = uvs[vertexIndex];
+  return output;
+}
+
+@fragment
+fn fragmentMain(input: VertexOutput) -> @location(0) vec4f {
+  return textureSample(sourceTexture, sourceSampler, input.uv);
+}
+`;
 const MAX_COMPOSITE_LAYERS = 8;
 const MULTIPLY_COLOR_OFFSET = 20;
 const SCREEN_COLOR_OFFSET = 24;
@@ -113,6 +138,8 @@ interface Animation2DSharedGpu {
   readonly textureLayout: GPUBindGroupLayout;
   readonly compositeLayout: GPUBindGroupLayout;
   readonly sampler: GPUSampler;
+  readonly mipmapSampler: GPUSampler;
+  readonly mipmapPipeline: GPURenderPipeline;
   readonly shader: GPUShaderModule;
   readonly pipelineLayout: GPUPipelineLayout;
   readonly pipelines: Map<string, GPURenderPipeline>;
@@ -130,7 +157,7 @@ function getAnimation2DSharedGpu(
 ): Animation2DSharedGpu {
   return getExtensionSharedRendererResource(
     device,
-    'Animation2D.sharedGpu:v1',
+    'Animation2D.sharedGpu:v2',
     () => createAnimation2DSharedGpu(device, tracker),
   );
 }
@@ -159,7 +186,21 @@ function createAnimation2DSharedGpu(
     })),
     { binding: MAX_COMPOSITE_LAYERS, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'filtering' } },
   ] });
-  const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear' });
+  const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', mipmapFilter: 'linear' });
+  const mipmapSampler = device.createSampler({
+    magFilter: 'linear',
+    minFilter: 'linear',
+    addressModeU: 'clamp-to-edge',
+    addressModeV: 'clamp-to-edge',
+  });
+  const mipmapShader = device.createShaderModule({ label: 'Animation2D.textMipmapShader', code: TEXT_MIPMAP_SHADER });
+  const mipmapPipeline = device.createRenderPipeline({
+    label: 'Animation2D.textMipmapPipeline',
+    layout: 'auto',
+    vertex: { module: mipmapShader, entryPoint: 'vertexMain' },
+    fragment: { module: mipmapShader, entryPoint: 'fragmentMain', targets: [{ format: 'rgba8unorm' }] },
+    primitive: { topology: 'triangle-list' },
+  });
   const shader = device.createShaderModule({ label: 'Animation2D.shader', code: SHADER });
   const pipelineLayout = device.createPipelineLayout({
     bindGroupLayouts: [cameraLayout, objectLayout, textureLayout, compositeLayout],
@@ -213,6 +254,8 @@ function createAnimation2DSharedGpu(
     textureLayout,
     compositeLayout,
     sampler,
+    mipmapSampler,
+    mipmapPipeline,
     shader,
     pipelineLayout,
     pipelines: new Map(),
@@ -239,6 +282,8 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   private textureLayout!: GPUBindGroupLayout;
   private compositeLayout!: GPUBindGroupLayout;
   private sampler!: GPUSampler;
+  private mipmapSampler!: GPUSampler;
+  private mipmapPipeline!: GPURenderPipeline;
   private whiteTexture!: GPUTexture;
   private whiteBindGroup!: GPUBindGroup;
   private emptyCompositeBindGroup!: GPUBindGroup;
@@ -326,9 +371,21 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       group.push(item);
     }
 
+    // Variant-expanded documents can retain many mutually exclusive mask
+    // sources. A completely transparent group contributes the transparent
+    // identity mask, so sharing the renderer's immutable transparent texture
+    // is exact and avoids allocating one full-viewport target per inactive
+    // state. Keep the group keys so alpha-inverted consumers still resolve the
+    // correct transparent input instead of being classified as unresolved.
+    const knownSourceKeys = new Set(this.sourceItems.keys());
+    let activeSourceGroupCount = 0;
+    for (const sources of this.sourceItems.values()) {
+      if (sources.some(source => !isFullyTransparent(source.visual))) activeSourceGroupCount++;
+    }
+
     const viewKey = context.view?.key ?? 'default';
     assertAnimationMaskBudget({
-      groupCount: this.sourceItems.size,
+      groupCount: activeSourceGroupCount,
       maxGroupCount: this.maxMaskTargets,
       width: context.view?.target.width ?? this.engine.width,
       height: context.view?.target.height ?? this.engine.height,
@@ -347,13 +404,15 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     let effectPixels = 0;
     for (const sourceKey of orderSourceGroups(this.sourceItems)) {
       const sources = this.sourceItems.get(sourceKey)!;
+      if (sources.every(source => isFullyTransparent(source.visual))) continue;
       const targetKey = animationMaskTargetKey(viewKey, sourceKey);
       const target = this.getMaskTarget(targetKey, context, frame);
       maskPixels += target.width * target.height;
       maskCount++;
       let initialized = false;
       for (const source of sources) {
-        const resolved = this.resolveCompositeBindGroup(source.visual, maskTargets, viewKey);
+        if (isFullyTransparent(source.visual)) continue;
+        const resolved = this.resolveCompositeBindGroup(source.visual, maskTargets, knownSourceKeys, viewKey);
         if (!resolved) throw unresolvedCompositeError(source.visual, viewKey);
         compositeLayerCount += source.visual.compositeLayers.length;
         const effectTarget = source.visual.effects.length > 0 && !context.passEncoder
@@ -413,8 +472,8 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     };
     for (const item of this.items) {
       const { visual } = item;
-      if (visual.sourceOnly) continue;
-      const resolved = this.resolveCompositeBindGroup(visual, maskTargets, viewKey);
+      if (visual.sourceOnly || isFullyTransparent(visual)) continue;
+      const resolved = this.resolveCompositeBindGroup(visual, maskTargets, knownSourceKeys, viewKey);
       if (!resolved) throw unresolvedCompositeError(visual, viewKey);
       compositeLayerCount += visual.compositeLayers.length;
       if (visual.effects.length > 0 && !context.passEncoder) {
@@ -474,6 +533,8 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     this.textureLayout = shared.textureLayout;
     this.compositeLayout = shared.compositeLayout;
     this.sampler = shared.sampler;
+    this.mipmapSampler = shared.mipmapSampler;
+    this.mipmapPipeline = shared.mipmapPipeline;
     this.whiteTexture = shared.whiteTexture;
     this.whiteBindGroup = shared.whiteBindGroup;
     this.emptyCompositeBindGroup = shared.emptyCompositeBindGroup;
@@ -724,6 +785,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
         externalVersion: -1,
         externalWidth: 0,
         externalHeight: 0,
+        externalMipLevelCount: 1,
         externalBindGroup: null,
       };
     });
@@ -758,28 +820,74 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
             retire();
           }
         }
+        object.externalMipLevelCount = calculateMipLevelCount(size.width, size.height);
         object.externalTexture = requireEngineDevice(this.engine).createTexture({
           label: `Animation2D.text:${entity.id}`,
           size: [size.width, size.height],
+          mipLevelCount: object.externalMipLevelCount,
           format: 'rgba8unorm',
           // WebGPU copyExternalImageToTexture requires RENDER_ATTACHMENT in addition
           // to COPY_DST for browser-backed image sources.
           usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
         });
-        getExtensionGPUResourceTracker(this.engine)?.trackTexture(object.externalTexture, 'Animation2D.textTexture', size.width * size.height * 4);
+        getExtensionGPUResourceTracker(this.engine)?.trackTexture(
+          object.externalTexture,
+          'Animation2D.textTexture',
+          estimateRgba8MipChainBytes(size.width, size.height, object.externalMipLevelCount),
+        );
         object.externalBindGroup = this.createTextureBindGroup(object.externalTexture);
         object.externalWidth = size.width;
         object.externalHeight = size.height;
         object.externalVersion = -1;
       }
       if (object.externalSource !== source || object.externalVersion !== material.textureVersion) {
-        requireEngineDevice(this.engine).queue.copyExternalImageToTexture({ source }, { texture: object.externalTexture! }, [size.width, size.height]);
+        const device = requireEngineDevice(this.engine);
+        device.queue.copyExternalImageToTexture(
+          { source },
+          { texture: object.externalTexture!, premultipliedAlpha: true },
+          [size.width, size.height],
+        );
+        this.generateTextMipChain(device, object.externalTexture!, object.externalMipLevelCount, entity.id);
         object.externalSource = source;
         object.externalVersion = material.textureVersion;
       }
       return object.externalBindGroup!;
     }
     return visual.requiresTexture ? this.transparentBindGroup : this.whiteBindGroup;
+  }
+
+  private generateTextMipChain(
+    device: GPUDevice,
+    texture: GPUTexture,
+    mipLevelCount: number,
+    entityId: number,
+  ): void {
+    if (mipLevelCount <= 1) return;
+    const encoder = device.createCommandEncoder({ label: `Animation2D.textMipmaps:${entityId}` });
+    for (let level = 1; level < mipLevelCount; level++) {
+      const bindGroup = device.createBindGroup({
+        label: `Animation2D.textMipmapBindGroup:${entityId}:${level}`,
+        layout: this.mipmapPipeline.getBindGroupLayout(0),
+        entries: [
+          { binding: 0, resource: texture.createView({ baseMipLevel: level - 1, mipLevelCount: 1 }) },
+          { binding: 1, resource: this.mipmapSampler },
+        ],
+      });
+      const pass = encoder.beginRenderPass({
+        label: `Animation2D.textMipmapPass:${entityId}:${level}`,
+        colorAttachments: [{
+          view: texture.createView({ baseMipLevel: level, mipLevelCount: 1 }),
+          loadOp: 'clear',
+          storeOp: 'store',
+          clearValue: { r: 0, g: 0, b: 0, a: 0 },
+        }],
+      });
+      pass.setPipeline(this.mipmapPipeline);
+      pass.setBindGroup(0, bindGroup);
+      pass.draw(3);
+      pass.end();
+    }
+    device.queue.submit([encoder.finish()]);
   }
 
   private getGeometryGpu(visual: AnimationVisual2D): GeometryGpu {
@@ -842,19 +950,27 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   private resolveCompositeBindGroup(
     visual: AnimationVisual2D,
     targets: ReadonlyMap<string, MaskTarget>,
+    knownSourceKeys: ReadonlySet<string>,
     viewKey: string,
   ): GPUBindGroup | null {
     if (visual.compositeLayers.length === 0) return this.emptyCompositeBindGroup;
-    const resolved: MaskTarget[] = [];
+    const resolved: GPUTexture[] = [];
+    const resolvedKeys: string[] = [];
     for (const key of visual.compositeKeys) {
       const target = targets.get(key);
-      if (!target) return null;
-      resolved.push(target);
+      if (target) {
+        resolved.push(target.texture);
+        resolvedKeys.push(key);
+      } else {
+        if (!knownSourceKeys.has(key)) return null;
+        resolved.push(this.transparentTexture);
+        resolvedKeys.push(`transparent:${key}`);
+      }
     }
-    const key = animationMaskCompositeKey(viewKey, visual.compositeKeys);
+    const key = animationMaskCompositeKey(viewKey, resolvedKeys);
     let bindGroup = this.compositeBindGroups.get(key);
     if (!bindGroup) {
-      bindGroup = this.createCompositeBindGroup(resolved.map(target => target.texture));
+      bindGroup = this.createCompositeBindGroup(resolved);
       this.compositeBindGroups.set(key, bindGroup);
     }
     return bindGroup;
@@ -981,6 +1097,10 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   }
 }
 
+function isFullyTransparent(visual: AnimationVisual2D): boolean {
+  return visual.color[3] <= 0 && visual.effects.length === 0;
+}
+
 function writeBufferAligned(
   queue: GPUQueue,
   buffer: GPUBuffer,
@@ -1008,6 +1128,18 @@ function externalImageSize(source: ImageBitmap | HTMLCanvasElement | HTMLImageEl
     width: Math.max(1, isImage ? source.naturalWidth || source.width : source.width),
     height: Math.max(1, isImage ? source.naturalHeight || source.height : source.height),
   };
+}
+
+function calculateMipLevelCount(width: number, height: number): number {
+  return Math.floor(Math.log2(Math.max(1, width, height))) + 1;
+}
+
+function estimateRgba8MipChainBytes(width: number, height: number, mipLevelCount: number): number {
+  let bytes = 0;
+  for (let level = 0; level < mipLevelCount; level++) {
+    bytes += Math.max(1, width >> level) * Math.max(1, height >> level) * 4;
+  }
+  return bytes;
 }
 
 function compareItems(a: AnimationRenderItem, b: AnimationRenderItem): number {

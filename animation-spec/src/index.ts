@@ -45,6 +45,7 @@ export type {
   AnimationTextAnimator,
   AnimationTextDocumentKeyframe,
   AnimationTextRangeSelector,
+  AnimationTextStyleRun,
   AnimationTextSelectorShape,
   AnimationTextSelectorUnits,
   AnimationTrack,
