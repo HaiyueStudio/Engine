@@ -207,12 +207,37 @@ fn sample_blurred(uv : vec2<f32>, radius : vec2<f32>) -> vec4<f32> {
   return value;
 }
 
+fn local_to_output_pixels(value : vec2<f32>, dimensions : vec2<f32>) -> vec2<f32> {
+  let localToClip = camera.viewProj * object.model;
+  let clipDelta = (localToClip * vec4<f32>(value, 0.0, 0.0)).xy;
+  return vec2<f32>(clipDelta.x * dimensions.x * 0.5, -clipDelta.y * dimensions.y * 0.5);
+}
+
+fn sample_inner_feather(uv : vec2<f32>, parameters : vec4<f32>) -> vec4<f32> {
+  let dimensions = max(vec2<f32>(textureDimensions(baseTexture)), vec2<f32>(1.0));
+  let radius = vec2<f32>(
+    length(local_to_output_pixels(vec2<f32>(parameters.x, 0.0), dimensions)),
+    length(local_to_output_pixels(vec2<f32>(0.0, parameters.y), dimensions)),
+  );
+  let offsetUv = local_to_output_pixels(parameters.zw, dimensions) / dimensions;
+  let foreground = textureSampleLevel(baseTexture, baseSampler, uv, 0.0);
+  // Inner feather keeps the authored paint in the shape interior and softens
+  // only its edge with the blurred source coverage. Sampling the paint itself
+  // at the original UV preserves gradient coordinates and clips the result to
+  // the original path.
+  let featherCoverage = sample_blurred(uv - offsetUv, radius).a;
+  return foreground * featherCoverage;
+}
+
 @fragment
 fn fs_effect(input : EffectVertexOutput) -> @location(0) vec4<f32> {
   let kind = effect_kind(input.effectIndex);
   let data = object.effectData[input.effectIndex];
   if (kind < 4.5) { return apply_color_effect(textureSampleLevel(baseTexture, baseSampler, input.uv, 0.0), input.effectIndex); }
   if (kind < 5.5) { return sample_blurred(input.uv, max(data.data0.xy, vec2<f32>(0.0))); }
+  if (kind > 6.5) {
+    return sample_inner_feather(input.uv, vec4<f32>(max(data.data0.xy, vec2<f32>(0.0)), data.data0.zw));
+  }
   let dimensions = max(vec2<f32>(textureDimensions(baseTexture)), vec2<f32>(1.0));
   let shadowUv = input.uv - data.data1.yz / dimensions;
   let shadowCoverage = sample_blurred(shadowUv, vec2<f32>(max(data.data1.w, 0.0))).a;

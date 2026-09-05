@@ -34,7 +34,7 @@
 
 - procedural paths 的所有可动画参数、多 fill/stroke、有序 effect group、fill rule、blend、clip 与 draw rule。
 - gradient stop/transform/opacity、dash/trim、feather、image mesh、N-slice、solo/draw-order。
-- `official-inventory-demo-v2` 已在 production lowering 中保留 gradient opacity，并把带 inner Feather 的 gradient 限制到边缘带；但 HYA vector paint 还没有每个 fill 的 signed-distance feather，backpack shell 仍只能使用 gradient stroke 近似。因此该素材的 paint blocker 和本族 `partial` 状态均未关闭。
+- `official-inventory-demo-v2` 已在 production lowering 中保留 gradient opacity；HYA vector paint 新增可序列化的 paint-local `innerFeather` 半径/偏移和 WebGPU 执行面，production provider 只对 gradient feather 启用它。实色 feather 仍保留有界 stroke 代理，当前 9-tap coverage blur 也还不是 Rive 的精确 signed-distance/Gaussian oracle，因此该素材的 paint blocker 和本族 `partial` 状态均未关闭。
 - custom path effect 只能通过 G09 sandboxed protocol；不得直接注入 renderer。
 - `visual-baked` 仅可用于无任何 runtime observable 的纯视觉局部，并保留误差/采样 attribution。
 

@@ -369,6 +369,7 @@ test('HYA v2 round-trips ordered composite stacks and animated vector paints', (
             values: [0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0],
           },
           morphRelative: true,
+          innerFeather: { radius: [6, 8], offset: [1, -2] },
           fill: {
             kind: 'linear-gradient', start: [0, 0], end: [40, 0], opacity: 0.75,
             stops: [0, 1, 0, 0, 1, 1, 0, 0, 1, 0.5],
@@ -393,6 +394,7 @@ test('HYA v2 round-trips ordered composite stacks and animated vector paints', (
   assert.equal(vector.morph.values.buffer, binary);
   assert.equal(vector.morphRelative, true);
   assert.equal(vector.blendMode, 'screen');
+  assert.deepEqual(vector.innerFeather, { radius: [6, 8], offset: [1, -2] });
   assert.equal(vector.fill.opacity, 0.75);
   assert.deepEqual(Array.from(vector.fill.opacityTrack.values), [0.75, 0.25]);
 });

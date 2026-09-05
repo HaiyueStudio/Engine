@@ -1173,7 +1173,7 @@ function compositeOperationCode(operation: NonNullable<AnimationCompositeLayer['
 
 function effectKindCode(kind: AnimationVisual2D['effects'][number]['kind']): number {
   return kind === 'tint' ? 1 : kind === 'fill' ? 2 : kind === 'opacity' ? 3
-    : kind === 'color-matrix' ? 4 : kind === 'blur' ? 5 : 6;
+    : kind === 'color-matrix' ? 4 : kind === 'blur' ? 5 : kind === 'drop-shadow' ? 6 : 7;
 }
 
 function visualNodeKey(visual: AnimationVisual2D): string { return visual.nodeKey; }

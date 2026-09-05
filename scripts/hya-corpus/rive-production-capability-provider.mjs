@@ -3613,18 +3613,12 @@ export function vectorPaint(entry, owned, children, ownerSourceName = 'Shape') {
     if (feather) {
       const strength = finite(feather.fields.strength) ?? 1;
       if (source.kind !== 'solid') {
-        // Rive applies an inner Feather to the paint coverage, not to the
-        // geometry. HYA's vector core does not yet expose a per-fill signed
-        // distance channel, but a gradient stroke preserves the same authored
-        // paint coordinates while bounding the coverage to the feather band.
-        // This is materially closer than filling the complete shape (which
-        // stretches shell highlights through the entire interior).
         return {
-          stroke: {
-            color: [1, 1, 1, 1],
-            gradient: source,
-            width: Math.max(1, Math.min(64, strength)),
-            lineCap: 'round', lineJoin: 'round', miterLimit: 4,
+          fill: { ...source, opacity: 1 },
+          fillRule: entry.fields.fillRule === 1 ? 'evenodd' : 'nonzero',
+          innerFeather: {
+            radius: [Math.min(64, strength), Math.min(64, strength)],
+            offset: [finite(feather.fields.offsetX) ?? 0, finite(feather.fields.offsetY) ?? 0],
           },
         };
       }
@@ -3636,21 +3630,15 @@ export function vectorPaint(entry, owned, children, ownerSourceName = 'Shape') {
         lineCap: 'round', lineJoin: 'round', miterLimit: 4,
       };
       if (ownerSourceName === 'Shape') {
-        // A neutral inner feather is commonly used as a shell highlight or
-        // separator. A uniform translucent fill brightens the entire surface
-        // and destroys the authored gradient; retain only its edge proxy until
-        // the vector renderer has a per-paint signed-distance feather.
         if (neutralHighlight) return { stroke };
-        const fillOpacity = Math.min(0.22, 0.04 + strength / 48) * (neutralHighlight ? 0.3 : 1);
+        const fillOpacity = Math.min(0.22, 0.04 + strength / 48);
         return {
           fill: { ...source, opacity: fillOpacity },
           fillRule: entry.fields.fillRule === 1 ? 'evenodd' : 'nonzero',
           stroke,
         };
       }
-      return {
-        stroke,
-      };
+      return { stroke };
     }
     return { fill: { ...source, opacity: 1 }, fillRule: entry.fields.fillRule === 1 ? 'evenodd' : 'nonzero' };
   }

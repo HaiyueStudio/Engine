@@ -60,6 +60,8 @@ test('stage 9 reflection preserves multi-group, vertex and uniform ABI boundarie
   assert.match(components2d['animation-2d'].code, /object\.params\.y < 0\.5/);
   assert.match(components2d['animation-2d'].code, /let straightColor = mix\(previousColor, nextColor, local\)/);
   assert.match(components2d['animation-2d'].code, /straightColor\.rgb \* straightColor\.a/);
+  assert.match(components2d['animation-2d'].code, /fn sample_inner_feather/);
+  assert.match(components2d['animation-2d'].code, /foreground \* featherCoverage/);
   assert.match(components2d['animation-2d'].code, /sourcePremultiplied = true/);
   assert.equal(components2d['animation-2d'].uniformBlocks.find(block => block.id === 'object.animation2d').byteSize, 1296);
   assert.deepEqual(components2d['animation-2d'].bindGroups.map(group => group.logicalSpace), [

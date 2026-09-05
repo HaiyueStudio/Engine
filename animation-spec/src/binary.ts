@@ -379,6 +379,9 @@ function encodeComponent(
       component.blendMode === undefined
         ? -1
         : ['normal', 'additive', 'multiplicative', 'screen'].indexOf(component.blendMode),
+      component.innerFeather
+        ? [component.innerFeather.radius, component.innerFeather.offset ?? 0]
+        : 0,
     ];
   }
   if (component.type === 'sprite2d') return encodeSpriteComponent(
@@ -926,6 +929,9 @@ function decodeComponent(
       ...(component.length < 10 || component[9] !== 1 ? {} : { morphRelative: true }),
       ...(component.length < 11 || component[10] === -1 ? {} : {
         blendMode: indexedLiteral(['normal', 'additive', 'multiplicative', 'screen'] as const, component[10], `${path}[10]`),
+      }),
+      ...(component.length < 12 || component[11] === 0 ? {} : {
+        innerFeather: decodeVectorInnerFeather(component[11], `${path}[11]`),
       }),
     }, validationPath, options, countBudget);
   }
@@ -1526,6 +1532,14 @@ function compactArray(value: unknown, path: string, minimumLength = 0): unknown[
   const result = binaryArray(value, path);
   if (result.length < minimumLength) invalidBinary(`Expected at least ${minimumLength} entries at ${path}.`);
   return result;
+}
+
+function decodeVectorInnerFeather(value: unknown, path: string): Record<string, unknown> {
+  const feather = compactArray(value, path, 1);
+  return {
+    radius: feather[0],
+    ...(feather.length < 2 || feather[1] === 0 ? {} : { offset: feather[1] }),
+  };
 }
 
 function binaryRecord(value: unknown, path: string): Record<string, unknown> {

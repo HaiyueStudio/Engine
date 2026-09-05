@@ -24,7 +24,7 @@ export interface Texture2DGpu {
 
 export function createCamera2DLayout(device: GPUDevice): GPUBindGroupLayout {
   return device.createBindGroupLayout({
-    entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }],
+    entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }],
   });
 }
 

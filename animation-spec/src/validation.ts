@@ -665,6 +665,9 @@ function parseComponent(
     const morph = component.morph === undefined ? undefined : parseVectorValueTrack(component.morph, `${path}.morph`, valueSize, options.copyFloatData === true);
     const fill = component.fill === undefined ? undefined : parseVectorFill(component.fill, `${path}.fill`, options.copyFloatData === true);
     const stroke = component.stroke === undefined ? undefined : parseVectorStroke(component.stroke, `${path}.stroke`, options.copyFloatData === true);
+    const innerFeather = component.innerFeather === undefined
+      ? undefined
+      : parseVectorInnerFeather(component.innerFeather, `${path}.innerFeather`);
     const modifiers = component.modifiers === undefined
       ? undefined
       : array(component.modifiers, `${path}.modifiers`).map((modifier, index) => (
@@ -684,6 +687,7 @@ function parseComponent(
       ...(component.morphRelative === true ? { morphRelative: true } : {}),
       ...(fill ? { fill } : {}),
       ...(stroke ? { stroke } : {}),
+      ...(innerFeather ? { innerFeather } : {}),
       ...(modifiers ? { modifiers: Object.freeze(modifiers) } : {}),
       fillRule: component.fillRule === undefined ? 'nonzero' : literal(component.fillRule, ['nonzero', 'evenodd'] as const, `${path}.fillRule`),
       tolerance: component.tolerance === undefined ? 0.35 : positiveNumber(component.tolerance, `${path}.tolerance`),
@@ -877,6 +881,16 @@ function parseVectorModifier(value: unknown, path: string, copy: boolean) {
     ...parseVectorTrackField(modifier, 'startTrack', path, 1, copy),
     ...parseVectorTrackField(modifier, 'endTrack', path, 1, copy),
     ...parseVectorTrackField(modifier, 'offsetTrack', path, 1, copy),
+  });
+}
+
+function parseVectorInnerFeather(value: unknown, path: string) {
+  const feather = record(value, path);
+  const radius = nonNegativeVec2(feather.radius, `${path}.radius`);
+  if (radius[0] === 0 && radius[1] === 0) fail('Inner feather radius must contain a positive axis.', `${path}.radius`);
+  return Object.freeze({
+    radius,
+    ...(feather.offset === undefined ? {} : { offset: vec2(feather.offset, `${path}.offset`) }),
   });
 }
 

@@ -934,7 +934,7 @@ test('Rive omitted GradientStop color uses its opaque-white generated default', 
   assert.deepEqual(source.stops, [0, 1, 1, 1, 1, 1, 0.25, 0.5, 0.75, 0]);
 });
 
-test('shape feather keeps a bounded translucent fill while layout feather remains an edge proxy', () => {
+test('solid inner feather keeps the bounded stroke proxy while gradient feather uses the execution surface', () => {
   const fill = { sourceName: 'Fill', fields: {} };
   const solid = { sourceName: 'SolidColor', fields: { colorValue: [0, 1, 0.5, 1] } };
   const feather = { sourceName: 'Feather', fields: { inner: true, strength: 6 } };
@@ -946,23 +946,22 @@ test('shape feather keeps a bounded translucent fill while layout feather remain
   assert.deepEqual(vectorPaint(fill, [white, feather], new Map(), 'Shape'), {
     stroke: { color: [1, 1, 1, 0.6], width: 2, lineCap: 'round', lineJoin: 'round', miterLimit: 4 },
   });
-  assert.equal(vectorPaint(fill, [solid, feather], new Map(), 'LayoutComponent').stroke.width, 2);
-});
-
-test('neutral inner feather remains an edge highlight without washing out a shell gradient', () => {
-  const fill = { sourceName: 'Fill', fields: {} };
-  const solid = { sourceName: 'SolidColor', fields: { colorValue: [1, 1, 1, 0.6] } };
-  const feather = { sourceName: 'Feather', fields: { inner: true, strength: 12 } };
-
-  assert.deepEqual(vectorPaint(fill, [solid, feather], new Map(), 'Shape'), {
-    stroke: {
-      color: [1, 1, 1, 0.6], width: 4,
-      lineCap: 'round', lineJoin: 'round', miterLimit: 4,
-    },
+  assert.deepEqual(vectorPaint(fill, [solid, feather], new Map(), 'LayoutComponent'), {
+    stroke: { color: [0, 1, 0.5, 1], width: 2, lineCap: 'round', lineJoin: 'round', miterLimit: 4 },
   });
 });
 
-test('gradient inner feather is bounded to an executable edge band', () => {
+test('solid inner feather proxy preserves authored paint opacity', () => {
+  const fill = { sourceName: 'Fill', fields: {} };
+  const solid = { sourceName: 'SolidColor', fields: { colorValue: [1, 1, 1, 0.6] } };
+  const feather = { sourceName: 'Feather', fields: { inner: true, strength: 12, offsetX: 2, offsetY: 4 } };
+
+  assert.deepEqual(vectorPaint(fill, [solid, feather], new Map(), 'Shape'), {
+    stroke: { color: [1, 1, 1, 0.6], width: 4, lineCap: 'round', lineJoin: 'round', miterLimit: 4 },
+  });
+});
+
+test('gradient inner feather retains the full paint and its local attenuation', () => {
   const fill = { sourceName: 'Fill', fields: {} };
   const gradient = { sourceName: 'LinearGradient', scopeKey: 'scope', componentIndex: 7, fields: { startX: 0, startY: 0, endX: 0, endY: 100, opacity: 0.5 } };
   const stops = [
@@ -973,14 +972,12 @@ test('gradient inner feather is bounded to an executable edge band', () => {
   const children = new Map([[`scope\0${gradient.componentIndex}`, stops]]);
 
   assert.deepEqual(vectorPaint(fill, [gradient, feather], children, 'Shape'), {
-    stroke: {
-      color: [1, 1, 1, 1],
-      gradient: {
-        kind: 'linear-gradient', start: [0, 0], end: [0, 100],
-        stops: [0, 1, 1, 1, 0.5, 1, 1, 1, 1, 0],
-      },
-      width: 38, lineCap: 'round', lineJoin: 'round', miterLimit: 4,
+    fill: {
+      kind: 'linear-gradient', start: [0, 0], end: [0, 100],
+      stops: [0, 1, 1, 1, 0.5, 1, 1, 1, 1, 0], opacity: 1,
     },
+    fillRule: 'nonzero',
+    innerFeather: { radius: [38, 38], offset: [0, 0] },
   });
 });
 

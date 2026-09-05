@@ -53,6 +53,7 @@ export interface Animation2DRuntimeVisual {
   lastVectorTime?: number;
   readonly textRasterizer?: AnimationTextRasterizer;
   readonly sourceEffects?: readonly Readonly<AnimationLayerEffect>[];
+  readonly sourceEffectOffset?: number;
   lastEffectTime?: number;
   readonly compositeExpansionTracks?: readonly (Readonly<AnimationVectorValueTrack> | undefined)[];
   lastCompositeTime?: number;
@@ -363,7 +364,7 @@ export class Animation2DRuntime {
           visual.lastVectorTime = time;
         }
         if (visual.sourceEffects && visual.lastEffectTime !== time) {
-          updateVisualEffects(visual.component, visual.sourceEffects, time);
+          updateVisualEffects(visual.component, visual.sourceEffects, time, visual.sourceEffectOffset ?? 0);
           visual.component.revision++;
           visual.lastEffectTime = time;
         }
@@ -944,7 +945,18 @@ function createCoreVisual(
     ...(component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID && component.blendMode
       ? { blendMode: component.blendMode }
       : {}),
-    ...(effects?.length ? { effects: createVisualEffects(effects, 0) } : {}),
+    ...((component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID && component.innerFeather) || effects?.length ? {
+      effects: [
+        ...(component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID && component.innerFeather ? [{
+          kind: 'inner-feather' as const,
+          values: new Float32Array([
+            component.innerFeather.radius[0], component.innerFeather.radius[1],
+            component.innerFeather.offset?.[0] ?? 0, component.innerFeather.offset?.[1] ?? 0,
+          ]),
+        }] : []),
+        ...createVisualEffects(effects ?? [], 0),
+      ],
+    } : {}),
   });
   const initialStyleAlpha = component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID
     ? initialVectorStyleAlpha(component)
@@ -968,7 +980,11 @@ function createCoreVisual(
         ...(isVectorShapeDynamic(component) ? { lastVectorTime: Number.NaN } : {}),
       } : {}),
       ...(textMaterial ? { textRasterizer: textMaterial } : {}),
-      ...(effects?.length ? { sourceEffects: effects, lastEffectTime: 0 } : {}),
+      ...(effects?.length ? {
+        sourceEffects: effects,
+        sourceEffectOffset: component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID && component.innerFeather ? 1 : 0,
+        lastEffectTime: 0,
+      } : {}),
       ...(compositeExpansionTracks.some(track => track !== undefined) ? {
         compositeExpansionTracks,
         lastCompositeTime: Number.NaN,
@@ -992,11 +1008,12 @@ function updateVisualEffects(
   visual: AnimationVisual2D,
   effects: readonly Readonly<AnimationLayerEffect>[],
   time: number,
+  offset = 0,
 ): void {
-  const count = Math.min(visual.effects.length, effects.length);
+  const count = Math.min(Math.max(0, visual.effects.length - offset), effects.length);
   for (let index = 0; index < count; index++) {
     const sampled = sampleEffectValues(effects[index]!, time);
-    const target = visual.effects[index]!.values;
+    const target = visual.effects[index + offset]!.values;
     if (target.length === sampled.length) target.set(sampled);
   }
 }

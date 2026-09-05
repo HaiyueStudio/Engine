@@ -291,6 +291,15 @@ export type AnimationVectorPathModifier =
   | AnimationVectorTrimPathModifier
   | AnimationVectorRoundCornersModifier;
 
+/**
+ * Paint-local inner feather. Radius and offset use the vector shape's local
+ * coordinate system and are applied before compositing.
+ */
+export interface AnimationVectorInnerFeather {
+  readonly radius: readonly [number, number];
+  readonly offset?: readonly [number, number];
+}
+
 export interface AnimationVectorShapeComponent {
   readonly type: typeof ANIMATION_VECTOR_SHAPE_EXTENSION_ID;
   readonly commands: string;
@@ -302,6 +311,8 @@ export interface AnimationVectorShapeComponent {
   readonly morphRelative?: boolean;
   readonly fill?: AnimationVectorSolidPaint | AnimationVectorGradientPaint;
   readonly stroke?: AnimationVectorStrokePaint;
+  /** Unlike node effects, this edge attenuation does not affect sibling paints. */
+  readonly innerFeather?: AnimationVectorInnerFeather;
   /** Ordered, source-neutral path modifiers. Runtime execution follows array order. */
   readonly modifiers?: readonly AnimationVectorPathModifier[];
   readonly fillRule?: AnimationFillRule;
