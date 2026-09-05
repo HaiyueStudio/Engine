@@ -3622,7 +3622,10 @@ export function vectorPaint(entry, owned, children, ownerSourceName = 'Shape') {
   if (entry.sourceName === 'Fill') {
     const feather = owned.find(value => value.sourceName === 'Feather' && value.fields.inner === true);
     if (feather) {
-      const strength = finite(feather.fields.strength) ?? 1;
+      // FeatherBase::strength has a generated default of 12 in Rive 7.3.
+      // The field is omitted from many official files, so treating absence as
+      // a one-pixel feather silently changes authored paint semantics.
+      const strength = finite(feather.fields.strength) ?? 12;
       if (source.kind !== 'solid') {
         return {
           fill: { ...source, opacity: 1 },

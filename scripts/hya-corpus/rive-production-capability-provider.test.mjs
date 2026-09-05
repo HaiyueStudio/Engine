@@ -967,6 +967,21 @@ test('solid inner feather proxy preserves authored paint opacity', () => {
   });
 });
 
+test('omitted Rive inner feather strength uses the generated 12-unit default', () => {
+  const fill = { sourceName: 'Fill', fields: {} };
+  const gradient = { sourceName: 'LinearGradient', scopeKey: 'scope', componentIndex: 7, fields: { startX: 0, startY: 0, endX: 0, endY: 100 } };
+  const stops = [
+    { sourceName: 'GradientStop', fields: { position: 0, colorValue: [1, 1, 1, 1] } },
+    { sourceName: 'GradientStop', fields: { position: 1, colorValue: [1, 1, 1, 0] } },
+  ];
+  const feather = { sourceName: 'Feather', fields: { inner: true, offsetX: 2, offsetY: 3 } };
+  const children = new Map([[`scope\0${gradient.componentIndex}`, stops]]);
+
+  assert.deepEqual(vectorPaint(fill, [gradient, feather], children, 'Shape').innerFeather, {
+    radius: [12, 12], offset: [2, 3],
+  });
+});
+
 test('gradient inner feather retains the full paint and its local attenuation', () => {
   const fill = { sourceName: 'Fill', fields: {} };
   const gradient = { sourceName: 'LinearGradient', scopeKey: 'scope', componentIndex: 7, fields: { startX: 0, startY: 0, endX: 0, endY: 100, opacity: 0.5 } };
