@@ -196,9 +196,15 @@ test('view-model instance names select the matching nested Solo branch', () => {
     { componentIndex: 0, sourceName: 'Solo', fields: { activeComponentId: 1 } },
     { componentIndex: 1, sourceName: 'NestedArtboard', fields: { parentId: 0, name: 'All' } },
     { componentIndex: 2, sourceName: 'NestedArtboard', fields: { parentId: 0, name: 'Shield' } },
+    { componentIndex: 3, sourceName: 'NestedArtboard', fields: { parentId: 0, name: 'Quick Use' } },
+    { componentIndex: 4, sourceName: 'NestedArtboard', fields: { parentId: 0, name: 'Miscellaneous' } },
   ] };
   applyViewModelSoloSelection(hierarchy, { instanceName: 'IconShield' });
   assert.equal(hierarchy.entries[0].fields.activeComponentId, 2);
+  applyViewModelSoloSelection(hierarchy, { instanceName: 'IconQuick' });
+  assert.equal(hierarchy.entries[0].fields.activeComponentId, 3);
+  applyViewModelSoloSelection(hierarchy, { instanceName: 'IconMis' });
+  assert.equal(hierarchy.entries[0].fields.activeComponentId, 4);
 });
 
 test('nested artboards inherit the authored referenced view-model instance', () => {

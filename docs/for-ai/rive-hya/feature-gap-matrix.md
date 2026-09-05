@@ -70,6 +70,8 @@
 - pointer enter/exit/down/up/click/drag、keyboard/gamepad/text/semantic input、focus traversal、hit-test、nested routing。
 - role/name/description/value/state/actions/navigation order/live updates/reduced-motion；DOM overlay 只是 bridge，不是 semantic source。
 
+`official-inventory-demo-v2` 命中的脚本 View Model 实例别名现按 authored Solo branch 规范化：`IconQuick` 对应 `Quick Use`，`IconMis` 对应 `Miscellaneous`，不再让 Miscellaneous 静默沿用默认 Quick Use 子树。该修复只关闭此官方素材的确定性实例选择错误；任意脚本字符串映射、通用 list mutation/converter 与完整 View Model graph 仍未覆盖，所以本族保持 `partial`。
+
 ### Audio
 
 - embedded/referenced audio、timeline/event scheduling、sample offset/rate/gain/loop、multi-voice policy、autoplay resume、seek。

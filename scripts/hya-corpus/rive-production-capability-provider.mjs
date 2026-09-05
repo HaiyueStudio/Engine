@@ -3068,14 +3068,25 @@ export function defaultViewModelRuntime(report, objects, artboardObjectIds) {
 }
 
 export function applyViewModelSoloSelection(hierarchy, context) {
-  const requested = normalizeBindingName(context?.instanceName ?? '').replace(/^icon/u, '');
+  const requested = categorySoloName(context?.instanceName);
   if (!requested) return;
   for (const solo of hierarchy.entries.filter(value => value.sourceName === 'Solo')) {
     const candidates = hierarchy.entries.filter(value => value.fields.parentId === solo.componentIndex
       && NESTED_ARTBOARD_TYPES.has(value.sourceName));
-    const selected = candidates.find(value => normalizeBindingName(string(value.fields.name) ?? '').replace(/^icon/u, '') === requested);
+    const selected = candidates.find(value => categorySoloName(value.fields.name) === requested);
     if (selected) solo.fields.activeComponentId = selected.componentIndex;
   }
+}
+
+function categorySoloName(value) {
+  const normalized = normalizeBindingName(string(value) ?? '').replace(/^icon/u, '');
+  // The inventory script abbreviates two view-model instance names while the
+  // authored Solo branches use their display labels. Treat those spellings as
+  // the same category instead of silently retaining the default Quick Use
+  // branch for the Miscellaneous row.
+  if (normalized === 'quick') return 'quickuse';
+  if (normalized === 'mis') return 'miscellaneous';
+  return normalized;
 }
 
 export function scriptedListInitializers(artboardName, propertyName) {
