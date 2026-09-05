@@ -922,6 +922,18 @@ test('Rive gradient opacity multiplies every authored stop alpha', () => {
   assert.deepEqual(source.stops, [0, 0, 1, 0.5, 0, 1, 0, 1, 0.5, 0.05]);
 });
 
+test('Rive omitted GradientStop color uses its opaque-white generated default', () => {
+  const source = paintSource(
+    { sourceName: 'LinearGradient', fields: { startX: 0, startY: 0, endX: 100, endY: 0 } },
+    [
+      { sourceName: 'GradientStop', fields: {} },
+      { sourceName: 'GradientStop', fields: { position: 1, colorValue: [0.25, 0.5, 0.75, 0] } },
+    ],
+  );
+
+  assert.deepEqual(source.stops, [0, 1, 1, 1, 1, 1, 0.25, 0.5, 0.75, 0]);
+});
+
 test('shape feather keeps a bounded translucent fill while layout feather remains an edge proxy', () => {
   const fill = { sourceName: 'Fill', fields: {} };
   const solid = { sourceName: 'SolidColor', fields: { colorValue: [0, 1, 0.5, 1] } };

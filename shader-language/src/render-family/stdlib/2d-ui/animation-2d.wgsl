@@ -133,23 +133,23 @@ fn gradient_color(position : vec2<f32>) -> vec4<f32> {
   if (object.gradientParams.x > 1.5) { progress = length(position - start) / max(length(delta), 1e-6); }
   progress = clamp(progress, 0.0, 1.0);
   var previousOffset = gradient_offset(0);
-  var previousColor = vec4<f32>(
-    object.gradientColors[0].rgb * object.gradientColors[0].a,
-    object.gradientColors[0].a
-  );
+  var previousColor = object.gradientColors[0];
   for (var index = 1; index < 8; index++) {
     if (f32(index) >= object.gradientParams.y) { break; }
     let nextOffset = gradient_offset(index);
-    let straightNextColor = object.gradientColors[index];
-    let nextColor = vec4<f32>(straightNextColor.rgb * straightNextColor.a, straightNextColor.a);
+    let nextColor = object.gradientColors[index];
     if (progress <= nextOffset) {
       let local = clamp((progress - previousOffset) / max(nextOffset - previousOffset, 1e-6), 0.0, 1.0);
-      return mix(previousColor, nextColor, local) * object.gradientParams.z;
+      // Rive interpolates the authored straight RGBA stops and premultiplies
+      // the resulting sample. Premultiplying each stop before interpolation
+      // makes an opaque-white -> transparent-blue ramp stay white throughout.
+      let straightColor = mix(previousColor, nextColor, local);
+      return vec4<f32>(straightColor.rgb * straightColor.a, straightColor.a) * object.gradientParams.z;
     }
     previousOffset = nextOffset;
     previousColor = nextColor;
   }
-  return previousColor * object.gradientParams.z;
+  return vec4<f32>(previousColor.rgb * previousColor.a, previousColor.a) * object.gradientParams.z;
 }
 
 fn effect_kind(index : u32) -> f32 {

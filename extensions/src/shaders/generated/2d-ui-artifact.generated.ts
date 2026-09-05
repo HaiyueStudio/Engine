@@ -406,7 +406,7 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
           "generatedEndLine": 295
         }
       ],
-      "canonicalHash": "bfc05c7caf732ca525ac27c6b7b7a8915c37d0a750bbb6d0261217b1edada26e"
+      "canonicalHash": "59641c612ae1bffdb78620f023c6c25898607c58560f436844e9c1f95177c911"
     },
     "canvas-text-2d": {
       "id": "canvas-text-2d",
@@ -1071,5 +1071,5 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
       "canonicalHash": "4d1ef60104af17bdb6c837bbdb67640c96abf7533f156510de4da5240c8c388e"
     }
   },
-  "artifactHash": "aa797734c68546113ce049e6a09c6b380b9cf113b6fc6f36b4855c54b4438376"
+  "artifactHash": "821fc9e056f3405b91a914e710679f6bda7335ca77e7633196e65046673e88b4"
 } as const;

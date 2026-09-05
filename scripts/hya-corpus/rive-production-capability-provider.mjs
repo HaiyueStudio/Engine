@@ -3672,7 +3672,7 @@ export function paintSource(entry, owned) {
   const opacity = Math.max(0, Math.min(1, finite(entry.fields.opacity) ?? 1));
   const stops = owned.filter(value => value.sourceName === 'GradientStop')
     .map(value => {
-      const stopColor = color(value.fields.colorValue, RIVE_DEFAULT_PAINT_COLOR);
+      const stopColor = color(value.fields.colorValue, RIVE_DEFAULT_GRADIENT_STOP_COLOR);
       return {
         offset: Math.max(0, Math.min(1, finite(value.fields.position) ?? 0)),
         color: [stopColor[0], stopColor[1], stopColor[2], stopColor[3] * opacity],
@@ -3693,6 +3693,10 @@ function riveVectorBlendMode(value) {
 // Rive 7.3's serialized SolidColor omits colorValue when it is the schema
 // default. Preserve that default instead of treating an omitted field as black.
 const RIVE_DEFAULT_PAINT_COLOR = Object.freeze([116 / 255, 116 / 255, 116 / 255, 1]);
+// GradientStop has a different generated default from SolidColor. Rive omits
+// property 38 when the authored stop is opaque white (0xFFFFFFFF); sharing the
+// gray SolidColor fallback turns transparent highlight ramps into gray washes.
+const RIVE_DEFAULT_GRADIENT_STOP_COLOR = Object.freeze([1, 1, 1, 1]);
 
 function color(value, fallback) {
   return Array.isArray(value) && value.length === 4 ? value.map(component => Math.max(0, Math.min(1, Number(component)))) : fallback;
