@@ -34,7 +34,7 @@
 
 - procedural paths 的所有可动画参数、多 fill/stroke、有序 effect group、fill rule、blend、clip 与 draw rule。
 - gradient stop/transform/opacity、dash/trim、feather、image mesh、N-slice、solo/draw-order。
-- `official-inventory-demo-v2` 已在 production lowering 中保留 gradient opacity；HYA vector paint 新增可序列化的 paint-local `innerFeather` 半径/偏移和 WebGPU 执行面，production provider 只对 gradient feather 启用它。省略 `Feather.strength` 时现按 Rive 7.3 的生成默认值 `12` 处理；Inventory 的真实 differential 帧与修复前逐字节相同，证明该素材的 inner Feather 均显式写值。实色 feather 仍保留有界 stroke 代理，outer Feather 尚未进入可执行 paint-local contract，当前 9-tap coverage blur 也还不是 Rive 的精确 effect-path/Gaussian oracle，因此该素材的 paint blocker 和本族 `partial` 状态均未关闭。
+- `official-inventory-demo-v2` 已在 production lowering 中保留 gradient opacity。HYA vector paint 现有可追加、可序列化的 paint-local `feather`，覆盖 solid/gradient、fill/stroke、inner/outer、local/world、半径与偏移；旧 `innerFeather` 仍只作为 binary compatibility 输入。省略 `Feather.strength` 时按 Rive 7.3 生成默认值 `12` 处理，solid stroke proxy 与 outer 丢弃已移除。当前 WebGPU 执行仍使用 view-sized coverage 卷积，不是冻结 oracle 的 effect-path、analytic Gaussian coverage 与角点积分，因此 Inventory 的 paint blocker 和本族 `partial` 状态仍未关闭。
 - custom path effect 只能通过 G09 sandboxed protocol；不得直接注入 renderer。
 - `visual-baked` 仅可用于无任何 runtime observable 的纯视觉局部，并保留误差/采样 attribution。
 

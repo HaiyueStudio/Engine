@@ -3619,42 +3619,14 @@ export function vectorPaint(entry, owned, children, ownerSourceName = 'Shape') {
   const sourceEntry = owned.find(value => ['SolidColor', 'LinearGradient', 'RadialGradient'].includes(value.sourceName));
   const source = paintSource(sourceEntry, sourceEntry ? childEntries(children, sourceEntry) : []);
   if (source.kind === 'solid' && source.color[3] <= 0) return null;
+  const authoredFeather = owned.find(value => value.sourceName === 'Feather');
+  const feather = authoredFeather ? vectorFeather(authoredFeather, entry.sourceName === 'Fill') : undefined;
   if (entry.sourceName === 'Fill') {
-    const feather = owned.find(value => value.sourceName === 'Feather' && value.fields.inner === true);
-    if (feather) {
-      // FeatherBase::strength has a generated default of 12 in Rive 7.3.
-      // The field is omitted from many official files, so treating absence as
-      // a one-pixel feather silently changes authored paint semantics.
-      const strength = finite(feather.fields.strength) ?? 12;
-      if (source.kind !== 'solid') {
-        return {
-          fill: { ...source, opacity: 1 },
-          fillRule: entry.fields.fillRule === 1 ? 'evenodd' : 'nonzero',
-          innerFeather: {
-            radius: [Math.min(64, strength), Math.min(64, strength)],
-            offset: [finite(feather.fields.offsetX) ?? 0, finite(feather.fields.offsetY) ?? 0],
-          },
-        };
-      }
-      const rgb = source.color.slice(0, 3);
-      const neutralHighlight = Math.max(...rgb) > 0.8 && Math.max(...rgb) - Math.min(...rgb) < 0.08;
-      const stroke = {
-        color: source.color,
-        width: Math.max(1, Math.min(12, strength / 3)),
-        lineCap: 'round', lineJoin: 'round', miterLimit: 4,
-      };
-      if (ownerSourceName === 'Shape') {
-        if (neutralHighlight) return { stroke };
-        const fillOpacity = Math.min(0.22, 0.04 + strength / 48);
-        return {
-          fill: { ...source, opacity: fillOpacity },
-          fillRule: entry.fields.fillRule === 1 ? 'evenodd' : 'nonzero',
-          stroke,
-        };
-      }
-      return { stroke };
-    }
-    return { fill: { ...source, opacity: 1 }, fillRule: entry.fields.fillRule === 1 ? 'evenodd' : 'nonzero' };
+    return {
+      fill: { ...source, opacity: 1 },
+      fillRule: entry.fields.fillRule === 1 ? 'evenodd' : 'nonzero',
+      ...(feather ? { feather } : {}),
+    };
   }
   return {
     stroke: {
@@ -3666,6 +3638,20 @@ export function vectorPaint(entry, owned, children, ownerSourceName = 'Shape') {
       lineJoin: ['miter', 'round', 'bevel'][entry.fields.join ?? 0] ?? 'miter',
       miterLimit: 4,
     },
+    ...(feather ? { feather } : {}),
+  };
+}
+
+function vectorFeather(entry, allowInner) {
+  // FeatherBase::strength has a generated default of 12 in Rive 7.3. Keep
+  // authored strength in the source-neutral contract; the renderer owns its
+  // conversion to the Gaussian support radius.
+  const strength = Math.max(0, Math.min(4_096, finite(entry.fields.strength) ?? 12));
+  return {
+    radius: [strength, strength],
+    offset: [finite(entry.fields.offsetX) ?? 0, finite(entry.fields.offsetY) ?? 0],
+    inner: allowInner && entry.fields.inner === true,
+    space: entry.fields.spaceValue === 1 ? 'world' : 'local',
   };
 }
 

@@ -382,6 +382,14 @@ function encodeComponent(
       component.innerFeather
         ? [component.innerFeather.radius, component.innerFeather.offset ?? 0]
         : 0,
+      component.feather
+        ? [
+          component.feather.radius,
+          component.feather.offset ?? 0,
+          component.feather.inner ? 1 : 0,
+          component.feather.space === 'world' ? 1 : 0,
+        ]
+        : 0,
     ];
   }
   if (component.type === 'sprite2d') return encodeSpriteComponent(
@@ -932,6 +940,9 @@ function decodeComponent(
       }),
       ...(component.length < 12 || component[11] === 0 ? {} : {
         innerFeather: decodeVectorInnerFeather(component[11], `${path}[11]`),
+      }),
+      ...(component.length < 13 || component[12] === 0 ? {} : {
+        feather: decodeVectorFeather(component[12], `${path}[12]`),
       }),
     }, validationPath, options, countBudget);
   }
@@ -1539,6 +1550,16 @@ function decodeVectorInnerFeather(value: unknown, path: string): Record<string, 
   return {
     radius: feather[0],
     ...(feather.length < 2 || feather[1] === 0 ? {} : { offset: feather[1] }),
+  };
+}
+
+function decodeVectorFeather(value: unknown, path: string): Record<string, unknown> {
+  const feather = compactArray(value, path, 4);
+  return {
+    radius: feather[0],
+    ...(feather[1] === 0 ? {} : { offset: feather[1] }),
+    inner: boundedIndex(feather[2], 2, `${path}[2]`) === 1,
+    space: indexedLiteral(['local', 'world'] as const, feather[3], `${path}[3]`),
   };
 }
 

@@ -300,6 +300,18 @@ export interface AnimationVectorInnerFeather {
   readonly offset?: readonly [number, number];
 }
 
+/**
+ * Paint-local feather retained independently from layer effects. `inner`
+ * selects clipping to the authored paint path; `space` controls whether the
+ * radius and offset follow the local transform or the animation canvas.
+ */
+export interface AnimationVectorFeather {
+  readonly radius: readonly [number, number];
+  readonly offset?: readonly [number, number];
+  readonly inner: boolean;
+  readonly space?: 'local' | 'world';
+}
+
 export interface AnimationVectorShapeComponent {
   readonly type: typeof ANIMATION_VECTOR_SHAPE_EXTENSION_ID;
   readonly commands: string;
@@ -312,6 +324,8 @@ export interface AnimationVectorShapeComponent {
   readonly fill?: AnimationVectorSolidPaint | AnimationVectorGradientPaint;
   readonly stroke?: AnimationVectorStrokePaint;
   /** Unlike node effects, this edge attenuation does not affect sibling paints. */
+  readonly feather?: AnimationVectorFeather;
+  /** @deprecated Legacy inner-only field retained for HYA binary compatibility. */
   readonly innerFeather?: AnimationVectorInnerFeather;
   /** Ordered, source-neutral path modifiers. Runtime execution follows array order. */
   readonly modifiers?: readonly AnimationVectorPathModifier[];

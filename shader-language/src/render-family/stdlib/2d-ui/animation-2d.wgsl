@@ -210,6 +210,12 @@ fn local_to_output_pixels(value : vec2<f32>, dimensions : vec2<f32>) -> vec2<f32
   return vec2<f32>(clipDelta.x * dimensions.x * 0.5, -clipDelta.y * dimensions.y * 0.5);
 }
 
+fn feather_to_output_pixels(value : vec2<f32>, dimensions : vec2<f32>, worldSpace : bool) -> vec2<f32> {
+  if (!worldSpace) { return local_to_output_pixels(value, dimensions); }
+  let clipDelta = (camera.viewProj * vec4<f32>(value, 0.0, 0.0)).xy;
+  return vec2<f32>(clipDelta.x * dimensions.x * 0.5, -clipDelta.y * dimensions.y * 0.5);
+}
+
 fn sample_inner_feather(uv : vec2<f32>, parameters : vec4<f32>) -> vec4<f32> {
   let dimensions = max(vec2<f32>(textureDimensions(baseTexture)), vec2<f32>(1.0));
   let radius = vec2<f32>(
@@ -226,12 +232,33 @@ fn sample_inner_feather(uv : vec2<f32>, parameters : vec4<f32>) -> vec4<f32> {
   return foreground * featherCoverage;
 }
 
+fn sample_vector_feather(uv : vec2<f32>, data : EffectData) -> vec4<f32> {
+  let dimensions = max(vec2<f32>(textureDimensions(baseTexture)), vec2<f32>(1.0));
+  let worldSpace = data.data1.y > 0.5;
+  // Rive's feather strength covers three standard deviations. Its renderer
+  // exposes a support radius of strength * (3 / 2).
+  let radius = vec2<f32>(
+    length(feather_to_output_pixels(vec2<f32>(data.data0.x, 0.0), dimensions, worldSpace)),
+    length(feather_to_output_pixels(vec2<f32>(0.0, data.data0.y), dimensions, worldSpace)),
+  ) * 1.5;
+  let offsetUv = feather_to_output_pixels(data.data0.zw, dimensions, worldSpace) / dimensions;
+  let foreground = textureSampleLevel(baseTexture, baseSampler, uv, 0.0);
+  let feathered = sample_blurred(uv - offsetUv, radius);
+  if (data.data1.x > 0.5) {
+    return foreground * feathered.a;
+  }
+  return feathered;
+}
+
 @fragment
 fn fs_effect(input : EffectVertexOutput) -> @location(0) vec4<f32> {
   let kind = effect_kind(input.effectIndex);
   let data = object.effectData[input.effectIndex];
   if (kind < 4.5) { return apply_color_effect(textureSampleLevel(baseTexture, baseSampler, input.uv, 0.0), input.effectIndex); }
   if (kind < 5.5) { return sample_blurred(input.uv, max(data.data0.xy, vec2<f32>(0.0))); }
+  if (kind > 7.5) {
+    return sample_vector_feather(input.uv, data);
+  }
   if (kind > 6.5) {
     return sample_inner_feather(input.uv, vec4<f32>(max(data.data0.xy, vec2<f32>(0.0)), data.data0.zw));
   }

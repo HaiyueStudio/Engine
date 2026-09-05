@@ -924,6 +924,12 @@ function createCoreVisual(
       textMaterial = new AnimationTextRasterizer(component);
     }
   }
+  const vectorFeather = component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID
+    ? component.feather
+    : undefined;
+  const legacyInnerFeather = component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID
+    ? component.innerFeather
+    : undefined;
   const visual = new AnimationVisual2D({
     geometry,
     color,
@@ -945,13 +951,20 @@ function createCoreVisual(
     ...(component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID && component.blendMode
       ? { blendMode: component.blendMode }
       : {}),
-    ...((component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID && component.innerFeather) || effects?.length ? {
+    ...(vectorFeather || legacyInnerFeather || effects?.length ? {
       effects: [
-        ...(component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID && component.innerFeather ? [{
+        ...(vectorFeather ? [{
+          kind: 'vector-feather' as const,
+          values: new Float32Array([
+            vectorFeather.radius[0], vectorFeather.radius[1],
+            vectorFeather.offset?.[0] ?? 0, vectorFeather.offset?.[1] ?? 0,
+            vectorFeather.inner ? 1 : 0, vectorFeather.space === 'world' ? 1 : 0,
+          ]),
+        }] : legacyInnerFeather ? [{
           kind: 'inner-feather' as const,
           values: new Float32Array([
-            component.innerFeather.radius[0], component.innerFeather.radius[1],
-            component.innerFeather.offset?.[0] ?? 0, component.innerFeather.offset?.[1] ?? 0,
+            legacyInnerFeather.radius[0], legacyInnerFeather.radius[1],
+            legacyInnerFeather.offset?.[0] ?? 0, legacyInnerFeather.offset?.[1] ?? 0,
           ]),
         }] : []),
         ...createVisualEffects(effects ?? [], 0),
@@ -982,7 +995,7 @@ function createCoreVisual(
       ...(textMaterial ? { textRasterizer: textMaterial } : {}),
       ...(effects?.length ? {
         sourceEffects: effects,
-        sourceEffectOffset: component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID && component.innerFeather ? 1 : 0,
+        sourceEffectOffset: vectorFeather || legacyInnerFeather ? 1 : 0,
         lastEffectTime: 0,
       } : {}),
       ...(compositeExpansionTracks.some(track => track !== undefined) ? {

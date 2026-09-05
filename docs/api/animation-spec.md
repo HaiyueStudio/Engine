@@ -19,6 +19,8 @@ HYA parse/codec 失败抛出 `AnimationFormatError`；调用方应记录 code/pa
 
 格式版本和 2D/3D 范围见 [`SPECIFICATION.md`](../../animation-spec/SPECIFICATION.md)与[已知限制](../engine-guide/known-limitations.md)，不要从 TypeScript package version 推断 HYA container/project 版本。
 
+`AnimationVectorShapeComponent.feather` 是来源无关的 paint-local Feather contract：`radius` 为两轴非负 canvas unit，`offset` 为可选二维偏移，`inner` 明确区分内外侧，`space` 为 `local|world`。每轴半径 hard ceiling 为 `4096`，且至少一轴必须为正。旧 `innerFeather` 仅为既有 HYA binary 兼容字段；新数据不得同时声明两者。
+
 当前 Lottie 导入闭环保留拓扑稳定 path morph、动态 solid/gradient paint、stroke width/dash offset、空间 Bézier position、animated trim-path/round-corners、mask/matte graph、动画 text document、web font mapping，以及 character/排除空格/word/line、easing、smoothness、确定性 random range selector。type 15 data layer 以 binary resource 和非视觉 node extension 保留。Text Document Expression 的安全子集会在转换期编译为有版本、无后向跳转、受资源预算约束的 HYA IR，覆盖确定性数学、条件、字符串格式化和固定 JSON Data Layer 只读路径；HYA 不保存或执行原始 JavaScript。转换器 diagnostics 继续对 topology change、动画 mask feather、动画 boolean merge、blend/skew、expression selector、超出安全子集的 text expression 与未知 AE effect/plugin 等未覆盖语义给出精确 JSON path。
 
 `convertLottie(source, { fonts })` 的 `fonts` 以 Lottie `fName` 为 key，value 可以是 URI，也可以包含 `uri/family/style/weight/mimeType/integrity`。映射成功时输出 binary font resource；未映射字体产生 `W_LOTTIE_FONT_SUBSTITUTION`，runtime 使用浏览器 fallback metrics 而不会伪装 fidelity 完整。

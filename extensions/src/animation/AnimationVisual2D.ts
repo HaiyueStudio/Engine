@@ -46,7 +46,7 @@ export interface AnimationVisualGradient {
   opacity: number;
 }
 
-export type AnimationVisualEffectKind = 'tint' | 'fill' | 'opacity' | 'color-matrix' | 'blur' | 'drop-shadow' | 'inner-feather';
+export type AnimationVisualEffectKind = 'tint' | 'fill' | 'opacity' | 'color-matrix' | 'blur' | 'drop-shadow' | 'inner-feather' | 'vector-feather';
 
 export interface AnimationVisualEffect {
   readonly kind: AnimationVisualEffectKind;

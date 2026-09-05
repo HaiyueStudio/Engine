@@ -454,7 +454,7 @@ test('source-neutral vector shape runtime animates morph, color and opacity on o
         values: [0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 10, 0, 0, 0, 0, 0],
       },
       morphRelative: true,
-      innerFeather: { radius: [6, 8], offset: [1, -2] },
+      feather: { radius: [6, 8], offset: [1, -2], inner: true, space: 'world' },
       fill: {
         kind: 'solid', color: [1, 0, 0, 1], opacity: 1,
         colorTrack: { times: [0, 1], valueSize: 4, interpolation: 'linear', values: [1, 0, 0, 1, 0, 1, 0, 0.5] },
@@ -474,8 +474,8 @@ test('source-neutral vector shape runtime animates morph, color and opacity on o
   world.update(500, 0);
   assert.equal(visual.geometry, geometry);
   assert.equal(visual.blendMode, 'screen');
-  assert.equal(visual.effects[0].kind, 'inner-feather');
-  assert.deepEqual([...visual.effects[0].values], [6, 8, 1, -2]);
+  assert.equal(visual.effects[0].kind, 'vector-feather');
+  assert.deepEqual([...visual.effects[0].values], [6, 8, 1, -2, 1, 1]);
   assert.equal(geometry.version, 2, 'initial sampled pose and midpoint update reuse the same geometry object');
   assert.ok(Math.abs(visual.color[0] - 0.5) < 1e-5);
   assert.ok(Math.abs(visual.color[1] - 0.5) < 1e-5);

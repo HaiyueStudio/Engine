@@ -940,30 +940,33 @@ test('Rive omitted GradientStop color uses its opaque-white generated default', 
   assert.deepEqual(source.stops, [0, 1, 1, 1, 1, 1, 0.25, 0.5, 0.75, 0]);
 });
 
-test('solid inner feather keeps the bounded stroke proxy while gradient feather uses the execution surface', () => {
+test('solid inner feather lowers to the paint-local execution surface without a stroke proxy', () => {
   const fill = { sourceName: 'Fill', fields: {} };
   const solid = { sourceName: 'SolidColor', fields: { colorValue: [0, 1, 0.5, 1] } };
   const feather = { sourceName: 'Feather', fields: { inner: true, strength: 6 } };
   assert.deepEqual(vectorPaint(fill, [solid, feather], new Map(), 'Shape'), {
-    fill: { kind: 'solid', color: [0, 1, 0.5, 1], opacity: 0.165 }, fillRule: 'nonzero',
-    stroke: { color: [0, 1, 0.5, 1], width: 2, lineCap: 'round', lineJoin: 'round', miterLimit: 4 },
+    fill: { kind: 'solid', color: [0, 1, 0.5, 1], opacity: 1 }, fillRule: 'nonzero',
+    feather: { radius: [6, 6], offset: [0, 0], inner: true, space: 'local' },
   });
   const white = { sourceName: 'SolidColor', fields: { colorValue: [1, 1, 1, 0.6] } };
   assert.deepEqual(vectorPaint(fill, [white, feather], new Map(), 'Shape'), {
-    stroke: { color: [1, 1, 1, 0.6], width: 2, lineCap: 'round', lineJoin: 'round', miterLimit: 4 },
+    fill: { kind: 'solid', color: [1, 1, 1, 0.6], opacity: 1 }, fillRule: 'nonzero',
+    feather: { radius: [6, 6], offset: [0, 0], inner: true, space: 'local' },
   });
   assert.deepEqual(vectorPaint(fill, [solid, feather], new Map(), 'LayoutComponent'), {
-    stroke: { color: [0, 1, 0.5, 1], width: 2, lineCap: 'round', lineJoin: 'round', miterLimit: 4 },
+    fill: { kind: 'solid', color: [0, 1, 0.5, 1], opacity: 1 }, fillRule: 'nonzero',
+    feather: { radius: [6, 6], offset: [0, 0], inner: true, space: 'local' },
   });
 });
 
-test('solid inner feather proxy preserves authored paint opacity', () => {
+test('solid inner feather preserves authored paint alpha and offset', () => {
   const fill = { sourceName: 'Fill', fields: {} };
   const solid = { sourceName: 'SolidColor', fields: { colorValue: [1, 1, 1, 0.6] } };
   const feather = { sourceName: 'Feather', fields: { inner: true, strength: 12, offsetX: 2, offsetY: 4 } };
 
   assert.deepEqual(vectorPaint(fill, [solid, feather], new Map(), 'Shape'), {
-    stroke: { color: [1, 1, 1, 0.6], width: 4, lineCap: 'round', lineJoin: 'round', miterLimit: 4 },
+    fill: { kind: 'solid', color: [1, 1, 1, 0.6], opacity: 1 }, fillRule: 'nonzero',
+    feather: { radius: [12, 12], offset: [2, 4], inner: true, space: 'local' },
   });
 });
 
@@ -977,8 +980,8 @@ test('omitted Rive inner feather strength uses the generated 12-unit default', (
   const feather = { sourceName: 'Feather', fields: { inner: true, offsetX: 2, offsetY: 3 } };
   const children = new Map([[`scope\0${gradient.componentIndex}`, stops]]);
 
-  assert.deepEqual(vectorPaint(fill, [gradient, feather], children, 'Shape').innerFeather, {
-    radius: [12, 12], offset: [2, 3],
+  assert.deepEqual(vectorPaint(fill, [gradient, feather], children, 'Shape').feather, {
+    radius: [12, 12], offset: [2, 3], inner: true, space: 'local',
   });
 });
 
@@ -998,7 +1001,20 @@ test('gradient inner feather retains the full paint and its local attenuation', 
       stops: [0, 1, 1, 1, 0.5, 1, 1, 1, 1, 0], opacity: 1,
     },
     fillRule: 'nonzero',
-    innerFeather: { radius: [38, 38], offset: [0, 0] },
+    feather: { radius: [38, 38], offset: [0, 0], inner: true, space: 'local' },
+  });
+});
+
+test('outer feather and world-space semantics are retained for stroke paints', () => {
+  const stroke = { sourceName: 'Stroke', fields: { thickness: 3 } };
+  const solid = { sourceName: 'SolidColor', fields: { colorValue: [0.2, 0.4, 0.8, 0.75] } };
+  const feather = { sourceName: 'Feather', fields: { inner: true, strength: 18, offsetX: -2, offsetY: 5, spaceValue: 1 } };
+  assert.deepEqual(vectorPaint(stroke, [solid, feather], new Map(), 'Shape'), {
+    stroke: {
+      color: [0.2, 0.4, 0.8, 0.75], width: 3,
+      lineCap: 'butt', lineJoin: 'miter', miterLimit: 4,
+    },
+    feather: { radius: [18, 18], offset: [-2, 5], inner: false, space: 'world' },
   });
 });
 

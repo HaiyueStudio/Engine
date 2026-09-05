@@ -668,6 +668,10 @@ function parseComponent(
     const innerFeather = component.innerFeather === undefined
       ? undefined
       : parseVectorInnerFeather(component.innerFeather, `${path}.innerFeather`);
+    const feather = component.feather === undefined
+      ? undefined
+      : parseVectorFeather(component.feather, `${path}.feather`);
+    if (innerFeather && feather) fail('Vector shape cannot declare both feather and legacy innerFeather.', path);
     const modifiers = component.modifiers === undefined
       ? undefined
       : array(component.modifiers, `${path}.modifiers`).map((modifier, index) => (
@@ -687,6 +691,7 @@ function parseComponent(
       ...(component.morphRelative === true ? { morphRelative: true } : {}),
       ...(fill ? { fill } : {}),
       ...(stroke ? { stroke } : {}),
+      ...(feather ? { feather } : {}),
       ...(innerFeather ? { innerFeather } : {}),
       ...(modifiers ? { modifiers: Object.freeze(modifiers) } : {}),
       fillRule: component.fillRule === undefined ? 'nonzero' : literal(component.fillRule, ['nonzero', 'evenodd'] as const, `${path}.fillRule`),
@@ -891,6 +896,21 @@ function parseVectorInnerFeather(value: unknown, path: string) {
   return Object.freeze({
     radius,
     ...(feather.offset === undefined ? {} : { offset: vec2(feather.offset, `${path}.offset`) }),
+  });
+}
+
+function parseVectorFeather(value: unknown, path: string) {
+  const feather = record(value, path);
+  const radius = nonNegativeVec2(feather.radius, `${path}.radius`);
+  if (radius[0] === 0 && radius[1] === 0) fail('Vector feather radius must contain a positive axis.', `${path}.radius`);
+  if (radius[0] > 4_096 || radius[1] > 4_096) fail('Vector feather radius must not exceed 4096.', `${path}.radius`);
+  return Object.freeze({
+    radius,
+    ...(feather.offset === undefined ? {} : { offset: vec2(feather.offset, `${path}.offset`) }),
+    inner: booleanValue(feather.inner, `${path}.inner`),
+    ...(feather.space === undefined ? {} : {
+      space: literal(feather.space, ['local', 'world'] as const, `${path}.space`),
+    }),
   });
 }
 

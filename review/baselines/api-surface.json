@@ -1360,6 +1360,10 @@
               "kind": "type"
             },
             {
+              "name": "AnimationVectorFeather",
+              "kind": "type"
+            },
+            {
               "name": "AnimationVectorGradientPaint",
               "kind": "type"
             },

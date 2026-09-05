@@ -403,10 +403,10 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
           "sourceId": "builtin.animation-2d",
           "sourceName": "shader-language/builtin-components-2d-ui-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 320
+          "generatedEndLine": 347
         }
       ],
-      "canonicalHash": "5d157abc2ff42712823d567f8600dbda1b16e22e4f5e466580868631402692d0"
+      "canonicalHash": "af61c680853e544e39ecedf59798e8b1d022949c94fa27e199890d496015e8d2"
     },
     "canvas-text-2d": {
       "id": "canvas-text-2d",
@@ -1071,5 +1071,5 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
       "canonicalHash": "4d1ef60104af17bdb6c837bbdb67640c96abf7533f156510de4da5240c8c388e"
     }
   },
-  "artifactHash": "22fde339fd02cd2646b400dd4a51124d55bd499f3c0406f63ba7ad0ef283211e"
+  "artifactHash": "3f354592efc9d30257a8accd546db555ec0ad29fa0f496c4089a5b43cc397156"
 } as const;

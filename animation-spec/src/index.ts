@@ -51,6 +51,7 @@ export type {
   AnimationTrack,
   AnimationTrackProperty,
   AnimationTransform2D,
+  AnimationVectorFeather,
   AnimationVectorGradientPaint,
   AnimationVectorShapeComponent,
   AnimationVectorSolidPaint,

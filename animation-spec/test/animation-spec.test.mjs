@@ -369,7 +369,7 @@ test('HYA v2 round-trips ordered composite stacks and animated vector paints', (
             values: [0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0],
           },
           morphRelative: true,
-          innerFeather: { radius: [6, 8], offset: [1, -2] },
+          feather: { radius: [6, 8], offset: [1, -2], inner: false, space: 'world' },
           fill: {
             kind: 'linear-gradient', start: [0, 0], end: [40, 0], opacity: 0.75,
             stops: [0, 1, 0, 0, 1, 1, 0, 0, 1, 0.5],
@@ -394,9 +394,55 @@ test('HYA v2 round-trips ordered composite stacks and animated vector paints', (
   assert.equal(vector.morph.values.buffer, binary);
   assert.equal(vector.morphRelative, true);
   assert.equal(vector.blendMode, 'screen');
-  assert.deepEqual(vector.innerFeather, { radius: [6, 8], offset: [1, -2] });
+  assert.deepEqual(vector.feather, { radius: [6, 8], offset: [1, -2], inner: false, space: 'world' });
   assert.equal(vector.fill.opacity, 0.75);
   assert.deepEqual(Array.from(vector.fill.opacityTrack.values), [0.75, 0.25]);
+});
+
+test('HYA v2 continues to round-trip the legacy inner-only feather field', () => {
+  const source = {
+    ...documentFixture(),
+    nodes: [{
+      id: 'legacy-feather',
+      components: [{
+        type: 'org.haiyue.vector-shape@1', commands: 'MLLLZ', values: [0, 0, 20, 0, 20, 20, 0, 20],
+        fill: { kind: 'solid', color: [1, 1, 1, 1] },
+        innerFeather: { radius: [4, 5], offset: [1, 2] },
+      }],
+    }],
+    tracks: [],
+    extensionsUsed: ['org.haiyue.vector-shape@1'],
+  };
+  const vector = parseAnimation(encodeAnimationBinary(source)).nodes[0].components[0];
+  assert.deepEqual(vector.innerFeather, { radius: [4, 5], offset: [1, 2] });
+  assert.equal(vector.feather, undefined);
+});
+
+test('vector feather rejects ambiguous legacy fields and radius budget overflow', () => {
+  const component = {
+    type: 'org.haiyue.vector-shape@1', commands: 'MLLLZ', values: [0, 0, 20, 0, 20, 20, 0, 20],
+    fill: { kind: 'solid', color: [1, 1, 1, 1] },
+    feather: { radius: [4, 5], inner: true },
+  };
+  const document = {
+    ...documentFixture(),
+    nodes: [{ id: 'feather', components: [component] }], tracks: [],
+    extensionsUsed: ['org.haiyue.vector-shape@1'],
+  };
+  assert.throws(
+    () => parseAnimation({
+      ...document,
+      nodes: [{ id: 'feather', components: [{ ...component, innerFeather: { radius: [1, 1] } }] }],
+    }),
+    error => error instanceof AnimationFormatError && /cannot declare both/.test(error.message),
+  );
+  assert.throws(
+    () => parseAnimation({
+      ...document,
+      nodes: [{ id: 'feather', components: [{ ...component, feather: { radius: [4097, 1], inner: false } }] }],
+    }),
+    error => error instanceof AnimationFormatError && /must not exceed 4096/.test(error.message),
+  );
 });
 
 test('HYA v2 packs Lottie stroke values without changing the extension array contract', () => {
