@@ -25,6 +25,7 @@ interface Payload {
   mode: 'official' | 'hya'; assetId: string; rivSha256: string; scenarioSha256: string;
   artifactPrefix: string; scenario: any; environment: any;
   semanticTopology: Json;
+  selectedArtboardViewModelLinked: boolean;
 }
 interface CaptureState {
   viewport: { id: string; width: number; height: number; dpr: number };
@@ -165,7 +166,7 @@ async function createOfficialOwner(payload: Payload, canvas: HTMLCanvasElement, 
       // become formal evidence even though their framebuffer is valid.
       autoplay: false, autoBind: false, useOffscreenRenderer: false,
       onLoad: () => {
-        try { bindAuthoredDefaultViewModels(rive); resolve(rive); }
+        try { bindAuthoredDefaultViewModels(rive, payload.selectedArtboardViewModelLinked); resolve(rive); }
         catch (error) { reject(error); }
       },
       onLoadError: (event: unknown) => reject(new Error(`Official Rive load failed: ${String(event)}`)),
@@ -228,11 +229,16 @@ async function createOfficialOwner(payload: Payload, canvas: HTMLCanvasElement, 
   };
 }
 
-function bindAuthoredDefaultViewModels(instance: any): void {
+function bindAuthoredDefaultViewModels(instance: any, selectedArtboardViewModelLinked: boolean): void {
   // defaultViewModel() delegates to the low-level lookup that logs an error
   // when the file has no ViewModel definitions at all. Guard that call with
   // the metadata count so ordinary text/vector fixtures remain console-clean.
   if (!(Number(instance.viewModelCount) > 0)) return;
+  // A file may define ViewModels for other artboards. The source-neutral
+  // topology probe records whether the selected artboard actually serialized
+  // viewModelId; consulting the official runtime for an unlinked artboard
+  // would itself emit a console error and invalidate formal evidence.
+  if (!selectedArtboardViewModelLinked) return;
   const main = instance.defaultViewModel?.() ?? null;
   const globalNames = typeof instance.globalViewModelNames === 'function'
     ? instance.globalViewModelNames() as string[]

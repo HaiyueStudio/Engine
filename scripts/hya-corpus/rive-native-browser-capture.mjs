@@ -13,7 +13,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OFFICIAL_JS_SHA256 = 'd25d57588f63382b662a00b54b73164f7dcda65759dfcfa1009931d3a1ae1714';
 const OFFICIAL_WASM_SHA256 = '87d864c0efa264f287c3e6bf769b6ddf71d359bb0b3cef446aa0bc13ce4ffe32';
 const CAPTURE_INDEX_SHA256 = '2cba454cb87ab205bf4d93d717217faaf93ecc1b816e5c21eeafb0bfb6a4ffb0';
-const CAPTURE_BUNDLE_SHA256 = '9edb3d6098e65a9306849238c3e5ff3b7bdc323f1f4d89aa7c582f41ed09d3c9';
+const CAPTURE_BUNDLE_SHA256 = 'd6ba6164c2254d8e92f8919a00899200fd43e9cd6f34a5630b901811dff977cb';
 const SHARED_ENGINE_SHA256 = '3c16e877826db44bd06bdd5d71578a9a504f517a276eb2f06d77b043b8c64de2';
 const execute = promisify(execFile);
 
@@ -25,7 +25,7 @@ export async function captureWithNativeBrowser(mode, request) {
   const temporary = await mkdtemp(resolve(tmpdir(), `haiyue-rive-${mode}-capture-`));
   const runtimeBytes = mode === 'official' ? request.runtimeInput.bytes : request.runtimeInput.hyaBytes;
   const sourceRivBytes = mode === 'official' ? runtimeBytes : request.runtimeInput.sourceRivBytes;
-  const semanticTopology = await buildOfficialSemanticTopology(sourceRivBytes, request.scenario.selection.artboard);
+  const { semanticTopology, selectedArtboardViewModelLinked } = await buildOfficialSemanticEvidence(sourceRivBytes, request.scenario.selection.artboard);
   const packageAssetDirectory = mode === 'hya'
     ? await materializeHyaPackageAssets(request.runtimeInput.packageBytes, temporary)
     : null;
@@ -38,6 +38,7 @@ export async function captureWithNativeBrowser(mode, request) {
     scenario: request.scenario,
     environment: request.environment,
     semanticTopology,
+    selectedArtboardViewModelLinked,
   };
   const previousChromePath = process.env.CHROME_PATH;
   process.env.CHROME_PATH = browserPath(request.environment.browser);
@@ -104,7 +105,7 @@ async function materializeHyaPackageAssets(packageBytes, temporary) {
   return directory;
 }
 
-async function buildOfficialSemanticTopology(rivBytes, artboardName) {
+async function buildOfficialSemanticEvidence(rivBytes, artboardName) {
   const modulePath = resolve(root, 'animation-spec/dist-test/rive/import/index.js');
   if (!existsSync(modulePath)) throw new Error('Frozen Rive import runtime is unavailable for the topology oracle.');
   const { importFrozenRiv } = await import(`${pathToFileURL(modulePath).href}?topology=${hash(rivBytes)}`);
@@ -112,13 +113,29 @@ async function buildOfficialSemanticTopology(rivBytes, artboardName) {
   const objects = new Map(imported.ir.objects.map(value => [value.id, value]));
   const selectedIds = selectedArtboardObjectIds(imported, artboardName, objects);
   return {
-    oracle: 'neutral-drawable-topology@1',
-    items: imported.ir.drawables.filter(id => selectedIds.has(id)).map((id, drawOrder) => ({
-      id,
-      family: objects.get(id)?.family ?? 'unknown',
-      drawOrder,
-    })),
+    selectedArtboardViewModelLinked: selectedArtboardHasLinkedViewModel(imported, artboardName, objects),
+    semanticTopology: {
+      oracle: 'neutral-drawable-topology@1',
+      items: imported.ir.drawables.filter(id => selectedIds.has(id)).map((id, drawOrder) => ({
+        id,
+        family: objects.get(id)?.family ?? 'unknown',
+        drawOrder,
+      })),
+    },
   };
+}
+
+export function selectedArtboardHasLinkedViewModel(imported, artboardName, objects = new Map(imported.ir.objects.map(value => [value.id, value]))) {
+  for (const visit of imported.report.objects) {
+    if (visit.sourceName !== 'Artboard') continue;
+    const object = objects.get(visit.neutralObjectId);
+    const nameProperty = visit.properties.find(value => value.sourceName === 'name');
+    const nameField = object?.properties.find(value => nameProperty?.neutralFieldIds?.includes(value.id));
+    if (nameField?.value?.value !== artboardName) continue;
+    const viewModelProperty = visit.properties.find(value => value.sourceName === 'viewModelId');
+    return viewModelProperty?.status === 'consumed' && (viewModelProperty.neutralFieldIds?.length ?? 0) > 0;
+  }
+  throw new Error(`ViewModel probe could not resolve selected artboard ${String(artboardName)}.`);
 }
 
 function selectedArtboardObjectIds(imported, artboardName, objects) {
