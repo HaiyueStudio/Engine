@@ -19,6 +19,7 @@ import {
   compileTextComponents,
   compileComponentListInteractionDocument,
   compileStateMachineHoverInteractionDocument,
+  countVectorShapeComponents,
   curveAt,
   defaultViewModelRuntime,
   evaluate,
@@ -1199,6 +1200,15 @@ test('Rive rounded layout clipping lowers clip=true and propagates it to descend
   assert.deepEqual(result.compositeByTarget.get('planet'), {
     kind: 'mask', source: 'layout::rive-layout-clip-mask', mode: 'alpha', operation: 'intersect',
   });
+  assert.equal(countVectorShapeComponents(new Map(), result.nodes), 1);
+});
+
+test('generated clip-only vector components participate in extension accounting', () => {
+  assert.equal(countVectorShapeComponents(new Map(), [{ components: [
+    { type: 'org.haiyue.vector-shape@1' },
+    { type: 'org.haiyue.image@1' },
+  ] }]), 1);
+  assert.equal(countVectorShapeComponents(new Map(), []), 0);
 });
 
 test('Rive screen drawable blend is preserved on executable vector paints', () => {

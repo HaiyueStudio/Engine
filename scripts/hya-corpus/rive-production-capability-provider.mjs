@@ -82,7 +82,8 @@ export async function evaluate(request, context) {
       },
     });
   }).concat(clipMasks.nodes);
-  const hasVectorVisuals = vectorComponents.size > 0;
+  const vectorVisualCount = countVectorShapeComponents(vectorComponents, clipMasks.nodes);
+  const hasVectorVisuals = vectorVisualCount > 0;
   const hasTextVisuals = textComponents.size > 0;
   const hasImageVisuals = imageComponents.size > 0;
   const coverage = ir.objects.map(object => ({
@@ -135,7 +136,7 @@ export async function evaluate(request, context) {
       representation: 'native-semantic', count: ir.objects.length,
     }, ...(hasVectorVisuals ? [{
       feature: 'vector.executable-core', capability: 'hya-core',
-      representation: 'native-semantic', count: [...vectorComponents.values()].reduce((sum, value) => sum + value.length, 0),
+      representation: 'native-semantic', count: vectorVisualCount,
     }] : []), ...(hasTextVisuals ? [{
       feature: 'text-layout.executable-core', capability: 'hya-core',
       representation: 'native-semantic', count: [...textComponents.values()].reduce((sum, value) => sum + value.length, 0),
@@ -148,6 +149,14 @@ export async function evaluate(request, context) {
     }] : []), ...capabilityArtifacts.featureLedger],
     classification: { unclassifiedObjects: 0, unclassifiedProperties: 0, unclassifiedAssets: 0, unclassifiedScripts: 0 },
   };
+}
+
+export function countVectorShapeComponents(vectorComponents, generatedNodes = []) {
+  const compiledCount = [...vectorComponents.values()].reduce((sum, value) =>
+    sum + value.filter(component => component?.type === 'org.haiyue.vector-shape@1').length, 0);
+  const generatedCount = generatedNodes.reduce((sum, node) =>
+    sum + (node.components ?? []).filter(component => component?.type === 'org.haiyue.vector-shape@1').length, 0);
+  return compiledCount + generatedCount;
 }
 
 export function orderEntriesForRiveDrawStack(entries, drawableOrder) {
