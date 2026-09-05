@@ -34,7 +34,7 @@
 
 - procedural paths 的所有可动画参数、多 fill/stroke、有序 effect group、fill rule、blend、clip 与 draw rule。
 - gradient stop/transform/opacity、dash/trim、feather、image mesh、N-slice、solo/draw-order。
-- `official-inventory-demo-v2` 已在 production lowering 中保留 gradient opacity；HYA vector paint 新增可序列化的 paint-local `innerFeather` 半径/偏移和 WebGPU 执行面，production provider 只对 gradient feather 启用它。实色 feather 仍保留有界 stroke 代理，当前 9-tap coverage blur 也还不是 Rive 的精确 signed-distance/Gaussian oracle，因此该素材的 paint blocker 和本族 `partial` 状态均未关闭。
+- `official-inventory-demo-v2` 已在 production lowering 中保留 gradient opacity；HYA vector paint 新增可序列化的 paint-local `innerFeather` 半径/偏移和 WebGPU 执行面，production provider 只对 gradient feather 启用它。省略 `Feather.strength` 时现按 Rive 7.3 的生成默认值 `12` 处理；Inventory 的真实 differential 帧与修复前逐字节相同，证明该素材的 inner Feather 均显式写值。实色 feather 仍保留有界 stroke 代理，outer Feather 尚未进入可执行 paint-local contract，当前 9-tap coverage blur 也还不是 Rive 的精确 effect-path/Gaussian oracle，因此该素材的 paint blocker 和本族 `partial` 状态均未关闭。
 - custom path effect 只能通过 G09 sandboxed protocol；不得直接注入 renderer。
 - `visual-baked` 仅可用于无任何 runtime observable 的纯视觉局部，并保留误差/采样 attribution。
 
@@ -52,6 +52,8 @@
 - embedded/referenced/hosted font/image/blob/text/manifest assets；hash、MIME、CORS/URL policy、replacement identity 与 disposal。
 
 当前定向 differential 中，`official-text-fit` 的 shaping、word wrap、`scale`/`font-size` fit、overflow 与自定义行高已在诊断环境达到 pixel validator `passed`（最大通道差 `1/255`、changed pixel ratio `0`、SSIM `0.9999994597`）。`official-text-style-background` 的多 style run、字体 outline、joined background bounds 与 painter order 已对齐，但每帧仍有 `3–6` 个字形边缘采样像素不同（最大通道差 `104/255`、最高 changed pixel ratio `0.00146484375`），所以 text family 继续保持 `partial`；该结果也不能替代 clean revision 的正式设备 trace。
+
+硬件逐样本读取二值 atlas 与当前四点采样输出逐字节相同，排除了 WebGPU sample-position 模拟误差；把 atlas 从 `4×` 提升到 `8×` 以及用 Canvas `isPointInPath` 重建轮廓中心覆盖都没有通过 validator，最低 SSIM 反而降至 `0.9960431834`。这些实验均已撤回，剩余差异必须在 Rive-compatible glyph curve tessellation/edge raster contract 中解决，不能继续通过 atlas 分辨率或阈值调参冒充闭合。
 
 ### Timeline、state machine 与 mixing
 
