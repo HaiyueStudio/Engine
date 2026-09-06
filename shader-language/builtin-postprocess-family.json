@@ -4,6 +4,7 @@
   "id": "engine.postprocess-builtins",
   "passes": [
     { "id": "present", "operation": "present" },
+    { "id": "output", "operation": "output" },
     { "id": "grayscale", "operation": "grayscale" },
     { "id": "sobel", "operation": "sobel" },
     { "id": "fxaa", "operation": "fxaa" },

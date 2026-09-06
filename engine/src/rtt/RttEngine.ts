@@ -52,7 +52,7 @@ export class RttEngine implements IEngine {
   get context(): GPUCanvasContext | null { return this._real.context ?? null; }
   get canvas(): HTMLCanvasElement | null { return this._real.canvas ?? null; }
   get assetManager() { return this._real.assetManager; }
-  get format(): GPUTextureFormat { return this._real.format; }
+  get format(): GPUTextureFormat { return this._format ?? this._real.format; }
   get width(): number { return this._width; }
   get height(): number { return this._height; }
   get displayWidth(): number { return this._width; }
@@ -99,6 +99,7 @@ export class RttEngine implements IEngine {
     clearColor: { r: number; g: number; b: number; a: number } = { r: 0, g: 0, b: 0, a: 1 },
     private readonly _label = 'RttEngine',
     private readonly _resourceOwner: GPUResourceOwner | null = null,
+    private readonly _format?: GPUTextureFormat,
   ) {
     this._real = real;
     this._width = width;
@@ -145,7 +146,7 @@ export class RttEngine implements IEngine {
   // ── Private ────────────────────────────────────────────────────────────────
 
   private _createColorTarget(): void {
-    const { format } = this._real;
+    const format = this.format;
     const size: GPUExtent3DStrict = [this._width, this._height];
 
     // Sampleable resolve target (sampleCount=1)
@@ -162,7 +163,7 @@ export class RttEngine implements IEngine {
     const key = `${sampleCount}:${reverseZ ? 1 : 0}`;
     const cached = this._attachments.get(key);
     if (cached) return cached;
-    const { format } = this._real;
+    const format = this.format;
     const size: GPUExtent3DStrict = [this._width, this._height];
     let msaaTexture: GPUTexture | null = null;
     let msaaView: GPUTextureView | null = null;

@@ -349,7 +349,7 @@ export class VolumeRenderer extends BaseRenderer {
     data[base + 41] = material.opacityScale;
     data[base + 42] = Math.max(1, Math.min(192, material.steps));
     data[base + 43] = 0;
-    material.color.writeSRGB(data, base + 44);
+    material.color.writeLinear(data, base + 44);
     this.objectTable.writeSlot(objectSlot);
     writeClippingBlock(this.objectTable.auxiliaryData, objectSlot * CLIPPING_BLOCK_FLOATS, clippingPlanes);
     this.objectTable.writeAuxiliarySlot(objectSlot);
@@ -384,7 +384,7 @@ export class VolumeRenderer extends BaseRenderer {
       fragment: {
         module: this.shaderModule,
         entryPoint: 'fs_main',
-        targets: [{ format: this.engine.format, blend }],
+        targets: [{ format: this.colorFormat ?? this.engine.format, blend }],
       },
       primitive: { topology: 'triangle-list', cullMode: 'none' },
       depthStencil: {

@@ -9,6 +9,7 @@ import {
   PrecompiledUniformBlockWriter,
 } from '../shader/PrecompiledShaderRuntime';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
+import { deferPostProcessDisposal } from './PostProcessSubmission';
 
 export interface MotionBlurPassOptions {
   /** Virtual shutter angle in degrees. 180 means half-frame exposure. Defaults to 180. */
@@ -31,6 +32,17 @@ export interface MotionBlurPassOptions {
 
 const TILE_SIZE = 8;
 const VELOCITY_FORMAT: GPUTextureFormat = 'rg16float';
+
+interface MotionBlurSizedResources {
+  readonly uniform: GPUBuffer;
+  readonly tileParams: GPUBuffer;
+  readonly tile: GPUTexture;
+  readonly tileView: GPUTextureView;
+  readonly neighbor: GPUTexture;
+  readonly neighborView: GPUTextureView;
+  readonly neighborGroup: GPUBindGroup;
+  lastSeenFrame: number;
+}
 
 /** Camera, rigid-object, GPU-morph, and skinned motion blur backed by a signed UV velocity buffer. */
 export class MotionBlurPass extends PostProcessPass {
@@ -67,7 +79,6 @@ export class MotionBlurPass extends PostProcessPass {
   private _format!: GPUTextureFormat;
   private _width = 1;
   private _height = 1;
-  private _tileResourcesFullSize = false;
   private _tileMaxTexture!: GPUTexture;
   private _tileMaxView!: GPUTextureView;
   private _neighborMaxTexture!: GPUTexture;
@@ -81,6 +92,10 @@ export class MotionBlurPass extends PostProcessPass {
   private _historyRevision = 0;
   private _appliedFrameCount = 0;
   private _lastFrameId = -1;
+  private readonly _sizedResources = new Map<string, MotionBlurSizedResources>();
+  private _resourceKey = '';
+  private _retirementFrame = -1;
+  private _resourceGeneration = 0;
 
   constructor(options: MotionBlurPassOptions = {}) {
     super();
@@ -132,16 +147,6 @@ export class MotionBlurPass extends PostProcessPass {
       addressModeU: 'clamp-to-edge',
       addressModeV: 'clamp-to-edge',
     });
-    this._uniformBuffer = device.createBuffer({
-      label: 'MotionBlurPass.params',
-      size: this._uniformWriter.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-    this._tileParamsBuffer = device.createBuffer({
-      label: 'MotionBlurPass.tileParams',
-      size: this._tileParamsWriter.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
     this._createSizedResources(device, width, height);
   }
 
@@ -162,10 +167,10 @@ export class MotionBlurPass extends PostProcessPass {
     const frame = this._sceneTextures?.frame;
     if (!motion || !frame) throw new Error('MotionBlurPass requires motion and frame context textures.');
 
+    this._createSizedResources(device, frame.width, frame.height);
+    this._sizedResources.get(this._resourceKey)!.lastSeenFrame = frame.frameId;
+    this._retireUnusedResources(frame.frameId);
     this._writeUniforms(device, frame.width, frame.height);
-    if (this.reconstruction === 'tile-neighbor-max' && !this._tileResourcesFullSize) {
-      this._createSizedResources(device, this._width, this._height, true);
-    }
     this._ensureBindGroups(device, src, motion);
 
     if (this.reconstruction === 'tile-neighbor-max') {
@@ -224,13 +229,16 @@ export class MotionBlurPass extends PostProcessPass {
   }
 
   override destroy(): void {
+    this._resourceGeneration++;
     this._mainPipeline = null;
     this._tileMaxPipeline = null;
     this._neighborMaxPipeline = null;
-    this._uniformBuffer?.destroy();
-    this._tileParamsBuffer?.destroy();
-    this._tileMaxTexture?.destroy();
-    this._neighborMaxTexture?.destroy();
+    const resources = [...this._sizedResources.values()];
+    this._sizedResources.clear();
+    this._resourceKey = '';
+    this._retirementFrame = -1;
+    const dispose = (): void => { for (const resource of resources) destroySizedResources(resource); };
+    if (!deferPostProcessDisposal(this, dispose)) dispose();
     this._sceneTextures = null;
     this._clearBindGroups();
   }
@@ -260,9 +268,13 @@ export class MotionBlurPass extends PostProcessPass {
   ): void {
     this._width = Math.max(1, width);
     this._height = Math.max(1, height);
-    this._tileResourcesFullSize = fullSize;
-    this._tileMaxTexture?.destroy();
-    this._neighborMaxTexture?.destroy();
+    const key = `${this._width}x${this._height}:${fullSize ? 1 : 0}`;
+    if (this._resourceKey === key) return;
+    const cached = this._sizedResources.get(key);
+    if (cached) {
+      this._activateSizedResources(key, cached);
+      return;
+    }
     const tileWidth = fullSize ? Math.ceil(this._width / TILE_SIZE) : 1;
     const tileHeight = fullSize ? Math.ceil(this._height / TILE_SIZE) : 1;
     const descriptor = {
@@ -270,6 +282,8 @@ export class MotionBlurPass extends PostProcessPass {
       format: VELOCITY_FORMAT,
       usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     };
+    this._uniformBuffer = device.createBuffer({ label: 'MotionBlurPass.params', size: this._uniformWriter.byteLength, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    this._tileParamsBuffer = device.createBuffer({ label: 'MotionBlurPass.tileParams', size: this._tileParamsWriter.byteLength, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
     this._tileMaxTexture = device.createTexture({ ...descriptor, label: 'MotionBlurPass.tileMaxTexture' });
     this._tileMaxView = this._tileMaxTexture.createView();
     this._neighborMaxTexture = device.createTexture({ ...descriptor, label: 'MotionBlurPass.neighborMaxTexture' });
@@ -284,7 +298,40 @@ export class MotionBlurPass extends PostProcessPass {
       layout: this._neighborMaxBgl,
       entries: [{ binding: 0, resource: this._tileMaxView }],
     });
+    this._sizedResources.set(key, {
+      uniform: this._uniformBuffer, tileParams: this._tileParamsBuffer,
+      tile: this._tileMaxTexture, tileView: this._tileMaxView,
+      neighbor: this._neighborMaxTexture, neighborView: this._neighborMaxView,
+      neighborGroup: this._neighborMaxBindGroup, lastSeenFrame: -1,
+    });
+    this._resourceKey = key;
     this._clearBindGroups();
+  }
+
+  private _activateSizedResources(key: string, resources: MotionBlurSizedResources): void {
+    this._resourceKey = key;
+    this._uniformBuffer = resources.uniform;
+    this._tileParamsBuffer = resources.tileParams;
+    this._tileMaxTexture = resources.tile;
+    this._tileMaxView = resources.tileView;
+    this._neighborMaxTexture = resources.neighbor;
+    this._neighborMaxView = resources.neighborView;
+    this._neighborMaxBindGroup = resources.neighborGroup;
+    this._clearBindGroups();
+  }
+
+  private _retireUnusedResources(frameId: number): void {
+    if (this._retirementFrame === frameId) return;
+    const generation = this._resourceGeneration;
+    if (deferPostProcessDisposal(this, () => {
+      if (generation !== this._resourceGeneration) return;
+      for (const [key, resources] of this._sizedResources) {
+        if (resources.lastSeenFrame >= frameId) continue;
+        this._sizedResources.delete(key);
+        destroySizedResources(resources);
+        if (key === this._resourceKey) this._resourceKey = '';
+      }
+    })) this._retirementFrame = frameId;
   }
 
   private _ensureBindGroups(device: GPUDevice, src: GPUTexture, motion: GPUTexture): void {
@@ -355,6 +402,11 @@ export class MotionBlurPass extends PostProcessPass {
       primitive: { topology: 'triangle-list' },
     };
   }
+}
+
+function destroySizedResources(resources: MotionBlurSizedResources): void {
+  resources.uniform.destroy(); resources.tileParams.destroy();
+  resources.tile.destroy(); resources.neighbor.destroy();
 }
 
 function finite(value: number, label: string): number {

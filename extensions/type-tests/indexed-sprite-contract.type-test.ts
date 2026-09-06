@@ -16,9 +16,10 @@ const options: IndexedSpriteRendererOptions = { targetFormat: 'bgra8unorm', samp
 const layout = prepareIndexedSpriteAtlas([sprite], [palette]);
 const renderer = new IndexedSpriteRenderer(device, [sprite], [palette], options);
 const command: IndexedSpriteDrawCommand = { spriteId: sprite.id, paletteId: palette.id, x: 0, y: 0, sampling: 'nearest' };
+const subtractiveCommand: IndexedSpriteDrawCommand = { ...command, blend: 'subtractive' };
 
 layout.placements.get(sprite.id);
 // @ts-expect-error The deterministic placement map is immutable.
 layout.placements.set(sprite.id, layout.placements.get(sprite.id)!);
-renderer.render(pass, [command], 1280, 720);
+renderer.render(pass, [command, subtractiveCommand], 1280, 720);
 renderer.dispose();

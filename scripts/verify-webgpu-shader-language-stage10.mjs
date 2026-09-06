@@ -17,6 +17,7 @@ if (result.validationErrorCount !== 0) failures.push(`validationErrorCount=${res
 if (result.unclassifiedFailureCount !== 0) failures.push(`unclassifiedFailureCount=${result.unclassifiedFailureCount}`);
 if (!Array.isArray(result.outlinePixel) || result.outlinePixel.some((value, index) => Math.abs(value - [255, 255, 255, 255][index]) > 1)) failures.push(`outlinePixel=${JSON.stringify(result.outlinePixel)}`);
 if (!Array.isArray(result.motionPixel) || Math.abs(result.motionPixel[0] - 0.25) > 0.03 || Math.abs(result.motionPixel[1]) > 0.03) failures.push(`motionPixel=${JSON.stringify(result.motionPixel)}`);
-if (result.cache?.shaderModules !== 9 || result.cache?.rendererLayouts !== 30 || result.cache?.pipelineLayouts !== 9) failures.push(`cache=${JSON.stringify(result.cache)}`);
+// The two unskinned shadow variants and motion now also own material group 2.
+if (result.cache?.shaderModules !== 9 || result.cache?.rendererLayouts !== 33 || result.cache?.pipelineLayouts !== 9) failures.push(`cache=${JSON.stringify(result.cache)}`);
 if (failures.length > 0) throw new Error(`Shader language stage 10 WebGPU gate failed:\n- ${failures.join('\n- ')}`);
 console.log(`[shader-language:stage10:webgpu] passed: passes=${result.passCount}, outline=${result.outlinePixel.join(',')}, motion=${result.motionPixel.join(',')}, module=${result.deformationModuleHash.slice(0, 12)}.`);

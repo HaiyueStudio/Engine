@@ -201,7 +201,7 @@ function defineUniformAbiLayout(name: string, definitions: readonly UniformAbiFi
 
 function writeFogFields(out: Float32Array, fog: Fog | null): void {
   if (!fog || fog.disabled) return;
-  fog.color.writeSRGB(out, FOG_COLOR_FLOAT_OFFSET);
+  fog.color.writeLinear(out, FOG_COLOR_FLOAT_OFFSET);
   out[FOG_DISTANCE_FLOAT_OFFSET] = fog.mode === 'distance' ? 1 : 2;
   out[FOG_DISTANCE_FLOAT_OFFSET + 1] = fog.distanceStart;
   out[FOG_DISTANCE_FLOAT_OFFSET + 2] = Math.max(fog.distanceEnd, fog.distanceStart + 0.0001);

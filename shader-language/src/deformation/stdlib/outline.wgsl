@@ -13,11 +13,15 @@ struct VertexInput {
   @location(2) morphPosition1 : vec3<f32>,
   @location(3) morphPosition2 : vec3<f32>,
   @location(4) morphPosition3 : vec3<f32>,
+  @location(5) uv0 : vec2<f32>,
+  @location(6) uv1 : vec2<f32>,
   @builtin(vertex_index) vertexIndex : u32,
   @builtin(instance_index) instanceIndex : u32,
 }
 
 struct VertexOutput {
+  @location(2) uv0 : vec2<f32>,
+  @location(3) uv1 : vec2<f32>,
   @builtin(position) clipPosition : vec4<f32>,
   @location(0) worldPos : vec3<f32>,
   @location(1) @interpolate(flat) objectIndex : u32,
@@ -45,12 +49,15 @@ fn vs_main(input : VertexInput) -> VertexOutput {
   output.clipPosition = sceneFrame.viewProjection * worldPosition;
   output.worldPos = worldPosition.xyz;
   output.objectIndex = input.instanceIndex;
+  output.uv0 = input.uv0;
+  output.uv1 = input.uv1;
   return output;
 }
 
 @fragment
 fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
   let object = objects[input.objectIndex];
+  if (!hy_has_material_coverage(input.uv0, input.uv1)) { discard; }
   if (hy_is_clipped(input.worldPos, input.objectIndex)) { discard; }
   return vec4<f32>(1.0);
 }

@@ -123,7 +123,8 @@ test('SceneFrameUniform writer follows schema-derived offsets for camera and Fog
   assert.deepEqual([...data.subarray(32, 48)], [...matrix]);
   assert.deepEqual([...data.subarray(48, 52)], [11, 12, 13, 0]);
   assert.deepEqual([...data.subarray(52, 56)], [...new Float32Array([800, 400, 1 / 800, 1 / 400])]);
-  assert.deepEqual([...data.subarray(56, 60)], [...new Float32Array([0.25, 0.5, 0.75, 0.8])]);
+  const linear = value => ((value + 0.055) / 1.055) ** 2.4;
+  assert.deepEqual([...data.subarray(56, 60)], [...new Float32Array([linear(0.25), linear(0.5), linear(0.75), 0.8])]);
   assert.deepEqual([...data.subarray(60, 64)], [...new Float32Array([2, 4, 30, 0.7])]);
   assert.deepEqual([...data.subarray(64, 68)], [...new Float32Array([6, 0.12, 0.3, 0])]);
   assert.throws(() => writeSceneFrameUniforms(new Float32Array(67), {

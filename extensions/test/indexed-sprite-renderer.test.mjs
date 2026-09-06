@@ -62,8 +62,10 @@ test('renderer batches commands, performs bounded uploads, recovers, and dispose
     { id: 'color', width: 1, height: 1, format: 'rgba8', pixels: new Uint8Array([1, 2, 3, 4]) },
   ], [palette('main')], { targetFormat: 'bgra8unorm', sampleCount: 4, limits: limits() });
 
-  assert.equal(firstGpu.pipelines.length, 3);
+  assert.equal(firstGpu.pipelines.length, 4);
   assert.ok(firstGpu.pipelines.every(value => value.layout === firstGpu.pipelineLayouts[0] && value.multisample.count === 4));
+  const subtractive = firstGpu.pipelines.find(value => value.label.endsWith('.subtractive'));
+  assert.deepEqual(subtractive.fragment.targets[0].blend.color, { operation: 'reverse-subtract', srcFactor: 'src-alpha', dstFactor: 'one' });
   assert.equal(renderer.ready, false);
   renderer.upload(1024);
   assert.equal(renderer.ready, false);
@@ -78,10 +80,11 @@ test('renderer batches commands, performs bounded uploads, recovers, and dispose
     { spriteId: 'indexed', paletteId: 'main', x: 10, y: 10, priority: 1, colorMatrix },
     { spriteId: 'indexed', paletteId: 'main', x: 20, y: 10, priority: 1 },
     { spriteId: 'color', x: 30, y: 10, priority: 2, blend: 'additive', sampling: 'linear' },
+    { spriteId: 'color', x: 40, y: 10, priority: 3, blend: 'subtractive' },
   ], 1280, 720);
-  assert.equal(stats.drawCommands, 3);
-  assert.equal(stats.drawCalls, 2);
-  assert.deepEqual(pass.draws.map(value => [value.instanceCount, value.firstInstance]), [[2, 0], [1, 2]]);
+  assert.equal(stats.drawCommands, 4);
+  assert.equal(stats.drawCalls, 3);
+  assert.deepEqual(pass.draws.map(value => [value.instanceCount, value.firstInstance]), [[2, 0], [1, 2], [1, 3]]);
   const packedInstances = new Float32Array(firstGpu.bufferWrites.at(-2).data.buffer); assert.deepEqual([...packedInstances.slice(24, 36)], colorMatrix.map(Math.fround));
 
   const replacement = fakeDevice();

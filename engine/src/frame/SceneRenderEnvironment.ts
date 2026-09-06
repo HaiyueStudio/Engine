@@ -7,25 +7,16 @@ import { EnvironmentLight } from '../lighting/EnvironmentLight';
 import { Fog } from '../lighting/Fog';
 import { LightComponent } from '../lighting/LightComponent';
 import { PointLight } from '../lighting/PointLight';
-import { requiredItemAt } from '../math/arrayAccess';
+import { SceneLightSelection, createLightInfo, lightEnergy, type SceneLightCandidate, type SceneLightSelectionStats } from './SceneLightSelection';
+import { getSceneFrameUniformSnapshotMetadata, type SceneFrameUniformSnapshot } from './SceneFrameUniformLayout';
 import type { FrameData } from './FrameData';
 
-export const SCENE_RENDER_MAX_LIGHTS = 8;
-/** Fixed PBR shadow-map array capacity. Additional shadow-casting lights stay lit but unshadowed. */
-export const SCENE_RENDER_MAX_DIRECTIONAL_SHADOWS = 3;
+export { SCENE_RENDER_MAX_LIGHTS, SCENE_RENDER_MAX_DIRECTIONAL_SHADOWS, type PbrLightInfo } from './SceneLightData';
+import { SCENE_RENDER_MAX_LIGHTS, SCENE_RENDER_MAX_DIRECTIONAL_SHADOWS, type PbrLightInfo } from './SceneLightData';
 const FOG_ENVIRONMENT_QUERY = Object.freeze({ all: Object.freeze([Fog]) });
 const IMAGE_BASED_ENVIRONMENT_QUERY = Object.freeze({ all: Object.freeze([EnvironmentLight]) });
 const LIGHT_ENVIRONMENT_QUERY = Object.freeze({ all: Object.freeze([LightComponent]) });
 let lightingRevisionSequence = 0;
-
-export interface PbrLightInfo {
-  type: 0 | 1 | 2;
-  color: [number, number, number];
-  intensity: number;
-  direction: [number, number, number];
-  position: [number, number, number];
-  range: number;
-}
 
 /** Phase-local snapshot. Consumers must not retain it across FrameData phase changes. */
 export interface SceneRenderEnvironment {
@@ -40,18 +31,21 @@ export interface SceneRenderEnvironment {
   /** Shadow-casting directional lights, ordered first in pbrLights with matching indices. */
   readonly shadowLights: readonly DirectionalLight[];
   readonly pbrLights: readonly PbrLightInfo[];
+  /** Per-view admission diagnostics; overflow counts relevant lights excluded by the fixed budget. */
+  readonly lightSelection?: SceneLightSelectionStats;
 }
 
 const services = new WeakMap<FrameData, SceneRenderEnvironmentFrameService>();
 
 /** Internal frame service shared by every renderer recording the same World frame. */
-export function getSceneRenderEnvironment(frameData: FrameData, world: World): SceneRenderEnvironment {
+export function getSceneRenderEnvironment(frameData: FrameData, world: World, view?: SceneFrameUniformSnapshot): SceneRenderEnvironment {
   let service = services.get(frameData);
   if (!service) {
     service = new SceneRenderEnvironmentFrameService();
     services.set(frameData, service);
   }
-  return service.get(frameData, world);
+  const scene = service.get(frameData, world);
+  return view ? service.getView(frameData, world, scene, view) : scene;
 }
 
 class SceneRenderEnvironmentFrameService {
@@ -71,9 +65,11 @@ class SceneRenderEnvironmentFrameService {
   private readonly _resourceIds = new WeakMap<object, number>();
   private _nextResourceId = 1;
   private readonly _disabledHierarchyCache: EntityHierarchyDisabledCache = new Map();
-  private readonly _lightEntities: Entity[] = [];
-  private readonly _lightComponents: LightComponent[] = [];
-  private readonly _shadowEntities: Entity[] = [];
+  private readonly _candidatePool: SceneLightCandidate[] = [];
+  private readonly _candidates: SceneLightCandidate[] = [];
+  private readonly _shadowCandidates: SceneLightCandidate[] = [];
+  private readonly _selection = new SceneLightSelection();
+  private readonly _views = new WeakMap<object, SceneRenderEnvironmentFrameService>();
   private readonly _colorScratch = new Float32Array(4);
 
   get(frameData: FrameData, world: World): SceneRenderEnvironment {
@@ -87,9 +83,8 @@ class SceneRenderEnvironmentFrameService {
     this._world = world;
     this._frameId = frameData.frameId;
     this._phaseRevision = frameData.phaseRevision;
-    this._lightEntities.length = 0;
-    this._lightComponents.length = 0;
-    this._shadowEntities.length = 0;
+    this._candidates.length = 0;
+    this._shadowCandidates.length = 0;
     this._snapshotRevision = this._snapshotRevision >= Number.MAX_SAFE_INTEGER ? 1 : this._snapshotRevision + 1;
     const slot = this._snapshotRing[(this._snapshotRevision - 1) % this._snapshotRing.length]!;
     const pbrLights = slot.pbrLights;
@@ -120,34 +115,28 @@ class SceneRenderEnvironmentFrameService {
       if (isEntityDisabledInHierarchyCached(entity, this._disabledHierarchyCache)) continue;
       const light = entity.getComponent(LightComponent);
       if (!light || light.disabled) continue;
-      this._lightEntities.push(entity);
-      this._lightComponents.push(light);
-      if (
-        shadowLights.length < SCENE_RENDER_MAX_DIRECTIONAL_SHADOWS
-        && light instanceof DirectionalLight
-        && light.castShadow
-      ) {
-        shadowLights.push(light);
-        this._shadowEntities.push(entity);
+      const index = this._candidates.length;
+      let candidate = this._candidatePool[index];
+      if (!candidate || candidate.id !== entity.id) {
+        candidate = { id: entity.id, info: createLightInfo(), shadow: null };
+        this._candidatePool[index] = candidate;
       }
+      this._writeLightInfo(candidate.info, entity, light, frameData);
+      candidate.shadow = light instanceof DirectionalLight && light.castShadow ? light : null;
+      this._candidates.push(candidate);
+      if (candidate.shadow && lightEnergy(candidate.info) > 0) this._shadowCandidates.push(candidate);
     }
-
-    let lightCursor = 0;
-    for (let index = 0; index < this._shadowEntities.length; index++) {
-      const shadowEntity = requiredItemAt(this._shadowEntities, index, 'scene render shadow entities');
-      const shadowLight = requiredItemAt(shadowLights, index, 'scene render shadow lights');
-      const info = slot.lightPool[lightCursor++]!;
-      this._writeLightInfo(info, shadowEntity, shadowLight, frameData);
-      pbrLights.push(info);
-    }
-    for (let i = 0; i < this._lightEntities.length && pbrLights.length < SCENE_RENDER_MAX_LIGHTS; i++) {
-      const entity = requiredItemAt(this._lightEntities, i, 'scene render light entities');
-      if (this._shadowEntities.includes(entity)) continue;
-      const light = requiredItemAt(this._lightComponents, i, 'scene render light components');
-      const info = slot.lightPool[lightCursor++]!;
-      this._writeLightInfo(info, entity, light, frameData);
-      pbrLights.push(info);
-    }
+    this._candidatePool.length = this._candidates.length;
+    const previousShadows = this._snapshot?.shadowLights;
+    this._shadowCandidates.sort((a, b) => {
+      const aScore = lightEnergy(a.info) * (previousShadows?.includes(a.shadow!) ? 1.1 : 1);
+      const bScore = lightEnergy(b.info) * (previousShadows?.includes(b.shadow!) ? 1.1 : 1);
+      return bScore - aScore || a.id - b.id;
+    });
+    this._shadowCandidates.length = Math.min(this._shadowCandidates.length, SCENE_RENDER_MAX_DIRECTIONAL_SHADOWS);
+    this._shadowCandidates.sort((a, b) => a.id - b.id);
+    for (const candidate of this._shadowCandidates) shadowLights.push(candidate.shadow!);
+    slot.snapshot.lightSelection = this._selection.select(this._candidates, shadowLights, pbrLights, slot.lightPool);
 
     sweepEntityHierarchyDisabledCache(this._disabledHierarchyCache, world.entities);
     this._updateLightingRevision(pbrLights, environmentLight);
@@ -158,6 +147,28 @@ class SceneRenderEnvironmentFrameService {
     slot.snapshot.environmentLight = environmentLight;
     slot.snapshot.shadowLight = shadowLights[0] ?? null;
     this._snapshot = slot.snapshot;
+    return slot.snapshot;
+  }
+
+  getView(frameData: FrameData, world: World, scene: SceneRenderEnvironment, view: SceneFrameUniformSnapshot): SceneRenderEnvironment {
+    const stream = getSceneFrameUniformSnapshotMetadata(view)?.stream ?? view;
+    let state = this._views.get(stream);
+    if (!state) { state = new SceneRenderEnvironmentFrameService(); this._views.set(stream, state); }
+    if (state._world === world && state._frameId === frameData.frameId
+      && state._phaseRevision === frameData.phaseRevision && state._snapshot) return state._snapshot;
+    state._world = world; state._frameId = frameData.frameId; state._phaseRevision = frameData.phaseRevision;
+    const slot = state._snapshotRing[state._snapshotRevision++ % state._snapshotRing.length]!;
+    slot.shadowLights.length = 0;
+    slot.shadowLights.push(...scene.shadowLights);
+    slot.snapshot.lightSelection = state._selection.select(this._candidates, scene.shadowLights, slot.pbrLights, slot.lightPool, view);
+    state._updateLightingRevision(slot.pbrLights, scene.environmentLight);
+    slot.snapshot.frameId = scene.frameId;
+    slot.snapshot.phaseRevision = scene.phaseRevision;
+    slot.snapshot.lightingRevision = state._lightingRevision;
+    slot.snapshot.fog = scene.fog;
+    slot.snapshot.environmentLight = scene.environmentLight;
+    slot.snapshot.shadowLight = scene.shadowLight;
+    state._snapshot = slot.snapshot;
     return slot.snapshot;
   }
 
@@ -285,14 +296,7 @@ function createSceneRenderEnvironmentSlot(): SceneRenderEnvironmentSlot {
     },
     pbrLights,
     shadowLights,
-    lightPool: Array.from({ length: SCENE_RENDER_MAX_LIGHTS }, () => ({
-      type: 0,
-      color: [0, 0, 0],
-      intensity: 0,
-      direction: [0, -1, 0],
-      position: [0, 0, 0],
-      range: 10,
-    })),
+    lightPool: Array.from({ length: SCENE_RENDER_MAX_LIGHTS }, createLightInfo),
   };
 }
 

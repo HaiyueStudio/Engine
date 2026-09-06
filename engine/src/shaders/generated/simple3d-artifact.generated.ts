@@ -258,13 +258,98 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
               "id": "material.normalParameters",
               "binding": 0,
               "visibility": [
-                "vertex"
+                "vertex",
+                "fragment"
               ],
               "layout": {
                 "kind": "buffer",
                 "bufferType": "uniform",
                 "hasDynamicOffset": false,
                 "minBindingSize": 16
+              }
+            },
+            {
+              "id": "material.coverage",
+              "binding": 1,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "uniform",
+                "hasDynamicOffset": false,
+                "minBindingSize": 192
+              }
+            },
+            {
+              "id": "material.coverageTexture",
+              "binding": 2,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "texture",
+                "sampleType": "float",
+                "viewDimension": "2d",
+                "multisampled": false
+              }
+            },
+            {
+              "id": "material.coverageSampler",
+              "binding": 3,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "sampler",
+                "samplerType": "filtering"
+              }
+            }
+          ]
+        },
+        {
+          "logicalSpace": "object",
+          "logicalGroup": 1,
+          "physicalGroup": 3,
+          "owner": "renderer",
+          "bindings": [
+            {
+              "id": "object.currentJointMatrices",
+              "binding": 0,
+              "visibility": [
+                "vertex"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "read-only-storage",
+                "hasDynamicOffset": false,
+                "minBindingSize": 0
+              }
+            },
+            {
+              "id": "geometry.skinJoints",
+              "binding": 1,
+              "visibility": [
+                "vertex"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "read-only-storage",
+                "hasDynamicOffset": false,
+                "minBindingSize": 0
+              }
+            },
+            {
+              "id": "geometry.skinWeights",
+              "binding": 2,
+              "visibility": [
+                "vertex"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "read-only-storage",
+                "hasDynamicOffset": false,
+                "minBindingSize": 0
               }
             }
           ]
@@ -318,6 +403,56 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
           ]
         },
         {
+          "id": "material.coverage",
+          "alignment": 16,
+          "byteSize": 192,
+          "fields": [
+            {
+              "name": "baseColor",
+              "type": "vec4<f32>",
+              "offset": 0,
+              "size": 16
+            },
+            {
+              "name": "emissiveAndNormalScale",
+              "type": "vec4<f32>",
+              "offset": 16,
+              "size": 16
+            },
+            {
+              "name": "surfaceAndCutoff",
+              "type": "vec4<f32>",
+              "offset": 32,
+              "size": 16
+            },
+            {
+              "name": "flags",
+              "type": "vec4<u32>",
+              "offset": 48,
+              "size": 16
+            },
+            {
+              "name": "extensions",
+              "type": "array<vec4<f32>,6>",
+              "offset": 64,
+              "size": 96,
+              "arrayStride": 16
+            },
+            {
+              "name": "baseMapping0",
+              "type": "vec4<f32>",
+              "offset": 160,
+              "size": 16
+            },
+            {
+              "name": "baseMapping1",
+              "type": "vec4<f32>",
+              "offset": 176,
+              "size": 16
+            }
+          ]
+        },
+        {
           "id": "material.normalParameters",
           "alignment": 16,
           "byteSize": 16,
@@ -329,14 +464,14 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
               "size": 4
             },
             {
-              "name": "_pad0",
-              "type": "u32",
+              "name": "near",
+              "type": "f32",
               "offset": 4,
               "size": 4
             },
             {
-              "name": "_pad1",
-              "type": "u32",
+              "name": "far",
+              "type": "f32",
               "offset": 8,
               "size": 4
             },
@@ -373,6 +508,102 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
               "format": "float32x3"
             }
           ]
+        },
+        {
+          "arrayStride": 24,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "MORPH_POSITION_0",
+              "shaderLocation": 2,
+              "offset": 0,
+              "format": "float32x3"
+            },
+            {
+              "semantic": "MORPH_NORMAL_0",
+              "shaderLocation": 3,
+              "offset": 12,
+              "format": "float32x3"
+            }
+          ]
+        },
+        {
+          "arrayStride": 24,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "MORPH_POSITION_1",
+              "shaderLocation": 4,
+              "offset": 0,
+              "format": "float32x3"
+            },
+            {
+              "semantic": "MORPH_NORMAL_1",
+              "shaderLocation": 5,
+              "offset": 12,
+              "format": "float32x3"
+            }
+          ]
+        },
+        {
+          "arrayStride": 24,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "MORPH_POSITION_2",
+              "shaderLocation": 6,
+              "offset": 0,
+              "format": "float32x3"
+            },
+            {
+              "semantic": "MORPH_NORMAL_2",
+              "shaderLocation": 7,
+              "offset": 12,
+              "format": "float32x3"
+            }
+          ]
+        },
+        {
+          "arrayStride": 24,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "MORPH_POSITION_3",
+              "shaderLocation": 8,
+              "offset": 0,
+              "format": "float32x3"
+            },
+            {
+              "semantic": "MORPH_NORMAL_3",
+              "shaderLocation": 9,
+              "offset": 12,
+              "format": "float32x3"
+            }
+          ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_0",
+              "shaderLocation": 10,
+              "offset": 0,
+              "format": "float32x2"
+            }
+          ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_1",
+              "shaderLocation": 11,
+              "offset": 0,
+              "format": "float32x2"
+            }
+          ]
         }
       ],
       "varyings": [
@@ -393,31 +624,57 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
           "location": 2,
           "type": "u32",
           "interpolation": "flat"
+        },
+        {
+          "semantic": "TEXCOORD_0",
+          "location": 3,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
+        },
+        {
+          "semantic": "TEXCOORD_1",
+          "location": 4,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
+        },
+        {
+          "semantic": "VIEW_DEPTH",
+          "location": 5,
+          "type": "f32",
+          "interpolation": "perspective"
         }
       ],
       "renderTargets": [
         {
           "location": 0,
           "formatClass": "color"
+        },
+        {
+          "location": 1,
+          "formatClass": "optional-linear-depth-r32float"
         }
       ],
       "capabilities": [
         "storage-buffer",
-        "discard"
+        "discard",
+        "morph-targets",
+        "skinning",
+        "texture-sample"
       ],
       "passRequirements": [
         "normal-visualization",
-        "world-space-clipping"
+        "world-space-clipping",
+        "auxiliary-surface-mrt-v1"
       ],
       "sourceMap": [
         {
           "sourceId": "builtin.normal-material",
           "sourceName": "shader-language/builtin-simple-3d-runtime-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 133
+          "generatedEndLine": 282
         }
       ],
-      "canonicalHash": "754cc0817720a2e5eed53fd3b2e90bb515cd1423af8c2c1f28d00958dc46301a"
+      "canonicalHash": "50ff3ac7191bd1a71c6d9532a0624c4bc819d7b05596423cd892c22f2aad7212"
     },
     "particle3d": {
       "id": "particle3d",
@@ -789,11 +1046,11 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
           "sourceId": "builtin.sky",
           "sourceName": "shader-language/builtin-simple-3d-runtime-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 130
+          "generatedEndLine": 127
         }
       ],
-      "canonicalHash": "4d82d3197f9f67c21d1adbed12a488b39d3805d6da85cde698cd1cadb732d54e"
+      "canonicalHash": "51a18c6adf0460586ce776a2539b2c6e6b71c1d2e29da81c814b64a85aeda245"
     }
   },
-  "artifactHash": "07935ed749ff2233b1c2157362f7bc23d72500fc93569bcd79d2074ecf9d40af"
+  "artifactHash": "1ed297f225816718ce15c7402d7c5789490d5870144f0556f80b5f82125db841"
 } as const satisfies PrecompiledShaderArtifactV2;

@@ -892,6 +892,7 @@ export const MATERIAL_LIGHTING_SHADER_ARTIFACT = {
         "material-lighting-abi-v1",
         "deformation-abi-v1",
         "eight-light-cap",
+        "scene-linear-hdr",
         "three-directional-shadow-cap",
         "morph-before-skin",
         "world-space-clipping",
@@ -903,10 +904,10 @@ export const MATERIAL_LIGHTING_SHADER_ARTIFACT = {
           "sourceId": "material-lighting.pbr",
           "sourceName": "shader-language/builtin-material-lighting-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 825
+          "generatedEndLine": 820
         }
       ],
-      "canonicalHash": "4b93f74d723b49b53535079b33316133186089f03acc9d7201b06cde0be3d9a2"
+      "canonicalHash": "367c7d564382dfbcdbb49a64ec093d56f3688ed57f6185db43bc0f448aa9f77e"
     },
     "pbr-clearcoat": {
       "id": "pbr-clearcoat",
@@ -934,6 +935,7 @@ export const MATERIAL_LIGHTING_SHADER_ARTIFACT = {
         "material-lighting-abi-v1",
         "deformation-abi-v1",
         "eight-light-cap",
+        "scene-linear-hdr",
         "three-directional-shadow-cap",
         "morph-before-skin",
         "world-space-clipping",
@@ -945,10 +947,10 @@ export const MATERIAL_LIGHTING_SHADER_ARTIFACT = {
           "sourceId": "material-lighting.pbr-clearcoat",
           "sourceName": "shader-language/builtin-material-lighting-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 825
+          "generatedEndLine": 820
         }
       ],
-      "canonicalHash": "4440083ece2150a017ac294cca044736a30e59877ba9f3921c9ae210ab310117"
+      "canonicalHash": "c308b7ce880f39b64455087bc63973f433d761b2414ba9e3c36de610ff2680fc"
     },
     "pbr-transmission": {
       "id": "pbr-transmission",
@@ -976,6 +978,7 @@ export const MATERIAL_LIGHTING_SHADER_ARTIFACT = {
         "material-lighting-abi-v1",
         "deformation-abi-v1",
         "eight-light-cap",
+        "scene-linear-hdr",
         "three-directional-shadow-cap",
         "morph-before-skin",
         "world-space-clipping",
@@ -987,10 +990,10 @@ export const MATERIAL_LIGHTING_SHADER_ARTIFACT = {
           "sourceId": "material-lighting.pbr-transmission",
           "sourceName": "shader-language/builtin-material-lighting-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 825
+          "generatedEndLine": 820
         }
       ],
-      "canonicalHash": "ef94cd819d44d083f83d59128140d9adc74b86dd11bbd0c36bc85763d0c8d6e8"
+      "canonicalHash": "bc5fbd924a64cfb940fc9bd21c8b2aac9d44837a6b805437e62f147ea4c8e869"
     },
     "pbr-transmission-clearcoat": {
       "id": "pbr-transmission-clearcoat",
@@ -1019,6 +1022,7 @@ export const MATERIAL_LIGHTING_SHADER_ARTIFACT = {
         "material-lighting-abi-v1",
         "deformation-abi-v1",
         "eight-light-cap",
+        "scene-linear-hdr",
         "three-directional-shadow-cap",
         "morph-before-skin",
         "world-space-clipping",
@@ -1030,10 +1034,10 @@ export const MATERIAL_LIGHTING_SHADER_ARTIFACT = {
           "sourceId": "material-lighting.pbr-transmission-clearcoat",
           "sourceName": "shader-language/builtin-material-lighting-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 825
+          "generatedEndLine": 820
         }
       ],
-      "canonicalHash": "4247bd38eb2f407b9e20b3a0c7868c8157dcef8c4023089a9fa0c64908d339cd"
+      "canonicalHash": "42318377f1bfe489a23e174936e0d342ef8e9c53169d39dccaa3a9f960a0d1be"
     },
     "blinn-phong": {
       "id": "blinn-phong",
@@ -1312,17 +1316,18 @@ export const MATERIAL_LIGHTING_SHADER_ARTIFACT = {
         "material-lighting-abi-v1",
         "eight-light-cap",
         "fog-after-lighting",
-        "world-space-clipping"
+        "world-space-clipping",
+        "scene-linear-hdr"
       ],
       "sourceMap": [
         {
           "sourceId": "material-lighting.blinn-phong",
           "sourceName": "shader-language/builtin-material-lighting-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 179
+          "generatedEndLine": 177
         }
       ],
-      "canonicalHash": "48b339c093c165f0c824cea693313f2df2e57ab8cc3c6ed9e6d3821f5a4948a3"
+      "canonicalHash": "c5fa4382de798d10d8bcdf789e1e9f77c992517c3ff85d23311b02dd199609eb"
     },
     "toon": {
       "id": "toon",
@@ -1792,8 +1797,8 @@ export const MATERIAL_LIGHTING_SHADER_ARTIFACT = {
           "generatedEndLine": 284
         }
       ],
-      "canonicalHash": "9ec2dd98ec767b5d10b98a4921fd80581d712854685ec9acb56decd0b3629a0d"
+      "canonicalHash": "93117df538d266df6b353ef559034708b1692cb0ad2859ec4f543936bd4a739b"
     }
   },
-  "artifactHash": "b35f4d09b857a6714be37d15b73e0c5373d2998d412f60cfb5ca2db1a18ff2b2"
+  "artifactHash": "b448cc48ea296bdd03b4d994d2c70522cb37ae2e96c1cb975be13e4302c9cc5d"
 } as const satisfies PrecompiledShaderArtifactV2;

@@ -19,6 +19,34 @@ fn hy_is_clipped(p : vec3<f32>, o : u32) -> bool {
 }
 
 
+// Prefix of the forward PBR material ABI. Borrowing the same buffer and texture
+// keeps readiness, factor alpha, cutoff, UV selection and transforms identical.
+struct CoverageMaterial {
+  baseColor : vec4<f32>,
+  emissiveAndNormalScale : vec4<f32>,
+  surfaceAndCutoff : vec4<f32>,
+  flags : vec4<u32>,
+  extensions : array<vec4<f32>, 6>,
+  baseMapping0 : vec4<f32>,
+  baseMapping1 : vec4<f32>,
+}
+@group(2) @binding(1) var<uniform> coverage : CoverageMaterial;
+@group(2) @binding(2) var coverageTexture : texture_2d<f32>;
+@group(2) @binding(3) var coverageSampler : sampler;
+
+fn hy_has_material_coverage(uv0: vec2<f32>, uv1: vec2<f32>) -> bool {
+  if (coverage.flags.w != 1u) { return true; }
+  var alpha = coverage.baseColor.a;
+  if (coverage.flags.x != 0u) {
+    let uv = select(uv0, uv1, coverage.baseMapping0.w > 0.5);
+    let mapped = vec2<f32>(dot(coverage.baseMapping0.xy, uv) + coverage.baseMapping0.z,
+      dot(coverage.baseMapping1.xy, uv) + coverage.baseMapping1.z);
+    alpha *= textureSample(coverageTexture, coverageSampler, mapped).a;
+  }
+  return alpha >= coverage.surfaceAndCutoff.w;
+}
+
+
 fn applyMorphPosition(
   position : vec3<f32>,
   morphPosition0 : vec3<f32>,
@@ -113,12 +141,16 @@ struct ObjectData {
 @group(1) @binding(0) var<storage, read> objects : array<ObjectData>;
 
 struct ShadowVertexOutput {
+  @location(2) uv0 : vec2<f32>,
+  @location(3) uv1 : vec2<f32>,
   @builtin(position) clipPosition : vec4<f32>,
   @location(0) worldPos : vec3<f32>,
   @location(1) @interpolate(flat) objectIndex : u32,
 }
 
 struct VertexInput {
+  @location(5) uv0 : vec2<f32>,
+  @location(6) uv1 : vec2<f32>,
   @location(0) position : vec3<f32>,
   @location(1) morphPosition0 : vec3<f32>,
   @location(2) morphPosition1 : vec3<f32>,
@@ -147,11 +179,14 @@ fn vs_main(input: VertexInput) -> ShadowVertexOutput {
   output.clipPosition = lightCamera.viewProj * worldPosition;
   output.worldPos = worldPosition.xyz;
   output.objectIndex = input.instanceIndex;
+  output.uv0 = input.uv0;
+  output.uv1 = input.uv1;
   return output;
 }
 
 @fragment fn fs_main(input : ShadowVertexOutput) -> @location(0) vec4<f32> {
   let object = objects[input.objectIndex];
+  if (!hy_has_material_coverage(input.uv0, input.uv1)) { discard; }
   if (hy_is_clipped(input.worldPos, input.objectIndex)) { discard; }
   return vec4<f32>(1.0);
 }

@@ -1,6 +1,6 @@
 # 0029：视图级时域抗锯齿与后处理帧上下文
 
-- 状态：Accepted
+- 状态：Superseded（TAA 重投影、历史纹理与依赖由 [ADR 0095](./0095-motion-reprojected-temporal-antialiasing.md) 更新，其余条款继续适用）
 - 日期：2026-07-21
 
 ## 背景

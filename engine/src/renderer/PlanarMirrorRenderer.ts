@@ -301,7 +301,7 @@ export class PlanarMirrorRenderer extends BaseRenderer {
       fragment: {
         module: this.shader,
         entryPoint: 'fs_main',
-        targets: [{ format: this.engine.format }],
+        targets: [{ format: this.colorFormat ?? this.engine.format }],
       },
       primitive: createPrimitiveState(topology, cullMode, frontFace, stripIndexFormat),
       depthStencil: {

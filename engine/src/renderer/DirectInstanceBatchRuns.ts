@@ -25,6 +25,7 @@ export function forEachDirectInstanceBatchRun<M extends Material>(
   batchBuffer: GpuDrivenBatchBuffer,
   visit: (run: DirectInstanceBatchRun<M>) => void,
   firstBatchIndex = first,
+  requireConsecutiveSlots = true,
 ): void {
   const end = Math.min(items.length, first + count);
   let cursor = first;
@@ -42,7 +43,7 @@ export function forEachDirectInstanceBatchRun<M extends Material>(
         !isRenderableItem(next)
         || next.geometry.id !== item.geometry.id
         || next.material.id !== item.material.id
-        || batchBuffer.getObjectSlot(firstBatchIndex + runEnd - first) !== firstInstance + (runEnd - cursor)
+        || (requireConsecutiveSlots && batchBuffer.getObjectSlot(firstBatchIndex + runEnd - first) !== firstInstance + (runEnd - cursor))
       ) break;
       runEnd++;
     }
@@ -54,6 +55,15 @@ export function forEachDirectInstanceBatchRun<M extends Material>(
     });
     cursor = runEnd;
   }
+}
+
+/** Indirect commands carry their own object slots, so holes/reordering are safe. */
+export function forEachIndirectBatchRun<M extends Material>(
+  items: readonly MaterialRenderBatchItem<M>[], first: number, count: number,
+  batchBuffer: GpuDrivenBatchBuffer, visit: (run: DirectInstanceBatchRun<M>) => void,
+  firstBatchIndex = first,
+): void {
+  forEachDirectInstanceBatchRun(items, first, count, batchBuffer, visit, firstBatchIndex, false);
 }
 
 function isRenderableItem<M extends Material>(

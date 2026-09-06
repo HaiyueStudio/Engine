@@ -17,6 +17,8 @@ const compiled = fixtures.map(value => compileBuiltinRenderFamilyV1(value.source
   sourcePath: value.path,
   sourceSha256: value.hash,
 }));
+const auxiliaryContract = JSON.parse(await readFile(new URL('../auxiliary-surface-extension-contract.json', import.meta.url), 'utf8'));
+const runtimeSimple3d = await family('../builtin-simple-3d-runtime-family.json');
 
 test('current stage 9 families retain the historical seventeen passes plus indexed sprite', () => {
   const second = fixtures.map(value => compileBuiltinRenderFamilyV1(value.source, {
@@ -51,6 +53,10 @@ test('stage 9 reflection preserves multi-group, vertex and uniform ABI boundarie
   const engine2d = compiled[0].artifact.passes;
   const components2d = compiled[1].artifact.passes;
   const simple3d = compiled[2].artifact.passes;
+  assert.equal(compileBuiltinRenderFamilyV1(runtimeSimple3d.source, {
+    sourcePath: runtimeSimple3d.path, sourceSha256: runtimeSimple3d.hash,
+  }).artifact.artifactHash, auxiliaryContract.artifact.simple3dHash);
+  assert.deepEqual(simple3d['normal-material'].renderTargets.map(target => target.formatClass), ['color', 'optional-linear-depth-r32float']);
   assert.equal(components2d['animation-2d'].bindGroups.length, 4);
   assert.doesNotMatch(components2d['animation-2d'].code, /color\.rgb\s*=/);
   assert.match(components2d['animation-2d'].code, /color = vec4<f32>\(mix\(color\.rgb, tinted/);
@@ -78,6 +84,17 @@ test('stage 9 reflection preserves multi-group, vertex and uniform ABI boundarie
   assert.ok(simple3d['basic-material'].passRequirements.includes('world-space-clipping'));
   assert.ok(simple3d['basic-material-skinned'].passRequirements.includes('world-space-clipping'));
   assert.ok(simple3d['normal-material'].passRequirements.includes('world-space-clipping'));
+  assert.equal(simple3d['normal-material'].bindGroups.length, 4);
+  assert.deepEqual(simple3d['normal-material'].bindGroups[2].bindings.map(binding => binding.id), [
+    'material.normalParameters', 'material.coverage', 'material.coverageTexture', 'material.coverageSampler',
+  ]);
+  assert.deepEqual(simple3d['normal-material'].bindGroups[3].bindings.map(binding => binding.id), [
+    'object.currentJointMatrices', 'geometry.skinJoints', 'geometry.skinWeights',
+  ]);
+  assert.equal(simple3d['normal-material'].uniformBlocks.find(block => block.id === 'material.coverage').byteSize, 192);
+  assert.ok(simple3d['normal-material'].passRequirements.includes('auxiliary-surface-mrt-v1'));
+  const normalParameters = simple3d['normal-material'].uniformBlocks.find(block => block.id === 'material.normalParameters');
+  assert.deepEqual(normalParameters.fields.slice(0, 3).map(field => [field.name, field.offset]), [['space', 0], ['near', 4], ['far', 8]]);
   assert.equal(simple3d.sky.passRequirements.includes('world-space-clipping'), false);
   assert.equal(simple3d.particle3d.vertexBuffers[1].arrayStride, 48);
   assert.match(simple3d['basic-material-skinned'].code, /applyMorphPosition[\s\S]+skinPosition/);

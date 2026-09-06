@@ -15,7 +15,7 @@ if (result.schemaVersion !== 1 || result.suite !== 'shader-language-stage9-built
 if (result.artifactVersion !== 2 || result.compilerVersion !== 'shader-language-stage9') {
   failures.push('production artifact identity was not preserved');
 }
-if (result.familyCount !== 3 || result.passCount !== 15) {
+if (result.familyCount !== 3 || result.passCount !== 16) {
   failures.push(`unexpected family/pass count ${result.familyCount}/${result.passCount}`);
 }
 if (result.compilationErrorCount !== 0) failures.push(`compilationErrorCount=${result.compilationErrorCount}`);
@@ -24,7 +24,8 @@ if (result.unclassifiedFailureCount !== 0) failures.push(`unclassifiedFailureCou
 if (!Array.isArray(result.pixelDelta) || result.pixelDelta.some(value => value > 1)) {
   failures.push(`pixelDelta=${JSON.stringify(result.pixelDelta)}`);
 }
-if (result.cache?.shaderModules !== 15 || result.cache?.rendererLayouts !== 38 || result.cache?.pipelineLayouts !== 15) {
+// Current builtins include indexed-sprite; normal now also binds deformation at group 3.
+if (result.cache?.shaderModules !== 16 || result.cache?.rendererLayouts !== 41 || result.cache?.pipelineLayouts !== 16) {
   failures.push(`artifact runtime cache=${JSON.stringify(result.cache)}`);
 }
 if (failures.length > 0) throw new Error(`Shader language stage 9 WebGPU gate failed:\n- ${failures.join('\n- ')}`);

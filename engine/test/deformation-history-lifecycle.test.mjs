@@ -9,7 +9,7 @@ test('motion history is isolated by view and invalidated by frame, camera and sc
   assert.match(source, /state\.lastFrameId \+ 1 === options\.frameId/);
   assert.match(source, /state\.cameraId === options\.cameraId/);
   assert.match(source, /state\.historyRevision === options\.historyRevision/);
-  assert.match(source, /if \(!state\.continuous\) state\.previousViewProjection\.set\(state\.currentViewProjection\)/);
+  assert.match(source, /if \(!state\.continuous\)\s*\{\s*state\.previousViewProjection\.set\(state\.currentViewProjection\);\s*state\.previousJitter\.set\(state\.currentJitter\)/);
 });
 
 test('first frame, seek, teleport and geometry replacement reset every deformation history input', () => {

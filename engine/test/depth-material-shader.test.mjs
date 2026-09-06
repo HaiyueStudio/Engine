@@ -42,7 +42,7 @@ test('NormalMaterial resets homogeneous w before converting world normals to vie
     'utf8',
   );
 
-  assert.match(source, /let worldNormal = normalize\(\(object\.normalMatrix \* vec4<f32>\(input\.normal, 0\.0\)\)\.xyz\)/);
+  assert.match(source, /let worldNormal = normalize\(\(object\.normalMatrix \* vec4<f32>\(localNormal, 0\.0\)\)\.xyz\)/);
   assert.match(source, /sceneFrame\.view \* vec4<f32>\(worldNormal, 0\.0\)/);
   assert.doesNotMatch(source, /sceneFrame\.view \* object\.normalMatrix/);
 });

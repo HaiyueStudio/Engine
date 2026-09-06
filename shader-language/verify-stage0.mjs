@@ -19,6 +19,7 @@ const builtinPostprocessSchema = readJson('builtin-postprocess-family.schema.jso
 const builtinPostprocessFamily = readJson('builtin-postprocess-family.json');
 const stage8Contract = readJson('stage8-contract.json');
 const ambientOcclusionPostprocessExtension = readJson('ambient-occlusion-postprocess-extension-contract.json');
+const linearOutputExtension = readJson('linear-hdr-output-extension-contract.json');
 const builtinRenderSchema = readJson('builtin-render-family.schema.json');
 const builtinRenderFamilies = [
   readJson('builtin-engine-2d-ui-family.json'),
@@ -158,7 +159,7 @@ expect(builtinPostprocessFamily.version === 1, 'builtin postprocess family versi
 expectUniqueIds(builtinPostprocessFamily.passes, 'builtin postprocess pass');
 expectSet(
   builtinPostprocessFamily.passes.map(pass => pass.operation),
-  [...stage8Contract.moduleFamily.operations, ...ambientOcclusionPostprocessExtension.moduleFamily.addedOperations],
+  [...stage8Contract.moduleFamily.operations, ...ambientOcclusionPostprocessExtension.moduleFamily.addedOperations, 'output'],
   'builtin postprocess operations',
 );
 expect(stage8Contract.phase === 8, 'stage8 phase must be 8');
@@ -170,6 +171,8 @@ expect(stage8Contract.inventory?.wgslSourceCount === 58, 'stage8 WGSL inventory 
 expect(stage8Contract.inventory?.generatedSourceCount === 13, 'stage8 generated WGSL inventory changed without contract review');
 expect(stage8Contract.publicApiChanges?.length === 0, 'stage8 must not expand public API');
 expect(ambientOcclusionPostprocessExtension.contractVersion === 1, 'AO postprocess extension contractVersion must be 1');
+expect(linearOutputExtension.contractVersion === 1 && linearOutputExtension.postprocessPassCount === 15, 'linear HDR output extension must review fifteen operations');
+expect(linearOutputExtension.output?.uniformBytes === 16 && linearOutputExtension.scene?.format === 'rgba16float', 'linear HDR output contract changed');
 expect(ambientOcclusionPostprocessExtension.status === 'implemented', 'AO postprocess extension must be implemented');
 expect(ambientOcclusionPostprocessExtension.basePhase === 8, 'AO postprocess extension must extend the stage8 family');
 expect(ambientOcclusionPostprocessExtension.moduleFamily?.operationCount === 14, 'current builtin postprocess family must contain fourteen operations');

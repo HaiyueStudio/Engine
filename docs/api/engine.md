@@ -53,6 +53,12 @@ console.log(snapshot.frame.cpuMs, snapshot.gpuResources.totals);
 
 `/extension-authoring` 只面向扩展实现作者。它提供 command context、device guard、资源估算/记账和共享 renderer resource 能力；普通游戏代码应继续使用 `/core`、`/ecs`、`/components` 等领域入口。
 
+## 3D 场景输出
+
+`scene.render3DSystem`（或 `/systems` 的 `Render3DSystem`）提供 `exposure: number` 和 `toneMapping: 'none' | 'reinhard'`；构造 options 也接受这两个字段。默认值分别为 1 和 'reinhard'。曝光必须是非负有限数，非法设置在输出配置时抛出 RangeError。设置只作用于显示目标，浮点目标保留曝光前 HDR。
+
+`/rtt` 的 `RttTextureOptions.format?: GPUTextureFormat` 默认为引擎输出格式；3D 场景采样的离屏纹理应设为 'rgba16float'。低层材质注册协议的 `MaterialRendererViewContext.colorFormat` 指定当前场景颜色附件格式；不要用 canvas 格式代替它。参见 [后处理指南](../engine-guide/post-processing.md)。
+
 ## `HaiyueEngineOptions.canvas`
 
 类型为 `HTMLCanvasElement | string`。字符串可以是裸元素 ID 或 CSS 选择器，且必须解析为 `<canvas>`；无效目标会在构造阶段抛出 `E_WEBGPU_CONTEXT_UNAVAILABLE`，错误路径为 `options.canvas`。

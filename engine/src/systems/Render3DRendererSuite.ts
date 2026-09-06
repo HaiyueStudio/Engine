@@ -1,4 +1,7 @@
 import type { IEngine } from '../core/IEngine';
+import { SCENE_COLOR_FORMAT } from '../postprocess/SceneColor';
+import { PbrMaterial } from '../material/PbrMaterial';
+import type { MaterialCoverageResolver } from '../renderer/AuxiliaryMaterial';
 import { DepthRenderer } from '../renderer/DepthRenderer';
 import { BlinnPhongRenderer } from '../renderer/BlinnPhongRenderer';
 import { Mesh3DRenderer } from '../renderer/Mesh3DRenderer';
@@ -48,6 +51,13 @@ export class Render3DRendererSuite {
   private _planarMirror: PlanarMirrorRenderer | null = null;
   private _pbr: PbrRenderer | null = null;
   private _shadow: ShadowMapRenderer | null = null;
+  private readonly _coverageMaterials = new Set<number>();
+
+  readonly resolveMaterialCoverage: MaterialCoverageResolver = material => {
+    if (!(material instanceof PbrMaterial) || material.alphaMode !== 'mask') return null;
+    this._coverageMaterials.add(material.id);
+    return this.requirePbr().prepareMaterialCoverage(material);
+  };
 
   constructor(private readonly engine: IEngine) {}
 
@@ -90,6 +100,7 @@ export class Render3DRendererSuite {
 
   requireBasic(): Mesh3DRenderer {
     if (!this._basic) this._basic = new Mesh3DRenderer();
+    this._basic.colorFormat = SCENE_COLOR_FORMAT;
     if (!this._basicPrepared) {
       this._basic.prepare(this.engine);
       this._basicPrepared = true;
@@ -100,6 +111,7 @@ export class Render3DRendererSuite {
   requirePbr(): PbrRenderer {
     if (!this._pbr) {
       this._pbr = new PbrRenderer();
+      this._pbr.colorFormat = SCENE_COLOR_FORMAT;
       this._pbr.prepare(this.engine);
     }
     return this._pbr;
@@ -108,6 +120,7 @@ export class Render3DRendererSuite {
   requireBlinnPhong(): BlinnPhongRenderer {
     if (!this._blinnPhong) {
       this._blinnPhong = new BlinnPhongRenderer();
+      this._blinnPhong.colorFormat = SCENE_COLOR_FORMAT;
       this._blinnPhong.prepare(this.engine);
     }
     return this._blinnPhong;
@@ -116,6 +129,7 @@ export class Render3DRendererSuite {
   requireShadow(): ShadowMapRenderer {
     if (!this._shadow) {
       this._shadow = new ShadowMapRenderer();
+      this._shadow.resolveMaterialCoverage = this.resolveMaterialCoverage;
       this._shadow.prepare(this.engine);
     }
     return this._shadow;
@@ -124,6 +138,7 @@ export class Render3DRendererSuite {
   requireDepth(): DepthRenderer {
     if (!this._depth) {
       this._depth = new DepthRenderer();
+      this._depth.colorFormat = SCENE_COLOR_FORMAT;
       this._depth.prepare(this.engine);
     }
     return this._depth;
@@ -132,6 +147,7 @@ export class Render3DRendererSuite {
   requireNormal(): NormalRenderer {
     if (!this._normal) {
       this._normal = new NormalRenderer();
+      this._normal.colorFormat = SCENE_COLOR_FORMAT;
       this._normal.prepare(this.engine);
     }
     return this._normal;
@@ -140,6 +156,7 @@ export class Render3DRendererSuite {
   requireVolume(): VolumeRenderer {
     if (!this._volume) {
       this._volume = new VolumeRenderer();
+      this._volume.colorFormat = SCENE_COLOR_FORMAT;
       this._volume.prepare(this.engine);
     }
     return this._volume;
@@ -147,6 +164,7 @@ export class Render3DRendererSuite {
 
   requirePlanarMirror(): PlanarMirrorRenderer {
     if (!this._planarMirror) this._planarMirror = new PlanarMirrorRenderer();
+    this._planarMirror.colorFormat = SCENE_COLOR_FORMAT;
     this._planarMirror.prepare(this.engine);
     return this._planarMirror;
   }
@@ -202,7 +220,10 @@ export class Render3DRendererSuite {
     releaseRendererCaches(this._depth, live.depthEntities, live.depthGeometries, live.depthMaterials);
     releaseRendererCaches(this._normal, live.normalEntities, live.normalGeometries, live.normalMaterials);
     releaseRendererCaches(this._volume, live.volumeEntities, live.volumeGeometries, live.volumeMaterials);
-    releaseRendererCaches(this._pbr, live.pbrEntities, live.pbrGeometries, live.pbrMaterials);
+    releaseRendererCaches(this._pbr, live.pbrEntities, live.pbrGeometries, {
+      has: id => live.pbrMaterials.has(id) || this._coverageMaterials.has(id),
+    });
+    this._coverageMaterials.clear();
   }
 
   suspendForDeviceLoss(): void {

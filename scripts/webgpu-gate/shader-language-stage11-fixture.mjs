@@ -110,8 +110,8 @@ async function runFixture() {
     ambient: [0.03, 0.03, 0.03, 1],
     lightIntensity: 0.72,
   });
-  assertPixel(litPixel, [186, 0, 0, 255], 1, 'Blinn tone-mapped ambient lighting');
-  assertPixel(lowAmbientPixel, [44, 44, 44, 255], 1, 'Blinn low-intensity ambient display encoding');
+  assertPixel(litPixel, [255, 0, 0, 255], 1, 'Blinn linear ambient lighting');
+  assertPixel(lowAmbientPixel, [6, 6, 6, 255], 1, 'Blinn low-intensity linear ambient lighting');
   assertPixel(fogPixel, [0, 0, 255, 255], 1, 'post-lighting fog');
 
   const validationError = await device.popErrorScope();

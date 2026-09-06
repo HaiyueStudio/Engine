@@ -16,6 +16,8 @@ struct DepthParams {
 @group(2) @binding(0) var<uniform> params : DepthParams;
 
 struct VertexOutput {
+  @location(3) uv0 : vec2<f32>,
+  @location(4) uv1 : vec2<f32>,
   @builtin(position) clipPos : vec4<f32>,
   @location(0) viewDepth : f32,
   @location(1) worldPos : vec3<f32>,
@@ -28,6 +30,8 @@ struct VertexInput {
   @location(2) morphPosition1 : vec3<f32>,
   @location(3) morphPosition2 : vec3<f32>,
   @location(4) morphPosition3 : vec3<f32>,
+  @location(5) uv0 : vec2<f32>,
+  @location(6) uv1 : vec2<f32>,
   @builtin(vertex_index) vertexIndex : u32,
   @builtin(instance_index) instanceIndex : u32,
 }
@@ -56,12 +60,15 @@ fn vs_main(input: VertexInput) -> VertexOutput {
   out.viewDepth = -viewPosition.z;
   out.worldPos = worldPosition.xyz;
   out.objectIndex = input.instanceIndex;
+  out.uv0 = input.uv0;
+  out.uv1 = input.uv1;
   return out;
 }
 
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
   let object = objects[in.objectIndex];
+  if (!hy_has_material_coverage(in.uv0, in.uv1)) { discard; }
   if (hy_is_clipped(in.worldPos, in.objectIndex)) { discard; }
   let linearDepth = clamp((in.viewDepth - params.near) / (params.far - params.near), 0.0, 1.0);
   return vec4<f32>(linearDepth, linearDepth, linearDepth, 1.0);

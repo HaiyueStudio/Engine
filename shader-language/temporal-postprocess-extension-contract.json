@@ -1,0 +1,36 @@
+{
+  "contractVersion": 1,
+  "implementation": "motion-reprojected-temporal-resolve",
+  "adr": "docs/for-ai/adr/0095-motion-reprojected-temporal-antialiasing.md",
+  "motion": {
+    "abiVersion": 2,
+    "format": "rgba16float",
+    "xy": "unjittered-current-minus-previous-uv",
+    "z": "previous-normalized-linear-depth",
+    "w": {
+      "valid": 1,
+      "reset": -1,
+      "uncovered": 0
+    },
+    "objectUniformBytes": 272,
+    "staticPassCount": 9
+  },
+  "taa": {
+    "uniformBytes": 176,
+    "historyColorFormat": "rgba16float",
+    "historyDepthFormat": "r32float",
+    "historyBufferCount": 2,
+    "colorAttachmentCount": 3,
+    "historyBytesPerPixel": 24,
+    "historyCoordinates": "stable-output-grid",
+    "depthValidation": "per-bilinear-tap",
+    "depthAndMotionSelection": "closest-surface-in-3x3",
+    "neighborhoodClipping": "ycocg-variance-and-aabb",
+    "resetScope": "view-or-all",
+    "resourceRetirement": "after-submit-and-queue-completion"
+  },
+  "artifact": {
+    "postprocessHash": "ff225405fa05aca40c8818b2186927b25d123dae2183d256be27562d48262364",
+    "deformationHash": "d0306de1dbddc9e044d28a32f06b3c9397e6ed10f8726820386d073050a5f1be"
+  }
+}

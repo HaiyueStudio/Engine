@@ -5,6 +5,7 @@ import type { PostProcessSceneTextures } from './PostProcessPass';
 import { requiredItemAt } from '../math/arrayAccess';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import { getBuiltinPostprocessShader } from './BuiltinPostprocessShader';
+import { setPostProcessSubmission } from './PostProcessSubmission';
 
 interface PostProcessSurfaceResources {
   readonly buf0: GPUTexture;
@@ -48,6 +49,7 @@ export class PostProcessRenderer {
   private readonly _sceneAttachments = new Map<string, PostProcessSceneAttachments>();
   private _frameId = 0;
   private _retirementScheduledFrame = -1;
+  private _afterSubmit: ((callback: (queue: GPUQueue) => void) => void) | undefined;
   private _width = 0;
   private _height = 0;
   private _format!: GPUTextureFormat;
@@ -66,6 +68,7 @@ export class PostProcessRenderer {
 
   /** Registers the submission boundary used to retire view sizes not used by this frame. */
   beginFrame(frameId: number, afterSubmit?: (callback: (queue: GPUQueue) => void) => void): void {
+    this._afterSubmit = afterSubmit;
     this._frameId = frameId;
     const activeSurface = this._surfaceResources.get(this._surfaceKey);
     if (activeSurface) activeSurface.lastSeenFrame = frameId;
@@ -118,7 +121,7 @@ export class PostProcessRenderer {
     outputView: GPUTextureView,
     sceneTextures: PostProcessSceneTextures = {},
   ): void {
-    this._reconcilePreparedPasses(passes);
+    this._reconcilePreparedPasses(passes, this._afterSubmit);
     const N = passes.length;
     if (N === 0) {
       if ('beginRenderPass' in encoder) this._present(encoder, outputView);
@@ -146,8 +149,13 @@ export class PostProcessRenderer {
         this._preparedPasses.add(pass);
       }
 
-      pass.setSceneTextures(sceneTextures);
-      pass.apply(encoder, src, dstView, device);
+      setPostProcessSubmission(pass, this._afterSubmit);
+      try {
+        pass.setSceneTextures(sceneTextures);
+        pass.apply(encoder, src, dstView, device);
+      } finally {
+        setPostProcessSubmission(pass);
+      }
     }
   }
 
@@ -230,11 +238,12 @@ export class PostProcessRenderer {
     this._surfaceKey = '';
   }
 
-  private _reconcilePreparedPasses(passes: readonly PostProcessPass[]): void {
+  private _reconcilePreparedPasses(passes: readonly PostProcessPass[], afterSubmit?: (callback: (queue: GPUQueue) => void) => void): void {
     const activePasses = new Set(passes);
     for (const pass of this._preparedPasses) {
       if (activePasses.has(pass)) continue;
-      pass.destroy();
+      setPostProcessSubmission(pass, afterSubmit);
+      try { pass.destroy(); } finally { setPostProcessSubmission(pass); }
       this._preparedPasses.delete(pass);
     }
   }

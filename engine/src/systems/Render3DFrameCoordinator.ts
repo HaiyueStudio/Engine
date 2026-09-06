@@ -49,6 +49,7 @@ export interface Render3DFrameStageActions {
   sortTransparentOnGpu(): void;
   preparePbrLighting(): void;
   renderScene(): void;
+  renderAuxiliary(): void;
   renderPostScene(): void;
   renderDirectionalShadow(): void;
 }
@@ -62,7 +63,7 @@ const EMPTY_POST_PROCESS_PASSES: PostProcessPass[] = [];
  */
 export class Render3DFrameCoordinator {
   readonly viewPlan = new Render3DFramePlan();
-  readonly sceneGlobalPlan = new Render3DFramePlan();
+  readonly sceneGlobalPlan = new Render3DFramePlan('scene-global');
   private readonly viewStatePool: Render3DViewExecutionState[] = [];
   private viewStateDepth = 0;
   readonly sceneGlobalState: Render3DSceneGlobalExecutionState = {
@@ -110,12 +111,14 @@ export class Render3DFrameCoordinator {
   }
 
   executeSceneGlobal(hasDirectionalShadowPass: boolean): void {
-    this.sceneGlobalPlan.clear();
+    this.sceneGlobalPlan.clear().importResources('world-frame', 'shadow-view');
     if (hasDirectionalShadowPass) {
+      this.sceneGlobalPlan.exportResources('directional-shadow');
       this.sceneGlobalPlan.add(
         'render-directional-shadow',
         'render',
         this._actions.renderDirectionalShadow,
+        { reads: ['world-frame', 'shadow-view'], writes: ['directional-shadow'] },
       );
     }
     this.sceneGlobalPlan.execute();
@@ -169,24 +172,57 @@ export class Render3DFrameCoordinator {
     collectPass.lastSeenFrame = liveFrame;
     try {
       this.viewPlan.clear()
-        .add(collectPass.name, 'prepare', this._actions.collectView)
-        .add('sort-render-items', 'prepare', this._actions.sortRenderItems)
+        .importResources('world-frame', 'camera-frame', 'scene-environment', 'directional-shadow', 'view-output:previous')
+        .exportResources('view-output:next')
+        .add(collectPass.name, 'prepare', this._actions.collectView, {
+          reads: ['world-frame', 'camera-frame'], writes: ['visible-items'],
+        })
+        .add('sort-render-items', 'prepare', this._actions.sortRenderItems, {
+          reads: ['visible-items'], writes: ['sorted-items'],
+        })
         .add(
           'prepare-gpu-driven-batches',
           'compute',
           this._actions.prepareGpuDrivenBatches,
+          { reads: ['sorted-items'], writes: ['draw-commands'] },
         )
         .add(
           'sort-transparent-on-gpu',
           'compute',
           this._actions.sortTransparentOnGpu,
+          { reads: ['sorted-items', 'draw-commands'], writes: ['transparent-order'] },
         )
-        .add('prepare-pbr-lighting', 'prepare', this._actions.preparePbrLighting)
-        .add('render-scene-pass', 'render', this._actions.renderScene)
-        .add(
+        .add('prepare-pbr-lighting', 'prepare', this._actions.preparePbrLighting, {
+          reads: ['sorted-items', 'camera-frame', 'scene-environment', 'directional-shadow'], writes: ['pbr-lighting'],
+        })
+        .add('render-scene-pass', 'render', this._actions.renderScene, {
+          reads: ['sorted-items', 'draw-commands', 'transparent-order', 'pbr-lighting', 'camera-frame'],
+          writes: ['scene-linear-color', 'scene-depth', 'prepared-materials'],
+        });
+      const auxiliary: string[] = [];
+      if (postSceneRequirements.needsDepth) auxiliary.push('linear-depth');
+      if (postSceneRequirements.needsNormal) auxiliary.push('view-normal');
+      if (postSceneRequirements.needsMotion) auxiliary.push('motion');
+      if (postSceneRequirements.needsOutlineMask) auxiliary.push('outline-mask', 'outline-visible-mask');
+      if (postSceneRequirements.needsMotion) {
+        this.viewPlan.importResources('motion-history:previous', 'postprocess-history:previous');
+        this.viewPlan.exportResources('motion-history:next', 'postprocess-history:next');
+      }
+      if (auxiliary.length) this.viewPlan.add('render-auxiliary-buffers', 'render', this._actions.renderAuxiliary, {
+        reads: ['sorted-items', 'camera-frame', 'prepared-materials',
+          ...(postSceneRequirements.needsOutlineMask ? ['scene-depth'] : []),
+          ...(postSceneRequirements.needsMotion ? ['motion-history:previous'] : [])],
+        writes: [...auxiliary, 'auxiliary-depth-scratch', ...(postSceneRequirements.needsMotion ? ['motion-history:next'] : [])],
+      });
+      this.viewPlan.add(
           'render-post-scene-passes',
           'postprocess',
           this._actions.renderPostScene,
+          {
+            reads: ['scene-linear-color', 'view-output:previous', ...auxiliary,
+              ...(postSceneRequirements.needsMotion ? ['postprocess-history:previous'] : [])],
+            writes: ['view-output:next', ...(postSceneRequirements.needsMotion ? ['postprocess-history:next'] : [])],
+          },
         )
         .execute();
     } finally {

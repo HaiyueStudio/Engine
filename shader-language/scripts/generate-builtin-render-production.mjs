@@ -30,9 +30,14 @@ const families = Object.freeze([
   }),
 ]);
 
-export async function generateBuiltinRenderProduction({ write = false } = {}) {
+export async function generateBuiltinRenderProduction({ write = false, onlyFamily = null } = {}) {
+  if (onlyFamily !== null && !families.some(family => family.id === onlyFamily)) {
+    throw new Error(`Unknown builtin render family: ${onlyFamily}`);
+  }
   const summaries = [];
-  for (const family of families) summaries.push(await generateFamily(family, write));
+  for (const family of families) {
+    if (onlyFamily === null || family.id === onlyFamily) summaries.push(await generateFamily(family, write));
+  }
   return Object.freeze({
     id: 'builtin-render',
     artifactVersion: 2,
@@ -130,6 +135,7 @@ function sha256(value) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const write = process.argv.includes('--write');
-  const result = await generateBuiltinRenderProduction({ write });
+  const onlyFamily = process.argv.find(arg => arg.startsWith('--family='))?.slice('--family='.length) ?? null;
+  const result = await generateBuiltinRenderProduction({ write, onlyFamily });
   console.log(formatBuiltinRenderGenerationResult(result, write));
 }

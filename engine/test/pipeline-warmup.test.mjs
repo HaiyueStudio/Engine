@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createAuditGpuDevice } from '../../scripts/benchmark/real-renderer-audit-device.mjs';
 import {
   BaseRenderer,
   EngineErrorCode,
@@ -181,7 +182,6 @@ test('warmup deduplication does not merge caches owned by separate renderer inst
 });
 
 test('OutlineMaskRenderer warmup captures immutable MSAA and reverse-Z variants', async () => {
-  ensureOutlineGpuGlobals();
   const descriptors = [];
   const device = createOutlineWarmupDevice(descriptors);
   const engine = {
@@ -320,30 +320,12 @@ test('pipeline warmup falls back to synchronous creation when async WebGPU is un
   );
 });
 
-function ensureOutlineGpuGlobals() {
-  globalThis.GPUShaderStage ??= { VERTEX: 1, FRAGMENT: 2 };
-  globalThis.GPUBufferUsage ??= { UNIFORM: 1, COPY_DST: 2 };
-}
-
 function createOutlineWarmupDevice(descriptors) {
-  return {
-    limits: {
-      minUniformBufferOffsetAlignment: 256,
-      maxBufferSize: 1 << 28,
-      maxUniformBufferBindingSize: 1 << 20,
-    },
-    queue: { writeBuffer() {} },
-    createBindGroupLayout: descriptor => ({ descriptor }),
-    createBindGroup: descriptor => ({ descriptor }),
-    createBuffer: descriptor => ({ ...descriptor, destroy() {} }),
-    createPipelineLayout: descriptor => ({ descriptor }),
-    createShaderModule: descriptor => ({
-      descriptor,
-      async getCompilationInfo() { return { messages: [] }; },
-    }),
-    async createRenderPipelineAsync(descriptor) {
-      descriptors.push(descriptor);
-      return { descriptor };
-    },
+  const device = createAuditGpuDevice();
+  const createPipeline = device.createRenderPipelineAsync.bind(device);
+  device.createRenderPipelineAsync = descriptor => {
+    descriptors.push(descriptor);
+    return createPipeline(descriptor);
   };
+  return device;
 }

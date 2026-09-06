@@ -2,6 +2,7 @@ import type { PrecompiledShaderArtifactV2 } from '../adapter/precompiled-v2';
 
 export const BUILTIN_POSTPROCESS_OPERATIONS = [
   'present',
+  'output',
   'grayscale',
   'sobel',
   'fxaa',

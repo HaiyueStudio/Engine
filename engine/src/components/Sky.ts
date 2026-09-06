@@ -13,7 +13,7 @@ export interface SkyOptions {
   mieDirectionalG?: number;
   /** World-space sun direction or position. The renderer normalizes it. */
   sunPosition?: [number, number, number];
-  /** Simple exposure multiplier before tone mapping. */
+  /** Sky radiance multiplier, before the shared scene output exposure. */
   exposure?: number;
 }
 

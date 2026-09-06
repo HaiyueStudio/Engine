@@ -278,6 +278,6 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
   let maxLightChannel = max(max(lightColor.r, lightColor.g), lightColor.b);
   let lightTint = select(vec3<f32>(1.0), lightColor / maxLightChannel, maxLightChannel > 0.0001);
   let color = material.baseColor.rgb * band.rgb * lightTint;
-  let alpha = material.baseColor.a * band.a;
+  let alpha = select(material.baseColor.a * band.a, 1.0, material.params.w > 0.5);
   return vec4<f32>(applyFog(color, sceneFrame.fog, sceneFrame.eyePosition.xyz, in.worldPos), alpha);
 }

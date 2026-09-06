@@ -28,6 +28,7 @@
         "engine/src/shaders/generated/postprocess-outline-blur.generated.wgsl",
         "engine/src/shaders/generated/postprocess-outline-edge.generated.wgsl",
         "engine/src/shaders/generated/postprocess-outline-overlay.generated.wgsl",
+        "engine/src/shaders/generated/postprocess-output.generated.wgsl",
         "engine/src/shaders/generated/postprocess-present.generated.wgsl",
         "engine/src/shaders/generated/postprocess-sao.generated.wgsl",
         "engine/src/shaders/generated/postprocess-sobel.generated.wgsl",

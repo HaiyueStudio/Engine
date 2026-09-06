@@ -5,6 +5,7 @@ import type { RenderSampleCount } from '../core/RenderView';
 import { RttEngine } from './RttEngine';
 
 export interface TransientRenderTargetDescriptor {
+  readonly format?: GPUTextureFormat;
   readonly width: number;
   readonly height: number;
   readonly sampleCount: RenderSampleCount;
@@ -179,6 +180,7 @@ export class TransientRenderTargetPool {
         undefined,
         `TransientRTT:${id}`,
         scope?.owner ?? null,
+        descriptor.format,
       );
       target.msaaSamples = descriptor.sampleCount;
       target.reverseZ = descriptor.reverseZ;
@@ -219,7 +221,7 @@ function compareRequests<T>(a: TransientRenderTargetRequest<T>, b: TransientRend
 }
 
 function descriptorKey(descriptor: TransientRenderTargetDescriptor): string {
-  return `${descriptor.width}x${descriptor.height}:${descriptor.sampleCount}:${descriptor.reverseZ ? 1 : 0}`;
+  return `${descriptor.width}x${descriptor.height}:${descriptor.sampleCount}:${descriptor.reverseZ ? 1 : 0}:${descriptor.format ?? 'default'}`;
 }
 
 export function estimateTransientRenderTargetBytes(
@@ -227,10 +229,10 @@ export function estimateTransientRenderTargetBytes(
   descriptor: TransientRenderTargetDescriptor,
 ): number {
   const size: GPUExtent3DStrict = [descriptor.width, descriptor.height];
-  const color = estimateTextureBytes(size, engine.format, 1);
+  const color = estimateTextureBytes(size, descriptor.format ?? engine.format, 1);
   const depth = estimateTextureBytes(size, engine.getDepthFormat(descriptor.reverseZ), descriptor.sampleCount);
   const msaa = descriptor.sampleCount > 1
-    ? estimateTextureBytes(size, engine.format, descriptor.sampleCount)
+    ? estimateTextureBytes(size, descriptor.format ?? engine.format, descriptor.sampleCount)
     : 0;
   return color + depth + msaa;
 }

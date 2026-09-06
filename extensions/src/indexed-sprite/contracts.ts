@@ -1,6 +1,6 @@
 export type IndexedSpritePlaneFormat = 'indexed8' | 'rgb8' | 'rgba8';
 export type IndexedSpriteSampling = 'nearest' | 'linear';
-export type IndexedSpriteBlend = 'alpha' | 'additive' | 'opaque';
+export type IndexedSpriteBlend = 'alpha' | 'additive' | 'subtractive' | 'opaque';
 
 export interface IndexedSpritePlaneDescriptor {
   readonly id: string;

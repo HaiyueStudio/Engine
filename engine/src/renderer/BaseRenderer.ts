@@ -1,4 +1,5 @@
 import type { IEngine } from '../core/IEngine';
+import { IndirectBatchBundleCache } from './IndirectBatchBundleCache';
 import { releaseMapEntriesNotIn } from './utils';
 import type { LiveIdSet } from './utils';
 import { RendererPipelineLayoutCache, RendererResourceCache } from './RendererResourceCache';
@@ -21,6 +22,15 @@ export interface PipelineCacheDiagnosticsSnapshot {
 }
 
 export abstract class BaseRenderer {
+  protected readonly indirectBatches = new IndirectBatchBundleCache();
+  private _colorFormat: GPUTextureFormat | null = null;
+  /** Render attachment format. Render3D supplies rgba16float; standalone renderers default to engine.format. */
+  get colorFormat(): GPUTextureFormat | null { return this._colorFormat; }
+  set colorFormat(value: GPUTextureFormat | null) {
+    if (this._colorFormat === value) return;
+    this._colorFormat = value;
+    this.clearPipelineCache();
+  }
   protected maxPipelineCacheEntries = 128;
   protected readonly pipelineCache = new Map<string | number, GPURenderPipeline>();
   private readonly _computePipelineKeys = new Set<string | number>();
@@ -68,6 +78,7 @@ export abstract class BaseRenderer {
   }
 
   protected clearPipelineCache(): void {
+    this.indirectBatches.clear();
     this.pipelineCache.clear();
     this._computePipelineKeys.clear();
   }

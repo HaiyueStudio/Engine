@@ -68,15 +68,128 @@ fn hy_is_clipped(p : vec3<f32>, o : u32) -> bool {
 }
 
 
+fn applyMorphPosition(
+  position : vec3<f32>,
+  morphPosition0 : vec3<f32>,
+  morphPosition1 : vec3<f32>,
+  morphPosition2 : vec3<f32>,
+  morphPosition3 : vec3<f32>,
+  weights : vec4<f32>,
+) -> vec3<f32> {
+  return position +
+    morphPosition0 * weights.x +
+    morphPosition1 * weights.y +
+    morphPosition2 * weights.z +
+    morphPosition3 * weights.w;
+}
+
+fn applyMorphNormal(
+  normal : vec3<f32>,
+  morphNormal0 : vec3<f32>,
+  morphNormal1 : vec3<f32>,
+  morphNormal2 : vec3<f32>,
+  morphNormal3 : vec3<f32>,
+  weights : vec4<f32>,
+) -> vec3<f32> {
+  return normal +
+    morphNormal0 * weights.x +
+    morphNormal1 * weights.y +
+    morphNormal2 * weights.z +
+    morphNormal3 * weights.w;
+}
+
+
+@group(3) @binding(0) var<storage, read> skin : SkinUniforms;
+@group(3) @binding(1) var<storage, read> skinJoints : SkinAttributes;
+@group(3) @binding(2) var<storage, read> skinWeights : SkinAttributes;
+
+
+struct SkinUniforms {
+  jointMatrices : array<mat4x4<f32>>,
+}
+
+struct SkinAttributes {
+  values : array<vec4<f32>>,
+}
+
+fn skinPosition(position: vec3<f32>, joints: vec4<f32>, weights: vec4<f32>) -> vec4<f32> {
+  if (dot(weights, vec4<f32>(1.0)) <= 0.0) {
+    return vec4<f32>(position, 1.0);
+  }
+  let j0 = u32(joints.x);
+  let j1 = u32(joints.y);
+  let j2 = u32(joints.z);
+  let j3 = u32(joints.w);
+  let p = vec4<f32>(position, 1.0);
+  return (skin.jointMatrices[j0] * p) * weights.x +
+    (skin.jointMatrices[j1] * p) * weights.y +
+    (skin.jointMatrices[j2] * p) * weights.z +
+    (skin.jointMatrices[j3] * p) * weights.w;
+}
+
+fn skinNormal(normal: vec3<f32>, joints: vec4<f32>, weights: vec4<f32>) -> vec3<f32> {
+  if (dot(weights, vec4<f32>(1.0)) <= 0.0) {
+    return normal;
+  }
+  let j0 = u32(joints.x);
+  let j1 = u32(joints.y);
+  let j2 = u32(joints.z);
+  let j3 = u32(joints.w);
+  let n = vec4<f32>(normal, 0.0);
+  return (skin.jointMatrices[j0] * n).xyz * weights.x +
+    (skin.jointMatrices[j1] * n).xyz * weights.y +
+    (skin.jointMatrices[j2] * n).xyz * weights.z +
+    (skin.jointMatrices[j3] * n).xyz * weights.w;
+}
+
+fn safeNormalize(value: vec3<f32>) -> vec3<f32> {
+  let len2 = dot(value, value);
+  if (len2 <= 0.00000001) {
+    return value;
+  }
+  return value * inverseSqrt(len2);
+}
+
+
+// Prefix of the forward PBR material ABI. Borrowing the same buffer and texture
+// keeps readiness, factor alpha, cutoff, UV selection and transforms identical.
+struct CoverageMaterial {
+  baseColor : vec4<f32>,
+  emissiveAndNormalScale : vec4<f32>,
+  surfaceAndCutoff : vec4<f32>,
+  flags : vec4<u32>,
+  extensions : array<vec4<f32>, 6>,
+  baseMapping0 : vec4<f32>,
+  baseMapping1 : vec4<f32>,
+}
+@group(2) @binding(1) var<uniform> coverage : CoverageMaterial;
+@group(2) @binding(2) var coverageTexture : texture_2d<f32>;
+@group(2) @binding(3) var coverageSampler : sampler;
+
+fn hy_has_material_coverage(uv0: vec2<f32>, uv1: vec2<f32>) -> bool {
+  if (coverage.flags.w != 1u) { return true; }
+  var alpha = coverage.baseColor.a;
+  if (coverage.flags.x != 0u) {
+    let uv = select(uv0, uv1, coverage.baseMapping0.w > 0.5);
+    let mapped = vec2<f32>(dot(coverage.baseMapping0.xy, uv) + coverage.baseMapping0.z,
+      dot(coverage.baseMapping1.xy, uv) + coverage.baseMapping1.z);
+    alpha *= textureSample(coverageTexture, coverageSampler, mapped).a;
+  }
+  return alpha >= coverage.surfaceAndCutoff.w;
+}
+
+
 struct ObjectUniforms {
   model        : mat4x4<f32>,
   normalMatrix : mat4x4<f32>,
+  morphWeights : vec4<f32>,
+  deformationFlags : vec4<f32>,
 }
 
 struct NormalParams {
   space : u32,
-  _pad0 : u32,
-  _pad1 : u32,
+  near : f32,
+  far : f32,
   _pad2 : u32,
 }
 
@@ -87,6 +200,17 @@ struct NormalParams {
 struct VertexInput {
   @location(0) position : vec3<f32>,
   @location(1) normal   : vec3<f32>,
+  @location(2) morphPosition0 : vec3<f32>,
+  @location(3) morphNormal0 : vec3<f32>,
+  @location(4) morphPosition1 : vec3<f32>,
+  @location(5) morphNormal1 : vec3<f32>,
+  @location(6) morphPosition2 : vec3<f32>,
+  @location(7) morphNormal2 : vec3<f32>,
+  @location(8) morphPosition3 : vec3<f32>,
+  @location(9) morphNormal3 : vec3<f32>,
+  @location(10) uv0 : vec2<f32>,
+  @location(11) uv1 : vec2<f32>,
+  @builtin(vertex_index) vertexIndex : u32,
   @builtin(instance_index) instanceIndex : u32,
 }
 
@@ -95,27 +219,43 @@ struct VertexOutput {
   @location(0) normal        : vec3<f32>,
   @location(1) worldPos      : vec3<f32>,
   @location(2) @interpolate(flat) objectIndex : u32,
+  @location(3) uv0 : vec2<f32>,
+  @location(4) uv1 : vec2<f32>,
+  @location(5) viewDepth : f32,
 }
 
 @vertex
 fn vs_main(input: VertexInput) -> VertexOutput {
   var out: VertexOutput;
   let object = objects[input.instanceIndex];
-  let worldPosition = object.model * vec4<f32>(input.position, 1.0);
+  var position = vec4<f32>(applyMorphPosition(input.position, input.morphPosition0, input.morphPosition1,
+    input.morphPosition2, input.morphPosition3, object.morphWeights), 1.0);
+  var localNormal = applyMorphNormal(input.normal, input.morphNormal0, input.morphNormal1,
+    input.morphNormal2, input.morphNormal3, object.morphWeights);
+  if (object.deformationFlags.y > 0.5) {
+    let joints = skinJoints.values[input.vertexIndex];
+    let weights = skinWeights.values[input.vertexIndex];
+    position = skinPosition(position.xyz, joints, weights);
+    localNormal = safeNormalize(skinNormal(localNormal, joints, weights));
+  }
+  let worldPosition = object.model * position;
   out.clipPos = sceneFrame.viewProjection * worldPosition;
   out.worldPos = worldPosition.xyz;
   out.objectIndex = input.instanceIndex;
+  out.uv0 = input.uv0;
+  out.uv1 = input.uv1;
+  out.viewDepth = -(sceneFrame.view * worldPosition).z;
 
-  var n = input.normal;
+  var n = localNormal;
   if (params.space == 0u) {
-    n = normalize(input.normal);
+    n = normalize(localNormal);
   } else if (params.space == 1u) {
-    n = normalize((object.normalMatrix * vec4<f32>(input.normal, 0.0)).xyz);
+    n = normalize((object.normalMatrix * vec4<f32>(localNormal, 0.0)).xyz);
   } else {
     // A mat4 inverse-transpose can carry translation in its bottom row. Drop
     // that homogeneous component before the camera transform so translation
     // can never leak into a direction vector.
-    let worldNormal = normalize((object.normalMatrix * vec4<f32>(input.normal, 0.0)).xyz);
+    let worldNormal = normalize((object.normalMatrix * vec4<f32>(localNormal, 0.0)).xyz);
     n = normalize((sceneFrame.view * vec4<f32>(worldNormal, 0.0)).xyz);
   }
 
@@ -123,10 +263,19 @@ fn vs_main(input: VertexInput) -> VertexOutput {
   return out;
 }
 
+struct AuxiliaryOutput {
+  @location(0) normal : vec4<f32>,
+  @location(1) depth : f32,
+}
+
 @fragment
-fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
+fn fs_main(input: VertexOutput) -> AuxiliaryOutput {
   let object = objects[input.objectIndex];
+  if (!hy_has_material_coverage(input.uv0, input.uv1)) { discard; }
   if (hy_is_clipped(input.worldPos, input.objectIndex)) { discard; }
   let n = normalize(input.normal);
-  return vec4<f32>(n * 0.5 + vec3<f32>(0.5, 0.5, 0.5), 1.0);
+  var out : AuxiliaryOutput;
+  out.normal = vec4<f32>(n * 0.5 + vec3<f32>(0.5, 0.5, 0.5), 1.0);
+  out.depth = clamp((input.viewDepth - params.near) / (params.far - params.near), 0.0, 1.0);
+  return out;
 }

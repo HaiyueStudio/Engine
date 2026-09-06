@@ -118,7 +118,7 @@ async function runFixture() {
         fragment: {
           module: runtime.module,
           entryPoint: runtime.pass.entryPoints.fragment,
-          targets: runtime.pass.renderTargets.map(() => ({ format: 'rgba8unorm' })),
+          targets: runtime.pass.renderTargets.map(target => ({ format: target.formatClass === 'optional-linear-depth-r32float' ? 'r32float' : 'rgba8unorm' })),
         },
         primitive: { topology: 'triangle-list' },
       });

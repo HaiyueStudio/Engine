@@ -1,3 +1,4 @@
+import { createAuditGpuDevice, ensureRealRendererGpuConstants } from '../../scripts/benchmark/real-renderer-audit-device.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BvhLod3D } from '../dist/components.js';
@@ -34,19 +35,7 @@ class TestMaterial extends Material {
   type = 'render3d-test';
 }
 
-function ensureGpuConstants() {
-  globalThis.GPUBufferUsage ??= {
-    STORAGE: 1 << 0,
-    COPY_DST: 1 << 1,
-    COPY_SRC: 1 << 2,
-    INDIRECT: 1 << 3,
-    MAP_READ: 1 << 4,
-    UNIFORM: 1 << 5,
-  };
-  globalThis.GPUShaderStage ??= {
-    COMPUTE: 1 << 0,
-  };
-}
+function ensureGpuConstants() { ensureRealRendererGpuConstants(); }
 
 function createGpuBatchMockEngine(log = []) {
   ensureGpuConstants();
@@ -56,6 +45,7 @@ function createGpuBatchMockEngine(log = []) {
     },
   };
   const device = {
+    ...createAuditGpuDevice(),
     queue,
     features: new Set(['indirect-first-instance']),
     createBuffer(descriptor) {
@@ -92,6 +82,7 @@ function createGpuBatchMockEngine(log = []) {
   };
   return {
     device,
+    format: 'bgra8unorm',
     width: 640,
     height: 360,
     displayWidth: 640,
@@ -204,8 +195,7 @@ test('Render3DSystem uploads visible meshes into GpuDrivenBatchBuffer on the mai
   const passEncoder = {};
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder,
+    encoder: engine.device.createCommandEncoder(),
   });
 
   assert.deepEqual(draws, [entity.id]);
@@ -352,8 +342,8 @@ test('one Render3DSystem extracts once and selects LOD independently for each Re
   const extractionsBefore = render3D.sceneExtractionCount;
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
     frameData: world.frameData,
     viewFamily: family.snapshot(),
   });
@@ -388,8 +378,8 @@ test('one Render3DSystem extracts once and selects LOD independently for each Re
     world.frameData.begin(world, null, frame, 16);
     render3D.record(world, {
       device: engine.device,
-      encoder: {},
-      passEncoder: {},
+      encoder: engine.device.createCommandEncoder(),
+
       frameData: world.frameData,
       viewFamily: family.snapshot(),
     });
@@ -408,8 +398,8 @@ test('one Render3DSystem extracts once and selects LOD independently for each Re
   world.frameData.begin(world, null, 4, 16);
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
     frameData: world.frameData,
     viewFamily: family.snapshot(),
   });
@@ -497,8 +487,8 @@ test('Render3DSystem collects off-camera opaque casters independently from camer
 
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
   });
 
   assert.equal(render3D.renderSettings.frustumCulling, true);
@@ -511,33 +501,33 @@ test('Render3DSystem collects off-camera opaque casters independently from camer
   assert.equal(render3D.lastDirectionalShadowPassCount, 1);
 
   world.frameData.begin(world, engine, 1, 16);
-  render3D.record(world, { device: engine.device, encoder: {}, passEncoder: {} });
+  render3D.record(world, { device: engine.device, encoder: engine.device.createCommandEncoder() });
   assert.equal(shadowRenderCount, 1);
   assert.equal(render3D.lastDirectionalShadowCacheHit, true);
 
   caster.getComponent(CartesianTransform3D).setPosition(99, 0, 0);
   world.frameData.begin(world, engine, 2, 16);
-  render3D.record(world, { device: engine.device, encoder: {}, passEncoder: {} });
+  render3D.record(world, { device: engine.device, encoder: engine.device.createCommandEncoder() });
   assert.equal(shadowRenderCount, 2, 'caster transform revision invalidates the shadow cache');
 
   geometry.markDirty();
   world.frameData.begin(world, engine, 3, 16);
-  render3D.record(world, { device: engine.device, encoder: {}, passEncoder: {} });
+  render3D.record(world, { device: engine.device, encoder: engine.device.createCommandEncoder() });
   assert.equal(shadowRenderCount, 3, 'caster geometry/bounds revision invalidates the shadow cache');
 
   geometry.setMorphWeights([]);
   world.frameData.begin(world, engine, 4, 16);
-  render3D.record(world, { device: engine.device, encoder: {}, passEncoder: {} });
+  render3D.record(world, { device: engine.device, encoder: engine.device.createCommandEncoder() });
   assert.equal(shadowRenderCount, 4, 'caster deformation revision invalidates the shadow cache');
 
   shadowLight.shadow.bias += 0.0001;
   world.frameData.begin(world, engine, 5, 16);
-  render3D.record(world, { device: engine.device, encoder: {}, passEncoder: {} });
+  render3D.record(world, { device: engine.device, encoder: engine.device.createCommandEncoder() });
   assert.equal(shadowRenderCount, 5, 'direct shadow setting mutation invalidates the shadow cache');
 
   shadowLight.markDirty();
   world.frameData.begin(world, engine, 6, 16);
-  render3D.record(world, { device: engine.device, encoder: {}, passEncoder: {} });
+  render3D.record(world, { device: engine.device, encoder: engine.device.createCommandEncoder() });
   assert.equal(shadowRenderCount, 6, 'light revision invalidates the shadow cache');
 });
 
@@ -587,8 +577,8 @@ test('Render3DSystem builds GPU-resident material table and larger opaque mega-b
 
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
   });
 
   assert.equal(getRender3DGpuDrivenBatchBuffer(render3D)?.count, 3);
@@ -660,8 +650,8 @@ test('Render3DSystem dispatches opaque mega-batch runs through material renderBa
 
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
   });
 
   assert.deepEqual(calls, [[
@@ -728,8 +718,8 @@ test('Render3DSystem keeps CPU mega-batching without indirect-first-instance', (
 
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
   });
 
   assert.deepEqual(calls, [[
@@ -822,8 +812,8 @@ test('Render3DSystem batches only explicitly order-independent transparent range
 
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
   });
 
   assert.deepEqual(calls, [
@@ -922,8 +912,8 @@ test('Render3DSystem keeps sorted transparent instance batches view-local', () =
 
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
     frameData: world.frameData,
     viewFamily: family.snapshot(),
   });
@@ -992,8 +982,8 @@ test('Render3DSystem keeps one-item portable runs on the prepared batch-table pa
 
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
   });
 
   assert.deepEqual(calls, entities.map(entity => ['batch', 1, false, entity.id]));
@@ -1041,6 +1031,7 @@ test('Render3DSystem dispatches GPU culling before opening the render pass', () 
   world.addSystem(render3D);
 
   const encoder = {
+    ...engine.device.createCommandEncoder(),
     beginComputePass({ label }) {
       log.push(['beginComputePass', label]);
       return {
@@ -1053,6 +1044,7 @@ test('Render3DSystem dispatches GPU culling before opening the render pass', () 
     beginRenderPass() {
       log.push(['beginRenderPass']);
       return {
+        ...engine.device.createCommandEncoder().beginRenderPass({ colorAttachments: [] }),
         end() { log.push(['endRenderPass']); },
       };
     },
@@ -1130,6 +1122,7 @@ test('Render3DSystem keeps multi-view draw, cull, transparent sort, and readback
   world.addSystem(render3D);
 
   const encoder = {
+    ...engine.device.createCommandEncoder(),
     beginComputePass({ label }) {
       log.push(['beginComputePass', label]);
       return {
@@ -1140,7 +1133,7 @@ test('Render3DSystem keeps multi-view draw, cull, transparent sort, and readback
       };
     },
     beginRenderPass() {
-      return { end() {} };
+      return engine.device.createCommandEncoder().beginRenderPass({ colorAttachments: [] });
     },
     copyBufferToBuffer(source, _sourceOffset, destination, _destinationOffset, size) {
       log.push(['copyBufferToBuffer', source.label, destination.label, size]);
@@ -1189,7 +1182,7 @@ test('Render3DSystem keeps multi-view draw, cull, transparent sort, and readback
       `Render3DSystem.transparentMegaBatch.view.${viewSlot}.sortIndices.readback`,
     ));
   }
-  assert.equal(afterSubmitCallbacks.length, 4);
+  assert.equal(afterSubmitCallbacks.length, 5); // Four readbacks and HDR attachment retirement.
 });
 
 test('Render3DSystem forwards GPU-driven batch context to compatible non-Basic material renderers', () => {
@@ -1308,6 +1301,7 @@ test('Render3DSystem forwards GPU-driven batch context to compatible non-Basic m
   world.addSystem(render3D);
 
   const encoder = {
+    ...engine.device.createCommandEncoder(),
     beginComputePass({ label }) {
       return {
         setPipeline() {},
@@ -1321,7 +1315,7 @@ test('Render3DSystem forwards GPU-driven batch context to compatible non-Basic m
   render3D.record(world, {
     device: engine.device,
     encoder,
-    passEncoder: {},
+
   });
 
   assert.equal(received.length, 4);
@@ -1394,8 +1388,8 @@ test('Render3DSystem sweeps preview view, LOD selection, and collect-pass caches
     ] });
     render3D.record(world, {
       device: engine.device,
-      encoder: {},
-      passEncoder: {},
+      encoder: engine.device.createCommandEncoder(),
+
       frameData: world.frameData,
       viewFamily: family.snapshot(),
     });

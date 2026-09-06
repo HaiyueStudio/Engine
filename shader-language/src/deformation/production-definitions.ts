@@ -22,6 +22,9 @@ import motionVector from './stdlib/motion-vector.wgsl';
 import outline from './stdlib/outline.wgsl';
 import clippingPlanes from '../render-family/stdlib/simple-3d/clipping-planes.wgsl';
 
+import materialCoverage from './stdlib/material-coverage.wgsl';
+import { materialCoverageBindings, materialCoverageBlock } from './material-coverage-definition';
+
 interface Definition {
   readonly code: string;
   readonly bindGroups: readonly PrecompiledShaderBindGroupV2[];
@@ -63,7 +66,12 @@ export function emitProductionDeformationPass(
       uniformBlocks: definition.uniformBlocks,
       vertexBuffers: definition.vertexBuffers,
       varyings: definition.varyings,
-      renderTargets: Object.freeze([Object.freeze({ location: 0, formatClass: definition.target })]),
+      renderTargets: Object.freeze([Object.freeze({ location: 0, formatClass: definition.target }),
+        ...(operation === 'motion-vector' ? [
+          Object.freeze({ location: 1, formatClass: 'optional-linear-depth-r32float' }),
+          Object.freeze({ location: 2, formatClass: 'optional-view-normal-rgba16float' }),
+        ] : []),
+      ]),
       capabilities: definition.capabilities,
       passRequirements: definition.requirements,
       sourceMap: Object.freeze([Object.freeze({
@@ -86,7 +94,7 @@ function definitions(): Readonly<Record<ProductionDeformationOperation, Definiti
     storage('geometry.skinJoints', 1, VERTEX),
     storage('geometry.skinWeights', 2, VERTEX),
   ]);
-  const emptyMaterial = group('material', 2, []);
+  const coverageMaterial = group('material', 2, materialCoverageBindings);
   const scene = sceneFrameGroup(VERTEX_FRAGMENT);
   const basicGroups = [
     scene,
@@ -127,52 +135,54 @@ function definitions(): Readonly<Record<ProductionDeformationOperation, Definiti
       ['deformation-abi-v1', 'morph-before-skin', 'current-deformation-state', 'world-space-clipping'],
     ),
     depth: definition(
-      [SIMPLE_SCENE, morph, skinningBindings, skinning, depth].join('\n\n'),
-      [sceneFrameGroup(VERTEX), currentObject, group('material', 2, [uniform('material.depthParameters', 0, FRAGMENT, 16)]), currentSkin],
-      [sceneFrameBlock(), block('material.depthParameters', 16, [
+      [SIMPLE_SCENE, morph, skinningBindings, skinning, materialCoverage, depth].join('\n\n'),
+      [sceneFrameGroup(VERTEX), currentObject, group('material', 2, [uniform('material.depthParameters', 0, FRAGMENT, 16), ...materialCoverageBindings]), currentSkin],
+      [sceneFrameBlock(), materialCoverageBlock, block('material.depthParameters', 16, [
         field('near', 'f32', 0, 4), field('far', 'f32', 4, 4),
         field('isOrthographic', 'u32', 8, 4), field('reverseZ', 'u32', 12, 4),
       ])],
-      auxiliaryVertexBuffers(),
-      [varying('VIEW_DEPTH', 0, 'f32'), varying('WORLD_POSITION', 1, 'vec3<f32>'), flatVarying('OBJECT_INDEX', 2, 'u32')],
+      [...auxiliaryVertexBuffers(), ...coverageUvBuffers()],
+      [varying('VIEW_DEPTH', 0, 'f32'), varying('WORLD_POSITION', 1, 'vec3<f32>'), flatVarying('OBJECT_INDEX', 2, 'u32'), ...coverageUvVaryings(3)],
       'color',
-      ['morph-targets', 'skinning', 'storage-buffer'],
+      ['morph-targets', 'skinning', 'storage-buffer', 'texture-sample', 'discard'],
       ['deformation-abi-v1', 'morph-before-skin', 'current-deformation-state', 'world-space-clipping'],
     ),
-    shadow: shadowDefinition([clippingPlanes, shadow].join('\n\n'), shadowGroups, false, false),
-    'shadow-morph': shadowDefinition([clippingPlanes, morph, shadowMorph].join('\n\n'), shadowGroups, true, false),
-    'shadow-skinned': shadowDefinition([clippingPlanes, morph, skinningBindings, skinning, shadowSkinned].join('\n\n'), [...shadowGroups, emptyMaterial, currentSkin], false, true),
-    'shadow-skinned-morph': shadowDefinition([clippingPlanes, morph, skinningBindings, skinning, shadowSkinnedMorph].join('\n\n'), [...shadowGroups, emptyMaterial, currentSkin], true, true),
+    shadow: shadowDefinition([clippingPlanes, materialCoverage, shadow].join('\n\n'), [...shadowGroups, coverageMaterial], false, false),
+    'shadow-morph': shadowDefinition([clippingPlanes, materialCoverage, morph, shadowMorph].join('\n\n'), [...shadowGroups, coverageMaterial], true, false),
+    'shadow-skinned': shadowDefinition([clippingPlanes, materialCoverage, morph, skinningBindings, skinning, shadowSkinned].join('\n\n'), [...shadowGroups, coverageMaterial, currentSkin], false, true),
+    'shadow-skinned-morph': shadowDefinition([clippingPlanes, materialCoverage, morph, skinningBindings, skinning, shadowSkinnedMorph].join('\n\n'), [...shadowGroups, coverageMaterial, currentSkin], true, true),
     'motion-vector': definition(
-      [SIMPLE_SCENE, morph, motionVector].join('\n\n'),
+      [SIMPLE_SCENE, morph, materialCoverage, motionVector].join('\n\n'),
       [
         sceneFrameGroup(VERTEX_FRAGMENT),
         group('object', 1, [
-          uniform('object.deformationHistory', 0, VERTEX_FRAGMENT, 240),
+          uniform('object.deformationHistory', 0, VERTEX_FRAGMENT, 272),
           storage('object.clippingPlanes', 1, FRAGMENT),
         ]),
-        group('object', 2, [
+        coverageMaterial,
+        group('object', 3, [
           storage('object.currentJointMatrices', 0, VERTEX),
           storage('object.previousJointMatrices', 1, VERTEX),
           storage('geometry.skinJoints', 2, VERTEX),
           storage('geometry.skinWeights', 3, VERTEX),
         ]),
       ],
-      [sceneFrameBlock(), historyBlock()],
-      auxiliaryVertexBuffers(),
-      [varying('PREVIOUS_CLIP_POSITION', 0, 'vec4<f32>'), varying('WORLD_POSITION', 1, 'vec3<f32>')],
-      'velocity-rg16float',
-      ['morph-targets', 'skinning', 'history', 'storage-buffer'],
-      ['deformation-abi-v1', 'current-and-previous-same-deformation', 'reset-previous-to-current', 'world-space-clipping'],
+      [sceneFrameBlock(), historyBlock(), materialCoverageBlock],
+      motionSurfaceVertexBuffers(),
+      [varying('PREVIOUS_CLIP_POSITION', 0, 'vec4<f32>'), varying('WORLD_POSITION', 1, 'vec3<f32>'), ...coverageUvVaryings(2),
+        varying('VIEW_NORMAL', 4, 'vec3<f32>'), varying('VIEW_DEPTH', 5, 'f32')],
+      'temporal-motion-rgba16float',
+      ['morph-targets', 'skinning', 'history', 'storage-buffer', 'texture-sample', 'discard'],
+      ['deformation-abi-v1', 'temporal-motion-v2', 'auxiliary-surface-mrt-v1', 'unjittered-uv-velocity', 'previous-linear-depth', 'current-and-previous-same-deformation', 'reset-previous-to-current', 'world-space-clipping'],
     ),
     outline: definition(
-      [SIMPLE_SCENE, morph, skinningBindings, skinning, outline].join('\n\n'),
-      [sceneFrameGroup(VERTEX), currentObject, emptyMaterial, currentSkin],
-      [sceneFrameBlock()],
-      auxiliaryVertexBuffers(),
-      [varying('WORLD_POSITION', 0, 'vec3<f32>'), flatVarying('OBJECT_INDEX', 1, 'u32')],
+      [SIMPLE_SCENE, morph, skinningBindings, skinning, materialCoverage, outline].join('\n\n'),
+      [sceneFrameGroup(VERTEX), currentObject, coverageMaterial, currentSkin],
+      [sceneFrameBlock(), materialCoverageBlock],
+      [...auxiliaryVertexBuffers(), ...coverageUvBuffers()],
+      [varying('WORLD_POSITION', 0, 'vec3<f32>'), flatVarying('OBJECT_INDEX', 1, 'u32'), ...coverageUvVaryings(2)],
       'mask',
-      ['morph-targets', 'skinning', 'storage-buffer'],
+      ['morph-targets', 'skinning', 'storage-buffer', 'texture-sample', 'discard'],
       ['deformation-abi-v1', 'morph-before-skin', 'current-deformation-state', 'world-space-clipping'],
     ),
   });
@@ -187,11 +197,11 @@ function shadowDefinition(
   return definition(
     code,
     bindGroups,
-    [block('frame.shadowCamera', 64, [matrix('viewProj', 0)])],
-    morphed ? auxiliaryVertexBuffers() : positionVertexBuffers(),
-    [varying('WORLD_POSITION', 0, 'vec3<f32>'), flatVarying('OBJECT_INDEX', 1, 'u32')],
+    [block('frame.shadowCamera', 64, [matrix('viewProj', 0)]), materialCoverageBlock],
+    [...(morphed ? auxiliaryVertexBuffers() : positionVertexBuffers()), ...coverageUvBuffers()],
+    [varying('WORLD_POSITION', 0, 'vec3<f32>'), flatVarying('OBJECT_INDEX', 1, 'u32'), ...coverageUvVaryings(2)],
     'depth-only',
-    ['storage-buffer', ...(morphed ? ['morph-targets'] : []), ...(skinned ? ['skinning'] : [])],
+    ['storage-buffer', 'texture-sample', 'discard', ...(morphed ? ['morph-targets'] : []), ...(skinned ? ['skinning'] : [])],
     ['deformation-abi-v1', 'morph-before-skin', 'current-deformation-state', 'world-space-clipping'],
   );
 }
@@ -288,16 +298,18 @@ function basicMaterialBlock(): ShaderUniformBlockReflection {
   return block('material.basicParameters', 48, [
     field('color', 'vec4<f32>', 0, 16), field('emissiveFactor', 'vec4<f32>', 16, 16),
     field('useTexture', 'u32', 32, 4), field('useEmissiveTexture', 'u32', 36, 4),
-    field('_pad1', 'u32', 40, 4), field('_pad2', 'u32', 44, 4),
+    field('opaque', 'u32', 40, 4), field('_pad2', 'u32', 44, 4),
   ]);
 }
 
 function historyBlock(): ShaderUniformBlockReflection {
-  return block('object.deformationHistory', 240, [
+  return block('object.deformationHistory', 272, [
     matrix('currentModel', 0), matrix('previousModel', 64), matrix('previousViewProjection', 128),
     field('currentMorphWeights', 'vec4<f32>', 192, 16),
     field('previousMorphWeights', 'vec4<f32>', 208, 16),
     field('deformationFlags', 'vec4<f32>', 224, 16),
+    field('cameraDepth', 'vec4<f32>', 240, 16),
+    field('jitterDelta', 'vec4<f32>', 256, 16),
   ]);
 }
 
@@ -318,6 +330,24 @@ function auxiliaryVertexBuffers(): readonly PrecompiledShaderVertexBufferV2[] {
     vertexBuffer(12, 'POSITION', 0, 'float32x3'),
     ...Array.from({ length: 4 }, (_, index) => vertexBuffer(12, `MORPH_POSITION_${index}`, index + 1, 'float32x3')),
   ]);
+}
+
+function coverageUvBuffers(): readonly PrecompiledShaderVertexBufferV2[] {
+  return [vertexBuffer(8, 'TEXCOORD_0', 5, 'float32x2'), vertexBuffer(8, 'TEXCOORD_1', 6, 'float32x2')];
+}
+
+function motionSurfaceVertexBuffers(): readonly PrecompiledShaderVertexBufferV2[] {
+  return [vertexBuffer(12, 'POSITION', 0, 'float32x3'),
+    ...Array.from({ length: 4 }, (_, index): PrecompiledShaderVertexBufferV2 => ({
+      arrayStride: 24, stepMode: 'vertex', attributes: [
+        { semantic: `MORPH_POSITION_${index}`, shaderLocation: index + 1, offset: 0, format: 'float32x3' },
+        { semantic: `MORPH_NORMAL_${index}`, shaderLocation: index + 8, offset: 12, format: 'float32x3' },
+      ],
+    })), ...coverageUvBuffers(), vertexBuffer(12, 'NORMAL', 7, 'float32x3')];
+}
+
+function coverageUvVaryings(first: number): readonly ShaderVaryingReflection[] {
+  return [varying('TEXCOORD_0', first, 'vec2<f32>'), varying('TEXCOORD_1', first + 1, 'vec2<f32>')];
 }
 
 function basicVertexBuffers(): readonly PrecompiledShaderVertexBufferV2[] {

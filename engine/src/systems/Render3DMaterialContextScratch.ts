@@ -32,6 +32,7 @@ export class Render3DMaterialContextScratch {
   constructor(getGpuDrivenBatch: (batchIndex: number) => MaterialGpuDrivenBatch | undefined) {
     this.context = {
       engine: null as unknown as IEngine,
+      colorFormat: 'rgba16float',
       viewKey: '',
       entityId: 0,
       viewSlot: 0,

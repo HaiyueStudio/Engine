@@ -14,6 +14,7 @@ const ambientOcclusionExtension = JSON.parse(await readFile(
   new URL('../ambient-occlusion-postprocess-extension-contract.json', import.meta.url),
   'utf8',
 ));
+const temporalExtension = JSON.parse(await readFile(new URL('../linear-hdr-output-extension-contract.json', import.meta.url), 'utf8'));
 
 function compile(source = familySource) {
   return compileBuiltinPostprocessFamilyV1(source, {
@@ -23,7 +24,7 @@ function compile(source = familySource) {
   });
 }
 
-test('the stage 8 module family plus reviewed AO extension emits fourteen deterministic Artifact V2 production passes', () => {
+test('the stage 8 family plus AO, temporal and output extensions emits fifteen deterministic production passes', () => {
   const first = compile();
   const second = compile();
   assert.deepEqual(Object.keys(first.passes), BUILTIN_POSTPROCESS_OPERATIONS);
@@ -32,7 +33,7 @@ test('the stage 8 module family plus reviewed AO extension emits fourteen determ
   assert.equal(first.artifact.source.kind, 'module-family');
   assert.equal(first.artifact.source.sha256, sourceSha256);
   assert.equal(first.artifact.artifactHash, second.artifact.artifactHash);
-  assert.equal(first.artifact.artifactHash, ambientOcclusionExtension.artifact.artifactHash);
+  assert.equal(first.artifact.artifactHash, temporalExtension.artifact.postprocessHash);
   for (const pass of Object.values(first.artifact.passes)) {
     assert.equal(pass.bindGroups.length, 1);
     assert.equal(pass.bindGroups[0].logicalSpace, 'pass');
@@ -50,7 +51,10 @@ test('stage 8 reflection preserves uniforms, unfilterable depth and TAA MRT', ()
   assert.equal(artifact.passes['outline-overlay'].bindGroups[0].bindings.length, 6);
   assert.equal(artifact.passes.taa.bindGroups[0].bindings[2].layout.sampleType, 'unfilterable-float');
   assert.equal(artifact.passes.taa.uniformBlocks[0].byteSize, 176);
-  assert.equal(artifact.passes.taa.renderTargets.length, 2);
+  assert.equal(artifact.passes.taa.renderTargets.length, 3);
+  assert.equal(artifact.passes.taa.bindGroups[0].bindings[3].layout.sampleType, 'unfilterable-float');
+  assert.equal(artifact.passes.taa.bindGroups[0].bindings[5].id, 'pass.temporalMotion');
+  assert.ok(artifact.passes.taa.passRequirements.includes('temporal-motion-v2'));
   assert.ok(artifact.passes.taa.passRequirements.includes('view-local-history'));
   for (const algorithm of ['ssao', 'sao', 'gtao']) {
     const pass = artifact.passes[algorithm];
@@ -137,7 +141,7 @@ test('stage 8 remains historical while the AO extension reviews current producti
   assert.equal(contract.moduleFamily.operationCount, 9);
   assert.equal(contract.inventory.wgslSourceCount, 58);
   assert.equal(contract.inventory.generatedSourceCount, 13);
-  assert.equal(ambientOcclusionExtension.moduleFamily.sha256, sourceSha256);
+  assert.equal(temporalExtension.artifact.postprocessSourceSha256, sourceSha256);
   assert.equal(ambientOcclusionExtension.moduleFamily.operationCount, 14);
   assert.deepEqual(ambientOcclusionExtension.moduleFamily.addedOperations, ['ssao', 'sao', 'gtao', 'ao-denoise', 'ao-upscale']);
   assert.deepEqual(ambientOcclusionExtension.moduleFamily.algorithmOperations, ['ssao', 'sao', 'gtao']);
@@ -147,7 +151,7 @@ test('stage 8 remains historical while the AO extension reviews current producti
   assert.ok(sources.length >= contract.inventory.wgslSourceCount);
   assert.ok(generated.length >= contract.inventory.generatedSourceCount);
   assert.equal(manifest.inlineShaderSites.length, contract.inventory.inlineShaderSiteCount);
-  assert.equal(manifest.sourceFamilies.find(family => family.id === 'postprocess-builtins').sources.length, 15);
+  assert.equal(manifest.sourceFamilies.find(family => family.id === 'postprocess-builtins').sources.length, 16);
   assert.equal(ambientOcclusionExtension.inventoryDelta.generatedSourceCount, 5);
   assert.doesNotMatch(baseArtifact, /postprocess-(?:ssao|sao|gtao)\.generated\.wgsl/);
   for (const operation of ['ssao', 'sao', 'gtao', 'ao-denoise', 'ao-upscale']) assert.match(aoArtifact, new RegExp(`postprocess-${operation}\\.generated\\.wgsl`));

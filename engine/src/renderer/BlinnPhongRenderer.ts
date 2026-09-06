@@ -1,3 +1,4 @@
+import { ViewLightUniformBuffer, LIGHT_UNIFORM_BYTES, LIGHT_UNIFORM_BINDING } from './ViewLightUniformBuffer';
 import type { IEngine } from '../core/IEngine';
 import { getEngineGPUResourceTracker } from '../core/EngineDiagnosticsAccess';
 import type { Geometry3D } from '../geometry/Geometry3D';
@@ -10,7 +11,7 @@ import { colorEquals, getStripIndexFormat, matrixEquals, writeBuffer as wrtBuf }
 import type { LiveIdSet } from './utils';
 import type { MaterialGpuDrivenBatch, MaterialRenderBatchItem } from './MaterialRendererRegistry';
 import type { GpuDrivenBatchBuffer } from './GpuDrivenBatchBuffer';
-import { forEachDirectInstanceBatchRun } from './DirectInstanceBatchRuns';
+import { forEachDirectInstanceBatchRun, forEachIndirectBatchRun } from './DirectInstanceBatchRuns';
 import { createColorTargetState, createPrimitiveState } from './gpuDescriptors';
 import { RendererObjectTable } from './RendererObjectTable';
 import { RendererCacheMap, RendererObjectSlotCache } from './RendererCacheMap';
@@ -41,7 +42,6 @@ export const BLINN_PHONG_MAX_LIGHTS = SCENE_RENDER_MAX_LIGHTS;
 const OBJ_BASE_FLOATS = 128 / 4;
 const OBJ_FLOATS = OBJ_BASE_FLOATS;
 const MAT_SIZE   =  64;
-const LIGHT_SIZE = 16 + BLINN_PHONG_MAX_LIGHTS * 64; // 528
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GPU cache types
@@ -91,13 +91,12 @@ export class BlinnPhongRenderer extends BaseRenderer {
   private get _geoCache(): SharedGeometryRendererOwner { return this._rendererCore.geometry as SharedGeometryRendererOwner; }
   private get _objCache(): RendererObjectSlotCache<ObjGPU> { return this._rendererCore.requireObjects(); }
 
-  private _lightBuf!: GPUBuffer;
+  private _lightUniforms!: ViewLightUniformBuffer;
+  private _lights: readonly PbrLightInfo[] = [];
+  private _lightsNeedUpload = false;
   private _lightBG!:  GPUBindGroup;
 
   private _matCache = new RendererCacheMap<MatGPU>(data => data.buf.destroy());
-  private _lightData = new Float32Array(LIGHT_SIZE / 4);
-  private _lightDataSnapshot = new Float32Array(LIGHT_SIZE / 4);
-  private _lightU32 = new Uint32Array(this._lightData.buffer);
   private _inverseScratch = mat4.identity() as Float32Array;
   private _normalScratch = mat4.identity() as Float32Array;
   private _warnedLightLimit = false;
@@ -122,7 +121,7 @@ export class BlinnPhongRenderer extends BaseRenderer {
       entries: [{ binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }],
     });
     this._bgl3 = device.createBindGroupLayout({
-      entries: [{ binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }],
+      entries: [{ binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: LIGHT_UNIFORM_BINDING }],
     });
 
     const generated = getBuiltinMaterialLightingShader(
@@ -152,16 +151,15 @@ export class BlinnPhongRenderer extends BaseRenderer {
     });
 
     // Lights buffer
-    this._lightBuf = device.createBuffer({ size: LIGHT_SIZE, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
-    this._lightBG  = device.createBindGroup({
-      layout: this._bgl3,
-      entries: [{ binding: 0, resource: { buffer: this._lightBuf } }],
-    });
+    this._lightUniforms = new ViewLightUniformBuffer(device, 'BlinnPhongRenderer.lights');
+    this._rebuildLightBindGroup();
   }
 
   // ── Per-frame camera + lights upload ──────────────────────────────────────
 
   updateCamera(sceneFrame: SceneFrameUniformSnapshot, context?: RenderCommandContext): void {
+    this._lightsNeedUpload = true;
+    if (this._lightUniforms.selectView(sceneFrame, context)) this._rebuildLightBindGroup();
     this._cameraDynamicOffset[0] = this._sceneFrameBinding.upload(sceneFrame, context);
     this._rendererCore.beginUploads(context);
   }
@@ -236,51 +234,22 @@ export class BlinnPhongRenderer extends BaseRenderer {
   }
 
   updateLights(lights: readonly PbrLightInfo[]): void {
-    const count = Math.min(lights.length, BLINN_PHONG_MAX_LIGHTS);
+    this._lights = lights;
+    this._lightsNeedUpload = false;
     if (lights.length > BLINN_PHONG_MAX_LIGHTS && !this._warnedLightLimit) {
       this._warnedLightLimit = true;
       console.warn(`[BlinnPhongRenderer] Received ${lights.length} lights; only the first ${BLINN_PHONG_MAX_LIGHTS} are used.`);
     }
-    const data = this._lightData;
-    const u32 = this._lightU32;
+    const previousBuffer = this._lightUniforms.buffer;
+    this._lightUniforms.upload(lights);
+    if (previousBuffer !== this._lightUniforms.buffer) this._rebuildLightBindGroup();
+  }
 
-    u32[0] = count; // countVec.x
-    // indices 1-3 padding
-
-    for (let i = 0; i < count; i++) {
-      const l = lights[i]!;
-      const base = 4 + i * 16; // each LightData = 16 float32s (64 bytes)
-
-      u32[base + 0] = l.type; // typeVec.x  (u32 reinterpret)
-      // base+1..3 padding
-
-      data[base + 4] = l.color[0];
-      data[base + 5] = l.color[1];
-      data[base + 6] = l.color[2];
-      data[base + 7] = l.intensity;
-
-      data[base + 8]  = l.direction[0];
-      data[base + 9]  = l.direction[1];
-      data[base + 10] = l.direction[2];
-      // base+11 = 0
-
-      data[base + 12] = l.position[0];
-      data[base + 13] = l.position[1];
-      data[base + 14] = l.position[2];
-      data[base + 15] = l.range;
-    }
-
-    const usedLength = 4 + count * 16;
-    let changed = false;
-    for (let i = 0; i < usedLength; i++) {
-      if (data[i] !== this._lightDataSnapshot[i]) {
-        changed = true;
-        break;
-      }
-    }
-    if (!changed) return;
-    this._lightDataSnapshot.set(data.subarray(0, usedLength), 0);
-    wrtBuf(this.engine.device.queue, this._lightBuf, 0, data);
+  private _rebuildLightBindGroup(): void {
+    this._lightBG = this.engine.device.createBindGroup({
+      layout: this._bgl3,
+      entries: [{ binding: 0, resource: { buffer: this._lightUniforms.buffer, size: LIGHT_UNIFORM_BYTES } }],
+    });
   }
 
   // ── Draw ────────────────────────────────────────────────────────────────────
@@ -294,6 +263,7 @@ export class BlinnPhongRenderer extends BaseRenderer {
     options:     { gpuDrivenBatch?: MaterialGpuDrivenBatch | undefined } = {},
     clippingPlanes: ClippingPlanes | null = null,
   ): void {
+    if (this._lightsNeedUpload) this.updateLights(this._lights);
     const gpuDrivenBatch = options.gpuDrivenBatch;
     this._renderItem(
       pass,
@@ -314,20 +284,29 @@ export class BlinnPhongRenderer extends BaseRenderer {
     count: number,
     batchBuffer: GpuDrivenBatchBuffer,
   ): void {
-    if (batchBuffer.gpuUploadEnabled === false) {
-      forEachDirectInstanceBatchRun(items, first, count, batchBuffer, run => {
+    if (this._lightsNeedUpload) this.updateLights(this._lights);
+    if (!batchBuffer.gpuUploadEnabled || this._uploadsPrepared) {
+      const visitRuns = batchBuffer.gpuUploadEnabled ? forEachIndirectBatchRun : forEachDirectInstanceBatchRun;
+      visitRuns(items, first, count, batchBuffer, run => {
         const item = run.item;
         const geo = this._geoCache.ensure(item.geometry, this);
         const mat = this._ensureMaterial(item.material);
         if (!this._uploadsPrepared) this._writeMaterialUniform(mat, item.material);
-        pass.setPipeline(this._getOpaquePipeline(item.geometry));
-        pass.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
-        pass.setBindGroup(1, this._batchObjectTable.bindGroup);
-        pass.setBindGroup(2, mat.bg);
-        pass.setBindGroup(3, this._lightBG);
-        pass.setVertexBuffer(0, geo.positionBuf);
-        pass.setVertexBuffer(1, geo.normalBuf);
-        pass.setVertexBuffer(2, geo.uvBuf);
+        const bindings = batchBuffer.gpuUploadEnabled ? this.indirectBatches.begin() : pass;
+        bindings.setPipeline(item.material.blending === 'none' ? this._getOpaquePipeline(item.geometry) : this._getBlendPipeline(item.geometry));
+        bindings.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
+        bindings.setBindGroup(1, this._batchObjectTable.bindGroup);
+        bindings.setBindGroup(2, mat.bg);
+        bindings.setBindGroup(3, this._lightBG, this._lightUniforms.dynamicOffset);
+        bindings.setVertexBuffer(0, geo.positionBuf);
+        bindings.setVertexBuffer(1, geo.normalBuf);
+        bindings.setVertexBuffer(2, geo.uvBuf);
+        if (batchBuffer.gpuUploadEnabled) {
+          this.indirectBatches.draw(pass, this.engine.device, batchBuffer, run.firstBatch,
+            run.instanceCount, geo.indexBuf, geo.indexFormat, [this.colorFormat ?? this.engine.format],
+            this.engine.getDepthFormat(this.reverseZ), this.msaaSamples);
+          return;
+        }
         if (geo.indexBuf) {
           pass.setIndexBuffer(geo.indexBuf, geo.indexFormat);
           pass.drawIndexed(geo.indexCount, run.instanceCount, 0, 0, run.firstInstance);
@@ -392,7 +371,7 @@ export class BlinnPhongRenderer extends BaseRenderer {
     pass.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
     pass.setBindGroup(1, objectTable.bindGroup);
     pass.setBindGroup(2, mat.bg);
-    pass.setBindGroup(3, this._lightBG);
+    pass.setBindGroup(3, this._lightBG, this._lightUniforms.dynamicOffset);
     pass.setVertexBuffer(0, geo.positionBuf);
     pass.setVertexBuffer(1, geo.normalBuf);
     pass.setVertexBuffer(2, geo.uvBuf);
@@ -473,6 +452,7 @@ export class BlinnPhongRenderer extends BaseRenderer {
     const specular = material.specular;
     ambient.writeLinear(mat.data, 0);
     diffuse.writeLinear(mat.data, 4);
+    if (material.blending === 'none') mat.data[7] = 1;
     specular.writeLinear(mat.data, 8);
     const changed =
       mat.dirty ||
@@ -537,7 +517,7 @@ export class BlinnPhongRenderer extends BaseRenderer {
         { arrayStride: 12, attributes: [{ shaderLocation: 1, offset: 0, format: 'float32x3' }] },
         { arrayStride: 8, attributes: [{ shaderLocation: 2, offset: 0, format: 'float32x2' }] },
       ] },
-      fragment: { module: this._shader, entryPoint: 'fs_main', targets: [createColorTargetState(this.engine.format, blend)] },
+      fragment: { module: this._shader, entryPoint: 'fs_main', targets: [createColorTargetState(this.colorFormat ?? this.engine.format, blend)] },
       primitive: createPrimitiveState(topology, cullMode, frontFace, stripIndexFormat),
       depthStencil: {
         format: this.engine.getDepthFormat(this.reverseZ),
@@ -552,7 +532,9 @@ export class BlinnPhongRenderer extends BaseRenderer {
 
   destroy(): void {
     this._sceneFrameBinding?.destroy();
-    this._lightBuf?.destroy();
+    this._lightUniforms?.destroy();
+    this._lights = [];
+    this._lightsNeedUpload = false;
     this._rendererCore?.destroy();
     this._matCache.clear();
     this.clearPipelineCache();

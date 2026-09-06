@@ -33,6 +33,7 @@ async function main() {
   // ── Off-screen (RTT) setup ─────────────────────────────────────────────────
 
   const rtt = new RttTexture(engine, {
+    format: 'rgba16float',
     width:      512,
     height:     384,
     clearColor: { r: 0.05, g: 0.02, b: 0.12, a: 1 },

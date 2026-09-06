@@ -34,37 +34,53 @@ struct TaaParams {
 @group(0) @binding(0) var currentColor : texture_2d<f32>;
 @group(0) @binding(1) var historyColor : texture_2d<f32>;
 @group(0) @binding(2) var currentDepth : texture_2d<f32>;
-@group(0) @binding(3) var linearSampler : sampler;
+@group(0) @binding(3) var historyDepth : texture_2d<f32>;
 @group(0) @binding(4) var<uniform> params : TaaParams;
+@group(0) @binding(5) var temporalMotion : texture_2d<f32>;
 
 struct TaaOutput {
   @location(0) display : vec4<f32>,
   @location(1) history : vec4<f32>,
+  @location(2) depth : f32,
 }
 
-fn deviceDepthFromLinear(linearDepth : f32) -> f32 {
-  let near = params.depthHistory.z;
-  let far = params.depthHistory.w;
-  var standardDepth = linearDepth;
-  if (params.projection.x < 0.5) {
-    let viewDepth = near + linearDepth * (far - near);
-    standardDepth = (far - near * far / max(viewDepth, near)) / (far - near);
+struct HistorySample {
+  color : vec4<f32>,
+  confidence : f32,
+}
+
+fn toYCoCg(rgb : vec3<f32>) -> vec3<f32> {
+  return vec3<f32>(dot(rgb, vec3<f32>(0.25, 0.5, 0.25)), (rgb.r - rgb.b) * 0.5, dot(rgb, vec3<f32>(-0.25, 0.5, -0.25)));
+}
+
+fn fromYCoCg(color : vec3<f32>) -> vec3<f32> {
+  return vec3<f32>(color.x + color.y - color.z, color.x + color.z, color.x - color.y - color.z);
+}
+
+// Validate each bilinear tap before interpolating; filtering depth across a silhouette
+// could otherwise accept a color belonging to a different surface.
+fn sampleHistory(uv : vec2<f32>, expectedDepth : f32, dimensions : vec2<i32>) -> HistorySample {
+  let location = uv * vec2<f32>(dimensions) - vec2<f32>(0.5);
+  let origin = vec2<i32>(floor(location));
+  let fraction = fract(location);
+  let tolerance = params.depthHistory.x * max(1.0, expectedDepth * 8.0)
+    + max(abs(expectedDepth) * 0.0005, 0.00000006); // rgba16float motion-depth quantization
+  var color = vec4<f32>(0.0);
+  var confidence = 0.0;
+  for (var y = 0; y < 2; y++) {
+    for (var x = 0; x < 2; x++) {
+      let pixel = origin + vec2<i32>(x, y);
+      let weight = select(1.0 - fraction.x, fraction.x, x == 1) * select(1.0 - fraction.y, fraction.y, y == 1);
+      if (all(pixel >= vec2<i32>(0)) && all(pixel < dimensions)) {
+        let depth = textureLoad(historyDepth, pixel, 0).r;
+        if (abs(depth - expectedDepth) <= tolerance) {
+          color += textureLoad(historyColor, pixel, 0) * weight;
+          confidence += weight;
+        }
+      }
+    }
   }
-  if (params.projection.y > 0.5) { return 1.0 - standardDepth; }
-  return standardDepth;
-}
-
-fn linearDepthFromDevice(deviceDepth : f32) -> f32 {
-  let near = params.depthHistory.z;
-  let far = params.depthHistory.w;
-  let standardDepth = select(deviceDepth, 1.0 - deviceDepth, params.projection.y > 0.5);
-  if (params.projection.x > 0.5) { return clamp(standardDepth, 0.0, 1.0); }
-  let viewDepth = near * far / max(far - standardDepth * (far - near), 0.000001);
-  return clamp((viewDepth - near) / (far - near), 0.0, 1.0);
-}
-
-fn loadCurrent(pixel : vec2<i32>, dimensions : vec2<i32>) -> vec3<f32> {
-  return textureLoad(currentColor, clamp(pixel, vec2<i32>(0), dimensions - vec2<i32>(1)), 0).rgb;
+  return HistorySample(color / max(confidence, 0.000001), confidence);
 }
 
 @fragment
@@ -72,49 +88,81 @@ fn fs_main(input : VertexOutput) -> TaaOutput {
   let dimensions = vec2<i32>(textureDimensions(currentColor, 0));
   let pixel = clamp(vec2<i32>(input.pos.xy), vec2<i32>(0), dimensions - vec2<i32>(1));
   let current = textureLoad(currentColor, pixel, 0);
-  let linearDepth = textureLoad(currentDepth, pixel, 0).r;
-  var neighborhoodMin = current.rgb;
-  var neighborhoodMax = current.rgb;
+  let depth = textureLoad(currentDepth, pixel, 0).r;
+  var closestDepth = depth;
+  var motionPixel = pixel;
+  let currentYCoCg = toYCoCg(current.rgb);
+  var neighborhoodMin = currentYCoCg;
+  var neighborhoodMax = currentYCoCg;
   var neighborhoodSum = vec3<f32>(0.0);
-  for (var y = -1; y <= 1; y += 1) {
-    for (var x = -1; x <= 1; x += 1) {
-      let sampleColor = loadCurrent(pixel + vec2<i32>(x, y), dimensions);
-      neighborhoodMin = min(neighborhoodMin, sampleColor);
-      neighborhoodMax = max(neighborhoodMax, sampleColor);
-      neighborhoodSum += sampleColor;
+  var neighborhoodSquaredSum = vec3<f32>(0.0);
+  for (var y = -1; y <= 1; y++) {
+    for (var x = -1; x <= 1; x++) {
+      let samplePixel = clamp(pixel + vec2<i32>(x, y), vec2<i32>(0), dimensions - vec2<i32>(1));
+      let sampleDepth = textureLoad(currentDepth, samplePixel, 0).r;
+      if (sampleDepth < closestDepth) {
+        closestDepth = sampleDepth;
+        motionPixel = samplePixel;
+      }
+      let color = toYCoCg(textureLoad(currentColor, samplePixel, 0).rgb);
+      neighborhoodMin = min(neighborhoodMin, color);
+      neighborhoodMax = max(neighborhoodMax, color);
+      neighborhoodSum += color;
+      neighborhoodSquaredSum += color * color;
+    }
+  }
+  let mean = neighborhoodSum / 9.0;
+  let sigma = sqrt(max(neighborhoodSquaredSum / 9.0 - mean * mean, vec3<f32>(0.0)));
+  let clipMin = max(neighborhoodMin, mean - sigma * 1.5);
+  let clipMax = min(neighborhoodMax, mean + sigma * 1.5);
+
+  // Dilate depth and its corresponding motion together. A subpixel silhouette
+  // can change coverage with Halton jitter while still belonging to the same
+  // surface history; storing undilated depth would reject it every other frame.
+  let motion = textureLoad(temporalMotion, motionPixel, 0);
+
+  // History lives on the stable output grid. Motion already excludes both jitters;
+  // subtracting their difference again would lock history to the sample phase.
+  var previousUv = input.uv - motion.xy;
+  var expectedDepth = motion.z;
+  var usable = motion.w > 0.5 && expectedDepth >= 0.0 && expectedDepth <= 1.0;
+  if (motion.w == 0.0 && closestDepth >= 0.999999) {
+    // Only uncovered far background uses camera reprojection. Missing object
+    // history (-1) or an unsupported surface at finite depth must use current color.
+    let farDevice = select(1.0, 0.0, params.projection.y > 0.5);
+    let clip = vec4<f32>(input.uv.x * 2.0 - 1.0, 1.0 - input.uv.y * 2.0, farDevice, 1.0);
+    let worldH = params.currentInverseViewProjection * clip;
+    let world = worldH.xyz / select(-max(abs(worldH.w), 0.000001), max(abs(worldH.w), 0.000001), worldH.w >= 0.0);
+    var previousClip = params.previousViewProjection * vec4<f32>(world, 1.0);
+    if (params.projection.x < 0.5) {
+      let nearClip = vec4<f32>(clip.xy, 1.0 - farDevice, 1.0);
+      let nearH = params.currentInverseViewProjection * nearClip;
+      let nearWorld = nearH.xyz / nearH.w;
+      previousClip = params.previousViewProjection * vec4<f32>(world - nearWorld, 0.0);
+    }
+    if (previousClip.w > 0.000001) {
+      let ndc = previousClip.xy / previousClip.w;
+      previousUv = vec2<f32>(ndc.x * 0.5 + 0.5, 0.5 - ndc.y * 0.5) + params.projection.zw;
+      expectedDepth = 1.0;
+      usable = true;
     }
   }
   var resolved = current.rgb;
-  if (params.depthHistory.y > 0.5) {
-    let clip = vec4<f32>(
-      input.uv.x * 2.0 - 1.0,
-      1.0 - input.uv.y * 2.0,
-      deviceDepthFromLinear(linearDepth),
-      1.0,
-    );
-    let worldHomogeneous = params.currentInverseViewProjection * clip;
-    let world = worldHomogeneous.xyz / max(abs(worldHomogeneous.w), 0.000001) * sign(worldHomogeneous.w);
-    let previousClip = params.previousViewProjection * vec4<f32>(world, 1.0);
-    if (previousClip.w > 0.000001) {
-      let previousNdc = previousClip.xyz / previousClip.w;
-      let previousUv = vec2<f32>(previousNdc.x * 0.5 + 0.5, 0.5 - previousNdc.y * 0.5);
-      let inside = all(previousUv >= vec2<f32>(0.0)) && all(previousUv <= vec2<f32>(1.0));
-      if (inside && previousNdc.z >= 0.0 && previousNdc.z <= 1.0) {
-        let history = textureSampleLevel(historyColor, linearSampler, previousUv, 0.0);
-        let expectedDepth = linearDepthFromDevice(previousNdc.z);
-        let depthTolerance = params.depthHistory.x * max(1.0, expectedDepth * 8.0);
-        if (abs(history.a - expectedDepth) <= depthTolerance) {
-          let clippedHistory = clamp(history.rgb, neighborhoodMin, neighborhoodMax);
-          resolved = mix(current.rgb, clippedHistory, params.resolutionFeedback.z);
-        }
-      }
-    }
+  if (params.depthHistory.y > 0.5 && usable && all(previousUv >= vec2<f32>(0.0)) && all(previousUv <= vec2<f32>(1.0))) {
+    let history = sampleHistory(previousUv, expectedDepth, dimensions);
+    let clipped = clamp(toYCoCg(history.color.rgb), clipMin, clipMax);
+    let disagreement = abs(clipped.x - currentYCoCg.x) / max(max(abs(clipped.x), abs(currentYCoCg.x)), 0.05);
+    let motionPixels = length(motion.xy * params.resolutionFeedback.xy);
+    let feedback = mix(params.resolutionFeedback.z, min(params.resolutionFeedback.z, 0.75), clamp(motionPixels / 16.0, 0.0, 1.0));
+    let alphaConfidence = clamp(1.0 - abs(current.a - history.color.a) * 4.0, 0.0, 1.0);
+    let weight = feedback * history.confidence * alphaConfidence * (1.0 - clamp(disagreement * 0.5, 0.0, 0.9));
+    resolved = mix(current.rgb, fromYCoCg(clipped), weight);
   }
-  let neighborhoodMean = neighborhoodSum / 9.0;
-  let displayColor = max(resolved + (resolved - neighborhoodMean) * params.resolutionFeedback.w, vec3<f32>(0.0));
+  let sharpened = resolved + (resolved - fromYCoCg(mean)) * params.resolutionFeedback.w;
   var output : TaaOutput;
-  output.display = vec4<f32>(displayColor, current.a);
-  output.history = vec4<f32>(resolved, linearDepth);
+  output.display = vec4<f32>(max(sharpened, vec3<f32>(0.0)), current.a);
+  output.history = vec4<f32>(resolved, current.a);
+  output.depth = closestDepth;
   return output;
 }
 

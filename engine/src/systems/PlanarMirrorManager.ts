@@ -14,6 +14,7 @@ import type { World } from '../ecs/World';
 import type { FrameData } from '../frame/FrameData';
 import type { Material } from '../material/Material';
 import { RttEngine } from '../rtt/RttEngine';
+import { SCENE_COLOR_FORMAT } from '../postprocess/SceneColor';
 import {
   TransientRenderTargetPool,
   estimateTransientRenderTargetBytes,
@@ -349,7 +350,7 @@ export class PlanarMirrorManager {
     height: number,
     depth: number,
   ): MirrorViewRuntimeState {
-    const pendingTarget = new PendingMirrorTarget(this.engine.format, width, height);
+    const pendingTarget = new PendingMirrorTarget(SCENE_COLOR_FORMAT, width, height);
     const camera = new ObliqueReflectionCamera();
     const transform = new Transform3D();
     const cameraEntity = new Entity(`PlanarMirrorCamera:${state.entity.id}:${sourceView.key}`)
@@ -431,6 +432,7 @@ export class PlanarMirrorManager {
       payload: {
         runtime,
         descriptor: {
+          format: SCENE_COLOR_FORMAT,
           width: request.width,
           height: request.height,
           sampleCount: request.mirror.component.sampleCount,
@@ -469,6 +471,7 @@ export class PlanarMirrorManager {
         descriptor: {
           width: request.width,
           height: request.height,
+          format: SCENE_COLOR_FORMAT,
           sampleCount: state.component.sampleCount,
           reverseZ: request.sourceView.reverseZ,
         },
@@ -544,6 +547,7 @@ export class PlanarMirrorManager {
         state.component.clearColor as GPUColorDict,
         `PlanarMirror:${state.entity.id}:${runtime.sourceViewKey}`,
         scope?.owner ?? null,
+        SCENE_COLOR_FORMAT,
       );
       runtime.persistentScope = scope;
       runtime.persistentTarget = target;

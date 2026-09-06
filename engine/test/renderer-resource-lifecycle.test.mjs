@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createAuditGpuDevice } from '../../scripts/benchmark/real-renderer-audit-device.mjs';
 import {
   BasicMaterial,
   Geometry3D,
@@ -491,14 +492,14 @@ test('NormalRenderer merges sparse prepared object slots into one table upload',
     device,
     bindGroupLayout: {},
     label: 'normal.stable',
-    floatsPerSlot: 32,
+    floatsPerSlot: 40,
     auxiliary: { binding: 1, floatsPerSlot: 36, label: 'normal.stable.clipping' },
   });
   const batchTable = new RendererObjectTable({
     device,
     bindGroupLayout: {},
     label: 'normal.batch',
-    floatsPerSlot: 32,
+    floatsPerSlot: 40,
     auxiliary: { binding: 1, floatsPerSlot: 36, label: 'normal.batch.clipping' },
   });
   attachObjectCore(renderer, stableTable, batchTable, modelSlot => ({
@@ -511,14 +512,14 @@ test('NormalRenderer merges sparse prepared object slots into one table upload',
   const identity = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
   for (const [entityId, slot] of [[1, 10], [2, 11], [3, 13]]) {
     const object = renderer.entityCache.ensure(entityId);
-    renderer._writeObjectTableEntry(object, null, identity, slot, renderer.batchObjectTable);
+    renderer._writeObjectTableEntry(object, new Geometry3D({ positions: new Float32Array(9) }), null, identity, slot, renderer.batchObjectTable, true);
   }
 
   log.length = 0;
   renderer.flushUploads();
   const writes = log.filter(entry => entry[0] === 'writeBuffer');
   assert.deepEqual(writes, [
-    ['writeBuffer', 'normal.batch', 10 * 128, 10 * 128, 4 * 128],
+    ['writeBuffer', 'normal.batch', 10 * 160, 10 * 160, 4 * 160],
   ]);
 });
 
@@ -530,14 +531,14 @@ test('NormalRenderer uploads clipping storage only for semantic plane changes an
     device,
     bindGroupLayout: {},
     label: 'normal.stable',
-    floatsPerSlot: 32,
+    floatsPerSlot: 40,
     auxiliary: { binding: 1, floatsPerSlot: 36, label: 'normal.stable.clipping' },
   });
   const batchTable = new RendererObjectTable({
     device,
     bindGroupLayout: {},
     label: 'normal.batch',
-    floatsPerSlot: 32,
+    floatsPerSlot: 40,
     auxiliary: { binding: 1, floatsPerSlot: 36, label: 'normal.batch.clipping' },
   });
   attachObjectCore(renderer, stableTable, batchTable, modelSlot => ({
@@ -554,21 +555,21 @@ test('NormalRenderer uploads clipping storage only for semantic plane changes an
   );
 
   log.length = 0;
-  renderer._writeObjectTableEntry(object, clipping, identity, undefined, renderer.objectTable);
+  renderer._writeObjectTableEntry(object, new Geometry3D({ positions: new Float32Array(9) }), clipping, identity, undefined, renderer.objectTable, true);
   renderer.objectTable.flushUploads();
   assert.equal(clippingWrites().length, 1);
 
-  renderer._writeObjectTableEntry(object, clipping, identity, undefined, renderer.objectTable);
+  renderer._writeObjectTableEntry(object, new Geometry3D({ positions: new Float32Array(9) }), clipping, identity, undefined, renderer.objectTable, true);
   renderer.objectTable.flushUploads();
   assert.equal(clippingWrites().length, 1, 'a second view must reuse unchanged clipping storage');
 
   clipping.setPlane(0, { normal: [2, 0, 0], constant: -1 });
-  renderer._writeObjectTableEntry(object, clipping, identity, undefined, renderer.objectTable);
+  renderer._writeObjectTableEntry(object, new Geometry3D({ positions: new Float32Array(9) }), clipping, identity, undefined, renderer.objectTable, true);
   renderer.objectTable.flushUploads();
   assert.equal(clippingWrites().length, 1, 'an equivalent normalized plane must not upload');
 
   clipping.setPlane(0, { normal: [1, 0, 0], constant: -0.25 });
-  renderer._writeObjectTableEntry(object, clipping, identity, undefined, renderer.objectTable);
+  renderer._writeObjectTableEntry(object, new Geometry3D({ positions: new Float32Array(9) }), clipping, identity, undefined, renderer.objectTable, true);
   renderer.objectTable.flushUploads();
   assert.equal(clippingWrites().length, 2, 'a semantic plane change must upload exactly once');
   assert.equal(
@@ -580,13 +581,8 @@ test('NormalRenderer uploads clipping storage only for semantic plane changes an
 
 test('NormalRenderer collapses contiguous portable object slots into an instanced draw', () => {
   const renderer = new NormalRenderer();
-  attachObjectCore(renderer, {}, { bindGroup: {} });
-  renderer.sceneFrameBinding = { bindGroup: {} };
-  renderer._prepareObject = () => ({
-    geoData: { indexBuf: {}, indexFormat: 'uint16', indexCount: 3 },
-    matData: { paramsBindGroup: {} },
-  });
-  renderer._getPipeline = () => ({});
+  const device = createAuditGpuDevice();
+  renderer.prepare({ device, format: 'rgba8unorm', getDepthFormat: () => 'depth24plus' });
 
   const draws = [];
   const pass = {
@@ -605,10 +601,11 @@ test('NormalRenderer collapses contiguous portable object slots into an instance
   const identity = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
   const items = [1, 2, 3].map(entityId => ({ entityId, geometry, material, worldMatrix: identity }));
 
-  renderer.renderBatch(pass, items, 0, items.length, {
-    gpuUploadEnabled: false,
-    getObjectSlot: index => index + 7,
-  });
+  const batch = { gpuUploadEnabled: false, getObjectSlot: index => index + 7 };
+  renderer.prepareObjects(items, 0, items.length, 0, batch);
+  renderer.flushUploads();
+  renderer.renderBatch(pass, items, 0, items.length, batch);
+  renderer.destroy();
 
   assert.deepEqual(draws, [[3, 3, 0, 0, 7]]);
 });
@@ -673,13 +670,15 @@ test('DepthRenderer batches shared deformation bindings and falls back for incom
   ]);
 });
 
-test('PBR and Blinn batch renderers consume source ranges and derive indirect offsets from source indices', () => {
+test('PBR and Blinn batch renderers consume source ranges and derive indirect offsets from source indices', t => {
   const geometry = new Geometry3D({
     positions: new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0]),
   });
   const identity = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
-  const batchBuffer = {};
+  const batchBuffer = { gpuUploadEnabled: true };
   const verifyRenderer = (renderer, material) => {
+    renderer.prepare({ device: createAuditGpuDevice(), format: 'rgba8unorm', getDepthFormat: () => 'depth24plus' });
+    t.after(() => renderer.destroy());
     const calls = [];
     renderer._renderItem = (_pass, entityId, itemGeometry, itemMaterial, _clippingPlanes, worldMatrix, buffer, batchIndex) => {
       calls.push([entityId, itemGeometry, itemMaterial, worldMatrix, buffer, batchIndex]);

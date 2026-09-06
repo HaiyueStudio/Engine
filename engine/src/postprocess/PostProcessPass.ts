@@ -12,6 +12,7 @@ import { createRenderPipelineAsync, type PipelineWarmupPlan } from '../renderer/
 export interface PostProcessSceneTextures {
   depth?: GPUTexture | undefined;
   normal?: GPUTexture | undefined;
+  /** rgba16float: unjittered current-minus-previous UV, previous linear depth, validity (1 valid, -1 reset, 0 uncovered). */
   motion?: GPUTexture | undefined;
   outlineMask?: GPUTexture | undefined;
   outlineVisibleMask?: GPUTexture | undefined;
@@ -89,7 +90,7 @@ export abstract class PostProcessPass {
   ): boolean { return false; }
 
   /** Revision used to invalidate renderer-owned motion history after cuts or teleports. */
-  getMotionHistoryRevision(): number { return 0; }
+  getMotionHistoryRevision(_viewKey?: string): number { return 0; }
 
   /** Called when the viewport dimensions change.  Override to recreate sized resources. */
   resize(

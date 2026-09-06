@@ -120,7 +120,7 @@ function definitions(): Readonly<Record<ProductionMaterialLightingOperation, Def
       ...(transmission ? ['framebuffer-transmission'] : []),
     ],
     [
-      'material-lighting-abi-v1', 'deformation-abi-v1', 'eight-light-cap',
+      'material-lighting-abi-v1', 'deformation-abi-v1', 'eight-light-cap', 'scene-linear-hdr',
       'three-directional-shadow-cap', 'morph-before-skin', 'world-space-clipping',
       `clearcoat-${clearcoat ? 'enabled' : 'disabled'}`,
       `transmission-${transmission ? 'enabled' : 'disabled'}`,
@@ -138,7 +138,7 @@ function definitions(): Readonly<Record<ProductionMaterialLightingOperation, Def
       positionNormalUvBuffers(),
       litVaryings(false),
       ['storage-buffer'],
-      ['material-lighting-abi-v1', 'eight-light-cap', 'fog-after-lighting', 'world-space-clipping'],
+      ['material-lighting-abi-v1', 'eight-light-cap', 'fog-after-lighting', 'world-space-clipping', 'scene-linear-hdr'],
     ),
     toon: definition(
       [scene, clippingPlanes, specialize(pbrShadow, { MAX_DIRECTIONAL_SHADOWS: '1u' }), specialize(toon, {

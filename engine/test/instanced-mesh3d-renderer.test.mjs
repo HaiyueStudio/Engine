@@ -1,3 +1,4 @@
+import { createAuditGpuDevice } from '../../scripts/benchmark/real-renderer-audit-device.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { InstancedMaterial } from '../dist/material.js';
@@ -97,9 +98,7 @@ test('InstancedMesh3DRenderer preserves identity indices across incremental grow
 
 test('InstancedMesh3DRenderer shares the neutral PBR environment semantics', () => {
   const renderer = new InstancedMesh3DRenderer();
-  renderer.engine = { device: { queue: { writeBuffer() {} } } };
-  renderer.lightBuf = {};
-  renderer.environmentBuf = {};
+  renderer.prepare({ device: createAuditGpuDevice() });
 
   renderer.updateLighting([], null, 0);
   assert.deepEqual(Array.from(renderer._environmentData), [
@@ -112,4 +111,5 @@ test('InstancedMesh3DRenderer shares the neutral PBR environment semantics', () 
   assert.ok(Math.abs(renderer._environmentData[0] - renderer._environmentData[2]) < 1e-7);
   assert.ok(Math.abs(renderer._environmentData[4] - renderer._environmentData[6]) < 1e-7);
   assert.equal(renderer._environmentData[8], 1);
+  renderer.destroy();
 });

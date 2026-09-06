@@ -23,6 +23,7 @@ export class Mesh3DPipelineFactory {
     private readonly _skinnedShaderModule: GPUShaderModule,
     private readonly _pipelineLayout: GPUPipelineLayout,
     private readonly _skinnedPipelineLayout: GPUPipelineLayout,
+    private readonly _colorFormat?: () => GPUTextureFormat,
   ) {}
 
   create(options: Mesh3DPipelineOptions): GPURenderPipeline {
@@ -30,7 +31,7 @@ export class Mesh3DPipelineFactory {
   }
 
   descriptor(options: Mesh3DPipelineOptions): GPURenderPipelineDescriptor {
-    const { format } = this._engine;
+    const format = this._colorFormat?.() ?? this._engine.format;
     const skinned = options.skinned ?? false;
     return {
       layout: skinned ? this._skinnedPipelineLayout : this._pipelineLayout,

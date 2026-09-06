@@ -1,3 +1,4 @@
+import { auxiliaryCullMode, auxiliaryFrontFace, auxiliaryUsesDeformation, MATERIAL_COVERAGE_LAYOUT, MaterialCoverageBindings, type MaterialCoverageResolver } from './AuxiliaryMaterial';
 import { mat4 } from 'wgpu-matrix';
 import type { IEngine } from '../core/IEngine';
 import { getEngineGPUResourceTracker } from '../core/EngineDiagnosticsAccess';
@@ -78,6 +79,7 @@ interface ShadowPipelineVariant {
 }
 
 interface ShadowDrawCaster {
+  readonly coverage: GPUBindGroup;
   readonly sharedGeometry: SharedGeometry3DGPUData;
   readonly pipeline: GPURenderPipeline;
   readonly variant: ShadowPipelineVariant;
@@ -97,6 +99,8 @@ const SHADOW_PIPELINE_VARIANTS: readonly ShadowPipelineVariant[] = Object.freeze
 ]);
 
 export class ShadowMapRenderer extends BaseRenderer {
+  resolveMaterialCoverage: MaterialCoverageResolver = () => null;
+  private coverageBindings!: MaterialCoverageBindings;
   private _engine!: IEngine;
   private _cameraLayout!: GPUBindGroupLayout;
   private _objectLayout!: GPUBindGroupLayout;
@@ -156,7 +160,8 @@ export class ShadowMapRenderer extends BaseRenderer {
       { binding: 0, visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
       { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
     ] });
-    const emptyLayout = device.createBindGroupLayout({ entries: [] });
+    const coverageLayout = device.createBindGroupLayout({ entries: [...MATERIAL_COVERAGE_LAYOUT] });
+    this.coverageBindings = new MaterialCoverageBindings(device, coverageLayout);
     this._skinLayout = device.createBindGroupLayout({
       entries: [
         { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } },
@@ -164,8 +169,8 @@ export class ShadowMapRenderer extends BaseRenderer {
         { binding: 2, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } },
       ],
     });
-    const layouts = [this._cameraLayout, this._objectLayout];
-    const skinnedLayouts = [this._cameraLayout, this._objectLayout, emptyLayout, this._skinLayout];
+    const layouts = [this._cameraLayout, this._objectLayout, coverageLayout];
+    const skinnedLayouts = [this._cameraLayout, this._objectLayout, coverageLayout, this._skinLayout];
     const generated = SHADOW_PIPELINE_VARIANTS.map(variant => getBuiltinDeformationShader(
       device,
       variant.pass,
@@ -233,6 +238,17 @@ export class ShadowMapRenderer extends BaseRenderer {
         this._engine.device,
       );
     }
+  }
+
+  /** Refresh texture readiness even when the shadow geometry cache hits. */
+  prepareMaterialCoverage(items: readonly Render3DRenderItem[]): number {
+    let revision = 2166136261;
+    for (const item of items) {
+      if (!item.material) continue;
+      const resources = this.resolveMaterialCoverage(item.material);
+      if (resources) revision = Math.imul(revision ^ item.material.id ^ resources.textureRevision, 16777619);
+    }
+    return revision >>> 0;
   }
 
   get targetRevision(): number { return this._targetRevision; }
@@ -323,7 +339,7 @@ export class ShadowMapRenderer extends BaseRenderer {
       if (!this._liveEntities.has(item.entityId) || !item.geometry || !item.material || !item.worldMatrix) continue;
       const geometry = item.geometry;
       const sharedGeometry = this._geometryCache.ensure(geometry, this);
-      const deformationSupported = supportsShadowDeformation(item.material);
+      const deformationSupported = auxiliaryUsesDeformation(item.material);
       const morph = deformationSupported && geometry.morphUseGpu && geometry.hasMorphTargets;
       const skinned = deformationSupported && geometry.skinning !== null;
       const deformation = morph || skinned
@@ -336,7 +352,7 @@ export class ShadowMapRenderer extends BaseRenderer {
       const object = objects.ensure(item.entityId);
       this._writeObject(objectTable, object, geometry, item.clippingPlanes, item.worldMatrix, morph);
       const variant = this._variant(morph, skinned);
-      const cullMode = resolveCullMode(item.material) ?? geometry.cullMode ?? 'back';
+      const cullMode = resolveCullMode(item.material) ?? auxiliaryCullMode(geometry, item.material);
       const objectSlot = object.modelSlot;
       const previousCaster = this._drawCasters[this._drawCasters.length - 1];
       if (previousCaster && objectSlot < previousCaster.objectSlot) {
@@ -344,7 +360,8 @@ export class ShadowMapRenderer extends BaseRenderer {
       }
       this._drawCasters.push({
         sharedGeometry,
-        pipeline: this._getPipeline(geometry, cullMode, variant),
+        pipeline: this._getPipeline(geometry, cullMode, variant, item.material),
+        coverage: this.coverageBindings.get(this.resolveMaterialCoverage(item.material)),
         variant,
         cullMode,
         deformation,
@@ -605,6 +622,7 @@ export class ShadowMapRenderer extends BaseRenderer {
     if (
       first.pipeline !== next.pipeline
       || first.variant !== next.variant
+      || first.coverage !== next.coverage
       || first.cullMode !== next.cullMode
       || first.sharedGeometry.positionBuf !== next.sharedGeometry.positionBuf
       || first.sharedGeometry.vertexCount !== next.sharedGeometry.vertexCount
@@ -637,6 +655,10 @@ export class ShadowMapRenderer extends BaseRenderer {
   ): void {
     const { sharedGeometry, deformation, variant } = caster;
     pass.setPipeline(caster.pipeline);
+    pass.setBindGroup(2, caster.coverage);
+    const uvSlot = variant.morph ? 5 : 1;
+    pass.setVertexBuffer(uvSlot, sharedGeometry.uvBuf);
+    pass.setVertexBuffer(uvSlot + 1, sharedGeometry.uv1Buf ?? sharedGeometry.uvBuf);
     if (variant.skinned && deformation?.skinBindGroup) pass.setBindGroup(3, deformation.skinBindGroup);
     pass.setVertexBuffer(0, sharedGeometry.positionBuf);
     if (variant.morph && deformation) {
@@ -659,9 +681,10 @@ export class ShadowMapRenderer extends BaseRenderer {
     geometry: Geometry3D,
     cullMode: GPUCullMode,
     variant: ShadowPipelineVariant,
+    material: Material,
   ): GPURenderPipeline {
     const topology = geometry.topology ?? 'triangle-list';
-    const frontFace = geometry.frontFace ?? 'ccw';
+    const frontFace = auxiliaryFrontFace(geometry, material);
     const stripIndexFormat = getStripIndexFormat(geometry);
     const key = this._pipelineKey(topology, cullMode, frontFace, stripIndexFormat, variant);
     const shader = this._shaderModules[(variant.morph ? 1 : 0) | (variant.skinned ? 2 : 0)]!;
@@ -703,16 +726,22 @@ export class ShadowMapRenderer extends BaseRenderer {
         });
       }
     }
+    buffers.push(
+      { arrayStride: 8, attributes: [{ shaderLocation: 5, offset: 0, format: 'float32x2' }] },
+      { arrayStride: 8, attributes: [{ shaderLocation: 6, offset: 0, format: 'float32x2' }] },
+    );
     return {
       label: `ShadowMapRenderer.${variant.skinned ? 'skinned' : 'static'}${variant.morph ? '.morph' : ''}`,
       layout: variant.skinned ? this._skinnedPipelineLayout : this._pipelineLayout,
       vertex: { module: shader, entryPoint: 'vs_main', buffers },
+      fragment: { module: shader, entryPoint: 'fs_main', targets: [] },
       primitive: createPrimitiveState(topology, cullMode, frontFace, stripIndexFormat),
       depthStencil: { format: 'depth32float', depthWriteEnabled: true, depthCompare: 'less' },
     };
   }
 
   destroy(): void {
+    this.coverageBindings?.destroy();
     for (const buffer of this._cameraBuffers) buffer.destroy();
     this._cameraBuffers.length = 0;
     this._cameraBindGroups.length = 0;
@@ -744,8 +773,4 @@ function compareShadowCasterObjectSlots(a: ShadowDrawCaster, b: ShadowDrawCaster
 
 function compareEntityIds(a: number, b: number): number {
   return a - b;
-}
-
-function supportsShadowDeformation(material: Material): boolean {
-  return material.type === 'basic' || material.type === 'pbr-metallic-roughness';
 }

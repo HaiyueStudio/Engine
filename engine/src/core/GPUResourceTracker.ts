@@ -199,6 +199,7 @@ export class GPUResourceTracker {
   private readonly _resourcesByOwner = new Map<GPUResourceOwner, Set<GPUTrackedResource>>();
   private readonly _instrumentedDevices = new WeakSet<GPUDevice>();
   private readonly _instrumentedQueues = new WeakSet<GPUQueue>();
+  private readonly _bundleCounters = new WeakMap<GPURenderBundle, { draws: number; pipelineSwitches: number }>();
   private readonly _stats = new Map<GPUTrackedResourceType, MutableResourceTypeStats>();
   private readonly _caches = new Map<string, MutableCacheStats>();
   private readonly _releasedOwners = new Set<GPUResourceOwner>();
@@ -270,6 +271,7 @@ export class GPUResourceTracker {
     const createComputePipelineAsync = typeof device.createComputePipelineAsync === 'function' ? device.createComputePipelineAsync.bind(device) : null;
     const createQuerySet = device.createQuerySet.bind(device);
     const createCommandEncoder = typeof device.createCommandEncoder === 'function' ? device.createCommandEncoder.bind(device) : null;
+    const createRenderBundleEncoder = device.createRenderBundleEncoder?.bind(device);
     try {
       Object.defineProperties(device, {
         createBuffer: {
@@ -373,6 +375,11 @@ export class GPUResourceTracker {
             return this.trackQuerySet(resource, { owner: this._activeOwner ?? owner, label: descriptor.label ?? 'GPUQuerySet' });
           },
         },
+        ...(createRenderBundleEncoder ? { createRenderBundleEncoder: {
+          configurable: true,
+          value: (descriptor: GPURenderBundleEncoderDescriptor): GPURenderBundleEncoder =>
+            this._instrumentRenderBundleEncoder(createRenderBundleEncoder(descriptor)),
+        } } : {}),
         ...(createCommandEncoder ? { createCommandEncoder: {
           configurable: true,
           value: (descriptor?: GPUCommandEncoderDescriptor): GPUCommandEncoder => this._instrumentCommandEncoder(
@@ -688,7 +695,44 @@ export class GPUResourceTracker {
     this._instrumentCounterMethod(pass, 'drawIndirect', 'draws');
     this._instrumentCounterMethod(pass, 'drawIndexedIndirect', 'draws');
     this._instrumentCounterMethod(pass, 'setPipeline', 'pipelineSwitches');
+    const execute = pass.executeBundles?.bind(pass);
+    if (execute) {
+      try {
+        Object.defineProperty(pass, 'executeBundles', { configurable: true, value: (bundles: Iterable<GPURenderBundle>) => {
+          const list = Array.isArray(bundles) ? bundles : Array.from(bundles);
+          for (const bundle of list) {
+            const counts = this._bundleCounters.get(bundle);
+            if (counts) {
+              this._frameDiagnostics?.increment('draws', counts.draws);
+              this._frameDiagnostics?.increment('pipelineSwitches', counts.pipelineSwitches);
+            }
+          }
+          execute(list);
+        } });
+      } catch { /* Non-extensible wrappers keep best-effort diagnostics. */ }
+    }
     return pass;
+  }
+
+  private _instrumentRenderBundleEncoder(encoder: GPURenderBundleEncoder): GPURenderBundleEncoder {
+    if (!this._frameDiagnostics?.enabled) return encoder;
+    const counts = { draws: 0, pipelineSwitches: 0 };
+    try {
+      for (const name of ['draw', 'drawIndexed', 'drawIndirect', 'drawIndexedIndirect', 'setPipeline'] as const) {
+        const bound = encoder[name].bind(encoder) as (...args: unknown[]) => void;
+        Object.defineProperty(encoder, name, { configurable: true, value: (...args: unknown[]) => {
+          counts[name === 'setPipeline' ? 'pipelineSwitches' : 'draws']++;
+          bound(...args);
+        } });
+      }
+      const finish = encoder.finish.bind(encoder);
+      Object.defineProperty(encoder, 'finish', { configurable: true, value: (descriptor?: GPURenderBundleDescriptor) => {
+        const bundle = finish(descriptor);
+        this._bundleCounters.set(bundle, counts);
+        return bundle;
+      } });
+    } catch { /* Non-extensible wrappers keep best-effort diagnostics. */ }
+    return encoder;
   }
 
   private _instrumentComputePass(pass: GPUComputePassEncoder): GPUComputePassEncoder {

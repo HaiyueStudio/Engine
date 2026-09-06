@@ -1,4 +1,5 @@
 import type { IEngine } from '../core/IEngine';
+import { SCENE_COLOR_FORMAT } from '../postprocess/SceneColor';
 import type { Entity } from '../ecs/Entity';
 import { System } from '../ecs/System';
 import type { World } from '../ecs/World';
@@ -46,7 +47,7 @@ export class ToonRenderSystem extends System {
     render3DSystem.registerMaterialRenderer<ToonMaterial>({
       materialType: ToonMaterial,
       receivesDirectionalShadow: true,
-      shadowCullMode: material => material.doubleSided ? 'none' : 'back',
+      shadowCullMode: material => material.doubleSided ? 'none' : null,
       isTransparent: material => material.alphaMode === 'blend',
       transparentDepthSort: material => material.alphaMode === 'blend',
       beginView: context => this._requireRenderer().beginView(context),
@@ -123,6 +124,7 @@ export class ToonRenderSystem extends System {
   private _requireRenderer(): ToonRenderer {
     if (!this._renderer) {
       this._renderer = new ToonRenderer();
+      this._renderer.colorFormat = SCENE_COLOR_FORMAT;
       this._renderer.prepare(this._engine);
     }
     return this._renderer;

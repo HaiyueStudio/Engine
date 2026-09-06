@@ -1,0 +1,36 @@
+{
+  "contractVersion": 1,
+  "implementation": "scene-linear-hdr-with-unified-output",
+  "adr": "docs/for-ai/adr/0096-scene-linear-hdr-output.md",
+  "scene": {
+    "format": "rgba16float",
+    "transmission": "linear",
+    "reflection": "linear",
+    "history": "before-exposure"
+  },
+  "output": {
+    "uniformBytes": 16,
+    "toneMapping": "reinhard",
+    "exposure": 1,
+    "transfer": "piecewise-srgb-or-hardware",
+    "floatingPointTarget": "scene-linear-passthrough",
+    "staticPassCount": 1,
+    "runtimePipelineVariantsPerFormat": 4
+  },
+  "alpha": {
+    "opaqueCoverage": 1,
+    "basicUniformBytes": 48,
+    "opaqueFieldOffset": 40,
+    "blendedScene": "premultiplied",
+    "additiveZeroCoverage": "preserved",
+    "toonOpaqueFlagOffset": 108
+  },
+  "artifact": {
+    "postprocessHash": "dde4eed317ff3c19f7c664498c2f35674a685676084a86c3ef658656be352454",
+    "deformationHash": "6c81685a8a108f057c8752b56f207432516b5e50a0ea6d21a9971005a1d9b72c",
+    "materialLightingHash": "b448cc48ea296bdd03b4d994d2c70522cb37ae2e96c1cb975be13e4302c9cc5d",
+    "simple3dHash": "6df5e6cfc4b2276213869335c16ed39e0553d87bdc0f168616226965bc31f451",
+    "postprocessSourceSha256": "53ba55eee8a6d26268234d39d34fd1562257738a87310ebd4dc41ad088e26dd0"
+  },
+  "postprocessPassCount": 15
+}

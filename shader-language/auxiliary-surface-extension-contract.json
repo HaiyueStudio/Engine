@@ -1,0 +1,25 @@
+{
+  "contractVersion": 1,
+  "implementation": "coverage-compatible-auxiliary-mrt",
+  "adr": "docs/for-ai/adr/0097-auxiliary-mrt-and-frame-resource-dependencies.md",
+  "motion": {
+    "objectUniformBytes": 272,
+    "normalEnabledOffset": 236,
+    "vertexBufferCount": 8,
+    "interleavedMorphStride": 24,
+    "outputs": ["temporal-motion-rgba16float", "optional-linear-depth-r32float", "optional-view-normal-rgba16float"],
+    "runtimeAttachmentVariants": 4
+  },
+  "normal": {
+    "parameterBytes": 16,
+    "nearOffset": 4,
+    "farOffset": 8,
+    "outputs": ["normal", "optional-linear-depth-r32float"],
+    "runtimeAttachmentVariants": 2
+  },
+  "additionalStaticPasses": 0,
+  "artifact": {
+    "deformationHash": "c423d2b9c3b7aa02f51cc300c30f280d972bb8ee300cf712dfc657f1ee830462",
+    "simple3dHash": "1ed297f225816718ce15c7402d7c5789490d5870144f0556f80b5f82125db841"
+  }
+}

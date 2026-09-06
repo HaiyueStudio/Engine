@@ -196,10 +196,6 @@ fn resolveClearcoatNormal(input: VertexOutput) -> vec3<f32> {
   let bitangent = normalize(cross(n, tangent));
   return normalize(mat3x3<f32>(tangent, bitangent, n) * mapNormal);
 }
-fn inverseDisplayToneMap(value: vec3<f32>) -> vec3<f32> {
-  let linearDisplay = pow(clamp(value, vec3<f32>(0.0), vec3<f32>(0.9999)), vec3<f32>(2.2));
-  return linearDisplay / max(vec3<f32>(0.0001), vec3<f32>(1.0) - linearDisplay);
-}
 fn sampleTransmissionFramebuffer(uv: vec2<f32>, roughness: f32) -> vec3<f32> {
   let dimensions = vec2<f32>(textureDimensions(transmissionFramebuffer));
   let radius = roughness * roughness * 8.0;
@@ -209,7 +205,7 @@ fn sampleTransmissionFramebuffer(uv: vec2<f32>, roughness: f32) -> vec3<f32> {
   let x1 = textureSampleLevel(transmissionFramebuffer, environmentSampler, clamp(uv - vec2<f32>(radius * texel.x, 0.0), vec2<f32>(0.0), vec2<f32>(1.0)), 0.0).rgb;
   let y0 = textureSampleLevel(transmissionFramebuffer, environmentSampler, clamp(uv + vec2<f32>(0.0, radius * texel.y), vec2<f32>(0.0), vec2<f32>(1.0)), 0.0).rgb;
   let y1 = textureSampleLevel(transmissionFramebuffer, environmentSampler, clamp(uv - vec2<f32>(0.0, radius * texel.y), vec2<f32>(0.0), vec2<f32>(1.0)), 0.0).rgb;
-  return inverseDisplayToneMap((center * 4.0 + x0 + x1 + y0 + y1) / 8.0);
+  return (center * 4.0 + x0 + x1 + y0 + y1) / 8.0;
 }
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
@@ -474,7 +470,6 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
   var emissive = material.emissiveNormalScale.rgb;
   if ((material.flags.z & 4u) != 0u) { emissive *= textureSample(emissiveTexture, emissiveSampler, textureUv(input, material.emissiveMapping)).rgb; }
   let color = direct + ibl + emissive;
-  let mapped = color / (color + vec3<f32>(1.0));
-  let displayColor = pow(mapped, vec3<f32>(1.0 / 2.2));
-  return vec4<f32>(applyFog(displayColor, sceneFrame.fog, sceneFrame.eyePosition.xyz, input.worldPos), base.a);
+  base.a = select(1.0, base.a, material.flags.w == 2u);
+  return vec4<f32>(applyFog(color, sceneFrame.fog, sceneFrame.eyePosition.xyz, input.worldPos), base.a);
 }

@@ -13,7 +13,8 @@ import { alignUp4 } from '../utils/align';
 import { AssetManager, type AssetHandle } from '../assets/AssetManager';
 import type { MaterialGpuDrivenBatch, MaterialRenderBatchItem } from './MaterialRendererRegistry';
 import type { GpuDrivenBatchBuffer } from './GpuDrivenBatchBuffer';
-import { forEachDirectInstanceBatchRun } from './DirectInstanceBatchRuns';
+import { forEachDirectInstanceBatchRun, forEachIndirectBatchRun } from './DirectInstanceBatchRuns';
+import type { RenderBatchBindingEncoder } from './IndirectBatchBundleCache';
 import { RendererObjectTable } from './RendererObjectTable';
 import { RendererCacheMap, RendererObjectSlotCache } from './RendererCacheMap';
 import { Mesh3DPipelineFactory } from './Mesh3DPipelineFactory';
@@ -192,6 +193,7 @@ export class Mesh3DRenderer extends BaseRenderer {
       this.skinnedShaderModule,
       this.pipelineLayout,
       this.skinnedPipelineLayout,
+      () => this.colorFormat ?? engine.format,
     );
 
     this.rendererCore = new ParameterizedRendererCore({
@@ -489,6 +491,29 @@ export class Mesh3DRenderer extends BaseRenderer {
       return;
     }
 
+    let opaqueRange = true;
+    for (let index = first; index < end; index++) {
+      if (items[index]?.material?.blending !== 'none') { opaqueRange = false; break; }
+    }
+    if (this.rendererCore.uploadsPrepared && opaqueRange) {
+      forEachIndirectBatchRun(items, first, count, batchBuffer, run => {
+        const item = run.item;
+        const matData = this._ensureBatchMaterialData(item.material);
+        const { geoData, entData } = this._ensureGeometryEntityResources(item.entityId,
+          item.geometry, item.clippingPlanes, item.worldMatrix, run.firstInstance, this.batchObjectTable);
+        const bindings = this.indirectBatches.begin();
+        bindings.setPipeline(this._getOpaquePipeline(item.geometry, item.material));
+        bindings.setBindGroup(0, this.sceneFrameBinding.bindGroup, this.cameraDynamicOffset);
+        bindings.setBindGroup(2, matData.bindGroup);
+        this._bindGeometry(bindings, geoData, entData, this.batchObjectTable);
+        this.indirectBatches.draw(passEncoder, this.engine.device, batchBuffer,
+          firstBatchIndex + run.firstBatch - first, run.instanceCount, geoData.indexBuf,
+          geoData.indexFormat, [this.colorFormat ?? this.engine.format],
+          this.engine.getDepthFormat(this.reverseZ), this.msaaSamples);
+      }, firstBatchIndex);
+      return;
+    }
+
     if (!skipDepthPrepass) {
       for (let itemIndex = first; itemIndex < end; itemIndex++) {
         const item = items[itemIndex];
@@ -671,7 +696,7 @@ export class Mesh3DRenderer extends BaseRenderer {
   }
 
   private _bindGeometry(
-    passEncoder: GPURenderPassEncoder,
+    passEncoder: RenderBatchBindingEncoder,
     geoData: GeoGPUData,
     entData: EntityGPUData,
     objectTable: RendererObjectTable = this.objectTable,
@@ -681,7 +706,7 @@ export class Mesh3DRenderer extends BaseRenderer {
     passEncoder.setVertexBuffer(0, geoData.positionBuf);
     passEncoder.setVertexBuffer(1, geoData.normalBuf);
     passEncoder.setVertexBuffer(2, geoData.uvBuf);
-    for (let i = 0; i < 4; i++) passEncoder.setVertexBuffer(3 + i, geoData.morphPositionBufs[i]);
+    for (let i = 0; i < 4; i++) passEncoder.setVertexBuffer(3 + i, geoData.morphPositionBufs[i]!);
   }
 
   private _draw(passEncoder: GPURenderPassEncoder, geoData: GeoGPUData, gpuDrivenBatch?: MaterialGpuDrivenBatch | undefined, firstInstance = 0): void {
@@ -771,7 +796,7 @@ export class Mesh3DRenderer extends BaseRenderer {
   }
 
   private _writeMaterialUniform(matData: MatGPUData, material: BasicMaterial): void {
-    material.color.writeSRGB(matData.uniformF32, 0);
+    material.color.writeLinear(matData.uniformF32, 0);
     const r = matData.uniformF32[0]!;
     const g = matData.uniformF32[1]!;
     const b = matData.uniformF32[2]!;
@@ -782,6 +807,7 @@ export class Mesh3DRenderer extends BaseRenderer {
     const color = matData.lastColor;
     const emissiveFactor = matData.lastEmissiveFactor;
     const changed =
+      matData.uniformU32[10] !== (material.blending === 'none' ? 1 : 0) ||
       matData.uniformDirty ||
       color[0] !== r ||
       color[1] !== g ||
@@ -802,7 +828,7 @@ export class Mesh3DRenderer extends BaseRenderer {
     matData.uniformF32[7] = 1;
     matData.uniformU32[8] = useTexture;
     matData.uniformU32[9] = useEmissiveTexture;
-    matData.uniformU32[10] = 0;
+    matData.uniformU32[10] = material.blending === 'none' ? 1 : 0;
     matData.uniformU32[11] = 0;
     this.engine.device.queue.writeBuffer(matData.colorBuf, 0, matData.uniformData);
 
@@ -1116,7 +1142,7 @@ export class Mesh3DRenderer extends BaseRenderer {
   private async _loadTexture(
     src: string | ImageBitmap | HTMLCanvasElement | HTMLImageElement | Exclude<MaterialTextureSource, string | ImageBitmap | HTMLCanvasElement | HTMLImageElement | GPUTexture | SampleableTextureSource | null>,
   ): Promise<AssetHandle<GPUTexture>> {
-    return this.assetManager.loadTexture(src, { signal: this.rendererCore.signal });
+    return this.assetManager.loadTexture(src, { format: 'rgba8unorm-srgb', signal: this.rendererCore.signal });
   }
 
   private _uploadGeometry(geo: Geometry3D): GeoGPUData {

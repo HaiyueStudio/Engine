@@ -229,8 +229,9 @@ export class InstancedMesh3DRenderSystem extends System {
     const viewProj = this._viewProjMatrix;
     cameraFrame.frustum.copyPlanesTo(this._frustumPlanes);
 
-    const sceneEnvironment = getSceneRenderEnvironment(frameData, world);
-    this.renderer.updateCamera(getSceneFrameUniformSnapshot(cameraFrame, sceneEnvironment.fog), context);
+    const sceneFrame = getSceneFrameUniformSnapshot(cameraFrame, getSceneRenderEnvironment(frameData, world).fog);
+    const sceneEnvironment = getSceneRenderEnvironment(frameData, world, sceneFrame);
+    this.renderer.updateCamera(sceneFrame, context);
     this.renderer.updateLighting(
       sceneEnvironment.pbrLights,
       sceneEnvironment.environmentLight,

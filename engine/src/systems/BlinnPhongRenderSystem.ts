@@ -7,6 +7,7 @@ import { BlinnPhongRenderer } from '../renderer/BlinnPhongRenderer';
 import { Render3DSystem } from './Render3DSystem';
 import type { InternalMaterialRenderContext, MaterialRenderContext } from '../renderer/MaterialRendererRegistry';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
+import { SCENE_COLOR_FORMAT } from '../postprocess/SceneColor';
 
 /**
  * @deprecated Configure Render3DSystem instead. BlinnPhongMaterial support is enabled by default.
@@ -145,6 +146,7 @@ export class BlinnPhongRenderSystem extends System {
   private _requireRenderer(): BlinnPhongRenderer {
     if (!this._renderer) {
       this._renderer = new BlinnPhongRenderer();
+      this._renderer.colorFormat = SCENE_COLOR_FORMAT;
       this._renderer.prepare(this.engine);
     }
     return this._renderer;

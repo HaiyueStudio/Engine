@@ -99,7 +99,7 @@ async function runFixture() {
       fragment: {
         module: runtime.module,
         entryPoint: runtime.pass.entryPoints.fragment,
-        targets: [{ format: passId === 'motion-vector' ? 'rg16float' : 'rgba8unorm' }],
+        targets: [{ format: passId === 'motion-vector' ? 'rgba16float' : 'rgba8unorm' }],
       },
       primitive: { topology: 'triangle-list' },
     });
@@ -159,7 +159,7 @@ async function renderOutlinePixel(device, materialized) {
       { binding: 0, resource: { buffer: objectBuffer } },
       { binding: 1, resource: { buffer: clippingBuffer } },
     ] }),
-    device.createBindGroup({ layout: layouts[2], entries: [] }),
+    opaqueCoverageGroup(device, layouts[2]),
     device.createBindGroup({ layout: layouts[3], entries: [
       { binding: 0, resource: { buffer: matrixBuffer } },
       { binding: 1, resource: { buffer: joints } },
@@ -169,7 +169,7 @@ async function renderOutlinePixel(device, materialized) {
   const positions = vertex(device, [-1.5, -0.6, 0, -0.5, -0.6, 0, -1, 0.6, 0]);
   const morph = vertex(device, [1, 0, 0, 1, 0, 0, 1, 0, 0]);
   const zero = vertex(device, new Array(9).fill(0));
-  const rendered = await renderAndRead(device, runtime, groups, [positions, morph, zero, zero, zero], 'rgba8unorm', 'rgba8');
+  const rendered = await renderAndRead(device, runtime, groups, [positions, morph, zero, zero, zero, zero, zero], 'rgba8unorm', 'rgba8');
   destroy([sceneBuffer, objectBuffer, clippingBuffer, matrixBuffer, joints, weights, positions, morph, zero, rendered.target, rendered.readback]);
   return rendered.pixel;
 }
@@ -177,12 +177,14 @@ async function renderOutlinePixel(device, materialized) {
 async function renderMotionPixel(device, materialized) {
   const { runtime, layouts } = materialized;
   const sceneBuffer = buffer(device, sceneFrameData(8, 8), GPUBufferUsage.UNIFORM);
-  const object = new Float32Array(60);
+  const object = new Float32Array(68);
   object.set(identity(), 0);
   const previous = identity();
   previous[12] = -0.5;
   object.set(previous, 16);
   object.set(identity(), 32);
+  object[58] = 1;
+  object.set([0, 1, 1, 0], 60);
   const objectBuffer = buffer(device, object, GPUBufferUsage.UNIFORM);
   const clippingBuffer = buffer(device, new Float32Array(36), GPUBufferUsage.STORAGE);
   const matrixBuffer = buffer(device, identity(), GPUBufferUsage.STORAGE);
@@ -190,10 +192,11 @@ async function renderMotionPixel(device, materialized) {
   const groups = [
     device.createBindGroup({ layout: layouts[0], entries: [{ binding: 0, resource: { buffer: sceneBuffer, size: 272 } }] }),
     device.createBindGroup({ layout: layouts[1], entries: [
-      { binding: 0, resource: { buffer: objectBuffer, size: 240 } },
+      { binding: 0, resource: { buffer: objectBuffer, size: 272 } },
       { binding: 1, resource: { buffer: clippingBuffer } },
     ] }),
-    device.createBindGroup({ layout: layouts[2], entries: [
+    opaqueCoverageGroup(device, layouts[2]),
+    device.createBindGroup({ layout: layouts[3], entries: [
       { binding: 0, resource: { buffer: matrixBuffer } },
       { binding: 1, resource: { buffer: matrixBuffer } },
       { binding: 2, resource: { buffer: attributes } },
@@ -202,8 +205,9 @@ async function renderMotionPixel(device, materialized) {
   ];
   const positions = vertex(device, [-1, -1, 0, 3, -1, 0, -1, 3, 0]);
   const zero = vertex(device, new Array(9).fill(0));
-  const rendered = await renderAndRead(device, runtime, groups, [positions, zero, zero, zero, zero], 'rg16float', 'rg16f');
-  destroy([sceneBuffer, objectBuffer, clippingBuffer, matrixBuffer, attributes, positions, zero, rendered.target, rendered.readback]);
+  const zeroMorph = vertex(device, new Array(18).fill(0));
+  const rendered = await renderAndRead(device, runtime, groups, [positions, zeroMorph, zeroMorph, zeroMorph, zeroMorph, zero, zero, zero], 'rgba16float', 'rgba16f');
+  destroy([sceneBuffer, objectBuffer, clippingBuffer, matrixBuffer, attributes, positions, zero, zeroMorph, rendered.target, rendered.readback]);
   return rendered.pixel;
 }
 
@@ -235,12 +239,23 @@ async function renderAndRead(device, runtime, groups, vertices, format, readKind
   device.queue.submit([encoder.finish()]);
   await readback.mapAsync(GPUMapMode.READ);
   const bytes = new Uint8Array(readback.getMappedRange());
-  const offset = 4 * 256 + 4 * 4;
+  const offset = 4 * 256 + 4 * (readKind === 'rgba16f' ? 8 : 4);
   const pixel = readKind === 'rgba8'
     ? [...bytes.slice(offset, offset + 4)]
     : [halfToFloat(bytes[offset] | (bytes[offset + 1] << 8)), halfToFloat(bytes[offset + 2] | (bytes[offset + 3] << 8))];
   readback.unmap();
   return { pixel, target, readback };
+}
+
+function opaqueCoverageGroup(device, layout) {
+  // Fixture resources are owned by the device and released with it below.
+  const parameters = buffer(device, new Float32Array(48), GPUBufferUsage.UNIFORM);
+  const texture = device.createTexture({ size: [1, 1], format: 'rgba8unorm', usage: GPUTextureUsage.TEXTURE_BINDING });
+  return device.createBindGroup({ layout, entries: [
+    { binding: 1, resource: { buffer: parameters } },
+    { binding: 2, resource: texture.createView() },
+    { binding: 3, resource: device.createSampler() },
+  ] });
 }
 
 function bindingEntry(binding) {

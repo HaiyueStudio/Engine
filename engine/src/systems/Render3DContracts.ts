@@ -14,6 +14,10 @@ import type { ClippingPlanes } from '../components/ClippingPlanes';
 /** Public construction policy for the 3-D render orchestrator. */
 export interface Render3DSystemOptions {
   clearColor?: { r: number; g: number; b: number; a: number };
+  /** Display-stage exposure multiplier. Floating-point captures preserve scene radiance. */
+  exposure?: number;
+  /** Applied once, after the 3-D post chain. Defaults to reinhard. */
+  toneMapping?: 'none' | 'reinhard';
   reverseZ?: boolean;
   msaaSamples?: 1 | 4;
   viewport?: ViewportRect | null;

@@ -1,4 +1,5 @@
 import type { IEngine } from '../core/IEngine';
+import { SCENE_COLOR_FORMAT } from '../postprocess/SceneColor';
 import type { Entity } from '../ecs/Entity';
 import type { World } from '../ecs/World';
 import type { EntityHierarchyDisabledCache } from '../ecs/utils/hierarchy';
@@ -31,6 +32,7 @@ export class Render3DScenePassRenderer {
   contributePipelineWarmup(plan: PipelineWarmupPlan, reverseZ: boolean, msaaSamples: 1 | 4): void {
     if (!this._skyRenderer) {
       this._skyRenderer = new SkyRenderer();
+      this._skyRenderer.colorFormat = SCENE_COLOR_FORMAT;
       this._skyRenderer.prepare(this._engine);
     }
     this._skyRenderer.reverseZ = reverseZ;
@@ -39,6 +41,7 @@ export class Render3DScenePassRenderer {
 
     if (!this._helperRenderer) {
       this._helperRenderer = new MeshHelperRenderer();
+      this._helperRenderer.colorFormat = SCENE_COLOR_FORMAT;
       this._helperRenderer.prepare(this._engine);
     }
     this._helperRenderer.reverseZ = reverseZ;
@@ -58,6 +61,7 @@ export class Render3DScenePassRenderer {
     if (!sky) return;
     if (!this._skyRenderer) {
       this._skyRenderer = new SkyRenderer();
+      this._skyRenderer.colorFormat = SCENE_COLOR_FORMAT;
       this._skyRenderer.prepare(this._engine);
     }
     this._skyRenderer.reverseZ = reverseZ;
@@ -77,6 +81,7 @@ export class Render3DScenePassRenderer {
     if (helperItems.length < 1) return;
     if (!this._helperRenderer) {
       this._helperRenderer = new MeshHelperRenderer();
+      this._helperRenderer.colorFormat = SCENE_COLOR_FORMAT;
       this._helperRenderer.prepare(this._engine);
     }
     this._helperRenderer.reverseZ = reverseZ;

@@ -9,13 +9,15 @@ export interface RttTextureOptions {
   clearColor?: { r: number; g: number; b: number; a: number };
   msaaSamples?: 1 | 4;
   reverseZ?: boolean;
+  /** Use rgba16float for scene-linear HDR textures sampled by another 3D scene. */
+  format?: GPUTextureFormat;
 }
 
 /**
  * Render-to-texture container.
  *
  * Usage:
- *   const rtt = new RttTexture(engine, { width: 512, height: 384 });
+ *   const rtt = new RttTexture(engine, { width: 512, height: 384, format: 'rgba16float' });
  *
  *   // Populate the off-screen world with systems that use rtt.engine
  *   rtt.world.addSystem(new Render3DSystem(rtt.engine, camEntity));
@@ -46,6 +48,9 @@ export class RttTexture {
       options.width,
       options.height,
       options.clearColor ?? { r: 0.05, g: 0.05, b: 0.1, a: 1 },
+      undefined,
+      undefined,
+      options.format,
     );
     if (options.msaaSamples) this.engine.msaaSamples = options.msaaSamples;
     if (options.reverseZ)    this.engine.reverseZ    = options.reverseZ;

@@ -164,7 +164,7 @@ struct MaterialUniforms {
   emissiveFactor : vec4<f32>,
   useTexture : u32,
   useEmissiveTexture : u32,
-  _pad1    : u32,
+  opaque   : u32,
   _pad2    : u32,
 }
 
@@ -233,5 +233,6 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     let emissive = textureSample(emissiveTexture, baseSampler, input.uv).rgb * material.emissiveFactor.rgb;
     outColor = vec4<f32>(outColor.rgb + emissive, outColor.a);
   }
+  outColor.a = select(outColor.a, 1.0, material.opaque != 0u);
   return vec4<f32>(applyFog(outColor.rgb, sceneFrame.fog, sceneFrame.eyePosition.xyz, input.worldPos), outColor.a);
 }

@@ -1,6 +1,6 @@
 # 0034：动态模糊使用按需的 view-local motion-vector buffer
 
-- 状态：Accepted
+- 状态：Superseded（motion 格式、抖动与历史接口由 [ADR 0095](./0095-motion-reprojected-temporal-antialiasing.md) 更新，其余条款继续适用）
 - 日期：2026-07-22
 
 ## 背景

@@ -1,4 +1,6 @@
+import { ViewLightUniformBuffer, LIGHT_UNIFORM_BYTES, LIGHT_UNIFORM_BINDING } from './ViewLightUniformBuffer';
 import { mat4 } from 'wgpu-matrix';
+import type { MaterialCoverageResources } from './AuxiliaryMaterial';
 import type { AssetHandle, CompressedTextureSourceDescriptor } from '../assets/AssetManager';
 import { AssetManager } from '../assets/AssetManager';
 import type { IEngine } from '../core/IEngine';
@@ -9,7 +11,7 @@ import type { EnvironmentLight } from '../lighting/EnvironmentLight';
 import type { MaterialTextureSource } from '../material/BasicMaterial';
 import { getPbrTextureFormat, PBR_TEXTURE_SLOTS, type PbrAlphaMode, type PbrMaterial, type PbrTextureSlot } from '../material/PbrMaterial';
 import type { MaterialGpuDrivenBatch, MaterialRenderBatchItem } from './MaterialRendererRegistry';
-import { forEachDirectInstanceBatchRun } from './DirectInstanceBatchRuns';
+import { forEachDirectInstanceBatchRun, forEachIndirectBatchRun } from './DirectInstanceBatchRuns';
 import type { GpuDrivenBatchBuffer } from './GpuDrivenBatchBuffer';
 import { BaseRenderer } from './BaseRenderer';
 import { RendererCacheMap, RendererObjectSlotCache } from './RendererCacheMap';
@@ -107,7 +109,6 @@ const OBJECT_MORPH_OFFSET = 32;
 const OBJECT_DEFORMATION_FLAGS_OFFSET = 36;
 // Ten base vec4s plus two affine-transform vec4 rows for each texture slot.
 const MATERIAL_BYTES = 160 + TEXTURE_SLOTS.length * 32;
-const LIGHT_BYTES = 16 + PBR_MAX_LIGHTS * 64;
 const ENVIRONMENT_BYTES = 48;
 
 export class PbrRenderer extends BaseRenderer {
@@ -132,7 +133,8 @@ export class PbrRenderer extends BaseRenderer {
   private _sceneLayout!: GPUBindGroupLayout;
   private _sceneFrameBinding!: SceneFrameGpuBinding;
   private readonly _cameraDynamicOffset = new Uint32Array(1);
-  private _lightBuffer!: GPUBuffer;
+  private _lightUniforms!: ViewLightUniformBuffer;
+  private _lights: readonly PbrLightInfo[] = [];
   private _sceneBindGroup!: GPUBindGroup;
   private _environmentBuffer!: GPUBuffer;
   private _directionalShadowBinding!: PbrDirectionalShadowBinding;
@@ -156,9 +158,8 @@ export class PbrRenderer extends BaseRenderer {
   private _environmentState!: EnvironmentGpuState;
   private readonly _materials = new RendererCacheMap<MaterialGpuData>(data => this._destroyMaterial(data));
   private readonly _samplers = new Map<string, GPUSampler>();
-  private readonly _lightData = new Float32Array(LIGHT_BYTES / 4);
-  private readonly _lightU32 = new Uint32Array(this._lightData.buffer);
   private readonly _environmentData = new Float32Array(ENVIRONMENT_BYTES / 4);
+  private readonly _environmentSnapshot = new Float32Array(ENVIRONMENT_BYTES / 4).fill(Number.NaN);
   private readonly _inverseScratch = mat4.identity() as Float32Array;
   private readonly _normalScratch = mat4.identity() as Float32Array;
   private _initialized = false;
@@ -171,6 +172,7 @@ export class PbrRenderer extends BaseRenderer {
     if (this._initialized) return;
     this._initialized = true;
     this._engine = engine;
+    this._environmentSnapshot.fill(Number.NaN);
     const device = engine.device;
     this._assetManager = engine.assetManager ?? new AssetManager(device, getEngineGPUResourceTracker(engine), engine.defaults?.assetManager);
     this._ownsAssetManager = !engine.assetManager;
@@ -208,7 +210,7 @@ export class PbrRenderer extends BaseRenderer {
       createObject: modelSlot => ({ modelSlot, modelSnapshot: new Float32Array(16), dirty: true, clippingKey: '' }),
       geometry: new SharedGeometryRendererOwner(device, this, getEngineGPUResourceTracker(engine)),
     });
-    this._lightBuffer = device.createBuffer({ label: 'PbrRenderer.lights', size: LIGHT_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    this._lightUniforms = new ViewLightUniformBuffer(device, 'PbrRenderer.lights');
     this._environmentBuffer = device.createBuffer({ label: 'PbrRenderer.environment', size: ENVIRONMENT_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
     this._defaultSampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', mipmapFilter: 'linear' });
     this._environmentSampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', mipmapFilter: 'linear' });
@@ -287,7 +289,7 @@ export class PbrRenderer extends BaseRenderer {
     _viewSlot = 0,
     context?: RenderCommandContext,
   ): void {
-    this._writeLights(lights);
+    this._lights = lights;
     const environmentBindingsChanged = this.updateEnvironment(environment, false);
     const shadowBindingsChanged = this.updateShadows([shadow], false);
     if (environmentBindingsChanged || shadowBindingsChanged) this._rebuildSceneBindGroup();
@@ -296,11 +298,11 @@ export class PbrRenderer extends BaseRenderer {
     this.beginView(sceneFrame, context);
   }
 
-  /** Uploads scene-global PBR data only when its stable revision changes. */
+  /** Prepares selected lights for beginView and updates shared environment/shadow data. */
   beginScene(scene: PbrSceneLightingContext): void {
+    this._lights = scene.lights;
     let bindingsChanged = false;
     if (this._sceneLightingRevision !== scene.lightingRevision) {
-      this._writeLights(scene.lights);
       bindingsChanged = this.updateEnvironment(scene.environment, false) || bindingsChanged;
       this._sceneLightingRevision = scene.lightingRevision;
     }
@@ -313,6 +315,10 @@ export class PbrRenderer extends BaseRenderer {
 
   /** Selects one SceneFrame arena slot and starts view-local object uploads. */
   beginView(sceneFrame: SceneFrameUniformSnapshot, context?: RenderCommandContext): void {
+    const previousBuffer = this._lightUniforms.buffer;
+    this._lightUniforms.selectView(sceneFrame, context);
+    this._lightUniforms.upload(this._lights);
+    if (previousBuffer !== this._lightUniforms.buffer) this._rebuildSceneBindGroup();
     this._rendererCore.beginUploads(context);
     this._cameraDynamicOffset[0] = this._sceneFrameBinding.upload(sceneFrame, context);
   }
@@ -333,7 +339,7 @@ export class PbrRenderer extends BaseRenderer {
       void geometryData;
       this._deformationCache.ensure(item.geometry);
       const object = this._objects.ensure(item.entityId);
-      const batchSlot = batchBuffer && material.alphaMode === 'opaque' && material.transmissionFactor <= 0
+      const batchSlot = batchBuffer && material.alphaMode !== 'blend' && material.transmissionFactor <= 0
         ? batchBuffer.getObjectSlot(firstBatchIndex + index - first)
         : undefined;
       const objectSlot = batchSlot ?? object.modelSlot;
@@ -393,6 +399,13 @@ export class PbrRenderer extends BaseRenderer {
       });
       return;
     }
+    if (this._uploadsPrepared) {
+      forEachIndirectBatchRun(items, first, count, batchBuffer, run => {
+        this._renderDirectInstanceRun(pass, run.item.geometry, run.item.material,
+          run.firstInstance, run.instanceCount, batchBuffer, run.firstBatch);
+      });
+      return;
+    }
     const end = Math.min(items.length, first + count);
     for (let batchIndex = first; batchIndex < end; batchIndex++) {
       const item = items[batchIndex];
@@ -416,22 +429,31 @@ export class PbrRenderer extends BaseRenderer {
     material: PbrMaterial,
     firstInstance: number,
     instanceCount: number,
+    batchBuffer?: GpuDrivenBatchBuffer,
+    firstBatch = 0,
   ): void {
     const geometryData = this._geometryCache.ensure(geometry, this);
     const deformation = this._deformationCache.ensure(geometry);
     const materialData = this._materials.ensure(this._rendererCore.materialIdentity(material), () => this._createMaterial(material));
     if (!this._uploadsPrepared) this._syncMaterial(material, materialData);
 
-    pass.setPipeline(this._getPipeline(geometry, material));
-    pass.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
-    pass.setBindGroup(1, this._batchObjectTable.bindGroup);
-    pass.setBindGroup(2, materialData.bindGroup);
-    pass.setBindGroup(3, this._deformationCache.getSceneBindGroup(deformation));
-    pass.setVertexBuffer(0, geometryData.positionBuf);
-    pass.setVertexBuffer(1, geometryData.normalBuf);
-    pass.setVertexBuffer(2, geometryData.uvBuf);
-    pass.setVertexBuffer(3, geometryData.uv1Buf ?? geometryData.uvBuf);
-    for (let index = 0; index < 4; index++) pass.setVertexBuffer(index + 4, deformation.morphBuffers[index]!);
+    const bindings = batchBuffer ? this.indirectBatches.begin() : pass;
+    bindings.setPipeline(this._getPipeline(geometry, material));
+    bindings.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
+    bindings.setBindGroup(1, this._batchObjectTable.bindGroup);
+    bindings.setBindGroup(2, materialData.bindGroup);
+    bindings.setBindGroup(3, this._deformationCache.getSceneBindGroup(deformation), this._lightUniforms.dynamicOffset);
+    bindings.setVertexBuffer(0, geometryData.positionBuf);
+    bindings.setVertexBuffer(1, geometryData.normalBuf);
+    bindings.setVertexBuffer(2, geometryData.uvBuf);
+    bindings.setVertexBuffer(3, geometryData.uv1Buf ?? geometryData.uvBuf);
+    for (let index = 0; index < 4; index++) bindings.setVertexBuffer(index + 4, deformation.morphBuffers[index]!);
+    if (batchBuffer) {
+      this.indirectBatches.draw(pass, this._engine.device, batchBuffer, firstBatch, instanceCount,
+        geometryData.indexBuf, geometryData.indexFormat, [this.colorFormat ?? this._engine.format],
+        this._engine.getDepthFormat(this.reverseZ), this.msaaSamples);
+      return;
+    }
     if (geometryData.indexBuf) {
       pass.setIndexBuffer(geometryData.indexBuf, geometryData.indexFormat);
       pass.drawIndexed(geometryData.indexCount, instanceCount, 0, 0, firstInstance);
@@ -466,7 +488,7 @@ export class PbrRenderer extends BaseRenderer {
     pass.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
     pass.setBindGroup(1, objectTable.bindGroup);
     pass.setBindGroup(2, material.transmissionFactor > 0 ? materialData.transmissionBindGroup : materialData.bindGroup);
-    pass.setBindGroup(3, this._deformationCache.getSceneBindGroup(deformation));
+    pass.setBindGroup(3, this._deformationCache.getSceneBindGroup(deformation), this._lightUniforms.dynamicOffset);
     pass.setVertexBuffer(0, geometryData.positionBuf);
     pass.setVertexBuffer(1, geometryData.normalBuf);
     pass.setVertexBuffer(2, geometryData.uvBuf);
@@ -506,7 +528,7 @@ export class PbrRenderer extends BaseRenderer {
       ...BASE_BINDING_SLOTS.map((_, index) => ({ binding: index + 1 + BASE_BINDING_SLOTS.length, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'filtering' as GPUSamplerBindingType } })),
     ] });
     this._sceneLayout = device.createBindGroupLayout({ entries: [
-      { binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
+      { binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: LIGHT_UNIFORM_BINDING },
       { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
       { binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'float', viewDimension: 'cube' } },
       { binding: 3, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'float', viewDimension: 'cube' } },
@@ -577,29 +599,6 @@ export class PbrRenderer extends BaseRenderer {
     }
   }
 
-  private _writeLights(lights: readonly PbrLightInfo[]): void {
-    this._lightData.fill(0);
-    const count = Math.min(PBR_MAX_LIGHTS, lights.length);
-    this._lightU32[0] = count;
-    for (let index = 0; index < count; index++) {
-      const light = lights[index]!;
-      const base = 4 + index * 16;
-      this._lightU32[base] = light.type;
-      this._lightData[base + 4] = light.color[0];
-      this._lightData[base + 5] = light.color[1];
-      this._lightData[base + 6] = light.color[2];
-      this._lightData[base + 7] = light.intensity;
-      this._lightData[base + 8] = light.direction[0];
-      this._lightData[base + 9] = light.direction[1];
-      this._lightData[base + 10] = light.direction[2];
-      this._lightData[base + 12] = light.position[0];
-      this._lightData[base + 13] = light.position[1];
-      this._lightData[base + 14] = light.position[2];
-      this._lightData[base + 15] = light.range;
-    }
-    writeBuffer(this._engine.device.queue, this._lightBuffer, 0, this._lightData);
-  }
-
   private updateEnvironment(environment: EnvironmentLight | null, rebuildBindings = true): boolean {
     const diffuseSource = environment?.diffuseTexture ?? null;
     const specularSource = environment?.specularTexture ?? null;
@@ -633,7 +632,10 @@ export class PbrRenderer extends BaseRenderer {
       // stores this flag through the Float32 view rather than a Uint32 alias.
       hasTexture: Boolean(diffuseSource || specularSource),
     });
-    writeBuffer(this._engine.device.queue, this._environmentBuffer, 0, this._environmentData);
+    if (this._environmentData.some((value, index) => !Object.is(value, this._environmentSnapshot[index]))) {
+      writeBuffer(this._engine.device.queue, this._environmentBuffer, 0, this._environmentData);
+      this._environmentSnapshot.set(this._environmentData);
+    }
     return bindingsChanged;
   }
 
@@ -708,6 +710,13 @@ export class PbrRenderer extends BaseRenderer {
     data.u32 = new Uint32Array(data.uniformBuffer);
     data.bindGroup = this._buildMaterialBindGroup(data);
     data.transmissionBindGroup = this._buildMaterialBindGroup(data, true);
+    return data;
+  }
+
+  /** @internal Borrow the exact material state used by forward shading. */
+  prepareMaterialCoverage(material: PbrMaterial): MaterialCoverageResources {
+    const data = this._materials.ensure(this._rendererCore.materialIdentity(material), () => this._createMaterial(material));
+    this._syncMaterial(material, data);
     return data;
   }
 
@@ -862,7 +871,7 @@ export class PbrRenderer extends BaseRenderer {
     return this._engine.device.createBindGroup({
       layout: this._sceneLayout,
       entries: [
-        { binding: 0, resource: { buffer: this._lightBuffer } },
+        { binding: 0, resource: { buffer: this._lightUniforms.buffer, size: LIGHT_UNIFORM_BYTES } },
         { binding: 1, resource: { buffer: this._environmentBuffer } },
         { binding: 2, resource: this._environmentState.diffuseTexture.createView({ dimension: 'cube' }) },
         { binding: 3, resource: this._environmentState.specularTexture.createView({ dimension: 'cube' }) },
@@ -931,7 +940,7 @@ export class PbrRenderer extends BaseRenderer {
           ? (clearcoatEnabled ? this._transmissionClearcoatShader : this._transmissionShader)
           : (clearcoatEnabled ? this._clearcoatShader : this._baseShader),
         entryPoint: 'fs_main',
-        targets: [createColorTargetState(this._engine.format, alphaMode === 'blend' ? {
+        targets: [createColorTargetState(this.colorFormat ?? this._engine.format, alphaMode === 'blend' ? {
           color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha', operation: 'add' },
           alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
         } : undefined)],
@@ -1004,7 +1013,8 @@ export class PbrRenderer extends BaseRenderer {
 
   destroy(): void {
     this._sceneFrameBinding?.destroy();
-    this._lightBuffer?.destroy();
+    this._lightUniforms?.destroy();
+    this._lights = [];
     this._environmentBuffer?.destroy();
     this._directionalShadowBinding?.destroy();
     this._defaultWhite?.destroy();

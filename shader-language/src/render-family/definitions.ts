@@ -23,6 +23,8 @@ import basicMaterialSkinnedEntry from '../deformation/stdlib/forward-skinned.wgs
 import fog from './stdlib/simple-3d/fog.wgsl';
 import meshHelperEntry from './stdlib/simple-3d/mesh-helper.wgsl';
 import morph from '../deformation/stdlib/morph.wgsl';
+import materialCoverage from '../deformation/stdlib/material-coverage.wgsl';
+import { materialCoverageBindings, materialCoverageBlock } from '../deformation/material-coverage-definition';
 import normalMaterialEntry from './stdlib/simple-3d/normal-material.wgsl';
 import particle3d from './stdlib/simple-3d/particle3d.wgsl';
 import sceneFrame from './stdlib/simple-3d/scene-frame.wgsl';
@@ -58,7 +60,7 @@ const SIMPLE_SOURCES = Object.freeze({
   'basic-material': [CLIPPED_SCENE, morph, basicMaterialEntry].join('\n\n'),
   'basic-material-skinned': [CLIPPED_SCENE, morph, skinningBindings, skinning, basicMaterialSkinnedEntry].join('\n\n'),
   'mesh-helper': [SIMPLE_SCENE, meshHelperEntry].join('\n\n'),
-  'normal-material': [CLIPPED_SCENE, normalMaterialEntry].join('\n\n'),
+  'normal-material': [CLIPPED_SCENE, morph, skinningBindings, skinning, materialCoverage, normalMaterialEntry].join('\n\n'),
   particle3d,
   sky: [SIMPLE_SCENE, skyEntry].join('\n\n'),
 });
@@ -80,7 +82,9 @@ export function emitBuiltinRenderPass(
       uniformBlocks: definition.uniformBlocks,
       vertexBuffers: definition.vertexBuffers,
       varyings: definition.varyings,
-      renderTargets: Object.freeze([Object.freeze({ location: 0, formatClass: 'color' })]),
+      renderTargets: Object.freeze([Object.freeze({ location: 0, formatClass: 'color' }),
+        ...(operation === 'normal-material' ? [Object.freeze({ location: 1, formatClass: 'optional-linear-depth-r32float' })] : []),
+      ]),
       capabilities: definition.capabilities,
       passRequirements: definition.requirements,
       sourceMap: Object.freeze([Object.freeze({
@@ -240,16 +244,23 @@ function definitions(): Readonly<Record<BuiltinRenderOperation, RenderDefinition
         storage('object.normalTable', 0, VERTEX_FRAGMENT),
         storage('object.clippingPlanes', 1, FRAGMENT),
       ]),
-      group('material', 2, [uniform('material.normalParameters', 0, VERTEX, 16)]),
-    ], [
-      sceneFrameBlock(), block('material.normalParameters', 16, [
-        field('space', 'u32', 0, 4), field('_pad0', 'u32', 4, 4),
-        field('_pad1', 'u32', 8, 4), field('_pad2', 'u32', 12, 4),
+      group('material', 2, [uniform('material.normalParameters', 0, VERTEX_FRAGMENT, 16), ...materialCoverageBindings]),
+      group('object', 3, [
+        storage('object.currentJointMatrices', 0, VERTEX),
+        storage('geometry.skinJoints', 1, VERTEX),
+        storage('geometry.skinWeights', 2, VERTEX),
       ]),
-    ], positionNormalBuffers(), [
+    ], [
+      sceneFrameBlock(), materialCoverageBlock, block('material.normalParameters', 16, [
+        field('space', 'u32', 0, 4), field('near', 'f32', 4, 4),
+        field('far', 'f32', 8, 4), field('_pad2', 'u32', 12, 4),
+      ]),
+    ], normalDeformationBuffers(), [
       varying('NORMAL', 0, 'vec3<f32>'), varying('WORLD_POSITION', 1, 'vec3<f32>'),
       flatVarying('OBJECT_INDEX', 2, 'u32'),
-    ], ['storage-buffer', 'discard'], ['normal-visualization', 'world-space-clipping']),
+      varying('TEXCOORD_0', 3, 'vec2<f32>'), varying('TEXCOORD_1', 4, 'vec2<f32>'),
+      varying('VIEW_DEPTH', 5, 'f32'),
+    ], ['storage-buffer', 'discard', 'morph-targets', 'skinning', 'texture-sample'], ['normal-visualization', 'world-space-clipping', 'auxiliary-surface-mrt-v1']),
     particle3d: definition(SIMPLE_SOURCES.particle3d, [
       group('frame', 0, [uniform('frame.particleCamera', 0, VERTEX, 96)]),
       group('object', 1, [uniform('object.particle3d', 0, VERTEX_FRAGMENT, 80)]),
@@ -446,6 +457,18 @@ function positionUv3dBuffers(): readonly PrecompiledShaderVertexBufferV2[] {
     vertexBuffer(12, 'vertex', [attribute('POSITION', 0, 0, 'float32x3')]),
     vertexBuffer(8, 'vertex', [attribute('TEXCOORD_0', 1, 0, 'float32x2')]),
   ]);
+}
+
+function normalDeformationBuffers(): readonly PrecompiledShaderVertexBufferV2[] {
+  return [
+    ...positionNormalBuffers(),
+    ...Array.from({ length: 4 }, (_, index) => vertexBuffer(24, 'vertex', [
+      attribute(`MORPH_POSITION_${index}`, 2 + index * 2, 0, 'float32x3'),
+      attribute(`MORPH_NORMAL_${index}`, 3 + index * 2, 12, 'float32x3'),
+    ])),
+    vertexBuffer(8, 'vertex', [attribute('TEXCOORD_0', 10, 0, 'float32x2')]),
+    vertexBuffer(8, 'vertex', [attribute('TEXCOORD_1', 11, 0, 'float32x2')]),
+  ];
 }
 
 function positionNormalBuffers(): readonly PrecompiledShaderVertexBufferV2[] {

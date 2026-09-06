@@ -15,6 +15,8 @@ export type { MaterialConstructor, MaterialRendererKey } from './MaterialRegistr
 
 export interface MaterialRendererViewContext {
   engine: IEngine;
+  /** Scene attachment format; custom 3-D renderers output linear radiance into this format. */
+  colorFormat: GPUTextureFormat;
   /** Stable identity of the RenderView currently being encoded. */
   viewKey: string;
   viewProj: Float32Array;

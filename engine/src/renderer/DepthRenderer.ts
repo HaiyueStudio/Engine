@@ -1,3 +1,5 @@
+import type { Material } from '../material/Material';
+import { auxiliaryCullMode, auxiliaryFrontFace, auxiliaryUsesDeformation, MATERIAL_COVERAGE_LAYOUT, MaterialCoverageBindings, type MaterialCoverageResources } from './AuxiliaryMaterial';
 import type { IEngine } from '../core/IEngine';
 import { getEngineGPUResourceTracker } from '../core/EngineDiagnosticsAccess';
 import { Geometry3D, type Skinning3D } from '../geometry/Geometry3D';
@@ -17,7 +19,8 @@ import { getSceneFrameGpuArena, type SceneFrameGpuBinding } from './SceneFrameGp
 import { RendererCacheMap, RendererObjectSlotCache } from './RendererCacheMap';
 import { RendererObjectTable } from './RendererObjectTable';
 import type { GpuDrivenBatchBuffer } from './GpuDrivenBatchBuffer';
-import { forEachDirectInstanceBatchRun } from './DirectInstanceBatchRuns';
+import { forEachDirectInstanceBatchRun, forEachIndirectBatchRun } from './DirectInstanceBatchRuns';
+import type { RenderBatchBindingEncoder } from './IndirectBatchBundleCache';
 import { sharedZeroVectorCache } from './ZeroVectorCache';
 import { alignUp4 } from '../utils/align';
 import type { ClippingPlanes } from '../components/ClippingPlanes';
@@ -70,7 +73,6 @@ export class DepthRenderer extends BaseRenderer {
   reverseZ = false;
   msaaSamples: 1 | 4 = 1;
   /** Optional auxiliary target override; ordinary material rendering uses the engine surface format. */
-  colorFormat: GPUTextureFormat | null = null;
 
   private engine!: IEngine;
   private bgl0!: GPUBindGroupLayout;
@@ -93,6 +95,7 @@ export class DepthRenderer extends BaseRenderer {
   private fallbackSkinAttributeBuffer!: GPUBuffer;
   private fallbackSkinBindGroup!: GPUBindGroup;
 
+  private coverageBindings!: MaterialCoverageBindings;
   private _initialized = false;
 
   prepare(engine: IEngine): void {
@@ -108,7 +111,7 @@ export class DepthRenderer extends BaseRenderer {
       { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
     ] });
     this.bgl2 = device.createBindGroupLayout({
-      entries: [{ binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }],
+      entries: [{ binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }, ...MATERIAL_COVERAGE_LAYOUT],
     });
     this.bgl3 = device.createBindGroupLayout({
       entries: [
@@ -118,6 +121,7 @@ export class DepthRenderer extends BaseRenderer {
       ],
     });
 
+    this.coverageBindings = new MaterialCoverageBindings(device, this.bgl2);
     const generated = getBuiltinDeformationShader(device, 'depth', [this.bgl0, this.bgl1, this.bgl2, this.bgl3]);
     this.shader = generated.module;
     this.pipelineLayout = generated.pipelineLayout;
@@ -204,7 +208,7 @@ export class DepthRenderer extends BaseRenderer {
     geometry: Geometry3D,
     material: DepthMaterial,
     worldMatrix: Float32Array,
-    options: { gpuDrivenBatch?: MaterialGpuDrivenBatch | undefined } = {},
+    options: { gpuDrivenBatch?: MaterialGpuDrivenBatch | undefined; sourceMaterial?: Material | null; coverage?: MaterialCoverageResources | null } = {},
     clippingPlanes: ClippingPlanes | null = null,
   ): void {
     const objectSlot = options.gpuDrivenBatch?.objectSlot;
@@ -217,16 +221,19 @@ export class DepthRenderer extends BaseRenderer {
       worldMatrix,
       objectSlot,
       objectTable,
+      auxiliaryUsesDeformation(options.sourceMaterial),
     );
     if (!this.rendererCore.uploadsPrepared) objectTable.flushUploads();
 
-    const pipeline = this._getPipeline(geometry);
+    const pipeline = this._getPipeline(geometry, options.sourceMaterial);
     passEncoder.setPipeline(pipeline);
     passEncoder.setBindGroup(0, this.sceneFrameBinding.bindGroup, this.cameraDynamicOffset);
     passEncoder.setBindGroup(1, objectTable.bindGroup);
-    passEncoder.setBindGroup(2, matData.paramsBindGroup);
+    passEncoder.setBindGroup(2, this.coverageBindings.get(options.coverage, matData.paramsBuf));
     passEncoder.setBindGroup(3, deformation.skinBindGroup);
     passEncoder.setVertexBuffer(0, geoData.positionBuf);
+    passEncoder.setVertexBuffer(5, geoData.uvBuf);
+    passEncoder.setVertexBuffer(6, geoData.uv1Buf ?? geoData.uvBuf);
     for (let index = 0; index < 4; index++) passEncoder.setVertexBuffer(index + 1, deformation.morphBuffers[index]!);
 
     const firstInstance = objectSlot ?? entData.modelSlot;
@@ -253,8 +260,9 @@ export class DepthRenderer extends BaseRenderer {
     count: number,
     batchBuffer: GpuDrivenBatchBuffer,
   ): void {
-    if (batchBuffer.gpuUploadEnabled === false) {
-      forEachDirectInstanceBatchRun(items, first, count, batchBuffer, run => {
+    if (!batchBuffer.gpuUploadEnabled || this.rendererCore.uploadsPrepared) {
+      const visitRuns = batchBuffer.gpuUploadEnabled ? forEachIndirectBatchRun : forEachDirectInstanceBatchRun;
+      visitRuns(items, first, count, batchBuffer, run => {
         const resources = this._prepareObject(
           run.item.entityId,
           run.item.geometry,
@@ -264,7 +272,14 @@ export class DepthRenderer extends BaseRenderer {
           run.firstInstance,
           this.batchObjectTable,
         );
-        this._bindBatchResources(passEncoder, run.item.geometry, resources);
+        const bindings = batchBuffer.gpuUploadEnabled ? this.indirectBatches.begin() : passEncoder;
+        this._bindBatchResources(bindings, run.item.geometry, resources);
+        if (batchBuffer.gpuUploadEnabled) {
+          this.indirectBatches.draw(passEncoder, this.engine.device, batchBuffer, run.firstBatch,
+            run.instanceCount, resources.geoData.indexBuf, resources.geoData.indexFormat,
+            [this.colorFormat ?? this.engine.format], this.engine.getDepthFormat(this.reverseZ), this.msaaSamples);
+          return;
+        }
         this._drawDirect(passEncoder, resources.geoData, run.instanceCount, run.firstInstance);
       });
       return;
@@ -305,13 +320,14 @@ export class DepthRenderer extends BaseRenderer {
     worldMatrix: Float32Array,
     requestedSlot?: number,
     objectTable: RendererObjectTable = this.objectTable,
+    deform = true,
   ) {
     const { device } = this.engine;
     const geoData = this.geoCache.ensure(geometry, this);
     const deformation = this._ensureDeformation(geometry);
     this._syncSkinningMatrices(geometry, deformation);
     const entData = this.entityCache.ensure(entityId);
-    this._writeObjectTableEntry(entData, geometry, clippingPlanes, worldMatrix, requestedSlot, objectTable);
+    this._writeObjectTableEntry(entData, geometry, clippingPlanes, worldMatrix, requestedSlot, objectTable, deform);
     const materialId = this.rendererCore.materialIdentity(material);
     let matData = this.matCache.get(materialId);
     if (!matData) {
@@ -319,10 +335,7 @@ export class DepthRenderer extends BaseRenderer {
       const paramsData = new ArrayBuffer(16);
       matData = {
         paramsBuf,
-        paramsBindGroup: device.createBindGroup({
-          layout: this.bgl2,
-          entries: [{ binding: 0, resource: { buffer: paramsBuf } }],
-        }),
+        paramsBindGroup: this.coverageBindings.get(null, paramsBuf),
         paramsData,
         paramsF32: new Float32Array(paramsData),
         paramsU32: new Uint32Array(paramsData),
@@ -364,17 +377,18 @@ export class DepthRenderer extends BaseRenderer {
     worldMatrix: Float32Array,
     requestedSlot: number | undefined,
     objectTable: RendererObjectTable,
+    deform: boolean,
   ): void {
     const objectSlot = requestedSlot ?? entData.modelSlot;
     objectTable.ensureCapacity(objectSlot + 1);
     const base = objectSlot * OBJECT_TABLE_FLOATS;
     const objectData = objectTable.data;
-    const morphEnabled = geometry.morphUseGpu && geometry.hasMorphTargets;
+    const morphEnabled = deform && geometry.morphUseGpu && geometry.hasMorphTargets;
     const morph0 = morphEnabled ? geometry.morphWeights[0] ?? 0 : 0;
     const morph1 = morphEnabled ? geometry.morphWeights[1] ?? 0 : 0;
     const morph2 = morphEnabled ? geometry.morphWeights[2] ?? 0 : 0;
     const morph3 = morphEnabled ? geometry.morphWeights[3] ?? 0 : 0;
-    const skinned = geometry.skinning ? 1 : 0;
+    const skinned = deform && geometry.skinning ? 1 : 0;
     const stable = objectTable === this.objectTable && requestedSlot === undefined;
     const clipKey = clippingStateKey(clippingPlanes);
     const objectUnchanged =
@@ -413,7 +427,7 @@ export class DepthRenderer extends BaseRenderer {
   }
 
   private _bindBatchResources(
-    passEncoder: GPURenderPassEncoder,
+    passEncoder: RenderBatchBindingEncoder,
     geometry: Geometry3D,
     resources: {
       geoData: SharedGeometry3DGPUData;
@@ -427,6 +441,8 @@ export class DepthRenderer extends BaseRenderer {
     passEncoder.setBindGroup(2, resources.matData.paramsBindGroup);
     passEncoder.setBindGroup(3, resources.deformation.skinBindGroup);
     passEncoder.setVertexBuffer(0, resources.geoData.positionBuf);
+    passEncoder.setVertexBuffer(5, resources.geoData.uvBuf);
+    passEncoder.setVertexBuffer(6, resources.geoData.uv1Buf ?? resources.geoData.uvBuf);
     for (let index = 0; index < 4; index++) {
       passEncoder.setVertexBuffer(index + 1, resources.deformation.morphBuffers[index]!);
     }
@@ -565,10 +581,10 @@ export class DepthRenderer extends BaseRenderer {
     data.skinMatrixBuffer?.destroy();
   }
 
-  private _getPipeline(geometry: Geometry3D): GPURenderPipeline {
+  private _getPipeline(geometry: Geometry3D, sourceMaterial?: Material | null): GPURenderPipeline {
     const topology = geometry.topology ?? 'triangle-list';
-    const cullMode = geometry.cullMode ?? 'back';
-    const frontFace = geometry.frontFace ?? 'ccw';
+    const cullMode = auxiliaryCullMode(geometry, sourceMaterial);
+    const frontFace = auxiliaryFrontFace(geometry, sourceMaterial);
     const stripIndexFormat = getStripIndexFormat(geometry);
     const key = `${encodePrimitivePipelineKey(topology, cullMode, frontFace, stripIndexFormat, this.reverseZ, this.msaaSamples)}:${this.colorFormat ?? this.engine.format}`;
     return this.getCachedPipeline(key, () => this.engine.device.createRenderPipeline(
@@ -593,6 +609,8 @@ export class DepthRenderer extends BaseRenderer {
               arrayStride: 12,
               attributes: [{ shaderLocation: index + 1, offset: 0, format: 'float32x3' }],
             })),
+            { arrayStride: 8, attributes: [{ shaderLocation: 5, offset: 0, format: 'float32x2' }] },
+            { arrayStride: 8, attributes: [{ shaderLocation: 6, offset: 0, format: 'float32x2' }] },
           ],
         },
         fragment: { module: this.shader, entryPoint: 'fs_main', targets: [{ format: this.colorFormat ?? this.engine.format }] },
@@ -607,6 +625,7 @@ export class DepthRenderer extends BaseRenderer {
   }
 
   destroy(): void {
+    this.coverageBindings?.destroy();
     this.sceneFrameBinding?.destroy();
     this.rendererCore?.destroy();
     this.deformationCache.clear();

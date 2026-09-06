@@ -185,7 +185,7 @@ test('PostProcessSceneTextureStore allocates signed motion vectors only when req
   assert.ok(store.motionTexture);
   assert.ok(log.some(item => item[0] === 'createTexture'
     && item[1].label === 'PostProcessSceneTextureStore.motionTexture'
-    && item[1].format === 'rg16float'));
+    && item[1].format === 'rgba16float'));
 });
 
 test('PostProcessSceneTextureStore matches the visible outline attachment to scene MSAA', () => {

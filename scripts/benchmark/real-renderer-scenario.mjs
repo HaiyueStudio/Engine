@@ -32,6 +32,7 @@ import {
   ensureRealRendererGpuConstants,
 } from './real-renderer-audit-device.mjs';
 import { createLightingScalingRealRendererAdapter } from './lighting-scaling-real-renderer-adapter.mjs';
+import { instrumentAuditBundleCreation, instrumentAuditRenderPass } from './real-renderer-bundle-audit.mjs';
 
 export { createRealRendererAuditDevice, ensureRealRendererGpuConstants } from './real-renderer-audit-device.mjs';
 const OBJECT_TABLE_DIAGNOSTICS = Symbol('real-renderer-object-table-diagnostics');
@@ -468,6 +469,10 @@ export function getRealRendererBenchmarkMetrics(state) {
     poolMisses: pools.poolMisses,
     hotObjectsCreated: pools.hotObjectsCreated,
     drawsPerFrame: state.diagnosticTotals.draws / frames,
+    bundleBuilds: audit.bundleBuilds,
+    bundleExecutionsPerFrame: audit.bundleExecutions / frames,
+    bundleEncodedDrawsPerFrame: audit.bundleEncodedDraws / frames,
+    directEncodedDrawsPerFrame: audit.directEncodedDraws / frames,
     renderPassesPerFrame: audit.renderPasses / frames,
     metricClassification,
     renderPhaseBreakdown: metricClassification.render,
@@ -608,6 +613,7 @@ function instrumentBenchmarkDeviceAudit(device) {
     bufferUploads: 0, uploadBytes: 0, buffersCreated: 0, buffersDestroyed: 0,
     bufferUploadCpuMs: 0,
     renderPasses: 0, draws: 0, renderPassInstrumentationFailures: 0,
+    bundleBuilds: 0, bundleExecutions: 0, bundleEncodedDraws: 0, directEncodedDraws: 0,
     bufferExpansions: 0, bufferRetirements: 0, renderPipelinesCreated: 0, bindGroupsCreated: 0,
     pbrLightUniformUploads: 0, pbrEnvironmentUniformUploads: 0, pbrShadowUniformUploads: 0,
   };
@@ -616,6 +622,7 @@ function instrumentBenchmarkDeviceAudit(device) {
     uploadsByBufferLabel: { value: new Map() },
     uploadsByRenderer: { value: new Map() },
     gpuTimestampProbe: { value: null, writable: true },
+    bundleDraws: { value: new WeakMap() },
   });
   const liveByLabel = new Map();
   const createdByLabel = new Map();
@@ -672,6 +679,7 @@ function instrumentBenchmarkDeviceAudit(device) {
   const originalCreateBindGroup = device.createBindGroup.bind(device);
   device.createBindGroup = function(descriptor) { audit.bindGroupsCreated++; return originalCreateBindGroup(descriptor); };
   const originalCreateCommandEncoder = device.createCommandEncoder.bind(device);
+  instrumentAuditBundleCreation(device, audit);
   device.createCommandEncoder = function(descriptor) {
     const encoder = originalCreateCommandEncoder(descriptor);
     const originalBeginRenderPass = encoder.beginRenderPass.bind(encoder);
@@ -1117,27 +1125,6 @@ function classifyRenderPhase(descriptor) {
     )
   ) return 'shadow';
   return 'mainScene';
-}
-
-function instrumentAuditRenderPass(pass, audit, phase) {
-  for (const methodName of ['draw', 'drawIndexed', 'drawIndirect', 'drawIndexedIndirect']) {
-    const method = pass?.[methodName];
-    if (typeof method !== 'function') continue;
-    const bound = method.bind(pass);
-    try {
-      Object.defineProperty(pass, methodName, {
-        configurable: true,
-        value(...args) {
-          audit.draws++;
-          audit.renderByPhase[phase].draws++;
-          return bound(...args);
-        },
-      });
-    } catch {
-      audit.renderPassInstrumentationFailures++;
-    }
-  }
-  return pass;
 }
 
 function normalizeGpuBufferLabel(label) {

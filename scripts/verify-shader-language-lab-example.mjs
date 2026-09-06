@@ -35,7 +35,8 @@ const result = await runChromeWebGpuFixture({
 assertEqual(result.schemaVersion, 2, 'schemaVersion');
 assertEqual(result.suite, 'shader-language-lab-example', 'suite');
 assertEqual(result.status, 'passed', 'status');
-assertEqual(result.navigationErrorCount, 0, 'navigationErrorCount');
+// The shared runner records errors from both the fixture and the navigation teardown.
+assertEqual(result.browserDiagnostics?.unclassifiedFailureCount, 0, 'browserDiagnostics.unclassifiedFailureCount');
 assertEqual(result.runtimeCompilerIncluded, false, 'runtimeCompilerIncluded');
 assertEqual(result.productRendererContract, 'webgpu-only-unchanged', 'productRendererContract');
 assertEqual(result.webgpuCompilationErrorCount, 0, 'webgpuCompilationErrorCount');

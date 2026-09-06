@@ -317,7 +317,7 @@ export class MeshHelperRenderer extends BaseRenderer {
     // ── Write object uniform (model + color + line) ──────────────────────────
     const lineWidth = Math.max(1, helper.lineWidth);
     const objectData = ent.objectData;
-    helper.color.writeSRGB(objectData, 16);
+    helper.color.writeLinear(objectData, 16);
     const colorChanged =
       ent.objectColorSnapshot[0] !== objectData[16] ||
       ent.objectColorSnapshot[1] !== objectData[17] ||
@@ -381,7 +381,7 @@ export class MeshHelperRenderer extends BaseRenderer {
         module: this.shader,
         entryPoint: 'fs_main',
         targets: [{
-          format: this.engine.format,
+          format: this.colorFormat ?? this.engine.format,
           blend: {
             color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha', operation: 'add' },
             alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },

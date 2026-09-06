@@ -149,11 +149,13 @@ export class Render3DDirectionalShadowOrchestrator {
         const slot = this._slots[index]!;
         if (!this._isRenderable(slot)) continue;
         const light = slot.light!;
+        const materialRevision = renderer.prepareMaterialCoverage?.(slot.items) ?? 0;
+        const casterRevisionB = (slot.casterRevisionB ^ materialRevision) >>> 0;
         if (slot.cache.matches(
           light,
           !targetChanged && this._shadows[index] !== null,
           slot.casterRevisionA,
-          slot.casterRevisionB,
+          casterRevisionB,
           slot.casterCount,
         )) {
           cacheHits++;
@@ -177,7 +179,7 @@ export class Render3DDirectionalShadowOrchestrator {
             DIRECTIONAL_SHADOW_FOCUS_ORIGIN,
             this._options.resolveShadowCullMode,
           );
-        slot.cache.store(light, slot.casterRevisionA, slot.casterRevisionB, slot.casterCount);
+        slot.cache.store(light, slot.casterRevisionA, casterRevisionB, slot.casterCount);
         this.passCount++;
         changed = true;
       }

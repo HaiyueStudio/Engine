@@ -1,3 +1,4 @@
+import { ViewLightUniformBuffer, LIGHT_UNIFORM_BYTES, LIGHT_UNIFORM_BINDING } from './ViewLightUniformBuffer';
 import type { IEngine } from '../core/IEngine';
 import { getEngineGPUResourceTracker } from '../core/EngineDiagnosticsAccess';
 import type { Geometry3D } from '../geometry/Geometry3D';
@@ -18,7 +19,7 @@ import { GpuSortComputePass } from '../compute/GpuSortComputePass';
 import { recordComputeResourcePass } from '../compute/ComputeResourceAccess';
 import { getBuiltinSpecializedRenderingShader } from '../shader/BuiltinSpecializedRenderingShader';
 import { getBuiltinComputeShader } from '../shader/BuiltinComputeShader';
-import { SCENE_RENDER_MAX_LIGHTS, type PbrLightInfo } from '../frame/SceneRenderEnvironment';
+import { type PbrLightInfo } from '../frame/SceneRenderEnvironment';
 import type { SceneFrameUniformSnapshot } from '../frame/SceneFrameUniformLayout';
 import type { PipelineWarmupPlan } from './PipelineWarmup';
 import { getSceneFrameGpuArena, type SceneFrameGpuBinding } from './SceneFrameGpuArena';
@@ -111,11 +112,12 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
   private cullBgl!: GPUBindGroupLayout;
   private sortKeyBgl!: GPUBindGroupLayout;
   private frustumBuf!: GPUBuffer;
-  private lightBuf!: GPUBuffer;
+  private _lightUniforms!: ViewLightUniformBuffer;
+  private _lights: readonly PbrLightInfo[] = [];
+  private _lightsNeedUpload = false;
   private environmentBuf!: GPUBuffer;
-  private readonly _lightData = new Float32Array((16 + SCENE_RENDER_MAX_LIGHTS * 64) / 4);
-  private readonly _lightU32 = new Uint32Array(this._lightData.buffer);
   private readonly _environmentData = new Float32Array(12);
+  private readonly _environmentSnapshot = new Float32Array(12).fill(Number.NaN);
   private readonly _materialData = new Float32Array(4);
   private _lightingRevision = -1;
   private readonly _cullParamsData = new ArrayBuffer(32);
@@ -141,6 +143,7 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
     this.clearPipelineCache();
     this._initialized = true;
     this.engine = engine;
+    this._environmentSnapshot.fill(Number.NaN);
     const { device } = engine;
     this.rendererCore = new ParameterizedRendererCore({
       geometry: new SharedGeometryRendererOwner(device, this, getEngineGPUResourceTracker(engine)),
@@ -163,7 +166,7 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
         { binding: 1, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } },
         { binding: 2, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } },
         { binding: 3, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
-        { binding: 4, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
+        { binding: 4, visibility: GPUShaderStage.FRAGMENT, buffer: LIGHT_UNIFORM_BINDING },
         { binding: 5, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
       ],
     }));
@@ -178,11 +181,7 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
       size: 96,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
-    this.lightBuf = device.createBuffer({
-      label: 'InstancedMesh3DRenderer.lights',
-      size: this._lightData.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+    this._lightUniforms = new ViewLightUniformBuffer(device, 'InstancedMesh3DRenderer.lights');
     this.environmentBuf = device.createBuffer({
       label: 'InstancedMesh3DRenderer.environment',
       size: this._environmentData.byteLength,
@@ -192,34 +191,32 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
   }
 
   updateCamera(sceneFrame: SceneFrameUniformSnapshot, context?: RenderCommandContext): void {
+    this._lightsNeedUpload = true;
+    if (this._lightUniforms.selectView(sceneFrame, context)) {
+      for (const data of this.matCache.values()) data.bindGroup1 = this._createObjectBindGroup(data);
+    }
     this.cameraDynamicOffset[0] = this.sceneFrameBinding.upload(sceneFrame, context);
   }
 
   updateLighting(lights: readonly PbrLightInfo[], environment: EnvironmentLight | null, revision: number): void {
+    this._lights = lights;
+    this._uploadLights();
     if (revision === this._lightingRevision) return;
     this._lightingRevision = revision;
-    this._lightData.fill(0);
-    const count = Math.min(SCENE_RENDER_MAX_LIGHTS, lights.length);
-    this._lightU32[0] = count;
-    for (let index = 0; index < count; index++) {
-      const light = lights[index]!;
-      const base = 4 + index * 16;
-      this._lightU32[base] = light.type;
-      this._lightData[base + 4] = light.color[0];
-      this._lightData[base + 5] = light.color[1];
-      this._lightData[base + 6] = light.color[2];
-      this._lightData[base + 7] = light.intensity;
-      this._lightData[base + 8] = light.direction[0];
-      this._lightData[base + 9] = light.direction[1];
-      this._lightData[base + 10] = light.direction[2];
-      this._lightData[base + 12] = light.position[0];
-      this._lightData[base + 13] = light.position[1];
-      this._lightData[base + 14] = light.position[2];
-      this._lightData[base + 15] = light.range;
-    }
     writePbrEnvironmentUniforms(this._environmentData, environment);
-    wrtBuf(this.engine.device.queue, this.lightBuf, 0, this._lightData);
-    wrtBuf(this.engine.device.queue, this.environmentBuf, 0, this._environmentData);
+    if (this._environmentData.some((value, index) => !Object.is(value, this._environmentSnapshot[index]))) {
+      wrtBuf(this.engine.device.queue, this.environmentBuf, 0, this._environmentData);
+      this._environmentSnapshot.set(this._environmentData);
+    }
+  }
+
+  private _uploadLights(): void {
+    this._lightsNeedUpload = false;
+    const previousBuffer = this._lightUniforms.buffer;
+    this._lightUniforms.upload(this._lights);
+    if (previousBuffer !== this._lightUniforms.buffer) {
+      for (const data of this.matCache.values()) data.bindGroup1 = this._createObjectBindGroup(data);
+    }
   }
 
   contributePipelineWarmup(plan: PipelineWarmupPlan): void {
@@ -411,6 +408,7 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
     const { device } = this.engine;
     const instanceCount = material.activeInstanceCount;
     if (instanceCount < 1) return;
+    if (this._lightsNeedUpload) this._uploadLights();
 
     // ── Geometry ──────────────────────────────────────────────────────────────
     const geoData = this.geoCache.ensure(geometry, this);
@@ -423,7 +421,7 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
     // ── Draw ──────────────────────────────────────────────────────────────────
     passEncoder.setPipeline(this._getPipeline(geometry, material));
     passEncoder.setBindGroup(0, this.sceneFrameBinding.bindGroup, this.cameraDynamicOffset);
-    passEncoder.setBindGroup(1, matData.bindGroup1);
+    passEncoder.setBindGroup(1, matData.bindGroup1, this._lightUniforms.dynamicOffset);
     passEncoder.setVertexBuffer(0, geoData.positionBuf);
     passEncoder.setVertexBuffer(1, geoData.normalBuf);
     passEncoder.setVertexBuffer(2, geoData.uvBuf);
@@ -507,17 +505,7 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
         size: 16,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       });
-      const bindGroup1 = device.createBindGroup({
-        layout: this.bgl1,
-        entries: [
-          { binding: 0, resource: { buffer: transformBuf } },
-          { binding: 1, resource: { buffer: colorBuf } },
-          { binding: 2, resource: { buffer: visibleIndexBuf } },
-          { binding: 3, resource: { buffer: materialBuf } },
-          { binding: 4, resource: { buffer: this.lightBuf } },
-          { binding: 5, resource: { buffer: this.environmentBuf } },
-        ],
-      });
+      const bindGroup1 = this._createObjectBindGroup({ transformBuf, colorBuf, visibleIndexBuf, materialBuf });
       const cullBindGroup = device.createBindGroup({
         layout: this.cullBgl,
         entries: [
@@ -699,10 +687,23 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
     };
   }
 
+  private _createObjectBindGroup(data: Pick<MatGPUData, 'transformBuf' | 'colorBuf' | 'visibleIndexBuf' | 'materialBuf'>): GPUBindGroup {
+    return this.engine.device.createBindGroup({ layout: this.bgl1, entries: [
+      { binding: 0, resource: { buffer: data.transformBuf } },
+      { binding: 1, resource: { buffer: data.colorBuf } },
+      { binding: 2, resource: { buffer: data.visibleIndexBuf } },
+      { binding: 3, resource: { buffer: data.materialBuf } },
+      { binding: 4, resource: { buffer: this._lightUniforms.buffer, size: LIGHT_UNIFORM_BYTES } },
+      { binding: 5, resource: { buffer: this.environmentBuf } },
+    ] });
+  }
+
   destroy(): void {
     this.sceneFrameBinding?.destroy();
     this.frustumBuf?.destroy();
-    this.lightBuf?.destroy();
+    this._lightUniforms?.destroy();
+    this._lights = [];
+    this._lightsNeedUpload = false;
     this.environmentBuf?.destroy();
     this.rendererCore?.destroy();
     this.destroyCacheEntries(this.matCache, m => {

@@ -26,9 +26,6 @@ fn vs_main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
   return out;
 }
 
-fn toneMap(color: vec3<f32>, exposure: f32) -> vec3<f32> {
-  return vec3<f32>(1.0) - exp(-max(color, vec3<f32>(0.0)) * exposure);
-}
 
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
@@ -71,5 +68,5 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
   let belowHorizon = 1.0 - smoothstep(-0.08, 0.04, viewDir.y);
   color = mix(color, vec3<f32>(0.025, 0.028, 0.04), belowHorizon * 0.8);
 
-  return vec4<f32>(toneMap(color, exposure), 1.0);
+  return vec4<f32>(max(color, vec3<f32>(0.0)) * exposure, 1.0);
 }

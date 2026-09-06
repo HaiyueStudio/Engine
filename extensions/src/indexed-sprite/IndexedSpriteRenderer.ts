@@ -221,7 +221,7 @@ export class IndexedSpriteRenderer {
       ],
     });
     const pipelineLayout = this.#device.createPipelineLayout({ label: `${this.label}.pipelineLayout`, bindGroupLayouts: [frameLayout, materialLayout] });
-    for (const blend of ['alpha', 'additive', 'opaque'] as const) this.#pipelines.set(blend, this.#device.createRenderPipeline({
+    for (const blend of ['alpha', 'additive', 'subtractive', 'opaque'] as const) this.#pipelines.set(blend, this.#device.createRenderPipeline({
       label: `${this.label}.pipeline.${blend}`,
       layout: pipelineLayout,
       vertex: { module, entryPoint: 'vs_main' },
@@ -296,6 +296,7 @@ function align(value: number, alignment: number): number { return Math.ceil(valu
 function blendState(blend: IndexedSpriteBlend): GPUBlendState | undefined {
   if (blend === 'opaque') return undefined;
   if (blend === 'additive') return { color: { operation: 'add', srcFactor: 'src-alpha', dstFactor: 'one' }, alpha: { operation: 'add', srcFactor: 'one', dstFactor: 'one' } };
+  if (blend === 'subtractive') return { color: { operation: 'reverse-subtract', srcFactor: 'src-alpha', dstFactor: 'one' }, alpha: { operation: 'add', srcFactor: 'zero', dstFactor: 'one' } };
   return { color: { operation: 'add', srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha' }, alpha: { operation: 'add', srcFactor: 'one', dstFactor: 'one-minus-src-alpha' } };
 }
 

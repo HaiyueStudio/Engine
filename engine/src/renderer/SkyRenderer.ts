@@ -102,7 +102,7 @@ export class SkyRenderer extends BaseRenderer {
   }
 
   private _pipelineDescriptor(): GPURenderPipelineDescriptor {
-      const { format } = this.engine;
+      const format = this.colorFormat ?? this.engine.format;
       return {
         layout: this.pipelineLayout,
         vertex: {

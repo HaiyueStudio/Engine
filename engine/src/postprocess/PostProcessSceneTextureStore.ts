@@ -8,6 +8,19 @@ export interface PostProcessSceneTextureRequirements {
   auxDepth?: boolean;
 }
 
+const TEXTURE_KEYS = [
+  'depthTexture', 'normalTexture', 'motionTexture', 'outlineMaskTexture',
+  'outlineVisibleMaskTexture', 'outlineVisibleMaskMsaaTexture', 'auxDepthTexture',
+] as const;
+const VIEW_KEYS = [
+  'depthView', 'normalView', 'motionView', 'outlineMaskView',
+  'outlineVisibleMaskView', 'outlineVisibleMaskMsaaView', 'auxDepthView',
+] as const;
+
+type SceneTextureResources = Record<typeof TEXTURE_KEYS[number], GPUTexture | null>
+  & Record<typeof VIEW_KEYS[number], GPUTextureView | null>
+  & { lastSeenEpoch: number };
+
 export class PostProcessSceneTextureStore {
   depthTexture: GPUTexture | null = null;
   depthView: GPUTextureView | null = null;
@@ -24,10 +37,32 @@ export class PostProcessSceneTextureStore {
   auxDepthTexture: GPUTexture | null = null;
   auxDepthView: GPUTextureView | null = null;
 
-  private _width = 0;
-  private _height = 0;
-  private _reverseZ = false;
-  private _sampleCount: 1 | 4 = 1;
+  private readonly _resources = new Map<string, SceneTextureResources>();
+  private _activeKey = '';
+  private _frameId: number | undefined;
+  private _epoch = 0;
+  private _retirementScheduledEpoch = -1;
+  private _generation = 0;
+
+  /** Without a submission boundary, cached textures stay alive until destroy(). */
+  beginFrame(frameId: number, afterSubmit?: (callback: (queue: GPUQueue) => void) => void): void {
+    if (frameId !== this._frameId) {
+      this._frameId = frameId;
+      this._epoch++;
+    }
+    if (!afterSubmit || this._retirementScheduledEpoch === this._epoch) return;
+    const epoch = this._epoch;
+    const generation = this._generation;
+    this._retirementScheduledEpoch = epoch;
+    afterSubmit(queue => {
+      if (generation !== this._generation) return;
+      const retire = (): void => {
+        if (generation !== this._generation) return;
+        this._sweepUnusedResources(epoch);
+      };
+      void queue.onSubmittedWorkDone().then(retire, retire);
+    });
+  }
 
   ensure(
     engine: IEngine,
@@ -38,18 +73,27 @@ export class PostProcessSceneTextureStore {
     const { device } = engine;
     const { width, height, format } = surface;
     const sampleCount = surface.sampleCount ?? engine.msaaSamples;
-    const sizeChanged = width !== this._width
-      || height !== this._height
-      || reverseZ !== this._reverseZ
-      || sampleCount !== this._sampleCount;
-
-    if (sizeChanged) {
-      this.destroy();
-      this._width = width;
-      this._height = height;
-      this._reverseZ = reverseZ;
-      this._sampleCount = sampleCount;
+    const depthFormat = engine.getDepthFormat(reverseZ);
+    const key = `${width}x${height}:${format}:${sampleCount}:${reverseZ ? 1 : 0}:${depthFormat}`;
+    let resources = this._resources.get(key);
+    if (key !== this._activeKey) {
+      this._activateResources(resources);
+      this._activeKey = key;
     }
+    if (!resources) {
+      resources = {
+        depthTexture: null, depthView: null,
+        normalTexture: null, normalView: null,
+        motionTexture: null, motionView: null,
+        outlineMaskTexture: null, outlineMaskView: null,
+        outlineVisibleMaskTexture: null, outlineVisibleMaskView: null,
+        outlineVisibleMaskMsaaTexture: null, outlineVisibleMaskMsaaView: null,
+        auxDepthTexture: null, auxDepthView: null,
+        lastSeenEpoch: this._epoch,
+      };
+      this._resources.set(key, resources);
+    }
+    resources.lastSeenEpoch = this._epoch;
 
     if (requirements.depth && !this.depthTexture) {
       this.depthTexture = this._createColorTexture(device, width, height, 'r32float', 'PostProcessSceneTextureStore.depthTexture');
@@ -65,7 +109,7 @@ export class PostProcessSceneTextureStore {
       this.motionTexture = device.createTexture({
         label: 'PostProcessSceneTextureStore.motionTexture',
         size: [width, height],
-        format: 'rg16float',
+        format: 'rgba16float',
         usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
       });
       this.motionView = this.motionTexture.createView();
@@ -96,35 +140,45 @@ export class PostProcessSceneTextureStore {
       this.auxDepthTexture = device.createTexture({
         label: 'PostProcessSceneTextureStore.auxDepthTexture',
         size: [width, height],
-        format: engine.getDepthFormat(reverseZ),
+        format: depthFormat,
         usage: GPUTextureUsage.RENDER_ATTACHMENT,
       });
       this.auxDepthView = this.auxDepthTexture.createView();
     }
+    for (const property of TEXTURE_KEYS) resources[property] = this[property];
+    for (const property of VIEW_KEYS) resources[property] = this[property];
   }
 
   destroy(): void {
-    this.depthTexture?.destroy();
-    this.normalTexture?.destroy();
-    this.motionTexture?.destroy();
-    this.outlineMaskTexture?.destroy();
-    this.outlineVisibleMaskTexture?.destroy();
-    this.outlineVisibleMaskMsaaTexture?.destroy();
-    this.auxDepthTexture?.destroy();
-    this.depthTexture = null;
-    this.depthView = null;
-    this.normalTexture = null;
-    this.normalView = null;
-    this.motionTexture = null;
-    this.motionView = null;
-    this.outlineMaskTexture = null;
-    this.outlineMaskView = null;
-    this.outlineVisibleMaskTexture = null;
-    this.outlineVisibleMaskView = null;
-    this.outlineVisibleMaskMsaaTexture = null;
-    this.outlineVisibleMaskMsaaView = null;
-    this.auxDepthTexture = null;
-    this.auxDepthView = null;
+    this._generation++;
+    for (const resources of this._resources.values()) this._destroyResources(resources);
+    this._resources.clear();
+    this._activateResources();
+    this._activeKey = '';
+    this._frameId = undefined;
+    this._retirementScheduledEpoch = -1;
+  }
+
+  private _activateResources(resources?: SceneTextureResources): void {
+    for (const property of TEXTURE_KEYS) this[property] = resources?.[property] ?? null;
+    for (const property of VIEW_KEYS) this[property] = resources?.[property] ?? null;
+  }
+
+  private _destroyResources(resources: SceneTextureResources): void {
+    for (const property of TEXTURE_KEYS) resources[property]?.destroy();
+  }
+
+  private _sweepUnusedResources(completedEpoch: number): void {
+    for (const [key, resources] of this._resources) {
+      // A later frame may have reused this set while queue completion was pending.
+      if (resources.lastSeenEpoch >= completedEpoch) continue;
+      this._destroyResources(resources);
+      this._resources.delete(key);
+      if (key === this._activeKey) {
+        this._activateResources();
+        this._activeKey = '';
+      }
+    }
   }
 
   private _createColorTexture(

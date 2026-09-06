@@ -1,3 +1,4 @@
+import { ViewLightUniformBuffer, LIGHT_UNIFORM_BYTES, LIGHT_UNIFORM_BINDING } from './ViewLightUniformBuffer';
 import { mat4 } from 'wgpu-matrix';
 import type { AssetHandle, CompressedTextureSourceDescriptor } from '../assets/AssetManager';
 import { AssetManager } from '../assets/AssetManager';
@@ -5,14 +6,13 @@ import type { IEngine } from '../core/IEngine';
 import type { RenderCommandContext } from '../core/RenderCommandContext';
 import { getEngineGPUResourceTracker } from '../core/EngineDiagnosticsAccess';
 import type { SceneFrameUniformSnapshot } from '../frame/SceneFrameUniformLayout';
-import { SCENE_RENDER_MAX_LIGHTS, type PbrLightInfo } from '../frame/SceneRenderEnvironment';
 import type { Geometry3D } from '../geometry/Geometry3D';
 import type { MaterialTextureSource, SampleableTextureSource } from '../material/BasicMaterial';
 import { TOON_MAX_LAYERS, type ToonMaterial, type ToonTextureMapping } from '../material/ToonMaterial';
 import { getBuiltinMaterialLightingShader } from '../shader/BuiltinMaterialLightingShader';
 import { BaseRenderer } from './BaseRenderer';
 import type { GpuDrivenBatchBuffer } from './GpuDrivenBatchBuffer';
-import { forEachDirectInstanceBatchRun } from './DirectInstanceBatchRuns';
+import { forEachDirectInstanceBatchRun, forEachIndirectBatchRun } from './DirectInstanceBatchRuns';
 import type { MaterialGpuDrivenBatch, MaterialRenderBatchItem, MaterialRendererViewContext } from './MaterialRendererRegistry';
 import type { PipelineWarmupPlan } from './PipelineWarmup';
 import { RendererCacheMap, RendererObjectSlotCache } from './RendererCacheMap';
@@ -32,8 +32,6 @@ const OBJECT_BASE_FLOATS = 32;
 const OBJECT_FLOATS = OBJECT_BASE_FLOATS;
 const MATERIAL_FLOATS = 60;
 const MATERIAL_BYTES = MATERIAL_FLOATS * 4;
-const LIGHT_FLOATS = 4 + SCENE_RENDER_MAX_LIGHTS * 16;
-const LIGHT_BYTES = LIGHT_FLOATS * 4;
 // Toon intentionally consumes one effective directional shadow, while the
 // shared PCF feature still requires an explicit array length and array view.
 const TOON_MAX_DIRECTIONAL_SHADOWS = 1;
@@ -82,7 +80,7 @@ export class ToonRenderer extends BaseRenderer {
   private get _batchObjectTable(): RendererObjectTable { return this._rendererCore.requireBatchObjectTable(); }
   private get _geometryCache(): SharedGeometryRendererOwner { return this._rendererCore.geometry as SharedGeometryRendererOwner; }
   private get _objects(): RendererObjectSlotCache<ToonObjectGpuData> { return this._rendererCore.requireObjects(); }
-  private _lightBuffer!: GPUBuffer;
+  private _lightUniforms!: ViewLightUniformBuffer;
   private _shadowBuffer!: GPUBuffer;
   private _sceneBindGroup!: GPUBindGroup;
   private _defaultTexture!: GPUTexture;
@@ -94,16 +92,11 @@ export class ToonRenderer extends BaseRenderer {
   private _shadowSampler!: GPUSampler;
   private readonly _materials = new RendererCacheMap<ToonMaterialGpuData>(data => this._destroyMaterial(data));
   private readonly _samplers = new Map<string, GPUSampler>();
-  private readonly _lightData = new Float32Array(LIGHT_FLOATS);
-  private readonly _lightSnapshot = new Float32Array(LIGHT_FLOATS);
-  private readonly _lightU32 = new Uint32Array(this._lightData.buffer);
   private readonly _shadowData = new Float32Array(SHADOW_FLOATS);
   private readonly _inverseScratch = mat4.identity() as Float32Array;
   private readonly _normalScratch = mat4.identity() as Float32Array;
-  private _lightingRevision = -1;
   private _initialized = false;
   private get _uploadsPrepared(): boolean { return this._rendererCore.uploadsPrepared; }
-  private _warnedLightLimit = false;
 
   prepare(engine: IEngine): void {
     if (this._initialized) return;
@@ -112,8 +105,6 @@ export class ToonRenderer extends BaseRenderer {
     const device = engine.device;
     this._assetManager = engine.assetManager ?? new AssetManager(device, getEngineGPUResourceTracker(engine), engine.defaults?.assetManager);
     this._ownsAssetManager = !engine.assetManager;
-    // A recovered device owns a fresh buffer even when the logical lights are unchanged.
-    this._lightSnapshot.fill(Number.NaN);
     this._sceneFrameBinding = getSceneFrameGpuArena(device).createBinding();
     this._objectLayout = device.createBindGroupLayout({ entries: [
       { binding: 0, visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
@@ -125,7 +116,7 @@ export class ToonRenderer extends BaseRenderer {
       ...LAYER_INDICES.map(index => ({ binding: index + 1 + TOON_MAX_LAYERS, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'filtering' as GPUSamplerBindingType } })),
     ] });
     this._sceneLayout = device.createBindGroupLayout({ entries: [
-      { binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
+      { binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: LIGHT_UNIFORM_BINDING },
       { binding: 5, visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
       { binding: 6, visibility: GPUShaderStage.FRAGMENT, texture: { sampleType: 'depth', viewDimension: '2d-array' } },
       { binding: 7, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'comparison' } },
@@ -150,7 +141,7 @@ export class ToonRenderer extends BaseRenderer {
       createObject: modelSlot => ({ modelSlot, modelSnapshot: new Float32Array(16), clippingKey: '', dirty: true }),
       geometry: new SharedGeometryRendererOwner(device, this, getEngineGPUResourceTracker(engine)),
     });
-    this._lightBuffer = device.createBuffer({ label: 'ToonRenderer.lights', size: LIGHT_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    this._lightUniforms = new ViewLightUniformBuffer(device, 'ToonRenderer.lights');
     this._shadowBuffer = device.createBuffer({ label: 'ToonRenderer.shadow', size: SHADOW_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
     this._defaultSampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear', mipmapFilter: 'linear' });
     this._defaultTexture = this._createSolidTexture();
@@ -177,10 +168,10 @@ export class ToonRenderer extends BaseRenderer {
     this.msaaSamples = context.msaaSamples;
     this._rendererCore.beginUploads(context.commandContext);
     this._cameraDynamicOffset[0] = this._sceneFrameBinding.upload(context.sceneFrameUniforms, context.commandContext);
-    if (this._lightingRevision !== context.sceneEnvironment.lightingRevision) {
-      this._writeLights(context.sceneEnvironment.pbrLights);
-      this._lightingRevision = context.sceneEnvironment.lightingRevision;
-    }
+    const previousBuffer = this._lightUniforms.buffer;
+    this._lightUniforms.selectView(context.sceneFrameUniforms, context.commandContext);
+    this._lightUniforms.upload(context.sceneEnvironment.pbrLights);
+    if (previousBuffer !== this._lightUniforms.buffer) this._rebuildSceneBindGroup();
     this._writeShadow(context.directionalShadow);
   }
 
@@ -235,21 +226,29 @@ export class ToonRenderer extends BaseRenderer {
     count: number,
     batchBuffer: GpuDrivenBatchBuffer,
   ): void {
-    if (batchBuffer.gpuUploadEnabled === false) {
-      forEachDirectInstanceBatchRun(items, first, count, batchBuffer, run => {
+    if (!batchBuffer.gpuUploadEnabled || this._uploadsPrepared) {
+      const visitRuns = batchBuffer.gpuUploadEnabled ? forEachIndirectBatchRun : forEachDirectInstanceBatchRun;
+      visitRuns(items, first, count, batchBuffer, run => {
         const item = run.item;
         const geometryData = this._geometryCache.ensure(item.geometry, this);
         const materialData = this._materials.ensure(item.material.id, () => this._createMaterial());
         if (!this._uploadsPrepared) this._syncMaterial(item.material, materialData);
-        pass.setPipeline(this._getPipeline(item.geometry, item.material));
-        pass.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
-        pass.setBindGroup(1, this._batchObjectTable.bindGroup);
-        pass.setBindGroup(2, materialData.bindGroup);
-        pass.setBindGroup(3, this._sceneBindGroup);
-        pass.setVertexBuffer(0, geometryData.positionBuf);
-        pass.setVertexBuffer(1, geometryData.normalBuf);
-        pass.setVertexBuffer(2, geometryData.uvBuf);
-        pass.setVertexBuffer(3, geometryData.uv1Buf ?? geometryData.uvBuf);
+        const bindings = batchBuffer.gpuUploadEnabled ? this.indirectBatches.begin() : pass;
+        bindings.setPipeline(this._getPipeline(item.geometry, item.material));
+        bindings.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
+        bindings.setBindGroup(1, this._batchObjectTable.bindGroup);
+        bindings.setBindGroup(2, materialData.bindGroup);
+        bindings.setBindGroup(3, this._sceneBindGroup, this._lightUniforms.dynamicOffset);
+        bindings.setVertexBuffer(0, geometryData.positionBuf);
+        bindings.setVertexBuffer(1, geometryData.normalBuf);
+        bindings.setVertexBuffer(2, geometryData.uvBuf);
+        bindings.setVertexBuffer(3, geometryData.uv1Buf ?? geometryData.uvBuf);
+        if (batchBuffer.gpuUploadEnabled) {
+          this.indirectBatches.draw(pass, this._engine.device, batchBuffer, run.firstBatch,
+            run.instanceCount, geometryData.indexBuf, geometryData.indexFormat,
+            [this.colorFormat ?? this._engine.format], this._engine.getDepthFormat(this.reverseZ), this.msaaSamples);
+          return;
+        }
         if (geometryData.indexBuf) {
           pass.setIndexBuffer(geometryData.indexBuf, geometryData.indexFormat);
           pass.drawIndexed(geometryData.indexCount, run.instanceCount, 0, 0, run.firstInstance);
@@ -302,7 +301,7 @@ export class ToonRenderer extends BaseRenderer {
     pass.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
     pass.setBindGroup(1, table.bindGroup);
     pass.setBindGroup(2, materialData.bindGroup);
-    pass.setBindGroup(3, this._sceneBindGroup);
+    pass.setBindGroup(3, this._sceneBindGroup, this._lightUniforms.dynamicOffset);
     pass.setVertexBuffer(0, geometryData.positionBuf);
     pass.setVertexBuffer(1, geometryData.normalBuf);
     pass.setVertexBuffer(2, geometryData.uvBuf);
@@ -394,7 +393,7 @@ export class ToonRenderer extends BaseRenderer {
     data.f32[24] = material.layers.length;
     data.f32[25] = material.bandSoftness;
     data.f32[26] = textureMask;
-    data.f32[27] = 0;
+    data.f32[27] = material.alphaMode === 'opaque' ? 1 : 0;
     writeBuffer(this._engine.device.queue, data.buffer, 0, data.f32);
   }
 
@@ -432,39 +431,6 @@ export class ToonRenderer extends BaseRenderer {
     return true;
   }
 
-  private _writeLights(lights: readonly PbrLightInfo[]): void {
-    this._lightData.fill(0);
-    const count = Math.min(SCENE_RENDER_MAX_LIGHTS, lights.length);
-    if (lights.length > SCENE_RENDER_MAX_LIGHTS && !this._warnedLightLimit) {
-      this._warnedLightLimit = true;
-      console.warn(`[ToonRenderer] Received ${lights.length} lights; only the first ${SCENE_RENDER_MAX_LIGHTS} are used.`);
-    }
-    this._lightU32[0] = count;
-    for (let index = 0; index < count; index++) {
-      const light = lights[index]!;
-      const offset = 4 + index * 16;
-      this._lightU32[offset] = light.type;
-      this._lightData[offset + 4] = light.color[0];
-      this._lightData[offset + 5] = light.color[1];
-      this._lightData[offset + 6] = light.color[2];
-      this._lightData[offset + 7] = light.intensity;
-      this._lightData[offset + 8] = light.direction[0];
-      this._lightData[offset + 9] = light.direction[1];
-      this._lightData[offset + 10] = light.direction[2];
-      this._lightData[offset + 12] = light.position[0];
-      this._lightData[offset + 13] = light.position[1];
-      this._lightData[offset + 14] = light.position[2];
-      this._lightData[offset + 15] = light.range;
-    }
-    let changed = false;
-    for (let index = 0; index < this._lightData.length; index++) {
-      if (!Object.is(this._lightData[index], this._lightSnapshot[index])) { changed = true; break; }
-    }
-    if (!changed) return;
-    this._lightSnapshot.set(this._lightData);
-    writeBuffer(this._engine.device.queue, this._lightBuffer, 0, this._lightData);
-  }
-
   private _writeShadow(shadow: DirectionalShadowState | null): void {
     const view = shadow?.arrayView ?? this._defaultShadowView;
     const sampler = shadow?.sampler ?? this._defaultShadowSampler;
@@ -485,7 +451,7 @@ export class ToonRenderer extends BaseRenderer {
 
   private _rebuildSceneBindGroup(): void {
     this._sceneBindGroup = this._engine.device.createBindGroup({ layout: this._sceneLayout, entries: [
-      { binding: 0, resource: { buffer: this._lightBuffer } },
+      { binding: 0, resource: { buffer: this._lightUniforms.buffer, size: LIGHT_UNIFORM_BYTES } },
       { binding: 5, resource: { buffer: this._shadowBuffer } },
       { binding: 6, resource: this._shadowView },
       { binding: 7, resource: this._shadowSampler },
@@ -532,7 +498,7 @@ export class ToonRenderer extends BaseRenderer {
         { arrayStride: 8, attributes: [{ shaderLocation: 2, offset: 0, format: 'float32x2' }] },
         { arrayStride: 8, attributes: [{ shaderLocation: 3, offset: 0, format: 'float32x2' }] },
       ] },
-      fragment: { module: this._shader, entryPoint: 'fs_main', targets: [createColorTargetState(this._engine.format, blend)] },
+      fragment: { module: this._shader, entryPoint: 'fs_main', targets: [createColorTargetState(this.colorFormat ?? this._engine.format, blend)] },
       primitive: createPrimitiveState(topology, cullMode, frontFace, stripIndexFormat),
       depthStencil: {
         format: this._engine.getDepthFormat(this.reverseZ),
@@ -577,7 +543,7 @@ export class ToonRenderer extends BaseRenderer {
 
   destroy(): void {
     this._sceneFrameBinding?.destroy();
-    this._lightBuffer?.destroy();
+    this._lightUniforms?.destroy();
     this._shadowBuffer?.destroy();
     this._defaultTexture?.destroy();
     this._defaultShadowTexture?.destroy();
@@ -586,7 +552,6 @@ export class ToonRenderer extends BaseRenderer {
     this._samplers.clear();
     if (this._ownsAssetManager) this._assetManager?.dispose();
     this.clearPipelineCache();
-    this._lightingRevision = -1;
     this._initialized = false;
   }
 }

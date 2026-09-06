@@ -428,7 +428,7 @@ test('motion vectors retain per-view previous morph weights and skin poses', () 
     cameraEntityId: 1,
     data: new Float32Array(68),
   });
-  const view = frameId => ({ viewKey: 'main', frameId, cameraId: 1, historyRevision: 0 });
+  const view = frameId => ({ viewKey: 'main', frameId, cameraId: 1, historyRevision: 0, near: 0.1, far: 100, isOrthographic: true, projectionJitter: [0, 0] });
 
   renderer.beginView(sceneFrame(1), view(1), context);
   renderer.render(pass, 701, geometry, worldMatrix);
@@ -446,12 +446,12 @@ test('motion vectors retain per-view previous morph weights and skin poses', () 
   assert.equal(entity.uniformData[52], 0.25, 'continuous frames use the prior morph weight');
   assert.equal(entity.previousSkinMatrices[12], 0.5);
   assert.notEqual(entity.currentSkinBuffer, entity.previousSkinBuffer);
-  assert.deepEqual(passLog.filter(entry => entry[0] === 'bindGroup').map(entry => entry[1]), [0, 1, 2]);
-  assert.deepEqual(passLog.filter(entry => entry[0] === 'vertexBuffer').map(entry => entry[1]), [0, 1, 2, 3, 4]);
+  assert.deepEqual(passLog.filter(entry => entry[0] === 'bindGroup').map(entry => entry[1]), [0, 1, 2, 3]);
+  assert.deepEqual(passLog.filter(entry => entry[0] === 'vertexBuffer').map(entry => entry[1]), [0, 5, 6, 7, 1, 2, 3, 4]);
   renderer.endView(view(2));
 
   geometry.setMorphWeights([1]);
-  const resetView = { viewKey: 'main', frameId: 3, cameraId: 1, historyRevision: 1 };
+  const resetView = { ...view(3), historyRevision: 1 };
   renderer.beginView(sceneFrame(3), resetView, context);
   renderer.render(pass, 701, geometry, worldMatrix);
   assert.equal(entity.uniformData[48], 1);
@@ -461,7 +461,7 @@ test('motion vectors retain per-view previous morph weights and skin poses', () 
   system.destroy();
 });
 
-test('PBR scene lighting uniforms upload only when their revisions change', () => {
+test('PBR view light records and scene IBL/shadow data upload only when their contents change', () => {
   const log = [];
   const engine = createPbrLifecycleEngine(log, async () => { throw new Error('not used'); });
   const system = new Render3DSystem(engine, new Entity('Camera'), { registerDefaultMaterialRenderers: false });
@@ -487,8 +487,11 @@ test('PBR scene lighting uniforms upload only when their revisions change', () =
     entry[0] === 'writeBuffer' && entry[1]?.descriptor?.label === label
   )).length;
 
+  const sceneFrame = { frameId: 1, phaseRevision: 1, cameraEntityId: 1, data: new Float32Array(68) };
   log.length = 0;
   pbr.beginScene(scene);
+  assert.equal(countSceneWrites('PbrRenderer.lights'), 0, 'light upload waits for a view slot');
+  pbr.beginView(sceneFrame);
   assert.deepEqual([
     countSceneWrites('PbrRenderer.lights'),
     countSceneWrites('PbrRenderer.environment'),
@@ -501,21 +504,23 @@ test('PBR scene lighting uniforms upload only when their revisions change', () =
   );
 
   pbr.beginScene(scene);
+  pbr.beginView(sceneFrame);
   assert.deepEqual([
     countSceneWrites('PbrRenderer.lights'),
     countSceneWrites('PbrRenderer.environment'),
     countSceneWrites('PbrRenderer.shadow'),
-  ], [1, 1, 1], 'another view only performs the constant-time revision check');
+  ], [1, 1, 1], 'an unchanged view reuses its light record');
 
   environment.intensity = 2;
   environment.rotation = Math.PI / 2;
   scene.lightingRevision++;
   pbr.beginScene(scene);
+  pbr.beginView(sceneFrame);
   assert.deepEqual([
     countSceneWrites('PbrRenderer.lights'),
     countSceneWrites('PbrRenderer.environment'),
     countSceneWrites('PbrRenderer.shadow'),
-  ], [2, 2, 1]);
+  ], [1, 2, 1]);
   assert.ok(
     Math.abs(pbr._environmentData[9] - Math.PI / 2) < 1e-6,
     'environment rotation reaches the PBR uniform payload',
@@ -523,11 +528,12 @@ test('PBR scene lighting uniforms upload only when their revisions change', () =
 
   scene.shadowRevision++;
   pbr.beginScene(scene);
+  pbr.beginView(sceneFrame);
   assert.deepEqual([
     countSceneWrites('PbrRenderer.lights'),
     countSceneWrites('PbrRenderer.environment'),
     countSceneWrites('PbrRenderer.shadow'),
-  ], [2, 2, 2]);
+  ], [1, 2, 2]);
   system.destroy();
 });
 
@@ -911,7 +917,7 @@ test('directional shadows isolate caster object tables per layer and share Basic
   );
   assert.equal(log.filter(entry => entry[0] === 'createRenderPipeline').length, 4);
   assert.equal(log.filter(entry =>
-    entry[0] === 'createRenderPipeline' && entry[1].descriptor.vertex.buffers.length === 5).length, 2);
+    entry[0] === 'createRenderPipeline' && entry[1].descriptor.vertex.buffers.length === 7).length, 2);
 
   passLog.length = 0;
   const replacementItems = items.slice(0, 5).map((item, index) => ({ ...item, entityId: index + 11 }));
@@ -1075,8 +1081,8 @@ test('directional shadow skinning and morph casters instance only with identical
   );
   assert.equal(
     passLog.filter(entry => entry[0] === 'vertexBuffer' && entry[1] > 0).length,
-    8,
-    'each distinct morph binding installs its four morph vertex buffers once',
+    16,
+    'four runs bind two coverage UV buffers each, and two morph runs bind four morph buffers each',
   );
 
   system.destroy();

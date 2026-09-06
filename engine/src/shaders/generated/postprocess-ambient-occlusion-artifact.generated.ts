@@ -13,10 +13,10 @@ export const AMBIENT_OCCLUSION_SHADER_ARTIFACT = {
   "source": {
     "kind": "module-family",
     "path": "shader-language/builtin-postprocess-family.json",
-    "sha256": "d5f386cc6f34a182e432ce1f82b0cb0cd11c65570ffb06fb3fa98cef9f5ab160"
+    "sha256": "53ba55eee8a6d26268234d39d34fd1562257738a87310ebd4dc41ad088e26dd0"
   },
-  "canonicalHash": "00c69ee40442913dca0aa0751f0cb714b8298a74dc1ede6291d7efed86f496cd",
-  "typedModuleHash": "664462e5a73c9d072b9f68e92c27b6645843cbcb421b47a88b70051667f6bb74",
+  "canonicalHash": "09c719fb38c74183b3fc416c3ba85b56e4968a205d66cc36e4e673fb4719bbad",
+  "typedModuleHash": "91ec9c7c009f924f689a3124de8a13b32a696357fbd1235a48176fcd96ba1801",
   "passes": {
     "ssao": {
       "id": "ssao",
@@ -857,5 +857,5 @@ export const AMBIENT_OCCLUSION_SHADER_ARTIFACT = {
       "canonicalHash": "40c0509f84465c2019798bbf424e9a468b6fb70f79a7f19bb64864637401b95b"
     }
   },
-  "artifactHash": "a84d2b41f649cddfd1a55417db5531237f38cc178a0175109cee2e83c5e23bf5"
+  "artifactHash": "dde4eed317ff3c19f7c664498c2f35674a685676084a86c3ef658656be352454"
 } as const satisfies PrecompiledShaderArtifactV2;

@@ -1,3 +1,5 @@
+import type { Material } from '../material/Material';
+import { auxiliaryCullMode, auxiliaryFrontFace, auxiliaryUsesDeformation, MATERIAL_COVERAGE_LAYOUT, MaterialCoverageBindings, type MaterialCoverageResources } from './AuxiliaryMaterial';
 import type { IEngine } from '../core/IEngine';
 import { getEngineGPUResourceTracker } from '../core/EngineDiagnosticsAccess';
 import type { Geometry3D } from '../geometry/Geometry3D';
@@ -48,6 +50,7 @@ export class OutlineMaskRenderer extends BaseRenderer {
     () => this.objectTable,
     modelSlot => ({ modelSlot, modelSnapshot: new Float32Array(16), modelDirty: true, clippingKey: '' }),
   );
+  private coverageBindings!: MaterialCoverageBindings;
   private _initialized = false;
 
   prepare(engine: IEngine): void {
@@ -63,7 +66,7 @@ export class OutlineMaskRenderer extends BaseRenderer {
       { binding: 0, visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
       { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
     ] });
-    this.bgl2 = device.createBindGroupLayout({ entries: [] });
+    this.bgl2 = device.createBindGroupLayout({ entries: [...MATERIAL_COVERAGE_LAYOUT] });
     this.bgl3 = device.createBindGroupLayout({
       entries: [
         { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } },
@@ -71,6 +74,7 @@ export class OutlineMaskRenderer extends BaseRenderer {
         { binding: 2, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } },
       ],
     });
+    this.coverageBindings = new MaterialCoverageBindings(device, this.bgl2);
     const generated = getBuiltinDeformationShader(device, 'outline', [this.bgl0, this.bgl1, this.bgl2, this.bgl3]);
     this.shaderModule = generated.module;
     this.pipelineLayout = generated.pipelineLayout;
@@ -119,20 +123,23 @@ export class OutlineMaskRenderer extends BaseRenderer {
     entityId: number,
     geometry: Geometry3D,
     worldMatrix: Float32Array,
-    options: { depthWrite?: boolean } = {},
+    options: { depthWrite?: boolean; sourceMaterial?: Material | null; coverage?: MaterialCoverageResources | null } = {},
     clippingPlanes: ClippingPlanes | null = null,
   ): void {
     const geoData = this.geoCache.ensure(geometry, this);
     const deformation = this.deformationCache.ensure(geometry);
     const entData = this.entityCache.ensure(entityId);
-    this._writeObject(entData, geometry, clippingPlanes, worldMatrix);
+    this._writeObject(entData, geometry, clippingPlanes, worldMatrix, auxiliaryUsesDeformation(options.sourceMaterial));
     this.objectTable.flushUploads();
 
-    passEncoder.setPipeline(this._getPipeline(geometry, options.depthWrite ?? true));
+    passEncoder.setPipeline(this._getPipeline(geometry, options.depthWrite ?? true, options.sourceMaterial));
     passEncoder.setBindGroup(0, this.sceneFrameBinding.bindGroup, this.cameraDynamicOffset);
     passEncoder.setBindGroup(1, this.objectTable.bindGroup);
+    passEncoder.setBindGroup(2, this.coverageBindings.get(options.coverage));
     passEncoder.setBindGroup(3, deformation.skinBindGroup);
     passEncoder.setVertexBuffer(0, geoData.positionBuf);
+    passEncoder.setVertexBuffer(5, geoData.uvBuf);
+    passEncoder.setVertexBuffer(6, geoData.uv1Buf ?? geoData.uvBuf);
     for (let index = 0; index < 4; index++) passEncoder.setVertexBuffer(index + 1, deformation.morphBuffers[index]!);
     if (geoData.indexBuf) {
       passEncoder.setIndexBuffer(geoData.indexBuf, geoData.indexFormat);
@@ -143,6 +150,7 @@ export class OutlineMaskRenderer extends BaseRenderer {
   }
 
   destroy(): void {
+    this.coverageBindings?.destroy();
     this.sceneFrameBinding?.destroy();
     this.geoCache?.releaseOwner(this);
     this.deformationCache?.destroy();
@@ -152,15 +160,15 @@ export class OutlineMaskRenderer extends BaseRenderer {
     this._initialized = false;
   }
 
-  private _writeObject(entData: EntityGPUData, geometry: Geometry3D, clippingPlanes: ClippingPlanes | null, worldMatrix: Float32Array): void {
+  private _writeObject(entData: EntityGPUData, geometry: Geometry3D, clippingPlanes: ClippingPlanes | null, worldMatrix: Float32Array, deform: boolean): void {
     const base = entData.modelSlot * OBJECT_TABLE_FLOATS;
     const data = this.objectTable.data;
-    const morphEnabled = geometry.morphUseGpu && geometry.hasMorphTargets;
+    const morphEnabled = deform && geometry.morphUseGpu && geometry.hasMorphTargets;
     const morph0 = morphEnabled ? geometry.morphWeights[0] ?? 0 : 0;
     const morph1 = morphEnabled ? geometry.morphWeights[1] ?? 0 : 0;
     const morph2 = morphEnabled ? geometry.morphWeights[2] ?? 0 : 0;
     const morph3 = morphEnabled ? geometry.morphWeights[3] ?? 0 : 0;
-    const skinned = geometry.skinning ? 1 : 0;
+    const skinned = deform && geometry.skinning ? 1 : 0;
     const clipKey = clippingStateKey(clippingPlanes);
     const objectUnchanged =
       !entData.modelDirty
@@ -192,10 +200,10 @@ export class OutlineMaskRenderer extends BaseRenderer {
     entData.clippingKey = clipKey;
   }
 
-  private _getPipeline(geometry: Geometry3D, depthWrite: boolean): GPURenderPipeline {
+  private _getPipeline(geometry: Geometry3D, depthWrite: boolean, sourceMaterial?: Material | null): GPURenderPipeline {
     const topology = geometry.topology ?? 'triangle-list';
-    const cullMode = geometry.cullMode ?? 'back';
-    const frontFace = geometry.frontFace ?? 'ccw';
+    const cullMode = auxiliaryCullMode(geometry, sourceMaterial);
+    const frontFace = auxiliaryFrontFace(geometry, sourceMaterial);
     const stripIndexFormat = getStripIndexFormat(geometry);
     const key = encodePrimitivePipelineKey(topology, cullMode, frontFace, stripIndexFormat, this.reverseZ, this.msaaSamples, depthWrite ? 1 : 0);
     return this.getCachedPipeline(key, () => this.engine.device.createRenderPipeline(
@@ -232,6 +240,8 @@ export class OutlineMaskRenderer extends BaseRenderer {
             arrayStride: 12,
             attributes: [{ shaderLocation: index + 1, offset: 0, format: 'float32x3' }],
           })),
+          { arrayStride: 8, attributes: [{ shaderLocation: 5, offset: 0, format: 'float32x2' }] },
+          { arrayStride: 8, attributes: [{ shaderLocation: 6, offset: 0, format: 'float32x2' }] },
         ],
       },
       fragment: { module: this.shaderModule, entryPoint: 'fs_main', targets: [{ format }] },

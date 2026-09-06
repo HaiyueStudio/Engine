@@ -1,3 +1,5 @@
+import type { Material } from '../material/Material';
+import { auxiliaryWritesDepth, type MaterialCoverageResolver } from '../renderer/AuxiliaryMaterial';
 import type { IEngine } from '../core/IEngine';
 import type { RenderCommandContext } from '../core/RenderCommandContext';
 import type { RenderViewSnapshot } from '../core/RenderView';
@@ -12,6 +14,9 @@ import type {
   PostProcessProjectionJitterContext,
 } from '../postprocess/PostProcessPass';
 import { PostProcessRenderer } from '../postprocess/PostProcessRenderer';
+import { SceneOutputPass } from '../postprocess/SceneOutputPass';
+import { SCENE_COLOR_FORMAT } from '../postprocess/SceneColor';
+import { srgbToLinear } from '../color/Color';
 import { PostProcessSceneTextureStore } from '../postprocess/PostProcessSceneTextureStore';
 import { DepthRenderer } from '../renderer/DepthRenderer';
 import { NormalRenderer } from '../renderer/NormalRenderer';
@@ -21,6 +26,7 @@ import type { LiveIdSet } from '../renderer/utils';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import type { SceneFrameUniformSnapshot } from '../frame/SceneFrameUniformLayout';
 import type { ClippingPlanes } from '../components/ClippingPlanes';
+import { auxiliarySurfacePassCount, canShareMotionSurface, isAuxiliarySurface } from './Render3DAuxiliaryPlan';
 
 interface MutableLiveIdSet extends LiveIdSet {
   add(id: number): void;
@@ -38,6 +44,7 @@ export interface Render3DPostSceneRequirements {
 
 export interface Render3DPostSceneItem {
   entityId: number;
+  material: Material | null;
   geometry: Geometry3D | null;
   clippingPlanes: ClippingPlanes | null;
   worldMatrix: Float32Array | null;
@@ -56,9 +63,12 @@ export interface Render3DPostSceneLiveSets {
 }
 
 export class Render3DPostScenePasses {
+  readonly output = new SceneOutputPass();
+  private readonly _chain: PostProcessPass[] = [];
   private readonly _sceneTextures = new PostProcessSceneTextureStore();
-  private readonly _depthMaterial = new DepthMaterial();
-  private readonly _normalMaterial = new NormalMaterial({ space: 'view' });
+  private readonly _viewMaterials = new Map<string, { depth: DepthMaterial; normal: NormalMaterial }>();
+  /** Structural counts for the last view, excluding the separate outline semantics. */
+  readonly auxiliaryStats = { surfacePassCount: 0, surfaceDrawCount: 0, unmergedPassCount: 0, unmergedDrawCount: 0, sharedMotionSurface: false };
   private _postRenderer: PostProcessRenderer | null = null;
   private _depthRenderer: DepthRenderer | null = null;
   private _normalRenderer: NormalRenderer | null = null;
@@ -74,7 +84,13 @@ export class Render3DPostScenePasses {
     needsSceneColorCapture: false,
   };
 
-  constructor(private readonly _engine: IEngine) {}
+  constructor(private readonly _engine: IEngine, private readonly resolveCoverage: MaterialCoverageResolver = () => null) {}
+
+  resolveMotionHistoryRevision(passes: readonly PostProcessPass[], viewKey: string): number {
+    let revision = 0;
+    for (const pass of passes) revision = (Math.imul(revision, 31) + pass.getMotionHistoryRevision(viewKey)) >>> 0;
+    return revision;
+  }
 
   resolveProjectionJitter(
     passes: readonly PostProcessPass[],
@@ -105,7 +121,13 @@ export class Render3DPostScenePasses {
     const normal = this._requireNormalRenderer();
     normal.reverseZ = reverseZ;
     normal.msaaSamples = 1;
+    normal.auxiliaryDepth = null;
     normal.contributePipelineWarmup(plan);
+    if (passes.some(pass => pass.needsDepthTexture) && passes.some(pass => pass.needsNormalTexture)) {
+      normal.auxiliaryDepth = { near: 0, far: 1 };
+      normal.contributePipelineWarmup(plan);
+      normal.auxiliaryDepth = null;
+    }
 
     const outline = this._requireOutlineMaskRenderer();
     outline.reverseZ = reverseZ;
@@ -119,15 +141,21 @@ export class Render3DPostScenePasses {
     if (passes.some(pass => !!pass.needsMotionTexture)) {
       const motion = this._requireMotionVectorRenderer();
       motion.reverseZ = reverseZ;
+      motion.auxiliaryDepth = false;
+      motion.auxiliaryNormal = false;
+      motion.contributePipelineWarmup(plan);
+      motion.auxiliaryDepth = passes.some(pass => !!pass.needsDepthTexture);
+      motion.auxiliaryNormal = passes.some(pass => !!pass.needsNormalTexture);
       motion.contributePipelineWarmup(plan);
     }
 
-    if (passes.length > 0) {
+    {
       if (!this._postRenderer) {
         this._postRenderer = new PostProcessRenderer();
-        this._postRenderer.prepare(this._engine);
+        this._postRenderer.prepare(this._engine, this._engine.width, this._engine.height, SCENE_COLOR_FORMAT);
       }
-      this._postRenderer.contributePipelineWarmup(plan, passes);
+      this.output.configure(this._engine.format, 1, 'reinhard');
+      this._postRenderer.contributePipelineWarmup(plan, this.outputChain(passes));
     }
   }
 
@@ -138,6 +166,16 @@ export class Render3DPostScenePasses {
     needsSceneColorCapture = false,
   ): Render3DPostSceneRequirements {
     const requirements = this.getRequirements(passes, needsSceneColorCapture);
+    Object.assign(this.auxiliaryStats, { surfacePassCount: 0, surfaceDrawCount: 0, unmergedPassCount: 0, unmergedDrawCount: 0, sharedMotionSurface: false });
+    // Every auxiliary configuration owns an aux-depth attachment. Keep advancing
+    // idle stores after effects are disabled, without adding callbacks to scenes
+    // that have never allocated auxiliary buffers.
+    if (requirements.needsAuxDepth || this._sceneTextures.auxDepthTexture !== null) {
+      this._sceneTextures.beginFrame(
+        context.frameData?.frameId ?? 0,
+        context.afterSubmit ? callback => context.afterSubmit!(callback) : undefined,
+      );
+    }
     if (!requirements.needsMotion && this._motionVectorRenderer) {
       const renderer = this._motionVectorRenderer;
       this._motionVectorRenderer = null;
@@ -150,9 +188,9 @@ export class Render3DPostScenePasses {
     if (context.passEncoder) {
       throw new EngineError(
         EngineErrorCode.RenderPipelineInvalidPassState,
-        'Render3DSystem.record() cannot use an external open pass when post-processing is enabled.',
+        'Render3DSystem.record() requires an isolated pass for linear HDR rendering and scene output.',
         {
-          hint: 'Register this Render3DSystem as an isolated render pipeline entry, or disable post-processing for shared-pass rendering.',
+          hint: 'Register this Render3DSystem as an isolated render pipeline entry so it can encode its HDR scene and output stages.',
           docsPath: 'errors/E_RENDER_PIPELINE_INVALID_PASS_STATE',
         },
       );
@@ -161,13 +199,12 @@ export class Render3DPostScenePasses {
     const surface = context.view?.target ?? this._engine;
     if (!this._postRenderer) {
       this._postRenderer = new PostProcessRenderer();
-      this._postRenderer.prepare(this._engine, surface.width, surface.height, surface.format);
+      this._postRenderer.prepare(this._engine, context.view?.width ?? surface.width, context.view?.height ?? surface.height, SCENE_COLOR_FORMAT);
     } else if (
-      this._postRenderer.width !== surface.width ||
-      this._postRenderer.height !== surface.height ||
-      this._postRenderer.format !== surface.format
+      this._postRenderer.width !== (context.view?.width ?? surface.width) ||
+      this._postRenderer.height !== (context.view?.height ?? surface.height)
     ) {
-      this._postRenderer.resize(surface.width, surface.height, surface.format);
+      this._postRenderer.resize(context.view?.width ?? surface.width, context.view?.height ?? surface.height, SCENE_COLOR_FORMAT);
     }
     this._postRenderer.beginFrame(
       context.frameData?.frameId ?? 0,
@@ -182,8 +219,8 @@ export class Render3DPostScenePasses {
         outlineMask: requirements.needsOutlineMask,
         auxDepth: requirements.needsAuxDepth,
       }, reverseZ, {
-        width: surface.width,
-        height: surface.height,
+        width: context.view?.width ?? surface.width,
+        height: context.view?.height ?? surface.height,
         format: surface.format,
         sampleCount: context.view?.sampleCount ?? this._engine.msaaSamples,
       });
@@ -197,7 +234,7 @@ export class Render3DPostScenePasses {
     needsSceneColorCapture = false,
   ): Render3DPostSceneRequirements {
     const requirements = this._requirements;
-    requirements.usePostProcess = passes.length > 0 || needsSceneColorCapture;
+    requirements.usePostProcess = true;
     requirements.needsSceneColorCapture = needsSceneColorCapture;
     requirements.needsDepth = false;
     requirements.needsNormal = false;
@@ -236,10 +273,13 @@ export class Render3DPostScenePasses {
       );
     }
 
+    const color = view?.clearColor ?? this._engine.clearColor;
+    const clearColor = view?.loadOp === 'load' ? { r: 0, g: 0, b: 0, a: 0 }
+      : { r: srgbToLinear(color.r) * color.a, g: srgbToLinear(color.g) * color.a, b: srgbToLinear(color.b) * color.a, a: color.a };
     return postRenderer.getScenePassDescriptor({
       sampleCount: view?.sampleCount ?? this._engine.msaaSamples,
       reverseZ,
-      clearColor: view?.clearColor ?? this._engine.clearColor,
+      clearColor,
       loadOp,
       depthFormat: this._engine.getDepthFormat(reverseZ),
       preserveMsaa,
@@ -256,6 +296,18 @@ export class Render3DPostScenePasses {
     return this._postRenderer.captureSceneColor(encoder);
   }
 
+  applySceneViewport(pass: GPURenderPassEncoder, view: RenderViewSnapshot): void {
+    const viewport = view.viewport;
+    if (viewport) pass.setViewport(0, 0, view.width, view.height, viewport.minDepth ?? 0, viewport.maxDepth ?? 1);
+    const scissor = view.scissor;
+    if (!scissor) return;
+    const x = Math.min(view.width, Math.max(0, scissor.x - (viewport?.x ?? 0)));
+    const y = Math.min(view.height, Math.max(0, scissor.y - (viewport?.y ?? 0)));
+    const right = Math.max(x, Math.min(view.width, scissor.x + scissor.width - (viewport?.x ?? 0)));
+    const bottom = Math.max(y, Math.min(view.height, scissor.y + scissor.height - (viewport?.y ?? 0)));
+    pass.setScissorRect(x, y, right - x, bottom - y);
+  }
+
   renderAuxiliaryBuffers(options: {
     encoder: GPUCommandEncoder;
     items: readonly Render3DPostSceneItem[];
@@ -269,12 +321,25 @@ export class Render3DPostScenePasses {
     frameId: number;
     cameraId: number;
     motionHistoryRevision: number;
+    projectionJitter: ArrayLike<number>;
     context: RenderCommandContext;
     requirements: Render3DPostSceneRequirements;
     live: Render3DPostSceneLiveSets;
   }): void {
     const { requirements } = options;
     if (!requirements.needsDepth && !requirements.needsNormal && !requirements.needsMotion && !requirements.needsOutlineMask) return;
+    const sharedMotion = requirements.needsMotion && canShareMotionSurface(options.items, options.motionItems);
+    const motionDepth = sharedMotion && requirements.needsDepth;
+    const motionNormal = sharedMotion && requirements.needsNormal;
+    const normalDepth = !motionDepth && requirements.needsNormal && requirements.needsDepth;
+    const stats = this.auxiliaryStats;
+    stats.sharedMotionSurface = sharedMotion;
+    stats.surfacePassCount = auxiliarySurfacePassCount(requirements, sharedMotion);
+    stats.unmergedPassCount = +requirements.needsDepth + +requirements.needsNormal + +requirements.needsMotion;
+    stats.unmergedDrawCount = 0;
+    stats.surfaceDrawCount = 0;
+    for (const item of options.items) if (isAuxiliarySurface(item)) stats.unmergedDrawCount += +requirements.needsDepth + +requirements.needsNormal;
+    for (const item of options.motionItems) if (isAuxiliarySurface(item)) stats.unmergedDrawCount += +requirements.needsMotion;
     const textures = this._sceneTextures;
     const depthAttachment = () => ({
       view: textures.auxDepthView!,
@@ -283,11 +348,12 @@ export class Render3DPostScenePasses {
       depthStoreOp: 'discard' as GPUStoreOp,
     });
 
-    if (requirements.needsDepth && textures.depthView) {
+    if (requirements.needsDepth && !motionDepth && !normalDepth && textures.depthView) {
+      const materials = this._getViewMaterials(options.viewKey);
       const renderer = this._requireDepthRenderer();
-      this._depthMaterial.near = options.camera.near;
-      this._depthMaterial.far = options.camera.far;
-      this._depthMaterial.isOrthographic = options.camera.projectionType === 'orthographic';
+      materials.depth.near = options.camera.near;
+      materials.depth.far = options.camera.far;
+      materials.depth.isOrthographic = options.camera.projectionType === 'orthographic';
       renderer.reverseZ = options.reverseZ;
       renderer.msaaSamples = 1;
       renderer.beginView(options.sceneFrameUniforms);
@@ -301,20 +367,24 @@ export class Render3DPostScenePasses {
         }],
         depthStencilAttachment: depthAttachment(),
       });
-      for (const { entityId, geometry, clippingPlanes, worldMatrix } of options.items) {
-        if (!geometry || !worldMatrix) continue;
+      for (const { entityId, material, geometry, clippingPlanes, worldMatrix } of options.items) {
+        if (!geometry || !worldMatrix || !material) continue;
+        if (!auxiliaryWritesDepth(material)) continue;
         options.live.depthEntities.add(entityId);
         options.live.depthGeometries.add(geometry.id);
-        options.live.depthMaterials.add(this._depthMaterial.id);
-        renderer.render(pass, entityId, geometry, this._depthMaterial, worldMatrix, {}, clippingPlanes);
+        options.live.depthMaterials.add(materials.depth.id);
+        renderer.render(pass, entityId, geometry, materials.depth, worldMatrix, { sourceMaterial: material, coverage: this.resolveCoverage(material) }, clippingPlanes);
+        stats.surfaceDrawCount++;
       }
       pass.end();
     }
 
-    if (requirements.needsNormal && textures.normalView) {
+    if (requirements.needsNormal && !motionNormal && textures.normalView) {
+      const materials = this._getViewMaterials(options.viewKey);
       const renderer = this._requireNormalRenderer();
       renderer.reverseZ = options.reverseZ;
       renderer.msaaSamples = 1;
+      renderer.auxiliaryDepth = normalDepth ? options.camera : null;
       renderer.beginView(options.sceneFrameUniforms);
       const pass = options.encoder.beginRenderPass({
         label: 'Render3DSystem.postNormalPass',
@@ -323,15 +393,17 @@ export class Render3DPostScenePasses {
           clearValue: { r: 0.5, g: 0.5, b: 1, a: 1 },
           loadOp: 'clear',
           storeOp: 'store',
-        }],
+        }, normalDepth ? { view: textures.depthView!, clearValue: [1, 1, 1, 1], loadOp: 'clear', storeOp: 'store' } : null],
         depthStencilAttachment: depthAttachment(),
       });
-      for (const { entityId, geometry, clippingPlanes, worldMatrix } of options.items) {
-        if (!geometry || !worldMatrix) continue;
+      for (const { entityId, material, geometry, clippingPlanes, worldMatrix } of options.items) {
+        if (!geometry || !worldMatrix || !material) continue;
+        if (!auxiliaryWritesDepth(material)) continue;
         options.live.normalEntities.add(entityId);
         options.live.normalGeometries.add(geometry.id);
-        options.live.normalMaterials.add(this._normalMaterial.id);
-        renderer.render(pass, entityId, geometry, this._normalMaterial, worldMatrix, {}, clippingPlanes);
+        options.live.normalMaterials.add(materials.normal.id);
+        renderer.render(pass, entityId, geometry, materials.normal, worldMatrix, { sourceMaterial: material, coverage: this.resolveCoverage(material) }, clippingPlanes);
+        stats.surfaceDrawCount++;
       }
       pass.end();
     }
@@ -339,11 +411,17 @@ export class Render3DPostScenePasses {
     if (requirements.needsMotion && textures.motionView) {
       const renderer = this._requireMotionVectorRenderer();
       renderer.reverseZ = options.reverseZ;
+      renderer.auxiliaryDepth = motionDepth;
+      renderer.auxiliaryNormal = motionNormal;
       const viewOptions = {
         viewKey: options.viewKey,
         frameId: options.frameId,
         cameraId: options.cameraId,
         historyRevision: options.motionHistoryRevision,
+        near: options.camera.near,
+        far: options.camera.far,
+        isOrthographic: options.camera.projectionType === 'orthographic',
+        projectionJitter: options.projectionJitter,
       };
       renderer.beginView(options.sceneFrameUniforms, viewOptions, options.context);
       const pass = options.encoder.beginRenderPass({
@@ -353,15 +431,17 @@ export class Render3DPostScenePasses {
           clearValue: { r: 0, g: 0, b: 0, a: 0 },
           loadOp: 'clear',
           storeOp: 'store',
-        }],
+        }, motionDepth ? { view: textures.depthView!, clearValue: [1, 1, 1, 1], loadOp: 'clear', storeOp: 'store' } : null,
+        motionNormal ? { view: textures.normalView!, clearValue: [0.5, 0.5, 1, 1], loadOp: 'clear', storeOp: 'store' } : null],
         depthStencilAttachment: depthAttachment(),
       });
-      // Transparent coverage requires material-specific alpha handling. The
-      // first velocity ABI deliberately starts with opaque rigid meshes.
-      for (const { entityId, geometry, clippingPlanes, worldMatrix } of options.motionItems) {
-        if (!geometry || !worldMatrix) continue;
+      // Velocity follows the opaque/alpha-tested surfaces of the main view.
+      for (const { entityId, material, geometry, clippingPlanes, worldMatrix } of options.motionItems) {
+        if (!geometry || !worldMatrix || !material) continue;
+        if (!auxiliaryWritesDepth(material)) continue;
         options.live.motionGeometries.add(geometry.id);
-        renderer.render(pass, entityId, geometry, worldMatrix, clippingPlanes);
+        renderer.render(pass, entityId, geometry, worldMatrix, clippingPlanes, material, this.resolveCoverage(material));
+        stats.surfaceDrawCount++;
       }
       pass.end();
       renderer.endView(viewOptions);
@@ -382,11 +462,11 @@ export class Render3DPostScenePasses {
         }],
         depthStencilAttachment: depthAttachment(),
       });
-      for (const { entityId, geometry, clippingPlanes, worldMatrix } of options.outlineItems) {
-        if (!geometry || !worldMatrix) continue;
+      for (const { entityId, material, geometry, clippingPlanes, worldMatrix } of options.outlineItems) {
+        if (!geometry || !worldMatrix || !material) continue;
         options.live.outlineEntities.add(entityId);
         options.live.outlineGeometries.add(geometry.id);
-        renderer.render(pass, entityId, geometry, worldMatrix, {}, clippingPlanes);
+        renderer.render(pass, entityId, geometry, worldMatrix, { sourceMaterial: material, coverage: this.resolveCoverage(material) }, clippingPlanes);
       }
       pass.end();
 
@@ -415,11 +495,11 @@ export class Render3DPostScenePasses {
             depthStoreOp: 'store',
           },
         });
-        for (const { entityId, geometry, clippingPlanes, worldMatrix } of options.outlineItems) {
-          if (!geometry || !worldMatrix) continue;
+        for (const { entityId, material, geometry, clippingPlanes, worldMatrix } of options.outlineItems) {
+          if (!geometry || !worldMatrix || !material) continue;
           options.live.outlineEntities.add(entityId);
           options.live.outlineGeometries.add(geometry.id);
-          renderer.render(visiblePass, entityId, geometry, worldMatrix, { depthWrite: false }, clippingPlanes);
+          renderer.render(visiblePass, entityId, geometry, worldMatrix, { depthWrite: false, sourceMaterial: material, coverage: this.resolveCoverage(material) }, clippingPlanes);
         }
         visiblePass.end();
       }
@@ -434,7 +514,7 @@ export class Render3DPostScenePasses {
     frame: PostProcessFrameContext,
   ): void {
     if (!requirements.usePostProcess || !this._postRenderer) return;
-    this._postRenderer.run(encoder, passes, outputView, {
+    this._postRenderer.run(encoder, this.outputChain(passes), outputView, {
       depth: requirements.needsDepth ? this._sceneTextures.depthTexture ?? undefined : undefined,
       normal: requirements.needsNormal ? this._sceneTextures.normalTexture ?? undefined : undefined,
       motion: requirements.needsMotion ? this._sceneTextures.motionTexture ?? undefined : undefined,
@@ -445,6 +525,9 @@ export class Render3DPostScenePasses {
   }
 
   releaseRendererCaches(live: Render3DPostSceneLiveSets): void {
+    for (const [key, materials] of this._viewMaterials) {
+      if (!live.depthMaterials.has(materials.depth.id) && !live.normalMaterials.has(materials.normal.id)) this._viewMaterials.delete(key);
+    }
     this._depthRenderer?.releaseEntitiesNotIn(live.depthEntities);
     this._depthRenderer?.releaseGeometriesNotIn(live.depthGeometries);
     this._depthRenderer?.releaseMaterialsNotIn(live.depthMaterials);
@@ -458,7 +541,25 @@ export class Render3DPostScenePasses {
     this._motionVectorRenderer?.releaseGeometriesNotIn(live.motionGeometries);
   }
 
+  private outputChain(passes: readonly PostProcessPass[]): PostProcessPass[] {
+    this._chain.length = 0;
+    this._chain.push(...passes, this.output);
+    return this._chain;
+  }
+
+  private _getViewMaterials(viewKey: string) {
+    // Camera-dependent parameter buffers differ between views in one submission.
+    let materials = this._viewMaterials.get(viewKey);
+    if (!materials) {
+      materials = { depth: new DepthMaterial(), normal: new NormalMaterial({ space: 'view' }) };
+      this._viewMaterials.set(viewKey, materials);
+    }
+    return materials;
+  }
+
   destroy(): void {
+    this._viewMaterials.clear();
+    this._chain.length = 0;
     this._postRenderer?.destroy();
     this._depthRenderer?.destroy();
     this._normalRenderer?.destroy();

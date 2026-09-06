@@ -223,7 +223,7 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "size": 4
             },
             {
-              "name": "_pad1",
+              "name": "opaque",
               "type": "u32",
               "offset": 40,
               "size": 4
@@ -371,10 +371,10 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "sourceId": "deformation.forward",
           "sourceName": "shader-language/builtin-deformation-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 181
+          "generatedEndLine": 182
         }
       ],
-      "canonicalHash": "fa7c5201d9c26a60741599288a268510883d346e19bfa6ff373e404ddc3b0aa9"
+      "canonicalHash": "82fc547dab5f128e2e438e46ad3c45c24a840d16f800bbd68d4e106f0b198feb"
     },
     "forward-skinned": {
       "id": "forward-skinned",
@@ -624,7 +624,7 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "size": 4
             },
             {
-              "name": "_pad1",
+              "name": "opaque",
               "type": "u32",
               "offset": 40,
               "size": 4
@@ -773,10 +773,10 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "sourceId": "deformation.forward-skinned",
           "sourceName": "shader-language/builtin-deformation-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 238
+          "generatedEndLine": 239
         }
       ],
-      "canonicalHash": "9f28a9a132a1ddc6585bc6dbd53363fda478dc183f2b8c62396974e856ffec33"
+      "canonicalHash": "dc685ec276d3f4fadea00326ea0633ab78ba1a92dddb995d77446c674dd4f2c6"
     },
     "depth": {
       "id": "depth",
@@ -859,6 +859,43 @@ export const DEFORMATION_SHADER_ARTIFACT = {
                 "bufferType": "uniform",
                 "hasDynamicOffset": false,
                 "minBindingSize": 16
+              }
+            },
+            {
+              "id": "material.coverage",
+              "binding": 1,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "uniform",
+                "hasDynamicOffset": false,
+                "minBindingSize": 192
+              }
+            },
+            {
+              "id": "material.coverageTexture",
+              "binding": 2,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "texture",
+                "sampleType": "float",
+                "viewDimension": "2d",
+                "multisampled": false
+              }
+            },
+            {
+              "id": "material.coverageSampler",
+              "binding": 3,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "sampler",
+                "samplerType": "filtering"
               }
             }
           ]
@@ -959,6 +996,56 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           ]
         },
         {
+          "id": "material.coverage",
+          "alignment": 16,
+          "byteSize": 192,
+          "fields": [
+            {
+              "name": "baseColor",
+              "type": "vec4<f32>",
+              "offset": 0,
+              "size": 16
+            },
+            {
+              "name": "emissiveAndNormalScale",
+              "type": "vec4<f32>",
+              "offset": 16,
+              "size": 16
+            },
+            {
+              "name": "surfaceAndCutoff",
+              "type": "vec4<f32>",
+              "offset": 32,
+              "size": 16
+            },
+            {
+              "name": "flags",
+              "type": "vec4<u32>",
+              "offset": 48,
+              "size": 16
+            },
+            {
+              "name": "extensions",
+              "type": "array<vec4<f32>,6>",
+              "offset": 64,
+              "size": 96,
+              "arrayStride": 16
+            },
+            {
+              "name": "baseMapping0",
+              "type": "vec4<f32>",
+              "offset": 160,
+              "size": 16
+            },
+            {
+              "name": "baseMapping1",
+              "type": "vec4<f32>",
+              "offset": 176,
+              "size": 16
+            }
+          ]
+        },
+        {
           "id": "material.depthParameters",
           "alignment": 16,
           "byteSize": 16,
@@ -1050,6 +1137,30 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "format": "float32x3"
             }
           ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_0",
+              "shaderLocation": 5,
+              "offset": 0,
+              "format": "float32x2"
+            }
+          ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_1",
+              "shaderLocation": 6,
+              "offset": 0,
+              "format": "float32x2"
+            }
+          ]
         }
       ],
       "varyings": [
@@ -1070,6 +1181,18 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "location": 2,
           "type": "u32",
           "interpolation": "flat"
+        },
+        {
+          "semantic": "TEXCOORD_0",
+          "location": 3,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
+        },
+        {
+          "semantic": "TEXCOORD_1",
+          "location": 4,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
         }
       ],
       "renderTargets": [
@@ -1081,7 +1204,9 @@ export const DEFORMATION_SHADER_ARTIFACT = {
       "capabilities": [
         "morph-targets",
         "skinning",
-        "storage-buffer"
+        "storage-buffer",
+        "texture-sample",
+        "discard"
       ],
       "passRequirements": [
         "deformation-abi-v1",
@@ -1094,10 +1219,10 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "sourceId": "deformation.depth",
           "sourceName": "shader-language/builtin-deformation-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 224
+          "generatedEndLine": 259
         }
       ],
-      "canonicalHash": "989a06a6eab56f0fe5d45db6d34863cad5b57a01a6a75ae8b2a8056d54ce21f3"
+      "canonicalHash": "3be878a3341fd5fffeb7af41f9094d15cad3afeb0a1779420f1ef11ae71ecdaf"
     },
     "shadow": {
       "id": "shadow",
@@ -1162,6 +1287,51 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               }
             }
           ]
+        },
+        {
+          "logicalSpace": "material",
+          "logicalGroup": 2,
+          "physicalGroup": 2,
+          "owner": "renderer",
+          "bindings": [
+            {
+              "id": "material.coverage",
+              "binding": 1,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "uniform",
+                "hasDynamicOffset": false,
+                "minBindingSize": 192
+              }
+            },
+            {
+              "id": "material.coverageTexture",
+              "binding": 2,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "texture",
+                "sampleType": "float",
+                "viewDimension": "2d",
+                "multisampled": false
+              }
+            },
+            {
+              "id": "material.coverageSampler",
+              "binding": 3,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "sampler",
+                "samplerType": "filtering"
+              }
+            }
+          ]
         }
       ],
       "uniformBlocks": [
@@ -1178,6 +1348,56 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "matrixStride": 16
             }
           ]
+        },
+        {
+          "id": "material.coverage",
+          "alignment": 16,
+          "byteSize": 192,
+          "fields": [
+            {
+              "name": "baseColor",
+              "type": "vec4<f32>",
+              "offset": 0,
+              "size": 16
+            },
+            {
+              "name": "emissiveAndNormalScale",
+              "type": "vec4<f32>",
+              "offset": 16,
+              "size": 16
+            },
+            {
+              "name": "surfaceAndCutoff",
+              "type": "vec4<f32>",
+              "offset": 32,
+              "size": 16
+            },
+            {
+              "name": "flags",
+              "type": "vec4<u32>",
+              "offset": 48,
+              "size": 16
+            },
+            {
+              "name": "extensions",
+              "type": "array<vec4<f32>,6>",
+              "offset": 64,
+              "size": 96,
+              "arrayStride": 16
+            },
+            {
+              "name": "baseMapping0",
+              "type": "vec4<f32>",
+              "offset": 160,
+              "size": 16
+            },
+            {
+              "name": "baseMapping1",
+              "type": "vec4<f32>",
+              "offset": 176,
+              "size": 16
+            }
+          ]
         }
       ],
       "vertexBuffers": [
@@ -1190,6 +1410,30 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "shaderLocation": 0,
               "offset": 0,
               "format": "float32x3"
+            }
+          ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_0",
+              "shaderLocation": 5,
+              "offset": 0,
+              "format": "float32x2"
+            }
+          ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_1",
+              "shaderLocation": 6,
+              "offset": 0,
+              "format": "float32x2"
             }
           ]
         }
@@ -1206,6 +1450,18 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "location": 1,
           "type": "u32",
           "interpolation": "flat"
+        },
+        {
+          "semantic": "TEXCOORD_0",
+          "location": 2,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
+        },
+        {
+          "semantic": "TEXCOORD_1",
+          "location": 3,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
         }
       ],
       "renderTargets": [
@@ -1215,7 +1471,9 @@ export const DEFORMATION_SHADER_ARTIFACT = {
         }
       ],
       "capabilities": [
-        "storage-buffer"
+        "storage-buffer",
+        "texture-sample",
+        "discard"
       ],
       "passRequirements": [
         "deformation-abi-v1",
@@ -1228,10 +1486,10 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "sourceId": "deformation.shadow",
           "sourceName": "shader-language/builtin-deformation-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 57
+          "generatedEndLine": 92
         }
       ],
-      "canonicalHash": "d3b8af2c067de47d1f8928c5730288257c071dbc4cf0b44e3da3536930e157cc"
+      "canonicalHash": "356399d3822327894021f58820f99fb78061b8704fda94e8da1f706cc8765e15"
     },
     "shadow-morph": {
       "id": "shadow-morph",
@@ -1296,6 +1554,51 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               }
             }
           ]
+        },
+        {
+          "logicalSpace": "material",
+          "logicalGroup": 2,
+          "physicalGroup": 2,
+          "owner": "renderer",
+          "bindings": [
+            {
+              "id": "material.coverage",
+              "binding": 1,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "uniform",
+                "hasDynamicOffset": false,
+                "minBindingSize": 192
+              }
+            },
+            {
+              "id": "material.coverageTexture",
+              "binding": 2,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "texture",
+                "sampleType": "float",
+                "viewDimension": "2d",
+                "multisampled": false
+              }
+            },
+            {
+              "id": "material.coverageSampler",
+              "binding": 3,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "sampler",
+                "samplerType": "filtering"
+              }
+            }
+          ]
         }
       ],
       "uniformBlocks": [
@@ -1310,6 +1613,56 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "offset": 0,
               "size": 64,
               "matrixStride": 16
+            }
+          ]
+        },
+        {
+          "id": "material.coverage",
+          "alignment": 16,
+          "byteSize": 192,
+          "fields": [
+            {
+              "name": "baseColor",
+              "type": "vec4<f32>",
+              "offset": 0,
+              "size": 16
+            },
+            {
+              "name": "emissiveAndNormalScale",
+              "type": "vec4<f32>",
+              "offset": 16,
+              "size": 16
+            },
+            {
+              "name": "surfaceAndCutoff",
+              "type": "vec4<f32>",
+              "offset": 32,
+              "size": 16
+            },
+            {
+              "name": "flags",
+              "type": "vec4<u32>",
+              "offset": 48,
+              "size": 16
+            },
+            {
+              "name": "extensions",
+              "type": "array<vec4<f32>,6>",
+              "offset": 64,
+              "size": 96,
+              "arrayStride": 16
+            },
+            {
+              "name": "baseMapping0",
+              "type": "vec4<f32>",
+              "offset": 160,
+              "size": 16
+            },
+            {
+              "name": "baseMapping1",
+              "type": "vec4<f32>",
+              "offset": 176,
+              "size": 16
             }
           ]
         }
@@ -1374,6 +1727,30 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "format": "float32x3"
             }
           ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_0",
+              "shaderLocation": 5,
+              "offset": 0,
+              "format": "float32x2"
+            }
+          ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_1",
+              "shaderLocation": 6,
+              "offset": 0,
+              "format": "float32x2"
+            }
+          ]
         }
       ],
       "varyings": [
@@ -1388,6 +1765,18 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "location": 1,
           "type": "u32",
           "interpolation": "flat"
+        },
+        {
+          "semantic": "TEXCOORD_0",
+          "location": 2,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
+        },
+        {
+          "semantic": "TEXCOORD_1",
+          "location": 3,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
         }
       ],
       "renderTargets": [
@@ -1398,6 +1787,8 @@ export const DEFORMATION_SHADER_ARTIFACT = {
       ],
       "capabilities": [
         "storage-buffer",
+        "texture-sample",
+        "discard",
         "morph-targets"
       ],
       "passRequirements": [
@@ -1411,10 +1802,10 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "sourceId": "deformation.shadow-morph",
           "sourceName": "shader-language/builtin-deformation-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 102
+          "generatedEndLine": 137
         }
       ],
-      "canonicalHash": "1120fa169579b379a962601d48c4d243a9ad30312197c858d5a0e616dd06975f"
+      "canonicalHash": "3ca029efd812ddf523ae8351c96e1b7369e55e098a8d556ef3a8ad47d0de336a"
     },
     "shadow-skinned": {
       "id": "shadow-skinned",
@@ -1485,7 +1876,45 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "logicalGroup": 2,
           "physicalGroup": 2,
           "owner": "renderer",
-          "bindings": []
+          "bindings": [
+            {
+              "id": "material.coverage",
+              "binding": 1,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "uniform",
+                "hasDynamicOffset": false,
+                "minBindingSize": 192
+              }
+            },
+            {
+              "id": "material.coverageTexture",
+              "binding": 2,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "texture",
+                "sampleType": "float",
+                "viewDimension": "2d",
+                "multisampled": false
+              }
+            },
+            {
+              "id": "material.coverageSampler",
+              "binding": 3,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "sampler",
+                "samplerType": "filtering"
+              }
+            }
+          ]
         },
         {
           "logicalSpace": "object",
@@ -1549,6 +1978,56 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "matrixStride": 16
             }
           ]
+        },
+        {
+          "id": "material.coverage",
+          "alignment": 16,
+          "byteSize": 192,
+          "fields": [
+            {
+              "name": "baseColor",
+              "type": "vec4<f32>",
+              "offset": 0,
+              "size": 16
+            },
+            {
+              "name": "emissiveAndNormalScale",
+              "type": "vec4<f32>",
+              "offset": 16,
+              "size": 16
+            },
+            {
+              "name": "surfaceAndCutoff",
+              "type": "vec4<f32>",
+              "offset": 32,
+              "size": 16
+            },
+            {
+              "name": "flags",
+              "type": "vec4<u32>",
+              "offset": 48,
+              "size": 16
+            },
+            {
+              "name": "extensions",
+              "type": "array<vec4<f32>,6>",
+              "offset": 64,
+              "size": 96,
+              "arrayStride": 16
+            },
+            {
+              "name": "baseMapping0",
+              "type": "vec4<f32>",
+              "offset": 160,
+              "size": 16
+            },
+            {
+              "name": "baseMapping1",
+              "type": "vec4<f32>",
+              "offset": 176,
+              "size": 16
+            }
+          ]
         }
       ],
       "vertexBuffers": [
@@ -1561,6 +2040,30 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "shaderLocation": 0,
               "offset": 0,
               "format": "float32x3"
+            }
+          ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_0",
+              "shaderLocation": 5,
+              "offset": 0,
+              "format": "float32x2"
+            }
+          ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_1",
+              "shaderLocation": 6,
+              "offset": 0,
+              "format": "float32x2"
             }
           ]
         }
@@ -1577,6 +2080,18 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "location": 1,
           "type": "u32",
           "interpolation": "flat"
+        },
+        {
+          "semantic": "TEXCOORD_0",
+          "location": 2,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
+        },
+        {
+          "semantic": "TEXCOORD_1",
+          "location": 3,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
         }
       ],
       "renderTargets": [
@@ -1587,6 +2102,8 @@ export const DEFORMATION_SHADER_ARTIFACT = {
       ],
       "capabilities": [
         "storage-buffer",
+        "texture-sample",
+        "discard",
         "skinning"
       ],
       "passRequirements": [
@@ -1600,10 +2117,10 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "sourceId": "deformation.shadow-skinned",
           "sourceName": "shader-language/builtin-deformation-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 146
+          "generatedEndLine": 181
         }
       ],
-      "canonicalHash": "2062a09ec81a9de64c25d548e465982885e6504a470753dce5ec1d32220b4f6e"
+      "canonicalHash": "acf740713cd533a3922c3dedfe89e44ef1278d7cc72d20bc725bfb0da02e4605"
     },
     "shadow-skinned-morph": {
       "id": "shadow-skinned-morph",
@@ -1674,7 +2191,45 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "logicalGroup": 2,
           "physicalGroup": 2,
           "owner": "renderer",
-          "bindings": []
+          "bindings": [
+            {
+              "id": "material.coverage",
+              "binding": 1,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "uniform",
+                "hasDynamicOffset": false,
+                "minBindingSize": 192
+              }
+            },
+            {
+              "id": "material.coverageTexture",
+              "binding": 2,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "texture",
+                "sampleType": "float",
+                "viewDimension": "2d",
+                "multisampled": false
+              }
+            },
+            {
+              "id": "material.coverageSampler",
+              "binding": 3,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "sampler",
+                "samplerType": "filtering"
+              }
+            }
+          ]
         },
         {
           "logicalSpace": "object",
@@ -1736,6 +2291,56 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "offset": 0,
               "size": 64,
               "matrixStride": 16
+            }
+          ]
+        },
+        {
+          "id": "material.coverage",
+          "alignment": 16,
+          "byteSize": 192,
+          "fields": [
+            {
+              "name": "baseColor",
+              "type": "vec4<f32>",
+              "offset": 0,
+              "size": 16
+            },
+            {
+              "name": "emissiveAndNormalScale",
+              "type": "vec4<f32>",
+              "offset": 16,
+              "size": 16
+            },
+            {
+              "name": "surfaceAndCutoff",
+              "type": "vec4<f32>",
+              "offset": 32,
+              "size": 16
+            },
+            {
+              "name": "flags",
+              "type": "vec4<u32>",
+              "offset": 48,
+              "size": 16
+            },
+            {
+              "name": "extensions",
+              "type": "array<vec4<f32>,6>",
+              "offset": 64,
+              "size": 96,
+              "arrayStride": 16
+            },
+            {
+              "name": "baseMapping0",
+              "type": "vec4<f32>",
+              "offset": 160,
+              "size": 16
+            },
+            {
+              "name": "baseMapping1",
+              "type": "vec4<f32>",
+              "offset": 176,
+              "size": 16
             }
           ]
         }
@@ -1800,6 +2405,30 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "format": "float32x3"
             }
           ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_0",
+              "shaderLocation": 5,
+              "offset": 0,
+              "format": "float32x2"
+            }
+          ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_1",
+              "shaderLocation": 6,
+              "offset": 0,
+              "format": "float32x2"
+            }
+          ]
         }
       ],
       "varyings": [
@@ -1814,6 +2443,18 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "location": 1,
           "type": "u32",
           "interpolation": "flat"
+        },
+        {
+          "semantic": "TEXCOORD_0",
+          "location": 2,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
+        },
+        {
+          "semantic": "TEXCOORD_1",
+          "location": 3,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
         }
       ],
       "renderTargets": [
@@ -1824,6 +2465,8 @@ export const DEFORMATION_SHADER_ARTIFACT = {
       ],
       "capabilities": [
         "storage-buffer",
+        "texture-sample",
+        "discard",
         "morph-targets",
         "skinning"
       ],
@@ -1838,10 +2481,10 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "sourceId": "deformation.shadow-skinned-morph",
           "sourceName": "shader-language/builtin-deformation-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 158
+          "generatedEndLine": 193
         }
       ],
-      "canonicalHash": "6b68c8413774a09d436e89bef2f52e98f7df22cf4f05be789e012018dc1add87"
+      "canonicalHash": "15ed081ceffe5d18cf7150a6a4a7ab6faab8a046e4a9ce106ea30e48d91fd9d2"
     },
     "motion-vector": {
       "id": "motion-vector",
@@ -1890,7 +2533,7 @@ export const DEFORMATION_SHADER_ARTIFACT = {
                 "kind": "buffer",
                 "bufferType": "uniform",
                 "hasDynamicOffset": false,
-                "minBindingSize": 240
+                "minBindingSize": 272
               }
             },
             {
@@ -1909,9 +2552,54 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           ]
         },
         {
+          "logicalSpace": "material",
+          "logicalGroup": 2,
+          "physicalGroup": 2,
+          "owner": "renderer",
+          "bindings": [
+            {
+              "id": "material.coverage",
+              "binding": 1,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "uniform",
+                "hasDynamicOffset": false,
+                "minBindingSize": 192
+              }
+            },
+            {
+              "id": "material.coverageTexture",
+              "binding": 2,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "texture",
+                "sampleType": "float",
+                "viewDimension": "2d",
+                "multisampled": false
+              }
+            },
+            {
+              "id": "material.coverageSampler",
+              "binding": 3,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "sampler",
+                "samplerType": "filtering"
+              }
+            }
+          ]
+        },
+        {
           "logicalSpace": "object",
           "logicalGroup": 1,
-          "physicalGroup": 2,
+          "physicalGroup": 3,
           "owner": "renderer",
           "bindings": [
             {
@@ -2019,7 +2707,7 @@ export const DEFORMATION_SHADER_ARTIFACT = {
         {
           "id": "object.deformationHistory",
           "alignment": 16,
-          "byteSize": 240,
+          "byteSize": 272,
           "fields": [
             {
               "name": "currentModel",
@@ -2059,6 +2747,68 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "type": "vec4<f32>",
               "offset": 224,
               "size": 16
+            },
+            {
+              "name": "cameraDepth",
+              "type": "vec4<f32>",
+              "offset": 240,
+              "size": 16
+            },
+            {
+              "name": "jitterDelta",
+              "type": "vec4<f32>",
+              "offset": 256,
+              "size": 16
+            }
+          ]
+        },
+        {
+          "id": "material.coverage",
+          "alignment": 16,
+          "byteSize": 192,
+          "fields": [
+            {
+              "name": "baseColor",
+              "type": "vec4<f32>",
+              "offset": 0,
+              "size": 16
+            },
+            {
+              "name": "emissiveAndNormalScale",
+              "type": "vec4<f32>",
+              "offset": 16,
+              "size": 16
+            },
+            {
+              "name": "surfaceAndCutoff",
+              "type": "vec4<f32>",
+              "offset": 32,
+              "size": 16
+            },
+            {
+              "name": "flags",
+              "type": "vec4<u32>",
+              "offset": 48,
+              "size": 16
+            },
+            {
+              "name": "extensions",
+              "type": "array<vec4<f32>,6>",
+              "offset": 64,
+              "size": 96,
+              "arrayStride": 16
+            },
+            {
+              "name": "baseMapping0",
+              "type": "vec4<f32>",
+              "offset": 160,
+              "size": 16
+            },
+            {
+              "name": "baseMapping1",
+              "type": "vec4<f32>",
+              "offset": 176,
+              "size": 16
             }
           ]
         }
@@ -2077,7 +2827,7 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           ]
         },
         {
-          "arrayStride": 12,
+          "arrayStride": 24,
           "stepMode": "vertex",
           "attributes": [
             {
@@ -2085,11 +2835,17 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "shaderLocation": 1,
               "offset": 0,
               "format": "float32x3"
+            },
+            {
+              "semantic": "MORPH_NORMAL_0",
+              "shaderLocation": 8,
+              "offset": 12,
+              "format": "float32x3"
             }
           ]
         },
         {
-          "arrayStride": 12,
+          "arrayStride": 24,
           "stepMode": "vertex",
           "attributes": [
             {
@@ -2097,11 +2853,17 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "shaderLocation": 2,
               "offset": 0,
               "format": "float32x3"
+            },
+            {
+              "semantic": "MORPH_NORMAL_1",
+              "shaderLocation": 9,
+              "offset": 12,
+              "format": "float32x3"
             }
           ]
         },
         {
-          "arrayStride": 12,
+          "arrayStride": 24,
           "stepMode": "vertex",
           "attributes": [
             {
@@ -2109,6 +2871,54 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "shaderLocation": 3,
               "offset": 0,
               "format": "float32x3"
+            },
+            {
+              "semantic": "MORPH_NORMAL_2",
+              "shaderLocation": 10,
+              "offset": 12,
+              "format": "float32x3"
+            }
+          ]
+        },
+        {
+          "arrayStride": 24,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "MORPH_POSITION_3",
+              "shaderLocation": 4,
+              "offset": 0,
+              "format": "float32x3"
+            },
+            {
+              "semantic": "MORPH_NORMAL_3",
+              "shaderLocation": 11,
+              "offset": 12,
+              "format": "float32x3"
+            }
+          ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_0",
+              "shaderLocation": 5,
+              "offset": 0,
+              "format": "float32x2"
+            }
+          ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_1",
+              "shaderLocation": 6,
+              "offset": 0,
+              "format": "float32x2"
             }
           ]
         },
@@ -2117,8 +2927,8 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "stepMode": "vertex",
           "attributes": [
             {
-              "semantic": "MORPH_POSITION_3",
-              "shaderLocation": 4,
+              "semantic": "NORMAL",
+              "shaderLocation": 7,
               "offset": 0,
               "format": "float32x3"
             }
@@ -2137,22 +2947,60 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "location": 1,
           "type": "vec3<f32>",
           "interpolation": "perspective"
+        },
+        {
+          "semantic": "TEXCOORD_0",
+          "location": 2,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
+        },
+        {
+          "semantic": "TEXCOORD_1",
+          "location": 3,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
+        },
+        {
+          "semantic": "VIEW_NORMAL",
+          "location": 4,
+          "type": "vec3<f32>",
+          "interpolation": "perspective"
+        },
+        {
+          "semantic": "VIEW_DEPTH",
+          "location": 5,
+          "type": "f32",
+          "interpolation": "perspective"
         }
       ],
       "renderTargets": [
         {
           "location": 0,
-          "formatClass": "velocity-rg16float"
+          "formatClass": "temporal-motion-rgba16float"
+        },
+        {
+          "location": 1,
+          "formatClass": "optional-linear-depth-r32float"
+        },
+        {
+          "location": 2,
+          "formatClass": "optional-view-normal-rgba16float"
         }
       ],
       "capabilities": [
         "morph-targets",
         "skinning",
         "history",
-        "storage-buffer"
+        "storage-buffer",
+        "texture-sample",
+        "discard"
       ],
       "passRequirements": [
         "deformation-abi-v1",
+        "temporal-motion-v2",
+        "auxiliary-surface-mrt-v1",
+        "unjittered-uv-velocity",
+        "previous-linear-depth",
         "current-and-previous-same-deformation",
         "reset-previous-to-current",
         "world-space-clipping"
@@ -2162,10 +3010,10 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "sourceId": "deformation.motion-vector",
           "sourceName": "shader-language/builtin-deformation-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 212
+          "generatedEndLine": 299
         }
       ],
-      "canonicalHash": "9d67582223c31fe8fff2d7d5fe76e7e0ca857248a46a37bce4704a4f66f641ba"
+      "canonicalHash": "24efceacc06f79f8416f11667dcdd1028b4b470ec5c49559b86f09cad1031c9a"
     },
     "outline": {
       "id": "outline",
@@ -2236,7 +3084,45 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "logicalGroup": 2,
           "physicalGroup": 2,
           "owner": "renderer",
-          "bindings": []
+          "bindings": [
+            {
+              "id": "material.coverage",
+              "binding": 1,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "uniform",
+                "hasDynamicOffset": false,
+                "minBindingSize": 192
+              }
+            },
+            {
+              "id": "material.coverageTexture",
+              "binding": 2,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "texture",
+                "sampleType": "float",
+                "viewDimension": "2d",
+                "multisampled": false
+              }
+            },
+            {
+              "id": "material.coverageSampler",
+              "binding": 3,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "sampler",
+                "samplerType": "filtering"
+              }
+            }
+          ]
         },
         {
           "logicalSpace": "object",
@@ -2332,6 +3218,56 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "size": 48
             }
           ]
+        },
+        {
+          "id": "material.coverage",
+          "alignment": 16,
+          "byteSize": 192,
+          "fields": [
+            {
+              "name": "baseColor",
+              "type": "vec4<f32>",
+              "offset": 0,
+              "size": 16
+            },
+            {
+              "name": "emissiveAndNormalScale",
+              "type": "vec4<f32>",
+              "offset": 16,
+              "size": 16
+            },
+            {
+              "name": "surfaceAndCutoff",
+              "type": "vec4<f32>",
+              "offset": 32,
+              "size": 16
+            },
+            {
+              "name": "flags",
+              "type": "vec4<u32>",
+              "offset": 48,
+              "size": 16
+            },
+            {
+              "name": "extensions",
+              "type": "array<vec4<f32>,6>",
+              "offset": 64,
+              "size": 96,
+              "arrayStride": 16
+            },
+            {
+              "name": "baseMapping0",
+              "type": "vec4<f32>",
+              "offset": 160,
+              "size": 16
+            },
+            {
+              "name": "baseMapping1",
+              "type": "vec4<f32>",
+              "offset": 176,
+              "size": 16
+            }
+          ]
         }
       ],
       "vertexBuffers": [
@@ -2394,6 +3330,30 @@ export const DEFORMATION_SHADER_ARTIFACT = {
               "format": "float32x3"
             }
           ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_0",
+              "shaderLocation": 5,
+              "offset": 0,
+              "format": "float32x2"
+            }
+          ]
+        },
+        {
+          "arrayStride": 8,
+          "stepMode": "vertex",
+          "attributes": [
+            {
+              "semantic": "TEXCOORD_1",
+              "shaderLocation": 6,
+              "offset": 0,
+              "format": "float32x2"
+            }
+          ]
         }
       ],
       "varyings": [
@@ -2408,6 +3368,18 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "location": 1,
           "type": "u32",
           "interpolation": "flat"
+        },
+        {
+          "semantic": "TEXCOORD_0",
+          "location": 2,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
+        },
+        {
+          "semantic": "TEXCOORD_1",
+          "location": 3,
+          "type": "vec2<f32>",
+          "interpolation": "perspective"
         }
       ],
       "renderTargets": [
@@ -2419,7 +3391,9 @@ export const DEFORMATION_SHADER_ARTIFACT = {
       "capabilities": [
         "morph-targets",
         "skinning",
-        "storage-buffer"
+        "storage-buffer",
+        "texture-sample",
+        "discard"
       ],
       "passRequirements": [
         "deformation-abi-v1",
@@ -2432,11 +3406,11 @@ export const DEFORMATION_SHADER_ARTIFACT = {
           "sourceId": "deformation.outline",
           "sourceName": "shader-language/builtin-deformation-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 212
+          "generatedEndLine": 247
         }
       ],
-      "canonicalHash": "a8688b9b5b1d92e28e027bf7a16959e848c88bbd0306a254086bd50d82a43b61"
+      "canonicalHash": "1b2173ae4a745c324078f37e5417dafbbced14c79475b7a65b6c661c11d53707"
     }
   },
-  "artifactHash": "df3d51f3f4eccd478940c38f2234f7f65c6aef6746e2035f13b26879170d5d7a"
+  "artifactHash": "c423d2b9c3b7aa02f51cc300c30f280d972bb8ee300cf712dfc657f1ee830462"
 } as const satisfies PrecompiledShaderArtifactV2;

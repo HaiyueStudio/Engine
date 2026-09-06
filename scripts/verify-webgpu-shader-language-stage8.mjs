@@ -12,7 +12,7 @@ const failures = [];
 if (result.schemaVersion !== 1 || result.suite !== 'shader-language-stage8-builtin-postprocess' || result.status !== 'passed') {
   failures.push('invalid result identity');
 }
-if (result.artifactVersion !== 2 || result.compilerVersion !== 'shader-language-stage8' || result.passCount !== 9) {
+if (result.artifactVersion !== 2 || result.compilerVersion !== 'shader-language-stage8' || result.passCount !== 10) {
   failures.push('production artifact identity was not preserved');
 }
 if (result.compilationErrorCount !== 0) failures.push(`compilationErrorCount=${result.compilationErrorCount}`);
@@ -21,7 +21,7 @@ if (result.unclassifiedFailureCount !== 0) failures.push(`unclassifiedFailureCou
 if (!Array.isArray(result.pixelDelta) || result.pixelDelta.some(value => value > 1)) {
   failures.push(`pixelDelta=${JSON.stringify(result.pixelDelta)}`);
 }
-if (result.cache?.shaderModules !== 9 || result.cache?.artifactLayouts !== 9 || result.cache?.pipelineLayouts !== 9) {
+if (result.cache?.shaderModules !== 10 || result.cache?.artifactLayouts !== 10 || result.cache?.pipelineLayouts !== 10) {
   failures.push(`artifact runtime cache=${JSON.stringify(result.cache)}`);
 }
 if (failures.length > 0) throw new Error(`Shader language stage 8 WebGPU gate failed:\n- ${failures.join('\n- ')}`);

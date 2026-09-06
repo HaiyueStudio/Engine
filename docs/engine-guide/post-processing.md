@@ -2,6 +2,15 @@
 
 后期处理在 3D 场景完成后读取场景颜色，并按顺序执行一个或多个全屏 `PostProcessPass`。普通项目通过 `PostProcessRenderFeature` 把效果链挂到场景的 `Render3DSystem`；中间纹理、窗口尺寸变化和最终输出由引擎管理，不需要直接创建 `PostProcessRenderer`。
 
+3D 材质和后处理读取、写入线性 HDR 颜色；引擎在效果链结束后统一应用曝光、色调映射和显示编码。空效果链也执行统一输出。TAA 历史保留曝光前颜色，调整曝光无需重置历史。
+
+```ts
+scene.render3DSystem!.exposure = 1.2; // 非负有限数，默认 1
+scene.render3DSystem!.toneMapping = 'reinhard'; // 默认；'none' 关闭曲线
+```
+
+浮点目标保留线性 HDR，跳过上述显示转换。嵌套 3D 场景可使用 `new RttTexture(engine, { width: 512, height: 384, format: 'rgba16float' })`，参见 [RTT 示例](../../examples/rtt/main.ts)。直接提供 GPUTexture 时，颜色图片应使用 sRGB 格式，HDR 场景纹理应使用浮点格式。自定义后处理应保持线性颜色和预乘 alpha，不再自行进行显示编码。
+
 ## 接入一个最小效果链
 
 下面在已有 3D 场景中启用 FXAA。应先创建 pass 和 feature，再将 feature 加入场景：
@@ -42,7 +51,7 @@ engine.switchScene(scene);
 engine.run();
 ```
 
-`PostProcessRenderFeature` 应当与它接收的 `Render3DSystem` 属于同一个场景。创建 feature 会要求该 3D renderer 使用独立 render pass，以便场景颜色可以被后续 pass 采样。
+`PostProcessRenderFeature` 应当与它接收的 `Render3DSystem` 属于同一个场景。3D renderer 始终使用独立 render pass，以便 HDR 场景颜色被后续 pass 采样。
 
 ## 组合和切换效果
 
@@ -87,7 +96,7 @@ function setPostProcessing(mode: 'off' | 'fxaa' | 'blurred') {
 | `GrayscalePass` | 灰度转换 | 无 |
 | `SobelPass` | 亮度梯度边缘或边缘叠加 | 无 |
 | `OutlinePass` | 为带 `OutlineTarget` 的对象绘制可见/遮挡轮廓 | 选择对象的轮廓 mask |
-| `TaaPass` | 带投影抖动、重投影和历史拒绝的时域抗锯齿 | 线性深度和每个 view 的历史 |
+| `TaaPass` | 使用物体运动重投影、投影抖动和历史拒绝的时域抗锯齿 | 线性深度、运动纹理和每个 view 的颜色/深度历史 |
 | `MotionBlurPass` | 相机、刚体、morph 和蒙皮动画的运动模糊 | motion vectors 和上一帧变换 |
 | `CustomPass` | 使用自定义 WGSL fragment shader 的全屏效果 | 由自定义 pass 决定 |
 
@@ -166,7 +175,7 @@ const motionBlur = new MotionBlurPass({
   displayMode: 'blur', // 也可使用 'split' 或 'velocity' 做诊断
 });
 
-postProcess.setPasses([taa]);
+postProcess.setPasses([taa, motionBlur]);
 
 function onCameraCut() {
   taa.resetHistory();
@@ -176,7 +185,9 @@ function onCameraCut() {
 
 `TaaPass` 为每个 view 分别维护历史；调整 `jitterScale` 或重新启用 TAA 时也应调用 `resetHistory()`。`MotionBlurPass` 的第一帧只建立上一帧状态，只有相机或对象在连续帧之间发生运动时才会产生模糊。`shutterAngle` 只描述帧周期内的曝光比例，`intensity` 是独立的美术增益；提高 `sampleCount` 只改善采样平滑度，不会放大模糊。默认 `centered` 模式沿当前像素 velocity 采样；`tile-neighbor-max` 额外生成 8×8 tile-max 和 3×3 neighbor-max 速度层，让运动表面稳定地贡献到轮廓外侧，最终跨度仍受 `maxBlurPixels` 限制。`split` 显示原图/结果分屏，`velocity` 显示方向和长度热图。
 
-如果产品只需要一种抗锯齿，通常在 TAA 与 FXAA 之间选择一种。组合多个效果时，把依赖原始几何时序信息的 pass 放在风格化、强模糊或边缘处理之前，再根据实际画面验证顺序。
+TAA 单独使用时会自动申请运动纹理，不需要安装 Motion Blur。相机和对象运动共用同一套速度，包含刚体、morph 和蒙皮；投影抖动已从物理速度中移除。`taa.resetHistory(viewKey)` 可以只重置指定视图的颜色和运动历史。改变相机、投影、尺寸或中断连续帧时会自动拒绝旧历史。历史颜色保留 HDR 与 alpha，深度独立保存；近距离重叠表面需要更严格拒绝时，可降低 `depthThreshold`。
+
+如果产品只需要一种抗锯齿，通常在 TAA 与 FXAA 之间选择一种。组合多个效果时，把依赖原始几何时序信息的 pass 放在风格化、强模糊或边缘处理之前，再根据实际画面验证顺序。透明多层、粒子和自定义顶点位移仍需要各自的历史数据，不能依赖 TAA 自动推断。内部格式和资源成本见 [ADR 0095](../for-ai/adr/0095-motion-reprojected-temporal-antialiasing.md)。
 
 ## 编写简单的自定义效果
 
@@ -213,6 +224,8 @@ postProcess.setPasses([chromaticAberration, fxaa]);
 自定义 uniform、texture 或 sampler 使用 `CustomPass` 的 `extraBindings` 与 `extraEntries` 放入 group 1 及后续 bind group。需要线性深度、normal、motion 或自定义多阶段资源时，应继承 `PostProcessPass` 实现独立 pass，而不是从 renderer 内部读取私有纹理。
 
 ## 生命周期与常见问题
+
+引擎按效果声明的纹理需求生成辅助缓冲。覆盖范围一致时，深度、法线和运动向量会在一次几何绘制中输出；不需要运动向量时，深度与法线也会合并。写深度的透明材质会使用独立的运动绘制路径，完整选择轮廓仍保留被遮挡部分。应用不需要手动配置这些合并规则。
 
 - 把 `PostProcessRenderFeature` 加到 scene，而不是只创建实例；未执行 `scene.addSystem(postProcess)` 时效果链不会参与渲染。
 - 在 feature 创建前确保 scene 启用了 `render3D`，并使用该 scene 自己的 `render3DSystem`。

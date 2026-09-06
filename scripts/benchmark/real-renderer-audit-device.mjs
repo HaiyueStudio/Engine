@@ -1,6 +1,6 @@
 export const GPU_MOCK_CAPABILITY_CONTRACT = Object.freeze({
   schema: 'haiyue-gpu-mock-capability-contract',
-  version: 1,
+  version: 2,
   capabilities: Object.freeze([
     'buffer',
     'texture',
@@ -12,6 +12,7 @@ export const GPU_MOCK_CAPABILITY_CONTRACT = Object.freeze({
     'render-pipeline',
     'compute-pipeline',
     'command-encoder',
+    'render-bundle',
     'query-set',
     'queue',
   ]),
@@ -22,7 +23,7 @@ export const GPU_MOCK_CAPABILITIES = Object.freeze({
   RESOURCE_UPLOAD: Object.freeze(['buffer', 'texture', 'command-encoder', 'queue']),
   RENDER: Object.freeze([
     'buffer', 'texture', 'sampler', 'shader-module', 'bind-group-layout', 'bind-group',
-    'pipeline-layout', 'render-pipeline', 'command-encoder', 'queue',
+    'pipeline-layout', 'render-pipeline', 'command-encoder', 'render-bundle', 'queue',
   ]),
   COMPUTE: Object.freeze([
     'buffer', 'texture', 'sampler', 'shader-module', 'bind-group-layout', 'bind-group',
@@ -396,6 +397,24 @@ export function createAuditGpuDevice(options = {}) {
       const value = resource('query-set', descriptor);
       value.destroyed = false;
       value.destroy = () => destroyResource(value, 'query-set', 'querySet.destroy');
+      return value;
+    },
+    createRenderBundleEncoder(descriptor = {}) {
+      record('render-bundle', 'device.createRenderBundleEncoder', { label: descriptor.label ?? '' });
+      const value = { id: ++nextId, type: 'render-bundle-encoder', descriptor };
+      const commands = [];
+      for (const name of ['setPipeline', 'setBindGroup', 'setVertexBuffer', 'setIndexBuffer', 'draw', 'drawIndexed', 'drawIndirect', 'drawIndexedIndirect']) {
+        value[name] = (...args) => {
+          const savedArgs = args.map(arg => ArrayBuffer.isView(arg) ? arg.slice() : arg);
+          commands.push({ name, args: savedArgs });
+          record('render-bundle', `renderBundle.${name}`, { resourceId: value.id });
+          return invokeBehavior(`renderBundle.${name}`, { resource: value, args }, () => undefined);
+        };
+      }
+      value.finish = () => {
+        record('render-bundle', 'renderBundle.finish', { resourceId: value.id });
+        return { id: ++nextId, type: 'render-bundle', descriptor, commands };
+      };
       return value;
     },
     createCommandEncoder(descriptor = {}) {

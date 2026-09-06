@@ -1,8 +1,11 @@
+import type { Material } from '../material/Material';
+import { auxiliaryCullMode, auxiliaryFrontFace, auxiliaryUsesDeformation, MATERIAL_COVERAGE_LAYOUT, MaterialCoverageBindings, type MaterialCoverageResources } from './AuxiliaryMaterial';
 import type { IEngine } from '../core/IEngine';
 import { getEngineGPUResourceTracker } from '../core/EngineDiagnosticsAccess';
 import { Geometry3D } from '../geometry/Geometry3D';
 import { NormalMaterial } from '../material/NormalMaterial';
 import { mat4 } from 'wgpu-matrix';
+import { PbrDeformationGpuCache } from './PbrDeformationGpuCache';
 import { BaseRenderer } from './BaseRenderer';
 import type { SharedGeometry3DGPUData } from './SharedGeometry3DGPUCache';
 import { encodePrimitivePipelineKey } from './pipelineKey';
@@ -17,7 +20,8 @@ import { getSceneFrameGpuArena, type SceneFrameGpuBinding } from './SceneFrameGp
 import { RendererObjectTable } from './RendererObjectTable';
 import { RendererObjectSlotCache } from './RendererCacheMap';
 import type { GpuDrivenBatchBuffer } from './GpuDrivenBatchBuffer';
-import { forEachDirectInstanceBatchRun } from './DirectInstanceBatchRuns';
+import { forEachDirectInstanceBatchRun, forEachIndirectBatchRun } from './DirectInstanceBatchRuns';
+import type { RenderBatchBindingEncoder } from './IndirectBatchBundleCache';
 import { getBuiltinSimple3dShader } from '../shader/BuiltinSimple3dShader';
 import type { ClippingPlanes } from '../components/ClippingPlanes';
 import { CLIPPING_BLOCK_FLOATS, clippingStateKey, writeClippingBlock } from './ClippingPlanesGpu';
@@ -30,12 +34,13 @@ interface EntityGPUData {
   clippingKey: string;
 }
 
-const OBJECT_TABLE_FLOATS = 32;
+const OBJECT_TABLE_FLOATS = 40;
 
 interface MatGPUData {
   paramsBuf: GPUBuffer;
   paramsBindGroup: GPUBindGroup;
   paramsData: Uint32Array;
+  depthData: Float32Array;
   lastSpace: number;
   paramsDirty: boolean;
 }
@@ -45,13 +50,16 @@ export class NormalRenderer extends BaseRenderer {
 
   reverseZ = false;
   msaaSamples: 1 | 4 = 1;
+  /** When set, location 1 writes normalized linear depth alongside the normal. */
+  auxiliaryDepth: { near: number; far: number } | null = null;
   /** Optional auxiliary target override; ordinary material rendering uses the engine surface format. */
-  colorFormat: GPUTextureFormat | null = null;
 
   private engine!: IEngine;
   private bgl0!: GPUBindGroupLayout;
   private bgl1!: GPUBindGroupLayout;
   private bgl2!: GPUBindGroupLayout;
+  private bgl3!: GPUBindGroupLayout;
+  private deformationCache!: PbrDeformationGpuCache;
   private shader!: GPUShaderModule;
   private pipelineLayout!: GPUPipelineLayout;
 
@@ -64,6 +72,7 @@ export class NormalRenderer extends BaseRenderer {
   private get entityCache(): RendererObjectSlotCache<EntityGPUData> { return this.rendererCore.requireObjects(); }
   private matCache = new Map<number, MatGPUData>();
 
+  private coverageBindings!: MaterialCoverageBindings;
   private _initialized = false;
   private _inverseScratch = mat4.identity() as Float32Array;
   private _normalScratch = mat4.identity() as Float32Array;
@@ -81,10 +90,32 @@ export class NormalRenderer extends BaseRenderer {
       { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
     ] });
     this.bgl2 = device.createBindGroupLayout({
-      entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }],
+      entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } }, ...MATERIAL_COVERAGE_LAYOUT],
     });
 
-    const generated = getBuiltinSimple3dShader(device, 'normal-material', [this.bgl0, this.bgl1, this.bgl2]);
+    this.bgl3 = device.createBindGroupLayout({ entries: [
+      { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } },
+      { binding: 1, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } },
+      { binding: 2, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } },
+    ] });
+    const createSkinBindGroup = (matrices: GPUBuffer, joints: GPUBuffer, weights: GPUBuffer): GPUBindGroup => device.createBindGroup({
+      layout: this.bgl3, entries: [
+        { binding: 0, resource: { buffer: matrices } },
+        { binding: 1, resource: { buffer: joints } },
+        { binding: 2, resource: { buffer: weights } },
+      ],
+    });
+    let fallbackSkin: GPUBindGroup | null = null;
+    this.deformationCache = new PbrDeformationGpuCache({
+      device, label: 'NormalRenderer', getSceneBindingRevision: () => 0, createSceneBindGroup: createSkinBindGroup,
+      getFallbackSceneBindGroup: () => fallbackSkin ??= createSkinBindGroup(
+        this.deformationCache.fallbackSkinMatrixBuffer,
+        this.deformationCache.fallbackSkinJointBuffer,
+        this.deformationCache.fallbackSkinWeightBuffer,
+      ),
+    });
+    this.coverageBindings = new MaterialCoverageBindings(device, this.bgl2);
+    const generated = getBuiltinSimple3dShader(device, 'normal-material', [this.bgl0, this.bgl1, this.bgl2, this.bgl3]);
     this.shader = generated.module;
     this.pipelineLayout = generated.pipelineLayout;
     this.rendererCore = new ParameterizedRendererCore({
@@ -111,9 +142,10 @@ export class NormalRenderer extends BaseRenderer {
   }
 
   contributePipelineWarmup(plan: PipelineWarmupPlan): void {
-    const key = encodePrimitivePipelineKey('triangle-list', 'back', 'ccw', undefined, this.reverseZ, this.msaaSamples);
+    const key = this._pipelineKey('triangle-list', 'back', 'ccw', undefined);
+    const depth = this.auxiliaryDepth !== null;
     this.addPipelineWarmup(plan, key, 'Normal material', () => (
-      this._pipelineDescriptor('triangle-list', 'back', 'ccw', undefined)
+      this._pipelineDescriptor('triangle-list', 'back', 'ccw', undefined, depth)
     ), this.engine.device);
   }
 
@@ -123,6 +155,7 @@ export class NormalRenderer extends BaseRenderer {
 
   releaseGeometriesNotIn(liveGeometries: LiveIdSet): void {
     this.geoCache.releaseUnused(this, liveGeometries);
+    this.deformationCache.releaseNotIn(liveGeometries);
   }
 
   releaseMaterialsNotIn(liveMaterials: LiveIdSet): void {
@@ -167,7 +200,7 @@ export class NormalRenderer extends BaseRenderer {
     geometry: Geometry3D,
     material: NormalMaterial,
     worldMatrix: Float32Array,
-    options: { gpuDrivenBatch?: MaterialGpuDrivenBatch | undefined } = {},
+    options: { gpuDrivenBatch?: MaterialGpuDrivenBatch | undefined; sourceMaterial?: Material | null; coverage?: MaterialCoverageResources | null } = {},
     clippingPlanes: ClippingPlanes | null = null,
   ): void {
     const objectSlot = options.gpuDrivenBatch?.objectSlot;
@@ -180,16 +213,16 @@ export class NormalRenderer extends BaseRenderer {
       worldMatrix,
       objectSlot,
       objectTable,
+      auxiliaryUsesDeformation(options.sourceMaterial),
     );
     if (!this.rendererCore.uploadsPrepared) objectTable.flushUploads();
 
-    const pipeline = this._getPipeline(geometry);
+    const pipeline = this._getPipeline(geometry, options.sourceMaterial);
     passEncoder.setPipeline(pipeline);
     passEncoder.setBindGroup(0, this.sceneFrameBinding.bindGroup, this.cameraDynamicOffset);
     passEncoder.setBindGroup(1, objectTable.bindGroup);
-    passEncoder.setBindGroup(2, matData.paramsBindGroup);
-    passEncoder.setVertexBuffer(0, geoData.positionBuf);
-    passEncoder.setVertexBuffer(1, geoData.normalBuf);
+    passEncoder.setBindGroup(2, this.coverageBindings.get(options.coverage, matData.paramsBuf));
+    this._bindGeometry(passEncoder, geometry, geoData);
 
     const firstInstance = objectSlot ?? entData.modelSlot;
     if (geoData.indexBuf) {
@@ -215,8 +248,9 @@ export class NormalRenderer extends BaseRenderer {
     count: number,
     batchBuffer: GpuDrivenBatchBuffer,
   ): void {
-    if (batchBuffer.gpuUploadEnabled === false) {
-      forEachDirectInstanceBatchRun(items, first, count, batchBuffer, run => {
+    if (!batchBuffer.gpuUploadEnabled || this.rendererCore.uploadsPrepared) {
+      const visitRuns = batchBuffer.gpuUploadEnabled ? forEachIndirectBatchRun : forEachDirectInstanceBatchRun;
+      visitRuns(items, first, count, batchBuffer, run => {
         const item = run.item;
         const { geoData, matData } = this._prepareObject(
           item.entityId,
@@ -227,7 +261,15 @@ export class NormalRenderer extends BaseRenderer {
           run.firstInstance,
           this.batchObjectTable,
         );
-        this._bindBatchResources(passEncoder, item.geometry, geoData, matData);
+        const bindings = batchBuffer.gpuUploadEnabled ? this.indirectBatches.begin() : passEncoder;
+        this._bindBatchResources(bindings, item.geometry, geoData, matData);
+        if (batchBuffer.gpuUploadEnabled) {
+          this.indirectBatches.draw(passEncoder, this.engine.device, batchBuffer, run.firstBatch,
+            run.instanceCount, geoData.indexBuf, geoData.indexFormat,
+            this.auxiliaryDepth ? [this.colorFormat ?? this.engine.format, 'r32float'] : [this.colorFormat ?? this.engine.format],
+            this.engine.getDepthFormat(this.reverseZ), this.msaaSamples);
+          return;
+        }
         this._drawDirect(passEncoder, geoData, run.instanceCount, run.firstInstance);
       });
       return;
@@ -268,30 +310,35 @@ export class NormalRenderer extends BaseRenderer {
     worldMatrix: Float32Array,
     requestedSlot?: number,
     objectTable: RendererObjectTable = this.objectTable,
+    deform = true,
   ) {
     const { device } = this.engine;
     const geoData = this.geoCache.ensure(geometry, this);
     const entData = this.entityCache.ensure(entityId);
-    this._writeObjectTableEntry(entData, clippingPlanes, worldMatrix, requestedSlot, objectTable);
+    this.deformationCache.ensure(geometry);
+    this._writeObjectTableEntry(entData, geometry, clippingPlanes, worldMatrix, requestedSlot, objectTable, deform);
     const materialId = this.rendererCore.materialIdentity(material);
     let matData = this.matCache.get(materialId);
     if (!matData) {
       const paramsBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+      const paramsData = new Uint32Array(4);
       matData = {
         paramsBuf,
-        paramsBindGroup: device.createBindGroup({
-          layout: this.bgl2,
-          entries: [{ binding: 0, resource: { buffer: paramsBuf } }],
-        }),
-        paramsData: new Uint32Array(4),
+        paramsBindGroup: this.coverageBindings.get(null, paramsBuf),
+        paramsData,
+        depthData: new Float32Array(paramsData.buffer),
         lastSpace: -1,
         paramsDirty: true,
       };
       this.matCache.set(materialId, matData);
     }
     const space = material.space === 'local' ? 0 : material.space === 'world' ? 1 : 2;
-    if (matData.paramsDirty || matData.lastSpace !== space) {
+    const near = Math.fround(this.auxiliaryDepth?.near ?? 0);
+    const far = Math.fround(this.auxiliaryDepth?.far ?? 1);
+    if (matData.paramsDirty || matData.lastSpace !== space || matData.depthData[1] !== near || matData.depthData[2] !== far) {
       matData.paramsData[0] = space;
+      matData.depthData[1] = near;
+      matData.depthData[2] = far;
       wrtBuf(device.queue, matData.paramsBuf, 0, matData.paramsData);
       matData.lastSpace = space;
       matData.paramsDirty = false;
@@ -301,17 +348,29 @@ export class NormalRenderer extends BaseRenderer {
 
   private _writeObjectTableEntry(
     entData: EntityGPUData,
+    geometry: Geometry3D,
     clippingPlanes: ClippingPlanes | null,
     worldMatrix: Float32Array,
     requestedSlot: number | undefined,
     objectTable: RendererObjectTable,
+    deform: boolean,
   ): void {
     const objectSlot = requestedSlot ?? entData.modelSlot;
     objectTable.ensureCapacity(objectSlot + 1);
     const stable = objectTable === this.objectTable && requestedSlot === undefined;
     const clipKey = clippingStateKey(clippingPlanes);
-    const objectUnchanged = stable && !entData.objectDirty && matrixEquals(entData.modelSnapshot, worldMatrix);
     const base = objectSlot * OBJECT_TABLE_FLOATS;
+    const morphed = deform && geometry.morphUseGpu && geometry.hasMorphTargets;
+    const skinned = deform && geometry.skinning ? 1 : 0;
+    let objectUnchanged = stable && !entData.objectDirty && matrixEquals(entData.modelSnapshot, worldMatrix)
+      && objectTable.data[base + 37] === skinned && objectTable.data[base + 36] === (morphed ? 1 : 0);
+    for (let index = 0; index < 4; index++) {
+      const weight = morphed ? geometry.morphWeights[index] ?? 0 : 0;
+      objectUnchanged &&= objectTable.data[base + 32 + index] === weight;
+      objectTable.data[base + 32 + index] = weight;
+    }
+    objectTable.data[base + 36] = morphed ? 1 : 0;
+    objectTable.data[base + 37] = skinned;
     if (!objectUnchanged) {
       objectTable.data.set(worldMatrix, base);
       mat4.inverse(worldMatrix, this._inverseScratch);
@@ -333,7 +392,7 @@ export class NormalRenderer extends BaseRenderer {
   }
 
   private _bindBatchResources(
-    passEncoder: GPURenderPassEncoder,
+    passEncoder: RenderBatchBindingEncoder,
     geometry: Geometry3D,
     geoData: SharedGeometry3DGPUData,
     matData: MatGPUData,
@@ -342,8 +401,17 @@ export class NormalRenderer extends BaseRenderer {
     passEncoder.setBindGroup(0, this.sceneFrameBinding.bindGroup, this.cameraDynamicOffset);
     passEncoder.setBindGroup(1, this.batchObjectTable.bindGroup);
     passEncoder.setBindGroup(2, matData.paramsBindGroup);
-    passEncoder.setVertexBuffer(0, geoData.positionBuf);
-    passEncoder.setVertexBuffer(1, geoData.normalBuf);
+    this._bindGeometry(passEncoder, geometry, geoData);
+  }
+
+  private _bindGeometry(pass: RenderBatchBindingEncoder, geometry: Geometry3D, data: SharedGeometry3DGPUData): void {
+    const deformation = this.deformationCache.ensure(geometry);
+    pass.setBindGroup(3, deformation.skinBindGroup);
+    pass.setVertexBuffer(0, data.positionBuf);
+    pass.setVertexBuffer(1, data.normalBuf);
+    for (let index = 0; index < 4; index++) pass.setVertexBuffer(index + 2, deformation.morphBuffers[index]!);
+    pass.setVertexBuffer(6, data.uvBuf);
+    pass.setVertexBuffer(7, data.uv1Buf ?? data.uvBuf);
   }
 
   private _drawDirect(
@@ -360,12 +428,12 @@ export class NormalRenderer extends BaseRenderer {
     }
   }
 
-  private _getPipeline(geometry: Geometry3D): GPURenderPipeline {
+  private _getPipeline(geometry: Geometry3D, sourceMaterial?: Material | null): GPURenderPipeline {
     const topology = geometry.topology ?? 'triangle-list';
-    const cullMode = geometry.cullMode ?? 'back';
-    const frontFace = geometry.frontFace ?? 'ccw';
+    const cullMode = auxiliaryCullMode(geometry, sourceMaterial);
+    const frontFace = auxiliaryFrontFace(geometry, sourceMaterial);
     const stripIndexFormat = getStripIndexFormat(geometry);
-    const key = `${encodePrimitivePipelineKey(topology, cullMode, frontFace, stripIndexFormat, this.reverseZ, this.msaaSamples)}:${this.colorFormat ?? this.engine.format}`;
+    const key = this._pipelineKey(topology, cullMode, frontFace, stripIndexFormat);
     return this.getCachedPipeline(key, () => this.engine.device.createRenderPipeline(
       this._pipelineDescriptor(topology, cullMode, frontFace, stripIndexFormat),
     ));
@@ -376,6 +444,7 @@ export class NormalRenderer extends BaseRenderer {
     cullMode: GPUCullMode,
     frontFace: GPUFrontFace,
     stripIndexFormat: GPUIndexFormat | undefined,
+    depth = this.auxiliaryDepth !== null,
   ): GPURenderPipelineDescriptor {
       return {
         layout: this.pipelineLayout,
@@ -385,12 +454,20 @@ export class NormalRenderer extends BaseRenderer {
           buffers: [
             { arrayStride: 12, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }] },
             { arrayStride: 12, attributes: [{ shaderLocation: 1, offset: 0, format: 'float32x3' }] },
+            ...Array.from({ length: 4 }, (_, index): GPUVertexBufferLayout => ({
+              arrayStride: 24, attributes: [
+                { shaderLocation: 2 + index * 2, offset: 0, format: 'float32x3' },
+                { shaderLocation: 3 + index * 2, offset: 12, format: 'float32x3' },
+              ],
+            })),
+            { arrayStride: 8, attributes: [{ shaderLocation: 10, offset: 0, format: 'float32x2' }] },
+            { arrayStride: 8, attributes: [{ shaderLocation: 11, offset: 0, format: 'float32x2' }] },
           ],
         },
         fragment: {
           module: this.shader,
           entryPoint: 'fs_main',
-          targets: [{ format: this.colorFormat ?? this.engine.format }],
+          targets: [{ format: this.colorFormat ?? this.engine.format }, depth ? { format: 'r32float' } : null],
         },
         primitive: createPrimitiveState(topology, cullMode, frontFace, stripIndexFormat),
         depthStencil: {
@@ -402,9 +479,15 @@ export class NormalRenderer extends BaseRenderer {
       };
   }
 
+  private _pipelineKey(topology: GPUPrimitiveTopology, cullMode: GPUCullMode, frontFace: GPUFrontFace, stripIndexFormat: GPUIndexFormat | undefined): string {
+    return `${encodePrimitivePipelineKey(topology, cullMode, frontFace, stripIndexFormat, this.reverseZ, this.msaaSamples)}:${this.colorFormat ?? this.engine.format}:${+(this.auxiliaryDepth !== null)}`;
+  }
+
   destroy(): void {
+    this.coverageBindings?.destroy();
     this.sceneFrameBinding?.destroy();
     this.rendererCore?.destroy();
+    this.deformationCache?.destroy();
     this.destroyCacheEntries(this.matCache, material => material.paramsBuf.destroy());
     this.clearPipelineCache();
   }

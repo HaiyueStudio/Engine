@@ -193,7 +193,7 @@ export function registerDefaultMaterialRenderers(
       registry.register<PbrMaterial>({
         materialType: PbrMaterial,
         receivesDirectionalShadow: true,
-        shadowCullMode: material => material.doubleSided ? 'none' : 'back',
+        shadowCullMode: material => material.doubleSided ? 'none' : null,
         beginView: context => access.pbr().beginView(
           context.sceneFrameUniforms,
           context.commandContext,

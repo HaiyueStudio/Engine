@@ -12,7 +12,7 @@ import {
 
 test('shared GPU mock exposes the complete versioned capability contract', async () => {
   assert.equal(GPU_MOCK_CAPABILITY_CONTRACT.schema, 'haiyue-gpu-mock-capability-contract');
-  assert.equal(GPU_MOCK_CAPABILITY_CONTRACT.version, 1);
+  assert.equal(GPU_MOCK_CAPABILITY_CONTRACT.version, 2);
   assert.deepEqual(GPU_MOCK_CAPABILITIES.ALL, GPU_MOCK_CAPABILITY_CONTRACT.capabilities);
 
   const device = createAuditGpuDevice();
@@ -54,7 +54,7 @@ test('shared GPU mock exposes the complete versioned capability contract', async
   assert.equal(audit.getCallCount('device.createRenderPipeline'), 1);
   assert.equal(audit.getCallCount('device.createComputePipeline'), 1);
   assert.equal(audit.getCallCount('device.createCommandEncoder'), 1);
-  assert.equal(audit.snapshot().version, 1);
+  assert.equal(audit.snapshot().version, 2);
 });
 
 test('GPU mock capabilities compose and missing APIs report actionable diagnostics', () => {
@@ -72,7 +72,7 @@ test('GPU mock capabilities compose and missing APIs report actionable diagnosti
       assert.ok(error instanceof GpuMockCapabilityError);
       assert.equal(error.capability, 'shader-module');
       assert.equal(error.method, 'device.createShaderModule');
-      assert.match(error.message, /contract haiyue-gpu-mock-capability-contract@1/);
+      assert.match(error.message, /contract haiyue-gpu-mock-capability-contract@2/);
       return true;
     },
   );
@@ -86,5 +86,5 @@ test('legacy real-renderer factory is backed by the shared audit contract', () =
   const audit = getAuditGpuDeviceState(device);
   assert.equal(audit.calls.length, 1);
   assert.equal(audit.droppedCallRecords, 1);
-  assert.equal(device.__gpuMockCapabilityContract.version, 1);
+  assert.equal(device.__gpuMockCapabilityContract.version, 2);
 });

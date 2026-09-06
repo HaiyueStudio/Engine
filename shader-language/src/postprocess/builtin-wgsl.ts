@@ -4,6 +4,8 @@ import type {
 } from '../adapter/precompiled-v2';
 import type { ShaderUniformBlockReflection } from '../contracts';
 import type { BuiltinPostprocessOperation } from './builtin-contracts';
+import TAA_FRAGMENT from './stdlib/taa.wgsl';
+import OUTPUT_FRAGMENT from './stdlib/output.wgsl';
 
 export const FULLSCREEN_POSTPROCESS_VERTEX_WGSL = `struct VertexOutput {
   @builtin(position) pos : vec4<f32>,
@@ -39,7 +41,7 @@ interface BuiltinPassDefinition {
   readonly fragment: string;
   readonly bindings: readonly PrecompiledShaderBindingV2[];
   readonly uniformBlocks: readonly ShaderUniformBlockReflection[];
-  readonly renderTargetCount: 1 | 2;
+  readonly renderTargetCount: 1 | 2 | 3;
   readonly capabilities: readonly string[];
   readonly requirements: readonly string[];
 }
@@ -56,6 +58,9 @@ const FILTERING_SAMPLER = Object.freeze({ kind: 'sampler' as const, samplerType:
 function getDefinitions(): Readonly<Record<BuiltinPostprocessOperation, BuiltinPassDefinition>> {
   return Object.freeze({
   present: definition(PRESENT_FRAGMENT, [texture('pass.sourceColor', 0)], [], 1, ['texture-load']),
+  output: definition(OUTPUT_FRAGMENT.trimEnd(), [texture('pass.sourceColor', 0), uniform('pass.outputParameters', 1, 16)],
+    [block('pass.outputParameters', 16, [field('settings', 'vec4<f32>', 0, 16)])], 1,
+    ['texture-load'], ['scene-linear-hdr', 'display-output', 'premultiplied-alpha']),
   grayscale: definition(GRAYSCALE_FRAGMENT, [
     texture('pass.sourceColor', 0), sampler('pass.linearSampler', 1),
   ]),
@@ -103,19 +108,20 @@ function getDefinitions(): Readonly<Record<BuiltinPostprocessOperation, BuiltinP
     uniform('pass.outlineParameters', 4, 48),
     texture('pass.outlineMask', 5),
   ], [outlineParameters('blendMode')], 1, ['texture-sample-level'], ['outline-mask']),
-  taa: definition(TAA_FRAGMENT, [
+  taa: definition(TAA_FRAGMENT.trimEnd(), [
     texture('pass.currentColor', 0),
     texture('pass.historyColor', 1),
     texture('pass.currentDepth', 2, true),
-    sampler('pass.linearSampler', 3),
+    texture('pass.historyDepth', 3, true),
     uniform('pass.taaParameters', 4, 176),
+    texture('pass.temporalMotion', 5),
   ], [block('pass.taaParameters', 176, [
     matrixField('currentInverseViewProjection', 0),
     matrixField('previousViewProjection', 64),
     field('resolutionFeedback', 'vec4<f32>', 128, 16),
     field('depthHistory', 'vec4<f32>', 144, 16),
     field('projection', 'vec4<f32>', 160, 16),
-  ])], 2, ['texture-load', 'texture-sample-level', 'multiple-render-targets'], ['linear-depth', 'view-local-history']),
+  ])], 3, ['texture-load', 'bounded-loop', 'multiple-render-targets'], ['linear-depth', 'view-local-history', 'temporal-motion-v2', 'unjittered-uv-velocity', 'separate-history-depth']),
   ssao: ambientOcclusionDefinition(SSAO_FRAGMENT),
   sao: ambientOcclusionDefinition(SAO_FRAGMENT),
   gtao: ambientOcclusionDefinition(GTAO_FRAGMENT),
@@ -214,7 +220,7 @@ function definition(
   fragment: string,
   bindings: readonly PrecompiledShaderBindingV2[],
   uniformBlocks: readonly ShaderUniformBlockReflection[] = [],
-  renderTargetCount: 1 | 2 = 1,
+  renderTargetCount: 1 | 2 | 3 = 1,
   capabilities: readonly string[] = ['texture-sample'],
   requirements: readonly string[] = [],
 ): BuiltinPassDefinition {
@@ -372,17 +378,17 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
   let directionReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) * (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
   let reciprocalDirectionMin = 1.0 / (min(abs(direction.x), abs(direction.y)) + directionReduce);
   direction = clamp(direction * reciprocalDirectionMin, vec2<f32>(-FXAA_SPAN_MAX), vec2<f32>(FXAA_SPAN_MAX)) * reciprocalFrame;
-  let rgbA = 0.5 * (
-    textureSample(sourceTexture, linearSampler, uv + direction * (1.0 / 3.0 - 0.5)).rgb +
-    textureSample(sourceTexture, linearSampler, uv + direction * (2.0 / 3.0 - 0.5)).rgb
+  let rgbaA = 0.5 * (
+    textureSample(sourceTexture, linearSampler, uv + direction * (1.0 / 3.0 - 0.5)) +
+    textureSample(sourceTexture, linearSampler, uv + direction * (2.0 / 3.0 - 0.5))
   );
-  let rgbB = rgbA * 0.5 + 0.25 * (
-    textureSample(sourceTexture, linearSampler, uv + direction * -0.5).rgb +
-    textureSample(sourceTexture, linearSampler, uv + direction * 0.5).rgb
+  let rgbaB = rgbaA * 0.5 + 0.25 * (
+    textureSample(sourceTexture, linearSampler, uv + direction * -0.5) +
+    textureSample(sourceTexture, linearSampler, uv + direction * 0.5)
   );
-  let lumaB = luma(rgbB);
-  if (lumaB < lumaMin || lumaB > lumaMax) { return vec4<f32>(rgbA, 1.0); }
-  return vec4<f32>(rgbB, 1.0);
+  let lumaB = luma(rgbaB.rgb);
+  if (lumaB < lumaMin || lumaB > lumaMax) { return rgbaA; }
+  return rgbaB;
 }`;
 
 const GAUSSIAN_BLUR_FRAGMENT = `struct BlurParams {
@@ -527,101 +533,6 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
     rgb *= mix(vec3<f32>(1.0), params.hiddenEdgeColor.rgb, hiddenWeight);
   }
   return vec4<f32>(rgb, base.a);
-}`;
-
-const TAA_FRAGMENT = `struct TaaParams {
-  currentInverseViewProjection : mat4x4<f32>,
-  previousViewProjection : mat4x4<f32>,
-  resolutionFeedback : vec4<f32>,
-  depthHistory : vec4<f32>,
-  projection : vec4<f32>,
-}
-
-@group(__GROUP__) @binding(0) var currentColor : texture_2d<f32>;
-@group(__GROUP__) @binding(1) var historyColor : texture_2d<f32>;
-@group(__GROUP__) @binding(2) var currentDepth : texture_2d<f32>;
-@group(__GROUP__) @binding(3) var linearSampler : sampler;
-@group(__GROUP__) @binding(4) var<uniform> params : TaaParams;
-
-struct TaaOutput {
-  @location(0) display : vec4<f32>,
-  @location(1) history : vec4<f32>,
-}
-
-fn deviceDepthFromLinear(linearDepth : f32) -> f32 {
-  let near = params.depthHistory.z;
-  let far = params.depthHistory.w;
-  var standardDepth = linearDepth;
-  if (params.projection.x < 0.5) {
-    let viewDepth = near + linearDepth * (far - near);
-    standardDepth = (far - near * far / max(viewDepth, near)) / (far - near);
-  }
-  if (params.projection.y > 0.5) { return 1.0 - standardDepth; }
-  return standardDepth;
-}
-
-fn linearDepthFromDevice(deviceDepth : f32) -> f32 {
-  let near = params.depthHistory.z;
-  let far = params.depthHistory.w;
-  let standardDepth = select(deviceDepth, 1.0 - deviceDepth, params.projection.y > 0.5);
-  if (params.projection.x > 0.5) { return clamp(standardDepth, 0.0, 1.0); }
-  let viewDepth = near * far / max(far - standardDepth * (far - near), 0.000001);
-  return clamp((viewDepth - near) / (far - near), 0.0, 1.0);
-}
-
-fn loadCurrent(pixel : vec2<i32>, dimensions : vec2<i32>) -> vec3<f32> {
-  return textureLoad(currentColor, clamp(pixel, vec2<i32>(0), dimensions - vec2<i32>(1)), 0).rgb;
-}
-
-@fragment
-fn fs_main(input : VertexOutput) -> TaaOutput {
-  let dimensions = vec2<i32>(textureDimensions(currentColor, 0));
-  let pixel = clamp(vec2<i32>(input.pos.xy), vec2<i32>(0), dimensions - vec2<i32>(1));
-  let current = textureLoad(currentColor, pixel, 0);
-  let linearDepth = textureLoad(currentDepth, pixel, 0).r;
-  var neighborhoodMin = current.rgb;
-  var neighborhoodMax = current.rgb;
-  var neighborhoodSum = vec3<f32>(0.0);
-  for (var y = -1; y <= 1; y += 1) {
-    for (var x = -1; x <= 1; x += 1) {
-      let sampleColor = loadCurrent(pixel + vec2<i32>(x, y), dimensions);
-      neighborhoodMin = min(neighborhoodMin, sampleColor);
-      neighborhoodMax = max(neighborhoodMax, sampleColor);
-      neighborhoodSum += sampleColor;
-    }
-  }
-  var resolved = current.rgb;
-  if (params.depthHistory.y > 0.5) {
-    let clip = vec4<f32>(
-      input.uv.x * 2.0 - 1.0,
-      1.0 - input.uv.y * 2.0,
-      deviceDepthFromLinear(linearDepth),
-      1.0,
-    );
-    let worldHomogeneous = params.currentInverseViewProjection * clip;
-    let world = worldHomogeneous.xyz / max(abs(worldHomogeneous.w), 0.000001) * sign(worldHomogeneous.w);
-    let previousClip = params.previousViewProjection * vec4<f32>(world, 1.0);
-    if (previousClip.w > 0.000001) {
-      let previousNdc = previousClip.xyz / previousClip.w;
-      let previousUv = vec2<f32>(previousNdc.x * 0.5 + 0.5, 0.5 - previousNdc.y * 0.5);
-      let inside = all(previousUv >= vec2<f32>(0.0)) && all(previousUv <= vec2<f32>(1.0));
-      if (inside && previousNdc.z >= 0.0 && previousNdc.z <= 1.0) {
-        let history = textureSampleLevel(historyColor, linearSampler, previousUv, 0.0);
-        let expectedDepth = linearDepthFromDevice(previousNdc.z);
-        let depthTolerance = params.depthHistory.x * max(1.0, expectedDepth * 8.0);
-        if (abs(history.a - expectedDepth) <= depthTolerance) {
-          let clippedHistory = clamp(history.rgb, neighborhoodMin, neighborhoodMax);
-          resolved = mix(current.rgb, clippedHistory, params.resolutionFeedback.z);
-        }
-      }
-    }
-  }
-  let neighborhoodMean = neighborhoodSum / 9.0;
-  let displayColor = max(resolved + (resolved - neighborhoodMean) * params.resolutionFeedback.w, vec3<f32>(0.0));
-  var output : TaaOutput;
-  output.display = vec4<f32>(displayColor, current.a);
-  output.history = vec4<f32>(resolved, linearDepth);
-  return output;
 }`;
 
 const AO_FRAGMENT_HEADER = `struct AmbientOcclusionParams {

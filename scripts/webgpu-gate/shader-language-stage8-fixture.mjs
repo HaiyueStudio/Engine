@@ -58,7 +58,9 @@ async function runFixture() {
     for (const message of info.messages) {
       if (message.type === 'error') compilationErrors.push(`${passId}:${message.lineNum}:${message.linePos} ${message.message}`);
     }
-    const targets = runtime.pass.renderTargets.map(() => ({ format: 'rgba8unorm' }));
+    const targets = runtime.pass.renderTargets.map((_target, location) => ({
+      format: passId === 'taa' ? ['rgba8unorm', 'rgba16float', 'r32float'][location] : 'rgba8unorm',
+    }));
     progressNode.textContent = `stage8 ${index + 1}/${passIds.length} ${passId}: creating render pipeline`;
     await trackedDevice.createRenderPipelineAsync({
       label: `shader-language-stage8-${passId}`,

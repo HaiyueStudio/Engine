@@ -17,7 +17,6 @@ import { MeshHelper } from '../components/MeshHelper';
 import { mat4 } from 'wgpu-matrix';
 import type { ViewportRect, ScissorRect } from '../core/ViewportRect';
 import type { EntityHierarchyDisabledCache } from '../ecs/utils/hierarchy';
-import { beginRenderCommandPass } from '../core/RenderCommandContext';
 import type { RenderCommandContext, RenderFrameContext } from '../core/RenderCommandContext';
 import { MaterialRendererRegistry } from '../renderer/MaterialRendererRegistry';
 import type { InternalMaterialRenderContext, MaterialGpuDrivenBatch, MaterialRendererKey, MaterialRendererRegistration } from '../renderer/MaterialRendererRegistry';
@@ -114,6 +113,8 @@ export class Render3DSystem extends System {
   scissor: ScissorRect | null;
   loadOp: 'clear' | 'load';
   transparentSort: boolean;
+  exposure: number;
+  toneMapping: 'none' | 'reinhard';
   private _renderProfile: RenderProfileName;
   private _renderSettings: RenderProfileSettings;
   private readonly _spatialCandidates: Render3DSpatialCandidateResolver;
@@ -124,7 +125,7 @@ export class Render3DSystem extends System {
   readonly frustum: Frustum = new Frustum();
 
   get renderPipelineOptions(): RenderPipelineEntryOptions {
-    return { pass: (this.requiresIsolatedPass || this.passes.length > 0) ? 'isolated' : 'shared', loadOp: this.loadOp, sort: this.priority };
+    return { pass: 'isolated', loadOp: this.loadOp, sort: this.priority };
   }
 
   get renderProfile(): RenderProfileName { return this._renderProfile; }
@@ -380,6 +381,8 @@ export class Render3DSystem extends System {
     super({ all: [Mesh3D] });
     this._telemetry.bind(this);
     this.engine       = engine;
+    this.exposure = options.exposure ?? 1;
+    this.toneMapping = options.toneMapping ?? 'reinhard';
     this.cameraEntity = cameraEntity;
     this._renderers = new Render3DRendererSuite(engine);
     this._worldExtractionOptions = {
@@ -399,7 +402,7 @@ export class Render3DSystem extends System {
       scissor: options.scissor ?? null,
       loadOp: options.loadOp ?? 'clear',
     });
-    this._postScenePasses = new Render3DPostScenePasses(engine);
+    this._postScenePasses = new Render3DPostScenePasses(engine, this._renderers.resolveMaterialCoverage);
     this._reverseZ    = options.reverseZ    ?? engine.reverseZ;
     this._msaaSamples = options.msaaSamples ?? engine.msaaSamples;
     this.viewport     = options.viewport    ?? null;
@@ -463,6 +466,7 @@ export class Render3DSystem extends System {
       preparePbrLighting: this._preparePbrLightingPass,
       renderScene: this._renderScenePassPass,
       renderPostScene: this._renderPostScenePassesPass,
+      renderAuxiliary: this._renderAuxiliaryPassesPass,
       renderDirectionalShadow: this._renderDirectionalShadowPass,
     });
     this._planarMirrorManager = new PlanarMirrorManager(this.engine, options.planarMirrorPlanner);
@@ -885,13 +889,20 @@ export class Render3DSystem extends System {
   };
 
   private readonly _preparePbrLightingPass = () => {
+    const state = this._frameExecution;
+    this._materialRenderContext.sceneEnvironment = getSceneRenderEnvironment(
+      state.context.frameData ?? state.world.frameData, state.world, this._materialRenderContext.sceneFrameUniforms,
+    );
     if (!this._containsPbrMaterial(this._opaqueItems, this._transparentItems)) return;
+    this._pbrSceneLightingContext.lights = this._materialRenderContext.sceneEnvironment.pbrLights;
+    this._pbrSceneLightingContext.lightingRevision = this._materialRenderContext.sceneEnvironment.lightingRevision;
     this._requirePbrRenderer().beginScene(this._pbrSceneLightingContext);
   };
 
   private readonly _renderScenePassPass = () => this._measureStage('upload', this._renderScenePassStage);
   private readonly _renderScenePassStage = () => this._renderScenePass();
   private readonly _renderPostScenePassesPass = () => this._renderPostScenePasses();
+  private readonly _renderAuxiliaryPassesPass = () => this._renderAuxiliaryPasses();
 
   private _measureStage(stage: 'collect' | 'sort' | 'batch-build' | 'upload', action: () => void): void {
     const diagnostics = getEngineFrameDiagnostics(this.engine);
@@ -909,7 +920,6 @@ export class Render3DSystem extends System {
     const helperItems = this._helperItems;
     const viewProj = this._viewProjMatrix;
     const viewMatrix = this._viewMatrix;
-    const loadOp = state.frameView.loadOp;
     const submitterOptions = this._getSubmitterOptions();
     try {
       this._submitter.prepareView(opaqueItems, transparentItems, this._materialRenderContext, submitterOptions);
@@ -921,78 +931,56 @@ export class Render3DSystem extends System {
       }
       const pbrRenderer = this._renderers.pbr;
       if (!needsSceneColorCapture) pbrRenderer?.setTransmissionFramebuffer(null);
-      let passEncoder: GPURenderPassEncoder;
-      let ownsPass = false;
-      if (postSceneRequirements.usePostProcess) {
+      let passEncoder = context.encoder.beginRenderPass(this._postScenePasses.buildScenePassDescriptor(
+        'clear', this.reverseZ, context.view, needsSceneColorCapture,
+      ));
+
+      this._postScenePasses.applySceneViewport(passEncoder, state.frameView);
+
+      this._scenePassRenderer.renderSky(
+        passEncoder,
+        world,
+        this._disabledHierarchyCache,
+        this._materialRenderContext.sceneFrameUniforms,
+        this.reverseZ,
+        this.msaaSamples,
+      );
+
+      this._submitter.drawOpaqueItems(opaqueItems, passEncoder, viewProj, viewMatrix, submitterOptions);
+      if (needsSceneColorCapture) {
+        passEncoder.end();
+        const sceneColor = this._postScenePasses.captureSceneColor(context.encoder);
+        this._requirePbrRenderer().setTransmissionFramebuffer(sceneColor);
         passEncoder = context.encoder.beginRenderPass(this._postScenePasses.buildScenePassDescriptor(
-          loadOp,
+          'load',
           this.reverseZ,
           context.view,
-          needsSceneColorCapture,
+          true,
         ));
-        ownsPass = true;
-      } else if (context.passEncoder) {
-        passEncoder = context.passEncoder;
-      } else if (isRenderFrameContext(context)) {
-        passEncoder = context.beginPass(context.descriptor, context.loadOp);
-      } else {
-        const commandPass = beginRenderCommandPass(context);
-        passEncoder = commandPass.passEncoder;
-        ownsPass = commandPass.ownsPass;
+        this._postScenePasses.applySceneViewport(passEncoder, state.frameView);
       }
+      this._submitter.drawDepthPrepassItems(transparentItems, passEncoder, viewProj, viewMatrix, submitterOptions);
+      this._submitter.drawTransparentItems(
+        transparentItems,
+        passEncoder,
+        viewProj,
+        viewMatrix,
+        opaqueItems.length,
+        submitterOptions,
+      );
 
-    const applyViewState = (pass: GPURenderPassEncoder): void => {
-      const viewport = context.view?.viewport ?? this.viewport;
-      const scissor = context.view?.scissor ?? this.scissor;
-      if (viewport) pass.setViewport(viewport.x, viewport.y, viewport.width, viewport.height, viewport.minDepth ?? 0, viewport.maxDepth ?? 1);
-      if (scissor) pass.setScissorRect(scissor.x, scissor.y, scissor.width, scissor.height);
-    };
-    applyViewState(passEncoder);
+      this._scenePassRenderer.renderHelpers(passEncoder, helperItems, this._materialRenderContext.sceneFrameUniforms, this.reverseZ, this.msaaSamples, {
+        helperEntities: this._liveHelperEntities,
+        helperGeometries: this._liveHelperGeometries,
+      });
 
-    this._scenePassRenderer.renderSky(
-      passEncoder,
-      world,
-      this._disabledHierarchyCache,
-      this._materialRenderContext.sceneFrameUniforms,
-      this.reverseZ,
-      this.msaaSamples,
-    );
-
-    this._submitter.drawOpaqueItems(opaqueItems, passEncoder, viewProj, viewMatrix, submitterOptions);
-    if (needsSceneColorCapture) {
       passEncoder.end();
-      const sceneColor = this._postScenePasses.captureSceneColor(context.encoder);
-      this._requirePbrRenderer().setTransmissionFramebuffer(sceneColor);
-      passEncoder = context.encoder.beginRenderPass(this._postScenePasses.buildScenePassDescriptor(
-        'load',
-        this.reverseZ,
-        context.view,
-        true,
-      ));
-      applyViewState(passEncoder);
-    }
-    this._submitter.drawDepthPrepassItems(transparentItems, passEncoder, viewProj, viewMatrix, submitterOptions);
-    this._submitter.drawTransparentItems(
-      transparentItems,
-      passEncoder,
-      viewProj,
-      viewMatrix,
-      opaqueItems.length,
-      submitterOptions,
-    );
-
-    this._scenePassRenderer.renderHelpers(passEncoder, helperItems, this._materialRenderContext.sceneFrameUniforms, this.reverseZ, this.msaaSamples, {
-      helperEntities: this._liveHelperEntities,
-      helperGeometries: this._liveHelperGeometries,
-    });
-
-      if (ownsPass) passEncoder.end();
     } finally {
       this._submitter.endView(this._materialRenderContext);
     }
   }
 
-  private _renderPostScenePasses(): void {
+  private _renderAuxiliaryPasses(): void {
     const {
       context,
       camera,
@@ -1003,7 +991,6 @@ export class Render3DSystem extends System {
       postSceneRequirements,
     } = this._frameExecution;
     const opaqueItems = this._opaqueItems;
-    const transparentItems = this._transparentItems;
     const outlineItems = this._outlineItems;
     if (!postSceneRequirements.usePostProcess) return;
     if (postSceneRequirements.needsDepth || postSceneRequirements.needsNormal || postSceneRequirements.needsMotion || postSceneRequirements.needsOutlineMask) {
@@ -1020,7 +1007,8 @@ export class Render3DSystem extends System {
         viewKey: frameView.key,
         frameId: cameraFrame.frameId,
         cameraId: cameraEntityId,
-        motionHistoryRevision: resolveMotionHistoryRevision(postProcessPasses),
+        motionHistoryRevision: this._postScenePasses.resolveMotionHistoryRevision(postProcessPasses, frameView.key),
+        projectionJitter: cameraFrame.projectionJitter,
         context,
         requirements: postSceneRequirements,
         live: {
@@ -1036,7 +1024,12 @@ export class Render3DSystem extends System {
         },
       });
     }
+  }
+
+  private _renderPostScenePasses(): void {
+    const { context, camera, cameraEntityId, cameraFrame, frameView, postProcessPasses, postSceneRequirements } = this._frameExecution;
     const outputView = context.view?.target.getOutputView() ?? this.engine.getOutputView();
+    this._postScenePasses.output.configure(frameView.target.format, this.exposure, this.toneMapping, frameView);
     const frame = this._postProcessFrameContext;
     frame.viewKey = frameView.key;
     frame.frameId = cameraFrame.frameId;
@@ -1081,7 +1074,7 @@ export class Render3DSystem extends System {
 
   recoverGpuResource(_device: GPUDevice, signal: AbortSignal): void {
     if (signal.aborted) throw signal.reason;
-    this._postScenePasses = new Render3DPostScenePasses(this.engine);
+    this._postScenePasses = new Render3DPostScenePasses(this.engine, this._renderers.resolveMaterialCoverage);
     this._viewPreparation.recoverGpuResources();
     this._scenePassRenderer = new Render3DScenePassRenderer(this.engine);
   }
@@ -1255,18 +1248,8 @@ export function getRender3DGpuDrivenMaterialSlot(
   return readRender3DGpuDrivenMaterialSlot(system, materialId);
 }
 
-function isRenderFrameContext(context: RenderCommandContext): context is RenderFrameContext {
-  return typeof (context as Partial<RenderFrameContext>).endPass === 'function'
-    && typeof (context as Partial<RenderFrameContext>).beginPass === 'function';
-}
 
 function normalizeNonNegativeInteger(value: number | undefined, fallback: number): number {
   if (value === undefined || !Number.isFinite(value)) return fallback;
   return Math.max(0, Math.floor(value));
-}
-
-function resolveMotionHistoryRevision(passes: readonly PostProcessPass[]): number {
-  let revision = 0;
-  for (const pass of passes) revision = (Math.imul(revision, 31) + pass.getMotionHistoryRevision()) >>> 0;
-  return revision;
 }

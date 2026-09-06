@@ -1,3 +1,4 @@
+import { createAuditGpuDevice, ensureRealRendererGpuConstants } from '../../scripts/benchmark/real-renderer-audit-device.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -20,20 +21,7 @@ class TestMaterial extends Material {
   type = 'mirror-test';
 }
 
-function ensureGpuConstants() {
-  globalThis.GPUTextureUsage ??= {
-    RENDER_ATTACHMENT: 1 << 0,
-    TEXTURE_BINDING: 1 << 1,
-    COPY_DST: 1 << 2,
-  };
-  globalThis.GPUBufferUsage ??= {
-    UNIFORM: 1 << 0,
-    COPY_DST: 1 << 1,
-    STORAGE: 1 << 2,
-    COPY_SRC: 1 << 3,
-    INDIRECT: 1 << 4,
-  };
-}
+function ensureGpuConstants() { ensureRealRendererGpuConstants(); }
 
 function createMirrorEngine(log = []) {
   ensureGpuConstants();
@@ -41,6 +29,7 @@ function createMirrorEngine(log = []) {
   const outputView = { label: 'main-output' };
   const depthView = { label: 'main-depth' };
   const device = {
+    ...createAuditGpuDevice(),
     features: new Set(),
     limits: { maxTextureDimension2D: 4096, minUniformBufferOffsetAlignment: 256 },
     queue: {
@@ -233,8 +222,8 @@ test('Render3D schedules reflection before the source view, excludes mirrors, an
   world.frameData.begin(world, engine, 0, 16);
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
     frameData: world.frameData,
     view: sourceView.snapshot(),
   });
@@ -248,6 +237,7 @@ test('Render3D schedules reflection before the source view, excludes mirrors, an
   ]);
   const reflection = mirrorComponent.material.getReflection('main');
   assert.ok(reflection);
+  assert.equal(reflection.texture.descriptor.format, 'rgba16float');
   assert.ok(reflection.texture.descriptor.size[0] > 0 && reflection.texture.descriptor.size[0] <= 400);
   assert.ok(reflection.texture.descriptor.size[1] > 0 && reflection.texture.descriptor.size[1] <= 300);
   assert.equal(Array.from(reflection.viewProjectionMatrix).every(Number.isFinite), true);
@@ -260,8 +250,8 @@ test('Render3D schedules reflection before the source view, excludes mirrors, an
   draws.length = 0;
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
     frameData: world.frameData,
     view: sourceView.snapshot(),
   });
@@ -273,8 +263,8 @@ test('Render3D schedules reflection before the source view, excludes mirrors, an
   world.frameData.begin(world, engine, 32, 16);
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
     frameData: world.frameData,
     view: sourceView.snapshot(),
   });
@@ -286,8 +276,8 @@ test('Render3D schedules reflection before the source view, excludes mirrors, an
   draws.length = 0;
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
     frameData: world.frameData,
     view: sourceView.snapshot(),
   });
@@ -343,8 +333,8 @@ test('Render3D prepares two-mirror bounce chains deepest-first and retires reduc
   const sourceView = new RenderView({ camera, target: engine, key: 'main' });
   const record = () => render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
     frameData: world.frameData,
     view: sourceView.snapshot(),
   });
@@ -564,8 +554,8 @@ function createMirrorRenderSystem(engine, camera, planarMirrorPlanner = {}) {
 function recordMirrorFrame(render3D, world, engine, sourceView) {
   render3D.record(world, {
     device: engine.device,
-    encoder: {},
-    passEncoder: {},
+    encoder: engine.device.createCommandEncoder(),
+
     frameData: world.frameData,
     view: sourceView.snapshot(),
   });

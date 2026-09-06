@@ -1,3 +1,5 @@
+import type { Material } from '../material/Material';
+import { auxiliaryCullMode, auxiliaryFrontFace, auxiliaryUsesDeformation, MATERIAL_COVERAGE_LAYOUT, MaterialCoverageBindings, type MaterialCoverageResources } from './AuxiliaryMaterial';
 import type { IEngine } from '../core/IEngine';
 import type { RenderCommandContext } from '../core/RenderCommandContext';
 import { getEngineGPUResourceTracker } from '../core/EngineDiagnosticsAccess';
@@ -13,12 +15,11 @@ import { getStripIndexFormat, writeBuffer } from './utils';
 import type { LiveIdSet } from './utils';
 import type { PipelineWarmupPlan } from './PipelineWarmup';
 import { RendererCacheMap } from './RendererCacheMap';
-import { sharedZeroVectorCache } from './ZeroVectorCache';
 import { alignUp4 } from '../utils/align';
 import type { ClippingPlanes } from '../components/ClippingPlanes';
 import { CLIPPING_BLOCK_FLOATS, clippingStateKey, writeClippingBlock } from './ClippingPlanesGpu';
 
-const MOTION_BASE_FLOATS = 60;
+const MOTION_BASE_FLOATS = 68;
 const MOTION_OBJECT_FLOATS = MOTION_BASE_FLOATS;
 
 interface MotionEntityState {
@@ -36,6 +37,7 @@ interface MotionEntityState {
   skinJointBuffer: GPUBuffer | null;
   skinMatrixByteLength: number;
   geometryId: number;
+  deformationEnabled: boolean;
   lastFrameId: number;
   clippingKey: string;
 }
@@ -44,6 +46,7 @@ interface MotionGeometryDeformationData {
   readonly vertexCount: number;
   readonly morphEnabled: boolean;
   readonly morphSources: readonly (Float32Array | null)[];
+  readonly morphNormalSources: readonly (Float32Array | null)[];
   readonly morphBuffers: GPUBuffer[];
   readonly skinning: Geometry3D['skinning'];
   readonly skinJointSource: Float32Array | null;
@@ -57,6 +60,11 @@ interface MotionViewState {
   readonly liveEntities: Set<number>;
   readonly previousViewProjection: Float32Array;
   readonly currentViewProjection: Float32Array;
+  readonly previousJitter: Float32Array;
+  readonly currentJitter: Float32Array;
+  readonly cameraDepth: Float32Array;
+  width: number;
+  height: number;
   valid: boolean;
   continuous: boolean;
   lastFrameId: number;
@@ -71,13 +79,20 @@ export interface MotionVectorViewOptions {
   readonly frameId: number;
   readonly cameraId: number;
   readonly historyRevision: number;
+  readonly near: number;
+  readonly far: number;
+  readonly isOrthographic: boolean;
+  readonly projectionJitter: ArrayLike<number>;
 }
 
-/** Internal rigid and deformed-mesh velocity-buffer renderer. Motion is encoded in signed UV units. */
+/** Unjittered UV velocity, previous linear depth and history validity for temporal consumers. */
 export class MotionVectorRenderer extends BaseRenderer {
   readonly type = 'motion-vector';
   reverseZ = false;
   msaaSamples: 1 | 4 = 1;
+  /** Optional MRT outputs; location 0 retains the temporal motion ABI. */
+  auxiliaryDepth = false;
+  auxiliaryNormal = false;
 
   private _engine!: IEngine;
   private _sceneFrameBinding!: SceneFrameGpuBinding;
@@ -94,6 +109,7 @@ export class MotionVectorRenderer extends BaseRenderer {
   private readonly _views = new Map<string, MotionViewState>();
   private _activeView: MotionViewState | null = null;
   private _activeContext: RenderCommandContext | null = null;
+  private coverageBindings!: MaterialCoverageBindings;
   private _initialized = false;
 
   prepare(engine: IEngine): void {
@@ -119,9 +135,12 @@ export class MotionVectorRenderer extends BaseRenderer {
         { binding: 3, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } },
       ],
     });
+    const coverageLayout = device.createBindGroupLayout({ entries: [...MATERIAL_COVERAGE_LAYOUT] });
+    this.coverageBindings = new MaterialCoverageBindings(device, coverageLayout);
     const generated = getBuiltinDeformationShader(device, 'motion-vector', [
       this._sceneFrameBinding.bindGroupLayout,
       this._objectLayout,
+      coverageLayout,
       this._deformationLayout,
     ]);
     this._shader = generated.module;
@@ -142,6 +161,11 @@ export class MotionVectorRenderer extends BaseRenderer {
         liveEntities: new Set(),
         previousViewProjection: new Float32Array(16),
         currentViewProjection: new Float32Array(16),
+        previousJitter: new Float32Array(2),
+        currentJitter: new Float32Array(2),
+        cameraDepth: new Float32Array(4),
+        width: 0,
+        height: 0,
         valid: false,
         continuous: false,
         lastFrameId: -1,
@@ -153,12 +177,26 @@ export class MotionVectorRenderer extends BaseRenderer {
       this._views.set(options.viewKey, state);
     }
     state.currentViewProjection.set(sceneFrame.data.subarray(0, 16));
+    const width = sceneFrame.data[52]!;
+    const height = sceneFrame.data[53]!;
+    state.currentJitter[0] = (options.projectionJitter[0] ?? 0) / Math.max(1, width);
+    state.currentJitter[1] = (options.projectionJitter[1] ?? 0) / Math.max(1, height);
     state.currentFrameId = options.frameId;
     state.continuous = state.valid
       && state.lastFrameId + 1 === options.frameId
       && state.cameraId === options.cameraId
-      && state.historyRevision === options.historyRevision;
-    if (!state.continuous) state.previousViewProjection.set(state.currentViewProjection);
+      && state.historyRevision === options.historyRevision
+      && state.width === width && state.height === height
+      && state.cameraDepth[0] === Math.fround(options.near) && state.cameraDepth[1] === Math.fround(options.far)
+      && state.cameraDepth[2] === (options.isOrthographic ? 1 : 0)
+      && state.cameraDepth[3] === (this.reverseZ ? 1 : 0);
+    state.cameraDepth.set([options.near, options.far, options.isOrthographic ? 1 : 0, this.reverseZ ? 1 : 0]);
+    state.width = width;
+    state.height = height;
+    if (!state.continuous) {
+      state.previousViewProjection.set(state.currentViewProjection);
+      state.previousJitter.set(state.currentJitter);
+    }
     state.lastSeenFrameId = options.frameId;
     state.liveEntities.clear();
     this._cameraDynamicOffset[0] = this._sceneFrameBinding.upload(sceneFrame, context);
@@ -172,6 +210,8 @@ export class MotionVectorRenderer extends BaseRenderer {
     geometry: Geometry3D,
     worldMatrix: Float32Array,
     clippingPlanes: ClippingPlanes | null = null,
+    sourceMaterial: Material | null = null,
+    coverage: MaterialCoverageResources | null = null,
   ): void {
     const state = this._activeView;
     if (!state) throw new Error('MotionVectorRenderer.render() requires beginView().');
@@ -213,15 +253,18 @@ export class MotionVectorRenderer extends BaseRenderer {
         skinJointBuffer: null,
         skinMatrixByteLength: 0,
         geometryId: -1,
+        deformationEnabled: true,
         lastFrameId: -1,
         clippingKey: '',
       };
       state.entities.set(entityId, entity);
     }
+    const deform = auxiliaryUsesDeformation(sourceMaterial);
     const entityContinuous = state.continuous
       && entity.lastFrameId === state.lastFrameId
-      && entity.geometryId === geometry.id;
-    const morphEnabled = deformation.morphEnabled;
+      && entity.geometryId === geometry.id
+      && entity.deformationEnabled === deform;
+    const morphEnabled = deform && deformation.morphEnabled;
     entity.uniformData.set(worldMatrix, 0);
     entity.uniformData.set(entityContinuous ? entity.previousModel : worldMatrix, 16);
     entity.uniformData.set(state.previousViewProjection, 32);
@@ -231,9 +274,12 @@ export class MotionVectorRenderer extends BaseRenderer {
       entity.uniformData[52 + index] = entityContinuous ? entity.previousMorphWeights[index]! : current;
     }
     entity.uniformData[56] = morphEnabled ? 1 : 0;
-    entity.uniformData[57] = geometry.skinning ? 1 : 0;
-    entity.uniformData[58] = 0;
-    entity.uniformData[59] = 0;
+    entity.uniformData[57] = deform && geometry.skinning ? 1 : 0;
+    entity.uniformData[58] = entityContinuous ? 1 : 0;
+    entity.uniformData[59] = this.auxiliaryNormal ? 1 : 0;
+    entity.uniformData.set(state.cameraDepth, 60);
+    entity.uniformData[64] = state.currentJitter[0]! - state.previousJitter[0]!;
+    entity.uniformData[65] = state.currentJitter[1]! - state.previousJitter[1]!;
     const clipKey = clippingStateKey(clippingPlanes);
     if (entity.clippingKey !== clipKey) {
       writeClippingBlock(entity.clippingData, 0, clippingPlanes);
@@ -243,12 +289,16 @@ export class MotionVectorRenderer extends BaseRenderer {
     this._prepareEntitySkinHistory(entity, deformation, geometry, entityContinuous);
     writeBuffer(device.queue, entity.buffer, 0, entity.uniformData);
 
-    const pipeline = this._getPipeline(geometry);
+    const pipeline = this._getPipeline(geometry, sourceMaterial);
     pass.setPipeline(pipeline);
     pass.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
     pass.setBindGroup(1, entity.bindGroup);
-    pass.setBindGroup(2, entity.skinBindGroup);
+    pass.setBindGroup(2, this.coverageBindings.get(coverage));
+    pass.setBindGroup(3, entity.skinBindGroup);
     pass.setVertexBuffer(0, geometryData.positionBuf);
+    pass.setVertexBuffer(5, geometryData.uvBuf);
+    pass.setVertexBuffer(6, geometryData.uv1Buf ?? geometryData.uvBuf);
+    pass.setVertexBuffer(7, geometryData.normalBuf);
     for (let index = 0; index < 4; index++) pass.setVertexBuffer(index + 1, deformation.morphBuffers[index]!);
     if (geometryData.indexBuf) {
       pass.setIndexBuffer(geometryData.indexBuf, geometryData.indexFormat);
@@ -261,6 +311,7 @@ export class MotionVectorRenderer extends BaseRenderer {
     if (geometry.skinning) entity.previousSkinMatrices = copyFloat32Array(geometry.skinning.jointMatrices, entity.previousSkinMatrices);
     else entity.previousSkinMatrices = new Float32Array(0);
     entity.geometryId = geometry.id;
+    entity.deformationEnabled = deform;
     entity.lastFrameId = state.currentFrameId;
     state.liveEntities.add(entityId);
   }
@@ -275,6 +326,7 @@ export class MotionVectorRenderer extends BaseRenderer {
       this._retireEntity(entity, context);
     }
     state.previousViewProjection.set(state.currentViewProjection);
+    state.previousJitter.set(state.currentJitter);
     state.valid = true;
     state.lastFrameId = options.frameId;
     state.cameraId = options.cameraId;
@@ -289,9 +341,10 @@ export class MotionVectorRenderer extends BaseRenderer {
   }
 
   contributePipelineWarmup(plan: PipelineWarmupPlan): void {
-    const key = encodePrimitivePipelineKey('triangle-list', 'back', 'ccw', undefined, this.reverseZ, 1);
+    const key = this._pipelineKey('triangle-list', 'back', 'ccw', undefined);
+    const depth = this.auxiliaryDepth, normal = this.auxiliaryNormal;
     this.addPipelineWarmup(plan, key, 'Motion vectors', () => (
-      this._pipelineDescriptor('triangle-list', 'back', 'ccw', undefined)
+      this._pipelineDescriptor('triangle-list', 'back', 'ccw', undefined, depth, normal)
     ), this._engine.device);
   }
 
@@ -314,6 +367,7 @@ export class MotionVectorRenderer extends BaseRenderer {
     tracker?.untrackBuffer(this._fallbackAttributeBuffer);
     this._fallbackMatrixBuffer?.destroy();
     this._fallbackAttributeBuffer?.destroy();
+    this.coverageBindings?.destroy();
     this._sceneFrameBinding?.destroy();
     this.clearPipelineCache();
     this._activeView = null;
@@ -361,6 +415,7 @@ export class MotionVectorRenderer extends BaseRenderer {
     if (data.vertexCount !== geometry.vertexCount || data.morphEnabled !== morphEnabled) return false;
     for (let index = 0; index < 4; index++) {
       if (data.morphSources[index] !== (morphEnabled ? geometry.morphTargets[index]?.positions ?? null : null)) return false;
+      if (data.morphNormalSources[index] !== (morphEnabled ? geometry.morphTargets[index]?.normals ?? null : null)) return false;
     }
     const skinning = geometry.skinning;
     return data.skinning === skinning
@@ -374,20 +429,28 @@ export class MotionVectorRenderer extends BaseRenderer {
   ): MotionGeometryDeformationData {
     const morphSources = Array.from({ length: 4 }, (_, index) =>
       morphEnabled ? geometry.morphTargets[index]?.positions ?? null : null);
-    const zeroMorph = sharedZeroVectorCache.vec3(geometry.vertexCount);
+    const morphNormalSources = Array.from({ length: 4 }, (_, index) =>
+      morphEnabled ? geometry.morphTargets[index]?.normals ?? null : null);
     let zeroMorphBuffer: GPUBuffer | null = null;
     const morphBuffers = morphSources.map((source, index) => {
-      if (!source) {
-        zeroMorphBuffer ??= this._makeVertexBuffer(zeroMorph, 'MotionVectorRenderer.zeroMorph');
+      const normal = morphNormalSources[index];
+      if (!source && !normal) {
+        zeroMorphBuffer ??= this._makeVertexBuffer(new Float32Array(geometry.vertexCount * 6), 'MotionVectorRenderer.zeroMorph');
         return zeroMorphBuffer;
       }
-      return this._makeVertexBuffer(source, `MotionVectorRenderer.morph${index}`);
+      const interleaved = new Float32Array(geometry.vertexCount * 6);
+      for (let vertex = 0; vertex < geometry.vertexCount; vertex++) for (let axis = 0; axis < 3; axis++) {
+        interleaved[vertex * 6 + axis] = source?.[vertex * 3 + axis] ?? 0;
+        interleaved[vertex * 6 + 3 + axis] = normal?.[vertex * 3 + axis] ?? 0;
+      }
+      return this._makeVertexBuffer(interleaved, `MotionVectorRenderer.morph${index}`);
     });
     const skinning = geometry.skinning;
     return {
       vertexCount: geometry.vertexCount,
       morphEnabled,
       morphSources,
+      morphNormalSources,
       morphBuffers,
       skinning,
       skinJointSource: skinning?.joints ?? null,
@@ -508,12 +571,12 @@ export class MotionVectorRenderer extends BaseRenderer {
     else retire();
   }
 
-  private _getPipeline(geometry: Geometry3D): GPURenderPipeline {
+  private _getPipeline(geometry: Geometry3D, sourceMaterial?: Material | null): GPURenderPipeline {
     const topology = geometry.topology ?? 'triangle-list';
-    const cullMode = geometry.cullMode ?? 'back';
-    const frontFace = geometry.frontFace ?? 'ccw';
+    const cullMode = auxiliaryCullMode(geometry, sourceMaterial);
+    const frontFace = auxiliaryFrontFace(geometry, sourceMaterial);
     const stripIndexFormat = getStripIndexFormat(geometry);
-    const key = encodePrimitivePipelineKey(topology, cullMode, frontFace, stripIndexFormat, this.reverseZ, 1);
+    const key = this._pipelineKey(topology, cullMode, frontFace, stripIndexFormat);
     return this.getCachedPipeline(key, () => this._engine.device.createRenderPipeline(
       this._pipelineDescriptor(topology, cullMode, frontFace, stripIndexFormat),
     ));
@@ -524,6 +587,8 @@ export class MotionVectorRenderer extends BaseRenderer {
     cullMode: GPUCullMode,
     frontFace: GPUFrontFace,
     stripIndexFormat: GPUIndexFormat | undefined,
+    depth = this.auxiliaryDepth,
+    normal = this.auxiliaryNormal,
   ): GPURenderPipelineDescriptor {
     return {
       label: 'MotionVectorRenderer.pipeline',
@@ -534,12 +599,20 @@ export class MotionVectorRenderer extends BaseRenderer {
         buffers: [
           { arrayStride: 12, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }] },
           ...Array.from({ length: 4 }, (_, index): GPUVertexBufferLayout => ({
-            arrayStride: 12,
-            attributes: [{ shaderLocation: index + 1, offset: 0, format: 'float32x3' }],
+            arrayStride: 24,
+            attributes: [
+              { shaderLocation: index + 1, offset: 0, format: 'float32x3' },
+              { shaderLocation: index + 8, offset: 12, format: 'float32x3' },
+            ],
           })),
+          { arrayStride: 8, attributes: [{ shaderLocation: 5, offset: 0, format: 'float32x2' }] },
+          { arrayStride: 8, attributes: [{ shaderLocation: 6, offset: 0, format: 'float32x2' }] },
+          { arrayStride: 12, attributes: [{ shaderLocation: 7, offset: 0, format: 'float32x3' }] },
         ],
       },
-      fragment: { module: this._shader, entryPoint: 'fs_main', targets: [{ format: 'rg16float' }] },
+      fragment: { module: this._shader, entryPoint: 'fs_main', targets: [
+        { format: 'rgba16float' }, depth ? { format: 'r32float' } : null, normal ? { format: 'rgba16float' } : null,
+      ] },
       primitive: createPrimitiveState(topology, cullMode, frontFace, stripIndexFormat),
       depthStencil: {
         format: this._engine.getDepthFormat(this.reverseZ),
@@ -548,6 +621,10 @@ export class MotionVectorRenderer extends BaseRenderer {
       },
       multisample: { count: 1 },
     };
+  }
+
+  private _pipelineKey(topology: GPUPrimitiveTopology, cullMode: GPUCullMode, frontFace: GPUFrontFace, stripIndexFormat: GPUIndexFormat | undefined): string {
+    return `${encodePrimitivePipelineKey(topology, cullMode, frontFace, stripIndexFormat, this.reverseZ, 1)}:${+this.auxiliaryDepth}:${+this.auxiliaryNormal}`;
   }
 
   private _sweepStaleViews(frameId: number, activeViewKey: string, context: RenderCommandContext): void {

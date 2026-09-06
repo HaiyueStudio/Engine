@@ -24,6 +24,7 @@ export interface PbrDeformationGpuData {
 
 export interface PbrDeformationGpuCacheOptions {
   readonly device: GPUDevice;
+  readonly label?: string;
   readonly getSceneBindingRevision: () => number;
   readonly getFallbackSceneBindGroup: () => GPUBindGroup;
   readonly createSceneBindGroup: (
@@ -34,7 +35,7 @@ export interface PbrDeformationGpuCacheOptions {
 }
 
 /**
- * Owns every PBR morph/skinning GPU allocation.
+ * Owns morph positions/normals and skinning for PBR and auxiliary normals.
  *
  * Geometry identity and source-array identity decide allocation reuse, while
  * Skinning3D.version decides matrix uploads. This keeps camera/view changes
@@ -55,10 +56,12 @@ export class PbrDeformationGpuCache {
       0, 0, 1, 0,
       0, 0, 0, 1,
     ]);
-    this.fallbackSkinMatrixBuffer = this._makeStorageBuffer(identity, 'PbrRenderer.fallbackSkinMatrices', 64);
-    this.fallbackSkinJointBuffer = this._makeStorageBuffer(new Float32Array(4), 'PbrRenderer.fallbackSkinJoints');
-    this.fallbackSkinWeightBuffer = this._makeStorageBuffer(new Float32Array(4), 'PbrRenderer.fallbackSkinWeights');
+    this.fallbackSkinMatrixBuffer = this._makeStorageBuffer(identity, `${this._label}.fallbackSkinMatrices`, 64);
+    this.fallbackSkinJointBuffer = this._makeStorageBuffer(new Float32Array(4), `${this._label}.fallbackSkinJoints`);
+    this.fallbackSkinWeightBuffer = this._makeStorageBuffer(new Float32Array(4), `${this._label}.fallbackSkinWeights`);
   }
+
+  private get _label(): string { return this._options.label ?? 'PbrRenderer'; }
 
   ensure(geometry: Geometry3D): PbrDeformationGpuData {
     const morphEnabled = geometry.morphUseGpu && geometry.hasMorphTargets;
@@ -119,21 +122,21 @@ export class PbrDeformationGpuCache {
     const morphBuffers = Array.from({ length: 4 }, (_, index) => {
       const target = morphEnabled ? geometry.morphTargets[index] : undefined;
       if (!target?.positions && !target?.normals) {
-        zeroMorphBuffer ??= this._makeMorphBuffer(null, geometry.vertexCount, 'PbrRenderer.zeroMorph');
+        zeroMorphBuffer ??= this._makeMorphBuffer(null, geometry.vertexCount, `${this._label}.zeroMorph`);
         return zeroMorphBuffer;
       }
-      return this._makeMorphBuffer(target, geometry.vertexCount, `PbrRenderer.morph${index}`);
+      return this._makeMorphBuffer(target, geometry.vertexCount, `${this._label}.morph${index}`);
     });
 
     const skinning = geometry.skinning;
     const skinMatrixBuffer = skinning
-      ? this._makeStorageBuffer(skinning.jointMatrices, 'PbrRenderer.skinMatrices', 64)
+      ? this._makeStorageBuffer(skinning.jointMatrices, `${this._label}.skinMatrices`, 64)
       : null;
     const skinJointBuffer = skinning
-      ? this._makeStorageBuffer(skinning.joints, 'PbrRenderer.skinJoints')
+      ? this._makeStorageBuffer(skinning.joints, `${this._label}.skinJoints`)
       : null;
     const skinWeightBuffer = skinning
-      ? this._makeStorageBuffer(skinning.weights, 'PbrRenderer.skinWeights')
+      ? this._makeStorageBuffer(skinning.weights, `${this._label}.skinWeights`)
       : null;
     const skinBindGroup = skinMatrixBuffer && skinJointBuffer && skinWeightBuffer
       ? this._options.createSceneBindGroup(skinMatrixBuffer, skinJointBuffer, skinWeightBuffer)

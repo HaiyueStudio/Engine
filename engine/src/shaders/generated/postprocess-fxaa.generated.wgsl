@@ -56,16 +56,16 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
   let directionReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) * (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
   let reciprocalDirectionMin = 1.0 / (min(abs(direction.x), abs(direction.y)) + directionReduce);
   direction = clamp(direction * reciprocalDirectionMin, vec2<f32>(-FXAA_SPAN_MAX), vec2<f32>(FXAA_SPAN_MAX)) * reciprocalFrame;
-  let rgbA = 0.5 * (
-    textureSample(sourceTexture, linearSampler, uv + direction * (1.0 / 3.0 - 0.5)).rgb +
-    textureSample(sourceTexture, linearSampler, uv + direction * (2.0 / 3.0 - 0.5)).rgb
+  let rgbaA = 0.5 * (
+    textureSample(sourceTexture, linearSampler, uv + direction * (1.0 / 3.0 - 0.5)) +
+    textureSample(sourceTexture, linearSampler, uv + direction * (2.0 / 3.0 - 0.5))
   );
-  let rgbB = rgbA * 0.5 + 0.25 * (
-    textureSample(sourceTexture, linearSampler, uv + direction * -0.5).rgb +
-    textureSample(sourceTexture, linearSampler, uv + direction * 0.5).rgb
+  let rgbaB = rgbaA * 0.5 + 0.25 * (
+    textureSample(sourceTexture, linearSampler, uv + direction * -0.5) +
+    textureSample(sourceTexture, linearSampler, uv + direction * 0.5)
   );
-  let lumaB = luma(rgbB);
-  if (lumaB < lumaMin || lumaB > lumaMax) { return vec4<f32>(rgbA, 1.0); }
-  return vec4<f32>(rgbB, 1.0);
+  let lumaB = luma(rgbaB.rgb);
+  if (lumaB < lumaMin || lumaB > lumaMax) { return rgbaA; }
+  return rgbaB;
 }
 
