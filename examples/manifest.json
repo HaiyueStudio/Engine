@@ -2031,6 +2031,30 @@
         "group": "compute",
         "order": 5
       }
+    },
+    {
+      "id": "virtual-joystick",
+      "title": "Virtual Joystick",
+      "entry": "virtual-joystick/main.ts",
+      "capabilities": [
+        "virtual-joystick",
+        "fixed-and-floating",
+        "multitouch",
+        "entity-movement",
+        "gui",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "smoke",
+      "catalog": {
+        "group": "interaction",
+        "order": 9
+      }
     }
   ],
   "catalog": {

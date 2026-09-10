@@ -16,6 +16,7 @@
 - [`@haiyue/engine`](./engine.md)
 - [`@haiyue/engine/geometry`](./geometry.md)
 - [`@haiyue/extensions`](./extensions.md)
+- [`@haiyue/extensions/controls` 虚拟摇杆](./controls.md)
 - [`@haiyue/animation-spec`](./animation-spec.md)
 - [`@haiyue/engine/navigation`](./navigation.md)
 - [`@haiyue/engine/save`](./save.md)

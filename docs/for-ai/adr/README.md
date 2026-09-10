@@ -117,3 +117,5 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0097：辅助缓冲 MRT 与帧资源依赖](./0097-auxiliary-mrt-and-frame-resource-dependencies.md)
 - [0098：GPU-driven 间接绘制命令复用](./0098-gpu-driven-indirect-bundle-submission.md)
 - [0099：先按视图选择灯光，再评估 clustered](./0099-view-light-selection-before-clustering.md)
+- [0100：Native GUI 字体栅格化注入](./0100-native-gui-font-rasterization.md)
+- [0101：Extensions 虚拟摇杆 controls](./0101-virtual-joystick-extension-controls.md)

@@ -1,0 +1,18 @@
+
+> @haiyue/engine-repository@0.1.0 docs:check
+> node scripts/check-docs.mjs
+
+file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/studio-repository-layout.mjs:19
+  if (!existsSync(repository.root)) throw new Error(`${name} repository is unavailable at ${repository.root}.`);
+                                          ^
+
+Error: Editor repository is unavailable at /Users/qingque/Desktop/HaiyueStudio/Editor.
+    at requireStudioRepository (file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/studio-repository-layout.mjs:19:43)
+    at file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/check-docs.mjs:9:16
+    at Array.map (<anonymous>)
+    at file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/check-docs.mjs:9:4
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.19.0

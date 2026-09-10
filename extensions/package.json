@@ -91,13 +91,17 @@
     "./gltf-animation3d": {
       "types": "./dist/gltf-animation3d.d.ts",
       "import": "./dist/gltf-animation3d.js"
+    },
+    "./controls": {
+      "types": "./dist/controls.d.ts",
+      "import": "./dist/controls.js"
     }
   },
   "scripts": {
     "build": "node ../scripts/build-rollup-once.mjs && node ../scripts/build-rollup-once.mjs rollup.worker.config.js && node ../scripts/prune-package-declarations.mjs extensions",
     "build:animation-runtime-tests": "node -e \"require('node:fs').rmSync('dist-test', { recursive: true, force: true })\" && tsc -p tsconfig.animation-runtime-tests.json",
     "test": "npm run build && npm run build:animation-runtime-tests && node --test --test-concurrency=1 \"test/**/*.test.mjs\"",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.animation3d-type-tests.json && tsc -p tsconfig.indexed-sprite-type-tests.json && tsc -p tsconfig.animation-runtime-tests.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.animation3d-type-tests.json && tsc -p tsconfig.indexed-sprite-type-tests.json && tsc -p tsconfig.animation-runtime-tests.json --noEmit && tsc -p tsconfig.controls-type-tests.json"
   },
   "dependencies": {
     "draco3dgltf": "^1.5.7",

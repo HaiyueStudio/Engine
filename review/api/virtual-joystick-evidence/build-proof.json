@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "scope": "local-development-validation",
+  "generatedAt": "2026-09-10T12:06:19.464033+00:00",
+  "sha256": {
+    "extensions/src/controls/contracts.ts": "55f4a38d941dd3eca2d1839b9e5302d6c0ac69dc3c4774790465e6cd1810c023",
+    "extensions/src/controls/JoystickView.ts": "ba424cebe33b3b3d7ff3c09570e14433ec7008b8144eb9b8de1ef65d65fb6ccf",
+    "extensions/src/controls/VirtualJoystickControls.ts": "6e2e4a1b653cab359c83e112c93ebaafac957368e900f6a7d03cee9005c53725",
+    "extensions/src/controls.ts": "ab097746619c5409b41bbd908ef9a74eb9fd5e50794a888ead4d8106f509bd69",
+    "extensions/package.json": "57b80166eccec74723bf9b5f2d68511e382666d53d0ac42a76c0a81547e81cba",
+    "extensions/dist/controls.js": "6c117d054e430913eeba2ef5d5ab8bd32dddb475b17fd76fe86ab0e833d85132",
+    "extensions/dist/controls.d.ts": "fd6dab0fc4b110be8fb62d73e9e6a95a051e61c7a16b9e287383d0e61977dc33",
+    "extensions/test/virtual-joystick.test.mjs": "32b978a7d07ee92c5f291075973ed30834c8ffab4d71dcc780d8bfae4635e0a5",
+    "extensions/type-tests/controls-contract.type-test.ts": "eb787cc605bcd1a4b86c963960ea3ccf2fffb364dcfa87c31f337defcbbecb09",
+    "examples/virtual-joystick/main.ts": "06d59971e48b44d73cb3c989b274a2ea2d75fa45bf41c75aab7d8f3f862cbd3d",
+    "examples/virtual-joystick/verification.ts": "dac238d8df2e26ec888c070f9cdd93a150fc25d2dd6028393f2552132d025736",
+    "examples/virtual-joystick/bundle.js": "e41944db5e118b8edd71decb7435ef9559a03de07466a0efca1d357367dcfb71",
+    "examples/shared/engine.js": "ab3476596022a54477250ab298f9448408f2cfc7ceedee008f5124507f7bd9fe",
+    "config/public-api-capability-budgets.json": "4917a218b48833fe18b02544e34770f4e967bd9b0eaf330e3866060261ec55b3",
+    "extensions/tsconfig.controls-type-tests.json": "7d2ea84462876f22d1104e43e114e1ce9819c2635f35592b65abf65ec513c644",
+    "examples/tsconfig.json": "13db440cc947b90c0a5ff64ebb7a7c9fa9c56491adb6d8b7e8f8cc9b5f365c50"
+  },
+  "package": {
+    "filename": "haiyue-extensions-0.1.0.tgz",
+    "size": 514386,
+    "unpackedSize": 2655220,
+    "integrity": "sha512-4MpQEOqomU5SJBDbd0fjtQpUJTY7o/OEeYi/z0yRsVB/YEdpuu3NMwaxeXH2dj1/07U7TyIhtQdWSkJmDAtlMA=="
+  },
+  "controlsModule": {
+    "bytes": 16764,
+    "gzipBytes": 4524
+  },
+  "browser": "Chrome native Metal WebGPU, portrait and landscape",
+  "nativeDeviceTested": false,
+  "repositoryTests": {
+    "status": "passed",
+    "total": 1268,
+    "workspaces": {
+      "shader-language": 112,
+      "engine": 618,
+      "animation-spec": 139,
+      "extensions": 392,
+      "examples-catalog": 7
+    }
+  },
+  "focusedTests": 20,
+  "packedRuntimeConsumer": "passed",
+  "packedDeclarationConsumer": "passed"
+}

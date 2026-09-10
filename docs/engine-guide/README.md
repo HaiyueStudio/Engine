@@ -23,6 +23,7 @@
 - [插件开发](./plugin-authoring.md)
 - [Device recovery](./device-recovery.md)
 - [点击、拖拽与键盘交互](./interaction.md)
+- [虚拟摇杆与角色移动](./virtual-joystick.md)
 - [2D 小游戏实战：打砖块](./2d-breakout-game.md)
 - [3D 小游戏实战：水晶收集](./3d-roll-a-ball-game.md)
 - [后期处理效果](./post-processing.md)

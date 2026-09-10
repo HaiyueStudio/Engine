@@ -2,6 +2,12 @@
 
 Optional runtime capabilities for `@haiyue/engine`.
 
+`@haiyue/extensions/controls` adds configurable fixed/floating virtual joystick input,
+per-frame events, Entity movement/heading and optional Engine GUI presentation.
+See the [guide](../docs/engine-guide/virtual-joystick.md) and
+[runnable example](../examples/virtual-joystick/index.html). This new stable subpath
+is a local candidate for a future reviewed minor release, not a published 0.1.x addition.
+
 ## Stable entrypoints
 
 - `@haiyue/extensions/gltf` — glTF loading, runtime components, compatibility reports, materials, and the engine plugin.

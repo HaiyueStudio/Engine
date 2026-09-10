@@ -1,0 +1,24 @@
+
+> @haiyue/engine-repository@0.1.0 api:check
+> node scripts/api-surface.mjs --check
+
+node:fs:484
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open '/Users/qingque/Desktop/HaiyueStudio/Editor/editor/package.json'
+    at readFileSync (node:fs:484:20)
+    at file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/api-surface.mjs:285:33
+    at Array.map (<anonymous>)
+    at createSnapshot (file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/api-surface.mjs:284:53)
+    at file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/api-surface.mjs:249:17
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/qingque/Desktop/HaiyueStudio/Editor/editor/package.json'
+}
+
+Node.js v24.19.0

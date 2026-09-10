@@ -155,6 +155,12 @@
           "stability": "experimental",
           "growthReserve": { "ratio": 0.25, "minimumSymbols": 2 },
           "entrypoints": { "./ray-tracing": 11 }
+        },
+        {
+          "id": "virtual-joystick-controls",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
+          "entrypoints": { "./controls": 9 }
         }
       ]
     },

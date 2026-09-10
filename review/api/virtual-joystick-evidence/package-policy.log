@@ -1,0 +1,14 @@
+✔ package capacity is reviewed capability plus explicit growth reserve (13.931877ms)
+✔ package globs include nested release files without admitting source maps (2.615429ms)
+✔ public package manifests expose dist-only targets and never publish source trees (5.085621ms)
+✔ pack policy rejects forbidden files and missing export targets (2.14891ms)
+✔ release package policy turns unresolved publication inputs into hard errors (0.882359ms)
+✔ consumer policy blocks heavy physics, AO, unrelated shaders, and gzip excess (1.214736ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 382.820789

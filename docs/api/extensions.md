@@ -23,6 +23,8 @@ Extensions 包提供不属于引擎核心的可选完整能力，例如 glTF loa
 
 精确类型签名以构建后的 `extensions/dist/*.d.ts` 为准。
 
+新增的 [`@haiyue/extensions/controls`](./controls.md) 提供固定/浮动虚拟摇杆、逐帧事件、2D/3D Entity 移动和朝向及可选 Engine GUI。它是面向后续 minor 的本地开发候选，不属于已冻结的 0.1 首发清单。
+
 ## HYA Animation2D 状态机
 
 `@haiyue/extensions/hya-state-machine` 提供 `Animation2DStateMachineComponent` 与 `Animation2DStateMachineSystem`。它们消费 `.hya` 内建的 `org.haiyue.animation-state-machine@1` 扩展，在一份解析结果和一棵运行时节点树上播放多个命名 clip，并复用共享状态机、2D mixer、layer/mask 和 Blend Tree 语义。该能力使用独立子路径，基础 Animation2D 和编辑器首帧闭包不会为未使用的状态机付费。

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "scope": "additive-local-development-candidate",
+  "entrypoint": "@haiyue/extensions/controls",
+  "source": "extensions/src/controls.ts",
+  "exports": [
+    {
+      "name": "JoystickPoint",
+      "kind": "type"
+    },
+    {
+      "name": "JoystickRegion",
+      "kind": "type"
+    },
+    {
+      "name": "JoystickViewport",
+      "kind": "type"
+    },
+    {
+      "name": "VirtualJoystickControls",
+      "kind": "value"
+    },
+    {
+      "name": "VirtualJoystickEventMap",
+      "kind": "type"
+    },
+    {
+      "name": "VirtualJoystickFrame",
+      "kind": "type"
+    },
+    {
+      "name": "VirtualJoystickOptions",
+      "kind": "type"
+    },
+    {
+      "name": "VirtualJoystickState",
+      "kind": "type"
+    },
+    {
+      "name": "VirtualJoystickSurface",
+      "kind": "type"
+    }
+  ],
+  "rootExportsUnchanged": true,
+  "review": "docs/for-ai/adr/0101-virtual-joystick-extension-controls.md",
+  "globalCheck": "Unavailable: Editor repository is absent. Only the reviewed controls entry was added to the existing baseline."
+}

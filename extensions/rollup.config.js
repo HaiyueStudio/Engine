@@ -14,6 +14,7 @@ export default {
     'canvas-text': 'src/canvas-text.ts',
     tween: 'src/tween.ts',
     grid: 'src/grid.ts',
+    controls: 'src/controls.ts',
     animation: 'src/animation.ts',
     'deformable-animation': 'src/deformable-animation.ts',
     'hya-state-machine': 'src/hya-state-machine.ts',

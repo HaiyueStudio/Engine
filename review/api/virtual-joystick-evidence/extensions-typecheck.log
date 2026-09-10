@@ -1,0 +1,4 @@
+
+> @haiyue/extensions@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit && tsc -p tsconfig.animation3d-type-tests.json && tsc -p tsconfig.indexed-sprite-type-tests.json && tsc -p tsconfig.animation-runtime-tests.json --noEmit && tsc -p tsconfig.controls-type-tests.json
+

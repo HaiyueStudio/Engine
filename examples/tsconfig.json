@@ -11,6 +11,7 @@
       "@haiyue/animation-spec/lottie": ["../animation-spec/src/lottie.ts"],
       "@haiyue/extensions/animation": ["../extensions/src/animation.ts"],
       "@haiyue/extensions/canvas-text": ["../extensions/src/canvas-text.ts"],
+      "@haiyue/extensions/controls": ["../extensions/src/controls.ts"],
       "@haiyue/extensions/gltf": ["../extensions/src/gltf.ts"],
       "@haiyue/extensions/experimental/gltf-worker": ["../extensions/src/experimental-gltf-worker.ts"],
       "@haiyue/extensions/gltf-animation3d": ["../extensions/src/gltf-animation3d.ts"],

@@ -1,0 +1,28 @@
+✔ focused export leaves root lightweight (4.742611ms)
+✔ public controls entry, reviewed API and capability budget agree (6.262085ms)
+✔ fixed center clamps diagonal displacement and reports raw distance separately (5.867819ms)
+✔ GUI scroll prevention does not swallow joystick input; explicit arbitration still works (1.33939ms)
+✔ fixed hit disk, activation region, non-left buttons and HUD predicate reject without consuming (1.381734ms)
+✔ floating center uses each press, stays anchored outside region and hides on release (2.747769ms)
+✔ dead zone suppresses drift and rescales strength continuously (0.748789ms)
+✔ first eligible finger owns joystick even when not primary; other fingers cannot move/end it (0.855656ms)
+✔ every enabled frame emits exact dt for idle, zero dt and stationary held input (1.228367ms)
+✔ 3D movement uses seconds, preserves height/pitch/roll and aligns -Z model forward (5.508287ms)
+✔ speed is frame-rate independent and diagonal input is normalized (8.440459ms)
+✔ 2D binding, analog toggle, heading offset and finite turn rate (2.054609ms)
+✔ movement basis rotates independently of model facing and can disable facing (1.325562ms)
+✔ zero turn speed preserves heading and finite turn chooses shortest path across PI (1.199482ms)
+✔ cancel paths release capture and emit only once; disabled stops new presses (0.987165ms)
+✔ surface resize/offset change cancels drag; callbacks resolve new logical viewport (0.783274ms)
+✔ invalid configuration and dt reject; valid configuration cancels gesture atomically (1.551387ms)
+✔ target destruction/component replacement and disabled targets never write stale transforms (2.560279ms)
+✔ World drives frames and destroy removes GUI, input and callbacks idempotently (2.976955ms)
+✔ World first-frame clock adjustment yields zero dt and does not abort movement updates (0.955221ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 610.531707

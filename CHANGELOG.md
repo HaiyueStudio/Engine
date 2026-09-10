@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- 新增 `@haiyue/extensions/controls` 虚拟摇杆：固定/浮动中心、区域命中、距离与死区、逐帧事件、2D/3D Entity 移动与朝向、Engine GUI 及完整输入清理；提供 Virtual Joystick 示例。此新增稳定入口为后续 minor 的本地开发候选，不发布为 0.1.x patch。
+
 - 0.1 首发正确性矩阵收敛为 Windows 10 22H2+ Chrome/Edge 与真实 GeForce/Radeon RX 独显；取消 Apple/Windows 集显的独立 required handoff，并将 Chrome/macOS 调整为 extended。软件与远程虚拟 adapter 继续禁止。
 - 将 `@haiyue/extensions` 纳入公共 npm 包；在首批 `/animation3d`、`/gltf`、`/gltf-animation3d` 后，经 feature-freeze 漏审纠偏将 `/animation`、`/hya-state-machine`、`/spine`、`/tilemap`、`/canvas-text`、`/tween`、`/grid` 转正。glTF/Spine worker transport 与 parser 底层分别保留在 `/experimental/gltf-worker`、`/experimental/spine-worker`。
 - 新增 stable `@haiyue/engine/extension-authoring` 窄 SPI，使独立渲染扩展不再依赖 engine experimental 声明；feature freeze 仍保持 active。

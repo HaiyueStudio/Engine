@@ -1,0 +1,43 @@
+
+> @haiyue/engine-repository@0.1.0 typecheck
+> npm run typecheck -w ./shader-language && npm run typecheck -w ./engine && npm run typecheck -w ./animation-spec && npm run build -w ./engine && npm run build -w ./animation-spec && npm run typecheck -w ./extensions && npm run typecheck -w ./examples
+
+
+> @haiyue/shader-language@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @haiyue/engine@0.1.0 typecheck
+> tsc --noEmit
+
+
+> @haiyue/animation-spec@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @haiyue/engine@0.1.0 build
+> node ../scripts/build-rollup-once.mjs
+
+
+src/index.ts, src/experimental.ts, src/experimental/assets.ts, src/experimental/async.ts, src/experimental/ktx2-worker-runtime.ts, src/experimental/diagnostics.ts, src/experimental/gpu-driven.ts, src/experimental/renderer.ts, src/experimental/simulation.ts, src/experimental/audio.ts, src/core.ts, src/assets.ts, src/diagnostics.ts, src/extension-authoring.ts, src/ecs.ts, src/components.ts, src/geometry.ts, src/material.ts, src/systems.ts, src/physics.ts, src/physics-components.ts, src/physics/backend.ts, src/postprocess.ts, src/gui.ts, src/compute.ts, src/scene.ts, src/input.ts, src/controls.ts, src/tween.ts, src/rtt.ts, src/font.ts, src/color.ts, src/lighting.ts, src/math.ts, src/serialization.ts, src/save.ts, src/renderer.ts, src/navigation.ts, src/shader/PrecompiledShaderRuntime.ts, src/shaders/generated/postprocess-builtins-artifact.generated.ts, src/shaders/generated/2d-ui-artifact.generated.ts, src/shaders/generated/simple3d-artifact.generated.ts, src/shaders/generated/deformation-artifact.generated.ts, src/shaders/generated/material-lighting-artifact.generated.ts, src/shaders/generated/specialized-rendering-artifact.generated.ts, src/shaders/generated/compute-artifact.generated.ts → dist...
+created dist in 46.4s
+
+> @haiyue/animation-spec@0.1.0 build
+> node ../scripts/build-rollup-once.mjs && rollup -c rollup.dts.config.js && node ../scripts/install-bundled-declarations.mjs animation-spec dist-declarations
+
+
+src/index.ts, src/lottie.ts, src/native3d.ts, src/deformable2d.ts, src/cubism.ts, src/live2d.ts, src/conversion.ts, src/live2d/clip-baked.ts → dist...
+created dist in 26.5s
+[rollup-runner] rollup.config.js produced dist but retained process handles for 1500ms; sending SIGTERM to process group 11226.
+
+dist/index.d.ts, dist/lottie.d.ts, dist/native3d.d.ts, dist/deformable2d.d.ts, dist/cubism.d.ts, dist/live2d.d.ts, dist/conversion.d.ts, dist/live2d/clip-baked.d.ts → dist-declarations...
+created dist-declarations in 739ms
+[package-declarations] @haiyue/animation-spec: installed 9 bundled public declarations.
+
+> @haiyue/extensions@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit && tsc -p tsconfig.animation3d-type-tests.json && tsc -p tsconfig.indexed-sprite-type-tests.json && tsc -p tsconfig.animation-runtime-tests.json --noEmit && tsc -p tsconfig.controls-type-tests.json
+
+
+> @haiyue/examples@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+

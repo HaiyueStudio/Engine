@@ -1,0 +1,19 @@
+
+> @haiyue/engine-repository@0.1.0 examples:catalog:check
+> node --test examples/catalog.test.mjs
+
+✔ example shell is self-contained after the UI workspace split (13.535915ms)
+✔ example catalog derives every group, label, order, and URL from manifest metadata (66.211514ms)
+✔ catalog loader fetches the manifest once and keeps its array API (4.288316ms)
+✔ catalog isolates malformed examples and reports diagnostics without hiding valid examples (7.530544ms)
+✔ catalog omits groups emptied by invalid examples but keeps manifest structure errors fatal (7.577552ms)
+✔ every example loads one shared Engine bundle before its own bundle (49.486632ms)
+✔ example builds are content-addressed and dev watches every producing workspace (1664.130586ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2189.33928

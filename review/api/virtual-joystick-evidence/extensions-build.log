@@ -1,0 +1,11 @@
+
+> @haiyue/extensions@0.1.0 build
+> node ../scripts/build-rollup-once.mjs && node ../scripts/build-rollup-once.mjs rollup.worker.config.js && node ../scripts/prune-package-declarations.mjs extensions
+
+
+src/index.ts, src/gltf.ts, src/spine.ts, src/tilemap.ts, src/canvas-text.ts, src/tween.ts, src/grid.ts, src/controls.ts, src/animation.ts, src/deformable-animation.ts, src/hya-state-machine.ts, src/animation3d.ts, src/gltf-animation3d.ts, src/experimental-gltf-worker.ts, src/experimental-spine-worker.ts, src/experimental-indexed-sprite.ts, src/ray-tracing.ts, src/benchmark.ts, src/shaders/generated/2d-ui-artifact.generated.ts → dist...
+created dist in 35.3s
+
+src/gltf-worker-runtime.ts → dist/gltf-worker-runtime.js...
+created dist/gltf-worker-runtime.js in 23.3s
+[package-declarations] @haiyue/extensions: retained=150, removed=103.
