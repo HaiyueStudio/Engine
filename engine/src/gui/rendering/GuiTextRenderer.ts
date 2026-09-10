@@ -38,6 +38,8 @@ export class GuiTextRenderer extends BaseRenderer {
   private sampler: GPUSampler | null = null;
   private initialized = false;
 
+  constructor(private readonly readAtlasPixels?: (canvas: HTMLCanvasElement) => Uint8Array) { super(); }
+
   prepare(engine: IEngine): void {
     if (this.initialized && this.engine.device === engine.device) return;
     if (this.initialized) this.destroy();
@@ -163,8 +165,8 @@ export class GuiTextRenderer extends BaseRenderer {
 
     const source = font.pageImages?.[0];
     if (source) {
-      const width = source instanceof HTMLCanvasElement ? source.width : source.width;
-      const height = source instanceof HTMLCanvasElement ? source.height : source.height;
+      const width = source.width;
+      const height = source.height;
       texture = device.createTexture({
         size: [width, height],
         format: 'rgba8unorm',
@@ -173,11 +175,20 @@ export class GuiTextRenderer extends BaseRenderer {
           GPUTextureUsage.COPY_DST |
           GPUTextureUsage.RENDER_ATTACHMENT,
       });
-      device.queue.copyExternalImageToTexture(
-        { source: source as HTMLCanvasElement | ImageBitmap | HTMLImageElement },
-        { texture },
-        [width, height],
-      );
+      try {
+        if (this.readAtlasPixels) {
+          const pixels = this.readAtlasPixels(source as HTMLCanvasElement);
+          if (pixels.byteLength !== width * height * 4) throw new RangeError('GUI font atlas requires tightly packed RGBA8 pixels.');
+          device.queue.writeTexture({ texture }, new Uint8Array(pixels).buffer, { bytesPerRow: width * 4 }, [width, height]);
+        } else {
+          device.queue.copyExternalImageToTexture(
+            { source: source as HTMLCanvasElement | ImageBitmap | HTMLImageElement }, { texture }, [width, height],
+          );
+        }
+      } catch (error) {
+        texture.destroy();
+        throw error;
+      }
     }
 
     fontData = {

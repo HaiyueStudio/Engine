@@ -6,6 +6,8 @@ const PRINTABLE_ASCII =
   'abcdefghijklmnopqrstuvwxyz{|}~';
 
 export interface BuildFontOptions {
+  /** Optional synchronous Canvas 2D factory for hosts without a document. */
+  canvasFactory?: (width: number, height: number) => HTMLCanvasElement;
   /** Characters to include (default: printable ASCII 32-126) */
   chars?: string;
   /** Font size in CSS pixels (default: 32) */
@@ -44,7 +46,8 @@ export function buildBitmapFont(options: BuildFontOptions = {}): BuiltFont {
   const fontStr = `${fontWeight} ${fontSize}px ${fontFamily}`;
 
   // ── Measure phase ──────────────────────────────────────────────────────────
-  const probe = document.createElement('canvas');
+  const createCanvas = options.canvasFactory ?? (() => document.createElement('canvas'));
+  const probe = createCanvas(1, 1);
   probe.width = 1;
   probe.height = 1;
   const pctx = probe.getContext('2d')!;
@@ -77,7 +80,7 @@ export function buildBitmapFont(options: BuildFontOptions = {}): BuiltFont {
   const base = maxAscent + padding;
 
   // ── Pack into atlas ────────────────────────────────────────────────────────
-  const atlas = document.createElement('canvas');
+  const atlas = createCanvas(atlasSize, atlasSize);
   atlas.width  = atlasSize;
   atlas.height = atlasSize;
   const ctx = atlas.getContext('2d')!;

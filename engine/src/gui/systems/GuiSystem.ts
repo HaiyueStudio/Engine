@@ -40,6 +40,11 @@ interface CachedCanvasRect {
 }
 
 export interface GuiFontOptions {
+  /** Synchronous Canvas 2D factory for non-DOM hosts. */
+  readonly canvasFactory?: (width: number, height: number) => HTMLCanvasElement;
+  /** Optional tightly packed RGBA8 atlas readback; Engine owns the uploaded GPU texture. */
+  readonly readAtlasPixels?: (canvas: HTMLCanvasElement) => Uint8Array;
+
   readonly chars?: string;
   readonly fontSize?: number;
   readonly fontFamily?: string;

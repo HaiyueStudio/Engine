@@ -28,6 +28,11 @@ import { GuiImageRenderer } from './GuiImageRenderer';
 import type { PipelineWarmupPlan } from '../../renderer/PipelineWarmup';
 
 interface GuiRendererFontOptions {
+  /** Synchronous Canvas 2D factory for non-DOM hosts. */
+  readonly canvasFactory?: (width: number, height: number) => HTMLCanvasElement;
+  /** Optional tightly packed RGBA8 atlas readback; Engine owns the uploaded GPU texture. */
+  readonly readAtlasPixels?: (canvas: HTMLCanvasElement) => Uint8Array;
+
   readonly chars?: string;
   readonly fontSize?: number;
   readonly fontFamily?: string;
@@ -59,7 +64,7 @@ export class GuiRenderer {
   readonly popupImageBatch = new GuiImageBatch();
 
   private shapeRenderer = new GuiShapeRenderer();
-  private textRenderer = new GuiTextRenderer();
+  private textRenderer: GuiTextRenderer;
   private imageRenderer = new GuiImageRenderer();
   private prepared = false;
   private preparedDevice: GPUDevice | null = null;
@@ -80,6 +85,7 @@ export class GuiRenderer {
 
   constructor(fontOptions: GuiRendererFontOptions = {}) {
     this.fontOptions = Object.freeze({ ...fontOptions });
+    this.textRenderer = new GuiTextRenderer(fontOptions.readAtlasPixels);
     this.registerElementRenderer(GuiButton, (element, theme) => this.addButton(element, theme));
     this.registerElementRenderer(GuiLabel, (element, theme) => this.addLabel(element, theme));
     this.registerElementRenderer(GuiModal, (element, theme) => this.addModal(element, theme));
@@ -107,6 +113,7 @@ export class GuiRenderer {
       this.textRenderer.prepare(engine);
       this.imageRenderer.prepare(engine);
       this.defaultFont = buildBitmapFont({
+      ...(this.fontOptions.canvasFactory ? { canvasFactory: this.fontOptions.canvasFactory } : {}),
       chars: this.fontOptions.chars ?? ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~年月日今天周一二三四五六重置旋转翻',
       fontSize: this.fontOptions.fontSize ?? 32,
       fontFamily: this.fontOptions.fontFamily ?? 'sans-serif',

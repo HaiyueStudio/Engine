@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "model": "reviewed-capability-plus-growth-reserve",
   "principles": [
+    "ADR 0100 adds optional native GUI/font raster callbacks with zero exported-symbol growth; existing root and domain budgets are unchanged.",
     "The Engine root is an exact golden path, not a capacity pool.",
     "New capabilities use focused entrypoints and are classified stable or experimental before baseline promotion.",
     "Reviewed symbol counts describe admitted capability scope; reserve absorbs implementation-shaped API growth but never bypasses API baseline review.",
