@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { Geometry3D, Ray } from '../dist/experimental.js';
+import { Camera3D, Geometry3D, Ray } from '../dist/experimental.js';
+import { mat4, vec3 } from 'wgpu-matrix';
 
 const IDENTITY = new Float32Array([
   1, 0, 0, 0,
@@ -31,12 +32,60 @@ test('Ray camera and matrix boundaries reject incomplete or zero-length inputs',
   const ray = new Ray();
   assert.throws(() => ray.setFromCamera(0, 0, new Float32Array(2), IDENTITY), /at least 3 elements/);
   assert.throws(() => ray.setFromCamera(0, 0, new Float32Array(3), new Float32Array(15)), /at least 16 elements/);
-  assert.throws(() => ray.setFromCamera(0, 0, new Float32Array([0, 0, 0.5]), IDENTITY), /non-zero direction/);
+  assert.throws(() => ray.setFromCamera(0, 0, new Float32Array(3), new Float32Array(16)), /non-zero direction/);
   assert.throws(() => ray.intersectMesh(createTriangle(), new Float32Array(15)), /at least 16 elements/);
 
   ray.setFromCamera(0, 0, new Float32Array([0, 0, 0]), IDENTITY);
   assert.deepEqual(Array.from(ray.origin), [0, 0, 0]);
-  assert.deepEqual(Array.from(ray.direction), [0, 0, 1]);
+  assert.deepEqual(Array.from(ray.direction), [0, 0, -1]);
+});
+
+test('projected world points round-trip through camera rays across projections, resize, movement and reverseZ', () => {
+  const targets = [[0, 0, 0], [-4, -3, 0], [4, -3, 0], [-4, 3, 0], [4, 3, 0]];
+  for (const type of ['orthographic', 'perspective']) {
+    for (const reverseZ of [false, true]) {
+      for (const aspect of [1, 16 / 9, 9 / 16]) {
+        for (const eye of [[0, 0, 22], [5, 4, 30]]) {
+          const camera = new Camera3D({ type, near: 0.01, far: 100, aspect });
+          camera.reverseZ = reverseZ;
+          camera.orthoLeft = -8.75 * aspect; camera.orthoRight = 8.75 * aspect;
+          camera.orthoBottom = -8.75; camera.orthoTop = 8.75;
+          const view = mat4.lookAt(eye, [0, 0, 0], [0, 1, 0]);
+          const viewProjection = mat4.multiply(camera.projectionMatrix, view);
+          const inverse = mat4.inverse(viewProjection);
+          let previousDirection;
+          for (const point of targets) {
+            const ndc = vec3.transformMat4(point, viewProjection);
+            const ray = new Ray().setFromCamera(ndc[0], ndc[1], new Float32Array(eye), inverse);
+            const t = -ray.origin[2] / ray.direction[2];
+            const hit = Array.from(ray.origin, (v, i) => v + t * ray.direction[i]);
+            const label = JSON.stringify({ type, reverseZ, aspect, eye, point, hit });
+            assert.ok(t > 0, label);
+            assert.ok(Math.hypot(...hit.map((v, i) => v - point[i])) < 0.002, label);
+            if (type === 'orthographic' && previousDirection) {
+              assert.deepEqual(ray.direction, previousDirection, 'orthographic rays must be parallel');
+            }
+            if (type === 'perspective') assert.deepEqual(Array.from(ray.origin), eye);
+            previousDirection = ray.direction;
+          }
+        }
+      }
+    }
+  }
+});
+
+test('orthographic rays keep forward orientation when the depth interval straddles the camera', () => {
+  for (const reverseZ of [false, true]) {
+    const camera = new Camera3D({ type: 'orthographic', near: -1000, far: 1000 });
+    camera.reverseZ = reverseZ;
+    camera.orthoLeft = -10; camera.orthoRight = 10;
+    camera.orthoBottom = -10; camera.orthoTop = 10;
+    const ray = new Ray().setFromCamera(0.4, -0.3, new Float32Array(3), mat4.inverse(camera.projectionMatrix));
+    assert.ok(Math.abs(ray.origin[0] - 4) < 1e-6);
+    assert.ok(Math.abs(ray.origin[1] + 3) < 1e-6);
+    assert.ok(Math.hypot(ray.direction[0], ray.direction[1], ray.direction[2] + 1) < 1e-6);
+    assert.equal(ray.origin[2], 0);
+  }
 });
 
 test('Ray BVH and linear triangle paths return the same closest hit and ignore incomplete index tails', () => {

@@ -289,7 +289,8 @@ export class Ray {
 
   /**
    * Initialise from a canvas pointer position.
-   * Works correctly regardless of whether reverseZ is active.
+   * Supports perspective and orthographic projections, including reverseZ.
+   * Orthographic rays start on the camera plane and remain parallel.
    *
    * @param ndcX  [-1, 1] horizontal NDC
    * @param ndcY  [-1, 1] vertical NDC  (1 = top)
@@ -319,11 +320,26 @@ export class Ray {
     rayOrigin[0] = cameraPosition[0];
     rayOrigin[1] = cameraPosition[1];
     rayOrigin[2] = cameraPosition[2];
-    const dx = wp[0] - cameraPosition[0];
-    const dy = wp[1] - cameraPosition[1];
-    const dz = wp[2] - cameraPosition[2];
+    let dx = wp[0] - cameraPosition[0];
+    let dy = wp[1] - cameraPosition[1];
+    let dz = wp[2] - cameraPosition[2];
+    // An orthographic inverse has a constant homogeneous w. Its screen-right
+    // and screen-up columns determine forward (-Z), independently of the depth
+    // mapping. In particular, reverseZ and a negative near plane must not flip
+    // the ray. Perspective rays retain the camera position as their origin.
+    if (inverseViewProjection[3] === 0 && inverseViewProjection[7] === 0 && inverseViewProjection[11] === 0) {
+      const m = inverseViewProjection;
+      dx = m[2] * m[5] - m[1] * m[6];
+      dy = m[0] * m[6] - m[2] * m[4];
+      dz = m[1] * m[4] - m[0] * m[5];
+      const squaredLength = dx * dx + dy * dy + dz * dz;
+      const depth = ((wp[0] - cameraPosition[0]) * dx + (wp[1] - cameraPosition[1]) * dy + (wp[2] - cameraPosition[2]) * dz) / squaredLength;
+      rayOrigin[0] = wp[0] - dx * depth;
+      rayOrigin[1] = wp[1] - dy * depth;
+      rayOrigin[2] = wp[2] - dz * depth;
+    }
     const len = normLen(dx, dy, dz);
-    if (!Number.isFinite(len) || len < EPSILON) {
+    if (!Number.isFinite(len) || len < EPSILON || !rayOrigin.every(Number.isFinite)) {
       throw new RangeError('Ray.setFromCamera could not derive a finite non-zero direction.');
     }
     rayDirection[0] = dx / len;
