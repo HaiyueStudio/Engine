@@ -30,3 +30,9 @@
 5. 新增 stable 功能必须同时提供 API 声明、最小 example、对应 Guide 页面和自动化证据。
 
 详细的归档与更新规则见 [文档维护约定](./for-ai/documentation-conventions.md)。
+
+## 本地参考文档发布
+
+运行 `npm run docs:export -- artifacts/reference-docs.json` 导出 API 说明与 Engine Guide 的只读文档伴随产物。导出保留文件路径、内容摘要、来源修订和文档脏状态；不包含内部 `for-ai` 页面。使用方应审核并锁定这个产物的摘要，并根据实际安装版本的公开声明生成签名，不能用教程替代类型契约。
+
+运行 `npm run docs:export:test` 验证导出器；文档仍维护在原来的 API/Guide 页面，不为某个 AI 客户端复制一套指南。
