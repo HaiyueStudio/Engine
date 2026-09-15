@@ -36,7 +36,9 @@ export class GuiImageRenderer extends BaseRenderer {
   private readonly viewportData = new Float32Array(4);
   private imageCache = new WeakMap<object, ImageGpuData>();
   private readonly liveImageData = new Set<ImageGpuData>();
-  private groupBuffers = new WeakMap<GuiImageGroup, GroupGpuBuffer>();
+  // Batches outlive their rebuilt group objects. Owning buffers by a transient
+  // group leaked one allocation per texture on every HUD rebuild.
+  private batchBuffers = new WeakMap<GuiImageBatch, Map<NonNullable<GuiImageSource>, GroupGpuBuffer>>();
   private readonly liveGroupBuffers = new Set<GroupGpuBuffer>();
   private defaultTexture!: GPUTexture;
   private sampler: GPUSampler | null = null;
@@ -90,7 +92,22 @@ export class GuiImageRenderer extends BaseRenderer {
   }
 
   render(passEncoder: GPURenderPassEncoder, batch: GuiImageBatch): void {
-    if (!this.initialized || batch.groups.length < 1) return;
+    if (!this.initialized) return;
+    let buffers = this.batchBuffers.get(batch);
+    if (buffers) {
+      const sources = new Set(batch.groups.map((group) => group.source));
+      for (const [source, buffer] of buffers) {
+        if (sources.has(source)) continue;
+        buffer.vertexBuffer.destroy();
+        this.liveGroupBuffers.delete(buffer);
+        buffers.delete(source);
+      }
+    }
+    if (batch.groups.length < 1) return;
+    if (!buffers) {
+      buffers = new Map();
+      this.batchBuffers.set(batch, buffers);
+    }
     const pipeline = this.getPipeline();
     const viewport = this.viewportData;
     viewport[0] = this.engine.displayWidth;
@@ -100,7 +117,7 @@ export class GuiImageRenderer extends BaseRenderer {
     passEncoder.setPipeline(pipeline);
     passEncoder.setBindGroup(0, this.viewportBindGroup);
     for (const group of batch.groups) {
-      const vertexBuffer = this.uploadGroup(group);
+      const vertexBuffer = this.uploadGroup(group, buffers);
       if (!vertexBuffer) continue;
       const imageData = this.getImageGpuData(group.source);
       passEncoder.setBindGroup(1, imageData.bindGroup);
@@ -115,13 +132,13 @@ export class GuiImageRenderer extends BaseRenderer {
   }
 
   releaseBatch(batch: GuiImageBatch): void {
-    for (const group of batch.groups) {
-      const gpuBuffer = this.groupBuffers.get(group);
-      if (!gpuBuffer) continue;
+    const buffers = this.batchBuffers.get(batch);
+    if (!buffers) return;
+    for (const gpuBuffer of buffers.values()) {
       gpuBuffer.vertexBuffer.destroy();
       this.liveGroupBuffers.delete(gpuBuffer);
-      this.groupBuffers.delete(group);
     }
+    this.batchBuffers.delete(batch);
   }
 
   destroy(): void {
@@ -134,17 +151,17 @@ export class GuiImageRenderer extends BaseRenderer {
       if (data.ownsTexture) data.texture.destroy();
     }
     this.liveImageData.clear();
-    this.groupBuffers = new WeakMap();
+    this.batchBuffers = new WeakMap();
     this.imageCache = new WeakMap();
     this.sampler = null;
     this.clearPipelineCache();
     this.initialized = false;
   }
 
-  private uploadGroup(group: GuiImageGroup): GPUBuffer | null {
+  private uploadGroup(group: GuiImageGroup, buffers: Map<NonNullable<GuiImageSource>, GroupGpuBuffer>): GPUBuffer | null {
     const usedByteLength = group.vertexCount * GUI_IMAGE_FLOATS_PER_VERTEX * 4;
     const byteLength = Math.max(4, usedByteLength);
-    let gpuBuffer = this.groupBuffers.get(group);
+    let gpuBuffer = buffers.get(group.source);
     if (!gpuBuffer || gpuBuffer.vertexBufferSize < byteLength) {
       if (gpuBuffer) {
         gpuBuffer.vertexBuffer.destroy();
@@ -155,11 +172,12 @@ export class GuiImageRenderer extends BaseRenderer {
         vertexBufferSize,
         uploadedVersion: -1,
         vertexBuffer: this.engine.device.createBuffer({
+          label: 'gui-image:vertices',
           size: vertexBufferSize,
           usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         }),
       };
-      this.groupBuffers.set(group, gpuBuffer);
+      buffers.set(group.source, gpuBuffer);
       this.liveGroupBuffers.add(gpuBuffer);
     }
     if (gpuBuffer.uploadedVersion !== group.version) {

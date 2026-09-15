@@ -26,6 +26,7 @@ export class GuiImageBatch {
   readonly commands: GuiImageCommand[] = [];
   readonly groups: GuiImageGroup[] = [];
   private version = 0;
+  private readonly cachedGroups = new Map<NonNullable<GuiImageSource>, { group: GuiImageGroup; scratch: Float32Array }>();
   dirty = true;
 
   clear(): void {
@@ -53,12 +54,33 @@ export class GuiImageBatch {
     }
     this.groups.length = 0;
     this.version++;
+    for (const source of this.cachedGroups.keys()) {
+      if (!grouped.has(source)) this.cachedGroups.delete(source);
+    }
     for (const [source, commands] of grouped) {
       const vertexCount = commands.length * VERTICES_PER_IMAGE;
-      const vertexData = new Float32Array(vertexCount * GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex);
+      const floatCount = vertexCount * GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex;
+      let cached = this.cachedGroups.get(source);
+      if (!cached || cached.scratch.length < floatCount) {
+        cached = {
+          group: { source, vertexData: new Float32Array(floatCount), vertexCount: 0, version: -1 },
+          scratch: new Float32Array(floatCount),
+        };
+        this.cachedGroups.set(source, cached);
+      }
+      const vertexData = cached.scratch;
       let offset = 0;
       for (const command of commands) offset = appendImage(vertexData, offset, command);
-      this.groups.push({ source, vertexData, vertexCount, version: this.version });
+      const group = cached.group;
+      let changed = group.vertexCount !== vertexCount;
+      for (let i = 0; !changed && i < floatCount; i++) changed = group.vertexData[i] !== vertexData[i];
+      if (changed) {
+        cached.scratch = group.vertexData;
+        group.vertexData = vertexData;
+        group.vertexCount = vertexCount;
+        group.version = this.version;
+      }
+      this.groups.push(group);
     }
     this.dirty = false;
   }

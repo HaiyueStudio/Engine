@@ -33,6 +33,7 @@ export class GuiImage extends GuiElement {
   }
 
   setUv(uv: [number, number, number, number]): void {
+    if (uv.every((value, index) => value === this.uv[index])) return;
     this.uv = [...uv];
     this.markDirty(GuiDirtyFlags.Visual);
   }

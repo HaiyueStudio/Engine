@@ -5,6 +5,7 @@ import { requireEngineDevice } from './IEngine';
 import { EngineError, EngineErrorCode } from './EngineError';
 import type { FrameData } from '../frame/FrameData';
 import type { FrameDiagnostics } from './FrameDiagnostics';
+import { cacheRenderPassState } from './RenderPassStateCache';
 import {
   RenderView,
   RenderViewFamily,
@@ -73,7 +74,7 @@ export class RenderFrameContext implements RenderCommandContext {
     const encoder = this.device.createCommandEncoder(options.label ? { label: options.label } : undefined);
     this._gpuPassTiming = gpuPassTimingByOptions.get(options) ?? null;
     if (this._gpuPassTiming) gpuPassTimingByContext.set(this, this._gpuPassTiming);
-    this.encoder = this._gpuPassTiming ? createGpuPassTimingCommandEncoder(encoder, this._gpuPassTiming) : encoder;
+    this.encoder = createFrameCommandEncoder(encoder, this._gpuPassTiming);
     this.viewFamily = options.viewFamily instanceof RenderViewFamily ? options.viewFamily.snapshot() : options.viewFamily;
     this.view = options.view instanceof RenderView ? options.view.snapshot() : options.view;
     if (!this.view) this.view = this.viewFamily?.views[0];
@@ -136,7 +137,7 @@ export class RenderFrameContext implements RenderCommandContext {
         },
       );
     }
-    this.passEncoder = this.encoder.beginRenderPass(this.descriptor);
+    this.passEncoder = cacheRenderPassState(this.encoder.beginRenderPass(this.descriptor));
     this._passActive = true;
     return this.passEncoder;
   }
@@ -235,20 +236,20 @@ export function createRenderGpuPassProfiler(
   return new GpuPassProfiler(device, diagnostics);
 }
 
-function createGpuPassTimingCommandEncoder(
+function createFrameCommandEncoder(
   encoder: GPUCommandEncoder,
-  timing: GpuPassTimingRecorder,
+  timing: GpuPassTimingRecorder | null,
 ): GPUCommandEncoder {
   return new Proxy(encoder, {
     get(target, property) {
       if (property === 'beginRenderPass') {
         return (descriptor: GPURenderPassDescriptor): GPURenderPassEncoder => (
-          target.beginRenderPass(timing.decorateRenderPass(descriptor))
+          cacheRenderPassState(target.beginRenderPass(timing ? timing.decorateRenderPass(descriptor) : descriptor))
         );
       }
       if (property === 'beginComputePass') {
         return (descriptor?: GPUComputePassDescriptor): GPUComputePassEncoder => (
-          target.beginComputePass(timing.decorateComputePass(descriptor))
+          target.beginComputePass(timing ? timing.decorateComputePass(descriptor) : descriptor)
         );
       }
       const value = Reflect.get(target, property, target) as unknown;
@@ -276,5 +277,5 @@ export function beginRenderCommandPass(context: RenderCommandContext): { passEnc
       },
     );
   }
-  return { passEncoder: context.encoder.beginRenderPass(context.descriptor), ownsPass: true };
+  return { passEncoder: cacheRenderPassState(context.encoder.beginRenderPass(context.descriptor)), ownsPass: true };
 }

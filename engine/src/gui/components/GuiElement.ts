@@ -125,6 +125,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   }
 
   setStyle(style: GuiStyle): void {
+    if ((Object.keys(style) as (keyof GuiStyle)[]).every((key) => Object.is(this.style[key], style[key]))) return;
     this.style = { ...this.style, ...style };
     this.markDirty(GuiDirtyFlags.Visual);
   }
