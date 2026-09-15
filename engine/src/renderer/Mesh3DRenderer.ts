@@ -1249,6 +1249,20 @@ export class Mesh3DRenderer extends BaseRenderer {
         return;
       }
       const shared = this.sharedGeoCache.ensure(geo, this);
+      // Slots 3–6 remain vertex-rate inputs even without morph targets. Dynamic
+      // helpers can grow after upload, so their zero streams must grow as well.
+      const requiredMorphBytes = Math.max(4, geo.vertexCount * 3 * Float32Array.BYTES_PER_ELEMENT);
+      if (data.morphPositionBufs.some(buffer => buffer.size < requiredMorphBytes)) {
+        const previous = data.morphPositionBufs;
+        const zeroMorphData = sharedZeroVectorCache.vec3(geo.vertexCount);
+        data.morphPositionBufs = previous.map((_, slot) => {
+          const buffer = this._makeVertexBuffer(zeroMorphData);
+          buffer.label = `Mesh3DRenderer.zeroMorph${slot}`;
+          return buffer;
+        });
+        const retire = () => { for (const buffer of previous) buffer.destroy(); };
+        void this.engine.device.queue.onSubmittedWorkDone().then(retire, retire);
+      }
       data.positionBuf = shared.positionBuf;
       data.normalBuf = shared.normalBuf;
       data.uvBuf = shared.uvBuf;

@@ -185,3 +185,39 @@ test('Ray BVH sorting matches linear traversal for more than one leaf', () => {
   assert.ok(Math.abs(bvh.distance - linear.distance) < 1e-6);
   assert.deepEqual(Array.from(bvh.point), Array.from(linear.point));
 });
+
+test('Ray per-call counters measure pruning and reset on misses for indexed and unindexed meshes', () => {
+  for (const indexed of [false, true]) {
+    const positions = [];
+    for (let x = -32; x <= 32; x++) {
+      positions.push(x - 0.4, -0.4, 0, x + 0.4, -0.4, 0, x, 0.4, 0);
+    }
+    const geometry = new Geometry3D({
+      positions: new Float32Array(positions),
+      ...(indexed ? { indices: new Uint32Array(Array.from({ length: positions.length / 3 }, (_, i) => i)) } : {}),
+    });
+    const ray = createRay();
+    const linearStats = { triangleTests: -1, boundingBoxTests: -1 };
+    const bvhStats = { triangleTests: -1, boundingBoxTests: -1 };
+    const result = () => ({ distance: 0, point: new Float32Array(3), normal: new Float32Array(3) });
+    const linear = ray.intersectMesh(geometry, IDENTITY, { useBVH: false, stats: linearStats }, result());
+    const bvh = ray.intersectMesh(geometry, IDENTITY, { useBVH: true, stats: bvhStats }, result());
+    assert.deepEqual(bvh, linear, 'instrumented paths preserve hit and face normal');
+    assert.equal(linearStats.triangleTests, 65);
+    assert.equal(linearStats.boundingBoxTests, 1);
+    assert.ok(bvhStats.triangleTests > 0 && bvhStats.triangleTests < 65 / 2);
+    assert.ok(bvhStats.boundingBoxTests > 1);
+    for (const useBVH of [false, true]) {
+      ray.origin.set([100, 100, 1]);
+      assert.equal(ray.intersectMesh(geometry, IDENTITY, { useBVH, stats: bvhStats }), null);
+      assert.deepEqual(bvhStats, { triangleTests: 0, boundingBoxTests: 1 });
+      ray.origin.set([0.45, 0, 1]);
+      assert.equal(ray.intersectMesh(geometry, IDENTITY, { useBVH, stats: bvhStats }), null);
+      assert.ok(bvhStats.triangleTests > 0, 'misses inside the mesh bounds still count triangle work');
+      ray.direction.fill(0);
+      assert.equal(ray.intersectMesh(geometry, IDENTITY, { useBVH, stats: bvhStats }), null);
+      assert.deepEqual(bvhStats, { triangleTests: 0, boundingBoxTests: 0 });
+      ray.direction.set([0, 0, -1]);
+    }
+  }
+});

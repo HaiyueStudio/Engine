@@ -405,6 +405,8 @@ export { BoxSelectionControl } from './controls/BoxSelectionControl';
 export type { BoxSelectionControlOptions, BoxSelectionMode, BoxSelectionRect, BoxSelectionResult } from './controls/BoxSelectionControl';
 
 // Math
+export { createRaycastBVHInspector } from './math/RaycastBVHInspector';
+export type { RaycastBVHInspector, RaycastBVHSnapshot, RaycastBVHTrace } from './math/RaycastBVHInspector';
 export { Ray } from './math/Ray';
 export type { RayHit, RayIntersectMeshOptions } from './math/Ray';
 

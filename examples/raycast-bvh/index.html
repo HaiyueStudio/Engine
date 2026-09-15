@@ -1,65 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>海月 - Raycast BVH</title>
+  <title>海月 · Raycast BVH</title>
   <style>
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      height: 100vh;
-      overflow: hidden;
-      color: #d8e2f2;
-      background: #10141c;
-      font: 12px system-ui, sans-serif;
+    body { margin: 0; height: 100dvh; display: flex; color: #dce8f5; background: #09111b; font: 13px/1.6 system-ui, sans-serif; }
+    #viewport { flex: 1; position: relative; min-width: 0; }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+    #hint { position: absolute; left: 24px; bottom: 24px; pointer-events: none; color: #9db1c9; }
+    #normal-label { display: block; color: #dce8f5; margin-bottom: 4px; }
+    #panel { width: 380px; flex-shrink: 0; padding: 28px 24px; overflow-y: auto; background: #111d2b; border-left: 1px solid #233549; }
+    .eyebrow { color: #78b8e9; font-size: 10px; letter-spacing: 2px; }
+    h1 { margin: 6px 0 10px; font-size: 26px; letter-spacing: -0.6px; }
+    h2 { font-size: 14px; margin: 24px 0 12px; }
+    p { margin: 8px 0; color: #9db1c9; }
+    select, button { width: 100%; border: 1px solid #37536c; border-radius: 6px; color: #e5f2ff; background: #1b3045; padding: 9px; font: inherit; }
+    select { margin-top: 6px; } button { cursor: pointer; } button:disabled { opacity: 0.5; cursor: wait; }
+    #click-status { margin: 16px 0 10px; color: #e5f2ff; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 9px 4px; text-align: right; border-bottom: 1px solid #25364a; font-variant-numeric: tabular-nums; }
+    th:first-child, td:first-child { text-align: left; color: #9db1c9; }
+    .on { color: #40ffb8; } .off { color: #ff9c40; }
+    .bar-row { display: grid; grid-template-columns: 56px 1fr; gap: 10px; align-items: center; margin: 9px 0; font-size: 11px; }
+    .track { height: 6px; background: #223348; border-radius: 3px; overflow: hidden; }
+    .bar { height: 100%; width: 0; } #on-bar { background: #40ffb8; } #off-bar { background: #ff9c40; }
+    #reduction { color: #40ffb8; font-weight: 600; margin-top: 14px; }
+    .note { font-size: 11px; color: #8198b1; }
+    .row { display: flex; justify-content: space-between; gap: 12px; margin: 6px 0; font-size: 12px; }
+    .value { font-variant-numeric: tabular-nums; text-align: right; }
+    details { margin-top: 24px; border-top: 1px solid #293a4e; padding-top: 14px; }
+    summary { cursor: pointer; margin-bottom: 12px; }
+    @media (max-width: 700px) {
+      body { flex-direction: column; overflow: auto; height: auto; }
+      #viewport { flex: none; height: 52dvh; min-height: 280px; }
+      #panel { width: 100%; padding: 20px; overflow: visible; }
+      #hint { left: 16px; bottom: 12px; font-size: 11px; }
     }
-    canvas {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-      background: #05070b;
-    }
-    #panel {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      width: 360px;
-      display: grid;
-      gap: 8px;
-      padding: 10px;
-      border: 1px solid #303746;
-      border-radius: 4px;
-      background: rgba(16, 20, 28, 0.88);
-    }
-    button {
-      height: 28px;
-      border: 1px solid #3d6fa8;
-      border-radius: 4px;
-      color: #eef3ff;
-      background: #255a91;
-      cursor: pointer;
-    }
-    .row {
-      display: grid;
-      grid-template-columns: 128px minmax(0, 1fr);
-      gap: 8px;
-    }
-    .label { color: #8fa7c8; }
-    .value { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
   </style>
-  <link rel="stylesheet" href="../example-fullscreen.css" />
 </head>
 <body>
-  <canvas id="canvas"></canvas>
-  <div id="panel">
-    <button id="run">Run benchmark</button>
-    <div class="row"><div class="label">Triangles</div><div id="triangles" class="value">-</div></div>
-    <div class="row"><div class="label">Rays</div><div id="rays" class="value">-</div></div>
-    <div class="row"><div class="label">BVH on</div><div id="bvh-on" class="value">-</div></div>
-    <div class="row"><div class="label">BVH off</div><div id="bvh-off" class="value">-</div></div>
-    <div class="row"><div class="label">Speedup</div><div id="speedup" class="value">-</div></div>
-  </div>
+  <main id="viewport">
+    <canvas id="canvas" aria-label="点击球体测量射线检测，拖拽旋转视角"></canvas>
+    <div id="hint"><span id="normal-label">三角形面法线</span>点击球体 · 拖拽旋转 · 滚轮缩放<br>白色十字位于面的切平面，彩色线垂直于该面</div>
+  </main>
+  <aside id="panel">
+    <div class="eyebrow">HAIYUE ENGINE / INTERACTION</div>
+    <h1>Raycast BVH</h1>
+    <p>点击一个位置，看同一条射线需要检查多少个三角形。</p>
+    <div class="row"><span>物体三角形总数</span><span id="triangles" class="value">—</span></div>
+    <h2>点击效果</h2>
+    <label for="mode">法线显示模式</label>
+    <select id="mode"><option value="on">BVH 开启 · 绿色法线</option><option value="off">BVH 关闭 · 橙色法线</option></select>
+    <p class="note">每次点击都会实测两种模式。切换显示可核对法线位置；拖拽可从侧面观察。</p>
+    <section aria-live="polite">
+      <div id="click-status">正在初始化…</div>
+      <table aria-label="单次点击计算量对比">
+        <thead><tr><th>本次计算量</th><th class="on">BVH 开启</th><th class="off">BVH 关闭</th></tr></thead>
+        <tbody>
+          <tr><td>CPU 耗时</td><td id="on-time">—</td><td id="off-time">—</td></tr>
+          <tr><td>三角形检测</td><td id="on-triangles">—</td><td id="off-triangles">—</td></tr>
+          <tr><td>包围盒检测</td><td id="on-boxes">—</td><td id="off-boxes">—</td></tr>
+        </tbody>
+      </table>
+      <div class="bar-row"><span class="on">BVH 开启</span><div class="track"><div id="on-bar" class="bar"></div></div></div>
+      <div class="bar-row"><span class="off">BVH 关闭</span><div class="track"><div id="off-bar" class="bar"></div></div></div>
+      <p id="reduction">等待测量</p>
+      <p id="agreement" class="note">—</p>
+      <div class="row"><span>命中坐标</span><span id="hit-point" class="value">—</span></div>
+      <div class="row"><span>面法线</span><span id="hit-normal" class="value">—</span></div>
+    </section>
+    <p class="note">检测次数为实际执行次数。耗时仅包含 CPU 射线求交（含计数），不含绘制、UI 和缓存预热；单次时间受浏览器计时精度及调度影响。</p>
+    <div class="row note"><span>首次 BVH 构建 + 预热</span><span id="build-time">—</span></div>
+    <details>
+      <summary>批量性能测试 · 6,000 条射线</summary>
+      <button id="run" disabled>运行 6,000 条射线测试</button>
+      <div class="row"><span class="on">BVH 开启</span><span id="bvh-on" class="value">—</span></div>
+      <div class="row"><span class="off">BVH 关闭</span><span id="bvh-off" class="value">—</span></div>
+      <div class="row"><span>耗时加速比</span><span id="speedup" class="value">—</span></div>
+      <p class="note">分帧运行，累计求交耗时，不含帧间等待。不会覆盖上方单次点击结果。</p>
+    </details>
+  </aside>
   <script src="../shared/engine.js"></script>
   <script type="module" src="./bundle.js"></script>
 </body>

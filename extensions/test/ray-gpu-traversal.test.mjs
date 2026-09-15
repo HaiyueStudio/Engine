@@ -68,9 +68,11 @@ test('RT math uses wgpu-matrix while AABB/f32 serialization stays RT-specific, a
   assert.match(math, /outwardF32Bounds/);
 
   const picking = read('engine/src/math/Ray.ts');
+  const pickingBVH = read('engine/src/math/RaycastBVH.ts');
   const spatial = read('engine/src/spatial/SpatialIndex.ts');
   const rt = read('extensions/src/ray-tracing/acceleration/runtime.ts');
-  assert.match(picking, /WeakMap<Geometry3D, GeometryBVH>/);
+  assert.match(picking, /getGeometryBVH.*from '\.\/RaycastBVH'/);
+  assert.match(pickingBVH, /WeakMap<Geometry3D, GeometryBVH>/);
   assert.match(spatial, /beginIncrementalUpdate/);
   assert.match(rt, /membership-rebuild|transform-refit/);
   assert.match(read('../milestones/milestones/m04-webgpu-ray-tracing/contracts.md'), /保持不同 owner、更新策略和 public surface/);

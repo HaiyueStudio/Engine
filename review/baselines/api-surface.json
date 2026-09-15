@@ -4003,6 +4003,10 @@
               "kind": "value"
             },
             {
+              "name": "createRaycastBVHInspector",
+              "kind": "value"
+            },
+            {
               "name": "createRect2D",
               "kind": "value"
             },
@@ -5667,6 +5671,18 @@
               "kind": "value"
             },
             {
+              "name": "RaycastBVHInspector",
+              "kind": "type"
+            },
+            {
+              "name": "RaycastBVHSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "RaycastBVHTrace",
+              "kind": "type"
+            },
+            {
               "name": "RayHit",
               "kind": "type"
             },
@@ -6906,6 +6922,10 @@
               "kind": "value"
             },
             {
+              "name": "createRaycastBVHInspector",
+              "kind": "value"
+            },
+            {
               "name": "EngineDiagnosticsState",
               "kind": "type"
             },
@@ -6987,6 +7007,18 @@
             },
             {
               "name": "GPUTrackedResourceType",
+              "kind": "type"
+            },
+            {
+              "name": "RaycastBVHInspector",
+              "kind": "type"
+            },
+            {
+              "name": "RaycastBVHSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "RaycastBVHTrace",
               "kind": "type"
             },
             {

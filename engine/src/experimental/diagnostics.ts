@@ -1,4 +1,6 @@
 export { FrameDiagnostics } from '../core/FrameDiagnostics';
+export { createRaycastBVHInspector } from '../math/RaycastBVHInspector';
+export type { RaycastBVHInspector, RaycastBVHSnapshot, RaycastBVHTrace } from '../math/RaycastBVHInspector';
 export type {
   FrameDiagnosticsOptions,
   FrameMetricCounter,

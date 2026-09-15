@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>海月 · BVH 遍历可视化</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; height: 100dvh; overflow: hidden; color: #dceaf5; background: #09121d; font: 12px/1.6 system-ui, sans-serif; }
+    header { height: 76px; display: flex; align-items: center; justify-content: space-between; padding: 0 26px; border-bottom: 1px solid #24384a; }
+    .eyebrow { color: #7ea7c3; font-size: 9px; letter-spacing: 2px; } h1 { font-size: 21px; margin: 2px 0 0; } h2 { font-size: 12px; margin: 0 0 10px; }
+    header p { color: #9db3c6; max-width: 440px; margin-left: 24px; }
+    #workspace { display: grid; grid-template-columns: 348px minmax(0, 1fr); height: calc(100dvh - 76px); }
+    aside { overflow-y: auto; background: #111e2c; border-right: 1px solid #24384a; padding: 20px; }
+    .source-stage { width: 100%; aspect-ratio: 1; position: relative; border: 1px solid #3d627b; border-radius: 8px; overflow: hidden; }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+    #source { cursor: crosshair; } #observer { cursor: grab; }
+    #aim { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; border: 1px solid #30d9ff; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+    .note { color: #839bb0; font-size: 11px; margin: 8px 0; }
+    .buttons { display: flex; gap: 8px; margin: 12px 0; } button { flex: 1; font: inherit; color: #e0edf8; background: #21384d; border: 1px solid #3b5b76; border-radius: 5px; padding: 8px; cursor: pointer; }
+    button:hover { background: #2d4b65; } button:disabled { opacity: .45; cursor: wait; } button[aria-pressed="true"] { border-color: #ffac29; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+    .stat { background: #192a3b; border: 1px solid #263c50; border-radius: 6px; padding: 9px 11px; } .stat span { display: block; color: #91abc0; font-size: 10px; } .stat strong { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .row { display: flex; justify-content: space-between; gap: 12px; margin: 5px 0; color: #9eb3c5; } .row b { color: #deecf8; font-weight: 500; font-variant-numeric: tabular-nums; }
+    section.controls { border-top: 1px solid #2a3e51; padding-top: 16px; margin-top: 16px; }
+    input[type="range"] { width: 100%; accent-color: #ffb13a; cursor: pointer; }
+    input[type="checkbox"] { accent-color: #ffb13a; margin-right: 6px; } label.check { display: block; margin: 7px 0; }
+    #observation { position: relative; min-width: 0; }
+    #view-label { position: absolute; top: 20px; left: 24px; pointer-events: none; }
+    #view-label h2 { font-size: 15px; margin-bottom: 3px; } #view-label p { color: #8aa5ba; margin: 0; }
+    #legend { position: absolute; top: 20px; right: 22px; padding: 10px 14px; background: #0b1826df; border: 1px solid #263e51; border-radius: 7px; pointer-events: none; }
+    #legend div { margin: 3px 0; } .swatch { display: inline-block; width: 17px; height: 3px; margin: 0 8px 3px 0; background: var(--color); }
+    #leaf-card { position: absolute; top: 102px; left: 24px; width: 226px; padding: 12px; border: 1px solid #2e485c; border-radius: 7px; background: #0e1e2df2; pointer-events: none; }
+    #leaf-card h2 { margin: 0 0 6px; } #leaf-preview { width: 100%; height: auto; } #leaf-card .note { margin-bottom: 0; font-size: 10px; }
+    #leaf-detail { color: #a4ff49; font-size: 10px; margin-top: 6px; }
+    #walk { position: absolute; bottom: 20px; right: 24px; width: min(560px, calc(100% - 48px)); padding: 16px 18px; border: 1px solid #31495d; border-radius: 8px; background: #0e1e2df2; }
+    #walk .buttons { margin: 8px 0; max-width: 300px; } #walk h2 { display: flex; justify-content: space-between; margin: 0 0 8px; }
+    #progress { color: #ffbe59; font-variant-numeric: tabular-nums; } #current-node { color: #ffcb76; font-variant-numeric: tabular-nums; }
+    #status { color: #78ddf2; margin-top: 12px; } .lime { color: #a4ff49; }
+    @media (max-width: 1050px) { #leaf-card { top: 82px; left: 14px; width: 170px; padding: 8px; } #legend { font-size: 9px; padding: 7px; } }
+    @media (max-width: 850px) { header p { display: none; } #workspace { grid-template-columns: 290px minmax(0, 1fr); } aside { padding: 14px; } #legend { display: none; } #walk { right: 14px; bottom: 14px; width: calc(100% - 28px); padding: 12px; } #leaf-card { width: 135px; } }
+    @media (max-width: 600px) { body { height: auto; overflow: auto; } header { height: 68px; padding: 0 18px; } #workspace { height: auto; display: flex; flex-direction: column; } aside { order: 2; overflow: visible; } #observation { height: 72dvh; min-height: 520px; } .source-stage { max-width: 340px; margin: auto; } #legend { top: 64px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div><div class="eyebrow">HAIYUE ENGINE / SPATIAL QUERIES</div><h1>BVH 遍历可视化</h1></div>
+    <p>沿路径挤出高密度几何体，观察射线如何逐层排除空间，直到检测叶子中的三角形。</p>
+  </header>
+  <main id="workspace">
+    <aside>
+      <h2>01 / 射线输入视图</h2>
+      <div class="source-stage"><canvas id="source" aria-label="移动鼠标发射射线"></canvas><div id="aim"></div></div>
+      <p class="note">在此移动鼠标。移到右侧后保留最后一条射线，方便旋转观察。</p>
+      <div class="buttons"><button id="freeze" disabled aria-pressed="false">冻结当前射线</button><button id="sample" disabled>示范命中</button></div>
+      <div id="status" role="status">正在初始化 WebGPU…</div>
+      <div class="stats">
+        <div class="stat"><span>几何体三角形</span><strong id="triangles">—</strong></div>
+        <div class="stat"><span>实际三角形检测</span><strong id="triangle-tests" class="lime">—</strong></div>
+        <div class="stat"><span>包围盒检测</span><strong id="box-tests">—</strong></div>
+        <div class="stat"><span>减少三角形检测</span><strong id="saved">—</strong></div>
+      </div>
+      <div class="row"><span>本次完整求交 + 遍历记录</span><b id="query-time">—</b></div>
+      <section class="controls">
+        <h2>BVH helper</h2>
+        <label for="depth">背景节点层级 <b id="depth-value">3</b></label>
+        <input id="depth" type="range" min="0" max="8" value="3" />
+        <label class="check"><input id="background" type="checkbox" checked />显示背景包围盒</label>
+        <label class="check"><input id="rejected" type="checkbox" />显示未通过 / 剪枝节点</label>
+        <p class="note">背景只显示所选层和根节点，避免密集遮挡；本次遍历路径中的所有层级都会显示。</p>
+      </section>
+      <section class="controls">
+        <h2>挤出几何体与 BVH</h2>
+        <p id="extrusion" class="note">—</p>
+        <div class="row"><span>节点 / 叶子</span><b><span id="nodes">—</span> / <span id="leaves">—</span></b></div>
+        <div class="row"><span>最深层级（根节点为 0）</span><b id="tree-depth">—</b></div>
+        <div class="row"><span>挤出生成</span><b id="extrusion-time">—</b></div>
+        <div class="row"><span>BVH 构建 + 只读快照</span><b id="build-time">—</b></div>
+        <p class="note">计数来自 Engine 的实际求交路径；包围盒检测包含一次物体整体检测。高亮辅助几何体不参与求交。</p>
+      </section>
+    </aside>
+    <section id="observation">
+      <canvas id="observer" aria-label="BVH 观察视图，拖拽旋转，滚轮缩放"></canvas>
+      <div id="view-label"><h2>02 / BVH 观察视图</h2><p>拖拽旋转 · 滚轮缩放 · 青色小锥体为射线发射相机</p></div>
+      <div id="leaf-card"><h2>叶子三角形 · 局部放大</h2><canvas id="leaf-preview" width="440" height="250" aria-label="当前已检测叶子的原始三角形局部放大图"></canvas><div id="leaf-detail">等待到达叶子</div><p class="note">最近访问叶子的原始三角形，按局部面投影；绿色区域也在模型上同步高亮。</p></div>
+      <div id="legend">
+        <div><span class="swatch" style="--color:#37586c"></span>背景节点</div>
+        <div><span class="swatch" style="--color:#ffae25"></span>内部节点通过</div>
+        <div><span class="swatch" style="--color:#a4ff49"></span>到达叶子 / 三角形已检测</div>
+        <div><span class="swatch" style="--color:#f34a57"></span>未通过 / 被更近命中剪枝</div>
+        <div><span class="swatch" style="--color:#2bd9ff"></span>当前射线 · 白点为最近命中</div>
+      </div>
+      <div id="walk">
+        <h2>实际遍历顺序 <span id="progress">0 / 0</span></h2>
+        <input id="step" type="range" min="0" max="0" value="0" disabled aria-label="遍历步骤" />
+        <div id="current-node">等待第一条射线</div>
+        <div class="buttons"><button id="replay" disabled>从根节点回放</button><button id="next" disabled>单步</button></div>
+        <div>当前展示 <span id="shown-leaves" class="lime">0</span> 个叶子、<span id="shown-triangles" class="lime">0</span> 个已检测三角形</div>
+        <p class="note">绿色表示已执行三角形求交，不代表这些三角形全部命中。回放只展开本次记录，不重新计算或改变遍历顺序。</p>
+      </div>
+    </section>
+  </main>
+  <script src="../shared/engine.js"></script>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

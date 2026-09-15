@@ -1279,6 +1279,27 @@
       }
     },
     {
+      "id": "bvh-visualizer",
+      "title": "BVH Traversal Visualizer",
+      "entry": "bvh-visualizer/main.ts",
+      "capabilities": [
+        "raycast-bvh",
+        "path-extrusion",
+        "bvh-visualization"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "manual",
+      "catalog": {
+        "group": "interaction",
+        "order": 10
+      }
+    },
+    {
       "id": "raycast-bvh",
       "title": "Raycast BVH",
       "entry": "raycast-bvh/main.ts",
