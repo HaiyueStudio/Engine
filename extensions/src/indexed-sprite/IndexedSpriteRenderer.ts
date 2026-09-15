@@ -15,6 +15,10 @@ import {
 
 const INSTANCE_BYTES = 144;
 const INSTANCE_WORDS = INSTANCE_BYTES / 4;
+const WHITE = [1, 1, 1, 1] as const;
+const IDENTITY_COLOR = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0] as const;
+const compareCommands = (a: PreparedCommand, b: PreparedCommand) =>
+  (a.command!.priority ?? 0) - (b.command!.priority ?? 0) || a.sourceOrder - b.sourceOrder;
 
 interface GpuPage {
   readonly page: IndexedSpriteAtlasPage;
@@ -33,12 +37,12 @@ interface UploadJob {
 }
 
 interface PreparedCommand {
-  readonly command: IndexedSpriteDrawCommand;
-  readonly pageIndex: number;
-  readonly pageKind: 'indexed' | 'color';
-  readonly sampling: IndexedSpriteSampling;
-  readonly blend: IndexedSpriteBlend;
-  readonly sourceOrder: number;
+  command: IndexedSpriteDrawCommand | null;
+  pageIndex: number;
+  pageKind: 'indexed' | 'color';
+  sampling: IndexedSpriteSampling;
+  blend: IndexedSpriteBlend;
+  sourceOrder: number;
 }
 
 export interface IndexedSpriteRendererOptions {
@@ -72,6 +76,12 @@ export class IndexedSpriteRenderer {
   #batches = 0;
   #generation = 0;
   #disposed = false;
+  #prepared: PreparedCommand[] = [];
+  #commandPool: PreparedCommand[] = [];
+  #instanceData = new ArrayBuffer(0);
+  #instanceFloats = new Float32Array(this.#instanceData);
+  #instanceUints = new Uint32Array(this.#instanceData);
+  #viewportData = new Float32Array(4);
 
   constructor(
     device: GPUDevice,
@@ -131,14 +141,29 @@ export class IndexedSpriteRenderer {
     if (!this.ready) throw new Error('Indexed sprite renderer cannot draw until all bounded uploads are complete.');
     if (!Number.isFinite(viewportWidth) || !Number.isFinite(viewportHeight) || viewportWidth <= 0 || viewportHeight <= 0) throw new RangeError('Indexed sprite viewport must be finite and positive.');
     if (commands.length > this.limits.maxDrawCommandsPerFrame) throw new RangeError(`Indexed sprite draw command count exceeds ${this.limits.maxDrawCommandsPerFrame}.`);
-    const prepared = commands.map((command, sourceOrder) => this.#prepareCommand(command, sourceOrder))
-      .sort((left, right) => (left.command.priority ?? 0) - (right.command.priority ?? 0) || left.sourceOrder - right.sourceOrder);
-    const data = new ArrayBuffer(prepared.length * INSTANCE_BYTES);
-    const floats = new Float32Array(data);
-    const uints = new Uint32Array(data);
-    prepared.forEach((value, index) => this.#writeInstance(value, index * INSTANCE_WORDS, floats, uints));
-    if (data.byteLength > 0) this.#device.queue.writeBuffer(this.#instanceBuffer!, 0, data);
-    this.#device.queue.writeBuffer(this.#viewportBuffer!, 0, new Float32Array([viewportWidth, viewportHeight, 0, 0]));
+    const prepared = this.#prepared;
+    const bytes = commands.length * INSTANCE_BYTES;
+    if (bytes > this.#instanceData.byteLength) {
+      const capacity = Math.min(this.limits.maxDrawCommandsPerFrame, Math.max(64, 2 ** Math.ceil(Math.log2(commands.length))));
+      this.#instanceData = new ArrayBuffer(capacity * INSTANCE_BYTES);
+      this.#instanceFloats = new Float32Array(this.#instanceData);
+      this.#instanceUints = new Uint32Array(this.#instanceData);
+    }
+    try {
+    let ordered = true, previousPriority = -Infinity;
+    for (let i = 0; i < commands.length; i++) {
+      const value = this.#prepareCommand(commands[i]!, i);
+      prepared.push(value);
+      const priority = commands[i]!.priority ?? 0;
+      if (priority < previousPriority) ordered = false;
+      previousPriority = priority;
+    }
+    if (!ordered) prepared.sort(compareCommands);
+    for (let i = 0; i < prepared.length; i++) this.#writeInstance(prepared[i]!, i * INSTANCE_WORDS, this.#instanceFloats, this.#instanceUints);
+    // writeBuffer copies immediately; CPU scratch can be reused after this call.
+    if (bytes > 0) this.#device.queue.writeBuffer(this.#instanceBuffer!, 0, this.#instanceData, 0, bytes);
+    this.#viewportData[0] = viewportWidth; this.#viewportData[1] = viewportHeight;
+    this.#device.queue.writeBuffer(this.#viewportBuffer!, 0, this.#viewportData);
     pass.setBindGroup(0, this.#frameBindGroup!);
     let batchStart = 0;
     let drawCalls = 0;
@@ -161,6 +186,10 @@ export class IndexedSpriteRenderer {
     this.#drawCalls = drawCalls;
     this.#batches = drawCalls;
     return this.stats();
+    } finally {
+      for (const value of prepared) value.command = null;
+      prepared.length = 0;
+    }
   }
 
   recover(device: GPUDevice): void {
@@ -197,6 +226,10 @@ export class IndexedSpriteRenderer {
     if (this.#disposed) return;
     this.#disposed = true;
     this.#destroyGpuResources();
+    this.#prepared.length = 0; this.#commandPool.length = 0;
+    this.#instanceData = new ArrayBuffer(0);
+    this.#instanceFloats = new Float32Array(this.#instanceData);
+    this.#instanceUints = new Uint32Array(this.#instanceData);
   }
 
   #createGpuResources(): void {
@@ -255,14 +288,17 @@ export class IndexedSpriteRenderer {
     const placement = this.layout.placements.get(command.spriteId);
     if (!placement) throw new RangeError(`Indexed sprite draw references unknown sprite ${command.spriteId}.`);
     if (placement.pageKind === 'indexed' && (!command.paletteId || !this.layout.paletteRows.has(command.paletteId))) throw new RangeError(`Indexed sprite ${command.spriteId} requires a known paletteId.`);
-    for (const value of [command.x, command.y, command.axisX ?? 0, command.axisY ?? 0, command.scaleX ?? 1, command.scaleY ?? 1, command.rotationRadians ?? 0, command.opacity ?? 1, command.priority ?? 0, command.depth ?? 0.5]) if (!Number.isFinite(value)) throw new RangeError('Indexed sprite draw contains a non-finite number.');
+    if (!Number.isFinite(command.x) || !Number.isFinite(command.y) || !Number.isFinite(command.axisX ?? 0) || !Number.isFinite(command.axisY ?? 0) || !Number.isFinite(command.scaleX ?? 1) || !Number.isFinite(command.scaleY ?? 1) || !Number.isFinite(command.rotationRadians ?? 0) || !Number.isFinite(command.opacity ?? 1) || !Number.isFinite(command.priority ?? 0) || !Number.isFinite(command.depth ?? 0.5)) throw new RangeError('Indexed sprite draw contains a non-finite number.');
     const opacity = command.opacity ?? 1;
     if (opacity < 0 || opacity > 1) throw new RangeError('Indexed sprite opacity must be in [0,1].');
-    return Object.freeze({ command, pageIndex: placement.pageIndex, pageKind: placement.pageKind, sampling: command.sampling ?? 'nearest', blend: command.blend ?? 'alpha', sourceOrder });
+    const value = this.#commandPool[sourceOrder] ??= { command: null, pageIndex: 0, pageKind: 'color', sampling: 'nearest', blend: 'alpha', sourceOrder };
+    value.command = command; value.pageIndex = placement.pageIndex; value.pageKind = placement.pageKind;
+    value.sampling = command.sampling ?? 'nearest'; value.blend = command.blend ?? 'alpha';
+    return value;
   }
 
   #writeInstance(prepared: PreparedCommand, offset: number, floats: Float32Array, uints: Uint32Array): void {
-    const command = prepared.command;
+    const command = prepared.command!;
     const placement = this.layout.placements.get(command.spriteId)!;
     floats[offset] = command.x; floats[offset + 1] = command.y; floats[offset + 2] = command.scaleX ?? 1; floats[offset + 3] = command.scaleY ?? 1;
     floats[offset + 4] = placement.width; floats[offset + 5] = placement.height; floats[offset + 6] = command.axisX ?? 0; floats[offset + 7] = command.axisY ?? 0;
@@ -271,9 +307,9 @@ export class IndexedSpriteRenderer {
     uints[offset + 16] = prepared.pageKind === 'indexed' ? this.layout.paletteRows.get(command.paletteId!)! : 0;
     uints[offset + 17] = (prepared.pageKind === 'indexed' ? 1 : 0) | (prepared.sampling === 'linear' ? 2 : 0) | (command.flipX ? 4 : 0) | (command.flipY ? 8 : 0);
     uints[offset + 18] = 0; uints[offset + 19] = 0;
-    const tint = command.tint ?? [1, 1, 1, 1];
+    const tint = command.tint ?? WHITE;
     for (let index = 0; index < 4; index++) { const value = tint[index]!; if (!Number.isFinite(value)) throw new RangeError('Indexed sprite tint must be finite.'); floats[offset + 20 + index] = value; }
-    const colorMatrix = command.colorMatrix ?? [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0];
+    const colorMatrix = command.colorMatrix ?? IDENTITY_COLOR;
     if (colorMatrix.length !== 12) throw new RangeError('Indexed sprite colorMatrix must contain twelve values.');
     for (let index = 0; index < 12; index++) { const value = colorMatrix[index]!; if (!Number.isFinite(value)) throw new RangeError('Indexed sprite colorMatrix must be finite.'); floats[offset + 24 + index] = value; }
   }
