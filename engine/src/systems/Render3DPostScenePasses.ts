@@ -2,7 +2,7 @@ import type { Material } from '../material/Material';
 import { auxiliaryWritesDepth, type MaterialCoverageResolver } from '../renderer/AuxiliaryMaterial';
 import type { IEngine } from '../core/IEngine';
 import type { RenderCommandContext } from '../core/RenderCommandContext';
-import type { RenderViewSnapshot } from '../core/RenderView';
+import { getRenderViewPassOptions, type RenderViewSnapshot } from '../core/RenderView';
 import { EngineError, EngineErrorCode } from '../core/EngineError';
 import type { Camera3D } from '../components/Camera3D';
 import type { Geometry3D } from '../geometry/Geometry3D';
@@ -276,6 +276,15 @@ export class Render3DPostScenePasses {
     const color = view?.clearColor ?? this._engine.clearColor;
     const clearColor = view?.loadOp === 'load' ? { r: 0, g: 0, b: 0, a: 0 }
       : { r: srgbToLinear(color.r) * color.a, g: srgbToLinear(color.g) * color.a, b: srgbToLinear(color.b) * color.a, a: color.a };
+    // Full-target HDR passes must write the depth that later 3D overlay systems
+    // load. SceneOutput only transfers color. Viewport-local HDR surfaces retain
+    // their own depth because their attachment size/origin differs from the target.
+    const sharesTargetCoordinates = !view?.viewport
+      && postRenderer.width === (view?.target.width ?? this._engine.width)
+      && postRenderer.height === (view?.target.height ?? this._engine.height);
+    const depthAttachment = sharesTargetCoordinates
+      ? (view ? view.target.getRenderPassDescriptor(getRenderViewPassOptions(view)) : this._engine.getRenderPassDescriptor()).depthStencilAttachment
+      : undefined;
     return postRenderer.getScenePassDescriptor({
       sampleCount: view?.sampleCount ?? this._engine.msaaSamples,
       reverseZ,
@@ -283,6 +292,7 @@ export class Render3DPostScenePasses {
       loadOp,
       depthFormat: this._engine.getDepthFormat(reverseZ),
       preserveMsaa,
+      ...(depthAttachment ? { depthAttachment } : {}),
     });
   }
 

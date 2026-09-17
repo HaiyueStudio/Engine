@@ -12,6 +12,7 @@ interface DemoEmitter {
 }
 
 async function main(): Promise<void> {
+  document.body.dataset.renderStatus = 'initializing';
   const canvas = query<HTMLCanvasElement>('#canvas');
   const engine = new HaiyueEngine({
     canvas,
@@ -19,6 +20,7 @@ async function main(): Promise<void> {
     msaaSamples: 4,
   });
   await engine.init();
+  document.body.dataset.renderStatus = 'ready';
 
   const validationErrors: string[] = [];
   engine.device.addEventListener('uncapturederror', event => validationErrors.push(event.error.message));
@@ -137,6 +139,7 @@ async function main(): Promise<void> {
   bindControls(emitters);
   engine.switchScene(scene);
   engine.run();
+  document.body.dataset.renderStatus = 'running';
 
   let frameCount = 0;
   let validationFinished = false;
@@ -149,6 +152,15 @@ async function main(): Promise<void> {
   });
 
   async function finishValidation(): Promise<void> {
+    // Submit the copy in this frame, before yielding: the canvas texture expires
+    // when the browser presents it. Counts alone cannot detect invisible draws.
+    let visibleParticlePixels = 0;
+    try {
+      visibleParticlePixels = await countVisibleParticlePixels(engine);
+      if (visibleParticlePixels === 0) validationErrors.push('Particle draws produced no visible pixels.');
+    } catch (error) {
+      validationErrors.push(error instanceof Error ? error.message : String(error));
+    }
     await engine.device.queue.onSubmittedWorkDone();
     const scopedError = await engine.device.popErrorScope();
     if (scopedError) validationErrors.push(scopedError.message);
@@ -164,7 +176,41 @@ async function main(): Promise<void> {
     document.body.dataset.particleCount = String(renderer.stats.particleCount);
     const result = query<HTMLElement>('#result');
     result.dataset.status = validationErrors.length === 0 ? 'passed' : 'failed';
-    result.textContent = JSON.stringify({ status: result.dataset.status, errors: validationErrors, renderer: renderer.stats });
+    result.textContent = JSON.stringify({ status: result.dataset.status, errors: validationErrors, visibleParticlePixels, renderer: renderer.stats });
+  }
+}
+
+async function countVisibleParticlePixels(engine: HaiyueEngine): Promise<number> {
+  if (!engine.context) throw new Error('Particle canvas context is unavailable.');
+  const width = engine.width;
+  const height = engine.height;
+  const bytesPerRow = Math.ceil(width * 4 / 256) * 256;
+  const buffer = engine.device.createBuffer({
+    label: 'Particles3D.visibilityReadback',
+    size: bytesPerRow * height,
+    usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+  });
+  try {
+    const encoder = engine.device.createCommandEncoder({ label: 'Particles3D.visibilityCheck' });
+    encoder.copyTextureToBuffer(
+      { texture: engine.context.getCurrentTexture() },
+      { buffer, bytesPerRow, rowsPerImage: height },
+      [width, height],
+    );
+    engine.device.queue.submit([encoder.finish()]);
+    await buffer.mapAsync(GPUMapMode.READ);
+    const pixels = new Uint8Array(buffer.getMappedRange());
+    let visible = 0;
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+      const offset = y * bytesPerRow + x * 4;
+      // The dark stage stays below this threshold. DOM controls are not part of
+      // the canvas, so only the luminous particles can satisfy this check.
+      if (Math.max(pixels[offset]!, pixels[offset + 1]!, pixels[offset + 2]!) > 128) visible++;
+    }
+    return visible;
+  } finally {
+    if (buffer.mapState === 'mapped') buffer.unmap();
+    buffer.destroy();
   }
 }
 

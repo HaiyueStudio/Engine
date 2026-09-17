@@ -86,6 +86,54 @@ test('scene output resolves into the display MSAA attachment and keeps its sampl
   assert.equal([...output._pipelines.values()][0].descriptor.multisample.count, 4);
 });
 
+for (const sampleCount of [1, 4]) for (const reverseZ of [false, true]) {
+  test(`HDR scene preserves target depth for particles (${sampleCount} samples, reverseZ=${reverseZ})`, t => {
+    const { engine, device, system } = fixture(t);
+    const target = new RttEngine(engine, 16, 16);
+    t.after(() => target.destroy());
+    const view = new RenderView({
+      key: 'particles', target, camera: new Entity('camera'), sampleCount,
+      depthConvention: reverseZ ? 'reverse' : 'standard',
+    }).snapshot();
+    const post = system._postScenePasses;
+    post.prepare([], { device, encoder: device.createCommandEncoder(), view }, reverseZ);
+    const sceneDescriptor = post.buildScenePassDescriptor('clear', reverseZ, view);
+    const destination = target.getRenderPassDescriptor(view);
+    assert.equal(sceneDescriptor.depthStencilAttachment.view, destination.depthStencilAttachment.view);
+    assert.equal(sceneDescriptor.depthStencilAttachment.depthClearValue, reverseZ ? 0 : 1);
+    assert.equal(sceneDescriptor.depthStencilAttachment.depthStoreOp, 'store');
+    assert.equal(post._postRenderer.sceneDepthView, destination.depthStencilAttachment.view,
+      'outline visibility and later overlays must read the same scene depth');
+
+    const continuation = post.buildScenePassDescriptor('load', reverseZ, view);
+    assert.equal(continuation.depthStencilAttachment.view, sceneDescriptor.depthStencilAttachment.view);
+    assert.equal(continuation.depthStencilAttachment.depthLoadOp, 'load');
+    post.destroy();
+    assert.equal(destination.depthStencilAttachment.view.texture.destroyed, false,
+      'the post renderer must not destroy borrowed target depth');
+  });
+}
+
+test('viewport-local HDR depth remains local after a full-target view', t => {
+  const { engine, device, system } = fixture(t);
+  const target = new RttEngine(engine, 16, 16);
+  t.after(() => target.destroy());
+  const post = system._postScenePasses;
+  const full = new RenderView({ key: 'full', target, camera: new Entity('camera') }).snapshot();
+  post.prepare([], { device, encoder: device.createCommandEncoder(), view: full }, false);
+  const borrowed = post.buildScenePassDescriptor('clear', false, full).depthStencilAttachment.view;
+  const inset = new RenderView({
+    key: 'inset', target, camera: full.camera,
+    viewport: { x: 4, y: 4, width: 8, height: 8 },
+  }).snapshot();
+  post.prepare([], { device, encoder: device.createCommandEncoder(), view: inset }, false);
+  const local = post.buildScenePassDescriptor('clear', false, inset).depthStencilAttachment.view;
+  assert.notEqual(local, borrowed);
+  assert.equal(local.texture.width, 8);
+  assert.equal(local.texture.height, 8);
+  assert.equal(post._postRenderer.sceneDepthView, local);
+});
+
 test('HDR RTT format survives resize and cannot alias an UNORM target with equal dimensions', t => {
   const { engine } = fixture(t);
   const rtt = new RttTexture(engine, { width: 16, height: 16, format: 'rgba16float' });

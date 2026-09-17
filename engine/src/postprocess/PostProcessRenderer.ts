@@ -43,6 +43,7 @@ export class PostProcessRenderer {
   private _sceneMsaaView: GPUTextureView | null = null;
   private _sceneDepthTexture: GPUTexture | null = null;
   private _sceneDepthView: GPUTextureView | null = null;
+  private _borrowedDepthView: GPUTextureView | null = null;
   private _sceneAttachmentKey = '';
   private _surfaceKey = '';
   private readonly _surfaceResources = new Map<string, PostProcessSurfaceResources>();
@@ -64,7 +65,7 @@ export class PostProcessRenderer {
   get height(): number { return this._height; }
   get format(): GPUTextureFormat { return this._format; }
 
-  get sceneDepthView(): GPUTextureView | null { return this._sceneDepthView; }
+  get sceneDepthView(): GPUTextureView | null { return this._borrowedDepthView ?? this._sceneDepthView; }
 
   /** Registers the submission boundary used to retire view sizes not used by this frame. */
   beginFrame(frameId: number, afterSubmit?: (callback: (queue: GPUQueue) => void) => void): void {
@@ -183,8 +184,11 @@ export class PostProcessRenderer {
     loadOp: GPULoadOp;
     depthFormat: GPUTextureFormat;
     preserveMsaa?: boolean;
+    /** Borrow the destination depth when scene and destination coordinates match. */
+    depthAttachment?: GPURenderPassDepthStencilAttachment;
   }): GPURenderPassDescriptor {
     this._ensureSceneAttachments(options.sampleCount, options.reverseZ, options.depthFormat);
+    this._borrowedDepthView = options.depthAttachment?.view as GPUTextureView | undefined ?? null;
     const colorAttachment: GPURenderPassColorAttachment = this._sceneMsaaView
       ? {
           view: this._sceneMsaaView,
@@ -202,7 +206,7 @@ export class PostProcessRenderer {
     return {
       colorAttachments: [colorAttachment],
       depthStencilAttachment: {
-        view: this._sceneDepthView!,
+        view: this.sceneDepthView!,
         depthClearValue: options.reverseZ ? 0 : 1,
         depthLoadOp: options.loadOp === 'load' ? 'load' : 'clear',
         depthStoreOp: 'store',
@@ -353,6 +357,7 @@ export class PostProcessRenderer {
   }
 
   private _activateSceneAttachments(attachments: PostProcessSceneAttachments | null): void {
+    this._borrowedDepthView = null;
     this._sceneMsaaTexture = attachments?.msaaTexture ?? null;
     this._sceneMsaaView = attachments?.msaaView ?? null;
     this._sceneDepthTexture = attachments?.depthTexture ?? null;
