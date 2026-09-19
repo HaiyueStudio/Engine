@@ -497,7 +497,7 @@ export class GuiRenderer {
     const textColor = select.selectedOption
       ? colorToRgba(theme.colors.text, theme.colors.text)
       : colorToRgba(theme.colors.textMuted, theme.colors.textMuted);
-    this.addText(select.displayText, select.rect.x + 8, select.rect.y, Math.max(0, select.rect.width - 30), select.rect.height, theme.fontSize, textColor);
+    this.addText(select.displayText, select.rect.x + 8, select.rect.y, Math.max(0, select.rect.width - 30), select.rect.height, theme.fontSize, textColor, true);
 
     const arrowX = select.rect.x + select.rect.width - 18;
     const arrowY = select.rect.y + select.rect.height * 0.5;
@@ -523,7 +523,7 @@ export class GuiRenderer {
       if (selected) {
         this.addPopupRect(popup.x + 2, y + 2, popup.width - 4, select.optionHeight - 4, Math.max(0, radius - 2), withAlpha(colorToRgba(theme.colors.primary, theme.colors.primary), 0.32), popup);
       }
-      this.addPopupText(option.label, popup.x + 8, y, popup.width - 18, select.optionHeight, theme.fontSize, withAlpha(colorToRgba(option.disabled ? theme.colors.textMuted : theme.colors.text, theme.colors.text), option.disabled ? 0.55 : 1), popup);
+      this.addPopupText(option.label, popup.x + 8, y, popup.width - 18, select.optionHeight, theme.fontSize, withAlpha(colorToRgba(option.disabled ? theme.colors.textMuted : theme.colors.text, theme.colors.text), option.disabled ? 0.55 : 1), popup, true);
     }
     if (select.maxScrollY > 0) {
       const trackH = popup.height - 8;
@@ -657,6 +657,7 @@ export class GuiRenderer {
     height: number,
     fontSize: number,
     color: [number, number, number, number],
+    singleLine = false,
   ): void {
     this.currentTextBatch.addText({
       text,
@@ -666,8 +667,8 @@ export class GuiRenderer {
       height,
       fontSize,
       color,
-      multiline: true,
-      wrap: true,
+      multiline: !singleLine,
+      wrap: !singleLine,
       lineHeight: fontSize * 1.2,
       clip: { x, y, width, height },
     });
@@ -682,6 +683,7 @@ export class GuiRenderer {
     fontSize: number,
     color: [number, number, number, number],
     clip = { x, y, width, height },
+    singleLine = false,
   ): void {
     this.currentPopupTextBatch.addText({
       text,
@@ -691,8 +693,8 @@ export class GuiRenderer {
       height,
       fontSize,
       color,
-      multiline: true,
-      wrap: true,
+      multiline: !singleLine,
+      wrap: !singleLine,
       lineHeight: fontSize * 1.2,
       clip,
     });

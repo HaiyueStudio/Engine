@@ -11,6 +11,7 @@ import {
   GuiModal,
   GuiRoot,
   GuiSelect,
+  GuiSystem,
   GuiTextBatch,
   measureGuiTextWidth,
   parseGuiColor,
@@ -202,3 +203,22 @@ function createTestFont() {
     kernings: new Map(),
   });
 }
+
+test('select label and popup rows are vertically centered at multiple GUI scales', () => {
+  const system = new GuiSystem({});
+  const renderer = system.renderer;
+  const font = createTestFont();
+  for (const scale of [0.6, 1, 2]) {
+    renderer.textBatch.clear(); renderer.popupTextBatch.clear();
+    const root = new GuiRoot({theme: {fontSize: 10 * scale}});
+    const select = new GuiSelect({ x:20, y:30, width:200, height:40*scale, optionHeight:50*scale, value:'AB', options:[{label:'AB',value:'AB'}] });
+    select.layout({x:0,y:0,width:400,height:300});select.setOpen(true);
+    renderer.addSelect(select, root.theme);
+    for(const [batch,rect] of [[renderer.textBatch,select.rect],[renderer.popupTextBatch,select.popupRect]]) {
+      batch.rebuild(font);
+      const top=batch.vertexData[1], bottom=top+10*scale;
+      assert.ok(Math.abs((top-rect.y)-(rect.y+rect.height-bottom))<1e-5);
+      assert.equal(batch.vertexCount,12);
+    }
+  }
+});
