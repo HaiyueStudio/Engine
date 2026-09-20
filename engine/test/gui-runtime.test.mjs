@@ -6,6 +6,7 @@ import {
   GuiButton,
   GuiElement,
   GuiImage,
+  GuiInput,
   GuiImageBatch,
   GuiLabel,
   GuiModal,
@@ -221,4 +222,58 @@ test('select label and popup rows are vertically centered at multiple GUI scales
       assert.equal(batch.vertexCount,12);
     }
   }
+});
+
+test('touch release and cancellation clear GUI hover while mouse release retains hover', () => {
+  for (const [pointerType, end, clicks, hovered] of [
+    ['touch', 'pointerup', 1, false],
+    ['touch', 'pointercancel', 0, false],
+    ['mouse', 'pointerup', 1, true],
+    ['mouse', 'pointercancel', 0, false],
+  ]) {
+    const system = new GuiSystem({});
+    // Input dispatch needs no GPU allocation in this regression test.
+    system.renderer.prepare = () => {};
+    const root = new GuiRoot();
+    let count = 0;
+    const button = root.add(new GuiButton({ x: 10, y: 10, width: 100, height: 40, onClick: () => count++ }));
+    root.layout(320, 180);
+    system.roots.add(root);
+    const world = new World('GuiTouchRelease');
+    const native = { pointerType, pointerId: 1, button: 0, buttons: 1, preventDefault() {} };
+    const dispatch = type => system.dispatchPointerEvent(world, { type, native, x: 20, y: 20 });
+    dispatch('pointerdown');
+    assert.equal(button.pressed, true);
+    assert.equal(button.hovered, true);
+    root.clearDirty();
+    native.buttons = 0;
+    dispatch(end);
+    assert.equal(button.pressed, false, `${pointerType} ${end} clears pressed`);
+    assert.equal(button.hovered, hovered, `${pointerType} ${end} hover`);
+    assert.equal(button.focused, pointerType !== 'touch', `${pointerType} ${end} focus outline`);
+    assert.equal(count, clicks, `${pointerType} ${end} click count`);
+    assert.equal(system.pressed, null);
+    system.destroy();
+  }
+});
+
+test('touch button cleanup preserves text focus assigned by its click handler', () => {
+  const system = new GuiSystem({});
+  system.renderer.prepare = () => {};
+  const root = new GuiRoot();
+  const input = root.add(new GuiInput({ x: 10, y: 70, width: 200, height: 40 }));
+  const button = root.add(new GuiButton({ x: 10, y: 10, width: 100, height: 40, onClick: () => system.focus.focus(input) }));
+  root.layout(320, 180);
+  system.roots.add(root);
+  const world = new World('GuiTouchTextFocus');
+  const native = { pointerType: 'touch', pointerId: 1, button: 0, buttons: 0, preventDefault() {} };
+  for (const type of ['pointerdown', 'pointerup']) system.dispatchPointerEvent(world, { type, native, x: 20, y: 20 });
+  assert.equal(button.focused, false);
+  assert.equal(input.focused, true);
+  assert.equal(system.focus.focused, input);
+  // Direct touch on the text field also keeps it ready for keyboard input.
+  for (const type of ['pointerdown', 'pointerup']) system.dispatchPointerEvent(world, { type, native, x: 20, y: 80 });
+  assert.equal(input.focused, true);
+  assert.equal(input.hovered, false);
+  system.destroy();
 });

@@ -2,6 +2,7 @@ import type { IEngine } from '../../core/IEngine';
 import { System } from '../../ecs/System';
 import { World } from '../../ecs/World';
 import { GuiElement } from '../components/GuiElement';
+import { GuiButton } from '../components/GuiButton';
 import { GuiInput } from '../components/GuiInput';
 import { GuiLabel, setGuiLabelMeasuredTextWidth } from '../components/GuiLabel';
 import { GuiRadio } from '../components/GuiRadio';
@@ -371,6 +372,9 @@ export class GuiSystem extends System {
       }
       this.engine.canvas?.releasePointerCapture?.(native.pointerId);
       this.pressed = null;
+      // Touch has no hover after contact ends, even without a later pointermove.
+      if (native.pointerType === 'touch' || pending.type === 'pointercancel') this.updateHover(null, pending);
+      if (native.pointerType === 'touch' && target instanceof GuiButton && this.focus.focused === target) this.focus.blur();
     }
   }
 
