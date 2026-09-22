@@ -1405,3 +1405,46 @@ test('Render3DSystem sweeps preview view, LOD selection, and collect-pass caches
   assert.equal(collector.lodSelectionCacheCount, 0);
   assert.equal(render3D._frameCoordinator.collectPassNames.size, 0);
 });
+
+
+test('shadow enrollment batches interleaved geometry and opaque colors while retaining stable dirty slots', () => {
+  const log=[];
+  const engine=createGpuBatchMockEngine(log);
+  const system=new Render3DSystem(engine,new Entity('Camera'),{registerDefaultMaterialRenderers:false});
+  const shadow=system._requireShadowRenderer();
+  const geometry=[new Geometry3D({positions:new Float32Array([0,0,0,1,0,0,0,1,0])}),new Geometry3D({positions:new Float32Array([0,0,0,2,0,0,0,2,0])})];
+  const colors=[new PbrMaterial({baseColor:[1,0,0,1]}),new PbrMaterial({baseColor:[0,1,0,1]})];
+  const items=Array.from({length:96},(_,i)=>({entityId:i+1,geometry:geometry[i%2],material:colors[Math.floor(i/2)%2],worldMatrix:new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]),worldSphere:null,clippingPlanes:null}));
+  for(let i=0;i<items.length;i++)items[i].worldMatrix[12]=i/100;
+  const light=new DirectionalLight();
+  function render(input){
+    const draws=[],encoder=engine.device.createCommandEncoder();
+    const begin=encoder.beginRenderPass.bind(encoder);
+    encoder.beginRenderPass=(descriptor)=>{const pass=begin(descriptor),draw=pass.draw.bind(pass);pass.draw=(...args)=>{draws.push(args);draw(...args);};return pass;};
+    shadow.render(encoder,input,light);encoder.finish();return draws;
+  }
+  assert.deepEqual(render(items).map(d=>d[1]),[48,48],'96 differently colored interleaved casters use two instanced draws');
+  const slots=items.map(i=>shadow._objects[0].get(i.entityId).modelSlot);
+  const allocations=log.filter(x=>x[0]==='createBuffer').length;
+  log.length=0;
+  assert.equal(render([...items].reverse()).length,2,'spatial traversal reordering cannot break the batches');
+  assert.equal(log.filter(x=>x[0]==='writeBuffer' && x[1]==='ShadowMapRenderer.objectTable').length,0,'unchanged transforms are not uploaded again');
+  items[17].worldMatrix[12]=1;
+  assert.equal(render(items).length,2,'moving one caster preserves instancing');
+  assert.deepEqual(items.map(i=>shadow._objects[0].get(i.entityId).modelSlot),slots,'motion keeps object slots stable');
+  assert.equal(log.filter(x=>x[0]==='createBuffer').length,0,'movement does not allocate more buffers');
+  assert.ok(allocations>0);
+  for(let i=0;i<items.length;i++)items[i].geometry=geometry[Math.floor(i/2)%2];
+  assert.deepEqual(render(items).map(d=>d[1]),[48,48],'reusing entities for different room geometry regroups existing slots');
+  const regrouped=items.map(i=>shadow._objects[0].get(i.entityId).modelSlot);
+  assert.equal(new Set(regrouped).size,96,'slot permutation never aliases two objects');
+  const table=shadow._objectTables[0];
+  for(const item of items)assert.equal(table.data[shadow._objects[0].get(item.entityId).modelSlot*table.floatsPerSlot+12],item.worldMatrix[12],'regrouping uploads the correct transform to the new slot');
+  log.length=0;items[17].worldMatrix[12]=2;
+  assert.equal(render([...items].reverse()).length,2);
+  assert.deepEqual(items.map(i=>shadow._objects[0].get(i.entityId).modelSlot),regrouped,'regrouped slots remain stable under subsequent motion');
+  assert.equal(log.filter(x=>x[0]==='createBuffer').length,0);
+  const drawsAfterRemoval=render(items.slice(20));
+  assert.equal(drawsAfterRemoval.reduce((sum,d)=>sum+d[1],0),76,'removal after slot permutation releases the correct owners');
+  system.destroy();
+});

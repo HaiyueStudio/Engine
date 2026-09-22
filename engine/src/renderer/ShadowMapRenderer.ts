@@ -53,6 +53,7 @@ interface ShadowObjectData {
   modelSlot: number;
   modelSnapshot: Float32Array;
   modelDirty: boolean;
+  geometryId: number;
   clippingKey: string;
 }
 
@@ -122,7 +123,8 @@ export class ShadowMapRenderer extends BaseRenderer {
   private readonly _objects: RendererObjectSlotCache<ShadowObjectData>[] = [];
   private readonly _deformations = new RendererCacheMap<ShadowDeformationGpuData>(data => this._destroyDeformation(data));
   private readonly _liveEntities = new Set<number>();
-  private readonly _unassignedEntityIds: number[] = [];
+  private readonly _unassignedCasters: Render3DRenderItem[] = [];
+  private readonly _batchSlots: number[] = [];
   private readonly _liveGeometries = new Set<number>();
   private readonly _liveDeformations = new Set<number>();
   private readonly _batchLiveGeometries = new Set<number>();
@@ -211,6 +213,7 @@ export class ShadowMapRenderer extends BaseRenderer {
           modelSlot,
           modelSnapshot: new Float32Array(16),
           modelDirty: true,
+          geometryId: -1,
           clippingKey: '',
         }),
       ));
@@ -325,16 +328,44 @@ export class ShadowMapRenderer extends BaseRenderer {
     // The table bind group changes when its storage buffer grows. Reserve before
     // encoding so the pass can bind one stable object table for every caster.
     objectTable.ensureCapacity(Math.max(1, this._liveEntities.size));
-    // Spatial traversal order is view- and motion-dependent. Letting that order
-    // assign stable slots scatters logically adjacent entity updates across the
-    // whole table, turning one dynamic range into hundreds of queue writes.
-    // Only new enrollment pays this sort; established entities retain slots.
-    this._unassignedEntityIds.length = 0;
-    for (const entityId of this._liveEntities) {
-      if (!objects.get(entityId)) this._unassignedEntityIds.push(entityId);
+    // Enroll compatible geometry together, independently of spatial traversal and
+    // creation order. Opaque base colors do not affect shadow coverage. Once
+    // enrolled, slots stay stable so moving actors retain dirty-range uploads.
+    this._unassignedCasters.length = 0;
+    let regroup = false;
+    for (const item of items) {
+      if (!this._liveEntities.has(item.entityId)) continue;
+      const object = objects.get(item.entityId);
+      if (!object) this._unassignedCasters.push(item);
+      else if (object.geometryId !== item.geometry!.id) regroup = true;
     }
-    this._unassignedEntityIds.sort(compareEntityIds);
-    for (const entityId of this._unassignedEntityIds) objects.ensure(entityId);
+    // Games reuse entities across rooms. If an existing mesh changes geometry,
+    // permute ownership of the already allocated slots once, not on movement.
+    if (regroup) {
+      this._unassignedCasters.length = 0;
+      for (const item of items) if (this._liveEntities.has(item.entityId)) this._unassignedCasters.push(item);
+    }
+    this._unassignedCasters.sort((a, b) =>
+      (a.geometry!.id - b.geometry!.id)
+      || Number(auxiliaryUsesDeformation(a.material)) - Number(auxiliaryUsesDeformation(b.material))
+      || (resolveCullMode(a.material!) ?? auxiliaryCullMode(a.geometry!, a.material)).localeCompare(resolveCullMode(b.material!) ?? auxiliaryCullMode(b.geometry!, b.material))
+      || auxiliaryFrontFace(a.geometry!, a.material).localeCompare(auxiliaryFrontFace(b.geometry!, b.material))
+      || ((this.resolveMaterialCoverage(a.material!) ? a.material!.id : 0) - (this.resolveMaterialCoverage(b.material!) ? b.material!.id : 0))
+      || a.entityId - b.entityId);
+    for (const item of this._unassignedCasters) objects.ensure(item.entityId);
+    if (regroup) {
+      const slots = this._batchSlots;
+      slots.length = 0;
+      for (const item of this._unassignedCasters) slots.push(objects.get(item.entityId)!.modelSlot);
+      slots.sort((a, b) => a - b);
+      for (let i = 0; i < this._unassignedCasters.length; i++) {
+        const object = objects.get(this._unassignedCasters[i]!.entityId)!;
+        if (object.modelSlot === slots[i]) continue;
+        object.modelSlot = slots[i]!;
+        object.modelDirty = true;
+        object.clippingKey = '';
+      }
+    }
     for (const item of items) {
       if (!this._liveEntities.has(item.entityId) || !item.geometry || !item.material || !item.worldMatrix) continue;
       const geometry = item.geometry;
@@ -350,6 +381,7 @@ export class ShadowMapRenderer extends BaseRenderer {
         this._syncSkinningMatrices(geometry, deformation);
       }
       const object = objects.ensure(item.entityId);
+      object.geometryId = geometry.id;
       this._writeObject(objectTable, object, geometry, item.clippingPlanes, item.worldMatrix, morph);
       const variant = this._variant(morph, skinned);
       const cullMode = resolveCullMode(item.material) ?? auxiliaryCullMode(geometry, item.material);
@@ -754,6 +786,8 @@ export class ShadowMapRenderer extends BaseRenderer {
     this._geometryCache?.releaseOwner(this);
     this._shaderModules.length = 0;
     this._drawCasters.length = 0;
+    this._unassignedCasters.length = 0;
+    this._batchSlots.length = 0;
     this._drawCastersOutOfSlotOrder = false;
     this._batchLiveGeometries.clear();
     this._batchLiveDeformations.clear();
@@ -769,8 +803,4 @@ export class ShadowMapRenderer extends BaseRenderer {
 
 function compareShadowCasterObjectSlots(a: ShadowDrawCaster, b: ShadowDrawCaster): number {
   return a.objectSlot - b.objectSlot;
-}
-
-function compareEntityIds(a: number, b: number): number {
-  return a - b;
 }

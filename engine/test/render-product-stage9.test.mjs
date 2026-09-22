@@ -1019,12 +1019,12 @@ test('directional shadows direct-instance only contiguous geometry, pipeline, cu
 
   assert.deepEqual(
     passLog.filter(entry => entry[0] === 'drawIndexed').map(entry => [entry[2], entry[5]]),
-    [[2, 0], [1, 2], [1, 3], [1, 4]],
-    'only the first two casters share every draw binding and a continuous object-table range',
+    [[3, 0], [1, 3], [1, 4]],
+    'compatible casters enroll together even when a different cull mode was created between them',
   );
   assert.deepEqual(
     passLog.filter(entry => entry[0] === 'indexBuffer').map(entry => entry[2]),
-    ['uint16', 'uint16', 'uint16', 'uint32'],
+    ['uint16', 'uint16', 'uint32'],
     'index format changes split direct instance runs',
   );
 
@@ -1035,7 +1035,7 @@ test('directional shadows direct-instance only contiguous geometry, pipeline, cu
   ], new DirectionalLight({ shadow: { mapSize: 64, extent: 20 } }), undefined, undefined, resolveCullMode);
   assert.deepEqual(
     passLog.filter(entry => entry[0] === 'drawIndexed').map(entry => [entry[2], entry[5]]),
-    [[1, 0], [1, 2]],
+    [[1, 0], [1, 3]],
     'compatible casters separated by a released object slot do not instance across the gap',
   );
 
