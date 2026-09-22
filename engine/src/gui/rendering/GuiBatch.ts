@@ -28,7 +28,7 @@ export class GuiBatch {
   }
 
   rebuild(): void {
-    const vertexCount = this.commands.length * VERTICES_PER_QUAD;
+    const vertexCount = this.commands.reduce((count, c) => count + (c.strokeWidth ? 36 * 6 : VERTICES_PER_QUAD), 0);
     const requiredFloats = vertexCount * GUI_SHAPE_VERTEX_LAYOUT.floatsPerVertex;
     if (this.vertexData.length < requiredFloats) {
       this.vertexData = new Float32Array(nextCapacity(requiredFloats));
@@ -51,6 +51,15 @@ export class GuiBatch {
       const clipY0 = clip.y;
       const clipX1 = clip.x + clip.width;
       const clipY1 = clip.y + clip.height;
+      if (command.strokeWidth) {
+        const outer = outlinePoints(command, 0), inner = outlinePoints(command, command.strokeWidth);
+        for (let i = 0; i < outer.length; i++) {
+          const j = (i + 1) % outer.length;
+          for (const point of [outer[i]!, outer[j]!, inner[i]!, outer[j]!, inner[j]!, inner[i]!])
+            offset = writeVertex(data, offset, point[0], point[1], command, clipX0, clipY0, clipX1, clipY1);
+        }
+        continue;
+      }
       offset = writeVertex(data, offset, x0, y0, command, clipX0, clipY0, clipX1, clipY1);
       offset = writeVertex(data, offset, x1, y0, command, clipX0, clipY0, clipX1, clipY1);
       offset = writeVertex(data, offset, x0, y1, command, clipX0, clipY0, clipX1, clipY1);
@@ -97,4 +106,17 @@ function writeVertex(
   data[base + fields.clip + 2] = clipX1;
   data[base + fields.clip + 3] = clipY1;
   return base + GUI_SHAPE_VERTEX_LAYOUT.floatsPerVertex;
+}
+
+function outlinePoints(c: GuiShapeCommand, inset: number): [number, number][] {
+  const d = Math.min(inset, c.width / 2, c.height / 2);
+  const x = c.x + d, y = c.y + d, w = c.width - d * 2, h = c.height - d * 2;
+  const r = Math.max(0, Math.min(c.radius - d, w / 2, h / 2));
+  const points: [number, number][] = [];
+  const centers = [[x+w-r,y+r],[x+w-r,y+h-r],[x+r,y+h-r],[x+r,y+r]];
+  centers.forEach(([cx,cy], corner) => {
+    for (let n=0;n<=8;n++) { const a=(corner-1)*Math.PI/2+n*Math.PI/16;
+      points.push([cx!+Math.cos(a)*r,cy!+Math.sin(a)*r]); }
+  });
+  return points;
 }

@@ -12,6 +12,7 @@ export interface GuiTextCommand {
   fontSize: number;
   color: [number, number, number, number];
   multiline?: boolean;
+  verticalAlign?: 'top' | 'center';
   wrap?: boolean;
   lineHeight?: number;
   clip?: { x: number; y: number; width: number; height: number };
@@ -118,7 +119,8 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
   const clipY1 = clip.y + clip.height;
   const lineStep = (command.lineHeight ?? font.lineHeight) * scale;
   let x = command.x;
-  let baselineY = command.y + (command.multiline ? 0 : (command.height - font.lineHeight * scale) * 0.5);
+  const centerBlock = command.multiline && command.verticalAlign === 'center';
+  let baselineY = command.y + (command.multiline || command.verticalAlign === 'top' ? 0 : (command.height - font.lineHeight * scale) * 0.5);
   let previousCode: number | null = null;
   const glyphs: LaidOutGlyph[] = [];
 
@@ -128,7 +130,7 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
       x = command.x;
       baselineY += lineStep;
       previousCode = null;
-      if (baselineY > clipY1) break;
+      if (!centerBlock && baselineY > clipY1) break;
       continue;
     }
     const code = char.codePointAt(0);
@@ -148,7 +150,7 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
       x = command.x;
       baselineY += lineStep;
       previousCode = null;
-      if (baselineY > clipY1) break;
+      if (!centerBlock && baselineY > clipY1) break;
     }
     const nextX0 = x + glyph.xoffset * scale;
     const nextY0 = baselineY + glyph.yoffset * scale;
@@ -159,13 +161,20 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
     const u1 = (glyph.x + glyph.width) / font.scaleW;
     const v1 = (glyph.y + glyph.height) / font.scaleH;
 
-    if (nextY1 >= clipY0 && nextY0 <= clipY1 && nextX1 >= clipX0 && nextX0 <= clipX1) {
+    if ((centerBlock || (nextY1 >= clipY0 && nextY0 <= clipY1)) && nextX1 >= clipX0 && nextX0 <= clipX1) {
       glyphs.push({ x0: nextX0, y0: nextY0, x1: nextX1, y1: nextY1, u0, v0, u1, v1 });
     }
     x += glyph.xadvance * scale;
     previousCode = code;
 
     if (!command.wrap && x > clipX1) break;
+  }
+  if (centerBlock) {
+    // Measure all wrapped lines before centering; overflowing text stays top-aligned.
+    const blockHeight = baselineY - command.y + font.lineHeight * scale;
+    const shift = Math.max(0, (command.height - blockHeight) * 0.5);
+    for (const glyph of glyphs) { glyph.y0 += shift; glyph.y1 += shift; }
+    return { glyphs: glyphs.filter(g => g.y1 >= clipY0 && g.y0 <= clipY1), clipX0, clipY0, clipX1, clipY1 };
   }
   return { glyphs, clipX0, clipY0, clipX1, clipY1 };
 }

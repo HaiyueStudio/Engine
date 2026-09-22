@@ -81,7 +81,7 @@ export * from './experimental/simulation';
 export * from './experimental/audio';
 
 // GUI
-export * from './gui';
+export * from './gui/index';
 
 // RTT
 export { RttTexture } from './rtt/RttTexture';

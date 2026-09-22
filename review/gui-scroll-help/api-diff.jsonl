@@ -1,0 +1,3 @@
+{"entry":"index","before":30,"after":30,"added":[],"removed":[]}
+{"entry":"gui","before":78,"after":82,"added":["type:GuiHelpDialogOptions","type:GuiScrollViewOptions","value:GuiHelpDialog","value:GuiScrollView"],"removed":[]}
+{"entry":"experimental","before":846,"after":846,"added":[],"removed":[]}

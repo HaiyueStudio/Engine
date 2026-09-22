@@ -1,3 +1,4 @@
+import { GuiScrollView } from '../components/GuiScrollView';
 import type { IEngine } from '../../core/IEngine';
 import type { BitmapFontData } from '../../font/BitmapFontData';
 import { buildBitmapFont } from '../../font/BitmapFontBuilder';
@@ -294,9 +295,13 @@ export class GuiRenderer {
     this.currentModalImageBatch = this.imageBatch;
   }
 
+  private currentClip: GuiRect | undefined;
+
   private collectElement(element: GuiElement, theme: GuiTheme): void {
     if (!element.visible) return;
     if (element instanceof GuiModal) {
+      const previousClip = this.currentClip;
+      this.currentClip = undefined;
       const previousBatch = this.currentBatch;
       const previousTextBatch = this.currentTextBatch;
       const previousImageBatch = this.currentImageBatch;
@@ -305,13 +310,21 @@ export class GuiRenderer {
       this.currentImageBatch = this.currentModalImageBatch;
       this.addElementShapes(element, theme);
       for (const child of element.children) this.collectElement(child, theme);
+      this.currentClip = previousClip;
       this.currentBatch = previousBatch;
       this.currentTextBatch = previousTextBatch;
       this.currentImageBatch = previousImageBatch;
       return;
     }
     this.addElementShapes(element, theme);
+    const previousClip = this.currentClip;
+    if (element instanceof GuiScrollView) this.currentClip = this.clipRect(element.rect);
     for (const child of element.children) this.collectElement(child, theme);
+    if (element instanceof GuiScrollView && element.showScrollbar && element.maxScrollY > 0) {
+      const r = element.rect, height = Math.min(r.height, Math.max(24, r.height*r.height/element.contentHeight));
+      this.addRect(r.x+r.width-4,r.y+(r.height-height)*element.scrollY/element.maxScrollY,3,height,1.5,colorToRgba(element.style.borderColor,theme.colors.border));
+    }
+    this.currentClip = previousClip;
   }
 
   private addElementShapes(element: GuiElement, theme: GuiTheme): void {
@@ -334,7 +347,7 @@ export class GuiRenderer {
       height: image.rect.height,
       uv: image.uv,
       color: colorToRgba(image.tint, theme.colors.text),
-      clip: image.rect,
+      clip: this.clipRect(image.rect),
     });
   }
 
@@ -368,6 +381,11 @@ export class GuiRenderer {
     const textColor = button.hovered
       ? button.style.hoverColor ?? button.style.color
       : button.style.color;
+    if (button.variant === 'outline') {
+      this.currentBatch.addShape({ ...button.rect, radius, color: border, strokeWidth: 1.5, clip: this.currentClip });
+      this.addCenteredText(button.text, button.rect.x+4, button.rect.y, button.rect.width-8, button.rect.height, theme.fontSize, colorToRgba(textColor,theme.colors.text));
+      return;
+    }
     this.addRect(button.rect.x, button.rect.y, button.rect.width, button.rect.height, radius, border);
     this.addRect(button.rect.x + 1, button.rect.y + 1, button.rect.width - 2, button.rect.height - 2, Math.max(0, radius - 1), withAlpha(colorToRgba(background, surface), button.disabled ? 0.45 : 1));
     this.addCenteredText(button.text, button.rect.x + 8, button.rect.y, button.rect.width - 16, button.rect.height, theme.fontSize, colorToRgba(textColor, theme.colors.text));
@@ -421,7 +439,7 @@ export class GuiRenderer {
       color: withAlpha(colorToRgba(label.style.color, theme.colors.text), opacity),
       multiline: false,
       wrap: false,
-      clip: label.rect,
+      clip: this.clipRect(label.rect),
     });
   }
 
@@ -480,7 +498,7 @@ export class GuiRenderer {
       }
     }
 
-    this.addText(text, input.rect.x + padding, input.rect.y, input.rect.width - padding * 2, input.rect.height, theme.fontSize, color);
+    this.addText(text, input.rect.x + padding, input.rect.y, input.rect.width - padding * 2, input.rect.height, theme.fontSize, color, true);
 
     if (input.focused && !input.disabled && !input.readOnly && this.defaultFont) {
       const beforeCaret = input.value.slice(0, input.selectionFocus);
@@ -539,7 +557,14 @@ export class GuiRenderer {
     const rect = tooltip.popupRect;
     const radius = tooltip.style.radius ?? theme.radius;
     this.addPopupRect(rect.x, rect.y, rect.width, rect.height, radius, withAlpha(colorToRgba(tooltip.style.backgroundColor, theme.colors.background), 0.96));
-    this.addPopupText(tooltip.content, rect.x + 8, rect.y, rect.width - 16, rect.height, theme.fontSize, colorToRgba(theme.colors.text, theme.colors.text));
+    this.currentPopupTextBatch.addText({
+      text: tooltip.content,
+      x: rect.x + 8, y: rect.y, width: rect.width - 16, height: rect.height,
+      fontSize: theme.fontSize,
+      color: colorToRgba(theme.colors.text, theme.colors.text),
+      multiline: true, wrap: true, verticalAlign: 'center',
+      clip: rect,
+    });
   }
 
   private addTree(tree: GuiTree, theme: GuiTheme): void {
@@ -570,7 +595,7 @@ export class GuiRenderer {
       const color = row.node.disabled
         ? withAlpha(colorToRgba(theme.colors.textMuted, theme.colors.textMuted), 0.55)
         : colorToRgba(theme.colors.text, theme.colors.text);
-      this.addText(row.node.label, labelX, row.rowRect.y, Math.max(0, tree.rect.x + tree.rect.width - labelX - 8), row.rowRect.height, theme.fontSize, color);
+      this.addText(row.node.label, labelX, row.rowRect.y, Math.max(0, tree.rect.x + tree.rect.width - labelX - 8), row.rowRect.height, theme.fontSize, color, true);
     }
   }
 
@@ -588,7 +613,7 @@ export class GuiRenderer {
       this.addRect(x + 8, y + 6, 7, 2, 1, mark);
     }
     if (checkbox.label) {
-      this.addText(checkbox.label, x + size + 8, checkbox.rect.y, checkbox.rect.width - size - 10, checkbox.rect.height, theme.fontSize, colorToRgba(theme.colors.text, theme.colors.text));
+      this.addText(checkbox.label, x + size + 8, checkbox.rect.y, checkbox.rect.width - size - 10, checkbox.rect.height, theme.fontSize, colorToRgba(theme.colors.text, theme.colors.text), true);
     }
   }
 
@@ -605,7 +630,7 @@ export class GuiRenderer {
       this.addRect(x + 5, y + 5, size - 10, size - 10, Math.max(0, radius - 5), withAlpha(colorToRgba(theme.colors.primary, fill), radio.disabled ? 0.45 : 1));
     }
     if (radio.label) {
-      this.addText(radio.label, x + size + 8, radio.rect.y, radio.rect.width - size - 10, radio.rect.height, theme.fontSize, colorToRgba(theme.colors.text, theme.colors.text));
+      this.addText(radio.label, x + size + 8, radio.rect.y, radio.rect.width - size - 10, radio.rect.height, theme.fontSize, colorToRgba(theme.colors.text, theme.colors.text), true);
     }
   }
 
@@ -641,8 +666,15 @@ export class GuiRenderer {
     this.addRect(thumbX, slider.rect.y + (slider.rect.height - thumbSize) * 0.5, thumbSize, thumbSize, thumbSize * 0.5, colorToRgba(slider.focused ? theme.colors.active : theme.colors.text, theme.colors.text));
   }
 
+  private clipRect(rect: GuiRect): GuiRect {
+    const clip = this.currentClip;
+    if (!clip) return rect;
+    const x=Math.max(rect.x,clip.x),y=Math.max(rect.y,clip.y);
+    return {x,y,width:Math.max(0,Math.min(rect.x+rect.width,clip.x+clip.width)-x),height:Math.max(0,Math.min(rect.y+rect.height,clip.y+clip.height)-y)};
+  }
+
   private addRect(x: number, y: number, width: number, height: number, radius: number, color: [number, number, number, number]): void {
-    this.currentBatch.addShape({ x, y, width, height, radius, color });
+    this.currentBatch.addShape({ x, y, width, height, radius, color, clip: this.currentClip });
   }
 
   private addPopupRect(x: number, y: number, width: number, height: number, radius: number, color: [number, number, number, number], clip?: GuiRect): void {
@@ -670,7 +702,7 @@ export class GuiRenderer {
       multiline: !singleLine,
       wrap: !singleLine,
       lineHeight: fontSize * 1.2,
-      clip: { x, y, width, height },
+      clip: this.clipRect({ x, y, width, height }),
     });
   }
 
@@ -725,7 +757,7 @@ export class GuiRenderer {
       color,
       multiline: false,
       wrap: false,
-      clip: { x, y, width, height },
+      clip: this.clipRect({ x, y, width, height }),
     });
   }
 }

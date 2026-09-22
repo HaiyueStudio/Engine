@@ -7877,6 +7877,14 @@
               "kind": "value"
             },
             {
+              "name": "GuiHelpDialog",
+              "kind": "value"
+            },
+            {
+              "name": "GuiHelpDialogOptions",
+              "kind": "type"
+            },
+            {
               "name": "GuiImage",
               "kind": "value"
             },
@@ -7986,6 +7994,14 @@
             },
             {
               "name": "GuiRootOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiScrollView",
+              "kind": "value"
+            },
+            {
+              "name": "GuiScrollViewOptions",
               "kind": "type"
             },
             {

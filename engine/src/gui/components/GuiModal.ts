@@ -5,6 +5,7 @@ import {
   type GuiPointerEvent,
   type GuiRect,
   resolveGuiLength,
+  containsPoint,
 } from '../GuiTypes';
 import { GuiButton } from './GuiButton';
 import { GuiElement } from './GuiElement';
@@ -237,7 +238,7 @@ export class GuiModal extends GuiElement {
 
   override handleClick(event: GuiPointerEvent): void {
     super.handleClick(event);
-    if (this.closeOnBackdrop && event.target === this) this.close('backdrop');
+    if (this.closeOnBackdrop && event.target === this && !containsPoint(this.dialogRect, event.x, event.y)) this.close('backdrop');
   }
 
   private syncButtonVisibility(): void {

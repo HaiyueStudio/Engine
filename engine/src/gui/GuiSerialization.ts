@@ -1,3 +1,5 @@
+import { GuiHelpDialog } from './components/GuiHelpDialog';
+import { GuiScrollView } from './components/GuiScrollView';
 import type { GuiElementOptions, GuiLength, GuiStyle, GuiTheme } from './GuiTypes';
 import { requiredItemAt } from '../math/arrayAccess';
 import { EngineError, EngineErrorCode, ErrorDomain } from '../core/EngineError';
@@ -34,6 +36,8 @@ export type GuiSerializedElementType =
   | 'button'
   | 'label'
   | 'modal'
+  | 'help-dialog'
+  | 'scroll-view'
   | 'input'
   | 'checkbox'
   | 'switch'
@@ -218,6 +222,10 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
         autoWidth: booleanProp(props.autoWidth, false),
       });
     }
+    case 'scroll-view':
+      return new GuiScrollView({ ...base, contentHeight: numberProp(props.contentHeight, 0), scrollY: numberProp(props.scrollY, 0), showScrollbar: booleanProp(props.showScrollbar, true) });
+    case 'help-dialog':
+      return new GuiHelpDialog({ ...base, title: stringProp(props.title, ''), message: stringProp(props.message, ''), backdropColor: stringProp(props.backdropColor, 'rgba(15,23,42,0.48)') });
     case 'modal':
       return new GuiModal({
         ...base,
@@ -311,6 +319,8 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
 }
 
 function getSerializedElementType(element: GuiElement): GuiSerializedElementType {
+  if (element instanceof GuiHelpDialog) return 'help-dialog';
+  if (element instanceof GuiScrollView) return 'scroll-view';
   if (element instanceof GuiModal) return 'modal';
   if (element instanceof GuiButton) return 'button';
   if (element instanceof GuiLabel) return 'label';
@@ -328,6 +338,7 @@ function getSerializedElementType(element: GuiElement): GuiSerializedElementType
 }
 
 function serializeElementProps(element: GuiElement): Record<string, unknown> {
+  if (element instanceof GuiScrollView) return { contentHeight: element.contentHeight, scrollY: element.scrollY, showScrollbar: element.showScrollbar };
   if (element instanceof GuiModal) {
     return {
       title: element.title,
@@ -440,8 +451,8 @@ function scalarProp(value: unknown, fallback: GuiSerializedValue): GuiSerialized
   return fallback;
 }
 
-function variantProp(value: unknown): 'default' | 'primary' | 'danger' {
-  return value === 'primary' || value === 'danger' ? value : 'default';
+function variantProp(value: unknown): 'default' | 'primary' | 'danger' | 'outline' {
+  return value === 'primary' || value === 'danger' || value === 'outline' ? value : 'default';
 }
 
 function textAlignProp(value: unknown): GuiLabelTextAlign {
@@ -492,12 +503,12 @@ function treeNodesProp(value: unknown): GuiTreeNode<GuiSerializedValue>[] {
 
 const GUI_ELEMENT_TYPES = new Set<GuiSerializedElementType>([
   'element', 'button', 'label', 'input', 'checkbox', 'switch', 'radio', 'slider',
-  'progress', 'select', 'tree', 'tooltip', 'image', 'modal',
+  'progress', 'select', 'tree', 'tooltip', 'image', 'modal', 'help-dialog', 'scroll-view',
 ]);
 
 const STRING_PROPS = new Set(['text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId', 'title', 'message', 'confirmText', 'cancelText', 'backdropColor']);
-const NUMBER_PROPS = new Set(['fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
-const BOOLEAN_PROPS = new Set(['autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
+const NUMBER_PROPS = new Set(['contentHeight', 'scrollY', 'fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
+const BOOLEAN_PROPS = new Set(['showScrollbar', 'autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
 
 function validateProps(type: GuiSerializedElementType, value: unknown, path: string): void {
   const props = recordAt(value, path);
@@ -506,7 +517,7 @@ function validateProps(type: GuiSerializedElementType, value: unknown, path: str
     if (STRING_PROPS.has(key)) {
       if (key === 'sourceKey' && prop === null) continue;
       else if (typeof prop !== 'string') invalidGuiData(`GUI ${key} must be a string.`, propPath);
-      if (key === 'variant' && prop !== 'default' && prop !== 'primary' && prop !== 'danger') {
+      if (key === 'variant' && prop !== 'default' && prop !== 'primary' && prop !== 'danger' && prop !== 'outline') {
         invalidGuiData('GUI button variant is invalid.', propPath, { receivedVariant: prop });
       }
       if (key === 'textAlign' && prop !== 'left' && prop !== 'center' && prop !== 'right') {

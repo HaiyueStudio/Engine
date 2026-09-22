@@ -1,3 +1,5 @@
+import { GuiScrollView } from '../components/GuiScrollView';
+import { GuiHelpDialog, setGuiHelpDialogTextMetrics } from '../components/GuiHelpDialog';
 import type { IEngine } from '../../core/IEngine';
 import { System } from '../../ecs/System';
 import { World } from '../../ecs/World';
@@ -74,6 +76,7 @@ export class GuiSystem extends System {
   private canvasRectResetScheduled = false;
   private hovered: GuiElement | null = null;
   private pressed: GuiElement | null = null;
+  private scrollGesture: { view: GuiScrollView; pointerId: number; startY: number; startOffset: number; dragging: boolean } | null = null;
   private roots = new Set<GuiRoot>();
   private renderer: GuiRenderer;
   private readonly font: GuiFontOptions;
@@ -123,6 +126,10 @@ export class GuiSystem extends System {
   }
 
   suspendForDeviceLoss(): void {
+    this.scrollGesture = null;
+    if (this.pressed) this.pressed.pressed = false;
+    this.pressed = null;
+    this.pending.length = this.pendingWheel.length = 0;
     this.renderer.destroy();
   }
 
@@ -338,16 +345,44 @@ export class GuiSystem extends System {
     if (!native) return;
     this.renderer.prepare(this.engine);
     const hit = hitTestGui(world, this.roots, pending.x, pending.y);
+    const gesture = this.scrollGesture;
+    if (gesture && native.pointerId !== gesture.pointerId) return;
+    if (gesture && (pending.type === 'pointermove' || pending.type === 'pointerup' || pending.type === 'pointercancel')) {
+      if (pending.type === 'pointermove' && (gesture.dragging || Math.abs(pending.y - gesture.startY) > 6)) {
+        if (!gesture.dragging) {
+          gesture.dragging = true;
+          if (this.pressed) this.pressed.handlePointerUp(this.makeEvent('pointerup', this.pressed, pending, native));
+          this.pressed = null;
+          this.focus.blur();
+          this.updateHover(null, pending);
+        }
+        gesture.view.scrollTo(gesture.startOffset + gesture.startY - pending.y);
+      }
+      if (gesture.dragging) {
+        if (pending.type === 'pointerup' || pending.type === 'pointercancel') {
+          this.scrollGesture = null;
+          this.engine.canvas?.releasePointerCapture?.(native.pointerId);
+        }
+        return;
+      }
+      if (pending.type === 'pointerup' || pending.type === 'pointercancel') this.scrollGesture = null;
+    }
     if (pending.type === 'pointermove') this.updateHover(hit, pending);
 
     if (pending.type === 'pointerdown') {
       this.closePopupsExcept(hit, pending.x, pending.y);
       this.updateHover(hit, pending);
       this.pressed = hit;
+      const scroll = this.scrollAncestor(hit);
+      this.scrollGesture = scroll ? {view:scroll,pointerId:native.pointerId,startY:pending.y,startOffset:scroll.scrollY,dragging:false} : null;
       this.focus.focus(hit);
       if (hit) {
         this.engine.canvas?.focus();
-        this.engine.canvas?.setPointerCapture?.(native.pointerId);
+        // Input may have completed before this frame drains its event queue.
+        // Capturing an ended touch throws on Native and browsers alike.
+        const latest = this.pending.findLast(event => event.native?.pointerId === native.pointerId);
+        if (latest?.type !== 'pointerup' && latest?.type !== 'pointercancel')
+          this.engine.canvas?.setPointerCapture?.(native.pointerId);
         if (hit instanceof GuiInput) this.updateInputCaretFromPointer(hit, pending, false);
         hit.handlePointerDown(this.makeEvent('pointerdown', hit, pending, native));
       } else {
@@ -430,6 +465,11 @@ export class GuiSystem extends System {
     }
   }
 
+  private scrollAncestor(element: GuiElement | null): GuiScrollView | null {
+    for (let node=element;node;node=node.parent) if (node instanceof GuiScrollView && node.maxScrollY>0) return node;
+    return null;
+  }
+
   private dispatchWheelEvent(world: World, pending: PendingGuiWheelEvent): void {
     const native = pending.native;
     if (!native) return;
@@ -437,6 +477,15 @@ export class GuiSystem extends System {
     if (hit instanceof GuiSelect && hit.open && hit.containsPointIncludingPopup(pending.x, pending.y)) {
       hit.scrollBy(pending.deltaY);
       native.preventDefault();
+      return;
+    }
+    let scroll = this.scrollAncestor(hit);
+    const delta = pending.deltaY * (native.deltaMode === 1 ? 16 : native.deltaMode === 2 ? (scroll?.rect.height ?? 1) : 1);
+    while (scroll) {
+      const previous = scroll.scrollY;
+      scroll.scrollBy(delta);
+      if (scroll.scrollY !== previous) break;
+      scroll = this.scrollAncestor(scroll.parent);
     }
   }
 
@@ -487,6 +536,7 @@ export class GuiSystem extends System {
   }
 
   private measureAutoWidthLabels(element: GuiElement, themeFontSize: number): void {
+    if (element instanceof GuiHelpDialog) setGuiHelpDialogTextMetrics(element,(text,size)=>this.renderer.measureTextWidth(text,size));
     if (element instanceof GuiLabel && element.autoWidth) {
       setGuiLabelMeasuredTextWidth(
         element,

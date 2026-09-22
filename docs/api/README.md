@@ -33,3 +33,5 @@ npm run api:check
 ```
 
 只有经过 API 评审后才运行 `npm run api:update`。后续引入自动 API 页面生成时，应从构建后的声明文件生成到本目录的生成子目录，手写入口和错误码页面继续保留。
+
+- [GUI controls](./gui-controls.md)

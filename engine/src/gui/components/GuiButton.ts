@@ -3,13 +3,13 @@ import { GuiDirtyFlags, GuiElementOptions, GuiPointerEvent } from '../GuiTypes';
 
 export interface GuiButtonOptions extends GuiElementOptions {
   text?: string;
-  variant?: 'default' | 'primary' | 'danger';
+  variant?: 'default' | 'primary' | 'danger' | 'outline';
   onClick?: (event: GuiPointerEvent) => void;
 }
 
 export class GuiButton extends GuiElement {
   text: string;
-  variant: 'default' | 'primary' | 'danger';
+  variant: 'default' | 'primary' | 'danger' | 'outline';
 
   constructor(options: GuiButtonOptions = {}) {
     super({ width: 96, height: 32, ...options });

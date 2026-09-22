@@ -4,6 +4,10 @@ import {
   createBitmapFontData,
   deserializeGuiRoot,
   GuiButton,
+  GuiCheckbox,
+  GuiRadio,
+  GuiTooltip,
+  GuiTree,
   GuiElement,
   GuiImage,
   GuiInput,
@@ -276,4 +280,61 @@ test('touch button cleanup preserves text focus assigned by its click handler', 
   assert.equal(input.focused, true);
   assert.equal(input.hovered, false);
   system.destroy();
+});
+
+
+test('checkbox, radio, input and tree rows center their text at every scale', () => {
+  const renderer = new GuiSystem({}).renderer, font = createTestFont();
+  for (const scale of [0.6, 1, 2]) {
+    const theme = new GuiRoot({theme: {fontSize: 10 * scale}}).theme;
+    const bounds = {x: 20, y: 30, width: 240, height: 40 * scale};
+    const cases = [
+      [new GuiCheckbox({...bounds, label: 'AB'}), 'addCheckbox'],
+      [new GuiRadio({...bounds, label: 'AB'}), 'addRadio'],
+      [new GuiInput({...bounds, value: 'AB'}), 'addInput'],
+      [new GuiInput({...bounds, placeholder: 'AB'}), 'addInput'],
+      [new GuiTree({...bounds, height: 80 * scale, rowHeight: 40 * scale,
+        nodes: [{key:'a',label:'AB',children:[{key:'b',label:'AB'}]}], expandedKeys:['a']}), 'addTree'],
+    ];
+    for (const [control, method] of cases) {
+      renderer.textBatch.clear();
+      control.layout({x: 0, y: 0, width: 400, height: 300});
+      renderer[method](control, theme);
+      renderer.textBatch.rebuild(font);
+      const rows = control instanceof GuiTree ? control.visibleNodes.map(row => row.rowRect) : [control.rect];
+      assert.equal(renderer.textBatch.vertexCount, rows.length * 12, method);
+      rows.forEach((rect, i) => {
+        const top = renderer.textBatch.vertexData[i * 12 * 12 + 1];
+        assert.ok(Math.abs(top + 5 * scale - rect.y - rect.height / 2) < 1e-5, `${method} scale ${scale} row ${i}`);
+      });
+      for (const command of renderer.textBatch.commands) {
+        assert.equal(command.wrap, false, 'single-line controls clip instead of wrapping');
+      }
+    }
+  }
+});
+
+test('tooltip centers single, explicit multiline and wrapped text without dropping overflow', () => {
+  const renderer = new GuiSystem({}).renderer, font = createTestFont();
+  const target = new GuiButton({x: 100, y: 200, width: 100, height: 40});
+  target.layout({x: 0,y: 0,width: 400,height: 400});
+  target.hovered = true;
+  for (const scale of [0.6, 1, 2]) {
+    for (const [content, width, height, lines, glyphs] of [
+      ['AB', 100, 60, 1, 2], ['A\nB', 100, 60, 2, 2], ['ABAB', 25, 60, 2, 4],
+      ['A\nB\nA\nB', 100, 15, 4, 2],
+    ]) {
+      const tooltip = new GuiTooltip({target, content, width: width * scale + 16, height: height * scale});
+      tooltip.layout({x: 0,y: 0,width: 400,height: 400});
+      const theme = new GuiRoot({theme: {fontSize: 10 * scale}}).theme;
+      renderer.popupTextBatch.clear();
+      renderer.addTooltip(tooltip, theme);
+      renderer.popupTextBatch.rebuild(font);
+      const batch = renderer.popupTextBatch, rect = tooltip.popupRect;
+      assert.equal(batch.vertexCount, glyphs * 6);
+      const top = batch.vertexData[1];
+      const expected = rect.y + Math.max(0, (rect.height - lines * 10 * scale) / 2);
+      assert.ok(Math.abs(top - expected) < 1e-4, `${content} at ${scale}`);
+    }
+  }
 });
