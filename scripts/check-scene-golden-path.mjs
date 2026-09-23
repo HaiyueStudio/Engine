@@ -1,15 +1,19 @@
+import { includesGatePath } from './engine-release-policy.mjs';
 import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
 
+const gateScope = process.argv.includes('--engine') ? 'engine' : 'studio';
+const selectedPath = path => includesGatePath(path, gateScope);
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const violations = [];
 
 for (const { kind, directory } of [
   { kind: 'examples', directory: resolve(root, 'examples') },
-  { kind: 'games', directory: resolveStudioRepositoryPath('Games', 'games') },
+  ...(gateScope === 'studio' ? [{ kind: 'games', directory: resolveStudioRepositoryPath('Games', 'games') }] : []),
 ]) {
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;

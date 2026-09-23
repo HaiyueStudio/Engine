@@ -111,34 +111,6 @@
         "dist/**/*.js",
         "dist/**/*.d.ts"
       ]
-    },
-    "@haiyue/ui": {
-      "workspace": "../UI",
-      "nodeImport": false,
-      "maxPackedBytes": 55000,
-      "maxUnpackedBytes": 280000,
-      "maxFileCount": 60,
-      "capacity": {
-        "reviewed": { "packedBytes": 48827, "unpackedBytes": 246442, "fileCount": 49 },
-        "growthReserve": { "packedBytes": 6173, "unpackedBytes": 33558, "fileCount": 11 },
-        "capabilityBasis": "dependency-free Web Components root registration plus focused component subpaths"
-      },
-      "sideEffects": ["./themes/*.css"],
-      "declaredFiles": [
-        "README.md",
-        "LICENSE",
-        "dist/**/*.js",
-        "dist/**/*.d.ts",
-        "themes/*.css"
-      ],
-      "allowedFilePatterns": [
-        "package.json",
-        "README.md",
-        "LICENSE",
-        "dist/**/*.js",
-        "dist/**/*.d.ts",
-        "themes/*.css"
-      ]
     }
   },
   "tarball": {
@@ -382,14 +354,6 @@
         "compileMaterialGraphDocumentV1",
         "getMaterialGraphAuthoringCatalogV1"
       ]
-    }
-  },
-  "uiConsumers": {
-    "ui-button": {
-      "fixture": "scripts/fixtures/engine-consumers/ui-button.mjs",
-      "packageName": "@haiyue/ui",
-      "maxGzipBytes": 5000,
-      "requiredExports": ["HYButton", "defineButtonComponents"]
     }
   }
 }

@@ -1,8 +1,12 @@
+import { includesGatePath } from './engine-release-policy.mjs';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
+
+const gateScope = process.argv.includes('--engine') ? 'engine' : 'studio';
+const selectedPath = path => includesGatePath(path, gateScope);
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const packageDirectories = ['engine', 'extensions'];
@@ -69,7 +73,7 @@ function checkExactOptionalProperties() {
 }
 
 function checkExplicitAnySources() {
-  for (const directory of sourceDirectories) {
+  for (const directory of sourceDirectories.filter(selectedPath)) {
     const absolute = resolveLogicalPath(directory);
     if (!existsSync(absolute)) continue;
     for (const file of walkTypeScriptFiles(absolute)) {
@@ -85,7 +89,7 @@ function checkExplicitAnySources() {
       }
     }
   }
-  for (const path of explicitAnyAdapters.keys()) {
+  for (const path of [...explicitAnyAdapters.keys()].filter(selectedPath)) {
     if (!existsSync(resolveLogicalPath(path))) failures.push(`Registered any adapter no longer exists: ${path}.`);
   }
 }
@@ -109,7 +113,7 @@ function checkPublicDeclarations() {
 }
 
 function checkPublicFailurePaths() {
-  for (const path of publicFailurePaths) {
+  for (const path of publicFailurePaths.filter(selectedPath)) {
     const absolute = resolveLogicalPath(path);
     const files = statSync(absolute).isDirectory() ? walkTypeScriptFiles(absolute) : [absolute];
     for (const file of files) {
@@ -217,6 +221,7 @@ function resolveLogicalPath(path) {
 }
 
 function logicalPathFor(file) {
+  if (gateScope === 'engine') return normalize(relative(root, file));
   const editorSourceRoot = resolveStudioRepositoryPath('Editor', 'editor');
   const voxelEditorRoot = resolveStudioRepositoryPath('Editor', 'voxelEditor');
   const uiRoot = resolveStudioRepositoryPath('UI');

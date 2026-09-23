@@ -124,7 +124,17 @@
     "ray-tracing:orbit-example:check": "node scripts/webgpu-gate/verify-ray-tracing-orbit-example.mjs",
     "mugen-indexed-sprite:check": "npm run build -w ./extensions && node scripts/webgpu-gate/verify-indexed-sprite.mjs",
     "pack:candidates": "node scripts/pack-repository-candidates.mjs",
-    "release:no-rive": "node scripts/check-release-no-rive.mjs"
+    "release:no-rive": "node scripts/check-release-no-rive.mjs",
+    "check:studio:fast": "npm run fast-gate-policy:test && npm run typecheck && npm run unchecked-index:check && npm run check:boundaries && npm run architecture:check && npm run scene-golden-path:check && npm run editor-architecture:check && npm run responsibilities:check && npm run renderer-prepare:check && npm run observability:check && npm run asset-script:check && npm run render-product:structure && npm run performance-budget:test && npm run capability:admission:check && npm run examples:catalog:check && npm run api:check && npm run release:scope:check && npm run docs:studio:check && npm run shader-language:check && npm run test:workspaces:fast && npm run contracts:check && npm run lifecycle:check && node scripts/run-studio-npm.mjs UI run build && node scripts/run-studio-npm.mjs Editor run build && node scripts/run-studio-npm.mjs Editor run bundle:check -w ./editor",
+    "check:studio:slow": "node scripts/run-slow-checks.mjs",
+    "release:studio:artifacts": "node scripts/inspect-release-artifacts.mjs --release",
+    "check:engine:fast": "npm run typecheck && npm test && node scripts/check-workspace-boundaries.mjs && npm run modules:check && npm run check:engine:contracts && npm run performance-budget:test && npm run architecture:check && npm run renderer-prepare:check && npm run capability:admission:check && npm run docs:check && npm run api:check && npm run release:scope:check && npm run shader-language:check && npm run release:policy:test",
+    "check:engine:slow": "node scripts/run-engine-slow-checks.mjs",
+    "release:policy:test": "node --test scripts/release-gate-policy.test.mjs scripts/engine-release-isolation.test.mjs scripts/engine-package-policy.test.mjs scripts/release-no-rive-policy.test.mjs",
+    "verify:engine-render": "node scripts/verify-render-regressions.mjs && node scripts/verify-webgpu-readback-churn.mjs && npm run verify:gltf-asset && npm run verify:renderer-benchmark && npm run verify:lighting-scaling && npm run verify:planar-reflection && npm run verify:motion-blur && npm run verify:ambient-occlusion && npm run verify:clipping-planes && npm run verify:navmesh-first-person && node scripts/verify-pbr-example.mjs && node scripts/verify-fog-example.mjs && node scripts/verify-volume-example.mjs && node scripts/verify-pixel-regression.mjs && node scripts/verify-pixel-regression.mjs --product && npm run verify:engine-screenshots",
+    "verify:engine-screenshots": "npm run build:engine && npm run build:extensions && npm run build:target -- example:gltf-animation3d-crossfade example:ambient-occlusion example:shadow-map example:spine-viewer && node scripts/verify-product-screenshot-regressions.mjs --engine",
+    "docs:studio:check": "node scripts/check-docs.mjs --studio && node --test scripts/export-reference-docs.test.mjs",
+    "check:engine:contracts": "node scripts/check-no-unchecked-indexed-access.mjs --engine && node scripts/check-stage3-contracts.mjs --engine && node scripts/check-stage4-lifecycle.mjs --engine && node scripts/check-scene-golden-path.mjs --engine && node scripts/check-responsibility-boundaries.mjs --engine && node scripts/check-stage7-observability.mjs --engine && node scripts/check-stage8-asset-script.mjs --engine && node scripts/check-stage9-render-product.mjs --engine"
   },
   "devDependencies": {
     "@babylonjs/core": "9.21.2",

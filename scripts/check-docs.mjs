@@ -5,8 +5,8 @@ import { STUDIO_REPOSITORIES, requireStudioRepository } from './studio-repositor
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const docsRoot = resolve(root, 'docs');
-const documentationRoots = Object.keys(STUDIO_REPOSITORIES)
-  .map(name => requireStudioRepository(name).root);
+const studio = process.argv.includes('--studio');
+const documentationRoots = Object.values(STUDIO_REPOSITORIES).map(repository => repository.root);
 const violations = [];
 const expectedRootEntries = new Set([
   'AGENTS.md',
@@ -40,7 +40,7 @@ validateMarkdownLinks(resolve(root, 'README.md'));
 for (const absolute of walkSources([
   resolve(root, 'engine/src'),
   resolve(root, 'extensions/src'),
-  resolve(requireStudioRepository('Editor').root, 'editor/src'),
+  ...(studio ? [resolve(requireStudioRepository('Editor').root, 'editor/src')] : []),
 ])) {
   const source = readFileSync(absolute, 'utf8');
   for (const match of source.matchAll(/docsPath:\s*['"]([^'"]+)['"]/g)) {
@@ -79,7 +79,7 @@ function validateMarkdownLinks(absolute) {
     const target = resolve(dirname(absolute), decoded);
     if (!isInsideDocumentationRoots(target)) {
       violations.push(`${relativeSource} links outside the HaiyueStudio repositories: ${destination}`);
-    } else if (!existsSync(target)) {
+    } else if ((studio || target === root || target.startsWith(root + sep)) && !existsSync(target)) {
       violations.push(`${relativeSource} has a broken link: ${destination}`);
     }
   }

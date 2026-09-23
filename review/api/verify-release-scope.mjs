@@ -1,7 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { requireStudioRepository } from '../../scripts/studio-repository-layout.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const manifest = readJson('review/api/release-manifest.json');
@@ -13,28 +12,16 @@ const expectedArtifacts = new Map([
   ['animation-spec-npm', ['npm-package', 'animation-spec', 'stable']],
   ['extensions-npm', ['npm-package', 'extensions', 'stable-focused-subpaths']],
   ['shader-language-npm', ['npm-package', 'shader-language', 'stable-build-tooling']],
-  ['ui-npm', ['npm-package', 'ui', 'stable-focused-subpaths']],
-  ['scene-editor-static', ['static-web-app', 'editor', 'stable']],
-  ['animation-editor-static', ['static-web-app', 'AnimationEditor', 'stable']],
-  ['voxel-editor-pwa', ['pwa', 'voxelEditor', 'stable']],
-  ['voxel-editor-electron', ['electron-platform-set', 'voxelEditor', 'preview-unsigned']],
   ['examples-static-catalog', ['static-catalog', 'examples', 'supporting']],
-  ['games-static-catalog', ['static-catalog', 'games', 'supporting']],
 ]);
-const publicPackages = new Set(['@haiyue/engine', '@haiyue/animation-spec', '@haiyue/extensions', '@haiyue/shader-language', '@haiyue/ui']);
-const privateWorkspaces = ['editor', 'AnimationEditor', 'voxelEditor', 'examples', 'games'];
-const editorRoot = requireStudioRepository('Editor').root;
+const publicPackages = new Set(['@haiyue/engine', '@haiyue/animation-spec', '@haiyue/extensions', '@haiyue/shader-language']);
+const privateWorkspaces = ['examples'];
 const workspacePackages = new Map([
   ['engine', resolve(root, 'engine/package.json')],
   ['animation-spec', resolve(root, 'animation-spec/package.json')],
   ['extensions', resolve(root, 'extensions/package.json')],
   ['shader-language', resolve(root, 'shader-language/package.json')],
-  ['ui', resolve(requireStudioRepository('UI').root, 'package.json')],
-  ['editor', resolve(editorRoot, 'editor/package.json')],
-  ['AnimationEditor', resolve(editorRoot, 'AnimationEditor/package.json')],
-  ['voxelEditor', resolve(editorRoot, 'voxelEditor/package.json')],
   ['examples', resolve(root, 'examples/package.json')],
-  ['games', resolve(requireStudioRepository('Games').root, 'package.json')],
 ]);
 
 check(manifest.schemaVersion === 1, 'release manifest schemaVersion must be 1');
@@ -73,7 +60,7 @@ for (const artifact of artifacts) {
 for (const id of expectedArtifacts.keys()) check(ids.has(id), `release artifact is missing: ${id}`);
 
 const npmArtifacts = artifacts.filter(artifact => artifact.kind === 'npm-package');
-check(npmArtifacts.length === publicPackages.size, 'release manifest must contain exactly five public npm packages');
+check(npmArtifacts.length === publicPackages.size, 'release manifest must contain exactly four public npm packages');
 for (const artifact of npmArtifacts) {
   const pkg = readJsonAbsolute(workspacePackages.get(artifact.workspace), `${artifact.workspace}/package.json`);
   check(publicPackages.has(artifact.packageName), `${artifact.id} is not an approved public package`);
@@ -86,7 +73,7 @@ for (const artifact of npmArtifacts) {
 }
 check(
   sameSet(new Set(npmArtifacts.map(artifact => artifact.packageName)), publicPackages),
-  'release manifest public package set differs from the capability-attributed five-package scope',
+  'release manifest public package set differs from the capability-attributed four-package scope',
 );
 
 for (const workspace of privateWorkspaces) {
@@ -100,7 +87,7 @@ if (errors.length > 0) {
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
-console.log('[release-scope] Five public npm packages and six app/catalog artifacts match the capability-attributed release scope.');
+console.log('[release-scope] Four public npm packages and the Engine example catalog match the capability-attributed release scope.');
 
 function readJson(path) {
   const absolute = resolve(root, path);

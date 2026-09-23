@@ -6,6 +6,11 @@ export const PRODUCT_SCREENSHOT_CASES = Object.freeze([
   screenshotCase('complete-game-match-3', 'games/match-3/index.html', { regression: 1 }),
 ]);
 
+export function selectProductScreenshotCases(scope = 'studio') {
+  if (!['engine', 'studio'].includes(scope)) throw new Error(`Unknown screenshot scope: ${scope}`);
+  return PRODUCT_SCREENSHOT_CASES.filter(entry => scope === 'studio' || entry.fixture.startsWith('examples/'));
+}
+
 export const DEFAULT_SCREENSHOT_BUDGET = Object.freeze({
   maxMeanAbsoluteError: 14,
   maxChangedChannelRatio: 0.18,

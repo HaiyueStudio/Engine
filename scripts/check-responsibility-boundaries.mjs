@@ -1,8 +1,12 @@
+import { includesGatePath } from './engine-release-policy.mjs';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
+
+const gateScope = process.argv.includes('--engine') ? 'engine' : 'studio';
+const selectedPath = path => includesGatePath(path, gateScope);
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
@@ -444,6 +448,7 @@ const contracts = [
 ];
 
 for (const contract of contracts) {
+  if (!selectedPath(contract.owner)) continue;
   const owner = parse(contract.owner);
   const module = parse(contract.module);
   const ownerDependencies = dependencies(owner);
@@ -467,6 +472,7 @@ for (const contract of contracts) {
 }
 
 for (const budget of ownerSizeBudgets) {
+  if (!selectedPath(budget.path)) continue;
   const lines = readFileSync(resolveContractPath(budget.path), 'utf8').split(/\r?\n/).length;
   if (lines > budget.maxLines) {
     failures.push(

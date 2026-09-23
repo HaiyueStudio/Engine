@@ -20,7 +20,8 @@ import {
 } from './benchmark/cpu-benchmark-policy.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const editorWorkspace = resolve(requireStudioRepository('Editor').root, 'editor');
+const benchmarkScope = process.env.HAIYUE_BENCHMARK_SCOPE ?? 'studio';
+if (!['engine', 'studio'].includes(benchmarkScope)) throw new Error(`Unknown benchmark scope: ${benchmarkScope}`);
 await main();
 
 async function main() {
@@ -34,7 +35,7 @@ async function main() {
     cohortRounds: cli.cohortRounds ?? process.env.BENCHMARK_COHORT_ROUNDS,
     caseFilter: cli.caseFilter.length > 0 ? cli.caseFilter : process.env.BENCHMARK_CASE_FILTER,
   });
-  const output = resolve(root, cli.output ?? process.env.BENCHMARK_OUTPUT ?? 'artifacts/benchmarks/haiyue-benchmark-v3.json');
+  const output = resolve(root, cli.output ?? process.env.BENCHMARK_OUTPUT ?? (benchmarkScope === 'engine' ? 'artifacts/benchmarks/haiyue-engine-benchmark-v3.json' : 'artifacts/benchmarks/haiyue-benchmark-v3.json'));
   const baselinePath = resolve(root, cli.baseline ?? process.env.BENCHMARK_BASELINE ?? 'review/baselines/benchmark-stage9.json');
   const runnerProfile = cli.runnerProfile ?? process.env.CPU_BENCHMARK_RUNNER_PROFILE;
   const threshold = Number(cli.threshold ?? process.env.BENCHMARK_REGRESSION_THRESHOLD ?? 0.15);
@@ -42,6 +43,7 @@ async function main() {
     throw new RangeError(`CPU benchmark regression threshold must be a finite non-negative number; received ${threshold}.`);
   }
   const writingBaseline = output === baselinePath;
+  if (writingBaseline && benchmarkScope !== 'studio') throw new Error('Engine-scoped diagnostics cannot replace the Studio baseline.');
   if (writingBaseline) {
     assertBaselinePromotionContext({
       configuration,
@@ -62,11 +64,11 @@ async function main() {
     buildWorkspace('engine');
     buildWorkspace('extensions');
     buildWorkspace('extensions', 'rollup.worker.config.js');
-    buildEditorTesting();
+    if (benchmarkScope === 'studio') buildEditorTesting();
   }
 
   const { createBenchmarkCases } = await import('./benchmark/suite.mjs');
-  const cases = createBenchmarkCases(configuration.profile)
+  const cases = createBenchmarkCases(configuration.profile, benchmarkScope)
     .filter(benchmark => matchesCaseFilter(benchmark.id, configuration.caseFilter));
   if (cases.length === 0) {
     throw new Error(`CPU benchmark case filter matched no cases: ${configuration.caseFilter.join(', ') || '(empty)'}.`);
@@ -139,6 +141,7 @@ async function main() {
   const report = {
     schemaVersion: 4,
     suiteVersion: 'stage9-follow-up-v3',
+    scope: benchmarkScope,
     generatedAt: new Date().toISOString(),
     profile: configuration.profile,
     revision,
@@ -209,6 +212,7 @@ function buildWorkspace(workspace, config = null) {
 }
 
 function buildEditorTesting() {
+  const editorWorkspace = resolve(requireStudioRepository('Editor').root, 'editor');
   const result = spawnSync(process.execPath, [resolve(root, 'scripts/build-rollup-once.mjs'), 'rollup.test.config.js'], {
     cwd: editorWorkspace,
     stdio: 'inherit',

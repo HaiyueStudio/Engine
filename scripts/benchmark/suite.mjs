@@ -69,9 +69,9 @@ import {
   resolveRealRendererStructuralBudgets,
 } from './real-renderer-budgets.mjs';
 
-const editorTestingModuleUrl = pathToFileURL(
-  resolveStudioRepositoryPath('Editor', 'editor/dist-test/testing.js'),
-).href;
+function editorTestingModuleUrl() {
+  return pathToFileURL(resolveStudioRepositoryPath('Editor', 'editor/dist-test/testing.js')).href;
+}
 
 // glTF's URL adapter uses the browser location only to resolve relative URLs.
 globalThis.window ??= { location: { href: 'http://benchmark.haiyue.local/' } };
@@ -89,7 +89,8 @@ const SPINE_SAMPLE_WINDOW_ITERATIONS = 1_000;
 class BenchA extends Component { static UniqueCheckType = UniqueCheckType.SAME | UniqueCheckType.REPLACE; }
 class BenchB extends Component { static UniqueCheckType = UniqueCheckType.SAME | UniqueCheckType.REPLACE; }
 
-export function createBenchmarkCases(profile = 'ci') {
+export function createBenchmarkCases(profile = 'ci', scope = 'studio') {
+  if (!['engine', 'studio'].includes(scope)) throw new Error(`Unknown benchmark scope: ${scope}`);
   const scale = profile === 'full' ? 4 : 1;
   const realRendererEntities = profile === 'full' ? 1_000 : 256;
   return [
@@ -135,8 +136,10 @@ export function createBenchmarkCases(profile = 'ci') {
     rendererObjectTableDirtyRangeCase(10_000, 0.1),
     rendererObjectTableDirtyRangeCase(10_000, 1),
     renderObjectChurnCase(10_000 * scale),
-    editorPlayRestartImportChurnCase(500 * scale),
-    editorExportBinaryWriterCase(4 * 1024 * 1024 * scale),
+    ...(scope === 'studio' ? [
+      editorPlayRestartImportChurnCase(500 * scale),
+      editorExportBinaryWriterCase(4 * 1024 * 1024 * scale),
+    ] : []),
   ];
 }
 
@@ -153,7 +156,7 @@ function editorExportBinaryWriterCase(byteCount) {
       peakWorkingBytes: { max: byteCount * 5 },
     },
     async setup() {
-      const { BinaryWriter } = await import(editorTestingModuleUrl);
+      const { BinaryWriter } = await import(editorTestingModuleUrl());
       return { BinaryWriter, source: new Float32Array(1024), metrics: null };
     },
     run(state) {
@@ -1996,7 +1999,7 @@ function createTinyKtx2Payload() {
 }
 
 async function createEditorChurnState() {
-  const { PlaySession, RuntimeOwnershipScope } = await import(editorTestingModuleUrl);
+  const { PlaySession, RuntimeOwnershipScope } = await import(editorTestingModuleUrl());
   const originalWindow = globalThis.window;
   const listeners = new Map();
   globalThis.window = {

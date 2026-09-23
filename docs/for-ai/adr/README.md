@@ -125,3 +125,5 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [ADR 0103: Engine GUI RGB color picker](0103-gui-color-picker.md)
 
 - [0104：Rive 研发分支与 0.1.1 发布范围](./0104-rive-development-branch.md)
+
+- [0105：UI 与 Engine 独立发布门禁](0105-independent-library-release-gates.md)

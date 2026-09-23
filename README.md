@@ -123,3 +123,11 @@ WebGPU、像素和性能改动还需要相应的真实浏览器或设备验证�
 ## License
 
 [MIT](./LICENSE)
+
+## Independent library release gates
+
+`release:check`, `release:check:local`, `release:check:global` and `release:artifact:check`
+validate only the four Engine repository libraries and Engine examples. UI owns its API,
+package budget and release checks in the UI repository. Cross-repository integration remains
+explicitly available through `check:studio:fast` and `check:studio:slow`; legacy `check:fast`
+and `check:slow` retain their Studio scope. See [ADR 0105](docs/for-ai/adr/0105-independent-library-release-gates.md).

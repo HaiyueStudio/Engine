@@ -30,7 +30,6 @@ test('public package manifests expose dist-only targets and never publish source
     ['animation-spec', new URL('../animation-spec/package.json', import.meta.url)],
     ['shader-language', new URL('../shader-language/package.json', import.meta.url)],
     ['extensions', new URL('../extensions/package.json', import.meta.url)],
-    ['ui', new URL('../../UI/package.json', import.meta.url)],
   ];
   for (const [workspace, manifestUrl] of workspaces) {
     const manifest = JSON.parse(readFileSync(manifestUrl, 'utf8'));

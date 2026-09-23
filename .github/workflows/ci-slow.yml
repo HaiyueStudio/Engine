@@ -47,8 +47,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run slow quality gate
-        run: npm run check:slow -- --content-tier="${CONTENT_TIER}"
+      - name: Run Engine slow quality gate
+        run: npm run check:engine:slow -- --content-tier="${CONTENT_TIER}"
 
       - name: Upload slow-gate reports
         if: always()
