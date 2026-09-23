@@ -1077,6 +1077,9 @@ export class Mesh3DRenderer extends BaseRenderer {
         matData.sourceEmissiveTexture = source;
       }
       matData.uniformDirty = true;
+      // The old owned texture has been released. Bind the fallback immediately;
+      // asynchronous loading will install the replacement in a later frame.
+      this._rebuildMatBindGroup(matData);
       this._loadTextureAsync(source, matData, slot);
       return;
     }

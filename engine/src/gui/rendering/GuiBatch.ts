@@ -28,7 +28,7 @@ export class GuiBatch {
   }
 
   rebuild(): void {
-    const vertexCount = this.commands.reduce((count, c) => count + (c.strokeWidth ? 36 * 6 : VERTICES_PER_QUAD), 0);
+    const vertexCount = this.commands.reduce((count, c) => count + (c.strokeWidth ? 36 * 6 : c.roundedMesh ? 36 * 3 : VERTICES_PER_QUAD), 0);
     const requiredFloats = vertexCount * GUI_SHAPE_VERTEX_LAYOUT.floatsPerVertex;
     if (this.vertexData.length < requiredFloats) {
       this.vertexData = new Float32Array(nextCapacity(requiredFloats));
@@ -57,6 +57,14 @@ export class GuiBatch {
           const j = (i + 1) % outer.length;
           for (const point of [outer[i]!, outer[j]!, inner[i]!, outer[j]!, inner[j]!, inner[i]!])
             offset = writeVertex(data, offset, point[0], point[1], command, clipX0, clipY0, clipX1, clipY1);
+        }
+        continue;
+      }
+      if (command.roundedMesh) {
+        const edge = outlinePoints(command, 0);
+        for (let i = 0; i < edge.length; i++) {
+          for (const [x, y] of [[(x0 + x1) / 2, (y0 + y1) / 2], edge[i]!, edge[(i + 1) % edge.length]!])
+            offset = writeVertex(data, offset, x!, y!, command, clipX0, clipY0, clipX1, clipY1);
         }
         continue;
       }

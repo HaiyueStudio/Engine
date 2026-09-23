@@ -1,3 +1,4 @@
+import { GuiSwitch } from '../components/GuiSwitch';
 import { GuiScrollView } from '../components/GuiScrollView';
 import { GuiHelpDialog, setGuiHelpDialogTextMetrics } from '../components/GuiHelpDialog';
 import type { IEngine } from '../../core/IEngine';
@@ -25,6 +26,7 @@ import type { PipelineWarmupPlan } from '../../renderer/PipelineWarmup';
 interface PendingGuiPointerEvent {
   type: 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel';
   native: PointerEvent | null;
+  timestamp?: number;
   x: number;
   y: number;
 }
@@ -76,11 +78,15 @@ export class GuiSystem extends System {
   private canvasRectResetScheduled = false;
   private hovered: GuiElement | null = null;
   private pressed: GuiElement | null = null;
-  private scrollGesture: { view: GuiScrollView; pointerId: number; startY: number; startOffset: number; dragging: boolean } | null = null;
+  private scrollGesture: {
+    view: GuiScrollView; pointerId: number; startY: number; startOffset: number; dragging: boolean;
+    samples: { time: number; offset: number }[]; lastMove: number; direction: number;
+  } | null = null;
   private roots = new Set<GuiRoot>();
   private renderer: GuiRenderer;
   private readonly font: GuiFontOptions;
   private disposed = false;
+  private motionFrames = new WeakMap<object, number>();
   private composing = false;
   loadOp: 'clear' | 'load';
   readonly recoveryLabel: string;
@@ -112,10 +118,54 @@ export class GuiSystem extends System {
   record(world: World, context: RenderCommandContext): this {
     if (this.disabled) return this;
     this.prepareRoots(world, context.view?.displayWidth, context.view?.displayHeight);
+    // RenderIntegration owns this system and disables ordinary autoUpdate.
+    // Use the shared frame identity so multiple views never advance motion twice.
+    const frame = context.frameData ?? world.frameData;
+    this.advanceMotion(world, frame.delta, frame);
     this.dispatchPendingEvents(world);
     this.render(context);
     for (const root of this.roots) root.clearDirty();
     return this;
+  }
+
+  /** Demand-rendering hosts should keep requesting frames while this is true. */
+  get animating(): boolean {
+    const active = (element: GuiElement): boolean => element.visible && !element.disabled &&
+      (((element instanceof GuiScrollView || element instanceof GuiSwitch) && element.animating) || element.children.some(active));
+    for (const root of this.roots) if (active(root.root)) return true;
+    return false;
+  }
+
+  override update(world: World, time: number, delta: number): this {
+    if (this.disabled) { this.stopAnimations(); return this; }
+    this.advanceMotion(world, delta);
+    return super.update(world, time, delta);
+  }
+
+  private advanceMotion(world: World, delta: number, frame = world.frameData): void {
+    if (frame.frameId > 0 && this.motionFrames.get(frame) === frame.frameId) return;
+    this.motionFrames.set(frame, frame.frameId);
+    const advance = (element: GuiElement, parentActive: boolean): void => {
+      const active = parentActive && element.visible && !element.disabled;
+      if (element instanceof GuiScrollView) {
+        if (active) element.advanceAnimation(delta); else element.stopInertia();
+      } else if (element instanceof GuiSwitch) {
+        if (active) element.advanceAnimation(delta); else if (element.animating) element.finishAnimation();
+      }
+      for (const child of element.children) advance(child, active);
+    };
+    const entities = this.entitySet.get(world);
+    if (entities) for (const entity of entities) {
+      const root = entity.getComponent(GuiRoot);
+      if (root) advance(root.root, true);
+    }
+  }
+
+  stopAnimations(): void {
+    for (const root of this.roots) this.walkGui(root.root, element => {
+      if (element instanceof GuiScrollView) element.stopInertia();
+      else if (element instanceof GuiSwitch && element.animating) element.finishAnimation();
+    });
   }
 
   override destroy(): this {
@@ -126,6 +176,7 @@ export class GuiSystem extends System {
   }
 
   suspendForDeviceLoss(): void {
+    this.stopAnimations();
     this.scrollGesture = null;
     if (this.pressed) this.pressed.pressed = false;
     this.pressed = null;
@@ -321,6 +372,7 @@ export class GuiSystem extends System {
     const pending = this.pendingPool.pop() ?? { type, native: null, x: 0, y: 0 };
     pending.type = type;
     pending.native = event;
+    pending.timestamp = Number.isFinite(event.timeStamp) ? event.timeStamp : performance.now();
     pending.x = event.clientX - rect.left;
     pending.y = event.clientY - rect.top;
     this.pending.push(pending);
@@ -345,6 +397,7 @@ export class GuiSystem extends System {
     if (!native) return;
     this.renderer.prepare(this.engine);
     const hit = hitTestGui(world, this.roots, pending.x, pending.y);
+    const timestamp = pending.timestamp ?? (Number.isFinite(native.timeStamp) ? native.timeStamp : performance.now());
     const gesture = this.scrollGesture;
     if (gesture && native.pointerId !== gesture.pointerId) return;
     if (gesture && (pending.type === 'pointermove' || pending.type === 'pointerup' || pending.type === 'pointercancel')) {
@@ -357,9 +410,17 @@ export class GuiSystem extends System {
           this.updateHover(null, pending);
         }
         gesture.view.scrollTo(gesture.startOffset + gesture.startY - pending.y);
+        this.sampleScroll(gesture, timestamp);
       }
       if (gesture.dragging) {
         if (pending.type === 'pointerup' || pending.type === 'pointercancel') {
+          if (pending.type === 'pointerup') {
+            gesture.view.scrollTo(gesture.startOffset + gesture.startY - pending.y);
+            this.sampleScroll(gesture, timestamp);
+            const first = gesture.samples[0]!, duration = timestamp - first.time;
+            if (timestamp - gesture.lastMove <= 100 && duration > 0)
+              gesture.view.fling((gesture.view.scrollY - first.offset) * 1000 / duration);
+          } else gesture.view.stopInertia();
           this.scrollGesture = null;
           this.engine.canvas?.releasePointerCapture?.(native.pointerId);
         }
@@ -374,7 +435,14 @@ export class GuiSystem extends System {
       this.updateHover(hit, pending);
       this.pressed = hit;
       const scroll = this.scrollAncestor(hit);
-      this.scrollGesture = scroll ? {view:scroll,pointerId:native.pointerId,startY:pending.y,startOffset:scroll.scrollY,dragging:false} : null;
+      const stopping = scroll?.animating ?? false;
+      scroll?.stopInertia();
+      this.scrollGesture = scroll ? {
+        view: scroll, pointerId: native.pointerId, startY: pending.y, startOffset: scroll.scrollY,
+        dragging: stopping, samples: [{ time: timestamp, offset: scroll.scrollY }], lastMove: timestamp, direction: 0,
+      } : null;
+      // A tap during momentum only stops the list; it must not toggle the row under the finger.
+      if (stopping) { this.pressed = null; this.focus.blur(); this.updateHover(null, pending); return; }
       this.focus.focus(hit);
       if (hit) {
         this.engine.canvas?.focus();
@@ -463,6 +531,21 @@ export class GuiSystem extends System {
       const native = pending.native;
       if (native) this.hovered.handlePointerEnter(this.makeEvent('pointerenter', this.hovered, pending, native));
     }
+  }
+
+  private sampleScroll(gesture: NonNullable<GuiSystem['scrollGesture']>, time: number): void {
+    const previous = gesture.samples.at(-1)!;
+    const movement = gesture.view.scrollY - previous.offset;
+    if (movement) {
+      const direction = Math.sign(movement);
+      if (gesture.direction && direction !== gesture.direction) gesture.samples = [previous];
+      gesture.direction = direction;
+      gesture.lastMove = time;
+    }
+    // Retain a short recent window, including the release pause; do not reuse stale fling speed.
+    while (gesture.samples.length > 1 && time - gesture.samples[0]!.time > 100) gesture.samples.shift();
+    if (time > previous.time) gesture.samples.push({ time, offset: gesture.view.scrollY });
+    else previous.offset = gesture.view.scrollY;
   }
 
   private scrollAncestor(element: GuiElement | null): GuiScrollView | null {

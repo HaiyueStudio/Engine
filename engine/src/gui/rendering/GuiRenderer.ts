@@ -635,16 +635,16 @@ export class GuiRenderer {
   }
 
   private addSwitch(control: GuiSwitch, theme: GuiTheme): void {
-    const trackColor = control.checked ? theme.colors.primary : theme.colors.border;
-    const track = withAlpha(colorToRgba(control.style.backgroundColor, trackColor), control.disabled ? 0.45 : 1);
+    const off = colorToRgba(control.style.backgroundColor, theme.colors.border);
+    const on = colorToRgba(control.style.backgroundColor, theme.colors.primary);
+    const amount = control.colorProgress;
+    const track = withAlpha(off.map((value, i) => value + (on[i]! - value) * amount) as [number, number, number, number], control.disabled ? 0.45 : 1);
     const thumb = colorToRgba(theme.colors.text, theme.colors.text);
     const radius = control.rect.height * 0.5;
-    this.addRect(control.rect.x, control.rect.y, control.rect.width, control.rect.height, radius, track);
-    const thumbSize = Math.max(4, control.rect.height - 8);
-    const thumbX = control.checked
-      ? control.rect.x + control.rect.width - thumbSize - 4
-      : control.rect.x + 4;
-    this.addRect(thumbX, control.rect.y + 4, thumbSize, thumbSize, thumbSize * 0.5, thumb);
+    this.currentBatch.addShape({ ...control.rect, radius, color: track, roundedMesh: true, clip: this.currentClip });
+    const thumbSize = Math.max(4, control.rect.height - 6);
+    const thumbX = control.rect.x + 3 + Math.max(0, control.rect.width - thumbSize - 6) * control.thumbProgress;
+    this.currentBatch.addShape({ x: thumbX, y: control.rect.y + 3, width: thumbSize, height: thumbSize, radius: thumbSize * 0.5, color: withAlpha(thumb, control.disabled ? 0.45 : 1), roundedMesh: true, clip: this.currentClip });
   }
 
   private addProgress(progress: GuiProgress, theme: GuiTheme): void {

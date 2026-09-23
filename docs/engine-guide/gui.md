@@ -47,3 +47,17 @@ GUI serialization restores scroll offsets, contents, help text, and the outline
 button variant. Do not send the new tags to older engine readers. The runnable
 integration is [LED Sudoku](../../../Games/games/led-sudoku/README.md), shared by
 its browser and Native app.
+
+For touch lists that should coast after a quick swipe, set `inertia: true` on
+`GuiScrollView`. Start with `inertiaStrength: 1`; increase it to coast farther or
+reduce it for a shorter stop. A new contact stops momentum before activating a
+row. The default is no inertia. Enable the same option on `help.body` for long
+rule explanations.
+
+To animate switches, pass `thumbTransitionMs: 200` and
+`colorTransitionMs: 200` to `GuiSwitch`. Omit either value for its original
+instant behavior. Both settings work independently, and rapid reversals remain
+continuous. See [motion options](../api/gui-controls.md#optional-motion).
+The regular `world.update(time, delta)` drives these animations. A host which
+renders on demand should continue frames while `guiSystem.animating` is true
+and stop animations on suspension with `guiSystem.stopAnimations()`.

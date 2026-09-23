@@ -201,3 +201,124 @@ test('a down/up queued before the frame clicks without capturing an expired nati
   assert.equal(toggle.checked,true);assert.equal(system.pending.length,0);
   system.engine.canvas=undefined;system.destroy();
 });
+
+test('switch capsule geometry uses circular ends and inherits clipping', () => {
+  for (const [width, height] of [[50, 30], [24, 24], [75, 45]]) {
+    const batch = new GuiBatch();
+    batch.addShape({ x: 10, y: 20, width, height, radius: height / 2, roundedMesh: true, color: [1, 1, 1, 1], clip: { x: 0, y: 0, width: 200, height: 200 } });
+    batch.rebuild();
+    assert.equal(batch.vertexCount, 108);
+    const stride = GUI_SHAPE_VERTEX_LAYOUT.floatsPerVertex, fields = GUI_SHAPE_VERTEX_LAYOUT.floatOffsets;
+    for (let i = 0; i < batch.vertexCount; i++) {
+      if (i % 3 === 0) continue;
+      const x = batch.vertexData[i * stride + fields.position] - 10;
+      const y = batch.vertexData[i * stride + fields.position + 1] - 20;
+      const center = x < width / 2 ? height / 2 : width - height / 2;
+      assert(Math.abs(Math.hypot(x - center, y - height / 2) - height / 2) < 0.001);
+      assert.equal(batch.vertexData[i * stride + fields.clip + 2], 200);
+    }
+  }
+});
+
+test('scroll inertia is opt-in, tunable, frame-rate independent and bounded', () => {
+  const make = options => { const v = new GuiScrollView({ contentHeight: 10000, ...options }); v.rect = { x: 0, y: 0, width: 200, height: 300 }; return v; };
+  const plain = make({}); plain.fling(1200); plain.advanceAnimation(100);
+  assert.equal(plain.scrollY, 0); assert(!plain.animating);
+  const a = make({ inertia: true }), b = make({ inertia: true });
+  a.fling(1000); b.fling(1000);
+  for (let i = 0; i < 30; i++) a.advanceAnimation(1000 / 30);
+  for (let i = 0; i < 120; i++) b.advanceAnimation(1000 / 120);
+  assert(Math.abs(a.scrollY - b.scrollY) < 0.0001);
+  const strong = make({ inertia: true, inertiaStrength: 2 }); strong.fling(1000); strong.advanceAnimation(1000);
+  assert(strong.scrollY > a.scrollY);
+  a.scrollTo(10); assert(!a.animating);
+  a.fling(-4000); a.advanceAnimation(16); assert.equal(a.scrollY, 0); assert(!a.animating);
+  a.scrollTo(a.maxScrollY - 1); a.fling(4000); a.advanceAnimation(16);
+  assert.equal(a.scrollY, a.maxScrollY); assert(!a.animating);
+  b.inertia = false; b.advanceAnimation(16); assert(!b.animating);
+  b.inertia = true; b.inertiaStrength = 0; b.fling(5000); assert(!b.animating);
+});
+
+test('fling uses recent release speed, new contact stops it and hold/cancel do not fling', () => {
+  const { system, root, world, view } = fixture();
+  view.inertia = true;
+  const send = (type, y, timeStamp) => system.dispatchPointerEvent(world, { type, x: 45, y, native: { pointerType: 'touch', pointerId: 1, button: 0, buttons: 1, timeStamp, preventDefault() {} } });
+  send('pointerdown', 95, 1000); send('pointermove', 75, 1016); send('pointermove', 45, 1032); send('pointerup', 45, 1048);
+  const released = view.scrollY;
+  assert(view.animating); assert(system.animating);
+  view.advanceAnimation(16); assert(view.scrollY > released);
+  send('pointerdown', 80, 1100); assert(!view.animating);
+  const stopped = view.scrollY; send('pointerup', 80, 1116); view.advanceAnimation(100); assert.equal(view.scrollY, stopped);
+  view.scrollTo(0);
+  send('pointerdown', 95, 2000); send('pointermove', 45, 2020); send('pointerup', 45, 2300); assert(!view.animating);
+  send('pointerdown', 95, 3000); send('pointermove', 45, 3020); send('pointercancel', 45, 3030); assert(!view.animating);
+  view.fling(1000);
+  system.dispatchWheelEvent(world, { x: 45, y: 80, deltaY: 1, native: { deltaMode: 0, preventDefault() {} } });
+  assert(!view.animating, 'do not add a second momentum curve to native wheel events');
+  view.fling(1000); root.root.visible = false; assert(!system.animating);
+  system.suspendForDeviceLoss(); assert(!view.animating);
+  system.destroy();
+});
+
+test('switch movement and color have independent durations, default instant, and reverse continuously', () => {
+  const plain = new GuiSwitch(); plain.setChecked(true); assert.equal(plain.thumbProgress, 1); assert.equal(plain.colorProgress, 1); assert(!plain.animating);
+  const s = new GuiSwitch({ thumbTransitionMs: 200, colorTransitionMs: 400 });
+  s.setChecked(true); assert.equal(s.thumbProgress, 0); assert.equal(s.colorProgress, 0); assert(s.animating);
+  s.advanceAnimation(100); assert(s.thumbProgress > 0 && s.thumbProgress < 1);
+  assert(s.colorProgress > 0 && s.colorProgress < s.thumbProgress);
+  s.advanceAnimation(100); assert.equal(s.thumbProgress, 1); assert(s.colorProgress < 1);
+  const color = s.colorProgress; s.setChecked(false); assert.equal(s.colorProgress, color); assert.equal(s.thumbProgress, 1);
+  s.advanceAnimation(400); assert.equal(s.thumbProgress, 0); assert.equal(s.colorProgress, 0); assert(!s.animating);
+  const checked = new GuiSwitch({ checked: true, thumbTransitionMs: 200, colorTransitionMs: 200 });
+  assert.equal(checked.thumbProgress, 1); assert(!checked.animating);
+  checked.setChecked(false); checked.finishAnimation(); assert.equal(checked.thumbProgress, 0); assert(!checked.animating);
+});
+
+test('motion options serialize while transient velocities and progress do not', () => {
+  const root = new GuiRoot();
+  root.add(new GuiScrollView({ id: 'motion-list', inertia: true, inertiaStrength: 1.5, contentHeight: 400, height: 100 }));
+  root.add(new GuiSwitch({ id: 'motion-switch', thumbTransitionMs: 200, colorTransitionMs: 300, checked: true }));
+  const restored = deserializeGuiRoot(serializeGuiRoot(root));
+  const list = restored.findById('motion-list'), control = restored.findById('motion-switch');
+  assert.equal(list.inertia, true); assert.equal(list.inertiaStrength, 1.5); assert(!list.animating);
+  assert.equal(control.thumbTransitionMs, 200); assert.equal(control.colorTransitionMs, 300);
+  assert.equal(control.thumbProgress, 1); assert(!control.animating);
+});
+
+test('GuiSystem advances visible motion once per update and stops hidden subtrees', async () => {
+  const { Entity } = await import('../dist/index.js');
+  const { system, root, world, view } = fixture();
+  const control = root.add(new GuiSwitch({ thumbTransitionMs: 200, colorTransitionMs: 200 }));
+  world.addEntity(new Entity('motion').addComponent(root)); world.addSystem(system);
+  view.inertia = true; view.fling(1000);
+  control.setChecked(true); assert.equal(control.thumbProgress, 0);
+  world.update(100, 100);
+  assert(view.scrollY > 0); assert(control.thumbProgress > 0 && control.thumbProgress < 1); assert(system.animating);
+  world.update(200, 100); assert.equal(control.thumbProgress, 1);
+  root.root.setVisible(false); world.update(216, 16);
+  assert(!view.animating); assert(!system.animating);
+  world.destroy();
+});
+
+test('render integration advances GUI motion with autoUpdate disabled and only once across views', async () => {
+  const { Entity } = await import('../dist/index.js');
+  const { RenderIntegration } = await import('../dist/experimental.js');
+  const { system, root, world, view } = fixture();
+  world.addEntity(new Entity('integrated-motion').addComponent(root)); world.addSystem(system);
+  const integration = new RenderIntegration({});
+  world.addRuntimeIntegration(integration); integration.registerAll(world);
+  assert.equal(system.autoUpdate, false);
+  system.prepareRoots = () => {}; system.render = () => {};
+  integration.pipeline.execute = w => {
+    system.record(w, { frameData: w.frameData });
+    system.record(w, { frameData: w.frameData });
+  };
+  const control = root.add(new GuiSwitch({ thumbTransitionMs: 200, colorTransitionMs: 200 }));
+  control.setChecked(true); assert.equal(control.thumbProgress, 0);
+  view.inertia = true; view.fling(1000);
+  world.update(100, 100);
+  assert(Math.abs(view.scrollY - 325 * (1 - Math.exp(-100 / 325))) < 0.0001);
+  assert(control.thumbProgress > 0 && control.thumbProgress < 1);
+  world.update(200, 100); assert.equal(control.thumbProgress, 1);
+  world.destroy();
+});

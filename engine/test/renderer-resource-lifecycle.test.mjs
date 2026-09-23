@@ -825,3 +825,34 @@ test('RendererPipelineLayoutCache has bounded device-scoped storage', () => {
   assert.deepEqual(log.filter(item => item[0] === 'createPipelineLayout').map(item => item[2]), [1, 2, 3]);
   RendererResourceCache.clear(device);
 });
+
+test('Mesh3DRenderer rebinds the fallback while replacement textures load', async () => {
+  for (const slot of ['base', 'emissive']) {
+    const renderer = new Mesh3DRenderer(), device = createAuditGpuDevice();
+    renderer.engine = { device };
+    renderer.rendererCore = { destroyed: false };
+    renderer.defaultTexture = device.createTexture({ size: [1, 1], format: 'rgba8unorm', usage: 4 });
+    renderer.bgl2 = device.createBindGroupLayout({ entries: [] });
+    const old = device.createTexture({ size: [1, 1], format: 'rgba8unorm', usage: 4 });
+    let finish, releases = 0;
+    renderer._loadTexture = () => new Promise(resolve => { finish = resolve; });
+    const data = { colorBuf: device.createBuffer({ size: 16, usage: 8 }), sampler: device.createSampler(),
+      gpuTexture: slot === 'base' ? old : renderer.defaultTexture,
+      emissiveGpuTexture: slot === 'emissive' ? old : renderer.defaultTexture,
+      ownsTexture: slot === 'base', ownsEmissiveTexture: slot === 'emissive',
+      textureHandle: slot === 'base' ? { release() { releases++;old.destroy(); } } : null,
+      emissiveTextureHandle: slot === 'emissive' ? { release() { releases++;old.destroy(); } } : null,
+    };
+    const bindings = [], createBindGroup = device.createBindGroup;
+    device.createBindGroup = descriptor => { bindings.push(descriptor);return createBindGroup(descriptor); };
+    renderer._rebuildMatBindGroup(data);
+    const previous = data.bindGroup;
+    renderer._syncMaterialTexture('replacement.png', data, slot);
+    assert.equal(releases, 1);
+    assert.notEqual(data.bindGroup, previous, 'cannot submit a bind group that references the released texture');
+    assert.equal(bindings.length, 2, 'fallback bound before async loading finishes');
+    finish({ value: device.createTexture({ size: [1, 1], format: 'rgba8unorm', usage: 4 }), release() {} });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(bindings.length, 3, 'loaded replacement is bound');
+  }
+});

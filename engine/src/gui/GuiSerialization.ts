@@ -223,7 +223,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
       });
     }
     case 'scroll-view':
-      return new GuiScrollView({ ...base, contentHeight: numberProp(props.contentHeight, 0), scrollY: numberProp(props.scrollY, 0), showScrollbar: booleanProp(props.showScrollbar, true) });
+      return new GuiScrollView({ ...base, contentHeight: numberProp(props.contentHeight, 0), scrollY: numberProp(props.scrollY, 0), showScrollbar: booleanProp(props.showScrollbar, true), inertia: booleanProp(props.inertia, false), inertiaStrength: numberProp(props.inertiaStrength, 1) });
     case 'help-dialog':
       return new GuiHelpDialog({ ...base, title: stringProp(props.title, ''), message: stringProp(props.message, ''), backdropColor: stringProp(props.backdropColor, 'rgba(15,23,42,0.48)') });
     case 'modal':
@@ -249,7 +249,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
     case 'checkbox':
       return new GuiCheckbox({ ...base, checked: booleanProp(props.checked, false), label: stringProp(props.label, '') });
     case 'switch':
-      return new GuiSwitch({ ...base, checked: booleanProp(props.checked, false), label: stringProp(props.label, '') });
+      return new GuiSwitch({ ...base, checked: booleanProp(props.checked, false), label: stringProp(props.label, ''), thumbTransitionMs: numberProp(props.thumbTransitionMs, 0), colorTransitionMs: numberProp(props.colorTransitionMs, 0) });
     case 'radio':
       return new GuiRadio({
         ...base,
@@ -338,7 +338,7 @@ function getSerializedElementType(element: GuiElement): GuiSerializedElementType
 }
 
 function serializeElementProps(element: GuiElement): Record<string, unknown> {
-  if (element instanceof GuiScrollView) return { contentHeight: element.contentHeight, scrollY: element.scrollY, showScrollbar: element.showScrollbar };
+  if (element instanceof GuiScrollView) return { contentHeight: element.contentHeight, scrollY: element.scrollY, showScrollbar: element.showScrollbar, inertia: element.inertia, inertiaStrength: element.inertiaStrength };
   if (element instanceof GuiModal) {
     return {
       title: element.title,
@@ -362,7 +362,7 @@ function serializeElementProps(element: GuiElement): Record<string, unknown> {
     };
   }
   if (element instanceof GuiInput) return { value: element.value, placeholder: element.placeholder, readOnly: element.readOnly };
-  if (element instanceof GuiSwitch) return { checked: element.checked, label: element.label };
+  if (element instanceof GuiSwitch) return { checked: element.checked, label: element.label, thumbTransitionMs: element.thumbTransitionMs, colorTransitionMs: element.colorTransitionMs };
   if (element instanceof GuiCheckbox) return { checked: element.checked, label: element.label };
   if (element instanceof GuiRadio) return { checked: element.checked, label: element.label, group: element.group, value: scalarProp(element.value, null) };
   if (element instanceof GuiSlider) return { value: element.value, min: element.min, max: element.max, step: element.step };
@@ -507,8 +507,8 @@ const GUI_ELEMENT_TYPES = new Set<GuiSerializedElementType>([
 ]);
 
 const STRING_PROPS = new Set(['text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId', 'title', 'message', 'confirmText', 'cancelText', 'backdropColor']);
-const NUMBER_PROPS = new Set(['contentHeight', 'scrollY', 'fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
-const BOOLEAN_PROPS = new Set(['showScrollbar', 'autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
+const NUMBER_PROPS = new Set(['inertiaStrength', 'thumbTransitionMs', 'colorTransitionMs', 'contentHeight', 'scrollY', 'fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
+const BOOLEAN_PROPS = new Set(['inertia', 'showScrollbar', 'autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
 
 function validateProps(type: GuiSerializedElementType, value: unknown, path: string): void {
   const props = recordAt(value, path);
