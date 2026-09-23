@@ -121,3 +121,5 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0101：Extensions 虚拟摇杆 controls](./0101-virtual-joystick-extension-controls.md)
 
 - [0102：GUI 滚动容器与可关闭帮助面板](./0102-gui-scroll-view-and-help-dialog.md)
+
+- [ADR 0103: Engine GUI RGB color picker](0103-gui-color-picker.md)

@@ -61,3 +61,27 @@ continuous. See [motion options](../api/gui-controls.md#optional-motion).
 The regular `world.update(time, delta)` drives these animations. A host which
 renders on demand should continue frames while `guiSystem.animating` is true
 and stop animations on suspension with `guiSystem.stopAnimations()`.
+
+
+## Edit a component color
+
+Add a color picker and apply its canonical HEX value to a supported GUI style:
+
+```ts
+import { GuiButton, GuiColorPicker } from '@haiyue/engine/gui';
+
+const button = root.add(new GuiButton({ x: 24, y: 24, text: 'Preview' }));
+root.add(new GuiColorPicker({
+  x: 24, y: 80, width: 260, height: 144, value: '#2563eb',
+  onChange: color => button.setStyle({ backgroundColor: color }),
+}));
+```
+
+Try the [GUI Runtime playground](../../examples/gui-runtime/index.html): choose
+`GuiColorPicker`, edit HEX or RGB, or scroll another component's properties to
+its color editors. Editing a style color enables `customColors`; switch it off
+to restore theme/variant colors. Reset restores both values and theme behavior.
+Image tint uses the same picker. Only style fields consumed by each component's
+renderer are offered (for example slider/progress background is the track color).
+See the [color-picker API](../api/gui-controls.md#rgb-color-picker) for events and
+serialization.

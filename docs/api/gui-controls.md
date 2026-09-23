@@ -58,3 +58,25 @@ const toggle = rules.add(new GuiSwitch({
 ```
 
 LED Sudoku uses these values for its lists and switches on browser and Native.
+
+## RGB color picker
+
+`GuiColorPicker` / `GuiColorPickerOptions` are available from
+`@haiyue/engine/gui` (local candidate, [ADR 0103](../for-ai/adr/0103-gui-color-picker.md)).
+The component uses engine GUI rendering and works without a native DOM color dialog.
+
+| API | Behavior |
+| --- | --- |
+| `value?: string` | Initial opaque `#rgb` or `#rrggbb`, default `#2563eb`. Invalid initial values use the default. |
+| `picker.value` | Read-only canonical lowercase `#rrggbb`. |
+| `setValue(value, emit = false)` | Normalize a valid HEX value; ignore invalid input. Changed values emit only when requested. |
+| `onChange?: (value: string) => void` | Fires for valid HEX edits and RGB slider changes. |
+| `onCommit?: (value: string) => void` | Fires on valid HEX submission or slider release. |
+| `width` / `height` | Standard GUI lengths, default 240 × 144. Allow at least 180 × 128 for comfortable editing. |
+| `setDisabled(disabled)` | Disables the picker and its internal input/slider controls. |
+
+HEX input accepts uppercase and surrounding whitespace. Incomplete/invalid drafts
+show a red border and leave the last valid color unchanged; Enter restores that
+color. Three-digit shorthand remains editable so six-digit input can be completed.
+Alpha and other CSS color syntaxes are not supported. Serialization preserves
+configuration/value; callbacks and transient input drafts are not serialized.

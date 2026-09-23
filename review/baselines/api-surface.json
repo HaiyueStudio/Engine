@@ -7857,6 +7857,14 @@
               "kind": "type"
             },
             {
+              "name": "GuiColorPicker",
+              "kind": "value"
+            },
+            {
+              "name": "GuiColorPickerOptions",
+              "kind": "type"
+            },
+            {
               "name": "GuiDeserializeOptions",
               "kind": "type"
             },

@@ -1,3 +1,4 @@
+import { GuiColorPicker } from './components/GuiColorPicker';
 import { GuiHelpDialog } from './components/GuiHelpDialog';
 import { GuiScrollView } from './components/GuiScrollView';
 import type { GuiElementOptions, GuiLength, GuiStyle, GuiTheme } from './GuiTypes';
@@ -39,6 +40,7 @@ export type GuiSerializedElementType =
   | 'help-dialog'
   | 'scroll-view'
   | 'input'
+  | 'color-picker'
   | 'checkbox'
   | 'switch'
   | 'radio'
@@ -121,7 +123,7 @@ export function serializeGuiElement(element: GuiElement): GuiSerializedElement {
   };
   const props = serializeElementProps(element);
   if (Object.keys(props).length > 0) serialized.props = props;
-  if (!(element instanceof GuiModal) && element.children.length > 0) {
+  if (!(element instanceof GuiModal) && !(element instanceof GuiColorPicker) && element.children.length > 0) {
     serialized.children = element.children.map(serializeGuiElement);
   }
   return serialized;
@@ -210,6 +212,8 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
   const base = getBaseOptions(data);
   const props = data.props ?? {};
   switch (data.type) {
+    case 'color-picker':
+      return new GuiColorPicker({ ...base, value: stringProp(props.value, '#2563eb') });
     case 'button':
       return new GuiButton({ ...base, text: stringProp(props.text, 'Button'), variant: variantProp(props.variant) });
     case 'label': {
@@ -319,6 +323,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
 }
 
 function getSerializedElementType(element: GuiElement): GuiSerializedElementType {
+  if (element instanceof GuiColorPicker) return 'color-picker';
   if (element instanceof GuiHelpDialog) return 'help-dialog';
   if (element instanceof GuiScrollView) return 'scroll-view';
   if (element instanceof GuiModal) return 'modal';
@@ -338,6 +343,7 @@ function getSerializedElementType(element: GuiElement): GuiSerializedElementType
 }
 
 function serializeElementProps(element: GuiElement): Record<string, unknown> {
+  if (element instanceof GuiColorPicker) return { value: element.value };
   if (element instanceof GuiScrollView) return { contentHeight: element.contentHeight, scrollY: element.scrollY, showScrollbar: element.showScrollbar, inertia: element.inertia, inertiaStrength: element.inertiaStrength };
   if (element instanceof GuiModal) {
     return {
@@ -503,7 +509,7 @@ function treeNodesProp(value: unknown): GuiTreeNode<GuiSerializedValue>[] {
 
 const GUI_ELEMENT_TYPES = new Set<GuiSerializedElementType>([
   'element', 'button', 'label', 'input', 'checkbox', 'switch', 'radio', 'slider',
-  'progress', 'select', 'tree', 'tooltip', 'image', 'modal', 'help-dialog', 'scroll-view',
+  'progress', 'select', 'tree', 'tooltip', 'image', 'modal', 'help-dialog', 'scroll-view', 'color-picker',
 ]);
 
 const STRING_PROPS = new Set(['text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId', 'title', 'message', 'confirmText', 'cancelText', 'backdropColor']);
@@ -530,8 +536,8 @@ function validateProps(type: GuiSerializedElementType, value: unknown, path: str
     }
     if (NUMBER_PROPS.has(key) || key === 'value') {
       if (key === 'value' && (type === 'radio' || type === 'select')) validateScalar(prop, propPath);
-      else if (key === 'value' && type === 'input') {
-        if (typeof prop !== 'string') invalidGuiData('GUI input value must be a string.', propPath);
+      else if (key === 'value' && (type === 'input' || type === 'color-picker')) {
+        if (typeof prop !== 'string') invalidGuiData('GUI text/color value must be a string.', propPath);
       }
       else if (typeof prop !== 'number' || !Number.isFinite(prop)) invalidGuiData(`GUI ${key} must be a finite number.`, propPath);
       continue;
