@@ -177,17 +177,19 @@ test('content tier CLI defaults to smoke and rejects ambiguous or unknown input'
   assert.throws(() => resolveContentTier(['--typo=full']), /Unknown check:slow argument/);
 });
 
-test('real manifests produce 50 smoke targets and 62 smoke-plus-full targets', () => {
+test('real manifests determine smoke and full target membership and counts', () => {
   const smoke = createContentTargetPlan('smoke', manifests);
   const full = createContentTargetPlan('full', manifests);
-  assert.equal(smoke.targets.length, 50);
-  assert.deepEqual(smoke.selectedCounts, { smoke: 50, full: 0, manual: 0 });
-  assert.equal(full.targets.length, 62);
-  assert.deepEqual(full.selectedCounts, { smoke: 50, full: 12, manual: 0 });
-  assert.equal(full.manifestCounts.manual, 47);
-
   const expectedSmoke = manifestTargets(entry => entry.ci === 'smoke');
+  const expectedFullOnly = manifestTargets(entry => entry.ci === 'full');
   const expectedFull = manifestTargets(entry => entry.ci === 'smoke' || entry.ci === 'full');
+  const expectedManual = manifestTargets(entry => entry.ci === 'manual');
+  assert.equal(smoke.targets.length, expectedSmoke.length);
+  assert.deepEqual(smoke.selectedCounts, { smoke: expectedSmoke.length, full: 0, manual: 0 });
+  assert.equal(full.targets.length, expectedFull.length);
+  assert.deepEqual(full.selectedCounts, { smoke: expectedSmoke.length, full: expectedFullOnly.length, manual: 0 });
+  assert.equal(full.manifestCounts.manual, expectedManual.length);
+
   assert.deepEqual(smoke.targets, expectedSmoke);
   assert.deepEqual(full.targets, expectedFull);
   const manual = new Set(manifestTargets(entry => entry.ci === 'manual'));

@@ -1,30 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { AnimationTextRasterizer, quantizeRiveTextCoverage } from '../dist-test/animation/AnimationTextRasterizer.js';
-
-test('Rive text coverage quantization restores binary opaque paint samples', () => {
-  const image = { data: new Uint8ClampedArray([
-    255, 255, 255, 96,
-    24, 225, 24, 160,
-    24, 225, 24, 200,
-    88, 150, 88, 255,
-    24, 225, 24, 255,
-  ]) };
-  let committed = null;
-  const context = {
-    getImageData() { return image; },
-    putImageData(value) { committed = value; },
-  };
-  quantizeRiveTextCoverage(context, 5, 1, [[116 / 255, 116 / 255, 116 / 255, 1], [0, 1, 0, 1]]);
-  assert.deepEqual([...image.data], [
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 255, 0, 255,
-    116, 116, 116, 255,
-    0, 255, 0, 255,
-  ]);
-  assert.equal(committed, image);
-});
+import { AnimationTextRasterizer } from '../dist-test/animation/AnimationTextRasterizer.js';
 
 test('text rasterizer applies word selector groups to every grapheme in the selected word', async () => {
   const previousDocument = globalThis.document;
@@ -32,6 +8,8 @@ test('text rasterizer applies word selector groups to every grapheme in the sele
   let translatedX = 0;
   const context = {
     setTransform() {}, clearRect() {}, fillRect() {}, save() {}, restore() {}, rotate() {}, scale() {},
+    getImageData() { assert.fail('Text rendering must not read back the atlas'); },
+    putImageData() { assert.fail('Text rendering must preserve Canvas coverage'); },
     measureText: () => ({ width: 10 }),
     translate(x) { translatedX = x; },
     fillText(glyph) { draws.push({ glyph, x: translatedX }); },
@@ -43,7 +21,7 @@ test('text rasterizer applies word selector groups to every grapheme in the sele
   try {
     const rasterizer = new AnimationTextRasterizer({
       type: 'text2d', text: 'AB CD\nEF', size: [300, 100], color: [1, 1, 1, 1],
-      fontSize: 10, lineHeight: 20, textAlign: 'left', verticalAlign: 'top',
+      resolutionScale: 4, fontSize: 10, lineHeight: 20, textAlign: 'left', verticalAlign: 'top',
       animators: [{
         selector: { start: 0, end: 1, units: 'index', shape: 'square', basedOn: 'words' },
         position: [100, 0],

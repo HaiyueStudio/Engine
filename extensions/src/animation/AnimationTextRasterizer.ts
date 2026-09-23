@@ -160,8 +160,8 @@ export class AnimationTextRasterizer {
     const context = canvas.getContext('2d');
     if (!context) return;
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    // Rive rasterizes unhinted vector glyph outlines. Ask the browser text
-    // shaper for geometric precision so Canvas does not snap small embedded
+    // Ask the browser text shaper for geometric precision so Canvas does
+    // not snap small embedded
     // fonts to the host platform's UI-text hinting grid.
     context.textRendering = 'geometricPrecision';
     context.fontKerning = 'normal';
@@ -176,7 +176,6 @@ export class AnimationTextRasterizer {
     const contentHeight = Math.max(1, height - padding * 2);
     if ((component.styleRuns?.length ?? 0) > 0) {
       drawStyledText(context, component, document, time, padding, contentWidth, contentHeight, this.outlineFonts);
-      quantizeRiveTextCoverage(context, canvas.width, canvas.height, riveTextPaintPalette(component, document));
       return;
     }
     let fontSize = document.fontSize;
@@ -245,80 +244,7 @@ export class AnimationTextRasterizer {
         x += advance + tracking + state.tracking;
       }
     }
-    quantizeRiveTextCoverage(context, canvas.width, canvas.height, riveTextPaintPalette(component, document));
   }
-}
-
-/**
- * Canvas preserves continuous coverage inside every high-resolution atlas
- * texel. Rive's WebGL2 renderer instead evaluates authored vector paints at
- * four discrete MSAA locations. Converting opaque text paint edges back to a
- * binary high-resolution sample grid lets the fragment shader reproduce those
- * four coverage steps without changing shaping or authored colors.
- *
- * Semi-transparent paints intentionally bypass this compatibility path: their
- * source-over result cannot be reconstructed from one flattened Canvas pixel.
- */
-export function quantizeRiveTextCoverage(
-  context: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  palette: readonly (readonly [number, number, number, number])[] | null,
-): void {
-  if (!palette || palette.length === 0
-    || typeof context.getImageData !== 'function'
-    || typeof context.putImageData !== 'function') return;
-  const image = context.getImageData(0, 0, width, height);
-  const data = image.data;
-  const colors = palette.map(color => [
-    Math.round(clamp(color[0], 0, 1) * 255),
-    Math.round(clamp(color[1], 0, 1) * 255),
-    Math.round(clamp(color[2], 0, 1) * 255),
-  ] as const);
-  for (let offset = 0; offset < data.length; offset += 4) {
-    const alpha = data[offset + 3]!;
-    if (alpha === 0) continue;
-    if (alpha < 192) {
-      data[offset] = 0; data[offset + 1] = 0; data[offset + 2] = 0; data[offset + 3] = 0;
-      continue;
-    }
-    let nearest = colors[0]!;
-    let nearestDistance = Number.POSITIVE_INFINITY;
-    for (const color of colors) {
-      const red = data[offset]! - color[0];
-      const green = data[offset + 1]! - color[1];
-      const blue = data[offset + 2]! - color[2];
-      const distance = red * red + green * green + blue * blue;
-      if (distance < nearestDistance) { nearest = color; nearestDistance = distance; }
-    }
-    data[offset] = nearest[0]; data[offset + 1] = nearest[1]; data[offset + 2] = nearest[2]; data[offset + 3] = 255;
-  }
-  context.putImageData(image, 0, 0);
-}
-
-function riveTextPaintPalette(
-  component: Readonly<AnimationText2DComponent>,
-  document: ResolvedTextDocument,
-): readonly (readonly [number, number, number, number])[] | null {
-  if ((component.resolutionScale ?? 2) < 4) return null;
-  if ((component.animators ?? []).some(animator => animator.opacity !== undefined || animator.opacityTrack !== undefined
-    || animator.fillColor !== undefined || animator.fillColorTrack !== undefined)) return null;
-  const colors: (readonly [number, number, number, number])[] = [document.color];
-  if (component.backgroundColor?.[3]) colors.push(component.backgroundColor);
-  if (component.lineBackground) {
-    colors.push(component.lineBackground.fill);
-    if (component.lineBackground.stroke) colors.push(component.lineBackground.stroke);
-  }
-  for (const run of component.styleRuns ?? []) {
-    if (run.color) colors.push(run.color);
-    if (run.lineBackground) {
-      colors.push(run.lineBackground.fill);
-      if (run.lineBackground.stroke) colors.push(run.lineBackground.stroke);
-    }
-  }
-  const visible = colors.filter(color => color[3] > 1e-6);
-  if (visible.some(color => Math.abs(color[3] - 1) > 1e-6)) return null;
-  return visible.filter((color, index) => visible.findIndex(candidate => candidate.every((value, channel) => value === color[channel])) === index);
 }
 
 function drawStyledText(
@@ -350,9 +276,8 @@ function drawStyledText(
       } else high = candidate - 1;
     }
     scale = best / Math.max(1, maxFontSize);
-    // @rive-app/webgl2@2.40.0 preserves authored custom line boxes while
-    // stepping the top font size. This legacy compatibility behavior is
-    // observable in the pinned text_fit_test.riv oracle.
+    // Font-size fitting preserves authored custom line boxes while
+    // stepping the top font size; uniform scaling also scales line metrics.
     scaleLineMetrics = false;
     lines = layoutStyledText(context, component, document, contentWidth, scale, scaleLineMetrics, time);
   } else if (component.fit === 'scale' && lines.length > 0) {
@@ -386,10 +311,10 @@ function drawStyledText(
     firstLine = false;
   }
 
-  // Rive accumulates every glyph rectangle owned by a TextStylePaint, unions
-  // touching lines into one contour, and paints all backgrounds before any
+  // Accumulate every glyph rectangle owned by a style, union
+  // touching lines into one contour, and paint all backgrounds before any
   // glyph paths. Keeping the geometry grouped by style key preserves both the
-  // stepped outline between unequal line widths and the official paint order.
+  // stepped outline between unequal line widths and the background-before-glyph paint order.
   const backgroundGroups = new Map<number, {
     background: NonNullable<ResolvedRunStyle['lineBackground']>;
     rects: BackgroundRect[];
@@ -525,7 +450,7 @@ function layoutStyledText(
       fontSize: sampled(run.fontSizeTrack, time, [run.fontSize ?? document.fontSize])[0] ?? run.fontSize ?? document.fontSize,
       fontWeight: run.fontWeight ?? document.fontWeight,
       fontStyle: run.fontStyle ?? document.fontStyle,
-      // Zero is runtime-private shorthand for Rive's automatic line height;
+      // Zero is runtime-private shorthand for automatic line height;
       // it is resolved from the loaded font metrics in measureStyledLine.
       lineHeight: sampled(run.lineHeightTrack, time, [run.lineHeight ?? 0])[0] ?? run.lineHeight ?? 0,
       tracking: sampled(run.trackingTrack, time, [run.tracking ?? document.tracking])[0] ?? run.tracking ?? document.tracking,
@@ -618,8 +543,8 @@ function scaledRunStyle(
     fontSize: source.fontSize * fontScale,
     fontWeight: source.fontWeight,
     fontStyle: source.fontStyle,
-    // Rive applies one uniform fit scale to font size, custom line height,
-    // letter spacing and TextStyleBackground geometry.
+    // Apply one uniform fit scale to font size, custom line height,
+    // letter spacing and line background geometry.
     lineHeight: source.lineHeight * metricScale,
     tracking: source.tracking * metricScale,
     color: source.color,

@@ -67,56 +67,75 @@
       "id": "lottie-hya-compare",
       "title": "Lottie → HYA Fidelity Compare",
       "entry": "lottie-hya-compare/main.ts",
-      "capabilities": ["animation-format", "lottie-conversion", "fidelity-compare", "official-reference-player", "auto-bounds", "timeline-scrubbing", "webgpu", "2d"],
-      "assets": ["lottie-hya-compare/samples/manifest.json", "lottie-hya-compare/samples/orbit-badge.json", "lottie-hya-compare/samples/wide-cards.json"],
-      "screenshot": { "required": false, "baseline": null },
+      "capabilities": [
+        "animation-format",
+        "lottie-conversion",
+        "fidelity-compare",
+        "official-reference-player",
+        "auto-bounds",
+        "timeline-scrubbing",
+        "webgpu",
+        "2d"
+      ],
+      "assets": [
+        "lottie-hya-compare/samples/manifest.json",
+        "lottie-hya-compare/samples/orbit-badge.json",
+        "lottie-hya-compare/samples/wide-cards.json"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
       "performance": null,
       "ci": "smoke",
-      "catalog": { "group": "assets-ui", "order": 12 }
+      "catalog": {
+        "group": "assets-ui",
+        "order": 12
+      }
     },
     {
       "id": "live2d-hya-compare",
       "title": "Live2D → HYA Fidelity Compare",
       "entry": "live2d-hya-compare/main.ts",
-      "capabilities": ["animation-format", "live2d-cubism-import", "fidelity-compare", "licensed-official-core-reference", "auto-bounds", "timeline-scrubbing", "deformable-mesh", "webgpu", "2d"],
-      "assets": ["live2d-hya-compare/samples/manifest.json", "live2d-hya-compare/samples/mascot.hya", "live2d-hya-compare/samples/mascot.hydm", "live2d-hya-compare/samples/mascot.png", "live2d-hya-compare/samples/mascot.capture.json", "live2d-hya-compare/samples/mask-parity.hya", "live2d-hya-compare/samples/mask-parity.hydm", "live2d-hya-compare/samples/mask-parity.png", "live2d-hya-compare/samples/mask-parity.capture.json", "live2d-hya-compare/samples/mask-parity-conversion-report.json", "live2d-hya-compare/samples/blend-parity.hya", "live2d-hya-compare/samples/blend-parity.hydm", "live2d-hya-compare/samples/blend-parity-a.png", "live2d-hya-compare/samples/blend-parity-b.png", "live2d-hya-compare/samples/blend-parity.capture.json", "live2d-hya-compare/samples/blend-parity-conversion-report.json"],
-      "screenshot": { "required": false, "baseline": null },
+      "capabilities": [
+        "animation-format",
+        "live2d-cubism-import",
+        "fidelity-compare",
+        "licensed-official-core-reference",
+        "auto-bounds",
+        "timeline-scrubbing",
+        "deformable-mesh",
+        "webgpu",
+        "2d"
+      ],
+      "assets": [
+        "live2d-hya-compare/samples/manifest.json",
+        "live2d-hya-compare/samples/mascot.hya",
+        "live2d-hya-compare/samples/mascot.hydm",
+        "live2d-hya-compare/samples/mascot.png",
+        "live2d-hya-compare/samples/mascot.capture.json",
+        "live2d-hya-compare/samples/mask-parity.hya",
+        "live2d-hya-compare/samples/mask-parity.hydm",
+        "live2d-hya-compare/samples/mask-parity.png",
+        "live2d-hya-compare/samples/mask-parity.capture.json",
+        "live2d-hya-compare/samples/mask-parity-conversion-report.json",
+        "live2d-hya-compare/samples/blend-parity.hya",
+        "live2d-hya-compare/samples/blend-parity.hydm",
+        "live2d-hya-compare/samples/blend-parity-a.png",
+        "live2d-hya-compare/samples/blend-parity-b.png",
+        "live2d-hya-compare/samples/blend-parity.capture.json",
+        "live2d-hya-compare/samples/blend-parity-conversion-report.json"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
       "performance": null,
       "ci": "smoke",
-      "catalog": { "group": "assets-ui", "order": 13 }
-    },
-    {
-      "id": "rive-hya-compare",
-      "title": "Rive → HYA Fidelity Compare",
-      "entry": "rive-hya-compare/main.ts",
-      "capabilities": ["animation-format", "rive-7.3-import", "automatic-production-conversion", "fidelity-compare", "official-reference-player", "hash-pinned-remote-assets", "webgl2", "webgpu", "2d"],
-      "assets": ["rive-hya-compare/samples.json", "rive-hya-compare/styles.css"],
-      "screenshot": { "required": false, "baseline": null },
-      "performance": null,
-      "ci": "manual",
-      "catalog": { "group": "assets-ui", "order": 14 }
-    },
-    {
-      "id": "rive-feature-corpus",
-      "title": "Rive → HYA Feature Corpus",
-      "entry": "rive-feature-corpus/main.ts",
-      "capabilities": ["animation-format", "rive-7.3-census", "feature-coverage", "capability-dashboard", "source-provenance", "2d"],
-      "assets": ["rive-feature-corpus/corpus.json", "rive-feature-corpus/styles.css"],
-      "screenshot": { "required": false, "baseline": null },
-      "performance": null,
-      "ci": "smoke",
-      "catalog": { "group": "assets-ui", "order": 15 }
-    },
-    {
-      "id": "rive-production-capture",
-      "title": "Rive G11 Native Capture Host",
-      "entry": "rive-production-capture/main.ts",
-      "capabilities": ["formal-evidence", "webgl2", "webgpu", "exact-hya"],
-      "assets": [],
-      "screenshot": { "required": false, "baseline": null },
-      "performance": null,
-      "ci": "manual",
-      "catalog": { "group": "assets-ui", "order": 16 }
+      "catalog": {
+        "group": "assets-ui",
+        "order": 13
+      }
     },
     {
       "id": "hya-state-machine",

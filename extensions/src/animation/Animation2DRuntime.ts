@@ -945,7 +945,7 @@ function createCoreVisual(
       // Canvas glyph coverage must stay premultiplied through the generated
       // mip chain. Averaging straight-alpha transparent texels and multiplying
       // afterwards squares edge coverage and visibly softens small text.
-      textureAlphaMode: 'rive-text' as const,
+      textureAlphaMode: 'premultiplied' as const,
     } : {}),
     ...(gradient ? { gradient } : {}),
     ...(component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID && component.blendMode

@@ -1,5 +1,8 @@
 # HaiYue Engine
 
+> 0.1.1 候选不包含 Rive 能力；相关研发保留在 `feature/rive-development` 分支。
+> 版本号与发布状态未变更，详见 [候选检查报告](review/release-0.1.1.md)。
+
 HaiYue Engine 是一个以 WebGPU 为唯一渲染后端、面向现代浏览器的 TypeScript 图形与交互引擎。仓库包含核心运行时、可选扩展、HYA 动画规范、着色器构建工具，以及由清单统一管理的可执行示例。
 
 [在线预览 Examples](https://haiyuestudio.github.io/Engine/examples/) · [引擎指南](./docs/engine-guide/README.md) · [API 文档](./docs/api/README.md) · [浏览器要求](./docs/engine-guide/browser-requirements.md)
@@ -87,8 +90,6 @@ GitHub Pages catalog 会展示当前发布版本中可公开运行的示例，�
 - [glTF Viewer](https://haiyuestudio.github.io/Engine/examples/#gltf-viewer)
 - [Lottie → HYA 对比](https://haiyuestudio.github.io/Engine/examples/#lottie-hya-compare)
 - [Live2D → HYA 对比](https://haiyuestudio.github.io/Engine/examples/#live2d-hya-compare)
-- [Rive → HYA 左右渲染对比](https://haiyuestudio.github.io/Engine/examples/#rive-hya-compare)
-- [Rive → HYA Feature Corpus](https://haiyuestudio.github.io/Engine/examples/#rive-feature-corpus)
 
 在线站点由 [GitHub Pages 工作流](./.github/workflows/deploy-pages.yml)从人工选择并验证签名的 release tag 构建；它不会提交 `dist/` 或 examples bundle 到源码分支。仓库管理员首次使用时需在 GitHub 的 **Settings → Pages → Build and deployment** 中选择 **GitHub Actions**，然后运行 `Deploy GitHub Pages` 工作流。
 
