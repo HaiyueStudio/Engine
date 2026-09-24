@@ -13,6 +13,7 @@ jobs:
     env:
       BENCHMARK_PROFILE: ci
       CPU_BENCHMARK_RUNNER_PROFILE: github-hosted-ubuntu-latest
+      WEBGPU_ANGLE_BACKEND: swiftshader
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:

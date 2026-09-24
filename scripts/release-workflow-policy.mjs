@@ -39,6 +39,7 @@ export function validateReleaseWorkflows(workflows) {
 function validateFast(source, errors) {
   requireMatch(source, /pull_request:/u, 'ci-fast must run on pull requests', errors);
   requireMatch(source, /push:\s*\n\s*branches:\s*\[master\]/u, 'ci-fast must run on master pushes', errors);
+  requireMatch(source, /WEBGPU_ANGLE_BACKEND:\s*swiftshader/u, 'ci-fast must force swiftshader for hosted headless WebGPU gates', errors);
   requireMatch(source, /npm run check:engine:fast/u, 'ci-fast must run check:engine:fast', errors);
   requireMatch(source, /release-ci-bootstrap\.mjs[\s\S]*npm run check:engine:fast/u, 'ci-fast must build workspace foundations before check:engine:fast', errors);
 }
@@ -49,6 +50,7 @@ function validateSlow(source, errors) {
   requireMatch(source, /schedule:\s*\n\s*- cron:/u, 'ci-slow must have a nightly schedule', errors);
   requireMatch(source, /content_tier:[\s\S]*options:[\s\S]*- smoke[\s\S]*- full/u, 'ci-slow dispatch must expose smoke and full only', errors);
   requireMatch(source, /github\.event_name == 'schedule' && 'full'/u, 'ci-slow schedule must select full', errors);
+  requireMatch(source, /WEBGPU_ANGLE_BACKEND:\s*swiftshader/u, 'ci-slow must force swiftshader for hosted headless WebGPU gates', errors);
   requireMatch(source, /check:engine:slow -- --content-tier="\$\{CONTENT_TIER\}"/u, 'ci-slow must pass its selected content tier', errors);
   if (/options:[\s\S]*- manual/u.test(source)) errors.push('ci-slow must never expose the manual manifest tier');
 }
@@ -56,6 +58,7 @@ function validateSlow(source, errors) {
 function validateRelease(source, errors) {
   requireMatch(source, /push:\s*\n\s*tags:\s*\n\s*- ['"]v\*['"]/u, 'release rehearsal must run for version tags', errors);
   requireMatch(source, /workflow_dispatch:/u, 'release rehearsal must support explicit dispatch', errors);
+  requireMatch(source, /WEBGPU_ANGLE_BACKEND:\s*swiftshader/u, 'release rehearsal must force swiftshader for hosted headless WebGPU gates', errors);
   requireMatch(source, /release-ci-bootstrap\.mjs/u, 'release rehearsal must build Engine foundations before full checks', errors);
   requireMatch(source, /check:engine:slow -- --content-tier=full/u, 'release rehearsal must run the full content tier', errors);
   requireMatch(source, /release-rehearsal\.mjs --worker/u, 'release workflow must run the no-publish worker', errors);
