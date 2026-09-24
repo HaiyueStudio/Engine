@@ -7,6 +7,7 @@ import type { ShaderUniformBlockReflection } from '../contracts';
 import type { ProductionComputeOperation, ProductionComputePassIrV1 } from './contracts';
 import gpuDrawCommand from './stdlib/gpu-draw-command.wgsl';
 import gpuSortBitonic from './stdlib/gpu-sort-bitonic.wgsl';
+import instancedLod from './stdlib/instanced-lod.wgsl';
 import instancedCull from './stdlib/instanced-cull.wgsl';
 import instancedDepthSortKey from './stdlib/instanced-depth-sort-key.wgsl';
 import mesh3dCull from './stdlib/mesh3d-cull.wgsl';
@@ -17,6 +18,7 @@ export function productionComputeModules(): Readonly<Record<ProductionComputeOpe
   return Object.freeze({
     'gpu-draw-command': `${gpuDrawCommand.trim()}\n`,
     'gpu-sort-bitonic': `${gpuSortBitonic.trim()}\n`,
+    'instanced-lod': `${instancedLod.trim()}\n`,
     'instanced-cull': `${instancedCull.trim()}\n`,
     'instanced-depth-sort-key': `${instancedDepthSortKey.trim()}\n`,
     'mesh3d-cull': `${mesh3dCull.trim()}\n`,
@@ -96,6 +98,7 @@ function uniformBlocks(operation: ProductionComputeOperation): readonly ShaderUn
   switch (operation) {
     case 'gpu-draw-command': return Object.freeze([block('pass.drawCommandParams', 16, [field('commandCount', 'u32', 0, 4)])]);
     case 'gpu-sort-bitonic': return Object.freeze([]);
+    case 'instanced-lod': return Object.freeze([block('pass.lodParams', 224, [field('planes', 'array<vec4<f32>, 6>', 0, 96), matrix('view', 96), field('screen', 'vec4<f32>', 160, 16), field('tuning', 'vec4<f32>', 176, 16), field('sphere', 'vec4<f32>', 192, 16), field('dispatchInfo', 'vec4<u32>', 208, 16)])]);
     case 'instanced-cull': return Object.freeze([
       block('pass.frustum', 96, [field('planes', 'array<vec4<f32>, 6>', 0, 96)]),
       block('pass.cullingParams', 32, [field('instanceCount', 'u32', 0, 4), field('localSphere', 'vec4<f32>', 16, 16)]),

@@ -7,6 +7,7 @@
     "New capabilities use focused entrypoints and are classified stable or experimental before baseline promotion.",
     "Reviewed symbol counts describe admitted capability scope; reserve absorbs implementation-shaped API growth but never bypasses API baseline review.",
     "A capability addition must update its reviewed count, evidence, package measurement, and baseline in one reviewed change.",
+    "ADR 0108 adds 11 focused GPU instance/simulation symbols and 9 compatibility aggregate exports for 0.2.1; evidence: review/engine-0.2.1-gpu-instances.md.",
     "ADR 0106 admits audio mixing, multiplayer input, fonts, animation interaction and virtual joystick for 0.2.0; evidence: review/release-0.2.0-capability-budgets.md."
   ],
   "packages": {
@@ -106,11 +107,11 @@
           "stability": "experimental",
           "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
           "entrypoints": {
-            "./experimental": 846,
+            "./experimental": 855,
             "./experimental/assets": 38,
             "./experimental/async": 7,
             "./experimental/diagnostics": 23,
-            "./experimental/gpu-driven": 25,
+            "./experimental/gpu-driven": 36,
             "./experimental/ktx2-worker-runtime": 0,
             "./experimental/renderer": 51,
             "./experimental/simulation": 34,

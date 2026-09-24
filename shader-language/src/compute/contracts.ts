@@ -6,6 +6,7 @@ export const PRODUCTION_COMPUTE_OPERATIONS = [
   'instanced-cull',
   'instanced-depth-sort-key',
   'mesh3d-cull',
+  'instanced-lod',
 ] as const;
 
 export type ProductionComputeOperation = typeof PRODUCTION_COMPUTE_OPERATIONS[number];

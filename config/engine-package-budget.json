@@ -8,6 +8,7 @@
       "Attribute new public entrypoints in config/public-api-capability-budgets.json.",
       "Increase reviewed capacity only with capability, API, consumer, and bundle evidence.",
       "Keep root and focused consumer closure budgets independent from total package capacity.",
+      "0.2.1 adds GPU instance/simulation declarations: measured 602 files plus the existing 7-file reserve; review/engine-0.2.1-gpu-instances.md.",
       "0.2.0 capability attribution and reserve rationale: review/release-0.2.0-capability-budgets.md."
     ]
   },
@@ -16,9 +17,9 @@
       "workspace": "engine",
       "maxPackedBytes": 2100000,
       "maxUnpackedBytes": 9000000,
-      "maxFileCount": 600,
+      "maxFileCount": 609,
       "capacity": {
-        "reviewed": { "packedBytes": 1874952, "unpackedBytes": 8362294, "fileCount": 593 },
+        "reviewed": { "packedBytes": 1874952, "unpackedBytes": 8362294, "fileCount": 602 },
         "growthReserve": { "packedBytes": 225048, "unpackedBytes": 637706, "fileCount": 7 },
         "capabilityBasis": "stable golden path plus focused ECS, scene, rendering, physics, compute, assets, diagnostics, game saves, and experimental runtime seams; 0.2.0 owner-safe audio mixer, multiplayer input and GUI font options"
       },
@@ -117,7 +118,7 @@
   "tarball": {
     "maxPackedBytes": 2100000,
     "maxUnpackedBytes": 9000000,
-    "maxFileCount": 600,
+    "maxFileCount": 609,
     "filesWhitelist": [
       "README.md",
       "LICENSE",
@@ -133,6 +134,12 @@
     ]
   },
   "consumers": {
+    "gpu-instances-only": {
+      "fixture": "scripts/fixtures/engine-consumers/gpu-instances-only.mjs",
+      "maxGzipBytes": 91000,
+      "requiredExports": ["GpuComputeProgram", "GpuInstanceLod", "GpuReadbackRing", "InstancedToonMaterial", "InstancedMesh3DRenderer", "inspectGpuSimulationCapabilities"],
+      "allowedGeneratedShaderArtifacts": ["specialized-rendering-shader-artifact", "compute-shader-artifact"]
+    },
     "root-golden-path": {
       "fixture": "scripts/fixtures/engine-consumers/root-golden-path.mjs",
       "maxGzipBytes": 60000,

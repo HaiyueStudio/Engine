@@ -127,7 +127,8 @@
         "engine/src/shaders/generated/compute-gpu-sort-bitonic.generated.wgsl",
         "engine/src/shaders/generated/compute-instanced-cull.generated.wgsl",
         "engine/src/shaders/generated/compute-instanced-depth-sort-key.generated.wgsl",
-        "engine/src/shaders/generated/compute-mesh3d-cull.generated.wgsl"
+        "engine/src/shaders/generated/compute-mesh3d-cull.generated.wgsl",
+        "engine/src/shaders/generated/compute-instanced-lod.generated.wgsl"
       ]
     }
   ],

@@ -1,7 +1,7 @@
 // haiyue:compute-pass mesh3d-cull
 // haiyue:compute-abi 1
 // haiyue:compute-ir b2b34ffadaefeed1b48f20c12118a8df53524afa1ee59792ad455fd7017f497a
-// haiyue:compute-module 224edd29cb3a5bf01c487e04e033918d52080c080ac656754d0a633b961894a6
+// haiyue:compute-module f2bc6d1a9a7a9ff1b6a041fc71a3d2c06a503b08d161eabe763c56f7d858774d
 // source: shader-language/builtin-compute-family.json
 
 struct CullParams { commandCount: u32, _pad0: u32, _pad1: u32, _pad2: u32, };

@@ -1,0 +1,14 @@
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { runChromeWebGpuFixture } from './webgpu-gate/chrome-runner.mjs';
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const result = await runChromeWebGpuFixture({ root, fixture: 'examples/gpu-instances/index.html', query: { test: '1' }, timeoutMs: 60000 });
+if (result.suite !== 'gpu-instances-021' || result.instanceCount !== 10000 || result.uniqueIds !== 10000 || JSON.stringify(result.counts) !== '[3334,3333,3333]' || result.frustumCulled !== 10000 || result.validationErrors !== 0) throw new Error(`GPU instance contract failed: ${JSON.stringify(result)}`);
+const normals = await runChromeWebGpuFixture({ root, fixture: 'scripts/webgpu-gate/instanced-normal-021.html', timeoutMs: 60000 });
+if (normals.suite !== 'instanced-normal-021' || normals.status !== 'passed') throw new Error('Normal/Toon pixel contract failed');
+const evidence = { schemaVersion: 1, tier: 'diagnostic', generatedAt: new Date().toISOString(), revision: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), dirty: execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }).trim() !== '', result, normals };
+mkdirSync(resolve(root, 'artifacts/gpu-instances-021'), { recursive: true });
+writeFileSync(resolve(root, 'artifacts/gpu-instances-021/diagnostic.json'), JSON.stringify(evidence, null, 2) + '\n');
+console.log(`[gpu-instances-021] passed: 10000 stable IDs, LOD 3334/3333/3333, frustum rejection, indirect draws, normal/Toon pixels. Evidence: artifacts/gpu-instances-021/diagnostic.json`);

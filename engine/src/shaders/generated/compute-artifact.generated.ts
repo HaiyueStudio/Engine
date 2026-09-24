@@ -5,6 +5,7 @@ import GpuSortBitonicWgsl from './compute-gpu-sort-bitonic.generated.wgsl';
 import InstancedCullWgsl from './compute-instanced-cull.generated.wgsl';
 import InstancedDepthSortKeyWgsl from './compute-instanced-depth-sort-key.generated.wgsl';
 import Mesh3dCullWgsl from './compute-mesh3d-cull.generated.wgsl';
+import InstancedLodWgsl from './compute-instanced-lod.generated.wgsl';
 
 export const COMPUTE_SHADER_ARTIFACT = {
   "format": "haiyue-precompiled-shader-artifact",
@@ -13,10 +14,10 @@ export const COMPUTE_SHADER_ARTIFACT = {
   "source": {
     "kind": "typed-ir",
     "path": "shader-language/builtin-compute-family.json",
-    "sha256": "08017749911b7d4fdcdfaa6b9af34e1fe12123f15d889392d2d3761705499737"
+    "sha256": "3f86732fa6194712c5ac9649f307385ca90734823e7b8cf5a13f4c3f554eba33"
   },
-  "canonicalHash": "7efa186e519c24304293f287e0d6dc9be507a1f64a653315652d4bf36ddecd2f",
-  "typedModuleHash": "fad7e8deb4097542cff56fbf0be7ebdb3f1a0f08699438e34a540903d84ea60e",
+  "canonicalHash": "77129b1770e3e26dccddbbc96d06d14946a3ece82e8f5448e88ca5cc7aec0b05",
+  "typedModuleHash": "9231f1561a817c57551c97783ba456d20cf67a083238de027d523a88427448fe",
   "passes": {
     "gpu-draw-command": {
       "id": "gpu-draw-command",
@@ -127,7 +128,7 @@ export const COMPUTE_SHADER_ARTIFACT = {
           "generatedEndLine": 48
         }
       ],
-      "canonicalHash": "fba7247f9a49fce9d0bbab0c40903b348178ef3557bb3e84c4e0d96ffaaed204"
+      "canonicalHash": "f1749c6bba6fc33e9cb2eff2b31652e19573d1f698a45833048744274bf53df4"
     },
     "gpu-sort-bitonic": {
       "id": "gpu-sort-bitonic",
@@ -210,7 +211,7 @@ export const COMPUTE_SHADER_ARTIFACT = {
           "generatedEndLine": 77
         }
       ],
-      "canonicalHash": "1df2eb8c536ae6fffa517bc621e719189f6c8bf1ba5a746377e7e98c11d177af"
+      "canonicalHash": "33ac77fc63602256078ea2f33a2f64e48f2f56fef3463718b8650704751b68fc"
     },
     "instanced-cull": {
       "id": "instanced-cull",
@@ -353,7 +354,7 @@ export const COMPUTE_SHADER_ARTIFACT = {
           "generatedEndLine": 46
         }
       ],
-      "canonicalHash": "32a928775f97a9de79e0fa1be134efa4fa3d42fcd20749660a5aeb65bff0e2c6"
+      "canonicalHash": "7aab02655736bd25c80ad67e1b7c195c2f20376d3ec83718eb78a7049091269f"
     },
     "instanced-depth-sort-key": {
       "id": "instanced-depth-sort-key",
@@ -482,7 +483,7 @@ export const COMPUTE_SHADER_ARTIFACT = {
           "generatedEndLine": 41
         }
       ],
-      "canonicalHash": "385e2d0eb087c74f54cce4b52412703f9848007a0685bf217317e46189b68db6"
+      "canonicalHash": "4c6de70f121fa3bd9ec07fba7d860b26bd31d43a39a76b2a3a662493bddde234"
     },
     "mesh3d-cull": {
       "id": "mesh3d-cull",
@@ -632,8 +633,164 @@ export const COMPUTE_SHADER_ARTIFACT = {
           "generatedEndLine": 45
         }
       ],
-      "canonicalHash": "1b0fe6c378f990a75f1f3f5c89c2329ce554319fe39ebdaeaec801159b55cbdb"
+      "canonicalHash": "b3e39272bdc92b625c83080a0cda76ded75bcaf1525b80ae63725699d0c265bf"
+    },
+    "instanced-lod": {
+      "id": "instanced-lod",
+      "code": InstancedLodWgsl,
+      "entryPoints": {
+        "compute": "cs_main"
+      },
+      "bindGroups": [
+        {
+          "logicalSpace": "pass",
+          "logicalGroup": 3,
+          "physicalGroup": 0,
+          "owner": "artifact",
+          "bindings": [
+            {
+              "id": "pass.transforms",
+              "binding": 0,
+              "visibility": [
+                "compute"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "read-only-storage",
+                "hasDynamicOffset": false,
+                "minBindingSize": 64
+              }
+            },
+            {
+              "id": "pass.lodVisible",
+              "binding": 1,
+              "visibility": [
+                "compute"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "storage",
+                "hasDynamicOffset": false,
+                "minBindingSize": 4
+              }
+            },
+            {
+              "id": "pass.lodCounts",
+              "binding": 2,
+              "visibility": [
+                "compute"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "storage",
+                "hasDynamicOffset": false,
+                "minBindingSize": 12
+              }
+            },
+            {
+              "id": "pass.lodLevels",
+              "binding": 3,
+              "visibility": [
+                "compute"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "storage",
+                "hasDynamicOffset": false,
+                "minBindingSize": 4
+              }
+            },
+            {
+              "id": "pass.lodParams",
+              "binding": 4,
+              "visibility": [
+                "compute"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "uniform",
+                "hasDynamicOffset": false,
+                "minBindingSize": 224
+              }
+            }
+          ]
+        }
+      ],
+      "uniformBlocks": [
+        {
+          "id": "pass.lodParams",
+          "alignment": 16,
+          "byteSize": 224,
+          "fields": [
+            {
+              "name": "planes",
+              "type": "array<vec4<f32>, 6>",
+              "offset": 0,
+              "size": 96
+            },
+            {
+              "name": "view",
+              "type": "mat4x4<f32>",
+              "offset": 96,
+              "size": 64,
+              "matrixStride": 16
+            },
+            {
+              "name": "screen",
+              "type": "vec4<f32>",
+              "offset": 160,
+              "size": 16
+            },
+            {
+              "name": "tuning",
+              "type": "vec4<f32>",
+              "offset": 176,
+              "size": 16
+            },
+            {
+              "name": "sphere",
+              "type": "vec4<f32>",
+              "offset": 192,
+              "size": 16
+            },
+            {
+              "name": "dispatchInfo",
+              "type": "vec4<u32>",
+              "offset": 208,
+              "size": 16
+            }
+          ]
+        }
+      ],
+      "vertexBuffers": [],
+      "varyings": [],
+      "renderTargets": [],
+      "capabilities": [
+        "compute",
+        "storage-buffer",
+        "explicit-side-effects",
+        "explicit-dispatch-abi",
+        "atomic"
+      ],
+      "passRequirements": [
+        "compute-abi-v1",
+        "workgroup-size-64x1x1",
+        "dispatch-domain-instance-count",
+        "dispatch-schedule-single",
+        "effect-store:pass.lodVisible",
+        "effect-store:pass.lodLevels",
+        "effect-atomic-add:pass.lodCounts"
+      ],
+      "sourceMap": [
+        {
+          "sourceId": "compute.instanced-lod",
+          "sourceName": "shader-language/builtin-compute-family.json",
+          "generatedStartLine": 1,
+          "generatedEndLine": 55
+        }
+      ],
+      "canonicalHash": "fd6515779b0f68d6b4a3d540a96058df657ed1504c9eccc8419aa8cfac35fd04"
     }
   },
-  "artifactHash": "70c60d0986507390e66ef37aa242c1e3ac82fdaea7658ce14e4b19ebe37ef8bb"
+  "artifactHash": "f58b0de8483a7e5ea6999652985330733118394c6054dec56c82b2181b93f18a"
 } as const satisfies PrecompiledShaderArtifactV2;

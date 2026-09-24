@@ -1,7 +1,7 @@
 // haiyue:compute-pass instanced-depth-sort-key
 // haiyue:compute-abi 1
 // haiyue:compute-ir 8b478f9851905763a5e130fcc0f9154aa71095f8abf3aa6f24cfd135974089d6
-// haiyue:compute-module 224edd29cb3a5bf01c487e04e033918d52080c080ac656754d0a633b961894a6
+// haiyue:compute-module f2bc6d1a9a7a9ff1b6a041fc71a3d2c06a503b08d161eabe763c56f7d858774d
 // source: shader-language/builtin-compute-family.json
 
 struct SortKeyParams {

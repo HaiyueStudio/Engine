@@ -54,3 +54,5 @@
 能力是否进入 stable 以 [API stability](../for-ai/api-stability.md) 和发布包 exports 为准，不应根据源码目录推断公共 API。
 
 - [Scrollable GUI and rule help](./gui.md)
+
+- [GPU 实例与模拟（experimental）](gpu-instances.md)

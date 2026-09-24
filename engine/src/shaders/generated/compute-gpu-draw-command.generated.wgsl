@@ -1,7 +1,7 @@
 // haiyue:compute-pass gpu-draw-command
 // haiyue:compute-abi 1
 // haiyue:compute-ir e8b0c13e681a306ae56b7b2a32209123cc9c3407e75834cf58de590244d53b95
-// haiyue:compute-module 224edd29cb3a5bf01c487e04e033918d52080c080ac656754d0a633b961894a6
+// haiyue:compute-module f2bc6d1a9a7a9ff1b6a041fc71a3d2c06a503b08d161eabe763c56f7d858774d
 // source: shader-language/builtin-compute-family.json
 
 struct DrawCommandParams {

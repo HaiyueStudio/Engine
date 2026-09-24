@@ -1,6 +1,6 @@
 {
   "name": "@haiyue/engine-repository",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "license": "MIT",
   "repository": "https://github.com/HaiyueStudio/Engine.git",
@@ -42,6 +42,7 @@
     "docs:export:test": "node --test scripts/export-reference-docs.test.mjs",
     "contracts:check": "node scripts/check-stage3-contracts.mjs",
     "lifecycle:check": "node scripts/check-stage4-lifecycle.mjs",
+    "verify:gpu-instances": "npm run build:engine && npm run build:target -- example:gpu-instances && node scripts/verify-gpu-instances-021.mjs",
     "verify:engine-package": "npm run build:engine && node scripts/verify-engine-package.mjs",
     "release:check": "node scripts/release-gate.mjs --global",
     "release:check:global": "node scripts/release-gate.mjs --global",

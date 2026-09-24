@@ -3,6 +3,30 @@
   "kind": "examples",
   "entries": [
     {
+      "id": "gpu-instances",
+      "title": "GPU Instances · Toon & LOD",
+      "entry": "gpu-instances/main.ts",
+      "capabilities": [
+        "gpu-compute",
+        "gpu-instances",
+        "instanced-toon",
+        "gpu-lod",
+        "indirect-rendering",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "rendering",
+        "order": 99
+      }
+    },
+    {
       "id": "animation-spec",
       "title": "Lottie to HYA Playground",
       "entry": "animation-spec/main.ts",

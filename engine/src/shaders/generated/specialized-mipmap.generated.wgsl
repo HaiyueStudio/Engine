@@ -1,6 +1,6 @@
 // haiyue:specialized-rendering-pass mipmap
 // haiyue:specialized-rendering-abi 1
-// haiyue:specialized-rendering-module e58254ced41b58d62be3b93804a7633bcaa270d03d1064a773f62a4db8af1e3d
+// haiyue:specialized-rendering-module 2a0b46e6283414cf912d4e8c3afc006d036bf2db14f527d0f6f488de6cc53729
 // source: shader-language/builtin-specialized-rendering-family.json
 
 struct VertexOutput {

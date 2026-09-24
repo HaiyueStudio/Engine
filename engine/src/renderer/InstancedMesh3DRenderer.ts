@@ -3,6 +3,10 @@ import type { IEngine } from '../core/IEngine';
 import { getEngineGPUResourceTracker } from '../core/EngineDiagnosticsAccess';
 import type { Geometry3D } from '../geometry/Geometry3D';
 import type { InstancedMaterial } from '../material/InstancedMaterial';
+import { InstancedToonMaterial } from '../material/InstancedToonMaterial';
+import type { GpuInstanceSource } from './GpuInstanceSource';
+import { GpuInstanceBindings } from './GpuInstanceBindings';
+import { instanceDataChanges } from '../material/InstanceDataJournal';
 import { InstancedPbrMaterial } from '../material/InstancedPbrMaterial';
 import type { InstancedPbrAlphaMode } from '../material/InstancedPbrMaterial';
 import type { EnvironmentLight } from '../lighting/EnvironmentLight';
@@ -12,7 +16,7 @@ import type { SharedGeometry3DGPUData } from './SharedGeometry3DGPUCache';
 import { encodePrimitivePipelineKey } from './pipelineKey';
 import { getStripIndexFormat, writeBuffer as wrtBuf } from './utils';
 import type { LiveIdSet } from './utils';
-import { IndirectDrawCommandBuffer } from './IndirectDrawCommandBuffer';
+import { InstancedAuxiliaryBuffers } from './InstancedAuxiliaryBuffers';
 import type { BoundingSphere } from '../culling/Frustum';
 import type { RenderCommandContext } from '../core/RenderCommandContext';
 import { GpuSortComputePass } from '../compute/GpuSortComputePass';
@@ -33,22 +37,18 @@ interface MatGPUData {
   transformBuf:  GPUBuffer;
   colorBuf:      GPUBuffer;
   visibleIndexBuf: GPUBuffer;
-  sortKeyBuf: GPUBuffer;
-  sortIndexBuf: GPUBuffer;
-  sortParamsBuf: GPUBuffer;
-  sortBindGroup: GPUBindGroup;
-  counterBuf:    GPUBuffer;
-  cullParamsBuf: GPUBuffer;
   materialBuf: GPUBuffer;
-  bindGroup1:    GPUBindGroup;
-  cullBindGroup: GPUBindGroup;
-  indirect:      IndirectDrawCommandBuffer;
+  bindGroup1: GPUBindGroup;
+  auxiliary: InstancedAuxiliaryBuffers;
   instanceCount: number;
   instanceCapacity: number;
   identityIndexCapacity: number;
   identityIndicesValid: boolean;
   materialId: number;
   materialRevision: number;
+  transformRevision?: number;
+  colorRevision?: number;
+  sourceMaterial?: InstancedMaterial;
 }
 
 interface InstancedCoreObject {
@@ -56,6 +56,8 @@ interface InstancedCoreObject {
 }
 
 export interface InstancedMesh3DRenderOptions {
+  /** Borrowed GPU-produced transforms/colors/visibility; bypasses CPU instance uploads. */
+  externalInstances?: GpuInstanceSource;
   indirect?: boolean;
   gpuCulling?: boolean;
   instanceSorted?: boolean;
@@ -135,6 +137,7 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
   private rendererCore!: ParameterizedRendererCore<InstancedCoreObject, SharedGeometry3DGPUData>;
   private get geoCache(): SharedGeometryRendererOwner { return this.rendererCore.geometry as SharedGeometryRendererOwner; }
   private matCache = new Map<number, MatGPUData>();
+  private externalBindings!: GpuInstanceBindings;
 
   private _initialized = false;
 
@@ -177,6 +180,9 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
     this.pipelineLayout = generated.pipelineLayout;
     this._instanceSortPass = new GpuSortComputePass(engine, 'InstancedMesh3D.instanceDepthSort');
 
+    this.externalBindings = new GpuInstanceBindings(device, (source, materialBuf) => this._createObjectBindGroup({
+      transformBuf: source.transforms, colorBuf: source.colors, visibleIndexBuf: source.visibleIndices, materialBuf,
+    }, source));
     this.frustumBuf = device.createBuffer({
       size: 96,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
@@ -194,6 +200,7 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
     this._lightsNeedUpload = true;
     if (this._lightUniforms.selectView(sceneFrame, context)) {
       for (const data of this.matCache.values()) data.bindGroup1 = this._createObjectBindGroup(data);
+      this.externalBindings?.rebind();
     }
     this.cameraDynamicOffset[0] = this.sceneFrameBinding.upload(sceneFrame, context);
   }
@@ -216,6 +223,7 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
     this._lightUniforms.upload(this._lights);
     if (previousBuffer !== this._lightUniforms.buffer) {
       for (const data of this.matCache.values()) data.bindGroup1 = this._createObjectBindGroup(data);
+      this.externalBindings?.rebind();
     }
   }
 
@@ -261,17 +269,13 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
   }
 
   releaseEntitiesNotIn(liveEntities: LiveIdSet): void {
+    this.externalBindings?.release(liveEntities);
     this.releaseCacheEntriesNotIn(this.matCache, liveEntities, data => {
       data.transformBuf.destroy();
       data.colorBuf.destroy();
       data.visibleIndexBuf.destroy();
-      data.sortKeyBuf.destroy();
-      data.sortIndexBuf.destroy();
-      data.sortParamsBuf.destroy();
-      data.counterBuf.destroy();
-      data.cullParamsBuf.destroy();
       data.materialBuf.destroy();
-      data.indirect.destroy();
+      data.auxiliary.destroy();
     });
   }
 
@@ -293,6 +297,7 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
     const matData = this._ensureMaterialData(entityId, material, material.activeInstanceCount, false);
     if (material.activeInstanceCount < 1) return;
     const geoData = this.geoCache.ensure(geometry, this);
+    const cull = matData.auxiliary.culling();
     this._uploadDirtyInstanceData(matData, material);
 
     const device = this.engine.device;
@@ -302,41 +307,41 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
     this._cullParamsF32[5] = options.localSphere.center[1];
     this._cullParamsF32[6] = options.localSphere.center[2];
     this._cullParamsF32[7] = options.localSphere.radius;
-    device.queue.writeBuffer(matData.cullParamsBuf, 0, this._cullParamsData);
+    device.queue.writeBuffer(cull.cullParamsBuf, 0, this._cullParamsData);
 
     if (!options.externalIndirect) {
       if (geoData.indexBuf) {
-        matData.indirect.writeIndexed(geoData.indexCount, 0);
+        matData.auxiliary.indirect().writeIndexed(geoData.indexCount, 0);
       } else {
-        matData.indirect.write(geoData.vertexCount, 0);
+        matData.auxiliary.indirect().write(geoData.vertexCount, 0);
       }
     }
 
-    context.encoder.clearBuffer(matData.counterBuf);
+    context.encoder.clearBuffer(cull.counterBuf);
     const pass = context.encoder.beginComputePass({
       label: 'InstancedMesh3DRenderer.gpuCulling',
       ...(options.timestampWrites === undefined ? {} : { timestampWrites: options.timestampWrites }),
     });
     pass.setPipeline(this._getCullPipeline());
-    pass.setBindGroup(0, matData.cullBindGroup);
+    pass.setBindGroup(0, cull.cullBindGroup);
     pass.dispatchWorkgroups(Math.ceil(material.activeInstanceCount / 64));
     pass.end();
     if (geoData.indexBuf) {
       options.externalIndirect
-        ? context.encoder.copyBufferToBuffer(matData.counterBuf, 0, options.externalIndirect.indexedIndirectBuffer, options.externalIndirect.indexedIndirectOffset + 4, 4)
-        : context.encoder.copyBufferToBuffer(matData.counterBuf, 0, matData.indirect.indexedBuffer, 4, 4);
+        ? context.encoder.copyBufferToBuffer(cull.counterBuf, 0, options.externalIndirect.indexedIndirectBuffer, options.externalIndirect.indexedIndirectOffset + 4, 4)
+        : context.encoder.copyBufferToBuffer(cull.counterBuf, 0, matData.auxiliary.indirect().indexedBuffer, 4, 4);
     } else {
       options.externalIndirect
-        ? context.encoder.copyBufferToBuffer(matData.counterBuf, 0, options.externalIndirect.drawIndirectBuffer, options.externalIndirect.drawIndirectOffset + 4, 4)
-        : context.encoder.copyBufferToBuffer(matData.counterBuf, 0, matData.indirect.drawBuffer, 4, 4);
+        ? context.encoder.copyBufferToBuffer(cull.counterBuf, 0, options.externalIndirect.drawIndirectBuffer, options.externalIndirect.drawIndirectOffset + 4, 4)
+        : context.encoder.copyBufferToBuffer(cull.counterBuf, 0, matData.auxiliary.indirect().drawBuffer, 4, 4);
     }
     matData.identityIndicesValid = false;
   }
 
   copyGpuCullingCountTo(context: RenderCommandContext, entityId: number, dstBuffer: GPUBuffer, dstOffset = 0): boolean {
     const matData = this.matCache.get(entityId);
-    if (!matData) return false;
-    context.encoder.copyBufferToBuffer(matData.counterBuf, 0, dstBuffer, dstOffset, 4);
+    if (!matData?.auxiliary.counter) return false;
+    context.encoder.copyBufferToBuffer(matData.auxiliary.counter, 0, dstBuffer, dstOffset, 4);
     return true;
   }
 
@@ -350,6 +355,7 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
     if (instanceCount <= 1) return;
     const matData = this._ensureMaterialData(entityId, material, instanceCount, false);
     this._uploadDirtyInstanceData(matData, material);
+    const sort = matData.auxiliary.sorting();
     const paddedCount = nextPowerOfTwo(instanceCount);
 
     this._sortParamsU32[0] = instanceCount >>> 0;
@@ -357,25 +363,25 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
     this._sortParamsU32[2] = paddedCount >>> 0;
     this._sortParamsU32[3] = 0;
     this._sortParamsF32.set(options.viewMatrix, 4);
-    this.engine.device.queue.writeBuffer(matData.sortParamsBuf, 0, this._sortParamsData);
+    this.engine.device.queue.writeBuffer(sort.sortParamsBuf, 0, this._sortParamsData);
 
     const keyToken = recordComputeResourcePass(context, {
       label: 'InstancedMesh3DRenderer.instanceDepthSortKeys',
       path: 'InstancedMesh3DRenderer.instanceDepthSortKeys.resources',
       accesses: [
-        { resource: matData.sortKeyBuf, use: 'storage-write', path: 'InstancedMesh3DRenderer.instanceDepthSortKeys.sortKeyBuffer' },
-        { resource: matData.sortIndexBuf, use: 'storage-write', path: 'InstancedMesh3DRenderer.instanceDepthSortKeys.sortIndexBuffer' },
+        { resource: sort.sortKeyBuf, use: 'storage-write', path: 'InstancedMesh3DRenderer.instanceDepthSortKeys.sortKeyBuffer' },
+        { resource: sort.sortIndexBuf, use: 'storage-write', path: 'InstancedMesh3DRenderer.instanceDepthSortKeys.sortIndexBuffer' },
       ],
     });
     const pass = context.encoder.beginComputePass({ label: 'InstancedMesh3DRenderer.instanceDepthSortKeys' });
     pass.setPipeline(this._getSortKeyPipeline());
-    pass.setBindGroup(0, matData.sortBindGroup);
+    pass.setBindGroup(0, sort.sortBindGroup);
     pass.dispatchWorkgroups(Math.ceil(paddedCount / 64));
     pass.end();
 
     const sortToken = this._instanceSortPass.sort(context, {
-      sortKeyBuffer: matData.sortKeyBuf,
-      sortIndexBuffer: matData.sortIndexBuf,
+      sortKeyBuffer: sort.sortKeyBuf,
+      sortIndexBuffer: sort.sortIndexBuf,
       count: instanceCount,
       paddedCapacity: paddedCount,
     }, { after: [keyToken], path: 'InstancedMesh3DRenderer.instanceDepthSort.resources' });
@@ -385,12 +391,12 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
         path: 'InstancedMesh3DRenderer.visibleIndexCopy',
         after: [sortToken],
         accesses: [
-          { resource: matData.sortIndexBuf, use: 'copy-read', path: 'InstancedMesh3DRenderer.visibleIndexCopy.sortIndexBuffer' },
+          { resource: sort.sortIndexBuf, use: 'copy-read', path: 'InstancedMesh3DRenderer.visibleIndexCopy.sortIndexBuffer' },
           { resource: matData.visibleIndexBuf, use: 'copy-write', path: 'InstancedMesh3DRenderer.visibleIndexCopy.visibleIndexBuffer' },
         ],
       });
     }
-    context.encoder.copyBufferToBuffer(matData.sortIndexBuf, 0, matData.visibleIndexBuf, 0, instanceCount * 4);
+    context.encoder.copyBufferToBuffer(sort.sortIndexBuf, 0, matData.visibleIndexBuf, 0, instanceCount * 4);
     matData.identityIndicesValid = false;
   }
 
@@ -406,17 +412,21 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
     options: InstancedMesh3DRenderOptions = {},
   ): void {
     const { device } = this.engine;
-    const instanceCount = material.activeInstanceCount;
+    const instanceCount = options.externalInstances?.count ?? material.activeInstanceCount;
     if (instanceCount < 1) return;
+    if (options.externalInstances && options.indirect && !options.externalIndirect) throw new Error('GPU instance indirect draws require an external command.');
     if (this._lightsNeedUpload) this._uploadLights();
 
     // ── Geometry ──────────────────────────────────────────────────────────────
     const geoData = this.geoCache.ensure(geometry, this);
 
-    const matData = this._ensureMaterialData(entityId, material, instanceCount, !(options.gpuCulling || options.instanceSorted));
+    const matData = options.externalInstances
+      ? this.externalBindings.get(entityId, options.externalInstances)
+      : this._ensureMaterialData(entityId, material, instanceCount, !(options.gpuCulling || options.instanceSorted));
 
     // ── Upload dirty instance data ────────────────────────────────────────────
-    this._uploadDirtyInstanceData(matData, material);
+    if (options.externalInstances) this._uploadMaterialData(matData, material);
+    else this._uploadDirtyInstanceData(matData as MatGPUData, material);
 
     // ── Draw ──────────────────────────────────────────────────────────────────
     passEncoder.setPipeline(this._getPipeline(geometry, material));
@@ -432,8 +442,8 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
         if (options.externalIndirect) {
           passEncoder.drawIndexedIndirect(options.externalIndirect.indexedIndirectBuffer, options.externalIndirect.indexedIndirectOffset);
         } else {
-          if (!options.gpuCulling) matData.indirect.writeIndexed(geoData.indexCount, instanceCount);
-          passEncoder.drawIndexedIndirect(matData.indirect.indexedBuffer, 0);
+          if (!options.gpuCulling) (matData as MatGPUData).auxiliary.indirect().writeIndexed(geoData.indexCount, instanceCount);
+          passEncoder.drawIndexedIndirect((matData as MatGPUData).auxiliary.indirect().indexedBuffer, 0);
         }
       } else {
         passEncoder.drawIndexed(geoData.indexCount, instanceCount);
@@ -443,8 +453,8 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
         if (options.externalIndirect) {
           passEncoder.drawIndirect(options.externalIndirect.drawIndirectBuffer, options.externalIndirect.drawIndirectOffset);
         } else {
-          if (!options.gpuCulling) matData.indirect.write(geoData.vertexCount, instanceCount);
-          passEncoder.drawIndirect(matData.indirect.drawBuffer, 0);
+          if (!options.gpuCulling) (matData as MatGPUData).auxiliary.indirect().write(geoData.vertexCount, instanceCount);
+          passEncoder.drawIndirect((matData as MatGPUData).auxiliary.indirect().drawBuffer, 0);
         }
       } else {
         passEncoder.draw(geoData.vertexCount, instanceCount);
@@ -459,13 +469,8 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
       matData?.transformBuf.destroy();
       matData?.colorBuf.destroy();
       matData?.visibleIndexBuf.destroy();
-      matData?.sortKeyBuf.destroy();
-      matData?.sortIndexBuf.destroy();
-      matData?.sortParamsBuf.destroy();
-      matData?.counterBuf.destroy();
-      matData?.cullParamsBuf.destroy();
       matData?.materialBuf.destroy();
-      matData?.indirect.destroy();
+      matData?.auxiliary.destroy();
       const instanceCapacity = nextInstanceBufferCapacity(instanceCount, matData?.instanceCapacity ?? 0);
 
       const transformBuf = device.createBuffer({
@@ -480,66 +485,21 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
         size: Math.max(instanceCapacity * 4, 4),
         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
       });
-      const sortKeyBuf = device.createBuffer({
-        size: Math.max(instanceCapacity * 4, 4),
-        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-      });
-      const sortIndexBuf = device.createBuffer({
-        size: Math.max(instanceCapacity * 4, 4),
-        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC,
-      });
-      const sortParamsBuf = device.createBuffer({
-        size: 80,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      });
-      const counterBuf = device.createBuffer({
-        size: 4,
-        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
-      });
-      const cullParamsBuf = device.createBuffer({
-        size: 32,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      });
       const materialBuf = device.createBuffer({
         label: `InstancedMesh3D.${entityId}.pbrMaterial`,
         size: 16,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       });
       const bindGroup1 = this._createObjectBindGroup({ transformBuf, colorBuf, visibleIndexBuf, materialBuf });
-      const cullBindGroup = device.createBindGroup({
-        layout: this.cullBgl,
-        entries: [
-          { binding: 0, resource: { buffer: transformBuf } },
-          { binding: 1, resource: { buffer: visibleIndexBuf } },
-          { binding: 2, resource: { buffer: counterBuf } },
-          { binding: 3, resource: { buffer: this.frustumBuf } },
-          { binding: 4, resource: { buffer: cullParamsBuf } },
-        ],
-      });
-      const sortBindGroup = device.createBindGroup({
-        layout: this.sortKeyBgl,
-        entries: [
-          { binding: 0, resource: { buffer: transformBuf } },
-          { binding: 1, resource: { buffer: sortKeyBuf } },
-          { binding: 2, resource: { buffer: sortIndexBuf } },
-          { binding: 3, resource: { buffer: sortParamsBuf } },
-        ],
-      });
-      const indirect = new IndirectDrawCommandBuffer(this.engine, `InstancedMesh3D.${entityId}`);
+      const auxiliary = new InstancedAuxiliaryBuffers(this.engine, entityId, instanceCapacity,
+        transformBuf, visibleIndexBuf, this.frustumBuf, this.cullBgl, this.sortKeyBgl);
       matData = {
         transformBuf,
         colorBuf,
         visibleIndexBuf,
-        sortKeyBuf,
-        sortIndexBuf,
-        sortParamsBuf,
-        sortBindGroup,
-        counterBuf,
-        cullParamsBuf,
+        auxiliary,
         materialBuf,
         bindGroup1,
-        cullBindGroup,
-        indirect,
         instanceCount,
         instanceCapacity,
         identityIndexCapacity: 0,
@@ -578,24 +538,32 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
   private _uploadDirtyInstanceData(matData: MatGPUData, material: InstancedMaterial): void {
     const queue = this.engine.device.queue;
     const instanceCount = material.activeInstanceCount;
-    if (material.transformsDirty) {
-      const start = Math.min(material.transformDirtyStart, instanceCount);
-      const end = Math.min(material.transformDirtyEnd, instanceCount);
-      if (end > start) wrtBuf(queue, matData.transformBuf, start * 16 * 4, material.transforms.subarray(start * 16, end * 16));
-      material.clearTransformsDirty();
-    }
-    if (material.colorsDirty) {
-      const start = Math.min(material.colorDirtyStart, instanceCount);
-      const end = Math.min(material.colorDirtyEnd, instanceCount);
-      if (end > start) wrtBuf(queue, matData.colorBuf, start * 4 * 4, material.colors.subarray(start * 4, end * 4));
-      material.clearColorsDirty();
-    }
+    const changedSource = matData.sourceMaterial !== material;
+    const transforms = instanceDataChanges(material, 'transforms', changedSource ? undefined : matData.transformRevision, instanceCount);
+    const colors = instanceDataChanges(material, 'colors', changedSource ? undefined : matData.colorRevision, instanceCount);
+    if (transforms.end > transforms.start) wrtBuf(queue, matData.transformBuf, transforms.start * 64, material.transforms.subarray(transforms.start * 16, transforms.end * 16));
+    if (colors.end > colors.start) wrtBuf(queue, matData.colorBuf, colors.start * 16, material.colors.subarray(colors.start * 4, colors.end * 4));
+    matData.transformRevision = transforms.revision;
+    matData.colorRevision = colors.revision;
+    matData.sourceMaterial = material;
+    material.clearTransformsDirty();
+    material.clearColorsDirty();
+    this._uploadMaterialData(matData, material);
+  }
+
+  private _uploadMaterialData(matData: Pick<MatGPUData, 'materialBuf' | 'materialId' | 'materialRevision'>, material: InstancedMaterial): void {
+    const queue = this.engine.device.queue;
     if (matData.materialBuf && (matData.materialId !== material.id || matData.materialRevision !== material.revision)) {
       this._materialData.fill(0);
       if (material instanceof InstancedPbrMaterial) {
         this._materialData[0] = 1;
         this._materialData[1] = material.metallic;
         this._materialData[2] = material.roughness;
+      }
+      if (material instanceof InstancedToonMaterial) {
+        this._materialData[0] = 2;
+        this._materialData[1] = material.bands;
+        this._materialData[2] = material.ambient;
       }
       wrtBuf(queue, matData.materialBuf, 0, this._materialData);
       matData.materialId = material.id;
@@ -687,11 +655,11 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
     };
   }
 
-  private _createObjectBindGroup(data: Pick<MatGPUData, 'transformBuf' | 'colorBuf' | 'visibleIndexBuf' | 'materialBuf'>): GPUBindGroup {
+  private _createObjectBindGroup(data: Pick<MatGPUData, 'transformBuf' | 'colorBuf' | 'visibleIndexBuf' | 'materialBuf'>, source?: GpuInstanceSource): GPUBindGroup {
     return this.engine.device.createBindGroup({ layout: this.bgl1, entries: [
-      { binding: 0, resource: { buffer: data.transformBuf } },
-      { binding: 1, resource: { buffer: data.colorBuf } },
-      { binding: 2, resource: { buffer: data.visibleIndexBuf } },
+      { binding: 0, resource: { buffer: data.transformBuf, ...(source ? { size: source.capacity * 64 } : {}) } },
+      { binding: 1, resource: { buffer: data.colorBuf, ...(source ? { size: source.capacity * 16 } : {}) } },
+      { binding: 2, resource: { buffer: data.visibleIndexBuf, ...(source ? { offset: source.visibleOffset ?? 0, size: source.capacity * 4 } : {}) } },
       { binding: 3, resource: { buffer: data.materialBuf } },
       { binding: 4, resource: { buffer: this._lightUniforms.buffer, size: LIGHT_UNIFORM_BYTES } },
       { binding: 5, resource: { buffer: this.environmentBuf } },
@@ -699,6 +667,7 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
   }
 
   destroy(): void {
+    this.externalBindings?.destroy();
     this.sceneFrameBinding?.destroy();
     this.frustumBuf?.destroy();
     this._lightUniforms?.destroy();
@@ -710,13 +679,8 @@ export class InstancedMesh3DRenderer extends BaseRenderer {
       m.transformBuf.destroy();
       m.colorBuf.destroy();
       m.visibleIndexBuf.destroy();
-      m.sortKeyBuf.destroy();
-      m.sortIndexBuf.destroy();
-      m.sortParamsBuf.destroy();
-      m.counterBuf.destroy();
-      m.cullParamsBuf.destroy();
       m.materialBuf.destroy();
-      m.indirect.destroy();
+      m.auxiliary.destroy();
     });
     this.clearPipelineCache();
     this.cullPipeline = null;

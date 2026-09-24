@@ -17,3 +17,5 @@
 - [独立库发布门禁检查](independent-library-release.md)：UI 与 Engine 发布范围分离。
 
 - [0.2.0 验收阻塞修复](release-0.2.0-blocker-fixes.md)
+
+- [0.2.1 GPU 实例实施审查](engine-0.2.1-gpu-instances.md)

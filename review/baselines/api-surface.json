@@ -4563,6 +4563,10 @@
               "kind": "type"
             },
             {
+              "name": "GpuComputeProgram",
+              "kind": "value"
+            },
+            {
               "name": "GpuDrawCommandBuffers",
               "kind": "type"
             },
@@ -4619,6 +4623,26 @@
               "kind": "type"
             },
             {
+              "name": "GpuInstanceLod",
+              "kind": "value"
+            },
+            {
+              "name": "GpuInstanceLodView",
+              "kind": "type"
+            },
+            {
+              "name": "GpuInstanceSource",
+              "kind": "type"
+            },
+            {
+              "name": "GpuReadbackResult",
+              "kind": "type"
+            },
+            {
+              "name": "GpuReadbackRing",
+              "kind": "value"
+            },
+            {
               "name": "GPUResourceDebugSnapshot",
               "kind": "type"
             },
@@ -4656,6 +4680,10 @@
             },
             {
               "name": "GPUResourceUsage",
+              "kind": "type"
+            },
+            {
+              "name": "GpuSimulationRequirements",
               "kind": "type"
             },
             {
@@ -5023,6 +5051,10 @@
               "kind": "type"
             },
             {
+              "name": "inspectGpuSimulationCapabilities",
+              "kind": "value"
+            },
+            {
               "name": "inspectKtx2Texture",
               "kind": "value"
             },
@@ -5085,6 +5117,10 @@
             {
               "name": "InstancedMesh3DRenderSystemOptions",
               "kind": "type"
+            },
+            {
+              "name": "InstancedToonMaterial",
+              "kind": "value"
             },
             {
               "name": "InteractionRaycastResult",
@@ -7088,6 +7124,10 @@
               "kind": "value"
             },
             {
+              "name": "GpuComputeProgram",
+              "kind": "value"
+            },
+            {
               "name": "GpuDrawCommandBuffers",
               "kind": "type"
             },
@@ -7144,6 +7184,30 @@
               "kind": "type"
             },
             {
+              "name": "GpuInstanceLod",
+              "kind": "value"
+            },
+            {
+              "name": "GpuInstanceLodView",
+              "kind": "type"
+            },
+            {
+              "name": "GpuInstanceSource",
+              "kind": "type"
+            },
+            {
+              "name": "GpuReadbackResult",
+              "kind": "type"
+            },
+            {
+              "name": "GpuReadbackRing",
+              "kind": "value"
+            },
+            {
+              "name": "GpuSimulationRequirements",
+              "kind": "type"
+            },
+            {
               "name": "GpuSortableBuffers",
               "kind": "type"
             },
@@ -7153,6 +7217,22 @@
             },
             {
               "name": "IndirectDrawCommandBuffer",
+              "kind": "value"
+            },
+            {
+              "name": "inspectGpuSimulationCapabilities",
+              "kind": "value"
+            },
+            {
+              "name": "InstancedMesh3DRenderer",
+              "kind": "value"
+            },
+            {
+              "name": "InstancedMesh3DRenderOptions",
+              "kind": "type"
+            },
+            {
+              "name": "InstancedToonMaterial",
               "kind": "value"
             },
             {

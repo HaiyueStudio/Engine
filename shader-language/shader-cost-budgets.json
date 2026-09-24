@@ -9,10 +9,10 @@
     "maxColdCompilationMs": 500
   },
   "production": {
-    "maxGeneratedWgslBytes": 360000,
-    "maxGeneratedWgslFiles": 66,
-    "maxVariantCount": 58,
-    "maxPipelineCount": 58,
+    "maxGeneratedWgslBytes": 363464,
+    "maxGeneratedWgslFiles": 67,
+    "maxVariantCount": 59,
+    "maxPipelineCount": 59,
     "maxColdGenerationMs": 10000,
     "growthBaseline": {
       "generatedWgslBytes": 305504,
@@ -21,10 +21,10 @@
       "pipelineCount": 56
     },
     "maxGrowth": {
-      "generatedWgslBytes": 54496,
-      "generatedWgslFiles": 2,
-      "variantCount": 2,
-      "pipelineCount": 2
+      "generatedWgslBytes": 57960,
+      "generatedWgslFiles": 3,
+      "variantCount": 3,
+      "pipelineCount": 3
     }
   },
   "dag": {

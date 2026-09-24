@@ -90,6 +90,76 @@
         { "kind": "store", "resource": "pass.indexedIndirect" },
         { "kind": "store", "resource": "pass.drawIndirect" }
       ]
+    },
+    {
+      "id": "instanced-lod",
+      "operation": "instanced-lod",
+      "entryPoint": "cs_main",
+      "workgroupSize": [
+        64,
+        1,
+        1
+      ],
+      "dispatch": {
+        "domain": "instance-count",
+        "schedule": "single",
+        "ceilDivisor": [
+          64,
+          1,
+          1
+        ]
+      },
+      "resources": [
+        {
+          "id": "pass.transforms",
+          "binding": 0,
+          "kind": "storage-buffer",
+          "access": "read",
+          "minBindingSize": 64
+        },
+        {
+          "id": "pass.lodVisible",
+          "binding": 1,
+          "kind": "storage-buffer",
+          "access": "read-write",
+          "minBindingSize": 4
+        },
+        {
+          "id": "pass.lodCounts",
+          "binding": 2,
+          "kind": "storage-buffer",
+          "access": "atomic-read-write",
+          "minBindingSize": 12
+        },
+        {
+          "id": "pass.lodLevels",
+          "binding": 3,
+          "kind": "storage-buffer",
+          "access": "read-write",
+          "minBindingSize": 4
+        },
+        {
+          "id": "pass.lodParams",
+          "binding": 4,
+          "kind": "uniform-buffer",
+          "access": "read",
+          "minBindingSize": 224
+        }
+      ],
+      "effects": [
+        {
+          "kind": "store",
+          "resource": "pass.lodVisible"
+        },
+        {
+          "kind": "store",
+          "resource": "pass.lodLevels"
+        },
+        {
+          "kind": "atomic-add",
+          "resource": "pass.lodCounts"
+        }
+      ]
     }
   ]
 }
