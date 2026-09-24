@@ -1,6 +1,6 @@
 {
   "name": "@haiyue/extensions",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "description": "Stable optional HaiYue runtimes for 2D/3D animation, glTF, Spine, tilemaps, text, tweening, and grids.",
   "license": "MIT",
@@ -110,12 +110,12 @@
     "wgpu-matrix": "^3.0.0"
   },
   "peerDependencies": {
-    "@haiyue/animation-spec": ">=0.1.0 <0.2.0",
-    "@haiyue/engine": ">=0.1.0 <0.2.0"
+    "@haiyue/animation-spec": ">=0.2.0 <0.3.0",
+    "@haiyue/engine": ">=0.2.0 <0.3.0"
   },
   "devDependencies": {
-    "@haiyue/animation-spec": "0.1.0",
-    "@haiyue/engine": "0.1.0",
+    "@haiyue/animation-spec": "0.2.0",
+    "@haiyue/engine": "0.2.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-typescript": "^11.0.0",
     "@types/opentype.js": "^1.3.8",

@@ -13,7 +13,7 @@ const resultNode = document.querySelector('#result');
 const progressNode = document.querySelector('#progress');
 const query = new URLSearchParams(location.search);
 const mode = query.get('mode') === 'full' ? 'full' : 'smoke';
-const warmup = positiveInteger(query.get('warmup'), mode === 'full' ? 3 : 2);
+const warmup = Math.max(3, positiveInteger(query.get('warmup'), 3));
 const samples = positiveInteger(query.get('samples'), 40);
 const budgetCaseIds = new Set([
   'render3d.planar-reflection.1000e.1m.1b.1v',
@@ -22,12 +22,12 @@ const budgetCaseIds = new Set([
   'render3d.planar-reflection.10000e.4m.8b.4v',
 ]);
 
+const benchmarkResults = [];
 try {
   if (!navigator.gpu) throw new Error('navigator.gpu is unavailable');
   const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
   if (!adapter) throw new Error('No WebGPU adapter');
   const adapterInfo = plainAdapterInfo(adapter.info ?? {});
-  const benchmarkResults = [];
   const configurations = createConfigurations(mode);
   for (let index = 0; index < configurations.length; index++) {
     const configuration = configurations[index];
@@ -70,7 +70,7 @@ try {
   resultNode.dataset.status = 'passed';
   progressNode.textContent = 'complete';
 } catch (error) {
-  resultNode.textContent = error instanceof Error ? `${error.stack ?? error.message}` : String(error);
+  resultNode.textContent = JSON.stringify({ status: 'failed', error: error instanceof Error ? (error.stack ?? error.message) : String(error), benchmarkResults });
   resultNode.dataset.status = 'failed';
 }
 
@@ -93,7 +93,7 @@ function createConfigurations(profile) {
 async function runBenchmarkCase(configuration) {
   const id = caseId(configuration);
   const budgetCase = budgetCaseIds.has(id);
-  const caseWarmup = budgetCase ? warmup : 1;
+  const caseWarmup = warmup;
   const caseSamples = budgetCase ? samples : 1;
   return withStrictDevice(`benchmark:${caseId(configuration)}`, async device => {
     const state = await createRealRendererBenchmarkScenario({
@@ -106,7 +106,16 @@ async function runBenchmarkCase(configuration) {
     });
     try {
       const pipelineWarmup = await warmRealRendererBenchmarkPipelines(state);
-      for (let index = 0; index < caseWarmup; index++) await runRealRendererBenchmarkFrame(state);
+      const warmupFrames = [];
+      for (let index = 0; index < caseWarmup; index++) {
+        resetRealRendererBenchmarkMetrics(state);
+        const startedAt = performance.now();
+        await runRealRendererBenchmarkFrame(state);
+        const metrics = getRealRendererBenchmarkMetrics(state);
+        warmupFrames.push({ frame: index + 1, wallMs: performance.now() - startedAt,
+          uploadBytes: metrics.uploadBytesPerFrame, uploadCalls: metrics.bufferUploadsPerFrame,
+          bufferExpansions: metrics.bufferExpansions, lightUploads: metrics.pbrLightUniformUploadsPerFrame });
+      }
       resetRealRendererBenchmarkMetrics(state);
       const durations = [];
       for (let index = 0; index < caseSamples; index++) {
@@ -121,6 +130,7 @@ async function runBenchmarkCase(configuration) {
         ...configuration,
         performanceBudgetCase: budgetCase,
         warmup: caseWarmup,
+        warmupFrames,
         samples: caseSamples,
         timing,
         frameMs: timing.p95,
@@ -256,10 +266,19 @@ async function readTargetPixels(device, texture, width, height) {
     rightMirror: samplePixel(mapped, bytesPerRow, width * 3 >> 2, height >> 1),
     corner: samplePixel(mapped, bytesPerRow, 4, 4),
   };
+  const rgba = new Uint8ClampedArray(width * height * 4);
+  for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+    const source = y * bytesPerRow + x * 4, destination = (y * width + x) * 4;
+    rgba.set([mapped[source + 2], mapped[source + 1], mapped[source], mapped[source + 3]], destination);
+  }
+  const canvas = new OffscreenCanvas(width, height);
+  canvas.getContext('2d').putImageData(new ImageData(rgba, width, height), 0, 0);
+  const png = new Uint8Array(await (await canvas.convertToBlob({ type: 'image/png' })).arrayBuffer());
+  const imagePng = btoa(Array.from(png, value => String.fromCharCode(value)).join(''));
   buffer.unmap();
   buffer.destroy();
   return {
-    width, height,
+    width, height, imagePng,
     hash: (hash >>> 0).toString(16).padStart(8, '0'),
     nonBlackPixels,
     averageLuminance: Math.round(luminanceSum / (width * height * 10)),

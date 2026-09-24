@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { computeHistoricalCostDiff } from './shader-cost-policy.mjs';
+import { computeHistoricalCostDiff, loadShaderCostBudget, validateProductionBundleCost } from './shader-cost-policy.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const contract = JSON.parse(await readFile(resolve(root, 'shader-language/stage10-contract.json'), 'utf8'));
@@ -14,9 +14,9 @@ const evidence = {
 };
 const failures = [];
 const diff = computeHistoricalCostDiff(evidence, contract.bundle);
-if (evidence.deformationArtifactGzipBytes > contract.bundle.deformationArtifactGzipBudgetBytes) {
-  failures.push(`gzip ${evidence.deformationArtifactGzipBytes} exceeds ${contract.bundle.deformationArtifactGzipBudgetBytes}`);
-}
+const costBudget = loadShaderCostBudget(root);
+const budgetError = validateProductionBundleCost('deformationArtifactGzipBytes', evidence.deformationArtifactGzipBytes, costBudget);
+if (budgetError) failures.push(budgetError);
 if (/compileProductionDeformationFamilyV1|haiyue-production-deformation-family/.test(deformation.toString('utf8'))) {
   failures.push('engine deformation artifact contains the compiler or family parser');
 }
@@ -24,7 +24,7 @@ if (/basic-material|forward-skinned|haiyue:deformation-pass/.test(simple3d)) {
   failures.push('simple-3D artifact retained duplicate forward deformation code');
 }
 if (failures.length > 0) throw new Error(`Stage 10 shader bundle gate failed:\n- ${failures.join('\n- ')}`);
-console.log(`[shader-language:stage10:bundle] passed: raw=${format(diff.deformationArtifactRawBytes)}, gzip=${format(diff.deformationArtifactGzipBytes)}/${contract.bundle.deformationArtifactGzipBudgetBytes}.`);
+console.log(`[shader-language:stage10:bundle] passed: raw=${format(diff.deformationArtifactRawBytes)}, gzip=${format(diff.deformationArtifactGzipBytes)}/${costBudget.productionBundles.deformationArtifactGzipBytes}.`);
 
 function format(entry) {
   return `${entry.current} (historical=${entry.baseline}, delta=${entry.delta >= 0 ? '+' : ''}${entry.delta})`;

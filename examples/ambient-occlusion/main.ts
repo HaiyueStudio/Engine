@@ -55,7 +55,7 @@ async function main(): Promise<void> {
         target: [0, 1.25, -1.4],
       },
     },
-    render3D: { renderProfile: 'gpu-driven' },
+    render3D: { renderProfile: 'gpu-driven', toneMapping: occlusionOnly && enabled ? 'none' : 'reinhard' },
     render2D: false,
     gui: false,
   });
@@ -113,6 +113,12 @@ async function main(): Promise<void> {
   }
 
   bindControls(passes, postProcess, () => algorithm, value => { algorithm = value; }, () => aoEnabled, value => { aoEnabled = value; });
+  // Visibility is a diagnostic scalar; preserve white instead of tone-mapping it as radiance.
+  const syncOutput = (): void => {
+    scene.render3DSystem!.toneMapping = aoEnabled && query<HTMLSelectElement>('#display').value === 'occlusion' ? 'none' : 'reinhard';
+  };
+  query<HTMLSelectElement>('#display').addEventListener('change', syncOutput);
+  query<HTMLInputElement>('#enabled').addEventListener('change', syncOutput);
   const warmupStartedAt = performance.now();
   const warmup = await scene.warmupPipelines();
   const pipelineWarmupMs = performance.now() - warmupStartedAt;

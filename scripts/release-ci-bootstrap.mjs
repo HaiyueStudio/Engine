@@ -2,20 +2,17 @@ import { spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { npmArgs, npmCommand } from './npm-process.mjs';
+import { ENGINE_FOUNDATIONS } from './engine-rehearsal-plan.mjs';
 
 const toolingRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const pagesExamples = process.argv.includes('--pages-examples');
 const root = pagesExamples
   ? resolve(process.env.PAGES_SOURCE_ROOT ?? toolingRoot)
   : toolingRoot;
-const allBuilds = [
-  ['shader-language'],
-  ['engine'],
-  ['animation-spec'],
-  ['extensions'],
-  ['ui'],
-];
-const builds = pagesExamples ? allBuilds.slice(0, 4) : allBuilds;
+const builds = ENGINE_FOUNDATIONS.map(workspace => [workspace]);
+for (const argument of process.argv.slice(2)) {
+  if (argument !== '--pages-examples') throw new Error(`Unknown bootstrap argument: ${argument}`);
+}
 
 for (const [workspace] of builds) {
   console.log(`[release-ci-bootstrap] build workspace=${workspace}`);
@@ -25,6 +22,7 @@ if (!pagesExamples) {
   console.log('[release-ci-bootstrap] generate lighting scaling diagnostic required by fast policy tests; formal-evidence=false');
   run(process.execPath, [
     'scripts/verify-webgpu-lighting-scaling-fixture.mjs',
+    '--evidence=diagnostic',
     '--lights=128',
     '--overlap=high',
     '--dynamic=1',

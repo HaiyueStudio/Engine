@@ -1,3 +1,4 @@
+import { createPortablePixelRecord } from './visual-regression/portable-pixels.mjs';
 import { createHash } from 'node:crypto';
 import {
   existsSync,
@@ -44,8 +45,7 @@ const current = {
   fixture: 'haiyue-ktx2-volume-storage-table-chrome-960x640',
   width: png.readUInt32BE(16),
   height: png.readUInt32BE(20),
-  hash: createHash('sha256').update(png).digest('hex'),
-  bytes: png.byteLength,
+  ...createPortablePixelRecord(png),
   coverage: capture.coverage,
 };
 if (current.width !== 960 || current.height !== 640) {
@@ -53,6 +53,9 @@ if (current.width !== 960 || current.height !== 640) {
 }
 if (current.bytes < 5_000) throw new Error(`Volume screenshot is unexpectedly empty (${current.bytes} bytes).`);
 
+mkdirSync(resolve(root, 'artifacts/render-regression'), { recursive: true });
+writeFileSync(resolve(root, 'artifacts/render-regression/volume.png'), png);
+writeFileSync(resolve(root, 'artifacts/render-regression/volume-candidate.json'), `${JSON.stringify(current, null, 2)}\n`);
 if (process.env.UPDATE_VOLUME_EXAMPLE_BASELINE === '1') {
   if (candidateMode.enabled) {
     throw new Error('Volume baseline update and candidate retention are mutually exclusive.');

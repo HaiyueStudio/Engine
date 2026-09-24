@@ -1,15 +1,17 @@
 const FULL_CORRECTNESS_CHECKS = Object.freeze([
-  Object.freeze(['run', 'check:fast']),
-  Object.freeze(['run', 'check:slow', '--', '--content-tier=full']),
+  Object.freeze(['run', 'verify:lighting-scaling:formal']),
+  Object.freeze(['run', 'lighting:evidence:check']),
+  Object.freeze(['run', 'check:engine:fast']),
+  Object.freeze(['run', 'check:engine:slow', '--', '--content-tier=full']),
   Object.freeze(['run', 'verify:webgpu-readback:long']),
 ]);
 
 const ARTIFACT_CHECKS = Object.freeze([
-  Object.freeze(['run', 'render-product:check']),
+  Object.freeze(['run', 'render-product:test']),
   Object.freeze(['run', 'api:check']),
   Object.freeze(['run', 'build:engine']),
   Object.freeze(['run', 'build:extensions']),
-  Object.freeze(['run', 'build:editor']),
+  Object.freeze(['run', 'release:scope:check']),
 ]);
 
 export function resolveReleaseGateMode(argv) {
@@ -31,9 +33,10 @@ export function createReleaseGateChecks(mode) {
     .map(args => [...args]);
   checks.push([
     'exec:node',
-    'scripts/inspect-release-artifacts.mjs',
+    'scripts/verify-engine-package.mjs',
     ...(mode === 'artifact' ? [] : ['--release']),
   ]);
+  checks.push(['exec:node', 'scripts/check-engine-entry-budget.mjs']);
   if (mode === 'local' || mode === 'global') checks.push(['run', 'performance:compare:formal']);
   return checks;
 }

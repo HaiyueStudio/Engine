@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadLightingDecisionEvidence } from './lighting-decision-evidence.mjs';
 import { evaluateCapabilityAdmissionPolicy } from './capability-admission-policy.mjs';
 import { evaluateLightingArchitectureDecision } from './lighting-architecture-decision-policy.mjs';
 
@@ -8,8 +9,7 @@ const root = new URL('../', import.meta.url);
 const lightingPolicy = readJson('config/lighting-architecture-policy.json');
 const capabilityPolicy = readJson('config/capability-admission-policy.json');
 const lighting = evaluateLightingArchitectureDecision(lightingPolicy, {
-  lightingScaling: readOptional(lightingPolicy.forwardPlus.scalingEvidencePath
-    ?? 'artifacts/webgpu/lighting-scaling.json'),
+  lightingScaling: loadLightingDecisionEvidence(fileURLToPath(root), lightingPolicy.forwardPlus.scalingEvidencePath),
   forwardPlusEvidence: readOptional(lightingPolicy.forwardPlus.evidencePath),
   csmEvidence: readOptional(lightingPolicy.csm.evidencePath),
 });

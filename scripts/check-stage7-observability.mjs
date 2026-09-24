@@ -1,6 +1,10 @@
+import { includesGatePath } from './engine-release-policy.mjs';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
+
+const gateScope = process.argv.includes('--engine') ? 'engine' : 'studio';
+const selectedPath = path => includesGatePath(path, gateScope);
 
 const root = resolve(import.meta.dirname, '..');
 const failures = [];
@@ -44,10 +48,12 @@ requireFile('scripts/verify-pixel-regression.mjs');
 requireFile('review/baselines/render-pixels-stage7.json');
 requirePatterns('pixel regression', read('scripts/verify-pixel-regression.mjs'), ['WebGPU readback', "['fixture', 'width', 'height', 'hash'", 'CHROME_PATH']);
 
-const player = read('editor/src/player.ts');
-const panel = read('editor/src/play/runtimeDebugPanel.ts');
-requirePatterns('editor diagnostics producer', player, ['getEngineFrameDiagnostics(engine)', 'frameDiagnostics?.snapshot()', 'pipeline.getDebugSnapshot()', 'getEngineGPUResourceTracker(engine)', 'resourceTracker?.getDebugSnapshot()', 'assetManager?.getDebugSnapshot()']);
-requirePatterns('editor diagnostics panel', panel, ['Asset refs', 'Cache hit rate', 'Pipeline issues', 'Slowest GPU pass', 'exportDiagnosticSnapshot()', 'haiyue-diagnostics-']);
+if (gateScope === 'studio') {
+  const player = read('editor/src/player.ts');
+  const panel = read('editor/src/play/runtimeDebugPanel.ts');
+  requirePatterns('editor diagnostics producer', player, ['getEngineFrameDiagnostics(engine)', 'frameDiagnostics?.snapshot()', 'pipeline.getDebugSnapshot()', 'getEngineGPUResourceTracker(engine)', 'resourceTracker?.getDebugSnapshot()', 'assetManager?.getDebugSnapshot()']);
+  requirePatterns('editor diagnostics panel', panel, ['Asset refs', 'Cache hit rate', 'Pipeline issues', 'Slowest GPU pass', 'exportDiagnosticSnapshot()', 'haiyue-diagnostics-']);
+}
 
 const engine = read('engine/src/core/Engine.ts');
 requirePatterns('production opt-in', engine, ["options.diagnostics?.enabled === true", 'captureResourceStacks']);

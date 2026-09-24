@@ -779,8 +779,8 @@ test('shared web-font loading invalidates every text rasterizer and releases the
       node.children.flatMap(content => content.children)
     ).map(entity => entity.getComponent(Symbol.for('AnimationVisual2D'))).filter(Boolean);
     assert.equal(textVisuals.length, 2);
-    assert.ok(textVisuals.every(visual => visual.textureAlphaMode === 'rive-text'),
-      'text visuals must retain premultiplied glyph coverage and use the Rive subpixel sampler');
+    assert.ok(textVisuals.every(visual => visual.textureAlphaMode === 'premultiplied'),
+      'text visuals must retain premultiplied glyph coverage and use the standard texture sampler');
     owner.removeComponent(player);
     assert.equal(deletedFaces.length, 1);
     assert.equal(released, 1);

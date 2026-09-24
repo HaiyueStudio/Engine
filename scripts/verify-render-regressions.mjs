@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { selectEngineRenderTargets } from './engine-release-policy.mjs';
 
 const rootDir = fileURLToPath(new URL('..', import.meta.url));
 const typecheckTimeoutMs = environmentDuration('RENDER_TYPECHECK_TIMEOUT_MS', 300_000);
@@ -8,12 +9,8 @@ const engineBuildTimeoutMs = environmentDuration('RENDER_ENGINE_BUILD_TIMEOUT_MS
 const exampleBuildTimeoutMs = environmentDuration('RENDER_EXAMPLE_BUILD_TIMEOUT_MS', 120_000);
 
 const manifest = JSON.parse(readFileSync(new URL('../examples/manifest.json', import.meta.url), 'utf8'));
-const renderTargets = manifest.entries.filter(entry =>
-  entry.screenshot?.required
-  || entry.capabilities.includes('render-pipeline')
-  || entry.capabilities.includes('gui')
-  || entry.capabilities.includes('2d'),
-);
+const renderTargets = selectEngineRenderTargets(manifest);
+console.log(`[render-regressions] targets=${renderTargets.length}: ${renderTargets.map(entry => entry.id).join(', ')}; manual=excluded.`);
 const commands = [
   { cmd: 'npm run typecheck', timeout: typecheckTimeoutMs },
   { cmd: 'npm run build:engine', timeout: engineBuildTimeoutMs },

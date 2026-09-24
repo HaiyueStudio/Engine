@@ -16,7 +16,8 @@ import { createDeterministicTar, listScannableFiles } from './release-archive.mj
 import { parseSha256Sums, sha256, validateReleaseRehearsalBundle } from './release-rehearsal-policy.mjs';
 import { findCredentialLeaks, sha256File } from './release-supply-chain-policy.mjs';
 import { npmArgs, npmCommand } from './npm-process.mjs';
-import { releaseCatalogBuildTimeout } from './release-duration-policy.mjs';
+import { stageEngineExamples } from './engine-release-catalog.mjs';
+import { createEngineRehearsalPlan } from './engine-rehearsal-plan.mjs';
 import { portableReleasePath } from './release-path-policy.mjs';
 import { releaseTemporaryBase } from './release-temp-path.mjs';
 
@@ -25,7 +26,12 @@ const worker = process.argv.includes('--worker');
 const candidateSnapshot = process.argv.includes('--candidate-snapshot');
 let workerPhase = 'startup';
 for (const argument of process.argv.slice(2)) {
-  if (!['--worker', '--candidate-snapshot'].includes(argument)) throw new Error(`Unknown release rehearsal argument "${argument}".`);
+  if (!['--worker', '--candidate-snapshot', '--plan'].includes(argument)) throw new Error(`Unknown release rehearsal argument "${argument}".`);
+}
+if (process.argv.includes('--plan')) {
+  if (worker || candidateSnapshot) throw new Error('--plan cannot be combined with execution modes.');
+  console.log(JSON.stringify(createEngineRehearsalPlan(root), null, 2));
+  process.exit(0);
 }
 if (worker && candidateSnapshot) throw new Error('--worker and --candidate-snapshot cannot be combined.');
 assertNodeVersion();
@@ -46,7 +52,7 @@ function runFromTemporaryCheckout(snapshot) {
   const sourceRevision = git(root, ['rev-parse', 'HEAD']);
   const sourceDirty = git(root, ['status', '--porcelain']).length > 0;
   if (sourceDirty && !snapshot) {
-    throw new Error('Release rehearsal requires a clean source checkout; use --candidate-snapshot only for a local uncommitted G06 verification.');
+    throw new Error('Release rehearsal requires a clean source checkout; use --candidate-snapshot only for a local uncommitted verification.');
   }
   const temporaryBase = releaseTemporaryBase();
   mkdirSync(temporaryBase, { recursive: true });
@@ -112,17 +118,8 @@ function runFromTemporaryCheckout(snapshot) {
 }
 
 function applyCandidateSnapshot(checkout, baseRevision) {
-  const changedTracked = gitNull(root, ['diff', '--name-only', '-z', baseRevision, '--'])
-    .filter(isG06CandidatePath);
-  const changedUntracked = gitNull(root, ['ls-files', '--others', '--exclude-standard', '-z'])
-    .filter(isG06CandidatePath);
-  const excluded = [
-    ...gitNull(root, ['diff', '--name-only', '-z', baseRevision, '--']).filter(path => !isG06CandidatePath(path)),
-    ...gitNull(root, ['ls-files', '--others', '--exclude-standard', '-z']).filter(path => !isG06CandidatePath(path)),
-  ];
-  if (excluded.length > 0) {
-    console.log(`[release-rehearsal] candidate snapshot excludes unrelated paths: ${excluded.join(', ')}.`);
-  }
+  const changedTracked = gitNull(root, ['diff', '--name-only', '-z', baseRevision, '--']);
+  const changedUntracked = gitNull(root, ['ls-files', '--others', '--exclude-standard', '-z']);
   const patch = changedTracked.length > 0
     ? spawnSync('git', ['diff', '--binary', baseRevision, '--', ...changedTracked], { cwd: root, encoding: 'buffer' })
     : { status: 0, stdout: Buffer.alloc(0) };
@@ -148,15 +145,7 @@ function applyCandidateSnapshot(checkout, baseRevision) {
     GIT_AUTHOR_DATE: '2000-01-01T00:00:00Z',
     GIT_COMMITTER_DATE: '2000-01-01T00:00:00Z',
   });
-  runChecked(checkout, 'commit deterministic local candidate snapshot', 'git', ['commit', '--quiet', '-m', 'G06 local candidate snapshot'], 60_000, commitEnvironment);
-}
-
-function isG06CandidatePath(path) {
-  return path.startsWith('.github/workflows/')
-    || path.startsWith('scripts/release-')
-    || path === 'package-lock.json'
-    || path === 'SECURITY.md'
-    || path === 'docs/for-ai/release-process.md';
+  runChecked(checkout, 'commit deterministic local candidate snapshot', 'git', ['commit', '--quiet', '-m', 'Local Engine release candidate snapshot'], 60_000, commitEnvironment);
 }
 
 function runWorker() {
@@ -168,6 +157,7 @@ function runWorker() {
   const startedAt = new Date().toISOString();
   const releaseManifestPath = resolve(root, 'review/api/release-manifest.json');
   const releaseManifest = JSON.parse(readFileSync(releaseManifestPath, 'utf8'));
+  const plan = createEngineRehearsalPlan(root);
   const version = releaseManifest.releaseVersion;
   validateVersionInputs(releaseManifest);
   const outputRoot = resolve(root, 'artifacts/release/rehearsal');
@@ -179,30 +169,11 @@ function runWorker() {
   const baselineBefore = hashTree(resolve(root, 'review/baselines'));
   const commands = [];
 
-  run('production dependency, license and credential audit', process.execPath, [
-    'scripts/release-supply-chain.mjs', '--output', 'artifacts/release/rehearsal/supply-chain',
-  ], 600_000, commands);
-  run('build clean-checkout workspace dependency foundations', process.execPath, [
-    'scripts/release-ci-bootstrap.mjs',
-  ], 1_200_000, commands);
-  run('fast release prerequisite gate', npmCommand(), npmArgs(['run', 'check:fast']), 1_800_000, commands);
-  run('deterministic public packages and app delivery', process.execPath, [
-    'scripts/inspect-release-artifacts.mjs', '--release',
-  ], 2_400_000, commands);
-  run(
-    'build complete examples catalog',
-    npmCommand(),
-    npmArgs(['run', 'build:examples']),
-    catalogBuildTimeout('examples'),
-    commands,
-  );
-  run(
-    'build complete games catalog',
-    npmCommand(),
-    npmArgs(['run', 'build:games']),
-    catalogBuildTimeout('games'),
-    commands,
-  );
+  console.log(`[release-rehearsal] scope=engine; tier=full; targets=${plan.content.targets.join(', ')}; manual=excluded.`);
+  for (const step of plan.commands) {
+    run(step.label, step.executable === 'node' ? process.execPath : npmCommand(),
+      step.executable === 'node' ? step.args : npmArgs(step.args), step.timeoutMs, commands, step.environment);
+  }
 
   workerPhase = 'assemble release archives';
   const temporaryBase = releaseTemporaryBase();
@@ -211,7 +182,7 @@ function runWorker() {
   let artifactRecords;
   let artifactCredentialFindings;
   try {
-    const archiveInputs = prepareArchiveInputs(stagingRoot, releaseManifest);
+    const archiveInputs = prepareArchiveInputs(stagingRoot, releaseManifest, plan.content.targets);
     artifactCredentialFindings = deduplicateFindings(findCredentialLeaks(listScannableFiles(
       archiveInputs.flatMap(input => input.roots),
     )));
@@ -285,6 +256,7 @@ function runWorker() {
       manualTargetsAutomaticallySelected: false,
     },
     commands,
+    contentTargets: plan.content.targets,
     artifacts: artifactRecords,
     artifactCredentialFindings,
     evidence: {
@@ -356,60 +328,9 @@ function normalizeWindowsWorkspaceBin(directory) {
   if (result.status !== 0) throw new Error(`Could not normalize Windows workspace bin metadata: ${result.stderr.trim()}`);
 }
 
-function prepareArchiveInputs(stagingRoot, releaseManifest) {
-  const catalogs = new Map();
-  for (const kind of ['examples', 'games']) catalogs.set(kind, stageCatalog(kind, resolve(stagingRoot, `${kind}-catalog`)));
-  const electronRoot = resolve(root, 'artifacts/release/apps/voxel-electron');
-  const electronEntries = readdirSync(electronRoot, { withFileTypes: true })
-    .filter(entry => entry.isDirectory() && !entry.name.startsWith('.'))
-    .map(entry => ({ source: resolve(electronRoot, entry.name), prefix: entry.name }));
-  if (electronEntries.length === 0) throw new Error('Voxel Electron rehearsal has no current-host platform directory.');
-  const inputs = [
-    { id: 'scene-editor-static', filename: `haiyue-scene-editor-${releaseManifest.releaseVersion}.tar`, roots: [{ source: resolve(root, 'artifacts/release/apps/scene-editor'), prefix: 'editor' }] },
-    { id: 'animation-editor-static', filename: `haiyue-animation-editor-${releaseManifest.releaseVersion}.tar`, roots: [{ source: resolve(root, 'artifacts/release/apps/animation-editor'), prefix: 'AnimationEditor' }] },
-    { id: 'voxel-editor-pwa', filename: `haiyue-voxel-editor-pwa-${releaseManifest.releaseVersion}.tar`, roots: [{ source: resolve(root, 'artifacts/release/apps/voxel-pwa'), prefix: 'voxelEditor/app-dist' }] },
-    { id: 'voxel-editor-electron', filename: `haiyue-voxel-editor-electron-${process.platform}-${process.arch}-${releaseManifest.releaseVersion}.tar`, roots: electronEntries },
-    { id: 'examples-static-catalog', filename: `haiyue-examples-${releaseManifest.releaseVersion}.tar`, roots: catalogs.get('examples') },
-    { id: 'games-static-catalog', filename: `haiyue-games-${releaseManifest.releaseVersion}.tar`, roots: catalogs.get('games') },
-  ];
-  return inputs;
-}
-
-function stageCatalog(kind, destination) {
-  const sourceRoot = resolve(root, kind);
-  const manifest = JSON.parse(readFileSync(resolve(sourceRoot, 'manifest.json'), 'utf8'));
-  const directories = new Set(manifest.entries.map(entry => dirname(entry.entry)));
-  mkdirSync(resolve(destination, kind), { recursive: true });
-  for (const entry of readdirSync(sourceRoot, { withFileTypes: true })) {
-    if (entry.isFile()) cpSync(resolve(sourceRoot, entry.name), resolve(destination, kind, entry.name));
-  }
-  if (kind === 'examples') {
-    const sharedSource = resolve(sourceRoot, 'shared');
-    const sharedTarget = resolve(destination, kind, 'shared');
-    cpSync(sharedSource, sharedTarget, { recursive: true });
-    if (!existsSync(resolve(sharedTarget, 'engine.js'))) {
-      throw new Error('examples catalog is missing built shared/engine.js.');
-    }
-  }
-  for (const directory of [...directories].sort()) {
-    const source = resolve(sourceRoot, directory);
-    const target = resolve(destination, kind, directory);
-    cpSync(source, target, { recursive: true });
-    for (const required of ['index.html', 'bundle.js']) {
-      if (!existsSync(resolve(target, required))) throw new Error(`${kind}:${directory} is missing built ${required}.`);
-    }
-  }
-  for (const asset of new Set(manifest.entries.flatMap(entry => entry.assets ?? []))) {
-    const source = resolve(sourceRoot, asset);
-    assertInside(root, source);
-    if (!existsSync(source)) throw new Error(`${kind} catalog asset is missing: ${asset}.`);
-    const target = resolve(destination, relative(root, source));
-    mkdirSync(dirname(target), { recursive: true });
-    cpSync(source, target, { recursive: true });
-  }
-  return readdirSync(destination, { withFileTypes: true })
-    .filter(entry => entry.isDirectory())
-    .map(entry => ({ source: resolve(destination, entry.name), prefix: entry.name }));
+function prepareArchiveInputs(stagingRoot, releaseManifest, targets) {
+  return [{ id: 'examples-static-catalog', filename: `haiyue-examples-${releaseManifest.releaseVersion}.tar`,
+    roots: stageEngineExamples(root, resolve(stagingRoot, 'examples-catalog'), targets) }];
 }
 
 function buildReleaseArtifacts(releaseManifest, archiveInputs, artifactRoot) {
@@ -428,9 +349,7 @@ function buildReleaseArtifacts(releaseManifest, archiveInputs, artifactRoot) {
     if (!contract) throw new Error(`Archive input ${input.id} is not in the release manifest.`);
     const output = resolve(artifactRoot, input.filename);
     createDeterministicTar(output, input.roots);
-    records.push(recordArtifact(contract, output, input.id === 'voxel-editor-electron'
-      ? { candidatePlatforms: [`${process.platform}-${process.arch}`], signing: 'unsigned-preview' }
-      : {}));
+    records.push(recordArtifact(contract, output));
   }
   return records.sort((a, b) => a.id.localeCompare(b.id));
 }
@@ -452,19 +371,13 @@ function recordArtifact(contract, absolutePath, extra = {}) {
 
 function preserveRawEvidence(evidenceRoot) {
   for (const path of [
-    'artifacts/release/g03-package-app-candidate.json',
     'artifacts/release/public-packages.json',
   ]) {
     const source = resolve(root, path);
     if (!existsSync(source)) throw new Error(`Required raw evidence is missing: ${path}.`);
     cpSync(source, resolve(evidenceRoot, basename(path)));
   }
-  const appEvidenceRoot = resolve(evidenceRoot, 'app-manifests');
-  mkdirSync(appEvidenceRoot, { recursive: true });
-  for (const directory of ['scene-editor', 'animation-editor', 'voxel-pwa', 'hya-viewer', 'hya-dashboard']) {
-    const source = resolve(root, 'artifacts/release/apps', directory, 'release-manifest.json');
-    cpSync(source, resolve(appEvidenceRoot, `${directory}.json`));
-  }
+
 }
 
 function createReleasePlan(releaseManifest, releaseNotesPath) {
@@ -563,7 +476,7 @@ function createProvenance({ invocationId, revision, releaseManifest, artifactRec
         externalParameters: { releaseVersion: releaseManifest.releaseVersion, contentTier: 'full', publish: false },
         internalParameters: { commands: commands.map(command => command.command) },
         resolvedDependencies: [
-          { uri: 'git+https://github.com/HypnosNova/HaiYue.git', digest: { gitCommit: revision } },
+          { uri: 'git+https://github.com/HaiyueStudio/Engine.git', digest: { gitCommit: revision } },
           { uri: 'file:package-lock.json', digest: { sha256: sha256File(resolve(root, 'package-lock.json')) } },
           { uri: 'file:review/api/release-manifest.json', digest: { sha256: sha256File(resolve(root, 'review/api/release-manifest.json')) } },
         ],
@@ -591,7 +504,7 @@ function validateVersionInputs(releaseManifest) {
   if (!existsSync(notesPath) || !readFileSync(notesPath, 'utf8').includes(version)) throw new Error(`Release notes for ${version} are missing.`);
 }
 
-function run(label, command, args, timeoutMs, commands) {
+function run(label, command, args, timeoutMs, commands, environment = {}) {
   workerPhase = label;
   const startedAt = new Date().toISOString();
   console.log(`\n[release-rehearsal] ${label}: ${command} ${args.join(' ')}`);
@@ -600,11 +513,12 @@ function run(label, command, args, timeoutMs, commands) {
     cwd: root,
     stdio: 'inherit',
     timeout: timeoutMs,
-    env: sanitizedEnvironment(),
+    env: sanitizedEnvironment(environment),
   });
   commands.push({
     label,
     command: [command, ...args],
+    ...(Object.keys(environment).length ? { environment } : {}),
     startedAt,
     durationMs: Date.now() - started,
     status: result.status,
@@ -650,13 +564,7 @@ function runChecked(cwd, label, command, args, timeoutMs, env = sanitizedEnviron
   if (result.status !== 0) throw new Error(`${label} exited ${result.status}.`);
 }
 
-function catalogBuildTimeout(workspace) {
-  const manifest = JSON.parse(readFileSync(resolve(root, workspace, 'manifest.json'), 'utf8'));
-  if (!Array.isArray(manifest.entries)) {
-    throw new TypeError(`${workspace}/manifest.json must contain an entries array.`);
-  }
-  return releaseCatalogBuildTimeout(manifest.entries.length);
-}
+
 
 function hashTree(directory) {
   const hash = createHash('sha256');

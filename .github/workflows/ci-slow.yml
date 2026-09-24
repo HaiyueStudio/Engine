@@ -3,7 +3,7 @@ name: CI Slow
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [master]
   schedule:
     - cron: '30 18 * * *'
   workflow_dispatch:
@@ -32,6 +32,7 @@ jobs:
       BENCHMARK_PROFILE: ci
       CPU_BENCHMARK_RUNNER_PROFILE: github-hosted-ubuntu-latest
       CONTENT_TIER: ${{ github.event_name == 'schedule' && 'full' || (github.event_name == 'workflow_dispatch' && inputs.content_tier || 'smoke') }}
+      WEBGPU_ANGLE_BACKEND: swiftshader
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -47,8 +48,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run slow quality gate
-        run: npm run check:slow -- --content-tier="${CONTENT_TIER}"
+      - name: Build Engine foundations and diagnostic inputs
+        run: node scripts/release-ci-bootstrap.mjs
+
+      - name: Run Engine slow quality gate
+        run: npm run check:engine:slow -- --content-tier="${CONTENT_TIER}"
 
       - name: Upload slow-gate reports
         if: always()
@@ -57,7 +61,6 @@ jobs:
           name: slow-gate-${{ env.CONTENT_TIER }}-reports
           path: |
             artifacts/benchmarks/*.json
-            artifacts/editor-e2e/*
             artifacts/webgpu/*.json
           if-no-files-found: warn
           retention-days: 30

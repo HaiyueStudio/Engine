@@ -451,16 +451,16 @@ function validateLightOverflow(metric, configuration, lightingStrategy, fail) {
   if ([
     totalCapacity,
     localCapacity,
-    authoredAmbient,
-    authoredDirectional,
+    submittedAmbient,
+    submittedDirectional,
   ].every(Number.isInteger)) {
     const expectedLocalCapacity = Math.max(
       0,
-      totalCapacity - authoredAmbient - authoredDirectional,
+      totalCapacity - submittedAmbient - submittedDirectional,
     );
     if (localCapacity !== expectedLocalCapacity) {
       fail(
-        `${path}.value.rendererLocalLightCapacity must reserve authored `
+        `${path}.value.rendererLocalLightCapacity must reserve submitted `
         + 'ambient and directional lights from rendererTotalLightCapacity',
       );
     }

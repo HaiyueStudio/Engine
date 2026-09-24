@@ -2,6 +2,9 @@
 
 Status: implemented local development candidate; no npm publication requested.
 
+The current-release exclusion below is superseded by [ADR 0106](0106-release-0.2.0-capability-budgets.md):
+the user admitted this capability into the 0.2.0 candidate on 2026-09-23. Other design decisions remain in force.
+
 ## Decision and API review
 
 The user requested a reusable configurable virtual joystick in Engine/extensions.

@@ -4,22 +4,7 @@ import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { portableReleasePath } from './release-path-policy.mjs';
 
-const REQUIRED_COMMANDS = Object.freeze([
-  'production dependency, license and credential audit',
-  'build clean-checkout workspace dependency foundations',
-  'fast release prerequisite gate',
-  'deterministic public packages and app delivery',
-  'build complete examples catalog',
-  'build complete games catalog',
-]);
-
-const REQUIRED_APP_MANIFESTS = Object.freeze([
-  'animation-editor',
-  'hya-dashboard',
-  'hya-viewer',
-  'scene-editor',
-  'voxel-pwa',
-]);
+import { ENGINE_REHEARSAL_LABELS as REQUIRED_COMMANDS, createEngineRehearsalPlan } from './engine-rehearsal-plan.mjs';
 
 export function validateReleaseRehearsalBundle({
   releaseManifest,
@@ -108,6 +93,7 @@ export function validateReleaseRehearsalDirectory(repositoryRoot, bundleDirector
   const reportPath = resolve(bundleRoot, 'report.json');
   const rehearsal = readJson(reportPath, 'rehearsal report');
   const releaseManifest = readJson(resolve(root, 'review/api/release-manifest.json'), 'release manifest');
+  const plan = createEngineRehearsalPlan(root);
   const evidence = rehearsal.evidence ?? {};
   const bundlePath = portableReleasePath(relative(root, bundleRoot));
   const expectedEvidence = {
@@ -162,7 +148,8 @@ export function validateReleaseRehearsalDirectory(repositoryRoot, bundleDirector
   if (rehearsal.gate?.status !== 'passed' || (rehearsal.gate?.errors ?? []).length > 0) {
     errors.push('rehearsal report does not contain a passed internal gate');
   }
-  validateRawReports(root, evidence, errors);
+  errors.push(...validateEngineRehearsalExecution(rehearsal, plan));
+  validateRawReports(root, evidence, errors, rehearsal, releaseManifest);
   return { errors: [...new Set(errors)], rehearsal, releaseManifest };
 }
 
@@ -205,7 +192,7 @@ function validateProvenance(rehearsal, provenance, errors) {
     errors.push('provenance external parameters do not bind full no-publish rehearsal inputs');
   }
   const dependencies = new Map((predicate?.buildDefinition?.resolvedDependencies ?? []).map(item => [item.uri, item.digest]));
-  if (dependencies.get('git+https://github.com/HypnosNova/HaiYue.git')?.gitCommit !== rehearsal.source?.revision) errors.push('provenance revision does not match rehearsal');
+  if (dependencies.get('git+https://github.com/HaiyueStudio/Engine.git')?.gitCommit !== rehearsal.source?.revision) errors.push('provenance revision does not match rehearsal');
   if (dependencies.get('file:package-lock.json')?.sha256 !== rehearsal.source?.packageLockSha256) errors.push('provenance package-lock digest does not match rehearsal');
   if (dependencies.get('file:review/api/release-manifest.json')?.sha256 !== rehearsal.source?.releaseManifestSha256) errors.push('provenance release-manifest digest does not match rehearsal');
   const runtime = (predicate?.runDetails?.byproducts ?? []).find(item => item.name === 'runtime')?.value;
@@ -280,9 +267,7 @@ function validateRawEvidence(rehearsal, evidenceFiles, errors) {
   const root = rehearsal.evidence?.rawEvidenceRoot;
   const supplyRoot = dirname(rehearsal.evidence?.supplyChainReportPath ?? '');
   const required = [
-    `${root}/g03-package-app-candidate.json`,
     `${root}/public-packages.json`,
-    ...REQUIRED_APP_MANIFESTS.map(name => `${root}/app-manifests/${name}.json`),
     `${supplyRoot}/npm-audit-production.json`,
     `${supplyRoot}/dependencies.cdx.json`,
   ];
@@ -290,24 +275,19 @@ function validateRawEvidence(rehearsal, evidenceFiles, errors) {
   for (const path of required) if (!available.has(path)) errors.push(`required raw evidence is missing: ${path}`);
 }
 
-function validateRawReports(root, evidence, errors) {
+function validateRawReports(root, evidence, errors, rehearsal, releaseManifest) {
   const rawRoot = resolve(root, evidence.rawEvidenceRoot ?? '');
   if (!isInside(root, rawRoot)) {
     errors.push('raw evidence root escapes the repository');
     return;
   }
-  for (const name of ['g03-package-app-candidate.json', 'public-packages.json']) {
+  for (const name of ['public-packages.json']) {
     const path = resolve(rawRoot, name);
     if (!existsSync(path)) continue;
     const report = readJson(path, name);
-    if (report.gate?.status !== 'passed' || (report.gate?.errors ?? []).length > 0) errors.push(`${name} raw evidence gate did not pass`);
+    errors.push(...validatePublicPackageEvidence(report, releaseManifest, rehearsal));
   }
-  for (const name of REQUIRED_APP_MANIFESTS) {
-    const path = resolve(rawRoot, 'app-manifests', `${name}.json`);
-    if (!existsSync(path)) continue;
-    const report = readJson(path, `${name} app manifest`);
-    if ((report.errors ?? []).length > 0) errors.push(`${name} app manifest contains build errors`);
-  }
+
 }
 
 function readJson(path, label) {
@@ -374,3 +354,31 @@ function runCli() {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) runCli();
+
+export function validatePublicPackageEvidence(report, releaseManifest, rehearsal) {
+  const errors = [];
+  const expected = releaseManifest.artifacts.filter(item => item.kind === 'npm-package');
+  if (report.mode !== 'release' || report.sourceState?.revision !== rehearsal.source.revision || report.sourceState?.workingTreeDirty !== false) errors.push('public package evidence must match the clean release revision');
+  if (!sameList((report.packages ?? []).map(item => `${item.name}@${item.version}`).sort(), expected.map(item => `${item.packageName}@${item.version}`).sort())) errors.push('raw package evidence does not match release manifest');
+  for (const item of report.packages ?? []) {
+    const contract = expected.find(entry => entry.packageName === item.name);
+    const artifact = rehearsal.artifacts.find(entry => entry.id === contract?.id);
+    if (!artifact || item.sha256 !== artifact.sha256 || item.deterministicRepackSha256 !== artifact.sha256) errors.push(`raw package hash differs from archived artifact: ${item.name}`);
+  }
+  if (report.gate?.status !== 'passed' || (report.gate?.errors ?? []).length > 0) errors.push(`public-packages.json raw evidence gate did not pass`);
+  return errors;
+}
+
+export function validateEngineRehearsalExecution(rehearsal, plan) {
+  const errors = [];
+  if (!sameList((rehearsal.commands ?? []).map(item => item.label), plan.commands.map(item => item.label))) errors.push('rehearsal commands differ from the ordered Engine plan');
+  if (!sameList(rehearsal.contentTargets ?? [], plan.content.targets)) errors.push('rehearsal content targets differ from full Engine manifest');
+  for (const step of plan.commands) {
+    const actual = rehearsal.commands?.find(item => item.label === step.label);
+    // npm on Windows is launched through node + npm-cli.js by npm-process.
+    const argv = actual?.command ?? [];
+    if (!sameList(argv.slice(-step.args.length), step.args)) errors.push(`rehearsal command differs from Engine plan: ${step.label}`);
+    if (step.environment && JSON.stringify(actual?.environment) !== JSON.stringify(step.environment)) errors.push(`rehearsal environment differs from Engine plan: ${step.label}`);
+  }
+  return errors;
+}

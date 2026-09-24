@@ -1,10 +1,11 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
-import { inflateSync } from 'node:zlib';
+import { decodePng } from './visual-regression/png.mjs';
+import { createPortablePixelRecord, comparePortablePixelRecords } from './visual-regression/portable-pixels.mjs';
 import {
   defaultChromePath,
   defaultWebGpuAngleBackend,
@@ -53,12 +54,13 @@ if (on.hash === sheen.hash) throw new Error('PBR Sheen on/off outputs unexpected
 if (on.hash === transmission.hash) throw new Error('PBR Transmission/Volume on/off outputs unexpectedly match.');
 if (on.hash === shadowInstancing.hash) throw new Error('Direct-instanced directional-shadow fixture did not change the rendered output.');
 const current = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   fixture: 'haiyue-pbr-showcase-clearcoat-chrome-960x640',
   width: 960,
   height: 640,
   modes: { off, on, specular, sheen, transmission, shadowInstancing },
 };
+writeFileSync(resolve(root, 'artifacts/render-regression/pbr/candidate.json'), `${JSON.stringify(current, null, 2)}\n`);
 if (process.env.UPDATE_PBR_EXAMPLE_BASELINE === '1') {
   writeFileSync(baselinePath, `${JSON.stringify(current, null, 2)}\n`);
   console.log(`[pbr-example] Updated ${baselinePath}.`);
@@ -68,11 +70,8 @@ if (process.env.UPDATE_PBR_EXAMPLE_BASELINE === '1') {
     if (current[key] !== baseline[key]) throw new Error(`PBR example pixel regression at ${key}: expected ${baseline[key]}, received ${current[key]}.`);
   }
   for (const mode of ['off', 'on', 'specular', 'sheen', 'transmission', 'shadowInstancing']) {
-    for (const key of ['hash', 'bytes']) {
-      if (current.modes[mode][key] !== baseline.modes?.[mode]?.[key]) {
-        throw new Error(`PBR example pixel regression at ${mode}.${key}: expected ${baseline.modes?.[mode]?.[key]}, received ${current.modes[mode][key]}.`);
-      }
-    }
+    const comparison = comparePortablePixelRecords(current.modes[mode], baseline.modes?.[mode]);
+    if (comparison.status !== 'passed') throw new Error(`PBR ${mode} pixel regression: ${JSON.stringify(comparison)}`);
   }
   console.log(`[pbr-example] PBR base ${off.hash.slice(0, 16)}…, clearcoat ${on.hash.slice(0, 16)}…, IOR/Specular ${specular.hash.slice(0, 16)}…, Sheen ${sheen.hash.slice(0, 16)}…, Transmission/Volume ${transmission.hash.slice(0, 16)}…, direct-instanced shadows ${shadowInstancing.hash.slice(0, 16)}…; shadow/IBL pixels and four deformation variants passed.`);
 }
@@ -85,7 +84,11 @@ function pixelRecord(result) {
   const width = png.readUInt32BE(16);
   const height = png.readUInt32BE(20);
   if (width !== 960 || height !== 640) throw new Error(`PBR screenshot dimensions changed: expected 960x640, received ${width}x${height}.`);
-  return { hash: createHash('sha256').update(png).digest('hex'), bytes: png.byteLength };
+  const record = createPortablePixelRecord(png);
+  const directory = resolve(root, 'artifacts/render-regression/pbr');
+  mkdirSync(directory, { recursive: true });
+  writeFileSync(resolve(directory, `${record.hash}.png`), png);
+  return record;
 }
 
 function assertNeutralRimPixels(image) {
@@ -108,65 +111,6 @@ function assertNeutralRimPixels(image) {
       + `tinted pixels ${(tintedRatio * 100).toFixed(3)}%.`,
     );
   }
-}
-
-function decodePng(png) {
-  if (png.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a') throw new Error('PBR screenshot is not PNG.');
-  let offset = 8;
-  let width = 0;
-  let height = 0;
-  let colorType = -1;
-  const compressed = [];
-  while (offset < png.length) {
-    const length = png.readUInt32BE(offset);
-    const type = png.toString('ascii', offset + 4, offset + 8);
-    const data = png.subarray(offset + 8, offset + 8 + length);
-    if (type === 'IHDR') {
-      width = data.readUInt32BE(0);
-      height = data.readUInt32BE(4);
-      if (data[8] !== 8 || data[12] !== 0) throw new Error('PBR PNG decoder requires non-interlaced 8-bit data.');
-      colorType = data[9];
-    } else if (type === 'IDAT') compressed.push(data);
-    else if (type === 'IEND') break;
-    offset += length + 12;
-  }
-  const channels = colorType === 6 ? 4 : colorType === 2 ? 3 : 0;
-  if (!channels) throw new Error(`Unsupported PBR PNG color type ${colorType}.`);
-  const packed = inflateSync(Buffer.concat(compressed));
-  const stride = width * channels;
-  const rows = Buffer.alloc(stride * height);
-  let packedOffset = 0;
-  for (let y = 0; y < height; y++) {
-    const filter = packed[packedOffset++];
-    const rowOffset = y * stride;
-    for (let x = 0; x < stride; x++) {
-      const raw = packed[packedOffset++];
-      const left = x >= channels ? rows[rowOffset + x - channels] : 0;
-      const up = y > 0 ? rows[rowOffset - stride + x] : 0;
-      const upperLeft = y > 0 && x >= channels ? rows[rowOffset - stride + x - channels] : 0;
-      const value = filter === 0 ? raw : filter === 1 ? raw + left : filter === 2 ? raw + up
-        : filter === 3 ? raw + Math.floor((left + up) / 2) : filter === 4 ? raw + paeth(left, up, upperLeft) : Number.NaN;
-      if (!Number.isFinite(value)) throw new Error(`Unsupported PBR PNG filter ${filter}.`);
-      rows[rowOffset + x] = value & 255;
-    }
-  }
-  if (channels === 4) return { width, height, data: rows };
-  const rgba = Buffer.alloc(width * height * 4);
-  for (let source = 0, target = 0; source < rows.length; source += 3, target += 4) {
-    rgba[target] = rows[source];
-    rgba[target + 1] = rows[source + 1];
-    rgba[target + 2] = rows[source + 2];
-    rgba[target + 3] = 255;
-  }
-  return { width, height, data: rgba };
-}
-
-function paeth(a, b, c) {
-  const estimate = a + b - c;
-  const pa = Math.abs(estimate - a);
-  const pb = Math.abs(estimate - b);
-  const pc = Math.abs(estimate - c);
-  return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
 }
 
 async function capture(binary, url, expectedCoverage, verifyControls = false) {

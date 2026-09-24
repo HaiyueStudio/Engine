@@ -2,18 +2,16 @@ import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runChromeWebGpuFixture } from './chrome-runner.mjs';
+import { nativeExampleBrowserCandidates } from './native-example-browsers.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const browsers = [
-  ['chrome', 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'],
-  ['edge', 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'],
-].filter(([, path]) => existsSync(path));
+const browsers = nativeExampleBrowserCandidates().filter(({ path }) => existsSync(path));
 if (browsers.length === 0) throw new Error('Ray tracing example verification requires Chrome or Edge.');
 
 const evidence = [];
-for (const [browser, path] of browsers) {
+for (const { browser, path, backend } of browsers) {
   process.env.CHROME_PATH = path;
-  process.env.WEBGPU_ANGLE_BACKEND = 'd3d11';
+  process.env.WEBGPU_ANGLE_BACKEND = backend;
   const result = await runChromeWebGpuFixture({
     root,
     fixture: 'examples/ray-tracing/index.html',

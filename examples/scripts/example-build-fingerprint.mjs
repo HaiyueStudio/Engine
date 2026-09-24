@@ -21,6 +21,7 @@ const IGNORED_FILES = new Set([
 const IGNORED_OUTPUTS = new Set([
   resolve(examplesDir, SHARED_ENGINE_OUTPUT),
   resolve(examplesDir, `${SHARED_ENGINE_OUTPUT}.map`),
+  resolve(examplesDir, 'page-turn-book/pdf.worker.min.mjs'),
 ]);
 const SOURCE_ROOTS = [
   resolve(root, 'engine/src'),
@@ -33,6 +34,8 @@ const CONFIG_FILES = [
   resolve(root, 'package-lock.json'),
   resolve(root, 'config/rollup.shared.js'),
   resolve(root, 'scripts/rollup-plugin-wgsl.js'),
+  // Hash the worker that Rollup copies, never its generated example output.
+  resolve(root, 'node_modules/pdfjs-dist/build/pdf.worker.min.mjs'),
 ];
 
 /** Hashes every workspace source/config input that can affect an example bundle. */

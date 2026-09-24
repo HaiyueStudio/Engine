@@ -1,25 +1,21 @@
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, relative, resolve } from 'node:path';
+import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const studioRoot = resolve(root, '..');
 const baselinePath = resolve(root, 'review/baselines/api-surface.json');
 const candidatePath = resolve(root, 'artifacts/api/api-surface-candidate.json');
 const capabilityBudgetPath = resolve(root, 'config/public-api-capability-budgets.json');
 const capabilityBudgetPolicy = JSON.parse(readFileSync(capabilityBudgetPath, 'utf8'));
-const publicWorkspaceDirectories = ['shader-language', 'animation-spec', 'engine', 'extensions', 'ui'];
-const allWorkspaceDirectories = ['shader-language', 'animation-spec', 'engine', 'extensions', 'ui', 'editor', 'examples', 'games'];
+const publicWorkspaceDirectories = ['shader-language', 'animation-spec', 'engine', 'extensions'];
+const allWorkspaceDirectories = ['shader-language', 'animation-spec', 'engine', 'extensions', 'examples'];
 const workspaceRoots = new Map([
   ['shader-language', resolve(root, 'shader-language')],
   ['animation-spec', resolve(root, 'animation-spec')],
   ['engine', resolve(root, 'engine')],
   ['extensions', resolve(root, 'extensions')],
-  ['ui', resolve(studioRoot, 'UI')],
-  ['editor', resolve(studioRoot, 'Editor/editor')],
   ['examples', resolve(root, 'examples')],
-  ['games', resolve(studioRoot, 'Games')],
 ]);
 const mode = process.argv[2];
 const engineExperimentalOnlyExports = new Set([
@@ -311,7 +307,7 @@ function createSnapshot() {
     for (const [exportPath, target] of packageEntrypoints(manifest)) {
       const source = sourceForTarget(directory, target);
       entrypoints[exportPath] = {
-        source: `${directory}/${relative(workspaceRoots.get(directory), source)}`,
+        source: `${directory}/${relative(workspaceRoots.get(directory), source).split(sep).join('/')}`,
         exports: collectExports(source),
       };
     }

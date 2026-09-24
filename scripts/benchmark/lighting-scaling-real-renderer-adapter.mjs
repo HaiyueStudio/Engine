@@ -248,8 +248,8 @@ class LightingScalingRealRendererAdapter {
     const rendererLocalLightCapacity = Math.max(
       0,
       PBR_MAX_LIGHTS
-        - authoredAmbientLightCount
-        - authoredDirectionalLightCount,
+        - submittedAmbientLightCount
+        - submittedDirectionalLightCount,
     );
     return {
       lightingFixtureId: this.fixture.id,

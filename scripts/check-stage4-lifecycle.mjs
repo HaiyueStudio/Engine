@@ -1,6 +1,10 @@
+import { includesGatePath } from './engine-release-policy.mjs';
 import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+const gateScope = process.argv.includes('--engine') ? 'engine' : 'studio';
+const selectedPath = path => includesGatePath(path, gateScope);
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const editorRoot = resolve(root, '../Editor/editor');
@@ -20,6 +24,7 @@ const requiredContracts = new Map([
 ]);
 
 for (const [path, snippets] of requiredContracts) {
+  if (!selectedPath(path)) continue;
   const source = readFileSync(resolveContract(path), 'utf8');
   for (const snippet of snippets) {
     if (!source.includes(snippet)) failures.push(`${path} is missing stage-4 contract: ${snippet}`);

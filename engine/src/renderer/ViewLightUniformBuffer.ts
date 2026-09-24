@@ -108,10 +108,21 @@ export class ViewLightUniformBuffer {
   private _createSlot(context?: RenderCommandContext): Slot {
     const index = this._free.pop() ?? this._nextSlot++;
     if (this._ring.ensureCapacity(index + 1, context)) {
-      this._fallback.valid = false;
-      for (const view of this._views.values()) for (const slot of view.slots) if (slot) slot.valid = false;
+      // Restore cached records into the new generation at the growth boundary.
+      // Old encoded bindings retain the retiring buffer. Invalidating all view
+      // regions instead spreads unchanged-light uploads over subsequent frames.
+      this._restoreSlot(this._fallback);
+      for (const view of this._views.values()) for (const slot of view.slots) if (slot) this._restoreSlot(slot);
     }
     return { index, data: new Float32Array(this._scratch.length), valid: false, encoder: undefined };
+  }
+
+  private _restoreSlot(slot: Slot): void {
+    if (!slot.valid) return;
+    writeBuffer(this._device.queue, this.buffer, slot.index * this._stride, slot.data);
+    this.uploadCount++;
+    // The new generation has not encoded this slot yet.
+    slot.encoder = undefined;
   }
 
   private _sweep(context?: RenderCommandContext): void {

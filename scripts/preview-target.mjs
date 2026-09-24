@@ -2,7 +2,6 @@ import { createReadStream, readFileSync } from 'node:fs';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'node:http';
-import { handleRiveExampleConversionRequest } from './rive-example-conversion-service.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const target = process.argv[2];
@@ -20,7 +19,6 @@ if (!manifest.entries.some(entry => entry.id === id)) {
 const home = `/${directory}/${id}/`;
 const port = Number(process.env.PORT ?? 8080);
 const server = createServer(async (request, response) => {
-  if (id === 'rive-hya-compare' && await handleRiveExampleConversionRequest(request, response)) return;
   const url = new URL(request.url ?? '/', 'http://localhost');
   if (url.pathname === '/') {
     response.writeHead(302, { location: home });

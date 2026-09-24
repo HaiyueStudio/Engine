@@ -9,6 +9,7 @@ const BUFFER_BYTES = FLOATS_PER_SLOT * SCENE_RENDER_MAX_DIRECTIONAL_SHADOWS * 4;
 export class PbrDirectionalShadowBinding {
   readonly buffer: GPUBuffer;
   readonly data = new Float32Array(BUFFER_BYTES / 4);
+  private readonly _uploadedData = new Float32Array(BUFFER_BYTES / 4);
   view: GPUTextureView;
   sampler: GPUSampler;
   private _uploadedSlotSpan = 0;
@@ -52,7 +53,14 @@ export class PbrDirectionalShadowBinding {
     // Upload only the active prefix. When the shadow count shrinks, include the
     // previously uploaded suffix once so stale enabled slots are cleared.
     const uploadSlotSpan = Math.max(activeSlotSpan, this._uploadedSlotSpan);
-    if (uploadSlotSpan > 0) {
+    const uploadFloatCount = uploadSlotSpan * FLOATS_PER_SLOT;
+    let changed = false;
+    for (let index = 0; index < uploadFloatCount; index++) {
+      if (!Object.is(this.data[index], this._uploadedData[index])) { changed = true; break; }
+    }
+    // A shadow-map redraw advances the scene revision even if its sampling
+    // matrix and parameters are unchanged. Only upload changed uniform bytes.
+    if (changed) {
       writeBuffer(
         this.device.queue,
         this.buffer,
@@ -61,6 +69,7 @@ export class PbrDirectionalShadowBinding {
         0,
         uploadSlotSpan * FLOATS_PER_SLOT * 4,
       );
+      for (let index = 0; index < uploadFloatCount; index++) this._uploadedData[index] = this.data[index]!;
     }
     this._uploadedSlotSpan = activeSlotSpan;
     return bindingsChanged;

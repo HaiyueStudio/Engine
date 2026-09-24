@@ -14,7 +14,7 @@ import {
 } from './content-gate-policy.mjs';
 
 const root = new URL('../', import.meta.url);
-const manifests = loadContentManifests(fileURLToPath(root));
+const manifests = loadContentManifests(fileURLToPath(root), 'engine');
 
 test('unqualified release gate is the strict global candidate gate', () => {
   assert.equal(resolveReleaseGateMode([]), 'global');
@@ -36,7 +36,7 @@ test('local candidate runs the same portable comparison contract', () => {
   );
   assert.ok(createReleaseGateChecks('local').some(args => (
     args[0] === 'exec:node'
-    && args[1] === 'scripts/inspect-release-artifacts.mjs'
+    && args[1] === 'scripts/verify-engine-package.mjs'
     && args[2] === '--release'
   )));
 });
@@ -54,14 +54,14 @@ test('portable release gates do not require a fixed CPU runner identity', () => 
 test('artifact mode remains an explicit fast packaging check', () => {
   assert.equal(resolveReleaseGateMode(['--artifact']), 'artifact');
   const checks = createReleaseGateChecks('artifact');
-  assert.ok(checks.some(args => args.includes('render-product:check')));
-  assert.ok(!checks.some(args => args.includes('check:slow')));
+  assert.ok(checks.some(args => args.includes('render-product:test')));
+  assert.ok(!checks.some(args => args.includes('check:engine:slow')));
   assert.ok(!checks.some(args => args.includes('performance:evidence:check')));
   assert.ok(!checks.some(args => args.includes('performance:compare:formal')));
   assert.ok(!checks.some(args => args.includes('release-gate-cpu-benchmark.mjs')));
   assert.deepEqual(
-    checks.find(args => args.includes('scripts/inspect-release-artifacts.mjs')),
-    ['exec:node', 'scripts/inspect-release-artifacts.mjs'],
+    checks.find(args => args.includes('scripts/verify-engine-package.mjs')),
+    ['exec:node', 'scripts/verify-engine-package.mjs'],
   );
 });
 
@@ -72,7 +72,7 @@ test('conflicting release gate modes are rejected', () => {
   );
 });
 
-test('editor large-scene browser gate is mandatory in slow and full correctness modes', () => {
+test('editor large-scene browser gate stays in the separate Studio slow workflow', () => {
   const slowRunner = readFileSync(new URL('./run-slow-checks.mjs', import.meta.url), 'utf8');
   const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
   assert.match(slowRunner, /\['run', 'verify:editor-large-scene:built'\]/);
@@ -88,7 +88,7 @@ test('editor large-scene browser gate is mandatory in slow and full correctness 
     const checks = createReleaseGateChecks(mode);
     assert.ok(checks.some(args => (
       args[0] === 'run'
-      && args[1] === 'check:slow'
+      && args[1] === 'check:engine:slow'
       && args.includes('--content-tier=full')
     )));
     assert.ok(!checks.some(args => args[1] === 'verify:editor-large-scene'));
@@ -132,7 +132,7 @@ test('AO device performance uses smoke budgets on PR paths and full budgets on r
   for (const mode of ['local', 'global']) {
     assert.ok(createReleaseGateChecks(mode).some(args => (
       args[0] === 'run'
-      && args[1] === 'check:slow'
+      && args[1] === 'check:engine:slow'
       && args.at(-1) === '--content-tier=full'
     )));
   }
@@ -161,11 +161,11 @@ test('local and global candidates consume smoke plus full manifest content', () 
   for (const mode of ['local', 'global']) {
     assert.ok(createReleaseGateChecks(mode).some(args => (
       args[0] === 'run'
-      && args[1] === 'check:slow'
+      && args[1] === 'check:engine:slow'
       && args.at(-1) === '--content-tier=full'
     )));
   }
-  assert.ok(!createReleaseGateChecks('artifact').some(args => args[1] === 'check:slow'));
+  assert.ok(!createReleaseGateChecks('artifact').some(args => args[1] === 'check:engine:slow'));
 });
 
 test('content tier CLI defaults to smoke and rejects ambiguous or unknown input', () => {
@@ -177,17 +177,19 @@ test('content tier CLI defaults to smoke and rejects ambiguous or unknown input'
   assert.throws(() => resolveContentTier(['--typo=full']), /Unknown check:slow argument/);
 });
 
-test('real manifests produce 50 smoke targets and 62 smoke-plus-full targets', () => {
+test('real manifests determine smoke and full target membership and counts', () => {
   const smoke = createContentTargetPlan('smoke', manifests);
   const full = createContentTargetPlan('full', manifests);
-  assert.equal(smoke.targets.length, 50);
-  assert.deepEqual(smoke.selectedCounts, { smoke: 50, full: 0, manual: 0 });
-  assert.equal(full.targets.length, 62);
-  assert.deepEqual(full.selectedCounts, { smoke: 50, full: 12, manual: 0 });
-  assert.equal(full.manifestCounts.manual, 47);
-
   const expectedSmoke = manifestTargets(entry => entry.ci === 'smoke');
+  const expectedFullOnly = manifestTargets(entry => entry.ci === 'full');
   const expectedFull = manifestTargets(entry => entry.ci === 'smoke' || entry.ci === 'full');
+  const expectedManual = manifestTargets(entry => entry.ci === 'manual');
+  assert.equal(smoke.targets.length, expectedSmoke.length);
+  assert.deepEqual(smoke.selectedCounts, { smoke: expectedSmoke.length, full: 0, manual: 0 });
+  assert.equal(full.targets.length, expectedFull.length);
+  assert.deepEqual(full.selectedCounts, { smoke: expectedSmoke.length, full: expectedFullOnly.length, manual: 0 });
+  assert.equal(full.manifestCounts.manual, expectedManual.length);
+
   assert.deepEqual(smoke.targets, expectedSmoke);
   assert.deepEqual(full.targets, expectedFull);
   const manual = new Set(manifestTargets(entry => entry.ci === 'manual'));
@@ -211,15 +213,15 @@ test('a newly added full entry is consumed without a second static target list',
   );
 });
 
-test('CI routes pull requests and main pushes to smoke, and scheduled runs to full', () => {
+test('CI routes pull requests and master pushes to smoke, and scheduled runs to full', () => {
   const workflow = readFileSync(new URL('../.github/workflows/ci-slow.yml', import.meta.url), 'utf8');
   assert.match(workflow, /pull_request:/);
-  assert.match(workflow, /push:\s*\n\s*branches: \[main\]/);
+  assert.match(workflow, /push:\s*\n\s*branches: \[master\]/);
   assert.match(workflow, /schedule:\s*\n\s*- cron:/);
   assert.match(workflow, /content_tier:[\s\S]*options:[\s\S]*- smoke[\s\S]*- full/);
   assert.match(workflow, /github\.event_name == 'schedule' && 'full'/);
   assert.match(workflow, /github\.event_name == 'workflow_dispatch' && inputs\.content_tier \|\| 'smoke'/);
-  assert.match(workflow, /npm run check:slow -- --content-tier="\$\{CONTENT_TIER\}"/);
+  assert.match(workflow, /npm run check:engine:slow -- --content-tier="\$\{CONTENT_TIER\}"/);
 });
 
 function manifestTargets(predicate) {

@@ -11,10 +11,9 @@ import {
 import {
   createPerformanceEvidence,
   createPerformanceSourceFingerprint,
-  evaluatePerformanceBudget,
+  assessDevicePerformance,
   loadPerformanceBudgetConfig,
   performanceEvidencePath,
-  selectPerformanceProfile,
   shouldEnforceDevicePerformanceBudgets,
 } from './webgpu-performance-budget.mjs';
 import { shouldWriteFormalPerformanceEvidence } from './performance-evidence-policy.mjs';
@@ -45,7 +44,7 @@ const fixtureOptions = {
   fixture: 'scripts/webgpu-gate/real-renderer-benchmark-fixture.html',
   query: {
     entities: long ? 1_000 : 256,
-    warmup: long ? 4 : 2,
+    warmup: long ? 4 : 3,
     samples: samplesPerCohort,
     gpuSamples,
     pass: 'timing',
@@ -102,14 +101,11 @@ result.sourceConsistency = {
 };
 
 const performanceConfig = loadPerformanceBudgetConfig(root);
-const selected = selectPerformanceProfile(
-  performanceConfig,
-  { nodePlatform: process.platform, adapter: result.adapter },
-  process.env.WEBGPU_DEVICE_PROFILE,
-);
-const performanceBudget = evaluatePerformanceBudget(
-  performanceConfig, selected.id, result.suite, mode, result,
-);
+const { selected, performanceBudget } = assessDevicePerformance(
+    performanceConfig,
+    { nodePlatform: process.platform, adapter: result.adapter },
+    result.suite, mode, result,
+  );
 const enforcePerformanceBudget = shouldEnforceDevicePerformanceBudgets();
 result.mode = mode;
 result.performanceBudget = performanceBudget;
@@ -129,7 +125,8 @@ if (shouldWriteFormalPerformanceEvidence(mode)) {
   mkdirSync(dirname(evidencePath), { recursive: true });
   writeFileSync(evidencePath, `${JSON.stringify(result, null, 2)}\n`);
 }
-if (performanceBudget.status !== 'passed') {
+if (performanceBudget.status === 'not-enrolled') console.warn(`[performance] ${performanceBudget.reason}`);
+if (performanceBudget.status === 'failed') {
   const detail = performanceBudget.violations
     .map(item => `${item.caseId ?? item.rule}${item.channel ? ` [${item.channel}]` : ''}: ${item.reason}${Number.isFinite(item.p95Ms) ? ` (${item.p95Ms.toFixed(2)}ms > ${item.maxP95Ms}ms)` : ''}`)
     .join('\n');

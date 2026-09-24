@@ -8,7 +8,7 @@ export function validateReleaseWorkflows(workflows) {
     const writePermissions = source.split('\n')
       .map(line => line.trim())
       .filter(line => /^(?:[\w-]+:\s*write|write-all)$/u.test(line));
-    if (name === 'deploy-pages.yml') {
+    if (['deploy-pages.yml', 'deploy-pages-ci.yml'].includes(name)) {
       const unexpected = writePermissions.filter(line => !['pages: write', 'id-token: write'].includes(line));
       if (unexpected.length > 0) errors.push(`${name} grants unexpected write permission: ${unexpected.join(', ')}`);
     } else if (writePermissions.length > 0) {
@@ -32,32 +32,35 @@ export function validateReleaseWorkflows(workflows) {
   validateRelease(workflows['ci-release-rehearsal.yml'] ?? '', errors);
   validateDevice(workflows['ci-device-performance.yml'] ?? '', errors);
   validatePages(workflows['deploy-pages.yml'] ?? '', errors);
+  if (workflows['deploy-pages-ci.yml']) validatePreviewPages(workflows['deploy-pages-ci.yml'], errors);
   return errors;
 }
 
 function validateFast(source, errors) {
   requireMatch(source, /pull_request:/u, 'ci-fast must run on pull requests', errors);
-  requireMatch(source, /push:\s*\n\s*branches:\s*\[main\]/u, 'ci-fast must run on main pushes', errors);
-  requireMatch(source, /npm run check:fast/u, 'ci-fast must run check:fast', errors);
-  requireMatch(source, /release-ci-bootstrap\.mjs[\s\S]*npm run check:fast/u, 'ci-fast must build workspace foundations before check:fast', errors);
+  requireMatch(source, /push:\s*\n\s*branches:\s*\[master\]/u, 'ci-fast must run on master pushes', errors);
+  requireMatch(source, /WEBGPU_ANGLE_BACKEND:\s*swiftshader/u, 'ci-fast must force swiftshader for hosted headless WebGPU gates', errors);
+  requireMatch(source, /npm run check:engine:fast/u, 'ci-fast must run check:engine:fast', errors);
+  requireMatch(source, /release-ci-bootstrap\.mjs[\s\S]*npm run check:engine:fast/u, 'ci-fast must build workspace foundations before check:engine:fast', errors);
 }
 
 function validateSlow(source, errors) {
   requireMatch(source, /pull_request:/u, 'ci-slow must run on pull requests', errors);
-  requireMatch(source, /push:\s*\n\s*branches:\s*\[main\]/u, 'ci-slow must run on main pushes', errors);
+  requireMatch(source, /push:\s*\n\s*branches:\s*\[master\]/u, 'ci-slow must run on master pushes', errors);
   requireMatch(source, /schedule:\s*\n\s*- cron:/u, 'ci-slow must have a nightly schedule', errors);
   requireMatch(source, /content_tier:[\s\S]*options:[\s\S]*- smoke[\s\S]*- full/u, 'ci-slow dispatch must expose smoke and full only', errors);
   requireMatch(source, /github\.event_name == 'schedule' && 'full'/u, 'ci-slow schedule must select full', errors);
-  requireMatch(source, /check:slow -- --content-tier="\$\{CONTENT_TIER\}"/u, 'ci-slow must pass its selected content tier', errors);
+  requireMatch(source, /WEBGPU_ANGLE_BACKEND:\s*swiftshader/u, 'ci-slow must force swiftshader for hosted headless WebGPU gates', errors);
+  requireMatch(source, /check:engine:slow -- --content-tier="\$\{CONTENT_TIER\}"/u, 'ci-slow must pass its selected content tier', errors);
   if (/options:[\s\S]*- manual/u.test(source)) errors.push('ci-slow must never expose the manual manifest tier');
 }
 
 function validateRelease(source, errors) {
   requireMatch(source, /push:\s*\n\s*tags:\s*\n\s*- ['"]v\*['"]/u, 'release rehearsal must run for version tags', errors);
   requireMatch(source, /workflow_dispatch:/u, 'release rehearsal must support explicit dispatch', errors);
-  requireMatch(source, /release-ci-bootstrap\.mjs[\s\S]*npm run check:fast/u, 'release rehearsal must build workspace foundations before check:fast', errors);
-  requireMatch(source, /npm run check:fast/u, 'release rehearsal must run the fast gate', errors);
-  requireMatch(source, /check:slow -- --content-tier=full/u, 'release rehearsal must run the full content tier', errors);
+  requireMatch(source, /WEBGPU_ANGLE_BACKEND:\s*swiftshader/u, 'release rehearsal must force swiftshader for hosted headless WebGPU gates', errors);
+  requireMatch(source, /release-ci-bootstrap\.mjs/u, 'release rehearsal must build Engine foundations before full checks', errors);
+  requireMatch(source, /check:engine:slow -- --content-tier=full/u, 'release rehearsal must run the full content tier', errors);
   requireMatch(source, /release-rehearsal\.mjs --worker/u, 'release workflow must run the no-publish worker', errors);
   requireMatch(source, /release-rehearsal\.mjs --worker[\s\S]*release-rehearsal-policy\.mjs --bundle artifacts\/release\/rehearsal/u, 'release workflow must independently validate the assembled rehearsal bundle', errors);
   requireMatch(source, /Upload rehearsal, provenance, SBOM and raw evidence/u, 'release workflow must upload rehearsal evidence', errors);
@@ -76,24 +79,38 @@ function validateDevice(source, errors) {
 }
 
 function validatePages(source, errors) {
-  requireMatch(source, /workflow_dispatch:[\s\S]*release_tag:[\s\S]*required:\s*true/u, 'Pages deploy must require an explicit release tag', errors);
-  if (/^\s*push:/mu.test(source)) errors.push('Pages deploy must not run automatically from an unreviewed push');
-  requireMatch(source, /contents:\s*read/u, 'Pages deploy must keep source read-only', errors);
-  requireMatch(source, /pages:\s*write/u, 'Pages deploy requires only the Pages write capability', errors);
-  requireMatch(source, /id-token:\s*write/u, 'Pages deploy requires OIDC for the official deploy action', errors);
-  requireMatch(source, /ref:\s*\$\{\{\s*inputs\.release_tag\s*\}\}/u, 'Pages deploy must checkout the requested immutable release tag', errors);
-  requireMatch(source, /persist-credentials:\s*false/u, 'Pages deploy checkout must not persist credentials', errors);
-  requireMatch(source, /git rev-parse "\$\{RELEASE_TAG\}\^\{tag\}"/u, 'Pages deploy must reject lightweight tags', errors);
-  requireMatch(source, /git\/tags\/\$\{TAG_SHA\}[\s\S]*verification\.verified/u, 'Pages deploy must require GitHub-verified tag signatures', errors);
-  requireMatch(source, /release-ci-bootstrap\.mjs/u, 'Pages deploy must build workspace foundations', errors);
-  requireMatch(source, /node automation\/scripts\/assemble-pages-release\.mjs/u, 'Pages deploy must use the governed site assembler from the tooling checkout', errors);
-  requireMatch(source, /PAGES_SOURCE_ROOT:\s*\$\{\{\s*github\.workspace\s*\}\}\/release/u, 'Pages assembler must consume only the release-tag checkout', errors);
-  requireMatch(source, /actions\/configure-pages@[0-9a-f]{40}/u, 'Pages deploy must configure Pages with a pinned action', errors);
-  requireMatch(source, /actions\/upload-pages-artifact@[0-9a-f]{40}/u, 'Pages deploy must upload with a pinned action', errors);
-  requireMatch(source, /actions\/deploy-pages@[0-9a-f]{40}/u, 'Pages deploy must deploy with a pinned action', errors);
-  requireMatch(source, /name:\s*github-pages/u, 'Pages deploy must use the protected github-pages environment', errors);
+  requireMatch(source, /workflow_dispatch:/u, 'Pages deploy must support manual dispatch', errors);
+  if (/^\s*push:/mu.test(source)) errors.push('Manual Pages deploy must leave push routing to deploy-pages-ci');
+  requireMatch(source, /ref:\s*master\s*\n/u, 'Manual Pages deploy must checkout master', errors);
+  if (/release_tag|TAG_SHA|verification\.verified/u.test(source)) errors.push('Master Pages deployment must not require a release tag');
+  validatePagesBuildAndDeploy(source, 'Pages deploy', errors);
+}
+
+function validatePagesBuildAndDeploy(source, label, errors) {
+  requireMatch(source, /group:\s*github-pages\s*\n\s*cancel-in-progress:\s*false/u, `${label} must share the serialized github-pages deployment group`, errors);
+  requireMatch(source, /persist-credentials:\s*false/u, `${label} checkout must not persist credentials`, errors);
+  requireMatch(source, /node scripts\/release-ci-bootstrap\.mjs --pages-examples/u, `${label} must build workspace foundations`, errors);
+  requireMatch(source, /npm run build:examples[\s\S]*npm run examples:catalog:check/u, `${label} must build and validate the examples catalog`, errors);
+  requireMatch(source, /node scripts\/assemble-pages-release\.mjs/u, `${label} must assemble the checked-out source`, errors);
+  requireMatch(source, /PAGES_OUTPUT_ROOT:\s*\$\{\{\s*github\.workspace\s*\}\}\/artifacts\/pages-release/u, `${label} must use the repository Pages output`, errors);
+  requireMatch(source, /actions\/configure-pages@[0-9a-f]{40}/u, `${label} must configure Pages with a pinned action`, errors);
+  requireMatch(source, /actions\/upload-pages-artifact@[0-9a-f]{40}/u, `${label} must upload with a pinned action`, errors);
+  const deploy = source.split(/\n  deploy:\s*\n/u);
+  if (deploy.length !== 2 || /(?:pages|id-token):\s*write/u.test(deploy[0])) errors.push(`${label} write permissions must stay in deploy job`);
+  requireMatch(deploy[1] ?? '', /pages:\s*write/u, `${label} requires Pages write capability`, errors);
+  requireMatch(deploy[1] ?? '', /id-token:\s*write/u, `${label} requires OIDC for deployment`, errors);
+  requireMatch(deploy[1] ?? '', /environment:\s*\n\s*name: github-pages/u, `${label} requires its protected environment`, errors);
+  requireMatch(deploy[1] ?? '', /needs: build/u, `${label} deploy must depend on its build`, errors);
+  requireMatch(deploy[1] ?? '', /actions\/deploy-pages@[0-9a-f]{40}/u, `${label} must use pinned official deployment`, errors);
 }
 
 function requireMatch(source, pattern, message, errors) {
   if (!pattern.test(source)) errors.push(message);
+}
+
+// Automatic pushes and manual dispatch deploy the same master examples site.
+function validatePreviewPages(source, errors) {
+  requireMatch(source, /push:\s*\n\s*branches:\s*\n\s*- master/u, 'Pages CI must keep its explicit master routing', errors);
+  requireMatch(source, /ref:\s*\$\{\{\s*github\.sha\s*\}\}/u, 'Pages CI must checkout the exact pushed commit', errors);
+  validatePagesBuildAndDeploy(source, 'Pages CI', errors);
 }

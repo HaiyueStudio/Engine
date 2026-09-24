@@ -245,7 +245,10 @@ export function createTimingVariabilityAnalysis(artifact, performanceBudget) {
     result => result.conclusion === 'measurement-or-environment-variance'
       && result.cohortsExceedingBudget > 0,
   );
-  const overallConclusion = consistentFailures.length > 0
+  const hasTimingBudget = [...budgetByCase.values()].some(Number.isFinite);
+  const overallConclusion = !hasTimingBudget
+    ? 'diagnostic-no-enrolled-budget'
+    : consistentFailures.length > 0
     ? 'stable-workload-budget-regression-observed'
     : mixedFailures.length > 0
       ? 'budget-failure-with-cross-cohort-variance'
@@ -375,6 +378,8 @@ export function assessCaseVariability(result, budgetP95Ms = null) {
     && individualFailures > 0
   ) {
     conclusion = 'transient-cohort-excursion';
+  } else if (!Number.isFinite(budgetP95Ms)) {
+    conclusion = 'diagnostic-no-enrolled-budget';
   } else {
     conclusion = 'stable-within-budget';
   }

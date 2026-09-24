@@ -25,35 +25,11 @@
         "@haiyue/engine"
       ]
     },
-    "ui": {
-      "name": "@haiyue/ui",
-      "private": false,
-      "workspaceDependencies": []
-    },
-    "editor": {
-      "name": "@haiyue/editor",
-      "private": true,
-      "workspaceDependencies": [
-        "@haiyue/animation-spec",
-        "@haiyue/engine",
-        "@haiyue/extensions",
-        "@haiyue/shader-language",
-        "@haiyue/ui"
-      ]
-    },
     "examples": {
       "name": "@haiyue/examples",
       "private": true,
       "workspaceDependencies": [
         "@haiyue/animation-spec",
-        "@haiyue/engine",
-        "@haiyue/extensions"
-      ]
-    },
-    "games": {
-      "name": "@haiyue/games-repository",
-      "private": true,
-      "workspaceDependencies": [
         "@haiyue/engine",
         "@haiyue/extensions"
       ]
@@ -65,7 +41,7 @@
       "private": false,
       "entrypoints": {
         ".": {
-          "source": "shader-language/src\\index.ts",
+          "source": "shader-language/src/index.ts",
           "exports": [
             {
               "name": "BUILTIN_POSTPROCESS_OPERATIONS",
@@ -1058,7 +1034,7 @@
           ]
         },
         "./material-graph": {
-          "source": "shader-language/src\\material-graph.ts",
+          "source": "shader-language/src/material-graph.ts",
           "exports": [
             {
               "name": "compileMaterialGraphDocumentV1",
@@ -1129,7 +1105,7 @@
       "private": false,
       "entrypoints": {
         ".": {
-          "source": "animation-spec/src\\index.ts",
+          "source": "animation-spec/src/index.ts",
           "exports": [
             {
               "name": "ANIMATION_FILE_EXTENSION",
@@ -1344,6 +1320,10 @@
               "kind": "type"
             },
             {
+              "name": "AnimationTextStyleRun",
+              "kind": "type"
+            },
+            {
               "name": "AnimationTintEffect",
               "kind": "type"
             },
@@ -1510,7 +1490,7 @@
           ]
         },
         "./conversion": {
-          "source": "animation-spec/src\\conversion.ts",
+          "source": "animation-spec/src/conversion.ts",
           "exports": [
             {
               "name": "OfflineConversionAdapter",
@@ -1595,7 +1575,7 @@
           ]
         },
         "./cubism": {
-          "source": "animation-spec/src\\cubism.ts",
+          "source": "animation-spec/src/cubism.ts",
           "exports": [
             {
               "name": "combineCubismCaptureClips",
@@ -1720,7 +1700,7 @@
           ]
         },
         "./deformable2d": {
-          "source": "animation-spec/src\\deformable2d.ts",
+          "source": "animation-spec/src/deformable2d.ts",
           "exports": [
             {
               "name": "createDeformableMesh2DFormatHandler",
@@ -1789,7 +1769,7 @@
           ]
         },
         "./live2d": {
-          "source": "animation-spec/src\\live2d.ts",
+          "source": "animation-spec/src/live2d.ts",
           "exports": [
             {
               "name": "combineCubismCaptureClips",
@@ -1914,7 +1894,7 @@
           ]
         },
         "./live2d/clip-baked": {
-          "source": "animation-spec/src\\live2d\\clip-baked.ts",
+          "source": "animation-spec/src/live2d/clip-baked.ts",
           "exports": [
             {
               "name": "CUBISM_CAPTURE_FRAME_OPERATIONS",
@@ -1951,7 +1931,7 @@
           ]
         },
         "./lottie": {
-          "source": "animation-spec/src\\lottie.ts",
+          "source": "animation-spec/src/lottie.ts",
           "exports": [
             {
               "name": "convertLottie",
@@ -1992,7 +1972,7 @@
           ]
         },
         "./native3d": {
-          "source": "animation-spec/src\\native3d.ts",
+          "source": "animation-spec/src/native3d.ts",
           "exports": [
             {
               "name": "createNative3DAnimationExtensionHandler",
@@ -2175,7 +2155,7 @@
       "private": false,
       "entrypoints": {
         ".": {
-          "source": "engine/src\\index.ts",
+          "source": "engine/src/index.ts",
           "exports": [
             {
               "name": "BasicMaterial",
@@ -2300,7 +2280,7 @@
           ]
         },
         "./assets": {
-          "source": "engine/src\\assets.ts",
+          "source": "engine/src/assets.ts",
           "exports": [
             {
               "name": "ASSET_JOB_PRIORITY_VALUE",
@@ -2389,7 +2369,7 @@
           ]
         },
         "./color": {
-          "source": "engine/src\\color.ts",
+          "source": "engine/src/color.ts",
           "exports": [
             {
               "name": "BuiltinColorSpace",
@@ -2458,7 +2438,7 @@
           ]
         },
         "./components": {
-          "source": "engine/src\\components.ts",
+          "source": "engine/src/components.ts",
           "exports": [
             {
               "name": "BasisTransform3D",
@@ -2879,7 +2859,7 @@
           ]
         },
         "./compute": {
-          "source": "engine/src\\compute.ts",
+          "source": "engine/src/compute.ts",
           "exports": [
             {
               "name": "ComputeKernel",
@@ -2912,7 +2892,7 @@
           ]
         },
         "./controls": {
-          "source": "engine/src\\controls.ts",
+          "source": "engine/src/controls.ts",
           "exports": [
             {
               "name": "BoxSelectionControl",
@@ -2953,7 +2933,7 @@
           ]
         },
         "./core": {
-          "source": "engine/src\\core.ts",
+          "source": "engine/src/core.ts",
           "exports": [
             {
               "name": "AssetJobState",
@@ -3230,7 +3210,7 @@
           ]
         },
         "./diagnostics": {
-          "source": "engine/src\\diagnostics.ts",
+          "source": "engine/src/diagnostics.ts",
           "exports": [
             {
               "name": "EngineDiagnosticsSnapshot",
@@ -3283,7 +3263,7 @@
           ]
         },
         "./ecs": {
-          "source": "engine/src\\ecs.ts",
+          "source": "engine/src/ecs.ts",
           "exports": [
             {
               "name": "Component",
@@ -3376,7 +3356,7 @@
           ]
         },
         "./experimental": {
-          "source": "engine/src\\experimental.ts",
+          "source": "engine/src/experimental.ts",
           "exports": [
             {
               "name": "alignUp",
@@ -3535,6 +3515,18 @@
               "kind": "type"
             },
             {
+              "name": "AudioMixerBus",
+              "kind": "type"
+            },
+            {
+              "name": "AudioMixerPlayRequest",
+              "kind": "type"
+            },
+            {
+              "name": "AudioMixerStats",
+              "kind": "type"
+            },
+            {
               "name": "BaseRenderer",
               "kind": "value"
             },
@@ -3648,6 +3640,14 @@
             },
             {
               "name": "BoxSelectionResult",
+              "kind": "type"
+            },
+            {
+              "name": "BrowserMultiplayerInput",
+              "kind": "value"
+            },
+            {
+              "name": "BrowserMultiplayerInputOptions",
               "kind": "type"
             },
             {
@@ -4723,6 +4723,10 @@
               "kind": "value"
             },
             {
+              "name": "GuiFontOptions",
+              "kind": "type"
+            },
+            {
               "name": "GuiImage",
               "kind": "value"
             },
@@ -5387,6 +5391,10 @@
               "kind": "type"
             },
             {
+              "name": "MultiplayerInputSnapshot",
+              "kind": "type"
+            },
+            {
               "name": "MusicPlayerComponent",
               "kind": "value"
             },
@@ -5437,6 +5445,14 @@
             {
               "name": "OutlineTarget",
               "kind": "value"
+            },
+            {
+              "name": "OwnerSafeAudioMixer",
+              "kind": "value"
+            },
+            {
+              "name": "OwnerSafeAudioMixerOptions",
+              "kind": "type"
             },
             {
               "name": "parseAssetWorkerFirst",
@@ -5584,6 +5600,10 @@
             },
             {
               "name": "PlaneGeometryOptions",
+              "kind": "type"
+            },
+            {
+              "name": "PlayerInputSnapshot",
               "kind": "type"
             },
             {
@@ -6725,7 +6745,7 @@
           ]
         },
         "./experimental/assets": {
-          "source": "engine/src\\experimental\\assets.ts",
+          "source": "engine/src/experimental/assets.ts",
           "exports": [
             {
               "name": "AssetCacheBudget",
@@ -6882,7 +6902,7 @@
           ]
         },
         "./experimental/async": {
-          "source": "engine/src\\experimental\\async.ts",
+          "source": "engine/src/experimental/async.ts",
           "exports": [
             {
               "name": "createAbortError",
@@ -6914,8 +6934,33 @@
             }
           ]
         },
+        "./experimental/audio": {
+          "source": "engine/src/experimental/audio.ts",
+          "exports": [
+            {
+              "name": "AudioMixerBus",
+              "kind": "type"
+            },
+            {
+              "name": "AudioMixerPlayRequest",
+              "kind": "type"
+            },
+            {
+              "name": "AudioMixerStats",
+              "kind": "type"
+            },
+            {
+              "name": "OwnerSafeAudioMixer",
+              "kind": "value"
+            },
+            {
+              "name": "OwnerSafeAudioMixerOptions",
+              "kind": "type"
+            }
+          ]
+        },
         "./experimental/diagnostics": {
-          "source": "engine/src\\experimental\\diagnostics.ts",
+          "source": "engine/src/experimental/diagnostics.ts",
           "exports": [
             {
               "name": "createGPUResourceOwner",
@@ -7028,7 +7073,7 @@
           ]
         },
         "./experimental/gpu-driven": {
-          "source": "engine/src\\experimental\\gpu-driven.ts",
+          "source": "engine/src/experimental/gpu-driven.ts",
           "exports": [
             {
               "name": "getRender3DGpuDrivenBatchBuffer",
@@ -7133,11 +7178,11 @@
           ]
         },
         "./experimental/ktx2-worker-runtime": {
-          "source": "engine/src\\experimental\\ktx2-worker-runtime.ts",
+          "source": "engine/src/experimental/ktx2-worker-runtime.ts",
           "exports": []
         },
         "./experimental/renderer": {
-          "source": "engine/src\\experimental\\renderer.ts",
+          "source": "engine/src/experimental/renderer.ts",
           "exports": [
             {
               "name": "BaseRenderer",
@@ -7346,8 +7391,16 @@
           ]
         },
         "./experimental/simulation": {
-          "source": "engine/src\\experimental\\simulation.ts",
+          "source": "engine/src/experimental/simulation.ts",
           "exports": [
+            {
+              "name": "BrowserMultiplayerInput",
+              "kind": "value"
+            },
+            {
+              "name": "BrowserMultiplayerInputOptions",
+              "kind": "type"
+            },
             {
               "name": "canonicalSimulationState",
               "kind": "value"
@@ -7406,6 +7459,14 @@
             },
             {
               "name": "InputReplayV1",
+              "kind": "type"
+            },
+            {
+              "name": "MultiplayerInputSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "PlayerInputSnapshot",
               "kind": "type"
             },
             {
@@ -7471,7 +7532,7 @@
           ]
         },
         "./extension-authoring": {
-          "source": "engine/src\\extension-authoring.ts",
+          "source": "engine/src/extension-authoring.ts",
           "exports": [
             {
               "name": "alignUp4",
@@ -7532,7 +7593,7 @@
           ]
         },
         "./font": {
-          "source": "engine/src\\font.ts",
+          "source": "engine/src/font.ts",
           "exports": [
             {
               "name": "BitmapFontChar",
@@ -7589,7 +7650,7 @@
           ]
         },
         "./geometry": {
-          "source": "engine/src\\geometry.ts",
+          "source": "engine/src/geometry.ts",
           "exports": [
             {
               "name": "BoxGeometryOptions",
@@ -7818,7 +7879,7 @@
           ]
         },
         "./gui": {
-          "source": "engine/src\\gui.ts",
+          "source": "engine/src/gui.ts",
           "exports": [
             {
               "name": "containsPoint",
@@ -7883,6 +7944,10 @@
             {
               "name": "GuiFocusManager",
               "kind": "value"
+            },
+            {
+              "name": "GuiFontOptions",
+              "kind": "type"
             },
             {
               "name": "GuiHelpDialog",
@@ -8155,7 +8220,7 @@
           ]
         },
         "./input": {
-          "source": "engine/src\\input.ts",
+          "source": "engine/src/input.ts",
           "exports": [
             {
               "name": "InputActionBindings",
@@ -8172,7 +8237,7 @@
           ]
         },
         "./lighting": {
-          "source": "engine/src\\lighting.ts",
+          "source": "engine/src/lighting.ts",
           "exports": [
             {
               "name": "AmbientLight",
@@ -8253,7 +8318,7 @@
           ]
         },
         "./material": {
-          "source": "engine/src\\material.ts",
+          "source": "engine/src/material.ts",
           "exports": [
             {
               "name": "BasicMaterial",
@@ -8534,7 +8599,7 @@
           ]
         },
         "./math": {
-          "source": "engine/src\\math.ts",
+          "source": "engine/src/math.ts",
           "exports": [
             {
               "name": "BoundingSphere",
@@ -8567,7 +8632,7 @@
           ]
         },
         "./navigation": {
-          "source": "engine/src\\navigation.ts",
+          "source": "engine/src/navigation.ts",
           "exports": [
             {
               "name": "NavMesh",
@@ -8608,7 +8673,7 @@
           ]
         },
         "./physics": {
-          "source": "engine/src\\physics.ts",
+          "source": "engine/src/physics.ts",
           "exports": [
             {
               "name": "Physics2DBody",
@@ -8781,7 +8846,7 @@
           ]
         },
         "./physics/backend": {
-          "source": "engine/src\\physics\\backend.ts",
+          "source": "engine/src/physics/backend.ts",
           "exports": [
             {
               "name": "createBox2DPhysics2DBackend",
@@ -8962,7 +9027,7 @@
           ]
         },
         "./physics/components": {
-          "source": "engine/src\\physics-components.ts",
+          "source": "engine/src/physics-components.ts",
           "exports": [
             {
               "name": "Physics2DBody",
@@ -9019,7 +9084,7 @@
           ]
         },
         "./postprocess": {
-          "source": "engine/src\\postprocess.ts",
+          "source": "engine/src/postprocess.ts",
           "exports": [
             {
               "name": "AmbientOcclusionPassOptions",
@@ -9140,7 +9205,7 @@
           ]
         },
         "./rtt": {
-          "source": "engine/src\\rtt.ts",
+          "source": "engine/src/rtt.ts",
           "exports": [
             {
               "name": "RttEngine",
@@ -9165,7 +9230,7 @@
           ]
         },
         "./save": {
-          "source": "engine/src\\save.ts",
+          "source": "engine/src/save.ts",
           "exports": [
             {
               "name": "assertValidGameSaveEnvelope",
@@ -9310,7 +9375,7 @@
           ]
         },
         "./scene": {
-          "source": "engine/src\\scene.ts",
+          "source": "engine/src/scene.ts",
           "exports": [
             {
               "name": "isPipelineWarmupParticipant",
@@ -9379,7 +9444,7 @@
           ]
         },
         "./serialization": {
-          "source": "engine/src\\serialization.ts",
+          "source": "engine/src/serialization.ts",
           "exports": [
             {
               "name": "ComponentDeserializeContext",
@@ -9436,7 +9501,7 @@
           ]
         },
         "./systems": {
-          "source": "engine/src\\systems.ts",
+          "source": "engine/src/systems.ts",
           "exports": [
             {
               "name": "BitmapTextRenderSystem",
@@ -9605,7 +9670,7 @@
           ]
         },
         "./tween": {
-          "source": "engine/src\\tween.ts",
+          "source": "engine/src/tween.ts",
           "exports": [
             {
               "name": "Easing",
@@ -9692,7 +9757,7 @@
       "private": false,
       "entrypoints": {
         ".": {
-          "source": "extensions/src\\index.ts",
+          "source": "extensions/src/index.ts",
           "exports": [
             {
               "name": "RenderSystem2DBase",
@@ -9705,7 +9770,7 @@
           ]
         },
         "./animation": {
-          "source": "extensions/src\\animation.ts",
+          "source": "extensions/src/animation.ts",
           "exports": [
             {
               "name": "Animation2DComponent",
@@ -9730,6 +9795,10 @@
             {
               "name": "Animation2DExtensionRegistry",
               "kind": "value"
+            },
+            {
+              "name": "Animation2DNodeOverride",
+              "kind": "type"
             },
             {
               "name": "Animation2DRenderStats",
@@ -9804,6 +9873,30 @@
               "kind": "value"
             },
             {
+              "name": "InteractionActionPort",
+              "kind": "type"
+            },
+            {
+              "name": "InteractionGeometryPort",
+              "kind": "type"
+            },
+            {
+              "name": "InteractionRuntime",
+              "kind": "value"
+            },
+            {
+              "name": "RoutedInteractionEvent",
+              "kind": "type"
+            },
+            {
+              "name": "RuntimeInteractionAction",
+              "kind": "type"
+            },
+            {
+              "name": "RuntimeInteractionDocument",
+              "kind": "type"
+            },
+            {
               "name": "tessellateAnimationPath",
               "kind": "value"
             },
@@ -9814,7 +9907,7 @@
           ]
         },
         "./animation3d": {
-          "source": "extensions/src\\animation3d.ts",
+          "source": "extensions/src/animation3d.ts",
           "exports": [
             {
               "name": "Animation3DAction",
@@ -10119,7 +10212,7 @@
           ]
         },
         "./canvas-text": {
-          "source": "extensions/src\\canvas-text.ts",
+          "source": "extensions/src/canvas-text.ts",
           "exports": [
             {
               "name": "CanvasText2DRenderSystem",
@@ -10140,7 +10233,7 @@
           ]
         },
         "./controls": {
-          "source": "extensions/src\\controls.ts",
+          "source": "extensions/src/controls.ts",
           "exports": [
             {
               "name": "JoystickPoint",
@@ -10181,7 +10274,7 @@
           ]
         },
         "./deformable-animation": {
-          "source": "extensions/src\\deformable-animation.ts",
+          "source": "extensions/src/deformable-animation.ts",
           "exports": [
             {
               "name": "createDeformableMesh2DRuntimeExtension",
@@ -10209,8 +10302,8 @@
             }
           ]
         },
-      "./experimental/gltf-worker": {
-          "source": "extensions/src\\experimental-gltf-worker.ts",
+        "./experimental/gltf-worker": {
+          "source": "extensions/src/experimental-gltf-worker.ts",
           "exports": [
             {
               "name": "createGltfAssetWorkerClientFromUrl",
@@ -10256,75 +10349,75 @@
               "name": "prepareGltfGeometryPayloads",
               "kind": "value"
             }
-        ]
-      },
-      "./experimental/indexed-sprite": {
-        "source": "extensions/src\\experimental-indexed-sprite.ts",
-        "exports": [
-          {
-            "name": "DEFAULT_INDEXED_SPRITE_ATLAS_LIMITS",
-            "kind": "value"
-          },
-          {
-            "name": "IndexedSpriteAtlasLayout",
-            "kind": "type"
-          },
-          {
-            "name": "IndexedSpriteAtlasLimits",
-            "kind": "type"
-          },
-          {
-            "name": "IndexedSpriteAtlasPage",
-            "kind": "type"
-          },
-          {
-            "name": "IndexedSpriteAtlasPlacement",
-            "kind": "type"
-          },
-          {
-            "name": "IndexedSpriteBlend",
-            "kind": "type"
-          },
-          {
-            "name": "IndexedSpriteDrawCommand",
-            "kind": "type"
-          },
-          {
-            "name": "IndexedSpritePaletteDescriptor",
-            "kind": "type"
-          },
-          {
-            "name": "IndexedSpritePlaneDescriptor",
-            "kind": "type"
-          },
-          {
-            "name": "IndexedSpritePlaneFormat",
-            "kind": "type"
-          },
-          {
-            "name": "IndexedSpriteRenderer",
-            "kind": "value"
-          },
-          {
-            "name": "IndexedSpriteRendererOptions",
-            "kind": "type"
-          },
-          {
-            "name": "IndexedSpriteRendererStats",
-            "kind": "type"
-          },
-          {
-            "name": "IndexedSpriteSampling",
-            "kind": "type"
-          },
-          {
-            "name": "prepareIndexedSpriteAtlas",
-            "kind": "value"
-          }
-        ]
-      },
-      "./experimental/spine-worker": {
-          "source": "extensions/src\\experimental-spine-worker.ts",
+          ]
+        },
+        "./experimental/indexed-sprite": {
+          "source": "extensions/src/experimental-indexed-sprite.ts",
+          "exports": [
+            {
+              "name": "DEFAULT_INDEXED_SPRITE_ATLAS_LIMITS",
+              "kind": "value"
+            },
+            {
+              "name": "IndexedSpriteAtlasLayout",
+              "kind": "type"
+            },
+            {
+              "name": "IndexedSpriteAtlasLimits",
+              "kind": "type"
+            },
+            {
+              "name": "IndexedSpriteAtlasPage",
+              "kind": "type"
+            },
+            {
+              "name": "IndexedSpriteAtlasPlacement",
+              "kind": "type"
+            },
+            {
+              "name": "IndexedSpriteBlend",
+              "kind": "type"
+            },
+            {
+              "name": "IndexedSpriteDrawCommand",
+              "kind": "type"
+            },
+            {
+              "name": "IndexedSpritePaletteDescriptor",
+              "kind": "type"
+            },
+            {
+              "name": "IndexedSpritePlaneDescriptor",
+              "kind": "type"
+            },
+            {
+              "name": "IndexedSpritePlaneFormat",
+              "kind": "type"
+            },
+            {
+              "name": "IndexedSpriteRenderer",
+              "kind": "value"
+            },
+            {
+              "name": "IndexedSpriteRendererOptions",
+              "kind": "type"
+            },
+            {
+              "name": "IndexedSpriteRendererStats",
+              "kind": "type"
+            },
+            {
+              "name": "IndexedSpriteSampling",
+              "kind": "type"
+            },
+            {
+              "name": "prepareIndexedSpriteAtlas",
+              "kind": "value"
+            }
+          ]
+        },
+        "./experimental/spine-worker": {
+          "source": "extensions/src/experimental-spine-worker.ts",
           "exports": [
             {
               "name": "createInlineSpineAssetWorkerClient",
@@ -10365,7 +10458,7 @@
           ]
         },
         "./gltf": {
-          "source": "extensions/src\\gltf.ts",
+          "source": "extensions/src/gltf.ts",
           "exports": [
             {
               "name": "applyGltfAnimationClip",
@@ -10582,7 +10675,7 @@
           ]
         },
         "./gltf-animation3d": {
-          "source": "extensions/src\\gltf-animation3d.ts",
+          "source": "extensions/src/gltf-animation3d.ts",
           "exports": [
             {
               "name": "createGltfAnimation3DClips",
@@ -10607,7 +10700,7 @@
           ]
         },
         "./grid": {
-          "source": "extensions/src\\grid.ts",
+          "source": "extensions/src/grid.ts",
           "exports": [
             {
               "name": "Grid2DComponent",
@@ -10620,7 +10713,7 @@
           ]
         },
         "./hya-state-machine": {
-          "source": "extensions/src\\hya-state-machine.ts",
+          "source": "extensions/src/hya-state-machine.ts",
           "exports": [
             {
               "name": "Animation2DStateMachineComponent",
@@ -10677,7 +10770,7 @@
           ]
         },
         "./ray-tracing": {
-          "source": "extensions/src\\ray-tracing.ts",
+          "source": "extensions/src/ray-tracing.ts",
           "exports": [
             {
               "name": "rayAcceleration",
@@ -10726,7 +10819,7 @@
           ]
         },
         "./spine": {
-          "source": "extensions/src\\spine.ts",
+          "source": "extensions/src/spine.ts",
           "exports": [
             {
               "name": "createSpinePlugin",
@@ -10763,7 +10856,7 @@
           ]
         },
         "./tilemap": {
-          "source": "extensions/src\\tilemap.ts",
+          "source": "extensions/src/tilemap.ts",
           "exports": [
             {
               "name": "createTilemapPlugin",
@@ -10800,7 +10893,7 @@
           ]
         },
         "./tween": {
-          "source": "extensions/src\\tween.ts",
+          "source": "extensions/src/tween.ts",
           "exports": [
             {
               "name": "Tween2DComponent",
@@ -10824,751 +10917,6 @@
             },
             {
               "name": "Tween2DSystemOptions",
-              "kind": "type"
-            }
-          ]
-        }
-      }
-    },
-    "@haiyue/ui": {
-      "workspace": "ui",
-      "private": false,
-      "entrypoints": {
-        ".": {
-          "source": "ui/src\\index.ts",
-          "exports": [
-            {
-              "name": "calculateVirtualListRange",
-              "kind": "value"
-            },
-            {
-              "name": "defineBorderBeamComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineButtonComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineCheckboxComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineContextMenuComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineDialogComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineDrawerComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineDropdownComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineHaiyueUI",
-              "kind": "value"
-            },
-            {
-              "name": "defineHistoryControlsComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineInputComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineNotificationComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineRadioComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineRangeComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineSelectComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineSplitComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineTabsComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineTooltipComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineTreeComponents",
-              "kind": "value"
-            },
-            {
-              "name": "defineVirtualListComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYBorderBeam",
-              "kind": "value"
-            },
-            {
-              "name": "HYButton",
-              "kind": "value"
-            },
-            {
-              "name": "HYCheckbox",
-              "kind": "value"
-            },
-            {
-              "name": "HYCheckboxChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYContextMenu",
-              "kind": "value"
-            },
-            {
-              "name": "HYContextMenuItem",
-              "kind": "type"
-            },
-            {
-              "name": "HYContextMenuSelectDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYDialog",
-              "kind": "value"
-            },
-            {
-              "name": "HYDialogCloseDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYDialogCloseReason",
-              "kind": "type"
-            },
-            {
-              "name": "HYDrawer",
-              "kind": "value"
-            },
-            {
-              "name": "HYDrawerCloseDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYDrawerCloseReason",
-              "kind": "type"
-            },
-            {
-              "name": "HYDrawerPlacement",
-              "kind": "type"
-            },
-            {
-              "name": "HYDropdown",
-              "kind": "value"
-            },
-            {
-              "name": "HYDropdownItem",
-              "kind": "type"
-            },
-            {
-              "name": "HYDropdownPlacement",
-              "kind": "type"
-            },
-            {
-              "name": "HYDropdownSelectDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYHistoryControls",
-              "kind": "value"
-            },
-            {
-              "name": "HYHistoryEntry",
-              "kind": "type"
-            },
-            {
-              "name": "HYInput",
-              "kind": "value"
-            },
-            {
-              "name": "HYInputChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYInputType",
-              "kind": "type"
-            },
-            {
-              "name": "HYNotification",
-              "kind": "value"
-            },
-            {
-              "name": "HYNotificationCloseDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYNotificationCloseReason",
-              "kind": "type"
-            },
-            {
-              "name": "HYNotificationMethodOptions",
-              "kind": "type"
-            },
-            {
-              "name": "HYNotificationOpenDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYNotificationOptions",
-              "kind": "type"
-            },
-            {
-              "name": "HYNotificationPlacement",
-              "kind": "type"
-            },
-            {
-              "name": "HYNotificationType",
-              "kind": "type"
-            },
-            {
-              "name": "HYRadio",
-              "kind": "value"
-            },
-            {
-              "name": "HYRadioChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYRange",
-              "kind": "value"
-            },
-            {
-              "name": "HYRangeChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYRangeHandle",
-              "kind": "type"
-            },
-            {
-              "name": "HYRangeValue",
-              "kind": "type"
-            },
-            {
-              "name": "HYSelect",
-              "kind": "value"
-            },
-            {
-              "name": "HYSelectChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYSelectOption",
-              "kind": "type"
-            },
-            {
-              "name": "HYSplit",
-              "kind": "value"
-            },
-            {
-              "name": "HYSplitDirection",
-              "kind": "type"
-            },
-            {
-              "name": "HYSplitRatioChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYTabChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYTabOption",
-              "kind": "type"
-            },
-            {
-              "name": "HYTabs",
-              "kind": "value"
-            },
-            {
-              "name": "HYTooltip",
-              "kind": "value"
-            },
-            {
-              "name": "HYTooltipPlacement",
-              "kind": "type"
-            },
-            {
-              "name": "HYTree",
-              "kind": "value"
-            },
-            {
-              "name": "HYTreeDataChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYTreeDropPosition",
-              "kind": "type"
-            },
-            {
-              "name": "HYTreeNode",
-              "kind": "value"
-            },
-            {
-              "name": "HYTreeNodeContextMenuDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYTreeNodeData",
-              "kind": "type"
-            },
-            {
-              "name": "HYTreeSelectionChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYVirtualList",
-              "kind": "value"
-            },
-            {
-              "name": "HYVirtualListAlign",
-              "kind": "type"
-            },
-            {
-              "name": "HYVirtualListItemClickDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYVirtualListItemRenderer",
-              "kind": "type"
-            },
-            {
-              "name": "HYVirtualListRange",
-              "kind": "type"
-            },
-            {
-              "name": "HYVirtualListRangeChangeDetail",
-              "kind": "type"
-            }
-          ]
-        },
-        "./border-beam": {
-          "source": "ui/src\\border-beam.ts",
-          "exports": [
-            {
-              "name": "defineBorderBeamComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYBorderBeam",
-              "kind": "value"
-            }
-          ]
-        },
-        "./button": {
-          "source": "ui/src\\button.ts",
-          "exports": [
-            {
-              "name": "defineButtonComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYButton",
-              "kind": "value"
-            }
-          ]
-        },
-        "./checkbox": {
-          "source": "ui/src\\checkbox.ts",
-          "exports": [
-            {
-              "name": "defineCheckboxComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYCheckbox",
-              "kind": "value"
-            },
-            {
-              "name": "HYCheckboxChangeDetail",
-              "kind": "type"
-            }
-          ]
-        },
-        "./context-menu": {
-          "source": "ui/src\\context-menu.ts",
-          "exports": [
-            {
-              "name": "defineContextMenuComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYContextMenu",
-              "kind": "value"
-            },
-            {
-              "name": "HYContextMenuItem",
-              "kind": "type"
-            },
-            {
-              "name": "HYContextMenuSelectDetail",
-              "kind": "type"
-            }
-          ]
-        },
-        "./dialog": {
-          "source": "ui/src\\dialog.ts",
-          "exports": [
-            {
-              "name": "defineDialogComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYDialog",
-              "kind": "value"
-            },
-            {
-              "name": "HYDialogCloseDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYDialogCloseReason",
-              "kind": "type"
-            }
-          ]
-        },
-        "./drawer": {
-          "source": "ui/src\\drawer.ts",
-          "exports": [
-            {
-              "name": "defineDrawerComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYDrawer",
-              "kind": "value"
-            },
-            {
-              "name": "HYDrawerCloseDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYDrawerCloseReason",
-              "kind": "type"
-            },
-            {
-              "name": "HYDrawerPlacement",
-              "kind": "type"
-            }
-          ]
-        },
-        "./dropdown": {
-          "source": "ui/src\\dropdown.ts",
-          "exports": [
-            {
-              "name": "defineDropdownComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYDropdown",
-              "kind": "value"
-            },
-            {
-              "name": "HYDropdownItem",
-              "kind": "type"
-            },
-            {
-              "name": "HYDropdownPlacement",
-              "kind": "type"
-            },
-            {
-              "name": "HYDropdownSelectDetail",
-              "kind": "type"
-            }
-          ]
-        },
-        "./history-controls": {
-          "source": "ui/src\\history-controls.ts",
-          "exports": [
-            {
-              "name": "defineHistoryControlsComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYHistoryControls",
-              "kind": "value"
-            },
-            {
-              "name": "HYHistoryEntry",
-              "kind": "type"
-            }
-          ]
-        },
-        "./input": {
-          "source": "ui/src\\input.ts",
-          "exports": [
-            {
-              "name": "defineInputComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYInput",
-              "kind": "value"
-            },
-            {
-              "name": "HYInputChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYInputType",
-              "kind": "type"
-            }
-          ]
-        },
-        "./notification": {
-          "source": "ui/src\\notification.ts",
-          "exports": [
-            {
-              "name": "defineNotificationComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYNotification",
-              "kind": "value"
-            },
-            {
-              "name": "HYNotificationCloseDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYNotificationCloseReason",
-              "kind": "type"
-            },
-            {
-              "name": "HYNotificationMethodOptions",
-              "kind": "type"
-            },
-            {
-              "name": "HYNotificationOpenDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYNotificationOptions",
-              "kind": "type"
-            },
-            {
-              "name": "HYNotificationPlacement",
-              "kind": "type"
-            },
-            {
-              "name": "HYNotificationType",
-              "kind": "type"
-            }
-          ]
-        },
-        "./radio": {
-          "source": "ui/src\\radio.ts",
-          "exports": [
-            {
-              "name": "defineRadioComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYRadio",
-              "kind": "value"
-            },
-            {
-              "name": "HYRadioChangeDetail",
-              "kind": "type"
-            }
-          ]
-        },
-        "./range": {
-          "source": "ui/src\\range.ts",
-          "exports": [
-            {
-              "name": "defineRangeComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYRange",
-              "kind": "value"
-            },
-            {
-              "name": "HYRangeChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYRangeHandle",
-              "kind": "type"
-            },
-            {
-              "name": "HYRangeValue",
-              "kind": "type"
-            }
-          ]
-        },
-        "./select": {
-          "source": "ui/src\\select.ts",
-          "exports": [
-            {
-              "name": "defineSelectComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYSelect",
-              "kind": "value"
-            },
-            {
-              "name": "HYSelectChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYSelectOption",
-              "kind": "type"
-            }
-          ]
-        },
-        "./split": {
-          "source": "ui/src\\split.ts",
-          "exports": [
-            {
-              "name": "defineSplitComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYSplit",
-              "kind": "value"
-            },
-            {
-              "name": "HYSplitDirection",
-              "kind": "type"
-            },
-            {
-              "name": "HYSplitRatioChangeDetail",
-              "kind": "type"
-            }
-          ]
-        },
-        "./tabs": {
-          "source": "ui/src\\tabs.ts",
-          "exports": [
-            {
-              "name": "defineTabsComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYTabChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYTabOption",
-              "kind": "type"
-            },
-            {
-              "name": "HYTabs",
-              "kind": "value"
-            }
-          ]
-        },
-        "./tooltip": {
-          "source": "ui/src\\tooltip.ts",
-          "exports": [
-            {
-              "name": "defineTooltipComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYTooltip",
-              "kind": "value"
-            },
-            {
-              "name": "HYTooltipPlacement",
-              "kind": "type"
-            }
-          ]
-        },
-        "./tree": {
-          "source": "ui/src\\tree.ts",
-          "exports": [
-            {
-              "name": "defineTreeComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYTree",
-              "kind": "value"
-            },
-            {
-              "name": "HYTreeDataChangeDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYTreeDropPosition",
-              "kind": "type"
-            },
-            {
-              "name": "HYTreeNode",
-              "kind": "value"
-            },
-            {
-              "name": "HYTreeNodeContextMenuDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYTreeNodeData",
-              "kind": "type"
-            },
-            {
-              "name": "HYTreeSelectionChangeDetail",
-              "kind": "type"
-            }
-          ]
-        },
-        "./virtual-list": {
-          "source": "ui/src\\virtual-list.ts",
-          "exports": [
-            {
-              "name": "calculateVirtualListRange",
-              "kind": "value"
-            },
-            {
-              "name": "defineVirtualListComponents",
-              "kind": "value"
-            },
-            {
-              "name": "HYVirtualList",
-              "kind": "value"
-            },
-            {
-              "name": "HYVirtualListAlign",
-              "kind": "type"
-            },
-            {
-              "name": "HYVirtualListItemClickDetail",
-              "kind": "type"
-            },
-            {
-              "name": "HYVirtualListItemRenderer",
-              "kind": "type"
-            },
-            {
-              "name": "HYVirtualListRange",
-              "kind": "type"
-            },
-            {
-              "name": "HYVirtualListRangeChangeDetail",
               "kind": "type"
             }
           ]

@@ -1,3 +1,4 @@
+import { createPortablePixelRecord, comparePortablePixelRecords } from './visual-regression/portable-pixels.mjs';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -31,7 +32,7 @@ const cases = {
 };
 const captures = await captureCases(chrome, cases);
 const current = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   fixture: 'haiyue-distance-height-fog-chrome-960x640',
   width: 960,
   height: 640,
@@ -50,6 +51,7 @@ const current = {
 assertEquivalent(current.noFogEquivalence.noFog, current.noFogEquivalence.disabled, 'disabled Fog');
 assertEquivalent(current.noFogEquivalence.noFog, current.noFogEquivalence.maxOpacityZero, 'maxOpacity=0 Fog');
 
+writeCandidateArtifacts(current, captures);
 if (process.env.UPDATE_FOG_BASELINE === '1') {
   writeFileSync(baselinePath, `${JSON.stringify(current, null, 2)}\n`);
   console.log(`[fog-example] Updated ${baselinePath}.`);
@@ -109,10 +111,7 @@ function pixelRecord(capture) {
   if (width !== 960 || height !== 640) {
     throw new Error(`Fog screenshot dimensions changed: expected 960x640, received ${width}x${height}.`);
   }
-  return {
-    hash: createHash('sha256').update(png).digest('hex'),
-    bytes: png.byteLength,
-  };
+  return createPortablePixelRecord(png);
 }
 
 function assertEquivalent(expected, actual, label) {
@@ -122,11 +121,8 @@ function assertEquivalent(expected, actual, label) {
 }
 
 function compareRecord(currentRecord, baselineRecord, label, mismatches) {
-  for (const key of ['hash', 'bytes']) {
-    if (currentRecord[key] !== baselineRecord?.[key]) {
-      mismatches.push(`Fog pixel regression at ${label}.${key}: expected ${baselineRecord?.[key]}, received ${currentRecord[key]}.`);
-    }
-  }
+  const comparison = comparePortablePixelRecords(currentRecord, baselineRecord);
+  if (comparison.status !== 'passed') mismatches.push(`Fog pixel regression at ${label}: ${JSON.stringify(comparison)}`);
 }
 
 function writeCandidateArtifacts(result, caseCaptures) {

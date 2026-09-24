@@ -6,10 +6,9 @@ import { validateAmbientOcclusionGpuCostArtifact } from './webgpu-gate/ambient-o
 import {
   createPerformanceEvidence,
   createPerformanceSourceFingerprint,
-  evaluatePerformanceBudget,
+  assessDevicePerformance,
   loadPerformanceBudgetConfig,
   performanceEvidencePath,
-  selectPerformanceProfile,
   shouldEnforceDevicePerformanceBudgets,
 } from './webgpu-performance-budget.mjs';
 import { shouldWriteFormalPerformanceEvidence } from './performance-evidence-policy.mjs';
@@ -57,17 +56,10 @@ if (result.status === 'unavailable') {
   }
   console.warn(`[ambient-occlusion:performance] unavailable: ${result.gate.unavailableReason}`);
 } else {
-  const selected = selectPerformanceProfile(
+  const { selected, performanceBudget } = assessDevicePerformance(
     performanceConfig,
     { nodePlatform: process.platform, adapter: result.adapter },
-    process.env.WEBGPU_DEVICE_PROFILE,
-  );
-  const performanceBudget = evaluatePerformanceBudget(
-    performanceConfig,
-    selected.id,
-    result.suite,
-    mode,
-    result,
+    result.suite, mode, result,
   );
   result.performanceBudget = performanceBudget;
   result.gate = {
@@ -84,7 +76,8 @@ if (result.status === 'unavailable') {
     mkdirSync(dirname(evidencePath), { recursive: true });
     writeFileSync(evidencePath, `${JSON.stringify(result, null, 2)}\n`);
   }
-  if (performanceBudget.status !== 'passed') {
+  if (performanceBudget.status === 'not-enrolled') console.warn(`[performance] ${performanceBudget.reason}`);
+if (performanceBudget.status === 'failed') {
     const detail = performanceBudget.violations
       .map(item => `${item.caseId ?? item.rule}${item.channel ? ` [${item.channel}]` : ''}: ${item.reason}`)
       .join('\n');

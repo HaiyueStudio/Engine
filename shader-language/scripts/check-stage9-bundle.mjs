@@ -2,6 +2,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadShaderCostBudget, validateProductionBundleCost } from './shader-cost-policy.mjs';
 
 const directory = dirname(fileURLToPath(import.meta.url));
 const root = resolve(directory, '../..');
@@ -21,7 +22,13 @@ const evidence = {
 };
 evidence.engineArtifactGzipBytes = evidence.engine2dUiArtifactGzipBytes + evidence.simple3dArtifactGzipBytes;
 const failures = [];
+const costBudget = loadShaderCostBudget(root);
 for (const [key, value] of Object.entries(evidence)) {
+  if (['simple3dArtifactGzipBytes', 'componentsEvidenceArtifactGzipBytes'].includes(key)) {
+    const error = validateProductionBundleCost(key, value, costBudget);
+    if (error) failures.push(error);
+    continue;
+  }
   if (key.startsWith('simple3dArtifact')) {
     if (value > contract.bundle[key]) failures.push(`${key} historical maximum ${contract.bundle[key]}, received ${value}`);
     continue;

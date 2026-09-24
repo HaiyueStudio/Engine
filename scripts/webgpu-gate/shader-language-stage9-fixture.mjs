@@ -134,7 +134,14 @@ async function runFixture() {
     throw new Error(`Unexpected generated tilemap pixel ${pixel.join(',')}; expected ${expectedPixel.join(',')}.`);
   }
   const { main: animationPixel, effect: animationEffectPixel } = await renderAnimation2dPixel(trackedDevice, runtimes.get('components-2d-ui/animation-2d'));
-  const expectedAnimationPixel = [96, 0, 159, 96];
+  // At x=0.25: red/blue weights are 3/8 and 5/8, paint opacity 1/2,
+  // and subtract-mask coverage is 191/255. Output is premultiplied RGBA.
+  const validationError = await device.popErrorScope();
+  device.destroy();
+  if (validationError || uncapturedErrors.length > 0) {
+    throw new Error(`WebGPU validation errors: ${validationError?.message ?? uncapturedErrors.join('; ')}`);
+  }
+  const expectedAnimationPixel = [36, 0, 60, 96];
   const animationPixelDelta = animationPixel.map((value, index) => Math.abs(value - expectedAnimationPixel[index]));
   if (animationPixelDelta.some(value => value > 2)) {
     throw new Error(`Unexpected generated Animation2D pixel ${animationPixel.join(',')}; expected ${expectedAnimationPixel.join(',')}.`);
@@ -145,11 +152,6 @@ async function runFixture() {
     throw new Error(`Unexpected generated Animation2D effect pixel ${animationEffectPixel.join(',')}; expected ${expectedAnimationEffectPixel.join(',')}.`);
   }
 
-  const validationError = await device.popErrorScope();
-  device.destroy();
-  if (validationError || uncapturedErrors.length > 0) {
-    throw new Error(`WebGPU validation errors: ${validationError?.message ?? uncapturedErrors.join('; ')}`);
-  }
   return {
     schemaVersion: 1,
     suite: 'shader-language-stage9-builtin-render',
@@ -185,21 +187,27 @@ async function renderAnimation2dPixel(device, materialized) {
     0, 0, 0, 1,
   ]);
   const camera = device.createBuffer({ size: 64, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
-  const object = device.createBuffer({ size: 1264, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
-  const objectData = new Float32Array(316);
-  objectData.set(identity, 0);
-  objectData.set([1, 1, 1, 1], 16);
-  objectData[20] = 2;
-  objectData.set([0, 0, 1, 1], 24);
-  objectData.set([2, 0, 0, 0], 28); // luma add
-  objectData.set([0, 1, 0, 0], 32); // alpha subtract
-  objectData.set([1, 2, 0.5, 0], 68); // linear, two stops, 50% paint opacity
-  objectData.set([-1, 0, 1, 0], 72);
-  objectData.set([1, 0, 0, 1], 76);
-  objectData.set([0, 0, 1, 1], 80);
-  objectData.set([0, 1, 0, 0], 108);
-  objectData[116] = 1; // tint
-  objectData.set([0, 0, 1, 1, 1, 0, 1], 124); // black=blue, white=yellow, amount=1
+  const block = runtime.pass.uniformBlocks.find(block => block.id === 'object.animation2d');
+  if (!block) throw new Error('Missing reflected Animation2D uniform layout');
+  const object = device.createBuffer({ size: block.byteSize, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  const objectData = new Float32Array(block.byteSize / 4);
+  const set = (name, values) => {
+    const field = block.fields.find(field => field.name === name);
+    if (!field || values.length * 4 > field.size) throw new Error(`Invalid Animation2D fixture field ${name}`);
+    objectData.set(values, field.offset / 4);
+  };
+  set('model', identity);
+  set('color', [1, 1, 1, 1]);
+  set('multiplyColor', [1, 1, 1, 1]);
+  set('params', [2, 0, 0, 0]);
+  set('uvRect', [0, 0, 1, 1]);
+  set('compositeParams', [2, 0, 0, 0, 0, 1, 0, 0]); // luma add, alpha subtract
+  set('gradientParams', [1, 2, 0.5, 0]); // linear, two stops, 50% paint opacity
+  set('gradientGeometry', [-1, 0, 1, 0]);
+  set('gradientColors', [1, 0, 0, 1, 0, 0, 1, 1]);
+  set('gradientOffsets0', [0, 1, 0, 0]);
+  set('effectKinds0', [1]); // tint
+  set('effectData', [0, 0, 1, 1, 1, 0, 1]); // black=blue, white=yellow, amount=1
   device.queue.writeBuffer(camera, 0, identity);
   device.queue.writeBuffer(object, 0, objectData);
   const cameraGroup = device.createBindGroup({ layout: layouts[0], entries: [{ binding: 0, resource: { buffer: camera } }] });

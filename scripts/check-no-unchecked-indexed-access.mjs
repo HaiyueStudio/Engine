@@ -1,8 +1,12 @@
+import { includesGatePath } from './engine-release-policy.mjs';
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
+
+const gateScope = process.argv.includes('--engine') ? 'engine' : 'studio';
+const selectedPath = path => includesGatePath(path, gateScope);
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const baseConfig = JSON.parse(readFileSync(resolve(root, 'tsconfig.base.json'), 'utf8'));
@@ -15,10 +19,10 @@ if (baseConfig.compilerOptions?.noUncheckedIndexedAccess !== true) {
 const workspaces = [
   { label: 'engine', configPath: resolve(root, 'engine/tsconfig.json') },
   { label: 'extensions', configPath: resolve(root, 'extensions/tsconfig.json') },
-  { label: 'ui', configPath: resolveStudioRepositoryPath('UI', 'tsconfig.json') },
-  { label: 'editor', configPath: resolveStudioRepositoryPath('Editor', 'editor', 'tsconfig.json') },
+  ...(gateScope === 'studio' ? [{ label: 'ui', configPath: resolveStudioRepositoryPath('UI', 'tsconfig.json') }] : []),
+  ...(gateScope === 'studio' ? [{ label: 'editor', configPath: resolveStudioRepositoryPath('Editor', 'editor', 'tsconfig.json') }] : []),
   { label: 'examples', configPath: resolve(root, 'examples/tsconfig.json') },
-  { label: 'games', configPath: resolveStudioRepositoryPath('Games', 'tsconfig.json') },
+  ...(gateScope === 'studio' ? [{ label: 'games', configPath: resolveStudioRepositoryPath('Games', 'tsconfig.json') }] : []),
 ];
 const tsc = resolve(root, 'node_modules/typescript/bin/tsc');
 let failed = false;

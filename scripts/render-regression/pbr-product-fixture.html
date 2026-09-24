@@ -120,10 +120,11 @@ try {
   }
   const sample = (x, y) => Array.from(pixels.slice((y * width + x) * 4, (y * width + x) * 4 + 4));
   const payload = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     fixture: 'pbr-shadow-ibl-rgba8unorm-96x64',
     width, height,
     hash: hash.toString(16).padStart(8, '0'),
+    rgbaBase64: btoa(Array.from(pixels, value => String.fromCharCode(value)).join('')),
     spherePixels,
     shadowPixels,
     dielectric: sample(28, 29),

@@ -45,13 +45,11 @@ errors.push(...validateCapabilityPackageBudgetConfig(budget));
 let shaderLanguageBuildEvidence = null;
 let animationSpecBuildEvidence = null;
 let extensionsBuildEvidence = null;
-let uiBuildEvidence = null;
 
 try {
   shaderLanguageBuildEvidence = buildPublicWorkspace('Shader Language', resolve(root, 'shader-language'));
   animationSpecBuildEvidence = buildAnimationSpec();
   extensionsBuildEvidence = buildExtensions();
-  uiBuildEvidence = buildPublicWorkspace('UI', resolve(root, '../UI'));
   rmSync(tarballOutputRoot, { recursive: true, force: true });
   mkdirSync(tarballOutputRoot, { recursive: true });
 
@@ -86,7 +84,7 @@ try {
     consumers.push(withoutConsumerCode(result));
     errors.push(...validateGenericConsumerResult(result, policy));
   }
-  for (const section of ['shaderLanguageConsumers', 'uiConsumers']) {
+  for (const section of ['shaderLanguageConsumers']) {
     for (const [id, policy] of Object.entries(budget[section] ?? {})) {
       const result = await bundleConsumer({ id, policy, installed, packageDirectories });
       consumers.push(withoutConsumerCode(result));
@@ -109,7 +107,7 @@ try {
     generatedAt: new Date().toISOString(),
     sourceState: readSourceState(),
     mode: releaseMode ? 'release' : 'development',
-    buildEvidence: { shaderLanguage: shaderLanguageBuildEvidence, animationSpec: animationSpecBuildEvidence, extensions: extensionsBuildEvidence, ui: uiBuildEvidence },
+    buildEvidence: { shaderLanguage: shaderLanguageBuildEvidence, animationSpec: animationSpecBuildEvidence, extensions: extensionsBuildEvidence },
     packages: packedPackages.map(withoutPrivatePackFields),
     install: {
       manager: installed.manager,

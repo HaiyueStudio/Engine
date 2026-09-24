@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 1,
+  "scope": "local diagnostic candidate; not clean-runner release approval",
+  "sourceState": {
+    "revision": "d598dda347ba98719ce1ba19161d12c2bc0c6428",
+    "workingTreeDirty": true
+  },
+  "generatedAt": "2026-09-23T10:42:22.977Z",
+  "packages": [
+    {
+      "name": "@haiyue/engine",
+      "version": "0.2.0",
+      "packedBytes": 1874952,
+      "unpackedBytes": 8362294,
+      "fileCount": 593,
+      "sha256": "8aefbbafafadc5a467066543827d6bcf36593104bcee8900a1682fa711d89e18",
+      "deterministicRepackSha256": "8aefbbafafadc5a467066543827d6bcf36593104bcee8900a1682fa711d89e18"
+    },
+    {
+      "name": "@haiyue/animation-spec",
+      "version": "0.2.0",
+      "packedBytes": 130279,
+      "unpackedBytes": 502980,
+      "fileCount": 48,
+      "sha256": "5a62d094eb363b864c164b473fd7df6ecc7443a09bf610897d08a0a6efd65128",
+      "deterministicRepackSha256": "5a62d094eb363b864c164b473fd7df6ecc7443a09bf610897d08a0a6efd65128"
+    },
+    {
+      "name": "@haiyue/extensions",
+      "version": "0.2.0",
+      "packedBytes": 513428,
+      "unpackedBytes": 2651601,
+      "fileCount": 188,
+      "sha256": "6ec2adcce1552ef80476c74d860c0b9202c6bb473ec6bb21a6dd867e15184f6c",
+      "deterministicRepackSha256": "6ec2adcce1552ef80476c74d860c0b9202c6bb473ec6bb21a6dd867e15184f6c"
+    },
+    {
+      "name": "@haiyue/shader-language",
+      "version": "0.2.0",
+      "packedBytes": 143348,
+      "unpackedBytes": 695651,
+      "fileCount": 71,
+      "sha256": "dc489c264b38c33f33fcc4e61a4e07fd3f38ca3878ecc34d1850f33344f99c62",
+      "deterministicRepackSha256": "dc489c264b38c33f33fcc4e61a4e07fd3f38ca3878ecc34d1850f33344f99c62"
+    }
+  ],
+  "consumers": [
+    {
+      "id": "root-golden-path",
+      "rawBytes": 319984,
+      "gzipBytes": 48221,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "save-only",
+      "rawBytes": 28230,
+      "gzipBytes": 5957,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "fxaa-only",
+      "rawBytes": 87689,
+      "gzipBytes": 13162,
+      "generatedShaderArtifacts": [
+        "postprocess-shader-artifact"
+      ]
+    },
+    {
+      "id": "geometry-only",
+      "rawBytes": 63191,
+      "gzipBytes": 12888,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "tween-only",
+      "rawBytes": 18588,
+      "gzipBytes": 4442,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "worker-url-only",
+      "rawBytes": 10543,
+      "gzipBytes": 2867,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "audio-mixer-only",
+      "rawBytes": 11092,
+      "gzipBytes": 2961,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "multiplayer-input-only",
+      "rawBytes": 15866,
+      "gzipBytes": 4077,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "font-builder-only",
+      "rawBytes": 3579,
+      "gzipBytes": 1347,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "gui-font",
+      "rawBytes": 274631,
+      "gzipBytes": 47783,
+      "generatedShaderArtifacts": [
+        "2d-ui-shader-artifact"
+      ]
+    },
+    {
+      "id": "animation-spec-root",
+      "rawBytes": 77590,
+      "gzipBytes": 21523,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "animation-spec-lottie",
+      "rawBytes": 141126,
+      "gzipBytes": 41516,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "animation-spec-native3d",
+      "rawBytes": 96822,
+      "gzipBytes": 26609,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "animation-spec-live2d",
+      "rawBytes": 90916,
+      "gzipBytes": 26062,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "extensions-animation",
+      "rawBytes": 1112581,
+      "gzipBytes": 223060,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "extensions-animation3d",
+      "rawBytes": 125075,
+      "gzipBytes": 23466,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "extensions-deformable-animation",
+      "rawBytes": 270180,
+      "gzipBytes": 42196,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "extensions-gltf",
+      "rawBytes": 474833,
+      "gzipBytes": 79058,
+      "generatedShaderArtifacts": [
+        "deformation-shader-artifact"
+      ]
+    },
+    {
+      "id": "extensions-gltf-animation3d",
+      "rawBytes": 304770,
+      "gzipBytes": 45913,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "extensions-hya-state-machine",
+      "rawBytes": 1174076,
+      "gzipBytes": 230623,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "extensions-spine",
+      "rawBytes": 421779,
+      "gzipBytes": 70092,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "extensions-tilemap",
+      "rawBytes": 270955,
+      "gzipBytes": 41255,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "extensions-canvas-text",
+      "rawBytes": 301588,
+      "gzipBytes": 47142,
+      "generatedShaderArtifacts": [
+        "deformation-shader-artifact"
+      ]
+    },
+    {
+      "id": "extensions-tween",
+      "rawBytes": 214663,
+      "gzipBytes": 28855,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "extensions-grid",
+      "rawBytes": 4734,
+      "gzipBytes": 1449,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "extensions-interaction",
+      "rawBytes": 289456,
+      "gzipBytes": 49181,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "extensions-controls",
+      "rawBytes": 261715,
+      "gzipBytes": 39060,
+      "generatedShaderArtifacts": []
+    },
+    {
+      "id": "shader-language-material-graph",
+      "rawBytes": 200042,
+      "gzipBytes": 39688,
+      "generatedShaderArtifacts": []
+    }
+  ],
+  "runtimeChecks": {
+    "node": {
+      "status": "passed",
+      "detail": "{\"status\":\"passed\",\"format\":\"haiyue-animation\",\"duration\":1,\"tweenOpacity\":0.5}"
+    },
+    "typescript": {
+      "status": "passed",
+      "detail": "TypeScript packed declarations passed"
+    },
+    "exports": {
+      "status": "passed",
+      "detail": "{\"status\":\"passed\",\"imports\":64}"
+    },
+    "cli": {
+      "status": "passed",
+      "detail": "Usage: hya-convert <input.json> <output.hya|output.json> [--strict] (alias: hya-lottie-convert)"
+    }
+  },
+  "fontParserAttribution": [
+    {
+      "id": "extensions-animation",
+      "mode": "source",
+      "rawBytes": 1112575,
+      "gzipBytes": 223172
+    },
+    {
+      "id": "extensions-animation",
+      "mode": "source-without-font-parser",
+      "rawBytes": 652529,
+      "gzipBytes": 125510
+    },
+    {
+      "id": "extensions-hya-state-machine",
+      "mode": "source",
+      "rawBytes": 1174068,
+      "gzipBytes": 231125
+    },
+    {
+      "id": "extensions-hya-state-machine",
+      "mode": "source-without-font-parser",
+      "rawBytes": 714022,
+      "gzipBytes": 133448
+    }
+  ],
+  "measurementCommand": "node review/api/measure-0.2.0-capabilities.mjs",
+  "packedMeasurementCommand": "node scripts/verify-engine-package.mjs"
+}

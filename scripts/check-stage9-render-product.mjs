@@ -1,8 +1,12 @@
+import { includesGatePath } from './engine-release-policy.mjs';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
+
+const gateScope = process.argv.includes('--engine') ? 'engine' : 'studio';
+const selectedPath = path => includesGatePath(path, gateScope);
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const violations = [];
@@ -18,16 +22,16 @@ for (const path of [
   'extensions/test/gltf-loader.test.mjs',
 ]) requireFile(path);
 
-const manifests = [validateManifest('examples'), validateManifest('games')];
+const manifests = [validateManifest('examples'), ...(gateScope === 'studio' ? [validateManifest('games')] : [])];
 const allCapabilities = new Set(manifests.flatMap(manifest => manifest.entries.flatMap(entry => entry.capabilities)));
 for (const capability of ['render-profiles', 'pbr-metallic-roughness', 'pbr-clearcoat', 'directional-shadow', 'environment-ibl', 'distance-fog', 'height-fog', 'material-variants', 'gltf', 'gpu-driven', '2d', 'gui', 'spine', 'tilemap']) {
   if (!allCapabilities.has(capability)) violations.push(`stable capability has no manifest coverage: ${capability}`);
 }
 
-for (const config of ['engine/rollup.config.js', 'extensions/rollup.config.js', 'editor/rollup.config.js', 'examples/rollup.config.js', 'games/rollup.config.js']) {
+for (const config of ['engine/rollup.config.js', 'extensions/rollup.config.js', 'editor/rollup.config.js', 'examples/rollup.config.js', 'games/rollup.config.js'].filter(selectedPath)) {
   requireSharedBuildImport(config);
 }
-for (const config of ['examples/rollup.config.js', 'games/rollup.config.js']) {
+for (const config of ['examples/rollup.config.js', 'games/rollup.config.js'].filter(selectedPath)) {
   requireSharedBuildImport(config, 'loadContentManifest');
   forbidCallIdentifiers(config, new Set(['readdirSync', 'existsSync']));
 }
@@ -53,7 +57,7 @@ for (const path of [
   'review/baselines/render-pixels-fog.json',
 ]) requireFile(path);
 
-for (const path of walkSources(['engine/src', 'extensions/src', 'editor/src'])) {
+for (const path of walkSources(['engine/src', 'extensions/src', 'editor/src'].filter(selectedPath))) {
   const value = source(path);
   for (const match of value.matchAll(/docsPath:\s*['"]([^'"]+)['"]/g)) requireFile(`docs/api/${match[1]}.md`);
 }
@@ -97,7 +101,7 @@ for (const token of ['distance / height Fog', '`fog`', 'Basic/PBR/Blinn/Instance
   if (!source('docs/for-ai/capability-coverage.md').includes(token)) violations.push(`Fog capability coverage misses ${token}`);
 }
 for (const scenario of matrix.requiredScenarios ?? []) {
-  if (scenario.startsWith('editor:')) continue;
+  if (scenario.startsWith('editor:') || (gateScope === 'engine' && scenario.startsWith('game:'))) continue;
   const [kind, id] = scenario.split(':');
   const manifest = manifests.find(item => item.kind === `${kind}s`);
   if (!manifest?.entries.some(entry => entry.id === id)) violations.push(`release scenario is absent from manifest: ${scenario}`);

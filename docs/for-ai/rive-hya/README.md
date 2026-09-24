@@ -1,5 +1,10 @@
 # Rive → HYA full-fidelity contracts
 
+> 历史研发资料：Rive 实现、转换工具、素材与示例已移至 `feature/rive-development` 分支。
+> 0.1.1 候选不提供 Rive 导入或播放能力。本文中的 Rive 命令和实现路径仅适用于该研发分支。
+> 当前分支保留 census 与闭包禁止清单，供来源无关 HYA 契约测试及安全检查使用。
+> 参见 [ADR 0104](../adr/0104-rive-development-branch.md)。
+
 本目录冻结 M07 的 Rive 兼容分母。它描述的是 build-time `.riv` 导入与来源无关 HYA 能力，不是把 Rive runtime 加入 HaiYue 页面播放闭包。
 
 ## 阅读顺序
@@ -16,7 +21,7 @@
 
 可执行视图：`examples/rive-feature-corpus` 把完整 1317 条 census 投影成可搜索页面；`examples/rive-hya-compare` 在右侧运行固定 hash 的官方 WebGL2 oracle，并只在左侧输入的 HYA 与 conversion report 同时绑定当前 RIV/HYA SHA-256 后才显示 HaiYue WebGPU 结果。两者的数据均由 `npm run rive:examples:data` 从本目录 census 与正式 corpus manifest 生成。
 
-`tools/` 只保存 census 的可复现生成器；生成结果本身受兼容 tuple 和 source digest 约束。
+census 的可复现生成器保留在 `feature/rive-development` 分支的 `tools/` 目录；此处仅保留历史说明与生成结果，后者受兼容 tuple 和 source digest 约束。
 
 ## 冻结结论
 

@@ -2,7 +2,15 @@
 
 ## Unreleased
 
-- 新增 `@haiyue/extensions/controls` 虚拟摇杆：固定/浮动中心、区域命中、距离与死区、逐帧事件、2D/3D Entity 移动与朝向、Engine GUI 及完整输入清理；提供 Virtual Joystick 示例。此新增稳定入口为后续 minor 的本地开发候选，不发布为 0.1.x patch。
+## 0.2.0 (候选，未发布)
+
+- Engine 发布演练、CI 初始化、归档与验收器统一为四个 npm 包和 smoke/full 示例；诊断灯光与正式证据分离，独立校验候选命令、包哈希和完整产物。
+
+- 0.2.0 发布资格新增 macOS 14+ Chrome/Metal 路径，与 Windows Chrome+Edge/独显路径二选一；正式灯光证据绑定干净提交与真实设备。修复灯光采样容量统计、Animation2D 辅助 pass 的相机反射可见性和旧测试数据布局；Shader 成本按能力重新评审。
+
+- 当前候选为 **0.2.0**，尚未发布。用户已确认音频混音、多玩家输入、字体、动画交互和虚拟摇杆均进入本次范围；见 [0.2.0 候选说明](docs/engine-guide/release-notes-0.2.0.md)。
+- 纳入 experimental `OwnerSafeAudioMixer`、`BrowserMultiplayerInput`，stable `GuiFontOptions`、`AnimationTextStyleRun` 与动画 `InteractionRuntime` 相关契约；按 ADR 0106 评审 API 基线与消费端预算。
+- 新增 `@haiyue/extensions/controls` 虚拟摇杆：固定/浮动中心、区域命中、距离与死区、逐帧事件、2D/3D Entity 移动与朝向、Engine GUI 及完整输入清理；提供 Virtual Joystick 示例。本次以 0.2.0 minor 候选纳入发布。
 
 - 0.1 首发正确性矩阵收敛为 Windows 10 22H2+ Chrome/Edge 与真实 GeForce/Radeon RX 独显；取消 Apple/Windows 集显的独立 required handoff，并将 Chrome/macOS 调整为 extended。软件与远程虚拟 adapter 继续禁止。
 - 将 `@haiyue/extensions` 纳入公共 npm 包；在首批 `/animation3d`、`/gltf`、`/gltf-animation3d` 后，经 feature-freeze 漏审纠偏将 `/animation`、`/hya-state-machine`、`/spine`、`/tilemap`、`/canvas-text`、`/tween`、`/grid` 转正。glTF/Spine worker transport 与 parser 底层分别保留在 `/experimental/gltf-worker`、`/experimental/spine-worker`。

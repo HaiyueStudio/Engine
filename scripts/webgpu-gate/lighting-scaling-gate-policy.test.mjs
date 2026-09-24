@@ -47,13 +47,14 @@ test('lighting scaling gate remains in slow and full release paths', () => {
     /npm run verify:lighting-scaling/,
   );
   assert.match(slowChecks, /\['run', 'verify:render'\]/);
+  assert.match(packageJson.scripts['verify:engine-render'], /npm run verify:lighting-scaling/);
   assert.match(
     packageJson.scripts?.['release:check'] ?? '',
     /scripts\/release-gate\.mjs --global/,
   );
   assert.match(
     releasePolicy,
-    /Object\.freeze\(\['run', 'check:slow', '--', '--content-tier=full'\]\)/,
+    /Object\.freeze\(\['run', 'check:engine:slow', '--', '--content-tier=full'\]\)/,
   );
 });
 

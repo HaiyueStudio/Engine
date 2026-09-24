@@ -1184,5 +1184,5 @@ export const BUILTIN_POSTPROCESS_SHADER_ARTIFACT = {
       "canonicalHash": "ed09d346294b558a374c0e803d7caec7f7c977f5f9756998a74c1c41042635de"
     }
   },
-  "artifactHash": "dde4eed317ff3c19f7c664498c2f35674a685676084a86c3ef658656be352454"
+  "artifactHash": "7e24253794246cc1ef7406eeac34b47bbe8413ebae1de3558fb6a5e7ecaab9a9"
 } as const satisfies PrecompiledShaderArtifactV2;

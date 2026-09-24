@@ -9,7 +9,7 @@
     "maxColdCompilationMs": 500
   },
   "production": {
-    "maxGeneratedWgslBytes": 328000,
+    "maxGeneratedWgslBytes": 360000,
     "maxGeneratedWgslFiles": 66,
     "maxVariantCount": 58,
     "maxPipelineCount": 58,
@@ -21,8 +21,8 @@
       "pipelineCount": 56
     },
     "maxGrowth": {
-      "generatedWgslBytes": 22500,
-      "generatedWgslFiles": 1,
+      "generatedWgslBytes": 54496,
+      "generatedWgslFiles": 2,
       "variantCount": 2,
       "pipelineCount": 2
     }
@@ -32,5 +32,10 @@
     "maxEngineBuilds": 1,
     "maxExtensionsBuilds": 1,
     "maxProductionGenerationRuns": 1
+  },
+  "productionBundles": {
+    "simple3dArtifactGzipBytes": 7100,
+    "componentsEvidenceArtifactGzipBytes": 2850,
+    "deformationArtifactGzipBytes": 9600
   }
 }

@@ -58,6 +58,7 @@ test('stage 9 reflection preserves multi-group, vertex and uniform ABI boundarie
   }).artifact.artifactHash, auxiliaryContract.artifact.simple3dHash);
   assert.deepEqual(simple3d['normal-material'].renderTargets.map(target => target.formatClass), ['color', 'optional-linear-depth-r32float']);
   assert.equal(components2d['animation-2d'].bindGroups.length, 4);
+  assert.deepEqual(components2d['animation-2d'].bindGroups[0].bindings[0].visibility, ['vertex', 'fragment']);
   assert.doesNotMatch(components2d['animation-2d'].code, /color\.rgb\s*=/);
   assert.match(components2d['animation-2d'].code, /color = vec4<f32>\(mix\(color\.rgb, tinted/);
   assert.match(components2d['animation-2d'].code, /fn fs_main_premultiplied_texture/);

@@ -6,23 +6,24 @@ import { runChromeWebGpuFixture } from './webgpu-gate/chrome-runner.mjs';
 import {
   compareVisualFingerprint,
   DEFAULT_SCREENSHOT_BUDGET,
-  PRODUCT_SCREENSHOT_CASES,
+  selectProductScreenshotCases,
 } from './visual-regression/product-screenshot-policy.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const update = process.env.UPDATE_PRODUCT_SCREENSHOT_BASELINES === '1';
 
-for (const definition of PRODUCT_SCREENSHOT_CASES) {
+const scope = process.argv.includes('--engine') ? 'engine' : 'studio';
+for (const definition of selectProductScreenshotCases(scope)) {
   console.log(`[product-screenshot] ${definition.id}`);
   const result = await runChromeWebGpuFixture({
     root,
     fixture: definition.fixture,
     query: definition.query,
     timeoutMs: 90_000,
-    mounts: [{
+    mounts: scope === 'studio' ? [{
       prefix: '/games',
       directory: resolveStudioRepositoryPath('Games', 'games'),
-    }],
+    }] : [],
     visualCapture: { viewportWidth: 960, viewportHeight: 540, sampleWidth: 24, sampleHeight: 14 },
   });
   const capture = result.visualCapture;

@@ -34,8 +34,9 @@ export function resolveContentTier(argv) {
   return tier;
 }
 
-export function loadContentManifests(root) {
-  return MANIFEST_SOURCES.map(source => ({
+export function loadContentManifests(root, scope = 'studio') {
+  if (!['engine', 'studio'].includes(scope)) throw new Error(`Unknown content scope: ${scope}`);
+  return MANIFEST_SOURCES.filter(source => scope === 'studio' || source.repository === 'Engine').map(source => ({
     ...source,
     manifest: JSON.parse(readFileSync(resolve(
       source.repository === 'Games' ? resolve(root, '../Games') : root,

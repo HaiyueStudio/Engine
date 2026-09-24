@@ -69,9 +69,9 @@ import {
   resolveRealRendererStructuralBudgets,
 } from './real-renderer-budgets.mjs';
 
-const editorTestingModuleUrl = pathToFileURL(
-  resolveStudioRepositoryPath('Editor', 'editor/dist-test/testing.js'),
-).href;
+function editorTestingModuleUrl() {
+  return pathToFileURL(resolveStudioRepositoryPath('Editor', 'editor/dist-test/testing.js')).href;
+}
 
 // glTF's URL adapter uses the browser location only to resolve relative URLs.
 globalThis.window ??= { location: { href: 'http://benchmark.haiyue.local/' } };
@@ -89,7 +89,8 @@ const SPINE_SAMPLE_WINDOW_ITERATIONS = 1_000;
 class BenchA extends Component { static UniqueCheckType = UniqueCheckType.SAME | UniqueCheckType.REPLACE; }
 class BenchB extends Component { static UniqueCheckType = UniqueCheckType.SAME | UniqueCheckType.REPLACE; }
 
-export function createBenchmarkCases(profile = 'ci') {
+export function createBenchmarkCases(profile = 'ci', scope = 'studio') {
+  if (!['engine', 'studio'].includes(scope)) throw new Error(`Unknown benchmark scope: ${scope}`);
   const scale = profile === 'full' ? 4 : 1;
   const realRendererEntities = profile === 'full' ? 1_000 : 256;
   return [
@@ -135,8 +136,10 @@ export function createBenchmarkCases(profile = 'ci') {
     rendererObjectTableDirtyRangeCase(10_000, 0.1),
     rendererObjectTableDirtyRangeCase(10_000, 1),
     renderObjectChurnCase(10_000 * scale),
-    editorPlayRestartImportChurnCase(500 * scale),
-    editorExportBinaryWriterCase(4 * 1024 * 1024 * scale),
+    ...(scope === 'studio' ? [
+      editorPlayRestartImportChurnCase(500 * scale),
+      editorExportBinaryWriterCase(4 * 1024 * 1024 * scale),
+    ] : []),
   ];
 }
 
@@ -153,7 +156,7 @@ function editorExportBinaryWriterCase(byteCount) {
       peakWorkingBytes: { max: byteCount * 5 },
     },
     async setup() {
-      const { BinaryWriter } = await import(editorTestingModuleUrl);
+      const { BinaryWriter } = await import(editorTestingModuleUrl());
       return { BinaryWriter, source: new Float32Array(1024), metrics: null };
     },
     run(state) {
@@ -981,9 +984,7 @@ function render3dFullPrepareCase(entityCount, viewCount) {
       state.endViewBaseline = state.counters.endViews;
     },
     run(state) {
-      state.world.frameData.begin(state.world, state.engine, ++state.frameId, 16);
-      state.render3d.record(state.world, state.context);
-      state.measuredFrames++;
+      recordRender3dPrepareFrame(state);
       return state.render3d.lastVisibleCount + state.counters.drawCalls;
     },
     teardown(state) {
@@ -1030,9 +1031,7 @@ function render3dGpuMultiViewPrepareCase(entityCount, viewCount) {
       state.viewIndirectUploadBaseline = getRender3dPrepareViewIndirectWriteCount(state.device);
     },
     run(state) {
-      state.world.frameData.begin(state.world, state.engine, ++state.frameId, 16);
-      state.render3d.record(state.world, state.context);
-      state.measuredFrames++;
+      recordRender3dPrepareFrame(state);
       return state.render3d.lastGpuDrivenBatchCount + state.counters.drawCalls;
     },
     teardown(state) {
@@ -1085,9 +1084,7 @@ function render3dSpatialIncrementalCase(entityCount, dynamicRatio, viewCount) {
         const transform = state.meshTransforms[item];
         transform.setTranslation(transform.localMatrix[12] + 0.001, transform.localMatrix[13], transform.localMatrix[14]);
       }
-      state.world.frameData.begin(state.world, state.engine, ++state.frameId, 16);
-      state.render3d.record(state.world, state.context);
-      state.measuredFrames++;
+      recordRender3dPrepareFrame(state);
       return state.render3d.lastSpatialCandidateCount + state.render3d.lastVisibleCount + state.motionTick;
     },
     teardown(state) {
@@ -1137,9 +1134,7 @@ function render3dShadowSpatialCase(entityCount, viewCount) {
       state.fullScanBaseline = service.meshFullScanCount;
     },
     run(state) {
-      state.world.frameData.begin(state.world, state.engine, ++state.frameId, 16);
-      state.render3d.record(state.world, state.context);
-      state.measuredFrames++;
+      recordRender3dPrepareFrame(state);
       return state.render3d.lastSpatialCandidateCount + state.render3d.lastVisibleCount;
     },
     teardown(state) {
@@ -1272,10 +1267,7 @@ function createRender3dFullPrepareState(
   if (phaseTimings.enabled) installRender3dPhaseTiming(render3d, phaseTimings);
   world.addSystem(render3d);
 
-  const context = {
-    device,
-    encoder: {},
-    passEncoder: {},
+  const contextOptions = {
     descriptor: target.getRenderPassDescriptor(),
     loadOp: 'clear',
     frameData: world.frameData,
@@ -1288,7 +1280,7 @@ function createRender3dFullPrepareState(
     device,
     render3d,
     arena,
-    context,
+    contextOptions,
     counters,
     entityCount,
     viewCount,
@@ -1311,6 +1303,16 @@ function createRender3dFullPrepareState(
     globalInstanceUploadBaseline: 0,
     viewIndirectUploadBaseline: 0,
   };
+}
+
+function recordRender3dPrepareFrame(state) {
+  state.world.frameData.begin(state.world, state.engine, ++state.frameId, 16);
+  // Encoder-scoped resource dependencies and submit callbacks belong to one
+  // frame. Reusing an encoder across samples conflates independent GPU work.
+  const context = createRenderFrameContext(state.engine, state.contextOptions);
+  state.render3d.record(state.world, context);
+  context.submit();
+  state.measuredFrames++;
 }
 
 function render3dFullPrepareMetrics(state) {
@@ -1446,7 +1448,7 @@ function render3dGpuMultiViewPrepareMetrics(state) {
 
 function createRender3dPrepareDevice(indirect = false) {
   return createAuditGpuDevice({
-    capabilities: ['buffer', 'bind-group-layout', 'bind-group', 'queue'],
+    capabilities: composeGpuMockCapabilities(GPU_MOCK_CAPABILITIES.RENDER, indirect ? GPU_MOCK_CAPABILITIES.COMPUTE : []),
     features: indirect ? ['indirect-first-instance'] : [],
   });
 }
@@ -1996,7 +1998,7 @@ function createTinyKtx2Payload() {
 }
 
 async function createEditorChurnState() {
-  const { PlaySession, RuntimeOwnershipScope } = await import(editorTestingModuleUrl);
+  const { PlaySession, RuntimeOwnershipScope } = await import(editorTestingModuleUrl());
   const originalWindow = globalThis.window;
   const listeners = new Map();
   globalThis.window = {

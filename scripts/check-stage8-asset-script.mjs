@@ -1,7 +1,11 @@
+import { includesGatePath } from './engine-release-policy.mjs';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolveStudioRepositoryPath } from './studio-repository-layout.mjs';
+
+const gateScope = process.argv.includes('--engine') ? 'engine' : 'studio';
+const selectedPath = path => includesGatePath(path, gateScope);
 
 const root = resolve(import.meta.dirname, '..');
 const checkerPath = fileURLToPath(import.meta.url);
@@ -57,29 +61,32 @@ requirePatterns('script isolation and errors', read('engine/src/components/Scrip
   "'trusted-project'", "'disable-script'", 'ComponentScriptFailed', 'ScriptExecutionScope', 'sourceMap', 'restart()', '_disposeScope()',
 ]);
 requirePatterns('script hot reload notification', read('engine/src/script/ScriptResource.ts'), ['onChange(', '_version++']);
-requirePatterns('editor contract hints', read('editor/src/script/scriptAuthoringText.ts'), ['SCRIPT_RUNTIME_COMPLETION_PATHS']);
-requirePatterns('export declaration generation', read('editor/src/export/projectTemplate.ts'), [
-  'generateScriptRuntimeDeclarations', "'src/haiyue-script-runtime.d.ts'",
-]);
-requirePatterns('editor runtime capabilities', read('editor/src/player.ts'), [
-  'enableTrustedProject', "capabilities: ['read', 'scene', 'asset', 'input', 'physics', 'debug']", 'onError:', "errorPolicy: 'disable-script'",
-]);
-for (const path of [
-  'editor/scene-examples/2048-starter.scene.json',
-  'editor/scene-examples/minesweeper-starter.scene.json',
-  'editor/scene-examples/hex-minesweeper-starter.scene.json',
-  'editor/scene-examples/snake-starter.scene.json',
-  'editor/scene-examples/billiards-3d-import.scene.json',
-  'editor/scene-examples/rubiks-cube-3d-import.scene.json',
-  'games/pad-simulator/scenes/2048-starter.scene.json',
-  'games/pad-simulator/scenes/minesweeper-starter.scene.json',
-  'games/pad-simulator/scenes/hex-minesweeper-starter.scene.json',
-  'games/pad-simulator/scenes/snake-starter.scene.json',
-  'games/pad-simulator/scenes/billiards-3d-import.scene.json',
-]) {
-  const source = read(path);
-  requirePatterns('owned scene-script listeners', source, ['api.debug.listen', 'api.debug.addDisposer']);
-  forbidPatterns('unowned scene-script listeners', source, ['addEventListener(']);
+if (gateScope === 'studio') {
+  requirePatterns('editor contract hints', read('editor/src/script/scriptAuthoringText.ts'), ['SCRIPT_RUNTIME_COMPLETION_PATHS']);
+  requirePatterns('export declaration generation', read('editor/src/export/projectTemplate.ts'), [
+    'generateScriptRuntimeDeclarations', "'src/haiyue-script-runtime.d.ts'",
+  ]);
+  requirePatterns('editor runtime capabilities', read('editor/src/player.ts'), [
+    'enableTrustedProject', "capabilities: ['read', 'scene', 'asset', 'input', 'physics', 'debug']", 'onError:', "errorPolicy: 'disable-script'",
+  ]);
+  for (const path of [
+    'editor/scene-examples/2048-starter.scene.json',
+    'editor/scene-examples/minesweeper-starter.scene.json',
+    'editor/scene-examples/hex-minesweeper-starter.scene.json',
+    'editor/scene-examples/snake-starter.scene.json',
+    'editor/scene-examples/billiards-3d-import.scene.json',
+    'editor/scene-examples/rubiks-cube-3d-import.scene.json',
+    'games/pad-simulator/scenes/2048-starter.scene.json',
+    'games/pad-simulator/scenes/minesweeper-starter.scene.json',
+    'games/pad-simulator/scenes/hex-minesweeper-starter.scene.json',
+    'games/pad-simulator/scenes/snake-starter.scene.json',
+    'games/pad-simulator/scenes/billiards-3d-import.scene.json',
+  ]) {
+    const source = read(path);
+    requirePatterns('owned scene-script listeners', source, ['api.debug.listen', 'api.debug.addDisposer']);
+    forbidPatterns('unowned scene-script listeners', source, ['addEventListener(']);
+  }
+
 }
 
 requirePatterns('parser contract tests', read('extensions/test/asset-parser-contract.test.mjs'), [
@@ -141,7 +148,7 @@ function forbidPatterns(label, source, patterns) {
 }
 function collectText(paths) {
   let result = '';
-  for (const path of paths) walk(resolveLogicalPath(path));
+  for (const path of paths.filter(selectedPath)) walk(resolveLogicalPath(path));
   return result;
   function walk(absolute) {
     if (!existsSync(absolute)) return;
@@ -161,7 +168,7 @@ function collectText(paths) {
 }
 
 function validateSerializedScripts(paths) {
-  for (const directory of paths) {
+  for (const directory of paths.filter(selectedPath)) {
     const absoluteDirectory = resolveLogicalPath(directory);
     for (const name of readdirSync(absoluteDirectory)) {
       if (!name.endsWith('.json')) continue;

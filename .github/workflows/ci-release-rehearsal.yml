@@ -1,0 +1,39 @@
+name: Engine No-publish Rehearsal
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rehearsal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      BENCHMARK_PROFILE: ci
+      CPU_BENCHMARK_RUNNER_PROFILE: github-hosted-ubuntu-latest
+      WEBGPU_ANGLE_BACKEND: swiftshader
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: node scripts/release-ci-bootstrap.mjs
+      - run: npm run check:engine:slow -- --content-tier=full
+      - run: node scripts/release-rehearsal.mjs --worker
+      - run: node scripts/release-rehearsal-policy.mjs --bundle artifacts/release/rehearsal
+      - name: Upload rehearsal, provenance, SBOM and raw evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: engine-release-rehearsal-${{ github.sha }}
+          path: |
+            artifacts/release/rehearsal/
+            artifacts/release/rehearsal-failure/
+            artifacts/webgpu/
+          if-no-files-found: warn

@@ -1,5 +1,7 @@
 # Census tools
 
+> 工具已移至 `feature/rive-development` 分支；以下为历史运行说明，当前候选不包含这些脚本。
+
 `generate-census.mjs` 从 G01 冻结的官方 `rive-runtime` source tree 读取：
 
 - `include/rive/generated/core_registry.hpp` 中可实例化 object type 与 property dispatch；

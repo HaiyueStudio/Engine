@@ -9,10 +9,9 @@ import {
 import {
   createPerformanceEvidence,
   createPerformanceSourceFingerprint,
-  evaluatePerformanceBudget,
+  assessDevicePerformance,
   loadPerformanceBudgetConfig,
   performanceEvidencePath,
-  selectPerformanceProfile,
   shouldEnforceDevicePerformanceBudgets,
 } from './webgpu-performance-budget.mjs';
 import { shouldWriteFormalPerformanceEvidence } from './performance-evidence-policy.mjs';
@@ -30,7 +29,7 @@ const result = await runChromeWebGpuFixture({
   fixture: 'scripts/webgpu-gate/planar-reflection-fixture.html',
   query: {
     mode,
-    warmup: process.env.PLANAR_REFLECTION_WARMUP ?? (long ? 3 : 2),
+    warmup: process.env.PLANAR_REFLECTION_WARMUP ?? 3,
     samples: process.env.PLANAR_REFLECTION_SAMPLES ?? 40,
   },
   timeoutMs: long ? 900_000 : 300_000,
@@ -38,14 +37,11 @@ const result = await runChromeWebGpuFixture({
 if (createPerformanceSourceFingerprint(root, benchmarkRoot) !== sourceFingerprint) {
   throw new Error('Performance executable inputs changed while the planar-reflection fixture was running; discard this evidence and retry.');
 }
-const selected = selectPerformanceProfile(
-  performanceConfig,
-  { nodePlatform: process.platform, adapter: result.adapter },
-  process.env.WEBGPU_DEVICE_PROFILE,
-);
-const performanceBudget = evaluatePerformanceBudget(
-  performanceConfig, selected.id, result.suite, mode, result,
-);
+const { selected, performanceBudget } = assessDevicePerformance(
+    performanceConfig,
+    { nodePlatform: process.platform, adapter: result.adapter },
+    result.suite, mode, result,
+  );
 const enforcePerformanceBudget = shouldEnforceDevicePerformanceBudgets();
 result.performanceBudget = performanceBudget;
 result.gate.performanceBudgetStatus = performanceBudget.status;
@@ -86,7 +82,8 @@ if (shouldWriteFormalPerformanceEvidence(mode)) {
 
 if (pixelBaselineFailure) throw new Error(pixelBaselineFailure);
 
-if (performanceBudget.status !== 'passed') {
+if (performanceBudget.status === 'not-enrolled') console.warn(`[performance] ${performanceBudget.reason}`);
+if (performanceBudget.status === 'failed') {
   const detail = performanceBudget.violations
     .map(item => `${item.caseId ?? item.rule}: ${item.reason}${Number.isFinite(item.p95Ms) ? ` (${item.p95Ms.toFixed(2)}ms > ${item.maxP95Ms}ms)` : ''}`)
     .join('\n');

@@ -33,7 +33,9 @@ test('shader cost growth budget rejects small absolute values that grow too quic
     budget.production.growthBaseline.generatedWgslFiles
     + budget.production.maxGrowth.generatedWgslFiles
     + 1;
-  const result = evaluateShaderCostBudget(report, budget);
+  const growthOnlyBudget = structuredClone(budget);
+  growthOnlyBudget.production.maxGeneratedWgslFiles = report.production.generatedWgslFiles + 1;
+  const result = evaluateShaderCostBudget(report, growthOnlyBudget);
   assert.equal(result.status, 'failed');
   assert.deepEqual(
     result.violations.map(item => item.metric),
@@ -169,3 +171,12 @@ function fixtureReport() {
     },
   };
 }
+
+test('production bundle admission fails closed and preserves byte limits', async () => {
+  const { validateProductionBundleCost } = await import('../scripts/shader-cost-policy.mjs');
+  const budget = { productionBundles: { sample: 100 } };
+  assert.equal(validateProductionBundleCost('sample', 100, budget), null);
+  for (const actual of [101, NaN, undefined, -1]) assert.ok(validateProductionBundleCost('sample', actual, budget));
+  assert.ok(validateProductionBundleCost('unknown', 1, budget));
+  assert.ok(validateProductionBundleCost('sample', 1, { productionBundles: { sample: NaN } }));
+});

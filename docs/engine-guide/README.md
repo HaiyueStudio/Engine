@@ -32,6 +32,7 @@
 - [3D 物理与 Rapier adapter](./physics-3d.md)
 - [游戏存档](./game-saves.md)
 - [Haiyue 0.1.0 首发候选说明](./release-notes-0.1.0.md)
+- [Haiyue 0.2.0 发布候选说明](./release-notes-0.2.0.md)
 
 ## 可运行示例
 

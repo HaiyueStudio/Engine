@@ -6,7 +6,6 @@ import { npmArgs, npmCommand } from './npm-process.mjs';
 import { requireStudioRepository } from './studio-repository-layout.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const gamesRoot = requireStudioRepository('Games').root;
 const targets = process.argv.slice(2);
 
 if (targets.length === 0) {
@@ -33,9 +32,9 @@ for (const target of targets) {
     : kind === 'game'
       ? {
           kind,
-          root: gamesRoot,
+          root: requireStudioRepository('Games').root,
           directory: 'games',
-          manifestDirectory: resolve(gamesRoot, 'games'),
+          manifestDirectory: resolve(requireStudioRepository('Games').root, 'games'),
           npmArguments: ['run', 'build'],
           filter: 'GAME_FILTER',
           manifestKind: 'games',
