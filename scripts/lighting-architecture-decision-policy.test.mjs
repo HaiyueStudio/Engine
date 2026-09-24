@@ -1,16 +1,15 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+import { loadLightingDecisionEvidence } from './lighting-decision-evidence.mjs';
 import { evaluateLightingArchitectureDecision } from './lighting-architecture-decision-policy.mjs';
 
 const policy = JSON.parse(await readFile(
   new URL('../config/lighting-architecture-policy.json', import.meta.url),
   'utf8',
 ));
-const currentLightingEvidence = JSON.parse(await readFile(
-  new URL('../artifacts/webgpu/lighting-scaling.json', import.meta.url),
-  'utf8',
-));
+const currentLightingEvidence = loadLightingDecisionEvidence(fileURLToPath(new URL('../', import.meta.url)));
 
 test('current 128-light fixture observes the cap but does not authorize Forward+', () => {
   const result = evaluateLightingArchitectureDecision(policy, {

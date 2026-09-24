@@ -136,8 +136,9 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
   let stepJitter = fract(0.754877666 * f32(aoPixel(input.uv).x) + 0.569840296 * f32(aoPixel(input.uv).y));
   let viewDirection = normalize(-center);
   var integratedVisibility = 0.0;
+  // Exit bounded tails instead of continuing nested loops (native Metal portability).
   for (var directionIndex = 0; directionIndex < 5; directionIndex += 1) {
-    if (directionIndex >= directionCount) { continue; }
+    if (directionIndex >= directionCount) { break; }
     let angle = f32(directionIndex) * AO_PI / f32(directionCount) + rotation;
     let sampleDirection = vec3<f32>(cos(angle), sin(angle), 0.0);
     let sliceBitangentRaw = cross(sampleDirection, viewDirection);
@@ -152,7 +153,7 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
     let initialHorizon = dot(viewDirection, tangentToNormal);
     var horizons = vec2<f32>(initialHorizon, -initialHorizon);
     for (var stepIndex = 0; stepIndex < 11; stepIndex += 1) {
-      if (stepIndex >= stepCount) { continue; }
+      if (stepIndex >= stepCount) { break; }
       let stepFraction = (f32(stepIndex) + 1.0 + stepJitter) / f32(stepCount);
       let sampleDistance = stepFraction * stepFraction * radiusView;
       let sampleOffset = sampleDirection * sampleDistance;

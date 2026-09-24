@@ -11,14 +11,14 @@
     "front-visible": {
       "width": 320,
       "height": 192,
-      "hash": "99ef2630",
+      "hash": "de4f2eaa",
       "nonBlackPixels": 8239,
-      "averageLuminance": 11,
+      "averageLuminance": 15,
       "samples": {
         "center": [
-          25,
-          25,
-          25,
+          78,
+          78,
+          78,
           255
         ],
         "leftMirror": [
@@ -62,9 +62,9 @@
     "recursive-deepest-first": {
       "width": 320,
       "height": 192,
-      "hash": "65504c6c",
+      "hash": "14aa4ef0",
       "nonBlackPixels": 10849,
-      "averageLuminance": 11,
+      "averageLuminance": 17,
       "samples": {
         "center": [
           0,
@@ -113,9 +113,9 @@
     "frustum-culled": {
       "width": 320,
       "height": 192,
-      "hash": "5b9850b0",
+      "hash": "3a87feea",
       "nonBlackPixels": 6559,
-      "averageLuminance": 11,
+      "averageLuminance": 13,
       "samples": {
         "center": [
           0,
@@ -164,14 +164,14 @@
     "back-facing": {
       "width": 320,
       "height": 192,
-      "hash": "6c5663e0",
+      "hash": "ae41b472",
       "nonBlackPixels": 8239,
-      "averageLuminance": 11,
+      "averageLuminance": 15,
       "samples": {
         "center": [
-          20,
-          20,
-          20,
+          77,
+          77,
+          77,
           255
         ],
         "leftMirror": [
@@ -212,5 +212,9 @@
         }
       }
     }
+  },
+  "review": {
+    "sourceSha256": "41babb6cfb5473beea232ea34e24209825d0e1e83f3d8af48e9423e5f61fb97a",
+    "reason": "Reviewed four native Metal captures after HDR SceneOutput integration: reflection geometry, visibility/culling and exact mirror statistics preserved; linear-to-display transfer accounts for center luminance changes. Existing tolerances unchanged."
   }
 }

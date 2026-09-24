@@ -1,9 +1,9 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "fixture": "pbr-shadow-ibl-rgba8unorm-96x64",
   "width": 96,
   "height": 64,
-  "hash": "a2ae2374",
+  "hash": "46f70067",
   "spherePixels": 2621,
   "shadowPixels": 325,
   "dielectric": [
@@ -31,10 +31,22 @@
     255
   ],
   "adapter": {
-    "vendor": "nvidia",
-    "architecture": "pascal",
+    "vendor": "amd",
+    "architecture": "rdna-1",
     "device": "",
     "description": ""
   },
-  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36"
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+  "visual": {
+    "width": 96,
+    "height": 64,
+    "encoding": "deflate-rgba8",
+    "rgba": "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"
+  },
+  "provenance": {
+    "review": "review/release-0.2.0-blocker-fixes.md",
+    "legacyHash": "a2ae2374",
+    "candidateSha256": "e71bd0e9143be4b27eba890f85d5835e2c09d3ea7b445e428371c0448f75145a",
+    "note": "Reviewed both spheres and shadow in complete RGBA readback; retained old exact coverage counts and sample expectations with one-channel quantization tolerance."
+  }
 }

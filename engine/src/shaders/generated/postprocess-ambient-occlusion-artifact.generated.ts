@@ -499,10 +499,10 @@ export const AMBIENT_OCCLUSION_SHADER_ARTIFACT = {
           "sourceId": "builtin.gtao",
           "sourceName": "shader-language/builtin-postprocess-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 176
+          "generatedEndLine": 177
         }
       ],
-      "canonicalHash": "17086492831bf71851f8f2488019ca26e7cdcece27598746f7936206c5488b3b"
+      "canonicalHash": "f36a1b4dc4c894394edaa06e39d3a9b5773d59c0652d0e6898057f1cb928110f"
     },
     "ao-denoise": {
       "id": "ao-denoise",
@@ -857,5 +857,5 @@ export const AMBIENT_OCCLUSION_SHADER_ARTIFACT = {
       "canonicalHash": "40c0509f84465c2019798bbf424e9a468b6fb70f79a7f19bb64864637401b95b"
     }
   },
-  "artifactHash": "dde4eed317ff3c19f7c664498c2f35674a685676084a86c3ef658656be352454"
+  "artifactHash": "7e24253794246cc1ef7406eeac34b47bbe8413ebae1de3558fb6a5e7ecaab9a9"
 } as const satisfies PrecompiledShaderArtifactV2;

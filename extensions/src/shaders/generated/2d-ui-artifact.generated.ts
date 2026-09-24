@@ -35,7 +35,8 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
               "id": "frame.camera",
               "binding": 0,
               "visibility": [
-                "vertex"
+                "vertex",
+                "fragment"
               ],
               "layout": {
                 "kind": "buffer",
@@ -406,7 +407,7 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
           "generatedEndLine": 322
         }
       ],
-      "canonicalHash": "7c90563b84f69040b1237f0d7cac8845fb2749cfb55080361ef383298a328e09"
+      "canonicalHash": "352f83931c94e068cd3062ff27498a6d342d27947758c7bb6a578ae43e828fc3"
     },
     "canvas-text-2d": {
       "id": "canvas-text-2d",
@@ -1071,5 +1072,5 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
       "canonicalHash": "4d1ef60104af17bdb6c837bbdb67640c96abf7533f156510de4da5240c8c388e"
     }
   },
-  "artifactHash": "16351e143605d747b237fd98379388007b01b9cb600c3e2395b9ac1aa9a4d4f4"
+  "artifactHash": "13fbee749aa5946580c6c90392b4e2cedc88b288a808a151c8e9bbe297ee9833"
 } as const;

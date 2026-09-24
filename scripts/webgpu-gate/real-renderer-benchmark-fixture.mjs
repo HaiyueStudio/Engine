@@ -2,7 +2,7 @@ const resultNode = document.querySelector('#result');
 const progressNode = document.querySelector('#progress');
 const query = new URLSearchParams(location.search);
 const entityCount = positiveInteger(query.get('entities'), 256);
-const warmup = positiveInteger(query.get('warmup'), 2);
+const warmup = Math.max(3, positiveInteger(query.get('warmup'), 3));
 const samples = positiveInteger(query.get('samples'), 6);
 const gpuSamples = nonNegativeInteger(query.get('gpuSamples'), 4);
 const passKind = query.get('pass') === 'allocation' ? 'allocation' : 'timing';

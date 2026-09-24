@@ -5,12 +5,19 @@
   "drawableCount": 1,
   "vertexCount": 169,
   "textureCount": 1,
+  "maskReferenceCount": 0,
+  "invertedMaskDrawableCount": 0,
+  "additiveDrawableCount": 0,
+  "multiplicativeDrawableCount": 0,
+  "multiplyColorDrawableCount": 0,
+  "screenColorDrawableCount": 0,
+  "multiplyColorDrawableFrameCount": 0,
+  "screenColorDrawableFrameCount": 0,
+  "emptyDrawableCount": 0,
   "unsupportedRuntimeFeatures": [
     "parameterized-input",
     "physics-runtime",
-    "motion-sync",
-    "multiply-screen-color",
-    "culling"
+    "motion-sync"
   ],
   "diagnostics": []
 }

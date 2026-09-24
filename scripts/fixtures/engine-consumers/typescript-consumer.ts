@@ -15,6 +15,20 @@ import { getEngineDiagnosticsSnapshot } from '@haiyue/engine/diagnostics';
 import { Animation3DMixer } from '@haiyue/extensions/animation3d';
 import { createGltfPlugin, type LoadGltfOptions } from '@haiyue/extensions/gltf';
 import { createGltfAnimation3DRuntime } from '@haiyue/extensions/gltf-animation3d';
+import { OwnerSafeAudioMixer, type AudioMixerPlayRequest } from '@haiyue/engine/experimental/audio';
+import { BrowserMultiplayerInput, type MultiplayerInputSnapshot } from '@haiyue/engine/experimental/simulation';
+import type { GuiFontOptions } from '@haiyue/engine/gui';
+import type { AnimationTextStyleRun } from '@haiyue/animation-spec';
+import { InteractionRuntime, type RuntimeInteractionDocument } from '@haiyue/extensions/animation';
+import { VirtualJoystickControls, type VirtualJoystickOptions } from '@haiyue/extensions/controls';
+
+// Check that the admitted 0.2.0 declarations resolve from installed tarballs.
+export type CapabilityContracts = [AudioMixerPlayRequest, MultiplayerInputSnapshot,
+  GuiFontOptions, AnimationTextStyleRun, RuntimeInteractionDocument, VirtualJoystickOptions];
+void OwnerSafeAudioMixer;
+void BrowserMultiplayerInput;
+void InteractionRuntime;
+void VirtualJoystickControls;
 
 const options: HaiyueEngineOptions = { canvas: '#canvas' };
 const tweenOptions: TweenOptions = { duration: 250 };

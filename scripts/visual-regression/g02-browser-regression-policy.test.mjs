@@ -31,16 +31,16 @@ test('first-release Windows browsers support Windows 10 22H2 and newer', () => {
   assert.ok(browsers.every(browser => browser.os === 'Windows 10 22H2+'));
   assert.deepEqual(
     releaseMatrix.browsers.filter(browser => browser.tier === 'required').map(browser => browser.id),
-    ['chrome-windows', 'edge-windows'],
+    ['chrome-macos', 'chrome-windows', 'edge-windows'],
   );
-  assert.equal(releaseMatrix.browsers.find(browser => browser.id === 'chrome-macos')?.tier, 'extended');
+  assert.equal(releaseMatrix.browsers.find(browser => browser.id === 'chrome-macos')?.tier, 'required');
 });
 
-test('first-release hardware matrix requires Windows discrete without integrated GPU handoffs', () => {
+test('release hardware matrix offers native Mac and Windows discrete alternatives', () => {
   const requiredDevices = releaseMatrix.deviceClasses
     .filter(device => device.tier === 'required')
     .map(device => device.id);
-  assert.deepEqual(requiredDevices, ['windows-discrete']);
+  assert.deepEqual(requiredDevices, ['macos-native-metal', 'windows-discrete']);
   assert.ok(!releaseMatrix.deviceClasses.some(device => device.id === 'apple-integrated'));
   assert.ok(!releaseMatrix.deviceClasses.some(device => device.id === 'windows-integrated'));
   assert.match(releaseMatrix.policy, /native hardware WebGPU/u);
@@ -48,6 +48,21 @@ test('first-release hardware matrix requires Windows discrete without integrated
 
 test('G02 candidate policy accepts native browser evidence and explicit required-device handoffs', () => {
   assert.deepEqual(validateG02CandidateReport(candidate(), matrix), []);
+});
+
+test('a complete Mac path qualifies without claiming Windows coverage', () => {
+  const report = candidate();
+  report.qualificationPath = 'macos';
+  report.candidateState = 'all-required-evidence-passed';
+  report.browserMatrix = [{ ...report.browserMatrix[0], id: 'chrome-macos', angleBackend: 'metal', os: 'macOS 26.6.2', adapter: 'AMD Radeon Pro' }];
+  report.deviceMatrix = [{ ...passedDevice('macos-native-metal', ['chrome-macos']), angleBackend: 'metal', os: 'macOS 26.6.2', adapter: 'AMD Radeon Pro' }];
+  for (const entry of [...report.representativeCases, ...report.editorE2E]) entry.browserId = 'chrome-macos';
+  assert.deepEqual(validateG02CandidateReport(report, releaseMatrix, { requireAllDevices: true }), []);
+  report.deviceMatrix[0].angleBackend = 'd3d11';
+  assert.ok(validateG02CandidateReport(report, releaseMatrix).some(error => error.includes('backend does not match')));
+  report.deviceMatrix[0].angleBackend = 'metal';
+  report.qualificationPath = 'windows';
+  assert.ok(validateG02CandidateReport(report, releaseMatrix).some(error => error.includes('required browser ids')));
 });
 
 test('G02 candidate policy rejects software WebGPU, hidden failures and handoffs in final mode', () => {
@@ -95,7 +110,7 @@ test('G02 artifact checks can classify an explicit set of accepted platform outc
   const errors = verifyG02CandidateArtifacts(fileURLToPath(new URL('../..', import.meta.url)), {
     artifactChecks: [{
       path: 'package.json',
-      assertions: [{ path: 'version', oneOf: ['0.1.0', '0.1.1'] }],
+      assertions: [{ path: 'version', oneOf: ['0.2.0'] }],
     }],
   });
   assert.deepEqual(errors, []);

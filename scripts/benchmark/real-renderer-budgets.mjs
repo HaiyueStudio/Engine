@@ -32,18 +32,22 @@ export function resolveRealRendererStructuralBudgets(entityCount, dynamicRatio, 
       : dynamicRatio <= 0.1
         ? interpolateEnrolledEntityBudget(entityCount, 33 * 16, 162 * 16)
         : interpolateEnrolledEntityBudget(entityCount, 257 * 16, 1_000 * 16);
-  const uploadBytes = sceneFrameBytes + legacyUploadBytes + deformationFlagsBytes;
-  const renderPasses = viewCount * 2 + (dynamicRatio > 0 ? 1 : 0);
+  // Normal object records now carry morphWeights and deformationFlags (128 -> 160 bytes).
+  // Material lane 4 of each seven entities is Normal; only changed transforms upload.
+  const normalDeformationBytes = Math.floor((Math.round(entityCount * dynamicRatio) + 2) / 7) * 32;
+  const uploadBytes = sceneFrameBytes + legacyUploadBytes + deformationFlagsBytes + normalDeformationBytes;
+  const renderPasses = viewCount * 3 + (dynamicRatio > 0 ? 1 : 0);
   return Object.freeze({
     mainDraws,
     shadowDraws,
-    totalDraws: mainDraws + shadowDraws,
+    totalDraws: mainDraws + shadowDraws + viewCount,
     uploadCalls,
     uploadBytes,
     uploadBytesBreakdown: Object.freeze({
       sceneFrame: sceneFrameBytes,
       legacyObjectAndUniforms: legacyUploadBytes,
       deformationFlags: deformationFlagsBytes,
+      normalDeformation: normalDeformationBytes,
     }),
     renderPasses,
   });
@@ -67,7 +71,7 @@ export function resolvePlanarReflectionStructuralBudgets(
     ? sourceDrawsPerView
     : Math.ceil(entityCount / 7) + 6;
   const shadowDraws = Math.ceil(entityCount / 1_000);
-  const postProcessDraws = viewCount;
+  const postProcessDraws = viewCount * 2 + reflectionViews;
   const totalDraws =
     sourceDrawsPerView * viewCount
     + reflectionDrawsPerView * reflectionViews
@@ -79,10 +83,15 @@ export function resolvePlanarReflectionStructuralBudgets(
   // previous 200,000-byte envelope absorbed all but 80 bytes of the deliberate
   // Mesh3D/shadow deformation ABI expansion; keep the deterministic boundary
   // exact so another object-record widening is visible.
-  const uploadBytes = Math.ceil(50_000 + entityScale * 150_080);
-  const renderPasses = reflectionViews + viewCount * 2 + 1;
+  const legacyUploadBytes = Math.ceil(50_000 + entityScale * 150_080);
+  // Reflection fixtures animate 10% of objects; Normal's widened record is
+  // shared across views, so charge it once, not once per reflection.
+  const normalDeformationBytes = Math.floor((Math.round(entityCount * 0.1) + 2) / 7) * 32;
+  const uploadBytes = legacyUploadBytes + normalDeformationBytes;
+  const renderPasses = reflectionViews * 2 + viewCount * 3 + 1;
   return Object.freeze({
     reflectionViews,
+    uploadBytesBreakdown: Object.freeze({ legacy: legacyUploadBytes, normalDeformation: normalDeformationBytes }),
     totalDraws,
     uploadCalls,
     uploadBytes,

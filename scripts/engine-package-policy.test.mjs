@@ -11,9 +11,16 @@ import {
 test('package capacity is reviewed capability plus explicit growth reserve', () => {
   const budget = JSON.parse(readFileSync(new URL('../config/engine-package-budget.json', import.meta.url), 'utf8'));
   assert.deepEqual(validateCapabilityPackageBudgetConfig(budget), []);
-  assert.equal(budget.publicPackages['@haiyue/engine'].capacity.reviewed.fileCount, 560);
-  assert.ok(budget.publicPackages['@haiyue/engine'].maxFileCount > 560);
-  assert.ok(budget.publicPackages['@haiyue/animation-spec'].maxFileCount > 31);
+  for (const policy of Object.values(budget.publicPackages)) {
+    assert.ok(policy.maxFileCount > policy.capacity.reviewed.fileCount);
+  }
+  const unreviewedIncrease = structuredClone(budget);
+  unreviewedIncrease.publicPackages['@haiyue/extensions'].maxUnpackedBytes += 1;
+  assert.ok(validateCapabilityPackageBudgetConfig(unreviewedIncrease)
+    .some(error => error.includes('maxUnpackedBytes must equal')));
+  const noReserve = structuredClone(budget);
+  noReserve.publicPackages['@haiyue/animation-spec'].capacity.growthReserve.fileCount = 0;
+  assert.ok(validateCapabilityPackageBudgetConfig(noReserve).some(error => error.includes('maxFileCount must equal')));
 });
 
 test('package globs include nested release files without admitting source maps', () => {

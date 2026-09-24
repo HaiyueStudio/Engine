@@ -984,9 +984,7 @@ function render3dFullPrepareCase(entityCount, viewCount) {
       state.endViewBaseline = state.counters.endViews;
     },
     run(state) {
-      state.world.frameData.begin(state.world, state.engine, ++state.frameId, 16);
-      state.render3d.record(state.world, state.context);
-      state.measuredFrames++;
+      recordRender3dPrepareFrame(state);
       return state.render3d.lastVisibleCount + state.counters.drawCalls;
     },
     teardown(state) {
@@ -1033,9 +1031,7 @@ function render3dGpuMultiViewPrepareCase(entityCount, viewCount) {
       state.viewIndirectUploadBaseline = getRender3dPrepareViewIndirectWriteCount(state.device);
     },
     run(state) {
-      state.world.frameData.begin(state.world, state.engine, ++state.frameId, 16);
-      state.render3d.record(state.world, state.context);
-      state.measuredFrames++;
+      recordRender3dPrepareFrame(state);
       return state.render3d.lastGpuDrivenBatchCount + state.counters.drawCalls;
     },
     teardown(state) {
@@ -1088,9 +1084,7 @@ function render3dSpatialIncrementalCase(entityCount, dynamicRatio, viewCount) {
         const transform = state.meshTransforms[item];
         transform.setTranslation(transform.localMatrix[12] + 0.001, transform.localMatrix[13], transform.localMatrix[14]);
       }
-      state.world.frameData.begin(state.world, state.engine, ++state.frameId, 16);
-      state.render3d.record(state.world, state.context);
-      state.measuredFrames++;
+      recordRender3dPrepareFrame(state);
       return state.render3d.lastSpatialCandidateCount + state.render3d.lastVisibleCount + state.motionTick;
     },
     teardown(state) {
@@ -1140,9 +1134,7 @@ function render3dShadowSpatialCase(entityCount, viewCount) {
       state.fullScanBaseline = service.meshFullScanCount;
     },
     run(state) {
-      state.world.frameData.begin(state.world, state.engine, ++state.frameId, 16);
-      state.render3d.record(state.world, state.context);
-      state.measuredFrames++;
+      recordRender3dPrepareFrame(state);
       return state.render3d.lastSpatialCandidateCount + state.render3d.lastVisibleCount;
     },
     teardown(state) {
@@ -1275,10 +1267,7 @@ function createRender3dFullPrepareState(
   if (phaseTimings.enabled) installRender3dPhaseTiming(render3d, phaseTimings);
   world.addSystem(render3d);
 
-  const context = {
-    device,
-    encoder: {},
-    passEncoder: {},
+  const contextOptions = {
     descriptor: target.getRenderPassDescriptor(),
     loadOp: 'clear',
     frameData: world.frameData,
@@ -1291,7 +1280,7 @@ function createRender3dFullPrepareState(
     device,
     render3d,
     arena,
-    context,
+    contextOptions,
     counters,
     entityCount,
     viewCount,
@@ -1314,6 +1303,16 @@ function createRender3dFullPrepareState(
     globalInstanceUploadBaseline: 0,
     viewIndirectUploadBaseline: 0,
   };
+}
+
+function recordRender3dPrepareFrame(state) {
+  state.world.frameData.begin(state.world, state.engine, ++state.frameId, 16);
+  // Encoder-scoped resource dependencies and submit callbacks belong to one
+  // frame. Reusing an encoder across samples conflates independent GPU work.
+  const context = createRenderFrameContext(state.engine, state.contextOptions);
+  state.render3d.record(state.world, context);
+  context.submit();
+  state.measuredFrames++;
 }
 
 function render3dFullPrepareMetrics(state) {
@@ -1449,7 +1448,7 @@ function render3dGpuMultiViewPrepareMetrics(state) {
 
 function createRender3dPrepareDevice(indirect = false) {
   return createAuditGpuDevice({
-    capabilities: ['buffer', 'bind-group-layout', 'bind-group', 'queue'],
+    capabilities: composeGpuMockCapabilities(GPU_MOCK_CAPABILITIES.RENDER, indirect ? GPU_MOCK_CAPABILITIES.COMPUTE : []),
     features: indirect ? ['indirect-first-instance'] : [],
   });
 }

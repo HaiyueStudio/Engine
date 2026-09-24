@@ -1,7 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { summarizeTimingSamples } from './timing-cohorts.mjs';
+import { summarizeTimingSamples, createTimingVariabilityAnalysis } from './timing-cohorts.mjs';
+
+test('unregistered timing retains stability without claiming a budget pass', () => {
+  const timing = summarizeTimingSamples([4, 4, 4]);
+  const artifact = { results: [{ id: 'native-mac', timing, timingCohorts: Array.from({ length: 3 }, () => ({
+    timing, cpuSubmit: timing, cpuRecord: timing, queueWait: timing,
+  })) }] };
+  const diagnostic = createTimingVariabilityAnalysis(artifact, { status: 'not-enrolled', checks: [{ caseId: 'native-mac', maxP95Ms: null }] });
+  assert.equal(diagnostic.summary.stability, 'stable');
+  assert.equal(diagnostic.summary.conclusion, 'diagnostic-no-enrolled-budget');
+  assert.equal(diagnostic.cases[0].conclusion, 'diagnostic-no-enrolled-budget');
+  assert.equal(diagnostic.cases[0].pooledP95Ms, 4);
+  assert.equal(diagnostic.cases[0].cohortsExceedingBudget, null);
+  const registered = createTimingVariabilityAnalysis(artifact, { checks: [{ caseId: 'native-mac', maxP95Ms: 5 }] });
+  assert.equal(registered.cases[0].conclusion, 'stable-within-budget');
+  const exceeded = createTimingVariabilityAnalysis(artifact, { checks: [{ caseId: 'native-mac', maxP95Ms: 3 }] });
+  assert.equal(exceeded.cases[0].conclusion, 'consistent-workload-cost');
+});
 
 test('nearest-rank timing summary exposes P50/P95/P99 and 1% low FPS', () => {
   const samples = Array.from({ length: 100 }, (_, index) => index + 1);

@@ -1,0 +1,34 @@
+name: Native Lighting Release Evidence
+on:
+  workflow_dispatch:
+    inputs:
+      qualification_path:
+        description: Native release host
+        type: choice
+        required: true
+        default: macos
+        options: [macos, windows]
+permissions:
+  contents: read
+jobs:
+  lighting:
+    runs-on: ${{ fromJSON(inputs.qualification_path == 'macos' && '["self-hosted","haiyue-performance","macOS"]' || '["self-hosted","haiyue-performance","Windows"]') }}
+    timeout-minutes: 20
+    env:
+      WEBGPU_REQUIRE_NATIVE: "1"
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run verify:lighting-scaling:formal
+      - run: npm run lighting:evidence:check
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: lighting-${{ inputs.qualification_path }}-${{ github.sha }}
+          path: artifacts/webgpu/lighting-scaling.json
+          if-no-files-found: error

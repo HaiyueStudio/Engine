@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import {
   runStatisticalBenchmarks,
+  runBenchmarkLifecycleSmoke,
   summarizeBenchmarkCohorts,
 } from './harness.mjs';
 import { createBenchmarkCases } from './suite.mjs';
+import { getAuditGpuDeviceState } from './real-renderer-audit-device.mjs';
 import {
   resolvePlanarReflectionStructuralBudgets,
   resolveRealRendererStructuralBudgets,
@@ -39,7 +41,7 @@ test('lighting scale fixture drives the real renderer and reports the current fo
   });
   const lightingSceneDocument = await parseBilliards3DSceneDocument(
     await readFile(new URL(
-      '../../games/pad-simulator/scenes/billiards-3d-import.scene.json',
+      '../fixtures/lighting-content/pad-simulator/scenes/billiards-3d-import.scene.json',
       import.meta.url,
     )),
   );
@@ -76,13 +78,13 @@ test('lighting scale fixture drives the real renderer and reports the current fo
     assert.equal(metrics.lightingDynamicLocalLightCount, 32);
     assert.equal(metrics.lightingDynamicUpdatesPerFrame, 32);
     assert.equal(metrics.submittedLightCount, 8);
-    assert.equal(metrics.submittedAmbientLightCount, 1);
+    assert.equal(metrics.submittedAmbientLightCount, 0);
     assert.equal(metrics.submittedDirectionalLightCount, 1);
-    assert.equal(metrics.submittedLocalLightCount, 6);
-    assert.equal(metrics.unsubmittedLocalLightCount, 122);
+    assert.equal(metrics.submittedLocalLightCount, 7);
+    assert.equal(metrics.unsubmittedLocalLightCount, 121);
     assert.equal(metrics.unsubmittedTotalLightCount, 122);
     assert.equal(metrics.rendererTotalLightCapacity, 8);
-    assert.equal(metrics.rendererLocalLightCapacity, 6);
+    assert.equal(metrics.rendererLocalLightCapacity, 7);
     assert.equal(metrics.realContentProvenance.scenePath, BILLIARDS_3D_SCENE_PATH);
     assert.equal(
       metrics.realContentProvenance.sceneByteLength,
@@ -162,7 +164,7 @@ test('render3d.real-frame uses real renderers and leaves no steady-state or owne
   const benchmark = createBenchmarkCases('ci')
     .find(candidate => candidate.id === 'render3d.real-frame.256e.100pct.4v');
   assert.ok(benchmark);
-  const [result] = await runStatisticalBenchmarks([benchmark], { warmup: 1, samples: 1, iterations: 1 });
+  const [result] = await runStatisticalBenchmarks([benchmark], { warmup: 3, samples: 1, iterations: 1 });
   assert.ok(result.metrics.bufferUploadsPerFrame > 0);
   assert.ok(result.metrics.uploadBytesPerFrame > 0);
   assert.ok(result.metrics.setupRenderPipelinesCreated >= 6);
@@ -175,7 +177,7 @@ test('render3d.real-frame uses real renderers and leaves no steady-state or owne
     'portable batching and shadow slot ordering must satisfy the structural draw budget',
   );
   assert.ok(result.metrics.bufferUploadsPerFrame <= 128, 'full transform churn must stay within the upload-call budget');
-  assert.equal(result.metrics.renderPassesPerFrame, 9);
+  assert.equal(result.metrics.renderPassesPerFrame, 13);
   assert.ok(result.metrics.pbrLightUniformUploadsPerFrame <= 1);
   assert.ok(result.metrics.pbrEnvironmentUniformUploadsPerFrame <= 1);
   assert.ok(result.metrics.pbrShadowUniformUploadsPerFrame <= 1);
@@ -186,7 +188,7 @@ test('render3d.real-frame uses real renderers and leaves no steady-state or owne
   assert.equal(classification.render.categories.mainScene.passesPerFrame, 4);
   assert.equal(classification.render.categories.shadow.passesPerFrame, 1);
   assert.ok(classification.render.categories.shadow.drawsPerFrame <= budgets.shadowDraws);
-  assert.equal(classification.render.categories.postprocess.passesPerFrame, 4);
+  assert.equal(classification.render.categories.postprocess.passesPerFrame, 8);
   assert.equal(
     sum(Object.values(classification.render.categories), 'draws'),
     classification.render.totals.draws,
@@ -250,7 +252,7 @@ test('render3d.real-frame full profile covers 1000 entities, four dynamic ratios
       resolveRealRendererStructuralBudgets(1_000, 1, 1).totalDraws,
       resolveRealRendererStructuralBudgets(1_000, 1, 4).totalDraws,
     ],
-    [292, 1_165],
+    [293, 1_169],
     'full-dynamic structural budgets require one camera-independent shadow draw',
   );
   assert.deepEqual(
@@ -265,12 +267,12 @@ test('render3d.real-frame full profile covers 1000 entities, four dynamic ratios
     [
       [1, 272],
       [4, 1_088],
-      [12, 4_864],
-      [15, 5_680],
-      [25, 40_176],
-      [28, 40_992],
-      [11, 197_088],
-      [14, 197_904],
+      [12, 4_896],
+      [15, 5_712],
+      [25, 40_624],
+      [28, 41_440],
+      [11, 201_664],
+      [14, 202_480],
     ],
     'structural upload budgets must retain the reviewed cost-model tradeoff',
   );
@@ -288,10 +290,10 @@ test('render3d.real-frame full profile covers 1000 entities, four dynamic ratios
       [4, 1_088],
       [7, 1_088],
       [10, 1_904],
-      [12, 6_784],
-      [15, 7_600],
-      [11, 50_816],
-      [14, 51_632],
+      [12, 6_912],
+      [15, 7_728],
+      [11, 51_968],
+      [14, 52_784],
     ],
     'smoke budgets must retain fixed renderer costs at the enrolled anchor',
   );
@@ -334,7 +336,7 @@ test('render3d.planar-reflection exposes the smoke and complete parameter matric
 
   const benchmark = ciCases.find(candidate => candidate.id === 'render3d.planar-reflection.1000e.2m.3b.4v');
   assert.ok(benchmark);
-  const [result] = await runStatisticalBenchmarks([benchmark], { warmup: 1, samples: 1, iterations: 1 });
+  const [result] = await runStatisticalBenchmarks([benchmark], { warmup: 3, samples: 1, iterations: 1 });
   const budgets = resolvePlanarReflectionStructuralBudgets(1_000, 2, 3, 4);
   assert.ok(result.metrics.mirrorPlannedViews >= 8);
   assert.ok(result.metrics.mirrorExecutedViews > 0);
@@ -366,7 +368,7 @@ test('render3d full-prepare phase diagnostics preserve the 10K four-view contrac
     assert.ok(benchmark);
     const [result] = await runStatisticalBenchmarks(
       [benchmark],
-      { warmup: 1, samples: 1, iterations: 1 },
+      { warmup: 3, samples: 1, iterations: 1 },
     );
 
     assert.equal(result.metrics.sceneExtractionsPerFrame, 1);
@@ -457,11 +459,11 @@ test('planar-reflection structural budgets cap recursive work before exponential
       resolvePlanarReflectionStructuralBudgets(10_000, 4, 5, 1).renderPasses,
       resolvePlanarReflectionStructuralBudgets(10_000, 4, 8, 4).renderPasses,
     ],
-    [4, 25, 19, 25],
+    [6, 45, 36, 45],
   );
   assert.equal(
     resolvePlanarReflectionStructuralBudgets(10_000, 4, 8, 4).uploadBytes,
-    200_080,
+    204_656,
     'the full planar upload envelope must retain the post-deformation-ABI label total',
   );
 });
@@ -473,3 +475,38 @@ function sum(values, key) {
 function sumNamedCounts(counts) {
   return Object.values(counts ?? {}).reduce((total, value) => total + value, 0);
 }
+
+
+test('Engine multiview prepare benchmarks declare render and compute mock capabilities', async () => {
+  const cases = createBenchmarkCases('ci', 'engine').filter(item => item.id.startsWith('render3d.gpu-multiview-prepare.'));
+  assert.ok(cases.length > 0);
+  const results = await runBenchmarkLifecycleSmoke(cases);
+  assert.equal(results.length, cases.length);
+  assert.ok(results.every(result => result.stages.includes('teardown')));
+});
+
+test('prepare benchmark samples own independent encoders and submit every frame', async () => {
+  const cases = createBenchmarkCases('ci', 'engine').filter(item => /^render3d\.(full-prepare|gpu-multiview-prepare|spatial-incremental|shadow-spatial)\./u.test(item.id));
+  assert.ok(cases.length > 0);
+  for (const benchmark of cases) {
+    const state = await benchmark.setup();
+    const audit = getAuditGpuDeviceState(state.device);
+    try {
+      for (let frame = 0; frame < 6; frame++) {
+        if (frame === 3) benchmark.resetMetrics(state);
+        const encoders = audit.getCallCount('device.createCommandEncoder');
+        const submits = audit.getCallCount('queue.submit');
+        await benchmark.run(state);
+        assert.equal(audit.getCallCount('device.createCommandEncoder'), encoders + 1, `${benchmark.id}: fresh encoder`);
+        assert.equal(audit.getCallCount('queue.submit'), submits + 1, `${benchmark.id}: submitted frame`);
+      }
+      const metrics = benchmark.metrics(state);
+      for (const [name, budget] of Object.entries(benchmark.metricBudgets)) {
+        assert.ok(metrics[name] >= budget.min && metrics[name] <= budget.max,
+          `${benchmark.id}.${name}: ${metrics[name]} outside ${budget.min}..${budget.max}`);
+      }
+    } finally {
+      await benchmark.teardown(state);
+    }
+  }
+});

@@ -10,6 +10,10 @@
 
 ## 0.1 首发公共面
 
+当前候选已按 [ADR 0106](adr/0106-release-0.2.0-capability-budgets.md) 扩展为 0.2.0。
+音频混音、多玩家输入保持 experimental；字体、动画交互与虚拟摇杆按各自 stable 入口纳入。
+Engine 仓库独立发布的四个包与 examples 以当前 release manifest 为准；以下保留首发边界背景。
+
 公共 npm 包是 `@haiyue/engine`、`@haiyue/animation-spec`、`@haiyue/extensions`、`@haiyue/shader-language` 与 `@haiyue/ui`。`@haiyue/animation-spec` 的来源无关格式与离线 adapter 为 stable；extensions 按 ADR 0070/0071/0085 承诺已准入的 focused runtime，ray tracing 保持 experimental。UI Web Components 与 Shader Language build-time compiler 使用独立 focused entrypoint；三个编辑器 package 仍为 private workspace。所有入口的能力归属和增长储备由 [`config/public-api-capability-budgets.json`](../../config/public-api-capability-budgets.json) 管理。
 
 0.1.x patch 只接受兼容修复。新增 stable API 需要评审后的 minor；stable 破坏必须显式进入新的 minor、提供迁移说明并完成全仓迁移。Engine experimental 入口可在 minor 破坏，但必须保留 API diff 和 release note。应用、npm 包、HYA core、HYA binary container、AnimationEditor 2D/3D project schema 与 Shader artifact 各自版本化，不能用 npm 版本替代数据格式版本。

@@ -1112,7 +1112,8 @@ function createMetricClassification(state, audit, breakdown, frames) {
 function classifyRenderPhase(descriptor) {
   const label = String(descriptor?.label ?? '').toLowerCase();
   if (
-    label.includes('postprocess')
+    label === 'sceneoutput.renderpass'
+    || label.includes('postprocess')
     || label.includes('render3dsystem.post')
     || label.endsWith('pass.renderpass')
   ) return 'postprocess';

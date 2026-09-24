@@ -131,6 +131,12 @@ test('light GPU records isolate views and same-submit mutations; growth and remo
     renderer.updateCamera(view(i + 200), firstContext); renderer.updateLights(lights(i + 4));
   }
   assert.notEqual(renderer._lightUniforms.buffer, oldBuffer);
+  const newBuffer = renderer._lightUniforms.buffer;
+  assert.ok(writes.some(write => write.buffer === newBuffer && write.offset === firstOffset && write.data[11] === 1),
+    'growth restores the unchanged view record into the new buffer');
+  const afterGrowthWrites = writes.length;
+  renderer.updateCamera(b, context()); renderer.updateLights(lights(2));
+  assert.equal(writes.length, afterGrowthWrites, 'revisiting a restored view must not reupload its unchanged light data');
   assert.equal(oldBuffer.destroyed, false, 'growth retains the encoded generation until submission completes');
   for (const callback of submitted.splice(0)) callback(device.queue);
   await device.queue.onSubmittedWorkDone();

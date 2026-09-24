@@ -2,9 +2,9 @@
 
 最低要求是 WebGPU、ES modules、Workers、AbortController 和现代 TypedArray。正式支持矩阵的唯一机器可读来源是 [`config/release-matrix.json`](../../config/release-matrix.json)。
 
-0.1 required 目标为 Windows 10 22H2 或更高版本上的当前稳定版 Chrome/Edge。所有正式证据必须使用真实硬件 native WebGPU；Windows 硬件边界要求 NVIDIA GeForce 或 AMD Radeon RX 独显，不承诺 Windows 集显兼容性。Chrome/macOS、Safari/macOS、Chrome Android 和 ChromeOS 属 extended；它们会积累兼容性证据，但不属于 0.1 稳定支持承诺。Windows 最低版本决策见 [ADR 0072](../for-ai/adr/0072-windows-10-first-release-support.md)，硬件矩阵见 [ADR 0080](../for-ai/adr/0080-hardware-webgpu-browser-correctness-matrix.md)，Windows-first 浏览器范围见 [ADR 0081](../for-ai/adr/0081-windows-first-0-1-browser-support.md)。
+0.2.0 发布可选择一条完整资格路径：macOS 14+ 上的 Chrome/Metal（Apple Silicon、Intel 或 AMD 原生 GPU），或 Windows 10 22H2+ 上的 Chrome 与 Edge（NVIDIA GeForce 或 AMD Radeon RX 独显）。满足所选路径全部 required 项即可，不要求两种操作系统同时可用。Safari/macOS、Chrome Android 和 ChromeOS 继续属于 extended。决策见 [ADR 0107](../for-ai/adr/0107-native-macos-release-qualification.md)。
 
-真实同步门禁分两层：`check:slow` 在 required Windows Chrome/WebGPU runner 上执行 120 帧短跑，候选版在同一 required Windows 硬件边界执行 1800 帧长期 churn；`macos-15` Chrome/Metal 长跑继续提供 extended 覆盖。所有路径都上传机器可读 artifact，不把软件 adapter、远程虚拟渲染或 backend fallback 冒充硬件 GPU 证据。
+真实同步门禁包含 120 帧短跑和候选版 1800 帧长期 churn，使用所选路径的真实硬件。所有路径都上传机器可读 artifact，不把软件 adapter、远程虚拟渲染或 backend fallback 冒充硬件 GPU 证据。报告标明实测平台，Mac 通过不代表 Windows 已通过。
 
 引擎默认 `batched` profile，不依赖 optional WebGPU feature。`gpu-driven` 和 `diagnostic` 会协商 `indirect-first-instance` / `timestamp-query`，不支持时提供报告并降级。纹理压缩必须准备 BC、ETC2/ASTC 或未压缩 fallback。浏览器缺少 WebGPU 时会产生带恢复建议的 `EngineError`，应用应展示不支持页面而不是继续创建场景。
 

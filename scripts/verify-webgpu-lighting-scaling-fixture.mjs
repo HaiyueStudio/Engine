@@ -1,8 +1,11 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { hostname, release } from 'node:os';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { runChromeWebGpuFixture } from './webgpu-gate/chrome-runner.mjs';
+import { validateLightingReleaseEvidence } from './release-platform-policy.mjs';
 import {
   LIGHTING_SCALING_RESULT_FORMAT,
   LIGHTING_SCALING_RESULT_SCHEMA_VERSION,
@@ -10,16 +13,18 @@ import {
 } from './webgpu-gate/lighting-scaling-contract.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const options = parseArguments(process.argv.slice(2));
 const artifactPath = resolve(
   root,
-  'artifacts/webgpu/lighting-scaling.json',
+  options.evidence === 'formal' ? 'artifacts/webgpu/lighting-scaling.json' : 'artifacts/webgpu/lighting-scaling-diagnostic.json',
 );
 const BILLIARDS_SCENE = Object.freeze({
   sourcePath: 'games/pad-simulator/scenes/billiards-3d-import.scene.json',
   byteLength: 363097,
   sha256: '9e7f393aba90a91a1a84a42be9583ce627bfa2a0ee996c0b843d21f9514ba007',
 });
-const options = parseArguments(process.argv.slice(2));
+const identity = collectIdentity();
+if (options.evidence === 'formal' && identity.dirty) throw new Error('Formal lighting requires a clean revision; use diagnostic mode for a working tree.');
 const result = await runChromeWebGpuFixture({
   root,
   fixture: 'scripts/webgpu-gate/lighting-scaling-fixture.html',
@@ -129,6 +134,14 @@ if (result.metrics?.timing?.gpuTimestamp?.status === 'unavailable') {
   }
 }
 mkdirSync(dirname(artifactPath), { recursive: true });
+const after = collectIdentity();
+if (after.revision !== identity.revision || after.dirty !== identity.dirty) throw new Error('Source state changed while capturing lighting evidence.');
+result.releaseEvidence = { ...identity, mode: options.evidence, generatedAt: new Date().toISOString() };
+if (options.evidence === 'formal') {
+  const matrix = JSON.parse(readFileSync(resolve(root, 'config/release-matrix.json'), 'utf8'));
+  const errors = validateLightingReleaseEvidence(result, matrix, result.releaseEvidence);
+  if (errors.length) throw new Error(`Formal lighting evidence rejected:\n${errors.join('\n')}`);
+}
 writeFileSync(artifactPath, `${JSON.stringify(result, null, 2)}\n`);
 
 console.log(
@@ -154,7 +167,10 @@ function parseArguments(argumentsList) {
     }
     values.set(match[1], match[2]);
   }
+  const evidence = values.get('evidence') ?? 'diagnostic';
+  if (!['diagnostic', 'formal'].includes(evidence)) throw new Error('--evidence must be diagnostic or formal');
   return {
+    evidence,
     lights: numberValue(values, 'lights', 128),
     overlap: values.get('overlap') ?? 'high',
     dynamic: numberValue(values, 'dynamic', 1),
@@ -164,6 +180,24 @@ function parseArguments(argumentsList) {
     samples: positiveInteger(values, 'samples', 8),
     gpuSamples: nonNegativeInteger(values, 'gpu-samples', 2),
     timeoutMs: positiveInteger(values, 'timeout-ms', 120_000),
+  };
+}
+
+function collectIdentity() {
+  const git = args => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
+  const mac = process.platform === 'darwin';
+  const osVersion = mac ? execFileSync('sw_vers', ['-productVersion'], { encoding: 'utf8' }).trim() : release();
+  return {
+    qualificationPath: mac ? 'macos' : 'windows',
+    runnerProfile: mac ? 'release-macos-native' : 'release-windows-native',
+    platform: process.platform, hostname: hostname(), osVersion,
+    operatingSystem: mac ? execFileSync('sw_vers', [], { encoding: 'utf8' }).trim() : `Windows ${osVersion}`,
+    driver: mac ? execFileSync('system_profiler', ['SPDisplaysDataType'], { encoding: 'utf8' }).trim()
+      : process.platform === 'win32' ? execFileSync('powershell.exe', ['-NoProfile', '-Command', 'Get-CimInstance Win32_VideoController | Select-Object Name,DriverVersion | ConvertTo-Json -Compress'], { encoding: 'utf8' }).trim()
+        : 'unregistered diagnostic host',
+    localConsole: !process.env.SSH_CONNECTION && !process.env.SSH_TTY && !/rdp|ica/i.test(process.env.SESSIONNAME ?? ''),
+    revision: git(['rev-parse', 'HEAD']), dirty: git(['status', '--porcelain']).length > 0,
+    node: process.version,
   };
 }
 
@@ -249,7 +283,8 @@ function assertSceneProvenance(result) {
 }
 
 function assertKnownForwardCap(result, authoredLocalLightCount) {
-  const rendererLocalLightCapacity = 6;
+  const selected = result.metrics.evidence.lightOverflow.value;
+  const rendererLocalLightCapacity = 8 - selected.submittedAmbientLightCount - selected.submittedDirectionalLightCount;
   const expectedSubmitted = Math.min(
     authoredLocalLightCount,
     rendererLocalLightCapacity,
@@ -257,7 +292,7 @@ function assertKnownForwardCap(result, authoredLocalLightCount) {
   const expectedOverflow = authoredLocalLightCount - expectedSubmitted;
   assertEqual(
     result.capability?.status,
-    expectedOverflow === 0
+    selected.overflowTotalLightCount === 0
       ? 'complete-for-selected-input'
       : 'known-forward-light-cap',
     'Forward capability status',
@@ -279,7 +314,7 @@ function assertKnownForwardCap(result, authoredLocalLightCount) {
   );
   assertEqual(
     result.failureSummary?.counts?.['light-cap-overflow'],
-    Number(expectedOverflow > 0),
+    Number(selected.overflowTotalLightCount > 0),
     'light cap attribution count',
   );
   assertEqual(

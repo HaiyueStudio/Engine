@@ -1,5 +1,7 @@
+import { deflateSync } from 'node:zlib';
+import { comparePortablePixelRecords } from './visual-regression/portable-pixels.mjs';
 import { createServer } from 'node:http';
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { spawn } from 'node:child_process';
 import { mkdtempSync } from 'node:fs';
@@ -36,7 +38,15 @@ try {
   const browserResult = await runChromeFixture(chrome, `http://127.0.0.1:${address.port}/`);
   const { status } = browserResult;
   const current = JSON.parse(browserResult.text);
+  if (productFixture) {
+    const rgba = Buffer.from(current.rgbaBase64 ?? '', 'base64');
+    if (rgba.length !== current.width * current.height * 4) throw new Error('Incomplete product RGBA readback.');
+    current.visual = { width: current.width, height: current.height, encoding: 'deflate-rgba8', rgba: deflateSync(rgba).toString('base64') };
+    delete current.rgbaBase64;
+  }
   if (status !== 'passed') throw new Error(`Pixel fixture failed: ${current.error ?? 'unknown error'}`);
+  mkdirSync(resolve(root, 'artifacts/render-regression'), { recursive: true });
+  writeFileSync(resolve(root, `artifacts/render-regression/${productFixture ? 'pbr-product' : 'simple'}-candidate.json`), `${JSON.stringify(current, null, 2)}\n`);
   if (process.env.UPDATE_RENDER_BASELINE === '1') {
     writeFileSync(baselinePath, `${JSON.stringify(current, null, 2)}\n`);
     console.log(`[render-pixels] Updated ${baselinePath}.`);
@@ -45,13 +55,20 @@ try {
   if (!existsSync(baselinePath)) throw new Error('Pixel baseline is missing. Run with UPDATE_RENDER_BASELINE=1 after reviewing the fixture output.');
   const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'));
   const scalarKeys = productFixture
-    ? ['fixture', 'width', 'height', 'hash', 'spherePixels', 'shadowPixels']
+    ? ['schemaVersion', 'fixture', 'width', 'height', 'spherePixels', 'shadowPixels']
     : ['fixture', 'width', 'height', 'hash', 'backgroundPixels', 'trianglePixels'];
   for (const key of scalarKeys) {
     if (current[key] !== baseline[key]) throw new Error(`Pixel regression at ${key}: expected ${baseline[key]}, received ${current[key]}.`);
   }
   for (const key of productFixture ? ['dielectric', 'metal', 'shadow', 'corner'] : ['center', 'corner']) {
-    if (JSON.stringify(current[key]) !== JSON.stringify(baseline[key])) throw new Error(`Pixel regression at ${key}.`);
+    const matches = productFixture
+      ? current[key]?.length === 4 && baseline[key]?.length === 4 && current[key].every((value, i) => Math.abs(value - baseline[key][i]) <= 1)
+      : JSON.stringify(current[key]) === JSON.stringify(baseline[key]);
+    if (!matches) throw new Error(`Pixel regression at ${key}.`);
+  }
+  if (productFixture) {
+    const comparison = comparePortablePixelRecords(current, baseline);
+    if (comparison.status !== 'passed') throw new Error(`Product RGBA regression: ${JSON.stringify(comparison)}`);
   }
   const coverage = productFixture ? `spheres=${current.spherePixels}, shadow=${current.shadowPixels}` : `triangle=${current.trianglePixels}`;
   console.log(`[render-pixels] ${current.fixture} passed: hash=${current.hash}, ${coverage}, adapter=${current.adapter.description || current.adapter.device || 'unknown'}.`);

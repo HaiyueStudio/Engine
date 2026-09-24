@@ -6,7 +6,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createReleaseGateChecks } from './release-gate-policy.mjs';
-import { createEngineSlowChecks, validateEngineEntryBudget, includesGatePath } from './engine-release-policy.mjs';
+import { createEngineSlowChecks, validateEngineEntryBudget, includesGatePath, selectEngineRenderTargets } from './engine-release-policy.mjs';
 import { createContentTargetPlan, loadContentManifests } from './content-gate-policy.mjs';
 import { selectProductScreenshotCases, PRODUCT_SCREENSHOT_CASES } from './visual-regression/product-screenshot-policy.mjs';
 const source = fileURLToPath(new URL('../', import.meta.url));
@@ -132,4 +132,18 @@ test('Engine lighting gate retains the reviewed content bytes without a Games ch
   const runner = readFileSync(resolve(source, 'scripts/verify-webgpu-lighting-scaling-fixture.mjs'), 'utf8');
   assert.doesNotMatch(runner, /resolveStudioRepositoryPath|requireStudioRepository/);
   assert.match(runner, /scripts\/fixtures\/lighting-content/);
+});
+
+test('automatic rendering regression preserves every qualifying smoke/full case and excludes manual dashboards', () => {
+  const manifest = read('examples/manifest.json');
+  const targets = selectEngineRenderTargets(manifest);
+  assert.deepEqual(targets, manifest.entries.filter(entry => ['smoke', 'full'].includes(entry.ci) && (
+    entry.screenshot?.required || entry.capabilities.some(capability => ['render-pipeline', 'gui', '2d', 'ktx2-volume'].includes(capability))
+  )));
+  assert.ok(targets.some(entry => entry.id === 'ktx2-volume' && entry.ci === 'full'));
+  assert.ok(targets.length > 0);
+  assert.ok(targets.every(entry => entry.ci !== 'manual'));
+  const manual = { id: 'manual', ci: 'manual', screenshot: { required: true }, capabilities: ['2d'] };
+  const required = { ...manual, id: 'new-required', ci: 'full' };
+  assert.deepEqual(selectEngineRenderTargets({ entries: [manual, required] }), [required]);
 });

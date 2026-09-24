@@ -6,7 +6,8 @@
     "The Engine root is an exact golden path, not a capacity pool.",
     "New capabilities use focused entrypoints and are classified stable or experimental before baseline promotion.",
     "Reviewed symbol counts describe admitted capability scope; reserve absorbs implementation-shaped API growth but never bypasses API baseline review.",
-    "A capability addition must update its reviewed count, evidence, package measurement, and baseline in one reviewed change."
+    "A capability addition must update its reviewed count, evidence, package measurement, and baseline in one reviewed change.",
+    "ADR 0106 admits audio mixing, multiplayer input, fonts, animation interaction and virtual joystick for 0.2.0; evidence: review/release-0.2.0-capability-budgets.md."
   ],
   "packages": {
     "@haiyue/shader-language": {
@@ -33,7 +34,7 @@
           "id": "source-neutral-animation-format",
           "stability": "stable",
           "growthReserve": { "ratio": 0.12, "minimumSymbols": 2 },
-          "entrypoints": { ".": 87, "./native3d": 43, "./deformable2d": 15 }
+          "entrypoints": { ".": 95, "./native3d": 43, "./deformable2d": 15 }
         },
         {
           "id": "offline-source-adapters",
@@ -76,7 +77,7 @@
             "./controls": 9,
             "./font": 13,
             "./geometry": 53,
-            "./gui": 77,
+            "./gui": 84,
             "./input": 3,
             "./lighting": 19,
             "./material": 69,
@@ -105,14 +106,14 @@
           "stability": "experimental",
           "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
           "entrypoints": {
-            "./experimental": 823,
+            "./experimental": 846,
             "./experimental/assets": 38,
             "./experimental/async": 7,
             "./experimental/diagnostics": 23,
             "./experimental/gpu-driven": 25,
             "./experimental/ktx2-worker-runtime": 0,
             "./experimental/renderer": 51,
-            "./experimental/simulation": 30,
+            "./experimental/simulation": 34,
             "./experimental/audio": 5
           }
         }

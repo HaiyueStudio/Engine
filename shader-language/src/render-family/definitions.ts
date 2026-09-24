@@ -110,7 +110,7 @@ function definitions(): Readonly<Record<BuiltinRenderOperation, RenderDefinition
   const colorVarying = varying('COLOR_0', 0, 'vec4<f32>');
   return Object.freeze({
     'animation-2d': definition(animation2d, [
-      group('frame', 0, [camera()]),
+      group('frame', 0, [uniform('frame.camera', 0, VERTEX_FRAGMENT, 64)]),
       group('object', 1, [uniform('object.animation2d', 0, VERTEX_FRAGMENT, 1296)]),
       textureGroup(2, 'material.baseTexture', 'material.baseSampler'),
       group('pass', 3, [

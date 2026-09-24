@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { selectReleaseQualification } from '../release-platform-policy.mjs';
 
 export const G02_REPRESENTATIVE_CASES = Object.freeze([
   'pbr',
@@ -46,22 +47,27 @@ export function validateG02CandidateReport(report, releaseMatrix, options = {}) 
   check(report?.formalBaselineUpdated === false, 'formalBaselineUpdated must be false', errors);
   check(/^[0-9a-f]{40}$/u.test(report?.baseHead ?? ''), 'baseHead must be a full Git commit', errors);
 
-  const requiredBrowsers = (releaseMatrix?.browsers ?? [])
+  let qualification;
+  if (releaseMatrix?.qualificationPaths) {
+    try { qualification = selectReleaseQualification(releaseMatrix, report?.qualificationPath); }
+    catch (error) { errors.push(error.message); }
+  }
+  const requiredBrowsers = qualification?.browserIds ?? (releaseMatrix?.browsers ?? [])
     .filter(browser => browser.tier === 'required')
     .map(browser => browser.id);
   const browserEntries = report?.browserMatrix ?? [];
   checkSet(browserEntries.map(entry => entry.id), requiredBrowsers, 'required browser ids', errors);
   for (const browser of browserEntries) {
-    validateMatrixEvidence(browser, `browser ${browser.id}`, options, errors);
+    validateMatrixEvidence(browser, `browser ${browser.id}`, { ...options, qualification }, errors);
   }
 
-  const requiredDevices = (releaseMatrix?.deviceClasses ?? [])
+  const requiredDevices = qualification?.deviceClassIds ?? (releaseMatrix?.deviceClasses ?? [])
     .filter(device => device.tier === 'required')
     .map(device => device.id);
   const deviceEntries = report?.deviceMatrix ?? [];
   checkSet(deviceEntries.map(entry => entry.id), requiredDevices, 'required device ids', errors);
   for (const device of deviceEntries) {
-    validateMatrixEvidence(device, `device ${device.id}`, options, errors);
+    validateMatrixEvidence(device, `device ${device.id}`, { ...options, qualification }, errors);
     if (device.status === 'passed') {
       check(
         Array.isArray(device.browserIds) && device.browserIds.length > 0,
@@ -190,6 +196,12 @@ function validatePassedEvidence(entry, label, errors) {
 
 function validateMatrixEvidence(entry, label, options, errors) {
   if (entry.status === 'passed') {
+    const path = options.qualification;
+    if (path) {
+      check(entry.angleBackend === path.angleBackend, `${label} backend does not match qualification path`, errors);
+      check((path.nodePlatform === 'darwin' ? /^macOS\s/i : /^Windows\s/i).test(entry.os ?? ''), `${label} OS does not match qualification path`, errors);
+      check(new RegExp(path.adapterPattern, 'i').test(entry.adapter ?? '') && !/swiftshader|software|warp|llvmpipe|lavapipe|virtual|remote/i.test(entry.adapter ?? ''), `${label} GPU does not match qualification path`, errors);
+    }
     check(entry.nativeWebGpu === true, `${label} must use native WebGPU`, errors);
     check(!/swiftshader|software|warp|llvmpipe/iu.test(entry.angleBackend ?? ''), `${label} cannot use a software backend`, errors);
     check(entry.unclassifiedFailureCount === 0, `${label} unclassifiedFailureCount must be 0`, errors);

@@ -2,12 +2,13 @@
   "schemaVersion": 3,
   "budgetPolicy": {
     "model": "reviewed-capability-plus-growth-reserve",
-    "reviewedAt": "2026-08-20",
+    "reviewedAt": "2026-09-23",
     "requirements": [
       "Measure a deterministic dist-only npm pack candidate before changing reviewed capacity.",
       "Attribute new public entrypoints in config/public-api-capability-budgets.json.",
       "Increase reviewed capacity only with capability, API, consumer, and bundle evidence.",
-      "Keep root and focused consumer closure budgets independent from total package capacity."
+      "Keep root and focused consumer closure budgets independent from total package capacity.",
+      "0.2.0 capability attribution and reserve rationale: review/release-0.2.0-capability-budgets.md."
     ]
   },
   "publicPackages": {
@@ -17,9 +18,9 @@
       "maxUnpackedBytes": 9000000,
       "maxFileCount": 600,
       "capacity": {
-        "reviewed": { "packedBytes": 1806568, "unpackedBytes": 7978044, "fileCount": 560 },
-        "growthReserve": { "packedBytes": 293432, "unpackedBytes": 1021956, "fileCount": 40 },
-        "capabilityBasis": "stable golden path plus focused ECS, scene, rendering, physics, compute, assets, diagnostics, game saves, and experimental runtime seams"
+        "reviewed": { "packedBytes": 1874952, "unpackedBytes": 8362294, "fileCount": 593 },
+        "growthReserve": { "packedBytes": 225048, "unpackedBytes": 637706, "fileCount": 7 },
+        "capabilityBasis": "stable golden path plus focused ECS, scene, rendering, physics, compute, assets, diagnostics, game saves, and experimental runtime seams; 0.2.0 owner-safe audio mixer, multiplayer input and GUI font options"
       },
       "declaredFiles": [
         "README.md",
@@ -37,13 +38,13 @@
     },
     "@haiyue/animation-spec": {
       "workspace": "animation-spec",
-      "maxPackedBytes": 125000,
+      "maxPackedBytes": 145000,
       "maxUnpackedBytes": 550000,
       "maxFileCount": 50,
       "capacity": {
-        "reviewed": { "packedBytes": 119038, "unpackedBytes": 464495, "fileCount": 47 },
-        "growthReserve": { "packedBytes": 5962, "unpackedBytes": 85505, "fileCount": 3 },
-        "capabilityBasis": "source-neutral HYA format, native 3D, deformable 2D, and offline Lottie/Cubism adapters"
+        "reviewed": { "packedBytes": 130279, "unpackedBytes": 502980, "fileCount": 48 },
+        "growthReserve": { "packedBytes": 14721, "unpackedBytes": 47020, "fileCount": 2 },
+        "capabilityBasis": "source-neutral HYA format, native 3D, deformable 2D, and offline Lottie/Cubism adapters; reviewed text style runs and their codec/schema/validation"
       },
       "declaredFiles": [
         "dist",
@@ -67,12 +68,12 @@
     "@haiyue/extensions": {
       "workspace": "extensions",
       "maxPackedBytes": 550000,
-      "maxUnpackedBytes": 2500000,
+      "maxUnpackedBytes": 3000000,
       "maxFileCount": 200,
       "capacity": {
-        "reviewed": { "packedBytes": 377051, "unpackedBytes": 2024224, "fileCount": 176 },
-        "growthReserve": { "packedBytes": 172949, "unpackedBytes": 475776, "fileCount": 24 },
-        "capabilityBasis": "admitted optional animation, asset, text, tile, deformable, and experimental ray tracing runtimes"
+        "reviewed": { "packedBytes": 513428, "unpackedBytes": 2651601, "fileCount": 188 },
+        "growthReserve": { "packedBytes": 36572, "unpackedBytes": 348399, "fileCount": 12 },
+        "capabilityBasis": "admitted optional animation, asset, text, tile, deformable, and experimental ray tracing runtimes; reviewed OpenType-backed animation text, routed interaction and virtual joystick"
       },
       "declaredFiles": [
         "README.md",
@@ -194,6 +195,30 @@
         "resolveWorkerUrl"
       ],
       "allowedGeneratedShaderArtifacts": []
+    },
+    "audio-mixer-only": {
+      "fixture": "scripts/fixtures/engine-consumers/audio-mixer-only.mjs",
+      "maxGzipBytes": 4000,
+      "requiredExports": ["OwnerSafeAudioMixer"],
+      "allowedGeneratedShaderArtifacts": []
+    },
+    "multiplayer-input-only": {
+      "fixture": "scripts/fixtures/engine-consumers/multiplayer-input-only.mjs",
+      "maxGzipBytes": 6000,
+      "requiredExports": ["BrowserMultiplayerInput", "InputActionMap"],
+      "allowedGeneratedShaderArtifacts": []
+    },
+    "font-builder-only": {
+      "fixture": "scripts/fixtures/engine-consumers/font-builder-only.mjs",
+      "maxGzipBytes": 2000,
+      "requiredExports": ["buildBitmapFont"],
+      "allowedGeneratedShaderArtifacts": []
+    },
+    "gui-font": {
+      "fixture": "scripts/fixtures/engine-consumers/gui-font.mjs",
+      "maxGzipBytes": 55000,
+      "requiredExports": ["GuiSystem"],
+      "allowedGeneratedShaderArtifacts": ["2d-ui-shader-artifact"]
     }
   },
   "animationSpecConsumers": {
@@ -254,7 +279,7 @@
     "extensions-animation": {
       "fixture": "scripts/fixtures/engine-consumers/extensions-animation.mjs",
       "packageName": "@haiyue/extensions",
-      "maxGzipBytes": 120000,
+      "maxGzipBytes": 245000,
       "requiredExports": ["Animation2DComponent", "Animation2DRenderSystem", "Animation2DSystem", "createAnimationAssetLoader"]
     },
     "extensions-animation3d": {
@@ -310,7 +335,7 @@
     "extensions-hya-state-machine": {
       "fixture": "scripts/fixtures/engine-consumers/extensions-hya-state-machine.mjs",
       "packageName": "@haiyue/extensions",
-      "maxGzipBytes": 130000,
+      "maxGzipBytes": 255000,
       "requiredExports": ["Animation2DStateMachineComponent", "Animation2DStateMachineSystem", "createHyaAnimation2DClips"]
     },
     "extensions-spine": {
@@ -342,6 +367,18 @@
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 9000,
       "requiredExports": ["Grid2DComponent"]
+    },
+    "extensions-interaction": {
+      "fixture": "scripts/fixtures/engine-consumers/extensions-interaction.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 55000,
+      "requiredExports": ["InteractionRuntime"]
+    },
+    "extensions-controls": {
+      "fixture": "scripts/fixtures/engine-consumers/extensions-controls.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 45000,
+      "requiredExports": ["VirtualJoystickControls"]
     }
   },
   "shaderLanguageConsumers": {

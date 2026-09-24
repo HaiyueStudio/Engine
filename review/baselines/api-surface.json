@@ -1320,6 +1320,10 @@
               "kind": "type"
             },
             {
+              "name": "AnimationTextStyleRun",
+              "kind": "type"
+            },
+            {
               "name": "AnimationTintEffect",
               "kind": "type"
             },
@@ -3511,6 +3515,18 @@
               "kind": "type"
             },
             {
+              "name": "AudioMixerBus",
+              "kind": "type"
+            },
+            {
+              "name": "AudioMixerPlayRequest",
+              "kind": "type"
+            },
+            {
+              "name": "AudioMixerStats",
+              "kind": "type"
+            },
+            {
               "name": "BaseRenderer",
               "kind": "value"
             },
@@ -3624,6 +3640,14 @@
             },
             {
               "name": "BoxSelectionResult",
+              "kind": "type"
+            },
+            {
+              "name": "BrowserMultiplayerInput",
+              "kind": "value"
+            },
+            {
+              "name": "BrowserMultiplayerInputOptions",
               "kind": "type"
             },
             {
@@ -4699,6 +4723,10 @@
               "kind": "value"
             },
             {
+              "name": "GuiFontOptions",
+              "kind": "type"
+            },
+            {
               "name": "GuiImage",
               "kind": "value"
             },
@@ -5363,6 +5391,10 @@
               "kind": "type"
             },
             {
+              "name": "MultiplayerInputSnapshot",
+              "kind": "type"
+            },
+            {
               "name": "MusicPlayerComponent",
               "kind": "value"
             },
@@ -5413,6 +5445,14 @@
             {
               "name": "OutlineTarget",
               "kind": "value"
+            },
+            {
+              "name": "OwnerSafeAudioMixer",
+              "kind": "value"
+            },
+            {
+              "name": "OwnerSafeAudioMixerOptions",
+              "kind": "type"
             },
             {
               "name": "parseAssetWorkerFirst",
@@ -5560,6 +5600,10 @@
             },
             {
               "name": "PlaneGeometryOptions",
+              "kind": "type"
+            },
+            {
+              "name": "PlayerInputSnapshot",
               "kind": "type"
             },
             {
@@ -6890,6 +6934,31 @@
             }
           ]
         },
+        "./experimental/audio": {
+          "source": "engine/src/experimental/audio.ts",
+          "exports": [
+            {
+              "name": "AudioMixerBus",
+              "kind": "type"
+            },
+            {
+              "name": "AudioMixerPlayRequest",
+              "kind": "type"
+            },
+            {
+              "name": "AudioMixerStats",
+              "kind": "type"
+            },
+            {
+              "name": "OwnerSafeAudioMixer",
+              "kind": "value"
+            },
+            {
+              "name": "OwnerSafeAudioMixerOptions",
+              "kind": "type"
+            }
+          ]
+        },
         "./experimental/diagnostics": {
           "source": "engine/src/experimental/diagnostics.ts",
           "exports": [
@@ -7325,6 +7394,14 @@
           "source": "engine/src/experimental/simulation.ts",
           "exports": [
             {
+              "name": "BrowserMultiplayerInput",
+              "kind": "value"
+            },
+            {
+              "name": "BrowserMultiplayerInputOptions",
+              "kind": "type"
+            },
+            {
               "name": "canonicalSimulationState",
               "kind": "value"
             },
@@ -7382,6 +7459,14 @@
             },
             {
               "name": "InputReplayV1",
+              "kind": "type"
+            },
+            {
+              "name": "MultiplayerInputSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "PlayerInputSnapshot",
               "kind": "type"
             },
             {
@@ -7859,6 +7944,10 @@
             {
               "name": "GuiFocusManager",
               "kind": "value"
+            },
+            {
+              "name": "GuiFontOptions",
+              "kind": "type"
             },
             {
               "name": "GuiHelpDialog",
@@ -9708,6 +9797,10 @@
               "kind": "value"
             },
             {
+              "name": "Animation2DNodeOverride",
+              "kind": "type"
+            },
+            {
               "name": "Animation2DRenderStats",
               "kind": "type"
             },
@@ -9778,6 +9871,30 @@
             {
               "name": "HAIYUE_ANIMATION_ASSET_TYPE",
               "kind": "value"
+            },
+            {
+              "name": "InteractionActionPort",
+              "kind": "type"
+            },
+            {
+              "name": "InteractionGeometryPort",
+              "kind": "type"
+            },
+            {
+              "name": "InteractionRuntime",
+              "kind": "value"
+            },
+            {
+              "name": "RoutedInteractionEvent",
+              "kind": "type"
+            },
+            {
+              "name": "RuntimeInteractionAction",
+              "kind": "type"
+            },
+            {
+              "name": "RuntimeInteractionDocument",
+              "kind": "type"
             },
             {
               "name": "tessellateAnimationPath",

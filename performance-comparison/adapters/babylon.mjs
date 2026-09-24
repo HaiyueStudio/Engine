@@ -18,6 +18,8 @@ export async function createAdapter({ canvas, contract, objects, version }) {
   await engine.initAsync();
   engine.setSize(contract.viewport.width, contract.viewport.height, true);
   const scene = new Scene(engine);
+  // The shared camera and object transforms use a right-handed world.
+  scene.useRightHandedSystem = true;
   scene.clearColor = new Color4(...contract.clearColor);
   const camera = new FreeCamera('Comparison camera', new Vector3(...contract.camera.position), scene);
   camera.fov = contract.camera.fovRadians;

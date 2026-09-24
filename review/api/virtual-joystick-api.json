@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "scope": "additive-local-development-candidate",
+  "scope": "reviewed-0.2.0-release-candidate",
   "entrypoint": "@haiyue/extensions/controls",
   "source": "extensions/src/controls.ts",
   "exports": [
@@ -42,6 +42,6 @@
     }
   ],
   "rootExportsUnchanged": true,
-  "review": "docs/for-ai/adr/0101-virtual-joystick-extension-controls.md",
-  "globalCheck": "Unavailable: Editor repository is absent. Only the reviewed controls entry was added to the existing baseline."
+  "review": "docs/for-ai/adr/0106-release-0.2.0-capability-budgets.md",
+  "globalCheck": "Included in the independent Engine API baseline and packed controls consumer gate; see review/release-0.2.0-capability-budgets.md."
 }

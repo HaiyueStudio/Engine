@@ -22,6 +22,7 @@
 
 ## Snapshot, BLAS and TLAS
 
+- CPU picking BVH、BVH LOD 与 ray-tracing BLAS/TLAS 可以共享数学约定，但保持不同 owner、更新策略和 public surface，禁止强行合并状态。
 - Immutable snapshot 记录 source revision/fingerprint 以及 geometry、transform、material、light、camera revision；
   removal 和 replacement 生成新 membership revision。
 - BLAS 仅拥有 geometry-derived bounds/nodes/primitive order；geometry revision 改变时 rebuild。TLAS 仅拥有

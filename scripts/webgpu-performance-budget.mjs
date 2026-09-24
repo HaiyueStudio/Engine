@@ -33,13 +33,48 @@ export function selectPerformanceProfile(config, environment, requestedProfile =
   );
 }
 
+/** Native Mac release correctness can run before fixed-device timing enrollment.
+ * Unregistered measurements are diagnostic only; explicit profiles, candidate/formal
+ * evidence and enforced budgets always retain strict profile matching.
+ */
+export function assessDevicePerformance(config, environment, suiteId, mode, artifact, variables = process.env) {
+  let selected;
+  const evidenceMode = resolvePerformanceEvidenceMode(mode, variables);
+  const requested = variables.WEBGPU_DEVICE_PROFILE;
+  const adapterText = adapterFingerprint(environment.adapter);
+  const matching = Object.values(config.profiles).some(profile => matchesProfile(profile, environment.nodePlatform, adapterText));
+  if (!matching && !requested && evidenceMode === 'diagnostic'
+    && !shouldEnforceDevicePerformanceBudgets(variables)
+    && environment.nodePlatform === 'darwin'
+    && /\b(apple|amd|intel)\b/i.test(adapterText)
+    && !/swiftshader|software|llvmpipe|lavapipe|warp|virtual|remote/i.test(adapterText)
+    && environment.adapter?.isFallbackAdapter !== true
+    && artifact.browserEvidence?.nativeBackend === true
+    && artifact.browserEvidence?.angleBackend === 'metal') {
+    selected = { id: 'macos-native-unregistered', adapterText,
+      profile: { tier: 'extended', enrolled: false, source: 'Native Metal diagnostic; no fixed-device timing budget enrolled.' } };
+  } else {
+    selected = selectPerformanceProfile(config, environment, requested);
+  }
+  const budget = evaluateMeasurements(config, selected.id, selected.profile, suiteId, mode, artifact);
+  // Missing timings/cases/samples are correctness failures even on an unregistered device.
+  const invalidMeasurements = budget.violations.filter(item => item.reason !== 'p95-exceeded');
+  if (invalidMeasurements.length) throw new Error(`Invalid performance measurements: ${JSON.stringify(invalidMeasurements)}`);
+  return { selected, performanceBudget: budget };
+}
+
 export function evaluatePerformanceBudget(config, profileId, suiteId, mode, artifact) {
   const profile = config.profiles[profileId];
-  const suite = config.suites[suiteId];
   if (!profile) throw new Error(`Unknown performance profile ${profileId}.`);
+  return evaluateMeasurements(config, profileId, profile, suiteId, mode, artifact);
+}
+
+function evaluateMeasurements(config, profileId, profile, suiteId, mode, artifact) {
+  const suite = config.suites[suiteId];
   if (!suite) throw new Error(`Unknown performance suite ${suiteId}.`);
   const budgets = profile.budgets?.[suiteId];
-  if (!budgets) throw new Error(`Performance profile ${profileId} has no ${suiteId} budget.`);
+  const unregistered = profileId === 'macos-native-unregistered';
+  if (!budgets && !unregistered) throw new Error(`Performance profile ${profileId} has no ${suiteId} budget.`);
   const results = artifact.results ?? artifact.benchmarkResults ?? artifact.cases ?? [];
   const minimumSamples = suite.minimumSamples?.[mode];
   const budgetChannels = suite.budgetChannels ?? ['timing'];
@@ -57,7 +92,7 @@ export function evaluatePerformanceBudget(config, profileId, suiteId, mode, arti
       });
       continue;
     }
-    const ruleBudget = budgets[rule.id];
+    const ruleBudget = budgets?.[rule.id];
     for (const result of matches) {
       const samples = result.samples
         ?? result.gpu?.total?.sampleCount
@@ -66,7 +101,7 @@ export function evaluatePerformanceBudget(config, profileId, suiteId, mode, arti
         ?? null;
       for (const channel of budgetChannels) {
         const maxP95Ms = resolveChannelBudget(ruleBudget, channel);
-        if (!Number.isFinite(maxP95Ms)) {
+        if (!unregistered && !Number.isFinite(maxP95Ms)) {
           violations.push({
             rule: rule.id,
             caseId: result.id,
@@ -83,14 +118,14 @@ export function evaluatePerformanceBudget(config, profileId, suiteId, mode, arti
           caseId: result.id,
           channel,
           p95Ms,
-          maxP95Ms,
+          maxP95Ms: maxP95Ms ?? null,
           samples,
-          headroomMs: Number.isFinite(p95Ms) ? maxP95Ms - p95Ms : null,
+          headroomMs: Number.isFinite(p95Ms) && Number.isFinite(maxP95Ms) ? maxP95Ms - p95Ms : null,
         };
         checks.push(check);
         if (!Number.isFinite(p95Ms)) {
           violations.push({ ...check, reason: 'timing-missing' });
-        } else if (p95Ms > maxP95Ms) {
+        } else if (!unregistered && p95Ms > maxP95Ms) {
           violations.push({ ...check, reason: 'p95-exceeded' });
         }
       }
@@ -115,7 +150,8 @@ export function evaluatePerformanceBudget(config, profileId, suiteId, mode, arti
     profileSource: profile.source,
     suite: suiteId,
     mode,
-    status: violations.length === 0 ? 'passed' : 'failed',
+    status: violations.length ? 'failed' : unregistered ? 'not-enrolled' : 'passed',
+    ...(unregistered ? { reason: 'Fixed-device P95 budget is not enrolled; timings and workload coverage were validated.' } : {}),
     checks,
     violations,
   };

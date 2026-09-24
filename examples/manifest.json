@@ -1041,7 +1041,7 @@
         "baseline": null
       },
       "performance": null,
-      "ci": "manual",
+      "ci": "full",
       "catalog": {
         "group": "materials",
         "order": 3

@@ -529,6 +529,11 @@ test('PBR view light records and scene IBL/shadow data upload only when their co
   scene.shadowRevision++;
   pbr.beginScene(scene);
   pbr.beginView(sceneFrame);
+  assert.equal(countSceneWrites('PbrRenderer.shadow'), 1, 'shadow-map redraw must not upload unchanged sampling uniforms');
+  shadow.bias = 0.002;
+  scene.shadowRevision++;
+  pbr.beginScene(scene);
+  pbr.beginView(sceneFrame);
   assert.deepEqual([
     countSceneWrites('PbrRenderer.lights'),
     countSceneWrites('PbrRenderer.environment'),
@@ -641,9 +646,13 @@ test('PBR packs three directional shadow matrices and array layers into one scen
   });
   assert.equal(
     log.find(entry => entry[0] === 'writeBuffer' && entry[1]?.descriptor?.label === 'PbrRenderer.shadow')?.[5],
-    80,
-    'steady one-shadow updates stay on the single-slot upload path',
+    undefined,
+    'an unchanged shadow prefix does not upload after shrinking',
   );
+  shadows[0].bias += 0.001;
+  pbr.beginScene({ lightingRevision: 1, shadowRevision: 4, lights: [], environment: null, shadow: shadows[0], shadows: [shadows[0]] });
+  assert.equal(log.find(entry => entry[0] === 'writeBuffer' && entry[1]?.descriptor?.label === 'PbrRenderer.shadow')?.[5], 80,
+    'changed one-shadow parameters still upload only the active slot');
   system.destroy();
 });
 

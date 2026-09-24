@@ -29,7 +29,10 @@ export async function createAdapter({ canvas, contract, objects, version }) {
       far: contract.camera.far,
     }))
     .addComponent(sphericalCameraTransform(contract.camera));
-  const scene = engine.createScene({ name: contract.id, camera, render3D: true, render2D: false, gui: false });
+  const scene = engine.createScene({
+    name: contract.id, camera, render3D: true, render2D: false, gui: false,
+    view: { clearColor: rgba(contract.clearColor) },
+  });
   const geometry = createBox3D({
     width: contract.grid.boxSize,
     height: contract.grid.boxSize,

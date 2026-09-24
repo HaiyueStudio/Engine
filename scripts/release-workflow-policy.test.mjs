@@ -14,7 +14,9 @@ test('checked-in workflows preserve release routing and least-privilege policy',
     .map(name => [name, readFileSync(resolve(workflowRoot, name), 'utf8')]));
   assert.deepEqual(validateReleaseWorkflows(workflows), []);
   const bootstrap = readFileSync(resolve(root, 'scripts/release-ci-bootstrap.mjs'), 'utf8');
-  assert.match(bootstrap, /shader-language[\s\S]*engine[\s\S]*animation-spec[\s\S]*extensions[\s\S]*ui/);
+  assert.match(bootstrap, /ENGINE_FOUNDATIONS/);
+  assert.doesNotMatch(bootstrap, /\['ui'\]/);
+  assert.match(bootstrap, /--evidence=diagnostic/);
   assert.match(bootstrap, /verify-webgpu-lighting-scaling-fixture\.mjs/);
   assert.match(bootstrap, /WEBGPU_RECORD_PERFORMANCE_EVIDENCE:\s*'0'/);
   assert.match(workflows['ci-release-rehearsal.yml'], /release-rehearsal-policy\.mjs --bundle artifacts\/release\/rehearsal/);

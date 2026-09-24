@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   evaluatePerformanceBudget,
+  assessDevicePerformance,
   createPerformanceSourceFingerprint,
   loadPerformanceBudgetConfig,
   selectPerformanceProfile,
@@ -254,3 +255,33 @@ function timingCohort(id, frameSamples) {
     },
   };
 }
+
+
+test('unenrolled native Mac keeps complete diagnostic measurements without claiming budget acceptance', () => {
+  const environment = { nodePlatform: 'darwin', adapter: { vendor: 'amd', architecture: 'rdna-1' } };
+  const artifact = { browserEvidence: { nativeBackend: true, angleBackend: 'metal' },
+    results: [0, 1, 10, 100].flatMap(dynamicRatio => [1, 4].map(viewCount => ({
+      id: `${dynamicRatio}:${viewCount}`, entityCount: 256, dynamicRatio: dynamicRatio / 100,
+      viewCount, samples: 20, timing: { p95: 500 }, sampleWall: { p95: 600 }, queueWait: { p95: 100 },
+    }))) };
+  const assess = (variables = {}, value = artifact, host = environment, mode = 'smoke') =>
+    assessDevicePerformance(config, host, 'render3d.real-frame', mode, value, variables);
+  const { selected, performanceBudget } = assess();
+  assert.equal(selected.id, 'macos-native-unregistered');
+  assert.equal(selected.profile.enrolled, false);
+  assert.equal(performanceBudget.status, 'not-enrolled');
+  assert.equal(performanceBudget.checks.length, 24);
+  assert.ok(performanceBudget.checks.every(check => check.maxP95Ms === null));
+  for (const variables of [
+    { WEBGPU_DEVICE_PROFILE: 'apple-integrated' },
+    { WEBGPU_ENFORCE_DEVICE_PERFORMANCE_BUDGETS: '1' },
+    { WEBGPU_PERFORMANCE_EVIDENCE_MODE: 'candidate' },
+    { WEBGPU_PERFORMANCE_EVIDENCE_MODE: 'formal' },
+  ]) assert.throws(() => assess(variables, artifact, environment, 'full'), /profile.*match/i);
+  assert.throws(() => assess({}, { ...artifact, browserEvidence: { nativeBackend: false } }), /No WebGPU performance profile/);
+  assert.throws(() => assess({}, artifact, { ...environment, adapter: { vendor: 'amd', description: 'SwiftShader' } }), /No WebGPU performance profile/);
+  for (const change of [a => a.results.pop(), a => { a.results[0].samples = 1; }, a => { a.results[0].queueWait.p95 = NaN; }]) {
+    const invalid = structuredClone(artifact); change(invalid);
+    assert.throws(() => assess({}, invalid), /Invalid performance measurements/);
+  }
+});

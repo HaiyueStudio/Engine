@@ -1,6 +1,6 @@
 {
   "name": "@haiyue/engine-repository",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "license": "MIT",
   "repository": "https://github.com/HaiyueStudio/Engine.git",
@@ -34,7 +34,7 @@
     "render-product:structure": "node scripts/check-stage9-render-product.mjs",
     "render-product:test": "npm run build -w ./engine && node --test --test-concurrency=1 engine/test/render-product-stage9.test.mjs engine/test/render3d-gpu-driven-batch.test.mjs engine/test/lifecycle-stage4.test.mjs engine/test/readback-submit-order.test.mjs scripts/webgpu-gate/readback-churn-contract.test.mjs scripts/webgpu-gate/gltf-asset-contract.test.mjs && npm run build -w ./extensions && node --test --test-concurrency=1 extensions/test/gltf-loader.test.mjs && npm run examples:catalog:check",
     "render-product:check": "npm run render-product:structure && npm run render-product:test",
-    "performance-budget:test": "node --test performance-comparison/test/policy.test.mjs scripts/webgpu-performance-budget.test.mjs scripts/planar-reflection-pixel-baseline.test.mjs scripts/benchmark/ambient-occlusion-cost-model.test.mjs scripts/benchmark/cpu-benchmark-policy.test.mjs scripts/benchmark/ray-product-candidate-contract.test.mjs scripts/benchmark/timing-cohorts.test.mjs scripts/hya-corpus/first-frame-policy.test.mjs scripts/capability-admission-policy.test.mjs scripts/editor-memory-budget-policy.test.mjs scripts/engine-package-policy.test.mjs scripts/lighting-architecture-decision-policy.test.mjs scripts/release-gate-policy.test.mjs scripts/visual-regression/product-screenshot-policy.test.mjs scripts/visual-regression/ray-g10-review-contract.test.mjs scripts/volume-example-pixel-policy.test.mjs scripts/webgpu-gate/ambient-occlusion-gpu-cost-contract.test.mjs scripts/webgpu-gate/chrome-runner-mounts.test.mjs scripts/webgpu-gate/lighting-scaling-contract.test.mjs scripts/webgpu-gate/lighting-scaling-report.test.mjs scripts/webgpu-gate/lighting-scaling-gate-policy.test.mjs scripts/webgpu-gate/motion-blur-gate-policy.test.mjs scripts/webgpu-gate/latest-capabilities-gate-policy.test.mjs",
+    "performance-budget:test": "node --test performance-comparison/test/policy.test.mjs scripts/webgpu-performance-budget.test.mjs scripts/planar-reflection-pixel-baseline.test.mjs scripts/benchmark/ambient-occlusion-cost-model.test.mjs scripts/benchmark/cpu-benchmark-policy.test.mjs scripts/benchmark/ray-product-candidate-contract.test.mjs scripts/benchmark/timing-cohorts.test.mjs scripts/hya-corpus/first-frame-policy.test.mjs scripts/capability-admission-policy.test.mjs scripts/editor-memory-budget-policy.test.mjs scripts/engine-package-policy.test.mjs scripts/lighting-architecture-decision-policy.test.mjs scripts/release-gate-policy.test.mjs scripts/visual-regression/product-screenshot-policy.test.mjs scripts/visual-regression/portable-pixels.test.mjs scripts/visual-regression/ray-g10-review-contract.test.mjs scripts/volume-example-pixel-policy.test.mjs scripts/webgpu-gate/ambient-occlusion-gpu-cost-contract.test.mjs scripts/webgpu-gate/chrome-runner-mounts.test.mjs scripts/webgpu-gate/lighting-scaling-contract.test.mjs scripts/webgpu-gate/lighting-scaling-report.test.mjs scripts/webgpu-gate/lighting-scaling-gate-policy.test.mjs scripts/webgpu-gate/motion-blur-gate-policy.test.mjs scripts/webgpu-gate/latest-capabilities-gate-policy.test.mjs",
     "api:check": "node scripts/api-surface.mjs --check",
     "release:scope:check": "npm run build:engine && npm run build:animation-spec && npm run build:extensions && node review/api/verify-release-scope.mjs && npm run release:no-rive -- --artifacts",
     "docs:check": "node scripts/check-docs.mjs && node --test scripts/export-reference-docs.test.mjs",
@@ -97,7 +97,7 @@
     "verify:pbr-pixels": "node scripts/verify-pixel-regression.mjs --product",
     "verify:pbr-example": "node scripts/verify-pbr-example.mjs",
     "verify:fog-example": "node scripts/verify-fog-example.mjs",
-    "verify:volume-example": "node scripts/verify-volume-example.mjs",
+    "verify:volume-example": "npm run build:target -- example:ktx2-volume && node scripts/verify-volume-example.mjs",
     "verify:live2d-hya": "npm run build:target -- example:live2d-hya && node scripts/verify-live2d-hya-example.mjs",
     "verify:hya-live2d-corpus": "npm run build:target -- example:hya-live2d-corpus-dashboard && node scripts/verify-live2d-corpus-dashboard.mjs",
     "verify:animation-compare": "npm run build:target -- example:lottie-hya-compare example:live2d-hya-compare && node scripts/verify-animation-compare-examples.mjs",
@@ -130,11 +130,15 @@
     "release:studio:artifacts": "node scripts/inspect-release-artifacts.mjs --release",
     "check:engine:fast": "npm run typecheck && npm test && node scripts/check-workspace-boundaries.mjs && npm run modules:check && npm run check:engine:contracts && npm run performance-budget:test && npm run architecture:check && npm run renderer-prepare:check && npm run capability:admission:check && npm run docs:check && npm run api:check && npm run release:scope:check && npm run shader-language:check && npm run release:policy:test",
     "check:engine:slow": "node scripts/run-engine-slow-checks.mjs",
-    "release:policy:test": "node --test scripts/release-gate-policy.test.mjs scripts/engine-release-isolation.test.mjs scripts/engine-package-policy.test.mjs scripts/release-no-rive-policy.test.mjs",
+    "release:policy:test": "node --test scripts/release-gate-policy.test.mjs scripts/engine-release-isolation.test.mjs scripts/engine-package-policy.test.mjs scripts/release-no-rive-policy.test.mjs scripts/release-platform-policy.test.mjs scripts/release-rehearsal-policy.test.mjs scripts/engine-rehearsal-plan.test.mjs scripts/release-supply-chain-policy.test.mjs scripts/release-archive.test.mjs scripts/lighting-decision-evidence.test.mjs scripts/release-workflow-policy.test.mjs",
     "verify:engine-render": "node scripts/verify-render-regressions.mjs && node scripts/verify-webgpu-readback-churn.mjs && npm run verify:gltf-asset && npm run verify:renderer-benchmark && npm run verify:lighting-scaling && npm run verify:planar-reflection && npm run verify:motion-blur && npm run verify:ambient-occlusion && npm run verify:clipping-planes && npm run verify:navmesh-first-person && node scripts/verify-pbr-example.mjs && node scripts/verify-fog-example.mjs && node scripts/verify-volume-example.mjs && node scripts/verify-pixel-regression.mjs && node scripts/verify-pixel-regression.mjs --product && npm run verify:engine-screenshots",
     "verify:engine-screenshots": "npm run build:engine && npm run build:extensions && npm run build:target -- example:gltf-animation3d-crossfade example:ambient-occlusion example:shadow-map example:spine-viewer && node scripts/verify-product-screenshot-regressions.mjs --engine",
     "docs:studio:check": "node scripts/check-docs.mjs --studio && node --test scripts/export-reference-docs.test.mjs",
-    "check:engine:contracts": "node scripts/check-no-unchecked-indexed-access.mjs --engine && node scripts/check-stage3-contracts.mjs --engine && node scripts/check-stage4-lifecycle.mjs --engine && node scripts/check-scene-golden-path.mjs --engine && node scripts/check-responsibility-boundaries.mjs --engine && node scripts/check-stage7-observability.mjs --engine && node scripts/check-stage8-asset-script.mjs --engine && node scripts/check-stage9-render-product.mjs --engine"
+    "check:engine:contracts": "node scripts/check-no-unchecked-indexed-access.mjs --engine && node scripts/check-stage3-contracts.mjs --engine && node scripts/check-stage4-lifecycle.mjs --engine && node scripts/check-scene-golden-path.mjs --engine && node scripts/check-responsibility-boundaries.mjs --engine && node scripts/check-stage7-observability.mjs --engine && node scripts/check-stage8-asset-script.mjs --engine && node scripts/check-stage9-render-product.mjs --engine",
+    "verify:lighting-scaling:formal": "npm run build:engine && node scripts/verify-webgpu-lighting-scaling-fixture.mjs --lights=128 --overlap=high --dynamic=1 --views=4 --resolution=720p --warmup=4 --samples=8 --gpu-samples=2 --evidence=formal",
+    "lighting:evidence:check": "node scripts/check-lighting-release-evidence.mjs",
+    "release:rehearsal": "node scripts/release-rehearsal.mjs",
+    "release:rehearsal:plan": "node scripts/release-rehearsal.mjs --plan"
   },
   "devDependencies": {
     "@babylonjs/core": "9.21.2",

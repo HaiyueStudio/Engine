@@ -20,3 +20,13 @@ export function includesGatePath(path, scope = 'studio') {
   if (!['engine', 'studio'].includes(scope)) throw new Error(`Unknown gate scope: ${scope}`);
   return scope === 'studio' || !['ui', 'editor', 'AnimationEditor', 'voxelEditor', 'games'].includes(path.split('/')[0]);
 }
+
+export function selectEngineRenderTargets(manifest) {
+  return manifest.entries.filter(entry => ['smoke', 'full'].includes(entry.ci) && (
+    entry.screenshot?.required
+    || entry.capabilities.includes('ktx2-volume')
+    || entry.capabilities.includes('render-pipeline')
+    || entry.capabilities.includes('gui')
+    || entry.capabilities.includes('2d')
+  ));
+}

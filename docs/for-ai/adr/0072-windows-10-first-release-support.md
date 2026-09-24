@@ -4,6 +4,8 @@
 - 日期：2026-08-15
 - 影响范围：首发浏览器支持矩阵、Windows 设备登记、M02 正式证据
 
+当前发布资格路径由 [ADR 0107](0107-native-macos-release-qualification.md) 扩展为 Mac / Windows 任选其一。下文保留历史决策。
+
 ## 背景
 
 M02 原冻结范围要求 Windows 11 上的稳定 Chrome 和 Edge。当前后续开发主机只有 Windows 10

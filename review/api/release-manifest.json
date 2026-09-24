@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "releaseId": "haiyue-0.1.0-first-public-release",
-  "releaseVersion": "0.1.0",
+  "releaseId": "haiyue-0.2.0-capability-release",
+  "releaseVersion": "0.2.0",
   "releaseMatrix": "config/release-matrix.json",
   "featureFreeze": {
     "status": "active",
     "classification": "capability-attributed-public-surface",
-    "exceptions": "P0/P1 release blockers only"
+    "exceptions": "P0/P1 release blockers only after the reviewed 0.2.0 capability admission in ADR 0106"
   },
   "artifacts": [
     {
@@ -14,7 +14,7 @@
       "kind": "npm-package",
       "workspace": "engine",
       "packageName": "@haiyue/engine",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "entry": ".",
       "supportTier": "stable",
       "owner": "engine",
@@ -23,14 +23,14 @@
         "npm run verify:engine-package"
       ],
       "publishChannel": "npm-public-latest",
-      "rollbackUnit": "npm:@haiyue/engine@0.1.0"
+      "rollbackUnit": "npm:@haiyue/engine@0.2.0"
     },
     {
       "id": "animation-spec-npm",
       "kind": "npm-package",
       "workspace": "animation-spec",
       "packageName": "@haiyue/animation-spec",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "entry": ".",
       "supportTier": "stable",
       "owner": "animation-spec",
@@ -39,14 +39,14 @@
         "npm run verify:engine-package"
       ],
       "publishChannel": "npm-public-latest",
-      "rollbackUnit": "npm:@haiyue/animation-spec@0.1.0"
+      "rollbackUnit": "npm:@haiyue/animation-spec@0.2.0"
     },
     {
       "id": "extensions-npm",
       "kind": "npm-package",
       "workspace": "extensions",
       "packageName": "@haiyue/extensions",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "entry": "./animation",
       "supportTier": "stable-focused-subpaths",
       "owner": "extensions",
@@ -55,14 +55,14 @@
         "npm run verify:engine-package"
       ],
       "publishChannel": "npm-public-latest",
-      "rollbackUnit": "npm:@haiyue/extensions@0.1.0"
+      "rollbackUnit": "npm:@haiyue/extensions@0.2.0"
     },
     {
       "id": "shader-language-npm",
       "kind": "npm-package",
       "workspace": "shader-language",
       "packageName": "@haiyue/shader-language",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "entry": ".",
       "supportTier": "stable-build-tooling",
       "owner": "shader-language",
@@ -72,13 +72,13 @@
         "npm run shader-language:check"
       ],
       "publishChannel": "npm-public-latest",
-      "rollbackUnit": "npm:@haiyue/shader-language@0.1.0"
+      "rollbackUnit": "npm:@haiyue/shader-language@0.2.0"
     },
     {
       "id": "examples-static-catalog",
       "kind": "static-catalog",
       "workspace": "examples",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "entry": "index.html",
       "supportTier": "supporting",
       "owner": "examples",
@@ -87,7 +87,7 @@
         "npm run examples:catalog:check"
       ],
       "publishChannel": "immutable-static-deployment",
-      "rollbackUnit": "static:examples:0.1.0"
+      "rollbackUnit": "static:examples:0.2.0"
     }
   ]
 }

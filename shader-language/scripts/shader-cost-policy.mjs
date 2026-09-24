@@ -134,3 +134,11 @@ export function computeHistoricalCostDiff(current, historical) {
     }),
   ])));
 }
+
+// Historical stage contracts remain unchanged; current capability admission lives in the cost policy.
+export function validateProductionBundleCost(metric, actual, budget) {
+  const maximum = budget.productionBundles?.[metric];
+  if (!Number.isSafeInteger(maximum) || maximum <= 0) return `${metric} has no valid production bundle budget`;
+  if (!Number.isSafeInteger(actual) || actual < 0) return `${metric} has no valid measurement`;
+  return actual > maximum ? `${metric} exceeds ${maximum}, received ${actual}` : null;
+}

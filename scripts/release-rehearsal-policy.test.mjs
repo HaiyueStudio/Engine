@@ -4,16 +4,16 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { releaseCatalogBuildTimeout } from './release-duration-policy.mjs';
 import { portableReleasePath } from './release-path-policy.mjs';
-import { parseSha256Sums, sha256, validateReleaseRehearsalBundle } from './release-rehearsal-policy.mjs';
+import { parseSha256Sums, sha256, validateReleaseRehearsalBundle, validatePublicPackageEvidence } from './release-rehearsal-policy.mjs';
 import { releaseTemporaryBase } from './release-temp-path.mjs';
 
 const COMMAND_LABELS = [
   'production dependency, license and credential audit',
   'build clean-checkout workspace dependency foundations',
   'fast release prerequisite gate',
-  'deterministic public packages and app delivery',
-  'build complete examples catalog',
-  'build complete games catalog',
+  'deterministic public packages',
+  'engine entry budget',
+  'build full Engine examples catalog',
 ];
 
 test('complete rehearsal bundle binds manifest, hash, provenance, SBOM, release notes, raw evidence and rollback', () => {
@@ -101,17 +101,6 @@ test('release rehearsal preserves phase-bound worker failure evidence', () => {
   assert.match(source, /preserveWorkerFailure\(checkout\)/);
 });
 
-test('release rehearsal consumes the verified Electron release artifact', () => {
-  const inspector = readFileSync(new URL('./inspect-release-artifacts.mjs', import.meta.url), 'utf8');
-  const rehearsal = readFileSync(new URL('./release-rehearsal.mjs', import.meta.url), 'utf8');
-  assert.match(inspector, /electronArtifactRoot\s*=\s*resolve\(appArtifactRoot, 'voxel-electron'\)/);
-  assert.match(inspector, /syncVerifiedElectronArtifact\(electronOutputRoot, electronArtifactRoot\)/);
-  assert.match(inspector, /Locked Electron artifact differs from the verified package/);
-  assert.match(inspector, /Persisted Electron artifact differs from the verified package/);
-  assert.match(rehearsal, /artifacts\/release\/apps\/voxel-electron/);
-  assert.doesNotMatch(rehearsal, /voxelEditor\/release-electron/);
-});
-
 test('release metadata uses platform-independent logical paths', () => {
   assert.equal(
     portableReleasePath('artifacts\\release\\rehearsal\\evidence'),
@@ -185,7 +174,7 @@ function completeFixture() {
       buildDefinition: {
         externalParameters: { releaseVersion: version, contentTier: 'full', publish: false },
         resolvedDependencies: [
-          { uri: 'git+https://github.com/HypnosNova/HaiYue.git', digest: { gitCommit: revision } },
+          { uri: 'git+https://github.com/HaiyueStudio/Engine.git', digest: { gitCommit: revision } },
           { uri: 'file:package-lock.json', digest: { sha256: packageLockSha256 } },
           { uri: 'file:review/api/release-manifest.json', digest: { sha256: releaseManifestSha256 } },
         ],
@@ -226,10 +215,7 @@ function completeFixture() {
   };
   const releaseNotes = Buffer.from(`# HaiYue ${version}\n`);
   const evidenceFiles = [
-    `${evidenceRoot}/g03-package-app-candidate.json`,
     `${evidenceRoot}/public-packages.json`,
-    ...['animation-editor', 'hya-dashboard', 'hya-viewer', 'scene-editor', 'voxel-pwa']
-      .map(name => `${evidenceRoot}/app-manifests/${name}.json`),
     `${supplyRoot}/npm-audit-production.json`,
     `${supplyRoot}/dependencies.cdx.json`,
   ];
@@ -266,3 +252,19 @@ function completeFixture() {
 function validate(fixture) {
   return validateReleaseRehearsalBundle(fixture);
 }
+
+test('raw package evidence binds clean release mode, every package and exact archived bytes', () => {
+  const manifest = JSON.parse(readFileSync(new URL('../review/api/release-manifest.json', import.meta.url)));
+  const packages = manifest.artifacts.filter(item => item.kind === 'npm-package');
+  const sha256 = 'd'.repeat(64);
+  const rehearsal = { source: { revision: 'a'.repeat(40) }, artifacts: packages.map(item => ({ id: item.id, sha256 })) };
+  const report = { mode: 'release', sourceState: { revision: rehearsal.source.revision, workingTreeDirty: false },
+    packages: packages.map(item => ({ name: item.packageName, version: item.version, sha256, deterministicRepackSha256: sha256 })),
+    gate: { status: 'passed', errors: [] } };
+  assert.deepEqual(validatePublicPackageEvidence(report, manifest, rehearsal), []);
+  for (const mutate of [r => r.mode = 'development', r => r.sourceState.workingTreeDirty = true,
+    r => r.sourceState.revision = 'b'.repeat(40), r => r.packages.pop(), r => r.packages[0].sha256 = 'e'.repeat(64),
+    r => r.packages[0].deterministicRepackSha256 = 'e'.repeat(64), r => r.gate.errors.push('failed')]) {
+    const bad = structuredClone(report); mutate(bad); assert.ok(validatePublicPackageEvidence(bad, manifest, rehearsal).length);
+  }
+});

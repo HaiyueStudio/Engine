@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { SHARED_SCENE_FRAME_UNIFORM_CALL } from './scene-frame-source-policy.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const violations = [];
@@ -53,8 +54,8 @@ const instanced3D = source('engine/src/systems/InstancedMesh3DRenderSystem.ts');
 const blinnPhong = source('engine/src/systems/BlinnPhongRenderSystem.ts');
 requireMatch(render3D, /getSceneRenderEnvironment\(frameData, world\)/, 'Render3DSystem does not consume the shared scene render environment');
 requireMatch(instanced3D, /getSceneRenderEnvironment\(frameData, world\)/, 'InstancedMesh3DRenderSystem does not consume the shared scene render environment');
-requireMatch(render3D, /getSceneFrameUniformSnapshot\(cameraFrame, sceneEnvironment\.fog\)/, 'Render3DSystem does not build the shared scene frame uniform snapshot');
-requireMatch(instanced3D, /getSceneFrameUniformSnapshot\(cameraFrame, sceneEnvironment\.fog\)/, 'InstancedMesh3DRenderSystem does not share the scene frame uniform snapshot');
+requireMatch(render3D, SHARED_SCENE_FRAME_UNIFORM_CALL, 'Render3DSystem does not build the shared scene frame uniform snapshot');
+requireMatch(instanced3D, SHARED_SCENE_FRAME_UNIFORM_CALL, 'InstancedMesh3DRenderSystem does not share the scene frame uniform snapshot');
 requireMatch(blinnPhong, /sceneEnvironment\.pbrLights/, 'BlinnPhongRenderSystem does not consume the shared light snapshot');
 requireMatch(blinnPhong, /sceneFrameUniforms/, 'BlinnPhongRenderSystem does not consume the shared scene frame uniform snapshot');
 for (const [name, value] of [['Render3DSystem', render3D], ['InstancedMesh3DRenderSystem', instanced3D], ['BlinnPhongRenderSystem', blinnPhong]]) {

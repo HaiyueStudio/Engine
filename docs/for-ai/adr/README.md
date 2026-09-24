@@ -127,3 +127,5 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0104：Rive 研发分支与 0.1.1 发布范围](./0104-rive-development-branch.md)
 
 - [0105：UI 与 Engine 独立发布门禁](0105-independent-library-release-gates.md)
+- [0106：0.2.0 能力范围与包体预算](0106-release-0.2.0-capability-budgets.md)
+- [0107：Mac 与 Windows 原生 GPU 发布资格路径](0107-native-macos-release-qualification.md)

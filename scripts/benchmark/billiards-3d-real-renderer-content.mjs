@@ -19,7 +19,7 @@ export const BILLIARDS_3D_SCENE_SHA256 =
   '9e7f393aba90a91a1a84a42be9583ce627bfa2a0ee996c0b843d21f9514ba007';
 
 const BILLIARDS_3D_SCENE_URL =
-  new URL(`../../${BILLIARDS_3D_SCENE_PATH}`, import.meta.url);
+  new URL('../fixtures/lighting-content/pad-simulator/scenes/billiards-3d-import.scene.json', import.meta.url);
 const REPRESENTATIVE_DIRECTIONAL_SHADOW = Object.freeze({
   mapSize: 256,
   extent: 576,
