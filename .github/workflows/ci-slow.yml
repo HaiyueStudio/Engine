@@ -3,7 +3,7 @@ name: CI Slow
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [master]
   schedule:
     - cron: '30 18 * * *'
   workflow_dispatch:

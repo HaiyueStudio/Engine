@@ -21,7 +21,7 @@ bootstrap 显式选择 `--evidence=diagnostic`，仅写 `artifacts/webgpu/lighti
 
 正式发布仍只通过 `lighting:evidence:check` 验证 `artifacts/webgpu/lighting-scaling.json`，要求当前 clean revision、完整 workload、合格原生 GPU 与新鲜时间戳。诊断读取不会写入或覆盖正式文件。hosted CI 的诊断不能代替物理设备正式发布证据。
 
-`.github/workflows/ci-fast.yml` 在 PR/main 执行 bootstrap 与 Engine fast；`ci-slow.yml` 在 PR/main 选择 smoke、nightly 选择 full，manual dispatch 可选 smoke/full。`ci-release-rehearsal.yml` 在版本 tag 或显式 dispatch 执行 Engine full slow，再运行 no-publish worker 和独立 bundle validator。
+`.github/workflows/ci-fast.yml` 在 PR/master 执行 bootstrap 与 Engine fast；`ci-slow.yml` 在 PR/master 选择 smoke、nightly 选择 full，manual dispatch 可选 smoke/full。`ci-release-rehearsal.yml` 在版本 tag 或显式 dispatch 执行 Engine full slow，再运行 no-publish worker 和独立 bundle validator。
 
 三个工作流使用 `npm ci`、精确 SHA 锁定 Actions、`contents: read`，checkout 不持久化凭据。失败时保留原始报告。没有 npm publish、tag 创建、push、签名或部署动作；正式灯光和跨引擎性能由独立 native GPU job 采集。
 
@@ -65,7 +65,7 @@ node scripts/release-rehearsal-policy.mjs --bundle artifacts/release/rehearsal
 
 演练通过不代表已经发布。release owner 在同一 frozen revision 收齐完整 correctness、正式性能、制品与演练结果后，核对 `release-plan.json`，再按具体操作取得 tag、push、npm、GitHub Release、Pages 部署等授权。发布凭据只进入受保护环境，不写入本地文件、日志或 artifact，见 [`SECURITY.md`](../../SECURITY.md)。
 
-签名 tag 的正式 Pages 部署由 `deploy-pages.yml` 执行；已有 master 自动示例预览由 `deploy-pages-ci.yml` 单独管理。后者不是正式 npm 发布或签名 tag 的证据，两者均保留 protected `github-pages` 环境。
+Pages 使用 GitHub Actions 部署 `master`，不需要 `gh-pages` 分支或 release tag。`deploy-pages-ci.yml` 在 push 到 `master` 时构建该次提交；`deploy-pages.yml` 支持手动 dispatch，显式 checkout `master`，与触发页面选中的分支无关。两者均先构建基础库、示例并校验目录，再组装和上传站点；共享 `github-pages` 并发组，部署写权限仅存在于受保护的 `github-pages` job。该站点部署不代表 npm 包已发布，也不替代冻结版本验收。
 
 失败时停止后续外部动作，保留候选与原始证据。npm 版本不能覆盖，应 deprecate 问题版本并发布修复；静态部署可切回上一 immutable deployment。修复后在新的 clean revision 重跑相关完整门禁，不复用旧候选的正式结论。
 

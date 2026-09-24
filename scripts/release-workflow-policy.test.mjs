@@ -23,9 +23,9 @@ test('checked-in workflows preserve release routing and least-privilege policy',
   assert.match(workflows['ci-device-performance.yml'], /runs-on: \[self-hosted, haiyue-performance\]/);
   assert.match(workflows['ci-device-performance.yml'], /performance:compare:formal/);
   assert.match(workflows['deploy-pages.yml'], /workflow_dispatch:/);
-  assert.match(workflows['deploy-pages.yml'], /ref: \$\{\{ inputs\.release_tag \}\}/);
-  assert.match(workflows['deploy-pages.yml'], /node automation\/scripts\/assemble-pages-release\.mjs/);
-  assert.match(workflows['deploy-pages.yml'], /PAGES_SOURCE_ROOT: \$\{\{ github\.workspace \}\}\/release/);
+  assert.match(workflows['deploy-pages.yml'], /ref: master/);
+  assert.match(workflows['deploy-pages.yml'], /node scripts\/assemble-pages-release\.mjs/);
+  assert.doesNotMatch(workflows['deploy-pages.yml'], /release_tag/);
 });
 
 test('policy rejects floating actions, secrets and automatic publish commands', () => {
@@ -43,6 +43,31 @@ test('policy rejects an automatic or over-privileged Pages deployment', () => {
     'deploy-pages.yml': `on:\n  push:\npermissions:\n  contents: write\n  pages: write\n  id-token: write\nsteps:\n  - uses: actions/deploy-pages@v4\n`,
   });
   assert.ok(errors.some(error => error.includes('unexpected write permission')));
-  assert.ok(errors.some(error => error.includes('must not run automatically')));
+  assert.ok(errors.some(error => error.includes('leave push routing')));
   assert.ok(errors.some(error => error.includes('not pinned')));
+});
+
+test('Pages policy rejects wrong source branches and concurrent deployment lanes', () => {
+  const manual = readFileSync(resolve(root, '.github/workflows/deploy-pages.yml'), 'utf8');
+  const automatic = readFileSync(resolve(root, '.github/workflows/deploy-pages-ci.yml'), 'utf8');
+  for (const ref of ['main', '${{ github.ref }}', '${{ inputs.release_tag }}']) {
+    const errors = validateReleaseWorkflows({ 'deploy-pages.yml': manual.replace('ref: master', `ref: ${ref}`) });
+    assert.ok(errors.includes('Manual Pages deploy must checkout master'), ref);
+  }
+  const errors = validateReleaseWorkflows({
+    'deploy-pages.yml': manual,
+    'deploy-pages-ci.yml': automatic
+      .replace('group: github-pages', 'group: github-pages-ci')
+      .replace('ref: ${{ github.sha }}', 'ref: master'),
+  });
+  assert.ok(errors.includes('Pages CI must share the serialized github-pages deployment group'));
+  assert.ok(errors.includes('Pages CI must checkout the exact pushed commit'));
+});
+
+test('both Pages entrypoints reject deployment privileges in the build job', () => {
+  for (const name of ['deploy-pages.yml', 'deploy-pages-ci.yml']) {
+    const source = readFileSync(resolve(root, '.github/workflows', name), 'utf8');
+    const errors = validateReleaseWorkflows({ [name]: source.replace('pages: read', 'pages: write') });
+    assert.ok(errors.some(error => error.includes('write permissions must stay in deploy job')), name);
+  }
 });

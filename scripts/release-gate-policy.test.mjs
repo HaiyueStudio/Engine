@@ -213,10 +213,10 @@ test('a newly added full entry is consumed without a second static target list',
   );
 });
 
-test('CI routes pull requests and main pushes to smoke, and scheduled runs to full', () => {
+test('CI routes pull requests and master pushes to smoke, and scheduled runs to full', () => {
   const workflow = readFileSync(new URL('../.github/workflows/ci-slow.yml', import.meta.url), 'utf8');
   assert.match(workflow, /pull_request:/);
-  assert.match(workflow, /push:\s*\n\s*branches: \[main\]/);
+  assert.match(workflow, /push:\s*\n\s*branches: \[master\]/);
   assert.match(workflow, /schedule:\s*\n\s*- cron:/);
   assert.match(workflow, /content_tier:[\s\S]*options:[\s\S]*- smoke[\s\S]*- full/);
   assert.match(workflow, /github\.event_name == 'schedule' && 'full'/);
