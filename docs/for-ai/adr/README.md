@@ -131,3 +131,4 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0107：Mac 与 Windows 原生 GPU 发布资格路径](0107-native-macos-release-qualification.md)
 
 - [0108：0.2.1 GPU 实例与模拟接入](0108-gpu-instance-simulation-021.md)
+- [0109：0.2.1 Deferred 与 Tiled 光照合同](0109-deferred-lighting-021-contract.md)

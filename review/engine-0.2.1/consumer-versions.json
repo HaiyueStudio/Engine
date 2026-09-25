@@ -1,0 +1,653 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-09-25",
+  "scope": "read-only manifest and lockfile census; no compatibility claimed",
+  "repositories": [
+    {
+      "repository": "Engine",
+      "revision": "365552908414ffa193c63a62aaf682f4ddb23b94",
+      "files": [
+        {
+          "path": "examples/package.json",
+          "sha256": "014565f8500f69df63829a7f3541eb60d6abadeac9e838bb0309d2d2dbeb3d13",
+          "matches": {
+            "dependencies": {
+              "@haiyue/animation-spec": "0.2.1",
+              "@haiyue/engine": "0.2.1",
+              "@haiyue/extensions": "0.2.1"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "extensions/package.json",
+          "sha256": "94b8d1122539e9befc56b614f787d88e464046fd939ccd7f93e515580e7331fa",
+          "matches": {
+            "dependencies": {},
+            "peerDependencies": {
+              "@haiyue/animation-spec": ">=0.2.0 <0.3.0",
+              "@haiyue/engine": ">=0.2.0 <0.3.0"
+            },
+            "devDependencies": {
+              "@haiyue/animation-spec": "0.2.1",
+              "@haiyue/engine": "0.2.1"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "repository": "UI",
+      "revision": "dafd51e4de978e7fb6346ffdf9ec1cd8cbba297a",
+      "files": []
+    },
+    {
+      "repository": "Editor",
+      "revision": "754bf1dde92bf65d2114c76ff92fbf6eeefa54c4",
+      "files": [
+        {
+          "path": "package-lock.json",
+          "sha256": "d0104470643a1c35aae77b549ddaad49d50cfc31552cb8d2df0a0359ffc753bc",
+          "matches": {
+            "node_modules/@haiyue/animation-spec": {
+              "version": "0.1.0",
+              "resolved": null,
+              "integrity": null
+            },
+            "node_modules/@haiyue/engine": {
+              "version": "0.1.0",
+              "resolved": null,
+              "integrity": null
+            },
+            "node_modules/@haiyue/extensions": {
+              "version": "0.1.0",
+              "resolved": null,
+              "integrity": null
+            },
+            "node_modules/@haiyue/shader-language": {
+              "version": "0.1.0",
+              "resolved": null,
+              "integrity": null
+            },
+            "node_modules/@haiyue/ui": {
+              "version": "0.1.0",
+              "resolved": null,
+              "integrity": null
+            }
+          }
+        },
+        {
+          "path": "editor/package.json",
+          "sha256": "2fb40b8acccc72e850b2254e713e2c535bc435417695cba709a6a8ae4b8d8c81",
+          "matches": {
+            "dependencies": {
+              "@haiyue/editor-app-kit": "0.1.0",
+              "@haiyue/editor-platform": "0.1.0",
+              "@haiyue/editor-plugin-sdk": "0.1.0",
+              "@haiyue/editor-shell": "0.1.1",
+              "@haiyue/animation-spec": ">=0.1.0 <0.2.0",
+              "@haiyue/extensions": ">=0.1.0 <0.2.0",
+              "@haiyue/shader-language": ">=0.1.0 <0.2.0",
+              "@haiyue/ui": ">=0.1.0 <0.2.0",
+              "@haiyue/engine": ">=0.1.0 <0.2.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "editor-platform/package.json",
+          "sha256": "e345d2b665120dc1ab29c9f24fda4768bc841f74e977518cf1aba1068c7c2575",
+          "matches": {
+            "dependencies": {
+              "@haiyue/editor-plugin-sdk": "0.1.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "editor-app-kit/package.json",
+          "sha256": "4a6602b440dfb40c9631dd673b3ae727f634a45fad30af6c36373bbba881df07",
+          "matches": {
+            "dependencies": {
+              "@haiyue/editor-plugin-sdk": "0.1.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "voxelEditor/package.json",
+          "sha256": "e105a22ce6016575afb8f286f96267c866ffa4f34c195abef1bdf8905ab8a3ad",
+          "matches": {
+            "dependencies": {
+              "@haiyue/editor-app-kit": "0.1.0",
+              "@haiyue/editor-platform": "0.1.0",
+              "@haiyue/editor-plugin-sdk": "0.1.0",
+              "@haiyue/editor-shell": "0.1.1",
+              "@haiyue/engine": ">=0.1.0 <0.2.0",
+              "@haiyue/ui": ">=0.1.0 <0.2.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "editor-shell/package.json",
+          "sha256": "1b99bcd14cb670512c59bc8985122133fd5150beeb2f766c7eb2c9c72c92bb9d",
+          "matches": {
+            "dependencies": {
+              "@haiyue/editor-plugin-sdk": "0.1.0",
+              "@haiyue/editor-platform": "0.1.0",
+              "@haiyue/ui": ">=0.1.0 <0.2.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "AnimationEditor/package.json",
+          "sha256": "038b153094e936333d6160967a5c08d5d871a66deaf76445bb6397cd3c739843",
+          "matches": {
+            "dependencies": {
+              "@haiyue/editor-app-kit": "0.1.0",
+              "@haiyue/editor-platform": "0.1.0",
+              "@haiyue/editor-plugin-sdk": "0.1.0",
+              "@haiyue/editor-shell": "0.1.1",
+              "@haiyue/animation-spec": ">=0.1.0 <0.2.0",
+              "@haiyue/engine": ">=0.1.0 <0.2.0",
+              "@haiyue/extensions": ">=0.1.0 <0.2.0",
+              "@haiyue/ui": ">=0.1.0 <0.2.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        }
+      ]
+    },
+    {
+      "repository": "AIStudio",
+      "revision": "c4fa2477d58ad89f7b1e5223e3f00f7b65918c38",
+      "files": [
+        {
+          "path": "package.json",
+          "sha256": "8680558a3df11e9af446ebc2c700e2a7b99cf3476a75651050133f0f3c1a791e",
+          "matches": {
+            "dependencies": {
+              "@haiyue/animation-spec": "file:vendor/haiyue-animation-spec-0.1.0.tgz",
+              "@haiyue/editor-app-kit": "file:vendor/haiyue-editor-app-kit-0.1.0.tgz",
+              "@haiyue/editor-platform": "file:vendor/haiyue-editor-platform-0.1.0.tgz",
+              "@haiyue/editor-plugin-sdk": "file:vendor/haiyue-editor-plugin-sdk-0.1.0.tgz",
+              "@haiyue/editor-shell": "file:vendor/haiyue-editor-shell-0.1.1.tgz",
+              "@haiyue/engine": "file:vendor/haiyue-engine-0.1.0-orthographic-picking.tgz",
+              "@haiyue/extensions": "file:vendor/haiyue-extensions-0.1.0.tgz",
+              "@haiyue/ui": "file:vendor/haiyue-ui-0.1.4-expandable.tgz"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "4be493d597603ebfeb9f77365d4cc9a517af14dd19af91a76a33d4acdf8a2bfe",
+          "matches": {
+            "node_modules/@haiyue/animation-spec": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-animation-spec-0.1.0.tgz",
+              "integrity": "sha512-4RuqxC8fVGxQSviit53DgCY70ffbTkqC0ocFqRu2UzS1bT7H4ioCRVTmuR29wv13JVUcqHIjPVlKCAQi7x9+7w=="
+            },
+            "node_modules/@haiyue/editor-app-kit": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-editor-app-kit-0.1.0.tgz",
+              "integrity": "sha512-Ng19nu1aftNGG+154RHL0BwruXj74PTG5Fk99pdAjNA0K9aiy0DgwPz41coNI2XrdveRBEZHI0PCOhQRHJVMUw=="
+            },
+            "node_modules/@haiyue/editor-platform": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-editor-platform-0.1.0.tgz",
+              "integrity": "sha512-LXHtWGYIbOz/ju9ZUzFcD5bZnGbqazJspU7e8rfTt0vbQjZwwdD6gqsD6N0iBw4mPaiuEg0P6yNdHj6UCywbyg=="
+            },
+            "node_modules/@haiyue/editor-plugin-sdk": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-editor-plugin-sdk-0.1.0.tgz",
+              "integrity": "sha512-ZT43u4tgcda4SdKaRZhxxm4HsusEyvjn43uItj/HaeWcujOgRpgTdtWBYZP7Y2Ee6lBH1k4mI0DMZ4kH51kLxA=="
+            },
+            "node_modules/@haiyue/editor-shell": {
+              "version": "0.1.1",
+              "resolved": "file:vendor/haiyue-editor-shell-0.1.1.tgz",
+              "integrity": "sha512-RqAU5zkbDsl2jdRFv9iv7CvTrWq2VONjcouaZtqOGNouqrx53oywI20D4/BcgMwfFTfu1dmUlGhkNOGknC9npA=="
+            },
+            "node_modules/@haiyue/engine": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-engine-0.1.0-orthographic-picking.tgz",
+              "integrity": "sha512-oRFHDLfR3G6aaTGQ9klJ40uUE0fTxUoMdspfCbMhuucpRtAwkFXatyPwDLtoMKe4rm+Ms3AU+OoEXYoHGMixnA=="
+            },
+            "node_modules/@haiyue/extensions": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-extensions-0.1.0.tgz",
+              "integrity": "sha512-dbtWJtq3kUzGCyO8Z/o19JMwTlYP7XhhVrUI6zMiexARuBMzqX9mOp4rBb5bUXQxKKnOfhih52H9TIQl2N3AaQ=="
+            },
+            "node_modules/@haiyue/ui": {
+              "version": "0.1.4",
+              "resolved": "file:vendor/haiyue-ui-0.1.4-expandable.tgz",
+              "integrity": "sha512-OWJcV0xd4z9RnN7JoZ4D5J+Jk+Adckh0jNXIAwBPpGLOaBuHDHiQeCjEniPOX6iWTwiyLx8WLAZ4WHvq+wTFNQ=="
+            }
+          }
+        },
+        {
+          "path": "packages/agent-backends/package.json",
+          "sha256": "3a5fa28c08ca0a42dc518124e733341bc909837fecb0bb29f0afa3685fe3dc8b",
+          "matches": {
+            "dependencies": {
+              "@haiyue/ai-studio-agent-runtime": "0.0.0",
+              "@haiyue/ai-studio-contracts": "0.0.0",
+              "@haiyue/ai-studio-harness-bridge": "0.0.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "packages/studio-shell/package.json",
+          "sha256": "89af04ac7b55a113c5e7008c6fbc0193c77650711cac3efd280c25b7570f7eef",
+          "matches": {
+            "dependencies": {
+              "@haiyue/ai-studio-contracts": "0.0.0"
+            },
+            "peerDependencies": {
+              "@haiyue/editor-app-kit": "0.1.0",
+              "@haiyue/editor-plugin-sdk": "0.1.0",
+              "@haiyue/editor-shell": "0.1.1",
+              "@haiyue/ui": ">=0.1.4 <0.2.0"
+            },
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "packages/agent-orchestration/package.json",
+          "sha256": "08211431104d54539074f5fe664cf52d76f87affa6d52d5a2ad1e253250b55a8",
+          "matches": {
+            "dependencies": {
+              "@haiyue/ai-studio-agent-runtime": "0.0.0",
+              "@haiyue/ai-studio-contracts": "0.0.0",
+              "@haiyue/ai-studio-game-authoring-tools": "0.0.0",
+              "@haiyue/ai-studio-operation-log": "0.0.0",
+              "@haiyue/ai-studio-shell": "0.0.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "packages/harness-bridge/package.json",
+          "sha256": "e1beebf2bfa62c2d7fbc74e4399e7695b7199345cfd3811c8d5364ad96698e65",
+          "matches": {
+            "dependencies": {
+              "@haiyue/ai-studio-contracts": "0.0.0",
+              "@haiyue/ai-studio-kernel": "0.0.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "packages/operation-log/package.json",
+          "sha256": "e8d5f22a2819fce1582866ccfe0e69b0a996165515e4c78eba16fdb8dfe963c3",
+          "matches": {
+            "dependencies": {
+              "@haiyue/ai-studio-contracts": "0.0.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "packages/editor-plugins/package.json",
+          "sha256": "96a37263c46c2c30905f4b4380bd1c01dfc6ad97ffb44c6862707e345ec6f7aa",
+          "matches": {
+            "dependencies": {
+              "@haiyue/ai-studio-contracts": "0.0.0",
+              "@haiyue/ai-studio-kernel": "0.0.0",
+              "@haiyue/ai-studio-operation-log": "0.0.0",
+              "@haiyue/engine": "0.1.0"
+            },
+            "peerDependencies": {
+              "@haiyue/editor-platform": "0.1.0",
+              "@haiyue/editor-plugin-sdk": "0.1.0"
+            },
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "apps/ai-studio/package.json",
+          "sha256": "c103773037dfcd9947345b8f29e78bb358effe26d7f0c060d519e77f595253e9",
+          "matches": {
+            "dependencies": {
+              "@haiyue/ai-studio-agent-backends": "0.0.0",
+              "@haiyue/ai-studio-agent-runtime": "0.0.0",
+              "@haiyue/ai-studio-contracts": "0.0.0",
+              "@haiyue/ai-studio-editor-plugins": "0.0.0",
+              "@haiyue/ai-studio-game-authoring-tools": "0.0.0",
+              "@haiyue/ai-studio-harness-bridge": "0.0.0",
+              "@haiyue/ai-studio-kernel": "0.0.0",
+              "@haiyue/ai-studio-operation-log": "0.0.0",
+              "@haiyue/ai-studio-script-preview": "0.0.0",
+              "@haiyue/ai-studio-shell": "0.0.0",
+              "@haiyue/editor-app-kit": "0.1.0",
+              "@haiyue/editor-platform": "0.1.0",
+              "@haiyue/engine": "0.1.0",
+              "@haiyue/ui": "0.1.4",
+              "@haiyue/ai-studio-agent-orchestration": "0.0.0",
+              "@haiyue/editor-shell": "0.1.1"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "packages/studio-kernel/package.json",
+          "sha256": "c346709a7aed332be28c554d64e14491c57f2525cdac45493582264f3ceefe5a",
+          "matches": {
+            "dependencies": {
+              "@haiyue/ai-studio-contracts": "0.0.0"
+            },
+            "peerDependencies": {
+              "@haiyue/editor-platform": "0.1.0",
+              "@haiyue/editor-plugin-sdk": "0.1.0"
+            },
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "packages/game-authoring-tools/package.json",
+          "sha256": "654eaf58588e5822078b9befae66008f49de9597cb8459305f0629788e8ca907",
+          "matches": {
+            "dependencies": {
+              "@haiyue/ai-studio-agent-runtime": "0.0.0",
+              "@haiyue/ai-studio-contracts": "0.0.0",
+              "@haiyue/ai-studio-editor-plugins": "0.0.0",
+              "@haiyue/ai-studio-operation-log": "0.0.0",
+              "@haiyue/ai-studio-script-preview": "0.0.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {
+              "@haiyue/ai-studio-agent-backends": "0.0.0",
+              "@haiyue/ai-studio-harness-bridge": "0.0.0",
+              "@haiyue/editor-platform": "0.1.0"
+            }
+          }
+        },
+        {
+          "path": "packages/agent-runtime/package.json",
+          "sha256": "252fff8795d5dfe154b5b38e763dca8c8f084238de6907eb9127c38bd81ffb6e",
+          "matches": {
+            "dependencies": {
+              "@haiyue/ai-studio-contracts": "0.0.0",
+              "@haiyue/ai-studio-operation-log": "0.0.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "packages/script-preview/package.json",
+          "sha256": "a623cf5d03273b845cd7df86681dee1f21349f38a50139277bef475dffeb2ea7",
+          "matches": {
+            "dependencies": {
+              "@haiyue/ai-studio-contracts": "0.0.0",
+              "@haiyue/ai-studio-editor-plugins": "0.0.0",
+              "@haiyue/ai-studio-operation-log": "0.0.0",
+              "@haiyue/animation-spec": "0.1.0",
+              "@haiyue/engine": "0.1.0",
+              "@haiyue/extensions": "0.1.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        }
+      ]
+    },
+    {
+      "repository": "Games",
+      "revision": "cfde6e3063c36d092cf70e9e824ff062be1e3950",
+      "files": [
+        {
+          "path": "package.json",
+          "sha256": "facd234a8fba6c0a4460457c9d7239a1b7cc32ca5e83b93d01e3af3c7fe98629",
+          "matches": {
+            "dependencies": {
+              "@haiyue/engine": ">=0.1.0 <0.2.0",
+              "@haiyue/extensions": ">=0.1.0 <0.2.0",
+              "@haiyue/ui": ">=0.1.2 <0.2.0"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "4ce26c8ae2ca62fbbdcc05910ff2df0fc59449239a90d42124a26a8fea83d1bc",
+          "matches": {
+            "node_modules/@haiyue/animation-spec": {
+              "version": "0.1.0",
+              "resolved": "file:../Engine/.artifacts/packages/haiyue-animation-spec-0.1.0.tgz",
+              "integrity": "sha512-e4I3I4kLgK+dUDzONkJvy8afDMPvpaLgH9qxiS7U7Gbzgb3pxHCUnJY58wLuqrmiNaic8gmgZFJcMIP7fcvvEg=="
+            },
+            "node_modules/@haiyue/engine": {
+              "version": "0.1.0",
+              "resolved": "file:../Engine/.artifacts/packages/haiyue-engine-0.1.0.tgz",
+              "integrity": "sha512-VtorjDXeBGWOPKxmL7hN5Xng604zeerDIrXLFjZWMBPnBA/t0WlJsDeKHd6iNqVpUmwW2aFCjyHjmXj7o4vLVg=="
+            },
+            "node_modules/@haiyue/extensions": {
+              "version": "0.1.0",
+              "resolved": "file:../Engine/.artifacts/packages/haiyue-extensions-0.1.0.tgz",
+              "integrity": "sha512-K4wGJpz0n/wIuOMkSLcUvP3yZD9Q4ip5yUVzgDNVDsGBYVnY4DrDVOpj+M3NVkF+owPeFigfvktZJaqhWooF7w=="
+            },
+            "node_modules/@haiyue/ui": {
+              "version": "0.1.2",
+              "resolved": "file:../UI/.artifacts/packages/haiyue-ui-0.1.2.tgz",
+              "integrity": "sha512-XoM2/taUb6J9Xb9TF4HM+iBJrd15tv1YVVws3RTfmgp2rTXzHTzDLcdKeX+T6Y0nH0vuVTGh3exQ7EDQJqYINg=="
+            }
+          }
+        }
+      ]
+    },
+    {
+      "repository": "Native",
+      "revision": "47a4dfb0f1b6da5507f359a99241c030d7552cb1",
+      "files": [
+        {
+          "path": "npm/package.json",
+          "sha256": "04b88759452311af4650fa31322dddb276a29ca28ccd76b6dc5f47ab9a4a57c5",
+          "matches": {
+            "dependencies": {},
+            "peerDependencies": {
+              "@haiyue/engine": "0.1.0"
+            },
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "npm/package-lock.json",
+          "sha256": "abb7ec72cd2522f18b64546d968b489e065d1d0722a87375fc5c87334b336d30",
+          "matches": {
+            "node_modules/@haiyue/engine": {
+              "version": "0.1.0",
+              "resolved": "https://registry.npmjs.org/@haiyue/engine/-/engine-0.1.0.tgz",
+              "integrity": "sha512-g7B7UOKL7tL/NQuXeFIXqXP3FO5r4Q9EuUNrXZw6evwKhJ04V+W7jARqKH6KyQzyE1Jn3nXjRwByfdiW11zdcw=="
+            }
+          }
+        },
+        {
+          "path": "examples/ak47-range/package.json",
+          "sha256": "ba1a631256cda8c4146af9b8786f9b43968bb1738b4403fa01b59ce0eb887f33",
+          "matches": {
+            "dependencies": {
+              "@haiyue/engine": "file:vendor/haiyue-engine-0.1.0.tgz",
+              "@haiyue/extensions": "file:vendor/haiyue-extensions-0.1.0.tgz",
+              "@haiyue/animation-spec": "file:vendor/haiyue-animation-spec-0.1.0.tgz"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "examples/ak47-range/package-lock.json",
+          "sha256": "83462625620b11403930af25568c1750ef5eff303e34b7eb753d061d33b1d10b",
+          "matches": {
+            "node_modules/@haiyue/animation-spec": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-animation-spec-0.1.0.tgz",
+              "integrity": "sha512-/ZMn8XMzf/RUsz1Fi+SZfamUfHsGRgHsAY2z+kKszPNk3260TA0f777icioVV3lDIUp3DuV/HiAoRy8RufUkHg=="
+            },
+            "node_modules/@haiyue/engine": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-engine-0.1.0.tgz",
+              "integrity": "sha512-SHfBHVhJkiLWjfipf3sEcZd4NE/e6jO3eIUaMUtiTLl5c/tos/LT7vuWh+CsQWbjrAja9ZZOb9Wf2ZIv636njg=="
+            },
+            "node_modules/@haiyue/extensions": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-extensions-0.1.0.tgz",
+              "integrity": "sha512-4MpQEOqomU5SJBDbd0fjtQpUJTY7o/OEeYi/z0yRsVB/YEdpuu3NMwaxeXH2dj1/07U7TyIhtQdWSkJmDAtlMA=="
+            }
+          }
+        },
+        {
+          "path": "examples/spider-solitaire/package.json",
+          "sha256": "7829d0c7cca024c96bedad96440c0cbbf38a583d0ad9ab17d61927baf1b93246",
+          "matches": {
+            "dependencies": {
+              "@haiyue/engine": "file:vendor/haiyue-engine-0.1.0.tgz"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "examples/spider-solitaire/package-lock.json",
+          "sha256": "faf0506463c3c692015619573fc29416f4b02d2897576a77b81df8a5f8095e87",
+          "matches": {
+            "node_modules/@haiyue/engine": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-engine-0.1.0.tgz",
+              "integrity": "sha512-SHfBHVhJkiLWjfipf3sEcZd4NE/e6jO3eIUaMUtiTLl5c/tos/LT7vuWh+CsQWbjrAja9ZZOb9Wf2ZIv636njg=="
+            }
+          }
+        },
+        {
+          "path": "examples/sky-strike/package-lock.json",
+          "sha256": "f4ab2afae21ebd312db081eac4d2f1d4fd4bce3e5dbb1d3a0c2038de0a9d39b3",
+          "matches": {
+            "node_modules/@haiyue/animation-spec": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-animation-spec-0.1.0.tgz",
+              "integrity": "sha512-/ZMn8XMzf/RUsz1Fi+SZfamUfHsGRgHsAY2z+kKszPNk3260TA0f777icioVV3lDIUp3DuV/HiAoRy8RufUkHg=="
+            },
+            "node_modules/@haiyue/engine": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-engine-0.1.0.tgz",
+              "integrity": "sha512-SHfBHVhJkiLWjfipf3sEcZd4NE/e6jO3eIUaMUtiTLl5c/tos/LT7vuWh+CsQWbjrAja9ZZOb9Wf2ZIv636njg=="
+            },
+            "node_modules/@haiyue/extensions": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-extensions-0.1.0.tgz",
+              "integrity": "sha512-CyR9ReIQgjAXaepk0tSpun0jknd0tvuzqGzXCWkOo7jkIUYnwcIHnQcjtg46IcLE2napEj0+2eKfppD5FIRaQA=="
+            }
+          }
+        },
+        {
+          "path": "examples/sky-strike/package.json",
+          "sha256": "6bcc8e49d13fdbc9e664a0a6145a58d190bb10f558a0a93da0aef1d90bd08ec1",
+          "matches": {
+            "dependencies": {
+              "@haiyue/animation-spec": "file:vendor/haiyue-animation-spec-0.1.0.tgz",
+              "@haiyue/engine": "file:vendor/haiyue-engine-0.1.0.tgz",
+              "@haiyue/extensions": "file:vendor/haiyue-extensions-0.1.0.tgz"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "examples/ios-pbr-orbit/package-lock.json",
+          "sha256": "b4710468fc6de8414b7079eb6aac5d5273cd2c87a2b58ea478ecdd1f61a5f01d",
+          "matches": {
+            "node_modules/@haiyue/engine": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-engine-0.1.0.tgz",
+              "integrity": "sha512-iaNOF4EquRZmXUJTYtw63rWCc32jeIrcEu3ZPffUHI1jdyfT5Vl/amosPStg2fD6Q+l/EsLGs+OXjBvziXqDCw=="
+            }
+          }
+        },
+        {
+          "path": "examples/rubiks-cube/package.json",
+          "sha256": "54d11045b1cb0ef4b68a63442a4da975fb1d1958bc1357717d1d45052084a242",
+          "matches": {
+            "dependencies": {
+              "@haiyue/engine": "file:vendor/haiyue-engine-0.1.0.tgz"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "examples/rubiks-cube/package-lock.json",
+          "sha256": "41e36d4caef0ae8befa70767724038002f120d810ababa9470b78f1135a53c42",
+          "matches": {
+            "node_modules/@haiyue/engine": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-engine-0.1.0.tgz",
+              "integrity": "sha512-SHfBHVhJkiLWjfipf3sEcZd4NE/e6jO3eIUaMUtiTLl5c/tos/LT7vuWh+CsQWbjrAja9ZZOb9Wf2ZIv636njg=="
+            }
+          }
+        },
+        {
+          "path": "examples/ios-pbr-orbit/package.json",
+          "sha256": "ad89f9168dd92fa01e1b5f4b94535d7a1458bf05dd6c32a4a16a3cfdeedc94a6",
+          "matches": {
+            "dependencies": {
+              "@haiyue/engine": "file:vendor/haiyue-engine-0.1.0.tgz"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "examples/neon-circuit/package.json",
+          "sha256": "bcd39eefe9e8cd85a01c54b97fc952fef32ed16cbe8900b49c90dbe240cff042",
+          "matches": {
+            "dependencies": {
+              "@haiyue/engine": "file:vendor/haiyue-engine-0.1.0.tgz",
+              "@haiyue/extensions": "file:vendor/haiyue-extensions-0.1.0.tgz",
+              "@haiyue/animation-spec": "file:vendor/haiyue-animation-spec-0.1.0.tgz"
+            },
+            "peerDependencies": {},
+            "devDependencies": {}
+          }
+        },
+        {
+          "path": "examples/neon-circuit/package-lock.json",
+          "sha256": "44a141e5b7d6b93f1de42f9bbb2be5780239cb59a88de42e2ca13174c9048836",
+          "matches": {
+            "node_modules/@haiyue/animation-spec": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-animation-spec-0.1.0.tgz",
+              "integrity": "sha512-/ZMn8XMzf/RUsz1Fi+SZfamUfHsGRgHsAY2z+kKszPNk3260TA0f777icioVV3lDIUp3DuV/HiAoRy8RufUkHg=="
+            },
+            "node_modules/@haiyue/engine": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-engine-0.1.0.tgz",
+              "integrity": "sha512-bukLNqqNwlpRwt9cXzGoHJTgMu6zL+a5EnZjEIj8HDDGQ63TzoSG7Rk2+PV2Ve3SgLTgw9nVy8PZViLIgSVHdw=="
+            },
+            "node_modules/@haiyue/extensions": {
+              "version": "0.1.0",
+              "resolved": "file:vendor/haiyue-extensions-0.1.0.tgz",
+              "integrity": "sha512-4MpQEOqomU5SJBDbd0fjtQpUJTY7o/OEeYi/z0yRsVB/YEdpuu3NMwaxeXH2dj1/07U7TyIhtQdWSkJmDAtlMA=="
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

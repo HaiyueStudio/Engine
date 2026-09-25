@@ -1,0 +1,549 @@
+{
+  "schemaVersion": 1,
+  "contractId": "engine-deferred-021-v1",
+  "state": "candidate-awaiting-baseline",
+  "productionImplemented": false,
+  "owner": "m18/g01-contracts-baseline",
+  "sourceRevision": "365552908414ffa193c63a62aaf682f4ddb23b94",
+  "adr": "docs/for-ai/adr/0109-deferred-lighting-021-contract.md",
+  "sampling": {
+    "warmupFrames": 120,
+    "samplesPerCohort": 300,
+    "cohorts": 3,
+    "percentile": "nearest-rank",
+    "aggregation": "pool-all-equal-sized-cohorts",
+    "dropSlowSamples": false,
+    "gpuTiming": "timestamp-query; separate from CPU population",
+    "cpuTiming": "prepare+record+submit excluding queue wait",
+    "cohortOrder": "alternate adapters and reverse case order",
+    "hostEvidence": {
+      "command": "pmset -g therm",
+      "when": "before-and-after-each-capture",
+      "cpuSpeedLimit": 100,
+      "cpuSchedulerLimit": 100,
+      "scope": "G01 frozen macOS host; snapshots do not prove uninterrupted clock stability"
+    }
+  },
+  "devices": [
+    {
+      "id": "mac-amd-rdna1",
+      "class": "discrete",
+      "powerPreference": "high-performance",
+      "vendor": "amd",
+      "architecture": "rdna-1",
+      "captureOwner": "G01 local Chrome runner; G05/G07 repeat same protocol",
+      "absoluteBudgetStatus": "pending-measurement",
+      "cpuP95Ms": null,
+      "gpuP95Ms": null
+    },
+    {
+      "id": "mac-intel-gen9",
+      "class": "integrated",
+      "powerPreference": "low-power",
+      "vendor": "intel",
+      "architecture": "gen-9",
+      "captureOwner": "G01 local Chrome runner; G05/G07 repeat same protocol",
+      "absoluteBudgetStatus": "pending-measurement",
+      "cpuP95Ms": null,
+      "gpuP95Ms": null
+    }
+  ],
+  "correctness": {
+    "gbufferMaxRelativeError": 0.001,
+    "gbufferMaxAbsoluteError": 0.0005,
+    "normalMaxAngleDegrees": 0.1,
+    "tiledHdrRelativeError": 0.002,
+    "tiledHdrAbsoluteError": 0.002,
+    "tiledLdrMaxChannelDelta": 2,
+    "forwardHdrRelativeError": 0.005,
+    "forwardHdrAbsoluteError": 0.003,
+    "forwardLdrMaxChannelDelta": 3,
+    "validationErrors": 0,
+    "ownerResidual": 0,
+    "eligibleLightOmissions": 0
+  },
+  "relativeBudgets": {
+    "smallSceneCpuP95RegressionRatio": 0.05,
+    "smallSceneGpuP95RegressionRatio": 0.05,
+    "sparse256CullLightingP95ImprovementRatio": 0.2,
+    "overlap128FrameGpuP95RegressionRatio": 0.1
+  },
+  "layout": {
+    "gbufferColorFormats": [
+      "rgba16float",
+      "rgba16float",
+      "rgba16float"
+    ],
+    "depthFormat": "depth32float",
+    "sampleCount": 1,
+    "colorBytesPerPixel": 24,
+    "depthBytesPerPixel": 4,
+    "hdrBytesPerPixelSeparate": 8,
+    "localCapacity": 1024,
+    "directionalCapacity": 8,
+    "lightStrideBytes": 64,
+    "tileSizePixels": 16,
+    "tileHeaderBytes": 16,
+    "tileIndexCapacity": 128,
+    "indexStrideBytes": 4,
+    "computeWorkgroupInvocations": 64,
+    "overflow": "same-frame-full-view-list",
+    "viewAmbientAggregateCapacity": 1,
+    "viewHeaderBytes": 32,
+    "ambientOwner": "per-view after effective source selection; no new public light layer-mask API"
+  },
+  "memory": {
+    "maxWidth": 1920,
+    "maxHeight": 1080,
+    "maxViews": 4,
+    "maxLiveTargetGenerations": 2,
+    "maxDeferredBytesPerViewGeneration": 67108864,
+    "maxDeferredTargetBytesTotal": 536870912,
+    "normalFrameNewGpuResources": 0,
+    "driverResidentMemoryClaim": false
+  },
+  "packageReview": {
+    "existingBudgetsUnchanged": true,
+    "newConsumer": "deferred-renderer-only (G07 registration)",
+    "ordinaryConsumersMayImportDeferredShaders": false,
+    "newShaderBytesVariantsPipelines": "measure and attribute before approval; not a blanket increase",
+    "reviewOwner": "G07"
+  },
+  "content": {
+    "legacyFixture": "scripts/fixtures/lighting-content/pad-simulator/scenes/billiards-3d-import.scene.json",
+    "legacyFixtureSha256": "9e7f393aba90a91a1a84a42be9583ce627bfa2a0ee996c0b843d21f9514ba007",
+    "legacyLimit": "mixed materials and 8-total Forward; not full-light correctness oracle",
+    "newFixtureId": "deferred-room-021-v1",
+    "seed": 21128,
+    "roomMeters": [
+      24,
+      8,
+      24
+    ],
+    "opaqueObjects": 256,
+    "materialCount": 8,
+    "cameraReplay": "240 frames at fixed 60 Hz; orbit radius 18m, height 6m; angle 2pi*frame/240",
+    "lightDistribution": "seeded xorshift32; xyz within room; sparse range 2m, high-overlap range 40m; linear colors; no local shadows",
+    "dynamicRule": "sinusoidal x/z offsets amplitude 1m; phase from stable ID; fixed timestep",
+    "resolutionDpr": 1,
+    "implementationOwner": "G02 fixture; G06 example"
+  },
+  "cases": [
+    {
+      "id": "lights-0",
+      "group": "A",
+      "lights": 0,
+      "required": true,
+      "owner": "g02-deferred-core",
+      "oracle": "linear-HDR independent single-light accumulation; tiled vs reference",
+      "seed": 21128
+    },
+    {
+      "id": "lights-1",
+      "group": "A",
+      "lights": 1,
+      "required": true,
+      "owner": "g02-deferred-core",
+      "oracle": "linear-HDR independent single-light accumulation; tiled vs reference",
+      "seed": 21128
+    },
+    {
+      "id": "lights-8",
+      "group": "A",
+      "lights": 8,
+      "required": true,
+      "owner": "g02-deferred-core",
+      "oracle": "linear-HDR independent single-light accumulation; tiled vs reference",
+      "seed": 21128
+    },
+    {
+      "id": "lights-9",
+      "group": "A",
+      "lights": 9,
+      "required": true,
+      "owner": "g02-deferred-core",
+      "oracle": "linear-HDR independent single-light accumulation; tiled vs reference",
+      "seed": 21128
+    },
+    {
+      "id": "lights-32",
+      "group": "A",
+      "lights": 32,
+      "required": true,
+      "owner": "g02-deferred-core",
+      "oracle": "linear-HDR independent single-light accumulation; tiled vs reference",
+      "seed": 21128
+    },
+    {
+      "id": "lights-128",
+      "group": "A",
+      "lights": 128,
+      "required": true,
+      "owner": "g02-deferred-core",
+      "oracle": "linear-HDR independent single-light accumulation; tiled vs reference",
+      "seed": 21128
+    },
+    {
+      "id": "lights-256",
+      "group": "A",
+      "lights": 256,
+      "required": true,
+      "owner": "g02-deferred-core",
+      "oracle": "linear-HDR independent single-light accumulation; tiled vs reference",
+      "seed": 21128
+    },
+    {
+      "id": "cull-sparse",
+      "group": "B",
+      "required": true,
+      "owner": "g03-tiled-lighting",
+      "oracle": "CPU conservative membership + full-list image",
+      "seed": 21128
+    },
+    {
+      "id": "cull-high-overlap",
+      "group": "B",
+      "required": true,
+      "owner": "g03-tiled-lighting",
+      "oracle": "CPU conservative membership + full-list image",
+      "seed": 21128
+    },
+    {
+      "id": "cull-all-in-one-tile",
+      "group": "B",
+      "required": true,
+      "owner": "g03-tiled-lighting",
+      "oracle": "CPU conservative membership + full-list image",
+      "seed": 21128
+    },
+    {
+      "id": "cull-near-plane",
+      "group": "B",
+      "required": true,
+      "owner": "g03-tiled-lighting",
+      "oracle": "CPU conservative membership + full-list image",
+      "seed": 21128
+    },
+    {
+      "id": "cull-inside-light",
+      "group": "B",
+      "required": true,
+      "owner": "g03-tiled-lighting",
+      "oracle": "CPU conservative membership + full-list image",
+      "seed": 21128
+    },
+    {
+      "id": "cull-empty-tile",
+      "group": "B",
+      "required": true,
+      "owner": "g03-tiled-lighting",
+      "oracle": "CPU conservative membership + full-list image",
+      "seed": 21128
+    },
+    {
+      "id": "cull-orthographic",
+      "group": "B",
+      "required": true,
+      "owner": "g03-tiled-lighting",
+      "oracle": "CPU conservative membership + full-list image",
+      "seed": 21128
+    },
+    {
+      "id": "cull-jitter-reverse-z",
+      "group": "B",
+      "required": true,
+      "owner": "g03-tiled-lighting",
+      "oracle": "CPU conservative membership + full-list image",
+      "seed": 21128
+    },
+    {
+      "id": "cull-forced-tile-overflow",
+      "group": "B",
+      "required": true,
+      "owner": "g03-tiled-lighting",
+      "oracle": "CPU conservative membership + full-list image",
+      "seed": 21128
+    },
+    {
+      "id": "cull-source-capacity-error",
+      "group": "B",
+      "required": true,
+      "owner": "g03-tiled-lighting",
+      "oracle": "CPU conservative membership + full-list image",
+      "seed": 21128
+    },
+    {
+      "id": "material-standard",
+      "group": "C",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "oracle": "frozen material matrix + pixel/coverage reference",
+      "seed": 21128
+    },
+    {
+      "id": "material-mask-uv",
+      "group": "C",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "oracle": "frozen material matrix + pixel/coverage reference",
+      "seed": 21128
+    },
+    {
+      "id": "material-extensions",
+      "group": "C",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "oracle": "frozen material matrix + pixel/coverage reference",
+      "seed": 21128
+    },
+    {
+      "id": "material-transmission",
+      "group": "C",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "oracle": "frozen material matrix + pixel/coverage reference",
+      "seed": 21128
+    },
+    {
+      "id": "material-transparent",
+      "group": "C",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "oracle": "frozen material matrix + pixel/coverage reference",
+      "seed": 21128
+    },
+    {
+      "id": "material-deformed",
+      "group": "C",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "oracle": "frozen material matrix + pixel/coverage reference",
+      "seed": 21128
+    },
+    {
+      "id": "material-instanced",
+      "group": "C",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "oracle": "frozen material matrix + pixel/coverage reference",
+      "seed": 21128
+    },
+    {
+      "id": "material-special-forward",
+      "group": "C",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "oracle": "frozen material matrix + pixel/coverage reference",
+      "seed": 21128
+    },
+    {
+      "id": "effects-environment",
+      "group": "C",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "oracle": "frozen material matrix + pixel/coverage reference",
+      "seed": 21128
+    },
+    {
+      "id": "effects-output",
+      "group": "C",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "oracle": "frozen material matrix + pixel/coverage reference",
+      "seed": 21128
+    },
+    {
+      "id": "effects-temporal",
+      "group": "C",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "oracle": "frozen material matrix + pixel/coverage reference",
+      "seed": 21128
+    },
+    {
+      "id": "view-reflection",
+      "group": "C",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "oracle": "frozen material matrix + pixel/coverage reference",
+      "seed": 21128
+    },
+    {
+      "id": "lifecycle-four-view-layers",
+      "group": "D",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "iterations": 300
+    },
+    {
+      "id": "lifecycle-resize-dpr",
+      "group": "D",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "iterations": 300
+    },
+    {
+      "id": "lifecycle-profile-switch",
+      "group": "D",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "iterations": 300
+    },
+    {
+      "id": "lifecycle-view-destroy",
+      "group": "D",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "iterations": 300
+    },
+    {
+      "id": "lifecycle-device-replacement",
+      "group": "D",
+      "required": true,
+      "owner": "g04-rendering-compatibility",
+      "iterations": 300
+    },
+    {
+      "id": "small-8",
+      "group": "E",
+      "lights": 8,
+      "views": 1,
+      "resolution": "720p",
+      "required": true,
+      "owner": "g05-performance-qualification",
+      "seed": 21128
+    },
+    {
+      "id": "sparse-128",
+      "group": "E",
+      "lights": 128,
+      "views": 1,
+      "resolution": "720p",
+      "required": true,
+      "owner": "g05-performance-qualification",
+      "seed": 21128
+    },
+    {
+      "id": "overlap-128",
+      "group": "E",
+      "lights": 128,
+      "views": 1,
+      "resolution": "720p",
+      "required": true,
+      "owner": "g05-performance-qualification",
+      "seed": 21128
+    },
+    {
+      "id": "sparse-256",
+      "group": "E",
+      "lights": 256,
+      "views": 1,
+      "resolution": "720p",
+      "required": true,
+      "owner": "g05-performance-qualification",
+      "seed": 21128
+    },
+    {
+      "id": "dynamic-128-four-view",
+      "group": "E",
+      "lights": 128,
+      "views": 4,
+      "resolution": "720p",
+      "required": true,
+      "owner": "g05-performance-qualification",
+      "seed": 21128
+    },
+    {
+      "id": "1080p-128",
+      "group": "E",
+      "lights": 128,
+      "views": 1,
+      "resolution": "1080p",
+      "required": true,
+      "owner": "g05-performance-qualification",
+      "seed": 21128
+    },
+    {
+      "id": "instances-1000-1v",
+      "group": "F",
+      "count": 1000,
+      "views": 1,
+      "variants": [
+        "lod-on",
+        "lod-off",
+        "frustum-visible",
+        "frustum-rejected"
+      ],
+      "required": true,
+      "owner": "g05-performance-qualification",
+      "seed": 21128
+    },
+    {
+      "id": "instances-1000-4v",
+      "group": "F",
+      "count": 1000,
+      "views": 4,
+      "variants": [
+        "lod-on",
+        "lod-off",
+        "frustum-visible",
+        "frustum-rejected"
+      ],
+      "required": true,
+      "owner": "g05-performance-qualification",
+      "seed": 21128
+    },
+    {
+      "id": "instances-10000-1v",
+      "group": "F",
+      "count": 10000,
+      "views": 1,
+      "variants": [
+        "lod-on",
+        "lod-off",
+        "frustum-visible",
+        "frustum-rejected"
+      ],
+      "required": true,
+      "owner": "g05-performance-qualification",
+      "seed": 21128
+    },
+    {
+      "id": "instances-10000-4v",
+      "group": "F",
+      "count": 10000,
+      "views": 4,
+      "variants": [
+        "lod-on",
+        "lod-off",
+        "frustum-visible",
+        "frustum-rejected"
+      ],
+      "required": true,
+      "owner": "g05-performance-qualification",
+      "seed": 21128
+    },
+    {
+      "id": "stress-512",
+      "group": "G",
+      "lights": 512,
+      "resolution": "1080p",
+      "overlap": "high",
+      "required": true,
+      "absoluteTimingGate": false,
+      "owner": "g05-performance-qualification",
+      "seed": 21128
+    },
+    {
+      "id": "stress-1024",
+      "group": "G",
+      "lights": 1024,
+      "resolution": "1080p",
+      "overlap": "high",
+      "required": true,
+      "absoluteTimingGate": false,
+      "owner": "g05-performance-qualification",
+      "seed": 21128
+    }
+  ]
+}

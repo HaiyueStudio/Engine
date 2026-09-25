@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-09-25",
+  "hostClass": "Intel Mac notebook, native macOS Chrome/Metal; two adapters on one host",
+  "classes": [
+    {
+      "id": "mac-amd-rdna1",
+      "class": "discrete",
+      "hardware": "AMD Radeon Pro 5300M",
+      "preference": "high-performance"
+    },
+    {
+      "id": "mac-intel-gen9",
+      "class": "integrated",
+      "hardware": "Intel UHD Graphics 630",
+      "preference": "low-power"
+    }
+  ],
+  "actualAdapters": [
+    {
+      "powerPreference": "high-performance",
+      "status": "available",
+      "info": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "limits": {
+        "maxColorAttachments": 8,
+        "maxColorAttachmentBytesPerSample": 128,
+        "maxStorageBufferBindingSize": 2147483644,
+        "maxStorageBuffersPerShaderStage": 10,
+        "maxBufferSize": 2147483648,
+        "maxComputeInvocationsPerWorkgroup": 1024,
+        "maxTextureDimension2D": 16384
+      },
+      "features": [
+        "depth32float-stencil8",
+        "rg11b10ufloat-renderable",
+        "bgra8unorm-storage",
+        "texture-formats-tier1",
+        "texture-compression-bc",
+        "dual-source-blending",
+        "core-features-and-limits",
+        "chromium-experimental-timestamp-query-inside-passes",
+        "float32-filterable",
+        "indirect-first-instance",
+        "float32-blendable",
+        "texture-compression-unaligned",
+        "depth-clip-control",
+        "texture-compression-bc-sliced-3d",
+        "texture-formats-tier2",
+        "timestamp-query",
+        "clip-distances",
+        "shader-f16",
+        "texture-component-swizzle",
+        "subgroups"
+      ],
+      "timestampEnabled": true
+    },
+    {
+      "powerPreference": "low-power",
+      "status": "available",
+      "info": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "limits": {
+        "maxColorAttachments": 8,
+        "maxColorAttachmentBytesPerSample": 128,
+        "maxStorageBufferBindingSize": 2147483644,
+        "maxStorageBuffersPerShaderStage": 10,
+        "maxBufferSize": 2147483648,
+        "maxComputeInvocationsPerWorkgroup": 1024,
+        "maxTextureDimension2D": 16384
+      },
+      "features": [
+        "depth32float-stencil8",
+        "rg11b10ufloat-renderable",
+        "texture-formats-tier1",
+        "bgra8unorm-storage",
+        "texture-compression-bc",
+        "dual-source-blending",
+        "core-features-and-limits",
+        "chromium-experimental-timestamp-query-inside-passes",
+        "float32-filterable",
+        "indirect-first-instance",
+        "float32-blendable",
+        "texture-compression-unaligned",
+        "depth-clip-control",
+        "texture-compression-bc-sliced-3d",
+        "shader-f16",
+        "timestamp-query",
+        "clip-distances",
+        "texture-component-swizzle"
+      ],
+      "timestampEnabled": true
+    }
+  ],
+  "owners": {
+    "baseline": "M18 G01, local Chrome capture runner",
+    "optimizationQualification": "M18 G05, same adapter identities and case protocol",
+    "releaseRecapture": "M18 G07, frozen clean candidate"
+  },
+  "mobileQualification": false,
+  "evidence": "artifacts/engine-0.2.1/g01/adapters.json"
+}

@@ -93,3 +93,8 @@ CSM 使用独立的 `haiyue-csm-product-decision@1` 证据。它必须来自长�
 3. 用同一输入比较 CPU tiled/clustered 与 GPU clustered light list。
 4. 选定 lighting path 后再评估 shadow atlas；CSM 作为独立实验，不能捆绑进 lighting 原型。
 5. 最后接入异步 warmup、编辑器可视化、capability fallback、像素与 recovery 门禁。
+## 0.2.1 合同补充
+
+用户提出的多灯 Deferred 迭代由 [ADR 0109](./adr/0109-deferred-lighting-021-contract.md) 单独定义，
+其基线/设备/预算见 [G01 交接](../../review/engine-0.2.1/README.md)。该合同尚不代表生产 Deferred 已实现；
+既有 Forward+ 与 CSM 的 hold、证据和验收规则保持，不能用旧 128 authored 的受限 Forward 报告声明完整多灯支持。
