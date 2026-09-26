@@ -43,6 +43,28 @@ test('shader cost growth budget rejects small absolute values that grow too quic
   );
 });
 
+test('production capacity and historical growth agree and reject each metric above its limit', () => {
+  for (const [metric, maximumKey] of [
+    ['generatedWgslBytes', 'maxGeneratedWgslBytes'],
+    ['generatedWgslFiles', 'maxGeneratedWgslFiles'],
+    ['variantCount', 'maxVariantCount'],
+    ['pipelineCount', 'maxPipelineCount'],
+  ]) {
+    const maximum = budget.production[maximumKey];
+    assert.equal(maximum,
+      budget.production.growthBaseline[metric] + budget.production.maxGrowth[metric]);
+    const report = fixtureReport();
+    report.production[metric] = maximum;
+    assert.equal(evaluateShaderCostBudget(report, budget).status, 'passed', metric);
+    report.production[metric]++;
+    const result = evaluateShaderCostBudget(report, budget);
+    assert.equal(result.status, 'failed', metric);
+    assert.deepEqual(result.violations.map(item => item.metric), [
+      `production.${metric}`, `production.${metric}Growth`,
+    ]);
+  }
+});
+
 test('shader cost report exposes an auditable per-metric baseline diff', () => {
   const report = fixtureReport();
   report.production.variantCount = budget.production.growthBaseline.variantCount + 1;
@@ -136,6 +158,8 @@ test('production cache is content-addressed per generator family', () => {
       'material-lighting',
       'specialized-rendering',
       'compute',
+      'deferred-lighting',
+      'deferred-tiled',
     ],
   );
   assert.ok(PRODUCTION_CACHE_SCOPES.every(scope => scope.inputs.length >= 2));

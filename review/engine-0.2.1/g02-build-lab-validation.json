@@ -1,0 +1,700 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "generatedAt": "2026-09-25T13:16:35.582Z",
+  "revision": "61d40f7bf75e05ec948754d85fdbf70512a21ca8",
+  "dirty": true,
+  "evidenceClass": "development fix verification; not G02 completion or release qualification",
+  "sources": [
+    {
+      "path": "config/rollup.shared.js",
+      "sha256": "939d724cc8cdead661f44717ee8919bc1914e597aad7e9dbf292442d3b66c1ac"
+    },
+    {
+      "path": "examples/rollup.config.js",
+      "sha256": "59adbf0595d7ae85f8071bf1bd89a1cc699ca5dc73ba10a64de30ff6a5218cdc"
+    },
+    {
+      "path": "examples/scripts/build-examples.mjs",
+      "sha256": "5f4d57d17f20dc7eea8022f187ad4b2bee7e84f6b98cbc65737b142e62f67dab"
+    },
+    {
+      "path": "examples/scripts/example-typescript.mjs",
+      "sha256": "deb5758b31cc9aa8e974f76de44458c1a836724b59721f5118c921fb1d68516e"
+    },
+    {
+      "path": "scripts/example-typescript.test.mjs",
+      "sha256": "a8eeb9489736e82a6d5533b7e925c7d5bed069cbb48ffa4e93f08ebe785eb015"
+    },
+    {
+      "path": "examples/shader-language-lab/DualBackendRenderer.ts",
+      "sha256": "21278f17ca5001fa3a9a47fbd3653ad44b83b03b93010f560f968c5e6ac55f1a"
+    },
+    {
+      "path": "examples/shader-language-lab/main.ts",
+      "sha256": "d146f4bb70251990b1c96beef98d7dce409c3da7cab6d4c0dc45c5b1dc4327e8"
+    },
+    {
+      "path": "examples/shader-language-lab/generated/showcase.generated.ts",
+      "sha256": "cbd12a1a6ff24bb834975f380665843016d9a6db65dcfe42a57867238b214fa3"
+    },
+    {
+      "path": "scripts/verify-shader-language-lab-example.mjs",
+      "sha256": "d189262461cfe9d4e56063e2a6940d977914ffa76675b8c3f4b82a09ab50437a"
+    },
+    {
+      "path": "package.json",
+      "sha256": "95e561b8408fc6977c3a47970f71da1327f2386410a993b8904bde3e0ef6c315"
+    }
+  ],
+  "build": {
+    "command": "npm run build",
+    "exitCode": 0,
+    "filtered": false,
+    "timeoutOverride": false,
+    "defaultTargetTimeoutMs": 60000,
+    "exampleCount": 93,
+    "freshness": {
+      "targetCount": 95,
+      "sourceFingerprint": "abc62057969248c2ccd3dccb344e293c67a3a7ba151c221cbcf51381fe7621b4"
+    },
+    "typecheckSeconds": 52.5,
+    "targets": [
+      {
+        "id": "gpu-instances",
+        "rollupSeconds": 0.594
+      },
+      {
+        "id": "animation-spec",
+        "rollupSeconds": 4.9
+      },
+      {
+        "id": "live2d-hya",
+        "rollupSeconds": 4.1
+      },
+      {
+        "id": "lottie-hya-compare",
+        "rollupSeconds": 6.9
+      },
+      {
+        "id": "live2d-hya-compare",
+        "rollupSeconds": 5.2
+      },
+      {
+        "id": "hya-state-machine",
+        "rollupSeconds": 4.6
+      },
+      {
+        "id": "hya-samples",
+        "rollupSeconds": 3.9
+      },
+      {
+        "id": "hya-lottie-corpus-dashboard",
+        "rollupSeconds": 4.2
+      },
+      {
+        "id": "hya-live2d-corpus-dashboard",
+        "rollupSeconds": 3.9
+      },
+      {
+        "id": "consumer-walkthrough",
+        "rollupSeconds": 0.377
+      },
+      {
+        "id": "bvh-lod",
+        "rollupSeconds": 0.46
+      },
+      {
+        "id": "bitmap-font",
+        "rollupSeconds": 0.41300000000000003
+      },
+      {
+        "id": "blending",
+        "rollupSeconds": 1.1
+      },
+      {
+        "id": "blinn-phong",
+        "rollupSeconds": 0.589
+      },
+      {
+        "id": "box-selection",
+        "rollupSeconds": 0.41300000000000003
+      },
+      {
+        "id": "toon-layers",
+        "rollupSeconds": 0.484
+      },
+      {
+        "id": "toon-pencil-sketch",
+        "rollupSeconds": 0.591
+      },
+      {
+        "id": "box2d-collision",
+        "rollupSeconds": 0.385
+      },
+      {
+        "id": "box2d-filtering",
+        "rollupSeconds": 0.381
+      },
+      {
+        "id": "box2d-joints",
+        "rollupSeconds": 0.406
+      },
+      {
+        "id": "box2d-mouse-drag",
+        "rollupSeconds": 0.496
+      },
+      {
+        "id": "physics3d-collision",
+        "rollupSeconds": 1.2
+      },
+      {
+        "id": "physics3d-joints",
+        "rollupSeconds": 1.2
+      },
+      {
+        "id": "physics3d-buoyancy",
+        "rollupSeconds": 1.2
+      },
+      {
+        "id": "physics3d-orbital-gravity",
+        "rollupSeconds": 1.8
+      },
+      {
+        "id": "physics3d-cloth",
+        "rollupSeconds": 1.7
+      },
+      {
+        "id": "camera-switch",
+        "rollupSeconds": 1
+      },
+      {
+        "id": "csg",
+        "rollupSeconds": 1.1
+      },
+      {
+        "id": "css-material",
+        "rollupSeconds": 1.2
+      },
+      {
+        "id": "cube-texture",
+        "rollupSeconds": 0.41300000000000003
+      },
+      {
+        "id": "depth-material",
+        "rollupSeconds": 1.2
+      },
+      {
+        "id": "fog",
+        "rollupSeconds": 1.2
+      },
+      {
+        "id": "frustum-cull",
+        "rollupSeconds": 1.1
+      },
+      {
+        "id": "game-of-life",
+        "rollupSeconds": 0.553
+      },
+      {
+        "id": "wind-field",
+        "rollupSeconds": 0.892
+      },
+      {
+        "id": "gltf-viewer",
+        "rollupSeconds": 2.3
+      },
+      {
+        "id": "gltf-animation3d-crossfade",
+        "rollupSeconds": 1.9
+      },
+      {
+        "id": "gpu-driven-instancing",
+        "rollupSeconds": 1.5
+      },
+      {
+        "id": "gpu-driven-megabatch",
+        "rollupSeconds": 0.56
+      },
+      {
+        "id": "gui-runtime",
+        "rollupSeconds": 0.782
+      },
+      {
+        "id": "icosahedron",
+        "rollupSeconds": 1.4
+      },
+      {
+        "id": "instancing-raycast",
+        "rollupSeconds": 1.3
+      },
+      {
+        "id": "instancing",
+        "rollupSeconds": 1.9
+      },
+      {
+        "id": "interactive",
+        "rollupSeconds": 0.579
+      },
+      {
+        "id": "page-turn-book",
+        "rollupSeconds": 4.4
+      },
+      {
+        "id": "ktx2-matrix",
+        "rollupSeconds": 0.719
+      },
+      {
+        "id": "ktx2-volume",
+        "rollupSeconds": 0.561
+      },
+      {
+        "id": "lines",
+        "rollupSeconds": 1
+      },
+      {
+        "id": "mesh-helper",
+        "rollupSeconds": 1.2
+      },
+      {
+        "id": "mirror-hall",
+        "rollupSeconds": 0.552
+      },
+      {
+        "id": "mixed-scene",
+        "rollupSeconds": 0.8130000000000001
+      },
+      {
+        "id": "msaa",
+        "rollupSeconds": 1
+      },
+      {
+        "id": "normal-material",
+        "rollupSeconds": 1.1
+      },
+      {
+        "id": "orbit-control",
+        "rollupSeconds": 1
+      },
+      {
+        "id": "outline-postprocess",
+        "rollupSeconds": 1.5
+      },
+      {
+        "id": "pbr-showcase",
+        "rollupSeconds": 0.931
+      },
+      {
+        "id": "ibl",
+        "rollupSeconds": 0.594
+      },
+      {
+        "id": "planar-mirror",
+        "rollupSeconds": 0.538
+      },
+      {
+        "id": "postprocess",
+        "rollupSeconds": 1.1
+      },
+      {
+        "id": "bvh-visualizer",
+        "rollupSeconds": 1.4
+      },
+      {
+        "id": "raycast-bvh",
+        "rollupSeconds": 1.2
+      },
+      {
+        "id": "render-pipeline",
+        "rollupSeconds": 0.387
+      },
+      {
+        "id": "reverse-z",
+        "rollupSeconds": 0.984
+      },
+      {
+        "id": "rtt",
+        "rollupSeconds": 0.428
+      },
+      {
+        "id": "shapes2d",
+        "rollupSeconds": 0.439
+      },
+      {
+        "id": "sky",
+        "rollupSeconds": 1
+      },
+      {
+        "id": "sobel-postprocess",
+        "rollupSeconds": 1.5
+      },
+      {
+        "id": "taa-postprocess",
+        "rollupSeconds": 0.529
+      },
+      {
+        "id": "motion-blur",
+        "rollupSeconds": 2
+      },
+      {
+        "id": "ambient-occlusion",
+        "rollupSeconds": 0.597
+      },
+      {
+        "id": "spine-viewer",
+        "rollupSeconds": 2.3
+      },
+      {
+        "id": "svg-geometry",
+        "rollupSeconds": 0.485
+      },
+      {
+        "id": "texture-convolution",
+        "rollupSeconds": 0.8320000000000001
+      },
+      {
+        "id": "transform3d-basis",
+        "rollupSeconds": 1.1
+      },
+      {
+        "id": "viewport-scissor",
+        "rollupSeconds": 0.561
+      },
+      {
+        "id": "particles-2d",
+        "rollupSeconds": 0.683
+      },
+      {
+        "id": "particles-3d",
+        "rollupSeconds": 0.6
+      },
+      {
+        "id": "triangle-disintegration",
+        "rollupSeconds": 1.3
+      },
+      {
+        "id": "geometry-subdivision",
+        "rollupSeconds": 0.523
+      },
+      {
+        "id": "geometry-simplification",
+        "rollupSeconds": 0.529
+      },
+      {
+        "id": "shadow-map",
+        "rollupSeconds": 0.458
+      },
+      {
+        "id": "cubemap",
+        "rollupSeconds": 1.3
+      },
+      {
+        "id": "equirectangular-reflection",
+        "rollupSeconds": 0.5700000000000001
+      },
+      {
+        "id": "refraction-glass",
+        "rollupSeconds": 0.532
+      },
+      {
+        "id": "shader-language-lab",
+        "rollupSeconds": 3.8
+      },
+      {
+        "id": "shader-language-character-material",
+        "rollupSeconds": 3.7
+      },
+      {
+        "id": "clipping-planes",
+        "rollupSeconds": 0.582
+      },
+      {
+        "id": "navmesh-rts",
+        "rollupSeconds": 1.7
+      },
+      {
+        "id": "navmesh-first-person",
+        "rollupSeconds": 0.705
+      },
+      {
+        "id": "wfc-map",
+        "rollupSeconds": 0.729
+      },
+      {
+        "id": "ray-tracing",
+        "rollupSeconds": 2.4
+      },
+      {
+        "id": "ray-tracing-orbit",
+        "rollupSeconds": 2.4
+      },
+      {
+        "id": "virtual-joystick",
+        "rollupSeconds": 0.765
+      }
+    ]
+  },
+  "lab": {
+    "status": "passed",
+    "browser": {
+      "product": "Chrome/153.0.8010.53",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+      "platform": "MacIntel",
+      "url": "http://127.0.0.1:57315/examples/shader-language-lab/index.html?regression=1",
+      "angleBackend": "metal",
+      "nativeBackend": true
+    },
+    "originalMaximum": 190,
+    "originalOverTolerancePixelCount": 4,
+    "maximum": 2,
+    "mean": 0.015613132052951388,
+    "overTolerancePixelCount": 0,
+    "samplingFilter": "linear",
+    "samplingRegression": [
+      {
+        "id": "undistorted",
+        "difference": {
+          "maxChannelDelta": 1,
+          "meanAbsoluteDelta": 0.015097724066840278,
+          "changedPixelRatio": 0.05897352430555555,
+          "changedPixelCount": 8696,
+          "overTolerancePixelCount": 0,
+          "maximumDeltaPixel": {
+            "x": 6,
+            "y": 0,
+            "webgpu": [
+              59,
+              3,
+              10,
+              255
+            ],
+            "webgl2": [
+              59,
+              3,
+              11,
+              255
+            ]
+          }
+        }
+      },
+      {
+        "id": "wave-positive",
+        "difference": {
+          "maxChannelDelta": 1,
+          "meanAbsoluteDelta": 0.016020033094618056,
+          "changedPixelRatio": 0.062201605902777776,
+          "changedPixelCount": 9172,
+          "overTolerancePixelCount": 0,
+          "maximumDeltaPixel": {
+            "x": 8,
+            "y": 0,
+            "webgpu": [
+              65,
+              4,
+              12,
+              255
+            ],
+            "webgl2": [
+              66,
+              4,
+              12,
+              255
+            ]
+          }
+        }
+      },
+      {
+        "id": "wave-negative",
+        "difference": {
+          "maxChannelDelta": 1,
+          "meanAbsoluteDelta": 0.015485975477430556,
+          "changedPixelRatio": 0.05988905164930555,
+          "changedPixelCount": 8831,
+          "overTolerancePixelCount": 0,
+          "maximumDeltaPixel": {
+            "x": 17,
+            "y": 0,
+            "webgpu": [
+              42,
+              2,
+              23,
+              255
+            ],
+            "webgl2": [
+              43,
+              2,
+              23,
+              255
+            ]
+          }
+        }
+      },
+      {
+        "id": "repeat-seam",
+        "difference": {
+          "maxChannelDelta": 1,
+          "meanAbsoluteDelta": 0.017042371961805556,
+          "changedPixelRatio": 0.06486680772569445,
+          "changedPixelCount": 9565,
+          "overTolerancePixelCount": 0,
+          "maximumDeltaPixel": {
+            "x": 2,
+            "y": 0,
+            "webgpu": [
+              52,
+              3,
+              9,
+              255
+            ],
+            "webgl2": [
+              53,
+              3,
+              9,
+              255
+            ]
+          }
+        }
+      }
+    ],
+    "canonicalShaderUnchanged": true,
+    "browserDiagnostics": {
+      "consoleErrorCount": 0,
+      "exceptionCount": 0,
+      "unclassifiedFailureCount": 0,
+      "profileCleanup": {
+        "status": "passed",
+        "attempts": 1,
+        "durationMs": 84
+      }
+    },
+    "httpProvenance": {
+      "transport": "http",
+      "requestCount": 9,
+      "uniqueFileCount": 8,
+      "files": [
+        {
+          "sourcePath": "examples/example-fullscreen.css",
+          "byteLength": 1013,
+          "sha256": "5d93a199f5eae5e46e4e69da6f0f3c8829e628fb1c8327fbcd50aadfcbf76b5d",
+          "requestCount": 1
+        },
+        {
+          "sourcePath": "examples/shader-language-lab/bundle.js",
+          "byteLength": 950771,
+          "sha256": "05e46e88bcd9ed2e213a5ebe2c2006fc8ff6600874b5a7e9d61f5364d0615ba3",
+          "requestCount": 1
+        },
+        {
+          "sourcePath": "examples/shader-language-lab/index.html",
+          "byteLength": 22862,
+          "sha256": "4dd89d0bb08f4ceaa74acbbaf13f29b4eda27668d469143ef65817036c06fd8d",
+          "requestCount": 1
+        },
+        {
+          "sourcePath": "examples/shared/engine.js",
+          "byteLength": 7472781,
+          "sha256": "c10be8f41060f438b11941bdab2fe83cd54ceb558fb1e806abd044fe69906aec",
+          "requestCount": 1
+        },
+        {
+          "sourcePath": "node_modules/draco3dgltf/draco_decoder_gltf_nodejs.js",
+          "byteLength": 58456,
+          "sha256": "8bb2952d2ba7d67e1414f8df819410cb0434a666be53f671fff75f68843d76f6",
+          "requestCount": 1
+        },
+        {
+          "sourcePath": "node_modules/draco3dgltf/draco_decoder_gltf.wasm",
+          "byteLength": 192593,
+          "sha256": "712db3449ae2041d6e8a224c395bda6cedb49e51322fae38b7db9beb8b381889",
+          "requestCount": 1
+        },
+        {
+          "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/medium-rigged-figure-draco/RiggedFigure.gltf",
+          "byteLength": 50939,
+          "sha256": "25039daae7c4cd7394b39180341fd2519af82d6ac6ca2e8bec737cb9866b6d69",
+          "requestCount": 2
+        },
+        {
+          "sourcePath": "scripts/webgpu-gate/assets/gltf-corpus/medium-rigged-figure-draco/RiggedFigure0.bin",
+          "byteLength": 6172,
+          "sha256": "ef8c02bf4d186b058d21d5615bd133e75ec5be46f23cc4943d2543d745ede5cb",
+          "requestCount": 1
+        }
+      ]
+    }
+  },
+  "checks": {
+    "typecheck": "passed",
+    "tests": {
+      "shaderLanguage": 119,
+      "engine": 707,
+      "animationSpec": 107,
+      "extensions": 392,
+      "catalog": 7,
+      "total": 1332
+    },
+    "fastGatePolicy": 17,
+    "rollupRunner": 8,
+    "api": "passed",
+    "docs": "passed",
+    "diffCheck": "passed"
+  },
+  "artifacts": [
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/api.log",
+      "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/docs.log",
+      "sha256": "91fe553a1d70d673719216ef1bcc7d752322dea50fb80e141aa293a484c8ffbd"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/fast-policy.log",
+      "sha256": "adffea491ed6af3c30a2efa340d17ad1553519cb94e59853619bc2c782171c85"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/focused-build.log",
+      "sha256": "613de249c7ecf440d9d50b48299b2931a46418cb372a610cdad1624453cc534b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/freshness.log",
+      "sha256": "eaa568f06f7173319e430f7f3d6066c01589c03b45501e0a319ba59930524326"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/full-build.log",
+      "sha256": "bc88772312147afe304d7e2c20d9f67ac8bd9c70c7679a60a321e72ea802a184"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/full-example-times.json",
+      "sha256": "48c01b3a9c17c8b15c98b328874f5de8ded4ad5246b26ba4bd933fd0c11bfa22"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/lab-after.json",
+      "sha256": "6f82032333464329c21c93f74fce34e03cd7428837008dc9e266984bde116e8b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/lab-before.log",
+      "sha256": "bf799f56e7731b95f1ef16471068671ee1f63b990b36db93456ba6bae73011f1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/lab-final.json",
+      "sha256": "5bfe37f96756449db23096f5ba4c25ad87b11e89417e664bad9955fa44b9fd0d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/rollup-policy.log",
+      "sha256": "b0b34b4b36bc719573f5a5a6b67ba6e8ec5763104573530a97cee73cb4d65d87"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/sampling-probe.json",
+      "sha256": "ed6366072dacefb2d12d7fb6108ba631cdc845a375e866399f38b757dfb96a2a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/tests.log",
+      "sha256": "2e18de87f9a90e599ffd5377e019123416b7ae348a5bba84e752c57ea7c6cb85"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/build-lab-fix/typecheck.log",
+      "sha256": "5cc4f73976a8471630b0ccca4077e5f6d4ffb199bfe7ce4522fc82471e8a4cc6"
+    }
+  ]
+}

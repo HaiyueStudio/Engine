@@ -1,0 +1,23 @@
+{
+  "contractVersion": 1,
+  "implementation": "private-deferred-reference",
+  "adr": "docs/for-ai/adr/0109-deferred-lighting-021-contract.md",
+  "publicExport": false,
+  "previousMaterialLightingHash": "b448cc48ea296bdd03b4d994d2c70522cb37ae2e96c1cb975be13e4302c9cc5d",
+  "materialLightingHash": "e3926b1ac655f17e90b403bdcceb2e47ee968ccdfde968ddca7a2445eb4d6ef4",
+  "reason": "Share standard PBR surface sampling between Forward and Deferred, including vertex RGBA and matching alpha coverage in depth, shadow, normal, motion and outline passes; preserve material uniform ABI.",
+  "deferredArtifactHash": "a175e0b8187143b3e432490463f3724d4fc1ef9e63e6b0ea776c4447258d7222",
+  "passCount": 2,
+  "wgslBytes": 33068,
+  "releaseQualification": "pending G07 package and API review",
+  "vertexColors": {
+    "scope": "private linear normalized RGBA; no importer/editor API",
+    "interleavedUv1ColorStride": 24,
+    "shaderLocation": 12,
+    "varyingLocation": 6,
+    "previousDeformationHash": "c423d2b9c3b7aa02f51cc300c30f280d972bb8ee300cf712dfc657f1ee830462",
+    "previousSimple3dHash": "1ed297f225816718ce15c7402d7c5789490d5870144f0556f80b5f82125db841",
+    "deformationHash": "db2f01eff2888ce452be55e52c8724522d78e4b6e2c8afab27cea2061e84f12e",
+    "simple3dHash": "2d603df1727c5bc0fd8f14b1686abab2e8b689b4fce8424c3e5e724591536c1c"
+  }
+}

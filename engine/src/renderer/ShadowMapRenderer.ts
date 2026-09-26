@@ -690,7 +690,7 @@ export class ShadowMapRenderer extends BaseRenderer {
     pass.setBindGroup(2, caster.coverage);
     const uvSlot = variant.morph ? 5 : 1;
     pass.setVertexBuffer(uvSlot, sharedGeometry.uvBuf);
-    pass.setVertexBuffer(uvSlot + 1, sharedGeometry.uv1Buf ?? sharedGeometry.uvBuf);
+    pass.setVertexBuffer(uvSlot + 1, sharedGeometry.uv1Buf);
     if (variant.skinned && deformation?.skinBindGroup) pass.setBindGroup(3, deformation.skinBindGroup);
     pass.setVertexBuffer(0, sharedGeometry.positionBuf);
     if (variant.morph && deformation) {
@@ -760,7 +760,7 @@ export class ShadowMapRenderer extends BaseRenderer {
     }
     buffers.push(
       { arrayStride: 8, attributes: [{ shaderLocation: 5, offset: 0, format: 'float32x2' }] },
-      { arrayStride: 8, attributes: [{ shaderLocation: 6, offset: 0, format: 'float32x2' }] },
+      { arrayStride: 24, attributes: [{ shaderLocation: 6, offset: 0, format: 'float32x2' }, { shaderLocation: 12, offset: 8, format: 'float32x4' }] },
     );
     return {
       label: `ShadowMapRenderer.${variant.skinned ? 'skinned' : 'static'}${variant.morph ? '.morph' : ''}`,

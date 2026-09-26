@@ -259,7 +259,7 @@ function definitions(): Readonly<Record<BuiltinRenderOperation, RenderDefinition
       varying('NORMAL', 0, 'vec3<f32>'), varying('WORLD_POSITION', 1, 'vec3<f32>'),
       flatVarying('OBJECT_INDEX', 2, 'u32'),
       varying('TEXCOORD_0', 3, 'vec2<f32>'), varying('TEXCOORD_1', 4, 'vec2<f32>'),
-      varying('VIEW_DEPTH', 5, 'f32'),
+      varying('VIEW_DEPTH', 5, 'f32'), varying('VERTEX_ALPHA', 6, 'f32'),
     ], ['storage-buffer', 'discard', 'morph-targets', 'skinning', 'texture-sample'], ['normal-visualization', 'world-space-clipping', 'auxiliary-surface-mrt-v1']),
     particle3d: definition(SIMPLE_SOURCES.particle3d, [
       group('frame', 0, [uniform('frame.particleCamera', 0, VERTEX, 96)]),
@@ -467,7 +467,7 @@ function normalDeformationBuffers(): readonly PrecompiledShaderVertexBufferV2[] 
       attribute(`MORPH_NORMAL_${index}`, 3 + index * 2, 12, 'float32x3'),
     ])),
     vertexBuffer(8, 'vertex', [attribute('TEXCOORD_0', 10, 0, 'float32x2')]),
-    vertexBuffer(8, 'vertex', [attribute('TEXCOORD_1', 11, 0, 'float32x2')]),
+    vertexBuffer(24, 'vertex', [attribute('TEXCOORD_1', 11, 0, 'float32x2'), attribute('COLOR_0', 12, 8, 'float32x4')]),
   ];
 }
 

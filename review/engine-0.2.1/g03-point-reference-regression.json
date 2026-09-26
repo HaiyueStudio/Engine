@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "generatedAt": "2026-09-26T08:26:30.518Z",
+  "inputs": {
+    "sha256": "e1ace98e435a904e5c0d576e0c5e5f0a6fd30ef8fd407302f485494d021b5581",
+    "fileCount": 598
+  },
+  "captures": [
+    {
+      "path": "artifacts/engine-0.2.1/g03/point-checks/reference-high-performance.json",
+      "sha256": "2d0c2f0ccf2acfa02cab05863d252fa6772b8f07c0bc0b0e24860071591c91f3",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/point-checks/reference-low-power.json",
+      "sha256": "89138ed3ecc01df16fc456383beffae8a0dfd3d85b50f47855ed88dded09a5a1",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    }
+  ]
+}

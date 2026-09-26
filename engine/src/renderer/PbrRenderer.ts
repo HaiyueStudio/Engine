@@ -46,6 +46,7 @@ import type { ClippingPlanes } from '../components/ClippingPlanes';
 import { CLIPPING_BLOCK_FLOATS, clippingStateKey, writeClippingBlock } from './ClippingPlanesGpu';
 import { writePbrEnvironmentUniforms } from './PbrEnvironmentUniforms';
 import { ParameterizedRendererCore, SharedGeometryRendererOwner } from './ParameterizedRendererCore';
+import { registerPbrDeferredSurfacePort, deletePbrDeferredSurfacePort, type PbrDeferredSurfaceShader } from './PbrDeferredSurfacePort';
 
 export const PBR_MAX_LIGHTS = SCENE_RENDER_MAX_LIGHTS;
 export type { PbrLightInfo } from '../frame/SceneRenderEnvironment';
@@ -112,6 +113,7 @@ const MATERIAL_BYTES = 160 + TEXTURE_SLOTS.length * 32;
 const ENVIRONMENT_BYTES = 48;
 
 export class PbrRenderer extends BaseRenderer {
+  private _deferredSurface: PbrDeferredSurfaceShader | null = null;
   reverseZ = false;
   msaaSamples: 1 | 4 = 1;
 
@@ -179,6 +181,25 @@ export class PbrRenderer extends BaseRenderer {
     this._sceneFrameBinding = getSceneFrameGpuArena(device).createBinding();
     this._createLayouts();
     const layouts = [this._cameraLayout, this._objectLayout, this._materialLayout, this._sceneLayout];
+    let deferredBindingRevision = -1;
+    let deferredBindings: readonly GPUBindGroupEntry[] = [];
+    registerPbrDeferredSurfacePort(this, {
+      layouts,
+      setSurface: shader => { this._deferredSurface = shader; },
+      lightingBindings: () => {
+        if (deferredBindingRevision === this._sceneBindingRevision) return deferredBindings;
+        deferredBindingRevision = this._sceneBindingRevision;
+        return deferredBindings = [
+        { binding: 8, resource: { buffer: this._environmentBuffer } },
+        { binding: 9, resource: this._environmentState.diffuseTexture.createView({ dimension: 'cube' }) },
+        { binding: 10, resource: this._environmentState.specularTexture.createView({ dimension: 'cube' }) },
+        { binding: 11, resource: this._environmentSampler },
+        { binding: 12, resource: { buffer: this._directionalShadowBinding.buffer } },
+        { binding: 13, resource: this._directionalShadowBinding.view },
+        { binding: 14, resource: this._directionalShadowBinding.sampler },
+        ];
+      },
+    });
     const base = getBuiltinMaterialLightingShader(device, 'pbr', layouts);
     const clearcoat = getBuiltinMaterialLightingShader(device, 'pbr-clearcoat', layouts);
     const transmission = getBuiltinMaterialLightingShader(device, 'pbr-transmission', layouts);
@@ -446,12 +467,13 @@ export class PbrRenderer extends BaseRenderer {
     bindings.setVertexBuffer(0, geometryData.positionBuf);
     bindings.setVertexBuffer(1, geometryData.normalBuf);
     bindings.setVertexBuffer(2, geometryData.uvBuf);
-    bindings.setVertexBuffer(3, geometryData.uv1Buf ?? geometryData.uvBuf);
+    bindings.setVertexBuffer(3, geometryData.uv1Buf);
     for (let index = 0; index < 4; index++) bindings.setVertexBuffer(index + 4, deformation.morphBuffers[index]!);
     if (batchBuffer) {
       this.indirectBatches.draw(pass, this._engine.device, batchBuffer, firstBatch, instanceCount,
-        geometryData.indexBuf, geometryData.indexFormat, [this.colorFormat ?? this._engine.format],
-        this._engine.getDepthFormat(this.reverseZ), this.msaaSamples);
+        geometryData.indexBuf, geometryData.indexFormat,
+        this._deferredSurface ? ['rgba16float', 'rgba16float', 'rgba16float'] : [this.colorFormat ?? this._engine.format],
+        this._deferredSurface ? 'depth32float' : this._engine.getDepthFormat(this.reverseZ), this.msaaSamples);
       return;
     }
     if (geometryData.indexBuf) {
@@ -492,7 +514,7 @@ export class PbrRenderer extends BaseRenderer {
     pass.setVertexBuffer(0, geometryData.positionBuf);
     pass.setVertexBuffer(1, geometryData.normalBuf);
     pass.setVertexBuffer(2, geometryData.uvBuf);
-    pass.setVertexBuffer(3, geometryData.uv1Buf ?? geometryData.uvBuf);
+    pass.setVertexBuffer(3, geometryData.uv1Buf);
     for (let index = 0; index < 4; index++) pass.setVertexBuffer(index + 4, deformation.morphBuffers[index]!);
     if (geometryData.indexBuf) {
       pass.setIndexBuffer(geometryData.indexBuf, geometryData.indexFormat);
@@ -898,7 +920,7 @@ export class PbrRenderer extends BaseRenderer {
     const primitiveKey = encodePrimitivePipelineKey(topology, cullMode, frontFace, stripIndexFormat, this.reverseZ, this.msaaSamples, alphaFlag);
     const key = this._rendererCore.pipelineKey(
       `${primitiveKey}|uv:${geometry.textureCoordinateLayoutKey}|cc:${clearcoatEnabled ? 1 : 0}|tr:${transmissionEnabled ? 1 : 0}`,
-      this._shaderKey(clearcoatEnabled, transmissionEnabled),
+      this._deferredSurface?.key ?? this._shaderKey(clearcoatEnabled, transmissionEnabled),
     );
     return this.getCachedPipeline(key, () => this._engine.device.createRenderPipeline(
       this._pipelineDescriptor(topology, cullMode, frontFace, material.alphaMode, clearcoatEnabled, stripIndexFormat, transmissionEnabled),
@@ -917,15 +939,15 @@ export class PbrRenderer extends BaseRenderer {
     return {
       layout: this._pipelineLayout,
       vertex: {
-        module: transmissionEnabled
+        module: this._deferredSurface?.module ?? (transmissionEnabled
           ? (clearcoatEnabled ? this._transmissionClearcoatShader : this._transmissionShader)
-          : (clearcoatEnabled ? this._clearcoatShader : this._baseShader),
+          : (clearcoatEnabled ? this._clearcoatShader : this._baseShader)),
         entryPoint: 'vs_main',
         buffers: [
           { arrayStride: 12, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }] },
           { arrayStride: 12, attributes: [{ shaderLocation: 1, offset: 0, format: 'float32x3' }] },
           { arrayStride: 8, attributes: [{ shaderLocation: 2, offset: 0, format: 'float32x2' }] },
-          { arrayStride: 8, attributes: [{ shaderLocation: 3, offset: 0, format: 'float32x2' }] },
+          { arrayStride: 24, attributes: [{ shaderLocation: 3, offset: 0, format: 'float32x2' }, { shaderLocation: 12, offset: 8, format: 'float32x4' }] },
           ...Array.from({ length: 4 }, (_, index): GPUVertexBufferLayout => ({
             arrayStride: 24,
             attributes: [
@@ -936,18 +958,18 @@ export class PbrRenderer extends BaseRenderer {
         ],
       },
       fragment: {
-        module: transmissionEnabled
+        module: this._deferredSurface?.module ?? (transmissionEnabled
           ? (clearcoatEnabled ? this._transmissionClearcoatShader : this._transmissionShader)
-          : (clearcoatEnabled ? this._clearcoatShader : this._baseShader),
+          : (clearcoatEnabled ? this._clearcoatShader : this._baseShader)),
         entryPoint: 'fs_main',
-        targets: [createColorTargetState(this.colorFormat ?? this._engine.format, alphaMode === 'blend' ? {
+        targets: this._deferredSurface ? [0, 1, 2].map(() => ({ format: 'rgba16float' as const })) : [createColorTargetState(this.colorFormat ?? this._engine.format, alphaMode === 'blend' ? {
           color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha', operation: 'add' },
           alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
         } : undefined)],
       },
       primitive: createPrimitiveState(topology, cullMode, frontFace, stripIndexFormat),
       depthStencil: {
-        format: this._engine.getDepthFormat(this.reverseZ),
+        format: this._deferredSurface ? 'depth32float' : this._engine.getDepthFormat(this.reverseZ),
         depthWriteEnabled: alphaMode !== 'blend',
         depthCompare: this.reverseZ ? 'greater-equal' : 'less-equal',
       },
@@ -1012,6 +1034,8 @@ export class PbrRenderer extends BaseRenderer {
   }
 
   destroy(): void {
+    deletePbrDeferredSurfacePort(this);
+    this._deferredSurface = null;
     this._sceneFrameBinding?.destroy();
     this._lightUniforms?.destroy();
     this._lights = [];

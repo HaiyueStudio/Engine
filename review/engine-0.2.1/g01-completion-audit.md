@@ -1,32 +1,27 @@
-# G01 完成审计（设备条件阻塞）
+# G01 完成审计
 
-截至本次工作进度，G01 为 blocked，未完成。这里列出原 Goal 各项要求的证据与缺口，不用已完成部分重新定义完成条件。
+日期：2026-09-25。G01 complete；合同、预算和全部本阶段必需检查已通过。原目标保持为“现状复核、架构合同和预算冻结”，不以当前实现范围替代。
 
-| 原要求 | 当前证据 | 状态 |
-| --- | --- | --- |
-| 复核来源并分类 | README 的 8 项 source census；Engine revision 未变 | 已复核 |
-| 冻结材质、ABI、profile、owner、fallback、阴影/MSAA | ADR 0109 candidate；机器配置案例 A–G | 待最终一致性审查和冻结 |
-| 两类设备与采集 owner | device-plan.json；adapters.json 的实际 native 适配器 | 已实测可用 |
-| G-buffer 格式/精度配对 | gbuffer-probe.json，两类 device，3×rgba16float + depth32float | 已通过，不是带宽性能证明 |
-| Forward + 已有 GPU 实例基线 | 其他任务自然结束后已重采 30 项；完整性通过，仍有 9/10 个组合波动超标；随后系统报告 CPU 限速 33/26 | 未满足稳定性；等待系统限速恢复后复核 |
-| CPU/GPU 绝对预算基于实测冻结 | lighting-performance-021.json 的设备预算目前 null | 未完成，G02 不可启动 |
-| 案例、seed、精度、内存、包体/Shader 评审方式 | 配置与 ADR 的固定房间/相机/灯光定义 | 已定义，待最终核对 |
-| 上游 commit / license | upstream-reference.json，官方固定 commit 与 SHA-256，BSD-3-Clause | 已完成 |
-| 消费方版本与独立发布线 | consumer-versions.json；协调仓 producerCandidates.Engine | 已登记，未改变消费仓依赖 |
-| 采样/统计策略测试 | 新 12 项测试（含稳定性/冻结/主机限速负向断言）、26 项旧灯光测试通过 | 已通过 |
-| 文档、API、性能策略与协调仓检查 | docs:check、api:check、协调仓 check 通过；performance-budget:test 获准 loopback 后完整 122/122 | 已通过；首次 EPERM 日志保留 |
+| 原要求 | 权威证据与核对结论 |
+| --- | --- |
+| 复核来源并分类 | README 的 still-current / already-fixed / new-work / deferred 表；生产 runtime 与原观察点一致 |
+| 材质、ABI、profile、owner、fallback、阴影/MSAA | ADR 0109 frozen；source/view 字段与偏移、generation/稳定 ID/索引、材质逐项 owner/case、pass 顺序、实验入口隔离、MSAA/特殊材质回退均已明确 |
+| 两类设备及 owner | device-plan.json、adapters.json；AMD rdna-1 与 Intel gen-9，native、timestamp 可用；G01/G05/G07 的采集责任分别列出 |
+| G-buffer limits、精度与带宽评估 | 两设备 gbuffer-probe.json 通过；ADR 记录实际 device limits 检查、误差阈值、B/pixel/读写 payload 和估算边界，不冒认完整场景性能 |
+| Forward 与既有 GPU 实例基线 | frozen-baseline 完整 30 项，固定输入、300 CPU/300 GPU ×3、原始样本全部保留、60 次主机限制 100；g01-baseline-summary.json 绑定文件哈希 |
+| 稳定性与预算冻结 | 8/10 组合相对稳定；用户明确批准另两项具名绝对上限，仍保留 stable=false；配置 frozen、设备 CPU/GPU/frameWall 及 E/F 每项数值齐全，--require-frozen 通过 |
+| 固定案例/seed、精度、内存、包体/Shader 方法 | 机器配置 A–G；ADR 固定房间、PRNG/灯光/相机/材质、720p/1080p/四完整视图，既有包体预算不提高，新增成本由 G07 逐入口评审 |
+| 上游 commit/hash/license | upstream-reference.json，官方固定 commit、五个文件 SHA-256、BSD-3-Clause；本轮未复制代码/模型 |
+| 实验入口、实际消费版本、独立发布线 | ADR 中现有 experimental/renderer 的异步工厂/backend port 设计；consumer-versions.json 哈希复核；协调仓 producerCandidates.Engine；不升级消费依赖或依赖 UI 发布 |
+| 采样与统计验证 | G01 policy/host 测试含缺样、假 GPU、设备/工作量错配、NaN、负计数、指纹、主机限速、相对波动、具名上限超限和冻结文件篡改拒绝 |
+| 必需检查 | G01 policy/host 16/16、lighting 30/30、performance-budget:test 122/122；docs:check、api:check、协调仓 check、--require-frozen 与 diff whitespace 检查均通过；最终日志在 artifacts/engine-0.2.1/g01/ |
 
-## 最终冻结前的设计复核
+## 范围与交接
 
-- ambient 合同已改为每视图确定有效源后聚合，view header 32 字节；ADR、机器配置、内存公式和测试一致。现有 RenderView/Light 没有 per-light layer-mask API，本版保持现有 World/disabled/hierarchy 语义。
-- 独立 artifact 校验已覆盖 30 个文件、每项 300 CPU/300 GPU 样本、3 个 cohort、真实适配器、HTTP served file hashes、场景来源与零验证错误。G01 未提交诊断数据不升级为 clean-release evidence。
-- 跨轮稳定性要求为 P95 相对极差 ≤ 20%、CV ≤ 10%，必须全部满足。当前 9/10 个设备/场景组合未通过；`--require-frozen` 正确拒绝当前状态。所有轮次与慢样本保留。
-- 已按用户选择等其他任务自然结束后重采样，没有终止原生渲染或编译。前一轮数据保留在 `attempt-1-contended/`；第二轮完整性通过但稳定性仍未通过。不能直接归因于已经结束的任务，不能提高绝对预算、降低样本数或挑选最快轮次。
-- 绝对 CPU/GPU 预算仍为 null；稳定采样、预算依据与合同最终冻结完成前，G02 不可启动。
-- 当前可验证的环境前置条件未满足：`pmset -g therm` 的 CPU speed limit 低于 100。新的 `--host-check` 已实际拒绝采样，旧报告仍保留。无法以修改引擎或放宽验收解决系统限速；等待设备状态恢复后再继续预算冻结。
+冻结的是设计和 G01 校准预算，不是 Deferred 已实现、帧率已达成或发布资格。G02 实现全灯参考，G03 Tiled，G04 兼容，G05 完整设备性能，G06 示例，G07 clean candidate 与独立 Engine 门禁。已有 Forward+/CSM hold 保持，稳定 root/API 和包版本未改。
 
-## 阻塞审计与恢复条件
+G01 旧 Forward 的 128 灯场景仍受 8 灯上限截断，不参与未来完整 128 灯的等工作量加速比。现有实例基线只测静态外部矩阵 + LOD/indirect，不能外推动态模拟、LOD 画质收益或完整 F 组；其 CPU record 也不替代后续 CPU prepare+record+submit。
 
-连续三轮 Goal 工作均未能取得可冻结的稳定基线：第一轮等待其他任务结束后重采仍有 9/10 个组合波动；第二轮查明当前系统限速并补齐前后检查；第三轮重新执行 `--host-check`，2026-09-25 12:45:54（UTC+8）仍报告 CPU speed limit 40，退出 1。之前两轮有实质进展，但相同的环境稳定性前置条件一直未满足。
+## 阻塞与恢复历史
 
-当前没有正在执行的基线任务需要等待，继续重复采样不能绕过该条件。恢复需要外部设备状态变化：系统 speed/scheduler limit 均恢复 100，再运行新的完整三轮、验证稳定性、依据实测制定绝对预算并完成合同一致性审查。恢复主机状态本身不等于 G01 完成；不得仅因前置检查转绿就跳过其余验收。
+原三轮 Goal 工作因设备稳定性前置条件未满足而 blocked，保留原始失败数据。恢复时主机限制为 100；第三次采样中途再次限速并按门禁停止。第四次在统一场景间空闲下完成三轮，原始样本未删改；用户随后确认两项微小时延的具名绝对上限。所有失败与恢复过程见 README 和对应归档，旧波动没有被改写为历史通过。

@@ -139,7 +139,7 @@ export class OutlineMaskRenderer extends BaseRenderer {
     passEncoder.setBindGroup(3, deformation.skinBindGroup);
     passEncoder.setVertexBuffer(0, geoData.positionBuf);
     passEncoder.setVertexBuffer(5, geoData.uvBuf);
-    passEncoder.setVertexBuffer(6, geoData.uv1Buf ?? geoData.uvBuf);
+    passEncoder.setVertexBuffer(6, geoData.uv1Buf);
     for (let index = 0; index < 4; index++) passEncoder.setVertexBuffer(index + 1, deformation.morphBuffers[index]!);
     if (geoData.indexBuf) {
       passEncoder.setIndexBuffer(geoData.indexBuf, geoData.indexFormat);
@@ -241,7 +241,7 @@ export class OutlineMaskRenderer extends BaseRenderer {
             attributes: [{ shaderLocation: index + 1, offset: 0, format: 'float32x3' }],
           })),
           { arrayStride: 8, attributes: [{ shaderLocation: 5, offset: 0, format: 'float32x2' }] },
-          { arrayStride: 8, attributes: [{ shaderLocation: 6, offset: 0, format: 'float32x2' }] },
+          { arrayStride: 24, attributes: [{ shaderLocation: 6, offset: 0, format: 'float32x2' }, { shaderLocation: 12, offset: 8, format: 'float32x4' }] },
         ],
       },
       fragment: { module: this.shaderModule, entryPoint: 'fs_main', targets: [{ format }] },

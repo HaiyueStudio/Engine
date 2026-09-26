@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "status": "applied-and-validated",
+  "appliedAt": "2026-09-26T09:18:15.300Z",
+  "approval": "User: shader预算提案可行",
+  "proposal": {
+    "path": "review/engine-0.2.1/g03-budget-proposal.json",
+    "sha256": "c37427d095e138708aaddc43fd0314e34db1540d6c31c1363ec59e167a2c427e"
+  },
+  "previous": {
+    "schemaVersion": 1,
+    "showcase": {
+      "maxSourceBytes": 5200,
+      "maxIrNodeCountBeforeOptimization": 64,
+      "maxIrNodeCountAfterOptimization": 60,
+      "maxVariantCount": 1,
+      "maxPipelineCount": 2,
+      "maxColdCompilationMs": 500
+    },
+    "production": {
+      "maxGeneratedWgslBytes": 400801,
+      "maxGeneratedWgslFiles": 69,
+      "maxVariantCount": 61,
+      "maxPipelineCount": 61,
+      "maxColdGenerationMs": 10000,
+      "growthBaseline": {
+        "generatedWgslBytes": 305504,
+        "generatedWgslFiles": 64,
+        "variantCount": 56,
+        "pipelineCount": 56
+      },
+      "maxGrowth": {
+        "generatedWgslBytes": 95297,
+        "generatedWgslFiles": 5,
+        "variantCount": 5,
+        "pipelineCount": 5
+      }
+    },
+    "dag": {
+      "maxShaderLanguageBuilds": 1,
+      "maxEngineBuilds": 1,
+      "maxExtensionsBuilds": 1,
+      "maxProductionGenerationRuns": 1
+    },
+    "productionBundles": {
+      "simple3dArtifactGzipBytes": 7100,
+      "componentsEvidenceArtifactGzipBytes": 2850,
+      "deformationArtifactGzipBytes": 9600
+    }
+  },
+  "applied": {
+    "schemaVersion": 1,
+    "showcase": {
+      "maxSourceBytes": 5200,
+      "maxIrNodeCountBeforeOptimization": 64,
+      "maxIrNodeCountAfterOptimization": 60,
+      "maxVariantCount": 1,
+      "maxPipelineCount": 2,
+      "maxColdCompilationMs": 500
+    },
+    "production": {
+      "maxGeneratedWgslBytes": 418480,
+      "maxGeneratedWgslFiles": 71,
+      "maxVariantCount": 63,
+      "maxPipelineCount": 63,
+      "maxColdGenerationMs": 10000,
+      "growthBaseline": {
+        "generatedWgslBytes": 305504,
+        "generatedWgslFiles": 64,
+        "variantCount": 56,
+        "pipelineCount": 56
+      },
+      "maxGrowth": {
+        "generatedWgslBytes": 112976,
+        "generatedWgslFiles": 7,
+        "variantCount": 7,
+        "pipelineCount": 7
+      }
+    },
+    "dag": {
+      "maxShaderLanguageBuilds": 1,
+      "maxEngineBuilds": 1,
+      "maxExtensionsBuilds": 1,
+      "maxProductionGenerationRuns": 1
+    },
+    "productionBundles": {
+      "simple3dArtifactGzipBytes": 7100,
+      "componentsEvidenceArtifactGzipBytes": 2850,
+      "deformationArtifactGzipBytes": 9600
+    }
+  },
+  "scope": "Only approved production absolute and growth caps; historical baseline, package/performance budgets and statistics population unchanged",
+  "validatedAt": "2026-09-26T09:22:30.928Z",
+  "validation": {
+    "policyTests": 10,
+    "shaderLanguageCheck": "passed",
+    "stage14": {
+      "status": "passed",
+      "nodes": 25,
+      "dag": {
+        "shaderLanguageBuilds": 1,
+        "engineBuilds": 1,
+        "extensionsBuilds": 1,
+        "productionGenerationRuns": 0
+      }
+    },
+    "cost": {
+      "status": "passed",
+      "production": {
+        "generatedWgslBytes": 417394,
+        "generatedWgslFiles": 71,
+        "variantCount": 63,
+        "pipelineCount": 63,
+        "coldGenerationMs": null,
+        "generatorRuns": 0,
+        "generators": [
+          {
+            "id": "motion-blur",
+            "passCount": 0,
+            "outputCount": 4,
+            "artifactHash": "0c8dc5e8f0264ab0c5c7f2d12095782bab639d17f85120478e11afb3fcb54be5"
+          },
+          {
+            "id": "builtin-postprocess",
+            "passCount": 15,
+            "outputCount": 18,
+            "artifactHash": "f0a413ee92e26c980f4b4e7f6f6258138a6a84936144a160376f880d293bf476"
+          },
+          {
+            "id": "builtin-render",
+            "passCount": 16,
+            "outputCount": 19,
+            "artifactHash": null
+          },
+          {
+            "id": "deformation",
+            "passCount": 9,
+            "outputCount": 12,
+            "artifactHash": "db2f01eff2888ce452be55e52c8724522d78e4b6e2c8afab27cea2061e84f12e"
+          },
+          {
+            "id": "material-lighting",
+            "passCount": 6,
+            "outputCount": 9,
+            "artifactHash": "e3926b1ac655f17e90b403bdcceb2e47ee968ccdfde968ddca7a2445eb4d6ef4"
+          },
+          {
+            "id": "specialized-rendering",
+            "passCount": 7,
+            "outputCount": 8,
+            "artifactHash": "94fc7a2d004f7921e99497faab088d21126efe50251888b673867466d4ce05d8"
+          },
+          {
+            "id": "compute",
+            "passCount": 6,
+            "outputCount": 7,
+            "artifactHash": "f58b0de8483a7e5ea6999652985330733118394c6054dec56c82b2181b93f18a"
+          },
+          {
+            "id": "deferred-lighting",
+            "passCount": 2,
+            "outputCount": 3,
+            "artifactHash": "a175e0b8187143b3e432490463f3724d4fc1ef9e63e6b0ea776c4447258d7222"
+          },
+          {
+            "id": "deferred-tiled",
+            "passCount": 2,
+            "outputCount": 4,
+            "artifactHash": "0438621590043faed4948e4a515a1d637f2718c8a162321a4e32a383dd7b6f4f"
+          }
+        ],
+        "costDiff": {
+          "generatedWgslBytes": {
+            "baseline": 305504,
+            "current": 417394,
+            "delta": 111890,
+            "maximumGrowth": 112976
+          },
+          "generatedWgslFiles": {
+            "baseline": 64,
+            "current": 71,
+            "delta": 7,
+            "maximumGrowth": 7
+          },
+          "variantCount": {
+            "baseline": 56,
+            "current": 63,
+            "delta": 7,
+            "maximumGrowth": 7
+          },
+          "pipelineCount": {
+            "baseline": 56,
+            "current": 63,
+            "delta": 7,
+            "maximumGrowth": 7
+          }
+        }
+      },
+      "remainingWgslBytes": 1086
+    },
+    "boundaries": [
+      {
+        "metric": "generatedWgslBytes",
+        "maximum": 418480,
+        "atCap": "passed",
+        "capPlusOne": "rejected"
+      },
+      {
+        "metric": "generatedWgslFiles",
+        "maximum": 71,
+        "atCap": "passed",
+        "capPlusOne": "rejected"
+      },
+      {
+        "metric": "variantCount",
+        "maximum": 63,
+        "atCap": "passed",
+        "capPlusOne": "rejected"
+      },
+      {
+        "metric": "pipelineCount",
+        "maximum": 63,
+        "atCap": "passed",
+        "capPlusOne": "rejected"
+      }
+    ],
+    "currentPerformanceFingerprintsUnchanged": true
+  },
+  "evidence": [
+    {
+      "path": "artifacts/engine-0.2.1/g03/approved-budget/stage14-dag.json",
+      "sha256": "836cbfb04c1fdd7a45dcf67cd260067e3bbd3d7912be249f6a7c4fbf6393f5e8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/approved-budget/shader-cost.json",
+      "sha256": "041964a7238a2395277d0759806e81147ca625de96823006f2fb3c0c10c5505f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/approved-budget/budget-policy.log",
+      "sha256": "1e34e9b8333700ca84cde3f3708eee9996b36a6e874febc152cac91a3c1576af"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/approved-budget/shader-check.log",
+      "sha256": "4cad6e05283c68001e05a7639e8111ba8c1063131435d94d0914ae80973c34bd"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/approved-budget/stage14.log",
+      "sha256": "cb9a99f0ecb8450dd3713ba061b00dfa1f3f48b9ba63541ccc7c49058b3e31c2"
+    }
+  ]
+}

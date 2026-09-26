@@ -13,6 +13,8 @@ const source = await readFile(new URL('../builtin-deformation-family.json', impo
 const compiled = compileProductionDeformationFamilyV1(source, { sourcePath: path, sourceSha256: sha256(source) });
 const temporalContract = JSON.parse(await readFile(new URL('../temporal-postprocess-extension-contract.json', import.meta.url), 'utf8'));
 const outputContract = JSON.parse(await readFile(new URL('../linear-hdr-output-extension-contract.json', import.meta.url), 'utf8'));
+const colorContract = JSON.parse(await readFile(new URL('../deferred-lighting-extension-contract.json', import.meta.url), 'utf8')).vertexColors;
+assert.equal(colorContract.previousDeformationHash, JSON.parse(await readFile(new URL('../auxiliary-surface-extension-contract.json', import.meta.url), 'utf8')).artifact.deformationHash);
 const auxiliaryContract = JSON.parse(await readFile(new URL('../auxiliary-surface-extension-contract.json', import.meta.url), 'utf8'));
 
 test('stage 10 atomically compiles the production deformation pass family', () => {
@@ -43,7 +45,7 @@ test('stage 10 reflection freezes current and history deformation ABI', () => {
     'object.currentJointMatrices', 'geometry.skinJoints', 'geometry.skinWeights',
   ]);
   const motion = passes['motion-vector'];
-  assert.equal(compiled.artifact.artifactHash, auxiliaryContract.artifact.deformationHash);
+  assert.equal(compiled.artifact.artifactHash, colorContract.deformationHash);
   assert.equal(motion.vertexBuffers.length, auxiliaryContract.motion.vertexBufferCount);
   assert.deepEqual(motion.vertexBuffers.slice(1, 5).map(buffer => buffer.arrayStride), [24, 24, 24, 24]);
   assert.ok(motion.passRequirements.includes('auxiliary-surface-mrt-v1'));

@@ -47,6 +47,7 @@ import type { MirrorViewPlannerStats } from './MirrorViewPlanner';
 import type { RenderGraphStats } from '../core/RenderGraph';
 import type { TransientRenderTargetPoolStats } from '../rtt/TransientRenderTargetPool';
 import { getSceneFrameGpuArena } from '../renderer/SceneFrameGpuArena';
+import { getDeferredLightingBackend, removeDeferredLightingBackend } from '../renderer/DeferredLightingBackendPort';
 import type { FrameData } from '../frame/FrameData';
 import type { Camera3DFrameData } from '../frame/FrameData';
 import { EngineError, EngineErrorCode } from '../core/EngineError';
@@ -132,6 +133,7 @@ export class Render3DSystem extends System {
   get renderSettings(): RenderProfileSettings { return this._renderSettings; }
 
   setRenderProfile(profile: RenderProfileName): this {
+    removeDeferredLightingBackend(this);
     if (profile === this._renderProfile) return this;
     this._renderProfile = profile;
     this._renderSettings = this.engine.capabilities?.profile.name === profile
@@ -923,6 +925,14 @@ export class Render3DSystem extends System {
     const submitterOptions = this._getSubmitterOptions();
     try {
       this._submitter.prepareView(opaqueItems, transparentItems, this._materialRenderContext, submitterOptions);
+      const lightingBackend = getDeferredLightingBackend(this);
+      if (lightingBackend && this._scenePassRenderer.renderDeferred(lightingBackend, {
+        context, world, view: state.frameView,
+        sceneFrame: this._materialRenderContext.sceneFrameUniforms!,
+        opaqueItems, transparentCount: transparentItems.length, helperCount: helperItems.length,
+        postScene: this._postScenePasses, disabledCache: this._disabledHierarchyCache,
+        drawOpaque: pass => this._submitter.drawOpaqueItems(opaqueItems, pass, viewProj, viewMatrix, submitterOptions),
+      })) return;
       const needsSceneColorCapture = transparentItems.some(item =>
         item.material instanceof PbrMaterial && item.material.transmissionFactor > 0);
       if (needsSceneColorCapture) {
@@ -1056,6 +1066,7 @@ export class Render3DSystem extends System {
   }
 
   suspendForDeviceLoss(): void {
+    removeDeferredLightingBackend(this, true);
     this._renderers.suspendForDeviceLoss();
     this._postScenePasses.destroy();
     this._scenePassRenderer.destroy();

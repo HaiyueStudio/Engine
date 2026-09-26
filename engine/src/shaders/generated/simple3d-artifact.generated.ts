@@ -594,7 +594,7 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
           ]
         },
         {
-          "arrayStride": 8,
+          "arrayStride": 24,
           "stepMode": "vertex",
           "attributes": [
             {
@@ -602,6 +602,12 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
               "shaderLocation": 11,
               "offset": 0,
               "format": "float32x2"
+            },
+            {
+              "semantic": "COLOR_0",
+              "shaderLocation": 12,
+              "offset": 8,
+              "format": "float32x4"
             }
           ]
         }
@@ -642,6 +648,12 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
           "location": 5,
           "type": "f32",
           "interpolation": "perspective"
+        },
+        {
+          "semantic": "VERTEX_ALPHA",
+          "location": 6,
+          "type": "f32",
+          "interpolation": "perspective"
         }
       ],
       "renderTargets": [
@@ -671,10 +683,10 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
           "sourceId": "builtin.normal-material",
           "sourceName": "shader-language/builtin-simple-3d-runtime-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 282
+          "generatedEndLine": 285
         }
       ],
-      "canonicalHash": "50ff3ac7191bd1a71c6d9532a0624c4bc819d7b05596423cd892c22f2aad7212"
+      "canonicalHash": "f073f487dac63b0f7848f0e25d8f4738c06f2ed10fe97f56633308251380e7d9"
     },
     "particle3d": {
       "id": "particle3d",
@@ -1052,5 +1064,5 @@ export const BUILTIN_RENDER_SHADER_ARTIFACT = {
       "canonicalHash": "51a18c6adf0460586ce776a2539b2c6e6b71c1d2e29da81c814b64a85aeda245"
     }
   },
-  "artifactHash": "1ed297f225816718ce15c7402d7c5789490d5870144f0556f80b5f82125db841"
+  "artifactHash": "2d603df1727c5bc0fd8f14b1686abab2e8b689b4fce8424c3e5e724591536c1c"
 } as const satisfies PrecompiledShaderArtifactV2;

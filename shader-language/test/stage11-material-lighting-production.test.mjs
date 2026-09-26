@@ -12,6 +12,7 @@ const path = 'shader-language/builtin-material-lighting-family.json';
 const source = await readFile(new URL('../builtin-material-lighting-family.json', import.meta.url), 'utf8');
 const compiled = compileProductionMaterialLightingFamilyV1(source, { sourcePath: path, sourceSha256: sha256(source) });
 const outputContract = JSON.parse(await readFile(new URL('../linear-hdr-output-extension-contract.json', import.meta.url), 'utf8'));
+const deferredContract = JSON.parse(await readFile(new URL('../deferred-lighting-extension-contract.json', import.meta.url), 'utf8'));
 
 test('stage 11 compiles the reviewed material-lighting family atomically', () => {
   assert.equal(compiled.family.abiVersion, 1);
@@ -26,7 +27,8 @@ test('stage 11 compiles the reviewed material-lighting family atomically', () =>
   }
   const second = compileProductionMaterialLightingFamilyV1(source, { sourcePath: path, sourceSha256: sha256(source) });
   assert.equal(second.artifact.artifactHash, compiled.artifact.artifactHash);
-  assert.equal(compiled.artifact.artifactHash, outputContract.artifact.materialLightingHash);
+  assert.equal(deferredContract.previousMaterialLightingHash, outputContract.artifact.materialLightingHash);
+  assert.equal(compiled.artifact.artifactHash, deferredContract.materialLightingHash);
 });
 
 test('stage 11 reflection freezes lighting, material, shadow and deformation ABI', () => {

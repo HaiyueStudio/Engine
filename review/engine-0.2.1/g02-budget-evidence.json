@@ -1,0 +1,486 @@
+{
+  "schemaVersion": 1,
+  "status": "proposed-not-applied",
+  "measuredAt": "2026-09-25T12:28:14.858Z",
+  "revision": "61d40f7bf75e05ec948754d85fdbf70512a21ca8",
+  "dirty": true,
+  "shader": {
+    "current": {
+      "generatedWgslBytes": 397578,
+      "generatedWgslFiles": 69,
+      "variantCount": 61,
+      "pipelineCount": 61,
+      "coldGenerationMs": 631.7601669999999,
+      "generatorRuns": 8,
+      "generators": [
+        {
+          "id": "motion-blur",
+          "passCount": 0,
+          "outputCount": 4,
+          "artifactHash": "0c8dc5e8f0264ab0c5c7f2d12095782bab639d17f85120478e11afb3fcb54be5"
+        },
+        {
+          "id": "builtin-postprocess",
+          "passCount": 15,
+          "outputCount": 18,
+          "artifactHash": "7e24253794246cc1ef7406eeac34b47bbe8413ebae1de3558fb6a5e7ecaab9a9"
+        },
+        {
+          "id": "builtin-render",
+          "passCount": 16,
+          "outputCount": 19,
+          "artifactHash": null
+        },
+        {
+          "id": "deformation",
+          "passCount": 9,
+          "outputCount": 12,
+          "artifactHash": "db2f01eff2888ce452be55e52c8724522d78e4b6e2c8afab27cea2061e84f12e"
+        },
+        {
+          "id": "material-lighting",
+          "passCount": 6,
+          "outputCount": 9,
+          "artifactHash": "e3926b1ac655f17e90b403bdcceb2e47ee968ccdfde968ddca7a2445eb4d6ef4"
+        },
+        {
+          "id": "specialized-rendering",
+          "passCount": 7,
+          "outputCount": 8,
+          "artifactHash": "94fc7a2d004f7921e99497faab088d21126efe50251888b673867466d4ce05d8"
+        },
+        {
+          "id": "compute",
+          "passCount": 6,
+          "outputCount": 7,
+          "artifactHash": "f58b0de8483a7e5ea6999652985330733118394c6054dec56c82b2181b93f18a"
+        },
+        {
+          "id": "deferred-lighting",
+          "passCount": 2,
+          "outputCount": 3,
+          "artifactHash": "a175e0b8187143b3e432490463f3724d4fc1ef9e63e6b0ea776c4447258d7222"
+        }
+      ],
+      "costDiff": {
+        "generatedWgslBytes": {
+          "baseline": 305504,
+          "current": 397578,
+          "delta": 92074,
+          "maximumGrowth": 57960
+        },
+        "generatedWgslFiles": {
+          "baseline": 64,
+          "current": 69,
+          "delta": 5,
+          "maximumGrowth": 3
+        },
+        "variantCount": {
+          "baseline": 56,
+          "current": 61,
+          "delta": 5,
+          "maximumGrowth": 3
+        },
+        "pipelineCount": {
+          "baseline": 56,
+          "current": 61,
+          "delta": 5,
+          "maximumGrowth": 3
+        }
+      }
+    },
+    "originalViolations": [
+      {
+        "metric": "production.generatedWgslBytes",
+        "actual": 397578,
+        "maximum": 363464,
+        "status": "failed",
+        "reason": "budget-exceeded"
+      },
+      {
+        "metric": "production.generatedWgslFiles",
+        "actual": 69,
+        "maximum": 67,
+        "status": "failed",
+        "reason": "budget-exceeded"
+      },
+      {
+        "metric": "production.variantCount",
+        "actual": 61,
+        "maximum": 59,
+        "status": "failed",
+        "reason": "budget-exceeded"
+      },
+      {
+        "metric": "production.pipelineCount",
+        "actual": 61,
+        "maximum": 59,
+        "status": "failed",
+        "reason": "budget-exceeded"
+      },
+      {
+        "metric": "production.generatedWgslBytesGrowth",
+        "actual": 92074,
+        "maximum": 57960,
+        "status": "failed",
+        "reason": "budget-exceeded"
+      },
+      {
+        "metric": "production.generatedWgslFilesGrowth",
+        "actual": 5,
+        "maximum": 3,
+        "status": "failed",
+        "reason": "budget-exceeded"
+      },
+      {
+        "metric": "production.variantCountGrowth",
+        "actual": 5,
+        "maximum": 3,
+        "status": "failed",
+        "reason": "budget-exceeded"
+      },
+      {
+        "metric": "production.pipelineCountGrowth",
+        "actual": 5,
+        "maximum": 3,
+        "status": "failed",
+        "reason": "budget-exceeded"
+      }
+    ],
+    "proposedProduction": {
+      "maxGeneratedWgslBytes": 400801,
+      "maxGeneratedWgslFiles": 69,
+      "maxVariantCount": 61,
+      "maxPipelineCount": 61,
+      "maxColdGenerationMs": 10000,
+      "growthBaseline": {
+        "generatedWgslBytes": 305504,
+        "generatedWgslFiles": 64,
+        "variantCount": 56,
+        "pipelineCount": 56
+      },
+      "maxGrowth": {
+        "generatedWgslBytes": 95297,
+        "generatedWgslFiles": 5,
+        "variantCount": 5,
+        "pipelineCount": 5
+      }
+    },
+    "proposalEvaluation": {
+      "schemaVersion": 1,
+      "budget": "shader-language/shader-cost-budgets.json",
+      "status": "passed",
+      "checks": [
+        {
+          "metric": "showcase.sourceBytes",
+          "actual": 4852,
+          "maximum": 5200,
+          "status": "passed"
+        },
+        {
+          "metric": "showcase.irNodeCountBeforeOptimization",
+          "actual": 60,
+          "maximum": 64,
+          "status": "passed"
+        },
+        {
+          "metric": "showcase.irNodeCountAfterOptimization",
+          "actual": 59,
+          "maximum": 60,
+          "status": "passed"
+        },
+        {
+          "metric": "showcase.variantCount",
+          "actual": 1,
+          "maximum": 1,
+          "status": "passed"
+        },
+        {
+          "metric": "showcase.pipelineCount",
+          "actual": 2,
+          "maximum": 2,
+          "status": "passed"
+        },
+        {
+          "metric": "showcase.coldCompilationMs",
+          "actual": 110.77306499999986,
+          "maximum": 500,
+          "status": "passed"
+        },
+        {
+          "metric": "production.generatedWgslBytes",
+          "actual": 397578,
+          "maximum": 400801,
+          "status": "passed"
+        },
+        {
+          "metric": "production.generatedWgslFiles",
+          "actual": 69,
+          "maximum": 69,
+          "status": "passed"
+        },
+        {
+          "metric": "production.variantCount",
+          "actual": 61,
+          "maximum": 61,
+          "status": "passed"
+        },
+        {
+          "metric": "production.pipelineCount",
+          "actual": 61,
+          "maximum": 61,
+          "status": "passed"
+        },
+        {
+          "metric": "production.generatedWgslBytesGrowth",
+          "actual": 92074,
+          "maximum": 95297,
+          "status": "passed"
+        },
+        {
+          "metric": "production.generatedWgslFilesGrowth",
+          "actual": 5,
+          "maximum": 5,
+          "status": "passed"
+        },
+        {
+          "metric": "production.variantCountGrowth",
+          "actual": 5,
+          "maximum": 5,
+          "status": "passed"
+        },
+        {
+          "metric": "production.pipelineCountGrowth",
+          "actual": 5,
+          "maximum": 5,
+          "status": "passed"
+        },
+        {
+          "metric": "production.coldGenerationMs",
+          "actual": 631.7601669999999,
+          "maximum": 10000,
+          "status": "passed"
+        }
+      ],
+      "violations": []
+    },
+    "attribution": [
+      {
+        "path": "engine/src/shaders/generated/deferred-gbuffer.generated.wgsl",
+        "before": 0,
+        "current": 21778,
+        "delta": 21778
+      },
+      {
+        "path": "engine/src/shaders/generated/deferred-reference.generated.wgsl",
+        "before": 0,
+        "current": 11290,
+        "delta": 11290
+      },
+      {
+        "path": "engine/src/shaders/generated/deformation-depth.generated.wgsl",
+        "before": 7956,
+        "current": 8108,
+        "delta": 152
+      },
+      {
+        "path": "engine/src/shaders/generated/deformation-motion-vector.generated.wgsl",
+        "before": 11123,
+        "current": 11278,
+        "delta": 155
+      },
+      {
+        "path": "engine/src/shaders/generated/deformation-outline.generated.wgsl",
+        "before": 7580,
+        "current": 7738,
+        "delta": 158
+      },
+      {
+        "path": "engine/src/shaders/generated/deformation-shadow-morph.generated.wgsl",
+        "before": 4142,
+        "current": 4300,
+        "delta": 158
+      },
+      {
+        "path": "engine/src/shaders/generated/deformation-shadow-skinned-morph.generated.wgsl",
+        "before": 5870,
+        "current": 6028,
+        "delta": 158
+      },
+      {
+        "path": "engine/src/shaders/generated/deformation-shadow-skinned.generated.wgsl",
+        "before": 5493,
+        "current": 5651,
+        "delta": 158
+      },
+      {
+        "path": "engine/src/shaders/generated/deformation-shadow.generated.wgsl",
+        "before": 3003,
+        "current": 3154,
+        "delta": 151
+      },
+      {
+        "path": "engine/src/shaders/generated/material-lighting-pbr-clearcoat.generated.wgsl",
+        "before": 31239,
+        "current": 31995,
+        "delta": 756
+      },
+      {
+        "path": "engine/src/shaders/generated/material-lighting-pbr-transmission-clearcoat.generated.wgsl",
+        "before": 31247,
+        "current": 32003,
+        "delta": 756
+      },
+      {
+        "path": "engine/src/shaders/generated/material-lighting-pbr-transmission.generated.wgsl",
+        "before": 31242,
+        "current": 31998,
+        "delta": 756
+      },
+      {
+        "path": "engine/src/shaders/generated/material-lighting-pbr.generated.wgsl",
+        "before": 31234,
+        "current": 31990,
+        "delta": 756
+      },
+      {
+        "path": "engine/src/shaders/generated/simple3d-normal-material.generated.wgsl",
+        "before": 8989,
+        "current": 9144,
+        "delta": 155
+      }
+    ]
+  },
+  "package": {
+    "size": 1913174,
+    "unpackedSize": 8494886,
+    "fileCount": 614,
+    "sha256": "90c68926872be22d2aac3dd04022f7ca69da489832fcacb698183039efda7dfd",
+    "deterministicRepack": true,
+    "originalErrors": [
+      "tarball file count 614 exceeds 609"
+    ],
+    "proposedLimits": {
+      "maxPackedBytes": 2100000,
+      "maxUnpackedBytes": 9000000,
+      "maxFileCount": 620,
+      "filesWhitelist": [
+        "README.md",
+        "LICENSE",
+        "dist/**/*.js",
+        "dist/**/*.d.ts"
+      ],
+      "allowedFilePatterns": [
+        "package.json",
+        "README.md",
+        "LICENSE",
+        "dist/**/*.js",
+        "dist/**/*.d.ts"
+      ]
+    },
+    "proposedCapacity": {
+      "reviewed": {
+        "packedBytes": 1874952,
+        "unpackedBytes": 8362294,
+        "fileCount": 613
+      },
+      "growthReserve": {
+        "packedBytes": 225048,
+        "unpackedBytes": 637706,
+        "fileCount": 7
+      },
+      "capabilityBasis": "stable golden path plus focused ECS, scene, rendering, physics, compute, assets, diagnostics, game saves, and experimental runtime seams; 0.2.0 owner-safe audio mixer, multiplayer input and GUI font options"
+    },
+    "proposalErrors": [],
+    "additionalDeclarations": [
+      {
+        "path": "dist/experimental/DeferredReferenceProfile.d.ts",
+        "size": 1114,
+        "mode": 420
+      },
+      {
+        "path": "dist/frame/DeferredLightTable.d.ts",
+        "size": 2127,
+        "mode": 420
+      },
+      {
+        "path": "dist/frame/DeferredWorldLights.d.ts",
+        "size": 355,
+        "mode": 420
+      },
+      {
+        "path": "dist/geometry/GeometryVertexColors.d.ts",
+        "size": 406,
+        "mode": 420
+      },
+      {
+        "path": "dist/renderer/DeferredLightGpuTable.d.ts",
+        "size": 1766,
+        "mode": 420
+      },
+      {
+        "path": "dist/renderer/DeferredLightingBackendPort.d.ts",
+        "size": 1709,
+        "mode": 420
+      },
+      {
+        "path": "dist/renderer/DeferredLightingCapabilities.d.ts",
+        "size": 205,
+        "mode": 420
+      },
+      {
+        "path": "dist/renderer/DeferredReferenceBackend.d.ts",
+        "size": 2008,
+        "mode": 420
+      },
+      {
+        "path": "dist/renderer/PbrDeferredSurfacePort.d.ts",
+        "size": 763,
+        "mode": 420
+      },
+      {
+        "path": "dist/shaders/generated/deferred-lighting-abi.generated.d.ts",
+        "size": 4227,
+        "mode": 420
+      },
+      {
+        "path": "dist/shaders/generated/deferred-lighting-artifact.generated.d.ts",
+        "size": 44126,
+        "mode": 420
+      }
+    ],
+    "deferredMarkersInPublishedJs": []
+  },
+  "boundaryChecks": [
+    {
+      "metric": "generatedWgslBytes",
+      "maximum": 400801,
+      "atLimit": "passed",
+      "overByOne": "rejected"
+    },
+    {
+      "metric": "generatedWgslFiles",
+      "maximum": 69,
+      "atLimit": "passed",
+      "overByOne": "rejected"
+    },
+    {
+      "metric": "variantCount",
+      "maximum": 61,
+      "atLimit": "passed",
+      "overByOne": "rejected"
+    },
+    {
+      "metric": "pipelineCount",
+      "maximum": 61,
+      "atLimit": "passed",
+      "overByOne": "rejected"
+    },
+    {
+      "metric": "package.fileCount",
+      "maximum": 620,
+      "atLimit": "passed",
+      "overByOne": "rejected"
+    }
+  ]
+}

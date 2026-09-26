@@ -17,6 +17,8 @@ const compiled = fixtures.map(value => compileBuiltinRenderFamilyV1(value.source
   sourcePath: value.path,
   sourceSha256: value.hash,
 }));
+const colorContract = JSON.parse(await readFile(new URL('../deferred-lighting-extension-contract.json', import.meta.url), 'utf8')).vertexColors;
+assert.equal(colorContract.previousSimple3dHash, JSON.parse(await readFile(new URL('../auxiliary-surface-extension-contract.json', import.meta.url), 'utf8')).artifact.simple3dHash);
 const auxiliaryContract = JSON.parse(await readFile(new URL('../auxiliary-surface-extension-contract.json', import.meta.url), 'utf8'));
 const runtimeSimple3d = await family('../builtin-simple-3d-runtime-family.json');
 
@@ -55,7 +57,7 @@ test('stage 9 reflection preserves multi-group, vertex and uniform ABI boundarie
   const simple3d = compiled[2].artifact.passes;
   assert.equal(compileBuiltinRenderFamilyV1(runtimeSimple3d.source, {
     sourcePath: runtimeSimple3d.path, sourceSha256: runtimeSimple3d.hash,
-  }).artifact.artifactHash, auxiliaryContract.artifact.simple3dHash);
+  }).artifact.artifactHash, colorContract.simple3dHash);
   assert.deepEqual(simple3d['normal-material'].renderTargets.map(target => target.formatClass), ['color', 'optional-linear-depth-r32float']);
   assert.equal(components2d['animation-2d'].bindGroups.length, 4);
   assert.deepEqual(components2d['animation-2d'].bindGroups[0].bindings[0].visibility, ['vertex', 'fragment']);

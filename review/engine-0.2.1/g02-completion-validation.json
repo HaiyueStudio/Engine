@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "generatedAt": "2026-09-26T05:31:26.371Z",
+  "scope": "G02 development correctness and closing checks; not release or performance qualification",
+  "inputs": {
+    "sha256": "0beca3099d61ccdbfdd5654c69d612765eb56350ccbe935bc1d90bf7ff26f0d9",
+    "fileCount": 589
+  },
+  "harness": {
+    "sha256": "c8e9522e585c96256ed1ac27147c4627f7596a20fc6cdfb2105a663157bedb18",
+    "fileCount": 11
+  },
+  "rootTests": {
+    "total": 1340,
+    "shaderLanguage": 123,
+    "engine": 711,
+    "animationSpec": 107,
+    "extensions": 392,
+    "catalog": 7
+  },
+  "rootTypecheck": "passed",
+  "materialExamples": {
+    "lab": {
+      "status": "passed",
+      "samplingCases": 4,
+      "maxChannelDelta": 2
+    },
+    "character": {
+      "status": "passed",
+      "passes": 5,
+      "silhouetteMismatchPixels": 0
+    }
+  },
+  "rootBuild": {
+    "status": "passed",
+    "exampleTargets": 95,
+    "timeoutOverride": false
+  },
+  "api": "passed",
+  "docs": "passed",
+  "performancePolicyTests": 131,
+  "deferredPolicyAndRoomTests": 7,
+  "stage14": {
+    "nodes": 25,
+    "evidence": {
+      "path": "artifacts/engine-0.2.1/g02/final-validation/stage14-dag.json",
+      "sha256": "8b71c45a602891b42bd23c56fdee511a6408253fd1f8bbf2a9a3b37eabc23d98"
+    }
+  },
+  "sceneOutput": {
+    "cases": 17,
+    "evidence": {
+      "path": "artifacts/engine-0.2.1/g02/final-validation/scene-output-diagnostic.json",
+      "sha256": "7652148e9d5b964a8a0d45cddef45989c662629c33c2c045da22b86ce0aa79e4"
+    }
+  },
+  "shaderCost": {
+    "path": "artifacts/engine-0.2.1/g02/final-validation/shader-cost.json",
+    "sha256": "4f4b0cdd9d76bae836f9afc66db21d868e3c54fc0a7bb5504fff22bab4ca3549"
+  },
+  "metadataCompaction": {
+    "path": "artifacts/engine-0.2.1/g02/final-validation/compact-deformation-equivalence.json",
+    "sha256": "1016fd3b56ce33fd9941f7e2682f913c5ba32a220fa4503e40fd75ea598fdba5"
+  },
+  "native": {
+    "path": "review/engine-0.2.1/g02-final-native-validation.json",
+    "sha256": "bcb372ff8c076b7b4ec520d59095a094f3739731d2dddd53c2a9caa4fef3748b"
+  },
+  "logs": [
+    {
+      "name": "typecheck",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/typecheck.log",
+      "sha256": "6197d43f7ccba9f49abe488bbfbcb23bde5c8db3ee71c9beeea4c780125fc86c"
+    },
+    {
+      "name": "tests-serial",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/tests-serial.log",
+      "sha256": "da7143bebfbb73d6d789b79ec8247e0752b2da5d2c1c9c82ca39e79310cc1d93"
+    },
+    {
+      "name": "build",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/build.log",
+      "sha256": "615c4688667ff3f32d5e109a53bf5aaa4869807b06e19f3baa1e4f8b6c854ec1"
+    },
+    {
+      "name": "api",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/api.log",
+      "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+    },
+    {
+      "name": "docs",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/docs.log",
+      "sha256": "55604eeaae8585cbb2eb68b4dec60d115c0d0d775d4f3b0b64041657137ec57a"
+    },
+    {
+      "name": "policy",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/policy.log",
+      "sha256": "eb243bf87c057ae8ae962eb834c3c787f86943ac03be47cadec9aeefa199e23c"
+    },
+    {
+      "name": "deferred-policy",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/deferred-policy.log",
+      "sha256": "11b9ddcab1ef4aa88a7ee21c7318d86e84d6f663935a0e59ec74b68fcecf3e65"
+    },
+    {
+      "name": "boundaries",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/boundaries.log",
+      "sha256": "a6c312d77bfdf54654156228e731cabe3d93bb351a968d942126b81007143105"
+    },
+    {
+      "name": "stage14-serial",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/stage14-serial.log",
+      "sha256": "d7d719819560617b59bf8cc39e6b0fbd19c12f9068000214464bedc9c6cfefa7"
+    },
+    {
+      "name": "scene-output",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/scene-output.log",
+      "sha256": "b8a1f3b673ed8c32cb03e7da57db1c223ff4bcba2593b2362726f822c68a8a5b"
+    },
+    {
+      "name": "freshness",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/freshness.log",
+      "sha256": "fdbd02d89fe062773dd8c897db44fed7cded85147ceeb7fe6bd00c2da66a1318"
+    },
+    {
+      "name": "shader-check",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/shader-check.log",
+      "sha256": "e4a3ae41141d87bd1c0f84d553bb2d7682671518686eed5b5d9bcca26df077ab"
+    },
+    {
+      "name": "lab",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/lab.log",
+      "sha256": "6324d1a6146cc33c32b221a067c9b72b2496cb3a14b49faf45675c734410db8a"
+    },
+    {
+      "name": "character",
+      "path": "artifacts/engine-0.2.1/g02/final-validation/character.log",
+      "sha256": "0b32495c97cac33fa1314b72524fff5c3f550e953d25b13469794db18f01c93e"
+    }
+  ],
+  "coordination": {
+    "status": "passed",
+    "g02": "complete",
+    "g03": "ready-not-activated",
+    "evidence": {
+      "path": "artifacts/engine-0.2.1/g02/final-validation/milestones.log",
+      "sha256": "c6289cfdbe5368bea8a2f7ebb50fd8111f51d28fed8241021c7bac199e40f2cf"
+    }
+  }
+}

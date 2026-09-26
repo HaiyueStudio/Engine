@@ -1,0 +1,375 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "scope": "Native B matrix, overflow, source capacity, four views and automatic selection; performance reviewed separately",
+  "generatedAt": "2026-09-26T07:09:06.677Z",
+  "inputs": {
+    "sha256": "ff8089c7f84f1b76460adf093f391b84e2b470980fcfa2582e65601ad8f7600b",
+    "fileCount": 598
+  },
+  "harness": {
+    "sha256": "60c8b0fb30a9014c4d611545f3c8d725991e3e01b6e1c09c7ed2af7eb635a983",
+    "files": [
+      {
+        "path": "scripts/webgpu-gate/chrome-runner.mjs",
+        "sha256": "fe20cd10b0122117fad4ebe34099c4424b86c1200f1631acecf52086bfdbe1fb"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tile-fixture.html",
+        "sha256": "50d1d95fb6868aec81db76f8eb91e86a9021854ac0d6220f5643b0fc253efe3b"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tile-fixture.mjs",
+        "sha256": "ffa1724f703e72af38a5aa515fb4f6b17426517cc3296d7b704e2fd60ceef693"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tile-oracle.mjs",
+        "sha256": "c972a096163ed372fb34b852965aa4fe5b4742f3b4233b60f06eff3f1e3812da"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-boundaries.mjs",
+        "sha256": "8ebc2ec3fd2802bc942c64bd8aa57a9ab094bf8593e410df763b8d75236cb8f5"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-policy.mjs",
+        "sha256": "e5eba37a298b86718a72272e6c66988bc7787364aef05b7e08e7382099422254"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-render-fixture.html",
+        "sha256": "aa2ba73746ae671559266312d45373ef838bb95b98eb0d7fc2da2d01bebdeb30"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-render-fixture.mjs",
+        "sha256": "83173d6ef1497a9294cd9ff3ade33c205e9d76f104021c418cf57400de781dc2"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-views.mjs",
+        "sha256": "7d7fb93746fe8fa3f3dc1b2fd87694ee7926972b6dd2cf64850b759e28701dac"
+      },
+      {
+        "path": "scripts/webgpu-gate/float-texture-readback.mjs",
+        "sha256": "137c1db65b877fbfeb79ca404c12ac4600be243c0be8c3abd248068a8b14e661"
+      },
+      {
+        "path": "scripts/webgpu-gate/run-deferred-tile-fixture.mjs",
+        "sha256": "e49b8238e0666a29e2ef36be8c3ef2ce8bbf64c302c2b03a324c925ced0b9f94"
+      }
+    ]
+  },
+  "captures": [
+    {
+      "path": "artifacts/engine-0.2.1/g03/tile-render-high-performance-2026-09-26T07-07-05.340Z.json",
+      "sha256": "04e2757968b81b5b0ed81a07218ebc32d62b7be3ebb8758b11a0d98d73211f48",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": 32,
+      "boundaryCases": 17,
+      "capacityCases": [
+        {
+          "id": "cull-source-capacity-error",
+          "failurePolicy": "strict",
+          "requested": 1025,
+          "thrown": {
+            "name": "DeferredLightingCapabilityError",
+            "reason": "point-capacity",
+            "observed": 1025,
+            "supported": 1024
+          },
+          "diagnostics": {
+            "requested": "deferred-tiled",
+            "effective": "forward",
+            "completeCoverage": false,
+            "reason": "point-capacity"
+          },
+          "recovered": 1024
+        },
+        {
+          "id": "cull-source-capacity-error",
+          "failurePolicy": "forward",
+          "requested": 1025,
+          "thrown": null,
+          "diagnostics": {
+            "requested": "deferred-tiled",
+            "effective": "forward",
+            "completeCoverage": false,
+            "reason": "point-capacity"
+          },
+          "recovered": 1024
+        }
+      ],
+      "viewCases": {
+        "reuse": {
+          "frames": 8,
+          "baseline": {
+            "buffers": 796,
+            "bindGroups": 646,
+            "pipelines": 255,
+            "computePipelines": 240
+          },
+          "dynamic": {
+            "buffers": 796,
+            "bindGroups": 646,
+            "pipelines": 255,
+            "computePipelines": 240
+          }
+        },
+        "transitions": [
+          {
+            "range": 40,
+            "paths": [
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              }
+            ],
+            "tileBuffers": 0
+          },
+          {
+            "range": 3,
+            "paths": [
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-tiled",
+                "completeCoverage": true,
+                "reason": null
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-tiled",
+                "completeCoverage": true,
+                "reason": null
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-tiled",
+                "completeCoverage": true,
+                "reason": null
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-tiled",
+                "completeCoverage": true,
+                "reason": null
+              }
+            ],
+            "tileBuffers": 4
+          },
+          {
+            "range": 40,
+            "paths": [
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              }
+            ],
+            "tileBuffers": 0
+          }
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/tile-render-low-power-2026-09-26T07-07-10.898Z.json",
+      "sha256": "4c39f887574a8bb3f101290093f068b122bdb9a1423ab0a56a2f21277a70f322",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": 32,
+      "boundaryCases": 17,
+      "capacityCases": [
+        {
+          "id": "cull-source-capacity-error",
+          "failurePolicy": "strict",
+          "requested": 1025,
+          "thrown": {
+            "name": "DeferredLightingCapabilityError",
+            "reason": "point-capacity",
+            "observed": 1025,
+            "supported": 1024
+          },
+          "diagnostics": {
+            "requested": "deferred-tiled",
+            "effective": "forward",
+            "completeCoverage": false,
+            "reason": "point-capacity"
+          },
+          "recovered": 1024
+        },
+        {
+          "id": "cull-source-capacity-error",
+          "failurePolicy": "forward",
+          "requested": 1025,
+          "thrown": null,
+          "diagnostics": {
+            "requested": "deferred-tiled",
+            "effective": "forward",
+            "completeCoverage": false,
+            "reason": "point-capacity"
+          },
+          "recovered": 1024
+        }
+      ],
+      "viewCases": {
+        "reuse": {
+          "frames": 8,
+          "baseline": {
+            "buffers": 796,
+            "bindGroups": 646,
+            "pipelines": 255,
+            "computePipelines": 240
+          },
+          "dynamic": {
+            "buffers": 796,
+            "bindGroups": 646,
+            "pipelines": 255,
+            "computePipelines": 240
+          }
+        },
+        "transitions": [
+          {
+            "range": 40,
+            "paths": [
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              }
+            ],
+            "tileBuffers": 0
+          },
+          {
+            "range": 3,
+            "paths": [
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-tiled",
+                "completeCoverage": true,
+                "reason": null
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-tiled",
+                "completeCoverage": true,
+                "reason": null
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-tiled",
+                "completeCoverage": true,
+                "reason": null
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-tiled",
+                "completeCoverage": true,
+                "reason": null
+              }
+            ],
+            "tileBuffers": 4
+          },
+          {
+            "range": 40,
+            "paths": [
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              },
+              {
+                "requested": "deferred-tiled",
+                "effective": "deferred-reference",
+                "completeCoverage": true,
+                "reason": "all-lights-cover-near-plane"
+              }
+            ],
+            "tileBuffers": 0
+          }
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    }
+  ]
+}

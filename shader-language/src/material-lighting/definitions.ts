@@ -374,7 +374,10 @@ function pbrVertexBuffers(): readonly PrecompiledShaderVertexBufferV2[] {
     vertexBuffer(12, 'POSITION', 0, 'float32x3'),
     vertexBuffer(12, 'NORMAL', 1, 'float32x3'),
     vertexBuffer(8, 'TEXCOORD_0', 2, 'float32x2'),
-    vertexBuffer(8, 'TEXCOORD_1', 3, 'float32x2'),
+    { arrayStride: 24, stepMode: 'vertex', attributes: [
+      { semantic: 'TEXCOORD_1', shaderLocation: 3, offset: 0, format: 'float32x2' },
+      { semantic: 'COLOR_0', shaderLocation: 12, offset: 8, format: 'float32x4' },
+    ] },
     ...Array.from({ length: 4 }, (_, index): PrecompiledShaderVertexBufferV2 => Object.freeze({
       arrayStride: 24,
       stepMode: 'vertex' as const,
@@ -395,7 +398,7 @@ function positionNormalUvBuffers(): readonly PrecompiledShaderVertexBufferV2[] {
 }
 
 function positionNormalUv1Buffers(): readonly PrecompiledShaderVertexBufferV2[] {
-  return Object.freeze([...positionNormalUvBuffers(), vertexBuffer(8, 'TEXCOORD_1', 3, 'float32x2')]);
+  return Object.freeze([...positionNormalUvBuffers(), vertexBuffer(24, 'TEXCOORD_1', 3, 'float32x2')]);
 }
 
 function varying(semantic: string, location: number, type: string): ShaderVaryingReflection {
@@ -411,7 +414,7 @@ function pbrVaryings(): readonly ShaderVaryingReflection[] {
     varying('WORLD_POSITION', 0, 'vec3<f32>'), varying('WORLD_NORMAL', 1, 'vec3<f32>'),
     varying('TEXCOORD_0', 2, 'vec2<f32>'), varying('TEXCOORD_1', 3, 'vec2<f32>'),
     varying('WORLD_SCALE', 4, 'f32'),
-    flatVarying('OBJECT_INDEX', 5, 'u32'),
+    flatVarying('OBJECT_INDEX', 5, 'u32'), varying('COLOR_0', 6, 'vec4<f32>'),
   ]);
 }
 

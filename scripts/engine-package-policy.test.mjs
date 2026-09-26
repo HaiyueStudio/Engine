@@ -31,6 +31,27 @@ test('package globs include nested release files without admitting source maps',
   assert.equal(matchesPackageGlob('src/index.ts', 'dist/**/*.d.ts'), false);
 });
 
+test('admitted package file capacity still enforces independent byte and file limits', () => {
+  const budget = JSON.parse(readFileSync(new URL('../config/engine-package-budget.json', import.meta.url), 'utf8'));
+  const packageJson = { sideEffects: false, files: budget.tarball.filesWhitelist };
+  const manifest = {
+    size: budget.tarball.maxPackedBytes,
+    unpackedSize: budget.tarball.maxUnpackedBytes,
+    files: Array.from({ length: budget.tarball.maxFileCount }, (_, index) => ({ path: `dist/item-${index}.d.ts` })),
+  };
+  const errors = candidate => validateEnginePackManifest({ manifest: candidate, packageJson, budget }).errors;
+  assert.deepEqual(errors(manifest), []);
+  for (const [field, message] of [['size', 'tarball gzip'], ['unpackedSize', 'tarball unpacked']]) {
+    const candidate = structuredClone(manifest);
+    candidate[field]++;
+    assert.equal(errors(candidate).length, 1);
+    assert.ok(errors(candidate)[0].startsWith(message));
+  }
+  manifest.files.push({ path: 'dist/over-budget.d.ts' });
+  assert.equal(errors(manifest).length, 1);
+  assert.ok(errors(manifest)[0].startsWith('tarball file count'));
+});
+
 test('public package manifests expose dist-only targets and never publish source trees', () => {
   const workspaces = [
     ['engine', new URL('../engine/package.json', import.meta.url)],

@@ -34,9 +34,9 @@ struct CoverageMaterial {
 @group(2) @binding(2) var coverageTexture : texture_2d<f32>;
 @group(2) @binding(3) var coverageSampler : sampler;
 
-fn hy_has_material_coverage(uv0: vec2<f32>, uv1: vec2<f32>) -> bool {
+fn hy_has_material_coverage(uv0: vec2<f32>, uv1: vec2<f32>, vertexAlpha: f32) -> bool {
   if (coverage.flags.w != 1u) { return true; }
-  var alpha = coverage.baseColor.a;
+  var alpha = coverage.baseColor.a * vertexAlpha;
   if (coverage.flags.x != 0u) {
     let uv = select(uv0, uv1, coverage.baseMapping0.w > 0.5);
     let mapped = vec2<f32>(dot(coverage.baseMapping0.xy, uv) + coverage.baseMapping0.z,
@@ -141,6 +141,7 @@ struct ObjectData {
 @group(1) @binding(0) var<storage, read> objects : array<ObjectData>;
 
 struct ShadowVertexOutput {
+  @location(6) vertexAlpha : f32,
   @location(2) uv0 : vec2<f32>,
   @location(3) uv1 : vec2<f32>,
   @builtin(position) clipPosition : vec4<f32>,
@@ -149,6 +150,7 @@ struct ShadowVertexOutput {
 }
 
 struct VertexInput {
+  @location(12) color : vec4<f32>,
   @location(5) uv0 : vec2<f32>,
   @location(6) uv1 : vec2<f32>,
   @location(0) position : vec3<f32>,
@@ -181,12 +183,13 @@ fn vs_main(input: VertexInput) -> ShadowVertexOutput {
   output.objectIndex = input.instanceIndex;
   output.uv0 = input.uv0;
   output.uv1 = input.uv1;
+  output.vertexAlpha = input.color.a;
   return output;
 }
 
 @fragment fn fs_main(input : ShadowVertexOutput) -> @location(0) vec4<f32> {
   let object = objects[input.objectIndex];
-  if (!hy_has_material_coverage(input.uv0, input.uv1)) { discard; }
+  if (!hy_has_material_coverage(input.uv0, input.uv1, input.vertexAlpha)) { discard; }
   if (hy_is_clipped(input.worldPos, input.objectIndex)) { discard; }
   return vec4<f32>(1.0);
 }

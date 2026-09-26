@@ -1,11 +1,18 @@
 import type { GpuDrivenBatchBuffer } from '../renderer/GpuDrivenBatchBuffer';
 import type { Mesh3DRenderer } from '../renderer/Mesh3DRenderer';
+import type { PbrRenderer } from '../renderer/PbrRenderer';
 
 interface ExperimentalRender3DSystemAccess {
+  _requirePbrRenderer(): PbrRenderer;
   readonly gpuDrivenBatchBuffer: GpuDrivenBatchBuffer | null;
   addRenderer(renderer: Mesh3DRenderer): unknown;
   getGpuDrivenBatchIndexForEntity(entityId: number): number | undefined;
   getGpuDrivenMaterialSlot(materialId: number): number | undefined;
+}
+
+/** Internal lazy-lighting factory hook; deliberately absent from public exports. */
+export function prepareRender3DPbrRenderer(system: unknown): PbrRenderer {
+  return experimentalAccess(system)._requirePbrRenderer();
 }
 
 function experimentalAccess(system: unknown): ExperimentalRender3DSystemAccess {

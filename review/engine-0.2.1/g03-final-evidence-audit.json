@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 1,
+  "status": "incomplete-performance-host-blocked",
+  "generatedAt": "2026-09-26T09:41:37.848Z",
+  "scope": "Final G03 evidence audit; correctness/admission checked, performance stability not accepted",
+  "productQualification": false,
+  "runtime": {
+    "sha256": "e1ace98e435a904e5c0d576e0c5e5f0a6fd30ef8fd407302f485494d021b5581",
+    "fileCount": 598
+  },
+  "nativeCorrectness": "passed-current-fingerprints",
+  "g02ReferenceRegression": "passed-current-fingerprints",
+  "roomMatrix": {
+    "cases": 8,
+    "status": "passed",
+    "harnessChange": "Only preflight logging outside measured work; original runner hash reproduced and all other harness file hashes match"
+  },
+  "rootTests": {
+    "total": 1349,
+    "workspaceCounts": [
+      125,
+      718,
+      107,
+      392,
+      7
+    ]
+  },
+  "shaderAdmission": {
+    "status": "passed",
+    "stage14Nodes": 25,
+    "application": "review/engine-0.2.1/g03-budget-application.json"
+  },
+  "latestRecapture": {
+    "directory": "artifacts/engine-0.2.1/g03/cohorts-2026-09-26T09-31-37.647Z",
+    "validCompletedCaptures": 6,
+    "invalidCapture": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-low-power-2026-09-26T09-37-37.225Z.json",
+    "cpuSpeedLimit": {
+      "before": 100,
+      "after": 53
+    },
+    "decision": "Keep complete raw failure; no cohort qualification or population splicing. Await user-provided idle/cooldown window."
+  },
+  "remaining": [
+    "AMD sparse Tiled GPU-span and lighting stability under original thresholds",
+    "Final milestone/handoff closure after accepted performance evidence"
+  ],
+  "checkedEvidence": [
+    {
+      "path": "review/engine-0.2.1/g03-point-correctness.json",
+      "sha256": "6624291b35128bcdee7f0c7962436353d743fc87c5781899f32b55bd93920e75"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/tile-render-high-performance-2026-09-26T07-47-42.798Z.json",
+      "sha256": "fd005da97609ee2c30ed85ae3dfc174284ed4e251b8a1b020359243d5259e04e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/tile-render-low-power-2026-09-26T07-47-52.317Z.json",
+      "sha256": "8252dc2bd214c7bf062e25d1450254c1dc6edea02d09daf8de634cbef2e43489"
+    },
+    {
+      "path": "review/engine-0.2.1/g03-point-reference-regression.json",
+      "sha256": "88b8629c0cea9a58574a00a9e3023a39c33295fb46b02a7b04888cd2e722d324"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/point-checks/reference-high-performance.json",
+      "sha256": "2d0c2f0ccf2acfa02cab05863d252fa6772b8f07c0bc0b0e24860071591c91f3"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/point-checks/reference-low-power.json",
+      "sha256": "89138ed3ecc01df16fc456383beffae8a0dfd3d85b50f47855ed88dded09a5a1"
+    },
+    {
+      "path": "review/engine-0.2.1/g03-point-room-matrix.json",
+      "sha256": "f83f4b985ca6fdd900df54cd29f4e8074121cfb7fa1ffaeca89e9566956a6f44"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-high-performance-2026-09-26T08-25-28.716Z.json",
+      "sha256": "0a36f89256037d2213ca9085d00d74b00626409a33bdd36ff12ccf0028011ceb"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-low-power-2026-09-26T08-27-42.165Z.json",
+      "sha256": "a8691b2a7e61600de7b64d7014a2950ed5fe4b0e842d8cc986c31685c92c3996"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-26T08-29-01.840Z.json",
+      "sha256": "185bb58b8c604086ae93436e95d8bdcde78ebcf4223e0f8c136905cd4cdc78b7"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-low-power-2026-09-26T08-31-09.811Z.json",
+      "sha256": "7e6348d03d9a30d8a45867f6a88006cb002d2748e7275a20ec03f3f27e752aa3"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-sparse-high-performance-2026-09-26T08-23-59.720Z.json",
+      "sha256": "4b5d6fe7141bcca26ab7e3e9a66660ebce6c0ee977d7ab10f515ac2045ecdd03"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-sparse-low-power-2026-09-26T08-24-02.820Z.json",
+      "sha256": "ba72d5bef4e2610117a7f576ca52421d01736d09b870d66adc333d57b6bb5068"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-overlap-high-performance-2026-09-26T08-24-05.718Z.json",
+      "sha256": "0bd22d2246f9ea5aecf49c53eb7ce133625cfb18f7ae298a8b43a63c65af4d44"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-overlap-low-power-2026-09-26T08-24-09.638Z.json",
+      "sha256": "ec2f3b4c05b1ccb944852cbf5707bdd9b7b3568b6b7496438120a9d69f9bc2b7"
+    },
+    {
+      "path": "review/engine-0.2.1/g03-budget-application.json",
+      "sha256": "97bf530eadee6f1ac320fe0dae34f5d9ee4b91c49fb0c33aa12a4443815e1356"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/approved-budget/stage14-dag.json",
+      "sha256": "836cbfb04c1fdd7a45dcf67cd260067e3bbd3d7912be249f6a7c4fbf6393f5e8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/approved-budget/shader-cost.json",
+      "sha256": "041964a7238a2395277d0759806e81147ca625de96823006f2fb3c0c10c5505f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/approved-budget/budget-policy.log",
+      "sha256": "1e34e9b8333700ca84cde3f3708eee9996b36a6e874febc152cac91a3c1576af"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/approved-budget/shader-check.log",
+      "sha256": "4cad6e05283c68001e05a7639e8111ba8c1063131435d94d0914ae80973c34bd"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/approved-budget/stage14.log",
+      "sha256": "cb9a99f0ecb8450dd3713ba061b00dfa1f3f48b9ba63541ccc7c49058b3e31c2"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/approved-budget/stage14-dag.json",
+      "sha256": "836cbfb04c1fdd7a45dcf67cd260067e3bbd3d7912be249f6a7c4fbf6393f5e8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/cohorts-2026-09-26T09-31-37.647Z/captures.json",
+      "sha256": "d10d4ec341beadeae0426b09f6847af558ec6a3a6ac4b59a60978ffc2a93a59f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-high-performance-2026-09-26T09-32-23.949Z.json",
+      "sha256": "048ae25e2ed80471dc60d27a2a5e9e5a19417bcdb16015e4ab86bcd1c228c96f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-high-performance-2026-09-26T09-33-01.031Z.json",
+      "sha256": "4056b0fb39e488c6536a75a7011c2a62bb152712accffdb3becdc9d7f7cbebe8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-low-power-2026-09-26T09-34-31.154Z.json",
+      "sha256": "dff6c270bbb549381f67d5f00bb009a300b796eaeae5ff196187e4abc708f4ae"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-low-power-2026-09-26T09-35-13.476Z.json",
+      "sha256": "f288241f1964acdc521566e92cccd6a71a9541558c34cd4432ae1467d12683bb"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-high-performance-2026-09-26T09-35-53.980Z.json",
+      "sha256": "f6454928411dd8b689808eff863f41395a2d0c437db314dad4fe1afe87a2815d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-26T09-36-32.858Z.json",
+      "sha256": "eca545b5703657b206e6f32a275bee3379a5400439350a0e099948392bc3cd95"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-low-power-2026-09-26T09-37-37.225Z.json",
+      "sha256": "5ea6dea438ce2bfa1c425922b9bf33ebc7c15afbc96703382e094e3818a26672"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/point-checks/root-typecheck.log",
+      "sha256": "ad350a0afbc699f206467bb213402ecadaa69f85cdc3236bd549bc59d22b3092"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/point-checks/root-test.log",
+      "sha256": "5fb3bc7dca1fe00eee9403041670d718847f33aa8b985a9154e23e92eacef5c5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/point-checks/root-build.log",
+      "sha256": "72317f80219a4616b7d4dd52e2532aff0ab8f924bda51ef548dcd2ecef531f9e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/point-checks/api.log",
+      "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/point-checks/modules.log",
+      "sha256": "00f3e9f91c3798e801d80e22ef3501104042731e5875d13fffa2a170eb1516ad"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/point-checks/responsibilities.log",
+      "sha256": "6fa09923726c2f63ea49a166fb29d211950e6aaa019390427f961c4d74e2b3c9"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/point-checks/prepare.log",
+      "sha256": "3896d25e54cb62720a681e2bc7098bf3551ea000929e9a62e6f5e5139f0b6e0b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/point-checks/package.log",
+      "sha256": "e8ea938654d510f03bd743ee1f761fcdda6778579212d3e9aee36da200e2d9a8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/point-checks/public-packages.json",
+      "sha256": "4ea66d2ccb258e975fd7b8eece4e531b47943822e5959112a4959b188a4a3f44"
+    }
+  ],
+  "rootChecks": {
+    "typecheck": "passed",
+    "tests": 1349,
+    "freshExampleBuilds": 95,
+    "api": "passed",
+    "modules": "passed",
+    "responsibilities": "passed",
+    "rendererPrepare": "passed",
+    "scope": "Previously completed current-runtime checks; new CLI-only log change separately covered by six room/cohort policy tests"
+  },
+  "packages": {
+    "status": "passed",
+    "mode": "development",
+    "packages": [
+      {
+        "name": "@haiyue/engine",
+        "version": "0.2.1",
+        "packedBytes": 1895285,
+        "unpackedBytes": 8286100,
+        "fileCount": 619
+      },
+      {
+        "name": "@haiyue/animation-spec",
+        "version": "0.2.1",
+        "packedBytes": 130281,
+        "unpackedBytes": 502980,
+        "fileCount": 48
+      },
+      {
+        "name": "@haiyue/extensions",
+        "version": "0.2.1",
+        "packedBytes": 513429,
+        "unpackedBytes": 2651645,
+        "fileCount": 188
+      },
+      {
+        "name": "@haiyue/shader-language",
+        "version": "0.2.1",
+        "packedBytes": 146390,
+        "unpackedBytes": 707600,
+        "fileCount": 75
+      }
+    ],
+    "scope": "Existing dist-only package result; approved Shader budget configuration and external CLI logs are not package files"
+  }
+}

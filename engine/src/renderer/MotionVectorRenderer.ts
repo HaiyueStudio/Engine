@@ -297,7 +297,7 @@ export class MotionVectorRenderer extends BaseRenderer {
     pass.setBindGroup(3, entity.skinBindGroup);
     pass.setVertexBuffer(0, geometryData.positionBuf);
     pass.setVertexBuffer(5, geometryData.uvBuf);
-    pass.setVertexBuffer(6, geometryData.uv1Buf ?? geometryData.uvBuf);
+    pass.setVertexBuffer(6, geometryData.uv1Buf);
     pass.setVertexBuffer(7, geometryData.normalBuf);
     for (let index = 0; index < 4; index++) pass.setVertexBuffer(index + 1, deformation.morphBuffers[index]!);
     if (geometryData.indexBuf) {
@@ -606,7 +606,7 @@ export class MotionVectorRenderer extends BaseRenderer {
             ],
           })),
           { arrayStride: 8, attributes: [{ shaderLocation: 5, offset: 0, format: 'float32x2' }] },
-          { arrayStride: 8, attributes: [{ shaderLocation: 6, offset: 0, format: 'float32x2' }] },
+          { arrayStride: 24, attributes: [{ shaderLocation: 6, offset: 0, format: 'float32x2' }, { shaderLocation: 12, offset: 8, format: 'float32x4' }] },
           { arrayStride: 12, attributes: [{ shaderLocation: 7, offset: 0, format: 'float32x3' }] },
         ],
       },

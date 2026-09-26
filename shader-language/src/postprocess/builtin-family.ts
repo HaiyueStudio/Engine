@@ -10,6 +10,7 @@ import {
 } from './builtin-contracts';
 import {
   FULLSCREEN_POSTPROCESS_VERTEX_WGSL,
+  OUTPUT_POSTPROCESS_VERTEX_WGSL,
   emitBuiltinPostprocessPass,
 } from './builtin-wgsl';
 
@@ -32,7 +33,7 @@ export function compileBuiltinPostprocessFamilyV1(
   const compiledPasses = family.passes.map(pass => emitBuiltinPostprocessPass(
     pass.id,
     pass.operation,
-    FULLSCREEN_POSTPROCESS_VERTEX_WGSL,
+    pass.operation === 'output' ? OUTPUT_POSTPROCESS_VERTEX_WGSL : FULLSCREEN_POSTPROCESS_VERTEX_WGSL,
     passGroup,
     options.sourcePath,
   ));

@@ -89,8 +89,13 @@ export class SceneOutputPass extends PostProcessPass {
       view: sampleCount > 1 && targetAttachment ? targetAttachment.view : dst,
       ...(sampleCount > 1 ? { resolveTarget: dst } : {}),
       loadOp: blend || viewport || scissor ? 'load' : 'clear', clearValue: { r: 0, g: 0, b: 0, a: 0 }, storeOp: 'store' }] });
+    // Establish output coverage explicitly on every view. Native four-view probes
+    // can leave the clear untouched when relying on implicit full-target state.
+    const target = this._view?.target;
     if (viewport) pass.setViewport(viewport.x, viewport.y, viewport.width, viewport.height, 0, 1);
+    else if (target) pass.setViewport(0, 0, target.width, target.height, 0, 1);
     if (scissor) pass.setScissorRect(scissor.x, scissor.y, scissor.width, scissor.height);
+    else if (target) pass.setScissorRect(0, 0, target.width, target.height);
     pass.setPipeline(pipeline); pass.setBindGroup(0, binding.group); pass.draw(3); pass.end();
   }
 

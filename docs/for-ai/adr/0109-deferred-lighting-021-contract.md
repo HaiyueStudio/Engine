@@ -1,7 +1,7 @@
 # ADR 0109：0.2.1 Deferred 与 Tiled 光照合同
 
 - 日期：2026-09-25
-- 状态：Contract candidate；设备基线与格式探测验收后冻结。不是已实现能力，也不是 stable/product 准入。
+- 状态：Contract frozen（2026-09-25）；设备基线、格式探测和用户确认的预算方法已验收。不是已实现能力，也不是 stable/product 准入。
 - 范围：M18 G01；接续 [ADR 0021](0021-benchmark-driven-lighting-shadow-scale.md)、[ADR 0099](0099-view-light-selection-before-clustering.md)、[ADR 0097](0097-auxiliary-mrt-and-frame-resource-dependencies.md)。
 - 权威配置：[lighting-performance-021.json](../../../config/lighting-performance-021.json)；当前证据：[G01 交接](../../../review/engine-0.2.1/README.md)。
 
@@ -19,7 +19,7 @@
 
 ### 源灯记录
 
-一个 World/frame 一份 immutable point/directional source，版本、帧号、长度独立保存在 16 B header；每灯 64 B、16 B 对齐：
+一个 World/frame 一份 immutable point/directional source。16 B header 按偏移 0/4/8/12 保存四个 u32：`abiVersion=1`、`sourceGeneration`、`pointCount`、`directionalCount`；frame ID 由 CPU frame owner 的提交元数据持有，不再隐含占用 header 字段。记录从偏移 16 开始，每灯 64 B、16 B 对齐：
 
 | 字节偏移 | 类型 | 含义 |
 | --- | --- | --- |
@@ -30,11 +30,11 @@
 
 无 shadow slot 使用 `0xffffffff`。容量为局部 1024、方向 8；ambient 保留 CPU 源记录，在每视图确定有效源后按既有线性加和语义聚合到该视图 uniform，分别统计原始/聚合数量；环境贴图 IBL 继续由原 environment owner 管理。stable ID 为 owner 分配的 GPU u32 标识，不能把任意 JS entity ID 直接截成 u32；复用/环绕必须换 generation。1024 只是本版有界容量，不代表该数量有统一帧率保证。每类超限都返回结构化能力错误或显式受限 Forward 回退，不能截断后声明完整覆盖。
 
-全局方向记录与局部记录分段保存（同一帧 owner、同一 storage buffer）；局部配额不被方向光和 ambient 占用。World source 不含相机选择结果；frame ring 至少覆盖实际在途提交，扩容不能覆盖已编码数据。静态源不重复上传，相机变更只影响 view index。
+全局方向记录在前，局部记录随后，分段保存在同一 storage buffer、由同一帧 owner 管理；局部配额不被方向光和 ambient 占用。局部索引 i 的字节偏移为 `16 + 64*(directionalCount+i)`，不是以稳定灯 ID 直接索引。v1 源记录的 flags 保留为零；后续赋予位语义需要 ABI 评审。World source 不含相机选择结果；frame ring 至少覆盖实际在途提交，扩容不能覆盖已编码数据。静态源不重复上传，相机变更只影响 view index。
 
 ### View / tile 索引
 
-可见局部 ID 数组为 u32，索引进入当前 source generation；view header 32 B：前 16 B 保存 source generation、局部数、方向数、flags，后 16 B 为 ambient linear radiance.xyz 与保留零。view key 包含 camera ID、viewport、World/视图可见性 revision、projection revision、device generation。现有 RenderView/Light 没有公开 per-light layer-mask API，本版不新增该 API；计划中的 layer 用例验证现有渲染层/视图所有权隔离，不假装已有逐灯 layer 过滤。当前 ambient 有效源遵守 World、disabled/hierarchy 规则，未来新增过滤也必须先过滤再聚合。
+可见局部索引数组为 u32，每项属于当前 source generation 的 `[0,pointCount)`；稳定灯 ID 仅标识实体生命周期，不能与数组索引混用。view header 32 B：偏移 0/4/8/12 为 u32 source generation、局部数、方向数、flags（v1 为零），偏移 16/20/24/28 为 f32 ambient linear radiance.xyz 与保留零。generation 不匹配时不得消费旧 view/tile 列表。view key 包含 camera ID、viewport、World/视图可见性 revision、projection revision、device generation。现有 RenderView/Light 没有公开 per-light layer-mask API，本版不新增该 API；计划中的 layer 用例验证现有渲染层/视图所有权隔离，不假装已有逐灯 layer 过滤。当前 ambient 有效源遵守 World、disabled/hierarchy 规则，未来新增过滤也必须先过滤再聚合。
 
 tile 采用 16×16 pixels，compute workgroup 64 invocation；每 tile header 为 16 B（offset、accepted count、overflow flag、reserved），与索引同存一个 storage buffer；每 tile stride 528 B。每 tile 固定保留 128 个 u32 槽；只有完整接纳的 tile 才使用这些索引。超过 128 时设 overflow，本帧 resolve 遍历该 view 的全部局部 ID，已写入前缀不再重复计算；方向光独立全量计算。这样避免固定原子分配池溢出后等待 CPU 下一帧修复。
 
@@ -105,6 +105,10 @@ G-buffer/source/view list/history 由既有 Render3D frame/resource owner 管理
 ### 独立增量预算
 
 新功能保持独立增量预算，详见机器配置；既有 Forward、包体、Shader、设备 gate 不改变。128/256 灯要求完整参与；512/1024 是诊断档。发布必须同一 clean revision + 两类设备 + 全材质/生命周期/包消费与示例证据，不以本 ADR 代替实现验收。
+
+用户确认的单视图 720p 目标为独显 60 FPS、集显 30 FPS。冻结 CPU/GPU P95 分别为独显 4/12 ms、集显 8/24 ms，完整帧 P95 另行限制为 1000/60 与 1000/30 ms，不能把独立样本群的 CPU/GPU P95 相加冒充实测帧率。CPU 计算 prepare+record+submit，完整帧在基准中等待提交完成测量，不要求生产正常帧同步等待 GPU。1080p 的 GPU/完整帧预算乘像素倍率 2.25；四个完整 720p 视图的三类预算乘 4，不承诺保持单视图帧率。E/F 各 case 的具体数值已写入机器合同，G05 必须验证优化路径达标。
+
+G01 校准固定 120 预热帧、每轮 300 CPU/300 GPU 样本、三轮交错顺序及 30 秒场景间空闲；原始数据全部保留，采样前后主机限制必须为 100。三轮 P95 相对极差 ≤20%、CV ≤10%；仅两项用户明确批准的已有独显实例通道允许按冻结绝对上限纳入，仍报告其相对不稳定，不将例外扩散到其他测试。详见[预算依据](../../../review/engine-0.2.1/g01-budget-freeze.md)。本阶段诊断基线用于冻结合同，不替代 G05/G07 的产品性能、持续运行和 clean-release 验收。
 
 当前布局的每视图增量下界为 28×W×H + ceil(W/16)×ceil(H/16)×528 + 4×1024 + 32 bytes；它不包含原 HDR、历史、shadow、pipeline/driver 隐藏开销和 frame-ring 多代。按实际存活代数乘算。所谓带宽估算是 attachment 写/读 payload，不是实测 DRAM 流量或驱动驻留显存。
 

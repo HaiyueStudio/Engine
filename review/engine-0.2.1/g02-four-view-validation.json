@@ -1,0 +1,666 @@
+{
+  "schemaVersion": 1,
+  "status": "historical-explicit-state-cohort-superseded",
+  "evidenceClass": "dirty-worktree diagnostic; not release or performance qualification",
+  "generatedAt": "2026-09-25T14:25:42.624139+00:00",
+  "implementation": "engine/src/postprocess/SceneOutputPass.ts",
+  "change": "Explicit default destination viewport/scissor; no shader or resource allocation changes",
+  "probeSeries": "artifacts/engine-0.2.1/g02/output-probe-cold-start-series.json",
+  "independentFullRuns": [
+    {
+      "path": "artifacts/engine-0.2.1/g02/reference-explicit-state-high-performance-1.json",
+      "sha256": "7b30dc2c369741f388334a10c85f2734beb105a979bdf24a85fcb12f79e2f603",
+      "generatedAt": "2026-09-25T13:57:57.794Z",
+      "inputs": {
+        "sha256": "6878a64b8b1b3ad1518d6d2a0525d0ddd58ef861178d41a931a11038ca16fb66",
+        "fileCount": 589
+      },
+      "harness": {
+        "sha256": "851c0b69f615a0f77a67f2b7603705408545a3a5d081057f9acf3e86367132eb",
+        "fileCount": 10
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/reference-explicit-state-high-performance-2.json",
+      "sha256": "4c5be75ba39933218b4dacc364099adde799a94986caca970b8be186b59659fc",
+      "generatedAt": "2026-09-25T13:59:02.622Z",
+      "inputs": {
+        "sha256": "6878a64b8b1b3ad1518d6d2a0525d0ddd58ef861178d41a931a11038ca16fb66",
+        "fileCount": 589
+      },
+      "harness": {
+        "sha256": "851c0b69f615a0f77a67f2b7603705408545a3a5d081057f9acf3e86367132eb",
+        "fileCount": 10
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/reference-explicit-state-high-performance-3.json",
+      "sha256": "f2c7374b7025da227073592b440517884be3c2652dbc94fa3394be12ac1cc8e6",
+      "generatedAt": "2026-09-25T13:59:34.737Z",
+      "inputs": {
+        "sha256": "6878a64b8b1b3ad1518d6d2a0525d0ddd58ef861178d41a931a11038ca16fb66",
+        "fileCount": 589
+      },
+      "harness": {
+        "sha256": "851c0b69f615a0f77a67f2b7603705408545a3a5d081057f9acf3e86367132eb",
+        "fileCount": 10
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/reference-explicit-state-high-performance-4.json",
+      "sha256": "f07ef6bca622251520f3e38f75720ae252c082fee9fb3509ff0736ed9dc3695e",
+      "generatedAt": "2026-09-25T14:00:12.630Z",
+      "inputs": {
+        "sha256": "6878a64b8b1b3ad1518d6d2a0525d0ddd58ef861178d41a931a11038ca16fb66",
+        "fileCount": 589
+      },
+      "harness": {
+        "sha256": "851c0b69f615a0f77a67f2b7603705408545a3a5d081057f9acf3e86367132eb",
+        "fileCount": 10
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/reference-explicit-state-high-performance-5.json",
+      "sha256": "35da93f5998510231356f702fc1b1d7f0a729dec0de4c6a8b2c94681842bcd94",
+      "generatedAt": "2026-09-25T14:00:57.023Z",
+      "inputs": {
+        "sha256": "6878a64b8b1b3ad1518d6d2a0525d0ddd58ef861178d41a931a11038ca16fb66",
+        "fileCount": 589
+      },
+      "harness": {
+        "sha256": "851c0b69f615a0f77a67f2b7603705408545a3a5d081057f9acf3e86367132eb",
+        "fileCount": 10
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/reference-explicit-state-low-power-1.json",
+      "sha256": "79d7f649061ed90bacce0310573f2a7722ed2b2ee9844dcfab92211a4ea12e54",
+      "generatedAt": "2026-09-25T14:02:00.207Z",
+      "inputs": {
+        "sha256": "6878a64b8b1b3ad1518d6d2a0525d0ddd58ef861178d41a931a11038ca16fb66",
+        "fileCount": 589
+      },
+      "harness": {
+        "sha256": "851c0b69f615a0f77a67f2b7603705408545a3a5d081057f9acf3e86367132eb",
+        "fileCount": 10
+      },
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/reference-explicit-state-low-power-2.json",
+      "sha256": "cfc6daf0a60a9eb7fbcf38354d75a4ff32351fd89e13bf12a9949c9a74d99875",
+      "generatedAt": "2026-09-25T14:02:53.000Z",
+      "inputs": {
+        "sha256": "6878a64b8b1b3ad1518d6d2a0525d0ddd58ef861178d41a931a11038ca16fb66",
+        "fileCount": 589
+      },
+      "harness": {
+        "sha256": "851c0b69f615a0f77a67f2b7603705408545a3a5d081057f9acf3e86367132eb",
+        "fileCount": 10
+      },
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/reference-explicit-state-low-power-3.json",
+      "sha256": "637ecb5d26f0861d52aab828001a82710fa98d2f22d3a013c928a4a49394bde4",
+      "generatedAt": "2026-09-25T14:04:04.583Z",
+      "inputs": {
+        "sha256": "6878a64b8b1b3ad1518d6d2a0525d0ddd58ef861178d41a931a11038ca16fb66",
+        "fileCount": 589
+      },
+      "harness": {
+        "sha256": "851c0b69f615a0f77a67f2b7603705408545a3a5d081057f9acf3e86367132eb",
+        "fileCount": 10
+      },
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    }
+  ],
+  "totalFourViewFrames": 4608,
+  "totalProfileActivations": 72,
+  "limitations": [
+    "Explicit state alone later recurred; these passes are historical, not current closure evidence.",
+    "Final arithmetic output vertex + explicit state evidence is linked by currentValidation.",
+    "Native backend root cause remains unproven."
+  ],
+  "finalProbeRuns": [
+    {
+      "path": "artifacts/engine-0.2.1/g02/output-probe-high-performance-explicit-state.json",
+      "sha256": "d1e6fa08ebb0d054edcd1999900d015a0fa1f6e5b8bc9b24ca4eeb68db239c3d",
+      "generatedAt": "2026-09-25T14:05:46.890Z",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": [
+        {
+          "mode": "clear-only",
+          "completedFrames": 512
+        },
+        {
+          "mode": "shared-hdr",
+          "completedFrames": 512
+        },
+        {
+          "mode": "isolated-hdr",
+          "completedFrames": 512
+        }
+      ],
+      "inputs": [
+        {
+          "path": "engine/src/shaders/generated/postprocess-output.generated.wgsl",
+          "sha256": "b71a1b44aaf69b7147397c5d3f4ba5daf9e3b9045cea81b6cb21defc841300d5"
+        },
+        {
+          "path": "scripts/webgpu-gate/multiview-output-probe.html",
+          "sha256": "513872da505734e3afb2fb0fa191cf11f984474e2bd11f04d8e2d67be0e3d497"
+        },
+        {
+          "path": "scripts/webgpu-gate/multiview-output-probe.mjs",
+          "sha256": "e8a084588d9113127677d5a2be8a30ba57d0ea1051b7057006ac83da86813aa7"
+        },
+        {
+          "path": "scripts/webgpu-gate/run-multiview-output-probe.mjs",
+          "sha256": "07682ad60e6cdd77ae22d581a8f089629286968bb17460ae55f796eb91b41aa1"
+        },
+        {
+          "path": "scripts/webgpu-gate/chrome-runner.mjs",
+          "sha256": "fe20cd10b0122117fad4ebe34099c4424b86c1200f1631acecf52086bfdbe1fb"
+        },
+        {
+          "path": "scripts/webgpu-gate/deferred-fixture-policy.mjs",
+          "sha256": "08a91edf4f520d4c981dd5301c25daeb4f572c3a810641c3de155e57a477a8f6"
+        },
+        {
+          "path": "scripts/webgpu-gate/multiview-output-probe-policy.mjs",
+          "sha256": "e64f0fc17c9b7a15670b42e611e722e61dbb73088334ef85534d7382302fe1b7"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/output-probe-low-power-explicit-state.json",
+      "sha256": "40f30ea128b096b55ace50aef6a7ae0d6b422eaffef2261e6550e70950c17468",
+      "generatedAt": "2026-09-25T14:08:03.398Z",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": [
+        {
+          "mode": "clear-only",
+          "completedFrames": 512
+        },
+        {
+          "mode": "shared-hdr",
+          "completedFrames": 512
+        },
+        {
+          "mode": "isolated-hdr",
+          "completedFrames": 512
+        }
+      ],
+      "inputs": [
+        {
+          "path": "engine/src/shaders/generated/postprocess-output.generated.wgsl",
+          "sha256": "b71a1b44aaf69b7147397c5d3f4ba5daf9e3b9045cea81b6cb21defc841300d5"
+        },
+        {
+          "path": "scripts/webgpu-gate/multiview-output-probe.html",
+          "sha256": "513872da505734e3afb2fb0fa191cf11f984474e2bd11f04d8e2d67be0e3d497"
+        },
+        {
+          "path": "scripts/webgpu-gate/multiview-output-probe.mjs",
+          "sha256": "e8a084588d9113127677d5a2be8a30ba57d0ea1051b7057006ac83da86813aa7"
+        },
+        {
+          "path": "scripts/webgpu-gate/run-multiview-output-probe.mjs",
+          "sha256": "07682ad60e6cdd77ae22d581a8f089629286968bb17460ae55f796eb91b41aa1"
+        },
+        {
+          "path": "scripts/webgpu-gate/chrome-runner.mjs",
+          "sha256": "fe20cd10b0122117fad4ebe34099c4424b86c1200f1631acecf52086bfdbe1fb"
+        },
+        {
+          "path": "scripts/webgpu-gate/deferred-fixture-policy.mjs",
+          "sha256": "08a91edf4f520d4c981dd5301c25daeb4f572c3a810641c3de155e57a477a8f6"
+        },
+        {
+          "path": "scripts/webgpu-gate/multiview-output-probe-policy.mjs",
+          "sha256": "e64f0fc17c9b7a15670b42e611e722e61dbb73088334ef85534d7382302fe1b7"
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "rootTypecheck": "passed",
+    "focusedSceneOutputTests": {
+      "passed": 12
+    },
+    "performancePolicyTests": {
+      "passed": 126
+    },
+    "modules": "passed",
+    "responsibilities": "passed",
+    "rendererPrepare": "passed",
+    "docs": "passed",
+    "sceneOutputPixels": {
+      "passed": 17,
+      "validationErrors": [],
+      "path": "artifacts/webgpu/scene-output-diagnostic.json",
+      "sha256": "e2e4e683f4c1efdebf2373b352844e5d7b81bd2ba420b0d1df9324a66cba55d7"
+    },
+    "api": "passed",
+    "rootTests": {
+      "passed": 1334,
+      "shaderLanguage": 119,
+      "engine": 709,
+      "animationSpec": 107,
+      "extensions": 392,
+      "catalog": 7
+    },
+    "rootBuild": {
+      "status": "passed",
+      "examples": 93,
+      "sharedTargets": 2,
+      "timeoutOverride": false
+    },
+    "exampleFreshness": {
+      "status": "passed",
+      "targets": 95,
+      "sourceFingerprintPrefix": "ef3395be3b40"
+    },
+    "finalSceneOutputFingerprint": "matches final built runtime"
+  },
+  "logs": [
+    {
+      "name": "root-typecheck",
+      "path": "artifacts/engine-0.2.1/g02/four-view-validation/root-typecheck.log",
+      "sha256": "d016f3ef143f7a4eb0b29e8594adee1379e9904041ac3d4035a5ec573cc08cfd"
+    },
+    {
+      "name": "root-test",
+      "path": "artifacts/engine-0.2.1/g02/four-view-validation/root-test.log",
+      "sha256": "586e22d80573d1dd8f6ff877fed76d9f667ca622b25a926a489637bd43258307"
+    },
+    {
+      "name": "root-build",
+      "path": "artifacts/engine-0.2.1/g02/four-view-validation/root-build.log",
+      "sha256": "25a59ea4c802268ef54ef7bfd5b2fedc4ce44578c4d7df6abbe5d3c7a7c5fe03"
+    },
+    {
+      "name": "freshness",
+      "path": "artifacts/engine-0.2.1/g02/four-view-validation/freshness.log",
+      "sha256": "5dae4b12abf919aa0d2616e710fd67c012141cda706ff1be7339696f899d1ef9"
+    },
+    {
+      "name": "focused-scene-output",
+      "path": "artifacts/engine-0.2.1/g02/four-view-validation/focused-scene-output.log",
+      "sha256": "3a12dc0d31afdb4fd50225760249aa32e9dce70398dba0be1bf24e7707394105"
+    },
+    {
+      "name": "policy",
+      "path": "artifacts/engine-0.2.1/g02/four-view-validation/policy.log",
+      "sha256": "a6c064fe8b13716453797ef99138cb38bd72a806a57c9649b219589850e81e4e"
+    },
+    {
+      "name": "boundaries",
+      "path": "artifacts/engine-0.2.1/g02/four-view-validation/boundaries.log",
+      "sha256": "a6c312d77bfdf54654156228e731cabe3d93bb351a968d942126b81007143105"
+    },
+    {
+      "name": "api",
+      "path": "artifacts/engine-0.2.1/g02/four-view-validation/api.log",
+      "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+    },
+    {
+      "name": "docs",
+      "path": "artifacts/engine-0.2.1/g02/four-view-validation/docs.log",
+      "sha256": "2a595d5a0b85384fa44f3a82c35a2723e7bbbeeb063bf46793be55ed47a459d3"
+    },
+    {
+      "name": "scene-output-pixels",
+      "path": "artifacts/engine-0.2.1/g02/four-view-validation/scene-output-pixels.log",
+      "sha256": "b8a1f3b673ed8c32cb03e7da57db1c223ff4bcba2593b2362726f822c68a8a5b"
+    }
+  ],
+  "recurrence": {
+    "path": "artifacts/engine-0.2.1/g02/reference-high-performance-failed-2026-09-25T14-53-32.311Z.json",
+    "finding": "Explicit viewport/scissor alone is insufficient: frame 1, view 2 is fully transparent; serial reread unchanged. Arithmetic output vertex candidate under validation."
+  },
+  "historicalSnapshot": true,
+  "currentValidation": "review/engine-0.2.1/g02-final-native-validation.json"
+}

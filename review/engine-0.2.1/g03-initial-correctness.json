@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "scope": "Initial 64x64 and mixed small-view correctness cohort; no room/performance/release qualification",
+  "generatedAt": "2026-09-26T06:23:18.080Z",
+  "inputs": {
+    "sha256": "c7ba435a9fb25a438810cb2a246355a59fbc3db5bb0affd6f7ffdb04baccf5bd",
+    "fileCount": 595
+  },
+  "harness": {
+    "sha256": "538010d95ecbd64c1e759a2e398db8743883be7fededd8b954273798a504eaad",
+    "files": [
+      {
+        "path": "scripts/webgpu-gate/chrome-runner.mjs",
+        "sha256": "fe20cd10b0122117fad4ebe34099c4424b86c1200f1631acecf52086bfdbe1fb"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tile-fixture.html",
+        "sha256": "50d1d95fb6868aec81db76f8eb91e86a9021854ac0d6220f5643b0fc253efe3b"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tile-fixture.mjs",
+        "sha256": "ffa1724f703e72af38a5aa515fb4f6b17426517cc3296d7b704e2fd60ceef693"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tile-oracle.mjs",
+        "sha256": "c972a096163ed372fb34b852965aa4fe5b4742f3b4233b60f06eff3f1e3812da"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-boundaries.mjs",
+        "sha256": "d888e422ba7dd0ccd6a055b444b20c4aeb8e28a11b177973bb95b14515985f58"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-policy.mjs",
+        "sha256": "e43841c0a1d2438f8efd4ee38ee80eb3be61e03df0f8e93d3fc49a10f70d1b22"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-render-fixture.html",
+        "sha256": "aa2ba73746ae671559266312d45373ef838bb95b98eb0d7fc2da2d01bebdeb30"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-render-fixture.mjs",
+        "sha256": "92aadf4fb10e6aba92693b7bda89ca7099214e1bbf90bed3f833b2aeec968d5b"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-views.mjs",
+        "sha256": "dbc21cb2dec6fd0190aa368ac94f9f7ecf7de1854fdf7388b2f9ec19a8c0bafb"
+      },
+      {
+        "path": "scripts/webgpu-gate/float-texture-readback.mjs",
+        "sha256": "137c1db65b877fbfeb79ca404c12ac4600be243c0be8c3abd248068a8b14e661"
+      },
+      {
+        "path": "scripts/webgpu-gate/run-deferred-tile-fixture.mjs",
+        "sha256": "e49b8238e0666a29e2ef36be8c3ef2ce8bbf64c302c2b03a324c925ced0b9f94"
+      }
+    ]
+  },
+  "captures": [
+    {
+      "path": "artifacts/engine-0.2.1/g03/tile-render-high-performance-2026-09-26T06-20-27.951Z.json",
+      "sha256": "bfa0030af79338b66ece57962ab475894c0e6ca129f55e1860bfb3507a24c02f",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": 32,
+      "boundaryCases": 16,
+      "views": 4,
+      "reuse": {
+        "frames": 8,
+        "baseline": {
+          "buffers": 775,
+          "bindGroups": 628,
+          "pipelines": 151
+        },
+        "dynamic": {
+          "buffers": 775,
+          "bindGroups": 628,
+          "pipelines": 151
+        }
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/tile-render-low-power-2026-09-26T06-21-06.505Z.json",
+      "sha256": "f18b0e8b93f80accb36eef9468f65998446e5ba841028c57f90efd4723693f2f",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": 32,
+      "boundaryCases": 16,
+      "views": 4,
+      "reuse": {
+        "frames": 8,
+        "baseline": {
+          "buffers": 775,
+          "bindGroups": 628,
+          "pipelines": 151
+        },
+        "dynamic": {
+          "buffers": 775,
+          "bindGroups": 628,
+          "pipelines": 151
+        }
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    }
+  ]
+}

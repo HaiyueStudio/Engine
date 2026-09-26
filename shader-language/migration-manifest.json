@@ -39,7 +39,9 @@
     {
       "id": "custom-pass-support",
       "status": "retained-escape-hatch",
-      "sources": ["engine/src/shaders/postprocess/custom-pass-bindings.wgsl"]
+      "sources": [
+        "engine/src/shaders/postprocess/custom-pass-bindings.wgsl"
+      ]
     },
     {
       "id": "2d-ui",
@@ -130,16 +132,56 @@
         "engine/src/shaders/generated/compute-mesh3d-cull.generated.wgsl",
         "engine/src/shaders/generated/compute-instanced-lod.generated.wgsl"
       ]
+    },
+    {
+      "id": "deferred-lighting",
+      "status": "generated",
+      "generator": "deferred-lighting",
+      "sources": [
+        "engine/src/shaders/generated/deferred-gbuffer.generated.wgsl",
+        "engine/src/shaders/generated/deferred-reference.generated.wgsl"
+      ]
+    },
+    {
+      "id": "deferred-tiled",
+      "status": "generated",
+      "generator": "deferred-tiled",
+      "sources": [
+        "engine/src/shaders/generated/deferred-tile-cull.generated.wgsl",
+        "engine/src/shaders/generated/deferred-tiled.generated.wgsl"
+      ]
     }
   ],
   "inlineShaderSites": [
-    { "path": "engine/src/assets/ImageTextureUpload.ts", "disposition": "migrated-to-specialized-rendering-artifact" },
-    { "path": "engine/src/lighting/EquirectangularReflectionMap.ts", "disposition": "migrated-to-specialized-rendering-artifact" }
+    {
+      "path": "engine/src/assets/ImageTextureUpload.ts",
+      "disposition": "migrated-to-specialized-rendering-artifact"
+    },
+    {
+      "path": "engine/src/lighting/EquirectangularReflectionMap.ts",
+      "disposition": "migrated-to-specialized-rendering-artifact"
+    }
   ],
   "escapeHatches": [
-    { "id": "custom-pass", "path": "engine/src/postprocess/CustomPass.ts", "disposition": "retain-raw-wgsl" },
-    { "id": "compute-kernel", "path": "engine/src/compute/ComputeKernel.ts", "disposition": "retain-raw-wgsl" },
-    { "id": "compute-pass-base", "path": "engine/src/compute/ComputePassBase.ts", "disposition": "retain-private-runtime-infrastructure-consuming-generated-reflection" },
-    { "id": "wgsl-feature-composer", "path": "engine/src/shader/WgslFeatureComposer.ts", "disposition": "retain-until-separate-breaking-adr" }
+    {
+      "id": "custom-pass",
+      "path": "engine/src/postprocess/CustomPass.ts",
+      "disposition": "retain-raw-wgsl"
+    },
+    {
+      "id": "compute-kernel",
+      "path": "engine/src/compute/ComputeKernel.ts",
+      "disposition": "retain-raw-wgsl"
+    },
+    {
+      "id": "compute-pass-base",
+      "path": "engine/src/compute/ComputePassBase.ts",
+      "disposition": "retain-private-runtime-infrastructure-consuming-generated-reflection"
+    },
+    {
+      "id": "wgsl-feature-composer",
+      "path": "engine/src/shader/WgslFeatureComposer.ts",
+      "disposition": "retain-until-separate-breaking-adr"
+    }
   ]
 }

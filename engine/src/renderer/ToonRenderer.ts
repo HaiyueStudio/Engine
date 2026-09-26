@@ -242,7 +242,7 @@ export class ToonRenderer extends BaseRenderer {
         bindings.setVertexBuffer(0, geometryData.positionBuf);
         bindings.setVertexBuffer(1, geometryData.normalBuf);
         bindings.setVertexBuffer(2, geometryData.uvBuf);
-        bindings.setVertexBuffer(3, geometryData.uv1Buf ?? geometryData.uvBuf);
+        bindings.setVertexBuffer(3, geometryData.uv1Buf);
         if (batchBuffer.gpuUploadEnabled) {
           this.indirectBatches.draw(pass, this._engine.device, batchBuffer, run.firstBatch,
             run.instanceCount, geometryData.indexBuf, geometryData.indexFormat,
@@ -305,7 +305,7 @@ export class ToonRenderer extends BaseRenderer {
     pass.setVertexBuffer(0, geometryData.positionBuf);
     pass.setVertexBuffer(1, geometryData.normalBuf);
     pass.setVertexBuffer(2, geometryData.uvBuf);
-    pass.setVertexBuffer(3, geometryData.uv1Buf ?? geometryData.uvBuf);
+    pass.setVertexBuffer(3, geometryData.uv1Buf);
     if (geometryData.indexBuf) {
       pass.setIndexBuffer(geometryData.indexBuf, geometryData.indexFormat);
       if (batchBuffer && batchIndex !== undefined) pass.drawIndexedIndirect(batchBuffer.indexedIndirectBuffer, batchBuffer.getIndexedIndirectOffset(batchIndex));
@@ -496,7 +496,7 @@ export class ToonRenderer extends BaseRenderer {
         { arrayStride: 12, attributes: [{ shaderLocation: 0, offset: 0, format: 'float32x3' }] },
         { arrayStride: 12, attributes: [{ shaderLocation: 1, offset: 0, format: 'float32x3' }] },
         { arrayStride: 8, attributes: [{ shaderLocation: 2, offset: 0, format: 'float32x2' }] },
-        { arrayStride: 8, attributes: [{ shaderLocation: 3, offset: 0, format: 'float32x2' }] },
+        { arrayStride: 24, attributes: [{ shaderLocation: 3, offset: 0, format: 'float32x2' }] },
       ] },
       fragment: { module: this._shader, entryPoint: 'fs_main', targets: [createColorTargetState(this.colorFormat ?? this._engine.format, blend)] },
       primitive: createPrimitiveState(topology, cullMode, frontFace, stripIndexFormat),

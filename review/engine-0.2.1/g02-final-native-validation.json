@@ -1,0 +1,1283 @@
+{
+  "schemaVersion": 1,
+  "status": "native-correctness-passed",
+  "evidenceClass": "dirty-worktree diagnostic; not release or performance qualification",
+  "generatedAt": "2026-09-26T01:17:02.008Z",
+  "inputs": {
+    "sha256": "0beca3099d61ccdbfdd5654c69d612765eb56350ccbe935bc1d90bf7ff26f0d9",
+    "fileCount": 589
+  },
+  "harness": {
+    "sha256": "c8e9522e585c96256ed1ac27147c4627f7596a20fc6cdfb2105a663157bedb18",
+    "fileCount": 11
+  },
+  "runs": [
+    {
+      "path": "artifacts/engine-0.2.1/g02/final-output-amd-1.json",
+      "sha256": "144871d0e42b7a2f7e86dcf9e2859edb8302ab4d5c19a8fb7bd333a8dd8c7940",
+      "generatedAt": "2026-09-26T01:14:27.989Z",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "browserEvidence": {
+        "product": "Chrome/153.0.8010.53",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "url": "http://127.0.0.1:62653/scripts/webgpu-gate/deferred-reference-fixture.html?powerPreference=high-performance&full=1&room=0",
+        "angleBackend": "metal",
+        "nativeBackend": true
+      },
+      "lightCounts": [
+        0,
+        1,
+        8,
+        9,
+        32,
+        128,
+        256
+      ],
+      "independentContributions": 256,
+      "submission": {
+        "id": "submitted-arena-ordering",
+        "frames": 32,
+        "checkedWords": 128,
+        "stableBinding": true
+      },
+      "stationary": {
+        "id": "stationary-resource-reuse",
+        "frames": 8,
+        "baseline": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        }
+      },
+      "dynamic": {
+        "id": "dynamic-resource-reuse",
+        "frames": 8,
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "dynamic": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 8
+        },
+        "createdGroups": []
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": []
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/final-output-amd-2.json",
+      "sha256": "2532e005178ac0cf922e41dade0c5d40510b71bbeecb5dec7ac4b617db339257",
+      "generatedAt": "2026-09-26T01:14:42.540Z",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "browserEvidence": {
+        "product": "Chrome/153.0.8010.53",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "url": "http://127.0.0.1:62731/scripts/webgpu-gate/deferred-reference-fixture.html?powerPreference=high-performance&full=1&room=0",
+        "angleBackend": "metal",
+        "nativeBackend": true
+      },
+      "lightCounts": [
+        0,
+        1,
+        8,
+        9,
+        32,
+        128,
+        256
+      ],
+      "independentContributions": 256,
+      "submission": {
+        "id": "submitted-arena-ordering",
+        "frames": 32,
+        "checkedWords": 128,
+        "stableBinding": true
+      },
+      "stationary": {
+        "id": "stationary-resource-reuse",
+        "frames": 8,
+        "baseline": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        }
+      },
+      "dynamic": {
+        "id": "dynamic-resource-reuse",
+        "frames": 8,
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "dynamic": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 8
+        },
+        "createdGroups": []
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": []
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/final-output-amd-3.json",
+      "sha256": "82c84ff4416525248c78dff6348ac2e35ec227b7b165082f4d7240d2db1d53e2",
+      "generatedAt": "2026-09-26T01:14:58.546Z",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "browserEvidence": {
+        "product": "Chrome/153.0.8010.53",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "url": "http://127.0.0.1:62775/scripts/webgpu-gate/deferred-reference-fixture.html?powerPreference=high-performance&full=1&room=0",
+        "angleBackend": "metal",
+        "nativeBackend": true
+      },
+      "lightCounts": [
+        0,
+        1,
+        8,
+        9,
+        32,
+        128,
+        256
+      ],
+      "independentContributions": 256,
+      "submission": {
+        "id": "submitted-arena-ordering",
+        "frames": 32,
+        "checkedWords": 128,
+        "stableBinding": true
+      },
+      "stationary": {
+        "id": "stationary-resource-reuse",
+        "frames": 8,
+        "baseline": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        }
+      },
+      "dynamic": {
+        "id": "dynamic-resource-reuse",
+        "frames": 8,
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "dynamic": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 8
+        },
+        "createdGroups": []
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": []
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/final-output-amd-4.json",
+      "sha256": "26556d493d84deac4295066300087e44ac601ed68bd0d39f38d7311db1c1f94d",
+      "generatedAt": "2026-09-26T01:15:16.083Z",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "browserEvidence": {
+        "product": "Chrome/153.0.8010.53",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "url": "http://127.0.0.1:62835/scripts/webgpu-gate/deferred-reference-fixture.html?powerPreference=high-performance&full=1&room=0",
+        "angleBackend": "metal",
+        "nativeBackend": true
+      },
+      "lightCounts": [
+        0,
+        1,
+        8,
+        9,
+        32,
+        128,
+        256
+      ],
+      "independentContributions": 256,
+      "submission": {
+        "id": "submitted-arena-ordering",
+        "frames": 32,
+        "checkedWords": 128,
+        "stableBinding": true
+      },
+      "stationary": {
+        "id": "stationary-resource-reuse",
+        "frames": 8,
+        "baseline": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        }
+      },
+      "dynamic": {
+        "id": "dynamic-resource-reuse",
+        "frames": 8,
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "dynamic": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 8
+        },
+        "createdGroups": []
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": []
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/final-output-amd-5.json",
+      "sha256": "8b58dbbba34544fed9bb79513a161b7307510a52801757c1669e9d2d75371eaf",
+      "generatedAt": "2026-09-26T01:15:34.272Z",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "browserEvidence": {
+        "product": "Chrome/153.0.8010.53",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "url": "http://127.0.0.1:62893/scripts/webgpu-gate/deferred-reference-fixture.html?powerPreference=high-performance&full=1&room=0",
+        "angleBackend": "metal",
+        "nativeBackend": true
+      },
+      "lightCounts": [
+        0,
+        1,
+        8,
+        9,
+        32,
+        128,
+        256
+      ],
+      "independentContributions": 256,
+      "submission": {
+        "id": "submitted-arena-ordering",
+        "frames": 32,
+        "checkedWords": 128,
+        "stableBinding": true
+      },
+      "stationary": {
+        "id": "stationary-resource-reuse",
+        "frames": 8,
+        "baseline": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        }
+      },
+      "dynamic": {
+        "id": "dynamic-resource-reuse",
+        "frames": 8,
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "dynamic": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 8
+        },
+        "createdGroups": []
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": []
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/final-output-amd-6.json",
+      "sha256": "de25bbc6ff721c752390ed0a5d6f6d57a0559f004096ee8f76177f00166234c3",
+      "generatedAt": "2026-09-26T01:15:52.966Z",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "browserEvidence": {
+        "product": "Chrome/153.0.8010.53",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "url": "http://127.0.0.1:62956/scripts/webgpu-gate/deferred-reference-fixture.html?powerPreference=high-performance&full=1&room=0",
+        "angleBackend": "metal",
+        "nativeBackend": true
+      },
+      "lightCounts": [
+        0,
+        1,
+        8,
+        9,
+        32,
+        128,
+        256
+      ],
+      "independentContributions": 256,
+      "submission": {
+        "id": "submitted-arena-ordering",
+        "frames": 32,
+        "checkedWords": 128,
+        "stableBinding": true
+      },
+      "stationary": {
+        "id": "stationary-resource-reuse",
+        "frames": 8,
+        "baseline": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        }
+      },
+      "dynamic": {
+        "id": "dynamic-resource-reuse",
+        "frames": 8,
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "dynamic": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 8
+        },
+        "createdGroups": []
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": []
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/final-output-intel-1.json",
+      "sha256": "92ffbd7cc8611c7c43b90b962c6af65f653d22a021887acbaba17c9038a2b887",
+      "generatedAt": "2026-09-26T01:16:08.084Z",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "browserEvidence": {
+        "product": "Chrome/153.0.8010.53",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "url": "http://127.0.0.1:63002/scripts/webgpu-gate/deferred-reference-fixture.html?powerPreference=low-power&full=1&room=0",
+        "angleBackend": "metal",
+        "nativeBackend": true
+      },
+      "lightCounts": [
+        0,
+        1,
+        8,
+        9,
+        32,
+        128,
+        256
+      ],
+      "independentContributions": 256,
+      "submission": {
+        "id": "submitted-arena-ordering",
+        "frames": 32,
+        "checkedWords": 128,
+        "stableBinding": true
+      },
+      "stationary": {
+        "id": "stationary-resource-reuse",
+        "frames": 8,
+        "baseline": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        }
+      },
+      "dynamic": {
+        "id": "dynamic-resource-reuse",
+        "frames": 8,
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "dynamic": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 8
+        },
+        "createdGroups": []
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": []
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/final-output-intel-2.json",
+      "sha256": "eff1670a3ff2acf49c163e0faf3be13dbd2eeb42c53259b4240c099d8ff153f2",
+      "generatedAt": "2026-09-26T01:16:24.876Z",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "browserEvidence": {
+        "product": "Chrome/153.0.8010.53",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "url": "http://127.0.0.1:63072/scripts/webgpu-gate/deferred-reference-fixture.html?powerPreference=low-power&full=1&room=0",
+        "angleBackend": "metal",
+        "nativeBackend": true
+      },
+      "lightCounts": [
+        0,
+        1,
+        8,
+        9,
+        32,
+        128,
+        256
+      ],
+      "independentContributions": 256,
+      "submission": {
+        "id": "submitted-arena-ordering",
+        "frames": 32,
+        "checkedWords": 128,
+        "stableBinding": true
+      },
+      "stationary": {
+        "id": "stationary-resource-reuse",
+        "frames": 8,
+        "baseline": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        }
+      },
+      "dynamic": {
+        "id": "dynamic-resource-reuse",
+        "frames": 8,
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "dynamic": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 8
+        },
+        "createdGroups": []
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": []
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/final-output-intel-3.json",
+      "sha256": "3f290ca176f38c3df7acc84f29c17c25802628edbebd8e65fd9121aa22fbcf70",
+      "generatedAt": "2026-09-26T01:16:39.680Z",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "browserEvidence": {
+        "product": "Chrome/153.0.8010.53",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "url": "http://127.0.0.1:63109/scripts/webgpu-gate/deferred-reference-fixture.html?powerPreference=low-power&full=1&room=0",
+        "angleBackend": "metal",
+        "nativeBackend": true
+      },
+      "lightCounts": [
+        0,
+        1,
+        8,
+        9,
+        32,
+        128,
+        256
+      ],
+      "independentContributions": 256,
+      "submission": {
+        "id": "submitted-arena-ordering",
+        "frames": 32,
+        "checkedWords": 128,
+        "stableBinding": true
+      },
+      "stationary": {
+        "id": "stationary-resource-reuse",
+        "frames": 8,
+        "baseline": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        }
+      },
+      "dynamic": {
+        "id": "dynamic-resource-reuse",
+        "frames": 8,
+        "current": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 1
+        },
+        "dynamic": {
+          "buffers": 429,
+          "bindGroups": 67,
+          "pipelines": 27,
+          "sourceUploads": 8
+        },
+        "createdGroups": []
+      },
+      "fourView": {
+        "id": "four-view-source-reuse",
+        "frames": 576,
+        "profileActivations": 9,
+        "viewCount": 4,
+        "sourceUploads": 1,
+        "pixels": [
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ],
+          [
+            11,
+            17,
+            29,
+            255
+          ]
+        ]
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": []
+    }
+  ],
+  "totalFourViewFrames": 5184,
+  "totalProfileActivations": 81,
+  "rooms": [
+    {
+      "path": "artifacts/engine-0.2.1/g02/room-high-performance-final.json",
+      "sha256": "69049e2e77518c1e9cab051f9792335ebd53aabcc734983090e01078983f3678",
+      "screenshot": {
+        "path": "artifacts/engine-0.2.1/g02/room-high-performance-final.png",
+        "sha256": "29b4ecfd6a22669e7fee922ead4bc5884a5778e8020b8bac4d89b4a9929d1729"
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "resolution": [
+        1280,
+        720
+      ],
+      "cases": [
+        {
+          "id": "room-128-sparse-frame0",
+          "count": 128,
+          "frame": 0,
+          "overlap": false,
+          "source": {
+            "candidateCount": 130,
+            "rejectedCount": 0,
+            "pointCount": 128,
+            "directionalCount": 1,
+            "ambientCount": 1
+          },
+          "litPixels": 692672,
+          "maxChannel": 3.40625,
+          "visibleMeshes": 255,
+          "completeCoverage": true,
+          "stableIdCount": 129
+        },
+        {
+          "id": "room-256-sparse-frame0",
+          "count": 256,
+          "frame": 0,
+          "overlap": false,
+          "source": {
+            "candidateCount": 258,
+            "rejectedCount": 0,
+            "pointCount": 256,
+            "directionalCount": 1,
+            "ambientCount": 1
+          },
+          "litPixels": 696218,
+          "maxChannel": 3.40625,
+          "visibleMeshes": 255,
+          "completeCoverage": true,
+          "stableIdCount": 257
+        },
+        {
+          "id": "room-128-overlap-frame37",
+          "count": 128,
+          "frame": 37,
+          "overlap": true,
+          "source": {
+            "candidateCount": 130,
+            "rejectedCount": 0,
+            "pointCount": 128,
+            "directionalCount": 1,
+            "ambientCount": 1
+          },
+          "litPixels": 683554,
+          "maxChannel": 79.875,
+          "visibleMeshes": 256,
+          "completeCoverage": true,
+          "stableIdCount": 129
+        },
+        {
+          "id": "room-256-overlap-frame37",
+          "count": 256,
+          "frame": 37,
+          "overlap": true,
+          "source": {
+            "candidateCount": 258,
+            "rejectedCount": 0,
+            "pointCount": 256,
+            "directionalCount": 1,
+            "ambientCount": 1
+          },
+          "litPixels": 683554,
+          "maxChannel": 118.875,
+          "visibleMeshes": 256,
+          "completeCoverage": true,
+          "stableIdCount": 257
+        }
+      ],
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": []
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/room-low-power-final.json",
+      "sha256": "89f06db04e3f51fb802f4f9cc902113c88429647d6f98fabbd08e353677e8154",
+      "screenshot": {
+        "path": "artifacts/engine-0.2.1/g02/room-low-power-final.png",
+        "sha256": "123d5d580d0a6a54bae24454f8c486ff329dfbfd8049cefa7c5876722189e57d"
+      },
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "resolution": [
+        1280,
+        720
+      ],
+      "cases": [
+        {
+          "id": "room-128-sparse-frame0",
+          "count": 128,
+          "frame": 0,
+          "overlap": false,
+          "source": {
+            "candidateCount": 130,
+            "rejectedCount": 0,
+            "pointCount": 128,
+            "directionalCount": 1,
+            "ambientCount": 1
+          },
+          "litPixels": 692672,
+          "maxChannel": 3.40625,
+          "visibleMeshes": 255,
+          "completeCoverage": true,
+          "stableIdCount": 129
+        },
+        {
+          "id": "room-256-sparse-frame0",
+          "count": 256,
+          "frame": 0,
+          "overlap": false,
+          "source": {
+            "candidateCount": 258,
+            "rejectedCount": 0,
+            "pointCount": 256,
+            "directionalCount": 1,
+            "ambientCount": 1
+          },
+          "litPixels": 696218,
+          "maxChannel": 3.40625,
+          "visibleMeshes": 255,
+          "completeCoverage": true,
+          "stableIdCount": 257
+        },
+        {
+          "id": "room-128-overlap-frame37",
+          "count": 128,
+          "frame": 37,
+          "overlap": true,
+          "source": {
+            "candidateCount": 130,
+            "rejectedCount": 0,
+            "pointCount": 128,
+            "directionalCount": 1,
+            "ambientCount": 1
+          },
+          "litPixels": 683554,
+          "maxChannel": 79.9375,
+          "visibleMeshes": 256,
+          "completeCoverage": true,
+          "stableIdCount": 129
+        },
+        {
+          "id": "room-256-overlap-frame37",
+          "count": 256,
+          "frame": 37,
+          "overlap": true,
+          "source": {
+            "candidateCount": 258,
+            "rejectedCount": 0,
+            "pointCount": 256,
+            "directionalCount": 1,
+            "ambientCount": 1
+          },
+          "litPixels": 683554,
+          "maxChannel": 118.875,
+          "visibleMeshes": 256,
+          "completeCoverage": true,
+          "stableIdCount": 257
+        }
+      ],
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": []
+    }
+  ],
+  "probes": [
+    {
+      "path": "artifacts/engine-0.2.1/g02/output-probe-high-performance-original-final.json",
+      "sha256": "3d4d1153c6249d7912db2351672a25ec3ff358522537f01c7cbccd357a352f88",
+      "inputs": [
+        {
+          "path": "engine/src/shaders/generated/postprocess-output.generated.wgsl",
+          "sha256": "4b198a671b653278bbb549792aa64922a9cb544569c2eaea30dd3dbee2162662"
+        },
+        {
+          "path": "scripts/webgpu-gate/multiview-output-probe.html",
+          "sha256": "513872da505734e3afb2fb0fa191cf11f984474e2bd11f04d8e2d67be0e3d497"
+        },
+        {
+          "path": "scripts/webgpu-gate/multiview-output-probe.mjs",
+          "sha256": "e8a084588d9113127677d5a2be8a30ba57d0ea1051b7057006ac83da86813aa7"
+        },
+        {
+          "path": "scripts/webgpu-gate/run-multiview-output-probe.mjs",
+          "sha256": "07682ad60e6cdd77ae22d581a8f089629286968bb17460ae55f796eb91b41aa1"
+        },
+        {
+          "path": "scripts/webgpu-gate/chrome-runner.mjs",
+          "sha256": "fe20cd10b0122117fad4ebe34099c4424b86c1200f1631acecf52086bfdbe1fb"
+        },
+        {
+          "path": "scripts/webgpu-gate/deferred-fixture-policy.mjs",
+          "sha256": "ba016608f822e2439870af0135d48a9dc6734f9825d0fc9e8a6c4a44afb99f26"
+        },
+        {
+          "path": "scripts/webgpu-gate/multiview-output-probe-policy.mjs",
+          "sha256": "e64f0fc17c9b7a15670b42e611e722e61dbb73088334ef85534d7382302fe1b7"
+        }
+      ],
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": [
+        {
+          "mode": "clear-only",
+          "completedFrames": 512
+        },
+        {
+          "mode": "shared-hdr",
+          "completedFrames": 512
+        },
+        {
+          "mode": "isolated-hdr",
+          "completedFrames": 512
+        }
+      ],
+      "variantNote": "original means the current production shader, now arithmetic output vertex; no substitution"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/output-probe-low-power-original-final.json",
+      "sha256": "7c5851aca01ba253ba62e7a248479b42ab69e96eab1cfb5789419ffbd20a04bb",
+      "inputs": [
+        {
+          "path": "engine/src/shaders/generated/postprocess-output.generated.wgsl",
+          "sha256": "4b198a671b653278bbb549792aa64922a9cb544569c2eaea30dd3dbee2162662"
+        },
+        {
+          "path": "scripts/webgpu-gate/multiview-output-probe.html",
+          "sha256": "513872da505734e3afb2fb0fa191cf11f984474e2bd11f04d8e2d67be0e3d497"
+        },
+        {
+          "path": "scripts/webgpu-gate/multiview-output-probe.mjs",
+          "sha256": "e8a084588d9113127677d5a2be8a30ba57d0ea1051b7057006ac83da86813aa7"
+        },
+        {
+          "path": "scripts/webgpu-gate/run-multiview-output-probe.mjs",
+          "sha256": "07682ad60e6cdd77ae22d581a8f089629286968bb17460ae55f796eb91b41aa1"
+        },
+        {
+          "path": "scripts/webgpu-gate/chrome-runner.mjs",
+          "sha256": "fe20cd10b0122117fad4ebe34099c4424b86c1200f1631acecf52086bfdbe1fb"
+        },
+        {
+          "path": "scripts/webgpu-gate/deferred-fixture-policy.mjs",
+          "sha256": "ba016608f822e2439870af0135d48a9dc6734f9825d0fc9e8a6c4a44afb99f26"
+        },
+        {
+          "path": "scripts/webgpu-gate/multiview-output-probe-policy.mjs",
+          "sha256": "e64f0fc17c9b7a15670b42e611e722e61dbb73088334ef85534d7382302fe1b7"
+        }
+      ],
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": [
+        {
+          "mode": "clear-only",
+          "completedFrames": 512
+        },
+        {
+          "mode": "shared-hdr",
+          "completedFrames": 512
+        },
+        {
+          "mode": "isolated-hdr",
+          "completedFrames": 512
+        }
+      ],
+      "variantNote": "original means the current production shader, now arithmetic output vertex; no substitution"
+    }
+  ],
+  "candidate": {
+    "path": "artifacts/engine-0.2.1/g02/fixture-build.json",
+    "sha256": "f79d5f8075eb30e88bd8e58e51dabad2bd21a62d77a405196eb5f5386f6841a7"
+  },
+  "shaderContract": {
+    "path": "shader-language/output-vertex-compatibility-contract.json",
+    "sha256": "24f99edcdc7809cab5aab50603d42c5dc2011890e566b233b57054f79ee02f87"
+  },
+  "retainedFailure": {
+    "path": "artifacts/engine-0.2.1/g02/reference-high-performance-failed-2026-09-25T14-53-32.311Z.json",
+    "sha256": "9773f2a65d5b45d6cf604b07e08a67cfacc35a7848742ca9f90dbd2c3e393791"
+  },
+  "limitations": [
+    "The precise native backend cause of missing output coverage is unproven.",
+    "Tested Chrome/Metal on AMD RDNA-1 and Intel Gen-9; broader device qualification remains G05/G07."
+  ]
+}

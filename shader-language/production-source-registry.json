@@ -19,8 +19,16 @@
       "reflectionOwner": "typed IR composer resource allocator",
       "layoutOwner": "artifact",
       "variantOwner": "pilot-motion-blur-postprocess.graph.json",
-      "resources": ["color", "depth", "velocity", "neighbor-max", "display-uniforms"],
-      "targets": ["webgpu-wgsl"],
+      "resources": [
+        "color",
+        "depth",
+        "velocity",
+        "neighbor-max",
+        "display-uniforms"
+      ],
+      "targets": [
+        "webgpu-wgsl"
+      ],
       "retention": "canonical Typed IR production slice"
     },
     {
@@ -37,8 +45,16 @@
       "reflectionOwner": "postprocess family definitions validated against WGSL declarations",
       "layoutOwner": "artifact",
       "variantOwner": "shader-language/builtin-postprocess-family.json",
-      "resources": ["sampled-textures", "depth-textures", "samplers", "pass-uniforms", "taa-mrt"],
-      "targets": ["webgpu-wgsl"],
+      "resources": [
+        "sampled-textures",
+        "depth-textures",
+        "samplers",
+        "pass-uniforms",
+        "taa-mrt"
+      ],
+      "targets": [
+        "webgpu-wgsl"
+      ],
       "retention": "WebGPU effects require texture, derivative and temporal operations outside the portable authoring IR"
     },
     {
@@ -55,8 +71,17 @@
       "reflectionOwner": "render family definitions validated against WGSL declarations",
       "layoutOwner": "renderer",
       "variantOwner": "shader-language/builtin-render-family.json",
-      "resources": ["frame-uniforms", "object-tables", "material-textures", "samplers", "clipping-planes", "vertex-inputs"],
-      "targets": ["webgpu-wgsl"],
+      "resources": [
+        "frame-uniforms",
+        "object-tables",
+        "material-textures",
+        "samplers",
+        "clipping-planes",
+        "vertex-inputs"
+      ],
+      "targets": [
+        "webgpu-wgsl"
+      ],
       "retention": "renderer-owned object and material ABI remains a reviewed production module family"
     },
     {
@@ -73,8 +98,17 @@
       "reflectionOwner": "deformation production definitions validated against WGSL declarations",
       "layoutOwner": "renderer",
       "variantOwner": "shader-language/builtin-deformation-family.json",
-      "resources": ["scene-frame", "deformation-tables", "clipping-planes", "joint-matrices", "morph-targets", "history"],
-      "targets": ["webgpu-wgsl"],
+      "resources": [
+        "scene-frame",
+        "deformation-tables",
+        "clipping-planes",
+        "joint-matrices",
+        "morph-targets",
+        "history"
+      ],
+      "targets": [
+        "webgpu-wgsl"
+      ],
       "retention": "atomic forward/depth/shadow/motion/outline parity requires the production deformation family"
     },
     {
@@ -91,8 +125,18 @@
       "reflectionOwner": "material-lighting definitions validated against WGSL declarations",
       "layoutOwner": "renderer",
       "variantOwner": "shader-language/builtin-material-lighting-family.json",
-      "resources": ["scene-frame", "lights", "shadow-maps", "ibl", "material-textures", "deformation", "clipping-planes"],
-      "targets": ["webgpu-wgsl"],
+      "resources": [
+        "scene-frame",
+        "lights",
+        "shadow-maps",
+        "ibl",
+        "material-textures",
+        "deformation",
+        "clipping-planes"
+      ],
+      "targets": [
+        "webgpu-wgsl"
+      ],
       "retention": "PBR, shadow, IBL and transmission use renderer-owned multi-group ABI"
     },
     {
@@ -109,8 +153,17 @@
       "reflectionOwner": "specialized-rendering definitions validated against WGSL declarations",
       "layoutOwner": "artifact-and-renderer-by-pass",
       "variantOwner": "shader-language/builtin-specialized-rendering-family.json",
-      "resources": ["instancing", "volume-texture", "clipping-planes", "mirror-texture", "storage-texture", "cube-texture"],
-      "targets": ["webgpu-wgsl"],
+      "resources": [
+        "instancing",
+        "volume-texture",
+        "clipping-planes",
+        "mirror-texture",
+        "storage-texture",
+        "cube-texture"
+      ],
+      "targets": [
+        "webgpu-wgsl"
+      ],
       "retention": "volume, planar reflection and texture utilities use bounded specialized resource types"
     },
     {
@@ -127,9 +180,75 @@
       "reflectionOwner": "typed compute resource/effect definitions validated against WGSL declarations",
       "layoutOwner": "artifact",
       "variantOwner": "shader-language/builtin-compute-family.json",
-      "resources": ["uniform-buffers", "storage-buffers", "atomic-storage", "indirect-output", "dispatch-schedule"],
-      "targets": ["webgpu-wgsl"],
+      "resources": [
+        "uniform-buffers",
+        "storage-buffers",
+        "atomic-storage",
+        "indirect-output",
+        "dispatch-schedule"
+      ],
+      "targets": [
+        "webgpu-wgsl"
+      ],
       "retention": "dispatch and storage side effects remain explicit in the compute-specific typed program"
+    },
+    {
+      "id": "deferred-lighting",
+      "stage": 14,
+      "moduleId": "haiyue-deferred-lighting-family",
+      "moduleVersion": 1,
+      "authoring": "trusted-target-source-modules",
+      "escapeLevel": 2,
+      "typedSignature": "shared PBR surface + Deferred ABI v1 -> MRT geometry and full-light HDR reference Artifact V2",
+      "sourceOwner": "shader-language/src/deferred-lighting",
+      "generator": "shader-language/scripts/generate-deferred-lighting-production.mjs",
+      "artifact": "engine/src/shaders/generated/deferred-lighting-artifact.generated.ts",
+      "reflectionOwner": "Deferred family definitions and ABI descriptors validated against WGSL declarations",
+      "layoutOwner": "artifact-and-renderer",
+      "variantOwner": "shader-language/src/deferred-lighting/family.ts",
+      "resources": [
+        "frame-uniforms",
+        "source-light-storage",
+        "view-indices",
+        "gbuffer-mrt",
+        "depth-texture",
+        "environment",
+        "directional-shadows"
+      ],
+      "targets": [
+        "webgpu-wgsl"
+      ],
+      "retention": "experimental opt-in reference; geometry reuses production PBR surface and deformation; lighting reuses production BRDF and shadows"
+    },
+    {
+      "id": "deferred-tiled",
+      "stage": 14,
+      "moduleId": "haiyue-deferred-tiled-family",
+      "moduleVersion": 1,
+      "authoring": "trusted-target-source-modules",
+      "escapeLevel": 2,
+      "typedSignature": "Deferred source/view ABI -> stable tile compute and same-frame overflow HDR resolve Artifact V2",
+      "sourceOwner": "shader-language/src/deferred-lighting",
+      "generator": "shader-language/scripts/generate-deferred-tiled-production.mjs",
+      "artifact": "engine/src/shaders/generated/deferred-tiled-artifact.generated.ts",
+      "reflectionOwner": "Deferred family definitions and ABI descriptors validated against WGSL declarations",
+      "layoutOwner": "artifact-and-renderer",
+      "variantOwner": "shader-language/src/deferred-lighting/tiled-family.ts",
+      "resources": [
+        "frame-uniforms",
+        "source-light-storage",
+        "view-indices",
+        "gbuffer-mrt",
+        "depth-texture",
+        "environment",
+        "directional-shadows",
+        "tile-storage",
+        "tile-parameters"
+      ],
+      "targets": [
+        "webgpu-wgsl"
+      ],
+      "retention": "experimental opt-in tile culling; full-list reference remains independent; compute uses workgroup synchronization outside portable IR"
     }
   ],
   "portability": {
@@ -139,8 +258,20 @@
     "decision": "shader-language/glsl-es300-decision.json"
   },
   "explicitEscapeHatches": [
-    { "id": "custom-pass", "level": 3, "productionFamily": false },
-    { "id": "compute-kernel", "level": 3, "productionFamily": false },
-    { "id": "wgsl-feature-composer", "level": 2, "productionFamily": false }
+    {
+      "id": "custom-pass",
+      "level": 3,
+      "productionFamily": false
+    },
+    {
+      "id": "compute-kernel",
+      "level": 3,
+      "productionFamily": false
+    },
+    {
+      "id": "wgsl-feature-composer",
+      "level": 2,
+      "productionFamily": false
+    }
   ]
 }

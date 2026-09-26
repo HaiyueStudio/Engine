@@ -35,12 +35,14 @@
             }
           }
         }
-      ]
+      ],
+      "revalidatedRevision": "61d40f7bf75e05ec948754d85fdbf70512a21ca8"
     },
     {
       "repository": "UI",
       "revision": "dafd51e4de978e7fb6346ffdf9ec1cd8cbba297a",
-      "files": []
+      "files": [],
+      "revalidatedRevision": "dafd51e4de978e7fb6346ffdf9ec1cd8cbba297a"
     },
     {
       "repository": "Editor",
@@ -165,7 +167,8 @@
             "devDependencies": {}
           }
         }
-      ]
+      ],
+      "revalidatedRevision": "754bf1dde92bf65d2114c76ff92fbf6eeefa54c4"
     },
     {
       "repository": "AIStudio",
@@ -406,7 +409,8 @@
             "devDependencies": {}
           }
         }
-      ]
+      ],
+      "revalidatedRevision": "c4fa2477d58ad89f7b1e5223e3f00f7b65918c38"
     },
     {
       "repository": "Games",
@@ -451,7 +455,8 @@
             }
           }
         }
-      ]
+      ],
+      "revalidatedRevision": "cfde6e3063c36d092cf70e9e824ff062be1e3950"
     },
     {
       "repository": "Native",
@@ -647,7 +652,10 @@
             }
           }
         }
-      ]
+      ],
+      "revalidatedRevision": "47a4dfb0f1b6da5507f359a99241c030d7552cb1"
     }
-  ]
+  ],
+  "revalidatedAt": "2026-09-25T08:11:52.294Z",
+  "revalidation": "All recorded manifest/lockfile hashes remain unchanged; Engine HEAD contains G01 tooling, with unchanged production runtime."
 }

@@ -13,15 +13,17 @@ export function haiyuePlugins({
   declaration,
   localPackages = {},
   commonjsInterop = true,
+  typescriptPlugin,
+  resolveExtensions,
   extra = [],
 } = {}) {
   return [
     wgslRaw(),
     workerModuleUrlPolicy(),
     resolveLocalWorkspace(localPackages),
-    nodeResolve({ browser: true, preferBuiltins: false }),
+    nodeResolve({ browser: true, preferBuiltins: false, ...(resolveExtensions ? { extensions: resolveExtensions } : {}) }),
     commonjsInterop ? commonjs() : null,
-    typescript({ tsconfig, ...(declaration === undefined ? {} : { declaration }) }),
+    typescriptPlugin ?? typescript({ tsconfig, ...(declaration === undefined ? {} : { declaration }) }),
     ...extra,
   ].filter(Boolean);
 }

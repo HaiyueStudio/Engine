@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "status": "proposed-not-applied",
+  "generatedAt": "2026-09-26T08:21:24.222Z",
+  "files": [
+    {
+      "file": "deferred-tile-cull.generated.wgsl",
+      "bytes": 5041,
+      "sha256": "72df80eebc14803b619fdf110041fb5f187f671a97056ce2eb2b5a3564081b36"
+    },
+    {
+      "file": "deferred-tiled.generated.wgsl",
+      "bytes": 14926,
+      "sha256": "d81f1b31556335052d79cff4fe3fa1726787b21ef40949dbadbe33e172a65243"
+    }
+  ],
+  "increment": 17679,
+  "existing": {
+    "schemaVersion": 1,
+    "showcase": {
+      "maxSourceBytes": 5200,
+      "maxIrNodeCountBeforeOptimization": 64,
+      "maxIrNodeCountAfterOptimization": 60,
+      "maxVariantCount": 1,
+      "maxPipelineCount": 2,
+      "maxColdCompilationMs": 500
+    },
+    "production": {
+      "maxGeneratedWgslBytes": 400801,
+      "maxGeneratedWgslFiles": 69,
+      "maxVariantCount": 61,
+      "maxPipelineCount": 61,
+      "maxColdGenerationMs": 10000,
+      "growthBaseline": {
+        "generatedWgslBytes": 305504,
+        "generatedWgslFiles": 64,
+        "variantCount": 56,
+        "pipelineCount": 56
+      },
+      "maxGrowth": {
+        "generatedWgslBytes": 95297,
+        "generatedWgslFiles": 5,
+        "variantCount": 5,
+        "pipelineCount": 5
+      }
+    },
+    "dag": {
+      "maxShaderLanguageBuilds": 1,
+      "maxEngineBuilds": 1,
+      "maxExtensionsBuilds": 1,
+      "maxProductionGenerationRuns": 1
+    },
+    "productionBundles": {
+      "simple3dArtifactGzipBytes": 7100,
+      "componentsEvidenceArtifactGzipBytes": 2850,
+      "deformationArtifactGzipBytes": 9600
+    }
+  },
+  "proposed": {
+    "schemaVersion": 1,
+    "showcase": {
+      "maxSourceBytes": 5200,
+      "maxIrNodeCountBeforeOptimization": 64,
+      "maxIrNodeCountAfterOptimization": 60,
+      "maxVariantCount": 1,
+      "maxPipelineCount": 2,
+      "maxColdCompilationMs": 500
+    },
+    "production": {
+      "maxGeneratedWgslBytes": 418480,
+      "maxGeneratedWgslFiles": 71,
+      "maxVariantCount": 63,
+      "maxPipelineCount": 63,
+      "maxColdGenerationMs": 10000,
+      "growthBaseline": {
+        "generatedWgslBytes": 305504,
+        "generatedWgslFiles": 64,
+        "variantCount": 56,
+        "pipelineCount": 56
+      },
+      "maxGrowth": {
+        "generatedWgslBytes": 112976,
+        "generatedWgslFiles": 7,
+        "variantCount": 7,
+        "pipelineCount": 7
+      }
+    },
+    "dag": {
+      "maxShaderLanguageBuilds": 1,
+      "maxEngineBuilds": 1,
+      "maxExtensionsBuilds": 1,
+      "maxProductionGenerationRuns": 1
+    },
+    "productionBundles": {
+      "simple3dArtifactGzipBytes": 7100,
+      "componentsEvidenceArtifactGzipBytes": 2850,
+      "deformationArtifactGzipBytes": 9600
+    }
+  },
+  "simulation": {
+    "schemaVersion": 1,
+    "budget": "shader-language/shader-cost-budgets.json",
+    "status": "passed",
+    "checks": [
+      {
+        "metric": "showcase.sourceBytes",
+        "actual": 4852,
+        "maximum": 5200,
+        "status": "passed"
+      },
+      {
+        "metric": "showcase.irNodeCountBeforeOptimization",
+        "actual": 60,
+        "maximum": 64,
+        "status": "passed"
+      },
+      {
+        "metric": "showcase.irNodeCountAfterOptimization",
+        "actual": 59,
+        "maximum": 60,
+        "status": "passed"
+      },
+      {
+        "metric": "showcase.variantCount",
+        "actual": 1,
+        "maximum": 1,
+        "status": "passed"
+      },
+      {
+        "metric": "showcase.pipelineCount",
+        "actual": 2,
+        "maximum": 2,
+        "status": "passed"
+      },
+      {
+        "metric": "showcase.coldCompilationMs",
+        "actual": 77.01950599999986,
+        "maximum": 500,
+        "status": "passed"
+      },
+      {
+        "metric": "production.generatedWgslBytes",
+        "actual": 417394,
+        "maximum": 418480,
+        "status": "passed"
+      },
+      {
+        "metric": "production.generatedWgslFiles",
+        "actual": 71,
+        "maximum": 71,
+        "status": "passed"
+      },
+      {
+        "metric": "production.variantCount",
+        "actual": 63,
+        "maximum": 63,
+        "status": "passed"
+      },
+      {
+        "metric": "production.pipelineCount",
+        "actual": 63,
+        "maximum": 63,
+        "status": "passed"
+      },
+      {
+        "metric": "production.generatedWgslBytesGrowth",
+        "actual": 111890,
+        "maximum": 112976,
+        "status": "passed"
+      },
+      {
+        "metric": "production.generatedWgslFilesGrowth",
+        "actual": 7,
+        "maximum": 7,
+        "status": "passed"
+      },
+      {
+        "metric": "production.variantCountGrowth",
+        "actual": 7,
+        "maximum": 7,
+        "status": "passed"
+      },
+      {
+        "metric": "production.pipelineCountGrowth",
+        "actual": 7,
+        "maximum": 7,
+        "status": "passed"
+      },
+      {
+        "metric": "production.coldGenerationMs",
+        "actual": 549.4810120000001,
+        "maximum": 10000,
+        "status": "passed"
+      }
+    ],
+    "violations": []
+  },
+  "boundaries": [
+    {
+      "key": "generatedWgslBytes",
+      "atLimit": "passed",
+      "oneOver": "rejected"
+    },
+    {
+      "key": "generatedWgslFiles",
+      "atLimit": "passed",
+      "oneOver": "rejected"
+    },
+    {
+      "key": "variantCount",
+      "atLimit": "passed",
+      "oneOver": "rejected"
+    },
+    {
+      "key": "pipelineCount",
+      "atLimit": "passed",
+      "oneOver": "rejected"
+    }
+  ],
+  "requestedIncreaseUnchanged": true,
+  "currentGeneratedWgslBytes": 417394,
+  "currentCapabilityIncrement": 19967,
+  "reserveUsedByPointOptimization": 2288,
+  "remainingReserve": 1086
+}

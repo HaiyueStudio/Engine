@@ -2,13 +2,14 @@
   "schemaVersion": 3,
   "budgetPolicy": {
     "model": "reviewed-capability-plus-growth-reserve",
-    "reviewedAt": "2026-09-23",
+    "reviewedAt": "2026-09-25",
     "requirements": [
       "Measure a deterministic dist-only npm pack candidate before changing reviewed capacity.",
       "Attribute new public entrypoints in config/public-api-capability-budgets.json.",
       "Increase reviewed capacity only with capability, API, consumer, and bundle evidence.",
       "Keep root and focused consumer closure budgets independent from total package capacity.",
       "0.2.1 adds GPU instance/simulation declarations: measured 602 files plus the existing 7-file reserve; review/engine-0.2.1-gpu-instances.md.",
+      "0.2.1 G02 adds 11 private Deferred/vertex-color declarations; reviewed file capacity 613 plus the existing 7-file reserve; byte limits unchanged; review/engine-0.2.1/g02-budget-review.md.",
       "0.2.0 capability attribution and reserve rationale: review/release-0.2.0-capability-budgets.md."
     ]
   },
@@ -17,11 +18,11 @@
       "workspace": "engine",
       "maxPackedBytes": 2100000,
       "maxUnpackedBytes": 9000000,
-      "maxFileCount": 609,
+      "maxFileCount": 620,
       "capacity": {
-        "reviewed": { "packedBytes": 1874952, "unpackedBytes": 8362294, "fileCount": 602 },
+        "reviewed": { "packedBytes": 1874952, "unpackedBytes": 8362294, "fileCount": 613 },
         "growthReserve": { "packedBytes": 225048, "unpackedBytes": 637706, "fileCount": 7 },
-        "capabilityBasis": "stable golden path plus focused ECS, scene, rendering, physics, compute, assets, diagnostics, game saves, and experimental runtime seams; 0.2.0 owner-safe audio mixer, multiplayer input and GUI font options"
+        "capabilityBasis": "stable golden path plus focused ECS, scene, rendering, physics, compute, assets, diagnostics, game saves, and experimental runtime seams; 0.2.0 owner-safe audio mixer, multiplayer input and GUI font options; 0.2.1 GPU instances and private Deferred/vertex-color declarations"
       },
       "declaredFiles": [
         "README.md",
@@ -118,7 +119,7 @@
   "tarball": {
     "maxPackedBytes": 2100000,
     "maxUnpackedBytes": 9000000,
-    "maxFileCount": 609,
+    "maxFileCount": 620,
     "filesWhitelist": [
       "README.md",
       "LICENSE",

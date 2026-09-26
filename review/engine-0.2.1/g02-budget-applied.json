@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 1,
+  "status": "applied-and-validated",
+  "validatedAt": "2026-09-25T12:40:50.193Z",
+  "sourceState": {
+    "revision": "61d40f7bf75e05ec948754d85fdbf70512a21ca8",
+    "workingTreeDirty": true
+  },
+  "scope": "development budget admission; not clean release or G02 correctness completion",
+  "configuration": {
+    "config/engine-package-budget.json": "85755fcabef871fdf2799580ff3144667a99848fe06a04798bfdf3b3372bd0f0",
+    "shader-language/shader-cost-budgets.json": "b196243ac83e24d8355952e8638f0078aa5529969604ad630518f0913d0b3bcb"
+  },
+  "checks": {
+    "focusedPolicy": {
+      "passed": 17
+    },
+    "releasePolicy": {
+      "passed": 69
+    },
+    "shaderLanguage": {
+      "passed": 119,
+      "budget": {
+        "schemaVersion": 1,
+        "budget": "shader-language/shader-cost-budgets.json",
+        "status": "passed",
+        "checks": [
+          {
+            "metric": "showcase.sourceBytes",
+            "actual": 4852,
+            "maximum": 5200,
+            "status": "passed"
+          },
+          {
+            "metric": "showcase.irNodeCountBeforeOptimization",
+            "actual": 60,
+            "maximum": 64,
+            "status": "passed"
+          },
+          {
+            "metric": "showcase.irNodeCountAfterOptimization",
+            "actual": 59,
+            "maximum": 60,
+            "status": "passed"
+          },
+          {
+            "metric": "showcase.variantCount",
+            "actual": 1,
+            "maximum": 1,
+            "status": "passed"
+          },
+          {
+            "metric": "showcase.pipelineCount",
+            "actual": 2,
+            "maximum": 2,
+            "status": "passed"
+          },
+          {
+            "metric": "showcase.coldCompilationMs",
+            "actual": 243.86251699999957,
+            "maximum": 500,
+            "status": "passed"
+          },
+          {
+            "metric": "production.generatedWgslBytes",
+            "actual": 397578,
+            "maximum": 400801,
+            "status": "passed"
+          },
+          {
+            "metric": "production.generatedWgslFiles",
+            "actual": 69,
+            "maximum": 69,
+            "status": "passed"
+          },
+          {
+            "metric": "production.variantCount",
+            "actual": 61,
+            "maximum": 61,
+            "status": "passed"
+          },
+          {
+            "metric": "production.pipelineCount",
+            "actual": 61,
+            "maximum": 61,
+            "status": "passed"
+          },
+          {
+            "metric": "production.generatedWgslBytesGrowth",
+            "actual": 92074,
+            "maximum": 95297,
+            "status": "passed"
+          },
+          {
+            "metric": "production.generatedWgslFilesGrowth",
+            "actual": 5,
+            "maximum": 5,
+            "status": "passed"
+          },
+          {
+            "metric": "production.variantCountGrowth",
+            "actual": 5,
+            "maximum": 5,
+            "status": "passed"
+          },
+          {
+            "metric": "production.pipelineCountGrowth",
+            "actual": 5,
+            "maximum": 5,
+            "status": "passed"
+          },
+          {
+            "metric": "production.coldGenerationMs",
+            "actual": 1473.0843000000007,
+            "maximum": 10000,
+            "status": "passed"
+          }
+        ],
+        "violations": []
+      }
+    },
+    "package": {
+      "gate": {
+        "status": "passed",
+        "errors": []
+      },
+      "serialVerification": true,
+      "packages": [
+        {
+          "name": "@haiyue/engine",
+          "packedBytes": 1913174,
+          "unpackedBytes": 8494886,
+          "fileCount": 614,
+          "sha256": "90c68926872be22d2aac3dd04022f7ca69da489832fcacb698183039efda7dfd",
+          "deterministicRepackSha256": "90c68926872be22d2aac3dd04022f7ca69da489832fcacb698183039efda7dfd"
+        },
+        {
+          "name": "@haiyue/animation-spec",
+          "packedBytes": 130281,
+          "unpackedBytes": 502980,
+          "fileCount": 48,
+          "sha256": "8b2c8b49714cf9ef535d9988816436bc81d88d9fd5f5e4d033bc642342b95179",
+          "deterministicRepackSha256": "8b2c8b49714cf9ef535d9988816436bc81d88d9fd5f5e4d033bc642342b95179"
+        },
+        {
+          "name": "@haiyue/extensions",
+          "packedBytes": 513429,
+          "unpackedBytes": 2651645,
+          "fileCount": 188,
+          "sha256": "af634dd03c9ec4511265bf7a1e582cf180df09d818220816373d189942fe3fae",
+          "deterministicRepackSha256": "af634dd03c9ec4511265bf7a1e582cf180df09d818220816373d189942fe3fae"
+        },
+        {
+          "name": "@haiyue/shader-language",
+          "packedBytes": 145635,
+          "unpackedBytes": 705299,
+          "fileCount": 73,
+          "sha256": "e8a9b2962c592c45d9902b5c6a41a5f99d19b85897518ce00aeab24a3e3440a4",
+          "deterministicRepackSha256": "e8a9b2962c592c45d9902b5c6a41a5f99d19b85897518ce00aeab24a3e3440a4"
+        }
+      ],
+      "consumerCount": 29,
+      "consumers": [
+        {
+          "id": "gpu-instances-only",
+          "gzipBytes": 80329,
+          "generatedShaderArtifacts": [
+            "compute-shader-artifact",
+            "specialized-rendering-shader-artifact"
+          ]
+        },
+        {
+          "id": "root-golden-path",
+          "gzipBytes": 48221,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "save-only",
+          "gzipBytes": 5957,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "fxaa-only",
+          "gzipBytes": 13160,
+          "generatedShaderArtifacts": [
+            "postprocess-shader-artifact"
+          ]
+        },
+        {
+          "id": "geometry-only",
+          "gzipBytes": 12888,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "tween-only",
+          "gzipBytes": 4442,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "worker-url-only",
+          "gzipBytes": 2867,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "audio-mixer-only",
+          "gzipBytes": 2961,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "multiplayer-input-only",
+          "gzipBytes": 4077,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "font-builder-only",
+          "gzipBytes": 1347,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "gui-font",
+          "gzipBytes": 47783,
+          "generatedShaderArtifacts": [
+            "2d-ui-shader-artifact"
+          ]
+        },
+        {
+          "id": "animation-spec-root",
+          "gzipBytes": 21523,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "animation-spec-lottie",
+          "gzipBytes": 41516,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "animation-spec-native3d",
+          "gzipBytes": 26609,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "animation-spec-live2d",
+          "gzipBytes": 26062,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "extensions-animation",
+          "gzipBytes": 223060,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "extensions-animation3d",
+          "gzipBytes": 23466,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "extensions-deformable-animation",
+          "gzipBytes": 42196,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "extensions-gltf",
+          "gzipBytes": 79058,
+          "generatedShaderArtifacts": [
+            "deformation-shader-artifact"
+          ]
+        },
+        {
+          "id": "extensions-gltf-animation3d",
+          "gzipBytes": 45913,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "extensions-hya-state-machine",
+          "gzipBytes": 230623,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "extensions-spine",
+          "gzipBytes": 70092,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "extensions-tilemap",
+          "gzipBytes": 41255,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "extensions-canvas-text",
+          "gzipBytes": 47142,
+          "generatedShaderArtifacts": [
+            "deformation-shader-artifact"
+          ]
+        },
+        {
+          "id": "extensions-tween",
+          "gzipBytes": 28855,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "extensions-grid",
+          "gzipBytes": 1449,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "extensions-interaction",
+          "gzipBytes": 49181,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "extensions-controls",
+          "gzipBytes": 39060,
+          "generatedShaderArtifacts": []
+        },
+        {
+          "id": "shader-language-material-graph",
+          "gzipBytes": 39688,
+          "generatedShaderArtifacts": []
+        }
+      ],
+      "runtimeChecks": {
+        "node": {
+          "status": "passed",
+          "detail": "{\"status\":\"passed\",\"format\":\"haiyue-animation\",\"duration\":1,\"tweenOpacity\":0.5}"
+        },
+        "typescript": {
+          "status": "passed",
+          "detail": "TypeScript packed declarations passed"
+        },
+        "exports": {
+          "status": "passed",
+          "detail": "{\"status\":\"passed\",\"imports\":64}"
+        },
+        "cli": {
+          "status": "passed",
+          "detail": "Usage: hya-convert <input.json> <output.hya|output.json> [--strict] (alias: hya-lottie-convert)"
+        }
+      }
+    },
+    "api": "passed",
+    "docs": "passed"
+  },
+  "artifacts": {
+    "artifacts/release/public-packages.json": "59b0bfb53a620a588f2a6200efdc26096793f43b23d9347f40ba53c4d56b0d41",
+    "artifacts/shader-language/shader-cost.json": "cdcc31b762eaaa9a467bd246c0611dfbbaf8d4256c160ae3752ff8da7a35d818"
+  }
+}

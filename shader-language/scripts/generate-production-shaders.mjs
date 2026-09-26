@@ -1,6 +1,9 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkShaderMigrationManifest } from './check-migration-manifest.mjs';
+import { generateDeferredLightingAbi } from './generate-deferred-lighting-abi.mjs';
+import { generateDeferredTiledProduction } from './generate-deferred-tiled-production.mjs';
+import { generateDeferredLightingProduction } from './generate-deferred-lighting-production.mjs';
 import { generateRuntimeArtifactContract } from './generate-runtime-artifact-contract.mjs';
 import {
   formatMotionBlurGenerationResult,
@@ -32,6 +35,14 @@ import {
 } from './generate-compute-production.mjs';
 
 export const PRODUCTION_SHADER_GENERATORS = Object.freeze([
+  Object.freeze({
+    id: 'deferred-tiled', artifactVersion: 2, run: generateDeferredTiledProduction,
+    format: (result, write) => `[shader-language:production:deferred-tiled] ${write ? 'wrote' : 'verified'} ${result.outputCount} files, passes=${result.passCount}, WGSL=${result.wgslBytes} bytes.`,
+  }),
+  Object.freeze({
+    id: 'deferred-lighting', artifactVersion: 2, run: generateDeferredLightingProduction,
+    format: (result, write) => `[shader-language:production:deferred-lighting] ${write ? 'wrote' : 'verified'} ${result.outputCount} files, passes=${result.passCount}, WGSL=${result.wgslBytes} bytes.`,
+  }),
   Object.freeze({
     id: 'motion-blur',
     artifactVersion: 2,
@@ -77,6 +88,7 @@ export const PRODUCTION_SHADER_GENERATORS = Object.freeze([
 ]);
 
 export async function generateProductionShaders({ write = false, only } = {}) {
+  await generateDeferredLightingAbi({ write });
   await generateRuntimeArtifactContract({ write });
   const manifest = await checkShaderMigrationManifest();
   const selected = only

@@ -3,6 +3,7 @@ import { estimateTextureBytes, type GPUResourceScope } from '../core/GPUResource
 import type { IEngine } from '../core/IEngine';
 import type { RenderSampleCount } from '../core/RenderView';
 import { RttEngine } from './RttEngine';
+import type { RenderCommandContext } from '../core/RenderCommandContext';
 
 export interface TransientRenderTargetDescriptor {
   readonly format?: GPUTextureFormat;
@@ -144,6 +145,7 @@ export class TransientRenderTargetPool {
   }
 
   destroy(): void {
+    releaseTransientAttachments(this);
     for (const physical of this._targets) this._destroyPhysical(physical);
     this._targets.length = 0;
     this._assignments.length = 0;
@@ -213,6 +215,101 @@ export class TransientRenderTargetPool {
   private _destroyPhysical(physical: PhysicalTarget): void {
     physical.target.destroy();
     physical.scope?.release();
+  }
+}
+
+interface AttachmentGeneration {
+  readonly owner: TransientRenderTargetPool;
+  readonly scope: string;
+  readonly device: GPUDevice;
+  readonly key: string;
+  readonly textures: readonly GPUTexture[];
+  readonly views: readonly GPUTextureView[];
+  readonly encoders: Set<GPUCommandEncoder>;
+  retired: boolean;
+  released: boolean;
+}
+const attachments = new WeakMap<TransientRenderTargetPool, Map<string, AttachmentGeneration>>();
+const attachmentGenerations = new WeakMap<TransientRenderTargetPool, Set<AttachmentGeneration>>();
+
+export class TransientAttachmentCapacityError extends Error {
+  constructor(readonly reason: string, readonly observed: number, readonly supported: number) {
+    super(`Transient attachments ${reason}: ${observed} exceeds ${supported}.`);
+  }
+}
+
+/** Private MRT allocation port of the shared transient pool; avoids allocating a redundant depth per color. */
+export function acquireTransientAttachments(
+  pool: TransientRenderTargetPool,
+  scope: string,
+  width: number,
+  height: number,
+  formats: readonly GPUTextureFormat[],
+  context: RenderCommandContext,
+  limits?: { readonly maxViews: number; readonly maxLiveGenerations: number },
+): { readonly textures: readonly GPUTexture[]; readonly views: readonly GPUTextureView[] } {
+  if (!context.afterSubmit) throw new Error('Transient MRT attachments require an afterSubmit lifecycle hook.');
+  let scopes = attachments.get(pool);
+  if (!scopes) { scopes = new Map(); attachments.set(pool, scopes); }
+  const key = `${width}x${height}:${formats.join(',')}`;
+  let current = scopes.get(scope);
+  if (!current || current.key !== key || current.device !== context.device) {
+    const live = [...(attachmentGenerations.get(pool) ?? [])].filter(g => g !== current || g.encoders.size > 0);
+    if (limits) {
+      const views = new Set([...live.map(g => g.scope), scope]).size;
+      const generations = live.filter(g => g.scope === scope).length + 1;
+      if (views > limits.maxViews) throw new TransientAttachmentCapacityError('view-count', views, limits.maxViews);
+      if (generations > limits.maxLiveGenerations) throw new TransientAttachmentCapacityError('live-target-generations', generations, limits.maxLiveGenerations);
+    }
+    const textures: GPUTexture[] = [];
+    try {
+      for (const [index, format] of formats.entries()) textures.push(context.device.createTexture({
+        label: `TransientMRT:${scope}:${index}`, size: [width, height], format,
+        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
+      }));
+    } catch (error) { for (const texture of textures) texture.destroy(); throw error; }
+    if (current) retireAttachments(current);
+    current = { owner: pool, scope, device: context.device, key, textures, views: textures.map(t => t.createView()), encoders: new Set(), retired: false, released: false };
+    let generations = attachmentGenerations.get(pool);
+    if (!generations) { generations = new Set(); attachmentGenerations.set(pool, generations); }
+    generations.add(current);
+    scopes.set(scope, current);
+  }
+  if (!current.encoders.has(context.encoder)) {
+    current.encoders.add(context.encoder);
+    const generation = current;
+    context.afterSubmit(queue => {
+      const done = () => { generation.encoders.delete(context.encoder); if (generation.retired) retireAttachments(generation); };
+      void queue.onSubmittedWorkDone().then(done, done);
+    });
+  }
+  return current;
+}
+
+/** Profile teardown retires pending attachments; device loss can abandon commands that will never execute. */
+export function releaseTransientAttachments(pool: TransientRenderTargetPool, abandon = false, scope?: string): void {
+  const scopes = attachments.get(pool);
+  for (const generation of attachmentGenerations.get(pool) ?? []) {
+    if (scope !== undefined && generation.scope !== scope) continue;
+    if (abandon) generation.encoders.clear();
+    retireAttachments(generation);
+  }
+  if (scope !== undefined) scopes?.delete(scope);
+  else { scopes?.clear(); attachments.delete(pool); }
+}
+
+export function retainTransientAttachmentScopes(pool: TransientRenderTargetPool, liveScopes: ReadonlySet<string>): void {
+  for (const scope of attachments.get(pool)?.keys() ?? []) {
+    if (!liveScopes.has(scope)) releaseTransientAttachments(pool, false, scope);
+  }
+}
+
+function retireAttachments(generation: AttachmentGeneration): void {
+  generation.retired = true;
+  if (!generation.encoders.size && !generation.released) {
+    generation.released = true;
+    for (const texture of generation.textures) texture.destroy();
+    attachmentGenerations.get(generation.owner)?.delete(generation);
   }
 }
 

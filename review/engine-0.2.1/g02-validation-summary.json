@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-25T12:19:08.552Z",
+  "status": "in-progress",
+  "evidenceClass": "dirty-worktree diagnostic; not release or performance qualification",
+  "inputs": {
+    "sha256": "5b894e24c871e7c2f7965ae1ccb8b96774395bfe9213db13b71cb900d342b4c9",
+    "fileCount": 589
+  },
+  "harness": {
+    "sha256": "851c0b69f615a0f77a67f2b7603705408545a3a5d081057f9acf3e86367132eb",
+    "fileCount": 10
+  },
+  "captures": [
+    {
+      "path": "artifacts/engine-0.2.1/g02/reference-high-performance.json",
+      "tier": "diagnostic-g02-reference",
+      "generatedAt": "2026-09-25T12:16:58.096Z",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": 7,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "vertexColorAssertions": [
+        {
+          "id": "vertex-color-interpolation",
+          "sampled": [
+            {
+              "x": 16,
+              "pixel": [
+                0.0797119140625,
+                0.01421356201171875,
+                0.012542724609375,
+                0
+              ],
+              "expected": [
+                0.07974081822470122,
+                0.014216973413439358,
+                0.012543602802907117,
+                0
+              ]
+            },
+            {
+              "x": 48,
+              "pixel": [
+                0.0260162353515625,
+                0.041778564453125,
+                0.02081298828125,
+                0
+              ],
+              "expected": [
+                0.026020688052270924,
+                0.041789285487988416,
+                0.020819794342969544,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "id": "vertex-color-forward-deferred",
+          "pixels": 4096,
+          "opaqueAndMask": true,
+          "whiteRestored": true
+        },
+        {
+          "id": "vertex-alpha-auxiliary",
+          "morphAndSkin": true,
+          "maskedShadow": 384,
+          "opaqueShadow": 1024,
+          "updatedZeroAlpha": true
+        }
+      ],
+      "multiViewFrames": 576,
+      "profileActivations": 9,
+      "runtimeMatchesCurrent": true,
+      "harnessMatchesCurrent": true
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/reference-low-power.json",
+      "tier": "diagnostic-g02-reference",
+      "generatedAt": "2026-09-25T12:15:34.667Z",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": 7,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "vertexColorAssertions": [
+        {
+          "id": "vertex-color-interpolation",
+          "sampled": [
+            {
+              "x": 16,
+              "pixel": [
+                0.0797119140625,
+                0.01421356201171875,
+                0.012542724609375,
+                0
+              ],
+              "expected": [
+                0.07974081822470122,
+                0.014216973413439358,
+                0.012543602802907117,
+                0
+              ]
+            },
+            {
+              "x": 48,
+              "pixel": [
+                0.0260162353515625,
+                0.041778564453125,
+                0.02081298828125,
+                0
+              ],
+              "expected": [
+                0.026020688052270924,
+                0.041789285487988416,
+                0.020819794342969544,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "id": "vertex-color-forward-deferred",
+          "pixels": 4096,
+          "opaqueAndMask": true,
+          "whiteRestored": true
+        },
+        {
+          "id": "vertex-alpha-auxiliary",
+          "morphAndSkin": true,
+          "maskedShadow": 384,
+          "opaqueShadow": 1024,
+          "updatedZeroAlpha": true
+        }
+      ],
+      "multiViewFrames": 576,
+      "profileActivations": 9,
+      "runtimeMatchesCurrent": true,
+      "harnessMatchesCurrent": true
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/room-high-performance.json",
+      "tier": "diagnostic-g02-room",
+      "generatedAt": "2026-09-25T11:19:30.756Z",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": 4,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "runtimeMatchesCurrent": true,
+      "harnessMatchesCurrent": false
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g02/room-low-power.json",
+      "tier": "diagnostic-g02-room",
+      "generatedAt": "2026-09-25T11:19:42.598Z",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": 4,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "runtimeMatchesCurrent": true,
+      "harnessMatchesCurrent": false
+    }
+  ],
+  "tests": {
+    "repository": 1331,
+    "engine": 707,
+    "shaderLanguage": 118,
+    "animationSpec": 107,
+    "extensions": 392,
+    "exampleCatalog": 7,
+    "vertexAndLifecycleFocused": 25,
+    "fixturePolicy": 4
+  },
+  "passedChecks": [
+    "repository typecheck",
+    "module boundaries",
+    "responsibility boundaries",
+    "renderer prepare",
+    "public API",
+    "generation consistency",
+    "milestones check",
+    "default built JS Deferred shader isolation (139 files)",
+    "runtime workspace builds",
+    "built-runtime scene-output pixels (17 cases)",
+    "built-runtime auxiliary semantics pixels (17 cases)",
+    "Showcase canonical generation consistency",
+    "character-material five-pass browser verification"
+  ],
+  "openItems": [],
+  "vertexColors": {
+    "status": "implemented-and-native-validated",
+    "publicExport": false,
+    "modelImport": false,
+    "editorTools": false
+  },
+  "fourViewInvestigation": {
+    "report": "review/engine-0.2.1/g02-four-view-investigation.md",
+    "runtimeChanged": true,
+    "shaderChanged": true,
+    "closed": true,
+    "policyTestsPassed": 4,
+    "closureScope": "Arithmetic output vertex + explicit state validated in nine final AMD/Intel full runs; earlier explicit-state-only fix recurred and is superseded. Native backend root cause remains unproven.",
+    "historicalIndependentFullRuns": {
+      "passed": 7,
+      "emptyOutputFailed": 4,
+      "dynamicResourceFailed": 1
+    },
+    "historicalProbe": {
+      "amd": {
+        "framesPerCase": 512,
+        "cases": 3,
+        "status": "passed"
+      },
+      "intel": {
+        "framesPerCase": 512,
+        "cases": 3,
+        "status": "passed"
+      },
+      "limitation": "Diagnostic only. Captures predate the runner-only failure-retention update; result inputs retain their exact prior source hashes."
+    },
+    "followUpValidation": "review/engine-0.2.1/g02-four-view-validation.json",
+    "independentFullRunsAfterFix": {
+      "amdPassed": 5,
+      "intelPassed": 3,
+      "failed": 0,
+      "fourViewFrames": 4608,
+      "profileActivations": 72
+    },
+    "currentEvidence": "review/engine-0.2.1/g02-final-native-validation.json"
+  },
+  "resolvedFollowUps": [
+    {
+      "id": "shader-cost",
+      "status": "resolved by reviewed follow-up",
+      "originalFailure": {
+        "id": "shader-cost",
+        "status": "failed",
+        "wgslBytes": {
+          "actual": 397578,
+          "maximum": 363464
+        },
+        "files": {
+          "actual": 69,
+          "maximum": 67
+        },
+        "variantsAndPipelines": {
+          "actual": 61,
+          "maximum": 59
+        }
+      },
+      "review": "review/engine-0.2.1/g02-budget-review.md"
+    },
+    {
+      "id": "package-file-count",
+      "status": "resolved by reviewed follow-up",
+      "originalFailure": {
+        "id": "package-file-count",
+        "status": "failed",
+        "actual": 614,
+        "maximum": 609,
+        "artifact": "artifacts/engine-0.2.1/g02/engine-pack-dry-run.json"
+      },
+      "review": "review/engine-0.2.1/g02-budget-review.md"
+    },
+    {
+      "id": "full-examples-build",
+      "status": "resolved by reviewed follow-up",
+      "originalFailure": {
+        "id": "full-examples-build",
+        "status": "failed: physics3d-joints exceeded the default 60-second timeout",
+        "completedExamples": 22,
+        "totalExamples": 93,
+        "independentRetry": {
+          "target": "physics3d-joints",
+          "status": "passed",
+          "seconds": 44.1,
+          "timeoutMs": 60000
+        },
+        "materialExampleDiagnosticBuild": {
+          "status": "passed; local diagnostic override only",
+          "timeoutMs": 120000,
+          "reason": "default 60000ms retry timed out rebuilding shared Engine bundle; default gate remains failed",
+          "targetSeconds": {
+            "sharedEngine": 52.3,
+            "shaderLanguageLab": 83.3,
+            "characterMaterial": 58.3
+          }
+        }
+      },
+      "review": "review/engine-0.2.1/g02-build-lab-fixes.md"
+    },
+    {
+      "id": "lab-dual-backend-pixel-parity",
+      "status": "resolved by reviewed follow-up",
+      "originalFailure": {
+        "id": "lab-dual-backend-pixel-parity",
+        "status": "failed in unchanged standalone preview path; cause not established",
+        "maximumChannelDelta": 190,
+        "allowedMaximumChannelDelta": 2,
+        "meanAbsoluteDelta": 0.016298082139756944,
+        "compilationAndValidationErrors": 0,
+        "artifact": "artifacts/engine-0.2.1/g02/lab-failure.json"
+      },
+      "review": "review/engine-0.2.1/g02-build-lab-fixes.md"
+    },
+    {
+      "id": "four-view-empty-output",
+      "status": "mitigated on tested native adapters by explicit output viewport/scissor",
+      "originalFailure": {
+        "id": "four-view-empty-output",
+        "status": "Open: reproduced four times in twelve AMD full runs; affected output entirely transparent with valid per-view G-buffers. Same symptom reproduced without Engine imports. Shader and HDR-allocation comparisons do not yet establish a fix; current AMD/Intel 576-frame retries passed."
+      },
+      "review": "review/engine-0.2.1/g02-four-view-investigation.md",
+      "validation": "review/engine-0.2.1/g02-four-view-validation.json"
+    }
+  ],
+  "followUpNote": "Original status, captures and input hashes remain historical. G02 is complete; current source-bound closing evidence and limitations are in the completion audit and validation index. G03 is ready, not activated.",
+  "historicalSnapshot": true,
+  "latestFourViewValidation": "review/engine-0.2.1/g02-final-native-validation.json",
+  "currentValidation": "review/engine-0.2.1/g02-completion-validation.json",
+  "currentStatus": "complete",
+  "completedAt": "2026-09-26",
+  "completionAudit": "review/engine-0.2.1/g02-completion-audit.md"
+}

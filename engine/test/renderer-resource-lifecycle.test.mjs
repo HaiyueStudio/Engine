@@ -727,7 +727,7 @@ test('SharedGeometry3DGPUCache releases buffers only after the last owner leaves
   assert.equal(cache.size, 0);
   assert.equal(cache.getOwnerGeometryCount(ownerB), 0);
   assert.equal(cache.hasGeometry(geometry.id), false);
-  assert.equal(log.filter(item => item[0] === 'destroyBuffer').length, 4);
+  assert.equal(log.filter(item => item[0] === 'destroyBuffer').length, 5);
 
   disposeSharedGeometry3DGPUCache(device);
 });
@@ -746,7 +746,7 @@ test('SharedGeometry3DGPUCache represents empty geometry without zero-byte GPU b
   assert.equal(data.vertexCount, 0);
   assert.equal(data.indexCount, 0);
   assert.equal(data.indexBuf, null);
-  assert.deepEqual(log.filter(item => item[0] === 'createBuffer').map(item => item[2]), [4, 4, 4]);
+  assert.deepEqual(log.filter(item => item[0] === 'createBuffer').map(item => item[2]), [4, 4, 4, 4]);
   assert.equal(log.filter(item => item[0] === 'writeBuffer').length, 0);
 
   cache.releaseOwner(owner);
@@ -779,7 +779,7 @@ test('SharedGeometry3DGPUCache uploads dynamic UV semantics in physical layout o
 
   assert.equal(geometry.textureCoordinateLayoutKey, '0=TEXCOORD_5|1=TEXCOORD_2');
   assert.deepEqual(uploads[2], Array.from(uv5));
-  assert.deepEqual(uploads[3], Array.from(uv2));
+  assert.deepEqual(uploads[3], Array.from({ length: 3 }, (_, i) => [...uv2.slice(i * 2, i * 2 + 2), 1, 1, 1, 1]).flat());
   assert.ok(data.uv1Buf);
 
   cache.releaseOwner(owner);

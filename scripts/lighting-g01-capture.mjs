@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { setTimeout as idle } from 'node:timers/promises';
 import { runChromeWebGpuFixture } from './webgpu-gate/chrome-runner.mjs';
 import { validateLightingScalingResult } from './webgpu-gate/lighting-scaling-contract.mjs';
 import { G01_SAMPLING, G01_BASELINE_CASES, validateG01Baseline, poolG01Cohorts, canonicalInputPaths } from './benchmark/lighting-g01-policy.mjs';
@@ -45,12 +46,15 @@ const fingerprint = (snapshot = false) => {
 };
 const sourceHash=fingerprint(true), revision=git(['rev-parse','HEAD']);
 const results=[];
-const settings=smoke?{warmup:2,samples:3,cohorts:1}:G01_SAMPLING;
+const settings=smoke?{warmup:2,samples:3,cohorts:1,interCaseIdleMs:0}:G01_SAMPLING;
 for(let cohort=0;cohort<settings.cohorts;cohort++) {
   const devices = cohort%2 ? ['low-power','high-performance'] : ['high-performance','low-power'];
   for(const powerPreference of devices) {
     const cases=smoke ? [G01_BASELINE_CASES[0],G01_BASELINE_CASES[3]] : (cohort%2?[...G01_BASELINE_CASES].reverse():G01_BASELINE_CASES);
     for(const c of cases) {
+      const idleStarted=performance.now();
+      while(performance.now()-idleStarted<settings.interCaseIdleMs) await idle(Math.max(1,settings.interCaseIdleMs-(performance.now()-idleStarted)));
+      const interCaseIdleMs=performance.now()-idleStarted;
       console.log(`G01 ${cohort+1}/${settings.cohorts} ${powerPreference} ${c.id}`);
       const beforeHost=hostSample();
       if(!beforeHost.ready) throw new Error('Host entered a limited state before capture; wait for recovery');
@@ -62,7 +66,7 @@ for(let cohort=0;cohort<settings.cohorts;cohort++) {
       if(result.adapter?.vendor!==expected[0] || result.adapter?.architecture!==expected[1]) errors.push('Actual adapter does not match frozen host mapping');
       if(c.fixture==='lighting') errors.push(...validateLightingScalingResult(result));
       const file=`${powerPreference}-${c.id}-${cohort+1}.json`;
-      writeFileSync(resolve(out,file),JSON.stringify({schemaVersion:1,tier:'diagnostic-baseline',revision,sourceHash,dirty:git(['status','--porcelain']).length>0,cohort,caseId:c.id,generatedAt:new Date().toISOString(),hostSamples,validationErrors:errors,result},null,2)+'\n');
+      writeFileSync(resolve(out,file),JSON.stringify({schemaVersion:1,tier:'diagnostic-baseline',revision,sourceHash,dirty:git(['status','--porcelain']).length>0,cohort,caseId:c.id,generatedAt:new Date().toISOString(),interCaseIdleMs,hostSamples,validationErrors:errors,result},null,2)+'\n');
       if(errors.length) throw new Error(`${file}: ${errors.join('; ')}`);
       results.push({file,cohort,powerPreference,caseId:c.id,result});
       if(fingerprint()!==sourceHash) throw new Error('Source inputs changed during capture');

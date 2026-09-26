@@ -1,3 +1,4 @@
+import { packGeometryUv1Color } from '../geometry/GeometryVertexColors';
 import { Geometry3D } from '../geometry/Geometry3D';
 import type { GPUResourceTracker } from '../core/GPUResourceTracker';
 import { writeBuffer as wrtBuf, writeBufferAligned } from './utils';
@@ -9,7 +10,8 @@ export interface SharedGeometry3DGPUData {
   positionBuf: GPUBuffer;
   normalBuf: GPUBuffer;
   uvBuf: GPUBuffer;
-  uv1Buf: GPUBuffer | null;
+  /** Interleaved UV1 (8 bytes) and linear RGBA (16 bytes). */
+  uv1Buf: GPUBuffer;
   indexBuf: GPUBuffer | null;
   indexCount: number;
   vertexCount: number;
@@ -124,13 +126,13 @@ export class SharedGeometry3DGPUCache {
   }
 
   private _createEntry(geometry: Geometry3D): CacheEntry {
+    const uv1Color = packGeometryUv1Color(geometry);
     const uv0 = geometry.getTextureCoordinatesForChannel(0);
-    const uv1 = geometry.getTextureCoordinatesForChannel(1);
     const entry = {
       positionBuf: this._makeVertexBuffer(geometry.positions),
       normalBuf: this._makeVertexBuffer(geometry.normals ?? sharedZeroVectorCache.vec3(geometry.vertexCount)),
       uvBuf: this._makeVertexBuffer(uv0 ?? sharedZeroVectorCache.vec2(geometry.vertexCount)),
-      uv1Buf: uv1 ? this._makeVertexBuffer(uv1) : null,
+      uv1Buf: this._makeVertexBuffer(uv1Color),
       indexBuf: this._makeIndexBuffer(geometry.indices),
       indexCount: geometry.indexCount,
       vertexCount: geometry.vertexCount,
@@ -142,13 +144,13 @@ export class SharedGeometry3DGPUCache {
   }
 
   private _replaceBuffers(entry: CacheEntry, geometry: Geometry3D): void {
+    const uv1Color = packGeometryUv1Color(geometry);
     this._destroyBuffers(entry);
     const uv0 = geometry.getTextureCoordinatesForChannel(0);
-    const uv1 = geometry.getTextureCoordinatesForChannel(1);
     entry.positionBuf = this._makeVertexBuffer(geometry.positions);
     entry.normalBuf = this._makeVertexBuffer(geometry.normals ?? sharedZeroVectorCache.vec3(geometry.vertexCount));
     entry.uvBuf = this._makeVertexBuffer(uv0 ?? sharedZeroVectorCache.vec2(geometry.vertexCount));
-    entry.uv1Buf = uv1 ? this._makeVertexBuffer(uv1) : null;
+    entry.uv1Buf = this._makeVertexBuffer(uv1Color);
     entry.indexBuf = this._makeIndexBuffer(geometry.indices);
     entry.indexCount = geometry.indexCount;
     entry.vertexCount = geometry.vertexCount;

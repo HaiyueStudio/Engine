@@ -169,8 +169,10 @@ async function renderOutlinePixel(device, materialized) {
   const positions = vertex(device, [-1.5, -0.6, 0, -0.5, -0.6, 0, -1, 0.6, 0]);
   const morph = vertex(device, [1, 0, 0, 1, 0, 0, 1, 0, 0]);
   const zero = vertex(device, new Array(9).fill(0));
-  const rendered = await renderAndRead(device, runtime, groups, [positions, morph, zero, zero, zero, zero, zero], 'rgba8unorm', 'rgba8');
-  destroy([sceneBuffer, objectBuffer, clippingBuffer, matrixBuffer, joints, weights, positions, morph, zero, rendered.target, rendered.readback]);
+  // UV1 and white RGBA share the production 24-byte vertex stream.
+  const uvColor = vertex(device, [0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1]);
+  const rendered = await renderAndRead(device, runtime, groups, [positions, morph, zero, zero, zero, zero, uvColor], 'rgba8unorm', 'rgba8');
+  destroy([sceneBuffer, objectBuffer, clippingBuffer, matrixBuffer, joints, weights, positions, morph, zero, uvColor, rendered.target, rendered.readback]);
   return rendered.pixel;
 }
 
@@ -206,12 +208,14 @@ async function renderMotionPixel(device, materialized) {
   const positions = vertex(device, [-1, -1, 0, 3, -1, 0, -1, 3, 0]);
   const zero = vertex(device, new Array(9).fill(0));
   const zeroMorph = vertex(device, new Array(18).fill(0));
-  const rendered = await renderAndRead(device, runtime, groups, [positions, zeroMorph, zeroMorph, zeroMorph, zeroMorph, zero, zero, zero], 'rgba16float', 'rgba16f');
-  destroy([sceneBuffer, objectBuffer, clippingBuffer, matrixBuffer, attributes, positions, zero, zeroMorph, rendered.target, rendered.readback]);
+  const uvColor = vertex(device, [0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1]);
+  const rendered = await renderAndRead(device, runtime, groups, [positions, zeroMorph, zeroMorph, zeroMorph, zeroMorph, zero, uvColor, zero], 'rgba16float', 'rgba16f');
+  destroy([sceneBuffer, objectBuffer, clippingBuffer, matrixBuffer, attributes, positions, zero, zeroMorph, uvColor, rendered.target, rendered.readback]);
   return rendered.pixel;
 }
 
 async function renderAndRead(device, runtime, groups, vertices, format, readKind) {
+  device.pushErrorScope('validation');
   const target = device.createTexture({ size: [8, 8], format, usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC });
   const readback = device.createBuffer({ size: 256 * 8, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
   const pipeline = device.createRenderPipeline({
@@ -244,6 +248,8 @@ async function renderAndRead(device, runtime, groups, vertices, format, readKind
     ? [...bytes.slice(offset, offset + 4)]
     : [halfToFloat(bytes[offset] | (bytes[offset + 1] << 8)), halfToFloat(bytes[offset + 2] | (bytes[offset + 3] << 8))];
   readback.unmap();
+  const validationError = await device.popErrorScope();
+  if (validationError) throw new Error(`Deformation draw validation failed: ${validationError.message}`);
   return { pixel, target, readback };
 }
 

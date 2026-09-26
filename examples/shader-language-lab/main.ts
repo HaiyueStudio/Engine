@@ -61,6 +61,19 @@ async function main(): Promise<void> {
   query<HTMLElement>('#character-status').textContent = `${characterRenderer.evidence.jointCount} joints · 5 shared passes`;
   query<HTMLElement>('#character-status').dataset.passed = 'true';
 
+  const samplingRegression: { id: string; difference: DualBackendFrame['difference'] }[] = [];
+  if (regression) {
+    for (const sample of [
+      { id: 'undistorted', time: 0, noiseStrength: 0 },
+      { id: 'wave-positive', time: 1.8, noiseScale: 32, noiseStrength: 0.16 },
+      { id: 'wave-negative', time: 4.2, noiseScale: 11, noiseStrength: 0.2 },
+      { id: 'repeat-seam', time: 6.1, noiseScale: 48, noiseStrength: 0.22 },
+    ]) {
+      const frame = await dualRenderer.render({ ...snapshotState(), ...sample });
+      samplingRegression.push({ id: sample.id, difference: frame.difference });
+    }
+  }
+
   let queued = false;
   let rendering = false;
   let shuttingDown = false;
@@ -87,7 +100,7 @@ async function main(): Promise<void> {
             characterRenderer.render(delta, state.time),
           ]);
           if (shuttingDown) break;
-          publishEvidence(lastDual, lastPbr, lastCharacter, dualRenderer, pbrRenderer, characterRenderer);
+          publishEvidence(lastDual, lastPbr, lastCharacter, dualRenderer, pbrRenderer, characterRenderer, samplingRegression);
         }
       } catch (error) {
         if (!shuttingDown) fail(error);
@@ -106,7 +119,7 @@ async function main(): Promise<void> {
   lastDual = await dualRenderer.render(snapshotState());
   lastPbr = await pbrRenderer.render(snapshotPbrState());
   lastCharacter = await characterRenderer.render(regression ? 0.1 : 1 / 30, state.time + 0.35);
-  publishEvidence(lastDual, lastPbr, lastCharacter, dualRenderer, pbrRenderer, characterRenderer);
+  publishEvidence(lastDual, lastPbr, lastCharacter, dualRenderer, pbrRenderer, characterRenderer, samplingRegression);
 
   let animate = !regression;
   const animationToggle = query<HTMLInputElement>('#animate');
@@ -210,6 +223,7 @@ function publishEvidence(
   dualRenderer: DualBackendRenderer,
   pbrRenderer: PbrMaterialRenderer,
   characterRenderer: CharacterPassRenderer,
+  samplingRegression: readonly { id: string; difference: DualBackendFrame['difference'] }[],
 ): void {
   query<HTMLElement>('#max-delta').textContent = String(dual.difference.maxChannelDelta);
   query<HTMLElement>('#mean-delta').textContent = dual.difference.meanAbsoluteDelta.toFixed(4);
@@ -226,6 +240,8 @@ function publishEvidence(
   }
 
   const dualPassed = dual.difference.maxChannelDelta <= 2
+    && samplingRegression.every(sample => sample.difference.maxChannelDelta <= 2
+      && sample.difference.meanAbsoluteDelta <= 0.25)
     && Object.values(dualRenderer.evidence).every(value => value === 0);
   const pbrPassed = pbr.visiblePixelCount > 1_000
     && pbrRenderer.compilationErrorCount === 0
@@ -264,6 +280,10 @@ function publishEvidence(
     maxChannelDelta: dual.difference.maxChannelDelta,
     meanAbsoluteDelta: dual.difference.meanAbsoluteDelta,
     changedPixelRatio: dual.difference.changedPixelRatio,
+    overTolerancePixelCount: dual.difference.overTolerancePixelCount,
+    maximumDeltaPixel: dual.difference.maximumDeltaPixel,
+    samplingFilter: 'linear',
+    samplingRegression,
     pipelineCount: 2 + 1 + characterRenderer.evidence.passCount,
     pipelineRebuildCount: dual.pipelineRebuildCount + pbr.pipelineRebuildCount + character.pipelineRebuildCount,
     uniformWriteCount: dual.uniformWriteCount + pbr.uniformWriteCount + character.totalUploadCallCount,

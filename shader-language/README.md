@@ -32,6 +32,7 @@ npm run verify:shader-language-lab
 - 阶段 6 机器边界：[stage6-contract.json](./stage6-contract.json)
 - 阶段 7 机器边界：[stage7-contract.json](./stage7-contract.json)
 - 阶段 8 机器边界：[stage8-contract.json](./stage8-contract.json)
+- 最终输出顶点兼容性：[output-vertex-compatibility-contract.json](./output-vertex-compatibility-contract.json)，保留 HDR 历史合同与其余 14 个 pass 的代码哈希。
 - 阶段 9 机器边界：[stage9-contract.json](./stage9-contract.json)
 - 阶段 10 机器边界：[stage10-contract.json](./stage10-contract.json)
 - 阶段 11 机器边界：[stage11-contract.json](./stage11-contract.json)

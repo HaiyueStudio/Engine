@@ -11,6 +11,8 @@ import type { LiveIdSet } from '../renderer/utils';
 import type { Render3DHelperItem } from './Render3DContracts';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import type { SceneFrameUniformSnapshot } from '../frame/SceneFrameUniformLayout';
+import type { DeferredLightingBackendPort, DeferredLightingRecordInput } from '../renderer/DeferredLightingBackendPort';
+import type { Render3DPostScenePasses } from './Render3DPostScenePasses';
 
 interface MutableLiveIdSet extends LiveIdSet {
   add(id: number): void;
@@ -28,6 +30,20 @@ export class Render3DScenePassRenderer {
   private _helperRenderer: MeshHelperRenderer | null = null;
 
   constructor(private readonly _engine: IEngine) {}
+
+  /** Adapts the existing sky/output owners to an optional lighting provider. */
+  renderDeferred(backend: DeferredLightingBackendPort, input: Omit<DeferredLightingRecordInput,
+    'engine' | 'drawSky' | 'applyViewport' | 'sceneDescriptor'> & {
+      postScene: Render3DPostScenePasses;
+      disabledCache: EntityHierarchyDisabledCache;
+    }): boolean {
+    const { postScene, disabledCache, ...record } = input;
+    return backend.record({ ...record, engine: this._engine,
+      sceneDescriptor: postScene.buildScenePassDescriptor('clear', input.view.reverseZ, input.context.view),
+      applyViewport: pass => postScene.applySceneViewport(pass, input.view),
+      drawSky: pass => this.renderSky(pass, input.world, disabledCache, input.sceneFrame, input.view.reverseZ, input.view.sampleCount),
+    });
+  }
 
   contributePipelineWarmup(plan: PipelineWarmupPlan, reverseZ: boolean, msaaSamples: 1 | 4): void {
     if (!this._skyRenderer) {

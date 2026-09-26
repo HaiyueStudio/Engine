@@ -411,7 +411,7 @@ export class NormalRenderer extends BaseRenderer {
     pass.setVertexBuffer(1, data.normalBuf);
     for (let index = 0; index < 4; index++) pass.setVertexBuffer(index + 2, deformation.morphBuffers[index]!);
     pass.setVertexBuffer(6, data.uvBuf);
-    pass.setVertexBuffer(7, data.uv1Buf ?? data.uvBuf);
+    pass.setVertexBuffer(7, data.uv1Buf);
   }
 
   private _drawDirect(
@@ -461,7 +461,7 @@ export class NormalRenderer extends BaseRenderer {
               ],
             })),
             { arrayStride: 8, attributes: [{ shaderLocation: 10, offset: 0, format: 'float32x2' }] },
-            { arrayStride: 8, attributes: [{ shaderLocation: 11, offset: 0, format: 'float32x2' }] },
+            { arrayStride: 24, attributes: [{ shaderLocation: 11, offset: 0, format: 'float32x2' }, { shaderLocation: 12, offset: 8, format: 'float32x4' }] },
           ],
         },
         fragment: {

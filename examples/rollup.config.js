@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { haiyuePlugins, loadContentManifest, selectContentEntries, toGlobalName } from '../config/rollup.shared.js';
 import { exampleBuildMetadata } from './scripts/example-build-metadata-plugin.mjs';
+import { exampleTypeScript } from './scripts/example-typescript.mjs';
 import {
   SHARED_ENGINE_GLOBAL,
   SHARED_ENGINE_INPUT,
@@ -14,6 +15,12 @@ import {
 
 const manifest = loadContentManifest('examples');
 const demos = selectContentEntries(manifest, process.env.EXAMPLE_FILTER);
+// Direct Rollup/watch retains its typechecking plugin. The build orchestrator
+// opts in only after both complete project checks succeeded.
+const checkedTypeScript = () => process.env.EXAMPLE_TYPECHECKED === '1' ? {
+  typescriptPlugin: exampleTypeScript(),
+  resolveExtensions: ['.mjs', '.js', '.json', '.node', '.ts', '.tsx', '.mts', '.cts'],
+} : {};
 
 const sharedEngine = {
   input: SHARED_ENGINE_INPUT,
@@ -27,6 +34,7 @@ const sharedEngine = {
   plugins: [
     sharedEngineEntryPlugin(),
     ...haiyuePlugins({
+      ...checkedTypeScript(),
       tsconfig: './tsconfig.shared-engine.json',
       declaration: false,
       localPackages: sharedEngineLocalPackages,
@@ -42,7 +50,7 @@ const sourceViewer = {
     format: 'es',
     sourcemap: true,
   },
-  plugins: [...haiyuePlugins({ declaration: false }), exampleBuildMetadata('source-viewer')],
+  plugins: [...haiyuePlugins({ ...checkedTypeScript(), declaration: false }), exampleBuildMetadata('source-viewer')],
 };
 
 const exampleBundles = demos.map(entry => ({
@@ -57,7 +65,7 @@ const exampleBundles = demos.map(entry => ({
     globals: id => sharedEngineGlobal(id),
   },
   plugins: [
-    ...haiyuePlugins({ declaration: false }),
+    ...haiyuePlugins({ ...checkedTypeScript(), declaration: false }),
     exampleBuildMetadata(entry.id),
     pdfWorkerAsset(entry.id),
   ],

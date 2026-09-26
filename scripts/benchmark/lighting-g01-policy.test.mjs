@@ -2,12 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { summarizeTimingSamples } from './timing-cohorts.mjs';
 import { validateG01Baseline, poolG01Cohorts, G01_SAMPLING } from './lighting-g01-policy.mjs';
-import { validateDeferred021Contract, canonicalInputPaths, assessG01Stability, assessG01Readiness } from './lighting-g01-policy.mjs';
+import { validateDeferred021Contract, canonicalInputPaths, assessG01Stability, assessG01Readiness, assessG01Channel, G01_APPROVED_CEILINGS, validateG01CaseIdentity, validateG01FrozenManifest } from './lighting-g01-policy.mjs';
 import { readFileSync } from 'node:fs';
 
 function fixture() {
   const samples = Array.from({length:300},(_,i)=>i>=285?9:1);
-  return {suite:'lighting.g01.existing-instances',adapter:{vendor:'intel',architecture:'gen-9',isFallbackAdapter:false},count:1000,counts:[334,333,333],validationErrors:0,normalFrameInstanceReadbackBytes:0,timing:{cpuRecord:summarizeTimingSamples(samples),gpuTimestamp:{status:'available',timing:summarizeTimingSamples(samples)}}};
+  return {suite:'lighting.g01.existing-instances',adapter:{vendor:'intel',architecture:'gen-9',isFallbackAdapter:false},count:1000,counts:[334,333,333],warmup:120,resolution:[1280,720],validationErrors:0,normalFrameInstanceReadbackBytes:0,timing:{cpuRecord:summarizeTimingSamples(samples),frameWall:summarizeTimingSamples(samples),gpuTimestamp:{status:'available',timing:summarizeTimingSamples(samples)}}};
 }
 test('fingerprint paths are deterministic across filesystem traversal order',()=>{
   assert.deepEqual(canonicalInputPaths(['b','a','b']),canonicalInputPaths(['a','b']));
@@ -34,7 +34,7 @@ test('preserves complete sample population and uses nearest rank P95',()=>{
   const r=fixture();assert.deepEqual(validateG01Baseline(r),[]);
   const pooled=poolG01Cohorts([r,structuredClone(r),structuredClone(r)]);
   assert.equal(pooled.cpu.rawSamples.length,900);assert.equal(pooled.cpu.p95,1);assert.equal(pooled.cpu.p99,9);
-  assert.deepEqual(G01_SAMPLING,{warmup:120,samples:300,cohorts:3});
+  assert.deepEqual(G01_SAMPLING,{warmup:120,samples:300,cohorts:3,interCaseIdleMs:30000});
 });
 test('rejects fabricated statistics, dropped samples and CPU substituted for missing GPU',()=>{
   const r=fixture();r.timing.cpuRecord.p95=0;assert.match(validateG01Baseline(r).join(),/statistics/);
@@ -63,4 +63,36 @@ test('cohorts bind actual served input hashes',()=>{
   const a=fixture();a.httpProvenance={files:[{sourcePath:'engine/dist/index.js',sha256:'a',byteLength:1}]};
   const b=structuredClone(a);b.httpProvenance.files[0].sha256='b';
   assert.throws(()=>poolG01Cohorts([a,a,b]),/Served inputs changed/);
+});
+test('approved absolute ceiling retains instability and rejects even stable over-budget data',()=>{
+  const options={deviceId:'mac-amd-rdna1',caseId:'instances-1k',channel:'gpuTimestamp',ceilings:G01_APPROVED_CEILINGS};
+  const result=assessG01Channel([.050718,.078598,.050918],options);
+  assert.equal(result.stable,false);assert.equal(result.acceptance,'approved-absolute-ceiling');
+  assert.equal(assessG01Channel([.11,.11,.11],options).accepted,false);
+  assert.equal(assessG01Channel([.05,.078,.05],{...options,deviceId:'mac-intel-gen9'}).accepted,false);
+  assert.equal(assessG01Channel([.05,.078,.05],{...options,channel:'cpuRecord'}).accepted,false);
+  assert.equal(assessG01Channel([.17,.135,.14],{...options,caseId:'instances-10k',channel:'cpuRecord'}).accepted,true);
+  assert.equal(assessG01Channel([.17,.23,.14],{...options,caseId:'instances-10k',channel:'cpuRecord'}).accepted,false);
+});
+test('frozen contracts cannot expand named exceptions, omit timing channels or hide nonfinite memory',()=>{
+  const c=JSON.parse(readFileSync(new URL('../../config/lighting-performance-021.json',import.meta.url),'utf8'));
+  assert.deepEqual(validateDeferred021Contract(c,{requireFrozen:true}),[]);
+  for(const mutate of [x=>{x.baselineVarianceCeilings.limits[0].maxCohortP95Ms=.2;},x=>{x.baselineVarianceCeilings.approvedBy='inferred';},x=>{x.devices[0].frameWallP95Ms=NaN;},x=>{delete x.cases.find(s=>s.group==='E').absoluteBudgets;},x=>{x.memory.maxWidth=NaN;},x=>{delete x.relativeBudgets.smallSceneGpuP95RegressionRatio;}]) {
+    const bad=structuredClone(c);mutate(bad);assert.ok(validateDeferred021Contract(bad,{requireFrozen:true}).length);
+  }
+});
+test('independent validation binds actual adapter and workload, not just filenames',()=>{
+  const r=fixture(), c={fixture:'instances',count:1000}, d={vendor:'intel',architecture:'gen-9'};
+  assert.deepEqual(validateG01CaseIdentity(r,c,d),[]);
+  assert.match(validateG01CaseIdentity(r,c,{vendor:'amd',architecture:'rdna-1'}).join(),/adapter/);
+  r.count=10000;assert.match(validateG01CaseIdentity(r,c,d).join(),/workload/);
+  const bad=fixture();bad.timing.frameWall.rawSamples.pop();assert.match(validateG01Baseline(bad).join(),/frameWall population/);
+  bad.counts=[1001,-1,0];assert.match(validateG01Baseline(bad).join(),/coverage/);
+});
+test('frozen evidence rejects tampered policy, omitted files and changed raw bytes',()=>{
+  const value={summary:{sourceHash:'source',revision:'commit'},evidence:{sourceHash:'source',revision:'commit',finalPolicySha256:'policy',captureFiles:[{file:'a',sha256:'hash-a'},{file:'b',sha256:'hash-b'}]},expectedFiles:['a','b'],policyHash:'policy',fileHashes:{a:'hash-a',b:'hash-b'}};
+  assert.deepEqual(validateG01FrozenManifest(value),[]);
+  for(const mutate of [v=>{v.policyHash='changed';},v=>{v.evidence.captureFiles.pop();},v=>{v.fileHashes.b='changed';},v=>{v.evidence.sourceHash='changed';}]) {
+    const bad=structuredClone(value);mutate(bad);assert.ok(validateG01FrozenManifest(bad).length);
+  }
 });

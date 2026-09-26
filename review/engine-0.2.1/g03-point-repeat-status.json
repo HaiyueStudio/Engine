@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "status": "incomplete-host-preflight-rejected",
+  "generatedAt": "2026-09-26T09:00:58.858Z",
+  "scope": "One predeclared full repeat; no samples replace original population",
+  "productQualification": false,
+  "completedCaptures": [
+    {
+      "cohort": 0,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-high-performance-2026-09-26T08-54-21.579Z.json",
+      "sha256": "39ca07630161f81c5e3220c65f3708046d738cd1af8e8b241184d0eb318153d8"
+    },
+    {
+      "cohort": 0,
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-high-performance-2026-09-26T08-54-59.854Z.json",
+      "sha256": "b4bb092eab8e8a802ef17d38e26f9effa913c795e8e7d610a5c5464168bec7cc"
+    },
+    {
+      "cohort": 0,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-low-power-2026-09-26T08-56-29.940Z.json",
+      "sha256": "2746e04403c0dd229a5ca2cefe2c4f9b255a4b67f6195d1a837662b7da07b839"
+    }
+  ],
+  "plannedCaptureCount": 24,
+  "failedCapture": 4,
+  "failure": {
+    "path": "artifacts/engine-0.2.1/g03/cohorts-2026-09-26T08-53-35.170Z/4.log",
+    "sha256": "e78ba0b1b41559f5081d667cef21199a79b3c99f71ece424606cd274563c9091",
+    "reason": "CPU speed limit reduced or unavailable before capture; raw rejected pmset output was not retained by runner, so exact limit is unknown"
+  },
+  "hostFollowup": {
+    "observedAt": "2026-09-26T08:59:29Z",
+    "cpuSchedulerLimit": 100,
+    "cpuSpeedLimit": 100,
+    "availableCpus": 12,
+    "scope": "Read-only follow-up, not evidence of readiness at rejected capture"
+  },
+  "decision": "Do not evaluate incomplete cohorts or splice into original population. No further immediate retry; await a sufficiently idle host window. Shader budget approval also remains pending."
+}

@@ -30,6 +30,13 @@ export interface PixelDifference {
   readonly meanAbsoluteDelta: number;
   readonly changedPixelRatio: number;
   readonly changedPixelCount: number;
+  readonly overTolerancePixelCount: number;
+  readonly maximumDeltaPixel: {
+    readonly x: number;
+    readonly y: number;
+    readonly webgpu: readonly number[];
+    readonly webgl2: readonly number[];
+  };
 }
 
 export interface DualBackendFrame {
@@ -172,8 +179,11 @@ class WebGpuShowcaseRenderer {
     );
     const sampler = device.createSampler({
       label: 'shader-language-lab.sampler',
-      magFilter: 'nearest',
-      minFilter: 'nearest',
+      // Wave-distorted UVs may sample opposite sides of a texel boundary across
+      // backends. Continuous filtering prevents nearest's discontinuous jump
+      // between unrelated colors; both panes must use the same sampling rule.
+      magFilter: 'linear',
+      minFilter: 'linear',
       addressModeU: 'repeat',
       addressModeV: 'repeat',
     });
@@ -313,8 +323,8 @@ class WebGl2ShowcaseRenderer {
     const texture = requiredGlObject(gl.createTexture(), 'WebGL2 source texture');
     gl.activeTexture(gl.TEXTURE0 + sampled.textureUnit);
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, TEXTURE_SIZE, TEXTURE_SIZE, 0, gl.RGBA, gl.UNSIGNED_BYTE, texturePixels);
@@ -405,15 +415,20 @@ function comparePixels(left: Uint8Array, right: Uint8Array): PixelDifference {
   let maxChannelDelta = 0;
   let totalDelta = 0;
   let changedPixelCount = 0;
+  let overTolerancePixelCount = 0;
+  let maximumOffset = 0;
   for (let offset = 0; offset < left.length; offset += 4) {
     let changed = false;
+    let overTolerance = false;
     for (let channel = 0; channel < 4; channel++) {
       const delta = Math.abs(left[offset + channel]! - right[offset + channel]!);
-      maxChannelDelta = Math.max(maxChannelDelta, delta);
+      if (delta > maxChannelDelta) { maxChannelDelta = delta; maximumOffset = offset; }
       totalDelta += delta;
       changed ||= delta > 0;
+      overTolerance ||= delta > 2;
     }
     if (changed) changedPixelCount++;
+    if (overTolerance) overTolerancePixelCount++;
   }
   const pixelCount = left.length / 4;
   return Object.freeze({
@@ -421,6 +436,13 @@ function comparePixels(left: Uint8Array, right: Uint8Array): PixelDifference {
     meanAbsoluteDelta: totalDelta / left.length,
     changedPixelRatio: changedPixelCount / pixelCount,
     changedPixelCount,
+    overTolerancePixelCount,
+    maximumDeltaPixel: {
+      x: (maximumOffset / 4) % WIDTH,
+      y: Math.floor(maximumOffset / 4 / WIDTH),
+      webgpu: Array.from(left.slice(maximumOffset, maximumOffset + 4)),
+      webgl2: Array.from(right.slice(maximumOffset, maximumOffset + 4)),
+    },
   });
 }
 

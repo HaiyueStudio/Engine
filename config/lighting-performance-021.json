@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractId": "engine-deferred-021-v1",
-  "state": "candidate-awaiting-baseline",
+  "state": "frozen",
   "productionImplemented": false,
   "owner": "m18/g01-contracts-baseline",
   "sourceRevision": "365552908414ffa193c63a62aaf682f4ddb23b94",
@@ -16,6 +16,7 @@
     "gpuTiming": "timestamp-query; separate from CPU population",
     "cpuTiming": "prepare+record+submit excluding queue wait",
     "cohortOrder": "alternate adapters and reverse case order",
+    "interCaseIdleMs": 30000,
     "hostEvidence": {
       "command": "pmset -g therm",
       "when": "before-and-after-each-capture",
@@ -32,9 +33,11 @@
       "vendor": "amd",
       "architecture": "rdna-1",
       "captureOwner": "G01 local Chrome runner; G05/G07 repeat same protocol",
-      "absoluteBudgetStatus": "pending-measurement",
-      "cpuP95Ms": null,
-      "gpuP95Ms": null
+      "absoluteBudgetStatus": "frozen",
+      "cpuP95Ms": 4,
+      "gpuP95Ms": 12,
+      "targetFps": 60,
+      "frameWallP95Ms": 16.666666666666668
     },
     {
       "id": "mac-intel-gen9",
@@ -43,9 +46,11 @@
       "vendor": "intel",
       "architecture": "gen-9",
       "captureOwner": "G01 local Chrome runner; G05/G07 repeat same protocol",
-      "absoluteBudgetStatus": "pending-measurement",
-      "cpuP95Ms": null,
-      "gpuP95Ms": null
+      "absoluteBudgetStatus": "frozen",
+      "cpuP95Ms": 8,
+      "gpuP95Ms": 24,
+      "targetFps": 30,
+      "frameWallP95Ms": 33.333333333333336
     }
   ],
   "correctness": {
@@ -411,7 +416,21 @@
       "resolution": "720p",
       "required": true,
       "owner": "g05-performance-qualification",
-      "seed": 21128
+      "seed": 21128,
+      "absoluteBudgets": [
+        {
+          "deviceId": "mac-amd-rdna1",
+          "cpuP95Ms": 4,
+          "gpuP95Ms": 12,
+          "frameWallP95Ms": 16.666666666666668
+        },
+        {
+          "deviceId": "mac-intel-gen9",
+          "cpuP95Ms": 8,
+          "gpuP95Ms": 24,
+          "frameWallP95Ms": 33.333333333333336
+        }
+      ]
     },
     {
       "id": "sparse-128",
@@ -421,7 +440,21 @@
       "resolution": "720p",
       "required": true,
       "owner": "g05-performance-qualification",
-      "seed": 21128
+      "seed": 21128,
+      "absoluteBudgets": [
+        {
+          "deviceId": "mac-amd-rdna1",
+          "cpuP95Ms": 4,
+          "gpuP95Ms": 12,
+          "frameWallP95Ms": 16.666666666666668
+        },
+        {
+          "deviceId": "mac-intel-gen9",
+          "cpuP95Ms": 8,
+          "gpuP95Ms": 24,
+          "frameWallP95Ms": 33.333333333333336
+        }
+      ]
     },
     {
       "id": "overlap-128",
@@ -431,7 +464,21 @@
       "resolution": "720p",
       "required": true,
       "owner": "g05-performance-qualification",
-      "seed": 21128
+      "seed": 21128,
+      "absoluteBudgets": [
+        {
+          "deviceId": "mac-amd-rdna1",
+          "cpuP95Ms": 4,
+          "gpuP95Ms": 12,
+          "frameWallP95Ms": 16.666666666666668
+        },
+        {
+          "deviceId": "mac-intel-gen9",
+          "cpuP95Ms": 8,
+          "gpuP95Ms": 24,
+          "frameWallP95Ms": 33.333333333333336
+        }
+      ]
     },
     {
       "id": "sparse-256",
@@ -441,7 +488,21 @@
       "resolution": "720p",
       "required": true,
       "owner": "g05-performance-qualification",
-      "seed": 21128
+      "seed": 21128,
+      "absoluteBudgets": [
+        {
+          "deviceId": "mac-amd-rdna1",
+          "cpuP95Ms": 4,
+          "gpuP95Ms": 12,
+          "frameWallP95Ms": 16.666666666666668
+        },
+        {
+          "deviceId": "mac-intel-gen9",
+          "cpuP95Ms": 8,
+          "gpuP95Ms": 24,
+          "frameWallP95Ms": 33.333333333333336
+        }
+      ]
     },
     {
       "id": "dynamic-128-four-view",
@@ -451,7 +512,21 @@
       "resolution": "720p",
       "required": true,
       "owner": "g05-performance-qualification",
-      "seed": 21128
+      "seed": 21128,
+      "absoluteBudgets": [
+        {
+          "deviceId": "mac-amd-rdna1",
+          "cpuP95Ms": 16,
+          "gpuP95Ms": 48,
+          "frameWallP95Ms": 66.66666666666667
+        },
+        {
+          "deviceId": "mac-intel-gen9",
+          "cpuP95Ms": 32,
+          "gpuP95Ms": 96,
+          "frameWallP95Ms": 133.33333333333334
+        }
+      ]
     },
     {
       "id": "1080p-128",
@@ -461,7 +536,21 @@
       "resolution": "1080p",
       "required": true,
       "owner": "g05-performance-qualification",
-      "seed": 21128
+      "seed": 21128,
+      "absoluteBudgets": [
+        {
+          "deviceId": "mac-amd-rdna1",
+          "cpuP95Ms": 4,
+          "gpuP95Ms": 27,
+          "frameWallP95Ms": 37.5
+        },
+        {
+          "deviceId": "mac-intel-gen9",
+          "cpuP95Ms": 8,
+          "gpuP95Ms": 54,
+          "frameWallP95Ms": 75
+        }
+      ]
     },
     {
       "id": "instances-1000-1v",
@@ -476,7 +565,21 @@
       ],
       "required": true,
       "owner": "g05-performance-qualification",
-      "seed": 21128
+      "seed": 21128,
+      "absoluteBudgets": [
+        {
+          "deviceId": "mac-amd-rdna1",
+          "cpuP95Ms": 4,
+          "gpuP95Ms": 12,
+          "frameWallP95Ms": 16.666666666666668
+        },
+        {
+          "deviceId": "mac-intel-gen9",
+          "cpuP95Ms": 8,
+          "gpuP95Ms": 24,
+          "frameWallP95Ms": 33.333333333333336
+        }
+      ]
     },
     {
       "id": "instances-1000-4v",
@@ -491,7 +594,21 @@
       ],
       "required": true,
       "owner": "g05-performance-qualification",
-      "seed": 21128
+      "seed": 21128,
+      "absoluteBudgets": [
+        {
+          "deviceId": "mac-amd-rdna1",
+          "cpuP95Ms": 16,
+          "gpuP95Ms": 48,
+          "frameWallP95Ms": 66.66666666666667
+        },
+        {
+          "deviceId": "mac-intel-gen9",
+          "cpuP95Ms": 32,
+          "gpuP95Ms": 96,
+          "frameWallP95Ms": 133.33333333333334
+        }
+      ]
     },
     {
       "id": "instances-10000-1v",
@@ -506,7 +623,21 @@
       ],
       "required": true,
       "owner": "g05-performance-qualification",
-      "seed": 21128
+      "seed": 21128,
+      "absoluteBudgets": [
+        {
+          "deviceId": "mac-amd-rdna1",
+          "cpuP95Ms": 4,
+          "gpuP95Ms": 12,
+          "frameWallP95Ms": 16.666666666666668
+        },
+        {
+          "deviceId": "mac-intel-gen9",
+          "cpuP95Ms": 8,
+          "gpuP95Ms": 24,
+          "frameWallP95Ms": 33.333333333333336
+        }
+      ]
     },
     {
       "id": "instances-10000-4v",
@@ -521,7 +652,21 @@
       ],
       "required": true,
       "owner": "g05-performance-qualification",
-      "seed": 21128
+      "seed": 21128,
+      "absoluteBudgets": [
+        {
+          "deviceId": "mac-amd-rdna1",
+          "cpuP95Ms": 16,
+          "gpuP95Ms": 48,
+          "frameWallP95Ms": 66.66666666666667
+        },
+        {
+          "deviceId": "mac-intel-gen9",
+          "cpuP95Ms": 32,
+          "gpuP95Ms": 96,
+          "frameWallP95Ms": 133.33333333333334
+        }
+      ]
     },
     {
       "id": "stress-512",
@@ -545,5 +690,45 @@
       "owner": "g05-performance-qualification",
       "seed": 21128
     }
-  ]
+  ],
+  "frozenAt": "2026-09-25",
+  "captureRevision": "61d40f7bf75e05ec948754d85fdbf70512a21ca8",
+  "baselineVarianceCeilings": {
+    "approvedBy": "user",
+    "approvedAt": "2026-09-25",
+    "scope": "Only G01 existing-instance fixtures; relative instability remains reported. Not a general regression allowance.",
+    "derivation": "ceil(max(cohort P95) * 1.25 * 100) / 100 ms",
+    "limits": [
+      {
+        "deviceId": "mac-amd-rdna1",
+        "caseId": "instances-1k",
+        "channel": "gpuTimestamp",
+        "maxCohortP95Ms": 0.1
+      },
+      {
+        "deviceId": "mac-amd-rdna1",
+        "caseId": "instances-10k",
+        "channel": "cpuRecord",
+        "maxCohortP95Ms": 0.22
+      }
+    ]
+  },
+  "absoluteBudgetMethod": {
+    "scope": "G05 optimized Deferred E cases and complete F workloads; reference-only correctness is not required to meet optimized timing targets",
+    "cpu": "prepare+record+submit, excluding queue wait; do not substitute the G01 instance cpuRecord channel",
+    "gpu": "whole-frame timestamp-query, including culling, geometry, lighting and compatibility passes",
+    "frameWall": "benchmark submit-complete wall time; measured independently in untimestamped frames, not CPU P95 + GPU P95 or normal-runtime synchronization",
+    "allocation": "approximately one quarter CPU and three quarters GPU of the user-selected frame period, with explicit frameWall gate",
+    "scaling": "CPU scales by view count; GPU/frameWall scale by view count and pixel ratio from 1280x720; no single-view FPS claim for scaled cases",
+    "baselineRole": "current Forward and existing instances establish device cost and regression references; they do not predict full-light Deferred performance",
+    "stress": "512/1024: timing reported, no absolute FPS qualification; correctness/resource gates remain mandatory"
+  },
+  "baselineEvidence": {
+    "summaryPath": "review/engine-0.2.1/g01-baseline-summary.json",
+    "rawDirectory": "artifacts/engine-0.2.1/g01/frozen-baseline",
+    "revision": "61d40f7bf75e05ec948754d85fdbf70512a21ca8",
+    "sourceHash": "41dd483e5d583453330426ef9b3ed9ae21b9295289c6932bd50f87d491264e69",
+    "tier": "diagnostic-baseline",
+    "productQualification": false
+  }
 }
