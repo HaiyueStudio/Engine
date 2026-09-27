@@ -1,19 +1,82 @@
 {
   "schemaVersion": 1,
-  "status": "incomplete-performance-host-blocked",
-  "generatedAt": "2026-09-26T09:41:37.848Z",
-  "scope": "Final G03 evidence audit; correctness/admission checked, performance stability not accepted",
+  "status": "complete-g03-scope",
+  "generatedAt": "2026-09-27T04:18:34.066Z",
+  "scope": "G03 correctness, relative performance, stability and admitted Shader cost; G05/G07 absolute/full-device/release qualification excluded",
   "productQualification": false,
+  "revision": "17637dcce8855fee6ac7d0c9f944cfc27409d53b",
+  "dirty": true,
   "runtime": {
     "sha256": "e1ace98e435a904e5c0d576e0c5e5f0a6fd30ef8fd407302f485494d021b5581",
     "fileCount": 598
   },
+  "roomHarness": "62ed4276e9ef256db2ebd764873f0adef5fde90e4e356a82392466bef1213aac",
+  "nativeHarness": "7c83b013ceef5543bdc2c90c115d97a3dc0c505f6aab75bce2cb15198d04a30f",
   "nativeCorrectness": "passed-current-fingerprints",
   "g02ReferenceRegression": "passed-current-fingerprints",
   "roomMatrix": {
-    "cases": 8,
     "status": "passed",
-    "harnessChange": "Only preflight logging outside measured work; original runner hash reproduced and all other harness file hashes match"
+    "cases": 8,
+    "report": "review/engine-0.2.1/g03-final-room-matrix.json"
+  },
+  "performance": {
+    "directory": "artifacts/engine-0.2.1/g03/cohorts-2026-09-27T03-18-41.242Z",
+    "report": "review/engine-0.2.1/g03-final-performance-review.json",
+    "captures": 24,
+    "timedSamples": 7200,
+    "hostObservations": 48,
+    "interCaseIdleMs": 120000,
+    "stabilityPassed": true,
+    "relativeBudgetsPassed": true,
+    "absoluteBudgetsPassed": false
+  },
+  "laterOwners": {
+    "G05/G07": [
+      {
+        "device": "mac-amd-rdna1",
+        "count": 128,
+        "overlap": true,
+        "absoluteBudgets": {
+          "cpu": {
+            "observed": 2.7300000190734863,
+            "limit": 4,
+            "passed": true
+          },
+          "gpu": {
+            "observed": 14.760535,
+            "limit": 12,
+            "passed": false
+          },
+          "frameWall": {
+            "observed": 34.8050000667572,
+            "limit": 16.666666666666668,
+            "passed": false
+          }
+        }
+      },
+      {
+        "device": "mac-intel-gen9",
+        "count": 128,
+        "overlap": true,
+        "absoluteBudgets": {
+          "cpu": {
+            "observed": 3.6699999570846558,
+            "limit": 8,
+            "passed": true
+          },
+          "gpu": {
+            "observed": 62.894184,
+            "limit": 24,
+            "passed": false
+          },
+          "frameWall": {
+            "observed": 69.31499993801117,
+            "limit": 33.333333333333336,
+            "passed": false
+          }
+        }
+      }
+    ]
   },
   "rootTests": {
     "total": 1349,
@@ -25,25 +88,56 @@
       7
     ]
   },
+  "rootChecks": {
+    "typecheck": "passed",
+    "tests": 1349,
+    "freshExampleBuilds": 95,
+    "api": "passed",
+    "modules": "passed",
+    "responsibilities": "passed",
+    "rendererPrepare": "passed",
+    "scope": "Current runtime unchanged; archived root checks rehashed. Host-only extended cooldown is separately covered by eight room/cohort policy tests."
+  },
+  "packages": {
+    "status": "passed",
+    "mode": "development",
+    "packages": [
+      {
+        "name": "@haiyue/engine",
+        "version": "0.2.1",
+        "packedBytes": 1895285,
+        "unpackedBytes": 8286100,
+        "fileCount": 619
+      },
+      {
+        "name": "@haiyue/animation-spec",
+        "version": "0.2.1",
+        "packedBytes": 130281,
+        "unpackedBytes": 502980,
+        "fileCount": 48
+      },
+      {
+        "name": "@haiyue/extensions",
+        "version": "0.2.1",
+        "packedBytes": 513429,
+        "unpackedBytes": 2651645,
+        "fileCount": 188
+      },
+      {
+        "name": "@haiyue/shader-language",
+        "version": "0.2.1",
+        "packedBytes": 146390,
+        "unpackedBytes": 707600,
+        "fileCount": 75
+      }
+    ],
+    "scope": "Existing dist-only package result; approved Shader budget configuration and external CLI logs are not package files"
+  },
   "shaderAdmission": {
     "status": "passed",
     "stage14Nodes": 25,
     "application": "review/engine-0.2.1/g03-budget-application.json"
   },
-  "latestRecapture": {
-    "directory": "artifacts/engine-0.2.1/g03/cohorts-2026-09-26T09-31-37.647Z",
-    "validCompletedCaptures": 6,
-    "invalidCapture": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-low-power-2026-09-26T09-37-37.225Z.json",
-    "cpuSpeedLimit": {
-      "before": 100,
-      "after": 53
-    },
-    "decision": "Keep complete raw failure; no cohort qualification or population splicing. Await user-provided idle/cooldown window."
-  },
-  "remaining": [
-    "AMD sparse Tiled GPU-span and lighting stability under original thresholds",
-    "Final milestone/handoff closure after accepted performance evidence"
-  ],
   "checkedEvidence": [
     {
       "path": "review/engine-0.2.1/g03-point-correctness.json",
@@ -130,10 +224,6 @@
       "sha256": "cb9a99f0ecb8450dd3713ba061b00dfa1f3f48b9ba63541ccc7c49058b3e31c2"
     },
     {
-      "path": "artifacts/engine-0.2.1/g03/approved-budget/stage14-dag.json",
-      "sha256": "836cbfb04c1fdd7a45dcf67cd260067e3bbd3d7912be249f6a7c4fbf6393f5e8"
-    },
-    {
       "path": "artifacts/engine-0.2.1/g03/cohorts-2026-09-26T09-31-37.647Z/captures.json",
       "sha256": "d10d4ec341beadeae0426b09f6847af558ec6a3a6ac4b59a60978ffc2a93a59f"
     },
@@ -200,51 +290,320 @@
     {
       "path": "artifacts/engine-0.2.1/g03/point-checks/public-packages.json",
       "sha256": "4ea66d2ccb258e975fd7b8eece4e531b47943822e5959112a4959b188a4a3f44"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-high-performance-2026-09-27T00-54-38.933Z.json",
+      "sha256": "684b685e7fa339f13e2a491014a4e4ffd5cf50de1968bc045e5628f7125346ce"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-high-performance-2026-09-27T00-55-15.604Z.json",
+      "sha256": "99d4d33a42e2d2d6a5b78d7b8262cab72d4dce97f7b60f27f3410b0dcc2d1994"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-low-power-2026-09-27T00-56-45.691Z.json",
+      "sha256": "0e49f85c21adf2f72232c800c5f2795927ee15b2a6fed117563395cb10c3932a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-low-power-2026-09-27T00-57-25.202Z.json",
+      "sha256": "c97f57284b2ff130f26e5f7082075dfb14021d53eb3850bb127756c2786c920a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-high-performance-2026-09-27T00-58-07.895Z.json",
+      "sha256": "055ec56005ec1030af4c86fe4b45e3283f078f3b3b805492bc58cec42e1d3625"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T00-58-50.109Z.json",
+      "sha256": "d165d90521d3791f1c3c41063186315c8f2f594a241a0be20e459574ed42da93"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-low-power-2026-09-27T00-59-53.823Z.json",
+      "sha256": "c60fcab9ea4285c53485c2f14610e8ff994123c7c57743031e6cbed17a3b6277"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-low-power-2026-09-27T01-00-55.149Z.json",
+      "sha256": "268d7d1c53ee1881103bc9bb7d8adf7658fdcfcdee9b0d92a591fb3084f3e04a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-low-power-2026-09-27T01-01-56.802Z.json",
+      "sha256": "612ea426a6fcc75f548728ba83e7bea82298c22a4af7fce349dfa58d73b2a2c8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-low-power-2026-09-27T01-03-00.958Z.json",
+      "sha256": "c045aa5cda2887f5881bcebcd1ca05d62b2ec6562c597a72e0005e643c9e4205"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T01-03-44.747Z.json",
+      "sha256": "23ee9dae3ccbf230a3a69c9af9ebaa8065bd81e1bfd49602dd12fb582f83dc52"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-high-performance-2026-09-27T01-04-27.070Z.json",
+      "sha256": "181762dcb19ad3a38edcba60f538d0bc87bc51ca3a1a750fb2b89be727f24896"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-low-power-2026-09-27T01-05-07.245Z.json",
+      "sha256": "ee6d26c3b90f21866490deee3529a4da41bf5d1c69cc89a92337ce61a28bd08d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-low-power-2026-09-27T01-06-37.247Z.json",
+      "sha256": "e2ee9064c317965403b7ebbfd0c41071b64cdc72555122ba783936b39c8f3044"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-high-performance-2026-09-27T01-07-13.940Z.json",
+      "sha256": "91046091f51c9442428829e8fc42bb5c7d578426c0e5b1bd8a83839ed4198b4f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-high-performance-2026-09-27T01-07-59.933Z.json",
+      "sha256": "4436f8001f1376cfbc0629bd3e810ff1b1a90cb79cc8fd9bad49084dbee7c252"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-high-performance-2026-09-27T01-08-46.004Z.json",
+      "sha256": "d0ac253f862b208803063b6fad5faf4b3ef4f0381706eeb38c0f7c8b1310c7e0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-high-performance-2026-09-27T01-09-22.787Z.json",
+      "sha256": "4dbd80dce65e402a609e649c7d8c8a6b50e3e08bc317ab16e97161fa14f446b6"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-low-power-2026-09-27T01-10-52.896Z.json",
+      "sha256": "f56e18f536d37a01114d5b1d77cabff2d222ad8782de2a25e178edea9dcd8b34"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-low-power-2026-09-27T01-11-32.382Z.json",
+      "sha256": "66943ff8606f03234a03a7cd3d907c3c1d420a68a73beed14688b89e754ae852"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-high-performance-2026-09-27T01-12-12.804Z.json",
+      "sha256": "34a9324a75313308dc7fef8a5e9b56e1f9bff28bb7de2ca40ea727ddb3accf3c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T01-12-54.016Z.json",
+      "sha256": "bbc5cbae7342de875f5d758584dc06495355ca34ba216ebf6a1eb9e52e67bd1e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-low-power-2026-09-27T01-13-57.955Z.json",
+      "sha256": "499ab880a9b14bc4cef8fbf5dd0c0fb033bfce53316358f8266fedcad17276b7"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-low-power-2026-09-27T01-14-59.375Z.json",
+      "sha256": "029e3774fef8f9e697f303af380acdf5d20cad3d44ee3406a7d0d4e9b65eee20"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/cohorts-2026-09-27T01-35-04.196Z/1.log",
+      "sha256": "777835844def581e9229823a31a2b21a8fb42a4c3ad71af6d226970ef8720bcd"
+    },
+    {
+      "path": "config/lighting-performance-021.json",
+      "sha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/cohorts-2026-09-27T03-18-41.242Z/captures.json",
+      "sha256": "6e4f2b434bfe2e8171ff9b476b8d0a26e83ead1854e36f8cce78f0e6610c4089"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/cohorts-2026-09-27T03-18-41.242Z/plan.json",
+      "sha256": "5c93214d01b5895c48fd9e479df87ceb07463cd8b5bd0b58c74cc238776589bb"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-high-performance-2026-09-27T03-20-56.994Z.json",
+      "sha256": "3b7a5994ea5a672479686e665b4829d365498e20450411bd0b1a05bd931379fa"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/fixture.js",
+      "sha256": "09fe828f8bcf65750a374f97a52ac3a755310eaa34fb884f9eec56d057d56c78"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/fixture-deferred-reference-runtime-BFEGE4xT.js",
+      "sha256": "8e109ae9bf1b9ed1f2ef510c96472d3df89e45658114a5b80a7f889855058252"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/fixture-DeferredReferenceBackend-BNX3P6ZT.js",
+      "sha256": "e673b8ff8b5992d898714fbeca029fbcf243e1a66aec8a291df8303bfe1c292c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/fixture-DeferredTileCuller-DR_BZK0S.js",
+      "sha256": "6a9950aa2dbf3999b451c8c1c9a42546aa2047bc51e4b9501b097bebe37de464"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/fixture-DeferredTileResources-I1PPb6Dn.js",
+      "sha256": "109fe48ac66c8547381e9c4f8e74470b3ecd69096d56c2d37778ed65e4ed6b41"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-room-fixture.mjs",
+      "sha256": "99f1eaa7b5fa45698e53b67d88a027be3780ee2f4e391501338213517857bf40"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-tiled-room-fixture.html",
+      "sha256": "e0bde3e4211aefa078e1e754fba943beecaffab5587f19f5ef5c6d7e6f56ca0c"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-tiled-room-fixture.mjs",
+      "sha256": "299ced34480021bb28c0ed12f6a1c6616958f646db66f27ec80f3590cb30a6d3"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-tiled-room-scene.mjs",
+      "sha256": "c8eac68c6e6d1ef9e089b6894e9f54d455ea01a25394e6149f406c244801ed5a"
+    },
+    {
+      "path": "scripts/webgpu-gate/float-texture-readback.mjs",
+      "sha256": "137c1db65b877fbfeb79ca404c12ac4600be243c0be8c3abd248068a8b14e661"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-high-performance-2026-09-27T03-23-03.552Z.json",
+      "sha256": "9e41c3e8a40f6014cd1eaa86e4ff0b081d5251d2d03e01aa6ae0f1766c753a4f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-low-power-2026-09-27T03-26-03.865Z.json",
+      "sha256": "f5b96a770b0b6790e6a6c3a13f0ce28f11c37ffc4d7fd556c006ce2fc18e71ef"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-low-power-2026-09-27T03-28-13.331Z.json",
+      "sha256": "79ef1609d3b251cc4dfbded7488c2f8b20be3538401de6b210d0bb0a84fec103"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-high-performance-2026-09-27T03-30-22.712Z.json",
+      "sha256": "369ff5afde2a4fb3338765853356e70bd639db8f25d2a3bdd8d36ff9656ef16b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T03-32-32.370Z.json",
+      "sha256": "82300db67c89b05999c22931a46a53232cf6d52ce915d9de5cef0f270bf26a9e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-low-power-2026-09-27T03-35-06.049Z.json",
+      "sha256": "17b08bbddcd4f6af923272fe7c5a26c942dc9e13df9c1a82a877e61f77b864bb"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-low-power-2026-09-27T03-37-37.380Z.json",
+      "sha256": "d46cfd44508efff413545c51ca872ed407e1b9c59e996380053bfe995282f042"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-low-power-2026-09-27T03-40-08.739Z.json",
+      "sha256": "aeeb33aa3c666fea6e746040098d76ce8f2b4bed620ef1247b80fbae5e691220"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-low-power-2026-09-27T03-42-42.510Z.json",
+      "sha256": "466f72cff90793a3f0a0847f001a6c24cb342f874a479862a39b4b93683c48bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T03-44-51.485Z.json",
+      "sha256": "6574c7fd132de232daea232afb1240ef72cf46d614b13491a90c105c400c3516"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-high-performance-2026-09-27T03-47-01.294Z.json",
+      "sha256": "8c2ab867284d4b2d5893b4d732b2559fe2df0390592edf60c0367c692096a50e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-low-power-2026-09-27T03-49-10.736Z.json",
+      "sha256": "eb8bd7c1c328c3167e436173bea33904f12f8bcf09c68e2fb98acf6ba184e3ef"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-low-power-2026-09-27T03-52-10.651Z.json",
+      "sha256": "e5a971cd0143eaea0fd7a7971fed78694f3d89bca4c7a84281ae76165a688a3a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-high-performance-2026-09-27T03-54-17.358Z.json",
+      "sha256": "68066cc18016d08aa2b1df0356eb96707d31153aba417d611a8eb194e1f5177b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-high-performance-2026-09-27T03-56-33.648Z.json",
+      "sha256": "d9b8f0db1b3a3f73728ec3c12a8fdecf8266d5aa5c145b02753b72b444fdb5a5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-high-performance-2026-09-27T03-58-49.159Z.json",
+      "sha256": "720a728cc85594e94f27f8d0031d7fd8b625f8b5fea9e7ef07665f67ae8f10cc"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-high-performance-2026-09-27T04-00-55.910Z.json",
+      "sha256": "52083afb72992f8ffa269200a471901c83a1073701e61f22e9b3554a47bfb8bb"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-low-power-2026-09-27T04-03-55.702Z.json",
+      "sha256": "809a4358983f300cb4e4c9d3a747776bad37383be6f8e914ecf1bfa467b06700"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-low-power-2026-09-27T04-06-05.187Z.json",
+      "sha256": "c5196f955fde9a6e8ff723c24ac1f524d9f43626b2d0d4f6aa6fa543e8b14afd"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-high-performance-2026-09-27T04-08-15.775Z.json",
+      "sha256": "a88001865692f47cbf1796551e3f6cf6d21053bc826f405cb8f863abc759709f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T04-10-25.504Z.json",
+      "sha256": "ffff45e9c121aa6ceb9e3d2f312ada8bffd6e4429336b4fd8df9724ea3fe0d7a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-low-power-2026-09-27T04-12-59.151Z.json",
+      "sha256": "76a399ef77c78d7fd8b0d3774c40cbb0b8190a5bfd82732b845143061ad00cf1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-low-power-2026-09-27T04-15-30.475Z.json",
+      "sha256": "9a32ed0d4fb16beaccbaa53ba3ca5e9a8b62e42d999d22026a67a4e3460e905b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/cohorts-2026-09-27T03-18-41.242Z/report.json",
+      "sha256": "2f598489179563154abc040df9caa8e4c834b0de536c39fb5429453cf6a6a67d"
+    },
+    {
+      "path": "review/engine-0.2.1/g03-final-performance-review.json",
+      "sha256": "45d21f2bdfa4d6c1b850d2d1d42729e4faf3e1413dfa7ae31466dc707ce342a4"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-sparse-high-performance-2026-09-27T04-16-21.438Z.json",
+      "sha256": "5e718dc30d9eff436944362b1bee6c6ecf5a52ef4a8436ede028f95367b82f9b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-sparse-low-power-2026-09-27T04-16-24.440Z.json",
+      "sha256": "c21b51d872917de2f469673cb50830ea112384cbf998096d821bb7a3d9978a90"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-overlap-high-performance-2026-09-27T04-16-27.552Z.json",
+      "sha256": "2bc44a2d9a5b5245c4fa2b4ff2513bce12b2e48f92a683a245609a72f6717a8b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-overlap-low-power-2026-09-27T04-16-31.565Z.json",
+      "sha256": "9f9a8d4b77144744a24ee748898a32a659220463aa8b5700e786502c1b7be37c"
+    },
+    {
+      "path": "review/engine-0.2.1/g03-final-room-matrix.json",
+      "sha256": "26a2e458b21a2cbc39bc4a415949dc57de1c19c25f2fd92b1c9ae23242437eb2"
+    },
+    {
+      "path": "shader-language/shader-cost-budgets.json",
+      "sha256": "ccc757479ce3351112d20af439e946ce2384d12038dbf79d59f84776105678bc"
     }
   ],
-  "rootChecks": {
-    "typecheck": "passed",
-    "tests": 1349,
-    "freshExampleBuilds": 95,
+  "remainingG03": [],
+  "historicalAudit": "artifacts/engine-0.2.1/g03/final-evidence-audit-before-acceptance-2026-09-27.json",
+  "completedAt": "2026-09-27T04:24:30.286Z",
+  "closingChecks": {
+    "policyTests": 8,
+    "docs": "passed",
     "api": "passed",
-    "modules": "passed",
-    "responsibilities": "passed",
-    "rendererPrepare": "passed",
-    "scope": "Previously completed current-runtime checks; new CLI-only log change separately covered by six room/cohort policy tests"
-  },
-  "packages": {
-    "status": "passed",
-    "mode": "development",
-    "packages": [
+    "milestones": "passed",
+    "diffWhitespace": "passed-both-repositories",
+    "evidence": [
       {
-        "name": "@haiyue/engine",
-        "version": "0.2.1",
-        "packedBytes": 1895285,
-        "unpackedBytes": 8286100,
-        "fileCount": 619
+        "path": "artifacts/engine-0.2.1/g03/completion-2026-09-27/policy.log",
+        "sha256": "c894eeef428cfcecbb4ce13cdb8a096828bf8c53ec3724fbdc1fa15c10619184"
       },
       {
-        "name": "@haiyue/animation-spec",
-        "version": "0.2.1",
-        "packedBytes": 130281,
-        "unpackedBytes": 502980,
-        "fileCount": 48
+        "path": "artifacts/engine-0.2.1/g03/completion-2026-09-27/docs.log",
+        "sha256": "5178be5ddaf20d27749cba0337e658faac292dfe1be7e8a6e1ae638ee8ab1feb"
       },
       {
-        "name": "@haiyue/extensions",
-        "version": "0.2.1",
-        "packedBytes": 513429,
-        "unpackedBytes": 2651645,
-        "fileCount": 188
+        "path": "artifacts/engine-0.2.1/g03/completion-2026-09-27/api.log",
+        "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
       },
       {
-        "name": "@haiyue/shader-language",
-        "version": "0.2.1",
-        "packedBytes": 146390,
-        "unpackedBytes": 707600,
-        "fileCount": 75
+        "path": "artifacts/engine-0.2.1/g03/completion-2026-09-27/milestones.log",
+        "sha256": "c6289cfdbe5368bea8a2f7ebb50fd8111f51d28fed8241021c7bac199e40f2cf"
       }
-    ],
-    "scope": "Existing dist-only package result; approved Shader budget configuration and external CLI logs are not package files"
+    ]
+  },
+  "milestone": {
+    "path": "../milestones/milestones/m18-engine-0.2.1/milestone.json",
+    "sha256": "929b3d6a4a4255b47de7e4c09943df9a5378c931d634992b624eeb8fc89ee490",
+    "g03": "complete",
+    "g04": "ready-not-activated"
   }
 }

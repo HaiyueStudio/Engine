@@ -2,12 +2,11 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {spawn} from 'node:child_process';
 import {resolve,dirname,relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {tiledCohortPlan,evaluateTiledCohorts} from './deferred-tiled-cohort-policy.mjs';
+import {parseTiledCohortOptions,tiledCohortPlan,evaluateTiledCohorts} from './deferred-tiled-cohort-policy.mjs';
 import {sha256} from './deferred-fixture-policy.mjs';
-const args=process.argv.slice(2);
-if(args.length!==1||!['--plan','--run'].includes(args[0]))throw Error('Choose --plan or --run; sampling is fixed at 3 × 120 warmup / 300 samples per adapter and path.');
-const plan=tiledCohortPlan();
-if(args[0]==='--plan')console.log(JSON.stringify(plan,null,2));
+const options=parseTiledCohortOptions(process.argv.slice(2));
+const plan=tiledCohortPlan(options.idleMs);
+if(options.mode==='--plan')console.log(JSON.stringify(plan,null,2));
 else {
   const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..'),stamp=new Date().toISOString().replaceAll(':','-');
   const output=resolve(root,`artifacts/engine-0.2.1/g03/cohorts-${stamp}`);await mkdir(output,{recursive:true});
@@ -15,7 +14,7 @@ else {
   const captures=[],index=[];
   await writeFile(resolve(output,'plan.json'),JSON.stringify(plan,null,2)+'\n');
   for(const [i,run] of plan.entries()){
-    const flags=['--full',`--count=${run.count}`];
+    const flags=['--full',`--count=${run.count}`,`--idle-ms=${run.idleMs}`];
     if(run.overlap)flags.push('--overlap');if(run.preference==='low-power')flags.push('--integrated');if(run.algorithm==='reference')flags.push('--reference');
     console.log(`Capture ${i+1}/${plan.length}: cohort ${run.cohort+1}, ${run.preference}, ${run.count} ${run.overlap?'overlap':'sparse'}, ${run.algorithm}`);
     let log='';

@@ -1,6 +1,6 @@
-# G03 → G04 integration handoff (draft)
+# G03 → G04 integration handoff
 
-G03 is still active. This document prepares the integration handoff; it does **not** complete G03 or activate G04. Check the [working completion audit](g03-completion-audit.md) and milestone manifest before starting the next goal.
+2026-09-27: G03 is complete and this handoff is accepted. G04 is ready, not activated. Read the [completion audit](g03-completion-audit.md), [accepted performance review](g03-final-performance-review.md) and milestone manifest before explicit G04 activation.
 
 ## Paths and ownership to preserve
 
@@ -37,14 +37,14 @@ Reproduction:
 node scripts/webgpu-gate/build-deferred-fixture.mjs --tiled
 node scripts/webgpu-gate/run-deferred-tile-fixture.mjs --render
 node scripts/webgpu-gate/run-deferred-tile-fixture.mjs --render --integrated
-node scripts/webgpu-gate/run-deferred-tiled-cohorts.mjs --plan
-node scripts/webgpu-gate/run-deferred-tiled-cohorts.mjs --run
+node scripts/webgpu-gate/run-deferred-tiled-cohorts.mjs --plan --idle-ms=120000
+node scripts/webgpu-gate/run-deferred-tiled-cohorts.mjs --run --idle-ms=120000
 ```
 
-Do not run builds or change runtime/harness sources during performance capture. Every full capture retains 120 warmup / 300 samples, minimum 30-second idle and before/after host state. Three equal-size cohorts are pooled without dropping slow samples, while round stability is checked separately.
+Do not run builds or change runtime/harness sources during performance capture. Every full capture retains 120 warmup / 300 samples, 120-second idle for the accepted G03 population (30-second frozen minimum) and before/after host state. Three equal-size cohorts are pooled without dropping slow samples, while round stability is checked separately.
 
 ## Remaining admission and later owners
 
-- G03's Shader cost proposal is approved/applied and the complete 25-node Stage14 chain passes; see [application evidence](g03-budget-application.json). Two AMD sparse cohort-stability failures and the closing audit remain pending. No release qualification is implied by this draft.
-- G05 owns the complete 60 FPS discrete / 30 FPS integrated absolute performance/device matrix. High-overlap GPU/frame-wall gaps observed in diagnostic runs must be carried forward explicitly, not described as solved by sparse-scene improvements.
+- G03's Shader cost proposal is approved/applied and the complete 25-node Stage14 chain passes; see [application evidence](g03-budget-application.json). The final 24-capture population passes all four relative budgets and all 32 stability channels, resolving both original sparse GPU failures and the overlap frame-wall failure. All raw/provenance checks and eight room combinations pass. No release qualification is implied.
+- G05 owns the complete 60 FPS discrete / 30 FPS integrated absolute performance/device matrix. Accepted high-overlap Tiled P95 remains AMD GPU/frameWall 14.761/34.805 ms and Intel 62.894/69.315 ms, above the 12/16.667 and 24/33.333 ms limits. Preserve these gaps and the runner absolute-budget failure; sparse-scene improvements do not solve them.
 - G06 owns the interactive example. G07 owns public experimental exports, new deferred consumer registration, clean release/package/device qualification and publication materials. Existing root/focused consumer budgets remain unchanged.

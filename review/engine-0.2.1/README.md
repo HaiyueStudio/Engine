@@ -68,3 +68,7 @@ G01 policy/host 16/16、既有 lighting 30/30、performance-budget:test 122/122�
 ## G03 当前进展（2026-09-26）
 
 G03 已显式激活，状态为 active；上面的 G02 完成时状态保留为历史。分块灯光、同帧溢出回退和高重叠自动选择的实现与验证见 [G03 进展](g03-progress.md)。G04–G07 未激活。
+
+## G03 完成（2026-09-27）
+
+G03 已完成，G04 为 ready、尚未激活；上面的阶段状态保留为历史。[完成审计](g03-completion-audit.md)、[最终性能报告](g03-final-performance-review.md)、[八场景证据](g03-final-room-matrix.json)及[G04 交接](g04-handoff.md)记录当前结果。停止竞争游戏后，重新完整采集 24 项并通过全部相对预算与稳定性检查；未拼接样本或放宽阈值。高重叠绝对帧率目标继续由 G05/G07 完成，不宣称发布资格。

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "generatedAt": "2026-09-27T04:24:30.289Z",
+  "scope": "G03 completion, excluding G05/G07 absolute/device/release qualification",
+  "productQualification": false,
+  "audit": {
+    "path": "review/engine-0.2.1/g03-final-evidence-audit.json",
+    "sha256": "aea827c35bf145db1d9d7f9dba95d594a5d0afaec6958d7689e615992a011fca"
+  },
+  "checkedSourceEvidenceFiles": 108,
+  "closingChecks": {
+    "policyTests": 8,
+    "docs": "passed",
+    "api": "passed",
+    "milestones": "passed",
+    "diffWhitespace": "passed-both-repositories",
+    "evidence": [
+      {
+        "path": "artifacts/engine-0.2.1/g03/completion-2026-09-27/policy.log",
+        "sha256": "c894eeef428cfcecbb4ce13cdb8a096828bf8c53ec3724fbdc1fa15c10619184"
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g03/completion-2026-09-27/docs.log",
+        "sha256": "5178be5ddaf20d27749cba0337e658faac292dfe1be7e8a6e1ae638ee8ab1feb"
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g03/completion-2026-09-27/api.log",
+        "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g03/completion-2026-09-27/milestones.log",
+        "sha256": "c6289cfdbe5368bea8a2f7ebb50fd8111f51d28fed8241021c7bac199e40f2cf"
+      }
+    ]
+  },
+  "milestone": {
+    "path": "../milestones/milestones/m18-engine-0.2.1/milestone.json",
+    "sha256": "929b3d6a4a4255b47de7e4c09943df9a5378c931d634992b624eeb8fc89ee490",
+    "g03": "complete",
+    "g04": "ready-not-activated"
+  }
+}

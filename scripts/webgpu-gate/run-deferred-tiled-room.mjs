@@ -14,7 +14,7 @@ if(inputs.sha256!==build.inputs.sha256)throw Error('Stale tiled runtime; rebuild
 for(const output of build.outputs)if(sha256(await readFile(resolve(directory,output.file)))!==output.sha256)throw Error('Tiled runtime chunk changed');
 const host=()=>{const output=execFileSync('pmset',['-g','therm'],{encoding:'utf8'});return {command:'pmset -g therm',observedAt:new Date().toISOString(),output,...parseG01ThermalStatus(output)};};
 let interCaseIdleMs=0;
-if(options.full){const started=performance.now();console.log('Full G03 capture: waiting 30 seconds before host check.');await idle(30000);interCaseIdleMs=performance.now()-started;}
+if(options.full){const started=performance.now();console.log(`Full G03 capture: waiting ${options.idleMs/1000} seconds before host check.`);await idle(options.idleMs);interCaseIdleMs=performance.now()-started;}
 const before=host();
 // Retain rejected preflight values in the capture log before any early exit.
 console.log(JSON.stringify({phase:'host-before',host:before}));

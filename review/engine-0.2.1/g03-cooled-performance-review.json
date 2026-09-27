@@ -1,0 +1,1043 @@
+{
+  "schemaVersion": 1,
+  "tier": "diagnostic-g03-paired-cohorts",
+  "productQualification": false,
+  "inputs": "e1ace98e435a904e5c0d576e0c5e5f0a6fd30ef8fd407302f485494d021b5581",
+  "harness": "1c19447edcb68445f864855d353e1a70d97db427c01a253b55c8a4ad89a075b7",
+  "revision": "17637dcce8855fee6ac7d0c9f944cfc27409d53b",
+  "dirty": true,
+  "stabilityPassed": false,
+  "relativeBudgetsPassed": true,
+  "absoluteBudgetsPassed": false,
+  "comparisons": [
+    {
+      "device": "mac-amd-rdna1",
+      "count": 256,
+      "overlap": false,
+      "samplesPerAlgorithm": 900,
+      "reference": {
+        "cpuRuntimeMs": 3.174999952316284,
+        "frameWallMs": 49.6599999666214,
+        "gpuSpanMs": 27.092907,
+        "gpuPassSumMs": 26.97767,
+        "cullMs": 0,
+        "resolveMs": 26.24972,
+        "lightingMs": 26.24972
+      },
+      "tiled": {
+        "cpuRuntimeMs": 3.2699999809265137,
+        "frameWallMs": 10.480000019073486,
+        "gpuSpanMs": 2.673218,
+        "gpuPassSumMs": 2.454125,
+        "cullMs": 0.359835,
+        "resolveMs": 1.597631,
+        "lightingMs": 1.957511
+      },
+      "ratio": 0.0745726430605736,
+      "limit": 0.8,
+      "passed": true,
+      "stability": {
+        "reference": {
+          "cpuRuntimeMs": {
+            "cohortP95": [
+              3.1299999952316284,
+              3.1649999618530273,
+              3.3249999284744263
+            ],
+            "relativeSpread": 0.0616113540578466,
+            "cv": 0.02647157566701479,
+            "stable": true
+          },
+          "gpuSpanMs": {
+            "cohortP95": [
+              27.076387,
+              26.543515,
+              27.241504
+            ],
+            "relativeSpread": 0.025778513211530022,
+            "cv": 0.01105020388052194,
+            "stable": true
+          },
+          "lightingMs": {
+            "cohortP95": [
+              26.496715,
+              25.985363,
+              26.331519
+            ],
+            "relativeSpread": 0.01941976837720599,
+            "cv": 0.008110453573712102,
+            "stable": true
+          },
+          "frameWallMs": {
+            "cohortP95": [
+              49.799999952316284,
+              49.78500008583069,
+              47.12999999523163
+            ],
+            "relativeSpread": 0.05363061067553487,
+            "cv": 0.025664645457119252,
+            "stable": true
+          }
+        },
+        "tiled": {
+          "cpuRuntimeMs": {
+            "cohortP95": [
+              3.2699999809265137,
+              3.28000009059906,
+              3.2549999952316284
+            ],
+            "relativeSpread": 0.007645289147784085,
+            "cv": 0.0031435161426866215,
+            "stable": true
+          },
+          "gpuSpanMs": {
+            "cohortP95": [
+              2.661838,
+              2.697918,
+              2.656129
+            ],
+            "relativeSpread": 0.015699302512023675,
+            "cv": 0.006924234835373848,
+            "stable": true
+          },
+          "lightingMs": {
+            "cohortP95": [
+              1.95491,
+              1.9577399999999998,
+              1.95614
+            ],
+            "relativeSpread": 0.001446726716901596,
+            "cv": 0.0005922666129905655,
+            "stable": true
+          },
+          "frameWallMs": {
+            "cohortP95": [
+              10.415000081062317,
+              10.669999957084656,
+              10.455000042915344
+            ],
+            "relativeSpread": 0.024390231944105563,
+            "cv": 0.010650963417793752,
+            "stable": true
+          }
+        }
+      },
+      "absoluteBudgets": {
+        "cpu": {
+          "observed": 3.2699999809265137,
+          "limit": 4,
+          "passed": true
+        },
+        "gpu": {
+          "observed": 2.673218,
+          "limit": 12,
+          "passed": true
+        },
+        "frameWall": {
+          "observed": 10.480000019073486,
+          "limit": 16.666666666666668,
+          "passed": true
+        }
+      },
+      "cohorts": [
+        {
+          "cohort": 0,
+          "algorithm": "reference",
+          "p95": {
+            "cpuRuntimeMs": 3.1299999952316284,
+            "frameWallMs": 49.799999952316284,
+            "gpuSpanMs": 27.076387,
+            "gpuPassSumMs": 27.014507,
+            "cullMs": 0,
+            "resolveMs": 26.496715,
+            "lightingMs": 26.496715
+          }
+        },
+        {
+          "cohort": 0,
+          "algorithm": "tiled",
+          "p95": {
+            "cpuRuntimeMs": 3.2699999809265137,
+            "frameWallMs": 10.415000081062317,
+            "gpuSpanMs": 2.661838,
+            "gpuPassSumMs": 2.453168,
+            "cullMs": 0.357223,
+            "resolveMs": 1.596087,
+            "lightingMs": 1.95491
+          }
+        },
+        {
+          "cohort": 1,
+          "algorithm": "tiled",
+          "p95": {
+            "cpuRuntimeMs": 3.28000009059906,
+            "frameWallMs": 10.669999957084656,
+            "gpuSpanMs": 2.697918,
+            "gpuPassSumMs": 2.454486,
+            "cullMs": 0.362954,
+            "resolveMs": 1.597191,
+            "lightingMs": 1.9577399999999998
+          }
+        },
+        {
+          "cohort": 1,
+          "algorithm": "reference",
+          "p95": {
+            "cpuRuntimeMs": 3.1649999618530273,
+            "frameWallMs": 49.78500008583069,
+            "gpuSpanMs": 26.543515,
+            "gpuPassSumMs": 26.423797,
+            "cullMs": 0,
+            "resolveMs": 25.985363,
+            "lightingMs": 25.985363
+          }
+        },
+        {
+          "cohort": 2,
+          "algorithm": "reference",
+          "p95": {
+            "cpuRuntimeMs": 3.3249999284744263,
+            "frameWallMs": 47.12999999523163,
+            "gpuSpanMs": 27.241504,
+            "gpuPassSumMs": 26.995749,
+            "cullMs": 0,
+            "resolveMs": 26.331519,
+            "lightingMs": 26.331519
+          }
+        },
+        {
+          "cohort": 2,
+          "algorithm": "tiled",
+          "p95": {
+            "cpuRuntimeMs": 3.2549999952316284,
+            "frameWallMs": 10.455000042915344,
+            "gpuSpanMs": 2.656129,
+            "gpuPassSumMs": 2.452166,
+            "cullMs": 0.357371,
+            "resolveMs": 1.598192,
+            "lightingMs": 1.95614
+          }
+        }
+      ]
+    },
+    {
+      "device": "mac-amd-rdna1",
+      "count": 128,
+      "overlap": true,
+      "samplesPerAlgorithm": 900,
+      "reference": {
+        "cpuRuntimeMs": 2.690000057220459,
+        "frameWallMs": 35.17999994754791,
+        "gpuSpanMs": 18.624991,
+        "gpuPassSumMs": 18.540595,
+        "cullMs": 0,
+        "resolveMs": 17.942972,
+        "lightingMs": 17.942972
+      },
+      "tiled": {
+        "cpuRuntimeMs": 2.8949999809265137,
+        "frameWallMs": 36.14999997615814,
+        "gpuSpanMs": 15.513964,
+        "gpuPassSumMs": 15.395045,
+        "cullMs": 0,
+        "resolveMs": 14.640337,
+        "lightingMs": 14.640337
+      },
+      "ratio": 0.8329649125736489,
+      "limit": 1.1,
+      "passed": true,
+      "stability": {
+        "reference": {
+          "cpuRuntimeMs": {
+            "cohortP95": [
+              2.6100000143051147,
+              2.6299999952316284,
+              2.759999990463257
+            ],
+            "relativeSpread": 0.05703421157038114,
+            "cv": 0.024937418810872695,
+            "stable": true
+          },
+          "gpuSpanMs": {
+            "cohortP95": [
+              18.893592,
+              18.584033,
+              17.0314
+            ],
+            "relativeSpread": 0.10020386855748696,
+            "cv": 0.0448408117354951,
+            "stable": true
+          },
+          "lightingMs": {
+            "cohortP95": [
+              18.243602,
+              17.70086,
+              16.227113
+            ],
+            "relativeSpread": 0.1139203970880511,
+            "cv": 0.048990661833085015,
+            "stable": true
+          },
+          "frameWallMs": {
+            "cohortP95": [
+              35.795000076293945,
+              35.450000047683716,
+              34.37999999523163
+            ],
+            "relativeSpread": 0.03991537599884354,
+            "cv": 0.017110053386934075,
+            "stable": true
+          }
+        },
+        "tiled": {
+          "cpuRuntimeMs": {
+            "cohortP95": [
+              2.790000081062317,
+              2.884999990463257,
+              3.0749999284744263
+            ],
+            "relativeSpread": 0.0987867758593461,
+            "cv": 0.040623688234628606,
+            "stable": true
+          },
+          "gpuSpanMs": {
+            "cohortP95": [
+              15.517084,
+              15.581282,
+              15.013661
+            ],
+            "relativeSpread": 0.0365803910064545,
+            "cv": 0.01651224229861349,
+            "stable": true
+          },
+          "lightingMs": {
+            "cohortP95": [
+              14.640193,
+              14.714431,
+              14.341763
+            ],
+            "relativeSpread": 0.02545512890437982,
+            "cv": 0.01105743439610434,
+            "stable": true
+          },
+          "frameWallMs": {
+            "cohortP95": [
+              49.1800000667572,
+              36.575000047683716,
+              34.86500000953674
+            ],
+            "relativeSpread": 0.3913875608628201,
+            "cv": 0.1587645406183911,
+            "stable": false
+          }
+        }
+      },
+      "absoluteBudgets": {
+        "cpu": {
+          "observed": 2.8949999809265137,
+          "limit": 4,
+          "passed": true
+        },
+        "gpu": {
+          "observed": 15.513964,
+          "limit": 12,
+          "passed": false
+        },
+        "frameWall": {
+          "observed": 36.14999997615814,
+          "limit": 16.666666666666668,
+          "passed": false
+        }
+      },
+      "cohorts": [
+        {
+          "cohort": 0,
+          "algorithm": "reference",
+          "p95": {
+            "cpuRuntimeMs": 2.6100000143051147,
+            "frameWallMs": 35.795000076293945,
+            "gpuSpanMs": 18.893592,
+            "gpuPassSumMs": 18.808113,
+            "cullMs": 0,
+            "resolveMs": 18.243602,
+            "lightingMs": 18.243602
+          }
+        },
+        {
+          "cohort": 0,
+          "algorithm": "tiled",
+          "p95": {
+            "cpuRuntimeMs": 2.790000081062317,
+            "frameWallMs": 49.1800000667572,
+            "gpuSpanMs": 15.517084,
+            "gpuPassSumMs": 15.391926999999999,
+            "cullMs": 0,
+            "resolveMs": 14.640193,
+            "lightingMs": 14.640193
+          }
+        },
+        {
+          "cohort": 1,
+          "algorithm": "tiled",
+          "p95": {
+            "cpuRuntimeMs": 2.884999990463257,
+            "frameWallMs": 36.575000047683716,
+            "gpuSpanMs": 15.581282,
+            "gpuPassSumMs": 15.467448,
+            "cullMs": 0,
+            "resolveMs": 14.714431,
+            "lightingMs": 14.714431
+          }
+        },
+        {
+          "cohort": 1,
+          "algorithm": "reference",
+          "p95": {
+            "cpuRuntimeMs": 2.6299999952316284,
+            "frameWallMs": 35.450000047683716,
+            "gpuSpanMs": 18.584033,
+            "gpuPassSumMs": 18.407358,
+            "cullMs": 0,
+            "resolveMs": 17.70086,
+            "lightingMs": 17.70086
+          }
+        },
+        {
+          "cohort": 2,
+          "algorithm": "reference",
+          "p95": {
+            "cpuRuntimeMs": 2.759999990463257,
+            "frameWallMs": 34.37999999523163,
+            "gpuSpanMs": 17.0314,
+            "gpuPassSumMs": 16.926756,
+            "cullMs": 0,
+            "resolveMs": 16.227113,
+            "lightingMs": 16.227113
+          }
+        },
+        {
+          "cohort": 2,
+          "algorithm": "tiled",
+          "p95": {
+            "cpuRuntimeMs": 3.0749999284744263,
+            "frameWallMs": 34.86500000953674,
+            "gpuSpanMs": 15.013661,
+            "gpuPassSumMs": 14.896105,
+            "cullMs": 0,
+            "resolveMs": 14.341763,
+            "lightingMs": 14.341763
+          }
+        }
+      ]
+    },
+    {
+      "device": "mac-intel-gen9",
+      "count": 256,
+      "overlap": false,
+      "samplesPerAlgorithm": 900,
+      "reference": {
+        "cpuRuntimeMs": 4.170000076293945,
+        "frameWallMs": 140.04499995708466,
+        "gpuSpanMs": 133.262501,
+        "gpuPassSumMs": 133.229501,
+        "cullMs": 0,
+        "resolveMs": 131.009453,
+        "lightingMs": 131.009453
+      },
+      "tiled": {
+        "cpuRuntimeMs": 3.3600000143051147,
+        "frameWallMs": 15.965000033378601,
+        "gpuSpanMs": 10.112258,
+        "gpuPassSumMs": 10.045593,
+        "cullMs": 1.131399,
+        "resolveMs": 6.59423,
+        "lightingMs": 7.669796999999999
+      },
+      "ratio": 0.05854384416061945,
+      "limit": 0.8,
+      "passed": true,
+      "stability": {
+        "reference": {
+          "cpuRuntimeMs": {
+            "cohortP95": [
+              4.140000104904175,
+              4.115000009536743,
+              4.2799999713897705
+            ],
+            "relativeSpread": 0.03985506223962921,
+            "cv": 0.017377750606807296,
+            "stable": true
+          },
+          "gpuSpanMs": {
+            "cohortP95": [
+              133.320666,
+              133.102504,
+              134.080238
+            ],
+            "relativeSpread": 0.007333701738333637,
+            "cv": 0.0031390059648461082,
+            "stable": true
+          },
+          "lightingMs": {
+            "cohortP95": [
+              131.244699,
+              130.863621,
+              131.654192
+            ],
+            "relativeSpread": 0.006023641381508292,
+            "cv": 0.002459493218097029,
+            "stable": true
+          },
+          "frameWallMs": {
+            "cohortP95": [
+              139.8949999809265,
+              139.58500003814697,
+              140.51499998569489
+            ],
+            "relativeSpread": 0.006647842651093392,
+            "cv": 0.0027617322470208337,
+            "stable": true
+          }
+        },
+        "tiled": {
+          "cpuRuntimeMs": {
+            "cohortP95": [
+              3.365000009536743,
+              3.3499999046325684,
+              3.334999918937683
+            ],
+            "relativeSpread": 0.00895525118002966,
+            "cv": 0.003655965941565539,
+            "stable": true
+          },
+          "gpuSpanMs": {
+            "cohortP95": [
+              10.003177,
+              10.069426,
+              11.817982
+            ],
+            "relativeSpread": 0.1802292404750777,
+            "cv": 0.07905100471432676,
+            "stable": true
+          },
+          "lightingMs": {
+            "cohortP95": [
+              7.594298,
+              7.633881,
+              8.968111
+            ],
+            "relativeSpread": 0.179962590456938,
+            "cv": 0.07916458040877025,
+            "stable": true
+          },
+          "frameWallMs": {
+            "cohortP95": [
+              15.43500006198883,
+              16.5900000333786,
+              16.269999980926514
+            ],
+            "relativeSpread": 0.07098954964620705,
+            "cv": 0.030245404830786162,
+            "stable": true
+          }
+        }
+      },
+      "absoluteBudgets": {
+        "cpu": {
+          "observed": 3.3600000143051147,
+          "limit": 8,
+          "passed": true
+        },
+        "gpu": {
+          "observed": 10.112258,
+          "limit": 24,
+          "passed": true
+        },
+        "frameWall": {
+          "observed": 15.965000033378601,
+          "limit": 33.333333333333336,
+          "passed": true
+        }
+      },
+      "cohorts": [
+        {
+          "cohort": 0,
+          "algorithm": "reference",
+          "p95": {
+            "cpuRuntimeMs": 4.140000104904175,
+            "frameWallMs": 139.8949999809265,
+            "gpuSpanMs": 133.320666,
+            "gpuPassSumMs": 133.28525,
+            "cullMs": 0,
+            "resolveMs": 131.244699,
+            "lightingMs": 131.244699
+          }
+        },
+        {
+          "cohort": 0,
+          "algorithm": "tiled",
+          "p95": {
+            "cpuRuntimeMs": 3.365000009536743,
+            "frameWallMs": 15.43500006198883,
+            "gpuSpanMs": 10.003177,
+            "gpuPassSumMs": 9.914428000000001,
+            "cullMs": 1.112899,
+            "resolveMs": 6.514232,
+            "lightingMs": 7.594298
+          }
+        },
+        {
+          "cohort": 1,
+          "algorithm": "tiled",
+          "p95": {
+            "cpuRuntimeMs": 3.3499999046325684,
+            "frameWallMs": 16.5900000333786,
+            "gpuSpanMs": 10.069426,
+            "gpuPassSumMs": 9.987843999999999,
+            "cullMs": 1.107983,
+            "resolveMs": 6.547231,
+            "lightingMs": 7.633881
+          }
+        },
+        {
+          "cohort": 1,
+          "algorithm": "reference",
+          "p95": {
+            "cpuRuntimeMs": 4.115000009536743,
+            "frameWallMs": 139.58500003814697,
+            "gpuSpanMs": 133.102504,
+            "gpuPassSumMs": 133.07467200000002,
+            "cullMs": 0,
+            "resolveMs": 130.863621,
+            "lightingMs": 130.863621
+          }
+        },
+        {
+          "cohort": 2,
+          "algorithm": "reference",
+          "p95": {
+            "cpuRuntimeMs": 4.2799999713897705,
+            "frameWallMs": 140.51499998569489,
+            "gpuSpanMs": 134.080238,
+            "gpuPassSumMs": 134.049655,
+            "cullMs": 0,
+            "resolveMs": 131.654192,
+            "lightingMs": 131.654192
+          }
+        },
+        {
+          "cohort": 2,
+          "algorithm": "tiled",
+          "p95": {
+            "cpuRuntimeMs": 3.334999918937683,
+            "frameWallMs": 16.269999980926514,
+            "gpuSpanMs": 11.817982,
+            "gpuPassSumMs": 11.779816,
+            "cullMs": 1.319729,
+            "resolveMs": 7.70238,
+            "lightingMs": 8.968111
+          }
+        }
+      ]
+    },
+    {
+      "device": "mac-intel-gen9",
+      "count": 128,
+      "overlap": true,
+      "samplesPerAlgorithm": 900,
+      "reference": {
+        "cpuRuntimeMs": 3.5800000429153442,
+        "frameWallMs": 75.6800000667572,
+        "gpuSpanMs": 69.32975,
+        "gpuPassSumMs": 69.29900099999999,
+        "cullMs": 0,
+        "resolveMs": 67.000704,
+        "lightingMs": 67.000704
+      },
+      "tiled": {
+        "cpuRuntimeMs": 3.684999942779541,
+        "frameWallMs": 69.79000008106232,
+        "gpuSpanMs": 63.332177,
+        "gpuPassSumMs": 63.30401,
+        "cullMs": 0,
+        "resolveMs": 60.987047,
+        "lightingMs": 60.987047
+      },
+      "ratio": 0.9134920723066215,
+      "limit": 1.1,
+      "passed": true,
+      "stability": {
+        "reference": {
+          "cpuRuntimeMs": {
+            "cohortP95": [
+              3.5549999475479126,
+              3.6700000762939453,
+              3.4800000190734863
+            ],
+            "relativeSpread": 0.05344586779853905,
+            "cv": 0.0218976412060117,
+            "stable": true
+          },
+          "gpuSpanMs": {
+            "cohortP95": [
+              69.329,
+              69.445331,
+              69.247334
+            ],
+            "relativeSpread": 0.0028559044555669473,
+            "cv": 0.001171664068386463,
+            "stable": true
+          },
+          "lightingMs": {
+            "cohortP95": [
+              66.98287,
+              67.108535,
+              66.857705
+            ],
+            "relativeSpread": 0.003744688754005429,
+            "cv": 0.001528759990724964,
+            "stable": true
+          },
+          "frameWallMs": {
+            "cohortP95": [
+              75.32000005245209,
+              76.1049998998642,
+              75.52999997138977
+            ],
+            "relativeSpread": 0.010393219220302684,
+            "cv": 0.0043861758374563325,
+            "stable": true
+          }
+        },
+        "tiled": {
+          "cpuRuntimeMs": {
+            "cohortP95": [
+              3.7200000286102295,
+              3.694999933242798,
+              3.6399999856948853
+            ],
+            "relativeSpread": 0.021650891572583812,
+            "cv": 0.009068269381001904,
+            "stable": true
+          },
+          "gpuSpanMs": {
+            "cohortP95": [
+              63.35876,
+              63.348677,
+              63.260178
+            ],
+            "relativeSpread": 0.0015561808812517629,
+            "cv": 0.0006993897157253738,
+            "stable": true
+          },
+          "lightingMs": {
+            "cohortP95": [
+              61.003963,
+              61.055463,
+              60.908882
+            ],
+            "relativeSpread": 0.0024028111091734276,
+            "cv": 0.000995527801417175,
+            "stable": true
+          },
+          "frameWallMs": {
+            "cohortP95": [
+              69.73500001430511,
+              70.40500009059906,
+              69.50499999523163
+            ],
+            "relativeSpread": 0.012906002655521758,
+            "cv": 0.005463228318350062,
+            "stable": true
+          }
+        }
+      },
+      "absoluteBudgets": {
+        "cpu": {
+          "observed": 3.684999942779541,
+          "limit": 8,
+          "passed": true
+        },
+        "gpu": {
+          "observed": 63.332177,
+          "limit": 24,
+          "passed": false
+        },
+        "frameWall": {
+          "observed": 69.79000008106232,
+          "limit": 33.333333333333336,
+          "passed": false
+        }
+      },
+      "cohorts": [
+        {
+          "cohort": 0,
+          "algorithm": "reference",
+          "p95": {
+            "cpuRuntimeMs": 3.5549999475479126,
+            "frameWallMs": 75.32000005245209,
+            "gpuSpanMs": 69.329,
+            "gpuPassSumMs": 69.297917,
+            "cullMs": 0,
+            "resolveMs": 66.98287,
+            "lightingMs": 66.98287
+          }
+        },
+        {
+          "cohort": 0,
+          "algorithm": "tiled",
+          "p95": {
+            "cpuRuntimeMs": 3.7200000286102295,
+            "frameWallMs": 69.73500001430511,
+            "gpuSpanMs": 63.35876,
+            "gpuPassSumMs": 63.33067700000001,
+            "cullMs": 0,
+            "resolveMs": 61.003963,
+            "lightingMs": 61.003963
+          }
+        },
+        {
+          "cohort": 1,
+          "algorithm": "tiled",
+          "p95": {
+            "cpuRuntimeMs": 3.694999933242798,
+            "frameWallMs": 70.40500009059906,
+            "gpuSpanMs": 63.348677,
+            "gpuPassSumMs": 63.310511,
+            "cullMs": 0,
+            "resolveMs": 61.055463,
+            "lightingMs": 61.055463
+          }
+        },
+        {
+          "cohort": 1,
+          "algorithm": "reference",
+          "p95": {
+            "cpuRuntimeMs": 3.6700000762939453,
+            "frameWallMs": 76.1049998998642,
+            "gpuSpanMs": 69.445331,
+            "gpuPassSumMs": 69.41733099999999,
+            "cullMs": 0,
+            "resolveMs": 67.108535,
+            "lightingMs": 67.108535
+          }
+        },
+        {
+          "cohort": 2,
+          "algorithm": "reference",
+          "p95": {
+            "cpuRuntimeMs": 3.4800000190734863,
+            "frameWallMs": 75.52999997138977,
+            "gpuSpanMs": 69.247334,
+            "gpuPassSumMs": 69.21775099999999,
+            "cullMs": 0,
+            "resolveMs": 66.857705,
+            "lightingMs": 66.857705
+          }
+        },
+        {
+          "cohort": 2,
+          "algorithm": "tiled",
+          "p95": {
+            "cpuRuntimeMs": 3.6399999856948853,
+            "frameWallMs": 69.50499999523163,
+            "gpuSpanMs": 63.260178,
+            "gpuPassSumMs": 63.231761,
+            "cullMs": 0,
+            "resolveMs": 60.908882,
+            "lightingMs": 60.908882
+          }
+        }
+      ]
+    }
+  ],
+  "generatedAt": "2026-09-27T01:14:59.725Z",
+  "captures": [
+    {
+      "cohort": 0,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-high-performance-2026-09-27T00-54-38.933Z.json",
+      "sha256": "684b685e7fa339f13e2a491014a4e4ffd5cf50de1968bc045e5628f7125346ce"
+    },
+    {
+      "cohort": 0,
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-high-performance-2026-09-27T00-55-15.604Z.json",
+      "sha256": "99d4d33a42e2d2d6a5b78d7b8262cab72d4dce97f7b60f27f3410b0dcc2d1994"
+    },
+    {
+      "cohort": 0,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-low-power-2026-09-27T00-56-45.691Z.json",
+      "sha256": "0e49f85c21adf2f72232c800c5f2795927ee15b2a6fed117563395cb10c3932a"
+    },
+    {
+      "cohort": 0,
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-low-power-2026-09-27T00-57-25.202Z.json",
+      "sha256": "c97f57284b2ff130f26e5f7082075dfb14021d53eb3850bb127756c2786c920a"
+    },
+    {
+      "cohort": 0,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-high-performance-2026-09-27T00-58-07.895Z.json",
+      "sha256": "055ec56005ec1030af4c86fe4b45e3283f078f3b3b805492bc58cec42e1d3625"
+    },
+    {
+      "cohort": 0,
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T00-58-50.109Z.json",
+      "sha256": "d165d90521d3791f1c3c41063186315c8f2f594a241a0be20e459574ed42da93"
+    },
+    {
+      "cohort": 0,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-low-power-2026-09-27T00-59-53.823Z.json",
+      "sha256": "c60fcab9ea4285c53485c2f14610e8ff994123c7c57743031e6cbed17a3b6277"
+    },
+    {
+      "cohort": 0,
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-low-power-2026-09-27T01-00-55.149Z.json",
+      "sha256": "268d7d1c53ee1881103bc9bb7d8adf7658fdcfcdee9b0d92a591fb3084f3e04a"
+    },
+    {
+      "cohort": 1,
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-low-power-2026-09-27T01-01-56.802Z.json",
+      "sha256": "612ea426a6fcc75f548728ba83e7bea82298c22a4af7fce349dfa58d73b2a2c8"
+    },
+    {
+      "cohort": 1,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-low-power-2026-09-27T01-03-00.958Z.json",
+      "sha256": "c045aa5cda2887f5881bcebcd1ca05d62b2ec6562c597a72e0005e643c9e4205"
+    },
+    {
+      "cohort": 1,
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T01-03-44.747Z.json",
+      "sha256": "23ee9dae3ccbf230a3a69c9af9ebaa8065bd81e1bfd49602dd12fb582f83dc52"
+    },
+    {
+      "cohort": 1,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-high-performance-2026-09-27T01-04-27.070Z.json",
+      "sha256": "181762dcb19ad3a38edcba60f538d0bc87bc51ca3a1a750fb2b89be727f24896"
+    },
+    {
+      "cohort": 1,
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-low-power-2026-09-27T01-05-07.245Z.json",
+      "sha256": "ee6d26c3b90f21866490deee3529a4da41bf5d1c69cc89a92337ce61a28bd08d"
+    },
+    {
+      "cohort": 1,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-low-power-2026-09-27T01-06-37.247Z.json",
+      "sha256": "e2ee9064c317965403b7ebbfd0c41071b64cdc72555122ba783936b39c8f3044"
+    },
+    {
+      "cohort": 1,
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-high-performance-2026-09-27T01-07-13.940Z.json",
+      "sha256": "91046091f51c9442428829e8fc42bb5c7d578426c0e5b1bd8a83839ed4198b4f"
+    },
+    {
+      "cohort": 1,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-high-performance-2026-09-27T01-07-59.933Z.json",
+      "sha256": "4436f8001f1376cfbc0629bd3e810ff1b1a90cb79cc8fd9bad49084dbee7c252"
+    },
+    {
+      "cohort": 2,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-high-performance-2026-09-27T01-08-46.004Z.json",
+      "sha256": "d0ac253f862b208803063b6fad5faf4b3ef4f0381706eeb38c0f7c8b1310c7e0"
+    },
+    {
+      "cohort": 2,
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-high-performance-2026-09-27T01-09-22.787Z.json",
+      "sha256": "4dbd80dce65e402a609e649c7d8c8a6b50e3e08bc317ab16e97161fa14f446b6"
+    },
+    {
+      "cohort": 2,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-256-sparse-low-power-2026-09-27T01-10-52.896Z.json",
+      "sha256": "f56e18f536d37a01114d5b1d77cabff2d222ad8782de2a25e178edea9dcd8b34"
+    },
+    {
+      "cohort": 2,
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-low-power-2026-09-27T01-11-32.382Z.json",
+      "sha256": "66943ff8606f03234a03a7cd3d907c3c1d420a68a73beed14688b89e754ae852"
+    },
+    {
+      "cohort": 2,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-high-performance-2026-09-27T01-12-12.804Z.json",
+      "sha256": "34a9324a75313308dc7fef8a5e9b56e1f9bff28bb7de2ca40ea727ddb3accf3c"
+    },
+    {
+      "cohort": 2,
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T01-12-54.016Z.json",
+      "sha256": "bbc5cbae7342de875f5d758584dc06495355ca34ba216ebf6a1eb9e52e67bd1e"
+    },
+    {
+      "cohort": 2,
+      "path": "artifacts/engine-0.2.1/g03/room-reference-128-overlap-low-power-2026-09-27T01-13-57.955Z.json",
+      "sha256": "499ab880a9b14bc4cef8fbf5dd0c0fb033bfce53316358f8266fedcad17276b7"
+    },
+    {
+      "cohort": 2,
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-low-power-2026-09-27T01-14-59.375Z.json",
+      "sha256": "029e3774fef8f9e697f303af380acdf5d20cad3d44ee3406a7d0d4e9b65eee20"
+    }
+  ],
+  "status": "relative-budgets-passed-one-frame-wall-stability-failure",
+  "auditedAt": "2026-09-27T01:17:19.800Z",
+  "hashesAndCurrentFingerprintsVerified": true,
+  "failedStability": [
+    {
+      "device": "mac-amd-rdna1",
+      "overlap": true,
+      "algorithm": "tiled",
+      "channel": "frameWallMs",
+      "cohortP95": [
+        49.1800000667572,
+        36.575000047683716,
+        34.86500000953674
+      ],
+      "relativeSpread": 0.3913875608628201,
+      "cv": 0.1587645406183911,
+      "stable": false
+    }
+  ],
+  "previousTwoFailuresResolved": {
+    "cpuRuntimeMs": {
+      "cohortP95": [
+        3.2699999809265137,
+        3.28000009059906,
+        3.2549999952316284
+      ],
+      "relativeSpread": 0.007645289147784085,
+      "cv": 0.0031435161426866215,
+      "stable": true
+    },
+    "gpuSpanMs": {
+      "cohortP95": [
+        2.661838,
+        2.697918,
+        2.656129
+      ],
+      "relativeSpread": 0.015699302512023675,
+      "cv": 0.006924234835373848,
+      "stable": true
+    },
+    "lightingMs": {
+      "cohortP95": [
+        1.95491,
+        1.9577399999999998,
+        1.95614
+      ],
+      "relativeSpread": 0.001446726716901596,
+      "cv": 0.0005922666129905655,
+      "stable": true
+    },
+    "frameWallMs": {
+      "cohortP95": [
+        10.415000081062317,
+        10.669999957084656,
+        10.455000042915344
+      ],
+      "relativeSpread": 0.024390231944105563,
+      "cv": 0.010650963417793752,
+      "stable": true
+    }
+  },
+  "qualification": "G03 remains incomplete; no old or partial samples spliced",
+  "sourceReport": {
+    "path": "artifacts/engine-0.2.1/g03/cohorts-2026-09-27T00-53-53.067Z/report.json",
+    "sha256": "bcd6d200e45aac1a420a03227885982227fceb3c9673eae3e73c7dc394f43933"
+  }
+}

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {tiledCohortPlan,evaluateTiledCohorts} from './deferred-tiled-cohort-policy.mjs';
+import {parseTiledCohortOptions,tiledCohortPlan,evaluateTiledCohorts} from './deferred-tiled-cohort-policy.mjs';
 const contract=JSON.parse(await readFile(new URL('../../config/lighting-performance-021.json',import.meta.url),'utf8'));
 function fixture(){return tiledCohortPlan().map(({cohort,...options})=>{
   const device=contract.devices.find(d=>d.powerPreference===options.preference),tiled=options.algorithm==='tiled'&&!options.overlap;
@@ -31,4 +31,16 @@ test('pooled budget success cannot hide unstable rounds or inherit G01 instance 
   for(const c of captures)if(c.cohort===2)for(const sample of c.evidence.result.raw)sample.cpuRuntimeMs=3.5;
   const report=evaluateTiledCohorts(captures,contract);
   assert.equal(report.relativeBudgetsPassed,true);assert.equal(report.absoluteBudgetsPassed,true);assert.equal(report.stabilityPassed,false);
+});
+
+test('extended cooldown is explicit, uniform and verified against measured idle',()=>{
+  assert.deepEqual(parseTiledCohortOptions(['--run','--idle-ms=120000']),{mode:'--run',idleMs:120000});
+  assert.deepEqual(parseTiledCohortOptions(['--plan']),{mode:'--plan',idleMs:30000});
+  for(const args of [[],['--run','--plan'],['--run','--samples=1'],['--run','--idle-ms=29999'],['--run','--idle-ms=120000','--idle-ms=120000']])assert.throws(()=>parseTiledCohortOptions(args));
+  const plan=tiledCohortPlan(120000);assert.equal(plan.length,24);assert.ok(plan.every(run=>run.idleMs===120000));
+  const captures=fixture();for(const c of captures){c.evidence.options.idleMs=120000;c.evidence.interCaseIdleMs=120001;}
+  assert.equal(evaluateTiledCohorts(captures,contract).interCaseIdleMs,120000);
+  captures[1].evidence.options.idleMs=30000;assert.throws(()=>evaluateTiledCohorts(captures,contract),/workload/);
+  captures[1].evidence.options.idleMs=120000;captures[1].evidence.interCaseIdleMs=119999;assert.throws(()=>evaluateTiledCohorts(captures,contract),/Host/);
+  captures[1].evidence.interCaseIdleMs=NaN;assert.throws(()=>evaluateTiledCohorts(captures,contract),/Host/);
 });

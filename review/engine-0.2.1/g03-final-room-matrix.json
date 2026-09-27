@@ -1,0 +1,3414 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "generatedAt": "2026-09-27T04:18:34.062Z",
+  "productQualification": false,
+  "scope": "All eight 128/256 sparse/overlap combinations; current runtime and exact room harness. Four extra smoke timings excluded from performance.",
+  "inputs": {
+    "sha256": "e1ace98e435a904e5c0d576e0c5e5f0a6fd30ef8fd407302f485494d021b5581",
+    "fileCount": 598
+  },
+  "harness": {
+    "sha256": "62ed4276e9ef256db2ebd764873f0adef5fde90e4e356a82392466bef1213aac",
+    "files": [
+      {
+        "path": "scripts/webgpu-gate/chrome-runner.mjs",
+        "sha256": "fe20cd10b0122117fad4ebe34099c4424b86c1200f1631acecf52086bfdbe1fb"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tile-fixture.html",
+        "sha256": "50d1d95fb6868aec81db76f8eb91e86a9021854ac0d6220f5643b0fc253efe3b"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tile-fixture.mjs",
+        "sha256": "ffa1724f703e72af38a5aa515fb4f6b17426517cc3296d7b704e2fd60ceef693"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tile-oracle.mjs",
+        "sha256": "c972a096163ed372fb34b852965aa4fe5b4742f3b4233b60f06eff3f1e3812da"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-boundaries.mjs",
+        "sha256": "b5f714ba886d1bf5b222e7982935572697b7a6e376cb641a11ac5e9db9005257"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-policy.mjs",
+        "sha256": "cb5e5bda454eb796213326b260537637624612634cd2e22a992ab87ad45f79f5"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-render-fixture.html",
+        "sha256": "aa2ba73746ae671559266312d45373ef838bb95b98eb0d7fc2da2d01bebdeb30"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-render-fixture.mjs",
+        "sha256": "83173d6ef1497a9294cd9ff3ade33c205e9d76f104021c418cf57400de781dc2"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-views.mjs",
+        "sha256": "27de64738d9895e89a791ab00a4e33ba4e4dfa2b077318b2ac46454fcbfaa64f"
+      },
+      {
+        "path": "scripts/webgpu-gate/float-texture-readback.mjs",
+        "sha256": "137c1db65b877fbfeb79ca404c12ac4600be243c0be8c3abd248068a8b14e661"
+      },
+      {
+        "path": "scripts/webgpu-gate/run-deferred-tile-fixture.mjs",
+        "sha256": "e49b8238e0666a29e2ef36be8c3ef2ce8bbf64c302c2b03a324c925ced0b9f94"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-room-fixture.mjs",
+        "sha256": "99f1eaa7b5fa45698e53b67d88a027be3780ee2f4e391501338213517857bf40"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-room-fixture.html",
+        "sha256": "e0bde3e4211aefa078e1e754fba943beecaffab5587f19f5ef5c6d7e6f56ca0c"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-room-fixture.mjs",
+        "sha256": "299ced34480021bb28c0ed12f6a1c6616958f646db66f27ec80f3590cb30a6d3"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-room-scene.mjs",
+        "sha256": "c8eac68c6e6d1ef9e089b6894e9f54d455ea01a25394e6149f406c244801ed5a"
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-tiled-room-policy.mjs",
+        "sha256": "06b8ac663cf81bf3a82f2fa1d5eceec12443c55e7c31d9c2661340ec049f77d4"
+      },
+      {
+        "path": "scripts/webgpu-gate/run-deferred-tiled-room.mjs",
+        "sha256": "f7408697c678e749171e3301361877f111ed63002174ecf9783c212dec119e86"
+      },
+      {
+        "path": "scripts/benchmark/lighting-g01-host.mjs",
+        "sha256": "002551699e629aef82dd8d831b1216c5e1dd2a62fe5ff027b9f0d5e59c05e443"
+      },
+      {
+        "path": "config/lighting-performance-021.json",
+        "sha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-high-performance-2026-09-27T03-23-03.552Z.json",
+      "sha256": "9e41c3e8a40f6014cd1eaa86e4ff0b081d5251d2d03e01aa6ae0f1766c753a4f",
+      "options": {
+        "preference": "high-performance",
+        "algorithm": "tiled",
+        "overlap": false,
+        "count": 256,
+        "full": true,
+        "idleMs": 120000
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "pixels": {
+        "maxHdrDelta": 0.00006103515625,
+        "maxLdrDelta": 0,
+        "litPixels": 696218
+      },
+      "source": {
+        "candidateCount": 258,
+        "rejectedCount": 0,
+        "pointCount": 256,
+        "directionalCount": 1,
+        "ambientCount": 1
+      },
+      "tiles": {
+        "plan": {
+          "columns": 80,
+          "rows": 45,
+          "tileCount": 3600,
+          "storedTiles": 3600,
+          "tileCapacity": 128,
+          "byteSize": 1900800,
+          "fullListTiles": 0,
+          "viewBytes": 27709728
+        },
+        "gpuTileStorageAllocated": true,
+        "bypassReason": null,
+        "acceptedReferences": 36681,
+        "resolveListReferences": 36681,
+        "overflowTiles": 0,
+        "sourceGeneration": 421
+      },
+      "heatmapEntries": 3600,
+      "metrics": {
+        "bufferUploadsPerFrame": 4,
+        "uploadBytesPerFrame": 18544,
+        "renderPipelinesCreated": 0,
+        "bindGroupsCreated": 0,
+        "setupRenderPipelinesCreated": 6,
+        "setupBindGroupsCreated": 57,
+        "buffersCreatedTotal": 115,
+        "bufferExpansionsTotal": 44,
+        "bufferRetirementsTotal": 38,
+        "buffersCreated": 0,
+        "bufferExpansions": 0,
+        "bufferRetirements": 0,
+        "objectTableDirtyRangeCpuMsPerFrame": 0.0028166683514912923,
+        "objectTableUploadCpuMsPerFrame": 0,
+        "objectTableFlushesPerFrame": 2,
+        "denseWholeSpanUploadsPerFrame": 0,
+        "poolMisses": 0,
+        "hotObjectsCreated": 0,
+        "drawsPerFrame": 18.38,
+        "bundleBuilds": 0,
+        "bundleExecutionsPerFrame": 0,
+        "bundleEncodedDrawsPerFrame": 0,
+        "directEncodedDrawsPerFrame": 18.38,
+        "renderPassesPerFrame": 3,
+        "metricClassification": {
+          "schemaVersion": 1,
+          "measuredFrames": 300,
+          "strictEquality": {
+            "passed": true,
+            "checks": [
+              {
+                "name": "render.draws",
+                "classified": 5514,
+                "aggregate": 5514,
+                "equal": true
+              },
+              {
+                "name": "render.passes",
+                "classified": 900,
+                "aggregate": 900,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.calls",
+                "classified": 1200,
+                "aggregate": 1200,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.bytes",
+                "classified": 5563200,
+                "aggregate": 5563200,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.calls",
+                "classified": 1200,
+                "aggregate": 1200,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.bytes",
+                "classified": 5563200,
+                "aggregate": 5563200,
+                "equal": true
+              },
+              {
+                "name": "audit.draws",
+                "classified": 5514,
+                "aggregate": 5514,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadCalls",
+                "classified": 1200,
+                "aggregate": 1200,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadBytes",
+                "classified": 5563200,
+                "aggregate": 5563200,
+                "equal": true
+              },
+              {
+                "name": "audit.renderPassInstrumentationFailures",
+                "classified": 0,
+                "aggregate": 0,
+                "equal": true
+              }
+            ]
+          },
+          "render": {
+            "categories": {
+              "mainScene": {
+                "draws": 5214,
+                "passes": 600,
+                "drawsPerFrame": 17.38,
+                "passesPerFrame": 2
+              },
+              "shadow": {
+                "draws": 0,
+                "passes": 0,
+                "drawsPerFrame": 0,
+                "passesPerFrame": 0
+              },
+              "postprocess": {
+                "draws": 300,
+                "passes": 300,
+                "drawsPerFrame": 1,
+                "passesPerFrame": 1
+              }
+            },
+            "totals": {
+              "draws": 5514,
+              "passes": 900,
+              "drawsPerFrame": 18.38,
+              "passesPerFrame": 3
+            }
+          },
+          "uploads": {
+            "dimensions": {
+              "gpuBufferLabel": [
+                {
+                  "label": "DeferredLights.source",
+                  "calls": 300,
+                  "bytes": 4939200,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 16464
+                },
+                {
+                  "label": "DeferredLights.view",
+                  "calls": 300,
+                  "bytes": 384000,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 1280
+                },
+                {
+                  "label": "PbrRenderer.lights",
+                  "calls": 300,
+                  "bytes": 158400,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "label": "SceneFrameGpuArena.buffer",
+                  "calls": 300,
+                  "bytes": 81600,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ],
+              "renderer": [
+                {
+                  "renderer": "(unattributed)",
+                  "calls": 600,
+                  "bytes": 5323200,
+                  "callsPerFrame": 2,
+                  "bytesPerFrame": 17744
+                },
+                {
+                  "renderer": "PbrRenderer",
+                  "calls": 300,
+                  "bytes": 158400,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "renderer": "SceneFrameGpuArena",
+                  "calls": 300,
+                  "bytes": 81600,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ]
+            },
+            "totals": {
+              "calls": 1200,
+              "bytes": 5563200,
+              "callsPerFrame": 4,
+              "bytesPerFrame": 18544
+            }
+          }
+        },
+        "renderPhaseBreakdown": {
+          "categories": {
+            "mainScene": {
+              "draws": 5214,
+              "passes": 600,
+              "drawsPerFrame": 17.38,
+              "passesPerFrame": 2
+            },
+            "shadow": {
+              "draws": 0,
+              "passes": 0,
+              "drawsPerFrame": 0,
+              "passesPerFrame": 0
+            },
+            "postprocess": {
+              "draws": 300,
+              "passes": 300,
+              "drawsPerFrame": 1,
+              "passesPerFrame": 1
+            }
+          },
+          "totals": {
+            "draws": 5514,
+            "passes": 900,
+            "drawsPerFrame": 18.38,
+            "passesPerFrame": 3
+          }
+        },
+        "rendererRunBreakdown": {
+          "sampledViews": 1,
+          "opaqueItems": 255,
+          "transparentItems": 0,
+          "actualDraws": 17,
+          "transparentDraws": 0,
+          "mainSceneDraws": 17,
+          "theoreticalCompatibleDraws": 13,
+          "legalOpaqueDrawLowerBound": 13,
+          "legalMainSceneDrawLowerBound": 13,
+          "drawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "transparentDrawsByRenderer": {},
+          "mainSceneDrawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "theoreticalDrawsByRenderer": {
+            "PbrRenderer": 13
+          },
+          "runBreaks": {
+            "material": 7,
+            "geometry": 5,
+            "pipeline": 0,
+            "indexFormat": 0,
+            "cullMode": 0,
+            "deformationBinding": 0,
+            "depthPrepass": 0,
+            "objectSlotContiguity": 4,
+            "transparentDirectInstancingProhibited": 0
+          },
+          "views": [
+            {
+              "opaqueItems": 255,
+              "transparentItems": 0,
+              "actualDraws": 17,
+              "transparentDraws": 0,
+              "mainSceneDraws": 17,
+              "theoreticalCompatibleDraws": 13,
+              "legalOpaqueDrawLowerBound": 13,
+              "legalMainSceneDrawLowerBound": 13,
+              "drawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "transparentDrawsByRenderer": {},
+              "mainSceneDrawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "theoreticalDrawsByRenderer": {
+                "PbrRenderer": 13
+              },
+              "runBreaks": {
+                "material": 7,
+                "geometry": 5,
+                "pipeline": 0,
+                "indexFormat": 0,
+                "cullMode": 0,
+                "deformationBinding": 0,
+                "depthPrepass": 0,
+                "objectSlotContiguity": 4,
+                "transparentDirectInstancingProhibited": 0
+              }
+            }
+          ]
+        },
+        "uploadBreakdown": {
+          "dimensions": {
+            "gpuBufferLabel": [
+              {
+                "label": "DeferredLights.source",
+                "calls": 300,
+                "bytes": 4939200,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 16464
+              },
+              {
+                "label": "DeferredLights.view",
+                "calls": 300,
+                "bytes": 384000,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 1280
+              },
+              {
+                "label": "PbrRenderer.lights",
+                "calls": 300,
+                "bytes": 158400,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "label": "SceneFrameGpuArena.buffer",
+                "calls": 300,
+                "bytes": 81600,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ],
+            "renderer": [
+              {
+                "renderer": "(unattributed)",
+                "calls": 600,
+                "bytes": 5323200,
+                "callsPerFrame": 2,
+                "bytesPerFrame": 17744
+              },
+              {
+                "renderer": "PbrRenderer",
+                "calls": 300,
+                "bytes": 158400,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "renderer": "SceneFrameGpuArena",
+                "calls": 300,
+                "bytes": 81600,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ]
+          },
+          "totals": {
+            "calls": 1200,
+            "bytes": 5563200,
+            "callsPerFrame": 4,
+            "bytesPerFrame": 18544
+          }
+        },
+        "directionalShadowPassesPerFrame": 0,
+        "directionalShadowCacheHits": 300,
+        "maxDirectionalShadowPassesPerFrame": 0,
+        "pbrLightUniformUploadsPerFrame": 1,
+        "pbrEnvironmentUniformUploadsPerFrame": 0,
+        "pbrShadowUniformUploadsPerFrame": 0,
+        "mirrorPlannedViews": 0,
+        "mirrorExecutedViews": 0,
+        "mirrorDroppedViews": 0,
+        "mirrorRttPixels": 0,
+        "renderGraphPasses": 2,
+        "renderGraphCulledPasses": 0,
+        "mirrorLogicalTargets": 0,
+        "mirrorPhysicalTargets": 0,
+        "mirrorTargetAliasCount": 0,
+        "mirrorTargetLogicalBytes": 0,
+        "mirrorTargetResidentBytes": 0,
+        "mirrorTargetAliasSavedBytes": 0,
+        "mirrorResourceScopeCount": 0,
+        "liveGpuResources": 196,
+        "ownerResidual": 0
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-sparse-low-power-2026-09-27T03-28-13.331Z.json",
+      "sha256": "79ef1609d3b251cc4dfbded7488c2f8b20be3538401de6b210d0bb0a84fec103",
+      "options": {
+        "preference": "low-power",
+        "algorithm": "tiled",
+        "overlap": false,
+        "count": 256,
+        "full": true,
+        "idleMs": 120000
+      },
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "pixels": {
+        "maxHdrDelta": 0.0009765625,
+        "maxLdrDelta": 0,
+        "litPixels": 696218
+      },
+      "source": {
+        "candidateCount": 258,
+        "rejectedCount": 0,
+        "pointCount": 256,
+        "directionalCount": 1,
+        "ambientCount": 1
+      },
+      "tiles": {
+        "plan": {
+          "columns": 80,
+          "rows": 45,
+          "tileCount": 3600,
+          "storedTiles": 3600,
+          "tileCapacity": 128,
+          "byteSize": 1900800,
+          "fullListTiles": 0,
+          "viewBytes": 27709728
+        },
+        "gpuTileStorageAllocated": true,
+        "bypassReason": null,
+        "acceptedReferences": 36681,
+        "resolveListReferences": 36681,
+        "overflowTiles": 0,
+        "sourceGeneration": 421
+      },
+      "heatmapEntries": 3600,
+      "metrics": {
+        "bufferUploadsPerFrame": 4,
+        "uploadBytesPerFrame": 18544,
+        "renderPipelinesCreated": 0,
+        "bindGroupsCreated": 0,
+        "setupRenderPipelinesCreated": 6,
+        "setupBindGroupsCreated": 57,
+        "buffersCreatedTotal": 115,
+        "bufferExpansionsTotal": 44,
+        "bufferRetirementsTotal": 38,
+        "buffersCreated": 0,
+        "bufferExpansions": 0,
+        "bufferRetirements": 0,
+        "objectTableDirtyRangeCpuMsPerFrame": 0.003249999284744263,
+        "objectTableUploadCpuMsPerFrame": 0,
+        "objectTableFlushesPerFrame": 2,
+        "denseWholeSpanUploadsPerFrame": 0,
+        "poolMisses": 0,
+        "hotObjectsCreated": 0,
+        "drawsPerFrame": 18.38,
+        "bundleBuilds": 0,
+        "bundleExecutionsPerFrame": 0,
+        "bundleEncodedDrawsPerFrame": 0,
+        "directEncodedDrawsPerFrame": 18.38,
+        "renderPassesPerFrame": 3,
+        "metricClassification": {
+          "schemaVersion": 1,
+          "measuredFrames": 300,
+          "strictEquality": {
+            "passed": true,
+            "checks": [
+              {
+                "name": "render.draws",
+                "classified": 5514,
+                "aggregate": 5514,
+                "equal": true
+              },
+              {
+                "name": "render.passes",
+                "classified": 900,
+                "aggregate": 900,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.calls",
+                "classified": 1200,
+                "aggregate": 1200,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.bytes",
+                "classified": 5563200,
+                "aggregate": 5563200,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.calls",
+                "classified": 1200,
+                "aggregate": 1200,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.bytes",
+                "classified": 5563200,
+                "aggregate": 5563200,
+                "equal": true
+              },
+              {
+                "name": "audit.draws",
+                "classified": 5514,
+                "aggregate": 5514,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadCalls",
+                "classified": 1200,
+                "aggregate": 1200,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadBytes",
+                "classified": 5563200,
+                "aggregate": 5563200,
+                "equal": true
+              },
+              {
+                "name": "audit.renderPassInstrumentationFailures",
+                "classified": 0,
+                "aggregate": 0,
+                "equal": true
+              }
+            ]
+          },
+          "render": {
+            "categories": {
+              "mainScene": {
+                "draws": 5214,
+                "passes": 600,
+                "drawsPerFrame": 17.38,
+                "passesPerFrame": 2
+              },
+              "shadow": {
+                "draws": 0,
+                "passes": 0,
+                "drawsPerFrame": 0,
+                "passesPerFrame": 0
+              },
+              "postprocess": {
+                "draws": 300,
+                "passes": 300,
+                "drawsPerFrame": 1,
+                "passesPerFrame": 1
+              }
+            },
+            "totals": {
+              "draws": 5514,
+              "passes": 900,
+              "drawsPerFrame": 18.38,
+              "passesPerFrame": 3
+            }
+          },
+          "uploads": {
+            "dimensions": {
+              "gpuBufferLabel": [
+                {
+                  "label": "DeferredLights.source",
+                  "calls": 300,
+                  "bytes": 4939200,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 16464
+                },
+                {
+                  "label": "DeferredLights.view",
+                  "calls": 300,
+                  "bytes": 384000,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 1280
+                },
+                {
+                  "label": "PbrRenderer.lights",
+                  "calls": 300,
+                  "bytes": 158400,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "label": "SceneFrameGpuArena.buffer",
+                  "calls": 300,
+                  "bytes": 81600,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ],
+              "renderer": [
+                {
+                  "renderer": "(unattributed)",
+                  "calls": 600,
+                  "bytes": 5323200,
+                  "callsPerFrame": 2,
+                  "bytesPerFrame": 17744
+                },
+                {
+                  "renderer": "PbrRenderer",
+                  "calls": 300,
+                  "bytes": 158400,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "renderer": "SceneFrameGpuArena",
+                  "calls": 300,
+                  "bytes": 81600,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ]
+            },
+            "totals": {
+              "calls": 1200,
+              "bytes": 5563200,
+              "callsPerFrame": 4,
+              "bytesPerFrame": 18544
+            }
+          }
+        },
+        "renderPhaseBreakdown": {
+          "categories": {
+            "mainScene": {
+              "draws": 5214,
+              "passes": 600,
+              "drawsPerFrame": 17.38,
+              "passesPerFrame": 2
+            },
+            "shadow": {
+              "draws": 0,
+              "passes": 0,
+              "drawsPerFrame": 0,
+              "passesPerFrame": 0
+            },
+            "postprocess": {
+              "draws": 300,
+              "passes": 300,
+              "drawsPerFrame": 1,
+              "passesPerFrame": 1
+            }
+          },
+          "totals": {
+            "draws": 5514,
+            "passes": 900,
+            "drawsPerFrame": 18.38,
+            "passesPerFrame": 3
+          }
+        },
+        "rendererRunBreakdown": {
+          "sampledViews": 1,
+          "opaqueItems": 255,
+          "transparentItems": 0,
+          "actualDraws": 17,
+          "transparentDraws": 0,
+          "mainSceneDraws": 17,
+          "theoreticalCompatibleDraws": 13,
+          "legalOpaqueDrawLowerBound": 13,
+          "legalMainSceneDrawLowerBound": 13,
+          "drawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "transparentDrawsByRenderer": {},
+          "mainSceneDrawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "theoreticalDrawsByRenderer": {
+            "PbrRenderer": 13
+          },
+          "runBreaks": {
+            "material": 7,
+            "geometry": 5,
+            "pipeline": 0,
+            "indexFormat": 0,
+            "cullMode": 0,
+            "deformationBinding": 0,
+            "depthPrepass": 0,
+            "objectSlotContiguity": 4,
+            "transparentDirectInstancingProhibited": 0
+          },
+          "views": [
+            {
+              "opaqueItems": 255,
+              "transparentItems": 0,
+              "actualDraws": 17,
+              "transparentDraws": 0,
+              "mainSceneDraws": 17,
+              "theoreticalCompatibleDraws": 13,
+              "legalOpaqueDrawLowerBound": 13,
+              "legalMainSceneDrawLowerBound": 13,
+              "drawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "transparentDrawsByRenderer": {},
+              "mainSceneDrawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "theoreticalDrawsByRenderer": {
+                "PbrRenderer": 13
+              },
+              "runBreaks": {
+                "material": 7,
+                "geometry": 5,
+                "pipeline": 0,
+                "indexFormat": 0,
+                "cullMode": 0,
+                "deformationBinding": 0,
+                "depthPrepass": 0,
+                "objectSlotContiguity": 4,
+                "transparentDirectInstancingProhibited": 0
+              }
+            }
+          ]
+        },
+        "uploadBreakdown": {
+          "dimensions": {
+            "gpuBufferLabel": [
+              {
+                "label": "DeferredLights.source",
+                "calls": 300,
+                "bytes": 4939200,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 16464
+              },
+              {
+                "label": "DeferredLights.view",
+                "calls": 300,
+                "bytes": 384000,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 1280
+              },
+              {
+                "label": "PbrRenderer.lights",
+                "calls": 300,
+                "bytes": 158400,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "label": "SceneFrameGpuArena.buffer",
+                "calls": 300,
+                "bytes": 81600,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ],
+            "renderer": [
+              {
+                "renderer": "(unattributed)",
+                "calls": 600,
+                "bytes": 5323200,
+                "callsPerFrame": 2,
+                "bytesPerFrame": 17744
+              },
+              {
+                "renderer": "PbrRenderer",
+                "calls": 300,
+                "bytes": 158400,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "renderer": "SceneFrameGpuArena",
+                "calls": 300,
+                "bytes": 81600,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ]
+          },
+          "totals": {
+            "calls": 1200,
+            "bytes": 5563200,
+            "callsPerFrame": 4,
+            "bytesPerFrame": 18544
+          }
+        },
+        "directionalShadowPassesPerFrame": 0,
+        "directionalShadowCacheHits": 300,
+        "maxDirectionalShadowPassesPerFrame": 0,
+        "pbrLightUniformUploadsPerFrame": 1,
+        "pbrEnvironmentUniformUploadsPerFrame": 0,
+        "pbrShadowUniformUploadsPerFrame": 0,
+        "mirrorPlannedViews": 0,
+        "mirrorExecutedViews": 0,
+        "mirrorDroppedViews": 0,
+        "mirrorRttPixels": 0,
+        "renderGraphPasses": 2,
+        "renderGraphCulledPasses": 0,
+        "mirrorLogicalTargets": 0,
+        "mirrorPhysicalTargets": 0,
+        "mirrorTargetAliasCount": 0,
+        "mirrorTargetLogicalBytes": 0,
+        "mirrorTargetResidentBytes": 0,
+        "mirrorTargetAliasSavedBytes": 0,
+        "mirrorResourceScopeCount": 0,
+        "liveGpuResources": 196,
+        "ownerResidual": 0
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T03-32-32.370Z.json",
+      "sha256": "82300db67c89b05999c22931a46a53232cf6d52ce915d9de5cef0f270bf26a9e",
+      "options": {
+        "preference": "high-performance",
+        "algorithm": "tiled",
+        "overlap": true,
+        "count": 128,
+        "full": true,
+        "idleMs": 120000
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "pixels": {
+        "maxHdrDelta": 0.0078125,
+        "maxLdrDelta": 0.9999999403953552,
+        "litPixels": 719666
+      },
+      "source": {
+        "candidateCount": 130,
+        "rejectedCount": 0,
+        "pointCount": 128,
+        "directionalCount": 1,
+        "ambientCount": 1
+      },
+      "tiles": {
+        "plan": {
+          "columns": 80,
+          "rows": 45,
+          "tileCount": 3600,
+          "storedTiles": 0,
+          "tileCapacity": 128,
+          "byteSize": 4,
+          "fullListTiles": 3600,
+          "viewBytes": 25808932
+        },
+        "gpuTileStorageAllocated": true,
+        "tileStorageBytes": 4,
+        "bypassReason": "all-lights-cover-near-plane",
+        "acceptedReferences": null,
+        "resolveListReferences": 460800,
+        "overflowTiles": 0
+      },
+      "heatmapEntries": 3600,
+      "metrics": {
+        "bufferUploadsPerFrame": 4,
+        "uploadBytesPerFrame": 9840,
+        "renderPipelinesCreated": 0,
+        "bindGroupsCreated": 0,
+        "setupRenderPipelinesCreated": 6,
+        "setupBindGroupsCreated": 55,
+        "buffersCreatedTotal": 115,
+        "bufferExpansionsTotal": 44,
+        "bufferRetirementsTotal": 38,
+        "buffersCreated": 0,
+        "bufferExpansions": 0,
+        "bufferRetirements": 0,
+        "objectTableDirtyRangeCpuMsPerFrame": 0.0026666669050852457,
+        "objectTableUploadCpuMsPerFrame": 0,
+        "objectTableFlushesPerFrame": 2,
+        "denseWholeSpanUploadsPerFrame": 0,
+        "poolMisses": 0,
+        "hotObjectsCreated": 0,
+        "drawsPerFrame": 18.38,
+        "bundleBuilds": 0,
+        "bundleExecutionsPerFrame": 0,
+        "bundleEncodedDrawsPerFrame": 0,
+        "directEncodedDrawsPerFrame": 18.38,
+        "renderPassesPerFrame": 3,
+        "metricClassification": {
+          "schemaVersion": 1,
+          "measuredFrames": 300,
+          "strictEquality": {
+            "passed": true,
+            "checks": [
+              {
+                "name": "render.draws",
+                "classified": 5514,
+                "aggregate": 5514,
+                "equal": true
+              },
+              {
+                "name": "render.passes",
+                "classified": 900,
+                "aggregate": 900,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.calls",
+                "classified": 1200,
+                "aggregate": 1200,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.bytes",
+                "classified": 2952000,
+                "aggregate": 2952000,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.calls",
+                "classified": 1200,
+                "aggregate": 1200,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.bytes",
+                "classified": 2952000,
+                "aggregate": 2952000,
+                "equal": true
+              },
+              {
+                "name": "audit.draws",
+                "classified": 5514,
+                "aggregate": 5514,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadCalls",
+                "classified": 1200,
+                "aggregate": 1200,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadBytes",
+                "classified": 2952000,
+                "aggregate": 2952000,
+                "equal": true
+              },
+              {
+                "name": "audit.renderPassInstrumentationFailures",
+                "classified": 0,
+                "aggregate": 0,
+                "equal": true
+              }
+            ]
+          },
+          "render": {
+            "categories": {
+              "mainScene": {
+                "draws": 5214,
+                "passes": 600,
+                "drawsPerFrame": 17.38,
+                "passesPerFrame": 2
+              },
+              "shadow": {
+                "draws": 0,
+                "passes": 0,
+                "drawsPerFrame": 0,
+                "passesPerFrame": 0
+              },
+              "postprocess": {
+                "draws": 300,
+                "passes": 300,
+                "drawsPerFrame": 1,
+                "passesPerFrame": 1
+              }
+            },
+            "totals": {
+              "draws": 5514,
+              "passes": 900,
+              "drawsPerFrame": 18.38,
+              "passesPerFrame": 3
+            }
+          },
+          "uploads": {
+            "dimensions": {
+              "gpuBufferLabel": [
+                {
+                  "label": "DeferredLights.source",
+                  "calls": 300,
+                  "bytes": 2481600,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 8272
+                },
+                {
+                  "label": "DeferredLights.view",
+                  "calls": 300,
+                  "bytes": 230400,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 768
+                },
+                {
+                  "label": "PbrRenderer.lights",
+                  "calls": 300,
+                  "bytes": 158400,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "label": "SceneFrameGpuArena.buffer",
+                  "calls": 300,
+                  "bytes": 81600,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ],
+              "renderer": [
+                {
+                  "renderer": "(unattributed)",
+                  "calls": 600,
+                  "bytes": 2712000,
+                  "callsPerFrame": 2,
+                  "bytesPerFrame": 9040
+                },
+                {
+                  "renderer": "PbrRenderer",
+                  "calls": 300,
+                  "bytes": 158400,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "renderer": "SceneFrameGpuArena",
+                  "calls": 300,
+                  "bytes": 81600,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ]
+            },
+            "totals": {
+              "calls": 1200,
+              "bytes": 2952000,
+              "callsPerFrame": 4,
+              "bytesPerFrame": 9840
+            }
+          }
+        },
+        "renderPhaseBreakdown": {
+          "categories": {
+            "mainScene": {
+              "draws": 5214,
+              "passes": 600,
+              "drawsPerFrame": 17.38,
+              "passesPerFrame": 2
+            },
+            "shadow": {
+              "draws": 0,
+              "passes": 0,
+              "drawsPerFrame": 0,
+              "passesPerFrame": 0
+            },
+            "postprocess": {
+              "draws": 300,
+              "passes": 300,
+              "drawsPerFrame": 1,
+              "passesPerFrame": 1
+            }
+          },
+          "totals": {
+            "draws": 5514,
+            "passes": 900,
+            "drawsPerFrame": 18.38,
+            "passesPerFrame": 3
+          }
+        },
+        "rendererRunBreakdown": {
+          "sampledViews": 1,
+          "opaqueItems": 255,
+          "transparentItems": 0,
+          "actualDraws": 17,
+          "transparentDraws": 0,
+          "mainSceneDraws": 17,
+          "theoreticalCompatibleDraws": 13,
+          "legalOpaqueDrawLowerBound": 13,
+          "legalMainSceneDrawLowerBound": 13,
+          "drawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "transparentDrawsByRenderer": {},
+          "mainSceneDrawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "theoreticalDrawsByRenderer": {
+            "PbrRenderer": 13
+          },
+          "runBreaks": {
+            "material": 7,
+            "geometry": 5,
+            "pipeline": 0,
+            "indexFormat": 0,
+            "cullMode": 0,
+            "deformationBinding": 0,
+            "depthPrepass": 0,
+            "objectSlotContiguity": 4,
+            "transparentDirectInstancingProhibited": 0
+          },
+          "views": [
+            {
+              "opaqueItems": 255,
+              "transparentItems": 0,
+              "actualDraws": 17,
+              "transparentDraws": 0,
+              "mainSceneDraws": 17,
+              "theoreticalCompatibleDraws": 13,
+              "legalOpaqueDrawLowerBound": 13,
+              "legalMainSceneDrawLowerBound": 13,
+              "drawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "transparentDrawsByRenderer": {},
+              "mainSceneDrawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "theoreticalDrawsByRenderer": {
+                "PbrRenderer": 13
+              },
+              "runBreaks": {
+                "material": 7,
+                "geometry": 5,
+                "pipeline": 0,
+                "indexFormat": 0,
+                "cullMode": 0,
+                "deformationBinding": 0,
+                "depthPrepass": 0,
+                "objectSlotContiguity": 4,
+                "transparentDirectInstancingProhibited": 0
+              }
+            }
+          ]
+        },
+        "uploadBreakdown": {
+          "dimensions": {
+            "gpuBufferLabel": [
+              {
+                "label": "DeferredLights.source",
+                "calls": 300,
+                "bytes": 2481600,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 8272
+              },
+              {
+                "label": "DeferredLights.view",
+                "calls": 300,
+                "bytes": 230400,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 768
+              },
+              {
+                "label": "PbrRenderer.lights",
+                "calls": 300,
+                "bytes": 158400,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "label": "SceneFrameGpuArena.buffer",
+                "calls": 300,
+                "bytes": 81600,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ],
+            "renderer": [
+              {
+                "renderer": "(unattributed)",
+                "calls": 600,
+                "bytes": 2712000,
+                "callsPerFrame": 2,
+                "bytesPerFrame": 9040
+              },
+              {
+                "renderer": "PbrRenderer",
+                "calls": 300,
+                "bytes": 158400,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "renderer": "SceneFrameGpuArena",
+                "calls": 300,
+                "bytes": 81600,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ]
+          },
+          "totals": {
+            "calls": 1200,
+            "bytes": 2952000,
+            "callsPerFrame": 4,
+            "bytesPerFrame": 9840
+          }
+        },
+        "directionalShadowPassesPerFrame": 0,
+        "directionalShadowCacheHits": 300,
+        "maxDirectionalShadowPassesPerFrame": 0,
+        "pbrLightUniformUploadsPerFrame": 1,
+        "pbrEnvironmentUniformUploadsPerFrame": 0,
+        "pbrShadowUniformUploadsPerFrame": 0,
+        "mirrorPlannedViews": 0,
+        "mirrorExecutedViews": 0,
+        "mirrorDroppedViews": 0,
+        "mirrorRttPixels": 0,
+        "renderGraphPasses": 2,
+        "renderGraphCulledPasses": 0,
+        "mirrorLogicalTargets": 0,
+        "mirrorPhysicalTargets": 0,
+        "mirrorTargetAliasCount": 0,
+        "mirrorTargetLogicalBytes": 0,
+        "mirrorTargetResidentBytes": 0,
+        "mirrorTargetAliasSavedBytes": 0,
+        "mirrorResourceScopeCount": 0,
+        "liveGpuResources": 194,
+        "ownerResidual": 0
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-overlap-low-power-2026-09-27T03-37-37.380Z.json",
+      "sha256": "d46cfd44508efff413545c51ca872ed407e1b9c59e996380053bfe995282f042",
+      "options": {
+        "preference": "low-power",
+        "algorithm": "tiled",
+        "overlap": true,
+        "count": 128,
+        "full": true,
+        "idleMs": 120000
+      },
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "pixels": {
+        "maxHdrDelta": 0.03125,
+        "maxLdrDelta": 0.9999999403953552,
+        "litPixels": 719666
+      },
+      "source": {
+        "candidateCount": 130,
+        "rejectedCount": 0,
+        "pointCount": 128,
+        "directionalCount": 1,
+        "ambientCount": 1
+      },
+      "tiles": {
+        "plan": {
+          "columns": 80,
+          "rows": 45,
+          "tileCount": 3600,
+          "storedTiles": 0,
+          "tileCapacity": 128,
+          "byteSize": 4,
+          "fullListTiles": 3600,
+          "viewBytes": 25808932
+        },
+        "gpuTileStorageAllocated": true,
+        "tileStorageBytes": 4,
+        "bypassReason": "all-lights-cover-near-plane",
+        "acceptedReferences": null,
+        "resolveListReferences": 460800,
+        "overflowTiles": 0
+      },
+      "heatmapEntries": 3600,
+      "metrics": {
+        "bufferUploadsPerFrame": 4,
+        "uploadBytesPerFrame": 9840,
+        "renderPipelinesCreated": 0,
+        "bindGroupsCreated": 0,
+        "setupRenderPipelinesCreated": 6,
+        "setupBindGroupsCreated": 55,
+        "buffersCreatedTotal": 115,
+        "bufferExpansionsTotal": 44,
+        "bufferRetirementsTotal": 38,
+        "buffersCreated": 0,
+        "bufferExpansions": 0,
+        "bufferRetirements": 0,
+        "objectTableDirtyRangeCpuMsPerFrame": 0.004049999713897705,
+        "objectTableUploadCpuMsPerFrame": 0,
+        "objectTableFlushesPerFrame": 2,
+        "denseWholeSpanUploadsPerFrame": 0,
+        "poolMisses": 0,
+        "hotObjectsCreated": 0,
+        "drawsPerFrame": 18.38,
+        "bundleBuilds": 0,
+        "bundleExecutionsPerFrame": 0,
+        "bundleEncodedDrawsPerFrame": 0,
+        "directEncodedDrawsPerFrame": 18.38,
+        "renderPassesPerFrame": 3,
+        "metricClassification": {
+          "schemaVersion": 1,
+          "measuredFrames": 300,
+          "strictEquality": {
+            "passed": true,
+            "checks": [
+              {
+                "name": "render.draws",
+                "classified": 5514,
+                "aggregate": 5514,
+                "equal": true
+              },
+              {
+                "name": "render.passes",
+                "classified": 900,
+                "aggregate": 900,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.calls",
+                "classified": 1200,
+                "aggregate": 1200,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.bytes",
+                "classified": 2952000,
+                "aggregate": 2952000,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.calls",
+                "classified": 1200,
+                "aggregate": 1200,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.bytes",
+                "classified": 2952000,
+                "aggregate": 2952000,
+                "equal": true
+              },
+              {
+                "name": "audit.draws",
+                "classified": 5514,
+                "aggregate": 5514,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadCalls",
+                "classified": 1200,
+                "aggregate": 1200,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadBytes",
+                "classified": 2952000,
+                "aggregate": 2952000,
+                "equal": true
+              },
+              {
+                "name": "audit.renderPassInstrumentationFailures",
+                "classified": 0,
+                "aggregate": 0,
+                "equal": true
+              }
+            ]
+          },
+          "render": {
+            "categories": {
+              "mainScene": {
+                "draws": 5214,
+                "passes": 600,
+                "drawsPerFrame": 17.38,
+                "passesPerFrame": 2
+              },
+              "shadow": {
+                "draws": 0,
+                "passes": 0,
+                "drawsPerFrame": 0,
+                "passesPerFrame": 0
+              },
+              "postprocess": {
+                "draws": 300,
+                "passes": 300,
+                "drawsPerFrame": 1,
+                "passesPerFrame": 1
+              }
+            },
+            "totals": {
+              "draws": 5514,
+              "passes": 900,
+              "drawsPerFrame": 18.38,
+              "passesPerFrame": 3
+            }
+          },
+          "uploads": {
+            "dimensions": {
+              "gpuBufferLabel": [
+                {
+                  "label": "DeferredLights.source",
+                  "calls": 300,
+                  "bytes": 2481600,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 8272
+                },
+                {
+                  "label": "DeferredLights.view",
+                  "calls": 300,
+                  "bytes": 230400,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 768
+                },
+                {
+                  "label": "PbrRenderer.lights",
+                  "calls": 300,
+                  "bytes": 158400,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "label": "SceneFrameGpuArena.buffer",
+                  "calls": 300,
+                  "bytes": 81600,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ],
+              "renderer": [
+                {
+                  "renderer": "(unattributed)",
+                  "calls": 600,
+                  "bytes": 2712000,
+                  "callsPerFrame": 2,
+                  "bytesPerFrame": 9040
+                },
+                {
+                  "renderer": "PbrRenderer",
+                  "calls": 300,
+                  "bytes": 158400,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "renderer": "SceneFrameGpuArena",
+                  "calls": 300,
+                  "bytes": 81600,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ]
+            },
+            "totals": {
+              "calls": 1200,
+              "bytes": 2952000,
+              "callsPerFrame": 4,
+              "bytesPerFrame": 9840
+            }
+          }
+        },
+        "renderPhaseBreakdown": {
+          "categories": {
+            "mainScene": {
+              "draws": 5214,
+              "passes": 600,
+              "drawsPerFrame": 17.38,
+              "passesPerFrame": 2
+            },
+            "shadow": {
+              "draws": 0,
+              "passes": 0,
+              "drawsPerFrame": 0,
+              "passesPerFrame": 0
+            },
+            "postprocess": {
+              "draws": 300,
+              "passes": 300,
+              "drawsPerFrame": 1,
+              "passesPerFrame": 1
+            }
+          },
+          "totals": {
+            "draws": 5514,
+            "passes": 900,
+            "drawsPerFrame": 18.38,
+            "passesPerFrame": 3
+          }
+        },
+        "rendererRunBreakdown": {
+          "sampledViews": 1,
+          "opaqueItems": 255,
+          "transparentItems": 0,
+          "actualDraws": 17,
+          "transparentDraws": 0,
+          "mainSceneDraws": 17,
+          "theoreticalCompatibleDraws": 13,
+          "legalOpaqueDrawLowerBound": 13,
+          "legalMainSceneDrawLowerBound": 13,
+          "drawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "transparentDrawsByRenderer": {},
+          "mainSceneDrawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "theoreticalDrawsByRenderer": {
+            "PbrRenderer": 13
+          },
+          "runBreaks": {
+            "material": 7,
+            "geometry": 5,
+            "pipeline": 0,
+            "indexFormat": 0,
+            "cullMode": 0,
+            "deformationBinding": 0,
+            "depthPrepass": 0,
+            "objectSlotContiguity": 4,
+            "transparentDirectInstancingProhibited": 0
+          },
+          "views": [
+            {
+              "opaqueItems": 255,
+              "transparentItems": 0,
+              "actualDraws": 17,
+              "transparentDraws": 0,
+              "mainSceneDraws": 17,
+              "theoreticalCompatibleDraws": 13,
+              "legalOpaqueDrawLowerBound": 13,
+              "legalMainSceneDrawLowerBound": 13,
+              "drawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "transparentDrawsByRenderer": {},
+              "mainSceneDrawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "theoreticalDrawsByRenderer": {
+                "PbrRenderer": 13
+              },
+              "runBreaks": {
+                "material": 7,
+                "geometry": 5,
+                "pipeline": 0,
+                "indexFormat": 0,
+                "cullMode": 0,
+                "deformationBinding": 0,
+                "depthPrepass": 0,
+                "objectSlotContiguity": 4,
+                "transparentDirectInstancingProhibited": 0
+              }
+            }
+          ]
+        },
+        "uploadBreakdown": {
+          "dimensions": {
+            "gpuBufferLabel": [
+              {
+                "label": "DeferredLights.source",
+                "calls": 300,
+                "bytes": 2481600,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 8272
+              },
+              {
+                "label": "DeferredLights.view",
+                "calls": 300,
+                "bytes": 230400,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 768
+              },
+              {
+                "label": "PbrRenderer.lights",
+                "calls": 300,
+                "bytes": 158400,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "label": "SceneFrameGpuArena.buffer",
+                "calls": 300,
+                "bytes": 81600,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ],
+            "renderer": [
+              {
+                "renderer": "(unattributed)",
+                "calls": 600,
+                "bytes": 2712000,
+                "callsPerFrame": 2,
+                "bytesPerFrame": 9040
+              },
+              {
+                "renderer": "PbrRenderer",
+                "calls": 300,
+                "bytes": 158400,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "renderer": "SceneFrameGpuArena",
+                "calls": 300,
+                "bytes": 81600,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ]
+          },
+          "totals": {
+            "calls": 1200,
+            "bytes": 2952000,
+            "callsPerFrame": 4,
+            "bytesPerFrame": 9840
+          }
+        },
+        "directionalShadowPassesPerFrame": 0,
+        "directionalShadowCacheHits": 300,
+        "maxDirectionalShadowPassesPerFrame": 0,
+        "pbrLightUniformUploadsPerFrame": 1,
+        "pbrEnvironmentUniformUploadsPerFrame": 0,
+        "pbrShadowUniformUploadsPerFrame": 0,
+        "mirrorPlannedViews": 0,
+        "mirrorExecutedViews": 0,
+        "mirrorDroppedViews": 0,
+        "mirrorRttPixels": 0,
+        "renderGraphPasses": 2,
+        "renderGraphCulledPasses": 0,
+        "mirrorLogicalTargets": 0,
+        "mirrorPhysicalTargets": 0,
+        "mirrorTargetAliasCount": 0,
+        "mirrorTargetLogicalBytes": 0,
+        "mirrorTargetResidentBytes": 0,
+        "mirrorTargetAliasSavedBytes": 0,
+        "mirrorResourceScopeCount": 0,
+        "liveGpuResources": 194,
+        "ownerResidual": 0
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-sparse-high-performance-2026-09-27T04-16-21.438Z.json",
+      "sha256": "5e718dc30d9eff436944362b1bee6c6ecf5a52ef4a8436ede028f95367b82f9b",
+      "options": {
+        "preference": "high-performance",
+        "algorithm": "tiled",
+        "overlap": false,
+        "count": 128,
+        "full": false,
+        "idleMs": 30000
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "pixels": {
+        "maxHdrDelta": 0.00006103515625,
+        "maxLdrDelta": 0,
+        "litPixels": 692672
+      },
+      "source": {
+        "candidateCount": 130,
+        "rejectedCount": 0,
+        "pointCount": 128,
+        "directionalCount": 1,
+        "ambientCount": 1
+      },
+      "tiles": {
+        "plan": {
+          "columns": 80,
+          "rows": 45,
+          "tileCount": 3600,
+          "storedTiles": 3600,
+          "tileCapacity": 128,
+          "byteSize": 1900800,
+          "fullListTiles": 0,
+          "viewBytes": 27709728
+        },
+        "gpuTileStorageAllocated": true,
+        "bypassReason": null,
+        "acceptedReferences": 18143,
+        "resolveListReferences": 18143,
+        "overflowTiles": 0,
+        "sourceGeneration": 6
+      },
+      "heatmapEntries": 3600,
+      "metrics": {
+        "bufferUploadsPerFrame": 4,
+        "uploadBytesPerFrame": 9840,
+        "renderPipelinesCreated": 0,
+        "bindGroupsCreated": 0,
+        "setupRenderPipelinesCreated": 6,
+        "setupBindGroupsCreated": 56,
+        "buffersCreatedTotal": 113,
+        "bufferExpansionsTotal": 42,
+        "bufferRetirementsTotal": 36,
+        "buffersCreated": 0,
+        "bufferExpansions": 0,
+        "bufferRetirements": 0,
+        "objectTableDirtyRangeCpuMsPerFrame": 0.004999995231628418,
+        "objectTableUploadCpuMsPerFrame": 0,
+        "objectTableFlushesPerFrame": 2,
+        "denseWholeSpanUploadsPerFrame": 0,
+        "poolMisses": 0,
+        "hotObjectsCreated": 0,
+        "drawsPerFrame": 19,
+        "bundleBuilds": 0,
+        "bundleExecutionsPerFrame": 0,
+        "bundleEncodedDrawsPerFrame": 0,
+        "directEncodedDrawsPerFrame": 19,
+        "renderPassesPerFrame": 3,
+        "metricClassification": {
+          "schemaVersion": 1,
+          "measuredFrames": 3,
+          "strictEquality": {
+            "passed": true,
+            "checks": [
+              {
+                "name": "render.draws",
+                "classified": 57,
+                "aggregate": 57,
+                "equal": true
+              },
+              {
+                "name": "render.passes",
+                "classified": 9,
+                "aggregate": 9,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.calls",
+                "classified": 12,
+                "aggregate": 12,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.bytes",
+                "classified": 29520,
+                "aggregate": 29520,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.calls",
+                "classified": 12,
+                "aggregate": 12,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.bytes",
+                "classified": 29520,
+                "aggregate": 29520,
+                "equal": true
+              },
+              {
+                "name": "audit.draws",
+                "classified": 57,
+                "aggregate": 57,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadCalls",
+                "classified": 12,
+                "aggregate": 12,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadBytes",
+                "classified": 29520,
+                "aggregate": 29520,
+                "equal": true
+              },
+              {
+                "name": "audit.renderPassInstrumentationFailures",
+                "classified": 0,
+                "aggregate": 0,
+                "equal": true
+              }
+            ]
+          },
+          "render": {
+            "categories": {
+              "mainScene": {
+                "draws": 54,
+                "passes": 6,
+                "drawsPerFrame": 18,
+                "passesPerFrame": 2
+              },
+              "shadow": {
+                "draws": 0,
+                "passes": 0,
+                "drawsPerFrame": 0,
+                "passesPerFrame": 0
+              },
+              "postprocess": {
+                "draws": 3,
+                "passes": 3,
+                "drawsPerFrame": 1,
+                "passesPerFrame": 1
+              }
+            },
+            "totals": {
+              "draws": 57,
+              "passes": 9,
+              "drawsPerFrame": 19,
+              "passesPerFrame": 3
+            }
+          },
+          "uploads": {
+            "dimensions": {
+              "gpuBufferLabel": [
+                {
+                  "label": "DeferredLights.source",
+                  "calls": 3,
+                  "bytes": 24816,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 8272
+                },
+                {
+                  "label": "DeferredLights.view",
+                  "calls": 3,
+                  "bytes": 2304,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 768
+                },
+                {
+                  "label": "PbrRenderer.lights",
+                  "calls": 3,
+                  "bytes": 1584,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "label": "SceneFrameGpuArena.buffer",
+                  "calls": 3,
+                  "bytes": 816,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ],
+              "renderer": [
+                {
+                  "renderer": "(unattributed)",
+                  "calls": 6,
+                  "bytes": 27120,
+                  "callsPerFrame": 2,
+                  "bytesPerFrame": 9040
+                },
+                {
+                  "renderer": "PbrRenderer",
+                  "calls": 3,
+                  "bytes": 1584,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "renderer": "SceneFrameGpuArena",
+                  "calls": 3,
+                  "bytes": 816,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ]
+            },
+            "totals": {
+              "calls": 12,
+              "bytes": 29520,
+              "callsPerFrame": 4,
+              "bytesPerFrame": 9840
+            }
+          }
+        },
+        "renderPhaseBreakdown": {
+          "categories": {
+            "mainScene": {
+              "draws": 54,
+              "passes": 6,
+              "drawsPerFrame": 18,
+              "passesPerFrame": 2
+            },
+            "shadow": {
+              "draws": 0,
+              "passes": 0,
+              "drawsPerFrame": 0,
+              "passesPerFrame": 0
+            },
+            "postprocess": {
+              "draws": 3,
+              "passes": 3,
+              "drawsPerFrame": 1,
+              "passesPerFrame": 1
+            }
+          },
+          "totals": {
+            "draws": 57,
+            "passes": 9,
+            "drawsPerFrame": 19,
+            "passesPerFrame": 3
+          }
+        },
+        "rendererRunBreakdown": {
+          "sampledViews": 1,
+          "opaqueItems": 255,
+          "transparentItems": 0,
+          "actualDraws": 17,
+          "transparentDraws": 0,
+          "mainSceneDraws": 17,
+          "theoreticalCompatibleDraws": 13,
+          "legalOpaqueDrawLowerBound": 13,
+          "legalMainSceneDrawLowerBound": 13,
+          "drawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "transparentDrawsByRenderer": {},
+          "mainSceneDrawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "theoreticalDrawsByRenderer": {
+            "PbrRenderer": 13
+          },
+          "runBreaks": {
+            "material": 7,
+            "geometry": 5,
+            "pipeline": 0,
+            "indexFormat": 0,
+            "cullMode": 0,
+            "deformationBinding": 0,
+            "depthPrepass": 0,
+            "objectSlotContiguity": 4,
+            "transparentDirectInstancingProhibited": 0
+          },
+          "views": [
+            {
+              "opaqueItems": 255,
+              "transparentItems": 0,
+              "actualDraws": 17,
+              "transparentDraws": 0,
+              "mainSceneDraws": 17,
+              "theoreticalCompatibleDraws": 13,
+              "legalOpaqueDrawLowerBound": 13,
+              "legalMainSceneDrawLowerBound": 13,
+              "drawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "transparentDrawsByRenderer": {},
+              "mainSceneDrawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "theoreticalDrawsByRenderer": {
+                "PbrRenderer": 13
+              },
+              "runBreaks": {
+                "material": 7,
+                "geometry": 5,
+                "pipeline": 0,
+                "indexFormat": 0,
+                "cullMode": 0,
+                "deformationBinding": 0,
+                "depthPrepass": 0,
+                "objectSlotContiguity": 4,
+                "transparentDirectInstancingProhibited": 0
+              }
+            }
+          ]
+        },
+        "uploadBreakdown": {
+          "dimensions": {
+            "gpuBufferLabel": [
+              {
+                "label": "DeferredLights.source",
+                "calls": 3,
+                "bytes": 24816,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 8272
+              },
+              {
+                "label": "DeferredLights.view",
+                "calls": 3,
+                "bytes": 2304,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 768
+              },
+              {
+                "label": "PbrRenderer.lights",
+                "calls": 3,
+                "bytes": 1584,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "label": "SceneFrameGpuArena.buffer",
+                "calls": 3,
+                "bytes": 816,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ],
+            "renderer": [
+              {
+                "renderer": "(unattributed)",
+                "calls": 6,
+                "bytes": 27120,
+                "callsPerFrame": 2,
+                "bytesPerFrame": 9040
+              },
+              {
+                "renderer": "PbrRenderer",
+                "calls": 3,
+                "bytes": 1584,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "renderer": "SceneFrameGpuArena",
+                "calls": 3,
+                "bytes": 816,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ]
+          },
+          "totals": {
+            "calls": 12,
+            "bytes": 29520,
+            "callsPerFrame": 4,
+            "bytesPerFrame": 9840
+          }
+        },
+        "directionalShadowPassesPerFrame": 0,
+        "directionalShadowCacheHits": 3,
+        "maxDirectionalShadowPassesPerFrame": 0,
+        "pbrLightUniformUploadsPerFrame": 1,
+        "pbrEnvironmentUniformUploadsPerFrame": 0,
+        "pbrShadowUniformUploadsPerFrame": 0,
+        "mirrorPlannedViews": 0,
+        "mirrorExecutedViews": 0,
+        "mirrorDroppedViews": 0,
+        "mirrorRttPixels": 0,
+        "renderGraphPasses": 2,
+        "renderGraphCulledPasses": 0,
+        "mirrorLogicalTargets": 0,
+        "mirrorPhysicalTargets": 0,
+        "mirrorTargetAliasCount": 0,
+        "mirrorTargetLogicalBytes": 0,
+        "mirrorTargetResidentBytes": 0,
+        "mirrorTargetAliasSavedBytes": 0,
+        "mirrorResourceScopeCount": 0,
+        "liveGpuResources": 195,
+        "ownerResidual": 0
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-128-sparse-low-power-2026-09-27T04-16-24.440Z.json",
+      "sha256": "c21b51d872917de2f469673cb50830ea112384cbf998096d821bb7a3d9978a90",
+      "options": {
+        "preference": "low-power",
+        "algorithm": "tiled",
+        "overlap": false,
+        "count": 128,
+        "full": false,
+        "idleMs": 30000
+      },
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "pixels": {
+        "maxHdrDelta": 0.000030517578125,
+        "maxLdrDelta": 0,
+        "litPixels": 692672
+      },
+      "source": {
+        "candidateCount": 130,
+        "rejectedCount": 0,
+        "pointCount": 128,
+        "directionalCount": 1,
+        "ambientCount": 1
+      },
+      "tiles": {
+        "plan": {
+          "columns": 80,
+          "rows": 45,
+          "tileCount": 3600,
+          "storedTiles": 3600,
+          "tileCapacity": 128,
+          "byteSize": 1900800,
+          "fullListTiles": 0,
+          "viewBytes": 27709728
+        },
+        "gpuTileStorageAllocated": true,
+        "bypassReason": null,
+        "acceptedReferences": 18143,
+        "resolveListReferences": 18143,
+        "overflowTiles": 0,
+        "sourceGeneration": 6
+      },
+      "heatmapEntries": 3600,
+      "metrics": {
+        "bufferUploadsPerFrame": 4,
+        "uploadBytesPerFrame": 9840,
+        "renderPipelinesCreated": 0,
+        "bindGroupsCreated": 0,
+        "setupRenderPipelinesCreated": 6,
+        "setupBindGroupsCreated": 56,
+        "buffersCreatedTotal": 113,
+        "bufferExpansionsTotal": 42,
+        "bufferRetirementsTotal": 36,
+        "buffersCreated": 0,
+        "bufferExpansions": 0,
+        "bufferRetirements": 0,
+        "objectTableDirtyRangeCpuMsPerFrame": 0.009999990463256836,
+        "objectTableUploadCpuMsPerFrame": 0,
+        "objectTableFlushesPerFrame": 2,
+        "denseWholeSpanUploadsPerFrame": 0,
+        "poolMisses": 0,
+        "hotObjectsCreated": 0,
+        "drawsPerFrame": 19,
+        "bundleBuilds": 0,
+        "bundleExecutionsPerFrame": 0,
+        "bundleEncodedDrawsPerFrame": 0,
+        "directEncodedDrawsPerFrame": 19,
+        "renderPassesPerFrame": 3,
+        "metricClassification": {
+          "schemaVersion": 1,
+          "measuredFrames": 3,
+          "strictEquality": {
+            "passed": true,
+            "checks": [
+              {
+                "name": "render.draws",
+                "classified": 57,
+                "aggregate": 57,
+                "equal": true
+              },
+              {
+                "name": "render.passes",
+                "classified": 9,
+                "aggregate": 9,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.calls",
+                "classified": 12,
+                "aggregate": 12,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.bytes",
+                "classified": 29520,
+                "aggregate": 29520,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.calls",
+                "classified": 12,
+                "aggregate": 12,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.bytes",
+                "classified": 29520,
+                "aggregate": 29520,
+                "equal": true
+              },
+              {
+                "name": "audit.draws",
+                "classified": 57,
+                "aggregate": 57,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadCalls",
+                "classified": 12,
+                "aggregate": 12,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadBytes",
+                "classified": 29520,
+                "aggregate": 29520,
+                "equal": true
+              },
+              {
+                "name": "audit.renderPassInstrumentationFailures",
+                "classified": 0,
+                "aggregate": 0,
+                "equal": true
+              }
+            ]
+          },
+          "render": {
+            "categories": {
+              "mainScene": {
+                "draws": 54,
+                "passes": 6,
+                "drawsPerFrame": 18,
+                "passesPerFrame": 2
+              },
+              "shadow": {
+                "draws": 0,
+                "passes": 0,
+                "drawsPerFrame": 0,
+                "passesPerFrame": 0
+              },
+              "postprocess": {
+                "draws": 3,
+                "passes": 3,
+                "drawsPerFrame": 1,
+                "passesPerFrame": 1
+              }
+            },
+            "totals": {
+              "draws": 57,
+              "passes": 9,
+              "drawsPerFrame": 19,
+              "passesPerFrame": 3
+            }
+          },
+          "uploads": {
+            "dimensions": {
+              "gpuBufferLabel": [
+                {
+                  "label": "DeferredLights.source",
+                  "calls": 3,
+                  "bytes": 24816,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 8272
+                },
+                {
+                  "label": "DeferredLights.view",
+                  "calls": 3,
+                  "bytes": 2304,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 768
+                },
+                {
+                  "label": "PbrRenderer.lights",
+                  "calls": 3,
+                  "bytes": 1584,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "label": "SceneFrameGpuArena.buffer",
+                  "calls": 3,
+                  "bytes": 816,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ],
+              "renderer": [
+                {
+                  "renderer": "(unattributed)",
+                  "calls": 6,
+                  "bytes": 27120,
+                  "callsPerFrame": 2,
+                  "bytesPerFrame": 9040
+                },
+                {
+                  "renderer": "PbrRenderer",
+                  "calls": 3,
+                  "bytes": 1584,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "renderer": "SceneFrameGpuArena",
+                  "calls": 3,
+                  "bytes": 816,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ]
+            },
+            "totals": {
+              "calls": 12,
+              "bytes": 29520,
+              "callsPerFrame": 4,
+              "bytesPerFrame": 9840
+            }
+          }
+        },
+        "renderPhaseBreakdown": {
+          "categories": {
+            "mainScene": {
+              "draws": 54,
+              "passes": 6,
+              "drawsPerFrame": 18,
+              "passesPerFrame": 2
+            },
+            "shadow": {
+              "draws": 0,
+              "passes": 0,
+              "drawsPerFrame": 0,
+              "passesPerFrame": 0
+            },
+            "postprocess": {
+              "draws": 3,
+              "passes": 3,
+              "drawsPerFrame": 1,
+              "passesPerFrame": 1
+            }
+          },
+          "totals": {
+            "draws": 57,
+            "passes": 9,
+            "drawsPerFrame": 19,
+            "passesPerFrame": 3
+          }
+        },
+        "rendererRunBreakdown": {
+          "sampledViews": 1,
+          "opaqueItems": 255,
+          "transparentItems": 0,
+          "actualDraws": 17,
+          "transparentDraws": 0,
+          "mainSceneDraws": 17,
+          "theoreticalCompatibleDraws": 13,
+          "legalOpaqueDrawLowerBound": 13,
+          "legalMainSceneDrawLowerBound": 13,
+          "drawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "transparentDrawsByRenderer": {},
+          "mainSceneDrawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "theoreticalDrawsByRenderer": {
+            "PbrRenderer": 13
+          },
+          "runBreaks": {
+            "material": 7,
+            "geometry": 5,
+            "pipeline": 0,
+            "indexFormat": 0,
+            "cullMode": 0,
+            "deformationBinding": 0,
+            "depthPrepass": 0,
+            "objectSlotContiguity": 4,
+            "transparentDirectInstancingProhibited": 0
+          },
+          "views": [
+            {
+              "opaqueItems": 255,
+              "transparentItems": 0,
+              "actualDraws": 17,
+              "transparentDraws": 0,
+              "mainSceneDraws": 17,
+              "theoreticalCompatibleDraws": 13,
+              "legalOpaqueDrawLowerBound": 13,
+              "legalMainSceneDrawLowerBound": 13,
+              "drawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "transparentDrawsByRenderer": {},
+              "mainSceneDrawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "theoreticalDrawsByRenderer": {
+                "PbrRenderer": 13
+              },
+              "runBreaks": {
+                "material": 7,
+                "geometry": 5,
+                "pipeline": 0,
+                "indexFormat": 0,
+                "cullMode": 0,
+                "deformationBinding": 0,
+                "depthPrepass": 0,
+                "objectSlotContiguity": 4,
+                "transparentDirectInstancingProhibited": 0
+              }
+            }
+          ]
+        },
+        "uploadBreakdown": {
+          "dimensions": {
+            "gpuBufferLabel": [
+              {
+                "label": "DeferredLights.source",
+                "calls": 3,
+                "bytes": 24816,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 8272
+              },
+              {
+                "label": "DeferredLights.view",
+                "calls": 3,
+                "bytes": 2304,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 768
+              },
+              {
+                "label": "PbrRenderer.lights",
+                "calls": 3,
+                "bytes": 1584,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "label": "SceneFrameGpuArena.buffer",
+                "calls": 3,
+                "bytes": 816,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ],
+            "renderer": [
+              {
+                "renderer": "(unattributed)",
+                "calls": 6,
+                "bytes": 27120,
+                "callsPerFrame": 2,
+                "bytesPerFrame": 9040
+              },
+              {
+                "renderer": "PbrRenderer",
+                "calls": 3,
+                "bytes": 1584,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "renderer": "SceneFrameGpuArena",
+                "calls": 3,
+                "bytes": 816,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ]
+          },
+          "totals": {
+            "calls": 12,
+            "bytes": 29520,
+            "callsPerFrame": 4,
+            "bytesPerFrame": 9840
+          }
+        },
+        "directionalShadowPassesPerFrame": 0,
+        "directionalShadowCacheHits": 3,
+        "maxDirectionalShadowPassesPerFrame": 0,
+        "pbrLightUniformUploadsPerFrame": 1,
+        "pbrEnvironmentUniformUploadsPerFrame": 0,
+        "pbrShadowUniformUploadsPerFrame": 0,
+        "mirrorPlannedViews": 0,
+        "mirrorExecutedViews": 0,
+        "mirrorDroppedViews": 0,
+        "mirrorRttPixels": 0,
+        "renderGraphPasses": 2,
+        "renderGraphCulledPasses": 0,
+        "mirrorLogicalTargets": 0,
+        "mirrorPhysicalTargets": 0,
+        "mirrorTargetAliasCount": 0,
+        "mirrorTargetLogicalBytes": 0,
+        "mirrorTargetResidentBytes": 0,
+        "mirrorTargetAliasSavedBytes": 0,
+        "mirrorResourceScopeCount": 0,
+        "liveGpuResources": 195,
+        "ownerResidual": 0
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-overlap-high-performance-2026-09-27T04-16-27.552Z.json",
+      "sha256": "2bc44a2d9a5b5245c4fa2b4ff2513bce12b2e48f92a683a245609a72f6717a8b",
+      "options": {
+        "preference": "high-performance",
+        "algorithm": "tiled",
+        "overlap": true,
+        "count": 256,
+        "full": false,
+        "idleMs": 30000
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "pixels": {
+        "maxHdrDelta": 0.015625,
+        "maxLdrDelta": 0,
+        "litPixels": 719666
+      },
+      "source": {
+        "candidateCount": 258,
+        "rejectedCount": 0,
+        "pointCount": 256,
+        "directionalCount": 1,
+        "ambientCount": 1
+      },
+      "tiles": {
+        "plan": {
+          "columns": 80,
+          "rows": 45,
+          "tileCount": 3600,
+          "storedTiles": 0,
+          "tileCapacity": 128,
+          "byteSize": 4,
+          "fullListTiles": 3600,
+          "viewBytes": 25808932
+        },
+        "gpuTileStorageAllocated": true,
+        "tileStorageBytes": 4,
+        "bypassReason": "all-lights-cover-near-plane",
+        "acceptedReferences": null,
+        "resolveListReferences": 921600,
+        "overflowTiles": 0
+      },
+      "heatmapEntries": 3600,
+      "metrics": {
+        "bufferUploadsPerFrame": 4,
+        "uploadBytesPerFrame": 18544,
+        "renderPipelinesCreated": 0,
+        "bindGroupsCreated": 0,
+        "setupRenderPipelinesCreated": 6,
+        "setupBindGroupsCreated": 54,
+        "buffersCreatedTotal": 113,
+        "bufferExpansionsTotal": 42,
+        "bufferRetirementsTotal": 36,
+        "buffersCreated": 0,
+        "bufferExpansions": 0,
+        "bufferRetirements": 0,
+        "objectTableDirtyRangeCpuMsPerFrame": 0.011666655540466309,
+        "objectTableUploadCpuMsPerFrame": 0,
+        "objectTableFlushesPerFrame": 2,
+        "denseWholeSpanUploadsPerFrame": 0,
+        "poolMisses": 0,
+        "hotObjectsCreated": 0,
+        "drawsPerFrame": 19,
+        "bundleBuilds": 0,
+        "bundleExecutionsPerFrame": 0,
+        "bundleEncodedDrawsPerFrame": 0,
+        "directEncodedDrawsPerFrame": 19,
+        "renderPassesPerFrame": 3,
+        "metricClassification": {
+          "schemaVersion": 1,
+          "measuredFrames": 3,
+          "strictEquality": {
+            "passed": true,
+            "checks": [
+              {
+                "name": "render.draws",
+                "classified": 57,
+                "aggregate": 57,
+                "equal": true
+              },
+              {
+                "name": "render.passes",
+                "classified": 9,
+                "aggregate": 9,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.calls",
+                "classified": 12,
+                "aggregate": 12,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.bytes",
+                "classified": 55632,
+                "aggregate": 55632,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.calls",
+                "classified": 12,
+                "aggregate": 12,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.bytes",
+                "classified": 55632,
+                "aggregate": 55632,
+                "equal": true
+              },
+              {
+                "name": "audit.draws",
+                "classified": 57,
+                "aggregate": 57,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadCalls",
+                "classified": 12,
+                "aggregate": 12,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadBytes",
+                "classified": 55632,
+                "aggregate": 55632,
+                "equal": true
+              },
+              {
+                "name": "audit.renderPassInstrumentationFailures",
+                "classified": 0,
+                "aggregate": 0,
+                "equal": true
+              }
+            ]
+          },
+          "render": {
+            "categories": {
+              "mainScene": {
+                "draws": 54,
+                "passes": 6,
+                "drawsPerFrame": 18,
+                "passesPerFrame": 2
+              },
+              "shadow": {
+                "draws": 0,
+                "passes": 0,
+                "drawsPerFrame": 0,
+                "passesPerFrame": 0
+              },
+              "postprocess": {
+                "draws": 3,
+                "passes": 3,
+                "drawsPerFrame": 1,
+                "passesPerFrame": 1
+              }
+            },
+            "totals": {
+              "draws": 57,
+              "passes": 9,
+              "drawsPerFrame": 19,
+              "passesPerFrame": 3
+            }
+          },
+          "uploads": {
+            "dimensions": {
+              "gpuBufferLabel": [
+                {
+                  "label": "DeferredLights.source",
+                  "calls": 3,
+                  "bytes": 49392,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 16464
+                },
+                {
+                  "label": "DeferredLights.view",
+                  "calls": 3,
+                  "bytes": 3840,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 1280
+                },
+                {
+                  "label": "PbrRenderer.lights",
+                  "calls": 3,
+                  "bytes": 1584,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "label": "SceneFrameGpuArena.buffer",
+                  "calls": 3,
+                  "bytes": 816,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ],
+              "renderer": [
+                {
+                  "renderer": "(unattributed)",
+                  "calls": 6,
+                  "bytes": 53232,
+                  "callsPerFrame": 2,
+                  "bytesPerFrame": 17744
+                },
+                {
+                  "renderer": "PbrRenderer",
+                  "calls": 3,
+                  "bytes": 1584,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "renderer": "SceneFrameGpuArena",
+                  "calls": 3,
+                  "bytes": 816,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ]
+            },
+            "totals": {
+              "calls": 12,
+              "bytes": 55632,
+              "callsPerFrame": 4,
+              "bytesPerFrame": 18544
+            }
+          }
+        },
+        "renderPhaseBreakdown": {
+          "categories": {
+            "mainScene": {
+              "draws": 54,
+              "passes": 6,
+              "drawsPerFrame": 18,
+              "passesPerFrame": 2
+            },
+            "shadow": {
+              "draws": 0,
+              "passes": 0,
+              "drawsPerFrame": 0,
+              "passesPerFrame": 0
+            },
+            "postprocess": {
+              "draws": 3,
+              "passes": 3,
+              "drawsPerFrame": 1,
+              "passesPerFrame": 1
+            }
+          },
+          "totals": {
+            "draws": 57,
+            "passes": 9,
+            "drawsPerFrame": 19,
+            "passesPerFrame": 3
+          }
+        },
+        "rendererRunBreakdown": {
+          "sampledViews": 1,
+          "opaqueItems": 255,
+          "transparentItems": 0,
+          "actualDraws": 17,
+          "transparentDraws": 0,
+          "mainSceneDraws": 17,
+          "theoreticalCompatibleDraws": 13,
+          "legalOpaqueDrawLowerBound": 13,
+          "legalMainSceneDrawLowerBound": 13,
+          "drawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "transparentDrawsByRenderer": {},
+          "mainSceneDrawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "theoreticalDrawsByRenderer": {
+            "PbrRenderer": 13
+          },
+          "runBreaks": {
+            "material": 7,
+            "geometry": 5,
+            "pipeline": 0,
+            "indexFormat": 0,
+            "cullMode": 0,
+            "deformationBinding": 0,
+            "depthPrepass": 0,
+            "objectSlotContiguity": 4,
+            "transparentDirectInstancingProhibited": 0
+          },
+          "views": [
+            {
+              "opaqueItems": 255,
+              "transparentItems": 0,
+              "actualDraws": 17,
+              "transparentDraws": 0,
+              "mainSceneDraws": 17,
+              "theoreticalCompatibleDraws": 13,
+              "legalOpaqueDrawLowerBound": 13,
+              "legalMainSceneDrawLowerBound": 13,
+              "drawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "transparentDrawsByRenderer": {},
+              "mainSceneDrawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "theoreticalDrawsByRenderer": {
+                "PbrRenderer": 13
+              },
+              "runBreaks": {
+                "material": 7,
+                "geometry": 5,
+                "pipeline": 0,
+                "indexFormat": 0,
+                "cullMode": 0,
+                "deformationBinding": 0,
+                "depthPrepass": 0,
+                "objectSlotContiguity": 4,
+                "transparentDirectInstancingProhibited": 0
+              }
+            }
+          ]
+        },
+        "uploadBreakdown": {
+          "dimensions": {
+            "gpuBufferLabel": [
+              {
+                "label": "DeferredLights.source",
+                "calls": 3,
+                "bytes": 49392,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 16464
+              },
+              {
+                "label": "DeferredLights.view",
+                "calls": 3,
+                "bytes": 3840,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 1280
+              },
+              {
+                "label": "PbrRenderer.lights",
+                "calls": 3,
+                "bytes": 1584,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "label": "SceneFrameGpuArena.buffer",
+                "calls": 3,
+                "bytes": 816,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ],
+            "renderer": [
+              {
+                "renderer": "(unattributed)",
+                "calls": 6,
+                "bytes": 53232,
+                "callsPerFrame": 2,
+                "bytesPerFrame": 17744
+              },
+              {
+                "renderer": "PbrRenderer",
+                "calls": 3,
+                "bytes": 1584,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "renderer": "SceneFrameGpuArena",
+                "calls": 3,
+                "bytes": 816,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ]
+          },
+          "totals": {
+            "calls": 12,
+            "bytes": 55632,
+            "callsPerFrame": 4,
+            "bytesPerFrame": 18544
+          }
+        },
+        "directionalShadowPassesPerFrame": 0,
+        "directionalShadowCacheHits": 3,
+        "maxDirectionalShadowPassesPerFrame": 0,
+        "pbrLightUniformUploadsPerFrame": 1,
+        "pbrEnvironmentUniformUploadsPerFrame": 0,
+        "pbrShadowUniformUploadsPerFrame": 0,
+        "mirrorPlannedViews": 0,
+        "mirrorExecutedViews": 0,
+        "mirrorDroppedViews": 0,
+        "mirrorRttPixels": 0,
+        "renderGraphPasses": 2,
+        "renderGraphCulledPasses": 0,
+        "mirrorLogicalTargets": 0,
+        "mirrorPhysicalTargets": 0,
+        "mirrorTargetAliasCount": 0,
+        "mirrorTargetLogicalBytes": 0,
+        "mirrorTargetResidentBytes": 0,
+        "mirrorTargetAliasSavedBytes": 0,
+        "mirrorResourceScopeCount": 0,
+        "liveGpuResources": 193,
+        "ownerResidual": 0
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g03/room-tiled-256-overlap-low-power-2026-09-27T04-16-31.565Z.json",
+      "sha256": "9f9a8d4b77144744a24ee748898a32a659220463aa8b5700e786502c1b7be37c",
+      "options": {
+        "preference": "low-power",
+        "algorithm": "tiled",
+        "overlap": true,
+        "count": 256,
+        "full": false,
+        "idleMs": 30000
+      },
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "pixels": {
+        "maxHdrDelta": 0.03125,
+        "maxLdrDelta": 0.9999999403953552,
+        "litPixels": 719666
+      },
+      "source": {
+        "candidateCount": 258,
+        "rejectedCount": 0,
+        "pointCount": 256,
+        "directionalCount": 1,
+        "ambientCount": 1
+      },
+      "tiles": {
+        "plan": {
+          "columns": 80,
+          "rows": 45,
+          "tileCount": 3600,
+          "storedTiles": 0,
+          "tileCapacity": 128,
+          "byteSize": 4,
+          "fullListTiles": 3600,
+          "viewBytes": 25808932
+        },
+        "gpuTileStorageAllocated": true,
+        "tileStorageBytes": 4,
+        "bypassReason": "all-lights-cover-near-plane",
+        "acceptedReferences": null,
+        "resolveListReferences": 921600,
+        "overflowTiles": 0
+      },
+      "heatmapEntries": 3600,
+      "metrics": {
+        "bufferUploadsPerFrame": 4,
+        "uploadBytesPerFrame": 18544,
+        "renderPipelinesCreated": 0,
+        "bindGroupsCreated": 0,
+        "setupRenderPipelinesCreated": 6,
+        "setupBindGroupsCreated": 54,
+        "buffersCreatedTotal": 113,
+        "bufferExpansionsTotal": 42,
+        "bufferRetirementsTotal": 36,
+        "buffersCreated": 0,
+        "bufferExpansions": 0,
+        "bufferRetirements": 0,
+        "objectTableDirtyRangeCpuMsPerFrame": 0.010000030199686686,
+        "objectTableUploadCpuMsPerFrame": 0,
+        "objectTableFlushesPerFrame": 2,
+        "denseWholeSpanUploadsPerFrame": 0,
+        "poolMisses": 0,
+        "hotObjectsCreated": 0,
+        "drawsPerFrame": 19,
+        "bundleBuilds": 0,
+        "bundleExecutionsPerFrame": 0,
+        "bundleEncodedDrawsPerFrame": 0,
+        "directEncodedDrawsPerFrame": 19,
+        "renderPassesPerFrame": 3,
+        "metricClassification": {
+          "schemaVersion": 1,
+          "measuredFrames": 3,
+          "strictEquality": {
+            "passed": true,
+            "checks": [
+              {
+                "name": "render.draws",
+                "classified": 57,
+                "aggregate": 57,
+                "equal": true
+              },
+              {
+                "name": "render.passes",
+                "classified": 9,
+                "aggregate": 9,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.calls",
+                "classified": 12,
+                "aggregate": 12,
+                "equal": true
+              },
+              {
+                "name": "uploads.gpuBufferLabel.bytes",
+                "classified": 55632,
+                "aggregate": 55632,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.calls",
+                "classified": 12,
+                "aggregate": 12,
+                "equal": true
+              },
+              {
+                "name": "uploads.renderer.bytes",
+                "classified": 55632,
+                "aggregate": 55632,
+                "equal": true
+              },
+              {
+                "name": "audit.draws",
+                "classified": 57,
+                "aggregate": 57,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadCalls",
+                "classified": 12,
+                "aggregate": 12,
+                "equal": true
+              },
+              {
+                "name": "audit.uploadBytes",
+                "classified": 55632,
+                "aggregate": 55632,
+                "equal": true
+              },
+              {
+                "name": "audit.renderPassInstrumentationFailures",
+                "classified": 0,
+                "aggregate": 0,
+                "equal": true
+              }
+            ]
+          },
+          "render": {
+            "categories": {
+              "mainScene": {
+                "draws": 54,
+                "passes": 6,
+                "drawsPerFrame": 18,
+                "passesPerFrame": 2
+              },
+              "shadow": {
+                "draws": 0,
+                "passes": 0,
+                "drawsPerFrame": 0,
+                "passesPerFrame": 0
+              },
+              "postprocess": {
+                "draws": 3,
+                "passes": 3,
+                "drawsPerFrame": 1,
+                "passesPerFrame": 1
+              }
+            },
+            "totals": {
+              "draws": 57,
+              "passes": 9,
+              "drawsPerFrame": 19,
+              "passesPerFrame": 3
+            }
+          },
+          "uploads": {
+            "dimensions": {
+              "gpuBufferLabel": [
+                {
+                  "label": "DeferredLights.source",
+                  "calls": 3,
+                  "bytes": 49392,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 16464
+                },
+                {
+                  "label": "DeferredLights.view",
+                  "calls": 3,
+                  "bytes": 3840,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 1280
+                },
+                {
+                  "label": "PbrRenderer.lights",
+                  "calls": 3,
+                  "bytes": 1584,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "label": "SceneFrameGpuArena.buffer",
+                  "calls": 3,
+                  "bytes": 816,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ],
+              "renderer": [
+                {
+                  "renderer": "(unattributed)",
+                  "calls": 6,
+                  "bytes": 53232,
+                  "callsPerFrame": 2,
+                  "bytesPerFrame": 17744
+                },
+                {
+                  "renderer": "PbrRenderer",
+                  "calls": 3,
+                  "bytes": 1584,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 528
+                },
+                {
+                  "renderer": "SceneFrameGpuArena",
+                  "calls": 3,
+                  "bytes": 816,
+                  "callsPerFrame": 1,
+                  "bytesPerFrame": 272
+                }
+              ]
+            },
+            "totals": {
+              "calls": 12,
+              "bytes": 55632,
+              "callsPerFrame": 4,
+              "bytesPerFrame": 18544
+            }
+          }
+        },
+        "renderPhaseBreakdown": {
+          "categories": {
+            "mainScene": {
+              "draws": 54,
+              "passes": 6,
+              "drawsPerFrame": 18,
+              "passesPerFrame": 2
+            },
+            "shadow": {
+              "draws": 0,
+              "passes": 0,
+              "drawsPerFrame": 0,
+              "passesPerFrame": 0
+            },
+            "postprocess": {
+              "draws": 3,
+              "passes": 3,
+              "drawsPerFrame": 1,
+              "passesPerFrame": 1
+            }
+          },
+          "totals": {
+            "draws": 57,
+            "passes": 9,
+            "drawsPerFrame": 19,
+            "passesPerFrame": 3
+          }
+        },
+        "rendererRunBreakdown": {
+          "sampledViews": 1,
+          "opaqueItems": 255,
+          "transparentItems": 0,
+          "actualDraws": 17,
+          "transparentDraws": 0,
+          "mainSceneDraws": 17,
+          "theoreticalCompatibleDraws": 13,
+          "legalOpaqueDrawLowerBound": 13,
+          "legalMainSceneDrawLowerBound": 13,
+          "drawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "transparentDrawsByRenderer": {},
+          "mainSceneDrawsByRenderer": {
+            "PbrRenderer": 17
+          },
+          "theoreticalDrawsByRenderer": {
+            "PbrRenderer": 13
+          },
+          "runBreaks": {
+            "material": 7,
+            "geometry": 5,
+            "pipeline": 0,
+            "indexFormat": 0,
+            "cullMode": 0,
+            "deformationBinding": 0,
+            "depthPrepass": 0,
+            "objectSlotContiguity": 4,
+            "transparentDirectInstancingProhibited": 0
+          },
+          "views": [
+            {
+              "opaqueItems": 255,
+              "transparentItems": 0,
+              "actualDraws": 17,
+              "transparentDraws": 0,
+              "mainSceneDraws": 17,
+              "theoreticalCompatibleDraws": 13,
+              "legalOpaqueDrawLowerBound": 13,
+              "legalMainSceneDrawLowerBound": 13,
+              "drawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "transparentDrawsByRenderer": {},
+              "mainSceneDrawsByRenderer": {
+                "PbrRenderer": 17
+              },
+              "theoreticalDrawsByRenderer": {
+                "PbrRenderer": 13
+              },
+              "runBreaks": {
+                "material": 7,
+                "geometry": 5,
+                "pipeline": 0,
+                "indexFormat": 0,
+                "cullMode": 0,
+                "deformationBinding": 0,
+                "depthPrepass": 0,
+                "objectSlotContiguity": 4,
+                "transparentDirectInstancingProhibited": 0
+              }
+            }
+          ]
+        },
+        "uploadBreakdown": {
+          "dimensions": {
+            "gpuBufferLabel": [
+              {
+                "label": "DeferredLights.source",
+                "calls": 3,
+                "bytes": 49392,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 16464
+              },
+              {
+                "label": "DeferredLights.view",
+                "calls": 3,
+                "bytes": 3840,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 1280
+              },
+              {
+                "label": "PbrRenderer.lights",
+                "calls": 3,
+                "bytes": 1584,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "label": "SceneFrameGpuArena.buffer",
+                "calls": 3,
+                "bytes": 816,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ],
+            "renderer": [
+              {
+                "renderer": "(unattributed)",
+                "calls": 6,
+                "bytes": 53232,
+                "callsPerFrame": 2,
+                "bytesPerFrame": 17744
+              },
+              {
+                "renderer": "PbrRenderer",
+                "calls": 3,
+                "bytes": 1584,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 528
+              },
+              {
+                "renderer": "SceneFrameGpuArena",
+                "calls": 3,
+                "bytes": 816,
+                "callsPerFrame": 1,
+                "bytesPerFrame": 272
+              }
+            ]
+          },
+          "totals": {
+            "calls": 12,
+            "bytes": 55632,
+            "callsPerFrame": 4,
+            "bytesPerFrame": 18544
+          }
+        },
+        "directionalShadowPassesPerFrame": 0,
+        "directionalShadowCacheHits": 3,
+        "maxDirectionalShadowPassesPerFrame": 0,
+        "pbrLightUniformUploadsPerFrame": 1,
+        "pbrEnvironmentUniformUploadsPerFrame": 0,
+        "pbrShadowUniformUploadsPerFrame": 0,
+        "mirrorPlannedViews": 0,
+        "mirrorExecutedViews": 0,
+        "mirrorDroppedViews": 0,
+        "mirrorRttPixels": 0,
+        "renderGraphPasses": 2,
+        "renderGraphCulledPasses": 0,
+        "mirrorLogicalTargets": 0,
+        "mirrorPhysicalTargets": 0,
+        "mirrorTargetAliasCount": 0,
+        "mirrorTargetLogicalBytes": 0,
+        "mirrorTargetResidentBytes": 0,
+        "mirrorTargetAliasSavedBytes": 0,
+        "mirrorResourceScopeCount": 0,
+        "liveGpuResources": 193,
+        "ownerResidual": 0
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    }
+  ]
+}

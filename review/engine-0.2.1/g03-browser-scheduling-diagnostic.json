@@ -1,0 +1,127 @@
+{
+  "scope": "Diagnostic only: three counterbalanced pairs, same AMD overlap128 Tiled workload. No qualification or replacement of existing population.",
+  "flags": [
+    "--disable-background-timer-throttling",
+    "--disable-backgrounding-occluded-windows",
+    "--disable-renderer-backgrounding"
+  ],
+  "wrapperSha256": "88f85753ff7cd50cd4908f1f4b67f67711e9fe65f32c0ac84d6b61051f2e31a9",
+  "plan": [
+    "standard",
+    "flags",
+    "flags",
+    "standard",
+    "standard",
+    "flags"
+  ],
+  "captures": [
+    {
+      "mode": "standard",
+      "path": "/Users/qingque/Desktop/HaiyueStudio/Engine/artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T01-17-26.200Z.json",
+      "sha256": "3cc1335da403930c021525dba57c290d68f5de7f16bd904ee1beff17a69f784b",
+      "p95": {
+        "cpuRuntimeMs": 2.7299998998641968,
+        "frameWallMs": 34.19500005245209,
+        "gpuSpanMs": 15.27848,
+        "gpuPassSumMs": 15.1642,
+        "cullMs": 0,
+        "resolveMs": 14.484318,
+        "lightingMs": 14.484318
+      }
+    },
+    {
+      "mode": "flags",
+      "path": "/Users/qingque/Desktop/HaiyueStudio/Engine/artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T01-18-10.221Z.json",
+      "sha256": "99b2592ea4595b40e05a45b5376291c691dc9811bfbb882e911ce94b4d9a24c9",
+      "p95": {
+        "cpuRuntimeMs": 2.759999990463257,
+        "frameWallMs": 48.019999980926514,
+        "gpuSpanMs": 15.449928,
+        "gpuPassSumMs": 15.333412000000001,
+        "cullMs": 0,
+        "resolveMs": 14.576755,
+        "lightingMs": 14.576755
+      }
+    },
+    {
+      "mode": "flags",
+      "path": "/Users/qingque/Desktop/HaiyueStudio/Engine/artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T01-18-50.280Z.json",
+      "sha256": "26949bb599ad982d95d3153ed5b6546fe67c767e17498c5f4e4493226a684163",
+      "p95": {
+        "cpuRuntimeMs": 2.899999976158142,
+        "frameWallMs": 32.955000042915344,
+        "gpuSpanMs": 15.161969,
+        "gpuPassSumMs": 15.010572,
+        "cullMs": 0,
+        "resolveMs": 14.263662,
+        "lightingMs": 14.263662
+      }
+    },
+    {
+      "mode": "standard",
+      "path": "/Users/qingque/Desktop/HaiyueStudio/Engine/artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T01-19-31.655Z.json",
+      "sha256": "9322de154b20e6e011b2deaba0dd1ad0fba72211b7f74415b4c9d0b8f8a7d59e",
+      "p95": {
+        "cpuRuntimeMs": 2.784999966621399,
+        "frameWallMs": 35.139999985694885,
+        "gpuSpanMs": 15.355851,
+        "gpuPassSumMs": 15.245455,
+        "cullMs": 0,
+        "resolveMs": 14.484878,
+        "lightingMs": 14.484878
+      }
+    },
+    {
+      "mode": "standard",
+      "path": "/Users/qingque/Desktop/HaiyueStudio/Engine/artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T01-20-14.154Z.json",
+      "sha256": "3ad35d015276e54f80e3c0c39152f6277ba1db041d6878d597ba87d6b18959b5",
+      "p95": {
+        "cpuRuntimeMs": 2.7300000190734863,
+        "frameWallMs": 35.735000014305115,
+        "gpuSpanMs": 15.38957,
+        "gpuPassSumMs": 15.257495,
+        "cullMs": 0,
+        "resolveMs": 14.518997,
+        "lightingMs": 14.518997
+      }
+    },
+    {
+      "mode": "flags",
+      "path": "/Users/qingque/Desktop/HaiyueStudio/Engine/artifacts/engine-0.2.1/g03/room-tiled-128-overlap-high-performance-2026-09-27T01-20-54.289Z.json",
+      "sha256": "ba8be52f76395ec7280d0d08bf5f6b7fd552d3e5b13b31c06e8ac1c8c9b5b8f8",
+      "p95": {
+        "cpuRuntimeMs": 2.7799999713897705,
+        "frameWallMs": 34.52999997138977,
+        "gpuSpanMs": 15.190016,
+        "gpuPassSumMs": 15.11318,
+        "cullMs": 0,
+        "resolveMs": 14.528364,
+        "lightingMs": 14.528364
+      }
+    }
+  ],
+  "status": "complete-diagnostic-only",
+  "analysis": {
+    "standard": {
+      "cohortP95": [
+        34.19500005245209,
+        35.139999985694885,
+        35.735000014305115
+      ],
+      "relativeSpread": 0.043824700127488465,
+      "cv": 0.01810483389922881,
+      "stable": true
+    },
+    "flags": {
+      "cohortP95": [
+        48.019999980926514,
+        32.955000042915344,
+        34.52999997138977
+      ],
+      "relativeSpread": 0.4362872849838821,
+      "cv": 0.17560595899353318,
+      "stable": false
+    }
+  },
+  "decision": "Do not adopt flags: their wall-time instability persists. Default three-run diagnostic is stable but does not replace paired qualification. Run another complete 24-capture population with original settings, preserve all previous failures."
+}

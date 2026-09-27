@@ -2,11 +2,19 @@ import {readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {sha256} from './deferred-fixture-policy.mjs';
 import {tiledHarnessFingerprint} from './deferred-tiled-policy.mjs';
+export function parseTiledIdleMs(args){
+  const flags=args.filter(arg=>arg.startsWith('--idle-ms='));
+  if(flags.length>1)throw Error('Choose one inter-case idle duration');
+  const value=flags.length?flags[0].slice('--idle-ms='.length):'30000';
+  const ms=Number(value);
+  if(!/^\d+$/.test(value)||!Number.isSafeInteger(ms)||ms<30000||ms>300000)throw Error('Inter-case idle must be an integer from 30000 to 300000 ms');
+  return ms;
+}
 export function parseTiledRoomOptions(args){
-  for(const arg of args)if(!['--integrated','--reference','--overlap','--full','--count=128','--count=256'].includes(arg))throw Error(`Unknown tiled room option: ${arg}`);
+  for(const arg of args)if(!['--integrated','--reference','--overlap','--full','--count=128','--count=256'].includes(arg)&&!arg.startsWith('--idle-ms='))throw Error(`Unknown tiled room option: ${arg}`);
   if(args.includes('--count=128')&&args.includes('--count=256'))throw Error('Choose one light count');
   return {preference:args.includes('--integrated')?'low-power':'high-performance',algorithm:args.includes('--reference')?'reference':'tiled',
-    overlap:args.includes('--overlap'),count:args.includes('--count=128')?128:256,full:args.includes('--full')};
+    overlap:args.includes('--overlap'),count:args.includes('--count=128')?128:256,full:args.includes('--full'),idleMs:parseTiledIdleMs(args)};
 }
 export async function tiledRoomHarnessFingerprint(root){
   const base=await tiledHarnessFingerprint(root);
