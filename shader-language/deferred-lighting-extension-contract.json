@@ -6,9 +6,9 @@
   "previousMaterialLightingHash": "b448cc48ea296bdd03b4d994d2c70522cb37ae2e96c1cb975be13e4302c9cc5d",
   "materialLightingHash": "e3926b1ac655f17e90b403bdcceb2e47ee968ccdfde968ddca7a2445eb4d6ef4",
   "reason": "Share standard PBR surface sampling between Forward and Deferred, including vertex RGBA and matching alpha coverage in depth, shadow, normal, motion and outline passes; preserve material uniform ABI.",
-  "deferredArtifactHash": "a175e0b8187143b3e432490463f3724d4fc1ef9e63e6b0ea776c4447258d7222",
+  "deferredArtifactHash": "a86678918dce8989b276ec17cf312e1c4c1be96d071528454e49f16ead516586",
   "passCount": 2,
-  "wgslBytes": 33068,
+  "wgslBytes": 34260,
   "releaseQualification": "pending G07 package and API review",
   "vertexColors": {
     "scope": "private linear normalized RGBA; no importer/editor API",
@@ -19,5 +19,26 @@
     "previousSimple3dHash": "1ed297f225816718ce15c7402d7c5789490d5870144f0556f80b5f82125db841",
     "deformationHash": "db2f01eff2888ce452be55e52c8724522d78e4b6e2c8afab27cea2061e84f12e",
     "simple3dHash": "2d603df1727c5bc0fd8f14b1686abab2e8b689b4fce8424c3e5e724591536c1c"
+  },
+  "beforeOpaqueProxy": {
+    "artifactHash": "a175e0b8187143b3e432490463f3724d4fc1ef9e63e6b0ea776c4447258d7222",
+    "wgslBytes": 33068
+  },
+  "opaqueProxy": "G1 roughness=-1 marks extended opaque PBR; resolve writes shared scene depth; opaque full Forward samples G1 via otherwise unused pass binding 11, preserving the 16-texture layout. Transparent/transmission retain scene color. Original sorted item offsets and coplanar winner mask are preserved.",
+  "beforeLightingAo": {
+    "artifactHash": "bee63c574e1e5f7b9b24a969028dcddd52f831cf16379ba15fe6bd2d9284d4a8",
+    "wgslBytes": 33611
+  },
+  "lightingAo": {
+    "semantics": "screen-space visibility modulates ambient and environment terms, preserving direct lighting, emission and transmitted scene radiance",
+    "privateBinding": 17,
+    "bufferLayout": "u32 width,height,rowStrideWords,layoutVersion=2; padded r16float pixels at byte 256, two values per u32; neutral width=0",
+    "sampledTextureCountUnchanged": true,
+    "layoutVersion": 2
+  },
+  "beforePackedAo": {
+    "artifactHash": "33cc3fb6187bd036b5543a3e0986a144b6840654c3fd19f27c333e913b8bc454",
+    "wgslBytes": 34123,
+    "bufferLayout": "u32 width,height,rowStrideWords,reserved; rgba16float pixels at byte 256; neutral width=0"
   }
 }

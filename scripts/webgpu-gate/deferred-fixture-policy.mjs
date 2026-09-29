@@ -71,3 +71,9 @@ export function validateDeferredReuseEvidence(oracle) {
   }
   if(!Array.isArray(dynamic.createdGroups)||dynamic.createdGroups.length)throw new Error('Dynamic resource-reuse created bind groups or lacks diagnostics.');
 }
+
+export function parseDeferredFixtureBuildOptions(args) {
+  if (args.some(arg => !['--tiled', '--compatibility', '--performance'].includes(arg))) throw new Error('Unknown Deferred fixture build option.');
+  if (args.length > 1) throw new Error('Select exactly one Deferred fixture build target.');
+  return { goal: args.includes('--performance') ? 'g05' : args.includes('--compatibility') ? 'g04' : args.includes('--tiled') ? 'g03' : 'g02' };
+}

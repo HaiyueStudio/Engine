@@ -4,6 +4,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs
 import { extname, relative, resolve, sep } from 'node:path';
 import { spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
+import { captureAllocationPhase } from './allocation-sampling-phase.mjs';
 
 export function defaultChromePath() {
   if (process.platform === 'darwin') return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -28,6 +29,7 @@ export async function runChromeWebGpuFixture({
   navigateAwayAfterResult = false,
   mounts = [],
   crossOriginIsolation = true,
+  interact = null,
 }) {
   const chrome = process.env.CHROME_PATH ?? defaultChromePath();
   if (!existsSync(chrome)) throw new Error(`Chrome/WebGPU gate requires Chrome. Set CHROME_PATH (looked for ${chrome}).`);
@@ -43,6 +45,7 @@ export async function runChromeWebGpuFixture({
       acceptedStatuses,
       visualCapture,
       navigateAwayAfterResult,
+      interact,
     );
     result.httpProvenance = fixtureServer.provenance();
     return result;
@@ -140,6 +143,7 @@ async function runChrome(
   acceptedStatuses,
   visualCapture,
   navigateAwayAfterResult,
+  interact,
 ) {
   const angleBackend = process.env.WEBGPU_ANGLE_BACKEND ?? defaultWebGpuAngleBackend();
   if (process.env.WEBGPU_REQUIRE_NATIVE === '1' && isSoftwareBackend(angleBackend)) {
@@ -211,13 +215,21 @@ async function runChrome(
       }
       if (allocationSampling) {
         await cdp.call('HeapProfiler.enable');
+        if (!allocationSampling.phase) {
         await cdp.call('HeapProfiler.startSampling', {
           samplingInterval: allocationSampling.samplingInterval ?? 32768,
           includeObjectsCollectedByMajorGC: allocationSampling.includeObjectsCollectedByMajorGC ?? true,
           includeObjectsCollectedByMinorGC: allocationSampling.includeObjectsCollectedByMinorGC ?? true,
         });
+        }
       }
       await cdp.call('Page.navigate', { url });
+      // Product examples may exercise their controls before publishing #result.
+      // Reuse the same browser error collection, native backend and finally cleanup.
+      if (interact) await interact(cdp);
+      const phaseProfile = allocationSampling?.phase
+        ? await captureAllocationPhase(cdp, waitFor, allocationSampling, timeoutMs)
+        : null;
       let lastProgress = '';
       const fixtureResult = await waitFor(async () => {
         let response;
@@ -251,11 +263,15 @@ async function runChrome(
         nativeBackend: !isSoftwareBackend(angleBackend),
       };
       if (allocationSampling) {
-        const response = await cdp.call('HeapProfiler.stopSampling');
+        const profile = phaseProfile ?? (await cdp.call('HeapProfiler.stopSampling')).result?.profile;
         result.allocationSampling = summarizeAllocationProfile(
-          response.result?.profile,
+          profile,
           allocationSampling.samplingInterval ?? 32768,
         );
+        if (phaseProfile) Object.assign(result.allocationSampling, {
+          scope: allocationSampling.phase, includeObjectsCollectedByMajorGC: true,
+          includeObjectsCollectedByMinorGC: true, rawProfile: phaseProfile,
+        });
       }
       if (visualCapture) result.visualCapture = await captureVisual(cdp, visualCapture);
       if (navigateAwayAfterResult) {

@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "scope": "Three rejected GPU experiments: integer powers/early rejection, inverse-square-root normalization, and an alias of the source buffer through uniform binding. Short diagnostic populations, not performance qualification or paired speedup proof.",
+  "decision": "Restore the exact pre-experiment runtime. Neither variant demonstrated the Intel budget improvement needed to justify a runtime change. All trial captures retained.",
+  "restoredRuntime": "6bb2179a2fd27d7893459dd4e52f1d9494d5f440d13ada872a327a04551d9c42",
+  "artifacts": [
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-low-power-2026-09-28T04-46-46.776Z.json",
+      "sha256": "4183d66ad8f40d2a4676264fee717585a8c870eb998c75a5694ea99bec8eeee2",
+      "runtime": "876371269157ceaa2388bc447acb565232bdcfa6a6ff0d047d73102097b8f7ce",
+      "status": "passed",
+      "tier": "diagnostic-g05-cost-smoke",
+      "diagnosticP95Ms": {
+        "gpu": 182.448316,
+        "resolve": 67.976771
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-reference-high-performance-passed-2026-09-28T04-46-03.223Z.json",
+      "sha256": "a73f8c2af8662bca0f4884aef874ec3961a4cf2f3711b81e936dd64a0d701546",
+      "runtime": "876371269157ceaa2388bc447acb565232bdcfa6a6ff0d047d73102097b8f7ce",
+      "status": "passed",
+      "tier": "diagnostic-g05-regression-reference"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-tiled-high-performance-passed-2026-09-28T04-46-12.421Z.json",
+      "sha256": "6b4d93b6eb34edd1b534a2eea699fd5ee23bbde068e4ca87b3bdf63db7e16dde",
+      "runtime": "876371269157ceaa2388bc447acb565232bdcfa6a6ff0d047d73102097b8f7ce",
+      "status": "passed",
+      "tier": "diagnostic-g05-regression-tiled"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-low-power-2026-09-28T04-46-36.562Z.json",
+      "sha256": "51810cfc570acad42bd210dc0e526c179c603cacaff8023cfeb7c030f7e76d2a",
+      "runtime": "876371269157ceaa2388bc447acb565232bdcfa6a6ff0d047d73102097b8f7ce",
+      "status": "passed",
+      "tier": "diagnostic-g05-room-smoke",
+      "diagnosticP95Ms": {
+        "gpu": 65.230314,
+        "resolve": 62.648688
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-reference-low-power-passed-2026-09-28T04-46-19.728Z.json",
+      "sha256": "baca88f60855fe0681b5e54d20d39e17089134d8c57a0d36a704d5f438661af8",
+      "runtime": "876371269157ceaa2388bc447acb565232bdcfa6a6ff0d047d73102097b8f7ce",
+      "status": "passed",
+      "tier": "diagnostic-g05-regression-reference"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-tiled-low-power-passed-2026-09-28T04-46-28.980Z.json",
+      "sha256": "a174833fc6f6d8a620e7e5217fd3a80922908dd10cb8525c09e53a326f02a2b7",
+      "runtime": "876371269157ceaa2388bc447acb565232bdcfa6a6ff0d047d73102097b8f7ce",
+      "status": "passed",
+      "tier": "diagnostic-g05-regression-tiled"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-high-performance-2026-09-28T04-46-40.421Z.json",
+      "sha256": "24f8d7f6a2992dc4c5dfe91f089e8295339737ba42dc41ff054a489522f2d96d",
+      "runtime": "876371269157ceaa2388bc447acb565232bdcfa6a6ff0d047d73102097b8f7ce",
+      "status": "passed",
+      "tier": "diagnostic-g05-cost-smoke",
+      "diagnosticP95Ms": {
+        "gpu": 32.245753,
+        "resolve": 3.93978
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-high-performance-2026-09-28T04-46-32.285Z.json",
+      "sha256": "6686f5734ae9fbdfbf6b59665733c96ae46444497556c56ce207747608ae9c70",
+      "runtime": "876371269157ceaa2388bc447acb565232bdcfa6a6ff0d047d73102097b8f7ce",
+      "status": "passed",
+      "tier": "diagnostic-g05-room-smoke",
+      "diagnosticP95Ms": {
+        "gpu": 6.236134,
+        "resolve": 5.950437
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-reference-low-power-passed-2026-09-28T04-48-54.295Z.json",
+      "sha256": "366658f3e0a1d82e2496e5904edd8d9bc44528064d157e8dacc56ee1bd12853a",
+      "runtime": "e990c130481fef4b97728e838574b3b09adbb5e1aff1e5528521d2ca1420c17e",
+      "status": "passed",
+      "tier": "diagnostic-g05-regression-reference"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-tiled-low-power-passed-2026-09-28T04-49-03.230Z.json",
+      "sha256": "9bc17f752bea9f3c9f97ef3d33e3e2f793cfddde5a611c7cd378d0702ebc4ae9",
+      "runtime": "e990c130481fef4b97728e838574b3b09adbb5e1aff1e5528521d2ca1420c17e",
+      "status": "passed",
+      "tier": "diagnostic-g05-regression-tiled"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-high-performance-2026-09-28T04-49-06.397Z.json",
+      "sha256": "4243dbf192accf08cc8a35564ca10773490060b2b9393e3417f563a42ad8d91b",
+      "runtime": "e990c130481fef4b97728e838574b3b09adbb5e1aff1e5528521d2ca1420c17e",
+      "status": "passed",
+      "tier": "diagnostic-g05-room-smoke",
+      "diagnosticP95Ms": {
+        "gpu": 6.660928,
+        "resolve": 6.392717
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-reference-high-performance-passed-2026-09-28T04-48-37.873Z.json",
+      "sha256": "9cacc65a730b19c9b5ca5d5017f6b5467e326dc5f945642a4d644f65c616625b",
+      "runtime": "e990c130481fef4b97728e838574b3b09adbb5e1aff1e5528521d2ca1420c17e",
+      "status": "passed",
+      "tier": "diagnostic-g05-regression-reference"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-tiled-high-performance-passed-2026-09-28T04-48-46.990Z.json",
+      "sha256": "38988d53a2bf5e600f8c2e4f84bcb25523c3746cc405aed8eb0b7d3a8a241ba1",
+      "runtime": "e990c130481fef4b97728e838574b3b09adbb5e1aff1e5528521d2ca1420c17e",
+      "status": "passed",
+      "tier": "diagnostic-g05-regression-tiled"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-low-power-2026-09-28T04-49-16.977Z.json",
+      "sha256": "28fd674ddb067d623a7aea065d3505d645305f757ab5131f2656d72185adaf46",
+      "runtime": "e990c130481fef4b97728e838574b3b09adbb5e1aff1e5528521d2ca1420c17e",
+      "status": "passed",
+      "tier": "diagnostic-g05-cost-smoke",
+      "diagnosticP95Ms": {
+        "gpu": 179.81069,
+        "resolve": 68.184851
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-low-power-2026-09-28T04-49-10.797Z.json",
+      "sha256": "8f978e0f6e1decfab0dbc82d6425933d2bbac5ec03e8828723ab261d2bf5beae",
+      "runtime": "e990c130481fef4b97728e838574b3b09adbb5e1aff1e5528521d2ca1420c17e",
+      "status": "passed",
+      "tier": "diagnostic-g05-room-smoke",
+      "diagnosticP95Ms": {
+        "gpu": 63.331927,
+        "resolve": 60.764384
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-low-power-2026-09-28T05-01-32.904Z.json",
+      "sha256": "56d37d07e1bba560726ff7d0ccf78a971f4f2fb32adf6b852281cb8a4507a555",
+      "runtime": "82319a9ef1b6d89be5f07d5d2724f1fb25179bda19c8efd8122fa3729a58cf07",
+      "status": "passed",
+      "tier": "diagnostic-g05-room-smoke",
+      "diagnosticP95Ms": {
+        "gpu": 62.144446,
+        "resolve": 59.534986
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-low-power-2026-09-28T05-01-39.355Z.json",
+      "sha256": "4d78a49cf0e2a759364ca25c5de9d0fb1895f36031edec83ccac8cc07699aa1b",
+      "runtime": "82319a9ef1b6d89be5f07d5d2724f1fb25179bda19c8efd8122fa3729a58cf07",
+      "status": "passed",
+      "tier": "diagnostic-g05-cost-smoke",
+      "diagnosticP95Ms": {
+        "gpu": 186.820164,
+        "resolve": 74.625167
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-reference-high-performance-passed-2026-09-28T05-01-00.025Z.json",
+      "sha256": "69bb90c6a6bc3661f45430fad49ba92b2f3c7dabdc83852b3d4594c2f001ca97",
+      "runtime": "82319a9ef1b6d89be5f07d5d2724f1fb25179bda19c8efd8122fa3729a58cf07",
+      "status": "passed",
+      "tier": "diagnostic-g05-regression-reference"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-tiled-high-performance-passed-2026-09-28T05-01-09.213Z.json",
+      "sha256": "f6966bda9850d5aad900ee96542a15863362bebc02e7295db4195f40eed9891d",
+      "runtime": "82319a9ef1b6d89be5f07d5d2724f1fb25179bda19c8efd8122fa3729a58cf07",
+      "status": "passed",
+      "tier": "diagnostic-g05-regression-tiled"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-reference-low-power-passed-2026-09-28T05-01-16.541Z.json",
+      "sha256": "ea87b3524180f23d25386f09372e1bb6eb8b4003f8da039dca298c11df33b359",
+      "runtime": "82319a9ef1b6d89be5f07d5d2724f1fb25179bda19c8efd8122fa3729a58cf07",
+      "status": "passed",
+      "tier": "diagnostic-g05-regression-reference"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-tiled-low-power-passed-2026-09-28T05-01-25.588Z.json",
+      "sha256": "d86fcb7f4e88f548084dcd34e9f66a1f792fbee02a7aebae65359f562617a191",
+      "runtime": "82319a9ef1b6d89be5f07d5d2724f1fb25179bda19c8efd8122fa3729a58cf07",
+      "status": "passed",
+      "tier": "diagnostic-g05-regression-tiled"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-high-performance-2026-09-28T05-01-28.811Z.json",
+      "sha256": "f9c315833bce41f6afc45fef55d8637be917d543bda58fd07e950db409888ec9",
+      "runtime": "82319a9ef1b6d89be5f07d5d2724f1fb25179bda19c8efd8122fa3729a58cf07",
+      "status": "passed",
+      "tier": "diagnostic-g05-room-smoke",
+      "diagnosticP95Ms": {
+        "gpu": 6.576456,
+        "resolve": 6.303014
+      }
+    }
+  ],
+  "logs": [
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-point-ao-intel.log",
+      "sha256": "9e9dc5b1a26569223f4fb23f2825d37446b509f1806a4282abbe569eee98c28b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-point-regressions-amd.log",
+      "sha256": "5bc4be4bc86a20f94e75c251965a1b4e870a06e29eaa8f73dc522215ca89397a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-point-overlap-intel.log",
+      "sha256": "6ea4a72ebb644c09b244afe083a8f8e586baa90774e1a7b01ec62f70329b51a7"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-point-regressions-intel.log",
+      "sha256": "71659563f42ea57c11b80cb26883760f0f9e7c34ed3015b52e6750919aeed670"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-point-ao-amd.log",
+      "sha256": "05d307caebec71a58feaf523d2c2d3d77a69fbe02f3a817a866691b57900fd0f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-point-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-point-invsqrt-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-point-overlap-amd.log",
+      "sha256": "1173dc36df93fd4152bc4be781447db415aa491e465e0d83d659079c52d0833f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-invsqrt-regressions-intel.log",
+      "sha256": "71d54a8c1d3a2886efc3401fdca6d86e090a3843ae6c43f528ae5b365e1c9d74"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-invsqrt-overlap-amd.log",
+      "sha256": "f1f7aace46fe335b0e667cc1806ea0e78284ae1e638c238655815960bc8fde9c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-invsqrt-regressions-amd.log",
+      "sha256": "bdcf501c47c21edc82319dfb6ac583d57ebcebe43e576ac1e7ad3d8e3d123597"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-invsqrt-ao-intel.log",
+      "sha256": "d2213e239ebb6b921ca50c97fb87a594f975aeadd4008baa15085a3171279a54"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-invsqrt-overlap-intel.log",
+      "sha256": "c3da433cf655fcbea2d4c5a733d6d2c6ed86c179f9e66a813a0d6c8f85ed8ed4"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-uniform-shader-tests.log",
+      "sha256": "de7a49909231ed5fc54ca46a843ea6c042cbbb3c5a11f76900960b752f5e235a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-uniform-overlap-intel.log",
+      "sha256": "75a37ea6718213eeee4b9694c8bf29e25f47f45f744842f871cdeae1f95974df"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-uniform-ao-intel.log",
+      "sha256": "df4fd5ecc52d18c6ea63ccbdc0b5402a3ee861217d5c43a96c4199034ec3ed73"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-uniform-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-uniform-regressions-amd.log",
+      "sha256": "ece8aa006bc3c073b7de4a39195777c89eb906bd12a73103e50123fcb0d38b73"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-uniform-regressions-intel.log",
+      "sha256": "42214c87b19218c42a1c10385817baa8d94897507da8f63d3f37ad3cd2d143cd"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/gpu-arithmetic-2026-09-28/g05-uniform-overlap-amd.log",
+      "sha256": "d4e4e48072feddf6d8a0be00cf738060ea89aadfb3085258b6eed072df6e1457"
+    }
+  ]
+}

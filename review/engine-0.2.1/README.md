@@ -72,3 +72,43 @@ G03 已显式激活，状态为 active；上面的 G02 完成时状态保留为�
 ## G03 完成（2026-09-27）
 
 G03 已完成，G04 为 ready、尚未激活；上面的阶段状态保留为历史。[完成审计](g03-completion-audit.md)、[最终性能报告](g03-final-performance-review.md)、[八场景证据](g03-final-room-matrix.json)及[G04 交接](g04-handoff.md)记录当前结果。停止竞争游戏后，重新完整采集 24 项并通过全部相对预算与稳定性检查；未拼接样本或放宽阈值。高重叠绝对帧率目标继续由 G05/G07 完成，不宣称发布资格。
+
+## G04 当前进展（2026-09-27）
+
+G04 正在实施，尚未完成。透明完整灯表路径的实现、双 GPU 正确性证据与未完成范围见 [G04 进度](g04-progress.md)。用户批准后的 Shader 成本预算、构建期 include 与 Artifact 去重见 [实施报告](g04-budget-import-application.md)；[原提案](g04-budget-import-review.md)保留当时测量。未来不透明扩展代理表面的预算仍需按实际实现核定。
+
+## G04 安装修复与兼容性审计（2026-09-27）
+
+[Editor 安装修复](g04-editor-install-repair.md)已完成，消费版本策略不变。G04 新增了不透明扩展 PBR 的完整灯表通路，并完成双 GPU 材质/效果/输出/实例回退/设备/312 次切换及 A/B 原生回归；最终状态见[兼容性审计](g04-compatibility-audit.md)。用户选择的[光照阶段 AO](g04-ao-contract-review.md)已完成；双 GPU 贡献隔离、1,367 项测试、95 个示例构建及 Stage14 全部通过。**G04 complete；[G05](g05-handoff.md) ready，尚未启动。**
+
+## G05 activation — 2026-09-28
+
+G05 已由用户激活，当前为 **active**；上一节的 ready 是历史状态。[进度与完整验收清单](g05-progress.md)记录分离 CPU/GPU 采样、逐视图像素检查、三轮房间矩阵和剩余性能资格。当前短测只属于诊断，不能替代两类 GPU 的完整性能验收。
+
+## G05 实例资源与包体积检查（2026-09-28）
+
+[实例缓存与包消费者审计](g05-instance-cache-review.md)记录四视图绑定组从每帧 12 个降至 0、双 GPU 32 项诊断和 37 个公开类型入口的真实安装验证。完整性能采样与其余 E/F/G 验收仍在进行，G05 保持 active。
+
+## G05 AO 内存修复与对象分配归因（2026-09-28）
+
+[当前检查点](g05-r16-checkpoint.md)记录 R16F AO、共享在途资源预算、双 GPU 像素/生命周期回归，以及 2,400 帧 CPU 对象分配采样。1080p AO 的 Deferred 内存已降到 64 MiB 预算内；全灯回退成本与完整 E/F/G 性能资格仍未完成。全仓 1,376 项测试、95 个示例目标和包消费者检查通过，不等于 G05 或发布验收完成。
+
+## G05 静态灯快照复用（2026-09-28）
+
+[实现与验证报告](g05-light-cache-review.md)记录静态场景双 GPU 采样分配量约 31% 的下降，及旧快照、稳定灯 ID、阴影槽和完整灯表的兼容性回归。全仓 1,380 项测试和 95 个构建目标通过。对象分配改善不代表帧率资格；GPU 成本和完整性能矩阵仍待完成。
+
+## G05 GPU 耗时与全量性能门禁（2026-09-28）
+
+[最新审计](g05-gpu-performance-audit.md)及[机器证据索引](g05-gpu-performance-audit.json)记录明确的 **failed-and-incomplete** 结果：Intel 高重叠在采样前后 CPU limit 均为 100 时仍为 62.70 ms（预算 24 ms）；Intel 完整 GTAO 长负载结束时出现 75/46 限速。Forward、F、E/G 全量入口已执行，但均被首例主机预检拦截，不能声称完成 264 次矩阵。三项 GPU 优化试验未证明所需收益，已撤回并恢复原运行时；185 项性能策略测试通过。G05 保持 active，未完成性能资格，未进入 G06/G07。
+
+## G05 evening resumption — 2026-09-28
+
+See [resumption audit](g05-resume-audit.md) and [hash-bound evidence](g05-resume-audit.json). Four current-runtime AMD/Intel pending/AO resource captures and the real package/29-consumer qualification pass. A timer early-wakeup defect was fixed without weakening the 120-second gate; 190 policy tests pass. The fresh full Forward/F/E-G attempt subsequently failed real host preflight (86/77/88), so full timing/stability remains incomplete. All processes are terminal; G05 is not complete.
+
+## G05 完整复测（2026-09-29）
+
+[完整性能审计](g05-full-performance-2026-09-29.md)与[机器证据索引](g05-full-performance-2026-09-29.json)已完成。Forward、F、E/G 和高重叠/GTAO 专项人口均完整，主机前后检查全部通过；预算及跨轮稳定性仍失败。G05 保持 active，G06/G07 保持 draft，未发布。上述历史阶段状态保留。
+
+## G06 多灯示例 — 2026-09-29
+
+[交互与集成验收](g06-example-audit.md)通过：96 个 fresh 示例目标、25 项 native 浏览器检查、API/包消费/生命周期验收完成。G06 complete；G05 仍未取得性能资格，G07 仍 draft。跨引擎及设备分档另立 M18 G08 draft。

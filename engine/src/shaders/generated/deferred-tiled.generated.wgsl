@@ -224,6 +224,17 @@ fn shadowVisibility(shadowIndex: u32, worldPosition: vec3<f32>, normal: vec3<f32
 }
 
 
+@group(3) @binding(17) var<storage, read> lightingAo: array<u32>;
+fn lightingAmbientVisibility(pixel: vec2<f32>) -> f32 {
+  if (lightingAo[0] == 0u) { return 1.0; }
+  let xy = min(vec2<u32>(max(pixel, vec2<f32>(0.0))), vec2<u32>(lightingAo[0], lightingAo[1]) - vec2<u32>(1u));
+  // Private layout v2: padded R16F rows, two visibility values per storage word.
+  let offset = 64u + xy.y * lightingAo[2] + xy.x / 2u;
+  let pair = unpack2x16float(lightingAo[offset]);
+  return clamp(select(pair.x, pair.y, (xy.x & 1u) == 1u), 0.0, 1.0);
+}
+
+
 struct DeferredSource {
   header: DeferredSourceHeader,
   records: array<DeferredLightRecord>,
@@ -306,7 +317,8 @@ fn fs_main(@builtin(position) pixel: vec4<f32>) -> DeferredResolveOutput {
   let baseMetallic = textureLoad(g0, xy, 0);
   let normalRoughness = textureLoad(g1, xy, 0);
   let emissiveOcclusion = textureLoad(g2, xy, 0);
-  if (normalRoughness.a < 0.0) { discard; }
+  // Populate the shared scene depth even where the opaque proxy defers lighting.
+  if (normalRoughness.a < 0.0) { return DeferredResolveOutput(vec4<f32>(0.0, 0.0, 0.0, 1.0), depth); }
   // CPU validates the same contract. Guard GPU access as well; no stale list can address another generation.
   if (source.header.abiVersion != 1u || source.header.sourceGeneration != lightView.sourceGeneration
     || lightView.directionalCount != source.header.directionalCount
@@ -321,8 +333,9 @@ fn fs_main(@builtin(position) pixel: vec4<f32>) -> DeferredResolveOutput {
   let base = baseMetallic.rgb;
   let metallic = baseMetallic.a;
   let roughness = normalRoughness.a;
+  let lightingAoVisibility = lightingAmbientVisibility(pixel.xy);
   let ambientF = fresnelSchlickF90(nDotV, vec3<f32>(0.04), vec3<f32>(1.0));
-  var direct = lightView.ambientRadiance.rgb * base * (1.0 - metallic) * (1.0 - deferredMaxComponent(ambientF));
+  var direct = lightingAoVisibility * lightView.ambientRadiance.rgb * base * (1.0 - metallic) * (1.0 - deferredMaxComponent(ambientF));
   for (var index = 0u; index < lightView.directionalCount; index++) {
     direct += deferredDirect(source.records[index], position, n, v, nDotV, base, metallic, roughness);
   }
@@ -356,7 +369,7 @@ fn fs_main(@builtin(position) pixel: vec4<f32>) -> DeferredResolveOutput {
     irradiance *= textureSampleLevel(diffuseEnvironment, environmentSampler, deferredRotateY(n, rotation), environment.params.z).rgb;
     prefiltered *= textureSampleLevel(specularEnvironment, environmentSampler, deferredRotateY(reflect(-v, n), rotation), roughness * environment.params.z).rgb;
   }
-  let ibl = (kd * irradiance * base / PI + prefiltered * environmentF) * environment.params.x * emissiveOcclusion.a;
+  let ibl = (kd * irradiance * base / PI + prefiltered * environmentF) * environment.params.x * emissiveOcclusion.a * lightingAoVisibility;
   let color = direct + ibl + emissiveOcclusion.rgb;
   return DeferredResolveOutput(vec4<f32>(applyFog(color, sceneFrame.fog, sceneFrame.eyePosition.xyz, position), 1.0), depth);
 }

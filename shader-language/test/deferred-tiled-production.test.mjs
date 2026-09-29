@@ -5,7 +5,7 @@ import {compileDeferredLightingArtifact} from '../scripts/generate-deferred-ligh
 
 test('tiled family keeps reference surface/global lighting and specializes point evaluation without changing global lighting',async()=>{
   const reference=await compileDeferredLightingArtifact(),result=await generateDeferredTiledProduction();
-  assert.equal(reference.artifactHash,'a175e0b8187143b3e432490463f3724d4fc1ef9e63e6b0ea776c4447258d7222');
+  assert.equal(reference.artifactHash,'a86678918dce8989b276ec17cf312e1c4c1be96d071528454e49f16ead516586');
   assert.equal(result.passCount,2);
   const pass=result.artifact.passes['deferred-tiled'],original=reference.passes['deferred-reference'];
   const localBegin=original.code.indexOf('  for (var index = 0u; index < lightView.pointCount; index++) {');

@@ -7,6 +7,7 @@ import {
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import { getAmbientOcclusionShader } from './AmbientOcclusionShader';
 import { PrecompiledUniformBlockWriter } from '../shader/PrecompiledShaderRuntime';
+import { registerLightingAmbientOcclusion } from './LightingAmbientOcclusion';
 import { mat4 } from 'wgpu-matrix';
 
 type AmbientOcclusionAlgorithm = 'gtao' | 'sao' | 'ssao';
@@ -124,6 +125,23 @@ class AmbientOcclusionPass extends PostProcessPass {
     this.displayMode = displayMode(options.displayMode ?? 'composite');
     this.resolutionScale = resolutionScale(options.resolutionScale ?? 0.5);
     this.scratchFormat = scratchFormat(options.scratchFormat ?? 'r8unorm');
+    registerLightingAmbientOcclusion(this, {
+      composite: () => this.displayMode === 'composite',
+      create: () => new AmbientOcclusionPass(this.algorithm, { resolutionScale: this.resolutionScale, scratchFormat: this.scratchFormat }),
+      recorded: target => {
+        const ao = target as AmbientOcclusionPass;
+        this._frameCount++;
+        this._width = ao._width; this._height = ao._height;
+        this._scratchWidth = ao._scratchWidth; this._scratchHeight = ao._scratchHeight;
+      },
+      configure: (target, first) => {
+        const ao = target as AmbientOcclusionPass;
+        for (const key of ['radius', 'intensity', 'bias', 'power', 'distanceFalloff', 'quality'] as const) {
+          Object.assign(ao, { [key]: this[key] });
+        }
+        ao.displayMode = first ? 'occlusion' : 'composite';
+      },
+    });
   }
 
   get stats(): AmbientOcclusionPassStats {

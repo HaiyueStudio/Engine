@@ -1,0 +1,494 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-27T23:30:38.412Z",
+  "status": "complete-g04-correctness",
+  "runtimeFingerprint": "07917b4fd68a4aae19b8f8223c2f596ada929bb731eb92f51e4bc6908c2ec5c2",
+  "captures": [
+    {
+      "path": "artifacts/engine-0.2.1/g04/materials-high-performance-passed-2026-09-27T23-17-29.831Z.json",
+      "sha256": "e1041b7b4717f1be03218ddffcf884d4c16fd4c10c7b18e7a19b827bc85d605a",
+      "tier": "diagnostic-g04-materials",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": 100,
+      "maximumDelta": 0.000568389892578125,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "httpFiles": 8,
+      "httpVerifiedBytes": 3975034
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/effects-high-performance-passed-2026-09-27T23-17-37.719Z.json",
+      "sha256": "c6257bd463b2db21a55e30c93e6a07fe97dcc72669a180b2ce269e3003a54a0b",
+      "tier": "diagnostic-g04-effects",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": 30,
+      "lightingAoPairs": 36,
+      "maximumDelta": 1,
+      "ao": {
+        "protectedMaximumDelta": 0,
+        "minimumDarkenedPixels": 1129,
+        "minimumVisibility": 0.216064453125
+      },
+      "httpFiles": 9,
+      "httpVerifiedBytes": 3976039
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/output-high-performance-passed-2026-09-27T23-17-40.852Z.json",
+      "sha256": "1c38d3e0fef9b99376a87053b64641774a95df9ee3085a3e443c63cb47fda8a9",
+      "tier": "diagnostic-g04-output",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": 16,
+      "maximumDelta": 0,
+      "httpFiles": 8,
+      "httpVerifiedBytes": 3971014
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/instances-high-performance-passed-2026-09-27T23-17-43.763Z.json",
+      "sha256": "9c8c4afe5afc4b4940d62330ccacd0f7a4708d3d4c70edab72ed841ce0875d80",
+      "tier": "diagnostic-g04-instances",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": 4,
+      "maximumDelta": 0,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "httpFiles": 8,
+      "httpVerifiedBytes": 3968387
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/device-high-performance-passed-2026-09-27T23-17-46.559Z.json",
+      "sha256": "081f298101e01238209b7f5a689b0724f921719b7db4182afc991f97a1598b28",
+      "tier": "diagnostic-g04-device",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": 6,
+      "maximumDelta": 0,
+      "httpFiles": 7,
+      "httpVerifiedBytes": 3964423
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/lifecycle-high-performance-passed-2026-09-27T23-17-56.259Z.json",
+      "sha256": "aa02b9e4f50326425455f8a520321749a5b52ddb3480aa7e8a1c320a1a14186a",
+      "tier": "diagnostic-g04-lifecycle",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "switches": 312,
+      "highWater": {
+        "buffers": {
+          "warm": 70,
+          "later": 70
+        },
+        "textures": {
+          "warm": 65,
+          "later": 65
+        },
+        "bufferBytes": {
+          "warm": 816880,
+          "later": 816880
+        },
+        "textureBytes": {
+          "warm": 488568,
+          "later": 488568
+        }
+      },
+      "httpFiles": 8,
+      "httpVerifiedBytes": 3970380
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/regression-reference-high-performance-passed-2026-09-27T23-18-04.135Z.json",
+      "sha256": "eb8d5ad904387ac64d9e5fe8605ce58c0f7d7145e125807e9e3d37d716d0cbfd",
+      "tier": "diagnostic-g04-regression-reference",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": 7,
+      "geometryCases": 14,
+      "maximumDelta": 0,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "httpFiles": 10,
+      "httpVerifiedBytes": 3962515
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/regression-tiled-high-performance-passed-2026-09-27T23-18-11.718Z.json",
+      "sha256": "2e92235925cdabdb07eca2b573bc1f0c369a0afe8a41c6cdd1ff73c2a4cb09ce",
+      "tier": "diagnostic-g04-regression-tiled",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": 32,
+      "boundaryCases": 47,
+      "maximumDelta": 0,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "httpFiles": 10,
+      "httpVerifiedBytes": 3989403
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/materials-low-power-passed-2026-09-27T23-18-21.051Z.json",
+      "sha256": "c5f1f675ed624764bf8d41f5d28ba0d3d260b5e911ebc7552ca7b81778dda8f5",
+      "tier": "diagnostic-g04-materials",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": 100,
+      "maximumDelta": 0.000568389892578125,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "httpFiles": 8,
+      "httpVerifiedBytes": 3975034
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/effects-low-power-passed-2026-09-27T23-18-30.528Z.json",
+      "sha256": "8d64a007a42c0beb646ca238ec70717c7805246b57099e9b6f3d38ec9e1a4239",
+      "tier": "diagnostic-g04-effects",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": 30,
+      "lightingAoPairs": 36,
+      "maximumDelta": 1,
+      "ao": {
+        "protectedMaximumDelta": 0,
+        "minimumDarkenedPixels": 1123,
+        "minimumVisibility": 0.216064453125
+      },
+      "httpFiles": 9,
+      "httpVerifiedBytes": 3976039
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/output-low-power-passed-2026-09-27T23-18-33.933Z.json",
+      "sha256": "61369863bc14abf411f0350f167f22fbe00567b23a2da4e67ff6654ffb09aec7",
+      "tier": "diagnostic-g04-output",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": 16,
+      "maximumDelta": 0,
+      "httpFiles": 8,
+      "httpVerifiedBytes": 3971014
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/instances-low-power-passed-2026-09-27T23-18-37.061Z.json",
+      "sha256": "34f7341b21c9b2c5570630a6d705f9a4b28bc21e34e86432104801230732001c",
+      "tier": "diagnostic-g04-instances",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": 4,
+      "maximumDelta": 0,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "httpFiles": 8,
+      "httpVerifiedBytes": 3968387
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/device-low-power-passed-2026-09-27T23-18-40.009Z.json",
+      "sha256": "039ad7ace68150b56613bd3a2866288f11a0fdd15f8aa4952af52e62d037bdf6",
+      "tier": "diagnostic-g04-device",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": 6,
+      "maximumDelta": 0,
+      "httpFiles": 7,
+      "httpVerifiedBytes": 3964423
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/lifecycle-low-power-passed-2026-09-27T23-18-52.256Z.json",
+      "sha256": "a1b11158aae1293963a93e0cad2704e068f0f7333346993769e665657eff3e2c",
+      "tier": "diagnostic-g04-lifecycle",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "switches": 312,
+      "highWater": {
+        "buffers": {
+          "warm": 70,
+          "later": 70
+        },
+        "textures": {
+          "warm": 65,
+          "later": 65
+        },
+        "bufferBytes": {
+          "warm": 816880,
+          "later": 816880
+        },
+        "textureBytes": {
+          "warm": 488568,
+          "later": 488568
+        }
+      },
+      "httpFiles": 8,
+      "httpVerifiedBytes": 3970380
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/regression-reference-low-power-passed-2026-09-27T23-19-00.757Z.json",
+      "sha256": "c017fa64b6d57ad46c2aa544749595cc64d31ea8c6c86e52c7d4343178c2ba5a",
+      "tier": "diagnostic-g04-regression-reference",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": 7,
+      "geometryCases": 14,
+      "maximumDelta": 0,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "httpFiles": 10,
+      "httpVerifiedBytes": 3962515
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/regression-tiled-low-power-passed-2026-09-27T23-19-10.273Z.json",
+      "sha256": "e003dda64ef3b88a0b15a08ca4a3bffeb4f78529d46eb92ddee5eab3867222db",
+      "tier": "diagnostic-g04-regression-tiled",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": 32,
+      "boundaryCases": 47,
+      "maximumDelta": 0,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "httpFiles": 10,
+      "httpVerifiedBytes": 3989403
+    }
+  ],
+  "httpFilesRevalidated": 136,
+  "uniqueHttpFilesRevalidated": 36,
+  "checks": [
+    {
+      "command": "npm run typecheck",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-typecheck.log",
+      "sha256": "8378ee391f7859a0c18271eaf0c9303933dcb8587fa7349f707a366b40edf418",
+      "bytes": 2835
+    },
+    {
+      "command": "npm test",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-test.log",
+      "sha256": "c6c3f7263a0c52215e86dfe73d5ca186774f8d84e076c4c1d8a598a3f6174f31",
+      "bytes": 139824
+    },
+    {
+      "command": "npm run build",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-build.log",
+      "sha256": "7580d6488b46818b2e400a8fb241d11b7b1dcc9ed38ecfd4b98cf644fdd60313",
+      "bytes": 15968
+    },
+    {
+      "command": "node --test engine/test/deferred-*.test.mjs",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-ao-completion-focused.log",
+      "sha256": "f525ea1b7911a15dc8c9c4eda079e8d3d4787bdf920eb65883bff9bf84811ebf",
+      "bytes": 4559
+    },
+    {
+      "command": "node --test scripts/webgpu-gate/deferred-g04-suite-policy.test.mjs scripts/webgpu-gate/deferred-g04-lifecycle-policy.test.mjs",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-policy-focused.log",
+      "sha256": "7ca1e179506c8e001e9df390c1bc0d440270d347635a4010a962844e0054a9f5",
+      "bytes": 345
+    },
+    {
+      "command": "npm run performance-budget:test",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-budget-policy.log",
+      "sha256": "d64ed6421b56778fda46c0e9cf40c23480159c2a9ec9f1b3aa152ec537b8f36f",
+      "bytes": 14510
+    },
+    {
+      "command": "npm run shader-language:check",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-ao-shader-check.log",
+      "sha256": "7362d94f849319f2b0ba172b83b3d270c6ff411d08d10c08597481f227aa105b",
+      "bytes": 16259
+    },
+    {
+      "command": "npm run verify:shader-language-stage14",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-stage14.log",
+      "sha256": "3a362c8238bb11aea43a63effdc3a8bc16e92af4bdeda4056a9cebc4a6a99258",
+      "bytes": 23473
+    },
+    {
+      "command": "node scripts/webgpu-gate/run-deferred-g04-acceptance.mjs",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-ao-completion-native.log",
+      "sha256": "9a6a6e9bd3d1c16c1c754a19b992c669a1f3c70e1294c1ff4101a0c53b356b1c",
+      "bytes": 5132
+    },
+    {
+      "command": "npm run modules:check",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-modules.log",
+      "sha256": "aedd03659ceac8b166ec3eabadb41b02bc11eeaa41c76baa2fc301f588e6f79e",
+      "bytes": 180
+    },
+    {
+      "command": "npm run responsibilities:check",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-responsibilities.log",
+      "sha256": "6fa09923726c2f63ea49a166fb29d211950e6aaa019390427f961c4d74e2b3c9",
+      "bytes": 259
+    },
+    {
+      "command": "npm run renderer-prepare:check",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-prepare.log",
+      "sha256": "3896d25e54cb62720a681e2bc7098bf3551ea000929e9a62e6f5e5139f0b6e0b",
+      "bytes": 239
+    },
+    {
+      "command": "npm run api:check",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-api.log",
+      "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79",
+      "bytes": 158
+    },
+    {
+      "command": "npm run check:boundaries",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-boundaries.log",
+      "sha256": "cfac1f27b1a8943f2899d5d8fbf9134a7f32cb56964d877c478f1f9168291129",
+      "bytes": 1037
+    },
+    {
+      "command": "npm run docs:check",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-docs.log",
+      "sha256": "495ad3e501ceccf01841e1448cab3e13954d80e41680e6cd5ff5be96f7bd70fc",
+      "bytes": 407
+    },
+    {
+      "command": "node scripts/verify-gpu-instances-021.mjs",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-gpu-instances.log",
+      "sha256": "69e8a0f87984ff1095767e7dcbb5557c7c44d816c1a84f90b31a70d3f7ce6e16",
+      "bytes": 175
+    },
+    {
+      "command": "node scripts/verify-ambient-occlusion-example.mjs",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-legacy-ao.log",
+      "sha256": "d6e272c9bdef5bd48ec4daa65c935abb88b883f27508996a8a33e62c321ccab4",
+      "bytes": 4478
+    },
+    {
+      "command": "node scripts/verify-clipping-planes-example.mjs",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-clipping.log",
+      "sha256": "72fa9b05f66f5c556ff872edcca6e3ab6759e7d09c7235e32fa3504170fe5432",
+      "bytes": 1111
+    },
+    {
+      "command": "node scripts/verify-webgpu-planar-reflection.mjs",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-reflection.log",
+      "sha256": "d2b5dfbd3ca96ae2d5885c13a100797107f178e0ff0e573e26798d34da02073d",
+      "bytes": 326
+    },
+    {
+      "command": "milestones: npm run check",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-milestones.log",
+      "sha256": "c6289cfdbe5368bea8a2f7ebb50fd8111f51d28fed8241021c7bac199e40f2cf",
+      "bytes": 195
+    },
+    {
+      "command": "git diff --check (Engine)",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-diff-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "command": "git diff --check (milestones)",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/completion-checks/g04-completion-milestone-diff.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "shaderBudget": {
+    "bytes": 560954,
+    "maximumBytes": 570000,
+    "files": 75,
+    "variants": 67,
+    "pipelines": 67
+  },
+  "open": [],
+  "handoff": [
+    "G05 absolute performance/device qualification including AO overhead and high-overlap frame budgets",
+    "G06 example and diagnostics product integration",
+    "G07 clean-revision package/API/release qualification"
+  ],
+  "scope": "Dirty-worktree G04 correctness diagnostic; not performance or release qualification."
+}

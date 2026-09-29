@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "performanceQualified": false,
+  "generatedAt": "2026-09-28T04:09:59.302142+00:00",
+  "beforeAudit": {
+    "path": "artifacts/engine-0.2.1/g05/cpu-allocation-audit-2026-09-28T03-41-36.266Z.json",
+    "sha256": "28de10a8586f97bdb4f6cbdd2181ae60fa1c2a22cff2bbd4a1f96f9a2cda9c33"
+  },
+  "afterAudit": {
+    "path": "artifacts/engine-0.2.1/g05/cpu-allocation-audit-2026-09-28T04-08-06.895Z.json",
+    "sha256": "7e128e8ddd8adc02add23a0d19d9473840360399504e1ed547fb42ee09303ea1"
+  },
+  "beforeInputs": {
+    "sha256": "ce94c5127913b6cd9339d48b06bf49465a2893861c3f91b70f412177d34aa32c",
+    "fileCount": 610
+  },
+  "afterInputs": {
+    "sha256": "6bb2179a2fd27d7893459dd4e52f1d9494d5f440d13ada872a327a04551d9c42",
+    "fileCount": 610
+  },
+  "harness": "c6c7824e1186ea29c4031dfc02df802301cf737cca70defb800f5e5b2086fcca",
+  "scope": "All eight matched V8 allocation diagnostics, fixed 4096-byte sampling interval and 300 frames each. Allocation estimates are not CPU timing or FPS qualification. No samples or case populations removed.",
+  "rows": [
+    {
+      "options": {
+        "caseId": "dynamic-128-four-view",
+        "algorithm": "tiled",
+        "preference": "high-performance",
+        "full": false,
+        "idleMs": 120000,
+        "moving": true
+      },
+      "before": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-dynamic-128-four-view-tiled-moving-high-performance-2026-09-28T03-36-07.788Z.json",
+          "sha256": "3b845d912d66f794bb3663222e817847d9a6f59ee901407f1a637199934790da"
+        },
+        "bytesPerFrame": 1291622.3733333333,
+        "lightTableBytes": 51801744
+      },
+      "after": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-dynamic-128-four-view-tiled-moving-high-performance-2026-09-28T04-05-23.410Z.json",
+          "sha256": "8e24fc54e689e85572399ee8d70a5e4f7efdd72271728b90685ea934611010aa"
+        },
+        "bytesPerFrame": 1289011.3066666666,
+        "lightTableBytes": 51826692
+      },
+      "allocationChangePercent": -0.20215402896189838,
+      "sourceUploadDelta": {
+        "sourceUploads": 300,
+        "sourceUploadBytes": 2481600,
+        "viewUploads": 300,
+        "viewUploadBytes": 230400
+      }
+    },
+    {
+      "options": {
+        "caseId": "sparse-128",
+        "algorithm": "tiled",
+        "preference": "high-performance",
+        "full": false,
+        "idleMs": 120000,
+        "moving": true
+      },
+      "before": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-moving-high-performance-2026-09-28T03-34-35.009Z.json",
+          "sha256": "193213a1dfa38d12783b429152384ed01933a4d95480cf0b991ab9120b41305c"
+        },
+        "bytesPerFrame": 653480.12,
+        "lightTableBytes": 52027408
+      },
+      "after": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-moving-high-performance-2026-09-28T04-04-58.318Z.json",
+          "sha256": "b466113ea6e742406e780657e45b42c39cd54befd61aac13f4bb86bd714e9a55"
+        },
+        "bytesPerFrame": 659186.2266666667,
+        "lightTableBytes": 51057720
+      },
+      "allocationChangePercent": 0.8731874914062576,
+      "sourceUploadDelta": {
+        "sourceUploads": 300,
+        "sourceUploadBytes": 2481600,
+        "viewUploads": 300,
+        "viewUploadBytes": 230400
+      }
+    },
+    {
+      "options": {
+        "caseId": "sparse-128",
+        "algorithm": "reference",
+        "preference": "high-performance",
+        "full": false,
+        "idleMs": 120000,
+        "moving": true
+      },
+      "before": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-reference-moving-high-performance-2026-09-28T03-35-43.237Z.json",
+          "sha256": "ca26ffb2f100cdf9b86bae5d9f957d30f4224f1b796771f544c7788d1a1bceab"
+        },
+        "bytesPerFrame": 643395.1466666666,
+        "lightTableBytes": 52102324
+      },
+      "after": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-reference-moving-high-performance-2026-09-28T04-05-08.147Z.json",
+          "sha256": "02c824ea921bcbed8ff61267906c1a93579292775f4503fb51f698a9f412f1b9"
+        },
+        "bytesPerFrame": 640531.1333333333,
+        "lightTableBytes": 51978848
+      },
+      "allocationChangePercent": -0.44514064928393715,
+      "sourceUploadDelta": {
+        "sourceUploads": 300,
+        "sourceUploadBytes": 2481600,
+        "viewUploads": 300,
+        "viewUploadBytes": 230400
+      }
+    },
+    {
+      "options": {
+        "caseId": "sparse-128",
+        "algorithm": "tiled",
+        "preference": "high-performance",
+        "full": false,
+        "idleMs": 120000,
+        "moving": false
+      },
+      "before": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-static-high-performance-2026-09-28T03-35-29.190Z.json",
+          "sha256": "14fcc996a56e70c4631bba3f8a43383181af8679df038efe89dcf792f595616a"
+        },
+        "bytesPerFrame": 644462.2666666667,
+        "lightTableBytes": 51362892
+      },
+      "after": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-static-high-performance-2026-09-28T04-04-50.873Z.json",
+          "sha256": "df9e6c051d20c3e2d5b3655fb039d1fead046ef905ce1d19265afe7234b42d29"
+        },
+        "bytesPerFrame": 443368.13333333336,
+        "lightTableBytes": 28848
+      },
+      "allocationChangePercent": -31.203399133582575,
+      "sourceUploadDelta": {
+        "sourceUploads": 0,
+        "sourceUploadBytes": 0,
+        "viewUploads": 0,
+        "viewUploadBytes": 0
+      }
+    },
+    {
+      "options": {
+        "caseId": "dynamic-128-four-view",
+        "algorithm": "tiled",
+        "preference": "low-power",
+        "full": false,
+        "idleMs": 120000,
+        "moving": true
+      },
+      "before": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-dynamic-128-four-view-tiled-moving-low-power-2026-09-28T03-38-43.777Z.json",
+          "sha256": "f0dd91c65ac51c48746c8f3307cab7f2fc5f7b25c6cd954b76918f89848b45e1"
+        },
+        "bytesPerFrame": 1295139.4133333333,
+        "lightTableBytes": 51351656
+      },
+      "after": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-dynamic-128-four-view-tiled-moving-low-power-2026-09-28T04-07-07.399Z.json",
+          "sha256": "bfed449b299187fe1f88722b44e15100d1502755e603a78125f15fa896389d1b"
+        },
+        "bytesPerFrame": 1296640.3733333333,
+        "lightTableBytes": 51826712
+      },
+      "allocationChangePercent": 0.11589177076596346,
+      "sourceUploadDelta": {
+        "sourceUploads": 300,
+        "sourceUploadBytes": 2481600,
+        "viewUploads": 300,
+        "viewUploadBytes": 230400
+      }
+    },
+    {
+      "options": {
+        "caseId": "sparse-128",
+        "algorithm": "tiled",
+        "preference": "low-power",
+        "full": false,
+        "idleMs": 120000,
+        "moving": true
+      },
+      "before": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-moving-low-power-2026-09-28T03-36-35.004Z.json",
+          "sha256": "2b0a18ce9245945f36d195bd7946d3031bfe451b21898b9194518142a8e0579d"
+        },
+        "bytesPerFrame": 648380.36,
+        "lightTableBytes": 50806124
+      },
+      "after": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-moving-low-power-2026-09-28T04-05-51.819Z.json",
+          "sha256": "eeec345cb8fdda91acf50ee464bb8dca9c76af4027f662c74ff335cc8483e110"
+        },
+        "bytesPerFrame": 657719.88,
+        "lightTableBytes": 51329320
+      },
+      "allocationChangePercent": 1.4404384488142075,
+      "sourceUploadDelta": {
+        "sourceUploads": 300,
+        "sourceUploadBytes": 2481600,
+        "viewUploads": 300,
+        "viewUploadBytes": 230400
+      }
+    },
+    {
+      "options": {
+        "caseId": "sparse-128",
+        "algorithm": "reference",
+        "preference": "low-power",
+        "full": false,
+        "idleMs": 120000,
+        "moving": true
+      },
+      "before": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-reference-moving-low-power-2026-09-28T03-37-51.872Z.json",
+          "sha256": "8886d4813e82b3a0187b5149e36b1e427c488c65913a3204aa33d7ebf9b570cc"
+        },
+        "bytesPerFrame": 640006.2133333334,
+        "lightTableBytes": 51341840
+      },
+      "after": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-reference-moving-low-power-2026-09-28T04-06-37.012Z.json",
+          "sha256": "0cfb808fe213b1997841a857373beb7bc0c8f89392f8724bbfc0a0056204c7ef"
+        },
+        "bytesPerFrame": 636952.04,
+        "lightTableBytes": 51282296
+      },
+      "allocationChangePercent": -0.47720995042006553,
+      "sourceUploadDelta": {
+        "sourceUploads": 300,
+        "sourceUploadBytes": 2481600,
+        "viewUploads": 300,
+        "viewUploadBytes": 230400
+      }
+    },
+    {
+      "options": {
+        "caseId": "sparse-128",
+        "algorithm": "tiled",
+        "preference": "low-power",
+        "full": false,
+        "idleMs": 120000,
+        "moving": false
+      },
+      "before": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-static-low-power-2026-09-28T03-36-56.475Z.json",
+          "sha256": "6618349c5a0225cb480e5e7f34ab35b63414c25ffc4b67bfdc781e6b96dacc4b"
+        },
+        "bytesPerFrame": 648235.32,
+        "lightTableBytes": 52110368
+      },
+      "after": {
+        "evidence": {
+          "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-static-low-power-2026-09-28T04-05-36.930Z.json",
+          "sha256": "97e4b6b08e842124257e2e2ec627515d543d2099538064fdf07046e9c7c2f8c9"
+        },
+        "bytesPerFrame": 447559.49333333335,
+        "lightTableBytes": 61896
+      },
+      "allocationChangePercent": -30.95724970164642,
+      "sourceUploadDelta": {
+        "sourceUploads": 0,
+        "sourceUploadBytes": 0,
+        "viewUploads": 0,
+        "viewUploadBytes": 0
+      }
+    }
+  ]
+}

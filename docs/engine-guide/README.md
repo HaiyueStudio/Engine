@@ -56,3 +56,4 @@
 - [Scrollable GUI and rule help](./gui.md)
 
 - [GPU 实例与模拟（experimental）](gpu-instances.md)
+- [Deferred 多光源实验室（experimental）](deferred-lighting.md)

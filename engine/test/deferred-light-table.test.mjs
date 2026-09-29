@@ -95,3 +95,91 @@ test('World extraction uses the untruncated source and honors disabled hierarchy
   world.frameData.advancePhase();
   assert.equal(getDeferredWorldLights(world.frameData, world).stats.pointCount, 255);
 });
+
+test('cached inputs observe every in-place radiance, position, range and direction change', () => {
+  const changes = [
+    light => { light.intensity = 3; },
+    ...[0, 1, 2].map(axis => light => { light.color[axis] += .125; }),
+    ...[0, 1, 2].map(axis => light => { light.position[axis] += .5; }),
+    light => { light.range += 1; },
+  ];
+  for (const mutate of changes) {
+    const table = new DeferredLightTable(), point = candidate(10);
+    const first = table.update([point], []), bytes = first.bytes.slice(0);
+    assert.equal(table.update([point], []), first);
+    mutate(point.info);
+    const changed = table.update([point], []);
+    assert.equal(changed.generation, first.generation + 1);
+    assert.notDeepEqual(changed.bytes, bytes);
+    assert.deepEqual(first.bytes, bytes);
+    assert.equal(table.update([point], []), changed);
+  }
+  const table = new DeferredLightTable(), sun = candidate(11, 1);
+  let previous = table.update([sun], []);
+  for (const axis of [0, 2, 1]) {
+    sun.info.direction[axis] += .5;
+    const next = table.update([sun], []);
+    assert.notEqual(next, previous);
+    assert.equal(next.records[0].identity[1], previous.records[0].identity[1]);
+    previous = next;
+  }
+});
+
+test('cached snapshots retain float32 equality, signed zero and updated rejected/ambient diagnostics', () => {
+  const table = new DeferredLightTable(), point = candidate(1), ambient = candidate(2, 0), bad = candidate(3, 2, {intensity: NaN});
+  let source = table.update([point, ambient, bad], []);
+  point.info.position[0] += 1e-10;
+  assert.equal(table.update([point, ambient, bad], []), source, 'sub-f32 change retains the original immutable snapshot');
+  assert.equal(table.update([point, ambient, bad], []), source);
+  point.info.position[0] = 0;
+  source = table.update([point, ambient, bad], []);
+  point.info.position[0] = -0;
+  const negative = table.update([point, ambient, bad], []);
+  assert.notEqual(negative, source);
+  assert.equal(new DataView(negative.bytes).getUint32(16, true), 0x80000000);
+  ambient.info.intensity = 4;
+  source = table.update([point, ambient, bad], []);
+  assert.deepEqual(source.ambientRadiance, [1, 2, 4]);
+  bad.info.intensity = 2;
+  source = table.update([point, ambient, bad], []);
+  assert.equal(source.stats.rejectedCount, 0);assert.equal(source.stats.pointCount, 2);
+  const extraBad = candidate(4, 2, {range: Infinity});
+  const rejected = table.update([point, ambient, bad, extraBad], []);
+  assert.equal(rejected.stats.rejectedCount, 1);assert.equal(rejected.stats.candidateCount, 4);
+  assert.equal(table.update([point, ambient, bad, extraBad], []), rejected);
+});
+
+test('input cache cannot hide shadow-slot changes, query reordering or failed-update recovery', () => {
+  const table = new DeferredLightTable(), a = candidate(10, 1), b = candidate(20, 1), point = candidate(30);
+  a.shadow = {}; b.shadow = {};
+  const first = table.update([a, b, point], [a.shadow, b.shadow]);
+  assert.equal(table.update([a, b, point], [a.shadow, b.shadow]), first);
+  const swapped = table.update([a, b, point], [b.shadow, a.shadow]);
+  assert.deepEqual(swapped.records.slice(0, 2).map(r => r.identity[2]), [1, 0]);
+  assert.equal(table.update([point, b, a], [b.shadow, a.shadow]), swapped);
+  assert.equal(table.update([point, b, a], [b.shadow, a.shadow]), swapped);
+  assert.throws(() => table.update([a, a, point], []), /distinct/);
+  assert.throws(() => table.update(Array.from({length:1025}, (_, i) => candidate(i)), []), {reason:'point-capacity'});
+  assert.equal(table.update([point, b, a], [b.shadow, a.shadow]), swapped);
+  const replacement = candidate(31);
+  const replaced = table.update([a, b, replacement], [b.shadow, a.shadow]);
+  assert.notEqual(replaced.records[2].identity[1], first.records[2].identity[1]);
+  assert.deepEqual(first.records.slice(0, 2).map(r => r.identity[2]), [0, 1]);
+});
+
+test('input cache has bounded storage and does not impose an additional candidate limit', () => {
+  const table = new DeferredLightTable(), point = candidate(1);
+  const first = table.update([point], []), smallStorage = table._inputCache;
+  for (let i = 0; i < 300; i++) assert.equal(table.update([point], []), first);
+  assert.equal(table._inputCache, smallStorage, 'steady input does not grow scratch storage');
+  const manyAmbient = Array.from({length:3000}, (_, i) => candidate(i, 0));
+  const source = table.update(manyAmbient, []);
+  assert.equal(source.stats.ambientCount, 3000);
+  assert.equal(table.update(manyAmbient, []), source);
+  assert.equal(table._inputCache, smallStorage, 'oversized candidate sets bypass the cache');
+  point.info.color.push(Infinity);
+  const invalid = table.update([point], []);
+  assert.equal(invalid.stats.rejectedCount, 1);
+  point.info.color.pop();
+  assert.equal(table.update([point], []).stats.pointCount, 1);
+});

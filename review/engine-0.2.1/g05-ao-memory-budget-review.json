@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "status": "failed-budget",
+  "generatedAt": "2026-09-28T02:37:42.163Z",
+  "runtimeSha256": "43eaf828b7dc68a3f6e7bdd1e591bf71d07d6ad4f47b777ec54a9ae5fe5c5baf",
+  "configSha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a",
+  "limitBytes": 67108864,
+  "entries": [
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-high-performance-2026-09-28T02-25-15.831Z.json",
+      "sha256": "ed78971263bc5ed66e55e59f922e528a75ff00ad7957e0ea3965168706d36e0e",
+      "inputs": {
+        "sha256": "43eaf828b7dc68a3f6e7bdd1e591bf71d07d6ad4f47b777ec54a9ae5fe5c5baf",
+        "fileCount": 608
+      },
+      "harness": "eb3c5fc1c4117b68af569deae9bbfc9bae20b3a3c6dd66a5ade76976d60bc665",
+      "preference": "high-performance",
+      "renderStatus": "passed",
+      "validationStatus": "failed",
+      "error": "AO allocation budget exceeded at warm: 95832328 bytes, per-view limit 67108864, total limit 536870912",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "ao": {
+        "radius": 2,
+        "intensity": 3,
+        "resolutionScale": 1,
+        "quality": "high"
+      },
+      "deferredBytes": 95832328,
+      "allTrackedBytes": 171569124,
+      "totals": {
+        "gbuffer": {
+          "count": 4,
+          "bytes": 58060800
+        },
+        "tiles": {
+          "count": 1,
+          "bytes": 4308480
+        },
+        "light-source": {
+          "count": 1,
+          "bytes": 265216
+        },
+        "light-view": {
+          "count": 1,
+          "bytes": 17408
+        },
+        "parameters": {
+          "count": 2,
+          "bytes": 2048
+        },
+        "ao": {
+          "count": 4,
+          "bytes": 33178376
+        },
+        "other-deferred": {
+          "count": 0,
+          "bytes": 0
+        },
+        "other": {
+          "count": 121,
+          "bytes": 75736796
+        }
+      },
+      "pixels": [
+        {
+          "key": "real-frame-view:0",
+          "checkedComponents": 8294400,
+          "maxHdrDelta": 0.000030517578125,
+          "maxHdrToleranceRatio": 0.0152587890625,
+          "maxLdrDelta": 0,
+          "litPixels": 1490646
+        }
+      ],
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": []
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-low-power-2026-09-28T02-32-12.471Z.json",
+      "sha256": "e995f512aad3c39ede0d52ad06e2026ba7bb874bc63a0ef8a146a8c841638fd9",
+      "inputs": {
+        "sha256": "43eaf828b7dc68a3f6e7bdd1e591bf71d07d6ad4f47b777ec54a9ae5fe5c5baf",
+        "fileCount": 608
+      },
+      "harness": "5b7af7034b18b7c73086b80626b7dead1140339de72682d62766644118e5cf37",
+      "preference": "low-power",
+      "renderStatus": "passed",
+      "validationStatus": "failed",
+      "error": "AO allocation budget exceeded at warm: 95832328 bytes, per-view limit 67108864, total limit 536870912",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "ao": {
+        "radius": 2,
+        "intensity": 3,
+        "resolutionScale": 1,
+        "quality": "high"
+      },
+      "deferredBytes": 95832328,
+      "allTrackedBytes": 171569124,
+      "totals": {
+        "gbuffer": {
+          "count": 4,
+          "bytes": 58060800
+        },
+        "tiles": {
+          "count": 1,
+          "bytes": 4308480
+        },
+        "light-source": {
+          "count": 1,
+          "bytes": 265216
+        },
+        "light-view": {
+          "count": 1,
+          "bytes": 17408
+        },
+        "parameters": {
+          "count": 2,
+          "bytes": 2048
+        },
+        "ao": {
+          "count": 4,
+          "bytes": 33178376
+        },
+        "other-deferred": {
+          "count": 0,
+          "bytes": 0
+        },
+        "other": {
+          "count": 121,
+          "bytes": 75736796
+        }
+      },
+      "pixels": [
+        {
+          "key": "real-frame-view:0",
+          "checkedComponents": 8294400,
+          "maxHdrDelta": 0.0001220703125,
+          "maxHdrToleranceRatio": 0.06103515625,
+          "maxLdrDelta": 0,
+          "litPixels": 1490650
+        }
+      ],
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": []
+    }
+  ],
+  "proposedR16Estimate": {
+    "implemented": false,
+    "visibilityBytes": 8295176,
+    "totalDeferredBytes": 70949128,
+    "remainingOverBudgetBytes": 3840264
+  },
+  "performanceQualified": false
+}

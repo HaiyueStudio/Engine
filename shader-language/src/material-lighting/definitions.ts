@@ -10,7 +10,7 @@ import sceneFrame from '../render-family/stdlib/simple-3d/scene-frame.wgsl';
 import morph from '../deformation/stdlib/morph.wgsl';
 import skinning from '../deformation/stdlib/skinning.wgsl';
 import skinningBindings from '../deformation/stdlib/skinning-bindings.wgsl';
-import pbrSkinningBindings from './stdlib/pbr-skinning-bindings.wgsl';
+import pbrCommon from './stdlib/pbr-common.wgslinc';
 import fog from './stdlib/fog.wgsl';
 import pbrBrdf from './stdlib/pbr-brdf.wgsl';
 import pbrClearcoat from './stdlib/pbr-clearcoat.wgsl';
@@ -39,7 +39,6 @@ const MAX_DIRECTIONAL_SHADOWS = 3;
 const PBR_MATERIAL_BYTES = 608;
 const LIGHT_BYTES = 16 + MAX_LIGHTS * 64;
 const PBR_SHADOW_BYTES = MAX_DIRECTIONAL_SHADOWS * 80;
-const pbrSkinning = [pbrSkinningBindings, skinning].join('\n\n');
 
 export function productionMaterialLightingModules(): {
   readonly fog: string;
@@ -99,7 +98,7 @@ export function emitProductionMaterialLightingPass(
 
 function definitions(): Readonly<Record<ProductionMaterialLightingOperation, Definition>> {
   const scene = [fog, sceneFrame].join('\n\n');
-  const pbrModules = [scene, clippingPlanes, morph, pbrSkinning, pbrBrdf, pbrClearcoat, pbrSheen];
+  const pbrModules = [pbrCommon];
   const pbrDefinition = (clearcoat: boolean, transmission: boolean) => definition(
     [...pbrModules, specialize(pbrShadow, {
       MAX_DIRECTIONAL_SHADOWS: `${MAX_DIRECTIONAL_SHADOWS}u`,

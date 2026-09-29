@@ -1,3 +1,4 @@
+import { Render3DPostSceneFrameContext } from './Render3DPostSceneFrameContext';
 import { System } from '../ecs/System';
 import { Entity } from '../ecs/Entity';
 import { World } from '../ecs/World';
@@ -302,21 +303,7 @@ export class Render3DSystem extends System {
     shadows: [] as readonly (DirectionalShadowState | null)[],
   };
   private readonly _projectionJitter = new Float32Array(2);
-  private readonly _postProcessFrameContext = {
-    viewKey: '',
-    frameId: 0,
-    cameraId: 0,
-    width: 1,
-    height: 1,
-    reverseZ: false,
-    near: 0.1,
-    far: 1000,
-    isOrthographic: false,
-    projectionJitter: new Float32Array(2),
-    projectionMatrix: mat4.identity() as Float32Array,
-    viewProjectionMatrix: mat4.identity() as Float32Array,
-    inverseViewProjectionMatrix: mat4.identity() as Float32Array,
-  };
+  private readonly _postProcessFrameContext = new Render3DPostSceneFrameContext();
   private readonly _directionalShadows: Render3DDirectionalShadowOrchestrator;
   private readonly _transparentMaterialInfoScratch: TransparentMaterialInfo = {
     transparent: false,
@@ -925,20 +912,25 @@ export class Render3DSystem extends System {
     const submitterOptions = this._getSubmitterOptions();
     try {
       this._submitter.prepareView(opaqueItems, transparentItems, this._materialRenderContext, submitterOptions);
-      const lightingBackend = getDeferredLightingBackend(this);
-      if (lightingBackend && this._scenePassRenderer.renderDeferred(lightingBackend, {
-        context, world, view: state.frameView,
-        sceneFrame: this._materialRenderContext.sceneFrameUniforms!,
-        opaqueItems, transparentCount: transparentItems.length, helperCount: helperItems.length,
-        postScene: this._postScenePasses, disabledCache: this._disabledHierarchyCache,
-        drawOpaque: pass => this._submitter.drawOpaqueItems(opaqueItems, pass, viewProj, viewMatrix, submitterOptions),
-      })) return;
       const needsSceneColorCapture = transparentItems.some(item =>
         item.material instanceof PbrMaterial && item.material.transmissionFactor > 0);
       if (needsSceneColorCapture) {
         postSceneRequirements = this._postScenePasses.prepare(postProcessPasses, context, this.reverseZ, true);
         state.postSceneRequirements = postSceneRequirements;
       }
+      const lightingBackend = getDeferredLightingBackend(this);
+      if (lightingBackend && this._scenePassRenderer.renderDeferred(lightingBackend, {
+        context, world, view: state.frameView,
+        ambientOcclusion: { passes: postProcessPasses, prepare: () => {
+          this._renderAuxiliaryPasses(true);
+          return this._postScenePasses.lightingAmbientOcclusionTextures(this._postProcessFrameContext.update(this._frameExecution));
+        } },
+        sceneFrame: this._materialRenderContext.sceneFrameUniforms!,
+        opaqueItems, transparentItems, transparentCount: transparentItems.length, helperCount: helperItems.length, needsSceneColorCapture,
+        postScene: this._postScenePasses, disabledCache: this._disabledHierarchyCache,
+        submitter: this._submitter, submitterOptions, viewProj, viewMatrix,
+        pbrRenderer: this._requirePbrRenderer(),
+      })) return;
       const pbrRenderer = this._renderers.pbr;
       if (!needsSceneColorCapture) pbrRenderer?.setTransmissionFramebuffer(null);
       let passEncoder = context.encoder.beginRenderPass(this._postScenePasses.buildScenePassDescriptor(
@@ -990,7 +982,7 @@ export class Render3DSystem extends System {
     }
   }
 
-  private _renderAuxiliaryPasses(): void {
+  private _renderAuxiliaryPasses(beforeLighting = false): void {
     const {
       context,
       camera,
@@ -1006,6 +998,7 @@ export class Render3DSystem extends System {
     if (postSceneRequirements.needsDepth || postSceneRequirements.needsNormal || postSceneRequirements.needsMotion || postSceneRequirements.needsOutlineMask) {
       const postItems = this._frameItems.preparePostItems();
       this._postScenePasses.renderAuxiliaryBuffers({
+        beforeLighting,
         encoder: context.encoder,
         items: postItems,
         motionItems: opaqueItems,
@@ -1040,20 +1033,7 @@ export class Render3DSystem extends System {
     const { context, camera, cameraEntityId, cameraFrame, frameView, postProcessPasses, postSceneRequirements } = this._frameExecution;
     const outputView = context.view?.target.getOutputView() ?? this.engine.getOutputView();
     this._postScenePasses.output.configure(frameView.target.format, this.exposure, this.toneMapping, frameView);
-    const frame = this._postProcessFrameContext;
-    frame.viewKey = frameView.key;
-    frame.frameId = cameraFrame.frameId;
-    frame.cameraId = cameraEntityId;
-    frame.width = frameView.width;
-    frame.height = frameView.height;
-    frame.reverseZ = cameraFrame.reverseZ;
-    frame.near = camera.near;
-    frame.far = camera.far;
-    frame.isOrthographic = camera.projectionType === 'orthographic';
-    frame.projectionJitter.set(cameraFrame.projectionJitter);
-    frame.projectionMatrix.set(cameraFrame.projectionMatrix);
-    frame.viewProjectionMatrix.set(cameraFrame.viewProjectionMatrix);
-    frame.inverseViewProjectionMatrix.set(cameraFrame.inverseViewProjectionMatrix);
+    const frame = this._postProcessFrameContext.update(this._frameExecution);
     this._postScenePasses.runPostProcess(context.encoder, postProcessPasses, outputView, postSceneRequirements, frame);
   }
 

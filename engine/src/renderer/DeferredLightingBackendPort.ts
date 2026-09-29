@@ -1,3 +1,4 @@
+import type { DeferredAmbientOcclusionInput } from './DeferredAmbientOcclusion';
 import type { IEngine } from '../core/IEngine';
 import type { RenderCommandContext } from '../core/RenderCommandContext';
 import type { RenderViewSnapshot } from '../core/RenderView';
@@ -6,6 +7,7 @@ import type { SceneFrameUniformSnapshot } from '../frame/SceneFrameUniformLayout
 import type { Render3DRenderItem } from '../systems/Render3DContracts';
 
 export interface DeferredLightingRecordInput {
+  readonly ambientOcclusion?: DeferredAmbientOcclusionInput;
   readonly engine: IEngine;
   readonly context: RenderCommandContext;
   readonly world: World;
@@ -13,9 +15,15 @@ export interface DeferredLightingRecordInput {
   readonly sceneFrame: SceneFrameUniformSnapshot;
   readonly opaqueItems: readonly Render3DRenderItem[];
   readonly transparentCount: number;
+  readonly transparentItems: readonly Render3DRenderItem[];
+  readonly needsSceneColorCapture: boolean;
   readonly helperCount: number;
   readonly sceneDescriptor: GPURenderPassDescriptor;
   drawOpaque(pass: GPURenderPassEncoder): void;
+  drawOpaqueForward(pass: GPURenderPassEncoder, indices: readonly number[]): void;
+  drawTransparent(pass: GPURenderPassEncoder): void;
+  prepareTransparent(): void;
+  sceneLoadDescriptor(): GPURenderPassDescriptor;
   drawSky(pass: GPURenderPassEncoder): void;
   applyViewport(pass: GPURenderPassEncoder): void;
 }

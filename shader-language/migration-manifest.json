@@ -150,6 +150,17 @@
         "engine/src/shaders/generated/deferred-tile-cull.generated.wgsl",
         "engine/src/shaders/generated/deferred-tiled.generated.wgsl"
       ]
+    },
+    {
+      "id": "deferred-full-forward",
+      "status": "generated",
+      "generator": "deferred-full-forward",
+      "sources": [
+        "engine/src/shaders/generated/deferred-full-pbr.generated.wgsl",
+        "engine/src/shaders/generated/deferred-full-pbr-clearcoat.generated.wgsl",
+        "engine/src/shaders/generated/deferred-full-pbr-transmission.generated.wgsl",
+        "engine/src/shaders/generated/deferred-full-pbr-transmission-clearcoat.generated.wgsl"
+      ]
     }
   ],
   "inlineShaderSites": [

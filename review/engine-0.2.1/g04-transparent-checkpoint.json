@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "status": "checkpoint-passed-goal-incomplete",
+  "generatedAt": "2026-09-27T12:19:28.884Z",
+  "scope": "G04 transparent full-light PBR correctness only",
+  "inputs": {
+    "sha256": "f3ef265f91c47a3a45c3ee869b2b25763375875f3f92e532b4e2fc8fd0a65fa2",
+    "fileCount": 605
+  },
+  "captures": [
+    {
+      "path": "artifacts/engine-0.2.1/g04/transparent-high-performance-passed-2026-09-27T12-14-33.315Z.json",
+      "sha256": "89ec697a3f94cd27ff1dc3bb5b2826dd1e4a34e1610903d7bfccfc6180ffb741",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cases": 50,
+      "independentContributions": 640,
+      "maxHdrDelta": 0.0002765655517578125,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": [],
+      "harness": "bc7510f935ce73ee7c74aa909e56a5c9d132b9f51bbdad365e5e89a814d8508f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/transparent-low-power-passed-2026-09-27T12-14-39.843Z.json",
+      "sha256": "1dad51254b7de259a3f3a62792f679957ed1712992af9b4c52d77d6ec25fd006",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cases": 50,
+      "independentContributions": 640,
+      "maxHdrDelta": 0.00015926361083984375,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "validationErrors": [],
+      "harness": "bc7510f935ce73ee7c74aa909e56a5c9d132b9f51bbdad365e5e89a814d8508f"
+    }
+  ],
+  "shaderArtifact": "924dc9c0413c497d013dd3f8bbb9207eff4622e861b9c8f6f4a9db7cf991b853",
+  "costAdmission": {
+    "status": "failed-existing-budget",
+    "addedWgslBytes": 137842,
+    "addedVariants": 4,
+    "totalWgslBytes": 555236,
+    "limitWgslBytes": 418480,
+    "totalVariants": 67,
+    "limitVariants": 63,
+    "budgetModified": false
+  },
+  "remaining": [
+    "opaque extension proxy surfaces",
+    "auxiliary/AO and effect/history compatibility",
+    "deformation and external GPU instance matrix",
+    "RTT/reflection and multiview lifecycle",
+    "native 300 lifecycle switches",
+    "device loss/replacement/cancellation matrix",
+    "current-source A/B native regressions",
+    "complete Stage14 and cost admission/final audit"
+  ],
+  "validation": [
+    {
+      "command": "npm run typecheck",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/validation/root-typecheck.log",
+      "sha256": "4320c608399370af10f8788ff708c34d18240becbb1d34ad506e58cb8f29677e"
+    },
+    {
+      "command": "npm test",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/validation/root-test.log",
+      "sha256": "45c8c87dce027d699e2fc116c04a622568e89143536ca43bb7831f0f840a66f1"
+    },
+    {
+      "command": "npm run build",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/validation/root-build.log",
+      "sha256": "69d62fbc7fda5dbb81322f4bd307343b144cf4898969530caba255adfce1a755"
+    },
+    {
+      "command": "npm run modules:check",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/validation/modules-final.log",
+      "sha256": "06ecfc0ad32e1560658b0f1ed04c6ef7a8df6b6c3a825b425413ff3f823f4df3"
+    },
+    {
+      "command": "npm run responsibilities:check",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/validation/responsibilities-final.log",
+      "sha256": "6fa09923726c2f63ea49a166fb29d211950e6aaa019390427f961c4d74e2b3c9"
+    },
+    {
+      "command": "npm run renderer-prepare:check",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/validation/prepare-final.log",
+      "sha256": "3896d25e54cb62720a681e2bc7098bf3551ea000929e9a62e6f5e5139f0b6e0b"
+    },
+    {
+      "command": "npm run api:check",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/validation/api-final.log",
+      "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+    },
+    {
+      "command": "npm run performance-budget:test",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/validation/performance-policy-final.log",
+      "sha256": "42da260e097b8709c52c8a35fcc1c1f0629265c818ca1292fcba68b8de649f7f"
+    },
+    {
+      "command": "node --test scripts/webgpu-gate/deferred-{compatibility,fixture}-policy.test.mjs",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/validation/fixture-policy-final.log",
+      "sha256": "c2f92b47170650dd2a15027650d5d384e9174ab096fe3922607e77eee742116d"
+    },
+    {
+      "command": "npm run check --prefix ../milestones",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g04/validation/milestones-check.log",
+      "sha256": "c6289cfdbe5368bea8a2f7ebb50fd8111f51d28fed8241021c7bac199e40f2cf"
+    },
+    {
+      "command": "node shader-language/scripts/verify-production-cache.mjs",
+      "status": "failed-existing-budget",
+      "path": "artifacts/engine-0.2.1/g04/validation/cost-final.log",
+      "sha256": "84c91adff2b6fbc64f29add7b43bc9486a8ca5ff5c45e6c528aa2d2af17afab5"
+    }
+  ],
+  "validationSummary": {
+    "workspaceTests": 1354,
+    "performancePolicyTests": 134,
+    "fixturePolicyTests": 8,
+    "freshExampleTargets": 95,
+    "publicApiChanged": false,
+    "stage14FullMatrix": "not-run-pending-remaining-G04-implementation",
+    "performancePolicyRetry": "Initial sandbox run could not bind localhost (EPERM); the authorized local-server retry passed."
+  }
+}

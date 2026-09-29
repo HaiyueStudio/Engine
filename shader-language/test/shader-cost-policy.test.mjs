@@ -151,6 +151,7 @@ test('production cache is content-addressed per generator family', () => {
   assert.deepEqual(
     PRODUCTION_CACHE_SCOPES.map(scope => scope.id),
     [
+      'deferred-full-forward',
       'motion-blur',
       'builtin-postprocess',
       'builtin-render',

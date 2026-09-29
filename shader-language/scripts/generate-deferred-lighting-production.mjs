@@ -22,6 +22,7 @@ export async function compileDeferredLightingArtifact() {
   const source = await text(baseSourcePath);
   const base = compileProductionMaterialLightingFamilyV1(source, { sourcePath: baseSourcePath, sourceSha256: hash(source) });
   const modules = {
+    lightingAo: await text('shader-language/src/deferred-lighting/lighting-ao.wgslinc'),
     geometry: await text('shader-language/src/deferred-lighting/gbuffer.wgsl'),
     resolve: await text('shader-language/src/deferred-lighting/resolve.wgsl'),
     abi: DEFERRED_LIGHTING_ABI_WGSL,

@@ -1,3 +1,9 @@
+import { DeferredAmbientOcclusion } from './DeferredAmbientOcclusion';
+import { getDeferredAllocationBudget, DeferredSharedAllocationLease, type DeferredAllocationBudget } from './DeferredAllocationBudget';
+import { DEFERRED_SHARED_RESERVE_BYTES, planDeferredViewMemory } from './DeferredViewMemory';
+import { InstancedMesh3D } from '../components/InstancedMesh3D';
+import { isEntityDisabledInHierarchy } from '../ecs/utils/hierarchy';
+import { DeferredFullForward } from './DeferredFullForward';
 import type { DeferredTileCuller } from './DeferredTileCuller';
 import type { DeferredTileOptions } from './DeferredTileResources';
 import type { IEngine } from '../core/IEngine';
@@ -44,6 +50,7 @@ function cancellable<T>(pending: Promise<T>, signal: AbortSignal): Promise<T> {
 /** Lazy provider. Render3D owns recording/output; this provider owns only its Deferred resources. */
 export class DeferredReferenceBackend implements DeferredLightingBackendPort {
   private readonly _device: GPUDevice;
+  private readonly _ambientOcclusion: DeferredAmbientOcclusion;
   private readonly _pool: TransientRenderTargetPool;
   private readonly _plan = new Render3DFramePlan();
   private readonly _views = new WeakMap<DeferredLightSource, DeferredLightView>();
@@ -51,7 +58,9 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
   private readonly _bindGroups = new Map<string, GPUBindGroup>();
   private readonly _resourceIds = new WeakMap<object, number>();
   private _nextResourceId = 1;
+  private readonly _opaqueForwardIndices: number[] = [];
   private _port: PbrDeferredSurfacePort | undefined;
+  private _fullForward: DeferredFullForward | undefined;
   private _tiles: DeferredTileCuller | undefined;
   private _geometry: PrecompiledShaderPassRuntime | undefined;
   private _resolve: PrecompiledShaderPassRuntime | undefined;
@@ -65,12 +74,20 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
   private readonly _initialization = new AbortController();
   lastSource: DeferredLightSource | undefined;
   lastAttachments: { readonly textures: readonly GPUTexture[]; readonly views: readonly GPUTextureView[] } | undefined;
+  private readonly _allocationBudget: DeferredAllocationBudget;
+  private readonly _sharedAllocation: DeferredSharedAllocationLease;
+  private readonly _attachmentLimits: { maxViews: number; maxLiveGenerations: number; reserveBytes: (bytes: number) => () => void };
   diagnostics: { requested: 'deferred-reference' | 'deferred-tiled'; effective: 'deferred-reference' | 'deferred-tiled' | 'forward'; completeCoverage: boolean; reason: string | null } = {
     requested: 'deferred-reference', effective: 'forward', completeCoverage: false, reason: 'not-initialized',
   };
 
   constructor(engine: IEngine, private readonly _options: DeferredReferenceOptions) {
     this._device = engine.device;
+    this._allocationBudget = getDeferredAllocationBudget(this._device);
+    this._sharedAllocation = new DeferredSharedAllocationLease(this._allocationBudget, DEFERRED_SHARED_RESERVE_BYTES);
+    this._attachmentLimits = { maxViews: 4, maxLiveGenerations: 2, reserveBytes: bytes => this._allocationBudget.reserve(bytes) };
+    try { this._ambientOcclusion = new DeferredAmbientOcclusion(this._device); }
+    catch (error) { this._sharedAllocation.destroy(true); throw error; }
     this._pool = new TransientRenderTargetPool(engine);
     if (_options.tiled) this.diagnostics.requested = 'deferred-tiled';
   }
@@ -84,6 +101,7 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
     signal?.addEventListener('abort', abort, { once: true });
     try {
       this._port = getPbrDeferredSurfacePort(renderer);
+      this._fullForward = new DeferredFullForward(this._device, this._port);
       this._geometry = getPrecompiledShaderPassRuntime(this._device, DEFERRED_LIGHTING_SHADER_ARTIFACT, 'deferred-gbuffer', {
         rendererOwnedLayouts: Object.fromEntries(this._port.layouts.map((layout, i) => [i, layout])),
       });
@@ -98,7 +116,7 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
       this._resolve = this._tiles?.resolveRuntime(this._frame.bindGroupLayout) ?? getPrecompiledShaderPassRuntime(this._device, DEFERRED_LIGHTING_SHADER_ARTIFACT, 'deferred-reference', {
         rendererOwnedLayouts: { 0: this._frame.bindGroupLayout },
       });
-      for (const runtime of [this._geometry, this._resolve]) {
+      for (const runtime of [this._geometry, this._resolve, ...this._fullForward.runtimes]) {
         await cancellable(checkCompilation(runtime), this._initialization.signal);
         check();
       }
@@ -128,21 +146,38 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
     try {
       if (input.context.device !== this._device) throw new DeferredLightingCapabilityError('device-generation', 0, 1);
       validateDeferredViewConfiguration(this._device, input.view.width, input.view.height, input.view.sampleCount);
-      if (input.transparentCount || input.helperCount) throw new DeferredLightingCapabilityError('unsupported-forward-surface', input.transparentCount + input.helperCount, 0);
-      for (const item of input.opaqueItems) {
+      const memory = planDeferredViewMemory(input.view.width, input.view.height, this._ambientOcclusion.countSources(input.ambientOcclusion));
+      // Independently recorded instance draws still use the bounded Forward light ABI.
+      // Reject the complete view rather than claiming full-light coverage for only its Mesh3D subset.
+      for (const entity of input.world.iterQueryCandidates({ all: [InstancedMesh3D] })) {
+        if (!input.view.excludedEntityIds?.has(entity.id) && !isEntityDisabledInHierarchy(entity)) {
+          throw new DeferredLightingCapabilityError('unsupported-instance-surface', 1, 0);
+        }
+      }
+      if (input.helperCount) throw new DeferredLightingCapabilityError('unsupported-forward-surface', input.helperCount, 0);
+      if (input.transparentCount && (input.transparentItems?.length !== input.transparentCount
+        || input.transparentItems.some(item => !(item.material instanceof PbrMaterial) || item.material.constructor !== PbrMaterial))) {
+        throw new DeferredLightingCapabilityError('unsupported-forward-surface', input.transparentCount, 0);
+      }
+      this._opaqueForwardIndices.length = 0;
+      for (const [index, item] of input.opaqueItems.entries()) {
         const material = item.material;
         if (!(material instanceof PbrMaterial) || material.constructor !== PbrMaterial || material.alphaMode === 'blend'
-          || material.clearcoatFactor > 0 || material.transmissionFactor > 0 || material.ior !== 1.5
+          || material.transmissionFactor > 0) {
+          throw new DeferredLightingCapabilityError('unsupported-material-surface', 1, 0);
+        }
+        if (material.clearcoatFactor > 0 || material.ior !== 1.5
           || material.specularFactor !== 1 || material.specularColorFactor.some(v => v !== 1)
           || material.specularTexture || material.specularColorTexture || material.sheenColorFactor.some(v => v !== 0)
           || material.sheenColorTexture || material.sheenRoughnessTexture) {
-          throw new DeferredLightingCapabilityError('unsupported-material-surface', 1, 0);
+          this._opaqueForwardIndices.push(index);
         }
       }
+      this._sharedAllocation.retain(input.context);
       this.lastSource = getDeferredWorldLights(input.context.frameData ?? input.world.frameData, input.world);
       if (input.context.viewFamily) retainTransientAttachmentScopes(this._pool, new Set(input.context.viewFamily.views.map(view => view.key)));
       this.lastAttachments = acquireTransientAttachments(this._pool, input.view.key, input.view.width, input.view.height,
-        ['rgba16float', 'rgba16float', 'rgba16float', 'depth32float'], input.context, { maxViews: 4, maxLiveGenerations: 2 });
+        ['rgba16float', 'rgba16float', 'rgba16float', 'depth32float'], input.context, this._attachmentLimits);
       const source = this.lastSource!;
       let lightView = this._views.get(source);
       if (!lightView) { lightView = createDeferredReferenceView(source); this._views.set(source, lightView); }
@@ -161,24 +196,29 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
       const attachments = this.lastAttachments!;
       const frameOffset = this._frame!.upload(input.sceneFrame, input.context);
       const bypassReason = this._tiles?.select(input, source, lightView) ?? null;
-      const tiled = this._tiles?.prepare(input, lightBindings, frameOffset, bypassReason !== null);
+      const tiled = this._tiles?.prepare(input, lightBindings, frameOffset, bypassReason !== null, memory);
       const resolve = this._resolve!;
       const pipelines = this._pipelines;
       const lightingBindings = this._port!.lightingBindings();
+      let ao = this._ambientOcclusion.neutral;
+      const resolveGroup = () => {
       const bindingKey = [lightBindings.source, lightBindings.header, lightBindings.indices, parameters]
         .map(b => `${this._resourceId(b.buffer)}:${b.offset ?? 0}:${b.size ?? 0}`).join('|')
         + `|${this._resourceId(attachments.views)}:${this._resourceId(lightingBindings)}:${tiled?.bindingKey ?? "reference"}`;
-      let group = this._bindGroups.get(bindingKey);
+      const aoKey = `${bindingKey}|ao:${this._resourceId(ao.buffer)}`;
+      let group = this._bindGroups.get(aoKey);
       if (!group) {
         group = this._device.createBindGroup({ label: 'DeferredReference.pass', layout: resolve.bindGroupLayouts[3]!, entries: [
         { binding: 0, resource: lightBindings.source }, { binding: 1, resource: lightBindings.header },
         { binding: 2, resource: lightBindings.indices },
         ...attachments.views.map((view, i) => ({ binding: i + 3, resource: view })),
-        { binding: 7, resource: parameters }, ...lightingBindings, ...(tiled?.extraEntries ?? []),
+        { binding: 7, resource: parameters }, ...lightingBindings, ...(tiled?.extraEntries ?? []), { binding: 17, resource: ao },
       ] });
         if (this._bindGroups.size >= 128) this._bindGroups.delete(this._bindGroups.keys().next().value!);
-        this._bindGroups.set(bindingKey, group);
+        this._bindGroups.set(aoKey, group);
       }
+      return group;
+      };
       this._plan.clear().importResources('view', 'complete-light-source', 'prepared-materials').exportResources('scene-linear-color', 'scene-depth')
         .add('deferred-gbuffer', 'render', () => {
           const pass = input.context.encoder.beginRenderPass({ label: 'DeferredReference.gbuffer',
@@ -189,6 +229,9 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
           this._port!.setSurface({ module: this._geometry!.module, key: this._geometry!.pass.canonicalHash });
           try { input.drawOpaque(pass); } finally { this._port!.setSurface(null); pass.end(); }
         }, { reads: ['view', 'prepared-materials'], writes: ['gbuffer'] });
+      this._plan.add('deferred-lighting-ao', 'render', () => {
+        ao = this._ambientOcclusion.record(input.context, input.view.key, width, height, input.ambientOcclusion);
+      }, { reads: ['gbuffer'], writes: ['lighting-ao'] });
       if (tiled?.record) this._plan.add('deferred-tile-cull', 'compute', tiled.record, { reads: ['view', 'complete-light-source'], writes: ['tile-list'] });
       this._plan.add(tiled ? 'deferred-tiled-light-resolve' : 'deferred-full-light-resolve', 'render', () => {
           const pass = input.context.encoder.beginRenderPass({ ...input.sceneDescriptor, label: tiled ? 'DeferredTiles.resolve' : 'DeferredReference.resolve' });
@@ -198,9 +241,24 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
             pass.setPipeline(pipelines[input.engine.getDepthFormat(input.view.reverseZ)]!);
             pass.setBindGroup(0, this._frame!.bindGroup, [frameOffset]);
             pass.setBindGroup(1, this._emptyGroups[0]!); pass.setBindGroup(2, this._emptyGroups[1]!);
-            pass.setBindGroup(3, group!); pass.draw(3);
+            pass.setBindGroup(3, resolveGroup()); pass.draw(3);
           } finally { pass.end(); }
-        }, { reads: ['view', 'complete-light-source', 'gbuffer', ...(tiled?.record ? ['tile-list'] : [])], writes: ['scene-linear-color', 'scene-depth'] }).execute();
+        }, { reads: ['view', 'complete-light-source', 'gbuffer', 'lighting-ao', ...(tiled?.record ? ['tile-list'] : [])], writes: this._opaqueForwardIndices.length ? ['resolved-linear-color', 'resolved-scene-depth'] : input.transparentCount ? ['opaque-linear-color', 'opaque-scene-depth'] : ['scene-linear-color', 'scene-depth'] });
+      if (this._opaqueForwardIndices.length) this._plan.add('deferred-full-light-opaque', 'render', () => {
+        const pass = input.context.encoder.beginRenderPass(input.sceneLoadDescriptor());
+        input.applyViewport(pass);
+        this._port!.setFullLighting(this._fullForward!.bind(lightBindings, attachments.views[1]!, ao));
+        try { input.drawOpaqueForward(pass, this._opaqueForwardIndices); } finally { this._port!.setFullLighting(null); pass.end(); }
+      }, { reads: ['resolved-linear-color', 'resolved-scene-depth', 'gbuffer', 'complete-light-source', 'prepared-materials'],
+        writes: input.transparentCount ? ['opaque-linear-color', 'opaque-scene-depth'] : ['scene-linear-color', 'scene-depth'] });
+      if (input.transparentCount) this._plan.add('deferred-full-light-transparent', 'render', () => {
+        input.prepareTransparent();
+        const pass = input.context.encoder.beginRenderPass(input.sceneLoadDescriptor());
+        input.applyViewport(pass);
+        this._port!.setFullLighting(this._fullForward!.bind(lightBindings, undefined, ao));
+        try { input.drawTransparent(pass); } finally { this._port!.setFullLighting(null); pass.end(); }
+      }, { reads: ['opaque-linear-color', 'opaque-scene-depth', 'complete-light-source', 'prepared-materials'], writes: ['scene-linear-color', 'scene-depth'] });
+      this._plan.execute();
       this.diagnostics = { requested: this._tiles ? 'deferred-tiled' : 'deferred-reference', effective: tiled ? 'deferred-tiled' : 'deferred-reference', completeCoverage: true, reason: bypassReason };
       return true;
     } catch (error) {
@@ -216,6 +274,7 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
   }
 
   get tileDiagnostics() { return this._tiles ? { bypassReason: this._tiles.lastBypassReason, plan: this._tiles.lastPlan, binding: this._tiles.lastBinding, resources: this._tiles.resources.stats } : undefined; }
+  get allocationDiagnostics() { return { reservedBytes: this._allocationBudget.bytes, peakReservedBytes: this._allocationBudget.peakBytes, limitBytes: this._allocationBudget.maximumBytes }; }
   get passes() { return this._plan.snapshot; }
   get uploadStats() { return this._lights?.stats; }
 
@@ -226,6 +285,8 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
   }
 
   destroy(abandon = false): void {
+    this._sharedAllocation.destroy(abandon);
+    this._ambientOcclusion.destroy(abandon);
     this._tiles?.destroy(abandon);
     // A later device-loss notification must also release work left pending by normal teardown.
     if (abandon) { this._lights?.abandon(); this._params?.abandon(); releaseTransientAttachments(this._pool, true); }
@@ -233,6 +294,8 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
     this._destroyed = true;
     this._initialization.abort(new Error('Deferred initialization cancelled.'));
     this._port?.setSurface(null);
+    this._port?.setFullLighting(null);
+    this._fullForward?.destroy();
     if (!abandon) { this._lights?.destroy(); this._params?.destroy(); }
     this._frame?.destroy(); this._pool.destroy(); this._parameters.clear();
     this._bindGroups.clear();

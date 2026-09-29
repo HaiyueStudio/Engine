@@ -37,3 +37,4 @@ npm run api:check
 - [GUI controls](./gui-controls.md)
 
 - [GPU 实例、Toon、LOD 与模拟（experimental）](gpu-instances.md)
+- [Deferred Lighting（experimental）](deferred-lighting.md)

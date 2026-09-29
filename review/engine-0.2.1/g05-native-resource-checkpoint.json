@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "tier": "diagnostic-g05-native-resource-checkpoint",
+  "status": "passed",
+  "performanceQualified": false,
+  "runtimeHash": "43eaf828b7dc68a3f6e7bdd1e591bf71d07d6ad4f47b777ec54a9ae5fe5c5baf",
+  "roomMatrix": {
+    "path": "artifacts/engine-0.2.1/g05/room-smoke-matrix-2026-09-28T01-20-43.800Z.json",
+    "sha256": "64717d8a92991e1dbfd44c2a79c27d57e71c9f4429a977fb5ce285ed3d6adb04"
+  },
+  "roomCaptures": 52,
+  "perViewPixelChecks": 64,
+  "maxHdrToleranceRatio": 0.48780487804878053,
+  "maxLdrChannelDelta": 0.9999999403953552,
+  "deferredAllocatedBytes": {
+    "high-performance/single-1/tiled/True": 27990792,
+    "high-performance/single-1/reference/True": 26088968,
+    "high-performance/small-8/reference/True": 26088968,
+    "high-performance/small-8/tiled/True": 27990792,
+    "high-performance/sparse-128/tiled/True": 27990792,
+    "high-performance/sparse-128/reference/True": 26088968,
+    "high-performance/overlap-128/reference/True": 26088968,
+    "high-performance/overlap-128/tiled/True": 26089996,
+    "high-performance/sparse-256/tiled/True": 27990792,
+    "high-performance/sparse-256/reference/True": 26088968,
+    "high-performance/dynamic-128-four-view/reference/True": 103503368,
+    "high-performance/dynamic-128-four-view/tiled/True": 111107592,
+    "high-performance/1080p-128/tiled/True": 62654472,
+    "high-performance/1080p-128/reference/True": 58344968,
+    "high-performance/stress-512/reference/True": 58344968,
+    "high-performance/stress-512/tiled/True": 58345996,
+    "high-performance/stress-1024/tiled/True": 58345996,
+    "high-performance/stress-1024/reference/True": 58344968,
+    "high-performance/single-1/reference/False": 26088968,
+    "high-performance/single-1/tiled/False": 27990792,
+    "high-performance/small-8/tiled/False": 27990792,
+    "high-performance/small-8/reference/False": 26088968,
+    "high-performance/sparse-128/reference/False": 26088968,
+    "high-performance/sparse-128/tiled/False": 27990792,
+    "high-performance/sparse-256/tiled/False": 27990792,
+    "high-performance/sparse-256/reference/False": 26088968,
+    "low-power/single-1/tiled/True": 27990792,
+    "low-power/single-1/reference/True": 26088968,
+    "low-power/small-8/reference/True": 26088968,
+    "low-power/small-8/tiled/True": 27990792,
+    "low-power/sparse-128/tiled/True": 27990792,
+    "low-power/sparse-128/reference/True": 26088968,
+    "low-power/overlap-128/reference/True": 26088968,
+    "low-power/overlap-128/tiled/True": 26089996,
+    "low-power/sparse-256/tiled/True": 27990792,
+    "low-power/sparse-256/reference/True": 26088968,
+    "low-power/dynamic-128-four-view/reference/True": 103503368,
+    "low-power/dynamic-128-four-view/tiled/True": 111107592,
+    "low-power/1080p-128/tiled/True": 62654472,
+    "low-power/1080p-128/reference/True": 58344968,
+    "low-power/stress-512/reference/True": 58344968,
+    "low-power/stress-512/tiled/True": 58345996,
+    "low-power/stress-1024/tiled/True": 58345996,
+    "low-power/stress-1024/reference/True": 58344968,
+    "low-power/single-1/reference/False": 26088968,
+    "low-power/single-1/tiled/False": 27990792,
+    "low-power/small-8/tiled/False": 27990792,
+    "low-power/small-8/reference/False": 26088968,
+    "low-power/sparse-128/reference/False": 26088968,
+    "low-power/sparse-128/tiled/False": 27990792,
+    "low-power/sparse-256/tiled/False": 27990792,
+    "low-power/sparse-256/reference/False": 26088968
+  },
+  "forwardMatrix": {
+    "path": "artifacts/engine-0.2.1/g05/forward-cohorts-2026-09-28T01-18-45.320Z.json",
+    "sha256": "c37baeafd40012b736f09ee075ac2ea49acb797a4f6048fb4a191bf6aab5f89e"
+  },
+  "forwardCaptures": 4,
+  "sharedSourceUploadChecks": {
+    "staticCaptures": 16,
+    "dynamicCaptures": 36,
+    "checkedPopulations": 104
+  },
+  "coreRegressions": [
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-reference-high-performance-passed-2026-09-28T01-28-02.475Z.json",
+      "sha256": "b2564d13338bf216249cd3187648a5f76510cfd2e127cafdb00a1a945fba02f6",
+      "cases": 7,
+      "boundaries": 0,
+      "capacityCases": null
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-tiled-high-performance-passed-2026-09-28T01-28-12.662Z.json",
+      "sha256": "2aa0b001b7e2b9c953f9fa25df44d7fb4d68c8b028713d3a2b98a898552c4165",
+      "cases": 32,
+      "boundaries": 47,
+      "capacityCases": [
+        {
+          "id": "cull-source-capacity-error",
+          "failurePolicy": "strict",
+          "requested": 1025,
+          "thrown": {
+            "name": "DeferredLightingCapabilityError",
+            "reason": "point-capacity",
+            "observed": 1025,
+            "supported": 1024
+          },
+          "diagnostics": {
+            "requested": "deferred-tiled",
+            "effective": "forward",
+            "completeCoverage": false,
+            "reason": "point-capacity"
+          },
+          "recovered": 1024
+        },
+        {
+          "id": "cull-source-capacity-error",
+          "failurePolicy": "forward",
+          "requested": 1025,
+          "thrown": null,
+          "diagnostics": {
+            "requested": "deferred-tiled",
+            "effective": "forward",
+            "completeCoverage": false,
+            "reason": "point-capacity"
+          },
+          "recovered": 1024
+        }
+      ]
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-reference-low-power-passed-2026-09-28T01-28-50.394Z.json",
+      "sha256": "e274b687829c3c44b40c22e17f12508f9cfb7b66ee80c8b0c7b689f7f9a73c7e",
+      "cases": 7,
+      "boundaries": 0,
+      "capacityCases": null
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-tiled-low-power-passed-2026-09-28T01-28-58.893Z.json",
+      "sha256": "93173546a70e19dbc6ce62413cec1ee5bf16b77517a2368c0755f6e3fcae9463",
+      "cases": 32,
+      "boundaries": 47,
+      "capacityCases": [
+        {
+          "id": "cull-source-capacity-error",
+          "failurePolicy": "strict",
+          "requested": 1025,
+          "thrown": {
+            "name": "DeferredLightingCapabilityError",
+            "reason": "point-capacity",
+            "observed": 1025,
+            "supported": 1024
+          },
+          "diagnostics": {
+            "requested": "deferred-tiled",
+            "effective": "forward",
+            "completeCoverage": false,
+            "reason": "point-capacity"
+          },
+          "recovered": 1024
+        },
+        {
+          "id": "cull-source-capacity-error",
+          "failurePolicy": "forward",
+          "requested": 1025,
+          "thrown": null,
+          "diagnostics": {
+            "requested": "deferred-tiled",
+            "effective": "forward",
+            "completeCoverage": false,
+            "reason": "point-capacity"
+          },
+          "recovered": 1024
+        }
+      ]
+    }
+  ]
+}

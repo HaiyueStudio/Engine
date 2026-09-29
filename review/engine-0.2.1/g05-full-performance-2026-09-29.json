@@ -1,0 +1,2733 @@
+{
+  "schemaVersion": 1,
+  "tier": "diagnostic-g05-complete-population-audit",
+  "generatedAt": "2026-09-29T13:11:06.218Z",
+  "integrity": "passed",
+  "performanceQualification": "failed",
+  "releaseQualified": false,
+  "runtime": {
+    "sha256": "6bb2179a2fd27d7893459dd4e52f1d9494d5f440d13ada872a327a04551d9c42",
+    "fileCount": 610
+  },
+  "priorResourcePackageAudit": {
+    "path": "review/engine-0.2.1/g05-resume-audit.json",
+    "sha256": "c62e6d8d1cb9059981450a6ec3b808d48aae6a4642109c54cda1b7e3fd148857"
+  },
+  "master": {
+    "path": "artifacts/engine-0.2.1/g05/full-performance-attempt-2026-09-28T22-56-43.615Z.json",
+    "sha256": "34e50a99ec5a8e0103f5fce8d674fe0779fd0d59013237bf9b20e67f2968eef1"
+  },
+  "stages": [
+    {
+      "id": "forward",
+      "status": "failed",
+      "manifest": {
+        "path": "artifacts/engine-0.2.1/g05/forward-cohorts-2026-09-28T22-56-43.758Z.json",
+        "sha256": "e09f7481cb631cf76ea50f59c7fab36edd1a1800abbd0506d2788aea50f907f8"
+      },
+      "captures": 12,
+      "cpuSamples": 3600,
+      "gpuSamples": 3600,
+      "hostSnapshots": 24,
+      "minIdleMs": 120000.85043100012,
+      "budgets": {
+        "total": 8,
+        "failed": [
+          {
+            "caseId": "forward-small-1",
+            "preference": "high-performance",
+            "metric": "cpu",
+            "observedP95Ms": 0.9950000047683716,
+            "baselineP95Ms": 0.9399999380111694,
+            "ratio": 1.0585107131746945,
+            "limit": 1.05,
+            "stability": {
+              "cohortP95": [
+                1.0600000619888306,
+                0.9500000476837158,
+                0.9199999570846558
+              ],
+              "relativeSpread": 0.14736852408115367,
+              "cv": 0.061622799265875265,
+              "stable": true
+            },
+            "passed": false
+          },
+          {
+            "caseId": "forward-cap-8",
+            "preference": "high-performance",
+            "metric": "cpu",
+            "observedP95Ms": 1.0550000667572021,
+            "baselineP95Ms": 0.9399999380111694,
+            "ratio": 1.1223405705635974,
+            "limit": 1.05,
+            "stability": {
+              "cohortP95": [
+                1.0649999380111694,
+                0.9150000810623169,
+                1.159999966621399
+              ],
+              "relativeSpread": 0.23004685429053287,
+              "cv": 0.0963605580211646,
+              "stable": false
+            },
+            "passed": false
+          },
+          {
+            "caseId": "forward-small-1",
+            "preference": "low-power",
+            "metric": "cpu",
+            "observedP95Ms": 1.3299999237060547,
+            "baselineP95Ms": 1.1349999904632568,
+            "ratio": 1.1718061100275494,
+            "limit": 1.05,
+            "stability": {
+              "cohortP95": [
+                1.125,
+                1.090000033378601,
+                2.625
+              ],
+              "relativeSpread": 1.364444414774577,
+              "cv": 0.44349113787162386,
+              "stable": false
+            },
+            "passed": false
+          },
+          {
+            "caseId": "forward-cap-8",
+            "preference": "low-power",
+            "metric": "cpu",
+            "observedP95Ms": 1.5800000429153442,
+            "baselineP95Ms": 1.1399999856948853,
+            "ratio": 1.385964967317309,
+            "limit": 1.05,
+            "stability": {
+              "cohortP95": [
+                1.2799999713897705,
+                1.1949999332427979,
+                2.7549999952316284
+              ],
+              "relativeSpread": 1.218750075669961,
+              "cv": 0.410820777554066,
+              "stable": false
+            },
+            "passed": false
+          }
+        ]
+      },
+      "stability": {
+        "total": 8,
+        "failed": 3
+      }
+    },
+    {
+      "id": "instances",
+      "status": "failed",
+      "manifest": {
+        "path": "artifacts/engine-0.2.1/g05/instance-cohorts-2026-09-28T23-22-13.107Z.json",
+        "sha256": "27a70af3ad6346b7bcf30825f8eae34254852bd90fd4b6a45624ac253f08b98e"
+      },
+      "audit": {
+        "path": "artifacts/engine-0.2.1/g05/instances-audit-2026-09-29T02-51-41.130Z.json",
+        "sha256": "8871e8272419ed1046bdcc820742a24956813eaf1df4044069cb45a0d61c614e"
+      },
+      "captures": 96,
+      "cpuSamples": 57600,
+      "gpuSamples": 57600,
+      "hostSnapshots": 192,
+      "minIdleMs": 120000.364527,
+      "budgets": {
+        "total": 96,
+        "failed": []
+      },
+      "stability": {
+        "total": 192,
+        "failed": 83
+      }
+    },
+    {
+      "id": "rooms",
+      "status": "failed",
+      "manifest": {
+        "path": "artifacts/engine-0.2.1/g05/room-cohorts-2026-09-29T02-51-41.457Z.json",
+        "sha256": "78b4584fed710c39cac10b472f1880160622a72e3aff8075d5ad398fdd03b44f"
+      },
+      "audit": {
+        "path": "artifacts/engine-0.2.1/g05/rooms-audit-2026-09-29T11-47-34.224Z.json",
+        "sha256": "10c5702c5fa9824c2e885932e42f1a18bb5f747fa600f057699456ed31737fe7"
+      },
+      "captures": 156,
+      "cpuSamples": 46800,
+      "gpuSamples": 46800,
+      "hostSnapshots": 312,
+      "minIdleMs": 120000.10094399999,
+      "budgets": {
+        "total": 60,
+        "failed": [
+          {
+            "deviceId": "mac-amd-rdna1",
+            "caseId": "overlap-128",
+            "moving": true,
+            "metric": "frameWallP95Ms",
+            "observed": 35.04000008106232,
+            "limit": 16.666666666666668,
+            "passed": false
+          },
+          {
+            "deviceId": "mac-intel-gen9",
+            "caseId": "overlap-128",
+            "moving": true,
+            "metric": "gpuP95Ms",
+            "observed": 62.789435,
+            "limit": 24,
+            "passed": false
+          },
+          {
+            "deviceId": "mac-intel-gen9",
+            "caseId": "overlap-128",
+            "moving": true,
+            "metric": "frameWallP95Ms",
+            "observed": 72.07500004768372,
+            "limit": 33.333333333333336,
+            "passed": false
+          }
+        ]
+      },
+      "stability": {
+        "total": 156,
+        "failed": 52
+      },
+      "memory": {
+        "total": 156,
+        "failed": 0
+      }
+    },
+    {
+      "id": "gpu-focus",
+      "status": "failed",
+      "manifest": {
+        "path": "artifacts/engine-0.2.1/g05/gpu-focus-cohorts-2026-09-29T11-48-25.591Z.json",
+        "sha256": "6dedc919a27dd98a9051d8ab855d8a940cb5ecde737a1e4618167d14be55ba84"
+      },
+      "captures": 24,
+      "cpuSamples": 7200,
+      "gpuSamples": 7200,
+      "hostSnapshots": 48,
+      "minIdleMs": 120000.117857,
+      "stability": {
+        "total": 24,
+        "failed": 7
+      },
+      "rows": [
+        {
+          "job": {
+            "cohort": 0,
+            "preference": "high-performance",
+            "caseId": "overlap-128",
+            "ao": "off",
+            "runner": "room",
+            "algorithm": "tiled",
+            "moving": true,
+            "full": true,
+            "idleMs": 120000
+          },
+          "cohorts": [
+            {
+              "cohort": 0,
+              "cpuP95Ms": 2.8100000619888306,
+              "frameWallP95Ms": 35.265000104904175,
+              "gpuP95Ms": 6.428302,
+              "resolveP95Ms": 6.152426,
+              "cullP95Ms": 0
+            },
+            {
+              "cohort": 1,
+              "cpuP95Ms": 2.8049999475479126,
+              "frameWallP95Ms": 18.704999923706055,
+              "gpuP95Ms": 9.588094,
+              "resolveP95Ms": 9.248019,
+              "cullP95Ms": 0
+            },
+            {
+              "cohort": 2,
+              "cpuP95Ms": 2.7350000143051147,
+              "frameWallP95Ms": 11.019999980926514,
+              "gpuP95Ms": 7.038785,
+              "resolveP95Ms": 6.767233,
+              "cullP95Ms": 0
+            }
+          ],
+          "cpuSamples": 900,
+          "gpuSamples": 900,
+          "summary": {
+            "cpuP95Ms": 2.7899999618530273,
+            "frameWallP95Ms": 33.860000014305115,
+            "gpuP95Ms": 8.331873,
+            "resolveP95Ms": 8.009677,
+            "cullP95Ms": 0
+          },
+          "stability": {
+            "cpuP95Ms": {
+              "cohortP95": [
+                2.8100000619888306,
+                2.8049999475479126,
+                2.7350000143051147
+              ],
+              "relativeSpread": 0.026737985413967547,
+              "cv": 0.01230098054144114,
+              "stable": true
+            },
+            "gpuP95Ms": {
+              "cohortP95": [
+                6.428302,
+                9.588094,
+                7.038785
+              ],
+              "relativeSpread": 0.44891156641380575,
+              "cv": 0.17807710983806332,
+              "stable": false
+            },
+            "frameWallP95Ms": {
+              "cohortP95": [
+                35.265000104904175,
+                18.704999923706055,
+                11.019999980926514
+              ],
+              "relativeSpread": 1.2961775045639217,
+              "cv": 0.46699247884237444,
+              "stable": false
+            }
+          },
+          "passes": [
+            {
+              "label": "DeferredReference.gbuffer",
+              "p95Ms": 0.194077
+            },
+            {
+              "label": "DeferredTiles.resolve",
+              "p95Ms": 8.009677
+            },
+            {
+              "label": "SceneOutput.renderPass",
+              "p95Ms": 0.081359
+            }
+          ],
+          "checks": [
+            {
+              "metric": "cpuP95Ms",
+              "observed": 2.7899999618530273,
+              "limit": 4,
+              "passed": true,
+              "qualificationGate": true,
+              "note": "Frozen E absolute timing gate"
+            },
+            {
+              "metric": "gpuP95Ms",
+              "observed": 8.331873,
+              "limit": 12,
+              "passed": true,
+              "qualificationGate": true,
+              "note": "Frozen E absolute timing gate"
+            },
+            {
+              "metric": "frameWallP95Ms",
+              "observed": 33.860000014305115,
+              "limit": 16.666666666666668,
+              "passed": false,
+              "qualificationGate": true,
+              "note": "Frozen E absolute timing gate"
+            }
+          ]
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "preference": "high-performance",
+            "caseId": "overlap-128",
+            "ao": "off",
+            "runner": "room",
+            "algorithm": "reference",
+            "moving": true,
+            "full": true,
+            "idleMs": 120000
+          },
+          "cohorts": [
+            {
+              "cohort": 0,
+              "cpuP95Ms": 2.665000081062317,
+              "frameWallP95Ms": 51.2849999666214,
+              "gpuP95Ms": 7.828561,
+              "resolveP95Ms": 7.52197,
+              "cullP95Ms": 0
+            },
+            {
+              "cohort": 1,
+              "cpuP95Ms": 2.634999990463257,
+              "frameWallP95Ms": 11.480000019073486,
+              "gpuP95Ms": 7.644123,
+              "resolveP95Ms": 7.372127,
+              "cullP95Ms": 0
+            },
+            {
+              "cohort": 2,
+              "cpuP95Ms": 2.7699999809265137,
+              "frameWallP95Ms": 12.545000076293945,
+              "gpuP95Ms": 15.508806,
+              "resolveP95Ms": 14.634914,
+              "cullP95Ms": 0
+            }
+          ],
+          "cpuSamples": 900,
+          "gpuSamples": 900,
+          "summary": {
+            "cpuP95Ms": 2.7050000429153442,
+            "frameWallP95Ms": 34.86500000953674,
+            "gpuP95Ms": 8.030475,
+            "resolveP95Ms": 7.598568,
+            "cullP95Ms": 0
+          },
+          "stability": {
+            "cpuP95Ms": {
+              "cohortP95": [
+                2.665000081062317,
+                2.634999990463257,
+                2.7699999809265137
+              ],
+              "relativeSpread": 0.050656655293399994,
+              "cv": 0.021516418847447014,
+              "stable": true
+            },
+            "gpuP95Ms": {
+              "cohortP95": [
+                7.828561,
+                7.644123,
+                15.508806
+              ],
+              "relativeSpread": 1.0046141302341516,
+              "cv": 0.3548649476661815,
+              "stable": false
+            },
+            "frameWallP95Ms": {
+              "cohortP95": [
+                51.2849999666214,
+                11.480000019073486,
+                12.545000076293945
+              ],
+              "relativeSpread": 3.1729772583076095,
+              "cv": 0.7376844544744549,
+              "stable": false
+            }
+          },
+          "passes": [
+            {
+              "label": "DeferredReference.gbuffer",
+              "p95Ms": 0.174434
+            },
+            {
+              "label": "DeferredReference.resolve",
+              "p95Ms": 7.598568
+            },
+            {
+              "label": "SceneOutput.renderPass",
+              "p95Ms": 0.064439
+            }
+          ],
+          "checks": []
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "preference": "high-performance",
+            "caseId": "1080p-128",
+            "ao": "gtao",
+            "runner": "cost",
+            "algorithm": "reference",
+            "moving": true,
+            "full": true,
+            "idleMs": 120000
+          },
+          "cohorts": [
+            {
+              "cohort": 0,
+              "cpuP95Ms": 3.9299999475479126,
+              "frameWallP95Ms": 51.90499997138977,
+              "gpuP95Ms": 42.776507,
+              "resolveP95Ms": 16.471029,
+              "cullP95Ms": 0
+            },
+            {
+              "cohort": 1,
+              "cpuP95Ms": 3.7100000381469727,
+              "frameWallP95Ms": 51,
+              "gpuP95Ms": 44.813516,
+              "resolveP95Ms": 16.465909,
+              "cullP95Ms": 0
+            },
+            {
+              "cohort": 2,
+              "cpuP95Ms": 3.9149999618530273,
+              "frameWallP95Ms": 64.70499992370605,
+              "gpuP95Ms": 43.109102,
+              "resolveP95Ms": 16.467269,
+              "cullP95Ms": 0
+            }
+          ],
+          "cpuSamples": 900,
+          "gpuSamples": 900,
+          "summary": {
+            "cpuP95Ms": 3.8549998998641968,
+            "frameWallP95Ms": 51.90499997138977,
+            "gpuP95Ms": 43.878731,
+            "resolveP95Ms": 16.467269,
+            "cullP95Ms": 0
+          },
+          "stability": {
+            "cpuP95Ms": {
+              "cohortP95": [
+                3.9299999475479126,
+                3.7100000381469727,
+                3.9149999618530273
+              ],
+              "relativeSpread": 0.05619410256566407,
+              "cv": 0.026056362341227685,
+              "stable": true
+            },
+            "gpuP95Ms": {
+              "cohortP95": [
+                42.776507,
+                44.813516,
+                43.109102
+              ],
+              "relativeSpread": 0.04725241087137463,
+              "cv": 0.020480332292885445,
+              "stable": true
+            },
+            "frameWallP95Ms": {
+              "cohortP95": [
+                51.90499997138977,
+                51,
+                64.70499992370605
+              ],
+              "relativeSpread": 0.2640400718863366,
+              "cv": 0.11201367322369,
+              "stable": false
+            }
+          },
+          "passes": [
+            {
+              "label": "DeferredReference.gbuffer",
+              "p95Ms": 0.352195
+            },
+            {
+              "label": "Render3DSystem.postNormalPass",
+              "p95Ms": 0.223876
+            },
+            {
+              "label": "GTAOPass.occlusionPass",
+              "p95Ms": 23.420442
+            },
+            {
+              "label": "GTAOPass.denoisePass",
+              "p95Ms": 3.577826
+            },
+            {
+              "label": "GTAOPass.upscalePass",
+              "p95Ms": 0.356635
+            },
+            {
+              "label": "DeferredReference.resolve",
+              "p95Ms": 16.467269
+            },
+            {
+              "label": "SceneOutput.renderPass",
+              "p95Ms": 0.140038
+            }
+          ],
+          "checks": []
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "preference": "high-performance",
+            "caseId": "1080p-128",
+            "ao": "gtao",
+            "runner": "cost",
+            "algorithm": "tiled",
+            "moving": true,
+            "full": true,
+            "idleMs": 120000
+          },
+          "cohorts": [
+            {
+              "cohort": 0,
+              "cpuP95Ms": 3.909999966621399,
+              "frameWallP95Ms": 28.75,
+              "gpuP95Ms": 26.614868,
+              "resolveP95Ms": 4.092675,
+              "cullP95Ms": 0.060838
+            },
+            {
+              "cohort": 1,
+              "cpuP95Ms": 3.9199999570846558,
+              "frameWallP95Ms": 51.31000006198883,
+              "gpuP95Ms": 24.638265,
+              "resolveP95Ms": 4.347813,
+              "cullP95Ms": 0.034679
+            },
+            {
+              "cohort": 2,
+              "cpuP95Ms": 3.7649999856948853,
+              "frameWallP95Ms": 28.864999890327454,
+              "gpuP95Ms": 26.809262,
+              "resolveP95Ms": 4.154473,
+              "cullP95Ms": 0.058479
+            }
+          ],
+          "cpuSamples": 900,
+          "gpuSamples": 900,
+          "summary": {
+            "cpuP95Ms": 3.884999990463257,
+            "frameWallP95Ms": 43.77999997138977,
+            "gpuP95Ms": 26.521475,
+            "resolveP95Ms": 4.325094,
+            "cullP95Ms": 0.056638
+          },
+          "stability": {
+            "cpuP95Ms": {
+              "cohortP95": [
+                3.909999966621399,
+                3.9199999570846558,
+                3.7649999856948853
+              ],
+              "relativeSpread": 0.039641936755233476,
+              "cv": 0.018325593871012333,
+              "stable": true
+            },
+            "gpuP95Ms": {
+              "cohortP95": [
+                26.614868,
+                24.638265,
+                26.809262
+              ],
+              "relativeSpread": 0.08157083476799508,
+              "cv": 0.037693488058264155,
+              "stable": true
+            },
+            "frameWallP95Ms": {
+              "cohortP95": [
+                28.75,
+                51.31000006198883,
+                28.864999890327454
+              ],
+              "relativeSpread": 0.7815693797923275,
+              "cv": 0.29216114340999066,
+              "stable": false
+            }
+          },
+          "passes": [
+            {
+              "label": "DeferredReference.gbuffer",
+              "p95Ms": 0.34871
+            },
+            {
+              "label": "Render3DSystem.postNormalPass",
+              "p95Ms": 0.214633
+            },
+            {
+              "label": "GTAOPass.occlusionPass",
+              "p95Ms": 15.588962
+            },
+            {
+              "label": "GTAOPass.denoisePass",
+              "p95Ms": 3.181472
+            },
+            {
+              "label": "GTAOPass.upscalePass",
+              "p95Ms": 0.352229
+            },
+            {
+              "label": "DeferredTiles.cull",
+              "p95Ms": 0.056638
+            },
+            {
+              "label": "DeferredTiles.resolve",
+              "p95Ms": 4.325094
+            },
+            {
+              "label": "SceneOutput.renderPass",
+              "p95Ms": 0.139358
+            }
+          ],
+          "checks": [
+            {
+              "metric": "cpuP95Ms",
+              "observed": 3.884999990463257,
+              "limit": 4,
+              "passed": true,
+              "qualificationGate": false,
+              "note": "AO cost is compared to the existing resolution budget for attribution; it has no separate frozen AO FPS allowance."
+            },
+            {
+              "metric": "gpuP95Ms",
+              "observed": 26.521475,
+              "limit": 27,
+              "passed": true,
+              "qualificationGate": false,
+              "note": "AO cost is compared to the existing resolution budget for attribution; it has no separate frozen AO FPS allowance."
+            },
+            {
+              "metric": "frameWallP95Ms",
+              "observed": 43.77999997138977,
+              "limit": 37.5,
+              "passed": false,
+              "qualificationGate": false,
+              "note": "AO cost is compared to the existing resolution budget for attribution; it has no separate frozen AO FPS allowance."
+            }
+          ]
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "preference": "low-power",
+            "caseId": "overlap-128",
+            "ao": "off",
+            "runner": "room",
+            "algorithm": "tiled",
+            "moving": true,
+            "full": true,
+            "idleMs": 120000
+          },
+          "cohorts": [
+            {
+              "cohort": 0,
+              "cpuP95Ms": 4.0299999713897705,
+              "frameWallP95Ms": 68.22499990463257,
+              "gpuP95Ms": 62.885684,
+              "resolveP95Ms": 60.443389,
+              "cullP95Ms": 0
+            },
+            {
+              "cohort": 1,
+              "cpuP95Ms": 6.804999947547913,
+              "frameWallP95Ms": 73.16000008583069,
+              "gpuP95Ms": 63.755087,
+              "resolveP95Ms": 61.283709,
+              "cullP95Ms": 0
+            },
+            {
+              "cohort": 2,
+              "cpuP95Ms": 3.950000047683716,
+              "frameWallP95Ms": 68.21000003814697,
+              "gpuP95Ms": 62.821019,
+              "resolveP95Ms": 60.528388,
+              "cullP95Ms": 0
+            }
+          ],
+          "cpuSamples": 900,
+          "gpuSamples": 900,
+          "summary": {
+            "cpuP95Ms": 6.259999990463257,
+            "frameWallP95Ms": 71.95000004768372,
+            "gpuP95Ms": 63.035515,
+            "resolveP95Ms": 60.606386,
+            "cullP95Ms": 0
+          },
+          "stability": {
+            "cpuP95Ms": {
+              "cohortP95": [
+                4.0299999713897705,
+                6.804999947547913,
+                3.950000047683716
+              ],
+              "relativeSpread": 0.7084367047475766,
+              "cv": 0.26934167321058783,
+              "stable": false
+            },
+            "gpuP95Ms": {
+              "cohortP95": [
+                62.885684,
+                63.755087,
+                62.821019
+              ],
+              "relativeSpread": 0.014853428325594796,
+              "cv": 0.00674385834693313,
+              "stable": true
+            },
+            "frameWallP95Ms": {
+              "cohortP95": [
+                68.22499990463257,
+                73.16000008583069,
+                68.21000003814697
+              ],
+              "relativeSpread": 0.07255404990257251,
+              "cv": 0.03334895791855386,
+              "stable": true
+            }
+          },
+          "passes": [
+            {
+              "label": "DeferredReference.gbuffer",
+              "p95Ms": 1.989885
+            },
+            {
+              "label": "DeferredTiles.resolve",
+              "p95Ms": 60.606386
+            },
+            {
+              "label": "SceneOutput.renderPass",
+              "p95Ms": 0.510658
+            }
+          ],
+          "checks": [
+            {
+              "metric": "cpuP95Ms",
+              "observed": 6.259999990463257,
+              "limit": 8,
+              "passed": true,
+              "qualificationGate": true,
+              "note": "Frozen E absolute timing gate"
+            },
+            {
+              "metric": "gpuP95Ms",
+              "observed": 63.035515,
+              "limit": 24,
+              "passed": false,
+              "qualificationGate": true,
+              "note": "Frozen E absolute timing gate"
+            },
+            {
+              "metric": "frameWallP95Ms",
+              "observed": 71.95000004768372,
+              "limit": 33.333333333333336,
+              "passed": false,
+              "qualificationGate": true,
+              "note": "Frozen E absolute timing gate"
+            }
+          ]
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "preference": "low-power",
+            "caseId": "overlap-128",
+            "ao": "off",
+            "runner": "room",
+            "algorithm": "reference",
+            "moving": true,
+            "full": true,
+            "idleMs": 120000
+          },
+          "cohorts": [
+            {
+              "cohort": 0,
+              "cpuP95Ms": 3.8799999952316284,
+              "frameWallP95Ms": 73.91999995708466,
+              "gpuP95Ms": 69.177335,
+              "resolveP95Ms": 66.882288,
+              "cullP95Ms": 0
+            },
+            {
+              "cohort": 1,
+              "cpuP95Ms": 3.805000066757202,
+              "frameWallP95Ms": 74.1049998998642,
+              "gpuP95Ms": 69.121504,
+              "resolveP95Ms": 66.700708,
+              "cullP95Ms": 0
+            },
+            {
+              "cohort": 2,
+              "cpuP95Ms": 3.7699999809265137,
+              "frameWallP95Ms": 73.91499996185303,
+              "gpuP95Ms": 69.141336,
+              "resolveP95Ms": 66.741041,
+              "cullP95Ms": 0
+            }
+          ],
+          "cpuSamples": 900,
+          "gpuSamples": 900,
+          "summary": {
+            "cpuP95Ms": 3.819999933242798,
+            "frameWallP95Ms": 73.93999993801117,
+            "gpuP95Ms": 69.159003,
+            "resolveP95Ms": 66.76454,
+            "cullP95Ms": 0
+          },
+          "stability": {
+            "cpuP95Ms": {
+              "cohortP95": [
+                3.8799999952316284,
+                3.805000066757202,
+                3.7699999809265137
+              ],
+              "relativeSpread": 0.02890933308152656,
+              "cv": 0.01201737169343008,
+              "stable": true
+            },
+            "gpuP95Ms": {
+              "cohortP95": [
+                69.177335,
+                69.121504,
+                69.141336
+              ],
+              "relativeSpread": 0.0008074909052957517,
+              "cv": 0.0003342059899106994,
+              "stable": true
+            },
+            "frameWallP95Ms": {
+              "cohortP95": [
+                73.91999995708466,
+                74.1049998998642,
+                73.91499996185303
+              ],
+              "relativeSpread": 0.0025703454832450854,
+              "cv": 0.0011950782193745207,
+              "stable": true
+            }
+          },
+          "passes": [
+            {
+              "label": "DeferredReference.gbuffer",
+              "p95Ms": 1.984969
+            },
+            {
+              "label": "DeferredReference.resolve",
+              "p95Ms": 66.76454
+            },
+            {
+              "label": "SceneOutput.renderPass",
+              "p95Ms": 0.511325
+            }
+          ],
+          "checks": []
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "preference": "low-power",
+            "caseId": "1080p-128",
+            "ao": "gtao",
+            "runner": "cost",
+            "algorithm": "reference",
+            "moving": true,
+            "full": true,
+            "idleMs": 120000
+          },
+          "cohorts": [
+            {
+              "cohort": 0,
+              "cpuP95Ms": 5.225000023841858,
+              "frameWallP95Ms": 269.2150000333786,
+              "gpuP95Ms": 275.052452,
+              "resolveP95Ms": 159.58609,
+              "cullP95Ms": 0
+            },
+            {
+              "cohort": 1,
+              "cpuP95Ms": 5.454999923706055,
+              "frameWallP95Ms": 270.2849999666214,
+              "gpuP95Ms": 277.60008,
+              "resolveP95Ms": 160.954818,
+              "cullP95Ms": 0
+            },
+            {
+              "cohort": 2,
+              "cpuP95Ms": 5.340000033378601,
+              "frameWallP95Ms": 270.44000005722046,
+              "gpuP95Ms": 273.332062,
+              "resolveP95Ms": 160.055416,
+              "cullP95Ms": 0
+            }
+          ],
+          "cpuSamples": 900,
+          "gpuSamples": 900,
+          "summary": {
+            "cpuP95Ms": 5.375,
+            "frameWallP95Ms": 269.89999997615814,
+            "gpuP95Ms": 276.307016,
+            "resolveP95Ms": 160.478909,
+            "cullP95Ms": 0
+          },
+          "stability": {
+            "cpuP95Ms": {
+              "cohortP95": [
+                5.225000023841858,
+                5.454999923706055,
+                5.340000033378601
+              ],
+              "relativeSpread": 0.04307114202744238,
+              "cv": 0.017583720231875752,
+              "stable": true
+            },
+            "gpuP95Ms": {
+              "cohortP95": [
+                275.052452,
+                277.60008,
+                273.332062
+              ],
+              "relativeSpread": 0.015517105806422637,
+              "cv": 0.006367988090732967,
+              "stable": true
+            },
+            "frameWallP95Ms": {
+              "cohortP95": [
+                269.2150000333786,
+                270.2849999666214,
+                270.44000005722046
+              ],
+              "relativeSpread": 0.004532253080981698,
+              "cv": 0.0020172799749453465,
+              "stable": true
+            }
+          },
+          "passes": [
+            {
+              "label": "DeferredReference.gbuffer",
+              "p95Ms": 5.144253
+            },
+            {
+              "label": "Render3DSystem.postNormalPass",
+              "p95Ms": 16.014333
+            },
+            {
+              "label": "GTAOPass.occlusionPass",
+              "p95Ms": 72.032791
+            },
+            {
+              "label": "GTAOPass.denoisePass",
+              "p95Ms": 18.658292
+            },
+            {
+              "label": "GTAOPass.upscalePass",
+              "p95Ms": 3.221533
+            },
+            {
+              "label": "DeferredReference.resolve",
+              "p95Ms": 160.478909
+            },
+            {
+              "label": "SceneOutput.renderPass",
+              "p95Ms": 1.168149
+            }
+          ],
+          "checks": []
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "preference": "low-power",
+            "caseId": "1080p-128",
+            "ao": "gtao",
+            "runner": "cost",
+            "algorithm": "tiled",
+            "moving": true,
+            "full": true,
+            "idleMs": 120000
+          },
+          "cohorts": [
+            {
+              "cohort": 0,
+              "cpuP95Ms": 5.569999933242798,
+              "frameWallP95Ms": 191.18499994277954,
+              "gpuP95Ms": 195.186866,
+              "resolveP95Ms": 79.583423,
+              "cullP95Ms": 0.761322
+            },
+            {
+              "cohort": 1,
+              "cpuP95Ms": 5.379999995231628,
+              "frameWallP95Ms": 191.4799998998642,
+              "gpuP95Ms": 196.955506,
+              "resolveP95Ms": 78.813602,
+              "cullP95Ms": 0.791655
+            },
+            {
+              "cohort": 2,
+              "cpuP95Ms": 5.384999990463257,
+              "frameWallP95Ms": 191.13499999046326,
+              "gpuP95Ms": 194.074134,
+              "resolveP95Ms": 77.744785,
+              "cullP95Ms": 0.789238
+            }
+          ],
+          "cpuSamples": 900,
+          "gpuSamples": 900,
+          "summary": {
+            "cpuP95Ms": 5.434999942779541,
+            "frameWallP95Ms": 191.37000000476837,
+            "gpuP95Ms": 195.944021,
+            "resolveP95Ms": 78.710104,
+            "cullP95Ms": 0.788654
+          },
+          "stability": {
+            "cpuP95Ms": {
+              "cohortP95": [
+                5.569999933242798,
+                5.379999995231628,
+                5.384999990463257
+              ],
+              "relativeSpread": 0.03528318260866408,
+              "cv": 0.01623726116361587,
+              "stable": true
+            },
+            "gpuP95Ms": {
+              "cohortP95": [
+                195.186866,
+                196.955506,
+                194.074134
+              ],
+              "relativeSpread": 0.014762120316025912,
+              "cv": 0.006071635083625475,
+              "stable": true
+            },
+            "frameWallP95Ms": {
+              "cohortP95": [
+                191.18499994277954,
+                191.4799998998642,
+                191.13499999046326
+              ],
+              "relativeSpread": 0.001804534401256355,
+              "cv": 0.0007958742560066054,
+              "stable": true
+            }
+          },
+          "passes": [
+            {
+              "label": "DeferredReference.gbuffer",
+              "p95Ms": 5.288917
+            },
+            {
+              "label": "Render3DSystem.postNormalPass",
+              "p95Ms": 15.997167
+            },
+            {
+              "label": "GTAOPass.occlusionPass",
+              "p95Ms": 73.337271
+            },
+            {
+              "label": "GTAOPass.denoisePass",
+              "p95Ms": 19.933272
+            },
+            {
+              "label": "GTAOPass.upscalePass",
+              "p95Ms": 3.493779
+            },
+            {
+              "label": "DeferredTiles.cull",
+              "p95Ms": 0.788654
+            },
+            {
+              "label": "DeferredTiles.resolve",
+              "p95Ms": 78.710104
+            },
+            {
+              "label": "SceneOutput.renderPass",
+              "p95Ms": 1.373312
+            }
+          ],
+          "checks": [
+            {
+              "metric": "cpuP95Ms",
+              "observed": 5.434999942779541,
+              "limit": 8,
+              "passed": true,
+              "qualificationGate": false,
+              "note": "AO cost is compared to the existing resolution budget for attribution; it has no separate frozen AO FPS allowance."
+            },
+            {
+              "metric": "gpuP95Ms",
+              "observed": 195.944021,
+              "limit": 54,
+              "passed": false,
+              "qualificationGate": false,
+              "note": "AO cost is compared to the existing resolution budget for attribution; it has no separate frozen AO FPS allowance."
+            },
+            {
+              "metric": "frameWallP95Ms",
+              "observed": 191.37000000476837,
+              "limit": 75,
+              "passed": false,
+              "qualificationGate": false,
+              "note": "AO cost is compared to the existing resolution budget for attribution; it has no separate frozen AO FPS allowance."
+            }
+          ]
+        }
+      ],
+      "ratios": [
+        {
+          "preference": "high-performance",
+          "metric": "wholeGpuRatio",
+          "observed": 1.0375317773855222,
+          "limit": 1.1,
+          "passed": true
+        },
+        {
+          "preference": "low-power",
+          "metric": "wholeGpuRatio",
+          "observed": 0.9114578329013794,
+          "limit": 1.1,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "captures": 288,
+    "cpuSamples": 115200,
+    "gpuSamples": 115200,
+    "hostSnapshots": 576
+  },
+  "rawArtifacts": [
+    {
+      "path": "artifacts/engine-0.2.1/g05/forward-forward-small-1-high-performance-2026-09-28T22-59-06.563Z.json",
+      "sha256": "091ab768e205809a3c57beb8d4681ab3e832e619e697f285bc9f177470e37b8f",
+      "stage": "forward"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/forward-forward-cap-8-high-performance-2026-09-28T23-01-12.060Z.json",
+      "sha256": "51caac2bca0b443d997da6dbcbfcbcbb03d74a6d1cc575bdfd929ef43a39cf3d",
+      "stage": "forward"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/forward-forward-small-1-low-power-2026-09-28T23-03-18.119Z.json",
+      "sha256": "204a303e72becc360929b1466580086c64e95dd09d348359325c249ffb056408",
+      "stage": "forward"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/forward-forward-cap-8-low-power-2026-09-28T23-05-25.695Z.json",
+      "sha256": "d7620b16e44f1bc16fb49764fa042d9649d10d7c9fd510ce9d6852137179a600",
+      "stage": "forward"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/forward-forward-cap-8-low-power-2026-09-28T23-07-32.372Z.json",
+      "sha256": "d4e1a9e417f4405e5c6673a0eb11771af18a8c826acccec37dd87a9e8ac26962",
+      "stage": "forward"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/forward-forward-small-1-low-power-2026-09-28T23-09-38.473Z.json",
+      "sha256": "27cd4bea1a4fc2819283079be4643279333e9c62babab5a95ec7f6cb6096ba2e",
+      "stage": "forward"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/forward-forward-cap-8-high-performance-2026-09-28T23-11-43.910Z.json",
+      "sha256": "947799837308576d610360867ca5c9cb4c0c1882e801b2cb1126784cb6d32971",
+      "stage": "forward"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/forward-forward-small-1-high-performance-2026-09-28T23-13-49.154Z.json",
+      "sha256": "5907649410b906acf8011d19d3f7394748a9142c81cc77c717b8007b3d978e75",
+      "stage": "forward"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/forward-forward-small-1-high-performance-2026-09-28T23-15-54.081Z.json",
+      "sha256": "16edbba6363c1974713045d3dc08282118e4248e4cfad540854dbb1f96bf8843",
+      "stage": "forward"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/forward-forward-cap-8-high-performance-2026-09-28T23-17-59.506Z.json",
+      "sha256": "5dc7cf862aa86d1001581a865ce4d0d8db56524baba9e5db7ace78bdfe9a2e1b",
+      "stage": "forward"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/forward-forward-small-1-low-power-2026-09-28T23-20-05.743Z.json",
+      "sha256": "f5849b1d58bcce31fc1b5e114e216446065591b808f848e2d73f796fa46b49ef",
+      "stage": "forward"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/forward-forward-cap-8-low-power-2026-09-28T23-22-12.546Z.json",
+      "sha256": "242a4d2206b6d272278266adffc9e31b61889a130a142964fa93d7a568a39e1c",
+      "stage": "forward"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-lod-on-high-performance-2026-09-28T23-24-17.850Z.json",
+      "sha256": "5963f23fb3e09f5a4e4ba1186333adbbde16a30a85df621b758800d3882698cd",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-lod-off-high-performance-2026-09-28T23-26-22.758Z.json",
+      "sha256": "4e841d5bb2c420706b216f14207fb95df9b92afb91162fbac56d53b6e8097a7b",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-frustum-visible-high-performance-2026-09-28T23-28-27.809Z.json",
+      "sha256": "72514a8f0fe34e001defcf4c8f2397dc471de2e6d1dac19351ecce4f0af1d874",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-frustum-rejected-high-performance-2026-09-28T23-30-32.519Z.json",
+      "sha256": "e46a7663ba99f1ef25669b079eeadbf65b46af1002d3510cafafb5ab0da9fb30",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-lod-on-high-performance-2026-09-28T23-32-40.438Z.json",
+      "sha256": "a9974da0950414fb1d8ef340af9229f8102c7df4ff5ee714de2d1fd91e69f3a9",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-lod-off-high-performance-2026-09-28T23-35-03.380Z.json",
+      "sha256": "25fb9d25fb83f2b1ec86602a25fd4850ee449a09d27a6535e1dc6b00b1bb2917",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-frustum-visible-high-performance-2026-09-28T23-37-11.809Z.json",
+      "sha256": "1909e45e20838be4852f3d183a9f1d66f2586093c1e16ae38fcc00e06a888484",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-frustum-rejected-high-performance-2026-09-28T23-39-19.698Z.json",
+      "sha256": "e6f05779a188f76075352227a6d041abb6057b596ff965c82514103d1402ee92",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-lod-on-high-performance-2026-09-28T23-41-26.694Z.json",
+      "sha256": "da70c021ee012b1edbbf4359ffc9f10ec8dae66a5db6f7016b816a2b57fd3383",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-lod-off-high-performance-2026-09-28T23-43-33.728Z.json",
+      "sha256": "3292153600e661d22e5bb658a838ac05372559e74e68d57eff79c8fae70064a6",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-frustum-visible-high-performance-2026-09-28T23-45-41.768Z.json",
+      "sha256": "28a0c7198f7af39e83dbf2b80baf0117c1b3194a1c50bd30dc862e05c6e9f484",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-frustum-rejected-high-performance-2026-09-28T23-47-47.963Z.json",
+      "sha256": "34a861b62de7c77e455f39617e9498883f12acca2bb9a11af901231d8e0f92f5",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-lod-on-high-performance-2026-09-28T23-50-00.634Z.json",
+      "sha256": "08750f84fdf4a50e00a61e7920ba6b1dbdce62842e86d9a303395e013299e82c",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-lod-off-high-performance-2026-09-28T23-52-14.059Z.json",
+      "sha256": "f303369aab567823471bc78c8ec4516960851499c17656be73ad59e1237edb25",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-visible-high-performance-2026-09-28T23-54-28.577Z.json",
+      "sha256": "12a632f067b44b71bf68a4ee1ca4af5a5f3daeb2ab6a3a6db7d09e6368427d62",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-rejected-high-performance-2026-09-28T23-56-38.704Z.json",
+      "sha256": "8fc581d162e3654c375078790a7c4af100273001fe8f094df55feaba62a1bfa5",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-lod-on-low-power-2026-09-28T23-58-44.317Z.json",
+      "sha256": "f6c6a69b8b3bb2de50182467160a2a68b285ae037240d8ab27afb67955655c28",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-lod-off-low-power-2026-09-29T00-00-49.911Z.json",
+      "sha256": "626d309284d1ff7c9cb7e4487f8430d928307c6bc055aef4efe5058567bc1e4b",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-frustum-visible-low-power-2026-09-29T00-02-55.654Z.json",
+      "sha256": "f1f077c20db4862d0cf3167ceee8dfbf7c78b1ab6e1362e810c7c1efd30ace43",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-frustum-rejected-low-power-2026-09-29T00-05-01.156Z.json",
+      "sha256": "568d74539171d33af1a210520101e9e9f93915e0caffd69aaf62532e28dd9730",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-lod-on-low-power-2026-09-29T00-07-10.417Z.json",
+      "sha256": "bdb33d0914ed8fb88c11f5fe2695525cd9f6e19f00de4fb4d577ea58ef75f702",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-lod-off-low-power-2026-09-29T00-09-19.716Z.json",
+      "sha256": "e2aad3b9f2fff49d2e33b921f4925b78c7d6f395e9c69e7ea9473798eed4073e",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-frustum-visible-low-power-2026-09-29T00-11-29.441Z.json",
+      "sha256": "043e41ac27169988047c63332f5fd2ca0b600ab135e6d989cefd1d8cc616009d",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-frustum-rejected-low-power-2026-09-29T00-13-38.035Z.json",
+      "sha256": "bd5da5ec49655a3fc83e196ef7b821d020e89fa7e681f40444e4aaef1694e0b3",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-lod-on-low-power-2026-09-29T00-15-47.893Z.json",
+      "sha256": "20344f3cdd5a45de0195700efb38e156f878bbb1c129b08680f62e30a29147a6",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-lod-off-low-power-2026-09-29T00-17-58.127Z.json",
+      "sha256": "47ca6ce29d9bfb3875a1cbec7103da304e55e40c3c2305e37f0eab3822efc48c",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-frustum-visible-low-power-2026-09-29T00-20-09.841Z.json",
+      "sha256": "e6b1669355180728a60bc3a05778363ca075f9143d84cc5ee3e49a5727cc5dd7",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-frustum-rejected-low-power-2026-09-29T00-22-18.683Z.json",
+      "sha256": "b95f34ddfc0643d539c5155f4de764928fb8257c7f6a8c499bd1f64bf7b6fafa",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-lod-on-low-power-2026-09-29T00-24-45.243Z.json",
+      "sha256": "d57111dab6fd12f7050f73aea898acdc65418df297fa246a4fc8c2bc81cdbeb4",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-lod-off-low-power-2026-09-29T00-27-11.099Z.json",
+      "sha256": "2926bcd3273c0978f88a59a8c395d2502fa66c6d3533775a58eb3fc1160610ef",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-visible-low-power-2026-09-29T00-29-41.850Z.json",
+      "sha256": "6595a3156ca6536193867e03207259907d0e35739bf01d5cca7b64c2fbf3f947",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-rejected-low-power-2026-09-29T00-32-02.275Z.json",
+      "sha256": "781fc53734dded72d61d278aa26f8cf04f098f9a7d184967d92cf121afe93c63",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-rejected-low-power-2026-09-29T00-34-22.725Z.json",
+      "sha256": "ac1b258cd7fa4785ba01360beec125afdccfa042a3c4d0a2c6743c3b152b2a6b",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-visible-low-power-2026-09-29T00-36-53.571Z.json",
+      "sha256": "892c093fc3e2ccd85c06695e4a93736a77aaa8e15f2362f14101cc24d6ac9f9c",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-lod-off-low-power-2026-09-29T00-39-19.507Z.json",
+      "sha256": "ae214cc3a5039c611a2fcf3a80897669993918d1d9b6a4db66eb59965e3e3c81",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-lod-on-low-power-2026-09-29T00-41-45.742Z.json",
+      "sha256": "b14e5e6e8be0d8d58748bef1525ce2be9d2c7fb48731ebeb8093909f7fd341b5",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-frustum-rejected-low-power-2026-09-29T00-43-54.118Z.json",
+      "sha256": "838a1f02cb0bdcca4679348924f35183427a6aa72cc2689afce99d460f08c09c",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-frustum-visible-low-power-2026-09-29T00-46-06.030Z.json",
+      "sha256": "5aa9f8640bac0529ef87865ce5247815a671800ddffbc8d6f2cd84d418e14aaf",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-lod-off-low-power-2026-09-29T00-48-16.278Z.json",
+      "sha256": "5f1da26ee2d5fb3e46b619d6beefda5c9512e3ae802025b0ade6cd2ffec4f7fd",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-lod-on-low-power-2026-09-29T00-50-26.887Z.json",
+      "sha256": "e1f3604d5884879ba30856019f04eadb1b5768575a705a8a9bdfb21c968d7705",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-frustum-rejected-low-power-2026-09-29T00-52-35.689Z.json",
+      "sha256": "9528addb22554964b77a764b8a820a64efc910cbedf12a998bc591dcac1fb250",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-frustum-visible-low-power-2026-09-29T00-54-45.527Z.json",
+      "sha256": "47d9c2b9ed0f3d78fa9bd7cc2cc53abc88a5fa97b7b1b901a1c4985f8af2124e",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-lod-off-low-power-2026-09-29T00-56-54.678Z.json",
+      "sha256": "e6cd287a6e64bddabff15c746e42925f839b8cab593b87b7e92c327495496bdc",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-lod-on-low-power-2026-09-29T00-59-04.001Z.json",
+      "sha256": "8ec20f18737f84f4f812006e8aafaf44990635095afeacc66752de15053d3f92",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-frustum-rejected-low-power-2026-09-29T01-01-09.352Z.json",
+      "sha256": "b3747d110847b45cf89dfa64cba13a51b54515b43ac05b44285340796fb43d2b",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-frustum-visible-low-power-2026-09-29T01-03-15.134Z.json",
+      "sha256": "5e624250389867f8c020ee17086fbd40a0b863ae5507da72bddcb6d44831f3a8",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-lod-off-low-power-2026-09-29T01-05-20.797Z.json",
+      "sha256": "0a8f12dae4b0685c62f5c21384342e68cf91acd06cfe8ea2643d0a5b94b25d77",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-lod-on-low-power-2026-09-29T01-07-26.423Z.json",
+      "sha256": "9dcf9f93206389d9082c3a8261270d4db714647ac7f8d212c5afc3dba3d31b29",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-rejected-high-performance-2026-09-29T01-09-36.908Z.json",
+      "sha256": "6677604830d43f77025e058f0dd8e0402f3decee760875a97543906c969923d2",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-visible-high-performance-2026-09-29T01-11-49.584Z.json",
+      "sha256": "f5ff2de59ee16e624eca4acba565b008aac0a0d6cdebf57ba47a5d23edc953a6",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-lod-off-high-performance-2026-09-29T01-14-04.040Z.json",
+      "sha256": "a0b614236935c5ad88ae6790cacf9243f8fdd964c344f9009cf7c560fbebd2da",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-lod-on-high-performance-2026-09-29T01-16-17.574Z.json",
+      "sha256": "4098a3a0ebf1e8682d0398c96e324647c80c4dddc3b0becc9ae71153bed4175d",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-frustum-rejected-high-performance-2026-09-29T01-18-28.478Z.json",
+      "sha256": "037bdd796e27deaf7cf27f8182df9d47f8a4f96c00a77eadfa5c8aa024a40c1e",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-frustum-visible-high-performance-2026-09-29T01-20-35.959Z.json",
+      "sha256": "0f35284105be62b772762564e42c28f7fe9a839059aac689e318511695965a17",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-lod-off-high-performance-2026-09-29T01-22-43.178Z.json",
+      "sha256": "764e9f03eb316a44367eb8003d38245a575c54ea2465460c13b0cf7769c7c43d",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-lod-on-high-performance-2026-09-29T01-24-51.230Z.json",
+      "sha256": "f0f9cf5b6ace5bad9c922bec7b2ceeff4ab9b1bd07472584953cd37dd5bcfffe",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-frustum-rejected-high-performance-2026-09-29T01-27-00.994Z.json",
+      "sha256": "8341e21c94900796d366f95ffe63a3621b0e21502d007991bc4a6d44c152e31a",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-frustum-visible-high-performance-2026-09-29T01-29-11.091Z.json",
+      "sha256": "8445a66c9acfb931782c35771f7ca2edd77177aae104545b62af0aba30e126c1",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-lod-off-high-performance-2026-09-29T01-31-25.732Z.json",
+      "sha256": "ddcff455d1dc908e43a58b0deb223be1b31bb9779edacfbbeacb1594b57f628b",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-lod-on-high-performance-2026-09-29T01-33-34.684Z.json",
+      "sha256": "dfaa8b1e8109bd45f0ae54d2ef1a7a6cbeffafc3fb84bc584b77344974417b70",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-frustum-rejected-high-performance-2026-09-29T01-35-39.728Z.json",
+      "sha256": "98f4b855d4da0e2399ebef97c3a5b3d2921ec184e32bd11cd4f3ba278a830286",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-frustum-visible-high-performance-2026-09-29T01-37-45.127Z.json",
+      "sha256": "a4c1c66f5b53f10ce0518aa82f632f6536d4afee9c904bb5facd1428805ed9d4",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-lod-off-high-performance-2026-09-29T01-39-50.402Z.json",
+      "sha256": "0a4223c90ad3f97bed6ab9fb0cf03323d5a92242fe80617c7e02761a748d0a4b",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-lod-on-high-performance-2026-09-29T01-41-55.654Z.json",
+      "sha256": "ea706c67508993b7c100b4a295e3492b59ed12f6cd48460bce5f7ed4eeca9adf",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-lod-on-high-performance-2026-09-29T01-44-00.690Z.json",
+      "sha256": "41f9df6a97990fb50b11a00c4dea13993b4a38ed2d5096eee0404d9c49faa61e",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-lod-off-high-performance-2026-09-29T01-46-06.070Z.json",
+      "sha256": "a3e76b70b8ebdc8ea7740da1c87c4ee836ed0494afc51107e850cb227ba31568",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-frustum-visible-high-performance-2026-09-29T01-48-11.300Z.json",
+      "sha256": "c6da4097020828b5e2ab5a2395c75aa4c0b45515c4c7b32c0c6dd8d65e8be58e",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-frustum-rejected-high-performance-2026-09-29T01-50-16.537Z.json",
+      "sha256": "7f55e08cb55b6481c9f06173c1e8f63c6c812fbcf343549939a068723c0e01f8",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-lod-on-high-performance-2026-09-29T01-52-24.730Z.json",
+      "sha256": "b08b40bec9b6b80a3ea49be79db083900e0224a17dc553601372854413d02517",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-lod-off-high-performance-2026-09-29T01-54-33.176Z.json",
+      "sha256": "fa0b9578b7ad6b708c1558e04c23bea34b90abe029b8b5e3b7445342efd19b8f",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-frustum-visible-high-performance-2026-09-29T01-56-41.914Z.json",
+      "sha256": "27d3b523ffaadcf9b0b84bb9516c7fff0bcfaf879ee459a60fe7b0209facdca2",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-frustum-rejected-high-performance-2026-09-29T01-58-49.935Z.json",
+      "sha256": "821f126baca714459c6ad3af5f3f031a4c6904dfb99445325d7988812d9a8ccc",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-lod-on-high-performance-2026-09-29T02-00-57.231Z.json",
+      "sha256": "36e988d6b79836d479ba57756c2a2646bba33b00abfd452d514054cb0ca3f88b",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-lod-off-high-performance-2026-09-29T02-03-04.489Z.json",
+      "sha256": "0edd4bfea0c294f32f0c50bbd1c2f66788b1780835fdc2937e696a8cb27393be",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-frustum-visible-high-performance-2026-09-29T02-05-12.326Z.json",
+      "sha256": "0e11a40f4d633c0cc918261ec1b271cf447688a1341e02b88b69215663ade55c",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-frustum-rejected-high-performance-2026-09-29T02-07-18.851Z.json",
+      "sha256": "257d960d8236f6fdedf9f016d25d9c18d816f8807f8679b571d5fc9e44ef1e82",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-lod-on-high-performance-2026-09-29T02-09-32.242Z.json",
+      "sha256": "1b2bb42315ccbfbe40651403e84532c2686376e12c54efbc4093b69500ecbda0",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-lod-off-high-performance-2026-09-29T02-11-45.416Z.json",
+      "sha256": "e0bb60be194f39ddc11ec7e2cdb5dd37c75f3809e80a046c715a13e323f7b519",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-visible-high-performance-2026-09-29T02-13-58.790Z.json",
+      "sha256": "7f18228d195b92480b117b0c9267fc16be15b2ac47949bfd5cfba019df9c4ac2",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-rejected-high-performance-2026-09-29T02-16-09.134Z.json",
+      "sha256": "dccca3abdd0b1719a35cbd9d662da24479c4850085b290c996b8308371a69649",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-lod-on-low-power-2026-09-29T02-18-15.323Z.json",
+      "sha256": "8c83cf903da3aa755abb0df16fad5aacebcd7cd3e6efef96ee15c4c51e1388b8",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-lod-off-low-power-2026-09-29T02-20-21.325Z.json",
+      "sha256": "a4d0624c65aada0e27bb681de06e036c50ec96cf9a4e671865e5242f33788395",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-frustum-visible-low-power-2026-09-29T02-22-27.481Z.json",
+      "sha256": "87d69353133a0c1eaa2429cc72dedfe32027cd697311c9c6891c154ec52dbb1a",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-1v-frustum-rejected-low-power-2026-09-29T02-24-33.026Z.json",
+      "sha256": "976ab6209d6ebe048edfbef17ffcc1d6878973578ac967edb55f0b8e3f3455d9",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-lod-on-low-power-2026-09-29T02-26-42.170Z.json",
+      "sha256": "5b82127ea25644600d7596cf2f1d7240ce7c28aef1110a18fd0d84daa2c47467",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-lod-off-low-power-2026-09-29T02-28-51.280Z.json",
+      "sha256": "946f5ecbb1f7a5add774a5158b98fb2c26e0688a1d3d865c26107699eb3abe0b",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-frustum-visible-low-power-2026-09-29T02-31-03.115Z.json",
+      "sha256": "64af1f6b95e8e1e227a2527052dbdfa0c601351b22d1d4992564a582c5d88ac4",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-1000-4v-frustum-rejected-low-power-2026-09-29T02-33-12.444Z.json",
+      "sha256": "5836a879e0174986eed196b1bb396873f7fdbc3eaaa3825803e8a8c5c0a48f37",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-lod-on-low-power-2026-09-29T02-35-22.755Z.json",
+      "sha256": "c7278349c64e80488a668f58eecebe0d1e70fdb7737c8cb7da001768576e14a4",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-lod-off-low-power-2026-09-29T02-37-32.920Z.json",
+      "sha256": "c06406f19e10dc4c61fd9a924ed1a0cc3c4e3af1f40266d94ce739616f22289c",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-frustum-visible-low-power-2026-09-29T02-39-44.492Z.json",
+      "sha256": "548050137ba260c13bbe8f829a2b1ddf92161eaf4b0a4cd05267fbe2558bd3fc",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-1v-frustum-rejected-low-power-2026-09-29T02-41-53.162Z.json",
+      "sha256": "03c87dbbb8e973ad954cb58ab84a56541a51fa6cd687c330349c41f85816043f",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-lod-on-low-power-2026-09-29T02-44-19.345Z.json",
+      "sha256": "5af52529f27a68756d4d85fa52bc703b9eaee43ce25a980163f4094b6c02a397",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-lod-off-low-power-2026-09-29T02-46-45.333Z.json",
+      "sha256": "f56b47efef85f3dce6127bd0f9eac95a71129ef0484d4e9b7b39d13c8acfc289",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-visible-low-power-2026-09-29T02-49-16.363Z.json",
+      "sha256": "8020291da51a8238e2c508f9ca17ba60cbdcfdd62807a6ec31d81cd44d0430f7",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-rejected-low-power-2026-09-29T02-51-37.265Z.json",
+      "sha256": "2b691b5408607efb445e25c3c0f6de4f4077e43e06fa8871857785694a3069d3",
+      "stage": "instances"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-tiled-moving-high-performance-2026-09-29T02-53-52.099Z.json",
+      "sha256": "e4556dbea55bb024f29b67c1ee5f969563d98b5eb063aa3407ee1f47bb3d11bb",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-reference-moving-high-performance-2026-09-29T02-55-59.412Z.json",
+      "sha256": "58e8f00d7d4ce9a848025f5085bffc726ac9c3cc2dd9fd89ffe408124b465b36",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-reference-moving-high-performance-2026-09-29T02-58-07.381Z.json",
+      "sha256": "9ce74fdd39c0f91f71edf7be7897a306c938bbc9af1eafd2b49e41adeaa59adf",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-tiled-moving-high-performance-2026-09-29T03-00-15.138Z.json",
+      "sha256": "f522d45a0effe26cf0e74542b9e098ed0eb46762b64b924a7835e5d75388aac8",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-tiled-moving-high-performance-2026-09-29T03-02-23.607Z.json",
+      "sha256": "5864b3583c4a18d75e726f7300ce49da3df490c95417be6583c522f9993a651b",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-reference-moving-high-performance-2026-09-29T03-04-41.076Z.json",
+      "sha256": "d9112a25a67e7904e909ec7a9c044eb527c4253be6cd0dcf82983315db2ccbaa",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-reference-moving-high-performance-2026-09-29T03-06-58.905Z.json",
+      "sha256": "a270ce18b81e80362a48acb5153a2c3f2c0dcebcc893ebd718b00d42f3494c83",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-high-performance-2026-09-29T03-09-16.055Z.json",
+      "sha256": "f0ebe2e2e904b8e6cfdcfec644e46f1c75656ba24830da3ed329895babf0fd41",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-tiled-moving-high-performance-2026-09-29T03-11-25.756Z.json",
+      "sha256": "21eadb75c64a7d95bb0585ddaecbb5c985fb0d4d5e52abb60d086dcfb901dd81",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-reference-moving-high-performance-2026-09-29T03-13-49.467Z.json",
+      "sha256": "55b2cddd87ac45bf5096c9317b99bc63a86461fae44111fb64cd0ca6bee29f56",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-reference-moving-high-performance-2026-09-29T03-16-25.936Z.json",
+      "sha256": "4fa7485bdad2deeb8a20cb32d8c7bc8c1499ecfb076a97d7b0e6799a7df12d5c",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-tiled-moving-high-performance-2026-09-29T03-18-43.359Z.json",
+      "sha256": "210db42eed2df220a1f8c4e9be4689eb11d6957308e72e2be112a41496a92584",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-1080p-128-tiled-moving-high-performance-2026-09-29T03-20-55.412Z.json",
+      "sha256": "9bf6c0c453788788b9d141f3acdedcb18bb3a32f354d78f80ab21261787cc714",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-1080p-128-reference-moving-high-performance-2026-09-29T03-23-19.620Z.json",
+      "sha256": "4589299dbab724346eecd98bddd4b00547c61037ffcb5b9db36951abb9cd1f33",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-512-reference-moving-high-performance-2026-09-29T03-26-21.686Z.json",
+      "sha256": "cfea7f39e2e06d708714290c869f3a9b72e88f1d1d8c6ab01ffb3652d9306ab4",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-512-tiled-moving-high-performance-2026-09-29T03-29-16.538Z.json",
+      "sha256": "12c7f57ee608597d1963fdb2d2392e6c727454c35d443073de6439127f562d86",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-1024-tiled-moving-high-performance-2026-09-29T03-32-51.055Z.json",
+      "sha256": "14547b0fd7351166ea52a70d6043f78681c6eb93c734f0716f0774e852b41385",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-1024-reference-moving-high-performance-2026-09-29T03-36-46.348Z.json",
+      "sha256": "5d8db2fc4996864d5d46ec004f968c0c0a528550b6526326bcff6b5d073318e8",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-reference-static-high-performance-2026-09-29T03-38-53.307Z.json",
+      "sha256": "dfc355f473855f0aa91d6d4158c282fe6d06f1c9bc9127fea88265236d3ae01a",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-tiled-static-high-performance-2026-09-29T03-41-00.431Z.json",
+      "sha256": "85e90ea1e125d1999c7dc0d3a900f1e32925911d2ce6471b244a655271b139ee",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-tiled-static-high-performance-2026-09-29T03-43-07.554Z.json",
+      "sha256": "19694aea664f657593cfe25dcef0e112dfaafe449c4806e0bea91a90d4561ca9",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-reference-static-high-performance-2026-09-29T03-45-15.650Z.json",
+      "sha256": "46f2c239f8c6677594b32f8553f623a5303ea4edf8e1627c690dfc16378eb341",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-reference-static-high-performance-2026-09-29T03-47-31.727Z.json",
+      "sha256": "b45d06a91993f66c252106671d12f26454fb36f3d528b9ee7221569fb7ffea9a",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-tiled-static-high-performance-2026-09-29T03-49-40.242Z.json",
+      "sha256": "e99dd7a34cf25a378a19507e2883473521a92aee2ba18476cd7e6375b5c606e0",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-tiled-static-high-performance-2026-09-29T03-51-49.593Z.json",
+      "sha256": "2ba4f9892ab6179795880a1fcee60ae418e2ee4b36a9c54e4fb100dafe1486f7",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-reference-static-high-performance-2026-09-29T03-54-12.932Z.json",
+      "sha256": "a510b067241bc341ff7a65d9b710ea95f452c1b04ec42903fdce3bec61177ee5",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-tiled-moving-low-power-2026-09-29T03-56-26.830Z.json",
+      "sha256": "f516c078723ee933af437474783ac3ac226e4f1b881d57e4e18a298323a1f2eb",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-reference-moving-low-power-2026-09-29T03-58-37.868Z.json",
+      "sha256": "0d284c551b47f8e77caf8ef33d7e4ab24d99134a6ee981d97fec1086a33538bc",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-reference-moving-low-power-2026-09-29T04-00-51.647Z.json",
+      "sha256": "24458eda49848e2f16f0947b71eb47296cc9c2e28f7fa7c44ff6d5b5678b2a28",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-tiled-moving-low-power-2026-09-29T04-03-03.061Z.json",
+      "sha256": "cfd9004fe19d96d264612511cfb1bf26885427f3d5b4abd5399aceb711790c9b",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-tiled-moving-low-power-2026-09-29T04-05-16.395Z.json",
+      "sha256": "54de7638f6aef2721b7707878124ef9486afa793f0596d756b659072f7ffc4c9",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-reference-moving-low-power-2026-09-29T04-08-24.436Z.json",
+      "sha256": "92bacdbf55070a9ac894041d58d15316a216e45bd23c6d96cfd8173ae4614cd2",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-reference-moving-low-power-2026-09-29T04-11-31.826Z.json",
+      "sha256": "b3f12209718631225230cf2463e291880cdfe8afee850c664ec9ceeab7b00a81",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-low-power-2026-09-29T04-14-33.399Z.json",
+      "sha256": "e4b47b97033b545f9f484c96cff90abafffd7f095669bd54f444d62d43e3c1df",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-tiled-moving-low-power-2026-09-29T04-16-49.334Z.json",
+      "sha256": "b21fd31971f5aba9dfa47d905a8e8bd508ef5f9b7ea0bba53b7118fb11eaee6a",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-reference-moving-low-power-2026-09-29T04-20-45.769Z.json",
+      "sha256": "eb38f7ddc32bd1d19782741bdffcbbc961f0986d5fa48d1d6ff1fd9b68b43fb1",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-reference-moving-low-power-2026-09-29T04-26-42.793Z.json",
+      "sha256": "a449fc8363bcdc76f882cddcf8ed9e6a332cfc600ebb5939d82a2dcc7663675b",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-tiled-moving-low-power-2026-09-29T04-29-21.318Z.json",
+      "sha256": "c8e7ea553f4c6724abf7a9fc9e95c159624ff2abbe01a18f4a79db232f16baaa",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-1080p-128-tiled-moving-low-power-2026-09-29T04-31-43.326Z.json",
+      "sha256": "6121057f1c1ab199ca3180428e62f93ecc11b69ac288fa33e1aa69c820f31532",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-1080p-128-reference-moving-low-power-2026-09-29T04-36-02.867Z.json",
+      "sha256": "7ab82afd26009f8aba4a51abb373fbba60e1b9c6e39e9a531fd04cf7597af02e",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-512-reference-moving-low-power-2026-09-29T04-46-08.655Z.json",
+      "sha256": "b49663aebbc9d41b050318ea2b661486d1e910fdc4121153b06f538c8c5afaba",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-512-tiled-moving-low-power-2026-09-29T04-55-29.907Z.json",
+      "sha256": "afd94ba7f068c750f5cc6f556aecbb229ca90f11e498c02324816402bfb1dd67",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-1024-tiled-moving-low-power-2026-09-29T05-11-45.646Z.json",
+      "sha256": "1e2fe19555efd8169f5ac05b5bd6affc7955cca8f1dcace3a569e190986bc905",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-1024-reference-moving-low-power-2026-09-29T05-29-42.358Z.json",
+      "sha256": "361a3861dda10c212b9c8a28900f643b5408579052d3c6914388613b001b3a91",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-reference-static-low-power-2026-09-29T05-31-57.211Z.json",
+      "sha256": "c285b7c9db172cf747b1c996f9f2425549ea21bb9ce30f972d744572f0236d3e",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-tiled-static-low-power-2026-09-29T05-34-12.091Z.json",
+      "sha256": "b6f524bc3cc16d7e6f5be45140f882a2e20220f9c2f018209d8824214155ba5d",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-tiled-static-low-power-2026-09-29T05-36-24.144Z.json",
+      "sha256": "4fc9c95fccc42263ff1069262832f4cf5d0253e5fb06e0b51030a29e397344cc",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-reference-static-low-power-2026-09-29T05-38-38.544Z.json",
+      "sha256": "92b99e43174f626a47ca8550c50e5af91cababfe720bd7314b866c5cde72e1dd",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-reference-static-low-power-2026-09-29T05-41-45.851Z.json",
+      "sha256": "ae11f13f17ed7b631530303b6793715c130e2c52be0e8fb4d8943913d2b8799a",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-tiled-static-low-power-2026-09-29T05-43-59.707Z.json",
+      "sha256": "f277e8ad120d53bfe23b250402dff4a9ce98916e68821184f74a65006681dbc6",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-tiled-static-low-power-2026-09-29T05-46-15.438Z.json",
+      "sha256": "72c19628e69df807dd04f1eb3e030f97d206e98acc9d56ebc88b2a784eb6d560",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-reference-static-low-power-2026-09-29T05-50-24.744Z.json",
+      "sha256": "baefdd6c758e24061fc462953c77969324a6d91dfffc4b8729cffb941fd65ffb",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-reference-static-low-power-2026-09-29T05-54-34.423Z.json",
+      "sha256": "9eb33c1a5190d7cb3d4f7daa36afbc9f5830b4f28f2c9afd5fc19c258a31e049",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-tiled-static-low-power-2026-09-29T05-56-50.228Z.json",
+      "sha256": "a0bcc60f33c795cb6ee24ee69d4502c1a1696d478bae88c813d39ea168007c17",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-tiled-static-low-power-2026-09-29T05-59-03.922Z.json",
+      "sha256": "1159526f23b2b44fd023b53e48254d3a5bbab178da57cb2797afbb9a09dd475e",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-reference-static-low-power-2026-09-29T06-02-11.052Z.json",
+      "sha256": "2e545d86d23b01b174b79afe78071207e354ec70b8c121d38ac16d66126f957d",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-reference-static-low-power-2026-09-29T06-04-25.610Z.json",
+      "sha256": "39b7e42d8273256ff38b9d3086a5a26fa7e9019afc8d1f92fe00771b913f87ee",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-tiled-static-low-power-2026-09-29T06-06-37.557Z.json",
+      "sha256": "3ef68e68c3e41e6e311e077c195a1de2d228cf3adb9d522c18b15edb57311e16",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-tiled-static-low-power-2026-09-29T06-08-49.296Z.json",
+      "sha256": "51ae7b42fef80a3f6391375e6788af8213d823590c5ff38532a1a10529c49b05",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-reference-static-low-power-2026-09-29T06-11-00.739Z.json",
+      "sha256": "4446f2b5f884423ba18d27d3d2e45d03b49ee72d0b45ba1246164bbae554b7e5",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-1024-reference-moving-low-power-2026-09-29T06-28-58.351Z.json",
+      "sha256": "786bde4619406a8ec42b0f78d3dbe95c8516da71e2f8d6fcbf6c1276d837fdd1",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-1024-tiled-moving-low-power-2026-09-29T06-45-20.313Z.json",
+      "sha256": "452df3e6eeb3b002e83b23c0882d84261a79bd21059590c20e03c6f8336b82d3",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-512-tiled-moving-low-power-2026-09-29T06-54-41.499Z.json",
+      "sha256": "26c6e0f7b998d5eca88cba141552aef55c275c90ff9010049f0be54122fb375a",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-512-reference-moving-low-power-2026-09-29T07-04-47.652Z.json",
+      "sha256": "f3153d96a831464fdd7b30ba15a18c2388b4930f184a55359d871f8712bba826",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-1080p-128-reference-moving-low-power-2026-09-29T07-09-06.934Z.json",
+      "sha256": "0db241586fa208f78e30bfbf9b8debc4ee2bcfde1872a02ce0b5da89a6cc2e46",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-1080p-128-tiled-moving-low-power-2026-09-29T07-11-29.360Z.json",
+      "sha256": "b276291ae4231c4d6e53a737264cde4527ae725b49a9ce5c2e1c57be5e2f6698",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-tiled-moving-low-power-2026-09-29T07-14-06.876Z.json",
+      "sha256": "726adc18bf9aeb1ef8c44cc513415bed30df0c18fdc54fe510712d45843191c3",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-reference-moving-low-power-2026-09-29T07-20-04.735Z.json",
+      "sha256": "defcc7e7a7bbfaa5cb4552f96a8fd170e86e6e36385e6844006b99e144029083",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-reference-moving-low-power-2026-09-29T07-24-00.883Z.json",
+      "sha256": "ea121ac3f9a210e95db7959c126561edc490a0a879caf2d0ff71b12a7b1629eb",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-tiled-moving-low-power-2026-09-29T07-26-16.471Z.json",
+      "sha256": "77c4aaf2818064b65a5111980ae4d22e5eeba1b96db0510f855a9a393dab1cab",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-low-power-2026-09-29T07-29-15.571Z.json",
+      "sha256": "d417c4475a386b5ea2d18deeab2addfa1fd05c2453944c15c10b5e0e4b312a5d",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-reference-moving-low-power-2026-09-29T07-32-19.836Z.json",
+      "sha256": "daa5a4106a1d3640d3164a94061e237756fad36fd636f79ff8fd0a49bef1e7b7",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-reference-moving-low-power-2026-09-29T07-35-24.086Z.json",
+      "sha256": "6785105710ae1534d0ae22c0532d74b924698497daa4dc8c0882a04fa71645f4",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-tiled-moving-low-power-2026-09-29T07-37-37.882Z.json",
+      "sha256": "54c6c9b152398f376f09edd16c9a12dca1438cf1117a3e351321f644d38323d6",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-tiled-moving-low-power-2026-09-29T07-39-49.529Z.json",
+      "sha256": "1aca388322ed0d502d99bf05c4f008495a5abb1d2c51bde3638c5757a207d24c",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-reference-moving-low-power-2026-09-29T07-42-03.536Z.json",
+      "sha256": "ee428998429b2872183b7391b1bb9b7d145301994be10fed1b020d0cf3f1d66f",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-reference-moving-low-power-2026-09-29T07-44-16.317Z.json",
+      "sha256": "a4ca28acad069179e127fb900862bf180a096b3ce1c8940f6db61826cb1dadd1",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-tiled-moving-low-power-2026-09-29T07-46-28.224Z.json",
+      "sha256": "ce93bf14f6ba8d1a6dd6821442dd46e34cafcfa68f54e5ce3882ece4516b5eed",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-reference-static-high-performance-2026-09-29T07-48-47.212Z.json",
+      "sha256": "63a1a569190d082944ee2c381212ea2c6470dd07970f61c09ab8e7137d369d65",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-tiled-static-high-performance-2026-09-29T07-50-56.008Z.json",
+      "sha256": "4b292c06b5a4703f663ecbae72b547cce5a2eb780ef86c550cc4c734a343e13e",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-tiled-static-high-performance-2026-09-29T07-53-04.243Z.json",
+      "sha256": "b15109abf6f992fd2f72a0ea09fe2cdb013593372cad0f04fd0395964922adc1",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-reference-static-high-performance-2026-09-29T07-55-17.278Z.json",
+      "sha256": "6bd813b001b491b5dd584c1901fadf39d4f9072db5dd1dbb4bce5f10da4d2a45",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-reference-static-high-performance-2026-09-29T07-57-25.020Z.json",
+      "sha256": "e2d4ead2d454a6ea991d79fbd3060d728cb93c737e22dd7a54e7f2bbd2ad45bf",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-tiled-static-high-performance-2026-09-29T07-59-32.642Z.json",
+      "sha256": "fdb38357d2d1f725ede8afe0e4a959176673e72be322d5ef8b95cf145ca1845a",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-tiled-static-high-performance-2026-09-29T08-01-39.874Z.json",
+      "sha256": "21a803ba8a314641de5acdc552f595f6afb3b0e24288440e0fd1b3205eceda81",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-reference-static-high-performance-2026-09-29T08-03-46.693Z.json",
+      "sha256": "b7fce28f5f369b55c1f58b9d2e727bc3a9de3f3ef56a29668a9f94e6e8c7a416",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-1024-reference-moving-high-performance-2026-09-29T08-07-42.731Z.json",
+      "sha256": "39920b8dde5c47968e9148439fc61846581aabb3c64465226b651b517e53488e",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-1024-tiled-moving-high-performance-2026-09-29T08-11-19.083Z.json",
+      "sha256": "9b523bf72e4fa36f597418d3c8b27819114020930f874a351034adcca552a933",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-512-tiled-moving-high-performance-2026-09-29T08-14-11.261Z.json",
+      "sha256": "6357167e21dc7ad512e1203d56ed92235887c090c99b32fb338337132324d6fd",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-512-reference-moving-high-performance-2026-09-29T08-17-13.837Z.json",
+      "sha256": "46066eb5b80d5aec7943039a88b1ca976b1505d0e21c1e9c4503484c3ac99a09",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-1080p-128-reference-moving-high-performance-2026-09-29T08-19-40.714Z.json",
+      "sha256": "863da7ae68e02659b9c53a93d4e26722e879255d70ccd5fb5eef72bf97297dcd",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-1080p-128-tiled-moving-high-performance-2026-09-29T08-21-51.140Z.json",
+      "sha256": "43c2a72d644b3839b39ffbf6c10cffef6304d7440d00369a252d56f5a3140bc7",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-tiled-moving-high-performance-2026-09-29T08-24-09.450Z.json",
+      "sha256": "0c6c4239c6e44201f45207c6e44ae225e065c2368e186a419965798d458a6038",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-reference-moving-high-performance-2026-09-29T08-26-45.760Z.json",
+      "sha256": "1248733acb548175e06e46833355860898a9bff469278e9c31d93b1d13e49504",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-reference-moving-high-performance-2026-09-29T08-29-09.876Z.json",
+      "sha256": "4ec68bcf3310c10d1277617b7cce358afaabca23209cbb04b150772c81c540b3",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-tiled-moving-high-performance-2026-09-29T08-31-20.677Z.json",
+      "sha256": "bd724172cdf969ec88c6f5d0ad20e7abb8c600711d8340383bb0125e4100682c",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-high-performance-2026-09-29T08-33-37.368Z.json",
+      "sha256": "ab8ff0826094b0e435f0a65d6263536f176f969b8b7c58f55ca787b3b2a603c8",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-reference-moving-high-performance-2026-09-29T08-35-55.203Z.json",
+      "sha256": "111bf9e66a9760ef283136959c51ab6467ff67b65763565b57f8252cb7153e9a",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-reference-moving-high-performance-2026-09-29T08-38-13.276Z.json",
+      "sha256": "12f1659f253a1fa2411d2f3320e122ea8208bc158986cd2eb3168a8749b4d320",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-tiled-moving-high-performance-2026-09-29T08-40-22.322Z.json",
+      "sha256": "8e61327c0a9968b798fd4cc51fa59c95345f0e0eeb2e777c07f69b6045c195a3",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-tiled-moving-high-performance-2026-09-29T08-42-29.604Z.json",
+      "sha256": "a86948892d526136b26322508533e803de3a9668ffd10bce2c721d485b050cdd",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-reference-moving-high-performance-2026-09-29T08-44-37.741Z.json",
+      "sha256": "ce041c0c385d29054c5140f70992ff2fbc7b17fef035582d61da230e65ab4c20",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-reference-moving-high-performance-2026-09-29T08-46-44.858Z.json",
+      "sha256": "2353b7dc0179e6622ef73af898a7387d7f0338557a103ea4e80086525f3be230",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-tiled-moving-high-performance-2026-09-29T08-48-52.187Z.json",
+      "sha256": "1521022b052f24d47600a92b2c6fafd4ee707cf22f87ffa21e240bb2585c55d5",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-tiled-moving-high-performance-2026-09-29T08-50-59.367Z.json",
+      "sha256": "78ef7ee06e4045975a482fe165f3cd20981d1b0c6f50c0ce4e1377bc4fd4040a",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-reference-moving-high-performance-2026-09-29T08-53-08.253Z.json",
+      "sha256": "bb9fd01e2874c7b536f1587d54615e61ccfbe35bfbcbb8a68b7e44c7a9b2ba34",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-reference-moving-high-performance-2026-09-29T08-55-16.607Z.json",
+      "sha256": "359e2107a24ccf70ab24337ceea94ddd33001a920ebd649ae7e7836acfd84d0d",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-tiled-moving-high-performance-2026-09-29T08-57-24.605Z.json",
+      "sha256": "d09b646b7ac0f01f9bc8ca3ce9c1c0820b8ad6db00ca6ab06294166d753217a4",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-tiled-moving-high-performance-2026-09-29T08-59-33.528Z.json",
+      "sha256": "7f622d8be808b5a1e51983911c251a0812f035266865c1105da2bbaf46bdea9f",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-reference-moving-high-performance-2026-09-29T09-01-51.516Z.json",
+      "sha256": "4c9ea0407e4e390c8996afa3e45ddea1ff84b1ea62a85ce8ade9ded81506d84d",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-reference-moving-high-performance-2026-09-29T09-04-09.362Z.json",
+      "sha256": "9829f41b3a16dc3c6e25ec2540783f804ebb45ec879397405c5b82a614b392fb",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-high-performance-2026-09-29T09-06-26.059Z.json",
+      "sha256": "55e97517c2f0aedf1411d942265c0c6be4ab27c4104a63231fe9a9f124de0b72",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-tiled-moving-high-performance-2026-09-29T09-08-36.415Z.json",
+      "sha256": "63e9e5dfb70437bed0b70813196e7f7919c81ab098f6269447f055d45986629c",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-reference-moving-high-performance-2026-09-29T09-11-00.456Z.json",
+      "sha256": "508069740da5543677f5750dbb7c0eb202fcf8692d9dbf6c0deb35e4be355447",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-reference-moving-high-performance-2026-09-29T09-13-36.767Z.json",
+      "sha256": "6aec2dfbf5610fbfe6d44e895ce3b8b6326e8ae261cd531ae381de22341ebcc5",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-tiled-moving-high-performance-2026-09-29T09-15-55.095Z.json",
+      "sha256": "1c09e94af15ed2d55454b3652ffece6b2d101b3eb863eb945ea741564e4e628a",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-1080p-128-tiled-moving-high-performance-2026-09-29T09-18-07.556Z.json",
+      "sha256": "eef7580d47db91173166cb13d8d27b8b6b613d468ebdf83734029d30e3b5a85c",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-1080p-128-reference-moving-high-performance-2026-09-29T09-20-34.105Z.json",
+      "sha256": "1330b8fcaf855a5fed478dcb772b5da40bb223b7806a3202fcff3cbc5237a98b",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-512-reference-moving-high-performance-2026-09-29T09-23-38.574Z.json",
+      "sha256": "b3491d42d256f1205e632114bad447ecb0dd5fa2b42d7db7614443e4d50397a9",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-512-tiled-moving-high-performance-2026-09-29T09-26-32.473Z.json",
+      "sha256": "0ca4c967a57b1af73984c2d5efdd723e033107f49cb413f67365ce5516fb1f5c",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-1024-tiled-moving-high-performance-2026-09-29T09-30-08.638Z.json",
+      "sha256": "23edb8bed4f1c46c1ae380939f53fc7007426d5574c883bc24414a3a0e6f5b50",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-1024-reference-moving-high-performance-2026-09-29T09-34-04.891Z.json",
+      "sha256": "e5d313fb24a4ad20450c94c61546cca4a20330cc32a3da89b501f34652fcb822",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-reference-static-high-performance-2026-09-29T09-36-12.378Z.json",
+      "sha256": "dea2559a509d00a46e22e15550700eb6ff997782e11c7cea662b5c3dbac40a4d",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-tiled-static-high-performance-2026-09-29T09-38-20.277Z.json",
+      "sha256": "42079fcd4c9c6e6c5943d597df3ed77f7791195435143fff229f563e1a43b75f",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-tiled-static-high-performance-2026-09-29T09-40-28.140Z.json",
+      "sha256": "5e719b290b1ea96935b1d6ed6817f0a7aea400fb40ba55a4d43967563251d76f",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-reference-static-high-performance-2026-09-29T09-42-36.454Z.json",
+      "sha256": "31cb95ba82f7d57235ec7eb94610b876e1dfd70d0dd2d2d1ba55bf743cfa964e",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-reference-static-high-performance-2026-09-29T09-44-53.050Z.json",
+      "sha256": "22dc3b2569b8620ea386cf7c561ba88bb0147172c0a5510d122a3f3cb90494c1",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-tiled-static-high-performance-2026-09-29T09-47-01.541Z.json",
+      "sha256": "db1c2f9bf3e24b5ee66ad98ad90202354d9d2437be19ea0ad2acf09e00d52693",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-tiled-static-high-performance-2026-09-29T09-49-11.080Z.json",
+      "sha256": "08f95cbd1aaa7e47fe441b1594f427b7ea0a1409da2481ae702cbc7c031ec688",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-reference-static-high-performance-2026-09-29T09-51-34.701Z.json",
+      "sha256": "6454873a811f588dd24980ff4ebb78482041081a0d456676900536f23d3b0ad6",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-tiled-moving-low-power-2026-09-29T09-53-47.790Z.json",
+      "sha256": "5ff6761595e22742996c515bc126bce3ddf471e51c35d2978b178fe0388e1d9d",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-reference-moving-low-power-2026-09-29T09-56-00.056Z.json",
+      "sha256": "93730a9c16ae99295c109bf207799d019fb51bafc20764a902b1fe9a1dabece1",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-reference-moving-low-power-2026-09-29T09-58-15.102Z.json",
+      "sha256": "d866b2fa078a0c6161a8d9699ad1ae6c10cd3e501259582aa8cfb3194b6bc76d",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-tiled-moving-low-power-2026-09-29T10-00-27.664Z.json",
+      "sha256": "ae18b38bd61ced9c82128fabb2b1849d4340d6a792561e8893f3b5490c0bcec2",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-tiled-moving-low-power-2026-09-29T10-02-41.994Z.json",
+      "sha256": "269c5a8e5818f3d5bd44fc6eb493770d937abf6ac2018b9d20dc6139f375e73d",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-reference-moving-low-power-2026-09-29T10-05-49.749Z.json",
+      "sha256": "5659271999a230434f3b86724e9d9427fba1fa12e46244b2c165d2f358430f8d",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-reference-moving-low-power-2026-09-29T10-08-57.093Z.json",
+      "sha256": "2157aca908744a87453ad0baa2b31c38e8a634f9cd34357a511d07b43f32e865",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-low-power-2026-09-29T10-11-58.852Z.json",
+      "sha256": "f29b4568c1f62b686ef8707ae4df7b4e7377690d7d73eec8baa4e0ea9302bba8",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-tiled-moving-low-power-2026-09-29T10-14-15.743Z.json",
+      "sha256": "da76a8ddbfab05fd6dba40d74cc88ed6a16ecc6932c48846dd672573a5c7356e",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-reference-moving-low-power-2026-09-29T10-18-13.422Z.json",
+      "sha256": "83247aae00786b813a4c6e702402ef540fbae23562283eab0704e196cc93845a",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-reference-moving-low-power-2026-09-29T10-24-11.649Z.json",
+      "sha256": "b1e102e768f1227e175687224774a34ad8fb5762c7082de9c2bbbc30b8ff7b91",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-tiled-moving-low-power-2026-09-29T10-26-49.854Z.json",
+      "sha256": "8fd91d1172e0610a0ef5ec3dc070030544d86c7fc63017ddda7dbf4a7c91a74c",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-1080p-128-tiled-moving-low-power-2026-09-29T10-29-12.186Z.json",
+      "sha256": "9d97945022b6aa373dccb02e9160d91b06876b8a770a85050befe5be5d18d692",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-1080p-128-reference-moving-low-power-2026-09-29T10-33-32.786Z.json",
+      "sha256": "4de9d91917a46e1ec45e0f43ae16a0a0bdda6976c014f448a31ab1c8498677ef",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-512-reference-moving-low-power-2026-09-29T10-43-39.112Z.json",
+      "sha256": "4648421e51ff83fdbb35a6255d100d5f6dd5fd98e9de942c140c2514e7fa423c",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-512-tiled-moving-low-power-2026-09-29T10-52-57.825Z.json",
+      "sha256": "dfe0672313277600f78a6cda03e5307d09ac45c6254f9fcee9b6be9d4f4161fb",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-1024-tiled-moving-low-power-2026-09-29T11-09-15.022Z.json",
+      "sha256": "45622fdccff7fb3bed73254ca1211b130427dd3236e2e4660e15426d4ec05156",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-1024-reference-moving-low-power-2026-09-29T11-27-08.063Z.json",
+      "sha256": "d7f06a2750372dbb687c0993dd16871dc90477d671a139ea6cf40cbf333dc9d9",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-reference-static-low-power-2026-09-29T11-29-19.743Z.json",
+      "sha256": "7701f1f527ac1cec26126ec38a3d68f05a3c8008cf57de1ae160a84c2a1fbd2d",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-tiled-static-low-power-2026-09-29T11-31-32.330Z.json",
+      "sha256": "7132b69548d15e50a910737df97ed46fadb6c2db610d408c557f960cb736e245",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-tiled-static-low-power-2026-09-29T11-33-44.402Z.json",
+      "sha256": "83114479a173e24660cb6412f17782fde3e7ad6fb30f6da844b0bbcb13e224f0",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-small-8-reference-static-low-power-2026-09-29T11-35-58.658Z.json",
+      "sha256": "1890fd43010b27d72686511d89d86824c1fb1e4d294afbdeb8f4c20feef968ff",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-reference-static-low-power-2026-09-29T11-39-02.917Z.json",
+      "sha256": "14de665a1ce49f85f9f5a4b80f61a0725f28301638c48ab703e2dbaea2974ad0",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-128-tiled-static-low-power-2026-09-29T11-41-16.640Z.json",
+      "sha256": "b4e21abb5fb8a008599e56ff9a1e29efb30413f3ed223e983aba7eba03d9b94c",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-tiled-static-low-power-2026-09-29T11-43-32.192Z.json",
+      "sha256": "5b2f11a257cd650c00b58b3502239988db3c1a2463f4dcf6feb96aadb7a583db",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-reference-static-low-power-2026-09-29T11-47-28.878Z.json",
+      "sha256": "e52acc8665945d8a0a42119fc786aa8f9d346618202889a62f3874b6545ae44e",
+      "stage": "rooms"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-high-performance-2026-09-29T11-50-42.224Z.json",
+      "sha256": "79b50499febb4af77e4c3cc5387bf88f8196886867856d4d2b3c865cb7a79fca",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-reference-moving-high-performance-2026-09-29T11-53-00.622Z.json",
+      "sha256": "b3dc3121cb7cfc3da692fcb9f7f1f8e8920540d0250fd404f2ee2ac651af3cde",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-reference-moving-high-performance-2026-09-29T11-55-41.159Z.json",
+      "sha256": "dd997636a330a1b40cc4b88992ebbf9df503f488e229cbf15e62fafe3cbd10e5",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-high-performance-2026-09-29T11-58-08.808Z.json",
+      "sha256": "c514d8d830a977a453a00c334dd09ad4f30aaa18ea5861ae72b97f3932b1f020",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-low-power-2026-09-29T12-01-07.945Z.json",
+      "sha256": "ac3e1e82be33c433d1bc2a9531681fb3abd8f7726fbc82697c8f03e47bed3482",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-reference-moving-low-power-2026-09-29T12-04-11.954Z.json",
+      "sha256": "2b3908788c3007689f0f9dda21a2b56e695f41d0da0da2fa12b432c70c911c90",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-reference-moving-low-power-2026-09-29T12-09-56.037Z.json",
+      "sha256": "8760ecbc3358bb0fdfd864e2c9a8ad2c27381de0dae33b0fef7679ff5836edeb",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-low-power-2026-09-29T12-14-36.581Z.json",
+      "sha256": "95dfb7ad8927c79aa22e5c7103cb85948ccc5a8b2ce49e422e5617d2e2d2ff56",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-low-power-2026-09-29T12-19-17.012Z.json",
+      "sha256": "a060604300e018f8333b71c957afd7fa5b589feaa35d43c828c8b7e2ce71f78f",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-reference-moving-low-power-2026-09-29T12-25-01.086Z.json",
+      "sha256": "bda4a7c75ded2f3752711ca2c42ceb78cf5d0090c44e2645eb5bc844e3017fef",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-reference-moving-low-power-2026-09-29T12-28-06.297Z.json",
+      "sha256": "375390b692171614b67ce7d07786e1022139619f3dcdf157f68158f6060b8003",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-low-power-2026-09-29T12-31-08.203Z.json",
+      "sha256": "29edbc95bce58276f68abbd199d14858f65f2cc0ed816bea4cc3d0646456eeaa",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-high-performance-2026-09-29T12-33-38.095Z.json",
+      "sha256": "8e52960bafa2c5e6ca09794e1383cf943f05d66e7e155017c53b4855c1bef9da",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-reference-moving-high-performance-2026-09-29T12-36-18.432Z.json",
+      "sha256": "3b19d3c1d614a913e9cdcedecf4c4a68e5f8fdb0dad0a9f365fd205af86f4e01",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-reference-moving-high-performance-2026-09-29T12-38-31.020Z.json",
+      "sha256": "0de2093c48a059c8410328b7b280adeff185fd4ff37daf36122e11226e984855",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-high-performance-2026-09-29T12-40-43.861Z.json",
+      "sha256": "97ba4a6631807d12e69363bc4022c52dcab71b423d8e809ff6476b321e493acb",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-high-performance-2026-09-29T12-42-57.044Z.json",
+      "sha256": "1cbc1f63cec673ff0b9ffc58eaee1818821603ae7eb1d2ad279ce9fdb8b6cef0",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-reference-moving-high-performance-2026-09-29T12-45-11.332Z.json",
+      "sha256": "918a1d5cf236d639a8033a3796c0bd2ffcac98a029a2334f9bf7bfeb3563fa38",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-reference-moving-high-performance-2026-09-29T12-47-52.312Z.json",
+      "sha256": "913f3b89a20b95c8ad91b6001079c8a10c17baa491a3b10e8d6cdc8005b39381",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-high-performance-2026-09-29T12-50-19.932Z.json",
+      "sha256": "b6b4ca22b42747defa75a202a874307226ca608b4477c7b761d2bca1f3d98069",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-low-power-2026-09-29T12-53-18.766Z.json",
+      "sha256": "322295fedd8a3a45c33a548fde5e1cc7ba25937911d11675997dbf4cbc95293c",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-reference-moving-low-power-2026-09-29T12-56-22.527Z.json",
+      "sha256": "d79b2150852c69c0b63d255ca5e36032685c22d1f1e3cac5c3160b8f2cfc037d",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-reference-moving-low-power-2026-09-29T13-02-06.396Z.json",
+      "sha256": "801e98269830645d42ea6f104d810a1a3529b03b010c69948a387801e25b36ab",
+      "stage": "gpu-focus"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-low-power-2026-09-29T13-06-46.481Z.json",
+      "sha256": "619236de18ed51269976cd452d45e98c7e0cd897a7ac208dbfae33ccd8533da1",
+      "stage": "gpu-focus"
+    }
+  ],
+  "bindings": [
+    {
+      "path": "artifacts/engine-0.2.1/g05/full-performance-attempt-2026-09-28T22-56-43.615Z.json",
+      "sha256": "34e50a99ec5a8e0103f5fce8d674fe0779fd0d59013237bf9b20e67f2968eef1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/gpu-focus-cohorts-2026-09-29T11-48-25.591Z.json",
+      "sha256": "6dedc919a27dd98a9051d8ab855d8a940cb5ecde737a1e4618167d14be55ba84"
+    },
+    {
+      "path": "config/lighting-performance-021.json",
+      "sha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-g05-gpu-focus-policy.mjs",
+      "sha256": "87e2254213311baeac125f9db61c34ec4c97cfd064754fad6de8ed3b1262b81d"
+    },
+    {
+      "path": "scripts/webgpu-gate/run-deferred-g05-gpu-focus.mjs",
+      "sha256": "78562d3e20728b6ead6510754a2c40d42e463e3fa8160ab910a4e891811e56d1"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-g05-cohort-policy.mjs",
+      "sha256": "68a72c12073d0538ba0b77ef5a2b4886b62fe66645453428617aa04091b1d7f6"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-g05-cost-policy.mjs",
+      "sha256": "f9766efb76758f2c3045f1d636c680fce9bb3bfc592e0f53d3db3bc69d3b28e2"
+    },
+    {
+      "path": "scripts/benchmark/lighting-g01-policy.mjs",
+      "sha256": "563a83075d5029f292c27fe5c977083ad63dcb52f3f022c9372fe82b66948087"
+    },
+    {
+      "path": "scripts/benchmark/timing-cohorts.mjs",
+      "sha256": "4d578eb53e345f676bb044a48b086e9edec9d3593b54740e87085979905da96e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/full-acceptance-2026-09-29/g05-full-acceptance.mjs",
+      "sha256": "fc1b8ee078c90f40b9803b255195dc9bdb1ddec1bbf25c1ba17649cd92640140"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/forward-cohorts-2026-09-28T22-56-43.758Z.json",
+      "sha256": "e09f7481cb631cf76ea50f59c7fab36edd1a1800abbd0506d2788aea50f907f8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/full-attempt-forward-2026-09-28T22-56-43.615Z.log",
+      "sha256": "03226674cd23c22815ce52d633d7ff44df2168626beb6493ca23dbb37d6e3841"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instance-cohorts-2026-09-28T23-22-13.107Z.json",
+      "sha256": "27a70af3ad6346b7bcf30825f8eae34254852bd90fd4b6a45624ac253f08b98e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/full-attempt-instances-2026-09-28T22-56-43.615Z.log",
+      "sha256": "39790c8478731ea5b7795be694fe5984c4d5b730d3f2e216e8a9b71c52d3ee01"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/instances-audit-2026-09-29T02-51-41.130Z.json",
+      "sha256": "8871e8272419ed1046bdcc820742a24956813eaf1df4044069cb45a0d61c614e"
+    },
+    {
+      "path": "scripts/webgpu-gate/audit-deferred-g05-cohorts.mjs",
+      "sha256": "7c166faa91ee2ca1e37cc434c05f663336baf6916ea202ef2b08b91bfc801bc6"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-g05-stability-policy.mjs",
+      "sha256": "7659db1b741d644212caa0b5c0c4a123e37bc3a6e8e87c5f1737b4b4f7fe5a95"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-g05-instance-cohort-policy.mjs",
+      "sha256": "50e2d357a9e6d37029fb09c800003697f67f83f77bd97617a3f9aacd72b82dd8"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-g05-instance-policy.mjs",
+      "sha256": "cc9f999d0a37eedb7bd249105d7dcd3b92d989398e9fa34cca1c0fc933dd36c2"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-g05-policy.mjs",
+      "sha256": "82af1a6e7aae858331aa0db69d656adda31a8983041cad221915834221265bf7"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-g05-memory-policy.mjs",
+      "sha256": "35a64b5a8d866e15cf5c49cf53d7dc49784bc92e9a00f8e6d30cd45407c300b4"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-cohorts-2026-09-29T02-51-41.457Z.json",
+      "sha256": "78b4584fed710c39cac10b472f1880160622a72e3aff8075d5ad398fdd03b44f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/full-attempt-rooms-2026-09-28T22-56-43.615Z.log",
+      "sha256": "75b8cb638ede9bd324ddcc4fa3c4912bf9e7cc2948a54d736dca7921edd9fad2"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/rooms-audit-2026-09-29T11-47-34.224Z.json",
+      "sha256": "10c5702c5fa9824c2e885932e42f1a18bb5f747fa600f057699456ed31737fe7"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/full-acceptance-2026-09-29/final-audit.mjs",
+      "sha256": "eaeb9396da2812686f0b1477813d91de74ca875910bc274cb531f50f05849222"
+    },
+    {
+      "path": "review/engine-0.2.1/g05-resume-audit.json",
+      "sha256": "c62e6d8d1cb9059981450a6ec3b808d48aae6a4642109c54cda1b7e3fd148857"
+    }
+  ],
+  "scope": "Complete Forward/F/E-G and high-overlap/1080p GTAO cohorts; no sample splicing. Other AO modes, physical below-floor devices and clean-release qualification are not inferred.",
+  "limitations": [
+    "Host snapshots do not prove uninterrupted clock stability.",
+    "GPU and CPU/frameWall populations are separate; pass P95 values must not be added to reconstruct frame P95.",
+    "AO comparisons to existing resolution budgets are attribution, not a separate frozen AO FPS gate."
+  ]
+}

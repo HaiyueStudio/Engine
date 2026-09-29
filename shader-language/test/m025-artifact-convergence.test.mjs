@@ -30,8 +30,8 @@ test('every production generator is Artifact V2 and has an explicit source reten
     assert.deepEqual(family.targets, ['webgpu-wgsl']);
     assert.ok(family.escapeLevel === 0 || family.escapeLevel === 2);
   }
-  assert.deepEqual(registry.families.map(family => family.stage), [6, 8, 9, 10, 11, 12, 13, 14, 14]);
-  assert.deepEqual(registry.families.slice(-2).map(family => family.id), ['deferred-lighting', 'deferred-tiled']);
+  assert.deepEqual(registry.families.map(family => family.stage), [6, 8, 9, 10, 11, 12, 13, 14, 14, 14]);
+  assert.deepEqual(registry.families.slice(-3).map(family => family.id), ['deferred-lighting', 'deferred-tiled', 'deferred-full-forward']);
   assert.equal(registry.portability.stage, 14);
 });
 

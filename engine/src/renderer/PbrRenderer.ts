@@ -1,3 +1,4 @@
+import { PbrSceneBindGroups } from './PbrSceneBindGroups';
 import { ViewLightUniformBuffer, LIGHT_UNIFORM_BYTES, LIGHT_UNIFORM_BINDING } from './ViewLightUniformBuffer';
 import { mat4 } from 'wgpu-matrix';
 import type { MaterialCoverageResources } from './AuxiliaryMaterial';
@@ -46,7 +47,7 @@ import type { ClippingPlanes } from '../components/ClippingPlanes';
 import { CLIPPING_BLOCK_FLOATS, clippingStateKey, writeClippingBlock } from './ClippingPlanesGpu';
 import { writePbrEnvironmentUniforms } from './PbrEnvironmentUniforms';
 import { ParameterizedRendererCore, SharedGeometryRendererOwner } from './ParameterizedRendererCore';
-import { registerPbrDeferredSurfacePort, deletePbrDeferredSurfacePort, type PbrDeferredSurfaceShader } from './PbrDeferredSurfacePort';
+import { registerPbrDeferredSurfacePort, deletePbrDeferredSurfacePort, type PbrDeferredSurfaceShader, type PbrFullLightingState } from './PbrDeferredSurfacePort';
 
 export const PBR_MAX_LIGHTS = SCENE_RENDER_MAX_LIGHTS;
 export type { PbrLightInfo } from '../frame/SceneRenderEnvironment';
@@ -114,6 +115,8 @@ const ENVIRONMENT_BYTES = 48;
 
 export class PbrRenderer extends BaseRenderer {
   private _deferredSurface: PbrDeferredSurfaceShader | null = null;
+  private _fullLighting: PbrFullLightingState | null = null;
+  private readonly _sceneGroups = new PbrSceneBindGroups();
   reverseZ = false;
   msaaSamples: 1 | 4 = 1;
 
@@ -186,6 +189,7 @@ export class PbrRenderer extends BaseRenderer {
     registerPbrDeferredSurfacePort(this, {
       layouts,
       setSurface: shader => { this._deferredSurface = shader; },
+      setFullLighting: state => { this._fullLighting = state; },
       lightingBindings: () => {
         if (deferredBindingRevision === this._sceneBindingRevision) return deferredBindings;
         deferredBindingRevision = this._sceneBindingRevision;
@@ -463,7 +467,7 @@ export class PbrRenderer extends BaseRenderer {
     bindings.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
     bindings.setBindGroup(1, this._batchObjectTable.bindGroup);
     bindings.setBindGroup(2, materialData.bindGroup);
-    bindings.setBindGroup(3, this._deformationCache.getSceneBindGroup(deformation), this._lightUniforms.dynamicOffset);
+    bindings.setBindGroup(3, this._sceneGroup(deformation), this._lightUniforms.dynamicOffset);
     bindings.setVertexBuffer(0, geometryData.positionBuf);
     bindings.setVertexBuffer(1, geometryData.normalBuf);
     bindings.setVertexBuffer(2, geometryData.uvBuf);
@@ -510,7 +514,7 @@ export class PbrRenderer extends BaseRenderer {
     pass.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
     pass.setBindGroup(1, objectTable.bindGroup);
     pass.setBindGroup(2, material.transmissionFactor > 0 ? materialData.transmissionBindGroup : materialData.bindGroup);
-    pass.setBindGroup(3, this._deformationCache.getSceneBindGroup(deformation), this._lightUniforms.dynamicOffset);
+    pass.setBindGroup(3, this._sceneGroup(deformation), this._lightUniforms.dynamicOffset);
     pass.setVertexBuffer(0, geometryData.positionBuf);
     pass.setVertexBuffer(1, geometryData.normalBuf);
     pass.setVertexBuffer(2, geometryData.uvBuf);
@@ -890,9 +894,7 @@ export class PbrRenderer extends BaseRenderer {
     skinJoints: GPUBuffer,
     skinWeights: GPUBuffer,
   ): GPUBindGroup {
-    return this._engine.device.createBindGroup({
-      layout: this._sceneLayout,
-      entries: [
+    const entries: GPUBindGroupEntry[] = [
         { binding: 0, resource: { buffer: this._lightUniforms.buffer, size: LIGHT_UNIFORM_BYTES } },
         { binding: 1, resource: { buffer: this._environmentBuffer } },
         { binding: 2, resource: this._environmentState.diffuseTexture.createView({ dimension: 'cube' }) },
@@ -905,8 +907,13 @@ export class PbrRenderer extends BaseRenderer {
         { binding: 9, resource: { buffer: skinJoints } },
         { binding: 10, resource: { buffer: skinWeights } },
         { binding: 11, resource: this._transmissionFramebufferView },
-      ],
-    });
+      ];
+    return this._sceneGroups.create(this._engine.device, this._sceneLayout, entries);
+  }
+
+  private _sceneGroup(deformation: PbrDeformationGpuData): GPUBindGroup {
+    const base = this._deformationCache.getSceneBindGroup(deformation);
+    return this._sceneGroups.resolve(base, this._deferredSurface ? null : this._fullLighting);
   }
 
   private _getPipeline(geometry: Geometry3D, material: PbrMaterial): GPURenderPipeline {
@@ -920,7 +927,7 @@ export class PbrRenderer extends BaseRenderer {
     const primitiveKey = encodePrimitivePipelineKey(topology, cullMode, frontFace, stripIndexFormat, this.reverseZ, this.msaaSamples, alphaFlag);
     const key = this._rendererCore.pipelineKey(
       `${primitiveKey}|uv:${geometry.textureCoordinateLayoutKey}|cc:${clearcoatEnabled ? 1 : 0}|tr:${transmissionEnabled ? 1 : 0}`,
-      this._deferredSurface?.key ?? this._shaderKey(clearcoatEnabled, transmissionEnabled),
+      this._deferredSurface?.key ?? this._fullLighting?.shader(clearcoatEnabled, transmissionEnabled).key ?? this._shaderKey(clearcoatEnabled, transmissionEnabled),
     );
     return this.getCachedPipeline(key, () => this._engine.device.createRenderPipeline(
       this._pipelineDescriptor(topology, cullMode, frontFace, material.alphaMode, clearcoatEnabled, stripIndexFormat, transmissionEnabled),
@@ -936,10 +943,11 @@ export class PbrRenderer extends BaseRenderer {
     stripIndexFormat?: GPUIndexFormat,
     transmissionEnabled = false,
   ): GPURenderPipelineDescriptor {
+    const full = this._deferredSurface ? null : this._fullLighting?.shader(clearcoatEnabled, transmissionEnabled);
     return {
-      layout: this._pipelineLayout,
+      layout: full?.pipelineLayout ?? this._pipelineLayout,
       vertex: {
-        module: this._deferredSurface?.module ?? (transmissionEnabled
+        module: this._deferredSurface?.module ?? full?.module ?? (transmissionEnabled
           ? (clearcoatEnabled ? this._transmissionClearcoatShader : this._transmissionShader)
           : (clearcoatEnabled ? this._clearcoatShader : this._baseShader)),
         entryPoint: 'vs_main',
@@ -958,7 +966,7 @@ export class PbrRenderer extends BaseRenderer {
         ],
       },
       fragment: {
-        module: this._deferredSurface?.module ?? (transmissionEnabled
+        module: this._deferredSurface?.module ?? full?.module ?? (transmissionEnabled
           ? (clearcoatEnabled ? this._transmissionClearcoatShader : this._transmissionShader)
           : (clearcoatEnabled ? this._clearcoatShader : this._baseShader)),
         entryPoint: 'fs_main',
@@ -1036,6 +1044,7 @@ export class PbrRenderer extends BaseRenderer {
   destroy(): void {
     deletePbrDeferredSurfacePort(this);
     this._deferredSurface = null;
+    this._fullLighting = null;
     this._sceneFrameBinding?.destroy();
     this._lightUniforms?.destroy();
     this._lights = [];

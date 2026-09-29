@@ -178,11 +178,12 @@
     }
   },
   "scripts": {
-    "build": "node ../scripts/build-rollup-once.mjs",
+    "build": "node ../scripts/build-rollup-once.mjs && node ../scripts/prune-package-declarations.mjs engine",
     "dev": "rollup -c rollup.config.js --watch",
     "benchmark:wasm": "node ../scripts/build-rollup-once.mjs && node ../scripts/benchmark/m025-scene-batch-wasm.mjs",
     "test": "node ../scripts/build-rollup-once.mjs && node --test --test-concurrency=1 \"test/**/*.test.mjs\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepack": "node ../scripts/prune-package-declarations.mjs engine"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "^0.19.3",

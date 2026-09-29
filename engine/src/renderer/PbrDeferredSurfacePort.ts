@@ -4,9 +4,14 @@ export interface PbrDeferredSurfaceShader {
   readonly module: GPUShaderModule;
   readonly key: string;
 }
+export interface PbrFullLightingState {
+  shader(clearcoat: boolean, transmission: boolean): PbrDeferredSurfaceShader & { readonly pipelineLayout: GPUPipelineLayout };
+  bindGroup(base: GPUBindGroup, entries: readonly GPUBindGroupEntry[]): GPUBindGroup;
+}
 export interface PbrDeferredSurfacePort {
   readonly layouts: readonly GPUBindGroupLayout[];
   setSurface(shader: PbrDeferredSurfaceShader | null): void;
+  setFullLighting(state: PbrFullLightingState | null): void;
   lightingBindings(): readonly GPUBindGroupEntry[];
 }
 const ports = new WeakMap<PbrRenderer, PbrDeferredSurfacePort>();

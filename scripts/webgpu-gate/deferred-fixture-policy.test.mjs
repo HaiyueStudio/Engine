@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDeferredFixtureOptions,validateDeferredFixtureEvidence,validateDeferredReuseEvidence } from './deferred-fixture-policy.mjs';
+import { parseDeferredFixtureBuildOptions,parseDeferredFixtureOptions,validateDeferredFixtureEvidence,validateDeferredReuseEvidence } from './deferred-fixture-policy.mjs';
 test('Deferred diagnostic modes are explicit, mutually exclusive and cannot silently ignore flags',()=>{
   assert.deepEqual(parseDeferredFixtureOptions(['--room','--integrated']),{mode:'room',preference:'low-power',tier:'diagnostic-g02-room'});
   assert.equal(parseDeferredFixtureOptions(['--full']).mode,'reference');
@@ -61,4 +61,12 @@ test('resource-reuse evidence rejects extra bindings, missing observations and s
     assert.throws(()=>validateDeferredReuseEvidence(bad),/resource-reuse/);
   }
   assert.throws(()=>validateDeferredReuseEvidence(valid.slice(1)),/Missing/);
+});
+
+test('compatibility builds keep G02/G03 evidence directories separate', () => {
+  assert.deepEqual(parseDeferredFixtureBuildOptions([]), {goal:'g02'});
+  assert.deepEqual(parseDeferredFixtureBuildOptions(['--tiled']), {goal:'g03'});
+  assert.deepEqual(parseDeferredFixtureBuildOptions(['--compatibility']), {goal:'g04'});
+  assert.deepEqual(parseDeferredFixtureBuildOptions(['--performance']), {goal:'g05'});
+  for (const args of [['--performance','--tiled'], ['--unknown'], ['--tiled', '--compatibility'], ['--compatibility', '--compatibility']]) assert.throws(() => parseDeferredFixtureBuildOptions(args));
 });

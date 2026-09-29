@@ -80,7 +80,8 @@ fn fs_main(@builtin(position) pixel: vec4<f32>) -> DeferredResolveOutput {
   let baseMetallic = textureLoad(g0, xy, 0);
   let normalRoughness = textureLoad(g1, xy, 0);
   let emissiveOcclusion = textureLoad(g2, xy, 0);
-  if (normalRoughness.a < 0.0) { discard; }
+  // Populate the shared scene depth even where the opaque proxy defers lighting.
+  if (normalRoughness.a < 0.0) { return DeferredResolveOutput(vec4<f32>(0.0, 0.0, 0.0, 1.0), depth); }
   // CPU validates the same contract. Guard GPU access as well; no stale list can address another generation.
   if (source.header.abiVersion != 1u || source.header.sourceGeneration != lightView.sourceGeneration
     || lightView.directionalCount != source.header.directionalCount
@@ -95,8 +96,9 @@ fn fs_main(@builtin(position) pixel: vec4<f32>) -> DeferredResolveOutput {
   let base = baseMetallic.rgb;
   let metallic = baseMetallic.a;
   let roughness = normalRoughness.a;
+  let lightingAoVisibility = lightingAmbientVisibility(pixel.xy);
   let ambientF = fresnelSchlickF90(nDotV, vec3<f32>(0.04), vec3<f32>(1.0));
-  var direct = lightView.ambientRadiance.rgb * base * (1.0 - metallic) * (1.0 - deferredMaxComponent(ambientF));
+  var direct = lightingAoVisibility * lightView.ambientRadiance.rgb * base * (1.0 - metallic) * (1.0 - deferredMaxComponent(ambientF));
   for (var index = 0u; index < lightView.directionalCount; index++) {
     direct += deferredDirect(source.records[index], position, n, v, nDotV, base, metallic, roughness);
   }
@@ -117,7 +119,7 @@ fn fs_main(@builtin(position) pixel: vec4<f32>) -> DeferredResolveOutput {
     irradiance *= textureSampleLevel(diffuseEnvironment, environmentSampler, deferredRotateY(n, rotation), environment.params.z).rgb;
     prefiltered *= textureSampleLevel(specularEnvironment, environmentSampler, deferredRotateY(reflect(-v, n), rotation), roughness * environment.params.z).rgb;
   }
-  let ibl = (kd * irradiance * base / PI + prefiltered * environmentF) * environment.params.x * emissiveOcclusion.a;
+  let ibl = (kd * irradiance * base / PI + prefiltered * environmentF) * environment.params.x * emissiveOcclusion.a * lightingAoVisibility;
   let color = direct + ibl + emissiveOcclusion.rgb;
   return DeferredResolveOutput(vec4<f32>(applyFog(color, sceneFrame.fog, sceneFrame.eyePosition.xyz, position), 1.0), depth);
 }

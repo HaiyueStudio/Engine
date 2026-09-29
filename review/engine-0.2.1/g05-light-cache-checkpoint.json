@@ -1,0 +1,269 @@
+{
+  "schemaVersion": 1,
+  "status": "diagnostic-checkpoint",
+  "performanceQualified": false,
+  "generatedAt": "2026-09-28T04:16:56.629738+00:00",
+  "inputs": {
+    "sha256": "6bb2179a2fd27d7893459dd4e52f1d9494d5f440d13ada872a327a04551d9c42",
+    "fileCount": 610
+  },
+  "revision": "5b07c271d05115762699b3d9f3fbb5e04310b95b",
+  "dirty": true,
+  "implementation": {
+    "path": "engine/src/frame/DeferredLightTable.ts",
+    "sha256": "96419be91eb88c82b9c643a26fc81ef96d61a10be1d37ea7138e9a6cc5ba27b0"
+  },
+  "tests": {
+    "path": "engine/test/deferred-light-table.test.mjs",
+    "sha256": "1c666a644c87c5dff8f728e61febde532b8386fbd7aff9b9b05a30a74a3d1edd"
+  },
+  "beforeSource": {
+    "path": "artifacts/engine-0.2.1/g05/runtime-ce94c5127913/DeferredLightTable.before.ts",
+    "sha256": "e3fecb53caba88de4f6fa7360ca5d1315d4872d6ce4f6b67e3c5a6e8478bf3c6"
+  },
+  "evidence": [
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-dynamic-128-four-view-tiled-moving-high-performance-2026-09-28T04-05-23.410Z.json",
+      "sha256": "8e24fc54e689e85572399ee8d70a5e4f7efdd72271728b90685ea934611010aa"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-moving-high-performance-2026-09-28T04-04-58.318Z.json",
+      "sha256": "b466113ea6e742406e780657e45b42c39cd54befd61aac13f4bb86bd714e9a55"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-reference-moving-high-performance-2026-09-28T04-05-08.147Z.json",
+      "sha256": "02c824ea921bcbed8ff61267906c1a93579292775f4503fb51f698a9f412f1b9"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-static-high-performance-2026-09-28T04-04-50.873Z.json",
+      "sha256": "df9e6c051d20c3e2d5b3655fb039d1fead046ef905ce1d19265afe7234b42d29"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-dynamic-128-four-view-tiled-moving-low-power-2026-09-28T04-07-07.399Z.json",
+      "sha256": "bfed449b299187fe1f88722b44e15100d1502755e603a78125f15fa896389d1b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-moving-low-power-2026-09-28T04-05-51.819Z.json",
+      "sha256": "eeec345cb8fdda91acf50ee464bb8dca9c76af4027f662c74ff335cc8483e110"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-reference-moving-low-power-2026-09-28T04-06-37.012Z.json",
+      "sha256": "0cfb808fe213b1997841a857373beb7bc0c8f89392f8724bbfc0a0056204c7ef"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-static-low-power-2026-09-28T04-05-36.930Z.json",
+      "sha256": "97e4b6b08e842124257e2e2ec627515d543d2099538064fdf07046e9c7c2f8c9"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-reference-high-performance-passed-2026-09-28T04-07-22.209Z.json",
+      "sha256": "18539168d3d340fc703036d859ee3ffbd53337e249a7f2ac7e41400890300ed0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-tiled-high-performance-passed-2026-09-28T04-07-36.872Z.json",
+      "sha256": "d2e2397d54fb594e7b3341a0b6c93c8041301613f99c858451ead79b4a8a5efc"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-reference-low-power-passed-2026-09-28T04-07-49.554Z.json",
+      "sha256": "2f8e109b6039954a3b8030bab996c4c8d67efe9f60544109bd046462609ecad0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/regression-tiled-low-power-passed-2026-09-28T04-08-03.278Z.json",
+      "sha256": "d90d8a5f1c727dd2ff92bb37271116b3fde4596e3c4a76699ad385060971e3aa"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/effects-high-performance-passed-2026-09-28T04-09-10.911Z.json",
+      "sha256": "f68f3eb32b88443978671809929f9cefb63f10a7f23a9206ebfed35040d39dd5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/effects-low-power-passed-2026-09-28T04-09-23.614Z.json",
+      "sha256": "d60c056162eb522370ae01d1957433a42bc23d3061fc5aa0b2b0e1903280e4b5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-audit-2026-09-28T04-08-06.895Z.json",
+      "sha256": "7e128e8ddd8adc02add23a0d19d9473840360399504e1ed547fb42ee09303ea1"
+    },
+    {
+      "path": "review/engine-0.2.1/g05-light-cache-allocation-comparison.json",
+      "sha256": "fc340abe40c7bb2086c3c7edd5101ef2266311d95ab57b5af61862c306a0dce7"
+    }
+  ],
+  "checks": [
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/allocation-audit.mjs",
+      "sha256": "b0c56c4b3996c075c5bf0d750612f8fbfc513499e5f584be74cdbbc6902588d0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-alloc-amd-four-view.log",
+      "sha256": "296d0a7efb07acf35556220b481205cbdd0cea75f09df992202edf6290a1f62a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-alloc-amd-moving.log",
+      "sha256": "bc74349c891c23005460f5501eddb125755f3d6c4bec1dcb0edfb98c01c45501"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-alloc-amd-reference.log",
+      "sha256": "7db5530aca05f01351e4bb73f23ffa2895114d7d3c55d1b1132322509348a91b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-alloc-amd-static.log",
+      "sha256": "b961cd6f4197711f8ed5fd4d493839809f5da17463955b3c1d88606aa087f982"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-alloc-intel-four-view.log",
+      "sha256": "1a666361d984385301192d29106cb7eb1b60615d5bcea2bdf7c920f0e286b360"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-alloc-intel-moving.log",
+      "sha256": "ced200443b09812790a17c09ea6caff5996092485990cea89cc52deda10f19cb"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-alloc-intel-reference.log",
+      "sha256": "5a417283dd0d4d1e1d2352b32699e2bab66a9070b9e64b4f953773751f20d0a2"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-alloc-intel-static.log",
+      "sha256": "e653f6ebe81606555cc789698ba4134ece68ed7d90a75a2993066f79c0cff5c1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-allocation-audit.log",
+      "sha256": "1687169057431d6ac1e4232cacce00467e4df2e85e2db83940f338461b34ea82"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-api.log",
+      "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-checkpoint.py",
+      "sha256": "0574d4969fefd0c3d28e50c9cb203daa736da2ab93d09a08b0bf03164d774803"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-compare.py",
+      "sha256": "669b0b0c020cdf37812c8465c5c441dd95b8436e2e370949a8afb892149c2321"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-differential-v1.json",
+      "sha256": "f64c14ad30eb9589b7675800ef1bcc49eae2e21866c0a934c903a2c825023d4d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-differential-v1.log",
+      "sha256": "0587ce12f78995c46d1a343a7c74e60dbfdc767de4dcf75cfb1d6529e08abc74"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-differential-v1.mjs",
+      "sha256": "3d8822c5d2330e3359a94ae43e01da7b805eda80dfdfab5517aa7a61c600edc5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-differential.json",
+      "sha256": "6746de7f1fb497d639f77fda8e048e968df41b8644c64978afda97bf5e52c305"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-differential.log",
+      "sha256": "fb36df9b480a9be1ed0c900ff7c3f8406c91e400d27b1e4633a5dfac41702287"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-differential.mjs",
+      "sha256": "0da924309a2029a5acc54ac6e9a662feac06d025ec66a4e7689884f63308cef5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-effects-amd.log",
+      "sha256": "cd41b33ef20b7b27b56af34a2bf8079312b6d7d9cfeb8697495669f8a9863d06"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-effects-intel.log",
+      "sha256": "e8f9ac71d3170521587d369c03579bffdb57a72e7c0eec6ac14c98ebebac35be"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-engine-build.log",
+      "sha256": "aedc745a22d3d26e033d589594754631324e67aab5541967e3a6a2e53ca1dfba"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-engine-test.log",
+      "sha256": "2481f6ddd0dd13537112c44763312b8b9fa63564156d3373ca39767eee83fe68"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-fixture-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-focused.log",
+      "sha256": "6ba562a97f19e3e5ad74d67f1aedd084013edae17e087aab3376e92ffea56538"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-modules.log",
+      "sha256": "43bb801d6168810851ac2001664bcc563147a90f049c1474c456c11b833fc604"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-performance-policy.log",
+      "sha256": "a5cef4c8e22736ee1d84839c5234517040a2fa0a5c1d1362a28bd6d8f4d8a755"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-prepare.log",
+      "sha256": "3896d25e54cb62720a681e2bc7098bf3551ea000929e9a62e6f5e5139f0b6e0b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-regression-amd.log",
+      "sha256": "671227f8abd78b188e9bdd2530cb7ff5beb89cde98bc1d2b5070e080ca4d6b24"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-regression-intel.log",
+      "sha256": "6cbc61f120bdbdf9be3fae3a12e037e62d1689c2692441ef0b27b9a763a4cbcf"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-responsibilities.log",
+      "sha256": "6fa09923726c2f63ea49a166fb29d211950e6aaa019390427f961c4d74e2b3c9"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-root-build.log",
+      "sha256": "0c477bf022fba45376dd27f8c3eddf5afd542a0726c6ab81e0d5476740b92294"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-root-test.log",
+      "sha256": "6cee8cc08cc0082d9f7498de120dd6b471b9efea9d8217dd9507409b20467f18"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-root-typecheck.log",
+      "sha256": "7870fb4f7e0c09385e09c76f71263cbc84c750430b8def581a51f1f523f5a295"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/light-cache-2026-09-28/g05-light-cache-typecheck.log",
+      "sha256": "a24c45a9380b23cce7ea8d2497da98371519befaf4d189650f8b3e3c41eeca0b"
+    }
+  ],
+  "validation": {
+    "focusedTests": 23,
+    "engineTests": 739,
+    "repositoryTests": 1380,
+    "freshExampleTargets": 95,
+    "performancePolicies": 176,
+    "nativeAdapters": [
+      "amd/rdna-1",
+      "intel/gen-9"
+    ],
+    "referenceCasesPerAdapter": 7,
+    "tiledCasesPerAdapter": 32,
+    "effectCasesPerAdapter": 30,
+    "aoContributionChecksPerAdapter": 36,
+    "differential": {
+      "status": "passed",
+      "seed": 217,
+      "iterations": 6000,
+      "reused": 3875,
+      "changes": 1931,
+      "rejections": 194,
+      "retainedSnapshots": 58,
+      "scope": "Deterministic randomized differential audit against archived pre-change implementation; not a performance result"
+    }
+  },
+  "cache": {
+    "maximumCandidates": 1032,
+    "bytesPerCandidate": 112,
+    "maximumCpuStorageBytesPerWorld": 115584,
+    "gpuAbiChanged": false,
+    "newAdmissionLimit": false
+  },
+  "remaining": [
+    "Full current-runtime E/G and F cohorts and Forward regression/stability qualification.",
+    "High-overlap and AO complete-light-fallback GPU costs.",
+    "Final G05 audit; no G06/G07 activation or publication."
+  ]
+}

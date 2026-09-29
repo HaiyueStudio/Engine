@@ -51,10 +51,10 @@ export class DeferredTileCuller {
     this.lastBypassReason = this._options.forceCulling ? null : deferredTileBypassReason(source, view, input.sceneFrame, input.view.reverseZ);
     return this.lastBypassReason;
   }
-  prepare(input: DeferredLightingRecordInput, lights: LightBindings, frameOffset: number, bypass = false) {
+  prepare(input: DeferredLightingRecordInput, lights: LightBindings, frameOffset: number, bypass = false, reservation?: { reservedBytes: number; maxTileRecords: number }) {
     if (this._destroyed || !this._runtime || !this._pipeline) throw new Error('Deferred tile culler unavailable.');
     if (input.context.viewFamily) this.resources.retain(new Set(input.context.viewFamily.views.map(view => view.key)));
-    const plan = planDeferredTiles(this._device, input.view.width, input.view.height, bypass ? { ...this._options, maxTileRecords: 0 } : this._options);
+    const plan = planDeferredTiles(this._device, input.view.width, input.view.height, bypass ? { ...this._options, maxTileRecords: 0 } : this._options, reservation);
     const tiles = this.resources.acquire(input.view.key, plan, input.context);
     this.lastPlan = plan; this.lastBinding = tiles;
     const key = `${plan.columns}:${plan.rows}:${plan.storedTiles}:${plan.tileCapacity}:${input.view.width}:${input.view.height}`;

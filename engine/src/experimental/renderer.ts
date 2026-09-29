@@ -48,3 +48,6 @@ export type {
 } from '../renderer/RenderPipeline';
 export { getSystemRenderPipelineOptions, isRenderPipelineSystem, RenderIntegration } from '../renderer/RenderIntegration';
 export type { RenderIntegrationOptions, RenderPipelineEntryOptionsFactory } from '../renderer/RenderIntegration';
+
+export { createDeferredLightingProfile } from './DeferredLightingProfile';
+export type { DeferredLightingProfile, DeferredLightingProfileOptions, DeferredLightingDebugChannel, DeferredLightingDebugImage } from './DeferredLightingProfile';

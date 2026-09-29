@@ -13,9 +13,14 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const cachePath = resolve(root, 'artifacts/cache/shader-language/generation-v2.json');
 const reportPath = resolve(root, 'artifacts/shader-language/shader-cost.json');
 const showcasePath = resolve(root, 'examples/shader-language-lab/generated/showcase.generated.ts');
-const compilerInputs = Object.freeze(['shader-language/dist']);
+const compilerInputs = Object.freeze(['shader-language/dist', 'shader-language/src', 'shader-language/wgsl-module-registry.json', 'shader-language/scripts/wgsl-includes.mjs']);
 
 export const PRODUCTION_CACHE_SCOPES = Object.freeze([
+  scope('deferred-full-forward', 2,
+    ['shader-language/scripts/generate-deferred-full-forward-production.mjs', 'shader-language/scripts/shader-source-variant.mjs', 'shader-language/scripts/generate-deferred-lighting-production.mjs',
+      'shader-language/scripts/compact-artifact-literal.mjs', 'shader-language/src/deferred-lighting',
+      'shader-language/builtin-material-lighting-family.json', 'engine/src/shaders/generated/deferred-lighting-abi.generated.ts'],
+    ['engine/src/shaders/generated/deferred-full-']),
   scope('motion-blur', 2,
     ['shader-language/scripts/generate-motion-blur-production.mjs', 'shader-language/pilot-motion-blur-postprocess.graph.json', 'shader-language/stage5-contract.json'],
     ['engine/src/shaders/generated/motion-']),

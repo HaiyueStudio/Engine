@@ -17,6 +17,7 @@ function context(device) { const callbacks=[];return { device,encoder:device.cre
 
 test('actual device limits, dimensions and unchanged sample counts are checked explicitly', () => {
   const device = createAuditGpuDevice({limits});
+  assert.throws(()=>validateDeferredDevice(createAuditGpuDevice({limits:{...limits,maxStorageBuffersPerShaderStage:4}})),{reason:'device-limit:maxStorageBuffersPerShaderStage'});
   validateDeferredDevice(device); validateDeferredViewConfiguration(device,1280,720,1);
   assert.throws(()=>validateDeferredDevice(createAuditGpuDevice({limits:{...limits,maxColorAttachments:2}})),{reason:'device-limit:maxColorAttachments'});
   assert.throws(()=>validateDeferredViewConfiguration(device,1280,720,4),{reason:'sample-count'});
@@ -111,7 +112,7 @@ test('profile reactivation reuses immutable shader compilation checks', async t 
     const backend=new DeferredReferenceBackend(host,{failurePolicy:'strict'});
     await backend.initialize(renderer);backend.destroy();
   }
-  assert.equal(checks,2,'exactly one compilation check for each of the two immutable modules');
+  assert.equal(checks,6,'one compilation check per immutable geometry/resolve and four full-light modules across reactivation');
 });
 
 test('destroy cancels initialization even when native compilation diagnostics never resolve', async t => {
@@ -162,4 +163,31 @@ test('Tiled initialization compiles only its active resolve pipelines, while Ref
     assert.deepEqual(pipelines.map(call=>call.label),['depth24plus','depth32float'].map(format=>`${tiled?'DeferredTiles':'DeferredReference'}.resolve:${format}`));
     backend.destroy();
   }
+});
+
+test('independent instance surfaces cannot be reported as complete Deferred coverage; exclusions and disabled hierarchy are respected', async () => {
+  const {World}=await importEngineSource('ecs/World.ts');
+  const {InstancedMesh3D}=await importEngineSource('components/InstancedMesh3D.ts');
+  const {Geometry3D}=await importEngineSource('geometry/Geometry3D.ts');
+  const {InstancedPbrMaterial}=await importEngineSource('material/InstancedPbrMaterial.ts');
+  const {BasicMaterial}=await importEngineSource('material/BasicMaterial.ts');
+  const device=createAuditGpuDevice({limits}),host=engine(device),renderer=new PbrRenderer();renderer.prepare(host);
+  const world=new World(),entity=new Entity('instance').addComponent(new InstancedMesh3D(new Geometry3D({positions:new Float32Array(9)}),new InstancedPbrMaterial(1)));world.add(entity);
+  const input={context:{device},world,view:{key:'a',width:32,height:32,sampleCount:1},helperCount:0,transparentCount:0,opaqueItems:[{material:new BasicMaterial()}]};
+  try {
+    for(const failurePolicy of ['strict','forward']){
+      const backend=new DeferredReferenceBackend(host,{failurePolicy});await backend.initialize(renderer);
+      try {
+        if(failurePolicy==='strict')assert.throws(()=>backend.record(input),{reason:'unsupported-instance-surface'});
+        else assert.equal(backend.record(input),false);
+        assert.equal(backend.diagnostics.completeCoverage,false);assert.equal(backend.diagnostics.reason,'unsupported-instance-surface');
+        entity.disabled=true;
+        if(failurePolicy==='strict')assert.throws(()=>backend.record(input),{reason:'unsupported-material-surface'});else backend.record(input);
+        assert.equal(backend.diagnostics.reason,'unsupported-material-surface');entity.disabled=false;
+        input.view.excludedEntityIds=new Set([entity.id]);
+        if(failurePolicy==='strict')assert.throws(()=>backend.record(input),{reason:'unsupported-material-surface'});else backend.record(input);
+        assert.equal(backend.diagnostics.reason,'unsupported-material-surface');input.view.excludedEntityIds=null;
+      }finally{backend.destroy();}
+    }
+  }finally{world.destroy();renderer.destroy();disposeSceneFrameGpuArena(device);}
 });

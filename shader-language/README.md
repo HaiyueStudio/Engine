@@ -106,6 +106,25 @@ npm run shader-language:check
 
 该门禁先检查阶段 0 文件、固定枚举、逻辑资源空间、Artifact/module-family schema、迁移清单和仓库索引，再执行阶段 1–14 typecheck、构建、契约测试、private compiler/runtime 边界与统一 production artifact stale check。真实 Chrome 验证使用阶段 2–14 的独立命令；阶段 14 运行 `npm run verify:shader-language-stage14`。后续编译器实现不能通过修改统计口径绕过这些契约；需要改变决策时应新增 ADR并提升对应格式版本。
 
+## 受信任 WGSL 的构建期 include
+
+内部 WGSL 模块可以在 `.wgslinc` 作者文件中使用独占一行的 `#include <module/id>`。例如：
+
+```wgsl
+#include <pbr/brdf>
+#include <pbr/clearcoat>
+```
+
+ID 必须在 [wgsl-module-registry.json](./wgsl-module-registry.json) 中注册，路径相对于 `shader-language/src`。首个生产入口是 [pbr-common.wgslinc](./src/material-lighting/stdlib/pbr-common.wgslinc)，供现有 PBR family 及派生的 Deferred 完整灯表 family 使用。该入口只组织现有受信任 WGSL 模块；Typed IR、module linker、资源所有权及最终编译验证继续负责语义。
+
+- 仅 Shader Language 的 Rollup 构建展开 include；Engine 消费完整生成产物，不加载 include 解析器或 compiler。Graph JSON 无此入口。
+- 仅允许模块级 include，同一 ID 只展开一次；注释内的指令不生效。缺失/循环依赖、重复 ID、越过源目录的路径或符号链接均报错。
+- 预处理会检查重复顶层声明和数字字面量绑定槽。它不是完整 WGSL 验证器，类型、表达式绑定及完整 ABI 仍由既有编译和 native 门禁验证。
+- 模块文本与作者分隔符原样保留；指令自身的换行也保留。调整分隔符后应检查生产产物是否发生意外变化。
+- Registry 和全部传递依赖进入 watch 与生成缓存；构建另输出 `dist/wgsl-includes.provenance.json`，记录原文件、行号、展开文本及依赖哈希。内部 `mapWgslIncludePosition` 可把展开位置映射回原文件；该 sidecar 不进入 runtime，也不会自动重写 GPU 编译器诊断。
+
+修改模块后执行 `npm run build -w ./shader-language`，再执行 `node shader-language/scripts/generate-production-shaders.mjs --write` 并审查生成差异；检查使用 `npm run shader-language:check`。include 减少维护重复，展开 WGSL 成本仍按完整产物统计。Artifact 的字符串/反射共享另行测量实际 bundle 收益。
+
 ## 阶段 14 仍未包含
 
 - 不实现 arbitrary deformation node plugin、text parser、完整优化器或 shader graph UI。

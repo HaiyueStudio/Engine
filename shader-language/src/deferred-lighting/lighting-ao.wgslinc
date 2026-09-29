@@ -1,0 +1,9 @@
+@group(3) @binding(__BINDING__) var<storage, read> lightingAo: array<u32>;
+fn lightingAmbientVisibility(pixel: vec2<f32>) -> f32 {
+  if (lightingAo[0] == 0u) { return 1.0; }
+  let xy = min(vec2<u32>(max(pixel, vec2<f32>(0.0))), vec2<u32>(lightingAo[0], lightingAo[1]) - vec2<u32>(1u));
+  // Private layout v2: padded R16F rows, two visibility values per storage word.
+  let offset = 64u + xy.y * lightingAo[2] + xy.x / 2u;
+  let pair = unpack2x16float(lightingAo[offset]);
+  return clamp(select(pair.x, pair.y, (xy.x & 1u) == 1u), 0.0, 1.0);
+}

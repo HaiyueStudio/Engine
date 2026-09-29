@@ -9,10 +9,10 @@ export const DEFERRED_LIGHTING_SHADER_ARTIFACT = {
   "source": {
     "kind": "module-family",
     "path": "shader-language/src/deferred-lighting/family.ts",
-    "sha256": "149ef2cd4f6759db9671a534a4ad5dbed32787bb94093426d6064ab99faf147f"
+    "sha256": "a68ed0da7bdddde7a52b0f2546471ebb8fe3f24c475a3b3fce24afd006e7f013"
   },
-  "canonicalHash": "36e1433105685a6e38eb28f989e211d107a192f4d1d5ce27defc889a03cb3ca8",
-  "typedModuleHash": "36e1433105685a6e38eb28f989e211d107a192f4d1d5ce27defc889a03cb3ca8",
+  "canonicalHash": "6cb363c278d18402d372d3db477aa3e558ee101124db757e975156bd6a010a7a",
+  "typedModuleHash": "6cb363c278d18402d372d3db477aa3e558ee101124db757e975156bd6a010a7a",
   "passes": {
     "deferred-gbuffer": {
       "id": "deferred-gbuffer",
@@ -904,10 +904,10 @@ export const DEFERRED_LIGHTING_SHADER_ARTIFACT = {
           "sourceId": "deferred-gbuffer",
           "sourceName": "shader-language/src/deferred-lighting/gbuffer.wgsl",
           "generatedStartLine": 1,
-          "generatedEndLine": 604
+          "generatedEndLine": 608
         }
       ],
-      "canonicalHash": "9d460ef8e83e8b71e8d6f0e1b501187e280d54981b497c3c855f2579f38f9777"
+      "canonicalHash": "2e5542a19ed4724363bfebe83e73bf70ecdf398b9336e8cfa247f00ff47a4356"
     },
     "deferred-reference": {
       "id": "deferred-reference",
@@ -995,6 +995,19 @@ export const DEFERRED_LIGHTING_SHADER_ARTIFACT = {
                 "kind": "buffer",
                 "bufferType": "read-only-storage",
                 "minBindingSize": 4,
+                "hasDynamicOffset": false
+              }
+            },
+            {
+              "id": "pass.lightingAo",
+              "binding": 17,
+              "visibility": [
+                "fragment"
+              ],
+              "layout": {
+                "kind": "buffer",
+                "bufferType": "read-only-storage",
+                "minBindingSize": 260,
                 "hasDynamicOffset": false
               }
             },
@@ -1320,11 +1333,11 @@ export const DEFERRED_LIGHTING_SHADER_ARTIFACT = {
           "sourceId": "deferred-reference",
           "sourceName": "shader-language/src/deferred-lighting/resolve.wgsl",
           "generatedStartLine": 1,
-          "generatedEndLine": 280
+          "generatedEndLine": 293
         }
       ],
-      "canonicalHash": "a403e9cfe3c00c4a106458584e90e993fbd70b19213b85253e3e0cfd45e3edbb"
+      "canonicalHash": "e3181f4cc7d15517dc49d477697bc43588195a2b91313182333a8e1b5b2270ab"
     }
   },
-  "artifactHash": "a175e0b8187143b3e432490463f3724d4fc1ef9e63e6b0ea776c4447258d7222"
+  "artifactHash": "a86678918dce8989b276ec17cf312e1c4c1be96d071528454e49f16ead516586"
 } as const satisfies PrecompiledShaderArtifactV2;

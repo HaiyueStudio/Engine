@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-27T13:28:53.926350+00:00",
+  "status": "implemented-and-verified",
+  "scope": "Approved current transparent full-list shader budget, private build-time includes, and lossless Artifact packing; G04 completion is separate",
+  "revision": "5b07c271d05115762699b3d9f3fbb5e04310b95b",
+  "dirty": true,
+  "authorization": "User: 按照这个建议进行优化",
+  "budget": {
+    "schemaVersion": 1,
+    "showcase": {
+      "maxSourceBytes": 5200,
+      "maxIrNodeCountBeforeOptimization": 64,
+      "maxIrNodeCountAfterOptimization": 60,
+      "maxVariantCount": 1,
+      "maxPipelineCount": 2,
+      "maxColdCompilationMs": 500
+    },
+    "production": {
+      "maxGeneratedWgslBytes": 570000,
+      "maxGeneratedWgslFiles": 75,
+      "maxVariantCount": 67,
+      "maxPipelineCount": 67,
+      "maxColdGenerationMs": 10000,
+      "growthBaseline": {
+        "generatedWgslBytes": 305504,
+        "generatedWgslFiles": 64,
+        "variantCount": 56,
+        "pipelineCount": 56
+      },
+      "maxGrowth": {
+        "generatedWgslBytes": 264496,
+        "generatedWgslFiles": 11,
+        "variantCount": 11,
+        "pipelineCount": 11
+      }
+    },
+    "dag": {
+      "maxShaderLanguageBuilds": 1,
+      "maxEngineBuilds": 1,
+      "maxExtensionsBuilds": 1,
+      "maxProductionGenerationRuns": 1
+    },
+    "productionBundles": {
+      "simple3dArtifactGzipBytes": 7100,
+      "componentsEvidenceArtifactGzipBytes": 2850,
+      "deformationArtifactGzipBytes": 9600
+    }
+  },
+  "expandedCost": {
+    "wgslBytes": 555236,
+    "files": 75,
+    "variants": 67,
+    "pipelines": 67,
+    "byteHeadroom": 14764
+  },
+  "packing": {
+    "before": {
+      "scope": "standalone generated Artifact Rollup bundle; no minification; gzip level 9; excludes renderer/npm package",
+      "jsBytes": 190289,
+      "gzipBytes": 31297,
+      "sha256": "639d3332d3a6f982cde0f4b9f21388f0a295176d128195df37d16f85675ca427",
+      "artifactHash": "924dc9c0413c497d013dd3f8bbb9207eff4622e861b9c8f6f4a9db7cf991b853",
+      "passes": [
+        {
+          "id": "deferred-full-pbr",
+          "bytes": 34454,
+          "sha256": "5c58caa765f231ea862715f7305a6158a5b84ea0bcb32856f7e53ff1dab460a5"
+        },
+        {
+          "id": "deferred-full-pbr-clearcoat",
+          "bytes": 34459,
+          "sha256": "3e1a3a3d3811d96ca74e5cce0db37e4894f3211a631c7b23c2cab865303b421a"
+        },
+        {
+          "id": "deferred-full-pbr-transmission",
+          "bytes": 34462,
+          "sha256": "396ef56e8fa9fe078407da54e4d768fa90f5ffdbfd3593a08a2e73c01a409677"
+        },
+        {
+          "id": "deferred-full-pbr-transmission-clearcoat",
+          "bytes": 34467,
+          "sha256": "c394798322daaf5d6ca22361d739858ae282ca1c5e7d7ffaa1ca6583cf92835c"
+        }
+      ]
+    },
+    "after": {
+      "scope": "standalone generated Artifact Rollup bundle; no minification; gzip level 9; excludes renderer/npm package",
+      "jsBytes": 52867,
+      "gzipBytes": 10484,
+      "sha256": "cf104c6450f5d4f20da7331064ef64b51e84c995e8effe365492b02c82987882",
+      "artifactHash": "924dc9c0413c497d013dd3f8bbb9207eff4622e861b9c8f6f4a9db7cf991b853",
+      "passes": [
+        {
+          "id": "deferred-full-pbr",
+          "bytes": 34454,
+          "sha256": "5c58caa765f231ea862715f7305a6158a5b84ea0bcb32856f7e53ff1dab460a5"
+        },
+        {
+          "id": "deferred-full-pbr-clearcoat",
+          "bytes": 34459,
+          "sha256": "3e1a3a3d3811d96ca74e5cce0db37e4894f3211a631c7b23c2cab865303b421a"
+        },
+        {
+          "id": "deferred-full-pbr-transmission",
+          "bytes": 34462,
+          "sha256": "396ef56e8fa9fe078407da54e4d768fa90f5ffdbfd3593a08a2e73c01a409677"
+        },
+        {
+          "id": "deferred-full-pbr-transmission-clearcoat",
+          "bytes": 34467,
+          "sha256": "c394798322daaf5d6ca22361d739858ae282ca1c5e7d7ffaa1ca6583cf92835c"
+        }
+      ]
+    },
+    "artifactAndPassHashesUnchanged": true
+  },
+  "native": [
+    {
+      "path": "artifacts/engine-0.2.1/g04/transparent-high-performance-passed-2026-09-27T13-09-32.641Z.json",
+      "sha256": "8946c11846a4d65f65b433f2911808778d8cbc77f847c4703b04e0ac4a55d45d",
+      "bytes": 220114,
+      "runtimeInputs": {
+        "sha256": "6cb7e5ff0402762535e3f4aaa22b4aacf0317c6378684f7798e3303d57ae82b0",
+        "fileCount": 605
+      },
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "status": "passed",
+      "caseCount": 50,
+      "independentContributions": 640,
+      "maxDelta": 0.0002765655517578125,
+      "validationErrors": [],
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/transparent-low-power-passed-2026-09-27T13-09-39.124Z.json",
+      "sha256": "9cbbbd1782804835ac179a7522e979ce10e4828560f1ace22dc6ae035c591836",
+      "bytes": 220220,
+      "runtimeInputs": {
+        "sha256": "6cb7e5ff0402762535e3f4aaa22b4aacf0317c6378684f7798e3303d57ae82b0",
+        "fileCount": 605
+      },
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "status": "passed",
+      "caseCount": 50,
+      "independentContributions": 640,
+      "maxDelta": 0.00015926361083984375,
+      "validationErrors": [],
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    }
+  ],
+  "checks": {
+    "typecheck": "passed",
+    "tests": {
+      "status": "passed",
+      "total": 1360,
+      "workspaces": {
+        "shader-language": 135,
+        "engine": 719,
+        "animation-spec": 107,
+        "extensions": 392,
+        "examples-catalog": 7
+      }
+    },
+    "build": {
+      "status": "passed",
+      "freshExamples": 95
+    },
+    "stage14": {
+      "status": "passed",
+      "nodes": 25
+    },
+    "cost": "passed",
+    "api": "passed",
+    "engineWorkspaceAndModuleBoundaries": "passed",
+    "responsibilities": "passed",
+    "rendererPrepare": "passed",
+    "docs": "passed",
+    "diffWhitespace": "passed"
+  },
+  "additionalCheckLimitation": {
+    "command": "npm run check:boundaries",
+    "status": "failed-in-sibling-Editor",
+    "reason": "Engine workspace/module checks passed; Editor check could not resolve its local TypeScript installation at Editor/node_modules/typescript/index.js. No Editor dependencies were modified."
+  },
+  "implementationSources": [
+    {
+      "path": "shader-language/scripts/wgsl-includes.mjs",
+      "sha256": "49d8c3e8243046e1b55367ebad406a1da10671b293dcb05bda85c4d001e9655d",
+      "bytes": 6717
+    },
+    {
+      "path": "shader-language/wgsl-module-registry.json",
+      "sha256": "60cb8f9146ec8b21c0c4a9ca4aa069d35d92888fa3b7d2de4dccc336e94babb8",
+      "bytes": 951
+    },
+    {
+      "path": "shader-language/src/material-lighting/stdlib/pbr-common.wgslinc",
+      "sha256": "a58209c368b8ccfe877b8be538bbf63208f423dd887d4fa593089dd08ddb25d9",
+      "bytes": 245
+    },
+    {
+      "path": "shader-language/src/material-lighting/definitions.ts",
+      "sha256": "cbaedd6d59a5c193419d65e817ebe24156ab153a280de94a5a9b23838127f889",
+      "bytes": 17353
+    },
+    {
+      "path": "shader-language/scripts/generate-deferred-full-forward-production.mjs",
+      "sha256": "b79b1af6c0a44485038dc5a5ed9b5236c022869aae306b97832b8a994266a4d1",
+      "bytes": 4555
+    },
+    {
+      "path": "shader-language/scripts/verify-production-cache.mjs",
+      "sha256": "c50bc9c43780125017791c914e97d0cccdd35f866e31deac922729ee21f0fbc8",
+      "bytes": 14549
+    },
+    {
+      "path": "shader-language/shader-cost-budgets.json",
+      "sha256": "a24be9253b2d99ac9e38604be03d3f14fce9d592194157977fd11e7547b7d8fe",
+      "bytes": 1026
+    },
+    {
+      "path": "shader-language/test/wgsl-includes.test.mjs",
+      "sha256": "37f270281a4d19e1d40b944051c53500b940aad22c2e4a1efcc6e9e4b9cc4ee9",
+      "bytes": 5755
+    },
+    {
+      "path": "shader-language/test/deferred-full-forward.test.mjs",
+      "sha256": "15b88b540af3c84f658fe9897df30524646965a0cd5dc2d158ae1f4952f72c38",
+      "bytes": 6683
+    },
+    {
+      "path": "engine/src/shaders/generated/deferred-full-forward-artifact.generated.ts",
+      "sha256": "f2280c006e84e569b4e4aad4a42c5ac2b4f3fcc40873f65d99573c42f78c79ea",
+      "bytes": 16174
+    }
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/after.json",
+      "sha256": "bedbb7274ae6b170f8903498b0e52e79902745b63779efead9fd3f66b7a75008",
+      "bytes": 999
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/api.log",
+      "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79",
+      "bytes": 158
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/before.json",
+      "sha256": "52dd13321168578c69457e4a94ce22748f36fc1923f086e9c6a012a0d2e44ac8",
+      "bytes": 1000
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/boundaries.log",
+      "sha256": "35580475f1ea4cf24b44bef8ee017d1e07565bbc9bedf08e89864bbb60a2ee83",
+      "bytes": 2491
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/include-final.log",
+      "sha256": "311ecb38e09c95586e39c393754dcc15d6ad60a9d39f7f73a9b3e159deea6c0f",
+      "bytes": 664
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/native-amd.log",
+      "sha256": "0ca979327e9043c2e0f375d0b153bd16f8d3391494f4cfd1e6d27124da92235d",
+      "bytes": 337
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/native-intel.log",
+      "sha256": "384a565efe35a2b36a03105dc01c105a720d95917e585847b60fbfc3145007e0",
+      "bytes": 332
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/prepare.log",
+      "sha256": "3896d25e54cb62720a681e2bc7098bf3551ea000929e9a62e6f5e5139f0b6e0b",
+      "bytes": 239
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/responsibilities.log",
+      "sha256": "6fa09923726c2f63ea49a166fb29d211950e6aaa019390427f961c4d74e2b3c9",
+      "bytes": 259
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/root-build.log",
+      "sha256": "358000525ebd8d095b7e5c177a598d033da29519fa83a174269402efe03f1eff",
+      "bytes": 16069
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/root-test.log",
+      "sha256": "53faecb9788224091d57ad1abfd473ac7bc12d8580628d80475ec0b613ff0e91",
+      "bytes": 139140
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/root-typecheck.log",
+      "sha256": "95af89df1640d7334cd32614ddcd9b7cc63836e47ff0e1945fbbf09a92893be2",
+      "bytes": 2966
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/shader-cost.json",
+      "sha256": "b540eb961c3a1eff398345d73b042d5fa5c10deb347233bcc5a4daffbdc15a80",
+      "bytes": 9008
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/stage14-dag.json",
+      "sha256": "78503255720a69d10d93849f9c8d37399144f479fe783a45fcfc16ce1447355a",
+      "bytes": 24858
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/stage14.log",
+      "sha256": "1fd89f593b2500ad05ae8b05346c82554f1b5596322d8d024672c69b652f99d9",
+      "bytes": 25500
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/wgsl-includes.provenance.json",
+      "sha256": "dd15f8e9567ded13907918b9c7e8fb8f1f62d8567dc2e22330561c7634fed72e",
+      "bytes": 61914
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/docs-final.log",
+      "sha256": "f60ed7184d81bed6203c67b04e5d3d98959cbba1fb28a8704411a44e8184e5bb",
+      "bytes": 408
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g04/module-optimization/diff-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "remaining": "Full G04 opaque/effects/deformation/view/native-lifecycle compatibility and final acceptance; no release qualification."
+}

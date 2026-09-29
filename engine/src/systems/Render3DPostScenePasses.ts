@@ -1,3 +1,4 @@
+import { getLightingAmbientOcclusion } from '../postprocess/LightingAmbientOcclusion';
 import type { Material } from '../material/Material';
 import { auxiliaryWritesDepth, type MaterialCoverageResolver } from '../renderer/AuxiliaryMaterial';
 import type { IEngine } from '../core/IEngine';
@@ -63,6 +64,7 @@ export interface Render3DPostSceneLiveSets {
 }
 
 export class Render3DPostScenePasses {
+  private _lightingAoPrepared = false;
   readonly output = new SceneOutputPass();
   private readonly _chain: PostProcessPass[] = [];
   private readonly _sceneTextures = new PostProcessSceneTextureStore();
@@ -165,6 +167,7 @@ export class Render3DPostScenePasses {
     reverseZ: boolean,
     needsSceneColorCapture = false,
   ): Render3DPostSceneRequirements {
+    this._lightingAoPrepared = false;
     const requirements = this.getRequirements(passes, needsSceneColorCapture);
     Object.assign(this.auxiliaryStats, { surfacePassCount: 0, surfaceDrawCount: 0, unmergedPassCount: 0, unmergedDrawCount: 0, sharedMotionSurface: false });
     // Every auxiliary configuration owns an aux-depth attachment. Keep advancing
@@ -318,7 +321,12 @@ export class Render3DPostScenePasses {
     pass.setScissorRect(x, y, right - x, bottom - y);
   }
 
+  lightingAmbientOcclusionTextures(frame: PostProcessFrameContext) {
+    return { depth: this._sceneTextures.depthTexture ?? undefined, normal: this._sceneTextures.normalTexture ?? undefined, frame };
+  }
+
   renderAuxiliaryBuffers(options: {
+    beforeLighting?: boolean;
     encoder: GPUCommandEncoder;
     items: readonly Render3DPostSceneItem[];
     motionItems: readonly Render3DPostSceneItem[];
@@ -336,20 +344,24 @@ export class Render3DPostScenePasses {
     requirements: Render3DPostSceneRequirements;
     live: Render3DPostSceneLiveSets;
   }): void {
-    const { requirements } = options;
+    const requirements = options.beforeLighting || this._lightingAoPrepared ? { ...options.requirements } : options.requirements;
+    if (options.beforeLighting) requirements.needsOutlineMask = false;
+    else if (this._lightingAoPrepared) requirements.needsDepth = requirements.needsNormal = requirements.needsMotion = false;
     if (!requirements.needsDepth && !requirements.needsNormal && !requirements.needsMotion && !requirements.needsOutlineMask) return;
     const sharedMotion = requirements.needsMotion && canShareMotionSurface(options.items, options.motionItems);
     const motionDepth = sharedMotion && requirements.needsDepth;
     const motionNormal = sharedMotion && requirements.needsNormal;
     const normalDepth = !motionDepth && requirements.needsNormal && requirements.needsDepth;
     const stats = this.auxiliaryStats;
-    stats.sharedMotionSurface = sharedMotion;
-    stats.surfacePassCount = auxiliarySurfacePassCount(requirements, sharedMotion);
-    stats.unmergedPassCount = +requirements.needsDepth + +requirements.needsNormal + +requirements.needsMotion;
-    stats.unmergedDrawCount = 0;
-    stats.surfaceDrawCount = 0;
-    for (const item of options.items) if (isAuxiliarySurface(item)) stats.unmergedDrawCount += +requirements.needsDepth + +requirements.needsNormal;
-    for (const item of options.motionItems) if (isAuxiliarySurface(item)) stats.unmergedDrawCount += +requirements.needsMotion;
+    if (!this._lightingAoPrepared) {
+      stats.sharedMotionSurface = sharedMotion;
+      stats.surfacePassCount = auxiliarySurfacePassCount(requirements, sharedMotion);
+      stats.unmergedPassCount = +requirements.needsDepth + +requirements.needsNormal + +requirements.needsMotion;
+      stats.unmergedDrawCount = 0;
+      stats.surfaceDrawCount = 0;
+      for (const item of options.items) if (isAuxiliarySurface(item)) stats.unmergedDrawCount += +requirements.needsDepth + +requirements.needsNormal;
+      for (const item of options.motionItems) if (isAuxiliarySurface(item)) stats.unmergedDrawCount += +requirements.needsMotion;
+    }
     const textures = this._sceneTextures;
     const depthAttachment = () => ({
       view: textures.auxDepthView!,
@@ -514,6 +526,7 @@ export class Render3DPostScenePasses {
         visiblePass.end();
       }
     }
+    if (options.beforeLighting) this._lightingAoPrepared = true;
   }
 
   runPostProcess(
@@ -553,7 +566,8 @@ export class Render3DPostScenePasses {
 
   private outputChain(passes: readonly PostProcessPass[]): PostProcessPass[] {
     this._chain.length = 0;
-    this._chain.push(...passes, this.output);
+    for (const pass of passes) if (!this._lightingAoPrepared || !getLightingAmbientOcclusion(pass)) this._chain.push(pass);
+    this._chain.push(this.output);
     return this._chain;
   }
 

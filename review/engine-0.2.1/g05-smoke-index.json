@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "status": "diagnostic-only",
+  "generatedAt": "2026-09-28T00:00:47.923Z",
+  "runtimeSha256": "07917b4fd68a4aae19b8f8223c2f596ada929bb731eb92f51e4bc6908c2ec5c2",
+  "runtimeUnchangedFromG04": true,
+  "scope": "Initial G05 harness development smoke; harness revisions differ and all captures have host qualification failures. No performance acceptance or cohort merging.",
+  "captures": [
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-tiled-moving-high-performance-2026-09-27T23-49-54.640Z.json",
+      "sha256": "6f2d0c9553c8d8ba2fffb7d90624830e8f7699da0ba4d89c0fa43d0e7a493a40",
+      "caseId": "dynamic-128-four-view",
+      "algorithm": "tiled",
+      "moving": true,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "scope": "smoke only; no performance qualification",
+      "cpuSamples": 3,
+      "gpuSamples": 3,
+      "pixelViews": 4,
+      "hostReady": false,
+      "hostSpeedLimits": [
+        86,
+        88
+      ],
+      "harnessSha256": "04f0407b7a54c872697e4fb99fc1b65d981e48bd6cdc7d61c788c8418dda7986",
+      "httpRecordedHashesConsistent": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-dynamic-128-four-view-tiled-moving-low-power-2026-09-27T23-51-08.959Z.json",
+      "sha256": "52ec9190d947cb056acb64935db8cd5c5d878fd48412135c1eaafb1c6fc3b211",
+      "caseId": "dynamic-128-four-view",
+      "algorithm": "tiled",
+      "moving": true,
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "scope": "smoke only; no performance qualification",
+      "cpuSamples": 3,
+      "gpuSamples": 3,
+      "pixelViews": 4,
+      "hostReady": false,
+      "hostSpeedLimits": [
+        48,
+        42
+      ],
+      "harnessSha256": "04f0407b7a54c872697e4fb99fc1b65d981e48bd6cdc7d61c788c8418dda7986",
+      "httpRecordedHashesConsistent": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-high-performance-2026-09-27T23-49-07.159Z.json",
+      "sha256": "33e2477d3347dd15168fbc22fcb554fd9b1f851d4506c5df0f9756a7c80b47d9",
+      "caseId": "overlap-128",
+      "algorithm": "tiled",
+      "moving": true,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "scope": "smoke only; no performance qualification",
+      "cpuSamples": 3,
+      "gpuSamples": 3,
+      "pixelViews": 1,
+      "hostReady": false,
+      "hostSpeedLimits": [
+        62,
+        60
+      ],
+      "harnessSha256": "04f0407b7a54c872697e4fb99fc1b65d981e48bd6cdc7d61c788c8418dda7986",
+      "httpRecordedHashesConsistent": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-overlap-128-tiled-moving-low-power-2026-09-27T23-50-22.271Z.json",
+      "sha256": "8e5fb6ffcf8503c78cc2eb3f58320a4783977d63736724212b42941386a2ad32",
+      "caseId": "overlap-128",
+      "algorithm": "tiled",
+      "moving": true,
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "scope": "smoke only; no performance qualification",
+      "cpuSamples": 3,
+      "gpuSamples": 3,
+      "pixelViews": 1,
+      "hostReady": false,
+      "hostSpeedLimits": [
+        86,
+        73
+      ],
+      "harnessSha256": "04f0407b7a54c872697e4fb99fc1b65d981e48bd6cdc7d61c788c8418dda7986",
+      "httpRecordedHashesConsistent": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-single-1-reference-moving-high-performance-2026-09-27T23-59-20.910Z.json",
+      "sha256": "c081a021227c3320019c12c20d1e61bc53958a77b1c7d7fe16b34bebb6cf03d1",
+      "caseId": "single-1",
+      "algorithm": "reference",
+      "moving": true,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "scope": "smoke only; no performance qualification",
+      "cpuSamples": 3,
+      "gpuSamples": 3,
+      "pixelViews": 1,
+      "hostReady": false,
+      "hostSpeedLimits": [
+        31,
+        28
+      ],
+      "harnessSha256": "fc1b06a76c038edfa546cbe2aa898f5c655cc103f9e8278618465a459e14d103",
+      "httpRecordedHashesConsistent": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-sparse-256-tiled-static-high-performance-2026-09-27T23-53-28.188Z.json",
+      "sha256": "883fe49fbfde15b6585234283f619e4c5c3cb2ca41e99973b869408766c4b14b",
+      "caseId": "sparse-256",
+      "algorithm": "tiled",
+      "moving": false,
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "scope": "smoke only; no performance qualification",
+      "cpuSamples": 3,
+      "gpuSamples": 3,
+      "pixelViews": 1,
+      "hostReady": false,
+      "hostSpeedLimits": [
+        44,
+        44
+      ],
+      "harnessSha256": "171099e4a59876072f89b62dbbc0b63294967aa96afd23d33b60d78364dc7dc0",
+      "httpRecordedHashesConsistent": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/room-stress-1024-tiled-moving-low-power-2026-09-27T23-58-05.115Z.json",
+      "sha256": "ed02ea940723a6823b16c7b5bebb3482016d843eb7b72e04e7f8130889351b29",
+      "caseId": "stress-1024",
+      "algorithm": "tiled",
+      "moving": true,
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "scope": "smoke only; no performance qualification",
+      "cpuSamples": 3,
+      "gpuSamples": 3,
+      "pixelViews": 1,
+      "hostReady": false,
+      "hostSpeedLimits": [
+        33,
+        42
+      ],
+      "harnessSha256": "fc1b06a76c038edfa546cbe2aa898f5c655cc103f9e8278618465a459e14d103",
+      "httpRecordedHashesConsistent": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      }
+    }
+  ],
+  "checks": {
+    "focusedPolicy": {
+      "passed": 13
+    },
+    "performancePolicy": {
+      "passed": 146,
+      "sandboxAttempt": "2 local HTTP listen EPERM failures; complete suite rerun outside sandbox passed"
+    },
+    "milestonePolicy": "passed"
+  }
+}

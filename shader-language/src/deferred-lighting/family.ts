@@ -4,6 +4,7 @@ export interface DeferredFamilyModules {
   readonly geometry: string;
   readonly resolve: string;
   readonly abi: string;
+  readonly lightingAo: string;
   readonly scene: string;
   readonly fog: string;
   readonly brdf: string;
@@ -21,7 +22,7 @@ export function buildDeferredLightingPasses(base: PrecompiledShaderPassV2, modul
   const geometryCode = parts[0]! + modules.geometry;
   const shadow = modules.shadow.replaceAll('MAX_DIRECTIONAL_SHADOWS', '3u')
     .replace('@binding(5)', '@binding(12)').replace('@binding(6)', '@binding(13)').replace('@binding(7)', '@binding(14)');
-  const resolveCode = [modules.fog, modules.scene, modules.brdf, modules.abi, shadow, modules.resolve].join('\n\n');
+  const resolveCode = [modules.fog, modules.scene, modules.brdf, modules.abi, shadow, modules.lightingAo.replace('__BINDING__', '17'), modules.resolve].join('\n\n');
   const buffer = (id: string, binding: number, bufferType: 'uniform' | 'read-only-storage', minBindingSize: number): PrecompiledShaderBindingV2 => ({
     id, binding, visibility: ['fragment'], layout: { kind: 'buffer', bufferType, minBindingSize, hasDynamicOffset: false },
   });
@@ -46,7 +47,7 @@ export function buildDeferredLightingPasses(base: PrecompiledShaderPassV2, modul
         { logicalSpace: 'material', logicalGroup: 2, physicalGroup: 2, owner: 'artifact', bindings: [] },
         { logicalSpace: 'pass', logicalGroup: 3, physicalGroup: 3, owner: 'artifact', bindings: [
           buffer('pass.source', 0, 'read-only-storage', 80), buffer('pass.view', 1, 'uniform', 32),
-          buffer('pass.pointIndices', 2, 'read-only-storage', 4),
+          buffer('pass.pointIndices', 2, 'read-only-storage', 4), buffer('pass.lightingAo', 17, 'read-only-storage', 260),
           texture('pass.g0', 3), texture('pass.g1', 4), texture('pass.g2', 5), texture('pass.depth', 6, true),
           buffer('pass.resolve', 7, 'uniform', 32), buffer('pass.environment', 8, 'uniform', 48),
           texture('pass.diffuseEnvironment', 9, false, 'cube'), texture('pass.specularEnvironment', 10, false, 'cube'),

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-28T00:45:52.004207+00:00",
+  "status": "diagnostic-checkpoint",
+  "performanceQualified": false,
+  "runtimeHash": "43eaf828b7dc68a3f6e7bdd1e591bf71d07d6ad4f47b777ec54a9ae5fe5c5baf",
+  "matrix": {
+    "path": "artifacts/engine-0.2.1/g05/instance-smoke-matrix-2026-09-28T00-25-35.596Z.json",
+    "sha256": "936306bead15a6a47a2b538e7efa2c1a1ca342e4305a07f6614cdcd29967b0b0"
+  },
+  "captures": 32,
+  "perViewPixels": 80,
+  "maxPixelDelta": 0,
+  "normalProbesPerCase": 9,
+  "maxNormalDelta": 0,
+  "cacheComparison": {
+    "before": {
+      "path": "artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-rejected-high-performance-2026-09-28T00-11-09.542Z.json",
+      "sha256": "6c07170ff8e055ce8f0d72aceffd2c62ac3b7eb41c8f17573bc50b9467ea2b97"
+    },
+    "after": {
+      "path": "/Users/qingque/Desktop/HaiyueStudio/Engine/artifacts/engine-0.2.1/g05/instances-10000-4v-frustum-rejected-high-performance-2026-09-28T00-26-39.955Z.json",
+      "sha256": "3a5a34e0bd298ed25eebc70e6dba7be8dd0dd95b2c465dbe9e7dfaa577803c09"
+    },
+    "samplesPerPopulation": 3,
+    "beforeGroups": {
+      "metrics": 36,
+      "gpuMetrics": 36
+    },
+    "afterGroups": {
+      "metrics": 0,
+      "gpuMetrics": 0
+    },
+    "qualification": "structural counts only; harness strengthened and host throttled; no pooled timings or FPS claim"
+  },
+  "package": {
+    "evidence": {
+      "path": "artifacts/engine-0.2.1/g05/package-2026-09-28T00-37-52.526Z/candidate/public-packages.json",
+      "sha256": "be57ab1ab44680fdbab2912390a5bbc75d84bbe6c15cfbe091eee9d00647fc28"
+    },
+    "fileCount": 498,
+    "packedBytes": 1831454,
+    "unpackedBytes": 7598548,
+    "publicTypeEntrypoints": 37,
+    "gate": {
+      "status": "passed",
+      "errors": []
+    }
+  },
+  "checksDirectory": "artifacts/engine-0.2.1/g05/checks/instance-cache-2026-09-28"
+}

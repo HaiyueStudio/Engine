@@ -226,6 +226,7 @@ interface AttachmentGeneration {
   readonly textures: readonly GPUTexture[];
   readonly views: readonly GPUTextureView[];
   readonly encoders: Set<GPUCommandEncoder>;
+  readonly releaseAllocation: () => void;
   retired: boolean;
   released: boolean;
 }
@@ -246,7 +247,7 @@ export function acquireTransientAttachments(
   height: number,
   formats: readonly GPUTextureFormat[],
   context: RenderCommandContext,
-  limits?: { readonly maxViews: number; readonly maxLiveGenerations: number },
+  limits?: { readonly maxViews: number; readonly maxLiveGenerations: number; readonly reserveBytes?: (bytes: number) => () => void },
 ): { readonly textures: readonly GPUTexture[]; readonly views: readonly GPUTextureView[] } {
   if (!context.afterSubmit) throw new Error('Transient MRT attachments require an afterSubmit lifecycle hook.');
   let scopes = attachments.get(pool);
@@ -261,15 +262,19 @@ export function acquireTransientAttachments(
       if (views > limits.maxViews) throw new TransientAttachmentCapacityError('view-count', views, limits.maxViews);
       if (generations > limits.maxLiveGenerations) throw new TransientAttachmentCapacityError('live-target-generations', generations, limits.maxLiveGenerations);
     }
+    if (current && !current.encoders.size) { retireAttachments(current); scopes.delete(scope); current = undefined; }
+    const releaseAllocation = limits?.reserveBytes?.(formats.reduce((bytes, format) => bytes + estimateTextureBytes([width, height], format, 1), 0)) ?? (() => {});
     const textures: GPUTexture[] = [];
+    let views: GPUTextureView[];
     try {
       for (const [index, format] of formats.entries()) textures.push(context.device.createTexture({
         label: `TransientMRT:${scope}:${index}`, size: [width, height], format,
         usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
       }));
-    } catch (error) { for (const texture of textures) texture.destroy(); throw error; }
+      views = textures.map(t => t.createView());
+    } catch (error) { for (const texture of textures) texture.destroy(); releaseAllocation(); throw error; }
     if (current) retireAttachments(current);
-    current = { owner: pool, scope, device: context.device, key, textures, views: textures.map(t => t.createView()), encoders: new Set(), retired: false, released: false };
+    current = { owner: pool, scope, device: context.device, key, textures, views, releaseAllocation, encoders: new Set(), retired: false, released: false };
     let generations = attachmentGenerations.get(pool);
     if (!generations) { generations = new Set(); attachmentGenerations.set(pool, generations); }
     generations.add(current);
@@ -309,6 +314,7 @@ function retireAttachments(generation: AttachmentGeneration): void {
   if (!generation.encoders.size && !generation.released) {
     generation.released = true;
     for (const texture of generation.textures) texture.destroy();
+    generation.releaseAllocation();
     attachmentGenerations.get(generation.owner)?.delete(generation);
   }
 }

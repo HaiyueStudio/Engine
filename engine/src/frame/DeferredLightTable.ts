@@ -42,14 +42,23 @@ export interface DeferredLightView {
   readonly stats: { readonly eligibleCount: number; readonly selectedCount: number; readonly overflowCount: 0 };
 }
 
+// This is a cache bound, not an admission limit. Larger candidate sets use normal packing.
+const INPUT_CACHE_CAPACITY = ABI.maxPoints + ABI.maxDirectionals;
+const INPUT_CACHE_STRIDE = 14;
+
 /** One owner per World. Snapshots are immutable across phases and shared by every view. */
 export class DeferredLightTable {
   private readonly _ids = new Map<number, number>();
   private _nextId = 1;
   private _generation = 0;
   private _current: DeferredLightSource | undefined;
+  private _inputCache = new Float64Array(0);
+  private _cachedCandidateCount = -1;
 
   update(candidates: readonly SceneLightCandidate[], shadows: readonly DirectionalLight[]): DeferredLightSource {
+    // Cache values, never borrowed light objects: callers mutate their arrays in place.
+    // A hit reuses a previously validated snapshot without allocating records or packed bytes.
+    if (this._current && this._matchesInputs(candidates, shadows)) return this._current;
     const seen = new Set<number>();
     const directionals: SceneLightCandidate[] = [], points: SceneLightCandidate[] = [];
     const ambient: [number, number, number] = [0, 0, 0];
@@ -103,14 +112,62 @@ export class DeferredLightTable {
     const previous = this._current;
     // Stats are part of the snapshot too: changing a rejected/ambient source cannot return stale diagnostics.
     if (previous && equalRecords(bytes, previous.bytes) && ambient.every((v, i) => v === previous.ambientRadiance[i])
-      && Object.keys(stats).every(k => stats[k as keyof DeferredSourceStats] === previous.stats[k as keyof DeferredSourceStats])) return previous;
+      && Object.keys(stats).every(k => stats[k as keyof DeferredSourceStats] === previous.stats[k as keyof DeferredSourceStats])) {
+      this._rememberInputs(candidates, shadows);
+      return previous;
+    }
     if (this._generation >= 0xffffffff) throw new DeferredLightingCapabilityError('generation-exhausted', this._generation + 1, 0xffffffff);
     const generation = ++this._generation;
     writeDeferredSourceHeader(data, 0, { abiVersion: ABI.version, sourceGeneration: generation, pointCount: points.length, directionalCount: directionals.length });
     for (const id of this._ids.keys()) if (!seen.has(id)) this._ids.delete(id);
-    return this._current = Object.freeze({ generation, bytes, records: Object.freeze(records),
+    this._current = Object.freeze({ generation, bytes, records: Object.freeze(records),
       entityIds: Object.freeze(ordered.map(c => c.id)), ambientRadiance: Object.freeze(ambient), stats });
+    this._rememberInputs(candidates, shadows);
+    return this._current;
   }
+
+  private _matchesInputs(candidates: readonly SceneLightCandidate[], shadows: readonly DirectionalLight[]): boolean {
+    if (candidates.length !== this._cachedCandidateCount) return false;
+    const cache = this._inputCache;
+    for (let i = 0; i < candidates.length; i++) {
+      const candidate = candidates[i]!, light = candidate.info, offset = i * INPUT_CACHE_STRIDE;
+      if (light.color.length !== 3 || light.direction.length !== 3 || light.position.length !== 3
+        || !Object.is(cache[offset], candidate.id) || !Object.is(cache[offset + 1], light.type)
+        || !Object.is(cache[offset + 2], light.intensity) || !Object.is(cache[offset + 12], light.range)
+        || cache[offset + 13] !== shadowSlot(candidate, shadows)) return false;
+      for (let axis = 0; axis < 3; axis++) {
+        if (!Object.is(cache[offset + 3 + axis], light.color[axis])
+          || !Object.is(cache[offset + 6 + axis], light.direction[axis])
+          || !Object.is(cache[offset + 9 + axis], light.position[axis])) return false;
+      }
+    }
+    return true;
+  }
+
+  private _rememberInputs(candidates: readonly SceneLightCandidate[], shadows: readonly DirectionalLight[]): void {
+    this._cachedCandidateCount = -1;
+    if (candidates.length > INPUT_CACHE_CAPACITY) return;
+    const length = candidates.length * INPUT_CACHE_STRIDE;
+    if (this._inputCache.length < length) this._inputCache = new Float64Array(length);
+    const cache = this._inputCache;
+    for (let i = 0; i < candidates.length; i++) {
+      const candidate = candidates[i]!, light = candidate.info, offset = i * INPUT_CACHE_STRIDE;
+      if (light.color.length !== 3 || light.direction.length !== 3 || light.position.length !== 3) return;
+      cache[offset] = candidate.id; cache[offset + 1] = light.type; cache[offset + 2] = light.intensity;
+      for (let axis = 0; axis < 3; axis++) {
+        cache[offset + 3 + axis] = light.color[axis]!;
+        cache[offset + 6 + axis] = light.direction[axis]!;
+        cache[offset + 9 + axis] = light.position[axis]!;
+      }
+      cache[offset + 12] = light.range; cache[offset + 13] = shadowSlot(candidate, shadows);
+    }
+    this._cachedCandidateCount = candidates.length;
+  }
+}
+
+function shadowSlot(candidate: SceneLightCandidate, shadows: readonly DirectionalLight[]): number {
+  const index = candidate.shadow ? shadows.indexOf(candidate.shadow) : -1;
+  return index >= 0 && index < 3 ? index : ABI.noShadow;
 }
 
 /** Reference path conservatively accepts every valid source point, including offscreen influence. */

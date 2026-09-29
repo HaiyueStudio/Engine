@@ -2,6 +2,8 @@ import type { RenderCommandContext } from '../core/RenderCommandContext';
 import { DeferredLightingCapabilityError } from '../frame/DeferredLightTable';
 import { DEFERRED_TILE_LAYOUT as TILE } from '../shaders/generated/deferred-tile-layout.generated';
 import { FrameRingResource } from './FrameRingResource';
+import { getDeferredAllocationBudget, type DeferredAllocationBudget } from './DeferredAllocationBudget';
+import { DEFERRED_VIEW_LIMIT_BYTES } from './DeferredViewMemory';
 
 export interface DeferredTileOptions {
   /** Diagnostic oracle forces the GPU culling/overflow path even when no reduction is possible. */
@@ -14,9 +16,10 @@ export interface DeferredTilePlan {
   readonly columns: number; readonly rows: number; readonly tileCount: number;
   readonly storedTiles: number; readonly tileCapacity: number; readonly byteSize: number;
   readonly fullListTiles: number; readonly viewBytes: number;
+  readonly memoryLimitedTiles: number;
 }
 
-export function planDeferredTiles(device: GPUDevice, width: number, height: number, options: DeferredTileOptions = {}): DeferredTilePlan {
+export function planDeferredTiles(device: GPUDevice, width: number, height: number, options: DeferredTileOptions = {}, reservation?: { reservedBytes: number; maxTileRecords: number }): DeferredTilePlan {
   for (const value of [width, height]) if (!Number.isSafeInteger(value) || value < 1 || value > device.limits.maxTextureDimension2D) {
     throw new DeferredLightingCapabilityError('tile-extent', value, device.limits.maxTextureDimension2D);
   }
@@ -33,16 +36,17 @@ export function planDeferredTiles(device: GPUDevice, width: number, height: numb
   }
   const columns = Math.ceil(width / TILE.tileSize), rows = Math.ceil(height / TILE.tileSize), tileCount = columns * rows;
   if (Math.max(columns, rows) > device.limits.maxComputeWorkgroupsPerDimension) throw new DeferredLightingCapabilityError('tile-dispatch', Math.max(columns, rows), device.limits.maxComputeWorkgroupsPerDimension);
-  const storedTiles = Math.min(tileCount, limit);
+  const unrestrictedTiles = Math.min(tileCount, limit);
+  const storedTiles = Math.min(unrestrictedTiles, reservation?.maxTileRecords ?? Number.MAX_SAFE_INTEGER);
   const byteSize = Math.max(4, storedTiles * TILE.strideWords * 4);
   const supported = Math.min(device.limits.maxBufferSize, device.limits.maxStorageBufferBindingSize);
   if (byteSize > supported) throw new DeferredLightingCapabilityError('tile-buffer-bytes', byteSize, supported);
-  const viewBytes = 28 * width * height + byteSize + 4 * 1024 + 32;
-  if (viewBytes > 64 * 1024 * 1024) throw new DeferredLightingCapabilityError('view-deferred-bytes', viewBytes, 64 * 1024 * 1024);
-  return { columns, rows, tileCount, storedTiles, tileCapacity, byteSize, fullListTiles: tileCount - storedTiles, viewBytes };
+  const viewBytes = 28 * width * height + byteSize + (reservation?.reservedBytes ?? 4 * 1024 + 32);
+  if (viewBytes > DEFERRED_VIEW_LIMIT_BYTES) throw new DeferredLightingCapabilityError('view-deferred-bytes', viewBytes, DEFERRED_VIEW_LIMIT_BYTES);
+  return { columns, rows, tileCount, storedTiles, tileCapacity, byteSize, fullListTiles: tileCount - storedTiles, viewBytes, memoryLimitedTiles: unrestrictedTiles - storedTiles };
 }
 
-interface RecordBuffer { buffer: GPUBuffer; readonly encoders: Set<GPUCommandEncoder>; retired: boolean; destroyed: boolean }
+interface RecordBuffer { buffer: GPUBuffer; readonly releaseAllocation: () => void; readonly encoders: Set<GPUCommandEncoder>; retired: boolean; destroyed: boolean }
 interface ViewBuffers { ring: FrameRingResource<RecordBuffer>; readonly live: Set<RecordBuffer> }
 
 /** GPU-produced lists are overwritten by compute immediately before their own resolve.
@@ -52,13 +56,17 @@ export class DeferredTileResources {
   private readonly _live = new Set<RecordBuffer>();
   private readonly _scopes = new Map<string, Set<RecordBuffer>>();
   private _destroyed = false;
-  constructor(private readonly _device: GPUDevice) {}
+  constructor(private readonly _device: GPUDevice, private readonly _budget: DeferredAllocationBudget = getDeferredAllocationBudget(_device)) {}
 
   acquire(key: string, plan: DeferredTilePlan, context: RenderCommandContext): GPUBufferBinding {
     if (this._destroyed) throw new Error('Deferred tiles are destroyed.');
     if (context.device !== this._device) throw new Error('Deferred tiles device generation mismatch.');
     if (!context.afterSubmit) throw new Error('Deferred tiles require afterSubmit.');
     let view = this._views.get(key);
+    if (view && ((view.ring.capacity < plan.byteSize && !view.ring.resource.encoders.size)
+      || plan.viewBytes - plan.byteSize + view.ring.capacity > DEFERRED_VIEW_LIMIT_BYTES)) {
+      this.releaseView(key); view = undefined;
+    }
     if (!view) {
       if (!this._scopes.has(key) && this._scopes.size >= 4) throw new DeferredLightingCapabilityError('tile-view-count', this._scopes.size + 1, 4);
       const live = this._scopes.get(key) ?? new Set<RecordBuffer>();
@@ -67,8 +75,11 @@ export class DeferredTileResources {
         initialCapacity: plan.byteSize, maximumCapacity: Math.min(this._device.limits.maxStorageBufferBindingSize, this._device.limits.maxBufferSize),
         create: info => {
           if (live.size >= 2) throw new DeferredLightingCapabilityError('tile-live-generations', live.size + 1, 2);
-          const record: RecordBuffer = { buffer: this._device.createBuffer({ label: `DeferredTiles:${key}`,
-            size: info.capacity, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC }), encoders: new Set(), retired: false, destroyed: false };
+          const releaseAllocation = this._budget.reserve(info.capacity);
+          let buffer: GPUBuffer;
+          try { buffer = this._device.createBuffer({ label: `DeferredTiles:${key}`, size: info.capacity, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC }); }
+          catch (error) { releaseAllocation(); throw error; }
+          const record: RecordBuffer = { buffer, releaseAllocation, encoders: new Set(), retired: false, destroyed: false };
           live.add(record); this._live.add(record); return record;
         },
         destroy: record => { record.retired = true; this._release(record, live); },
@@ -102,7 +113,7 @@ export class DeferredTileResources {
   get stats() { return { views: this._views.size, liveBuffers: this._live.size, bytes: [...this._live].reduce((n, r) => n + r.buffer.size, 0) }; }
   private _release(record: RecordBuffer, live?: Set<RecordBuffer>): void {
     if (!record.retired || record.encoders.size || record.destroyed) return;
-    record.destroyed = true; record.buffer.destroy(); live?.delete(record); this._live.delete(record);
+    record.destroyed = true; record.buffer.destroy(); record.releaseAllocation(); live?.delete(record); this._live.delete(record);
     for (const [key, records] of this._scopes) { records.delete(record); if (!records.size) this._scopes.delete(key); }
   }
 }

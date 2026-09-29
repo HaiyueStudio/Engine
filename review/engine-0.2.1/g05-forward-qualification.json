@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "generatedAt": "2026-09-28T02:24:41.483Z",
+  "scope": "Complete G05 default Forward diagnostic qualification; dirty source is not formal G07 release evidence",
+  "artifact": {
+    "path": "artifacts/engine-0.2.1/g05/forward-cohorts-2026-09-28T01-51-47.415Z.json",
+    "sha256": "f40dc4d0d33ca142aeef813ebc457b7f96421eff361802cc69faf2a8dc0a104c"
+  },
+  "configSha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a",
+  "captures": 12,
+  "rawCpuSamples": 3600,
+  "rawGpuSamples": 3600,
+  "runtimeSha256": "43eaf828b7dc68a3f6e7bdd1e591bf71d07d6ad4f47b777ec54a9ae5fe5c5baf",
+  "inputs": "d4fc7ba165691e2351a150fc37a6b3e4e70d9a172b7a99e0f1334566b2db4359",
+  "harness": "23602c9b406344633a03d857c847c7fb05a5fa8cbc7e92d28c88bcfb358d8e49",
+  "allRawHashesMatch": true,
+  "baselineHashesMatch": true,
+  "currentSourceAndDistMatch": true,
+  "allHostSamples100": true,
+  "zeroDeferredCreations": true,
+  "zeroCleanupResidue": true,
+  "budgets": {
+    "status": "passed",
+    "checks": [
+      {
+        "caseId": "forward-small-1",
+        "preference": "high-performance",
+        "metric": "cpu",
+        "observedP95Ms": 0.9499999284744263,
+        "baselineP95Ms": 0.9399999380111694,
+        "ratio": 1.0106382884284169,
+        "limit": 1.05,
+        "stability": {
+          "cohortP95": [
+            0.9049999713897705,
+            0.8849999904632568,
+            1.0099999904632568
+          ],
+          "relativeSpread": 0.13812155132783346,
+          "cv": 0.058738876675836806,
+          "stable": true
+        },
+        "passed": true
+      },
+      {
+        "caseId": "forward-small-1",
+        "preference": "high-performance",
+        "metric": "gpu",
+        "observedP95Ms": 0.752777,
+        "baselineP95Ms": 0.753778,
+        "ratio": 0.9986720227971632,
+        "limit": 1.05,
+        "stability": {
+          "cohortP95": [
+            0.752537,
+            0.7526970000000001,
+            0.7538560000000001
+          ],
+          "relativeSpread": 0.0017523651615458412,
+          "cv": 0.0007804621069715403,
+          "stable": true
+        },
+        "passed": true
+      },
+      {
+        "caseId": "forward-cap-8",
+        "preference": "high-performance",
+        "metric": "cpu",
+        "observedP95Ms": 0.9550000429153442,
+        "baselineP95Ms": 0.9399999380111694,
+        "ratio": 1.0159575594610268,
+        "limit": 1.05,
+        "stability": {
+          "cohortP95": [
+            0.9600000381469727,
+            0.940000057220459,
+            0.9600000381469727
+          ],
+          "relativeSpread": 0.020833312637276943,
+          "cv": 0.009889595438138254,
+          "stable": true
+        },
+        "passed": true
+      },
+      {
+        "caseId": "forward-cap-8",
+        "preference": "high-performance",
+        "metric": "gpu",
+        "observedP95Ms": 1.421637,
+        "baselineP95Ms": 1.4242759999999999,
+        "ratio": 0.9981471287868364,
+        "limit": 1.05,
+        "stability": {
+          "cohortP95": [
+            1.420979,
+            1.424037,
+            1.418637
+          ],
+          "relativeSpread": 0.0038001969064990204,
+          "cv": 0.0015557018330341445,
+          "stable": true
+        },
+        "passed": true
+      },
+      {
+        "caseId": "forward-small-1",
+        "preference": "low-power",
+        "metric": "cpu",
+        "observedP95Ms": 1.1399999856948853,
+        "baselineP95Ms": 1.1349999904632568,
+        "ratio": 1.004405282179419,
+        "limit": 1.05,
+        "stability": {
+          "cohortP95": [
+            1.09499990940094,
+            1.1449999809265137,
+            1.1399999856948853
+          ],
+          "relativeSpread": 0.043859712414905216,
+          "cv": 0.01995674374341158,
+          "stable": true
+        },
+        "passed": true
+      },
+      {
+        "caseId": "forward-small-1",
+        "preference": "low-power",
+        "metric": "gpu",
+        "observedP95Ms": 2.684707,
+        "baselineP95Ms": 2.6651239999999996,
+        "ratio": 1.0073478757461192,
+        "limit": 1.05,
+        "stability": {
+          "cohortP95": [
+            2.6642919999999997,
+            2.657959,
+            2.7290410000000005
+          ],
+          "relativeSpread": 0.026679508101965003,
+          "cv": 0.011968227450765792,
+          "stable": true
+        },
+        "passed": true
+      },
+      {
+        "caseId": "forward-cap-8",
+        "preference": "low-power",
+        "metric": "cpu",
+        "observedP95Ms": 1.1899999380111694,
+        "baselineP95Ms": 1.1399999856948853,
+        "ratio": 1.0438596078453517,
+        "limit": 1.05,
+        "stability": {
+          "cohortP95": [
+            1.1700000762939453,
+            1.1850000619888306,
+            1.2049999237060547
+          ],
+          "relativeSpread": 0.029535734667699345,
+          "cv": 0.012081862958277198,
+          "stable": true
+        },
+        "passed": true
+      },
+      {
+        "caseId": "forward-cap-8",
+        "preference": "low-power",
+        "metric": "gpu",
+        "observedP95Ms": 3.593527,
+        "baselineP95Ms": 3.6272770000000003,
+        "ratio": 0.9906954996819928,
+        "limit": 1.05,
+        "stability": {
+          "cohortP95": [
+            3.5748599999999997,
+            3.5984439999999998,
+            3.604861
+          ],
+          "relativeSpread": 0.008337214640550301,
+          "cv": 0.0035902964888933327,
+          "stable": true
+        },
+        "passed": true
+      }
+    ],
+    "scope": "G01 same-workload default Forward regression only; cap-8 capacity remains legacy and is not a complete-light Deferred speedup oracle"
+  }
+}

@@ -2119,6 +2119,30 @@
         "group": "interaction",
         "order": 9
       }
+    },
+    {
+      "id": "deferred-lighting",
+      "title": "多光源实验室 · Deferred Lighting",
+      "entry": "deferred-lighting/main.ts",
+      "capabilities": [
+        "3d",
+        "webgpu",
+        "pbr",
+        "deferred-lighting",
+        "tiled-lighting",
+        "diagnostics"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "rendering",
+        "order": 100
+      }
     }
   ],
   "catalog": {

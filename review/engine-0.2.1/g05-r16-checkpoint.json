@@ -1,0 +1,352 @@
+{
+  "schemaVersion": 1,
+  "status": "diagnostic-checkpoint",
+  "performanceQualified": false,
+  "generatedAt": "2026-09-28T03:45:18.479066+00:00",
+  "inputs": {
+    "sha256": "ce94c5127913b6cd9339d48b06bf49465a2893861c3f91b70f412177d34aa32c",
+    "fileCount": 610
+  },
+  "revision": "5b07c271d05115762699b3d9f3fbb5e04310b95b",
+  "dirty": true,
+  "evidence": [
+    {
+      "path": "artifacts/engine-0.2.1/g05/pending-memory-ao-high-performance-passed-2026-09-28T03-27-14.401Z.json",
+      "sha256": "c21c6267cddd90ed2fe64aa83cd40cfa0cf1f208bfdf0bc26ad1b8e2b7c72f06"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/pending-memory-ao-low-power-passed-2026-09-28T03-27-44.623Z.json",
+      "sha256": "e61c945489cd49c20057b3bd7d71332ea025ea4219899e694aac0f6a0984e5aa"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/effects-high-performance-passed-2026-09-28T03-25-35.609Z.json",
+      "sha256": "dfd440c2ff2583dded490e3cbd06e2caf6ebe039d70cc2c4ce6f0a5e444705a9"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/effects-low-power-passed-2026-09-28T03-27-00.575Z.json",
+      "sha256": "8bf9ca5a3b583fc7516b4a4ee9d820ca917bb308c572a4bb4a59dc28044554f8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-high-performance-2026-09-28T02-54-38.787Z.json",
+      "sha256": "eddf6191906579ef6e4645960fe09d809ba2b93ef8654f5b3256ea8b6f20b9fe"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-1080p-128-tiled-moving-low-power-2026-09-28T02-56-28.719Z.json",
+      "sha256": "0cc770f40b047227db041e698d162af5b63a42eee3f952658847bfa4f81a409e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-smoke-matrix-2026-09-28T03-39-10.536Z.json",
+      "sha256": "43c3284a5edc260fa480eaa110d39d7b556ba37178b4f4596f1776b3726619f4"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-audit-2026-09-28T03-41-36.266Z.json",
+      "sha256": "28de10a8586f97bdb4f6cbdd2181ae60fa1c2a22cff2bbd4a1f96f9a2cda9c33"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/pending-memory-high-performance-passed-2026-09-28T03-44-01.578Z.json",
+      "sha256": "2f52fb27d82b0a83aca51deb9c8f4695a2944fd939204fa3e2cb74b60c6a2704"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/pending-memory-low-power-passed-2026-09-28T03-44-03.926Z.json",
+      "sha256": "ffc1984cf007014a5d36581ae9a8294ddde6f6a129039b75796980df7d680ac8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-off-small-8-reference-moving-high-performance-2026-09-28T03-39-22.669Z.json",
+      "sha256": "a68844f3a11c7b43fc7661d5769ea091a2e4d4dadf27c5b7c987607d9639b0b4"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-small-8-reference-moving-high-performance-2026-09-28T03-39-33.745Z.json",
+      "sha256": "4be322abeaa74fc3562db744bc081e721154a4e6d5514a95cf1604e5e364e71d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-sao-small-8-reference-moving-high-performance-2026-09-28T03-39-43.535Z.json",
+      "sha256": "0150dd7fe23bda69ee9909ebebccf0f0a64c7e2ec1fd9bbe3547066140ff37c4"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-ssao-small-8-reference-moving-high-performance-2026-09-28T03-39-55.313Z.json",
+      "sha256": "d95a232b9f1140d549d60c61ee71ab618e3d9dd41d5236a846e6f9de7ee78986"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-off-small-8-tiled-moving-high-performance-2026-09-28T03-40-05.725Z.json",
+      "sha256": "dc99da403b4838a610458035a4ef0956180fff5d80fd6e638a1045d464c8f436"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-small-8-tiled-moving-high-performance-2026-09-28T03-40-16.061Z.json",
+      "sha256": "b49195ff3efb969c4ed09e763be90652f128a4fe56820c65b702da5dfa1886da"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-sao-small-8-tiled-moving-high-performance-2026-09-28T03-40-25.982Z.json",
+      "sha256": "600a31ab9c27283b158ad58d74282d967030be2d6e5ff41ab57e482c95975b5c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-ssao-small-8-tiled-moving-high-performance-2026-09-28T03-40-37.042Z.json",
+      "sha256": "175dcfa259798a5db5afc2b738f214b0a64692d2a68c136f4bdae197f0ac26fc"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-off-small-8-reference-moving-low-power-2026-09-28T03-40-46.712Z.json",
+      "sha256": "46acbefb82b969d59c7e8b3963c9ddb66c3a5331fbe5271e0f092f8cc3ed05ed"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-small-8-reference-moving-low-power-2026-09-28T03-41-01.255Z.json",
+      "sha256": "5302bd2b021b4779c57bcc52b743c5404259022b598e6d2283784c67d55e76a7"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-sao-small-8-reference-moving-low-power-2026-09-28T03-41-11.806Z.json",
+      "sha256": "95eeca19eb4c58939854967c941c74fb7fd7c37231326abed08e00c258564637"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-ssao-small-8-reference-moving-low-power-2026-09-28T03-41-27.768Z.json",
+      "sha256": "386b548d5126f4fc0b369585bf12422e8c21752870662af2f1fd539c76151bf8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-off-small-8-tiled-moving-low-power-2026-09-28T03-41-37.605Z.json",
+      "sha256": "106d2f7d3759e2f4b6fc663bb80bf8697080598a1b448716fa8bcbefe2bf57a3"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-gtao-small-8-tiled-moving-low-power-2026-09-28T03-41-52.536Z.json",
+      "sha256": "61c4fccbb3ca4f1e53b7737a15ee7fce29b3bffcc14f7972d629a80bfa52d07f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-sao-small-8-tiled-moving-low-power-2026-09-28T03-42-04.660Z.json",
+      "sha256": "55523b68a0cb79e53c88f7571a95d3750f5995be9e000e09d50a69d0ba3c48ef"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cost-ssao-small-8-tiled-moving-low-power-2026-09-28T03-42-14.414Z.json",
+      "sha256": "70a9f18608440d4c8e774319285f54bad31cd68c33a776f0cccf086055004f32"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-dynamic-128-four-view-tiled-moving-high-performance-2026-09-28T03-36-07.788Z.json",
+      "sha256": "3b845d912d66f794bb3663222e817847d9a6f59ee901407f1a637199934790da"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-dynamic-128-four-view-tiled-moving-low-power-2026-09-28T03-38-43.777Z.json",
+      "sha256": "f0dd91c65ac51c48746c8f3307cab7f2fc5f7b25c6cd954b76918f89848b45e1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-reference-moving-high-performance-2026-09-28T03-35-43.237Z.json",
+      "sha256": "ca26ffb2f100cdf9b86bae5d9f957d30f4224f1b796771f544c7788d1a1bceab"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-reference-moving-low-power-2026-09-28T03-37-51.872Z.json",
+      "sha256": "8886d4813e82b3a0187b5149e36b1e427c488c65913a3204aa33d7ebf9b570cc"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-moving-high-performance-2026-09-28T03-34-35.009Z.json",
+      "sha256": "193213a1dfa38d12783b429152384ed01933a4d95480cf0b991ab9120b41305c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-moving-low-power-2026-09-28T03-36-35.004Z.json",
+      "sha256": "2b0a18ce9245945f36d195bd7946d3031bfe451b21898b9194518142a8e0579d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-static-high-performance-2026-09-28T03-35-29.190Z.json",
+      "sha256": "14fcc996a56e70c4631bba3f8a43383181af8679df038efe89dcf792f595616a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/cpu-allocation-sparse-128-tiled-static-low-power-2026-09-28T03-36-56.475Z.json",
+      "sha256": "6618349c5a0225cb480e5e7f34ab35b63414c25ffc4b67bfdc781e6b96dacc4b"
+    }
+  ],
+  "package": {
+    "evidence": {
+      "path": "artifacts/engine-0.2.1/g05/package-r16-2026-09-28T03-43/candidate/public-packages.json",
+      "sha256": "a41988246d720721b69b7078719a3c1f7da4ebc55747b7ce8d44edf0ad737e5f"
+    },
+    "relocatedTarballs": "artifacts/engine-0.2.1/g05/package-r16-2026-09-28T03-43/candidate/npm",
+    "historicalReleaseOutputRestored": true,
+    "fileCount": 498,
+    "packedBytes": 1831465,
+    "unpackedBytes": 7598647,
+    "publicTypeEntrypoints": 37
+  },
+  "checks": [
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/allocation-audit.mjs",
+      "sha256": "b0c56c4b3996c075c5bf0d750612f8fbfc513499e5f584be74cdbbc6902588d0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/create-checkpoint.py",
+      "sha256": "1d21a2c09e2800e19e97a56a6b8edc69294d9d5b0d91c2bb08afdaab352e63d7"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-amd-four-view.log",
+      "sha256": "9efa58b69d4b82978a463f0716e9a9a246fda03fbcb7090324c05b527df6c9e9"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-amd-reference.log",
+      "sha256": "be293f7e822fdf9264475a894f42e58d2ff9aa74549d93fe6dbbf5786541eee7"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-amd-static.log",
+      "sha256": "b02c9faaf0bea256027db9f6278a3d170193bdd17f935e2267122bd486223ce9"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-audit-mapped-final.log",
+      "sha256": "43278b82b78ad54d7e6ddd1c71dfd7f4610fcdd83c583cae1044b43db3d07336"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-audit-mapped.log",
+      "sha256": "600b57eed8f6722c600975e8f56cc77f8fd1e9e500ed9998bac767387ec8a00b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-audit-output.log",
+      "sha256": "dac4465a482bd0dfcd5b34f33366ba4bebc553f227317084e1d59da80c46a226"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-intel-four-view.log",
+      "sha256": "207f32faccb3e2845cbd3fae3de55125679a5d9a9ae46726e2da30b7d4ce3da4"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-intel-moving.log",
+      "sha256": "76dceabaf6c6fe116bc322e3f92999a64bf9df6fb01ad5d1ba1d43ff5beb3432"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-intel-reference.log",
+      "sha256": "fe7208473da1c9af44acc2c9f7d1f92e23eb5d8cd4bc07ccc3d3d8544db844b1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-intel-static.log",
+      "sha256": "bbb4ee5e375e99fdc80e6bb64889b3d23e28b8598a27e1a84213e6272eb23719"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-phase-test-native.log",
+      "sha256": "8d2e8bd52248b3b02b25ca9179d1dd8f62699f7f956eeae4a5f4a89d69712ea9"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-phase-test.log",
+      "sha256": "44866794829dfa94a9a2cc4dc043f0f4fa816458cc60099a7dd491d720d6cd97"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-policy-final.log",
+      "sha256": "82684ba02128864b2bc022db3c2af10aef38bd9e14cb6aaa9cca28131cf9e940"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-allocation-policy.log",
+      "sha256": "2cb1501a5aac51dac5bfd419ac62f0bca3c1a0ef9eb13862b84144a0b577f90d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-ao-shader-tests.log",
+      "sha256": "0833e782132143d568cf72971f8d64c1fe0971935544c1010a677fece498317d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-ao-typecheck-final.log",
+      "sha256": "a24c45a9380b23cce7ea8d2497da98371519befaf4d189650f8b3e3c41eeca0b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-api.log",
+      "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-cost-policy-final.log",
+      "sha256": "928517788c36e69ccda392c7f3c456f0afdc74ae93c4689a3b57226784ce1dc6"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-cost-policy.log",
+      "sha256": "1b970450fd97c4365bc008c8b4912598611e5b6d6354a1aea2e5f8efb4a881b2"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-cost-smoke.log",
+      "sha256": "6fa2ba4e914861f01802a33b3eddf23d80c3e0b4c384fb987ea35d98c1dd1fc5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-engine-tests.log",
+      "sha256": "315dfa2d3315917546168fd4ccb38969385968d4dbbc1f1ab82b478fde2c234a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-milestone-check.log",
+      "sha256": "c6289cfdbe5368bea8a2f7ebb50fd8111f51d28fed8241021c7bac199e40f2cf"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-modules.log",
+      "sha256": "43bb801d6168810851ac2001664bcc563147a90f049c1474c456c11b833fc604"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-native-amd.log",
+      "sha256": "5d8cea35aee932123c15e9e2ff655c4cd13e5dfb677a197f2577e8489510a761"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-native-intel.log",
+      "sha256": "d04731d01aa3457c750e21c9a5c1cbcd4226b8cb411375032a488df3de1bda13"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-package.log",
+      "sha256": "05fecaf3594bf932e20d51bda26a59509ac481c0efc52476af434eccedb827fc"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-pending-build.log",
+      "sha256": "6efa4163e022cf75e974b8724151918fd1451c7d03bd165fe1e08dc04fb8004b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-pending-plain-amd.log",
+      "sha256": "db7b484f3897a9c442a43e2aa294ebfdbf97c9a369dbe200c9c619142bd1aefa"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-pending-plain-intel.log",
+      "sha256": "909d0a2c4a179f1972a73fea9cb6a8f1f50171c69b8b246aa9257acede885595"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-pending-policy.log",
+      "sha256": "e2561f3c830726e5bbb93327a827336554ecb51518b037804b5e4bcc0416199e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-performance-policy.log",
+      "sha256": "e42b1181826ad0666cd86d48fb43211aa96789af3dffc44d9e5d6c7bc7edd00b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-prepare.log",
+      "sha256": "3896d25e54cb62720a681e2bc7098bf3551ea000929e9a62e6f5e5139f0b6e0b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-responsibilities.log",
+      "sha256": "6fa09923726c2f63ea49a166fb29d211950e6aaa019390427f961c4d74e2b3c9"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-root-build.log",
+      "sha256": "3732c402a95b908f30022a17c0fe314df399e28a18c296b32e0e0928edcc6443"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-root-test.log",
+      "sha256": "76fcd83913e8fde5df9c38891c67e882d1e07308080821195909ad59a981f911"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-root-typecheck.log",
+      "sha256": "916488b48f47f799f1f296ab3da89906dae269b805618dc7c8f773444ab0d841"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g05/checks/r16-2026-09-28/g05-r16-shader-check.log",
+      "sha256": "1b7299945cede0ff02e4a142bbf617f306b1748ff4e0195ef67d13e871574e41"
+    }
+  ],
+  "testCounts": {
+    "repository": 1376,
+    "engine": 735,
+    "performancePolicies": 176,
+    "allocationPhaseAndPolicy": 5,
+    "pendingPolicy": 3,
+    "freshExampleTargets": 95
+  },
+  "limits": {
+    "viewBytes": 67108864,
+    "pendingTargetBytes": 536870912
+  },
+  "conclusions": {
+    "1080pAoDeferredBytes": 66869272,
+    "previous1080pAoDeferredBytes": 95832328,
+    "pendingAoBytes": 532674052,
+    "pendingWithoutAoBytes": 494917952,
+    "packingValuesPerGpu": 8772,
+    "effectsPerGpu": 30,
+    "aoContributionChecksPerGpu": 36,
+    "allocationCaptures": 8,
+    "allocationSampledFrames": 2400
+  },
+  "limitations": [
+    "All native captures here are diagnostic; root builds/tests overlapped cost/allocation collection. Host throttling was observed in the cold/AO matrix.",
+    "1080p high-quality AO stores only 433 of 8160 tiles; 7727 tiles use complete-light fallback. GPU cost remains unqualified.",
+    "Two chained full-resolution AO passes at 1080p exceed the fixed per-view budget and fail explicitly.",
+    "The ledger estimates Deferred-owned descriptor bytes, not driver resident memory or all AO auxiliary scratch.",
+    "CPU allocation sampling includes fixture/VM allocations and retains missing-node samples as explicitly unattributed bytes.",
+    "E/G 156 and F 96 full captures and a new-runtime Forward 12-capture qualification remain outstanding. Old Forward qualification is source-bound to runtime 43eaf828.",
+    "High-overlap GPU and instance wall-time concerns remain; no G05 completion or release readiness claimed."
+  ]
+}

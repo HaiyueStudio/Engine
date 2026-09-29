@@ -443,7 +443,14 @@ function runNodeRuntimeConsumer(installed) {
 function runTypeScriptConsumer(installed) {
   const source = resolve(root, 'scripts/fixtures/engine-consumers/typescript-consumer.ts');
   const input = resolve(installed.root, 'typescript-consumer.ts');
-  copyFileSync(source, input);
+  const enginePackage = JSON.parse(readFileSync(resolve(installed.root, 'node_modules/@haiyue/engine/package.json'), 'utf8'));
+  const typeEntrypoints = Object.entries(enginePackage.exports)
+    .filter(([, target]) => target && typeof target === 'object' && typeof target.types === 'string')
+    .map(([path]) => path === '.' ? enginePackage.name : `${enginePackage.name}${path.slice(1)}`);
+  // Check every public declaration root, including focused experimental subpaths.
+  // Unused type imports are still resolved and checked with skipLibCheck=false.
+  writeFileSync(input, readFileSync(source, 'utf8') + '\n' + typeEntrypoints.map((path, index) =>
+    `import type * as EnginePublicTypes${index} from ${JSON.stringify(path)};`).join('\n') + '\n');
   writeFileSync(resolve(installed.root, 'tsconfig.json'), `${JSON.stringify({
     compilerOptions: {
       target: 'ESNext',
@@ -463,7 +470,7 @@ function runTypeScriptConsumer(installed) {
     encoding: 'utf8',
     timeout: 60_000,
   });
-  return commandCheck(result, 'TypeScript packed declarations');
+  return { ...commandCheck(result, 'TypeScript packed declarations'), engineTypeEntrypoints: typeEntrypoints };
 }
 
 function runAllExportsConsumer(installed, packages) {

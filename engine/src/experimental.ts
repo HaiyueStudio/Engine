@@ -510,3 +510,6 @@ export type { GpuReadbackResult } from './compute/GpuReadbackRing';
 export { GpuComputeProgram } from './compute/GpuComputeProgram';
 export { inspectGpuSimulationCapabilities } from './compute/GpuSimulationCapabilities';
 export type { GpuSimulationRequirements } from './compute/GpuSimulationCapabilities';
+
+export { createDeferredLightingProfile } from './experimental/DeferredLightingProfile';
+export type { DeferredLightingProfile, DeferredLightingProfileOptions, DeferredLightingDebugChannel, DeferredLightingDebugImage } from './experimental/DeferredLightingProfile';

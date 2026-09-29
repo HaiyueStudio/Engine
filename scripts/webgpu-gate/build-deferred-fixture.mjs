@@ -4,11 +4,10 @@ import { haiyuePlugins } from '../../config/rollup.shared.js';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeFile, mkdir } from 'node:fs/promises';
-import { deferredRuntimeFingerprint, sha256 } from './deferred-fixture-policy.mjs';
+import { deferredRuntimeFingerprint, sha256, parseDeferredFixtureBuildOptions } from './deferred-fixture-policy.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
-const args=process.argv.slice(2);
-if(args.some(arg=>arg!=='--tiled'))throw new Error('Only --tiled is supported.');
-const outputDirectory=resolve(root,`artifacts/engine-0.2.1/${args.includes('--tiled')?'g03':'g02'}`);
+const {goal}=parseDeferredFixtureBuildOptions(process.argv.slice(2));
+const outputDirectory=resolve(root,`artifacts/engine-0.2.1/${goal}`);
 await mkdir(outputDirectory,{recursive:true});
 const inputs=await deferredRuntimeFingerprint(root);
 const bundle=await rollup({input:resolve(root,'scripts/webgpu-gate/deferred-reference-runtime.mjs'),external:id=>id.startsWith('node:'),plugins:[{

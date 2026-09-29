@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url';
+import { wgslBuildIncludes } from './scripts/wgsl-includes.mjs';
 import {
   cleanOutputDirectory,
   haiyueExternal,
@@ -12,5 +14,5 @@ export default {
   },
   output: libraryOutput(),
   external: haiyueExternal(),
-  plugins: [cleanOutputDirectory(), ...haiyuePlugins()],
+  plugins: [cleanOutputDirectory(), wgslBuildIncludes({root:fileURLToPath(new URL('./src',import.meta.url)), registryPath:fileURLToPath(new URL('./wgsl-module-registry.json',import.meta.url))}), ...haiyuePlugins()],
 };

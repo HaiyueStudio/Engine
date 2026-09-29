@@ -3963,6 +3963,10 @@
               "kind": "value"
             },
             {
+              "name": "createDeferredLightingProfile",
+              "kind": "value"
+            },
+            {
               "name": "createGPUResourceOwner",
               "kind": "value"
             },
@@ -4144,6 +4148,22 @@
             },
             {
               "name": "DefaultMaterialRendererOptions",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingDebugChannel",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingDebugImage",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingProfile",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingProfileOptions",
               "kind": "type"
             },
             {
@@ -7273,8 +7293,28 @@
               "kind": "value"
             },
             {
+              "name": "createDeferredLightingProfile",
+              "kind": "value"
+            },
+            {
               "name": "createRenderPipelineAsync",
               "kind": "value"
+            },
+            {
+              "name": "DeferredLightingDebugChannel",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingDebugImage",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingProfile",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingProfileOptions",
+              "kind": "type"
             },
             {
               "name": "DeltaRenderRecordSystem",

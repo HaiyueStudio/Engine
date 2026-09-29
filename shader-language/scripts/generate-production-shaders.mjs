@@ -1,3 +1,4 @@
+import { generateDeferredFullForwardProduction } from './generate-deferred-full-forward-production.mjs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkShaderMigrationManifest } from './check-migration-manifest.mjs';
@@ -35,6 +36,10 @@ import {
 } from './generate-compute-production.mjs';
 
 export const PRODUCTION_SHADER_GENERATORS = Object.freeze([
+  Object.freeze({
+    id: 'deferred-full-forward', artifactVersion: 2, run: generateDeferredFullForwardProduction,
+    format: (result, write) => `[shader-language:production:deferred-full-forward] ${write ? 'wrote' : 'verified'} ${result.outputCount} files, passes=${result.passCount}, WGSL=${result.wgslBytes} bytes.`,
+  }),
   Object.freeze({
     id: 'deferred-tiled', artifactVersion: 2, run: generateDeferredTiledProduction,
     format: (result, write) => `[shader-language:production:deferred-tiled] ${write ? 'wrote' : 'verified'} ${result.outputCount} files, passes=${result.passCount}, WGSL=${result.wgslBytes} bytes.`,

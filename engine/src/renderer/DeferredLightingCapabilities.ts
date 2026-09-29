@@ -4,7 +4,7 @@ import { DEFERRED_LIGHTING_ABI as ABI } from '../shaders/generated/deferred-ligh
 export function validateDeferredDevice(device: GPUDevice): void {
   const requirements: Partial<Record<keyof GPUSupportedLimits, number>> = {
     maxColorAttachments: 3, maxColorAttachmentBytesPerSample: 24,
-    maxStorageBuffersPerShaderStage: 3, maxComputeInvocationsPerWorkgroup: 64,
+    maxStorageBuffersPerShaderStage: 5, maxComputeInvocationsPerWorkgroup: 64,
     maxStorageBufferBindingSize: ABI.blocks.sourceHeader.byteSize + (ABI.maxPoints + ABI.maxDirectionals) * ABI.blocks.light.byteSize,
     maxUniformBufferBindingSize: 272,
   };

@@ -249,6 +249,35 @@
         "webgpu-wgsl"
       ],
       "retention": "experimental opt-in tile culling; full-list reference remains independent; compute uses workgroup synchronization outside portable IR"
+    },
+    {
+      "id": "deferred-full-forward",
+      "stage": 14,
+      "moduleId": "haiyue-deferred-full-forward-family",
+      "moduleVersion": 1,
+      "authoring": "trusted-target-source-modules",
+      "escapeLevel": 2,
+      "typedSignature": "production layered PBR + complete Deferred source/view ABI -> sorted transparent and Forward-only HDR Artifact V2",
+      "sourceOwner": "shader-language/src/deferred-lighting",
+      "generator": "shader-language/scripts/generate-deferred-full-forward-production.mjs",
+      "artifact": "engine/src/shaders/generated/deferred-full-forward-artifact.generated.ts",
+      "reflectionOwner": "production PBR family and Deferred ABI validated against WGSL declarations",
+      "layoutOwner": "artifact-and-renderer",
+      "variantOwner": "shader-language/src/deferred-lighting/full-forward-family.ts",
+      "resources": [
+        "frame-uniforms",
+        "source-light-storage",
+        "view-indices",
+        "material-textures",
+        "deformation",
+        "environment",
+        "directional-shadows",
+        "opaque-scene-color"
+      ],
+      "targets": [
+        "webgpu-wgsl"
+      ],
+      "retention": "private Deferred opt-in; four existing material texture layouts and static clearcoat/transmission BRDF variants preserved; default Forward closure unchanged"
     }
   ],
   "portability": {
