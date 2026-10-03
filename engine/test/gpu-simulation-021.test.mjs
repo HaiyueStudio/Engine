@@ -140,6 +140,46 @@ test('disposing an encoded readback retains its destination until submitted work
   assert.equal(ring.stats.pending, 0); source.destroy();
 });
 
+function lossControlledGpu(options) {
+  const device = gpu(options); let lose;
+  device.lost = new Promise(resolve => { lose = resolve; });
+  return { device, lose };
+}
+test('device loss fails reserved requests and retires buffers without requiring submission', async () => {
+  const { device, lose } = lossControlledGpu();
+  const ring = new GpuReadbackRing(device, 4, 1), source = device.createBuffer({ size: 4, usage: GPUBufferUsage.COPY_SRC }), ctx = context(device);
+  const audit = getAuditGpuDeviceState(device), info = { reason: 'unknown', message: 'lost before submit' };
+  let result; ring.request(ctx, source, 0, 4, 'lost-frame').then(value => { result = value; });
+  audit.reset(); lose(info); await flush();
+  assert.equal(result?.status, 'failed'); assert.equal(result.error, info); assert.equal(result.token, 'lost-frame');
+  assert.equal(ring.stats.pending, 0); assert.equal(ring.stats.failed, 1); assert.equal(audit.getCallCount('buffer.destroy'), 1);
+  assert.throws(() => ring.request(context(device), source, 0, 4), /device is lost/);
+  ctx.submit(); await flush(); ring.destroy();
+  assert.equal(audit.getCallCount('buffer.mapAsync'), 0); assert.equal(audit.getCallCount('buffer.destroy'), 1); source.destroy();
+});
+test('device loss settles mapping requests without publishing late pixels or destroying pending maps', async () => {
+  let complete;
+  const { device, lose } = lossControlledGpu({ behaviors: { 'buffer.mapAsync': ({ defaultImplementation }) => new Promise(resolve => { complete = () => { defaultImplementation(); resolve(); }; }) } });
+  const ring = new GpuReadbackRing(device, 4, 1), source = device.createBuffer({ size: 4, usage: GPUBufferUsage.COPY_SRC }), ctx = context(device);
+  let result; ring.request(ctx, source, 0, 4).then(value => { result = value; }); ctx.submit(); await flush();
+  const audit = getAuditGpuDeviceState(device); audit.reset(); lose({ reason: 'unknown', message: 'lost while mapping' }); await flush();
+  assert.equal(result?.status, 'failed'); assert.equal(result.bytes, null); assert.equal(ring.stats.pending, 1);
+  assert.equal(audit.getCallCount('buffer.destroy'), 0);
+  complete(); await flush(); await flush();
+  assert.equal(ring.stats.pending, 0); assert.equal(ring.stats.failed, 1); assert.equal(ring.stats.completed, 0);
+  assert.equal(audit.getCallCount('buffer.destroy'), 1); ring.destroy(); source.destroy();
+});
+test('device loss after ring disposal also retires abandoned reservations exactly once', async () => {
+  const { device, lose } = lossControlledGpu();
+  const ring = new GpuReadbackRing(device, 4, 2), source = device.createBuffer({ size: 4, usage: GPUBufferUsage.COPY_SRC }), ctx = context(device);
+  const request = ring.request(ctx, source, 0, 4); const audit = getAuditGpuDeviceState(device); audit.reset();
+  ring.destroy(); assert.equal((await request).status, 'cancelled'); assert.equal(audit.getCallCount('buffer.destroy'), 1);
+  lose({ reason: 'destroyed', message: 'owner teardown' }); await flush();
+  assert.equal(ring.stats.pending, 0); assert.equal(ring.stats.cancelled, 1); assert.equal(ring.stats.failed, 0);
+  ctx.submit(); await flush(); ring.destroy(); assert.equal(audit.getCallCount('buffer.mapAsync'), 0);
+  assert.equal(audit.getCallCount('buffer.destroy'), 2); source.destroy();
+});
+
 test('legacy instance buffers allocate culling/sorting on demand and release all auxiliary resources', () => {
   const device = gpu(), renderer = new InstancedMesh3DRenderer(); renderer.prepare({ device });
   const audit = getAuditGpuDeviceState(device); audit.reset();

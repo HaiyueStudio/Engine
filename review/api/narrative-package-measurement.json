@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-03",
+  "entrypoint": "@haiyue/extensions/narrative",
+  "files": [
+    {
+      "path": "extensions/dist/narrative.js",
+      "bytes": 26243,
+      "gzipBytes": 6792,
+      "sha256": "a7c2d34f1d3c0b27166a69c42e9dedaf29cbe31f8ef2886492faf89c0001ae42"
+    },
+    {
+      "path": "extensions/dist/chunks/bindings-D-tM6trR.js",
+      "bytes": 5380,
+      "gzipBytes": 1473,
+      "sha256": "70257901eb47f13dfbaf99966f684844d96b933d0dc82415ab35e0eec2e1566d"
+    }
+  ],
+  "totalLocalBytes": 31623,
+  "totalLocalGzipBytes": 8265,
+  "externalRuntimeImports": [
+    "@haiyue/engine/gui"
+  ],
+  "newDependencies": [],
+  "rootExportsUnchanged": true
+}

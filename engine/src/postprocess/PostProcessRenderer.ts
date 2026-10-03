@@ -1,3 +1,6 @@
+import { PostProcessGraph } from './PostProcessGraph';
+import { TransientTextureAllocator } from '../rtt/TransientTextureAllocator';
+import { setPostProcessTransientTextures } from './PostProcessTransientTextures';
 import type { IEngine } from '../core/IEngine';
 import { requireEngineDevice } from '../core/IEngine';
 import type { PostProcessPass } from './PostProcessPass';
@@ -35,6 +38,8 @@ interface PostProcessSceneAttachments {
  */
 export class PostProcessRenderer {
   private _engine!: IEngine;
+  private _transientTextures: TransientTextureAllocator | undefined;
+  private readonly _graph = new PostProcessGraph();
   private _buf0!: GPUTexture;
   private _buf0View!: GPUTextureView;
   private _buf1: GPUTexture | null = null;
@@ -92,6 +97,7 @@ export class PostProcessRenderer {
     if (this._prepared) return;
     this._prepared = true;
     this._engine   = engine;
+    this._transientTextures = new TransientTextureAllocator(requireEngineDevice(engine), undefined, 64, 'postprocess');
     this._width    = width;
     this._height   = height;
     this._format   = format;
@@ -99,10 +105,13 @@ export class PostProcessRenderer {
   }
 
   contributePipelineWarmup(plan: PipelineWarmupPlan, passes: readonly PostProcessPass[]): void {
-    this._reconcilePreparedPasses(passes);
+    this._graph.setCacheScope(requireEngineDevice(this._engine), JSON.stringify([this._width, this._height, this._format, this._sceneAttachmentKey]));
+    const active = this._graph.compile(passes);
+    this._reconcilePreparedPasses(active);
     const device = requireEngineDevice(this._engine);
-    for (const pass of passes) {
+    for (const pass of active) {
       if (!this._preparedPasses.has(pass)) {
+        // Warmup can precede a submission scope. Built-ins opt into pooling on first managed record.
         pass.prepare(device, this._format, this._width, this._height);
         this._preparedPasses.add(pass);
       }
@@ -122,8 +131,11 @@ export class PostProcessRenderer {
     outputView: GPUTextureView,
     sceneTextures: PostProcessSceneTextures = {},
   ): void {
-    this._reconcilePreparedPasses(passes, this._afterSubmit);
-    const N = passes.length;
+    this._transientTextures?.beginFrame(encoder);
+    this._graph.setCacheScope(requireEngineDevice(this._engine), JSON.stringify([this._width, this._height, this._format, this._sceneAttachmentKey]));
+    const active = this._graph.compile(passes);
+    this._reconcilePreparedPasses(active, this._afterSubmit);
+    const N = active.length;
     if (N === 0) {
       if ('beginRenderPass' in encoder) this._present(encoder, outputView);
       return;
@@ -137,7 +149,7 @@ export class PostProcessRenderer {
     }
 
     for (let i = 0; i < N; i++) {
-      const pass   = requiredItemAt(passes, i, 'post-process passes');
+      const pass   = requiredItemAt(active, i, 'post-process passes');
       const isLast = i === N - 1;
 
       const src     = (i % 2 === 0) ? this._buf0 : this._buf1!;
@@ -146,12 +158,14 @@ export class PostProcessRenderer {
         : ((i % 2 === 0) ? this._buf1View! : this._buf0View);
 
       if (!this._preparedPasses.has(pass)) {
+        if (this._afterSubmit) setPostProcessTransientTextures(pass, this._transientTextures!);
         pass.prepare(device, format, this._width, this._height);
         this._preparedPasses.add(pass);
       }
 
       setPostProcessSubmission(pass, this._afterSubmit);
       try {
+        if (this._afterSubmit) setPostProcessTransientTextures(pass, this._transientTextures!);
         pass.setSceneTextures(sceneTextures);
         pass.apply(encoder, src, dstView, device);
       } finally {
@@ -173,7 +187,9 @@ export class PostProcessRenderer {
     this._activateSceneAttachments(null);
     const device = requireEngineDevice(this._engine);
     for (const p of this._preparedPasses) {
-      p.resize(device, format, this._width, this._height);
+      setPostProcessSubmission(p, this._afterSubmit);
+      try { p.resize(device, format, this._width, this._height); }
+      finally { setPostProcessSubmission(p); }
     }
   }
 
@@ -226,13 +242,18 @@ export class PostProcessRenderer {
   }
 
   destroy(): void {
+    this._graph.clearCache();
+    this._transientTextures?.destroy();
     for (const resources of this._surfaceResources.values()) {
       resources.buf0.destroy();
       resources.buf1?.destroy();
     }
     this._surfaceResources.clear();
     this._destroySceneAttachments();
-    for (const p of this._preparedPasses) p.destroy();
+    for (const p of this._preparedPasses) {
+      setPostProcessSubmission(p, this._afterSubmit);
+      try { p.destroy(); } finally { setPostProcessSubmission(p); }
+    }
     this._preparedPasses.clear();
     this._prepared = false;
     this._presentLayout = null;

@@ -1,3 +1,5 @@
+import { deferPostProcessDisposal } from './PostProcessSubmission';
+import { registerPostProcessGraphAccess } from './PostProcessGraph';
 import { PostProcessPass, getPostProcessTextureView } from './PostProcessPass';
 import type { PostProcessSceneTextures } from './PostProcessPass';
 import type { ColorValue } from '../color/Color';
@@ -72,6 +74,7 @@ export class OutlinePass extends PostProcessPass {
 
   constructor(options: OutlinePassOptions = {}) {
     super();
+    if (new.target === OutlinePass) registerPostProcessGraphAccess(this);
     this._visibleEdgeColor = resolveColor(options.visibleEdgeColor);
     this._hiddenEdgeColor = resolveColor(options.hiddenEdgeColor, [0.1, 0.04, 0.02, 1]);
     this.edgeStrength = options.edgeStrength ?? 3;
@@ -108,14 +111,6 @@ export class OutlinePass extends PostProcessPass {
       size: this._paramsWriter.byteLength,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
-    this._blurHParamsBuf = device.createBuffer({
-      size: this._blurWriter.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-    this._blurVParamsBuf = device.createBuffer({
-      size: this._blurWriter.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
     this._fallbackMask = this._createFallbackTexture(device);
 
     this._createSizedResources(device, width, height);
@@ -139,7 +134,8 @@ export class OutlinePass extends PostProcessPass {
     );
   }
 
-  override resize(device: GPUDevice, _format: GPUTextureFormat, width: number, height: number): void {
+  override resize(device: GPUDevice, format: GPUTextureFormat, width: number, height: number): void {
+    if (this._format !== format) { this._edgePipeline = this._blurPipeline = this._overlayPipeline = null; this._format = format; }
     this._width = width;
     this._height = height;
     this._createSizedResources(device, width, height);
@@ -232,13 +228,7 @@ export class OutlinePass extends PostProcessPass {
     this._edgePipeline = null;
     this._blurPipeline = null;
     this._overlayPipeline = null;
-    this._paramsBuf?.destroy();
-    this._blurHParamsBuf?.destroy();
-    this._blurVParamsBuf?.destroy();
-    this._fallbackMask?.destroy();
-    this._edgeTex?.destroy();
-    this._blurTex?.destroy();
-    this._glowTex?.destroy();
+    this._retireResources([this._paramsBuf, this._blurHParamsBuf, this._blurVParamsBuf, this._fallbackMask, this._edgeTex, this._blurTex, this._glowTex]);
     this._maskTex = null;
     this._visibleMaskTex = null;
     this._lastMask = null;
@@ -262,10 +252,17 @@ export class OutlinePass extends PostProcessPass {
     };
   }
 
+  private _retireResources(resources: readonly ({ destroy(): void } | undefined)[]): void {
+    const dispose = () => { for (const resource of resources) resource?.destroy(); };
+    if (!deferPostProcessDisposal(this, dispose)) dispose();
+  }
+
   private _createSizedResources(device: GPUDevice, width: number, height: number): void {
-    this._edgeTex?.destroy();
-    this._blurTex?.destroy();
-    this._glowTex?.destroy();
+    this._retireResources([this._edgeTex, this._blurTex, this._glowTex, this._blurHParamsBuf, this._blurVParamsBuf]);
+    // A preceding differently sized view can still be pending in this encoder.
+    const uniform = { size: this._blurWriter.byteLength, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST };
+    this._blurHParamsBuf = device.createBuffer(uniform);
+    this._blurVParamsBuf = device.createBuffer(uniform);
     const desc = {
       size: [Math.max(1, width), Math.max(1, height)] as [number, number],
       format: this._format,

@@ -38,3 +38,14 @@ test('probe acceptance rejects partial cases, wrong workloads and missing diagno
     { cases: result.cases.slice(1) }, { cases: result.cases.map(c => ({ ...c, completedFrames: 511 })) },
   ]) assert.throws(() => validateOutputProbeEvidence({ ...result, ...change }, options, 'hash'));
 });
+
+test('fallback initialization comparison uses identical shaders and preserves normal output branch', () => {
+  const source = readFileSync(new URL('../../engine/src/shaders/generated/postprocess-output.generated.wgsl', import.meta.url), 'utf8');
+  const lazy = outputProbeShader(source, 'lazy-depth');
+  assert.equal(lazy, outputProbeShader(source, 'initialized-depth'));
+  assert.match(lazy, /@binding\(2\).*texture_depth_2d_array/);
+  assert.match(lazy, /params.settings.w > 0.0/);
+  assert.equal(lazy.slice(lazy.indexOf('  let size =')), source.slice(source.indexOf('  let size =')));
+  assert.equal(parseOutputProbeOptions(['--variant=lazy-depth']).variant, 'lazy-depth');
+  assert.equal(parseOutputProbeOptions(['--variant=initialized-depth']).variant, 'initialized-depth');
+});

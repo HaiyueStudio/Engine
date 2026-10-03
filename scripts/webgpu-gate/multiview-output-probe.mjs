@@ -36,8 +36,20 @@ try {
     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC });
   const outputs = Array.from({ length: 4 }, () => createTexture('bgra8unorm'));
   const sources = Array.from({ length: 4 }, () => createTexture('rgba16float'));
+  const fallback = ['lazy-depth', 'initialized-depth'].includes(variant) ? device.createTexture({
+    size: [1, 1, 4], format: 'depth32float', usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT,
+  }) : null;
+  if (variant === 'initialized-depth') {
+    const initialize = device.createCommandEncoder();
+    for (let layer = 0; layer < 4; layer++) initialize.beginRenderPass({ colorAttachments: [], depthStencilAttachment: {
+      view: fallback.createView({ dimension: '2d', baseArrayLayer: layer, arrayLayerCount: 1 }),
+      depthLoadOp: 'clear', depthClearValue: 0, depthStoreOp: 'store',
+    } }).end();
+    device.queue.submit([initialize.finish()]);
+  }
+  const fallbackEntries = fallback ? [{ binding: 2, resource: fallback.createView({ dimension: '2d-array' }) }] : [];
   const groups = sources.map(texture => device.createBindGroup({ layout: pipeline.getBindGroupLayout(0),
-    entries: [{ binding: 0, resource: texture.createView() }, { binding: 1, resource: { buffer: uniform } }] }));
+    entries: [{ binding: 0, resource: texture.createView() }, { binding: 1, resource: { buffer: uniform } }, ...fallbackEntries] }));
   const cases = [];
   let failure = null;
   for (const mode of ['clear-only', 'shared-hdr', 'isolated-hdr']) {

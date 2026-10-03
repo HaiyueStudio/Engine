@@ -39,3 +39,24 @@ engine.destroy();
 - Snapshot 内存是 Deferred 跟踪分配估算；GPU pass 合计、CPU record、帧间隔是不同计时口径，不相加，不替代 P95。
 
 API 准入说明见 [G06 评审](../../review/engine-0.2.1/g06-example-api-review.md)。跨引擎比较与设备分档另立目标，不借示例重写现有性能结论。
+
+## FrameGraph 诊断
+
+示例底部「FrameGraph」区域先选择效果链，再点击「捕获下一帧」：
+
+1. 选择 GTAO + 双模糊，查看 Deferred/AO/后处理的逻辑资源、物理 ID 与复用原因。
+2. 选择灰度 → 模糊 → AO 独立输出，查看不再被读取的颜色步骤裁剪；AO 所需辅助输入继续保留。
+3. 查看局部图的读写依赖、生命周期条和缓存命中。改变效果/路径/窗口尺寸后重新捕获，比较结构和资源；关闭效果回到基础场景。
+4. 导出 JSON 保存整份快照；导出图 PNG 保存所选逻辑图。两种导出都只使用冻结元数据，不读取场景 GPU 内容。
+
+```ts
+import { createFrameGraphInspector } from '@haiyue/engine/experimental/renderer';
+const inspector = createFrameGraphInspector(scene.render3DSystem!);
+inspector.requestCapture(); // 下一次 system.record() 收集；不会启动 engine
+// 在该帧完成后显式读取；未捕获时为 null。
+const snapshot = inspector.snapshot();
+// 退出时注销，不影响 system 的 GPU 所有权。
+inspector.dispose();
+```
+
+捕获后的数据保持冻结，动画、灯数和相机改变不会自动刷新。路径/设备切换清除快照。图层级可能重叠；实际编码的 pass/draw/dispatch/submit 在摘要独立显示。区间只在所属图/分配批次内比较；池高水位仅覆盖参与捕获的临时池，不代表全部显存。一次捕获会增加 CPU 开销，不作为正式计时；完整字段和不可观测值见 [API 合同](../api/framegraph-inspector.md)。

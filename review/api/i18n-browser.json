@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-02",
+  "surface": "Codex in-app browser / WebGPU",
+  "url": "http://127.0.0.1:8156/examples/i18n/index.html?verify=1",
+  "result": {
+    "passed": true,
+    "locales": [
+      "en",
+      "zh-CN",
+      "zh-Hant"
+    ],
+    "observed": [
+      "assets/title.en.svg",
+      "assets/title.zh-CN.svg",
+      "assets/title.zh-Hant.svg"
+    ],
+    "heading": "One scene, every language",
+    "coins": "2 coins",
+    "buttons": 3,
+    "issues": [],
+    "checks": [
+      "GPU GUI",
+      "GUI pointer buttons",
+      "localized textures",
+      "parameters",
+      "plurals",
+      "latest-wins",
+      "pack completeness"
+    ]
+  },
+  "consoleWarningsAndErrors": [],
+  "errorElement": "",
+  "inputMethod": "Example verification dispatches synthetic pointerdown/up through Engine GUI hit testing; OS-level CDP clicks timed out in this session.",
+  "visualInspection": [
+    "English title/text and all language buttons render correctly",
+    "Simplified Chinese title/text render with complete CJK repertoire"
+  ],
+  "bundleSha256": "5eab966b0331407003e79bc95aab22373b02b942fb538e30fccaeba94a37146e"
+}

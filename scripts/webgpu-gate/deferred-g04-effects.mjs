@@ -10,7 +10,7 @@ class TemporalProbe extends TaaPass {
   setSceneTextures(textures){super.setSceneTextures(textures);this.observed=textures;}
 }
 async function capture(device,id,algorithm,aoEnabled=true,lightMode='mixed'){
-  const target=createAuditTarget(device,64,64,true),owned=[];let state,result;
+  const target=createAuditTarget(device,64,64,true),owned=[];let state,result,failure;
   try{
     state=await createRealRendererBenchmarkScenario({device,target,entityCount:0,renderProfile:'batched'});
     for(const entity of [...state.world.entities.values()])state.world.removeEntity(entity);
@@ -69,8 +69,8 @@ async function capture(device,id,algorithm,aoEnabled=true,lightMode='mixed'){
     result={id,algorithm,pixels,minAo,temporal:temporalEvidence,shadowPasses:state.render3d.lastDirectionalShadowPassCount,coverage:profile?.backend.diagnostics??{effective:'forward',completeCoverage:false}};
     if(id==='shadows')check(result.shadowPasses===3,`expected three directional shadow passes, got ${result.shadowPasses}`);
     return result;
-  }finally{
-    if(state){await destroyRealRendererBenchmarkScenario(state);if(result)result.cleanup={ownerResidual:state.finalMetrics.ownerResidual,liveGpuResources:state.finalMetrics.liveGpuResources};}
+  }catch(error){failure=error;throw error;}finally{
+    if(state){try{await destroyRealRendererBenchmarkScenario(state);}catch(error){if(!failure)throw error;failure.stack+=`\nCleanup: ${error.stack}`;}if(result)result.cleanup={ownerResidual:state.finalMetrics.ownerResidual,liveGpuResources:state.finalMetrics.liveGpuResources};}
     for(const texture of owned)texture.destroy();target.destroy();
   }
 }

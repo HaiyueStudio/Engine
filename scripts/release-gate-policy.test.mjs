@@ -12,6 +12,22 @@ import {
   loadContentManifests,
   resolveContentTier,
 } from './content-gate-policy.mjs';
+import { createEngineSlowChecks } from './engine-release-policy.mjs';
+
+test('native FrameGraph precedes release timing and reuses the example build, without entering software CI', () => {
+  for (const mode of ['local', 'global']) {
+    const checks = createReleaseGateChecks(mode);
+    assert.deepEqual(checks[0], ['run', 'check:engine:fast']);
+    assert.deepEqual(checks[1], ['run', 'verify:framegraph:full']);
+    assert.ok(checks.findIndex(c => c[1] === 'verify:framegraph:example') > checks.findIndex(c => c[1] === 'check:engine:slow'));
+    assert.doesNotMatch(JSON.stringify(checks), /UI|Editor|Games/);
+  }
+  for (const tier of ['smoke', 'full']) assert.ok(!createEngineSlowChecks(createContentTargetPlan(tier, manifests)).some(c => c[1]?.startsWith('verify:framegraph')));
+  assert.ok(!createReleaseGateChecks('artifact').some(c => c[1]?.startsWith('verify:framegraph')));
+  const scripts = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).scripts;
+  assert.match(scripts['performance-budget:test'], /framegraph-regression-policy.test.mjs/);
+  assert.equal(scripts['verify:framegraph:example'], 'node scripts/verify-framegraph-example.mjs');
+});
 
 const root = new URL('../', import.meta.url);
 const manifests = loadContentManifests(fileURLToPath(root), 'engine');

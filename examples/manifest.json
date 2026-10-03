@@ -2143,6 +2143,63 @@
         "group": "rendering",
         "order": 100
       }
+    },
+    {
+      "id": "i18n",
+      "title": "Internationalization · Text & Artwork",
+      "entry": "i18n/main.ts",
+      "capabilities": [
+        "i18n",
+        "gui",
+        "localized-assets"
+      ],
+      "assets": [
+        "i18n/assets/title.en.svg",
+        "i18n/assets/title.zh-CN.svg",
+        "i18n/assets/title.zh-Hant.svg",
+        "i18n/locales/en.json",
+        "i18n/locales/zh-CN.json",
+        "i18n/locales/zh-Hant.json"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 100
+      }
+    },
+    {
+      "id": "narrative",
+      "title": "Narrative · The Last Signal",
+      "entry": "narrative/main.ts",
+      "capabilities": [
+        "narrative",
+        "i18n",
+        "gui",
+        "branching-story",
+        "save-restore"
+      ],
+      "assets": [
+        "narrative/story.json",
+        "narrative/locales/en.json",
+        "narrative/locales/zh-CN.json",
+        "narrative/assets/orbit.svg",
+        "narrative/assets/dawn.svg"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 101
+      }
     }
   ],
   "catalog": {

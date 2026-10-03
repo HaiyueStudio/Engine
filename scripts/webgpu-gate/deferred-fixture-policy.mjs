@@ -73,7 +73,7 @@ export function validateDeferredReuseEvidence(oracle) {
 }
 
 export function parseDeferredFixtureBuildOptions(args) {
-  if (args.some(arg => !['--tiled', '--compatibility', '--performance'].includes(arg))) throw new Error('Unknown Deferred fixture build option.');
+  if (args.some(arg => !['--tiled', '--compatibility', '--performance', '--framegraph'].includes(arg))) throw new Error('Unknown Deferred fixture build option.');
   if (args.length > 1) throw new Error('Select exactly one Deferred fixture build target.');
-  return { goal: args.includes('--performance') ? 'g05' : args.includes('--compatibility') ? 'g04' : args.includes('--tiled') ? 'g03' : 'g02' };
+  return { goal: args.includes('--framegraph') ? 'g09' : args.includes('--performance') ? 'g05' : args.includes('--compatibility') ? 'g04' : args.includes('--tiled') ? 'g03' : 'g02' };
 }

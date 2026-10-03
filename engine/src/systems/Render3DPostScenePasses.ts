@@ -1,3 +1,6 @@
+import { depthAttachmentOperations } from '../rtt/AttachmentOperations';
+import { frameGraphCacheScope } from '../core/frameGraphCacheScope';
+import { PostProcessGraph } from '../postprocess/PostProcessGraph';
 import { getLightingAmbientOcclusion } from '../postprocess/LightingAmbientOcclusion';
 import type { Material } from '../material/Material';
 import { auxiliaryWritesDepth, type MaterialCoverageResolver } from '../renderer/AuxiliaryMaterial';
@@ -65,6 +68,8 @@ export interface Render3DPostSceneLiveSets {
 
 export class Render3DPostScenePasses {
   private _lightingAoPrepared = false;
+  private readonly _requirementsGraph = new PostProcessGraph('requirements');
+  private _attachmentOptimizations = true;
   readonly output = new SceneOutputPass();
   private readonly _chain: PostProcessPass[] = [];
   private readonly _sceneTextures = new PostProcessSceneTextureStore();
@@ -115,29 +120,35 @@ export class Render3DPostScenePasses {
     reverseZ: boolean,
     sampleCount: 1 | 4,
   ): void {
-    const depth = this._requireDepthRenderer();
-    depth.reverseZ = reverseZ;
-    depth.msaaSamples = 1;
-    depth.contributePipelineWarmup(plan);
-
-    const normal = this._requireNormalRenderer();
-    normal.reverseZ = reverseZ;
-    normal.msaaSamples = 1;
-    normal.auxiliaryDepth = null;
-    normal.contributePipelineWarmup(plan);
-    if (passes.some(pass => pass.needsDepthTexture) && passes.some(pass => pass.needsNormalTexture)) {
-      normal.auxiliaryDepth = { near: 0, far: 1 };
-      normal.contributePipelineWarmup(plan);
-      normal.auxiliaryDepth = null;
+    this._requirementsGraph.setCacheScope(this._engine.device ?? undefined, JSON.stringify(['warmup', reverseZ, sampleCount]));
+    passes = this._requirementsGraph.compile(passes);
+    if (passes.some(pass => pass.needsDepthTexture)) {
+      const depth = this._requireDepthRenderer();
+      depth.reverseZ = reverseZ;
+      depth.msaaSamples = 1;
+      depth.contributePipelineWarmup(plan);
     }
-
-    const outline = this._requireOutlineMaskRenderer();
-    outline.reverseZ = reverseZ;
-    outline.msaaSamples = 1;
-    outline.contributePipelineWarmup(plan);
-    if (sampleCount > 1) {
-      outline.msaaSamples = sampleCount;
+    if (passes.some(pass => pass.needsNormalTexture)) {
+      const normal = this._requireNormalRenderer();
+      normal.reverseZ = reverseZ;
+      normal.msaaSamples = 1;
+      normal.auxiliaryDepth = null;
+      normal.contributePipelineWarmup(plan);
+      if (passes.some(pass => pass.needsDepthTexture)) {
+        normal.auxiliaryDepth = { near: 0, far: 1 };
+        normal.contributePipelineWarmup(plan);
+        normal.auxiliaryDepth = null;
+      }
+    }
+    if (passes.some(pass => pass.needsOutlineMask)) {
+      const outline = this._requireOutlineMaskRenderer();
+      outline.reverseZ = reverseZ;
+      outline.msaaSamples = 1;
       outline.contributePipelineWarmup(plan);
+      if (sampleCount > 1) {
+        outline.msaaSamples = sampleCount;
+        outline.contributePipelineWarmup(plan);
+      }
     }
 
     if (passes.some(pass => !!pass.needsMotionTexture)) {
@@ -168,6 +179,7 @@ export class Render3DPostScenePasses {
     needsSceneColorCapture = false,
   ): Render3DPostSceneRequirements {
     this._lightingAoPrepared = false;
+    this._requirementsGraph.setCacheScope(context.device, frameGraphCacheScope(context));
     const requirements = this.getRequirements(passes, needsSceneColorCapture);
     Object.assign(this.auxiliaryStats, { surfacePassCount: 0, surfaceDrawCount: 0, unmergedPassCount: 0, unmergedDrawCount: 0, sharedMotionSurface: false });
     // Every auxiliary configuration owns an aux-depth attachment. Keep advancing
@@ -203,16 +215,15 @@ export class Render3DPostScenePasses {
     if (!this._postRenderer) {
       this._postRenderer = new PostProcessRenderer();
       this._postRenderer.prepare(this._engine, context.view?.width ?? surface.width, context.view?.height ?? surface.height, SCENE_COLOR_FORMAT);
-    } else if (
-      this._postRenderer.width !== (context.view?.width ?? surface.width) ||
-      this._postRenderer.height !== (context.view?.height ?? surface.height)
-    ) {
-      this._postRenderer.resize(context.view?.width ?? surface.width, context.view?.height ?? surface.height, SCENE_COLOR_FORMAT);
     }
     this._postRenderer.beginFrame(
       context.frameData?.frameId ?? 0,
       context.afterSubmit ? callback => context.afterSubmit!(callback) : undefined,
     );
+    if (this._postRenderer.width !== (context.view?.width ?? surface.width) ||
+      this._postRenderer.height !== (context.view?.height ?? surface.height)) {
+      this._postRenderer.resize(context.view?.width ?? surface.width, context.view?.height ?? surface.height, SCENE_COLOR_FORMAT);
+    }
 
     if (requirements.needsDepth || requirements.needsNormal || requirements.needsMotion || requirements.needsOutlineMask) {
       this._sceneTextures.ensure(this._engine, {
@@ -243,9 +254,8 @@ export class Render3DPostScenePasses {
     requirements.needsNormal = false;
     requirements.needsMotion = false;
     requirements.needsOutlineMask = false;
-    for (let i = 0; i < passes.length; i++) {
-      const pass = passes[i];
-      if (!pass) continue;
+    const active = this._requirementsGraph.compile(passes);
+    for (const pass of active) {
       requirements.needsDepth ||= !!pass.needsDepthTexture;
       requirements.needsNormal ||= !!pass.needsNormalTexture;
       requirements.needsMotion ||= !!pass.needsMotionTexture;
@@ -365,9 +375,7 @@ export class Render3DPostScenePasses {
     const textures = this._sceneTextures;
     const depthAttachment = () => ({
       view: textures.auxDepthView!,
-      depthClearValue: options.reverseZ ? 0.0 : 1.0,
-      depthLoadOp: 'clear' as GPULoadOp,
-      depthStoreOp: 'discard' as GPUStoreOp,
+      ...depthAttachmentOperations({ loadOp: 'clear', clearValue: options.reverseZ ? 0 : 1, writesDepth: true, retained: false }, this._attachmentOptimizations),
     });
 
     if (requirements.needsDepth && !motionDepth && !normalDepth && textures.depthView) {
@@ -513,8 +521,7 @@ export class Render3DPostScenePasses {
           colorAttachments: [visibleColorAttachment],
           depthStencilAttachment: {
             view: this._postRenderer!.sceneDepthView!,
-            depthLoadOp: 'load',
-            depthStoreOp: 'store',
+            ...depthAttachmentOperations({ loadOp: 'load', writesDepth: false, retained: true }, this._attachmentOptimizations),
           },
         });
         for (const { entityId, material, geometry, clippingPlanes, worldMatrix } of options.outlineItems) {
@@ -582,6 +589,7 @@ export class Render3DPostScenePasses {
   }
 
   destroy(): void {
+    this._requirementsGraph.clearCache();
     this._viewMaterials.clear();
     this._chain.length = 0;
     this._postRenderer?.destroy();

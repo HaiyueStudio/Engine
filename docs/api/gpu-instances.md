@@ -20,7 +20,7 @@ LOD 的包围球必须包含武器、手部、动画和死亡姿态。矩阵/颜
 每个 LOD owner 每次提交编码一次；不同视图分别创建 owner。编码后应立即提交，再更新下一帧 uniform；不能在未提交时复写同一 owner 的参数。
 `reset()` 清除滞回历史，不是游戏状态重置。设备替换后重建 LOD、实例源、renderer 和 readback；GpuComputeProgram 可重新 initialize，但必须创建新的 bind group。
 
-readback `invalidate()` 使旧结果失效，不抢占在途缓冲；`destroy()` 后已经编码的请求仍须正常提交，以便安全映射/回收。
+readback `invalidate()` 使旧结果失效，不抢占在途缓冲；正常设备上 `destroy()` 后已经编码的请求仍须正常提交，以便安全映射/回收。设备丢失时，尚未完成的请求返回 `failed`，`error` 保留设备丢失信息；未提交的预留槽会直接回收，正在映射的槽等待映射结束后回收。旧 ring 不再接收请求，应随替换设备重新创建；已取消的请求保持 `cancelled`。
 若整个设备被销毁，底层资源由设备释放；不要继续提交该设备的 command encoder。
 将 readback 用于低频统计或检查点；不能因为 ring 忙而跳过游戏逻辑。
 

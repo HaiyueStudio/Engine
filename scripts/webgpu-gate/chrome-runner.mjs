@@ -171,6 +171,9 @@ async function runChrome(
   ], { stdio: ['ignore', 'pipe', 'pipe'] });
   child.stdout.resume();
   let stderr = '';
+  let lastProgress = '';
+  let browserProduct = 'unknown';
+  const browserErrors = [];
   let completedResult = null;
   let primaryError = null;
   child.stderr.setEncoding('utf8');
@@ -184,7 +187,6 @@ async function runChrome(
     }, 20_000, 'Chrome/WebGPU fixture page');
     const cdp = await connectCdp(page.webSocketDebuggerUrl, Math.min(timeoutMs, 30_000));
     try {
-      const browserErrors = [];
       cdp.on('Runtime.exceptionThrown', event => {
         browserErrors.push({
           kind: 'exception',
@@ -205,6 +207,7 @@ async function runChrome(
       await cdp.call('Runtime.enable');
       await cdp.call('Page.enable');
       const version = await cdp.call('Browser.getVersion');
+      browserProduct = version.result?.product ?? 'unknown';
       if (visualCapture) {
         await cdp.call('Emulation.setDeviceMetricsOverride', {
           width: visualCapture.viewportWidth ?? 960,
@@ -230,7 +233,6 @@ async function runChrome(
       const phaseProfile = allocationSampling?.phase
         ? await captureAllocationPhase(cdp, waitFor, allocationSampling, timeoutMs)
         : null;
-      let lastProgress = '';
       const fixtureResult = await waitFor(async () => {
         let response;
         try {
@@ -320,8 +322,11 @@ async function runChrome(
       cdp.close();
     }
   } catch (error) {
-    primaryError = error;
-    throw error;
+    primaryError = attachChromeFailureDiagnostics(error, {
+      url, angleBackend, browserProduct, lastProgress, browserErrors, stderr,
+      exitCode: child.exitCode, signalCode: child.signalCode,
+    });
+    throw primaryError;
   } finally {
     if (child.exitCode === null) {
       await waitForChildExit(child, 5_000);
@@ -354,6 +359,17 @@ async function runChrome(
       throw cleanupError;
     }
   }
+}
+
+/** Preserve failure context even when a fixture never publishes a JSON result. */
+export function attachChromeFailureDiagnostics(error, diagnostics) {
+  const failure = error instanceof Error ? error : new Error(String(error));
+  const stderr = diagnostics.stderr ?? '';
+  const details = { ...diagnostics, stderr: stderr.slice(-65536), stderrTruncated: stderr.length > 65536 };
+  failure.browserFailure = details;
+  // Existing gates persist Error.stack; retain structured context there as well.
+  failure.stack = `${failure.stack}\nChrome/WebGPU failure diagnostics: ${JSON.stringify(details)}`;
+  return failure;
 }
 
 export async function removeChromeProfile(profile, {

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "messages": {
+    "title": "PLAY",
+    "heading": "One scene, every language",
+    "score": "Score: {score}",
+    "coins": {
+      "one": "{count} coin",
+      "other": "{count} coins"
+    },
+    "tip": "Text and title artwork follow your language.",
+    "add": "Add a coin"
+  },
+  "assets": {
+    "title.logo": "assets/title.en.svg"
+  }
+}

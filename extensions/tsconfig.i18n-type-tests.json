@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@haiyue/extensions/i18n": [
+        "./src/i18n.ts"
+      ]
+    },
+    "types": [
+      "@webgpu/types"
+    ]
+  },
+  "include": [
+    "type-tests/i18n-contract.type-test.ts"
+  ]
+}

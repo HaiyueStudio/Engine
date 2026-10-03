@@ -1,3 +1,6 @@
+import { acquirePostProcessTransientTextures, clearPostProcessTransientTextures, hasPostProcessTransientTextures } from './PostProcessTransientTextures';
+import { deferPostProcessDisposal } from './PostProcessSubmission';
+import { registerPostProcessGraphAccess } from './PostProcessGraph';
 import { PostProcessPass, getPostProcessTextureView } from './PostProcessPass';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import { getBuiltinPostprocessShader } from './BuiltinPostprocessShader';
@@ -25,6 +28,9 @@ export class GaussianBlurPass extends PostProcessPass {
 
   // Horizontal intermediate buffer
   private _hTex!: GPUTexture;
+  private _ownsScratch = false;
+  private _width = 0;
+  private _height = 0;
   private _hView!: GPUTextureView;
 
   // Per-direction uniform buffers (H and V)
@@ -35,10 +41,11 @@ export class GaussianBlurPass extends PostProcessPass {
   // Bind groups (src-texture changes between frames only on resize)
   private _lastSrc: GPUTexture | null = null;
   private _hBG: GPUBindGroup | null = null;
-  private _vBG!: GPUBindGroup;
+  private _vBG: GPUBindGroup | null = null;
 
   constructor(options: GaussianBlurPassOptions = {}) {
     super();
+    if (new.target === GaussianBlurPass) registerPostProcessGraphAccess(this);
     this._radius = options.radius ?? 4;
     this._sigma  = options.sigma  ?? this._radius / 2;
   }
@@ -78,6 +85,18 @@ export class GaussianBlurPass extends PostProcessPass {
     dstView: GPUTextureView,
     device: GPUDevice,
   ): void {
+    const scratch = acquirePostProcessTransientTextures(this, device, encoder, [{ name: 'gaussian.horizontal',
+      descriptor: { label: 'GaussianBlurPass.horizontal', size: [this._width, this._height], format: this._format,
+        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING }, firstUse: 0, lastUse: 1 }]);
+    if (scratch) {
+      this._releaseOwnedScratch();
+      const assignment = scratch.assignments[0]!;
+      if (this._hTex !== assignment.texture || !this._vBG) {
+        this._hTex = assignment.texture; this._hView = assignment.view;
+        this._createVerticalBindGroup(device);
+      }
+    }
+    try {
     // Rebuild H bind group if src texture changed (e.g. on resize / chain reorder)
     if (src !== this._lastSrc) {
       this._hBG = device.createBindGroup({
@@ -118,16 +137,20 @@ export class GaussianBlurPass extends PostProcessPass {
       }],
     });
     vPass.setPipeline(pipeline);
-    vPass.setBindGroup(0, this._vBG);
+    vPass.setBindGroup(0, this._vBG!);
     vPass.draw(3);
     vPass.end();
+    } finally { scratch?.release(); }
   }
 
   destroy(): void {
+    clearPostProcessTransientTextures(this);
     this._pipeline = null;
-    this._hTex?.destroy();
-    this._hParamsBuf?.destroy();
-    this._vParamsBuf?.destroy();
+    this._releaseOwnedScratch();
+    const h = this._hParamsBuf, v = this._vParamsBuf;
+    const release = () => { h?.destroy(); v?.destroy(); };
+    if (!deferPostProcessDisposal(this, release)) release();
+    this._vBG = null;
     this._lastSrc = null;
     this._hBG = null;
   }
@@ -150,16 +173,24 @@ export class GaussianBlurPass extends PostProcessPass {
     width: number,
     height: number,
   ): void {
-    this._hTex?.destroy();
-    this._hParamsBuf?.destroy();
-    this._vParamsBuf?.destroy();
+    this._releaseOwnedScratch();
+    const h = this._hParamsBuf, v = this._vParamsBuf;
+    const release = () => { h?.destroy(); v?.destroy(); };
+    if (!deferPostProcessDisposal(this, release)) release();
+    this._vBG = null;
 
+    this._width = width; this._height = height;
+    if (format !== this._format) this._pipeline = null;
+    this._format = format;
+    if (!hasPostProcessTransientTextures(this)) {
+    this._ownsScratch = true;
     this._hTex = device.createTexture({
       size:   [width, height],
       format,
       usage:  GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     });
     this._hView = this._hTex.createView();
+    }
 
     const texelW = 1 / width;
     const texelH = 1 / height;
@@ -167,17 +198,22 @@ export class GaussianBlurPass extends PostProcessPass {
     this._hParamsBuf = this._writeParamsBuf(device, 1, 0, texelW, texelH);
     this._vParamsBuf = this._writeParamsBuf(device, 0, 1, texelW, texelH);
 
-    // V bind group uses the fixed _hTex as source — created once here
-    this._vBG = device.createBindGroup({
-      layout: this._bgl,
-      entries: [
-        { binding: 0, resource: this._hView },
-        { binding: 1, resource: this._sampler },
-        { binding: 2, resource: { buffer: this._vParamsBuf } },
-      ],
-    });
-    // Force hBG rebuild next apply()
+    if (this._ownsScratch) this._createVerticalBindGroup(device);
     this._lastSrc = null;
+  }
+
+  private _createVerticalBindGroup(device: GPUDevice): void {
+    this._vBG = device.createBindGroup({ layout: this._bgl, entries: [
+      { binding: 0, resource: this._hView }, { binding: 1, resource: this._sampler },
+      { binding: 2, resource: { buffer: this._vParamsBuf } },
+    ] });
+  }
+  private _releaseOwnedScratch(): void {
+    if (!this._ownsScratch) return;
+    this._ownsScratch = false;
+    const texture = this._hTex;
+    const release = () => texture?.destroy();
+    if (!deferPostProcessDisposal(this, release)) release();
   }
 
   private _writeParamsBuf(

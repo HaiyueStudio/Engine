@@ -29,3 +29,16 @@ Deferred 分配为 backend 跟踪估算，不等于整个应用或驱动驻留�
 `node scripts/verify-deferred-lighting-example.mjs`（本机 Chrome + native WebGPU）
 
 截图和原始验证结果：`artifacts/engine-0.2.1/g06/`。这不是跨引擎基准；横向对比和设备分档另由 M18 G08 规划。
+
+## FrameGraph 单帧观察
+
+底部面板默认不捕获。选择效果链并点击「捕获下一帧」，切换局部图查看真实读写依赖、裁剪原因、生命周期；下方显示临时池逻辑/物理映射、复用原因、pending 高水位与计划缓存。
+
+- **GTAO + 双模糊**：观察 Deferred/AO/后处理临时资源。
+- **灰度 → 模糊 → AO 独立输出**：末尾 AO 不消费前序颜色，因此灰度/模糊可裁剪；所需深度/法线等依然保留。
+- **导出 JSON / 图 PNG**：只读取冻结元数据；PNG 是所选逻辑图，不是 GPU 场景截图。
+- 再次捕获才能更新；路径和设备切换清除快照。退出会取消 pending 捕获。
+
+逻辑节点不是 GPU pass；表内区间是局部闭区间，物理 ID 需与池 ID 联用。临时池估算不包含全部外部/持久资源，不是驱动驻留显存。metadataCopyMs 只统计内部元数据复制的一部分开销；正式采样应关闭观察者和 G-buffer 调试读回。
+
+[完整 API](../../docs/api/framegraph-inspector.md)。浏览器专项：`node scripts/verify-framegraph-example.mjs`，先运行定向构建。该检查使用双 GPU 的原生后端，不是正式性能验收。

@@ -1,8 +1,13 @@
+import { registerPostProcessGraphAccess } from './PostProcessGraph';
 import { PostProcessPass, getPostProcessTextureView } from './PostProcessPass';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import { getBuiltinPostprocessShader } from './BuiltinPostprocessShader';
 
 export class GrayscalePass extends PostProcessPass {
+  constructor() {
+    super();
+    if (new.target === GrayscalePass) registerPostProcessGraphAccess(this);
+  }
   readonly label = 'Grayscale';
 
   private _pipeline: GPURenderPipeline | null = null;

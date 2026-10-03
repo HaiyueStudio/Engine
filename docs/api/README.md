@@ -38,3 +38,7 @@ npm run api:check
 
 - [GPU 实例、Toon、LOD 与模拟（experimental）](gpu-instances.md)
 - [Deferred Lighting（experimental）](deferred-lighting.md)
+
+- [FrameGraph Inspector（experimental）](framegraph-inspector.md)
+- [国际化](i18n.md)：语言包、文本与艺术字资源绑定。
+- [剧情运行时](narrative.md)：分支、存档与状态机动作接口。

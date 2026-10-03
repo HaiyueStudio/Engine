@@ -3967,6 +3967,10 @@
               "kind": "value"
             },
             {
+              "name": "createFrameGraphInspector",
+              "kind": "value"
+            },
+            {
               "name": "createGPUResourceOwner",
               "kind": "value"
             },
@@ -4424,6 +4428,14 @@
             },
             {
               "name": "FrameDiagnosticsOptions",
+              "kind": "type"
+            },
+            {
+              "name": "FrameGraphInspector",
+              "kind": "type"
+            },
+            {
+              "name": "FrameGraphSnapshot",
               "kind": "type"
             },
             {
@@ -7297,6 +7309,10 @@
               "kind": "value"
             },
             {
+              "name": "createFrameGraphInspector",
+              "kind": "value"
+            },
+            {
               "name": "createRenderPipelineAsync",
               "kind": "value"
             },
@@ -7327,6 +7343,14 @@
             {
               "name": "disposeSceneFrameGpuArena",
               "kind": "value"
+            },
+            {
+              "name": "FrameGraphInspector",
+              "kind": "type"
+            },
+            {
+              "name": "FrameGraphSnapshot",
+              "kind": "type"
             },
             {
               "name": "FrameRingGenerationInfo",
@@ -10885,6 +10909,168 @@
             },
             {
               "name": "hyaStateMachineChannelCapability",
+              "kind": "value"
+            }
+          ]
+        },
+        "./i18n": {
+          "source": "extensions/src/i18n.ts",
+          "exports": [
+            {
+              "name": "bindI18nImage",
+              "kind": "value"
+            },
+            {
+              "name": "bindI18nText",
+              "kind": "value"
+            },
+            {
+              "name": "checkLocalePacks",
+              "kind": "value"
+            },
+            {
+              "name": "collectLocaleCharacters",
+              "kind": "value"
+            },
+            {
+              "name": "createI18nTextureLoader",
+              "kind": "value"
+            },
+            {
+              "name": "I18n",
+              "kind": "value"
+            },
+            {
+              "name": "I18nDiagnostic",
+              "kind": "type"
+            },
+            {
+              "name": "I18nEvent",
+              "kind": "type"
+            },
+            {
+              "name": "I18nImageBinding",
+              "kind": "type"
+            },
+            {
+              "name": "I18nImageHandle",
+              "kind": "type"
+            },
+            {
+              "name": "I18nImageLoader",
+              "kind": "type"
+            },
+            {
+              "name": "I18nImageOptions",
+              "kind": "type"
+            },
+            {
+              "name": "I18nOptions",
+              "kind": "type"
+            },
+            {
+              "name": "I18nParams",
+              "kind": "type"
+            },
+            {
+              "name": "I18nTextBinding",
+              "kind": "type"
+            },
+            {
+              "name": "LocalePack",
+              "kind": "type"
+            },
+            {
+              "name": "LocalePackIssue",
+              "kind": "type"
+            },
+            {
+              "name": "LocalePackLoader",
+              "kind": "type"
+            },
+            {
+              "name": "validateLocalePack",
+              "kind": "value"
+            }
+          ]
+        },
+        "./narrative": {
+          "source": "extensions/src/narrative.ts",
+          "exports": [
+            {
+              "name": "connectNarrativeActions",
+              "kind": "value"
+            },
+            {
+              "name": "NarrativeActionConnection",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeActionHandler",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeActionRequest",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeArtwork",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeCondition",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeEffect",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeEvent",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeGui",
+              "kind": "value"
+            },
+            {
+              "name": "NarrativeGuiOptions",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeNode",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeOption",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeRuntime",
+              "kind": "value"
+            },
+            {
+              "name": "NarrativeSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeValue",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeVariables",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeView",
+              "kind": "type"
+            },
+            {
+              "name": "validateNarrativeDefinition",
               "kind": "value"
             }
           ]

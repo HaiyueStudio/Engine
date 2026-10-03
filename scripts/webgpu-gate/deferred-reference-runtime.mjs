@@ -20,3 +20,6 @@ export { InstancedPbrMaterial } from '../../engine/src/material/InstancedPbrMate
 export { GpuInstanceLod } from '../../engine/src/compute/GpuInstanceLod.ts';
 export { InstancedToonMaterial } from '../../engine/src/material/InstancedToonMaterial.ts';
 export { createSphere3D } from '../../engine/src/geometry/SphereGeometry.ts';
+
+export { GaussianBlurPass } from '../../engine/src/postprocess/GaussianBlurPass.ts';
+export { getSequentialAttachmentAllocator } from '../../engine/src/rtt/TransientAttachmentSequence.ts';

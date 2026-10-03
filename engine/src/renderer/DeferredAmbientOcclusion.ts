@@ -1,3 +1,6 @@
+import { TransientTextureAllocator } from '../rtt/TransientTextureAllocator';
+import { setPostProcessTransientTextures } from '../postprocess/PostProcessTransientTextures';
+import { setPostProcessSubmission } from '../postprocess/PostProcessSubmission';
 import { DeferredLightingCapabilityError } from '../frame/DeferredLightTable';
 import type { RenderCommandContext } from '../core/RenderCommandContext';
 import type { PostProcessPass, PostProcessSceneTextures } from '../postprocess/PostProcessPass';
@@ -15,8 +18,8 @@ interface Slot {
   readonly height: number;
   readonly sources: readonly PostProcessPass[];
   readonly passes: readonly PostProcessPass[];
-  readonly textures: readonly GPUTexture[];
-  readonly views: readonly GPUTextureView[];
+  /** Diagnostic snapshot, valid until the next AO record; physical ownership belongs to the pool. */
+  textures: readonly GPUTexture[];
   readonly buffer: GPUBuffer;
   readonly bytesPerRow: number;
   readonly releaseAllocation: () => void;
@@ -28,6 +31,7 @@ interface Slot {
 /** AO visibility travels in a storage buffer: layered PBR already uses all 16 sampled textures. */
 export class DeferredAmbientOcclusion {
   readonly neutral: GPUBufferBinding;
+  private readonly _transientTextures: TransientTextureAllocator;
   private readonly _slots = new Set<Slot>();
   private readonly _neutralEncoders = new Set<GPUCommandEncoder>();
   private _destroyed = false;
@@ -35,6 +39,7 @@ export class DeferredAmbientOcclusion {
   private readonly _releaseNeutralAllocation: () => void;
 
   constructor(private readonly _device: GPUDevice, private readonly _budget: DeferredAllocationBudget = getDeferredAllocationBudget(_device)) {
+    this._transientTextures = new TransientTextureAllocator(_device, bytes => _budget.reserve(bytes), 64, 'deferred-ao');
     this._releaseNeutralAllocation = _budget.reserve(260);
     try { this.neutral = { buffer: _device.createBuffer({ label: 'DeferredAO.neutral', size: 260, usage: GPUBufferUsage.STORAGE }) }; }
     catch (error) { this._releaseNeutralAllocation(); throw error; }
@@ -48,6 +53,7 @@ export class DeferredAmbientOcclusion {
     input?: DeferredAmbientOcclusionInput): GPUBufferBinding {
     if (this._destroyed || context.device !== this._device) throw new Error('Deferred AO owner is unavailable.');
     if (!context.afterSubmit) throw new Error('Deferred AO requires an afterSubmit lifecycle hook.');
+    this._transientTextures.beginFrame(context.encoder);
     const sources = input?.passes.filter(pass => getLightingAmbientOcclusion(pass)) ?? [];
     const liveViews = context.viewFamily ? new Set(context.viewFamily.views.map(view => view.key)) : null;
     for (const slot of this._slots) {
@@ -85,60 +91,63 @@ export class DeferredAmbientOcclusion {
     });
     const scene = input!.prepare();
     if (!scene.depth || !scene.normal || !scene.frame) throw new Error('Deferred AO requires prepared depth, normal and frame data.');
+    const visibility = this._transientTextures.acquire(Array.from({ length: Math.min(2, sources.length) }, (_, i) => ({
+      name: `${viewKey}:visibility:${i}`, descriptor: { label: `DeferredAO.visibility:${i}`, size: [width, height], format: 'r16float' as const,
+        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC },
+      firstUse: 0, lastUse: sources.length,
+    })), context);
+    selected.textures = visibility.assignments.map(assignment => assignment.texture);
+    try {
     for (const [index, pass] of selected.passes.entries()) {
       getLightingAmbientOcclusion(sources[index]!)!.configure(pass, index === 0);
       pass.setSceneTextures(scene);
+      setPostProcessSubmission(pass, callback => context.afterSubmit!(callback));
       try {
         // The first pass ignores source color in occlusion display mode; subsequent AO passes multiply visibility.
-        const source = index === 0 ? scene.normal : selected.textures[(index - 1) % 2]!;
-        pass.apply(context.encoder, source, selected.views[index % 2]!, this._device);
+        const source = index === 0 ? scene.normal : visibility.assignments[(index - 1) % 2]!.texture;
+        pass.apply(context.encoder, source, visibility.assignments[index % 2]!.view, this._device);
         getLightingAmbientOcclusion(sources[index]!)!.recorded?.(pass);
-      } finally { pass.setSceneTextures({}); }
+      } finally { pass.setSceneTextures({}); setPostProcessSubmission(pass); }
     }
-    context.encoder.copyTextureToBuffer({ texture: selected.textures[(sources.length - 1) % 2]! },
+    context.encoder.copyTextureToBuffer({ texture: visibility.assignments[(sources.length - 1) % 2]!.texture },
       { buffer: selected.buffer, offset: 256, bytesPerRow: selected.bytesPerRow }, [width, height]);
     return { buffer: selected.buffer };
+    } finally { visibility.release(); }
   }
 
   destroy(abandon = false): void {
     this._destroyed = true;
+    this._transientTextures.destroy(abandon);
     for (const slot of this._slots) { if (abandon) { slot.encoders.clear(); slot.pending.clear(); } this._retire(slot); }
     if (abandon) this._neutralEncoders.clear();
     this._releaseNeutral();
   }
 
   private _create(viewKey: string, width: number, height: number, sources: readonly PostProcessPass[]): Slot {
-    const { bytesPerRow, bufferBytes, bytes } = deferredAoStorage(width, height, sources.length);
-    const releaseAllocation = this._budget.reserve(bytes);
+    const { bytesPerRow, bufferBytes } = deferredAoStorage(width, height, sources.length);
+    const releaseAllocation = this._budget.reserve(bufferBytes);
     let buffer: GPUBuffer | undefined;
-    const textures: GPUTexture[] = [], passes: PostProcessPass[] = [];
-    let views: GPUTextureView[];
+    const passes: PostProcessPass[] = [];
     try {
       buffer = this._device.createBuffer({ label: 'DeferredAO.visibility', size: bufferBytes,
         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST, mappedAtCreation: true });
       new Uint32Array(buffer.getMappedRange(), 0, 4).set([width, height, bytesPerRow / 4, DEFERRED_AO_LAYOUT_VERSION]); buffer.unmap();
-      for (let i = 0; i < Math.min(2, sources.length); i++) textures.push(this._device.createTexture({
-        label: `DeferredAO.visibility:${i}`, size: [width, height], format: 'r16float',
-        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
-      }));
       for (const source of sources) {
         const pass = getLightingAmbientOcclusion(source)!.create();
+        setPostProcessTransientTextures(pass, this._transientTextures);
         passes.push(pass); pass.prepare(this._device, 'r16float', width, height);
       }
-      views = textures.map(t => t.createView());
     } catch (error) {
       for (const pass of passes) pass.destroy();
-      for (const texture of textures) texture.destroy();
       buffer?.destroy(); releaseAllocation(); throw error;
     }
-    return { viewKey, width, height, sources, passes, textures, views, buffer: buffer!, bytesPerRow, releaseAllocation,
+    return { viewKey, width, height, sources, passes, textures: [], buffer: buffer!, bytesPerRow, releaseAllocation,
       pending: new Set(), encoders: new Set(), retired: false };
   }
   private _retire(slot: Slot): void {
     slot.retired = true;
     if (slot.encoders.size) return;
     for (const pass of slot.passes) pass.destroy();
-    for (const texture of slot.textures) texture.destroy();
     slot.buffer.destroy(); slot.releaseAllocation(); this._slots.delete(slot);
   }
   private _releaseNeutral(): void {

@@ -3,6 +3,8 @@ import { AmbientLight, PointLight } from '@haiyue/engine/lighting';
 import { ColorLinear } from '@haiyue/engine/color';
 import { getEngineDiagnosticsSnapshot } from '@haiyue/engine/diagnostics';
 import { createDeferredLightingProfile, type DeferredLightingProfile, type DeferredLightingDebugChannel } from '@haiyue/engine/experimental/renderer';
+import { GaussianBlurPass, GrayscalePass, GtaoPass } from '@haiyue/engine/postprocess';
+import { mountFrameGraphPanel } from './framegraph';
 import { mat4, vec3 } from 'wgpu-matrix';
 import { LIGHT_COUNTS, lightPosition, makeLights, parseCount, parsePath, type Vec3 } from './model';
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -13,18 +15,21 @@ async function main() {
   const params = new URLSearchParams(location.search), regression = params.get('regression') === '1';
   const canvas = $<HTMLCanvasElement>('canvas'), overlay = $<HTMLCanvasElement>('overlay'), debug = $<HTMLCanvasElement>('debug');
   const overlayContext = overlay.getContext('2d')!, debugContext = debug.getContext('2d')!;
-  const engine = new HaiyueEngine({ canvas, renderProfile: 'diagnostic', msaaSamples: 1, diagnostics: { enabled: true }, clearColor: { r: .015, g: .023, b: .04, a: 1 },
+  const powerPreference = params.get('powerPreference') === 'low-power' ? 'low-power' : 'high-performance';
+  const engine = new HaiyueEngine({ canvas,
+    ...(regression ? { gpu: { requestAdapter: () => navigator.gpu.requestAdapter({ powerPreference }), getPreferredCanvasFormat: () => navigator.gpu.getPreferredCanvasFormat() } } : {}), renderProfile: 'diagnostic', msaaSamples: 1, diagnostics: { enabled: true }, clearColor: { r: .015, g: .023, b: .04, a: 1 },
     devicePixelRatio: () => Math.min(1, 1280 / Math.max(canvas.clientWidth, 1), 720 / Math.max(canvas.clientHeight, 1)) });
   const lifetime = new AbortController();
   let destroyed = false, generation = 0, pending: AbortController | undefined, profile: DeferredLightingProfile | undefined;
   let control: OrbitControl | undefined, observer: ResizeObserver | undefined;
+  let framegraph: ReturnType<typeof mountFrameGraphPanel> | undefined;
   let hudTimer: ReturnType<typeof setInterval> | undefined;
   let latestGpu: { ms: number; at: number; frame: number } | undefined;
   let time = 0, frameDelta = 0, lastDebug = 0, debugBusy = false, readyFrames = 0;
   const errors: string[] = [], disabled = new Set<number>();
   function dispose() {
     if (destroyed) return;
-    destroyed = true; generation++; clearInterval(hudTimer); lifetime.abort(); pending?.abort(); observer?.disconnect(); control?.destroy(); profile?.dispose(); engine.destroy();
+    destroyed = true; generation++; clearInterval(hudTimer); lifetime.abort(); pending?.abort(); observer?.disconnect(); control?.destroy(); framegraph?.dispose(); profile?.dispose(); engine.destroy();
     document.body.dataset.renderStatus = 'disposed';
   }
   window.addEventListener('pagehide', dispose, { signal: lifetime.signal });
@@ -34,6 +39,9 @@ async function main() {
   const scene = engine.createScene({ name: 'Deferred light laboratory',
     camera: { camera3D: { fov: Math.PI / 3, near: .1, far: 120 }, orbit: { radius: 29, theta: .2, phi: .32 * Math.PI, target: [0, 1, -1] } },
     render3D: { renderProfile: 'batched', toneMapping: 'reinhard' }, render2D: false, gui: false });
+  engine.switchScene(scene);
+  framegraph = mountFrameGraphPanel(scene.render3DSystem!, lifetime.signal);
+  const effects = { blur: new GaussianBlurPass(), secondBlur: new GaussianBlurPass({ radius: 2 }), gray: new GrayscalePass(), ao: new GtaoPass(), occlusion: new GtaoPass({ displayMode: 'occlusion' }) };
   const camera = scene.cameraEntity.getComponent(Camera3D)!, orbit = scene.cameraEntity.getComponent(SphericalTransform3D)!;
   control = new OrbitControl(canvas, orbit, { minRadius: 8, maxRadius: 48 });
   const material = (color: Vec3, metallic = .1, roughness = .65) => new PbrMaterial({ baseColor: new ColorLinear(...color), metallic, roughness });
@@ -81,6 +89,7 @@ async function main() {
     input('selected').value = String(selected); input('enabled').checked = !disabled.has(selected - 1); updateLights();
   }
   async function switchPath() {
+    framegraph?.clear();
     const ticket = ++generation; pending?.abort(); pending = new AbortController(); profile?.dispose(); profile = undefined;
     scene.render3DSystem!.setRenderProfile('batched');
     latestGpu = undefined; document.body.dataset.renderStatus = 'loading'; $('status').textContent = '正在准备渲染路径…'; readyFrames = 0; debug.hidden = true;
@@ -99,6 +108,11 @@ async function main() {
   }
   const on = (id: string, event: string, action: () => void) => $(id).addEventListener(event, action, { signal: lifetime.signal });
   on('path', 'change', () => { select('display').value = 'render'; void switchPath(); });
+  on('fg-effects', 'change', () => {
+    const mode = select('fg-effects').value;
+    scene.render3DSystem!.passes = mode === 'ao-blur' ? [effects.ao, effects.blur, effects.secondBlur] : mode === 'cull' ? [effects.gray, effects.blur, effects.occlusion] : [];
+    framegraph?.clear();
+  });
   on('count', 'change', syncSelection); on('selected', 'change', syncSelection);
   on('enabled', 'change', () => { const i = Number(input('selected').value) - 1; if (input('enabled').checked) disabled.delete(i); else disabled.add(i); updateLights(); });
   for (const id of ['solo', 'intensity', 'range']) on(id, 'input', updateLights);
@@ -174,16 +188,16 @@ async function main() {
   function fail(message: string) { document.body.dataset.renderStatus = 'failed'; $('status').textContent = `无法完成渲染：${message}`; $('result').textContent = JSON.stringify({ status: 'failed', errors: [...errors, message] }); engine.stop(); }
   engine.on('update', event => { frameDelta = event.detail.delta; if (input('motion').checked) { time += Math.min(frameDelta, 100) / 1000; updateLights(); } });
   engine.on('after-update', event => {
-    if (destroyed) return; readyFrames++; drawHelpers();
+    if (destroyed) return; readyFrames++; drawHelpers(); framegraph?.afterFrame();
     
     if (event.detail.time - lastDebug > 500) { lastDebug = event.detail.time; void drawDebug(); }
   });
-  engine.on('device-lost', () => { generation++; pending?.abort(); debug.hidden = true; });
+  engine.on('device-lost', () => { framegraph?.clear(); generation++; pending?.abort(); debug.hidden = true; });
   engine.on('device-restored', () => { void switchPath(); });
   engine.on('recovery-failed', event => fail(event.detail.error.message));
   observer = new ResizeObserver(() => { if (!destroyed) { engine.resizeToDisplaySize(); debug.hidden = true; } }); observer.observe(canvas);
   hudTimer = setInterval(() => { if (document.body.dataset.renderStatus === 'ready') updateHud(); }, 100);
-  syncSelection(); engine.switchScene(scene); engine.run(); await switchPath();
-  Object.assign(window, { __deferredExample: { dispose, snapshot: () => ({ ...JSON.parse($('result').textContent || '{}'), lifecycle: document.body.dataset.renderStatus, resources: getEngineDiagnosticsSnapshot(engine).gpuResources.totals }) } });
+  syncSelection(); engine.run(); await switchPath();
+  Object.assign(window, { __deferredExample: { dispose, framegraph, whenSubmittedWorkDone: () => engine.device.queue.onSubmittedWorkDone(), snapshot: () => ({ ...JSON.parse($('result').textContent || '{}'), lifecycle: document.body.dataset.renderStatus, resources: getEngineDiagnosticsSnapshot(engine).gpuResources.totals }) } });
 }
 void main().catch(error => { document.body.dataset.renderStatus = 'failed'; $('status').textContent = `WebGPU 初始化失败：${String(error)}`; console.error(error); });

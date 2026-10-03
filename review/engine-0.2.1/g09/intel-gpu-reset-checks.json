@@ -1,0 +1,359 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-02T22:56:51.008Z",
+  "status": "investigated-no-adopted-fix",
+  "revision": "21105a2a94e1b811b4c9b03fbca3c6187e1fa771",
+  "dirty": true,
+  "runtime": {
+    "sha256": "2009a192457771194fbd4933279a9637c1cdac1b2f0b828fff6bd05e2f90ad29",
+    "fileCount": 620
+  },
+  "g09Qualified": false,
+  "performanceQualified": false,
+  "productionRuntimeChanged": false,
+  "systemGpuResetObserved": true,
+  "driverOrHardwareRootCauseEstablished": false,
+  "counts": {
+    "browserSessions": 22,
+    "nativeCaptured": 20,
+    "passed": 6,
+    "failedNative": 14,
+    "browserStartupFailures": 2
+  },
+  "cohorts": [
+    {
+      "report": {
+        "path": "artifacts/engine-0.2.1/g09/browser-mode-screen-2026-10-02T22-40-41.119Z/report.json",
+        "sha256": "0694803e861f96dcb2dbea78c3308fa2b1c025a7b5743aa746dcc3a898999d59"
+      },
+      "scope": "B4 native Intel complete-chain browser flag hypothesis screen",
+      "inputsUnchanged": true,
+      "results": [
+        {
+          "index": 0,
+          "mode": "default",
+          "status": "failed",
+          "classification": "capture-unreliable",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/browser-mode-screen-2026-10-02T22-40-41.119Z/0-default.json",
+            "sha256": "896d423dd09947ce5a889f959e1b77fef2252b90885f46521e378c547f3bd026"
+          }
+        },
+        {
+          "index": 1,
+          "mode": "no-unsafe",
+          "status": "passed",
+          "classification": "passed",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/browser-mode-screen-2026-10-02T22-40-41.119Z/1-no-unsafe.json",
+            "sha256": "93651aaef13669acce31cc544a43fa576e58388349f9e20eab7f2e34c7313b1a"
+          }
+        },
+        {
+          "index": 2,
+          "mode": "no-unsafe",
+          "status": "failed",
+          "classification": "image-mismatch",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/browser-mode-screen-2026-10-02T22-40-41.119Z/2-no-unsafe.json",
+            "sha256": "1b791e1baa4a391de472ffabeb83aca5841a2348e05b87204f23e87f4b1f51d5"
+          }
+        },
+        {
+          "index": 3,
+          "mode": "default",
+          "status": "failed",
+          "classification": "image-mismatch",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/browser-mode-screen-2026-10-02T22-40-41.119Z/3-default.json",
+            "sha256": "b2fa3cc31f9cee6888298b839529a4688368ac8336670184e73d8d5bfbf7edb3"
+          }
+        },
+        {
+          "index": 4,
+          "mode": "default",
+          "status": "failed",
+          "classification": "capture-unreliable",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/browser-mode-screen-2026-10-02T22-40-41.119Z/4-default.json",
+            "sha256": "be3f114d8b9600298eabbd714e33083605c1ae8c9a7bcc8ecc767b6885eb5b6f"
+          }
+        },
+        {
+          "index": 5,
+          "mode": "no-unsafe",
+          "status": "failed",
+          "classification": "image-mismatch",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/browser-mode-screen-2026-10-02T22-40-41.119Z/5-no-unsafe.json",
+            "sha256": "b14be8e458b922800ffdf0a14a7d621674ea989921ca465274004fce0665bd77"
+          }
+        },
+        {
+          "index": 6,
+          "mode": "no-unsafe",
+          "status": "passed",
+          "classification": "passed",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/browser-mode-screen-2026-10-02T22-40-41.119Z/6-no-unsafe.json",
+            "sha256": "e482fbfc0fe0341cafe4fc87bd8624023b05b5f0e62bbd3aa347181f3f6ba8b7"
+          }
+        },
+        {
+          "index": 7,
+          "mode": "default",
+          "status": "failed",
+          "classification": "capture-unreliable",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/browser-mode-screen-2026-10-02T22-40-41.119Z/7-default.json",
+            "sha256": "e6e3dc5ca27c744ddd44ce07e86d57780d5d995f88eafc4030b783edcb205e09"
+          }
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/engine-0.2.1/g09/ao-kernel-screen-2026-10-02T22-45-21.387Z/report.json",
+        "sha256": "1fa47c7f020b98bd32450921e5166ea2efd222414e9dc609c5ccf0c41f4f3f6f"
+      },
+      "scope": "B4 Intel AO kernel elimination only; altered shading cannot qualify product pixels",
+      "inputsUnchanged": true,
+      "results": [
+        {
+          "index": 0,
+          "mode": "production",
+          "status": "passed",
+          "classification": "passed",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/ao-kernel-screen-2026-10-02T22-45-21.387Z/0-production.json",
+            "sha256": "4c0a0f85ee0b95d04a3ffbe1fe7de1475c11045cd2f308214f7cb6ff3095c40a"
+          }
+        },
+        {
+          "index": 1,
+          "mode": "all",
+          "status": "failed",
+          "classification": "capture-unreliable",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/ao-kernel-screen-2026-10-02T22-45-21.387Z/1-all.json",
+            "sha256": "87784e0aae360a8d9e66d73e7fa916e55423ce3892030f1f55a00adc68185ede"
+          }
+        },
+        {
+          "index": 2,
+          "mode": "all",
+          "status": "passed",
+          "classification": "passed",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/ao-kernel-screen-2026-10-02T22-45-21.387Z/2-all.json",
+            "sha256": "8d93321bbea8054ef6ec594093e473b5e915952b016beb418066c7abf75663a4"
+          }
+        },
+        {
+          "index": 3,
+          "mode": "production",
+          "status": "passed",
+          "classification": "passed",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/ao-kernel-screen-2026-10-02T22-45-21.387Z/3-production.json",
+            "sha256": "fd47c68431536cab9e0181a6b150c6d6ef9e4b2e7c0eb89e8a85b5e6b94245cd"
+          }
+        },
+        {
+          "index": 4,
+          "mode": "raw",
+          "status": "failed",
+          "classification": "image-mismatch",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/ao-kernel-screen-2026-10-02T22-45-21.387Z/4-raw.json",
+            "sha256": "3303ce62674245fd36970be6908cbd817fdd79d85e444559b5afeb863c6fdbd7"
+          }
+        },
+        {
+          "index": 5,
+          "mode": "ao-denoise",
+          "status": "failed",
+          "classification": "capture-unreliable",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/ao-kernel-screen-2026-10-02T22-45-21.387Z/5-ao-denoise.json",
+            "sha256": "bf007636ca3e3f3c063301eb2166b17691f17750fdaecf923f2bd0c85c31dc2b"
+          }
+        },
+        {
+          "index": 6,
+          "mode": "ao-upscale",
+          "status": "failed",
+          "classification": "image-mismatch",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/ao-kernel-screen-2026-10-02T22-45-21.387Z/6-ao-upscale.json",
+            "sha256": "74c8d2541327d62138f6f3b2c646bec31a0f64c422ff1dc359a3587987384200"
+          }
+        },
+        {
+          "index": 7,
+          "mode": "production",
+          "status": "failed",
+          "classification": "capture-unreliable",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/ao-kernel-screen-2026-10-02T22-45-21.387Z/7-production.json",
+            "sha256": "bd5e4dbb15e56c2197c5494e5dcda9a13c515b97ea6cffef120a0f7691e4d5a5"
+          }
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/engine-0.2.1/g09/headed-screen-2026-10-02T22-49-55.175Z/report.json",
+        "sha256": "178af5623352f820ed5110bfc0fa1495808cc8ca1c37459561b7c4815063bb0c"
+      },
+      "scope": "B4 native Intel complete-chain headless/headed diagnostic; not qualification",
+      "inputsUnchanged": true,
+      "results": [
+        {
+          "index": 0,
+          "mode": "default",
+          "status": "failed",
+          "classification": "image-mismatch",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/headed-screen-2026-10-02T22-49-55.175Z/0-default.json",
+            "sha256": "8980987f57cd997b36a90d0f159458c56e5197e997025954a59a510280f843de"
+          }
+        },
+        {
+          "index": 1,
+          "mode": "headed",
+          "status": "failed",
+          "classification": "browser-startup-failure",
+          "error": "Error: Timed out waiting for Chrome/WebGPU fixture page.\n    at waitFor (file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/webgpu-gate/chrome-runner.mjs:702:9)\n    at async runChrome (file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/webgpu-gate/chrome-runner.mjs:184:18)\n    at async runChromeWebGpuFixture (file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/webgpu-gate/chrome-runner.mjs:40:20)\n    at async file:///Users/qingque/Desktop/HaiyueStudio/Engine/artifacts/engine-0.2.1/g09/headed-screen.mjs:20:14\nChrome/WebGPU failure diagnostics: {\"url\":\"http://127.0.0.1:51538/scripts/webgpu-gate/framegraph-black-frame-fixture.html?powerPreference=low-power&copySource=1&readback=atomic&access=native-encoding&chain=full\",\"angleBackend\":\"metal\",\"browserProduct\":\"unknown\",\"lastProgress\":\"\",\"browserErrors\":[],\"stderr\":\"\\nDevTools listening on ws://127.0.0.1:51542/devtools/browser/a2f9cc8c-19a1-473c-b282-d7a43dbfb936\\n\",\"exitCode\":null,\"signalCode\":null,\"stderrTruncated\":false}"
+        },
+        {
+          "index": 2,
+          "mode": "headed",
+          "status": "failed",
+          "classification": "browser-startup-failure",
+          "error": "Error: Timed out waiting for Chrome/WebGPU fixture page.\n    at waitFor (file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/webgpu-gate/chrome-runner.mjs:702:9)\n    at async runChrome (file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/webgpu-gate/chrome-runner.mjs:184:18)\n    at async runChromeWebGpuFixture (file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/webgpu-gate/chrome-runner.mjs:40:20)\n    at async file:///Users/qingque/Desktop/HaiyueStudio/Engine/artifacts/engine-0.2.1/g09/headed-screen.mjs:20:14\nChrome/WebGPU failure diagnostics: {\"url\":\"http://127.0.0.1:51595/scripts/webgpu-gate/framegraph-black-frame-fixture.html?powerPreference=low-power&copySource=1&readback=atomic&access=native-encoding&chain=full\",\"angleBackend\":\"metal\",\"browserProduct\":\"unknown\",\"lastProgress\":\"\",\"browserErrors\":[],\"stderr\":\"\\nDevTools listening on ws://127.0.0.1:51596/devtools/browser/98c5ca16-794e-4149-9b76-202a72fac947\\n\",\"exitCode\":null,\"signalCode\":null,\"stderrTruncated\":false}"
+        },
+        {
+          "index": 3,
+          "mode": "default",
+          "status": "failed",
+          "classification": "image-mismatch",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/headed-screen-2026-10-02T22-49-55.175Z/3-default.json",
+            "sha256": "91594d9af2027745d857c2aa934c5987b6ac89bcba8b6f62d25c5b48a246babe"
+          }
+        }
+      ]
+    },
+    {
+      "report": {
+        "path": "artifacts/engine-0.2.1/g09/headed-first-run-screen-2026-10-02T22-52-37.021Z/report.json",
+        "sha256": "d44518cc96d447db00feff1fabd15758ccf6c6ede8b98c2316daa4dd5f736982"
+      },
+      "scope": "B4 headed browser first-run fixture validation; two native Intel samples, not qualification",
+      "inputsUnchanged": true,
+      "results": [
+        {
+          "index": 0,
+          "mode": "headed",
+          "status": "failed",
+          "classification": "capture-unreliable",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/headed-first-run-screen-2026-10-02T22-52-37.021Z/0-headed.json",
+            "sha256": "02e3c88a8295dded00213c83166811ee2993f65c9b2a296aeffae981b3599c93"
+          }
+        },
+        {
+          "index": 1,
+          "mode": "headed",
+          "status": "passed",
+          "classification": "passed",
+          "raw": {
+            "path": "artifacts/engine-0.2.1/g09/headed-first-run-screen-2026-10-02T22-52-37.021Z/1-headed.json",
+            "sha256": "d7340f3a18aecf2fbca757ccba407fdb14631bd9b8285a3a2d2fd469bc08e19e"
+          }
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/browser-mode-screen.mjs",
+      "sha256": "3745a0aba6458c5dd7b5bce272afcd0ef588211bb85e7b6df3faf85729e52694"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/ao-kernel-probe.html",
+      "sha256": "10fb8c9b3abd6185cd0c7b36050094efcf44694f2377797b1fed06d503cf8a8b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/ao-kernel-probe.mjs",
+      "sha256": "892a1d2e4f0959d99969375ed1fef2f67a508233970a92a509033ebab425f511"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/ao-kernel-screen.mjs",
+      "sha256": "85a84732eb95da488db6cffdca5386aa266c015e6ea87cd381b5e31a25f11c0d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/chrome-without-unsafe.zsh",
+      "sha256": "b27579fe79388c4430e3e0d08bbb238c53731159dbe79c6fcb4dbc48bb0ce9ac"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/chrome-headed.zsh",
+      "sha256": "3c81865cc256afe66ab1e75afdb6110f3d8c13613103668dc886f5259bf26f03"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/chrome-headed-no-first-run.zsh",
+      "sha256": "37aabf37bea471c727647883ed08017cdd5eb1235063f7fe9621b50cdae22bcb"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/headed-screen.mjs",
+      "sha256": "9ea7115a31eca4ed05208e411893bdb182b9a3807365b98f676aac13c7febcb1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/headed-first-run-screen.mjs",
+      "sha256": "072b7ab7ddbd9e8bdb445176769e94144030f72b509395d76bb547ed3258bd3a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/intel-restart-kernel-2026-10-03.log",
+      "sha256": "c9ecf7f0a35e9d3c924644cf5326d8a10c8da3f6b96a97aa05c3c2fdd8b9e63f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/intel-restart-final-2026-10-03.log",
+      "sha256": "af7e4488aadf60529d2622f51b56b55ef276d594da003defa0ba1f6cabe3bac2"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/intel-restart-reports-2026-10-03.json",
+      "sha256": "3f9cc68ff7e526380bcef12ad5b1b8739fda2f2efca0e2f3e761b77160ec0168"
+    }
+  ],
+  "correlatedFailure": {
+    "case": "artifacts/engine-0.2.1/g09/headed-first-run-screen-2026-10-02T22-52-37.021Z/0-headed.json",
+    "timezone": "Asia/Shanghai",
+    "start": "2026-10-03 06:52:37.201",
+    "end": "2026-10-03 06:53:35.909",
+    "intelTimeouts": [
+      "2026-10-03 06:52:47.664",
+      "2026-10-03 06:53:13.872"
+    ],
+    "webgpuDeviceLoss": null,
+    "validationErrors": []
+  },
+  "checks": [
+    {
+      "command": "npm run docs:check",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/g09/intel-reset-docs-check.log",
+        "sha256": "278809611a462b905dff58eb1aa0189a1a8bb8f9468a2b6e8146bee65730f547"
+      }
+    },
+    {
+      "command": "npm run api:check",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/g09/intel-reset-api-check.log",
+        "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+      }
+    }
+  ]
+}

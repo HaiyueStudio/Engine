@@ -1,0 +1,317 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-02T13:04:50.313Z",
+  "status": "failed-and-incomplete",
+  "goalStatus": "active",
+  "stageSixComplete": false,
+  "formalPerformanceSamplesCollected": false,
+  "performanceQualified": false,
+  "releaseQualified": false,
+  "revision": "21105a2a94e1b811b4c9b03fbca3c6187e1fa771",
+  "dirty": true,
+  "sourceFingerprint": "sha256:abc7842761f46cefc61057c00c28212a7673e22f581cf603684eeaca6bf73e9d",
+  "inputs": {
+    "sha256": "6d43df5388bfd87e124844416f37b7ee94d07eb1e4b91fa85c941bb0d6de9ae3",
+    "fileCount": 620
+  },
+  "filesSha256": {
+    "package.json": "7fc8e712bcd9beedf0d8d4c613365d6ab120fad5b74a78a4a4c305b9638a6d04",
+    "scripts/release-gate-policy.mjs": "591ea923d7ad80dc37f85f45d6731c3c92b1c4b9c028780fbdfe95b2ccc623cc",
+    "scripts/release-gate-policy.test.mjs": "76e4ca0b2b550b2c9426bde1a072e22643caba817ff066cea3e6256a2a89e7ef",
+    "scripts/verify-framegraph-regressions.mjs": "979258fcf142602df9684951048159b2497b838caec36211006aa0a1dcff5118",
+    "scripts/verify-framegraph-black-frame.mjs": "2e5a5bdba9a1695b3aaea8789b101f6d8adccb63024de203bf4c87f89511354e",
+    "scripts/webgpu-gate/framegraph-regression-policy.mjs": "e635c0c0112590dc8a3d296f0f35080f44be796a8230d047974d632c7f6f93a8",
+    "scripts/webgpu-gate/framegraph-regression-policy.test.mjs": "164366fbfa3b11eacc7603ef4d46f7122978d0f518c5942c58e6f0889de2f540",
+    "scripts/webgpu-gate/framegraph-black-frame-policy.mjs": "3c45aabd0d73f7534ae0ad2ed425706d6720e8d8ada9a3c35041bce0f8b249ef",
+    "scripts/webgpu-gate/framegraph-black-frame-policy.test.mjs": "1fdb2be00add584e319b884b7f284854cbef8d8ea323bed6e93c6f953d2e6f36",
+    "scripts/webgpu-gate/framegraph-black-frame-fixture.mjs": "54135e9a3fdc92a65241f75e75869a189dc8a670fe77c8336a2c87013b39e0d4",
+    "scripts/webgpu-gate/framegraph-reuse-fixture.mjs": "6af8dc9c71bf3ba779ca81c87f19a07b8fae4420e0881864d3104e9f6e1d4c34",
+    "scripts/webgpu-gate/framegraph-cache-fixture.mjs": "a34cf607f8f42adb3b74bed8933a60775f83131e694b1fa85a0e290f23e08789",
+    "examples/deferred-lighting/main.ts": "1e59fc082b44056a5b1f9d7059966c4617411822bae7e1d92bad122ee226301d"
+  },
+  "checks": [
+    {
+      "id": "typecheck",
+      "command": "npm run typecheck",
+      "status": "passed",
+      "log": "artifacts/engine-0.2.1/g09/stage-six-engineering/typecheck.log",
+      "sha256": "31a6c73d10093fa0599c9fdb473a6e9a4abfe4657156624de8bb3a734b20aa05"
+    },
+    {
+      "id": "tests",
+      "command": "npm test",
+      "status": "passed",
+      "log": "artifacts/engine-0.2.1/g09/stage-six-engineering/tests.log",
+      "sha256": "1ee0b3972d2190dfd3f54ff52509f2a635f852502e32b0f6f23dc7e150ce2dae"
+    },
+    {
+      "id": "build",
+      "command": "npm run build",
+      "status": "passed",
+      "log": "artifacts/engine-0.2.1/g09/stage-six-engineering/build.log",
+      "sha256": "bed453a5ef88509c16b90d7c7a6cc2a5f9adc2ac09e3345b88bf9f4eea078347"
+    },
+    {
+      "id": "freshness",
+      "command": "npm run freshness:check -w ./examples",
+      "status": "passed",
+      "log": "artifacts/engine-0.2.1/g09/stage-six-engineering/freshness.log",
+      "sha256": "248d51c2b0c459379521147ee9eb9602f5dd444633310f80af89f335d57302a4"
+    },
+    {
+      "id": "performance-policy",
+      "command": "npm run performance-budget:test",
+      "status": "passed",
+      "log": "artifacts/engine-0.2.1/g09/stage-six-engineering/performance-policy.log",
+      "sha256": "05424c5bd447b758d40888f3537f2b32ae56e2035e569def13ec489ecb2e8538"
+    },
+    {
+      "id": "release-policy",
+      "command": "npm run release:policy:test",
+      "status": "passed",
+      "log": "artifacts/engine-0.2.1/g09/stage-six-engineering/release-policy.log",
+      "sha256": "242438b37ed61adc347786079f35d7af971ba275c91a591135c103530a7561a7"
+    },
+    {
+      "id": "focused-policy",
+      "command": "node --test FrameGraph policies and release-gate-policy",
+      "status": "passed",
+      "log": "artifacts/engine-0.2.1/g09/stage-six-engineering/focused-policy.log",
+      "sha256": "85ebe2970309172cd65b28bc545e53d4dfe690085ebe9e776c2766a01078fb25"
+    },
+    {
+      "id": "docs",
+      "command": "npm run docs:check",
+      "status": "passed",
+      "log": "artifacts/engine-0.2.1/g09/stage-six-engineering/docs.log",
+      "sha256": "889388a78b40649059330985159d0a5adc15515b833ebeb6824647c86a9803d4"
+    },
+    {
+      "id": "milestones",
+      "command": "npm run check (milestones)",
+      "status": "passed",
+      "log": "artifacts/engine-0.2.1/g09/stage-six-engineering/milestones.log",
+      "sha256": "c6289cfdbe5368bea8a2f7ebb50fd8111f51d28fed8241021c7bac199e40f2cf"
+    }
+  ],
+  "rootTests": 1408,
+  "policySuites": {
+    "performance": 205,
+    "release": 70,
+    "overlap": true
+  },
+  "freshExampleTargets": 96,
+  "evidence": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/regressions-2026-10-02T12-58-01.839Z.json",
+      "sha256": "52810e6c7b8668f6a5ef6ea851a2ea0f815b2b26fa9d89dcbeab381a1b09140d",
+      "status": "failed",
+      "sourceFingerprint": "sha256:abc7842761f46cefc61057c00c28212a7673e22f581cf603684eeaca6bf73e9d",
+      "sourceMatchesCurrent": true
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/culling-2026-10-02T13-01-29.444Z/native.json",
+      "sha256": "fa23551c85c6e8a2f28c0735d1ec798677de2ad7ffb3a14225fdbc65b54b4a09",
+      "status": "passed",
+      "sourceFingerprint": "sha256:abc7842761f46cefc61057c00c28212a7673e22f581cf603684eeaca6bf73e9d",
+      "sourceMatchesCurrent": true
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/inspector-2026-10-02T13-02-50.431Z/native.json",
+      "sha256": "38e9328132c94806be103222dd7d391571de064e88c1db404163a9f12b91e7eb",
+      "status": "passed",
+      "sourceFingerprint": "sha256:abc7842761f46cefc61057c00c28212a7673e22f581cf603684eeaca6bf73e9d",
+      "sourceMatchesCurrent": true
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/black-frame-2026-10-02T12-38-46.821Z/reassessment.json",
+      "sha256": "f39599b5b4a4d597d0d290c91027259eae4721b9403254b6f2f86425ef494025",
+      "status": "failed",
+      "sourceFingerprint": null,
+      "sourceMatchesCurrent": false
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/black-frame-2026-10-02T12-53-09.984Z/report.json",
+      "sha256": "20499cc82aa0f19b4a95abab721dedafde5147324b8fbe909c97ebd88f0c9634",
+      "status": "failed",
+      "sourceFingerprint": "sha256:b4b927c770e059311ee3df6228e10c221344db2f162f6e03f3870faa86d0a256",
+      "sourceMatchesCurrent": false
+    }
+  ],
+  "nativePopulation": {
+    "expected": 16,
+    "passed": 13,
+    "failed": 1,
+    "notRun": 2,
+    "failure": "Intel framegraph-cache Forward alpha coverage 1/4096"
+  },
+  "resourceAblations": [
+    {
+      "device": "high-performance",
+      "algorithm": "forward",
+      "views": 1,
+      "mixed": false,
+      "scope": "candidate reuse off/on; not A0/B4 or GPU resident memory",
+      "beforeBytes": 71680,
+      "afterBytes": 34816,
+      "deltaBytes": -36864,
+      "reductionRatio": 0.5142857142857142,
+      "maxPixelDelta": 0,
+      "alphaCoverage": [
+        4096
+      ],
+      "renderPassesBefore": 16,
+      "renderPassesAfter": 16
+    },
+    {
+      "device": "high-performance",
+      "algorithm": "reference",
+      "views": 4,
+      "mixed": false,
+      "scope": "candidate reuse off/on; not A0/B4 or GPU resident memory",
+      "beforeBytes": 614400,
+      "afterBytes": 165888,
+      "deltaBytes": -448512,
+      "reductionRatio": 0.73,
+      "maxPixelDelta": 0,
+      "alphaCoverage": [
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "renderPassesBefore": 72,
+      "renderPassesAfter": 72
+    },
+    {
+      "device": "high-performance",
+      "algorithm": "tiled",
+      "views": 4,
+      "mixed": false,
+      "scope": "candidate reuse off/on; not A0/B4 or GPU resident memory",
+      "beforeBytes": 614400,
+      "afterBytes": 165888,
+      "deltaBytes": -448512,
+      "reductionRatio": 0.73,
+      "maxPixelDelta": 0,
+      "alphaCoverage": [
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "renderPassesBefore": 72,
+      "renderPassesAfter": 72
+    },
+    {
+      "device": "high-performance",
+      "algorithm": "tiled",
+      "views": 4,
+      "mixed": true,
+      "scope": "candidate reuse off/on; not A0/B4 or GPU resident memory",
+      "beforeBytes": 499328,
+      "afterBytes": 243648,
+      "deltaBytes": -255680,
+      "reductionRatio": 0.5120481927710844,
+      "maxPixelDelta": 0,
+      "alphaCoverage": [
+        4096,
+        1920,
+        4096,
+        1920
+      ],
+      "renderPassesBefore": 72,
+      "renderPassesAfter": 72
+    },
+    {
+      "device": "low-power",
+      "algorithm": "forward",
+      "views": 1,
+      "mixed": false,
+      "scope": "candidate reuse off/on; not A0/B4 or GPU resident memory",
+      "beforeBytes": 71680,
+      "afterBytes": 34816,
+      "deltaBytes": -36864,
+      "reductionRatio": 0.5142857142857142,
+      "maxPixelDelta": 0,
+      "alphaCoverage": [
+        4096
+      ],
+      "renderPassesBefore": 16,
+      "renderPassesAfter": 16
+    },
+    {
+      "device": "low-power",
+      "algorithm": "reference",
+      "views": 4,
+      "mixed": false,
+      "scope": "candidate reuse off/on; not A0/B4 or GPU resident memory",
+      "beforeBytes": 614400,
+      "afterBytes": 165888,
+      "deltaBytes": -448512,
+      "reductionRatio": 0.73,
+      "maxPixelDelta": 0,
+      "alphaCoverage": [
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "renderPassesBefore": 72,
+      "renderPassesAfter": 72
+    },
+    {
+      "device": "low-power",
+      "algorithm": "tiled",
+      "views": 4,
+      "mixed": false,
+      "scope": "candidate reuse off/on; not A0/B4 or GPU resident memory",
+      "beforeBytes": 614400,
+      "afterBytes": 165888,
+      "deltaBytes": -448512,
+      "reductionRatio": 0.73,
+      "maxPixelDelta": 0,
+      "alphaCoverage": [
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "renderPassesBefore": 72,
+      "renderPassesAfter": 72
+    },
+    {
+      "device": "low-power",
+      "algorithm": "tiled",
+      "views": 4,
+      "mixed": true,
+      "scope": "candidate reuse off/on; not A0/B4 or GPU resident memory",
+      "beforeBytes": 499328,
+      "afterBytes": 243648,
+      "deltaBytes": -255680,
+      "reductionRatio": 0.5120481927710844,
+      "maxPixelDelta": 0,
+      "alphaCoverage": [
+        4096,
+        1920,
+        4096,
+        1920
+      ],
+      "renderPassesBefore": 72,
+      "renderPassesAfter": 72
+    }
+  ],
+  "pending": [
+    "Resolve native empty/one-pixel output and sustained correctness stability",
+    "Freeze F0-F8 machine matrix and implement complete disjoint CPU/GPU performance collection",
+    "Complete paired A0/B4 and representative A/B1/B2/B3/B4 timing populations on both adapters",
+    "Consume complete same-clean-candidate performance evidence in G07; requalify G05"
+  ],
+  "unchanged": [
+    "versions",
+    "stable API",
+    "performance budgets",
+    "G05 failures",
+    "publication status"
+  ]
+}

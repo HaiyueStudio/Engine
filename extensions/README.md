@@ -53,3 +53,11 @@ renderer.dispose();
 ```
 
 WebGPU is required by the runtime; there is no WebGL fallback.
+
+## Internationalization
+
+`@haiyue/extensions/i18n` provides portable JSON language packs, text/plural formatting and optional GUI text/image bindings. See the [guide](../docs/engine-guide/i18n.md) and [example](../examples/i18n/README.md).
+
+## Narrative
+
+`@haiyue/extensions/narrative` provides JSON branching stories, transactional execution, save/restore, GPU GUI presentation and host-state action adapters. See the [guide](../docs/engine-guide/narrative.md) and [example](../examples/narrative/README.md).

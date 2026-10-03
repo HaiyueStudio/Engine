@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-02",
+  "entrypoint": "@haiyue/extensions/i18n",
+  "file": "extensions/dist/i18n.js",
+  "bytes": 16706,
+  "gzipBytes": 4291,
+  "sha256": "b92b08d63dc96430e18063ed9bf0ec9c5e9b4a44190a91cee02111415a3dce05",
+  "externalRuntimeImports": [],
+  "newDependencies": [],
+  "rootExportsUnchanged": true
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "scope": "G09 dependency/culling implementation baseline; no performance qualification",
+  "recordedAt": "2026-10-01",
+  "revision": "21105a2a94e1b811b4c9b03fbca3c6187e1fa771",
+  "dirty": false,
+  "inputs": {
+    "engine/src/systems/Render3DFramePlan.ts": "fee12ee7c61c3aa0c94079a3f5cb553fd0ed6d954368f47e16e0408410f96f50",
+    "engine/src/systems/Render3DFrameCoordinator.ts": "79561958b3a3cb3ee4583fe8756f56fdb16543ef8d9d7b3b22b418e9c0b3ac72",
+    "engine/src/systems/Render3DSystem.ts": "1349360a65ebe5ae11efe65bc4da5b267e570c6ab4f85b764f11425179dfb3ec",
+    "engine/src/renderer/DeferredReferenceBackend.ts": "91a5a56f188d3a68eed133b1f4c3dcbda3e85154ca50c63f46c6eab4b4b765f7",
+    "engine/src/postprocess/PostProcessRenderer.ts": "2753dc7123970356ef761b3db087b248020256df4c9e531aa0b71f42aaddef81",
+    "engine/src/postprocess/AmbientOcclusionPass.ts": "c39d912b87192590040719ec165217f587aaa098786aafcbacc2d37b3ed65738"
+  },
+  "performanceSamplesCollected": false
+}

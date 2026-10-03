@@ -160,6 +160,18 @@
           "entrypoints": { "./ray-tracing": 11 }
         },
         {
+          "id": "branching-narrative",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
+          "entrypoints": { "./narrative": 19 }
+        },
+        {
+          "id": "internationalization",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
+          "entrypoints": { "./i18n": 19 }
+        },
+        {
           "id": "virtual-joystick-controls",
           "stability": "stable",
           "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },

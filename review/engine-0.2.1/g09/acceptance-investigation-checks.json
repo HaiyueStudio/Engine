@@ -1,0 +1,511 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-02T14:12:01.933Z",
+  "status": "unresolved",
+  "goalStatus": "active",
+  "rootCauseEstablished": false,
+  "acceptedRuntimeFix": false,
+  "runtimeModifiedThisInvestigation": false,
+  "formalPerformanceSamplesCollected": false,
+  "performanceQualified": false,
+  "releaseQualified": false,
+  "revision": "21105a2a94e1b811b4c9b03fbca3c6187e1fa771",
+  "dirty": true,
+  "inputs": {
+    "sha256": "6d43df5388bfd87e124844416f37b7ee94d07eb1e4b91fa85c941bb0d6de9ae3",
+    "fileCount": 620
+  },
+  "priorRuntimeInputs": {
+    "sha256": "6d43df5388bfd87e124844416f37b7ee94d07eb1e4b91fa85c941bb0d6de9ae3",
+    "fileCount": 620
+  },
+  "sourceFingerprint": "sha256:f1935a61ed9477a577c6dbf5d1dbd654e8e0262fac0b0c1b90373299bee3682e",
+  "files": [
+    {
+      "path": "scripts/verify-framegraph-black-frame.mjs",
+      "sha256": "ee041acda5ff192986d3711be35bab79422e6e65e9058db2d0e2f02204a28338"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-black-frame-fixture.mjs",
+      "sha256": "82c5b4df07c95c0062835fafa2698417cc7b8ce8b9bb98a67637bf2e44b1fcb1"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-black-frame-policy.mjs",
+      "sha256": "fda90c30d35bd5538e3693b71ccf8a35a70398a9c544a6359aa5966adaf4bf0a"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-black-frame-policy.test.mjs",
+      "sha256": "2a6c54cf89932b5241509f941ad5b6d20c2fc33416678bf466b17363d01b672c"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-cache-fixture.mjs",
+      "sha256": "66c876b23c3821ec44b80ed6e1ea61c21035681dd3a3d108323f24af4f03c774"
+    },
+    {
+      "path": "scripts/webgpu-gate/multiview-output-probe.mjs",
+      "sha256": "7354096fcfdcf2d851178152ae835892408f0d26e01310323538fc95873bb938"
+    },
+    {
+      "path": "scripts/webgpu-gate/multiview-output-probe-policy.mjs",
+      "sha256": "04e0cf25aa6b9396400ee3dfcf9b815c29df9bfe849c4dffbd42cb6297370146"
+    },
+    {
+      "path": "scripts/webgpu-gate/multiview-output-probe-policy.test.mjs",
+      "sha256": "5f6735f36b950a1ddd86bd1e66201573a6647a3a024d3bc804c09179d2641a31"
+    },
+    {
+      "path": "scripts/webgpu-gate/chrome-runner.mjs",
+      "sha256": "a581ba8072e4cc451102afd4d343b45efd25210f301eb6cecf9fc1b3fe8814fc"
+    },
+    {
+      "path": "scripts/webgpu-gate/chrome-runner-mounts.test.mjs",
+      "sha256": "08687a9751d779d57e6b6c2b7a25c6e69c145180391510a34b4e8d1079a5dabe"
+    }
+  ],
+  "checks": [
+    {
+      "command": "npm run typecheck",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g09/acceptance-investigation-engineering/typecheck.log",
+      "sha256": "527647ae4314684fcde12c60e2bcca2e07c5ce842959aaa7de7b240769bafb4e"
+    },
+    {
+      "command": "npm test",
+      "status": "passed",
+      "tests": 1408,
+      "path": "artifacts/engine-0.2.1/g09/acceptance-investigation-engineering/tests.log",
+      "sha256": "d471b90f1db352381dd46c4628ab85b12adf5fe3ca336332bb7932d2d10732fd"
+    },
+    {
+      "command": "npm run build",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g09/acceptance-investigation-engineering/build.log",
+      "sha256": "43dc6cbb6e4965922968389032afc34a734d0fc145fe238d03c05d25bd92d529"
+    },
+    {
+      "command": "npm run freshness:check -w ./examples",
+      "status": "passed",
+      "examples": 96,
+      "sourcePrefix": "a5ae738bc05c",
+      "path": "artifacts/engine-0.2.1/g09/acceptance-investigation-engineering/freshness.log",
+      "sha256": "248d51c2b0c459379521147ee9eb9602f5dd444633310f80af89f335d57302a4"
+    },
+    {
+      "command": "npm run performance-budget:test",
+      "status": "passed",
+      "tests": 212,
+      "path": "artifacts/engine-0.2.1/g09/acceptance-investigation-engineering/policies-final.log",
+      "sha256": "58afc9868b5810630005ba7054c3246dcc9589428060ea6a8d902848233e928e"
+    },
+    {
+      "command": "npm run docs:check",
+      "status": "passed",
+      "path": "artifacts/engine-0.2.1/g09/acceptance-investigation-engineering/docs-final.log",
+      "sha256": "4094ae1f77371b54aa2da9d4a0ba9ba5d399a20bba6cbf31ae80bc8be98cf1d0"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  ],
+  "probes": [
+    {
+      "id": "sentinel",
+      "path": "artifacts/engine-0.2.1/g09/black-frame-2026-10-02T13-12-35.030Z/report.json",
+      "sha256": "8ab8e3dab3d2d28e15d228c881cb701549001ccfcf16a2ef41b1f7666fed49f7",
+      "status": "failed",
+      "sourceFingerprint": "sha256:91343a2b5130f412cf383cc5501c06230c865b065be5e52a8e8839155e8302ba",
+      "options": {
+        "coverage": "production",
+        "note": "initial sentinel instrumentation"
+      },
+      "interpretation": "Matching incomplete-coverage readbacks; shared lower-level faults remain possible",
+      "passed": 14,
+      "failed": [
+        {
+          "powerPreference": "low-power",
+          "variant": "B4",
+          "copySource": true,
+          "round": 2,
+          "assessment": {
+            "status": "failed",
+            "computed": {
+              "rgbMax": 1,
+              "alphaMin": 0,
+              "alphaMax": 1,
+              "coveredPixels": 1,
+              "lit": false
+            },
+            "copied": {
+              "rgbMax": 1,
+              "alphaMin": 0,
+              "alphaMax": 1,
+              "coveredPixels": 1,
+              "lit": false
+            },
+            "maxReadbackDelta": 1.110282599192658e-8,
+            "performanceQualified": false
+          }
+        },
+        {
+          "powerPreference": "low-power",
+          "variant": "A0",
+          "copySource": true,
+          "round": 3,
+          "assessment": {
+            "status": "failed",
+            "computed": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "lit": false
+            },
+            "copied": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "lit": false
+            },
+            "maxReadbackDelta": 0,
+            "performanceQualified": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "after-pipeline",
+      "path": "artifacts/engine-0.2.1/g09/black-frame-2026-10-02T13-21-27.953Z/report.json",
+      "sha256": "d0027670f7a0b9b95e5ce4d87af81f6bcfda10ae00835ae7c8c4807396912e0f",
+      "status": "failed",
+      "sourceFingerprint": "sha256:831a0e14312380d8766c7939541618d82cecd6063632ebb75892ce8438e2abc5",
+      "options": {
+        "coverage": "after-pipeline"
+      },
+      "interpretation": "State-order substitution insufficient",
+      "passed": 14,
+      "failed": [
+        {
+          "powerPreference": "low-power",
+          "variant": "A0",
+          "copySource": false,
+          "round": 0,
+          "assessment": {
+            "status": "failed",
+            "computed": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "copied": null,
+            "source": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "maxReadbackDelta": null,
+            "performanceQualified": false
+          }
+        },
+        {
+          "powerPreference": "low-power",
+          "variant": "B4",
+          "copySource": false,
+          "round": 2,
+          "assessment": {
+            "status": "failed",
+            "computed": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "copied": null,
+            "source": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "maxReadbackDelta": null,
+            "performanceQualified": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "execution-witness",
+      "path": "artifacts/engine-0.2.1/g09/black-frame-2026-10-02T13-51-15.459Z/report.json",
+      "sha256": "ad30a5304696f0f0876fd543938abc07345b6d83b8b818433ade409d8df14c8a",
+      "status": "failed",
+      "sourceFingerprint": "sha256:93722e8a8d1f038c7d1e62ebe42ed28fe7904ea9c3eb8f0b37097ae7905c4461",
+      "options": {
+        "coverage": "production"
+      },
+      "interpretation": "One conflicting-readback failure; one zero-execution-witness failure",
+      "passed": 14,
+      "failed": [
+        {
+          "powerPreference": "low-power",
+          "variant": "B4",
+          "copySource": true,
+          "round": 1,
+          "assessment": {
+            "status": "failed",
+            "witnessValid": true,
+            "computed": {
+              "rgbMax": 0.15294118225574493,
+              "alphaMin": 1,
+              "alphaMax": 1,
+              "coveredPixels": 4096,
+              "sentinelPixels": 0,
+              "coloredPixels": 1271,
+              "lit": true
+            },
+            "copied": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 1,
+              "coveredPixels": 1,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "source": {
+              "rgbMax": 0.0209503173828125,
+              "alphaMin": 0.998046875,
+              "alphaMax": 0.998046875,
+              "coveredPixels": 4096,
+              "sentinelPixels": 0,
+              "coloredPixels": 1717,
+              "lit": false
+            },
+            "maxReadbackDelta": 1,
+            "performanceQualified": false
+          }
+        },
+        {
+          "powerPreference": "low-power",
+          "variant": "B4",
+          "copySource": true,
+          "round": 2,
+          "assessment": {
+            "status": "failed",
+            "witnessValid": false,
+            "computed": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "copied": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "source": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "maxReadbackDelta": 0,
+            "performanceQualified": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "arithmetic-chain",
+      "path": "artifacts/engine-0.2.1/g09/black-frame-2026-10-02T13-55-10.077Z/report.json",
+      "sha256": "1a08ac97a4890924b880b62bb07b3e9baabc13fc40d4cabff2c55a2302dbd0f0",
+      "status": "failed",
+      "sourceFingerprint": "sha256:93722e8a8d1f038c7d1e62ebe42ed28fe7904ea9c3eb8f0b37097ae7905c4461",
+      "options": {
+        "coverage": "arithmetic-chain"
+      },
+      "interpretation": "Two zero-execution-witness failures; shader substitution insufficient",
+      "passed": 14,
+      "failed": [
+        {
+          "powerPreference": "low-power",
+          "variant": "A0",
+          "copySource": true,
+          "round": 0,
+          "assessment": {
+            "status": "failed",
+            "witnessValid": false,
+            "computed": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "copied": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "source": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "maxReadbackDelta": 0,
+            "performanceQualified": false
+          }
+        },
+        {
+          "powerPreference": "low-power",
+          "variant": "A0",
+          "copySource": true,
+          "round": 3,
+          "assessment": {
+            "status": "failed",
+            "witnessValid": false,
+            "computed": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "copied": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "source": {
+              "rgbMax": 0,
+              "alphaMin": 0,
+              "alphaMax": 0,
+              "coveredPixels": 0,
+              "sentinelPixels": 0,
+              "coloredPixels": 0,
+              "lit": false
+            },
+            "maxReadbackDelta": 0,
+            "performanceQualified": false
+          }
+        }
+      ]
+    }
+  ],
+  "regressions": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/regressions-2026-10-02T13-59-34.191Z.json",
+      "sha256": "3a3ddc413504fd8ca7663a073b35a5754f670175a34bdff2275fc7429eb1a6c8",
+      "status": "failed",
+      "sourceFingerprint": "sha256:93722e8a8d1f038c7d1e62ebe42ed28fe7904ea9c3eb8f0b37097ae7905c4461",
+      "passed": 10,
+      "failed": [
+        {
+          "name": "postprocess-multiview",
+          "powerPreference": "low-power",
+          "error": "Error: Chrome DevTools call timed out after 30000ms: Runtime.evaluate\n    at Timeout._onTimeout (file:///Users/qingque/Desktop/HaiyueStudio/Engine/scripts/webgpu-gate/chrome-runner.mjs:702:24)\n    at listOnTimeout (node:internal/timers:635:17)\n    at process.processTimers (node:internal/timers:571:7)"
+        }
+      ],
+      "unrun": 5
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/regressions-2026-10-02T14-05-27.907Z.json",
+      "sha256": "24778304c84fd099f51f40cebf02609d1fae25f7926d0a856ac441bcff77323b",
+      "status": "passed",
+      "sourceFingerprint": "sha256:f1935a61ed9477a577c6dbf5d1dbd654e8e0262fac0b0c1b90373299bee3682e",
+      "passed": 16,
+      "failed": [],
+      "unrun": 0
+    }
+  ],
+  "culling": {
+    "status": "passed",
+    "path": "artifacts/engine-0.2.1/g09/culling-2026-10-02T14-08-57.515Z/native.json",
+    "sha256": "ff2b889b6b936b58a9120daaece82170edf2086bdf3add4e3fd2d95b2fa3a30c"
+  },
+  "minimalProbes": [
+    {
+      "path": "artifacts/engine-0.2.1/g02/output-probe-low-power-explicit-state-passed-2026-10-02T13-26-36.178Z.json",
+      "sha256": "81200805e50ec0408f91109b79cf4d32d80575d248b6e9d65cdc859c90305b77"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/native-cold-start-2026-10-02T13-28-21.489Z/report.json",
+      "sha256": "1d278c6ca8057e15f33bf62dcf34c6974d5cae7b3f3d0d4e3c3aa1ece7619fae"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/native-depth-start-2026-10-02T13-31-56.691Z/report.json",
+      "sha256": "037ca9a46bf24a74820c2fe9bdc938374aa426464ea501c13ee06ad730743e46"
+    }
+  ],
+  "defaultWebGpuFlagControl": {
+    "scope": "short adapter availability only; no stability qualification",
+    "adapter": {
+      "vendor": "intel",
+      "architecture": "gen-9",
+      "isFallbackAdapter": false
+    },
+    "result": {
+      "path": "artifacts/engine-0.2.1/g02/output-probe-low-power-explicit-state-passed-2026-10-02T14-07-30.137Z.json",
+      "sha256": "ff4c48c1a06e5d903105a0a0476bf2ed6ebe0e1321845650c6909820b5d91bdd"
+    },
+    "launcher": {
+      "path": "artifacts/engine-0.2.1/g09/chrome-without-unsafe.zsh",
+      "sha256": "b27579fe79388c4430e3e0d08bbb238c53731159dbe79c6fcb4dbc48bb0ce9ac"
+    }
+  },
+  "harnessFailuresExcludedFromRendererFindings": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/black-frame-2026-10-02T13-35-16.076Z/report.json",
+      "sha256": "ddcf4dcf545b69de0d9a4e6fd1a37bc18bc3b9f2876744c031578c349a5c6109"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/black-frame-2026-10-02T13-38-42.907Z/report.json",
+      "sha256": "5b094a6f087f5fc6fc4dc285e5fcae0c2fcea11a6f23ade9de7dc3b0bfd268a1"
+    }
+  ],
+  "expectedTimeoutHarnessTest": {
+    "path": "artifacts/engine-0.2.1/g09/diagnostic-timeout-check.json",
+    "sha256": "b56a5707fcc8eccb99cb5f64612f7a7e86565e34092024b22b940962f300a495"
+  }
+}

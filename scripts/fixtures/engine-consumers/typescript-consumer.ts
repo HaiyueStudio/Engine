@@ -56,3 +56,11 @@ void gltfOptions;
 void Animation3DMixer;
 void createGltfPlugin;
 void createGltfAnimation3DRuntime;
+
+import { createFrameGraphInspector, type FrameGraphInspector, type FrameGraphSnapshot } from '@haiyue/engine/experimental/renderer';
+declare const renderSystem: Parameters<typeof createFrameGraphInspector>[0];
+const inspector: FrameGraphInspector = createFrameGraphInspector(renderSystem);
+inspector.requestCapture();
+const frameGraphSnapshot: FrameGraphSnapshot | null = inspector.snapshot();
+void frameGraphSnapshot;
+inspector.dispose();

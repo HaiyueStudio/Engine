@@ -46,3 +46,8 @@ process.stdout.write(JSON.stringify({
   duration: document.duration,
   tweenOpacity: target.opacity,
 }));
+
+import { createFrameGraphInspector } from '@haiyue/engine/experimental/renderer';
+const inspector = createFrameGraphInspector({});
+if (inspector.snapshot() !== null) throw Error('Packed inspector must start unarmed.');
+inspector.requestCapture(); inspector.clear(); inspector.dispose();

@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-02T22:29:09.603Z",
+  "status": "local-lifecycle-fix-verified",
+  "g09Status": "not-qualified",
+  "performanceQualified": false,
+  "releaseQualified": false,
+  "originalPixelFailureFixed": false,
+  "originalPixelRootCauseEstablished": false,
+  "revision": "21105a2a94e1b811b4c9b03fbca3c6187e1fa771",
+  "dirty": true,
+  "runtime": {
+    "sha256": "2009a192457771194fbd4933279a9637c1cdac1b2f0b828fff6bd05e2f90ad29",
+    "fileCount": 620
+  },
+  "sourceFingerprint": "sha256:5cc58f6159f27734a0edb69be9978d2d1db935c49e5a30fcf42eef3511b03c37",
+  "acceptedFix": "GpuReadbackRing device-loss settlement and retirement; capture loss classification",
+  "sources": [
+    {
+      "path": "engine/src/compute/GpuReadbackRing.ts",
+      "sha256": "a1d1afbf9f7eb5aa1b59cae33511c99bc722e71bfe22bd1cb1f8868b6f7efae3"
+    },
+    {
+      "path": "engine/test/gpu-simulation-021.test.mjs",
+      "sha256": "accf680e791893fc1ab7b722569fba83cce36760ebb479b1738610656b52d595"
+    },
+    {
+      "path": "docs/api/gpu-instances.md",
+      "sha256": "a20259ac2c9da740217869eb18ad18fba87ca938d7b1cd55651473f93199ad06"
+    },
+    {
+      "path": "scripts/verify-readback-device-loss.mjs",
+      "sha256": "d0057c0126f60f172318b7d9bc15052e6eeda4af4000b5de9ec671d9c98f037d"
+    },
+    {
+      "path": "scripts/webgpu-gate/readback-device-loss-fixture.html",
+      "sha256": "6c46c766602935ba80bc9c1f95b3b1cdd58667af0cc152aeec71825b29925638"
+    },
+    {
+      "path": "scripts/webgpu-gate/readback-device-loss-fixture.mjs",
+      "sha256": "5059a4542c53b51b2e7ca103f7c64e486342e507df19350beb3c5a33cf36b8bc"
+    },
+    {
+      "path": "scripts/webgpu-gate/readback-device-loss-policy.mjs",
+      "sha256": "3c801463ff074d83b407100eba4fec7f12cd3e3950960cbf1435e5fb5118d84f"
+    },
+    {
+      "path": "scripts/webgpu-gate/readback-device-loss-policy.test.mjs",
+      "sha256": "cfdcfefd902f905fa8d9eb14a74444ccf07af36f6bbf4b51330e67f3b6f3814e"
+    },
+    {
+      "path": "scripts/verify-framegraph-black-frame.mjs",
+      "sha256": "2c298c0cc5d5714c0c849971ff75115a09f384016a6806f685c4495c1eb9bc12"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-black-frame-fixture.mjs",
+      "sha256": "da61ec46918ef055852e05a8ffc562e5cc486a31014d24f3dd8a4f9a932e6c7d"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-black-frame-policy.mjs",
+      "sha256": "e39ac520b0506020ad78b69401155545e0409b7440c20c11e84899be4e028129"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-black-frame-policy.test.mjs",
+      "sha256": "cc7c8901f9995847c7894ff8205fcd9ad585e9edb75db6fbabfc0a5db0a08b7a"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-readback-controls-policy.mjs",
+      "sha256": "770d39525e6dfb95bca10f94eafb77bdb2571bd975124e3ad7829419f9a91a3d"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-readback-controls-policy.test.mjs",
+      "sha256": "2f0c722defa4d866b2c3e2df13ba6b8e2ac62806c6863bc14e612111094bfb8c"
+    }
+  ],
+  "native": {
+    "status": "passed",
+    "caseCount": 6,
+    "evidence": [
+      {
+        "path": "artifacts/engine-0.2.1/g09/readback-device-loss-2026-10-02T22-22-55.755Z/report.json",
+        "sha256": "516d9e9f5c246ef6af8343431ae69fe8dc51aa44acde1ccf27dd9f6da19504ad"
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/readback-device-loss-2026-10-02T22-22-55.755Z/high-performance.json",
+        "sha256": "48d1cd656df965ec41b38bd14c437e36e2edd26bd1754ce415ef8ce66479d98a"
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/readback-device-loss-2026-10-02T22-22-55.755Z/low-power.json",
+        "sha256": "bcd1b71f4b7bec2f6f7e8cd1af6d36dd439f47d46ff06a1b4fcfd3f14d9e3f46"
+      }
+    ]
+  },
+  "reproduction": {
+    "path": "artifacts/engine-0.2.1/g09/local-fix-engineering/before-after-reproduction.json",
+    "sha256": "089a228922f20ee86822e1e5a8a6ca50097a44ee90b4b5e03664ee5070be3ba4"
+  },
+  "engineering": {
+    "status": "passed-with-targeted-recovery",
+    "initialRootTestExitCode": 2,
+    "note": "Root test stopped at Extensions dependency declarations; prior workspace tests passed. After full build, Extensions and catalog rerun passed. Original failure preserved; underlying declaration failure cause unproven.",
+    "workspaceTestCounts": {
+      "shaderLanguage": 135,
+      "engine": 770,
+      "animationSpec": 107,
+      "extensions": 421,
+      "exampleCatalog": 7
+    },
+    "framegraphPolicyTests": 30,
+    "performancePolicyTests": 213,
+    "freshExamples": 98,
+    "checks": [
+      {
+        "command": "npm run framegraph:policy:test",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 593,
+        "log": "artifacts/engine-0.2.1/g09/local-fix-engineering/framegraph-policy-test.log",
+        "sha256": "dc407fa926e66e205786f81dd0422fac8dbc3683ff3fdb81662b8c79a4fed515"
+      },
+      {
+        "command": "npm run typecheck",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 98342,
+        "log": "artifacts/engine-0.2.1/g09/local-fix-engineering/typecheck.log",
+        "sha256": "274893eb7d902502df1d0ca733e257fad1bf78b10d3ac55501b1bdb261a4b098"
+      },
+      {
+        "command": "npm run test",
+        "exitCode": 2,
+        "signal": null,
+        "durationMs": 192339,
+        "log": "artifacts/engine-0.2.1/g09/local-fix-engineering/test.log",
+        "sha256": "6579202f13663ee7652e2665139d479d4b0b07fc7b847f9f7ea2f248590bc601"
+      },
+      {
+        "command": "npm run build",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 291962,
+        "log": "artifacts/engine-0.2.1/g09/local-fix-engineering/build.log",
+        "sha256": "de71a74409ece976ba95edf000cf5aa6b531d317b96facb876e84d95c6ddfdcf"
+      },
+      {
+        "command": "npm run modules:check",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 2550,
+        "log": "artifacts/engine-0.2.1/g09/local-fix-engineering/modules-check.log",
+        "sha256": "9dad7b1f0392a8d10289c079da36803aeb9e171fd958aaf28c90df2b1b883b41"
+      },
+      {
+        "command": "npm run responsibilities:check",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 1940,
+        "log": "artifacts/engine-0.2.1/g09/local-fix-engineering/responsibilities-check.log",
+        "sha256": "6fa09923726c2f63ea49a166fb29d211950e6aaa019390427f961c4d74e2b3c9"
+      },
+      {
+        "command": "npm run renderer-prepare:check",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 1346,
+        "log": "artifacts/engine-0.2.1/g09/local-fix-engineering/renderer-prepare-check.log",
+        "sha256": "3896d25e54cb62720a681e2bc7098bf3551ea000929e9a62e6f5e5139f0b6e0b"
+      },
+      {
+        "command": "npm run api:check",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 1194,
+        "log": "artifacts/engine-0.2.1/g09/local-fix-engineering/api-check.log",
+        "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+      },
+      {
+        "command": "npm run docs:check",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 1030,
+        "log": "artifacts/engine-0.2.1/g09/local-fix-engineering/docs-check.log",
+        "sha256": "3595277cb6dbadc1e1af4dfb7c7ae9a040cf59f4fd85533fd0f2391d433b8a90"
+      },
+      {
+        "command": "npm test -w ./extensions",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 102496,
+        "log": "artifacts/engine-0.2.1/g09/local-fix-engineering/extensions-test-retry.log",
+        "sha256": "f4d8ccc54edcc8563db7c73c754bd529ab0b2fbdf6fe724dbcbd91d3c2c31712"
+      },
+      {
+        "command": "npm run examples:catalog:check",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 1545,
+        "log": "artifacts/engine-0.2.1/g09/local-fix-engineering/examples-catalog-check.log",
+        "sha256": "9702f37c000aa822bf156ccdb31c9f46b5aede81a842ab25c268238a3760ffe4"
+      },
+      {
+        "command": "npm run performance-budget:test",
+        "exitCode": 0,
+        "signal": null,
+        "durationMs": 4032,
+        "log": "artifacts/engine-0.2.1/g09/local-fix-engineering/performance-budget-test.log",
+        "sha256": "8d2483c21f502a3bb37cea5d2433213d4034454c7ac21051149f83bd6b80b296"
+      },
+      {
+        "command": "npm run docs:check (final review)",
+        "exitCode": 0,
+        "log": "artifacts/engine-0.2.1/g09/local-fix-engineering/docs-final.log",
+        "sha256": "87b49f95fc76f49783ecb7d19417c8dc8dc142a6480c198548bfb5443a3dbb25"
+      }
+    ]
+  },
+  "developmentReports": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/queue-completion-development-2026-10-02T15-10-57.141Z/report.json",
+      "sha256": "97dc1190581da90ba91405d1fccb8da8c40b1f3ae4abab88547b40e5b0f50902"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/chain-isolation-2026-10-02T15-15-03.031Z/report.json",
+      "sha256": "7e8cb7c3f223c754f3c2b9a94ddfb2c9c21ae7e6c2bb15297d7e4b2ad9eb7005"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/ao-scratch-isolation-2026-10-02T15-20-11.273Z/report.json",
+      "sha256": "40f4cbb3cb507c0719261987e470ef1b39c466d533f5ae7fca2c06f4f6ff49ba"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/readback-device-loss-2026-10-02T15-35-32.802Z/report.json",
+      "sha256": "86d0078938e24263f159a2ed80773ac7e4fb72fcf03f140ddbb81bec7b903fc6"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/readback-device-loss-2026-10-02T15-38-16.028Z/report.json",
+      "sha256": "350cf8f08f21d2aaee772aa373e77ba45fc2fefb2d47b689fc7bd467afe0d92b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/readback-device-loss-2026-10-02T22-11-12.274Z/report.json",
+      "sha256": "6a541ff2df5308fc2fb336b0658e0c8523645ecb4aa9c9d2f7310251ac487168"
+    }
+  ],
+  "remaining": [
+    "Intel intermittent black frame/stale readback/path disagreement",
+    "G09 full correctness, stability and performance qualification"
+  ]
+}

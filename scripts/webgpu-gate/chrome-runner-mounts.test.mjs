@@ -4,7 +4,24 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import test from 'node:test';
 
-import { removeChromeProfile, startHttpFixtureServer } from './chrome-runner.mjs';
+import { attachChromeFailureDiagnostics, removeChromeProfile, startHttpFixtureServer } from './chrome-runner.mjs';
+
+test('Chrome timeout retains original cause, last progress, browser identity and stderr', () => {
+  const original = new Error('Runtime.evaluate timed out');
+  const result = attachChromeFailureDiagnostics(original, { url: 'http://127.0.0.1/fixture', browserProduct: 'Chrome/test',
+    lastProgress: 'view 3/4', stderr: 'GPU process exited', browserErrors: [{ kind: 'exception', message: 'device lost' }] });
+  assert.equal(result, original); assert.equal(result.message, 'Runtime.evaluate timed out');
+  assert.equal(result.browserFailure.lastProgress, 'view 3/4');
+  assert.equal(result.browserFailure.stderrTruncated, false);
+  assert.match(result.stack, /Runtime.evaluate timed out/); assert.match(result.stack, /GPU process exited/);
+  assert.match(result.stack, /Chrome\/test/); assert.match(result.stack, /device lost/);
+});
+
+test('Chrome failure stderr remains bounded without dropping its final error', () => {
+  const result = attachChromeFailureDiagnostics('failed', { stderr: 'x'.repeat(70000) + 'final error' });
+  assert.ok(result instanceof Error); assert.equal(result.browserFailure.stderr.length, 65536);
+  assert.equal(result.browserFailure.stderrTruncated, true); assert.ok(result.browserFailure.stderr.endsWith('final error'));
+});
 
 test('Chrome fixture server mounts a sibling content root without exposing its parent', async context => {
   const temporaryRoot = mkdtempSync(resolve(tmpdir(), 'haiyue-chrome-mount-'));

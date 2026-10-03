@@ -513,3 +513,6 @@ export type { GpuSimulationRequirements } from './compute/GpuSimulationCapabilit
 
 export { createDeferredLightingProfile } from './experimental/DeferredLightingProfile';
 export type { DeferredLightingProfile, DeferredLightingProfileOptions, DeferredLightingDebugChannel, DeferredLightingDebugImage } from './experimental/DeferredLightingProfile';
+
+export { createFrameGraphInspector } from './experimental/FrameGraphInspector';
+export type { FrameGraphInspector, FrameGraphSnapshot } from './experimental/FrameGraphInspector';

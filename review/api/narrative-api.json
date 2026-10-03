@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "entrypoint": "@haiyue/extensions/narrative",
+  "rootExportsUnchanged": true,
+  "review": "docs/for-ai/adr/0116-optional-narrative-runtime.md",
+  "exports": [
+    {
+      "name": "connectNarrativeActions",
+      "kind": "value"
+    },
+    {
+      "name": "NarrativeActionConnection",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeActionHandler",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeActionRequest",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeArtwork",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeCondition",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeDefinition",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeEffect",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeEvent",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeGui",
+      "kind": "value"
+    },
+    {
+      "name": "NarrativeGuiOptions",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeNode",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeOption",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeRuntime",
+      "kind": "value"
+    },
+    {
+      "name": "NarrativeSnapshot",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeValue",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeVariables",
+      "kind": "type"
+    },
+    {
+      "name": "NarrativeView",
+      "kind": "type"
+    },
+    {
+      "name": "validateNarrativeDefinition",
+      "kind": "value"
+    }
+  ]
+}

@@ -1,5 +1,7 @@
+import { captureFrameGraphPlan, frameGraphCaptureActive } from '../core/FrameGraphCapture';
 import { EngineError, EngineErrorCode } from '../core/EngineError';
-import { RenderGraph, type RenderGraphPassClass } from '../core/RenderGraph';
+import { FrameGraphPlanCache } from '../core/FrameGraphPlanCache';
+import { RenderGraph, type RenderGraphPassClass, type RenderGraphStats, type RenderGraphResourceLifetime } from '../core/RenderGraph';
 
 export type Render3DFramePassKind = 'prepare' | 'compute' | 'render' | 'postprocess' | 'cleanup';
 
@@ -7,6 +9,8 @@ export interface Render3DFramePassAccess {
   readonly reads?: readonly string[];
   readonly writes?: readonly string[];
   readonly after?: readonly string[];
+  /** Required external state updates. Data producers are retained through consumers/exports. */
+  readonly sideEffect?: boolean;
 }
 
 export interface Render3DFramePassSnapshot {
@@ -20,8 +24,17 @@ export interface Render3DFramePassSnapshot {
 interface Render3DFramePass {
   snapshot: Render3DFramePassSnapshot & { reads: string[]; writes: string[]; dependsOn: string[] };
   after: string[];
+  sideEffect: boolean;
   run(): void;
 }
+
+interface CompiledFramePlan {
+  readonly order: readonly number[];
+  readonly dependencies: readonly (readonly string[])[];
+  readonly lifetimes: readonly RenderGraphResourceLifetime<string>[];
+  readonly stats: RenderGraphStats;
+}
+const idle = () => {};
 
 /** View-scoped, single-writer resource versions compiled by the shared RenderGraph. */
 export class Render3DFramePlan {
@@ -35,9 +48,22 @@ export class Render3DFramePlan {
   private readonly _writers = new Map<string, number>();
   private readonly _names = new Map<string, number>();
 
-  constructor(private readonly _passClass: RenderGraphPassClass = 'view-local') {}
+  readonly cache = new FrameGraphPlanCache<CompiledFramePlan>();
+  private _scope = '';
+  private _compiledPlan: CompiledFramePlan | undefined;
+  private _executing = false;
+
+  setCacheScope(device: object | undefined, scope: string): this {
+    this._assertIdle(); this.cache.selectGeneration(device); this._scope = scope; return this;
+  }
+  clearCache(): void { this._assertIdle(); this.cache.clear(); }
+
+  constructor(private readonly _passClass: RenderGraphPassClass = 'view-local', private readonly _domain: string = _passClass) {}
 
   clear(): this {
+    this._assertIdle();
+    for (const pass of this._passPool) pass.run = idle;
+    this._compiledPlan = undefined;
     this._passes.length = 0;
     this._snapshot.length = 0;
     this._imports.clear();
@@ -51,24 +77,28 @@ export class Render3DFramePlan {
 
   /** External inputs must be imported explicitly. Mutations write a new version. */
   importResources(...names: string[]): this {
+    this._assertIdle();
     for (const name of names) this._imports.add(name);
     return this;
   }
 
   /** Outputs observed outside this plan must never be considered transient. */
   exportResources(...names: string[]): this {
+    this._assertIdle();
     for (const name of names) this._exports.add(name);
     return this;
   }
 
   add(name: string, kind: Render3DFramePassKind, run: () => void, access: Render3DFramePassAccess = {}): this {
+    this._assertIdle();
     const index = this._passes.length;
     let pass = this._passPool[index];
     if (!pass) {
-      pass = { snapshot: { name, kind, reads: [], writes: [], dependsOn: [] }, after: [], run };
+      pass = { snapshot: { name, kind, reads: [], writes: [], dependsOn: [] }, after: [], sideEffect: false, run };
       this._passPool.push(pass);
     }
     pass.run = run;
+    pass.sideEffect = access.sideEffect === true;
     pass.snapshot.name = name;
     pass.snapshot.kind = kind;
     copyNames(pass.snapshot.reads, access.reads);
@@ -79,7 +109,40 @@ export class Render3DFramePlan {
     return this;
   }
 
-  execute(): void {
+  execute(beforeExecute?: () => void): void {
+    this._assertIdle(); this._executing = true;
+    try {
+      const key = JSON.stringify([this._passClass, this._scope, [...this._imports], [...this._exports],
+        this._passes.map(pass => [pass.snapshot.name, pass.snapshot.kind, pass.snapshot.reads, pass.snapshot.writes, pass.after, pass.sideEffect])]);
+      let compiled = this.cache.get(key);
+      if (!compiled) {
+        this._compile();
+        compiled = Object.freeze({
+          order: Object.freeze(this._graph.compiledPasses.map(pass => pass.handle)),
+          dependencies: Object.freeze(this._passes.map(pass => Object.freeze([...pass.snapshot.dependsOn]))),
+          lifetimes: Object.freeze(this._graph.resourceLifetimes.map(resource => Object.freeze({ ...resource }))),
+          stats: Object.freeze({ ...this._graph.stats }),
+        });
+        this.cache.set(key, compiled);
+      }
+      this._compiledPlan = compiled;
+      this._snapshot.length = 0;
+      for (const index of compiled.order) {
+        const snapshot = this._passes[index]!.snapshot;
+        copyNames(snapshot.dependsOn, compiled.dependencies[index]); this._snapshot.push(snapshot);
+      }
+      if (frameGraphCaptureActive()) {
+        for (let index = 0; index < this._passes.length; index++) copyNames(this._passes[index]!.snapshot.dependsOn, compiled.dependencies[index]);
+        const live = new Set(compiled.order);
+        captureFrameGraphPlan(this._domain, this._passes.map((pass, index) => ({ ...pass.snapshot, live: live.has(index),
+          reason: !live.has(index) ? 'unreachable-from-outputs-and-side-effects' : pass.sideEffect ? 'side-effect' : pass.snapshot.writes.some(name => this._exports.has(name)) ? 'exported-output' : 'required-dependency' })), compiled.lifetimes, this.cache.stats);
+      }
+      beforeExecute?.();
+      for (const index of compiled.order) this._passes[index]!.run();
+    } finally { this._executing = false; }
+  }
+
+  private _compile(): void {
     // Compile the entire plan before invoking any action, including CPU preparation.
     this._graph.clear();
     this._resources.clear();
@@ -90,7 +153,7 @@ export class Render3DFramePlan {
     for (const pass of this._passes) {
       const { name, writes } = pass.snapshot;
       if (this._names.has(name)) this._invalid(`Duplicate pass "${name}".`);
-      const handle = this._graph.addPass({ name, passClass: this._passClass, payload: pass, sideEffect: true });
+      const handle = this._graph.addPass({ name, passClass: this._passClass, payload: pass, sideEffect: pass.sideEffect });
       this._names.set(name, handle);
       for (const resource of writes) {
         if (this._imports.has(resource)) this._invalid(`Pass "${name}" overwrites imported resource "${resource}"; write a new version.`);
@@ -121,14 +184,29 @@ export class Render3DFramePlan {
         pushUnique(dependsOn, dependency);
       }
     }
-    const compiled = this._graph.compile();
-    for (const pass of compiled) this._snapshot.push(pass.payload.snapshot);
-    for (const pass of compiled) pass.payload.run();
+    this._validateCycles();
+    this._graph.compile();
   }
 
   get snapshot(): readonly Render3DFramePassSnapshot[] { return this._snapshot; }
-  get resourceLifetimes() { return this._graph.resourceLifetimes; }
-  get stats() { return this._graph.stats; }
+  get resourceLifetimes() { return this._compiledPlan?.lifetimes ?? []; }
+  get stats() { return this._compiledPlan?.stats ?? this._graph.stats; }
+
+  private readonly _visitState: number[] = [];
+
+  /** Validate even dead branches before executing any CPU/GPU work. */
+  private _validateCycles(): void {
+    const state = this._visitState;
+    state.length = this._passes.length; state.fill(0);
+    const visit = (index: number): void => {
+      if (state[index] === 2) return;
+      if (state[index] === 1) this._invalid('dependency cycle.');
+      state[index] = 1;
+      for (const name of this._passes[index]!.snapshot.dependsOn) visit(this._names.get(name)!);
+      state[index] = 2;
+    };
+    for (let index = 0; index < this._passes.length; index++) visit(index);
+  }
 
   private _resource(name: string): number {
     let handle = this._resources.get(name);
@@ -137,6 +215,10 @@ export class Render3DFramePlan {
       this._resources.set(name, handle);
     }
     return handle;
+  }
+
+  private _assertIdle(): void {
+    if (this._executing) this._invalid('Cannot mutate or reenter an executing plan. Use a separate plan for nested recording.');
   }
 
   private _invalid(message: string): never {

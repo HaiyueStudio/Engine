@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-01",
+  "scope": "G09 dependency/culling substage",
+  "status": "passed",
+  "goalStatus": "active",
+  "revision": "21105a2a94e1b811b4c9b03fbca3c6187e1fa771",
+  "dirty": true,
+  "inputs": {
+    "engine/src/postprocess/AmbientOcclusionPass.ts": "590e48bb9182646afe90134fa1796e26efb1a9f7e47ef1519594c3ed597fe46a",
+    "engine/src/postprocess/FxaaPass.ts": "98cbeeb3b45bd6209e9d006a71eaf427b8a5166bebae105201b4ff747c94b123",
+    "engine/src/postprocess/GaussianBlurPass.ts": "235cd2c88bc885d808d757e5994c7044073ad045bb3b07be1571d4acbbbcc114",
+    "engine/src/postprocess/GrayscalePass.ts": "a6cd6c2d08694b7a57db5e28842f97dcd98ccd8ebd11f82225413dca728cbe59",
+    "engine/src/postprocess/OutlinePass.ts": "2013ef7649fc77127e81688d1a4d0f9d2d6693a09f27e6a50ea75547477cdef0",
+    "engine/src/postprocess/PostProcessGraph.ts": "44b6a03bffe42ebef4df6a9d3de50439ecfc3c55fba017e2e97f129d1c0f8da9",
+    "engine/src/postprocess/PostProcessRenderer.ts": "f12f92e5af19a4c657d1c3e1304bb8033c0275610e0785418690977af9669576",
+    "engine/src/postprocess/SobelPass.ts": "e390d03e2153f1efe055aaa5167d965bd47ade6ebf42e3166e0779940cb59208",
+    "engine/src/renderer/DeferredReferenceBackend.ts": "7d76c4e298dc5ae41b5c3745d6f181b6df0680be957b12d0a0af279e70de6e56",
+    "engine/src/systems/Render3DFramePlan.ts": "5cf7e0372ebfa8155a76124f9e6eefde57a373a65cc9321cf5e3ddff33994b7e",
+    "engine/src/systems/Render3DPostScenePasses.ts": "d3f1c5fee48defa15e00576ec862b82e1fe71ce2cacddc4ba4969ae821af4176",
+    "engine/test/postprocess-graph.test.mjs": "811c3902116974a783686164e230e2bca26f97144d5ced2c132ba6b7da4b1389",
+    "engine/test/render3d-frame-resources.test.mjs": "a48f633fb0f2d0f8d6b431673a721be8d83c8ce2b623741ce02e932c6d7cc88c",
+    "scripts/verify-framegraph-culling.mjs": "ba027c4532ae677ece98f5018b7ee7e2e5ac359d9bf20a10843031e05ad86b81",
+    "scripts/verify-framegraph-regressions.mjs": "662c03009d2acf2ee43c7bdaa859b475fe70d46ed1628ff0ac9d1812743b5e1b",
+    "scripts/webgpu-gate/auxiliary-semantics-fixture.mjs": "2a687dd3ba5702dc29c01b5db70f1f8e65246b9842d122b50d47921a55bfc41c",
+    "scripts/webgpu-gate/deferred-fixture-policy.mjs": "3e8cc7305caa5346937eff21093955604376b23d671313adf94eb4b6ee0ddf4e",
+    "scripts/webgpu-gate/deferred-fixture-policy.test.mjs": "1dcd0702ec45e14f3ca2aaeb1c88381c3cea4c2d3793092d565de7b96e69ffaa",
+    "scripts/webgpu-gate/framegraph-culling-fixture.html": "99f68ae900b42d9d59db9c3d8f94ec8d8c07cfeb82c2168487682c0838e117c7",
+    "scripts/webgpu-gate/framegraph-culling-fixture.mjs": "205f1c8e1413faa9d180ea532956bf191eb0c0e2f9dcfc1b5a8ea06c3b50d60f",
+    "scripts/webgpu-gate/postprocess-multiview-fixture.mjs": "39368d5d547858ad5364720fbaf922850a80bc30eedfda8b476072f858723e5d"
+  },
+  "checks": {
+    "focusedTests": 47,
+    "repositoryTests": 1388,
+    "policyTests": 13,
+    "buildTargets": 96,
+    "typecheck": "passed",
+    "build": "passed",
+    "boundariesPrepareApiDocs": "passed",
+    "milestones": "passed"
+  },
+  "nativeEvidence": [
+    "artifacts/engine-0.2.1/g09/culling-2026-10-01T13-27-56.980Z/native.json",
+    "artifacts/engine-0.2.1/g09/regressions-2026-10-01T13-28-30.513Z.json"
+  ],
+  "formalPerformanceQualified": false
+}

@@ -51,3 +51,6 @@ export type { RenderIntegrationOptions, RenderPipelineEntryOptionsFactory } from
 
 export { createDeferredLightingProfile } from './DeferredLightingProfile';
 export type { DeferredLightingProfile, DeferredLightingProfileOptions, DeferredLightingDebugChannel, DeferredLightingDebugImage } from './DeferredLightingProfile';
+
+export { createFrameGraphInspector } from './FrameGraphInspector';
+export type { FrameGraphInspector, FrameGraphSnapshot } from './FrameGraphInspector';

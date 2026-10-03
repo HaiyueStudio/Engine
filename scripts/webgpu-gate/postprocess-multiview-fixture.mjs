@@ -28,7 +28,7 @@ class AuxiliaryProbePass extends GrayscalePass {
 
 try {
   check(navigator.gpu, 'navigator.gpu is unavailable');
-  const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
+  const adapter = await navigator.gpu.requestAdapter({ powerPreference: new URLSearchParams(location.search).get('powerPreference') ?? 'high-performance' });
   check(adapter, 'No WebGPU adapter');
   const device = await adapter.requestDevice();
   const validationErrors = [];

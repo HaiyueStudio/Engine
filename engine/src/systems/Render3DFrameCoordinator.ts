@@ -1,3 +1,4 @@
+import { frameGraphCacheScope } from '../core/frameGraphCacheScope';
 import type { Camera3D } from '../components/Camera3D';
 import type { RenderCommandContext } from '../core/RenderCommandContext';
 import type { RenderViewSnapshot } from '../core/RenderView';
@@ -111,6 +112,7 @@ export class Render3DFrameCoordinator {
   }
 
   executeSceneGlobal(hasDirectionalShadowPass: boolean): void {
+    this.sceneGlobalPlan.setCacheScope(this.sceneGlobalState.context?.device, this.sceneGlobalState.context ? frameGraphCacheScope(this.sceneGlobalState.context) : '');
     this.sceneGlobalPlan.clear().importResources('world-frame', 'shadow-view');
     if (hasDirectionalShadowPass) {
       this.sceneGlobalPlan.exportResources('directional-shadow');
@@ -171,6 +173,7 @@ export class Render3DFrameCoordinator {
     }
     collectPass.lastSeenFrame = liveFrame;
     try {
+      this.viewPlan.setCacheScope(context.device, frameGraphCacheScope(context, frameView));
       this.viewPlan.clear()
         .importResources('world-frame', 'camera-frame', 'scene-environment', 'directional-shadow', 'view-output:previous')
         .exportResources('view-output:next')
@@ -239,6 +242,7 @@ export class Render3DFrameCoordinator {
 
   clearViewCaches(): void {
     this._collectPassNames.clear();
+    this.viewPlan.clear().clearCache(); this.sceneGlobalPlan.clear().clearCache();
   }
 }
 

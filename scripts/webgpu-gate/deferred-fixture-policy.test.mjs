@@ -68,5 +68,7 @@ test('compatibility builds keep G02/G03 evidence directories separate', () => {
   assert.deepEqual(parseDeferredFixtureBuildOptions(['--tiled']), {goal:'g03'});
   assert.deepEqual(parseDeferredFixtureBuildOptions(['--compatibility']), {goal:'g04'});
   assert.deepEqual(parseDeferredFixtureBuildOptions(['--performance']), {goal:'g05'});
+  assert.deepEqual(parseDeferredFixtureBuildOptions(['--framegraph']), {goal:'g09'});
+  assert.throws(() => parseDeferredFixtureBuildOptions(['--framegraph', '--compatibility']));
   for (const args of [['--performance','--tiled'], ['--unknown'], ['--tiled', '--compatibility'], ['--compatibility', '--compatibility']]) assert.throws(() => parseDeferredFixtureBuildOptions(args));
 });

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="240" viewBox="0 0 720 240">
+<defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#a7f3d0"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs>
+<path fill="#15263e" stroke="#a7f3d0" stroke-width="3" d="M36 18h616l44 42v144l-24 18H52L24 194V42z"/>
+<path fill="#a7f3d0" opacity=".15" d="M24 164 310 18h150L80 222H52L24 194z"/>
+<text x="360" y="162" text-anchor="middle" fill="#061528" stroke="#061528" stroke-width="8" font-family="Arial, sans-serif" font-weight="900" font-size="120" letter-spacing="10">PLAY</text>
+<text x="360" y="152" text-anchor="middle" fill="url(#g)" font-family="Arial, sans-serif" font-weight="900" font-size="120" letter-spacing="10">PLAY</text>
+<path stroke="#a7f3d0" stroke-width="4" d="M48 62V42h58m508 156h58v-20"/>
+</svg>

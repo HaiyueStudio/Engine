@@ -1,4 +1,4 @@
-export const OUTPUT_PROBE_VARIANTS = ['original', 'explicit-state', 'arithmetic-vertex', 'vertex-buffer'];
+export const OUTPUT_PROBE_VARIANTS = ['original', 'explicit-state', 'arithmetic-vertex', 'vertex-buffer', 'lazy-depth', 'initialized-depth'];
 
 export function parseOutputProbeOptions(args) {
   const options = { preference: 'high-performance', variant: 'original', frames: 512 };
@@ -19,6 +19,12 @@ export function parseOutputProbeOptions(args) {
 export function outputProbeShader(source, variant) {
   if (!OUTPUT_PROBE_VARIANTS.includes(variant)) throw new Error(`Unknown output variant: ${variant}`);
   if (variant === 'original' || variant === 'explicit-state') return source;
+  if (variant === 'lazy-depth' || variant === 'initialized-depth') {
+    // A dynamic uniform branch keeps the fallback binding in the interface while
+    // leaving the expected output unchanged (settings.w is zero in this probe).
+    return source.replace('@fragment', '@group(0) @binding(2) var fallbackDepth : texture_depth_2d_array;\n\n@fragment')
+      .replace('  let size =', '  if (params.settings.w > 0.0) { return vec4<f32>(textureLoad(fallbackDepth, vec2<i32>(0), 0, 0)); }\n  let size =');
+  }
   const start = source.indexOf('@vertex');
   const end = source.indexOf('struct OutputParams');
   if (start < 0 || end <= start) throw new Error('Unrecognized output vertex shader');

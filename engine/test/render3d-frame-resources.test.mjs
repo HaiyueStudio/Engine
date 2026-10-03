@@ -36,7 +36,7 @@ for (const [name, configure, message] of [
 ]) test(`frame resources reject ${name} before any action runs`, t => {
   const plan = fixture(t).viewPlan;
   let executed = false;
-  plan.add('prepare', 'prepare', () => { executed = true; });
+  plan.add('prepare', 'prepare', () => { executed = true; }, { sideEffect: true });
   configure(plan);
   assert.throws(() => plan.execute(), message);
   assert.equal(executed, false);
@@ -47,7 +47,7 @@ test('clear drops earlier view imports, writers and dependencies', t => {
   plan.importResources('other-view').add('a', 'render', () => {}, { reads: ['other-view'], writes: ['old-color'] }).execute();
   plan.clear().add('a', 'render', () => {}, { reads: ['old-color'] });
   assert.throws(() => plan.execute(), /without a producer/);
-  plan.clear().add('fresh', 'render', () => {}, { writes: ['color'] }).execute();
+  plan.clear().exportResources('color').add('fresh', 'render', () => {}, { writes: ['color'] }).execute();
   assert.deepEqual(plan.snapshot.map(p => p.name), ['fresh']);
   assert.deepEqual(plan.snapshot[0].dependsOn, []);
   assert.equal(plan.stats.resourceCount, 1);
@@ -72,4 +72,34 @@ test('view plan wires demanded auxiliary and history resources and omits unused 
   execute({});
   assert.ok(!coordinator.snapshot.some(p => p.name === auxiliaryName));
   assert.deepEqual(coordinator.snapshot.at(-1).reads, ['scene-linear-color', 'view-output:previous']);
+});
+
+test('only exports and explicit side effects retain their complete producer chains', t => {
+  const plan = fixture(t).viewPlan, calls = [];
+  const add = (name, access) => plan.add(name, 'prepare', () => calls.push(name), access);
+  plan.exportResources('display', 'history:next');
+  add('dead-upload', { writes: ['unused'] });
+  add('scene', { writes: ['color'] });
+  add('display', { reads: ['color'], writes: ['display'] });
+  add('history', { reads: ['color'], writes: ['history:next'] });
+  add('retire', { sideEffect: true });
+  plan.execute();
+  assert.deepEqual(calls, ['scene', 'display', 'history', 'retire']);
+  assert.equal(plan.stats.culledPassCount, 1);
+  assert.ok(!plan.resourceLifetimes.some(r => r.name === 'unused'));
+  calls.length = 0;
+  plan.clear().add('dead-upload', 'prepare', () => calls.push('unexpected'), { writes: ['unused'] }).execute();
+  assert.deepEqual(calls, []);
+  assert.equal(plan.stats.culledPassCount, 1);
+});
+
+test('scene-global shadow export remains a root across view-plan clears', t => {
+  const coordinator = fixture(t); let shadows = 0;
+  coordinator._actions.renderDirectionalShadow = () => shadows++;
+  coordinator.executeSceneGlobal(true);
+  assert.equal(shadows, 1);
+  assert.equal(coordinator.sceneGlobalPlan.stats.executedPassCount, 1);
+  coordinator.executeSceneGlobal(false);
+  assert.equal(shadows, 1);
+  assert.equal(coordinator.sceneGlobalPlan.stats.executedPassCount, 0);
 });

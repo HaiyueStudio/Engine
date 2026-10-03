@@ -133,3 +133,12 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0108：0.2.1 GPU 实例与模拟接入](0108-gpu-instance-simulation-021.md)
 - [0109：0.2.1 Deferred 与 Tiled 光照合同](0109-deferred-lighting-021-contract.md)
 - [0110：Deferred 示例的 experimental profile facade](0110-deferred-example-profile.md)
+
+- [0111：帧计划活跃根与后处理读写裁剪](./0111-framegraph-dependency-culling.md)
+
+- [ADR 0112：临时纹理按使用区间复用](0112-transient-texture-lifetime-reuse.md)
+- [ADR 0113：结构计划缓存与安全附件操作](0113-framegraph-plan-cache-and-attachment-operations.md)
+
+- [ADR 0114：FrameGraph 按需单帧诊断](0114-framegraph-one-shot-diagnostics.md)
+- [0115：可选国际化与 GUI 绑定](0115-optional-i18n-runtime.md)。
+- [0116：可选剧情运行时](0116-optional-narrative-runtime.md)。

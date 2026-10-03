@@ -1,0 +1,427 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-02T01:43:05.275Z",
+  "status": "stage-five-targeted-passed-stability-open",
+  "goalStatus": "active",
+  "revision": "21105a2a94e1b811b4c9b03fbca3c6187e1fa771",
+  "dirty": true,
+  "scope": "G09 one-shot diagnostics and example; no formal performance qualification",
+  "sourceFingerprint": "sha256:9989999c47d5c306ab7766a8af33cca193fc508a0306a29968077105b4ff401d",
+  "inputs": {
+    "engine/src/core/FrameGraphCapture.ts": "52350d3c06dce3101b1db93ffb83b5530923076b67d3150118067b91a4247c5e",
+    "engine/src/core/RenderCommandContext.ts": "6b5c13772bb4d4217863585e5dccf54c8e3f19f86db0ff8ea55e0381e722d890",
+    "engine/src/core/FrameGraphPlanCache.ts": "4bc2197c9498262a476b77e12b968729a4fadd0198817737ad97fd056cfc7a64",
+    "engine/src/experimental/FrameGraphInspector.ts": "d16eaf8ab1131846423dd55e14a084dc3a833de19cd30b66015cc913a24d921c",
+    "engine/src/experimental/renderer.ts": "eac8ed4f23f68d830f7ceca19fd0eae80d0520724624d3761e0b0d5801521246",
+    "engine/src/experimental.ts": "e44c37dc21b9b142e494b8347e075e298b9be81051074bd4c2077e146be001cf",
+    "engine/src/systems/Render3DSystem.ts": "d746b60e5966faa7008867baf368b36f9e80b81cf5be4308809388113a32e8d6",
+    "engine/src/systems/Render3DFramePlan.ts": "c11de84dc17dc19d34da02f06f372b5105e740164aea08a5554981e4ca578263",
+    "engine/src/systems/Render3DPostScenePasses.ts": "155edf9433f834a6c0a2fcb8dc1efd9a5be2c27be1655558a4f661617c7ffb1b",
+    "engine/src/postprocess/PostProcessGraph.ts": "4f8786bfb993fd57bafa39f9777ddef19cf2d23a7866e482ddb75fa82b0334dd",
+    "engine/src/postprocess/PostProcessRenderer.ts": "f3492e570cbd79bf284b8a3d0553c6cd169271827e886c795c5935fddefb4648",
+    "engine/src/renderer/DeferredReferenceBackend.ts": "f8c46b84f572070472eb1c9f1c08d4386d0acfa57aa740e1669d238cd97aebe3",
+    "engine/src/renderer/DeferredAmbientOcclusion.ts": "2258f6e8cac944130e9e4aaecb94dc79b3cc454fb1e825a977de6bcc8be88cee",
+    "engine/src/rtt/TransientTextureAllocator.ts": "47b50dd6d570f1612a3db240b846b5eef54a13c103eac292b77e85df77428684",
+    "engine/src/rtt/TransientAttachmentSequence.ts": "00c5928fde9dd56599efd8217ea6c0f6686ff9480e8501b7235a7936f8b2e962",
+    "engine/test/framegraph-inspector.test.mjs": "764526d7fe55a4f7fad7e8a7c5000bf612d60345c29e9a925eb4c404fc19051e",
+    "engine/test/framegraph-plan-cache.test.mjs": "50cf4bbb7592f5256a82b9defbd5dcbc2b430f5efc302216d73f3f5f619a165e",
+    "examples/deferred-lighting/main.ts": "10d505adc15f1072e06b5e594b767f4e3d2cf106b826213b710c4bc999a2dd02",
+    "examples/deferred-lighting/index.html": "5c02f07cd253946385fc213488cc203e192784fec1be3391290167b43584e667",
+    "examples/deferred-lighting/framegraph.ts": "c2031018f7858751d8cdad8e8180cd9008fdde0a80b9873eaad57a0d946b7b14",
+    "scripts/verify-framegraph-example.mjs": "999a1688dc19c7744cf435781f7b861cc45379c2da395cb9018ba6d576121780",
+    "scripts/webgpu-gate/framegraph-inspector-policy.mjs": "68a403038ffecae36730b0ba25ca3fece67c6238a8bd5a77d530706ca809e3c4",
+    "scripts/webgpu-gate/framegraph-inspector-policy.test.mjs": "ab260b09a4c1ee7200e2af94ce69eed85b4c00117c0fbeb9097ea226281c99ff",
+    "scripts/fixtures/engine-consumers/node-runtime.mjs": "aab44e03bc700e1b11efd1c204dec191005e4c16269531bc3360319c06dc70d4",
+    "scripts/fixtures/engine-consumers/typescript-consumer.ts": "dbf384ac99d63e9e36db437a48e3c1f16446ae0f4cc74d7abbd6cfd00dd267de",
+    "review/baselines/api-surface.json": "4a0de4b335946f88fe968745143e3a16ca235ff38a16de0eb63271d6a3acd91d"
+  },
+  "native": {
+    "path": "artifacts/engine-0.2.1/g09/inspector-2026-10-02T01-40-29.660Z/native.json",
+    "cases": 18,
+    "devices": [
+      {
+        "adapter": {
+          "vendor": "amd",
+          "architecture": "rdna-1",
+          "device": "",
+          "description": ""
+        },
+        "cases": [
+          {
+            "name": "forward-unarmed-presentation-stability",
+            "changed": 0,
+            "mean": 0
+          },
+          {
+            "name": "forward-capture-pixel-parity",
+            "mean": 0,
+            "changed": 0,
+            "work": {
+              "renderPasses": 2,
+              "computePasses": 0,
+              "drawCalls": 34,
+              "dispatchCalls": 0,
+              "bundleExecutions": 0,
+              "bundledDraws": 0,
+              "copies": 0,
+              "resolves": 0,
+              "submissions": 1
+            }
+          },
+          {
+            "name": "reference-unarmed-presentation-stability",
+            "changed": 0,
+            "mean": 0
+          },
+          {
+            "name": "reference-capture-pixel-parity",
+            "mean": 0,
+            "changed": 0,
+            "work": {
+              "renderPasses": 4,
+              "computePasses": 0,
+              "drawCalls": 35,
+              "dispatchCalls": 0,
+              "bundleExecutions": 0,
+              "bundledDraws": 0,
+              "copies": 0,
+              "resolves": 0,
+              "submissions": 1
+            }
+          },
+          {
+            "name": "tiled-unarmed-presentation-stability",
+            "changed": 0,
+            "mean": 0
+          },
+          {
+            "name": "tiled-capture-pixel-parity",
+            "mean": 0,
+            "changed": 0,
+            "work": {
+              "renderPasses": 4,
+              "computePasses": 1,
+              "drawCalls": 35,
+              "dispatchCalls": 1,
+              "bundleExecutions": 0,
+              "bundledDraws": 0,
+              "copies": 0,
+              "resolves": 0,
+              "submissions": 1
+            }
+          },
+          {
+            "name": "ao-and-blur-physical-mapping",
+            "physicalReuses": [
+              {
+                "physical": "4:1",
+                "batches": [
+                  3,
+                  4
+                ]
+              }
+            ],
+            "pools": [
+              {
+                "id": 2,
+                "owner": "deferred-mrt",
+                "at": "record-end",
+                "counters": {
+                  "allocations": 4,
+                  "reuses": 224,
+                  "logicalBytes": 17297280,
+                  "physicalBytes": 17297280,
+                  "peakBytes": 17297280,
+                  "pendingBytes": 17297280,
+                  "pendingPeakBytes": 17297280,
+                  "idleBytes": 0,
+                  "activeBytes": 0
+                }
+              },
+              {
+                "id": 3,
+                "owner": "deferred-ao",
+                "at": "record-end",
+                "counters": {
+                  "allocations": 3,
+                  "reuses": 0,
+                  "logicalBytes": 308880,
+                  "physicalBytes": 1544400,
+                  "peakBytes": 1544400,
+                  "pendingBytes": 1544400,
+                  "pendingPeakBytes": 1544400,
+                  "idleBytes": 0,
+                  "activeBytes": 0
+                }
+              },
+              {
+                "id": 4,
+                "owner": "postprocess",
+                "at": "record-end",
+                "counters": {
+                  "allocations": 1,
+                  "reuses": 1,
+                  "logicalBytes": 4942080,
+                  "physicalBytes": 4942080,
+                  "peakBytes": 4942080,
+                  "pendingBytes": 4942080,
+                  "pendingPeakBytes": 4942080,
+                  "idleBytes": 0,
+                  "activeBytes": 0
+                }
+              }
+            ]
+          },
+          {
+            "name": "culled-dependencies-frozen-json-and-png-export"
+          },
+          {
+            "name": "mobile-and-pending-capture-disposal",
+            "resources": {
+              "resources": 0,
+              "estimatedBytes": 0
+            }
+          }
+        ],
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 100
+          }
+        },
+        "browser": {
+          "product": "Chrome/154.0.8037.93",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "platform": "MacIntel",
+          "url": "http://127.0.0.1:54918/examples/deferred-lighting/index.html?regression=1&powerPreference=high-performance",
+          "angleBackend": "metal",
+          "nativeBackend": true
+        }
+      },
+      {
+        "adapter": {
+          "vendor": "intel",
+          "architecture": "gen-9",
+          "device": "",
+          "description": ""
+        },
+        "cases": [
+          {
+            "name": "forward-unarmed-presentation-stability",
+            "changed": 0,
+            "mean": 0
+          },
+          {
+            "name": "forward-capture-pixel-parity",
+            "mean": 0,
+            "changed": 0,
+            "work": {
+              "renderPasses": 2,
+              "computePasses": 0,
+              "drawCalls": 34,
+              "dispatchCalls": 0,
+              "bundleExecutions": 0,
+              "bundledDraws": 0,
+              "copies": 0,
+              "resolves": 0,
+              "submissions": 1
+            }
+          },
+          {
+            "name": "reference-unarmed-presentation-stability",
+            "changed": 0,
+            "mean": 0
+          },
+          {
+            "name": "reference-capture-pixel-parity",
+            "mean": 0,
+            "changed": 0,
+            "work": {
+              "renderPasses": 4,
+              "computePasses": 0,
+              "drawCalls": 35,
+              "dispatchCalls": 0,
+              "bundleExecutions": 0,
+              "bundledDraws": 0,
+              "copies": 0,
+              "resolves": 0,
+              "submissions": 1
+            }
+          },
+          {
+            "name": "tiled-unarmed-presentation-stability",
+            "changed": 0,
+            "mean": 0
+          },
+          {
+            "name": "tiled-capture-pixel-parity",
+            "mean": 0,
+            "changed": 0,
+            "work": {
+              "renderPasses": 4,
+              "computePasses": 1,
+              "drawCalls": 35,
+              "dispatchCalls": 1,
+              "bundleExecutions": 0,
+              "bundledDraws": 0,
+              "copies": 0,
+              "resolves": 0,
+              "submissions": 1
+            }
+          },
+          {
+            "name": "ao-and-blur-physical-mapping",
+            "physicalReuses": [
+              {
+                "physical": "4:1",
+                "batches": [
+                  3,
+                  4
+                ]
+              }
+            ],
+            "pools": [
+              {
+                "id": 2,
+                "owner": "deferred-mrt",
+                "at": "record-end",
+                "counters": {
+                  "allocations": 4,
+                  "reuses": 200,
+                  "logicalBytes": 17297280,
+                  "physicalBytes": 17297280,
+                  "peakBytes": 17297280,
+                  "pendingBytes": 17297280,
+                  "pendingPeakBytes": 17297280,
+                  "idleBytes": 0,
+                  "activeBytes": 0
+                }
+              },
+              {
+                "id": 3,
+                "owner": "deferred-ao",
+                "at": "record-end",
+                "counters": {
+                  "allocations": 3,
+                  "reuses": 0,
+                  "logicalBytes": 308880,
+                  "physicalBytes": 1544400,
+                  "peakBytes": 1544400,
+                  "pendingBytes": 1544400,
+                  "pendingPeakBytes": 1544400,
+                  "idleBytes": 0,
+                  "activeBytes": 0
+                }
+              },
+              {
+                "id": 4,
+                "owner": "postprocess",
+                "at": "record-end",
+                "counters": {
+                  "allocations": 1,
+                  "reuses": 1,
+                  "logicalBytes": 4942080,
+                  "physicalBytes": 4942080,
+                  "peakBytes": 4942080,
+                  "pendingBytes": 4942080,
+                  "pendingPeakBytes": 4942080,
+                  "idleBytes": 0,
+                  "activeBytes": 0
+                }
+              }
+            ]
+          },
+          {
+            "name": "culled-dependencies-frozen-json-and-png-export"
+          },
+          {
+            "name": "mobile-and-pending-capture-disposal",
+            "resources": {
+              "resources": 0,
+              "estimatedBytes": 0
+            }
+          }
+        ],
+        "browserDiagnostics": {
+          "consoleErrorCount": 0,
+          "exceptionCount": 0,
+          "unclassifiedFailureCount": 0,
+          "profileCleanup": {
+            "status": "passed",
+            "attempts": 1,
+            "durationMs": 91
+          }
+        },
+        "browser": {
+          "product": "Chrome/154.0.8037.93",
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "platform": "MacIntel",
+          "url": "http://127.0.0.1:54985/examples/deferred-lighting/index.html?regression=1&powerPreference=low-power",
+          "angleBackend": "metal",
+          "nativeBackend": true
+        }
+      }
+    ]
+  },
+  "engineeringArtifacts": "artifacts/engine-0.2.1/g09/diagnostics-engineering-2026-10-02T01-34-51.416Z",
+  "checks": {
+    "rootTypecheck": "passed",
+    "workspaceTests": {
+      "shaderLanguage": 135,
+      "engine": 767,
+      "animationSpec": 107,
+      "extensions": 392,
+      "catalog": 7,
+      "total": 1408,
+      "note": "Root run passed 1407 tests; final Engine rerun passed 767, including one subsequently added timing-attribution test."
+    },
+    "focusedInspectorAndCache": 14,
+    "inspectorAndPackagePolicy": 11,
+    "rootBuild": "passed",
+    "finalExamplesBuild": {
+      "targets": 96,
+      "freshness": "66ca0af385d2"
+    },
+    "api": "passed; only 3 additions in experimental renderer and aggregate",
+    "modules": "passed; 495 modules",
+    "responsibilities": "passed",
+    "rendererPrepare": "passed",
+    "docs": "passed",
+    "shader": {
+      "familyCacheHits": "11/11",
+      "wgslFiles": 75,
+      "wgslBytes": 561776,
+      "variants": 67,
+      "costBudget": "passed"
+    },
+    "package": {
+      "status": "passed",
+      "files": 515,
+      "packedBytes": 1899410,
+      "unpackedBytes": 7926625,
+      "consumers": 29,
+      "runtime": "Node/TypeScript/exports/CLI passed"
+    },
+    "noRive": "passed"
+  },
+  "retainedFailures": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/inspector-2026-10-02T01-27-01.394Z/native.json",
+      "classification": "Verifier expected same-batch alias; corrected to verify identical pool/physical IDs across sequential released leases."
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/inspector-2026-10-02T01-34-50.244Z/native.json",
+      "classification": "Unattributed Intel reference pixel difference; original runner did not wait for GPU completion or capture unarmed controls.",
+      "pixelMean": 33.80262669429336
+    }
+  ],
+  "remaining": [
+    "Full G09 stage-six A0/B4 performance and compatibility populations",
+    "Intel intermittent rendering/presentation investigation and sustained stability",
+    "G05/G07 final candidate qualification"
+  ]
+}

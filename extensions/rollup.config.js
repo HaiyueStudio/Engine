@@ -15,6 +15,8 @@ export default {
     tween: 'src/tween.ts',
     grid: 'src/grid.ts',
     controls: 'src/controls.ts',
+    i18n: 'src/i18n.ts',
+    narrative: 'src/narrative.ts',
     animation: 'src/animation.ts',
     'deformable-animation': 'src/deformable-animation.ts',
     'hya-state-machine': 'src/hya-state-machine.ts',

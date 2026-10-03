@@ -1,3 +1,4 @@
+import { beginFrameGraphCapture } from '../core/FrameGraphCapture';
 import { Render3DPostSceneFrameContext } from './Render3DPostSceneFrameContext';
 import { System } from '../ecs/System';
 import { Entity } from '../ecs/Entity';
@@ -531,9 +532,14 @@ export class Render3DSystem extends System {
       );
     }
     this._recording = true;
+    let capture: ReturnType<typeof beginFrameGraphCapture>;
+    let captureError: unknown;
     try {
-      return this._record(world, context);
-    } finally {
+      capture = beginFrameGraphCapture(this, context);
+      return this._record(world, capture?.context ?? context);
+    } catch (error) { captureError = error; throw error; }
+    finally {
+      capture?.finish(captureError);
       this._materialContextScratch.reset();
       this._recording = false;
     }
