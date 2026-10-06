@@ -1,0 +1,732 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-06T08:10:35.238Z",
+  "status": "reproduced",
+  "g09Qualified": false,
+  "performanceQualified": false,
+  "runtime": {
+    "sha256": "2009a192457771194fbd4933279a9637c1cdac1b2f0b828fff6bd05e2f90ad29",
+    "fileCount": 620
+  },
+  "revision": "e0303c3153036a7a19baec10721738b5c3087f5e",
+  "dirtyAtCapture": false,
+  "inputsUnchanged": true,
+  "boot": "kern.boottime: { sec = 1790987326, usec = 126826 } Sat Oct  3 08:28:46 2026",
+  "sourceFingerprint": "sha256:5cc58f6159f27734a0edb69be9978d2d1db935c49e5a30fcf42eef3511b03c37",
+  "results": [
+    {
+      "index": 0,
+      "powerPreference": "high-performance",
+      "startedAt": "2026-10-06T08:06:07.198Z",
+      "raw": {
+        "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/0-high-performance.json",
+        "sha256": "ba5750b1668a18a69e52567a8284af47e7ec85a2d14fd2622552ddcd795456d2"
+      },
+      "capture": {
+        "status": "passed",
+        "classification": "capture-consistent",
+        "controls": {
+          "status": "passed",
+          "checks": {
+            "buffer": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 256
+            },
+            "textureCompute": {
+              "status": "passed",
+              "maxDelta": 2.9685450542160652e-8,
+              "mismatches": 0,
+              "expectedComponents": 1260
+            },
+            "textureCopy": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 1260
+            },
+            "witness": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 8
+            }
+          }
+        },
+        "pair": {
+          "status": "passed",
+          "maxDelta": 7.421362635540163e-9,
+          "mismatches": 0,
+          "expectedComponents": 16384
+        }
+      },
+      "image": {
+        "status": "passed",
+        "witnessValid": null,
+        "computed": {
+          "rgbMax": 0.15294118225574493,
+          "alphaMin": 1,
+          "alphaMax": 1,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 1271,
+          "lit": true
+        },
+        "copied": {
+          "rgbMax": 0.15294117647058825,
+          "alphaMin": 1,
+          "alphaMax": 1,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 1271,
+          "lit": true
+        },
+        "source": {
+          "rgbMax": 0.0209503173828125,
+          "alphaMin": 1,
+          "alphaMax": 1,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 1717,
+          "lit": false
+        },
+        "maxReadbackDelta": 7.421362635540163e-9,
+        "performanceQualified": false
+      },
+      "status": "passed",
+      "classification": "passed",
+      "finishedAt": "2026-10-06T08:06:10.396Z",
+      "kernel": {
+        "index": 0,
+        "start": "2026-10-06T08:06:07.198Z",
+        "end": "2026-10-06T08:06:10.396Z",
+        "args": [
+          "show",
+          "--start",
+          "@1791273967",
+          "--end",
+          "@1791273971",
+          "--timezone",
+          "UTC",
+          "--style",
+          "compact",
+          "--predicate",
+          "process == \"kernel\" AND (eventMessage CONTAINS[c] \"timeout waiting for IntelAccelerator\" OR eventMessage CONTAINS[c] \"GPURestartSignaled\" OR eventMessage CONTAINS[c] \"GPURestartEnqueued\")"
+        ],
+        "file": "0-kernel-unix.log",
+        "sha256": "9f56fca152030dba9e8ee76dee4fc8967ab667507b5878f0f9ab819d55b6b9a6",
+        "intelTimeoutLines": 0,
+        "restartSignalLines": 0
+      }
+    },
+    {
+      "index": 1,
+      "powerPreference": "low-power",
+      "startedAt": "2026-10-06T08:06:11.536Z",
+      "raw": {
+        "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/1-low-power.json",
+        "sha256": "270d4520d886b0da905bcdaa9b26d1d14b2d11ae1f0ef1363f3e833827b815d3"
+      },
+      "capture": {
+        "status": "failed",
+        "classification": "capture-unreliable",
+        "controls": {
+          "status": "failed",
+          "checks": {
+            "buffer": {
+              "status": "failed",
+              "maxDelta": 2770089545,
+              "mismatches": 256,
+              "expectedComponents": 256
+            },
+            "textureCompute": {
+              "status": "failed",
+              "maxDelta": 1,
+              "mismatches": 1254,
+              "expectedComponents": 1260
+            },
+            "textureCopy": {
+              "status": "failed",
+              "maxDelta": 0.6470588235294118,
+              "mismatches": 1257,
+              "expectedComponents": 1260
+            },
+            "witness": {
+              "status": "failed",
+              "maxDelta": 2779096480,
+              "mismatches": 8,
+              "expectedComponents": 8
+            }
+          }
+        },
+        "pair": {
+          "status": "failed",
+          "maxDelta": 0.6470588235294118,
+          "mismatches": 16384,
+          "expectedComponents": 16384
+        }
+      },
+      "image": {
+        "status": "failed",
+        "witnessValid": null,
+        "computed": {
+          "rgbMax": 0,
+          "alphaMin": 0,
+          "alphaMax": 0,
+          "coveredPixels": 0,
+          "sentinelPixels": 0,
+          "coloredPixels": 0,
+          "lit": false
+        },
+        "copied": {
+          "rgbMax": 0.6470588235294118,
+          "alphaMin": 0.6470588235294118,
+          "alphaMax": 0.6470588235294118,
+          "coveredPixels": 0,
+          "sentinelPixels": 0,
+          "coloredPixels": 4096,
+          "lit": false
+        },
+        "source": {
+          "rgbMax": 0,
+          "alphaMin": 0,
+          "alphaMax": 0,
+          "coveredPixels": 0,
+          "sentinelPixels": 0,
+          "coloredPixels": 0,
+          "lit": false
+        },
+        "maxReadbackDelta": 0.6470588235294118,
+        "performanceQualified": false
+      },
+      "status": "failed",
+      "classification": "capture-unreliable",
+      "finishedAt": "2026-10-06T08:07:06.703Z",
+      "kernel": {
+        "index": 1,
+        "start": "2026-10-06T08:06:11.536Z",
+        "end": "2026-10-06T08:07:06.703Z",
+        "args": [
+          "show",
+          "--start",
+          "@1791273971",
+          "--end",
+          "@1791274027",
+          "--timezone",
+          "UTC",
+          "--style",
+          "compact",
+          "--predicate",
+          "process == \"kernel\" AND (eventMessage CONTAINS[c] \"timeout waiting for IntelAccelerator\" OR eventMessage CONTAINS[c] \"GPURestartSignaled\" OR eventMessage CONTAINS[c] \"GPURestartEnqueued\")"
+        ],
+        "file": "1-kernel-unix.log",
+        "sha256": "9a32bc257675702d5a3455148689c7a3e8512dfaf651c296eb04680b8dadd8be",
+        "intelTimeoutLines": 2,
+        "restartSignalLines": 15
+      }
+    },
+    {
+      "index": 2,
+      "powerPreference": "low-power",
+      "startedAt": "2026-10-06T08:07:07.865Z",
+      "raw": {
+        "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/2-low-power.json",
+        "sha256": "6d89e3aeea63b126fcb3b16cf170359d32063205a0780abc256d6370b40185b0"
+      },
+      "capture": {
+        "status": "failed",
+        "classification": "capture-unreliable",
+        "controls": {
+          "status": "passed",
+          "checks": {
+            "buffer": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 256
+            },
+            "textureCompute": {
+              "status": "passed",
+              "maxDelta": 2.9685450542160652e-8,
+              "mismatches": 0,
+              "expectedComponents": 1260
+            },
+            "textureCopy": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 1260
+            },
+            "witness": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 8
+            }
+          }
+        },
+        "pair": {
+          "status": "failed",
+          "maxDelta": 0.6470588235294118,
+          "mismatches": 16380,
+          "expectedComponents": 16384
+        }
+      },
+      "image": {
+        "status": "failed",
+        "witnessValid": null,
+        "computed": {
+          "rgbMax": 0,
+          "alphaMin": 1,
+          "alphaMax": 1,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 0,
+          "lit": false
+        },
+        "copied": {
+          "rgbMax": 0.6470588235294118,
+          "alphaMin": 0.6470588235294118,
+          "alphaMax": 1,
+          "coveredPixels": 1,
+          "sentinelPixels": 0,
+          "coloredPixels": 4095,
+          "lit": false
+        },
+        "source": {
+          "rgbMax": 0,
+          "alphaMin": 0.998046875,
+          "alphaMax": 0.998046875,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 0,
+          "lit": false
+        },
+        "maxReadbackDelta": 0.6470588235294118,
+        "performanceQualified": false
+      },
+      "status": "failed",
+      "classification": "capture-unreliable",
+      "finishedAt": "2026-10-06T08:07:36.467Z",
+      "kernel": {
+        "index": 2,
+        "start": "2026-10-06T08:07:07.865Z",
+        "end": "2026-10-06T08:07:36.467Z",
+        "args": [
+          "show",
+          "--start",
+          "@1791274027",
+          "--end",
+          "@1791274057",
+          "--timezone",
+          "UTC",
+          "--style",
+          "compact",
+          "--predicate",
+          "process == \"kernel\" AND (eventMessage CONTAINS[c] \"timeout waiting for IntelAccelerator\" OR eventMessage CONTAINS[c] \"GPURestartSignaled\" OR eventMessage CONTAINS[c] \"GPURestartEnqueued\")"
+        ],
+        "file": "2-kernel-unix.log",
+        "sha256": "6b69c0b8f7bf233e90c8dea57f1ee9b6bd0fb70da12ed989feecd6332df56b4b",
+        "intelTimeoutLines": 1,
+        "restartSignalLines": 7
+      }
+    },
+    {
+      "index": 3,
+      "powerPreference": "high-performance",
+      "startedAt": "2026-10-06T08:07:37.628Z",
+      "raw": {
+        "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/3-high-performance.json",
+        "sha256": "2964b7240339f39037d03765659d72ce1a816c1f52040829b3f64c674588f924"
+      },
+      "capture": {
+        "status": "passed",
+        "classification": "capture-consistent",
+        "controls": {
+          "status": "passed",
+          "checks": {
+            "buffer": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 256
+            },
+            "textureCompute": {
+              "status": "passed",
+              "maxDelta": 2.9685450542160652e-8,
+              "mismatches": 0,
+              "expectedComponents": 1260
+            },
+            "textureCopy": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 1260
+            },
+            "witness": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 8
+            }
+          }
+        },
+        "pair": {
+          "status": "passed",
+          "maxDelta": 7.421362635540163e-9,
+          "mismatches": 0,
+          "expectedComponents": 16384
+        }
+      },
+      "image": {
+        "status": "passed",
+        "witnessValid": null,
+        "computed": {
+          "rgbMax": 0.15294118225574493,
+          "alphaMin": 1,
+          "alphaMax": 1,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 1271,
+          "lit": true
+        },
+        "copied": {
+          "rgbMax": 0.15294117647058825,
+          "alphaMin": 1,
+          "alphaMax": 1,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 1271,
+          "lit": true
+        },
+        "source": {
+          "rgbMax": 0.0209503173828125,
+          "alphaMin": 1,
+          "alphaMax": 1,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 1717,
+          "lit": false
+        },
+        "maxReadbackDelta": 7.421362635540163e-9,
+        "performanceQualified": false
+      },
+      "status": "passed",
+      "classification": "passed",
+      "finishedAt": "2026-10-06T08:07:39.893Z",
+      "kernel": {
+        "index": 3,
+        "start": "2026-10-06T08:07:37.628Z",
+        "end": "2026-10-06T08:07:39.893Z",
+        "args": [
+          "show",
+          "--start",
+          "@1791274057",
+          "--end",
+          "@1791274060",
+          "--timezone",
+          "UTC",
+          "--style",
+          "compact",
+          "--predicate",
+          "process == \"kernel\" AND (eventMessage CONTAINS[c] \"timeout waiting for IntelAccelerator\" OR eventMessage CONTAINS[c] \"GPURestartSignaled\" OR eventMessage CONTAINS[c] \"GPURestartEnqueued\")"
+        ],
+        "file": "3-kernel-unix.log",
+        "sha256": "9f56fca152030dba9e8ee76dee4fc8967ab667507b5878f0f9ab819d55b6b9a6",
+        "intelTimeoutLines": 0,
+        "restartSignalLines": 0
+      }
+    },
+    {
+      "index": 4,
+      "powerPreference": "low-power",
+      "startedAt": "2026-10-06T08:07:41.062Z",
+      "raw": {
+        "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/4-low-power.json",
+        "sha256": "1e4d976a67c386f46cd4778cc33ab7563cb11c2f7180861868be462c4532d8b6"
+      },
+      "capture": {
+        "status": "passed",
+        "classification": "capture-consistent",
+        "controls": {
+          "status": "passed",
+          "checks": {
+            "buffer": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 256
+            },
+            "textureCompute": {
+              "status": "passed",
+              "maxDelta": 2.9685450542160652e-8,
+              "mismatches": 0,
+              "expectedComponents": 1260
+            },
+            "textureCopy": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 1260
+            },
+            "witness": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 8
+            }
+          }
+        },
+        "pair": {
+          "status": "passed",
+          "maxDelta": 0,
+          "mismatches": 0,
+          "expectedComponents": 16384
+        }
+      },
+      "image": {
+        "status": "failed",
+        "witnessValid": null,
+        "computed": {
+          "rgbMax": 0,
+          "alphaMin": 1,
+          "alphaMax": 1,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 0,
+          "lit": false
+        },
+        "copied": {
+          "rgbMax": 0,
+          "alphaMin": 1,
+          "alphaMax": 1,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 0,
+          "lit": false
+        },
+        "source": {
+          "rgbMax": 0,
+          "alphaMin": 0.998046875,
+          "alphaMax": 0.998046875,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 0,
+          "lit": false
+        },
+        "maxReadbackDelta": 0,
+        "performanceQualified": false
+      },
+      "status": "failed",
+      "classification": "image-mismatch",
+      "finishedAt": "2026-10-06T08:08:09.852Z",
+      "kernel": {
+        "index": 4,
+        "start": "2026-10-06T08:07:41.062Z",
+        "end": "2026-10-06T08:08:09.852Z",
+        "args": [
+          "show",
+          "--start",
+          "@1791274061",
+          "--end",
+          "@1791274090",
+          "--timezone",
+          "UTC",
+          "--style",
+          "compact",
+          "--predicate",
+          "process == \"kernel\" AND (eventMessage CONTAINS[c] \"timeout waiting for IntelAccelerator\" OR eventMessage CONTAINS[c] \"GPURestartSignaled\" OR eventMessage CONTAINS[c] \"GPURestartEnqueued\")"
+        ],
+        "file": "4-kernel-unix.log",
+        "sha256": "e0856d3130ef6af0da53994d53824ae469dd2af4927ebef615d2ec88b2944d86",
+        "intelTimeoutLines": 1,
+        "restartSignalLines": 6
+      }
+    },
+    {
+      "index": 5,
+      "powerPreference": "low-power",
+      "startedAt": "2026-10-06T08:08:10.942Z",
+      "raw": {
+        "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/5-low-power.json",
+        "sha256": "ba3f3b32c487f3f18c507f79d21147effe36433da791cc42fa799bcf1e346b74"
+      },
+      "capture": {
+        "status": "passed",
+        "classification": "capture-consistent",
+        "controls": {
+          "status": "passed",
+          "checks": {
+            "buffer": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 256
+            },
+            "textureCompute": {
+              "status": "passed",
+              "maxDelta": 2.9685450542160652e-8,
+              "mismatches": 0,
+              "expectedComponents": 1260
+            },
+            "textureCopy": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 1260
+            },
+            "witness": {
+              "status": "passed",
+              "maxDelta": 0,
+              "mismatches": 0,
+              "expectedComponents": 8
+            }
+          }
+        },
+        "pair": {
+          "status": "passed",
+          "maxDelta": 0,
+          "mismatches": 0,
+          "expectedComponents": 16384
+        }
+      },
+      "image": {
+        "status": "failed",
+        "witnessValid": null,
+        "computed": {
+          "rgbMax": 0,
+          "alphaMin": 1,
+          "alphaMax": 1,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 0,
+          "lit": false
+        },
+        "copied": {
+          "rgbMax": 0,
+          "alphaMin": 1,
+          "alphaMax": 1,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 0,
+          "lit": false
+        },
+        "source": {
+          "rgbMax": 0,
+          "alphaMin": 0.998046875,
+          "alphaMax": 0.998046875,
+          "coveredPixels": 4096,
+          "sentinelPixels": 0,
+          "coloredPixels": 0,
+          "lit": false
+        },
+        "maxReadbackDelta": 0,
+        "performanceQualified": false
+      },
+      "status": "failed",
+      "classification": "image-mismatch",
+      "finishedAt": "2026-10-06T08:08:39.354Z",
+      "kernel": {
+        "index": 5,
+        "start": "2026-10-06T08:08:10.942Z",
+        "end": "2026-10-06T08:08:39.354Z",
+        "args": [
+          "show",
+          "--start",
+          "@1791274090",
+          "--end",
+          "@1791274120",
+          "--timezone",
+          "UTC",
+          "--style",
+          "compact",
+          "--predicate",
+          "process == \"kernel\" AND (eventMessage CONTAINS[c] \"timeout waiting for IntelAccelerator\" OR eventMessage CONTAINS[c] \"GPURestartSignaled\" OR eventMessage CONTAINS[c] \"GPURestartEnqueued\")"
+        ],
+        "file": "5-kernel-unix.log",
+        "sha256": "666a32d135c9a953fbd2d0afe31ca1052d83bb5dfad899d3c6c61cdfcb5192ab",
+        "intelTimeoutLines": 1,
+        "restartSignalLines": 7
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/report.json",
+      "sha256": "4c5e9120e119e39dd8f53e9237ced3dce19a02f692672aa539496c5aa085b543"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/kernel-replay.json",
+      "sha256": "0dc7346ae0197b54d93804fabb495d025f89630e1459f990b72610837f4b42f4"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/processes-before.txt",
+      "sha256": "07984814df48d2a107e94c9e98e42980ca22686efa7c6f5130c03110a47af0cc"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/displays-before.txt",
+      "sha256": "bd9a54b90ba383d202718f405dd77035c9464f6bd38134e6ca4a61341fa9e8ca"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/before-kernel-unix.log",
+      "sha256": "9f56fca152030dba9e8ee76dee4fc8967ab667507b5878f0f9ab819d55b6b9a6"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/0-kernel-unix.log",
+      "sha256": "9f56fca152030dba9e8ee76dee4fc8967ab667507b5878f0f9ab819d55b6b9a6"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/1-kernel-unix.log",
+      "sha256": "9a32bc257675702d5a3455148689c7a3e8512dfaf651c296eb04680b8dadd8be"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/2-kernel-unix.log",
+      "sha256": "6b69c0b8f7bf233e90c8dea57f1ee9b6bd0fb70da12ed989feecd6332df56b4b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/3-kernel-unix.log",
+      "sha256": "9f56fca152030dba9e8ee76dee4fc8967ab667507b5878f0f9ab819d55b6b9a6"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/4-kernel-unix.log",
+      "sha256": "e0856d3130ef6af0da53994d53824ae469dd2af4927ebef615d2ec88b2944d86"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/5-kernel-unix.log",
+      "sha256": "666a32d135c9a953fbd2d0afe31ca1052d83bb5dfad899d3c6c61cdfcb5192ab"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/complete-kernel-unix.log",
+      "sha256": "2d79a74fdd64e4d5ba6660432d10cd3490165c94da8f1d8fc74ef1698226cd48"
+    }
+  ],
+  "scripts": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-reproduce.mjs",
+      "sha256": "8396f22621a301f5cee28a15c1348c393489813bba088ee5ef51e5486097a5b0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/post-reboot-kernel-replay.mjs",
+      "sha256": "036a3efcd35d4688ee44a7f7b564206452c62ad520aca249e04e6ec6ecc19812"
+    }
+  ],
+  "checks": [
+    {
+      "command": "npm run docs:check",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/docs-check.log",
+        "sha256": "52c3def5fb5489a56703caf98bca28b30e9f636eed189674bd68bb1558edb213"
+      }
+    },
+    {
+      "command": "npm run api:check",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/g09/post-reboot-2026-10-06T08-06-03.149Z/api-check.log",
+        "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+      }
+    }
+  ]
+}

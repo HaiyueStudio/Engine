@@ -2,6 +2,7 @@
 
 本目录记录 G09 各子阶段的实现与证据。真实依赖、裁剪、临时纹理复用、计划缓存、安全附件操作与按需诊断已实现；完整 G09 与持续稳定性资格尚未完成。
 
+- [重启后复现](post-reboot-reproduction.md)与[证据索引](post-reboot-checks.json)：2026-10-06 Intel 4/4 失败、AMD 2/2 通过；四个 Intel 样本窗口均有内核 GPU 超时与重置信号。
 - [Intel GPU 重置追查](intel-gpu-reset-investigation.md)与[证据索引](intel-gpu-reset-checks.json)：系统报告确认测试时段的集显挂起/重置；启动参数、AO 分段简化和带窗口模式均未消除异常。
 - [局部修复审计](local-fix-audit.md)与[检查索引](local-fix-checks.json)：设备丢失后的读回生命周期修复、双 GPU 回归及未采用的候选方案；集显异常仍未解决。
 - [同提交读回与已知答案对照](atomic-readback-investigation.md)：资源保留、固定数据/图案、包装范围隔离和双 GPU 诊断。
