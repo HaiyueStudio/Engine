@@ -6,8 +6,11 @@ import { sha256, deferredRuntimeFingerprint } from './webgpu-gate/deferred-fixtu
 import { createPerformanceSourceFingerprint } from './webgpu-performance-budget.mjs';
 import { classifyFrameGraphBlackFrame, compareFrameGraphProbePixels, parseFrameGraphBlackFrameOptions } from './webgpu-gate/framegraph-black-frame-policy.mjs';
 import { classifyAtomicReadback } from './webgpu-gate/framegraph-readback-controls-policy.mjs';
+import { loadFrameGraphQualification, frameGraphBrowserPath, assertFrameGraphQualificationUnchanged } from './webgpu-gate/framegraph-qualification.mjs';
+import { validateFrameGraphAdapter, validateFrameGraphBrowser, validateFrameGraphAdapterConsistency } from './webgpu-gate/framegraph-qualification-policy.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const options = parseFrameGraphBlackFrameOptions(process.argv.slice(2));
+const qualification = await loadFrameGraphQualification(root), adapters = [];
 const directory = resolve(root, 'artifacts/engine-0.2.1/g09');
 const inputs = await deferredRuntimeFingerprint(root), sourceFingerprint = createPerformanceSourceFingerprint(root, root);
 const baseline = JSON.parse(await readFile(resolve(directory, 'a0-built/provenance.json'), 'utf8'));
@@ -23,20 +26,21 @@ async function verifyChunks() {
 await verifyChunks();
 const out = resolve(directory, `black-frame-${new Date().toISOString().replaceAll(':', '-')}`);
 await mkdir(out);
-const report = { schemaVersion: 1, status: 'running', performanceQualified: false, scope: 'A0/B4 Forward black-frame attribution only; not complete F0-F8 acceptance',
+const report = { schemaVersion: 2, qualification, status: 'running', performanceQualified: false, scope: 'A0/B4 Forward black-frame attribution only; not complete F0-F8 acceptance',
   generatedAt: new Date().toISOString(), options, inputs, sourceFingerprint, wrapperHash: sha256(await readFile(fileURLToPath(import.meta.url))), baseline, build, results: [], pairs: [] };
 const controls = new Map();
 try {
-  for (const powerPreference of ['high-performance', 'low-power']) for (const copySource of [false, true])
+  for (const job of qualification.targets) for (const copySource of [false, true])
     for (const access of options.readback === 'atomic' ? ['audited', 'native', 'native-encoding'] : ['audited'])
     for (const [round, variant] of ['A0', 'B4', 'B4', 'A0'].entries()) {
-    const entry = { powerPreference, copySource, access, round, variant }; report.results.push(entry);
+    const { powerPreference, browserId } = job;
+    const entry = { ...job, copySource, access, round, variant }; report.results.push(entry);
     try {
-      const result = await runChromeWebGpuFixture({ root, fixture: 'scripts/webgpu-gate/framegraph-black-frame-fixture.html',
+      const result = await runChromeWebGpuFixture({ root, browserPath: frameGraphBrowserPath(browserId), fixture: 'scripts/webgpu-gate/framegraph-black-frame-fixture.html',
         query: { powerPreference, copySource: +copySource, coverage: options.coverage,
           readback: options.readback ?? 'sequential', access }, timeoutMs: 120000, acceptedStatuses: ['passed', 'failed'],
         mounts: [{ prefix: '/artifacts/engine-0.2.1/g09/oracle-runtime', directory: resolve(directory, variant === 'A0' ? 'a0-built' : '.') }] });
-      const file = `${powerPreference}-${+copySource}-${access}-${round}-${variant}.json`;
+      const file = `${browserId}-${+copySource}-${access}-${round}-${variant}.json`;
       await writeFile(resolve(out, file), JSON.stringify(result, null, 2) + '\n');
       entry.raw = { file, sha256: sha256(await readFile(resolve(out, file))) };
       if (result.coverage !== options.coverage || JSON.stringify(result.clearSentinel) !== '[1,0,1,0]' ||
@@ -51,17 +55,17 @@ try {
         : classifyFrameGraphBlackFrame(result);
       entry.classification = entry.captureAssessment?.status === 'failed' ? 'capture-unreliable'
         : entry.assessment.status === 'failed' ? 'image-mismatch' : 'passed';
-      const key = `${powerPreference}:${copySource}:${access}`;
+      const key = `${browserId}:${copySource}:${access}`;
       if (round === 0) controls.set(key, result.computed);
       else {
         const comparison = options.readback === 'atomic' && (!controls.get(key) || !result.computed)
           ? { status: 'failed', reason: 'Mapping unavailable in fixed A0 or paired capture', maxDelta: null, changedComponents: null }
           : compareFrameGraphProbePixels(controls.get(key), result.computed);
-        const pair = { powerPreference, copySource, access, variant, round, ...comparison };
+        const pair = { ...job, copySource, access, variant, round, ...comparison };
         report.pairs.push(pair);
       }
-      if (result.adapter.vendor !== (powerPreference === 'low-power' ? 'intel' : 'amd') ||
-          result.adapter.architecture !== (powerPreference === 'low-power' ? 'gen-9' : 'rdna-1')) throw Error('Frozen probe adapter mismatch');
+      validateFrameGraphAdapter(result.adapter, qualification);
+      validateFrameGraphBrowser(result, job, qualification); adapters.push(result.adapter);
       entry.status = entry.assessment.status === 'passed' && entry.captureAssessment?.status !== 'failed' ? 'passed' : 'failed';
     } catch (error) { entry.status = 'failed'; entry.error = error.stack; }
     await writeFile(resolve(out, 'report.json'), JSON.stringify(report, null, 2) + '\n');
@@ -70,8 +74,10 @@ try {
   if (sourceFingerprint !== createPerformanceSourceFingerprint(root, root) || inputs.sha256 !== (await deferredRuntimeFingerprint(root)).sha256 ||
       report.wrapperHash !== sha256(await readFile(fileURLToPath(import.meta.url)))) throw Error('Probe inputs changed');
   await verifyChunks();
-  report.status = report.results.length === (options.readback === 'atomic' ? 48 : 16) &&
-    report.results.every(r => r.status === 'passed') && report.pairs.length === (options.readback === 'atomic' ? 36 : 12) &&
+  await assertFrameGraphQualificationUnchanged(root, qualification);
+  validateFrameGraphAdapterConsistency(adapters);
+  report.status = report.results.length === qualification.targets.length * (options.readback === 'atomic' ? 24 : 8) &&
+    report.results.every(r => r.status === 'passed') && report.pairs.length === qualification.targets.length * (options.readback === 'atomic' ? 18 : 6) &&
     report.pairs.every(r => r.status === 'passed') ? 'passed' : 'failed';
 } catch (error) { report.status = 'failed'; report.error = error.stack; }
 finally {

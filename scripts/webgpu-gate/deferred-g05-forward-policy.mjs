@@ -14,12 +14,20 @@ export function validateG05ForwardCapture(e,job){
  if(!/^[a-f0-9]{64}$/.test(e.inputs?.sha256)||!/^[a-f0-9]{64}$/.test(e.harness?.sha256)||!/^[a-f0-9]{40}$/.test(e.revision))throw Error('Unbound Forward inputs');
  if(job.full&&(!Number.isFinite(e.interCaseIdleMs)||e.interCaseIdleMs<120000))throw Error(`Insufficient Forward cooling interval: ${e.interCaseIdleMs} ms; requires 120000 ms`);
  if(job.full&&(e.hostSamples?.length!==2||e.hostSamples.some(s=>s.ready!==true||s.cpuSpeedLimit!==100||s.cpuSchedulerLimit!==100)))throw Error('Unqualified Forward host');
- const r=e.result,c=G05_FORWARD_CASES.find(c=>c.id===job.caseId),device={vendor:job.preference==='low-power'?'intel':'amd',architecture:job.preference==='low-power'?'gen-9':'rdna-1'};
+ const device={vendor:job.preference==='low-power'?'intel':'amd',architecture:job.preference==='low-power'?'gen-9':'rdna-1'};
+ validateG05ForwardResult(e.result,job,device);
+}
+export function validateG05ForwardResult(r,job,device){
+ const c=G05_FORWARD_CASES.find(c=>c.id===job.caseId);
  if(!c)throw Error('Unknown Forward case');
  const failures=validateG01Baseline(r,{samples:job.full?300:3});
  if(job.full)failures.push(...validateG01CaseIdentity(r,c,device));
  if(r.adapter?.vendor!==device.vendor||r.adapter?.architecture!==device.architecture)failures.push('Frozen Forward adapter mismatch');
- const a=r.g05Forward;
+ try{validateG05ForwardAllocation(r);}catch(error){failures.push(error.message);}
+ if(failures.length)throw Error(failures.join('; '));
+}
+export function validateG05ForwardAllocation(r){
+ const failures=[],a=r.g05Forward;
  if(r.renderer?.lightingStrategy!=='forward'||a?.schemaVersion!==1||a?.deferredCreated?.length!==0||!Array.isArray(a?.allocations)||a.allocations.length===0)failures.push('Missing Forward allocation audit or Deferred allocation');
  const methods=['createBuffer','createTexture','createShaderModule','createRenderPipeline','createRenderPipelineAsync','createComputePipeline','createComputePipelineAsync'];
  if(JSON.stringify(a?.observedMethods)!==JSON.stringify(methods))failures.push('Incomplete Forward allocation observation');

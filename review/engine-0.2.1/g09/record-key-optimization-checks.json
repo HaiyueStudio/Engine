@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-07T09:49:22.207Z",
+  "status": "engineering-and-native-correctness-passed-performance-recapture-required",
+  "performanceQualified": false,
+  "dirty": true,
+  "revision": "e0d8a5a95f3d47c9029d11171c1f7064374df5bc",
+  "sourceFingerprint": "sha256:4a5505034f812a02e20789b9524b6a999f84ae3820993a27103f2cfd2436cc59",
+  "runtimeFingerprint": "5a8ef7d702493b4f374c0a94ffc55ba9bec95e22208084c21d82b974cfd58812",
+  "checks": {
+    "focused": 19,
+    "engine": 775,
+    "rootTypecheck": "passed",
+    "rootTests": "passed; final defensive branch additionally covered by final engine tests",
+    "rootBuild": "passed",
+    "nativeJobs": 16,
+    "nativeStatus": "passed",
+    "oldRuntimeChunksPreserved": 4,
+    "protocolUnchanged": true,
+    "regressionBudget": 0.05
+  },
+  "bindings": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/fixture.js",
+      "sha256": "f08c5bea66e4022cae626b7286ee66c4af6494a768108f2f096fcaa06f567403"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/fixture-deferred-reference-runtime-C50zAoKG.js",
+      "sha256": "0118dff008bff33f423270f8c23cf7bf77ce2efddacc407ef59960c3c3d95871"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/fixture-DeferredTileCuller-BWU7IGtU.js",
+      "sha256": "b3feb1f45c15370cd0606c49645f2f989bbab2d0bae165725dc145aee9de259d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/fixture-DeferredTileResources-Co-ty9le.js",
+      "sha256": "11752e0b4596d670df82f4283a2e0cafad423012825cad48b41bc002506a743c"
+    },
+    {
+      "path": "engine/src/systems/Render3DFramePlan.ts",
+      "sha256": "86bd5ffee5ed3f57dc645177357f63c66fe08f2ececc818a3454c933843c61a1"
+    },
+    {
+      "path": "engine/src/postprocess/PostProcessGraph.ts",
+      "sha256": "4aee1914887f936cac5d4f4c4ca20cd1a402277749089d5f3c987335d26f960a"
+    },
+    {
+      "path": "engine/test/framegraph-plan-cache.test.mjs",
+      "sha256": "17efa189bf368e75527d55bebf272caea3d6b82badd909d411d4277edbb8f6e5"
+    },
+    {
+      "path": "engine/test/postprocess-key-reuse.test.mjs",
+      "sha256": "222b8ab31ad02a6f3b75fa7819717df1b417df3a28fd6e17c222db4a95858b2a"
+    },
+    {
+      "path": "config/framegraph-sampling-021.json",
+      "sha256": "f1bb4852d938b9902843f9ca571ce2379fe6045abb058329aadcf2501adb14ee"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/regressions-2026-10-07T09-44-40.255Z.json",
+      "sha256": "01ed53c27d6c38a30e4f56295db26355be4b6742f952fc3439f2a32fd63c3330"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/launch-with-codex-closed.ps1",
+      "sha256": "6a733d0b43f2a7065910a7fcabee0bb831e5867d11f6da0ec661f19e28045f6f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/focused-tests.log",
+      "sha256": "9e0bc52557dcf819ee4ce189c32dbfad525280020fcc91ac3be86cf7e48363f0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/focused-final-tests.log",
+      "sha256": "e5dac13de77f3df2f9015709fd2c7fddda3e0eddeb6b682aa141bd2d8180fa93"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/engine-typecheck.log",
+      "sha256": "1d63a97e591fe321e22ae9a0d692da2d0f13f6742102f0ca97cba451db330950"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/engine-build.log",
+      "sha256": "9a37b637ce3375a1863fc8cda0cdd5fa95206b2dc7c9de875069e55fde1abe7c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/engine-test.log",
+      "sha256": "08a44c719d9874ce543f1f3f7997d97835108388c18d4d31deda07b02c3ce0b2"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/engine-final-typecheck.log",
+      "sha256": "1d63a97e591fe321e22ae9a0d692da2d0f13f6742102f0ca97cba451db330950"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/engine-final-test.log",
+      "sha256": "6b2f358b1195c95d0820bdb32e1c575a7554a16ba8bc035365482c5970bf4549"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/root-typecheck.log",
+      "sha256": "759f7d6a9f0cebe88bd2da49f198bd24a8d4b8d44ca40ba0183d7f5b2a5633cd"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/root-test.log",
+      "sha256": "3821dcdcc6fc45359dd8baca6e6508270912691ab70ee1a18b4badce19d0f4ba"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/root-build.log",
+      "sha256": "d84d91f690b05e15ccc80610cb71f2bc94cde2fb1314a9a13efe4bbe00d3e00e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/modules-check.log",
+      "sha256": "491a6c2787f94a71edc883ceed318ee4931feebe6565b8cb379f425302c5e5ae"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/responsibilities-check.log",
+      "sha256": "bcb72b687c109aa485c79be4959d9eb132d0821392272d9811e197117f91f5be"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/renderer-prepare-check.log",
+      "sha256": "4dede0ef60e8b34b8580b7ffc899ba262655ffc24c32c4ff0b9061b0f775193a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/api-check.log",
+      "sha256": "3e9ae8d8e9d67efceabcab5fd399ff83241a1438e6f62d91b8ac7a2734a7d511"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/docs-check.log",
+      "sha256": "fcc7d846dda223e57dae796c64fbfd8eadc8916b4634b0321d2a06c1190c67e1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/native-regressions.log",
+      "sha256": "4d9d991a6bf1fc48d26eb3c0e71a0be2108ddac6732e31e126c9d4decc25e3ed"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/microbenchmark.json",
+      "sha256": "bfff2bf3a9275e8fa9c944993a0fa32c399191e81b08bd0538c8bae2b58e06d3"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/microbenchmark-before-exception-guard.json",
+      "sha256": "007a9e402dc7aa047db854ba00e6503072015692cf34736dc7c7065914ee6ae6"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/compare.mjs",
+      "sha256": "4a2f02751bf6779762ebf695c7d5a65cb053dbe6bcd1a656deab57be852b4b33"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/launcher-report.log",
+      "sha256": "b154af94323dcc0e3f7142b6b3fd85fb3a1e59b02724c1881220d03362418dee"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/launcher-plan.json",
+      "sha256": "496f136321d1241aa2a19879aecb140167b316d100cf8ec2dd367158caf02977"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/docs-check-final.log",
+      "sha256": "2dbd84e240988cbb07a5064f7adf86de53e5229bf3f81efb4d828e87b1ef07ad"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-key-optimization-20261007/api-check-final.log",
+      "sha256": "3e9ae8d8e9d67efceabcab5fd399ff83241a1438e6f62d91b8ac7a2734a7d511"
+    }
+  ]
+}

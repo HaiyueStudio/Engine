@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDeferredFixtureBuildOptions,parseDeferredFixtureOptions,validateDeferredFixtureEvidence,validateDeferredReuseEvidence } from './deferred-fixture-policy.mjs';
+import { posix, win32 } from 'node:path';
+import { parseDeferredFixtureBuildOptions,parseDeferredFixtureOptions,validateDeferredFixtureEvidence,validateDeferredReuseEvidence,resolveDeferredFixtureSource } from './deferred-fixture-policy.mjs';
+
+test('private runtime builds resolve source instead of nonexistent dist TypeScript on Windows and POSIX', () => {
+  assert.equal(resolveDeferredFixtureSource('../../engine/dist/experimental.js', 'D:\\Engine\\scripts\\benchmark\\scenario.mjs', win32), 'D:/Engine/engine/src/experimental.ts');
+  assert.equal(resolveDeferredFixtureSource('../../engine/dist/experimental.js', '/Engine/scripts/benchmark/scenario.mjs', posix), '/Engine/engine/src/experimental.ts');
+  assert.equal(resolveDeferredFixtureSource('wgpu-matrix', '/Engine/scripts/benchmark/scenario.mjs', posix), null);
+  assert.equal(resolveDeferredFixtureSource('../../engine/dist/experimental.js', undefined), null);
+});
 test('Deferred diagnostic modes are explicit, mutually exclusive and cannot silently ignore flags',()=>{
   assert.deepEqual(parseDeferredFixtureOptions(['--room','--integrated']),{mode:'room',preference:'low-power',tier:'diagnostic-g02-room'});
   assert.equal(parseDeferredFixtureOptions(['--full']).mode,'reference');

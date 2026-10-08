@@ -11,7 +11,7 @@ import {parseG01ThermalStatus,validateG01HostSamples} from '../benchmark/lightin
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..'),directory=resolve(root,'artifacts/engine-0.2.1/g05');
 const options=parseG05CostOptions(process.argv.slice(2));await mkdir(directory,{recursive:true});
 async function fingerprintHarness(){
- const paths=['deferred-g05-policy.mjs','deferred-g05-cost-policy.mjs','deferred-g05-cost-observer.mjs','deferred-g05-cost-fixture.html','deferred-g05-cost-fixture.mjs','deferred-g05-memory-policy.mjs','deferred-g05-room-scene.mjs','run-deferred-g05-cost.mjs','deferred-room-fixture.mjs','float-texture-readback.mjs','chrome-runner.mjs','deferred-fixture-policy.mjs','deferred-g05-cooldown.mjs'].map(f=>`scripts/webgpu-gate/${f}`);
+ const paths=['deferred-g05-policy.mjs','deferred-g05-cost-policy.mjs','deferred-g05-cost-observer.mjs','deferred-g05-cost-fixture.html','deferred-g05-cost-fixture.mjs','deferred-g05-memory-policy.mjs','deferred-g05-room-scene.mjs','run-deferred-g05-cost.mjs','deferred-room-fixture.mjs','float-texture-readback.mjs','framegraph-pixel-oracle.mjs','chrome-runner.mjs','deferred-fixture-policy.mjs','deferred-g05-cooldown.mjs'].map(f=>`scripts/webgpu-gate/${f}`);
  paths.push('scripts/benchmark/lighting-g01-host.mjs','config/lighting-performance-021.json');
  const files=await Promise.all(paths.map(async path=>({path,sha256:sha256(await readFile(resolve(root,path)))})));return {files,sha256:sha256(JSON.stringify(files))};
 }

@@ -113,7 +113,7 @@ async function capture(algorithm, cached, count, mixed) {
     const alphaCoverage = pixels.map(image => image.reduce((count, value, index) => count + +(index % 4 === 3 && value >= 1 - 1 / 255), 0));
     // Retain the original image and structural state before any pixel assertion.
     failedCapture = { algorithm, cached, count, mixed, dimensions, alphaCoverage, pixels, cacheStats, attachmentOps,
-      adapter: { vendor: adapter.info.vendor, architecture: adapter.info.architecture }, stats, views,
+      adapter: { vendor: adapter.info.vendor, architecture: adapter.info.architecture, isFallbackAdapter: adapter.info.isFallbackAdapter }, stats, views,
       actualPasses: state.audit.renderPasses - beforePasses };
     check(alphaCoverage.every((covered, i) => covered === targets[i].width * targets[i].height),
       `incomplete output coverage ${algorithm}: ${JSON.stringify({ dimensions, alphaCoverage })}`);
@@ -121,7 +121,7 @@ async function capture(algorithm, cached, count, mixed) {
     // Latest exported G-buffer remains available after postprocessing (clearcoat/diagnostic consumer).
     let debug = null;
     if (profile) debug = Array.from(await readFloatTexture(device, profile.backend.lastAttachments.textures[0]));
-    result = { algorithm, cached, count, mixed, cacheStats, attachmentOps: { ...attachmentOps }, adapter: { vendor: adapter.info.vendor, architecture: adapter.info.architecture },
+    result = { algorithm, cached, count, mixed, cacheStats, attachmentOps: { ...attachmentOps }, adapter: { vendor: adapter.info.vendor, architecture: adapter.info.architecture, isFallbackAdapter: adapter.info.isFallbackAdapter },
       stats, views, dimensions, alphaCoverage, rgbMaxima: pixels.map(image => Math.max(...image.filter((_, i) => i % 4 !== 3))), actualPasses: state.audit.renderPasses - beforePasses, pixels, debug };
     return result;
   } catch (error) { failure = error; throw error; }

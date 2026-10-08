@@ -87,7 +87,7 @@ try {
   resultNode.textContent = JSON.stringify({
     schemaVersion: 1, suite: 'postprocess.multiview-lifecycle', status: 'passed',
     role: 'diagnostic-regression', generatedAt: new Date().toISOString(), browser: navigator.userAgent,
-    adapter: { vendor: adapter.info.vendor, architecture: adapter.info.architecture, device: adapter.info.device, description: adapter.info.description },
+    adapter: { vendor: adapter.info.vendor, architecture: adapter.info.architecture, device: adapter.info.device, description: adapter.info.description, isFallbackAdapter: adapter.info.isFallbackAdapter },
     frames: 5, dimensions: [[320, 180], [128, 96]],
     observedAuxiliaryTextures: allocatedAuxiliaryTextures, retiredAuxiliaryTextures: allocatedAuxiliaryTextures,
     validationErrors,

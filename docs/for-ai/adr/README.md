@@ -142,3 +142,7 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [ADR 0114：FrameGraph 按需单帧诊断](0114-framegraph-one-shot-diagnostics.md)
 - [0115：可选国际化与 GUI 绑定](0115-optional-i18n-runtime.md)。
 - [0116：可选剧情运行时](0116-optional-narrative-runtime.md)。
+- [0117：0.2.1 原生硬件验收范围](0117-native-021-hardware-scope.md)。
+- [0118 G09 冷启动与稳态的独立校准](0118-g09-cold-steady-sampling.md)
+- [0119 G09 扩展校准观察范围](0119-g09-extended-calibration-horizon.md)
+- [0120 G09 共同处理器电源条件](0120-g09-controlled-cpu-power.md)

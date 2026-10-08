@@ -214,7 +214,7 @@ try {
     finally { target.destroy(); maskTexture.destroy(); device.destroy(); }
   }
   check(state.finalMetrics.ownerResidual === 0, `released renderer owner has residual GPU resources: ${state.finalMetrics.ownerResidual}`);
-  resultNode.textContent = JSON.stringify({ schemaVersion: 1, suite: 'auxiliary.material-geometry-semantics', status: 'passed', role: 'diagnostic-regression', generatedAt: new Date().toISOString(), browser: navigator.userAgent, adapter: { vendor: adapter.info.vendor, architecture: adapter.info.architecture, device: adapter.info.device, description: adapter.info.description }, dimensions: [64, 64], cases, gpuTiming: { supported: gpuTimestampProbe.supported, reason: gpuTimestampProbe.reason }, ownerResidual: state.finalMetrics.ownerResidual, validationErrors: errors });
+  resultNode.textContent = JSON.stringify({ schemaVersion: 1, suite: 'auxiliary.material-geometry-semantics', status: 'passed', role: 'diagnostic-regression', generatedAt: new Date().toISOString(), browser: navigator.userAgent, adapter: { vendor: adapter.info.vendor, architecture: adapter.info.architecture, device: adapter.info.device, description: adapter.info.description, isFallbackAdapter: adapter.info.isFallbackAdapter }, dimensions: [64, 64], cases, gpuTiming: { supported: gpuTimestampProbe.supported, reason: gpuTimestampProbe.reason }, ownerResidual: state.finalMetrics.ownerResidual, validationErrors: errors });
   resultNode.dataset.status = 'passed';
 } catch (error) {
   resultNode.textContent = error.stack ?? String(error);

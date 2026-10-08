@@ -1,4 +1,8 @@
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
+import { createFrameGraphQualification } from './framegraph-qualification-policy.mjs';
+const matrix = JSON.parse(readFileSync(new URL('../../config/release-matrix.json', import.meta.url)));
+const qualification = createFrameGraphQualification(matrix, 'win32');
 import assert from 'node:assert/strict';
 import { createFrameGraphRegressionPlan, parseFrameGraphRegressionOptions,
   validateFrameGraphRegressionResult, validateFrameGraphRegressionEvidence } from './framegraph-regression-policy.mjs';
@@ -18,17 +22,17 @@ function result(name) {
   }])) })) };
 }
 function evidence() {
-  return { schemaVersion: 2, status: 'passed', tier: 'smoke', performanceQualified: false,
+  return { schemaVersion: 3, status: 'passed', tier: 'smoke', performanceQualified: false,
     inputs: { sha256: 'input' }, build: { inputs: { sha256: 'input' } }, sourceFingerprint: 'source',
     results: createFrameGraphRegressionPlan('smoke').map(job => ({ ...job, status: 'passed', result: result(job.name) })) };
 }
 const identity = { inputs: 'input', sourceFingerprint: 'source', tier: 'smoke' };
-test('full requires eight jobs on each frozen adapter, including 312-switch and native device tests', () => {
-  const plan = createFrameGraphRegressionPlan(); assert.equal(plan.length, 16);
-  for (const preference of ['high-performance', 'low-power']) {
-    assert.equal(plan.filter(j => j.powerPreference === preference).length, 8);
-    assert.ok(plan.some(j => j.powerPreference === preference && j.name === 'deferred-g04-lifecycle'));
-    assert.ok(plan.some(j => j.powerPreference === preference && j.name === 'deferred-g04-device'));
+test('full requires all eight cases in Chrome and Edge, including lifecycle and device tests', () => {
+  const plan = createFrameGraphRegressionPlan('full', qualification); assert.equal(plan.length, 16);
+  for (const browserId of ['chrome-windows', 'edge-windows']) {
+    assert.equal(plan.filter(j => j.browserId === browserId).length, 8);
+    assert.ok(plan.some(j => j.browserId === browserId && j.name === 'deferred-g04-lifecycle'));
+    assert.ok(plan.some(j => j.browserId === browserId && j.name === 'deferred-g04-device'));
   }
   assert.deepEqual(parseFrameGraphRegressionOptions([]), { tier: 'full', plan: false });
   assert.throws(() => parseFrameGraphRegressionOptions(['--full', '--smoke']));
@@ -54,10 +58,10 @@ test('reject blank pixels, NaN, wrong ablation, changed work, residue, missing p
     r => { r.cases[0].candidate.cleanup.ownerResidual = 1; }, r => { delete r.cases[0].candidate.stats.post; },
     r => { r.cases[0].candidate.stats.post.physicalBytes = 200; }]) {
     const r = result('framegraph-reuse'); mutate(r);
-    assert.throws(() => validateFrameGraphRegressionResult(r, { name: 'framegraph-reuse', powerPreference: 'high-performance' }));
+    assert.throws(() => validateFrameGraphRegressionResult(r, { name: 'framegraph-reuse', powerPreference: 'high-performance' }, 'smoke'));
   }
 });
-test('full rejects substituted device classes; smoke still rejects fallback adapters', () => {
+test('full rejects missing qualification; smoke still rejects fallback adapters', () => {
   const r = result('framegraph-cache');
   assert.throws(() => validateFrameGraphRegressionResult(r, { name: 'framegraph-cache', powerPreference: 'low-power' }));
   const fallback = structuredClone(r); fallback.cases[0].candidate.adapter.isFallbackAdapter = true;

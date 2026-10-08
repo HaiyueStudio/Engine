@@ -23,3 +23,5 @@ export { createSphere3D } from '../../engine/src/geometry/SphereGeometry.ts';
 
 export { GaussianBlurPass } from '../../engine/src/postprocess/GaussianBlurPass.ts';
 export { getSequentialAttachmentAllocator } from '../../engine/src/rtt/TransientAttachmentSequence.ts';
+export { captureRealRendererBenchmarkMetrics, warmRealRendererBenchmarkPipelines } from '../benchmark/real-renderer-scenario.mjs';
+export { BILLIARDS_3D_SCENE_BYTE_LENGTH, BILLIARDS_3D_SCENE_PATH, BILLIARDS_3D_SCENE_SHA256, parseBilliards3DSceneDocument } from '../benchmark/billiards-3d-real-renderer-content.mjs';

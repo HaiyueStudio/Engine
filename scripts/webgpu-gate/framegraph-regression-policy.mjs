@@ -2,6 +2,7 @@ import { validateG04Suite } from './deferred-g04-suite-policy.mjs';
 import { validateG04Output } from './deferred-g04-output-policy.mjs';
 import { validateG04Lifecycle } from './deferred-g04-lifecycle-policy.mjs';
 import { validateG04Device } from './deferred-g04-device-policy.mjs';
+import { validateFrameGraphAdapter, validateFrameGraphBrowser, validateFrameGraphAdapterConsistency } from './framegraph-qualification-policy.mjs';
 
 export const FRAMEGRAPH_CASES = Object.freeze([
   'deferred-g04-suite', 'deferred-g04-output', 'postprocess-multiview',
@@ -13,27 +14,27 @@ export function parseFrameGraphRegressionOptions(args) {
     throw Error('Use --smoke, --full or --plan; no argument selects full.');
   return { tier: args[0] === '--smoke' ? 'smoke' : 'full', plan: args[0] === '--plan' };
 }
-export function createFrameGraphRegressionPlan(tier = 'full') {
+export function createFrameGraphRegressionPlan(tier = 'full', qualification) {
   if (!['smoke', 'full'].includes(tier)) throw Error('Unknown FrameGraph tier');
-  const preferences = tier === 'full' ? ['high-performance', 'low-power'] : ['high-performance'];
+  if (tier === 'full' && !qualification) throw Error('Full regression requires the selected release qualification path');
+  const targets = tier === 'full' ? qualification.targets : [{ powerPreference: 'high-performance' }];
   const cases = tier === 'full' ? FRAMEGRAPH_CASES : ['framegraph-reuse', 'framegraph-cache'];
-  return preferences.flatMap(powerPreference => cases.map(name => ({ name, powerPreference })));
+  return targets.flatMap(target => cases.map(name => ({ name, ...target })));
 }
 const check = (value, message) => { if (!value) throw Error(message); };
 const finite = n => Number.isFinite(n) && n >= 0;
-function adapterMatches(adapter, preference, frozen) {
-  check(adapter && adapter.isFallbackAdapter !== true && adapter.vendor && adapter.architecture, 'Native identified adapter required');
-  if (frozen) check(adapter.vendor === (preference === 'low-power' ? 'intel' : 'amd') &&
-    adapter.architecture === (preference === 'low-power' ? 'gen-9' : 'rdna-1'), 'Frozen adapter mismatch');
-}
-export function validateFrameGraphRegressionResult(result, job, tier = 'full') {
+export function validateFrameGraphRegressionResult(result, job, tier = 'full', qualification) {
+  if (tier === 'full') {
+    check(qualification, 'Full regression requires hardware qualification');
+    validateFrameGraphBrowser(result, job, qualification);
+  }
   check(FRAMEGRAPH_CASES.includes(job.name), 'Unknown FrameGraph fixture');
   check(result?.schemaVersion === 1 && result.status === 'passed', `${job.name}: ${result?.error ?? 'fixture failed'}`);
   const validator = { 'deferred-g04-suite': validateG04Suite, 'deferred-g04-output': validateG04Output,
     'deferred-g04-lifecycle': validateG04Lifecycle, 'deferred-g04-device': validateG04Device }[job.name];
   if (validator) validator(result);
   if (!job.name.startsWith('framegraph-')) {
-    adapterMatches(result.adapter, job.powerPreference, tier === 'full');
+    validateFrameGraphAdapter(result.adapter, tier === 'full' ? qualification : null);
     check(Array.isArray(result.validationErrors) && result.validationErrors.length === 0, 'GPU validation errors missing or present');
   }
   if (job.name === 'postprocess-multiview') {
@@ -52,7 +53,7 @@ export function validateFrameGraphRegressionResult(result, job, tier = 'full') {
       const capture = row[name];
       check(JSON.stringify([capture?.algorithm, capture?.count, capture?.mixed]) === JSON.stringify(expected[i]), 'Ablation identity/order changed');
       check(capture[reuse ? 'reuse' : 'cached'] === optimized, 'Ablation switch mismatch');
-      adapterMatches(capture.adapter, job.powerPreference, tier === 'full');
+      validateFrameGraphAdapter(capture.adapter, tier === 'full' ? qualification : null);
       check(capture.cleanup?.ownerResidual === 0 && capture.cleanup?.liveGpuResources === 0, 'Resource residue');
       check(capture.rgbMaxima?.length === capture.count && capture.rgbMaxima.every(v => finite(v) && v > .1), 'Empty/nonfinite ablation image');
       const dimensions = Array.from({ length: capture.count }, (_, i) => capture.mixed && i % 2 ? [48, 40] : [64, 64]);
@@ -71,15 +72,19 @@ export function validateFrameGraphRegressionResult(result, job, tier = 'full') {
 }
 
 // A complete native correctness result is necessary, never sufficient for timing/release qualification.
-export function validateFrameGraphRegressionEvidence(evidence, { inputs, sourceFingerprint, tier = 'full' }) {
-  check(evidence?.schemaVersion === 2 && evidence.status === 'passed' && evidence.tier === tier, 'Incomplete FrameGraph evidence');
+export function validateFrameGraphRegressionEvidence(evidence, { inputs, sourceFingerprint, tier = 'full', qualification }) {
+  check(evidence?.schemaVersion === 3 && evidence.status === 'passed' && evidence.tier === tier, 'Incomplete FrameGraph evidence');
   check(evidence.inputs?.sha256 === inputs && evidence.build?.inputs?.sha256 === inputs && evidence.sourceFingerprint === sourceFingerprint, 'Stale FrameGraph evidence');
   check(evidence.performanceQualified === false, 'Correctness evidence cannot grant performance qualification');
-  const plan = createFrameGraphRegressionPlan(tier);
+  if (tier === 'full') check(JSON.stringify(evidence.qualification) === JSON.stringify(qualification), 'Qualification contract mismatch');
+  const plan = createFrameGraphRegressionPlan(tier, qualification), adapters = [];
   check(evidence.results?.length === plan.length, 'Missing FrameGraph jobs');
   for (const [i, job] of plan.entries()) {
     const entry = evidence.results[i];
-    check(entry.name === job.name && entry.powerPreference === job.powerPreference && entry.status === 'passed', 'Failed/reordered FrameGraph job');
-    validateFrameGraphRegressionResult(entry.result, job, tier);
+    check(entry.name === job.name && entry.powerPreference === job.powerPreference && entry.browserId === job.browserId && entry.status === 'passed', 'Failed/reordered FrameGraph job');
+    validateFrameGraphRegressionResult(entry.result, job, tier, qualification);
+    if (entry.result.adapter) adapters.push(entry.result.adapter);
+    else for (const row of entry.result.cases) adapters.push(row.baseline.adapter, row.candidate.adapter);
   }
+  validateFrameGraphAdapterConsistency(adapters);
 }

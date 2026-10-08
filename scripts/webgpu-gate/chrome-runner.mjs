@@ -20,6 +20,7 @@ export function defaultWebGpuAngleBackend(platform = process.platform) {
 
 export async function runChromeWebGpuFixture({
   root,
+  browserPath,
   fixture,
   query = {},
   timeoutMs = 60_000,
@@ -31,7 +32,7 @@ export async function runChromeWebGpuFixture({
   crossOriginIsolation = true,
   interact = null,
 }) {
-  const chrome = process.env.CHROME_PATH ?? defaultChromePath();
+  const chrome = browserPath ?? process.env.CHROME_PATH ?? defaultChromePath();
   if (!existsSync(chrome)) throw new Error(`Chrome/WebGPU gate requires Chrome. Set CHROME_PATH (looked for ${chrome}).`);
   const fixtureServer = await startHttpFixtureServer(root, { mounts, crossOriginIsolation });
   try {

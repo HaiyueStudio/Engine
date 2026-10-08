@@ -1,0 +1,522 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-07T09:21:08.671Z",
+  "status": "calibration-passed-stable-a0-baseline-b4-cpu-regression",
+  "performanceQualified": false,
+  "sourceFingerprint": "sha256:1ed3903b6d6a669bbda1b5bccc61797c2e3fb09c4cd11bc4a66177e425837e46",
+  "runtimeFingerprint": "38efadff37b1b25f6edb09b9b23807b914a12c26cdacc2ffacfc766f876df2e3",
+  "counts": {
+    "correctness": 4,
+    "calibration": 12,
+    "baseline": 12,
+    "calibrationCpuFrames": 288000,
+    "baselineSteadyCpuFrames": 36000,
+    "baselineGpuFrames": 3600
+  },
+  "selectedWarmup": 6000,
+  "baselineStable": true,
+  "regressionBudget": 0.05,
+  "metrics": [
+    {
+      "caseId": "forward-small-1",
+      "metric": "cpu",
+      "A0": 0.565000057220459,
+      "B4": 0.5950000286102295,
+      "ratio": 1.0530972891177333,
+      "limit": 1.05,
+      "gated": true,
+      "passed": false,
+      "A0Stability": {
+        "cohortP95": [
+          0.559999942779541,
+          0.5750000476837158,
+          0.565000057220459
+        ],
+        "relativeSpread": 0.02654885554873824,
+        "cv": 0.011004938828186595,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          0.5899999141693115,
+          0.5950000286102295,
+          0.5950000286102295
+        ],
+        "relativeSpread": 0.008403553278135094,
+        "cv": 0.00397260099405662,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-small-1",
+      "metric": "gpuPassSum",
+      "A0": 0.980992,
+      "B4": 0.9748800000000001,
+      "ratio": 0.9937695720250523,
+      "limit": 1.05,
+      "gated": true,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          0.97792,
+          0.982048,
+          0.980992
+        ],
+        "relativeSpread": 0.004207985386221315,
+        "cv": 0.0017861092241298474,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          0.9778560000000001,
+          0.9738559999999999,
+          0.9748479999999999
+        ],
+        "relativeSpread": 0.004103203781512723,
+        "cv": 0.0017434014510395906,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-small-1",
+      "metric": "gpuSpan",
+      "A0": 1.08032,
+      "B4": 1.076192,
+      "ratio": 0.9961789099526067,
+      "limit": 1.05,
+      "gated": true,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          1.077248,
+          1.081344,
+          1.081344
+        ],
+        "relativeSpread": 0.0037878787878788795,
+        "cv": 0.0017878806098269651,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          1.077248,
+          1.073152,
+          1.073152
+        ],
+        "relativeSpread": 0.0038167938931296564,
+        "cv": 0.0017969676777294186,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-small-1",
+      "metric": "frameWall",
+      "A0": 4.424999952316284,
+      "B4": 4.575000047683716,
+      "ratio": 1.0338983270019955,
+      "limit": null,
+      "gated": true,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          4.40500020980835,
+          4.455000162124634,
+          4.4049999713897705
+        ],
+        "relativeSpread": 0.011350780556952269,
+        "cv": 0.005330627775466889,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          4.5,
+          4.615000009536743,
+          4.580000162124634
+        ],
+        "relativeSpread": 0.0251091714991109,
+        "cv": 0.010543654574977893,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-small-1",
+      "metric": "coldCpu",
+      "A0": 1.5849997997283936,
+      "B4": 1.7599999904632568,
+      "ratio": 1.1104102289254871,
+      "limit": null,
+      "gated": false,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          1.6000001430511475,
+          1.5149998664855957,
+          1.5849997997283936
+        ],
+        "relativeSpread": 0.05362794151779543,
+        "cv": 0.023644845572651247,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          1.5250000953674316,
+          1.7699999809265137,
+          1.7599999904632568
+        ],
+        "relativeSpread": 0.1392044811855906,
+        "cv": 0.06718733809077679,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-cap-8",
+      "metric": "cpu",
+      "A0": 0.5750000476837158,
+      "B4": 0.6150000095367432,
+      "ratio": 1.069565145279831,
+      "limit": 1.05,
+      "gated": true,
+      "passed": false,
+      "A0Stability": {
+        "cohortP95": [
+          0.5750000476837158,
+          0.570000171661377,
+          0.5750000476837158
+        ],
+        "relativeSpread": 0.008695435839492479,
+        "cv": 0.004110983362339931,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          0.6000001430511475,
+          0.6050000190734863,
+          0.6800000667572021
+        ],
+        "relativeSpread": 0.13223127468420376,
+        "cv": 0.05823472148658278,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-cap-8",
+      "metric": "gpuPassSum",
+      "A0": 0.9973759999999999,
+      "B4": 0.9994240000000001,
+      "ratio": 1.0020533880903493,
+      "limit": 1.05,
+      "gated": true,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          0.9523199999999999,
+          0.979968,
+          1.01376
+        ],
+        "relativeSpread": 0.06269592476489033,
+        "cv": 0.025584659325099707,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          1.007648,
+          0.992256,
+          0.9952639999999999
+        ],
+        "relativeSpread": 0.015465243392707937,
+        "cv": 0.006671786850931916,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-cap-8",
+      "metric": "gpuSpan",
+      "A0": 1.09568,
+      "B4": 1.097728,
+      "ratio": 1.0018691588785047,
+      "limit": 1.05,
+      "gated": true,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          1.048576,
+          1.079296,
+          1.110016
+        ],
+        "relativeSpread": 0.05692599620493353,
+        "cv": 0.02323994063361647,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          1.106944,
+          1.087488,
+          1.093632
+        ],
+        "relativeSpread": 0.01779026217228457,
+        "cv": 0.0074091418582187965,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-cap-8",
+      "metric": "frameWall",
+      "A0": 4.4100000858306885,
+      "B4": 4.46999979019165,
+      "ratio": 1.0136053748737421,
+      "limit": null,
+      "gated": true,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          4.390000104904175,
+          4.409999847412109,
+          4.444999933242798
+        ],
+        "relativeSpread": 0.012471616834839173,
+        "cv": 0.005148413677052064,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          4.430000066757202,
+          4.419999837875366,
+          4.625
+        ],
+        "relativeSpread": 0.046275430933502365,
+        "cv": 0.021009857873127123,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-cap-8",
+      "metric": "coldCpu",
+      "A0": 1.8849999904632568,
+      "B4": 1.695000171661377,
+      "ratio": 0.8992043396482005,
+      "limit": null,
+      "gated": false,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          1.6399998664855957,
+          1.6349999904632568,
+          1.9199998378753662
+        ],
+        "relativeSpread": 0.1737804089111568,
+        "cv": 0.07691283032023166,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          1.5249998569488525,
+          1.7350001335144043,
+          1.5350000858306885
+        ],
+        "relativeSpread": 0.13680799011285197,
+        "cv": 0.06051566191038725,
+        "stable": true
+      }
+    }
+  ],
+  "host": {
+    "beforeAfterCpu": {
+      "n": 48,
+      "min": 0.18714909544603753,
+      "p50": 0.773646119291238,
+      "p95": 2.9187975551952072,
+      "max": 3.28767123287671,
+      "mean": 1.0744997435770578
+    },
+    "processRows": 4242,
+    "unreadable": {
+      "n": 4242,
+      "min": 1,
+      "p50": 1,
+      "p95": 1,
+      "max": 2,
+      "mean": 1.0004714757190005
+    },
+    "observedInteractiveApplications": [],
+    "frequencyRows": 2121
+  },
+  "restoration": {
+    "power": true,
+    "temporaryRemoved": true,
+    "search": true,
+    "remainingTestProcesses": []
+  },
+  "allCaptureCleanupPassed": true,
+  "bindings": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/report.json",
+      "sha256": "303feea4cc069a735cdfd45a4f8d114758d7b4dd310c9ce0c4bd11b0daac5bf0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/revalidation.json",
+      "sha256": "dfb0a40b71244b5885da51b0e29ae149a22f3dcf7a15e52c9af5731aee99db84"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/launcher-revalidation.json",
+      "sha256": "ccaa51a26bb1fb55f4feef4e909837627a9a39d37a612edd7a9b0fd986174aba"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/calibration.json",
+      "sha256": "c8584f19cf7ea68b1183d527909d04d7c831cdbb87914ba6ce23f5eb57e0d372"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/frozen-protocol.json",
+      "sha256": "54a7c9bea4ed2d927b3f2f551260817224db5cd1d0fecebabfce72f104cafceb"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/same-host-baseline.json",
+      "sha256": "d5845d429596ad728a3ad6748a177b6e8cc6870c89a2e9b83a8760a4b044bccd"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/completion.json",
+      "sha256": "fc99c6ef4870f51bd4113127f1d818011ceb888b8be1d8a6408bf8c589519aff"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/power-verification.json",
+      "sha256": "98f5512a26c09dca7a40d71f70db993427eee64d6bb8c04d51c4a7a912744181"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/service-verification.json",
+      "sha256": "44725b178eb84238a3f2cc5923d5d089d60d439b0b873c3afd0295d85f34b000"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/power-state.json",
+      "sha256": "8549c6dd0f1bb9712e53f3a230451aaf82e75d225c3dc972447f1a946865d113"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/processes.jsonl",
+      "sha256": "a658e9427b7e6a1e2f1e81586170ab6b9c9ac997339d4bc10d6b3576527af08b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/frequency.jsonl",
+      "sha256": "da0c3c8a8ae2e9953f53f8a56ed935c23068acab530093d764fd9bb4b53ffedb"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/full-verification.json",
+      "sha256": "961b77ca5d6cf6911272f4ed06bfb4ba07cb82bed310acafb088df8dd5a6aeff"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/analyze-controlled-v3.mjs",
+      "sha256": "11c7a16c3f600aa29d01eb9b9764832d0f4bd3af4181c995e324650b2741ffef"
+    }
+  ],
+  "rawCaptures": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/000-correctness-forward-small-1-A0.json",
+      "sha256": "2cbd2502f52117fde9010ac0c88d1e43f6c76edf0e620d0a2be00ff1e13c1610"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/001-correctness-forward-small-1-B4.json",
+      "sha256": "2cf8f22f42f6c7eb67bf87ac461ad81c9d59e4746753a4ed7fa9e58717fd63ac"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/002-correctness-forward-cap-8-A0.json",
+      "sha256": "bdd55de8a035e4fe0c12b5ed0180e4c2b7e07de9cdc9d8adf101d606253f23ff"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/003-correctness-forward-cap-8-B4.json",
+      "sha256": "f53bf8ed29553e8424cb5f8e685433c413bd5b95da93d17800f07d5e2f79f834"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/004-calibration-forward-small-1-A0.json",
+      "sha256": "87a41e3b25883893b65b0e116ed7572632bc360c05e104fa226f83c88f80caef"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/005-calibration-forward-small-1-B4.json",
+      "sha256": "8c4d7024f87a5dc27f77acdc26be0a12bfb765bb99c751d911182383956c24c1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/006-calibration-forward-cap-8-A0.json",
+      "sha256": "d13534e6aa27cd6b54340548e06cb06d512bba65dbdd72daed592c4ec78d32d3"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/007-calibration-forward-cap-8-B4.json",
+      "sha256": "237e30a3a4d9f7234894ff092214e5a7f0a0604c2fabb2daf71d4f3f695ce719"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/008-calibration-forward-cap-8-B4.json",
+      "sha256": "882cda633e3a5ffa8c58102aabc4e11f8ceabb01c6aecdea092c0aa34a7a2cf8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/009-calibration-forward-cap-8-A0.json",
+      "sha256": "19325600b7404c0102479f129b057935d2face0e2afd3a8e37bff0064a4d9a08"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/010-calibration-forward-small-1-B4.json",
+      "sha256": "30d6febbeee763835e3e317dc3d29f914d344d3f0eda0fa357b2c7dd88cb5897"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/011-calibration-forward-small-1-A0.json",
+      "sha256": "4946ae97312e4b440a7f0da979d3cdf49e83245982ccbd47f7f5439affc6baaf"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/012-calibration-forward-small-1-A0.json",
+      "sha256": "abfedb0d0533ee2f4ea4d75e48d8d6a9ad626b236df3641802e03fb855451e4f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/013-calibration-forward-small-1-B4.json",
+      "sha256": "a42f839ffb41ab95cd82348a28693170aefb816ac2906b05bcdab1ed4016a572"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/014-calibration-forward-cap-8-A0.json",
+      "sha256": "94ad5b685cb1c8cbb625de9dda50a933b7df5965859468434456da4e9c9e2ac1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/015-calibration-forward-cap-8-B4.json",
+      "sha256": "320e7142a7d651186cef44c3e278c3ff11eb70100e9a9ec3c2008c9c14fed952"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/016-baseline-forward-small-1-A0.json",
+      "sha256": "ad65d3ac9ca19b4d2b9bc7d34a7d9e9cb80f0132307bc84b683b108a1cf11e61"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/017-baseline-forward-small-1-B4.json",
+      "sha256": "2bcc63cf3718b0e5af5c1bec52c877f199ffb78a4ef83d2d209f08dbaa06a6f5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/018-baseline-forward-cap-8-A0.json",
+      "sha256": "cdebe89e39a94b6831ee6befca141693c8d122875d5d6d6e7416080794649c9c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/019-baseline-forward-cap-8-B4.json",
+      "sha256": "ba383321f95a25cd148510a5dfdf172b889351ebdfcab8556ede3f668e5e57b7"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/020-baseline-forward-cap-8-B4.json",
+      "sha256": "c162067d78eb50306f3b5c00312f04b0bdac4d0fbbf81e2691c8d3420285409d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/021-baseline-forward-cap-8-A0.json",
+      "sha256": "3f34a941d5a97ef5906f579aa1a01e4dcfd860fec57e1566da38148adeef612d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/022-baseline-forward-small-1-B4.json",
+      "sha256": "b1ae200aa93a86b4747838e43d9a114e4db463b4c5d862cdb6ac2cbe4c977174"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/023-baseline-forward-small-1-A0.json",
+      "sha256": "53c2e859f4849ee6791739ba7eb30de9dbc6e8a41c27480a7b70727dcd4e19e0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/024-baseline-forward-small-1-A0.json",
+      "sha256": "c55bceccef389e59b8439f03db9a9a87a75064ca026b797608aab6a4ca3322d2"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/025-baseline-forward-small-1-B4.json",
+      "sha256": "b10f9108fabde0fb2dce6c54173df8e2fd3f119c780a16d96f68490696d50449"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/026-baseline-forward-cap-8-A0.json",
+      "sha256": "60e56982f2256e03469ae54f9c3d0a4cc7a7e40899027df26916e16da6da30b8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T074248Z/measurement/027-baseline-forward-cap-8-B4.json",
+      "sha256": "78999ae22568de74d3758545ac954f6d50a1f8b9f7b116cc8173b77677e8c661"
+    }
+  ],
+  "note": "Validated against then-current source before subsequent runtime optimization. Frozen old evidence is not acceptance for the modified candidate."
+}

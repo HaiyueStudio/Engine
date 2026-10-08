@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "contractId": "g09-forward-cold-steady-v1",
+  "scope": "Same-host development baseline for inherited Forward workload, including existing postprocess; not effects-off F0, complete F0-F8, or G05/G07 qualification",
+  "hostContract": "config/framegraph-performance-021.json",
+  "budgetSource": "config/lighting-performance-021.json#relativeBudgets",
+  "legacyProtocol": "framegraph-021-default-path-preflight-v1 remains unchanged and its failed evidence is retained",
+  "cases": ["forward-small-1", "forward-cap-8"],
+  "sampling": {
+    "cohorts": 3,
+    "order": "AB-BA-AB",
+    "idleMs": 120000,
+    "entryQuietCpuPercent": 5,
+    "entryQuietSamples": 3,
+    "coldFrames": 120,
+    "steadyCpuSamples": 3000,
+    "gpuWarmup": 120,
+    "gpuSamples": 300,
+    "dropSamples": false
+  },
+  "calibration": {
+    "totalCpuFrames": 12000,
+    "candidateWarmups": [1200, 3600, 6000],
+    "windowFrames": 3000,
+    "plateauToleranceRatio": 0.05,
+    "selection": "Earliest candidate at which both successive windows have stable three-cohort CPU P95 and pooled P50/P95 drift <=5% for every case and variant; do not inspect candidate speedup to choose a warmup"
+  },
+  "coldDefinition": "Fresh browser profile/device; scenario setup and explicit pipeline compilation reported separately; startup CPU consists of the first 120 runtime frames after pipeline preparation. No OS/driver cache flush or GPU-cold claim.",
+  "steadyDefinition": "A single common warmup chosen from a separate complete calibration population, frozen before fresh baseline captures. Retain every warmup and measured frame; compare all 3000 CPU and 300 GPU samples per cohort.",
+  "regressionRatio": 0.05,
+  "stability": { "relativeSpread": 0.20, "cv": 0.10 },
+  "formalReleaseEnrolled": false
+}

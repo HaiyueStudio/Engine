@@ -115,3 +115,47 @@ test('cache hits preserve the reason for the last invalidation', () => {
   assert.equal(plan.cache.stats.lastReason, 'hit');
   assert.equal(plan.cache.stats.lastInvalidationReason, 'device-generation');
 });
+
+test('unchanged declarations reuse serialization but still consult cache generation and current callbacks', () => {
+  const plan = new Render3DFramePlan(), executed = [];
+  declare(plan, () => executed.push('first')).execute();
+  const key = plan._lastKey;
+  declare(plan, () => executed.push('second')).execute();
+  assert.equal(plan._lastKey, key);
+  plan.setCacheScope({}, '');
+  declare(plan, () => executed.push('new-device')).execute();
+  assert.equal(plan.cache.stats.misses, 2);
+  plan.cache.enabled = false;
+  declare(plan, () => executed.push('disabled')).execute();
+  assert.equal(plan.cache.stats.misses, 3);
+  assert.deepEqual(executed, ['first', 'second', 'new-device', 'disabled']);
+  plan.clearCache(); assert.equal(plan._lastKey, undefined);
+});
+
+test('structural key reuse detects each declaration field, including ordered names and mutated input arrays', () => {
+  const cases = [
+    p => p.importResources('extra'), p => p.exportResources('color'),
+    p => { p._passes[0].snapshot.name = 'renamed'; },
+    p => { p._passes[0].snapshot.kind = 'postprocess'; },
+    p => { p._passes[0].snapshot.reads.push('camera'); },
+    p => { p._passes[0].snapshot.writes.push('extra'); },
+    p => { p._passes[0].after.push('scene'); },
+    p => { p._passes[0].sideEffect = true; },
+    p => { p._passes.pop(); },
+    p => { p._imports.delete('camera'); p._imports.add('camera'); },
+  ];
+  for (const change of cases) {
+    const plan = new Render3DFramePlan();
+    declare(plan, () => {}).importResources('other').execute();
+    const key = plan._lastKey;
+    declare(plan, () => {}).importResources('other'); change(plan); plan.execute();
+    assert.notEqual(plan._lastKey, key);
+    assert.equal(plan.cache.stats.misses, 2);
+  }
+  const plan = new Render3DFramePlan(), reads = ['camera'];
+  const build = () => plan.clear().importResources('camera').exportResources('output')
+    .add('output', 'render', () => {}, { reads, writes: ['output'] });
+  build().execute(); reads[0] = 'missing';
+  assert.throws(() => build().execute(), /without a producer/);
+  assert.throws(() => build().execute(), /without a producer/, 'failed declarations must not become compiled cache entries');
+});

@@ -1,0 +1,2536 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-07T06:17:32.997Z",
+  "status": "power-intervention-supported-v3-full-calibration-pending",
+  "performanceQualified": false,
+  "rootCauseFullyEstablished": false,
+  "successfulLongCaptures": 10,
+  "successfulShortCaptures": 2,
+  "successfulFrames": 240480,
+  "failedDiagnosticProbes": 1,
+  "runs": [
+    {
+      "directory": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-10-27.306Z",
+      "variant": "A0",
+      "frames": 240,
+      "detail": false,
+      "status": "captured",
+      "performanceQualified": false,
+      "complete": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "browserCleanup": {
+        "status": "passed",
+        "attempts": 1,
+        "durationMs": 243
+      },
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-10-27.306Z/analysis.json",
+          "sha256": "f65a511a55b795c32989946a4ee2c989a773f964f86705481fd2ea5b708219f1",
+          "bytes": 12960
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-10-27.306Z/capture.json",
+          "sha256": "b4592675996c5ae2dd4a53118605e3ff0779789c4d7a52b7f2a6dbd1f7ddcb2d",
+          "bytes": 115280
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-10-27.306Z/cpu.cpuprofile",
+          "sha256": "5766ff807ef1bab8e04095e9306863f3f1cee284b3acad6b48736e11dc3f2332",
+          "bytes": 69818
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-10-27.306Z/fixture.html",
+          "sha256": "f12fc4fc3d3edc852594b0e0fec5d4d40a95e65218a372e14a46905c4fb136a2",
+          "bytes": 425
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-10-27.306Z/fixture.mjs",
+          "sha256": "6263d7cc929c876a82284fd2c955e1eff3adb177d887d0dd44d36fcd5735529b",
+          "bytes": 14573
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-10-27.306Z/host.jsonl",
+          "sha256": "091ba0cd22181e9600ecc1db5eeda2115747a6036e971e78d3905fd4c6aeb56c",
+          "bytes": 67403
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-10-27.306Z/observer.ps1",
+          "sha256": "483e920e1b589c875bb7709cda25a5efb0f8a1796784cab44c0a297005f8c757",
+          "bytes": 2442
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-10-27.306Z/observer.stop",
+          "sha256": "6c45cb72a36e63d522aa54ed8adbd7a29a989474f2f77e0458af8800564ef3cb",
+          "bytes": 4
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-10-27.306Z/plan.json",
+          "sha256": "3dd9a77e5bca339ebe93f0bec417d895518ee6768c2f3eaeb92500dd125f659f",
+          "bytes": 103573
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-10-27.306Z/producer.mjs",
+          "sha256": "e67192f3d2a7e247384b78b41ace4eb346420787ba2dbd1b3cdfc63d976e4ad5",
+          "bytes": 9037
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-10-27.306Z/trace.json",
+          "sha256": "1c75d502c4aea8aedcc6d34d74b16d5351a7ceaea17f0a3b8c5838f40ac93a4a",
+          "bytes": 8071958
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-11-11.953Z",
+      "variant": "A0",
+      "frames": 24000,
+      "detail": false,
+      "status": "captured",
+      "performanceQualified": false,
+      "complete": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "browserCleanup": {
+        "status": "passed",
+        "attempts": 1,
+        "durationMs": 187
+      },
+      "clockAlignmentResidualMs": -0.002000093460083008,
+      "late": [
+        {
+          "start": 12000,
+          "recordP95": 0.4550001621246338,
+          "tail": {
+            "frames": 153,
+            "withGc": 0,
+            "withJit": 9,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 153,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 153,
+              "p50": 0.04599999999999993,
+              "p95": 0.13,
+              "p99": 0.16499999999999992,
+              "mean": 0.046287581699346436,
+              "max": 0.249
+            }
+          }
+        },
+        {
+          "start": 15000,
+          "recordP95": 0.5,
+          "tail": {
+            "frames": 153,
+            "withGc": 0,
+            "withJit": 15,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 153,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 153,
+              "p50": 0.03200000000000003,
+              "p95": 0.16000000000000003,
+              "p99": 0.19300000000000006,
+              "mean": 0.05041176470588236,
+              "max": 0.2779999999999999
+            }
+          }
+        },
+        {
+          "start": 18000,
+          "recordP95": 0.41499996185302734,
+          "tail": {
+            "frames": 157,
+            "withGc": 1,
+            "withJit": 5,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 157,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0.00003184725524513599,
+              "max": 0.00500001907348635
+            },
+            "taskOffCpuMs": {
+              "count": 157,
+              "p50": 0.01200000000000001,
+              "p95": 0.125,
+              "p99": 0.16599999999999993,
+              "mean": 0.034541401273885344,
+              "max": 0.16800000000000004
+            }
+          }
+        },
+        {
+          "start": 21000,
+          "recordP95": 0.46000003814697266,
+          "tail": {
+            "frames": 161,
+            "withGc": 2,
+            "withJit": 6,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 161,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 161,
+              "p50": 0.020000000000000018,
+              "p95": 0.125,
+              "p99": 0.17499999999999993,
+              "mean": 0.04085093167701865,
+              "max": 0.23199999999999998
+            }
+          }
+        }
+      ],
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-11-11.953Z/analysis.json",
+          "sha256": "c9025e31a359b94c6220f2f298fa0145b2eb85d6a2dc8da22584f1d6c43da2b4",
+          "bytes": 65849
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-11-11.953Z/analysis.log",
+          "sha256": "1fef0f4455ecf64f30a21ab78c3e1823adce3dcb3cefaec238ef189fb741e160",
+          "bytes": 16315
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-11-11.953Z/capture.json",
+          "sha256": "b2a1a1a49737de7183d26812ce9b3d3fc014b6f1d142e4d9e442cc69642be19f",
+          "bytes": 8365771
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-11-11.953Z/cpu.cpuprofile",
+          "sha256": "b11d97b1ea21d9dc80f14812cba2d9b30220a39eb0e3fe9a4e082dcf444d6c36",
+          "bytes": 591646
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-11-11.953Z/fixture.html",
+          "sha256": "f12fc4fc3d3edc852594b0e0fec5d4d40a95e65218a372e14a46905c4fb136a2",
+          "bytes": 425
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-11-11.953Z/fixture.mjs",
+          "sha256": "c2f2bec80ca7692da11dd0aebd6440e6c36f53b39d8d291c5e4008a857d23e9e",
+          "bytes": 14583
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-11-11.953Z/host.jsonl",
+          "sha256": "627f7a1273800f699c988d2414c0e2390320f11bf59e478df9962026cdf26a21",
+          "bytes": 2291063
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-11-11.953Z/observer.ps1",
+          "sha256": "483e920e1b589c875bb7709cda25a5efb0f8a1796784cab44c0a297005f8c757",
+          "bytes": 2442
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-11-11.953Z/observer.stop",
+          "sha256": "6c45cb72a36e63d522aa54ed8adbd7a29a989474f2f77e0458af8800564ef3cb",
+          "bytes": 4
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-11-11.953Z/plan.json",
+          "sha256": "60ec373afaff5fe140dc8deff6bbc5269a7b2c999c38f9e6177b826c508ceae8",
+          "bytes": 103575
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-11-11.953Z/producer.mjs",
+          "sha256": "e67192f3d2a7e247384b78b41ace4eb346420787ba2dbd1b3cdfc63d976e4ad5",
+          "bytes": 9037
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-11-11.953Z/trace.json",
+          "sha256": "6fb7022276a68589dee870305d87478376e0905d185f4af2b63a3205f4a67a71",
+          "bytes": 260867088
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-13-22.393Z",
+      "variant": "B4",
+      "frames": 24000,
+      "detail": false,
+      "status": "captured",
+      "performanceQualified": false,
+      "complete": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "browserCleanup": {
+        "status": "passed",
+        "attempts": 1,
+        "durationMs": 189
+      },
+      "clockAlignmentResidualMs": 0.002000093460083008,
+      "late": [
+        {
+          "start": 12000,
+          "recordP95": 0.5199999809265137,
+          "tail": {
+            "frames": 159,
+            "withGc": 1,
+            "withJit": 3,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 159,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0.005000143051147488,
+              "mean": 0.00028930961560903127,
+              "max": 0.04100008583068848
+            },
+            "taskOffCpuMs": {
+              "count": 159,
+              "p50": 0.019000000000000017,
+              "p95": 0.15500000000000003,
+              "p99": 0.20899999999999996,
+              "mean": 0.044226415094339624,
+              "max": 0.488
+            }
+          }
+        },
+        {
+          "start": 15000,
+          "recordP95": 0.7699999809265137,
+          "tail": {
+            "frames": 153,
+            "withGc": 1,
+            "withJit": 10,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 153,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 153,
+              "p50": 0.04800000000000004,
+              "p95": 0.17500000000000004,
+              "p99": 0.33999999999999986,
+              "mean": 0.06205228758169932,
+              "max": 0.42999999999999994
+            }
+          }
+        },
+        {
+          "start": 18000,
+          "recordP95": 0.4849998950958252,
+          "tail": {
+            "frames": 156,
+            "withGc": 1,
+            "withJit": 3,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 156,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0.0002756395584497696,
+              "max": 0.042999771118164054
+            },
+            "taskOffCpuMs": {
+              "count": 156,
+              "p50": 0.009000000000000008,
+              "p95": 0.16599999999999998,
+              "p99": 0.236,
+              "mean": 0.03950641025641027,
+              "max": 0.262
+            }
+          }
+        },
+        {
+          "start": 21000,
+          "recordP95": 0.7650001049041748,
+          "tail": {
+            "frames": 152,
+            "withGc": 0,
+            "withJit": 1,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 152,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 152,
+              "p50": 0.06700000000000017,
+              "p95": 0.17200000000000004,
+              "p99": 0.29900000000000015,
+              "mean": 0.07825657894736847,
+              "max": 0.3600000000000001
+            }
+          }
+        }
+      ],
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-13-22.393Z/analysis.json",
+          "sha256": "e1426f8b72a0b822bfe5231fefd49f36b7e270ca17a70e54d3de83b96aa3cdbb",
+          "bytes": 69266
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-13-22.393Z/analysis.log",
+          "sha256": "5e471737837c9e45d44e70ff8fdd6a400c1c04550787ce88daf098d783d6657e",
+          "bytes": 17648
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-13-22.393Z/capture.json",
+          "sha256": "e8a6c729cea993d1045f0adac084754ec04aaaa9330e9c8925e50fa0dfe3eaad",
+          "bytes": 8325917
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-13-22.393Z/cpu.cpuprofile",
+          "sha256": "1293bd8ba400e37cecf16585f2cb63915599a7e2617636804b67af5f98ee8e19",
+          "bytes": 616382
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-13-22.393Z/fixture.html",
+          "sha256": "f12fc4fc3d3edc852594b0e0fec5d4d40a95e65218a372e14a46905c4fb136a2",
+          "bytes": 425
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-13-22.393Z/fixture.mjs",
+          "sha256": "c2f2bec80ca7692da11dd0aebd6440e6c36f53b39d8d291c5e4008a857d23e9e",
+          "bytes": 14583
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-13-22.393Z/host.jsonl",
+          "sha256": "d6c4e2ed194cfdd6e81e46e37aebba10623817c86e5ee387f6e3dd974f7612ea",
+          "bytes": 2379824
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-13-22.393Z/observer.ps1",
+          "sha256": "483e920e1b589c875bb7709cda25a5efb0f8a1796784cab44c0a297005f8c757",
+          "bytes": 2442
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-13-22.393Z/observer.stop",
+          "sha256": "6c45cb72a36e63d522aa54ed8adbd7a29a989474f2f77e0458af8800564ef3cb",
+          "bytes": 4
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-13-22.393Z/plan.json",
+          "sha256": "0063ce0c344461b45afc0ba8a40318d570fab118ec72b6564f71a8d00e4ab83e",
+          "bytes": 2269
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-13-22.393Z/producer.mjs",
+          "sha256": "e67192f3d2a7e247384b78b41ace4eb346420787ba2dbd1b3cdfc63d976e4ad5",
+          "bytes": 9037
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-13-22.393Z/trace.json",
+          "sha256": "98584be7b2f638d074a2485a96b0f6cdce485651d83137994e37983c974e6666",
+          "bytes": 258949648
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-17-36.552Z",
+      "variant": "B4",
+      "frames": 24000,
+      "detail": true,
+      "status": "failed",
+      "performanceQualified": false,
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-17-36.552Z/fixture-error.json",
+          "sha256": "072440de2a4981f157debd1440bf68cc362cb64b48af19feae729bf54231e9ff",
+          "bytes": 586
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-17-36.552Z/fixture.html",
+          "sha256": "f12fc4fc3d3edc852594b0e0fec5d4d40a95e65218a372e14a46905c4fb136a2",
+          "bytes": 425
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-17-36.552Z/fixture.mjs",
+          "sha256": "c0c79924e621e4ce92fe12c9f330378126f3a1e6bc73835e6c96421944f80c49",
+          "bytes": 16313
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-17-36.552Z/frequency.jsonl",
+          "sha256": "6ca699f0741f9800e59b16a720762721391e9659b3388d2a921134aca05b7602",
+          "bytes": 147264
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-17-36.552Z/host.jsonl",
+          "sha256": "178b2cb030a18e340ecdb64a6b14b4647ea8930e2a834c44d33405fc5e10de6b",
+          "bytes": 6269055
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-17-36.552Z/observer.ps1",
+          "sha256": "3ffff69792fec9360d8ec14a1608f58b2032caa53ffa87e9c94fdb8cfe1f5948",
+          "bytes": 2852
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-17-36.552Z/observer.stop",
+          "sha256": "6c45cb72a36e63d522aa54ed8adbd7a29a989474f2f77e0458af8800564ef3cb",
+          "bytes": 4
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-17-36.552Z/plan.json",
+          "sha256": "3274aca1bbc3f94108e9a67c61d3506200c02100c63f0ec08970bd9e6bc7c830",
+          "bytes": 4821
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-17-36.552Z/producer.mjs",
+          "sha256": "14968a5615674c0a7afeb95e743fab4764223525e63053567392435f2e56c96c",
+          "bytes": 12148
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-22-26.090Z",
+      "variant": "B4",
+      "frames": 240,
+      "detail": true,
+      "status": "captured",
+      "performanceQualified": false,
+      "complete": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "browserCleanup": {
+        "status": "passed",
+        "attempts": 1,
+        "durationMs": 226
+      },
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-22-26.090Z/capture.json",
+          "sha256": "61d9d2109cc193597221b9372ace24379d097551dcaa7c966046e42f4a3d1c2e",
+          "bytes": 168396
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-22-26.090Z/cpu.cpuprofile",
+          "sha256": "b20026723a8324b6158457ceaa6f2efe509d7e8e0c450a4239cf748a9586bafa",
+          "bytes": 68322
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-22-26.090Z/fixture.html",
+          "sha256": "f12fc4fc3d3edc852594b0e0fec5d4d40a95e65218a372e14a46905c4fb136a2",
+          "bytes": 425
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-22-26.090Z/fixture.mjs",
+          "sha256": "277e92e79c1a916b22fdc7794018b958e98714ff0c6a8de572cc403ef7e836f3",
+          "bytes": 16349
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-22-26.090Z/frequency.jsonl",
+          "sha256": "cb1f2391f02d2ef95828d3c49029f96a5e008af379ae699f98e5f079f65f86d9",
+          "bytes": 1097
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-22-26.090Z/host.jsonl",
+          "sha256": "80db9052f8a7a46e4a20d20ba3d004ac329a475a88486458511f4ecb9c00fb24",
+          "bytes": 70307
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-22-26.090Z/observer.ps1",
+          "sha256": "3ffff69792fec9360d8ec14a1608f58b2032caa53ffa87e9c94fdb8cfe1f5948",
+          "bytes": 2852
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-22-26.090Z/observer.stop",
+          "sha256": "6c45cb72a36e63d522aa54ed8adbd7a29a989474f2f77e0458af8800564ef3cb",
+          "bytes": 4
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-22-26.090Z/plan.json",
+          "sha256": "dec8dbadabd0180e4b530ec225ce4cfa452f80b5e6dd63f56281b2718193883e",
+          "bytes": 2285
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-22-26.090Z/producer.mjs",
+          "sha256": "fad6afd88b7f755bce4e94d4c7b2f45f8ddfa1d6a8fbbde655c9e86e8b0da91f",
+          "bytes": 12380
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-22-26.090Z/trace.json",
+          "sha256": "34204d1d5f613fb5076e6e40100493d6c93366f96fdeff836464bc5deb68285a",
+          "bytes": 7527096
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z",
+      "variant": "B4",
+      "frames": 24000,
+      "detail": true,
+      "status": "captured",
+      "performanceQualified": false,
+      "complete": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "browserCleanup": {
+        "status": "passed",
+        "attempts": 1,
+        "durationMs": 182
+      },
+      "clockAlignmentResidualMs": -0.002000093460083008,
+      "late": [
+        {
+          "start": 12000,
+          "recordP95": 0.4700000286102295,
+          "tail": {
+            "frames": 152,
+            "withGc": 0,
+            "withJit": 7,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 152,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 152,
+              "p50": 0.020000000000000018,
+              "p95": 0.11299999999999999,
+              "p99": 0.16999999999999993,
+              "mean": 0.03822368421052633,
+              "max": 0.18299999999999994
+            }
+          }
+        },
+        {
+          "start": 15000,
+          "recordP95": 0.39999985694885254,
+          "tail": {
+            "frames": 154,
+            "withGc": 0,
+            "withJit": 29,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 154,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 154,
+              "p50": 0.0050000000000000044,
+              "p95": 0.09499999999999997,
+              "p99": 0.126,
+              "mean": 0.023045454545454522,
+              "max": 0.22999999999999998
+            }
+          }
+        },
+        {
+          "start": 18000,
+          "recordP95": 0.5149998664855957,
+          "tail": {
+            "frames": 153,
+            "withGc": 0,
+            "withJit": 7,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 153,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0.0003071903527951711,
+              "max": 0.04700012397766118
+            },
+            "taskOffCpuMs": {
+              "count": 153,
+              "p50": 0.0040000000000000036,
+              "p95": 0.10799999999999998,
+              "p99": 0.22799999999999998,
+              "mean": 0.032960784313725476,
+              "max": 0.32499999999999996
+            }
+          }
+        },
+        {
+          "start": 21000,
+          "recordP95": 0.47500014305114746,
+          "tail": {
+            "frames": 157,
+            "withGc": 0,
+            "withJit": 2,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 157,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 157,
+              "p50": 0.006999999999999895,
+              "p95": 0.09700000000000009,
+              "p99": 0.19200000000000006,
+              "mean": 0.028165605095541404,
+              "max": 0.2499999999999999
+            }
+          }
+        }
+      ],
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/analysis.json",
+          "sha256": "a0d7ebc00b1851b3ab100f4169876e9cbeef9adc8477b0727d59455ddc9411da",
+          "bytes": 68449
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/analysis.log",
+          "sha256": "f428636577ff82fd4e9e4c8eae9f93b879053fcebd409c62c6e035cb69fbc339",
+          "bytes": 16781
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/capture.json",
+          "sha256": "7cbff3276aef31d87105f201382f1c197093a112bee839a0a8706ff5106e564b",
+          "bytes": 13602255
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/cpu.cpuprofile",
+          "sha256": "0c8a01d84dc5405f1ba3b4aa806ee67506b162144dc9e994813642b7e2fd9bb3",
+          "bytes": 566468
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/detail-analysis.json",
+          "sha256": "48ee9a1b293a547c9614d89721a4ce22f51fcc48462c0bb244bc56609fe106c9",
+          "bytes": 113770
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/detail-analysis.log",
+          "sha256": "4dc73340b0fa3059a55c0e84339fc16853fd57182fa6a0a468522b6813dff7a5",
+          "bytes": 27169
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/fixture.html",
+          "sha256": "f12fc4fc3d3edc852594b0e0fec5d4d40a95e65218a372e14a46905c4fb136a2",
+          "bytes": 425
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/fixture.mjs",
+          "sha256": "b08b1771a714794dd2cc3b7e8d515467e6bb2fae162164b80f5e6d85161001a1",
+          "bytes": 16363
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/frequency.jsonl",
+          "sha256": "69d7ba153a525cd46ebc818ed5bffd55df233f872cead9dbe047536e6f3cdbb3",
+          "bytes": 46812
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/host.jsonl",
+          "sha256": "db955559063ab7b7b8d3cc60b114d2c151cd88d541e63c3161c7da8b8c1f0733",
+          "bytes": 1978195
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/observer.ps1",
+          "sha256": "3ffff69792fec9360d8ec14a1608f58b2032caa53ffa87e9c94fdb8cfe1f5948",
+          "bytes": 2852
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/observer.stop",
+          "sha256": "6c45cb72a36e63d522aa54ed8adbd7a29a989474f2f77e0458af8800564ef3cb",
+          "bytes": 4
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/plan.json",
+          "sha256": "9ac777ad2d80464daf9eb9cf0300cac680111eb23c48c20e170132e9fa379ac9",
+          "bytes": 2287
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/producer.mjs",
+          "sha256": "fad6afd88b7f755bce4e94d4c7b2f45f8ddfa1d6a8fbbde655c9e86e8b0da91f",
+          "bytes": 12380
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-23-11.502Z/trace.json",
+          "sha256": "d138cda45b83e011631752e7c798bdd2e5e385617f307634ace8a72da6f95ad9",
+          "bytes": 258741800
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z",
+      "variant": "B4",
+      "frames": 24000,
+      "detail": true,
+      "status": "captured",
+      "performanceQualified": false,
+      "complete": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "browserCleanup": {
+        "status": "passed",
+        "attempts": 1,
+        "durationMs": 189
+      },
+      "clockAlignmentResidualMs": -0.005000114440917969,
+      "late": [
+        {
+          "start": 12000,
+          "recordP95": 0.4700000286102295,
+          "tail": {
+            "frames": 158,
+            "withGc": 2,
+            "withJit": 10,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 158,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 158,
+              "p50": 0.020000000000000018,
+              "p95": 0.1519999999999999,
+              "p99": 0.21599999999999997,
+              "mean": 0.042955696202531646,
+              "max": 0.22499999999999998
+            }
+          }
+        },
+        {
+          "start": 15000,
+          "recordP95": 0.5150001049041748,
+          "tail": {
+            "frames": 155,
+            "withGc": 1,
+            "withJit": 23,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 155,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0.010000047683715874,
+              "mean": 0.00020645216664960377,
+              "max": 0.02200003814697271
+            },
+            "taskOffCpuMs": {
+              "count": 155,
+              "p50": 0.04700000000000004,
+              "p95": 0.1429999999999998,
+              "p99": 0.21800000000000008,
+              "mean": 0.04904516129032258,
+              "max": 0.2220000000000001
+            }
+          }
+        },
+        {
+          "start": 18000,
+          "recordP95": 0.4550001621246338,
+          "tail": {
+            "frames": 152,
+            "withGc": 1,
+            "withJit": 2,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 152,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 152,
+              "p50": 0.008000000000000007,
+              "p95": 0.11299999999999999,
+              "p99": 0.17200000000000004,
+              "mean": 0.03686842105263157,
+              "max": 0.18199999999999994
+            }
+          }
+        },
+        {
+          "start": 21000,
+          "recordP95": 0.4350001811981201,
+          "tail": {
+            "frames": 154,
+            "withGc": 0,
+            "withJit": 1,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 154,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 154,
+              "p50": 0.006000000000000005,
+              "p95": 0.14200000000000002,
+              "p99": 0.18000000000000005,
+              "mean": 0.04004545454545455,
+              "max": 0.19300000000000006
+            }
+          }
+        }
+      ],
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/analysis.json",
+          "sha256": "ae49e5abd34ef872dddf6ae37ef52591a74f9a2487eaf560229d54730b8f06ec",
+          "bytes": 67949
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/analysis.log",
+          "sha256": "1699ae32d27b82fb01bbb22d0b1f237340cbb22664bdf140adb5726eb906490f",
+          "bytes": 16455
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/capture.json",
+          "sha256": "cb1a937efbbd0813e9fb9246596f4f0202297d480ab670fcb2e41e6645cc5438",
+          "bytes": 13635172
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/cpu.cpuprofile",
+          "sha256": "4184c2ae9e1f5268a052c35fc3877b0ae37c2edc3c1628e67470462c8e23ed6e",
+          "bytes": 571898
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/detail-analysis.json",
+          "sha256": "a92c66f5a2dce8df9443ba97accac86094d5644f1c823d0d9d524e5c64ee293e",
+          "bytes": 113796
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/detail-analysis.log",
+          "sha256": "8e4e6b1550108973318df00c3978ac89faf5c5a50645b521942109e719bc4882",
+          "bytes": 27193
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/fixture.html",
+          "sha256": "f12fc4fc3d3edc852594b0e0fec5d4d40a95e65218a372e14a46905c4fb136a2",
+          "bytes": 425
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/fixture.mjs",
+          "sha256": "b08b1771a714794dd2cc3b7e8d515467e6bb2fae162164b80f5e6d85161001a1",
+          "bytes": 16363
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/frequency.jsonl",
+          "sha256": "e53c562003744261e8e8a11b374033043a8930ef075871b64724b7427f4bc678",
+          "bytes": 48034
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/host.jsonl",
+          "sha256": "1259daa36d66e9d64961ebbe260da3d5971c4e0b38da08af0588ea8a1447496e",
+          "bytes": 2050104
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/observer.ps1",
+          "sha256": "3ffff69792fec9360d8ec14a1608f58b2032caa53ffa87e9c94fdb8cfe1f5948",
+          "bytes": 2852
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/observer.stop",
+          "sha256": "6c45cb72a36e63d522aa54ed8adbd7a29a989474f2f77e0458af8800564ef3cb",
+          "bytes": 4
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/plan.json",
+          "sha256": "ae322075c19dbe2883a65fcd3e9cda6e80440b68b24f9276dc0002dab1dafdfe",
+          "bytes": 2287
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/producer.mjs",
+          "sha256": "fad6afd88b7f755bce4e94d4c7b2f45f8ddfa1d6a8fbbde655c9e86e8b0da91f",
+          "bytes": 12380
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-26-28.344Z/trace.json",
+          "sha256": "18a434cd9a78fda2f5049a9f81d397666029d76d35cdbf70345880912928a83b",
+          "bytes": 258745573
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z",
+      "variant": "B4",
+      "frames": 24000,
+      "detail": true,
+      "status": "captured",
+      "performanceQualified": false,
+      "complete": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "browserCleanup": {
+        "status": "passed",
+        "attempts": 1,
+        "durationMs": 178
+      },
+      "clockAlignmentResidualMs": 0.0019998550415039062,
+      "late": [
+        {
+          "start": 12000,
+          "recordP95": 0.4350001811981201,
+          "tail": {
+            "frames": 156,
+            "withGc": 0,
+            "withJit": 10,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 156,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 156,
+              "p50": 0.0020000000000000018,
+              "p95": 0.11199999999999999,
+              "p99": 0.249,
+              "mean": 0.026967948717948723,
+              "max": 0.257
+            }
+          }
+        },
+        {
+          "start": 15000,
+          "recordP95": 0.48000001907348633,
+          "tail": {
+            "frames": 154,
+            "withGc": 0,
+            "withJit": 13,
+            "recordOffCpuAtLeast50us": 1,
+            "recordOffCpuLowerMs": {
+              "count": 154,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0.0015259733447780858,
+              "max": 0.2349998950958252
+            },
+            "taskOffCpuMs": {
+              "count": 154,
+              "p50": 0.007000000000000006,
+              "p95": 0.14500000000000002,
+              "p99": 0.22899999999999987,
+              "mean": 0.0368896103896104,
+              "max": 0.374
+            }
+          }
+        },
+        {
+          "start": 18000,
+          "recordP95": 0.4650001525878906,
+          "tail": {
+            "frames": 151,
+            "withGc": 0,
+            "withJit": 2,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 151,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 151,
+              "p50": 0.0050000000000000044,
+              "p95": 0.14700000000000002,
+              "p99": 0.19700000000000006,
+              "mean": 0.03633774834437088,
+              "max": 0.21700000000000008
+            }
+          }
+        },
+        {
+          "start": 21000,
+          "recordP95": 0.505000114440918,
+          "tail": {
+            "frames": 152,
+            "withGc": 0,
+            "withJit": 0,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 152,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 152,
+              "p50": 0.016999999999999904,
+              "p95": 0.11299999999999999,
+              "p99": 0.22199999999999998,
+              "mean": 0.037519736842105245,
+              "max": 0.273
+            }
+          }
+        }
+      ],
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/analysis.json",
+          "sha256": "5e368a32de1736cb9005921f5dfa6aa302c6ae44eb5b0a8ba32cb00df4e72f85",
+          "bytes": 67935
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/analysis.log",
+          "sha256": "06325d689e21278f9c935c8fe7ce5beeba42f6288c85fc5a99289cf402998411",
+          "bytes": 16691
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/capture.json",
+          "sha256": "a7aca440508de65cd77da01e1c6f23d8f091e2b6fd664ea8b727fd2ec5818ae9",
+          "bytes": 13618304
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/cpu.cpuprofile",
+          "sha256": "91e0a6747afa92be87842f745f5215df0e10f8b78bd45c5a6859c0133d9208e8",
+          "bytes": 560657
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/detail-analysis.json",
+          "sha256": "ac21b3c7fe955a6649598dfb118525c5687ddc12ffaa14e52b02af680ee1fbcb",
+          "bytes": 113800
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/detail-analysis.log",
+          "sha256": "28e97a1abc8ad67d3c6d98e3eae92ae739897465c3acb8aec5ab085eaa4df66d",
+          "bytes": 27169
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/fixture.html",
+          "sha256": "f12fc4fc3d3edc852594b0e0fec5d4d40a95e65218a372e14a46905c4fb136a2",
+          "bytes": 425
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/fixture.mjs",
+          "sha256": "b08b1771a714794dd2cc3b7e8d515467e6bb2fae162164b80f5e6d85161001a1",
+          "bytes": 16363
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/frequency.jsonl",
+          "sha256": "d3c5180d5b26c0b72f8ec44ee0b1f2fa427f6ec5c4b0325a32beee09e8c95b4c",
+          "bytes": 49097
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/host.jsonl",
+          "sha256": "773cf2e6163cee3656298974fffc64eceefa2f8bab927fa1ad3416668d4769e7",
+          "bytes": 2087423
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/observer.ps1",
+          "sha256": "3ffff69792fec9360d8ec14a1608f58b2032caa53ffa87e9c94fdb8cfe1f5948",
+          "bytes": 2852
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/observer.stop",
+          "sha256": "6c45cb72a36e63d522aa54ed8adbd7a29a989474f2f77e0458af8800564ef3cb",
+          "bytes": 4
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/plan.json",
+          "sha256": "2bb0eabcba223565e9a0f554ea016a51b2b4712aad9b9ce37b474e9bb80c4ef4",
+          "bytes": 2287
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/producer.mjs",
+          "sha256": "fad6afd88b7f755bce4e94d4c7b2f45f8ddfa1d6a8fbbde655c9e86e8b0da91f",
+          "bytes": 12380
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-28-53.076Z/trace.json",
+          "sha256": "af7937b356fb2950fa6412aa747f11d1f7ee72961b171593d8f1bdd4a660a01f",
+          "bytes": 260143884
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z",
+      "variant": "A0",
+      "frames": 24000,
+      "detail": true,
+      "status": "captured",
+      "performanceQualified": false,
+      "complete": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "browserCleanup": {
+        "status": "passed",
+        "attempts": 1,
+        "durationMs": 171
+      },
+      "clockAlignmentResidualMs": 0.0009999275207519531,
+      "late": [
+        {
+          "start": 12000,
+          "recordP95": 0.3600001335144043,
+          "tail": {
+            "frames": 179,
+            "withGc": 0,
+            "withJit": 8,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 179,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0.00026257057829276177,
+              "max": 0.04700013351440435
+            },
+            "taskOffCpuMs": {
+              "count": 179,
+              "p50": 0,
+              "p95": 0.08699999999999997,
+              "p99": 0.16500000000000004,
+              "mean": 0.01590502793296089,
+              "max": 0.2300000000000001
+            }
+          }
+        },
+        {
+          "start": 15000,
+          "recordP95": 0.36999988555908203,
+          "tail": {
+            "frames": 152,
+            "withGc": 2,
+            "withJit": 24,
+            "recordOffCpuAtLeast50us": 1,
+            "recordOffCpuLowerMs": {
+              "count": 152,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0.0009407896619094045,
+              "max": 0.14300002861022948
+            },
+            "taskOffCpuMs": {
+              "count": 152,
+              "p50": 0.0020000000000000018,
+              "p95": 0.10099999999999992,
+              "p99": 0.16400000000000003,
+              "mean": 0.02213815789473684,
+              "max": 0.298
+            }
+          }
+        },
+        {
+          "start": 18000,
+          "recordP95": 0.3600001335144043,
+          "tail": {
+            "frames": 171,
+            "withGc": 0,
+            "withJit": 7,
+            "recordOffCpuAtLeast50us": 1,
+            "recordOffCpuLowerMs": {
+              "count": 171,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0.002157895573398523,
+              "max": 0.3690001430511475
+            },
+            "taskOffCpuMs": {
+              "count": 171,
+              "p50": 0,
+              "p95": 0.09699999999999998,
+              "p99": 0.15800000000000003,
+              "mean": 0.014690058479532161,
+              "max": 0.474
+            }
+          }
+        },
+        {
+          "start": 21000,
+          "recordP95": 0.625,
+          "tail": {
+            "frames": 152,
+            "withGc": 3,
+            "withJit": 10,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 152,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 152,
+              "p50": 0.05899999999999994,
+              "p95": 0.121,
+              "p99": 0.20899999999999996,
+              "mean": 0.048624999999999974,
+              "max": 0.21199999999999997
+            }
+          }
+        }
+      ],
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z/analysis.json",
+          "sha256": "ce482e16bcdfda108345487fa9f699e1c2c4a2802e13da51df69b78501867f9f",
+          "bytes": 65528
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z/capture.json",
+          "sha256": "5aaccc584ffbd4f24aa342c00a63a641a0797fc3e994aa58cf624a815c93f491",
+          "bytes": 13487170
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z/cpu.cpuprofile",
+          "sha256": "bdc2afe5a5884755a5a2f5091acbbfda5b0c17ca8d3449a774727c5cd13b92b5",
+          "bytes": 528891
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z/detail-analysis.json",
+          "sha256": "163ec36097335e344177261a7124e8397324e9817c28251a06891364c5178a7a",
+          "bytes": 113354
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z/fixture.html",
+          "sha256": "f12fc4fc3d3edc852594b0e0fec5d4d40a95e65218a372e14a46905c4fb136a2",
+          "bytes": 425
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z/fixture.mjs",
+          "sha256": "b08b1771a714794dd2cc3b7e8d515467e6bb2fae162164b80f5e6d85161001a1",
+          "bytes": 16363
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z/frequency.jsonl",
+          "sha256": "1520390103219ae5de64dad775d5b498095f5d3bbd6645a3398e40f7a53c3adf",
+          "bytes": 43534
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z/host.jsonl",
+          "sha256": "e7b26d90a7ce9df24c4a0a0e45d7bc6bc2e1b92b1fbac48f384950a8babf03e9",
+          "bytes": 1557928
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z/observer.ps1",
+          "sha256": "3ffff69792fec9360d8ec14a1608f58b2032caa53ffa87e9c94fdb8cfe1f5948",
+          "bytes": 2852
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z/observer.stop",
+          "sha256": "6c45cb72a36e63d522aa54ed8adbd7a29a989474f2f77e0458af8800564ef3cb",
+          "bytes": 4
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z/plan.json",
+          "sha256": "c5affe2b75f6795d761b4478183a23789f40295e5218950d2d724704dad75e19",
+          "bytes": 103593
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z/producer.mjs",
+          "sha256": "fad6afd88b7f755bce4e94d4c7b2f45f8ddfa1d6a8fbbde655c9e86e8b0da91f",
+          "bytes": 12380
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T04-41-19.257Z/trace.json",
+          "sha256": "fb5e98f09fa700e93d6126bd8a780c16857591f39e69aaf011ac87f44572575a",
+          "bytes": 259252638
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z",
+      "variant": "B4",
+      "frames": 24000,
+      "detail": true,
+      "status": "captured",
+      "performanceQualified": false,
+      "complete": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "browserCleanup": {
+        "status": "passed",
+        "attempts": 1,
+        "durationMs": 179
+      },
+      "clockAlignmentResidualMs": 0.004000186920166016,
+      "late": [
+        {
+          "start": 12000,
+          "recordP95": 0.3900001049041748,
+          "tail": {
+            "frames": 153,
+            "withGc": 0,
+            "withJit": 9,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 153,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 153,
+              "p50": 0.0030000000000000027,
+              "p95": 0.07200000000000006,
+              "p99": 0.08899999999999997,
+              "mean": 0.014450980392156868,
+              "max": 0.09199999999999997
+            }
+          }
+        },
+        {
+          "start": 15000,
+          "recordP95": 0.38499999046325684,
+          "tail": {
+            "frames": 196,
+            "withGc": 1,
+            "withJit": 25,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 196,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 196,
+              "p50": 0.0020000000000000018,
+              "p95": 0.07800000000000007,
+              "p99": 0.10299999999999998,
+              "mean": 0.01581632653061224,
+              "max": 0.1060000000000001
+            }
+          }
+        },
+        {
+          "start": 18000,
+          "recordP95": 0.3899998664855957,
+          "tail": {
+            "frames": 158,
+            "withGc": 0,
+            "withJit": 14,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 158,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 158,
+              "p50": 0.006000000000000005,
+              "p95": 0.09000000000000002,
+              "p99": 0.11199999999999999,
+              "mean": 0.026499999999999985,
+              "max": 0.20400000000000007
+            }
+          }
+        },
+        {
+          "start": 21000,
+          "recordP95": 0.38499999046325684,
+          "tail": {
+            "frames": 155,
+            "withGc": 0,
+            "withJit": 3,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 155,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 155,
+              "p50": 0.0020000000000000018,
+              "p95": 0.05399999999999999,
+              "p99": 0.09299999999999997,
+              "mean": 0.009651612903225807,
+              "max": 0.21199999999999997
+            }
+          }
+        }
+      ],
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z/analysis.json",
+          "sha256": "b7cd47e3faa1572410b637c661fb6e77472ee8923812568328d02b5a6ff10254",
+          "bytes": 67857
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z/capture.json",
+          "sha256": "dae4c0741310e1187ae183f1367c385459ae44acbc9ce68758b5a3b65471d9bd",
+          "bytes": 13561578
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z/cpu.cpuprofile",
+          "sha256": "18948f5353a28c4c60d79ec5f00a5e03620fe6143eb344f5d39e3254632d569f",
+          "bytes": 505518
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z/detail-analysis.json",
+          "sha256": "d66405fb73da39ff0ba8ebd5929ce81fc54576904e534a4454d7ee607d1d3206",
+          "bytes": 113469
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z/fixture.html",
+          "sha256": "f12fc4fc3d3edc852594b0e0fec5d4d40a95e65218a372e14a46905c4fb136a2",
+          "bytes": 425
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z/fixture.mjs",
+          "sha256": "b08b1771a714794dd2cc3b7e8d515467e6bb2fae162164b80f5e6d85161001a1",
+          "bytes": 16363
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z/frequency.jsonl",
+          "sha256": "8dfbfbd418ff277d8061abcfdee4d4b1224acbae3cef9f54608e278a359cccda",
+          "bytes": 45727
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z/host.jsonl",
+          "sha256": "894f2fd471aa28b06475d029fdbe9eb8ff24f3d5eb97074eb2aa7012da51b48d",
+          "bytes": 1602320
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z/observer.ps1",
+          "sha256": "3ffff69792fec9360d8ec14a1608f58b2032caa53ffa87e9c94fdb8cfe1f5948",
+          "bytes": 2852
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z/observer.stop",
+          "sha256": "6c45cb72a36e63d522aa54ed8adbd7a29a989474f2f77e0458af8800564ef3cb",
+          "bytes": 4
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z/plan.json",
+          "sha256": "32a6cdadf6f8a22ed74b7ab85e97cebf0fbc5ed3961ba6d49ba87089c21ff7b1",
+          "bytes": 2287
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z/producer.mjs",
+          "sha256": "fad6afd88b7f755bce4e94d4c7b2f45f8ddfa1d6a8fbbde655c9e86e8b0da91f",
+          "bytes": 12380
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-B4-2026-10-07T04-43-05.071Z/trace.json",
+          "sha256": "de833643f12787d2c458ed3f3c34634f1a41eede37846085dc56dcebe2dbb870",
+          "bytes": 258178834
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z",
+      "variant": "A0",
+      "frames": 24000,
+      "detail": true,
+      "status": "captured",
+      "performanceQualified": false,
+      "complete": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "browserCleanup": {
+        "status": "passed",
+        "attempts": 1,
+        "durationMs": 177
+      },
+      "clockAlignmentResidualMs": 2.384185791015625e-7,
+      "late": [
+        {
+          "start": 12000,
+          "recordP95": 0.3600001335144043,
+          "tail": {
+            "frames": 162,
+            "withGc": 3,
+            "withJit": 20,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 162,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 162,
+              "p50": 0,
+              "p95": 0.08699999999999997,
+              "p99": 0.09799999999999998,
+              "mean": 0.014493827160493829,
+              "max": 0.122
+            }
+          }
+        },
+        {
+          "start": 15000,
+          "recordP95": 0.42999982833862305,
+          "tail": {
+            "frames": 152,
+            "withGc": 1,
+            "withJit": 24,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 152,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 152,
+              "p50": 0.0010000000000000009,
+              "p95": 0.10699999999999998,
+              "p99": 0.1259999999999999,
+              "mean": 0.023611842105263146,
+              "max": 0.138
+            }
+          }
+        },
+        {
+          "start": 18000,
+          "recordP95": 0.37000012397766113,
+          "tail": {
+            "frames": 163,
+            "withGc": 0,
+            "withJit": 5,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 163,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 163,
+              "p50": 0,
+              "p95": 0.07399999999999995,
+              "p99": 0.119,
+              "mean": 0.01568711656441718,
+              "max": 0.16100000000000003
+            }
+          }
+        },
+        {
+          "start": 21000,
+          "recordP95": 0.35500001907348633,
+          "tail": {
+            "frames": 195,
+            "withGc": 1,
+            "withJit": 7,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 195,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 195,
+              "p50": 0,
+              "p95": 0.09099999999999997,
+              "p99": 0.09999999999999998,
+              "mean": 0.014035897435897435,
+              "max": 0.15300000000000002
+            }
+          }
+        }
+      ],
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z/analysis.json",
+          "sha256": "1aa4c0e6c476be54070100dff1d8951462d109d4dec6dddb1db25fbb3445f511",
+          "bytes": 65022
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z/capture.json",
+          "sha256": "2e25598b22a4f08ae543dc98d4ba9d7a7c03f58a3bc4e1fc02dd01b7b86b057e",
+          "bytes": 13468611
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z/cpu.cpuprofile",
+          "sha256": "38e7dcf6dfb510d96178038f91e6514a9583c21f5643c9eaeee71a60ee393bf7",
+          "bytes": 507050
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z/detail-analysis.json",
+          "sha256": "f339e58c730dedb7d4881b4d6d76fc4906705c836e71657500f3868806473d90",
+          "bytes": 113638
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z/fixture.html",
+          "sha256": "f12fc4fc3d3edc852594b0e0fec5d4d40a95e65218a372e14a46905c4fb136a2",
+          "bytes": 425
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z/fixture.mjs",
+          "sha256": "b08b1771a714794dd2cc3b7e8d515467e6bb2fae162164b80f5e6d85161001a1",
+          "bytes": 16363
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z/frequency.jsonl",
+          "sha256": "d0751d8d338217dc99595c7b7561be6af4e6f9478147a7ef97b02c938300c608",
+          "bytes": 43546
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z/host.jsonl",
+          "sha256": "da1f1b5dd9d565a3e28e1eaa349d5029ea6588ecafa53ca833a113787165e05e",
+          "bytes": 1525251
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z/observer.ps1",
+          "sha256": "3ffff69792fec9360d8ec14a1608f58b2032caa53ffa87e9c94fdb8cfe1f5948",
+          "bytes": 2852
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z/observer.stop",
+          "sha256": "6c45cb72a36e63d522aa54ed8adbd7a29a989474f2f77e0458af8800564ef3cb",
+          "bytes": 4
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z/plan.json",
+          "sha256": "8c8c27561b6150e16e0d3ca7784d5260ce8097de2e20942559f936068a201e1b",
+          "bytes": 103593
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z/producer.mjs",
+          "sha256": "fad6afd88b7f755bce4e94d4c7b2f45f8ddfa1d6a8fbbde655c9e86e8b0da91f",
+          "bytes": 12380
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-19-20.935Z/trace.json",
+          "sha256": "340cf929f7da249e6958fbd55dbb5a16a3014d2b502be31ff93460dea251536b",
+          "bytes": 259633854
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z",
+      "variant": "A0",
+      "frames": 24000,
+      "detail": true,
+      "status": "captured",
+      "performanceQualified": false,
+      "complete": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "browserCleanup": {
+        "status": "passed",
+        "attempts": 1,
+        "durationMs": 176
+      },
+      "clockAlignmentResidualMs": 0.0010001659393310547,
+      "late": [
+        {
+          "start": 12000,
+          "recordP95": 0.36500000953674316,
+          "tail": {
+            "frames": 151,
+            "withGc": 1,
+            "withJit": 8,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 151,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 151,
+              "p50": 0,
+              "p95": 0.08300000000000007,
+              "p99": 0.127,
+              "mean": 0.015874172185430458,
+              "max": 0.22599999999999998
+            }
+          }
+        },
+        {
+          "start": 15000,
+          "recordP95": 0.3600001335144043,
+          "tail": {
+            "frames": 153,
+            "withGc": 2,
+            "withJit": 25,
+            "recordOffCpuAtLeast50us": 2,
+            "recordOffCpuLowerMs": {
+              "count": 153,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0.11299998092651364,
+              "mean": 0.0019019616569568903,
+              "max": 0.1780001525878906
+            },
+            "taskOffCpuMs": {
+              "count": 153,
+              "p50": 0.0019999999999998908,
+              "p95": 0.10499999999999998,
+              "p99": 0.4029999999999999,
+              "mean": 0.02582352941176471,
+              "max": 0.536
+            }
+          }
+        },
+        {
+          "start": 18000,
+          "recordP95": 0.3600001335144043,
+          "tail": {
+            "frames": 157,
+            "withGc": 0,
+            "withJit": 7,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 157,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0.0002292987556214545,
+              "max": 0.03599990463256836
+            },
+            "taskOffCpuMs": {
+              "count": 157,
+              "p50": 0,
+              "p95": 0.09000000000000008,
+              "p99": 0.10199999999999998,
+              "mean": 0.01923566878980891,
+              "max": 0.15299999999999997
+            }
+          }
+        },
+        {
+          "start": 21000,
+          "recordP95": 0.3600001335144043,
+          "tail": {
+            "frames": 157,
+            "withGc": 0,
+            "withJit": 12,
+            "recordOffCpuAtLeast50us": 1,
+            "recordOffCpuLowerMs": {
+              "count": 157,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0.001375795996113188,
+              "max": 0.2159999713897705
+            },
+            "taskOffCpuMs": {
+              "count": 157,
+              "p50": 0.0010000000000000009,
+              "p95": 0.07999999999999996,
+              "p99": 0.1469999999999998,
+              "mean": 0.012898089171974516,
+              "max": 0.326
+            }
+          }
+        }
+      ],
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z/analysis.json",
+          "sha256": "aff7a4a056136141669732c8a8cdda469a6a1e696c3202c01850daf4086a9e7a",
+          "bytes": 64748
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z/capture.json",
+          "sha256": "02b6532c7ee11991b41c84c37b1a2d0c5538e6ca7326b3f01593d7c6fbc27555",
+          "bytes": 13463467
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z/cpu.cpuprofile",
+          "sha256": "8b1b4916c64a3ddec6c1b164b89b82bf67942fbbed2e5252217d597f4a9b12be",
+          "bytes": 497461
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z/detail-analysis.json",
+          "sha256": "d6f4c6ecc547b142143f4b2441ffde423ba7aea52fae7d460e0b39caaf7b87b1",
+          "bytes": 113539
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z/fixture.html",
+          "sha256": "f12fc4fc3d3edc852594b0e0fec5d4d40a95e65218a372e14a46905c4fb136a2",
+          "bytes": 425
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z/fixture.mjs",
+          "sha256": "b08b1771a714794dd2cc3b7e8d515467e6bb2fae162164b80f5e6d85161001a1",
+          "bytes": 16363
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z/frequency.jsonl",
+          "sha256": "e51cb5373f345f0627f7ddacf31876686f3111494b6195d13839f4e9302ddbe5",
+          "bytes": 46870
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z/host.jsonl",
+          "sha256": "ec659593773707e872ebc2cbe7981d3214740727d6b9008998c32f4718c3d59e",
+          "bytes": 1647251
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z/observer.ps1",
+          "sha256": "3ffff69792fec9360d8ec14a1608f58b2032caa53ffa87e9c94fdb8cfe1f5948",
+          "bytes": 2852
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z/observer.stop",
+          "sha256": "6c45cb72a36e63d522aa54ed8adbd7a29a989474f2f77e0458af8800564ef3cb",
+          "bytes": 4
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z/plan.json",
+          "sha256": "6d41519a8059a16f69896db31cf9238073e64255cb6dcbbc168a83388a3cecd1",
+          "bytes": 103593
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z/producer.mjs",
+          "sha256": "fad6afd88b7f755bce4e94d4c7b2f45f8ddfa1d6a8fbbde655c9e86e8b0da91f",
+          "bytes": 12380
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-21-05.773Z/trace.json",
+          "sha256": "5bd24896da17a5fd5e3fb67e3303dc4be7446e56b6737b03bb81badbe7bc95b9",
+          "bytes": 258704763
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z",
+      "variant": "A0",
+      "frames": 24000,
+      "detail": true,
+      "status": "captured",
+      "performanceQualified": false,
+      "complete": true,
+      "cleanup": {
+        "ownerResidual": 0,
+        "liveGpuResources": 0
+      },
+      "browserCleanup": {
+        "status": "passed",
+        "attempts": 1,
+        "durationMs": 173
+      },
+      "clockAlignmentResidualMs": -0.003999948501586914,
+      "late": [
+        {
+          "start": 12000,
+          "recordP95": 0.5699999332427979,
+          "tail": {
+            "frames": 155,
+            "withGc": 0,
+            "withJit": 5,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 155,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 155,
+              "p50": 0.05300000000000005,
+              "p95": 0.12,
+              "p99": 0.17900000000000005,
+              "mean": 0.04519354838709679,
+              "max": 0.20800000000000007
+            }
+          }
+        },
+        {
+          "start": 15000,
+          "recordP95": 0.37000012397766113,
+          "tail": {
+            "frames": 159,
+            "withGc": 1,
+            "withJit": 24,
+            "recordOffCpuAtLeast50us": 1,
+            "recordOffCpuLowerMs": {
+              "count": 159,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0.010999856948852527,
+              "mean": 0.0012767291398918105,
+              "max": 0.19200007629394533
+            },
+            "taskOffCpuMs": {
+              "count": 159,
+              "p50": 0.0020000000000000018,
+              "p95": 0.09999999999999998,
+              "p99": 0.17099999999999993,
+              "mean": 0.024597484276729555,
+              "max": 0.3760000000000001
+            }
+          }
+        },
+        {
+          "start": 18000,
+          "recordP95": 0.8250000476837158,
+          "tail": {
+            "frames": 152,
+            "withGc": 0,
+            "withJit": 3,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 152,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0,
+              "max": 0
+            },
+            "taskOffCpuMs": {
+              "count": 152,
+              "p50": 0.08000000000000007,
+              "p95": 0.15599999999999992,
+              "p99": 0.2490000000000001,
+              "mean": 0.07962499999999996,
+              "max": 0.361
+            }
+          }
+        },
+        {
+          "start": 21000,
+          "recordP95": 0.4199998378753662,
+          "tail": {
+            "frames": 151,
+            "withGc": 0,
+            "withJit": 10,
+            "recordOffCpuAtLeast50us": 0,
+            "recordOffCpuLowerMs": {
+              "count": 151,
+              "p50": 0,
+              "p95": 0,
+              "p99": 0,
+              "mean": 0.00009271535810255829,
+              "max": 0.014000019073486303
+            },
+            "taskOffCpuMs": {
+              "count": 151,
+              "p50": 0.009000000000000008,
+              "p95": 0.11299999999999999,
+              "p99": 0.14899999999999997,
+              "mean": 0.0370728476821192,
+              "max": 0.266
+            }
+          }
+        }
+      ],
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z/analysis.json",
+          "sha256": "e22479656d2bdd9ba580bfaaef3577fc6e38e6cea1f94d264d076abecf03680a",
+          "bytes": 65489
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z/capture.json",
+          "sha256": "14338782cf4b93614b6d1e52938f617358fb62f9cae68f14f41d77ab2ffdfa53",
+          "bytes": 13485999
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z/cpu.cpuprofile",
+          "sha256": "ce738d2e8a5329dd85a75dfaa72a3fe4d92e132a9ec042ec0dbeb31bca7e688c",
+          "bytes": 531123
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z/detail-analysis.json",
+          "sha256": "8f6afd7635d32e5d49ab000da12377b3413e1a5a41a20af2aff86f35e5b3d653",
+          "bytes": 113633
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z/fixture.html",
+          "sha256": "f12fc4fc3d3edc852594b0e0fec5d4d40a95e65218a372e14a46905c4fb136a2",
+          "bytes": 425
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z/fixture.mjs",
+          "sha256": "b08b1771a714794dd2cc3b7e8d515467e6bb2fae162164b80f5e6d85161001a1",
+          "bytes": 16363
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z/frequency.jsonl",
+          "sha256": "15e6044fc0af2fa330b96104068abaff8158267117750007e04a609ce1d520f8",
+          "bytes": 47890
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z/host.jsonl",
+          "sha256": "a32021cc4187536e5ed2ab234dca05f889a299e23e2bf8bfa80d445556be366f",
+          "bytes": 1675415
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z/observer.ps1",
+          "sha256": "3ffff69792fec9360d8ec14a1608f58b2032caa53ffa87e9c94fdb8cfe1f5948",
+          "bytes": 2852
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z/observer.stop",
+          "sha256": "6c45cb72a36e63d522aa54ed8adbd7a29a989474f2f77e0458af8800564ef3cb",
+          "bytes": 4
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z/plan.json",
+          "sha256": "4f2dd9033f81d28608ce339c5a3f47519907da180df4765faf845931424dccb7",
+          "bytes": 103593
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z/producer.mjs",
+          "sha256": "fad6afd88b7f755bce4e94d4c7b2f45f8ddfa1d6a8fbbde655c9e86e8b0da91f",
+          "bytes": 12380
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/cpu-record-profile-A0-2026-10-07T05-22-50.135Z/trace.json",
+          "sha256": "29a9c3e8749213cf79b7f26a54754136b1f6f9e46d0730422d7ed24ed9a21ce9",
+          "bytes": 259457818
+        }
+      ]
+    }
+  ],
+  "conclusions": [
+    "Processor performance variation coincided with a late multi-stage slowdown and a slower independent arithmetic probe",
+    "Changing only AC minimum processor performance to 100% stabilized observed performance but did not eliminate record timing variation; reversal did not reproduce the same severe frequency drop",
+    "Direct GC/JIT pauses cannot explain most late slow frames in these diagnostic captures",
+    "The subsequent isolated pair contains no Codex/ChatGPT, VS Code or Epic among readable process observations; A0 late slowdown co-occurs with all-core performance falling to 67-69 and the independent arithmetic probe slowing from about 0.050 to 0.080 ms, then recovering together",
+    "B4 late record P95 remains about 0.385-0.390 ms in the isolated pair; conditions differ from A0 so this is not a valid speedup ratio",
+    "The isolated A0 power experiment held late CPU P95 at about 0.495-0.500 ms; restoring the original scheme reproduced slow windows and processor performance drops, supporting a common controlled power condition for a new full calibration",
+    "The underlying trigger and all residual variability remain unexplained; the three instrumented A0 runs are not a complete performance acceptance population"
+  ],
+  "regressionRatio": 0.05,
+  "originalPowerRestored": true,
+  "temporarySchemeRemoved": true,
+  "closedDiagnosticExecuted": true,
+  "closedPowerInterventionExecuted": true,
+  "powerInterventionSupported": true,
+  "closedPowerExperiment": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/completion.json",
+      "sha256": "7a6955951436e9c238c2290d1c08984a686836b64a6b1db8ab93c3ca58aeb39d",
+      "bytes": 3419
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/experiment-plan.json",
+      "sha256": "7daf9097a670615d10b4225b9c28895012ef77db21948644abbda61462b918f3",
+      "bytes": 1183
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/closed-verification.json",
+      "sha256": "a7a6621e255252ca0c682cfe9bda0a875f3418ebef4cf205318c50816d1019e9",
+      "bytes": 887845
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/verification-producer.mjs",
+      "sha256": "faf853e5a5bb5cb3dd105226b0ac8c134247872fafe5004710df5f5389b95627",
+      "bytes": 12066
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/verification.log",
+      "sha256": "263840aae20c8fcc4f45f63f35b278f7cb5f415508c53c4add922de9f1da7b3f",
+      "bytes": 2404
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/historical-v2-recheck.json",
+      "sha256": "90799945b30ad9f9f307ccd71dfa045f8d4e26ed924a613a3cd19872fb2e1cbe",
+      "bytes": 131198
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/v3-plan.json",
+      "sha256": "f68d1253bf3d8094f74e8effc36a10f8b7740190f9998f1ebb24f99b3d33a7bb",
+      "bytes": 3208
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/launcher-v3-plan.json",
+      "sha256": "c1f9d3d9cdd4df10b0204e2296aa5a9a1dd29daf2a45526656a6dbb4f9f17c94",
+      "bytes": 976
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/focused-tests.log",
+      "sha256": "b8dd8fbc3929f8279c42cab96da3bfab45c19cc877c16d72b724cffab7fb0629",
+      "bytes": 1659
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/framegraph-tests.log",
+      "sha256": "3444da7dbfcc05ad186d66a61439da1ad5390daa6f33f54a2d4c4b1ce4de2d08",
+      "bytes": 7752
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/performance-tests.log",
+      "sha256": "4dcfcc133784d3a4c98e13d09dbc4f27593ee7292bb979512cd98bc615f017dd",
+      "bytes": 25463
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/typecheck.log",
+      "sha256": "a6426c7d146a038a3781c9d30034a6bebd74f3c1fd3c4643a79fa94761daa2f0",
+      "bytes": 3088
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/root-test.log",
+      "sha256": "006ec288a3d9072d59c4339f5d2da35ff68110c6bad9c1ac4a325645e825b500",
+      "bytes": 14861
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/root-test-elevated.log",
+      "sha256": "cb091970d213ab825e5c9edc495a5694d77053feff5c7dd13e15fed85b6ed781",
+      "bytes": 145763
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/docs-check.log",
+      "sha256": "c6d051a2df42c36d4f703e503e1fd05b73702450f97397a1361b98896031352d",
+      "bytes": 418
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/boundaries.log",
+      "sha256": "a647bc81a74aab16b22a8f9964a196589b4882c7bdfda66bda2a06165e4d741f",
+      "bytes": 1062
+    }
+  ],
+  "v3Engineering": {
+    "status": "smoke-verified-full-population-pending",
+    "fullPopulationCompleted": false,
+    "newBaselineGenerated": false,
+    "bindings": [
+      {
+        "path": "config/framegraph-sampling-021.json",
+        "sha256": "f1bb4852d938b9902843f9ca571ce2379fe6045abb058329aadcf2501adb14ee",
+        "bytes": 1887
+      },
+      {
+        "path": "config/framegraph-sampling-021-v2.json",
+        "sha256": "44a71f8c313e983ff23548a5a8b075d60afb40d8fa2aa6ef89513fbfe1454b16",
+        "bytes": 1796
+      },
+      {
+        "path": "scripts/run-framegraph-unattended.ps1",
+        "sha256": "e85f63c806c6c8943326a90fa2617f2f3f1234364fe4baf4e0c7aeb425363d42",
+        "bytes": 13146
+      },
+      {
+        "path": "scripts/verify-framegraph-sampling.mjs",
+        "sha256": "a03f4d3f44b9916ea59513f5892f1c6d82645f28aadbbd96ef06e0fe46f0aa61",
+        "bytes": 13659
+      },
+      {
+        "path": "scripts/validate-framegraph-sampling.mjs",
+        "sha256": "e71fcda09b1c05ee4b23bbc618af0f35f4844e9493af46740bd5390f8874d4b9",
+        "bytes": 7150
+      },
+      {
+        "path": "scripts/webgpu-gate/framegraph-sampling-policy.mjs",
+        "sha256": "1141b9958868116764585830d0fb5ec55a63805d19731044a1dc04a4a0fd9f5c",
+        "bytes": 10145
+      },
+      {
+        "path": "scripts/webgpu-gate/framegraph-sampling-policy.test.mjs",
+        "sha256": "9c884a2de76725b5c0f7e704fb3e7e98f37ec7036ed1734aa71528ccf5c81f67",
+        "bytes": 9413
+      },
+      {
+        "path": "scripts/webgpu-gate/framegraph-windows-host.mjs",
+        "sha256": "c0d48943d738183927c169bbb1c3cfa2a4c6c442530782132bc0724991b7304c",
+        "bytes": 4065
+      },
+      {
+        "path": "scripts/webgpu-gate/framegraph-power-observation.ps1",
+        "sha256": "8851525834bd53c395d1a8bdb57efbc7e34a19cf6dfaed29a5f9e8828b877dc3",
+        "bytes": 2096
+      },
+      {
+        "path": "scripts/webgpu-gate/framegraph-power-control.ps1",
+        "sha256": "82b60ba0089a40a8e7005aa2a16a11553e062662df73d8cb7fbc61bf2fef2f95",
+        "bytes": 3179
+      },
+      {
+        "path": "scripts/webgpu-gate/framegraph-power-control.fixture.ps1",
+        "sha256": "43ede66ce46023f2de4a75266df364c4260ac813175808133b7fa2cd86ca1ec5",
+        "bytes": 2437
+      },
+      {
+        "path": "scripts/webgpu-gate/framegraph-power-control.test.mjs",
+        "sha256": "cd3e26382cd21a18c0cf41b59646f76913d7ba2908acc087c50730edb9a5cfd3",
+        "bytes": 2648
+      },
+      {
+        "path": "scripts/webgpu-gate/deferred-g05-forward-fixture.mjs",
+        "sha256": "f6ea6a96a886dc904f171c7e5e7bd444f31057d60dd95c3c8ac8eb493f82780f",
+        "bytes": 12999
+      },
+      {
+        "path": "docs/for-ai/adr/0120-g09-controlled-cpu-power.md",
+        "sha256": "cc6c100f5c1d64e3b567abc3923059905589d8101aaf55690d72bc7a4d141eae",
+        "bytes": 2934
+      }
+    ],
+    "smoke": [
+      {
+        "path": "artifacts/engine-0.2.1/g09/sampling-v3-smoke-20261007T061121Z/independent-verification.json",
+        "sha256": "30e30c4d52c83cbf69dd12809e82f1ef5a019ed682382f21fb03fe184b10929c",
+        "bytes": 621
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/sampling-v3-smoke-20261007T061121Z/host-after-verification.json",
+        "sha256": "5810435a508294d5312ff67dcb7afb661f4e374f4251e31aac0a7b4990a59baf",
+        "bytes": 467
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/sampling-v3-smoke-20261007T061121Z/measurement/report.json",
+        "sha256": "5a63f556ad5fe53ed029860cc7e5de6df519fb73093193e25d9818bdc3911dd7",
+        "bytes": 124528
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/sampling-v3-smoke-20261007T061121Z/power-state.json",
+        "sha256": "d67fcddbba9ded43307b458ff08d53f9fc65aeb69bd19e4b79a412fc0d9557e5",
+        "bytes": 1327
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/sampling-v3-smoke-20261007T061121Z/service-state.json",
+        "sha256": "e41199d3e59ea8bdf0cdaba2c6e8fcce5bfa676a09d92c0ac5ea1bc19b3a3522",
+        "bytes": 1363
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/sampling-v3-smoke-20261007T061121Z/processes.jsonl",
+        "sha256": "4525dd6e4a43d103dc05e1319d7b679b495a72ea1328a8e9d7a70a7ac7026a72",
+        "bytes": 2355825
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/sampling-v3-smoke-20261007T061121Z/frequency.jsonl",
+        "sha256": "cea69e13070897276bacb7996208e47f40cd930e0e1ba67b96df7fd2bea883ed",
+        "bytes": 59952
+      }
+    ],
+    "logs": [
+      {
+        "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/build.log",
+        "sha256": "b5741f6b1e1ec4729bc1302238499f399b04087665828f7d0da905c7875db535",
+        "bytes": 16875
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/api-check.log",
+        "sha256": "3e9ae8d8e9d67efceabcab5fd399ff83241a1438e6f62d91b8ac7a2734a7d511",
+        "bytes": 163
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-20261007T051901Z/v3-smoke-launch.log",
+        "sha256": "3314078378d2ee700f9f049d6c93a26466c4292df2b41b76c1d55739c1dae140",
+        "bytes": 302
+      }
+    ],
+    "powerCheck": {
+      "path": "artifacts/engine-0.2.1/g09/power-check-v3-20261007T0545/power-state.json",
+      "sha256": "bfbcacda42680feeae4202370ce2bfdf2f27c1a95be124ab219bf3903086ef9a",
+      "bytes": 1321
+    },
+    "launcher": {
+      "path": "artifacts/engine-0.2.1/g09/launch-with-codex-closed.ps1",
+      "sha256": "8b14966ce40679316997bed71d949747cdcdec0ce329a08c8a7d9221949e5497",
+      "bytes": 9058
+    }
+  },
+  "closedDiagnostic": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-diagnostic-closed-20261007T044118Z/completion.json",
+      "sha256": "c10fb1d2646fb3ccde86562a05ceec29826065f0a37213ddc8105006160272eb",
+      "bytes": 1444
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-diagnostic-closed-20261007T044118Z/closed-verification.json",
+      "sha256": "532301c1495ef2f121dac1fcb4b23f2e0802837167d08dad6af22c4bc249f947",
+      "bytes": 522051
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-diagnostic-closed-20261007T044118Z/host-after-verification.json",
+      "sha256": "1c51179274c5eaf9370d116f263d3a7f1a96806985d9977129c325a3c21a4418",
+      "bytes": 364
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-diagnostic-closed-20261007T044118Z/docs-check.log",
+      "sha256": "dd4f3ea8bce1d5e263fb668b6926136d948103302135bfc02cb59a62d8fe75d2",
+      "bytes": 418
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-diagnostic-closed-20261007T044118Z/api-check.log",
+      "sha256": "3e9ae8d8e9d67efceabcab5fd399ff83241a1438e6f62d91b8ac7a2734a7d511",
+      "bytes": 163
+    }
+  ],
+  "upcomingPowerControlChecks": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-checks/plan.json",
+      "sha256": "563d0bec5e30c35917409d58eca63eb1c08b98aea13022425671350c938b69ff",
+      "bytes": 1180
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-checks/syntax.json",
+      "sha256": "b3ae2d67ab554b65827a192dedc7cb02b816edbd8ac4d24a9d5361dafb4ae38c",
+      "bytes": 219
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-closed-checks/controller-tests.json",
+      "sha256": "6f87a30718fd1dec4d8ae7f79eeb8b9d2319c6d127bd19b7acc46fe4d28a0eab",
+      "bytes": 5974
+    }
+  ],
+  "tools": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/profile-cpu-record.mjs",
+      "sha256": "fad6afd88b7f755bce4e94d4c7b2f45f8ddfa1d6a8fbbde655c9e86e8b0da91f",
+      "bytes": 12380
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/analyze-cpu-record-profile.mjs",
+      "sha256": "3c5233e720b9513f9f8a23326bf31138ea33f8ed5d7d15bde0d232c9f9b18303",
+      "bytes": 7237
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/analyze-record-detail.mjs",
+      "sha256": "8a3c519f7b19c66d5f338bbad79138370218d9995cfb127693eb04c83932d6ca",
+      "bytes": 2710
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/analyze-closed-cpu-diagnostic.mjs",
+      "sha256": "faf853e5a5bb5cb3dd105226b0ac8c134247872fafe5004710df5f5389b95627",
+      "bytes": 12066
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/profile-fixed-cpu.ps1",
+      "sha256": "b140842bd6c58929f5141fa23540db9a110a6faf64c252c1d6c19516554ee604",
+      "bytes": 3095
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-experiment.json",
+      "sha256": "35fdcc2d01dd067fb7148b0fd0446bb00bf2b3a6bb81d971e44f4d2953c8d352",
+      "bytes": 1491
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/launch-cpu-diagnostic-closed.ps1",
+      "sha256": "24af0ed4f83a8d95c652a1c4d99d59fe53234c3784d746626ea16ff06a7fbd42",
+      "bytes": 3806
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/start-cpu-diagnostic-with-codex-closed.cmd",
+      "sha256": "248fdda92f62991f527ffde7c82236e100ce7a933b287796bac15b6495671b3f",
+      "bytes": 315
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/launch-cpu-power-closed.ps1",
+      "sha256": "e37c0e79c3c85d9db82c34f03151a7ec00a53707f4d8afbe2fc056a99fbfa5fb",
+      "bytes": 7394
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/start-cpu-power-with-codex-closed.cmd",
+      "sha256": "2dc496509f4431e2d10a5a6f4af7f342bc7e9eea1b8d1270a77412de54db8f72",
+      "bytes": 320
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/test-cpu-power-control.ps1",
+      "sha256": "5a3d761292844b70e5070f2f24d7fb047394e2f735a0239ebbdd255e00eab3f5",
+      "bytes": 3908
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/assemble-cpu-record-review.mjs",
+      "sha256": "52b1c7a82857d6b9c6a0b01b3b2357d460c9b726dd9b634d46e90a4351c6ff60",
+      "bytes": 10416
+    }
+  ],
+  "powerControl": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-control-20261007T042627Z/power-state.json",
+      "sha256": "5b38535328275467c2350ac50e7193293cba1466d3e51986cd977b9c72d1abdc",
+      "bytes": 1823
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-power-control-20261007T042627Z/capture.log",
+      "sha256": "01ecd424bad0ae9800c46bc256b15a5a0a53711f8b7e2d821fc24dcc544da7e0",
+      "bytes": 297
+    }
+  ],
+  "checks": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-record-diagnosis-checks/host-restoration.json",
+      "sha256": "71160f1aa86d4141b242924bf4ae5784007692134adfceec763d0ab7531244ae",
+      "bytes": 950
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-record-diagnosis-checks/launcher-plan.json",
+      "sha256": "103fc4a2868de9b80b35de802eb6a75470e3d4b975b82554d6830bcd7259b678",
+      "bytes": 423
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-record-diagnosis-checks/docs-check.log",
+      "sha256": "616d1156b6d116002ef772f9eb2e745682f0dc040bb4d4578d8d355e7c9daea2",
+      "bytes": 418
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/cpu-record-diagnosis-checks/api-check.log",
+      "sha256": "3e9ae8d8e9d67efceabcab5fd399ff83241a1438e6f62d91b8ac7a2734a7d511",
+      "bytes": 163
+    }
+  ]
+}

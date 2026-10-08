@@ -51,7 +51,7 @@ async function fingerprintInputs(){
  return {runtime,outputs,sha256:sha256(JSON.stringify({runtime,outputs}))};
 }
 async function fingerprintHarness(){
- const paths=['deferred-g05-forward-policy.mjs','deferred-g05-forward-allocation.mjs','deferred-g05-forward-fixture.mjs','deferred-g05-forward-fixture.html','run-deferred-g05-forward.mjs','lighting-scaling-contract.mjs','lighting-scaling-report.mjs','chrome-runner.mjs','deferred-fixture-policy.mjs','deferred-g05-cooldown.mjs'].map(f=>`scripts/webgpu-gate/${f}`);
+ const paths=['deferred-g05-forward-policy.mjs','deferred-g05-forward-allocation.mjs','float-texture-readback.mjs','framegraph-pixel-oracle.mjs','deferred-g05-forward-fixture.mjs','deferred-g05-forward-fixture.html','run-deferred-g05-forward.mjs','lighting-scaling-contract.mjs','lighting-scaling-report.mjs','chrome-runner.mjs','deferred-fixture-policy.mjs','deferred-g05-cooldown.mjs'].map(f=>`scripts/webgpu-gate/${f}`);
  paths.push('config/lighting-performance-021.json','engine/package.json','engine/rollup.config.js','review/engine-0.2.1/g01-baseline-summary.json');
  const files=await Promise.all(paths.map(async path=>({path,sha256:sha256(await readFile(resolve(root,path)))})));return {files,sha256:sha256(JSON.stringify(files))};
 }
