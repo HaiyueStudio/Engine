@@ -1,7 +1,16 @@
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import path, { resolve } from 'node:path';
+
+/** Resolve the import before replacing segments so Windows separators work too. */
+export function resolveDeferredFixtureSource(id, importer, paths = path) {
+  if (!importer || !id.includes('engine/dist/')) return null;
+  return paths.resolve(paths.dirname(importer), id)
+    .replaceAll('\\', '/')
+    .replace('/engine/dist/', '/engine/src/')
+    .replace(/\.js$/, '.ts');
+}
 
 export function parseDeferredFixtureOptions(args) {
   const supported=new Set(['--full','--room','--integrated']);
@@ -15,7 +24,7 @@ export const sha256=bytes=>createHash('sha256').update(bytes).digest('hex');
 
 export async function deferredRuntimeFingerprint(root) {
   const paths=['engine/src','scripts/benchmark','config/rollup.shared.js','package-lock.json',
-    'scripts/webgpu-gate/build-deferred-fixture.mjs','scripts/webgpu-gate/deferred-reference-runtime.mjs',
+    'scripts/webgpu-gate/build-deferred-fixture.mjs','scripts/webgpu-gate/deferred-fixture-builder.mjs','scripts/webgpu-gate/deferred-fixture-policy.mjs','scripts/webgpu-gate/deferred-reference-runtime.mjs',
     'scripts/webgpu-gate/deferred-fixture.tsconfig.json'];
   const files=[...new Set(execFileSync('git',['ls-files','--cached','--others','--exclude-standard','-z','--',...paths],{cwd:root,encoding:'utf8'}).split('\0').filter(Boolean))].sort();
   return fingerprintFiles(root,files);

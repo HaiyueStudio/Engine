@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policy": "Release correctness accepts one complete qualification path: macOS Chrome/Metal or Windows Chrome+Edge on a discrete GPU. All evidence requires native hardware WebGPU; performance uses the same-host cross-engine comparison.",
+  "policy": "Release correctness, G09 and subsequent G05/G07 qualification accept one complete path: macOS Chrome/Metal on Apple Silicon or AMD, or Windows Chrome+Edge on a discrete GPU. Legacy Intel integrated GPUs are extended, non-blocking compatibility. Hardware scope is not a performance waiver; new hosts need new paired evidence with unchanged budgets. See ADR 0117.",
   "browsers": [
     {
       "id": "chrome-macos",
@@ -50,8 +50,7 @@
       "id": "macos-native-metal",
       "examples": [
         "Apple Silicon GPU",
-        "AMD Radeon Pro",
-        "Intel Metal-capable GPU"
+        "AMD Radeon Pro"
       ],
       "tier": "required",
       "purpose": "Alternative macOS release correctness path on a physical Metal GPU; no fixed performance ranking host"
@@ -64,6 +63,12 @@
       ],
       "tier": "required",
       "purpose": "0.1 Windows hardware correctness boundary; not a fixed performance ranking host"
+    },
+    {
+      "id": "legacy-intel-integrated",
+      "examples": ["Intel Gen9 HD/UHD 630"],
+      "tier": "extended",
+      "purpose": "Non-blocking compatibility investigation; retained failures cannot grant release qualification"
     },
     {
       "id": "android-vulkan",
@@ -174,7 +179,7 @@
       "nodePlatform": "darwin",
       "angleBackend": "metal",
       "minimumOsMajor": 14,
-      "adapterPattern": "apple|intel|amd|radeon",
+      "adapterPattern": "apple|amd|radeon",
       "runnerProfile": "release-macos-native"
     },
     {

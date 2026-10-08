@@ -15,7 +15,7 @@ test('macOS and Windows are complete alternative qualification paths', () => {
   assert.throws(() => selectReleaseQualification(matrix, 'linux'));
   assert.deepEqual(validateLightingReleaseEvidence(result, matrix, identity), []);
   assert.deepEqual(validateLightingReleaseEvidence({ ...result, adapter: { vendor: 'apple' } }, matrix, identity), []);
-  assert.deepEqual(validateLightingReleaseEvidence({ ...result, adapter: { vendor: 'intel' } }, matrix, identity), []);
+  assert.ok(validateLightingReleaseEvidence({ ...result, adapter: { vendor: 'intel' } }, matrix, identity).length);
 });
 test('formal evidence rejects dirty, remote, old and mismatched hosts', () => {
   for (const patch of [{ runnerProfile: 'local-unregistered' }, { dirty: true }, { localConsole: false }, { revision: null }, { platform: 'win32' },

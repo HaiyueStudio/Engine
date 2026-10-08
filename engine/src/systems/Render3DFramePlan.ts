@@ -34,6 +34,13 @@ interface CompiledFramePlan {
   readonly lifetimes: readonly RenderGraphResourceLifetime<string>[];
   readonly stats: RenderGraphStats;
 }
+interface FramePlanKey {
+  readonly scope: string;
+  readonly imports: readonly string[];
+  readonly exports: readonly string[];
+  readonly passes: readonly (readonly [string, Render3DFramePassKind, readonly string[], readonly string[], readonly string[], boolean])[];
+  readonly serialized: string;
+}
 const idle = () => {};
 
 /** View-scoped, single-writer resource versions compiled by the shared RenderGraph. */
@@ -52,11 +59,12 @@ export class Render3DFramePlan {
   private _scope = '';
   private _compiledPlan: CompiledFramePlan | undefined;
   private _executing = false;
+  private _lastKey: FramePlanKey | undefined;
 
   setCacheScope(device: object | undefined, scope: string): this {
     this._assertIdle(); this.cache.selectGeneration(device); this._scope = scope; return this;
   }
-  clearCache(): void { this._assertIdle(); this.cache.clear(); }
+  clearCache(): void { this._assertIdle(); this.cache.clear(); this._lastKey = undefined; }
 
   constructor(private readonly _passClass: RenderGraphPassClass = 'view-local', private readonly _domain: string = _passClass) {}
 
@@ -112,8 +120,7 @@ export class Render3DFramePlan {
   execute(beforeExecute?: () => void): void {
     this._assertIdle(); this._executing = true;
     try {
-      const key = JSON.stringify([this._passClass, this._scope, [...this._imports], [...this._exports],
-        this._passes.map(pass => [pass.snapshot.name, pass.snapshot.kind, pass.snapshot.reads, pass.snapshot.writes, pass.after, pass.sideEffect])]);
+      const key = this._cacheKey();
       let compiled = this.cache.get(key);
       if (!compiled) {
         this._compile();
@@ -140,6 +147,25 @@ export class Render3DFramePlan {
       beforeExecute?.();
       for (const index of compiled.order) this._passes[index]!.run();
     } finally { this._executing = false; }
+  }
+
+  private _cacheKey(): string {
+    const previous = this._lastKey;
+    // Compare every structural field, including declaration order. Keep only copied
+    // strings/flags here: pooled declarations and current-frame callbacks are mutable.
+    if (previous && previous.scope === this._scope && sameSetOrder(this._imports, previous.imports)
+      && sameSetOrder(this._exports, previous.exports) && previous.passes.length === this._passes.length
+      && this._passes.every((pass, index) => {
+        const old = previous.passes[index]!;
+        return pass.snapshot.name === old[0] && pass.snapshot.kind === old[1] && pass.sideEffect === old[5]
+          && sameNames(pass.snapshot.reads, old[2]) && sameNames(pass.snapshot.writes, old[3]) && sameNames(pass.after, old[4]);
+      })) return previous.serialized;
+    const imports = [...this._imports], exports = [...this._exports];
+    const passes = this._passes.map(pass => [pass.snapshot.name, pass.snapshot.kind,
+      [...pass.snapshot.reads], [...pass.snapshot.writes], [...pass.after], pass.sideEffect] as const);
+    const serialized = JSON.stringify([this._passClass, this._scope, imports, exports, passes]);
+    this._lastKey = { scope: this._scope, imports, exports, passes, serialized };
+    return serialized;
   }
 
   private _compile(): void {
@@ -235,4 +261,17 @@ function copyNames(target: string[], source: readonly string[] = []): void {
 
 function pushUnique(target: string[], name: string): void {
   if (!target.includes(name)) target.push(name);
+}
+
+function sameNames(current: readonly string[], previous: readonly string[]): boolean {
+  if (current.length !== previous.length) return false;
+  for (let i = 0; i < current.length; i++) if (current[i] !== previous[i]) return false;
+  return true;
+}
+
+function sameSetOrder(current: ReadonlySet<string>, previous: readonly string[]): boolean {
+  if (current.size !== previous.length) return false;
+  let index = 0;
+  for (const value of current) if (value !== previous[index++]) return false;
+  return true;
 }

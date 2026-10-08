@@ -22,6 +22,7 @@ interface CompiledPostPlan {
   readonly lifetimes: readonly RenderGraphResourceLifetime<string>[];
   readonly stats: RenderGraphStats;
 }
+type AccessKey = readonly [string, boolean, boolean, boolean, boolean, boolean, boolean];
 
 /** Logical content dependencies; physical ping-pong bindings remain owned by the renderer. */
 export class PostProcessGraph {
@@ -32,15 +33,36 @@ export class PostProcessGraph {
   private scope = '';
   private compiled: CompiledPostPlan | undefined;
   private readonly currentNodes: RenderGraphCompiledPass<PostProcessPass>[] = [];
+  private readonly accessKeys: AccessKey[] = [];
+  private keyScope = '';
+  private serializedKey: string | undefined;
   setCacheScope(device: object | undefined, scope: string): void { this.cache.selectGeneration(device); this.scope = scope; }
-  clearCache(): void { this.cache.clear(); this.active.length = 0; this.currentNodes.length = 0; this.compiled = undefined; this.graph.clear(); }
+  clearCache(): void { this.cache.clear(); this.active.length = 0; this.currentNodes.length = 0; this.compiled = undefined; this.graph.clear(); this.accessKeys.length = 0; this.serializedKey = undefined; }
   compile(passes: readonly PostProcessPass[]): readonly PostProcessPass[] {
-    const accesses = passes.map(pass => {
+    let changed = this.keyScope !== this.scope || this.accessKeys.length !== passes.length;
+    const accesses = this.accessKeys;
+    for (let index = 0; index < passes.length; index++) {
+      const pass = passes[index]!;
       const access = contracts.get(pass)?.() ?? conservative;
-      return [pass.label, access.readsColor, access.sideEffect, !!pass.needsDepthTexture,
-        !!pass.needsNormalTexture, !!pass.needsMotionTexture, !!pass.needsOutlineMask] as const;
-    });
-    const key = JSON.stringify([this.scope, accesses]);
+      const label = pass.label, readsColor = access.readsColor, sideEffect = access.sideEffect;
+      const depth = !!pass.needsDepthTexture, normal = !!pass.needsNormalTexture;
+      const motion = !!pass.needsMotionTexture, outline = !!pass.needsOutlineMask;
+      const old = accesses[index];
+      // Re-read live contracts/requirements even when the pass instance is unchanged.
+      if (!old || old[0] !== label || old[1] !== readsColor || old[2] !== sideEffect
+        || old[3] !== depth || old[4] !== normal || old[5] !== motion || old[6] !== outline) {
+        changed = true;
+        // A later custom contract/getter may throw. Never leave an old serialized
+        // key associated with partially refreshed structural fields after recovery.
+        this.serializedKey = undefined;
+        accesses[index] = [label, readsColor, sideEffect, depth, normal, motion, outline];
+      }
+    }
+    accesses.length = passes.length;
+    if (changed || this.serializedKey === undefined) {
+      this.serializedKey = JSON.stringify([this.scope, accesses]); this.keyScope = this.scope;
+    }
+    const key = this.serializedKey;
     const cached = this.cache.get(key);
     if (cached) { const result = this.bind(cached, passes); this.capture(passes, accesses); return result; }
     const graph = this.graph;

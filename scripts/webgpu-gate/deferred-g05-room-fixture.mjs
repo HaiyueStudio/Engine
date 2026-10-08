@@ -1,4 +1,5 @@
 import {captureG05ResourceSnapshot} from './deferred-g05-memory-policy.mjs';
+import {encodeFrameGraphPixels} from './framegraph-pixel-oracle.mjs';
 import {createRealRendererBenchmarkScenario,runRealRendererBenchmarkFrame,destroyRealRendererBenchmarkScenario,createAuditTarget,
  createDeferredReferenceProfile,resetRealRendererBenchmarkMetrics,createRealRendererGpuTimestampProbe,getRealRendererBenchmarkMetrics,RenderView} from '../../artifacts/engine-0.2.1/g03/fixture.js';
 import {installG05RoomScene} from './deferred-g05-room-scene.mjs';
@@ -94,7 +95,9 @@ async function run(){
    adapter:{vendor:adapter.info.vendor,architecture:adapter.info.architecture,device:adapter.info.device,description:adapter.info.description,isFallbackAdapter:adapter.info.isFallbackAdapter},
    platform:{userAgent:navigator.userAgent,platform:navigator.platform,hardwareConcurrency:navigator.hardwareConcurrency},deviceLimits:Object.fromEntries(['maxBufferSize','maxStorageBufferBindingSize','maxStorageBuffersPerShaderStage','maxSampledTexturesPerShaderStage','maxColorAttachments','maxColorAttachmentBytesPerSample','maxTextureDimension2D'].map(k=>[k,device.limits[k]])),
    caseId,algorithm,moving,...c,fixtureId:scene.fixtureId,warmup,samples,cpu,gpu,cpuMetrics,gpuMetrics,cold,sourceUploads:{cpu:{before:cpuSourceBefore,after:cpuSourceAfter},gpu:{before:gpuSourceBefore,after:gpuSourceAfter}},resources:{warm:warmResources,cpu:cpuResources,gpu:gpuResources},resourceAttribution,source,
-   completeCoverage:comparison.backend.diagnostics.completeCoverage,pixels,validationErrors:errors};return result;
+   completeCoverage:comparison.backend.diagnostics.completeCoverage,pixels,validationErrors:errors};
+  if(query.get('framegraphOracle')==='1')globalThis.__framegraphPixels=encodeFrameGraphPixels(actual);
+  return result;
  }catch(error){failure=error;throw error;}
  finally{
   try{probe?.destroy();if(state){await destroyRealRendererBenchmarkScenario(state);if(result)result.cleanup={ownerResidual:state.finalMetrics.ownerResidual,liveGpuResources:state.finalMetrics.liveGpuResources};}}

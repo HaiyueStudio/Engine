@@ -1,0 +1,494 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-06T09:01:58.037Z",
+  "scope": "Windows available-hardware B4 diagnosis",
+  "status": "diagnostic-passed",
+  "performanceQualified": false,
+  "frozenDeviceQualified": false,
+  "integratedGpuTested": false,
+  "baselineComparison": false,
+  "revision": "e0d8a5a95f3d47c9029d11171c1f7064374df5bc",
+  "environment": {
+    "capturedAt": "2026-10-06T08:34:02.2884193Z",
+    "os": {
+      "Caption": "Microsoft Windows 10 专业版",
+      "Version": "10.0.19045",
+      "BuildNumber": "19045",
+      "LastBootUpTime": "2026-09-23T13:26:04.419229+08:00"
+    },
+    "videoControllers": [
+      {
+        "Name": "NVIDIA GeForce GTX 1070 Ti",
+        "AdapterCompatibility": "NVIDIA",
+        "DriverVersion": "32.0.15.6094",
+        "DriverDate": "2024-08-14T08:00:00+08:00",
+        "PNPDeviceID": "PCI\\VEN_10DE&DEV_1B82&SUBSYS_243619DA&REV_A1\\4&22817009&0&0008",
+        "VideoProcessor": "NVIDIA GeForce GTX 1070 Ti"
+      }
+    ],
+    "processor": {
+      "Name": "Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz"
+    },
+    "browsers": [
+      {
+        "path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+        "version": "153.0.8010.50"
+      },
+      {
+        "path": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+        "version": "154.0.4258.53"
+      }
+    ]
+  },
+  "health": {
+    "capturedAt": "2026-10-06T08:59:57.2584611Z",
+    "windowStart": "2026-10-06T08:30:00.0000000+00:00",
+    "windowEnd": "2026-10-06T16:59:57.2583123+08:00",
+    "board": {
+      "Manufacturer": "Gigabyte Technology Co., Ltd.",
+      "Product": "Z270-HD3-CF"
+    },
+    "displayDevices": [
+      {
+        "Name": "NVIDIA GeForce GTX 1070 Ti",
+        "Status": "OK",
+        "ConfigManagerErrorCode": 0,
+        "PNPDeviceID": "PCI\\VEN_10DE&DEV_1B82&SUBSYS_243619DA&REV_A1\\4&22817009&0&0008"
+      }
+    ],
+    "eventQuery": {
+      "status": "unavailable",
+      "error": "No events were found that match the specified selection criteria."
+    }
+  },
+  "sourceFiles": [
+    {
+      "path": "package.json",
+      "sha256": "13bc43a0bf5f3d62fb5439861f516dc839aab41648ed44917a78376c3b08df0a"
+    },
+    {
+      "path": "scripts/verify-framegraph-portable.mjs",
+      "sha256": "9abde8865414bbb888e4f96be29aebf36b657ba1015a6045c2f55a3be6dbb3c5"
+    },
+    {
+      "path": "scripts/webgpu-gate/build-deferred-fixture.mjs",
+      "sha256": "cfcaecb57be4dc9651c8803167a005a064020326608c306dd7db65ba6a971dd8"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-fixture-policy.mjs",
+      "sha256": "76faa2b669e75670e65fbb8dec685928341f2ea27954137b856571676602be2f"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-fixture-policy.test.mjs",
+      "sha256": "70a58abce16bd6dac6873eeb5004cb875960c96ab32ce2022753568cb7f44189"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-portable-policy.mjs",
+      "sha256": "e7a5e0db0b3b9f5b4ac1ed30a36ba63fc89b537b8dd892c8647a6cf9fbee5d0d"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-portable-policy.test.mjs",
+      "sha256": "bdcadfb11b587370dcd4ede089858a631e047b8f5adbfe475e185dc52455b0dc"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-reuse-fixture.mjs",
+      "sha256": "5c751656358316ca89cc7f3d2a6dff20d43f2a58c3ed9b65b3851443dc68b15d"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-cache-fixture.mjs",
+      "sha256": "72ecd7d67f77029c377a2de250a79d4818dcfe7ffba4cb0d48e59b518cee3196"
+    },
+    {
+      "path": "scripts/webgpu-gate/postprocess-multiview-fixture.mjs",
+      "sha256": "28a340db14b1bf2c6f23025e64f497b4392027d6bd26daa465089afddc2c2ff7"
+    },
+    {
+      "path": "scripts/webgpu-gate/auxiliary-semantics-fixture.mjs",
+      "sha256": "3e71a748c800d6426d2622f3d261c7553b84f6ff9fbee33ade9435e59207e846"
+    }
+  ],
+  "runs": [
+    {
+      "directory": "portable-2026-10-06T08-32-53.390Z",
+      "evidence": {
+        "path": "artifacts/engine-0.2.1/g09/portable-2026-10-06T08-32-53.390Z/report.json",
+        "sha256": "f4231a350f69cc1c2e7253a22359e2b2e9e7a67787335697428bdba4f4f168a6"
+      },
+      "status": "failed",
+      "generatedAt": "2026-10-06T08:32:53.390Z",
+      "finishedAt": "2026-10-06T08:36:40.653Z",
+      "revision": "e0d8a5a95f3d47c9029d11171c1f7064374df5bc",
+      "dirty": true,
+      "browserPath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "products": [
+        "Chrome/153.0.8010.50"
+      ],
+      "inputs": {
+        "sha256": "769f59868be7144e6f4b83faf64522f8705654d5291c96e5b0fa8ab838eae3e6",
+        "fileCount": 621
+      },
+      "sourceFingerprint": "sha256:a073764d2ae0a1931d1a24970821ac6d5349794160686eeba2edce93c57aa3e8",
+      "wrapperHash": "112833ccbb0e38a5381377c3c7b8fd45b2cc7c7bc67dec8c2bc1f6fb9fc36d1d",
+      "planned": 32,
+      "completed": 32,
+      "passed": 28,
+      "failed": [
+        {
+          "index": 26,
+          "name": "postprocess-multiview",
+          "error": "Error: Native identified GPU required; a power preference does not identify a device class\n    at assessFrameGraphPortableResult (file:///D:/HaiyueStudio/Engine/scripts/webgpu-gate/framegraph-portable-policy.mjs:28:11)\n    at file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-portable.mjs:64:26"
+        },
+        {
+          "index": 27,
+          "name": "auxiliary-semantics",
+          "error": "Error: Native identified GPU required; a power preference does not identify a device class\n    at assessFrameGraphPortableResult (file:///D:/HaiyueStudio/Engine/scripts/webgpu-gate/framegraph-portable-policy.mjs:28:11)\n    at file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-portable.mjs:64:26"
+        },
+        {
+          "index": 28,
+          "name": "framegraph-reuse",
+          "error": "Error: Native identified GPU required; a power preference does not identify a device class\n    at assessFrameGraphPortableResult (file:///D:/HaiyueStudio/Engine/scripts/webgpu-gate/framegraph-portable-policy.mjs:28:11)\n    at file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-portable.mjs:64:26"
+        },
+        {
+          "index": 29,
+          "name": "framegraph-cache",
+          "error": "Error: Native identified GPU required; a power preference does not identify a device class\n    at assessFrameGraphPortableResult (file:///D:/HaiyueStudio/Engine/scripts/webgpu-gate/framegraph-portable-policy.mjs:28:11)\n    at file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-portable.mjs:64:26"
+        }
+      ],
+      "blackFramePassed": 24,
+      "repeatPairs": 12,
+      "repeatMaxDelta": 0,
+      "observedAdaptersByPreference": {
+        "high-performance": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "isFallbackAdapter": false
+        },
+        "low-power": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "isFallbackAdapter": false
+        }
+      }
+    },
+    {
+      "directory": "portable-2026-10-06T08-52-18.101Z",
+      "evidence": {
+        "path": "artifacts/engine-0.2.1/g09/portable-2026-10-06T08-52-18.101Z/report.json",
+        "sha256": "28b8a3d4a0b41a95c80883582cfc2801f3734ddebf399a733356497afcb6d01d"
+      },
+      "status": "passed",
+      "generatedAt": "2026-10-06T08:52:18.101Z",
+      "finishedAt": "2026-10-06T08:55:38.020Z",
+      "revision": "e0d8a5a95f3d47c9029d11171c1f7064374df5bc",
+      "dirty": true,
+      "browserPath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "products": [
+        "Chrome/153.0.8010.50"
+      ],
+      "inputs": {
+        "sha256": "769f59868be7144e6f4b83faf64522f8705654d5291c96e5b0fa8ab838eae3e6",
+        "fileCount": 621
+      },
+      "sourceFingerprint": "sha256:359df63b2055f8fe7aacae816f5373a3f6d47b28907446503d511cd6b04a7654",
+      "wrapperHash": "9abde8865414bbb888e4f96be29aebf36b657ba1015a6045c2f55a3be6dbb3c5",
+      "planned": 32,
+      "completed": 32,
+      "passed": 32,
+      "failed": [],
+      "blackFramePassed": 24,
+      "repeatPairs": 12,
+      "repeatMaxDelta": 0,
+      "observedAdaptersByPreference": {
+        "high-performance": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "isFallbackAdapter": false
+        },
+        "low-power": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "isFallbackAdapter": false
+        }
+      }
+    },
+    {
+      "directory": "portable-2026-10-06T08-56-17.573Z",
+      "evidence": {
+        "path": "artifacts/engine-0.2.1/g09/portable-2026-10-06T08-56-17.573Z/report.json",
+        "sha256": "a4978ac8e8b75d3007ebf8f8d1becbd5ba0e7edaa1e4df7f65a726cba391f786"
+      },
+      "status": "passed",
+      "generatedAt": "2026-10-06T08:56:17.573Z",
+      "finishedAt": "2026-10-06T08:59:19.965Z",
+      "revision": "e0d8a5a95f3d47c9029d11171c1f7064374df5bc",
+      "dirty": true,
+      "browserPath": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "products": [
+        "Edg/154.0.4258.53"
+      ],
+      "inputs": {
+        "sha256": "769f59868be7144e6f4b83faf64522f8705654d5291c96e5b0fa8ab838eae3e6",
+        "fileCount": 621
+      },
+      "sourceFingerprint": "sha256:359df63b2055f8fe7aacae816f5373a3f6d47b28907446503d511cd6b04a7654",
+      "wrapperHash": "9abde8865414bbb888e4f96be29aebf36b657ba1015a6045c2f55a3be6dbb3c5",
+      "planned": 32,
+      "completed": 32,
+      "passed": 32,
+      "failed": [],
+      "blackFramePassed": 24,
+      "repeatPairs": 12,
+      "repeatMaxDelta": 0,
+      "observedAdaptersByPreference": {
+        "high-performance": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "isFallbackAdapter": false
+        },
+        "low-power": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "isFallbackAdapter": false
+        }
+      }
+    }
+  ],
+  "finalRuns": [
+    "portable-2026-10-06T08-52-18.101Z",
+    "portable-2026-10-06T08-56-17.573Z"
+  ],
+  "crossBrowser": [
+    {
+      "index": 0,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 1,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 2,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 3,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 4,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 5,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 6,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 7,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 8,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 9,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 10,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 11,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 12,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 13,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 14,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 15,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 16,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 17,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 18,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 19,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 20,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 21,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 22,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    },
+    {
+      "index": 23,
+      "status": "passed",
+      "maxDelta": 0,
+      "changedComponents": 0
+    }
+  ],
+  "engineering": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-engineering-20261006T083758/api.log",
+      "sha256": "3e9ae8d8e9d67efceabcab5fd399ff83241a1438e6f62d91b8ac7a2734a7d511"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-engineering-20261006T083758/build.log",
+      "sha256": "8ebb706fe50090bedc9f5fafd930050bb8ea4f363376e2a63120d1c3aa8eba55"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-engineering-20261006T083758/checks.json",
+      "sha256": "fca54f59345b3dfdd3238741b4a221aa0a100e985be96b18c18a85a4cae20df2"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-engineering-20261006T083758/docs-api-checks.json",
+      "sha256": "033931eaf8fe88906f6a8cb85e35a1bb37d2c6b350f52a28a22d9cd7579d59bb"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-engineering-20261006T083758/docs.log",
+      "sha256": "71f583a2083c80227cf8116cbb23b806a1f959215fa564c0e91cd4ae90a5640f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-engineering-20261006T083758/framegraph-policy-test.log",
+      "sha256": "572fc411c500a9f3897ec660682b983bcffcabf74a90fedd059d6955c7740e63"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-engineering-20261006T083758/performance-budget-test.log",
+      "sha256": "375b3ab2da851b345a57b857e69f18ae55d5bea8f5d9ecb187b494a94d1d67fa"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-engineering-20261006T083758/test-unsandboxed.json",
+      "sha256": "6d15665526370c74e2590ab0563510393367625d1c0b5f3e4495b888177c9b35"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-engineering-20261006T083758/test-unsandboxed.log",
+      "sha256": "f0926e65d93976691d4c32d8f0ca764f0d6a288f59cd123245eecb8d1664d9d3"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-engineering-20261006T083758/test.log",
+      "sha256": "5e19404e8398b8896e59f7b623ff328d08456172dccba18c90dd1991e7d5df16"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-engineering-20261006T083758/typecheck.log",
+      "sha256": "37ee40a4376183e0f346264f96f3f22a65ec0a723d9d7ae0fa033388e7008e17"
+    }
+  ],
+  "supporting": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-environment-20261006.json",
+      "sha256": "d7a9157cfc37424f8c66c2ddd262290b3f3f56157d63369b5864b7df2e7d53f7"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-health-20261006.json",
+      "sha256": "fe63733cc12e4e40cf670904edff0051bc94142b969dcbe1d558d071a8d16575"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-final-runs.json",
+      "sha256": "dd4871cea333fda01763dd15308302f7e74e32bcd272e8d5d83b855bed536f6a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-chrome-final.log",
+      "sha256": "969e3491906cd3afed21e509dcaaa83397cb65f3799cf523a9cb72534b891438"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-edge-final.log",
+      "sha256": "e7969fea3cb51f0d8d946d3c0c0aeeba2634a236981cd9a7c6e22b3955cc925d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-portable-plan.json",
+      "sha256": "73c0a937b9b5c374fa27bcf54899f6d223a3bebcbbdaafe6a3fd450a76082075"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-symlink-check.log",
+      "sha256": "76ebe669df4d9089818797662ce2115efa9be13ba178615b9f4edd32b6c566bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/windows-engineering.ps1",
+      "sha256": "abe977d7006877b6184bc1371d9712c2f74c0e3098a1b37da896bdcb603d7cc0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/summarize-windows.mjs",
+      "sha256": "4745ac5c016a4c01592912db216158f6dc19a518d9247575d26e3f24d7eb626c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/regressions-2026-10-06T08-30-09.613Z.json",
+      "sha256": "d274a9c3174ba18f3e24fc2b18e769e52c054594a6d31aeb3f8048504dbf4fea"
+    }
+  ]
+}

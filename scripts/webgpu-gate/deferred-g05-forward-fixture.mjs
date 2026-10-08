@@ -1,5 +1,7 @@
 // G05 copy of the frozen G01 replay; timing populations and workload remain identical.
 import {observeForwardAllocations} from './deferred-g05-forward-allocation.mjs';
+import {readFloatTexture} from './float-texture-readback.mjs';
+import {encodeFrameGraphPixels} from './framegraph-pixel-oracle.mjs';
 const resultNode = document.querySelector('#result');
 const progressNode = document.querySelector('#progress');
 const query = new URLSearchParams(location.search);
@@ -21,7 +23,7 @@ try {
     resetRealRendererBenchmarkMetrics,
     runRealRendererBenchmarkFrame,
     warmRealRendererBenchmarkPipelines,
-  } = await import('../benchmark/real-renderer-scenario.mjs');
+  } = await import(query.get('framegraphRuntime') === '1' ? '../../artifacts/engine-0.2.1/g09/oracle-runtime/fixture.js' : '../benchmark/real-renderer-scenario.mjs');
   const {
     summarizeTimingSamples,
   } = await import('../benchmark/timing-cohorts.mjs');
@@ -36,7 +38,7 @@ try {
     BILLIARDS_3D_SCENE_PATH,
     BILLIARDS_3D_SCENE_SHA256,
     parseBilliards3DSceneDocument,
-  } = await import('../benchmark/billiards-3d-real-renderer-content.mjs');
+  } = await import(query.get('framegraphRuntime') === '1' ? '../../artifacts/engine-0.2.1/g09/oracle-runtime/fixture.js' : '../benchmark/billiards-3d-real-renderer-content.mjs');
 
   progressNode.textContent = 'fetching and verifying billiards scene';
   const {
@@ -69,6 +71,12 @@ try {
   const warmup = positiveInteger(query.get('warmup'), 4);
   const samples = positiveInteger(query.get('samples'), 30);
   const gpuSamples = nonNegativeInteger(query.get('gpuSamples'), 8);
+  const samplingMode = query.get('framegraphSampling');
+  if (samplingMode !== null && (!['calibration', 'baseline'].includes(samplingMode) || query.get('framegraphRuntime') !== '1')) throw Error('Invalid G09 sampling mode');
+  const samplingProtocol = query.get('framegraphSamplingProtocol') ?? 'g09-forward-cold-steady-v1';
+  if (samplingMode && !['g09-forward-cold-steady-v1', 'g09-forward-cold-steady-v2', 'g09-forward-cold-steady-v3'].includes(samplingProtocol)) throw Error('Invalid G09 sampling protocol');
+  const gpuWarmup = samplingMode ? 120 : warmup;
+  const timeline = samplingMode ? { cpu: [], cpuUpdate: [], cpuRecord: [], cpuSubmit: [], frameWall: [], queueWait: [] } : null;
   progressNode.textContent = configuration.id;
 
   const setupStartedAt = performance.now();
@@ -94,6 +102,7 @@ try {
     const startedAt = performance.now();
     await runRealRendererBenchmarkFrame(state);
     warmupDurations.push(performance.now() - startedAt);
+    if (timeline) recordTimeline(timeline, state.lastFrameTiming);
   }
 
   resetRealRendererBenchmarkMetrics(state);
@@ -111,20 +120,28 @@ try {
     cpuUpdateDurations.push(state.lastFrameTiming.cpuUpdateMs);
     sampleWallDurations.push(state.lastFrameTiming.sampleWallMs);
     queueWaitDurations.push(state.lastFrameTiming.queueWaitMs);
+    if (timeline) recordTimeline(timeline, state.lastFrameTiming);
   }
   const metricsBeforeGpuProbe = captureRealRendererBenchmarkMetrics(state);
-  const gpuTimestampProbe = createRealRendererGpuTimestampProbe(state);
+  const gpuTimestampProbe = createRealRendererGpuTimestampProbe(state, { includeCompute: query.get('framegraphRuntime') === '1' });
   const gpuDurations = [];
+  const gpuSpans = [];
   let gpuPassLabels = [];
   if (gpuTimestampProbe.supported) {
+    if (query.get('framegraphRuntime') === '1') for (let index = 0; index < gpuWarmup; index++) await runRealRendererBenchmarkFrame(state, { gpuTimestampProbe });
     for (let index = 0; index < gpuSamples; index++) {
       await runRealRendererBenchmarkFrame(state, { gpuTimestampProbe });
       const sample = state.lastFrameTiming.gpuTimestamp;
       gpuDurations.push(sample.totalMs);
+      gpuSpans.push(sample.spanMs);
       gpuPassLabels = sample.passLabels;
     }
   }
   gpuTimestampProbe.destroy();
+  if (query.get('framegraphOracle') === '1') {
+    const ldr = await readFloatTexture(state.device, state.targets[0].colorTexture);
+    globalThis.__framegraphPixels = encodeFrameGraphPixels([{ key: 'real-frame-view:0', hdr: ldr, ldr }]);
+  }
   await destroyRealRendererBenchmarkScenario(state);
   const validationErrors = await finishStrictValidation(device, validation);
 
@@ -211,6 +228,8 @@ try {
   });
   const result = assertLightingScalingResult(report);
   result.g05Forward = {...allocationAudit.snapshot(), cleanup:{ownerResidual:state.finalMetrics.ownerResidual,liveGpuResources:state.finalMetrics.liveGpuResources}};
+  if (query.get('framegraphRuntime') === '1') result.g09WholeGpu = { scope: 'render-and-compute-span-v1', rawSamples: gpuSpans, warmup: gpuWarmup };
+  if (timeline) result.g09Sampling = { protocol: samplingProtocol, mode: samplingMode, warmup, gpuWarmup, coldFrames: 120, timeline };
   device.destroy();
   resultNode.dataset.status = 'passed';
   resultNode.textContent = JSON.stringify(result);
@@ -219,6 +238,15 @@ try {
   resultNode.dataset.status = 'failed';
   resultNode.textContent = error?.stack ?? String(error);
   progressNode.textContent = 'failed';
+}
+
+function recordTimeline(timeline, timing) {
+  timeline.cpu.push(timing.runtimeFrameMs);
+  timeline.cpuUpdate.push(timing.cpuUpdateMs);
+  timeline.cpuRecord.push(timing.cpuRecordMs);
+  timeline.cpuSubmit.push(timing.cpuSubmitMs);
+  timeline.frameWall.push(timing.sampleWallMs);
+  timeline.queueWait.push(timing.queueWaitMs);
 }
 
 function numberParameter(parameters, name, fallback) {

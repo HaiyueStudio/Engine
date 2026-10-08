@@ -65,7 +65,7 @@ async function capture(algorithm, reuse, count, mixed) {
     const pixels = [];
     for (const target of targets) pixels.push(Array.from(await readFloatTexture(device, target.colorTexture)));
     // Preserve the original failing frame before assertions/cleanup; never replace it with a retry.
-    failedCapture = { algorithm, reuse, count, mixed, adapter: { vendor: adapter.info.vendor, architecture: adapter.info.architecture },
+    failedCapture = { algorithm, reuse, count, mixed, adapter: { vendor: adapter.info.vendor, architecture: adapter.info.architecture, isFallbackAdapter: adapter.info.isFallbackAdapter },
       stats, views, dimensions: targets.map(target => [target.width, target.height]), pixels,
       actualPasses: state.audit.renderPasses - beforePasses };
     check(pixels.every(image => image.every(Number.isFinite)), 'nonfinite image');
@@ -77,7 +77,7 @@ async function capture(algorithm, reuse, count, mixed) {
     // Latest exported G-buffer remains available after postprocessing (clearcoat/diagnostic consumer).
     let debug = null;
     if (profile) debug = Array.from(await readFloatTexture(device, profile.backend.lastAttachments.textures[0]));
-    result = { algorithm, reuse, count, mixed, adapter: { vendor: adapter.info.vendor, architecture: adapter.info.architecture },
+    result = { algorithm, reuse, count, mixed, adapter: { vendor: adapter.info.vendor, architecture: adapter.info.architecture, isFallbackAdapter: adapter.info.isFallbackAdapter },
       stats, views, dimensions, alphaCoverage, rgbMaxima: pixels.map(image => Math.max(...image.filter((_, i) => i % 4 !== 3))), actualPasses: state.audit.renderPasses - beforePasses, pixels, debug };
     return result;
   } catch (error) { failure = error; throw error; }

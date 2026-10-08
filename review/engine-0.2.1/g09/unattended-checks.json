@@ -1,0 +1,1624 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-07T03:55:33.455Z",
+  "status": "codex-closed-v2-complete-calibration-failed",
+  "performanceQualified": false,
+  "releaseQualified": false,
+  "sharedWarmupDetermined": false,
+  "sameHostBaselineRebuilt": false,
+  "authorization": "User requested independent unattended calibration and same-host baseline rebuilding while retaining the original 5% regression budget; prior temporary Search pause/restore authorization retained",
+  "attempts": [
+    {
+      "directory": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z",
+      "report": {
+        "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/report.json",
+        "sha256": "f7b639d3232b6c84b7ec3226541658ed38676843a9152a065ebd9ef79f7fd2e7",
+        "bytes": 119902
+      },
+      "tier": "smoke",
+      "status": "failed",
+      "error": "Error: Host busy: CPU 15.4% (limit 15%), GPU 3% (limit 10%)\n    at validateFrameGraphWindowsHost (file:///D:/HaiyueStudio/Engine/scripts/webgpu-gate/framegraph-windows-host.mjs:29:13)\n    at population (file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-sampling.mjs:100:7)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-sampling.mjs:118:23",
+      "sourceFingerprint": "sha256:23620282b3feec623c08544853c76187c9d359a83d51edd1bf947f7dc203a04d",
+      "inputs": {
+        "sha256": "38efadff37b1b25f6edb09b9b23807b914a12c26cdacc2ffacfc766f876df2e3",
+        "fileCount": 622
+      },
+      "correctnessCases": 2,
+      "measuredCaptures": 1,
+      "completedCalibrationEntries": 0,
+      "calibrationStatus": "incomplete",
+      "protocol": "g09-forward-cold-steady-v1",
+      "performanceQualified": false,
+      "entryObservations": 1,
+      "entryCpuRange": [
+        10.106051154086092,
+        10.106051154086092
+      ],
+      "entryGpuRange": [
+        4,
+        4
+      ],
+      "captures": [
+        {
+          "job": {
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "correctness",
+          "file": "000-correctness-forward-small-1-A0.json",
+          "sha256": "7e0fae568c9e761e858123987173732664a4b68fecace9808a0cad82ec9206fb",
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/000-correctness-forward-small-1-A0.json",
+          "bytes": 39364516
+        },
+        {
+          "job": {
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "correctness",
+          "file": "001-correctness-forward-small-1-B4.json",
+          "sha256": "480c11fa0e9ff09bff828b0ad7a800f7f7f1bf5ce58d6cff5f0ec589daea543f",
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/001-correctness-forward-small-1-B4.json",
+          "bytes": 39362272
+        },
+        {
+          "job": {
+            "caseId": "forward-cap-8",
+            "variant": "A0"
+          },
+          "mode": "correctness",
+          "file": "002-correctness-forward-cap-8-A0.json",
+          "sha256": "ae6fa7da3d1216512c97b5be1699fe57649f717a1374abd6c727f6895dcc018a",
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/002-correctness-forward-cap-8-A0.json",
+          "bytes": 39364711
+        },
+        {
+          "job": {
+            "caseId": "forward-cap-8",
+            "variant": "B4"
+          },
+          "mode": "correctness",
+          "file": "003-correctness-forward-cap-8-B4.json",
+          "sha256": "420aeec628dbc85dc64a2d3d77f3d1e20e622c0cc905bd2c5cbe3e6882f1b238",
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/003-correctness-forward-cap-8-B4.json",
+          "bytes": 39362606
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "004-calibration-forward-small-1-A0.json",
+          "sha256": "b7e509b7a615dcf0151c364713454ad5f39f31891b766a163e9a3129d584958f",
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/004-calibration-forward-small-1-A0.json",
+          "bytes": 3405494
+        }
+      ],
+      "producer": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/producer/config/framegraph-sampling-021.json",
+          "sha256": "bac1f4436bfa7a60d97f949728f99c0e5548eb84cf4638b5c65063205b620d33",
+          "bytes": 1723
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/producer/config/framegraph-performance-021.json",
+          "sha256": "b2cac95deb900f1271c436f0ae31fa6e8314af7792e2b8a00c38617fcba9d4a6",
+          "bytes": 1820
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/producer/config/lighting-performance-021.json",
+          "sha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a",
+          "bytes": 20902
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/producer/scripts/verify-framegraph-sampling.mjs",
+          "sha256": "5d009f9e0b48f8b391757ab6864286e2f52dcd5ff76bfd374161d9103b4150b2",
+          "bytes": 12683
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/producer/scripts/validate-framegraph-sampling.mjs",
+          "sha256": "a8502a504f2191f9cee8c83005cb0c5331d2327f590662278d952d5a28910da0",
+          "bytes": 6827
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/producer/scripts/run-framegraph-unattended.ps1",
+          "sha256": "7a035d79badf8613d36cce3f364edb2264f67d382da41a234e0f731a7fb6046f",
+          "bytes": 10215
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/producer/scripts/webgpu-gate/framegraph-sampling-policy.mjs",
+          "sha256": "1ce7dde650f11d9332cf9a0e43aa8d0c45394e563ba2e62a5511704f5740f2d3",
+          "bytes": 8711
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/producer/scripts/webgpu-gate/deferred-g05-forward-fixture.mjs",
+          "sha256": "8e94b989d9a605aeb8090af3b5fd0ee7fdfd282191afe44016b4f3df2a24facf",
+          "bytes": 12723
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/producer/scripts/webgpu-gate/deferred-g05-forward-policy.mjs",
+          "sha256": "c3a422a9473841bbb13f24870c56c5c9416b5765942a4c54a0ad9d641c9a8652",
+          "bytes": 6406
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/producer/scripts/webgpu-gate/chrome-runner.mjs",
+          "sha256": "38f42bc1ff3d5fc7d8e39c59bb9ede3597c863b914c929faae60afe8123b2409",
+          "bytes": 31701
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/measurement/producer/scripts/webgpu-gate/framegraph-windows-host.mjs",
+          "sha256": "978752081d30c81f1ac8db432cbf42e78069ee17433ebb98fc66b21a37f628f3",
+          "bytes": 3329
+        }
+      ],
+      "serviceRestored": true,
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/service-state.json",
+          "sha256": "47379e65783eb272ca180425ec73981a317464456fb68ffaa48b2dda07c5c4b3",
+          "bytes": 1378
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/wrapper.ps1",
+          "sha256": "7a035d79badf8613d36cce3f364edb2264f67d382da41a234e0f731a7fb6046f",
+          "bytes": 10215
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/processes.jsonl",
+          "sha256": "320807aae2a7456c1c392b98e836846d9f6b24e5a6164eb39d42a1a7c3a63ac6",
+          "bytes": 1916351
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/events.jsonl",
+          "sha256": "87d29bab49b964467164de55671df45556fd3e1c6b33e8266868f0f6569719bb",
+          "bytes": 272
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-smoke-20261006T225150Z/stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z",
+      "report": {
+        "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/report.json",
+        "sha256": "9db4aa182d50afb2a7fdef9fd3d7453d02f89d117250cd333727cc34b9e7885a",
+        "bytes": 181768
+      },
+      "tier": "g09-cold-steady-development",
+      "status": "failed",
+      "error": "Error: Host busy: CPU 16.6% (limit 15%), GPU 17% (limit 10%)\n    at validateFrameGraphWindowsHost (file:///D:/HaiyueStudio/Engine/scripts/webgpu-gate/framegraph-windows-host.mjs:29:13)\n    at population (file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-sampling.mjs:89:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-sampling.mjs:126:23",
+      "sourceFingerprint": "sha256:8c445b1a2c7a4f161c84ecec58f2f25fc50069a8353fcb41349dd960adecc4b3",
+      "inputs": {
+        "sha256": "38efadff37b1b25f6edb09b9b23807b914a12c26cdacc2ffacfc766f876df2e3",
+        "fileCount": 622
+      },
+      "correctnessCases": 2,
+      "measuredCaptures": 0,
+      "completedCalibrationEntries": 0,
+      "calibrationStatus": "incomplete",
+      "protocol": "g09-forward-cold-steady-v1",
+      "performanceQualified": false,
+      "entryObservations": 39,
+      "entryCpuRange": [
+        7.546935223175433,
+        23.474586802535104
+      ],
+      "entryGpuRange": [
+        17,
+        31
+      ],
+      "captures": [
+        {
+          "job": {
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "correctness",
+          "file": "000-correctness-forward-small-1-A0.json",
+          "sha256": "7f4ed03439863e6bf45fda4e53670c687c6ab0c585be4a8d54692fce7da04051",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/000-correctness-forward-small-1-A0.json",
+          "bytes": 39364439
+        },
+        {
+          "job": {
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "correctness",
+          "file": "001-correctness-forward-small-1-B4.json",
+          "sha256": "82321ad49bdb7db3107ce2c355de25cac5da0798d485935c9323c8ce3ef2a9aa",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/001-correctness-forward-small-1-B4.json",
+          "bytes": 39362536
+        },
+        {
+          "job": {
+            "caseId": "forward-cap-8",
+            "variant": "A0"
+          },
+          "mode": "correctness",
+          "file": "002-correctness-forward-cap-8-A0.json",
+          "sha256": "aae481e4b215b782cf044e4d7c6c286f0d445a1cd4b4d9175c3fe08e179df627",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/002-correctness-forward-cap-8-A0.json",
+          "bytes": 39364854
+        },
+        {
+          "job": {
+            "caseId": "forward-cap-8",
+            "variant": "B4"
+          },
+          "mode": "correctness",
+          "file": "003-correctness-forward-cap-8-B4.json",
+          "sha256": "430ac3a9d765b093787012912fe4dbe30e562042659e8426b0a55274ac686f90",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/003-correctness-forward-cap-8-B4.json",
+          "bytes": 39362709
+        }
+      ],
+      "producer": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/producer/config/framegraph-sampling-021.json",
+          "sha256": "baa2cf559c47c541ad5faca3d5864cc25ec49b396e39e4711ad1620d47b91f50",
+          "bytes": 1782
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/producer/config/framegraph-performance-021.json",
+          "sha256": "b2cac95deb900f1271c436f0ae31fa6e8314af7792e2b8a00c38617fcba9d4a6",
+          "bytes": 1820
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/producer/config/lighting-performance-021.json",
+          "sha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a",
+          "bytes": 20902
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/producer/scripts/verify-framegraph-sampling.mjs",
+          "sha256": "f0c1c8a8355554c464225efbcac1736ef991b1ae09965041ff436dade888675f",
+          "bytes": 13178
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/producer/scripts/validate-framegraph-sampling.mjs",
+          "sha256": "a8502a504f2191f9cee8c83005cb0c5331d2327f590662278d952d5a28910da0",
+          "bytes": 6827
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/producer/scripts/run-framegraph-unattended.ps1",
+          "sha256": "7a035d79badf8613d36cce3f364edb2264f67d382da41a234e0f731a7fb6046f",
+          "bytes": 10215
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/producer/scripts/webgpu-gate/framegraph-sampling-policy.mjs",
+          "sha256": "21ccd054ca23565f6c7bedd3a87816674cb90e8024cfbf3036cb840bc6c69c40",
+          "bytes": 9096
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/producer/scripts/webgpu-gate/deferred-g05-forward-fixture.mjs",
+          "sha256": "8e94b989d9a605aeb8090af3b5fd0ee7fdfd282191afe44016b4f3df2a24facf",
+          "bytes": 12723
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/producer/scripts/webgpu-gate/deferred-g05-forward-policy.mjs",
+          "sha256": "c3a422a9473841bbb13f24870c56c5c9416b5765942a4c54a0ad9d641c9a8652",
+          "bytes": 6406
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/producer/scripts/webgpu-gate/chrome-runner.mjs",
+          "sha256": "38f42bc1ff3d5fc7d8e39c59bb9ede3597c863b914c929faae60afe8123b2409",
+          "bytes": 31701
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/measurement/producer/scripts/webgpu-gate/framegraph-windows-host.mjs",
+          "sha256": "978752081d30c81f1ac8db432cbf42e78069ee17433ebb98fc66b21a37f628f3",
+          "bytes": 3329
+        }
+      ],
+      "serviceRestored": true,
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/service-state.json",
+          "sha256": "fcdcbbce58e3a14c83ca9fac811b07077afbb5618db279932f1aeb7dc320365f",
+          "bytes": 1407
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/wrapper.ps1",
+          "sha256": "7a035d79badf8613d36cce3f364edb2264f67d382da41a234e0f731a7fb6046f",
+          "bytes": 10215
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/processes.jsonl",
+          "sha256": "12f290e367881cf44ecf3c82b836dbb0f91dd4c90443051559cec1175e6c4d22",
+          "bytes": 17943111
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/events.jsonl",
+          "sha256": "04a99097bc1f41ad3d8b21bebc5f858269bf151018f23caa087f46e100ee54dd",
+          "bytes": 270
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T225900Z/stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z",
+      "report": {
+        "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/report.json",
+        "sha256": "7b734684e2b99cb93bbfe53e2fbf4aef7ca7eb75f8477b5f2e640eaa47730f10",
+        "bytes": 319134
+      },
+      "tier": "g09-cold-steady-development",
+      "status": "failed",
+      "error": "Error: No shared stable CPU plateau; fresh baseline blocked\n    at file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-sampling.mjs:131:55",
+      "sourceFingerprint": "sha256:8c445b1a2c7a4f161c84ecec58f2f25fc50069a8353fcb41349dd960adecc4b3",
+      "inputs": {
+        "sha256": "38efadff37b1b25f6edb09b9b23807b914a12c26cdacc2ffacfc766f876df2e3",
+        "fileCount": 622
+      },
+      "correctnessCases": 2,
+      "measuredCaptures": 12,
+      "completedCalibrationEntries": 12,
+      "calibrationStatus": "failed",
+      "protocol": "g09-forward-cold-steady-v1",
+      "performanceQualified": false,
+      "entryObservations": 42,
+      "entryCpuRange": [
+        0.3874999999999962,
+        20.522434695663037
+      ],
+      "entryGpuRange": [
+        0,
+        1
+      ],
+      "captures": [
+        {
+          "job": {
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "correctness",
+          "file": "000-correctness-forward-small-1-A0.json",
+          "sha256": "25c72a1df357e4ad2bbe1825dd41fda704bde0bc68974b0da283d2ebf7668334",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/000-correctness-forward-small-1-A0.json",
+          "bytes": 39364536
+        },
+        {
+          "job": {
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "correctness",
+          "file": "001-correctness-forward-small-1-B4.json",
+          "sha256": "f3a4ebbdecbb327811b58699a3a31f1cd827988e982e8efb1280ebe3f800073d",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/001-correctness-forward-small-1-B4.json",
+          "bytes": 39362536
+        },
+        {
+          "job": {
+            "caseId": "forward-cap-8",
+            "variant": "A0"
+          },
+          "mode": "correctness",
+          "file": "002-correctness-forward-cap-8-A0.json",
+          "sha256": "40be416c67d028aa7e502006533219967582059c88fec9660652bd71f7bd8519",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/002-correctness-forward-cap-8-A0.json",
+          "bytes": 39364663
+        },
+        {
+          "job": {
+            "caseId": "forward-cap-8",
+            "variant": "B4"
+          },
+          "mode": "correctness",
+          "file": "003-correctness-forward-cap-8-B4.json",
+          "sha256": "e56b2efb008007000162492d2dda5f6b108b9c7ffdbfbbd8f130de34545ff18e",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/003-correctness-forward-cap-8-B4.json",
+          "bytes": 39362691
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "004-calibration-forward-small-1-A0.json",
+          "sha256": "62bd2f79df2b3e89a59e129d10193b23ac85454761924abafceac97433f8eb41",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/004-calibration-forward-small-1-A0.json",
+          "bytes": 3415329
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "005-calibration-forward-small-1-B4.json",
+          "sha256": "0719606a23cb3f048235ab21859b8956c2e09402d4011fe92db0e178d5cc6b9c",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/005-calibration-forward-small-1-B4.json",
+          "bytes": 3369318
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "caseId": "forward-cap-8",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "006-calibration-forward-cap-8-A0.json",
+          "sha256": "15dab9b13f073b455ca94425456a49bf2552d4adf4ab2eeee7ea232d7bb9386f",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/006-calibration-forward-cap-8-A0.json",
+          "bytes": 3383075
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "caseId": "forward-cap-8",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "007-calibration-forward-cap-8-B4.json",
+          "sha256": "07110db46d33c8dc6427ff88faafc9620fd84af16da23ff89028f5e8a7c0e4aa",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/007-calibration-forward-cap-8-B4.json",
+          "bytes": 3392300
+        },
+        {
+          "job": {
+            "cohort": 1,
+            "caseId": "forward-cap-8",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "008-calibration-forward-cap-8-B4.json",
+          "sha256": "0f856f0304276514ab50fb043e295fa9be8a0e3e4a6752f7d0dfe5a083360588",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/008-calibration-forward-cap-8-B4.json",
+          "bytes": 3376088
+        },
+        {
+          "job": {
+            "cohort": 1,
+            "caseId": "forward-cap-8",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "009-calibration-forward-cap-8-A0.json",
+          "sha256": "7369f3344912d0cebc81c0111d7b88d2a1a408ae89df8fcf2394cf9ffdec6f4f",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/009-calibration-forward-cap-8-A0.json",
+          "bytes": 3386635
+        },
+        {
+          "job": {
+            "cohort": 1,
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "010-calibration-forward-small-1-B4.json",
+          "sha256": "ef4eecf9e128658ffa5424a5dfd1205d4f12b05d9e05baf303c28cf7a59c3c20",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/010-calibration-forward-small-1-B4.json",
+          "bytes": 3365338
+        },
+        {
+          "job": {
+            "cohort": 1,
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "011-calibration-forward-small-1-A0.json",
+          "sha256": "73e3757b52c44e1751d6694e91a373e02a023c78ce4b6f8e422e0c44e8a21ca5",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/011-calibration-forward-small-1-A0.json",
+          "bytes": 3412812
+        },
+        {
+          "job": {
+            "cohort": 2,
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "012-calibration-forward-small-1-A0.json",
+          "sha256": "04ac59080c11e6b590b304eca910955f8045665e51ff185d69cc622c98a6a188",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/012-calibration-forward-small-1-A0.json",
+          "bytes": 3405933
+        },
+        {
+          "job": {
+            "cohort": 2,
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "013-calibration-forward-small-1-B4.json",
+          "sha256": "ed646697fc3ace7b10bd5cd93f198124d30c62db4b666cf51c667261aa205eaa",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/013-calibration-forward-small-1-B4.json",
+          "bytes": 3396674
+        },
+        {
+          "job": {
+            "cohort": 2,
+            "caseId": "forward-cap-8",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "014-calibration-forward-cap-8-A0.json",
+          "sha256": "93769766295d39914bea37a2311756cb6649d6148f166abaa90ad62bf2e34c62",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/014-calibration-forward-cap-8-A0.json",
+          "bytes": 3394024
+        },
+        {
+          "job": {
+            "cohort": 2,
+            "caseId": "forward-cap-8",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "015-calibration-forward-cap-8-B4.json",
+          "sha256": "63b31cac21a3a6254a821eadecb9b70986fb81a9e20d41537d45bdd26710f9b8",
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/015-calibration-forward-cap-8-B4.json",
+          "bytes": 3379154
+        }
+      ],
+      "producer": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/producer/config/framegraph-sampling-021.json",
+          "sha256": "baa2cf559c47c541ad5faca3d5864cc25ec49b396e39e4711ad1620d47b91f50",
+          "bytes": 1782
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/producer/config/framegraph-performance-021.json",
+          "sha256": "b2cac95deb900f1271c436f0ae31fa6e8314af7792e2b8a00c38617fcba9d4a6",
+          "bytes": 1820
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/producer/config/lighting-performance-021.json",
+          "sha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a",
+          "bytes": 20902
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/producer/scripts/verify-framegraph-sampling.mjs",
+          "sha256": "f0c1c8a8355554c464225efbcac1736ef991b1ae09965041ff436dade888675f",
+          "bytes": 13178
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/producer/scripts/validate-framegraph-sampling.mjs",
+          "sha256": "a8502a504f2191f9cee8c83005cb0c5331d2327f590662278d952d5a28910da0",
+          "bytes": 6827
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/producer/scripts/run-framegraph-unattended.ps1",
+          "sha256": "7a035d79badf8613d36cce3f364edb2264f67d382da41a234e0f731a7fb6046f",
+          "bytes": 10215
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/producer/scripts/webgpu-gate/framegraph-sampling-policy.mjs",
+          "sha256": "21ccd054ca23565f6c7bedd3a87816674cb90e8024cfbf3036cb840bc6c69c40",
+          "bytes": 9096
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/producer/scripts/webgpu-gate/deferred-g05-forward-fixture.mjs",
+          "sha256": "8e94b989d9a605aeb8090af3b5fd0ee7fdfd282191afe44016b4f3df2a24facf",
+          "bytes": 12723
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/producer/scripts/webgpu-gate/deferred-g05-forward-policy.mjs",
+          "sha256": "c3a422a9473841bbb13f24870c56c5c9416b5765942a4c54a0ad9d641c9a8652",
+          "bytes": 6406
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/producer/scripts/webgpu-gate/chrome-runner.mjs",
+          "sha256": "38f42bc1ff3d5fc7d8e39c59bb9ede3597c863b914c929faae60afe8123b2409",
+          "bytes": 31701
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/producer/scripts/webgpu-gate/framegraph-windows-host.mjs",
+          "sha256": "978752081d30c81f1ac8db432cbf42e78069ee17433ebb98fc66b21a37f628f3",
+          "bytes": 3329
+        }
+      ],
+      "serviceRestored": true,
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/service-state.json",
+          "sha256": "b0b0b06069402a038c230c7cdd110a2667a15632c9d6971c6e1ee5c35079ea59",
+          "bytes": 1407
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/wrapper.ps1",
+          "sha256": "7a035d79badf8613d36cce3f364edb2264f67d382da41a234e0f731a7fb6046f",
+          "bytes": 10215
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/processes.jsonl",
+          "sha256": "0206c0dd035d114d11d0bed95273c693e77ac88e7ea9962a7b766f291a96a467",
+          "bytes": 54061493
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/events.jsonl",
+          "sha256": "0bd059fb8fa33c7d53c8bbea7c86f2bf838844aec883d7bebccb63c961bf407c",
+          "bytes": 270
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z",
+      "report": {
+        "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/report.json",
+        "sha256": "c2d6d1a64290b0e67fba61d249fb8c33c72e1403eca5a34b21c4a0a6f7a2ad2d",
+        "bytes": 218101
+      },
+      "tier": "g09-cold-steady-development",
+      "status": "failed",
+      "error": "Error: Host busy: CPU 18.5% (limit 15%), GPU 0% (limit 10%)\n    at validateFrameGraphWindowsHost (file:///D:/HaiyueStudio/Engine/scripts/webgpu-gate/framegraph-windows-host.mjs:29:13)\n    at population (file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-sampling.mjs:108:7)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-sampling.mjs:126:23",
+      "sourceFingerprint": "sha256:331a6e922ffeeb04e3033870e63b39a339202cf25863486d5b16131f1d76f24a",
+      "inputs": {
+        "sha256": "38efadff37b1b25f6edb09b9b23807b914a12c26cdacc2ffacfc766f876df2e3",
+        "fileCount": 622
+      },
+      "correctnessCases": 2,
+      "measuredCaptures": 10,
+      "completedCalibrationEntries": 9,
+      "calibrationStatus": "incomplete",
+      "protocol": "g09-forward-cold-steady-v2",
+      "performanceQualified": false,
+      "entryObservations": 34,
+      "entryCpuRange": [
+        0.9681881051175623,
+        15.439429928741088
+      ],
+      "entryGpuRange": [
+        0,
+        0
+      ],
+      "captures": [
+        {
+          "job": {
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "correctness",
+          "file": "000-correctness-forward-small-1-A0.json",
+          "sha256": "906ca986176c3ec828071c480ccdc3d8bc3fa49c6e62b3edc6a7fc1341921073",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/000-correctness-forward-small-1-A0.json",
+          "bytes": 39364528
+        },
+        {
+          "job": {
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "correctness",
+          "file": "001-correctness-forward-small-1-B4.json",
+          "sha256": "fac2228ed5f2e1c2de359c99016bcf9c18aa3f069e5f5c1c4102923f8f85f10b",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/001-correctness-forward-small-1-B4.json",
+          "bytes": 39362520
+        },
+        {
+          "job": {
+            "caseId": "forward-cap-8",
+            "variant": "A0"
+          },
+          "mode": "correctness",
+          "file": "002-correctness-forward-cap-8-A0.json",
+          "sha256": "8bdb67c075e8709f4cf0c4c83c606e8c0ef073926f31efe9cef2e5d7f70a09b7",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/002-correctness-forward-cap-8-A0.json",
+          "bytes": 39364722
+        },
+        {
+          "job": {
+            "caseId": "forward-cap-8",
+            "variant": "B4"
+          },
+          "mode": "correctness",
+          "file": "003-correctness-forward-cap-8-B4.json",
+          "sha256": "bf13c109dfcbe2c644660c3b9ce8dffa5421a937d5a43ce2e8093335e0f3707c",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/003-correctness-forward-cap-8-B4.json",
+          "bytes": 39362665
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "004-calibration-forward-small-1-A0.json",
+          "sha256": "fc7840508c2f085ab2e46ebda75fe09e3ce17ba681d5f178a4fdd08b3090cbe3",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/004-calibration-forward-small-1-A0.json",
+          "bytes": 6802200
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "005-calibration-forward-small-1-B4.json",
+          "sha256": "3ca13925d42c7946061522e7f04851d7defa26662270a408135c19c35c36cdfb",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/005-calibration-forward-small-1-B4.json",
+          "bytes": 6718893
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "caseId": "forward-cap-8",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "006-calibration-forward-cap-8-A0.json",
+          "sha256": "30cdc232636b6037a268736d4dbbef4a1ff952069c9768bdee95ed1d96878806",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/006-calibration-forward-cap-8-A0.json",
+          "bytes": 6758000
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "caseId": "forward-cap-8",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "007-calibration-forward-cap-8-B4.json",
+          "sha256": "4c4af597b52ec26c2f2989fe54cc934e57cb28ccc38363882235648eea0e5a13",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/007-calibration-forward-cap-8-B4.json",
+          "bytes": 6707704
+        },
+        {
+          "job": {
+            "cohort": 1,
+            "caseId": "forward-cap-8",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "008-calibration-forward-cap-8-B4.json",
+          "sha256": "f9e8353c3e31f070b17a98ef8724953672b2c0649b30f11108e7a04cf42604ae",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/008-calibration-forward-cap-8-B4.json",
+          "bytes": 6685766
+        },
+        {
+          "job": {
+            "cohort": 1,
+            "caseId": "forward-cap-8",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "009-calibration-forward-cap-8-A0.json",
+          "sha256": "33c1033ce1a76cbdf6d5367cca8c5483513a3b894c2a62d1ac11b11f1fef207e",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/009-calibration-forward-cap-8-A0.json",
+          "bytes": 6759332
+        },
+        {
+          "job": {
+            "cohort": 1,
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "010-calibration-forward-small-1-B4.json",
+          "sha256": "273863c3cfde523f33284b8db2d57b10f3560ad9e7135599c847609162ac0b6a",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/010-calibration-forward-small-1-B4.json",
+          "bytes": 6719762
+        },
+        {
+          "job": {
+            "cohort": 1,
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "011-calibration-forward-small-1-A0.json",
+          "sha256": "9259bfd432e2b1c56c3b3cbc1bff1b22ff8634fdf9d9e896e77fc2651cb4377c",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/011-calibration-forward-small-1-A0.json",
+          "bytes": 6800926
+        },
+        {
+          "job": {
+            "cohort": 2,
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "012-calibration-forward-small-1-A0.json",
+          "sha256": "96f0ac77459b6f8a09ae37989c3dc7d14a1c9fa23d068720fd0e375f7243aee2",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/012-calibration-forward-small-1-A0.json",
+          "bytes": 6818435
+        },
+        {
+          "job": {
+            "cohort": 2,
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "013-calibration-forward-small-1-B4.json",
+          "sha256": "f34502356c3de2a9e327e40468be3a56c116b75efc0dc751708f97fe78215a90",
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/013-calibration-forward-small-1-B4.json",
+          "bytes": 6719845
+        }
+      ],
+      "producer": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/producer/config/framegraph-sampling-021.json",
+          "sha256": "44a71f8c313e983ff23548a5a8b075d60afb40d8fa2aa6ef89513fbfe1454b16",
+          "bytes": 1796
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/producer/config/framegraph-performance-021.json",
+          "sha256": "b2cac95deb900f1271c436f0ae31fa6e8314af7792e2b8a00c38617fcba9d4a6",
+          "bytes": 1820
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/producer/config/lighting-performance-021.json",
+          "sha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a",
+          "bytes": 20902
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/producer/scripts/verify-framegraph-sampling.mjs",
+          "sha256": "3ebc9b979584429b273970392c4ba578161ca74828e08ead0ad0fc0f898e6421",
+          "bytes": 13253
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/producer/scripts/validate-framegraph-sampling.mjs",
+          "sha256": "a8502a504f2191f9cee8c83005cb0c5331d2327f590662278d952d5a28910da0",
+          "bytes": 6827
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/producer/scripts/run-framegraph-unattended.ps1",
+          "sha256": "7a035d79badf8613d36cce3f364edb2264f67d382da41a234e0f731a7fb6046f",
+          "bytes": 10215
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/producer/scripts/webgpu-gate/framegraph-sampling-policy.mjs",
+          "sha256": "116ae02852713db6e35d161336562919437582fb060caf6068a63500a3b312ea",
+          "bytes": 9317
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/producer/scripts/webgpu-gate/deferred-g05-forward-fixture.mjs",
+          "sha256": "ac3936eef1bf480bccc627804e9c43cdf645e947e5bee315d9fe5b972872caf0",
+          "bytes": 12969
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/producer/scripts/webgpu-gate/deferred-g05-forward-policy.mjs",
+          "sha256": "c3a422a9473841bbb13f24870c56c5c9416b5765942a4c54a0ad9d641c9a8652",
+          "bytes": 6406
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/producer/scripts/webgpu-gate/chrome-runner.mjs",
+          "sha256": "38f42bc1ff3d5fc7d8e39c59bb9ede3597c863b914c929faae60afe8123b2409",
+          "bytes": 31701
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/measurement/producer/scripts/webgpu-gate/framegraph-windows-host.mjs",
+          "sha256": "978752081d30c81f1ac8db432cbf42e78069ee17433ebb98fc66b21a37f628f3",
+          "bytes": 3329
+        }
+      ],
+      "serviceRestored": true,
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/service-state.json",
+          "sha256": "0e4a2c0e03e05c1f1aa9961cfb58f1234ee4f7a09ac72dae78ff7c6958731b07",
+          "bytes": 1412
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/wrapper.ps1",
+          "sha256": "7a035d79badf8613d36cce3f364edb2264f67d382da41a234e0f731a7fb6046f",
+          "bytes": 10215
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/processes.jsonl",
+          "sha256": "b15e06cda33dfa2faaa0a7f068329999ce62e4ed5e460bdde23800b4ffb05aac",
+          "bytes": 56756182
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/events.jsonl",
+          "sha256": "60e4b30e06f6d700166de209eb441bca3f004c4f269ec4a0c035893f001dc54c",
+          "bytes": 276
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        }
+      ]
+    },
+    {
+      "directory": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z",
+      "report": {
+        "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/report.json",
+        "sha256": "e44f2bff7a1c58b6a797e809b47465733d9b9ef36b98fba6a515e543ddcc0d90",
+        "bytes": 360714
+      },
+      "tier": "g09-cold-steady-development",
+      "status": "failed",
+      "error": "Error: No shared stable CPU plateau; fresh baseline blocked\n    at file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-sampling.mjs:131:55",
+      "sourceFingerprint": "sha256:a38c8369a2aa9fae021698845b54585d3b4fa220caa1c71089b19eabe822b74a",
+      "inputs": {
+        "sha256": "38efadff37b1b25f6edb09b9b23807b914a12c26cdacc2ffacfc766f876df2e3",
+        "fileCount": 622
+      },
+      "correctnessCases": 2,
+      "measuredCaptures": 12,
+      "completedCalibrationEntries": 12,
+      "calibrationStatus": "failed",
+      "protocol": "g09-forward-cold-steady-v2",
+      "performanceQualified": false,
+      "entryObservations": 36,
+      "entryCpuRange": [
+        0.5998500374906235,
+        4.5029312710490155
+      ],
+      "entryGpuRange": [
+        0,
+        1
+      ],
+      "captures": [
+        {
+          "job": {
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "correctness",
+          "file": "000-correctness-forward-small-1-A0.json",
+          "sha256": "94e17778653c79ec9610335f8fff2ffe1f605880ad1b3dbf41b97e1bda76d674",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/000-correctness-forward-small-1-A0.json",
+          "bytes": 39364639
+        },
+        {
+          "job": {
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "correctness",
+          "file": "001-correctness-forward-small-1-B4.json",
+          "sha256": "8ad62e73a5fa6a1a860676df2bdff526834d961239a30e693a6a5816632cafbf",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/001-correctness-forward-small-1-B4.json",
+          "bytes": 39362485
+        },
+        {
+          "job": {
+            "caseId": "forward-cap-8",
+            "variant": "A0"
+          },
+          "mode": "correctness",
+          "file": "002-correctness-forward-cap-8-A0.json",
+          "sha256": "ce2539fa57ec0d874e3a74a60d8dc25ecf75fddf352c268e74e9cccd8c8d2680",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/002-correctness-forward-cap-8-A0.json",
+          "bytes": 39364664
+        },
+        {
+          "job": {
+            "caseId": "forward-cap-8",
+            "variant": "B4"
+          },
+          "mode": "correctness",
+          "file": "003-correctness-forward-cap-8-B4.json",
+          "sha256": "e7ad7dc55d79cf59e6d10773acd908fa71ef7205dd9047919761289762d66fd6",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/003-correctness-forward-cap-8-B4.json",
+          "bytes": 39362624
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "004-calibration-forward-small-1-A0.json",
+          "sha256": "e56c00af74e16b32e307d7cf084d3c7893c7de90f8dbc1d63f7c99a105b2a368",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/004-calibration-forward-small-1-A0.json",
+          "bytes": 6821161
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "005-calibration-forward-small-1-B4.json",
+          "sha256": "cb0017fe6de601af40226400fed82e1c8ca88869eaf830ce8f889b75f4adeb39",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/005-calibration-forward-small-1-B4.json",
+          "bytes": 6735672
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "caseId": "forward-cap-8",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "006-calibration-forward-cap-8-A0.json",
+          "sha256": "861ac564e3e746d04839b7c278cfbc78619579cd5095d1776207c3efbe0c85f5",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/006-calibration-forward-cap-8-A0.json",
+          "bytes": 6772179
+        },
+        {
+          "job": {
+            "cohort": 0,
+            "caseId": "forward-cap-8",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "007-calibration-forward-cap-8-B4.json",
+          "sha256": "593f1f716b65f9d856e0c440ba73db7a48397b179e0a294af654b2453869e953",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/007-calibration-forward-cap-8-B4.json",
+          "bytes": 6700490
+        },
+        {
+          "job": {
+            "cohort": 1,
+            "caseId": "forward-cap-8",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "008-calibration-forward-cap-8-B4.json",
+          "sha256": "28c7bdea3d58ef9db67117016c1879da519dbde5523cf155167d5e16b566b205",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/008-calibration-forward-cap-8-B4.json",
+          "bytes": 6703272
+        },
+        {
+          "job": {
+            "cohort": 1,
+            "caseId": "forward-cap-8",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "009-calibration-forward-cap-8-A0.json",
+          "sha256": "296401b84acbea2c040ae113138398cd96b833466f84b6690738d0f3792a02e3",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/009-calibration-forward-cap-8-A0.json",
+          "bytes": 6793163
+        },
+        {
+          "job": {
+            "cohort": 1,
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "010-calibration-forward-small-1-B4.json",
+          "sha256": "ce10d77633d08d5222349e17839205078e89cd0489d2b82e009cf15246e26aca",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/010-calibration-forward-small-1-B4.json",
+          "bytes": 6734446
+        },
+        {
+          "job": {
+            "cohort": 1,
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "011-calibration-forward-small-1-A0.json",
+          "sha256": "3321d90af514bce23a7b5c56e6e33507ffa48d42f13446f61ff7129d6a41059a",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/011-calibration-forward-small-1-A0.json",
+          "bytes": 6814386
+        },
+        {
+          "job": {
+            "cohort": 2,
+            "caseId": "forward-small-1",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "012-calibration-forward-small-1-A0.json",
+          "sha256": "91ffc2a9ca6e843a2d5fb088bf5eb70346ee0880f8c5af004200e3ddd7889394",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/012-calibration-forward-small-1-A0.json",
+          "bytes": 6817167
+        },
+        {
+          "job": {
+            "cohort": 2,
+            "caseId": "forward-small-1",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "013-calibration-forward-small-1-B4.json",
+          "sha256": "1b85362d5be92397a1adaab218e4069eded96c620911318d144d9080a75b8a64",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/013-calibration-forward-small-1-B4.json",
+          "bytes": 6737535
+        },
+        {
+          "job": {
+            "cohort": 2,
+            "caseId": "forward-cap-8",
+            "variant": "A0"
+          },
+          "mode": "calibration",
+          "file": "014-calibration-forward-cap-8-A0.json",
+          "sha256": "3f147dd9abb5f67f484db0e9cbf5ae3c822f19cd811e7987cfe160c334b48b4c",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/014-calibration-forward-cap-8-A0.json",
+          "bytes": 6775835
+        },
+        {
+          "job": {
+            "cohort": 2,
+            "caseId": "forward-cap-8",
+            "variant": "B4"
+          },
+          "mode": "calibration",
+          "file": "015-calibration-forward-cap-8-B4.json",
+          "sha256": "62db2f446e685f1c61f25350891a61c641f97f11f32c5c8503bfc1d9c2f49952",
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/015-calibration-forward-cap-8-B4.json",
+          "bytes": 6698642
+        }
+      ],
+      "producer": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/producer/config/framegraph-sampling-021.json",
+          "sha256": "44a71f8c313e983ff23548a5a8b075d60afb40d8fa2aa6ef89513fbfe1454b16",
+          "bytes": 1796
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/producer/config/framegraph-performance-021.json",
+          "sha256": "b2cac95deb900f1271c436f0ae31fa6e8314af7792e2b8a00c38617fcba9d4a6",
+          "bytes": 1820
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/producer/config/lighting-performance-021.json",
+          "sha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a",
+          "bytes": 20902
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/producer/scripts/verify-framegraph-sampling.mjs",
+          "sha256": "3ebc9b979584429b273970392c4ba578161ca74828e08ead0ad0fc0f898e6421",
+          "bytes": 13253
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/producer/scripts/validate-framegraph-sampling.mjs",
+          "sha256": "a8502a504f2191f9cee8c83005cb0c5331d2327f590662278d952d5a28910da0",
+          "bytes": 6827
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/producer/scripts/run-framegraph-unattended.ps1",
+          "sha256": "08cd27242e8ef2ea553c9b81abbb3f26b7875ba849f2e76802e4fa1923253bc3",
+          "bytes": 12023
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/producer/scripts/webgpu-gate/framegraph-sampling-policy.mjs",
+          "sha256": "116ae02852713db6e35d161336562919437582fb060caf6068a63500a3b312ea",
+          "bytes": 9317
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/producer/scripts/webgpu-gate/deferred-g05-forward-fixture.mjs",
+          "sha256": "ac3936eef1bf480bccc627804e9c43cdf645e947e5bee315d9fe5b972872caf0",
+          "bytes": 12969
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/producer/scripts/webgpu-gate/deferred-g05-forward-policy.mjs",
+          "sha256": "c3a422a9473841bbb13f24870c56c5c9416b5765942a4c54a0ad9d641c9a8652",
+          "bytes": 6406
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/producer/scripts/webgpu-gate/chrome-runner.mjs",
+          "sha256": "38f42bc1ff3d5fc7d8e39c59bb9ede3597c863b914c929faae60afe8123b2409",
+          "bytes": 31701
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/producer/scripts/webgpu-gate/framegraph-windows-host.mjs",
+          "sha256": "978752081d30c81f1ac8db432cbf42e78069ee17433ebb98fc66b21a37f628f3",
+          "bytes": 3329
+        }
+      ],
+      "serviceRestored": true,
+      "files": [
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/service-state.json",
+          "sha256": "0fb49483eadf7e7cdf2654bc13c1e56f5bc87fdbaca53f8be9652672cdaf673b",
+          "bytes": 1403
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/wrapper.ps1",
+          "sha256": "08cd27242e8ef2ea553c9b81abbb3f26b7875ba849f2e76802e4fa1923253bc3",
+          "bytes": 12023
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/processes.jsonl",
+          "sha256": "f576a298753b60034a4f65def8c33a82daa9dc34fb34b8e9f47307324899c1c4",
+          "bytes": 50522923
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/events.jsonl",
+          "sha256": "3c34c6f3200d6bf3fae4ce331e4a0885f9e96904dc193dad76b9071f229a464c",
+          "bytes": 286
+        },
+        {
+          "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        }
+      ]
+    }
+  ],
+  "serviceVerification": {
+    "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/service-verification.json",
+    "sha256": "4f29b283ddd042baf8b0965c4f9c79f41e028927010e93e322be60b70d0acda1",
+    "bytes": 395
+  },
+  "latestResult": {
+    "directory": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z",
+    "calibrationCaptures": 12,
+    "cpuFramesPerCapture": 24000,
+    "cpuFramesTotal": 288000,
+    "capturesIndependentlyChecked": 16,
+    "hostObservations": 24,
+    "hostCpuRange": [
+      1.187351581052365,
+      8.045977011494255
+    ],
+    "hostGpuRange": [
+      0,
+      1
+    ],
+    "codexProcessPresence": {
+      "samples": 0,
+      "maxCpu": 0
+    },
+    "selectedWarmup": null,
+    "failedCandidates": [
+      1200,
+      3600,
+      6000,
+      12000,
+      18000
+    ],
+    "baselineCaptures": 0,
+    "rootCauseEstablished": false,
+    "diagnosisScope": "Per-3000-frame channel statistics and whole-capture process observations. Capture intervals also include browser setup/GPU timing/cleanup; no exact per-frame UTC alignment or causal attribution.",
+    "files": [
+      {
+        "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/calibration.json",
+        "sha256": "e9d08060bfc48a9a349a114f30c1d205670e52a4f3db0de598695c36c2d56be5",
+        "bytes": 136215
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/measurement/revalidation.json",
+        "sha256": "356a5eb975cf003f59de9f33c52a665a22ccb95a35ad205a636f4def3fa70e4c",
+        "bytes": 131228
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/completion.json",
+        "sha256": "66c1e3a3adb191fde4bd52e13da66c24dc617f079855428a96df2f5fb70dac9b",
+        "bytes": 497
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/launcher.ps1",
+        "sha256": "2b762e2b10bd83cb3f4f54d51d0851004e681262d7539f277d9a4b8879ba68c4",
+        "bytes": 4991
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/calibration-diagnosis.json",
+        "sha256": "f44addf025c5eea9ec6a90ed6bf2b91f6f2964fbe5eb8210f08a8aa0b2a2eb7b",
+        "bytes": 254404
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T025839Z/revalidation.log",
+        "sha256": "861c6af5d4483de6f14eb530d0b021d4d7b01f70a7ccaa189519e34a87923c58",
+        "bytes": 212
+      }
+    ],
+    "resultDisplayChecks": [
+      {
+        "path": "artifacts/engine-0.2.1/g09/closed-codex-result-checks/report-powershell51.log",
+        "sha256": "3c66e9971ece61d7bb7ad29654b229c6b70227059d79b19cb02cc8b3113b309e",
+        "bytes": 1156
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/closed-codex-result-checks/report-powershell7.log",
+        "sha256": "d2cfd694779232449c715410eb49f3d730bb92e15a0500e614e34c099bc8f061",
+        "bytes": 1153
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/closed-codex-result-checks/plan.json",
+        "sha256": "d3dd766167291da9cca771a3d03529b5843ea557d6af21302850aa629816c71e",
+        "bytes": 728
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/closed-codex-result-checks/verification.json",
+        "sha256": "8b04dbd044df6597a48a63d89294393d53f7bf8ea159d8694b6a4319be0e3182",
+        "bytes": 364
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/closed-codex-result-checks/docs-check.log",
+        "sha256": "c5629ff269b452214efcb17140d38eeccadb47fa6108ac614c2d1640c5120d2d",
+        "bytes": 418
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/closed-codex-result-checks/api-check.log",
+        "sha256": "3e9ae8d8e9d67efceabcab5fd399ff83241a1438e6f62d91b8ac7a2734a7d511",
+        "bytes": 163
+      }
+    ]
+  },
+  "checks": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-engineering-20261007/typecheck.log",
+      "sha256": "8d01fe2e95ec3cff3cbc471946ea3079fb2db0e8e9dbb444ddf45588fa4b111b",
+      "bytes": 3088
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-engineering-20261007/test.log",
+      "sha256": "5042824ea71cff73657657f9f2ac0eda770980bfad1f78535a31018960188793",
+      "bytes": 14868
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-engineering-20261007/test-host.log",
+      "sha256": "37e60a41e259d6d8d7c2f78ed3369ea6f404adab50fce978fef23fceb69f5e9e",
+      "bytes": 145785
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-engineering-20261007/build-host.log",
+      "sha256": "c40356759c53a71b15a267d45bc50d180be4fd0dfd56b4a4013aeee93a375a68",
+      "bytes": 16874
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-engineering-20261007/performance-policy.log",
+      "sha256": "67330e693af9806054ea140b28eb934f7fc3752d9005139b1af7335009c8e4de",
+      "bytes": 24743
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-engineering-20261007/final-performance-policy.log",
+      "sha256": "6f16b8bed7ff04af1dca0b6ccffd836254c271a0dfc3662dfcd1686cd952cee1",
+      "bytes": 24742
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-engineering-20261007/framegraph-policy.log",
+      "sha256": "02d9e9d82ee01bd4b5aa837f9659c1f01d62c0778b965ae171c27dc2ce9eb13b",
+      "bytes": 6687
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-engineering-20261007/final-policy.log",
+      "sha256": "dabba6a8a325e077951468a370f583f79d4948fa7be257fd210021e2a3290183",
+      "bytes": 1850
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-engineering-20261007/api.log",
+      "sha256": "3e9ae8d8e9d67efceabcab5fd399ff83241a1438e6f62d91b8ac7a2734a7d511",
+      "bytes": 163
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-engineering-20261007/final-docs.log",
+      "sha256": "4048271a677cf3d842df804508642921a85bc6ce8febc03b7ddb9a0d5839bdeb",
+      "bytes": 418
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-engineering-20261007/plan.json",
+      "sha256": "3a29be8ea0a6a45631b020f93d7a86ac930754ec4b094fc32537d0eb2e031e40",
+      "bytes": 3063
+    }
+  ],
+  "validationSummary": {
+    "rootTypecheck": "passed",
+    "rootTest": "passed-on-host-after-sandbox-symlink-EPERM",
+    "rootBuild": "passed",
+    "freshExamples": 98,
+    "performancePolicyTests": 232,
+    "framegraphPolicyTests": 59,
+    "finalFocusedTests": 17,
+    "api": "passed",
+    "docs": "passed",
+    "diffWhitespace": "passed"
+  },
+  "v2Checks": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-v2-engineering-20261007/focused.log",
+      "sha256": "7fa33f045ddd4fe204051ffb5b726e3ed281765abd72842f441774142f5eaf6c",
+      "bytes": 1975
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-v2-engineering-20261007/typecheck.log",
+      "sha256": "586456331ddc3af700a4905a38fa6831f23bb66176c18ae3ba028ec90971b767",
+      "bytes": 3088
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-v2-engineering-20261007/test.log",
+      "sha256": "65ef7f29ef3a4236e4b652c34445965d317d434eeac43291dcdbf02ff1d910d5",
+      "bytes": 145735
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-v2-engineering-20261007/build.log",
+      "sha256": "8dd71287856ab9de8cb24cb3c82a97736fe90a889496d0f1472ad0faf459f6a1",
+      "bytes": 16874
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-v2-engineering-20261007/performance-budget-test.log",
+      "sha256": "629148ef2f707b2bc56e050e6fdc112e8df706ef10474393d787806944d069c2",
+      "bytes": 24825
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-v2-engineering-20261007/framegraph-policy-test.log",
+      "sha256": "1061427a2a201b6bda7fd3c5c7a91f80c6e942b9b12271f28c281d528f40b52a",
+      "bytes": 6774
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-v2-engineering-20261007/api-check.log",
+      "sha256": "3e9ae8d8e9d67efceabcab5fd399ff83241a1438e6f62d91b8ac7a2734a7d511",
+      "bytes": 163
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-v2-engineering-20261007/docs-check.log",
+      "sha256": "2dc4dbcc017209eea39c7f24417fe13ab16192d06882613132958f59864f84c8",
+      "bytes": 418
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/sampling-v2-engineering-20261007/plan.json",
+      "sha256": "029ceac14d773eda8b3c4876df8fc5a318ecd5b2cb726d82511e786b3c984fba",
+      "bytes": 3093
+    }
+  ],
+  "v2ValidationSummary": {
+    "rootTypecheck": "passed",
+    "rootTest": "passed",
+    "rootBuild": "passed",
+    "freshExamples": 98,
+    "focusedTests": 18,
+    "performancePolicyTests": 233,
+    "framegraphPolicyTests": 60,
+    "api": "passed",
+    "docs": "passed"
+  },
+  "servicePreflightFix": {
+    "status": "verified",
+    "focusedTests": 10,
+    "framegraphPolicyTests": 63,
+    "before": {
+      "State": "Stopped",
+      "StartMode": "Disabled",
+      "ProcessId": 0
+    },
+    "after": {
+      "State": "Stopped",
+      "StartMode": "Disabled",
+      "ProcessId": 0
+    },
+    "restored": true,
+    "samplingStarted": false,
+    "check": {
+      "path": "artifacts/engine-0.2.1/g09/search-service-check-20261007T023533Z/independent-verification.json",
+      "sha256": "3dd9095ddb06d569c84aea75ffa74ff644bded45f70aa12130b778896cef8caf",
+      "bytes": 799
+    },
+    "state": {
+      "path": "artifacts/engine-0.2.1/g09/search-service-check-20261007T023533Z/service-state.json",
+      "sha256": "467e2915b42849af64987d288acad4481f8987740370994535b578c60d018221",
+      "bytes": 1136
+    },
+    "wrapper": {
+      "path": "scripts/run-framegraph-unattended.ps1",
+      "sha256": "08cd27242e8ef2ea553c9b81abbb3f26b7875ba849f2e76802e4fa1923253bc3",
+      "bytes": 12023
+    },
+    "checks": [
+      {
+        "path": "artifacts/engine-0.2.1/g09/search-service-fix-checks/focused.log",
+        "sha256": "db7e06409533206ab46e6fc6ea8fd9e9c6ae05a3847f6542fa2e7c09d5569f2d",
+        "bytes": 1111
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/search-service-fix-checks/framegraph-policy-test.log",
+        "sha256": "09aea4e0783317fe22ab4cdbf3f352bf2147f798b0890cbd128125629f3c814e",
+        "bytes": 7140
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/search-service-fix-checks/typecheck.log",
+        "sha256": "65f5756933f63025fdb8fac50f25df8bbfeb428894394bda2ba4f3e5cc2c370a",
+        "bytes": 3088
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/search-service-fix-checks/test.log",
+        "sha256": "e814a2ca5d5d1fd188accdda95ce1be85ad74b87205e9caa9a956186507ec1b2",
+        "bytes": 145786
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/search-service-fix-checks/build.log",
+        "sha256": "1818f933826ced071e4bd9e7c2ffaae8a91dbfd37c2a90fe5486b1752c3fad37",
+        "bytes": 16878
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/search-service-fix-checks/docs-check.log",
+        "sha256": "78c7499c7a0d55e0dcf76b3d2c1294b8a8ccb74471d1f364eb0bbc0f282d5682",
+        "bytes": 418
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/search-service-fix-checks/api-check.log",
+        "sha256": "3e9ae8d8e9d67efceabcab5fd399ff83241a1438e6f62d91b8ac7a2734a7d511",
+        "bytes": 163
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/search-service-fix-checks/runtime-preflight.json",
+        "sha256": "98746b71aff202d2e6019beca41c754573d53d5db1e755ddf4286788dcf3ec03",
+        "bytes": 171
+      }
+    ],
+    "failedLaunch": [
+      {
+        "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T022808Z/service-state.json",
+        "sha256": "72ff47300cb7b39cda957f2e940f35c3540cac937d1a40160ea61f0caa797e29",
+        "bytes": 812
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T022808Z/service-verification.json",
+        "sha256": "07339e6679533928929d1ba45d75d579b73ade063580af7cadfdb7f11a8efbb2",
+        "bytes": 394
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T022808Z/completion.json",
+        "sha256": "829fa2b1dea444aa07444c124c09b563ede80fea0274d9c5324525bf4ab53ec7",
+        "bytes": 501
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T022808Z/wrapper.ps1",
+        "sha256": "7a035d79badf8613d36cce3f364edb2264f67d382da41a234e0f731a7fb6046f",
+        "bytes": 10215
+      },
+      {
+        "path": "artifacts/engine-0.2.1/g09/unattended-closed-codex-20261007T022808Z/launcher.ps1",
+        "sha256": "28841286811740ff80e80d5f926882b0afa957471fa2cd436d2c9a1e47a095d4",
+        "bytes": 4693
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/measurement/revalidation.json",
+      "sha256": "0fd0d3ea0db5bb0e7fe38c46e01169b2a6e82026dc7caa5ff5b4fa8eb5e267da",
+      "bytes": 79267
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/calibration-diagnosis.json",
+      "sha256": "b3dd9ef613764325a6511b096141b2995f5138fa4d5c604edb4429bf97965bc4",
+      "bytes": 48524
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-full-20261006T234337Z/service-verification.json",
+      "sha256": "79c293c5a9fd631471d754de61cb4a05d956be316e550cddf850e59f34b6cabd",
+      "bytes": 300
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-v2-full-20261007T003320Z/interruption-verification.json",
+      "sha256": "98b814a379c6bc5fb30bfa8f8a50cbcb64071fa6c441d7b544d2f767ba0657c0",
+      "bytes": 14622
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/verify-unattended-interruption.mjs",
+      "sha256": "32598c4140f8d6178aa5ea74d03afc0002a9907edbe7f5bf233dbc96177dada4",
+      "bytes": 5349
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/analyze-closed-codex-calibration.mjs",
+      "sha256": "228a57613934d9df2712c7037e0e0d63e62cb423e35f2b16191eb8128e56d6dc",
+      "bytes": 3425
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/launch-with-codex-closed.ps1",
+      "sha256": "d4979a1734480c2696bfebefed3d949213806b49d02a64590d568189d5df1f91",
+      "bytes": 7729
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/start-with-codex-closed.cmd",
+      "sha256": "a78ebddafb09ab74238c026262c764531d516dafb39a53629a2e2e8014b09445",
+      "bytes": 372
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/launcher-path-check.json",
+      "sha256": "5e014a29a527e1f1059d2dc8192fe4ce08ff9e9bc5a067a936d85fad982c9098",
+      "bytes": 1094
+    }
+  ],
+  "remaining": [
+    "Completed Codex-closed v2 population failed all five shared-window candidates; do not repeat unchanged sampling or extend the horizon again",
+    "Diagnose recurring late CPU record spikes with aligned frame/host timestamps, CPU stacks and runtime/system tracing; current evidence cannot attribute GC/JIT, renderer allocations or scheduler interference",
+    "Keep instrumented diagnostic captures separate from performance evidence; establish a cause and verify a correction before a new complete calibration population",
+    "Freeze the earliest shared plateau only if the pre-registered selector passes, then rebuild the fresh same-host baseline and independently revalidate all hashes/statistics"
+  ],
+  "unchangedRegressionRatio": 0.05
+}

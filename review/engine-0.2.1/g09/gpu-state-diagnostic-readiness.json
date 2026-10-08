@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "status": "engineering-smoke-passed-independent-gpu-diagnostic-pending",
+  "verifiedAt": "2026-10-07T11:38:10.166Z",
+  "performanceQualified": false,
+  "formalContractUnchanged": true,
+  "regressionBudget": 0.05,
+  "sourceFingerprint": "sha256:4a5505034f812a02e20789b9524b6a999f84ae3820993a27103f2cfd2436cc59",
+  "runtimeFingerprint": "5a8ef7d702493b4f374c0a94ffc55ba9bec95e22208084c21d82b974cfd58812",
+  "captures": [
+    {
+      "variant": "A0",
+      "out": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.1\\g09\\gpu-state-profile-A0-2026-10-07T11-33-54.563Z",
+      "status": "diagnostic-verified",
+      "telemetryRows": 36,
+      "profileCleanup": true,
+      "monitorStopped": true,
+      "observerStopped": true,
+      "analysisSha256": "82ffdd1687cdf356c8003db2c7e0de80a61e94caa1f9f64b848d812f0b401ce6",
+      "planSha256": "60d01797f721e7f200cffb3b683fbc1bc072226344accaf21b8f5f402d28fa41"
+    },
+    {
+      "variant": "B4",
+      "out": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.1\\g09\\gpu-state-profile-B4-2026-10-07T11-34-07.579Z",
+      "status": "diagnostic-verified",
+      "telemetryRows": 35,
+      "profileCleanup": true,
+      "monitorStopped": true,
+      "observerStopped": true,
+      "analysisSha256": "178dcbf05718e8ff36f82e448ed7f622aac2eb6aaaec01120bb409198c97264c",
+      "planSha256": "f70937ed905e22f63eb2f1dcfb3fb09090581e4848424168ff6765e7d61d4a05"
+    }
+  ],
+  "powerRestored": true,
+  "serviceUnchanged": true,
+  "initialFailure": "Windows PowerShell 5.1 returned null worker ExitCode; capture and restoration succeeded. Fixed by retaining process handle before wait; exit 0/7 propagation tested.",
+  "bindings": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/profile-gpu-state.mjs",
+      "sha256": "a111a9d3efccc1cf0c78c3fd9cefd2f90652364f493525736034412683005f3c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/analyze-gpu-state.mjs",
+      "sha256": "40475d29250c7d05477887ea7de2df3e2671371317716ab683c569e29cfd3de9"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/analyze-gpu-stability.mjs",
+      "sha256": "1e5911c2c25fdee92c75c90472725494040e6d8894258dacd221f9d410fab221"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/launch-gpu-state-closed.ps1",
+      "sha256": "1eda5b57196643d7f877007039b5b23836fe1c9c05c1ee1e249057eb2e9ba94d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/start-gpu-state-with-codex-closed.cmd",
+      "sha256": "9e9690d8de8dc05689be0e576372d65de11cbdda5531a1cc03108e04bf87489d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/test-gpu-launcher-exit.ps1",
+      "sha256": "e86ee192204ff12da673a585e3654a078153065c941294eadde5b76ee9f1ad60"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-launcher-exit-tests.log",
+      "sha256": "3e2c8ce9084ea13e03bf4f635e9298cb3c0d4c7c8a9949e08295a02bb0622fd5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-state-launcher-smoke-20261007.log",
+      "sha256": "04c9f8884aae424e23544c5aa03947df59895b96a40d7ac587fadb08a110edb8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-state-launcher-smoke-fixed-20261007.log",
+      "sha256": "7c0a8379a333aeddfaafeca499bccf5e337b310d5ceb36a2449413741c4f180a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-state-launcher-plan-20261007.json",
+      "sha256": "7e5ba55513091bb8d471098276347bc8a26dfd26a791f5fee4790e4215fa02b5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-state-smoke-20261007T113352Z/completion.json",
+      "sha256": "bdd682fd690ac8f6a6c9b0556f1d2230ecc0cf2bf7b9006541e334e6b749bd8e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-state-smoke-20261007T113352Z/power-state.json",
+      "sha256": "28516281a8e54e9f583b3a23cf55cc2f6f7bdf7748e5b2da06b841d81d4caa3e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-state-smoke-20261007T113134Z/completion.json",
+      "sha256": "f85b60cd7ec077a176bb01c176cadda8190f340cc297ba6b12b45d81246011a1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-state-launcher-plan-final-20261007.json",
+      "sha256": "c4db1a4ff9d1fb7552041640c7427a1493e6f2b19ab64556ad4e55a7a61f2845"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T095253Z/docs-check.log",
+      "sha256": "31a4251576ef7cb762ebc6bbb419949ab749e71a6ffe9357daa42d34b32e4b89"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T095253Z/api-check.log",
+      "sha256": "3e9ae8d8e9d67efceabcab5fd399ff83241a1438e6f62d91b8ac7a2734a7d511"
+    }
+  ]
+}

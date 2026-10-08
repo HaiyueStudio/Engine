@@ -1,0 +1,1925 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-07T11:24:34.324Z",
+  "status": "cpu-budget-passed-a0-gpu-baseline-unstable",
+  "performanceQualified": false,
+  "scope": "Complete v3 result with offline GPU stability analysis; no discarded samples or gate changes. GPU clocks were observed before/after only, not during timestamp samples.",
+  "sourceFingerprint": "sha256:4a5505034f812a02e20789b9524b6a999f84ae3820993a27103f2cfd2436cc59",
+  "runtimeFingerprint": "5a8ef7d702493b4f374c0a94ffc55ba9bec95e22208084c21d82b974cfd58812",
+  "contract": "g09-forward-cold-steady-v3",
+  "regressionBudget": 0.05,
+  "selectedWarmup": 6000,
+  "baselineStable": false,
+  "counts": {
+    "correctness": 4,
+    "calibration": 12,
+    "baseline": 12,
+    "cpuCalibrationFrames": 288000,
+    "cpuBaselineSteadyFrames": 36000,
+    "gpuBaselineSamples": 3600
+  },
+  "metrics": [
+    {
+      "caseId": "forward-small-1",
+      "metric": "cpu",
+      "a0": 0.565000057220459,
+      "b4": 0.5900001525878906,
+      "ratio": 1.044247951921316,
+      "limit": 1.05,
+      "gated": true,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          0.5799999237060547,
+          0.559999942779541,
+          0.559999942779541
+        ],
+        "relativeSpread": 0.03571425530374956,
+        "cv": 0.016637792615815265,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          0.5950000286102295,
+          0.5799999237060547,
+          0.6050000190734863
+        ],
+        "relativeSpread": 0.04201696498372543,
+        "cv": 0.017315840349727076,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-small-1",
+      "metric": "gpuPassSum",
+      "a0": 0.979904,
+      "b4": 0.9758720000000001,
+      "ratio": 0.9958853112141598,
+      "limit": 1.05,
+      "gated": true,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          0.9789439999999999,
+          0.980992,
+          0.97792
+        ],
+        "relativeSpread": 0.0031380753138074945,
+        "cv": 0.0013041677890463284,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          0.982016,
+          0.973824,
+          0.9748479999999999
+        ],
+        "relativeSpread": 0.008403361344537792,
+        "cv": 0.003730635308187046,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-small-1",
+      "metric": "gpuSpan",
+      "a0": 1.077248,
+      "b4": 1.0752,
+      "ratio": 0.9980988593155893,
+      "limit": 1.05,
+      "gated": true,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          1.0752,
+          1.08032,
+          1.0752
+        ],
+        "relativeSpread": 0.0047619047619047745,
+        "cv": 0.0022412259308606953,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          1.081344,
+          1.073152,
+          1.071104
+        ],
+        "relativeSpread": 0.009541984732824452,
+        "cv": 0.004114755998989122,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-small-1",
+      "metric": "frameWall",
+      "a0": 4.420000076293945,
+      "b4": 4.8399999141693115,
+      "ratio": 1.0950225861144158,
+      "limit": null,
+      "gated": true,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          4.43999981880188,
+          4.430000066757202,
+          4.394999980926514
+        ],
+        "relativeSpread": 0.010157976793961196,
+        "cv": 0.004363291979693974,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          4.924999952316284,
+          4.684999942779541,
+          4.659999847412109
+        ],
+        "relativeSpread": 0.056563523615958504,
+        "cv": 0.02511557924462558,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-small-1",
+      "metric": "coldCpu",
+      "a0": 1.5550000667572021,
+      "b4": 1.7100000381469727,
+      "ratio": 1.099678433913516,
+      "limit": null,
+      "gated": false,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          1.5699999332427979,
+          1.4849998950958252,
+          1.5550000667572021
+        ],
+        "relativeSpread": 0.05466240160634319,
+        "cv": 0.02410643723801946,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          1.7100000381469727,
+          1.5799999237060547,
+          1.6499998569488525
+        ],
+        "relativeSpread": 0.07878795497674262,
+        "cv": 0.032261925626488094,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-cap-8",
+      "metric": "cpu",
+      "a0": 0.5850000381469727,
+      "b4": 0.6000001430511475,
+      "ratio": 1.025641203292377,
+      "limit": 1.05,
+      "gated": true,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          0.5750000476837158,
+          0.5850000381469727,
+          0.6049997806549072
+        ],
+        "relativeSpread": 0.05128159147855374,
+        "cv": 0.021198992869586323,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          0.6050000190734863,
+          0.5899999141693115,
+          0.6050000190734863
+        ],
+        "relativeSpread": 0.024793561043430012,
+        "cv": 0.011785195752480616,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-cap-8",
+      "metric": "gpuPassSum",
+      "a0": 1.021952,
+      "b4": 0.995328,
+      "ratio": 0.9739478957915831,
+      "limit": 1.05,
+      "gated": true,
+      "passed": false,
+      "A0Stability": {
+        "cohortP95": [
+          1.024,
+          1.030144,
+          0.288768
+        ],
+        "relativeSpread": 0.7239999999999999,
+        "cv": 0.4456619133977596,
+        "stable": false
+      },
+      "B4Stability": {
+        "cohortP95": [
+          0.9902079999999999,
+          0.976896,
+          1.0076479999999999
+        ],
+        "relativeSpread": 0.031056101344363905,
+        "cv": 0.012698972818303086,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-cap-8",
+      "metric": "gpuSpan",
+      "a0": 1.117184,
+      "b4": 1.09056,
+      "ratio": 0.9761686526122824,
+      "limit": 1.05,
+      "gated": true,
+      "passed": false,
+      "A0Stability": {
+        "cohortP95": [
+          1.119232,
+          1.1264,
+          0.293888
+        ],
+        "relativeSpread": 0.7438243366880147,
+        "cv": 0.4616282176626032,
+        "stable": false
+      },
+      "B4Stability": {
+        "cohortP95": [
+          1.08544,
+          1.0752,
+          1.103872
+        ],
+        "relativeSpread": 0.02641509433962267,
+        "cv": 0.010902225343151056,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-cap-8",
+      "metric": "frameWall",
+      "a0": 4.8399999141693115,
+      "b4": 4.460000038146973,
+      "ratio": 0.9214876275286963,
+      "limit": null,
+      "gated": true,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          4.430000066757202,
+          4.4700000286102295,
+          4.960000038146973
+        ],
+        "relativeSpread": 0.11856822550279784,
+        "cv": 0.052158063440920624,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          4.420000076293945,
+          4.414999961853027,
+          4.7749998569488525
+        ],
+        "relativeSpread": 0.0814479386610499,
+        "cv": 0.03715049298611649,
+        "stable": true
+      }
+    },
+    {
+      "caseId": "forward-cap-8",
+      "metric": "coldCpu",
+      "a0": 1.6399998664855957,
+      "b4": 1.7150001525878906,
+      "ratio": 1.0457318854927806,
+      "limit": null,
+      "gated": false,
+      "passed": true,
+      "A0Stability": {
+        "cohortP95": [
+          1.6299998760223389,
+          1.809999942779541,
+          1.5699999332427979
+        ],
+        "relativeSpread": 0.1472392808534508,
+        "cv": 0.06106611207447512,
+        "stable": true
+      },
+      "B4Stability": {
+        "cohortP95": [
+          1.7599999904632568,
+          1.5899999141693115,
+          1.6050000190734863
+        ],
+        "relativeSpread": 0.10591904939171326,
+        "cv": 0.04652732291951855,
+        "stable": true
+      }
+    }
+  ],
+  "host": {
+    "processRows": 4231,
+    "unreadableMax": 2,
+    "observedInteractiveApplications": [],
+    "beforeAfterCpu": {
+      "n": 48,
+      "min": 0.18712574850299202,
+      "p50": 0.7734530938123707,
+      "p95": 2.9133466135458197,
+      "max": 9.765527562983289
+    }
+  },
+  "captures": [
+    {
+      "file": "000-correctness-forward-small-1-A0.json",
+      "sha256": "0cae6935b55f3e6a7503e8e7a35ee47d09e0c5b610e6bc4b12171e58ab01089d",
+      "mode": "correctness",
+      "job": {
+        "caseId": "forward-small-1",
+        "variant": "A0"
+      },
+      "cleanupPassed": true
+    },
+    {
+      "file": "001-correctness-forward-small-1-B4.json",
+      "sha256": "1bc8aa5aa0d88a133399b5497bf9d53355d5d10ab391908ed2bcda494c5f43db",
+      "mode": "correctness",
+      "job": {
+        "caseId": "forward-small-1",
+        "variant": "B4"
+      },
+      "cleanupPassed": true
+    },
+    {
+      "file": "002-correctness-forward-cap-8-A0.json",
+      "sha256": "e4bf9480d0cbc41e5844d3e3a571dde0346083539d81f94da899d46ec9285186",
+      "mode": "correctness",
+      "job": {
+        "caseId": "forward-cap-8",
+        "variant": "A0"
+      },
+      "cleanupPassed": true
+    },
+    {
+      "file": "003-correctness-forward-cap-8-B4.json",
+      "sha256": "24af5c1c1aef78fbc20205d0447e9f2c96058d9d5394c3accde67783382b83f1",
+      "mode": "correctness",
+      "job": {
+        "caseId": "forward-cap-8",
+        "variant": "B4"
+      },
+      "cleanupPassed": true
+    },
+    {
+      "file": "004-calibration-forward-small-1-A0.json",
+      "sha256": "743a85120f14ba71dc6c2b66c322e0a6fb641d960da6dc9bf1ca144172adf134",
+      "mode": "calibration",
+      "job": {
+        "cohort": 0,
+        "caseId": "forward-small-1",
+        "variant": "A0"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T09:55:50.505Z",
+      "end": "2026-10-07T09:57:32.300Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "278",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.744448,
+        "p50": 0.908288,
+        "p95": 0.98304,
+        "max": 1.60768
+      },
+      "span": {
+        "n": 300,
+        "min": 0.837632,
+        "p50": 1.002496,
+        "p95": 1.081344,
+        "max": 1.69984
+      },
+      "work": {
+        "drawsPerFrame": 8.896314907872696,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 286.00603015075376,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.1l.low.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 3
+      }
+    },
+    {
+      "file": "005-calibration-forward-small-1-B4.json",
+      "sha256": "0bcb6f0a0f594eae42b2b4a1265b6197cb1e86f2781051ad3200c83ae60522b3",
+      "mode": "calibration",
+      "job": {
+        "cohort": 0,
+        "caseId": "forward-small-1",
+        "variant": "B4"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T09:59:42.725Z",
+      "end": "2026-10-07T10:01:24.882Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "265",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.738304,
+        "p50": 0.908288,
+        "p95": 0.9728,
+        "max": 1.0342399999999998
+      },
+      "span": {
+        "n": 300,
+        "min": 0.830464,
+        "p50": 1.004544,
+        "p95": 1.071104,
+        "max": 1.143808
+      },
+      "work": {
+        "drawsPerFrame": 8.896314907872696,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 286.00603015075376,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.1l.low.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 3
+      }
+    },
+    {
+      "file": "006-calibration-forward-cap-8-A0.json",
+      "sha256": "659952831c02408cb72498cbf886ff6fa072ab7cd163b515cc19ccde92217aac",
+      "mode": "calibration",
+      "job": {
+        "cohort": 0,
+        "caseId": "forward-cap-8",
+        "variant": "A0"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:03:35.283Z",
+      "end": "2026-10-07T10:05:17.141Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "49",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "569",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.81408,
+        "p50": 0.92464,
+        "p95": 0.985088,
+        "max": 1.056768
+      },
+      "span": {
+        "n": 300,
+        "min": 0.91648,
+        "p50": 1.021952,
+        "p95": 1.082368,
+        "max": 1.153024
+      },
+      "work": {
+        "drawsPerFrame": 8.896314907872696,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 272.7396984924623,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.8l.high.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 8
+      }
+    },
+    {
+      "file": "007-calibration-forward-cap-8-B4.json",
+      "sha256": "7c12aa14dd4721261933d341308cc66d9df9024c11912e3abb3545e962fe12a8",
+      "mode": "calibration",
+      "job": {
+        "cohort": 0,
+        "caseId": "forward-cap-8",
+        "variant": "B4"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:07:27.555Z",
+      "end": "2026-10-07T10:09:09.882Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "49",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "51",
+        "0",
+        "518",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.857088,
+        "p50": 0.987136,
+        "p95": 1.048576,
+        "max": 1.107968
+      },
+      "span": {
+        "n": 300,
+        "min": 0.948224,
+        "p50": 1.081344,
+        "p95": 1.147904,
+        "max": 1.195008
+      },
+      "work": {
+        "drawsPerFrame": 8.896314907872696,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 272.7396984924623,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.8l.high.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 8
+      }
+    },
+    {
+      "file": "008-calibration-forward-cap-8-B4.json",
+      "sha256": "118d96bcd157c7290577abf924a7d8537b7b86c23fd4f639ac6e23a4e727e9e4",
+      "mode": "calibration",
+      "job": {
+        "cohort": 1,
+        "caseId": "forward-cap-8",
+        "variant": "B4"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:11:20.292Z",
+      "end": "2026-10-07T10:13:02.652Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "49",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "442",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.86528,
+        "p50": 0.985152,
+        "p95": 1.0455040000000002,
+        "max": 1.110016
+      },
+      "span": {
+        "n": 300,
+        "min": 0.960512,
+        "p50": 1.079296,
+        "p95": 1.141728,
+        "max": 1.235968
+      },
+      "work": {
+        "drawsPerFrame": 8.896314907872696,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 272.7396984924623,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.8l.high.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 8
+      }
+    },
+    {
+      "file": "009-calibration-forward-cap-8-A0.json",
+      "sha256": "7301ed98d409198ed34dbd3ef5490c3f5b27c8a0fbf20b0e60d2893d16727bf6",
+      "mode": "calibration",
+      "job": {
+        "cohort": 1,
+        "caseId": "forward-cap-8",
+        "variant": "A0"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:15:13.076Z",
+      "end": "2026-10-07T10:16:56.260Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "49",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "53",
+        "0",
+        "556",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.8171519999999999,
+        "p50": 0.9359360000000001,
+        "p95": 0.9912320000000001,
+        "max": 1.408
+      },
+      "span": {
+        "n": 300,
+        "min": 0.910336,
+        "p50": 1.033216,
+        "p95": 1.102848,
+        "max": 1.503232
+      },
+      "work": {
+        "drawsPerFrame": 8.896314907872696,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 272.7396984924623,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.8l.high.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 8
+      }
+    },
+    {
+      "file": "010-calibration-forward-small-1-B4.json",
+      "sha256": "ed9bd2ae920117e4b99baed1f055c1139fd703875687681393956b3c69e7bac7",
+      "mode": "calibration",
+      "job": {
+        "cohort": 1,
+        "caseId": "forward-small-1",
+        "variant": "B4"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:19:06.689Z",
+      "end": "2026-10-07T10:20:48.927Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "51",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "54",
+        "0",
+        "1607",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.11264,
+        "p50": 0.13619199999999998,
+        "p95": 0.14540799999999998,
+        "max": 0.14848
+      },
+      "span": {
+        "n": 300,
+        "min": 0.118784,
+        "p50": 0.142336,
+        "p95": 0.151552,
+        "max": 0.154624
+      },
+      "work": {
+        "drawsPerFrame": 8.896314907872696,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 286.00603015075376,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.1l.low.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 3
+      }
+    },
+    {
+      "file": "011-calibration-forward-small-1-A0.json",
+      "sha256": "6217ff131f61253921c88fa58d2f4ded4101562c409ce5aa89b80c7634db421c",
+      "mode": "calibration",
+      "job": {
+        "cohort": 1,
+        "caseId": "forward-small-1",
+        "variant": "A0"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:22:59.362Z",
+      "end": "2026-10-07T10:24:41.214Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "52",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "52",
+        "0",
+        "291",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.731136,
+        "p50": 0.909312,
+        "p95": 0.980992,
+        "max": 1.081344
+      },
+      "span": {
+        "n": 300,
+        "min": 0.823296,
+        "p50": 1.005568,
+        "p95": 1.076224,
+        "max": 1.176576
+      },
+      "work": {
+        "drawsPerFrame": 8.896314907872696,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 286.00603015075376,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.1l.low.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 3
+      }
+    },
+    {
+      "file": "012-calibration-forward-small-1-A0.json",
+      "sha256": "6cf264702d80fbc7810ee3c0ed547120d07ec06b1b88f92b41aaa22214d217e3",
+      "mode": "calibration",
+      "job": {
+        "cohort": 2,
+        "caseId": "forward-small-1",
+        "variant": "A0"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:26:51.650Z",
+      "end": "2026-10-07T10:28:33.126Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "51",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "53",
+        "0",
+        "1278",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.142336,
+        "p50": 0.173056,
+        "p95": 0.18431999999999998,
+        "max": 0.187392
+      },
+      "span": {
+        "n": 300,
+        "min": 0.14848,
+        "p50": 0.178176,
+        "p95": 0.190464,
+        "max": 0.193536
+      },
+      "work": {
+        "drawsPerFrame": 8.896314907872696,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 286.00603015075376,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.1l.low.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 3
+      }
+    },
+    {
+      "file": "013-calibration-forward-small-1-B4.json",
+      "sha256": "d9302e45ccee5ba1f65efbc0907fdf230c0bc8ae71ecc25576e77d87603b6b26",
+      "mode": "calibration",
+      "job": {
+        "cohort": 2,
+        "caseId": "forward-small-1",
+        "variant": "B4"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:30:43.543Z",
+      "end": "2026-10-07T10:32:25.320Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "53",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "53",
+        "0",
+        "291",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.739328,
+        "p50": 0.904224,
+        "p95": 0.976896,
+        "max": 1.5503040000000001
+      },
+      "span": {
+        "n": 300,
+        "min": 0.831488,
+        "p50": 1.002496,
+        "p95": 1.078272,
+        "max": 1.73056
+      },
+      "work": {
+        "drawsPerFrame": 8.896314907872696,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 286.00603015075376,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.1l.low.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 3
+      }
+    },
+    {
+      "file": "014-calibration-forward-cap-8-A0.json",
+      "sha256": "5ca66bdf18c32eabe25bbedec8970672d59b7d9d00ed6f5d987bec1a7c492972",
+      "mode": "calibration",
+      "job": {
+        "cohort": 2,
+        "caseId": "forward-cap-8",
+        "variant": "A0"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:34:35.737Z",
+      "end": "2026-10-07T10:36:17.755Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "52",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "52",
+        "0",
+        "582",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.800736,
+        "p50": 0.9123840000000001,
+        "p95": 0.9646079999999999,
+        "max": 1.0363200000000001
+      },
+      "span": {
+        "n": 300,
+        "min": 0.889856,
+        "p50": 1.00864,
+        "p95": 1.060864,
+        "max": 1.130496
+      },
+      "work": {
+        "drawsPerFrame": 8.896314907872696,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 272.7396984924623,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.8l.high.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 8
+      }
+    },
+    {
+      "file": "015-calibration-forward-cap-8-B4.json",
+      "sha256": "298ff91a23a9b3780c608a7405a9a20b99a570fc387407b4d64c67043724e0df",
+      "mode": "calibration",
+      "job": {
+        "cohort": 2,
+        "caseId": "forward-cap-8",
+        "variant": "B4"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:38:28.154Z",
+      "end": "2026-10-07T10:40:09.906Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "51",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "52",
+        "0",
+        "594",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.7905279999999999,
+        "p50": 0.900096,
+        "p95": 0.9564159999999999,
+        "max": 1.045504
+      },
+      "span": {
+        "n": 300,
+        "min": 0.88064,
+        "p50": 0.9984,
+        "p95": 1.051648,
+        "max": 1.134592
+      },
+      "work": {
+        "drawsPerFrame": 8.896314907872696,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 272.7396984924623,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.8l.high.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 8
+      }
+    },
+    {
+      "file": "016-baseline-forward-small-1-A0.json",
+      "sha256": "3e3290e75df388f1ead65ba33095cd257c7c9f8458a84953ea8223e23aa9ddd7",
+      "mode": "baseline",
+      "job": {
+        "cohort": 0,
+        "caseId": "forward-small-1",
+        "variant": "A0"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:42:21.109Z",
+      "end": "2026-10-07T10:43:02.626Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "51",
+        "0",
+        "354",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.734208,
+        "p50": 0.9072640000000001,
+        "p95": 0.9789439999999999,
+        "max": 1.0495999999999999
+      },
+      "span": {
+        "n": 300,
+        "min": 0.830464,
+        "p50": 1.00352,
+        "p95": 1.0752,
+        "max": 1.169408
+      },
+      "work": {
+        "drawsPerFrame": 8.899666666666667,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 285.728,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.1l.low.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 3
+      }
+    },
+    {
+      "file": "017-baseline-forward-small-1-B4.json",
+      "sha256": "f60256462b3113e09c59d0a612c509baffaa74d967b3aef0abf46d097ff89c6d",
+      "mode": "baseline",
+      "job": {
+        "cohort": 0,
+        "caseId": "forward-small-1",
+        "variant": "B4"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:45:13.064Z",
+      "end": "2026-10-07T10:45:52.451Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "442",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.744448,
+        "p50": 0.909312,
+        "p95": 0.982016,
+        "max": 1.619968
+      },
+      "span": {
+        "n": 300,
+        "min": 0.836608,
+        "p50": 1.005568,
+        "p95": 1.081344,
+        "max": 1.7152
+      },
+      "work": {
+        "drawsPerFrame": 8.899666666666667,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 285.728,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.1l.low.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 3
+      }
+    },
+    {
+      "file": "018-baseline-forward-cap-8-A0.json",
+      "sha256": "7318702dd5f2e32d823a494a14852c6d45f776f072338adf2c619834208b9403",
+      "mode": "baseline",
+      "job": {
+        "cohort": 0,
+        "caseId": "forward-cap-8",
+        "variant": "A0"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:48:02.899Z",
+      "end": "2026-10-07T10:48:44.311Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "51",
+        "0",
+        "531",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.841728,
+        "p50": 0.9615360000000001,
+        "p95": 1.024,
+        "max": 1.088512
+      },
+      "span": {
+        "n": 300,
+        "min": 0.934912,
+        "p50": 1.05472,
+        "p95": 1.119232,
+        "max": 1.199104
+      },
+      "work": {
+        "drawsPerFrame": 8.899666666666667,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 272,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.8l.high.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 8
+      }
+    },
+    {
+      "file": "019-baseline-forward-cap-8-B4.json",
+      "sha256": "c3a14c0f99f09f675d10b00c2f6b48c6919382cb9b99885d3f8003f1487323d7",
+      "mode": "baseline",
+      "job": {
+        "cohort": 0,
+        "caseId": "forward-cap-8",
+        "variant": "B4"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:50:59.188Z",
+      "end": "2026-10-07T10:51:40.630Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "49",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "556",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.8008,
+        "p50": 0.93088,
+        "p95": 0.9902079999999999,
+        "max": 1.019904
+      },
+      "span": {
+        "n": 300,
+        "min": 0.891904,
+        "p50": 1.025024,
+        "p95": 1.08544,
+        "max": 1.153024
+      },
+      "work": {
+        "drawsPerFrame": 8.899666666666667,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 272,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.8l.high.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 8
+      }
+    },
+    {
+      "file": "020-baseline-forward-cap-8-B4.json",
+      "sha256": "916b203a1167ba0225fba370cacdd243fc2afcfe1c1ba578e2ffbb4b00694aa0",
+      "mode": "baseline",
+      "job": {
+        "cohort": 1,
+        "caseId": "forward-cap-8",
+        "variant": "B4"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:53:51.059Z",
+      "end": "2026-10-07T10:54:32.077Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "49",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "569",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.788448,
+        "p50": 0.91952,
+        "p95": 0.976896,
+        "max": 1.020928
+      },
+      "span": {
+        "n": 300,
+        "min": 0.881632,
+        "p50": 1.011712,
+        "p95": 1.0752,
+        "max": 1.148928
+      },
+      "work": {
+        "drawsPerFrame": 8.899666666666667,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 272,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.8l.high.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 8
+      }
+    },
+    {
+      "file": "021-baseline-forward-cap-8-A0.json",
+      "sha256": "ce22121d2b7f4281a51c83bd1456c43f3c0f171165ef00b0bd4954e401af53eb",
+      "mode": "baseline",
+      "job": {
+        "cohort": 1,
+        "caseId": "forward-cap-8",
+        "variant": "A0"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:56:42.519Z",
+      "end": "2026-10-07T10:57:23.651Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "49",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "531",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.8570880000000001,
+        "p50": 0.9656319999999999,
+        "p95": 1.030144,
+        "max": 1.103872
+      },
+      "span": {
+        "n": 300,
+        "min": 0.95232,
+        "p50": 1.05984,
+        "p95": 1.1264,
+        "max": 1.196032
+      },
+      "work": {
+        "drawsPerFrame": 8.899666666666667,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 272,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.8l.high.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 8
+      }
+    },
+    {
+      "file": "022-baseline-forward-small-1-B4.json",
+      "sha256": "20e1de7a6a0bcb03bfc6aecdfb0d414cadd8622e1c66b01d42ef99b4a947a68d",
+      "mode": "baseline",
+      "job": {
+        "cohort": 1,
+        "caseId": "forward-small-1",
+        "variant": "B4"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T10:59:34.082Z",
+      "end": "2026-10-07T11:00:15.770Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "1607",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "0",
+        "278",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.7301759999999999,
+        "p50": 0.9072640000000001,
+        "p95": 0.973824,
+        "max": 1.019904
+      },
+      "span": {
+        "n": 300,
+        "min": 0.826368,
+        "p50": 1.00352,
+        "p95": 1.073152,
+        "max": 1.168384
+      },
+      "work": {
+        "drawsPerFrame": 8.899666666666667,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 285.728,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.1l.low.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 3
+      }
+    },
+    {
+      "file": "023-baseline-forward-small-1-A0.json",
+      "sha256": "5223c6b934ee497197b3c6eec33575d6c2aae4d73b870eebbcc5fc3868378d7b",
+      "mode": "baseline",
+      "job": {
+        "cohort": 1,
+        "caseId": "forward-small-1",
+        "variant": "A0"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T11:02:26.211Z",
+      "end": "2026-10-07T11:03:07.786Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "49",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "49",
+        "0",
+        "291",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.7434240000000001,
+        "p50": 0.9144319999999999,
+        "p95": 0.980992,
+        "max": 1.045504
+      },
+      "span": {
+        "n": 300,
+        "min": 0.83456,
+        "p50": 1.009664,
+        "p95": 1.08032,
+        "max": 1.1776
+      },
+      "work": {
+        "drawsPerFrame": 8.899666666666667,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 285.728,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.1l.low.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 3
+      }
+    },
+    {
+      "file": "024-baseline-forward-small-1-A0.json",
+      "sha256": "7c59cf39cba6981d83bab574b398d2df8df70209686e7de5ae90259e73da83d8",
+      "mode": "baseline",
+      "job": {
+        "cohort": 2,
+        "caseId": "forward-small-1",
+        "variant": "A0"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T11:05:18.207Z",
+      "end": "2026-10-07T11:05:59.438Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "48",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "49",
+        "0",
+        "354",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.744448,
+        "p50": 0.909312,
+        "p95": 0.97792,
+        "max": 1.02912
+      },
+      "span": {
+        "n": 300,
+        "min": 0.83456,
+        "p50": 1.007616,
+        "p95": 1.0752,
+        "max": 1.119232
+      },
+      "work": {
+        "drawsPerFrame": 8.899666666666667,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 285.728,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.1l.low.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 3
+      }
+    },
+    {
+      "file": "025-baseline-forward-small-1-B4.json",
+      "sha256": "862f78437091cc6cac39217da03b435dbea7e53d5bcb1064241e610c14ab3d6d",
+      "mode": "baseline",
+      "job": {
+        "cohort": 2,
+        "caseId": "forward-small-1",
+        "variant": "B4"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T11:08:09.885Z",
+      "end": "2026-10-07T11:08:51.433Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "48",
+        "0",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "49",
+        "0",
+        "329",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.734208,
+        "p50": 0.9072639999999998,
+        "p95": 0.9748479999999999,
+        "max": 1.031168
+      },
+      "span": {
+        "n": 300,
+        "min": 0.82944,
+        "p50": 1.004544,
+        "p95": 1.071104,
+        "max": 1.125376
+      },
+      "work": {
+        "drawsPerFrame": 8.899666666666667,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 285.728,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.1l.low.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 3
+      }
+    },
+    {
+      "file": "026-baseline-forward-cap-8-A0.json",
+      "sha256": "7c5e2e60e427fa43f4c6a25a741e37de5572b5476b497bc361c7391d2ea5f0c9",
+      "mode": "baseline",
+      "job": {
+        "cohort": 2,
+        "caseId": "forward-cap-8",
+        "variant": "A0"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T11:11:01.889Z",
+      "end": "2026-10-07T11:11:43.065Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "48",
+        "1",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "51",
+        "0",
+        "1607",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.234496,
+        "p50": 0.270336,
+        "p95": 0.288768,
+        "max": 0.294912
+      },
+      "span": {
+        "n": 300,
+        "min": 0.24064,
+        "p50": 0.277504,
+        "p95": 0.293888,
+        "max": 0.30208
+      },
+      "work": {
+        "drawsPerFrame": 8.899666666666667,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 272,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.8l.high.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 8
+      }
+    },
+    {
+      "file": "027-baseline-forward-cap-8-B4.json",
+      "sha256": "214e577876f020b62ea8a4946c288d68f2678de8248cb147900bf88d44cb11d0",
+      "mode": "baseline",
+      "job": {
+        "cohort": 2,
+        "caseId": "forward-cap-8",
+        "variant": "B4"
+      },
+      "cleanupPassed": true,
+      "start": "2026-10-07T11:13:53.529Z",
+      "end": "2026-10-07T11:14:35.048Z",
+      "preGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "50",
+        "1",
+        "139",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "postGpu": [
+        "NVIDIA GeForce GTX 1070 Ti",
+        "560.94",
+        "51",
+        "0",
+        "544",
+        "Not Active",
+        "Not Active",
+        "Not Active"
+      ],
+      "passLabels": [
+        "(unlabeled render pass)",
+        "GrayscalePass.renderPass",
+        "SceneOutput.renderPass"
+      ],
+      "gpu": {
+        "n": 300,
+        "min": 0.827392,
+        "p50": 0.946176,
+        "p95": 1.0076479999999999,
+        "max": 1.1151360000000001
+      },
+      "span": {
+        "n": 300,
+        "min": 0.9216,
+        "p50": 1.041408,
+        "p95": 1.103872,
+        "max": 1.210368
+      },
+      "work": {
+        "drawsPerFrame": 8.899666666666667,
+        "renderPassesPerFrame": 3,
+        "uploadBytesPerFrame": 272,
+        "poolMisses": 0,
+        "lightingFixtureId": "lighting.billiards-3d.8l.high.0pct.1v.720p",
+        "lightCapacity": 8,
+        "submittedTotal": 8
+      }
+    }
+  ],
+  "completion": {
+    "finishedAt": "2026-10-07T11:14:40.8408099Z",
+    "output": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.1\\g09\\unattended-controlled-v3-20261007T095253Z",
+    "samplingStarted": true,
+    "captureExitCode": 1,
+    "validationExitCode": 1,
+    "searchRestored": true,
+    "powerRestored": true,
+    "remainingTestProcesses": [],
+    "note": "Restoration does not mean sampling passed. Consult the measurement and independent revalidation records."
+  },
+  "power": {
+    "verifiedAt": "2026-10-07T11:14:38.2460320Z",
+    "restored": true,
+    "current": {
+      "schemaVersion": 1,
+      "schemeId": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "acLineStatus": 1,
+      "minimumAcPercent": 5,
+      "maximumAcPercent": 100,
+      "minimumDcPercent": 5,
+      "maximumDcPercent": 100
+    },
+    "temporaryRemoved": true
+  },
+  "service": {
+    "verifiedAt": "2026-10-07T11:14:37.8065779Z",
+    "verifierPid": 16296,
+    "service": {
+      "State": "Stopped",
+      "StartMode": "Disabled",
+      "ProcessId": 0
+    },
+    "Start": 4,
+    "DelayedAutoStart": 1,
+    "restored": true,
+    "remainingTestProcesses": []
+  },
+  "bindings": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T095253Z/measurement/report.json",
+      "sha256": "18346b45d1fa91a735da57f63dca32e7b9340ffedf29dea5b89df203fcc50bb3"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T095253Z/measurement/revalidation.json",
+      "sha256": "a263de89f5ae9ca1eeaddc19bce353a282b783bd660157ea2a1905028dba860a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T095253Z/measurement/launcher-revalidation.json",
+      "sha256": "7092e9d02bc4d9f04b4d5fbb9101786e5619c4883aa7b4a2aa4c52f86257d249"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T095253Z/measurement/frozen-protocol.json",
+      "sha256": "d5d3d84afdf610756c798a204159ee5f1a2bf25f66929fa34fcfcd2377c609da"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T095253Z/measurement/same-host-baseline.json",
+      "sha256": "47808fead5202db7ef3d2f460765ebc8e688e161318c9ebe4561cdc86ae1d18f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T095253Z/completion.json",
+      "sha256": "c12ebb4a56ce4a7f2fd821f774d607c5d7979f8a299a56e453455e14509869b8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T095253Z/power-verification.json",
+      "sha256": "89b76237efd0883b6feb3e7ccc88f20bb5d21a89c2577c7153f9d2ded3760132"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T095253Z/service-verification.json",
+      "sha256": "0165280663549258ce98852a55a656b21312397b01fee564f6d2d4269a769578"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T095253Z/processes.jsonl",
+      "sha256": "f74037318a2747c99a5e1923c69492dd54723cf38295754eabebbe8dbb9f83dd"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-v3-20261007T095253Z/frequency.jsonl",
+      "sha256": "69a8c2d61103e708f49b620e5cf1cc3a71d5748d6959c21eb145ce04bdf82bfe"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/analyze-gpu-stability.mjs",
+      "sha256": "1e5911c2c25fdee92c75c90472725494040e6d8894258dacd221f9d410fab221"
+    }
+  ]
+}

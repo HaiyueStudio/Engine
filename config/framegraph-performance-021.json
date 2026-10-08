@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "contractId": "framegraph-021-default-path-preflight-v1",
+  "scope": "Inherited G01/G05 Forward same-host A0/B4 regression preflight (including its existing postprocess); not the effects-off F0 or complete F0-F8 performance qualification",
+  "adr": "docs/for-ai/adr/0117-native-021-hardware-scope.md",
+  "hardwareContract": "engine-native-021-v2",
+  "baseline": "review/engine-0.2.1/g09/dependency-baseline.json",
+  "budgetSource": "config/lighting-performance-021.json#relativeBudgets",
+  "sampling": { "warmup": 120, "cpuSamples": 300, "gpuSamples": 300, "cohorts": 3, "idleMs": 120000, "order": "AB-BA-AB", "dropSamples": false },
+  "cases": ["forward-small-1", "forward-cap-8"],
+  "runner": {
+    "id": "windows-gtx1070ti-g09-development",
+    "hostname": "YLMF-2019UTBUGT",
+    "platform": "win32",
+    "browserId": "chrome-windows",
+    "vendor": "nvidia",
+    "architecture": "pascal",
+    "gpuName": "NVIDIA GeForce GTX 1070 Ti",
+    "driverVersion": "560.94",
+    "cpuModel": "Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz",
+    "formalReleaseEnrolled": false,
+    "maxBackgroundCpuPercent": 15,
+    "maxBackgroundGpuPercent": 10,
+    "hostObservation": "NVIDIA temperature/utilization/clocks/thermal flags, CPU load/frequency/model and Windows power scheme before/after; CPU thermal state unavailable is recorded explicitly"
+  },
+  "requiredBeforeTiming": "A0/B4 inherited Forward full-image parity on the registered host; failed correctness stops timing",
+  "remainingQualification": ["F0-F8 complete performance and correctness registry, including effects-off F0", "non-overlapping CPU phase attribution", "A/B1/B2/B3/B4 representative ablations", "paired uncertainty intervals and resource attribution", "final G05 requalification", "clean registered release-runner promotion in G07"]
+}
