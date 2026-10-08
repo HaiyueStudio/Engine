@@ -61,3 +61,7 @@ WebGPU is required by the runtime; there is no WebGL fallback.
 ## Narrative
 
 `@haiyue/extensions/narrative` provides JSON branching stories, transactional execution, save/restore, GPU GUI presentation and host-state action adapters. See the [guide](../docs/engine-guide/narrative.md) and [example](../examples/narrative/README.md).
+
+## Share content
+
+`@haiyue/extensions/share-content` generates localized score cards, PNG/JPEG captures and versioned challenge links. It produces plain data for a platform share adapter, without depending on Native or social SDKs. See the [guide](../docs/engine-guide/share-content.md) and [example](../examples/share-content/README.md).

@@ -59,3 +59,5 @@
 - [Deferred 多光源实验室（experimental）](deferred-lighting.md)
 - [游戏国际化](i18n.md)：文字与艺术字图片的多语言切换。
 - [分支剧情](narrative.md)：对话 GUI、插图、选项和存档恢复。
+
+- [分享战绩和挑战](share-content.md)：生成内容并交给平台分享。

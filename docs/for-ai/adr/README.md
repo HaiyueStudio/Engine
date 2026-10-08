@@ -142,3 +142,7 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [ADR 0114：FrameGraph 按需单帧诊断](0114-framegraph-one-shot-diagnostics.md)
 - [0115：可选国际化与 GUI 绑定](0115-optional-i18n-runtime.md)。
 - [0116：可选剧情运行时](0116-optional-narrative-runtime.md)。
+
+- [0117: CMYK color value through the existing color protocol](0117-cmyk-color-value.md)
+
+- [0118 分享内容生成与平台分享分层](0118-share-content-composition.md)。

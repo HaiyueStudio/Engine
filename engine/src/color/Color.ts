@@ -1,4 +1,4 @@
-export type BuiltinColorSpace = 'srgb' | 'linear' | 'hsl';
+export type BuiltinColorSpace = 'srgb' | 'linear' | 'hsl' | 'cmyk';
 
 /** Structural color contract used by materials, renderers, plugins, and cross-bundle values. */
 export interface ColorValue {

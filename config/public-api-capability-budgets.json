@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "model": "reviewed-capability-plus-growth-reserve",
   "principles": [
+    "ADR 0117 admits one ColorCMYK export in ./color for the next minor release; root and all growth reserves remain unchanged.",
     "G06 admits 5 Deferred lighting facade symbols in experimental/renderer and the compatibility aggregate; review/engine-0.2.1/g06-example-api-review.md. No stable root or performance budget growth.",
     "ADR 0100 adds optional native GUI/font raster callbacks with zero exported-symbol growth; existing root and domain budgets are unchanged.",
     "The Engine root is an exact golden path, not a capacity pool.",
@@ -74,7 +75,7 @@
           "stability": "stable",
           "growthReserve": { "ratio": 0.1, "minimumSymbols": 2 },
           "entrypoints": {
-            "./color": 16,
+            "./color": 17,
             "./components": 103,
             "./controls": 9,
             "./font": 13,
@@ -158,6 +159,12 @@
           "stability": "experimental",
           "growthReserve": { "ratio": 0.25, "minimumSymbols": 2 },
           "entrypoints": { "./ray-tracing": 11 }
+        },
+        {
+          "id": "share-content",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
+          "entrypoints": { "./share-content": 16 }
         },
         {
           "id": "branching-narrative",

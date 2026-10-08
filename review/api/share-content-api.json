@@ -1,0 +1,69 @@
+{
+  "source": "extensions/src/share-content.ts",
+  "exports": [
+    {
+      "name": "captureShareImage",
+      "kind": "value"
+    },
+    {
+      "name": "ChallengeData",
+      "kind": "type"
+    },
+    {
+      "name": "ChallengeLinkPolicy",
+      "kind": "type"
+    },
+    {
+      "name": "createChallengeLink",
+      "kind": "value"
+    },
+    {
+      "name": "parseChallengeLink",
+      "kind": "value"
+    },
+    {
+      "name": "PreparedShareContent",
+      "kind": "type"
+    },
+    {
+      "name": "prepareShareContent",
+      "kind": "value"
+    },
+    {
+      "name": "renderShareCard",
+      "kind": "value"
+    },
+    {
+      "name": "ShareCaptureSource",
+      "kind": "type"
+    },
+    {
+      "name": "ShareCard",
+      "kind": "type"
+    },
+    {
+      "name": "ShareCardOptions",
+      "kind": "type"
+    },
+    {
+      "name": "ShareCardSurface",
+      "kind": "type"
+    },
+    {
+      "name": "ShareContentRequest",
+      "kind": "type"
+    },
+    {
+      "name": "ShareImage",
+      "kind": "type"
+    },
+    {
+      "name": "ShareImageOptions",
+      "kind": "type"
+    },
+    {
+      "name": "ShareText",
+      "kind": "type"
+    }
+  ]
+}

@@ -7,3 +7,5 @@
 - [0.2.0 capability evidence](0.2.0-capability-evidence.json) and [diagnostic attribution runner](measure-0.2.0-capabilities.mjs).
 - [I18n API review and validation](i18n-validation.md).
 - [Narrative API review and validation](narrative-validation.md).
+
+- [Share content API review and validation](share-content-validation.md).

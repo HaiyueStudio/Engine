@@ -17,6 +17,7 @@ export default {
     controls: 'src/controls.ts',
     i18n: 'src/i18n.ts',
     narrative: 'src/narrative.ts',
+    'share-content': 'src/share-content.ts',
     animation: 'src/animation.ts',
     'deformable-animation': 'src/deformable-animation.ts',
     'hya-state-machine': 'src/hya-state-machine.ts',
