@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-08",
+  "url": "http://127.0.0.1:8164/examples/share-content/index.html?verify=1",
+  "result": {
+    "passed": true,
+    "checks": [
+      "GPU canvas capture",
+      "PNG decode",
+      "Chinese/English",
+      "landscape/portrait",
+      "challenge round trip",
+      "GPU validation"
+    ],
+    "sourceSamples": [
+      15764,
+      15764,
+      15764,
+      15764,
+      15764
+    ],
+    "hashes": [
+      "1c89d1d68c5abf96c631bf8982c917ec94711c1c3a0aef54d56dd8da80899b04",
+      "c90d710a8c8989f3de9243abb362252606a9d929a154e24364f27408bd7b0712",
+      "c56b917008140fe509c35b7df03e728cd1867022c5ac16c391588ebabe88e2ef",
+      "0fea364a06d77608ff325a9385d52494835a3d87f54cae6c4798f05ec14d676c"
+    ]
+  },
+  "consoleWarningsAndErrors": []
+}

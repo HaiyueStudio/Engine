@@ -2200,6 +2200,29 @@
         "group": "assets-ui",
         "order": 101
       }
+    },
+    {
+      "id": "share-content",
+      "title": "Share Content · Score Cards",
+      "entry": "share-content/main.ts",
+      "capabilities": [
+        "share-content",
+        "i18n",
+        "gui",
+        "screenshot",
+        "challenge-link"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 102
+      }
     }
   ],
   "catalog": {

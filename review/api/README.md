@@ -10,3 +10,5 @@
 - [loaders.gl dependency range review](loaders-gl-dependency-review.md).
 - [Extensions capability, ownership and package review](extensions-capability-review.md).
 - [Animation text OpenType loading review](animation-opentype-loading-review.md).
+- [Share content API review and validation](share-content-validation.md).
+

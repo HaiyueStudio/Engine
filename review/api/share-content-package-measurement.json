@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-08",
+  "entry": "@haiyue/extensions/share-content",
+  "bytes": 16025,
+  "gzipBytes": 5120,
+  "sha256": "2d69bc0447d3225fc37da2bec53a995fd279e44820fb97cd100343b403c84dee",
+  "imports": [],
+  "newDependencies": [],
+  "rootExportsUnchanged": true
+}
