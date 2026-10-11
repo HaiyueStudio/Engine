@@ -1,4 +1,6 @@
-param([ValidateSet('Full','Smoke','ServiceCheck','PowerCheck')][string]$Mode='Full',[Parameter(Mandatory=$true)][string]$OutputDirectory)
+param([ValidateSet('Full','Smoke','ServiceCheck','PowerCheck')][string]$Mode='Full',[Parameter(Mandatory=$true)][string]$OutputDirectory,[switch]$InjectFailureAfterPowerApply)
+if($PSVersionTable.PSVersion.Major -eq 5){$env:PSModulePath=Join-Path $PSHOME 'Modules'}
+if($InjectFailureAfterPowerApply -and $Mode -ne 'PowerCheck'){throw 'Injected failure is only allowed with PowerCheck'}
 $ErrorActionPreference = 'Stop'
 $repository=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 Set-Location -LiteralPath $repository
@@ -42,10 +44,11 @@ public static class HostTrace {
 New-Item -ItemType Directory -Path $out | Out-Null
 if($Mode -eq 'PowerCheck'){
  . (Join-Path $PSScriptRoot 'webgpu-gate/framegraph-power-control.ps1')
- $powerOnly=$null
- try{$powerOnly=Start-G09PowerControl $out}
- finally{if($null -ne $powerOnly){Stop-G09PowerControl $powerOnly}}
- Write-Output ('Processor power isolation and restoration verified; no service changes or timing samples: '+$out)
+ . (Join-Path $PSScriptRoot 'webgpu-gate/framegraph-gpu-power-control.ps1')
+ $powerOnly=$null;$gpuOnly=$null
+ try{$powerOnly=Start-G09PowerControl $out;$gpuOnly=Start-G09ChromePower $out;if($InjectFailureAfterPowerApply){throw 'Expected injected failure after CPU/GPU power apply'}}
+ finally{try{if($null -ne $gpuOnly){Stop-G09ChromePower $gpuOnly}}finally{if($null -ne $powerOnly){Stop-G09PowerControl $powerOnly}}}
+ Write-Output ('CPU/Chrome GPU power isolation and restoration verified; no service changes or timing samples: '+$out)
  exit 0
 }
 $service = Get-CimInstance Win32_Service -Filter "Name='WSearch'"
@@ -55,17 +58,19 @@ $scope = 'Independent G09 cold/steady calibration followed by fresh same-host ba
 $record = [ordered]@{ startedAt=[DateTime]::UtcNow.ToString('o'); scope=$scope; mode=$Mode; observerPid=$PID; before=($service|Select-Object State,StartMode,ProcessId); output=$out; captureExitCode=1; samplingStarted=$false }
 $record.startupBefore=@{Start=$serviceRegistry.Start;HasDelayedAutoStart=($serviceRegistry.PSObject.Properties.Name -contains 'DelayedAutoStart');DelayedAutoStart=$serviceRegistry.DelayedAutoStart}
 if($Mode -eq 'Full'){
- $record.applicationPreflight=@(Get-CimInstance Win32_Process -Filter "Name='Code.exe' OR Name='EpicGamesLauncher.exe' OR Name='EpicWebHelper.exe'"|Select-Object ProcessId,Name,CreationDate)
- if($record.applicationPreflight.Count){throw 'VS Code or Epic is still running; no applications will be terminated automatically.'}
+ . (Join-Path $PSScriptRoot 'webgpu-gate/framegraph-background-policy.ps1')
+ $record.applicationPreflight=@(Get-G09GpuStartBlockers)
+ if($record.applicationPreflight.Count){throw ('Close background applications before Full sampling: '+(Format-G09GpuStartBlockers $record.applicationPreflight))}
 }
 Copy-Item -LiteralPath $PSCommandPath -Destination (Join-Path $out 'wrapper.ps1')
 $record|ConvertTo-Json -Depth 5|Set-Content -LiteralPath (Join-Path $out 'service-state.json') -Encoding utf8
 $child = $null
 $startupChanged=$false
 . (Join-Path $PSScriptRoot 'webgpu-gate/framegraph-power-control.ps1')
-$powerRecord=$null
+. (Join-Path $PSScriptRoot 'webgpu-gate/framegraph-gpu-power-control.ps1')
+$powerRecord=$null;$gpuPowerRecord=$null
 try {
- if($Mode -ne 'ServiceCheck'){$powerRecord=Start-G09PowerControl $out}
+ if($Mode -ne 'ServiceCheck'){$powerRecord=Start-G09PowerControl $out;$gpuPowerRecord=Start-G09ChromePower $out}
 try {
  if ($service.State -notin @('Running','Stopped')) { throw ('Windows Search is not in a stable running/stopped state: '+$service.State) }
  if (@((Get-Service WSearch).DependentServices|Where-Object Status -ne 'Stopped').Count) { throw 'Active dependent services' }
@@ -96,6 +101,7 @@ try {
  $arguments = @('scripts/verify-framegraph-sampling.mjs',('--'+$Mode.ToLowerInvariant()),('"'+(Join-Path $out 'measurement')+'"'))
  $record.command = @($node) + $arguments
  $child=Start-Process -FilePath $node -ArgumentList $arguments -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $out 'events.jsonl') -RedirectStandardError (Join-Path $out 'stderr.log')
+ $childHandle=$child.Handle
  $record.childPid=$child.Id
  $record.samplingStarted=$true
  $record|ConvertTo-Json -Depth 5|Set-Content -LiteralPath (Join-Path $out 'service-state.json') -Encoding utf8
@@ -183,9 +189,11 @@ try {
  if(-not $record.restored){throw 'Windows Search restoration check failed'}
 }
 }finally{
+ try{if($null -ne $gpuPowerRecord){Stop-G09ChromePower $gpuPowerRecord;Write-Output ('Chrome GPU policy restored: '+$gpuPowerRecord.restored)}}finally{
  if($null -ne $powerRecord){
   Stop-G09PowerControl $powerRecord
   Write-Output ('Original power scheme restored: '+$powerRecord.restored+'; temporary scheme removed: '+$powerRecord.removed)
  }
+}
 }
 if($record.captureExitCode -ne 0){exit 1}

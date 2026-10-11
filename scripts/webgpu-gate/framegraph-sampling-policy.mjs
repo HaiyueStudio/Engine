@@ -2,6 +2,7 @@ import { summarizeTimingSamples } from '../benchmark/timing-cohorts.mjs';
 import { assessG01Stability } from '../benchmark/lighting-g01-policy.mjs';
 import { G05_FORWARD_CASES, validateG05ForwardAllocation } from './deferred-g05-forward-policy.mjs';
 import { validateFrameGraphWindowsHost } from './framegraph-windows-host.mjs';
+import { FRAMEGRAPH_GPU_CONTROL } from './framegraph-gpu-policy.mjs';
 const check = (value, message) => { if (!value) throw Error(message); };
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 export function validateSamplingConfig(c) {
@@ -9,12 +10,14 @@ export function validateSamplingConfig(c) {
     'g09-forward-cold-steady-v1': { total: 12000, candidates: [1200, 3600, 6000] },
     'g09-forward-cold-steady-v2': { total: 24000, candidates: [1200, 3600, 6000, 12000, 18000] },
     'g09-forward-cold-steady-v3': { total: 24000, candidates: [1200, 3600, 6000, 12000, 18000] },
+    'g09-forward-cold-steady-v4': { total: 24000, candidates: [1200, 3600, 6000, 12000, 18000] },
   };
   const horizon = horizons[c?.contractId];
   check(c?.schemaVersion === 1 && horizon, 'Unknown cold/steady protocol');
-  check(c.contractId === 'g09-forward-cold-steady-v3'
+  check(['g09-forward-cold-steady-v3', 'g09-forward-cold-steady-v4'].includes(c.contractId)
     ? equal(c.powerControl, { acLineStatus: 1, minimumAcPercent: 100, maximumAcPercent: 100 })
     : c.powerControl === undefined, 'Wrong cold/steady power contract');
+  check(c.contractId === 'g09-forward-cold-steady-v4' ? equal(c.gpuControl, FRAMEGRAPH_GPU_CONTROL) : c.gpuControl === undefined, 'Wrong Chrome GPU power contract');
   check(c.hostContract === 'config/framegraph-performance-021.json' && c.budgetSource === 'config/lighting-performance-021.json#relativeBudgets', 'Sampling policy ownership changed');
   check(equal(c.cases, G05_FORWARD_CASES.map(c => c.id)), 'Cold/steady workload population changed');
   check(equal(c.sampling, { cohorts: 3, order: 'AB-BA-AB', idleMs: 120000, entryQuietCpuPercent: 5, entryQuietSamples: 3, coldFrames: 120, steadyCpuSamples: 3000, gpuWarmup: 120, gpuSamples: 300, dropSamples: false }), 'Cold/steady sample population changed');
@@ -60,9 +63,9 @@ function validatePopulation(entries, config, host, mode, warmup) {
   check(entries.length === plan.length, 'Incomplete cold/steady cohorts');
   for (const [i, e] of entries.entries()) {
     check(equal(e.job, plan[i]) && e.status === 'passed' && e.cooldownMs >= config.sampling.idleMs, 'Failed/reordered/short-cooled cold/steady cohort');
-    validateFrameGraphWindowsHost(e.hostSamples, host.runner, config.powerControl);
+    validateFrameGraphWindowsHost(e.hostSamples, host.runner, config.powerControl, config.gpuControl);
     check(e.readiness?.length >= 3 && e.readiness.slice(-3).every(s => s.cpu.loadPercent <= 5), 'Missing three quiet entry observations');
-    for (const s of e.readiness.slice(-3)) validateFrameGraphWindowsHost([s, s], host.runner, config.powerControl);
+    for (const s of e.readiness.slice(-3)) validateFrameGraphWindowsHost([s, s], host.runner, config.powerControl, config.gpuControl);
     check(equal(e.readiness.at(-1), e.hostSamples[0]), 'Readiness and pre-capture observation differ');
     validateSamplingCapture(e.result, e.job, config, mode, warmup);
     check(e.result.adapter?.vendor === host.runner.vendor && e.result.adapter.architecture === host.runner.architecture && e.result.adapter.isFallbackAdapter === false, 'Different/software sampling adapter');

@@ -31,7 +31,7 @@ function Stop-G09PowerControl($State){
 function Start-G09PowerControl([string]$OutputDirectory){
  $before=Read-G09PowerObservation
  if($before.schemaVersion -ne 1 -or $before.acLineStatus -ne 1 -or $before.maximumAcPercent -ne 100){throw 'Controlled sampling requires AC power and an original maximum processor state of 100%'}
- $state=[ordered]@{schemaVersion=1;contractId='g09-forward-cold-steady-v3';scope='Temporary common AC processor minimum 100% for all A0/B4 calibration and baseline captures';startedAt=[DateTime]::UtcNow.ToString('o');stateFile=(Join-Path $OutputDirectory 'power-state.json');original=$before.schemeId;temporary=[Guid]::NewGuid().ToString();before=$before;created=$false;activated=$false;restored=$false;removed=$false}
+ $state=[ordered]@{schemaVersion=1;contractId='g09-forward-cold-steady-v4';scope='Temporary common AC processor minimum 100% for all A0/B4 calibration and baseline captures';startedAt=[DateTime]::UtcNow.ToString('o');stateFile=(Join-Path $OutputDirectory 'power-state.json');original=$before.schemeId;temporary=[Guid]::NewGuid().ToString();before=$before;created=$false;activated=$false;restored=$false;removed=$false}
  Save-G09PowerControl $state
  try{
   Invoke-G09PowerConfig @('/duplicatescheme',$state.original,$state.temporary)|Out-Null

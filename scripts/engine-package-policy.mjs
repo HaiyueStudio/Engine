@@ -1,3 +1,6 @@
+import ts from 'typescript';
+import { validateConsumerLoadingPolicy } from './engine-package-loading-policy.mjs';
+
 const FORBIDDEN_PACKAGE_PATHS = Object.freeze([
   'node_modules/@dimforge/rapier3d-compat/',
   'node_modules/box2d.ts/',
@@ -42,15 +45,7 @@ export function validateEnginePackManifest({
       errors.push(`tarball contains a forbidden release artifact: ${file}`);
     }
   }
-  if (manifest.size > budget.tarball.maxPackedBytes) {
-    errors.push(`tarball gzip ${manifest.size}B exceeds ${budget.tarball.maxPackedBytes}B`);
-  }
-  if (manifest.unpackedSize > budget.tarball.maxUnpackedBytes) {
-    errors.push(`tarball unpacked ${manifest.unpackedSize}B exceeds ${budget.tarball.maxUnpackedBytes}B`);
-  }
-  if (files.length > budget.tarball.maxFileCount) {
-    errors.push(`tarball file count ${files.length} exceeds ${budget.tarball.maxFileCount}`);
-  }
+  errors.push(...validatePackageByteBudget(manifest, budget.tarball, 'tarball'));
 
   const requiredTargets = collectPackageTargets(packageJson);
   const published = new Set(files);
@@ -77,9 +72,14 @@ export function validateEnginePackManifest({
 
 export function validateCapabilityPackageBudgetConfig(budget) {
   const errors = [];
-  if (budget.schemaVersion !== 3
-    || budget.budgetPolicy?.model !== 'reviewed-capability-plus-growth-reserve') {
-    errors.push('public package budget must use the capability-attributed schemaVersion 3 model');
+  for (const [id, policy] of Object.entries(budget.extensionConsumers ?? {})) {
+    if (policy.loading) errors.push(...validateConsumerLoadingPolicy(policy.loading, policy.maxGzipBytes)
+      .map(error => `${id}: ${error}`));
+  }
+  if (budget.schemaVersion !== 4
+    || budget.budgetPolicy?.model !== 'reviewed-capability-plus-growth-reserve'
+    || budget.budgetPolicy?.fileCount !== 'observe-only') {
+    errors.push('public package budget must use schemaVersion 4 with observe-only file counts');
   }
   for (const [packageName, policy] of Object.entries(budget.publicPackages ?? {})) {
     const reviewed = policy.capacity?.reviewed;
@@ -91,7 +91,6 @@ export function validateCapabilityPackageBudgetConfig(budget) {
     for (const [maximumField, reviewedField, reserveField] of [
       ['maxPackedBytes', 'packedBytes', 'packedBytes'],
       ['maxUnpackedBytes', 'unpackedBytes', 'unpackedBytes'],
-      ['maxFileCount', 'fileCount', 'fileCount'],
     ]) {
       const maximum = policy[maximumField];
       const reviewedValue = reviewed[reviewedField];
@@ -101,14 +100,72 @@ export function validateCapabilityPackageBudgetConfig(budget) {
         errors.push(`${packageName} ${maximumField} must equal positive reviewed capacity plus positive growth reserve`);
       }
     }
+    if ('maxFileCount' in policy || 'fileCount' in reserve) {
+      errors.push(`${packageName} file counts are observations, not limits or growth reserves`);
+    }
+    if (!Number.isInteger(reviewed.fileCount) || reviewed.fileCount < 1) {
+      errors.push(`${packageName} must retain its positive reviewed file count observation`);
+    }
   }
   const engine = budget.publicPackages?.['@haiyue/engine'];
   if (engine && (budget.tarball?.maxPackedBytes !== engine.maxPackedBytes
-    || budget.tarball?.maxUnpackedBytes !== engine.maxUnpackedBytes
-    || budget.tarball?.maxFileCount !== engine.maxFileCount)) {
+    || budget.tarball?.maxUnpackedBytes !== engine.maxUnpackedBytes)) {
     errors.push('legacy engine tarball limits must match the capability-attributed @haiyue/engine envelope');
   }
+  if (budget.tarball && 'maxFileCount' in budget.tarball) errors.push('legacy engine tarball cannot impose a file count limit');
   return errors;
+}
+
+/** File count is reported by the producer; only byte capacity constrains packing. */
+export function validatePackageByteBudget(manifest, policy, label) {
+  const errors = [];
+  for (const [field, maximum, metric] of [
+    ['size', 'maxPackedBytes', 'packed'], ['unpackedSize', 'maxUnpackedBytes', 'unpacked'],
+  ]) {
+    if (!Number.isSafeInteger(manifest[field]) || manifest[field] < 0) errors.push(`${label} has invalid ${metric} bytes`);
+    else if (manifest[field] > policy[maximum]) errors.push(`${label} ${metric} ${manifest[field]}B exceeds ${policy[maximum]}B`);
+  }
+  return errors;
+}
+
+/** Stable capabilities must be exercised through their actual published subpath. */
+export function validateExtensionConsumerCoverage({ packageJson, capabilities, consumers, fixtures }) {
+  const errors = [], covered = new Set();
+  const groups = capabilities.packages?.[packageJson.name]?.groups ?? [];
+  const stable = groups.filter(group => group.stability === 'stable').flatMap(group => Object.keys(group.entrypoints));
+  if (stable.length === 0) errors.push(`${packageJson.name} has no admitted stable capabilities`);
+  for (const entrypoint of stable) {
+    const target = packageJson.exports?.[entrypoint];
+    if (!target?.types || !target?.import) errors.push(`${packageJson.name}${entrypoint.slice(1)} lacks a public runtime or declaration target`);
+  }
+  for (const [id, policy] of Object.entries(consumers)) {
+    if (policy.packageName !== packageJson.name || !packageJson.exports?.[policy.entrypoint]) {
+      errors.push(`${id} must identify an existing ${packageJson.name} entrypoint`);
+      continue;
+    }
+    const specifier = policy.entrypoint === '.' ? packageJson.name : packageJson.name + policy.entrypoint.slice(1);
+    const source = ts.createSourceFile(`${id}.mjs`, fixtures[id] ?? '', ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+    const imports = source.statements
+      .filter(statement => ts.isImportDeclaration(statement) || ts.isExportDeclaration(statement))
+      .map(statement => statement.moduleSpecifier)
+      .filter(value => value && ts.isStringLiteral(value))
+      .map(value => value.text);
+    if (!Array.isArray(policy.requiredExports) || policy.requiredExports.length === 0) {
+      errors.push(`${id} must retain at least one runtime export in its focused consumer`);
+    }
+    if (!imports.includes(specifier)) errors.push(`${id} fixture must import its declared capability ${specifier}`);
+    else covered.add(policy.entrypoint);
+  }
+  for (const entrypoint of stable) {
+    if (!covered.has(entrypoint)) errors.push(`${packageJson.name}${entrypoint.slice(1)} lacks a focused packed consumer`);
+  }
+  return errors;
+}
+
+export function collectPublicTypeEntrypoints(packages) {
+  return packages.flatMap(packageJson => Object.entries(packageJson.exports ?? {})
+    .filter(([, target]) => typeof target?.types === 'string')
+    .map(([path]) => path === '.' ? packageJson.name : packageJson.name + path.slice(1)));
 }
 
 export function validateEngineConsumerResult(result, policy) {

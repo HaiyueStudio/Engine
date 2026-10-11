@@ -22,6 +22,7 @@ function population(mode = 'calibration', warmup = 120, change = () => 1) {
       g05Forward: { schemaVersion: 1, allocations: [{ method: 'createBuffer', label: 'Forward.frame' }], observedMethods: ['createBuffer', 'createTexture', 'createShaderModule', 'createRenderPipeline', 'createRenderPipelineAsync', 'createComputePipeline', 'createComputePipelineAsync'], deferredCreated: [], cleanup: { liveGpuResources: 0, ownerResidual: 0 } } };
     const sample = { observedAt: '2026-10-07T00:00:00Z', hostname: host.runner.hostname, platform: 'win32', cpu: { model: host.runner.cpuModel, loadPercent: 1 }, gpu: { rows: [[host.runner.gpuName, host.runner.driverVersion, '50', '0', '139', 'Not Active', 'Not Active', 'Not Active']] }, powerScheme: { id: 'balanced' } };
     sample.powerSettings = { schemaVersion: 1, schemeId: 'balanced', acLineStatus: 1, minimumAcPercent: 100, maximumAcPercent: 100 };
+    sample.gpuPowerPolicy = { Found: true, ProfileName: 'Google Chrome', ApplicationName: 'chrome.exe', ApplicationCount: 1, SettingId: 274197361, Type: 0, Location: 0, CurrentPredefined: 0, Value: 1 };
     return { job, status: 'passed', cooldownMs: 120001, readiness: [structuredClone(sample), structuredClone(sample), sample], hostSamples: [sample, structuredClone(sample)], result };
   });
 }
@@ -93,4 +94,19 @@ test('calibration and fresh baseline must use the same controlled scheme', () =>
   validateSamplingPowerContinuity(a, b, config);
   b[0].hostSamples[1].powerScheme.id = 'different';
   assert.throws(() => validateSamplingPowerContinuity(a, b, config), /same controlled/);
+});
+
+test('v4 records the Chrome-only policy and preserves v3 historical capture semantics', () => {
+  const legacy = JSON.parse(readFileSync(new URL('../../config/framegraph-sampling-021-v3.json', import.meta.url)));
+  validateSamplingConfig(legacy);
+  assert.throws(() => validateSamplingConfig({ ...legacy, gpuControl: config.gpuControl }), /GPU/);
+  for (const change of [undefined, { ...config.gpuControl, value: 0 }, { ...config.gpuControl, applicationCount: 2 }, { ...config.gpuControl, clockLock: true }])
+    assert.throws(() => validateSamplingConfig({ ...config, gpuControl: change }), /GPU/);
+  for (const mutate of [s => { delete s.gpuPowerPolicy; }, s => { s.gpuPowerPolicy.Found = false; }, s => { s.gpuPowerPolicy.Value = 0; }, s => { s.gpuPowerPolicy.Location = 1; }, s => { s.gpuPowerPolicy.CurrentPredefined = 1; }, s => { s.gpuPowerPolicy.ApplicationName = 'other.exe'; }, s => { s.gpuPowerPolicy.ApplicationCount = 2; }, s => { s.gpuPowerPolicy.SettingId++; }]) {
+    const p = population(); mutate(p[0].hostSamples[1]);
+    assert.throws(() => evaluateCalibration(p, config, host), /GPU/);
+  }
+  const p = population();
+  p[0].hostSamples[1].gpu.rows[0][1] = '560.94';
+  assert.throws(() => evaluateCalibration(p, config, host), /NVIDIA/);
 });

@@ -74,7 +74,7 @@ try {
   const samplingMode = query.get('framegraphSampling');
   if (samplingMode !== null && (!['calibration', 'baseline'].includes(samplingMode) || query.get('framegraphRuntime') !== '1')) throw Error('Invalid G09 sampling mode');
   const samplingProtocol = query.get('framegraphSamplingProtocol') ?? 'g09-forward-cold-steady-v1';
-  if (samplingMode && !['g09-forward-cold-steady-v1', 'g09-forward-cold-steady-v2', 'g09-forward-cold-steady-v3'].includes(samplingProtocol)) throw Error('Invalid G09 sampling protocol');
+  if (samplingMode && !['g09-forward-cold-steady-v1', 'g09-forward-cold-steady-v2', 'g09-forward-cold-steady-v3', 'g09-forward-cold-steady-v4'].includes(samplingProtocol)) throw Error('Invalid G09 sampling protocol');
   const gpuWarmup = samplingMode ? 120 : warmup;
   const timeline = samplingMode ? { cpu: [], cpuUpdate: [], cpuRecord: [], cpuSubmit: [], frameWall: [], queueWait: [] } : null;
   progressNode.textContent = configuration.id;

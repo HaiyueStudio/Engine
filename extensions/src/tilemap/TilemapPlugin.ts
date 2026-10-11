@@ -5,7 +5,7 @@ import { Tilemap2DRenderSystem, type Tilemap2DRenderSystemOptions } from './Tile
 import {
   EXTENSIONS_PLUGIN_VERSION,
   installEditorRenderSystem,
-  removeSystem,
+  installOwnedSceneSystem,
   type EditorViewportContributionContext,
 } from '../plugins/pluginUtils';
 
@@ -15,7 +15,6 @@ export interface TilemapPluginOptions {
 }
 
 export function createTilemapPlugin(options: TilemapPluginOptions = {}): EnginePlugin {
-  let system: Tilemap2DRenderSystem | null = null;
   return {
     name: '@haiyue/extensions/tilemap',
     version: EXTENSIONS_PLUGIN_VERSION,
@@ -24,12 +23,8 @@ export function createTilemapPlugin(options: TilemapPluginOptions = {}): EngineP
     },
     installScene(context) {
       context.registerComponent({ type: 'Tilemap2DComponent', component: Tilemap2DComponent });
-      system = new Tilemap2DRenderSystem(context.engine, context.cameraEntity, options.system);
-      context.addSystem(system, options.render ?? { pass: 'shared', loadOp: system.loadOp });
-    },
-    uninstallScene(context) {
-      removeSystem(context, system);
-      system = null;
+      const system = new Tilemap2DRenderSystem(context.engine, context.cameraEntity, options.system);
+      installOwnedSceneSystem(context, system, options.render ?? { pass: 'shared', loadOp: system.loadOp });
     },
     installEditor(context) {
       context.registerContribution({ components: [{

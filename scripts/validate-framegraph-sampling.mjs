@@ -61,6 +61,7 @@ if (calibration.status === 'passed') {
   validateSamplingPowerContinuity(r.calibrationEntries, r.baselineEntries, r.config);
   const frozen = await read('frozen-protocol.json'), c = await read('calibration.json');
   if (r.config.powerControl) check(equal(frozen.powerControl, r.config.powerControl) && frozen.powerSchemeId === r.calibrationEntries[0].hostSamples[0].powerScheme.id, 'Frozen power condition mismatch');
+  if (r.config.gpuControl) check(equal(frozen.gpuControl, r.config.gpuControl), 'Frozen Chrome GPU condition mismatch');
   check(equal(frozen, r.frozenProtocol) && equal(c.assessment, calibration) && frozen.calibrationHash === sha256(await readFile(resolve(out, 'calibration.json'))) && frozen.warmup === calibration.selectedWarmup, 'Frozen calibration mismatch');
   check(equal(c.captures, r.captures.filter(a => a.mode === 'calibration')), 'Calibration capture set mismatch');
   check(Date.parse(frozen.frozenAt) >= Date.parse(r.calibrationEntries.at(-1).captureFinishedAt) && Date.parse(frozen.frozenAt) <= Date.parse(r.baselineEntries[0].captureStartedAt), 'Protocol was not frozen before fresh baseline');

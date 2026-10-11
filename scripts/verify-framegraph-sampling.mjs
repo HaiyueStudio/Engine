@@ -36,7 +36,8 @@ const sourceFingerprint = createPerformanceSourceFingerprint(root, root);
 const filePaths = ['config/framegraph-sampling-021.json', config.hostContract, 'config/lighting-performance-021.json',
   'scripts/verify-framegraph-sampling.mjs', 'scripts/validate-framegraph-sampling.mjs', 'scripts/run-framegraph-unattended.ps1', 'scripts/webgpu-gate/framegraph-sampling-policy.mjs', 'scripts/webgpu-gate/deferred-g05-forward-fixture.mjs',
   'scripts/webgpu-gate/deferred-g05-forward-policy.mjs', 'scripts/webgpu-gate/chrome-runner.mjs', 'scripts/webgpu-gate/framegraph-windows-host.mjs',
-  'scripts/webgpu-gate/framegraph-power-observation.ps1', 'scripts/webgpu-gate/framegraph-power-control.ps1'];
+  'scripts/webgpu-gate/framegraph-power-observation.ps1', 'scripts/webgpu-gate/framegraph-power-control.ps1',
+  'scripts/webgpu-gate/framegraph-gpu-policy.mjs', 'scripts/webgpu-gate/framegraph-gpu-power-control.ps1', 'scripts/webgpu-gate/framegraph-gpu-power-observation.ps1', 'scripts/webgpu-gate/framegraph-nvapi-chrome-power.cs', 'scripts/webgpu-gate/framegraph-background-policy.ps1'];
 const bindings = await Promise.all(filePaths.map(async path => ({ path, sha256: sha256(await readFile(resolve(root, path))) })));
 for (const { path } of bindings) { const to = resolve(out, 'producer', path); await mkdir(dirname(to), { recursive: true }); await copyFile(resolve(root, path), to); }
 const report = { schemaVersion: 1, status: 'running', tier: args[0] === '--full' ? 'g09-cold-steady-development' : 'smoke', performanceQualified: false,
@@ -85,9 +86,9 @@ async function population(mode, warmup, jobs) {
       // They may delay a job, but may never replace or discard a completed capture.
       const started = performance.now(); let before, quietSamples = 0;
       while (true) {
-        before = await captureFrameGraphWindowsHost(config.powerControl); e.readiness.push(before);
+        before = await captureFrameGraphWindowsHost(config.powerControl, config.gpuControl); e.readiness.push(before);
         try {
-          validateFrameGraphWindowsHost([before, before], host.runner, config.powerControl);
+          validateFrameGraphWindowsHost([before, before], host.runner, config.powerControl, config.gpuControl);
           quietSamples = before.cpu.loadPercent <= 5 ? quietSamples + 1 : 0;
           if (quietSamples >= 3) break;
           if (performance.now() - started >= 600000) throw Error('Host did not reach three quiet entry observations (CPU <=5%)');
@@ -104,9 +105,9 @@ async function population(mode, warmup, jobs) {
       e.hostSamples = [before]; e.captureStartedAt = new Date().toISOString();
       await status('capture', { mode, index: i + 1, total: jobs.length, job });
       const { raw, artifact } = await capture(job, mode, warmup); e.result = raw; e.artifact = artifact;
-      e.hostSamples.push(await captureFrameGraphWindowsHost(config.powerControl));
+      e.hostSamples.push(await captureFrameGraphWindowsHost(config.powerControl, config.gpuControl));
       e.captureFinishedAt = new Date().toISOString();
-      validateFrameGraphWindowsHost(e.hostSamples, host.runner, config.powerControl); e.status = 'passed';
+      validateFrameGraphWindowsHost(e.hostSamples, host.runner, config.powerControl, config.gpuControl); e.status = 'passed';
     } catch (error) { e.status = 'failed'; e.error = error.stack; throw error; }
     finally { await save(); }
   }
@@ -132,7 +133,7 @@ try {
     if (report.calibration.status !== 'passed') throw Error('No shared stable CPU plateau; fresh baseline blocked');
     const calibrationHash = sha256(await readFile(resolve(out, 'calibration.json')));
     report.frozenProtocol = { contractId: config.contractId, warmup: report.calibration.selectedWarmup, sampling: config.sampling,
-      powerControl: config.powerControl ?? null, powerSchemeId: calibration[0].hostSamples[0].powerScheme.id,
+      powerControl: config.powerControl ?? null, gpuControl: config.gpuControl ?? null, powerSchemeId: calibration[0].hostSamples[0].powerScheme.id,
       calibrationHash, frozenAt: new Date().toISOString(), sourceFingerprint, bindings };
     await atomic('frozen-protocol.json', report.frozenProtocol); await save();
     const entries = await population('baseline', report.frozenProtocol.warmup, plan);

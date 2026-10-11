@@ -1,26 +1,66 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { measureConsumerLoading, validateConsumerLoading, validateConsumerLoadingPolicy } from './engine-package-loading-policy.mjs';
 import {
   matchesPackageGlob,
+  collectPublicTypeEntrypoints,
+  validateExtensionConsumerCoverage,
+  validatePackageByteBudget,
   validateCapabilityPackageBudgetConfig,
   validateEngineConsumerResult,
   validateEnginePackManifest,
 } from './engine-package-policy.mjs';
 
-test('package capacity is reviewed capability plus explicit growth reserve', () => {
+test('split consumer measures static transitive closure and deferred chunks independently', () => {
+  const chunk = (fileName, isEntry, imports, dynamicImports, modules) => ({
+    fileName, isEntry, imports, dynamicImports, modules: Object.fromEntries(modules.map(name => [name, {}])),
+    code: `export const name = ${JSON.stringify(fileName)};`,
+  });
+  const chunks = [
+    chunk('entry.js', true, ['shared.js'], ['font.js'], ['animation']),
+    chunk('shared.js', false, ['entry.js'], [], ['common']),
+    chunk('font.js', false, ['shared.js'], [], ['opentype']),
+  ];
+  const policy = { schemaVersion: 1, maxInitialGzipBytes: 200, maxTotalGzipBytes: 300, deferredModuleMarkers: ['opentype'] };
+  const result = measureConsumerLoading(chunks);
+  assert.deepEqual(result.initialFiles, ['entry.js', 'shared.js']);
+  assert.equal(result.deferredGzipBytes, result.files[2].gzipBytes);
+  assert.deepEqual(validateConsumerLoading(result, policy, 300), []);
+  for (const [mutate, message] of [
+    [value => value.files[1].imports.push('font.js'), 'eager capability'],
+    [value => value.files[2].dynamicImports.push('missing.js'), 'unresolved chunk'],
+    [value => { value.files[0].dynamicImports = []; }, 'unreachable emitted'],
+    [value => { value.initialGzipBytes = 1; }, 'byte totals'],
+    [value => { value.files[2].modules = []; }, 'missing deferred capability'],
+    [value => { value.files[1].gzipBytes = -1; }, 'invalid chunk byte'],
+    [value => { value.files[1].modules = null; }, 'invalid split chunk'],
+  ]) {
+    const candidate = structuredClone(result); mutate(candidate);
+    assert.ok(validateConsumerLoading(candidate, policy, 300).some(error => error.includes(message)), message);
+  }
+  assert.ok(validateConsumerLoading(result, { ...policy, maxInitialGzipBytes: 1 }, 300).some(error => error.includes('initial gzip')));
+  assert.ok(validateConsumerLoading(result, { ...policy, maxInitialGzipBytes: 1, maxTotalGzipBytes: 2 }, 300).some(error => error.includes('total gzip')));
+  assert.ok(validateConsumerLoadingPolicy({ ...policy, maxTotalGzipBytes: 301 }, 300).length);
+  assert.ok(validateConsumerLoadingPolicy({ ...policy, deferredModuleMarkers: [] }, 300).length);
+  assert.ok(validateConsumerLoadingPolicy(policy, undefined).length);
+  assert.deepEqual(validateConsumerLoading(null, policy, 300), ['missing split consumer loading evidence']);
+});
+
+test('byte capacity retains reviewed reserve while file counts are observations', () => {
   const budget = JSON.parse(readFileSync(new URL('../config/engine-package-budget.json', import.meta.url), 'utf8'));
   assert.deepEqual(validateCapabilityPackageBudgetConfig(budget), []);
   for (const policy of Object.values(budget.publicPackages)) {
-    assert.ok(policy.maxFileCount > policy.capacity.reviewed.fileCount);
+    assert.equal(policy.maxFileCount, undefined);
+    assert.ok(policy.capacity.reviewed.fileCount > 0);
   }
   const unreviewedIncrease = structuredClone(budget);
   unreviewedIncrease.publicPackages['@haiyue/extensions'].maxUnpackedBytes += 1;
   assert.ok(validateCapabilityPackageBudgetConfig(unreviewedIncrease)
     .some(error => error.includes('maxUnpackedBytes must equal')));
-  const noReserve = structuredClone(budget);
-  noReserve.publicPackages['@haiyue/animation-spec'].capacity.growthReserve.fileCount = 0;
-  assert.ok(validateCapabilityPackageBudgetConfig(noReserve).some(error => error.includes('maxFileCount must equal')));
+  const fileLimit = structuredClone(budget);
+  fileLimit.publicPackages['@haiyue/extensions'].maxFileCount = 200;
+  assert.ok(validateCapabilityPackageBudgetConfig(fileLimit).some(error => error.includes('observations, not limits')));
 });
 
 test('package globs include nested release files without admitting source maps', () => {
@@ -31,25 +71,55 @@ test('package globs include nested release files without admitting source maps',
   assert.equal(matchesPackageGlob('src/index.ts', 'dist/**/*.d.ts'), false);
 });
 
-test('admitted package file capacity still enforces independent byte and file limits', () => {
+test('additional valid modules do not fail packaging but byte excess still does', () => {
   const budget = JSON.parse(readFileSync(new URL('../config/engine-package-budget.json', import.meta.url), 'utf8'));
   const packageJson = { sideEffects: false, files: budget.tarball.filesWhitelist };
   const manifest = {
     size: budget.tarball.maxPackedBytes,
     unpackedSize: budget.tarball.maxUnpackedBytes,
-    files: Array.from({ length: budget.tarball.maxFileCount }, (_, index) => ({ path: `dist/item-${index}.d.ts` })),
+    files: Array.from({ length: 1000 }, (_, index) => ({ path: `dist/item-${index}.d.ts` })),
   };
   const errors = candidate => validateEnginePackManifest({ manifest: candidate, packageJson, budget }).errors;
   assert.deepEqual(errors(manifest), []);
-  for (const [field, message] of [['size', 'tarball gzip'], ['unpackedSize', 'tarball unpacked']]) {
+  for (const [field, message] of [['size', 'tarball packed'], ['unpackedSize', 'tarball unpacked']]) {
     const candidate = structuredClone(manifest);
     candidate[field]++;
     assert.equal(errors(candidate).length, 1);
     assert.ok(errors(candidate)[0].startsWith(message));
   }
   manifest.files.push({ path: 'dist/over-budget.d.ts' });
-  assert.equal(errors(manifest).length, 1);
-  assert.ok(errors(manifest)[0].startsWith('tarball file count'));
+  assert.deepEqual(errors(manifest), []);
+  const extensionPolicy = budget.publicPackages['@haiyue/extensions'];
+  assert.deepEqual(validatePackageByteBudget({ size: 10, unpackedSize: 20, files: manifest.files }, extensionPolicy, 'extensions'), []);
+  assert.equal(validatePackageByteBudget({ size: extensionPolicy.maxPackedBytes + 1, unpackedSize: 20 }, extensionPolicy, 'extensions').length, 1);
+});
+
+test('every admitted stable extension requires a real focused consumer and public types', () => {
+  const packageJson = { name: '@haiyue/extensions', exports: { './i18n': { import: './dist/i18n.js', types: './dist/i18n.d.ts' } } };
+  const capabilities = { packages: { [packageJson.name]: { groups: [{ stability: 'stable', entrypoints: { './i18n': 19 } }] } } };
+  const consumers = { localized: { packageName: packageJson.name, entrypoint: './i18n', requiredExports: ['I18n'] } };
+  const fixtures = { localized: "export { I18n } from '@haiyue/extensions/i18n';" };
+  const valid = { packageJson, capabilities, consumers, fixtures };
+  assert.deepEqual(validateExtensionConsumerCoverage(valid), []);
+  assert.match(validateExtensionConsumerCoverage({ ...valid, consumers: {} }).join('\n'), /lacks a focused packed consumer/);
+  assert.match(validateExtensionConsumerCoverage({ ...valid, fixtures: { localized: "export { I18n } from '../extensions/src/i18n';" } }).join('\n'), /must import its declared capability/);
+  assert.match(validateExtensionConsumerCoverage({ ...valid, fixtures: { localized: "// export { I18n } from '@haiyue/extensions/i18n';\nexport const I18n = 0;" } }).join('\n'), /must import its declared capability/);
+  const noExports = structuredClone(valid);
+  noExports.consumers.localized.requiredExports = [];
+  assert.match(validateExtensionConsumerCoverage(noExports).join('\n'), /must retain at least one runtime export/);
+  const missingTypes = structuredClone(valid);
+  delete missingTypes.packageJson.exports['./i18n'].types;
+  assert.match(validateExtensionConsumerCoverage(missingTypes).join('\n'), /lacks a public runtime or declaration/);
+  const addition = structuredClone(valid);
+  addition.capabilities.packages[packageJson.name].groups[0].entrypoints['./narrative'] = 19;
+  assert.equal(validateExtensionConsumerCoverage(addition).length, 2);
+});
+
+test('packed declaration checks include all public packages, not only engine', () => {
+  assert.deepEqual(collectPublicTypeEntrypoints([
+    { name: '@haiyue/engine', exports: { '.': { types: './dist/index.d.ts' } } },
+    { name: '@haiyue/extensions', exports: { './i18n': { types: './dist/i18n.d.ts' }, './experimental/test': { types: './dist/test.d.ts' } } },
+  ]), ['@haiyue/engine', '@haiyue/extensions/i18n', '@haiyue/extensions/experimental/test']);
 });
 
 test('public package manifests expose dist-only targets and never publish source trees', () => {
@@ -93,7 +163,6 @@ test('pack policy rejects forbidden files and missing export targets', () => {
       tarball: {
         maxPackedBytes: 100,
         maxUnpackedBytes: 100,
-        maxFileCount: 10,
         filesWhitelist: ['README.md', 'LICENSE', 'dist/**/*.js', 'dist/**/*.d.ts'],
         allowedFilePatterns: ['package.json', 'README.md', 'LICENSE', 'dist/**/*.js', 'dist/**/*.d.ts'],
       },
@@ -129,7 +198,6 @@ test('release package policy turns unresolved publication inputs into hard error
       tarball: {
         maxPackedBytes: 100,
         maxUnpackedBytes: 100,
-        maxFileCount: 10,
         filesWhitelist: ['README.md', 'LICENSE', 'dist/**/*.js', 'dist/**/*.d.ts'],
         allowedFilePatterns: ['package.json', 'README.md', 'LICENSE', 'dist/**/*.js', 'dist/**/*.d.ts'],
       },

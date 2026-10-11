@@ -1,0 +1,1296 @@
+{
+  "schemaVersion": 1,
+  "status": "extensions-capability-review-passed",
+  "verifiedAt": "2026-10-11T06:44:59.320Z",
+  "releasePackageGatePassed": true,
+  "g09Complete": false,
+  "performanceQualified": false,
+  "performanceBudgetChanged": false,
+  "fileCountPolicy": "observe-only",
+  "previousByteAndConsumerBudgetsUnchanged": true,
+  "historicalPackReplay": {
+    "status": "passed-under-current-byte-and-allowlist-policy",
+    "historicalReportUnmodified": true,
+    "packages": [
+      {
+        "name": "@haiyue/engine",
+        "historicalFileCount": 515,
+        "currentByteAndAllowlistPolicy": "passed"
+      },
+      {
+        "name": "@haiyue/animation-spec",
+        "historicalFileCount": 48,
+        "currentByteAndAllowlistPolicy": "passed"
+      },
+      {
+        "name": "@haiyue/extensions",
+        "historicalFileCount": 202,
+        "currentByteAndAllowlistPolicy": "passed"
+      },
+      {
+        "name": "@haiyue/shader-language",
+        "historicalFileCount": 76,
+        "currentByteAndAllowlistPolicy": "passed"
+      }
+    ]
+  },
+  "package": {
+    "files": 202,
+    "declarations": 161,
+    "reachableDeclarations": 161,
+    "packedBytes": 528657,
+    "unpackedBytes": 2711809,
+    "sha256": "44a8aa631ec7925c98cc0d5d4dad82053df053d829e2f3d7a0b78cb2afea2f4e"
+  },
+  "stableCapabilities": [
+    {
+      "entrypoint": "./animation",
+      "reviewedSymbols": 33,
+      "runtimeExports": [
+        "Animation2DComponent",
+        "Animation2DExtensionRegistry",
+        "Animation2DRenderSystem",
+        "Animation2DSystem",
+        "AnimationStateMachineController",
+        "AnimationStateMachineValidationError",
+        "compileAnimationStateMachine",
+        "createAnimation2DStateMachineController",
+        "createAnimationAssetLoader",
+        "HAIYUE_ANIMATION_ASSET_TYPE",
+        "InteractionRuntime",
+        "tessellateAnimationPath",
+        "validateAnimationStateMachineDefinition"
+      ],
+      "consumers": [
+        "extensions-animation",
+        "extensions-interaction"
+      ]
+    },
+    {
+      "entrypoint": "./animation3d",
+      "reviewedSymbols": 75,
+      "runtimeExports": [
+        "Animation3DError",
+        "Animation3DMixer",
+        "Animation3DPoseApplier",
+        "Animation3DPoseBuffer",
+        "Animation3DStateMachineController",
+        "Animation3DStateMachineValidationError",
+        "compileAnimation3DStateMachineDefinition",
+        "createHyaAnimation3DRuntime",
+        "HyaAnimation3DRuntime",
+        "validateAnimation3DStateMachineDefinition"
+      ],
+      "consumers": [
+        "extensions-animation3d"
+      ]
+    },
+    {
+      "entrypoint": "./canvas-text",
+      "reviewedSymbols": 4,
+      "runtimeExports": [
+        "CanvasText2DRenderSystem",
+        "CanvasTextComponent"
+      ],
+      "consumers": [
+        "extensions-canvas-text"
+      ]
+    },
+    {
+      "entrypoint": "./deformable-animation",
+      "reviewedSymbols": 6,
+      "runtimeExports": [
+        "createDeformableMesh2DRuntimeExtension",
+        "sampleDeformableMesh2DDrawable"
+      ],
+      "consumers": [
+        "extensions-deformable-animation"
+      ]
+    },
+    {
+      "entrypoint": "./gltf",
+      "reviewedSymbols": 53,
+      "runtimeExports": [
+        "applyGltfAnimationClip",
+        "collectGltfMaterialExtensionPatches",
+        "collectGltfMaterialVariantNames",
+        "collectGltfMaterialVariantReferences",
+        "createGltfPlugin",
+        "DEFAULT_GLTF_EXTENSION_ADAPTERS",
+        "disposeGltfModel",
+        "encodeGltfPbrMaterial",
+        "GLTF_EXTENSION_CAPABILITIES",
+        "GltfModelComponent",
+        "GltfModelSystem",
+        "loadGltfModel",
+        "resolveGltfExtensionAdapters",
+        "setGltfMaterialVariant"
+      ],
+      "consumers": [
+        "extensions-gltf"
+      ]
+    },
+    {
+      "entrypoint": "./gltf-animation3d",
+      "reviewedSymbols": 5,
+      "runtimeExports": [
+        "createGltfAnimation3DClips",
+        "createGltfAnimation3DRuntime",
+        "GltfAnimation3DRuntime"
+      ],
+      "consumers": [
+        "extensions-gltf-animation3d"
+      ]
+    },
+    {
+      "entrypoint": "./grid",
+      "reviewedSymbols": 2,
+      "runtimeExports": [
+        "Grid2DComponent"
+      ],
+      "consumers": [
+        "extensions-grid"
+      ]
+    },
+    {
+      "entrypoint": "./hya-state-machine",
+      "reviewedSymbols": 13,
+      "runtimeExports": [
+        "Animation2DStateMachineComponent",
+        "Animation2DStateMachineSystem",
+        "AnimationStateMachineChannelError",
+        "assertAudioStateMachineCompatible",
+        "audioStateMachineCompatibilityDiagnostic",
+        "createHyaAnimation2DClips",
+        "getHyaStateMachineExtension",
+        "HYA_STATE_MACHINE_CHANNEL_REGISTRY",
+        "hyaStateMachineChannelCapability"
+      ],
+      "consumers": [
+        "extensions-hya-state-machine"
+      ]
+    },
+    {
+      "entrypoint": "./spine",
+      "reviewedSymbols": 8,
+      "runtimeExports": [
+        "createSpinePlugin",
+        "Spine2DComponent",
+        "Spine2DRenderSystem"
+      ],
+      "consumers": [
+        "extensions-spine"
+      ]
+    },
+    {
+      "entrypoint": "./tilemap",
+      "reviewedSymbols": 8,
+      "runtimeExports": [
+        "createTilemapPlugin",
+        "Tilemap2DComponent",
+        "Tilemap2DRenderSystem"
+      ],
+      "consumers": [
+        "extensions-tilemap"
+      ]
+    },
+    {
+      "entrypoint": "./tween",
+      "reviewedSymbols": 6,
+      "runtimeExports": [
+        "Tween2DComponent",
+        "Tween2DSystem"
+      ],
+      "consumers": [
+        "extensions-tween"
+      ]
+    },
+    {
+      "entrypoint": "./narrative",
+      "reviewedSymbols": 19,
+      "runtimeExports": [
+        "connectNarrativeActions",
+        "NarrativeGui",
+        "NarrativeRuntime",
+        "validateNarrativeDefinition"
+      ],
+      "consumers": [
+        "extensions-narrative",
+        "extensions-narrative-gui"
+      ]
+    },
+    {
+      "entrypoint": "./i18n",
+      "reviewedSymbols": 19,
+      "runtimeExports": [
+        "bindI18nImage",
+        "bindI18nText",
+        "checkLocalePacks",
+        "collectLocaleCharacters",
+        "createI18nTextureLoader",
+        "I18n",
+        "validateLocalePack"
+      ],
+      "consumers": [
+        "extensions-i18n"
+      ]
+    },
+    {
+      "entrypoint": "./controls",
+      "reviewedSymbols": 9,
+      "runtimeExports": [
+        "VirtualJoystickControls"
+      ],
+      "consumers": [
+        "extensions-controls"
+      ]
+    }
+  ],
+  "publicTypeEntrypoints": [
+    "@haiyue/engine",
+    "@haiyue/engine/core",
+    "@haiyue/engine/assets",
+    "@haiyue/engine/diagnostics",
+    "@haiyue/engine/extension-authoring",
+    "@haiyue/engine/ecs",
+    "@haiyue/engine/components",
+    "@haiyue/engine/geometry",
+    "@haiyue/engine/material",
+    "@haiyue/engine/experimental",
+    "@haiyue/engine/experimental/assets",
+    "@haiyue/engine/experimental/async",
+    "@haiyue/engine/experimental/ktx2-worker-runtime",
+    "@haiyue/engine/experimental/diagnostics",
+    "@haiyue/engine/experimental/gpu-driven",
+    "@haiyue/engine/experimental/renderer",
+    "@haiyue/engine/experimental/simulation",
+    "@haiyue/engine/experimental/audio",
+    "@haiyue/engine/systems",
+    "@haiyue/engine/physics",
+    "@haiyue/engine/physics/components",
+    "@haiyue/engine/physics/backend",
+    "@haiyue/engine/postprocess",
+    "@haiyue/engine/gui",
+    "@haiyue/engine/compute",
+    "@haiyue/engine/scene",
+    "@haiyue/engine/input",
+    "@haiyue/engine/controls",
+    "@haiyue/engine/tween",
+    "@haiyue/engine/rtt",
+    "@haiyue/engine/font",
+    "@haiyue/engine/color",
+    "@haiyue/engine/lighting",
+    "@haiyue/engine/math",
+    "@haiyue/engine/serialization",
+    "@haiyue/engine/save",
+    "@haiyue/engine/navigation",
+    "@haiyue/animation-spec",
+    "@haiyue/animation-spec/lottie",
+    "@haiyue/animation-spec/native3d",
+    "@haiyue/animation-spec/deformable2d",
+    "@haiyue/animation-spec/cubism",
+    "@haiyue/animation-spec/live2d",
+    "@haiyue/animation-spec/conversion",
+    "@haiyue/animation-spec/live2d/clip-baked",
+    "@haiyue/extensions",
+    "@haiyue/extensions/gltf",
+    "@haiyue/extensions/experimental/gltf-worker",
+    "@haiyue/extensions/experimental/spine-worker",
+    "@haiyue/extensions/experimental/indexed-sprite",
+    "@haiyue/extensions/ray-tracing",
+    "@haiyue/extensions/spine",
+    "@haiyue/extensions/tilemap",
+    "@haiyue/extensions/canvas-text",
+    "@haiyue/extensions/tween",
+    "@haiyue/extensions/grid",
+    "@haiyue/extensions/animation",
+    "@haiyue/extensions/deformable-animation",
+    "@haiyue/extensions/hya-state-machine",
+    "@haiyue/extensions/animation3d",
+    "@haiyue/extensions/gltf-animation3d",
+    "@haiyue/extensions/controls",
+    "@haiyue/extensions/i18n",
+    "@haiyue/extensions/narrative",
+    "@haiyue/shader-language",
+    "@haiyue/shader-language/material-graph"
+  ],
+  "totalRootTests": 1460,
+  "rootTestCounts": [
+    135,
+    775,
+    107,
+    436,
+    7
+  ],
+  "lifecycleCases": 14,
+  "freshExampleBuilds": 98,
+  "runtimeConsumers": {
+    "node": {
+      "status": "passed",
+      "detail": "{\"status\":\"passed\",\"format\":\"haiyue-animation\",\"duration\":1,\"tweenOpacity\":0.5}"
+    },
+    "typescript": {
+      "status": "passed",
+      "detail": "TypeScript packed declarations passed",
+      "publicTypeEntrypoints": [
+        "@haiyue/engine",
+        "@haiyue/engine/core",
+        "@haiyue/engine/assets",
+        "@haiyue/engine/diagnostics",
+        "@haiyue/engine/extension-authoring",
+        "@haiyue/engine/ecs",
+        "@haiyue/engine/components",
+        "@haiyue/engine/geometry",
+        "@haiyue/engine/material",
+        "@haiyue/engine/experimental",
+        "@haiyue/engine/experimental/assets",
+        "@haiyue/engine/experimental/async",
+        "@haiyue/engine/experimental/ktx2-worker-runtime",
+        "@haiyue/engine/experimental/diagnostics",
+        "@haiyue/engine/experimental/gpu-driven",
+        "@haiyue/engine/experimental/renderer",
+        "@haiyue/engine/experimental/simulation",
+        "@haiyue/engine/experimental/audio",
+        "@haiyue/engine/systems",
+        "@haiyue/engine/physics",
+        "@haiyue/engine/physics/components",
+        "@haiyue/engine/physics/backend",
+        "@haiyue/engine/postprocess",
+        "@haiyue/engine/gui",
+        "@haiyue/engine/compute",
+        "@haiyue/engine/scene",
+        "@haiyue/engine/input",
+        "@haiyue/engine/controls",
+        "@haiyue/engine/tween",
+        "@haiyue/engine/rtt",
+        "@haiyue/engine/font",
+        "@haiyue/engine/color",
+        "@haiyue/engine/lighting",
+        "@haiyue/engine/math",
+        "@haiyue/engine/serialization",
+        "@haiyue/engine/save",
+        "@haiyue/engine/navigation",
+        "@haiyue/animation-spec",
+        "@haiyue/animation-spec/lottie",
+        "@haiyue/animation-spec/native3d",
+        "@haiyue/animation-spec/deformable2d",
+        "@haiyue/animation-spec/cubism",
+        "@haiyue/animation-spec/live2d",
+        "@haiyue/animation-spec/conversion",
+        "@haiyue/animation-spec/live2d/clip-baked",
+        "@haiyue/extensions",
+        "@haiyue/extensions/gltf",
+        "@haiyue/extensions/experimental/gltf-worker",
+        "@haiyue/extensions/experimental/spine-worker",
+        "@haiyue/extensions/experimental/indexed-sprite",
+        "@haiyue/extensions/ray-tracing",
+        "@haiyue/extensions/spine",
+        "@haiyue/extensions/tilemap",
+        "@haiyue/extensions/canvas-text",
+        "@haiyue/extensions/tween",
+        "@haiyue/extensions/grid",
+        "@haiyue/extensions/animation",
+        "@haiyue/extensions/deformable-animation",
+        "@haiyue/extensions/hya-state-machine",
+        "@haiyue/extensions/animation3d",
+        "@haiyue/extensions/gltf-animation3d",
+        "@haiyue/extensions/controls",
+        "@haiyue/extensions/i18n",
+        "@haiyue/extensions/narrative",
+        "@haiyue/shader-language",
+        "@haiyue/shader-language/material-graph"
+      ],
+      "engineTypeEntrypoints": [
+        "@haiyue/engine",
+        "@haiyue/engine/core",
+        "@haiyue/engine/assets",
+        "@haiyue/engine/diagnostics",
+        "@haiyue/engine/extension-authoring",
+        "@haiyue/engine/ecs",
+        "@haiyue/engine/components",
+        "@haiyue/engine/geometry",
+        "@haiyue/engine/material",
+        "@haiyue/engine/experimental",
+        "@haiyue/engine/experimental/assets",
+        "@haiyue/engine/experimental/async",
+        "@haiyue/engine/experimental/ktx2-worker-runtime",
+        "@haiyue/engine/experimental/diagnostics",
+        "@haiyue/engine/experimental/gpu-driven",
+        "@haiyue/engine/experimental/renderer",
+        "@haiyue/engine/experimental/simulation",
+        "@haiyue/engine/experimental/audio",
+        "@haiyue/engine/systems",
+        "@haiyue/engine/physics",
+        "@haiyue/engine/physics/components",
+        "@haiyue/engine/physics/backend",
+        "@haiyue/engine/postprocess",
+        "@haiyue/engine/gui",
+        "@haiyue/engine/compute",
+        "@haiyue/engine/scene",
+        "@haiyue/engine/input",
+        "@haiyue/engine/controls",
+        "@haiyue/engine/tween",
+        "@haiyue/engine/rtt",
+        "@haiyue/engine/font",
+        "@haiyue/engine/color",
+        "@haiyue/engine/lighting",
+        "@haiyue/engine/math",
+        "@haiyue/engine/serialization",
+        "@haiyue/engine/save",
+        "@haiyue/engine/navigation"
+      ]
+    },
+    "exports": {
+      "status": "passed",
+      "detail": "{\"status\":\"passed\",\"imports\":66}"
+    },
+    "cli": {
+      "status": "passed",
+      "detail": "Usage: hya-convert <input.json> <output.hya|output.json> [--strict] (alias: hya-lottie-convert)"
+    }
+  },
+  "extensionConsumers": [
+    {
+      "id": "extensions-root",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-root.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 243129,
+      "gzipBytes": 35445,
+      "exports": [
+        "RenderSystem2DBase"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/engine/dist/chunks/ColorSRGB-DiXuNgg5.js",
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/EngineDiagnosticsAccess-SXWvpo8N.js",
+        "@haiyue/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+        "@haiyue/engine/dist/chunks/Geometry2D-D7SVMQoB.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/engine/dist/chunks/IEngine-BWIJHt_0.js",
+        "@haiyue/engine/dist/chunks/Material2D-DMc_MGWJ.js",
+        "@haiyue/engine/dist/chunks/Mesh2D-Dudne44S.js",
+        "@haiyue/engine/dist/chunks/System-CIIb_ci6.js",
+        "@haiyue/engine/dist/chunks/Transform3D-ClwzR-VK.js",
+        "@haiyue/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+        "@haiyue/engine/dist/chunks/hierarchy-CZkgLn-Q.js",
+        "@haiyue/engine/dist/chunks/materialValidation-Daa_VxS1.js",
+        "@haiyue/engine/dist/color.js",
+        "@haiyue/engine/dist/extension-authoring.js",
+        "@haiyue/extensions/dist/chunks/RenderSystem2DBase-CF2s00vg.js",
+        "fixture/extensions-root.mjs",
+        "node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-i18n",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-i18n.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 16673,
+      "gzipBytes": 4274,
+      "exports": [
+        "I18n",
+        "bindI18nImage",
+        "bindI18nText",
+        "checkLocalePacks",
+        "collectLocaleCharacters",
+        "createI18nTextureLoader",
+        "validateLocalePack"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/extensions/dist/chunks/bindings-D-tM6trR.js",
+        "@haiyue/extensions/dist/i18n.js",
+        "fixture/extensions-i18n.mjs"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-narrative",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-narrative.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 18257,
+      "gzipBytes": 4704,
+      "exports": [
+        "NarrativeRuntime",
+        "connectNarrativeActions",
+        "validateNarrativeDefinition"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/extensions/dist/narrative.js",
+        "fixture/extensions-narrative.mjs"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-narrative-gui",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-narrative-gui.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 44976,
+      "gzipBytes": 10897,
+      "exports": [
+        "NarrativeGui"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/engine/dist/chunks/GuiSystem-CrvHduqA.js",
+        "@haiyue/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+        "@haiyue/extensions/dist/chunks/bindings-D-tM6trR.js",
+        "@haiyue/extensions/dist/narrative.js",
+        "fixture/extensions-narrative-gui.mjs"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-animation",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-animation.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 1112582,
+      "gzipBytes": 223053,
+      "exports": [
+        "Animation2DComponent",
+        "Animation2DRenderSystem",
+        "Animation2DSystem",
+        "createAnimationAssetLoader"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/animation-spec/dist/chunks/binary-DvuTJ_hy.js",
+        "@haiyue/animation-spec/dist/chunks/errors-Bzs3GOD9.js",
+        "@haiyue/animation-spec/dist/chunks/expression-D1cKtNwM.js",
+        "@haiyue/animation-spec/dist/chunks/extensions-DxL4AxOC.js",
+        "@haiyue/animation-spec/dist/index.js",
+        "@haiyue/engine/dist/chunks/ColorSRGB-DiXuNgg5.js",
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/EngineDiagnosticsAccess-SXWvpo8N.js",
+        "@haiyue/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+        "@haiyue/engine/dist/chunks/Entity-D-_UAiw1.js",
+        "@haiyue/engine/dist/chunks/GPUResourceTracker-C7_d3HbZ.js",
+        "@haiyue/engine/dist/chunks/Geometry2D-D7SVMQoB.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/engine/dist/chunks/IEngine-BWIJHt_0.js",
+        "@haiyue/engine/dist/chunks/Material2D-DMc_MGWJ.js",
+        "@haiyue/engine/dist/chunks/Mesh2D-Dudne44S.js",
+        "@haiyue/engine/dist/chunks/ParticleEmitter3D-qTvZwiEl.js",
+        "@haiyue/engine/dist/chunks/RenderCommandContext-BwnkNm0B.js",
+        "@haiyue/engine/dist/chunks/RendererResourceCache-BYhgsxw8.js",
+        "@haiyue/engine/dist/chunks/SVGGeometry2D-DhiqGy7N.js",
+        "@haiyue/engine/dist/chunks/System-CIIb_ci6.js",
+        "@haiyue/engine/dist/chunks/Transform2D-BQcy9yW6.js",
+        "@haiyue/engine/dist/chunks/Transform3D-ClwzR-VK.js",
+        "@haiyue/engine/dist/chunks/align-BPmoUMBR.js",
+        "@haiyue/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+        "@haiyue/engine/dist/chunks/hierarchy-CZkgLn-Q.js",
+        "@haiyue/engine/dist/chunks/materialValidation-Daa_VxS1.js",
+        "@haiyue/engine/dist/color.js",
+        "@haiyue/engine/dist/extension-authoring.js",
+        "@haiyue/extensions/dist/animation.js",
+        "@haiyue/extensions/dist/chunks/2d-ui-animation-2d.generated-FpziAeGJ.js",
+        "@haiyue/extensions/dist/chunks/Animation2DStateMachine-BHcA6Cu3.js",
+        "@haiyue/extensions/dist/chunks/AnimationVisual2D-8y3qp0_U.js",
+        "@haiyue/extensions/dist/chunks/RenderSystem2DBase-CF2s00vg.js",
+        "fixture/extensions-animation.mjs",
+        "node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-animation3d",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-animation3d.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 125075,
+      "gzipBytes": 23466,
+      "exports": [
+        "Animation3DMixer",
+        "Animation3DPoseBuffer",
+        "Animation3DStateMachineController"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/extensions/dist/animation3d.js",
+        "@haiyue/extensions/dist/chunks/AnimationStateMachineController-4sKaqh9E.js",
+        "@haiyue/extensions/dist/chunks/GltfAnimation3DAdapter-Cu3rQQsW.js",
+        "fixture/extensions-animation3d.mjs"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-deformable-animation",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-deformable-animation.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 270180,
+      "gzipBytes": 42196,
+      "exports": [
+        "createDeformableMesh2DRuntimeExtension",
+        "sampleDeformableMesh2DDrawable"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/animation-spec/dist/chunks/errors-Bzs3GOD9.js",
+        "@haiyue/animation-spec/dist/deformable2d.js",
+        "@haiyue/animation-spec/dist/index.js",
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+        "@haiyue/engine/dist/chunks/Entity-D-_UAiw1.js",
+        "@haiyue/engine/dist/chunks/Geometry2D-D7SVMQoB.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/engine/dist/chunks/Transform2D-BQcy9yW6.js",
+        "@haiyue/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+        "@haiyue/extensions/dist/chunks/AnimationVisual2D-8y3qp0_U.js",
+        "@haiyue/extensions/dist/deformable-animation.js",
+        "fixture/extensions-deformable-animation.mjs",
+        "node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-gltf",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gltf.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 475088,
+      "gzipBytes": 79073,
+      "exports": [
+        "GltfModelComponent",
+        "GltfModelSystem",
+        "createGltfPlugin"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/engine/dist/chunks/AssetParser-BT55VvTe.js",
+        "@haiyue/engine/dist/chunks/BasicMaterial-DvxA4_w-.js",
+        "@haiyue/engine/dist/chunks/CartesianTransform3D--7y3_ktY.js",
+        "@haiyue/engine/dist/chunks/ColorSRGB-DiXuNgg5.js",
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+        "@haiyue/engine/dist/chunks/Entity-D-_UAiw1.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/engine/dist/chunks/Mesh3D-B44-2vJf.js",
+        "@haiyue/engine/dist/chunks/PbrMaterial-CztLoloL.js",
+        "@haiyue/engine/dist/chunks/System-CIIb_ci6.js",
+        "@haiyue/engine/dist/chunks/ToonMaterial-QRBQIqH2.js",
+        "@haiyue/engine/dist/chunks/Transform3D-ClwzR-VK.js",
+        "@haiyue/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+        "@haiyue/engine/dist/chunks/assets-n0E8FE_J.js",
+        "@haiyue/engine/dist/chunks/materialValidation-Daa_VxS1.js",
+        "@haiyue/engine/dist/color.js",
+        "@haiyue/engine/dist/internal/deformation-shader-artifact.js",
+        "@haiyue/engine/dist/material.js",
+        "@haiyue/extensions/dist/chunks/GltfAnimationRuntime-CRHsLycN.js",
+        "@haiyue/extensions/dist/chunks/gltfLoader-Dm22jLYB.js",
+        "@haiyue/extensions/dist/chunks/pluginUtils-BjtEV6zU.js",
+        "@haiyue/extensions/dist/gltf.js",
+        "fixture/extensions-gltf.mjs",
+        "node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+      ],
+      "generatedShaderArtifacts": [
+        "deformation-shader-artifact"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "extensions-gltf-animation3d",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gltf-animation3d.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 304770,
+      "gzipBytes": 45913,
+      "exports": [
+        "GltfAnimation3DRuntime",
+        "createGltfAnimation3DClips",
+        "createGltfAnimation3DRuntime"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/engine/dist/chunks/AssetParser-BT55VvTe.js",
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/engine/dist/chunks/Transform3D-ClwzR-VK.js",
+        "@haiyue/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+        "@haiyue/extensions/dist/chunks/GltfAnimation3DAdapter-Cu3rQQsW.js",
+        "@haiyue/extensions/dist/chunks/GltfAnimationRuntime-CRHsLycN.js",
+        "fixture/extensions-gltf-animation3d.mjs",
+        "node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-hya-state-machine",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-hya-state-machine.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 1174076,
+      "gzipBytes": 230623,
+      "exports": [
+        "Animation2DStateMachineComponent",
+        "Animation2DStateMachineSystem",
+        "createHyaAnimation2DClips"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/animation-spec/dist/chunks/binary-DvuTJ_hy.js",
+        "@haiyue/animation-spec/dist/chunks/errors-Bzs3GOD9.js",
+        "@haiyue/animation-spec/dist/chunks/expression-D1cKtNwM.js",
+        "@haiyue/animation-spec/dist/chunks/extensions-DxL4AxOC.js",
+        "@haiyue/animation-spec/dist/index.js",
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+        "@haiyue/engine/dist/chunks/Entity-D-_UAiw1.js",
+        "@haiyue/engine/dist/chunks/Geometry2D-D7SVMQoB.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/engine/dist/chunks/ParticleEmitter3D-qTvZwiEl.js",
+        "@haiyue/engine/dist/chunks/SVGGeometry2D-DhiqGy7N.js",
+        "@haiyue/engine/dist/chunks/System-CIIb_ci6.js",
+        "@haiyue/engine/dist/chunks/Transform2D-BQcy9yW6.js",
+        "@haiyue/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+        "@haiyue/extensions/dist/chunks/Animation2DStateMachine-BHcA6Cu3.js",
+        "@haiyue/extensions/dist/chunks/AnimationStateMachineController-4sKaqh9E.js",
+        "@haiyue/extensions/dist/chunks/AnimationVisual2D-8y3qp0_U.js",
+        "@haiyue/extensions/dist/hya-state-machine.js",
+        "fixture/extensions-hya-state-machine.mjs",
+        "node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-spine",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-spine.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 422164,
+      "gzipBytes": 70235,
+      "exports": [
+        "Spine2DComponent",
+        "Spine2DRenderSystem",
+        "createSpinePlugin"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/engine/dist/chunks/AssetParser-BT55VvTe.js",
+        "@haiyue/engine/dist/chunks/ColorSRGB-DiXuNgg5.js",
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/EngineDiagnosticsAccess-SXWvpo8N.js",
+        "@haiyue/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+        "@haiyue/engine/dist/chunks/GPUResourceTracker-C7_d3HbZ.js",
+        "@haiyue/engine/dist/chunks/Geometry2D-D7SVMQoB.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/engine/dist/chunks/IEngine-BWIJHt_0.js",
+        "@haiyue/engine/dist/chunks/Material2D-DMc_MGWJ.js",
+        "@haiyue/engine/dist/chunks/Mesh2D-Dudne44S.js",
+        "@haiyue/engine/dist/chunks/RenderCommandContext-BwnkNm0B.js",
+        "@haiyue/engine/dist/chunks/System-CIIb_ci6.js",
+        "@haiyue/engine/dist/chunks/Transform3D-ClwzR-VK.js",
+        "@haiyue/engine/dist/chunks/align-BPmoUMBR.js",
+        "@haiyue/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+        "@haiyue/engine/dist/chunks/hierarchy-CZkgLn-Q.js",
+        "@haiyue/engine/dist/chunks/materialValidation-Daa_VxS1.js",
+        "@haiyue/engine/dist/color.js",
+        "@haiyue/engine/dist/extension-authoring.js",
+        "@haiyue/extensions/dist/chunks/2d-ui-spine2d.generated-CUUi8xjl.js",
+        "@haiyue/extensions/dist/chunks/RenderSystem2DBase-CF2s00vg.js",
+        "@haiyue/extensions/dist/chunks/Spine2DRuntime-D9M9LAQR.js",
+        "@haiyue/extensions/dist/chunks/SpineAssetParser-BSDmPge1.js",
+        "@haiyue/extensions/dist/chunks/pluginUtils-BjtEV6zU.js",
+        "@haiyue/extensions/dist/spine.js",
+        "fixture/extensions-spine.mjs",
+        "node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-tilemap",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-tilemap.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 271340,
+      "gzipBytes": 41400,
+      "exports": [
+        "Tilemap2DComponent",
+        "Tilemap2DRenderSystem",
+        "createTilemapPlugin"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/engine/dist/chunks/ColorSRGB-DiXuNgg5.js",
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/EngineDiagnosticsAccess-SXWvpo8N.js",
+        "@haiyue/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+        "@haiyue/engine/dist/chunks/Geometry2D-D7SVMQoB.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/engine/dist/chunks/IEngine-BWIJHt_0.js",
+        "@haiyue/engine/dist/chunks/Material2D-DMc_MGWJ.js",
+        "@haiyue/engine/dist/chunks/Mesh2D-Dudne44S.js",
+        "@haiyue/engine/dist/chunks/RenderCommandContext-BwnkNm0B.js",
+        "@haiyue/engine/dist/chunks/System-CIIb_ci6.js",
+        "@haiyue/engine/dist/chunks/Transform3D-ClwzR-VK.js",
+        "@haiyue/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+        "@haiyue/engine/dist/chunks/hierarchy-CZkgLn-Q.js",
+        "@haiyue/engine/dist/chunks/materialValidation-Daa_VxS1.js",
+        "@haiyue/engine/dist/color.js",
+        "@haiyue/engine/dist/extension-authoring.js",
+        "@haiyue/extensions/dist/chunks/2d-ui-tilemap2d.generated-gebw4mX7.js",
+        "@haiyue/extensions/dist/chunks/RenderSystem2DBase-CF2s00vg.js",
+        "@haiyue/extensions/dist/chunks/pluginUtils-BjtEV6zU.js",
+        "@haiyue/extensions/dist/tilemap.js",
+        "fixture/extensions-tilemap.mjs",
+        "node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-canvas-text",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-canvas-text.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 301442,
+      "gzipBytes": 47118,
+      "exports": [
+        "CanvasText2DRenderSystem",
+        "CanvasTextComponent"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/engine/dist/chunks/BasicMaterial-DvxA4_w-.js",
+        "@haiyue/engine/dist/chunks/ColorSRGB-DiXuNgg5.js",
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/CssMaterial-BsNsk31l.js",
+        "@haiyue/engine/dist/chunks/EngineDiagnosticsAccess-SXWvpo8N.js",
+        "@haiyue/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+        "@haiyue/engine/dist/chunks/GPUResourceTracker-C7_d3HbZ.js",
+        "@haiyue/engine/dist/chunks/Geometry2D-D7SVMQoB.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/engine/dist/chunks/IEngine-BWIJHt_0.js",
+        "@haiyue/engine/dist/chunks/Material2D-DMc_MGWJ.js",
+        "@haiyue/engine/dist/chunks/Mesh2D-Dudne44S.js",
+        "@haiyue/engine/dist/chunks/RenderCommandContext-BwnkNm0B.js",
+        "@haiyue/engine/dist/chunks/System-CIIb_ci6.js",
+        "@haiyue/engine/dist/chunks/Transform2D-BQcy9yW6.js",
+        "@haiyue/engine/dist/chunks/Transform3D-ClwzR-VK.js",
+        "@haiyue/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+        "@haiyue/engine/dist/chunks/hierarchy-CZkgLn-Q.js",
+        "@haiyue/engine/dist/chunks/materialValidation-Daa_VxS1.js",
+        "@haiyue/engine/dist/color.js",
+        "@haiyue/engine/dist/extension-authoring.js",
+        "@haiyue/engine/dist/internal/deformation-shader-artifact.js",
+        "@haiyue/extensions/dist/canvas-text.js",
+        "@haiyue/extensions/dist/chunks/2d-ui-canvas-text-2d.generated-C0Eaej2m.js",
+        "@haiyue/extensions/dist/chunks/RenderSystem2DBase-CF2s00vg.js",
+        "fixture/extensions-canvas-text.mjs",
+        "node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+      ],
+      "generatedShaderArtifacts": [
+        "deformation-shader-artifact"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "extensions-tween",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-tween.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 214663,
+      "gzipBytes": 28855,
+      "exports": [
+        "Tween2DComponent",
+        "Tween2DSystem"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/engine/dist/chunks/System-CIIb_ci6.js",
+        "@haiyue/engine/dist/chunks/Transform2D-BQcy9yW6.js",
+        "@haiyue/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+        "@haiyue/engine/dist/tween.js",
+        "@haiyue/extensions/dist/tween.js",
+        "fixture/extensions-tween.mjs",
+        "node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-grid",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-grid.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 4734,
+      "gzipBytes": 1449,
+      "exports": [
+        "Grid2DComponent"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/extensions/dist/grid.js",
+        "fixture/extensions-grid.mjs"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-interaction",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-interaction.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 289456,
+      "gzipBytes": 49181,
+      "exports": [
+        "InteractionRuntime"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/animation-spec/dist/chunks/binary-DvuTJ_hy.js",
+        "@haiyue/animation-spec/dist/chunks/errors-Bzs3GOD9.js",
+        "@haiyue/animation-spec/dist/chunks/expression-D1cKtNwM.js",
+        "@haiyue/animation-spec/dist/chunks/extensions-DxL4AxOC.js",
+        "@haiyue/animation-spec/dist/index.js",
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/extensions/dist/animation.js",
+        "@haiyue/extensions/dist/chunks/RenderSystem2DBase-CF2s00vg.js",
+        "fixture/extensions-interaction.mjs",
+        "node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    },
+    {
+      "id": "extensions-controls",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-controls.mjs",
+      "packageName": "@haiyue/extensions",
+      "rawBytes": 261715,
+      "gzipBytes": 39060,
+      "exports": [
+        "VirtualJoystickControls"
+      ],
+      "imports": [],
+      "dynamicImports": [],
+      "modules": [
+        "@haiyue/engine/dist/chunks/CartesianTransform3D--7y3_ktY.js",
+        "@haiyue/engine/dist/chunks/Component-Du0fittL.js",
+        "@haiyue/engine/dist/chunks/EngineError-Cp-e1RTL.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/engine/dist/chunks/GuiSystem-CrvHduqA.js",
+        "@haiyue/engine/dist/chunks/System-CIIb_ci6.js",
+        "@haiyue/engine/dist/chunks/Transform2D-BQcy9yW6.js",
+        "@haiyue/engine/dist/chunks/Transform3D-ClwzR-VK.js",
+        "@haiyue/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+        "@haiyue/extensions/dist/controls.js",
+        "fixture/extensions-controls.mjs",
+        "node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"
+      ],
+      "generatedShaderArtifacts": [],
+      "warnings": []
+    }
+  ],
+  "gltfGate": {
+    "status": "passed",
+    "checkedAt": "2026-10-11T06:43:42.721Z",
+    "chromePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "angleBackend": "d3d11",
+    "validationErrors": [],
+    "manifest": "scripts\\webgpu-gate\\assets\\gltf-corpus\\manifest.json"
+  },
+  "bindings": [
+    {
+      "path": "extensions/src/plugins/pluginUtils.ts",
+      "sha256": "481fad1147a454da47198671f70b5295467b598a65edbfc648434ce1a08a18fe"
+    },
+    {
+      "path": "extensions/src/gltf/GltfPlugin.ts",
+      "sha256": "1314d09c8e62c7b95885a5da0324df786791d38e7b50a51731ef9ee8a68902d2"
+    },
+    {
+      "path": "extensions/src/spine/SpinePlugin.ts",
+      "sha256": "f2051859a566dbd2d50199d1000e8f49c30b663ab58c845a7a90954791d10fad"
+    },
+    {
+      "path": "extensions/src/tilemap/TilemapPlugin.ts",
+      "sha256": "5c02b31b555192205079aaae5ddccbda93f750ec6b16dffad7670bd66ccf8a68"
+    },
+    {
+      "path": "extensions/test/plugin-lifecycle.test.mjs",
+      "sha256": "58bd3412229fa0fdbb17e61e80f3f51ebb949d3fce1c15774054c6d32501eac1"
+    },
+    {
+      "path": "extensions/test/stable-declaration-boundary.test.mjs",
+      "sha256": "28058652097531e06124761c177c8a399095a1ef13585567c996a8d01f889f3a"
+    },
+    {
+      "path": "extensions/README.md",
+      "sha256": "b3a360607d6260b63bd498fd9765087891db0cde4483b42ab69762c126ecb950"
+    },
+    {
+      "path": "extensions/package.json",
+      "sha256": "d6eaac5cbe9ad331df1699ff3c52986feda72e3e114bd75bb384224a8fe8d87e"
+    },
+    {
+      "path": "config/engine-package-budget.json",
+      "sha256": "a37b2d1a299d9ddc7b50e0ba672223b420d2fbaf9a4299ac28773312c235c332"
+    },
+    {
+      "path": "config/public-api-capability-budgets.json",
+      "sha256": "38ec10b126bd3f0e66d94db3ad6215e1d0b63ce8319005344065bc5a394cb4cf"
+    },
+    {
+      "path": "scripts/engine-package-policy.mjs",
+      "sha256": "400037f3fc54fc68be7d9863692cd95c1c123b1e749ad606643812d9f55b4b9a"
+    },
+    {
+      "path": "scripts/engine-package-policy.test.mjs",
+      "sha256": "4f34911f31f21923d5e0b526a7f69e3637243140a6431c8293f41822621c4216"
+    },
+    {
+      "path": "scripts/verify-engine-package.mjs",
+      "sha256": "813bdaf9c9613b6ae69db506f06088fa351754107ae29bfeab2fd585b28c5247"
+    },
+    {
+      "path": "docs/for-ai/adr/0122-package-capability-structure-review.md",
+      "sha256": "15f653f71df0b18b02c87846211c0c6899f3bafc9377560201f067f2cd569601"
+    },
+    {
+      "path": "docs/for-ai/api-stability.md",
+      "sha256": "918a7bf4a8a1d349d672d975d6a9c81c4404745641ff7b76b3f4a522ff86567e"
+    },
+    {
+      "path": "review/api/extensions-capability-review.md",
+      "sha256": "166cde7895be40a4d16e3f4858126b4187c263fe18d866a023f8586757dd6160"
+    },
+    {
+      "path": "review/baselines/api-surface.json",
+      "sha256": "ec82c28736a6578eea4a76dceae5e1037a8a2faa7492e6eededad076d3079949"
+    },
+    {
+      "path": "review/api/README.md",
+      "sha256": "d0c6e5ede29a2b96024c8caf163bc4c417cfc002c3f1967f388bd39f086f1132"
+    },
+    {
+      "path": "review/engine-0.2.1/g09/README.md",
+      "sha256": "90a2192bdc2c52db887141c25e67b97e94349aa2d12e1b8c3896ff837a762032"
+    },
+    {
+      "path": "artifacts/release/npm/haiyue-engine-0.2.1.tgz",
+      "sha256": "c27b6052d7a4db36a8eaf031c2bb8be7d8e5a912cbcb7e18cdefc7f85c831dde"
+    },
+    {
+      "path": "artifacts/release/npm/haiyue-animation-spec-0.2.1.tgz",
+      "sha256": "048a205e2906eb685d3bb4a31980ebd3ac6b11a6c8f9d0f04d88ea2ca07255e0"
+    },
+    {
+      "path": "artifacts/release/npm/haiyue-extensions-0.2.1.tgz",
+      "sha256": "44a8aa631ec7925c98cc0d5d4dad82053df053d829e2f3d7a0b78cb2afea2f4e"
+    },
+    {
+      "path": "artifacts/release/npm/haiyue-shader-language-0.2.1.tgz",
+      "sha256": "afc558b7761cef41f9a93f341fd80004918a61fbfd4cae691c79b3c4d69dce06"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/summarize.mjs",
+      "sha256": "6e59a4fac4b51318baaf6982f642a4fd729e3632ffcfec238444b9431bd478c4"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/checks.mjs",
+      "sha256": "5a1f0f3f4ef9810c581c2162fd06820aecc7797c448fd322a6ff30c728a82a58"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/lifecycle.before.log",
+      "sha256": "3c538c823bfc32fae23e60da46564a108e9ee4f0a51bdb2047fac57010703e6c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/package-budget.before.json",
+      "sha256": "85755fcabef871fdf2799580ff3144667a99848fe06a04798bfdf3b3372bd0f0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/public-packages.before.json",
+      "sha256": "3711cfe5222d14e1492f4f9ebf9d1ca2e0885357636a0c06cb98d5bb8b378d71"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/public-packages.measurement.json",
+      "sha256": "7ab8801cd68594fcf2902d94e938ae873cfa017f7ab6f3bc49542d3397b3205b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/public-packages.measurement.log",
+      "sha256": "f6431ccef3a5e94bd3b52e42f75d7cb0d851a8daa6d62e4b7f04c8a4550a9653"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/public-packages.final.json",
+      "sha256": "ffefbdb9954b6c08f71ebb6716b8bd1b15e2b148b31b7691c99367848f10b991"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/gltf-asset.json",
+      "sha256": "bad5aeaa0f46cd866a52a53b5e20dea8cb000c9f6574f3b410925c698ff3c4ce"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/full-checks.json",
+      "sha256": "b3cb60fdf60d6548231d06340162dc5d7fbe4cdae582e3566d6f280b4dd478c0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/test.log",
+      "sha256": "7cba84ba2c7272a806a436807faf97569a36238f30a28bbf11633cf3887e3d9d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/lifecycle-final-checks.json",
+      "sha256": "f1bd1c5fe34e596ea7ec97d87240a8e8d01176ae2efe3e457d5cfb6fc5da850c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/full-final-checks.json",
+      "sha256": "cc8b3383e8b41702b5964931a43f2d5e1cbb195c6c80cb71d30f0ec58bfd0a76"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/package-final-checks.json",
+      "sha256": "ce7313fe990e5c499493041019a2db6a0bf4f00ef237a8c4ce2e6571d2c0f91c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/governance-checks.json",
+      "sha256": "5e9e42d773adc197ac3b41a4d43a0353ca5a24827334ced0ce074c56b7565546"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/gltf-checks.json",
+      "sha256": "6684e05dcd430cc3d6f79edaec4116c590093feaea2baf4b54e274a4e3fdaae3"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/extensions-typecheck-final.log",
+      "sha256": "67af9b05f283186565497d9f1bf334ef59a043f6d099243e687b083410b203cf"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/extensions-build-final.log",
+      "sha256": "f315c7b56cc8125d174250a72401f0491af288ba1f2abaa2674a82d01b9ac579"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/lifecycle-final.log",
+      "sha256": "7646b75a871db396dbb8803d1622bdaacb37335ce2304b9c6c0007cbff2ddc60"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/test-final.log",
+      "sha256": "221776f70603251cf2b13e162e85f180d43120ece2c90b6c5fb4166daed958c0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/build.log",
+      "sha256": "f3c436d15f98e983a82bff1139c97d3ad7c4d05dda8db8becb867e9350a40c26"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/public-packages-final.log",
+      "sha256": "19101e0c1b55cd67f5a7a5fc1201715fa16d6e695a8131aa0529fc68ecae4bfc"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/boundaries.log",
+      "sha256": "497ebec50efbaf483c1895f4a4db9b37d81faf6a334660c104492fccab50e9e8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/api.log",
+      "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/docs.log",
+      "sha256": "14f38a72b3e926ed7cad931625657597219e67c9a481fbfe85964f9c32136c56"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/release-policy.log",
+      "sha256": "9c4b406e018a47d5529695ea67bbcd5c2fdeb8cb7566072a1689289c490c69a9"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/gltf-asset.log",
+      "sha256": "10326637e820ffbf6d04c050be757707939e9835d9f9f0bd11b1fc6632ce9885"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/extensions-review-20261011/typecheck.log",
+      "sha256": "de4030d3d45254c6e1bbb476ceb2578942d2ec5e7d759520e43f1b81c9102a2a"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-root.mjs",
+      "sha256": "fc8c93585ed659870c17ae7794ae7b1abc7775aef5522621cab1debbcbb377d0"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-i18n.mjs",
+      "sha256": "9b27e5d867388f1e4f6c20f4647d6ba112571a08f57143d13cee1616268b3035"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-narrative.mjs",
+      "sha256": "617509513bf22153e6d4a15c4b6251a7289dff25a27ce5ecb86e8aecff884b13"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-narrative-gui.mjs",
+      "sha256": "5c18e37d3ad5b76ac001e2a4ce68975437c7c77e1a34ff525de6ebe766119021"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-animation.mjs",
+      "sha256": "87ddb2700ebb230636c1cf82d8a42cd9b29c1b9fe5c259d2528407e0d2655496"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-animation3d.mjs",
+      "sha256": "6c27772ef86f644d314f6c7c890e1521df44e243d741082bdd8fda4ad9330d94"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-deformable-animation.mjs",
+      "sha256": "8629179376ec2bb8a087a82e01a9b9e9ac77b53d4a2df3c022e383e6d8fad8c4"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-gltf.mjs",
+      "sha256": "22188fab55a995f01b05443d71d1426cb0b441eecc82c4a996da8310762c62ee"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-gltf-animation3d.mjs",
+      "sha256": "3272e354f0ef41411f0dfa9365bb6e3981a2147111fd6aa20bc92d167bcf5cc0"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-hya-state-machine.mjs",
+      "sha256": "335df89904d3de2971f682d025504a5435c6051b23448cf8c590f9f8fa99469d"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-spine.mjs",
+      "sha256": "522c686850d952a001c9a8cd25b4634ff042c7856a6abfa8d3ac78bf51ad4597"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-tilemap.mjs",
+      "sha256": "fe72d631527b7e504d77a999ef8185dfe7066259c0b105f3967c7481fdda58d5"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-canvas-text.mjs",
+      "sha256": "1ade2cceed752cfc223dd19a3b9d1ce79b2d3723d06515da786fc16b94839f52"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-tween.mjs",
+      "sha256": "8bbc42a346c2a1f63668bb534fed770278286a201fc55e1e1f0bbcfaed0eed45"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-grid.mjs",
+      "sha256": "a8b5e90f28f99e905a33c8a339258249014a49d305e6076203defdf7f0ecfbee"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-interaction.mjs",
+      "sha256": "69753ade306cc32d139a5212a252c8405a0c2878f6631320b6e9f4ed060535b3"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-controls.mjs",
+      "sha256": "b3cb934a7af91ce4243486d3c8d4b42419bcad16518d85811047bb4e0961ab87"
+    }
+  ]
+}

@@ -1,0 +1,1811 @@
+{
+  "schemaVersion": 1,
+  "status": "diagnostic-verified-v4-ready-for-independent-baseline",
+  "checkedAt": "2026-10-09T06:58:38.308Z",
+  "performanceQualified": false,
+  "regressionBudget": 0.05,
+  "diagnostic": {
+    "batch": "artifacts/engine-0.2.1/g09/gpu-power-closed-20261009T060836Z",
+    "status": "independent-diagnostic-verified",
+    "captureCount": 6,
+    "frames": 14400,
+    "hostObservations": 292,
+    "interactiveObservations": 0,
+    "unreadableMax": 2,
+    "restoration": {
+      "cpu": true,
+      "gpu": true,
+      "serviceUnchanged": true
+    },
+    "gpuObservation": "All 48 fixed measurement windows remained in P8 / memory 405 MHz. Core frequency differs between captures; Chrome preference readback does not imply a clock lock or P0.",
+    "rows": [
+      {
+        "index": 0,
+        "variant": "A0",
+        "cpuP95": 0.5750000001862645,
+        "firstGpuP95": 0.9677439999999999,
+        "allGpuP95": 0.9728,
+        "allSpanP95": 1.069056,
+        "windows": [
+          {
+            "index": 0,
+            "passSumP95": 0.9677439999999999,
+            "spanP95": 1.067008,
+            "p50": 0.915456,
+            "coreMHz": [
+              582
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 1,
+            "passSumP95": 0.9768640000000001,
+            "spanP95": 1.074176,
+            "p50": 0.9061759999999999,
+            "coreMHz": [
+              582
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 2,
+            "passSumP95": 0.975872,
+            "spanP95": 1.069056,
+            "p50": 0.9175359999999999,
+            "coreMHz": [
+              582
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 3,
+            "passSumP95": 0.969728,
+            "spanP95": 1.068032,
+            "p50": 0.8959680000000001,
+            "coreMHz": [
+              582
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 4,
+            "passSumP95": 0.9687039999999999,
+            "spanP95": 1.066016,
+            "p50": 0.9144320000000001,
+            "coreMHz": [
+              582
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 5,
+            "passSumP95": 0.9727680000000001,
+            "spanP95": 1.069056,
+            "p50": 0.911328,
+            "coreMHz": [
+              582
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 6,
+            "passSumP95": 0.9778880000000001,
+            "spanP95": 1.077248,
+            "p50": 0.9185599999999999,
+            "coreMHz": [
+              582
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 7,
+            "passSumP95": 0.969728,
+            "spanP95": 1.064992,
+            "p50": 0.8939520000000001,
+            "coreMHz": [
+              582
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          }
+        ],
+        "hostObservations": 49,
+        "temperatureC": {
+          "min": 48,
+          "max": 49
+        }
+      },
+      {
+        "index": 1,
+        "variant": "B4",
+        "cpuP95": 0.5549999997019768,
+        "firstGpuP95": 1.01376,
+        "allGpuP95": 1.016832,
+        "allSpanP95": 1.113088,
+        "windows": [
+          {
+            "index": 0,
+            "passSumP95": 1.01376,
+            "spanP95": 1.11104,
+            "p50": 0.95232,
+            "coreMHz": [
+              544
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 1,
+            "passSumP95": 1.012704,
+            "spanP95": 1.110016,
+            "p50": 0.9441280000000001,
+            "coreMHz": [
+              544
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 2,
+            "passSumP95": 1.0158079999999998,
+            "spanP95": 1.108992,
+            "p50": 0.955392,
+            "coreMHz": [
+              544
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 3,
+            "passSumP95": 1.01376,
+            "spanP95": 1.107968,
+            "p50": 0.932864,
+            "coreMHz": [
+              544
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 4,
+            "passSumP95": 1.01376,
+            "spanP95": 1.11104,
+            "p50": 0.953344,
+            "coreMHz": [
+              544
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 5,
+            "passSumP95": 1.011744,
+            "spanP95": 1.108,
+            "p50": 0.945152,
+            "coreMHz": [
+              544
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 6,
+            "passSumP95": 1.028096,
+            "spanP95": 1.124352,
+            "p50": 0.95744,
+            "coreMHz": [
+              544
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 7,
+            "passSumP95": 1.0229759999999999,
+            "spanP95": 1.118208,
+            "p50": 0.9390080000000001,
+            "coreMHz": [
+              544
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          }
+        ],
+        "hostObservations": 48,
+        "temperatureC": {
+          "min": 49,
+          "max": 50
+        }
+      },
+      {
+        "index": 2,
+        "variant": "B4",
+        "cpuP95": 0.599999999627471,
+        "firstGpuP95": 0.982016,
+        "allGpuP95": 0.986112,
+        "allSpanP95": 1.08032,
+        "windows": [
+          {
+            "index": 0,
+            "passSumP95": 0.982016,
+            "spanP95": 1.077248,
+            "p50": 0.9246719999999999,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 1,
+            "passSumP95": 0.982016,
+            "spanP95": 1.079296,
+            "p50": 0.915456,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 2,
+            "passSumP95": 1.031168,
+            "spanP95": 1.119232,
+            "p50": 0.9297920000000001,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 3,
+            "passSumP95": 0.98304,
+            "spanP95": 1.079296,
+            "p50": 0.9041920000000001,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 4,
+            "passSumP95": 0.985088,
+            "spanP95": 1.078272,
+            "p50": 0.923648,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 5,
+            "passSumP95": 0.9840959999999999,
+            "spanP95": 1.08032,
+            "p50": 0.914432,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 6,
+            "passSumP95": 0.985088,
+            "spanP95": 1.078272,
+            "p50": 0.927744,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 7,
+            "passSumP95": 0.984064,
+            "spanP95": 1.079296,
+            "p50": 0.907264,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          }
+        ],
+        "hostObservations": 49,
+        "temperatureC": {
+          "min": 49,
+          "max": 51
+        }
+      },
+      {
+        "index": 3,
+        "variant": "A0",
+        "cpuP95": 0.5600000005215406,
+        "firstGpuP95": 0.9421120000000001,
+        "allGpuP95": 0.9461439999999999,
+        "allSpanP95": 1.043424,
+        "windows": [
+          {
+            "index": 0,
+            "passSumP95": 0.9421120000000001,
+            "spanP95": 1.041408,
+            "p50": 0.886816,
+            "coreMHz": [
+              607
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 1,
+            "passSumP95": 0.9462079999999999,
+            "spanP95": 1.043456,
+            "p50": 0.8806080000000001,
+            "coreMHz": [
+              607
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 2,
+            "passSumP95": 0.9492160000000001,
+            "spanP95": 1.047552,
+            "p50": 0.891904,
+            "coreMHz": [
+              607
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 3,
+            "passSumP95": 0.944128,
+            "spanP95": 1.038336,
+            "p50": 0.86832,
+            "coreMHz": [
+              607
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 4,
+            "passSumP95": 0.944128,
+            "spanP95": 1.042432,
+            "p50": 0.8929279999999999,
+            "coreMHz": [
+              607
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 5,
+            "passSumP95": 0.943072,
+            "spanP95": 1.041408,
+            "p50": 0.8826560000000001,
+            "coreMHz": [
+              607
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 6,
+            "passSumP95": 0.9512959999999999,
+            "spanP95": 1.050624,
+            "p50": 0.891872,
+            "coreMHz": [
+              607
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 7,
+            "passSumP95": 0.9430400000000001,
+            "spanP95": 1.03936,
+            "p50": 0.871424,
+            "coreMHz": [
+              607
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          }
+        ],
+        "hostObservations": 48,
+        "temperatureC": {
+          "min": 50,
+          "max": 52
+        }
+      },
+      {
+        "index": 4,
+        "variant": "A0",
+        "cpuP95": 0.5650000004097819,
+        "firstGpuP95": 0.979968,
+        "allGpuP95": 0.9779200000000001,
+        "allSpanP95": 1.073152,
+        "windows": [
+          {
+            "index": 0,
+            "passSumP95": 0.979968,
+            "spanP95": 1.074208,
+            "p50": 0.9216,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 1,
+            "passSumP95": 0.9809919999999999,
+            "spanP95": 1.072128,
+            "p50": 0.914432,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 2,
+            "passSumP95": 0.979968,
+            "spanP95": 1.074176,
+            "p50": 0.9216,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 3,
+            "passSumP95": 0.9728000000000001,
+            "spanP95": 1.071104,
+            "p50": 0.898048,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 4,
+            "passSumP95": 0.976896,
+            "spanP95": 1.072128,
+            "p50": 0.917504,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 5,
+            "passSumP95": 0.9779200000000001,
+            "spanP95": 1.074176,
+            "p50": 0.913408,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 6,
+            "passSumP95": 0.9789759999999998,
+            "spanP95": 1.074176,
+            "p50": 0.9216000000000001,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 7,
+            "passSumP95": 0.9728000000000001,
+            "spanP95": 1.068032,
+            "p50": 0.8970239999999999,
+            "coreMHz": [
+              569
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          }
+        ],
+        "hostObservations": 49,
+        "temperatureC": {
+          "min": 52,
+          "max": 53
+        }
+      },
+      {
+        "index": 5,
+        "variant": "B4",
+        "cpuP95": 0.5750000001862645,
+        "firstGpuP95": 0.991232,
+        "allGpuP95": 0.9963519999999999,
+        "allSpanP95": 1.089536,
+        "windows": [
+          {
+            "index": 0,
+            "passSumP95": 0.991232,
+            "spanP95": 1.084416,
+            "p50": 0.932864,
+            "coreMHz": [
+              556
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 1,
+            "passSumP95": 0.9943040000000001,
+            "spanP95": 1.08544,
+            "p50": 0.9267200000000001,
+            "coreMHz": [
+              556
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 2,
+            "passSumP95": 0.9994559999999999,
+            "spanP95": 1.091584,
+            "p50": 0.93488,
+            "coreMHz": [
+              556
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 3,
+            "passSumP95": 0.9932799999999999,
+            "spanP95": 1.08544,
+            "p50": 0.913408,
+            "coreMHz": [
+              556
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 4,
+            "passSumP95": 0.997376,
+            "spanP95": 1.088512,
+            "p50": 0.934912,
+            "coreMHz": [
+              556
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 5,
+            "passSumP95": 0.9984,
+            "spanP95": 1.092608,
+            "p50": 0.9277440000000001,
+            "coreMHz": [
+              556
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          },
+          {
+            "index": 6,
+            "passSumP95": 0.999424,
+            "spanP95": 1.094656,
+            "p50": 0.937952,
+            "coreMHz": [
+              556
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 5
+          },
+          {
+            "index": 7,
+            "passSumP95": 0.9912319999999999,
+            "spanP95": 1.086464,
+            "p50": 0.910336,
+            "coreMHz": [
+              556
+            ],
+            "memoryMHz": [
+              405
+            ],
+            "telemetryRows": 6
+          }
+        ],
+        "hostObservations": 49,
+        "temperatureC": {
+          "min": 51,
+          "max": 53
+        }
+      }
+    ],
+    "comparisons": [
+      {
+        "metric": "cpu",
+        "A0": {
+          "pooled": {
+            "unit": "ms",
+            "samples": 9000,
+            "sampleCount": 9000,
+            "p50": 0.48000000044703484,
+            "p95": 0.5699999993667006,
+            "p99": 0.6999999992549419,
+            "onePercentLowFps": 1428.5714300919553,
+            "min": 0.27000000048428774,
+            "max": 1.7450000001117587,
+            "mean": 0.4475827777763415,
+            "variance": 0.009776148704556085,
+            "standardDeviation": 0.09887440874440709,
+            "relativeStandardDeviation": 0.22090753633468654
+          },
+          "stability": {
+            "cohortP95": [
+              0.5750000001862645,
+              0.5600000005215406,
+              0.5650000004097819
+            ],
+            "relativeSpread": 0.026548671953707446,
+            "cv": 0.011004874413769414,
+            "stable": true
+          }
+        },
+        "B4": {
+          "pooled": {
+            "unit": "ms",
+            "samples": 9000,
+            "sampleCount": 9000,
+            "p50": 0.4900000002235174,
+            "p95": 0.5800000000745058,
+            "p99": 0.7099999999627471,
+            "onePercentLowFps": 1408.450704299252,
+            "min": 0.27500000037252903,
+            "max": 1.8950000004842877,
+            "mean": 0.4469072222322639,
+            "variance": 0.010787054170012604,
+            "standardDeviation": 0.103860744124104,
+            "relativeStandardDeviation": 0.23239889390314242
+          },
+          "stability": {
+            "cohortP95": [
+              0.5549999997019768,
+              0.599999999627471,
+              0.5750000001862645
+            ],
+            "relativeSpread": 0.07826086941029038,
+            "cv": 0.031923008649199267,
+            "stable": true
+          }
+        },
+        "descriptiveP95Ratio": 1.0175438609103784,
+        "scope": "Diagnostic description only; not formal acceptance"
+      },
+      {
+        "metric": "firstGpu",
+        "A0": {
+          "pooled": {
+            "unit": "ms",
+            "samples": 900,
+            "sampleCount": 900,
+            "p50": 0.9062399999999999,
+            "p95": 0.968704,
+            "p99": 1.002496,
+            "onePercentLowFps": 997.5102145045964,
+            "min": 0.766976,
+            "max": 1.2328960000000002,
+            "mean": 0.9031550222222239,
+            "variance": 0.0021911809012306166,
+            "standardDeviation": 0.04681005128421263,
+            "relativeStandardDeviation": 0.05182947570732202
+          },
+          "stability": {
+            "cohortP95": [
+              0.9677439999999999,
+              0.9421120000000001,
+              0.979968
+            ],
+            "relativeSpread": 0.0391177832153957,
+            "cv": 0.016375869408364652,
+            "stable": true
+          }
+        },
+        "B4": {
+          "pooled": {
+            "unit": "ms",
+            "samples": 900,
+            "sampleCount": 900,
+            "p50": 0.93696,
+            "p95": 0.998432,
+            "p99": 1.0280960000000001,
+            "onePercentLowFps": 972.6718127490038,
+            "min": 0.802816,
+            "max": 1.502208,
+            "mean": 0.9335238755555553,
+            "variance": 0.003185157718242286,
+            "standardDeviation": 0.05643720154510043,
+            "relativeStandardDeviation": 0.060456087972590666
+          },
+          "stability": {
+            "cohortP95": [
+              1.01376,
+              0.982016,
+              0.991232
+            ],
+            "relativeSpread": 0.03202479338842975,
+            "cv": 0.013391858062821123,
+            "stable": true
+          }
+        },
+        "descriptiveP95Ratio": 1.0306884249471457,
+        "scope": "Diagnostic description only; not formal acceptance"
+      },
+      {
+        "metric": "allGpu",
+        "A0": {
+          "pooled": {
+            "unit": "ms",
+            "samples": 7200,
+            "sampleCount": 7200,
+            "p50": 0.9021440000000001,
+            "p95": 0.971776,
+            "p99": 0.992256,
+            "onePercentLowFps": 1007.8044375644995,
+            "min": 0.766976,
+            "max": 1.44896,
+            "mean": 0.899631146666666,
+            "variance": 0.0025943577416362466,
+            "standardDeviation": 0.05093483819191189,
+            "relativeStandardDeviation": 0.05661746859325272
+          },
+          "stability": {
+            "cohortP95": [
+              0.9728,
+              0.9461439999999999,
+              0.9779200000000001
+            ],
+            "relativeSpread": 0.032664473684210785,
+            "cv": 0.014426220689061202,
+            "stable": true
+          }
+        },
+        "B4": {
+          "pooled": {
+            "unit": "ms",
+            "samples": 7200,
+            "sampleCount": 7200,
+            "p50": 0.9328320000000001,
+            "p95": 1.004544,
+            "p99": 1.046528,
+            "onePercentLowFps": 955.5406066536204,
+            "min": 0.79872,
+            "max": 1.51552,
+            "mean": 0.9322665911111121,
+            "variance": 0.004176237011383974,
+            "standardDeviation": 0.06462381148914055,
+            "relativeStandardDeviation": 0.06931902537890942
+          },
+          "stability": {
+            "cohortP95": [
+              1.016832,
+              0.986112,
+              0.9963519999999999
+            ],
+            "relativeSpread": 0.030832476875642317,
+            "cv": 0.012774521634598635,
+            "stable": true
+          }
+        },
+        "descriptiveP95Ratio": 1.0337197049525817,
+        "scope": "Diagnostic description only; not formal acceptance"
+      },
+      {
+        "metric": "firstSpan",
+        "A0": {
+          "pooled": {
+            "unit": "ms",
+            "samples": 900,
+            "sampleCount": 900,
+            "p50": 1.001472,
+            "p95": 1.06496,
+            "p99": 1.102848,
+            "onePercentLowFps": 906.7432683379758,
+            "min": 0.86016,
+            "max": 1.323008,
+            "mean": 0.9976733511111107,
+            "variance": 0.0022378687694456106,
+            "standardDeviation": 0.04730611767462651,
+            "relativeStandardDeviation": 0.04741643907992691
+          },
+          "stability": {
+            "cohortP95": [
+              1.067008,
+              1.041408,
+              1.074208
+            ],
+            "relativeSpread": 0.03074016314779286,
+            "cv": 0.013267686759500795,
+            "stable": true
+          }
+        },
+        "B4": {
+          "pooled": {
+            "unit": "ms",
+            "samples": 900,
+            "sampleCount": 900,
+            "p50": 1.030144,
+            "p95": 1.094688,
+            "p99": 1.123328,
+            "onePercentLowFps": 890.2119416590701,
+            "min": 0.896,
+            "max": 1.598464,
+            "mean": 1.0275647644444446,
+            "variance": 0.003247085959166733,
+            "standardDeviation": 0.05698320769460713,
+            "relativeStandardDeviation": 0.05545461431369267
+          },
+          "stability": {
+            "cohortP95": [
+              1.11104,
+              1.077248,
+              1.084416
+            ],
+            "relativeSpread": 0.031161473087818737,
+            "cv": 0.01332637011204435,
+            "stable": true
+          }
+        },
+        "descriptiveP95Ratio": 1.0279146634615386,
+        "scope": "Diagnostic description only; not formal acceptance"
+      },
+      {
+        "metric": "allSpan",
+        "A0": {
+          "pooled": {
+            "unit": "ms",
+            "samples": 7200,
+            "sampleCount": 7200,
+            "p50": 0.996352,
+            "p95": 1.067008,
+            "p99": 1.093632,
+            "onePercentLowFps": 914.3843632958802,
+            "min": 0.860096,
+            "max": 1.550336,
+            "mean": 0.9945302355555552,
+            "variance": 0.0026449782661489532,
+            "standardDeviation": 0.051429352184807396,
+            "relativeStandardDeviation": 0.05171220576926795
+          },
+          "stability": {
+            "cohortP95": [
+              1.069056,
+              1.043424,
+              1.073152
+            ],
+            "relativeSpread": 0.027807710727969535,
+            "cv": 0.012388613156534464,
+            "stable": true
+          }
+        },
+        "B4": {
+          "pooled": {
+            "unit": "ms",
+            "samples": 7200,
+            "sampleCount": 7200,
+            "p50": 1.027072,
+            "p95": 1.1008,
+            "p99": 1.159168,
+            "onePercentLowFps": 862.6877208480565,
+            "min": 0.886784,
+            "max": 1.634304,
+            "mean": 1.0266905111111093,
+            "variance": 0.004256080679916523,
+            "standardDeviation": 0.065238644068654,
+            "relativeStandardDeviation": 0.06354265804799458
+          },
+          "stability": {
+            "cohortP95": [
+              1.113088,
+              1.08032,
+              1.089536
+            ],
+            "relativeSpread": 0.03007518796992493,
+            "cv": 0.012608473444421588,
+            "stable": true
+          }
+        },
+        "descriptiveP95Ratio": 1.0316698656429943,
+        "scope": "Diagnostic description only; not formal acceptance"
+      }
+    ],
+    "windowDrift": [
+      {
+        "variant": "A0",
+        "windows": [
+          {
+            "index": 0,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.9062399999999999,
+              "p95": 0.968704,
+              "p99": 1.002496,
+              "onePercentLowFps": 997.5102145045964,
+              "min": 0.766976,
+              "max": 1.2328960000000002,
+              "mean": 0.9031550222222239,
+              "variance": 0.0021911809012306166,
+              "standardDeviation": 0.04681005128421263,
+              "relativeStandardDeviation": 0.05182947570732202
+            },
+            "stability": {
+              "cohortP95": [
+                0.9677439999999999,
+                0.9421120000000001,
+                0.979968
+              ],
+              "relativeSpread": 0.0391177832153957,
+              "cv": 0.016375869408364652,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": 0,
+              "p95": 0
+            }
+          },
+          {
+            "index": 1,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.900096,
+              "p95": 0.9738559999999999,
+              "p99": 1.00864,
+              "onePercentLowFps": 991.4340101522843,
+              "min": 0.7700480000000001,
+              "max": 1.3742079999999999,
+              "mean": 0.9017260444444448,
+              "variance": 0.002856045469740248,
+              "standardDeviation": 0.05344198227742163,
+              "relativeStandardDeviation": 0.059266317754354474
+            },
+            "stability": {
+              "cohortP95": [
+                0.9768640000000001,
+                0.9462079999999999,
+                0.9809919999999999
+              ],
+              "relativeSpread": 0.03560782258328685,
+              "cv": 0.016028724290135247,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": -0.006779661016949046,
+              "p95": 0.005318446088794948
+            }
+          },
+          {
+            "index": 2,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.9113279999999999,
+              "p95": 0.9748800000000001,
+              "p99": 1.006624,
+              "onePercentLowFps": 993.4195886448168,
+              "min": 0.784384,
+              "max": 1.3772799999999998,
+              "mean": 0.9060455111111105,
+              "variance": 0.0026828053624098785,
+              "standardDeviation": 0.05179580448655932,
+              "relativeStandardDeviation": 0.05716689046120938
+            },
+            "stability": {
+              "cohortP95": [
+                0.975872,
+                0.9492160000000001,
+                0.979968
+              ],
+              "relativeSpread": 0.031512329485834094,
+              "cv": 0.014079723240505293,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": 0.005614406779661074,
+              "p95": 0.006375528541226361
+            }
+          },
+          {
+            "index": 3,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.885728,
+              "p95": 0.966656,
+              "p99": 0.984064,
+              "onePercentLowFps": 1016.1940686784599,
+              "min": 0.768,
+              "max": 1.01888,
+              "mean": 0.8875036444444432,
+              "variance": 0.002409956100424691,
+              "standardDeviation": 0.04909130371486065,
+              "relativeStandardDeviation": 0.055313917888856305
+            },
+            "stability": {
+              "cohortP95": [
+                0.969728,
+                0.944128,
+                0.9728000000000001
+              ],
+              "relativeSpread": 0.02956705385427681,
+              "cv": 0.01335804922579837,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": -0.022634180790960468,
+              "p95": -0.0021141649048626032
+            }
+          },
+          {
+            "index": 4,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.9062399999999999,
+              "p95": 0.968704,
+              "p99": 0.985088,
+              "onePercentLowFps": 1015.1377338877339,
+              "min": 0.7884800000000001,
+              "max": 1.2492800000000002,
+              "mean": 0.9027100799999994,
+              "variance": 0.0021706622663224904,
+              "standardDeviation": 0.04659036666868475,
+              "relativeStandardDeviation": 0.05161166104258499
+            },
+            "stability": {
+              "cohortP95": [
+                0.9687039999999999,
+                0.944128,
+                0.976896
+              ],
+              "relativeSpread": 0.03382663847780129,
+              "cv": 0.014455051774890953,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": 0,
+              "p95": 0
+            }
+          },
+          {
+            "index": 5,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.900064,
+              "p95": 0.9728,
+              "p99": 0.990208,
+              "onePercentLowFps": 1009.8888314374354,
+              "min": 0.789472,
+              "max": 1.29536,
+              "mean": 0.9007933866666671,
+              "variance": 0.002481049731481605,
+              "standardDeviation": 0.04981013683460029,
+              "relativeStandardDeviation": 0.055295850937493854
+            },
+            "stability": {
+              "cohortP95": [
+                0.9727680000000001,
+                0.943072,
+                0.9779200000000001
+              ],
+              "relativeSpread": 0.03582354682719836,
+              "cv": 0.015921714924802974,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": -0.006814971751412435,
+              "p95": 0.0042283298097252064
+            }
+          },
+          {
+            "index": 6,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.9104000000000001,
+              "p95": 0.975872,
+              "p99": 0.992256,
+              "onePercentLowFps": 1007.8044375644995,
+              "min": 0.7864,
+              "max": 1.44896,
+              "mean": 0.9072360177777773,
+              "variance": 0.002876485708017458,
+              "standardDeviation": 0.053632878983114994,
+              "relativeStandardDeviation": 0.059116787618822345
+            },
+            "stability": {
+              "cohortP95": [
+                0.9778880000000001,
+                0.9512959999999999,
+                0.9789759999999998
+              ],
+              "relativeSpread": 0.028305900062174733,
+              "cv": 0.013203959431007764,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": 0.004590395480226217,
+              "p95": 0.007399577167019
+            }
+          },
+          {
+            "index": 7,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.886784,
+              "p95": 0.96768,
+              "p99": 0.983008,
+              "onePercentLowFps": 1017.2857189361633,
+              "min": 0.778208,
+              "max": 1.3895680000000001,
+              "mean": 0.8878794666666675,
+              "variance": 0.0026748830367288924,
+              "standardDeviation": 0.051719271424962014,
+              "relativeStandardDeviation": 0.05825032942717972
+            },
+            "stability": {
+              "cohortP95": [
+                0.969728,
+                0.9430400000000001,
+                0.9728000000000001
+              ],
+              "relativeSpread": 0.030689017951425562,
+              "cv": 0.013893866475129215,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": -0.021468926553672274,
+              "p95": -0.0010570824524313016
+            }
+          }
+        ],
+        "scope": "All eight predeclared fixed windows; no window selection or new formal calibration rule"
+      },
+      {
+        "variant": "B4",
+        "windows": [
+          {
+            "index": 0,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.93696,
+              "p95": 0.998432,
+              "p99": 1.0280960000000001,
+              "onePercentLowFps": 972.6718127490038,
+              "min": 0.802816,
+              "max": 1.502208,
+              "mean": 0.9335238755555553,
+              "variance": 0.003185157718242286,
+              "standardDeviation": 0.05643720154510043,
+              "relativeStandardDeviation": 0.060456087972590666
+            },
+            "stability": {
+              "cohortP95": [
+                1.01376,
+                0.982016,
+                0.991232
+              ],
+              "relativeSpread": 0.03202479338842975,
+              "cv": 0.013391858062821123,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": 0,
+              "p95": 0
+            }
+          },
+          {
+            "index": 1,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.928768,
+              "p95": 1.00352,
+              "p99": 1.025024,
+              "onePercentLowFps": 975.5869130869131,
+              "min": 0.7997120000000001,
+              "max": 1.476608,
+              "mean": 0.9303086933333341,
+              "variance": 0.003039087512052628,
+              "standardDeviation": 0.055127919533142444,
+              "relativeStandardDeviation": 0.05925766353490351
+            },
+            "stability": {
+              "cohortP95": [
+                1.012704,
+                0.982016,
+                0.9943040000000001
+              ],
+              "relativeSpread": 0.03086380020597327,
+              "cv": 0.012657186835603374,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": -0.008743169398907069,
+              "p95": 0.005095990513124482
+            }
+          },
+          {
+            "index": 2,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.9390080000000001,
+              "p95": 1.009664,
+              "p99": 1.3998080000000002,
+              "onePercentLowFps": 714.3836869056327,
+              "min": 0.804864,
+              "max": 1.488896,
+              "mean": 0.9442994488888878,
+              "variance": 0.006336944893491821,
+              "standardDeviation": 0.07960493008282729,
+              "relativeStandardDeviation": 0.0843005152406841
+            },
+            "stability": {
+              "cohortP95": [
+                1.0158079999999998,
+                1.031168,
+                0.9994559999999999
+              ],
+              "relativeSpread": 0.031218497983871156,
+              "cv": 0.012751127574471032,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": 0.002185792349726823,
+              "p95": 0.011249639434633307
+            }
+          },
+          {
+            "index": 3,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.9185280000000001,
+              "p95": 1.001472,
+              "p99": 1.03424,
+              "onePercentLowFps": 966.8935643564356,
+              "min": 0.79872,
+              "max": 1.4848,
+              "mean": 0.9201609244444444,
+              "variance": 0.003699923912532069,
+              "standardDeviation": 0.060826999864633045,
+              "relativeStandardDeviation": 0.06610474129985242
+            },
+            "stability": {
+              "cohortP95": [
+                1.01376,
+                0.98304,
+                0.9932799999999999
+              ],
+              "relativeSpread": 0.03092783505154636,
+              "cv": 0.012813895160184727,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": -0.01967213114754085,
+              "p95": 0.0030447742059549476
+            }
+          },
+          {
+            "index": 4,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.939008,
+              "p95": 1.001504,
+              "p99": 1.03728,
+              "onePercentLowFps": 964.0598488354158,
+              "min": 0.799744,
+              "max": 1.452032,
+              "mean": 0.9353365688888884,
+              "variance": 0.0034290906959252455,
+              "standardDeviation": 0.05855843829820981,
+              "relativeStandardDeviation": 0.06260680940527426
+            },
+            "stability": {
+              "cohortP95": [
+                1.01376,
+                0.985088,
+                0.997376
+              ],
+              "relativeSpread": 0.028747433264887094,
+              "cv": 0.011759843153851859,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": 0.0021857923497266007,
+              "p95": 0.0030768244607544126
+            }
+          },
+          {
+            "index": 5,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.929792,
+              "p95": 1.002496,
+              "p99": 1.024,
+              "onePercentLowFps": 976.5625,
+              "min": 0.804864,
+              "max": 1.447968,
+              "mean": 0.929264497777778,
+              "variance": 0.0024735318775833287,
+              "standardDeviation": 0.04973461448109685,
+              "relativeStandardDeviation": 0.05352040737597431
+            },
+            "stability": {
+              "cohortP95": [
+                1.011744,
+                0.9840959999999999,
+                0.9984
+              ],
+              "relativeSpread": 0.02769230769230781,
+              "cv": 0.011311234122494821,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": -0.007650273224043769,
+              "p95": 0.004070382359539826
+            }
+          },
+          {
+            "index": 6,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.93904,
+              "p95": 1.011776,
+              "p99": 1.368064,
+              "onePercentLowFps": 730.9599550898204,
+              "min": 0.811008,
+              "max": 1.51552,
+              "mean": 0.9414187377777781,
+              "variance": 0.005262423347953462,
+              "standardDeviation": 0.0725425623200164,
+              "relativeStandardDeviation": 0.07705663740160233
+            },
+            "stability": {
+              "cohortP95": [
+                1.028096,
+                0.985088,
+                0.999424
+              ],
+              "relativeSpread": 0.04303278688524584,
+              "cv": 0.01780530367601465,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": 0.0022199453551912107,
+              "p95": 0.013364956251402216
+            }
+          },
+          {
+            "index": 7,
+            "pooled": {
+              "unit": "ms",
+              "samples": 900,
+              "sampleCount": 900,
+              "p50": 0.9195519999999999,
+              "p95": 1.004576,
+              "p99": 1.325056,
+              "onePercentLowFps": 754.6850850077279,
+              "min": 0.806912,
+              "max": 1.4929919999999999,
+              "mean": 0.9238199822222226,
+              "variance": 0.0055134408553952395,
+              "standardDeviation": 0.0742525478040669,
+              "relativeStandardDeviation": 0.08037555934377444
+            },
+            "stability": {
+              "cohortP95": [
+                1.0229759999999999,
+                0.984064,
+                0.9912319999999999
+              ],
+              "relativeSpread": 0.03925619834710728,
+              "cv": 0.016918669503416393,
+              "stable": true
+            },
+            "relativeToFirst": {
+              "p50": -0.01857923497267766,
+              "p95": 0.006153648921508825
+            }
+          }
+        ],
+        "scope": "All eight predeclared fixed windows; no window selection or new formal calibration rule"
+      }
+    ]
+  },
+  "v4": {
+    "contractId": "g09-forward-cold-steady-v4",
+    "gpuControl": {
+      "profileName": "Google Chrome",
+      "applicationName": "chrome.exe",
+      "applicationCount": 1,
+      "settingId": 274197361,
+      "value": 1,
+      "clockLock": false
+    },
+    "samplingAndCalibrationUnchanged": true,
+    "legacyV3": {
+      "status": "passed",
+      "meaning": "New policy retains exact v3 historical failure and calculations",
+      "capturesChecked": 28,
+      "historicalContract": "g09-forward-cold-steady-v3",
+      "historicalStatus": "failed",
+      "baselineStable": false,
+      "selectedWarmup": 6000
+    },
+    "completePopulation": "pending; no new baseline or full qualification yet",
+    "entry": "scripts/start-framegraph-unattended.cmd"
+  },
+  "bindings": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-power-closed-20261009T060836Z/independent-audit.json",
+      "sha256": "7f6e10bd9630bd79f7f92343ef26062a1dca6e487b01ab364d1eb381a01e5ea0"
+    },
+    {
+      "path": "config/framegraph-sampling-021.json",
+      "sha256": "e7133a5f2ffb4e2089c7dc3b22d71a8cc2bb56d782f08cfbd7222a1768db169d"
+    },
+    {
+      "path": "config/framegraph-performance-021.json",
+      "sha256": "f4707951d50edd09608c9f5ee0430598e7d914552c814b2d0d8ada401784fa77"
+    },
+    {
+      "path": "config/lighting-performance-021.json",
+      "sha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a"
+    },
+    {
+      "path": "scripts/verify-framegraph-sampling.mjs",
+      "sha256": "3b111669fbd6e4e41d7d5b814727b4e2fb4194313759d024ce79376756d1a355"
+    },
+    {
+      "path": "scripts/validate-framegraph-sampling.mjs",
+      "sha256": "e9b1ddcb081f5615910ec97561e174b3c7d1b19f21001f5304cc66723f73b1b9"
+    },
+    {
+      "path": "scripts/run-framegraph-unattended.ps1",
+      "sha256": "c1ead3d8293f635f9541ceb6d29f4f8fdec4742cd593d0d4ee95fac00eff1620"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-sampling-policy.mjs",
+      "sha256": "07239ca0e7716e2d1b3b7d8610299214478babc76baffcbd4ea7470b7a5f92b7"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-g05-forward-fixture.mjs",
+      "sha256": "8845a927387e7ae5b04327342fceca0636b8bdb3ef91800e6dc329441942c9ca"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-g05-forward-policy.mjs",
+      "sha256": "c3a422a9473841bbb13f24870c56c5c9416b5765942a4c54a0ad9d641c9a8652"
+    },
+    {
+      "path": "scripts/webgpu-gate/chrome-runner.mjs",
+      "sha256": "38f42bc1ff3d5fc7d8e39c59bb9ede3597c863b914c929faae60afe8123b2409"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-windows-host.mjs",
+      "sha256": "57531ba37ad436df4f776e8740d0fcdb87617acd2f6b5cdbd492aae7727c227c"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-power-observation.ps1",
+      "sha256": "8851525834bd53c395d1a8bdb57efbc7e34a19cf6dfaed29a5f9e8828b877dc3"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-power-control.ps1",
+      "sha256": "bdcbb419b8a1ea1e1422c6a07224b7d692b51f4daf96f705e4f760e1479b825d"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-gpu-policy.mjs",
+      "sha256": "ddcd69486eb797a63d44b0b4d5c0beb6097fe67ce25fadb0a7f03a3efdbebc31"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-gpu-power-control.ps1",
+      "sha256": "4ce776f9e13d2d2b6e2cc20e6c046fc54ee2af149c17471a15cf6b2c8c839554"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-gpu-power-observation.ps1",
+      "sha256": "b3f3596a46ac702b18665ff7ce99e99251a7e01ee0651dc807bb0a1844ad8593"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-nvapi-chrome-power.cs",
+      "sha256": "d2e20ad3a932cdf7a2011fed0a8d094da6c95c163262602932d495a72b963b9e"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-background-policy.ps1",
+      "sha256": "873a2d6f0379ad052c1b660aea9bc86c739f781065e16b411bf89a9fe2155a14"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-gpu-v4-smoke-20261009T065510Z/completion.json",
+      "sha256": "a2fb99a444550d1c622b44a1c676dc4246ca4a6440495b87337941adbb9d6c34"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-gpu-v4-smoke-20261009T065510Z/power-state.json",
+      "sha256": "fcc95298a474e46848f6922a73d8ec125d5c4e11a35ee8c04788b3d1ba85d378"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-gpu-v4-smoke-20261009T065510Z/gpu-power-state.json",
+      "sha256": "d3c2907315eb33d241f8981d01bf21eea5bfad8c631a59cc21c148f1d7b0f056"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-gpu-v4-smoke-20261009T065510Z/service-state.json",
+      "sha256": "95524cd0f95b0bcee6ac51fcf447758469ab1e1d5456b5d0ad13143ae29f8a27"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-gpu-v4-smoke-20261009T065510Z/entry.ps1",
+      "sha256": "e9fef8ab3804fe85eb5c06e1fc83df04d208d2fcdcb67d499129aba6306733d2"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-gpu-v4-smoke-20261009T065510Z/measurement/report.json",
+      "sha256": "3607b3eec82865dd2f5c883da97cf4b0d91381534c4086e659661c0aba2dd809"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-gpu-v4-smoke-20261009T065510Z/measurement/000-correctness-forward-small-1-A0.json",
+      "sha256": "a8dec23561a068fdebd21e0dab110591128883b2bf6251a0e20fc86f5089ba34"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-gpu-v4-smoke-20261009T065510Z/measurement/001-correctness-forward-small-1-B4.json",
+      "sha256": "f7bd172770b96f238237000150f5175631aa7015f1339c62c6d22cd96abedc13"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-gpu-v4-smoke-20261009T065510Z/measurement/002-correctness-forward-cap-8-A0.json",
+      "sha256": "028714ade3691674ed3d3a0d9f64e4e78bd1d61b70e9f8e68f70f07cae829c1d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-gpu-v4-smoke-20261009T065510Z/measurement/003-correctness-forward-cap-8-B4.json",
+      "sha256": "a2dc3f131d5903851fa3bdb97027a5979e0f682ef6b0120bb0fc8ea3529784f1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-gpu-v4-smoke-20261009T065510Z/measurement/004-calibration-forward-small-1-A0.json",
+      "sha256": "be84df53ed701c91f9e3e114de366f90d9c03c08276d49c5289a6d09cb49aa23"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/final-state.json",
+      "sha256": "201e0ddbb53046b23de706babf715ea8700d247dbdb53dc834b708f9a54f3cbf"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/power-checks.json",
+      "sha256": "514ab25582caea057afcfb5b5a2b174b77f4e0a34093939c4225017a393a8ae3"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/normal/power-state.json",
+      "sha256": "7dec7c0eccaa926f9949870aa221adaef43435c46eab6f0ad49aa245a4940475"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/normal/gpu-power-state.json",
+      "sha256": "775aca4cbbfbae0afc7339736a249541c3de80ff53f46938e29ae3c51e8a8d25"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/injected-failure/power-state.json",
+      "sha256": "3d5373902cd25e38cb7a4fa93046be6fae6f6de690612480b4daef5fe5f0a7b4"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/injected-failure/gpu-power-state.json",
+      "sha256": "1d423dccea578d356557cb661634eb26f75df9ca958caf03d55b8de845ebed50"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/legacy-v3-check.json",
+      "sha256": "48505ac66c61445b1dd9ca42dbe537e6cc00866c59c670e10afdce1d5f6cb6d5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/entry-smoke.log",
+      "sha256": "552d7e95443c16b15b4d07367c118e1e4abdf22e93f2daba9c202094daa0b499"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/performance-budget-test.log",
+      "sha256": "d9730593da1ac7ec6e656a543b59cc5cd88ddf0c6b405c41a05bcdfb59838ad5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/typecheck.log",
+      "sha256": "2c937b090e756013c93e08c60050e019c319e26f9f063b9fa588e0fd27bd792f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/test.log",
+      "sha256": "518eb12a52ffc857a67a0bff5ea1f429138993c7c280b73cad71f767e18565c8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/build.log",
+      "sha256": "fddc46da989a5970190df809d8953f138364b216133ea4ac1e00289e844fa516"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/docs-check.log",
+      "sha256": "6911e9eb278509253554f789d83cb219e44d3ada71ad70936fb41b96466bac3c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/controlled-gpu-v4-validation-20261009T064208Z/api-check.log",
+      "sha256": "3e9ae8d8e9d67efceabcab5fd399ff83241a1438e6f62d91b8ac7a2734a7d511"
+    },
+    {
+      "path": "scripts/start-framegraph-unattended.cmd",
+      "sha256": "dc5c402250dd61b38c5ee2a1b66bcef684a4dc4a72e655d4f345ff27ad3be535"
+    },
+    {
+      "path": "scripts/start-framegraph-unattended.ps1",
+      "sha256": "e9fef8ab3804fe85eb5c06e1fc83df04d208d2fcdcb67d499129aba6306733d2"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-gpu-power-control.test.mjs",
+      "sha256": "185253285df8e5c82f07e11249c77c664394d2ad1704db6b302daecaa409726b"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-gpu-power-control.fixture.ps1",
+      "sha256": "d5b66896b9a4903fe1332cb7cc7c487158b30c910be5aae6e344e2d7589d6e8e"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-sampling-policy.test.mjs",
+      "sha256": "17edb3060c14dbf65413312a447de8a93559bf0a1c239b6c5fd8863dabe70d7c"
+    },
+    {
+      "path": "config/framegraph-sampling-021-v3.json",
+      "sha256": "f1bb4852d938b9902843f9ca571ce2379fe6045abb058329aadcf2501adb14ee"
+    },
+    {
+      "path": "docs/for-ai/adr/0121-g09-controlled-gpu-policy.md",
+      "sha256": "a759e3ab052e357fcfcae766ce6fa8a2e7b5b2dd315129fb2a2d8e2ffbc4db0d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/audit-v4-readiness.mjs",
+      "sha256": "237da28bd2a6a1f8d82dbff0bea3ddabc69a6d65db443dac2f30e1fca7e1a09b"
+    }
+  ],
+  "validation": {
+    "performancePolicyTests": 244,
+    "typecheck": "passed",
+    "repositoryTests": "passed",
+    "build": "passed",
+    "docsCheck": "passed",
+    "apiCheck": "passed",
+    "diffCheck": "passed",
+    "cmdPlan": "passed",
+    "readOnlyPreflight": "passed",
+    "normalAndInjectedPowerRestoration": "passed",
+    "finalEntrySmoke": "passed",
+    "finalSmokeCaptures": 5,
+    "finalSmokeSourceFingerprint": "sha256:1b25c9bf90443025c951e92860f07bdb1f081e18fe5fe148ebb19c6e18aab59d",
+    "finalSmokeOutput": "artifacts/engine-0.2.1/g09/unattended-gpu-v4-smoke-20261009T065510Z",
+    "engineImplementationChanged": false
+  }
+}

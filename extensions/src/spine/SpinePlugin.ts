@@ -5,7 +5,7 @@ import { Spine2DRenderSystem, type Spine2DRenderSystemOptions } from './Spine2DR
 import {
   EXTENSIONS_PLUGIN_VERSION,
   installEditorRenderSystem,
-  removeSystem,
+  installOwnedSceneSystem,
   type EditorViewportContributionContext,
 } from '../plugins/pluginUtils';
 
@@ -15,7 +15,6 @@ export interface SpinePluginOptions {
 }
 
 export function createSpinePlugin(options: SpinePluginOptions = {}): EnginePlugin {
-  let system: Spine2DRenderSystem | null = null;
   return {
     name: '@haiyue/extensions/spine',
     version: EXTENSIONS_PLUGIN_VERSION,
@@ -24,12 +23,8 @@ export function createSpinePlugin(options: SpinePluginOptions = {}): EnginePlugi
     },
     installScene(context) {
       context.registerComponent({ type: 'Spine2DComponent', component: Spine2DComponent });
-      system = new Spine2DRenderSystem(context.engine, context.cameraEntity, options.system);
-      context.addSystem(system, options.render ?? { pass: 'shared', loadOp: system.loadOp });
-    },
-    uninstallScene(context) {
-      removeSystem(context, system);
-      system = null;
+      const system = new Spine2DRenderSystem(context.engine, context.cameraEntity, options.system);
+      installOwnedSceneSystem(context, system, options.render ?? { pass: 'shared', loadOp: system.loadOp });
     },
     installEditor(context) {
       context.registerContribution({ components: [{

@@ -1,4 +1,6 @@
-import type { EnginePlugin, RenderPipelineEntryOptions, ScenePluginContext, System } from '@haiyue/engine/experimental';
+import type { ScenePluginContext } from '@haiyue/engine/core';
+import type { RenderPipelineEntryOptions } from '@haiyue/engine/extension-authoring';
+import type { System } from '@haiyue/engine/ecs';
 import type { Entity, HaiyueEngine, World } from '@haiyue/engine';
 
 export const EXTENSIONS_PLUGIN_VERSION = '0.1.0';
@@ -10,8 +12,15 @@ export interface EditorViewportContributionContext {
   registerRenderSystem?: (system: System, options?: RenderPipelineEntryOptions) => void;
 }
 
-export function removeSystem(context: ScenePluginContext, system: System | null): void {
-  if (system) context.world.removeSystem(system);
+/** The factory owns the system; the scene's addSystem token only detaches it. */
+export function installOwnedSceneSystem(
+  context: ScenePluginContext,
+  system: System,
+  renderOptions?: RenderPipelineEntryOptions | false | null,
+): void {
+  // Register before attachment so a partially failed add also releases resources.
+  context.rollback.track(() => system.destroy());
+  context.addSystem(system, renderOptions);
 }
 
 export function installEditorRenderSystem<T extends System & { autoUpdate: boolean; setCameraEntity?(entity: Entity): unknown }>(
@@ -21,30 +30,33 @@ export function installEditorRenderSystem<T extends System & { autoUpdate: boole
 ): { dispose(): void } {
   let system = context.world.getSystem(constructor) as T | null;
   const created = system === null;
-  if (!system) {
-    system = create();
-    context.world.addSystem(system);
+  if (!system) system = create();
+  const previousAutoUpdate = system.autoUpdate;
+  try {
+    if (created) context.world.addSystem(system);
+    system.setCameraEntity?.(context.camera2DEntity);
+    if (context.registerRenderSystem) {
+      system.autoUpdate = false;
+      context.registerRenderSystem(system);
+    } else {
+      system.autoUpdate = true;
+    }
+    return ownedEditorViewportSystem(system, created);
+  } catch (error) {
+    if (created) system.destroy();
+    else system.autoUpdate = previousAutoUpdate;
+    throw error;
   }
-  system.setCameraEntity?.(context.camera2DEntity);
-  if (context.registerRenderSystem) {
-    system.autoUpdate = false;
-    context.registerRenderSystem(system);
-  } else {
-    system.autoUpdate = true;
-  }
-  return ownedEditorViewportSystem(context.world, system, created);
 }
-
 export function ownedEditorViewportSystem(
-  world: World,
   system: System,
   owned: boolean,
 ): { dispose(): void } {
   return {
     dispose() {
-      if (owned && world.hasSystem(system)) world.removeSystem(system);
+      if (!owned) return;
+      owned = false;
+      system.destroy();
     },
   };
 }
-
-export type { EnginePlugin, RenderPipelineEntryOptions };
