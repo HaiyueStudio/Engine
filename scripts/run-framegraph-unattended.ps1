@@ -1,4 +1,4 @@
-param([ValidateSet('Full','Smoke','ServiceCheck','PowerCheck')][string]$Mode='Full',[Parameter(Mandatory=$true)][string]$OutputDirectory,[switch]$InjectFailureAfterPowerApply)
+﻿param([ValidateSet('Full','Smoke','FixtureSmoke','GpuStateDiagnostic','GpuStateSmoke','ServiceCheck','PowerCheck')][string]$Mode='Full',[Parameter(Mandatory=$true)][string]$OutputDirectory,[switch]$InjectFailureAfterPowerApply)
 if($PSVersionTable.PSVersion.Major -eq 5){$env:PSModulePath=Join-Path $PSHOME 'Modules'}
 if($InjectFailureAfterPowerApply -and $Mode -ne 'PowerCheck'){throw 'Injected failure is only allowed with PowerCheck'}
 $ErrorActionPreference = 'Stop'
@@ -42,11 +42,12 @@ public static class HostTrace {
 }
 '@
 New-Item -ItemType Directory -Path $out | Out-Null
+$samplingContract=(Get-Content -LiteralPath (Join-Path $repository 'config/framegraph-sampling-021.json') -Raw|ConvertFrom-Json).contractId
 if($Mode -eq 'PowerCheck'){
  . (Join-Path $PSScriptRoot 'webgpu-gate/framegraph-power-control.ps1')
  . (Join-Path $PSScriptRoot 'webgpu-gate/framegraph-gpu-power-control.ps1')
  $powerOnly=$null;$gpuOnly=$null
- try{$powerOnly=Start-G09PowerControl $out;$gpuOnly=Start-G09ChromePower $out;if($InjectFailureAfterPowerApply){throw 'Expected injected failure after CPU/GPU power apply'}}
+ try{$powerOnly=Start-G09PowerControl $out -ContractId $samplingContract;$gpuOnly=Start-G09ChromePower $out;if($InjectFailureAfterPowerApply){throw 'Expected injected failure after CPU/GPU power apply'}}
  finally{try{if($null -ne $gpuOnly){Stop-G09ChromePower $gpuOnly}}finally{if($null -ne $powerOnly){Stop-G09PowerControl $powerOnly}}}
  Write-Output ('CPU/Chrome GPU power isolation and restoration verified; no service changes or timing samples: '+$out)
  exit 0
@@ -54,10 +55,10 @@ if($Mode -eq 'PowerCheck'){
 $service = Get-CimInstance Win32_Service -Filter "Name='WSearch'"
 $serviceRegistryPath='HKLM:\SYSTEM\CurrentControlSet\Services\WSearch'
 $serviceRegistry=Get-ItemProperty -LiteralPath $serviceRegistryPath
-$scope = 'Independent G09 cold/steady calibration followed by fresh same-host baseline; no G05/G07 qualification'
+$scope = if($Mode -in @('GpuStateDiagnostic','GpuStateSmoke')){'Single-light GPU state diagnosis only; no new baseline or release qualification'}else{'Independent G09 cold/steady calibration followed by fresh same-host baseline; no G05/G07 qualification'}
 $record = [ordered]@{ startedAt=[DateTime]::UtcNow.ToString('o'); scope=$scope; mode=$Mode; observerPid=$PID; before=($service|Select-Object State,StartMode,ProcessId); output=$out; captureExitCode=1; samplingStarted=$false }
 $record.startupBefore=@{Start=$serviceRegistry.Start;HasDelayedAutoStart=($serviceRegistry.PSObject.Properties.Name -contains 'DelayedAutoStart');DelayedAutoStart=$serviceRegistry.DelayedAutoStart}
-if($Mode -eq 'Full'){
+if($Mode -in @('Full','GpuStateDiagnostic')){
  . (Join-Path $PSScriptRoot 'webgpu-gate/framegraph-background-policy.ps1')
  $record.applicationPreflight=@(Get-G09GpuStartBlockers)
  if($record.applicationPreflight.Count){throw ('Close background applications before Full sampling: '+(Format-G09GpuStartBlockers $record.applicationPreflight))}
@@ -70,7 +71,7 @@ $startupChanged=$false
 . (Join-Path $PSScriptRoot 'webgpu-gate/framegraph-gpu-power-control.ps1')
 $powerRecord=$null;$gpuPowerRecord=$null
 try {
- if($Mode -ne 'ServiceCheck'){$powerRecord=Start-G09PowerControl $out;$gpuPowerRecord=Start-G09ChromePower $out}
+ if($Mode -ne 'ServiceCheck'){$powerRecord=Start-G09PowerControl $out -ContractId $samplingContract;$gpuPowerRecord=Start-G09ChromePower $out}
 try {
  if ($service.State -notin @('Running','Stopped')) { throw ('Windows Search is not in a stable running/stopped state: '+$service.State) }
  if (@((Get-Service WSearch).DependentServices|Where-Object Status -ne 'Stopped').Count) { throw 'Active dependent services' }
@@ -98,7 +99,8 @@ try {
  }else{
  Write-Output ('Independent sampler started: ' + $out)
  $node=(Get-Command node).Source
- $arguments = @('scripts/verify-framegraph-sampling.mjs',('--'+$Mode.ToLowerInvariant()),('"'+(Join-Path $out 'measurement')+'"'))
+ $captureMode=switch($Mode){'FixtureSmoke'{'fixture-smoke'} 'GpuStateDiagnostic'{'gpu-state-diagnostic'} 'GpuStateSmoke'{'gpu-state-smoke'} default {$Mode.ToLowerInvariant()}}
+ $arguments = @('scripts/verify-framegraph-sampling.mjs',('--'+$captureMode),('"'+(Join-Path $out 'measurement')+'"'))
  $record.command = @($node) + $arguments
  $child=Start-Process -FilePath $node -ArgumentList $arguments -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $out 'events.jsonl') -RedirectStandardError (Join-Path $out 'stderr.log')
  $childHandle=$child.Handle

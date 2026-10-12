@@ -6,7 +6,7 @@ import { createPerformanceSourceFingerprint } from './webgpu-performance-budget.
 import { validateFrameGraphForwardPixels } from './webgpu-gate/framegraph-forward-policy.mjs';
 import { compareFrameGraphRoomPixels } from './webgpu-gate/framegraph-parity-policy.mjs';
 import { validateFrameGraphAdapter, validateFrameGraphBrowser, validateFrameGraphAdapterConsistency } from './webgpu-gate/framegraph-qualification-policy.mjs';
-import { evaluateCalibration, evaluateSteadyBaseline, validateSamplingPowerContinuity } from './webgpu-gate/framegraph-sampling-policy.mjs';
+import { evaluateCalibration, evaluateSteadyBaseline, validateSamplingPowerContinuity, validateSamplingCorrectness, isBatchSampling } from './webgpu-gate/framegraph-sampling-policy.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url)), args = process.argv.slice(2);
 if (args.length !== 1) throw Error('Use a completed G09 sampling artifact directory');
 const out = resolve(root, args[0]), read = async file => JSON.parse(await readFile(resolve(out, file), 'utf8'));
@@ -29,11 +29,12 @@ check(equal(r.config, await read('producer/config/framegraph-sampling-021.json')
 const captures = new Map();
 const target = r.qualification.targets.find(t => t.browserId === r.hostContract.runner.browserId);
 for (const artifact of r.captures) {
-  check(/^\d{3}-(correctness|calibration|baseline)-(forward-small-1|forward-cap-8)-(A0|B4)\.json$/.test(artifact.file), 'Unsafe capture path');
+  check(/^\d{3}-(correctness(?:-serial)?|calibration|baseline)-(forward-small-1|forward-cap-8)-(A0|B4)\.json$/.test(artifact.file), 'Unsafe capture path');
   const bytes = await readFile(resolve(out, artifact.file));
   check(sha256(bytes) === artifact.sha256 && !captures.has(artifact.file), 'Changed or duplicate capture');
   const raw = JSON.parse(bytes); captures.set(artifact.file, raw);
   validateFrameGraphAdapter(raw.adapter, r.qualification); validateFrameGraphBrowser(raw, target, r.qualification);
+  if (isBatchSampling(r.config) && artifact.mode.startsWith('correctness')) validateSamplingCorrectness(raw, artifact.job, r.config, r.hostContract, artifact.mode === 'correctness-serial' ? 'S8' : 'B8');
 }
 validateFrameGraphAdapterConsistency([...captures.values()].map(c => c.adapter));
 for (const caseId of r.config.cases) {
@@ -42,6 +43,12 @@ for (const caseId of r.config.cases) {
     const a = r.captures.filter(c => c.mode === 'correctness' && c.job.caseId === caseId && c.job.variant === variant);
     check(a.length === 1, 'Incomplete correctness population');
     images[variant] = captures.get(a[0].file).framegraphPixels; validateFrameGraphForwardPixels(images[variant]);
+    if (isBatchSampling(r.config)) {
+      const controls = r.captures.filter(c => c.mode === 'correctness-serial' && c.job.caseId === caseId && c.job.variant === variant);
+      check(controls.length === 1, 'Incomplete serial control population');
+      const control = captures.get(controls[0].file).framegraphPixels; validateFrameGraphForwardPixels(control);
+      check(compareFrameGraphRoomPixels(control, images[variant], { caseId: 'small-8' }).every(c => c.status === 'passed'), 'Serial/batch pixel parity failed during revalidation');
+    }
   }
   check(compareFrameGraphRoomPixels(images.A0, images.B4, { caseId: 'small-8' }).every(c => c.status === 'passed'), 'Pixel parity failed during revalidation');
 }
@@ -57,9 +64,11 @@ check(equal(calibration, r.calibration), 'Calibration re-evaluation mismatch');
 const result = { schemaVersion: 1, verifiedAt: new Date().toISOString(), sourceFingerprint: r.sourceFingerprint,
   reportSha256: sha256(await readFile(resolve(out, 'report.json'))), capturesChecked: captures.size, calibration,
   performanceQualified: false, status: 'calibration-failed' };
+if (calibration.status !== 'passed') check(r.status === 'failed' && r.baselineEntries.length === 0 && !r.frozenProtocol, 'Failed calibration must block the fresh baseline');
 if (calibration.status === 'passed') {
   validateSamplingPowerContinuity(r.calibrationEntries, r.baselineEntries, r.config);
   const frozen = await read('frozen-protocol.json'), c = await read('calibration.json');
+  if (isBatchSampling(r.config)) check(frozen.gpuWarmup === calibration.selectedGpuWarmup && equal(frozen.gpuCompletion, r.config.gpuCompletion) && equal(frozen.browserControl, r.config.browserControl), 'Frozen GPU calibration/completion mismatch');
   if (r.config.powerControl) check(equal(frozen.powerControl, r.config.powerControl) && frozen.powerSchemeId === r.calibrationEntries[0].hostSamples[0].powerScheme.id, 'Frozen power condition mismatch');
   if (r.config.gpuControl) check(equal(frozen.gpuControl, r.config.gpuControl), 'Frozen Chrome GPU condition mismatch');
   check(equal(frozen, r.frozenProtocol) && equal(c.assessment, calibration) && frozen.calibrationHash === sha256(await readFile(resolve(out, 'calibration.json'))) && frozen.warmup === calibration.selectedWarmup, 'Frozen calibration mismatch');

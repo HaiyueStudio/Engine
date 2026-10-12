@@ -1,8 +1,10 @@
 import { summarizeTimingSamples } from '../benchmark/timing-cohorts.mjs';
-import { assessG01Stability } from '../benchmark/lighting-g01-policy.mjs';
+import { assessG01Stability, validateG01Baseline } from '../benchmark/lighting-g01-policy.mjs';
 import { G05_FORWARD_CASES, validateG05ForwardAllocation } from './deferred-g05-forward-policy.mjs';
 import { validateFrameGraphWindowsHost } from './framegraph-windows-host.mjs';
 import { FRAMEGRAPH_GPU_CONTROL } from './framegraph-gpu-policy.mjs';
+import { validateBoundedFrameCompletion } from './framegraph-batch-policy.mjs';
+export const isBatchSampling = config => config.contractId === 'g09-forward-cold-steady-v5';
 const check = (value, message) => { if (!value) throw Error(message); };
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 export function validateSamplingConfig(c) {
@@ -11,16 +13,22 @@ export function validateSamplingConfig(c) {
     'g09-forward-cold-steady-v2': { total: 24000, candidates: [1200, 3600, 6000, 12000, 18000] },
     'g09-forward-cold-steady-v3': { total: 24000, candidates: [1200, 3600, 6000, 12000, 18000] },
     'g09-forward-cold-steady-v4': { total: 24000, candidates: [1200, 3600, 6000, 12000, 18000] },
+    'g09-forward-cold-steady-v5': { total: 24000, candidates: [1200, 3600, 6000, 12000, 18000] },
   };
   const horizon = horizons[c?.contractId];
   check(c?.schemaVersion === 1 && horizon, 'Unknown cold/steady protocol');
-  check(['g09-forward-cold-steady-v3', 'g09-forward-cold-steady-v4'].includes(c.contractId)
+  check(['g09-forward-cold-steady-v3', 'g09-forward-cold-steady-v4', 'g09-forward-cold-steady-v5'].includes(c.contractId)
     ? equal(c.powerControl, { acLineStatus: 1, minimumAcPercent: 100, maximumAcPercent: 100 })
     : c.powerControl === undefined, 'Wrong cold/steady power contract');
-  check(c.contractId === 'g09-forward-cold-steady-v4' ? equal(c.gpuControl, FRAMEGRAPH_GPU_CONTROL) : c.gpuControl === undefined, 'Wrong Chrome GPU power contract');
+  check(c.contractId === 'g09-forward-cold-steady-v4' || isBatchSampling(c) ? equal(c.gpuControl, FRAMEGRAPH_GPU_CONTROL) : c.gpuControl === undefined, 'Wrong Chrome GPU power contract');
   check(c.hostContract === 'config/framegraph-performance-021.json' && c.budgetSource === 'config/lighting-performance-021.json#relativeBudgets', 'Sampling policy ownership changed');
   check(equal(c.cases, G05_FORWARD_CASES.map(c => c.id)), 'Cold/steady workload population changed');
-  check(equal(c.sampling, { cohorts: 3, order: 'AB-BA-AB', idleMs: 120000, entryQuietCpuPercent: 5, entryQuietSamples: 3, coldFrames: 120, steadyCpuSamples: 3000, gpuWarmup: 120, gpuSamples: 300, dropSamples: false }), 'Cold/steady sample population changed');
+  check(equal(c.sampling, { cohorts: 3, order: 'AB-BA-AB', idleMs: 120000, entryQuietCpuPercent: 5, entryQuietSamples: 3, coldFrames: 120, steadyCpuSamples: 3000, gpuWarmup: isBatchSampling(c) ? 'calibrated' : 120, gpuSamples: 300, dropSamples: false }), 'Cold/steady sample population changed');
+  if (isBatchSampling(c)) {
+    check(equal(c.gpuCompletion, { id: 'bounded-batch-v1', inFlightCap: 8, readbackEvery: 8, readbackBytes: 16384, explicitFrameWait: false, engineRetirementWaits: true }), 'GPU completion contract changed');
+    check(equal(c.browserControl, { disableDx12InfoCollection: true }), 'GPU browser contract changed');
+    check(c.gpuCalibration?.totalFrames === 10200 && equal(c.gpuCalibration.candidateWarmups, [120, 600, 1200, 2400, 4800, 9600]) && c.gpuCalibration.windowFrames === 300 && c.gpuCalibration.plateauToleranceRatio === .05 && c.gpuCalibration.validationTail === 'all-remaining-windows-including-final-overlap', 'GPU calibration rule changed');
+  } else check(c.gpuCompletion === undefined && c.gpuCalibration === undefined && c.browserControl === undefined, 'Cannot relabel legacy GPU protocol');
   check(c.calibration.totalCpuFrames === horizon.total && equal(c.calibration.candidateWarmups, horizon.candidates) && c.calibration.windowFrames === 3000 && c.calibration.plateauToleranceRatio === .05, 'Calibration selection rule changed');
   check(c.regressionRatio === .05 && c.stability.relativeSpread === .2 && c.stability.cv === .1 && c.formalReleaseEnrolled === false, 'Regression/stability budget or enrollment changed');
 }
@@ -37,11 +45,29 @@ function series(values, n, label) {
 export function compactStats(values) {
   const { rawSamples, ...stats } = summarizeTimingSamples(values); return stats;
 }
-export function validateSamplingCapture(raw, job, config, mode, warmup) {
-  validateSamplingConfig(config);
-  const c = G05_FORWARD_CASES.find(c => c.id === job.caseId), f = raw.fixture, t = raw.g09Sampling;
+function validateSamplingWorkload(raw, job) {
+  const c = G05_FORWARD_CASES.find(c => c.id === job.caseId), f = raw.fixture;
   check(c && raw.suite === 'lighting.scaling.real-fixture' && f?.localLightCount === c.lights && f.dynamicRatio === c.dynamic && f.overlap === c.overlap && f.viewCount === c.views && f.resolution.width === 1280 && f.resolution.height === 720, 'Different cold/steady workload');
-  check(t?.protocol === config.contractId && t.mode === mode && t.warmup === warmup && t.gpuWarmup === 120 && t.coldFrames === 120, 'Wrong cold/steady fixture protocol');
+}
+export function validateSamplingCorrectness(raw, job, config, host, arm = 'B8') {
+  validateSamplingConfig(config);
+  check(isBatchSampling(config), 'Bounded correctness requires v5');
+  validateSamplingWorkload(raw, job);
+  series(raw.warmup?.rawSamples, 2, 'correctness CPU warmup');
+  check(raw.adapter?.vendor === host.runner.vendor && raw.adapter.architecture === host.runner.architecture, 'Wrong correctness adapter');
+  const errors = validateG01Baseline(raw, { samples: 19 });
+  check(errors.length === 0, errors.join('; '));
+  validateG05ForwardAllocation(raw);
+  check(raw.browserEvidence?.disableDx12InfoCollection === true && raw.g09WholeGpu?.warmup === 5 && raw.g09WholeGpu.scope === 'render-and-compute-span-v1', 'Wrong bounded correctness protocol');
+  validateBoundedFrameCompletion(raw.g09GpuCompletion, { arm, warmup: 5, samples: 19 });
+  const measured = raw.g09GpuCompletion.frames.slice(5);
+  check(equal(raw.g09WholeGpu.rawSamples, measured.map(f => f.spanMs)) && equal(raw.gpuTimestamp.timing.rawSamples, measured.map(f => f.passSumMs)), 'Incomplete correctness GPU tail');
+}
+export function validateSamplingCapture(raw, job, config, mode, warmup, gpuWarmup = 120) {
+  validateSamplingConfig(config);
+  validateSamplingWorkload(raw, job);
+  const t = raw.g09Sampling;
+  check(t?.protocol === config.contractId && t.mode === mode && t.warmup === warmup && t.gpuWarmup === gpuWarmup && t.coldFrames === 120, 'Wrong cold/steady fixture protocol');
   const samples = mode === 'calibration' ? config.calibration.totalCpuFrames - warmup : config.sampling.steadyCpuSamples;
   check(mode === 'calibration' ? warmup === 120 : mode === 'baseline' && config.calibration.candidateWarmups.includes(warmup), 'Unregistered sampling phase/warmup');
   for (const key of ['cpu', 'cpuUpdate', 'cpuRecord', 'cpuSubmit', 'frameWall', 'queueWait']) series(t.timeline[key], warmup + samples, key);
@@ -50,15 +76,23 @@ export function validateSamplingCapture(raw, job, config, mode, warmup) {
   check(equal(raw.timing.rawSamples, t.timeline.cpu.slice(warmup)), 'CPU population is not the complete registered tail');
   check(equal(raw.sampleWall.rawSamples, t.timeline.frameWall.slice(warmup)), 'Frame-wall population mismatch');
   for (const key of ['cpuUpdate', 'cpuRecord', 'cpuSubmit']) check(equal(raw.metrics.timing[key].value.rawSamples, t.timeline[key].slice(warmup)), 'CPU stage population mismatch');
-  series(raw.gpuTimestamp?.timing?.rawSamples, 300, 'GPU pass sum');
-  series(raw.g09WholeGpu?.rawSamples, 300, 'GPU span');
+  const gpuSamples = isBatchSampling(config) && mode === 'calibration' ? config.gpuCalibration.totalFrames - gpuWarmup : 300;
+  series(raw.gpuTimestamp?.timing?.rawSamples, gpuSamples, 'GPU pass sum');
+  series(raw.g09WholeGpu?.rawSamples, gpuSamples, 'GPU span');
   check(raw.gpuTimestamp.timing.rawSamples.every(v => v > 0) && raw.g09WholeGpu.rawSamples.every(v => v > 0), 'Zero GPU timestamps');
-  check(raw.gpuTimestamp.status === 'available' && raw.g09WholeGpu.scope === 'render-and-compute-span-v1' && raw.g09WholeGpu.warmup === 120, 'Missing separate GPU warmup/span');
+  check(raw.gpuTimestamp.status === 'available' && raw.g09WholeGpu.scope === 'render-and-compute-span-v1' && raw.g09WholeGpu.warmup === gpuWarmup, 'Missing separate GPU warmup/span');
+  if (isBatchSampling(config)) {
+    check(mode === 'calibration' ? gpuWarmup === 120 : config.gpuCalibration.candidateWarmups.includes(gpuWarmup), 'Unregistered GPU warmup');
+    check(raw.browserEvidence?.disableDx12InfoCollection === true, 'Missing common browser intervention');
+    validateBoundedFrameCompletion(raw.g09GpuCompletion, { arm: 'B8', warmup: gpuWarmup, samples: gpuSamples });
+    const frames = raw.g09GpuCompletion.frames.slice(gpuWarmup);
+    check(equal(raw.gpuTimestamp.timing.rawSamples, frames.map(f => f.passSumMs)) && equal(raw.g09WholeGpu.rawSamples, frames.map(f => f.spanMs)), 'GPU population is not the complete registered tail');
+  }
   check(raw.sceneProvenance?.matches === true && raw.execution?.validation?.errorCount === 0 && raw.execution?.ownerCleanup?.ownerResidual?.value === 0, 'Scene/validation/cleanup failure');
   check(Number.isFinite(raw.setup?.scenarioMs) && Number.isFinite(raw.setup?.pipelineWarmupMs), 'Missing cold setup timings');
   validateG05ForwardAllocation(raw);
 }
-function validatePopulation(entries, config, host, mode, warmup) {
+function validatePopulation(entries, config, host, mode, warmup, gpuWarmup = 120) {
   const plan = createSamplingPlan(config);
   check(entries.length === plan.length, 'Incomplete cold/steady cohorts');
   for (const [i, e] of entries.entries()) {
@@ -67,7 +101,7 @@ function validatePopulation(entries, config, host, mode, warmup) {
     check(e.readiness?.length >= 3 && e.readiness.slice(-3).every(s => s.cpu.loadPercent <= 5), 'Missing three quiet entry observations');
     for (const s of e.readiness.slice(-3)) validateFrameGraphWindowsHost([s, s], host.runner, config.powerControl, config.gpuControl);
     check(equal(e.readiness.at(-1), e.hostSamples[0]), 'Readiness and pre-capture observation differ');
-    validateSamplingCapture(e.result, e.job, config, mode, warmup);
+    validateSamplingCapture(e.result, e.job, config, mode, warmup, gpuWarmup);
     check(e.result.adapter?.vendor === host.runner.vendor && e.result.adapter.architecture === host.runner.architecture && e.result.adapter.isFallbackAdapter === false, 'Different/software sampling adapter');
   }
   check(entries[0].result.browserEvidence?.product && new Set(entries.map(e => e.result.browserEvidence.product)).size === 1, 'Mixed/missing browser revisions');
@@ -93,11 +127,43 @@ export function evaluateCalibration(entries, config, host) {
     return { warmup, rows, passed: rows.every(r => r.passed) };
   });
   const selectedWarmup = candidates.find(c => c.passed)?.warmup ?? null;
-  return { status: selectedWarmup === null ? 'failed' : 'passed', selectedWarmup, candidates, performanceQualified: false };
+  const gpu = isBatchSampling(config) ? evaluateGpuCalibration(entries, config) : null;
+  return { status: selectedWarmup === null || gpu?.status === 'failed' ? 'failed' : 'passed', selectedWarmup, candidates,
+    ...(gpu ? { gpu, selectedGpuWarmup: gpu.selectedWarmup } : {}), performanceQualified: false };
+}
+export function evaluateGpuCalibration(entries, config) {
+  validateSamplingConfig(config);
+  check(isBatchSampling(config) && entries.length === 12, 'A complete v5 GPU calibration is required');
+  const width = config.gpuCalibration.windowFrames;
+  const candidates = config.gpuCalibration.candidateWarmups.map(warmup => {
+    const rows = [];
+    for (const caseId of config.cases) for (const variant of ['A0', 'B4']) for (const metric of ['passSumMs', 'spanMs']) {
+      const captures = entries.filter(e => e.job.caseId === caseId && e.job.variant === variant);
+      check(captures.length === 3, 'Incomplete GPU calibration group');
+      const count = Math.floor((config.gpuCalibration.totalFrames - warmup) / width);
+      const starts = Array.from({ length: count }, (_, w) => warmup + w * width);
+      if (starts.at(-1) !== config.gpuCalibration.totalFrames - width) starts.push(config.gpuCalibration.totalFrames - width);
+      const windows = starts.map(start => ({ startFrame: start, ...summarizeGroup(captures.map(e => {
+        const values = e.result.g09GpuCompletion.frames.slice(start, start + width).map(f => f[metric]);
+        series(values, width, 'GPU calibration window'); return values;
+      })) }));
+      const driftOf = (a, b) => ({ p50: b.p50 / a.p50 - 1, p95: b.p95 / a.p95 - 1 });
+      const comparisons = windows.slice(1).flatMap((b, i) => [...new Set([0, i])].map(from => {
+        const a = windows[from];
+        return { from, to: i + 1, drift: driftOf(a.pooled, b.pooled), roundDrift: a.rounds.map((a, j) => driftOf(a, b.rounds[j])) };
+      }));
+      rows.push({ caseId, variant, metric, windows, comparisons,
+        passed: windows.every(w => w.stability.stable) && comparisons.every(c => [c.drift, ...c.roundDrift].every(d => Object.values(d).every(v => Number.isFinite(v) && Math.abs(v) <= .05))) });
+    }
+    return { warmup, rows, passed: rows.every(r => r.passed) };
+  });
+  const selectedWarmup = candidates.find(c => c.passed)?.warmup ?? null;
+  return { status: selectedWarmup === null ? 'failed' : 'passed', selectedWarmup, candidates };
 }
 export function evaluateSteadyBaseline(entries, config, host, calibration, budgets) {
   check(calibration.status === 'passed' && config.calibration.candidateWarmups.includes(calibration.selectedWarmup), 'A separately accepted calibration is required');
-  validatePopulation(entries, config, host, 'baseline', calibration.selectedWarmup);
+  if (isBatchSampling(config)) check(calibration.gpu?.status === 'passed' && calibration.selectedGpuWarmup === calibration.gpu.selectedWarmup && config.gpuCalibration.candidateWarmups.includes(calibration.selectedGpuWarmup), 'A separately accepted GPU calibration is required');
+  validatePopulation(entries, config, host, 'baseline', calibration.selectedWarmup, calibration.selectedGpuWarmup ?? 120);
   check(budgets.smallSceneCpuP95RegressionRatio === .05 && budgets.smallSceneGpuP95RegressionRatio === .05, 'Original 5% budget changed');
   const rows = [];
   for (const caseId of config.cases) for (const metric of ['cpu', 'gpuPassSum', 'gpuSpan', 'frameWall', 'coldCpu']) {

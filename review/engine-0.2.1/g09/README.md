@@ -2,6 +2,16 @@
 
 本目录记录 G09 各子阶段的实现与证据。真实依赖、裁剪、临时纹理复用、计划缓存、安全附件操作与按需诊断已实现；完整 G09 与持续稳定性资格尚未完成。
 
+- **单灯连续 GPU 状态诊断入口（2026-10-12）**：[固定对照与运行方式](single-light-gpu-state-diagnostic.md)及[工程检查](single-light-gpu-state-diagnostic-checks.json)。保留 v5 单灯负载、B8、三轮 AB/BA/AB，双方只共同增加 200 ms 连续 GPU 状态观察；诊断不直接生成基线。真实观察器及三组画面对照通过；工程计时尝试因其他构建的高 CPU 负载等待超时，已恢复设置，完整六次独立诊断待空闲执行。复核状态后再做两场景校准和全新三轮基线，原 5% 预算不变。
+
+- **v5 独立校准完成（2026-10-12，13:08）**：[结果](gpu-warmup-calibration-v5-result.md)及[独立复核](gpu-warmup-calibration-v5-result-checks.json)。20 次捕获完整，CPU 共同候选 12000 帧；单灯 B4 第三轮全尾段 GPU 跨轮 spread 超过 20%，GPU 校准失败，新基线阻断。六组画面对照零差异，设置恢复、无锁屏和采样退出已核验；尚缺执行期间连续 GPU 状态证据，不以增加预热或删除慢轮放行，原 5% 回归预算不变。
+
+- **共同 GPU 预热与新基线入口（2026-10-12）**：[v5 协议及操作](gpu-warmup-calibration-v5.md)及[机器复核](gpu-warmup-calibration-v5-checks.json)。双方统一八帧批量完成，独立选择共同 CPU/GPU 预热后冻结，再采三轮新基线；原 5% 回归预算不变。16 次原生工程捕获、42672 GPU 帧及六组零差异画面对照通过，恢复与进程退出已复核；111 项 FrameGraph 策略、全仓测试/类型/构建通过。独立完整校准及新基线尚待用户退出应用后运行 `D:\HaiyueStudio\start-g09-calibration.cmd`。
+
+- **独立长诊断完整结果（2026-10-12）**：[结果与剩余预热问题](batch-completion-long-result.md)及[机器复核](batch-completion-long-result-checks.json)。8/8 次、96 万测量帧、每次至少 90 秒且全程无锁屏；设置与资源恢复通过。B8 四次均无既定阈值慢帧，S8 有 1854 个主绘制慢帧、47 个长慢段，其中 46 段未观察到外部调度重合。约 686 万个事件完整复核；A0/B8 一轮首 300 帧仍有过渡波动，需要共同 GPU 预热校准和新基线，原 5% 预算不变。
+
+- **独立长诊断构建过期（2026-10-12）**：[现场、重建与提前预检](batch-completion-stale-build.md)及[机器复核](batch-completion-stale-build-checks.json)。CMYK 合入导致输入指纹变化，首组采样前被正确拒绝；设置和追踪均已恢复。独立重建的四个 B4 JavaScript 文件逐字节相同，刷新当前输入绑定；新增启动前 A0/B4 完整性检查，原采样期检查保留。86 项 FrameGraph 策略及原生入口专项通过；未重跑长采样，原 5% 预算不变。
+
 - **长诊断入口权限复核（2026-10-11）**：[现场与提示修正](batch-completion-permission-entry.md)及[机器复核](batch-completion-permission-entry-checks.json)。用户管理员权限已通过，实际由后台应用检查阻止启动；新增独立权限提示、启动记录和只读检查，验证真实 CMD 与隐藏 worker 的权限继承。工程检查未启动采样或修改设置，原长诊断协议及 5% 预算不变。
 
 - **动画文本按需加载（2026-10-11）**：[实现与合同评审](../../api/animation-opentype-loading-review.md)及[机器复核](../../api/animation-opentype-loading-checks.json)。OpenType 随实际字体资源准备加载，Animation2D / HYA 状态机初始 gzip 分别减少 43.59% / 42.16%，原完整消费端与整包字节上限保留。1,468 项全仓测试、98 个示例构建、独立发布包和浏览器字体像素验证通过。单文件 IIFE 仍内联；这不代表 G09 完整性能资格，5% 预算不变。
