@@ -14,6 +14,7 @@
       "@haiyue/extensions/controls": ["../extensions/src/controls.ts"],
       "@haiyue/extensions/i18n": ["../extensions/src/i18n.ts"],
       "@haiyue/extensions/share-content": ["../extensions/src/share-content.ts"],
+      "@haiyue/extensions/achievements": ["../extensions/src/achievements.ts"],
       "@haiyue/extensions/narrative": ["../extensions/src/narrative.ts"],
       "@haiyue/extensions/gltf": ["../extensions/src/gltf.ts"],
       "@haiyue/extensions/experimental/gltf-worker": ["../extensions/src/experimental-gltf-worker.ts"],

@@ -161,6 +161,12 @@
           "entrypoints": { "./ray-tracing": 11 }
         },
         {
+          "id": "achievements",
+          "stability": "stable",
+          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
+          "entrypoints": { "./achievements": 13 }
+        },
+        {
           "id": "share-content",
           "stability": "stable",
           "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },

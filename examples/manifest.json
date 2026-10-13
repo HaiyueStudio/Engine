@@ -4,7 +4,7 @@
   "entries": [
     {
       "id": "gpu-instances",
-      "title": "GPU Instances · Toon & LOD",
+      "title": "GPU Instances \u00b7 Toon & LOD",
       "entry": "gpu-instances/main.ts",
       "capabilities": [
         "gpu-compute",
@@ -89,7 +89,7 @@
     },
     {
       "id": "lottie-hya-compare",
-      "title": "Lottie → HYA Fidelity Compare",
+      "title": "Lottie \u2192 HYA Fidelity Compare",
       "entry": "lottie-hya-compare/main.ts",
       "capabilities": [
         "animation-format",
@@ -119,7 +119,7 @@
     },
     {
       "id": "live2d-hya-compare",
-      "title": "Live2D → HYA Fidelity Compare",
+      "title": "Live2D \u2192 HYA Fidelity Compare",
       "entry": "live2d-hya-compare/main.ts",
       "capabilities": [
         "animation-format",
@@ -1526,7 +1526,7 @@
     },
     {
       "id": "ambient-occlusion",
-      "title": "Ambient Occlusion · GTAO / SAO / SSAO",
+      "title": "Ambient Occlusion \u00b7 GTAO / SAO / SSAO",
       "entry": "ambient-occlusion/main.ts",
       "capabilities": [
         "ambient-occlusion",
@@ -2122,7 +2122,7 @@
     },
     {
       "id": "deferred-lighting",
-      "title": "多光源实验室 · Deferred Lighting",
+      "title": "\u591a\u5149\u6e90\u5b9e\u9a8c\u5ba4 \u00b7 Deferred Lighting",
       "entry": "deferred-lighting/main.ts",
       "capabilities": [
         "3d",
@@ -2146,7 +2146,7 @@
     },
     {
       "id": "i18n",
-      "title": "Internationalization · Text & Artwork",
+      "title": "Internationalization \u00b7 Text & Artwork",
       "entry": "i18n/main.ts",
       "capabilities": [
         "i18n",
@@ -2174,7 +2174,7 @@
     },
     {
       "id": "narrative",
-      "title": "Narrative · The Last Signal",
+      "title": "Narrative \u00b7 The Last Signal",
       "entry": "narrative/main.ts",
       "capabilities": [
         "narrative",
@@ -2203,7 +2203,7 @@
     },
     {
       "id": "share-content",
-      "title": "Share Content · Score Cards",
+      "title": "Share Content \u00b7 Score Cards",
       "entry": "share-content/main.ts",
       "capabilities": [
         "share-content",
@@ -2222,6 +2222,28 @@
       "catalog": {
         "group": "assets-ui",
         "order": 102
+      }
+    },
+    {
+      "id": "achievements",
+      "title": "Achievements \u00b7 Rules and GPU GUI",
+      "entry": "achievements/main.ts",
+      "capabilities": [
+        "achievements",
+        "i18n",
+        "gui",
+        "persistence"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 103
       }
     }
   ],
