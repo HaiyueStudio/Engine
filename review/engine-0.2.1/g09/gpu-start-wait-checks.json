@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-09T05:36:02.8906385Z",
+  "status": "startup-wait-verified-independent-sampling-pending",
+  "reportedBlocker": "Taskmgr.exe PID 8088",
+  "priorAttemptStartedSampling": false,
+  "settingsUnchanged": true,
+  "waitForAllApplicationsSeconds": 300,
+  "samplingAndRestorationCodeUnchanged": true,
+  "regressionBudget": 0.05,
+  "performanceQualified": false,
+  "tests": {
+    "status": "passed",
+    "cases": [
+      "Codex exits before Task Manager",
+      "Chrome exits before Edge",
+      "Unrelated process allowed",
+      "Read-only Codex allowance",
+      "Bounded timeout without starting",
+      "Observation error fails closed",
+      "Reopened application still rejected",
+      "Windows PowerShell 5.1 syntax",
+      "Sampling and restoration code unchanged"
+    ]
+  },
+  "realHostReadOnlyTimeout": "passed",
+  "cmdPlan": "passed",
+  "bindings": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-preflight-wait-20261009T053403Z/before-state.json",
+      "sha256": "b5a33c9804f2d8580137a625d6070c725a2712012d13f30ea0bafa8a6faa6386"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-preflight-wait-20261009T053403Z/after-state.json",
+      "sha256": "464d1754d3d56c9ba7779211204c25af1bdb7eff2befadf4c8fc88efb524bb35"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-preflight-wait-20261009T053403Z/launcher-before.ps1",
+      "sha256": "9c0011bdc47be9dceef0d8961473f94392adf919a39760771a8466bdb1b6fa38"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-preflight-wait-20261009T053403Z/launcher-after.ps1",
+      "sha256": "57528be9c87d2a68ec2243ed7b8f716f20685cde3f1bc42e66fa955a718fa998"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-preflight-wait-20261009T053403Z/gpu-diagnostic-start-wait.ps1",
+      "sha256": "ed3195820905587d827e6bd391b2223df67ba3ebd0eaa11fbdb0e0a843d27d08"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-preflight-wait-20261009T053403Z/test-start-wait.ps1",
+      "sha256": "ae6b270bfd85feabbeae3ea13043dd350d7b8477305b147000aa76f133f12eb1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-preflight-wait-20261009T053403Z/test-results.json",
+      "sha256": "ca3f1abac6cd5a37f67e431eab15ead84308326eef043b2b2088025a362155cd"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-preflight-wait-20261009T053403Z/tests.log",
+      "sha256": "1a5311deb3242a9d2aed91ba1a87771986cd462ac1264189adaf69f94f1fa271"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-preflight-wait-20261009T053403Z/plan.json",
+      "sha256": "7f1096e18df88e784c8c1d3cebb9b530822828d176fa284612517a7bf6355a20"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/launch-gpu-power-closed.ps1",
+      "sha256": "57528be9c87d2a68ec2243ed7b8f716f20685cde3f1bc42e66fa955a718fa998"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-diagnostic-start-wait.ps1",
+      "sha256": "ed3195820905587d827e6bd391b2223df67ba3ebd0eaa11fbdb0e0a843d27d08"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/start-gpu-power-with-codex-closed.cmd",
+      "sha256": "5cee6f1e659b1256e54b14648ae82caa2eb191645fbc77b30143afc30864b7fe"
+    }
+  ]
+}

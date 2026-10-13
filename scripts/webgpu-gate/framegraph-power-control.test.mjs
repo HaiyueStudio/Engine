@@ -6,9 +6,9 @@ import {fileURLToPath} from 'node:url';
 import {randomUUID} from 'node:crypto';
 const root=fileURLToPath(new URL('../..',import.meta.url));
 const windows={skip:process.platform!=='win32'?'Windows power controller':false};
-function run(scenario){
+function run(scenario, contractId = 'g09-forward-cold-steady-v4'){
   const shell=resolve(process.env.SystemRoot??'C:/Windows','System32/WindowsPowerShell/v1.0/powershell.exe');
-  const stdout=execFileSync(shell,['-NoProfile','-File',resolve(root,'scripts/webgpu-gate/framegraph-power-control.fixture.ps1'),'-Scenario',scenario,'-OutputDirectory',resolve(root,'artifacts/engine-0.2.1/g09',`power-test-${randomUUID()}`)],{encoding:'utf8',windowsHide:true,timeout:30000});
+  const stdout=execFileSync(shell,['-NoProfile','-File',resolve(root,'scripts/webgpu-gate/framegraph-power-control.fixture.ps1'),'-Scenario',scenario,'-ContractId',contractId,'-OutputDirectory',resolve(root,'artifacts/engine-0.2.1/g09',`power-test-${randomUUID()}`)],{encoding:'utf8',windowsHide:true,timeout:30000});
   const line=stdout.split(/\r?\n/).find(s=>s.startsWith('POWER_TEST_RESULT='));assert.ok(line,stdout);
   return JSON.parse(line.slice('POWER_TEST_RESULT='.length));
 }
@@ -24,4 +24,10 @@ test('failed restoration never deletes the active scheme, and cleanup errors sta
 });
 test('battery or limited maximum processor state is rejected without power writes',windows,()=>{
   for(const scenario of ['battery','max-limited']){const r=run(scenario);assert.ok(r.failure);assert.deepEqual(r.calls,[]);assert.equal(r.record,null);assert.equal(r.copyExists,false);}
+});
+test('power journal binds the calling sampling protocol while preserving legacy defaults', windows, () => {
+  for (const id of ['g09-forward-cold-steady-v4', 'g09-forward-cold-steady-v5']) {
+    const r = run('capture-failure', id);
+    assert.equal(r.record.contractId, id); assert.equal(r.record.restored, true); assert.equal(r.record.removed, true);
+  }
 });

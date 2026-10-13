@@ -2,29 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createSamplingPlan, validateSamplingConfig, validateSamplingCapture, evaluateCalibration, evaluateSteadyBaseline, validateSamplingPowerContinuity } from './framegraph-sampling-policy.mjs';
-import { G05_FORWARD_CASES } from './deferred-g05-forward-policy.mjs';
-import { summarizeTimingSamples } from '../benchmark/timing-cohorts.mjs';
-const config = JSON.parse(readFileSync(new URL('../../config/framegraph-sampling-021.json', import.meta.url)));
+const config = JSON.parse(readFileSync(new URL('../../config/framegraph-sampling-021-v4.json', import.meta.url)));
 const host = JSON.parse(readFileSync(new URL('../../config/framegraph-performance-021.json', import.meta.url)));
 const budgets = { smallSceneCpuP95RegressionRatio: .05, smallSceneGpuP95RegressionRatio: .05 };
-function population(mode = 'calibration', warmup = 120, change = () => 1) {
-  return createSamplingPlan(config).map(job => {
-    const f = G05_FORWARD_CASES.find(c => c.id === job.caseId), n = mode === 'calibration' ? config.calibration.totalCpuFrames : warmup + 3000;
-    const cpu = Array.from({ length: n }, (_, i) => change(job, i));
-    const timeline = Object.fromEntries(['cpu', 'cpuUpdate', 'cpuRecord', 'cpuSubmit', 'frameWall', 'queueWait'].map(k => [k, [...cpu]]));
-    const result = { suite: 'lighting.scaling.real-fixture', fixture: { localLightCount: f.lights, dynamicRatio: f.dynamic, overlap: f.overlap, viewCount: f.views, resolution: { width: 1280, height: 720 } },
-      adapter: { vendor: 'nvidia', architecture: 'pascal', isFallbackAdapter: false }, browserEvidence: { product: 'Chrome/153.0.8010.50' },
-      g09Sampling: { protocol: config.contractId, mode, warmup, gpuWarmup: 120, coldFrames: 120, timeline },
-      timing: summarizeTimingSamples(cpu.slice(warmup)), warmup: summarizeTimingSamples(cpu.slice(0, warmup)), sampleWall: summarizeTimingSamples(cpu.slice(warmup)),
-      metrics: { timing: Object.fromEntries(['cpuUpdate', 'cpuRecord', 'cpuSubmit'].map(k => [k, { value: summarizeTimingSamples(timeline[k].slice(warmup)) }])) },
-      gpuTimestamp: { status: 'available', timing: summarizeTimingSamples(Array(300).fill(1)) }, g09WholeGpu: { scope: 'render-and-compute-span-v1', warmup: 120, rawSamples: Array(300).fill(1) },
-      sceneProvenance: { matches: true }, execution: { validation: { errorCount: 0 }, ownerCleanup: { ownerResidual: { value: 0 } } }, setup: { scenarioMs: 1, pipelineWarmupMs: 1 }, renderer: { lightingStrategy: 'forward' },
-      g05Forward: { schemaVersion: 1, allocations: [{ method: 'createBuffer', label: 'Forward.frame' }], observedMethods: ['createBuffer', 'createTexture', 'createShaderModule', 'createRenderPipeline', 'createRenderPipelineAsync', 'createComputePipeline', 'createComputePipelineAsync'], deferredCreated: [], cleanup: { liveGpuResources: 0, ownerResidual: 0 } } };
-    const sample = { observedAt: '2026-10-07T00:00:00Z', hostname: host.runner.hostname, platform: 'win32', cpu: { model: host.runner.cpuModel, loadPercent: 1 }, gpu: { rows: [[host.runner.gpuName, host.runner.driverVersion, '50', '0', '139', 'Not Active', 'Not Active', 'Not Active']] }, powerScheme: { id: 'balanced' } };
-    sample.powerSettings = { schemaVersion: 1, schemeId: 'balanced', acLineStatus: 1, minimumAcPercent: 100, maximumAcPercent: 100 };
-    return { job, status: 'passed', cooldownMs: 120001, readiness: [structuredClone(sample), structuredClone(sample), sample], hostSamples: [sample, structuredClone(sample)], result };
-  });
-}
+import { population } from './framegraph-sampling-test-fixtures.mjs';
 test('protocol retains both cases, three AB/BA/AB cohorts, all raw frames and original limits', () => {
   assert.equal(createSamplingPlan(config).length, 12);
   assert.deepEqual(createSamplingPlan(config).slice(4, 6).map(j => j.variant), ['B4', 'A0']);
@@ -93,4 +74,19 @@ test('calibration and fresh baseline must use the same controlled scheme', () =>
   validateSamplingPowerContinuity(a, b, config);
   b[0].hostSamples[1].powerScheme.id = 'different';
   assert.throws(() => validateSamplingPowerContinuity(a, b, config), /same controlled/);
+});
+
+test('v4 records the Chrome-only policy and preserves v3 historical capture semantics', () => {
+  const legacy = JSON.parse(readFileSync(new URL('../../config/framegraph-sampling-021-v3.json', import.meta.url)));
+  validateSamplingConfig(legacy);
+  assert.throws(() => validateSamplingConfig({ ...legacy, gpuControl: config.gpuControl }), /GPU/);
+  for (const change of [undefined, { ...config.gpuControl, value: 0 }, { ...config.gpuControl, applicationCount: 2 }, { ...config.gpuControl, clockLock: true }])
+    assert.throws(() => validateSamplingConfig({ ...config, gpuControl: change }), /GPU/);
+  for (const mutate of [s => { delete s.gpuPowerPolicy; }, s => { s.gpuPowerPolicy.Found = false; }, s => { s.gpuPowerPolicy.Value = 0; }, s => { s.gpuPowerPolicy.Location = 1; }, s => { s.gpuPowerPolicy.CurrentPredefined = 1; }, s => { s.gpuPowerPolicy.ApplicationName = 'other.exe'; }, s => { s.gpuPowerPolicy.ApplicationCount = 2; }, s => { s.gpuPowerPolicy.SettingId++; }]) {
+    const p = population(); mutate(p[0].hostSamples[1]);
+    assert.throws(() => evaluateCalibration(p, config, host), /GPU/);
+  }
+  const p = population();
+  p[0].hostSamples[1].gpu.rows[0][1] = '560.94';
+  assert.throws(() => evaluateCalibration(p, config, host), /NVIDIA/);
 });

@@ -5,6 +5,7 @@ import { extname, relative, resolve, sep } from 'node:path';
 import { spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { captureAllocationPhase } from './allocation-sampling-phase.mjs';
+import { readCompletedFixtureText } from './completed-fixture-transfer.mjs';
 
 export function defaultChromePath() {
   if (process.platform === 'darwin') return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -31,6 +32,8 @@ export async function runChromeWebGpuFixture({
   mounts = [],
   crossOriginIsolation = true,
   interact = null,
+  disableDx12InfoCollection = false,
+  chunkedResult = false,
 }) {
   const chrome = browserPath ?? process.env.CHROME_PATH ?? defaultChromePath();
   if (!existsSync(chrome)) throw new Error(`Chrome/WebGPU gate requires Chrome. Set CHROME_PATH (looked for ${chrome}).`);
@@ -47,6 +50,8 @@ export async function runChromeWebGpuFixture({
       visualCapture,
       navigateAwayAfterResult,
       interact,
+      disableDx12InfoCollection,
+      chunkedResult,
     );
     result.httpProvenance = fixtureServer.provenance();
     return result;
@@ -145,6 +150,8 @@ async function runChrome(
   visualCapture,
   navigateAwayAfterResult,
   interact,
+  disableDx12InfoCollection,
+  chunkedResult,
 ) {
   const angleBackend = process.env.WEBGPU_ANGLE_BACKEND ?? defaultWebGpuAngleBackend();
   if (process.env.WEBGPU_REQUIRE_NATIVE === '1' && isSoftwareBackend(angleBackend)) {
@@ -160,6 +167,7 @@ async function runChrome(
     '--no-sandbox',
     '--disable-gpu-sandbox',
     '--enable-unsafe-webgpu',
+    ...(disableDx12InfoCollection ? ['--disable-gpu-process-for-dx12-info-collection'] : []),
     `--use-angle=${angleBackend}`,
     '--remote-debugging-port=0',
     ...(visualCapture ? [
@@ -234,11 +242,11 @@ async function runChrome(
       const phaseProfile = allocationSampling?.phase
         ? await captureAllocationPhase(cdp, waitFor, allocationSampling, timeoutMs)
         : null;
-      const fixtureResult = await waitFor(async () => {
+      let fixtureResult = await waitFor(async () => {
         let response;
         try {
           response = await cdp.call('Runtime.evaluate', {
-            expression: `(() => { const node = document.querySelector('#result'); return { status: node?.dataset.status || '', text: node?.textContent || '', progress: document.querySelector('#progress')?.textContent || '' }; })()`,
+            expression: `(() => { const node = document.querySelector('#result'); return { status: node?.dataset.status || '', text: ${chunkedResult ? "''" : "node?.textContent || ''"}, progress: document.querySelector('#progress')?.textContent || '' }; })()`,
             returnByValue: true,
           });
         } catch (error) {
@@ -249,6 +257,7 @@ async function runChrome(
         lastProgress = value?.progress ?? lastProgress;
         return value?.status ? value : null;
       }, timeoutMs, 'Chrome/WebGPU fixture result', () => lastProgress);
+      if (chunkedResult) fixtureResult = await readCompletedFixtureText(cdp);
       if (!acceptedStatuses.includes(fixtureResult.status)) {
         throw new Error(`Chrome/WebGPU fixture failed: ${fixtureResult.text}\n${stderr}`);
       }
@@ -264,6 +273,7 @@ async function runChrome(
         url: identityResponse.result?.result?.value?.href ?? url,
         angleBackend,
         nativeBackend: !isSoftwareBackend(angleBackend),
+        ...(disableDx12InfoCollection ? { disableDx12InfoCollection: true } : {}),
       };
       if (allocationSampling) {
         const profile = phaseProfile ?? (await cdp.call('HeapProfiler.stopSampling')).result?.profile;

@@ -1,0 +1,384 @@
+{
+  "schemaVersion": 1,
+  "status": "engineering-control-verified-independent-hidden-control-pending",
+  "verifiedAt": "2026-10-09T12:00:16.669Z",
+  "performanceQualified": false,
+  "regressionBudget": 0.05,
+  "engineeringRun": "artifacts/engine-0.2.1/g09/gpu-info-control-engineering-20261009T115211Z",
+  "engineering": {
+    "mode": "engineering",
+    "browserProduct": "Chrome/154.0.8037.99",
+    "browserStartedAt": "2026-10-09T11:52:21.0544866Z",
+    "browserEndedAt": "2026-10-09T11:54:56.1994014Z",
+    "browserLifetimeMs": 155145,
+    "browserCommandLine": "\"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" --headless=new --disable-gpu-process-for-dx12-info-collection --mute-audio --autoplay-policy=no-user-gesture-required --no-sandbox --disable-gpu-sandbox --enable-unsafe-webgpu --use-angle=d3d11 --remote-debugging-port=0 --user-data-dir=C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\haiyue-webgpu-gate-irfVX5 about:blank",
+    "gpuProcessCount": 1,
+    "informationCollectorCount": 0,
+    "measuredGpuFrames": 15000,
+    "allWindowsP8": true,
+    "outputSpikes": 14,
+    "windowP95Range": [
+      0.986112,
+      1.898464
+    ],
+    "knownInteractiveObservations": 1716,
+    "restored": true
+  },
+  "smokeResults": [
+    {
+      "run": "artifacts/engine-0.2.1/g09/gpu-info-control-smoke-20261009T115612Z",
+      "status": "failed",
+      "expectedFailure": true,
+      "restored": true
+    },
+    {
+      "run": "artifacts/engine-0.2.1/g09/gpu-info-control-smoke-20261009T115711Z",
+      "status": "diagnostic-smoke-complete",
+      "expectedFailure": false,
+      "restored": true
+    }
+  ],
+  "finalState": {
+    "observedAt": "2026-10-09T11:59:16.9861750Z",
+    "power": {
+      "schemaVersion": 1,
+      "schemeId": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "acLineStatus": 1,
+      "minimumAcPercent": 5,
+      "maximumAcPercent": 100,
+      "minimumDcPercent": 5,
+      "maximumDcPercent": 100
+    },
+    "gpu": {
+      "Found": false,
+      "ProfileName": "Google Chrome",
+      "ApplicationName": "chrome.exe",
+      "ApplicationCount": 1,
+      "SettingId": 274197361,
+      "Type": 0,
+      "Location": 0,
+      "CurrentPredefined": 0,
+      "PredefinedValid": 0,
+      "PredefinedValue": 0,
+      "Value": 0
+    },
+    "service": {
+      "State": "Stopped",
+      "StartMode": "Disabled"
+    },
+    "ownedTraceSessions": [],
+    "ownedWorkers": []
+  },
+  "nextPlan": {
+    "scope": "Matched v4 eight-light phase diagnostic only; no acceptance or baseline promotion",
+    "referenceRun": "unattended-controlled-gpu-v4-20261009T070046Z",
+    "entryQuietSamples": 3,
+    "entryQuietCpuPercent": 5,
+    "variants": [
+      "A0",
+      "B4"
+    ],
+    "caseId": "forward-cap-8",
+    "cpuWarmup": 18000,
+    "cpuSamples": 3000,
+    "gpuWarmup": 120,
+    "gpuSamples": 15000,
+    "gpuTelemetryIntervalMs": 200,
+    "cooldownSeconds": 120,
+    "waitForApplicationsExitSeconds": 300,
+    "gpuSettingsChanged": true,
+    "gpuPolicy": "Chrome-only prefer maximum performance; not a frequency lock",
+    "expectedDriver": "582.78",
+    "automaticGpuPolicyRestore": true,
+    "gpuStateObservation": "Retain all GPU frames; compare the same fifty fixed 300-frame windows in each capture",
+    "servicesChanged": false,
+    "temporaryCpuMinimum": 100,
+    "automaticPowerRestore": true,
+    "regressionBudget": 0.05,
+    "performanceQualified": false,
+    "out": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.1\\g09\\gpu-info-control-closed-20261009T115918Z",
+    "stoppingRule": "Exactly two captures, no automatic retries; stop on capture/cleanup/restoration error; analyze only after all captures and CPU/GPU power restoration",
+    "gpuSchedulerTrace": "Built-in GPU.Light ETW, unique owned instance per capture, saved on D, stopped before restoring power",
+    "expectedDiskFreeGiB": 10,
+    "browserIntervention": "--disable-gpu-process-for-dx12-info-collection",
+    "injectFailureAfterApply": false,
+    "backgroundPreflight": [
+      "Codex",
+      "VS Code",
+      "Epic",
+      "Steam",
+      "Task Manager",
+      "Chrome",
+      "Edge"
+    ],
+    "preflightAction": "Wait at startup for all listed applications; timeout before power changes or sampling; fail if reopened during sampling; never terminate applications"
+  },
+  "limits": [
+    "Online engineering control, not independent or formal acceptance. Desktop spikes and local clock changes remain.",
+    "Only the diagnostic runner adds the DX12 information collection flag. Shared production runner, Engine code and all acceptance budgets/populations remain unchanged.",
+    "The independent hidden launcher additionally removes its visible console. It tests the combined practical mitigation; it cannot by itself isolate cursor causality.",
+    "Original v4 full failure remains unchanged. New independent evidence must be checked before versioning sampling conditions and collecting a fresh baseline."
+  ],
+  "bindings": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/audit-gpu-info-control.mjs",
+      "sha256": "1f7c3af0b61ee9ec2927709771e795905285f3bf9e5c996f48890231e260e3aa"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-engineering-20261009T115211Z/completion.json",
+      "sha256": "85b432ead5c90e9eb6b3d187cf7da46c4da6a5176c4270dac47ba84b86a79a1b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/plan.json",
+      "sha256": "7d164ba74175279c886f7d3b8a8f4b2ed1fdea327347c13a1eaa9d95f9e0822e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/capture.json",
+      "sha256": "06e8b65551a751b76d7a78366d4c39e20cbe105df32c3126205124e0bab83bd2"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/analysis.json",
+      "sha256": "9f7615f31e115ed5e109ae2c4cf68c4e9731269e38e8cc89b769bc428a45719f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-engineering-20261009T115211Z/power-state.json",
+      "sha256": "33e2745728b00a750b168adeece799ebf2ce72bf662e41ea7cd214d3ad391013"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-engineering-20261009T115211Z/gpu-power-state.json",
+      "sha256": "455df5ebd542d83ec734e1bcd1c9b12f9bfcbb87204fb8aeca74ec06e30e593c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/producer/artifacts/engine-0.2.1/g09/gpu-info-chrome-runner.mjs",
+      "sha256": "6a30612d2c506829552b0a58063842111e3286967b712402a86af61de5ae3a00"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-chrome-runner.mjs",
+      "sha256": "6a30612d2c506829552b0a58063842111e3286967b712402a86af61de5ae3a00"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/producer/artifacts/engine-0.2.1/g09/profile-gpu-info-control.mjs",
+      "sha256": "71b9feda3829c8b9159550c5d339663493e9ca1538ca2c594ac875f4fe44513c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/profile-gpu-info-control.mjs",
+      "sha256": "71b9feda3829c8b9159550c5d339663493e9ca1538ca2c594ac875f4fe44513c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/producer/scripts/webgpu-gate/deferred-g05-forward-fixture.mjs",
+      "sha256": "8845a927387e7ae5b04327342fceca0636b8bdb3ef91800e6dc329441942c9ca"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-g05-forward-fixture.mjs",
+      "sha256": "8845a927387e7ae5b04327342fceca0636b8bdb3ef91800e6dc329441942c9ca"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/producer/scripts/webgpu-gate/chrome-runner.mjs",
+      "sha256": "38f42bc1ff3d5fc7d8e39c59bb9ede3597c863b914c929faae60afe8123b2409"
+    },
+    {
+      "path": "scripts/webgpu-gate/chrome-runner.mjs",
+      "sha256": "38f42bc1ff3d5fc7d8e39c59bb9ede3597c863b914c929faae60afe8123b2409"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/producer/scripts/webgpu-gate/framegraph-windows-host.mjs",
+      "sha256": "57531ba37ad436df4f776e8740d0fcdb87617acd2f6b5cdbd492aae7727c227c"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-windows-host.mjs",
+      "sha256": "57531ba37ad436df4f776e8740d0fcdb87617acd2f6b5cdbd492aae7727c227c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/producer/scripts/webgpu-gate/framegraph-gpu-policy.mjs",
+      "sha256": "ddcd69486eb797a63d44b0b4d5c0beb6097fe67ce25fadb0a7f03a3efdbebc31"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-gpu-policy.mjs",
+      "sha256": "ddcd69486eb797a63d44b0b4d5c0beb6097fe67ce25fadb0a7f03a3efdbebc31"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/producer/config/framegraph-sampling-021.json",
+      "sha256": "e7133a5f2ffb4e2089c7dc3b22d71a8cc2bb56d782f08cfbd7222a1768db169d"
+    },
+    {
+      "path": "config/framegraph-sampling-021.json",
+      "sha256": "e7133a5f2ffb4e2089c7dc3b22d71a8cc2bb56d782f08cfbd7222a1768db169d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/producer/config/framegraph-performance-021.json",
+      "sha256": "f4707951d50edd09608c9f5ee0430598e7d914552c814b2d0d8ada401784fa77"
+    },
+    {
+      "path": "config/framegraph-performance-021.json",
+      "sha256": "f4707951d50edd09608c9f5ee0430598e7d914552c814b2d0d8ada401784fa77"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/producer/artifacts/engine-0.2.1/g09/unattended-controlled-gpu-v4-20261009T070046Z/measurement/frozen-protocol.json",
+      "sha256": "6c20569d83a34d6452edf6e1baea251590c0dd8b7c40bb273beab2e2eaf38375"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/unattended-controlled-gpu-v4-20261009T070046Z/measurement/frozen-protocol.json",
+      "sha256": "6c20569d83a34d6452edf6e1baea251590c0dd8b7c40bb273beab2e2eaf38375"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/gpu-telemetry.jsonl",
+      "sha256": "a775a4737bda62dc65b791f5aa00e28c1f30c93fa8e4e479dca465f80fb842f8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/processes.jsonl",
+      "sha256": "c589a4722d40f57cfb9b255c3d3a8faa99ed050b974f0e8f0a1b8c17088c71ac"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-52-18.258Z/observer.ps1",
+      "sha256": "3f3c899ea8973227186625a7325c302970f81ff036f70d0f218acc8915397bf5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/analyze-gpu-v4-phases.mjs",
+      "sha256": "8d98b079bebb75145a2020e257c03941ca0fdbfad85a9dcc59307bfc2759ffbf"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-engineering-20261009T115211Z/lifetimes-B4.jsonl",
+      "sha256": "55a47f7d10d256470476735e2380414b6a551054574116c137b2ecb389944d52"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-smoke-20261009T115612Z/completion.json",
+      "sha256": "9f27147c9da80596ec6dd32de35c3257f56311c13e675e49df30480607b5ea9b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-dispatch-20261009T115612Z/dispatch.json",
+      "sha256": "4c02c2e3b7297944767442fa2692a2139ede31543973a4df663419bce53ab413"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-smoke-20261009T115612Z/power-state.json",
+      "sha256": "18e092a4fc42fd8b6fedb843a48b64942c0bba2ae83b96ca4d2d217c7b0bb2c7"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-smoke-20261009T115612Z/gpu-power-state.json",
+      "sha256": "7352e2eaee5d78bdbbeb43056a38a404fc3c2e0fe5e519e488331c7741f0b8b5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-smoke-20261009T115612Z/launcher.ps1",
+      "sha256": "007d244a9091afc68c27fbcaaa923c4dbe7167a1143bac74b9c5947d3d55ce30"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-dispatch-20261009T115612Z/launcher.log",
+      "sha256": "ae14517af01642ba375eac21a11eb23fb158ef911c60bc90ed2d5a1b96e854d6"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-dispatch-20261009T115612Z/launcher.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-smoke-20261009T115711Z/completion.json",
+      "sha256": "32e6afcf49d24bf4c8a783b200dfbe2deb7b297428747b4cd40ea12a26b692bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-dispatch-20261009T115711Z/dispatch.json",
+      "sha256": "254138beb5178618eefeebd329b006d00b61e6190b74d7ae2352c1605969da76"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-smoke-20261009T115711Z/power-state.json",
+      "sha256": "6ad77097977542006aac6ebdf2136f4ac9798c108530ad684a20dfda164e1474"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-smoke-20261009T115711Z/gpu-power-state.json",
+      "sha256": "5500454a887ac3cec4926a6bc58bf5ea41b3814c7b9573e4194d634fa34aaf4e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-A0-2026-10-09T11-57-18.863Z/plan.json",
+      "sha256": "19332df26e3cceb0bac3a43d0f4e86164e0f0cb4d956eb90d037f4960901e6d6"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-A0-2026-10-09T11-57-18.863Z/capture.json",
+      "sha256": "6b1627c71b058e2fb7773956cc56831307e832742b2b050c8665045beb7b863c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-57-45.274Z/plan.json",
+      "sha256": "699cf0087da7059497300252272de4e26b8aac7756c710fc85bec4b994558b4c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-profile-B4-2026-10-09T11-57-45.274Z/capture.json",
+      "sha256": "948e464cc98e963b07367712606db83c19399d4ed93f46164d090990875be48e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-smoke-20261009T115711Z/launcher.ps1",
+      "sha256": "007d244a9091afc68c27fbcaaa923c4dbe7167a1143bac74b9c5947d3d55ce30"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-dispatch-20261009T115711Z/launcher.log",
+      "sha256": "beeb98424e0c7a21c20b42d0f0252496c5143b3c0621e3bbf88109a53784348f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-dispatch-20261009T115711Z/launcher.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-final-state.json",
+      "sha256": "b2f07273cd0bac5ab74cf9ffd7a32104636d0d33649c98df9c52e47c48a0cf3e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-cmd-plan.json",
+      "sha256": "c148086c10afc69a6ffde27b81e5d4cea2f54179558e943f6895eb51a5ecb690"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-scheduler-closed-20261009T111159Z/chrome-info-attribution.json",
+      "sha256": "486be66bfeeb1f727ffd31bb6898e451680146a7ea56bcc27c1df3a8f255184a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/audit-chrome-info-attribution.mjs",
+      "sha256": "fc53bc3614c65c77523b97e2e7d1d6d0777c92792b827e1a0b8a129a5c333a2d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/extract-gpu-process-lifetimes.ps1",
+      "sha256": "a3d1f312f725627babf00a42749011fd769e1668caff4bbeda91c4de2f41b9aa"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-scheduler-closed-20261009T111159Z/completion.json",
+      "sha256": "b0306887a6cd8007958b597cf92788879c81f2916961eb5f5a85af2eb93ef76c"
+    },
+    {
+      "path": "review/engine-0.2.1/g09/gpu-scheduler-result-checks.json",
+      "sha256": "1cfe9348030a4f35d837be692a4c12215440918dfd861c5d9cd50799239172c8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-scheduler-closed-20261009T111159Z/lifetimes-A0.jsonl",
+      "sha256": "dcfb8efdad8001ea19df1800a6be17cd76b6153f83e5676b805b23c66f9187e0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-scheduler-profile-A0-2026-10-09T11-14-06.681Z/processes.jsonl",
+      "sha256": "8f6fc5a10d689a9344065ee55c6da3e1023184193e36fa5a0460a2d0fca21bad"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-scheduler-closed-20261009T111159Z/lifetimes-B4.jsonl",
+      "sha256": "dd87c18ec46a1dec4e0f5602e7891fce8c7f1057217a364bb98c2c9630de2f26"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-scheduler-profile-B4-2026-10-09T11-19-45.310Z/processes.jsonl",
+      "sha256": "66c1851e5d94a3d65f04a0911c2642dd33f0c9711b025849cf04e84aaf4cdd31"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/start-gpu-info-control-with-codex-closed.cmd",
+      "sha256": "f33787b65b604c9dc819672c1731bb2f60ebb211fab987deb7f2c314f293aeef"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/start-gpu-info-control.ps1",
+      "sha256": "ad1c3958cb0102a3f8209ff421406b60612d703d8e6b41a73da31278e33fe23f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/launch-gpu-info-control-closed.ps1",
+      "sha256": "007d244a9091afc68c27fbcaaa923c4dbe7167a1143bac74b9c5947d3d55ce30"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/read-gpu-info-final-state.ps1",
+      "sha256": "48979e348deed160a6f651f4535ac6c3baf612e75244704138dcd711e20e005d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-engineering-20261009T115211Z/00-B4-gpu.etl",
+      "sha256": "ef2c5a9e6feb11187b90a97adda5de076b396f24aea83e58c4e32451b5d679f9"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-info-control-engineering-20261009T115211Z/launcher.ps1",
+      "sha256": "007d244a9091afc68c27fbcaaa923c4dbe7167a1143bac74b9c5947d3d55ce30"
+    }
+  ]
+}

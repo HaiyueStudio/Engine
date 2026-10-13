@@ -2,6 +2,7 @@
 import {observeForwardAllocations} from './deferred-g05-forward-allocation.mjs';
 import {readFloatTexture} from './float-texture-readback.mjs';
 import {encodeFrameGraphPixels} from './framegraph-pixel-oracle.mjs';
+import {createBoundedFrameCompletion} from './framegraph-batch-completion.mjs';
 const resultNode = document.querySelector('#result');
 const progressNode = document.querySelector('#progress');
 const query = new URLSearchParams(location.search);
@@ -74,8 +75,12 @@ try {
   const samplingMode = query.get('framegraphSampling');
   if (samplingMode !== null && (!['calibration', 'baseline'].includes(samplingMode) || query.get('framegraphRuntime') !== '1')) throw Error('Invalid G09 sampling mode');
   const samplingProtocol = query.get('framegraphSamplingProtocol') ?? 'g09-forward-cold-steady-v1';
-  if (samplingMode && !['g09-forward-cold-steady-v1', 'g09-forward-cold-steady-v2', 'g09-forward-cold-steady-v3'].includes(samplingProtocol)) throw Error('Invalid G09 sampling protocol');
-  const gpuWarmup = samplingMode ? 120 : warmup;
+  if (samplingMode && !['g09-forward-cold-steady-v1', 'g09-forward-cold-steady-v2', 'g09-forward-cold-steady-v3', 'g09-forward-cold-steady-v4', 'g09-forward-cold-steady-v5'].includes(samplingProtocol)) throw Error('Invalid G09 sampling protocol');
+  const batchGpu = samplingProtocol === 'g09-forward-cold-steady-v5';
+  const batchArm = query.get('framegraphBatchArm') ?? 'B8';
+  if (!['B8', 'S8'].includes(batchArm) || (samplingMode && batchArm !== 'B8')) throw Error('Serial GPU control is correctness-only');
+  if (batchGpu && query.get('framegraphRuntime') !== '1') throw Error('Bounded completion requires the shared A0/B4 runtime');
+  const gpuWarmup = batchGpu ? positiveInteger(query.get('gpuWarmup'), 120) : samplingMode ? 120 : warmup;
   const timeline = samplingMode ? { cpu: [], cpuUpdate: [], cpuRecord: [], cpuSubmit: [], frameWall: [], queueWait: [] } : null;
   progressNode.textContent = configuration.id;
 
@@ -127,7 +132,18 @@ try {
   const gpuDurations = [];
   const gpuSpans = [];
   let gpuPassLabels = [];
+  let gpuCompletion = null;
   if (gpuTimestampProbe.supported) {
+    if (batchGpu) {
+      const completion = createBoundedFrameCompletion({ state, probe: gpuTimestampProbe, runFrame: runRealRendererBenchmarkFrame, arm: batchArm });
+      gpuCompletion = completion.result;
+      try {
+        await completion.runPhase('warmup', gpuWarmup);
+        const measured = await completion.runPhase('measurement', gpuSamples);
+        for (const frame of measured) { gpuDurations.push(frame.passSumMs); gpuSpans.push(frame.spanMs); }
+        gpuPassLabels = measured[0].passes.map(p => p.label);
+      } finally { await completion.close(); }
+    } else {
     if (query.get('framegraphRuntime') === '1') for (let index = 0; index < gpuWarmup; index++) await runRealRendererBenchmarkFrame(state, { gpuTimestampProbe });
     for (let index = 0; index < gpuSamples; index++) {
       await runRealRendererBenchmarkFrame(state, { gpuTimestampProbe });
@@ -136,8 +152,9 @@ try {
       gpuSpans.push(sample.spanMs);
       gpuPassLabels = sample.passLabels;
     }
+    }
   }
-  gpuTimestampProbe.destroy();
+  if (!gpuCompletion) gpuTimestampProbe.destroy();
   if (query.get('framegraphOracle') === '1') {
     const ldr = await readFloatTexture(state.device, state.targets[0].colorTexture);
     globalThis.__framegraphPixels = encodeFrameGraphPixels([{ key: 'real-frame-view:0', hdr: ldr, ldr }]);
@@ -230,6 +247,7 @@ try {
   result.g05Forward = {...allocationAudit.snapshot(), cleanup:{ownerResidual:state.finalMetrics.ownerResidual,liveGpuResources:state.finalMetrics.liveGpuResources}};
   if (query.get('framegraphRuntime') === '1') result.g09WholeGpu = { scope: 'render-and-compute-span-v1', rawSamples: gpuSpans, warmup: gpuWarmup };
   if (timeline) result.g09Sampling = { protocol: samplingProtocol, mode: samplingMode, warmup, gpuWarmup, coldFrames: 120, timeline };
+  if (gpuCompletion) result.g09GpuCompletion = gpuCompletion;
   device.destroy();
   resultNode.dataset.status = 'passed';
   resultNode.textContent = JSON.stringify(result);

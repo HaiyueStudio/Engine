@@ -1,0 +1,1537 @@
+{
+  "schemaVersion": 1,
+  "status": "independent-long-matrix-and-scheduler-verified-not-qualified",
+  "performanceQualified": false,
+  "regressionBudget": 0.05,
+  "verifiedAt": "2026-10-12T01:48:33.233Z",
+  "reviewRevision": "fcdb12d9aef8cf4b70f05247717de2633790839c",
+  "reviewDirtyState": "M review/engine-0.2.1/g09/README.md\n?? review/engine-0.2.1/g09/batch-completion-long-result.md\n?? review/engine-0.2.1/g09/batch-completion-stale-build-checks.json\n?? review/engine-0.2.1/g09/batch-completion-stale-build.md",
+  "run": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z",
+  "summary": {
+    "captures": 8,
+    "measuredGpuFrames": 960000,
+    "gpuWarmupFrames": 960,
+    "measuredCompletionBatches": 120000,
+    "decodedEvents": 6855219,
+    "pairedPackets": 977867,
+    "recordedSessionLocks": 0,
+    "blockedProcessObservations": 0,
+    "settingsRestored": true,
+    "originalBudgetPreserved": true,
+    "analysisPolicyTestsPassed": 11
+  },
+  "arms": [
+    {
+      "arm": "S8",
+      "measuredFrames": 480000,
+      "mainSlowFrames": 1854,
+      "longSegments": 47,
+      "longSegmentsNoOtherPackets": 46,
+      "outputSlowFrames": 480,
+      "outputSlowBatches": 399,
+      "outputSlowBatchesKnownForeign": 398,
+      "outputSlowBatchesOnlyUnresolved": 1,
+      "clockFrames": {
+        "P8": 460080,
+        "transition": 944,
+        "P0": 14312,
+        "P2": 2312,
+        "P5": 2352
+      }
+    },
+    {
+      "arm": "B8",
+      "measuredFrames": 480000,
+      "mainSlowFrames": 0,
+      "longSegments": 0,
+      "longSegmentsNoOtherPackets": 0,
+      "outputSlowFrames": 0,
+      "outputSlowBatches": 0,
+      "outputSlowBatchesKnownForeign": 0,
+      "outputSlowBatchesOnlyUnresolved": 0,
+      "clockFrames": {
+        "transition": 480,
+        "P0": 479520
+      }
+    }
+  ],
+  "rows": [
+    {
+      "index": 0,
+      "variant": "A0",
+      "arm": "S8",
+      "round": 1,
+      "measuredFrames": 120000,
+      "seconds": 510.53614501953126,
+      "mainP95Ms": 0.694272,
+      "gpuP95Ms": 1.04448,
+      "mainSlowFrames": 495,
+      "longSegments": 13,
+      "longSegmentsWithForeign": 0,
+      "longSegmentsWithUnresolved": 0,
+      "longSegmentsNoOtherPackets": 13,
+      "mainSlowBatches": {
+        "frames": 69,
+        "withOwnPacket": 69,
+        "withOtherPacket": 0,
+        "withKnownForeign": 0,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {},
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 495
+      },
+      "outputSlowFrames": 120,
+      "outputSlowBatches": {
+        "frames": 92,
+        "withOwnPacket": 92,
+        "withOtherPacket": 92,
+        "withKnownForeign": 92,
+        "withUnresolved": 1,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {
+          "dwm": 83,
+          "csrss": 9,
+          "explorer": 4,
+          "System": 7
+        },
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 120
+      },
+      "allBatches": {
+        "frames": 15000,
+        "withOwnPacket": 15000,
+        "withOtherPacket": 153,
+        "withKnownForeign": 152,
+        "withUnresolved": 2,
+        "onlyUnresolved": 1,
+        "overlappingKnownNames": {
+          "dwm": 117,
+          "System": 33,
+          "explorer": 7,
+          "csrss": 9
+        }
+      },
+      "events": 860081,
+      "pairedPackets": 122672,
+      "unmatchedBoundaryEvents": [
+        {
+          "id": 176,
+          "atMs": 1791762829552.6863
+        }
+      ],
+      "synchronization": {
+        "submissions": 120120,
+        "engineRetirementNotifications": 120120,
+        "explicitWaitCalls": 120120,
+        "cap": 8,
+        "peak": 1,
+        "batchWaitCalls": 15015,
+        "mapCalls": 15015,
+        "queueWaitMs": {
+          "samples": 120000,
+          "min": 2.4950000047683716,
+          "p50": 3.6599999964237213,
+          "p95": 4.514999985694885,
+          "max": 37.96999999880791
+        },
+        "batchFenceMs": {
+          "samples": 15000,
+          "min": 0.094970703125,
+          "p50": 0.3701171875,
+          "p95": 0.4599609375,
+          "max": 9.670166015625
+        },
+        "batchMapMs": {
+          "samples": 15000,
+          "min": 0.094970703125,
+          "p50": 0.33984375,
+          "p95": 0.449951171875,
+          "max": 11.18505859375
+        },
+        "batchWallMs": {
+          "samples": 15000,
+          "min": 24.465087890625,
+          "p50": 33.795166015625,
+          "p95": 37.170166015625,
+          "max": 107.64990234375
+        },
+        "meanObservedBatchFencePerFrameMs": 0.04487646891276042
+      },
+      "firstP0": {
+        "elapsedSeconds": 89.69246484375,
+        "nearbyForeignNames": [
+          "System",
+          "unresolved"
+        ]
+      },
+      "firstLongSegmentSeconds": 12.6356650390625,
+      "first90SecondsLongSegments": 3,
+      "first99SecondsLongSegments": 3,
+      "initialGpuWindows": [
+        {
+          "startFrame": 0,
+          "endFrame": 299,
+          "gpuP95Ms": 1.04448,
+          "mainP95Ms": 0.693248,
+          "states": [
+            "P8"
+          ]
+        },
+        {
+          "startFrame": 300,
+          "endFrame": 599,
+          "gpuP95Ms": 1.045504,
+          "mainP95Ms": 0.694272,
+          "states": [
+            "P8"
+          ]
+        },
+        {
+          "startFrame": 600,
+          "endFrame": 899,
+          "gpuP95Ms": 1.048576,
+          "mainP95Ms": 0.70144,
+          "states": [
+            "P8"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "variant": "B4",
+      "arm": "B8",
+      "round": 1,
+      "measuredFrames": 120000,
+      "seconds": 100.3153701171875,
+      "mainP95Ms": 0.237568,
+      "gpuP95Ms": 0.288768,
+      "mainSlowFrames": 0,
+      "longSegments": 0,
+      "longSegmentsWithForeign": 0,
+      "longSegmentsWithUnresolved": 0,
+      "longSegmentsNoOtherPackets": 0,
+      "mainSlowBatches": {
+        "frames": 0,
+        "withOwnPacket": 0,
+        "withOtherPacket": 0,
+        "withKnownForeign": 0,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {},
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 0
+      },
+      "outputSlowFrames": 0,
+      "outputSlowBatches": {
+        "frames": 0,
+        "withOwnPacket": 0,
+        "withOtherPacket": 0,
+        "withKnownForeign": 0,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {},
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 0
+      },
+      "allBatches": {
+        "frames": 15000,
+        "withOwnPacket": 15000,
+        "withOtherPacket": 93,
+        "withKnownForeign": 93,
+        "withUnresolved": 3,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {
+          "explorer": 1,
+          "System": 57,
+          "dwm": 37
+        }
+      },
+      "events": 854746,
+      "pairedPackets": 121929,
+      "unmatchedBoundaryEvents": [],
+      "synchronization": {
+        "submissions": 120120,
+        "engineRetirementNotifications": 120120,
+        "explicitWaitCalls": 0,
+        "cap": 8,
+        "peak": 8,
+        "batchWaitCalls": 15015,
+        "mapCalls": 15015,
+        "queueWaitMs": {
+          "samples": 120000,
+          "min": 0,
+          "p50": 0.004999995231628418,
+          "p95": 0.019999980926513672,
+          "max": 0.7350000143051147
+        },
+        "batchFenceMs": {
+          "samples": 15000,
+          "min": 0.340087890625,
+          "p50": 3.4599609375,
+          "p95": 4.46484375,
+          "max": 71.489990234375
+        },
+        "batchMapMs": {
+          "samples": 15000,
+          "min": 0.094970703125,
+          "p50": 0.259765625,
+          "p95": 0.35986328125,
+          "max": 18.969970703125
+        },
+        "batchWallMs": {
+          "samples": 15000,
+          "min": 3.860107421875,
+          "p50": 6.27490234375,
+          "p95": 7.39013671875,
+          "max": 77.455078125
+        },
+        "meanObservedBatchFencePerFrameMs": 0.43962106119791666
+      },
+      "firstP0": {
+        "elapsedSeconds": 0.1596650390625,
+        "nearbyForeignNames": [
+          "System"
+        ]
+      },
+      "firstLongSegmentSeconds": null,
+      "first90SecondsLongSegments": 0,
+      "first99SecondsLongSegments": 0,
+      "initialGpuWindows": [
+        {
+          "startFrame": 0,
+          "endFrame": 299,
+          "gpuP95Ms": 0.28774400000000006,
+          "mainP95Ms": 0.236544,
+          "states": [
+            "P0"
+          ]
+        },
+        {
+          "startFrame": 300,
+          "endFrame": 599,
+          "gpuP95Ms": 0.289792,
+          "mainP95Ms": 0.238592,
+          "states": [
+            "P0"
+          ]
+        },
+        {
+          "startFrame": 600,
+          "endFrame": 899,
+          "gpuP95Ms": 0.290816,
+          "mainP95Ms": 0.24064,
+          "states": [
+            "P0"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "variant": "A0",
+      "arm": "B8",
+      "round": 1,
+      "measuredFrames": 120000,
+      "seconds": 99.63128002929687,
+      "mainP95Ms": 0.237568,
+      "gpuP95Ms": 0.288768,
+      "mainSlowFrames": 0,
+      "longSegments": 0,
+      "longSegmentsWithForeign": 0,
+      "longSegmentsWithUnresolved": 0,
+      "longSegmentsNoOtherPackets": 0,
+      "mainSlowBatches": {
+        "frames": 0,
+        "withOwnPacket": 0,
+        "withOtherPacket": 0,
+        "withKnownForeign": 0,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {},
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 0
+      },
+      "outputSlowFrames": 0,
+      "outputSlowBatches": {
+        "frames": 0,
+        "withOwnPacket": 0,
+        "withOtherPacket": 0,
+        "withKnownForeign": 0,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {},
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 0
+      },
+      "allBatches": {
+        "frames": 15000,
+        "withOwnPacket": 15000,
+        "withOtherPacket": 75,
+        "withKnownForeign": 75,
+        "withUnresolved": 3,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {
+          "dwm": 22,
+          "System": 53
+        }
+      },
+      "events": 854129,
+      "pairedPackets": 121842,
+      "unmatchedBoundaryEvents": [],
+      "synchronization": {
+        "submissions": 120120,
+        "engineRetirementNotifications": 120120,
+        "explicitWaitCalls": 0,
+        "cap": 8,
+        "peak": 8,
+        "batchWaitCalls": 15015,
+        "mapCalls": 15015,
+        "queueWaitMs": {
+          "samples": 120000,
+          "min": 0,
+          "p50": 0.004999995231628418,
+          "p95": 0.02000001072883606,
+          "max": 0.8650000095367432
+        },
+        "batchFenceMs": {
+          "samples": 15000,
+          "min": 1.205078125,
+          "p50": 3.425048828125,
+          "p95": 4.4599609375,
+          "max": 54.804931640625
+        },
+        "batchMapMs": {
+          "samples": 15000,
+          "min": 0.094970703125,
+          "p50": 0.25,
+          "p95": 0.35986328125,
+          "max": 32.739990234375
+        },
+        "batchWallMs": {
+          "samples": 15000,
+          "min": 4.06005859375,
+          "p50": 6.175048828125,
+          "p95": 7.275146484375,
+          "max": 60.56005859375
+        },
+        "meanObservedBatchFencePerFrameMs": 0.4391336486816406
+      },
+      "firstP0": {
+        "elapsedSeconds": 0.0769150390625,
+        "nearbyForeignNames": [
+          "System"
+        ]
+      },
+      "firstLongSegmentSeconds": null,
+      "first90SecondsLongSegments": 0,
+      "first99SecondsLongSegments": 0,
+      "initialGpuWindows": [
+        {
+          "startFrame": 0,
+          "endFrame": 299,
+          "gpuP95Ms": 0.8960319999999999,
+          "mainP95Ms": 0.559168,
+          "states": [
+            "P0"
+          ]
+        },
+        {
+          "startFrame": 300,
+          "endFrame": 599,
+          "gpuP95Ms": 0.289792,
+          "mainP95Ms": 0.238592,
+          "states": [
+            "P0"
+          ]
+        },
+        {
+          "startFrame": 600,
+          "endFrame": 899,
+          "gpuP95Ms": 0.290816,
+          "mainP95Ms": 0.239616,
+          "states": [
+            "P0"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "variant": "B4",
+      "arm": "S8",
+      "round": 1,
+      "measuredFrames": 120000,
+      "seconds": 514.4927099609375,
+      "mainP95Ms": 0.702432,
+      "gpuP95Ms": 1.046528,
+      "mainSlowFrames": 426,
+      "longSegments": 11,
+      "longSegmentsWithForeign": 0,
+      "longSegmentsWithUnresolved": 0,
+      "longSegmentsNoOtherPackets": 11,
+      "mainSlowBatches": {
+        "frames": 62,
+        "withOwnPacket": 62,
+        "withOtherPacket": 0,
+        "withKnownForeign": 0,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {},
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 426
+      },
+      "outputSlowFrames": 134,
+      "outputSlowBatches": {
+        "frames": 115,
+        "withOwnPacket": 115,
+        "withOtherPacket": 115,
+        "withKnownForeign": 114,
+        "withUnresolved": 1,
+        "onlyUnresolved": 1,
+        "overlappingKnownNames": {
+          "dwm": 111,
+          "csrss": 2,
+          "System": 5,
+          "explorer": 1
+        },
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 134
+      },
+      "allBatches": {
+        "frames": 15000,
+        "withOwnPacket": 15000,
+        "withOtherPacket": 161,
+        "withKnownForeign": 160,
+        "withUnresolved": 1,
+        "onlyUnresolved": 1,
+        "overlappingKnownNames": {
+          "dwm": 134,
+          "csrss": 3,
+          "System": 29,
+          "explorer": 4
+        }
+      },
+      "events": 859697,
+      "pairedPackets": 122633,
+      "unmatchedBoundaryEvents": [],
+      "synchronization": {
+        "submissions": 120120,
+        "engineRetirementNotifications": 120120,
+        "explicitWaitCalls": 120120,
+        "cap": 8,
+        "peak": 1,
+        "batchWaitCalls": 15015,
+        "mapCalls": 15015,
+        "queueWaitMs": {
+          "samples": 120000,
+          "min": 1.354999989271164,
+          "p50": 3.669999986886978,
+          "p95": 4.504999995231628,
+          "max": 73.4699999988079
+        },
+        "batchFenceMs": {
+          "samples": 15000,
+          "min": 0.10498046875,
+          "p50": 0.375,
+          "p95": 0.465087890625,
+          "max": 10.385009765625
+        },
+        "batchMapMs": {
+          "samples": 15000,
+          "min": 0.094970703125,
+          "p50": 0.340087890625,
+          "p95": 0.449951171875,
+          "max": 8.5849609375
+        },
+        "batchWallMs": {
+          "samples": 15000,
+          "min": 24.530029296875,
+          "p50": 34.080078125,
+          "p95": 37.31005859375,
+          "max": 135.169921875
+        },
+        "meanObservedBatchFencePerFrameMs": 0.045390388997395836
+      },
+      "firstP0": {
+        "elapsedSeconds": 90.80085498046876,
+        "nearbyForeignNames": [
+          "System",
+          "unresolved"
+        ]
+      },
+      "firstLongSegmentSeconds": 13.70222998046875,
+      "first90SecondsLongSegments": 2,
+      "first99SecondsLongSegments": 2,
+      "initialGpuWindows": [
+        {
+          "startFrame": 0,
+          "endFrame": 299,
+          "gpuP95Ms": 0.99328,
+          "mainP95Ms": 0.649216,
+          "states": [
+            "P8"
+          ]
+        },
+        {
+          "startFrame": 300,
+          "endFrame": 599,
+          "gpuP95Ms": 0.9912320000000001,
+          "mainP95Ms": 0.653312,
+          "states": [
+            "P8"
+          ]
+        },
+        {
+          "startFrame": 600,
+          "endFrame": 899,
+          "gpuP95Ms": 0.997376,
+          "mainP95Ms": 0.656384,
+          "states": [
+            "P8"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "variant": "B4",
+      "arm": "S8",
+      "round": 2,
+      "measuredFrames": 120000,
+      "seconds": 515.6715949707032,
+      "mainP95Ms": 0.697344,
+      "gpuP95Ms": 1.0414080000000001,
+      "mainSlowFrames": 466,
+      "longSegments": 11,
+      "longSegmentsWithForeign": 0,
+      "longSegmentsWithUnresolved": 0,
+      "longSegmentsNoOtherPackets": 11,
+      "mainSlowBatches": {
+        "frames": 65,
+        "withOwnPacket": 65,
+        "withOtherPacket": 0,
+        "withKnownForeign": 0,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {},
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 466
+      },
+      "outputSlowFrames": 110,
+      "outputSlowBatches": {
+        "frames": 90,
+        "withOwnPacket": 90,
+        "withOtherPacket": 90,
+        "withKnownForeign": 90,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {
+          "System": 2,
+          "explorer": 4,
+          "dwm": 86,
+          "csrss": 3
+        },
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 110
+      },
+      "allBatches": {
+        "frames": 15000,
+        "withOwnPacket": 15000,
+        "withOtherPacket": 137,
+        "withKnownForeign": 137,
+        "withUnresolved": 1,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {
+          "System": 20,
+          "explorer": 5,
+          "dwm": 116,
+          "csrss": 3
+        }
+      },
+      "events": 858568,
+      "pairedPackets": 122479,
+      "unmatchedBoundaryEvents": [
+        {
+          "id": 176,
+          "atMs": 1791765378726.434
+        }
+      ],
+      "synchronization": {
+        "submissions": 120120,
+        "engineRetirementNotifications": 120120,
+        "explicitWaitCalls": 120120,
+        "cap": 8,
+        "peak": 1,
+        "batchWaitCalls": 15015,
+        "mapCalls": 15015,
+        "queueWaitMs": {
+          "samples": 120000,
+          "min": 2.4749999940395355,
+          "p50": 3.6700000166893005,
+          "p95": 4.510000020265579,
+          "max": 137.9350000023842
+        },
+        "batchFenceMs": {
+          "samples": 15000,
+          "min": 0.10986328125,
+          "p50": 0.375,
+          "p95": 0.465087890625,
+          "max": 12.02001953125
+        },
+        "batchMapMs": {
+          "samples": 15000,
+          "min": 0.094970703125,
+          "p50": 0.340087890625,
+          "p95": 0.449951171875,
+          "max": 10.35009765625
+        },
+        "batchWallMs": {
+          "samples": 15000,
+          "min": 24.349853515625,
+          "p50": 34.159912109375,
+          "p95": 37.405029296875,
+          "max": 215.72021484375
+        },
+        "meanObservedBatchFencePerFrameMs": 0.04522521158854167
+      },
+      "firstP0": {
+        "elapsedSeconds": 89.81132006835938,
+        "nearbyForeignNames": [
+          "System",
+          "unresolved"
+        ]
+      },
+      "firstLongSegmentSeconds": 14.395864990234376,
+      "first90SecondsLongSegments": 2,
+      "first99SecondsLongSegments": 2,
+      "initialGpuWindows": [
+        {
+          "startFrame": 0,
+          "endFrame": 299,
+          "gpuP95Ms": 1.057792,
+          "mainP95Ms": 0.713728,
+          "states": [
+            "P8"
+          ]
+        },
+        {
+          "startFrame": 300,
+          "endFrame": 599,
+          "gpuP95Ms": 1.05984,
+          "mainP95Ms": 0.7168,
+          "states": [
+            "P8"
+          ]
+        },
+        {
+          "startFrame": 600,
+          "endFrame": 899,
+          "gpuP95Ms": 1.067008,
+          "mainP95Ms": 0.720896,
+          "states": [
+            "P8"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "variant": "A0",
+      "arm": "B8",
+      "round": 2,
+      "measuredFrames": 120000,
+      "seconds": 99.28036499023438,
+      "mainP95Ms": 0.237568,
+      "gpuP95Ms": 0.288768,
+      "mainSlowFrames": 0,
+      "longSegments": 0,
+      "longSegmentsWithForeign": 0,
+      "longSegmentsWithUnresolved": 0,
+      "longSegmentsNoOtherPackets": 0,
+      "mainSlowBatches": {
+        "frames": 0,
+        "withOwnPacket": 0,
+        "withOtherPacket": 0,
+        "withKnownForeign": 0,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {},
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 0
+      },
+      "outputSlowFrames": 0,
+      "outputSlowBatches": {
+        "frames": 0,
+        "withOwnPacket": 0,
+        "withOtherPacket": 0,
+        "withKnownForeign": 0,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {},
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 0
+      },
+      "allBatches": {
+        "frames": 15000,
+        "withOwnPacket": 15000,
+        "withOtherPacket": 95,
+        "withKnownForeign": 95,
+        "withUnresolved": 1,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {
+          "System": 52,
+          "dwm": 42,
+          "csrss": 1,
+          "explorer": 1
+        }
+      },
+      "events": 854750,
+      "pairedPackets": 121917,
+      "unmatchedBoundaryEvents": [
+        {
+          "id": 176,
+          "atMs": 1791766250842.3777
+        }
+      ],
+      "synchronization": {
+        "submissions": 120120,
+        "engineRetirementNotifications": 120120,
+        "explicitWaitCalls": 0,
+        "cap": 8,
+        "peak": 8,
+        "batchWaitCalls": 15015,
+        "mapCalls": 15015,
+        "queueWaitMs": {
+          "samples": 120000,
+          "min": 0,
+          "p50": 0.004999995231628418,
+          "p95": 0.02000001072883606,
+          "max": 0.824999988079071
+        },
+        "batchFenceMs": {
+          "samples": 15000,
+          "min": 0.965087890625,
+          "p50": 3.39013671875,
+          "p95": 4.445068359375,
+          "max": 43.574951171875
+        },
+        "batchMapMs": {
+          "samples": 15000,
+          "min": 0.094970703125,
+          "p50": 0.25,
+          "p95": 0.35498046875,
+          "max": 48.454833984375
+        },
+        "batchWallMs": {
+          "samples": 15000,
+          "min": 3.72998046875,
+          "p50": 6.14501953125,
+          "p95": 7.239990234375,
+          "max": 58.525146484375
+        },
+        "meanObservedBatchFencePerFrameMs": 0.4382196736653646
+      },
+      "firstP0": {
+        "elapsedSeconds": 0.135844970703125,
+        "nearbyForeignNames": [
+          "System"
+        ]
+      },
+      "firstLongSegmentSeconds": null,
+      "first90SecondsLongSegments": 0,
+      "first99SecondsLongSegments": 0,
+      "initialGpuWindows": [
+        {
+          "startFrame": 0,
+          "endFrame": 299,
+          "gpuP95Ms": 0.288768,
+          "mainP95Ms": 0.237568,
+          "states": [
+            "P0"
+          ]
+        },
+        {
+          "startFrame": 300,
+          "endFrame": 599,
+          "gpuP95Ms": 0.289792,
+          "mainP95Ms": 0.238592,
+          "states": [
+            "P0"
+          ]
+        },
+        {
+          "startFrame": 600,
+          "endFrame": 899,
+          "gpuP95Ms": 0.29184,
+          "mainP95Ms": 0.239616,
+          "states": [
+            "P0"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "variant": "B4",
+      "arm": "B8",
+      "round": 2,
+      "measuredFrames": 120000,
+      "seconds": 99.61349487304688,
+      "mainP95Ms": 0.237568,
+      "gpuP95Ms": 0.289792,
+      "mainSlowFrames": 0,
+      "longSegments": 0,
+      "longSegmentsWithForeign": 0,
+      "longSegmentsWithUnresolved": 0,
+      "longSegmentsNoOtherPackets": 0,
+      "mainSlowBatches": {
+        "frames": 0,
+        "withOwnPacket": 0,
+        "withOtherPacket": 0,
+        "withKnownForeign": 0,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {},
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 0
+      },
+      "outputSlowFrames": 0,
+      "outputSlowBatches": {
+        "frames": 0,
+        "withOwnPacket": 0,
+        "withOtherPacket": 0,
+        "withKnownForeign": 0,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {},
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 0
+      },
+      "allBatches": {
+        "frames": 15000,
+        "withOwnPacket": 15000,
+        "withOtherPacket": 69,
+        "withKnownForeign": 69,
+        "withUnresolved": 1,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {
+          "dwm": 19,
+          "csrss": 1,
+          "System": 49
+        }
+      },
+      "events": 853948,
+      "pairedPackets": 121820,
+      "unmatchedBoundaryEvents": [],
+      "synchronization": {
+        "submissions": 120120,
+        "engineRetirementNotifications": 120120,
+        "explicitWaitCalls": 0,
+        "cap": 8,
+        "peak": 8,
+        "batchWaitCalls": 15015,
+        "mapCalls": 15015,
+        "queueWaitMs": {
+          "samples": 120000,
+          "min": 0,
+          "p50": 0.004999995231628418,
+          "p95": 0.019999980926513672,
+          "max": 0.7450000047683716
+        },
+        "batchFenceMs": {
+          "samples": 15000,
+          "min": 2.39013671875,
+          "p50": 3.420166015625,
+          "p95": 4.449951171875,
+          "max": 48.10498046875
+        },
+        "batchMapMs": {
+          "samples": 15000,
+          "min": 0.099853515625,
+          "p50": 0.25,
+          "p95": 0.35009765625,
+          "max": 15.239990234375
+        },
+        "batchWallMs": {
+          "samples": 15000,
+          "min": 4.7099609375,
+          "p50": 6.195068359375,
+          "p95": 7.244873046875,
+          "max": 52.639892578125
+        },
+        "meanObservedBatchFencePerFrameMs": 0.4376021931966146
+      },
+      "firstP0": {
+        "elapsedSeconds": 0.07206982421875,
+        "nearbyForeignNames": [
+          "System"
+        ]
+      },
+      "firstLongSegmentSeconds": null,
+      "first90SecondsLongSegments": 0,
+      "first99SecondsLongSegments": 0,
+      "initialGpuWindows": [
+        {
+          "startFrame": 0,
+          "endFrame": 299,
+          "gpuP95Ms": 0.288768,
+          "mainP95Ms": 0.236544,
+          "states": [
+            "P0"
+          ]
+        },
+        {
+          "startFrame": 300,
+          "endFrame": 599,
+          "gpuP95Ms": 0.290816,
+          "mainP95Ms": 0.238592,
+          "states": [
+            "P0"
+          ]
+        },
+        {
+          "startFrame": 600,
+          "endFrame": 899,
+          "gpuP95Ms": 0.29184,
+          "mainP95Ms": 0.24064,
+          "states": [
+            "P0"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "variant": "A0",
+      "arm": "S8",
+      "round": 2,
+      "measuredFrames": 120000,
+      "seconds": 511.8046401367188,
+      "mainP95Ms": 0.695296,
+      "gpuP95Ms": 1.0383360000000001,
+      "mainSlowFrames": 467,
+      "longSegments": 12,
+      "longSegmentsWithForeign": 1,
+      "longSegmentsWithUnresolved": 0,
+      "longSegmentsNoOtherPackets": 11,
+      "mainSlowBatches": {
+        "frames": 68,
+        "withOwnPacket": 68,
+        "withOtherPacket": 5,
+        "withKnownForeign": 5,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {
+          "dwm": 5
+        },
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 467
+      },
+      "outputSlowFrames": 116,
+      "outputSlowBatches": {
+        "frames": 102,
+        "withOwnPacket": 102,
+        "withOtherPacket": 102,
+        "withKnownForeign": 102,
+        "withUnresolved": 0,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {
+          "explorer": 3,
+          "dwm": 98,
+          "csrss": 2,
+          "System": 1
+        },
+        "scope": "completion batches, not individual-frame attribution",
+        "memberSlowFrames": 116
+      },
+      "allBatches": {
+        "frames": 15000,
+        "withOwnPacket": 15000,
+        "withOtherPacket": 145,
+        "withKnownForeign": 145,
+        "withUnresolved": 1,
+        "onlyUnresolved": 0,
+        "overlappingKnownNames": {
+          "explorer": 4,
+          "dwm": 119,
+          "System": 20,
+          "csrss": 4
+        }
+      },
+      "events": 859300,
+      "pairedPackets": 122575,
+      "unmatchedBoundaryEvents": [],
+      "synchronization": {
+        "submissions": 120120,
+        "engineRetirementNotifications": 120120,
+        "explicitWaitCalls": 120120,
+        "cap": 8,
+        "peak": 1,
+        "batchWaitCalls": 15015,
+        "mapCalls": 15015,
+        "queueWaitMs": {
+          "samples": 120000,
+          "min": 2.4500000178813934,
+          "p50": 3.6599999964237213,
+          "p95": 4.515000015497208,
+          "max": 49.55000001192093
+        },
+        "batchFenceMs": {
+          "samples": 15000,
+          "min": 0.10498046875,
+          "p50": 0.3701171875,
+          "p95": 0.465087890625,
+          "max": 10.849853515625
+        },
+        "batchMapMs": {
+          "samples": 15000,
+          "min": 0.094970703125,
+          "p50": 0.340087890625,
+          "p95": 0.449951171875,
+          "max": 10.43017578125
+        },
+        "batchWallMs": {
+          "samples": 15000,
+          "min": 24.530029296875,
+          "p50": 33.864990234375,
+          "p95": 37.23486328125,
+          "max": 118.385009765625
+        },
+        "meanObservedBatchFencePerFrameMs": 0.04512901611328125
+      },
+      "firstP0": {
+        "elapsedSeconds": 90.83815014648438,
+        "nearbyForeignNames": [
+          "System",
+          "unresolved"
+        ]
+      },
+      "firstLongSegmentSeconds": 14.97664501953125,
+      "first90SecondsLongSegments": 2,
+      "first99SecondsLongSegments": 2,
+      "initialGpuWindows": [
+        {
+          "startFrame": 0,
+          "endFrame": 299,
+          "gpuP95Ms": 0.9922559999999999,
+          "mainP95Ms": 0.650272,
+          "states": [
+            "P8"
+          ]
+        },
+        {
+          "startFrame": 300,
+          "endFrame": 599,
+          "gpuP95Ms": 1.00864,
+          "mainP95Ms": 0.656352,
+          "states": [
+            "P8"
+          ]
+        },
+        {
+          "startFrame": 600,
+          "endFrame": 899,
+          "gpuP95Ms": 0.9943040000000001,
+          "mainP95Ms": 0.65536,
+          "states": [
+            "P8"
+          ]
+        }
+      ]
+    }
+  ],
+  "initialGpuWindows": [
+    {
+      "index": 1,
+      "variant": "B4",
+      "round": 1,
+      "captureSha256": "3b4884629f179d2964a7533d49c4b48a6f7892e4d4517630ba05d877d31ac9ed",
+      "warmupFrames": 120,
+      "warmupElapsedMs": 160.034912109375,
+      "firstThreeWindows": [
+        {
+          "firstFrame": 0,
+          "lastFrame": 299,
+          "gpu": {
+            "samples": 300,
+            "min": 0.234496,
+            "p50": 0.270336,
+            "p95": 0.28774400000000006,
+            "max": 0.294912
+          },
+          "main": {
+            "samples": 300,
+            "min": 0.18432,
+            "p50": 0.219136,
+            "p95": 0.236544,
+            "max": 0.244736
+          }
+        },
+        {
+          "firstFrame": 300,
+          "lastFrame": 599,
+          "gpu": {
+            "samples": 300,
+            "min": 0.23347199999999999,
+            "p50": 0.269312,
+            "p95": 0.289792,
+            "max": 0.295936
+          },
+          "main": {
+            "samples": 300,
+            "min": 0.183296,
+            "p50": 0.218112,
+            "p95": 0.238592,
+            "max": 0.243712
+          }
+        },
+        {
+          "firstFrame": 600,
+          "lastFrame": 899,
+          "gpu": {
+            "samples": 300,
+            "min": 0.23449599999999998,
+            "p50": 0.270336,
+            "p95": 0.290816,
+            "max": 0.297984
+          },
+          "main": {
+            "samples": 300,
+            "min": 0.183296,
+            "p50": 0.219136,
+            "p95": 0.24064,
+            "max": 0.244736
+          }
+        }
+      ],
+      "firstVsSecondP95Ratio": 0.9929328621908129,
+      "wholePopulationGpu": {
+        "samples": 120000,
+        "min": 0.231424,
+        "p50": 0.269312,
+        "p95": 0.288768,
+        "max": 0.5949439999999999
+      }
+    },
+    {
+      "index": 2,
+      "variant": "A0",
+      "round": 1,
+      "captureSha256": "f5efeab4e958d6b7c1d419619312afd2e6e0118257886842637de68349414dda",
+      "warmupFrames": 120,
+      "warmupElapsedMs": 193.0751953125,
+      "firstThreeWindows": [
+        {
+          "firstFrame": 0,
+          "lastFrame": 299,
+          "gpu": {
+            "samples": 300,
+            "min": 0.23449599999999998,
+            "p50": 0.273408,
+            "p95": 0.8960319999999999,
+            "max": 0.966656
+          },
+          "main": {
+            "samples": 300,
+            "min": 0.183296,
+            "p50": 0.222208,
+            "p95": 0.559168,
+            "max": 0.58368
+          }
+        },
+        {
+          "firstFrame": 300,
+          "lastFrame": 599,
+          "gpu": {
+            "samples": 300,
+            "min": 0.23347199999999999,
+            "p50": 0.269312,
+            "p95": 0.289792,
+            "max": 0.29593600000000003
+          },
+          "main": {
+            "samples": 300,
+            "min": 0.183296,
+            "p50": 0.218112,
+            "p95": 0.238592,
+            "max": 0.244736
+          }
+        },
+        {
+          "firstFrame": 600,
+          "lastFrame": 899,
+          "gpu": {
+            "samples": 300,
+            "min": 0.236544,
+            "p50": 0.27136,
+            "p95": 0.290816,
+            "max": 0.29696
+          },
+          "main": {
+            "samples": 300,
+            "min": 0.18432,
+            "p50": 0.22016,
+            "p95": 0.239616,
+            "max": 0.243712
+          }
+        }
+      ],
+      "firstVsSecondP95Ratio": 3.091983215547703,
+      "wholePopulationGpu": {
+        "samples": 120000,
+        "min": 0.226304,
+        "p50": 0.268288,
+        "p95": 0.288768,
+        "max": 0.966656
+      }
+    },
+    {
+      "index": 5,
+      "variant": "A0",
+      "round": 2,
+      "captureSha256": "5a96cc78a2195bfb3d87bcd2639e3b5f62bcbcce5a3bd9830ec1c2c6326d3e02",
+      "warmupFrames": 120,
+      "warmupElapsedMs": 196.465087890625,
+      "firstThreeWindows": [
+        {
+          "firstFrame": 0,
+          "lastFrame": 299,
+          "gpu": {
+            "samples": 300,
+            "min": 0.23552,
+            "p50": 0.27136,
+            "p95": 0.288768,
+            "max": 0.297984
+          },
+          "main": {
+            "samples": 300,
+            "min": 0.18432,
+            "p50": 0.22016,
+            "p95": 0.237568,
+            "max": 0.24576
+          }
+        },
+        {
+          "firstFrame": 300,
+          "lastFrame": 599,
+          "gpu": {
+            "samples": 300,
+            "min": 0.23552,
+            "p50": 0.269312,
+            "p95": 0.289792,
+            "max": 0.29900800000000005
+          },
+          "main": {
+            "samples": 300,
+            "min": 0.18432,
+            "p50": 0.218112,
+            "p95": 0.238592,
+            "max": 0.244736
+          }
+        },
+        {
+          "firstFrame": 600,
+          "lastFrame": 899,
+          "gpu": {
+            "samples": 300,
+            "min": 0.23552,
+            "p50": 0.27136,
+            "p95": 0.29184,
+            "max": 0.29696
+          },
+          "main": {
+            "samples": 300,
+            "min": 0.18432,
+            "p50": 0.22016,
+            "p95": 0.239616,
+            "max": 0.24576
+          }
+        }
+      ],
+      "firstVsSecondP95Ratio": 0.9964664310954064,
+      "wholePopulationGpu": {
+        "samples": 120000,
+        "min": 0.226304,
+        "p50": 0.269312,
+        "p95": 0.288768,
+        "max": 0.41267200000000004
+      }
+    },
+    {
+      "index": 6,
+      "variant": "B4",
+      "round": 2,
+      "captureSha256": "e0c40e9ef0f91fc4e7d0fff5441703c4da9b98dc61c254c09cc489a0baedb8ad",
+      "warmupFrames": 120,
+      "warmupElapsedMs": 171.35498046875,
+      "firstThreeWindows": [
+        {
+          "firstFrame": 0,
+          "lastFrame": 299,
+          "gpu": {
+            "samples": 300,
+            "min": 0.23347199999999999,
+            "p50": 0.270336,
+            "p95": 0.288768,
+            "max": 0.294912
+          },
+          "main": {
+            "samples": 300,
+            "min": 0.183296,
+            "p50": 0.219136,
+            "p95": 0.236544,
+            "max": 0.243712
+          }
+        },
+        {
+          "firstFrame": 300,
+          "lastFrame": 599,
+          "gpu": {
+            "samples": 300,
+            "min": 0.23449599999999998,
+            "p50": 0.269312,
+            "p95": 0.290816,
+            "max": 0.29696
+          },
+          "main": {
+            "samples": 300,
+            "min": 0.183296,
+            "p50": 0.218112,
+            "p95": 0.238592,
+            "max": 0.244736
+          }
+        },
+        {
+          "firstFrame": 600,
+          "lastFrame": 899,
+          "gpu": {
+            "samples": 300,
+            "min": 0.23449599999999998,
+            "p50": 0.270336,
+            "p95": 0.29184,
+            "max": 0.29593600000000003
+          },
+          "main": {
+            "samples": 300,
+            "min": 0.183296,
+            "p50": 0.22016,
+            "p95": 0.24064,
+            "max": 0.244736
+          }
+        }
+      ],
+      "firstVsSecondP95Ratio": 0.9929577464788732,
+      "wholePopulationGpu": {
+        "samples": 120000,
+        "min": 0.231424,
+        "p50": 0.269312,
+        "p95": 0.289792,
+        "max": 0.40140800000000004
+      }
+    }
+  ],
+  "conclusion": "Bounded batch completion removes the observed sustained threshold slow segments on both A0 and B4 in this long diagnostic. The first 300 frames of one A0/B8 run remain transient; shared GPU warmup calibration and a fresh baseline are still required.",
+  "nextStep": "Version the common bounded GPU sampling protocol, independently calibrate and freeze a shared GPU warmup across both variants and cases, then collect a fresh three-cohort baseline under the original 5% regression, 20% spread and 10% CV budgets.",
+  "limits": [
+    "All data are retained; 1.2 ms main-pass and 0.4 ms output thresholds describe diagnostics only.",
+    "Both arms use whole-batch submit-to-fence bounds; external overlap is not per-frame attribution.",
+    "B8 has 99-100 seconds of exposure versus 510-516 seconds for S8; this is not indefinite stability proof.",
+    "Power states are observed, not locked; this experiment does not isolate a single driver-internal mechanism.",
+    "The changed sampling synchronization needs its own common calibration and fresh acceptance population; diagnostic results are not a baseline."
+  ],
+  "matrixBindingCount": 183,
+  "contextBindingCount": 39,
+  "offlineProcessing": "A serial derived decoder was replaced by three independent decoder groups after capture 0. The partial derived capture 1 is retained separately; only complete 0-7 extractions enter this review. Original ETLs and captures are unchanged.",
+  "bindings": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/audit-gpu-batch-long.mjs",
+      "sha256": "6052a23c457437ad34d1d9807ae7380e19a4a646d431ebafbf4c5941c9b92991"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/audit-batch-long-contexts.mjs",
+      "sha256": "51e180eb23374fdae1c71bfcce460689f295c81869d9c348d914332553becafc"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/audit-b8-startup.mjs",
+      "sha256": "d137369bf20db9ab261a9328bfa0067b2a23ea2d4c4dcb053e911c4adaee9803"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/record-batch-long-result.mjs",
+      "sha256": "c43a013a4f4f7ce0bdbfdbf20b2c149eb4e942ea2c65096b8e334acc28b29e99"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/analyze-batch-long-full-context.mjs",
+      "sha256": "0e6aebdad8d810c56c9f6c4cafc919823683028372783b64c1f34858aea4ae07"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/review-batch-long-contexts.mjs",
+      "sha256": "9dbda47b279b88339424ef8db68bbaf8b13129590da4f7bfebc3d992c8c33d8f"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/extract-batch-long-scheduler.ps1",
+      "sha256": "e4b747792fde1da19a019a752ea2b7e483664d5a075a26f07411831c964948d1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-scheduler-fast-decoder.cs",
+      "sha256": "6205d0888491cb381ef9cf46d4b2fe3f2c217919c60b120892068f67d02239f0"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z/long-context-audit.json",
+      "sha256": "f6b7022d7228c1df5f1854255339e7d90aa2881cc61f79bd222754ee9b2bceaf"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z/b8-startup-audit.json",
+      "sha256": "9b8371a4bceb553fa9cac6d878c1894da0f4aea607bf946435d75da741207376"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z/independent-audit.log",
+      "sha256": "b34db94f5f16d85e5c0a85c0093595763128a0685e4288b6a6380451cb707042"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z/long-context-audit.log",
+      "sha256": "7b6c9e7d836c71272bdfcc04ac589dcd474fd837e7e24a969f77dd117d2c0d33"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z/analysis-policy-tests.log",
+      "sha256": "d7e9c2553978f807df49a2efec3900b10a23a6a05047b17b6d4fb9c2d64d1c23"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z/scheduler-extraction.log",
+      "sha256": "87b057329d5483a537e64b84408625acfdd28a92155ce2b474e4bf27ccbbdd24"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z/scheduler-extraction-group-0.log",
+      "sha256": "753307c88ca511132a099e6447a9b8848cab3862c5c8b35f30df28ee007969d1"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z/scheduler-extraction-group-1.log",
+      "sha256": "7db9c3a57129114aa617e5f8bb3dd3d311234b12e071101aeb79115e588b4877"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z/scheduler-extraction-group-2.log",
+      "sha256": "6c896d48eb08f92ef449d36524dd467a2805e283bf1cbeed671ffbeeef73fe2d"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z/host-recovery-review.json",
+      "sha256": "d1ac2cb0df71efb7db69e99c731c82b875c087ed51dbabfbe0da84387faadf44"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z/completion-notice.json",
+      "sha256": "52377de71a152a71c615de95fb6ae3e7d52d3f1dc0da641c58ddc85bc415f47a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z/power-state.json",
+      "sha256": "3c2af77c02b9bde5ab11479e0d818a0f9de06a864ab00cff819e5b253468782a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-closed-20261011T234950Z/gpu-power-state.json",
+      "sha256": "4a5ca8772534bbfcb8e5b8f785cf4e2d9b41c8dbc0ee848e73ede481284c347c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/gpu-batch-long-safe-dispatch-20261011T234947358Z-0e4058/dispatch-completion.json",
+      "sha256": "2830efde440232443c1e2e2f8bbfdee62df5effa48a38b6d34e36272b299ea23"
+    }
+  ]
+}

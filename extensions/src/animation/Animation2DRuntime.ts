@@ -35,7 +35,8 @@ import {
   type VectorStrokePathComponent,
 } from './AnimationPathTessellator.js';
 import { AnimationVisual2D } from './AnimationVisual2D.js';
-import { AnimationTextRasterizer } from './AnimationTextRasterizer.js';
+import { AnimationTextRasterizer, type AnimationOutlineFont } from './AnimationTextRasterizer.js';
+import { loadAnimationOutlineFont } from './AnimationOpenType.js';
 import { AnimationAudioClip } from './AnimationAudioClip.js';
 import { createParticle2DEmitter } from './Particle2DDescriptorAdapter.js';
 
@@ -113,7 +114,7 @@ export class Animation2DRuntime {
   private readonly _fontLoads = new Map<string, {
     state: 'loading' | 'loaded' | 'failed';
     readonly rasterizers: Set<AnimationTextRasterizer>;
-    data?: ArrayBuffer;
+    outlineFont?: AnimationOutlineFont;
   }>();
   private readonly _fontFaces: FontFace[] = [];
   private readonly _expressionDataLoads = new Map<string, {
@@ -579,8 +580,8 @@ export class Animation2DRuntime {
     const key = `${descriptor.resource}:${descriptor.family}:${descriptor.style}:${descriptor.weight}`;
     const existing = this._fontLoads.get(key);
     if (existing) {
-      if (existing.state === 'loaded' && existing.data) {
-        rasterizer.setFontData(descriptor.family, descriptor.style, descriptor.weight, existing.data);
+      if (existing.state === 'loaded') {
+        rasterizer.setOutlineFont(descriptor.family, descriptor.style, descriptor.weight, existing.outlineFont);
       }
       else if (existing.state === 'loading') existing.rasterizers.add(rasterizer);
       return;
@@ -596,6 +597,11 @@ export class Animation2DRuntime {
     }
     this._pendingResourceCount++;
     let retainedHandle: AssetHandle<ArrayBuffer> | null = null;
+    const releaseRetainedHandle = (): void => {
+      const handle = retainedHandle;
+      retainedHandle = null;
+      handle?.release();
+    };
     void this._assetManager.load<ArrayBuffer>(
       `Animation2D.font:${resource.integrity ?? resource.uri}`,
       async signal => {
@@ -607,13 +613,18 @@ export class Animation2DRuntime {
       { signal: this._abortController.signal },
     ).then(async handle => {
       retainedHandle = handle;
-      if (this._destroyed) { handle.release(); return; }
+      if (this._destroyed) { releaseRetainedHandle(); return; }
+      // Module downloads cannot be aborted, but font asset ownership can end
+      // immediately when the runtime is removed, even while import is pending.
+      this._abortController.signal.addEventListener('abort', releaseRetainedHandle, { once: true });
       const face = new FontFace(descriptor.family, handle.value, {
         style: descriptor.style,
         weight: String(descriptor.weight),
       });
       await face.load();
-      if (this._destroyed) { handle.release(); return; }
+      if (this._destroyed) return;
+      const outlineFont = await loadAnimationOutlineFont(handle.value);
+      if (this._destroyed) return;
       document.fonts.add(face);
       this._fontFaces.push(face);
       this._assetHandles.push(handle);
@@ -621,14 +632,14 @@ export class Animation2DRuntime {
       const current = this._fontLoads.get(key);
       if (current) {
         current.state = 'loaded';
-        current.data = handle.value;
+        if (outlineFont) current.outlineFont = outlineFont;
         for (const target of current.rasterizers) {
-          target.setFontData(descriptor.family, descriptor.style, descriptor.weight, handle.value);
+          target.setOutlineFont(descriptor.family, descriptor.style, descriptor.weight, outlineFont);
         }
         current.rasterizers.clear();
       }
     }).catch(() => {
-      retainedHandle?.release();
+      releaseRetainedHandle();
       if (!this._destroyed) {
         const current = this._fontLoads.get(key);
         if (current) {
@@ -638,6 +649,7 @@ export class Animation2DRuntime {
         this._failedResourceCount++;
       }
     }).finally(() => {
+      this._abortController.signal.removeEventListener('abort', releaseRetainedHandle);
       this._pendingResourceCount = Math.max(0, this._pendingResourceCount - 1);
     });
   }

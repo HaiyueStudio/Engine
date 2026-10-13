@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "status": "driver-settings-save-failure-confirmed-repair-awaits-user",
+  "checkedAt": "2026-10-09T03:53:01.178Z",
+  "performanceQualified": false,
+  "regressionBudget": 0.05,
+  "uiFailure": "Access denied; unable to apply selected settings to system",
+  "driver": {
+    "DeviceName": "NVIDIA GeForce GTX 1070 Ti",
+    "DriverVersion": "32.0.15.6094",
+    "DriverDate": "2024-08-14T08:00:00+08:00",
+    "InfName": "oem39.inf",
+    "DriverProviderName": "NVIDIA",
+    "IsSigned": true,
+    "DeviceID": "PCI\\VEN_10DE&DEV_1B82&SUBSYS_243619DA&REV_A1\\4&22817009&0&0008"
+  },
+  "apiBefore": {
+    "before": {
+      "Found": false,
+      "ProfileName": "Google Chrome",
+      "ApplicationName": "chrome.exe",
+      "ApplicationCount": 1,
+      "SettingId": 274197361,
+      "Type": 0,
+      "Location": 0,
+      "CurrentPredefined": 0,
+      "PredefinedValid": 0,
+      "PredefinedValue": 0,
+      "Value": 0
+    },
+    "exportStatus": -1,
+    "saveUnchangedStatus": -1
+  },
+  "apiAfterServiceRestart": {
+    "before": {
+      "Found": false,
+      "ProfileName": "Google Chrome",
+      "ApplicationName": "chrome.exe",
+      "ApplicationCount": 1,
+      "SettingId": 274197361,
+      "Type": 0,
+      "Location": 0,
+      "CurrentPredefined": 0,
+      "PredefinedValid": 0,
+      "PredefinedValue": 0,
+      "Value": 0
+    },
+    "exportStatus": -1,
+    "saveUnchangedStatus": -1
+  },
+  "fileIo": {
+    "recordedEvents": 13153,
+    "matchedDrsCreates": 29,
+    "failedDrsCreates": 0,
+    "saveLockExclusiveOpenPassed": true,
+    "exportFileOpenObserved": false,
+    "traceStopped": true,
+    "interpretation": "No observed DRS file-access denial; this does not establish a corrupt database or exclude restrictions in unobserved channels."
+  },
+  "profileRead": {
+    "profiles": 7192,
+    "settings": 50647,
+    "countDifferences": 23,
+    "interpretation": "Public enumeration count differences may include hidden settings; not evidence permitting removal."
+  },
+  "backup": {
+    "configurationFiles": [
+      {
+        "name": "nvdrsdb0.bin",
+        "sha256": "CEF9AC0C71713386994BF6401ABB3DB24FDA3B5101B3BC089DD8353634F5DA9E",
+        "unchanged": true,
+        "attributes": "Archive",
+        "acl": "O:SYG:SYD:AI(A;ID;FA;;;WD)(A;ID;FA;;;AC)"
+      },
+      {
+        "name": "nvdrsdb1.bin",
+        "sha256": "C74A86F82633FD3B8B7BD3B9C1A82E813C446D21712B21F553E4B17292320886",
+        "unchanged": true,
+        "attributes": "Archive",
+        "acl": "O:SYG:SYD:AI(A;ID;FA;;;WD)(A;ID;FA;;;AC)"
+      },
+      {
+        "name": "nvdrssel.bin",
+        "sha256": "4BF5122F344554C53BDE2EBB8CD2B7E3D1600AD631C385A5D7CCE23C7785459A",
+        "unchanged": true,
+        "attributes": "Archive",
+        "acl": "O:SYG:SYD:AI(A;ID;FA;;;WD)(A;ID;FA;;;AC)"
+      },
+      {
+        "name": "update.bin",
+        "sha256": "6BAEF1833EFCFDE84C4CB51681B6B1205BC2AA3BF2AA2420716EDED5F540332C",
+        "unchanged": true,
+        "attributes": "Archive",
+        "acl": "O:BAG:SYD:AI(A;ID;FA;;;WD)(A;ID;FA;;;AC)"
+      }
+    ],
+    "driverFiles": 315,
+    "driverBytes": 1882219579,
+    "scope": "Installed display driver package and raw DRS files; not full NVIDIA application backup or guaranteed cross-version database restore"
+  },
+  "restoration": {
+    "chrome": {
+      "Found": false,
+      "ProfileName": "Google Chrome",
+      "ApplicationName": "chrome.exe",
+      "ApplicationCount": 1,
+      "SettingId": 274197361,
+      "Type": 0,
+      "Location": 0,
+      "CurrentPredefined": 0,
+      "PredefinedValid": 0,
+      "PredefinedValue": 0,
+      "Value": 0
+    },
+    "cpu": {
+      "schemaVersion": 1,
+      "schemeId": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "acLineStatus": 1,
+      "minimumAcPercent": 5,
+      "maximumAcPercent": 100,
+      "minimumDcPercent": 5,
+      "maximumDcPercent": 100
+    },
+    "services": [
+      {
+        "Name": "NvContainerLocalSystem",
+        "State": "Running",
+        "StartMode": "Auto"
+      },
+      {
+        "Name": "NVDisplay.ContainerLocalSystem",
+        "State": "Running",
+        "StartMode": "Auto"
+      },
+      {
+        "Name": "WSearch",
+        "State": "Stopped",
+        "StartMode": "Disabled"
+      }
+    ]
+  },
+  "proposal": {
+    "version": "582.78",
+    "method": "Official installer, Custom/Advanced, Perform a clean installation; restart after user has saved work",
+    "authorization": "pending",
+    "impact": "Reset custom driver 3D settings across applications and replace installed display driver",
+    "downloadsAndExtraction": "D drive; verify C drive capacity before install",
+    "performance": "Repeat correctness and common-condition validation; rebuild both A0/B4 baselines on same new driver, never combine old/new drivers; keep 5% budget",
+    "sources": [
+      "https://us.download.nvidia.com/Windows/582.78/582.78-win11-win10-release-notes.pdf",
+      "https://nvidia.custhelp.com/app/answers/detail/a_id/10/kw/setup"
+    ]
+  },
+  "bindings": [
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/backup-manifest.json",
+      "sha256": "c78d0515d49add3391cd6165c2cc66c381aea88862d51f1c2672edfbdf45d4e5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/directory-acl.txt",
+      "sha256": "8a8afca11de8511e082d63a0563981154e2d7a3c63236267598c9fb1c7fd244e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/nvdrsdb0.bin",
+      "sha256": "cef9ac0c71713386994bf6401abb3db24fda3b5101b3bc089dd8353634f5da9e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/nvdrsdb1.bin",
+      "sha256": "c74a86f82633fd3b8b7bd3b9c1a82e813c446d21712b21f553e4b17292320886"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/nvdrssel.bin",
+      "sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/update.bin",
+      "sha256": "6baef1833efcfde84c4cb51681b6b1205bc2aa3bf2aa2420716eded5f540332c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/driver-backup-manifest.json",
+      "sha256": "640eeede63e052bea22edd2f09ef5623691b9433f65b9ef94e44e7dac20aab5b"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/driver-export.log",
+      "sha256": "d7d96d5b35bcbd10b5e14b3a8d8923136fcc356f7e11fb7fcef33ade331f00bb"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/installed-driver.json",
+      "sha256": "0e05c1c999966268c2b1b41491cc059b29f434e29b8f6ba0cfc5fc5c26f0de2c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/control-panel-access-denied.png",
+      "sha256": "3adedc7e4c0430ec7c0493011040179d3dacb2530387b850df24989335ff86dc"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/nvapi-drs-probe.cs",
+      "sha256": "2b8a45d33dac015a072c056ed1b599b1e7e1379f092ffce18d17a32b62841ea4"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/nvapi-drs-audit.cs",
+      "sha256": "276f458da9b9c2424b489e5ec7340c640a8185292beb7d3224a5000acb8bb739"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/api-probe.ps1",
+      "sha256": "38c1cfdf160dc07865c80f1d38872f8d7261a503629fff9c60cb4f80e985d0b5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/api-probe-before-restart.json",
+      "sha256": "52cbac3f361d6318e58ea7951b2b01d80d35f68cda0cdc2556fd7f315131da20"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/api-probe-after-restart.json",
+      "sha256": "52cbac3f361d6318e58ea7951b2b01d80d35f68cda0cdc2556fd7f315131da20"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/profiles-audit.json",
+      "sha256": "9050e83afd72d33fae509c084f42a0b7f92f43e70caf7c410f1a3626b570adbb"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/file-io.etl",
+      "sha256": "a5c60721a8fdac0afec9116da18d5a55f7197ef9ffd904c8503ed25ef64169c8"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/file-io-correlated.json",
+      "sha256": "c831dceb4b84a525b039c1159bf548ad8cda377f8442ebffee2df2093906aa35"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/display-service-restart.json",
+      "sha256": "bf740f7ca0c60054a581591abc709323569837821826bfddce7b9f4f54fbb0d4"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/drs-final-verification.json",
+      "sha256": "c2635fa3d327f0081af6fb00f1066ee42c50a986c82dfd53cde9d4ceb125c7b7"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/chrome-final.json",
+      "sha256": "c7c58f095ed3b360bb8620e49747a7fd537841783c4bd1d48bfb2485d119eda5"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/cpu-power-final.json",
+      "sha256": "cd7a8acbd1817b8620407e9f3e7fb0536ce8eb5fc6a32311cec11b88fb4c524c"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/services-final.json",
+      "sha256": "f1a3dbb24aeced8cc6c84a242925f5509b5b3cfa143fcd770731642229c75e03"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/g09/nvidia-drs-diagnostic-20261009T033912Z/file-open-check.json",
+      "sha256": "9d47b7ec598e376381c314c06e185f5ca774f21f9fb3d622a494eb4786a7173b"
+    }
+  ]
+}

@@ -2,8 +2,9 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { cpus, hostname } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { validateFrameGraphGpuPolicy } from './framegraph-gpu-policy.mjs';
 const exec = promisify(execFile);
-export async function captureFrameGraphWindowsHost(powerPolicy) {
+export async function captureFrameGraphWindowsHost(powerPolicy, gpuPolicy) {
   const before = cpus(); await new Promise(r => setTimeout(r, 1000)); const after = cpus();
   const sum = rows => rows.reduce((s, c) => { for (const [k, v] of Object.entries(c.times)) { s.total += v; if (k === 'idle') s.idle += v; } return s; }, { total: 0, idle: 0 });
   const x = sum(before), y = sum(after);
@@ -11,15 +12,16 @@ export async function captureFrameGraphWindowsHost(powerPolicy) {
   const telemetry = await exec('nvidia-smi', [`--query-gpu=${fields.join(',')}`, '--format=csv,noheader,nounits'], { windowsHide: true });
   const power = await exec('powercfg', ['/getactivescheme'], { windowsHide: true, encoding: 'buffer' });
   const powerSettings = powerPolicy ? JSON.parse((await exec('powershell.exe', ['-NoProfile', '-File', fileURLToPath(new URL('./framegraph-power-observation.ps1', import.meta.url))], { windowsHide: true })).stdout.replace(/^\uFEFF/, '')) : undefined;
+  const gpuPowerPolicy = gpuPolicy ? JSON.parse((await exec('powershell.exe', ['-NoProfile', '-File', fileURLToPath(new URL('./framegraph-gpu-power-observation.ps1', import.meta.url))], { windowsHide: true })).stdout.replace(/^\uFEFF/, '')) : undefined;
   const rows = telemetry.stdout.trim().split(/\r?\n/).map(line => line.split(',').map(v => v.trim()));
   return { schemaVersion: 1, observedAt: new Date().toISOString(), hostname: hostname(), platform: process.platform,
     cpu: { model: after[0].model.trim(), logicalProcessors: after.length, reportedMHz: after.map(c => c.speed), loadPercent: 100 * (1 - (y.idle - x.idle) / (y.total - x.total)), thermalStatus: 'unavailable' },
     gpu: { fields, rows, stdout: telemetry.stdout },
     powerScheme: { id: power.stdout.toString().match(/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}/i)?.[0], rawBase64: power.stdout.toString('base64') },
-    ...(powerSettings ? { powerSettings } : {}),
+    ...(powerSettings ? { powerSettings } : {}), ...(gpuPowerPolicy ? { gpuPowerPolicy } : {}),
     scope: 'Before/after observations only; not continuous clock stability or CPU thermal qualification' };
 }
-export function validateFrameGraphWindowsHost(samples, runner, powerPolicy) {
+export function validateFrameGraphWindowsHost(samples, runner, powerPolicy, gpuPolicy) {
   if (!Array.isArray(samples) || samples.length !== 2) throw Error('Before/after Windows host observations required');
   for (const sample of samples) {
     if (sample.hostname !== runner.hostname || sample.platform !== runner.platform || sample.cpu.model !== runner.cpuModel ||
@@ -28,6 +30,7 @@ export function validateFrameGraphWindowsHost(samples, runner, powerPolicy) {
     if (powerPolicy && (!sample.powerSettings || sample.powerSettings.schemaVersion !== 1 || sample.powerSettings.schemeId !== sample.powerScheme.id ||
         Object.entries(powerPolicy).some(([key, value]) => sample.powerSettings[key] !== value)))
       throw Error('Controlled Windows power conditions missing or changed (AC and CPU minimum/maximum 100% required)');
+    validateFrameGraphGpuPolicy(sample.gpuPowerPolicy, gpuPolicy);
     const rows = sample.gpu.rows;
     if (rows.length !== 1 || rows[0].length !== 8 || rows[0][0] !== runner.gpuName || rows[0][1] !== runner.driverVersion || rows[0].slice(2, 5).some(v => !Number.isFinite(Number(v))) || rows[0].slice(5).some(v => v !== 'Not Active'))
       throw Error('Registered NVIDIA identity mismatch or observed thermal/power-brake slowdown');

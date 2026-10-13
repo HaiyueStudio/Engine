@@ -1,0 +1,450 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "generatedAt": "2026-10-11T08:16:44.603Z",
+  "sourceState": {
+    "revision": "a96b64f76eb4d24b1abe7f66f01c8e82a375059b",
+    "workingTreeDirty": true
+  },
+  "contract": "docs/for-ai/adr/0123-animation-opentype-on-demand.md",
+  "scope": "Animation text loading and package delivery; not G09 performance qualification",
+  "inputs": [
+    {
+      "path": "extensions/src/animation/AnimationOpenType.ts",
+      "sha256": "bdae613e3b49cffb17eff3f0abec5e917b660e86643863d0a877608221ce4518"
+    },
+    {
+      "path": "extensions/src/animation/Animation2DRuntime.ts",
+      "sha256": "5e46ff15f09999687ee5d1b65c38366b34abb5b7e98b54d35a05d487aba0cdcc"
+    },
+    {
+      "path": "extensions/src/animation/AnimationTextRasterizer.ts",
+      "sha256": "a859af97c2526ad40f2b14c1f0cec74c63b3e40cd31925c81392f85cd29a84f0"
+    },
+    {
+      "path": "extensions/test/animation-opentype-loading.test.mjs",
+      "sha256": "e0da356c4ed30aa58c0782f880422b48dfe85c6001f6994bd31a5ea7eca25cf0"
+    },
+    {
+      "path": "extensions/test/fixtures/animation-opentype-loading.mjs",
+      "sha256": "c70be404aa867fd3ad79e511ca71813ba104895eebb22686a436440420e8f55c"
+    },
+    {
+      "path": "extensions/test/animation-runtime.test.mjs",
+      "sha256": "0ca996258619193f179cbfa12ac39d3966a3cd012a0b1635075663d3085b698f"
+    },
+    {
+      "path": "extensions/test/animation-text-selector-runtime.test.mjs",
+      "sha256": "787d457e725e24441ab5c7a1a8c7d01947677bda3cefbd18d0f9c99cb73d75cf"
+    },
+    {
+      "path": "scripts/engine-package-loading-policy.mjs",
+      "sha256": "d6b81c27855dbd822f27c2cec841cc1ac9ea65a2dbbdf938d8c2498f75566c84"
+    },
+    {
+      "path": "scripts/engine-package-policy.mjs",
+      "sha256": "7105b1dbf7902501e7da08e24b45cfaf88484f3d725a54a12edca783c7873781"
+    },
+    {
+      "path": "scripts/engine-package-policy.test.mjs",
+      "sha256": "bc47b4e213198a793e23239c5f4847f2abf51dd0907dc1f81c55ed0810773797"
+    },
+    {
+      "path": "scripts/verify-engine-package.mjs",
+      "sha256": "b814d8f608bdc16b44f316233cf2c2c58633a73275db1aeb5ecf079840820eba"
+    },
+    {
+      "path": "scripts/browser-gates/verify-animation-font-loading.mjs",
+      "sha256": "6406616944c7211952a9e93d9ff2e05c039d2b08a0022370a68e2ee9cbeb44a2"
+    },
+    {
+      "path": "scripts/browser-gates/animation-font-loading-fixture.mjs",
+      "sha256": "c9c18d3d50ee741ebaec4e7932066e920177160daef7596ee48c0425b4c564da"
+    },
+    {
+      "path": "config/engine-package-budget.json",
+      "sha256": "7df4fad62e2c69de66087621ecd0b5665f626598ec38ce13294fd9e737b7c74e"
+    },
+    {
+      "path": "package.json",
+      "sha256": "ad56fdc68984bf0107cae47b0dd59eafc0fc14214a0fae255b754f1c12471d07"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "a08d91eefd539cd37280b90a20f1054e0c4c27bbdc5c8a68bf13fd41c2cbf924"
+    },
+    {
+      "path": "extensions/package.json",
+      "sha256": "d6eaac5cbe9ad331df1699ff3c52986feda72e3e114bd75bb384224a8fe8d87e"
+    }
+  ],
+  "consumers": [
+    {
+      "id": "extensions-animation",
+      "beforeInitialGzipBytes": 223053,
+      "initialGzipBytes": 125830,
+      "deferredGzipBytes": 98785,
+      "totalSplitGzipBytes": 224615,
+      "fullInlineGzipBytes": 224586,
+      "initialReductionPercent": 43.59,
+      "maxInitialGzipBytes": 145000,
+      "unchangedFullBudget": 245000
+    },
+    {
+      "id": "extensions-hya-state-machine",
+      "beforeInitialGzipBytes": 230623,
+      "initialGzipBytes": 133401,
+      "deferredGzipBytes": 98785,
+      "totalSplitGzipBytes": 232186,
+      "fullInlineGzipBytes": 232101,
+      "initialReductionPercent": 42.16,
+      "maxInitialGzipBytes": 153500,
+      "unchangedFullBudget": 255000
+    }
+  ],
+  "extensionsPackage": {
+    "fileCount": 203,
+    "packedBytes": 530638,
+    "unpackedBytes": 2718833,
+    "sha256": "e19de54f2c47f5e4d2d9e097757ae6b34aea7659f6d714cb77999a6529c82549"
+  },
+  "originalByteBudgetsUnchanged": true,
+  "publicTypeEntrypoints": 66,
+  "tests": {
+    "perWorkspace": [
+      135,
+      775,
+      107,
+      444,
+      7
+    ],
+    "total": 1468,
+    "extensions": 444,
+    "builtExamples": 98
+  },
+  "browser": {
+    "status": "passed",
+    "cases": [
+      {
+        "kind": "plain",
+        "paintedPixels": 1576,
+        "mismatchedChannels": 0
+      },
+      {
+        "kind": "styled",
+        "paintedPixels": 1596,
+        "mismatchedChannels": 0
+      },
+      {
+        "kind": "selector",
+        "paintedPixels": 1652,
+        "mismatchedChannels": 0
+      }
+    ],
+    "parserRequests": 1,
+    "releasedHandles": 1,
+    "residualFontFaces": 0,
+    "browserEvidence": {
+      "product": "Chrome/154.0.8037.99",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "url": "http://127.0.0.1:50637/artifacts/animation-font-loading/2026-10-11T08-14-56-633Z/index.html?",
+      "angleBackend": "d3d11",
+      "nativeBackend": true
+    }
+  },
+  "checks": [
+    {
+      "step": "extensions-typecheck-final",
+      "arguments": [
+        "run",
+        "typecheck",
+        "-w",
+        "./extensions"
+      ],
+      "startedAt": "2026-10-11T08:00:09.454Z",
+      "finishedAt": "2026-10-11T08:00:26.031Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/extensions-typecheck-final.log",
+        "sha256": "67af9b05f283186565497d9f1bf334ef59a043f6d099243e687b083410b203cf"
+      }
+    },
+    {
+      "step": "extensions-test-final",
+      "arguments": [
+        "test",
+        "-w",
+        "./extensions"
+      ],
+      "startedAt": "2026-10-11T08:00:26.034Z",
+      "finishedAt": "2026-10-11T08:01:41.839Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/extensions-test-final.log",
+        "sha256": "8b883522981a6ca38e1a624c0d65a7f1da27735ee319ce9b16262ce85a1a6100"
+      }
+    },
+    {
+      "step": "browser",
+      "arguments": [
+        "run",
+        "verify:animation-font-loading"
+      ],
+      "startedAt": "2026-10-11T08:02:34.109Z",
+      "finishedAt": "2026-10-11T08:03:00.276Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/browser.log",
+        "sha256": "bfbe8d7af469087f92f3db208c9b13e6679a71b217124d4ed5208db0700616b3"
+      }
+    },
+    {
+      "step": "typecheck",
+      "arguments": [
+        "run",
+        "typecheck"
+      ],
+      "startedAt": "2026-10-11T08:03:00.279Z",
+      "finishedAt": "2026-10-11T08:04:17.284Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/typecheck.log",
+        "sha256": "2157397181dbc6005e8fc5c81dfb9a67d69f9285ccbc168f735828898cba71a3"
+      }
+    },
+    {
+      "step": "test",
+      "arguments": [
+        "test"
+      ],
+      "startedAt": "2026-10-11T08:04:17.285Z",
+      "finishedAt": "2026-10-11T08:07:59.707Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/test.log",
+        "sha256": "43473cd8983d3316d946751ac1685b3331dd599d6ecedb9fb5fa6eba4dfa0ac8"
+      }
+    },
+    {
+      "step": "build",
+      "arguments": [
+        "run",
+        "build"
+      ],
+      "startedAt": "2026-10-11T08:07:59.708Z",
+      "finishedAt": "2026-10-11T08:12:05.213Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/build.log",
+        "sha256": "565a0ca7094bfcf7c740ffc24f4543632c8e9857788accf283ba9882122d1215"
+      }
+    },
+    {
+      "step": "public-packages",
+      "arguments": [
+        "run",
+        "verify:engine-package"
+      ],
+      "startedAt": "2026-10-11T08:12:05.214Z",
+      "finishedAt": "2026-10-11T08:14:10.868Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/public-packages.log",
+        "sha256": "b95d28061dd8d478b86a46cff6aba36412fc9948cf1a29ec4a75443a0ca9f2d2"
+      }
+    },
+    {
+      "step": "boundaries",
+      "arguments": [
+        "run",
+        "check:boundaries"
+      ],
+      "startedAt": "2026-10-11T08:01:02.426Z",
+      "finishedAt": "2026-10-11T08:01:11.525Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/boundaries.log",
+        "sha256": "497ebec50efbaf483c1895f4a4db9b37d81faf6a334660c104492fccab50e9e8"
+      }
+    },
+    {
+      "step": "api",
+      "arguments": [
+        "run",
+        "api:check"
+      ],
+      "startedAt": "2026-10-11T08:01:11.529Z",
+      "finishedAt": "2026-10-11T08:01:12.864Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/api.log",
+        "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+      }
+    },
+    {
+      "step": "docs",
+      "arguments": [
+        "run",
+        "docs:check"
+      ],
+      "startedAt": "2026-10-11T08:01:12.864Z",
+      "finishedAt": "2026-10-11T08:01:14.404Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/docs.log",
+        "sha256": "4ac24847544ed2eba8aa56379804ebbaaf589e1a8c46a900b68655f47b34fc15"
+      }
+    },
+    {
+      "step": "release-policy-final",
+      "arguments": [
+        "run",
+        "release:policy:test"
+      ],
+      "startedAt": "2026-10-11T08:01:54.073Z",
+      "finishedAt": "2026-10-11T08:02:08.498Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/release-policy-final.log",
+        "sha256": "d62b760c372b3cf482c948d00636f0bdcb4df140ab1a0555d80bb43af8d1f1e0"
+      }
+    },
+    {
+      "step": "package-policy-final",
+      "arguments": [
+        "--test",
+        "scripts/engine-package-policy.test.mjs"
+      ],
+      "startedAt": "2026-10-11T08:14:28.828Z",
+      "finishedAt": "2026-10-11T08:14:29.612Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/package-policy-final.log",
+        "sha256": "b861abd4c2897160549d4659ebd2d525340f7d3519539eb62c7a6aa9e1416fc2"
+      }
+    },
+    {
+      "step": "typecheck-final",
+      "arguments": [
+        "run",
+        "typecheck",
+        "-w",
+        "./extensions"
+      ],
+      "startedAt": "2026-10-11T08:14:29.614Z",
+      "finishedAt": "2026-10-11T08:14:47.838Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/typecheck-final.log",
+        "sha256": "67af9b05f283186565497d9f1bf334ef59a043f6d099243e687b083410b203cf"
+      }
+    },
+    {
+      "step": "compile-font-tests-final",
+      "arguments": [
+        "run",
+        "build:animation-runtime-tests",
+        "-w",
+        "./extensions"
+      ],
+      "startedAt": "2026-10-11T08:14:47.839Z",
+      "finishedAt": "2026-10-11T08:14:52.374Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/compile-font-tests-final.log",
+        "sha256": "b6b26c749e6da46686f8b19030308563cea37e2414ad1195410aa3b6377c799a"
+      }
+    },
+    {
+      "step": "font-tests-final",
+      "arguments": [
+        "--test",
+        "extensions/test/animation-opentype-loading.test.mjs",
+        "extensions/test/animation-text-selector-runtime.test.mjs",
+        "extensions/test/animation-runtime.test.mjs"
+      ],
+      "startedAt": "2026-10-11T08:14:52.375Z",
+      "finishedAt": "2026-10-11T08:14:56.030Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/font-tests-final.log",
+        "sha256": "3ef9e87635fcdbac81a85ec7c1d494c550da199b49ee339d4b135c1ea682008c"
+      }
+    },
+    {
+      "step": "browser-final",
+      "arguments": [
+        "scripts/browser-gates/verify-animation-font-loading.mjs"
+      ],
+      "startedAt": "2026-10-11T08:14:56.030Z",
+      "finishedAt": "2026-10-11T08:15:01.407Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/browser-final.log",
+        "sha256": "2337b4222ab066dafa36f4b117bd621e46a07c08733cd8553fd0acb3e07b2141"
+      }
+    },
+    {
+      "step": "api-final",
+      "arguments": [
+        "run",
+        "api:check"
+      ],
+      "startedAt": "2026-10-11T08:15:01.408Z",
+      "finishedAt": "2026-10-11T08:15:02.576Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/api-final.log",
+        "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+      }
+    },
+    {
+      "step": "docs-final",
+      "arguments": [
+        "run",
+        "docs:check"
+      ],
+      "startedAt": "2026-10-11T08:15:02.577Z",
+      "finishedAt": "2026-10-11T08:15:03.830Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/docs-final.log",
+        "sha256": "7b771aeeb792ae86cf956fdeeab529dda72716f44edafc9d635835c5b3d39c61"
+      }
+    },
+    {
+      "step": "review-docs-final",
+      "arguments": [
+        "run",
+        "docs:check"
+      ],
+      "startedAt": "2026-10-11T08:16:10.396Z",
+      "finishedAt": "2026-10-11T08:16:11.743Z",
+      "exitCode": 0,
+      "log": {
+        "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/review-docs-final.log",
+        "sha256": "6b35f6654dc92b77db680fbaf29420347b156c907d4c50148c8d9987de86b702"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/before-loading.json",
+      "sha256": "9c0c4903b1dea3f453a8005c3529578660935b2c47fdfd937129372fbc077813"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/before/extensions.tgz",
+      "sha256": "44a8aa631ec7925c98cc0d5d4dad82053df053d829e2f3d7a0b78cb2afea2f4e"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/public-packages.final.json",
+      "sha256": "b2b0bef04705e83b91c9c1777cff94b5c34b817110751b1b0da60165bf1add38"
+    },
+    {
+      "path": "artifacts/engine-0.2.1/opentype-lazy-20261011/browser.final.json",
+      "sha256": "8f2c59daf8edea001bf1f05d3262873168905dc17b5dd17cc75732ee50e151c8"
+    }
+  ],
+  "retainedDiagnosticFailure": "governance-checks.json: three Windows symlink tests hit EPERM in sandbox; release-policy-final passed with required filesystem privileges"
+}

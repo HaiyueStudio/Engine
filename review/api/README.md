@@ -7,5 +7,8 @@
 - [0.2.0 capability evidence](0.2.0-capability-evidence.json) and [diagnostic attribution runner](measure-0.2.0-capabilities.mjs).
 - [I18n API review and validation](i18n-validation.md).
 - [Narrative API review and validation](narrative-validation.md).
-
+- [loaders.gl dependency range review](loaders-gl-dependency-review.md).
+- [Extensions capability, ownership and package review](extensions-capability-review.md).
+- [Animation text OpenType loading review](animation-opentype-loading-review.md).
 - [Share content API review and validation](share-content-validation.md).
+

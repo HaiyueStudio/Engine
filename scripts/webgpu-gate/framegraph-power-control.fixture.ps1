@@ -1,4 +1,4 @@
-param([string]$Scenario,[string]$OutputDirectory)
+param([string]$Scenario,[string]$OutputDirectory,[string]$ContractId='g09-forward-cold-steady-v4')
 $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'framegraph-power-control.ps1')
 $script:originalId='381b4222-f694-41f0-9685-ff5bb260df2e'
@@ -27,7 +27,7 @@ function Invoke-G09PowerConfig([string[]]$Arguments){
 New-Item -ItemType Directory -Path $OutputDirectory|Out-Null
 $record=$null;$failure=$null
 try{
- try{$record=Start-G09PowerControl $OutputDirectory;if($Scenario -eq 'capture-failure'){throw 'injected capture failure'}}
+ try{$record=Start-G09PowerControl $OutputDirectory -ContractId $ContractId;if($Scenario -eq 'capture-failure'){throw 'injected capture failure'}}
  finally{if($null -ne $record){Stop-G09PowerControl $record}}
 }catch{$failure=$_.Exception.Message}
 $saved=$null;$stateFile=Join-Path $OutputDirectory 'power-state.json'

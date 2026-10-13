@@ -16,7 +16,7 @@
     "vendor": "nvidia",
     "architecture": "pascal",
     "gpuName": "NVIDIA GeForce GTX 1070 Ti",
-    "driverVersion": "560.94",
+    "driverVersion": "582.78",
     "cpuModel": "Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz",
     "formalReleaseEnrolled": false,
     "maxBackgroundCpuPercent": 15,

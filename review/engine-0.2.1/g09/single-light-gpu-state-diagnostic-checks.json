@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-12T09:06:33.346Z",
+  "status": "implementation-and-observer-checked-full-diagnostic-pending",
+  "protocol": "g09-single-light-gpu-state-v1",
+  "sourceFingerprint": "sha256:1e5cbfea04132f8ffb5e0f52fe69b0edeccdffc63c1ebd011a53e6d5c11486f6",
+  "bindings": [
+    {
+      "path": "config/framegraph-sampling-021.json",
+      "sha256": "47fddf627ea4f1a8249e87ef5511a0bdd7e8b4cc3d8668f7165b6c4fbcbe276e"
+    },
+    {
+      "path": "config/framegraph-performance-021.json",
+      "sha256": "f4707951d50edd09608c9f5ee0430598e7d914552c814b2d0d8ada401784fa77"
+    },
+    {
+      "path": "config/lighting-performance-021.json",
+      "sha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a"
+    },
+    {
+      "path": "scripts/verify-framegraph-sampling.mjs",
+      "sha256": "05184c462f2ebb382ac6448ef0fbc3b64391c3802e1e83bbffe17d7af2a2f0cb"
+    },
+    {
+      "path": "scripts/validate-framegraph-sampling.mjs",
+      "sha256": "f699eb1d6db56612fd46fcc4f0c36a52e17fcf7f7d8bb6aa0ee4c9880989f832"
+    },
+    {
+      "path": "scripts/run-framegraph-unattended.ps1",
+      "sha256": "d57e8d9871630f49b57af9a1deea26daa84b38577f2003a93053544d2814fb11"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-sampling-policy.mjs",
+      "sha256": "a456fb8379c0de0c0a2f086551eb568341c395892e64fae0862dcd82218f2d82"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-g05-forward-fixture.mjs",
+      "sha256": "9690c33c2dfeac6920d3720120a9cb5259c4ae9878a02d90efc62f7ee3d7d0ff"
+    },
+    {
+      "path": "scripts/webgpu-gate/deferred-g05-forward-policy.mjs",
+      "sha256": "c3a422a9473841bbb13f24870c56c5c9416b5765942a4c54a0ad9d641c9a8652"
+    },
+    {
+      "path": "scripts/webgpu-gate/chrome-runner.mjs",
+      "sha256": "84dd7a68c5b6c8527c0908e5c7585c9caecc60fcd3f7f1db08ed4e7713258a7a"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-windows-host.mjs",
+      "sha256": "57531ba37ad436df4f776e8740d0fcdb87617acd2f6b5cdbd492aae7727c227c"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-power-observation.ps1",
+      "sha256": "8851525834bd53c395d1a8bdb57efbc7e34a19cf6dfaed29a5f9e8828b877dc3"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-power-control.ps1",
+      "sha256": "873a176a48c3877eef11b6834fab6de00da6608c5b80fe6d5e5f70df73ec57ad"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-gpu-policy.mjs",
+      "sha256": "ddcd69486eb797a63d44b0b4d5c0beb6097fe67ce25fadb0a7f03a3efdbebc31"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-gpu-power-control.ps1",
+      "sha256": "4ce776f9e13d2d2b6e2cc20e6c046fc54ee2af149c17471a15cf6b2c8c839554"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-gpu-power-observation.ps1",
+      "sha256": "b3f3596a46ac702b18665ff7ce99e99251a7e01ee0651dc807bb0a1844ad8593"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-nvapi-chrome-power.cs",
+      "sha256": "d2e20ad3a932cdf7a2011fed0a8d094da6c95c163262602932d495a72b963b9e"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-background-policy.ps1",
+      "sha256": "873a2d6f0379ad052c1b660aea9bc86c739f781065e16b411bf89a9fe2155a14"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-batch-completion.mjs",
+      "sha256": "ad7cf8c717ae8799e56e9ae691cdab53c175eaaf4654ee4b690518eb1a5fb36b"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-batch-policy.mjs",
+      "sha256": "bd0202704d7321695cc38d6efa0adc995f3ed8577e1bb31b06c6ce6f0e784afc"
+    },
+    {
+      "path": "scripts/webgpu-gate/completed-fixture-transfer.mjs",
+      "sha256": "9c413ca05af8f2393b3ec0ef8c61d95a85569f22bb31720a4f57338e84e0e033"
+    },
+    {
+      "path": "scripts/start-framegraph-calibration.ps1",
+      "sha256": "c018be5474b565b6d7f82d2337be26668d21bfd58914821a854fe7fe07a21575"
+    },
+    {
+      "path": "scripts/start-framegraph-unattended.ps1",
+      "sha256": "0fa080ecca3bfd46d11fa886fd4de0462f894db7b4bd3536af099cab2b3b013e"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-build-preflight.ps1",
+      "sha256": "bbd9c64c6a23f7356ca4dacc3c156207bb6e1314560796ddf3b3c5e8055d5a1d"
+    },
+    {
+      "path": "scripts/webgpu-gate/check-framegraph-build.mjs",
+      "sha256": "2b48f5f16202e6d7be57691f0e69c9c1833799f78bd56908d00cec64ff27238b"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-build-policy.mjs",
+      "sha256": "50769111ca4a65fed4872e15052851edda643777aab4bdabdb9f1a48fc4938cf"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-desktop-preflight.ps1",
+      "sha256": "56b1f78466d55c7eaea1ab4f1b5ab29ddfe5631c70876fd1c3782353a0a10cbf"
+    },
+    {
+      "path": "scripts/webgpu-gate/check-framegraph-desktop.mjs",
+      "sha256": "9fef1e8be39915c2d15850f7ea335ec1f90ace8938a0414eef43bea2aef757e7"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-desktop-policy.mjs",
+      "sha256": "f2a416218cd5ecdb0ff2a69e4265d03491dc130e252cd5bd03c7f744c9c7238b"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-launch-permissions.ps1",
+      "sha256": "07c5a79c6e58f9c785c8334278867838f6815498a907f42a68f376d3255586f2"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-sampling-lease.ps1",
+      "sha256": "8eb6e737834b56de53790e4e4721643e2d7acf8ef359956b6f51a6f422807d34"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-gpu-state-policy.mjs",
+      "sha256": "15d49d9fed1d769827621614db7e8b0a037c2c6d8b8dbc1a3e72077547ac973b"
+    },
+    {
+      "path": "scripts/webgpu-gate/framegraph-gpu-state-observer.mjs",
+      "sha256": "e92a7b00f6eee1062a1128613800d3f61b92b85e83d7db8a76ea96734df81e99"
+    },
+    {
+      "path": "scripts/validate-framegraph-gpu-state.mjs",
+      "sha256": "4d80b6c09a69fea2746727893929bf6151d234f1534baf7831f13427ffb6c018"
+    }
+  ],
+  "launcher": "D:/HaiyueStudio/start-g09-gpu-state-diagnostic.cmd",
+  "run": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.1\\g09\\gpu-state-v5-dispatch-20261012T084355378Z-9dac52\\run",
+  "reportSha256": "413f02638f8b52ddddeecece434e1fc8668ad18f4f648e7cef9492e716461805",
+  "correctnessCaptures": 4,
+  "gpuCorrectnessFrames": 96,
+  "pixelComparisons": [
+    {
+      "from": "A0/correctness",
+      "to": "B4/correctness",
+      "result": [
+        {
+          "key": "real-frame-view:0",
+          "componentsPerChannel": 3686400,
+          "hdrMaxToleranceRatio": 0,
+          "ldrMaxDelta": 0,
+          "failures": 0,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "from": "A0/correctness-serial",
+      "to": "A0/correctness",
+      "result": [
+        {
+          "key": "real-frame-view:0",
+          "componentsPerChannel": 3686400,
+          "hdrMaxToleranceRatio": 0,
+          "ldrMaxDelta": 0,
+          "failures": 0,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "from": "B4/correctness-serial",
+      "to": "B4/correctness",
+      "result": [
+        {
+          "key": "real-frame-view:0",
+          "componentsPerChannel": 3686400,
+          "hdrMaxToleranceRatio": 0,
+          "ldrMaxDelta": 0,
+          "failures": 0,
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "nativeEndToEndDiagnosticCompleted": false,
+  "diagnosticTimedCaptures": 0,
+  "smokeOutcome": {
+    "status": "failed",
+    "error": "Error: Host busy: CPU 33.7% (limit 15%), GPU 2% (limit 10%)\n    at validateFrameGraphWindowsHost (file:///D:/HaiyueStudio/Engine/scripts/webgpu-gate/framegraph-windows-host.mjs:38:13)\n    at population (file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-sampling.mjs:122:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-sampling.mjs:174:5",
+    "readinessObservations": 32,
+    "firstAt": "2026-10-12T08:45:15.211Z",
+    "lastAt": "2026-10-12T08:55:12.591Z",
+    "cpuRangePercent": [
+      33.673469387755105,
+      100
+    ]
+  },
+  "liveObserver": {
+    "file": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.1\\g09\\gpu-state-v1-live-observer-1791795060282",
+    "sha256": "300d276d1a809b575f8ec10bafd6904bf20f3667c6715a941ea3cdb9d30b134c",
+    "observer": {
+      "startedAt": "2026-10-12T08:51:00.284Z",
+      "finishedAt": "2026-10-12T08:51:01.768Z",
+      "pid": 6412,
+      "intervalMs": 200,
+      "rows": 6,
+      "stopped": true,
+      "stopRequested": true,
+      "unexpectedExit": false,
+      "error": "",
+      "closeInfo": {
+        "code": null,
+        "signal": "SIGTERM"
+      },
+      "truncatedFinalLine": null
+    },
+    "identity": {
+      "uuid": "GPU-04c718fe-e0db-0d73-dc82-bd623c324e93",
+      "name": "NVIDIA GeForce GTX 1070 Ti",
+      "driver_version": "582.78",
+      "pstate": "P0",
+      "clocks.current.graphics": "1607",
+      "clocks.current.memory": "4006",
+      "temperature.gpu": "58",
+      "utilization.gpu": "1",
+      "utilization.memory": "0",
+      "power.draw": "46.57",
+      "clocks_event_reasons.sw_thermal_slowdown": "Not Active",
+      "clocks_event_reasons.hw_thermal_slowdown": "Not Active",
+      "clocks_event_reasons.hw_power_brake_slowdown": "Not Active"
+    },
+    "scope": "Only real telemetry startup/read/stop; not a workload diagnostic or baseline"
+  },
+  "recovery": {
+    "status": "passed",
+    "verifiedAt": "2026-10-12T08:56:17.4431487Z",
+    "cpu": {
+      "schemaVersion": 1,
+      "schemeId": "381b4222-f694-41f0-9685-ff5bb260df2e",
+      "acLineStatus": 1,
+      "minimumAcPercent": 5,
+      "maximumAcPercent": 100,
+      "minimumDcPercent": 5,
+      "maximumDcPercent": 100
+    },
+    "gpu": {
+      "Found": false,
+      "ProfileName": "Google Chrome",
+      "ApplicationName": "chrome.exe",
+      "ApplicationCount": 1,
+      "SettingId": 274197361,
+      "Type": 0,
+      "Location": 0,
+      "CurrentPredefined": 0,
+      "PredefinedValid": 0,
+      "PredefinedValue": 0,
+      "Value": 0
+    },
+    "service": {
+      "State": "Stopped",
+      "StartMode": "Disabled",
+      "ProcessId": 0
+    },
+    "ownedWorkers": [],
+    "temporarySchemeRemoved": true,
+    "settingsChangedByAudit": false
+  },
+  "completion": {
+    "startedAt": "2026-10-12T08:44:00.7231236Z",
+    "status": "failed",
+    "mode": "GpuStateSmoke",
+    "performanceQualified": false,
+    "regressionBudget": 0.05,
+    "output": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.1\\g09\\gpu-state-v5-dispatch-20261012T084355378Z-9dac52\\run",
+    "workerExitCode": 1,
+    "serviceRestored": true,
+    "cpuRestored": true,
+    "gpuRestored": true,
+    "error": "Sampling did not pass: Error: Host busy: CPU 33.7% (limit 15%), GPU 2% (limit 10%)\n    at validateFrameGraphWindowsHost (file:///D:/HaiyueStudio/Engine/scripts/webgpu-gate/framegraph-windows-host.mjs:38:13)\n    at population (file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-sampling.mjs:122:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async file:///D:/HaiyueStudio/Engine/scripts/verify-framegraph-sampling.mjs:174:5; evidence: D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.1\\g09\\gpu-state-v5-dispatch-20261012T084355378Z-9dac52\\run",
+    "finishedAt": "2026-10-12T08:55:17.4787155Z"
+  },
+  "historicalCompatibility": {
+    "verifiedAt": "2026-10-12T08:42:08.898Z",
+    "note": "Re-evaluated original raw populations with current unchanged sampling policy, not relabelled as current-source captures.",
+    "results": [
+      {
+        "directory": "sampling-v5-dispatch-20261012T041933916Z-99a0b0/run/measurement",
+        "reportSha256": "fa189c6cbe69e35277b557f9400ce555f7f2f11e5a18a9f9aa5dbd7ffb3352cd",
+        "calibrationStatus": "failed",
+        "cpuWarmup": 12000,
+        "gpuWarmup": null,
+        "baselineStatus": "not-created",
+        "unchanged": true
+      },
+      {
+        "directory": "unattended-controlled-gpu-v4-20261009T070046Z/measurement",
+        "reportSha256": "bb3a3be85f4115caedce98c4b5a676f445f4d27a2e13935e6a4b9d19958a85ab",
+        "calibrationStatus": "passed",
+        "cpuWarmup": 18000,
+        "gpuWarmup": null,
+        "baselineStatus": "failed",
+        "unchanged": true
+      }
+    ]
+  },
+  "tests": {
+    "framegraph": {
+      "passed": 120,
+      "log": "gpu-state-v1-framegraph-tests.log"
+    },
+    "workspaces": {
+      "passed": 1484,
+      "log": "gpu-state-v1-workspace-tests.log"
+    },
+    "typecheck": {
+      "status": "passed",
+      "log": "gpu-state-v1-typecheck.log"
+    },
+    "build": {
+      "status": "passed",
+      "freshExamples": 99,
+      "typescriptWarnings": 0,
+      "log": "gpu-state-v1-build-serial.log",
+      "retainedEarlierAttempt": {
+        "log": "gpu-state-v1-build.log",
+        "typescriptWarnings": 232,
+        "note": "Concurrent declaration-producing builds encountered missing declaration warnings; repeated serially with zero warnings."
+      }
+    },
+    "docs": {
+      "status": "passed",
+      "log": "gpu-state-v1-docs-check.log"
+    }
+  },
+  "regressionBudget": 0.05,
+  "createsBaseline": false,
+  "performanceQualified": false,
+  "remaining": "Close applications after other builds finish, run the full independent six-capture diagnostic, review GPU state, then recalibrate both cases and create a fresh baseline."
+}
