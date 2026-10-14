@@ -1,114 +1,43 @@
-# Engine 0.2.1 G01：合同与基线验收
+# Engine 0.2.1：验收结论
 
-日期：2026-09-25。状态：G01 complete，预算与合同已冻结，必需门禁已通过；G02 ready，尚未启动。Deferred 生产实现和发布资格尚未完成。
+G01–G04、G06 的实现阶段已完成；G05 与 [G09](g09/README.md) 尚未完成整体性能资格，G07 尚未取得发布资格。此处集中保留问题、最终结论和处理办法；阶段过程记录见 [归档](../archive/README.md)。版本号不是已发布证明。
 
-## 阅读顺序
-
-1. [ADR 0109](../../docs/for-ai/adr/0109-deferred-lighting-021-contract.md)：ABI、材质、pass 图、资源与回退合同。
-2. [机器合同](../../config/lighting-performance-021.json)：案例、设备、精度、内存和逐场景绝对预算。
-3. [预算冻结依据](./g01-budget-freeze.md)：用户确认的帧率目标与两项具名绝对上限。
-4. [基线摘要](./g01-baseline-summary.json)：三轮结果、输入/政策/原始文件哈希。
-5. [完成审计](./g01-completion-audit.md)、[上游固定参考](./upstream-reference.json)、[消费方版本](./consumer-versions.json)。
-
-## G02 完成（2026-09-26）
-
-G02 已完成，G03 ready、尚未启动。[完成审计](g02-completion-audit.md)与[最终检查证据](g02-completion-validation.json)记录当前结果。
-
-收尾资料：[资源复用修复](g02-resource-reuse.md)、[生成物压缩](g02-bundle-optimization.md)、[最终原生验证](g02-final-native-validation.json)、[G03 交接](g03-handoff.md)。
-
-本页保留 G01 冻结时的状态。后续工作见 [G02 进展](./g02-progress.md)、[四视图调查](./g02-four-view-investigation.md) 和 [Shader/包预算评审](./g02-budget-review.md)（[测量证据](./g02-budget-evidence.json)，预算已应用，原始证据保留提案状态）。
-
-全量示例构建与 Lab 跨后端像素差异的后续修复见 [构建/Lab 评审](./g02-build-lab-fixes.md)。
-
-## 冻结结果与证据范围
-
-- 单视图 720p、128/256 灯目标：独显 60 FPS、集显 30 FPS。CPU/GPU P95 分别为 4/12 ms 与 8/24 ms，完整帧另受 1000/60 与 1000/30 ms 上限约束。1080p、四视图逐项预算见配置；512/1024 灯保留压力诊断定位。这些是 G05 的验收目标，不是现有 Deferred 性能结果。
-- 本机两个实际 native 适配器为 AMD `rdna-1`（Radeon Pro 5300M）和 Intel `gen-9`（UHD 630），均支持 timestamp-query、非软件适配器。它们是同一主机的独显/集显两个类别，不是两台机器或移动端资格。
-- 完整 30 项采样，每项预热 120 帧、保留 300 CPU 与 300 GPU 样本，三轮交错顺序；每设备/场景各 900 个样本全部参与统计。每项前固定空闲至少 30 秒，前后共 60 次系统 speed/scheduler limit 均为 100。实际加载的 HTTP 文件、场景、设备、工作量、输入指纹与原始文件哈希已独立复核。
-- 10 个组合中 8 个同时满足 CPU/GPU 相对极差 ≤20%、CV ≤10%。用户明确批准独显 1k 实例 GPU ≤0.10 ms、10k 实例 CPU record ≤0.22 ms 两项绝对上限；它们仍标注 `stable=false`，只按 `approved-absolute-ceiling` 纳入。其他案例和既有回归阈值不变。
-- CPU 指标不混用：灯光基线为 runtime frame；现有实例基线为 cpuRecord，cpuSubmit、frameWall、queueWait 单独保留。后续 Deferred 的 CPU 预算必须测 prepare+record+submit，不能用 cpuRecord 单项代替。
-- 固定原始证据在 `artifacts/engine-0.2.1/g01/frozen-baseline/`；[独立检查](../../artifacts/engine-0.2.1/g01/completion-check.json) 返回 integrity passed / freeze ready。该诊断基线仅用于 G01 合同校准，不升级为 clean-release 或完整 GPU 实例性能资格。
-- [G-buffer 探测](../../artifacts/engine-0.2.1/g01/gbuffer-probe.json) 在两个实际 device 上通过 3×rgba16float + depth32float 的渲染/读回，normal 角误差约 0.0076°，零 validation error。它证明格式与量化可用；ADR 的读写 payload 是理论估算，不是实测 DRAM 带宽或驱动显存。
-
-## 源码复核分类
-
-生产源码观察点为 `365552908414ffa193c63a62aaf682f4ddb23b94`；采样基于 `61d40f7bf75e05ec948754d85fdbf70512a21ca8`，后者只提交 G01 规划和工具，生产 runtime 未变。捕获后只修改政策、统计验证器与文档，实际 served runtime/fixture 字节复核一致。采样时政策与最终冻结政策分别保留，不冒充相同文件。
-
-| 项目 | 分类 | 依据与处理 |
+| 问题 | 结论 | 解决方法与剩余边界 |
 | --- | --- | --- |
-| 8 灯 Forward、3 方向阴影 | still-current | SceneLightData/Selection/ViewLightUniformBuffer；Deferred 输入必须来自未截断源集 |
-| 辅助 MRT、frame graph、target pool | still-current | Render3DFramePlan/RenderGraph/TransientRenderTargetPool；扩展已有 owner |
-| GPU timestamp 与异步 readback | still-current | 复用现有 profiler；正常帧不读回全部实例 |
-| GPU instance / LOD / 外部 visible ID | still-current | ADR 0108 和既有专项；本轮仅静态外部矩阵 + LOD/indirect，动态模拟、画质收益和四视图完整资格仍属 G05 |
-| 0.2.0 AO、Shader/示例预算和发布问题 | already-fixed | `review/release-0.2.0-global-check.md`；不重新立为未修 bug |
-| Deferred/storage lights/Tiled/透明 PBR 全灯表 | new-work | ADR 0109；G02–G07 实现和验收 |
-| 字体解析器同步传递成本 | deferred | AnimationTextRasterizer 的 opentype 静态导入仍在；先独立评估，不加入本 Goal 实现 |
-| Spot/局部阴影/CSM/3D Clustered/Hi-Z/Rust | deferred | 独立准入；原 Forward+/CSM hold 不解除 |
+| 既有 Forward 不能完整处理百灯 | G02 全灯 Deferred 参考路径、G03 Tiled 路径已实现 | 独立几何/像素 oracle 检查完整覆盖；容量不足同帧遍历全灯，不以漏灯换耗时 |
+| 多视图、透明与扩展材质兼容 | G04 兼容验收完成 | 保留 source/view owner、完整灯表、线性 HDR 与显式不支持回退；原生销毁恢复和模拟故障分列 |
+| AO 语义与内存超预算 | 已改为光照阶段只调制 ambient/IBL；R16F 与联合在途资源核算将 1080p GTAO Deferred 分配降至约 63.77 MiB | 保留直接光、自发光和透射；64 MiB 预算未放宽。内存受限全灯回退的 GPU 成本仍需判断 |
+| AO 在途资源诊断误报 | 旧断言按八个视图代次各计一张 AO 纹理，实际在同一编码器顺序复用为两张不同尺寸纹理，八份可见性缓冲仍各自保留 | 断言改为精确核对物理纹理与缓冲数量、大小和类型；四视图两代读回、拒绝时零分配、提交前存活、完成后归零及原资源上限全部保留。调试读回正确仅用于定位，正式结论以修正后原生捕获为准 |
+| 正确性矩阵在 Edge 导航阶段超时 | 两次失败均发生在首个本地 HTTP 请求之前；空白页 NetLog 与 ABBA 对照确认，新配置的持久化 Cookie 初始化会造成约 5 秒等待，代理直连不能消除该等待 | 每次捕获仍启动全新浏览器和 GPU 设备，测试页改用 CDP 创建的独立内存上下文，避免磁盘 Cookie 初始化；A0/B4 与两浏览器一致，导航 30 秒上限、预热、样本和性能预算不变。失败上下文创建必须报错，不回落默认配置。Windows 收尾按唯一配置、可执行文件及创建时间核验并清理自有辅助进程；原失败和诊断均保留，最终完整矩阵仍须重新通过 |
+| 实例绑定组与静态灯对象分配 | 四视图每帧绑定组创建 12→0，静态快照复用减少诊断分配约 31% | 缓存有界并维护稳定 ID、阴影槽和旧快照；这些数值不代表完整 FPS 资格 |
+| 测试浏览器辅助进程收尾中断 | 完整矩阵确认 Edge 会处于 `HasExited=true`、原生退出信号尚未触发的异步收尾阶段；原来按短固定轮数扫描过早报残留，不能仅凭退出属性或进程枚举判断完成。原失败均保留，具体待完成的驱动/I/O 类型未确认 | 先固定句柄并核验唯一配置与进程身份，再用单调时钟限定最多 60 秒的采样后退出等待；必须确认退出信号且目录已释放才通过，仍存活或退出未完成继续报错。记录进程角色、等待耗时和逐项状态。该等待不进入 CPU/GPU 样本，导航 30 秒、样本和性能预算不变；完整资格仍须独立验收 |
+| 多灯性能资格 | Windows 房间、实例、Forward 共 276 次捕获完整，164 项性能预算全部通过；97/364 项跨轮稳定性超线，按用户批准的 ADR 0126 作为调查项，原报告仍保留失败 | Forward 原 5% 预算通过，唯一稳定性失败属于旧基线 CPU。最终资格仍依赖原始证据复核及其余完整门禁；不删除慢样本或自动重采，历史 AMD 高重叠 frameWall 35.040 ms 的失败保持原设备身份与结论 |
+| 交互式诊断缺少产品入口 | G06 多灯示例及最小 experimental facade 已完成 | 稳定 root 未扩大；原生交互、资源释放及独立包消费通过。API 范围见[评审](g06-example-api-review.md) |
+| FrameGraph 集成与验收过度依赖微基准 | 实现已落地；用户批准以生产流畅度和可复现退化验收 | 5% 改为 G09 调查触发线，旧校准/基线非前置；真实生产证据、资源稳定、归因收益与 clean release 仍必需 |
+| 本机生产路径是否流畅 | 干净测量快照 `1c9add8` 的 v2 九场景、两浏览器、两轮共 36 次实测及独立复核通过；最终候选 `f0c1286` 的四项各 310 秒资源长跑亦通过，资源有界、清理为零 | [结果与范围](g09/README.md)：最终同候选生产复核、完整消融和 G05/G07 资格未齐；保留原超时与失焦中断，不拼接短测为完整通过 |
 
-## 上游、消费与发布边界
+## 当前合同与证据
 
-官方 webgpu-samples 固定 commit 为 `e040ec1a20dbbe01afed30c812e825b2639cfe5b`，默认 128、最大 1024 灯；compute 更新位置，fragment 仍遍历所有灯。固定文件 SHA-256 与 BSD-3-Clause 原文地址见上游记录。本轮未复制生产代码或 dragon mesh；将来改编代码须保留许可、版权及免责，资产许可单独核查。
+- [G09 当前验收](../../config/framegraph-acceptance-021.json)及 [ADR 0124](../../docs/for-ai/adr/0124-g09-production-performance-acceptance.md)：新规则不将历史失败改为通过，不取消其他合同。
+- [G01 原机器合同](../../config/lighting-performance-021.json)、[冻结基线](g01-baseline-summary.json)：历史统计和具名绝对上限例外保留原字节。
+- [G05 连续采样协议](../../config/lighting-continuous-021.json)及 [ADR 0125](../../docs/for-ai/adr/0125-g05-continuous-sampling.md)：固定预热后连续采样，完整矩阵和预算保留；Windows 重新配对 G01 来源基线与候选，不复用 Mac 耗时。`lighting:continuous:run -- --suite=rooms|instances|forward --plan|--smoke|--full` 分别运行；入口测试通过尚不代表原生完整矩阵取得资格。
+- [ADR 0126](../../docs/for-ai/adr/0126-g05-stability-and-evidence-reuse.md)：用户批准 G05 跨轮稳定性作为调查项，原 5% 及其余预算保持；仅文档/验收解释变化且全部测量输入与新构建产物哈希一致时，允许复核旧证据，分别列出采样提交与验收提交。
+- [硬件范围](../../docs/for-ai/adr/0117-native-021-hardware-scope.md)：一条完整原生路径；旧 Intel Gen9 为扩展兼容。
+- [上游许可与固定参考](upstream-reference.json)、[设备记录](device-plan.json)、[消费版本](consumer-versions.json)：保留来源与身份，不冒充当前采样。
+- [历史 ZIP 与逐文件校验清单](../archive/README.md)：可检索 G01–G09 原文件名，保留未采用方案和失败证据；大型原始捕获仍位于原 `artifacts/` 路径。
 
-Engine 四库源码为 0.2.1；Editor/Games lockfile 中 Engine 仍为 0.1.0，AIStudio 使用本地 0.1.0 变体，Native 示例使用 vendor tarball 0.1.0。冻结前再次核对全部已记录 manifest/lockfile 哈希，均未改变。版本相同不等于字节或兼容性相同。
+当前 G05 证据绑定采样候选 `f0c1286adb9393a14ec3657df653e51247ee1ee6`，位于独立工作区 `Engine-rc-021-20261013`。两浏览器各三轮完整采样，未删除样本或自动重采；原始复核位于 `artifacts/final-g05-independent/`，执行索引为 `execution.json`。此处提交号指采样来源；最终验收提交另由 v2 机读报告绑定，不能把文档数值当成复用已通过的证明。
 
-UI 没有 Engine 依赖。协调仓仅登记 Engine 独立 candidate line，保留 0.1 消费范围，不升级其他仓依赖，不执行其门禁。Games 的实际 UI 依赖与原协调政策存在差异，仅记录。没有发布、tag、push、公开 API 或包版本变更。
+后续 AO 在途断言和浏览器独立上下文修正涉及被采样指纹覆盖的夹具文件，因此旧数据不能直接按 ADR 0126 复用为修正后候选的最终证据。保留下表与原失败报告作为历史完整结果，最终独立入口须重新生成完整矩阵；不排除受影响文件的哈希来恢复通过。这些修正没有改动引擎运行时或任何预算。
 
-## 失败历史与复现
+| 矩阵 | 完整捕获 | 性能预算 | 跨轮稳定性失败 | 原始报告（`artifacts/engine-0.2.1/g05/` 下） |
+| --- | --- | --- | --- | --- |
+| 房间 | 156/156 | 60/60；另有 156/156 内存检查通过 | 47/156：CPU 28、GPU 13、frameWall 6 | `continuous-rooms-2026-10-13T04-08-13.254Z/report.json` |
+| 实例 | 96/96 | 96/96 | 49/192：CPU 26、GPU 20、frameWall 3 | `continuous-instances-2026-10-13T04-55-25.588Z/report.json` |
+| Forward | 24/24 | 原 5% 预算 8/8 | 1/16：旧基线 Edge 8 灯 CPU | `continuous-forward-2026-10-13T05-09-28.338Z/report.json` |
 
-- 初次构建遇原 120 秒超时，原命令重试约 76.9 秒通过；冒烟阶段的缺少 dist、运行中输入变更、枚举顺序指纹误报均保留日志，后者已排序去重并测试。
-- 第一次完整采样受其他任务争用，第二次在它们自然结束后仍有 9/10 个组合波动。数据分别保存在 `attempt-1-contended/`、`attempt-2-post-contention/`。
-- 随后系统报告 CPU speed limit 33/26/40，新增前后主机检查。恢复 100 后的第三次连续采样在第 14 项变为 95，按规则退出，保存在 `attempt-3-host-limited/`。没有终止其他任务或关闭系统保护。
-- 第四次采用统一 30 秒场景间空闲，完成全量且主机检查均通过；两项微小时延波动的处理方法经用户明确选择后冻结，未挑最快轮次、删样或混合不同尝试。
-- 独立复核命令：`node scripts/lighting-g01-check.mjs --require-frozen`。新设备采样先运行 `node scripts/lighting-g01-capture.mjs --host-check`；G05/G07 仍需执行各自完整正确性、持续运行、性能和 clean-release 验收。
+房间最高绝对预算占用为 Edge 动态 sparse-256 CPU P95 3.825/4 ms；实例最高预算占用为 Chrome 10k 单视图视锥剔除案例 frameWall P95 5.070/16.667 ms。Forward 最大 CPU P95 变化为 +3.73%，GPU 基本持平；唯一稳定性失败的旧基线三轮 CPU P95 为 1.525/1.160/1.245 ms。这些离屏串行指标不等同于生产帧率；本次没有同步采集 GPU 时钟，不能认定频率变化是波动原因。原报告按 ADR 0125 的失败判定保留，新验收层按 ADR 0126 单独复核；预算通过不等同于整体资格通过。
 
-## 最终验证
+发布仍需同一干净候选的生产场景资格、全部正确性/生命周期、包/API/Shader 和独立 Engine 发布链。当前未执行发布、tag、push 或基线晋升。
 
-G01 policy/host 16/16、既有 lighting 30/30、performance-budget:test 122/122、docs:check、api:check、冻结证据检查与协调仓 check 均通过。新代码仅限诊断/政策设施，生产 runtime 与已有构建对应源码一致；不以这些检查替代 G02–G07 新实现和正式发布检查。
-
-## G03 当前进展（2026-09-26）
-
-G03 已显式激活，状态为 active；上面的 G02 完成时状态保留为历史。分块灯光、同帧溢出回退和高重叠自动选择的实现与验证见 [G03 进展](g03-progress.md)。G04–G07 未激活。
-
-## G03 完成（2026-09-27）
-
-G03 已完成，G04 为 ready、尚未激活；上面的阶段状态保留为历史。[完成审计](g03-completion-audit.md)、[最终性能报告](g03-final-performance-review.md)、[八场景证据](g03-final-room-matrix.json)及[G04 交接](g04-handoff.md)记录当前结果。停止竞争游戏后，重新完整采集 24 项并通过全部相对预算与稳定性检查；未拼接样本或放宽阈值。高重叠绝对帧率目标继续由 G05/G07 完成，不宣称发布资格。
-
-## G04 当前进展（2026-09-27）
-
-G04 正在实施，尚未完成。透明完整灯表路径的实现、双 GPU 正确性证据与未完成范围见 [G04 进度](g04-progress.md)。用户批准后的 Shader 成本预算、构建期 include 与 Artifact 去重见 [实施报告](g04-budget-import-application.md)；[原提案](g04-budget-import-review.md)保留当时测量。未来不透明扩展代理表面的预算仍需按实际实现核定。
-
-## G04 安装修复与兼容性审计（2026-09-27）
-
-[Editor 安装修复](g04-editor-install-repair.md)已完成，消费版本策略不变。G04 新增了不透明扩展 PBR 的完整灯表通路，并完成双 GPU 材质/效果/输出/实例回退/设备/312 次切换及 A/B 原生回归；最终状态见[兼容性审计](g04-compatibility-audit.md)。用户选择的[光照阶段 AO](g04-ao-contract-review.md)已完成；双 GPU 贡献隔离、1,367 项测试、95 个示例构建及 Stage14 全部通过。**G04 complete；[G05](g05-handoff.md) ready，尚未启动。**
-
-## G05 activation — 2026-09-28
-
-G05 已由用户激活，当前为 **active**；上一节的 ready 是历史状态。[进度与完整验收清单](g05-progress.md)记录分离 CPU/GPU 采样、逐视图像素检查、三轮房间矩阵和剩余性能资格。当前短测只属于诊断，不能替代两类 GPU 的完整性能验收。
-
-## G05 实例资源与包体积检查（2026-09-28）
-
-[实例缓存与包消费者审计](g05-instance-cache-review.md)记录四视图绑定组从每帧 12 个降至 0、双 GPU 32 项诊断和 37 个公开类型入口的真实安装验证。完整性能采样与其余 E/F/G 验收仍在进行，G05 保持 active。
-
-## G05 AO 内存修复与对象分配归因（2026-09-28）
-
-[当前检查点](g05-r16-checkpoint.md)记录 R16F AO、共享在途资源预算、双 GPU 像素/生命周期回归，以及 2,400 帧 CPU 对象分配采样。1080p AO 的 Deferred 内存已降到 64 MiB 预算内；全灯回退成本与完整 E/F/G 性能资格仍未完成。全仓 1,376 项测试、95 个示例目标和包消费者检查通过，不等于 G05 或发布验收完成。
-
-## G05 静态灯快照复用（2026-09-28）
-
-[实现与验证报告](g05-light-cache-review.md)记录静态场景双 GPU 采样分配量约 31% 的下降，及旧快照、稳定灯 ID、阴影槽和完整灯表的兼容性回归。全仓 1,380 项测试和 95 个构建目标通过。对象分配改善不代表帧率资格；GPU 成本和完整性能矩阵仍待完成。
-
-## G05 GPU 耗时与全量性能门禁（2026-09-28）
-
-[最新审计](g05-gpu-performance-audit.md)及[机器证据索引](g05-gpu-performance-audit.json)记录明确的 **failed-and-incomplete** 结果：Intel 高重叠在采样前后 CPU limit 均为 100 时仍为 62.70 ms（预算 24 ms）；Intel 完整 GTAO 长负载结束时出现 75/46 限速。Forward、F、E/G 全量入口已执行，但均被首例主机预检拦截，不能声称完成 264 次矩阵。三项 GPU 优化试验未证明所需收益，已撤回并恢复原运行时；185 项性能策略测试通过。G05 保持 active，未完成性能资格，未进入 G06/G07。
-
-## G05 evening resumption — 2026-09-28
-
-See [resumption audit](g05-resume-audit.md) and [hash-bound evidence](g05-resume-audit.json). Four current-runtime AMD/Intel pending/AO resource captures and the real package/29-consumer qualification pass. A timer early-wakeup defect was fixed without weakening the 120-second gate; 190 policy tests pass. The fresh full Forward/F/E-G attempt subsequently failed real host preflight (86/77/88), so full timing/stability remains incomplete. All processes are terminal; G05 is not complete.
-
-## G05 完整复测（2026-09-29）
-
-[完整性能审计](g05-full-performance-2026-09-29.md)与[机器证据索引](g05-full-performance-2026-09-29.json)已完成。Forward、F、E/G 和高重叠/GTAO 专项人口均完整，主机前后检查全部通过；预算及跨轮稳定性仍失败。G05 保持 active，G06/G07 保持 draft，未发布。上述历史阶段状态保留。
-
-## G06 多灯示例 — 2026-09-29
-
-[交互与集成验收](g06-example-audit.md)通过：96 个 fresh 示例目标、25 项 native 浏览器检查、API/包消费/生命周期验收完成。G06 complete；G05 仍未取得性能资格，G07 仍 draft。跨引擎及设备分档另立 M18 G08 draft。
+发布门禁通过 `release:021:evidence:check` 读取 `artifacts/engine-0.2.1/qualification.json` 中显式绑定的七份完整报告：F0–F8 正确性、生产流畅度、资源长跑、消融，以及 G05 房间／实例／Forward。v2 清单包含验收 revision 和各报告的采样 revision、相对路径、SHA-256；校验器重读原始捕获与截图，核对当前源码、配置、主机和干净提交，并重新构建候选夹具逐项比较可执行产物。短测、缺项、不符合 ADR 0126 的异版、预算或原始完整性失败不能补位；该检查仍不代替独立包、Shader、生命周期和其余发布门禁。用户说明见 [0.2.1 候选说明](../../docs/engine-guide/release-notes-0.2.1.md)。

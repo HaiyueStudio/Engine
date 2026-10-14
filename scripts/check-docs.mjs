@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { STUDIO_REPOSITORIES, requireStudioRepository } from './studio-repository-layout.mjs';
+import { validateReviewArchive } from './review-archive-policy.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const docsRoot = resolve(root, 'docs');
@@ -35,7 +36,18 @@ for (const path of [
 }
 
 for (const absolute of walkMarkdown(docsRoot)) validateMarkdownLinks(absolute);
+for (const directory of ['review/engine-0.2.1', 'review/archive']) {
+  for (const absolute of walkMarkdown(resolve(root, directory))) validateMarkdownLinks(absolute);
+}
 validateMarkdownLinks(resolve(root, 'README.md'));
+for (const entry of readdirSync(resolve(root, 'review/archive'))) {
+  if (!entry.endsWith('.json')) continue;
+  try {
+    const manifest = JSON.parse(readFileSync(resolve(root, 'review/archive', entry), 'utf8'));
+    if (!/^[a-z0-9-]+\.zip$/.test(manifest.archive ?? '')) throw Error('Unsafe archive name');
+    validateReviewArchive(manifest, readFileSync(resolve(root, 'review/archive', manifest.archive)));
+  } catch (error) { violations.push(`review/archive/${entry}: ${error.message}`); }
+}
 
 for (const absolute of walkSources([
   resolve(root, 'engine/src'),

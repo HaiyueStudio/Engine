@@ -18,6 +18,7 @@ import { createSamplingPlan, validateSamplingCapture, validateSamplingCorrectnes
 import { validateBoundedFrameCompletion } from './webgpu-gate/framegraph-batch-policy.mjs';
 import { GPU_STATE_PROTOCOL, gpuStatePlan, analyzeGpuStateCapture, validateGpuStatePopulation } from './webgpu-gate/framegraph-gpu-state-policy.mjs';
 import { startGpuStateObserver } from './webgpu-gate/framegraph-gpu-state-observer.mjs';
+import { createG09AcceptanceRoute, interpretG09Microbenchmark } from './webgpu-gate/framegraph-acceptance-routing.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url)), args = process.argv.slice(2);
 if (args.length < 1 || args.length > 2 || !['--plan', '--smoke', '--fixture-smoke', '--full', '--gpu-state-plan', '--gpu-state-diagnostic', '--gpu-state-smoke'].includes(args[0])) throw Error('Use --plan, --smoke, --fixture-smoke, --full, --gpu-state-plan, --gpu-state-diagnostic or --gpu-state-smoke [workspace-output-directory]');
@@ -25,8 +26,9 @@ const gpuState = args[0].startsWith('--gpu-state-'), gpuStateSmoke = args[0] ===
 const full = args[0] === '--full' || args[0] === '--gpu-state-diagnostic';
 const read = async p => JSON.parse(await readFile(resolve(root, p), 'utf8'));
 const config = await read('config/framegraph-sampling-021.json'), host = await read(config.hostContract), budgets = await read('config/lighting-performance-021.json');
+const acceptanceConfig = await read('config/framegraph-acceptance-021.json'), acceptance = createG09AcceptanceRoute(acceptanceConfig);
 const plan = createSamplingPlan(config), qualification = await loadFrameGraphQualification(root);
-if (args[0] === '--plan') { console.log(JSON.stringify({ config, plan, minimumCooldownMinutes: plan.length * 4, performanceQualified: false }, null, 2)); process.exit(0); }
+if (args[0] === '--plan') { console.log(JSON.stringify({ config, plan, acceptance, minimumCooldownMinutes: plan.length * 4, performanceQualified: false }, null, 2)); process.exit(0); }
 if (args[0] === '--gpu-state-plan') { console.log(JSON.stringify({ protocol: GPU_STATE_PROTOCOL, config, plan: gpuStatePlan(), minimumCooldownMinutes: 12, approximateMinutes: '25-35', performanceQualified: false, createsBaseline: false }, null, 2)); process.exit(0); }
 const generatedAt = new Date().toISOString(), directory = resolve(root, 'artifacts/engine-0.2.1/g09');
 const out = args[1] ? resolve(root, args[1]) : resolve(directory, `sampling-${generatedAt.replaceAll(':', '-')}`);
@@ -40,6 +42,7 @@ const fixed = await read('review/engine-0.2.1/g09/dependency-baseline.json'), in
 if (baseline.revision !== fixed.revision || inputs.sha256 !== build.inputs.sha256) throw Error('Stale A0/B4 runtime builds');
 const sourceFingerprint = createPerformanceSourceFingerprint(root, root);
 const filePaths = ['config/framegraph-sampling-021.json', config.hostContract, 'config/lighting-performance-021.json',
+  'config/framegraph-acceptance-021.json', 'scripts/webgpu-gate/framegraph-acceptance-routing.mjs',
   'scripts/verify-framegraph-sampling.mjs', 'scripts/validate-framegraph-sampling.mjs', 'scripts/run-framegraph-unattended.ps1', 'scripts/webgpu-gate/framegraph-sampling-policy.mjs', 'scripts/webgpu-gate/deferred-g05-forward-fixture.mjs',
   'scripts/webgpu-gate/deferred-g05-forward-policy.mjs', 'scripts/webgpu-gate/chrome-runner.mjs', 'scripts/webgpu-gate/framegraph-windows-host.mjs',
   'scripts/webgpu-gate/framegraph-power-observation.ps1', 'scripts/webgpu-gate/framegraph-power-control.ps1',
@@ -186,7 +189,10 @@ try {
   else {
     report.calibration = evaluateCalibration(calibration, config, host);
     await atomic('calibration.json', { generatedAt: new Date().toISOString(), sourceFingerprint, bindings, captures: report.captures.filter(c => c.mode === 'calibration'), assessment: report.calibration });
-    if (report.calibration.status !== 'passed') throw Error('No shared stable CPU/GPU plateau; fresh baseline blocked');
+    if (report.calibration.status !== 'passed') {
+      report.currentAcceptance = { contractId: acceptance.contractId, status: 'inconclusive', historicalStatus: 'calibration-failed', releaseBlocking: false, performanceQualified: false, g09Complete: false };
+      throw Error('Legacy calibration inconclusive; no legacy baseline created. This optional diagnostic is not a production-acceptance prerequisite');
+    }
     const calibrationHash = sha256(await readFile(resolve(out, 'calibration.json')));
     report.frozenProtocol = { contractId: config.contractId, warmup: report.calibration.selectedWarmup, sampling: config.sampling,
       ...(isBatchSampling(config) ? { gpuWarmup: report.calibration.selectedGpuWarmup, gpuCompletion: config.gpuCompletion, browserControl: config.browserControl } : {}),
@@ -197,6 +203,7 @@ try {
     validateSamplingPowerContinuity(calibration, entries, config);
     if (sha256(await readFile(resolve(out, 'calibration.json'))) !== calibrationHash) throw Error('Calibration changed after freeze');
     report.assessment = evaluateSteadyBaseline(entries, config, host, report.calibration, budgets.relativeBudgets);
+    report.currentAcceptance = interpretG09Microbenchmark(report.assessment, acceptanceConfig);
     report.status = report.assessment.status;
     if (report.status !== 'passed') report.error = report.assessment.rows.filter(r => r.gated && !r.passed)
       .map(r => `${r.caseId}/${r.metric}: B4/A0 P95=${r.ratio}, limit=${r.limit ?? 'stability-only'}, A0 stable=${r.A0.stability.stable}, B4 stable=${r.B4.stability.stable}`).join('; ');

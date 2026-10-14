@@ -7,7 +7,7 @@
 
 ## 原因与范围
 
-[既有诊断](../../../review/engine-0.2.1/g09/performance-host-diagnosis.md)取得完整 Forward 人口，但旧 A0 的八灯 CPU 轮次不稳定。短窗口对预热长度敏感，追加诊断又包含主机噪声。不能仅延长预热、挑选尾段或放宽预算修复门禁。
+[既有诊断](../../../review/archive/README.md)取得完整 Forward 人口，但旧 A0 的八灯 CPU 轮次不稳定。短窗口对预热长度敏感，追加诊断又包含主机噪声。不能仅延长预热、挑选尾段或放宽预算修复门禁。
 
 新增版本化的 G09 开发基线采样协议，复用原单灯／八灯、静态高重叠等确切配方、质量和 A0/B4 构建。它是包含既有后处理的 inherited Forward 对照，不冒充效果关闭的 F0 或完整 F0–F8。G01/G05 及旧 `framegraph-021-default-path-preflight-v1` 不改，既有失败原样保留。硬件范围继续按 [ADR 0117](0117-native-021-hardware-scope.md)。
 

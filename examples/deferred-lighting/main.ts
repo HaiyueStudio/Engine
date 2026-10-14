@@ -5,6 +5,7 @@ import { getEngineDiagnosticsSnapshot } from '@haiyue/engine/diagnostics';
 import { createDeferredLightingProfile, type DeferredLightingProfile, type DeferredLightingDebugChannel } from '@haiyue/engine/experimental/renderer';
 import { GaussianBlurPass, GrayscalePass, GtaoPass } from '@haiyue/engine/postprocess';
 import { mountFrameGraphPanel } from './framegraph';
+import { prepareFirstFrames } from './startup';
 import { mat4, vec3 } from 'wgpu-matrix';
 import { LIGHT_COUNTS, lightPosition, makeLights, parseCount, parsePath, type Vec3 } from './model';
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -89,6 +90,7 @@ async function main() {
     input('selected').value = String(selected); input('enabled').checked = !disabled.has(selected - 1); updateLights();
   }
   async function switchPath() {
+    engine.stop();
     framegraph?.clear();
     const ticket = ++generation; pending?.abort(); pending = new AbortController(); profile?.dispose(); profile = undefined;
     scene.render3DSystem!.setRenderProfile('batched');
@@ -100,7 +102,9 @@ async function main() {
         if (destroyed || ticket !== generation) { next.dispose(); return; }
         profile = next;
       }
-      if (ticket === generation && !destroyed) { document.body.dataset.renderStatus = 'ready'; engine.run(); updateHud(); }
+      if (ticket !== generation || destroyed) return;
+      await prepareFirstFrames(engine, pending.signal);
+      if (ticket === generation && !destroyed) { readyFrames = 0; document.body.dataset.renderStatus = 'ready'; engine.run(); updateHud(); }
     } catch (error) {
       if (destroyed || ticket !== generation || pending.signal.aborted) return;
       fail(error instanceof Error ? error.message : String(error));
@@ -186,9 +190,9 @@ async function main() {
     $('result').textContent = JSON.stringify({ status: document.body.dataset.renderStatus, errors, count, active, stats, width: canvas.width, height: canvas.height, frames: readyFrames, timestampSupported: engine.timestampQuerySupported, adapter: engine.adapter ? { isFallbackAdapter: engine.adapter.info.isFallbackAdapter, vendor: engine.adapter.info.vendor, architecture: engine.adapter.info.architecture, device: engine.adapter.info.device, description: engine.adapter.info.description } : null });
   }
   function fail(message: string) { document.body.dataset.renderStatus = 'failed'; $('status').textContent = `无法完成渲染：${message}`; $('result').textContent = JSON.stringify({ status: 'failed', errors: [...errors, message] }); engine.stop(); }
-  engine.on('update', event => { frameDelta = event.detail.delta; if (input('motion').checked) { time += Math.min(frameDelta, 100) / 1000; updateLights(); } });
+  engine.on('update', event => { frameDelta = event.detail.delta; if (document.body.dataset.renderStatus === 'ready' && input('motion').checked) { time += Math.min(frameDelta, 100) / 1000; updateLights(); } });
   engine.on('after-update', event => {
-    if (destroyed) return; readyFrames++; drawHelpers(); framegraph?.afterFrame();
+    if (destroyed || document.body.dataset.renderStatus !== 'ready') return; readyFrames++; drawHelpers(); framegraph?.afterFrame();
     
     if (event.detail.time - lastDebug > 500) { lastDebug = event.detail.time; void drawDebug(); }
   });
@@ -197,7 +201,7 @@ async function main() {
   engine.on('recovery-failed', event => fail(event.detail.error.message));
   observer = new ResizeObserver(() => { if (!destroyed) { engine.resizeToDisplaySize(); debug.hidden = true; } }); observer.observe(canvas);
   hudTimer = setInterval(() => { if (document.body.dataset.renderStatus === 'ready') updateHud(); }, 100);
-  syncSelection(); engine.run(); await switchPath();
+  syncSelection(); await switchPath();
   Object.assign(window, { __deferredExample: { dispose, framegraph, whenSubmittedWorkDone: () => engine.device.queue.onSubmittedWorkDone(), snapshot: () => ({ ...JSON.parse($('result').textContent || '{}'), lifecycle: document.body.dataset.renderStatus, resources: getEngineDiagnosticsSnapshot(engine).gpuResources.totals }) } });
 }
 void main().catch(error => { document.body.dataset.renderStatus = 'failed'; $('status').textContent = `WebGPU 初始化失败：${String(error)}`; console.error(error); });

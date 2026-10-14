@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "protocolId": "g05-windows-continuous-v1",
+  "adr": "docs/for-ai/adr/0125-g05-continuous-sampling.md",
+  "frozenBudget": {
+    "path": "config/lighting-performance-021.json",
+    "sha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a",
+    "deviceId": "mac-amd-rdna1",
+    "interpretation": "Inherit discrete-class numerical budgets only; all captures retain their actual NVIDIA/Windows identity. Historical macOS evidence is not a Windows baseline."
+  },
+  "device": { "platform": "win32", "gpu": "NVIDIA GeForce GTX 1070 Ti", "vendor": "nvidia", "architecture": "pascal", "cpu": "Intel Core i7-7700" },
+  "browsers": ["chrome-windows", "edge-windows"],
+  "sampling": { "warmupFrames": 120, "cpuSamples": 300, "gpuSamples": 300, "cohorts": 3, "interCaseIdleMs": 0, "dropSlowSamples": false, "retry": false },
+  "order": "Alternate browser and workload order each cohort; alternate reference/candidate order. Every registered capture is retained.",
+  "forwardBaselineRevision": "61d40f7bf75e05ec948754d85fdbf70512a21ca8",
+  "measurement": "Frozen room, instance and Forward fixtures; separate CPU runtime and GPU timestamps; equal per-frame completion/readback on both sides. These offscreen frame-wall measurements are not presented FPS.",
+  "hostEvidence": "Read-only Windows CPU/GPU/driver/power identity before and after the matrix; CPU busy samples before and after each capture. No claim of uninterrupted frequency stability; all cohort spread checks retained.",
+  "release": "Full coverage, raw artifact audit, frozen budgets and three-cohort stability required; local dirty results cannot grant clean-candidate release qualification."
+}

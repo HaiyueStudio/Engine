@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "contractId": "g09-production-acceptance-v2",
+  "adr": "docs/for-ai/adr/0124-g09-production-performance-acceptance.md",
+  "scope": "G09 acceptance and its G05/G07 handoff; other release, correctness, package and cross-engine contracts retain their own policies",
+  "hardwareContract": "engine-native-021-v2",
+  "microbenchmark": {
+    "regressionWarningRatio": 0.05,
+    "releaseBlocking": false,
+    "unstableResult": "inconclusive",
+    "invalidEvidence": "invalid",
+    "legacyCalibrationRequired": false,
+    "legacyBaselineRequired": false,
+    "maxPlannedAttempts": 2,
+    "retainAllSamples": true
+  },
+  "production": {
+    "profileRegistration": "required-before-capture",
+    "requiredProfileFields": ["device", "browser", "resolution", "quality", "workload", "targetFps", "frameP95Ms", "frameP99Ms", "longFrameThresholdMs", "maxLongFrameRatio", "maxConsecutiveLongFrames", "durationSeconds", "startupBoundary", "warmupBoundary", "cohortPlan"],
+    "measurement": "Presented-workload frame pacing and end-to-end runtime evidence; GPU pass sums, serial fence wall time and headless throughput alone cannot qualify",
+    "persistentRegression": "Review reproducibility, paired uncertainty, absolute milliseconds and impact on the registered production target together; a relative percentage alone cannot reject a candidate",
+    "unregisteredProfileResult": "incomplete",
+    "contaminatedEvidenceResult": "inconclusive",
+    "automaticRetry": false
+  },
+  "requiredEvidence": [
+    { "id": "correctness", "requirement": "Complete F0-F8 correctness, full-image parity, errors, lifecycle and device recovery on the selected native path" },
+    { "id": "production-smoothness", "requirement": "Preregister representative production profiles and validate complete frame pacing, long frames, cold startup and steady operation; retain all rounds" },
+    { "id": "sustained-resources", "requirement": "Long-run resource bounds, pending retirement and zero cleanup residue; no sustained growth, hangs or repeated stutter" },
+    { "id": "optimization-benefit", "requirement": "Representative A/B1/B2/B3/B4 attribution with at least one measured production benefit; separate CPU, GPU, waiting, allocation and bandwidth proxies" },
+    { "id": "release-requalification", "requirement": "Same-candidate G05 and clean registered G07 evidence, including unchanged independent release contracts" }
+  ],
+  "historicalEvidence": "Preserve original results and protocol bytes. New interpretation never relabels a legacy failure as a pass or promotes diagnostic samples to a release baseline."
+}

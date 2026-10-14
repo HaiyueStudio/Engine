@@ -153,3 +153,7 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0121 G09 驱动与 Chrome GPU 电源条件](0121-g09-controlled-gpu-policy.md)
 - [0122：以能力结构和公开覆盖验收发布包](0122-package-capability-structure-review.md)
 - [0123：动画文本 OpenType 按需准备](0123-animation-opentype-on-demand.md)
+
+- [0124：G09 以生产场景流畅度验收；取代 0118–0121 的发布前置关系](0124-g09-production-performance-acceptance.md)
+- [0125：G05 固定预热后连续采样；保留全矩阵、冻结预算与历史结果](0125-g05-continuous-sampling.md)
+- [0126：G05 稳定性作为调查项；按严格输入与产物哈希复核既有证据](0126-g05-stability-and-evidence-reuse.md)

@@ -24,18 +24,31 @@ test('native capacity failures must allocate nothing and all referenced resource
 
 test('native AO generations preserve every pixel probe and exact ledger retirement',()=>{
  const r=valid();r.withAo=true;const records=[];
- for(const [w,h]of r.dimensions)for(let v=0;v<4;v++){
+ for(const [w,h]of r.dimensions){for(let v=0;v<4;v++){
   const ao=256+Math.ceil(w*2/256)*256*h+2*w*h,stored=Math.min(Math.ceil(w/16)*Math.ceil(h/16),Math.floor((67108864-28*w*h-ao-524288)/528));
   for(let i=0;i<4;i++)records.push({id:records.length,type:'texture',label:`TransientMRT:view:${v}:${i}`,estimatedBytes:w*h*(i===3?4:8)});
   records.push({id:records.length,type:'buffer',label:`DeferredTiles:view:${v}`,estimatedBytes:stored*528});
   records.push({id:records.length,type:'buffer',label:'DeferredAO.visibility',estimatedBytes:256+Math.ceil(w*2/256)*256*h});
-  records.push({id:records.length,type:'texture',label:'DeferredAO.visibility:0',estimatedBytes:2*w*h});
+ }
+ records.push({id:records.length,type:'texture',label:'DeferredAO.visibility:0',estimatedBytes:2*w*h});
  }
  records.push({id:records.length,type:'buffer',label:'DeferredAO.neutral',estimatedBytes:260});
  r.pending={driverResidentMemory:false,records,...summarizeG05ResourceRecords(records)};
  const held=records.filter(x=>x.label!=='DeferredAO.neutral');r.heldBeforeSubmission={driverResidentMemory:false,records:held,...summarizeG05ResourceRecords(held)};
  r.budgetAtPeak=r.pending.deferredEstimateBytes;r.readbacks.forEach(v=>v.aoValues=Array(2).fill(.25+v.generation*.25+v.view/16));
  r.packingProbe={cases:[[17,9],[129,3],[1920,2]].map(([width,height])=>({width,height,values:Array.from({length:width*height+2},(_,i)=>{const p=i===width*height?0:i===width*height+1?width*height-1:i;return ((p%width)+7*Math.floor(p/width))%17/16;}),neutralValues:Array(width*height+2).fill(1)}))};
- validateG05PendingNative(r,config);
+ assert.equal(validateG05PendingNative(r,config).estimatedBytes,507985924);
  for(const change of [r=>r.readbacks[1].aoValues[0]=0,r=>r.budgetAfterCompletion=1,r=>r.budgetAtPeak++,r=>r.heldBeforeSubmission.records.pop(),r=>r.packingProbe.cases.pop(),r=>r.packingProbe.cases[0].values[1]=0,r=>r.packingProbe.cases[1].values[129]=0,r=>r.packingProbe.cases[2].values[3841]=0,r=>r.packingProbe.cases[0].neutralValues[0]=0]){const copy=structuredClone(r);change(copy);assert.throws(()=>validateG05PendingNative(copy,config));}
+ // A forged aggregate must not hide a missing per-view buffer, additional texture,
+ // wrong allocation type, or undercounted physical texture.
+ for(const change of [
+  records=>{const buffers=records.filter(x=>x.label==='DeferredAO.visibility');buffers[0].estimatedBytes+=buffers[1].estimatedBytes;records.splice(records.indexOf(buffers[1]),1);},
+  records=>{const texture=records.find(x=>x.type==='texture'&&x.label.startsWith('DeferredAO.'));const bytes=texture.estimatedBytes;texture.estimatedBytes=bytes/2;records.push({...texture,id:10000});},
+  records=>{records.find(x=>x.label==='DeferredAO.visibility').type='texture';},
+  records=>{records.find(x=>x.label==='DeferredAO.visibility').estimatedBytes++;records.find(x=>x.label==='DeferredAO.visibility:0').estimatedBytes--;},
+ ]){
+  const copy=structuredClone(r);change(copy.pending.records);
+  Object.assign(copy.pending,summarizeG05ResourceRecords(copy.pending.records));
+  assert.throws(()=>validateG05PendingNative(copy,config),/AO physical allocation population/);
+ }
 });

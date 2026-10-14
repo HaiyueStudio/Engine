@@ -5,11 +5,26 @@ export function validateG05PendingNative(r,config){
  if(JSON.stringify(r.dimensions)!==JSON.stringify([[1904,1072],[1920,1080]])||r.views!==4)throw Error('Pending workload changed');
  const withAo=r.withAo===true;
  let expectedBytes=withAo?260:0;
- for(const [w,h]of r.dimensions){const ao=withAo?256+Math.ceil(w*2/256)*256*h+2*w*h:0,tiles=Math.ceil(w/16)*Math.ceil(h/16),stored=withAo?Math.min(tiles,Math.floor((config.memory.maxDeferredBytesPerViewGeneration-28*w*h-ao-524288)/528)):tiles;expectedBytes+=4*(28*w*h+Math.max(4,stored*528)+ao);}
+ const aoAllocations=[];
+ if(withAo)aoAllocations.push(['buffer','DeferredAO.neutral',260]);
+ for(const [w,h]of r.dimensions){
+  const buffer=withAo?256+Math.ceil(w*2/256)*256*h:0,texture=withAo?2*w*h:0;
+  // Admission conservatively charges a full AO working set per view. The physical
+  // texture is reused after its copy, but all eight visibility buffers stay live.
+  const tiles=Math.ceil(w/16)*Math.ceil(h/16),stored=withAo?Math.min(tiles,Math.floor((config.memory.maxDeferredBytesPerViewGeneration-28*w*h-buffer-texture-524288)/528)):tiles;
+  expectedBytes+=4*(28*w*h+Math.max(4,stored*528)+buffer)+texture;
+  if(withAo){
+   for(let view=0;view<4;view++)aoAllocations.push(['buffer','DeferredAO.visibility',buffer]);
+   aoAllocations.push(['texture','DeferredAO.visibility:0',texture]);
+  }
+ }
+ const population=records=>records.map(record=>[record.type,record.label,record.estimatedBytes]).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
  for(const phase of ['pending','heldBeforeSubmission']){
   const snapshot=r[phase],sum=summarizeG05ResourceRecords(snapshot?.records);
   if(snapshot.driverResidentMemory!==false||JSON.stringify(snapshot.views)!==JSON.stringify(sum.views)||snapshot.deferredEstimateBytes!==sum.deferredEstimateBytes)throw Error('Invalid pending attribution');
   if(sum.views.length!==4||sum.views.some(v=>v.gbufferTextures!==8||v.tileBuffers!==2)||sum.deferredEstimateBytes!==(expectedBytes-(withAo&&phase==='heldBeforeSubmission'?260:0))||sum.deferredEstimateBytes>config.memory.maxDeferredTargetBytesTotal)throw Error('Pending allocation budget/population mismatch');
+  const expected=aoAllocations.filter(record=>phase!=='heldBeforeSubmission'||record[1]!=='DeferredAO.neutral');
+  if(JSON.stringify(population(snapshot.records.filter(record=>record.label.startsWith('DeferredAO.'))))!==JSON.stringify(expected.sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)))))throw Error('Pending AO physical allocation population mismatch');
  }
  const referenced=s=>s.records.filter(record=>record.label!=='DeferredAO.neutral');
  if(JSON.stringify(referenced(r.pending))!==JSON.stringify(referenced(r.heldBeforeSubmission)))throw Error('Referenced resources released before submission');

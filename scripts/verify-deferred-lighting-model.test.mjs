@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { LIGHT_COUNTS, makeLights, lightPosition, parseCount, parsePath } from '../examples/deferred-lighting/model.ts';
+import { prepareFirstFrames } from '../examples/deferred-lighting/startup.ts';
+import { EventEmitter } from '../engine/dist/core.js';
 test('count/path input cannot silently request unsupported populations', () => {
  for (const count of LIGHT_COUNTS) assert.equal(parseCount(String(count)), count);
  for (const value of [null, '', '-1', 'NaN', '1000000', '8.5']) assert.equal(parseCount(value), 128);
@@ -11,4 +13,20 @@ test('light motion preserves deterministic positions at pause/reset and finite b
  for(const light of first){assert.deepEqual(lightPosition(light.position,light.phase,0,false),lightPosition(light.position,light.phase,0,false));
   for(const overlap of [false,true])for(const time of [0,1,100]){const p=lightPosition(light.position,light.phase,time,overlap);assert.ok(p.every(Number.isFinite));assert.ok(Math.abs(p[0])<=10.5);assert.ok(p[1]>=.5&&p[1]<=4.6);}}
  assert.notDeepEqual(lightPosition(first[0].position,first[0].phase,0,false),lightPosition(first[0].position,first[0].phase,1,false));
+});
+
+test('presentation waits for both loading submissions and leaves the normal loop stopped', async()=>{
+ const events=new EventEmitter(),pending=[],submitted=[];
+ const engine=Object.assign(events,{run(){queueMicrotask(()=>events.emit('after-update'));},stop(){submitted.push('stop');},device:{queue:{onSubmittedWorkDone(){return new Promise(resolve=>pending.push(resolve));}}}});
+ let ready=false;const task=prepareFirstFrames(engine,new AbortController().signal).then(()=>ready=true);
+ await new Promise(setImmediate);assert.equal(pending.length,1);assert.equal(ready,false);
+ pending.shift()();await new Promise(setImmediate);assert.equal(pending.length,1);assert.equal(ready,false);
+ pending.shift()();await task;assert.equal(ready,true);assert.equal(submitted.length,2);
+});
+
+test('aborting loading removes the pending frame listener and cannot resume a superseded path',async()=>{
+ const events=new EventEmitter(),controller=new AbortController();let stopped=0;
+ const engine=Object.assign(events,{run(){},stop(){stopped++;},device:{queue:{onSubmittedWorkDone(){throw Error('must not wait without a submitted frame');}}}});
+ const task=prepareFirstFrames(engine,controller.signal);controller.abort(new Error('superseded'));
+ await assert.rejects(task,/superseded/);events.emit('after-update');assert.equal(stopped,1);
 });

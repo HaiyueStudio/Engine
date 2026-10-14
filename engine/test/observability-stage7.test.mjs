@@ -67,6 +67,26 @@ test('GPUResourceTracker keeps production diagnostic payload empty when debug is
   assert.deepEqual(snapshot.caches, []);
 });
 
+test('released owners drop cache records while late allocations remain diagnosable', () => {
+  const tracker = new GPUResourceTracker({ debug: true });
+  const live = tracker.createScope('system', 'live');
+  tracker.recordCacheAccess('live-cache', true, { owner: live.owner, entries: 1 });
+  let released;
+  for (let i = 0; i < 300; i++) {
+    const scope = tracker.createScope('frame', `temporary-${i}`);
+    tracker.recordCacheAccess('temporary-cache', false, { owner: scope.owner, entries: 1 });
+    scope.release(); released = scope.owner;
+    tracker.recordCacheAccess('late-cache-callback', true, { owner: scope.owner, entries: 1 });
+    assert.equal(tracker.getDebugSnapshot().caches.length, 1, 'retired cache metadata must not accumulate');
+  }
+  const late = tracker.trackBuffer({ destroy() {} }, { owner: released, label: 'late-async-result', estimatedBytes: 16 });
+  assert.equal(tracker.getDebugSnapshot().releasedOwnerResiduals, 1);
+  tracker.untrackBuffer(late);
+  assert.equal(tracker.getDebugSnapshot().releasedOwnerResiduals, 0);
+  tracker.releaseAll();
+  assert.equal(tracker.getDebugSnapshot().caches.length, 0);
+});
+
 test('instrumented GPUDevice covers allocation, upload, draw, dispatch, and pipeline switch entry points', () => {
   const diagnostics = new FrameDiagnostics({ enabled: true });
   diagnostics.beginFrame(1);

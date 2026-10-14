@@ -202,7 +202,8 @@ export class GPUResourceTracker {
   private readonly _bundleCounters = new WeakMap<GPURenderBundle, { draws: number; pipelineSwitches: number }>();
   private readonly _stats = new Map<GPUTrackedResourceType, MutableResourceTypeStats>();
   private readonly _caches = new Map<string, MutableCacheStats>();
-  private readonly _releasedOwners = new Set<GPUResourceOwner>();
+  // Remember late allocations without retaining every retired scene/frame owner.
+  private readonly _releasedOwners = new WeakSet<GPUResourceOwner>();
   private _activeOwner: GPUResourceOwner | null = null;
   private _frame = 0;
   private _nextResourceId = 0;
@@ -452,6 +453,7 @@ export class GPUResourceTracker {
   recordCacheAccess(label: string, hit: boolean, options: { owner?: GPUResourceOwner; entries?: number } = {}): void {
     if (!this.debug) return;
     const owner = options.owner ?? this._activeOwner ?? DEFAULT_OWNER;
+    if (this._releasedOwners.has(owner)) return;
     const key = `${owner.id}:${label}`;
     let stats = this._caches.get(key);
     if (!stats) {
@@ -474,6 +476,9 @@ export class GPUResourceTracker {
   releaseOwner(owner: GPUResourceOwner): void {
     const resources = this._resourcesByOwner.get(owner);
     this._releasedOwners.add(owner);
+    for (const [key, stats] of this._caches) {
+      if (stats.owner === owner) this._caches.delete(key);
+    }
     if (!resources) return;
     for (const resource of [...resources]) this._destroyAndUntrack(resource);
     this._resourcesByOwner.delete(owner);
@@ -482,6 +487,7 @@ export class GPUResourceTracker {
   releaseAll(): void {
     for (const resource of [...this._resources.keys()]) this._destroyAndUntrack(resource);
     this._resourcesByOwner.clear();
+    this._caches.clear();
   }
 
   getUsage(owner?: GPUResourceOwner): GPUResourceUsage {
@@ -529,7 +535,9 @@ export class GPUResourceTracker {
       return Object.freeze({ ...stats, hitRate: total === 0 ? 0 : stats.hits / total });
     });
     let releasedOwnerResiduals = 0;
-    for (const owner of this._releasedOwners) releasedOwnerResiduals += this._resourcesByOwner.get(owner)?.size ?? 0;
+    for (const [owner, resources] of this._resourcesByOwner) {
+      if (this._releasedOwners.has(owner)) releasedOwnerResiduals += resources.size;
+    }
     return Object.freeze({
       enabled: this.debug,
       frame: this._frame,

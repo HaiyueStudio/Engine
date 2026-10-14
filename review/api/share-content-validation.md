@@ -27,6 +27,11 @@ Measured validation on 2026-10-08:
   gzip 5,120 bytes; no runtime imports or new dependencies. Root exports are unchanged.
 - Interactive example: `examples/share-content/index.html`; append `?verify=1` to run the browser checks.
 
+The 0.2.1 public-package gate also retains all five runtime exports through a focused
+`@haiyue/extensions/share-content` packed consumer. Its 6,000-byte gzip ceiling uses the
+5,120-byte reviewed measurement above plus bounded growth room; existing package and other
+consumer budgets are unchanged. Unrelated GUI, glTF and animation runtimes must remain absent.
+
 Device follow-up: the Native repository's independent `org.haiyue.nativevalidation` host exercised actual
 GPU readback before presentation, Canvas2D composition, four locale/layout outputs and challenge parsing
 on iPhone 15 Plus and Android X4000. Host requirements found during acceptance: supply Intl locale

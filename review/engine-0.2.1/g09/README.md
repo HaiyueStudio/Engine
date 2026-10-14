@@ -1,92 +1,76 @@
-# G09 FrameGraph 验收索引
+# G09：问题、结论与解决方法
 
-本目录记录 G09 各子阶段的实现与证据。真实依赖、裁剪、临时纹理复用、计划缓存、安全附件操作与按需诊断已实现；完整 G09 与持续稳定性资格尚未完成。
+状态：实现已落地；资源引用退休和加载就绪修复后的 v2 九场景、36 次生产流畅度实测通过；最终候选 `f0c1286` 的完整资源长跑及独立复核通过。该最终候选的生产复核因采样期间前台切到 ChatGPT 而中断，消融及最终同候选发布资格尚未完成。当前验收以 [ADR 0124](../../../docs/for-ai/adr/0124-g09-production-performance-acceptance.md) 和 [机器合同](../../../config/framegraph-acceptance-021.json) 为准。5% 是 G09 微基准调查触发线；旧式校准与基线属于可选定位工具，不再是 G09 发布前置条件。
 
-- **单灯连续 GPU 状态诊断入口（2026-10-12）**：[固定对照与运行方式](single-light-gpu-state-diagnostic.md)及[工程检查](single-light-gpu-state-diagnostic-checks.json)。保留 v5 单灯负载、B8、三轮 AB/BA/AB，双方只共同增加 200 ms 连续 GPU 状态观察；诊断不直接生成基线。真实观察器及三组画面对照通过；工程计时尝试因其他构建的高 CPU 负载等待超时，已恢复设置，完整六次独立诊断待空闲执行。复核状态后再做两场景校准和全新三轮基线，原 5% 预算不变。
+## 已有结论
 
-- **v5 独立校准完成（2026-10-12，13:08）**：[结果](gpu-warmup-calibration-v5-result.md)及[独立复核](gpu-warmup-calibration-v5-result-checks.json)。20 次捕获完整，CPU 共同候选 12000 帧；单灯 B4 第三轮全尾段 GPU 跨轮 spread 超过 20%，GPU 校准失败，新基线阻断。六组画面对照零差异，设置恢复、无锁屏和采样退出已核验；尚缺执行期间连续 GPU 状态证据，不以增加预热或删除慢轮放行，原 5% 回归预算不变。
+| 问题 | 结论 | 解决方法与边界 |
+| --- | --- | --- |
+| 帧计划存在无消费者步骤 | 已接入真实依赖、活跃根与后处理裁剪 | 从输出与副作用回溯；保留历史、外部输出和未知效果。结构改善不等于同比帧率提升 |
+| 临时纹理重复分配 | 已实现生命周期内的兼容对象复用 | 诊断四视图的三类纹理由 600 降至 162 KiB，像素差 0；这不是全部显存或生产 FPS 收益 |
+| 重复编译结构计划 | 已实现有界计划/分配缓存和失效检查 | 每帧重绑当前资源；设备代际与 owner 销毁清理；不缓存历史纹理句柄 |
+| 混合尺寸描边提前释放 | 已修复 pending 纹理被销毁的问题 | 提交完成后退休旧资源，尺寸对应的参数独立保留；仍存在 resize 创建成本 |
+| 常开诊断有成本 | 单帧诊断改为按需捕获 | 冻结图数据用于 JSON/PNG 导出；诊断开销单列 |
+| Intel Gen9 空画面与 GPU 重置 | 旧 A0 和 B4 均复现，未证明已修复 | 按 ADR 0117 作为非阻塞扩展兼容；必需原生路径和原始失败保持 |
+| CPU record 后段波动 | 电源状态影响多个阶段；未证明全部来自 FrameGraph | 可选双方一致的临时电源对照并恢复；已优化重复结构序列化。旧 v4 CPU 单/八灯回归约 2.86%/2.73% |
+| GPU 主绘制慢段与提交等待 | 长诊断中固定上限 B8 未再观察到既定慢段，S8 仍存在；不能推广为所有产品负载已修复 | 保留每帧提交和引擎退休回调，在相同八帧上限下整批完成/读回；该模式属于测量协议 |
+| v5 无共同 GPU 预热候选 | CPU 候选 12000 帧；单灯 B4 第三轮整个尾段偏慢，跨轮稳定性失败 | 0.145408→0.180192 ms，绝对差 0.034784 ms；不是完整帧或已确认回归。当前分类为证据不足，历史校准失败不改写 |
+| 独立采样入口易被中断 | 已区分管理员通过与后台应用拦截，并加入构建预检、独占锁和恢复记录 | 需要诊断时退出宿主后从资源管理器启动；不要在编译负载下采样。该流程不再要求用户反复运行以获得绿色 |
+| 缺少 GPU 执行时状态 | 连续观察入口已实现，观察器与画面对照验证通过；完整六次计时未完成 | 保留可选入口 `scripts/start-framegraph-gpu-state.cmd`；只有实际流畅度问题值得追查时才继续 |
 
-- **共同 GPU 预热与新基线入口（2026-10-12）**：[v5 协议及操作](gpu-warmup-calibration-v5.md)及[机器复核](gpu-warmup-calibration-v5-checks.json)。双方统一八帧批量完成，独立选择共同 CPU/GPU 预热后冻结，再采三轮新基线；原 5% 回归预算不变。16 次原生工程捕获、42672 GPU 帧及六组零差异画面对照通过，恢复与进程退出已复核；111 项 FrameGraph 策略、全仓测试/类型/构建通过。独立完整校准及新基线尚待用户退出应用后运行 `D:\HaiyueStudio\start-g09-calibration.cmd`。
+## 本机生产路径实测（2026-10-13）
 
-- **独立长诊断完整结果（2026-10-12）**：[结果与剩余预热问题](batch-completion-long-result.md)及[机器复核](batch-completion-long-result-checks.json)。8/8 次、96 万测量帧、每次至少 90 秒且全程无锁屏；设置与资源恢复通过。B8 四次均无既定阈值慢帧，S8 有 1854 个主绘制慢帧、47 个长慢段，其中 46 段未观察到外部调度重合。约 686 万个事件完整复核；A0/B8 一轮首 300 帧仍有过渡波动，需要共同 GPU 预热校准和新基线，原 5% 预算不变。
+**v2 完整生产矩阵通过；范围为干净测量快照 `1c9add83a6344ce4cc3ab1c1b2cd3165a8521041`。** 在独立工作区 `Engine-rc-021-20261013` 按预登记完成 i7-7700、GTX 1070 Ti、Windows 10 19045、60 Hz 屏幕上的 Chrome 154 / Edge 155 各两轮，共 36 次捕获。使用平衡电源、真实 `engine.run()`、可见画布、动态相机和完整灯表；第二轮反转场景及浏览器顺序，所有样本保留。
 
-- **独立长诊断构建过期（2026-10-12）**：[现场、重建与提前预检](batch-completion-stale-build.md)及[机器复核](batch-completion-stale-build-checks.json)。CMYK 合入导致输入指纹变化，首组采样前被正确拒绝；设置和追踪均已恢复。独立重建的四个 B4 JavaScript 文件逐字节相同，刷新当前输入绑定；新增启动前 A0/B4 完整性检查，原采样期检查保留。86 项 FrameGraph 策略及原生入口专项通过；未重跑长采样，原 5% 预算不变。
+每次新建浏览器配置目录，在加载阶段完成两次真实提交并等待完成；随后分别检查首个 10 秒交互窗口和 30 秒稳态。**64,800 个稳态间隔全部达标，首段交互和稳态均无超过 50 ms 的间隔**；加载到可交互为 0.85–4.50 秒，交互首段最长间隔 19.625 ms，稳态最差 P99 为 16.94 ms。OS／驱动缓存未清空。下表为每个场景四次捕获的最差值；原上限 P95 20 ms、P99 34 ms、长帧比例 1%、最多连续 2 个长帧保持。
 
-- **长诊断入口权限复核（2026-10-11）**：[现场与提示修正](batch-completion-permission-entry.md)及[机器复核](batch-completion-permission-entry-checks.json)。用户管理员权限已通过，实际由后台应用检查阻止启动；新增独立权限提示、启动记录和只读检查，验证真实 CMD 与隐藏 worker 的权限继承。工程检查未启动采样或修改设置，原长诊断协议及 5% 预算不变。
+| 场景 | 渲染分辨率／视图 | 最差帧间隔 P95 / P99（ms） | CPU 更新至提交 P95（ms） |
+| --- | --- | --- | --- |
+| Forward，1 灯 | 1280×720 | 16.860 / 16.920 | 5.375 |
+| Reference，128 灯 | 1280×720 | 16.845 / 16.915 | 7.345 |
+| Tiled，256 灯 | 1280×720 | 16.855 / 16.920 | 8.975 |
+| Tiled，128 灯＋GTAO | 1920×1080 | 16.855 / 16.940 | 10.505 |
+| 透明 PBR＋TAA＋模糊 | 1280×720 | 16.855 / 16.920 | 11.700 |
+| 四分屏 | 4×640×360，总计 1280×720 | 16.860 / 16.930 | 15.850 |
+| 外部 RTT | 主画面 1280×720＋640×360 HDR 输出 | 16.855 / 16.920 | 11.420 |
+| 平面镜面 | 主画面 1280×720＋640×360 反射 | 16.855 / 16.925 | 7.845 |
+| Tiled，512 灯压力 | 1920×1080 | 16.855 / 16.915 | 11.285 |
 
-- **动画文本按需加载（2026-10-11）**：[实现与合同评审](../../api/animation-opentype-loading-review.md)及[机器复核](../../api/animation-opentype-loading-checks.json)。OpenType 随实际字体资源准备加载，Animation2D / HYA 状态机初始 gzip 分别减少 43.59% / 42.16%，原完整消费端与整包字节上限保留。1,468 项全仓测试、98 个示例构建、独立发布包和浏览器字体像素验证通过。单文件 IIFE 仍内联；这不代表 G09 完整性能资格，5% 预算不变。
+测量的是可见生产渲染路径的引擎 rAF 节奏，并以截图、完整灯光覆盖、浏览器错误和窗口可见／焦点记录核验；不宣称物理屏幕逐帧扫描时刻，也不把 CPU 数据称为 GPU 时间。开启 CPU/资源诊断、关闭 GPU timestamp；1080p 画布显示为 1280×720 CSS 尺寸，渲染像素保持 1920×1080。场景为包含 256 个 PBR 物体的登记房间及具名效果，不是全部游戏、四张完整 720p 视图、高重叠灯光或 10k 实例的性能资格。
 
-- **Extensions 结构与发布复核（2026-10-11）**：[实现/API 评审](../../api/extensions-capability-review.md)及[机器复核](../../api/extensions-capability-checks.json)。按用户要求将包文件数改为观察指标，原字节预算保留，补齐 14 个稳定入口的独立消费和四个包全部 66 个声明入口的检查；修复 glTF、Spine、Tilemap 自建系统的销毁与失败回滚。新发布包门禁通过，1,460 项全仓测试及 98 个示例构建通过。原文件数失败保留；这不代表 G09 完整性能资格，原 5% 预算不变。
+| 实测问题 | 结论 | 处理方法与边界 |
+| --- | --- | --- |
+| 新浏览器启动的前几帧停顿 | 异步管线预热单独使用仍有约 750–900 ms 空档；加载阶段完成两次真实绘制后，八次专项捕获的交互阶段均无超过 50 ms 的间隔 | 示例进入可交互状态前完成两次提交与 GPU 完成等待；耗时完整计入加载时间。v2 另外检查首个 10 秒交互窗口，不能用稳态掩盖启动停顿。驱动内部停顿的精确归因仍未确定 |
+| TAA／镜面对象不断增长 | 已定位为运动向量、镜面和输出绑定组的诊断引用未退休；另修复已释放 owner 与缓存元数据的强引用保留 | 清除废弃绑定组引用，保持原 GPU 安全退休时点及借用纹理所有权；released owner 改弱引用，清理对应缓存。修复前后测试覆盖实际对象增长；不能将零字节跟踪对象增长称作已证实的显存泄漏 |
+| 修复后的完整捕获超时 | 第一轮 17 项通过，随后三项 512 灯捕获超时；同时观察到 VS Code 后台高 CPU。退出后两浏览器短诊断各约 1,200 帧均完成 | 原失败报告保持 incomplete，不拼接重试。补充超时阶段、部分帧与截图；短诊断只确认当前能运行，不据此断言 VS Code 是唯一原因 |
+| 资源短测窗口正常但页面隐藏 | 实际读到 `visibilityState=hidden`，rAF 未推进；用户确认屏幕亮着，尚不能归因于锁屏或屏保 | 页面初始化完成后再前置，并确认真实可见／焦点状态；采样中持续丢失可见性则保存部分记录并停止，避免长时间空等。修复后 TAA／镜面短测通过；没有伪造可见性或禁用后台节流 |
+| 可见窗口采样偶发失焦 | 早先 Chrome 镜面失焦时用户确认未操作，最终候选资源长跑未复现；后续生产复核在 24 项通过后再次中断：12:05:37 前台由 Edge 切至 ChatGPT，页面失焦约 103 ms 后转为 hidden，346 帧的部分记录随之停止推进，浏览器渲染错误为零；采样器随后停止 | 已确定本次前台切换目标和页面隐藏，尚未确定触发机制，不能倒推早次原因。两个中断整组均保留 invalid；不自动抢焦点、伪造可见性或拼接样本。可见生产／消融改由退出宿主后的独立入口运行，其他不依赖焦点的资格继续执行 |
 
-- **loaders.gl 版本收紧（2026-10-11）**：[依赖评审](../../api/loaders-gl-dependency-review.md)及[机器复核](loaders-dependency-checks.json)。四个直接声明统一固定 4.4.4，显式 core 约束阻止 peer 漂移；全新 Engine 消费者的五个运行时包全部为 4.4.4。1,446 项全仓测试、类型/API 检查、98 个示例构建通过。发布包安装与消费通过，但 extensions 原有 202/200 文件数问题仍使总门禁失败，预算不变。B4 重建的四个 JavaScript 文件逐字节相同，已刷新锁文件变动后的当前构建输入绑定；独立长诊断和完整性能资格仍待完成，5% 预算保持。
+当前原始帧、截图、预登记、构建哈希及输入不变性检查位于独立工作区的 `artifacts/engine-0.2.1/g09/production-local-2026-10-13T02-46-45.513Z/report.json`；独立复核 `artifacts/candidate-production-reaudit.json` 为 passed。这里的通过限于本机登记场景的加载边界、交互和稳态，不授予优化收益或完整 G09/G07 资格。原 v1 报告及原超时尝试继续保留。
 
-- **完整验收推进（2026-10-11）**：[F0–F8 场景登记与预检](acceptance-preflight.md)及[机器复核](acceptance-preflight-checks.json)。60 个场景、Windows 两浏览器 224/224 次正确性捕获及原始数据复核通过，72 组 A0/B4、100 个视图画面差为 0；F0 仅断言显示输出。1,446 项全仓测试、98 个示例重新构建通过，重建影响的辅助专项另行复核。性能、消融及独立长诊断仍待完成，5% 预算不变；全新包消费另发现 loaders.gl 依赖版本不可用，保留失败。
+最终候选 `f0c1286adb9393a14ec3657df653e51247ee1ee6` 的资源长跑在同一独立工作区完成 Chrome／Edge × TAA／镜面全部四项，每项 310 秒。72,001 个稳态帧间隔中没有超过 50 ms 的长帧，最差 P95／P99 为 16.835／16.890 ms；各类资源数量、估算字节、owner 和缓存均未超过预登记的初始包络，最终 pending、owner／缓存残留与资源清理均为零。证据为 `artifacts/engine-0.2.1/g09/study-resources-2026-10-13T03-26-03.248Z/report.json`，独立复核为 `artifacts/final-resource-reaudit.json`。此结论限于已登记场景和时长，不是长期任意负载的显存驻留保证。
 
-- **长诊断启动中断（2026-10-11）**：[现场与外部入口](batch-completion-launch-interruption.md)及[复核记录](batch-completion-external-entry-checks.json)。确认弹窗后，后台停在等待 ChatGPT 退出阶段，随后消失；没有正式样本、没有设置残留。改为先退出聊天应用，再从资源管理器手动运行根目录 CMD，应用仍在后台则立即拒绝启动。采样协议及 5% 预算不变。
+## 验收剩余工作
 
-- **延长批量完成观察（2026-10-10）**：[设计与新入口](batch-completion-long-diagnostic.md)及[复核记录](batch-completion-long-checks.json)。双方每次固定 12 万测量帧并要求至少 90 秒，共 8 次；保留 8 帧上限与原 5% 预算。新增锁屏审查和大结果传输修复；工程验证不作性能资格，独立长矩阵待运行。
+1. **将最终发布候选绑定完整证据。** v2 冷启动及稳态在干净测量快照通过；后续可见采样被前台切换中断，须在宿主退出后的独立进程中补齐。按 [ADR 0126](../../../docs/for-ai/adr/0126-g05-stability-and-evidence-reuse.md)，仅验收/文档变化且全部输入及新构建哈希一致时可复核旧数据，不能改写原报告 revision。`1c9add8` 到 `f0c1286` 涉及采样器和来源登记变化，不因引擎运行时相同就自动复用。
+2. **完成同候选的消融收益。** 资源长跑已通过。四视图短诊断中 MRT 物理纹理估算由 24.61 降至 6.15 MiB，全部可见 RGB 一致；尚需完整 A/B1/B2/B3/B4 矩阵，不能将短测称为 FPS 收益。F6/F7 的切换、读回、pending、恢复要求不降低。
+3. **完成 G05/G07 重新验收。** 本机 G05 完整性能矩阵的原预算均通过，稳定性按 ADR 0126 调查；最终复核与历史高重叠的绝对耗时问题见[总验收](../README.md)。干净候选、包/API/Shader 与独立发布合同仍需验证。没有发布、基线晋升或 G09 完成声明。
 
-- **批量完成完整结果（2026-10-10，11:56）**：[结果与锁屏补救](batch-completion-full-result.md)及[复核记录](batch-completion-full-result-checks.json)。8/8 次、12 万帧完整，B8 四次主要处于 P0 且未出现原阈值慢帧；S8 仍有 7 个长慢段。Security 日志发现两次锁屏，6 组 GPU 测量受影响，整批不满足未锁屏条件；B8 仅约 12 秒也不足以证明长期稳定。用户已关闭屏保恢复登录，另加配置预检和运行期间锁屏审查；未建基线，5% 预算保持。
+既有 F0–F8 正确性预检完成 60 个登记场景、Windows 两浏览器 224 次捕获，72 组 A0/B4 的 100 个视图像素差为 0。它是原候选的正确性证据；F0 仅验证显示输出，不能替代新候选性能和最终发布资格。
 
-- **固定在途上限的批量完成（2026-10-10）**：[设计、验证与新入口](batch-completion-diagnostic.md)及[复核记录](batch-completion-checks.json)。S8/B8 共用 8 帧上限及整批完成/读回，仅切换逐帧显式等待；11 项专项、四组原生短采样、两组单帧尾批及故障恢复通过。独立 8 次、12 万帧矩阵待运行，较短运行时长不能证明慢段消失；5% 预算保持。
+## 证据与入口
 
-- **主绘制完整单变量矩阵（2026-10-10，10:14）**：[结果与后续边界](main-pass-full-result.md)及[复核记录](main-pass-full-result-checks.json)。12/12 次、18 万帧完整；W1 将等待移入读回，R1 未产生双方一致的改善，所有捕获仍有持续慢段。25 段中 23 段无外部重合或所查分页事件；250 个输出尖峰均有确认的外部活动。A0/R1 两次升频伴随桌面活动，未重现延迟 GPU 信息收集子进程。设置恢复、无采样残留；未建立新基线，5% 预算保持。
+- `npm run framegraph:acceptance:plan`：当前验收要求与完整正确性矩阵；计划明确标为 `incomplete`。
+- `npm run framegraph:production:plan` / `framegraph:production:run`：查看登记口径／运行本机可见窗口采样。`framegraph:production:smoke` 只验证入口和画面，不授予性能资格。
+- `npm run framegraph:production:audit -- --audit=<report>`：按预登记和原始文件重新计算；缺失、变更、失焦／隐藏及超时不能记为通过。
+- `npm run framegraph:production:diagnostic`：两浏览器压力短诊断，不能授予性能资格。
+- `npm run framegraph:study:run -- --mode=resources|ablation --plan|--smoke|--full`：资源长跑或五档消融；每次输出独立原始报告，以 `framegraph:study:audit -- --audit=<report>` 复核。
+- 加载就绪专项（本地 `artifacts/engine-0.2.1/g09/startup-ready-2026-10-13T01-03-32.323Z/report.json`）、绑定组修复长测（本地 `artifacts/engine-0.2.1/g09/resource-soak-2026-10-13T00-35-46.409Z/report.json`）、消融短诊断（本地 `artifacts/engine-0.2.1/g09/production-ablation-smoke-2026-10-13T01-21-13.923Z/report.json`）：各自仅支持对应结论，资源长测早于最终 tracker 元数据修复。
+- 未完成的 v2 矩阵（本地 `artifacts/engine-0.2.1/g09/production-local-2026-10-13T01-22-06.796Z/report.json`）、退出 VS Code 后短诊断（本地 `artifacts/engine-0.2.1/g09/production-stress-diagnostic-2026-10-13T01-50-38.972Z/report.json`）：保留失败与不同输入边界，不混为完整验收。
+- 计时器修复后的消融入口（本地 `artifacts/engine-0.2.1/g09/study-ablation-smoke-2026-10-13T02-02-03.398Z/report.json`）、可见性修复后的资源入口（本地 `artifacts/engine-0.2.1/g09/study-resources-smoke-2026-10-13T02-12-13.827Z/report.json`）：短测仅验证入口、画面、计时通道和资源清理，不能代替完整长测。
+- 最终候选失焦记录（独立工作区 `artifacts/engine-0.2.1/g09/production-local-2026-10-13T03-47-57.425Z/report.json`）、只读前台记录 `artifacts/final-production-foreground.jsonl`：保留部分帧、截图和停止时间；新独立入口位于该工作区 `artifacts/start-final-visible-validation.cmd`，不更改电源／服务，不自动终止用户应用或重试。
+- [A0 源码固定点](dependency-baseline.json)：程序直接读取，原字节保留。
+- [历史归档](../../archive/README.md)：按原文件名查询逐次报告与机器检查。关键记录：`acceptance-preflight-checks.json`、`batch-completion-long-result-checks.json`、`gpu-warmup-calibration-v5-result-checks.json`、`single-light-gpu-state-diagnostic-checks.json`。
+- [实现合同](../../../docs/for-ai/adr/README.md)：ADR 0111–0114；旧诊断 ADR 0118–0121 的发布前置关系由 ADR 0124 取代。
 
-- **主绘制矩阵首轮中断（2026-10-09，22:06）**：[结果](main-pass-partial-result.md)及[复核记录](main-pass-partial-result-checks.json)。仅完成 1/12 次 A0/C0；下一次前检测到 Codex/ChatGPT，整批保留 failed。15000 帧复现两段共 72 帧主绘制变慢，同期出现核心频率下探、无外部 GPU 区间重合；37 个输出尖峰均与 dwm 重合。尚无 W1/R1/B4 对照，不能判定干预效果；设置恢复、无采样残留，5% 预算不变。
-
-- **主绘制启动器修复（2026-10-09）**：[原因、恢复与新行为](main-pass-launcher-fix.md)及[检查记录](main-pass-launcher-fix-checks.json)。原入口后台启动后立即退出、缺少防重，导致两份任务重叠；两次均未取得样本，失败和恢复错误保留，原设置确认恢复并清理重复临时方案。已增加启动确认弹窗和跨进程独占保护，原 CMD 转接到修正版；测量协议和 5% 预算不变。
-
-- **主绘制单变量诊断已准备（2026-10-09）**：[实验设计与入口](main-pass-single-variable-diagnostic.md)及[工程检查](main-pass-diagnostic-checks.json)。A0/B4 共用 C0、仅取消采样等待 W1、仅每 8 帧读回 R1，固定反向平衡 12 次捕获；本机锁频接口不可用，频率只作共同观测。六组短验证、逐帧归属和故障恢复通过，资源回收通知保持；独立全量矩阵尚未运行，原 5% 预算不变。
-
-- **信息收集独立对照（2026-10-09，20:18）**：[本轮结果](gpu-info-control-result.md)、[整批复核](gpu-info-control-result-checks.json)、[主绘制事件](gpu-main-pass-context-checks.json)及[完成通知验证](gpu-completion-notice-checks.json)。B4 因 Codex 在采样结束前重新打开而保留 failed；A0 不再出现延迟信息收集进程或 P0，但仍有 10 个桌面任务重合尖峰和两段共 139 帧的主绘制变慢。后者没有同期外部调度包或所列分页事件，原因尚未查明。已补安全结束通知并验证恢复；暂不重复同批，原 5% 预算保持。
-
-- **独立调度归因（2026-10-09，19:23）**：[结果与修复对照](gpu-scheduler-result.md)、[独立复核](gpu-scheduler-result-checks.json)及[新入口检查](gpu-info-control-checks.json)。两组均在 Chrome 启动约 120 秒后出现短时 GPU 信息收集进程并升频；单参数工程对照未再出现该进程或 P0。63 个输出尖峰全部与桌面 GPU 活动重合。已准备关闭延迟收集、隐藏控制台的独立反证入口；原全量失败和 5% 预算保持。
-
-- **v4 八灯阶段诊断完成（2026-10-09，18:35）**：[阶段结果](gpu-v4-phases-result.md)及[独立复核](gpu-v4-phases-result-checks.json)。六轮 14400 帧完整，GPU 测量阶段均观察为 P8/405 MHz；发现稳定频率下的 SceneOutput 尖峰，且旧 A0 也有同类现象。延长预热或合并更多样本均不能据此作为修复；下一步用 GPU 调度记录归因，原 v4 失败和 5% 预算保持。
-
-- **v4 全量完成（2026-10-09，16:33）**：[校准与新基线结果](controlled-gpu-v4-result.md)及[检查记录](controlled-gpu-v4-checks.json)。28/28 项独立重算，共同预热 18000 帧；CPU 单灯/八灯 +2.86%/+2.73% 通过原 5% 预算。八灯 B4 GPU 三轮 1.339/0.979/0.288 ms，跨轮稳定性失败，完整基线仍未通过；所有临时设置恢复。后续仅运行约 25 分钟的八灯阶段诊断，入口见结果记录。
-
-- **独立 GPU 对照完成（2026-10-09）**：[稳定性复核与 v4 新基线入口](gpu-power-closed-result.md)及[检查索引](gpu-power-closed-checks.json)。六轮、14400 个测量帧完整；未发现指定后台程序，全部固定窗口为 P8/405 MHz，三轮 GPU spread 约 3.27%/3.08%。新条件已纳入 v4，正常与故障恢复通过；完整校准和全新基线待独立运行，原 5% 预算不变。
-
-- **重启后验证（2026-10-09）**：[设备恢复与 GPU 电源对照入口](post-reboot-gpu-power.md)及[检查索引](post-reboot-gpu-power-checks.json)。582.78 设备、Chrome 设置保存/恢复和 Chrome/Edge 16 项原生正确性通过；正常与故意中断路径均恢复 CPU/GPU 设置。独立六轮 GPU 状态对照待执行，尚未证明稳态，5% 预算不变。此前安装器收尾错误保留。
-
-- **驱动恢复与缓存迁移（2026-10-09）**：[582.78 恢复及接口验证](nvidia-clean-install.md)。官方清洁安装在旧组件清理阶段失败，随后 Windows PnP 成功安装同一官方驱动；设备正常，Chrome 设置写入/回读及两种恢复路径均通过。pip/npm 缓存已迁至 D 盘。此项为重启前记录；重启后进展见上，5% 预算不变。
-
-- **驱动保存故障（2026-10-09）**：[控制面板与 API 拒绝保存的诊断](nvidia-settings-save-failure.md)。普通文件访问与保存锁正常，显示配置服务重启无效，原样保存/导出也失败；未确定数据库损坏。现有配置已备份；用户已授权，后续状态见 [582.78 清洁安装与空间处理](nvidia-clean-install.md)。
-
-- **GPU 状态诊断（2026-10-09）**：[六轮连续频率与逐帧结果](gpu-state-closed-result.md)及[检查索引](gpu-state-closed-checks.json)。全部六组捕获完整；相同 A0 在 P8/显存 405 MHz 与 P0/4006 MHz 下分别约 1.01 ms 和 0.29 ms，确认跨轮 GPU 状态不可比。Epic 全程在后台，本轮保留 failed，不能作为安静验收。已补启动前后台预检；Chrome 专属电源控制在驱动保存接口报错，原设置未变，短对照尚不能开始。5% 预算不变。
-
-- **优化后复采（2026-10-07，19:14 完成）**：[CPU 通过与 GPU 状态差异](gpu-state-stability.md)及[检查索引](gpu-stability-checks.json)。完整 28 项捕获独立重算；CPU 单灯/八灯回归 4.42%/2.56%，通过原 5% 预算。八灯 A0 第三轮 GPU 耗时显著变短，伴随高结束频率，三轮 GPU 稳定性失败，整体基线仍不合格。已验证约 6–8 分钟的独立 GPU 定向诊断入口，已完成的独立运行结果见上。
-
-- **首轮完整 v3 结果（2026-10-07）**：[共同稳态、新基线与 CPU 回归](controlled-sampling-result.md)及[检查索引](controlled-sampling-checks.json)。28/28 捕获独立核验，共同预热选定 6000 帧，首轮 A0 同机基线稳定；当时 B4 单灯/八灯 CPU P95 回归 5.31%/6.96%，GPU 指标通过。后续重复结构序列化优化及复采结论见上，不覆盖此历史失败。
-
-- **CPU record 后段诊断（2026-10-07）**：[调用栈、GC/JIT、阶段计时与电源对照](cpu-record-diagnosis.md)。累计十次长诊断。新增三段独立 A0 对照：最低处理器状态 100% 时后半段 CPU P95 为 0.495–0.500 ms，恢复原方案后峰值再现。共同主机条件接入 [v3 协议](../../../docs/for-ai/adr/0120-g09-controlled-cpu-power.md)后完整校准通过，当前剩余 CPU 回归见最新结果；原 5% 预算不变。
-
-- **独立采样协议（2026-10-07）**：[ADR 0118](../../../docs/for-ai/adr/0118-g09-cold-steady-sampling.md)定义先校准、再冻结、最后以全新人口重建同机基线的流程；保留原 5% 回归预算及旧门禁记录。[历史 v1/v2 与 v3 入口记录](unattended-sampling.md)保留共同稳态失败、服务/电源恢复及工程修复经过；最新 v3 全量结果见上。
-
-- **性能验收进展（2026-10-06 晚）**：[逐进程归因与解决路径](performance-host-diagnosis.md)。已防止索引中途重启，完整预检取得 12/12 次捕获并通过 24 次主机检查；仍因旧基线八灯 CPU 稳定性失败而不合格。追加 18 次三轮预热校准，保留 3 次后台负载失败（含火绒/Codex），尚未证明统一稳态边界。正式口径未改；Search 原设置已恢复，测试进程无残留。
-
-- **当前合同（2026-10-06）**：[硬件范围修订与后续验收](hardware-scope-update.md)及[检查索引](hardware-scope-checks.json)。用户批准将旧 Intel Gen9 降为非阻塞扩展兼容；Windows 独显 Chrome＋Edge 或 macOS Apple/AMD Chrome 完成一条路径。Windows 正确性与 112 次生产分辨率对照通过；完整 Forward 人口已取得，当前性能资格仍未通过。以下修订前失败与身份保持历史原状。
-
-- [Windows 对照与集显测试准备](windows-reproduction.md)与[检查索引](windows-checks.json)：NVIDIA 上 Chrome/Edge 各 32/32 通过；Windows 测试入口已修复，本机 Intel HD 630 尚未枚举，集显复测仍待启用设备。
-
-- [重启后复现](post-reboot-reproduction.md)与[证据索引](post-reboot-checks.json)：2026-10-06 Intel 4/4 失败、AMD 2/2 通过；四个 Intel 样本窗口均有内核 GPU 超时与重置信号。
-- [Intel GPU 重置追查](intel-gpu-reset-investigation.md)与[证据索引](intel-gpu-reset-checks.json)：系统报告确认测试时段的集显挂起/重置；启动参数、AO 分段简化和带窗口模式均未消除异常。
-- [局部修复审计](local-fix-audit.md)与[检查索引](local-fix-checks.json)：设备丢失后的读回生命周期修复、双 GPU 回归及未采用的候选方案；集显异常仍未解决。
-- [同提交读回与已知答案对照](atomic-readback-investigation.md)：资源保留、固定数据/图案、包装范围隔离和双 GPU 诊断。
-- [同提交对照证据索引](atomic-readback-checks.json)：Chrome 154/156 共 96 个会话、原始数据哈希及映射失败重分类；G09 仍未通过。
-- [验收异常追查](acceptance-investigation.md)：单像素覆盖证据、A0/B4 对照及尚未证实的触发条件。
-- [验收追查证据索引](acceptance-investigation-checks.json)：读回矛盾、执行标记、超时诊断及最终兼容矩阵，保留全部失败。
-- [阶段六回归接线审计](comparison-regression-audit.md)与[检查记录](comparison-regression-checks.json)：完整资格仍未完成。
-- [阶段五诊断与示例审计](diagnostics-audit.md)：按需单帧捕获、API 评审、双设备专项和保留的集显差异。
-- [阶段五检查与源码指纹](diagnostics-checks.json)。
-- [安全附件操作与计划缓存审计](plan-cache-audit.md)：阶段四实现、消融验证与混合尺寸描边生命周期修复。
-- [阶段四检查与源码指纹](plan-cache-checks.json)：专项通过与完整兼容性未通过分别记录。
-- [临时纹理复用审计](resource-reuse-audit.md)：物理资源收益、双 GPU 验证及保留的集显偶发记录。
-- [临时纹理复用检查与源码指纹](resource-reuse-checks.json)。
-- [依赖与裁剪审计](dependency-culling-audit.md)：实现范围、对照和验证记录。
-- [检查摘要与源码指纹](dependency-culling-checks.json)。
-- [启动源码指纹](dependency-baseline.json)：本次实现前基线，无性能采样。
-- ADR：[帧计划活跃根与后处理读写裁剪](../../../docs/for-ai/adr/0111-framegraph-dependency-culling.md)。
-
-所选原生路径的完整性能人口与 G05 最终资格仍为后续工作；旧 Intel 集显异常保留为非阻塞兼容调查。计划缓存与附件操作的历史检查状态见阶段四审计。
+本页原位维护当前结论；运行日志、每次命令结果和中间尝试写入 `artifacts/`，不再新增一对过程说明与检查快照，也不在首页逐条追加时间线。

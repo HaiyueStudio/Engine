@@ -236,6 +236,7 @@ export class MotionVectorRenderer extends BaseRenderer {
         buffer,
         clippingBuffer,
         bindGroup: device.createBindGroup({
+          label: `MotionVectorRenderer.entity${entityId}.bindGroup`,
           layout: this._objectLayout,
           entries: [
             { binding: 0, resource: { buffer } },
@@ -351,6 +352,8 @@ export class MotionVectorRenderer extends BaseRenderer {
   destroy(): void {
     const tracker = getEngineGPUResourceTracker(this._engine);
     for (const state of this._views.values()) for (const entity of state.entities.values()) {
+      tracker?.untrackObject(entity.bindGroup);
+      if (entity.skinBindGroup !== this._fallbackDeformationBindGroup) tracker?.untrackObject(entity.skinBindGroup);
       tracker?.untrackBuffer(entity.buffer);
       tracker?.untrackBuffer(entity.clippingBuffer);
       entity.buffer.destroy();
@@ -473,6 +476,7 @@ export class MotionVectorRenderer extends BaseRenderer {
     const skinning = geometry.skinning;
     const context = this._activeContext;
     if (!skinning || !deformation.skinJointBuffer || !deformation.skinWeightBuffer) {
+      if (entity.skinBindGroup !== this._fallbackDeformationBindGroup) getEngineGPUResourceTracker(this._engine)?.untrackObject(entity.skinBindGroup);
       if (entity.currentSkinBuffer) this._retireBuffer(entity.currentSkinBuffer, context);
       if (entity.previousSkinBuffer) this._retireBuffer(entity.previousSkinBuffer, context);
       entity.currentSkinBuffer = null;
@@ -490,6 +494,7 @@ export class MotionVectorRenderer extends BaseRenderer {
       || entity.skinMatrixByteLength !== byteLength
       || entity.skinJointBuffer !== deformation.skinJointBuffer
     ) {
+      if (entity.skinBindGroup !== this._fallbackDeformationBindGroup) getEngineGPUResourceTracker(this._engine)?.untrackObject(entity.skinBindGroup);
       if (entity.currentSkinBuffer) this._retireBuffer(entity.currentSkinBuffer, context);
       if (entity.previousSkinBuffer) this._retireBuffer(entity.previousSkinBuffer, context);
       entity.currentSkinBuffer = this._createTrackedBuffer(
@@ -639,6 +644,8 @@ export class MotionVectorRenderer extends BaseRenderer {
   private _retireEntity(entity: MotionEntityState, context: RenderCommandContext): void {
     const tracker = getEngineGPUResourceTracker(this._engine);
     const retire = (): void => {
+      tracker?.untrackObject(entity.bindGroup);
+      if (entity.skinBindGroup !== this._fallbackDeformationBindGroup) tracker?.untrackObject(entity.skinBindGroup);
       tracker?.untrackBuffer(entity.buffer);
       tracker?.untrackBuffer(entity.clippingBuffer);
       if (entity.currentSkinBuffer) tracker?.untrackBuffer(entity.currentSkinBuffer);
