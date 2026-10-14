@@ -183,3 +183,65 @@ test('input cache has bounded storage and does not impose an additional candidat
   point.info.color.pop();
   assert.equal(table.update([point], []).stats.pointCount, 1);
 });
+
+test('moving lights share unchanged frozen fields without changing previous snapshots', () => {
+  const table = new DeferredLightTable(), moving = candidate(10), still = candidate(20);
+  let previous = table.update([moving, still], []);
+  const first = previous, bytes = first.bytes.slice(0);
+  for (let frame = 1; frame <= 300; frame++) {
+    moving.info.position[0] = frame + 1;
+    const next = table.update([still, moving], []);
+    assert.notEqual(next.records[0], previous.records[0]);
+    assert.notEqual(next.records[0].positionRange, previous.records[0].positionRange);
+    for (const key of ['radiance', 'direction', 'identity']) {
+      assert.equal(next.records[0][key], previous.records[0][key]);
+      assert.equal(Object.isFrozen(next.records[0][key]), true);
+    }
+    assert.equal(next.records[1], previous.records[1]);
+    assert.equal(new DataView(next.bytes).getFloat32(16, true), frame + 1);
+    previous = next;
+  }
+  assert.deepEqual(first.bytes, bytes);
+  assert.deepEqual(first.records[0].positionRange, [1, 2, 3, 4]);
+  moving.info.color[0] = .75;
+  const recolored = table.update([moving, still], []);
+  assert.notEqual(recolored.records[0].radiance, previous.records[0].radiance);
+  assert.equal(recolored.records[0].positionRange, previous.records[0].positionRange);
+  assert.deepEqual(first.records[0].radiance, [.5, 1, 2, 0]);
+});
+
+test('record sharing preserves type, shadow, signed-zero and membership transitions', () => {
+  const table = new DeferredLightTable(), a = candidate(10), b = candidate(20, 1);
+  b.shadow = {};
+  const point = table.update([a, b], [b.shadow]);
+  a.info.type = 1; a.shadow = {};
+  const directional = table.update([a, b], [a.shadow, b.shadow]);
+  assert.deepEqual(directional.records[0].direction, [0, -1, 0, 0]);
+  assert.deepEqual(directional.records.map(r => r.identity[2]), [0, 1]);
+  assert.equal(directional.records[0].identity[1], point.records[1].identity[1]);
+  a.info.direction[0] = -0;
+  const negative = table.update([a, b], [a.shadow, b.shadow]);
+  assert.equal(Object.is(negative.records[0].direction[0], -0), true);
+  assert.equal(new DataView(negative.bytes).getUint32(48, true), 0x80000000);
+  table.update([b], [b.shadow]);
+  const readded = table.update([a, b], [a.shadow, b.shadow]);
+  assert.notEqual(readded.records[0].identity[1], negative.records[0].identity[1]);
+  assert.deepEqual(point.records.map(r => r.identity[2]), [0, 0xffffffff]);
+});
+
+test('record reuse preserves existing packing of nonstandard finite vectors', () => {
+  for (const [type, key] of [[2, 'position'], [2, 'color'], [1, 'direction']]) {
+    const table = new DeferredLightTable(), light = candidate(1, type);
+    const valid = table.update([light], []);
+    light.info[key].push(.5);
+    const extended = table.update([light], []);
+    const field = key === 'position' ? 'positionRange' : key === 'color' ? 'radiance' : 'direction';
+    assert.equal(extended.records[0][field].length, 5);
+    assert.equal(Object.isFrozen(extended.records[0][field]), true);
+    assert.equal(extended.records[0][field][3], key === 'color' ? 1 : key === 'direction' ? .5 / Math.hypot(0, -2, 0, .5) : .5);
+    light.info[key].pop();
+    const restored = table.update([light], []);
+    assert.deepEqual(restored.records, valid.records);
+    assert.deepEqual(new Uint8Array(restored.bytes).slice(16), new Uint8Array(valid.bytes).slice(16));
+  }
+});

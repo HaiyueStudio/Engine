@@ -86,7 +86,9 @@ export class DeferredLightTable {
     points.sort((a, b) => a.id - b.id);
     const ordered = [...directionals, ...points];
     const records: DeferredLightRecordInput[] = [];
-    for (const candidate of ordered) {
+    const previous = this._current;
+    for (let index = 0; index < ordered.length; index++) {
+      const candidate = ordered[index]!;
       let id = this._ids.get(candidate.id);
       if (id === undefined) {
         // Never reuse a u32 ID in this owner. Explicit exhaustion is safer than aliasing a live light.
@@ -98,18 +100,33 @@ export class DeferredLightTable {
       const directional = light.type === 1;
       const length = directional ? Math.hypot(...light.direction) : 1;
       const shadow = candidate.shadow ? shadows.indexOf(candidate.shadow) : -1;
-      records.push(Object.freeze({
-        positionRange: tuple(directional ? [0, 0, 0, 0] : [...light.position, light.range]),
-        radiance: tuple([...light.color.map(c => c * light.intensity), 0]),
-        direction: tuple(directional ? [...light.direction.map(c => c / length), 0] : [0, 0, 0, 0]),
-        identity: tuple([light.type, id, shadow >= 0 && shadow < 3 ? shadow : ABI.noShadow, 0]),
-      }));
+      // Nonstandard vectors retain the existing packing/validation behavior.
+      if (light.color.length !== 3 || (directional ? light.direction : light.position).length !== 3) {
+        records.push(Object.freeze({
+          positionRange: freezeTuple(directional ? [0, 0, 0, 0] : [...light.position, light.range]),
+          radiance: freezeTuple([...light.color.map(c => c * light.intensity), 0]),
+          direction: freezeTuple(directional ? [...light.direction.map(c => c / length), 0] : [0, 0, 0, 0]),
+          identity: freezeTuple([light.type, id, shadow >= 0 && shadow < 3 ? shadow : ABI.noShadow, 0]),
+        }));
+        continue;
+      }
+      // Moving a point changes its position, not its radiance, direction or identity.
+      // Share only owned frozen values; never retain mutable candidate arrays.
+      const old = previous?.entityIds[index] === candidate.id ? previous.records[index] : undefined;
+      const positionRange = directional ? tuple(old?.positionRange, 0, 0, 0, 0)
+        : tuple(old?.positionRange, light.position[0], light.position[1], light.position[2], light.range);
+      const radiance = tuple(old?.radiance, light.color[0] * light.intensity, light.color[1] * light.intensity, light.color[2] * light.intensity, 0);
+      const direction = directional ? tuple(old?.direction, light.direction[0] / length, light.direction[1] / length, light.direction[2] / length, 0)
+        : tuple(old?.direction, 0, 0, 0, 0);
+      const identity = tuple(old?.identity, light.type, id, shadow >= 0 && shadow < 3 ? shadow : ABI.noShadow, 0);
+      records.push(old && positionRange === old.positionRange && radiance === old.radiance
+        && direction === old.direction && identity === old.identity ? old
+        : Object.freeze({ positionRange, radiance, direction, identity }));
     }
     const bytes = new ArrayBuffer(ABI.blocks.sourceHeader.byteSize + records.length * ABI.blocks.light.byteSize);
     const data = new DataView(bytes);
     for (let i = 0; i < records.length; i++) writeDeferredLightRecord(data, ABI.blocks.sourceHeader.byteSize + i * ABI.blocks.light.byteSize, records[i]!);
     const stats = Object.freeze({ candidateCount: candidates.length, rejectedCount, pointCount: points.length, directionalCount: directionals.length, ambientCount });
-    const previous = this._current;
     // Stats are part of the snapshot too: changing a rejected/ambient source cannot return stale diagnostics.
     if (previous && equalRecords(bytes, previous.bytes) && ambient.every((v, i) => v === previous.ambientRadiance[i])
       && Object.keys(stats).every(k => stats[k as keyof DeferredSourceStats] === previous.stats[k as keyof DeferredSourceStats])) {
@@ -194,7 +211,14 @@ export function validateDeferredView(view: DeferredLightView, source: DeferredLi
   }
 }
 
-function tuple(values: number[]): readonly [number, number, number, number] {
+function tuple(previous: readonly [number, number, number, number] | undefined,
+  x: number, y: number, z: number, w: number): readonly [number, number, number, number] {
+  if (previous?.length === 4 && Object.is(previous[0], x) && Object.is(previous[1], y)
+    && Object.is(previous[2], z) && Object.is(previous[3], w)) return previous;
+  return Object.freeze([x, y, z, w]);
+}
+
+function freezeTuple(values: number[]): readonly [number, number, number, number] {
   return Object.freeze(values as [number, number, number, number]);
 }
 
