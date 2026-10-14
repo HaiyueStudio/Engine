@@ -1,0 +1,57 @@
+{
+  "source": "extensions/src/achievements.ts",
+  "exports": [
+    {
+      "name": "AchievementDefinition",
+      "kind": "type"
+    },
+    {
+      "name": "AchievementFact",
+      "kind": "type"
+    },
+    {
+      "name": "AchievementGui",
+      "kind": "value"
+    },
+    {
+      "name": "AchievementGuiOptions",
+      "kind": "type"
+    },
+    {
+      "name": "AchievementPort",
+      "kind": "type"
+    },
+    {
+      "name": "AchievementProgress",
+      "kind": "type"
+    },
+    {
+      "name": "AchievementReceipt",
+      "kind": "type"
+    },
+    {
+      "name": "AchievementRule",
+      "kind": "type"
+    },
+    {
+      "name": "AchievementRuleSnapshot",
+      "kind": "type"
+    },
+    {
+      "name": "AchievementRuleStorage",
+      "kind": "type"
+    },
+    {
+      "name": "AchievementRuntime",
+      "kind": "value"
+    },
+    {
+      "name": "AchievementRuntimeEvent",
+      "kind": "type"
+    },
+    {
+      "name": "AchievementRuntimeOptions",
+      "kind": "type"
+    }
+  ]
+}

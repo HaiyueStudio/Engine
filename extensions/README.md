@@ -93,3 +93,7 @@ its asset handles. See the [asset lifecycle guide](../docs/engine-guide/asset-li
 ## Share content
 
 `@haiyue/extensions/share-content` generates localized score cards, PNG/JPEG captures and versioned challenge links. It produces plain data for a platform share adapter, without depending on Native or social SDKs. See the [guide](../docs/engine-guide/share-content.md) and [example](../examples/share-content/README.md).
+
+## Achievements
+
+`@haiyue/extensions/achievements` provides persistent event rules, bounded deduplication and optional localized GPU GUI. Inject a platform port; the extension imports no SDK. See the [guide](../docs/engine-guide/achievements.md) and [example](../examples/achievements/README.md).

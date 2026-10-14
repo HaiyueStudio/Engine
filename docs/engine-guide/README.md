@@ -62,3 +62,4 @@
 - [分支剧情](narrative.md)：对话 GUI、插图、选项和存档恢复。
 
 - [分享战绩和挑战](share-content.md)：生成内容并交给平台分享。
+- [成就规则与展示](achievements.md)：事实、计数、最好成绩、存档与 GPU GUI（开发候选）。

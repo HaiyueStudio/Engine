@@ -149,7 +149,7 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0118 G09 冷启动与稳态的独立校准](0118-g09-cold-steady-sampling.md)
 - [0119 G09 扩展校准观察范围](0119-g09-extended-calibration-horizon.md)
 - [0120 G09 共同处理器电源条件](0120-g09-controlled-cpu-power.md)
-
+- [0121 可选成就规则与展示](0121-optional-achievements-runtime.md)
 - [0121 G09 驱动与 Chrome GPU 电源条件](0121-g09-controlled-gpu-policy.md)
 - [0122：以能力结构和公开覆盖验收发布包](0122-package-capability-structure-review.md)
 - [0123：动画文本 OpenType 按需准备](0123-animation-opentype-on-demand.md)
