@@ -6,7 +6,8 @@ import { ENGINE_021_EVIDENCE_KINDS as kinds, validateEngine021EvidenceBindings, 
 function g05Audit(kind) {
   const [captures, checks, stability, memory] = { rooms: [156, 60, 156, 156], instances: [96, 96, 192, 0], forward: [24, 8, 16, 0] }[kind];
   return { status: 'passed', cleanCandidate: true, captures,
-    checks: Array.from({ length: checks }, () => ({ passed: true, observed: 1, limit: kind === 'forward' ? 1.05 : 4 })),
+    checks: Array.from({ length: checks }, (_, i) => ({ passed: true, observed: 1, limit: kind === 'forward' ? 1.05 : 4,
+      ...(kind === 'forward' ? { metric: i % 2 ? 'gpuP95Ratio' : 'cpuP95Ratio' } : {}) })),
     stability: Array.from({ length: stability }, () => ({ passed: true, stable: true, cohortP95: [1, 1, 1], relativeSpread: 0, cv: 0 })),
     memory: Array.from({ length: memory }, () => ({ status: 'passed', checks: [{ passed: true, observed: 1, limit: 2 }] })) };
 }
@@ -106,6 +107,36 @@ test('performance or resource failures never become stability warnings', () => {
   }
   const forward = g05Audit('forward'); forward.checks[0].limit = 1.06;
   assert.throws(() => assessEngine021G05Audit('forward', forward), /original performance budget/);
+});
+
+test('ADR 0127 preserves failed CPU ratios as investigations without rewriting evidence', () => {
+  const data = fixture();
+  data.reports.forward.status = data.audits.forward.status = 'failed';
+  Object.assign(data.audits.forward.checks[0], { observed: 1.2, passed: false });
+  const before = JSON.stringify(data);
+  const result = completeEngine021EvidenceAudit(data.audits, data.reports);
+  assert.equal(result.status, 'passed'); assert.equal(result.releaseQualified, false);
+  assert.equal(result.assessments.forward.hardPerformanceChecks, 4);
+  assert.deepEqual(result.assessments.forward.cpuRegressionInvestigations, [data.audits.forward.checks[0]]);
+  assert.equal(result.assessments.forward.originalStatus, 'failed');
+  assert.equal(JSON.stringify(data), before);
+  for (const kind of ['production', 'resources', 'correctness', 'ablation']) {
+    const copy = structuredClone(data); copy.audits[kind].status = 'failed';
+    assert.throws(() => completeEngine021EvidenceAudit(copy.audits, copy.reports));
+  }
+});
+
+test('Forward GPU failures, malformed CPU values and missing channel coverage still block', () => {
+  for (const mutate of [
+    a => { Object.assign(a.checks[1], { observed: 1.06, passed: false }); a.status = 'failed'; },
+    a => { a.checks[0].observed = NaN; },
+    a => { a.checks[0].observed = Infinity; },
+    a => { a.checks[0].passed = false; },
+    a => { a.checks[0].metric = 'gpuP95Ratio'; },
+    a => { a.checks[0].metric = 'otherCpuMetric'; },
+    a => { a.checks[0].limit = 1.06; },
+    a => { Object.assign(a.checks[0], { observed: 1.2, passed: false }); },
+  ]) { const audit = g05Audit('forward'); mutate(audit); assert.throws(() => assessEngine021G05Audit('forward', audit)); }
 });
 
 test('missing, dirty, malformed and inconsistent raw populations cannot be waived', () => {

@@ -77,9 +77,20 @@ export function assessEngine021G05Audit(kind, audit) {
   check(shape && ['passed', 'failed'].includes(audit?.status) && audit.cleanCandidate === true && audit.captures === shape[0] &&
     audit.checks?.length === shape[1] && audit.stability?.length === shape[2] && audit.memory?.length === shape[3],
     `${kind}: incomplete independent G05 audit`);
-  for (const c of audit.checks) check(c.passed === true && Number.isFinite(c.observed) && c.observed >= 0 &&
-    Number.isFinite(c.limit) && c.limit > 0 && c.observed <= c.limit && (kind !== 'forward' || c.limit === 1.05),
-    `${kind}: original performance budget failed`);
+  const cpuRegressionInvestigations = [];
+  for (const c of audit.checks) {
+    check(Number.isFinite(c.observed) && c.observed >= 0 && Number.isFinite(c.limit) && c.limit > 0 &&
+      c.passed === (c.observed <= c.limit) && (kind !== 'forward' || c.limit === 1.05),
+      `${kind}: invalid original performance budget evidence`);
+    if (kind === 'forward') check(['cpuP95Ratio', 'gpuP95Ratio'].includes(c.metric), 'forward: unknown timing metric');
+    // ADR 0127 changes only interpretation of Forward CPU relative excess. The
+    // original 1.05 line, measured values and failed checks remain in the audit.
+    if (kind === 'forward' && c.metric === 'cpuP95Ratio') {
+      if (!c.passed) cpuRegressionInvestigations.push(c);
+    } else check(c.passed, `${kind}: original performance budget failed`);
+  }
+  if (kind === 'forward') check(audit.checks.filter(c => c.metric === 'cpuP95Ratio').length === 4 &&
+    audit.checks.filter(c => c.metric === 'gpuP95Ratio').length === 4, 'forward: incomplete CPU/GPU coverage');
   for (const m of audit.memory) check(m.status === 'passed' && m.checks?.length > 0 && m.checks.every(c =>
     c.passed === true && Number.isFinite(c.observed) && c.observed >= 0 && Number.isFinite(c.limit) && c.limit > 0 && c.observed <= c.limit),
     `${kind}: original resource budget failed`);
@@ -88,10 +99,11 @@ export function assessEngine021G05Audit(kind, audit) {
     Number.isFinite(s.relativeSpread) && s.relativeSpread >= 0 && Number.isFinite(s.cv) && s.cv >= 0,
     `${kind}: incomplete stability evidence`);
   const warnings = audit.stability.filter(s => !s.stable);
-  check(audit.status === (warnings.length ? 'failed' : 'passed'), `${kind}: inconsistent original audit status`);
+  check(audit.status === (warnings.length || cpuRegressionInvestigations.length ? 'failed' : 'passed'), `${kind}: inconsistent original audit status`);
   return { status: 'passed', originalStatus: audit.status, performanceChecks: audit.checks.length,
-    stabilityChecks: audit.stability.length, warnings,
-    scope: 'ADR 0126 timing-budget prerequisite only. Cohort variation is investigated; complete production, resource, correctness and release evidence remains required.' };
+    hardPerformanceChecks: kind === 'forward' ? 4 : audit.checks.length,
+    stabilityChecks: audit.stability.length, warnings, cpuRegressionInvestigations,
+    scope: 'ADR 0126/0127 prerequisite only. Cohort variation and Forward CPU 5% excess are investigated. GPU 5%, other budgets, complete production, resources, correctness and release evidence remain required.' };
 }
 
 export function completeEngine021EvidenceAudit(audits, reports) {

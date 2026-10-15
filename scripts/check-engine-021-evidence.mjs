@@ -94,7 +94,7 @@ if (git(['rev-parse', 'HEAD']) !== current.revision || git(['status', '--porcela
 const policyFiles = ['scripts/engine-021-evidence-policy.mjs', 'scripts/check-engine-021-evidence.mjs'];
 const evidence = { ...result, schemaVersion: 2, contractId: 'engine-021-evidence-v2', assessedAt: new Date().toISOString(),
   acceptanceRevision: current.revision, dirty: false, manifest: manifestPath, manifestSha256: sha256(manifestBytes),
-  policy: { adr: '0126', files: await Promise.all(policyFiles.map(async path => ({ path, sha256: sha256(await readFile(resolve(root, path))) }))) },
+  policy: { adr: ['0126', '0127'], files: await Promise.all(policyFiles.map(async path => ({ path, sha256: sha256(await readFile(resolve(root, path))) }))) },
   bindings: Object.fromEntries(ENGINE_021_EVIDENCE_KINDS.map(kind => [kind, { ...manifest.reports[kind],
     captureRevision: reports[kind].revision, acceptanceRevision: current.revision, originalStatus: reports[kind].status,
     acceptanceStatus: 'passed', reused: reports[kind].revision !== current.revision }])),
