@@ -1,4 +1,5 @@
 import { GuiColorPicker } from './components/GuiColorPicker';
+import { GuiToast } from './components/GuiToast';
 import { GuiHelpDialog } from './components/GuiHelpDialog';
 import { GuiScrollView } from './components/GuiScrollView';
 import type { GuiElementOptions, GuiLength, GuiStyle, GuiTheme } from './GuiTypes';
@@ -49,6 +50,7 @@ export type GuiSerializedElementType =
   | 'select'
   | 'tree'
   | 'tooltip'
+  | 'toast'
   | 'image';
 
 export interface GuiSerializedElement {
@@ -123,7 +125,7 @@ export function serializeGuiElement(element: GuiElement): GuiSerializedElement {
   };
   const props = serializeElementProps(element);
   if (Object.keys(props).length > 0) serialized.props = props;
-  if (!(element instanceof GuiModal) && !(element instanceof GuiColorPicker) && element.children.length > 0) {
+  if (!(element instanceof GuiModal) && !(element instanceof GuiColorPicker) && !(element instanceof GuiToast) && element.children.length > 0) {
     serialized.children = element.children.map(serializeGuiElement);
   }
   return serialized;
@@ -212,6 +214,13 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
   const base = getBaseOptions(data);
   const props = data.props ?? {};
   switch (data.type) {
+    case 'toast': {
+      const iconKey = stringProp(props.iconKey, '');
+      return new GuiToast({ ...base, text: stringProp(props.text, ''), iconKey,
+        icon: iconKey ? options.resolveImageSource?.(iconKey) ?? null : null,
+        iconSize: numberProp(props.iconSize, 22), fontSize: numberProp(props.fontSize, 15),
+        durationMs: numberProp(props.durationMs, 2200), animationMs: numberProp(props.animationMs, 180) });
+    }
     case 'color-picker':
       return new GuiColorPicker({ ...base, value: stringProp(props.value, '#2563eb') });
     case 'button':
@@ -323,6 +332,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
 }
 
 function getSerializedElementType(element: GuiElement): GuiSerializedElementType {
+  if (element instanceof GuiToast) return 'toast';
   if (element instanceof GuiColorPicker) return 'color-picker';
   if (element instanceof GuiHelpDialog) return 'help-dialog';
   if (element instanceof GuiScrollView) return 'scroll-view';
@@ -343,6 +353,8 @@ function getSerializedElementType(element: GuiElement): GuiSerializedElementType
 }
 
 function serializeElementProps(element: GuiElement): Record<string, unknown> {
+  if (element instanceof GuiToast) return { text: element.text, iconKey: element.iconKey ?? '',
+    iconSize: element.iconSize, fontSize: element.fontSize, durationMs: element.durationMs, animationMs: element.animationMs };
   if (element instanceof GuiColorPicker) return { value: element.value };
   if (element instanceof GuiScrollView) return { contentHeight: element.contentHeight, scrollY: element.scrollY, showScrollbar: element.showScrollbar, inertia: element.inertia, inertiaStrength: element.inertiaStrength };
   if (element instanceof GuiModal) {
@@ -509,11 +521,11 @@ function treeNodesProp(value: unknown): GuiTreeNode<GuiSerializedValue>[] {
 
 const GUI_ELEMENT_TYPES = new Set<GuiSerializedElementType>([
   'element', 'button', 'label', 'input', 'checkbox', 'switch', 'radio', 'slider',
-  'progress', 'select', 'tree', 'tooltip', 'image', 'modal', 'help-dialog', 'scroll-view', 'color-picker',
+  'progress', 'select', 'tree', 'tooltip', 'toast', 'image', 'modal', 'help-dialog', 'scroll-view', 'color-picker',
 ]);
 
-const STRING_PROPS = new Set(['text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId', 'title', 'message', 'confirmText', 'cancelText', 'backdropColor']);
-const NUMBER_PROPS = new Set(['inertiaStrength', 'thumbTransitionMs', 'colorTransitionMs', 'contentHeight', 'scrollY', 'fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
+const STRING_PROPS = new Set(['iconKey', 'text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId', 'title', 'message', 'confirmText', 'cancelText', 'backdropColor']);
+const NUMBER_PROPS = new Set(['durationMs', 'animationMs', 'iconSize', 'inertiaStrength', 'thumbTransitionMs', 'colorTransitionMs', 'contentHeight', 'scrollY', 'fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
 const BOOLEAN_PROPS = new Set(['inertia', 'showScrollbar', 'autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
 
 function validateProps(type: GuiSerializedElementType, value: unknown, path: string): void {

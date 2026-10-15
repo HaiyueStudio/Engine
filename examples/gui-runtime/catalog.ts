@@ -1,7 +1,7 @@
 import {
   GuiButton, GuiCheckbox, GuiColorPicker, GuiElement, GuiHelpDialog, GuiImage, GuiInput, GuiLabel,
   GuiModal, GuiProgress, GuiRadio, GuiScrollView, GuiSelect, GuiSlider, GuiSwitch,
-  GuiTooltip, GuiTree, type GuiElementOptions, type GuiStyle,
+  GuiTooltip, GuiToast, GuiTree, type GuiElementOptions, type GuiStyle,
 } from '@haiyue/engine/gui';
 
 export type Value = string | number | boolean;
@@ -161,6 +161,11 @@ export function createCatalog(): Demo[] {
         return name === 'GuiModal' ? new GuiModal(dialogOptions) : new GuiHelpDialog(dialogOptions);
       },
     })),
+    {
+      name: 'GuiToast', hint: 'Click Show toast. New messages replace the current message; input passes through.',
+      parameters: [...size(280,48), text('text','Image saved'), boolean('icon',true), number('durationMs',2200,0,6000,100), number('animationMs',200,0,1000,20)],
+      create: (p,o) => new GuiToast({...o,text:s(p,'text'),icon:b(p,'icon')?source:null,durationMs:n(p,'durationMs'),animationMs:n(p,'animationMs')}),
+    },
   ];
   for (const demo of demos) {
     const styles = colorStyles[demo.name];

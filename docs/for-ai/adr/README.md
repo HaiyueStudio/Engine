@@ -153,3 +153,4 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0121 G09 驱动与 Chrome GPU 电源条件](0121-g09-controlled-gpu-policy.md)
 - [0122：以能力结构和公开覆盖验收发布包](0122-package-capability-structure-review.md)
 - [0123：动画文本 OpenType 按需准备](0123-animation-opentype-on-demand.md)
+- [0124：GUI Toast 短消息](0124-gui-toast.md)

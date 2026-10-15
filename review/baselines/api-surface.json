@@ -8306,6 +8306,14 @@
               "kind": "type"
             },
             {
+              "name": "GuiToast",
+              "kind": "value"
+            },
+            {
+              "name": "GuiToastOptions",
+              "kind": "type"
+            },
+            {
               "name": "GuiTooltip",
               "kind": "value"
             },

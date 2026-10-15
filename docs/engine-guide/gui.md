@@ -1,5 +1,25 @@
 # Scrollable GUI and rule help
 
+## Show a short confirmation
+
+The next-minor development candidate provides an engine-rendered Toast:
+
+```ts
+import { GuiToast } from '@haiyue/engine/gui';
+const saved = root.add(new GuiToast({
+  x: 24, y: 24, width: 280, height: 48,
+  text: 'Image saved', durationMs: 2200, animationMs: 200,
+}));
+// After the actual save promise succeeds:
+saved.show();
+// Supply icon: yourLoadedImage to display an optional borrowed image.
+```
+
+Try `GuiToast` in the [GUI Runtime playground](../../examples/gui-runtime/index.html).
+Press **Show toast**, adjust timings, or trigger it again to replace the message.
+It does not interrupt clicks. Call `hide()` to cancel. For long explanations,
+use the help dialog. See [Toast options](../api/gui-controls.md#toast-notifications).
+
 Use the stable `@haiyue/engine/gui` entrypoint. These controls render through
 Haiyue GUI on both WebGPU browser and Native hosts; they do not create DOM views.
 The new controls are a local development candidate (ADR 0102), pending a reviewed

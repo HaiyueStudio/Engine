@@ -1,4 +1,5 @@
 import { GuiSwitch } from '../components/GuiSwitch';
+import { GuiToast } from '../components/GuiToast';
 import { GuiScrollView } from '../components/GuiScrollView';
 import { GuiHelpDialog, setGuiHelpDialogTextMetrics } from '../components/GuiHelpDialog';
 import type { IEngine } from '../../core/IEngine';
@@ -131,7 +132,7 @@ export class GuiSystem extends System {
   /** Demand-rendering hosts should keep requesting frames while this is true. */
   get animating(): boolean {
     const active = (element: GuiElement): boolean => element.visible && !element.disabled &&
-      (((element instanceof GuiScrollView || element instanceof GuiSwitch) && element.animating) || element.children.some(active));
+      (((element instanceof GuiScrollView || element instanceof GuiSwitch || element instanceof GuiToast) && element.animating) || element.children.some(active));
     for (const root of this.roots) if (active(root.root)) return true;
     return false;
   }
@@ -151,6 +152,8 @@ export class GuiSystem extends System {
         if (active) element.advanceAnimation(delta); else element.stopInertia();
       } else if (element instanceof GuiSwitch) {
         if (active) element.advanceAnimation(delta); else if (element.animating) element.finishAnimation();
+      } else if (element instanceof GuiToast) {
+        if (active) element.advanceAnimation(delta); else element.hide();
       }
       for (const child of element.children) advance(child, active);
     };
@@ -165,6 +168,7 @@ export class GuiSystem extends System {
     for (const root of this.roots) this.walkGui(root.root, element => {
       if (element instanceof GuiScrollView) element.stopInertia();
       else if (element instanceof GuiSwitch && element.animating) element.finishAnimation();
+      else if (element instanceof GuiToast) element.hide();
     });
   }
 
