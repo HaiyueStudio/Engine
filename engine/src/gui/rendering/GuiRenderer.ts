@@ -1,4 +1,5 @@
 import { GuiScrollView } from '../components/GuiScrollView';
+import { GuiToast } from '../components/GuiToast';
 import type { IEngine } from '../../core/IEngine';
 import type { BitmapFontData } from '../../font/BitmapFontData';
 import { buildBitmapFont } from '../../font/BitmapFontBuilder';
@@ -78,6 +79,7 @@ export class GuiRenderer {
   private currentTextBatch = this.textBatch;
   private currentPopupBatch = this.popupBatch;
   private currentPopupTextBatch = this.popupTextBatch;
+  private currentPopupImageBatch = this.popupImageBatch;
   private currentImageBatch = this.imageBatch;
   private currentModalBatch = this.batch;
   private currentModalTextBatch = this.textBatch;
@@ -246,6 +248,7 @@ export class GuiRenderer {
     this.currentTextBatch = cache.textBatch;
     this.currentPopupBatch = cache.popupBatch;
     this.currentPopupTextBatch = cache.popupTextBatch;
+    this.currentPopupImageBatch = cache.popupImageBatch;
     this.currentImageBatch = cache.imageBatch;
     this.currentModalBatch = cache.modalBatch;
     this.currentModalTextBatch = cache.modalTextBatch;
@@ -289,6 +292,7 @@ export class GuiRenderer {
     this.currentTextBatch = this.textBatch;
     this.currentPopupBatch = this.popupBatch;
     this.currentPopupTextBatch = this.popupTextBatch;
+    this.currentPopupImageBatch = this.popupImageBatch;
     this.currentImageBatch = this.imageBatch;
     this.currentModalBatch = this.batch;
     this.currentModalTextBatch = this.textBatch;
@@ -299,6 +303,7 @@ export class GuiRenderer {
 
   private collectElement(element: GuiElement, theme: GuiTheme): void {
     if (!element.visible) return;
+    if (element instanceof GuiToast) { this.addToast(element, theme); return; }
     if (element instanceof GuiModal) {
       const previousClip = this.currentClip;
       this.currentClip = undefined;
@@ -336,6 +341,24 @@ export class GuiRenderer {
 
     const background = element.style.backgroundColor;
     if (background) this.addRect(element.rect.x, element.rect.y, element.rect.width, element.rect.height, element.style.radius ?? theme.radius, colorToRgba(background, theme.colors.surface));
+  }
+
+  private addToast(toast: GuiToast, theme: GuiTheme): void {
+    const p = toast.progress, opacity = p * (toast.style.opacity ?? 1);
+    if (opacity <= 0) return;
+    const r = { ...toast.rect, y: toast.rect.y + 8 * (1 - p) };
+    const padding = Math.max(0, toast.style.padding ?? 14);
+    const icon = toast.icon ? Math.max(0, Math.min(toast.iconSize, r.height - padding, r.width - padding * 2)) : 0;
+    this.currentPopupBatch.addShape({ ...r, radius: toast.style.radius ?? theme.radius,
+      color: withAlpha(colorToRgba(toast.style.backgroundColor, theme.colors.surface), opacity) });
+    if (icon > 0) this.currentPopupImageBatch.addImage({ source: toast.icon, x: r.x + padding,
+      y: r.y + (r.height - icon) / 2, width: icon, height: icon, uv: [0, 0, 1, 1],
+      color: withAlpha(colorToRgba(toast.style.color, theme.colors.text), opacity), clip: r });
+    const offset = padding + (icon > 0 ? icon + 10 : 0);
+    this.currentPopupTextBatch.addText({ text: toast.text, x: r.x + offset, y: r.y,
+      width: Math.max(0, r.width - offset - padding), height: r.height, fontSize: toast.fontSize,
+      color: withAlpha(colorToRgba(toast.style.color, theme.colors.text), opacity),
+      multiline: false, wrap: false, clip: r });
   }
 
   private addImage(image: GuiImage, theme: GuiTheme): void {

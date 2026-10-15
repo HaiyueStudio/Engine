@@ -1,7 +1,7 @@
 import { Entity, HaiyueEngine } from '@haiyue/engine';
 import {
   GuiButton, GuiColorPicker, GuiElement, GuiInput, GuiLabel, GuiModal, GuiRoot, GuiScrollView,
-  GuiSelect, GuiSlider, GuiSwitch,
+  GuiSelect, GuiSlider, GuiSwitch, GuiToast,
 } from '@haiyue/engine/gui';
 import { createCatalog, defaults, normalize, previewStyle, type Parameter, type Value } from './catalog';
 
@@ -92,6 +92,10 @@ async function main(): Promise<void> {
         }));
       } else {
         stage.add(component);
+        if (component instanceof GuiToast) stage.add(new GuiButton({
+          id: 'show-toast', x: Math.max(16, (stageWidth - 160) / 2), y: 8, width: 160, height: 36,
+          text: 'Show toast', onClick: () => { component.show(); record('show', component.text); },
+        }));
       }
       if (!dialog) stage.scrollTo(Math.min(stage.scrollY, stage.maxScrollY));
     }
