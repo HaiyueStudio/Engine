@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "contractId": "g09-presented-production-v2",
+  "device": { "platform": "win32", "gpu": "NVIDIA GeForce GTX 1070 Ti", "vendor": "nvidia", "architecture": "pascal", "cpu": "Intel Core i7-7700", "refreshHz": 60 },
+  "browser": ["chrome-windows", "edge-windows"],
+  "quality": "Native WebGPU; MSAA 1; batched renderer; full authored lighting coverage; moving camera/lights; normal engine.run scheduler; CPU/resource diagnostics enabled; GPU timestamp query disabled; no per-frame fence or readback",
+  "targetFps": 60,
+  "frameP95Ms": 20,
+  "frameP99Ms": 34,
+  "longFrameThresholdMs": 50,
+  "maxLongFrameRatio": 0.01,
+  "maxConsecutiveLongFrames": 2,
+  "durationSeconds": 30,
+  "startupBoundary": "Fresh profile/navigation through scene initialization and two actual submitted frames with GPU completion to readiness; every loading frame retained. Interactive pacing starts at readiness without further queue waits. OS/driver caches are not cleared.",
+  "readiness": { "mode": "submitted-frames-complete", "frames": 2, "interactivePacingRequired": true },
+  "warmupBoundary": { "seconds": 10, "origin": "first rendered frame", "selection": "fixed before capture; all startup/warmup frames retained" },
+  "cohortPlan": { "rounds": 2, "order": "round 1 listed workloads/browsers; round 2 reversed workloads/browsers", "retry": false },
+  "measurement": "Visible canvas engine rAF cadence and CPU update-to-submit wall time; not physical scanout timing or GPU duration. Canvas screenshot and native browser identity corroborate presentation.",
+  "scope": "Current B4 on this device; representative F0-F5 plus F8 load envelope. Not A0 comparison, complete G09, sustained-resource qualification or clean-runner release promotion.",
+  "rationale": "60 Hz ordinary-play target: P95 near one refresh, P99 no more than two refreshes, over-50 ms frames at most 1% and no three consecutive stalls. F8 keeps identical reported targets but is a stress envelope rather than an ordinary-play promise.",
+  "workloads": [
+    { "id": "f0-forward-1", "group": "F0", "resolution": [1280,720], "algorithm": "forward", "lights": 1, "effect": "none", "views": 1, "class": "normal" },
+    { "id": "f1-reference-128", "group": "F1", "resolution": [1280,720], "algorithm": "reference", "lights": 128, "effect": "none", "views": 1, "class": "normal" },
+    { "id": "f1-tiled-256", "group": "F1", "resolution": [1280,720], "algorithm": "tiled", "lights": 256, "effect": "none", "views": 1, "class": "normal" },
+    { "id": "f2-gtao-128", "group": "F2", "resolution": [1920,1080], "algorithm": "tiled", "lights": 128, "effect": "gtao", "views": 1, "class": "normal" },
+    { "id": "f3-temporal-transparent", "group": "F3", "resolution": [1280,720], "algorithm": "tiled", "lights": 128, "effect": "taa-blur", "views": 1, "class": "normal" },
+    { "id": "f4-four-viewports", "group": "F4", "resolution": [1280,720], "algorithm": "tiled", "lights": 128, "effect": "none", "views": 4, "class": "normal" },
+    { "id": "f5-rtt", "group": "F5", "resolution": [1280,720], "algorithm": "tiled", "lights": 128, "effect": "rtt", "views": 1, "class": "normal" },
+    { "id": "f5-mirror", "group": "F5", "resolution": [1280,720], "algorithm": "forward", "lights": 1, "effect": "mirror", "views": 1, "class": "normal" },
+    { "id": "f8-stress-512", "group": "F8", "resolution": [1920,1080], "algorithm": "tiled", "lights": 512, "effect": "none", "views": 1, "class": "stress" }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "policy": "Release correctness, G09 and subsequent G05/G07 qualification accept one complete path: macOS Chrome/Metal on Apple Silicon or AMD, or Windows Chrome+Edge on a discrete GPU. Legacy Intel integrated GPUs are extended, non-blocking compatibility. Hardware scope is not a performance waiver; new hosts need new paired evidence with unchanged budgets. See ADR 0117.",
+  "policy": "Release correctness accepts one complete native path: macOS Chrome/Metal on Apple Silicon or AMD, or Windows Chrome+Edge on a discrete GPU. Legacy Intel integrated GPUs are extended, non-blocking compatibility. G09 acceptance follows framegraph-acceptance-021.json: production smoothness and reproducible material regressions; 5% microbenchmark changes are warnings. Other contracts keep their own budgets. See ADR 0117 and ADR 0124.",
   "browsers": [
     {
       "id": "chrome-macos",
@@ -66,7 +66,9 @@
     },
     {
       "id": "legacy-intel-integrated",
-      "examples": ["Intel Gen9 HD/UHD 630"],
+      "examples": [
+        "Intel Gen9 HD/UHD 630"
+      ],
       "tier": "extended",
       "purpose": "Non-blocking compatibility investigation; retained failures cannot grant release qualification"
     },
@@ -197,5 +199,15 @@
       "adapterPattern": "nvidia|geforce|radeon rx",
       "runnerProfile": "release-windows-native"
     }
-  ]
+  ],
+  "framegraphAcceptance": {
+    "contract": "config/framegraph-acceptance-021.json",
+    "planCommand": "npm run framegraph:acceptance:plan",
+    "productionProfile": "config/framegraph-production-021.json",
+    "productionCommand": "npm run framegraph:production:run",
+    "productionArtifactAudit": "npm run framegraph:production:audit -- --audit=<report>",
+    "productionScope": "Local current-candidate smoothness; does not grant clean-runner G05/G07 release qualification",
+    "legacyCalibrationRequired": false,
+    "performanceQualification": "pending-production-evidence"
+  }
 }

@@ -166,9 +166,16 @@ export class PlanarMirrorRenderer extends BaseRenderer {
     this.initialized = false;
     this.sceneFrameBinding.destroy();
     this.geometryCache.releaseOwner(this);
-    for (const entity of this.entities.values()) entity.buffer.destroy();
+    const tracker = getEngineGPUResourceTracker(this.engine);
+    for (const entity of this.entities.values()) {
+      tracker?.untrackObject(entity.bindGroup);
+      entity.buffer.destroy();
+    }
     for (const byView of this.materials.values()) {
-      for (const material of byView.values()) material.buffer.destroy();
+      for (const material of byView.values()) {
+        tracker?.untrackObject(material.bindGroup);
+        material.buffer.destroy();
+      }
     }
     this.entities.clear();
     this.materials.clear();
@@ -188,6 +195,7 @@ export class PlanarMirrorRenderer extends BaseRenderer {
       data = {
         buffer,
         bindGroup: this.engine.device.createBindGroup({
+          label: `PlanarMirrorRenderer.entity.${entityId}.bindGroup`,
           layout: this.objectBindGroupLayout,
           entries: [{ binding: 0, resource: { buffer } }],
         }),
@@ -236,6 +244,9 @@ export class PlanarMirrorRenderer extends BaseRenderer {
     }
     data.lastSeenView = this.viewGeneration;
     if (data.texture !== texture || data.textureVersion !== textureVersion) {
+      // Submitted commands retain their binding. Diagnostics must not keep an
+      // obsolete wrapper alive after this cache replaces its reference.
+      getEngineGPUResourceTracker(this.engine)?.untrackObject(data.bindGroup);
       data.texture = texture;
       data.textureVersion = textureVersion;
       data.bindGroup = this.createMaterialBindGroup(data.buffer, texture);
@@ -262,6 +273,7 @@ export class PlanarMirrorRenderer extends BaseRenderer {
 
   private createMaterialBindGroup(buffer: GPUBuffer, texture: GPUTexture): GPUBindGroup {
     return this.engine.device.createBindGroup({
+      label: 'PlanarMirrorRenderer.material.bindGroup',
       layout: this.materialBindGroupLayout,
       entries: [
         { binding: 0, resource: { buffer } },
@@ -314,15 +326,18 @@ export class PlanarMirrorRenderer extends BaseRenderer {
   }
 
   private sweepCaches(): void {
+    const tracker = getEngineGPUResourceTracker(this.engine);
     const oldest = this.viewGeneration - CACHE_SWEEP_INTERVAL * 2;
     for (const [entityId, entity] of this.entities) {
       if (entity.lastSeenView >= oldest) continue;
+      tracker?.untrackObject(entity.bindGroup);
       entity.buffer.destroy();
       this.entities.delete(entityId);
     }
     for (const [materialId, byView] of this.materials) {
       for (const [viewKey, material] of byView) {
         if (material.lastSeenView >= oldest) continue;
+        tracker?.untrackObject(material.bindGroup);
         material.buffer.destroy();
         byView.delete(viewKey);
       }

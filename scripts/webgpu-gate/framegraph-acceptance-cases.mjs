@@ -43,8 +43,8 @@ export const G09_ACCEPTANCE_CASES = Object.freeze(rows.map(row => Object.freeze(
   ...row, parameters: Object.freeze(row.parameters), dimensions: Object.freeze(row.dimensions.map(Object.freeze)), hdrDimensions: Object.freeze(row.hdrDimensions.map(Object.freeze)),
 })));
 export const G09_OUTSTANDING_ACCEPTANCE = Object.freeze([
-  'independent-long-batch-diagnostic-and-common-sampling-freeze',
-  'F0-F5-F8-three-cohort-A0-B4-performance-with-original-budgets',
+  'preregistered-production-device-resolution-quality-and-frame-pacing-profiles',
+  'representative-F0-F5-F8-smoothness-and-reproducible-material-regression-review',
   'non-overlapping-CPU-phase-and-cold-start-attribution',
   'active-idle-pending-persistent-resource-high-water-and-bandwidth-proxies',
   'preregistered-A-B1-B2-B3-B4-ablations-in-F0-F2-F3-F4',

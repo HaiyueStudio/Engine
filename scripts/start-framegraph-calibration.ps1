@@ -45,8 +45,8 @@ if(-not $Worker){
    if($startup -or $workerProcess.HasExited){break};Start-Sleep -Milliseconds 200
   }
   if(-not $startup -or $startup.status -ne 'ready'){throw ('后台启动未就绪；请检查记录，不要重复启动：'+$dispatch+'；'+$startup.error)}
-  if(-not $NoNotify -and $GpuStateDiagnostic){Add-Type -AssemblyName System.Windows.Forms;[System.Windows.Forms.MessageBox]::Show("单灯 A0/B4 连续 GPU 状态诊断已准备。`r`n点击确定后开始，预计 25–35 分钟。保持空闲，不要打开聊天应用、浏览器或任务管理器，也不要锁屏。`r`n`r`n双方相同负载、相同观察器，共三轮；诊断不直接生成基线。设置恢复后会弹窗。`r`n原 5% 预算不变。`r`n`r`n记录："+$dispatch,'G09 单灯 GPU 状态诊断')|Out-Null}
-  if(-not $NoNotify -and -not $GpuStateDiagnostic){Add-Type -AssemblyName System.Windows.Forms;[System.Windows.Forms.MessageBox]::Show("共同 CPU/GPU 预热校准及三轮全新基线已准备。`r`n点击确定后开始，预计 80–100 分钟，空闲等待可能延长。请勿重新打开聊天应用、浏览器或任务管理器，不要锁屏。`r`n`r`n任一校准不稳定将停止，不会继续重建基线。所有数据保留，5% 预算不变。`r`n完成并恢复设置后会弹窗。`r`n`r`n记录："+$dispatch,'G09 v5 校准及基线')|Out-Null}
+  if(-not $NoNotify -and $GpuStateDiagnostic){Add-Type -AssemblyName System.Windows.Forms;[System.Windows.Forms.MessageBox]::Show("单灯 A0/B4 连续 GPU 状态诊断已准备。`r`n点击确定后开始，预计 25–35 分钟。保持空闲，不要打开聊天应用、浏览器或任务管理器，也不要锁屏。`r`n`r`n双方相同负载、相同观察器，共三轮；诊断不直接生成基线。设置恢复后会弹窗。`r`n旧 5% 判定仅用于诊断，不是新 G09 验收前置条件。`r`n`r`n记录："+$dispatch,'G09 单灯 GPU 状态诊断')|Out-Null}
+  if(-not $NoNotify -and -not $GpuStateDiagnostic){Add-Type -AssemblyName System.Windows.Forms;[System.Windows.Forms.MessageBox]::Show("共同 CPU/GPU 预热校准及三轮全新基线已准备。`r`n点击确定后开始，预计 80–100 分钟，空闲等待可能延长。请勿重新打开聊天应用、浏览器或任务管理器，不要锁屏。`r`n`r`n任一校准不稳定将停止，不会继续重建基线。所有数据保留；旧 5% 判定仅用于诊断，不是新 G09 验收前置条件。`r`n完成并恢复设置后会弹窗。`r`n`r`n记录："+$dispatch,'G09 v5 校准及基线')|Out-Null}
   if($workerProcess.HasExited -or (Test-Path -LiteralPath (Join-Path $dispatch 'dispatch-completion.json'))){throw '启动确认已过期；未启动采样，请检查记录。'}
   [IO.File]::WriteAllText((Join-Path $dispatch 'acknowledged'),[DateTime]::UtcNow.ToString('o'))
   Write-Output ('Independent G09 worker started: '+$dispatch)

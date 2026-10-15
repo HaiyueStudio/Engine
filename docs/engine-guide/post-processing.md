@@ -53,6 +53,8 @@ engine.run();
 
 `PostProcessRenderFeature` 应当与它接收的 `Render3DSystem` 属于同一个场景。3D renderer 始终使用独立 render pass，以便 HDR 场景颜色被后续 pass 采样。
 
+管线预热不会绘制实际场景，也不能保证所有 Deferred 材质变体及首次 GPU 提交已经完成。需要明确“可交互”边界的应用，应在加载提示期间提交首帧、等待完成，再开放输入；有历史效果时还应准备下一帧。等待只发生在加载阶段，正常循环不逐帧等待 GPU。[多光源示例](../../examples/deferred-lighting/startup.ts)使用现有公开 API 实现两帧准备，并在切换或销毁时取消旧任务。加载总时长与就绪后的帧节奏分别记录，不能把加载工作从冷启动统计中删除。
+
 ## 组合和切换效果
 
 构造函数和 `setPasses()` 接收的顺序就是执行顺序。下面先模糊场景，再在模糊结果上执行 FXAA：

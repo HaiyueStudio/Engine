@@ -2,8 +2,10 @@ import { createServer } from 'node:http';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { extname, relative, resolve, sep } from 'node:path';
-import { spawn } from 'node:child_process';
+import { spawn, execFile } from 'node:child_process';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 import { captureAllocationPhase } from './allocation-sampling-phase.mjs';
 import { readCompletedFixtureText } from './completed-fixture-transfer.mjs';
 
@@ -34,6 +36,7 @@ export async function runChromeWebGpuFixture({
   interact = null,
   disableDx12InfoCollection = false,
   chunkedResult = false,
+  presentation = null,
 }) {
   const chrome = browserPath ?? process.env.CHROME_PATH ?? defaultChromePath();
   if (!existsSync(chrome)) throw new Error(`Chrome/WebGPU gate requires Chrome. Set CHROME_PATH (looked for ${chrome}).`);
@@ -52,6 +55,7 @@ export async function runChromeWebGpuFixture({
       interact,
       disableDx12InfoCollection,
       chunkedResult,
+      presentation,
     );
     result.httpProvenance = fixtureServer.provenance();
     return result;
@@ -152,14 +156,17 @@ async function runChrome(
   interact,
   disableDx12InfoCollection,
   chunkedResult,
+  presentation,
 ) {
   const angleBackend = process.env.WEBGPU_ANGLE_BACKEND ?? defaultWebGpuAngleBackend();
   if (process.env.WEBGPU_REQUIRE_NATIVE === '1' && isSoftwareBackend(angleBackend)) {
     throw new Error(`Required browser evidence cannot use software WebGPU backend ${angleBackend}.`);
   }
+  const presentationArguments = chromePresentationArguments(presentation);
   const profile = mkdtempSync(resolve(tmpdir(), 'haiyue-webgpu-gate-'));
+  const launchedAt = new Date().toISOString();
   const child = spawn(binary, [
-    '--headless=new',
+    ...presentationArguments,
     // Evidence captures exercise real audio scheduling, but a headless gate
     // must never emit sound through the user's desktop output device.
     '--mute-audio',
@@ -185,14 +192,18 @@ async function runChrome(
   const browserErrors = [];
   let completedResult = null;
   let primaryError = null;
+  let browserCdp = null;
+  let fixtureContext = null;
   child.stderr.setEncoding('utf8');
   child.stderr.on('data', chunk => { stderr += chunk; });
   try {
     const endpoint = await waitFor(() => /DevTools listening on (ws:\/\/[^\s]+)/.exec(stderr)?.[1], 20_000, 'Chrome DevTools endpoint');
+    browserCdp = await connectCdp(endpoint, Math.min(timeoutMs, 30_000));
+    fixtureContext = await createIsolatedFixtureTarget(browserCdp, presentation);
     const listUrl = `http://${new URL(endpoint).host}/json/list`;
     const page = await waitFor(async () => {
       const targets = await fetch(listUrl).then(response => response.json()).catch(() => []);
-      return targets.find(target => target.type === 'page' && target.url === 'about:blank');
+      return targets.find(target => target.type === 'page' && target.id === fixtureContext.targetId && target.url === 'about:blank');
     }, 20_000, 'Chrome/WebGPU fixture page');
     const cdp = await connectCdp(page.webSocketDebuggerUrl, Math.min(timeoutMs, 30_000));
     try {
@@ -273,6 +284,8 @@ async function runChrome(
         url: identityResponse.result?.result?.value?.href ?? url,
         angleBackend,
         nativeBackend: !isSoftwareBackend(angleBackend),
+        presentationMode: presentation ? 'visible-window' : 'headless',
+        storageMode: 'isolated-memory-context',
         ...(disableDx12InfoCollection ? { disableDx12InfoCollection: true } : {}),
       };
       if (allocationSampling) {
@@ -336,9 +349,11 @@ async function runChrome(
     primaryError = attachChromeFailureDiagnostics(error, {
       url, angleBackend, browserProduct, lastProgress, browserErrors, stderr,
       exitCode: child.exitCode, signalCode: child.signalCode,
+      storageMode: 'isolated-memory-context', fixtureContext,
     });
     throw primaryError;
   } finally {
+    browserCdp?.close();
     if (child.exitCode === null) {
       await waitForChildExit(child, 5_000);
     }
@@ -354,11 +369,15 @@ async function runChrome(
     child.stderr.destroy();
     child.unref();
     try {
+      if (process.platform === 'win32') {
+        const cleanup = await cleanupOwnedWindowsFixtureProcesses(binary, profile, launchedAt);
+        if (completedResult) completedResult.browserDiagnostics.ownedProcessCleanup = cleanup;
+      }
       const cleanup = await removeChromeProfile(profile);
       if (completedResult) completedResult.browserDiagnostics.profileCleanup = cleanup;
     } catch (error) {
       const cleanupError = new Error(
-        `Chrome/WebGPU fixture left a temporary profile residual: ${error.message}`,
+        `Chrome/WebGPU fixture cleanup failed: ${error.message}`,
         { cause: error },
       );
       if (primaryError) {
@@ -370,6 +389,51 @@ async function runChrome(
       throw cleanupError;
     }
   }
+}
+
+async function cleanupOwnedWindowsFixtureProcesses(binary, profile, launchedAt) {
+  const executable = resolve(process.env.SystemRoot ?? 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe');
+  const script = fileURLToPath(new URL('./chrome-profile-cleanup.ps1', import.meta.url));
+  const { stdout } = await promisify(execFile)(executable,
+    ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', script,
+      '-ProfilePath', profile, '-BrowserPath', resolve(binary), '-LaunchedAt', launchedAt],
+    { windowsHide: true, timeout: 90000, maxBuffer: 1024 * 1024 });
+  const result = JSON.parse(stdout.trim());
+  if (result.status !== 'passed' || result.remaining !== 0 || !Array.isArray(result.terminatedPids)) throw Error('Missing owned-process cleanup proof');
+  return result;
+}
+
+/** Each capture has a fresh browser/device and a nonpersistent cookie store.
+ * Reading a fresh on-disk cookie DB can stall navigation before any HTTP request
+ * reaches the fixture server. An isolated context avoids that unrelated startup
+ * dependency without changing navigation deadlines, GPU warmup or sample counts.
+ */
+export async function createIsolatedFixtureTarget(cdp, presentation = null) {
+  const created = await cdp.call('Target.createBrowserContext', { disposeOnDetach: true });
+  const browserContextId = created.result?.browserContextId;
+  if (typeof browserContextId !== 'string' || !browserContextId) throw Error('Chrome fixture requires an isolated browser context');
+  try {
+    const opened = await cdp.call('Target.createTarget', {
+      url: 'about:blank', browserContextId, background: false,
+      ...(presentation ? { newWindow: true, width: presentation.width, height: presentation.height } : {}),
+    });
+    const targetId = opened.result?.targetId;
+    if (typeof targetId !== 'string' || !targetId) throw Error('Chrome fixture requires a page in its isolated context');
+    return { browserContextId, targetId };
+  } catch (error) {
+    await cdp.call('Target.disposeBrowserContext', { browserContextId }).catch(() => {});
+    throw error;
+  }
+}
+
+export function chromePresentationArguments(presentation) {
+  if (presentation === null) return ['--headless=new'];
+  if (presentation?.mode !== 'visible' || !Number.isSafeInteger(presentation.width) ||
+      !Number.isSafeInteger(presentation.height) || presentation.width < 320 || presentation.height < 240) {
+    throw Error('Explicit visible window dimensions required');
+  }
+  return [`--window-size=${presentation.width},${presentation.height}`, '--window-position=0,0',
+    '--force-device-scale-factor=1', '--no-first-run', '--no-default-browser-check'];
 }
 
 /** Preserve failure context even when a fixture never publishes a JSON result. */

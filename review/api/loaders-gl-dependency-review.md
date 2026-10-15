@@ -16,7 +16,7 @@ G09 的 runtime 输入指纹包含 `package-lock.json`，因此锁文件元数�
 
 ## 验证记录
 
-执行目录：[依赖修复验证](../../artifacts/engine-0.2.1/g09/loaders-pin-20261011T055135982Z)；汇总与文件摘要见[机器复核记录](../engine-0.2.1/g09/loaders-dependency-checks.json)。
+执行目录：[依赖修复验证](../../artifacts/engine-0.2.1/g09/loaders-pin-20261011T055135982Z)；汇总与文件摘要见[机器复核记录](../archive/README.md)。
 
 - 独立消费者使用本次实际 Engine tarball，在没有仓库 lock 和 overrides 的新目录安装；5 个运行时 loaders.gl 包全部为 4.4.4，没有嵌套重复版本。仓库 lock 中的 7 个 loaders.gl 包仍为 4.4.4，解析版本、完整性摘要及已安装 manifest 均未改变。
 - 29 项 loader 专项、1,446 项全仓测试、全仓类型检查、API 检查和构建通过，98 个示例重新生成。模块边界、职责边界、renderer prepare 与 no-rive 制品检查通过。

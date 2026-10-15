@@ -315,6 +315,24 @@
         "class Spine2DRenderSystem"
       ]
     },
+    "extensions-share-content": {
+      "entrypoint": "./share-content",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-share-content.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 6000,
+      "requiredExports": [
+        "captureShareImage",
+        "renderShareCard",
+        "prepareShareContent",
+        "createChallengeLink",
+        "parseChallengeLink"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class GltfModelSystem",
+        "class Animation2DRenderSystem"
+      ]
+    },
     "extensions-narrative": {
       "entrypoint": "./narrative",
       "fixture": "scripts/fixtures/engine-consumers/extensions-narrative.mjs",

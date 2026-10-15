@@ -13,13 +13,17 @@ import { waitG05Cooldown } from './webgpu-gate/deferred-g05-cooldown.mjs';
 import { captureFrameGraphPixels } from './webgpu-gate/framegraph-pixel-oracle.mjs';
 import { compareFrameGraphRoomPixels } from './webgpu-gate/framegraph-parity-policy.mjs';
 import { createPerformanceSourceFingerprint } from './webgpu-performance-budget.mjs';
+import { createG09AcceptanceRoute, interpretG09Microbenchmark } from './webgpu-gate/framegraph-acceptance-routing.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url)), args = process.argv.slice(2);
 if (args.length !== 1 || !['--smoke', '--full', '--plan'].includes(args[0])) throw Error('Use --smoke, --full or --plan');
 const configBytes = await readFile(resolve(root, 'config/framegraph-performance-021.json')), config = JSON.parse(configBytes);
+const acceptanceBytes = await readFile(resolve(root, 'config/framegraph-acceptance-021.json'));
+const acceptanceConfig = JSON.parse(acceptanceBytes);
+const acceptance = createG09AcceptanceRoute(acceptanceConfig);
 const budgetBytes = await readFile(resolve(root, 'config/lighting-performance-021.json')), budget = JSON.parse(budgetBytes);
 const qualification = await loadFrameGraphQualification(root), full = args[0] !== '--smoke', plan = createFrameGraphForwardPlan(config, full);
 const target = qualification.targets.find(t => t.browserId === config.runner.browserId);
-if (args[0] === '--plan') { console.log(JSON.stringify({ config, qualification, plan, minimumCooldownMinutes: plan.length * 2, performanceQualified: false }, null, 2)); process.exit(0); }
+if (args[0] === '--plan') { console.log(JSON.stringify({ config, qualification, plan, acceptance, minimumCooldownMinutes: plan.length * 2, performanceQualified: false }, null, 2)); process.exit(0); }
 if (!target || qualification.hostname !== config.runner.hostname || qualification.platform !== config.runner.platform) throw Error('Register actual performance host before capture; no device substitution');
 const directory = resolve(root, 'artifacts/engine-0.2.1/g09'), generatedAt = new Date().toISOString(), out = resolve(directory, `forward-${generatedAt.replaceAll(':', '-')}`);
 await mkdir(out);
@@ -28,10 +32,11 @@ const fixed = JSON.parse(await readFile(resolve(root, 'review/engine-0.2.1/g09/d
 if (baseline.revision !== fixed.revision || inputs.sha256 !== build.inputs.sha256) throw Error('Stale A0/B4 builds');
 const sourceFingerprint = createPerformanceSourceFingerprint(root, root), wrapperHash = sha256(await readFile(fileURLToPath(import.meta.url)));
 const report = { schemaVersion: 1, status: 'running', tier: full ? 'f0-development-cohorts' : 'f0-smoke', performanceQualified: false, generatedAt,
-  qualification, config, configSha256: sha256(configBytes), budgetSha256: sha256(budgetBytes), baseline, build, inputs, sourceFingerprint, wrapperHash,
+  qualification, config, configSha256: sha256(configBytes), acceptanceConfigSha256: sha256(acceptanceBytes), budgetSha256: sha256(budgetBytes), baseline, build, inputs, sourceFingerprint, wrapperHash,
   revision: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),
   dirty: !!execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }).trim(), plan, captures: [], correctness: [], entries: [] };
 async function verifyInputs() {
+  if (sha256(await readFile(resolve(root, 'config/framegraph-acceptance-021.json'))) !== report.acceptanceConfigSha256) throw Error('Acceptance contract changed during capture');
   for (const [variant, manifest] of [['A0', baseline], ['B4', build]]) for (const f of manifest.outputs)
     if (sha256(await readFile(resolve(directory, variant === 'A0' ? 'a0-built' : '.', f.file))) !== f.sha256) throw Error('Runtime chunk changed');
   await assertFrameGraphQualificationUnchanged(root, qualification);
@@ -84,7 +89,8 @@ try {
     console.log(`[framegraph-forward] ${index + 1}/${plan.length} ${job.caseId} ${job.variant}, cohort ${job.cohort + 1}: passed`);
   }
   await verifyInputs(); validateFrameGraphAdapterConsistency(report.entries.map(e => e.result.adapter));
-  if (full) { report.assessment = evaluateFrameGraphForward(report.entries, config, budget.relativeBudgets); report.status = report.assessment.status; }
+  if (full) { report.assessment = evaluateFrameGraphForward(report.entries, config, budget.relativeBudgets); report.status = report.assessment.status;
+    report.currentAcceptance = interpretG09Microbenchmark(report.assessment, acceptanceConfig); }
   else report.status = 'passed';
 } catch (error) { report.status = 'failed'; report.error = error.stack; process.exitCode = 1; }
 finally { report.finishedAt = new Date().toISOString(); await writeFile(resolve(out, 'report.json'), JSON.stringify(report, null, 2) + '\n'); console.log(`[framegraph-forward] ${out}: ${report.status}`); }

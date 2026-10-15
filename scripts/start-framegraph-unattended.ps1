@@ -97,5 +97,5 @@ finally{
 Write-Output ('Sampling status: '+$completion.status+'; '+$out)
 Write-Output ('CPU restored: '+$completion.cpuRestored+'; Chrome GPU restored: '+$completion.gpuRestored+'; Search restored: '+$completion.serviceRestored)
 if($failure){Write-Output $failure}
-Write-Output 'Original 5% regression budget unchanged. Development evidence is not full G09/G05 release qualification.'
+Write-Output 'Legacy 5% results are diagnostic only, not a production-acceptance prerequisite. Full G09/G05 qualification still needs production evidence.'
 if($completion.status -notin @('development-baseline-passed','engineering-smoke-passed','gpu-state-diagnostic-complete','gpu-state-engineering-smoke-passed')){exit 1}
