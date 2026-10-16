@@ -146,11 +146,11 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0117: CMYK color value through the existing color protocol](0117-cmyk-color-value.md)
 - [0117：0.2.1 原生硬件验收范围](0117-native-021-hardware-scope.md)。
 - [0118 分享内容生成与平台分享分层](0118-share-content-composition.md)。
-- [0118 G09 冷启动与稳态的独立校准](0118-g09-cold-steady-sampling.md)
-- [0119 G09 扩展校准观察范围](0119-g09-extended-calibration-horizon.md)
-- [0120 G09 共同处理器电源条件](0120-g09-controlled-cpu-power.md)
+- [0118 G09 冷启动与稳态的独立校准](0118-g09-cold-steady-sampling.md) — G09 准入前置部分已由 [ADR 0124](0124-g09-production-performance-acceptance.md) 取代，诊断协议保留。
+- [0119 G09 扩展校准观察范围](0119-g09-extended-calibration-horizon.md) — G09 准入前置部分已由 [ADR 0124](0124-g09-production-performance-acceptance.md) 取代，诊断协议保留。
+- [0120 G09 共同处理器电源条件](0120-g09-controlled-cpu-power.md) — G09 准入前置部分已由 [ADR 0124](0124-g09-production-performance-acceptance.md) 取代，诊断协议保留。
 - [0121 可选成就规则与展示](0121-optional-achievements-runtime.md)
-- [0121 G09 驱动与 Chrome GPU 电源条件](0121-g09-controlled-gpu-policy.md)
+- [0121 G09 驱动与 Chrome GPU 电源条件](0121-g09-controlled-gpu-policy.md) — G09 准入前置部分已由 [ADR 0124](0124-g09-production-performance-acceptance.md) 取代，诊断协议保留。
 - [0122：以能力结构和公开覆盖验收发布包](0122-package-capability-structure-review.md)
 - [0123：动画文本 OpenType 按需准备](0123-animation-opentype-on-demand.md)
 - [0124：GUI Toast 短消息](0124-gui-toast.md)

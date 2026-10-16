@@ -1,5 +1,7 @@
 # ADR 0121：G09 驱动与 Chrome GPU 电源条件
 
+> 历史诊断协议：本记录将共同校准、开发基线和 5% 微基准回归作为 G09 准入前置条件的部分已由 [ADR 0124](0124-g09-production-performance-acceptance.md) 取代。实验协议与历史结果保留；当前验收从 [G09 结论](../../../review/engine-0.2.1/g09/README.md)进入。
+
 状态：接受，开发机采样协议 v4；不代表性能或发布验收通过。
 日期：2026-10-09。
 接续 [ADR 0120](0120-g09-controlled-cpu-power.md)、[ADR 0118](0118-g09-cold-steady-sampling.md)。

@@ -1,0 +1,221 @@
+{
+  "schemaVersion": 1,
+  "archive": "engine-process-history-20261016.zip",
+  "sha256": "1d68f3bd7384c6c5aec0a64fbee9c4386d590f78a00f627ab6872a63541e65d2",
+  "sourceRevision": "3605493bdfb8b1ffa186d8f198acc1294bbbfb44",
+  "scope": "Superseded M2.5 handoffs and 0.1.1/0.2.0 process records; original bytes before consolidation/link maintenance. No runtime code, accepted ADR decision body, current baseline, license approval or raw capture removed.",
+  "originalBytes": 182811,
+  "archiveBytes": 99796,
+  "files": [
+    {
+      "path": "Engine/docs/for-ai/adr/0104-rive-development-branch.md",
+      "bytes": 1581,
+      "sha256": "fcef7b951ee169822b3f995e4183d7f8843fd2e61b9323bf20cd121b49df8ac6",
+      "role": "before-link-or-status-maintenance"
+    },
+    {
+      "path": "Engine/docs/for-ai/adr/0118-g09-cold-steady-sampling.md",
+      "bytes": 4361,
+      "sha256": "290527f4be7eba975901990d57d0d97fe2a0a7f66ce1c59fb33a69cc92178c75",
+      "role": "before-link-or-status-maintenance"
+    },
+    {
+      "path": "Engine/docs/for-ai/adr/0119-g09-extended-calibration-horizon.md",
+      "bytes": 2285,
+      "sha256": "0f25d363b5de535f0da1fb33666a552e7f8995dd8731e4d7fcc7d628cedb2c4f",
+      "role": "before-link-or-status-maintenance"
+    },
+    {
+      "path": "Engine/docs/for-ai/adr/0120-g09-controlled-cpu-power.md",
+      "bytes": 2935,
+      "sha256": "40c07164e3d6965453469e9c8c5221f26e28f23b635991e39ed4c5ac09bf83ae",
+      "role": "before-link-or-status-maintenance"
+    },
+    {
+      "path": "Engine/docs/for-ai/adr/0121-g09-controlled-gpu-policy.md",
+      "bytes": 3388,
+      "sha256": "75375d95972d63844e513095df63120e56963210469c6458d6f05557512bafba",
+      "role": "before-link-or-status-maintenance"
+    },
+    {
+      "path": "Engine/docs/for-ai/adr/README.md",
+      "bytes": 14458,
+      "sha256": "63bf6f8c0ece91db3b8b589079a16d836860a558e0adf818774eb0b2cf921fb8",
+      "role": "before-link-or-status-maintenance"
+    },
+    {
+      "path": "Engine/docs/for-ai/runtime-convergence/README.md",
+      "bytes": 2066,
+      "sha256": "ce8707ea2d85db8d379a17e2a3815562c63bf14747103821eabaf9e3398bea7e",
+      "role": "before-link-or-status-maintenance"
+    },
+    {
+      "path": "Engine/docs/for-ai/runtime-convergence/owner-matrix.md",
+      "bytes": 3507,
+      "sha256": "b7fe9d74aad7426d64386108ea6b5e91e82c693b548b2a40e8d6add928255ea5",
+      "role": "before-link-or-status-maintenance"
+    },
+    {
+      "path": "Engine/review/README.md",
+      "bytes": 1612,
+      "sha256": "86fb51de63f9bd070c7db3f2d1d6f9b9b9fc97c76b4b63224f903086410a15f0",
+      "role": "before-link-or-status-maintenance"
+    },
+    {
+      "path": "Engine/review/archive/README.md",
+      "bytes": 1185,
+      "sha256": "e5aa350274f63a520e19f692e94df6dc3e849370bd49af3cd1725704b4b5de97",
+      "role": "before-link-or-status-maintenance"
+    },
+    {
+      "path": "Engine/review/independent-library-release.md",
+      "bytes": 3918,
+      "sha256": "9ff06683781d380cf01480976e17d2a2136841f3e5e915fb1ba0f10555431fc3",
+      "role": "original-before-consolidation"
+    },
+    {
+      "path": "Engine/review/m02-g01-release-freeze-2026-08-17.md",
+      "bytes": 3433,
+      "sha256": "d1a5af0e300355bd3cac26254ba86bfe2b9875b2c569f1d13acd6368c42eb1f6",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m02-windows-reconstruction-audit-2026-08-15.md",
+      "bytes": 11311,
+      "sha256": "e4bc26e93de49a36931f6d3b11ec0558259dc2318b4767cc8ab1f785cf49cdcf",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/g01-completion.md",
+      "bytes": 1132,
+      "sha256": "1b0c91014b821df2ea7b7802cd577918d9d7a9c40f3f6847d5b292c17ef66081",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/g01-review-audit-matrix.md",
+      "bytes": 10143,
+      "sha256": "301d7bd24b7ca11e74ba5288ba0d0eb2c91726087288564b723a2768cb491a9a",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/g02-shader-convergence-handoff.md",
+      "bytes": 4348,
+      "sha256": "b793b0742c47788f3cc2daf183275a697986e0a58955d66b12d91ab6fa461b1d",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/g03-render-scheduling-handoff.md",
+      "bytes": 3914,
+      "sha256": "9669e0639aaf68f8f8c44015b15a6eaa3bd00db7c3e6cc9475257dce76cf689c",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/g04-renderer-core-handoff.md",
+      "bytes": 7025,
+      "sha256": "87c323c4691bb6dfe8ed2539fb0b00a88c98a53674a2dd7d23f0391790ba82e1",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/g05-async-worker-handoff.md",
+      "bytes": 6321,
+      "sha256": "d5b3922f97d330c1ac2e38ff33c582189738b80269c11d770ed7d9df2285676c",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/g06-compute-gui-handoff.md",
+      "bytes": 5634,
+      "sha256": "8a104ef2279d905090bea4b4d9a535d42e6709aa005e9821a821086f1a7951e8",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/g07-scene-batch-handoff.md",
+      "bytes": 2836,
+      "sha256": "ff08a4eb136c7e148adba2f7c58da69faa13c197e73a2798f12a8e0c7232b848",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/g08-api-format-review.md",
+      "bytes": 2504,
+      "sha256": "0ea71e2838036182f7502c5bb0fd6b57e423c69ae598650b09d2bb5c525136b3",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/g08-m03-handoff.md",
+      "bytes": 1788,
+      "sha256": "65385eeef0593f1a07d15f2044621c45b0176abf47d0496b6c1a7d3dfc83a117",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/g08-owner-deletion-matrix.md",
+      "bytes": 3133,
+      "sha256": "d3ab9629bca3424ba37c02827f2c2eb003cf5fc98155f8b9c066b4305393a625",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/g08-package-budget-review.md",
+      "bytes": 1751,
+      "sha256": "1ea639e6b5c5baa6db5eef33d4fcfc3166cae08b7bfcc5bef9a77021649dc04e",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/g08-runtime-convergence-completion.md",
+      "bytes": 3953,
+      "sha256": "dbffc05441291cf3439d8242aac2e6d51070df8b2b2c37140921625b831ed1ef",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/handoff-template.md",
+      "bytes": 621,
+      "sha256": "6e811efe325bade0515070fcbcee08c2a73e74cd7d55fec0b556f93ef1501984",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/m025/milestone-completion-audit.md",
+      "bytes": 2361,
+      "sha256": "90e293139858c0f708acfa87b5f86db601ba10032cc1ddd044def43380385d65",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/release-0.1.1.md",
+      "bytes": 7417,
+      "sha256": "1d36b6d8e3322161bda7614fb1f757e2fea78c9ff0eb32e6cd55bcb2374de376",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/release-0.2.0-acceptance.md",
+      "bytes": 6848,
+      "sha256": "8ad9e3d3993e4a7f0ee80492c4065349859e210eb6f94bba0eb26350a8ab1560",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/release-0.2.0-blocker-fixes.md",
+      "bytes": 9579,
+      "sha256": "4ba652d6cb59abac9fd7c01bbe60a31c78f1aed2a9d27ce1a2d88f2ce2f3284b",
+      "role": "original-before-consolidation"
+    },
+    {
+      "path": "Engine/review/release-0.2.0-formal-readiness.md",
+      "bytes": 8507,
+      "sha256": "3da16afe4231428c1ca5328b6d0d06dc76d20d32ebe3c355b17da414170bda12",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/release-0.2.0-global-check.md",
+      "bytes": 6304,
+      "sha256": "9dd15cdbf5b92aee2fe3d9342d8cd6b2ee09c5a14ea75784d313ea6bee4898c2",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "Engine/review/review-by-deepseek-20260816.md",
+      "bytes": 24123,
+      "sha256": "1737a98edb075f19ab9fa357f3ef66ff27fa77029a324c262d8ccb060fa9c30e",
+      "role": "archived-process-document"
+    },
+    {
+      "path": "milestones/milestones/m18-engine-0.2.1/assessment.md",
+      "bytes": 6529,
+      "sha256": "9db36a3fef36552dd770d3f36ab0bc52b2b526beffa3c0aa7072f17fdcaaef19",
+      "role": "before-link-or-status-maintenance"
+    }
+  ]
+}

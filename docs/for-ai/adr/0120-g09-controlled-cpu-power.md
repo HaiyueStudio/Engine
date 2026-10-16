@@ -1,5 +1,7 @@
 # ADR 0120：G09 共同处理器电源条件
 
+> 历史诊断协议：本记录将共同校准、开发基线和 5% 微基准回归作为 G09 准入前置条件的部分已由 [ADR 0124](0124-g09-production-performance-acceptance.md) 取代。实验协议与历史结果保留；当前验收从 [G09 结论](../../../review/engine-0.2.1/g09/README.md)进入。
+
 - 状态：接受主机条件修订；尚未完成新条件下的完整性能验收。
 - 日期：2026-10-07。
 - 承接：[ADR 0118](0118-g09-cold-steady-sampling.md)、[ADR 0119](0119-g09-extended-calibration-horizon.md)。

@@ -1,6 +1,6 @@
 # G09：问题、结论与解决方法
 
-实现与同候选原始证据已齐备，最终发布链尚未完成。采样来源为干净提交 `e07d8fb293bda190c92dd23d14b873370227074a`，工作区为 `Engine-rc-021-20261014`；验收解释提交另行记录。合同采用 [ADR 0124](../../../docs/for-ai/adr/0124-g09-production-performance-acceptance.md)、[ADR 0126](../../../docs/for-ai/adr/0126-g05-stability-and-evidence-reuse.md) 和 [ADR 0127](../../../docs/for-ai/adr/0127-forward-cpu-investigation.md)，原报告、原失败和全部样本保持。
+实现与同候选原始证据已齐备，七报告专项审计已通过，最终发布链尚未完成。采样来源为干净提交 `e07d8fb293bda190c92dd23d14b873370227074a`，验收及冻结发布候选为 `55feff182901a207e359d403565953438eec30f6`，工作区为 `Engine-rc-021-20261014`；范围及绑定统一见[候选清单](../release-candidate.json)。合同采用 [ADR 0124](../../../docs/for-ai/adr/0124-g09-production-performance-acceptance.md)、[ADR 0126](../../../docs/for-ai/adr/0126-g05-stability-and-evidence-reuse.md) 和 [ADR 0127](../../../docs/for-ai/adr/0127-forward-cpu-investigation.md)，原报告、原失败和全部样本保持。
 
 ## 问题与解决方法
 
@@ -43,6 +43,6 @@ G05 房间、实例与原 Forward 预算结果见[统一验收结论](../README.
 
 ## 发布剩余边界
 
-按最新验收解释，在干净提交重读七类完整原始证据、核对源码／采样器／配置／主机，并重建全部可执行 chunk 比较字节；只有文档或具名验收文件变化可复用。随后完成包/API/Shader、完整独立发布门禁及无发布演练。单项通过不授予 G07 发布资格；当前没有发布、tag、push 或基线晋升。
+七报告专项复核已核对源码／采样器／配置／主机，并重建全部可执行 chunk 比较字节。接下来仍需在同一冻结候选上完成包/API/Shader、完整独立发布门禁及无发布演练，最终链会重读原始证据并复核绑定；只有文档或具名验收文件变化可复用。单项通过不授予 G07 发布资格；当前没有发布、tag、push 或基线晋升。
 
 入口为 `framegraph:acceptance:plan`、`framegraph:production:plan|run|audit`、`framegraph:study:run -- --mode=resources|ablation --plan|--full`。短测只用于诊断，不能替代完整资格；最终机读入口为 `release:021:evidence:check`。

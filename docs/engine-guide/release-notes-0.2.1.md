@@ -2,6 +2,8 @@
 
 0.2.1 尚未发布。本页说明候选能力与升级边界；当前设备证据、性能资格和剩余发布工作统一见[验收结论](../../review/engine-0.2.1/README.md)。版本号、示例可运行或单项测试通过均不表示完整发布资格。
 
+本版使用[候选清单](../../review/engine-0.2.1/release-candidate.json)固定的 `55feff1`。开发线新增的 `GuiToast`／`GuiToastOptions` 留到下一 minor；本页的 0.2.1 范围和设备证据不包含该新增能力。开发线 GUI 实现继续保留，既有 GUI 能力以冻结候选的公开声明为准。
+
 ## 多灯与 FrameGraph
 
 - 通过 `@haiyue/engine/experimental/renderer` 的 `createDeferredLightingProfile()` 显式选择 `reference` 或 `tiled`。提供完整灯表、逐视图列表、容量诊断及主动调试读回；普通场景继续使用默认 Forward。接入见 [Deferred 多光源指南](deferred-lighting.md)和[可运行示例](../../examples/deferred-lighting/main.ts)。

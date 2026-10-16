@@ -1,5 +1,7 @@
 # Runtime convergence verification contract
 
+> 历史冻结协议：以下版本冻结值及 G02–G07 的阶段限制只对应已完成的 M2.5。当前 API、基线与发布要求以现行配置和后续 ADR 为准；阶段结论见 [M2.5](../../../review/m025/README.md)。
+
 ## Compatibility identity
 
 - Public surface：`review/api/release-manifest.json` 与 API surface gate。
