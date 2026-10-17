@@ -1,26 +1,80 @@
 export const ENGINE_021_EVIDENCE_KINDS = Object.freeze(['correctness', 'production', 'resources', 'ablation', 'rooms', 'instances', 'forward']);
+
+/** User-approved single repair case, ADR 0129. Digests identify complete immutable populations. */
+export const ENGINE_021_READBACK_REUSE = Object.freeze({
+  decision: 'ADR0129-readback-cache-history',
+  captureRevision: '384ad34d7007b0618cdd0408f3968d5085461130',
+  sourceFiles: Object.freeze({
+  "scripts/webgpu-gate/readback-churn-fixture.mjs": "6f5f5d9949121c5bfb4f2cbd93845acf70438cfd20cadafba3814a565d9a4782",
+  "scripts/webgpu-gate/readback-churn-cache-history.mjs": "103863f243f1218f8fd6143ffe53a0b907be054008777403daeea19f0c6d4a3b",
+  "scripts/webgpu-gate/readback-churn-contract.test.mjs": "68db10095316c7382b2a024b8aafd6d9055959b022e2b9c87203072f39aace62"
+}),
+  reports: Object.freeze(Object.fromEntries(Object.entries({
+  "resources": {
+    "file": "artifacts/engine-0.2.1/g09/study-resources-2026-10-17T01-26-17.345Z/report.json",
+    "sha256": "fe4e6a7579546ef237c0a8b7b7da716028f4b275833ce204c0e863e8c960fd86"
+  },
+  "rooms": {
+    "file": "artifacts/engine-0.2.1/g05/continuous-rooms-2026-10-17T02-15-12.689Z/report.json",
+    "sha256": "155bbd1b426fa7470061581b591c7b49460d28b0eba250865b0f7e1bce9aec91"
+  },
+  "instances": {
+    "file": "artifacts/engine-0.2.1/g05/continuous-instances-2026-10-17T03-02-39.220Z/report.json",
+    "sha256": "35b76ee7dd7b3fccdf932ad0421e6cb3474ad04982c94eb4982afadba5b2e6f1"
+  },
+  "forward": {
+    "file": "artifacts/engine-0.2.1/g05/continuous-forward-2026-10-17T03-17-41.282Z/report.json",
+    "sha256": "f45d42558354f73de3e2532f9469c2d48a23f9db18e4579f5360016d4815a03a"
+  },
+  "production": {
+    "file": "artifacts/engine-0.2.1/g09/production-local-2026-10-17T03-21-01.698Z/report.json",
+    "sha256": "1a78ec905affb2c072bc3b382b96c096b0a0763da1f8625fbe857133f5ac05cd"
+  },
+  "ablation": {
+    "file": "artifacts/engine-0.2.1/g09/study-ablation-2026-10-17T03-47-40.696Z/report.json",
+    "sha256": "2ad1239926d8a6d5a2267d1b7afba8c6120784aa6de94e2704c75c7ef5c6e920"
+  }
+}).map(([kind, value]) => [kind, Object.freeze(value)]))),
+});
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const check = (condition, message) => { if (!condition) throw Error(message); };
 const g05Kinds = ['rooms', 'instances', 'forward'];
 const policyFiles = new Set(['scripts/engine-021-evidence-policy.mjs', 'scripts/engine-021-evidence-policy.test.mjs',
   'scripts/check-engine-021-evidence.mjs']);
 
-/** ADR 0126 permits only prose/acceptance edits, in addition to exact measurement and binary hashes. */
-export function validateEngine021RevisionReuse(captureRevision, current) {
+export function isEngine021ReadbackReuseBinding(kind, binding) {
+  const pinned = ENGINE_021_READBACK_REUSE.reports[kind];
+  return !!pinned && binding?.captureRevision === ENGINE_021_READBACK_REUSE.captureRevision &&
+    binding.file === pinned.file && binding.sha256 === pinned.sha256;
+}
+
+const safePath = path => typeof path === 'string' && !path.split('/').some(p => !p || p === '..' || p === '.') && !path.includes('\\');
+const acceptancePath = path => safePath(path) && (policyFiles.has(path) || ['README.md', 'CHANGELOG.md'].includes(path) || /^(docs|review)\/.+\.md$/.test(path));
+
+/** ADR 0126 remains the default; ADR 0129 permits only the pinned six-report repair case. */
+export function validateEngine021RevisionReuse(captureRevision, current, kind, binding, reuseDecision) {
   check(/^[a-f0-9]{40}$/.test(captureRevision), 'Missing clean capture revision');
   if (captureRevision === current.revision) return;
   const paths = current.reuseChanges?.[captureRevision];
   check(Array.isArray(paths), 'Missing verified Git comparison for capture revision');
-  for (const path of paths) {
-    check(typeof path === 'string' && !path.split('/').some(p => !p || p === '..' || p === '.') &&
-      !path.includes('\\') && (policyFiles.has(path) || ['README.md', 'CHANGELOG.md'].includes(path) ||
-        /^(docs|review)\/.+\.md$/.test(path)), `Evidence reuse requires new sampling after non-acceptance change: ${path}`);
-  }
+  if (paths.every(acceptancePath)) return;
+  check(captureRevision === ENGINE_021_READBACK_REUSE.captureRevision && isEngine021ReadbackReuseBinding(kind, binding),
+    'Evidence reuse requires new sampling after non-acceptance change; this is not an ADR 0129 pinned population');
+  check(reuseDecision === ENGINE_021_READBACK_REUSE.decision, 'ADR 0129 requires its explicit manifest decision');
+  const fixedFiles = Object.entries(ENGINE_021_READBACK_REUSE.sourceFiles);
+  check(fixedFiles.every(([path, hash]) => paths.includes(path) && current.readbackFixFiles?.[path] === hash),
+    'ADR 0129 requires the exact reviewed readback repair bytes');
+  const allowed = new Set([...fixedFiles.map(([path]) => path),
+    'scripts/engine-021-candidate-policy.mjs', 'scripts/engine-021-candidate-policy.test.mjs',
+    'review/engine-0.2.1/release-candidate.json']);
+  check(paths.every(path => acceptancePath(path) || safePath(path) && allowed.has(path)),
+    'Evidence reuse requires new sampling after another non-acceptance change');
 }
 
 /** Identity checks precede independent raw-artifact audits; summary status alone never qualifies a bundle. */
 export function validateEngine021EvidenceBindings(manifest, reports, current) {
   check(manifest?.schemaVersion === 2 && manifest.contractId === 'engine-021-evidence-v2', 'Unknown qualification manifest');
+  check(manifest.reuseDecision === undefined || manifest.reuseDecision === ENGINE_021_READBACK_REUSE.decision, 'Unknown evidence reuse decision');
   check(/^[a-f0-9]{40}$/.test(current.revision) && current.dirty === false && manifest.revision === current.revision,
     'Qualification requires the current clean revision');
   check(same(Object.keys(manifest.reports ?? {}).sort(), [...ENGINE_021_EVIDENCE_KINDS].sort()) &&
@@ -33,7 +87,7 @@ export function validateEngine021EvidenceBindings(manifest, reports, current) {
     paths.add(binding.file);
     check(binding.captureRevision === report?.revision && report.dirty === false &&
       (report.status === 'passed' || g05Kinds.includes(kind) && report.status === 'failed'), `${kind}: not a complete clean capture`);
-    validateEngine021RevisionReuse(report.revision, current);
+    validateEngine021RevisionReuse(report.revision, current, kind, binding, manifest.reuseDecision);
     check(Number.isFinite(Date.parse(report.generatedAt)) && Number.isFinite(Date.parse(report.finishedAt)) &&
       Date.parse(report.finishedAt) >= Date.parse(report.generatedAt), `${kind}: missing capture completion`);
     if (kind === 'correctness') {

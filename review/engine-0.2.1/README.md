@@ -1,13 +1,14 @@
 # Engine 0.2.1：验收结论
 
-G01–G04、G06 的实现阶段已完成；0.2.1 现包含 GUI Toast。G05 与 [G09](g09/README.md) 的旧候选七报告完整并已独立复核，当前包含 Toast 的新候选需要重新取得七类完整证据；G07 最终发布链尚未完成。此处集中保留问题、结论和处理办法；阶段过程记录见 [归档](../archive/README.md)。版本号不是已发布证明。
+G01–G04、G06 的实现阶段已完成；0.2.1 现包含 GUI Toast。G05 与 [G09](g09/README.md) 的旧候选七报告完整并已独立复核，包含 Toast 的 `384ad34` 七组已完成原始数据复核；readback 诊断修复后，六组按 [ADR 0129](../../docs/for-ai/adr/0129-readback-repair-evidence-reuse.md) 限定复核，224 项正确性必须重采，G07 完整发布链仍须完成。此处集中保留问题、结论和处理办法；阶段过程记录见 [归档](../archive/README.md)。版本号不是已发布证明。
 
-**当前候选范围**见[机读清单](release-candidate.json)：用户明确要求将 `GuiToast`、`GuiToastOptions` 纳入 0.2.1，供依赖游戏发布使用；版本安排由 [ADR 0128](../../docs/for-ai/adr/0128-toast-in-021-release.md) 取代此前的推迟决定。使用 `Engine` 工作区包含 Toast 的干净提交，本地完整 revision 和运行时指纹写入清单指定的 `candidate-lock.json`。稳定 `./gui` 符号归属为 86，根入口仍为 30 个概念。工作区旁的 `start-engine-021-final-validation.cmd` 只接受新候选及其新报告；旧工作区、旧报告和原失败全部保留。
+**当前候选范围**见[机读清单](release-candidate.json)：用户明确要求将 `GuiToast`、`GuiToastOptions` 纳入 0.2.1，供依赖游戏发布使用；版本安排由 [ADR 0128](../../docs/for-ai/adr/0128-toast-in-021-release.md) 取代此前的推迟决定。使用 `Engine` 工作区包含 Toast 的干净提交，本地完整 revision 和运行时指纹写入清单指定的 `candidate-lock.json`。稳定 `./gui` 符号归属为 86，根入口仍为 30 个概念。工作区旁的 `start-engine-021-final-validation.cmd` 只接受冻结候选、新正确性及按 ADR 0129 固定哈希的六份报告；旧工作区、旧报告和原失败全部保留。
 
 下表实测数字来自旧采样提交 `e07d8fb` 和验收提交 `55feff1`，仅保留问题、解决方法和历史结果，不授予包含 Toast 的当前候选发布资格。
 
 | 问题 | 结论 | 解决方法与剩余边界 |
 | --- | --- | --- |
+| readback/churn 缓存活动被误报为零 | 追踪器在 owner 释放时正确清除元数据；夹具此前在释放后取数 | 夹具逐 owner 在释放前保存真实缓存活动，仍在清理后检查资源残留。120／1800 帧及回归测试通过；不修改运行时、阈值或原失败报告。六组限定复核、224 项正确性重采及完整发布链见 ADR 0129 |
 | 既有 Forward 不能完整处理百灯 | G02 全灯 Deferred 参考路径、G03 Tiled 路径已实现 | 独立几何/像素 oracle 检查完整覆盖；容量不足同帧遍历全灯，不以漏灯换耗时 |
 | 多视图、透明与扩展材质兼容 | G04 兼容验收完成 | 保留 source/view owner、完整灯表、线性 HDR 与显式不支持回退；原生销毁恢复和模拟故障分列 |
 | AO 语义与内存超预算 | 已改为光照阶段只调制 ambient/IBL；R16F 与联合在途资源核算将 1080p GTAO Deferred 分配降至约 63.77 MiB | 保留直接光、自发光和透射；64 MiB 预算未放宽。内存受限全灯回退的 GPU 成本仍需判断 |
@@ -42,6 +43,6 @@ Forward Edge 单灯 CPU P95 为 1.275 / 1.180 ms，八灯为 1.390 / 1.155 ms（
 
 完整补采索引为 `artifacts/final-release-2026-10-15T05-48-55.730Z/execution.json`，生产与消融分别为 `g09/production-local-2026-10-15T05-50-16.224Z/report.json`、`g09/study-ablation-2026-10-15T06-16-58.972Z/report.json`，同版本对照为 `g05/forward-controls-2026-10-15T06-29-34.352Z/report.json`（均在该候选的 `artifacts/engine-0.2.1/` 下）。原执行的 `evidence-complete-release-blocked` 状态不改写；`55feff1` 已通过单独的七报告专项审计，记录为 `artifacts/engine-0.2.1/qualification-audit-2026-10-15T08-00-05.443Z/report.json`。
 
-发布仍需当前包含 Toast 的同一干净候选取得七类完整新报告，并完成包/API/Shader、完整全局门禁和无发布演练。ADR 0126 的复用限制保持：运行时变化要求新采样，不能用旧七报告或单项 GUI 测试补位。归档期间不并行执行正式性能采样。当前未执行发布、tag、push 或基线晋升。
+发布仍需修复后同一干净候选取得新的完整正确性报告，并按 ADR 0129 严格复核固定六组，再完成包/API/Shader、完整全局门禁和无发布演练。ADR 0126 的复用限制保持：运行时变化要求新采样，不能用旧七报告或单项 GUI 测试补位。归档期间不并行执行正式性能采样。当前未执行发布、tag、push 或基线晋升。
 
 发布门禁通过 `release:021:evidence:check` 读取 `artifacts/engine-0.2.1/qualification.json` 中显式绑定的七份完整报告：F0–F8 正确性、生产流畅度、资源长跑、消融，以及 G05 房间／实例／Forward。v2 清单包含验收 revision 和各报告的采样 revision、相对路径、SHA-256；校验器重读原始捕获与截图，核对当前源码、配置、主机和干净提交，并重新构建候选夹具逐项比较可执行产物。短测、缺项、不符合 ADR 0126 的异版、预算或原始完整性失败不能补位；该检查仍不代替独立包、Shader、生命周期和其余发布门禁。用户说明见 [0.2.1 候选说明](../../docs/engine-guide/release-notes-0.2.1.md)。

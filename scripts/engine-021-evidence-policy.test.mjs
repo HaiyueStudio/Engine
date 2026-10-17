@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ENGINE_021_EVIDENCE_KINDS as kinds, validateEngine021EvidenceBindings, completeEngine021EvidenceAudit,
-  assessEngine021G05Audit, validateEngine021CompiledEvidence, validateEngine021RevisionReuse } from './engine-021-evidence-policy.mjs';
+  assessEngine021G05Audit, validateEngine021CompiledEvidence, validateEngine021RevisionReuse,
+  ENGINE_021_READBACK_REUSE as repair } from './engine-021-evidence-policy.mjs';
 
 function g05Audit(kind) {
   const [captures, checks, stability, memory] = { rooms: [156, 60, 156, 156], instances: [96, 96, 192, 0], forward: [24, 8, 16, 0] }[kind];
@@ -36,6 +37,53 @@ function fixture() {
   return { current, manifest, reports, audits, builds };
 }
 const validate = data => validateEngine021EvidenceBindings(data.manifest, data.reports, data.current);
+
+function repairFixture() {
+  const data = fixture();
+  data.manifest.reuseDecision = repair.decision;
+  data.current.readbackFixFiles = { ...repair.sourceFiles };
+  data.current.reuseChanges = { [repair.captureRevision]: [...Object.keys(repair.sourceFiles),
+    'scripts/engine-021-evidence-policy.mjs', 'scripts/engine-021-candidate-policy.mjs',
+    'scripts/engine-021-candidate-policy.test.mjs', 'review/engine-0.2.1/release-candidate.json',
+    'docs/for-ai/adr/0129-readback-repair-evidence-reuse.md'] };
+  for (const [kind, binding] of Object.entries(repair.reports)) {
+    data.manifest.reports[kind] = { ...binding, captureRevision: repair.captureRevision };
+    data.reports[kind].revision = repair.captureRevision;
+  }
+  return data;
+}
+
+test('ADR 0129 permits only six pinned populations and still requires new complete correctness', () => {
+  const data = repairFixture(); validate(data);
+  data.reports.correctness.revision = data.manifest.reports.correctness.captureRevision = repair.captureRevision;
+  assert.throws(() => validate(data), /not an ADR 0129 pinned population/);
+});
+
+test('ADR 0129 rejects another report, missing authorization, changed fix bytes and unrelated source edits', () => {
+  for (const mutate of [
+    d => { delete d.manifest.reuseDecision; },
+    d => { d.manifest.reuseDecision = 'another-decision'; },
+    d => { d.manifest.reports.rooms.sha256 = 'f'.repeat(64); },
+    d => { d.manifest.reports.resources.file = 'artifacts/other/report.json'; },
+    d => { delete d.current.readbackFixFiles; },
+    d => { d.current.readbackFixFiles[Object.keys(repair.sourceFiles)[0]] = '0'.repeat(64); },
+    d => { d.current.reuseChanges[repair.captureRevision].shift(); },
+    d => { d.current.reuseChanges[repair.captureRevision].push('engine/src/index.ts'); },
+    d => { d.current.reuseChanges[repair.captureRevision].push('package-lock.json'); },
+    d => { d.current.reuseChanges[repair.captureRevision].push('review/baseline.json'); },
+    d => { d.current.reuseChanges[repair.captureRevision].push('scripts/webgpu-gate/chrome-runner.mjs'); },
+  ]) { const data = repairFixture(); mutate(data); assert.throws(() => validate(data)); }
+});
+
+test('ADR 0129 never waives current inputs, configuration, clean state or executable bytes', () => {
+  for (const mutate of [
+    d => { d.current.dirty = true; }, d => { d.reports.rooms.dirty = true; },
+    d => { d.current.inputs.production = { other: true }; },
+    d => { d.current.lightingConfig = { changed: true }; },
+  ]) { const data = repairFixture(); mutate(data); assert.throws(() => validate(data)); }
+  const data = repairFixture(); data.builds.common[0].sha256 = 'f'.repeat(64);
+  assert.throws(() => validateEngine021CompiledEvidence(data.reports, data.builds));
+});
 
 test('all seven bindings and independent audits remain a scoped prerequisite, not release approval', () => {
   const data = fixture(); validate(data);

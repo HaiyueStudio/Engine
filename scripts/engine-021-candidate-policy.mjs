@@ -1,4 +1,4 @@
-import { ENGINE_021_EVIDENCE_KINDS } from './engine-021-evidence-policy.mjs';
+import { ENGINE_021_EVIDENCE_KINDS, ENGINE_021_READBACK_REUSE, isEngine021ReadbackReuseBinding } from './engine-021-evidence-policy.mjs';
 
 const check = (ok, message) => { if (!ok) throw Error(message); };
 const digest = value => /^[a-f0-9]{64}$/.test(value ?? '');
@@ -24,12 +24,15 @@ export function validateEngine021FreshQualification(manifest, expectedRevision, 
   check(revision(expectedRevision) && revision(captureRevision), 'Missing current acceptance/capture revision');
   check(manifest?.schemaVersion === 2 && manifest.contractId === 'engine-021-evidence-v2' &&
     manifest.revision === expectedRevision, 'Fresh qualification must bind the current candidate');
+  check(manifest.reuseDecision === undefined || manifest.reuseDecision === ENGINE_021_READBACK_REUSE.decision, 'Unknown reuse decision');
+  if (manifest.reuseDecision) check(captureRevision !== ENGINE_021_READBACK_REUSE.captureRevision, 'ADR 0129 requires new correctness');
   check(JSON.stringify(Object.keys(manifest.reports ?? {}).sort()) === JSON.stringify([...ENGINE_021_EVIDENCE_KINDS].sort()),
     'Seven fresh complete report bindings are required');
   const paths = new Set();
   for (const kind of ENGINE_021_EVIDENCE_KINDS) {
     const report = manifest.reports[kind];
-    check(report?.captureRevision === captureRevision, `${kind}: old capture cannot qualify the Toast runtime`);
+    check(report?.captureRevision === captureRevision || manifest.reuseDecision === ENGINE_021_READBACK_REUSE.decision &&
+      isEngine021ReadbackReuseBinding(kind, report), `${kind}: old capture cannot qualify the Toast runtime`);
     check(digest(report.sha256) && typeof report.file === 'string' && report.file.startsWith('artifacts/') &&
       report.file.split('/').every(p => p && p !== '.' && p !== '..') && !/[\\:\x00-\x1f]/.test(report.file) &&
       !paths.has(report.file), `${kind}: invalid or duplicate fresh report binding`);

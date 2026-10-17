@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validateEngine021CandidateLock as validateLock, validateEngine021FreshQualification as validateFresh } from './engine-021-candidate-policy.mjs';
-import { ENGINE_021_EVIDENCE_KINDS as kinds } from './engine-021-evidence-policy.mjs';
+import { ENGINE_021_EVIDENCE_KINDS as kinds, ENGINE_021_READBACK_REUSE as repair } from './engine-021-evidence-policy.mjs';
 
 function fixture() {
   const revision = 'a'.repeat(40), hash = 'b'.repeat(64), runtime = { sha256: 'c'.repeat(64), fileCount: 624 };
@@ -54,4 +54,18 @@ test('missing populations, duplicate paths, bad hashes and path escapes cannot f
     d => { d.manifest.reports.resources.file = 'artifacts/C:/old.json'; }]) {
     const d = fixture(); mutate(d); assert.throws(() => validateFresh(d.manifest, d.current.revision));
   }
+});
+
+test('ADR 0129 binds exactly six retained reports and keeps correctness on the new capture', () => {
+  const data = fixture(); data.manifest.reuseDecision = repair.decision;
+  for (const [kind, row] of Object.entries(repair.reports)) data.manifest.reports[kind] = { ...row, captureRevision: repair.captureRevision };
+  validateFresh(data.manifest, data.current.revision);
+  for (const mutate of [
+    d => { d.manifest.reports.correctness.captureRevision = repair.captureRevision; },
+    d => { d.manifest.reports.forward.sha256 = '0'.repeat(64); },
+    d => { d.manifest.reports.production.file = 'artifacts/another/report.json'; },
+    d => { d.manifest.reports.instances.captureRevision = 'e'.repeat(40); },
+    d => { delete d.manifest.reuseDecision; },
+  ]) { const copy = structuredClone(data); mutate(copy); assert.throws(() => validateFresh(copy.manifest, copy.current.revision)); }
+  assert.throws(() => validateFresh(data.manifest, data.current.revision, repair.captureRevision), /new correctness/);
 });

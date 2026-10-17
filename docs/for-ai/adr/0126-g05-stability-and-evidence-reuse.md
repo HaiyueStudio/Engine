@@ -2,6 +2,7 @@
 
 - 状态：接受；2026-10-13 用户明确批准两项调整。
 - 后续调整：[ADR 0127](0127-forward-cpu-investigation.md) 仅将 Forward CPU 5% 改为调查项；本页保留当时决定，其余要求继续有效。
+- 具名例外：[ADR 0129](0129-readback-repair-evidence-reuse.md) 仅允许一次 readback 夹具修复后复核固定的六组，完整正确性重采；本页原决定保持。
 - 取代范围：[ADR 0125](0125-g05-continuous-sampling.md) 的 G05 跨轮稳定性硬门禁，以及 0.2.1 专项证据仅因验收/文档提交号不同就必须重采的要求。采样协议和旧结果保留。
 - 执行入口：[0.2.1 证据策略](../../../scripts/engine-021-evidence-policy.mjs)与[独立复核](../../../scripts/check-engine-021-evidence.mjs)。
 

@@ -1,3 +1,5 @@
+import { GPUResourceTracker } from '../../engine/dist/experimental.js';
+import { aggregateChurnCacheHistory, releaseChurnOwner, releaseChurnScope } from './readback-churn-cache-history.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { READBACK_CHURN_SCHEMA_VERSION, READBACK_CHURN_SUITE, validateReadbackChurnResult } from './readback-churn-contract.mjs';
@@ -48,4 +50,52 @@ test('long profile cannot silently shrink below its evidence window', () => {
   result.profile = 'long';
   result.config.frames = 999;
   assert.equal(validateReadbackChurnResult(result, { profile: 'long' }).some(error => error.includes('at least 1000')), true);
+});
+
+test('retiring many churn owners preserves their measured totals while tracker metadata stays bounded', () => {
+  const tracker = new GPUResourceTracker({ debug: true });
+  const engine = tracker.createScope('engine', 'cache-history-engine');
+  const history = [];
+  tracker.recordCacheAccess('renderer-resource', false, { owner: engine.owner, entries: 1 });
+  for (let i = 0; i < 30; i++) {
+    const scope = tracker.createScope('frame', `cycle-${i}`);
+    tracker.recordCacheAccess('renderer-pipeline-layout', false, { owner: scope.owner, entries: 1 });
+    tracker.recordCacheAccess('renderer-pipeline-layout', true, { owner: scope.owner, entries: 1 });
+    tracker.recordCacheAccess('renderer-resource', true, { owner: engine.owner, entries: 1 });
+    releaseChurnScope(tracker, scope, history);
+    assert.equal(tracker.getDebugSnapshot().caches.length, 1, 'retired metadata must still be released');
+  }
+  releaseChurnOwner(tracker, engine.owner, history);
+  assert.deepEqual(tracker.getDebugSnapshot().caches, []);
+  assert.deepEqual(aggregateChurnCacheHistory(history), [
+    { label: 'renderer-pipeline-layout', hits: 30, misses: 30, peakEntries: 1 },
+    { label: 'renderer-resource', hits: 30, misses: 1, peakEntries: 1 },
+  ]);
+});
+
+test('empty and repeated releases do not invent activity or double count another live owner', () => {
+  const tracker = new GPUResourceTracker({ debug: true });
+  const scope = tracker.createScope('frame', 'one');
+  const other = tracker.createScope('engine', 'other');
+  const history = [];
+  tracker.recordCacheAccess('actual-cache', true, { owner: scope.owner, entries: 3 });
+  tracker.recordCacheAccess('other-cache', false, { owner: other.owner, entries: 1 });
+  releaseChurnScope(tracker, scope, history);
+  releaseChurnScope(tracker, scope, history);
+  assert.deepEqual(aggregateChurnCacheHistory(history), [{ label: 'actual-cache', hits: 1, misses: 0, peakEntries: 3 }]);
+  assert.equal(tracker.getDebugSnapshot().caches.length, 1);
+  tracker.releaseAll();
+  assert.deepEqual(aggregateChurnCacheHistory([]), []);
+});
+
+test('resource residue remains observable after activity capture', () => {
+  const tracker = new GPUResourceTracker({ debug: true });
+  const scope = tracker.createScope('frame', 'retired');
+  const history = [];
+  tracker.recordCacheAccess('cache', false, { owner: scope.owner });
+  releaseChurnScope(tracker, scope, history);
+  const buffer = tracker.trackBuffer({ destroy() {} }, { owner: scope.owner, label: 'late-buffer', estimatedBytes: 16 });
+  assert.equal(tracker.getDebugSnapshot().releasedOwnerResiduals, 1);
+  tracker.untrackBuffer(buffer);
+  assert.equal(tracker.getDebugSnapshot().releasedOwnerResiduals, 0);
 });

@@ -11,7 +11,7 @@ import { auditG09Preflight } from './webgpu-gate/framegraph-acceptance-policy.mj
 import { loadFrameGraphQualification } from './webgpu-gate/framegraph-qualification.mjs';
 import { buildDeferredFixture } from './webgpu-gate/deferred-fixture-builder.mjs';
 import { ENGINE_021_EVIDENCE_KINDS, validateEngine021EvidenceBindings, validateEngine021CompiledEvidence,
-  completeEngine021EvidenceAudit } from './engine-021-evidence-policy.mjs';
+  completeEngine021EvidenceAudit, ENGINE_021_READBACK_REUSE } from './engine-021-evidence-policy.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url)), args = process.argv.slice(2);
 if (args.length > 1 || args.length === 1 && !args[0].startsWith('--manifest=')) throw Error('Use --manifest=<artifacts/.../qualification.json>, or the default artifacts/engine-0.2.1/qualification.json');
@@ -43,6 +43,8 @@ const current = { revision: git(['rev-parse', 'HEAD']), dirty: !!git(['status', 
   inputs: { production: await productionEvidenceInputs(root), resources: await studyEvidenceInputs(root, 'resources'),
     ablation: await studyEvidenceInputs(root, 'ablation'), rooms: lightingInputs, instances: lightingInputs, forward: lightingInputs } };
 current.reuseChanges = {};
+current.readbackFixFiles = Object.fromEntries(await Promise.all(Object.keys(ENGINE_021_READBACK_REUSE.sourceFiles)
+  .map(async path => [path, sha256(await readFile(resolve(root, path)))])));
 for (const revision of new Set(Object.values(reports).map(report => report.revision))) {
   if (!/^[a-f0-9]{40}$/.test(revision)) throw Error('Missing capture commit');
   git(['cat-file', '-e', `${revision}^{commit}`]);
@@ -94,7 +96,8 @@ if (git(['rev-parse', 'HEAD']) !== current.revision || git(['status', '--porcela
 const policyFiles = ['scripts/engine-021-evidence-policy.mjs', 'scripts/check-engine-021-evidence.mjs'];
 const evidence = { ...result, schemaVersion: 2, contractId: 'engine-021-evidence-v2', assessedAt: new Date().toISOString(),
   acceptanceRevision: current.revision, dirty: false, manifest: manifestPath, manifestSha256: sha256(manifestBytes),
-  policy: { adr: ['0126', '0127'], files: await Promise.all(policyFiles.map(async path => ({ path, sha256: sha256(await readFile(resolve(root, path))) }))) },
+  policy: { adr: ['0126', '0127', ...(manifest.reuseDecision ? ['0129'] : [])], files: await Promise.all(policyFiles.map(async path => ({ path, sha256: sha256(await readFile(resolve(root, path))) }))) },
+  ...(manifest.reuseDecision ? { reuseDecision: manifest.reuseDecision, readbackFixFiles: current.readbackFixFiles } : {}),
   bindings: Object.fromEntries(ENGINE_021_EVIDENCE_KINDS.map(kind => [kind, { ...manifest.reports[kind],
     captureRevision: reports[kind].revision, acceptanceRevision: current.revision, originalStatus: reports[kind].status,
     acceptanceStatus: 'passed', reused: reports[kind].revision !== current.revision }])),

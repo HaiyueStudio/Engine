@@ -7,6 +7,7 @@ import {
   createRenderFrameContext,
 } from '/engine/dist/experimental.js';
 import { READBACK_CHURN_SCHEMA_VERSION, READBACK_CHURN_SUITE } from './readback-churn-contract.mjs';
+import { aggregateChurnCacheHistory, releaseChurnOwner, releaseChurnScope } from './readback-churn-cache-history.mjs';
 
 const parameters = new URLSearchParams(location.search);
 const profile = parameters.get('profile') === 'long' ? 'long' : 'short';
@@ -52,6 +53,7 @@ async function runGate(activeProfile, frames) {
 
   const batches = [];
   const liveScopes = [];
+  const cacheHistory = [];
   const expectedValues = new Map();
   const submittedTokens = new Set();
   const seenResultTokens = new Set();
@@ -134,25 +136,25 @@ async function runGate(activeProfile, frames) {
     }
     if (liveScopes.length > 4) {
       await device.queue.onSubmittedWorkDone();
-      liveScopes.shift().release();
+      releaseChurnScope(tracker, liveScopes.shift(), cacheHistory);
     }
     await nextAnimationFrame();
   }
 
   await device.queue.onSubmittedWorkDone();
-  for (const scope of liveScopes.splice(0)) scope.release();
+  for (const scope of liveScopes.splice(0)) releaseChurnScope(tracker, scope, cacheHistory);
   await waitFor(() => aggregateReadback(batches).pending === 0, 15_000, 'readback drain');
   batch?.destroy();
   RendererResourceCache.clear(device);
-  tracker.releaseOwner(readbackOwner);
-  tracker.releaseOwner(engineOwner);
+  releaseChurnOwner(tracker, readbackOwner, cacheHistory);
+  releaseChurnOwner(tracker, engineOwner, cacheHistory);
   await Promise.resolve();
 
   const validationError = await device.popErrorScope();
   if (validationError) validationErrors.push(validationError.message);
   const debug = aggregateReadback(batches);
   const resourceSnapshot = tracker.getDebugSnapshot();
-  const caches = aggregateCaches(resourceSnapshot.caches);
+  const caches = aggregateChurnCacheHistory(cacheHistory);
   const cacheStats = caches.reduce((totals, cache) => ({
     hits: totals.hits + cache.hits,
     misses: totals.misses + cache.misses,
@@ -292,18 +294,6 @@ function distribution(values) {
   if (values.length === 0) return { p50: 0, p95: 0, max: 0 };
   const sorted = [...values].sort((a, b) => a - b);
   return { p50: percentile(sorted, 0.5), p95: percentile(sorted, 0.95), max: sorted[sorted.length - 1] };
-}
-
-function aggregateCaches(caches) {
-  const byLabel = new Map();
-  for (const cache of caches) {
-    const current = byLabel.get(cache.label) ?? { label: cache.label, hits: 0, misses: 0, peakEntries: 0 };
-    current.hits += cache.hits;
-    current.misses += cache.misses;
-    current.peakEntries = Math.max(current.peakEntries, cache.peakEntries);
-    byLabel.set(cache.label, current);
-  }
-  return [...byLabel.values()].sort((a, b) => a.label.localeCompare(b.label));
 }
 
 function percentile(sorted, quantile) {

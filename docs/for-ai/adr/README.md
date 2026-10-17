@@ -159,3 +159,4 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0126：G05 稳定性作为调查项；按严格输入与产物哈希复核既有证据](0126-g05-stability-and-evidence-reuse.md)
 - [0127：Forward CPU 5% 作为调查项；其余硬门禁保持](0127-forward-cpu-investigation.md)
 - [0128：Toast 纳入 0.2.1；保留运行时合同并重新取得候选资格](0128-toast-in-021-release.md)
+- [0129：readback 诊断修复后限定复核六组；完整正确性重新采样](0129-readback-repair-evidence-reuse.md)

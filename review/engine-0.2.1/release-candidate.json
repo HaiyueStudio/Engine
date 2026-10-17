@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "version": "0.2.1",
-  "status": "toast-included-fresh-qualification-required",
+  "status": "toast-readback-repair-correctness-and-global-qualification-required",
   "candidate": {
     "workspace": "Engine",
     "revisionLockFile": "artifacts/engine-0.2.1/candidate-lock.json",
@@ -44,7 +44,7 @@
   },
   "qualification": {
     "file": "artifacts/engine-0.2.1/qualification.json",
-    "status": "fresh-capture-required",
+    "status": "pinned-six-and-fresh-correctness-required",
     "requiredKinds": [
       "correctness",
       "production",
@@ -54,7 +54,9 @@
       "instances",
       "forward"
     ],
-    "reports": {}
+    "reports": {},
+    "reuseDecision": "ADR0129-readback-cache-history",
+    "reportBindingsPolicy": "scripts/engine-021-evidence-policy.mjs#ENGINE_021_READBACK_REUSE"
   },
   "historicalCandidate": {
     "candidate": {
@@ -113,12 +115,14 @@
   },
   "launcher": {
     "workspaceRelativePath": "start-engine-021-final-validation.cmd",
-    "candidateHelper": "artifacts/start-final-release-closeout.ps1",
+    "candidateHelper": "artifacts/start-final-release-validation.ps1",
     "revisionBinding": "candidate.revisionLockFile",
-    "requiresFreshReports": true
+    "requiresFreshReports": false,
+    "requiresFreshCorrectness": true,
+    "requiresPinnedSixRawAudit": true
   },
   "pending": [
-    "seven fresh complete native reports including Toast runtime",
+    "fresh 224-case correctness and strict ADR 0129 six-population raw audit",
     "global Engine release gate",
     "no-publish rehearsal and independent audit",
     "final formal lighting evidence audit"
