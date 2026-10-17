@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
 import { decodePng } from './visual-regression/png.mjs';
-import { createPortablePixelRecord, comparePortablePixelRecords } from './visual-regression/portable-pixels.mjs';
+import { createPortablePixelRecord } from './visual-regression/portable-pixels.mjs';
+import { pbrPixelBaselinePath, comparePbrPixelBaseline } from './pbr-example-pixel-policy.mjs';
 import {
   defaultChromePath,
   defaultWebGpuAngleBackend,
@@ -13,7 +14,7 @@ import {
 } from './webgpu-gate/chrome-runner.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const baselinePath = resolve(root, 'review/baselines/render-pixels-stage9-pbr-example.json');
+const baselinePath = resolve(root, pbrPixelBaselinePath(process.platform));
 const chrome = process.env.CHROME_PATH ?? defaultChromePath();
 if (!existsSync(chrome)) throw new Error(`PBR product verification requires Chrome at ${chrome}.`);
 if (!existsSync(resolve(root, 'examples/pbr-showcase/bundle.js'))) throw new Error('Build example:pbr-showcase before PBR product verification.');
@@ -62,17 +63,17 @@ const current = {
 };
 writeFileSync(resolve(root, 'artifacts/render-regression/pbr/candidate.json'), `${JSON.stringify(current, null, 2)}\n`);
 if (process.env.UPDATE_PBR_EXAMPLE_BASELINE === '1') {
-  writeFileSync(baselinePath, `${JSON.stringify(current, null, 2)}\n`);
+  const reference = process.platform === 'win32' ? { ...current, referencePlatform: 'win32' } : current;
+  writeFileSync(baselinePath, `${JSON.stringify(reference, null, 2)}\n`);
   console.log(`[pbr-example] Updated ${baselinePath}.`);
 } else {
   const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'));
   for (const key of ['schemaVersion', 'fixture', 'width', 'height']) {
     if (current[key] !== baseline[key]) throw new Error(`PBR example pixel regression at ${key}: expected ${baseline[key]}, received ${current[key]}.`);
   }
-  for (const mode of ['off', 'on', 'specular', 'sheen', 'transmission', 'shadowInstancing']) {
-    const comparison = comparePortablePixelRecords(current.modes[mode], baseline.modes?.[mode]);
-    if (comparison.status !== 'passed') throw new Error(`PBR ${mode} pixel regression: ${JSON.stringify(comparison)}`);
-  }
+  const comparison = comparePbrPixelBaseline(current, baseline, process.platform);
+  writeFileSync(resolve(root, 'artifacts/render-regression/pbr/comparison.json'), `${JSON.stringify(comparison, null, 2)}\n`);
+  if (comparison.status !== 'passed') throw new Error(`PBR full-page pixel regression: ${JSON.stringify(comparison)}`);
   console.log(`[pbr-example] PBR base ${off.hash.slice(0, 16)}…, clearcoat ${on.hash.slice(0, 16)}…, IOR/Specular ${specular.hash.slice(0, 16)}…, Sheen ${sheen.hash.slice(0, 16)}…, Transmission/Volume ${transmission.hash.slice(0, 16)}…, direct-instanced shadows ${shadowInstancing.hash.slice(0, 16)}…; shadow/IBL pixels and four deformation variants passed.`);
 }
 } finally {

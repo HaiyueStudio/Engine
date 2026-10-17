@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ENGINE_021_EVIDENCE_KINDS as kinds, validateEngine021EvidenceBindings, completeEngine021EvidenceAudit,
   assessEngine021G05Audit, validateEngine021CompiledEvidence, validateEngine021RevisionReuse,
-  ENGINE_021_READBACK_REUSE as repair } from './engine-021-evidence-policy.mjs';
+  ENGINE_021_READBACK_REUSE as repair, ENGINE_021_PBR_REUSE as pbrRepair } from './engine-021-evidence-policy.mjs';
 
 function g05Audit(kind) {
   const [captures, checks, stability, memory] = { rooms: [156, 60, 156, 156], instances: [96, 96, 192, 0], forward: [24, 8, 16, 0] }[kind];
@@ -37,6 +37,54 @@ function fixture() {
   return { current, manifest, reports, audits, builds };
 }
 const validate = data => validateEngine021EvidenceBindings(data.manifest, data.reports, data.current);
+
+function pbrFixture() {
+  const data = fixture();
+  data.manifest.reuseDecision = pbrRepair.decision;
+  data.current.readbackFixFiles = { ...repair.sourceFiles };
+  data.current.pbrFixFiles = { ...pbrRepair.sourceFiles };
+  data.current.reuseChanges = {};
+  for (const [kind, binding] of Object.entries(pbrRepair.reports)) {
+    data.manifest.reports[kind] = { ...binding };
+    data.reports[kind].revision = binding.captureRevision;
+    data.current.reuseChanges[binding.captureRevision] = [...Object.keys(pbrRepair.sourceFiles),
+      ...(binding.captureRevision === repair.captureRevision ? Object.keys(repair.sourceFiles) : []),
+      'scripts/engine-021-evidence-policy.mjs', 'scripts/engine-021-candidate-policy.mjs',
+      'scripts/engine-021-candidate-policy.test.mjs', 'review/engine-0.2.1/release-candidate.json',
+      'docs/for-ai/adr/0130-pbr-windows-reference-evidence-reuse.md'];
+  }
+  return data;
+}
+
+test('ADR 0130 accepts only its seven pinned populations, exact isolated PBR bytes and original readback repair', () => {
+  const data = pbrFixture(); validate(data);
+  for (const mutate of [
+    d => { delete d.manifest.reuseDecision; },
+    d => { d.manifest.reuseDecision = repair.decision; },
+    d => { d.manifest.reports.correctness.sha256 = '0'.repeat(64); },
+    d => { d.manifest.reports.correctness.file = 'artifacts/another/report.json'; },
+    d => { d.current.pbrFixFiles['scripts/verify-pbr-example.mjs'] = '0'.repeat(64); },
+    d => { delete d.current.readbackFixFiles['scripts/webgpu-gate/readback-churn-fixture.mjs']; },
+    d => { delete d.current.reuseChanges[pbrRepair.reports.correctness.captureRevision]; },
+    d => { d.current.reuseChanges[repair.captureRevision].push('engine/src/changed.ts'); },
+    d => { d.current.reuseChanges[pbrRepair.reports.correctness.captureRevision].push('examples/pbr-showcase/main.ts'); },
+    d => { d.current.reuseChanges[pbrRepair.reports.correctness.captureRevision].push('scripts/verify-framegraph-acceptance.mjs'); },
+    d => { d.current.reuseChanges[pbrRepair.reports.correctness.captureRevision].pop(); d.current.reuseChanges[pbrRepair.reports.correctness.captureRevision].shift(); },
+  ]) { const copy = structuredClone(data); mutate(copy); assert.throws(() => validate(copy)); }
+});
+
+test('ADR 0130 does not bypass input, config, host, completion or full-population requirements', () => {
+  for (const mutate of [
+    d => { d.reports.correctness.inputs = { sha256: '0'.repeat(64), fileCount: 624 }; },
+    d => { d.reports.production.inputs = 'changed'; },
+    d => { d.reports.resources.config = {}; },
+    d => { d.reports.rooms.hostBefore.hostname = 'another-host'; },
+    d => { delete d.reports.correctness.finishedAt; },
+    d => { d.reports.correctness.tier = 'smoke'; },
+    d => { d.reports.ablation.dirty = true; },
+    d => { d.reports.correctness.revision = d.manifest.reports.correctness.captureRevision = d.current.revision; },
+  ]) { const data = pbrFixture(); mutate(data); assert.throws(() => validate(data)); }
+});
 
 function repairFixture() {
   const data = fixture();

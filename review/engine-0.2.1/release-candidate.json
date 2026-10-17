@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "version": "0.2.1",
-  "status": "toast-readback-repair-correctness-and-global-qualification-required",
+  "status": "toast-pbr-reference-seven-pinned-populations-and-global-qualification-required",
   "candidate": {
     "workspace": "Engine",
     "revisionLockFile": "artifacts/engine-0.2.1/candidate-lock.json",
@@ -44,7 +44,7 @@
   },
   "qualification": {
     "file": "artifacts/engine-0.2.1/qualification.json",
-    "status": "pinned-six-and-fresh-correctness-required",
+    "status": "pinned-seven-raw-audit-required",
     "requiredKinds": [
       "correctness",
       "production",
@@ -55,8 +55,8 @@
       "forward"
     ],
     "reports": {},
-    "reuseDecision": "ADR0129-readback-cache-history",
-    "reportBindingsPolicy": "scripts/engine-021-evidence-policy.mjs#ENGINE_021_READBACK_REUSE"
+    "reuseDecision": "ADR0130-pbr-windows-reference",
+    "reportBindingsPolicy": "scripts/engine-021-evidence-policy.mjs#ENGINE_021_PBR_REUSE"
   },
   "historicalCandidate": {
     "candidate": {
@@ -118,16 +118,19 @@
     "candidateHelper": "artifacts/start-final-release-validation.ps1",
     "revisionBinding": "candidate.revisionLockFile",
     "requiresFreshReports": false,
-    "requiresFreshCorrectness": true,
-    "requiresPinnedSixRawAudit": true
+    "requiresFreshCorrectness": false,
+    "requiresPinnedSixRawAudit": false,
+    "requiresPinnedSevenRawAudit": true
   },
   "pending": [
-    "fresh 224-case correctness and strict ADR 0129 six-population raw audit",
+    "strict ADR 0130 seven-population raw audit and current executable rebuild",
     "global Engine release gate",
     "no-publish rehearsal and independent audit",
     "final formal lighting evidence audit"
   ],
   "releaseQualified": false,
   "published": false,
-  "baselinePromoted": false
+  "baselinePromoted": false,
+  "windowsPbrReference": "user-approved-separate-full-page-reference",
+  "performanceBaselinePromoted": false
 }

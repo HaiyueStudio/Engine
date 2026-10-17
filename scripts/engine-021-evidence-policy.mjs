@@ -36,6 +36,53 @@ export const ENGINE_021_READBACK_REUSE = Object.freeze({
   }
 }).map(([kind, value]) => [kind, Object.freeze(value)]))),
 });
+/** User-approved isolated Windows PBR reference case, ADR 0130; never a generic fixture exemption. */
+export const ENGINE_021_PBR_REUSE = Object.freeze({
+  decision: 'ADR0130-pbr-windows-reference',
+  sourceFiles: Object.freeze({
+  "scripts/verify-pbr-example.mjs": "dc554daf0283bc780f7c17940bef5e269bb3733bdf71df7d03708bb853352580",
+  "scripts/pbr-example-pixel-policy.mjs": "a5a6812e42409d9716261b56d0cb72b8994f848bd781d8b9b7c3e99c8f38e37d",
+  "scripts/pbr-example-pixel-policy.test.mjs": "8725c333f3bc99afd26b57e0f2a1596346f4c2f17884b2522a8739c729d0477f",
+  "review/baselines/render-pixels-stage9-pbr-example.win32.json": "79da741390ae3516bcd4a7fb19bec47386e0394efb9625040c4605fc3593bb64"
+}),
+  reports: Object.freeze(Object.fromEntries(Object.entries({
+  "resources": {
+    "file": "artifacts/engine-0.2.1/g09/study-resources-2026-10-17T01-26-17.345Z/report.json",
+    "sha256": "fe4e6a7579546ef237c0a8b7b7da716028f4b275833ce204c0e863e8c960fd86",
+    "captureRevision": "384ad34d7007b0618cdd0408f3968d5085461130"
+  },
+  "rooms": {
+    "file": "artifacts/engine-0.2.1/g05/continuous-rooms-2026-10-17T02-15-12.689Z/report.json",
+    "sha256": "155bbd1b426fa7470061581b591c7b49460d28b0eba250865b0f7e1bce9aec91",
+    "captureRevision": "384ad34d7007b0618cdd0408f3968d5085461130"
+  },
+  "instances": {
+    "file": "artifacts/engine-0.2.1/g05/continuous-instances-2026-10-17T03-02-39.220Z/report.json",
+    "sha256": "35b76ee7dd7b3fccdf932ad0421e6cb3474ad04982c94eb4982afadba5b2e6f1",
+    "captureRevision": "384ad34d7007b0618cdd0408f3968d5085461130"
+  },
+  "forward": {
+    "file": "artifacts/engine-0.2.1/g05/continuous-forward-2026-10-17T03-17-41.282Z/report.json",
+    "sha256": "f45d42558354f73de3e2532f9469c2d48a23f9db18e4579f5360016d4815a03a",
+    "captureRevision": "384ad34d7007b0618cdd0408f3968d5085461130"
+  },
+  "production": {
+    "file": "artifacts/engine-0.2.1/g09/production-local-2026-10-17T03-21-01.698Z/report.json",
+    "sha256": "1a78ec905affb2c072bc3b382b96c096b0a0763da1f8625fbe857133f5ac05cd",
+    "captureRevision": "384ad34d7007b0618cdd0408f3968d5085461130"
+  },
+  "ablation": {
+    "file": "artifacts/engine-0.2.1/g09/study-ablation-2026-10-17T03-47-40.696Z/report.json",
+    "sha256": "2ad1239926d8a6d5a2267d1b7afba8c6120784aa6de94e2704c75c7ef5c6e920",
+    "captureRevision": "384ad34d7007b0618cdd0408f3968d5085461130"
+  },
+  "correctness": {
+    "file": "artifacts/engine-0.2.1/g09/acceptance-full-2026-10-17T05-32-37.989Z/report.json",
+    "sha256": "5011f738c412e25fff19694cd71a8fb5448c3f13b8d068ff045ea9fccb36194b",
+    "captureRevision": "1260d9b521b19c686794ad2f92056fe47662fb5a"
+  }
+}).map(([kind, value]) => [kind, Object.freeze(value)]))),
+});
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const check = (condition, message) => { if (!condition) throw Error(message); };
 const g05Kinds = ['rooms', 'instances', 'forward'];
@@ -48,12 +95,37 @@ export function isEngine021ReadbackReuseBinding(kind, binding) {
     binding.file === pinned.file && binding.sha256 === pinned.sha256;
 }
 
+export function isEngine021PbrReuseBinding(kind, binding) {
+  const pinned = ENGINE_021_PBR_REUSE.reports[kind];
+  return !!pinned && binding?.captureRevision === pinned.captureRevision && binding.file === pinned.file && binding.sha256 === pinned.sha256;
+}
+
 const safePath = path => typeof path === 'string' && !path.split('/').some(p => !p || p === '..' || p === '.') && !path.includes('\\');
 const acceptancePath = path => safePath(path) && (policyFiles.has(path) || ['README.md', 'CHANGELOG.md'].includes(path) || /^(docs|review)\/.+\.md$/.test(path));
 
-/** ADR 0126 remains the default; ADR 0129 permits only the pinned six-report repair case. */
+/** ADR 0126 remains the default; ADRs 0129 and 0130 are separate, byte-pinned repair cases. */
 export function validateEngine021RevisionReuse(captureRevision, current, kind, binding, reuseDecision) {
   check(/^[a-f0-9]{40}$/.test(captureRevision), 'Missing clean capture revision');
+  if (reuseDecision === ENGINE_021_PBR_REUSE.decision) {
+    check(captureRevision !== current.revision && isEngine021PbrReuseBinding(kind, binding),
+      'ADR 0130 requires its exact seven pinned populations');
+    const paths = current.reuseChanges?.[captureRevision];
+    check(Array.isArray(paths), 'ADR 0130 requires a verified Git comparison for every capture revision');
+    const fixedFiles = Object.entries(ENGINE_021_PBR_REUSE.sourceFiles);
+    check(fixedFiles.every(([path, hash]) => paths.includes(path) && current.pbrFixFiles?.[path] === hash),
+      'ADR 0130 requires the exact reviewed PBR repair and Windows reference bytes');
+    const readbackFiles = Object.entries(ENGINE_021_READBACK_REUSE.sourceFiles);
+    check(readbackFiles.every(([path, hash]) => current.readbackFixFiles?.[path] === hash),
+      'ADR 0130 retains the exact ADR 0129 readback repair');
+    const originalSix = captureRevision === ENGINE_021_READBACK_REUSE.captureRevision;
+    if (originalSix) check(readbackFiles.every(([path]) => paths.includes(path)), 'ADR 0130 original six require the readback repair comparison');
+    const allowed = new Set([...fixedFiles.map(([path]) => path), ...(originalSix ? readbackFiles.map(([path]) => path) : []),
+      'scripts/engine-021-candidate-policy.mjs', 'scripts/engine-021-candidate-policy.test.mjs',
+      'review/engine-0.2.1/release-candidate.json']);
+    check(paths.every(path => acceptancePath(path) || safePath(path) && allowed.has(path)),
+      'ADR 0130 requires new sampling after another non-acceptance change');
+    return;
+  }
   if (captureRevision === current.revision) return;
   const paths = current.reuseChanges?.[captureRevision];
   check(Array.isArray(paths), 'Missing verified Git comparison for capture revision');
@@ -74,7 +146,7 @@ export function validateEngine021RevisionReuse(captureRevision, current, kind, b
 /** Identity checks precede independent raw-artifact audits; summary status alone never qualifies a bundle. */
 export function validateEngine021EvidenceBindings(manifest, reports, current) {
   check(manifest?.schemaVersion === 2 && manifest.contractId === 'engine-021-evidence-v2', 'Unknown qualification manifest');
-  check(manifest.reuseDecision === undefined || manifest.reuseDecision === ENGINE_021_READBACK_REUSE.decision, 'Unknown evidence reuse decision');
+  check(manifest.reuseDecision === undefined || [ENGINE_021_READBACK_REUSE.decision, ENGINE_021_PBR_REUSE.decision].includes(manifest.reuseDecision), 'Unknown evidence reuse decision');
   check(/^[a-f0-9]{40}$/.test(current.revision) && current.dirty === false && manifest.revision === current.revision,
     'Qualification requires the current clean revision');
   check(same(Object.keys(manifest.reports ?? {}).sort(), [...ENGINE_021_EVIDENCE_KINDS].sort()) &&

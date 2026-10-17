@@ -160,3 +160,4 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0127：Forward CPU 5% 作为调查项；其余硬门禁保持](0127-forward-cpu-investigation.md)
 - [0128：Toast 纳入 0.2.1；保留运行时合同并重新取得候选资格](0128-toast-in-021-release.md)
 - [0129：readback 诊断修复后限定复核六组；完整正确性重新采样](0129-readback-repair-evidence-reuse.md)
+- [0130：PBR Windows 独立整页参考；固定七组原始数据与修复字节后限定复核](0130-pbr-windows-reference-evidence-reuse.md)

@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+// Include the Windows page-reference contract in the existing release-policy gate.
+import './pbr-example-pixel-policy.test.mjs';
 import { validateEngine021CandidateLock as validateLock, validateEngine021FreshQualification as validateFresh } from './engine-021-candidate-policy.mjs';
-import { ENGINE_021_EVIDENCE_KINDS as kinds, ENGINE_021_READBACK_REUSE as repair } from './engine-021-evidence-policy.mjs';
+import { ENGINE_021_EVIDENCE_KINDS as kinds, ENGINE_021_READBACK_REUSE as repair, ENGINE_021_PBR_REUSE as pbrRepair } from './engine-021-evidence-policy.mjs';
 
 function fixture() {
   const revision = 'a'.repeat(40), hash = 'b'.repeat(64), runtime = { sha256: 'c'.repeat(64), fileCount: 624 };
@@ -68,4 +70,19 @@ test('ADR 0129 binds exactly six retained reports and keeps correctness on the n
     d => { delete d.manifest.reuseDecision; },
   ]) { const copy = structuredClone(data); mutate(copy); assert.throws(() => validateFresh(copy.manifest, copy.current.revision)); }
   assert.throws(() => validateFresh(data.manifest, data.current.revision, repair.captureRevision), /new correctness/);
+});
+
+test('ADR 0130 binds the exact current 224-case report and six original reports without admitting replacement populations', () => {
+  const data = fixture(); data.manifest.reuseDecision = pbrRepair.decision;
+  data.manifest.reports = structuredClone(pbrRepair.reports);
+  validateFresh(data.manifest, data.current.revision);
+  for (const mutate of [
+    d => { delete d.manifest.reuseDecision; },
+    d => { d.manifest.reuseDecision = repair.decision; },
+    d => { d.manifest.reports.correctness.captureRevision = repair.captureRevision; },
+    d => { d.manifest.reports.correctness.captureRevision = d.current.revision; },
+    d => { d.manifest.reports.correctness.sha256 = '0'.repeat(64); },
+    d => { d.manifest.reports.rooms.file = 'artifacts/another/report.json'; },
+    d => { d.manifest.reports.forward.sha256 = '0'.repeat(64); },
+  ]) { const copy=structuredClone(data); mutate(copy); assert.throws(() => validateFresh(copy.manifest,copy.current.revision)); }
 });

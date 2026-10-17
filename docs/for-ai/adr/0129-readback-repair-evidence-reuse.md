@@ -1,6 +1,7 @@
 # ADR 0129：读回诊断修复后的六组限定复核
 
 - 状态：接受；2026-10-17 用户明确批准此次限定复用。
+- 后续具名例外：[ADR 0130](0130-pbr-windows-reference-evidence-reuse.md) 单独批准 Windows 页面参考修复及固定七组复核；本页原决定保留。
 - 调整范围：[ADR 0126](0126-g05-stability-and-evidence-reuse.md) 第 4 条的一次具名例外；默认复用规则与全部验收预算保持。
 - 执行入口：[具名报告与修复字节](../../../scripts/engine-021-evidence-policy.mjs)、[原始数据独立复核](../../../scripts/check-engine-021-evidence.mjs)。
 
