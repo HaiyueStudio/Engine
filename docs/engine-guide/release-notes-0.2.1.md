@@ -2,7 +2,9 @@
 
 0.2.1 尚未发布。本页说明候选能力与升级边界；当前设备证据、性能资格和剩余发布工作统一见[验收结论](../../review/engine-0.2.1/README.md)。版本号、示例可运行或单项测试通过均不表示完整发布资格。
 
-本版使用[候选清单](../../review/engine-0.2.1/release-candidate.json)固定的 `55feff1`。开发线新增的 `GuiToast`／`GuiToastOptions` 留到下一 minor；本页的 0.2.1 范围和设备证据不包含该新增能力。开发线 GUI 实现继续保留，既有 GUI 能力以冻结候选的公开声明为准。
+本版按 [ADR 0128](../for-ai/adr/0128-toast-in-021-release.md) 纳入 `GuiToast`／`GuiToastOptions`，从稳定 `@haiyue/engine/gui` 子路径提供。游戏在实际保存成功后调用 `show()` 显示短提示，使用 `hide()` 取消；图标仍由调用方拥有。此能力不增加 Native 或平台 SDK 依赖，App Store 提交与平台权限由应用负责。
+
+包含 Toast 的新候选及其本地冻结记录见[候选清单](../../review/engine-0.2.1/release-candidate.json)。旧 `55feff1` 七报告保留为历史对照；新运行时需要自己的完整验收。
 
 ## 多灯与 FrameGraph
 

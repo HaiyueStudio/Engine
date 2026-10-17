@@ -2,7 +2,8 @@
 
 ## Show a short confirmation
 
-The next-minor development candidate provides an engine-rendered Toast:
+The 0.2.1 candidate includes an engine-rendered Toast
+([release scope](../for-ai/adr/0128-toast-in-021-release.md)):
 
 ```ts
 import { GuiToast } from '@haiyue/engine/gui';

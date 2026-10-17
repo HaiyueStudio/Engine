@@ -2,8 +2,10 @@
 
 ## Toast notifications
 
-`GuiToast` and `GuiToastOptions` are local development candidates from
-`@haiyue/engine/gui`, intended for the next minor release ([ADR 0124](../for-ai/adr/0124-gui-toast.md)).
+`GuiToast` and `GuiToastOptions` are included in the 0.2.1 candidate through the
+stable `@haiyue/engine/gui` entrypoint ([ADR 0128](../for-ai/adr/0128-toast-in-021-release.md)).
+The candidate still requires its final release qualification; see the
+[0.2.1 status](../../review/engine-0.2.1/README.md).
 
 | Option / method | Behavior |
 | --- | --- |

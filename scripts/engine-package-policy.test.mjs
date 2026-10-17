@@ -115,6 +115,19 @@ test('every admitted stable extension requires a real focused consumer and publi
   assert.equal(validateExtensionConsumerCoverage(addition).length, 2);
 });
 
+test('the current stable extension surface has real focused packed consumers', () => {
+  const budget = JSON.parse(readFileSync(new URL('../config/engine-package-budget.json', import.meta.url), 'utf8'));
+  const packageJson = JSON.parse(readFileSync(new URL('../extensions/package.json', import.meta.url), 'utf8'));
+  const capabilities = JSON.parse(readFileSync(new URL('../config/public-api-capability-budgets.json', import.meta.url), 'utf8'));
+  const fixtures = Object.fromEntries(Object.entries(budget.extensionConsumers).map(([id, policy]) =>
+    [id, readFileSync(new URL('../' + policy.fixture, import.meta.url), 'utf8')]));
+  const current = { packageJson, capabilities, consumers: budget.extensionConsumers, fixtures };
+  assert.deepEqual(validateExtensionConsumerCoverage(current), []);
+  const missing = structuredClone(current);
+  delete missing.consumers['extensions-achievements'];
+  assert.ok(validateExtensionConsumerCoverage(missing).some(error => error.includes('/achievements lacks a focused packed consumer')));
+});
+
 test('packed declaration checks include all public packages, not only engine', () => {
   assert.deepEqual(collectPublicTypeEntrypoints([
     { name: '@haiyue/engine', exports: { '.': { types: './dist/index.d.ts' } } },

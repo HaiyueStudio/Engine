@@ -1,1 +1,1 @@
-export { GuiSystem } from '@haiyue/engine/gui';
+export { GuiSystem, GuiToast } from '@haiyue/engine/gui';

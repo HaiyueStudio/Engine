@@ -221,7 +221,7 @@
     "gui-font": {
       "fixture": "scripts/fixtures/engine-consumers/gui-font.mjs",
       "maxGzipBytes": 55000,
-      "requiredExports": ["GuiSystem"],
+      "requiredExports": ["GuiSystem", "GuiToast"],
       "allowedGeneratedShaderArtifacts": ["2d-ui-shader-artifact"]
     }
   },
@@ -314,6 +314,14 @@
         "class GltfModelSystem",
         "class Spine2DRenderSystem"
       ]
+    },
+    "extensions-achievements": {
+      "entrypoint": "./achievements",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-achievements.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 3500,
+      "requiredExports": ["AchievementRuntime"],
+      "forbiddenStaticTokens": ["class AchievementGui", "class GuiSystem", "class GltfModelSystem"]
     },
     "extensions-share-content": {
       "entrypoint": "./share-content",
