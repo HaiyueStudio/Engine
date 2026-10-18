@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { runChromeWebGpuFixture } from './webgpu-gate/chrome-runner.mjs';
 import { validateInspectorCapture, findSequentialPoolReuses } from './webgpu-gate/framegraph-inspector-policy.mjs';
 import { decodePng } from './visual-regression/png.mjs';
+import { configureFrameGraphDownloads } from './framegraph-example-download-policy.mjs';
 import { createPerformanceSourceFingerprint } from './webgpu-performance-budget.mjs';
 import { loadFrameGraphQualification, frameGraphBrowserPath, assertFrameGraphQualificationUnchanged } from './webgpu-gate/framegraph-qualification.mjs';
 import { validateFrameGraphAdapter, validateFrameGraphBrowser, validateFrameGraphAdapterConsistency } from './webgpu-gate/framegraph-qualification-policy.mjs';
@@ -14,7 +15,7 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const qualification = await loadFrameGraphQualification(root);
 const out = resolve(root, `artifacts/engine-0.2.1/g09/inspector-${new Date().toISOString().replaceAll(':', '-')}`);
 mkdirSync(out, { recursive: true });
-const files = ['examples/deferred-lighting/main.ts', 'examples/deferred-lighting/framegraph.ts', 'examples/deferred-lighting/model.ts', 'examples/deferred-lighting/index.html', 'examples/deferred-lighting/bundle.js', 'examples/shared/engine.js', 'scripts/verify-framegraph-example.mjs', 'scripts/webgpu-gate/framegraph-inspector-policy.mjs', 'scripts/webgpu-gate/chrome-runner.mjs'];
+const files = ['examples/deferred-lighting/main.ts', 'examples/deferred-lighting/framegraph.ts', 'examples/deferred-lighting/model.ts', 'examples/deferred-lighting/index.html', 'examples/deferred-lighting/bundle.js', 'examples/shared/engine.js', 'scripts/verify-framegraph-example.mjs', 'scripts/framegraph-example-download-policy.mjs', 'scripts/webgpu-gate/framegraph-inspector-policy.mjs', 'scripts/webgpu-gate/chrome-runner.mjs'];
 const hashes = () => Object.fromEntries(files.map(path => [path, createHash('sha256').update(readFileSync(resolve(root, path))).digest('hex')]));
 const evidence = { schemaVersion: 1, status: 'running', scope: 'one-shot-observer-correctness-not-formal-performance', generatedAt: new Date().toISOString(), revision: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), dirty: !!execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }).trim(), inputs: hashes(), sourceFingerprint: createPerformanceSourceFingerprint(root, root), devices: [] };
 try {
@@ -32,7 +33,7 @@ try {
       const pixels = async name => { await evaluate(`window.__deferredExample.whenSubmittedWorkDone()`); await evaluate(`new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))`); const clip = await evaluate(`(()=>{const r=document.getElementById('canvas').getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,scale:1};})()`); const png = Buffer.from((await cdp.call('Page.captureScreenshot', { format: 'png', clip })).result.data, 'base64'); writeFileSync(resolve(out, `${job.browserId}-${name}.png`), png); return decodePng(png); };
       const difference = (a, b) => { let changed = 0, sum = 0; assert.equal(a.data.length, b.data.length); for (let i = 0; i < a.data.length; i += 4) for (let c = 0; c < 3; c++) { const delta = Math.abs(a.data[i + c] - b.data[i + c]); sum += delta; if (delta) changed++; } return { changed, mean: sum / (a.width * a.height * 3) }; };
       const downloadDirectory = resolve(out, `${job.browserId}-downloads`); mkdirSync(downloadDirectory);
-      await cdp.call('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: downloadDirectory });
+      result.downloadContext = await configureFrameGraphDownloads(cdp, downloadDirectory);
       result.adapter = (await ready()).adapter;
       assert.equal(await evaluate(`window.__deferredExample.framegraph.snapshot()`), null);
       await set('helpers', false); await evaluate(`document.getElementById('status').hidden=true;document.getElementById('hint').hidden=true`);

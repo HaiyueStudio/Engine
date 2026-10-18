@@ -1,6 +1,7 @@
 # ADR 0130：PBR Windows 页面参考与七组限定复核
 
 - 状态：接受；2026-10-17 用户明确批准独立 Windows 页面参考及此次七组按哈希复用。
+- 后续具名例外：[ADR 0131](0131-framegraph-download-context-evidence-reuse.md) 单独批准下载检查的上下文绑定修复；本页决定和固定 PBR 字节保留。
 - 调整范围：[ADR 0126](0126-g05-stability-and-evidence-reuse.md) 第 4 条的第二个具名例外；[ADR 0129](0129-readback-repair-evidence-reuse.md) 的原决定及固定 readback 修复字节保持。
 - 执行入口：[PBR 页面策略](../../../scripts/pbr-example-pixel-policy.mjs)、[具名报告与修复哈希](../../../scripts/engine-021-evidence-policy.mjs)、[原始数据独立复核](../../../scripts/check-engine-021-evidence.mjs)。
 

@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ENGINE_021_EVIDENCE_KINDS as kinds, validateEngine021EvidenceBindings, completeEngine021EvidenceAudit,
   assessEngine021G05Audit, validateEngine021CompiledEvidence, validateEngine021RevisionReuse,
-  ENGINE_021_READBACK_REUSE as repair, ENGINE_021_PBR_REUSE as pbrRepair } from './engine-021-evidence-policy.mjs';
+  ENGINE_021_READBACK_REUSE as repair, ENGINE_021_PBR_REUSE as pbrRepair,
+  ENGINE_021_DOWNLOAD_REUSE as downloadRepair } from './engine-021-evidence-policy.mjs';
 
 function g05Audit(kind) {
   const [captures, checks, stability, memory] = { rooms: [156, 60, 156, 156], instances: [96, 96, 192, 0], forward: [24, 8, 16, 0] }[kind];
@@ -55,6 +56,41 @@ function pbrFixture() {
   }
   return data;
 }
+
+function downloadFixture() {
+  const data = pbrFixture(); data.manifest.reuseDecision = downloadRepair.decision;
+  data.current.downloadFixFiles = { ...downloadRepair.sourceFiles };
+  for (const paths of Object.values(data.current.reuseChanges)) paths.push(...Object.keys(downloadRepair.sourceFiles));
+  return data;
+}
+
+test('ADR 0131 permits only the reviewed download repair while retaining all PBR/readback/report pins', () => {
+  validate(downloadFixture());
+  for (const mutate of [
+    d => { d.manifest.reuseDecision = pbrRepair.decision; },
+    d => { delete d.current.downloadFixFiles; },
+    d => { d.current.downloadFixFiles['scripts/verify-framegraph-example.mjs'] = '0'.repeat(64); },
+    d => { d.current.pbrFixFiles['scripts/verify-pbr-example.mjs'] = '0'.repeat(64); },
+    d => { d.current.readbackFixFiles['scripts/webgpu-gate/readback-churn-fixture.mjs'] = '0'.repeat(64); },
+    d => { d.manifest.reports.correctness.sha256 = '0'.repeat(64); },
+    d => { d.current.reuseChanges[pbrRepair.reports.correctness.captureRevision].pop(); },
+    d => { d.current.reuseChanges[repair.captureRevision].push('scripts/webgpu-gate/chrome-runner.mjs'); },
+    d => { d.current.reuseChanges[repair.captureRevision].push('examples/deferred-lighting/framegraph.ts'); },
+  ]) { const data=downloadFixture(); mutate(data); assert.throws(() => validate(data)); }
+});
+
+test('download repair authorization never permits changed samples, runtime, host, budgets or executable bytes', () => {
+  for (const mutate of [
+    d => { d.reports.correctness.inputs = { ...d.reports.correctness.inputs, sha256: '0'.repeat(64) }; },
+    d => { d.reports.production.inputs = 'changed'; },
+    d => { d.reports.rooms.config = {}; },
+    d => { d.reports.forward.hostBefore.hostname = 'another-host'; },
+    d => { d.reports.resources.dirty = true; },
+  ]) { const data=downloadFixture(); mutate(data); assert.throws(() => validate(data)); }
+  const data=downloadFixture();
+  data.builds.common[0].sha256='0'.repeat(64);
+  assert.throws(() => validateEngine021CompiledEvidence(data.reports,data.builds), /bytes differ/);
+});
 
 test('ADR 0130 accepts only its seven pinned populations, exact isolated PBR bytes and original readback repair', () => {
   const data = pbrFixture(); validate(data);

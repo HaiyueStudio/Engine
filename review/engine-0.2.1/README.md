@@ -1,13 +1,14 @@
 # Engine 0.2.1：验收结论
 
-G01–G04、G06 的实现阶段已完成；0.2.1 现包含 GUI Toast。G05 与 [G09](g09/README.md) 的完整六组已独立复核，readback 修复后的 `1260d9b` 新采 224 项正确性也已通过。全局门禁随后被 PBR 整页字体／控件差异拦截；用户批准 [ADR 0130](../../docs/for-ai/adr/0130-pbr-windows-reference-evidence-reuse.md) 的独立 Windows 页面参考及固定七组按哈希复核。修复后的冻结候选仍须完成 G07 全局门禁及无发布演练。此处集中保留问题、结论和处理办法；阶段过程记录见 [归档](../archive/README.md)。版本号不是已发布证明。
+G01–G04、G06 的实现阶段已完成；0.2.1 现包含 GUI Toast。G05 与 [G09](g09/README.md) 的完整六组已独立复核，readback 修复后的 `1260d9b` 新采 224 项正确性也已通过。PBR 独立 Windows 页面参考已获批准；`7bd14fa` 的七组复核及完整慢检查命令通过，随后 FrameGraph 示例因下载策略未绑定独立上下文而超时。用户批准 [ADR 0131](../../docs/for-ai/adr/0131-framegraph-download-context-evidence-reuse.md) 的具名检查修复及相同七组复核。新冻结候选仍须完成 G07 全局门禁、正式性能比较及无发布演练。此处集中保留问题、结论和处理办法；阶段过程记录见 [归档](../archive/README.md)。版本号不是已发布证明。
 
-**当前候选范围**见[机读清单](release-candidate.json)：用户明确要求将 `GuiToast`、`GuiToastOptions` 纳入 0.2.1，供依赖游戏发布使用；版本安排由 [ADR 0128](../../docs/for-ai/adr/0128-toast-in-021-release.md) 取代此前的推迟决定。使用 `Engine` 工作区包含 Toast 的干净提交，本地完整 revision 和运行时指纹写入清单指定的 `candidate-lock.json`。稳定 `./gui` 符号归属为 86，根入口仍为 30 个概念。工作区旁的 `start-engine-021-final-validation.cmd` 只接受冻结候选及按 ADR 0130 固定哈希的七份报告；旧工作区、旧报告和原失败全部保留。
+**当前候选范围**见[机读清单](release-candidate.json)：用户明确要求将 `GuiToast`、`GuiToastOptions` 纳入 0.2.1，供依赖游戏发布使用；版本安排由 [ADR 0128](../../docs/for-ai/adr/0128-toast-in-021-release.md) 取代此前的推迟决定。使用 `Engine` 工作区包含 Toast 的干净提交，本地完整 revision 和运行时指纹写入清单指定的 `candidate-lock.json`。稳定 `./gui` 符号归属为 86，根入口仍为 30 个概念。工作区旁的 `start-engine-021-final-validation.cmd` 只接受冻结候选及按 ADR 0131 固定哈希的七份报告；旧工作区、旧报告和原失败全部保留。
 
 下表实测数字来自旧采样提交 `e07d8fb` 和验收提交 `55feff1`，仅保留问题、解决方法和历史结果，不授予包含 Toast 的当前候选发布资格。
 
 | 问题 | 结论 | 解决方法与剩余边界 |
 | --- | --- | --- |
+| FrameGraph JSON／PNG 检查等待超时 | 页面运行于独立上下文，原检查却只配置默认上下文的下载策略 | 为当前页面的实际 `browserContextId` 配置目录；缺失身份或协议拒绝继续失败。两浏览器 18 项与四份实际导出通过，原 60 秒上限及全部断言保持；限定复核范围见 ADR 0131 |
 | PBR 示例整页截图的文字／控件跨环境差异 | 当前 Windows 为 NSimSun／Microsoft YaHei UI；六种模式的场景主体接近旧参考，新配置重复截图逐字节一致 | 用户批准单独 Windows 全页参考，旧参考保留；全部像素、模式、交互和原容差保持。只改四份具名页面检查文件，固定七组原始数据复核后仍须完整全局门禁和无发布演练 |
 | readback/churn 缓存活动被误报为零 | 追踪器在 owner 释放时正确清除元数据；夹具此前在释放后取数 | 夹具逐 owner 在释放前保存真实缓存活动，仍在清理后检查资源残留。120／1800 帧及回归测试通过；不修改运行时、阈值或原失败报告。六组限定复核、224 项正确性重采及完整发布链见 ADR 0129 |
 | 既有 Forward 不能完整处理百灯 | G02 全灯 Deferred 参考路径、G03 Tiled 路径已实现 | 独立几何/像素 oracle 检查完整覆盖；容量不足同帧遍历全灯，不以漏灯换耗时 |
@@ -44,6 +45,6 @@ Forward Edge 单灯 CPU P95 为 1.275 / 1.180 ms，八灯为 1.390 / 1.155 ms（
 
 完整补采索引为 `artifacts/final-release-2026-10-15T05-48-55.730Z/execution.json`，生产与消融分别为 `g09/production-local-2026-10-15T05-50-16.224Z/report.json`、`g09/study-ablation-2026-10-15T06-16-58.972Z/report.json`，同版本对照为 `g05/forward-controls-2026-10-15T06-29-34.352Z/report.json`（均在该候选的 `artifacts/engine-0.2.1/` 下）。原执行的 `evidence-complete-release-blocked` 状态不改写；`55feff1` 已通过单独的七报告专项审计，记录为 `artifacts/engine-0.2.1/qualification-audit-2026-10-15T08-00-05.443Z/report.json`。
 
-发布仍需在页面检查修复后的同一干净候选按 ADR 0130 严格复核固定七组，再完成包/API/Shader、完整全局门禁和无发布演练。ADR 0126 的默认复用限制保持：运行时变化要求新采样，不能用其他旧报告或单项 GUI 测试补位。归档期间不并行执行正式性能采样。用户已批准独立 Windows 页面参考；当前未执行版本发布、tag、push 或性能基线晋升。
+发布仍需在下载检查修复后的同一干净候选按 ADR 0131 严格复核固定七组，再完成包/API/Shader、完整全局门禁、正式性能比较和无发布演练。ADR 0126 的默认复用限制保持：运行时变化要求新采样，不能用其他旧报告或单项 GUI 测试补位。归档期间不并行执行正式性能采样。用户已批准独立 Windows 页面参考；当前未执行版本发布、tag、push 或性能基线晋升。
 
 发布门禁通过 `release:021:evidence:check` 读取 `artifacts/engine-0.2.1/qualification.json` 中显式绑定的七份完整报告：F0–F8 正确性、生产流畅度、资源长跑、消融，以及 G05 房间／实例／Forward。v2 清单包含验收 revision 和各报告的采样 revision、相对路径、SHA-256；校验器重读原始捕获与截图，核对当前源码、配置、主机和干净提交，并重新构建候选夹具逐项比较可执行产物。短测、缺项、不符合 ADR 0126 的异版、预算或原始完整性失败不能补位；该检查仍不代替独立包、Shader、生命周期和其余发布门禁。用户说明见 [0.2.1 候选说明](../../docs/engine-guide/release-notes-0.2.1.md)。

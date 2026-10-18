@@ -1,4 +1,4 @@
-import { ENGINE_021_EVIDENCE_KINDS, ENGINE_021_READBACK_REUSE, isEngine021ReadbackReuseBinding, ENGINE_021_PBR_REUSE, isEngine021PbrReuseBinding } from './engine-021-evidence-policy.mjs';
+import { ENGINE_021_EVIDENCE_KINDS, ENGINE_021_READBACK_REUSE, isEngine021ReadbackReuseBinding, ENGINE_021_PBR_REUSE, isEngine021PbrReuseBinding, ENGINE_021_DOWNLOAD_REUSE } from './engine-021-evidence-policy.mjs';
 
 const check = (ok, message) => { if (!ok) throw Error(message); };
 const digest = value => /^[a-f0-9]{64}$/.test(value ?? '');
@@ -24,14 +24,14 @@ export function validateEngine021FreshQualification(manifest, expectedRevision, 
   check(revision(expectedRevision) && revision(captureRevision), 'Missing current acceptance/capture revision');
   check(manifest?.schemaVersion === 2 && manifest.contractId === 'engine-021-evidence-v2' &&
     manifest.revision === expectedRevision, 'Fresh qualification must bind the current candidate');
-  check(manifest.reuseDecision === undefined || [ENGINE_021_READBACK_REUSE.decision, ENGINE_021_PBR_REUSE.decision].includes(manifest.reuseDecision), 'Unknown reuse decision');
+  check(manifest.reuseDecision === undefined || [ENGINE_021_READBACK_REUSE.decision, ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision), 'Unknown reuse decision');
   if (manifest.reuseDecision === ENGINE_021_READBACK_REUSE.decision) check(captureRevision !== ENGINE_021_READBACK_REUSE.captureRevision, 'ADR 0129 requires new correctness');
   check(JSON.stringify(Object.keys(manifest.reports ?? {}).sort()) === JSON.stringify([...ENGINE_021_EVIDENCE_KINDS].sort()),
     'Seven fresh complete report bindings are required');
   const paths = new Set();
   for (const kind of ENGINE_021_EVIDENCE_KINDS) {
     const report = manifest.reports[kind];
-    check(manifest.reuseDecision === ENGINE_021_PBR_REUSE.decision ? isEngine021PbrReuseBinding(kind, report) :
+    check([ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision) ? isEngine021PbrReuseBinding(kind, report) :
       report?.captureRevision === captureRevision || manifest.reuseDecision === ENGINE_021_READBACK_REUSE.decision &&
       isEngine021ReadbackReuseBinding(kind, report), `${kind}: old capture cannot qualify the Toast runtime`);
     check(digest(report.sha256) && typeof report.file === 'string' && report.file.startsWith('artifacts/') &&

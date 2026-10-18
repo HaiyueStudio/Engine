@@ -83,6 +83,16 @@ export const ENGINE_021_PBR_REUSE = Object.freeze({
   }
 }).map(([kind, value]) => [kind, Object.freeze(value)]))),
 });
+/** User-approved isolated FrameGraph download-context case, ADR 0131. Population pins are unchanged. */
+export const ENGINE_021_DOWNLOAD_REUSE = Object.freeze({
+  decision: 'ADR0131-framegraph-download-context',
+  sourceFiles: Object.freeze({
+  "scripts/verify-framegraph-example.mjs": "b526aad50f726c30522d1a5101f334dd44c5b0cf6122c969ce46e6e11e87ebee",
+  "scripts/framegraph-example-download-policy.mjs": "8ed758c5835725af67fa0310e8f194eaa27e18aeec7b5f154534528023c62490",
+  "scripts/framegraph-example-download-policy.test.mjs": "c4956990e38f73dfb29d6563abe2874fc9f7bcb767c4d03ab4ed31c579b1c20f"
+}),
+  reports: ENGINE_021_PBR_REUSE.reports,
+});
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const check = (condition, message) => { if (!condition) throw Error(message); };
 const g05Kinds = ['rooms', 'instances', 'forward'];
@@ -103,10 +113,10 @@ export function isEngine021PbrReuseBinding(kind, binding) {
 const safePath = path => typeof path === 'string' && !path.split('/').some(p => !p || p === '..' || p === '.') && !path.includes('\\');
 const acceptancePath = path => safePath(path) && (policyFiles.has(path) || ['README.md', 'CHANGELOG.md'].includes(path) || /^(docs|review)\/.+\.md$/.test(path));
 
-/** ADR 0126 remains the default; ADRs 0129 and 0130 are separate, byte-pinned repair cases. */
+/** ADR 0126 remains the default; ADRs 0129–0131 are separate, byte-pinned repair cases. */
 export function validateEngine021RevisionReuse(captureRevision, current, kind, binding, reuseDecision) {
   check(/^[a-f0-9]{40}$/.test(captureRevision), 'Missing clean capture revision');
-  if (reuseDecision === ENGINE_021_PBR_REUSE.decision) {
+  if ([ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(reuseDecision)) {
     check(captureRevision !== current.revision && isEngine021PbrReuseBinding(kind, binding),
       'ADR 0130 requires its exact seven pinned populations');
     const paths = current.reuseChanges?.[captureRevision];
@@ -114,12 +124,15 @@ export function validateEngine021RevisionReuse(captureRevision, current, kind, b
     const fixedFiles = Object.entries(ENGINE_021_PBR_REUSE.sourceFiles);
     check(fixedFiles.every(([path, hash]) => paths.includes(path) && current.pbrFixFiles?.[path] === hash),
       'ADR 0130 requires the exact reviewed PBR repair and Windows reference bytes');
+    const downloadFiles = reuseDecision === ENGINE_021_DOWNLOAD_REUSE.decision ? Object.entries(ENGINE_021_DOWNLOAD_REUSE.sourceFiles) : [];
+    check(downloadFiles.every(([path, hash]) => paths.includes(path) && current.downloadFixFiles?.[path] === hash),
+      'ADR 0131 requires the exact reviewed isolated download-context repair bytes');
     const readbackFiles = Object.entries(ENGINE_021_READBACK_REUSE.sourceFiles);
     check(readbackFiles.every(([path, hash]) => current.readbackFixFiles?.[path] === hash),
       'ADR 0130 retains the exact ADR 0129 readback repair');
     const originalSix = captureRevision === ENGINE_021_READBACK_REUSE.captureRevision;
     if (originalSix) check(readbackFiles.every(([path]) => paths.includes(path)), 'ADR 0130 original six require the readback repair comparison');
-    const allowed = new Set([...fixedFiles.map(([path]) => path), ...(originalSix ? readbackFiles.map(([path]) => path) : []),
+    const allowed = new Set([...fixedFiles.map(([path]) => path), ...downloadFiles.map(([path]) => path), ...(originalSix ? readbackFiles.map(([path]) => path) : []),
       'scripts/engine-021-candidate-policy.mjs', 'scripts/engine-021-candidate-policy.test.mjs',
       'review/engine-0.2.1/release-candidate.json']);
     check(paths.every(path => acceptancePath(path) || safePath(path) && allowed.has(path)),
@@ -146,7 +159,7 @@ export function validateEngine021RevisionReuse(captureRevision, current, kind, b
 /** Identity checks precede independent raw-artifact audits; summary status alone never qualifies a bundle. */
 export function validateEngine021EvidenceBindings(manifest, reports, current) {
   check(manifest?.schemaVersion === 2 && manifest.contractId === 'engine-021-evidence-v2', 'Unknown qualification manifest');
-  check(manifest.reuseDecision === undefined || [ENGINE_021_READBACK_REUSE.decision, ENGINE_021_PBR_REUSE.decision].includes(manifest.reuseDecision), 'Unknown evidence reuse decision');
+  check(manifest.reuseDecision === undefined || [ENGINE_021_READBACK_REUSE.decision, ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision), 'Unknown evidence reuse decision');
   check(/^[a-f0-9]{40}$/.test(current.revision) && current.dirty === false && manifest.revision === current.revision,
     'Qualification requires the current clean revision');
   check(same(Object.keys(manifest.reports ?? {}).sort(), [...ENGINE_021_EVIDENCE_KINDS].sort()) &&
