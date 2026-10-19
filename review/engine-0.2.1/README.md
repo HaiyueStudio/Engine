@@ -1,6 +1,6 @@
 # Engine 0.2.1：验收结论
 
-G01–G04、G06 的实现阶段已完成；0.2.1 现包含 GUI Toast。G05 与 [G09](g09/README.md) 的完整六组已独立复核，readback 修复后的 `1260d9b` 新采 224 项正确性也已通过。PBR 独立 Windows 页面参考已获批准；`7bd14fa` 的七组复核及完整慢检查命令通过，随后 FrameGraph 示例因下载策略未绑定独立上下文而超时。用户批准 [ADR 0131](../../docs/for-ai/adr/0131-framegraph-download-context-evidence-reuse.md) 的具名检查修复及相同七组复核。新冻结候选仍须完成 G07 全局门禁、正式性能比较及无发布演练。此处集中保留问题、结论和处理办法；阶段过程记录见 [归档](../archive/README.md)。版本号不是已发布证明。
+G01–G04、G06 的实现阶段已完成；0.2.1 现包含 GUI Toast。G05 与 [G09](g09/README.md) 的七组完整证据按 [ADR 0131](../../docs/for-ai/adr/0131-framegraph-download-context-evidence-reuse.md) 复核通过。`4bc3096` 于 2026-10-19 完成 G07 全局门禁，含 FrameGraph 真实下载、长读回、包消费和正式性能对照；后续无发布演练在启动检查因更新日志版本标题缺少空白分隔而停止。标题现按既有检查格式修正，补充 Toast 变更说明；文档候选须重新冻结、复核并完成最终执行链，尚未取得完整发布资格。原执行记录为 `artifacts/final-release-2026-10-19T00-09-18.438Z/execution.json`，原通过与失败均保留。阶段过程记录见 [归档](../archive/README.md)。版本号不是已发布证明。
 
 **当前候选范围**见[机读清单](release-candidate.json)：用户明确要求将 `GuiToast`、`GuiToastOptions` 纳入 0.2.1，供依赖游戏发布使用；版本安排由 [ADR 0128](../../docs/for-ai/adr/0128-toast-in-021-release.md) 取代此前的推迟决定。使用 `Engine` 工作区包含 Toast 的干净提交，本地完整 revision 和运行时指纹写入清单指定的 `candidate-lock.json`。稳定 `./gui` 符号归属为 86，根入口仍为 30 个概念。工作区旁的 `start-engine-021-final-validation.cmd` 只接受冻结候选及按 ADR 0131 固定哈希的七份报告；旧工作区、旧报告和原失败全部保留。
 
