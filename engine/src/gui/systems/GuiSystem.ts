@@ -14,8 +14,10 @@ import { GuiRoot } from '../components/GuiRoot';
 import { GuiSelect } from '../components/GuiSelect';
 import { GuiFocusManager } from '../input/GuiFocusManager';
 import { hitTestGui } from '../input/GuiHitTest';
-import { GuiPointerEvent } from '../GuiTypes';
+import {GuiDirtyFlags, type GuiPointerEvent} from '../GuiTypes';
 import { GuiRenderer } from '../rendering/GuiRenderer';
+import {bindGuiMeasureOwner, guiMeasureFontVersion, requestGuiFontReload} from '../GuiMeasure';
+import {isGuiLayoutHidden, isGuiLayoutManaged, suspendGuiLayout} from '../GuiLayoutState';
 import { getCachedRenderPassDescriptor } from '../../core/renderPassDescriptor';
 import { beginRenderCommandPass } from '../../core/RenderCommandContext';
 import type { RenderCommandContext } from '../../core/RenderCommandContext';
@@ -87,6 +89,9 @@ export class GuiSystem extends System {
   private renderer: GuiRenderer;
   private readonly font: GuiFontOptions;
   private disposed = false;
+  private fontEventsCleanup: (() => void) | null = null;
+  private fontEventsGeneration = 0;
+  private autoWidthKeys = new WeakMap<GuiLabel, string>();
   private motionFrames = new WeakMap<object, number>();
   private composing = false;
   loadOp: 'clear' | 'load';
@@ -117,7 +122,7 @@ export class GuiSystem extends System {
   }
 
   record(world: World, context: RenderCommandContext): this {
-    if (this.disabled) return this;
+    if (this.disabled) {this.stopAnimations(); return this;}
     this.prepareRoots(world, context.view?.displayWidth, context.view?.displayHeight);
     // RenderIntegration owns this system and disables ordinary autoUpdate.
     // Use the shared frame identity so multiple views never advance motion twice.
@@ -131,7 +136,7 @@ export class GuiSystem extends System {
 
   /** Demand-rendering hosts should keep requesting frames while this is true. */
   get animating(): boolean {
-    const active = (element: GuiElement): boolean => element.visible && !element.disabled &&
+    const active = (element: GuiElement): boolean => element.visible && !isGuiLayoutHidden(element) && !element.disabled &&
       (((element instanceof GuiScrollView || element instanceof GuiSwitch || element instanceof GuiToast) && element.animating) || element.children.some(active));
     for (const root of this.roots) if (active(root.root)) return true;
     return false;
@@ -147,7 +152,7 @@ export class GuiSystem extends System {
     if (frame.frameId > 0 && this.motionFrames.get(frame) === frame.frameId) return;
     this.motionFrames.set(frame, frame.frameId);
     const advance = (element: GuiElement, parentActive: boolean): void => {
-      const active = parentActive && element.visible && !element.disabled;
+      const active = parentActive && element.visible && !isGuiLayoutHidden(element) && !element.disabled;
       if (element instanceof GuiScrollView) {
         if (active) element.advanceAnimation(delta); else element.stopInertia();
       } else if (element instanceof GuiSwitch) {
@@ -165,11 +170,13 @@ export class GuiSystem extends System {
   }
 
   stopAnimations(): void {
-    for (const root of this.roots) this.walkGui(root.root, element => {
+    this.autoWidthKeys = new WeakMap();
+    this.fontEventsCleanup?.(); this.fontEventsCleanup = null;
+    for (const root of this.roots) {suspendGuiLayout(root.root); this.walkGui(root.root, element => {
       if (element instanceof GuiScrollView) element.stopInertia();
       else if (element instanceof GuiSwitch && element.animating) element.finishAnimation();
       else if (element instanceof GuiToast) element.hide();
-    });
+    });}
   }
 
   override destroy(): this {
@@ -194,6 +201,7 @@ export class GuiSystem extends System {
   }
 
   private bindCanvas(): void {
+    this.ensureFontEvents();
     const canvas = this.engine.canvas;
     if (!canvas) return;
     canvas.addEventListener('pointerdown', this.onPointerDown);
@@ -213,6 +221,7 @@ export class GuiSystem extends System {
   private unbindCanvas(): void {
     if (this.disposed) return;
     this.disposed = true;
+    this.fontEventsCleanup?.(); this.fontEventsCleanup = null;
     const canvas = this.engine.canvas;
     if (!canvas) return;
     canvas.removeEventListener('pointerdown', this.onPointerDown);
@@ -231,6 +240,20 @@ export class GuiSystem extends System {
   private onPointerDown = (event: PointerEvent): void => {
     this.pushPointerEvent('pointerdown', event);
   };
+
+  private ensureFontEvents(): void {
+    if (this.disposed || this.fontEventsCleanup || typeof document === 'undefined' || !document.fonts) return;
+    const fonts = document.fonts, generation = ++this.fontEventsGeneration;
+    requestGuiFontReload(this.renderer);
+    const loaded = (): void => {
+      if (this.disposed || generation !== this.fontEventsGeneration) return;
+      requestGuiFontReload(this.renderer);
+      for (const root of this.roots) root.root.markDirty(GuiDirtyFlags.Text | GuiDirtyFlags.Visual);
+    };
+    fonts.addEventListener('loadingdone', loaded); fonts.addEventListener('loadingerror', loaded);
+    void fonts.ready.then(loaded, loaded);
+    this.fontEventsCleanup = () => {this.fontEventsGeneration++; fonts.removeEventListener('loadingdone', loaded); fonts.removeEventListener('loadingerror', loaded);};
+  }
 
   private onPointerMove = (event: PointerEvent): void => {
     this.pushPointerEvent('pointermove', event);
@@ -426,7 +449,7 @@ export class GuiSystem extends System {
               gesture.view.fling((gesture.view.scrollY - first.offset) * 1000 / duration);
           } else gesture.view.stopInertia();
           this.scrollGesture = null;
-          this.engine.canvas?.releasePointerCapture?.(native.pointerId);
+          this.releasePointerCapture(native.pointerId);
         }
         return;
       }
@@ -477,7 +500,7 @@ export class GuiSystem extends System {
       if (pending.type === 'pointerup' && target && target === hit) {
         target.handleClick(this.makeEvent('click', target, pending, native));
       }
-      this.engine.canvas?.releasePointerCapture?.(native.pointerId);
+      this.releasePointerCapture(native.pointerId);
       this.pressed = null;
       // Touch has no hover after contact ends, even without a later pointermove.
       if (native.pointerType === 'touch' || pending.type === 'pointercancel') this.updateHover(null, pending);
@@ -487,14 +510,21 @@ export class GuiSystem extends System {
 
   private updateInputCaretFromPointer(input: GuiInput, pending: PendingGuiPointerEvent, extendSelection: boolean): void {
     const fontSize = this.findThemeFontSize(input);
+    const root = [...this.roots].find(root => root.findById(input.id) === input);
     const padding = input.style.padding ?? 8;
     const index = input.getCaretIndexAt(
       pending.x - input.rect.x,
-      text => this.renderer.measureTextWidth(text, fontSize),
+      text => this.renderer.measureTextWidth(text, fontSize, root),
       padding,
     );
     if (extendSelection) input.setCaret(index, true);
     else input.setSelection(index, index);
+  }
+
+  private releasePointerCapture(pointerId: number): void {
+    const canvas = this.engine.canvas;
+    if (canvas?.hasPointerCapture && !canvas.hasPointerCapture(pointerId)) return;
+    canvas?.releasePointerCapture?.(pointerId);
   }
 
   private findThemeFontSize(element: GuiElement): number {
@@ -608,29 +638,39 @@ export class GuiSystem extends System {
   }
 
   private prepareRoots(world: World, width = this.engine.displayWidth, height = this.engine.displayHeight): void {
+    this.ensureFontEvents();
+    const previous = new Set(this.roots);
     this.roots.clear();
     this.renderer.prepare(this.engine);
     const entities = this.entitySet.get(world);
     if (entities) for (const entity of entities) {
       const root = entity.getComponent(GuiRoot);
       if (!root) continue;
-      this.measureAutoWidthLabels(root.root, root.theme.fontSize);
+      previous.delete(root);
+      bindGuiMeasureOwner(root, this.renderer);
+      this.measureAutoWidthLabels(root.root, root.theme.fontSize, root);
       root.layout(width, height);
       if (root.root.dirty) GuiRadio.rebuildGroupRegistry(root.root);
       else GuiRadio.ensureGroupRegistry(root.root);
       this.roots.add(root);
     }
+    for (const root of previous) suspendGuiLayout(root.root);
   }
 
-  private measureAutoWidthLabels(element: GuiElement, themeFontSize: number): void {
-    if (element instanceof GuiHelpDialog) setGuiHelpDialogTextMetrics(element,(text,size)=>this.renderer.measureTextWidth(text,size));
-    if (element instanceof GuiLabel && element.autoWidth) {
+  private measureAutoWidthLabels(element: GuiElement, themeFontSize: number, root: GuiRoot): void {
+    const version = guiMeasureFontVersion(root);
+    if (element instanceof GuiHelpDialog) setGuiHelpDialogTextMetrics(element,(text,size)=>this.renderer.measureTextWidth(text,size,root), version);
+    if (element instanceof GuiLabel && element.autoWidth && !isGuiLayoutManaged(element)) {
+      const key = JSON.stringify([version, element.text, element.fontSize ?? themeFontSize]);
+      if (this.autoWidthKeys.get(element) !== key) {
       setGuiLabelMeasuredTextWidth(
         element,
-        this.renderer.measureTextWidth(element.text, element.fontSize ?? themeFontSize),
+        this.renderer.measureTextWidth(element.text, element.fontSize ?? themeFontSize, root),
       );
+      this.autoWidthKeys.set(element, key);
+      }
     }
-    for (const child of element.children) this.measureAutoWidthLabels(child, themeFontSize);
+    for (const child of element.children) this.measureAutoWidthLabels(child, themeFontSize, root);
   }
 
   private dispatchPendingEvents(world: World): void {

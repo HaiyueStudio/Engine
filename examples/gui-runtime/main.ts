@@ -4,6 +4,8 @@ import {
   GuiSelect, GuiSlider, GuiSwitch, GuiToast,
 } from '@haiyue/engine/gui';
 import { createCatalog, defaults, normalize, previewStyle, type Parameter, type Value } from './catalog';
+import {attachGuiLayout} from '@haiyue/extensions/gui-layout';
+import {populateLayoutDemo} from './layout-demo';
 
 const colors = { panel: '#111c30', border: '#26354d', muted: '#91a3bd', accent: '#7dd3fc' };
 const label = (parent: GuiElement, text: string, x: number, y: number, width: number, fontSize = 14, color = colors.muted) =>
@@ -14,10 +16,12 @@ async function main(): Promise<void> {
   const status = document.getElementById('status')!;
   const engine = new HaiyueEngine({ canvas, clearColor: { r: 0.025, g: 0.045, b: 0.085, a: 1 } });
   let disposed = false;
+  let detachLayout: (() => void) | null = null;
   const cleanup = () => {
     if (disposed) return;
     disposed = true;
     window.removeEventListener('pagehide', cleanup);
+    detachLayout?.(); detachLayout = null;
     engine.destroy();
   };
   window.addEventListener('pagehide', cleanup);
@@ -26,6 +30,8 @@ async function main(): Promise<void> {
     if (disposed) return;
     const scene = engine.createScene({ name: 'gui-runtime', render3D: false, gui: { loadOp: 'clear' }, pipelineLabel: 'GuiPlaygroundRenderPipeline' });
     const root = new GuiRoot();
+    const layoutBinding = attachGuiLayout(root);
+    detachLayout = () => layoutBinding.dispose();
     const entity = new Entity('gui-playground');
     entity.addComponent(root);
     scene.add(entity);
@@ -83,6 +89,9 @@ async function main(): Promise<void> {
         disabled: values.disabled === true, style: previewStyle(selected, values),
       };
       const component = selected.create(values, options, previewChanged);
+      if (selected.name === 'Layouts') {
+        canvas.dataset.layoutMode = String(values.mode);
+      } else delete canvas.dataset.layoutMode;
       if (component instanceof GuiModal) {
         modal = root.add(component);
         stage.setContentHeight(stageHeight);
@@ -92,6 +101,9 @@ async function main(): Promise<void> {
         }));
       } else {
         stage.add(component);
+        if (selected.name === 'Layouts') {
+          populateLayoutDemo(component, String(values.mode), layoutBinding, value => record('layout action', value));
+        }
         if (component instanceof GuiToast) stage.add(new GuiButton({
           id: 'show-toast', x: Math.max(16, (stageWidth - 160) / 2), y: 8, width: 160, height: 36,
           text: 'Show toast', onClick: () => { component.show(); record('show', component.text); },

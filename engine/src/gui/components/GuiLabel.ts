@@ -1,5 +1,6 @@
 import { GuiDirtyFlags, type GuiElementOptions, type GuiRect } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
+import {assignedGuiRect} from '../GuiLayoutState';
 
 export type GuiLabelTextAlign = 'left' | 'center' | 'right';
 
@@ -43,7 +44,7 @@ export class GuiLabel extends GuiElement {
   setTextAlign(textAlign: GuiLabelTextAlign): void {
     if (this.textAlign === textAlign) return;
     this.textAlign = textAlign;
-    this.markDirty(GuiDirtyFlags.Text | GuiDirtyFlags.Visual);
+    this.markDirty(GuiDirtyFlags.Visual);
   }
 
   setAutoWidth(autoWidth: boolean): void {
@@ -54,7 +55,7 @@ export class GuiLabel extends GuiElement {
 
   override layout(parentRect: GuiRect): void {
     super.layout(parentRect);
-    if (!this.autoWidth) return;
+    if (!this.autoWidth || assignedGuiRect(this)) return;
     const measuredWidth = measuredTextWidths.get(this);
     if (measuredWidth === undefined) return;
     const padding = this.style.padding ?? 0;

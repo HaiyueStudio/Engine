@@ -2,7 +2,6 @@ import { GuiScrollView } from '../components/GuiScrollView';
 import { GuiToast } from '../components/GuiToast';
 import type { IEngine } from '../../core/IEngine';
 import type { BitmapFontData } from '../../font/BitmapFontData';
-import { buildBitmapFont } from '../../font/BitmapFontBuilder';
 import { GuiButton } from '../components/GuiButton';
 import { GuiCheckbox } from '../components/GuiCheckbox';
 import { GuiElement } from '../components/GuiElement';
@@ -28,24 +27,17 @@ import { GuiImageBatch } from './GuiImageBatch';
 import { requiredItemAt } from '../../math/arrayAccess';
 import { GuiImageRenderer } from './GuiImageRenderer';
 import type { PipelineWarmupPlan } from '../../renderer/PipelineWarmup';
+import {consumeGuiFontReload, registerGuiFontProvider, setGuiMeasureFont} from '../GuiMeasure';
+import {isGuiLayoutHidden, isGuiLayoutManaged} from '../GuiLayoutState';
+import {GuiFontOwner, type GuiAtlasOptions} from '../GuiFontOwner';
 
-interface GuiRendererFontOptions {
-  /** Synchronous Canvas 2D factory for non-DOM hosts. */
-  readonly canvasFactory?: (width: number, height: number) => HTMLCanvasElement;
-  /** Optional tightly packed RGBA8 atlas readback; Engine owns the uploaded GPU texture. */
-  readonly readAtlasPixels?: (canvas: HTMLCanvasElement) => Uint8Array;
-
-  readonly chars?: string;
-  readonly fontSize?: number;
-  readonly fontFamily?: string;
-  readonly padding?: number;
-  readonly atlasSize?: number;
-}
+type GuiRendererFontOptions = GuiAtlasOptions;
 
 type GuiElementConstructor<T extends GuiElement = GuiElement> = new (...args: never[]) => T;
 type GuiElementRenderer<T extends GuiElement = GuiElement> = (element: T, theme: GuiTheme) => void;
 
 interface GuiRootRenderCache {
+  font: BitmapFontData | null;
   batch: GuiBatch;
   textBatch: GuiTextBatch;
   popupBatch: GuiBatch;
@@ -72,6 +64,9 @@ export class GuiRenderer {
   private preparedDevice: GPUDevice | null = null;
   private needsRebuild = true;
   private defaultFont: BitmapFontData | null = null;
+  private currentFont: BitmapFontData | null = null;
+  private readonly fontOwner: GuiFontOwner;
+  private get activeFont(): BitmapFontData | null {return this.currentFont ?? this.defaultFont;}
   private readonly elementRenderers = new Map<Function, GuiElementRenderer>();
   private readonly rootCaches = new Map<GuiRoot, GuiRootRenderCache>();
   private activeRootCaches: GuiRootRenderCache[] = [];
@@ -89,6 +84,8 @@ export class GuiRenderer {
   constructor(fontOptions: GuiRendererFontOptions = {}) {
     this.fontOptions = Object.freeze({ ...fontOptions });
     this.textRenderer = new GuiTextRenderer(fontOptions.readAtlasPixels);
+    this.fontOwner = new GuiFontOwner(this.fontOptions, font => this.textRenderer.releaseFont(font));
+    registerGuiFontProvider(this, root => this.fontOwner.forRoot(root), root => this.fontOwner.forget(root));
     this.registerElementRenderer(GuiButton, (element, theme) => this.addButton(element, theme));
     this.registerElementRenderer(GuiLabel, (element, theme) => this.addLabel(element, theme));
     this.registerElementRenderer(GuiModal, (element, theme) => this.addModal(element, theme));
@@ -109,20 +106,18 @@ export class GuiRenderer {
   }
 
   prepare(engine: IEngine): void {
-    if (this.prepared && this.preparedDevice === engine.device) return;
+    const refresh = consumeGuiFontReload(this);
+    if (this.prepared && this.preparedDevice === engine.device) {
+      if (refresh) {this.defaultFont = this.fontOwner.prepare(true); setGuiMeasureFont(this, this.defaultFont); this.needsRebuild = true;}
+      return;
+    }
     if (this.prepared) this.destroy();
     try {
       this.shapeRenderer.prepare(engine);
       this.textRenderer.prepare(engine);
       this.imageRenderer.prepare(engine);
-      this.defaultFont = buildBitmapFont({
-      ...(this.fontOptions.canvasFactory ? { canvasFactory: this.fontOptions.canvasFactory } : {}),
-      chars: this.fontOptions.chars ?? ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~年月日今天周一二三四五六重置旋转翻',
-      fontSize: this.fontOptions.fontSize ?? 32,
-      fontFamily: this.fontOptions.fontFamily ?? 'sans-serif',
-      padding: this.fontOptions.padding ?? 4,
-      atlasSize: this.fontOptions.atlasSize ?? 512,
-      }).data;
+      this.defaultFont = this.fontOwner.prepare();
+      setGuiMeasureFont(this, this.defaultFont);
       this.preparedDevice = engine.device;
       this.prepared = true;
     } catch (error) {
@@ -145,8 +140,9 @@ export class GuiRenderer {
     }
   }
 
-  measureTextWidth(text: string, fontSize: number): number {
-    return this.defaultFont ? measureGuiTextWidth(text, this.defaultFont, fontSize) : text.length * fontSize * 0.55;
+  measureTextWidth(text: string, fontSize: number, root?: GuiRoot): number {
+    const font = root && this.prepared ? this.fontOwner.forRoot(root) : this.activeFont;
+    return font ? measureGuiTextWidth(text, font, fontSize) : text.length * fontSize * 0.55;
   }
 
   markDirty(): void {
@@ -158,12 +154,15 @@ export class GuiRenderer {
     this.rootCaches.clear();
     this.activeRootCaches = [];
     this.shapeRenderer.destroy();
+    this.fontOwner.destroy();
     this.textRenderer.destroy();
     this.imageRenderer.destroy();
     this.prepared = false;
     this.preparedDevice = null;
     this.needsRebuild = true;
     this.defaultFont = null;
+    this.currentFont = null;
+    setGuiMeasureFont(this, null);
   }
 
   render(
@@ -187,22 +186,23 @@ export class GuiRenderer {
     for (const cache of this.activeRootCaches) {
       this.shapeRenderer.render(passEncoder, cache.batch);
       this.imageRenderer.render(passEncoder, cache.imageBatch);
-      if (this.defaultFont) this.textRenderer.render(passEncoder, cache.textBatch, this.defaultFont);
+      if (cache.font) this.textRenderer.render(passEncoder, cache.textBatch, cache.font);
     }
     for (const cache of this.activeRootCaches) {
       this.shapeRenderer.render(passEncoder, cache.popupBatch);
       this.imageRenderer.render(passEncoder, cache.popupImageBatch);
-      if (this.defaultFont) this.textRenderer.render(passEncoder, cache.popupTextBatch, this.defaultFont);
+      if (cache.font) this.textRenderer.render(passEncoder, cache.popupTextBatch, cache.font);
     }
     for (const cache of this.activeRootCaches) {
       this.shapeRenderer.render(passEncoder, cache.modalBatch);
       this.imageRenderer.render(passEncoder, cache.modalImageBatch);
-      if (this.defaultFont) this.textRenderer.render(passEncoder, cache.modalTextBatch, this.defaultFont);
+      if (cache.font) this.textRenderer.render(passEncoder, cache.modalTextBatch, cache.font);
     }
   }
 
   private prepareRootCaches(roots: GuiRoot[]): void {
     const activeRoots = new Set(roots);
+    this.fontOwner.retain(activeRoots);
     for (const [root, cache] of this.rootCaches) {
       if (activeRoots.has(root)) continue;
       this.releaseRootCache(cache);
@@ -210,7 +210,8 @@ export class GuiRenderer {
     }
     this.activeRootCaches = roots.map(root => {
       const cache = this.getRootCache(root);
-      if (this.needsRebuild || root.dirty) this.rebuildRoot(root, cache);
+      const font = this.fontOwner.forRoot(root), changed = font !== cache.font; cache.font = font;
+      if (this.needsRebuild || root.dirty || changed) this.rebuildRoot(root, cache);
       return cache;
     });
     this.needsRebuild = false;
@@ -220,6 +221,7 @@ export class GuiRenderer {
     let cache = this.rootCaches.get(root);
     if (cache) return cache;
     cache = {
+      font: this.prepared ? this.fontOwner.forRoot(root) : this.defaultFont,
       batch: new GuiBatch(),
       textBatch: new GuiTextBatch(),
       popupBatch: new GuiBatch(),
@@ -235,6 +237,7 @@ export class GuiRenderer {
   }
 
   private rebuildRoot(root: GuiRoot, cache: GuiRootRenderCache): void {
+    this.currentFont = cache.font;
     cache.batch.clear();
     cache.textBatch.clear();
     cache.popupBatch.clear();
@@ -260,10 +263,9 @@ export class GuiRenderer {
     cache.popupImageBatch.rebuild();
     cache.modalBatch.rebuild();
     cache.modalImageBatch.rebuild();
-    if (this.defaultFont) cache.textBatch.rebuild(this.defaultFont);
-    if (this.defaultFont) cache.popupTextBatch.rebuild(this.defaultFont);
-    if (this.defaultFont) cache.modalTextBatch.rebuild(this.defaultFont);
+    if (cache.font) {cache.textBatch.rebuild(cache.font); cache.popupTextBatch.rebuild(cache.font); cache.modalTextBatch.rebuild(cache.font);}
     this.resetCurrentBatches();
+    this.currentFont = null;
   }
 
   private releaseRootCache(cache: GuiRootRenderCache): void {
@@ -302,7 +304,7 @@ export class GuiRenderer {
   private currentClip: GuiRect | undefined;
 
   private collectElement(element: GuiElement, theme: GuiTheme): void {
-    if (!element.visible) return;
+    if (!element.visible || isGuiLayoutHidden(element)) return;
     if (element instanceof GuiToast) { this.addToast(element, theme); return; }
     if (element instanceof GuiModal) {
       const previousClip = this.currentClip;
@@ -386,6 +388,7 @@ export class GuiRenderer {
   }
 
   private addButton(button: GuiButton, theme: GuiTheme): void {
+    const padding = isGuiLayoutManaged(button) ? button.style.padding ?? (button.variant === 'outline' ? 4 : 8) : button.variant === 'outline' ? 4 : 8;
     const radius = button.style.radius ?? theme.radius;
     const border = colorToRgba(button.style.borderColor, button.focused ? theme.colors.primary : theme.colors.border);
     const baseSurface = button.variant === 'primary'
@@ -406,15 +409,16 @@ export class GuiRenderer {
       : button.style.color;
     if (button.variant === 'outline') {
       this.currentBatch.addShape({ ...button.rect, radius, color: border, strokeWidth: 1.5, clip: this.currentClip });
-      this.addCenteredText(button.text, button.rect.x+4, button.rect.y, button.rect.width-8, button.rect.height, theme.fontSize, colorToRgba(textColor,theme.colors.text));
+      this.addCenteredText(button.text, button.rect.x+padding, button.rect.y, button.rect.width-padding*2, button.rect.height, theme.fontSize, colorToRgba(textColor,theme.colors.text));
       return;
     }
     this.addRect(button.rect.x, button.rect.y, button.rect.width, button.rect.height, radius, border);
     this.addRect(button.rect.x + 1, button.rect.y + 1, button.rect.width - 2, button.rect.height - 2, Math.max(0, radius - 1), withAlpha(colorToRgba(background, surface), button.disabled ? 0.45 : 1));
-    this.addCenteredText(button.text, button.rect.x + 8, button.rect.y, button.rect.width - 16, button.rect.height, theme.fontSize, colorToRgba(textColor, theme.colors.text));
+    this.addCenteredText(button.text, button.rect.x + padding, button.rect.y, button.rect.width - padding*2, button.rect.height, theme.fontSize, colorToRgba(textColor, theme.colors.text));
   }
 
   private addLabel(label: GuiLabel, theme: GuiTheme): void {
+    const font = this.activeFont;
     const opacity = label.style.opacity ?? 1;
     const radius = label.style.radius ?? theme.radius;
     const border = label.style.borderColor;
@@ -446,8 +450,8 @@ export class GuiRenderer {
     const width = Math.max(0, label.rect.width - padding * 2);
     const fontSize = label.fontSize ?? theme.fontSize;
     let textX = x;
-    if (this.defaultFont && label.textAlign !== 'left') {
-      const textWidth = measureGuiTextWidth(label.text, this.defaultFont, fontSize);
+    if (font && label.textAlign !== 'left') {
+      const textWidth = measureGuiTextWidth(label.text, font, fontSize);
       textX = label.textAlign === 'center'
         ? x + Math.max(0, (width - textWidth) * 0.5)
         : x + Math.max(0, width - textWidth);
@@ -455,13 +459,13 @@ export class GuiRenderer {
     this.currentTextBatch.addText({
       text: label.text,
       x: textX,
-      y: label.rect.y,
+      y: label.rect.y + (isGuiLayoutManaged(label) ? padding : 0),
       width: Math.max(0, x + width - textX),
-      height: label.rect.height,
+      height: Math.max(0, label.rect.height - (isGuiLayoutManaged(label) ? padding * 2 : 0)),
       fontSize,
       color: withAlpha(colorToRgba(label.style.color, theme.colors.text), opacity),
-      multiline: false,
-      wrap: false,
+      multiline: isGuiLayoutManaged(label),
+      wrap: isGuiLayoutManaged(label),
       clip: this.clipRect(label.rect),
     });
   }
@@ -492,6 +496,7 @@ export class GuiRenderer {
   }
 
   private addInput(input: GuiInput, theme: GuiTheme): void {
+    const font = this.activeFont;
     const radius = input.style.radius ?? theme.radius;
     const border = colorToRgba(input.style.borderColor, input.focused ? theme.colors.primary : theme.colors.border);
     this.addRect(input.rect.x, input.rect.y, input.rect.width, input.rect.height, radius, border);
@@ -503,9 +508,9 @@ export class GuiRenderer {
       ? colorToRgba(theme.colors.text, theme.colors.text)
       : colorToRgba(theme.colors.textMuted, theme.colors.textMuted);
 
-    if (input.focused && input.hasSelection && input.value && this.defaultFont) {
-      const selectionStartX = measureGuiTextWidth(input.value.slice(0, input.selectionStart), this.defaultFont, theme.fontSize);
-      const selectionEndX = measureGuiTextWidth(input.value.slice(0, input.selectionEnd), this.defaultFont, theme.fontSize);
+    if (input.focused && input.hasSelection && input.value && font) {
+      const selectionStartX = measureGuiTextWidth(input.value.slice(0, input.selectionStart), font, theme.fontSize);
+      const selectionEndX = measureGuiTextWidth(input.value.slice(0, input.selectionEnd), font, theme.fontSize);
       const x = input.rect.x + padding + selectionStartX;
       const maxWidth = Math.max(0, input.rect.x + input.rect.width - padding - x);
       const width = Math.min(Math.max(1, selectionEndX - selectionStartX), maxWidth);
@@ -523,9 +528,9 @@ export class GuiRenderer {
 
     this.addText(text, input.rect.x + padding, input.rect.y, input.rect.width - padding * 2, input.rect.height, theme.fontSize, color, true);
 
-    if (input.focused && !input.disabled && !input.readOnly && this.defaultFont) {
+    if (input.focused && !input.disabled && !input.readOnly && font) {
       const beforeCaret = input.value.slice(0, input.selectionFocus);
-      const caretX = input.rect.x + padding + measureGuiTextWidth(beforeCaret, this.defaultFont, theme.fontSize);
+      const caretX = input.rect.x + padding + measureGuiTextWidth(beforeCaret, font, theme.fontSize);
       this.addRect(caretX, input.rect.y + 7, 1.5, Math.max(10, input.rect.height - 14), 0.75, colorToRgba(theme.colors.text, theme.colors.text));
     }
   }
@@ -764,11 +769,12 @@ export class GuiRenderer {
     fontSize: number,
     color: [number, number, number, number],
   ): void {
-    if (!this.defaultFont) {
+    const font = this.activeFont;
+    if (!font) {
       this.addText(text, x, y, width, height, fontSize, color);
       return;
     }
-    const textWidth = measureGuiTextWidth(text, this.defaultFont, fontSize);
+    const textWidth = measureGuiTextWidth(text, font, fontSize);
     const textX = x + Math.max(0, (width - textWidth) * 0.5);
     this.currentTextBatch.addText({
       text,

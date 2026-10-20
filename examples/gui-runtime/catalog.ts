@@ -59,6 +59,11 @@ export function createCatalog(): Demo[] {
   const source = createImage();
   const demos: Demo[] = [
     {
+      name: 'Layouts', hint: 'Switch between manual coordinates, Flex wrapping and Grid. Resize the container to compare the same controls.',
+      parameters: [choice('mode', 'Flex', ['Manual', 'Flex', 'Grid']), number('width', 280, 160, 520), number('height', 180, 110, 300)],
+      create: (_p, options) => new GuiElement(options),
+    },
+    {
       name: 'GuiButton', hint: 'Click the button to see its event below.',
       parameters: [...size(200), text('text', 'Hello, Engine'), choice('variant', 'primary', ['default', 'primary', 'danger', 'outline'])],
       create: (p, o, change) => new GuiButton({ ...o, text: s(p, 'text'), variant: s(p, 'variant') as 'primary', onClick: () => change('clicks', n(p, 'clicks') + 1) }),

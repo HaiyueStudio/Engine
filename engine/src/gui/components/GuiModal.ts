@@ -9,6 +9,7 @@ import {
 } from '../GuiTypes';
 import { GuiButton } from './GuiButton';
 import { GuiElement } from './GuiElement';
+import {assignedGuiRect} from '../GuiLayoutState';
 import { GuiLabel } from './GuiLabel';
 
 export type GuiModalCloseReason = 'close' | 'confirm' | 'cancel' | 'backdrop';
@@ -192,6 +193,7 @@ export class GuiModal extends GuiElement {
   }
 
   override layout(parentRect: GuiRect): void {
+    parentRect = assignedGuiRect(this) ?? parentRect;
     this.rect = { ...parentRect };
     const availableWidth = Math.max(1, parentRect.width - 32);
     const availableHeight = Math.max(1, parentRect.height - 32);

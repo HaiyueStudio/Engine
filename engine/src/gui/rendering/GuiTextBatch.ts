@@ -77,6 +77,12 @@ export function measureGuiTextWidth(text: string, font: BitmapFontData, fontSize
   return maxWidth;
 }
 
+/** @internal Uses exactly the glyph advances, ink bounds, kerning and wrap of drawing. */
+export function measureGuiTextBlock(text: string, font: BitmapFontData, fontSize: number, width: number, wrap: boolean): {width: number; height: number} {
+  const result = layoutText({text, x: 0, y: 0, width, height: Infinity, fontSize, color: [1, 1, 1, 1], multiline: wrap, wrap, verticalAlign: 'top'}, font);
+  return {width: result.advanceWidth, height: text ? result.blockHeight : 0};
+}
+
 function measureGuiLineWidth(text: string, font: BitmapFontData, fontSize: number): number {
   const scale = fontSize / font.size;
   let width = 0;
@@ -110,6 +116,8 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
   clipY0: number;
   clipX1: number;
   clipY1: number;
+  advanceWidth: number;
+  blockHeight: number;
 } {
   const scale = command.fontSize / font.size;
   const clip = command.clip ?? { x: command.x, y: command.y, width: command.width, height: command.height };
@@ -123,10 +131,12 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
   let baselineY = command.y + (command.multiline || command.verticalAlign === 'top' ? 0 : (command.height - font.lineHeight * scale) * 0.5);
   let previousCode: number | null = null;
   const glyphs: LaidOutGlyph[] = [];
+  let advanceWidth = 0;
 
   for (const char of command.text) {
     if (char === '\n') {
       if (!command.multiline) break;
+      advanceWidth = Math.max(advanceWidth, x - command.x);
       x = command.x;
       baselineY += lineStep;
       previousCode = null;
@@ -147,6 +157,7 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
     const x1 = x0 + glyph.width * scale;
     const y1 = y0 + glyph.height * scale;
     if (command.wrap && x1 > clipX1 && x > command.x) {
+      advanceWidth = Math.max(advanceWidth, x - command.x);
       x = command.x;
       baselineY += lineStep;
       previousCode = null;
@@ -165,6 +176,7 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
       glyphs.push({ x0: nextX0, y0: nextY0, x1: nextX1, y1: nextY1, u0, v0, u1, v1 });
     }
     x += glyph.xadvance * scale;
+    advanceWidth = Math.max(advanceWidth, x - command.x);
     previousCode = code;
 
     if (!command.wrap && x > clipX1) break;
@@ -174,9 +186,9 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
     const blockHeight = baselineY - command.y + font.lineHeight * scale;
     const shift = Math.max(0, (command.height - blockHeight) * 0.5);
     for (const glyph of glyphs) { glyph.y0 += shift; glyph.y1 += shift; }
-    return { glyphs: glyphs.filter(g => g.y1 >= clipY0 && g.y0 <= clipY1), clipX0, clipY0, clipX1, clipY1 };
+    return { glyphs: glyphs.filter(g => g.y1 >= clipY0 && g.y0 <= clipY1), clipX0, clipY0, clipX1, clipY1, advanceWidth, blockHeight };
   }
-  return { glyphs, clipX0, clipY0, clipX1, clipY1 };
+  return { glyphs, clipX0, clipY0, clipX1, clipY1, advanceWidth, blockHeight: baselineY - command.y + font.lineHeight * scale };
 }
 
 function pushGlyph(

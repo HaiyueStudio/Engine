@@ -34,6 +34,7 @@ export class GuiTextRenderer extends BaseRenderer {
   private readonly liveBatchBuffers = new Set<BatchGpuBuffer>();
   private readonly viewportData = new Float32Array(4);
   private fontCache = new Map<number, FontGpuData>();
+  private readonly retiredFontTextures = new Set<GPUTexture>();
   private defaultTexture!: GPUTexture;
   private sampler: GPUSampler | null = null;
   private initialized = false;
@@ -129,6 +130,16 @@ export class GuiTextRenderer extends BaseRenderer {
     this.batchBuffers.delete(batch);
   }
 
+  /** Retire an atlas only after the work submitted with its previous generation is complete. */
+  releaseFont(font: BitmapFontData): void {
+    const data = this.fontCache.get(font.id); if (!data) return;
+    this.fontCache.delete(font.id);
+    if (data.texture === this.defaultTexture) return;
+    const texture = data.texture; this.retiredFontTextures.add(texture);
+    const release = (): void => {if (this.retiredFontTextures.delete(texture)) texture.destroy();};
+    void this.engine.device.queue.onSubmittedWorkDone().then(release, release);
+  }
+
   private uploadBatch(batch: GuiTextBatch): GPUBuffer | null {
     const usedByteLength = batch.vertexCount * GUI_TEXT_FLOATS_PER_VERTEX * 4;
     const byteLength = Math.max(4, usedByteLength);
@@ -219,6 +230,8 @@ export class GuiTextRenderer extends BaseRenderer {
       if (fontData.texture !== this.defaultTexture) fontData.texture.destroy();
     }
     this.fontCache.clear();
+    for (const texture of this.retiredFontTextures) texture.destroy();
+    this.retiredFontTextures.clear();
     this.defaultTexture.destroy();
     this.sampler = null;
     this.clearPipelineCache();

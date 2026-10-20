@@ -29,7 +29,7 @@ export class GuiImage extends GuiElement {
     if (this.source === source && this.sourceKey === sourceKey) return;
     this.source = source;
     this.sourceKey = sourceKey;
-    this.markDirty(GuiDirtyFlags.Visual);
+    this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Layout);
   }
 
   setUv(uv: [number, number, number, number]): void {

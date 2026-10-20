@@ -1,0 +1,537 @@
+{
+  "schemaVersion": 1,
+  "goal": "g03-gui-layout",
+  "runtimeFingerprints": {
+    "engine/src/gui/GuiColor.ts": "22c2263b367075b3eda4c764a29c0c3f046e1bf91aa7f89ecf015178e2923388",
+    "engine/src/gui/GuiFontOwner.ts": "76f63c18364fb02e6c2e769f05f2db91fcc783e782faa66f11397702ebee9bee",
+    "engine/src/gui/GuiLayoutOwner.ts": "d31eb26c65fc098d3db2a35197def6ebb1998129c94053c8a6f576a6fa375026",
+    "engine/src/gui/GuiLayoutState.ts": "efa2a8dd0518659d903873cfe13537ce575530c4565a4fb1dab452fe0b2e091d",
+    "engine/src/gui/GuiLayoutTypes.ts": "32cbf5fb9b44942adbe78cbbabeb47cc27b683d88bcd1b92302365660973d1c0",
+    "engine/src/gui/GuiMeasure.ts": "53c061eb8d2dfd535894a3b3112b4c3b2555e52c133417193d1093afcda97324",
+    "engine/src/gui/GuiSerialization.ts": "8b9f69cc11d39fb3463d8582f9bb0ac4fc638bc1101bc05e320c3333b1381ef3",
+    "engine/src/gui/GuiTypes.ts": "3961823ea70a9b5d433bb118535e0352f6e0c39dfe719b0b76afdb21444862a7",
+    "engine/src/gui/index.ts": "66628a89501f4a27c37802c11007343e026327c1d648608d4a5112f748fa1f59",
+    "engine/src/gui/components/GuiButton.ts": "7b23ec803c73a721905226d144ce1f07f178274b773cd9c64b0c1db195301c63",
+    "engine/src/gui/components/GuiCheckbox.ts": "cb5293b976c0bc65e5a36c43fe59d959e2915298ae3dcd0dff50b2ebf0cefe02",
+    "engine/src/gui/components/GuiColorPicker.ts": "c53101475d7e9a38de7afe65ee65d663844e6096cd320000f8cb590616ecebdb",
+    "engine/src/gui/components/GuiElement.ts": "b21afff57fa324857b1c8f4f3e8591299cb3bd761f1cbbbb0a3caf1c0ffdf478",
+    "engine/src/gui/components/GuiHelpDialog.ts": "2714ef271b61f3197da38629aeaae8afef1350ec2c377a120aec71dc0796d830",
+    "engine/src/gui/components/GuiImage.ts": "6f8b74b715fdc2164161c4635e155f34d7392ed3435c0164993c7cf9e11c1e58",
+    "engine/src/gui/components/GuiInput.ts": "8af06318b2514e8761b36ad8aac918efa2d67545d6716d9250f9371af7c07861",
+    "engine/src/gui/components/GuiLabel.ts": "d6a314ca546c462f02f090e4b2152e6338aa8f1a5e900c7c05e738bf475e75e0",
+    "engine/src/gui/components/GuiModal.ts": "7cf7fa7de467da4330fd34389057920b7a770787897c0166dccefc7ccb1ae8b2",
+    "engine/src/gui/components/GuiProgress.ts": "e470fb073de38c42377240708045c1ea2b88c70dfde5f6ccd1952c913785db7a",
+    "engine/src/gui/components/GuiRadio.ts": "e46b10ae41c70543db15de9cff78ed2c49d04962497ff5c795097de132e505a5",
+    "engine/src/gui/components/GuiRoot.ts": "55218062902f251238d816067ef152d3cb5bdb1b310eb7af7be8654347cfcbc9",
+    "engine/src/gui/components/GuiScrollView.ts": "964c6ed05b57bac86f2797763db6d259a5bc09d8c48101d5838b02d7e87f8568",
+    "engine/src/gui/components/GuiSelect.ts": "54bc330d96f99bbb7c28b4b8d155b42c3179c6e21fa7a0b5c012e6c3293cb7fa",
+    "engine/src/gui/components/GuiSlider.ts": "1af8d64fc51bdab2296173bd6b4ad96f61eecdb0936f8c6eb31e35a9b9e13bb6",
+    "engine/src/gui/components/GuiSwitch.ts": "2482d01f1adccbb4bac7556f9eb5486b0e5ae7c3faba11ae98f9af3db50c6f30",
+    "engine/src/gui/components/GuiToast.ts": "2fe7ac91279e875a2620c949c95054a0a95f73d3d46f5a4aabffb6c145c96f70",
+    "engine/src/gui/components/GuiTooltip.ts": "89147b717864fe0dd28ab5eb94a1223f4e73ca1efb03b41677fb24b6746d6968",
+    "engine/src/gui/components/GuiTree.ts": "3c67514ddd268359cd63e1cf6378f98d20f155b97d262452e698767db749fc08",
+    "engine/src/gui/components/index.ts": "2c517ba4a2442d370200bdb3be557adb10c2aecf29904944ecaf5882c9568d53",
+    "engine/src/gui/input/GuiFocusManager.ts": "d6245e12fad4a7276d357bddd03286b76ce5a329c835025a55558a7e21122820",
+    "engine/src/gui/input/GuiHitTest.ts": "31d8929e384cb47beb70a45a5d75490072e877197a8d6665a5092d4c8828496f",
+    "engine/src/gui/input/index.ts": "4bd3ef0bc27d206bd4b63dd87fb639c131ff32f6c4bcb0d66f9505d11c4fe90b",
+    "engine/src/gui/rendering/GuiBatch.ts": "3002ead6461ea44314b12613f591feec866b71a9912cac6c0f3409aa067667d1",
+    "engine/src/gui/rendering/GuiCommandCache.ts": "72fdf124ff0525ba2657c2c95c462011c8798ed98afeb50fef9ec29d3c435e39",
+    "engine/src/gui/rendering/GuiDrawCommand.ts": "e736df5f66b3e167e585af504c9e47191a7debc3502fdabfbe8d4aee6242e770",
+    "engine/src/gui/rendering/GuiImageBatch.ts": "73be26ede15a165cd7d5628aac750572169509d7f9c4de6f7486fcdf55feea46",
+    "engine/src/gui/rendering/GuiImageRenderer.ts": "ff2ba0fa41893bf425bc35166eeeed304a793312c6438bbf77a58a877c3d7598",
+    "engine/src/gui/rendering/GuiRenderer.ts": "1e9b187cad8c634b99fae6b12bab2f50ad9c6d7895236a162d12bbd5abb1a46e",
+    "engine/src/gui/rendering/GuiShapeRenderer.ts": "7d586496146d5c86e24c7da1a9e78b5945e0a7867c33e441a97dac25f0db09da",
+    "engine/src/gui/rendering/GuiTextBatch.ts": "be57360b1c7e7fe3f588ab68b6570c0543e078a0b710fc8550a18aa3caf07cc2",
+    "engine/src/gui/rendering/GuiTextRenderer.ts": "ac0df4e52e5405e592f6f2ba88b126e8e6e350517ac2ceb66136019f9ad6cdcf",
+    "engine/src/gui/rendering/GuiVertexLayout.ts": "8a3dcedf860042819b99a51e9adf8e9d3ea99308525710d2d8e10f7260c2dbd9",
+    "engine/src/gui/rendering/index.ts": "096506b60f9c1df34303ef83f23f0bc19a9769c45ef92e876da06e8320fd6ffb",
+    "engine/src/gui/systems/GuiSystem.ts": "f51260beecd8c015473881dd7bfa0fbe047bbcfc2258d0ac1a318c49dd22a0c2",
+    "engine/src/gui/systems/index.ts": "38e30df1acabd6d065e506e2afdc87cd1beed7391f04d53b86a009b739b394bc",
+    "extensions/src/gui-layout/binding.ts": "bc0eb712728ecfefef121882dd508cd705ac184ffc3c3140ceca29aa5d040c78",
+    "extensions/src/gui-layout/diagnostics.ts": "2f546cff7503fedd269e36fa40490e2ed9645d1aa3d84d79f8e9979c0fad0a1e",
+    "extensions/src/gui-layout/minimum.ts": "49c2c7776806fb2703ce5e8d008b8cdd6a45f30f0be04b1a93ec9175ee653ca1",
+    "extensions/src/gui-layout/presets.ts": "ebc0b721231c91a96b62e13a731fc569be9b30daa54f8ffad6f61d653c5bfe79",
+    "extensions/src/gui-layout/resources.ts": "363b1c273c1f9b35c0a3bf8470e79e72d183790ec5ac1d60287034c251846ba2",
+    "extensions/src/gui-layout/style.ts": "0803863cb0bff413ce85dee6441757e9b78c57a4e15d73c1f1b88678519ebe7f",
+    "extensions/src/gui-layout/types.ts": "244bd4904aca9142671d84418e6f87f0865b9fd071a48d3d239f2733300a60b4",
+    "extensions/src/gui-layout.ts": "ce96d0f8f07ecc12cd3875e3c26715f0f006a972eb4267e9d6b29fb11141c886",
+    "extensions/src/layout/box.ts": "9146a96a9bea8ba736afcc5e23fd5e5ca09739f9c62ba6961152a9a5c964e8f6",
+    "extensions/src/layout/flex.ts": "0e42f00518dc1a4af46dfc06b6b6dc55d70047e784e6a331ba79d8d36b46db07",
+    "extensions/src/layout/grid.ts": "994f7230f51cdcd61e41cc9a2906401883ab46da14e02f7a8db2271c4ec13142",
+    "extensions/src/layout/intrinsic.ts": "ab7a15a212aff23fdf2ef101d0a491c6d7ba213f6f30e4796be9834b1b97a979",
+    "extensions/src/layout/session.ts": "a565ea45eed706eed7d1de721367b6e457ea76bd8b7fc577cdba6698883816d8",
+    "extensions/src/layout/types.ts": "a445426463094970bef284c69ad5e635b2d35b1259653aaef2fc7fb3f3edcb69",
+    "extensions/src/layout/validate.ts": "a4894c88e7d68952d4df4a48b1e33b62dcdb2fbe7f2871b982ad441352c5a515",
+    "extensions/src/layout.ts": "4c12999b51305dd22d1087fdc27b514da3c25e91402dd1d09441995075d45609"
+  },
+  "packageRegistration": "G13 owns named GUI type registration and extensions subpath/package exports; source implementation uses existing public GuiRoot methods. API baseline was not changed.",
+  "commitProtocol": "GuiLayoutDelegate commit has an optional third argument for display:none/contentHeight metadata. Existing two-argument delegates remain valid; named registration remains G13. G01 accepted deliverables remain untouched.",
+  "productIntegration": {
+    "game": "Games/games/billiards/BilliardsHud.ts",
+    "originalPlannedDirectory": "Games/games/led-sudoku does not exist",
+    "publicCandidate": "D:/HaiyueStudio/_diagnostics/g03-packed-game-1792489383362/result.json",
+    "livePackageManifestsChanged": false,
+    "published": false,
+    "candidateInstalledFileHashes": "packedGame",
+    "gameFullQualification": false
+  },
+  "unrelatedGamesFailures": [
+    {
+      "check": "Games typecheck",
+      "reason": "Existing installed declarations lack @haiyue/extensions/controls and GuiFontOptions.canvasFactory; modified HUD compiled against the isolated current candidate."
+    },
+    {
+      "check": "Games MUGEN fixture admission",
+      "actualSha256": "771f7b72e03bed42f9fa318959ec106e8791bab0771de170b6b42408d91b30b7",
+      "expectedSha256": "b4cf7edeb94b073973be6fe5c38de25ee8875c21f757708747aa8efca6adf4cb",
+      "source": "Games/games/test/mugen-acceptance-g08e.test.mjs:15",
+      "budgetsOrReferencesChanged": false
+    },
+    {
+      "check": "Games shared save source policy",
+      "source": "Games/games/valley-of-light/map/player.ts:25",
+      "reason": "Existing map player directly calls localStorage; source policy fails independently of GUI runtime.",
+      "budgetsOrReferencesChanged": false
+    }
+  ],
+  "status": "complete",
+  "generatedAt": "2026-10-20T10:23:54.240098+00:00",
+  "allExplicitG03RequirementsProven": true,
+  "goalRemainsActive": false,
+  "qualification": "G03 implementation and local native correctness/product integration complete. Not whole Games, physical-device, formal performance, or release qualification.",
+  "checks": [
+    {
+      "id": "engine-typecheck",
+      "args": [
+        "run",
+        "typecheck",
+        "-w",
+        "./engine"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T09:52:08.254Z",
+      "finishedAt": "2026-10-20T09:52:16.160Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\engine-typecheck.log",
+      "sha256": "a24c45a9380b23cce7ea8d2497da98371519befaf4d189650f8b3e3c41eeca0b"
+    },
+    {
+      "id": "engine-tests",
+      "args": [
+        "test",
+        "-w",
+        "./engine"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T09:52:16.162Z",
+      "finishedAt": "2026-10-20T09:53:43.117Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\engine-tests.log",
+      "sha256": "df1c06a54ae53d2b13901fe0b56c2071f71f26bd1b1f33d877d45880c001ad3a"
+    },
+    {
+      "id": "engine-build",
+      "args": [
+        "run",
+        "build",
+        "-w",
+        "./engine"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T09:53:43.118Z",
+      "finishedAt": "2026-10-20T09:54:02.293Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\engine-build.log",
+      "sha256": "97c48826d11123d9cb260a7ccded668ab4bc0a89aac2bad42514c4bcd1ed0caa"
+    },
+    {
+      "id": "extensions-typecheck",
+      "args": [
+        "run",
+        "typecheck",
+        "-w",
+        "./extensions"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T09:54:02.294Z",
+      "finishedAt": "2026-10-20T09:54:21.901Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\extensions-typecheck.log",
+      "sha256": "1955d2bc290e408967f1d33c0d7e9e17ae3ae0c2bbcea1d9c60c7e755a835e03"
+    },
+    {
+      "id": "extensions-tests",
+      "args": [
+        "test",
+        "-w",
+        "./extensions"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T09:54:21.904Z",
+      "finishedAt": "2026-10-20T09:56:51.396Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\extensions-tests.log",
+      "sha256": "5e8dbbd234532e0040f9c3669842dd0937731f2921272d9c8dfa37db8d6bbb00"
+    },
+    {
+      "id": "extensions-build",
+      "args": [
+        "run",
+        "build",
+        "-w",
+        "./extensions"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T09:56:51.397Z",
+      "finishedAt": "2026-10-20T09:57:20.671Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\extensions-build.log",
+      "sha256": "e47ad39f6d44767602b455e15776e1b9fb98ae8b7de3e4f77cafea0a9612ae55"
+    },
+    {
+      "id": "fast-gate-policy",
+      "args": [
+        "run",
+        "fast-gate-policy:test"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T09:57:20.673Z",
+      "finishedAt": "2026-10-20T09:57:25.300Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\fast-gate-policy.log",
+      "sha256": "3c4b039cfbdaba04307a2504196881cdf1eedbf5c6533118ed96aa738489709b"
+    },
+    {
+      "id": "root-typecheck",
+      "args": [
+        "run",
+        "typecheck"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T09:57:25.303Z",
+      "finishedAt": "2026-10-20T09:59:08.825Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\root-typecheck.log",
+      "sha256": "4e025814c290aa6dfa4fc5df31c47f965adc0ac0ff1c0d590ca054a75c1a69e2"
+    },
+    {
+      "id": "root-tests",
+      "args": [
+        "test"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T09:59:08.827Z",
+      "finishedAt": "2026-10-20T10:02:47.757Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\root-tests.log",
+      "sha256": "2bde595484f7a731189644d120af0a5925b1518b05235f27beb2768b60cb3410"
+    },
+    {
+      "id": "root-build",
+      "args": [
+        "run",
+        "build"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T10:02:47.759Z",
+      "finishedAt": "2026-10-20T10:06:37.091Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\root-build.log",
+      "sha256": "eae3021fe75c9949aa000d4871949d868132a3056d0e3a8077e8516f73bbd9b5"
+    },
+    {
+      "id": "modules",
+      "args": [
+        "run",
+        "modules:check"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T10:06:37.093Z",
+      "finishedAt": "2026-10-20T10:06:39.179Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\modules.log",
+      "sha256": "8d72df948b8618e398281e4c27140507791016d51caa9d9cd355f9a9eb48b8b1"
+    },
+    {
+      "id": "responsibilities",
+      "args": [
+        "run",
+        "responsibilities:check"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T10:06:39.180Z",
+      "finishedAt": "2026-10-20T10:06:40.808Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\responsibilities.log",
+      "sha256": "6fa09923726c2f63ea49a166fb29d211950e6aaa019390427f961c4d74e2b3c9"
+    },
+    {
+      "id": "renderer-prepare",
+      "args": [
+        "run",
+        "renderer-prepare:check"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T10:06:40.809Z",
+      "finishedAt": "2026-10-20T10:06:42.011Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\renderer-prepare.log",
+      "sha256": "3896d25e54cb62720a681e2bc7098bf3551ea000929e9a62e6f5e5139f0b6e0b"
+    },
+    {
+      "id": "api",
+      "args": [
+        "run",
+        "api:check"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T10:06:42.012Z",
+      "finishedAt": "2026-10-20T10:06:43.082Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\api.log",
+      "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+    },
+    {
+      "id": "boundaries",
+      "args": [
+        "run",
+        "check:boundaries"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T10:06:43.083Z",
+      "finishedAt": "2026-10-20T10:06:52.766Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\boundaries.log",
+      "sha256": "594d080c9554000150897ac4a3b17ea3d7948624a3238c6fa7f949ef39d1e771"
+    },
+    {
+      "id": "docs",
+      "args": [
+        "run",
+        "docs:check"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T10:06:52.767Z",
+      "finishedAt": "2026-10-20T10:06:57.363Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\docs.log",
+      "sha256": "3ba5cce1b1616c730d21d87120607e23d9caace804b9ebcdb4ace5b394ded33c"
+    },
+    {
+      "id": "examples-freshness",
+      "args": [
+        "run",
+        "freshness:check",
+        "-w",
+        "./examples"
+      ],
+      "status": "passed",
+      "exitCode": 0,
+      "startedAt": "2026-10-20T10:06:57.365Z",
+      "finishedAt": "2026-10-20T10:06:58.453Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\full-1792489928251\\examples-freshness.log",
+      "sha256": "12298f730c2a2a54d5e4730bc130e554b8bf35a1e05d2b9f9291f3bc056a843c"
+    }
+  ],
+  "evidence": "artifacts/engine-0.2.2/g03/completion-audit-1792490890109.json",
+  "currentEvidence": {
+    "fullGates": "artifacts/engine-0.2.2/g03/full-1792489928251/result.json",
+    "nativeDpr1": "artifacts/engine-0.2.2/g03/native-dpr1-1792490787073.json",
+    "nativeDpr2": "artifacts/engine-0.2.2/g03/native-dpr2-1792490815514.json",
+    "playground": "artifacts/engine-0.2.2/g03/playground-1792490854411/result.json",
+    "packedGame": "artifacts/engine-0.2.2/g03/packed-game-1792490890109/result.json",
+    "gamesKnownFailures": "artifacts/engine-0.2.2/g03/games-baseline-1792490692181/result.json"
+  },
+  "evidenceFingerprints": {
+    "fullGates": "e68a118de1d52db9b778910dd009b1b16730ca34a41fd21e4cd868a4625af52b",
+    "nativeDpr1": "9437621ccad960eb565d847594a005eab9eb8a6c061fc934e63be4f8bf9442d9",
+    "nativeDpr2": "b7fe1dc4b419799917071d354e967b4034d79b3f1e7bb39dc774f546b1e47d9c",
+    "playground": "b3a6b7ade60559066f6fa957877a08fd9d627ec36991ffc88c916b72fad333ce",
+    "packedGame": "48f7bffe135073f326d95287171434370e9b1eb569b8135fddf1b489892043a8",
+    "gamesKnownFailures": "dd827ff672512aebd6d2e4e976347f0f7ef004d0bbe12bdf5754d9e09d57dc26"
+  },
+  "requirementsAudit": [
+    {
+      "requirement": "Algorithm-independent detachable Engine measure/arrange bridge, atomic commit and rollback",
+      "status": "proven-for-g03",
+      "evidence": "engine/test/gui-layout-delegate.test.mjs"
+    },
+    {
+      "requirement": "Manual, managed and composite ownership; same paint and hit geometry",
+      "status": "proven-for-g03",
+      "evidence": [
+        "extensions/test/gui-layout-binding.test.mjs",
+        "nativeDpr1",
+        "nativeDpr2",
+        "packedGame"
+      ]
+    },
+    {
+      "requirement": "Native text wrap, font generation/language/image/intrinsic size invalidation",
+      "status": "proven-for-g03",
+      "evidence": [
+        "engine/test/gui-layout-font-lifecycle.test.mjs",
+        "nativeDpr1",
+        "nativeDpr2"
+      ]
+    },
+    {
+      "requirement": "Shared row/column/flow/grid/margin/center, content versus explicit minima, grow, anchors/offsets",
+      "status": "proven-for-g03",
+      "evidence": [
+        "extensions/src/gui-layout/presets.ts",
+        "extensions/test/gui-layout-binding.test.mjs",
+        "playground",
+        "packedGame"
+      ]
+    },
+    {
+      "requirement": "Auto and manual scroll, nested clipping, clamp, touch drag/tap, Modal/Toast/focus ownership",
+      "status": "proven-for-g03",
+      "evidence": [
+        "extensions/test/gui-layout-binding.test.mjs",
+        "nativeDpr1",
+        "nativeDpr2"
+      ]
+    },
+    {
+      "requirement": "Dirty-subtree solving, static/paint zero solves, detach/remove/pause resource cleanup",
+      "status": "proven-for-g03",
+      "evidence": [
+        "extensions/test/gui-layout-binding.test.mjs",
+        "engine/test/gui-layout-font-lifecycle.test.mjs",
+        "nativeDpr1",
+        "nativeDpr2"
+      ]
+    },
+    {
+      "requirement": "G04 content/activity invalidation and old/new geometry bounds",
+      "status": "proven-for-g03",
+      "evidence": [
+        "engine/test/gui-layout-delegate.test.mjs",
+        "extensions/test/gui-layout-binding.test.mjs"
+      ]
+    },
+    {
+      "requirement": "Switchable actual playground and actual game via public packed candidate",
+      "status": "proven-for-g03",
+      "evidence": [
+        "playground",
+        "packedGame"
+      ]
+    },
+    {
+      "requirement": "Native browser long text/resize/hide/remount/fonts/images/mixed layout and solve/measure/upload counters",
+      "status": "proven-for-g03",
+      "evidence": [
+        "nativeDpr1",
+        "nativeDpr2"
+      ]
+    },
+    {
+      "requirement": "Full workspaces/repository checks and completion audit",
+      "status": "proven-for-g03",
+      "evidence": "fullGates"
+    },
+    {
+      "requirement": "Manual GUI serialization remains based on original layout options, not managed rectangles",
+      "status": "proven-for-g03",
+      "evidence": [
+        "engine/src/gui/GuiSerialization.ts:114",
+        "engine/test/gui-runtime.test.mjs",
+        "fullGates"
+      ]
+    }
+  ],
+  "testCounts": {
+    "engine-gui-tests": 67,
+    "extensions-binding-tests": 16,
+    "engine-full-tests": 808,
+    "extensions-full-tests": 522,
+    "engine-repository-checks": 17,
+    "native-dpr1-cases": 16,
+    "native-dpr2-cases": 16,
+    "playground-cases": 5,
+    "packed-game-cases": 6
+  },
+  "preservedBoundaries": {
+    "G02CoreSourceFilesUnchanged": 8,
+    "nativeDeviceGenerations": 2,
+    "staticLayoutMeasurementsAndBufferUploads": 0,
+    "GPUTime": "not measured; CPU runtime and queue/readback wait recorded separately",
+    "formalDeviceAndPerformanceQualification": "G13"
+  },
+  "nextWork": [],
+  "gamesRepositoryChecks": {
+    "typecheck": {
+      "status": "failed",
+      "exitCode": 1,
+      "reason": "Missing controls and canvasFactory declarations in existing installed packages"
+    },
+    "tests": {
+      "status": "failed",
+      "exitCode": 1,
+      "knownIndependentFailures": [
+        "MUGEN fixture hash",
+        "Valley map direct localStorage source policy"
+      ]
+    },
+    "build": {
+      "status": "passed-with-warnings",
+      "exitCode": 0
+    }
+  },
+  "gamesFullBuild": {
+    "status": "passed-with-existing-type-warnings",
+    "exitCode": 0,
+    "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g03\\games-baseline-1792490692181\\full-build.log",
+    "sha256": "3b150b1c201123c6e7891c60332873de26d5f82fbd91566511c84a278ee224d4",
+    "manifestGameCount": 28
+  },
+  "completionAuditSha256": "a028167f91f0198179010b679810416e8dac44590f0af9c92ab25ae9c1f01cf1",
+  "coordinationDocumentsSha256": {
+    "milestones/milestones/m23-engine-0.2.2/milestone.json": "9587e8ecba47e1150e648b54ddc5f1d20e2c00035e04df26a744d69c3b5af22e",
+    "milestones/milestones/m23-engine-0.2.2/README.md": "8fa6f486b22aec3ed0b36744eb3d8e8c0c9d0adff1d49084182d8e0511b1367f",
+    "milestones/milestones/m23-engine-0.2.2/goals/README.md": "72a62f42d020ab6f9ba7c96017e94739c1c332a1f43294725748699d44207bb1",
+    "Engine/review/engine-0.2.2/README.md": "2f8450ac5442746f964ec376ca7430db4c8e3e4a01069dbbba37a3bdfdbe4e7f"
+  },
+  "finalCoordinationChecks": [
+    {
+      "id": "docs",
+      "exitCode": 0,
+      "log": "D:/HaiyueStudio/Engine/artifacts/engine-0.2.2/g03/final-coordination-1792490890109/docs.log",
+      "sha256": "91be15969ba675f08010a12480b3284047a6308fed431cd432ca09eed5ce9d77"
+    },
+    {
+      "id": "api",
+      "exitCode": 0,
+      "log": "D:/HaiyueStudio/Engine/artifacts/engine-0.2.2/g03/final-coordination-1792490890109/api.log",
+      "sha256": "f0715475ad07c1cdc9a1553c5ceecf86913eb555bcce68c887f8ace709972c69"
+    },
+    {
+      "id": "milestones",
+      "exitCode": 0,
+      "log": "D:/HaiyueStudio/Engine/artifacts/engine-0.2.2/g03/final-coordination-1792490890109/milestones.log",
+      "sha256": "31640d2893bdca296e2d81d0d220f9e0f8d999aa934f30a16c5e11f6d8cbe406"
+    }
+  ],
+  "finalCoordinationEvidence": {
+    "path": "artifacts/engine-0.2.2/g03/final-coordination-1792490890109/result.json",
+    "sha256": "3d353474c6984c79339d8dbf5987f53c195460eb66190dff1918b71e5acd7d24"
+  },
+  "testAndHarnessSha256": {
+    "extensions/test/gui-layout-binding.test.mjs": "402b0d666e93766df0e1a2a42c37373f9ed5f889c74aaeeca4f71dd830b2e644",
+    "extensions/test/gui-layout-browser-gate.mjs": "b12f2ea11e04c9c6d66706d731b10fd10ab4ea3cfbb08ca59c81321574368871",
+    "extensions/test/gui-layout-browser.html": "8cd3d1d88b13a722c5dccfd5f1800cd804eb89b5d250e168270d0d253acf47dd",
+    "extensions/test/gui-layout-browser.mjs": "47cab0462462c3aafadcba37667b06dc49a378e73a732f0fa3d8fea93c7f08f4",
+    "extensions/test/gui-layout-game-browser.mjs": "fb8e1b04b20d9e8286444dfb80aee6c8adfe22aca0b3c14fdae0071601e96257",
+    "extensions/test/gui-layout-playground-gate.mjs": "5b6744e5c6520dd890f2adcc018c08079758b4e40ce94babd262b677c0d46d35",
+    "engine/test/gui-layout-delegate.test.mjs": "ae54fd614b6e905cd1f6e7e234d0fa7a2fd3bb342a6902d0e40396351f822f39",
+    "engine/test/gui-layout-font-lifecycle.test.mjs": "de94df0e3c081fdcbe85dfb5c315e505b396a2fbe9266255a9cb9bdb0c00143b",
+    "examples/gui-runtime/layout-demo.ts": "50aa3056651a7d984fb4726b6371eb6decc9543e02c7f41ee6aa282a7555948d",
+    "examples/gui-runtime/main.ts": "90e9c77b89bceee9fb3fb40ff9bfda4bab91ebc40d7ea3fbef617e77fa0c581f",
+    "examples/gui-runtime/catalog.ts": "80294cd773a34181d5076434b94dfcc0126fb8947edf7852abb1298857f8c29e",
+    "examples/rollup.config.js": "0e2f5e6f44b6ed8dbe76d2314159669a32588d701fb7cad3d7c744de57823583",
+    "examples/tsconfig.json": "84d6a488cb2a63d42b4e036ee7b9bc3e65a0da4d6ead7ce437fb659ab84fcce5"
+  }
+}

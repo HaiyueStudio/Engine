@@ -30,7 +30,9 @@ export class GuiSwitch extends GuiCheckbox {
     return this.sample(this.colorFrom, this.colorTransitionMs);
   }
   get animating(): boolean {
-    return this.thumbProgress !== this.target || this.colorProgress !== this.target;
+    const next = this.checked ? 1 : 0;
+    return (Number.isFinite(this.thumbTransitionMs) && this.thumbTransitionMs > 0 && this.sample(this.thumbFrom, this.thumbTransitionMs) !== next) ||
+      (Number.isFinite(this.colorTransitionMs) && this.colorTransitionMs > 0 && this.sample(this.colorFrom, this.colorTransitionMs) !== next);
   }
   advanceAnimation(deltaMs: number): void {
     const changed = this.syncTarget();

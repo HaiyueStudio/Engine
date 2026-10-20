@@ -11,6 +11,7 @@ import {
 } from '../GuiTypes';
 import { EventEmitter } from '../../core/EventEmitter';
 import { requiredItemAt } from '../../math/arrayAccess';
+import {assignedGuiRect, isGuiLayoutHidden, notifyGuiInvalidation} from '../GuiLayoutState';
 
 let guiElementId = 0;
 
@@ -76,8 +77,9 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
 
   markDirty(flags = GuiDirtyFlags.Visual): void {
     this.dirtyFlags |= flags;
+    notifyGuiInvalidation(this, flags);
     if (flags & (GuiDirtyFlags.Layout | GuiDirtyFlags.Children)) {
-      this.parent?.markDirty(GuiDirtyFlags.Children);
+      for (let ancestor = this.parent; ancestor; ancestor = ancestor.parent) ancestor.dirtyFlags |= GuiDirtyFlags.Children;
     }
   }
 
@@ -87,6 +89,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   }
 
   add<T extends GuiElement>(child: T): T {
+    for (let ancestor: GuiElement | null = this; ancestor; ancestor = ancestor.parent) if (ancestor === child) throw new Error('Cannot create a cyclic GUI tree.');
     if (child.parent) child.parent.remove(child);
     child.parent = this;
     this.children.push(child);
@@ -127,10 +130,17 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   setStyle(style: GuiStyle): void {
     if ((Object.keys(style) as (keyof GuiStyle)[]).every((key) => Object.is(this.style[key], style[key]))) return;
     this.style = { ...this.style, ...style };
-    this.markDirty(GuiDirtyFlags.Visual);
+    this.markDirty(GuiDirtyFlags.Visual | (style.padding !== undefined ? GuiDirtyFlags.Layout : GuiDirtyFlags.None));
   }
 
   layout(parentRect: GuiRect): void {
+    const assigned = assignedGuiRect(this);
+    if (assigned) {
+      this.rect = {...assigned};
+      if (isGuiLayoutHidden(this)) return;
+      for (const child of this.children) child.layout(this.rect);
+      return;
+    }
     const width = resolveGuiLength(this.width, parentRect.width, this.rect.width);
     const height = resolveGuiLength(this.height, parentRect.height, this.rect.height);
     const x = parentRect.x + resolveGuiLength(this.x, parentRect.width, 0);
@@ -140,7 +150,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   }
 
   hitTest(x: number, y: number): GuiElement | null {
-    if (!this.visible || this.disabled || !containsPoint(this.rect, x, y)) return null;
+    if (!this.visible || isGuiLayoutHidden(this) || this.disabled || !containsPoint(this.rect, x, y)) return null;
     for (let i = this.children.length - 1; i >= 0; i--) {
       const hit = requiredItemAt(this.children, i, 'GUI child elements').hitTest(x, y);
       if (hit) return hit;

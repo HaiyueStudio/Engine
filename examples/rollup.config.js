@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import {fileURLToPath} from 'node:url';
 import { haiyuePlugins, loadContentManifest, selectContentEntries, toGlobalName } from '../config/rollup.shared.js';
 import { exampleBuildMetadata } from './scripts/example-build-metadata-plugin.mjs';
 import { exampleTypeScript } from './scripts/example-typescript.mjs';
@@ -65,7 +66,7 @@ const exampleBundles = demos.map(entry => ({
     globals: id => sharedEngineGlobal(id),
   },
   plugins: [
-    ...haiyuePlugins({ ...checkedTypeScript(), declaration: false }),
+    ...haiyuePlugins({ ...checkedTypeScript(), declaration: false, localPackages: entry.id === 'gui-runtime' ? {'@haiyue/extensions/gui-layout': fileURLToPath(new URL('../extensions/src/gui-layout.ts', import.meta.url))} : {} }),
     exampleBuildMetadata(entry.id),
     pdfWorkerAsset(entry.id),
   ],

@@ -2,12 +2,15 @@ import { GuiModal, type GuiModalOptions } from './GuiModal';
 import { GuiLabel } from './GuiLabel';
 import { GuiScrollView } from './GuiScrollView';
 import type { GuiRect } from '../GuiTypes';
+import {GuiDirtyFlags} from '../GuiTypes';
 
 type Measure = (text: string, fontSize: number) => number;
-const textMetrics = new WeakMap<GuiHelpDialog, Measure>();
+const textMetrics = new WeakMap<GuiHelpDialog, {measure: Measure; version: number}>();
 /** Internal font adapter; no renderer resources are exposed through the component API. */
-export function setGuiHelpDialogTextMetrics(dialog: GuiHelpDialog, measure: Measure): void {
-  textMetrics.set(dialog, measure);
+export function setGuiHelpDialogTextMetrics(dialog: GuiHelpDialog, measure: Measure, version?: number): void {
+  const previous = textMetrics.get(dialog), next = version ?? (previous?.measure === measure ? previous.version : (previous?.version ?? 0) + 1);
+  textMetrics.set(dialog, {measure, version: next});
+  if (previous?.version !== next) dialog.markDirty(GuiDirtyFlags.Layout | GuiDirtyFlags.Text | GuiDirtyFlags.Visual);
 }
 export interface GuiHelpDialogOptions extends Omit<
   GuiModalOptions,
@@ -56,8 +59,8 @@ export class GuiHelpDialog extends GuiModal {
     this.body.rect = rect;
     const size = this.messageLabel.fontSize ?? 15,
       lineHeight = size * 1.5;
-    const measure = textMetrics.get(this) ?? ((text: string, s: number) => text.length * s);
-    const key = `${this.message}|${rect.width}|${size}|${textMetrics.has(this)}`;
+    const metrics = textMetrics.get(this), measure = metrics?.measure ?? ((text: string, s: number) => text.length * s);
+    const key = `${this.message}|${rect.width}|${size}|${metrics?.version ?? 0}`;
     if (key !== this.textKey) {
       this.textKey = key;
       for (const child of [...this.body.children]) this.body.remove(child);

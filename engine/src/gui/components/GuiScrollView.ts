@@ -1,5 +1,6 @@
 import { GuiElement } from './GuiElement';
 import { GuiDirtyFlags, type GuiElementOptions, type GuiRect } from '../GuiTypes';
+import {guiLayoutContentHeight, notifyGuiActivity, registerGuiScrollOffset} from '../GuiLayoutState';
 
 export interface GuiScrollViewOptions extends GuiElementOptions {
   contentHeight?: number;
@@ -13,7 +14,9 @@ export interface GuiScrollViewOptions extends GuiElementOptions {
 
 /** Vertical viewport. Children use content-local coordinates; drawing and hits are clipped. */
 export class GuiScrollView extends GuiElement {
-  contentHeight: number;
+  private manualContentHeight = 0;
+  get contentHeight(): number {return guiLayoutContentHeight(this) ?? this.manualContentHeight;}
+  set contentHeight(value: number) {this.manualContentHeight = value;}
   showScrollbar: boolean;
   inertia: boolean;
   inertiaStrength: number;
@@ -25,6 +28,10 @@ export class GuiScrollView extends GuiElement {
       ? Math.max(0, options.contentHeight!)
       : 0;
     this.offset = Number.isFinite(options.scrollY) ? Math.max(0, options.scrollY!) : 0;
+    registerGuiScrollOffset(this, () => this.offset, () => {
+      const offset = this.offset, velocity = this.velocity, height = this.manualContentHeight;
+      return () => {this.offset = offset; this.velocity = velocity; this.manualContentHeight = height;};
+    });
     this.showScrollbar = options.showScrollbar ?? true;
     this.inertia = options.inertia ?? false;
     this.inertiaStrength = options.inertiaStrength ?? 1;
@@ -65,8 +72,9 @@ export class GuiScrollView extends GuiElement {
     this.velocity = this.inertia && this.strength > 0 && Number.isFinite(velocity) && Math.abs(velocity) >= 30
       ? Math.max(-6000, Math.min(6000, velocity)) : 0;
     if ((this.offset <= 0 && this.velocity < 0) || (this.offset >= this.maxScrollY && this.velocity > 0)) this.stopInertia();
+    notifyGuiActivity(this);
   }
-  stopInertia(): void { this.velocity = 0; }
+  stopInertia(): void {if (this.velocity === 0) return; this.velocity = 0; notifyGuiActivity(this);}
   /** Advance in milliseconds. Exact exponential integration is independent of frame rate. */
   advanceAnimation(deltaMs: number): void {
     if (!this.animating) { this.stopInertia(); return; }
