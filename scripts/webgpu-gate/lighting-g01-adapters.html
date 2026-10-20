@@ -1,0 +1,18 @@
+<!doctype html><meta charset="utf-8"><title>G01 adapter identity probe</title>
+<pre id="result" data-status=""></pre><script type="module">
+const result = document.querySelector('#result');
+try {
+  const adapters = [];
+  for (const powerPreference of ['high-performance', 'low-power']) {
+    const adapter = await navigator.gpu.requestAdapter({ powerPreference });
+    if (!adapter) { adapters.push({ powerPreference, status: 'unavailable' }); continue; }
+    const info = adapter.info;
+    const limits = Object.fromEntries(['maxColorAttachments', 'maxColorAttachmentBytesPerSample', 'maxStorageBufferBindingSize', 'maxStorageBuffersPerShaderStage', 'maxBufferSize', 'maxComputeInvocationsPerWorkgroup', 'maxTextureDimension2D'].map(k => [k, adapter.limits[k]]));
+    const device = await adapter.requestDevice({ requiredFeatures: adapter.features.has('timestamp-query') ? ['timestamp-query'] : [] });
+    adapters.push({ powerPreference, status: 'available', info: { vendor: info.vendor, architecture: info.architecture, device: info.device, description: info.description, isFallbackAdapter: info.isFallbackAdapter }, limits, features: [...adapter.features], timestampEnabled: device.features.has('timestamp-query') });
+    device.destroy();
+  }
+  result.textContent = JSON.stringify({ schemaVersion: 1, status: 'passed', browser: navigator.userAgent, adapters });
+  result.dataset.status = 'passed';
+} catch (error) { result.textContent = error.stack; result.dataset.status = 'failed'; }
+</script>

@@ -2,6 +2,34 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { AnimationTextRasterizer } from '../dist-test/animation/AnimationTextRasterizer.js';
 
+test('destroy during bitmap conversion closes the late bitmap without recreating text', async () => {
+  const previousDocument = globalThis.document;
+  const previousBitmap = globalThis.createImageBitmap;
+  let complete;
+  let closed = 0;
+  let draws = 0;
+  globalThis.document = { createElement: () => ({ set width(_) { draws++; }, getContext: () => null }) };
+  globalThis.createImageBitmap = () => new Promise(resolve => { complete = resolve; });
+  try {
+    const rasterizer = new AnimationTextRasterizer({ type: 'text2d', text: 'A', size: [10, 10], color: [1, 1, 1, 1] });
+    rasterizer.invalidateFont();
+    rasterizer.destroy();
+    rasterizer.setOutlineFont('Late font', 'normal', 400, { getPath() {} });
+    rasterizer.setExpressionData('late-data', {});
+    complete({ close() { closed++; } });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(closed, 1);
+    assert.equal(draws, 1);
+    assert.equal(rasterizer.texture, null);
+    assert.equal(rasterizer.outlineFonts.size, 0);
+    rasterizer.destroy();
+    assert.equal(closed, 1);
+  } finally {
+    if (previousDocument === undefined) delete globalThis.document; else globalThis.document = previousDocument;
+    if (previousBitmap === undefined) delete globalThis.createImageBitmap; else globalThis.createImageBitmap = previousBitmap;
+  }
+});
+
 test('text rasterizer applies word selector groups to every grapheme in the selected word', async () => {
   const previousDocument = globalThis.document;
   const draws = [];

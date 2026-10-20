@@ -30,6 +30,22 @@ fn vs_main(@builtin(vertex_index) vertexIndex : u32) -> VertexOutput {
   return output;
 }`;
 
+// Avoid dynamic indexing of function-local arrays in the final output pass.
+// This preserves the fullscreen triangle and flipped UVs on every target format.
+export const OUTPUT_POSTPROCESS_VERTEX_WGSL = `struct VertexOutput {
+  @builtin(position) pos : vec4<f32>,
+  @location(0) uv : vec2<f32>,
+}
+
+@vertex
+fn vs_main(@builtin(vertex_index) vertexIndex : u32) -> VertexOutput {
+  let uv = vec2<f32>(f32((vertexIndex << 1u) & 2u), f32(vertexIndex & 2u));
+  var output : VertexOutput;
+  output.pos = vec4<f32>(uv * 2.0 - vec2<f32>(1.0), 0.0, 1.0);
+  output.uv = vec2<f32>(uv.x, 1.0 - uv.y);
+  return output;
+}`;
+
 interface BuiltinPassEmission {
   readonly id: string;
   readonly operation: BuiltinPostprocessOperation;

@@ -427,6 +427,7 @@ struct EnvironmentUniforms {
 @group(3) @binding(4) var environmentSampler : sampler;
 @group(3) @binding(11) var transmissionFramebuffer : texture_2d<f32>;
 struct VertexInput {
+  @location(12) color : vec4<f32>,
   @location(0) position : vec3<f32>,
   @location(1) normal : vec3<f32>,
   @location(2) uv0 : vec2<f32>,
@@ -443,6 +444,7 @@ struct VertexInput {
   @builtin(vertex_index) vertexIndex : u32,
 }
 struct VertexOutput {
+  @location(6) color : vec4<f32>,
   @builtin(position) clipPos : vec4<f32>,
   @location(0) worldPos : vec3<f32>,
   @location(1) worldNormal : vec3<f32>,
@@ -486,6 +488,7 @@ fn vs_main(input: VertexInput) -> VertexOutput {
   output.worldNormal = normalize((object.normalMatrix * vec4<f32>(localNormal, 0.0)).xyz);
   output.uv0 = input.uv0;
   output.uv1 = input.uv1;
+  output.color = input.color;
   output.worldScale = (
     length(object.model[0].xyz)
     + length(object.model[1].xyz)
@@ -551,11 +554,17 @@ fn sampleTransmissionFramebuffer(uv: vec2<f32>, roughness: f32) -> vec3<f32> {
   let y1 = textureSampleLevel(transmissionFramebuffer, environmentSampler, clamp(uv - vec2<f32>(0.0, radius * texel.y), vec2<f32>(0.0), vec2<f32>(1.0)), 0.0).rgb;
   return (center * 4.0 + x0 + x1 + y0 + y1) / 8.0;
 }
-@fragment
-fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
-  let object = objects[input.objectIndex];
-  if (hy_is_clipped(input.worldPos, input.objectIndex)) { discard; }
-  var base = material.baseColor;
+struct StandardPbrSurface {
+  base: vec4<f32>,
+  normal: vec3<f32>,
+  metallic: f32,
+  roughness: f32,
+  occlusion: f32,
+  emissive: vec3<f32>,
+}
+// Shared surface evaluation for Forward and Deferred geometry; coverage/UV/normal semantics stay identical.
+fn sampleStandardPbrSurface(input: VertexOutput) -> StandardPbrSurface {
+  var base = material.baseColor * input.color;
   if (material.flags.x != 0u) { base *= textureSample(baseColorTexture, baseColorSampler, textureUv(input, material.baseColorMapping)); }
   if (material.flags.w == 1u && base.a < material.factors.w) { discard; }
 
@@ -568,6 +577,23 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
   }
   roughness = clamp(roughness, 0.04, 1.0);
   metallic = clamp(metallic, 0.0, 1.0);
+  var occlusion = 1.0;
+  if ((material.flags.z & 2u) != 0u) {
+    let sampledOcclusion = textureSample(occlusionTexture, occlusionSampler, textureUv(input, material.occlusionMapping)).r;
+    occlusion = mix(1.0, sampledOcclusion, material.factors.z);
+  }
+  var emissive = material.emissiveNormalScale.rgb;
+  if ((material.flags.z & 4u) != 0u) { emissive *= textureSample(emissiveTexture, emissiveSampler, textureUv(input, material.emissiveMapping)).rgb; }
+  return StandardPbrSurface(base, resolveNormal(input), metallic, roughness, occlusion, emissive);
+}
+@fragment
+fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
+  let object = objects[input.objectIndex];
+  if (hy_is_clipped(input.worldPos, input.objectIndex)) { discard; }
+  let surface = sampleStandardPbrSurface(input);
+  var base = surface.base;
+  let metallic = surface.metallic;
+  let roughness = surface.roughness;
   var clearcoatFactor = material.clearcoatFactors.x;
   var clearcoatRoughness = material.clearcoatFactors.y;
   if (true) {
@@ -636,7 +662,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
   transmission = clamp(transmission, 0.0, 1.0) * (1.0 - metallic);
   thickness = max(thickness * input.worldScale, 0.0);
   let opaqueDiffuseWeight = 1.0 - transmission;
-  let n = resolveNormal(input);
+  let n = surface.normal;
   var clearcoatNormal = n;
   if (true) { clearcoatNormal = resolveClearcoatNormal(input); }
   let v = normalize(sceneFrame.eyePosition.xyz - input.worldPos);
@@ -751,11 +777,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
   );
   let environmentF = mix(dielectricEnvironmentF, metalEnvironmentF, metallic);
   let environmentKd = vec3<f32>(1.0 - maxComponent(dielectricEnvironmentF)) * (1.0 - metallic);
-  var occlusion = 1.0;
-  if ((material.flags.z & 2u) != 0u) {
-    let sampledOcclusion = textureSample(occlusionTexture, occlusionSampler, textureUv(input, material.occlusionMapping)).r;
-    occlusion = mix(1.0, sampledOcclusion, material.factors.z);
-  }
+  let occlusion = surface.occlusion;
   var ibl = (environmentKd * irradiance * base.rgb / PI * opaqueDiffuseWeight + prefiltered * environmentF) * environment.params.x * occlusion;
   if (true && transmission > 0.0) {
     var transmissionUv = input.clipPos.xy / vec2<f32>(textureDimensions(transmissionFramebuffer));
@@ -811,8 +833,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     ibl = ibl * clearcoatBaseAttenuation(clearcoatFresnel(clearcoatNDotV), clearcoatFactor)
       + clearcoatPrefiltered * clearcoatF * environment.params.x * occlusion;
   }
-  var emissive = material.emissiveNormalScale.rgb;
-  if ((material.flags.z & 4u) != 0u) { emissive *= textureSample(emissiveTexture, emissiveSampler, textureUv(input, material.emissiveMapping)).rgb; }
+  let emissive = surface.emissive;
   let color = direct + ibl + emissive;
   base.a = select(1.0, base.a, material.flags.w == 2u);
   return vec4<f32>(applyFog(color, sceneFrame.fog, sceneFrame.eyePosition.xyz, input.worldPos), base.a);

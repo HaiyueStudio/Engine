@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-03",
+  "surface": "Codex in-app browser / WebGPU",
+  "url": "http://127.0.0.1:8156/examples/narrative/index.html?verify=1",
+  "result": {
+    "passed": true,
+    "endings": [
+      "together",
+      "together",
+      "alone"
+    ],
+    "locale": "en",
+    "nodeId": "together",
+    "medals": 1,
+    "checks": [
+      "GUI pointer choices",
+      "three branches",
+      "two endings",
+      "host state round trip",
+      "pending action restore",
+      "effect non-replay",
+      "localized text and image",
+      "GPU validation"
+    ]
+  },
+  "consoleWarningsAndErrors": [],
+  "errorElement": "",
+  "inputMethod": "Synthetic pointerdown/up through Engine GUI hit testing, plus direct save/restore operations in the example verifier.",
+  "visualInspection": "Chinese initial dialogue wraps without clipping; English good ending, illustration and toolbar render correctly.",
+  "bundleSha256": "eac064b89082b5fc2da9313343b75772cd549bffddd625c6c1c577dea3e6f227"
+}

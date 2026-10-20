@@ -499,3 +499,20 @@ export type {
   SerializedVec2,
   SerializedVec3,
 } from './serialization/ComponentSerializationRegistry';
+
+// 0.2.1 GPU simulation compatibility exports; prefer the focused gpu-driven entry.
+export type { GpuInstanceSource } from './renderer/GpuInstanceSource';
+export { InstancedToonMaterial } from './material/InstancedToonMaterial';
+export { GpuInstanceLod } from './compute/GpuInstanceLod';
+export type { GpuInstanceLodView } from './compute/GpuInstanceLod';
+export { GpuReadbackRing } from './compute/GpuReadbackRing';
+export type { GpuReadbackResult } from './compute/GpuReadbackRing';
+export { GpuComputeProgram } from './compute/GpuComputeProgram';
+export { inspectGpuSimulationCapabilities } from './compute/GpuSimulationCapabilities';
+export type { GpuSimulationRequirements } from './compute/GpuSimulationCapabilities';
+
+export { createDeferredLightingProfile } from './experimental/DeferredLightingProfile';
+export type { DeferredLightingProfile, DeferredLightingProfileOptions, DeferredLightingDebugChannel, DeferredLightingDebugImage } from './experimental/DeferredLightingProfile';
+
+export { createFrameGraphInspector } from './experimental/FrameGraphInspector';
+export type { FrameGraphInspector, FrameGraphSnapshot } from './experimental/FrameGraphInspector';

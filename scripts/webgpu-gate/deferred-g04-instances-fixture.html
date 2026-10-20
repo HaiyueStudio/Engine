@@ -1,0 +1,4 @@
+<!doctype html><meta charset="utf-8"><title>G04 rendering compatibility</title>
+<pre id="progress">Loading compatibility fixture</pre><pre id="result" data-status=""></pre>
+<script>for(const type of ['error','unhandledrejection'])addEventListener(type,event=>{const node=document.querySelector('#result');node.textContent=JSON.stringify({status:'failed',error:String(event.error?.stack??event.reason?.stack??event.message??event.reason)});node.dataset.status='failed';});</script>
+<script type="module" src="./deferred-g04-instances-fixture.mjs"></script>

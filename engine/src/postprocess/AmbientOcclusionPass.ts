@@ -1,3 +1,6 @@
+import { acquirePostProcessTransientTextures, clearPostProcessTransientTextures, hasPostProcessTransientTextures } from './PostProcessTransientTextures';
+import { deferPostProcessDisposal } from './PostProcessSubmission';
+import { registerPostProcessGraphAccess } from './PostProcessGraph';
 import {
   PostProcessPass,
   getPostProcessTextureView,
@@ -7,6 +10,7 @@ import {
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import { getAmbientOcclusionShader } from './AmbientOcclusionShader';
 import { PrecompiledUniformBlockWriter } from '../shader/PrecompiledShaderRuntime';
+import { registerLightingAmbientOcclusion } from './LightingAmbientOcclusion';
 import { mat4 } from 'wgpu-matrix';
 
 type AmbientOcclusionAlgorithm = 'gtao' | 'sao' | 'ssao';
@@ -110,6 +114,11 @@ class AmbientOcclusionPass extends PostProcessPass {
 
   constructor(algorithm: AmbientOcclusionAlgorithm, options: AmbientOcclusionPassOptions = {}) {
     super();
+    const implementation: object = new.target;
+    if (implementation === AmbientOcclusionPass || implementation === SsaoPass || implementation === SaoPass || implementation === GtaoPass) {
+      // Frame-count progression is observable across frames, even in occlusion-only mode.
+      registerPostProcessGraphAccess(this, () => ({ readsColor: this.displayMode !== 'occlusion', sideEffect: true }));
+    }
     if (algorithm !== 'gtao' && algorithm !== 'sao' && algorithm !== 'ssao') {
       throw new RangeError(`AmbientOcclusionPass algorithm must be gtao, sao, or ssao; received ${String(algorithm)}.`);
     }
@@ -124,6 +133,23 @@ class AmbientOcclusionPass extends PostProcessPass {
     this.displayMode = displayMode(options.displayMode ?? 'composite');
     this.resolutionScale = resolutionScale(options.resolutionScale ?? 0.5);
     this.scratchFormat = scratchFormat(options.scratchFormat ?? 'r8unorm');
+    registerLightingAmbientOcclusion(this, {
+      composite: () => this.displayMode === 'composite',
+      create: () => new AmbientOcclusionPass(this.algorithm, { resolutionScale: this.resolutionScale, scratchFormat: this.scratchFormat }),
+      recorded: target => {
+        const ao = target as AmbientOcclusionPass;
+        this._frameCount++;
+        this._width = ao._width; this._height = ao._height;
+        this._scratchWidth = ao._scratchWidth; this._scratchHeight = ao._scratchHeight;
+      },
+      configure: (target, first) => {
+        const ao = target as AmbientOcclusionPass;
+        for (const key of ['radius', 'intensity', 'bias', 'power', 'distanceFalloff', 'quality'] as const) {
+          Object.assign(ao, { [key]: this[key] });
+        }
+        ao.displayMode = first ? 'occlusion' : 'composite';
+      },
+    });
   }
 
   get stats(): AmbientOcclusionPassStats {
@@ -208,6 +234,18 @@ class AmbientOcclusionPass extends PostProcessPass {
     if (!depth || !normal || !frame) {
       throw new Error(`${this.label}Pass requires linear-depth, view-normal, and post-process frame context.`);
     }
+    const scratch = acquirePostProcessTransientTextures(this, device, encoder, [
+      { name: 'ao.raw', descriptor: this._scratchDescriptor('raw'), firstUse: 0, lastUse: 1 },
+      { name: 'ao.denoised', descriptor: this._scratchDescriptor('denoised'), firstUse: 1, lastUse: 2 },
+    ]);
+    if (scratch) {
+      this._releaseOwnedScratch();
+      const [raw, denoised] = scratch.assignments;
+      if (this._rawOcclusionTexture !== raw!.texture || this._denoisedOcclusionTexture !== denoised!.texture) this._invalidateBindings();
+      this._rawOcclusionTexture = raw!.texture; this._rawOcclusionView = raw!.view;
+      this._denoisedOcclusionTexture = denoised!.texture; this._denoisedOcclusionView = denoised!.view;
+    }
+    try {
     this._writeUniforms(device, frame);
     if (src !== this._lastSource || depth !== this._lastDepth || normal !== this._lastNormal) {
       this._occlusionBindGroup = device.createBindGroup({
@@ -289,6 +327,7 @@ class AmbientOcclusionPass extends PostProcessPass {
     upscalePass.draw(3);
     upscalePass.end();
     this._frameCount++;
+    } finally { scratch?.release(); }
   }
 
   override resize(device: GPUDevice, format: GPUTextureFormat, width: number, height: number): void {
@@ -296,19 +335,20 @@ class AmbientOcclusionPass extends PostProcessPass {
     this._format = format;
     this._width = Math.max(1, width);
     this._height = Math.max(1, height);
-    this._rawOcclusionTexture.destroy();
-    this._denoisedOcclusionTexture.destroy();
+    this._releaseOwnedScratch();
     this._createOcclusionTextures(device);
     this._invalidateBindings();
   }
 
   override destroy(): void {
+    clearPostProcessTransientTextures(this);
     this._occlusionPipeline = null;
     this._denoisePipeline = null;
     this._upscalePipeline = null;
-    this._rawOcclusionTexture?.destroy();
-    this._denoisedOcclusionTexture?.destroy();
-    this._uniformBuffer?.destroy();
+    this._releaseOwnedScratch();
+    const uniform = this._uniformBuffer;
+    const release = () => uniform?.destroy();
+    if (!deferPostProcessDisposal(this, release)) release();
     this._sceneTextures = null;
     this._invalidateBindings();
   }
@@ -369,9 +409,13 @@ class AmbientOcclusionPass extends PostProcessPass {
     };
   }
 
+  private _ownsScratch = false;
+
   private _createOcclusionTextures(device: GPUDevice): void {
     this._scratchWidth = Math.max(1, Math.ceil(this._width * this.resolutionScale));
     this._scratchHeight = Math.max(1, Math.ceil(this._height * this.resolutionScale));
+    if (hasPostProcessTransientTextures(this)) return;
+    this._ownsScratch = true;
     this._rawOcclusionTexture = device.createTexture({
       label: `${this.label}Pass.rawOcclusionTexture`,
       size: [this._scratchWidth, this._scratchHeight],
@@ -386,6 +430,19 @@ class AmbientOcclusionPass extends PostProcessPass {
       usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     });
     this._denoisedOcclusionView = this._denoisedOcclusionTexture.createView();
+  }
+
+  private _scratchDescriptor(name: string): GPUTextureDescriptor {
+    return { label: `${this.label}Pass.${name}OcclusionTexture`, size: [this._scratchWidth, this._scratchHeight],
+      format: this.scratchFormat, usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING };
+  }
+
+  private _releaseOwnedScratch(): void {
+    if (!this._ownsScratch) return;
+    this._ownsScratch = false;
+    const raw = this._rawOcclusionTexture, denoised = this._denoisedOcclusionTexture;
+    const release = () => { raw?.destroy(); denoised?.destroy(); };
+    if (!deferPostProcessDisposal(this, release)) release();
   }
 
   private _invalidateBindings(): void {

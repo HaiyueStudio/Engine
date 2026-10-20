@@ -1,4 +1,5 @@
 import { mat4 } from 'wgpu-matrix';
+import { markInstanceData } from './InstanceDataJournal';
 import { Material } from './Material';
 import { clampedNumber, finiteNumber, integerInRange } from './materialValidation';
 
@@ -115,6 +116,7 @@ export class InstancedMaterial extends Material {
 
   markTransformsDirty(start = 0, end = this.instanceCount): this {
     if (end <= start) return this;
+    markInstanceData(this, 'transforms', Math.max(0, start), Math.min(this.instanceCount, end));
     this._transformDirtyStart = Math.min(this._transformDirtyStart, Math.max(0, start));
     this._transformDirtyEnd = Math.max(this._transformDirtyEnd, Math.min(this.instanceCount, end));
     return this;
@@ -122,6 +124,7 @@ export class InstancedMaterial extends Material {
 
   markColorsDirty(start = 0, end = this.instanceCount): this {
     if (end <= start) return this;
+    markInstanceData(this, 'colors', Math.max(0, start), Math.min(this.instanceCount, end));
     this._colorDirtyStart = Math.min(this._colorDirtyStart, Math.max(0, start));
     this._colorDirtyEnd = Math.max(this._colorDirtyEnd, Math.min(this.instanceCount, end));
     return this;

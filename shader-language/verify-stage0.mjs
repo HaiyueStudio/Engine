@@ -255,7 +255,8 @@ expect(computeFamilySchema.properties?.abiVersion?.const === 1, 'compute ABI sch
 expect(computeFamily.format === 'haiyue-production-compute-family', 'compute family format is invalid');
 expect(computeFamily.version === 1 && computeFamily.abiVersion === 1, 'compute family identity is invalid');
 expectUniqueIds(computeFamily.passes, 'production compute pass');
-expect(computeFamily.passes?.length === 5, 'production compute family must contain five passes');
+// Preserve historical Stage 13 evidence; ADR 0108 adds one production LOD pass.
+expect(computeFamily.passes?.map(pass => pass.id).sort().join(',') === [...stage13Contract.passes, 'instanced-lod'].sort().join(','), 'production compute family must contain the five Stage 13 passes plus ADR 0108 instanced-lod');
 expect(stage13Contract.phase === 13 && stage13Contract.status === 'implemented', 'stage13 contract identity is invalid');
 expect(stage13Contract.family?.abiVersion === 1 && stage13Contract.family?.passCount === 5, 'stage13 must freeze five compute passes at ABI v1');
 expect(stage13Contract.abi?.workgroupSize?.join('x') === '64x1x1', 'stage13 workgroup ABI changed');

@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-13",
+  "revision": "7d5580f16e1404f7bd090014d81c3d9989c06a5e",
+  "dirty": true,
+  "scope": "development correctness, not publication or performance qualification",
+  "checks": {
+    "typecheck": "passed",
+    "test": "passed",
+    "build": "passed",
+    "boundaries": "passed",
+    "api": "passed",
+    "docs": "passed",
+    "webgpu": "passed"
+  },
+  "workspaceTestCounts": [
+    135,
+    778,
+    107,
+    444,
+    7
+  ],
+  "exampleBuildTargets": 100,
+  "sources": {
+    "extensions/src/achievements/AchievementRuntime.ts": "0d3f19033cd06430338d5edb2c7a55e4993f23cda0c7eadd88d354a95eae9041",
+    "extensions/src/achievements/types.ts": "ffe3548e8ec7bbcb1d0010611bba7ec921f567829014275196d07bc16ea453f0",
+    "extensions/src/achievements/AchievementGui.ts": "1a9cc1d7b40b2e828575d2a4666ce239d308225bdd9aaf8864d4120763dd4df2",
+    "extensions/src/achievements.ts": "bbde207e57ea5139b096dc6d84001674132e96c536ae4ca92600502d1f9cf799",
+    "examples/achievements/main.ts": "fc3a201158e7fccc360c03de1e6e5730645f03750830d8196c77baa49d048ca5",
+    "extensions/package.json": "884a34382c98c6c36bcc41def78d7c482fb3a5c67952c1afaee28fdbb68c0891",
+    "scripts/verify-achievements-example.mjs": "306ce1b162cc909c1ea48a5eb042b56f4e7c11cd9feb416df05cd92f32512d49"
+  },
+  "logs": {
+    "haiyue-p1-engine-typecheck.log": "4c919d0ff9b8e161c5bbd61fe8c855df8e13a00169f30ef9ed40253d5fc4356b",
+    "haiyue-p1-engine-tests.log": "652e31017d0ac83ac694744b85a32f17283d47e2b51774a5bc58d52098824c2e",
+    "haiyue-p1-engine-build.log": "180d5f998c3e3d35b23e16d06e814d671e2b9d64f86942c01e4f74151e11432e",
+    "haiyue-p1-boundaries-final.log": "a94169d5b308ae3494495de425bc8b5793ded5ee845368f7ff717b4652c80f38",
+    "haiyue-p1-api-final.log": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79",
+    "haiyue-p1-engine-docs.log": "4d79aaf4089ee46761331a6308008affca94b3d3582b2cac7436710544d1c891",
+    "haiyue-p1-engine-docs-final.log": "7209b1da219d3e4a31964bf73b1785917955fb0eb652ea21ca4c0da989d8866f"
+  }
+}

@@ -61,7 +61,7 @@ async function runFixture() {
     pipelines.set(passId, pipeline);
   }
   if (compilationErrors.length > 0) throw new Error(`Compute WGSL failed:\n${compilationErrors.join('\n')}`);
-  if (moduleHashes.size !== 1 || irHashes.size !== 5) throw new Error(`Invalid family hashes: modules=${moduleHashes.size}, IR=${irHashes.size}`);
+  if (moduleHashes.size !== 1 || irHashes.size !== 6) throw new Error(`Invalid family hashes: modules=${moduleHashes.size}, IR=${irHashes.size}`);
 
   const drawCommand = await executeDrawCommand(device, runtimes.get('gpu-draw-command'), pipelines.get('gpu-draw-command'));
   const bitonicSort = await executeBitonicSort(device, runtimes.get('gpu-sort-bitonic'), pipelines.get('gpu-sort-bitonic'));

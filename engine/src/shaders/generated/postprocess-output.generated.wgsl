@@ -7,19 +7,10 @@ struct VertexOutput {
 
 @vertex
 fn vs_main(@builtin(vertex_index) vertexIndex : u32) -> VertexOutput {
-  var positions = array<vec2<f32>, 3>(
-    vec2<f32>(-1.0, -1.0),
-    vec2<f32>( 3.0, -1.0),
-    vec2<f32>(-1.0,  3.0),
-  );
-  var uvs = array<vec2<f32>, 3>(
-    vec2<f32>(0.0,  1.0),
-    vec2<f32>(2.0,  1.0),
-    vec2<f32>(0.0, -1.0),
-  );
+  let uv = vec2<f32>(f32((vertexIndex << 1u) & 2u), f32(vertexIndex & 2u));
   var output : VertexOutput;
-  output.pos = vec4<f32>(positions[vertexIndex], 0.0, 1.0);
-  output.uv = uvs[vertexIndex];
+  output.pos = vec4<f32>(uv * 2.0 - vec2<f32>(1.0), 0.0, 1.0);
+  output.uv = vec2<f32>(uv.x, 1.0 - uv.y);
   return output;
 }
 

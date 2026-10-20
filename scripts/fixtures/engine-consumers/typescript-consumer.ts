@@ -17,7 +17,7 @@ import { createGltfPlugin, type LoadGltfOptions } from '@haiyue/extensions/gltf'
 import { createGltfAnimation3DRuntime } from '@haiyue/extensions/gltf-animation3d';
 import { OwnerSafeAudioMixer, type AudioMixerPlayRequest } from '@haiyue/engine/experimental/audio';
 import { BrowserMultiplayerInput, type MultiplayerInputSnapshot } from '@haiyue/engine/experimental/simulation';
-import type { GuiFontOptions } from '@haiyue/engine/gui';
+import { GuiToast, type GuiToastOptions, type GuiFontOptions } from '@haiyue/engine/gui';
 import type { AnimationTextStyleRun } from '@haiyue/animation-spec';
 import { InteractionRuntime, type RuntimeInteractionDocument } from '@haiyue/extensions/animation';
 import { VirtualJoystickControls, type VirtualJoystickOptions } from '@haiyue/extensions/controls';
@@ -29,6 +29,11 @@ void OwnerSafeAudioMixer;
 void BrowserMultiplayerInput;
 void InteractionRuntime;
 void VirtualJoystickControls;
+
+const toastOptions: GuiToastOptions = { text: 'Saved', durationMs: 2200, animationMs: 180 };
+const toast = new GuiToast(toastOptions);
+toast.show({ text: 'Replaced', icon: null });
+toast.hide();
 
 const options: HaiyueEngineOptions = { canvas: '#canvas' };
 const tweenOptions: TweenOptions = { duration: 250 };
@@ -56,3 +61,11 @@ void gltfOptions;
 void Animation3DMixer;
 void createGltfPlugin;
 void createGltfAnimation3DRuntime;
+
+import { createFrameGraphInspector, type FrameGraphInspector, type FrameGraphSnapshot } from '@haiyue/engine/experimental/renderer';
+declare const renderSystem: Parameters<typeof createFrameGraphInspector>[0];
+const inspector: FrameGraphInspector = createFrameGraphInspector(renderSystem);
+inspector.requestCapture();
+const frameGraphSnapshot: FrameGraphSnapshot | null = inspector.snapshot();
+void frameGraphSnapshot;
+inspector.dispose();

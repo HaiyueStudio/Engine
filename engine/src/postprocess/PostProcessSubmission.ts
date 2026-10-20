@@ -2,6 +2,7 @@ import type { PostProcessPass } from './PostProcessPass';
 
 type AfterSubmit = (callback: (queue: GPUQueue) => void) => void;
 const boundaries = new WeakMap<PostProcessPass, AfterSubmit>();
+export function getPostProcessSubmission(pass: PostProcessPass): AfterSubmit | undefined { return boundaries.get(pass); }
 
 /** Internal encoding scope; never retain a callback from a completed frame. */
 export function setPostProcessSubmission(pass: PostProcessPass, afterSubmit?: AfterSubmit): void {

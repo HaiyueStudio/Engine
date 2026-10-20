@@ -113,3 +113,41 @@ test('InstancedMesh3DRenderer shares the neutral PBR environment semantics', () 
   assert.equal(renderer._environmentData[8], 1);
   renderer.destroy();
 });
+
+test('shared material revisions reach every entity and renderer without re-uploading unchanged views', () => {
+  const device = createAuditGpuDevice();
+  const first = new InstancedMesh3DRenderer(), second = new InstancedMesh3DRenderer();
+  first.prepare({ device }); second.prepare({ device });
+  const material = new InstancedMaterial(4);
+  const consumers = [
+    [first, first._ensureMaterialData(1, material, 4)],
+    [first, first._ensureMaterialData(2, material, 4)],
+    [second, second._ensureMaterialData(1, material, 4)],
+  ];
+  for (const [renderer, data] of consumers) renderer._uploadDirtyInstanceData(data, material);
+  const writes = [];
+  const original = device.queue.writeBuffer;
+  device.queue.writeBuffer = (...args) => { writes.push(args); original(...args); };
+  material.setColor(2, .2, .3, .4);
+  const matrix = new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,3,0,0,1]);
+  material.setTransform(2, matrix);
+  for (const [renderer, data] of consumers) {
+    renderer._uploadDirtyInstanceData(data, material);
+    assert.equal(writes.filter(w => w[0] === data.transformBuf).length, 1);
+    assert.equal(writes.filter(w => w[0] === data.colorBuf).length, 1);
+  }
+  writes.length = 0;
+  for (const [renderer, data] of consumers) renderer._uploadDirtyInstanceData(data, material);
+  assert.equal(writes.length, 0);
+  // Slow consumers beyond the bounded journal receive the full latest data.
+  material.setColor(0, .9, .8, .7);
+  for (let i = 0; i < 40; i++) material.setColor(3, i / 40, .4, .5);
+  for (const [renderer, data] of consumers) {
+    renderer._uploadDirtyInstanceData(data, material);
+    const upload = writes.filter(w => w[0] === data.colorBuf);
+    assert.equal(upload.length, 1);
+    assert.equal(upload[0][1], 0);
+    assert.equal(upload[0][4], 64);
+  }
+  first.destroy(); second.destroy();
+});

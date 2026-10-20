@@ -132,3 +132,5 @@ first. `build:target` and the examples watcher create or refresh the shared bund
 npm run build:target -- example:consumer-walkthrough example:hya-samples example:hya-state-machine
 npm run build:target -- example:gltf-animation3d-crossfade game:sokoban-3d
 ```
+
+- [GPU 实例、Toon 与 LOD](gpu-instances/main.ts)：10,000 个实例的实验性 GPU 计算到间接绘制链路。

@@ -4,7 +4,7 @@
 
 - `@haiyue/engine` 及所有不以 `experimental` 开头的已声明 subpath 是 stable。破坏式调整必须全仓原子迁移、更新 API 基线、ADR、示例和 changelog。
 - `@haiyue/engine/experimental` 是兼容聚合入口；新高级调用方应使用 `/experimental/assets`、`/experimental/diagnostics`、`/experimental/gpu-driven` 或 `/experimental/renderer`。这些入口都可在 minor 迭代重构，不进入普通用户主路径。
-- `@haiyue/extensions` 的十个业务 runtime subpath 是 stable；根入口与 `/experimental/*` worker/parser 协议仍为 experimental。
+- `@haiyue/extensions` 的稳定能力以 `config/public-api-capability-budgets.json` 的 stable 分组为准，覆盖动画、资产、文本、地图、输入、国际化与剧情等 focused subpath；根入口、`/experimental/*` 和未加前缀的 `/ray-tracing` 仍为 experimental。
 - 包内未由 `package.json#exports` 暴露的文件是 private，禁止跨 workspace 导入。
 - 编辑器导出格式和脚本 capability 都带独立版本；数据迁移不等于保留旧 TypeScript API。
 
@@ -49,6 +49,10 @@ Engine 仓库独立发布的四个包与 examples 以当前 release manifest 为
 | `@haiyue/extensions/hya-state-machine` | HYA 2D 状态机 component/system 与 channel contract | editor authoring internals |
 | `@haiyue/extensions/spine` | Spine component/system/plugin 与结构化 worker seam | worker client/source builder、parser 与 parsed payload |
 | `@haiyue/extensions/tilemap`、`/canvas-text`、`/tween`、`/grid` | 聚焦的 2D runtime components/systems/plugins | GPU renderer implementation |
+| `@haiyue/extensions/deformable-animation` | 来源无关 deformable 2D runtime extension 与采样契约 | 参数化 rig solver、GPU skinning 与 importer 内部实现 |
+| `@haiyue/extensions/controls` | 虚拟摇杆输入、移动和可选 GUI 呈现 | 私有 JoystickView 实现 |
+| `@haiyue/extensions/i18n` | 语言包、文本格式化与 GUI 绑定 | 游戏自定义语言下载或账号策略 |
+| `@haiyue/extensions/narrative` | 剧情运行时、校验、存档、宿主动作与可选 GUI | 游戏业务动作的实现 |
 
 Stable 自定义材质 API 只包含 `MaterialRendererRegistration`、`MaterialRenderContext` 等能力协议。GPU-driven table/readback、command buffer、renderer cache、内部 frame plan 和 compute pass 的具体实现只允许由 `@haiyue/engine/experimental` 暴露。
 
@@ -59,3 +63,5 @@ Stable 自定义材质 API 只包含 `MaterialRendererRegistration`、`MaterialR
 `api-surface` 同时检查导出清单、公开声明中的类型泄漏和每个 stable entrypoint 的符号预算。根入口不是“最多 30 个”的可替换额度，而是必须与 ADR 0035 名单完全一致；新增普通 stable API 应优先进入领域子入口。执行 `api:update` 不能绕过边界检查。新增 stable API 必须先修改 ADR/预算，并同时提供声明、最小 example、测试和文档。
 
 发布前运行 `npm run api:check` 和 `npm run release:check`。删除旧 API 时不得留下 deprecated alias、旧入口 re-export 或双字段读取。
+
+按 [ADR 0122](adr/0122-package-capability-structure-review.md)，包中文件数仅作结构观察。发布检查继续约束包体字节、依赖边界、全部公开声明、稳定能力的独立包消费与按需加载；不得为减少文件数合并职责或遗漏稳定能力。

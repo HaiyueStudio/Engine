@@ -16,11 +16,15 @@ export class ComputeKernel {
   readonly pipeline: GPUComputePipeline;
 
   private readonly engine: IEngine;
+  private readonly label: string;
+  private readonly device: GPUDevice;
 
   constructor(engine: IEngine, options: ComputeKernelOptions) {
     this.engine = engine;
     const device = requireEngineDevice(engine);
     const label = options.label ?? 'ComputeKernel';
+    this.label = label;
+    this.device = device;
     const module = device.createShaderModule({
       label: `${label} Shader`,
       code: options.code,
@@ -46,7 +50,8 @@ export class ComputeKernel {
   }
 
   createBindGroup(entries: GPUBindGroupEntry[], label?: string): GPUBindGroup {
-    return requireEngineDevice(this.engine).createBindGroup({
+    if (this.engine.device !== this.device) throw new Error('ComputeKernel belongs to a previous device; recreate after device loss.');
+    return this.device.createBindGroup({
       ...(label === undefined ? {} : { label }),
       layout: this.bindGroupLayout,
       entries,
@@ -55,8 +60,12 @@ export class ComputeKernel {
 
   dispatch(target: GPUCommandEncoder | RenderCommandContext, bindGroup: GPUBindGroup, x: number, y = 1, z = 1): void {
     validateDispatchSize(x, y, z);
+    if (this.engine.device !== this.device) throw new Error('ComputeKernel belongs to a previous device; recreate after device loss.');
+    if (isRenderCommandContext(target) && (target.passEncoder || target.device !== this.device)) throw new Error('ComputeKernel cannot dispatch during an active render pass.');
+    const maximum = this.device.limits?.maxComputeWorkgroupsPerDimension ?? 65535;
+    if (x > maximum || y > maximum || z > maximum) throw new RangeError(`Compute dispatch exceeds device limit ${maximum}.`);
     const commandEncoder = isRenderCommandContext(target) ? target.encoder : target;
-    const pass = commandEncoder.beginComputePass();
+    const pass = commandEncoder.beginComputePass({ label: this.label });
     pass.setPipeline(this.pipeline);
     pass.setBindGroup(0, bindGroup);
     pass.dispatchWorkgroups(x, y, z);

@@ -17,6 +17,7 @@ struct NormalParams {
 @group(2) @binding(0) var<uniform> params : NormalParams;
 
 struct VertexInput {
+  @location(12) color : vec4<f32>,
   @location(0) position : vec3<f32>,
   @location(1) normal   : vec3<f32>,
   @location(2) morphPosition0 : vec3<f32>,
@@ -34,6 +35,7 @@ struct VertexInput {
 }
 
 struct VertexOutput {
+  @location(6) vertexAlpha : f32,
   @builtin(position) clipPos : vec4<f32>,
   @location(0) normal        : vec3<f32>,
   @location(1) worldPos      : vec3<f32>,
@@ -63,6 +65,7 @@ fn vs_main(input: VertexInput) -> VertexOutput {
   out.objectIndex = input.instanceIndex;
   out.uv0 = input.uv0;
   out.uv1 = input.uv1;
+  out.vertexAlpha = input.color.a;
   out.viewDepth = -(sceneFrame.view * worldPosition).z;
 
   var n = localNormal;
@@ -90,7 +93,7 @@ struct AuxiliaryOutput {
 @fragment
 fn fs_main(input: VertexOutput) -> AuxiliaryOutput {
   let object = objects[input.objectIndex];
-  if (!hy_has_material_coverage(input.uv0, input.uv1)) { discard; }
+  if (!hy_has_material_coverage(input.uv0, input.uv1, input.vertexAlpha)) { discard; }
   if (hy_is_clipped(input.worldPos, input.objectIndex)) { discard; }
   let n = normalize(input.normal);
   var out : AuxiliaryOutput;

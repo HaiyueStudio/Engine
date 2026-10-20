@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "locale": "en",
+  "messages": {
+    "title": "THE LAST SIGNAL",
+    "subtitle": "Three decisions. Two endings. One shared story runtime.",
+    "pilot": "PILOT / MIRA",
+    "intro": "This is Mira. Our ship is drifting near the abandoned station. We have one battery left. Can you hear us?",
+    "decision": "The signal is fading. What will you do?",
+    "rescue": "Dock at the station and rescue the crew",
+    "signal": "Use the last battery to send a relay signal",
+    "leave": "Leave the station behind",
+    "battle": "Crossing the station requires an encounter. The story is waiting for the game state machine.",
+    "relay": "The relay is online. A rescue ship has answered. Your decision earned {trust} trust.",
+    "reward": "Recording the rescue medal.",
+    "together": "ENDING / TOGETHER\nThe crew reaches safety at dawn.\nTrust: {trust}    Rescue medals: {medals}",
+    "alone": "ENDING / SILENCE\nThe station disappears behind you. The last signal is lost.",
+    "orbit.alt": "A stranded ship and a silent station",
+    "dawn.alt": "A rescue ship at dawn",
+    "next": "Continue",
+    "wait": "Waiting for the game…",
+    "save": "Save",
+    "load": "Load",
+    "restart": "New story",
+    "language": "中文",
+    "battle.title": "EXTERNAL GAME STATE / ENCOUNTER",
+    "battle.help": "Demo state machine: return a result to the waiting story action.",
+    "win": "Return with victory",
+    "lose": "Return with defeat",
+    "saved": "Story saved",
+    "loaded": "Story restored",
+    "empty": "No saved story yet",
+    "mode": "Mode: {mode}",
+    "state.story": "Story",
+    "state.battle": "Battle"
+  },
+  "assets": {
+    "orbit": "assets/orbit.svg",
+    "dawn": "assets/dawn.svg"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-Hant",
+  "messages": {
+    "title": "啟程",
+    "heading": "同一場景，多種語言",
+    "score": "目前得分：{score}",
+    "coins": {
+      "other": "{count} 枚金幣"
+    },
+    "tip": "切換語言，文字與標題圖片同步更新。",
+    "add": "增加金幣"
+  },
+  "assets": {
+    "title.logo": "assets/title.zh-Hant.svg"
+  }
+}

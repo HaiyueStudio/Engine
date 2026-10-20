@@ -4,7 +4,7 @@ import { GltfModelSystem, type GltfModelSystemOptions } from './GltfModelSystem'
 import {
   EXTENSIONS_PLUGIN_VERSION,
   ownedEditorViewportSystem,
-  removeSystem,
+  installOwnedSceneSystem,
   type EditorViewportContributionContext,
 } from '../plugins/pluginUtils';
 
@@ -13,7 +13,6 @@ export interface GltfPluginOptions {
 }
 
 export function createGltfPlugin(options: GltfPluginOptions = {}): EnginePlugin {
-  let system: GltfModelSystem | null = null;
   return {
     name: '@haiyue/extensions/gltf',
     version: EXTENSIONS_PLUGIN_VERSION,
@@ -22,15 +21,11 @@ export function createGltfPlugin(options: GltfPluginOptions = {}): EnginePlugin 
     },
     installScene(context) {
       context.registerComponent({ type: 'GltfModelComponent', component: GltfModelComponent });
-      system = new GltfModelSystem({
+      const system = new GltfModelSystem({
         ...options.system,
         assetManager: options.system?.assetManager ?? context.assetManager ?? null,
       });
-      context.addSystem(system, false);
-    },
-    uninstallScene(context) {
-      removeSystem(context, system);
-      system = null;
+      installOwnedSceneSystem(context, system, false);
     },
     installEditor(context) {
       context.registerContribution({ components: [{
@@ -68,8 +63,11 @@ export function createGltfPlugin(options: GltfPluginOptions = {}): EnginePlugin 
         installViewport(viewport: EditorViewportContributionContext) {
           const existing = viewport.world.getSystem(GltfModelSystem);
           const viewportSystem = existing ?? new GltfModelSystem({ priority: 0 });
-          if (!existing) viewport.world.addSystem(viewportSystem);
-          return ownedEditorViewportSystem(viewport.world, viewportSystem, existing === null);
+          if (!existing) {
+            try { viewport.world.addSystem(viewportSystem); }
+            catch (error) { viewportSystem.destroy(); throw error; }
+          }
+          return ownedEditorViewportSystem(viewportSystem, existing === null);
         },
         runtimeExport: {
           imports: [{ from: '@haiyue/extensions/gltf', names: ['GltfModelComponent', 'GltfModelSystem'] }],

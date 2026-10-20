@@ -3,6 +3,30 @@
   "kind": "examples",
   "entries": [
     {
+      "id": "gpu-instances",
+      "title": "GPU Instances \u00b7 Toon & LOD",
+      "entry": "gpu-instances/main.ts",
+      "capabilities": [
+        "gpu-compute",
+        "gpu-instances",
+        "instanced-toon",
+        "gpu-lod",
+        "indirect-rendering",
+        "3d"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "rendering",
+        "order": 99
+      }
+    },
+    {
       "id": "animation-spec",
       "title": "Lottie to HYA Playground",
       "entry": "animation-spec/main.ts",
@@ -65,7 +89,7 @@
     },
     {
       "id": "lottie-hya-compare",
-      "title": "Lottie → HYA Fidelity Compare",
+      "title": "Lottie \u2192 HYA Fidelity Compare",
       "entry": "lottie-hya-compare/main.ts",
       "capabilities": [
         "animation-format",
@@ -95,7 +119,7 @@
     },
     {
       "id": "live2d-hya-compare",
-      "title": "Live2D → HYA Fidelity Compare",
+      "title": "Live2D \u2192 HYA Fidelity Compare",
       "entry": "live2d-hya-compare/main.ts",
       "capabilities": [
         "animation-format",
@@ -1502,7 +1526,7 @@
     },
     {
       "id": "ambient-occlusion",
-      "title": "Ambient Occlusion · GTAO / SAO / SSAO",
+      "title": "Ambient Occlusion \u00b7 GTAO / SAO / SSAO",
       "entry": "ambient-occlusion/main.ts",
       "capabilities": [
         "ambient-occlusion",
@@ -2094,6 +2118,132 @@
       "catalog": {
         "group": "interaction",
         "order": 9
+      }
+    },
+    {
+      "id": "deferred-lighting",
+      "title": "\u591a\u5149\u6e90\u5b9e\u9a8c\u5ba4 \u00b7 Deferred Lighting",
+      "entry": "deferred-lighting/main.ts",
+      "capabilities": [
+        "3d",
+        "webgpu",
+        "pbr",
+        "deferred-lighting",
+        "tiled-lighting",
+        "diagnostics"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "rendering",
+        "order": 100
+      }
+    },
+    {
+      "id": "i18n",
+      "title": "Internationalization \u00b7 Text & Artwork",
+      "entry": "i18n/main.ts",
+      "capabilities": [
+        "i18n",
+        "gui",
+        "localized-assets"
+      ],
+      "assets": [
+        "i18n/assets/title.en.svg",
+        "i18n/assets/title.zh-CN.svg",
+        "i18n/assets/title.zh-Hant.svg",
+        "i18n/locales/en.json",
+        "i18n/locales/zh-CN.json",
+        "i18n/locales/zh-Hant.json"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 100
+      }
+    },
+    {
+      "id": "narrative",
+      "title": "Narrative \u00b7 The Last Signal",
+      "entry": "narrative/main.ts",
+      "capabilities": [
+        "narrative",
+        "i18n",
+        "gui",
+        "branching-story",
+        "save-restore"
+      ],
+      "assets": [
+        "narrative/story.json",
+        "narrative/locales/en.json",
+        "narrative/locales/zh-CN.json",
+        "narrative/assets/orbit.svg",
+        "narrative/assets/dawn.svg"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 101
+      }
+    },
+    {
+      "id": "share-content",
+      "title": "Share Content \u00b7 Score Cards",
+      "entry": "share-content/main.ts",
+      "capabilities": [
+        "share-content",
+        "i18n",
+        "gui",
+        "screenshot",
+        "challenge-link"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 102
+      }
+    },
+    {
+      "id": "achievements",
+      "title": "Achievements \u00b7 Rules and GPU GUI",
+      "entry": "achievements/main.ts",
+      "capabilities": [
+        "achievements",
+        "i18n",
+        "gui",
+        "persistence"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 103
       }
     }
   ],

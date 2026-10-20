@@ -46,9 +46,9 @@ try {
   );
 
   if (!navigator.gpu) throw new Error('navigator.gpu is unavailable');
-  const adapter = await navigator.gpu.requestAdapter({
-    powerPreference: 'high-performance',
-  });
+  const powerPreference = query.get('powerPreference') ?? 'high-performance';
+  if (!['high-performance', 'low-power'].includes(powerPreference)) throw new Error('Invalid powerPreference');
+  const adapter = await navigator.gpu.requestAdapter({ powerPreference });
   if (!adapter) throw new Error('No WebGPU adapter');
   const timestampQuerySupported = adapter.features.has('timestamp-query');
   const device = await adapter.requestDevice({
@@ -238,6 +238,7 @@ function plainAdapterInfo(info) {
     architecture: info.architecture ?? '',
     device: info.device ?? '',
     description: info.description ?? '',
+    isFallbackAdapter: info.isFallbackAdapter,
   };
 }
 

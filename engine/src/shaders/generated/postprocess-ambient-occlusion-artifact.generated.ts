@@ -857,5 +857,5 @@ export const AMBIENT_OCCLUSION_SHADER_ARTIFACT = {
       "canonicalHash": "40c0509f84465c2019798bbf424e9a468b6fb70f79a7f19bb64864637401b95b"
     }
   },
-  "artifactHash": "7e24253794246cc1ef7406eeac34b47bbe8413ebae1de3558fb6a5e7ecaab9a9"
+  "artifactHash": "f0a413ee92e26c980f4b4e7f6f6258138a6a84936144a160376f880d293bf476"
 } as const satisfies PrecompiledShaderArtifactV2;

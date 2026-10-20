@@ -27,6 +27,7 @@ export class GuiShapeRenderer extends BaseRenderer {
   private readonly liveBatchBuffers = new Set<BatchGpuBuffer>();
   private readonly viewportData = new Float32Array(4);
   private initialized = false;
+  private viewportUploaded = false;
 
   prepare(engine: IEngine): void {
     if (this.initialized && this.engine.device === engine.device) return;
@@ -62,11 +63,13 @@ export class GuiShapeRenderer extends BaseRenderer {
     const pipeline = this.getPipeline();
 
     const viewport = this.viewportData;
-    viewport[0] = this.engine.displayWidth;
-    viewport[1] = this.engine.displayHeight;
-    viewport[2] = 0;
-    viewport[3] = 0;
-    writeBuffer(this.engine.device.queue, this.viewportBuffer, 0, viewport);
+    const width = this.engine.displayWidth, height = this.engine.displayHeight;
+    if (!this.viewportUploaded || viewport[0] !== Math.fround(width) || viewport[1] !== Math.fround(height)) {
+      viewport[0] = width;
+      viewport[1] = height;
+      writeBuffer(this.engine.device.queue, this.viewportBuffer, 0, viewport);
+      this.viewportUploaded = true;
+    }
 
     const vertexBuffer = this.uploadBatch(batch);
     if (!vertexBuffer) return;
@@ -120,6 +123,7 @@ export class GuiShapeRenderer extends BaseRenderer {
 
   destroy(): void {
     if (!this.initialized) return;
+    this.viewportUploaded = false;
     this.viewportBuffer.destroy();
     for (const buffer of this.liveBatchBuffers) buffer.vertexBuffer.destroy();
     this.liveBatchBuffers.clear();

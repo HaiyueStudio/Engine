@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-09-25",
+  "repository": "https://github.com/webgpu/webgpu-samples",
+  "revision": "e040ec1a20dbbe01afed30c812e825b2639cfe5b",
+  "committedAt": "2026-09-22T18:11:54Z",
+  "license": "BSD-3-Clause",
+  "vendoredRuntimeCode": false,
+  "files": [
+    {
+      "path": "LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/webgpu/webgpu-samples/e040ec1a20dbbe01afed30c812e825b2639cfe5b/LICENSE.txt",
+      "sha256": "fa0167eceb69ca740a694e9984024c6e50399a0e1ebf913ba74e9c78f344e8d2",
+      "bytes": 1511
+    },
+    {
+      "path": "sample/deferredRendering/main.ts",
+      "url": "https://raw.githubusercontent.com/webgpu/webgpu-samples/e040ec1a20dbbe01afed30c812e825b2639cfe5b/sample/deferredRendering/main.ts",
+      "sha256": "58b64720f9f0635cebdb77521d33a6e563b2d3bf8230b58cd0b908f53b26fcce",
+      "bytes": 15220
+    },
+    {
+      "path": "sample/deferredRendering/fragmentDeferredRendering.wgsl",
+      "url": "https://raw.githubusercontent.com/webgpu/webgpu-samples/e040ec1a20dbbe01afed30c812e825b2639cfe5b/sample/deferredRendering/fragmentDeferredRendering.wgsl",
+      "sha256": "1314318d5c8edb8a81da8047732c01d71b3d8a5adac2e969e81c94d56d1420f2",
+      "bytes": 2045
+    },
+    {
+      "path": "sample/deferredRendering/fragmentWriteGBuffers.wgsl",
+      "url": "https://raw.githubusercontent.com/webgpu/webgpu-samples/e040ec1a20dbbe01afed30c812e825b2639cfe5b/sample/deferredRendering/fragmentWriteGBuffers.wgsl",
+      "sha256": "734df92135f2058af531dc982db38575315999ed3228e5f45b3250547ff1983d",
+      "bytes": 573
+    },
+    {
+      "path": "sample/deferredRendering/lightUpdate.wgsl",
+      "url": "https://raw.githubusercontent.com/webgpu/webgpu-samples/e040ec1a20dbbe01afed30c812e825b2639cfe5b/sample/deferredRendering/lightUpdate.wgsl",
+      "sha256": "caaa30970a8953feb127a055647af46ff558f0c3a63ec305e08fcce0a7f31d92",
+      "bytes": 879
+    }
+  ],
+  "verifiedSettings": {
+    "maximumLights": 1024,
+    "defaultLights": 128
+  }
+}

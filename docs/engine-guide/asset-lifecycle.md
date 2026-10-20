@@ -61,3 +61,11 @@ engine.switchScene(nextScene, { destroyPrevious: true });
 `loadTexture()` 的 `mipmaps` 选项接受 `'none' | 'generate'`，默认值为 `'none'`，因此非 PBR 调用方不会隐式承担额外首帧上传和约三分之一的纹理显存。启用 `'generate'` 后，引擎从原图尺寸计算到 1×1 的完整 mip chain，先上传 level 0，再用一个 command encoder 的逐级 render pass 生成其余层，整条链只提交一次。`r8unorm`、`rg8unorm`、`rgba8unorm` 与 `bgra8unorm` 及其 sRGB 变体支持生成；不支持的格式会在创建 GPU texture 前返回 `E_ASSET_INVALID_DATA`。
 
 图片缓存键同时包含源对象、format 与 mipmap 策略。同一个 `ImageBitmap`/canvas 以 linear、sRGB 或不同 mip 策略加载时会得到独立 GPU 资源，完全相同的并发请求仍复用底层 job。KTX2 等压缩纹理忽略该生成选项，始终使用资产自带的 mip chain。
+
+## 动画文本字体准备
+
+从 `@haiyue/extensions/animation` 或 `/hya-state-machine` 导入时，OpenType 解析器不会立即下载。运行中的文本引用 `fontResource` 后，它随字体资源异步准备；没有文本或只用系统字体时无需加载。文本 document 和 style run 中的字体也遵守同一规则。
+
+动画已装入不表示字体已准备完成。观察组件的 `runtimeStats.pendingResourceCount`，并同时检查 `failedResourceCount`：解析器下载失败会记为资源失败，不能把 pending 归零当作成功。准备期间保持已有占位字体行为，完成后自动刷新文本纹理；该计数不表示 GPU 上传已经完成。浏览器能加载、但 OpenType 不支持的字体容器继续通过 Canvas 绘制。移除播放器或销毁场景会释放字体引用，并阻止稍后完成的准备重新注册字体。
+
+部署时保留构建产物中的动态块，并保证脚本 URL、MIME 和 CSP 允许加载它们。使用支持分块的 ES module 输出才能减少初始下载；`inlineDynamicImports` 或单文件 IIFE 仍包含完整解析器。现有 [HYA 示例](../../examples/hya-samples/main.ts)展示播放器生命周期，仓库示例采用的 IIFE 构建不用于证明下载节省。

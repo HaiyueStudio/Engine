@@ -1,0 +1,6 @@
+export function validateG04Instances(result){
+ if(result.schemaVersion!==1||result.status!=='passed'||result.adapter?.isFallbackAdapter!==false||!result.adapter.vendor||!result.adapter.architecture)throw Error('Native instance fixture failed');
+ if(!Array.isArray(result.validationErrors)||result.validationErrors.length||result.cleanup?.ownerResidual!==0||result.cleanup?.liveGpuResources!==0)throw Error('GPU errors or resource residue');
+ if(JSON.stringify(result.cases?.map(c=>`${c.algorithm}/${c.stream}`))!==JSON.stringify(['reference/cpu','reference/external-gpu','tiled/cpu','tiled/external-gpu'])||result.authoredLights!==9||JSON.stringify(result.externalVisibleIds)!=='[3,1,0,2]')throw Error('Incomplete instance matrix');
+ for(const c of result.cases){if(!Number.isFinite(c.maxDelta)||c.maxDelta<0||c.maxDelta>1/255+1e-5||c.diagnostics?.effective!=='forward'||c.diagnostics.completeCoverage!==false||c.diagnostics.reason!=='unsupported-instance-surface'||c.probes?.length!==4)throw Error('Incorrect instance fallback');for(const [id,p] of c.probes.entries())if(p.id!==id||p.mirrored!==(id%2===1)||p.pixel?.length!==4||p.pixel.some(v=>!Number.isFinite(v))||!p.pixel.slice(0,3).some(v=>v>.02))throw Error('Invalid instance pixels');}
+}

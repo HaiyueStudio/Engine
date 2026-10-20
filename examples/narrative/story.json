@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "last-signal",
+  "version": "1",
+  "start": "intro",
+  "variables": { "trust": 0, "battery": 1, "won": false, "medals": 0 },
+  "nodes": {
+    "intro": { "type": "dialogue", "speakerKey": "pilot", "textKey": "intro", "artwork": { "assetKey": "orbit", "textKey": "orbit.alt" }, "next": "decision" },
+    "decision": {
+      "type": "choice", "speakerKey": "pilot", "textKey": "decision", "artwork": { "assetKey": "orbit", "textKey": "orbit.alt" },
+      "options": [
+        { "id": "rescue", "textKey": "rescue", "next": "battle", "effects": [{ "op": "add", "variable": "trust", "value": 2 }] },
+        { "id": "signal", "textKey": "signal", "next": "relay", "enabledWhen": { "op": "gte", "variable": "battery", "value": 1 }, "effects": [{ "op": "add", "variable": "battery", "value": -1 }, { "op": "add", "variable": "trust", "value": 1 }] },
+        { "id": "leave", "textKey": "leave", "next": "alone" }
+      ]
+    },
+    "battle": { "type": "action", "name": "battle", "payload": { "difficulty": 1 }, "textKey": "battle", "next": "battle-result" },
+    "battle-result": { "type": "branch", "condition": { "op": "eq", "variable": "won", "value": true }, "then": "reward", "otherwise": "alone" },
+    "relay": { "type": "dialogue", "speakerKey": "pilot", "textKey": "relay", "next": "trust-check" },
+    "trust-check": { "type": "branch", "condition": { "op": "gte", "variable": "trust", "value": 1 }, "then": "reward", "otherwise": "alone" },
+    "reward": { "type": "action", "name": "award-medal", "textKey": "reward", "next": "together" },
+    "together": { "type": "end", "ending": "together", "textKey": "together", "artwork": { "assetKey": "dawn", "textKey": "dawn.alt" } },
+    "alone": { "type": "end", "ending": "alone", "textKey": "alone", "artwork": { "assetKey": "orbit", "textKey": "orbit.alt" } }
+  }
+}

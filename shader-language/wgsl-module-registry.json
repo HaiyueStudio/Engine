@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "modules": [
+    {
+      "id": "scene/fog",
+      "path": "material-lighting/stdlib/fog.wgsl"
+    },
+    {
+      "id": "scene/frame",
+      "path": "render-family/stdlib/simple-3d/scene-frame.wgsl"
+    },
+    {
+      "id": "scene/clipping",
+      "path": "render-family/stdlib/simple-3d/clipping-planes.wgsl"
+    },
+    {
+      "id": "deformation/morph",
+      "path": "deformation/stdlib/morph.wgsl"
+    },
+    {
+      "id": "deformation/pbr-skin-bindings",
+      "path": "material-lighting/stdlib/pbr-skinning-bindings.wgsl"
+    },
+    {
+      "id": "deformation/skinning",
+      "path": "deformation/stdlib/skinning.wgsl"
+    },
+    {
+      "id": "pbr/brdf",
+      "path": "material-lighting/stdlib/pbr-brdf.wgsl"
+    },
+    {
+      "id": "pbr/clearcoat",
+      "path": "material-lighting/stdlib/pbr-clearcoat.wgsl"
+    },
+    {
+      "id": "pbr/sheen",
+      "path": "material-lighting/stdlib/pbr-sheen.wgsl"
+    }
+  ]
+}

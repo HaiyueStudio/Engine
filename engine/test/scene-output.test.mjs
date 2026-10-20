@@ -149,3 +149,32 @@ test('HDR RTT format survives resize and cannot alias an UNORM target with equal
   assert.notEqual(assigned[0].physicalId, assigned[1].physicalId);
   assert.equal(assigned[1].estimatedBytes - assigned[0].estimatedBytes, 16 * 16 * 4);
 });
+
+for (const sampleCount of [1, 4]) {
+  test(`output coverage uses destination extent after a clipped view (${sampleCount} samples)`, t => {
+    const calls = [];
+    const { output, engine, device, texture } = fixture(t, {
+      'renderPass.setViewport': ({ args }) => calls.push(['viewport', ...args]),
+      'renderPass.setScissorRect': ({ args }) => calls.push(['scissor', ...args]),
+      'renderPass.draw': ({ args }) => calls.push(['draw', ...args]),
+    });
+    // Deliberately different from the 16×16 HDR source: output may be scaled.
+    const target = new RttEngine(engine, 32, 24); t.after(() => target.destroy());
+    const camera = new Entity('camera');
+    const views = [
+      new RenderView({ target, camera, sampleCount,
+        viewport: { x: 3, y: 4, width: 12, height: 10 },
+        scissor: { x: 5, y: 6, width: 8, height: 7 } }),
+      new RenderView({ target, camera, sampleCount }),
+    ];
+    for (const [frameId, view] of views.entries()) {
+      output.configure('bgra8unorm', 1, 'none', view.snapshot());
+      output.setSceneTextures({ frame: { frameId, viewKey: view.key } });
+      output.apply(device.createCommandEncoder(), texture, target.getOutputView(), device);
+    }
+    assert.deepEqual(calls, [
+      ['viewport', 3, 4, 12, 10, 0, 1], ['scissor', 5, 6, 8, 7], ['draw', 3],
+      ['viewport', 0, 0, 32, 24, 0, 1], ['scissor', 0, 0, 32, 24], ['draw', 3],
+    ]);
+  });
+}

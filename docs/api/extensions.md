@@ -27,6 +27,8 @@ Extensions 包提供不属于引擎核心的可选完整能力，例如 glTF loa
 
 ## HYA Animation2D 状态机
 
+Animation2D 与 HYA 状态机的字体资源共享按需 OpenType 准备路径；准备过程纳入 `runtimeStats.pendingResourceCount`，解析器加载失败纳入 `failedResourceCount`。仅系统字体文本不请求解析器。公开 API 不变，部署与准备时序见[动画文本字体准备](../engine-guide/asset-lifecycle.md#动画文本字体准备)和 [ADR 0123](../for-ai/adr/0123-animation-opentype-on-demand.md)。
+
 `@haiyue/extensions/hya-state-machine` 提供 `Animation2DStateMachineComponent` 与 `Animation2DStateMachineSystem`。它们消费 `.hya` 内建的 `org.haiyue.animation-state-machine@1` 扩展，在一份解析结果和一棵运行时节点树上播放多个命名 clip，并复用共享状态机、2D mixer、layer/mask 和 Blend Tree 语义。该能力使用独立子路径，基础 Animation2D 和编辑器首帧闭包不会为未使用的状态机付费。
 
 应用通过 `setFloat()`、`setInteger()`、`setBoolean()`、`setTrigger()` 驱动 transition，通过 `layerSnapshots` 读取当前 state/transition。组件移除、Entity 离开 World 或 System 销毁都会释放生成的层级与 mixer action。完整格式和示例见 [`animation-spec/README.md`](../../animation-spec/README.md#单素材状态机)。

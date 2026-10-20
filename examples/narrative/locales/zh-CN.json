@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "messages": {
+    "title": "最后的信号",
+    "subtitle": "三个选择，两种结局。剧情与游戏状态协同运行。",
+    "pilot": "飞行员 / 米拉",
+    "intro": "这里是米拉。我们的飞船漂流在废弃空间站旁，只剩最后一块电池。你能听见吗？",
+    "decision": "信号正在减弱。你准备怎么做？",
+    "rescue": "停靠空间站，亲自救援船员",
+    "signal": "使用最后一块电池，发送中继信号",
+    "leave": "离开空间站，继续独自航行",
+    "battle": "穿越空间站需要应对一次遭遇。剧情正在等待游戏状态机返回结果。",
+    "relay": "中继已经上线，救援船回应了呼叫。这次选择获得了 {trust} 点信任。",
+    "reward": "正在记录救援勋章。",
+    "together": "结局 / 一起回家\n船员们在黎明时分安全返航。\n信任：{trust}    救援勋章：{medals}",
+    "alone": "结局 / 沉默的星空\n空间站渐渐消失在身后，最后的信号中断了。",
+    "orbit.alt": "搁浅的飞船与寂静的空间站",
+    "dawn.alt": "黎明中返航的救援船",
+    "next": "继续",
+    "wait": "等待游戏处理…",
+    "save": "保存进度",
+    "load": "读取进度",
+    "restart": "新的故事",
+    "language": "English",
+    "battle.title": "外部游戏状态 / 遭遇战",
+    "battle.help": "状态机演示：选择一个战斗结果，返回等待中的剧情。",
+    "win": "胜利返回",
+    "lose": "失败返回",
+    "saved": "剧情进度已保存",
+    "loaded": "剧情进度已恢复",
+    "empty": "还没有存档",
+    "mode": "当前状态：{mode}",
+    "state.story": "剧情",
+    "state.battle": "战斗"
+  },
+  "assets": {
+    "orbit": "assets/orbit.svg",
+    "dawn": "assets/dawn.svg"
+  }
+}

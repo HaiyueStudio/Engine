@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {G04_EFFECT_CASES,G04_AO_MODES,validateG04Suite} from './deferred-g04-suite-policy.mjs';
+function evidence(){return {schemaVersion:1,status:'passed',adapter:{vendor:'native',architecture:'native',isFallbackAdapter:false},validationErrors:[],lightingAo:['gtao','sao','ssao'].flatMap(id=>['reference','tiled'].flatMap(algorithm=>G04_AO_MODES.map(mode=>({id,algorithm,mode,maxDelta:0,minAo:.5,darkenedPixels:100,brightenedPixels:0,offCleanup:{ownerResidual:0,liveGpuResources:0},onCleanup:{ownerResidual:0,liveGpuResources:0}})))),cases:G04_EFFECT_CASES.flatMap(id=>['forward','reference','tiled'].map(algorithm=>({id,algorithm,pixels:Array(64*64*4).fill(1),maxDelta:0,changedPixels:100,coverage:{completeCoverage:true},cleanup:{ownerResidual:0,liveGpuResources:0},temporal:{movingPixels:12,historyCount:1},shadowPasses:3})))};}
+test('effects evidence requires native identity, complete population, pixel thresholds, visible effects and ownership',()=>{
+ validateG04Suite(evidence());
+ for(const mutate of [e=>e.lightingAo.pop(),e=>e.lightingAo[0].maxDelta=2,e=>e.lightingAo[0].minAo=1,e=>e.lightingAo.find(c=>c.mode==='ambient').darkenedPixels=0,e=>e.lightingAo[0].onCleanup.liveGpuResources=1,e=>e.cases.pop(),e=>e.cases.reverse(),e=>e.adapter.isFallbackAdapter=true,e=>e.validationErrors.push('error'),e=>e.cases[0].pixels.pop(),e=>e.cases[0].pixels[0]=NaN,e=>e.cases[1].maxDelta=4,e=>e.cases[1].coverage.completeCoverage=false,e=>e.cases[3].changedPixels=0,e=>e.cases[0].cleanup.liveGpuResources=1,e=>e.cases.find(c=>c.id==='taa-motion').temporal.historyCount=2,e=>e.cases.find(c=>c.id==='shadows').shadowPasses=0]){const e=evidence();mutate(e);assert.throws(()=>validateG04Suite(e));}
+});

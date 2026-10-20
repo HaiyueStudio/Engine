@@ -1,0 +1,20 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@haiyue/extensions/share-content": [
+        "./src/share-content.ts"
+      ],
+      "@haiyue/extensions/i18n": [
+        "./src/i18n.ts"
+      ]
+    },
+    "types": [
+      "@webgpu/types"
+    ]
+  },
+  "include": [
+    "type-tests/share-content-contract.type-test.ts"
+  ]
+}

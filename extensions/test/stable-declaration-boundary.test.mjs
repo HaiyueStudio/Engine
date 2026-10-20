@@ -3,23 +3,19 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-const stableDeclarations = [
-  '../dist/animation.d.ts',
-  '../dist/animation3d.d.ts',
-  '../dist/canvas-text.d.ts',
-  '../dist/gltf.d.ts',
-  '../dist/gltf-animation3d.d.ts',
-  '../dist/grid.d.ts',
-  '../dist/hya-state-machine.d.ts',
-  '../dist/spine.d.ts',
-  '../dist/tilemap.d.ts',
-  '../dist/tween.d.ts',
-];
+const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+const capabilities = JSON.parse(readFileSync(new URL('../../config/public-api-capability-budgets.json', import.meta.url), 'utf8'));
+const stableEntrypoints = capabilities.packages[manifest.name].groups
+  .filter(group => group.stability === 'stable')
+  .flatMap(group => Object.keys(group.entrypoints));
 
 test('stable extension declarations do not depend on engine experimental entrypoints', () => {
-  for (const entry of stableDeclarations) {
+  assert.ok(stableEntrypoints.length > 0);
+  for (const entry of stableEntrypoints) {
+    const target = manifest.exports[entry]?.types;
+    assert.equal(typeof target, 'string', `${entry} must expose stable declarations`);
     const visited = new Set();
-    const pending = [resolve(import.meta.dirname, entry)];
+    const pending = [resolve(import.meta.dirname, '..', target)];
     while (pending.length > 0) {
       const file = pending.pop();
       if (!file || visited.has(file)) continue;

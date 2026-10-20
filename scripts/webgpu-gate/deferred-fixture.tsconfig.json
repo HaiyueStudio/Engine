@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "declaration": false,
+    "outDir": "../../artifacts/engine-0.2.1/g02",
+    "rootDir": "../../engine/src",
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "types": ["@webgpu/types"],
+    "paths": { "box2d.ts/dist/box2d.umd.js": ["../../engine/src/types/box2d-umd.d.ts"] }
+  },
+  "include": ["../../engine/src/**/*"]
+}

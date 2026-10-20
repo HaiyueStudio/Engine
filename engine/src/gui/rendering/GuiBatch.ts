@@ -1,3 +1,4 @@
+import { sameGuiCommand, snapshotGuiCommand } from './GuiCommandCache';
 import { GuiShapeCommand } from './GuiDrawCommand';
 import { GUI_SHAPE_VERTEX_LAYOUT } from './GuiVertexLayout';
 
@@ -10,12 +11,16 @@ export class GuiBatch {
   vertexCount = 0;
   version = 0;
   dirty = true;
+  private retained: GuiShapeCommand[] = [];
+  private retainedVertexCount = 0;
 
   clear(options: { releaseVertexData?: boolean } = {}): void {
     this.commands.length = 0;
     this.vertexCount = 0;
     if (options.releaseVertexData) {
       this.vertexData = new Float32Array(0);
+      this.retained = [];
+      this.retainedVertexCount = 0;
       this.version++;
     }
     this.dirty = true;
@@ -28,6 +33,12 @@ export class GuiBatch {
   }
 
   rebuild(): void {
+    if (this.commands.length === this.retained.length && this.commands.every((c, i) => sameGuiCommand(this.retained[i], c))) {
+      this.vertexCount = this.retainedVertexCount;
+      this.dirty = false;
+      return;
+    }
+    this.retained = this.commands.map(snapshotGuiCommand);
     const vertexCount = this.commands.reduce((count, c) => count + (c.strokeWidth ? 36 * 6 : c.roundedMesh ? 36 * 3 : VERTICES_PER_QUAD), 0);
     const requiredFloats = vertexCount * GUI_SHAPE_VERTEX_LAYOUT.floatsPerVertex;
     if (this.vertexData.length < requiredFloats) {
@@ -76,7 +87,7 @@ export class GuiBatch {
       offset = writeVertex(data, offset, x0, y1, command, clipX0, clipY0, clipX1, clipY1);
     }
 
-    this.vertexCount = vertexCount;
+    this.retainedVertexCount = this.vertexCount = vertexCount;
     this.version++;
     this.dirty = false;
   }

@@ -1,8 +1,13 @@
+import { registerPostProcessGraphAccess } from './PostProcessGraph';
 import { PostProcessPass, getPostProcessTextureView } from './PostProcessPass';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import { getBuiltinPostprocessShader } from './BuiltinPostprocessShader';
 
 export class FxaaPass extends PostProcessPass {
+  constructor() {
+    super();
+    if (new.target === FxaaPass) registerPostProcessGraphAccess(this);
+  }
   readonly label = 'FXAA';
 
   private _pipeline: GPURenderPipeline | null = null;

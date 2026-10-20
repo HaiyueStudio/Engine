@@ -1,5 +1,7 @@
 # Performance workflow
 
+G09 及其最终候选的验收采用 [ADR 0124](adr/0124-g09-production-performance-acceptance.md)：以登记设备/画质下的生产帧节奏、持续资源稳定和可复现退化为核心。5% 微基准差异是调查触发线，v1–v5 校准/基线和连续 GPU 长诊断均为可选工具。`npm run framegraph:acceptance:plan` 列出当前要求，缺少生产证据仍为未完成。以下其他性能合同继续按各自适用范围执行。
+
 先用 `diagnostic` profile 和编辑器诊断面板定位 CPU frame、upload、pass、pipeline/cache 与 GPU 资源 owner，再决定优化层级。不要用单次计时作为结论。
 
 - `npm run benchmark`：report-only 地统计 warmup 后的 P50/P95、标准差、分配量、分阶段预算，以及 readback skip rate、staging 峰值、cache hit rate 和 churn 清理残留等绝对指标预算。

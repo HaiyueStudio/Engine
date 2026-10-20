@@ -36,13 +36,13 @@ export class GuiImageRenderer extends BaseRenderer {
   private readonly viewportData = new Float32Array(4);
   private imageCache = new WeakMap<object, ImageGpuData>();
   private readonly liveImageData = new Set<ImageGpuData>();
-  // Batches outlive their rebuilt group objects. Owning buffers by a transient
-  // group leaked one allocation per texture on every HUD rebuild.
-  private batchBuffers = new WeakMap<GuiImageBatch, Map<NonNullable<GuiImageSource>, GroupGpuBuffer>>();
+  // Groups retain geometry slots across texture changes; prune slots when removed.
+  private batchBuffers = new WeakMap<GuiImageBatch, Map<GuiImageGroup, GroupGpuBuffer>>();
   private readonly liveGroupBuffers = new Set<GroupGpuBuffer>();
   private defaultTexture!: GPUTexture;
   private sampler: GPUSampler | null = null;
   private initialized = false;
+  private viewportUploaded = false;
 
   prepare(engine: IEngine): void {
     if (this.initialized && this.engine.device === engine.device) return;
@@ -95,12 +95,12 @@ export class GuiImageRenderer extends BaseRenderer {
     if (!this.initialized) return;
     let buffers = this.batchBuffers.get(batch);
     if (buffers) {
-      const sources = new Set(batch.groups.map((group) => group.source));
-      for (const [source, buffer] of buffers) {
-        if (sources.has(source)) continue;
+      const groups = new Set(batch.groups);
+      for (const [group, buffer] of buffers) {
+        if (groups.has(group)) continue;
         buffer.vertexBuffer.destroy();
         this.liveGroupBuffers.delete(buffer);
-        buffers.delete(source);
+        buffers.delete(group);
       }
     }
     if (batch.groups.length < 1) return;
@@ -110,9 +110,13 @@ export class GuiImageRenderer extends BaseRenderer {
     }
     const pipeline = this.getPipeline();
     const viewport = this.viewportData;
-    viewport[0] = this.engine.displayWidth;
-    viewport[1] = this.engine.displayHeight;
-    writeBuffer(this.engine.device.queue, this.viewportBuffer, 0, viewport);
+    const width = this.engine.displayWidth, height = this.engine.displayHeight;
+    if (!this.viewportUploaded || viewport[0] !== Math.fround(width) || viewport[1] !== Math.fround(height)) {
+      viewport[0] = width;
+      viewport[1] = height;
+      writeBuffer(this.engine.device.queue, this.viewportBuffer, 0, viewport);
+      this.viewportUploaded = true;
+    }
 
     passEncoder.setPipeline(pipeline);
     passEncoder.setBindGroup(0, this.viewportBindGroup);
@@ -143,6 +147,7 @@ export class GuiImageRenderer extends BaseRenderer {
 
   destroy(): void {
     if (!this.initialized) return;
+    this.viewportUploaded = false;
     this.viewportBuffer.destroy();
     this.defaultTexture.destroy();
     for (const buffer of this.liveGroupBuffers) buffer.vertexBuffer.destroy();
@@ -158,10 +163,10 @@ export class GuiImageRenderer extends BaseRenderer {
     this.initialized = false;
   }
 
-  private uploadGroup(group: GuiImageGroup, buffers: Map<NonNullable<GuiImageSource>, GroupGpuBuffer>): GPUBuffer | null {
+  private uploadGroup(group: GuiImageGroup, buffers: Map<GuiImageGroup, GroupGpuBuffer>): GPUBuffer | null {
     const usedByteLength = group.vertexCount * GUI_IMAGE_FLOATS_PER_VERTEX * 4;
     const byteLength = Math.max(4, usedByteLength);
-    let gpuBuffer = buffers.get(group.source);
+    let gpuBuffer = buffers.get(group);
     if (!gpuBuffer || gpuBuffer.vertexBufferSize < byteLength) {
       if (gpuBuffer) {
         gpuBuffer.vertexBuffer.destroy();
@@ -177,7 +182,7 @@ export class GuiImageRenderer extends BaseRenderer {
           usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         }),
       };
-      buffers.set(group.source, gpuBuffer);
+      buffers.set(group, gpuBuffer);
       this.liveGroupBuffers.add(gpuBuffer);
     }
     if (gpuBuffer.uploadedVersion !== group.version) {
@@ -216,7 +221,7 @@ export class GuiImageRenderer extends BaseRenderer {
       if (cached.ownsTexture) cached.texture.destroy();
     }
     this.imageCache.set(cacheKey, data);
-    this.liveImageData.add(data);
+    if (data.ownsTexture) this.liveImageData.add(data);
     return data;
   }
 

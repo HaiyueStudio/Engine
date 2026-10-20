@@ -48,7 +48,14 @@ export function getSceneRenderEnvironment(frameData: FrameData, world: World, vi
   return view ? service.getView(frameData, world, scene, view) : scene;
 }
 
+/** @internal Untruncated, phase-local source. Copy before retaining beyond this FrameData phase. */
+export function getSceneLightCandidates(frameData: FrameData, world: World): readonly SceneLightCandidate[] {
+  getSceneRenderEnvironment(frameData, world);
+  return services.get(frameData)!.candidates;
+}
+
 class SceneRenderEnvironmentFrameService {
+  get candidates(): readonly SceneLightCandidate[] { return this._candidates; }
   private _world: World | null = null;
   private _frameId = 0;
   private _phaseRevision = 0;

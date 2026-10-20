@@ -1,5 +1,5 @@
 struct InstancedMaterialUniforms {
-  // x: PBR enabled, y: metallic, z: roughness
+  // x: mode (0 unlit, 1 PBR, 2 toon); y/z: metallic/roughness or bands/ambient
   factors : vec4<f32>,
 }
 struct LightData {
@@ -50,7 +50,14 @@ fn vs_main(in: VIn, @builtin(instance_index) instanceIdx: u32) -> VOut {
   out.color = colors[sourceIdx];
   out.uv = in.uv;
   out.worldPos = worldPosition.xyz;
-  out.worldNormal = normalize((model * vec4<f32>(in.normal, 0.0)).xyz);
+  // Cofactor / determinant is the inverse transpose; preserve mirrored scales.
+  let cofactor = mat3x3<f32>(cross(model[1].xyz, model[2].xyz),
+    cross(model[2].xyz, model[0].xyz), cross(model[0].xyz, model[1].xyz));
+  let determinant = dot(model[0].xyz, cofactor[0]);
+  let transformed = cofactor * in.normal * select(-1.0, 1.0, determinant >= 0.0);
+  let lengthSquared = dot(transformed, transformed);
+  out.worldNormal = transformed * inverseSqrt(max(lengthSquared, 1e-20));
+  if (lengthSquared < 1e-20) { out.worldNormal = vec3<f32>(0.0, 1.0, 0.0); }
   return out;
 }
 
@@ -100,9 +107,23 @@ fn evaluatePbr(in: VOut) -> vec3<f32> {
   return pow(mapped, vec3<f32>(1.0 / 2.2));
 }
 
+fn evaluateToon(in: VOut) -> vec3<f32> {
+  var illumination = 0.0;
+  for (var index = 0u; index < min(lights.countVec.x, MAX_LIGHTS); index++) {
+    let light = lights.lights[index];
+    if (light.typeVec.x == 1u) {
+      illumination = max(illumination, max(0.0, dot(normalize(in.worldNormal), normalize(-light.direction.xyz))) * light.color.a);
+    }
+  }
+  let levels = max(2.0, material.factors.y);
+  let band = floor(clamp(illumination, 0.0, 1.0) * (levels - 1.0) + .5) / (levels - 1.0);
+  return in.color.rgb * mix(material.factors.z, 1.0, band);
+}
+
 @fragment
 fn fs_main(in: VOut) -> @location(0) vec4<f32> {
   var color = in.color.rgb;
-  if (material.factors.x > 0.5) { color = evaluatePbr(in); }
+  if (material.factors.x > 1.5) { color = evaluateToon(in); }
+  else if (material.factors.x > 0.5) { color = evaluatePbr(in); }
   return vec4<f32>(applyFog(color, sceneFrame.fog, sceneFrame.eyePosition.xyz, in.worldPos), in.color.a);
 }

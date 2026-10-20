@@ -18,7 +18,7 @@ export const SPECIALIZED_RENDERING_SHADER_ARTIFACT = {
     "sha256": "cd064f040a22bb3afd54e5841256efcb34790af7b4852d63ed89dc9b7515ee72"
   },
   "canonicalHash": "0c2f8e6e4668ee530dec412e64f4ca219879416362735e41c7cec3453ee597c1",
-  "typedModuleHash": "4bb68491af9b48fc1c5274788df175a0ddb69beb31b99911123aae6467c95fde",
+  "typedModuleHash": "9c2f4248099cb682ce11e3093f86a03aaf0b3c0d20511a87d35af04978a53e2c",
   "passes": {
     "instanced-mesh3d": {
       "id": "instanced-mesh3d",
@@ -329,10 +329,10 @@ export const SPECIALIZED_RENDERING_SHADER_ARTIFACT = {
           "sourceId": "specialized-rendering.instanced-mesh3d",
           "sourceName": "shader-language/builtin-specialized-rendering-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 207
+          "generatedEndLine": 228
         }
       ],
-      "canonicalHash": "fdd7e7d1aa8f6aaa6b961e269a4654b31edb5eb4321b93730f051ae7c92449e9"
+      "canonicalHash": "9c52fe21abb9e798759777f6edde5fd0bad98ee8cb387a054dffcd22806563da"
     },
     "line3d": {
       "id": "line3d",
@@ -522,7 +522,7 @@ export const SPECIALIZED_RENDERING_SHADER_ARTIFACT = {
           "generatedEndLine": 272
         }
       ],
-      "canonicalHash": "980573c7b284eb7fd30c0419b4d9ffccfb12180f3074bbe55b2da83270e195ff"
+      "canonicalHash": "357433ea15ba464989cbddd984262d252efa3a22faac4b018b3e3eb8f8785c94"
     },
     "planar-mirror": {
       "id": "planar-mirror",
@@ -750,7 +750,7 @@ export const SPECIALIZED_RENDERING_SHADER_ARTIFACT = {
           "generatedEndLine": 104
         }
       ],
-      "canonicalHash": "e4c73ffefe7b35af683c96bb1fdc7fe92d7cd3ba96644b2e9931ab0ee7cb0c15"
+      "canonicalHash": "1d9f17aea3cf913f117660181a89a4d6d21f143c74845c7a62a194efd9e59ec5"
     },
     "volume": {
       "id": "volume",
@@ -951,7 +951,7 @@ export const SPECIALIZED_RENDERING_SHADER_ARTIFACT = {
           "generatedEndLine": 157
         }
       ],
-      "canonicalHash": "a1385b5cefaf191cd42e4017feccf9bf21c19d078b18e367a220adf93da4e466"
+      "canonicalHash": "745875c5f893abbf2839b9d093387e617a7add3f1c3d5d43e14145c0407e129b"
     },
     "texture-convolution": {
       "id": "texture-convolution",
@@ -1063,7 +1063,7 @@ export const SPECIALIZED_RENDERING_SHADER_ARTIFACT = {
           "generatedEndLine": 39
         }
       ],
-      "canonicalHash": "8080991d04883c1fe38f9750de2b71fc46e57cfe557fcd47a9de817e87aa1637"
+      "canonicalHash": "c21956e2ae634c2352fff54c2908b4413c6702f69e1f09238e597461bddeb334"
     },
     "mipmap": {
       "id": "mipmap",
@@ -1139,7 +1139,7 @@ export const SPECIALIZED_RENDERING_SHADER_ARTIFACT = {
           "generatedEndLine": 36
         }
       ],
-      "canonicalHash": "55c78e3c1c31ccc0e99acf68c4a9c13d4a59d2c0937e88b13dcefc35299083a4"
+      "canonicalHash": "d363e9295a95f16c8f83768f4183271c051793ceaf85b8db68abf74c9b9189df"
     },
     "equirectangular-to-cube": {
       "id": "equirectangular-to-cube",
@@ -1222,8 +1222,8 @@ export const SPECIALIZED_RENDERING_SHADER_ARTIFACT = {
           "generatedEndLine": 58
         }
       ],
-      "canonicalHash": "65f857232597add7a97c027feff640b626192936d0c64c27e16f5a3dede4e8dc"
+      "canonicalHash": "a2be979dda46f5c7fe85344ed37ec33fe953c427c6ed17610084ba83cd92c84d"
     }
   },
-  "artifactHash": "3271a6346829ddaf6a88a04fcf6ee2a84f671a443af496fbe9fe29a9576c0885"
+  "artifactHash": "94fc7a2d004f7921e99497faab088d21126efe50251888b673867466d4ce05d8"
 } as const satisfies PrecompiledShaderArtifactV2;

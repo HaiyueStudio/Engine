@@ -13,9 +13,14 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const cachePath = resolve(root, 'artifacts/cache/shader-language/generation-v2.json');
 const reportPath = resolve(root, 'artifacts/shader-language/shader-cost.json');
 const showcasePath = resolve(root, 'examples/shader-language-lab/generated/showcase.generated.ts');
-const compilerInputs = Object.freeze(['shader-language/dist']);
+const compilerInputs = Object.freeze(['shader-language/dist', 'shader-language/src', 'shader-language/wgsl-module-registry.json', 'shader-language/scripts/wgsl-includes.mjs']);
 
 export const PRODUCTION_CACHE_SCOPES = Object.freeze([
+  scope('deferred-full-forward', 2,
+    ['shader-language/scripts/generate-deferred-full-forward-production.mjs', 'shader-language/scripts/shader-source-variant.mjs', 'shader-language/scripts/generate-deferred-lighting-production.mjs',
+      'shader-language/scripts/compact-artifact-literal.mjs', 'shader-language/src/deferred-lighting',
+      'shader-language/builtin-material-lighting-family.json', 'engine/src/shaders/generated/deferred-lighting-abi.generated.ts'],
+    ['engine/src/shaders/generated/deferred-full-']),
   scope('motion-blur', 2,
     ['shader-language/scripts/generate-motion-blur-production.mjs', 'shader-language/pilot-motion-blur-postprocess.graph.json', 'shader-language/stage5-contract.json'],
     ['engine/src/shaders/generated/motion-']),
@@ -26,17 +31,28 @@ export const PRODUCTION_CACHE_SCOPES = Object.freeze([
     ['shader-language/scripts/generate-builtin-render-production.mjs', 'shader-language/builtin-engine-2d-ui-family.json', 'shader-language/builtin-components-2d-ui-family.json', 'shader-language/builtin-simple-3d-runtime-family.json'],
     ['engine/src/shaders/generated/2d-ui-', 'extensions/src/shaders/generated/2d-ui-', 'engine/src/shaders/generated/simple3d-']),
   scope('deformation', 2,
-    ['shader-language/scripts/generate-deformation-production.mjs', 'shader-language/builtin-deformation-family.json'],
+    ['shader-language/scripts/generate-deformation-production.mjs', 'shader-language/scripts/compact-artifact-literal.mjs', 'shader-language/builtin-deformation-family.json'],
     ['engine/src/shaders/generated/deformation-']),
   scope('material-lighting', 2,
-    ['shader-language/scripts/generate-material-lighting-production.mjs', 'shader-language/builtin-material-lighting-family.json'],
+    ['shader-language/scripts/generate-material-lighting-production.mjs', 'shader-language/scripts/compact-artifact-literal.mjs', 'shader-language/scripts/shader-source-variant.mjs', 'shader-language/builtin-material-lighting-family.json'],
     ['engine/src/shaders/generated/material-lighting-']),
   scope('specialized-rendering', 2,
     ['shader-language/scripts/generate-specialized-rendering-production.mjs', 'shader-language/builtin-specialized-rendering-family.json'],
     ['engine/src/shaders/generated/specialized-']),
   scope('compute', 2,
-    ['shader-language/scripts/generate-compute-production.mjs', 'shader-language/builtin-compute-family.json'],
+    ['shader-language/scripts/generate-compute-production.mjs', 'shader-language/scripts/compact-artifact-literal.mjs', 'shader-language/builtin-compute-family.json'],
     ['engine/src/shaders/generated/compute-']),
+  scope('deferred-lighting', 2,
+    ['shader-language/scripts/generate-deferred-lighting-production.mjs', 'shader-language/scripts/generate-deferred-lighting-abi.mjs',
+      'shader-language/src/deferred-lighting', 'shader-language/builtin-material-lighting-family.json',
+      'shader-language/src/material-lighting/stdlib/pbr-shadow.wgsl', 'shader-language/src/render-family/stdlib/simple-3d/scene-frame.wgsl'],
+    ['engine/src/shaders/generated/deferred-gbuffer', 'engine/src/shaders/generated/deferred-reference', 'engine/src/shaders/generated/deferred-lighting-']),
+  scope('deferred-tiled', 2,
+    ['shader-language/scripts/generate-deferred-tiled-production.mjs', 'shader-language/scripts/generate-deferred-lighting-production.mjs',
+      'shader-language/scripts/compact-artifact-literal.mjs', 'shader-language/src/deferred-lighting',
+      'shader-language/builtin-material-lighting-family.json', 'engine/src/shaders/generated/deferred-lighting-abi.generated.ts',
+      'shader-language/src/material-lighting/stdlib/pbr-shadow.wgsl', 'shader-language/src/render-family/stdlib/simple-3d/scene-frame.wgsl'],
+    ['engine/src/shaders/generated/deferred-tile']),
 ]);
 
 const showcaseScope = scope('showcase', 1,

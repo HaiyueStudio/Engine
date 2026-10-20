@@ -1,0 +1,17 @@
+#include <scene/fog>
+
+#include <scene/frame>
+
+#include <scene/clipping>
+
+#include <deformation/morph>
+
+#include <deformation/pbr-skin-bindings>
+
+#include <deformation/skinning>
+
+#include <pbr/brdf>
+
+#include <pbr/clearcoat>
+
+#include <pbr/sheen>

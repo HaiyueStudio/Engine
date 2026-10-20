@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runRollupOnce } from '../../scripts/shared-rollup-runner.mjs';
+import { checkExampleTypes } from './example-typescript.mjs';
 import {
   computeExampleSourceFingerprint,
   verifyExampleBuildFreshness,
@@ -29,6 +30,11 @@ if (missingDemos.length > 0) {
   process.exit(1);
 }
 
+console.log('[examples:build] checking all example and shared Engine types once…');
+const typecheckStartedAt = performance.now();
+checkExampleTypes(resolve(examplesDir, 'tsconfig.json'));
+checkExampleTypes(resolve(examplesDir, 'tsconfig.shared-engine.json'));
+console.log(`[examples:build] complete project typechecks passed in ${((performance.now() - typecheckStartedAt) / 1000).toFixed(1)}s.`);
 const sourceFingerprint = await computeExampleSourceFingerprint();
 
 if (!shellOnly) {
@@ -83,6 +89,7 @@ async function buildTarget(label, environment, expectedOutput) {
       terminateGraceMs: environmentDuration('EXAMPLE_TERM_GRACE_MS', 1_000),
       killGraceMs: environmentDuration('EXAMPLE_KILL_GRACE_MS', 1_000),
       environment: {
+        EXAMPLE_TYPECHECKED: '1',
         EXAMPLE_SOURCE_FINGERPRINT: sourceFingerprint.hash,
         EXAMPLE_SOURCE_INPUT_COUNT: String(sourceFingerprint.inputCount),
         ...environment,

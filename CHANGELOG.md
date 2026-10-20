@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.2.1 （候选，未发布）
+
+- 新增稳定 `@haiyue/engine/gui` 的 `GuiToast`／`GuiToastOptions`，提供短提示显示与取消；图标由调用方拥有，不增加平台 SDK 依赖。
+- 新增显式 experimental Deferred Reference / Tiled 多灯路径、完整灯表与容量诊断，以及可交互的多灯示例；默认 Forward 和稳定根入口保持原有边界。
+- FrameGraph 接入真实资源依赖、无消费者步骤裁剪、临时纹理复用、有界计划缓存和按需检查器；修复运动向量、镜面及输出绑定组的诊断引用退休。
+- GPU 实例支持外部状态缓冲、按视图剔除与三档 LOD、间接绘制和有界异步读回；设备恢复仍由应用重建状态。
+- 多灯示例在进入交互前完成两次真实提交及 GPU 完成等待，加载时间单独保留；不在稳态逐帧等待 GPU。
+- 动画文本按 `fontResource` 异步加载 OpenType 解析器，保留字体失败诊断、延迟刷新和销毁取消；收紧整组 loaders.gl 依赖范围。
+- [0.2.1 候选说明](docs/engine-guide/release-notes-0.2.1.md)集中说明能力、升级和限制；[验收结论](review/engine-0.2.1/README.md)维护当前资格，历史过程资料已归档。尚未发布。
+
 ## 0.2.0 (候选，未发布)
 
 - Engine 发布演练、CI 初始化、归档与验收器统一为四个 npm 包和 smoke/full 示例；诊断灯光与正式证据分离，独立校验候选命令、包哈希和完整产物。

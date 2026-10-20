@@ -16,7 +16,7 @@
         "required": ["id", "operation", "entryPoint", "workgroupSize", "dispatch", "resources", "effects"],
         "properties": {
           "id": { "type": "string" },
-          "operation": { "enum": ["gpu-draw-command", "gpu-sort-bitonic", "instanced-cull", "instanced-depth-sort-key", "mesh3d-cull"] },
+          "operation": { "enum": ["gpu-draw-command", "gpu-sort-bitonic", "instanced-cull", "instanced-depth-sort-key", "mesh3d-cull", "instanced-lod"] },
           "entryPoint": { "const": "cs_main" },
           "workgroupSize": { "$ref": "#/$defs/tuple" },
           "dispatch": {

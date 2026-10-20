@@ -26,3 +26,14 @@ export {
   getRender3DGpuDrivenBatchIndexForEntity,
   getRender3DGpuDrivenMaterialSlot,
 } from '../systems/Render3DSystem';
+export type { GpuInstanceSource } from '../renderer/GpuInstanceSource';
+export { InstancedMesh3DRenderer } from '../renderer/InstancedMesh3DRenderer';
+export type { InstancedMesh3DRenderOptions } from '../renderer/InstancedMesh3DRenderer';
+export { InstancedToonMaterial } from '../material/InstancedToonMaterial';
+export { GpuInstanceLod } from '../compute/GpuInstanceLod';
+export type { GpuInstanceLodView } from '../compute/GpuInstanceLod';
+export { GpuReadbackRing } from '../compute/GpuReadbackRing';
+export type { GpuReadbackResult } from '../compute/GpuReadbackRing';
+export { GpuComputeProgram } from '../compute/GpuComputeProgram';
+export { inspectGpuSimulationCapabilities } from '../compute/GpuSimulationCapabilities';
+export type { GpuSimulationRequirements } from '../compute/GpuSimulationCapabilities';

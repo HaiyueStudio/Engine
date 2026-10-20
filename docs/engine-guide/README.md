@@ -33,6 +33,7 @@
 - [游戏存档](./game-saves.md)
 - [Haiyue 0.1.0 首发候选说明](./release-notes-0.1.0.md)
 - [Haiyue 0.2.0 发布候选说明](./release-notes-0.2.0.md)
+- [Haiyue 0.2.1 发布候选说明](./release-notes-0.2.1.md)
 
 ## 可运行示例
 
@@ -54,3 +55,11 @@
 能力是否进入 stable 以 [API stability](../for-ai/api-stability.md) 和发布包 exports 为准，不应根据源码目录推断公共 API。
 
 - [Scrollable GUI and rule help](./gui.md)
+
+- [GPU 实例与模拟（experimental）](gpu-instances.md)
+- [Deferred 多光源实验室（experimental）](deferred-lighting.md)
+- [游戏国际化](i18n.md)：文字与艺术字图片的多语言切换。
+- [分支剧情](narrative.md)：对话 GUI、插图、选项和存档恢复。
+
+- [分享战绩和挑战](share-content.md)：生成内容并交给平台分享。
+- [成就规则与展示](achievements.md)：事实、计数、最好成绩、存档与 GPU GUI（开发候选）。

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "locale": "zh-CN",
+  "messages": {
+    "title": "出发",
+    "heading": "同一场景，多种语言",
+    "score": "当前得分：{score}",
+    "coins": {
+      "other": "{count} 枚金币"
+    },
+    "tip": "切换语言，文字与标题图片同步更新。",
+    "add": "增加金币"
+  },
+  "assets": {
+    "title.logo": "assets/title.zh-CN.svg"
+  }
+}

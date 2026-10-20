@@ -1,3 +1,5 @@
+import { beginFrameGraphCapture } from '../core/FrameGraphCapture';
+import { Render3DPostSceneFrameContext } from './Render3DPostSceneFrameContext';
 import { System } from '../ecs/System';
 import { Entity } from '../ecs/Entity';
 import { World } from '../ecs/World';
@@ -47,6 +49,7 @@ import type { MirrorViewPlannerStats } from './MirrorViewPlanner';
 import type { RenderGraphStats } from '../core/RenderGraph';
 import type { TransientRenderTargetPoolStats } from '../rtt/TransientRenderTargetPool';
 import { getSceneFrameGpuArena } from '../renderer/SceneFrameGpuArena';
+import { getDeferredLightingBackend, removeDeferredLightingBackend } from '../renderer/DeferredLightingBackendPort';
 import type { FrameData } from '../frame/FrameData';
 import type { Camera3DFrameData } from '../frame/FrameData';
 import { EngineError, EngineErrorCode } from '../core/EngineError';
@@ -132,6 +135,7 @@ export class Render3DSystem extends System {
   get renderSettings(): RenderProfileSettings { return this._renderSettings; }
 
   setRenderProfile(profile: RenderProfileName): this {
+    removeDeferredLightingBackend(this);
     if (profile === this._renderProfile) return this;
     this._renderProfile = profile;
     this._renderSettings = this.engine.capabilities?.profile.name === profile
@@ -300,21 +304,7 @@ export class Render3DSystem extends System {
     shadows: [] as readonly (DirectionalShadowState | null)[],
   };
   private readonly _projectionJitter = new Float32Array(2);
-  private readonly _postProcessFrameContext = {
-    viewKey: '',
-    frameId: 0,
-    cameraId: 0,
-    width: 1,
-    height: 1,
-    reverseZ: false,
-    near: 0.1,
-    far: 1000,
-    isOrthographic: false,
-    projectionJitter: new Float32Array(2),
-    projectionMatrix: mat4.identity() as Float32Array,
-    viewProjectionMatrix: mat4.identity() as Float32Array,
-    inverseViewProjectionMatrix: mat4.identity() as Float32Array,
-  };
+  private readonly _postProcessFrameContext = new Render3DPostSceneFrameContext();
   private readonly _directionalShadows: Render3DDirectionalShadowOrchestrator;
   private readonly _transparentMaterialInfoScratch: TransparentMaterialInfo = {
     transparent: false,
@@ -542,9 +532,14 @@ export class Render3DSystem extends System {
       );
     }
     this._recording = true;
+    let capture: ReturnType<typeof beginFrameGraphCapture>;
+    let captureError: unknown;
     try {
-      return this._record(world, context);
-    } finally {
+      capture = beginFrameGraphCapture(this, context);
+      return this._record(world, capture?.context ?? context);
+    } catch (error) { captureError = error; throw error; }
+    finally {
+      capture?.finish(captureError);
       this._materialContextScratch.reset();
       this._recording = false;
     }
@@ -929,6 +924,19 @@ export class Render3DSystem extends System {
         postSceneRequirements = this._postScenePasses.prepare(postProcessPasses, context, this.reverseZ, true);
         state.postSceneRequirements = postSceneRequirements;
       }
+      const lightingBackend = getDeferredLightingBackend(this);
+      if (lightingBackend && this._scenePassRenderer.renderDeferred(lightingBackend, {
+        context, world, view: state.frameView,
+        ambientOcclusion: { passes: postProcessPasses, prepare: () => {
+          this._renderAuxiliaryPasses(true);
+          return this._postScenePasses.lightingAmbientOcclusionTextures(this._postProcessFrameContext.update(this._frameExecution));
+        } },
+        sceneFrame: this._materialRenderContext.sceneFrameUniforms!,
+        opaqueItems, transparentItems, transparentCount: transparentItems.length, helperCount: helperItems.length, needsSceneColorCapture,
+        postScene: this._postScenePasses, disabledCache: this._disabledHierarchyCache,
+        submitter: this._submitter, submitterOptions, viewProj, viewMatrix,
+        pbrRenderer: this._requirePbrRenderer(),
+      })) return;
       const pbrRenderer = this._renderers.pbr;
       if (!needsSceneColorCapture) pbrRenderer?.setTransmissionFramebuffer(null);
       let passEncoder = context.encoder.beginRenderPass(this._postScenePasses.buildScenePassDescriptor(
@@ -980,7 +988,7 @@ export class Render3DSystem extends System {
     }
   }
 
-  private _renderAuxiliaryPasses(): void {
+  private _renderAuxiliaryPasses(beforeLighting = false): void {
     const {
       context,
       camera,
@@ -996,6 +1004,7 @@ export class Render3DSystem extends System {
     if (postSceneRequirements.needsDepth || postSceneRequirements.needsNormal || postSceneRequirements.needsMotion || postSceneRequirements.needsOutlineMask) {
       const postItems = this._frameItems.preparePostItems();
       this._postScenePasses.renderAuxiliaryBuffers({
+        beforeLighting,
         encoder: context.encoder,
         items: postItems,
         motionItems: opaqueItems,
@@ -1030,20 +1039,7 @@ export class Render3DSystem extends System {
     const { context, camera, cameraEntityId, cameraFrame, frameView, postProcessPasses, postSceneRequirements } = this._frameExecution;
     const outputView = context.view?.target.getOutputView() ?? this.engine.getOutputView();
     this._postScenePasses.output.configure(frameView.target.format, this.exposure, this.toneMapping, frameView);
-    const frame = this._postProcessFrameContext;
-    frame.viewKey = frameView.key;
-    frame.frameId = cameraFrame.frameId;
-    frame.cameraId = cameraEntityId;
-    frame.width = frameView.width;
-    frame.height = frameView.height;
-    frame.reverseZ = cameraFrame.reverseZ;
-    frame.near = camera.near;
-    frame.far = camera.far;
-    frame.isOrthographic = camera.projectionType === 'orthographic';
-    frame.projectionJitter.set(cameraFrame.projectionJitter);
-    frame.projectionMatrix.set(cameraFrame.projectionMatrix);
-    frame.viewProjectionMatrix.set(cameraFrame.viewProjectionMatrix);
-    frame.inverseViewProjectionMatrix.set(cameraFrame.inverseViewProjectionMatrix);
+    const frame = this._postProcessFrameContext.update(this._frameExecution);
     this._postScenePasses.runPostProcess(context.encoder, postProcessPasses, outputView, postSceneRequirements, frame);
   }
 
@@ -1056,6 +1052,7 @@ export class Render3DSystem extends System {
   }
 
   suspendForDeviceLoss(): void {
+    removeDeferredLightingBackend(this, true);
     this._renderers.suspendForDeviceLoss();
     this._postScenePasses.destroy();
     this._scenePassRenderer.destroy();

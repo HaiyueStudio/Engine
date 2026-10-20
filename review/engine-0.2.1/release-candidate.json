@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 2,
+  "version": "0.2.1",
+  "status": "toast-download-context-seven-pinned-populations-and-global-qualification-required",
+  "candidate": {
+    "workspace": "Engine",
+    "revisionLockFile": "artifacts/engine-0.2.1/candidate-lock.json",
+    "requiresCleanRevision": true
+  },
+  "packages": [
+    {
+      "workspace": "engine",
+      "name": "@haiyue/engine",
+      "version": "0.2.1",
+      "manifestSha256": "592a251d27e198440a955fe7e18c1c9eacca6b915b8bb2e1b7f128a4bebea3c1"
+    },
+    {
+      "workspace": "animation-spec",
+      "name": "@haiyue/animation-spec",
+      "version": "0.2.1",
+      "manifestSha256": "d3b94989b22805e716ce10e9a8cc4fe4cbb71ce8ecfdcb06300c804c8e173ee2"
+    },
+    {
+      "workspace": "extensions",
+      "name": "@haiyue/extensions",
+      "version": "0.2.1",
+      "manifestSha256": "884a34382c98c6c36bcc41def78d7c482fb3a5c67952c1afaee28fdbb68c0891"
+    },
+    {
+      "workspace": "shader-language",
+      "name": "@haiyue/shader-language",
+      "version": "0.2.1",
+      "manifestSha256": "3e19b414bd6cff5109634731d1acabb18ee9018509ae53fbad68bf5512dd9fef"
+    }
+  ],
+  "scopeDecision": {
+    "decidedAt": "2026-10-16",
+    "guiToast": "included-in-0.2.1",
+    "decision": "docs/for-ai/adr/0128-toast-in-021-release.md",
+    "reason": "Dependent game needs Toast for its App Store release",
+    "guiSymbols": 86,
+    "rootConcepts": 30,
+    "versionPolicyException": "GuiToast and GuiToastOptions in this 0.2.1 release only"
+  },
+  "qualification": {
+    "file": "artifacts/engine-0.2.1/qualification.json",
+    "status": "pinned-seven-raw-audit-required",
+    "requiredKinds": [
+      "correctness",
+      "production",
+      "resources",
+      "ablation",
+      "rooms",
+      "instances",
+      "forward"
+    ],
+    "reports": {},
+    "reuseDecision": "ADR0131-framegraph-download-context",
+    "reportBindingsPolicy": "scripts/engine-021-evidence-policy.mjs#ENGINE_021_DOWNLOAD_REUSE"
+  },
+  "historicalCandidate": {
+    "candidate": {
+      "workspace": "Engine-rc-021-20261014",
+      "revision": "55feff182901a207e359d403565953438eec30f6",
+      "dirty": false,
+      "captureRevision": "e07d8fb293bda190c92dd23d14b873370227074a"
+    },
+    "qualification": {
+      "file": "artifacts/engine-0.2.1/qualification.json",
+      "sha256": "4ffdc08e3cb1307f800c9394013a1ff282d821fa0de52683858cd4e278ad03cc",
+      "reports": {
+        "resources": {
+          "file": "artifacts/engine-0.2.1/g09/study-resources-2026-10-14T12-14-11.050Z/report.json",
+          "sha256": "9e4fb0e16bd25f4605e9cb40d1a9b3306403d1e1a0fb60e68f32e0325b790148",
+          "captureRevision": "e07d8fb293bda190c92dd23d14b873370227074a"
+        },
+        "correctness": {
+          "file": "artifacts/engine-0.2.1/g09/acceptance-full-2026-10-15T02-16-54.724Z/report.json",
+          "sha256": "884044c34ab43295577c5749aab109941b01e400d9b62d40662ee55b01a95668",
+          "captureRevision": "e07d8fb293bda190c92dd23d14b873370227074a"
+        },
+        "rooms": {
+          "file": "artifacts/engine-0.2.1/g05/continuous-rooms-2026-10-15T02-41-10.790Z/report.json",
+          "sha256": "fdcf4cd31fa7f5cc646eb04afb8562440e73890a280e0aeadba6b92d5ab763a7",
+          "captureRevision": "e07d8fb293bda190c92dd23d14b873370227074a"
+        },
+        "instances": {
+          "file": "artifacts/engine-0.2.1/g05/continuous-instances-2026-10-15T03-29-15.825Z/report.json",
+          "sha256": "ef3ee651a50e77a1f2cf49e20b0ba9ecd8754c62700bad4d0edfd68ed5414ca7",
+          "captureRevision": "e07d8fb293bda190c92dd23d14b873370227074a"
+        },
+        "forward": {
+          "file": "artifacts/engine-0.2.1/g05/continuous-forward-2026-10-15T03-44-40.242Z/report.json",
+          "sha256": "87f3b2d72b0b0526044a0c0aa9bb4c4f42e3f529b3bf408120855ab00233c535",
+          "captureRevision": "e07d8fb293bda190c92dd23d14b873370227074a"
+        },
+        "production": {
+          "file": "artifacts/engine-0.2.1/g09/production-local-2026-10-15T05-50-16.224Z/report.json",
+          "sha256": "30ad96c80abaefcbd0933f61e30fbbda7e4741e1905cdbbd0383ff52284bebeb",
+          "captureRevision": "e07d8fb293bda190c92dd23d14b873370227074a"
+        },
+        "ablation": {
+          "file": "artifacts/engine-0.2.1/g09/study-ablation-2026-10-15T06-16-58.972Z/report.json",
+          "sha256": "07ee0d135bd19c38d33c1b3b86e1a9d77abbee9791ef6a5f28a056cb0dfab102",
+          "captureRevision": "e07d8fb293bda190c92dd23d14b873370227074a"
+        }
+      }
+    },
+    "completeRawAudit": {
+      "file": "artifacts/engine-0.2.1/qualification-audit-2026-10-15T08-00-05.443Z/report.json",
+      "sha256": "52026022a52eed279b68a492590024528382f22b19d3b99012a8aed95c14b2cc",
+      "status": "passed"
+    },
+    "eligibleForCurrentCandidate": false
+  },
+  "launcher": {
+    "workspaceRelativePath": "start-engine-021-final-validation.cmd",
+    "candidateHelper": "artifacts/start-final-release-validation.ps1",
+    "revisionBinding": "candidate.revisionLockFile",
+    "requiresFreshReports": false,
+    "requiresFreshCorrectness": false,
+    "requiresPinnedSixRawAudit": false,
+    "requiresPinnedSevenRawAudit": true
+  },
+  "pending": [
+    "strict ADR 0131 seven-population raw audit and current executable rebuild",
+    "global Engine release gate",
+    "no-publish rehearsal and independent audit",
+    "final formal lighting evidence audit"
+  ],
+  "releaseQualified": false,
+  "published": false,
+  "baselinePromoted": false,
+  "windowsPbrReference": "user-approved-separate-full-page-reference",
+  "performanceBaselinePromoted": false
+}

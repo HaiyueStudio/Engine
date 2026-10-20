@@ -13,9 +13,9 @@ struct CoverageMaterial {
 @group(2) @binding(2) var coverageTexture : texture_2d<f32>;
 @group(2) @binding(3) var coverageSampler : sampler;
 
-fn hy_has_material_coverage(uv0: vec2<f32>, uv1: vec2<f32>) -> bool {
+fn hy_has_material_coverage(uv0: vec2<f32>, uv1: vec2<f32>, vertexAlpha: f32) -> bool {
   if (coverage.flags.w != 1u) { return true; }
-  var alpha = coverage.baseColor.a;
+  var alpha = coverage.baseColor.a * vertexAlpha;
   if (coverage.flags.x != 0u) {
     let uv = select(uv0, uv1, coverage.baseMapping0.w > 0.5);
     let mapped = vec2<f32>(dot(coverage.baseMapping0.xy, uv) + coverage.baseMapping0.z,

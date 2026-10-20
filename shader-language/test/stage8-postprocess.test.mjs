@@ -15,6 +15,7 @@ const ambientOcclusionExtension = JSON.parse(await readFile(
   'utf8',
 ));
 const temporalExtension = JSON.parse(await readFile(new URL('../linear-hdr-output-extension-contract.json', import.meta.url), 'utf8'));
+const outputCompatibility = JSON.parse(await readFile(new URL('../output-vertex-compatibility-contract.json', import.meta.url), 'utf8'));
 
 function compile(source = familySource) {
   return compileBuiltinPostprocessFamilyV1(source, {
@@ -33,7 +34,8 @@ test('the stage 8 family plus AO, temporal and output extensions emits fifteen d
   assert.equal(first.artifact.source.kind, 'module-family');
   assert.equal(first.artifact.source.sha256, sourceSha256);
   assert.equal(first.artifact.artifactHash, second.artifact.artifactHash);
-  assert.equal(first.artifact.artifactHash, temporalExtension.artifact.postprocessHash);
+  assert.equal(outputCompatibility.previousPostprocessHash, temporalExtension.artifact.postprocessHash);
+  assert.equal(first.artifact.artifactHash, outputCompatibility.artifact.postprocessHash);
   for (const pass of Object.values(first.artifact.passes)) {
     assert.equal(pass.bindGroups.length, 1);
     assert.equal(pass.bindGroups[0].logicalSpace, 'pass');
@@ -161,4 +163,21 @@ test('stage 8 remains historical while the AO extension reviews current producti
   assert.equal(enginePackage.exports['./internal/postprocess-shader-artifact'], undefined);
   assert.deepEqual(contract.publicApiChanges, []);
   assert.equal(contract.apiBaselineUpdated, false);
+});
+
+
+test('output vertex compatibility preserves other passes and the output fragment ABI', async () => {
+  const { artifact, passes } = compile();
+  for (const [id, expected] of Object.entries(outputCompatibility.unchangedPassCodeHashes)) {
+    assert.equal(createHash('sha256').update(passes[id].code).digest('hex'), expected, id);
+  }
+  assert.equal(Object.keys(outputCompatibility.unchangedPassCodeHashes).length, 14);
+  const vertex = passes.output.code.split('struct OutputParams')[0];
+  assert.doesNotMatch(vertex, /array<|positions\[|uvs\[/);
+  const fragment = await readFile(new URL('../src/postprocess/stdlib/output.wgsl', import.meta.url), 'utf8');
+  assert.equal(passes.output.fragmentSource, fragment.trimEnd().replaceAll('__GROUP__', '0'));
+  assert.equal(artifact.passes.output.uniformBlocks[0].byteSize, outputCompatibility.uniformBytes);
+  assert.equal(artifact.passes.output.renderTargets.length, outputCompatibility.renderTargetCount);
+  assert.deepEqual(artifact.passes.output.bindGroups[0].bindings.map(binding => binding.id),
+    ['pass.sourceColor', 'pass.outputParameters']);
 });

@@ -766,8 +766,10 @@ test('shared web-font loading invalidates every text rasterizer and releases the
     world.addSystem(new Animation2DSystem({ assetManager }));
     world.update(0, 0);
     assert.equal(player.runtimeStats.pendingResourceCount, 1);
-    await new Promise(resolve => setImmediate(resolve));
-    await new Promise(resolve => setImmediate(resolve));
+    // Dynamic font parser preparation can span more than two event-loop turns.
+    for (let attempt = 0; attempt < 100 && player.runtimeStats.pendingResourceCount; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 5));
+    }
     assert.equal(loadCalls, 1);
     assert.equal(addedFaces.length, 1);
     assert.deepEqual(addedFaces[0].descriptors, { style: 'normal', weight: '400' });

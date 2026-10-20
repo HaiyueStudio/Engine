@@ -172,10 +172,10 @@ export const BUILTIN_POSTPROCESS_SHADER_ARTIFACT = {
           "sourceId": "builtin.output",
           "sourceName": "shader-language/builtin-postprocess-family.json",
           "generatedStartLine": 1,
-          "generatedEndLine": 51
+          "generatedEndLine": 42
         }
       ],
-      "canonicalHash": "4dedfaecda3e99f0e21c76e2ebcc6f32c31ddc1e1393c96fe6776804538ec2d0"
+      "canonicalHash": "7eedd6fbf9a02529234165739921e8ff0b61dcb55ede615601202d93e99f7d7f"
     },
     "grayscale": {
       "id": "grayscale",
@@ -1184,5 +1184,5 @@ export const BUILTIN_POSTPROCESS_SHADER_ARTIFACT = {
       "canonicalHash": "ed09d346294b558a374c0e803d7caec7f7c977f5f9756998a74c1c41042635de"
     }
   },
-  "artifactHash": "7e24253794246cc1ef7406eeac34b47bbe8413ebae1de3558fb6a5e7ecaab9a9"
+  "artifactHash": "f0a413ee92e26c980f4b4e7f6f6258138a6a84936144a160376f880d293bf476"
 } as const satisfies PrecompiledShaderArtifactV2;

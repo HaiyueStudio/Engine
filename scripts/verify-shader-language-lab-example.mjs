@@ -43,6 +43,17 @@ assertEqual(result.webgpuCompilationErrorCount, 0, 'webgpuCompilationErrorCount'
 assertEqual(result.webgpuValidationErrorCount, 0, 'webgpuValidationErrorCount');
 assertEqual(result.webglCompileErrorCount, 0, 'webglCompileErrorCount');
 assertEqual(result.webglLinkErrorCount, 0, 'webglLinkErrorCount');
+assertEqual(result.samplingFilter, 'linear', 'samplingFilter');
+const samplingCases = ['undistorted', 'wave-positive', 'wave-negative', 'repeat-seam'];
+assertEqual(JSON.stringify(result.samplingRegression?.map(sample => sample.id)), JSON.stringify(samplingCases), 'samplingRegression cases');
+for (const sample of result.samplingRegression) {
+  const difference = sample.difference;
+  if (!Number.isFinite(difference?.maxChannelDelta) || difference.maxChannelDelta > 2
+    || !Number.isFinite(difference?.meanAbsoluteDelta) || difference.meanAbsoluteDelta > 0.25
+    || difference.overTolerancePixelCount !== 0) {
+    throw new Error(`WGSL/GLSL sampling regression ${sample.id} failed: ${JSON.stringify(difference)}.`);
+  }
+}
 assertEqual(result.pipelineCount, 8, 'pipelineCount');
 assertEqual(result.pipelineRebuildCount, 0, 'pipelineRebuildCount');
 assertHash(result.canonicalHash, 'canonicalHash');

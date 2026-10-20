@@ -333,7 +333,10 @@ function auxiliaryVertexBuffers(): readonly PrecompiledShaderVertexBufferV2[] {
 }
 
 function coverageUvBuffers(): readonly PrecompiledShaderVertexBufferV2[] {
-  return [vertexBuffer(8, 'TEXCOORD_0', 5, 'float32x2'), vertexBuffer(8, 'TEXCOORD_1', 6, 'float32x2')];
+  return [vertexBuffer(8, 'TEXCOORD_0', 5, 'float32x2'), { arrayStride: 24, stepMode: 'vertex', attributes: [
+    { semantic: 'TEXCOORD_1', shaderLocation: 6, offset: 0, format: 'float32x2' },
+    { semantic: 'COLOR_0', shaderLocation: 12, offset: 8, format: 'float32x4' },
+  ] }];
 }
 
 function motionSurfaceVertexBuffers(): readonly PrecompiledShaderVertexBufferV2[] {
@@ -347,7 +350,7 @@ function motionSurfaceVertexBuffers(): readonly PrecompiledShaderVertexBufferV2[
 }
 
 function coverageUvVaryings(first: number): readonly ShaderVaryingReflection[] {
-  return [varying('TEXCOORD_0', first, 'vec2<f32>'), varying('TEXCOORD_1', first + 1, 'vec2<f32>')];
+  return [varying('TEXCOORD_0', first, 'vec2<f32>'), varying('TEXCOORD_1', first + 1, 'vec2<f32>'), varying('VERTEX_ALPHA', 6, 'f32')];
 }
 
 function basicVertexBuffers(): readonly PrecompiledShaderVertexBufferV2[] {

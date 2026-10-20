@@ -2384,6 +2384,10 @@
               "kind": "type"
             },
             {
+              "name": "ColorCMYK",
+              "kind": "value"
+            },
+            {
               "name": "ColorConvertible",
               "kind": "type"
             },
@@ -3963,6 +3967,14 @@
               "kind": "value"
             },
             {
+              "name": "createDeferredLightingProfile",
+              "kind": "value"
+            },
+            {
+              "name": "createFrameGraphInspector",
+              "kind": "value"
+            },
+            {
               "name": "createGPUResourceOwner",
               "kind": "value"
             },
@@ -4144,6 +4156,22 @@
             },
             {
               "name": "DefaultMaterialRendererOptions",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingDebugChannel",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingDebugImage",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingProfile",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingProfileOptions",
               "kind": "type"
             },
             {
@@ -4407,6 +4435,14 @@
               "kind": "type"
             },
             {
+              "name": "FrameGraphInspector",
+              "kind": "type"
+            },
+            {
+              "name": "FrameGraphSnapshot",
+              "kind": "type"
+            },
+            {
               "name": "FrameLoop",
               "kind": "value"
             },
@@ -4563,6 +4599,10 @@
               "kind": "type"
             },
             {
+              "name": "GpuComputeProgram",
+              "kind": "value"
+            },
+            {
               "name": "GpuDrawCommandBuffers",
               "kind": "type"
             },
@@ -4619,6 +4659,26 @@
               "kind": "type"
             },
             {
+              "name": "GpuInstanceLod",
+              "kind": "value"
+            },
+            {
+              "name": "GpuInstanceLodView",
+              "kind": "type"
+            },
+            {
+              "name": "GpuInstanceSource",
+              "kind": "type"
+            },
+            {
+              "name": "GpuReadbackResult",
+              "kind": "type"
+            },
+            {
+              "name": "GpuReadbackRing",
+              "kind": "value"
+            },
+            {
               "name": "GPUResourceDebugSnapshot",
               "kind": "type"
             },
@@ -4656,6 +4716,10 @@
             },
             {
               "name": "GPUResourceUsage",
+              "kind": "type"
+            },
+            {
+              "name": "GpuSimulationRequirements",
               "kind": "type"
             },
             {
@@ -5023,6 +5087,10 @@
               "kind": "type"
             },
             {
+              "name": "inspectGpuSimulationCapabilities",
+              "kind": "value"
+            },
+            {
               "name": "inspectKtx2Texture",
               "kind": "value"
             },
@@ -5085,6 +5153,10 @@
             {
               "name": "InstancedMesh3DRenderSystemOptions",
               "kind": "type"
+            },
+            {
+              "name": "InstancedToonMaterial",
+              "kind": "value"
             },
             {
               "name": "InteractionRaycastResult",
@@ -7088,6 +7160,10 @@
               "kind": "value"
             },
             {
+              "name": "GpuComputeProgram",
+              "kind": "value"
+            },
+            {
               "name": "GpuDrawCommandBuffers",
               "kind": "type"
             },
@@ -7144,6 +7220,30 @@
               "kind": "type"
             },
             {
+              "name": "GpuInstanceLod",
+              "kind": "value"
+            },
+            {
+              "name": "GpuInstanceLodView",
+              "kind": "type"
+            },
+            {
+              "name": "GpuInstanceSource",
+              "kind": "type"
+            },
+            {
+              "name": "GpuReadbackResult",
+              "kind": "type"
+            },
+            {
+              "name": "GpuReadbackRing",
+              "kind": "value"
+            },
+            {
+              "name": "GpuSimulationRequirements",
+              "kind": "type"
+            },
+            {
               "name": "GpuSortableBuffers",
               "kind": "type"
             },
@@ -7153,6 +7253,22 @@
             },
             {
               "name": "IndirectDrawCommandBuffer",
+              "kind": "value"
+            },
+            {
+              "name": "inspectGpuSimulationCapabilities",
+              "kind": "value"
+            },
+            {
+              "name": "InstancedMesh3DRenderer",
+              "kind": "value"
+            },
+            {
+              "name": "InstancedMesh3DRenderOptions",
+              "kind": "type"
+            },
+            {
+              "name": "InstancedToonMaterial",
               "kind": "value"
             },
             {
@@ -7193,8 +7309,32 @@
               "kind": "value"
             },
             {
+              "name": "createDeferredLightingProfile",
+              "kind": "value"
+            },
+            {
+              "name": "createFrameGraphInspector",
+              "kind": "value"
+            },
+            {
               "name": "createRenderPipelineAsync",
               "kind": "value"
+            },
+            {
+              "name": "DeferredLightingDebugChannel",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingDebugImage",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingProfile",
+              "kind": "type"
+            },
+            {
+              "name": "DeferredLightingProfileOptions",
+              "kind": "type"
             },
             {
               "name": "DeltaRenderRecordSystem",
@@ -7207,6 +7347,14 @@
             {
               "name": "disposeSceneFrameGpuArena",
               "kind": "value"
+            },
+            {
+              "name": "FrameGraphInspector",
+              "kind": "type"
+            },
+            {
+              "name": "FrameGraphSnapshot",
+              "kind": "type"
             },
             {
               "name": "FrameRingGenerationInfo",
@@ -8155,6 +8303,14 @@
             },
             {
               "name": "GuiTheme",
+              "kind": "type"
+            },
+            {
+              "name": "GuiToast",
+              "kind": "value"
+            },
+            {
+              "name": "GuiToastOptions",
               "kind": "type"
             },
             {
@@ -9769,6 +9925,63 @@
             }
           ]
         },
+        "./achievements": {
+          "source": "extensions/src/achievements.ts",
+          "exports": [
+            {
+              "name": "AchievementDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "AchievementFact",
+              "kind": "type"
+            },
+            {
+              "name": "AchievementGui",
+              "kind": "value"
+            },
+            {
+              "name": "AchievementGuiOptions",
+              "kind": "type"
+            },
+            {
+              "name": "AchievementPort",
+              "kind": "type"
+            },
+            {
+              "name": "AchievementProgress",
+              "kind": "type"
+            },
+            {
+              "name": "AchievementReceipt",
+              "kind": "type"
+            },
+            {
+              "name": "AchievementRule",
+              "kind": "type"
+            },
+            {
+              "name": "AchievementRuleSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "AchievementRuleStorage",
+              "kind": "type"
+            },
+            {
+              "name": "AchievementRuntime",
+              "kind": "value"
+            },
+            {
+              "name": "AchievementRuntimeEvent",
+              "kind": "type"
+            },
+            {
+              "name": "AchievementRuntimeOptions",
+              "kind": "type"
+            }
+          ]
+        },
         "./animation": {
           "source": "extensions/src/animation.ts",
           "exports": [
@@ -10769,6 +10982,168 @@
             }
           ]
         },
+        "./i18n": {
+          "source": "extensions/src/i18n.ts",
+          "exports": [
+            {
+              "name": "bindI18nImage",
+              "kind": "value"
+            },
+            {
+              "name": "bindI18nText",
+              "kind": "value"
+            },
+            {
+              "name": "checkLocalePacks",
+              "kind": "value"
+            },
+            {
+              "name": "collectLocaleCharacters",
+              "kind": "value"
+            },
+            {
+              "name": "createI18nTextureLoader",
+              "kind": "value"
+            },
+            {
+              "name": "I18n",
+              "kind": "value"
+            },
+            {
+              "name": "I18nDiagnostic",
+              "kind": "type"
+            },
+            {
+              "name": "I18nEvent",
+              "kind": "type"
+            },
+            {
+              "name": "I18nImageBinding",
+              "kind": "type"
+            },
+            {
+              "name": "I18nImageHandle",
+              "kind": "type"
+            },
+            {
+              "name": "I18nImageLoader",
+              "kind": "type"
+            },
+            {
+              "name": "I18nImageOptions",
+              "kind": "type"
+            },
+            {
+              "name": "I18nOptions",
+              "kind": "type"
+            },
+            {
+              "name": "I18nParams",
+              "kind": "type"
+            },
+            {
+              "name": "I18nTextBinding",
+              "kind": "type"
+            },
+            {
+              "name": "LocalePack",
+              "kind": "type"
+            },
+            {
+              "name": "LocalePackIssue",
+              "kind": "type"
+            },
+            {
+              "name": "LocalePackLoader",
+              "kind": "type"
+            },
+            {
+              "name": "validateLocalePack",
+              "kind": "value"
+            }
+          ]
+        },
+        "./narrative": {
+          "source": "extensions/src/narrative.ts",
+          "exports": [
+            {
+              "name": "connectNarrativeActions",
+              "kind": "value"
+            },
+            {
+              "name": "NarrativeActionConnection",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeActionHandler",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeActionRequest",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeArtwork",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeCondition",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeDefinition",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeEffect",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeEvent",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeGui",
+              "kind": "value"
+            },
+            {
+              "name": "NarrativeGuiOptions",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeNode",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeOption",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeRuntime",
+              "kind": "value"
+            },
+            {
+              "name": "NarrativeSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeValue",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeVariables",
+              "kind": "type"
+            },
+            {
+              "name": "NarrativeView",
+              "kind": "type"
+            },
+            {
+              "name": "validateNarrativeDefinition",
+              "kind": "value"
+            }
+          ]
+        },
         "./ray-tracing": {
           "source": "extensions/src/ray-tracing.ts",
           "exports": [
@@ -10815,6 +11190,75 @@
             {
               "name": "rayWorker",
               "kind": "value"
+            }
+          ]
+        },
+        "./share-content": {
+          "source": "extensions/src/share-content.ts",
+          "exports": [
+            {
+              "name": "captureShareImage",
+              "kind": "value"
+            },
+            {
+              "name": "ChallengeData",
+              "kind": "type"
+            },
+            {
+              "name": "ChallengeLinkPolicy",
+              "kind": "type"
+            },
+            {
+              "name": "createChallengeLink",
+              "kind": "value"
+            },
+            {
+              "name": "parseChallengeLink",
+              "kind": "value"
+            },
+            {
+              "name": "PreparedShareContent",
+              "kind": "type"
+            },
+            {
+              "name": "prepareShareContent",
+              "kind": "value"
+            },
+            {
+              "name": "renderShareCard",
+              "kind": "value"
+            },
+            {
+              "name": "ShareCaptureSource",
+              "kind": "type"
+            },
+            {
+              "name": "ShareCard",
+              "kind": "type"
+            },
+            {
+              "name": "ShareCardOptions",
+              "kind": "type"
+            },
+            {
+              "name": "ShareCardSurface",
+              "kind": "type"
+            },
+            {
+              "name": "ShareContentRequest",
+              "kind": "type"
+            },
+            {
+              "name": "ShareImage",
+              "kind": "type"
+            },
+            {
+              "name": "ShareImageOptions",
+              "kind": "type"
+            },
+            {
+              "name": "ShareText",
+              "kind": "type"
             }
           ]
         },

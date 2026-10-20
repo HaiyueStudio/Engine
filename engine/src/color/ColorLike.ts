@@ -1,3 +1,4 @@
+import { ColorCMYK } from './ColorCMYK';
 import { ColorHSL } from './ColorHSL';
 import { ColorLinear } from './ColorLinear';
 import { ColorSRGB } from './ColorSRGB';
@@ -18,7 +19,7 @@ export interface ColorConvertible {
   toSRGB(): ColorChannels;
 }
 
-export type ColorObject = ColorSRGB | ColorLinear | ColorHSL;
+export type ColorObject = ColorSRGB | ColorLinear | ColorHSL | ColorCMYK;
 /** Tuples and structural channel objects are interpreted as display-encoded sRGB. */
 export type ColorLike = ColorValue | ColorConvertible | ColorTuple | ColorChannels;
 

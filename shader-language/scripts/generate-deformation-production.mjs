@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { compactArtifactLiteral } from './compact-artifact-literal.mjs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -75,7 +76,7 @@ function generatedFeature(id, hash, source) {
 }
 
 function renderArtifact(value, files) {
-  const variables = Object.fromEntries(Object.keys(files).map(pass => [pass, sourceVariable(pass)]));
+  const variables = Object.fromEntries(Object.keys(files).map((pass, index) => [pass, `s${index}`]));
   const tokens = Object.fromEntries(Object.keys(files).map(pass => [pass, `__HAIYUE_SOURCE_${pass}__`]));
   const serializable = {
     ...value,
@@ -84,7 +85,8 @@ function renderArtifact(value, files) {
       { ...entry, code: tokens[pass] },
     ])),
   };
-  let literal = JSON.stringify(serializable, null, 2);
+  // Runtime metadata is machine-generated; compact it without changing reflection or shader text.
+  let literal = compactArtifactLiteral(serializable);
   for (const pass of Object.keys(files)) literal = literal.replace(JSON.stringify(tokens[pass]), variables[pass]);
   const imports = Object.entries(files)
     .map(([pass, file]) => `import ${variables[pass]} from './${file}';`)
@@ -95,9 +97,6 @@ function renderArtifact(value, files) {
     + `export const DEFORMATION_SHADER_ARTIFACT = ${literal} as const satisfies PrecompiledShaderArtifactV2;\n`;
 }
 
-function sourceVariable(pass) {
-  return `${pass.replace(/-([a-z0-9])/g, (_match, value) => value.toUpperCase()).replace(/^[a-z]/, value => value.toUpperCase())}Wgsl`;
-}
 
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');

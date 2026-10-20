@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-const ids = ['gpu-draw-command', 'gpu-sort-bitonic', 'instanced-cull', 'instanced-depth-sort-key', 'mesh3d-cull'];
+const ids = ['gpu-draw-command', 'gpu-sort-bitonic', 'instanced-cull', 'instanced-depth-sort-key', 'mesh3d-cull', 'instanced-lod'];
 const passes = new Map(await Promise.all(ids.map(async id => [id, await readFile(new URL(`../src/shaders/generated/compute-${id}.generated.wgsl`, import.meta.url), 'utf8')]))) ;
 
 test('production compute passes share generated family provenance and explicit ABI markers', () => {

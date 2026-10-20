@@ -218,6 +218,12 @@ export function configureRenderFrameContextGpuPassTiming(
   else gpuPassTimingByOptions.delete(options);
 }
 
+/** @internal Preserve timing attribution when diagnostics decorate a recording context. */
+export function inheritRenderCommandContextGpuPassTiming(source: RenderCommandContext, target: RenderCommandContext): void {
+  const timing = gpuPassTimingByContext.get(source);
+  if (timing) gpuPassTimingByContext.set(target, timing);
+}
+
 /** @internal */
 export function setNextGpuPassTimingLabel(context: RenderCommandContext, label: GpuPassTimingLabel): void {
   gpuPassTimingByContext.get(context)?.setNextPass(label);

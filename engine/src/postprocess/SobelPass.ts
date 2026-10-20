@@ -1,3 +1,4 @@
+import { registerPostProcessGraphAccess } from './PostProcessGraph';
 import { PostProcessPass, getPostProcessTextureView } from './PostProcessPass';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import { getBuiltinPostprocessShader } from './BuiltinPostprocessShader';
@@ -38,6 +39,7 @@ export class SobelPass extends PostProcessPass {
 
   constructor(options: SobelPassOptions = {}) {
     super();
+    if (new.target === SobelPass) registerPostProcessGraphAccess(this);
     this.edgeColor = options.edgeColor ?? [1, 1, 1];
     this.strength = options.strength ?? 1.5;
     this.threshold = options.threshold ?? 0.08;

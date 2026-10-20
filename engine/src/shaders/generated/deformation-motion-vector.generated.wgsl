@@ -116,9 +116,9 @@ struct CoverageMaterial {
 @group(2) @binding(2) var coverageTexture : texture_2d<f32>;
 @group(2) @binding(3) var coverageSampler : sampler;
 
-fn hy_has_material_coverage(uv0: vec2<f32>, uv1: vec2<f32>) -> bool {
+fn hy_has_material_coverage(uv0: vec2<f32>, uv1: vec2<f32>, vertexAlpha: f32) -> bool {
   if (coverage.flags.w != 1u) { return true; }
-  var alpha = coverage.baseColor.a;
+  var alpha = coverage.baseColor.a * vertexAlpha;
   if (coverage.flags.x != 0u) {
     let uv = select(uv0, uv1, coverage.baseMapping0.w > 0.5);
     let mapped = vec2<f32>(dot(coverage.baseMapping0.xy, uv) + coverage.baseMapping0.z,
@@ -156,6 +156,7 @@ struct MotionSkinAttributes {
 @group(3) @binding(3) var<storage, read> motionSkinWeights : MotionSkinAttributes;
 
 struct VertexOutput {
+  @location(6) vertexAlpha : f32,
   @location(2) uv0 : vec2<f32>,
   @location(3) uv1 : vec2<f32>,
   @builtin(position) clipPosition : vec4<f32>,
@@ -190,6 +191,7 @@ fn skinMotionPosition(
 }
 
 struct VertexInput {
+  @location(12) color : vec4<f32>,
   @location(0) position : vec3<f32>,
   @location(1) morphPosition0 : vec3<f32>,
   @location(2) morphPosition1 : vec3<f32>,
@@ -239,6 +241,7 @@ fn vs_main(input : VertexInput) -> VertexOutput {
   out.worldPos = (object.currentModel * currentPosition).xyz;
   out.uv0 = input.uv0;
   out.uv1 = input.uv1;
+  out.vertexAlpha = input.color.a;
   out.viewDepth = -(sceneFrame.view * object.currentModel * currentPosition).z;
   out.viewNormal = vec3<f32>(0.0, 0.0, 1.0);
   if (object.deformationFlags.w > 0.5) {
@@ -275,7 +278,7 @@ struct AuxiliaryOutput {
 
 @fragment
 fn fs_main(input : VertexOutput) -> AuxiliaryOutput {
-  if (!hy_has_material_coverage(input.uv0, input.uv1)) { discard; }
+  if (!hy_has_material_coverage(input.uv0, input.uv1, input.vertexAlpha)) { discard; }
   if (hy_is_clipped(input.worldPos, 0u)) { discard; }
   let previousMagnitude = max(abs(input.previousClipPosition.w), 0.000001);
   let previousW = select(-previousMagnitude, previousMagnitude, input.previousClipPosition.w >= 0.0);

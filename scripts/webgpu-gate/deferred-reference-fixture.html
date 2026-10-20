@@ -1,0 +1,5 @@
+<!doctype html><meta charset="utf-8"><title>G02 Deferred reference validation</title>
+<style>body{margin:16px;background:#16191e;color:#e9effa;font:14px sans-serif}#visuals{display:grid;grid-template-columns:1fr 1fr;gap:12px}figure{margin:0}figcaption{padding:8px 0}canvas{width:100%;height:auto}#result{white-space:pre-wrap;max-height:80px;overflow:hidden}</style>
+<section id="visuals"></section><pre id="progress">Loading fixture modules</pre><pre id="result" data-status=""></pre>
+<script>addEventListener('error',event=>{const node=document.querySelector('#result');node.textContent=event.error?.stack??event.message;node.dataset.status='failed';});addEventListener('unhandledrejection',event=>{const node=document.querySelector('#result');node.textContent=String(event.reason?.stack??event.reason);node.dataset.status='failed';});</script>
+<script type="module" src="./deferred-reference-fixture.mjs"></script>

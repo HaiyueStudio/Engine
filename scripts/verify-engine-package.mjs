@@ -22,11 +22,15 @@ import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import {
   matchesPackageGlob,
+  collectPublicTypeEntrypoints,
+  validateExtensionConsumerCoverage,
+  validatePackageByteBudget,
   validateCapabilityPackageBudgetConfig,
   validateEngineConsumerResult,
   validateEnginePackManifest,
 } from './engine-package-policy.mjs';
 import { npmArgs, npmCommand } from './npm-process.mjs';
+import { measureConsumerLoading, validateConsumerLoading } from './engine-package-loading-policy.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const budget = JSON.parse(readFileSync(resolve(root, 'config/engine-package-budget.json'), 'utf8'));
@@ -42,6 +46,13 @@ const legacyReportPath = resolve(root, 'artifacts/release/engine-package.json');
 const tarballOutputRoot = resolve(root, 'artifacts/release/npm');
 const errors = [];
 errors.push(...validateCapabilityPackageBudgetConfig(budget));
+errors.push(...validateExtensionConsumerCoverage({
+  packageJson: JSON.parse(readFileSync(resolve(root, 'extensions/package.json'), 'utf8')),
+  capabilities: JSON.parse(readFileSync(resolve(root, 'config/public-api-capability-budgets.json'), 'utf8')),
+  consumers: budget.extensionConsumers,
+  fixtures: Object.fromEntries(Object.entries(budget.extensionConsumers).map(([id, policy]) =>
+    [id, readFileSync(resolve(root, policy.fixture), 'utf8')])),
+}));
 let shaderLanguageBuildEvidence = null;
 let animationSpecBuildEvidence = null;
 let extensionsBuildEvidence = null;
@@ -94,7 +105,7 @@ try {
 
   const runtimeChecks = {
     node: runNodeRuntimeConsumer(installed),
-    typescript: runTypeScriptConsumer(installed),
+    typescript: runTypeScriptConsumer(installed, packedPackages),
     exports: runAllExportsConsumer(installed, packedPackages),
     cli: runCliConsumer(installed),
   };
@@ -268,15 +279,7 @@ function validatePublicPackageManifest({ packageName, manifest, packageJson, pol
   if (JSON.stringify(packageJson.files ?? []) !== JSON.stringify(policy.declaredFiles)) {
     errors.push(`${packageName} package files whitelist disagrees with the candidate budget`);
   }
-  if (manifest.size > policy.maxPackedBytes) {
-    errors.push(`${packageName} packed ${manifest.size}B exceeds ${policy.maxPackedBytes}B`);
-  }
-  if (manifest.unpackedSize > policy.maxUnpackedBytes) {
-    errors.push(`${packageName} unpacked ${manifest.unpackedSize}B exceeds ${policy.maxUnpackedBytes}B`);
-  }
-  if (files.length > policy.maxFileCount) {
-    errors.push(`${packageName} file count ${files.length} exceeds ${policy.maxFileCount}`);
-  }
+  errors.push(...validatePackageByteBudget(manifest, policy, packageName));
   for (const file of files) {
     if (!policy.allowedFilePatterns.some(pattern => matchesPackageGlob(file, pattern))) {
       errors.push(`${packageName} tarball contains non-allowlisted ${file}`);
@@ -386,6 +389,12 @@ async function bundleConsumer({ id, policy, installed, packageDirectories }) {
       .map(moduleId => moduleId.match(/^@haiyue\/engine\/dist\/internal\/([^/]*shader-artifact)\.js$/)?.[1])
       .filter(Boolean)
       .sort();
+    let loading;
+    if (policy.loading) {
+      const split = await bundle.generate({ format: 'es', sourcemap: false, chunkFileNames: 'chunks/[name]-[hash].js' });
+      loading = measureConsumerLoading(split.output.filter(output => output.type === 'chunk'),
+        moduleId => normalizeModuleId(moduleId, packageDirectories, input));
+    }
     return {
       id,
       fixture: policy.fixture,
@@ -398,6 +407,7 @@ async function bundleConsumer({ id, policy, installed, packageDirectories }) {
       modules,
       generatedShaderArtifacts,
       warnings,
+      ...(loading ? { loading } : {}),
       code,
     };
   } finally {
@@ -407,6 +417,8 @@ async function bundleConsumer({ id, policy, installed, packageDirectories }) {
 
 function validateGenericConsumerResult(result, policy) {
   const errors = [];
+  if (policy.loading) errors.push(...validateConsumerLoading(result.loading, policy.loading, policy.maxGzipBytes)
+    .map(error => `${result.id}: ${error}`));
   if (result.gzipBytes > policy.maxGzipBytes) {
     errors.push(`${result.id} gzip ${result.gzipBytes}B exceeds ${policy.maxGzipBytes}B`);
   }
@@ -440,10 +452,15 @@ function runNodeRuntimeConsumer(installed) {
   return commandCheck(result, 'Node ESM runtime');
 }
 
-function runTypeScriptConsumer(installed) {
+function runTypeScriptConsumer(installed, packages) {
   const source = resolve(root, 'scripts/fixtures/engine-consumers/typescript-consumer.ts');
   const input = resolve(installed.root, 'typescript-consumer.ts');
-  copyFileSync(source, input);
+  const typeEntrypoints = collectPublicTypeEntrypoints(packages.map(entry =>
+    JSON.parse(readFileSync(resolve(installed.root, 'node_modules', entry.name, 'package.json'), 'utf8'))));
+  // Check every public declaration root, including focused experimental subpaths.
+  // Unused type imports are still resolved and checked with skipLibCheck=false.
+  writeFileSync(input, readFileSync(source, 'utf8') + '\n' + typeEntrypoints.map((path, index) =>
+    `import type * as PublicTypes${index} from ${JSON.stringify(path)};`).join('\n') + '\n');
   writeFileSync(resolve(installed.root, 'tsconfig.json'), `${JSON.stringify({
     compilerOptions: {
       target: 'ESNext',
@@ -463,7 +480,10 @@ function runTypeScriptConsumer(installed) {
     encoding: 'utf8',
     timeout: 60_000,
   });
-  return commandCheck(result, 'TypeScript packed declarations');
+  return {
+    ...commandCheck(result, 'TypeScript packed declarations'), publicTypeEntrypoints: typeEntrypoints,
+    engineTypeEntrypoints: typeEntrypoints.filter(path => path === '@haiyue/engine' || path.startsWith('@haiyue/engine/')),
+  };
 }
 
 function runAllExportsConsumer(installed, packages) {

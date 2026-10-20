@@ -1,3 +1,5 @@
+import type { Render3DSubmitter, Render3DSubmitterOptions } from './Render3DSubmitter';
+import type { PbrRenderer } from '../renderer/PbrRenderer';
 import type { IEngine } from '../core/IEngine';
 import { SCENE_COLOR_FORMAT } from '../postprocess/SceneColor';
 import type { Entity } from '../ecs/Entity';
@@ -11,6 +13,8 @@ import type { LiveIdSet } from '../renderer/utils';
 import type { Render3DHelperItem } from './Render3DContracts';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import type { SceneFrameUniformSnapshot } from '../frame/SceneFrameUniformLayout';
+import type { DeferredLightingBackendPort, DeferredLightingRecordInput } from '../renderer/DeferredLightingBackendPort';
+import type { Render3DPostScenePasses } from './Render3DPostScenePasses';
 
 interface MutableLiveIdSet extends LiveIdSet {
   add(id: number): void;
@@ -28,6 +32,36 @@ export class Render3DScenePassRenderer {
   private _helperRenderer: MeshHelperRenderer | null = null;
 
   constructor(private readonly _engine: IEngine) {}
+
+  /** Adapts the existing sky/output owners to an optional lighting provider. */
+  renderDeferred(backend: DeferredLightingBackendPort, input: Omit<DeferredLightingRecordInput,
+    'engine' | 'drawSky' | 'applyViewport' | 'sceneDescriptor' | 'sceneLoadDescriptor' | 'drawOpaque' | 'drawOpaqueForward' | 'drawTransparent' | 'prepareTransparent'> & {
+      postScene: Render3DPostScenePasses;
+      submitter: Render3DSubmitter;
+      submitterOptions: Render3DSubmitterOptions;
+      pbrRenderer: PbrRenderer;
+      viewProj: Float32Array;
+      viewMatrix: Float32Array;
+      disabledCache: EntityHierarchyDisabledCache;
+    }): boolean {
+    const { postScene, disabledCache, submitter, submitterOptions, pbrRenderer, viewProj, viewMatrix, ...record } = input;
+    return backend.record({ ...record, engine: this._engine,
+      drawOpaque: pass => submitter.drawOpaqueItems(input.opaqueItems, pass, viewProj, viewMatrix, submitterOptions),
+      drawOpaqueForward: (pass, indices) => {
+        for (const index of indices) submitter.drawItemRun(input.opaqueItems, pass, viewProj, viewMatrix, index, 1, submitterOptions);
+      },
+      prepareTransparent: () => pbrRenderer.setTransmissionFramebuffer(input.needsSceneColorCapture
+        ? postScene.captureSceneColor(input.context.encoder) : null),
+      drawTransparent: pass => {
+        submitter.drawDepthPrepassItems(input.transparentItems, pass, viewProj, viewMatrix, submitterOptions);
+        submitter.drawTransparentItems(input.transparentItems, pass, viewProj, viewMatrix, input.opaqueItems.length, submitterOptions);
+      },
+      sceneDescriptor: postScene.buildScenePassDescriptor('clear', input.view.reverseZ, input.context.view, input.needsSceneColorCapture),
+      sceneLoadDescriptor: () => postScene.buildScenePassDescriptor('load', input.view.reverseZ, input.context.view, input.needsSceneColorCapture),
+      applyViewport: pass => postScene.applySceneViewport(pass, input.view),
+      drawSky: pass => this.renderSky(pass, input.world, disabledCache, input.sceneFrame, input.view.reverseZ, input.view.sampleCount),
+    });
+  }
 
   contributePipelineWarmup(plan: PipelineWarmupPlan, reverseZ: boolean, msaaSamples: 1 | 4): void {
     if (!this._skyRenderer) {

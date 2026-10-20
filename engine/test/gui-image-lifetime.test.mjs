@@ -90,3 +90,20 @@ test('same style and UV values keep a clean GUI subtree clean', () => {
   element.setStyle({ radius: 4 }); image.setUv([0, 0, 0.5, 1]);
   assert.equal(element.dirty, true); assert.equal(image.dirty, true);
 });
+
+test('alternating preview textures reuse one geometry slot without allocation or upload churn', () => {
+  const f = fixture(), batch = new GuiImageBatch();
+  const other = f.device.createTexture({ size: [1, 1], format: 'rgba8unorm', usage: GPUTextureUsage.TEXTURE_BINDING });
+  for (let frame = 0; frame < 1000; frame++) {
+    batch.clear(); batch.addImage({ ...f.command, source: frame % 2 ? other : f.source });
+    batch.rebuild(); f.renderer.render(f.pass, batch);
+  }
+  assert.equal(f.audit.getUploadCount('gui-image:vertices'), 1);
+  assert.equal(f.audit.snapshot().resources.buffer.created, 2, 'viewport and one persistent geometry buffer');
+  assert.equal(f.audit.getCallCount('queue.writeBuffer'), 2, 'one viewport and one geometry upload');
+  assert.equal(f.audit.getCallCount('renderPass.draw'), 1000, 'reuse must still draw every frame');
+  batch.clear(); batch.rebuild(); f.renderer.render(f.pass, batch);
+  assert.equal(f.audit.snapshot().resources.buffer.live, 1);
+  f.renderer.destroy(); f.source.destroy(); other.destroy();
+  assert.equal(f.audit.snapshot().resources.buffer.live, 0);
+});

@@ -1,0 +1,603 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-25T08:08:17.218Z",
+  "scope": "G01 budget calibration; not Deferred or clean-release performance qualification",
+  "revision": "61d40f7bf75e05ec948754d85fdbf70512a21ca8",
+  "sourceHash": "41dd483e5d583453330426ef9b3ed9ae21b9295289c6932bd50f87d491264e69",
+  "finalPolicySha256": "f35f2bb0955836ef3caf4d8219dd4137118c8deb323d66f1d0ad6ca45cce5a5a",
+  "rawDirectory": "artifacts/engine-0.2.1/g01/frozen-baseline",
+  "settings": {
+    "warmup": 120,
+    "samples": 300,
+    "cohorts": 3,
+    "interCaseIdleMs": 30000
+  },
+  "captureCount": 30,
+  "samplesPerDeviceCaseChannel": 900,
+  "hostObservationCount": 60,
+  "allHostObservationsReady": true,
+  "captureFiles": [
+    {
+      "file": "high-performance-forward-small-1-1.json",
+      "sha256": "be48c4d888ec1973458e75a954394475e64e0801c196ffa7a8f04c574f93dcd7"
+    },
+    {
+      "file": "high-performance-forward-cap-8-1.json",
+      "sha256": "d8b773d9996813977f4958cbbaf6140a2d3e2b3094dd2c80624c7d2dd5d24213"
+    },
+    {
+      "file": "high-performance-forward-overflow-128-four-view-1.json",
+      "sha256": "0222adca48f1ea4a5233062c9179d13cb33f2187bfc72912c488dbab352d929a"
+    },
+    {
+      "file": "high-performance-instances-1k-1.json",
+      "sha256": "eb243634697ac927b644caf22ad6da7e0425cd54b15fd8b8732f8cd4a776a818"
+    },
+    {
+      "file": "high-performance-instances-10k-1.json",
+      "sha256": "62b044f71747b72cfdf6bed629b38c1c9b1c2b3e406eb12b992a4eab828609ee"
+    },
+    {
+      "file": "low-power-forward-small-1-1.json",
+      "sha256": "5d1ba30c7498d15042da378fa32b3c024030fae4d446e07f56ba320d3c94ff43"
+    },
+    {
+      "file": "low-power-forward-cap-8-1.json",
+      "sha256": "d1ccc18ed2aaa7a79477428342ece9bd374bb2b51e7947b5677a696c241924e7"
+    },
+    {
+      "file": "low-power-forward-overflow-128-four-view-1.json",
+      "sha256": "523dcedb77e350e7331d065b2f28398c48660cbecd7cc97b951b169a49ec90ec"
+    },
+    {
+      "file": "low-power-instances-1k-1.json",
+      "sha256": "6ad5ba5e75063233331fda9bec6e627d6859fca139ce1e767da1dbbb5bc58f35"
+    },
+    {
+      "file": "low-power-instances-10k-1.json",
+      "sha256": "fcc151c8ed1f5e70b951a1daf7f660051c6ed6769a81d38b9e92554c239c0ebb"
+    },
+    {
+      "file": "low-power-instances-10k-2.json",
+      "sha256": "a5cc3109735d1723c28baf4028ec568f66c40bb9885939a0ed8879ecff5e0979"
+    },
+    {
+      "file": "low-power-instances-1k-2.json",
+      "sha256": "c3055f90816ef2657e2531db13e7c013ff997373e67f66fd8c3ed4b2cc959e51"
+    },
+    {
+      "file": "low-power-forward-overflow-128-four-view-2.json",
+      "sha256": "3f185114e3d5fbc5654c1e4bb4567ca703df5ab6f2f16572490d4e94ac4a2c2b"
+    },
+    {
+      "file": "low-power-forward-cap-8-2.json",
+      "sha256": "74f3726a350ea24f8a452492059b83d594ee3b20b2c7c5525b3848a670b2d115"
+    },
+    {
+      "file": "low-power-forward-small-1-2.json",
+      "sha256": "2e8311cfe74ed9b46153935e05a0dbecbd025a59ebd181dad2424c6e20bda5a8"
+    },
+    {
+      "file": "high-performance-instances-10k-2.json",
+      "sha256": "d61a176c3d260eb89c40647f661020cc4000285c9df49012aba856d6d08d4097"
+    },
+    {
+      "file": "high-performance-instances-1k-2.json",
+      "sha256": "fe155f59bdc8dd4ddc34eb6d28ff12eb6f6c20d847456e156dc3da2962b35f02"
+    },
+    {
+      "file": "high-performance-forward-overflow-128-four-view-2.json",
+      "sha256": "acabe3b3526d1d6f98890a59f27278225d4d041cae359da72020bfe4a9ddb541"
+    },
+    {
+      "file": "high-performance-forward-cap-8-2.json",
+      "sha256": "ddd9b7a8bcd6a876652b3d809c319be23592b9c466fedf8c9b88c58743c95453"
+    },
+    {
+      "file": "high-performance-forward-small-1-2.json",
+      "sha256": "055defd7c01700d3de207573568e30da94f7fc4b982bde173197d908da7260ea"
+    },
+    {
+      "file": "high-performance-forward-small-1-3.json",
+      "sha256": "7624d99c20294b0b867dc418f028656d55a225166bbc63c54b8634d7bee342fb"
+    },
+    {
+      "file": "high-performance-forward-cap-8-3.json",
+      "sha256": "2bea3dd8c6efad0e99c1d5345f8b716a44ce015a6cc33db3f2b0eac4ee0c2b14"
+    },
+    {
+      "file": "high-performance-forward-overflow-128-four-view-3.json",
+      "sha256": "05ebe31eb27cf7e475f95543e6970e5503bc1fa022f5229ba1d4958d249bd592"
+    },
+    {
+      "file": "high-performance-instances-1k-3.json",
+      "sha256": "7643b1953286d8bb83ddafb3413daa59cfdde30b9d905a6c2903fe07aeed67a8"
+    },
+    {
+      "file": "high-performance-instances-10k-3.json",
+      "sha256": "4669d71e8fa9f216fddecc47a50c7883947d23c725c03af3853b10b84df64dc0"
+    },
+    {
+      "file": "low-power-forward-small-1-3.json",
+      "sha256": "8c4d478f9c7070fe058fb9e7d50edf3b9d0b2f4ebd4e00d9cf5638786599ce3e"
+    },
+    {
+      "file": "low-power-forward-cap-8-3.json",
+      "sha256": "05bd6fd1b5f87239ad87f90455216f6ec2e4503fb70a935a00c6d1468c00d595"
+    },
+    {
+      "file": "low-power-forward-overflow-128-four-view-3.json",
+      "sha256": "e9ca762538f72aacb00942fc0a41a819b597b26bcae8aa5026aab5e4e20d8dda"
+    },
+    {
+      "file": "low-power-instances-1k-3.json",
+      "sha256": "af6cafa6fb5dd1d6a00942a465cc04f48d620d766b41b43fce4b0020c44fc83e"
+    },
+    {
+      "file": "low-power-instances-10k-3.json",
+      "sha256": "25aedcddfb46cc4f86dbbc0d7ce982b9e3f16d889f021cb789e2763f163a8cd2"
+    },
+    {
+      "file": "summary.json",
+      "sha256": "a64c4696d0d69aadc06d75aaf4f3702851fdfeecf96428edb50788a0debe090b"
+    },
+    {
+      "file": "inputs.json",
+      "sha256": "9216d78bad5333576018f18bec01cab2aaccac08680ce6b53554e0a4b9811a3b"
+    },
+    {
+      "file": "contract-at-capture.json",
+      "sha256": "5ff2e9828a25836395451a30dc6222e91c33411b07a10767411197beb70c2dab"
+    }
+  ],
+  "captureIntegrity": "passed",
+  "relativeStableCaseCount": 8,
+  "acceptedUnderAbsoluteCeiling": [
+    {
+      "deviceId": "mac-amd-rdna1",
+      "caseId": "instances-1k",
+      "channel": "gpuTimestamp",
+      "maxCohortP95Ms": 0.1
+    },
+    {
+      "deviceId": "mac-amd-rdna1",
+      "caseId": "instances-10k",
+      "channel": "cpuRecord",
+      "maxCohortP95Ms": 0.22
+    }
+  ],
+  "results": [
+    {
+      "caseId": "forward-small-1",
+      "powerPreference": "high-performance",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "cpuMetric": "runtimeFrame",
+      "cpuP95": 0.9399999380111694,
+      "gpuP95": 0.753778,
+      "frameWallP95": 9.509999990463257,
+      "samplesPerChannel": 900,
+      "instability": {
+        "cpu": {
+          "cohortP95": [
+            1.0049999952316284,
+            0.8949999809265137,
+            0.9150000810623169
+          ],
+          "relativeSpread": 0.12021858421848937,
+          "cv": 0.0509864899192926,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        },
+        "gpu": {
+          "cohortP95": [
+            0.8463349999999998,
+            0.744847,
+            0.753617
+          ],
+          "relativeSpread": 0.13466787506120456,
+          "cv": 0.058744395775626464,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        }
+      }
+    },
+    {
+      "caseId": "forward-cap-8",
+      "powerPreference": "high-performance",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "cpuMetric": "runtimeFrame",
+      "cpuP95": 0.9399999380111694,
+      "gpuP95": 1.4242759999999999,
+      "frameWallP95": 7.544999957084656,
+      "samplesPerChannel": 900,
+      "instability": {
+        "cpu": {
+          "cohortP95": [
+            0.9500000476837158,
+            0.9199999570846558,
+            0.9550000429153442
+          ],
+          "relativeSpread": 0.03684219376201661,
+          "cv": 0.016413527286886612,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        },
+        "gpu": {
+          "cohortP95": [
+            1.42472,
+            1.424157,
+            1.4226770000000002
+          ],
+          "relativeSpread": 0.0014345328499595165,
+          "cv": 0.0006051205755793114,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        }
+      }
+    },
+    {
+      "caseId": "forward-overflow-128-four-view",
+      "powerPreference": "high-performance",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "cpuMetric": "runtimeFrame",
+      "cpuP95": 2.149999976158142,
+      "gpuP95": 5.949898999999999,
+      "frameWallP95": 11.454999923706055,
+      "samplesPerChannel": 900,
+      "instability": {
+        "cpu": {
+          "cohortP95": [
+            2.2200000286102295,
+            2.100000023841858,
+            2.125
+          ],
+          "relativeSpread": 0.05647059047923369,
+          "cv": 0.024062162964010595,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        },
+        "gpu": {
+          "cohortP95": [
+            5.5249120000000005,
+            5.621069,
+            6.310944999999999
+          ],
+          "relativeSpread": 0.13983692425764543,
+          "cv": 0.06016230979361235,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        }
+      }
+    },
+    {
+      "caseId": "instances-1k",
+      "powerPreference": "high-performance",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cpuMetric": "cpuRecord",
+      "cpuP95": 0.1499999761581421,
+      "gpuP95": 0.066838,
+      "frameWallP95": 5.424999952316284,
+      "samplesPerChannel": 900,
+      "instability": {
+        "cpu": {
+          "cohortP95": [
+            0.14499998092651367,
+            0.1549999713897705,
+            0.14500010013580322
+          ],
+          "relativeSpread": 0.06896540384379812,
+          "cv": 0.03177985657724998,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        },
+        "gpu": {
+          "cohortP95": [
+            0.050718,
+            0.078598,
+            0.050918000000000005
+          ],
+          "relativeSpread": 0.5475470364114852,
+          "cv": 0.21798115987848088,
+          "stable": false,
+          "absoluteCeilingMs": 0.1,
+          "accepted": true,
+          "acceptance": "approved-absolute-ceiling"
+        }
+      }
+    },
+    {
+      "caseId": "instances-10k",
+      "powerPreference": "high-performance",
+      "adapter": {
+        "vendor": "amd",
+        "architecture": "rdna-1",
+        "isFallbackAdapter": false
+      },
+      "cpuMetric": "cpuRecord",
+      "cpuP95": 0.15500009059906006,
+      "gpuP95": 0.31574599999999997,
+      "frameWallP95": 4.814999938011169,
+      "samplesPerChannel": 900,
+      "instability": {
+        "cpu": {
+          "cohortP95": [
+            0.16999995708465576,
+            0.13499999046325684,
+            0.13999998569488525
+          ],
+          "relativeSpread": 0.2499997871262469,
+          "cv": 0.1041978768839963,
+          "stable": false,
+          "absoluteCeilingMs": 0.22,
+          "accepted": true,
+          "acceptance": "approved-absolute-ceiling"
+        },
+        "gpu": {
+          "cohortP95": [
+            0.31587000000000004,
+            0.31542,
+            0.315946
+          ],
+          "relativeSpread": 0.0016652420299491132,
+          "cv": 0.0007351757650838209,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        }
+      }
+    },
+    {
+      "caseId": "forward-small-1",
+      "powerPreference": "low-power",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "cpuMetric": "runtimeFrame",
+      "cpuP95": 1.1349999904632568,
+      "gpuP95": 2.6651239999999996,
+      "frameWallP95": 4.789999961853027,
+      "samplesPerChannel": 900,
+      "instability": {
+        "cpu": {
+          "cohortP95": [
+            1.125,
+            1.09499990940094,
+            1.1749999523162842
+          ],
+          "relativeSpread": 0.07111114925808376,
+          "cv": 0.029159054919278317,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        },
+        "gpu": {
+          "cohortP95": [
+            2.658792,
+            2.668541,
+            2.6629579999999997
+          ],
+          "relativeSpread": 0.003660966489144698,
+          "cv": 0.0014995705526830592,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        }
+      }
+    },
+    {
+      "caseId": "forward-cap-8",
+      "powerPreference": "low-power",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "cpuMetric": "runtimeFrame",
+      "cpuP95": 1.1399999856948853,
+      "gpuP95": 3.6272770000000003,
+      "frameWallP95": 5.610000014305115,
+      "samplesPerChannel": 900,
+      "instability": {
+        "cpu": {
+          "cohortP95": [
+            1.1549999713897705,
+            1.1449999809265137,
+            1.1200000047683716
+          ],
+          "relativeSpread": 0.03056765694710106,
+          "cv": 0.012911918939368756,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        },
+        "gpu": {
+          "cohortP95": [
+            3.650359,
+            3.632943,
+            3.5654440000000003
+          ],
+          "relativeSpread": 0.023373611972442074,
+          "cv": 0.010126838895212225,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        }
+      }
+    },
+    {
+      "caseId": "forward-overflow-128-four-view",
+      "powerPreference": "low-power",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false
+      },
+      "cpuMetric": "runtimeFrame",
+      "cpuP95": 2.53000009059906,
+      "gpuP95": 14.646438000000002,
+      "frameWallP95": 18.6599999666214,
+      "samplesPerChannel": 900,
+      "instability": {
+        "cpu": {
+          "cohortP95": [
+            2.475000023841858,
+            2.5700000524520874,
+            2.540000081062317
+          ],
+          "relativeSpread": 0.03740158487337416,
+          "cv": 0.015682770859124652,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        },
+        "gpu": {
+          "cohortP95": [
+            14.633689000000002,
+            14.656519000000003,
+            14.646105999999998
+          ],
+          "relativeSpread": 0.0015587761006236604,
+          "cv": 0.0006372134399473179,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        }
+      }
+    },
+    {
+      "caseId": "instances-1k",
+      "powerPreference": "low-power",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cpuMetric": "cpuRecord",
+      "cpuP95": 0.13999998569488525,
+      "gpuP95": 0.120328,
+      "frameWallP95": 1.2699999809265137,
+      "samplesPerChannel": 900,
+      "instability": {
+        "cpu": {
+          "cohortP95": [
+            0.1350001096725464,
+            0.13999998569488525,
+            0.14499998092651367
+          ],
+          "relativeSpread": 0.07142765911248675,
+          "cv": 0.02916021144860742,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        },
+        "gpu": {
+          "cohortP95": [
+            0.122165,
+            0.116998,
+            0.117415
+          ],
+          "relativeSpread": 0.04400630243154614,
+          "cv": 0.01971784975297516,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        }
+      }
+    },
+    {
+      "caseId": "instances-10k",
+      "powerPreference": "low-power",
+      "adapter": {
+        "vendor": "intel",
+        "architecture": "gen-9",
+        "isFallbackAdapter": false
+      },
+      "cpuMetric": "cpuRecord",
+      "cpuP95": 0.1799999475479126,
+      "gpuP95": 0.939402,
+      "frameWallP95": 2.184999942779541,
+      "samplesPerChannel": 900,
+      "instability": {
+        "cpu": {
+          "cohortP95": [
+            0.18499994277954102,
+            0.1799999475479126,
+            0.16999995708465576
+          ],
+          "relativeSpread": 0.08333327814383135,
+          "cv": 0.034968737248715534,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        },
+        "gpu": {
+          "cohortP95": [
+            0.9232360000000001,
+            0.954319,
+            0.9218200000000001
+          ],
+          "relativeSpread": 0.035201183662682066,
+          "cv": 0.01607240859395236,
+          "stable": true,
+          "absoluteCeilingMs": null,
+          "accepted": true,
+          "acceptance": "relative-stability"
+        }
+      }
+    }
+  ]
+}

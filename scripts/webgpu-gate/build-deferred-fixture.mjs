@@ -1,0 +1,13 @@
+import { buildDeferredFixture } from './deferred-fixture-builder.mjs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { writeFile, mkdir } from 'node:fs/promises';
+import { deferredRuntimeFingerprint, parseDeferredFixtureBuildOptions } from './deferred-fixture-policy.mjs';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
+const {goal}=parseDeferredFixtureBuildOptions(process.argv.slice(2));
+const outputDirectory=resolve(root,`artifacts/engine-0.2.1/${goal}`);
+await mkdir(outputDirectory,{recursive:true});
+const inputs=await deferredRuntimeFingerprint(root);
+const outputs = await buildDeferredFixture({ sourceRoot: root, outputDirectory });
+if(inputs.sha256!==(await deferredRuntimeFingerprint(root)).sha256)throw new Error('Deferred runtime sources changed during build.');
+await writeFile(resolve(outputDirectory,'fixture-build.json'),JSON.stringify({schemaVersion:1,inputs,outputs},null,2)+'\n');

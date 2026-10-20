@@ -1,5 +1,7 @@
 # Deferred capability registry
 
+> 历史准入快照：本表记录 M2.5 当时暂缓的范围，不代表当前所有列项仍为 hold。后续已批准能力按对应 ADR 和[当前能力准入](../capability-admission.md)判断，不能被旧表重新撤销；阶段结论见 [M2.5](../../../review/m025/README.md)。
+
 下列能力均为 `hold`。入口是 [capability admission](../capability-admission.md) 与 ADR 0066；旧 todo、评审建议、synthetic benchmark 或架构 seam 都不是实现授权。
 
 | 能力 | 当前 deficit | 解锁前最低真实证据 | 排除的 M2.5 Goal |

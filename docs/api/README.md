@@ -35,3 +35,14 @@ npm run api:check
 只有经过 API 评审后才运行 `npm run api:update`。后续引入自动 API 页面生成时，应从构建后的声明文件生成到本目录的生成子目录，手写入口和错误码页面继续保留。
 
 - [GUI controls](./gui-controls.md)
+
+- [GPU 实例、Toon、LOD 与模拟（experimental）](gpu-instances.md)
+- [Deferred Lighting（experimental）](deferred-lighting.md)
+
+- [FrameGraph Inspector（experimental）](framegraph-inspector.md)
+- [国际化](i18n.md)：语言包、文本与艺术字资源绑定。
+- [剧情运行时](narrative.md)：分支、存档与状态机动作接口。
+
+- [分享内容](share-content.md)：战绩卡、截图编码与挑战链接。
+
+- [Achievements (development candidate)](achievements.md): event rules, durable progress and optional GPU GUI.

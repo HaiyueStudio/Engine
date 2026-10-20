@@ -1,5 +1,31 @@
 # GUI controls
 
+## Toast notifications
+
+`GuiToast` and `GuiToastOptions` are included in the 0.2.1 candidate through the
+stable `@haiyue/engine/gui` entrypoint ([ADR 0128](../for-ai/adr/0128-toast-in-021-release.md)).
+The candidate still requires its final release qualification; see the
+[0.2.1 status](../../review/engine-0.2.1/README.md).
+
+| Option / method | Behavior |
+| --- | --- |
+| `text` | Short, single-line text; overflow is clipped to the content rectangle. |
+| `icon`, `iconKey` | Optional borrowed GuiImageSource and serialization key; caller owns its lifetime. |
+| `iconSize`, `fontSize` | Logical pixels, defaults 22 and 15. |
+| `durationMs` | Fully visible hold time, default 2200 ms. |
+| `animationMs` | Each fade/slide transition, default 180 ms; 0 means instant. |
+| `show({ text, icon, iconKey, durationMs, animationMs }?)` | Replace and restart one message; omitted values retain configuration. `icon: null` removes the icon. |
+| `hide()` | Immediately cancel and hide. |
+| `progress`, `animating` | Current visibility fraction and finite display lifecycle. |
+
+Normal GUI layout and `style.backgroundColor`, `style.color`, `style.opacity`,
+`style.padding`, `style.radius` apply. Toast starts hidden and never captures input.
+It draws above ordinary content, below modals. Non-finite/negative timings behave
+as zero. Include text glyphs in the GuiSystem font atlas. Serialization stores
+configuration and resolves `iconKey` through `resolveImageSource`, not progress.
+GuiSystem advances it automatically; use its existing `animating`/`stopAnimations`
+contract for on-demand hosts and suspension. No timers or DOM nodes are created.
+
 Stable entrypoint: `@haiyue/engine/gui`. New controls are a local development
 candidate requiring a reviewed minor release (ADR 0102).
 

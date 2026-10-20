@@ -1,0 +1,20 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@haiyue/extensions/narrative": [
+        "./src/narrative.ts"
+      ],
+      "@haiyue/extensions/i18n": [
+        "./src/i18n.ts"
+      ]
+    },
+    "types": [
+      "@webgpu/types"
+    ]
+  },
+  "include": [
+    "type-tests/narrative-contract.type-test.ts"
+  ]
+}

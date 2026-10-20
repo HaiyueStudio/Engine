@@ -13,7 +13,7 @@ test('stage 13 compiles all production compute passes as one typed side-effect f
   assert.equal(compiled.artifact.version, 2);
   assert.equal(compiled.artifact.compilerVersion, 'shader-language-stage13');
   assert.deepEqual(compiled.family.passes.map(pass => pass.operation), [...PRODUCTION_COMPUTE_OPERATIONS]);
-  assert.equal(new Set(compiled.family.passes.map(pass => pass.canonicalHash)).size, 5);
+  assert.equal(new Set(compiled.family.passes.map(pass => pass.canonicalHash)).size, PRODUCTION_COMPUTE_OPERATIONS.length);
   for (const pass of compiled.family.passes) {
     assert.deepEqual(pass.workgroupSize, [64, 1, 1]);
     assert.ok(pass.effects.length > 0);

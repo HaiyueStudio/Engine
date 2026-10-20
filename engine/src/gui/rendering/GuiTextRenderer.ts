@@ -37,6 +37,7 @@ export class GuiTextRenderer extends BaseRenderer {
   private defaultTexture!: GPUTexture;
   private sampler: GPUSampler | null = null;
   private initialized = false;
+  private viewportUploaded = false;
 
   constructor(private readonly readAtlasPixels?: (canvas: HTMLCanvasElement) => Uint8Array) { super(); }
 
@@ -97,11 +98,13 @@ export class GuiTextRenderer extends BaseRenderer {
     const pipeline = this.getPipeline();
 
     const viewport = this.viewportData;
-    viewport[0] = this.engine.displayWidth;
-    viewport[1] = this.engine.displayHeight;
-    viewport[2] = 0;
-    viewport[3] = 0;
-    writeBuffer(this.engine.device.queue, this.viewportBuffer, 0, viewport);
+    const width = this.engine.displayWidth, height = this.engine.displayHeight;
+    if (!this.viewportUploaded || viewport[0] !== Math.fround(width) || viewport[1] !== Math.fround(height)) {
+      viewport[0] = width;
+      viewport[1] = height;
+      writeBuffer(this.engine.device.queue, this.viewportBuffer, 0, viewport);
+      this.viewportUploaded = true;
+    }
     const vertexBuffer = this.uploadBatch(batch);
     const fontData = this.getFontGpuData(font);
     if (!vertexBuffer) return;
@@ -207,6 +210,7 @@ export class GuiTextRenderer extends BaseRenderer {
 
   destroy(): void {
     if (!this.initialized) return;
+    this.viewportUploaded = false;
     this.viewportBuffer.destroy();
     for (const buffer of this.liveBatchBuffers) buffer.vertexBuffer.destroy();
     this.liveBatchBuffers.clear();

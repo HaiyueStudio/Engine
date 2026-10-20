@@ -5,7 +5,24 @@ import type {
   AnimationVectorValueTrack,
 } from '@haiyue/animation-spec';
 import { evaluateSafeExpression } from '@haiyue/animation-spec';
-import { parse as parseOpenType, type Font as OpenTypeFont, type Path as OpenTypePath } from 'opentype.js';
+
+/** Private drawing contract; published declarations do not require vendor types. */
+export interface AnimationOutlineFont {
+  getPath(text: string, x: number, y: number, fontSize: number,
+    options: { kerning: boolean; features: { liga: boolean; rlig: boolean } }): AnimationOutlinePath;
+}
+
+interface AnimationOutlinePath {
+  readonly commands: readonly {
+    readonly type: string;
+    readonly x?: number;
+    readonly y?: number;
+    readonly x1?: number;
+    readonly y1?: number;
+    readonly x2?: number;
+    readonly y2?: number;
+  }[];
+}
 
 type TextTexture = HTMLCanvasElement | ImageBitmap;
 
@@ -76,10 +93,11 @@ export class AnimationTextRasterizer {
   private time = Number.NaN;
   private dirty = true;
   private updating = false;
+  private destroyed = false;
   private updateToken = 0;
   private readonly animated: boolean;
   private readonly expressionData = new Map<string, unknown>();
-  private readonly outlineFonts = new Map<string, OpenTypeFont>();
+  private readonly outlineFonts = new Map<string, AnimationOutlineFont>();
 
   constructor(readonly component: Readonly<AnimationText2DComponent>) {
     this.canvas = typeof document === 'undefined' ? null : document.createElement('canvas');
@@ -103,32 +121,32 @@ export class AnimationTextRasterizer {
     void this.updateTexture();
   }
 
-  setFontData(family: string, style: 'normal' | 'italic', weight: string | number, data: ArrayBuffer): void {
-    try {
-      let font = parsedOpenTypeFonts.get(data);
-      if (!font) { font = parseOpenType(data); parsedOpenTypeFonts.set(data, font); }
-      this.outlineFonts.set(outlineFontKey(family, style, weight), font);
-    } catch {
-      // FontFace remains the deterministic fallback for unsupported OpenType
-      // containers. A failed outline parse must not invalidate a loadable font.
-    }
+  setOutlineFont(family: string, style: 'normal' | 'italic', weight: string | number, font: AnimationOutlineFont | undefined): void {
+    if (this.destroyed) return;
+    if (font) this.outlineFonts.set(outlineFontKey(family, style, weight), font);
     this.invalidateFont();
   }
 
   setExpressionData(resource: string, value: unknown): void {
+    if (this.destroyed) return;
     this.expressionData.set(resource, value);
     this.dirty = true;
     void this.updateTexture();
   }
 
   destroy(): void {
+    if (this.destroyed) return;
+    this.destroyed = true;
+    this.dirty = false;
     this.updateToken++;
     closeTextTexture(this.texture, this.canvas);
     this.texture = null;
+    this.outlineFonts.clear();
+    this.expressionData.clear();
   }
 
   async updateTexture(): Promise<void> {
-    if (!this.dirty || this.updating || !this.canvas) return;
+    if (this.destroyed || !this.dirty || this.updating || !this.canvas) return;
     const token = ++this.updateToken;
     this.dirty = false;
     this.updating = true;
@@ -255,7 +273,7 @@ function drawStyledText(
   padding: number,
   contentWidth: number,
   contentHeight: number,
-  outlineFonts: ReadonlyMap<string, OpenTypeFont>,
+  outlineFonts: ReadonlyMap<string, AnimationOutlineFont>,
 ): void {
   context.textBaseline = 'alphabetic';
   context.textAlign = 'left';
@@ -378,7 +396,7 @@ function drawShapedStyleSegments(
   offsets: readonly number[],
   x: number,
   baseline: number,
-  outlineFonts: ReadonlyMap<string, OpenTypeFont>,
+  outlineFonts: ReadonlyMap<string, AnimationOutlineFont>,
 ): void {
   let start = 0;
   while (start < glyphs.length) {
@@ -400,15 +418,13 @@ function drawShapedStyleSegments(
   setCanvasLetterSpacing(context, 0);
 }
 
-const parsedOpenTypeFonts = new WeakMap<ArrayBuffer, OpenTypeFont>();
-
 function outlineFontKey(family: string, style: 'normal' | 'italic', weight: string | number): string {
   return `${family}\0${style}\0${String(weight)}`;
 }
 
 function drawOpenTypeText(
   context: CanvasRenderingContext2D,
-  font: OpenTypeFont,
+  font: AnimationOutlineFont,
   text: string,
   x: number,
   baseline: number,
@@ -421,7 +437,7 @@ function drawOpenTypeText(
   context.fill('nonzero');
 }
 
-function drawOpenTypePath(context: CanvasRenderingContext2D, path: OpenTypePath): void {
+function drawOpenTypePath(context: CanvasRenderingContext2D, path: AnimationOutlinePath): void {
   context.beginPath();
   for (const command of path.commands) switch (command.type) {
     case 'M': context.moveTo(command.x!, command.y!); break;

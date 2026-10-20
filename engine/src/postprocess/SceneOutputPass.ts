@@ -4,6 +4,7 @@ import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import { getBuiltinPostprocessShader } from './BuiltinPostprocessShader';
 import { isLinearColorTarget } from './SceneColor';
 import { deferPostProcessDisposal } from './PostProcessSubmission';
+import { getInstrumentedGPUResourceTracker } from '../core/GPUResourceTracker';
 
 interface OutputBinding {
   readonly uniform: GPUBuffer;
@@ -55,7 +56,7 @@ export class SceneOutputPass extends PostProcessPass {
     if (!frame) throw new Error('Scene output requires a view frame.');
     for (const [key, binding] of this._bindings) {
       if (frame.frameId - binding.lastFrame <= 120 || key === frame.viewKey) continue;
-      if (deferPostProcessDisposal(this, () => binding.uniform.destroy())) this._bindings.delete(key);
+      if (deferPostProcessDisposal(this, () => destroyBinding(binding, device))) this._bindings.delete(key);
     }
     let binding = this._bindings.get(frame.viewKey);
     if (!binding) {
@@ -71,6 +72,7 @@ export class SceneOutputPass extends PostProcessPass {
       device.queue.writeBuffer(binding.uniform, 0, binding.values.buffer as ArrayBuffer);
     }
     if (binding.source !== src || !binding.group) {
+      if (binding.group) getInstrumentedGPUResourceTracker(device)?.untrackObject(binding.group);
       binding.group = device.createBindGroup({ label: `SceneOutput.${frame.viewKey}`, layout: this._shader.bindGroupLayout,
         entries: [{ binding: 0, resource: getPostProcessTextureView(src) }, { binding: 1, resource: { buffer: binding.uniform } }] });
       binding.source = src;
@@ -89,14 +91,20 @@ export class SceneOutputPass extends PostProcessPass {
       view: sampleCount > 1 && targetAttachment ? targetAttachment.view : dst,
       ...(sampleCount > 1 ? { resolveTarget: dst } : {}),
       loadOp: blend || viewport || scissor ? 'load' : 'clear', clearValue: { r: 0, g: 0, b: 0, a: 0 }, storeOp: 'store' }] });
+    // Establish output coverage explicitly on every view. Native four-view probes
+    // can leave the clear untouched when relying on implicit full-target state.
+    const target = this._view?.target;
     if (viewport) pass.setViewport(viewport.x, viewport.y, viewport.width, viewport.height, 0, 1);
+    else if (target) pass.setViewport(0, 0, target.width, target.height, 0, 1);
     if (scissor) pass.setScissorRect(scissor.x, scissor.y, scissor.width, scissor.height);
+    else if (target) pass.setScissorRect(0, 0, target.width, target.height);
     pass.setPipeline(pipeline); pass.setBindGroup(0, binding.group); pass.draw(3); pass.end();
   }
 
   override destroy(): void {
     const bindings = [...this._bindings.values()];
-    const dispose = (): void => { for (const binding of bindings) binding.uniform.destroy(); };
+    const device = this._device;
+    const dispose = (): void => { for (const binding of bindings) destroyBinding(binding, device); };
     if (!deferPostProcessDisposal(this, dispose)) dispose();
     this._bindings.clear(); this._pipelines.clear(); this._device = null; this._textures = {}; this._view = undefined;
   }
@@ -109,4 +117,9 @@ export class SceneOutputPass extends PostProcessPass {
           alpha: { srcFactor: 'one' as const, dstFactor: 'one-minus-src-alpha' as const } } } : {}) }] },
       primitive: { topology: 'triangle-list' }, multisample: { count: sampleCount } };
   }
+}
+
+function destroyBinding(binding: OutputBinding, device: GPUDevice | null): void {
+  if (device && binding.group) getInstrumentedGPUResourceTracker(device)?.untrackObject(binding.group);
+  binding.uniform.destroy();
 }

@@ -129,3 +129,36 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0105：UI 与 Engine 独立发布门禁](0105-independent-library-release-gates.md)
 - [0106：0.2.0 能力范围与包体预算](0106-release-0.2.0-capability-budgets.md)
 - [0107：Mac 与 Windows 原生 GPU 发布资格路径](0107-native-macos-release-qualification.md)
+
+- [0108：0.2.1 GPU 实例与模拟接入](0108-gpu-instance-simulation-021.md)
+- [0109：0.2.1 Deferred 与 Tiled 光照合同](0109-deferred-lighting-021-contract.md)
+- [0110：Deferred 示例的 experimental profile facade](0110-deferred-example-profile.md)
+
+- [0111：帧计划活跃根与后处理读写裁剪](./0111-framegraph-dependency-culling.md)
+
+- [ADR 0112：临时纹理按使用区间复用](0112-transient-texture-lifetime-reuse.md)
+- [ADR 0113：结构计划缓存与安全附件操作](0113-framegraph-plan-cache-and-attachment-operations.md)
+
+- [ADR 0114：FrameGraph 按需单帧诊断](0114-framegraph-one-shot-diagnostics.md)
+- [0115：可选国际化与 GUI 绑定](0115-optional-i18n-runtime.md)。
+- [0116：可选剧情运行时](0116-optional-narrative-runtime.md)。
+
+- [0117: CMYK color value through the existing color protocol](0117-cmyk-color-value.md)
+- [0117：0.2.1 原生硬件验收范围](0117-native-021-hardware-scope.md)。
+- [0118 分享内容生成与平台分享分层](0118-share-content-composition.md)。
+- [0118 G09 冷启动与稳态的独立校准](0118-g09-cold-steady-sampling.md) — G09 准入前置部分已由 [ADR 0124](0124-g09-production-performance-acceptance.md) 取代，诊断协议保留。
+- [0119 G09 扩展校准观察范围](0119-g09-extended-calibration-horizon.md) — G09 准入前置部分已由 [ADR 0124](0124-g09-production-performance-acceptance.md) 取代，诊断协议保留。
+- [0120 G09 共同处理器电源条件](0120-g09-controlled-cpu-power.md) — G09 准入前置部分已由 [ADR 0124](0124-g09-production-performance-acceptance.md) 取代，诊断协议保留。
+- [0121 可选成就规则与展示](0121-optional-achievements-runtime.md)
+- [0121 G09 驱动与 Chrome GPU 电源条件](0121-g09-controlled-gpu-policy.md) — G09 准入前置部分已由 [ADR 0124](0124-g09-production-performance-acceptance.md) 取代，诊断协议保留。
+- [0122：以能力结构和公开覆盖验收发布包](0122-package-capability-structure-review.md)
+- [0123：动画文本 OpenType 按需准备](0123-animation-opentype-on-demand.md)
+- [0124：GUI Toast 短消息](0124-gui-toast.md) — 发布版本由 [ADR 0128](0128-toast-in-021-release.md) 调整为 0.2.1。
+- [0124：G09 以生产场景流畅度验收；取代 0118–0121 的发布前置关系](0124-g09-production-performance-acceptance.md)
+- [0125：G05 固定预热后连续采样；保留全矩阵、冻结预算与历史结果](0125-g05-continuous-sampling.md)
+- [0126：G05 稳定性作为调查项；按严格输入与产物哈希复核既有证据](0126-g05-stability-and-evidence-reuse.md)
+- [0127：Forward CPU 5% 作为调查项；其余硬门禁保持](0127-forward-cpu-investigation.md)
+- [0128：Toast 纳入 0.2.1；保留运行时合同并重新取得候选资格](0128-toast-in-021-release.md)
+- [0129：readback 诊断修复后限定复核六组；完整正确性重新采样](0129-readback-repair-evidence-reuse.md)
+- [0130：PBR Windows 独立整页参考；固定七组原始数据与修复字节后限定复核](0130-pbr-windows-reference-evidence-reuse.md)
+- [0131：FrameGraph 下载策略绑定独立页面上下文；相同固定七组限定复核](0131-framegraph-download-context-evidence-reuse.md)

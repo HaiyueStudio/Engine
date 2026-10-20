@@ -1,0 +1,35 @@
+{
+  "contractVersion": 1,
+  "implementation": "output-arithmetic-fullscreen-vertex",
+  "previousContract": "linear-hdr-output-extension-contract.json",
+  "previousPostprocessHash": "7e24253794246cc1ef7406eeac34b47bbe8413ebae1de3558fb6a5e7ecaab9a9",
+  "artifact": {
+    "postprocessHash": "f0a413ee92e26c980f4b4e7f6f6258138a6a84936144a160376f880d293bf476",
+    "postprocessSourceSha256": "53ba55eee8a6d26268234d39d34fd1562257738a87310ebd4dc41ad088e26dd0"
+  },
+  "changedOperations": [
+    "output"
+  ],
+  "postprocessPassCount": 15,
+  "uniformBytes": 16,
+  "renderTargetCount": 1,
+  "vertexCount": 3,
+  "publicApiChanges": [],
+  "unchangedPassCodeHashes": {
+    "present": "20fe1264e59f07ddc97fb2bcf26e237704e7ab559e79759636a8a54b2de17053",
+    "grayscale": "ab3d26114142abc03d2e4a8ca4b18752a38ed7942ad0515baca6a3dca4f9bf30",
+    "sobel": "6776cc8cd60673516b99e7d635dbea9b9cf4f67f3023a5d5ace9409aa68d860b",
+    "fxaa": "5848de33999d54eee433ecbab94ce75227491511a6c1fbea075a0fa9af3bea19",
+    "gaussian-blur": "fef4322b59bd4096abdee2c919f73767c6499d84265497ba324d6e9e5cf71fdd",
+    "outline-edge": "f0f77e5ada53f0d51ca4dd49ed1d2cf8342ba687fc1b3c2bcef61e8e99dae16f",
+    "outline-blur": "b05eec94d816c6cd6e6e8b3f92ea14d4534273cbd660b72643ae91df6d11eec2",
+    "outline-overlay": "c64ee72aa022b51990d92057e75ce289cfce672d48226f4e306b771cf239e2c7",
+    "taa": "042dc90643fde2b8167dd754b19e33862ac169d5410890cd73cd73ec699e67e4",
+    "ssao": "9df47c9e659081e79c8a1bc7cd22edd8961a8657942084cc732b5f8c724b9e75",
+    "sao": "57831bee1d187f274212d951d63b8398bd9f9399198715a26b04c4715f403f14",
+    "gtao": "1bb8be5b112ef5d0a39827706fbc954fcd0b0bbb60605e13b13b73f832798440",
+    "ao-denoise": "430a11ba4854f5406dcc1d8b017c9de3c23d3f7f05aee0e95bd1f827436f3048",
+    "ao-upscale": "556d09219018fe35a7051b6feab3d1408857a5360f1b10bf0bed6a80c7ebb579"
+  },
+  "reason": "Preserve fullscreen positions and flipped UVs without dynamically indexing function-local vertex arrays; native multi-view output compatibility."
+}

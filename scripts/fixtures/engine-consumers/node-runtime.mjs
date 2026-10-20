@@ -11,6 +11,19 @@ import { getEngineDiagnosticsSnapshot } from '@haiyue/engine/diagnostics';
 import { Animation3DMixer } from '@haiyue/extensions/animation3d';
 import { createGltfPlugin } from '@haiyue/extensions/gltf';
 import { createGltfAnimation3DRuntime } from '@haiyue/extensions/gltf-animation3d';
+import { GuiToast } from '@haiyue/engine/gui';
+
+let borrowedIconDestroyed = false;
+const toast = new GuiToast({ durationMs: 20, animationMs: 0,
+  icon: { destroy() { borrowedIconDestroyed = true; } } });
+toast.show({ text: 'Saved' });
+toast.advanceAnimation(60000);
+if (!toast.visible) throw new Error('Packed Toast consumed idle time before its first frame.');
+toast.advanceAnimation(20);
+if (toast.visible || borrowedIconDestroyed) throw new Error('Packed Toast lifetime or borrowed icon ownership failed.');
+toast.show({ text: 'Replaced', icon: null });
+toast.hide();
+if (toast.animating) throw new Error('Packed Toast remained active after hide.');
 
 const target = { opacity: 0 };
 const tweens = new TweenManager();
@@ -46,3 +59,8 @@ process.stdout.write(JSON.stringify({
   duration: document.duration,
   tweenOpacity: target.opacity,
 }));
+
+import { createFrameGraphInspector } from '@haiyue/engine/experimental/renderer';
+const inspector = createFrameGraphInspector({});
+if (inspector.snapshot() !== null) throw Error('Packed inspector must start unarmed.');
+inspector.requestCapture(); inspector.clear(); inspector.dispose();

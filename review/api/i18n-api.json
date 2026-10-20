@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "entrypoint": "@haiyue/extensions/i18n",
+  "rootExportsUnchanged": true,
+  "review": "docs/for-ai/adr/0115-optional-i18n-runtime.md",
+  "exports": [
+    {
+      "name": "bindI18nImage",
+      "kind": "value"
+    },
+    {
+      "name": "bindI18nText",
+      "kind": "value"
+    },
+    {
+      "name": "checkLocalePacks",
+      "kind": "value"
+    },
+    {
+      "name": "collectLocaleCharacters",
+      "kind": "value"
+    },
+    {
+      "name": "createI18nTextureLoader",
+      "kind": "value"
+    },
+    {
+      "name": "I18n",
+      "kind": "value"
+    },
+    {
+      "name": "I18nDiagnostic",
+      "kind": "type"
+    },
+    {
+      "name": "I18nEvent",
+      "kind": "type"
+    },
+    {
+      "name": "I18nImageBinding",
+      "kind": "type"
+    },
+    {
+      "name": "I18nImageHandle",
+      "kind": "type"
+    },
+    {
+      "name": "I18nImageLoader",
+      "kind": "type"
+    },
+    {
+      "name": "I18nImageOptions",
+      "kind": "type"
+    },
+    {
+      "name": "I18nOptions",
+      "kind": "type"
+    },
+    {
+      "name": "I18nParams",
+      "kind": "type"
+    },
+    {
+      "name": "I18nTextBinding",
+      "kind": "type"
+    },
+    {
+      "name": "LocalePack",
+      "kind": "type"
+    },
+    {
+      "name": "LocalePackIssue",
+      "kind": "type"
+    },
+    {
+      "name": "LocalePackLoader",
+      "kind": "type"
+    },
+    {
+      "name": "validateLocalePack",
+      "kind": "value"
+    }
+  ]
+}
