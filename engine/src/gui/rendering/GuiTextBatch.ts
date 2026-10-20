@@ -24,6 +24,8 @@ export class GuiTextBatch {
   vertexCount = 0;
   version = 0;
   dirty = true;
+  private scratch = new Float32Array(0);
+  private retainedVertexCount = 0;
 
   clear(): void {
     this.commands.length = 0;
@@ -38,21 +40,31 @@ export class GuiTextBatch {
   }
 
   rebuild(font: BitmapFontData): void {
-    let glyphCount = 0;
-    for (const command of this.commands) {
-      glyphCount += countGlyphs(command, font);
-    }
+    // Layout once, then reuse it for both the size calculation and packing.
+    // Re-evaluate font metrics on rebuild: BitmapFontData is mutable.
+    const layouts = this.commands.map(command => layoutText(command, font));
+    const glyphCount = layouts.reduce((sum, layout) => sum + layout.glyphs.length, 0);
     const vertexCount = glyphCount * VERTICES_PER_GLYPH;
     const requiredFloats = vertexCount * GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex;
-    if (this.vertexData.length < requiredFloats) {
-      this.vertexData = new Float32Array(nextCapacity(requiredFloats));
-    }
+    if (this.scratch.length < requiredFloats) this.scratch = new Float32Array(nextCapacity(requiredFloats));
     let offset = 0;
-    for (const command of this.commands) {
-      offset = appendText(this.vertexData, offset, command, font);
+    for (let i = 0; i < layouts.length; i++) {
+      const layout = layouts[i]!, command = this.commands[i]!;
+      for (const glyph of layout.glyphs) {
+        offset = pushGlyph(this.scratch, offset, glyph.x0, glyph.y0, glyph.x1, glyph.y1,
+          glyph.u0, glyph.v0, glyph.u1, glyph.v1, command.color,
+          layout.clipX0, layout.clipY0, layout.clipX1, layout.clipY1);
+      }
     }
-    this.vertexCount = vertexCount;
-    this.version++;
+    let changed = vertexCount !== this.retainedVertexCount;
+    for (let i = 0; !changed && i < requiredFloats; i++) changed = this.vertexData[i] !== this.scratch[i];
+    if (changed) {
+      const previous = this.vertexData;
+      this.vertexData = this.scratch;
+      this.scratch = previous;
+      this.version++;
+    }
+    this.retainedVertexCount = this.vertexCount = vertexCount;
     this.dirty = false;
   }
 }
@@ -79,18 +91,6 @@ function measureGuiLineWidth(text: string, font: BitmapFontData, fontSize: numbe
     previousCode = code;
   }
   return width;
-}
-
-function countGlyphs(command: GuiTextCommand, font: BitmapFontData): number {
-  return layoutText(command, font).glyphs.length;
-}
-
-function appendText(data: Float32Array, offset: number, command: GuiTextCommand, font: BitmapFontData): number {
-  const layout = layoutText(command, font);
-  for (const glyph of layout.glyphs) {
-    offset = pushGlyph(data, offset, glyph.x0, glyph.y0, glyph.x1, glyph.y1, glyph.u0, glyph.v0, glyph.u1, glyph.v1, command.color, layout.clipX0, layout.clipY0, layout.clipX1, layout.clipY1);
-  }
-  return offset;
 }
 
 interface LaidOutGlyph {
