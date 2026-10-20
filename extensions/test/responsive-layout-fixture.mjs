@@ -46,18 +46,18 @@ export function responsiveLayoutFixture() {
 export async function loadResponsiveLayoutModules(workspace) {
   const [specRoot, runtimeRoot] = await Promise.all([
     transpileTree(new URL('../../animation-spec/src/', import.meta.url)),
-    transpileTree(new URL('../src/animation/', import.meta.url))
+    transpileTree(new URL('../src/', import.meta.url), ['animation/', 'layout/'], workspace?.evaluatorSource)
   ]);
   const [spec, layoutRuntime, textRuntime] = await Promise.all([
     import(new URL('layout2d/parameterized/index.js', specRoot).href),
-    import(new URL('layout/parameterized/index.js', runtimeRoot).href),
-    import(new URL('text/parameterized/index.js', runtimeRoot).href)
+    import(new URL('animation/layout/parameterized/index.js', runtimeRoot).href),
+    import(new URL('animation/text/parameterized/index.js', runtimeRoot).href)
   ]);
   void workspace;
   return { spec, runtime: { ...layoutRuntime, ...textRuntime } };
 }
 
-async function transpileTree(sourceUrl) {
+async function transpileTree(sourceUrl, prefixes, evaluatorSource) {
   const { mkdtemp, mkdir, readFile, readdir, writeFile } = await import('node:fs/promises');
   const { tmpdir } = await import('node:os');
   const path = await import('node:path');
@@ -65,9 +65,12 @@ async function transpileTree(sourceUrl) {
   const ts = await import('typescript');
   const sourceRoot = fileURLToPath(sourceUrl), temporary = await mkdtemp(path.join(tmpdir(), 'haiyue-layout-test-'));
   for (const file of (await walk(sourceRoot, readdir, path)).filter(file => file.endsWith('.ts'))) {
+    if (prefixes && !prefixes.some(prefix => path.relative(sourceRoot,file).replaceAll('\\','/').startsWith(prefix))) continue;
     const output = path.join(temporary, path.relative(sourceRoot, file).replace(/\.ts$/, '.js'));
     await mkdir(path.dirname(output), { recursive: true });
-    const compiled = ts.transpileModule(await readFile(file, 'utf8'), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
+    const relative = path.relative(sourceRoot,file).replaceAll('\\','/');
+    const source = typeof evaluatorSource==='string'&&relative==='animation/layout/parameterized/LayoutEvaluator.ts'?evaluatorSource:await readFile(file,'utf8');
+    const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
     await writeFile(output, compiled);
   }
   return new URL(`file:///${temporary.replaceAll('\\', '/')}/`);

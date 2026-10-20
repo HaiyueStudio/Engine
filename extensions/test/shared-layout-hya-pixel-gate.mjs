@@ -1,0 +1,20 @@
+import {execFileSync} from 'node:child_process';
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {loadResponsiveLayoutModules,responsiveLayoutFixture} from './responsive-layout-fixture.mjs';
+import {cases,documentFor} from '../../scripts/fixtures/layout-contracts/cases.mjs';
+import {runChromeWebGpuFixture} from '../../scripts/webgpu-gate/chrome-runner.mjs';
+const root=fileURLToPath(new URL('../..',import.meta.url)),build=resolve(root,'artifacts/engine-0.2.2/g02/hya-layout-build');
+execFileSync(process.execPath,[resolve(root,'node_modules/typescript/bin/tsc'),'--target','ESNext','--module','ESNext','--moduleResolution','bundler','--strict','--noUncheckedIndexedAccess','--exactOptionalPropertyTypes','--skipLibCheck','--types','@webgpu/types','--rootDir',resolve(root,'extensions/src'),'--outDir',build,resolve(root,'extensions/src/animation/layout/parameterized/index.ts')],{cwd:root,stdio:'pipe'});
+const {spec}=await loadResponsiveLayoutModules(),before=JSON.parse(readFileSync(resolve(root,'artifacts/engine-0.2.2/g02/hya-before.json'),'utf8'));
+if(before.observations.length!==7)throw Error('Incomplete pre-migration reference');
+const inputs=before.observations.map(c=>({id:c.id,request:c.request,reference:c.evaluation,document:spec.parseResponsiveLayoutDocument(cases.some(x=>x.id===c.id)?documentFor(responsiveLayoutFixture(),cases.find(x=>x.id===c.id)):responsiveLayoutFixture())}));
+mkdirSync(resolve(build,'..'),{recursive:true});const inputPath=resolve(build,'../hya-pixel-input.json');writeFileSync(inputPath,JSON.stringify({cases:inputs}));
+let result;try{result=await runChromeWebGpuFixture({root,fixture:'extensions/test/shared-layout-hya-pixel.html',mounts:[{prefix:'/hya-layout-build',directory:build}],timeoutMs:90000,acceptedStatuses:['passed','failed']});}catch(error){result={status:'failed',error:String(error.stack??error),browserFailure:error.browserFailure};}
+const sha=p=>createHash('sha256').update(readFileSync(resolve(root,p))).digest('hex');
+const output=resolve(build,`../hya-pixels-${Date.now()}.json`);
+writeFileSync(output,JSON.stringify({schemaVersion:1,generatedAt:new Date().toISOString(),sourceRevision:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),workingTree:execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}),inputSha256:sha('artifacts/engine-0.2.2/g02/hya-pixel-input.json'),referenceSha256:sha('artifacts/engine-0.2.2/g02/hya-before.json'),runtimeFiles:Object.fromEntries(['extensions/src/animation/layout/parameterized/LayoutEvaluator.ts','extensions/src/animation/layout/parameterized/SharedLayoutAdapter.ts','extensions/src/animation/layout/parameterized/LayoutGpuRenderer.ts'].map(p=>[p,sha(p)])),...result},null,2)+'\n');
+console.log(JSON.stringify({output,status:result.status,cases:result.cases,error:result.error}));
+if(result.status!=='passed'||result.cases!==7||result.results.some(x=>x.differentBytes!==0||x.opaquePixels<=0))throw Error('Migrated HYA pixel comparison failed: '+output);

@@ -1,0 +1,446 @@
+{
+  "schemaVersion": 1,
+  "contractId": "engine-022-g01-v1",
+  "status": "frozen",
+  "role": "implementation-contract-and-diagnostic-baseline-not-release-evidence",
+  "targetVersion": "0.2.2",
+  "sourceRevision": "7d0df288285834e2583f563478f322fdf6743c09",
+  "releaseTag": "v0.2.1",
+  "releaseTagRevision": "e932ef91df917a2d1856155573743f0528035785",
+  "oracle": {
+    "geometryToleranceCssPx": 0.02,
+    "textMetrics": "injected-identical-metrics; geometry oracle uses empty boxes",
+    "browserVersions": "record full actual userAgent per capture; same binary required for subsequent comparison",
+    "dpr": [
+      1,
+      2
+    ],
+    "boxSizing": "border-box",
+    "cssAutoMinimum": "explicit minWidth/minHeight default 0; oracle resets them to 0"
+  },
+  "layout": {
+    "lengthUnits": [
+      "px",
+      "percent",
+      "auto"
+    ],
+    "edgeOrder": [
+      "top",
+      "right",
+      "bottom",
+      "left"
+    ],
+    "percentScale": 100,
+    "finiteOnly": true,
+    "negativeAllowed": [
+      "margin",
+      "inset"
+    ],
+    "minWinsOverMax": true,
+    "indefinitePercent": "intrinsic pass treats percentage as auto; final pass resolves only definite containing dimension; cycle raises LayoutError",
+    "percentEdgesReference": "containing inline width for all margin/padding percentages; insets use their axis",
+    "aspectRatio": "derive only missing axis then clamp; both definite axes override ratio",
+    "rounding": "double precision logical CSS px; no per-node snapping; scissor floors start and ceils end then clamps to target",
+    "maxDepth": 128,
+    "maxNodes": 10000,
+    "maxMeasureEntriesPerNode": 8,
+    "maxConstraintPasses": 4,
+    "invalidInput": "throw typed LayoutError before committing; previous valid result remains intact",
+    "abort": "AbortSignal before/after measure and every bounded traversal chunk; no partial commit"
+  },
+  "flex": {
+    "directions": [
+      "row",
+      "row-reverse",
+      "column",
+      "column-reverse"
+    ],
+    "wrap": [
+      "nowrap",
+      "wrap",
+      "wrap-reverse"
+    ],
+    "defaults": {
+      "grow": 0,
+      "shrink": 1,
+      "basis": "auto",
+      "alignItems": "stretch",
+      "alignContent": "stretch",
+      "justifyContent": "start"
+    },
+    "algorithm": "form lines with hypothetical sizes first; distribute grow/shrink per line, freeze clamped items and redistribute; scaled shrink weight = shrink * flex base; justify only remaining space after flexing",
+    "unsupported": [
+      "baseline",
+      "order",
+      "auto margins",
+      "visibility collapse",
+      "writing-mode"
+    ]
+  },
+  "grid": {
+    "tracks": "explicit px/percent/fr and minmax(px-or-percent,px-or-percent-or-fr); minimum cannot be fr; fixed maximum below minimum becomes minimum",
+    "placement": "zero-based column/row, positive spans; row-major sparse auto placement skipping occupied cells; no implicit tracks; reject overflow or overlap",
+    "gaps": "subtract gaps before fr allocation; include intervening gaps in span",
+    "unsupported": [
+      "subgrid",
+      "masonry",
+      "auto-fit",
+      "auto-fill",
+      "dense",
+      "min-content/max-content tracks",
+      "named lines"
+    ]
+  },
+  "hya": {
+    "format": "haiyue-responsive-layout-2d",
+    "version": 1,
+    "profile": "hya-v1",
+    "edgeOrder": [
+      "left",
+      "top",
+      "right",
+      "bottom"
+    ],
+    "gapOrder": [
+      "main-x",
+      "main-y"
+    ],
+    "percentScale": 100,
+    "mapping": "point->px, hug->auto, fraction/fill main-axis->grow weight with zero basis; grid fraction->fr; old missing shrink -> 0",
+    "legacyDifferences": [
+      "grid-gap",
+      "grid-track-max",
+      "flex-clamp-redistribution",
+      "flex-wrap-line-justify"
+    ],
+    "compatibility": "one shared solver with explicit hya-v1 compatibility switches at documented phases; old documents retain observed geometry; gui-v1 applies corrected semantics; no second solver or silent format change"
+  },
+  "region": {
+    "updateModes": [
+      "demand",
+      "once",
+      "continuous",
+      "disabled"
+    ],
+    "visibilityGate": "independent boolean supplied by host/compositor",
+    "clearModes": [
+      "on-update",
+      "once",
+      "never-after-initialization"
+    ],
+    "initialization": "always initialize a new target before sampling, regardless of clear/update preference",
+    "onceConsumption": "after successful submitted update; cancelled/lost/hidden requests remain pending",
+    "pixelStorage": "owned persistent targets, never canvas previous texture",
+    "physicalRect": "floor(min*DPR), ceil(max*DPR), intersect target; input inverse uses unsnapped logical rect",
+    "alpha": "premultiplied linear internal compositing; output conversion exactly once",
+    "samples": [
+      1,
+      4
+    ],
+    "loadStore": "load valid retained color, store retained outputs; resolve full attachment considered; disable partial-MSAA path until pixel evidence",
+    "idle": "no presentation acquisition/encoding/submission when all regions valid and inactive; independent business clock",
+    "cacheLimit": {
+      "maxRegions": 8,
+      "maxRetainedColorBytes": 67108864,
+      "include": "all live cached colors, MSAA colors, resolves and retirement overlap; depth counted separately in total GPU resource budget",
+      "overflow": "explicit diagnostic and direct redraw fallback; never invisible eviction",
+      "retire": "after last in-flight submission, same owner/device generation"
+    },
+    "dirtyRect": "optional after whole-region correctness; effects expand dependencies or force full redraw"
+  },
+  "input": {
+    "routing": "GUI consumes before scene default/unhandled actions; device state sampling remains shared",
+    "pointerFilters": [
+      "stop",
+      "pass",
+      "ignore"
+    ],
+    "capture": "one owner per pointerId until up/cancel; cancel on blur/pause/removal/modal block",
+    "focusModes": [
+      "none",
+      "click",
+      "all"
+    ],
+    "tabOrder": "explicit tabIndex then stable tree order; negative excludes sequential traversal; disabled/hidden excluded",
+    "directionalOrder": "explicit neighbour then forward half-plane by angle, distance and stable ID; visual row reversal does not reorder tree",
+    "modal": "trap scope and restore previous valid focus else first eligible element",
+    "navigation": "InputMap UI actions; active text/slider consumes dedicated keys before navigation"
+  },
+  "text": {
+    "storedAndPublicIndexUnit": "UTF-16, preserved API compatibility",
+    "interactiveBoundary": "extended grapheme cluster UAX29 Unicode 15.1 corpus; platform segmenter allowed only if corpus passes; no font parser dependency",
+    "normalizeIndex": "clamp then snap backward to nearest grapheme boundary; selection nonempty expands start backward/end forward",
+    "deletion": "one extended grapheme cluster; malformed lone surrogate cannot be created by editing valid input",
+    "ime": "preedit separate from committed value; composition commits once; cancellation restores prior selection; focus loss commits current native preedit only if host confirms, otherwise cancels",
+    "async": "generation-token guarded clipboard and host callbacks",
+    "native": "host owns platform text responder/IME, caret screen rectangle and keyboard inset; Engine owns edit model; no UIKit/Android SDK in Engine"
+  },
+  "theme": {
+    "priorityLowToHigh": [
+      "default",
+      "inherited resource",
+      "control-type resource",
+      "local resource",
+      "local style"
+    ],
+    "stateOverlayLowToHigh": [
+      "normal",
+      "hover",
+      "focus",
+      "pressed",
+      "disabled"
+    ],
+    "metrics": "font/size/icon/contentInsets change layout and paint; colors only paint",
+    "ownership": "borrow caller resources; own generated caches; unsubscribe before replacement/dispose",
+    "nineSlice": "shared pure computeNineSlicePatches in Engine geometry; HYA uses public geometry export; scale opposite borders proportionally when destination smaller than sum; allow atlas UV subrect; old HYA repeat/mirror maintained"
+  },
+  "composites": {
+    "owner": "GUI layout extension owns SplitPanel/TabContainer composition; Engine owns primitive GuiNineSlice, theme, focus, text and DnD protocols",
+    "split": "ratio 0..1; clamp to child minima; insufficient space overflows content and enables parent scroll; no negative sizes",
+    "tabs": "stable page IDs; active-only hit/layout/paint; preserve pending invalidation and business state; callbacks/transients not serialized"
+  },
+  "dragDrop": {
+    "owner": "Engine GUI protocol with optional extension composition",
+    "payload": "unknown caller-owned data, no cloning/OS handles",
+    "thresholdCssPx": 6,
+    "drop": "revalidate target then exactly once; reject/cancel zero commits",
+    "keyboard": "pick up focused source, navigate eligible target, confirm/cancel via UI actions",
+    "cancel": [
+      "Escape",
+      "pointercancel",
+      "source removed",
+      "target removed",
+      "region hidden",
+      "blocking modal",
+      "blur",
+      "pause"
+    ],
+    "preview": "global overlay, ignores hit testing, borrowed resource cleanup"
+  },
+  "sampling": {
+    "warmup": 12,
+    "samplesPerCohort": 30,
+    "rounds": 3,
+    "order": "round 2 reverse workload order",
+    "mutationsPercent": [
+      0,
+      1,
+      10
+    ],
+    "timing": "CPU wall, per-phase raw samples; no GPU timing from audit device",
+    "workloads": [
+      {
+        "id": "hud",
+        "nodes": 128,
+        "textRatio": 0.25,
+        "class": "production",
+        "tree": "one root, flat fixed 40x24 children, wrap, gap 4; fixed synthetic fixture text"
+      },
+      {
+        "id": "pressure",
+        "nodes": 1000,
+        "textRatio": 0.25,
+        "class": "stress",
+        "tree": "same deterministic generator"
+      },
+      {
+        "id": "diagnostic",
+        "nodes": 10000,
+        "textRatio": 0.25,
+        "class": "diagnostic",
+        "tree": "same deterministic generator"
+      }
+    ]
+  },
+  "acceptance": {
+    "staticSolveCount": 0,
+    "visualOnlySolveCount": 0,
+    "staticGuiDrawCountWithContinuousScene": 0,
+    "staticAdditionalUploads": 0,
+    "idlePresentationSubmitCount": 0,
+    "destroyResidue": 0,
+    "oneValidResultPerMutation": true,
+    "framePacingReference": "config/framegraph-production-021.json; same hard P95/P99/long-frame budgets, per target device refresh class",
+    "gpuAndOtherBudgets": "existing release budgets and named investigations unchanged",
+    "newCpuLimits": "fixed before G02; target-host microphase targets supported by G01 direct-GUI diagnostic; full native production qualification remains required",
+    "releaseWiring": "G10 validates real artifacts and wires contract; G01 runner is diagnostic and cannot grant release qualification",
+    "cpuPhaseLimitsMs": {
+      "hud": {
+        "layoutP95": 2,
+        "measureP95": 2,
+        "guiUpdateSubmitP95": 4
+      },
+      "pressure": {
+        "layoutP95": 8,
+        "measureP95": 8,
+        "guiUpdateSubmitP95": null
+      },
+      "diagnostic": {
+        "layoutP95": null,
+        "measureP95": null,
+        "guiUpdateSubmitP95": null
+      }
+    },
+    "cpuLimitRationale": "60Hz frame is 16.67ms: HUD layout and measure each 1/8 frame (2ms), GUI 1/4 frame (4ms); pressure phases each half frame (8ms), named G01 host only; 10k diagnostic no fps promise. Legacy full HYA evaluation includes animation/text and is not pure-layout timing."
+  },
+  "versions": {
+    "publish": {
+      "@haiyue/engine": "0.2.2",
+      "@haiyue/extensions": "0.2.2"
+    },
+    "unchanged": {
+      "@haiyue/shader-language": "0.2.1"
+    },
+    "extensionsEnginePeer": ">=0.2.2 <0.3.0",
+    "consumers": "Games LED Sudoku and Native examples exact lock to qualified 0.2.2 tarball/registry; unrelated consumers remain unchanged; no cross-repo source imports",
+    "formatChanges": false,
+    "thirdPartyDependenciesAdded": false,
+    "conditionalPublish": {
+      "@haiyue/animation-spec": {
+        "version": "0.2.2",
+        "condition": "G10 admission adds public HYA schema/parser/codec entry; exact symbols and package scope frozen before implementation"
+      }
+    }
+  },
+  "apiDraft": "review/engine-0.2.2/api-draft.d.ts",
+  "review": "review/engine-0.2.2/README.md",
+  "deviceMatrix": {
+    "inherit": "config/release-matrix.json",
+    "engineRelease": "one existing native qualification path (Windows Chrome+Edge discrete or macOS Chrome Metal); legacy Intel remains extended",
+    "additionalRequired": [
+      {
+        "id": "browser-ime",
+        "owner": "g06-text-input",
+        "evidence": "real Windows or macOS IME composition and keyboard navigation"
+      },
+      {
+        "id": "ios-native-input",
+        "owner": "g06-text-input",
+        "evidence": "physical iPhone Native host, Chinese/Latin/emoji preedit/commit/cancel, selection, rotate, keyboard inset, suspend/resume"
+      },
+      {
+        "id": "gamepad-navigation",
+        "owner": "g05-gui-input-navigation",
+        "evidence": "physical controller complete production UI workflow"
+      }
+    ],
+    "integrationOwner": "g13-integration-release",
+    "unavailable": "explicit pending; no desktop screenshot or synthetic input substitution"
+  },
+  "apiAllocations": {
+    "@haiyue/engine": {
+      ".": {
+        "baseline": 30,
+        "additions": [],
+        "maximum": 30
+      },
+      "./core": {
+        "baseline": 68,
+        "additions": [
+          "RegionUpdateMode",
+          "RenderRegionOptions",
+          "RenderRegion"
+        ],
+        "maximum": 71
+      },
+      "./geometry": {
+        "baseline": 53,
+        "additions": [
+          "NineSliceOptions",
+          "NineSlicePatch",
+          "computeNineSlicePatches"
+        ],
+        "maximum": 56
+      },
+      "./gui": {
+        "baseline": 86,
+        "additions": [
+          "GuiMeasureConstraint",
+          "GuiLayoutDelegate",
+          "GuiInvalidationReason",
+          "GuiInvalidation",
+          "GuiPointerFilter",
+          "GuiFocusMode",
+          "GuiFocusOptions",
+          "GuiActionEvent",
+          "GuiTextEdit",
+          "GuiTextComposition",
+          "GuiTextInputSession",
+          "GuiTextInputHost",
+          "GuiThemeResource",
+          "GuiThemeState",
+          "GuiSkin",
+          "GuiNineSliceOptions",
+          "GuiNineSlice",
+          "GuiDragSource",
+          "GuiDropTarget",
+          "GuiDragSession"
+        ],
+        "maximum": 106
+      }
+    },
+    "@haiyue/extensions": {
+      "./layout": {
+        "baseline": 0,
+        "additions": [
+          "LayoutLength",
+          "LayoutEdges",
+          "LayoutTrack",
+          "LayoutStyle",
+          "LayoutNode",
+          "LayoutConstraints",
+          "LayoutMeasure",
+          "LayoutRect",
+          "LayoutResult",
+          "LayoutLimits",
+          "LayoutSession",
+          "createLayoutSession",
+          "LayoutError"
+        ],
+        "maximum": 13
+      },
+      "./gui-layout": {
+        "baseline": 0,
+        "additions": [
+          "GuiLayoutOptions",
+          "GuiLayoutBinding",
+          "attachGuiLayout",
+          "GuiContainerPreset",
+          "createGuiContainer",
+          "GuiLayoutMeasurement",
+          "GuiSplitPanelOptions",
+          "GuiSplitPanel",
+          "GuiTabPage",
+          "GuiTabContainerOptions",
+          "GuiTabContainer"
+        ],
+        "maximum": 11
+      }
+    }
+  },
+  "apiAllocationRule": "Named proposed symbols only; no extra reserve for new slices. Existing classes gain compatible optional methods only. G10 updates active budgets atomically after actual builds, capability consumers, docs and examples pass. No automatic api:update authorization.",
+  "requiredCorrectnessCaseIds": [
+    "grid-gap",
+    "grid-track-max",
+    "flex-clamp-redistribution",
+    "flex-wrap-line-justify"
+  ],
+  "hyaProductionScope": {
+    "addedByUserAt": "2026-10-20",
+    "ownerGoals": [
+      "g10-hya-capability-contracts",
+      "g11-hya-production-runtime",
+      "g12-hya-production-qualification"
+    ],
+    "capabilityAdmission": "G10 freezes exact focused exports, per-symbol budget and versioned composition contract before G11; no automatic export of all private modules",
+    "production": "real glyph/image/N-slice, data/state/layout/input/semantics/audio composition, selected vector-paint and text-animator channels",
+    "performance": "incremental evaluation and capacity-based buffer reuse, real licensed corpus and lifecycle evidence",
+    "excluded": [
+      "Rive converter branch merge",
+      "arbitrary Rive full-fidelity",
+      "general script VM",
+      "custom WGSL runtime admission",
+      "Editor import/reimport"
+    ]
+  }
+}
