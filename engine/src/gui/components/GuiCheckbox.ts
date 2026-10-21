@@ -1,4 +1,6 @@
 import { GuiElement } from './GuiElement';
+import {activateGuiElement} from '../input/GuiActivation';
+import type {GuiActionEvent} from '../GuiTypes';
 import { GuiDirtyFlags, GuiElementOptions, GuiPointerEvent, GuiValueChangeHandler } from '../GuiTypes';
 
 export interface GuiCheckboxOptions extends GuiElementOptions {
@@ -8,12 +10,16 @@ export interface GuiCheckboxOptions extends GuiElementOptions {
 }
 
 export class GuiCheckbox extends GuiElement {
+  override handleAction(event: GuiActionEvent): void {
+    super.handleAction(event);
+    if (!event.consumed && event.action === 'confirm') activateGuiElement(this, event);
+  }
   checked: boolean;
   label: string;
   onChange: GuiValueChangeHandler<boolean> | null;
 
   constructor(options: GuiCheckboxOptions = {}) {
-    super({ width: 120, height: 28, ...options });
+    super({ width: 120, height: 28, focus: {mode: 'all'}, ...options });
     this.checked = options.checked ?? false;
     this.label = options.label ?? '';
     this.onChange = options.onChange ?? null;

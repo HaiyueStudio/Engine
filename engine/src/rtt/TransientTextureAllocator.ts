@@ -55,7 +55,7 @@ export class TransientTextureAllocator {
     this.collect();
   }
 
-  acquire(requests: readonly TransientTextureRequest[], context: Pick<RenderCommandContext, 'device' | 'encoder' | 'afterSubmit' | 'frameData'>) {
+  acquire(requests: readonly TransientTextureRequest[], context: Pick<RenderCommandContext, 'device' | 'encoder' | 'afterSubmit' | 'afterCancel' | 'frameData'>) {
     if (this.destroyed || context.device !== this.device || !context.afterSubmit) throw Error('Transient textures require a live device and submission boundary.');
     // Validate every descriptor and interval before any allocation or mutation.
     const keys = requests.map(request => {
@@ -63,7 +63,8 @@ export class TransientTextureAllocator {
       return textureKey(request.descriptor) + (request.compatibility ?? "");
     });
     if (new Set(requests.map(r => r.name)).size !== requests.length) throw Error('Duplicate transient texture name.');
-    const frame = context.encoder;
+    const encoder=context.encoder;
+    const frame = encoder;
     this.beginFrame(frame);
     const selected = new Map<Physical, number>();
     const created = new Set<Physical>();
@@ -89,10 +90,10 @@ export class TransientTextureAllocator {
         const dedicatedKey = `${request.name}:${key}`;
         let item = resolved.get(slot) ?? this.physical.find(candidate => !candidate.retired && candidate.key === key &&
           !candidate.held &&
-          (!candidate.pending.size || (candidate.pending.size === 1 && candidate.pending.has(context.encoder))) &&
+          (!candidate.pending.size || (candidate.pending.size === 1 && candidate.pending.has(encoder))) &&
           (this.reuse || this.dedicated.get(dedicatedKey) === candidate.id));
         if (decisions) decisions.push(resolved.has(slot) ? 'non-overlapping-lifetime-alias' : item ? 'compatible-available-texture' :
-          this.physical.some(p => p.key === key && p.pending.size && !p.pending.has(context.encoder)) ? 'different-unsubmitted-encoder' :
+          this.physical.some(p => p.key === key && p.pending.size && !p.pending.has(encoder)) ? 'different-unsubmitted-encoder' :
           this.physical.some(p => p.key === key && p.held) ? 'overlapping-interval-or-live-lease' : 'no-compatible-available-texture');
         if (!item) {
           if (this.physical.length >= this.maximumTextures) throw Error('Transient texture capacity exceeded.');
@@ -121,11 +122,12 @@ export class TransientTextureAllocator {
       this.collect(); throw error;
     }
     for (const item of selected.keys()) {
-      if (item.pending.has(context.encoder) || item.submitted.has(context.encoder)) continue;
-      item.pending.add(context.encoder);
+      if (item.pending.has(encoder) || item.submitted.has(encoder)) continue;
+      item.pending.add(encoder);
+      context.afterCancel?.(() => { item.pending.delete(encoder); this.collect(); });
       context.afterSubmit(queue => {
-        item.pending.delete(context.encoder); item.submitted.add(context.encoder); this.refresh();
-        const done = () => { item.submitted.delete(context.encoder); this.collect(); };
+        item.pending.delete(encoder); item.submitted.add(encoder); this.refresh();
+        const done = () => { item.submitted.delete(encoder); this.collect(); };
         void queue.onSubmittedWorkDone().then(done, done);
       });
     }

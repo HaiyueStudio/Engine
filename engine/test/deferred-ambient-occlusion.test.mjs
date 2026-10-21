@@ -74,3 +74,13 @@ test('AO storage capacity fails explicitly before allocating a visibility slot',
     assert.equal(f.owner._slots.size,0);assert.equal(f.created.length,0);
   }finally{f.destroy();}
 });
+
+
+test('cancelled AO visibility and neutral records retire without a fake submission',()=>{
+ const f=setup();try{
+  const cancel=[],ctx={...f.context(),afterCancel:cb=>cancel.push(cb)};
+  f.owner.record(ctx,'view',17,9,f.input);f.owner.record(ctx,'neutral',17,9);
+  f.owner.destroy();assert.ok(f.owner._slots.size>0);assert.equal(f.owner.neutral.buffer.destroyed,false);
+  cancel.forEach(cb=>cb());assert.equal(f.owner._slots.size,0);assert.equal(f.owner.neutral.buffer.destroyed,true);assert.equal(f.owner._transientTextures.stats.physicalBytes,0);
+ }finally{f.destroy();}
+});

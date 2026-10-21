@@ -51,9 +51,10 @@ export class DeferredAmbientOcclusion {
 
   record(context: RenderCommandContext, viewKey: string, width: number, height: number,
     input?: DeferredAmbientOcclusionInput): GPUBufferBinding {
+    const encoder=context.encoder;
     if (this._destroyed || context.device !== this._device) throw new Error('Deferred AO owner is unavailable.');
     if (!context.afterSubmit) throw new Error('Deferred AO requires an afterSubmit lifecycle hook.');
-    this._transientTextures.beginFrame(context.encoder);
+    this._transientTextures.beginFrame(encoder);
     const sources = input?.passes.filter(pass => getLightingAmbientOcclusion(pass)) ?? [];
     const liveViews = context.viewFamily ? new Set(context.viewFamily.views.map(view => view.key)) : null;
     for (const slot of this._slots) {
@@ -61,10 +62,11 @@ export class DeferredAmbientOcclusion {
         (slot.width !== width || slot.height !== height || !sameSources(slot.sources, sources)))) this._retire(slot);
     }
     if (!sources.length) {
-      if (!this._neutralEncoders.has(context.encoder)) {
-        this._neutralEncoders.add(context.encoder);
+      if (!this._neutralEncoders.has(encoder)) {
+        this._neutralEncoders.add(encoder);
+        context.afterCancel?.(() => {this._neutralEncoders.delete(encoder);this._releaseNeutral();});
         context.afterSubmit(queue => {
-          const done = () => { this._neutralEncoders.delete(context.encoder); this._releaseNeutral(); };
+          const done = () => { this._neutralEncoders.delete(encoder); this._releaseNeutral(); };
           void queue.onSubmittedWorkDone().then(done, done);
         });
       }
@@ -83,10 +85,11 @@ export class DeferredAmbientOcclusion {
       slot = this._create(viewKey, width, height, sources); this._slots.add(slot);
     }
     const selected = slot;
-    selected.pending.add(context.encoder); selected.encoders.add(context.encoder);
+    selected.pending.add(encoder); selected.encoders.add(encoder);
+    context.afterCancel?.(() => {selected.pending.delete(encoder);selected.encoders.delete(encoder);if(selected.retired)this._retire(selected);});
     context.afterSubmit(queue => {
-      selected.pending.delete(context.encoder);
-      const done = () => { selected.encoders.delete(context.encoder); if (selected.retired) this._retire(selected); };
+      selected.pending.delete(encoder);
+      const done = () => { selected.encoders.delete(encoder); if (selected.retired) this._retire(selected); };
       void queue.onSubmittedWorkDone().then(done, done);
     });
     const scene = input!.prepare();
@@ -101,15 +104,15 @@ export class DeferredAmbientOcclusion {
     for (const [index, pass] of selected.passes.entries()) {
       getLightingAmbientOcclusion(sources[index]!)!.configure(pass, index === 0);
       pass.setSceneTextures(scene);
-      setPostProcessSubmission(pass, callback => context.afterSubmit!(callback));
+      setPostProcessSubmission(pass, callback => context.afterSubmit!(callback),context.afterCancel?callback=>context.afterCancel!(callback):undefined);
       try {
         // The first pass ignores source color in occlusion display mode; subsequent AO passes multiply visibility.
         const source = index === 0 ? scene.normal : visibility.assignments[(index - 1) % 2]!.texture;
-        pass.apply(context.encoder, source, visibility.assignments[index % 2]!.view, this._device);
+        pass.apply(encoder, source, visibility.assignments[index % 2]!.view, this._device);
         getLightingAmbientOcclusion(sources[index]!)!.recorded?.(pass);
       } finally { pass.setSceneTextures({}); setPostProcessSubmission(pass); }
     }
-    context.encoder.copyTextureToBuffer({ texture: visibility.assignments[(sources.length - 1) % 2]!.texture },
+    encoder.copyTextureToBuffer({ texture: visibility.assignments[(sources.length - 1) % 2]!.texture },
       { buffer: selected.buffer, offset: 256, bytesPerRow: selected.bytesPerRow }, [width, height]);
     return { buffer: selected.buffer };
     } finally { visibility.release(); }

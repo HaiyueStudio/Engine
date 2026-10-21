@@ -12,6 +12,7 @@ import { getAmbientOcclusionShader } from './AmbientOcclusionShader';
 import { PrecompiledUniformBlockWriter } from '../shader/PrecompiledShaderRuntime';
 import { registerLightingAmbientOcclusion } from './LightingAmbientOcclusion';
 import { mat4 } from 'wgpu-matrix';
+import {PostProcessViewUniforms} from './PostProcessViewUniforms';
 
 type AmbientOcclusionAlgorithm = 'gtao' | 'sao' | 'ssao';
 type AmbientOcclusionQuality = 'low' | 'medium' | 'high';
@@ -92,6 +93,7 @@ class AmbientOcclusionPass extends PostProcessPass {
   private _upscaleBindGroupLayout!: GPUBindGroupLayout;
   private _sampler!: GPUSampler;
   private _uniformBuffer!: GPUBuffer;
+  private readonly _viewUniforms=new PostProcessViewUniforms();
   private _uniformWriter!: PrecompiledUniformBlockWriter;
   private _rawOcclusionTexture!: GPUTexture;
   private _rawOcclusionView!: GPUTextureView;
@@ -207,11 +209,7 @@ class AmbientOcclusionPass extends PostProcessPass {
       addressModeU: 'clamp-to-edge',
       addressModeV: 'clamp-to-edge',
     });
-    this._uniformBuffer = device.createBuffer({
-      label: `${this.label}Pass.parameters`,
-      size: this._uniformWriter.byteLength,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+    this._uniformBuffer=this._viewUniforms.prepare(device,`${this.label}Pass.parameters`,this._uniformWriter.byteLength);
   }
 
   override contributePipelineWarmup(plan: PipelineWarmupPlan, device: GPUDevice): void {
@@ -346,9 +344,7 @@ class AmbientOcclusionPass extends PostProcessPass {
     this._denoisePipeline = null;
     this._upscalePipeline = null;
     this._releaseOwnedScratch();
-    const uniform = this._uniformBuffer;
-    const release = () => uniform?.destroy();
-    if (!deferPostProcessDisposal(this, release)) release();
+    this._viewUniforms.destroy();
     this._sceneTextures = null;
     this._invalidateBindings();
   }
@@ -376,7 +372,8 @@ class AmbientOcclusionPass extends PostProcessPass {
       writer.setF32('projectionMatrix', index, frame.projectionMatrix[index] ?? 0);
       writer.setF32('inverseProjectionMatrix', index, this._inverseProjectionMatrix[index] ?? 0);
     }
-    device.queue.writeBuffer(this._uniformBuffer, 0, writer.buffer);
+    const uniform=this._viewUniforms.write(this,frame,writer.buffer);
+    if(uniform!==this._uniformBuffer){this._uniformBuffer=uniform;this._invalidateBindings();}
   }
 
   private _occlusionPipelineDescriptor(): GPURenderPipelineDescriptor {

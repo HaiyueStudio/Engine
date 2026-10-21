@@ -163,3 +163,4 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0130：PBR Windows 独立整页参考；固定七组原始数据与修复字节后限定复核](0130-pbr-windows-reference-evidence-reuse.md)
 - [0131：FrameGraph 下载策略绑定独立页面上下文；相同固定七组限定复核](0131-framegraph-download-context-evidence-reuse.md)
 - [0132：0.2.2 共享布局、GUI 交互与 HYA 生产边界](0132-gui-layout-interaction-022.md)
+- [0133：区域像素缓存与整帧工作集分别计量](0133-region-cache-working-set-accounting.md)

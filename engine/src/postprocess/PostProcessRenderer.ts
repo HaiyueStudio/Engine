@@ -8,7 +8,8 @@ import type { PostProcessSceneTextures } from './PostProcessPass';
 import { requiredItemAt } from '../math/arrayAccess';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import { getBuiltinPostprocessShader } from './BuiltinPostprocessShader';
-import { setPostProcessSubmission } from './PostProcessSubmission';
+import { setPostProcessSubmission, getPostProcessFrameCancellation, setPostProcessFrameCancellation } from './PostProcessSubmission';
+import {registerPostProcessFrameAbandonment} from './PostProcessHistory';
 
 interface PostProcessSurfaceResources {
   readonly buf0: GPUTexture;
@@ -95,6 +96,7 @@ export class PostProcessRenderer {
     format: GPUTextureFormat = engine.format,
   ): void {
     if (this._prepared) return;
+    registerPostProcessFrameAbandonment(this,token=>{if(this._afterSubmit===token)this._afterSubmit=undefined;});
     this._prepared = true;
     this._engine   = engine;
     this._transientTextures = new TransientTextureAllocator(requireEngineDevice(engine), undefined, 64, 'postprocess');
@@ -163,7 +165,7 @@ export class PostProcessRenderer {
         this._preparedPasses.add(pass);
       }
 
-      setPostProcessSubmission(pass, this._afterSubmit);
+      setPostProcessSubmission(pass, this._afterSubmit, getPostProcessFrameCancellation(this));
       try {
         if (this._afterSubmit) setPostProcessTransientTextures(pass, this._transientTextures!);
         pass.setSceneTextures(sceneTextures);
@@ -187,7 +189,7 @@ export class PostProcessRenderer {
     this._activateSceneAttachments(null);
     const device = requireEngineDevice(this._engine);
     for (const p of this._preparedPasses) {
-      setPostProcessSubmission(p, this._afterSubmit);
+      setPostProcessSubmission(p, this._afterSubmit, getPostProcessFrameCancellation(this));
       try { p.resize(device, format, this._width, this._height); }
       finally { setPostProcessSubmission(p); }
     }
@@ -251,7 +253,7 @@ export class PostProcessRenderer {
     this._surfaceResources.clear();
     this._destroySceneAttachments();
     for (const p of this._preparedPasses) {
-      setPostProcessSubmission(p, this._afterSubmit);
+      setPostProcessSubmission(p, this._afterSubmit, getPostProcessFrameCancellation(this));
       try { p.destroy(); } finally { setPostProcessSubmission(p); }
     }
     this._preparedPasses.clear();
@@ -261,13 +263,14 @@ export class PostProcessRenderer {
     this._buf1 = null;
     this._buf1View = null;
     this._surfaceKey = '';
+    setPostProcessFrameCancellation(this);
   }
 
   private _reconcilePreparedPasses(passes: readonly PostProcessPass[], afterSubmit?: (callback: (queue: GPUQueue) => void) => void): void {
     const activePasses = new Set(passes);
     for (const pass of this._preparedPasses) {
       if (activePasses.has(pass)) continue;
-      setPostProcessSubmission(pass, afterSubmit);
+      setPostProcessSubmission(pass, afterSubmit, getPostProcessFrameCancellation(this));
       try { pass.destroy(); } finally { setPostProcessSubmission(pass); }
       this._preparedPasses.delete(pass);
     }
@@ -318,7 +321,7 @@ export class PostProcessRenderer {
       label: 'PostProcessRenderer.pingPongTexture',
       size:   [this._width, this._height],
       format: this._format,
-      usage:  GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+      usage:  GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC,
     });
     this._buf1View = this._buf1.createView();
     resources.buf1 = this._buf1;

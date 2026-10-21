@@ -57,6 +57,9 @@ export class GuiModal extends GuiElement {
   constructor(options: GuiModalOptions = {}) {
     super({
       id: options.id,
+      ...(options.focus ? {focus: options.focus} : {}),
+      ...(options.pointerFilter ? {pointerFilter: options.pointerFilter} : {}),
+      ...(options.onAction ? {onAction: options.onAction} : {}),
       width: '100%',
       height: '100%',
       visible: options.visible ?? false,

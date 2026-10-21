@@ -11,6 +11,7 @@ export interface KeyboardSnapshot {
 
 interface KeyState {
   pressed: boolean;
+  consumed: boolean;
   downFrame: number;
   upFrame: number;
 }
@@ -48,15 +49,15 @@ export class KeyboardComponent extends Component {
   }
 
   static isPressed(code: string): boolean {
-    return KeyboardComponent._inputMap.matches(code, KeyboardComponent._isKeyPressed);
+    return KeyboardComponent._inputMap.matches(code, KeyboardComponent._isActionKeyPressed);
   }
 
   static wasPressed(code: string): boolean {
-    return KeyboardComponent._inputMap.matches(code, KeyboardComponent._wasKeyPressed);
+    return KeyboardComponent._inputMap.matches(code, KeyboardComponent._wasActionKeyPressed);
   }
 
   static wasReleased(code: string): boolean {
-    return KeyboardComponent._inputMap.matches(code, KeyboardComponent._wasKeyReleased);
+    return KeyboardComponent._inputMap.matches(code, KeyboardComponent._wasActionKeyReleased);
   }
 
   static isKeyPressed(code: string): boolean {
@@ -89,9 +90,9 @@ export class KeyboardComponent extends Component {
 
   static actionSnapshot(): InputActionSnapshot {
     return KeyboardComponent._inputMap.snapshot({
-      pressed: KeyboardComponent._isKeyPressed,
-      down: KeyboardComponent._wasKeyPressed,
-      up: KeyboardComponent._wasKeyReleased,
+      pressed: KeyboardComponent._isActionKeyPressed,
+      down: KeyboardComponent._wasActionKeyPressed,
+      up: KeyboardComponent._wasActionKeyReleased,
     });
   }
 
@@ -190,10 +191,12 @@ export class KeyboardComponent extends Component {
     }
     const state = KeyboardComponent._keys.get(event.code) ?? {
       pressed: false,
+      consumed: false,
       downFrame: -1,
       upFrame: -1,
     };
-    if (!state.pressed) state.downFrame = KeyboardComponent._frame + 1;
+    if (!state.pressed) {state.downFrame = KeyboardComponent._frame + 1;state.consumed = false;}
+    state.consumed ||= InputMap.isEventConsumed(event);
     state.pressed = true;
     KeyboardComponent._keys.set(event.code, state);
   };
@@ -204,9 +207,11 @@ export class KeyboardComponent extends Component {
     }
     const state = KeyboardComponent._keys.get(event.code) ?? {
       pressed: false,
+      consumed: false,
       downFrame: -1,
       upFrame: -1,
     };
+    state.consumed ||= InputMap.isEventConsumed(event);
     state.pressed = false;
     state.upFrame = KeyboardComponent._frame + 1;
     KeyboardComponent._keys.set(event.code, state);
@@ -229,6 +234,18 @@ export class KeyboardComponent extends Component {
 
   private static _wasKeyReleased = (code: string): boolean => {
     return KeyboardComponent._keys.get(code)?.upFrame === KeyboardComponent._frame;
+  };
+
+  private static _isActionKeyPressed = (code: string): boolean => {
+    return !KeyboardComponent._keys.get(code)?.consumed && KeyboardComponent._isKeyPressed(code);
+  };
+
+  private static _wasActionKeyPressed = (code: string): boolean => {
+    return !KeyboardComponent._keys.get(code)?.consumed && KeyboardComponent._wasKeyPressed(code);
+  };
+
+  private static _wasActionKeyReleased = (code: string): boolean => {
+    return !KeyboardComponent._keys.get(code)?.consumed && KeyboardComponent._wasKeyReleased(code);
   };
 
   private static _shouldPreventDefault(event: KeyboardEvent): boolean {

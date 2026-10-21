@@ -9,6 +9,25 @@ function setup() {
   const delegate={measure:()=>({width:0,height:0}),arrange(_root,viewport,commit){calls++;commit(a,{x:viewport.width/2,y:10,width:30,height:20});},dispose(){disposed++;}};
   return {root,a,b,delegate,get calls(){return calls},get disposed(){return disposed}};
 }
+
+test('manual roots keep paint and input invalidation without re-arranging geometry',()=>{
+ const s=setup();s.root.layout(200,100);s.root.clearDirty();const before={...s.a.rect};
+ let calls=0;const layout=s.root.root.layout.bind(s.root.root);s.root.root.layout=(...args)=>{calls++;return layout(...args)};
+ s.a.setStyle({color:'#f02040'});s.a.setDisabled(true);s.a.markDirty();s.root.layout(200,100);
+ assert.equal(calls,0);assert.deepEqual(s.a.rect,before);assert.equal(s.root.dirty,true,'paint must remain pending');
+ s.a.setDisabled(false);s.root.layout(200,100);assert.equal(s.root.hitTest(8,4),s.a);assert.equal(calls,0);
+ s.a.setText('new text');s.root.layout(200,100);assert.equal(calls,1);s.root.clearDirty();
+ s.a.markDirty(1 /* GuiDirtyFlags.Layout */);s.root.layout(200,100);assert.equal(calls,2);s.root.destroy();
+});
+
+test('manual roots still arrange viewport, child and scroll geometry changes',()=>{
+ const root=new GuiRoot(),percent=root.add(new GuiElement({x:'50%',width:'25%',height:8})),scroll=root.add(new GuiScrollView({y:20,width:100,height:40,contentHeight:200})),child=scroll.add(new GuiElement({x:3,y:50,width:20,height:10}));
+ root.layout(200,100);root.clearDirty();assert.equal(percent.rect.x,100);assert.equal(percent.rect.width,50);
+ root.layout(400,100);assert.equal(percent.rect.x,200);assert.equal(percent.rect.width,100);root.clearDirty();
+ const oldY=child.rect.y;scroll.scrollTo(30);root.layout(400,100);assert.equal(child.rect.y,oldY-30);root.clearDirty();
+ const added=root.add(new GuiElement({x:7,width:12,height:8}));root.layout(400,100);assert.equal(added.rect.x,7);assert.equal(root.hitTest(8,4),added);root.clearDirty();
+ root.remove(added);root.layout(400,100);assert.notEqual(root.hitTest(8,4),added);root.destroy();
+});
 test('opt-in delegate owns assigned rectangles, manual siblings keep coordinates and hits share geometry',()=>{
   const s=setup(),remove=s.root.installLayoutDelegate(s.delegate);
   s.root.layout(200,100);

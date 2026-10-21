@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compileBuiltinRenderFamilyV1 } from '../dist/index.js';
+import { compactArtifactLiteral } from './compact-artifact-literal.mjs';
 
 const directory = dirname(fileURLToPath(import.meta.url));
 const root = resolve(directory, '../..');
@@ -73,7 +74,7 @@ async function generateFamily(config, write) {
   ]));
   outputs.set(
     resolve(outputDirectory, `${config.prefix}-artifact.generated.ts`),
-    renderArtifact(compiled.artifact, passFiles, config.typed),
+    renderArtifact(compiled.artifact, passFiles, config.typed, config.id === 'engine-2d-ui'),
   );
   if (write) await mkdir(outputDirectory, { recursive: true });
   const stale = [];
@@ -98,7 +99,7 @@ async function generateFamily(config, write) {
   });
 }
 
-function renderArtifact(value, files, typed) {
+function renderArtifact(value, files, typed, compact = false) {
   const variables = Object.fromEntries(Object.keys(files).map(pass => [pass, sourceVariable(pass)]));
   const tokens = Object.fromEntries(Object.keys(files).map(pass => [pass, `__HAIYUE_SOURCE_${pass}__`]));
   const serializable = {
@@ -108,7 +109,7 @@ function renderArtifact(value, files, typed) {
       { ...entry, code: tokens[pass] },
     ])),
   };
-  let literal = JSON.stringify(serializable, null, 2);
+  let literal = compact ? compactArtifactLiteral(serializable) : JSON.stringify(serializable, null, 2);
   for (const pass of Object.keys(files)) {
     literal = literal.replace(JSON.stringify(tokens[pass]), variables[pass]);
   }

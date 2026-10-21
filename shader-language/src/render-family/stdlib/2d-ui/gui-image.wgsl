@@ -1,3 +1,7 @@
+override GUI_LINEAR_OUTPUT: bool = false;
+override GUI_LINEAR_TEXTURE: bool = false;
+fn gui_to_linear(c:vec3<f32>)->vec3<f32>{return select(c/12.92,pow((c+0.055)/1.055,vec3<f32>(2.4)),c>vec3<f32>(0.04045));}
+fn gui_to_srgb(c:vec3<f32>)->vec3<f32>{return select(1.055*pow(max(c,vec3<f32>(0.0)),vec3<f32>(1.0/2.4))-0.055,c*12.92,c<=vec3<f32>(0.0031308));}
 struct Viewport {
   size : vec2<f32>,
   _pad : vec2<f32>,
@@ -25,12 +29,12 @@ struct VertexOutput {
 @vertex
 fn vs_main(input : VertexInput) -> VertexOutput {
   var out : VertexOutput;
-  let clipX = input.position.x / viewport.size.x * 2.0 - 1.0;
-  let clipY = 1.0 - input.position.y / viewport.size.y * 2.0;
+  let clipX = (input.position.x - viewport._pad.x) / viewport.size.x * 2.0 - 1.0;
+  let clipY = 1.0 - (input.position.y - viewport._pad.y) / viewport.size.y * 2.0;
   out.clipPos = vec4<f32>(clipX, clipY, 0.0, 1.0);
   out.screenPos = input.position;
   out.uv = input.uv;
-  out.color = input.color;
+  out.color = vec4<f32>(select(input.color.rgb,gui_to_linear(input.color.rgb),GUI_LINEAR_OUTPUT),input.color.a);
   out.clip = input.clip;
   return out;
 }
@@ -45,7 +49,11 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
   ) {
     discard;
   }
-  let sample = textureSample(imageTex, imageSampler, input.uv) * input.color;
+  let texel = textureSample(imageTex, imageSampler, input.uv);
+  var rgb = texel.rgb;
+  if (GUI_LINEAR_OUTPUT && !GUI_LINEAR_TEXTURE) {rgb = gui_to_linear(rgb);}
+  if (!GUI_LINEAR_OUTPUT && GUI_LINEAR_TEXTURE) {rgb = gui_to_srgb(rgb);}
+  let sample = vec4<f32>(rgb,texel.a) * input.color;
   if (sample.a <= 0.01) {
     discard;
   }

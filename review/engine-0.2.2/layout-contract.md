@@ -85,6 +85,8 @@ DOM oracle 几何容差固定 0.02 CSS px，先使用无文字空盒；文字差
 
 缓存上限 8 区域、64 MiB 保留颜色（含 MSAA、resolve 及安全退役重叠），深度另计总 GPU 资源；超限显式诊断并直接重绘，不能消失内容或偷偷忽略目标。320×720 RGBA8 侧栏 resolve 为 921,600 bytes，DPR 2 为 3,686,400 bytes；4×MSAA 颜色再占其四倍，不能只报 resolve。
 
+2026-10-20 用户接受 [ADR 0133](../../docs/for-ai/adr/0133-region-cache-working-set-accounting.md)：上述限额约束保留像素缓存；正常整帧工作集及其退役重叠单独计量，完整纳入总 GPU 资源验收。工作缓冲每次呈现完整初始化，不作为上帧像素缓存。原冻结 G01 配置和历史报告保持，现行补充见 [工作集合同](../../config/region-working-set-022-contract.json)。
+
 ## 验收与设备责任
 
 G01 冻结 HUD 128、压力 1,000、诊断 10,000 节点，25% 文字、0/1/10% 变更、三轮反序采样。当前 HYA 完整求值包含文本/动画，不能作为未来纯布局的同名时间指标；GUI audit device 只提供 CPU 和结构计数，不给出真实 GPU 时长。

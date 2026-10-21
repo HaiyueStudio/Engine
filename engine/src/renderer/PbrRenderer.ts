@@ -2,20 +2,17 @@ import { PbrSceneBindGroups } from './PbrSceneBindGroups';
 import { ViewLightUniformBuffer, LIGHT_UNIFORM_BYTES, LIGHT_UNIFORM_BINDING } from './ViewLightUniformBuffer';
 import { mat4 } from 'wgpu-matrix';
 import type { MaterialCoverageResources } from './AuxiliaryMaterial';
-import type { AssetHandle, CompressedTextureSourceDescriptor } from '../assets/AssetManager';
 import { AssetManager } from '../assets/AssetManager';
 import type { IEngine } from '../core/IEngine';
 import { getEngineGPUResourceTracker } from '../core/EngineDiagnosticsAccess';
-import { writeColorLinear } from '../color/ColorLike';
 import type { Geometry3D } from '../geometry/Geometry3D';
 import type { EnvironmentLight } from '../lighting/EnvironmentLight';
-import type { MaterialTextureSource } from '../material/BasicMaterial';
-import { getPbrTextureFormat, PBR_TEXTURE_SLOTS, type PbrAlphaMode, type PbrMaterial, type PbrTextureSlot } from '../material/PbrMaterial';
+import type { PbrAlphaMode, PbrMaterial } from '../material/PbrMaterial';
 import type { MaterialGpuDrivenBatch, MaterialRenderBatchItem } from './MaterialRendererRegistry';
 import { forEachDirectInstanceBatchRun, forEachIndirectBatchRun } from './DirectInstanceBatchRuns';
 import type { GpuDrivenBatchBuffer } from './GpuDrivenBatchBuffer';
 import { BaseRenderer } from './BaseRenderer';
-import { RendererCacheMap, RendererObjectSlotCache } from './RendererCacheMap';
+import { RendererObjectSlotCache } from './RendererCacheMap';
 import { RendererObjectTable } from './RendererObjectTable';
 import type { SharedGeometry3DGPUData } from './SharedGeometry3DGPUCache';
 import { createColorTargetState, createPrimitiveState } from './gpuDescriptors';
@@ -36,10 +33,7 @@ import type { RenderCommandContext } from '../core/RenderCommandContext';
 import {
   getEnvironmentCubeMipCount,
   getEnvironmentCubeVersion,
-  getPbrTextureSource,
   unwrapEnvironmentCubeTexture,
-  unwrapPbrTexture,
-  writePbrTextureMapping,
 } from './PbrTextureBindings';
 import { PbrDirectionalShadowBinding } from './PbrDirectionalShadowBinding';
 import { PbrDeformationGpuCache, type PbrDeformationGpuData } from './PbrDeformationGpuCache';
@@ -47,6 +41,8 @@ import type { ClippingPlanes } from '../components/ClippingPlanes';
 import { CLIPPING_BLOCK_FLOATS, clippingStateKey, writeClippingBlock } from './ClippingPlanesGpu';
 import { writePbrEnvironmentUniforms } from './PbrEnvironmentUniforms';
 import { ParameterizedRendererCore, SharedGeometryRendererOwner } from './ParameterizedRendererCore';
+import { RecordedGpuResources } from './RecordedGpuResources';
+import { PbrMaterialResources, PBR_BASE_BINDING_SLOTS as BASE_BINDING_SLOTS, type MaterialGpuData } from './PbrMaterialResources';
 import { registerPbrDeferredSurfacePort, deletePbrDeferredSurfacePort, type PbrDeferredSurfaceShader, type PbrFullLightingState } from './PbrDeferredSurfacePort';
 
 export const PBR_MAX_LIGHTS = SCENE_RENDER_MAX_LIGHTS;
@@ -70,25 +66,6 @@ interface ObjectGpuData {
   clippingKey: string;
 }
 
-interface MaterialGpuData {
-  buffer: GPUBuffer;
-  bindGroup: GPUBindGroup;
-  transmissionBindGroup: GPUBindGroup;
-  samplers: Record<PbrTextureSlot, GPUSampler>;
-  samplerKeys: Record<PbrTextureSlot, string>;
-  textures: Record<PbrTextureSlot, GPUTexture>;
-  sources: Record<PbrTextureSlot, unknown>;
-  handles: Partial<Record<PbrTextureSlot, AssetHandle<GPUTexture>>>;
-  loaded: Record<PbrTextureSlot, boolean>;
-  uniformBuffer: ArrayBuffer;
-  f32: Float32Array;
-  u32: Uint32Array;
-  materialRevision: number;
-  textureRevision: number;
-  uploadedTextureRevision: number;
-  disposed: boolean;
-}
-
 interface EnvironmentGpuState {
   source: EnvironmentLight | null;
   diffuseSource: unknown;
@@ -99,18 +76,9 @@ interface EnvironmentGpuState {
   specularTexture: GPUTexture;
 }
 
-const TEXTURE_SLOTS: readonly PbrTextureSlot[] = PBR_TEXTURE_SLOTS;
-const BASE_BINDING_SLOTS: readonly PbrTextureSlot[] = TEXTURE_SLOTS.slice(0, 12);
-const TRANSMISSION_BINDING_SLOTS: readonly PbrTextureSlot[] = Object.freeze([
-  ...TEXTURE_SLOTS.slice(0, 10),
-  'transmission',
-  'thickness',
-]);
 const OBJECT_FLOATS = 40;
 const OBJECT_MORPH_OFFSET = 32;
 const OBJECT_DEFORMATION_FLAGS_OFFSET = 36;
-// Ten base vec4s plus two affine-transform vec4 rows for each texture slot.
-const MATERIAL_BYTES = 160 + TEXTURE_SLOTS.length * 32;
 const ENVIRONMENT_BYTES = 48;
 
 export class PbrRenderer extends BaseRenderer {
@@ -121,6 +89,9 @@ export class PbrRenderer extends BaseRenderer {
   msaaSamples: 1 | 4 = 1;
 
   private _engine!: IEngine;
+  private recordedOwner: RecordedGpuResources | undefined;
+  private get recorded(): RecordedGpuResources { return this.recordedOwner ??= new RecordedGpuResources(this._engine.device); }
+  private submissionContext: RenderCommandContext | undefined;
   private _assetManager!: AssetManager;
   private _ownsAssetManager = false;
   private _baseShader!: GPUShaderModule;
@@ -161,8 +132,8 @@ export class PbrRenderer extends BaseRenderer {
   private get _objects(): RendererObjectSlotCache<ObjectGpuData> { return this._rendererCore.requireObjects(); }
   private _deformationCache!: PbrDeformationGpuCache;
   private _environmentState!: EnvironmentGpuState;
-  private readonly _materials = new RendererCacheMap<MaterialGpuData>(data => this._destroyMaterial(data));
-  private readonly _samplers = new Map<string, GPUSampler>();
+  private _materialResources!: PbrMaterialResources;
+  private get _materials() { return this._materialResources.entries; }
   private readonly _environmentData = new Float32Array(ENVIRONMENT_BYTES / 4);
   private readonly _environmentSnapshot = new Float32Array(ENVIRONMENT_BYTES / 4).fill(Number.NaN);
   private readonly _inverseScratch = mat4.identity() as Float32Array;
@@ -179,6 +150,7 @@ export class PbrRenderer extends BaseRenderer {
     this._engine = engine;
     this._environmentSnapshot.fill(Number.NaN);
     const device = engine.device;
+    this.recordedOwner = new RecordedGpuResources(device);
     this._assetManager = engine.assetManager ?? new AssetManager(device, getEngineGPUResourceTracker(engine), engine.defaults?.assetManager);
     this._ownsAssetManager = !engine.assetManager;
     this._sceneFrameBinding = getSceneFrameGpuArena(device).createBinding();
@@ -258,6 +230,15 @@ export class PbrRenderer extends BaseRenderer {
       this._defaultShadowView,
       this._defaultShadowSampler,
     );
+    for (const texture of [this._defaultWhite, this._defaultNormal, this._defaultBlack, this._defaultCube, this._defaultShadow]) {
+      this.recorded.own(texture, () => texture.destroy());
+    }
+    const environmentBuffer = this._environmentBuffer;
+    this.recorded.own(environmentBuffer, () => environmentBuffer.destroy());
+    if (this._ownsAssetManager) { const assets = this._assetManager; this.recorded.own(assets, () => assets.dispose()); }
+    this._materialResources = new PbrMaterialResources({ device, assets: this._assetManager, signal: this._rendererCore.signal,
+      layout: this._materialLayout, defaultSampler: this._defaultSampler, white: this._defaultWhite,
+      normal: this._defaultNormal, black: this._defaultBlack, recorded: this.recorded });
     this._rebuildSceneBindGroup();
     this.updateEnvironment(null);
     this.updateShadow(null);
@@ -340,6 +321,11 @@ export class PbrRenderer extends BaseRenderer {
 
   /** Selects one SceneFrame arena slot and starts view-local object uploads. */
   beginView(sceneFrame: SceneFrameUniformSnapshot, context?: RenderCommandContext): void {
+    this.submissionContext = context;
+    this.recorded.retain(this._environmentBuffer, context);
+    this._directionalShadowBinding.retain(context);
+    for (const texture of [this._defaultWhite, this._defaultNormal, this._defaultBlack, this._defaultCube, this._defaultShadow]) this.recorded.retain(texture, context);
+    if (this._ownsAssetManager) this.recorded.retain(this._assetManager, context);
     const previousBuffer = this._lightUniforms.buffer;
     this._lightUniforms.selectView(sceneFrame, context);
     this._lightUniforms.upload(this._lights);
@@ -362,7 +348,7 @@ export class PbrRenderer extends BaseRenderer {
       const material = item.material;
       const geometryData = this._geometryCache.ensure(item.geometry, this);
       void geometryData;
-      this._deformationCache.ensure(item.geometry);
+      this._deformationCache.ensure(item.geometry, this.submissionContext);
       const object = this._objects.ensure(item.entityId);
       const batchSlot = batchBuffer && material.alphaMode !== 'blend' && material.transmissionFactor <= 0
         ? batchBuffer.getObjectSlot(firstBatchIndex + index - first)
@@ -381,6 +367,7 @@ export class PbrRenderer extends BaseRenderer {
 
   endView(): void {
     this._rendererCore.endView();
+    this.submissionContext = undefined;
   }
 
   render(
@@ -458,7 +445,7 @@ export class PbrRenderer extends BaseRenderer {
     firstBatch = 0,
   ): void {
     const geometryData = this._geometryCache.ensure(geometry, this);
-    const deformation = this._deformationCache.ensure(geometry);
+    const deformation = this._deformationCache.ensure(geometry, this.submissionContext);
     const materialData = this._materials.ensure(this._rendererCore.materialIdentity(material), () => this._createMaterial(material));
     if (!this._uploadsPrepared) this._syncMaterial(material, materialData);
 
@@ -499,7 +486,7 @@ export class PbrRenderer extends BaseRenderer {
     batchIndex?: number,
   ): void {
     const geometryData = this._geometryCache.ensure(geometry, this);
-    const deformation = this._deformationCache.ensure(geometry);
+    const deformation = this._deformationCache.ensure(geometry, this.submissionContext);
     const object = this._objects.ensure(entityId);
     const batchSlot = batchBuffer && batchIndex !== undefined
       ? batchBuffer.getObjectSlot(batchIndex)
@@ -646,7 +633,6 @@ export class PbrRenderer extends BaseRenderer {
       this._environmentState.diffuseTexture = unwrapEnvironmentCubeTexture(diffuseSource) ?? this._defaultCube;
       this._environmentState.specularTexture = unwrapEnvironmentCubeTexture(specularSource) ?? this._defaultCube;
       bindingsChanged = true;
-      if (rebuildBindings) this._rebuildSceneBindGroup();
     }
     writePbrEnvironmentUniforms(this._environmentData, environment, {
       maxMipLevel: Math.max(
@@ -659,9 +645,17 @@ export class PbrRenderer extends BaseRenderer {
       hasTexture: Boolean(diffuseSource || specularSource),
     });
     if (this._environmentData.some((value, index) => !Object.is(value, this._environmentSnapshot[index]))) {
+      if (this.recorded.pending(this._environmentBuffer)) {
+        const previous = this._environmentBuffer;
+        const buffer = this._engine.device.createBuffer({ label: 'PbrRenderer.environment', size: ENVIRONMENT_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+        this._environmentBuffer = this.recorded.own(buffer, () => buffer.destroy());
+        this.recorded.retire(previous);
+        bindingsChanged = true;
+      }
       writeBuffer(this._engine.device.queue, this._environmentBuffer, 0, this._environmentData);
       this._environmentSnapshot.set(this._environmentData);
     }
+    if (bindingsChanged && rebuildBindings) this._rebuildSceneBindGroup();
     return bindingsChanged;
   }
 
@@ -678,66 +672,7 @@ export class PbrRenderer extends BaseRenderer {
     return bindingsChanged;
   }
 
-  private _createMaterial(material: PbrMaterial): MaterialGpuData {
-    const buffer = this._engine.device.createBuffer({ size: MATERIAL_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
-    const samplerKeys = {} as Record<PbrTextureSlot, string>;
-    const samplers = {} as Record<PbrTextureSlot, GPUSampler>;
-    for (const slot of TEXTURE_SLOTS) {
-      const descriptor = material.getTextureSampler(slot);
-      samplerKeys[slot] = this._samplerKey(descriptor);
-      samplers[slot] = this._getSampler(descriptor);
-    }
-    const data: MaterialGpuData = {
-      buffer,
-      bindGroup: null as unknown as GPUBindGroup,
-      transmissionBindGroup: null as unknown as GPUBindGroup,
-      samplers,
-      samplerKeys,
-      textures: {
-        baseColor: this._defaultWhite,
-        metallicRoughness: this._defaultWhite,
-        normal: this._defaultNormal,
-        occlusion: this._defaultWhite,
-        emissive: this._defaultWhite,
-        clearcoat: this._defaultWhite,
-        clearcoatRoughness: this._defaultWhite,
-        clearcoatNormal: this._defaultNormal,
-        specular: this._defaultWhite,
-        specularColor: this._defaultWhite,
-        sheenColor: this._defaultWhite,
-        sheenRoughness: this._defaultWhite,
-        transmission: this._defaultWhite,
-        thickness: this._defaultWhite,
-      },
-      sources: {
-        baseColor: null, metallicRoughness: null, normal: null, occlusion: null, emissive: null,
-        clearcoat: null, clearcoatRoughness: null, clearcoatNormal: null,
-        specular: null, specularColor: null,
-        sheenColor: null, sheenRoughness: null,
-        transmission: null, thickness: null,
-      },
-      handles: {},
-      loaded: {
-        baseColor: false, metallicRoughness: false, normal: false, occlusion: false, emissive: false,
-        clearcoat: false, clearcoatRoughness: false, clearcoatNormal: false,
-        specular: false, specularColor: false,
-        sheenColor: false, sheenRoughness: false,
-        transmission: false, thickness: false,
-      },
-      uniformBuffer: new ArrayBuffer(MATERIAL_BYTES),
-      f32: null as unknown as Float32Array,
-      u32: null as unknown as Uint32Array,
-      materialRevision: -1,
-      textureRevision: 0,
-      uploadedTextureRevision: -1,
-      disposed: false,
-    };
-    data.f32 = new Float32Array(data.uniformBuffer);
-    data.u32 = new Uint32Array(data.uniformBuffer);
-    data.bindGroup = this._buildMaterialBindGroup(data);
-    data.transmissionBindGroup = this._buildMaterialBindGroup(data, true);
-    return data;
-  }
+  private _createMaterial(material: PbrMaterial): MaterialGpuData { return this._materialResources.create(material); }
 
   /** @internal Borrow the exact material state used by forward shading. */
   prepareMaterialCoverage(material: PbrMaterial): MaterialCoverageResources {
@@ -746,126 +681,7 @@ export class PbrRenderer extends BaseRenderer {
     return data;
   }
 
-  private _syncMaterial(material: PbrMaterial, data: MaterialGpuData): void {
-    if (data.materialRevision === material.revision
-      && data.uploadedTextureRevision === data.textureRevision) return;
-
-    if (data.materialRevision !== material.revision) {
-      let bindingsChanged = false;
-      for (const slot of TEXTURE_SLOTS) {
-        bindingsChanged = this._syncTexture(slot, getPbrTextureSource(material, slot), data) || bindingsChanged;
-      }
-      for (const slot of TEXTURE_SLOTS) {
-        const descriptor = material.samplers[slot] ?? null;
-        const samplerKey = this._samplerKey(descriptor);
-        if (samplerKey === data.samplerKeys[slot]) continue;
-        data.samplerKeys[slot] = samplerKey;
-        data.samplers[slot] = this._getSampler(descriptor);
-        bindingsChanged = true;
-      }
-      if (bindingsChanged) {
-        data.bindGroup = this._buildMaterialBindGroup(data);
-        data.transmissionBindGroup = this._buildMaterialBindGroup(data, true);
-      }
-    }
-    if (data.materialRevision === material.revision
-      && data.uploadedTextureRevision === data.textureRevision) return;
-
-    writeColorLinear(material.baseColor, data.f32, 0);
-    data.materialRevision = material.revision;
-    data.uploadedTextureRevision = data.textureRevision;
-    data.f32[4] = material.emissiveFactor[0];
-    data.f32[5] = material.emissiveFactor[1];
-    data.f32[6] = material.emissiveFactor[2];
-    data.f32[7] = material.normalScale;
-    data.f32[8] = material.metallic;
-    data.f32[9] = material.roughness;
-    data.f32[10] = material.occlusionStrength;
-    data.f32[11] = material.alphaCutoff;
-    data.u32[12] = data.loaded.baseColor ? 1 : 0;
-    data.u32[13] = data.loaded.metallicRoughness ? 1 : 0;
-    data.u32[14] = (data.loaded.normal ? 1 : 0) | (data.loaded.occlusion ? 2 : 0) | (data.loaded.emissive ? 4 : 0);
-    data.u32[15] = material.alphaMode === 'mask' ? 1 : material.alphaMode === 'blend' ? 2 : 0;
-    data.f32[16] = material.clearcoatFactor;
-    data.f32[17] = material.clearcoatRoughnessFactor;
-    data.f32[18] = material.clearcoatNormalScale;
-    data.f32[19] = material.ior;
-    data.u32[20] = (data.loaded.clearcoat ? 1 : 0)
-      | (data.loaded.clearcoatRoughness ? 2 : 0)
-      | (data.loaded.clearcoatNormal ? 4 : 0);
-    data.u32[21] = (data.loaded.specular ? 1 : 0)
-      | (data.loaded.specularColor ? 2 : 0);
-    data.u32[22] = (data.loaded.sheenColor ? 1 : 0)
-      | (data.loaded.sheenRoughness ? 2 : 0);
-    data.f32[24] = material.specularFactor;
-    data.f32[25] = material.specularColorFactor[0];
-    data.f32[26] = material.specularColorFactor[1];
-    data.f32[27] = material.specularColorFactor[2];
-    data.f32[28] = material.sheenColorFactor[0];
-    data.f32[29] = material.sheenColorFactor[1];
-    data.f32[30] = material.sheenColorFactor[2];
-    data.f32[31] = material.sheenRoughnessFactor;
-    data.f32[32] = material.transmissionFactor;
-    data.f32[33] = material.thicknessFactor;
-    data.f32[34] = Number.isFinite(material.attenuationDistance) ? material.attenuationDistance : 0;
-    data.f32[35] = (data.loaded.transmission ? 1 : 0) | (data.loaded.thickness ? 2 : 0);
-    data.f32[36] = material.attenuationColor[0];
-    data.f32[37] = material.attenuationColor[1];
-    data.f32[38] = material.attenuationColor[2];
-    for (let index = 0; index < TEXTURE_SLOTS.length; index++) {
-      const slot = TEXTURE_SLOTS[index]!;
-      writePbrTextureMapping(data.f32, 40 + index * 8, material.textureMappings[slot]);
-    }
-    writeBuffer(this._engine.device.queue, data.buffer, 0, data.f32);
-  }
-
-  private _syncTexture(slot: PbrTextureSlot, source: MaterialTextureSource, data: MaterialGpuData): boolean {
-    if (data.sources[slot] === source) return false;
-    data.handles[slot]?.release();
-    delete data.handles[slot];
-    data.sources[slot] = source;
-    data.loaded[slot] = false;
-    data.textures[slot] = this._defaultForSlot(slot);
-    data.textureRevision++;
-    if (!source) return true;
-    const immediate = unwrapPbrTexture(source);
-    if (immediate) {
-      data.textures[slot] = immediate;
-      data.loaded[slot] = true;
-      return true;
-    }
-    const format: GPUTextureFormat = getPbrTextureFormat(slot);
-    void this._assetManager.loadTexture(
-      source as string | ImageBitmap | HTMLCanvasElement | HTMLImageElement | CompressedTextureSourceDescriptor,
-      { format, mipmaps: 'generate', signal: this._rendererCore.signal },
-    ).then(handle => {
-      if (this._rendererCore.destroyed || data.disposed || data.sources[slot] !== source) {
-        handle.release();
-        return;
-      }
-      data.handles[slot] = handle;
-      data.textures[slot] = handle.value;
-      data.loaded[slot] = true;
-      data.textureRevision++;
-      data.bindGroup = this._buildMaterialBindGroup(data);
-      data.transmissionBindGroup = this._buildMaterialBindGroup(data, true);
-    }).catch(error => {
-      if (!this._rendererCore.destroyed) console.warn(`[PbrRenderer] Failed to load ${slot} texture.`, error);
-    });
-    return true;
-  }
-
-  private _buildMaterialBindGroup(data: MaterialGpuData, transmission = false): GPUBindGroup {
-    const slots = transmission ? TRANSMISSION_BINDING_SLOTS : BASE_BINDING_SLOTS;
-    return this._engine.device.createBindGroup({
-      layout: this._materialLayout,
-      entries: [
-        { binding: 0, resource: { buffer: data.buffer } },
-        ...slots.map((slot, index) => ({ binding: index + 1, resource: data.textures[slot].createView() })),
-        ...slots.map((slot, index) => ({ binding: index + 1 + slots.length, resource: data.samplers[slot] })),
-      ],
-    });
-  }
+  private _syncMaterial(material: PbrMaterial, data: MaterialGpuData): void { this._materialResources.sync(material, data, this.submissionContext); }
 
   private _createEnvironmentState(): EnvironmentGpuState {
     return {
@@ -992,27 +808,6 @@ export class PbrRenderer extends BaseRenderer {
     return clearcoatEnabled ? this._clearcoatShaderKey : this._baseShaderKey;
   }
 
-  private _defaultForSlot(slot: PbrTextureSlot): GPUTexture {
-    if (slot === 'normal' || slot === 'clearcoatNormal') return this._defaultNormal;
-    if (slot === 'emissive') return this._defaultBlack;
-    return this._defaultWhite;
-  }
-
-  private _getSampler(descriptor: GPUSamplerDescriptor | null): GPUSampler {
-    if (!descriptor) return this._defaultSampler;
-    const key = this._samplerKey(descriptor);
-    let sampler = this._samplers.get(key);
-    if (!sampler) {
-      sampler = this._engine.device.createSampler(descriptor);
-      this._samplers.set(key, sampler);
-    }
-    return sampler;
-  }
-
-  private _samplerKey(descriptor: GPUSamplerDescriptor | null): string {
-    return descriptor ? JSON.stringify(descriptor, Object.keys(descriptor).sort()) : 'default';
-  }
-
   private _createSolidTexture(color: readonly [number, number, number, number]): GPUTexture {
     const texture = this._engine.device.createTexture({
       size: [1, 1, 1],
@@ -1035,12 +830,6 @@ export class PbrRenderer extends BaseRenderer {
     return texture;
   }
 
-  private _destroyMaterial(data: MaterialGpuData): void {
-    data.disposed = true;
-    data.buffer.destroy();
-    for (const handle of Object.values(data.handles)) handle?.release();
-  }
-
   destroy(): void {
     deletePbrDeferredSurfacePort(this);
     this._deferredSurface = null;
@@ -1048,18 +837,11 @@ export class PbrRenderer extends BaseRenderer {
     this._sceneFrameBinding?.destroy();
     this._lightUniforms?.destroy();
     this._lights = [];
-    this._environmentBuffer?.destroy();
-    this._directionalShadowBinding?.destroy();
-    this._defaultWhite?.destroy();
-    this._defaultNormal?.destroy();
-    this._defaultBlack?.destroy();
-    this._defaultCube?.destroy();
-    this._defaultShadow?.destroy();
     this._rendererCore?.destroy();
     this._deformationCache?.destroy();
-    this._materials.clear();
-    this._samplers.clear();
-    if (this._ownsAssetManager) this._assetManager?.dispose();
+    this._directionalShadowBinding?.destroy();
+    this._materialResources?.destroy();
+    this.recordedOwner?.retireAll();
     this.clearPipelineCache();
     this._sceneLightingRevision = -1;
     this._sceneShadowRevision = -1;

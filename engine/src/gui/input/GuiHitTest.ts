@@ -6,7 +6,7 @@ import { GuiModal } from '../components/GuiModal';
 import { requiredItemAt } from '../../math/arrayAccess';
 import {isGuiLayoutHidden} from '../GuiLayoutState';
 
-export function hitTestGui(_world: World, roots: Set<GuiRoot>, x: number, y: number): GuiElement | null {
+export function hitTestGui(_world: World | null, roots: Set<GuiRoot>, x: number, y: number): GuiElement | null {
   const ordered = Array.from(roots);
   for (let i = ordered.length - 1; i >= 0; i--) {
     const modalHit = hitTestVisibleModal(requiredItemAt(ordered, i, 'GUI roots').root, x, y);
@@ -17,7 +17,8 @@ export function hitTestGui(_world: World, roots: Set<GuiRoot>, x: number, y: num
     if (popupHit) return popupHit;
   }
   for (let i = ordered.length - 1; i >= 0; i--) {
-    const hit = requiredItemAt(ordered, i, 'GUI roots').hitTest(x, y);
+    const root = requiredItemAt(ordered, i, 'GUI roots'), hit = root.hitTest(x, y);
+    if (hit === root.root && root.root.pointerFilter === 'pass') continue;
     if (hit) return hit;
   }
   return null;

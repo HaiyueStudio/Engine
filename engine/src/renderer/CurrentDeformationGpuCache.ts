@@ -4,6 +4,8 @@ import { RendererCacheMap } from './RendererCacheMap';
 import { sharedZeroVectorCache } from './ZeroVectorCache';
 import { writeBuffer } from './utils';
 import type { LiveIdSet } from './utils';
+import type { RenderCommandContext } from '../core/RenderCommandContext';
+import { RecordedGpuResources } from './RecordedGpuResources';
 
 export interface CurrentDeformationGpuData {
   readonly vertexCount: number;
@@ -27,12 +29,14 @@ export class CurrentDeformationGpuCache {
   private readonly fallbackMatrixBuffer: GPUBuffer;
   private readonly fallbackAttributeBuffer: GPUBuffer;
   private readonly fallbackBindGroup: GPUBindGroup;
+  private readonly recorded: RecordedGpuResources;
 
   constructor(
     private readonly device: GPUDevice,
     private readonly skinLayout: GPUBindGroupLayout,
     private readonly label: string,
   ) {
+    this.recorded = new RecordedGpuResources(device);
     this.fallbackMatrixBuffer = this.makeStorageBuffer(new Float32Array([
       1, 0, 0, 0,
       0, 1, 0, 0,
@@ -40,6 +44,7 @@ export class CurrentDeformationGpuCache {
       0, 0, 0, 1,
     ]), 64);
     this.fallbackAttributeBuffer = this.makeStorageBuffer(new Float32Array(4));
+    for (const buffer of [this.fallbackMatrixBuffer, this.fallbackAttributeBuffer]) this.recorded.own(buffer, () => buffer.destroy());
     this.fallbackBindGroup = device.createBindGroup({
       label: `${label}.fallbackSkinBindGroup`,
       layout: skinLayout,
@@ -51,11 +56,14 @@ export class CurrentDeformationGpuCache {
     });
   }
 
-  ensure(geometry: Geometry3D): CurrentDeformationGpuData {
+  ensure(geometry: Geometry3D, context?: RenderCommandContext): CurrentDeformationGpuData {
     const morphEnabled = geometry.morphUseGpu && geometry.hasMorphTargets;
     let data = this.cache.get(geometry.id);
-    if (!data || !this.matches(data, geometry, morphEnabled)) {
+    if (!data || !this.matches(data, geometry, morphEnabled)
+      || (geometry.skinning && data.skinVersion !== geometry.skinning.version && this.recorded.pending(data))) {
       data = this.createData(geometry, morphEnabled);
+      const owned = data;
+      this.recorded.own(owned, () => this.destroyBuffers(owned));
       this.cache.set(geometry.id, data);
     }
     const skinning = geometry.skinning;
@@ -63,6 +71,8 @@ export class CurrentDeformationGpuCache {
       writeBuffer(this.device.queue, data.skinMatrixBuffer, 0, skinning.jointMatrices);
       data.skinVersion = skinning.version;
     }
+    this.recorded.retain(data, context);
+    for (const buffer of [this.fallbackMatrixBuffer, this.fallbackAttributeBuffer]) this.recorded.retain(buffer, context);
     return data;
   }
 
@@ -72,8 +82,7 @@ export class CurrentDeformationGpuCache {
 
   destroy(): void {
     this.cache.clear();
-    this.fallbackMatrixBuffer.destroy();
-    this.fallbackAttributeBuffer.destroy();
+    this.recorded.retireAll();
   }
 
   private matches(data: CurrentDeformationGpuData, geometry: Geometry3D, morphEnabled: boolean): boolean {
@@ -153,6 +162,10 @@ export class CurrentDeformationGpuCache {
   }
 
   private destroyData(data: CurrentDeformationGpuData): void {
+    this.recorded.retire(data);
+  }
+
+  private destroyBuffers(data: CurrentDeformationGpuData): void {
     for (const buffer of new Set(data.morphBuffers)) buffer.destroy();
     data.skinJointBuffer?.destroy();
     data.skinWeightBuffer?.destroy();

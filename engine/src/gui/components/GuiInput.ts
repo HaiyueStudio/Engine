@@ -1,5 +1,6 @@
 import { GuiDirtyFlags, GuiElementOptions, GuiPointerEvent, GuiValueChangeHandler } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
+import type {GuiActionEvent} from '../GuiTypes';
 
 export interface GuiInputOptions extends GuiElementOptions {
   value?: string;
@@ -10,6 +11,17 @@ export interface GuiInputOptions extends GuiElementOptions {
 }
 
 export class GuiInput extends GuiElement {
+  override handlePointerCancel(event: GuiPointerEvent): void {
+    this.selecting = false;
+    super.handlePointerCancel(event);
+  }
+  override handleAction(event: GuiActionEvent): void {
+    super.handleAction(event);
+    if (event.consumed) return;
+    if (event.action === 'left' || event.action === 'right') {
+      this.moveCaret(event.action === 'left' ? -1 : 1); event.consume();
+    } else if (event.action === 'confirm') { this.submit(); event.consume(); }
+  }
   value: string;
   placeholder: string;
   readOnly: boolean;
@@ -21,7 +33,7 @@ export class GuiInput extends GuiElement {
   onSubmit: GuiValueChangeHandler<string> | null;
 
   constructor(options: GuiInputOptions = {}) {
-    super({ width: 180, height: 32, ...options });
+    super({ width: 180, height: 32, focus: {mode: 'all'}, ...options });
     this.value = options.value ?? '';
     this.placeholder = options.placeholder ?? '';
     this.readOnly = options.readOnly ?? false;

@@ -278,6 +278,28 @@
         "webgpu-wgsl"
       ],
       "retention": "private Deferred opt-in; four existing material texture layouts and static clearcoat/transmission BRDF variants preserved; default Forward closure unchanged"
+    },
+    {
+      "id": "gui-region-history",
+      "stage": 14,
+      "moduleId": "haiyue-gui-region-history",
+      "moduleVersion": 1,
+      "authoring": "trusted-target-source-modules",
+      "escapeLevel": 2,
+      "typedSignature": "Multisampled RGBA history + builtin sample_index -> exact per-sample RGBA, zero uniforms",
+      "sourceOwner": "shader-language/src/render-family/stdlib/2d-ui/gui-region-history.wgsl",
+      "generator": "shader-language/scripts/generate-gui-region-history-production.mjs",
+      "artifact": "engine/src/shaders/generated/2d-ui-region-history-artifact.generated.ts",
+      "reflectionOwner": "private fixed family definition validated against WGSL declarations",
+      "layoutOwner": "renderer, pass group3/binding0",
+      "variantOwner": "one MSAA4 shader; two cache-format pipelines (rgba8unorm/rgba16float)",
+      "resources": [
+        "pass.history: unfilterable-float multisampled2d"
+      ],
+      "targets": [
+        "webgpu-wgsl"
+      ],
+      "retention": "Preserve color and alpha sample history; resolving and broadcasting averages is incorrect. No public operation/export/schema or existing shader ABI changes."
     }
   ],
   "portability": {

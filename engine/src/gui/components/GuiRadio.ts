@@ -1,5 +1,7 @@
 import { GuiDirtyFlags, GuiElementOptions, GuiPointerEvent, GuiValueChangeHandler } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
+import {activateGuiElement} from '../input/GuiActivation';
+import type {GuiActionEvent} from '../GuiTypes';
 
 export interface GuiRadioOptions<T = string> extends GuiElementOptions {
   checked?: boolean;
@@ -10,6 +12,10 @@ export interface GuiRadioOptions<T = string> extends GuiElementOptions {
 }
 
 export class GuiRadio<T = string> extends GuiElement {
+  override handleAction(event: GuiActionEvent): void {
+    super.handleAction(event);
+    if (!event.consumed && event.action === 'confirm') activateGuiElement(this, event);
+  }
   private static readonly groupRegistries = new WeakMap<GuiElement, Map<string, Set<GuiRadio<unknown>>>>();
 
   checked: boolean;
@@ -19,7 +25,7 @@ export class GuiRadio<T = string> extends GuiElement {
   onChange: GuiValueChangeHandler<T> | null;
 
   constructor(options: GuiRadioOptions<T> = {}) {
-    super({ width: 120, height: 28, ...options });
+    super({ width: 120, height: 28, focus: {mode: 'all'}, ...options });
     this.checked = options.checked ?? false;
     this.label = options.label ?? '';
     this.group = options.group ?? 'default';

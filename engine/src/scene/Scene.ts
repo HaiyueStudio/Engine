@@ -147,6 +147,7 @@ export class Scene implements ScenePluginScene {
     if (!this._runtime.beginDestroy()) return;
     this._plugins.destroy();
     this._assets.destroy();
+    this.renderView.destroy();
     this._runtime.finishDestroy();
   }
 

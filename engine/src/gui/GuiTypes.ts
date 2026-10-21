@@ -65,7 +65,7 @@ export const DEFAULT_GUI_THEME: GuiTheme = {
 };
 
 export interface GuiPointerEvent {
-  type: 'pointerenter' | 'pointerleave' | 'pointerdown' | 'pointermove' | 'pointerup' | 'click';
+  type: 'pointerenter' | 'pointerleave' | 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel' | 'click';
   target: unknown;
   currentTarget: unknown;
   x: number;
@@ -76,6 +76,8 @@ export interface GuiPointerEvent {
   buttons: number;
   pointerId: number;
   nativeEvent: PointerEvent;
+  /** Native routing applies pointer filters; direct legacy event emission remains available. */
+  routed?: boolean;
   stopped: boolean;
   defaultPrevented: boolean;
   stopPropagation(): void;
@@ -84,6 +86,20 @@ export interface GuiPointerEvent {
 
 export type GuiPointerHandler = (event: GuiPointerEvent) => void;
 export type GuiValueChangeHandler<T> = (value: T) => void;
+
+export type GuiPointerFilter = 'stop' | 'pass' | 'ignore';
+export type GuiFocusMode = 'none' | 'click' | 'all';
+export interface GuiFocusOptions {
+  readonly mode: GuiFocusMode;
+  readonly tabIndex?: number;
+  readonly neighbours?: Partial<Record<'left' | 'right' | 'up' | 'down', string>>;
+}
+export interface GuiActionEvent {
+  readonly action: 'next' | 'previous' | 'left' | 'right' | 'up' | 'down' | 'confirm' | 'cancel';
+  readonly source: 'keyboard' | 'gamepad';
+  readonly consumed: boolean;
+  consume(): void;
+}
 
 export interface GuiElementOptions {
   id?: string | undefined;
@@ -94,11 +110,15 @@ export interface GuiElementOptions {
   visible?: boolean | undefined;
   disabled?: boolean | undefined;
   style?: GuiStyle | undefined;
+  pointerFilter?: GuiPointerFilter;
+  focus?: GuiFocusOptions;
+  onAction?: (event: GuiActionEvent) => void;
   onPointerEnter?: GuiPointerHandler;
   onPointerLeave?: GuiPointerHandler;
   onPointerDown?: GuiPointerHandler;
   onPointerMove?: GuiPointerHandler;
   onPointerUp?: GuiPointerHandler;
+  onPointerCancel?: GuiPointerHandler;
   onClick?: GuiPointerHandler;
 }
 

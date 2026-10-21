@@ -10,9 +10,9 @@
   },
   "production": {
     "maxGeneratedWgslBytes": 570000,
-    "maxGeneratedWgslFiles": 75,
-    "maxVariantCount": 67,
-    "maxPipelineCount": 67,
+    "maxGeneratedWgslFiles": 76,
+    "maxVariantCount": 68,
+    "maxPipelineCount": 68,
     "maxColdGenerationMs": 10000,
     "growthBaseline": {
       "generatedWgslBytes": 305504,
@@ -22,9 +22,9 @@
     },
     "maxGrowth": {
       "generatedWgslBytes": 264496,
-      "generatedWgslFiles": 11,
-      "variantCount": 11,
-      "pipelineCount": 11
+      "generatedWgslFiles": 12,
+      "variantCount": 12,
+      "pipelineCount": 12
     }
   },
   "dag": {

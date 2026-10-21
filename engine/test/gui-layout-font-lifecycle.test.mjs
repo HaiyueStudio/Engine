@@ -47,3 +47,11 @@ test('manual autoWidth and help wrapping skip static measurements and invalidate
  f.root.theme.fontFamily='Wide';f.prepare();assert.ok(calls>initial);assert.ok(help.body.children.length>lines);f.root.clearDirty();const changed=calls;f.prepare();assert.equal(calls,changed);
  f.system.destroy();assert.equal(f.audit.snapshot().resources.buffer.live,0);assert.equal(f.audit.snapshot().resources.texture.live,0);
 });
+
+test('already-loaded native font readiness does not invalidate the first retained GUI frame again',async()=>{
+ const previous=globalThis.document,fonts=new FontEvents();fonts.status='loaded';fonts.ready=Promise.resolve(fonts);globalThis.document={fonts};
+ try{
+  const f=fixture();f.prepare();f.root.clearDirty();await Promise.resolve();assert.equal(f.root.dirty,false);
+  fonts.dispatchEvent(new Event('loadingdone'));assert.equal(f.root.dirty,true);f.system.destroy();assert.equal(fonts.live,0);
+ }finally{if(previous===undefined)delete globalThis.document;else globalThis.document=previous;}
+});

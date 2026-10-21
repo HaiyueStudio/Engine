@@ -1,5 +1,6 @@
 import type { IEngine } from '../core/IEngine';
 import { getEngineGPUResourceTracker } from '../core/EngineDiagnosticsAccess';
+import {getInstrumentedGPUResourceTracker} from '../core/GPUResourceTracker';
 import { Geometry3D } from '../geometry/Geometry3D';
 import { BasicMaterial, BASIC_MATERIAL_SHADER, BASIC_MATERIAL_SKINNED_SHADER } from '../material/BasicMaterial';
 import type { BlendMode, MaterialTextureSource, SampleableTextureSource } from '../material/BasicMaterial';
@@ -26,6 +27,7 @@ import type { RenderCommandContext } from '../core/RenderCommandContext';
 import type { ClippingPlanes } from '../components/ClippingPlanes';
 import { CLIPPING_BLOCK_FLOATS, clippingStateKey, writeClippingBlock } from './ClippingPlanesGpu';
 import { ParameterizedRendererCore, RendererCacheGeometryOwner } from './ParameterizedRendererCore';
+import {RecordedGpuResources} from './RecordedGpuResources';
 
 interface GeoGPUData {
   geometryId: number;
@@ -140,6 +142,9 @@ export class Mesh3DRenderer extends BaseRenderer {
   private _samplerCache = new Map<string, GPUSampler>();
 
   private _initialized = false;
+  private recordedOwner:RecordedGpuResources|undefined;
+  private get recorded():RecordedGpuResources {return this.recordedOwner??=new RecordedGpuResources(this.engine.device);}
+  private submissionContext:RenderCommandContext|undefined;
 
   constructor(_options?: Record<string, unknown>) {
     super();
@@ -151,8 +156,10 @@ export class Mesh3DRenderer extends BaseRenderer {
     this._initialized = true;
     this.engine = engine;
     const { device } = engine;
+    this.recordedOwner=new RecordedGpuResources(device);
     this.assetManager = engine.assetManager ?? new AssetManager(device, getEngineGPUResourceTracker(engine), engine.defaults?.assetManager);
     this.ownsAssetManager = !engine.assetManager;
+    if(this.ownsAssetManager){const manager=this.assetManager;this.recorded.own(manager,()=>manager.dispose());}
     this.sharedGeoCache = getSharedGeometry3DGPUCache(device, getEngineGPUResourceTracker(engine));
 
     this.sceneFrameBinding = getSceneFrameGpuArena(device).createBinding();
@@ -222,6 +229,7 @@ export class Mesh3DRenderer extends BaseRenderer {
       format: 'rgba8unorm',
       usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
     });
+    const defaultTexture=this.defaultTexture;this.recorded.own(defaultTexture,()=>defaultTexture.destroy());
     device.queue.writeTexture(
       { texture: this.defaultTexture },
       new Uint8Array([255, 255, 255, 255]),
@@ -236,6 +244,7 @@ export class Mesh3DRenderer extends BaseRenderer {
   }
 
   updateCamera(sceneFrame: SceneFrameUniformSnapshot, _viewSlot = 0, context?: RenderCommandContext): void {
+    this.submissionContext=context;
     this.cameraDynamicOffset[0] = this.sceneFrameBinding.upload(sceneFrame, context);
     this.rendererCore.beginUploads(context);
   }
@@ -277,6 +286,7 @@ export class Mesh3DRenderer extends BaseRenderer {
 
   endView(): void {
     this.rendererCore.endView();
+    this.submissionContext=undefined;
   }
 
   contributePipelineWarmup(plan: PipelineWarmupPlan): void {
@@ -641,6 +651,7 @@ export class Mesh3DRenderer extends BaseRenderer {
       this._updateGeometryBuffers(geometry, geoData);
     }
     this._syncSkinningMatrices(geometry, geoData);
+    this._retainGeometry(geometry, geoData);
 
     const entData = this.entityCache.ensure(entityId);
     this._writeObjectTableEntry(entData, geometry, clippingPlanes, worldMatrix, objectSlot, objectTable);
@@ -661,7 +672,7 @@ export class Mesh3DRenderer extends BaseRenderer {
     if (this.rendererCore.uploadsPrepared) {
       const geoData = this.geoCache.get(geometry.id);
       const entData = this.entityCache.get(entityId);
-      if (geoData && entData) return { geoData, entData };
+      if (geoData && entData) { this._retainGeometry(geometry, geoData); return { geoData, entData }; }
     }
     let geoData = this.geoCache.get(geometry.id);
     if (!geoData) {
@@ -676,6 +687,7 @@ export class Mesh3DRenderer extends BaseRenderer {
       this._updateGeometryBuffers(geometry, geoData);
     }
     this._syncSkinningMatrices(geometry, geoData);
+    this._retainGeometry(geometry, geoData);
 
     const entData = this.entityCache.ensure(entityId);
     this._writeObjectTableEntry(entData, geometry, clippingPlanes, worldMatrix, objectSlot, objectTable);
@@ -693,6 +705,13 @@ export class Mesh3DRenderer extends BaseRenderer {
       this._rebuildMatBindGroup(matData);
     }
     this._writeMaterialUniform(matData, material);
+    this.recorded.retain(matData.colorBuf,this.submissionContext);this.recorded.retain(matData.bindGroup,this.submissionContext);
+    for(const slot of ['base','emissive'] as const){
+      const handle=slot==='base'?matData.textureHandle:matData.emissiveTextureHandle;
+      if(handle){this.recorded.own(handle,()=>handle.release());this.recorded.retain(handle,this.submissionContext);}
+      else if((slot==='base'?matData.gpuTexture:matData.emissiveGpuTexture)===this.defaultTexture)this.recorded.retain(this.defaultTexture,this.submissionContext);
+    }
+    if(this.ownsAssetManager)this.recorded.retain(this.assetManager,this.submissionContext);
   }
 
   private _bindGeometry(
@@ -830,6 +849,10 @@ export class Mesh3DRenderer extends BaseRenderer {
     matData.uniformU32[9] = useEmissiveTexture;
     matData.uniformU32[10] = material.blending === 'none' ? 1 : 0;
     matData.uniformU32[11] = 0;
+    if(this.recorded.pending(matData.colorBuf)){
+      const previous=matData.colorBuf,buffer=this.engine.device.createBuffer({label:'Mesh3DRenderer.materialUniform',size:48,usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST});
+      matData.colorBuf=this.recorded.own(buffer,()=>buffer.destroy());this._rebuildMatBindGroup(matData);this.recorded.retire(previous);
+    }
     this.engine.device.queue.writeBuffer(matData.colorBuf, 0, matData.uniformData);
 
     color[0] = r;
@@ -939,9 +962,11 @@ export class Mesh3DRenderer extends BaseRenderer {
     const { device } = this.engine;
     const uniformData = new ArrayBuffer(48);
     const colorBuf = device.createBuffer({
+      label:'Mesh3DRenderer.materialUniform',
       size: 48, // color vec4 + emissive vec4 + u32 x 4
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
+    this.recorded.own(colorBuf,()=>colorBuf.destroy());
     const samplerKey = this._samplerKey(material.sampler);
     const sampler = this._createSampler(material.sampler);
     const bindGroup = device.createBindGroup({
@@ -953,6 +978,7 @@ export class Mesh3DRenderer extends BaseRenderer {
         { binding: 3, resource: this.defaultTexture.createView() },
       ],
     });
+    this.recorded.own(bindGroup,()=>getInstrumentedGPUResourceTracker(device)?.untrackObject(bindGroup));
     return {
       colorBuf,
       gpuTexture: this.defaultTexture,
@@ -1009,6 +1035,7 @@ export class Mesh3DRenderer extends BaseRenderer {
 
   private _rebuildMatBindGroup(matData: MatGPUData): void {
     const { device } = this.engine;
+    const previous=matData.bindGroup;
     matData.bindGroup = device.createBindGroup({
       layout: this.bgl2,
       entries: [
@@ -1018,6 +1045,7 @@ export class Mesh3DRenderer extends BaseRenderer {
         { binding: 3, resource: matData.emissiveGpuTexture.createView() },
       ],
     });
+    const group=matData.bindGroup;this.recorded.own(group,()=>getInstrumentedGPUResourceTracker(device)?.untrackObject(group));this.recorded.retire(previous);
   }
 
   private _syncMaterialTexture(source: MaterialTextureSource, matData: MatGPUData, slot: 'base' | 'emissive'): void {
@@ -1150,7 +1178,7 @@ export class Mesh3DRenderer extends BaseRenderer {
 
   private _uploadGeometry(geo: Geometry3D): GeoGPUData {
     if (!geo.hasMorphTargets) {
-      const shared = this.sharedGeoCache.ensure(geo, this);
+      const shared = this.sharedGeoCache.ensure(geo, this, this.submissionContext);
       const zeroMorphData = sharedZeroVectorCache.vec3(geo.vertexCount);
       const morphPositionBufs: GPUBuffer[] = [];
       for (let i = 0; i < 4; i++) {
@@ -1202,6 +1230,8 @@ export class Mesh3DRenderer extends BaseRenderer {
         size: aligned,
         usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
       });
+      const owned = indexBuf;
+      this.recorded.own(owned, () => owned.destroy());
       writeBufferAligned(this.engine.device.queue, indexBuf, 0, indexData);
       indexFormat = indexData instanceof Uint32Array ? 'uint32' : 'uint16';
     }
@@ -1231,6 +1261,7 @@ export class Mesh3DRenderer extends BaseRenderer {
       size: Math.max(4, alignUp4(data.byteLength)),
       usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
     });
+    this.recorded.own(buf, () => buf.destroy());
     if (data.byteLength > 0) wrtBuf(this.engine.device.queue, buf, 0, data);
     return buf;
   }
@@ -1240,18 +1271,24 @@ export class Mesh3DRenderer extends BaseRenderer {
       size: Math.max(16, alignUp4(data.byteLength)),
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     });
+    this.recorded.own(buf, () => buf.destroy());
     wrtBuf(this.engine.device.queue, buf, 0, data);
     return buf;
   }
 
   private _updateGeometryBuffers(geo: Geometry3D, data: GeoGPUData): void {
+    if (!data.sharedStandard && this._localGeometryBuffers(data).some(buffer => this.recorded.pending(buffer))) {
+      this._destroyGeoData(data);
+      Object.assign(data, this._uploadGeometry(geo));
+      return;
+    }
     if (data.sharedStandard) {
       if (geo.hasMorphTargets) {
         this._destroyGeoData(data);
         Object.assign(data, this._uploadGeometry(geo));
         return;
       }
-      const shared = this.sharedGeoCache.ensure(geo, this);
+      const shared = this.sharedGeoCache.ensure(geo, this, this.submissionContext);
       // Slots 3–6 remain vertex-rate inputs even without morph targets. Dynamic
       // helpers can grow after upload, so their zero streams must grow as well.
       const requiredMorphBytes = Math.max(4, geo.vertexCount * 3 * Float32Array.BYTES_PER_ELEMENT);
@@ -1263,8 +1300,9 @@ export class Mesh3DRenderer extends BaseRenderer {
           buffer.label = `Mesh3DRenderer.zeroMorph${slot}`;
           return buffer;
         });
-        const retire = () => { for (const buffer of previous) buffer.destroy(); };
-        void this.engine.device.queue.onSubmittedWorkDone().then(retire, retire);
+        const retire = () => { for (const buffer of previous) this.recorded.retire(buffer); };
+        if (this.submissionContext?.afterSubmit) retire();
+        else void this.engine.device.queue.onSubmittedWorkDone().then(retire, retire);
       }
       data.positionBuf = shared.positionBuf;
       data.normalBuf = shared.normalBuf;
@@ -1304,6 +1342,7 @@ export class Mesh3DRenderer extends BaseRenderer {
       size: Math.max(64, alignUp4(skinning.jointMatrices.byteLength)),
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     });
+    this.recorded.own(skinMatrixBuf, () => skinMatrixBuf.destroy());
     wrtBuf(this.engine.device.queue, skinMatrixBuf, 0, skinning.jointMatrices);
     const skinJointBuf = this._makeStorageBuffer(skinning.joints);
     const skinWeightBuf = this._makeStorageBuffer(skinning.weights);
@@ -1323,9 +1362,7 @@ export class Mesh3DRenderer extends BaseRenderer {
   }
 
   private _replaceSkinningGpuData(geo: Geometry3D, data: GeoGPUData): void {
-    data.skinJointBuf?.destroy();
-    data.skinWeightBuf?.destroy();
-    data.skinMatrixBuf?.destroy();
+    for (const buffer of [data.skinJointBuf, data.skinWeightBuf, data.skinMatrixBuf]) if (buffer) this.recorded.retire(buffer);
     const skinData = this._createSkinningGpuData(geo);
     data.skinJointBuf = skinData.skinJointBuf;
     data.skinWeightBuf = skinData.skinWeightBuf;
@@ -1338,6 +1375,10 @@ export class Mesh3DRenderer extends BaseRenderer {
   private _syncSkinningMatrices(geo: Geometry3D, data: GeoGPUData): void {
     const skinning = geo.skinning;
     if (!skinning || !data.skinMatrixBuf || data.skinVersion === skinning.version) return;
+    if (this.recorded.pending(data.skinMatrixBuf)) {
+      this._replaceSkinningGpuData(geo, data);
+      return;
+    }
     wrtBuf(this.engine.device.queue, data.skinMatrixBuf, 0, skinning.jointMatrices);
     data.skinVersion = skinning.version;
   }
@@ -1358,7 +1399,7 @@ export class Mesh3DRenderer extends BaseRenderer {
   private _destroyOwnedTexture(matData: MatGPUData, slot: 'base' | 'emissive'): void {
     if (slot === 'base') {
       if (matData.ownsTexture && matData.gpuTexture !== this.defaultTexture) {
-        if (matData.textureHandle) matData.textureHandle.release();
+        if (matData.textureHandle) {const handle=matData.textureHandle;this.recorded.own(handle,()=>handle.release());this.recorded.retire(handle);}
         else this._deferTextureDestroy(matData.gpuTexture);
       }
       matData.textureHandle = null;
@@ -1366,7 +1407,7 @@ export class Mesh3DRenderer extends BaseRenderer {
       return;
     }
     if (matData.ownsEmissiveTexture && matData.emissiveGpuTexture !== this.defaultTexture) {
-      if (matData.emissiveTextureHandle) matData.emissiveTextureHandle.release();
+      if (matData.emissiveTextureHandle) {const handle=matData.emissiveTextureHandle;this.recorded.own(handle,()=>handle.release());this.recorded.retire(handle);}
       else this._deferTextureDestroy(matData.emissiveGpuTexture);
     }
     matData.emissiveTextureHandle = null;
@@ -1376,20 +1417,23 @@ export class Mesh3DRenderer extends BaseRenderer {
   private _destroyGeoData(data: GeoGPUData): void {
     if (data.sharedStandard) {
       this.sharedGeoCache?.release(data.geometryId, this);
-    } else {
-      data.positionBuf.destroy();
-      data.normalBuf.destroy();
-      data.uvBuf.destroy();
-      data.indexBuf?.destroy();
     }
-    for (const buf of data.morphPositionBufs) buf.destroy();
-    data.skinJointBuf?.destroy();
-    data.skinWeightBuf?.destroy();
-    data.skinMatrixBuf?.destroy();
+    for (const buffer of this._localGeometryBuffers(data)) this.recorded.retire(buffer);
+  }
+
+  private _localGeometryBuffers(data: GeoGPUData): GPUBuffer[] {
+    return [...(data.sharedStandard ? [] : [data.positionBuf, data.normalBuf, data.uvBuf, data.indexBuf]),
+      ...data.morphPositionBufs, data.skinJointBuf, data.skinWeightBuf, data.skinMatrixBuf]
+      .filter((buffer): buffer is GPUBuffer => !!buffer);
+  }
+
+  private _retainGeometry(geometry: Geometry3D, data: GeoGPUData): void {
+    if (data.sharedStandard) this.sharedGeoCache.ensure(geometry, this, this.submissionContext);
+    for (const buffer of this._localGeometryBuffers(data)) this.recorded.retain(buffer, this.submissionContext);
   }
 
   private _destroyMatData(data: MatGPUData): void {
-    data.colorBuf.destroy();
+    this.recorded.retire(data.colorBuf);this.recorded.retire(data.bindGroup);
     this._destroyOwnedTexture(data, 'base');
     this._destroyOwnedTexture(data, 'emissive');
   }
@@ -1398,9 +1442,8 @@ export class Mesh3DRenderer extends BaseRenderer {
     this.sceneFrameBinding?.destroy();
     this.rendererCore?.destroy();
     this.matCache.clear();
-    if (this.ownsAssetManager) this.assetManager?.dispose();
     this._samplerCache.clear();
-    this.defaultTexture?.destroy();
+    this.recordedOwner?.retireAll();
     this.clearPipelineCache();
   }
 }

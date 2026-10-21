@@ -13,6 +13,8 @@ import { RendererCacheMap } from './RendererCacheMap';
 import { encodeShaderPipelineKey } from './pipelineKey';
 
 export interface RendererGeometryOwner<TGeometry> {
+  beginUploads?(context?: RenderCommandContext): void;
+  endView?(): void;
   ensure(geometry: Geometry3D): TGeometry;
   releaseNotIn(liveGeometryIds: LiveIdSet): void;
   destroy(): void;
@@ -84,6 +86,7 @@ export class ParameterizedRendererCore<TObject extends { modelSlot: number }, TG
   beginUploads(context?: RenderCommandContext): void {
     this.assertAlive();
     this._uploadsPrepared = false;
+    this.geometry.beginUploads?.(context);
     this.objectTable?.beginUploads(context);
     this.batchObjectTable?.beginUploads(context);
   }
@@ -105,6 +108,7 @@ export class ParameterizedRendererCore<TObject extends { modelSlot: number }, TG
     this.assertAlive();
     if (!this._uploadsPrepared) this.flushUploads();
     this._uploadsPrepared = false;
+    this.geometry.endView?.();
   }
 
   releaseObjectsNotIn(liveObjectIds: LiveIdSet): void {
@@ -165,14 +169,18 @@ export class ParameterizedRendererCore<TObject extends { modelSlot: number }, TG
 
 export class SharedGeometryRendererOwner implements RendererGeometryOwner<SharedGeometry3DGPUData> {
   private readonly cache: SharedGeometry3DGPUCache;
+  private context: RenderCommandContext | undefined;
 
   constructor(device: GPUDevice, private readonly owner: object, tracker?: GPUResourceTracker) {
     this.cache = getSharedGeometry3DGPUCache(device, tracker);
   }
 
   ensure(geometry: Geometry3D, _legacyOwner?: object): SharedGeometry3DGPUData {
-    return this.cache.ensure(geometry, this.owner);
+    return this.cache.ensure(geometry, this.owner, this.context);
   }
+
+  beginUploads(context?: RenderCommandContext): void { this.context = context; }
+  endView(): void { this.context = undefined; }
 
   releaseNotIn(liveGeometryIds: LiveIdSet): void {
     this.cache.releaseUnused(this.owner, liveGeometryIds);

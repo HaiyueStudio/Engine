@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 1,
+  "goal": "g04-region-rendering",
+  "status": "complete-G04-implementation-and-correctness",
+  "generatedAt": "2026-10-21T12:22:03.609533+00:00",
+  "allExplicitG04RequirementsProven": true,
+  "goalRemainsActive": false,
+  "fullRepositoryTests": {
+    "passed": 1881,
+    "failed": 0,
+    "suites": [
+      138,
+      1107,
+      107,
+      522,
+      7
+    ]
+  },
+  "problem": "Repeated static GUI work and mutable GPU resources overwrote held recordings, including cancelled/unsubmitted shadow history.",
+  "method": "View/RTT-owned whole-region cache and invalidation; complete fresh composition; submission-aware resource versions, conditional shadow atlas replacement and full active-light initialization.",
+  "conclusion": "All 12 full repository/integration gates and all 32 native groups /3440 cases pass on the current source; all22 original G04 requirements audited. Auxiliary144 exact pixels and buffer/texture residue0. No formal hardware performance or release claim.",
+  "scopeApproval": {
+    "path": "artifacts/engine-0.2.2/g04/shadow-orchestrator-approved-application.json",
+    "sha256": "5d406745381f9892b00ad32db6d357aaea681f618ed268815fa28c45f00dc464"
+  },
+  "currentEvidence": {
+    "qualification": {
+      "path": "artifacts/engine-0.2.2/g04/final-g04-20261021T120423Z/result.json",
+      "sha256": "9aa144317d44fb6e5d1ad6c7e182473113a9401321ab18639fcf008b236719b7"
+    },
+    "originalContractAudit": {
+      "path": "artifacts/engine-0.2.2/g04/final-g04-20261021T120423Z/original-contract-audit.json",
+      "sha256": "70b66f433ab0d389c4756ebfb37c3e48c688b6f7f5895816d11f6db8d3debcd0"
+    },
+    "inputs": {
+      "path": "artifacts/engine-0.2.2/g04/final-g04-20261021T120423Z/verified-inputs.json",
+      "sha256": "00e12e7d997d599cf95cb8983701bf093d42041c5905658607110c8f244104da"
+    },
+    "sourceManifest": {
+      "path": "artifacts/engine-0.2.2/g04/final-g04-20261021T120423Z/source-manifest.json",
+      "sha256": "a54bfe099ed4900ba4e945d30a52af7ddee5e0791677a73945ff6a1d53b916e6"
+    },
+    "stage14": {
+      "path": "artifacts/engine-0.2.2/g04/final-g04-20261021T120423Z/stage14-dag.json",
+      "sha256": "9152333760285ca96a5f8377b79909adb38d0b3de7b1b2b2ac010c697b6e076f"
+    },
+    "shaderCost": {
+      "path": "artifacts/engine-0.2.2/g04/final-g04-20261021T120423Z/shader-cost.json",
+      "sha256": "9fb1ffbd6a86bd09433ba18df5d92503d83034d35d952cd78bb9ad67b56e44b0"
+    }
+  },
+  "requirementsAudit": [
+    {
+      "id": "R01",
+      "requirement": "View/RTT owns regional targets, invalidation and complete fresh output; GUI consumes public hooks",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R02",
+      "requirement": "Demand, once, continuous, disabled and independent visibility",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R03",
+      "requirement": "Update-once and clear-once consumed only after submission; hidden/cancelled/lost invalidations survive",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R04",
+      "requirement": "Whole-region persistent GUI pixels and independent continuously rendered scene",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R05",
+      "requirement": "Complete presentation initialized independently of previous swapchain contents",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R06",
+      "requirement": "Input/program/font/image/layout/scroll/animation/global-overlay first-frame invalidation",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R07",
+      "requirement": "Initialize/clear; premultiplied linear alpha and exactly one output conversion",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R08",
+      "requirement": "Native MSAA1/4 resolve and samplewise retained histories",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R09",
+      "requirement": "Size, independent DPR axes, viewport/input inverse and device-generation rebuild",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R10",
+      "requirement": "Retire only after last pending/submitted use, same owner/device; cancelled writers do not publish",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R11",
+      "requirement": "Device-wide8 regions/64 MiB includes cached MSAA/resolve/copy/retirement; explicit fallback, no invisible eviction",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R12",
+      "requirement": "Normal working/depth resources and composition costs reported separately",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R13",
+      "requirement": "Registered public-import fixed-sidebar/continuous3D example: interaction, pause, all-idle, resume, resize and cleanup",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R14",
+      "requirement": "Static GUI skips actual control records, layout and uploads while scene continues",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R15",
+      "requirement": "Independent ordinary full-output reference at frozen content, dimensions, DPR and MSAA; tolerance unchanged",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R16",
+      "requirement": "Transparent edges, moved/removed nodes, Popup/Modal/Toast across regions",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R17",
+      "requirement": "Scroll/camera, resize, cover restore, device loss and first cache initialization",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R18",
+      "requirement": "All-static zero presentation acquisition/encoding/submission; wake and cleanup",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R19",
+      "requirement": "Business simulation clock independent of rendering inactivity",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R20",
+      "requirement": "Pure layout has no regional/GPU owner; no per-control retained targets; ordinary GUI remains opt-in",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R21",
+      "requirement": "First phase whole-region caching; arbitrary dirty rectangles optional; effects use correct whole-view fallback or explicit device-size rejection",
+      "status": "passed-current-G04-correctness"
+    },
+    {
+      "id": "R22",
+      "requirement": "CPU record/GPU timing/queue wait/upload/draw/allocations/residue are distinct; formal hardware fluency/bandwidth/package qualification belongs to G13; physical input/focus to G05",
+      "status": "passed-G04-accounting-with-original-G05-G13-delegation"
+    }
+  ],
+  "preservedHistory": {
+    "previousReview": {
+      "path": "artifacts/engine-0.2.2/g04/final-g04-20261021T120423Z/review-before-final.json",
+      "sha256": "96a6ca0f1eccc96fe16f0c56b9e1cf15b8a6486bf1677c1ec9b90fb490a256e6"
+    },
+    "previousSummary": {
+      "path": "artifacts/engine-0.2.2/g04/final-g04-20261021T120423Z/summary-before-final.md",
+      "sha256": "d162feff0b95e549f48f8a209bf32cefe5d55e5cfa0b7d3ae6ac9ae57faf8650"
+    },
+    "previousProgressSeal": {
+      "path": "artifacts/engine-0.2.2/g04/auxiliary-proposal-progress.json",
+      "sha256": "1693e18bad7339fb64b2e7642f46b39270cde9a2cc8fb049f071cf87fe0fdb7e"
+    },
+    "allRawReportsRetained": true
+  },
+  "unchangedConstraints": [
+    "8 retained regions /64 MiB color-cache budget; normal working and depth resources separate",
+    "pixel tolerance2/255",
+    "all shader quantity/byte/time/bundle budgets",
+    "public package entry points and baseline ownership",
+    "G05 physical input/focus and G13 formal hardware/performance/package/release qualification"
+  ],
+  "qualificationLimits": [
+    "Experimental regional integration; whole-region caching; arbitrary dirty rectangles optional.",
+    "Over-device-size arbitrary nonempty user effects are explicitly rejected.",
+    "Tracked GPU allocation bytes are estimates; true GPU duration and bandwidth not qualified here.",
+    "G05 physical input/focus; G13 formal hardware performance, package/platform/release qualification."
+  ],
+  "nextWork": [
+    "G05 input/navigation implementation and physical validation.",
+    "G13 production device fluency, composition/total resource cost, package/platform and final candidate qualification."
+  ],
+  "generator": {
+    "path": "artifacts/engine-0.2.2/g04/finalize-approved-g04.py",
+    "sha256": "933ffdccbe957db13d5e0be20ec8ce3465b09651f2c2129b9c54a43385911885"
+  },
+  "reviewSummarySha256": "185d840044e30be1913ed99fad5fad96d604d8ec09de9d63027ef0cc9b1770b3"
+}

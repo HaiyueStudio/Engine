@@ -57,6 +57,7 @@
 - [Scrollable GUI and rule help](./gui.md)
 
 - [GPU 实例与模拟（experimental）](gpu-instances.md)
+- [固定 GUI 与连续 3D 分区（0.2.2 开发候选）](region-rendering.md)
 - [Deferred 多光源实验室（experimental）](deferred-lighting.md)
 - [游戏国际化](i18n.md)：文字与艺术字图片的多语言切换。
 - [分支剧情](narrative.md)：对话 GUI、插图、选项和存档恢复。

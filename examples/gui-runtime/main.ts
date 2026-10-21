@@ -6,6 +6,7 @@ import {
 import { createCatalog, defaults, normalize, previewStyle, type Parameter, type Value } from './catalog';
 import {attachGuiLayout} from '@haiyue/extensions/gui-layout';
 import {populateLayoutDemo} from './layout-demo';
+import {attachInputNavigation} from './input-navigation';
 
 const colors = { panel: '#111c30', border: '#26354d', muted: '#91a3bd', accent: '#7dd3fc' };
 const label = (parent: GuiElement, text: string, x: number, y: number, width: number, fontSize = 14, color = colors.muted) =>
@@ -17,11 +18,13 @@ async function main(): Promise<void> {
   const engine = new HaiyueEngine({ canvas, clearColor: { r: 0.025, g: 0.045, b: 0.085, a: 1 } });
   let disposed = false;
   let detachLayout: (() => void) | null = null;
+  let detachInput: (() => void) | null = null;
   const cleanup = () => {
     if (disposed) return;
     disposed = true;
     window.removeEventListener('pagehide', cleanup);
     detachLayout?.(); detachLayout = null;
+    detachInput?.();detachInput=null;
     engine.destroy();
   };
   window.addEventListener('pagehide', cleanup);
@@ -36,6 +39,12 @@ async function main(): Promise<void> {
     entity.addComponent(root);
     scene.add(entity);
     engine.switchScene(scene);
+
+    const inputWorkflow=new URLSearchParams(location.search).has('input-navigation');
+    detachInput=attachInputNavigation(engine,scene.guiSystem!,root,inputWorkflow);
+    if(inputWorkflow) {
+      engine.run();status.hidden=true;canvas.dataset.ready='true';return;
+    }
 
     const catalog = createCatalog();
     const states = new Map(catalog.map(demo => [demo.name, defaults(demo)]));

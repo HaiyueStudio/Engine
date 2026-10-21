@@ -1,7 +1,8 @@
+import type {RenderCommandContext} from '../../core/RenderCommandContext';
+import {GuiGpuResources} from './GuiGpuResources';
+import {guiLinearSurface,updateGuiViewport,type GuiRenderSurface} from './GuiRenderSurface';
 import type { IEngine } from '../../core/IEngine';
 import type { SampleableTextureSource } from '../../material/BasicMaterial';
-import { writeBuffer } from '../../renderer/utils';
-import { alignUp4 } from '../../utils/align';
 import type { GuiImageSource } from '../components/GuiImage';
 import { GUI_IMAGE_FLOATS_PER_VERTEX, GuiImageBatch, type GuiImageGroup } from './GuiImageBatch';
 import { BaseRenderer } from '../../renderer/BaseRenderer';
@@ -13,16 +14,11 @@ interface ImageGpuData {
   texture: GPUTexture;
   bindGroup: GPUBindGroup;
   ownsTexture: boolean;
-  version?: number | undefined;
-}
-
-interface GroupGpuBuffer {
-  vertexBuffer: GPUBuffer;
-  vertexBufferSize: number;
-  uploadedVersion: number;
+  version?: string | undefined;
 }
 
 export class GuiImageRenderer extends BaseRenderer {
+  surface: GuiRenderSurface | null = null;
   reverseZ = false;
   msaaSamples: 1 | 4 = 1;
 
@@ -31,14 +27,16 @@ export class GuiImageRenderer extends BaseRenderer {
   private imageBindGroupLayout!: GPUBindGroupLayout;
   private shader!: GPUShaderModule;
   private pipelineLayout!: GPUPipelineLayout;
-  private viewportBuffer!: GPUBuffer;
-  private viewportBindGroup!: GPUBindGroup;
+  private resources!:GuiGpuResources;
+  private readonly viewportKey={};
+  private viewportGroups=new WeakMap<GPUBuffer,GPUBindGroup>();
+  private viewportVersion=0;
   private readonly viewportData = new Float32Array(4);
+  private readonly groups=new Map<GuiImageBatch,Set<GuiImageGroup>>();
+  private readonly batchSources=new Map<GuiImageBatch,Set<NonNullable<GuiImageSource>>>();
+  private readonly sourceUsers=new Map<NonNullable<GuiImageSource>,Set<GuiImageBatch>>();
   private imageCache = new WeakMap<object, ImageGpuData>();
   private readonly liveImageData = new Set<ImageGpuData>();
-  // Groups retain geometry slots across texture changes; prune slots when removed.
-  private batchBuffers = new WeakMap<GuiImageBatch, Map<GuiImageGroup, GroupGpuBuffer>>();
-  private readonly liveGroupBuffers = new Set<GroupGpuBuffer>();
   private defaultTexture!: GPUTexture;
   private sampler: GPUSampler | null = null;
   private initialized = false;
@@ -48,6 +46,7 @@ export class GuiImageRenderer extends BaseRenderer {
     if (this.initialized && this.engine.device === engine.device) return;
     if (this.initialized) this.destroy();
     this.engine = engine;
+    this.resources=new GuiGpuResources(engine.device);
     const { device } = engine;
     try {
       this.viewportBindGroupLayout = device.createBindGroupLayout({
@@ -65,25 +64,20 @@ export class GuiImageRenderer extends BaseRenderer {
     ]);
     this.shader = generated.module;
     this.pipelineLayout = generated.pipelineLayout;
-    this.viewportBuffer = device.createBuffer({
-      size: 16,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-    this.viewportBindGroup = device.createBindGroup({
-      layout: this.viewportBindGroupLayout,
-      entries: [{ binding: 0, resource: { buffer: this.viewportBuffer } }],
-    });
+    const viewport=this.resources.reserve(this.viewportKey,16,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST,'gui-image:viewport');
+    this.viewportGroups.set(viewport,device.createBindGroup({layout:this.viewportBindGroupLayout,entries:[{binding:0,resource:{buffer:viewport}}]}));
     this.defaultTexture = device.createTexture({
       size: [1, 1],
       format: 'rgba8unorm',
       usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
     });
+    this.resources.own(this.defaultTexture);
     device.queue.writeTexture({ texture: this.defaultTexture }, new Uint8Array([255, 255, 255, 255]), { bytesPerRow: 4 }, [1, 1]);
       this.sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear' });
       this.initialized = true;
     } catch (error) {
-      this.viewportBuffer?.destroy();
-      this.defaultTexture?.destroy();
+      this.resources.destroy();
+
       this.sampler = null;
       this.clearPipelineCache();
       this.initialized = false;
@@ -91,39 +85,28 @@ export class GuiImageRenderer extends BaseRenderer {
     }
   }
 
-  render(passEncoder: GPURenderPassEncoder, batch: GuiImageBatch): void {
+  render(passEncoder: GPURenderPassEncoder, batch: GuiImageBatch, context?:RenderCommandContext): void {
     if (!this.initialized) return;
-    let buffers = this.batchBuffers.get(batch);
-    if (buffers) {
-      const groups = new Set(batch.groups);
-      for (const [group, buffer] of buffers) {
-        if (groups.has(group)) continue;
-        buffer.vertexBuffer.destroy();
-        this.liveGroupBuffers.delete(buffer);
-        buffers.delete(group);
-      }
-    }
-    if (batch.groups.length < 1) return;
-    if (!buffers) {
-      buffers = new Map();
-      this.batchBuffers.set(batch, buffers);
-    }
-    const pipeline = this.getPipeline();
+    this.syncSources(batch,new Set(batch.groups.map(group=>group.source)));
+    const previous=this.groups.get(batch)??new Set<GuiImageGroup>(),current=new Set(batch.groups);for(const group of previous)if(!current.has(group))this.resources.release(group);this.groups.set(batch,current);
+    if(batch.groups.length<1)return;
     const viewport = this.viewportData;
-    const width = this.engine.displayWidth, height = this.engine.displayHeight;
-    if (!this.viewportUploaded || viewport[0] !== Math.fround(width) || viewport[1] !== Math.fround(height)) {
-      viewport[0] = width;
-      viewport[1] = height;
-      writeBuffer(this.engine.device.queue, this.viewportBuffer, 0, viewport);
+    if (updateGuiViewport(viewport,this.surface,this.engine,this.viewportUploaded)) {
+      this.viewportVersion++;
       this.viewportUploaded = true;
     }
+    const viewportBuffer=this.resources.upload(this.viewportKey,this.viewportVersion,viewport,16,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST,'gui-image:viewport',context);
+    let viewportGroup=this.viewportGroups.get(viewportBuffer);if(!viewportGroup){viewportGroup=this.engine.device.createBindGroup({layout:this.viewportBindGroupLayout,entries:[{binding:0,resource:{buffer:viewportBuffer}}]});this.viewportGroups.set(viewportBuffer,viewportGroup);}
 
-    passEncoder.setPipeline(pipeline);
-    passEncoder.setBindGroup(0, this.viewportBindGroup);
+    passEncoder.setBindGroup(0, viewportGroup);
     for (const group of batch.groups) {
-      const vertexBuffer = this.uploadGroup(group, buffers);
-      if (!vertexBuffer) continue;
       const imageData = this.getImageGpuData(group.source);
+      if(!imageData)continue;
+      if(imageData.ownsTexture)this.resources.retain(imageData.texture,context);
+      const vertexBuffer = this.uploadGroup(group,context);
+      if (!vertexBuffer) continue;
+      const linearTexture = imageData.texture.format.endsWith('-srgb') || ['rgba16float','rgba32float','rg11b10ufloat'].includes(imageData.texture.format);
+      passEncoder.setPipeline(this.getPipeline(linearTexture));
       passEncoder.setBindGroup(1, imageData.bindGroup);
       passEncoder.setVertexBuffer(0, vertexBuffer);
       passEncoder.draw(group.vertexCount);
@@ -135,66 +118,39 @@ export class GuiImageRenderer extends BaseRenderer {
     this.addPipelineWarmup(plan, key, 'GUI images', () => this.pipelineDescriptor(), this.engine.device);
   }
 
-  releaseBatch(batch: GuiImageBatch): void {
-    const buffers = this.batchBuffers.get(batch);
-    if (!buffers) return;
-    for (const gpuBuffer of buffers.values()) {
-      gpuBuffer.vertexBuffer.destroy();
-      this.liveGroupBuffers.delete(gpuBuffer);
-    }
-    this.batchBuffers.delete(batch);
-  }
+  releaseBatch(batch: GuiImageBatch): void {for(const group of this.groups.get(batch)??[])this.resources.release(group);this.groups.delete(batch);this.syncSources(batch,new Set());this.batchSources.delete(batch);}
 
   destroy(): void {
-    if (!this.initialized) return;
-    this.viewportUploaded = false;
-    this.viewportBuffer.destroy();
-    this.defaultTexture.destroy();
-    for (const buffer of this.liveGroupBuffers) buffer.vertexBuffer.destroy();
-    this.liveGroupBuffers.clear();
-    for (const data of this.liveImageData) {
-      if (data.ownsTexture) data.texture.destroy();
-    }
-    this.liveImageData.clear();
-    this.batchBuffers = new WeakMap();
-    this.imageCache = new WeakMap();
-    this.sampler = null;
-    this.clearPipelineCache();
-    this.initialized = false;
+    if(!this.initialized)return;
+    this.resources.destroy();this.viewportGroups=new WeakMap();this.viewportUploaded=false;this.viewportVersion=0;
+    this.groups.clear();this.batchSources.clear();this.sourceUsers.clear();this.liveImageData.clear();this.imageCache=new WeakMap();
+    this.sampler=null;
+    this.clearPipelineCache();this.initialized=false;
   }
 
-  private uploadGroup(group: GuiImageGroup, buffers: Map<GuiImageGroup, GroupGpuBuffer>): GPUBuffer | null {
-    const usedByteLength = group.vertexCount * GUI_IMAGE_FLOATS_PER_VERTEX * 4;
-    const byteLength = Math.max(4, usedByteLength);
-    let gpuBuffer = buffers.get(group);
-    if (!gpuBuffer || gpuBuffer.vertexBufferSize < byteLength) {
-      if (gpuBuffer) {
-        gpuBuffer.vertexBuffer.destroy();
-        this.liveGroupBuffers.delete(gpuBuffer);
-      }
-      const vertexBufferSize = alignUp4(byteLength);
-      gpuBuffer = {
-        vertexBufferSize,
-        uploadedVersion: -1,
-        vertexBuffer: this.engine.device.createBuffer({
-          label: 'gui-image:vertices',
-          size: vertexBufferSize,
-          usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-        }),
-      };
-      buffers.set(group, gpuBuffer);
-      this.liveGroupBuffers.add(gpuBuffer);
-    }
-    if (gpuBuffer.uploadedVersion !== group.version) {
-      writeBuffer(this.engine.device.queue, gpuBuffer.vertexBuffer, 0, group.vertexData, 0, byteLength);
-      gpuBuffer.uploadedVersion = group.version;
-    }
-    return gpuBuffer.vertexBuffer;
+  private uploadGroup(group: GuiImageGroup,context?:RenderCommandContext): GPUBuffer | null {
+    const size=group.vertexCount*GUI_IMAGE_FLOATS_PER_VERTEX*4;if(!size)return null;
+    return this.resources.upload(group,group.version,group.vertexData,size,GPUBufferUsage.VERTEX|GPUBufferUsage.COPY_DST,'gui-image:vertices',context);
   }
 
-  private getImageGpuData(source: NonNullable<GuiImageSource>): ImageGpuData {
+  private syncSources(batch:GuiImageBatch,current:Set<NonNullable<GuiImageSource>>):void {
+    const previous=this.batchSources.get(batch)??new Set<NonNullable<GuiImageSource>>();
+    for(const source of previous)if(!current.has(source)){
+      const users=this.sourceUsers.get(source);users?.delete(batch);
+      if(!users?.size){this.sourceUsers.delete(source);if(this.imageCache.get(source)?.ownsTexture)this.invalidateSource(source);}
+    }
+    for(const source of current)if(!previous.has(source)){let users=this.sourceUsers.get(source);if(!users){users=new Set();this.sourceUsers.set(source,users);}users.add(batch);}
+    this.batchSources.set(batch,current);
+  }
+  invalidateSource(source:GuiImageSource):void {
+    if(!source)return;const previous=this.imageCache.get(source);this.imageCache.delete(source);if(previous){this.liveImageData.delete(previous);this.retireImage(previous)}
+  }
+  private retireImage(data:ImageGpuData):void {if(data.ownsTexture)this.resources.retire(data.texture,true);}
+  private getImageGpuData(source: NonNullable<GuiImageSource>): ImageGpuData|null {
+    if(isHtmlImageElement(source)&&(!source.complete||source.naturalWidth===0||source.naturalHeight===0))return null;
     const cacheKey = isGpuTextureSource(source) ? source : source as object;
-    const sourceVersion = isSampleableTextureSource(source) ? source.version : undefined;
+    const dimensions=isSampleableTextureSource(source)?source.texture:source;
+    const sourceVersion = JSON.stringify([isSampleableTextureSource(source)?source.version:0,'width'in dimensions?dimensions.width:0,'height'in dimensions?dimensions.height:0,'currentSrc'in source?source.currentSrc:undefined]);
     const cached = this.imageCache.get(cacheKey);
     if (cached && cached.version === sourceVersion) return cached;
     const texture = isGpuTextureSource(source)
@@ -204,7 +160,9 @@ export class GuiImageRenderer extends BaseRenderer {
         : this.createTextureFromImage(source);
     const sampler = this.sampler;
     if (!sampler) throw new Error('GuiImageRenderer sampler owner is not prepared.');
-    const data = {
+    const ownsTexture=!isGpuTextureSource(source)&&!isSampleableTextureSource(source);
+    if(ownsTexture)this.resources.own(texture);
+    let data:ImageGpuData;try{data = {
       texture,
       ownsTexture: !isGpuTextureSource(source) && !isSampleableTextureSource(source),
       version: sourceVersion,
@@ -216,9 +174,10 @@ export class GuiImageRenderer extends BaseRenderer {
         ],
       }),
     };
+    }catch(error){if(ownsTexture)this.resources.retire(texture);throw error;}
     if (cached) {
       this.liveImageData.delete(cached);
-      if (cached.ownsTexture) cached.texture.destroy();
+      this.retireImage(cached);
     }
     this.imageCache.set(cacheKey, data);
     if (data.ownsTexture) this.liveImageData.add(data);
@@ -234,21 +193,20 @@ export class GuiImageRenderer extends BaseRenderer {
       format: 'rgba8unorm',
       usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
     });
-    this.engine.device.queue.copyExternalImageToTexture({ source }, { texture }, [width, height]);
-    return texture;
+    try{this.engine.device.queue.copyExternalImageToTexture({ source }, { texture }, [width, height]);return texture;}catch(error){texture.destroy();throw error;}
   }
 
-  private getPipeline(): GPURenderPipeline {
-    const key = this.getPipelineKey();
-    return this.getCachedPipeline(key, () => this.engine.device.createRenderPipeline(this.pipelineDescriptor()));
+  private getPipeline(linearTexture = false): GPURenderPipeline {
+    const key = this.getPipelineKey(linearTexture);
+    return this.getCachedPipeline(key, () => this.engine.device.createRenderPipeline(this.pipelineDescriptor(linearTexture)));
   }
 
-  private getPipelineKey(): string {
-    return `gui-image|${this.reverseZ ? 1 : 0}|${this.msaaSamples}`;
+  private getPipelineKey(linearTexture = false): string {
+    return `gui-image|${this.surface?.format??this.engine.format}|${this.reverseZ ? 1 : 0}|${this.msaaSamples}|${linearTexture?1:0}`;
   }
 
-  private pipelineDescriptor(): GPURenderPipelineDescriptor {
-    const { format } = this.engine;
+  private pipelineDescriptor(linearTexture = false): GPURenderPipelineDescriptor {
+    const format = this.surface?.format ?? this.engine.format;
     const alphaBlend: GPUBlendComponent = {
       srcFactor: 'src-alpha',
       dstFactor: 'one-minus-src-alpha',
@@ -259,12 +217,14 @@ export class GuiImageRenderer extends BaseRenderer {
       vertex: {
         module: this.shader,
         entryPoint: 'vs_main',
+        constants: {GUI_LINEAR_OUTPUT:guiLinearSurface(this.surface,this.engine)?1:0},
         buffers: [GUI_TEXTURED_VERTEX_LAYOUT.gpu],
       },
       fragment: {
         module: this.shader,
         entryPoint: 'fs_main',
-        targets: [{ format, blend: { color: alphaBlend, alpha: alphaBlend } }],
+        constants: {GUI_LINEAR_OUTPUT:guiLinearSurface(this.surface,this.engine)?1:0,GUI_LINEAR_TEXTURE:linearTexture?1:0},
+        targets: [{ format, blend: { color: alphaBlend, alpha: {...alphaBlend,srcFactor:'one'} } }],
       },
       primitive: { topology: 'triangle-list', cullMode: 'none' },
       depthStencil: {
@@ -285,6 +245,6 @@ function isGpuTextureSource(source: GuiImageSource): source is GPUTexture {
   return !!source && typeof (source as Partial<GPUTexture>).createView === 'function';
 }
 
-function isHtmlImageElement(source: HTMLCanvasElement | HTMLImageElement | ImageBitmap): source is HTMLImageElement {
+function isHtmlImageElement(source: NonNullable<GuiImageSource>): source is HTMLImageElement {
   return typeof HTMLImageElement !== 'undefined' && source instanceof HTMLImageElement;
 }

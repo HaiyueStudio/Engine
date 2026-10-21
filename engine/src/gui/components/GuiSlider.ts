@@ -1,5 +1,6 @@
 import { GuiDirtyFlags, GuiElementOptions, GuiPointerEvent, GuiValueChangeHandler } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
+import type {GuiActionEvent} from '../GuiTypes';
 
 export interface GuiSliderOptions extends GuiElementOptions {
   value?: number;
@@ -11,6 +12,14 @@ export interface GuiSliderOptions extends GuiElementOptions {
 }
 
 export class GuiSlider extends GuiElement {
+  override handleAction(event: GuiActionEvent): void {
+    super.handleAction(event);
+    if (event.consumed) return;
+    if (event.action === 'left' || event.action === 'right') {
+      this.setValue(this.value + (event.action === 'left' ? -1 : 1) * (this.step > 0 ? this.step : (this.max - this.min) / 100), true);
+      event.consume();
+    } else if (event.action === 'confirm') { this.onCommit?.(this.value); event.consume(); }
+  }
   value: number;
   min: number;
   max: number;
@@ -19,7 +28,7 @@ export class GuiSlider extends GuiElement {
   onCommit: GuiValueChangeHandler<number> | null;
 
   constructor(options: GuiSliderOptions = {}) {
-    super({ width: 160, height: 28, ...options });
+    super({ width: 160, height: 28, focus: {mode: 'all'}, ...options });
     this.value = options.value ?? 0;
     this.min = options.min ?? 0;
     this.max = options.max ?? 100;

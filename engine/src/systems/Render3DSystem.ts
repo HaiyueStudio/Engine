@@ -1,4 +1,6 @@
 import { beginFrameGraphCapture } from '../core/FrameGraphCapture';
+import {isRegionRenderTarget,isRegionDisplayTarget} from '../core/RegionRenderTarget';
+import {markRegionReplacement} from '../core/RegionComposition';
 import { Render3DPostSceneFrameContext } from './Render3DPostSceneFrameContext';
 import { System } from '../ecs/System';
 import { Entity } from '../ecs/Entity';
@@ -25,6 +27,9 @@ import type { InternalMaterialRenderContext, MaterialGpuDrivenBatch, MaterialRen
 import type { RenderPipelineEntryOptions } from '../renderer/RenderPipeline';
 import type { GpuDrivenBatchBuffer } from '../renderer/GpuDrivenBatchBuffer';
 import { Render3DPostScenePasses } from './Render3DPostScenePasses';
+import {regionSceneView,getRegionSceneProjection,getRegionCameraViewport} from '../core/RegionSceneProjection';
+import {regionCameraFrame} from '../core/RegionSceneCamera';
+import {regionPrecisionWindowPixels} from '../renderer/regions/RegionStoragePlanner';
 import {
   Render3DSceneCollector,
   type Render3DViewCollectionOptions,
@@ -37,7 +42,7 @@ import { DEFAULT_RENDER_PROFILE, resolveRenderProfileSettings, type RenderProfil
 import type { DirectionalShadowState } from '../renderer/ShadowMapRenderer';
 import { Render3DBoundsCache } from './Render3DBoundsCache';
 import { getSceneRenderEnvironment, type SceneRenderEnvironment } from '../frame/SceneRenderEnvironment';
-import { getSceneFrameUniformSnapshot, type SceneFrameUniformSnapshot } from '../frame/SceneFrameUniformLayout';
+import type { SceneFrameUniformSnapshot } from '../frame/SceneFrameUniformLayout';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import { RenderView, getRenderViewPassOptions, type RenderViewSnapshot } from '../core/RenderView';
 import type { Render3DOpaqueSceneSortKey, WorldFrameState } from './Render3DFrameState';
@@ -52,6 +57,7 @@ import { getSceneFrameGpuArena } from '../renderer/SceneFrameGpuArena';
 import { getDeferredLightingBackend, removeDeferredLightingBackend } from '../renderer/DeferredLightingBackendPort';
 import type { FrameData } from '../frame/FrameData';
 import type { Camera3DFrameData } from '../frame/FrameData';
+import {Camera3DFrameSnapshots} from '../frame/Camera3DFrameSnapshots';
 import { EngineError, EngineErrorCode } from '../core/EngineError';
 import { Render3DMaterialContextScratch } from './Render3DMaterialContextScratch';
 import type {
@@ -305,6 +311,7 @@ export class Render3DSystem extends System {
   };
   private readonly _projectionJitter = new Float32Array(2);
   private readonly _postProcessFrameContext = new Render3DPostSceneFrameContext();
+  private readonly _cameraFrames = new Camera3DFrameSnapshots();
   private readonly _directionalShadows: Render3DDirectionalShadowOrchestrator;
   private readonly _transparentMaterialInfoScratch: TransparentMaterialInfo = {
     transparent: false,
@@ -534,11 +541,14 @@ export class Render3DSystem extends System {
     this._recording = true;
     let capture: ReturnType<typeof beginFrameGraphCapture>;
     let captureError: unknown;
+    let finishCameraFrames:((failed?:boolean)=>void)|undefined;
     try {
       capture = beginFrameGraphCapture(this, context);
+      finishCameraFrames=this._cameraFrames.begin(capture?.context??context,context.viewFamily!==undefined&&!isRegionRenderTarget(context.view?.target));
       return this._record(world, capture?.context ?? context);
     } catch (error) { captureError = error; throw error; }
     finally {
+      finishCameraFrames?.(captureError!==undefined);
       capture?.finish(captureError);
       this._materialContextScratch.reset();
       this._recording = false;
@@ -564,9 +574,11 @@ export class Render3DSystem extends System {
     this._fallbackView.reverseZ = this.reverseZ;
     this._fallbackView.sampleCount = this.msaaSamples;
     this._fallbackView.loadOp = this.loadOp;
-    const views = context.viewFamily?.views.length
+    const suppliedViews = isRegionRenderTarget(context.view?.target) ? [context.view!] : context.viewFamily?.views.length
       ? context.viewFamily.views
       : [context.view ?? this._fallbackView.snapshot()];
+    const views=suppliedViews.map(view=>isRegionRenderTarget(view.target)?regionSceneView(view,device.limits.maxTextureDimension2D,regionPrecisionWindowPixels(view.sampleCount)):view);
+    if(views.some(view=>getRegionSceneProjection(view)?.cameraViewport&&view.postProcessEnabled&&this.passes.length>0))throw RangeError('Oversized regional post-processing requires a bounded sampling dependency window.');
     const frameData = context.frameData ?? world.frameData;
     const sceneEnvironment = getSceneRenderEnvironment(frameData, world);
     const sceneFrameArena = typeof GPUShaderStage !== 'undefined'
@@ -596,16 +608,16 @@ export class Render3DSystem extends System {
       const projectionJitter = this._postScenePasses.resolveProjectionJitter(postProcessPasses, {
         viewKey: renderView.key,
         frameId: frameData.frameId,
-        width: renderView.width,
-        height: renderView.height,
+        width: getRegionCameraViewport(renderView)?.width??renderView.width,
+        height: getRegionCameraViewport(renderView)?.height??renderView.height,
       }, this._projectionJitter);
-      const cameraFrame = frameData.getCamera3D(renderView.camera, camera, {
-        width: renderView.width,
-        height: renderView.height,
+      const cameraFrame = this._cameraFrames.capture(renderView.key,regionCameraFrame(frameData.getCamera3D(renderView.camera, camera, {
+        width: getRegionCameraViewport(renderView)?.width??renderView.width,
+        height: getRegionCameraViewport(renderView)?.height??renderView.height,
         reverseZ: renderView.reverseZ,
         projectionJitter,
-      });
-      const sceneFrameUniforms = getSceneFrameUniformSnapshot(cameraFrame, sceneEnvironment.fog);
+      }),renderView));
+      const sceneFrameUniforms = this._cameraFrames.uniforms(cameraFrame, sceneEnvironment.fog);
       plannedViews.set(renderView.key, {
         cameraEntity: renderView.camera,
         camera,
@@ -622,6 +634,7 @@ export class Render3DSystem extends System {
       renderViews,
       entities,
       sceneEnvironment.shadowLights,
+      plannedViews,
     );
     this._worldExtractionOptions.frameData = frameData;
     const extractionDiagnostics = getEngineFrameDiagnostics(this.engine);
@@ -709,6 +722,7 @@ export class Render3DSystem extends System {
     views: readonly RenderViewSnapshot[],
     entities: ReadonlySet<Entity>,
     shadowLights: SceneRenderEnvironment['shadowLights'],
+    plannedViews?:ReadonlyMap<string,Render3DPlannedView>,
   ): ReadonlySet<Entity> {
     const result = this._spatialCandidates.resolve(
       world,
@@ -718,6 +732,7 @@ export class Render3DSystem extends System {
       shadowLights,
       this.cameraEntity,
       this.renderSettings.frustumCulling,
+      plannedViews,
     );
     const stats = this._spatialCandidates.stats;
     this.lastSpatialIndexUsed = stats.used;
@@ -757,15 +772,15 @@ export class Render3DSystem extends System {
       const projectionJitter = this._postScenePasses.resolveProjectionJitter(postProcessPasses, {
         viewKey: frameView.key,
         frameId: frameData.frameId,
-        width: vpW,
-        height: vpH,
+        width: getRegionCameraViewport(frameView)?.width??vpW,
+        height: getRegionCameraViewport(frameView)?.height??vpH,
       }, this._projectionJitter);
-      return frameData.getCamera3D(cameraEntity, camera, {
-        width: vpW,
-        height: vpH,
+      return this._cameraFrames.capture(frameView.key,regionCameraFrame(frameData.getCamera3D(cameraEntity, camera, {
+        width: getRegionCameraViewport(frameView)?.width??vpW,
+        height: getRegionCameraViewport(frameView)?.height??vpH,
         reverseZ: this.reverseZ,
         projectionJitter,
-      });
+      }),frameView));
     })();
     const camWorldMatrix = cameraFrame.worldMatrix;
     this._viewMatrix.set(cameraFrame.viewMatrix);
@@ -788,7 +803,7 @@ export class Render3DSystem extends System {
     eyePosition[2] = camZ;
 
     const sceneFrameUniforms = plannedView?.sceneFrameUniforms
-      ?? getSceneFrameUniformSnapshot(cameraFrame, sceneEnvironment.fog);
+      ?? this._cameraFrames.uniforms(cameraFrame, sceneEnvironment.fog);
     this._materialRenderContext.sceneEnvironment = sceneEnvironment;
     this._materialRenderContext.sceneFrameUniforms = sceneFrameUniforms;
     this._materialRenderContext.directionalShadow = this._directionalShadows.shadow;
@@ -1038,9 +1053,10 @@ export class Render3DSystem extends System {
   private _renderPostScenePasses(): void {
     const { context, camera, cameraEntityId, cameraFrame, frameView, postProcessPasses, postSceneRequirements } = this._frameExecution;
     const outputView = context.view?.target.getOutputView() ?? this.engine.getOutputView();
-    this._postScenePasses.output.configure(frameView.target.format, this.exposure, this.toneMapping, frameView);
+    this._postScenePasses.output.configure(frameView.target.format, this.exposure, this.toneMapping, frameView,isRegionDisplayTarget(frameView.target));
     const frame = this._postProcessFrameContext.update(this._frameExecution);
     this._postScenePasses.runPostProcess(context.encoder, postProcessPasses, outputView, postSceneRequirements, frame);
+    markRegionReplacement(frameView,context);
   }
 
   override destroy(): this {
@@ -1067,6 +1083,7 @@ export class Render3DSystem extends System {
     this._disabledHierarchyCache.clear();
     this._liveCaches.clear();
     this._spatialCandidates.reset();
+    this._cameraFrames.clear();
   }
 
   recoverGpuResource(_device: GPUDevice, signal: AbortSignal): void {

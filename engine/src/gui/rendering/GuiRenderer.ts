@@ -1,3 +1,4 @@
+import type {RenderCommandContext} from '../../core/RenderCommandContext';
 import { GuiScrollView } from '../components/GuiScrollView';
 import { GuiToast } from '../components/GuiToast';
 import type { IEngine } from '../../core/IEngine';
@@ -30,6 +31,8 @@ import type { PipelineWarmupPlan } from '../../renderer/PipelineWarmup';
 import {consumeGuiFontReload, registerGuiFontProvider, setGuiMeasureFont} from '../GuiMeasure';
 import {isGuiLayoutHidden, isGuiLayoutManaged} from '../GuiLayoutState';
 import {GuiFontOwner, type GuiAtlasOptions} from '../GuiFontOwner';
+import type {GuiRenderSurface} from './GuiRenderSurface';
+import type {GuiImageSource} from '../components/GuiImage';
 
 type GuiRendererFontOptions = GuiAtlasOptions;
 
@@ -165,14 +168,19 @@ export class GuiRenderer {
     setGuiMeasureFont(this, null);
   }
 
+  invalidateImageSource(source:GuiImageSource):void {this.imageRenderer.invalidateSource(source);}
+
   render(
     passEncoder: GPURenderPassEncoder,
     roots: Iterable<GuiRoot>,
     engine: IEngine,
     reverseZ = engine.reverseZ,
     sampleCount: 1 | 4 = engine.msaaSamples,
+    surface: GuiRenderSurface | null = null,
+    context?:RenderCommandContext,
   ): void {
     this.prepare(engine);
+    this.shapeRenderer.surface = surface; this.textRenderer.surface = surface; this.imageRenderer.surface = surface;
     this.shapeRenderer.reverseZ = reverseZ;
     this.shapeRenderer.msaaSamples = sampleCount;
     this.textRenderer.reverseZ = reverseZ;
@@ -184,19 +192,19 @@ export class GuiRenderer {
     this.prepareRootCaches(rootList);
 
     for (const cache of this.activeRootCaches) {
-      this.shapeRenderer.render(passEncoder, cache.batch);
-      this.imageRenderer.render(passEncoder, cache.imageBatch);
-      if (cache.font) this.textRenderer.render(passEncoder, cache.textBatch, cache.font);
+      this.shapeRenderer.render(passEncoder, cache.batch, context);
+      this.imageRenderer.render(passEncoder, cache.imageBatch, context);
+      if (cache.font) this.textRenderer.render(passEncoder, cache.textBatch, cache.font, context);
     }
     for (const cache of this.activeRootCaches) {
-      this.shapeRenderer.render(passEncoder, cache.popupBatch);
-      this.imageRenderer.render(passEncoder, cache.popupImageBatch);
-      if (cache.font) this.textRenderer.render(passEncoder, cache.popupTextBatch, cache.font);
+      this.shapeRenderer.render(passEncoder, cache.popupBatch, context);
+      this.imageRenderer.render(passEncoder, cache.popupImageBatch, context);
+      if (cache.font) this.textRenderer.render(passEncoder, cache.popupTextBatch, cache.font, context);
     }
     for (const cache of this.activeRootCaches) {
-      this.shapeRenderer.render(passEncoder, cache.modalBatch);
-      this.imageRenderer.render(passEncoder, cache.modalImageBatch);
-      if (cache.font) this.textRenderer.render(passEncoder, cache.modalTextBatch, cache.font);
+      this.shapeRenderer.render(passEncoder, cache.modalBatch, context);
+      this.imageRenderer.render(passEncoder, cache.modalImageBatch, context);
+      if (cache.font) this.textRenderer.render(passEncoder, cache.modalTextBatch, cache.font, context);
     }
   }
 

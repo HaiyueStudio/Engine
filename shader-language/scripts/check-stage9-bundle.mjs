@@ -34,7 +34,9 @@ for (const [key, value] of Object.entries(evidence)) {
     continue;
   }
   if (key === 'engineArtifactGzipBytes') continue;
-  if (contract.bundle[key] !== value) failures.push(`${key} expected ${contract.bundle[key]}, received ${value}`);
+  // Historical observations remain immutable upper limits; smaller equivalent metadata is valid.
+  const error = validateProductionBundleCost(key, value, { productionBundles: contract.bundle });
+  if (error) failures.push(error);
 }
 if (evidence.engineArtifactGzipBytes > contract.bundle.engineArtifactGzipBudgetBytes) {
   failures.push(`engine artifact gzip ${evidence.engineArtifactGzipBytes} exceeds ${contract.bundle.engineArtifactGzipBudgetBytes}`);

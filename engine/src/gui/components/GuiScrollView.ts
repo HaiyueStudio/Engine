@@ -1,4 +1,5 @@
 import { GuiElement } from './GuiElement';
+import type {GuiActionEvent} from '../GuiTypes';
 import { GuiDirtyFlags, type GuiElementOptions, type GuiRect } from '../GuiTypes';
 import {guiLayoutContentHeight, notifyGuiActivity, registerGuiScrollOffset} from '../GuiLayoutState';
 
@@ -14,6 +15,13 @@ export interface GuiScrollViewOptions extends GuiElementOptions {
 
 /** Vertical viewport. Children use content-local coordinates; drawing and hits are clipped. */
 export class GuiScrollView extends GuiElement {
+  override handleAction(event: GuiActionEvent): void {
+    super.handleAction(event);
+    if (event.consumed || (event.action !== 'up' && event.action !== 'down')) return;
+    const before = this.scrollY;
+    this.scrollBy(event.action === 'up' ? -40 : 40);
+    if (before !== this.scrollY) event.consume();
+  }
   private manualContentHeight = 0;
   get contentHeight(): number {return guiLayoutContentHeight(this) ?? this.manualContentHeight;}
   set contentHeight(value: number) {this.manualContentHeight = value;}
@@ -23,7 +31,7 @@ export class GuiScrollView extends GuiElement {
   private velocity = 0;
   private offset: number;
   constructor(options: GuiScrollViewOptions = {}) {
-    super(options);
+    super({focus: {mode: 'all'}, ...options});
     this.contentHeight = Number.isFinite(options.contentHeight)
       ? Math.max(0, options.contentHeight!)
       : 0;

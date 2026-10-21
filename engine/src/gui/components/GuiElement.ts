@@ -7,6 +7,9 @@ import {
   GuiPointerEvent,
   GuiRect,
   GuiStyle,
+  type GuiFocusOptions,
+  type GuiPointerFilter,
+  type GuiActionEvent,
   resolveGuiLength,
 } from '../GuiTypes';
 import { EventEmitter } from '../../core/EventEmitter';
@@ -26,6 +29,9 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   visible: boolean;
   disabled: boolean;
   style: GuiStyle;
+  pointerFilter: GuiPointerFilter;
+  private focusConfiguration: GuiFocusOptions;
+  private onAction: ((event: GuiActionEvent) => void) | null;
 
   protected x: GuiLength;
   protected y: GuiLength;
@@ -37,6 +43,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   protected onPointerDown: GuiPointerHandler | null;
   protected onPointerMove: GuiPointerHandler | null;
   protected onPointerUp: GuiPointerHandler | null;
+  protected onPointerCancel: GuiPointerHandler | null;
   protected onClick: GuiPointerHandler | null;
 
   constructor(options: GuiElementOptions = {}) {
@@ -49,11 +56,16 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
     this.visible = options.visible ?? true;
     this.disabled = options.disabled ?? false;
     this.style = options.style ?? {};
+    this.pointerFilter = options.pointerFilter ?? 'stop';
+    this.focusConfiguration = Object.freeze({mode: 'none'});
+    this.setFocusOptions(options.focus ?? {mode: 'none'});
+    this.onAction = options.onAction ?? null;
     this.onPointerEnter = options.onPointerEnter ?? null;
     this.onPointerLeave = options.onPointerLeave ?? null;
     this.onPointerDown = options.onPointerDown ?? null;
     this.onPointerMove = options.onPointerMove ?? null;
     this.onPointerUp = options.onPointerUp ?? null;
+    this.onPointerCancel = options.onPointerCancel ?? null;
     this.onClick = options.onClick ?? null;
   }
 
@@ -65,6 +77,23 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   getDirtyFlags(): GuiDirtyFlags {
     return this.dirtyFlags;
   }
+
+  get focusOptions(): GuiFocusOptions { return this.focusConfiguration; }
+
+  setFocusOptions(options: GuiFocusOptions): void {
+    if (!['none', 'click', 'all'].includes(options.mode) ||
+        (options.tabIndex !== undefined && !Number.isSafeInteger(options.tabIndex)))
+      throw new TypeError('Invalid GUI focus mode or tabIndex.');
+    if (options.neighbours && Object.entries(options.neighbours).some(([key,value]) =>
+      !['left','right','up','down'].includes(key) || typeof value !== 'string' || !value))
+      throw new TypeError('Invalid GUI focus neighbour.');
+    this.focusConfiguration = Object.freeze({...options,
+      ...(options.neighbours ? {neighbours: Object.freeze({...options.neighbours})} : {})});
+    this.markDirty(GuiDirtyFlags.Input);
+  }
+
+  /** Control-specific actions run before navigation; consumption is independent of DOM defaults. */
+  handleAction(event: GuiActionEvent): void { this.onAction?.(event); }
 
   getLayoutOptions(): Pick<GuiElementOptions, 'x' | 'y' | 'width' | 'height'> {
     return {
@@ -155,7 +184,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
       const hit = requiredItemAt(this.children, i, 'GUI child elements').hitTest(x, y);
       if (hit) return hit;
     }
-    return this;
+    return this.pointerFilter === 'ignore' ? null : this;
   }
 
   handlePointerEnter(event: GuiPointerEvent): void {
@@ -198,6 +227,12 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
     this.emitGuiPointerEvent(event, true);
   }
 
+  handlePointerCancel(event: GuiPointerEvent): void {
+    if (this.pressed) { this.pressed = false; this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input); }
+    this.onPointerCancel?.(event);
+    this.emitGuiPointerEvent(event, true);
+  }
+
   handleFocus(): void {
     if (this.focused) return;
     this.focused = true;
@@ -215,7 +250,8 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
     const path: GuiElement[] = [];
     let current: GuiElement | null = this;
     while (current) {
-      path.unshift(current);
+      if (!event.routed || current.pointerFilter !== 'ignore') path.unshift(current);
+      if (event.routed && current.pointerFilter === 'stop') break;
       current = current.parent;
     }
     const engineEvent = this.emit(event.type, {

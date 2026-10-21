@@ -7,6 +7,7 @@ import {
 } from '../core/EngineDiagnosticsAccess';
 import type { RenderViewTarget, RenderViewTargetPassOptions } from '../core/RenderView';
 import type { GPUResourceOwner } from '../core/GPUResourceTracker';
+import {rttHasSampleableMsaa} from './RttSampleableMsaa';
 
 let rttEngineId = 0;
 
@@ -110,7 +111,7 @@ export class RttEngine implements IEngine {
     if (resourceTracker && frameDiagnostics) {
       registerEngineDiagnostics(this, { resourceTracker, frameDiagnostics });
     }
-    this._createColorTarget();
+    try {this._createColorTarget();} catch (error) {this._colorTexture?.destroy(); throw error;}
   }
 
   resize(width: number, height: number): void {
@@ -154,7 +155,7 @@ export class RttEngine implements IEngine {
       label: `${this._label}.color`,
       size,
       format,
-      usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
+      usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
     });
     this._colorView = this._colorTexture.createView();
   }
@@ -167,17 +168,19 @@ export class RttEngine implements IEngine {
     const size: GPUExtent3DStrict = [this._width, this._height];
     let msaaTexture: GPUTexture | null = null;
     let msaaView: GPUTextureView | null = null;
+    let depthTexture: GPUTexture | null = null;
+    try {
     if (sampleCount > 1) {
       msaaTexture = this._createTexture({
         label: `${this._label}.msaa`,
         size,
         format,
         sampleCount,
-        usage: GPUTextureUsage.RENDER_ATTACHMENT,
+        usage: GPUTextureUsage.RENDER_ATTACHMENT | (rttHasSampleableMsaa(this) ? GPUTextureUsage.TEXTURE_BINDING : 0),
       });
       msaaView = msaaTexture.createView();
     }
-    const depthTexture = this._createTexture({
+    depthTexture = this._createTexture({
       label: `${this._label}.depth.${reverseZ ? 'reverse' : 'standard'}`,
       size,
       sampleCount,
@@ -212,6 +215,9 @@ export class RttEngine implements IEngine {
     };
     this._attachments.set(key, result);
     return result;
+    } catch (error) {
+      msaaTexture?.destroy(); depthTexture?.destroy(); throw error;
+    }
   }
 
   private _clearAttachments(): void {

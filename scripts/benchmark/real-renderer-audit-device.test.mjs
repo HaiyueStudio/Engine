@@ -24,7 +24,9 @@ test('shared GPU mock exposes the complete versioned capability contract', async
     label: 'contract.texture',
     size: [4, 2, 1],
     format: 'rgba8unorm',
+    usage: GPUTextureUsage.COPY_SRC | GPUTextureUsage.TEXTURE_BINDING,
   });
+  assert.equal(texture.usage,GPUTextureUsage.COPY_SRC|GPUTextureUsage.TEXTURE_BINDING);
   texture.createView();
   device.createSampler({ label: 'contract.sampler' });
   device.createShaderModule({ label: 'contract.shader', code: '' });

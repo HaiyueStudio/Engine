@@ -26,6 +26,7 @@ import { getBuiltinSimple3dShader } from '../shader/BuiltinSimple3dShader';
 import type { ClippingPlanes } from '../components/ClippingPlanes';
 import { CLIPPING_BLOCK_FLOATS, clippingStateKey, writeClippingBlock } from './ClippingPlanesGpu';
 import { ParameterizedRendererCore, SharedGeometryRendererOwner } from './ParameterizedRendererCore';
+import { RecordedGpuResources } from './RecordedGpuResources';
 
 interface EntityGPUData {
   modelSlot: number;
@@ -55,6 +56,9 @@ export class NormalRenderer extends BaseRenderer {
   /** Optional auxiliary target override; ordinary material rendering uses the engine surface format. */
 
   private engine!: IEngine;
+  private recordedOwner: RecordedGpuResources | undefined;
+  private get recorded(): RecordedGpuResources { return this.recordedOwner ??= new RecordedGpuResources(this.engine.device); }
+  private submissionContext: RenderCommandContext | undefined;
   private bgl0!: GPUBindGroupLayout;
   private bgl1!: GPUBindGroupLayout;
   private bgl2!: GPUBindGroupLayout;
@@ -83,6 +87,7 @@ export class NormalRenderer extends BaseRenderer {
     this._initialized = true;
     this.engine = engine;
     const { device } = engine;
+    this.recordedOwner = new RecordedGpuResources(device);
     this.sceneFrameBinding = getSceneFrameGpuArena(device).createBinding();
     this.bgl0 = this.sceneFrameBinding.bindGroupLayout;
     this.bgl1 = device.createBindGroupLayout({ entries: [
@@ -115,6 +120,8 @@ export class NormalRenderer extends BaseRenderer {
       ),
     });
     this.coverageBindings = new MaterialCoverageBindings(device, this.bgl2);
+    const coverage = this.coverageBindings;
+    this.recorded.own(coverage, () => coverage.destroy());
     const generated = getBuiltinSimple3dShader(device, 'normal-material', [this.bgl0, this.bgl1, this.bgl2, this.bgl3]);
     this.shader = generated.module;
     this.pipelineLayout = generated.pipelineLayout;
@@ -137,6 +144,8 @@ export class NormalRenderer extends BaseRenderer {
   }
 
   beginView(sceneFrame: SceneFrameUniformSnapshot, context?: RenderCommandContext): void {
+    this.submissionContext = context;
+    this.recorded.retain(this.coverageBindings, context);
     this.cameraDynamicOffset[0] = this.sceneFrameBinding.upload(sceneFrame, context);
     this.rendererCore.beginUploads(context);
   }
@@ -159,7 +168,7 @@ export class NormalRenderer extends BaseRenderer {
   }
 
   releaseMaterialsNotIn(liveMaterials: LiveIdSet): void {
-    this.releaseCacheEntriesNotIn(this.matCache, liveMaterials, data => data.paramsBuf.destroy());
+    this.releaseCacheEntriesNotIn(this.matCache, liveMaterials, data => this.recorded.retire(data.paramsBuf));
   }
 
   prepareObjects(
@@ -192,6 +201,7 @@ export class NormalRenderer extends BaseRenderer {
 
   endView(): void {
     this.rendererCore.endView();
+    this.submissionContext = undefined;
   }
 
   render(
@@ -315,12 +325,13 @@ export class NormalRenderer extends BaseRenderer {
     const { device } = this.engine;
     const geoData = this.geoCache.ensure(geometry, this);
     const entData = this.entityCache.ensure(entityId);
-    this.deformationCache.ensure(geometry);
+    this.deformationCache.ensure(geometry, this.submissionContext);
     this._writeObjectTableEntry(entData, geometry, clippingPlanes, worldMatrix, requestedSlot, objectTable, deform);
     const materialId = this.rendererCore.materialIdentity(material);
     let matData = this.matCache.get(materialId);
     if (!matData) {
       const paramsBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+      this.recorded.own(paramsBuf, () => paramsBuf.destroy());
       const paramsData = new Uint32Array(4);
       matData = {
         paramsBuf,
@@ -336,6 +347,13 @@ export class NormalRenderer extends BaseRenderer {
     const near = Math.fround(this.auxiliaryDepth?.near ?? 0);
     const far = Math.fround(this.auxiliaryDepth?.far ?? 1);
     if (matData.paramsDirty || matData.lastSpace !== space || matData.depthData[1] !== near || matData.depthData[2] !== far) {
+      if (this.recorded.pending(matData.paramsBuf)) {
+        const previous = matData.paramsBuf;
+        const buffer = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+        matData.paramsBuf = this.recorded.own(buffer, () => buffer.destroy());
+        matData.paramsBindGroup = this.coverageBindings.get(null, buffer);
+        this.recorded.retire(previous);
+      }
       matData.paramsData[0] = space;
       matData.depthData[1] = near;
       matData.depthData[2] = far;
@@ -343,6 +361,7 @@ export class NormalRenderer extends BaseRenderer {
       matData.lastSpace = space;
       matData.paramsDirty = false;
     }
+    this.recorded.retain(matData.paramsBuf, this.submissionContext);
     return { geoData, entData, matData };
   }
 
@@ -405,7 +424,7 @@ export class NormalRenderer extends BaseRenderer {
   }
 
   private _bindGeometry(pass: RenderBatchBindingEncoder, geometry: Geometry3D, data: SharedGeometry3DGPUData): void {
-    const deformation = this.deformationCache.ensure(geometry);
+    const deformation = this.deformationCache.ensure(geometry, this.submissionContext);
     pass.setBindGroup(3, deformation.skinBindGroup);
     pass.setVertexBuffer(0, data.positionBuf);
     pass.setVertexBuffer(1, data.normalBuf);
@@ -484,11 +503,11 @@ export class NormalRenderer extends BaseRenderer {
   }
 
   destroy(): void {
-    this.coverageBindings?.destroy();
     this.sceneFrameBinding?.destroy();
     this.rendererCore?.destroy();
     this.deformationCache?.destroy();
-    this.destroyCacheEntries(this.matCache, material => material.paramsBuf.destroy());
+    this.destroyCacheEntries(this.matCache, material => this.recorded.retire(material.paramsBuf));
+    this.recordedOwner?.retireAll();
     this.clearPipelineCache();
   }
 }

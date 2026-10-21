@@ -1,5 +1,6 @@
 import { containsPoint, GuiDirtyFlags, GuiElementOptions, GuiPointerEvent, GuiRect, GuiValueChangeHandler } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
+import type {GuiActionEvent} from '../GuiTypes';
 
 export interface GuiSelectOption<T = string> {
   label: string;
@@ -17,6 +18,26 @@ export interface GuiSelectOptions<T = string> extends GuiElementOptions {
 }
 
 export class GuiSelect<T = string> extends GuiElement {
+  override handlePointerCancel(event: GuiPointerEvent): void {
+    this.pointerDownInPopup = false;
+    super.handlePointerCancel(event);
+  }
+  override handleAction(event: GuiActionEvent): void {
+    super.handleAction(event);
+    if (event.consumed) return;
+    if (event.action === 'cancel' && this.open) { this.setOpen(false); event.consume(); }
+    else if (event.action === 'confirm') { this.setOpen(!this.open); event.consume(); }
+    else if (event.action === 'up' || event.action === 'down') {
+      const step = event.action === 'up' ? -1 : 1;
+      let index = this.options.findIndex(option => option.value === this.value);
+      if (index < 0) index = step > 0 ? -1 : this.options.length;
+      for (index += step; index >= 0 && index < this.options.length; index += step) {
+        const option = this.options[index]!;
+        if (!option.disabled) { this.setValue(option.value, true); break; }
+      }
+      event.consume();
+    }
+  }
   value: T | null;
   options: GuiSelectOption<T>[];
   placeholder: string;
@@ -34,7 +55,7 @@ export class GuiSelect<T = string> extends GuiElement {
   private selectedOptionCacheOptions: GuiSelectOption<T>[] | null = null;
 
   constructor(options: GuiSelectOptions<T> = {}) {
-    super({ width: 180, height: 32, ...options });
+    super({ width: 180, height: 32, focus: {mode: 'all'}, ...options });
     this.value = options.value ?? null;
     this.options = options.options ?? [];
     this.placeholder = options.placeholder ?? 'Select';
@@ -102,7 +123,7 @@ export class GuiSelect<T = string> extends GuiElement {
   }
 
   override hitTest(x: number, y: number): GuiElement | null {
-    if (!this.visible || this.disabled) return null;
+    if (!this.visible || this.disabled || this.pointerFilter === 'ignore') return null;
     if (containsPoint(this.rect, x, y)) return this;
     if (this.open && containsPoint(this.popupRect, x, y)) return this;
     return null;

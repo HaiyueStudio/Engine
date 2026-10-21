@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "goal": "g05-gui-input-navigation",
+  "status": "complete",
+  "generatedAt": "2026-10-21T15:53:47.976914+00:00",
+  "problem": "GUI/scene duplicate input, missing focus navigation, dead-zone leakage and repeated physical-button callbacks.",
+  "method": "Shared canvas input/focus owner; stable pointer capture and unhandled routing; control-first navigation and modal restoration; one host sampler; explicit Web IDL button-field snapshots.",
+  "conclusion": "Original 19 G05 requirements qualified. Current focused/global/native checks and a real Xbox workflow with human confirmation support completion; original manual heuristic failures remain unchanged.",
+  "proofs": {
+    "global": {
+      "path": "artifacts/engine-0.2.2/g05/global-20261021T142127Z/result.json",
+      "sha256": "d8da5bae1023e9f69a480989351c5f14555f3ce5031c322ec058abad01ab0cba"
+    },
+    "native": {
+      "path": "artifacts/engine-0.2.2/g05/native-20261021T143155Z/result.json",
+      "sha256": "744b8c5893b19a895aca475de284ca3805390d176d95e3f4fb4bdec07148c8dd"
+    },
+    "focused": {
+      "path": "artifacts/engine-0.2.2/g05/focused-20261021T141937Z/result.json",
+      "sha256": "812b15d0e773aeb6fa72f1bdd73a607a452ac4dbddc9ea660d710be1a3ad2426"
+    },
+    "physical": {
+      "path": "artifacts/engine-0.2.2/g05/controller-original-contract-audit.json",
+      "sha256": "1cee4dfb40beddd77e338547dd16c295496ed8b8b5c3d0884ab0a85d24aa55eb"
+    },
+    "physicalRaw": {
+      "path": "artifacts/engine-0.2.2/g05/controller-1792597726541.json",
+      "sha256": "7a09f21effd17abf7516e5f8d10afd6a690857ef878d6551470aa80c772a452a"
+    },
+    "human": {
+      "path": "artifacts/engine-0.2.2/g05/controller-final-human-confirmation.json",
+      "sha256": "600be9628b83921efc684719f2a5b1f0886921e4c0bb6118952b54c735ef65b2"
+    }
+  },
+  "tests": {
+    "focused": 139,
+    "root": 1944,
+    "globalChecks": 12,
+    "nativeCases": 194
+  },
+  "originalContractAudit": {
+    "path": "artifacts/engine-0.2.2/g05/final-20261021T155246Z/original-contract-audit.json",
+    "sha256": "1db426059bc91103e65908a9be0ee8657a5feb13ba4d4934f93bca5890c3fee3",
+    "requirements": 19
+  },
+  "verifiedArchive": {
+    "manifest": "artifacts/engine-0.2.2/g05/final-20261021T155246Z/verified-inputs.json",
+    "manifestSha256": "631006027f154f67de0552b8040443dc34105a83393bb8ce1f65df30a8a64aed",
+    "archive": "artifacts/engine-0.2.2/g05/final-20261021T155246Z/verified-inputs.zip",
+    "archiveSha256": "2c8e6f5a84c2337f86fa1e06519a63e1403440cc0fffb9b29b6cbc5587acbb11",
+    "files": 1242,
+    "zipReadbackAndEveryFileSha256Verified": true,
+    "originalsRetained": true
+  },
+  "physicalController": {
+    "qualification": "original-contract-audit-and-human-confirmation",
+    "rawLauncherStatus": "failed-retained",
+    "dpadConsecutiveSamples": 7,
+    "confirmConsecutiveSamples": 10,
+    "preparationActions": 2,
+    "workflowActions": 8,
+    "volume": 6,
+    "saves": 1,
+    "cancels": 1,
+    "sceneActions": 0,
+    "humanStatement": "十字键长按正常，流程完成"
+  },
+  "qualificationLimits": [
+    "The original manual launcher failed its extra ten-frame and fixed-total-count heuristics; it is not represented as passing. No wall-clock hold duration is inferred from sample count.",
+    "The failed manual wrapper omitted direct HTTP and successful cleanup fields. Native HTTP hashes corroborate the same source/bundle snapshots; native lifecycle tests supply teardown qualification.",
+    "G06 owns complete Unicode/IME/platform input. G13 owns public-entry registration, formal performance, package/platform and whole-version release qualification."
+  ],
+  "historicalG04Summary": {
+    "path": "artifacts/engine-0.2.2/g05/g04-qualified-summary.md",
+    "sha256": "185d840044e30be1913ed99fad5fad96d604d8ec09de9d63027ef0cc9b1770b3"
+  },
+  "completionSeal": "artifacts/engine-0.2.2/g05/final-20261021T155246Z/completion-seal.json",
+  "fullG05Complete": true,
+  "budgetsOrPixelToleranceChanged": false,
+  "baselinePromoted": false,
+  "published": false,
+  "rawFailuresAndOriginalFilesRetained": true
+}

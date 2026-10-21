@@ -19,6 +19,9 @@ import type {
 } from '../postprocess/PostProcessPass';
 import { PostProcessRenderer } from '../postprocess/PostProcessRenderer';
 import { SceneOutputPass } from '../postprocess/SceneOutputPass';
+import {setPostProcessFrameCancellation} from '../postprocess/PostProcessSubmission';
+import {getRegionSceneProjection} from '../core/RegionSceneProjection';
+import {resetAbandonedPostProcessHistory,abandonPostProcessFrame} from '../postprocess/PostProcessHistory';
 import { SCENE_COLOR_FORMAT } from '../postprocess/SceneColor';
 import { srgbToLinear } from '../color/Color';
 import { PostProcessSceneTextureStore } from '../postprocess/PostProcessSceneTextureStore';
@@ -178,6 +181,7 @@ export class Render3DPostScenePasses {
     reverseZ: boolean,
     needsSceneColorCapture = false,
   ): Render3DPostSceneRequirements {
+    if(context.afterCancel){const histories=[...passes],key=context.view?.key;context.afterCancel(()=>{if(key)for(const pass of histories)resetAbandonedPostProcessHistory(pass,key);});}
     this._lightingAoPrepared = false;
     this._requirementsGraph.setCacheScope(context.device, frameGraphCacheScope(context));
     const requirements = this.getRequirements(passes, needsSceneColorCapture);
@@ -216,10 +220,10 @@ export class Render3DPostScenePasses {
       this._postRenderer = new PostProcessRenderer();
       this._postRenderer.prepare(this._engine, context.view?.width ?? surface.width, context.view?.height ?? surface.height, SCENE_COLOR_FORMAT);
     }
-    this._postRenderer.beginFrame(
-      context.frameData?.frameId ?? 0,
-      context.afterSubmit ? callback => context.afterSubmit!(callback) : undefined,
-    );
+    setPostProcessFrameCancellation(this._postRenderer,context.afterCancel?callback=>context.afterCancel!(()=>{void context.device.queue.onSubmittedWorkDone().then(callback,callback)}):undefined);
+    const post=this._postRenderer,afterSubmit=context.afterSubmit?(callback:(queue:GPUQueue)=>void)=>context.afterSubmit!(callback):undefined;
+    post.beginFrame(context.frameData?.frameId??0,afterSubmit);
+    context.afterCancel?.(()=>abandonPostProcessFrame(post,afterSubmit));
     if (this._postRenderer.width !== (context.view?.width ?? surface.width) ||
       this._postRenderer.height !== (context.view?.height ?? surface.height)) {
       this._postRenderer.resize(context.view?.width ?? surface.width, context.view?.height ?? surface.height, SCENE_COLOR_FORMAT);
@@ -292,7 +296,9 @@ export class Render3DPostScenePasses {
     // Full-target HDR passes must write the depth that later 3D overlay systems
     // load. SceneOutput only transfers color. Viewport-local HDR surfaces retain
     // their own depth because their attachment size/origin differs from the target.
-    const sharesTargetCoordinates = !view?.viewport
+    const viewport=view?.viewport;
+    const fullTargetViewport=!viewport||(viewport.x===0&&viewport.y===0&&viewport.width===view?.target.width&&viewport.height===view?.target.height);
+    const sharesTargetCoordinates = fullTargetViewport
       && postRenderer.width === (view?.target.width ?? this._engine.width)
       && postRenderer.height === (view?.target.height ?? this._engine.height);
     const depthAttachment = sharesTargetCoordinates
@@ -320,6 +326,8 @@ export class Render3DPostScenePasses {
   }
 
   applySceneViewport(pass: GPURenderPassEncoder, view: RenderViewSnapshot): void {
+    const regional=getRegionSceneProjection(view);
+    if(regional){const r=regional.viewport;pass.setViewport(r.x,r.y,r.width,r.height,r.minDepth??0,r.maxDepth??1);pass.setScissorRect(0,0,view.width,view.height);return;}
     const viewport = view.viewport;
     if (viewport) pass.setViewport(0, 0, view.width, view.height, viewport.minDepth ?? 0, viewport.maxDepth ?? 1);
     const scissor = view.scissor;
@@ -386,7 +394,7 @@ export class Render3DPostScenePasses {
       materials.depth.isOrthographic = options.camera.projectionType === 'orthographic';
       renderer.reverseZ = options.reverseZ;
       renderer.msaaSamples = 1;
-      renderer.beginView(options.sceneFrameUniforms);
+      renderer.beginView(options.sceneFrameUniforms, options.context);
       const pass = options.encoder.beginRenderPass({
         label: 'Render3DSystem.postDepthPass',
         colorAttachments: [{
@@ -397,6 +405,7 @@ export class Render3DPostScenePasses {
         }],
         depthStencilAttachment: depthAttachment(),
       });
+      if(options.context.view&&getRegionSceneProjection(options.context.view))this.applySceneViewport(pass,options.context.view);
       for (const { entityId, material, geometry, clippingPlanes, worldMatrix } of options.items) {
         if (!geometry || !worldMatrix || !material) continue;
         if (!auxiliaryWritesDepth(material)) continue;
@@ -407,6 +416,7 @@ export class Render3DPostScenePasses {
         stats.surfaceDrawCount++;
       }
       pass.end();
+      renderer.endView();
     }
 
     if (requirements.needsNormal && !motionNormal && textures.normalView) {
@@ -415,7 +425,7 @@ export class Render3DPostScenePasses {
       renderer.reverseZ = options.reverseZ;
       renderer.msaaSamples = 1;
       renderer.auxiliaryDepth = normalDepth ? options.camera : null;
-      renderer.beginView(options.sceneFrameUniforms);
+      renderer.beginView(options.sceneFrameUniforms, options.context);
       const pass = options.encoder.beginRenderPass({
         label: 'Render3DSystem.postNormalPass',
         colorAttachments: [{
@@ -426,6 +436,7 @@ export class Render3DPostScenePasses {
         }, normalDepth ? { view: textures.depthView!, clearValue: [1, 1, 1, 1], loadOp: 'clear', storeOp: 'store' } : null],
         depthStencilAttachment: depthAttachment(),
       });
+      if(options.context.view&&getRegionSceneProjection(options.context.view))this.applySceneViewport(pass,options.context.view);
       for (const { entityId, material, geometry, clippingPlanes, worldMatrix } of options.items) {
         if (!geometry || !worldMatrix || !material) continue;
         if (!auxiliaryWritesDepth(material)) continue;
@@ -436,6 +447,7 @@ export class Render3DPostScenePasses {
         stats.surfaceDrawCount++;
       }
       pass.end();
+      renderer.endView();
     }
 
     if (requirements.needsMotion && textures.motionView) {
@@ -465,6 +477,7 @@ export class Render3DPostScenePasses {
         motionNormal ? { view: textures.normalView!, clearValue: [0.5, 0.5, 1, 1], loadOp: 'clear', storeOp: 'store' } : null],
         depthStencilAttachment: depthAttachment(),
       });
+      if(options.context.view&&getRegionSceneProjection(options.context.view))this.applySceneViewport(pass,options.context.view);
       // Velocity follows the opaque/alpha-tested surfaces of the main view.
       for (const { entityId, material, geometry, clippingPlanes, worldMatrix } of options.motionItems) {
         if (!geometry || !worldMatrix || !material) continue;
@@ -481,7 +494,8 @@ export class Render3DPostScenePasses {
       const renderer = this._requireOutlineMaskRenderer();
       renderer.reverseZ = options.reverseZ;
       renderer.msaaSamples = 1;
-      renderer.beginView(options.sceneFrameUniforms);
+      renderer.colorFormat=textures.outlineMaskTexture!.format;
+      renderer.beginView(options.sceneFrameUniforms, options.context);
       const pass = options.encoder.beginRenderPass({
         label: 'Render3DSystem.postOutlineMaskPass',
         colorAttachments: [{
@@ -492,6 +506,7 @@ export class Render3DPostScenePasses {
         }],
         depthStencilAttachment: depthAttachment(),
       });
+      if(options.context.view&&getRegionSceneProjection(options.context.view))this.applySceneViewport(pass,options.context.view);
       for (const { entityId, material, geometry, clippingPlanes, worldMatrix } of options.outlineItems) {
         if (!geometry || !worldMatrix || !material) continue;
         options.live.outlineEntities.add(entityId);
@@ -524,6 +539,7 @@ export class Render3DPostScenePasses {
             ...depthAttachmentOperations({ loadOp: 'load', writesDepth: false, retained: true }, this._attachmentOptimizations),
           },
         });
+        if(options.context.view&&getRegionSceneProjection(options.context.view))this.applySceneViewport(visiblePass,options.context.view);
         for (const { entityId, material, geometry, clippingPlanes, worldMatrix } of options.outlineItems) {
           if (!geometry || !worldMatrix || !material) continue;
           options.live.outlineEntities.add(entityId);
@@ -532,6 +548,7 @@ export class Render3DPostScenePasses {
         }
         visiblePass.end();
       }
+      renderer.endView();
     }
     if (options.beforeLighting) this._lightingAoPrepared = true;
   }

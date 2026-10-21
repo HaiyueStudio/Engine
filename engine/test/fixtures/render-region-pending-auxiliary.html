@@ -1,0 +1,5 @@
+<!doctype html><meta charset="utf-8"><title>G04 pending scene snapshots</title>
+<pre id="progress"></pre><pre id="result"></pre>
+<script>addEventListener('error',e=>{const n=document.querySelector('#result');if(!n.dataset.status){n.textContent=JSON.stringify({status:'failed',error:e.message});n.dataset.status='failed'}})</script>
+<script type="importmap">{"imports":{"wgpu-matrix":"/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"}}</script>
+<script type="module" src="./render-region-pending-auxiliary.mjs"></script>

@@ -21,6 +21,8 @@ export class GuiRoot extends Component {
   constructor(options: GuiRootOptions = {}) {
     super('GuiRoot');
     this.root = new GuiElement({
+      ...options,
+      pointerFilter: options.pointerFilter ?? 'pass',
       id: options.id ?? 'gui-root',
       x: options.x ?? 0,
       y: options.y ?? 0,
@@ -76,7 +78,7 @@ export class GuiRoot extends Component {
       this.viewport.height !== height;
     this.viewport = next;
     if (changed) this.root.markDirty(GuiDirtyFlags.Layout);
-    try {if (!this.layoutOwner.layout(this.viewport) && this.root.dirty) this.root.layout(this.viewport);}
+    try {if (!this.layoutOwner.layout(this.viewport) && needsCoordinateLayout(this.root)) this.root.layout(this.viewport);}
     catch (error) {this.viewport = previous; throw error;}
   }
 
@@ -87,4 +89,10 @@ export class GuiRoot extends Component {
   clearDirty(): void {
     this.root.clearDirty();
   }
+}
+
+/** Painting and input state retain the same geometry in the manual layout path. */
+function needsCoordinateLayout(element: GuiElement): boolean {
+  return (element.getDirtyFlags() & (GuiDirtyFlags.Layout | GuiDirtyFlags.Text | GuiDirtyFlags.Children)) !== 0
+    || element.children.some(needsCoordinateLayout);
 }

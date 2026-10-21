@@ -1,6 +1,8 @@
 // haiyue:builtin-render gui-text
 // source: shader-language/builtin-engine-2d-ui-family.json
 
+override GUI_LINEAR_OUTPUT: bool = false;
+fn gui_to_linear(c:vec3<f32>)->vec3<f32>{return select(c/12.92,pow((c+0.055)/1.055,vec3<f32>(2.4)),c>vec3<f32>(0.04045));}
 struct Viewport {
   size : vec2<f32>,
   _pad : vec2<f32>,
@@ -28,12 +30,12 @@ struct VertexOutput {
 @vertex
 fn vs_main(input : VertexInput) -> VertexOutput {
   var out : VertexOutput;
-  let clipX = input.position.x / viewport.size.x * 2.0 - 1.0;
-  let clipY = 1.0 - input.position.y / viewport.size.y * 2.0;
+  let clipX = (input.position.x - viewport._pad.x) / viewport.size.x * 2.0 - 1.0;
+  let clipY = 1.0 - (input.position.y - viewport._pad.y) / viewport.size.y * 2.0;
   out.clipPos = vec4<f32>(clipX, clipY, 0.0, 1.0);
   out.screenPos = input.position;
   out.uv = input.uv;
-  out.color = input.color;
+  out.color = vec4<f32>(select(input.color.rgb,gui_to_linear(input.color.rgb),GUI_LINEAR_OUTPUT),input.color.a);
   out.clip = input.clip;
   return out;
 }

@@ -2,7 +2,7 @@ import { GuiColorPicker } from './components/GuiColorPicker';
 import { GuiToast } from './components/GuiToast';
 import { GuiHelpDialog } from './components/GuiHelpDialog';
 import { GuiScrollView } from './components/GuiScrollView';
-import type { GuiElementOptions, GuiLength, GuiStyle, GuiTheme } from './GuiTypes';
+import type { GuiElementOptions, GuiLength, GuiStyle, GuiTheme, GuiFocusOptions, GuiPointerFilter } from './GuiTypes';
 import { requiredItemAt } from '../math/arrayAccess';
 import { EngineError, EngineErrorCode, ErrorDomain } from '../core/EngineError';
 
@@ -63,6 +63,8 @@ export interface GuiSerializedElement {
   visible?: boolean | undefined;
   disabled?: boolean | undefined;
   style?: GuiStyle | undefined;
+  focus?: GuiFocusOptions;
+  pointerFilter?: GuiPointerFilter;
   children?: GuiSerializedElement[];
   props?: Record<string, unknown>;
 }
@@ -103,6 +105,8 @@ export function deserializeGuiRoot(data: unknown, options: GuiDeserializeOptions
     visible: rootElement.visible,
     disabled: rootElement.disabled,
     style: cloneStyle(rootElement.style),
+    focus: rootElement.focusOptions,
+    pointerFilter: rootElement.pointerFilter,
     theme: serialized.theme,
   });
   root.root.children.length = 0;
@@ -122,6 +126,8 @@ export function serializeGuiElement(element: GuiElement): GuiSerializedElement {
     visible: element.visible,
     disabled: element.disabled,
     style: cloneStyle(element.style),
+    focus: element.focusOptions,
+    pointerFilter: element.pointerFilter,
   };
   const props = serializeElementProps(element);
   if (Object.keys(props).length > 0) serialized.props = props;
@@ -188,6 +194,19 @@ export function validateGuiSerializedElement(data: unknown, path = '$'): GuiSeri
   }
   optional(element.visible, 'boolean', `${path}.visible`);
   optional(element.disabled, 'boolean', `${path}.disabled`);
+  if (element.pointerFilter !== undefined && !['stop','pass','ignore'].includes(element.pointerFilter as string))
+    invalidGuiData('Unknown GUI pointer filter.', `${path}.pointerFilter`);
+  if (element.focus !== undefined) {
+    const focus = recordAt(element.focus, `${path}.focus`);
+    if (!['none','click','all'].includes(focus.mode as string) || (focus.tabIndex !== undefined && !Number.isSafeInteger(focus.tabIndex)))
+      invalidGuiData('Invalid GUI focus mode or tabIndex.', `${path}.focus`);
+    if (focus.neighbours !== undefined) {
+      const neighbours = recordAt(focus.neighbours, `${path}.focus.neighbours`);
+      for (const [key,value] of Object.entries(neighbours))
+        if (!['left','right','up','down'].includes(key) || typeof value !== 'string' || !value)
+          invalidGuiData('Invalid GUI focus neighbour.', `${path}.focus.neighbours.${key}`);
+    }
+  }
   if (element.style !== undefined) validateStyle(element.style, `${path}.style`);
   if (element.props !== undefined) validateProps(element.type as GuiSerializedElementType, element.props, `${path}.props`);
   let children: GuiSerializedElement[] | undefined;
@@ -205,6 +224,8 @@ export function validateGuiSerializedElement(data: unknown, path = '$'): GuiSeri
     ...(element.visible === undefined ? {} : { visible: element.visible as boolean }),
     ...(element.disabled === undefined ? {} : { disabled: element.disabled as boolean }),
     ...(element.style === undefined ? {} : { style: element.style as GuiStyle }),
+    ...(element.focus === undefined ? {} : {focus: element.focus as unknown as GuiFocusOptions}),
+    ...(element.pointerFilter === undefined ? {} : {pointerFilter: element.pointerFilter as GuiPointerFilter}),
     ...(children === undefined ? {} : { children }),
     ...(element.props === undefined ? {} : { props: element.props as Record<string, unknown> }),
   };
@@ -425,6 +446,8 @@ function getBaseOptions(data: GuiSerializedElement): GuiElementOptions {
     visible: data.visible,
     disabled: data.disabled,
     style: cloneStyle(data.style),
+    ...(data.focus ? {focus: data.focus} : {}),
+    ...(data.pointerFilter ? {pointerFilter: data.pointerFilter} : {}),
   };
 }
 

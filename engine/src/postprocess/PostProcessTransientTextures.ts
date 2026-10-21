@@ -1,6 +1,6 @@
 import type { PostProcessPass } from './PostProcessPass';
 import type { TransientTextureAllocator, TransientTextureRequest } from '../rtt/TransientTextureAllocator';
-import { getPostProcessSubmission } from './PostProcessSubmission';
+import { getPostProcessSubmission, getPostProcessRecording } from './PostProcessSubmission';
 
 const owners = new WeakMap<PostProcessPass, { pool: TransientTextureAllocator; id: number }>();
 let nextId = 0;
@@ -17,5 +17,6 @@ export function acquirePostProcessTransientTextures(pass: PostProcessPass, devic
   if (!owner) return undefined;
   const afterSubmit = getPostProcessSubmission(pass);
   if (!afterSubmit) throw Error('Managed postprocess scratch needs a submission boundary.');
-  return owner.pool.acquire(requests.map(request => ({ ...request, name: `${owner.id}:${request.name}` })), { device, encoder, afterSubmit });
+  const afterCancel=getPostProcessRecording(pass)?.afterCancel;
+  return owner.pool.acquire(requests.map(request => ({ ...request, name: `${owner.id}:${request.name}` })), { device, encoder, afterSubmit, ...(afterCancel?{afterCancel}:{}) });
 }

@@ -1,3 +1,5 @@
+import {isInputEventConsumed} from './InputEventConsumption';
+
 export type InputActionBindings = Record<string, string[]>;
 
 export interface InputActionSnapshot {
@@ -9,6 +11,7 @@ export interface InputActionSnapshot {
 type KeyPredicate = (code: string) => boolean;
 
 export class InputMap {
+  static isEventConsumed(event: Event): boolean { return isInputEventConsumed(event); }
   private readonly _bindings = new Map<string, Set<string>>();
   private readonly _snapshotPressed: string[] = [];
   private readonly _snapshotDown: string[] = [];
@@ -35,6 +38,12 @@ export class InputMap {
       Pause: ['KeyP', 'Escape'],
       Restart: ['KeyR'],
     });
+  }
+
+  /** GUI bindings reuse InputMap; the host retains device sampling ownership. */
+  static guiNavigation(): InputMap {
+    return new InputMap({next: ['Tab'], previous: ['Shift+Tab'], left: ['ArrowLeft'], right: ['ArrowRight'],
+      up: ['ArrowUp'], down: ['ArrowDown'], confirm: ['Enter', 'Space'], cancel: ['Escape']});
   }
 
   setBindings(bindings: InputActionBindings): this {

@@ -20,6 +20,8 @@ import type { RenderPassDescriptorCloneOptions, RenderPassLoadOp, RenderPassStor
 import type { World } from '../ecs/World';
 import { getRenderViewPassOptions, type RenderViewSnapshot } from '../core/RenderView';
 import type { WorldFrameToken } from '../frame/FrameData';
+import type {RenderRegion} from '../core/RenderRegion';
+import {createRegionExecution,type RegionExecution,type RegionPipelineStats} from './regions/RegionExecution';
 import {
   RenderFramePlanCompiler,
   type RenderFramePlan,
@@ -45,6 +47,8 @@ export type RenderPipelineRecordMode = 'frame' | 'delta';
 export type RenderPipelinePassSharing = 'isolated' | 'shared';
 
 export interface RenderPipelineEntryOptions {
+  /** Opt into the owning view's retained region; ordinary entries keep their existing path. */
+  region?: RenderRegion;
   passType?: RenderPipelineEntryType;
   loadOp?: RenderPassLoadOp | undefined;
   storeOp?: RenderPassStoreOp | undefined;
@@ -61,6 +65,7 @@ export interface RenderPipelineEntryOptions {
 }
 
 interface RenderPipelineEntry {
+  region: RenderRegion | undefined;
   id: number;
   system: RenderPipelineSystem;
   type: RenderPipelineEntryType;
@@ -127,6 +132,7 @@ export interface RenderPipelineDiagnosticIssue {
 }
 
 export interface RenderPipelineDebugSnapshot {
+  readonly regions?: RegionPipelineStats;
   readonly execution: number;
   readonly entries: readonly RenderPipelineEntryDebugSnapshot[];
   readonly passes: readonly RenderPipelinePassDebugSnapshot[];
@@ -156,6 +162,8 @@ export interface RenderPipelineExecutionBoundary {
 }
 
 export interface RenderPipelineExecuteOptions extends RenderFrameContextOptions {
+  /** Diagnostic full-raster reference; does not reuse region pixels. */
+  regionCache?: boolean;
   context?: RenderFrameContext;
   /** Borrowed phase token supplied by World.update(); callers must not retain it. */
   frameToken?: WorldFrameToken | undefined;
@@ -178,6 +186,7 @@ export class RenderPipeline {
   private _lastIssues: readonly RenderPipelineDiagnosticIssue[] = EMPTY_RENDER_PIPELINE_ISSUES;
   private readonly _frameContextOptions: RenderFrameContextOptions = {};
   private _gpuPassProfiler: RenderGpuPassProfiler | null = null;
+  private _regions: RegionExecution | null = null;
 
   constructor(
     private readonly _engine: IEngine,
@@ -189,6 +198,7 @@ export class RenderPipeline {
     if (current?.active) this.remove(system);
 
     const entry: RenderPipelineEntry = {
+      region: options.region,
       id: ++this._nextEntryId,
       system,
       type: options.passType ?? 'render',
@@ -239,6 +249,7 @@ export class RenderPipeline {
     this._framePlan = null;
     this._gpuPassProfiler?.destroy();
     this._gpuPassProfiler = null;
+    this._regions?.destroy(); this._regions = null;
     return this;
   }
 
@@ -255,6 +266,7 @@ export class RenderPipeline {
       passes: Object.freeze(this._lastPasses.map(pass => Object.freeze({ ...pass, entries: Object.freeze([...pass.entries]) }))),
       passCount: this._lastPasses.length,
       issues: Object.freeze(this._lastIssues.map(issue => Object.freeze({ ...issue }))),
+      ...(this._regions?{regions:this._regions.stats}:{}),
     });
   }
 
@@ -264,6 +276,16 @@ export class RenderPipeline {
     delta = 0,
     options: RenderPipelineExecuteOptions = EMPTY_RENDER_PIPELINE_EXECUTE_OPTIONS,
   ): RenderFrameContext {
+    const regionalEntries=this._getFramePlan().items.map(item=>item.payload);
+    if(regionalEntries.some(entry=>entry.region)){
+      this._regions??=createRegionExecution(this._engine);
+      const diagnostics=getEngineFrameDiagnostics(this._engine),enabled=diagnostics?.enabled===true;
+      this._execution++;this._lastPasses=EMPTY_RENDER_PIPELINE_PASSES;this._lastIssues=EMPTY_RENDER_PIPELINE_ISSUES;
+      return this._regions.execute(world,_time,delta,options,regionalEntries,(entry,context)=>{
+        this._recordEntry(entry,world,delta,context,diagnostics,enabled);
+      });
+    }
+    this._regions?.destroy();this._regions=null;
     const frameDiagnostics = getEngineFrameDiagnostics(this._engine);
     const diagnosticsEnabled = frameDiagnostics?.enabled === true;
     if (!diagnosticsEnabled) {
@@ -420,6 +442,7 @@ export class RenderPipeline {
       }
     } catch (error) {
       gpuPassTiming?.cancel();
+      try {context.cancel();} catch (cleanup) {throw new AggregateError([error, cleanup], 'Render recording and cancellation failed.');}
       throw error;
     } finally {
       context.endPass();
