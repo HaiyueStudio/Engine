@@ -74,6 +74,16 @@ try{
    for(const id of ['text-reset','text-password','text-limit','text-b','text-a']){await key('Tab','Tab',8);await wait(s=>s.focus===id,'previous '+id);}
    await key('KeyA','a',2);await evaluate("(()=>{const e=document.activeElement,data=new DataTransfer();data.setData('text/plain','A\\r\\n😀');e.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true}));})()");s=await wait(s=>field(s,'text-a').value==='A\r\n😀','single-line raw value');assert.equal(await evaluate("document.activeElement.value"),'A😀');
    await key('Home');await key('End');await key('ArrowLeft');await key('Backspace');s=await wait(s=>field(s,'text-a').value==='A😀','single-line invisible CRLF keeps its UTF-16 caret');record('single-line-sanitization-preserves-stored-index-and-grapheme-delete',s);
+   const tripleClick=async id=>{
+    const current=await state(),f=field(current,id),r=await evaluate("(()=>{const r=document.querySelector('canvas').getBoundingClientRect();return {left:r.left,top:r.top,width:r.width,height:r.height};})()");
+    const point={x:r.left+(f.rect.x+20)*r.width/current.viewport.width,y:r.top+(f.rect.y+f.rect.height/2)*r.height/current.viewport.height};
+    for(let n=1;n<=3;n++){await cdp.call('Input.dispatchMouseEvent',{type:'mousePressed',...point,button:'left',clickCount:n});await cdp.call('Input.dispatchMouseEvent',{type:'mouseReleased',...point,button:'left',clickCount:n});}
+    const selected=await wait(s=>s.focus===id&&field(s,id).selection[0]===0&&field(s,id).selection[1]===field(s,id).value.length,'triple click '+id);
+    const native=await evaluate("[document.activeElement.selectionStart,document.activeElement.selectionEnd,document.activeElement.value.length]");assert.deepEqual(native,[0,native[2],native[2]]);return selected;
+   };
+   await focus('text-b');s=await tripleClick('text-a');record('triple-click-selects-all-single-line-and-native-responder',s);
+   for(const id of ['text-b','text-limit','text-password','text-reset','text-multiline']){await key('Tab');await wait(s=>s.focus===id,'next '+id);}
+   s=await tripleClick('text-multiline');record('triple-click-selects-all-multiline-and-native-responder',s);
    await evaluate("window.dispatchEvent(new Event('pagehide'))");s=await state();assert.equal(s.disposed,true);assert.equal(await evaluate("document.querySelectorAll('[data-haiyue-text-input]').length"),0);record('text-host-and-sampler-teardown',s);
    await evaluate(`(()=>{const n=document.createElement('pre');n.id='result';n.dataset.status='passed';n.textContent=${JSON.stringify(JSON.stringify({status:'passed',caseCount:cases.length,cases,qualification:'Native WebGPU public GUI path with CDP keyboard/text and synthetic IME protocol tests. Not real human IME or physical iPhone qualification.'}))};document.body.append(n);})()`);
   }catch(error){await evaluate(`(()=>{const n=document.createElement('pre');n.id='result';n.dataset.status='failed';n.textContent=${JSON.stringify(JSON.stringify({status:'failed',error:String(error.stack??error),caseCount:cases.length,cases}))};document.body.append(n);})()`);}
@@ -82,4 +92,4 @@ try{
 const changed=paths.filter(p=>sha(p)!==fingerprints[p]);if(changed.length)result={...result,status:'failed',changed};
 const files=result.httpProvenance?.files??[],bad=files.filter(f=>{try{return sha(f.sourcePath)!==f.sha256;}catch{return true;}});if(!files.length||bad.length)result={...result,status:'failed',servedByteMismatch:bad};
 const out=resolve(root,`artifacts/engine-0.2.2/g06/browser-text-${Date.now()}.json`);writeFileSync(out,JSON.stringify({schemaVersion:1,generatedAt:new Date().toISOString(),fingerprints,...result},null,2)+'\n');
-console.log(JSON.stringify({out,status:result.status,cases:result.caseCount,error:result.error}));if(result.status!=='passed'||result.caseCount!==21)process.exitCode=1;
+console.log(JSON.stringify({out,status:result.status,cases:result.caseCount,error:result.error}));if(result.status!=='passed'||result.caseCount!==23)process.exitCode=1;

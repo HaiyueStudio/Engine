@@ -17,6 +17,7 @@ import { GuiFocusManager } from '../input/GuiFocusManager';
 import { hitTestGui } from '../input/GuiHitTest';
 import {guiPasswordEyeHit} from '../input/GuiInputAdornments';
 import {GuiDirtyFlags, type GuiPointerEvent} from '../GuiTypes';
+import {cancelGuiInputClick} from '../input/GuiInputClickSelection';
 import { GuiRenderer } from '../rendering/GuiRenderer';
 import {bindGuiMeasureOwner, guiMeasureFontVersion, requestGuiFontReload} from '../GuiMeasure';
 import {isGuiLayoutHidden, isGuiLayoutManaged, suspendGuiLayout} from '../GuiLayoutState';
@@ -529,7 +530,7 @@ export class GuiSystem extends System {
     if (this.pressed) {this.pressed.pressed = false;this.pressed.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);}
     if (this.hovered) {this.hovered.hovered = false;this.hovered.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);}
     const focused = this.focus.focused;
-    if (focused instanceof GuiInput && [...this.roots].some(root => root.findById(focused.id) === focused)) focused.selecting = false;
+    if (focused instanceof GuiInput && [...this.roots].some(root => root.findById(focused.id) === focused)) {focused.selecting = false;cancelGuiInputClick(focused);}
     for (const pointerId of this.capturedPointers) this.releasePointerCapture(pointerId);
     if (this.scrollGesture) {this.scrollGesture.view.stopInertia();this.releasePointerCapture(this.scrollGesture.pointerId);}
     this.scrollGesture = null;this.pressed = this.hovered = null;this.composing = false;
@@ -720,6 +721,7 @@ export class GuiSystem extends System {
       if (target) {
         if (pending.type === 'pointercancel') target.handlePointerCancel(this.makeEvent('pointercancel', target, pending, native));
         else target.handlePointerUp(this.makeEvent('pointerup', target, pending, native));
+        if (target instanceof GuiInput) this.synchronizeTextInput();
       }
       if (pending.type === 'pointerup' && target && target === hit) {
         target.handleClick(this.makeEvent('click', target, pending, native));

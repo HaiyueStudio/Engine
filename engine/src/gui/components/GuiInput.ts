@@ -5,6 +5,7 @@ import {GuiTextBuffer} from '../input/GuiTextBuffer';
 import {guiGraphemeBoundaries,guiSnapIndex} from '../input/GuiGraphemes';
 import {guiPasswordMasked,guiPasswordPress,guiPasswordRelease,guiPasswordCancel} from '../input/GuiInputAdornments';
 import {resetGuiInputCaret} from '../input/GuiInputPresentation';
+import {beginGuiInputClick,moveGuiInputClick,finishGuiInputClick,cancelGuiInputClick} from '../input/GuiInputClickSelection';
 
 export interface GuiInputOptions extends GuiElementOptions {
   value?: string;
@@ -20,7 +21,7 @@ export interface GuiInputOptions extends GuiElementOptions {
 
 export class GuiInput extends GuiElement {
   override handlePointerCancel(event: GuiPointerEvent): void {
-    this.selecting = false;guiPasswordCancel(this);
+    this.selecting = false;guiPasswordCancel(this);cancelGuiInputClick(this);
     super.handlePointerCancel(event);
   }
   override handleAction(event: GuiActionEvent): void {
@@ -152,10 +153,12 @@ export class GuiInput extends GuiElement {
   override handlePointerDown(event: GuiPointerEvent): void {
     super.handlePointerDown(event);
     this.selecting = !guiPasswordPress(this,event.x,event.y);
+    if(this.selecting)beginGuiInputClick(this,event);else cancelGuiInputClick(this);
   }
 
   override handlePointerMove(event: GuiPointerEvent): void {
     super.handlePointerMove(event);
+    moveGuiInputClick(this,event);
     if (!this.selecting || !(event.buttons & 1)) return;
     this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
   }
@@ -163,6 +166,7 @@ export class GuiInput extends GuiElement {
   override handlePointerUp(event: GuiPointerEvent): void {
     super.handlePointerUp(event);
     if(guiPasswordRelease(this,event.x,event.y)){resetGuiInputCaret(this);this.markDirty(GuiDirtyFlags.Text|GuiDirtyFlags.Visual|GuiDirtyFlags.Input);}
+    if(finishGuiInputClick(this,event))this.selectAll();
     this.selecting = false;
   }
 
@@ -182,7 +186,7 @@ export class GuiInput extends GuiElement {
   undo():void {if(!this.disabled&&!this.readOnly)this.edit(()=>this.buffer.undo());}
   redo():void {if(!this.disabled&&!this.readOnly)this.edit(()=>this.buffer.redo());}
   override handleFocus():void {resetGuiInputCaret(this);super.handleFocus();}
-  override handleBlur():void {guiPasswordCancel(this,true);this.markDirty(GuiDirtyFlags.Text);this.cancelComposition();this.selecting=false;resetGuiInputCaret(this);super.handleBlur();}
+  override handleBlur():void {guiPasswordCancel(this,true);cancelGuiInputClick(this);this.markDirty(GuiDirtyFlags.Text);this.cancelComposition();this.selecting=false;resetGuiInputCaret(this);super.handleBlur();}
 
   private displayIndex(index:number,forward=false):number {
     const boundaries=guiGraphemeBoundaries(this.buffer.displayValue),offset=guiSnapIndex(boundaries,index,forward);
@@ -194,6 +198,7 @@ export class GuiInput extends GuiElement {
     operation();if(revision===this.buffer.revision)return;
     resetGuiInputCaret(this);
     const changed=before!==this.buffer.value;
+    if(changed)cancelGuiInputClick(this);
     this.markDirty(GuiDirtyFlags.Visual|GuiDirtyFlags.Input|((changed||beforeDisplay!==this.buffer.displayValue)?GuiDirtyFlags.Text:0));
     if(changed&&emit)this.onChange?.(this.buffer.value);
   }
