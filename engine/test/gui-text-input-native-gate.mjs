@@ -17,8 +17,15 @@ try{
   const wait=async(predicate,label)=>{const start=Date.now();let last;while(Date.now()-start<15000){last=await state();if(last&&predicate(last))return last;await new Promise(r=>setTimeout(r,50));}throw Error(`Timed out ${label}: ${JSON.stringify(last)}`);};
   const field=(s,id)=>s.fields.find(f=>f.id===id);
   const key=async(code,key=code,modifiers=0)=>{
+   // Headless macOS has no AppKit key-binding translation; CDP supplies the native edit command.
+   const commands=process.platform==='darwin'&&(modifiers&2)?({KeyA:['selectAll'],KeyZ:[modifiers&8?'redo':'undo'],End:['moveToEndOfDocument'],Home:['moveToBeginningOfDocument']}[code]??[]):[];
+   // CDP uses platform-native editing shortcuts; macOS uses Command for A/Z.
+   if(process.platform==='darwin'&&(modifiers&2)){
+    if(code.startsWith('Key'))modifiers=(modifiers&~2)|4;
+    else if(code==='End'||code==='Home'){code=code==='End'?'ArrowDown':'ArrowUp';key=code;modifiers=(modifiers&~2)|4;}
+   }
    const windowsVirtualKeyCode=({End:35,Home:36,ArrowLeft:37,ArrowUp:38,ArrowRight:39,ArrowDown:40,Backspace:8,Delete:46,Tab:9,Enter:13,Escape:27})[code]??(code.startsWith('Key')?code.charCodeAt(3):0);
-   await cdp.call('Input.dispatchKeyEvent',{type:'keyDown',code,key,modifiers,windowsVirtualKeyCode});await cdp.call('Input.dispatchKeyEvent',{type:'keyUp',code,key,modifiers,windowsVirtualKeyCode});
+   await cdp.call('Input.dispatchKeyEvent',{type:'keyDown',code,key,modifiers,windowsVirtualKeyCode,...(commands.length?{commands}:{})});await cdp.call('Input.dispatchKeyEvent',{type:'keyUp',code,key,modifiers,windowsVirtualKeyCode});
   };
   const type=text=>cdp.call('Input.insertText',{text});
   const focus=async id=>{
@@ -46,6 +53,11 @@ try{
    await type('中文');s=await wait(s=>field(s,'text-b').value==='中文','post-cancel replacement');record('post-cancel-selection-replacement',s);
    await key('Tab');s=await wait(s=>s.focus==='text-limit'&&s.hostElements===1,'Tab host transfer');record('single-session-focus-transfer',s);
    await focus('text-password');await type('A😀');s=await wait(s=>field(s,'text-password').value.length>0,'password hint');assert.equal(await evaluate("document.querySelector('[data-haiyue-text-input]').type"),'password');
+   const selection=field(s,'text-password').selection;
+   await evaluate('window.__g06PasswordResponder=document.activeElement');
+   const eyePoint=await evaluate(`(()=>{const r=document.querySelector('canvas').getBoundingClientRect(),f=${JSON.stringify(field(s,'text-password').rect)},v=${JSON.stringify(s.viewport)};return {x:r.left+(f.x+f.width-18)*r.width/v.width,y:r.top+(f.y+f.height/2)*r.height/v.height};})()`);
+   await cdp.call('Input.dispatchMouseEvent',{type:'mousePressed',...eyePoint,button:'left',clickCount:1});await cdp.call('Input.dispatchMouseEvent',{type:'mouseReleased',...eyePoint,button:'left',clickCount:1});
+   await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');s=await state();assert.deepEqual(field(s,'text-password').selection,selection);assert.equal(s.focus,'text-password');assert.equal(await evaluate("document.activeElement===window.__g06PasswordResponder&&document.activeElement.type==='password'"),true);record('password-eye-keeps-responder-and-selection',s);
    await key('KeyA','a',2);const passwordClipboard=await evaluate("(()=>{const e=document.activeElement,data=new DataTransfer(),value=e.value;e.dispatchEvent(new ClipboardEvent('copy',{clipboardData:data,bubbles:true,cancelable:true}));e.dispatchEvent(new ClipboardEvent('cut',{clipboardData:data,bubbles:true,cancelable:true}));return {text:data.getData('text/plain'),unchanged:e.value===value};})()");assert.deepEqual(passwordClipboard,{text:'',unchanged:true});record('native-password-input-hint-and-clipboard-guard',s);
    await key('Tab');s=await wait(s=>s.focus==='text-reset'&&s.hostElements===0,'Tab to button');assert.equal(await evaluate("document.activeElement===document.querySelector('canvas')"),true);record('host-close-restores-canvas-keyboard',s);
    await key('Tab');s=await wait(s=>s.focus==='text-multiline'&&s.hostElements===1,'Tab to multiline');assert.ok(s.scrollY>0);assert.equal(await evaluate("document.activeElement.tagName"),'TEXTAREA');
@@ -70,4 +82,4 @@ try{
 const changed=paths.filter(p=>sha(p)!==fingerprints[p]);if(changed.length)result={...result,status:'failed',changed};
 const files=result.httpProvenance?.files??[],bad=files.filter(f=>{try{return sha(f.sourcePath)!==f.sha256;}catch{return true;}});if(!files.length||bad.length)result={...result,status:'failed',servedByteMismatch:bad};
 const out=resolve(root,`artifacts/engine-0.2.2/g06/browser-text-${Date.now()}.json`);writeFileSync(out,JSON.stringify({schemaVersion:1,generatedAt:new Date().toISOString(),fingerprints,...result},null,2)+'\n');
-console.log(JSON.stringify({out,status:result.status,cases:result.caseCount,error:result.error}));if(result.status!=='passed'||result.caseCount!==20)process.exitCode=1;
+console.log(JSON.stringify({out,status:result.status,cases:result.caseCount,error:result.error}));if(result.status!=='passed'||result.caseCount!==21)process.exitCode=1;

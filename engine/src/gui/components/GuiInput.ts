@@ -3,6 +3,7 @@ import { GuiElement } from './GuiElement';
 import type {GuiActionEvent} from '../GuiTypes';
 import {GuiTextBuffer} from '../input/GuiTextBuffer';
 import {guiGraphemeBoundaries,guiSnapIndex} from '../input/GuiGraphemes';
+import {guiPasswordMasked,guiPasswordPress,guiPasswordRelease,guiPasswordCancel} from '../input/GuiInputAdornments';
 import {resetGuiInputCaret} from '../input/GuiInputPresentation';
 
 export interface GuiInputOptions extends GuiElementOptions {
@@ -19,7 +20,7 @@ export interface GuiInputOptions extends GuiElementOptions {
 
 export class GuiInput extends GuiElement {
   override handlePointerCancel(event: GuiPointerEvent): void {
-    this.selecting = false;
+    this.selecting = false;guiPasswordCancel(this);
     super.handlePointerCancel(event);
   }
   override handleAction(event: GuiActionEvent): void {
@@ -48,7 +49,7 @@ export class GuiInput extends GuiElement {
   get isComposing():boolean{return this.buffer.composing;}
   get composition(){return this.buffer.composition;}
   get displayValue():string{
-    const text=this.buffer.displayValue;if(this.inputType!=='password')return text;
+    const text=this.buffer.displayValue;if(!guiPasswordMasked(this))return text;
     const boundaries=guiGraphemeBoundaries(text);
     return boundaries.slice(1).map((end,index)=>this.multiline&&/^[\r\n]+$/u.test(text.slice(boundaries[index],end))?'\n':'•').join('');
   }
@@ -137,8 +138,8 @@ export class GuiInput extends GuiElement {
     const boundaries=this.buffer.graphemeBoundaries;
     for (let i = 1; i < boundaries.length; i++) {
       const before=boundaries[i-1]!,after=boundaries[i]!;
-      const prev = measureTextWidth(this.inputType==='password'?'•'.repeat(i-1):this.value.slice(0, before).replace(/\r\n|\r|\n/gu,' '));
-      const next = measureTextWidth(this.inputType==='password'?'•'.repeat(i):this.value.slice(0, after).replace(/\r\n|\r|\n/gu,' '));
+      const prev = measureTextWidth(guiPasswordMasked(this)?'•'.repeat(i-1):this.value.slice(0, before).replace(/\r\n|\r|\n/gu,' '));
+      const next = measureTextWidth(guiPasswordMasked(this)?'•'.repeat(i):this.value.slice(0, after).replace(/\r\n|\r|\n/gu,' '));
       if (x < (prev + next) * 0.5) return before;
     }
     return this.value.length;
@@ -150,7 +151,7 @@ export class GuiInput extends GuiElement {
 
   override handlePointerDown(event: GuiPointerEvent): void {
     super.handlePointerDown(event);
-    this.selecting = true;
+    this.selecting = !guiPasswordPress(this,event.x,event.y);
   }
 
   override handlePointerMove(event: GuiPointerEvent): void {
@@ -161,6 +162,7 @@ export class GuiInput extends GuiElement {
 
   override handlePointerUp(event: GuiPointerEvent): void {
     super.handlePointerUp(event);
+    if(guiPasswordRelease(this,event.x,event.y)){resetGuiInputCaret(this);this.markDirty(GuiDirtyFlags.Text|GuiDirtyFlags.Visual|GuiDirtyFlags.Input);}
     this.selecting = false;
   }
 
@@ -180,11 +182,11 @@ export class GuiInput extends GuiElement {
   undo():void {if(!this.disabled&&!this.readOnly)this.edit(()=>this.buffer.undo());}
   redo():void {if(!this.disabled&&!this.readOnly)this.edit(()=>this.buffer.redo());}
   override handleFocus():void {resetGuiInputCaret(this);super.handleFocus();}
-  override handleBlur():void {this.cancelComposition();this.selecting=false;resetGuiInputCaret(this);super.handleBlur();}
+  override handleBlur():void {guiPasswordCancel(this,true);this.markDirty(GuiDirtyFlags.Text);this.cancelComposition();this.selecting=false;resetGuiInputCaret(this);super.handleBlur();}
 
   private displayIndex(index:number,forward=false):number {
     const boundaries=guiGraphemeBoundaries(this.buffer.displayValue),offset=guiSnapIndex(boundaries,index,forward);
-    return this.inputType==='password'?boundaries.indexOf(offset):offset;
+    return guiPasswordMasked(this)?boundaries.indexOf(offset):offset;
   }
 
   private edit(operation:()=>void,emit=true):void {

@@ -1,5 +1,6 @@
 import type {GuiInput} from '../components/GuiInput';
 import type {GuiRect} from '../GuiTypes';
+import {guiInputAdornments,guiPasswordMasked} from './GuiInputAdornments';
 import {guiGraphemeBoundaries} from './GuiGraphemes';
 
 interface InputView {x:number;y:number;caretVisible:boolean;revision:number;}
@@ -13,7 +14,8 @@ export function toggleGuiInputCaret(input:GuiInput):void {const view=state(input
 /** Shared geometry for GPU glyphs, pointer selection and the platform candidate window. */
 export function guiInputPresentation(input:GuiInput,measure:(text:string)=>number,fontSize:number,lineHeight=fontSize*1.2){
   const view=state(input),padding=Math.max(0,input.style.padding??8),r=input.rect;
-  const clip={x:r.x+padding,y:r.y+Math.min(padding,r.height/2),width:Math.max(0,r.width-2*padding),height:Math.max(0,r.height-2*padding)};
+  const adornments=guiInputAdornments(input,measure,fontSize);
+  const clip={x:r.x+padding,y:r.y+Math.min(padding,r.height/2),width:Math.max(0,r.width-2*padding-adornments.right),height:Math.max(0,r.height-2*padding-adornments.bottom)};
   const text=input.displayValue,lines:string[]=[],starts:number[]=[];
   const oneLine=(value:string)=>value.replace(/\r\n|\r|\n/gu,' ');
   if(input.multiline){let start=0;for(const match of text.matchAll(/\r\n|\r|\n/gu)){starts.push(start);lines.push(text.slice(start,match.index));start=match.index+match[0].length;}starts.push(start);lines.push(text.slice(start));}
@@ -50,7 +52,7 @@ export function guiInputPresentation(input:GuiInput,measure:(text:string)=>numbe
     let offset=line.length;
     for(let i=1;i<boundaries.length;i++)if(local<(measure(input.multiline?line.slice(0,boundaries[i-1]):oneLine(line.slice(0,boundaries[i-1])))+measure(input.multiline?line.slice(0,boundaries[i]):oneLine(line.slice(0,boundaries[i]))))/2){offset=boundaries[i-1]!;break;}
     const displayOffset=starts[row]!+offset;
-    return input.inputType==='password'?guiGraphemeBoundaries(input.value)[displayOffset]??input.value.length:displayOffset;
+    return guiPasswordMasked(input)?guiGraphemeBoundaries(input.value)[displayOffset]??input.value.length:displayOffset;
   };
-  return {clip,origin,caret:caretRect,lines,lineHeight,ranges,indexAt,contentWidth:width,contentHeight,scrollX:view.x,scrollY:view.y};
+  return {adornments,clip,origin,caret:caretRect,lines,lineHeight,ranges,indexAt,contentWidth:width,contentHeight,scrollX:view.x,scrollY:view.y};
 }

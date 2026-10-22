@@ -55,5 +55,7 @@ fn fs_main(input : VertexOutput) -> @location(0) vec4<f32> {
   if (alpha <= 0.01) {
     discard;
   }
-  return vec4<f32>(input.color.rgb, alpha);
+  let rgb = select(sample.rgb, gui_to_linear(sample.rgb), GUI_LINEAR_OUTPUT);
+  // Negative tint marks a color glyph; ordinary/legacy atlases remain alpha masks.
+  return vec4<f32>(select(input.color.rgb, rgb, input.color.r < 0.0), alpha);
 }

@@ -1,5 +1,6 @@
 import { bitmapKerningKey, type BitmapFontChar, type BitmapFontData } from '../../font/BitmapFontData';
 import { GUI_TEXTURED_VERTEX_LAYOUT } from './GuiVertexLayout';
+import {guiFontCharacters,guiFontGlyph,guiFontGlyphIsColored} from './GuiTextGlyphs';
 
 const VERTICES_PER_GLYPH = 6;
 
@@ -50,9 +51,10 @@ export class GuiTextBatch {
     let offset = 0;
     for (let i = 0; i < layouts.length; i++) {
       const layout = layouts[i]!, command = this.commands[i]!;
+      // Negative RGB marks atlas-colored glyphs; alpha still carries caller opacity.
       for (const glyph of layout.glyphs) {
         offset = pushGlyph(this.scratch, offset, glyph.x0, glyph.y0, glyph.x1, glyph.y1,
-          glyph.u0, glyph.v0, glyph.u1, glyph.v1, command.color,
+          glyph.u0, glyph.v0, glyph.u1, glyph.v1, glyph.colored ? [-1,-1,-1,command.color[3]] : command.color,
           layout.clipX0, layout.clipY0, layout.clipX1, layout.clipY1);
       }
     }
@@ -71,7 +73,7 @@ export class GuiTextBatch {
 
 export function measureGuiTextWidth(text: string, font: BitmapFontData, fontSize: number): number {
   let maxWidth = 0;
-  for (const line of text.split('\n')) {
+  for (const line of text.split(/\r\n|[\r\n]/u)) {
     maxWidth = Math.max(maxWidth, measureGuiLineWidth(line, font, fontSize));
   }
   return maxWidth;
@@ -87,10 +89,10 @@ function measureGuiLineWidth(text: string, font: BitmapFontData, fontSize: numbe
   const scale = fontSize / font.size;
   let width = 0;
   let previousCode: number | null = null;
-  for (const char of text) {
+  for (const char of guiFontCharacters(text,font)) {
     const code = char.codePointAt(0);
     if (code === undefined) continue;
-    const glyph = font.chars.get(code) ?? font.chars.get(63);
+    const glyph = guiFontGlyph(char,font);
     if (!glyph) continue;
     if (previousCode !== null) width += (font.kernings.get(bitmapKerningKey(previousCode, code)) ?? 0) * scale;
     width += glyph.xadvance * scale;
@@ -100,6 +102,7 @@ function measureGuiLineWidth(text: string, font: BitmapFontData, fontSize: numbe
 }
 
 interface LaidOutGlyph {
+  colored: boolean;
   x0: number;
   y0: number;
   x1: number;
@@ -133,8 +136,8 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
   const glyphs: LaidOutGlyph[] = [];
   let advanceWidth = 0;
 
-  for (const char of command.text) {
-    if (char === '\n') {
+  for (const char of guiFontCharacters(command.text,font)) {
+    if (char === '\n' || char === '\r' || char === '\r\n') {
       if (!command.multiline) break;
       advanceWidth = Math.max(advanceWidth, x - command.x);
       x = command.x;
@@ -145,7 +148,7 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
     }
     const code = char.codePointAt(0);
     if (code === undefined) continue;
-    const glyph: BitmapFontChar | undefined = font.chars.get(code) ?? font.chars.get(63);
+    const glyph: BitmapFontChar | undefined = guiFontGlyph(char,font);
     if (!glyph) continue;
 
     if (previousCode !== null) {
@@ -173,7 +176,7 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
     const v1 = (glyph.y + glyph.height) / font.scaleH;
 
     if ((centerBlock || (nextY1 >= clipY0 && nextY0 <= clipY1)) && nextX1 >= clipX0 && nextX0 <= clipX1) {
-      glyphs.push({ x0: nextX0, y0: nextY0, x1: nextX1, y1: nextY1, u0, v0, u1, v1 });
+      glyphs.push({ x0: nextX0, y0: nextY0, x1: nextX1, y1: nextY1, u0, v0, u1, v1, colored: guiFontGlyphIsColored(char,font) });
     }
     x += glyph.xadvance * scale;
     advanceWidth = Math.max(advanceWidth, x - command.x);

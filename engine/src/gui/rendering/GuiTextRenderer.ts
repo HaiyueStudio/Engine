@@ -215,6 +215,7 @@ export class GuiTextRenderer extends BaseRenderer {
       fragment: {
         module: this.shader,
         entryPoint: 'fs_main',
+        constants: {GUI_LINEAR_OUTPUT:guiLinearSurface(this.surface,this.engine)?1:0},
         targets: [{
           format,
           blend: { color: alphaBlend, alpha: {...alphaBlend,srcFactor:'one'} },

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {GuiRoot,GuiLabel,GuiSystem,GuiHelpDialog} from '../dist/gui.js';
+import {GuiRoot,GuiLabel,GuiSystem,GuiHelpDialog,GuiInput} from '../dist/gui.js';
 import {World} from '../dist/ecs.js';
 import {createAuditGpuDevice,getAuditGpuDeviceState} from '../../scripts/benchmark/real-renderer-audit-device.mjs';
 
@@ -54,4 +54,20 @@ test('already-loaded native font readiness does not invalidate the first retaine
   const f=fixture();f.prepare();f.root.clearDirty();await Promise.resolve();assert.equal(f.root.dirty,false);
   fonts.dispatchEvent(new Event('loadingdone'));assert.equal(f.root.dirty,true);f.system.destroy();assert.equal(fonts.live,0);
  }finally{if(previous===undefined)delete globalThis.document;else globalThis.document=previous;}
+});
+
+test('unseeded Chinese input and preedit extend the atlas once, preserve metrics and retire old textures',async()=>{
+ const f=fixture(),input=f.root.add(new GuiInput({value:'A',maxLength:4}));f.prepare();f.draw();const initial=f.system.renderer.rootCaches.get(f.root).font;
+ input.setValue('A我');f.prepare();f.draw();const chinese=f.system.renderer.rootCaches.get(f.root).font;assert.notEqual(chinese,initial);assert.ok(chinese.chars.has('我'.codePointAt(0)),'actual Chinese glyph, not question-mark fallback');
+ input.beginComposition();input.updateComposition('啊');f.prepare();f.draw();const preview=f.system.renderer.rootCaches.get(f.root).font;assert.ok(preview.chars.has('啊'.codePointAt(0)));
+ input.cancelComposition();f.prepare();f.draw();assert.equal(f.system.renderer.rootCaches.get(f.root).font,preview);
+ f.root.clearDirty();for(let i=0;i<5;i++){f.prepare();f.draw();assert.equal(f.system.renderer.rootCaches.get(f.root).font,preview,'unchanged atlas reused');}
+ await f.device.queue.onSubmittedWorkDone();await Promise.resolve();f.system.destroy();assert.equal(f.audit.snapshot().resources.texture.live,0);assert.equal(f.audit.snapshot().resources.buffer.live,0);
+});
+
+test('input atlas grows for the current repertoire and stays reused after ordinary edits',()=>{
+ const f=fixture(),text=Array.from({length:90},(_,i)=>String.fromCodePoint(0x4e00+i)).join(''),input=f.root.add(new GuiInput({value:text}));
+ f.prepare();f.draw();const font=f.system.renderer.rootCaches.get(f.root).font;assert.ok(font.scaleW>64);for(const char of text)assert.ok(font.chars.has(char.codePointAt(0)));
+ input.setValue(text.slice(0,3));f.prepare();f.draw();assert.equal(f.system.renderer.rootCaches.get(f.root).font,font);
+ f.system.destroy();assert.equal(f.audit.snapshot().resources.texture.live,0);
 });

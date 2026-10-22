@@ -36,3 +36,19 @@ test('disabling a system cancels all sequences immediately',()=>{
  const s=setup();let cancels=0;const button=s.root.add(new GuiButton({width:80,height:30,onPointerCancel:()=>cancels++}));s.ready();
  s.send('pointerdown',1,10,10);s.system.disabled=true;assert.equal(cancels,1);assert.equal(button.pressed,false);assert.equal(s.system.pointerStates.size,0);s.close();
 });
+
+test('password eye preserves focus, selection, value and history, and remasks on blur',()=>{
+ const s=setup();let changes=0;const input=s.root.add(new GuiInput({value:'A😀é',inputType:'password',width:200,height:40,onChange:()=>changes++}));s.ready();s.system.focus.focus(input);input.setSelection(1,3);
+ s.send('pointerdown',10,182,18);s.send('pointerup',10,182,18);
+ assert.equal(input.displayValue,'A😀é');assert.equal(input.inputType,'password');assert.equal(input.focused,true);assert.deepEqual([input.selectionStart,input.selectionEnd],[1,3]);assert.equal(changes,0);assert.equal(input.canUndo,false);assert.equal(input.displaySelectionEnd,3);
+ s.send('pointerdown',11,182,18);s.send('pointerup',11,182,18);assert.equal(input.displayValue,'•••');assert.equal(input.displaySelectionEnd,2);
+ s.send('pointerdown',12,182,18);s.send('pointerup',12,182,18);s.system.focus.blur();assert.equal(input.displayValue,'•••');s.close();
+});
+
+test('password eye ignores cancellation, releases outside, orphan releases and disabled controls',()=>{
+ const s=setup(),input=s.root.add(new GuiInput({value:'secret',inputType:'password',width:200,height:40}));s.ready();
+ s.send('pointerdown',1,182,18);s.send('pointercancel',1,182,18);assert.equal(input.displayValue,'••••••');
+ s.send('pointerdown',2,182,18);s.send('pointerup',2,120,18);assert.equal(input.displayValue,'••••••');
+ s.send('pointerup',3,182,18);assert.equal(input.displayValue,'••••••');
+ input.disabled=true;s.send('pointerdown',4,182,18);s.send('pointerup',4,182,18);assert.equal(input.displayValue,'••••••');s.close();
+});

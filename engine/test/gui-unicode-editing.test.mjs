@@ -115,3 +115,17 @@ test('serialization preserves text options, but never preedit, history or active
  assert.equal(copy.isComposing,false);assert.equal(copy.canUndo,false);assert.equal(copy.hasSelection,false);
  assert.ok(!JSON.stringify(document).includes('中'));root.destroy();restored.destroy();
 });
+
+test('Chinese IME and supplementary characters at a UTF-16 ceiling stay whole',()=>{
+ for(const text of ['我','啊','方','的']){
+  const input=new GuiInput({value:'A😀B',maxLength:4});input.setSelection(3,4);input.beginComposition();input.updateComposition(text);input.commitComposition();assert.equal(input.value,'A😀'+text);assert.ok(input.value.isWellFormed());
+  input.insertText('多');assert.equal(input.value,'A😀'+text);input.undo();assert.equal(input.value,'A😀B');
+ }
+ const input=new GuiInput({value:'A😀B',maxLength:4});input.setSelection(3,4);input.insertText('𠀀');assert.equal(input.value,'A😀B','a supplementary CJK character cannot be half inserted');
+});
+
+test('password reveal is transient and is not restored by serialization',()=>{
+ const root=new GuiRoot(),input=root.add(new GuiInput({id:'password',width:200,height:40,inputType:'password',value:'A😀我'}));root.layout(200,100);
+ const event={type:'pointerdown',x:182,y:18,buttons:1,nativeEvent:{},routed:true,target:input,currentTarget:input};input.handlePointerDown(event);input.handlePointerUp({...event,type:'pointerup'});assert.equal(input.displayValue,input.value);
+ const restored=deserializeGuiRoot(serializeGuiRoot(root));assert.equal(restored.findById('password').displayValue,'•••');assert.equal(restored.findById('password').inputType,'password');root.destroy();restored.destroy();
+});

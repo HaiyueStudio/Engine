@@ -34,8 +34,13 @@ export interface BuiltFont {
  * For SDF/MSDF quality, use an external tool (e.g. msdf-bmfont-xml) instead.
  */
 export function buildBitmapFont(options: BuildFontOptions = {}): BuiltFont {
+  const {data,atlas}=buildBitmapFontGlyphs(options, [...(options.chars ?? PRINTABLE_ASCII)]);
+  return {data,atlas};
+}
+
+/** @internal Rasterize complete strings; GUI supplies extended grapheme clusters. */
+export function buildBitmapFontGlyphs(options: BuildFontOptions, characters: readonly string[]): BuiltFont & {glyphs: Map<string, BitmapFontChar>} {
   const {
-    chars = PRINTABLE_ASCII,
     fontSize = 32,
     fontFamily = 'sans-serif',
     padding = 4,
@@ -65,7 +70,7 @@ export function buildBitmapFont(options: BuildFontOptions = {}): BuiltFont {
   let maxAscent = 0;
   let maxDescent = 0;
 
-  for (const ch of chars) {
+  for (const ch of new Set(characters)) {
     if (!ch.codePointAt(0)) continue;
     const m = pctx.measureText(ch);
     const ascent  = Math.ceil(m.actualBoundingBoxAscent)  + 1;
@@ -90,6 +95,7 @@ export function buildBitmapFont(options: BuildFontOptions = {}): BuiltFont {
   ctx.textBaseline = 'alphabetic';
 
   const charMap = new Map<number, BitmapFontChar>();
+  const clusterMap = new Map<string, BitmapFontChar>();
   let curX = padding;
   let curY = padding;
 
@@ -106,7 +112,7 @@ export function buildBitmapFont(options: BuildFontOptions = {}): BuiltFont {
     // Draw at the alphabetic baseline
     ctx.fillText(g.char, curX, curY + base);
 
-    charMap.set(g.code, {
+    const glyph: BitmapFontChar = {
       id:       g.code,
       x:        curX,
       y:        curY,
@@ -116,7 +122,9 @@ export function buildBitmapFont(options: BuildFontOptions = {}): BuiltFont {
       yoffset:  0,
       xadvance: g.xadvance,
       page:     0,
-    });
+    };
+    clusterMap.set(g.char, glyph);
+    if ([...g.char].length === 1) charMap.set(g.code, glyph);
 
     curX += g.cellW + padding;
   }
@@ -136,5 +144,5 @@ export function buildBitmapFont(options: BuildFontOptions = {}): BuiltFont {
     kernings:   new Map(),
   });
 
-  return { data, atlas };
+  return { data, atlas, glyphs: clusterMap };
 }

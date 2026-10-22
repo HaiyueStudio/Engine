@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "goal": "g06-text-input",
   "status": "active",
-  "generatedAt": "2026-10-22T00:30:16.416624+00:00",
+  "generatedAt": "2026-10-22T05:11:12.080273+00:00",
   "problem": "UTF-16 unit deletion split emoji; preedit and committed state needed separate ownership, and DOM line sanitization changed native indices.",
   "method": "Pinned Unicode 15.1 extended graphemes; UTF-16/native coordinate projection; generation-owned host sessions; shared caret/render/scroll geometry and phase-only invalidation; UIKit transport outside Engine.",
-  "conclusion": "Current automated correctness and source/package checks pass. Real desktop IME, Xcode compilation and physical iPhone acceptance remain pending.",
+  "conclusion": "Emoji/grapheme rendering and editing passed human recheck on the preceding candidate. Chinese question marks were traced to missing atlas glyphs, with complete 我/啊 in committed device logs. Dynamic input/preedit glyph coverage passed automated checks; the signed repaired candidate is installed and presents its first frame on iPhone. Chinese visual recheck and confirmation of the remaining physical checklist are pending; G06 remains incomplete.",
   "fullG06Complete": false,
   "realDesktopImeVerified": false,
   "realIosKeyboardVerified": false,
@@ -253,5 +253,102 @@
       }
     ],
     "completionRule": "Every G06 original requirement needs evidence at its own scope. Synthetic/browser/model/static results do not qualify physical UIKit or human IME. G13 responsibilities remain explicit."
+  },
+  "graphemeRenderingFix": {
+    "candidateId": "c82445c392880ff534850ced7ed668c29b59a1a800b9a5fb861b2580a51b30a9",
+    "engineTarballSha256": "804d57c656063b0168cdb56f047fdf4daf2bf75476a2a1c0b83da6a4da42b66a",
+    "status": "physical-human-grapheme-recheck-passed",
+    "method": [
+      "GUI-owned atlases rasterize complete Unicode extended graphemes, shared by drawing and caret measurement.",
+      "Private negative tint marker preserves color glyph RGB with unchanged vertex layout; legacy alpha masks retain theme tint.",
+      "Both fragment and vertex stages receive output color-space specialization.",
+      "Native B fixture explicitly distinguishes one ZWJ emoji from two independent consecutive emoji."
+    ],
+    "validation": {
+      "focusedTests": 40,
+      "browserInputCases": 20,
+      "browserColorCases": 4,
+      "nativeTests": 174,
+      "shaderStage14Nodes": 25,
+      "exampleBuildTargets": 101,
+      "deviceColorPixels": 1435,
+      "humanGraphemeRecheck": "passed"
+    },
+    "limits": [
+      "Initial grapheme fix used a finite configured repertoire; the subsequent dynamicInputGlyphs fix extends input display/preedit/placeholder text. Full shaping and arbitrary system-font fallback remain outside scope.",
+      "CDP IME remains synthetic; real human IME and full physical lifecycle checklist are separate."
+    ],
+    "evidence": [
+      {
+        "path": "artifacts/engine-0.2.2/g06/grapheme-fix/result.json",
+        "sha256": "5450a5459361e60dc6b8828486e24770d94998bc540bc37db7077d24e1421fe1"
+      },
+      {
+        "path": "../Native/examples/ios-gui-text-input/artifacts/device-acceptance/grapheme-fix-device-result.json",
+        "sha256": "08e5dfd19d9365be6426d111c4b8fb938725ea0d749f57f85ea8f556572d5cb4"
+      }
+    ]
+  },
+  "dynamicInputGlyphs": {
+    "candidateId": "0dac339e55fcfb7825254fceaf5cf6b12e4723583a4db44ac0352eb00a9559dd",
+    "engineTarballSha256": "9a1b2a5f2396c2458a1bbd60de0c9f3fdf010637cd5e475181df269f068c8e2f",
+    "status": "physical-human-Chinese-and-lifecycle-recheck-passed",
+    "diagnosis": "Device logs store A😀我 / A😀啊 without broken UTF-16. The configured atlas omitted these glyphs, causing ? fallback.",
+    "method": "Input display/preedit/placeholder clusters extend per-family atlases; generations are reused until new glyphs are needed, and GPU submission lifetime retires replacements.",
+    "lengthPolicy": "Existing UTF-16 maxLength remains unchanged; truncation respects complete grapheme boundaries.",
+    "capacity": "Automatic growth is bounded by min(4096, device.maxTextureDimension2D); exhausted atlas uses existing missing-glyph fallback without continuous rebuild.",
+    "evidence": [
+      {
+        "path": "artifacts/engine-0.2.2/g06/dynamic-glyphs/result.json",
+        "sha256": "809ccf4665ab6405ddb44568ac34b742292ea2ef594510da6bc1eeb74134791b"
+      },
+      {
+        "path": "../Native/examples/ios-gui-text-input/artifacts/device-acceptance/chinese-length-diagnosis.json",
+        "sha256": "093555ddc92642c4be7d60264731711e42e4eaad63bd532996da963378b4dbe6"
+      },
+      {
+        "path": "../Native/examples/ios-gui-text-input/artifacts/device-acceptance/dynamic-glyph-device-result.json",
+        "sha256": "9566fe9b5a621105294ada01fa1b035cafd2aa90cf7425131e8f53df20f968bc"
+      },
+      {
+        "path": "../Native/examples/ios-gui-text-input/artifacts/device-acceptance/human-chinese-recheck.json",
+        "sha256": "ebadc7768051e7cec0b883fece8eea49a78d147f4f2a163a941064cec5877a28"
+      }
+    ]
+  },
+  "inputAdornments": {
+    "candidateId": "97747ba1e874cada01497c107258c11b85795712fed116d955bca69c9fdcccad",
+    "status": "human-functional-acceptance-passed-eye-alignment-refined",
+    "behavior": {
+      "password": "Eye toggles GPU plaintext without changing secure native host/clipboard policy; preserves selection; remasks on blur.",
+      "lengthCounter": "Committed UTF-16 length / maxLength; reserves text gutters."
+    },
+    "validation": {
+      "repoTests": 1985,
+      "engineTests": 1211,
+      "browserInputCases": 21,
+      "gpuCases": 6,
+      "exampleBuildTargets": 101,
+      "physicalFirstFrame": "passed"
+    },
+    "pending": [],
+    "evidence": [
+      {
+        "path": "artifacts/engine-0.2.2/g06/input-adornments/result.json",
+        "sha256": "c8cac0c962f5ebdc2f3d1303dbd00b2d6ecbcba41866e6315ac323a8d2831783"
+      }
+    ],
+    "humanFeedback": "操作都正常，但是有个显示上的优化，密码框眼睛按钮没有垂直居中"
+  },
+  "passwordEyeCentering": {
+    "candidateId": "e7051ee3b15bbd9a0e6408de75a77984788480eb4e6a877519f9af8dd3158294",
+    "status": "eye-centering-fixed-installed-first-frame-passed",
+    "humanAcceptance": "Previous candidate operations passed; this alignment-only candidate has no new human feedback yet.",
+    "evidence": [
+      {
+        "path": "artifacts/engine-0.2.2/g06/eye-center/result.json",
+        "sha256": "f3a11013fc16d2075c388faff9dbb1437260db5137f1ab24bdc94504ca94056d"
+      }
+    ]
   }
 }

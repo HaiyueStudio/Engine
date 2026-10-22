@@ -15,6 +15,7 @@ import { GuiRoot } from '../components/GuiRoot';
 import { GuiSelect } from '../components/GuiSelect';
 import { GuiFocusManager } from '../input/GuiFocusManager';
 import { hitTestGui } from '../input/GuiHitTest';
+import {guiPasswordEyeHit} from '../input/GuiInputAdornments';
 import {GuiDirtyFlags, type GuiPointerEvent} from '../GuiTypes';
 import { GuiRenderer } from '../rendering/GuiRenderer';
 import {bindGuiMeasureOwner, guiMeasureFontVersion, requestGuiFontReload} from '../GuiMeasure';
@@ -697,7 +698,7 @@ export class GuiSystem extends System {
           this.engine.canvas?.setPointerCapture?.(native.pointerId);
           this.capturedPointers.add(native.pointerId);
         }
-        if (hit instanceof GuiInput) this.updateInputCaretFromPointer(hit, pending, false);
+        if (hit instanceof GuiInput && !guiPasswordEyeHit(hit,pending.x,pending.y)) this.updateInputCaretFromPointer(hit, pending, false);
         hit.handlePointerDown(this.makeEvent('pointerdown', hit, pending, native));
       } else {
         this.focus.blur();

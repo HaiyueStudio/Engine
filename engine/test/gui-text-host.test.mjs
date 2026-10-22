@@ -103,6 +103,7 @@ test('a long live session cannot replay a retired transaction after many newer n
 
 test('legacy canvas copy/cut cannot expose a password and a pending paste cannot interrupt new preedit',async()=>{
  const f=fixture(),password=f.root.add(new GuiInput({value:'A😀secret',inputType:'password'}));f.root.layout(200,100);f.focus(password);password.selectAll();
+ f.system.renderer.prepare=()=>{};for(const type of ['pointerdown','pointerup'])f.system.dispatchPointerEvent(null,{type,x:password.rect.x+password.rect.width-10,y:password.rect.y+10,routedHit:password,native:{pointerId:9,pointerType:'touch',button:0,buttons:type==='pointerdown'?1:0,preventDefault(){}}});assert.equal(password.displayValue,password.value);
  const written=[];f.system.writeClipboard=async text=>written.push(text);
  const keyboard=(key)=>{const event=new Event('keydown',{cancelable:true});Object.assign(event,{key,code:'Key'+key.toUpperCase(),ctrlKey:true});f.canvas.dispatchEvent(event);};
  for(const type of ['copy','cut']){const event=new Event(type,{cancelable:true});Object.assign(event,{clipboardData:{setData:(...args)=>written.push(args)}});f.canvas.dispatchEvent(event);assert.equal(event.defaultPrevented,true);}

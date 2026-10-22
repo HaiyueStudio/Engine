@@ -77,3 +77,20 @@ test('surface-relative safe insets also reveal the caret when the canvas has a n
  const scroll=f.root.add(new GuiScrollView({width:'100%',height:'100%',contentHeight:400})),input=scroll.add(new GuiInput({y:160,width:180,value:'a'}));f.root.layout(200,200);scroll.scrollTo(160);f.system.focus.focus(input);
  f.requests[0].onViewportInset({top:10,right:0,bottom:0,left:0});const caret=f.system.textCaretRect(input);assert.ok(caret.y>=70);assert.equal(scroll.scrollY,157);f.close();
 });
+
+test('length counter follows committed UTF-16 limit through edits, IME, rejection and undo',()=>{
+ const f=fixture(),input=f.root.add(new GuiInput({width:200,height:40,maxLength:4,value:'A😀B'}));f.root.layout(200,200);
+ const renderer=f.system.renderer;
+ const counter=()=>{renderer.textBatch.clear();renderer.batch.clear();renderer.addInput(input,f.root.theme);return renderer.textBatch.commands.at(-1)?.text;};
+ assert.equal(counter(),'4/4');input.insertText('X');assert.equal(counter(),'4/4');input.deleteBackward();assert.equal(counter(),'3/4');input.beginComposition();input.updateComposition('我');assert.equal(counter(),'3/4');input.commitComposition();assert.equal(counter(),'4/4');input.undo();assert.equal(counter(),'3/4');
+ input.value='';assert.equal(counter(),'0/4');input.maxLength=0;assert.equal(counter(),'0/0');input.maxLength=Infinity;assert.equal(counter(),undefined);assert.equal(renderer.textBatch.commands.length,0);f.close();
+});
+
+test('counter and eye have visible separate gutters with clipped text and multiline footer',()=>{
+ const f=fixture(),input=f.root.add(new GuiInput({width:200,height:40,value:'A😀B',maxLength:4,inputType:'password'}));f.root.layout(200,200);
+ const r=f.system.renderer;r.currentFont={size:16,lineHeight:19.2,chars:new Map(Array.from('0123456789/•?').map(c=>[c.codePointAt(0),{xadvance:8}])),kernings:new Map()};
+ r.addInput(input,f.root.theme);const [text,count]=r.textBatch.commands;
+ assert.equal(count.text,'4/4');assert.ok(text.clip.x+text.clip.width<=count.x);assert.ok(count.x+count.width<=164);assert.ok(count.clip.x+count.clip.width>=200,'counter must not inherit text clip');
+ const eye=r.batch.commands.filter(shape=>shape.x>=164);assert.ok(eye.length>=3);assert.ok(eye.every(shape=>shape.clip.x+shape.clip.width>=shape.x+shape.width),'eye must be visible outside text clip');
+ const multiline=f.root.add(new GuiInput({width:200,height:100,multiline:true,value:'A😀B',maxLength:4}));f.root.layout(200,200);r.textBatch.clear();r.batch.clear();r.addInput(multiline,f.root.theme);const [multi,footer]=r.textBatch.commands;assert.ok(multi.clip.y+multi.clip.height<=footer.y);assert.ok(footer.y+footer.height<=100);f.close();
+});

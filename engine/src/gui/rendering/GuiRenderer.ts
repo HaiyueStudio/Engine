@@ -20,6 +20,7 @@ import { GuiTooltip } from '../components/GuiTooltip';
 import { GuiTree } from '../components/GuiTree';
 import { GuiRect, GuiTheme } from '../GuiTypes';
 import { parseGuiColor as colorToRgba, withGuiAlpha as withAlpha } from '../GuiColor';
+import {guiPasswordRevealed} from '../input/GuiInputAdornments';
 import { GuiBatch } from './GuiBatch';
 import { GuiShapeRenderer } from './GuiShapeRenderer';
 import { GuiTextBatch, measureGuiTextWidth } from './GuiTextBatch';
@@ -70,7 +71,7 @@ export class GuiRenderer {
   private defaultFont: BitmapFontData | null = null;
   private currentFont: BitmapFontData | null = null;
   private readonly fontOwner: GuiFontOwner;
-  private get activeFont(): BitmapFontData | null {return this.currentFont ?? this.defaultFont;}
+  private get activeFont(): BitmapFontData | null {return this.currentFont ?? (this.prepared ? this.fontOwner.prepare() : this.defaultFont);}
   private readonly elementRenderers = new Map<Function, GuiElementRenderer>();
   private readonly rootCaches = new Map<GuiRoot, GuiRootRenderCache>();
   private activeRootCaches: GuiRootRenderCache[] = [];
@@ -112,7 +113,7 @@ export class GuiRenderer {
   prepare(engine: IEngine): void {
     const refresh = consumeGuiFontReload(this);
     if (this.prepared && this.preparedDevice === engine.device) {
-      if (refresh) {this.defaultFont = this.fontOwner.prepare(true); setGuiMeasureFont(this, this.defaultFont); this.needsRebuild = true;}
+      if (refresh) {this.defaultFont = this.fontOwner.prepare(true,engine.device.limits?.maxTextureDimension2D); setGuiMeasureFont(this, this.defaultFont); this.needsRebuild = true;}
       return;
     }
     if (this.prepared) this.destroy();
@@ -120,7 +121,7 @@ export class GuiRenderer {
       this.shapeRenderer.prepare(engine);
       this.textRenderer.prepare(engine);
       this.imageRenderer.prepare(engine);
-      this.defaultFont = this.fontOwner.prepare();
+      this.defaultFont = this.fontOwner.prepare(false,engine.device.limits?.maxTextureDimension2D);
       setGuiMeasureFont(this, this.defaultFont);
       this.preparedDevice = engine.device;
       this.prepared = true;
@@ -537,6 +538,17 @@ export class GuiRenderer {
 
     if (input.focused && !input.disabled && !input.readOnly && font && !input.hasSelection && (input.isComposing||guiInputCaretVisible(input))) {
       const rect=presentation.caret;this.addRect(rect.x,rect.y,rect.width,rect.height,0.75,colorToRgba(theme.colors.text,theme.colors.text));
+    }
+    this.currentClip=previousClip;this.currentClip=this.clipRect(input.rect);
+    const {counter,eye}=presentation.adornments;
+    if(counter)this.currentTextBatch.addText({text:counter.text,...counter.rect,fontSize:counter.fontSize,color:colorToRgba(input.value.length>=input.maxLength?theme.colors.primary:theme.colors.textMuted,theme.colors.textMuted),clip:this.currentClip,verticalAlign:'top'});
+    if(eye&&eye.width>0){
+      const cx=eye.x+eye.width/2,cy=eye.y+eye.height/2,ink=colorToRgba(theme.colors.textMuted,theme.colors.textMuted),surface=colorToRgba(input.style.backgroundColor,theme.colors.surface);
+      const scale=Math.min(1,eye.width/24),w=20*scale,h=12*scale;
+      this.addRect(cx-w/2,cy-h/2,w,h,h/2,ink);
+      this.addRect(cx-w/2+1.5,cy-h/2+1.5,Math.max(0,w-3),Math.max(0,h-3),Math.max(0,h/2-1.5),surface);
+      this.addRect(cx-3*scale,cy-3*scale,6*scale,6*scale,3*scale,ink);
+      if(!guiPasswordRevealed(input))for(let i=-7;i<=7;i++)this.addRect(cx+i*scale-1,cy+i*.65*scale-1,2,2,1,ink);
     }
     this.currentClip=previousClip;
   }
