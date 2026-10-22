@@ -279,6 +279,9 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
         value: stringProp(props.value, ''),
         placeholder: stringProp(props.placeholder, ''),
         readOnly: booleanProp(props.readOnly, false),
+        ...(props.maxLength===undefined?{}:{maxLength:numberProp(props.maxLength,Infinity)}),
+        inputType:props.inputType==='email'||props.inputType==='number'||props.inputType==='password'?props.inputType:'text',
+        multiline:booleanProp(props.multiline,false),
       });
     case 'checkbox':
       return new GuiCheckbox({ ...base, checked: booleanProp(props.checked, false), label: stringProp(props.label, '') });
@@ -400,7 +403,7 @@ function serializeElementProps(element: GuiElement): Record<string, unknown> {
       autoWidth: element.autoWidth,
     };
   }
-  if (element instanceof GuiInput) return { value: element.value, placeholder: element.placeholder, readOnly: element.readOnly };
+  if (element instanceof GuiInput) return { value: element.value, placeholder: element.placeholder, readOnly: element.readOnly, ...(Number.isFinite(element.maxLength)?{maxLength:element.maxLength}:{}), inputType:element.inputType, multiline:element.multiline };
   if (element instanceof GuiSwitch) return { checked: element.checked, label: element.label, thumbTransitionMs: element.thumbTransitionMs, colorTransitionMs: element.colorTransitionMs };
   if (element instanceof GuiCheckbox) return { checked: element.checked, label: element.label };
   if (element instanceof GuiRadio) return { checked: element.checked, label: element.label, group: element.group, value: scalarProp(element.value, null) };
@@ -555,6 +558,18 @@ function validateProps(type: GuiSerializedElementType, value: unknown, path: str
   const props = recordAt(value, path);
   for (const [key, prop] of Object.entries(props)) {
     const propPath = `${path}.${key}`;
+    if(type==='input'&&key==='maxLength'){
+      if(typeof prop!=='number'||!Number.isSafeInteger(prop)||prop<0)invalidGuiData('GUI maxLength must be a nonnegative UTF-16 integer.',propPath);
+      continue;
+    }
+    if(type==='input'&&key==='inputType'){
+      if(prop!=='text'&&prop!=='email'&&prop!=='number'&&prop!=='password')invalidGuiData('Unknown GUI text input type.',propPath);
+      continue;
+    }
+    if(type==='input'&&key==='multiline'){
+      if(typeof prop!=='boolean')invalidGuiData('GUI multiline must be a boolean.',propPath);
+      continue;
+    }
     if (STRING_PROPS.has(key)) {
       if (key === 'sourceKey' && prop === null) continue;
       else if (typeof prop !== 'string') invalidGuiData(`GUI ${key} must be a string.`, propPath);

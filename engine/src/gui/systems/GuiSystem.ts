@@ -35,6 +35,12 @@ import type {GuiActionEvent} from '../GuiTypes';
 import {GuiInputDomain, type GuiInputParticipant} from '../input/GuiInputDomain';
 import {createGuiSyntheticPointer} from '../input/GuiActivation';
 import {guiInputProjection,guiInputPoint,guiInputHostRect} from '../input/GuiInputProjection';
+import type {GuiTextInputHost} from '../input/GuiTextInputHost';
+import {GuiTextInputConnection} from '../input/GuiTextInputConnection';
+import {GuiBrowserTextInputHost} from '../input/GuiBrowserTextInputHost';
+import {guiInputPresentation} from '../input/GuiInputPresentation';
+import {GuiCaretClock} from '../input/GuiCaretClock';
+import {GuiTextViewport} from '../input/GuiTextViewport';
 
 interface PendingGuiPointerEvent {
   type: 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel';
@@ -72,6 +78,9 @@ export interface GuiFontOptions {
 }
 
 export interface GuiSystemOptions {
+  /** Platform-owned responder. Named public host types are integrated by G13. */
+  textInputHost?:GuiTextInputHost|'browser';
+  onViewportInset?:(inset:{top:number;right:number;bottom:number;left:number})=>void;
   /** Bind UI action names through the same InputMap abstraction used by scene actions. */
   navigationMap?: InputMap;
   /** Explicit ownership when multiple GUI systems render independent regions/overlays in one World. */
@@ -125,6 +134,13 @@ export class GuiSystem extends System {
   private autoWidthKeys = new WeakMap<GuiLabel, string>();
   private motionFrames = new WeakMap<object, number>();
   private composing = false;
+  private compositionTarget:GuiInput|null=null;
+  private compositionGeneration=0;
+  private textConnection:GuiTextInputConnection|null=null;
+  private readonly textSubscriptions:(()=>void)[]=[];
+  private readonly caretClock=new GuiCaretClock(input=>this.focus.focused===input&&this.inputParticipant.enabled()&&this.validPointerTarget(input));
+  private textViewportInset={top:0,right:0,bottom:0,left:0};
+  private readonly textViewport=new GuiTextViewport();
   loadOp: 'clear' | 'load';
   readonly recoveryLabel: string;
   readonly recoverySource = { kind: 'render-system' as const, system: 'GuiSystem' as const };
@@ -140,6 +156,8 @@ export class GuiSystem extends System {
 
   constructor(engine: IEngine, options: GuiSystemOptions = {}) {
     super({ all: [GuiRoot] });
+    const browserDocument=engine.canvas?.ownerDocument??globalThis.document;
+    if(options.textInputHost==='browser'&&!browserDocument)throw new Error('Browser text input requires a DOM document; Native hosts must supply a platform responder.');
     this.name = 'GuiSystem';
     this.priority = 10000;
     this.engine = engine;
@@ -154,15 +172,17 @@ export class GuiSystem extends System {
     this.inputParticipant = {
       roots: () => this.inputRoots().map(root => root.root),
       enabled: () => !this.disabled && !this.disposed && !this.inputSuspended && !this.inputWorld?.disabled && (!this.region || !!getRenderRegionState(this.region)?.snapshot().visible),
-      keyboard: event => this.handleKeyboardEvent(event),
-      action: (action,source) => this.handleAction(action,source),
+      keyboard: event => {const result=this.handleKeyboardEvent(event);this.synchronizeTextInput();return result;},
+      action: (action,source) => {const result=this.handleAction(action,source);this.synchronizeTextInput();return result;},
       text: event => {
         if (!(this.focus.focused instanceof GuiInput)) return false;
         if (event.type === 'compositionstart') this.onCompositionStart();
+        else if (event.type === 'compositionupdate') this.onCompositionUpdate(event as CompositionEvent);
         else if (event.type === 'compositionend') this.onCompositionEnd(event as CompositionEvent);
         else if (event.type === 'copy') this.onCopy(event as ClipboardEvent);
         else if (event.type === 'cut') this.onCut(event as ClipboardEvent);
         else if (event.type === 'paste') this.onPaste(event as ClipboardEvent);
+        this.synchronizeTextInput();
         return true;
       },
       preventDefault: () => this.preventDefault,
@@ -174,8 +194,32 @@ export class GuiSystem extends System {
       valid: element => this.validPointerTarget(element),
       cancelPointer: id => this.cancelPointer(id),
       leavePointer: event => this.leavePointer(event),
+      ownsTextTarget:target=>this.textConnection?.ownsTarget(target)??false,
     };
     this.unregisterInput = this.inputDomain.register(this.inputParticipant);
+    if(options.textInputHost){
+      const host=options.textInputHost==='browser'?new GuiBrowserTextInputHost(browserDocument!,()=>engine.canvas?.focus({preventScroll:true}),()=>{const r=engine.canvas?.getBoundingClientRect();return r?{x:r.left,y:r.top,width:r.width,height:r.height}:{x:0,y:0,width:browserDocument!.defaultView!.innerWidth,height:browserDocument!.defaultView!.innerHeight};}):options.textInputHost;
+      this.textConnection=new GuiTextInputConnection(host,{
+        valid:target=>this.inputParticipant.enabled()&&this.validPointerTarget(target),
+        caretRect:target=>this.textCaretRect(target),
+        viewportInset:inset=>{this.textViewportInset={...inset};if(!inset.top&&!inset.right&&!inset.bottom&&!inset.left)this.textViewport.clear();this.textConnection?.target?.markDirty(GuiDirtyFlags.Input);options.onViewportInset?.(inset);},
+        blur:target=>{if(this.focus.focused===target)this.focus.blur();},
+        command:command=>{
+          const target=this.focus.focused;
+          if(!(target instanceof GuiInput))return;
+          if(command==='undo')target.undo();else if(command==='redo')target.redo();
+          else if(command==='left'||command==='right'||command==='extendLeft'||command==='extendRight')target.moveCaret(command==='left'||command==='extendLeft'?-1:1,command==='extendLeft'||command==='extendRight');
+          else if(command==='deleteBackward')target.deleteBackward();else if(command==='deleteForward')target.deleteForward();
+          else if(command==='submit')target.submit();else this.dispatchAction(command==='cancel'?'cancel':command,'keyboard');
+          this.synchronizeTextInput();
+        },
+      });
+    }
+    this.textSubscriptions.push(this.focus.subscribeBeforeBlur(()=>{
+      this.compositionTarget?.cancelComposition();this.compositionTarget=null;this.composing=false;
+      const target=this.textConnection?.target;
+      this.textConnection?.close(!!target&&this.inputParticipant.enabled()&&this.validPointerTarget(target));
+    }),this.focus.subscribe(()=>this.synchronizeTextInput()));
     this.recoveryLabel = `${this.name}:${this.id}`;
     this.unregisterRecovery = engine.registerDeviceRecoveryParticipant?.(this) ?? null;
     this.bindCanvas();
@@ -266,6 +310,9 @@ export class GuiSystem extends System {
   }
 
   override destroy(): this {
+    this.caretClock.stop();
+    for(const unsubscribe of this.textSubscriptions)unsubscribe();this.textSubscriptions.length=0;
+    this.textConnection?.dispose();this.textConnection=null;
     this.unregisterInput();
     this.unregisterRecovery?.();
     this.unbindCanvas();
@@ -356,7 +403,12 @@ export class GuiSystem extends System {
     if (this.disabled || this.disposed) return false;
     this.focus.reconcile();
     const focused = this.focus.focused;
-    if (focused instanceof GuiInput && (this.composing || event.isComposing)) return true;
+    if (focused instanceof GuiInput && (this.composing || focused.isComposing || event.isComposing)) return true;
+    if(focused instanceof GuiInput&&focused.multiline&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&(event.key==='ArrowUp'||event.key==='ArrowDown')){
+      const root=[...this.roots].find(root=>root.findById(focused.id)===focused),size=this.findThemeFontSize(focused);
+      const presentation=guiInputPresentation(focused,text=>this.renderer.measureTextWidth(text,size,root),size,this.renderer.measureTextLineHeight(size,root));
+      focused.setCaret(presentation.indexAt(presentation.caret.x,presentation.caret.y+(event.key==='ArrowUp'?-1:1)*presentation.lineHeight+presentation.lineHeight/2),event.shiftKey);return true;
+    }
     const code = event.code || (event.key === ' ' ? 'Space' : event.key);
     if (!event.ctrlKey && !event.metaKey && !event.altKey &&
         (!(focused instanceof GuiInput) || ['Tab', 'Escape', 'ArrowUp', 'ArrowDown'].includes(code))) {
@@ -376,15 +428,18 @@ export class GuiSystem extends System {
 
     if (shortcut) {
       const key = event.key.toLowerCase();
+      if(key==='z'){if(event.shiftKey)focused.redo();else focused.undo();return true;}
+      if(key==='y'){focused.redo();return true;}
       if (key === 'a') {
         focused.selectAll();
         return true;
       }
       if (key === 'c') {
-        void this.writeClipboard(focused.selectedText);
+          if(focused.inputType!=='password')void this.writeClipboard(focused.selectedText);
         return true;
       }
       if (key === 'x') {
+          if(focused.inputType==='password')return true;
         void this.writeClipboard(focused.selectedText);
         if (!focused.readOnly && focused.hasSelection) focused.deleteForward();
         return true;
@@ -392,7 +447,7 @@ export class GuiSystem extends System {
       if (key === 'v') {
         const generation = this.focus.generation;
         void this.readClipboard().then(text => {
-          if (text && this.focus.generation === generation && this.focus.focused === focused && !this.disposed) focused.insertText(text);
+            if (text && this.focus.generation === generation && this.focus.focused === focused && !focused.isComposing && !this.disposed){focused.insertText(text);this.synchronizeTextInput();}
         });
         return true;
       }
@@ -424,7 +479,7 @@ export class GuiSystem extends System {
       return true;
     }
     if (event.key === 'Enter') {
-      if (!event.repeat) focused.submit();
+      if(focused.multiline)focused.insertText('\n');else if (!event.repeat) focused.submit();
       return true;
     }
     if (event.key.length === 1) {
@@ -465,6 +520,10 @@ export class GuiSystem extends System {
   }
 
   private cancelInput(): void {
+    this.caretClock.stop();
+    this.textViewport.clear();
+    this.textConnection?.close(false);
+    this.compositionTarget?.cancelComposition();this.compositionTarget=null;
     for (const id of [...this.pointerStates.keys()]) this.cancelPointer(id);
     if (this.pressed) {this.pressed.pressed = false;this.pressed.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);}
     if (this.hovered) {this.hovered.hovered = false;this.hovered.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);}
@@ -491,20 +550,27 @@ export class GuiSystem extends System {
   }
 
   private onCompositionStart = (): void => {
+    const target=this.focus.focused;if(!(target instanceof GuiInput)||target.readOnly)return;
     this.composing = true;
+    this.compositionTarget=target;this.compositionGeneration=this.focus.generation;target.beginComposition();
+  };
+
+  private onCompositionUpdate = (event:CompositionEvent): void => {
+    if(this.compositionTarget&&this.focus.focused===this.compositionTarget&&this.focus.generation===this.compositionGeneration)this.compositionTarget.updateComposition(event.data??'');
   };
 
   private onCompositionEnd = (event: CompositionEvent): void => {
     this.composing = false;
-    const focused = this.focus.focused;
-    if (!(focused instanceof GuiInput) || focused.readOnly) return;
-    if (event.data) focused.insertText(event.data);
+    const focused=this.compositionTarget;this.compositionTarget=null;
+    if(!focused||this.focus.focused!==focused||this.focus.generation!==this.compositionGeneration){focused?.cancelComposition();return;}
+    if(event.data)focused.commitComposition(event.data);else focused.cancelComposition();
     if (this.preventDefault) event.preventDefault();
   };
 
   private onCopy = (event: ClipboardEvent): void => {
     const focused = this.focus.focused;
     if (!(focused instanceof GuiInput) || !focused.hasSelection) return;
+    if(focused.inputType==='password'){event.preventDefault();return;}
     event.clipboardData?.setData('text/plain', focused.selectedText);
     if (this.preventDefault) event.preventDefault();
   };
@@ -512,6 +578,7 @@ export class GuiSystem extends System {
   private onCut = (event: ClipboardEvent): void => {
     const focused = this.focus.focused;
     if (!(focused instanceof GuiInput) || !focused.hasSelection || focused.readOnly) return;
+    if(focused.inputType==='password'){event.preventDefault();return;}
     event.clipboardData?.setData('text/plain', focused.selectedText);
     focused.deleteForward();
     if (this.preventDefault) event.preventDefault();
@@ -620,7 +687,9 @@ export class GuiSystem extends System {
       if (stopping) { this.pressed = null; this.focus.blur(); this.updateHover(null, pending); return; }
       this.focus.focus(hit);
       if (hit) {
-        this.engine.canvas?.focus();
+        // A text responder already owns native focus. Focusing the canvas here
+        // would immediately blur and destroy the session just opened above.
+        if(!this.textConnection?.connected)this.engine.canvas?.focus();
         // Input may have completed before this frame drains its event queue.
         // Capturing an ended touch throws on Native and browsers alike.
         const latest = this.pending.findLast(event => event.native?.pointerId === native.pointerId);
@@ -665,14 +734,11 @@ export class GuiSystem extends System {
   private updateInputCaretFromPointer(input: GuiInput, pending: PendingGuiPointerEvent, extendSelection: boolean): void {
     const fontSize = this.findThemeFontSize(input);
     const root = [...this.roots].find(root => root.findById(input.id) === input);
-    const padding = input.style.padding ?? 8;
-    const index = input.getCaretIndexAt(
-      pending.x - input.rect.x,
-      text => this.renderer.measureTextWidth(text, fontSize, root),
-      padding,
-    );
+    const presentation=guiInputPresentation(input,text=>this.renderer.measureTextWidth(text,fontSize,root),fontSize,this.renderer.measureTextLineHeight(fontSize,root));
+    const index=presentation.indexAt(pending.x,pending.y);
     if (extendSelection) input.setCaret(index, true);
     else input.setSelection(index, index);
+    this.synchronizeTextInput();
   }
 
   private releasePointerCapture(pointerId: number): void {
@@ -859,6 +925,28 @@ export class GuiSystem extends System {
     }
     for (const root of previous) suspendGuiLayout(root.root);
     this.inputDomain.refresh();
+    this.synchronizeTextInput();
+  }
+
+  private synchronizeTextInput():void {
+    const target=this.focus.focused;
+    if(!(target instanceof GuiInput))this.textViewport.clear();
+    this.caretClock.synchronize(target instanceof GuiInput?target:null);
+    this.textConnection?.synchronize(target instanceof GuiInput&&this.inputParticipant.enabled()&&this.validPointerTarget(target)?target:null);
+  }
+  private textCaretRect(input:GuiInput){
+    const root=[...this.roots].find(root=>root.findById(input.id)===input),size=this.findThemeFontSize(input);
+    const presentation=()=>guiInputPresentation(input,text=>this.renderer.measureTextWidth(text,size,root),size,this.renderer.measureTextLineHeight(size,root));
+    let local=presentation().caret;
+    const projection=this.inputProjection(),canvas=this.engine.canvas;
+    if(!projection||!canvas)return local;
+    const rect=canvas.getBoundingClientRect(),inset=this.textViewportInset;
+    const left=rect.left+inset.left,top=rect.top+inset.top,right=rect.left+rect.width-inset.right,bottom=rect.top+rect.height-inset.bottom;
+    const toLocal=(x:number,y:number)=>guiInputPoint(x,y,{x:rect.left,y:rect.top,width:rect.width,height:rect.height},projection);
+    const a=toLocal(left,top),b=toLocal(right,bottom);
+    if(a&&b){this.textViewport.reveal(input,local,{x:a.x,y:a.y,width:Math.max(0,b.x-a.x),height:Math.max(0,b.y-a.y)});local=presentation().caret;}
+    const host=guiInputHostRect(local,projection);
+    return {x:rect.left+host.x*rect.width/projection.hostWidth,y:rect.top+host.y*rect.height/projection.hostHeight,width:host.width*rect.width/projection.hostWidth,height:host.height*rect.height/projection.hostHeight};
   }
 
   private inputRoots(): GuiRoot[] {

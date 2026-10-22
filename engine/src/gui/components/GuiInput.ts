@@ -1,11 +1,18 @@
 import { GuiDirtyFlags, GuiElementOptions, GuiPointerEvent, GuiValueChangeHandler } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
 import type {GuiActionEvent} from '../GuiTypes';
+import {GuiTextBuffer} from '../input/GuiTextBuffer';
+import {guiGraphemeBoundaries,guiSnapIndex} from '../input/GuiGraphemes';
+import {resetGuiInputCaret} from '../input/GuiInputPresentation';
 
 export interface GuiInputOptions extends GuiElementOptions {
   value?: string;
   placeholder?: string;
   readOnly?: boolean;
+  /** UTF-16 ceiling; truncation never divides an extended grapheme. */
+  maxLength?: number;
+  inputType?: 'text'|'email'|'number'|'password';
+  multiline?: boolean;
   onChange?: GuiValueChangeHandler<string>;
   onSubmit?: GuiValueChangeHandler<string>;
 }
@@ -18,28 +25,52 @@ export class GuiInput extends GuiElement {
   override handleAction(event: GuiActionEvent): void {
     super.handleAction(event);
     if (event.consumed) return;
+    if(this.isComposing){if(event.action==='cancel')this.cancelComposition();event.consume();return;}
     if (event.action === 'left' || event.action === 'right') {
       this.moveCaret(event.action === 'left' ? -1 : 1); event.consume();
     } else if (event.action === 'confirm') { this.submit(); event.consume(); }
   }
-  value: string;
+  private readonly buffer: GuiTextBuffer;
+  get value():string{return this.buffer.value;}
+  set value(value:string){this.setValue(value);}
   placeholder: string;
   readOnly: boolean;
-  caretIndex: number;
-  selectionAnchor: number;
-  selectionFocus: number;
+  get caretIndex():number{return this.buffer.caret;}
+  set caretIndex(index:number){this.setCaret(index);}
+  get selectionAnchor():number{return this.buffer.selectionAnchor;}
+  set selectionAnchor(index:number){this.setSelection(index,this.selectionFocus);}
+  get selectionFocus():number{return this.buffer.selectionFocus;}
+  set selectionFocus(index:number){this.setSelection(this.selectionAnchor,index);}
+  get maxLength():number{return this.buffer.maxLength;}
+  set maxLength(value:number){this.edit(()=>this.buffer.setLimit(value),false);}
+  readonly inputType:'text'|'email'|'number'|'password';
+  readonly multiline:boolean;
+  get isComposing():boolean{return this.buffer.composing;}
+  get composition(){return this.buffer.composition;}
+  get displayValue():string{
+    const text=this.buffer.displayValue;if(this.inputType!=='password')return text;
+    const boundaries=guiGraphemeBoundaries(text);
+    return boundaries.slice(1).map((end,index)=>this.multiline&&/^[\r\n]+$/u.test(text.slice(boundaries[index],end))?'\n':'•').join('');
+  }
+  get displayCaretIndex():number{return this.displayIndex(this.buffer.displayCaret);}
+  get displaySelectionStart():number{return this.displayIndex(this.selectionStart);}
+  get displaySelectionEnd():number{return this.displayIndex(this.selectionEnd,true);}
+  get displayCompositionRange():readonly [number,number]|null {
+    const composition=this.buffer.composition;
+    return composition?[this.displayIndex(composition.startUtf16),this.displayIndex(composition.startUtf16+composition.text.length,true)]:null;
+  }
+  get canUndo():boolean{return this.buffer.canUndo;}
+  get canRedo():boolean{return this.buffer.canRedo;}
   selecting = false;
   onChange: GuiValueChangeHandler<string> | null;
   onSubmit: GuiValueChangeHandler<string> | null;
 
   constructor(options: GuiInputOptions = {}) {
     super({ width: 180, height: 32, focus: {mode: 'all'}, ...options });
-    this.value = options.value ?? '';
+    this.buffer = new GuiTextBuffer(options.value??'',options.maxLength??Infinity);
     this.placeholder = options.placeholder ?? '';
     this.readOnly = options.readOnly ?? false;
-    this.caretIndex = this.value.length;
-    this.selectionAnchor = this.caretIndex;
-    this.selectionFocus = this.caretIndex;
+    this.inputType=options.inputType??'text';this.multiline=options.multiline??false;
     this.onChange = options.onChange ?? null;
     this.onSubmit = options.onSubmit ?? null;
   }
@@ -61,76 +92,35 @@ export class GuiInput extends GuiElement {
   }
 
   setValue(value: string, emit = false): void {
-    if (this.value === value) return;
-    this.value = value;
-    this.caretIndex = Math.min(this.caretIndex, this.value.length);
-    this.setSelection(this.caretIndex, this.caretIndex, false);
-    this.markDirty(GuiDirtyFlags.Text | GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
-    if (emit) this.onChange?.(value);
+    this.edit(()=>this.buffer.setValue(value),emit);
   }
 
   insertText(text: string): void {
     if (this.disabled || this.readOnly || !text) return;
-    const [start, end] = this.getEditRange();
-    const next = this.value.slice(0, start) + text + this.value.slice(end);
-    this.caretIndex = start + text.length;
-    this.setValue(next, true);
+    this.edit(()=>this.buffer.insert(text));
   }
 
   deleteBackward(): void {
     if (this.disabled || this.readOnly) return;
-    const [start, end] = this.hasSelection
-      ? this.getEditRange()
-      : [Math.max(0, this.caretIndex - 1), this.caretIndex];
-    if (start === end) return;
-    const next = this.value.slice(0, start) + this.value.slice(end);
-    this.caretIndex = start;
-    this.setValue(next, true);
+    this.edit(()=>this.buffer.delete(true));
   }
 
   deleteForward(): void {
     if (this.disabled || this.readOnly) return;
-    const [start, end] = this.hasSelection
-      ? this.getEditRange()
-      : [this.caretIndex, Math.min(this.value.length, this.caretIndex + 1)];
-    if (start === end) return;
-    const next = this.value.slice(0, start) + this.value.slice(end);
-    this.caretIndex = start;
-    this.setValue(next, true);
+    this.edit(()=>this.buffer.delete(false));
   }
 
   moveCaret(delta: number, extendSelection = false): void {
-    const next = Math.max(0, Math.min(this.value.length, this.caretIndex + delta));
-    if (next === this.caretIndex && !extendSelection) return;
-    this.caretIndex = next;
-    if (extendSelection) {
-      this.selectionFocus = next;
-    } else {
-      this.setSelection(next, next, false);
-    }
-    this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
+    this.edit(()=>this.buffer.move(delta,extendSelection),false);
   }
 
   setCaret(index: number, extendSelection = false): void {
-    const next = Math.max(0, Math.min(this.value.length, index));
-    if (next === this.caretIndex && !extendSelection) return;
-    this.caretIndex = next;
-    if (extendSelection) {
-      this.selectionFocus = next;
-    } else {
-      this.setSelection(next, next, false);
-    }
-    this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
+    this.edit(()=>this.buffer.setCaret(index,extendSelection),false);
   }
 
   setSelection(anchor: number, focus: number, markDirty = true): void {
-    const nextAnchor = Math.max(0, Math.min(this.value.length, anchor));
-    const nextFocus = Math.max(0, Math.min(this.value.length, focus));
-    const changed = this.selectionAnchor !== nextAnchor || this.selectionFocus !== nextFocus;
-    this.selectionAnchor = nextAnchor;
-    this.selectionFocus = nextFocus;
-    this.caretIndex = nextFocus;
-    if (changed && markDirty) this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
+    if(markDirty)this.edit(()=>this.buffer.select(anchor,focus),false);
+    else this.buffer.select(anchor,focus);
   }
 
   selectAll(): void {
@@ -144,10 +134,12 @@ export class GuiInput extends GuiElement {
   getCaretIndexAt(localX: number, measureTextWidth: (text: string) => number, padding = this.style.padding ?? 8): number {
     const x = Math.max(0, localX - padding);
     if (x <= 0) return 0;
-    for (let i = 1; i <= this.value.length; i++) {
-      const prev = measureTextWidth(this.value.slice(0, i - 1));
-      const next = measureTextWidth(this.value.slice(0, i));
-      if (x < (prev + next) * 0.5) return i - 1;
+    const boundaries=this.buffer.graphemeBoundaries;
+    for (let i = 1; i < boundaries.length; i++) {
+      const before=boundaries[i-1]!,after=boundaries[i]!;
+      const prev = measureTextWidth(this.inputType==='password'?'•'.repeat(i-1):this.value.slice(0, before).replace(/\r\n|\r|\n/gu,' '));
+      const next = measureTextWidth(this.inputType==='password'?'•'.repeat(i):this.value.slice(0, after).replace(/\r\n|\r|\n/gu,' '));
+      if (x < (prev + next) * 0.5) return before;
     }
     return this.value.length;
   }
@@ -172,7 +164,35 @@ export class GuiInput extends GuiElement {
     this.selecting = false;
   }
 
-  private getEditRange(): [number, number] {
-    return this.hasSelection ? [this.selectionStart, this.selectionEnd] : [this.caretIndex, this.caretIndex];
+  replaceText(startUtf16:number,endUtf16:number,text:string,selectionUtf16?:readonly [number,number]):void {
+    if(this.disabled||this.readOnly)return;
+    this.edit(()=>{if(this.buffer.replace(startUtf16,endUtf16,text)&&selectionUtf16)this.buffer.select(...selectionUtf16);});
+  }
+  beginComposition():void {if(!this.disabled&&!this.readOnly)this.edit(()=>this.buffer.beginComposition(),false);}
+  updateComposition(text:string,selectionUtf16?:readonly [number,number]):void {
+    if(!this.disabled&&!this.readOnly)this.edit(()=>this.buffer.updateComposition(text,selectionUtf16),false);
+  }
+  commitComposition(text?:string):void {
+    if(this.disabled||this.readOnly){this.cancelComposition();return;}
+    this.edit(()=>this.buffer.commitComposition(text));
+  }
+  cancelComposition():void {this.edit(()=>this.buffer.cancelComposition(),false);}
+  undo():void {if(!this.disabled&&!this.readOnly)this.edit(()=>this.buffer.undo());}
+  redo():void {if(!this.disabled&&!this.readOnly)this.edit(()=>this.buffer.redo());}
+  override handleFocus():void {resetGuiInputCaret(this);super.handleFocus();}
+  override handleBlur():void {this.cancelComposition();this.selecting=false;resetGuiInputCaret(this);super.handleBlur();}
+
+  private displayIndex(index:number,forward=false):number {
+    const boundaries=guiGraphemeBoundaries(this.buffer.displayValue),offset=guiSnapIndex(boundaries,index,forward);
+    return this.inputType==='password'?boundaries.indexOf(offset):offset;
+  }
+
+  private edit(operation:()=>void,emit=true):void {
+    const before=this.buffer.value,beforeDisplay=this.buffer.displayValue,revision=this.buffer.revision;
+    operation();if(revision===this.buffer.revision)return;
+    resetGuiInputCaret(this);
+    const changed=before!==this.buffer.value;
+    this.markDirty(GuiDirtyFlags.Visual|GuiDirtyFlags.Input|((changed||beforeDisplay!==this.buffer.displayValue)?GuiDirtyFlags.Text:0));
+    if(changed&&emit)this.onChange?.(this.buffer.value);
   }
 }

@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 1,
+  "goal": "g06-text-input",
+  "status": "active",
+  "generatedAt": "2026-10-22T00:30:16.416624+00:00",
+  "problem": "UTF-16 unit deletion split emoji; preedit and committed state needed separate ownership, and DOM line sanitization changed native indices.",
+  "method": "Pinned Unicode 15.1 extended graphemes; UTF-16/native coordinate projection; generation-owned host sessions; shared caret/render/scroll geometry and phase-only invalidation; UIKit transport outside Engine.",
+  "conclusion": "Current automated correctness and source/package checks pass. Real desktop IME, Xcode compilation and physical iPhone acceptance remain pending.",
+  "fullG06Complete": false,
+  "realDesktopImeVerified": false,
+  "realIosKeyboardVerified": false,
+  "unicode": {
+    "version": "15.1.0",
+    "uax29Revision": 43,
+    "officialCases": 1187,
+    "storedIndexUnit": "UTF-16",
+    "insideClusterIndex": "clamp then backward snap",
+    "selection": "expand low backward and high forward, preserve reverse direction",
+    "historyEntries": 128
+  },
+  "proofs": {
+    "global": {
+      "path": "artifacts/engine-0.2.2/g06/global-20261022T001707Z/result.json",
+      "sha256": "5ca951b0c9b9911dfa89798ac5977a3d1c766957f11c5a3b02b66e458eb706d7",
+      "testsPassed": 1974,
+      "checksPassed": 12
+    },
+    "browserWebGpu": {
+      "path": "artifacts/engine-0.2.2/g06/native-20261022T001540Z/result.json",
+      "sha256": "fbdd87b497185ea495f7ae7987569b6fee9d4e2307deb52ed40476f2afe68a6d",
+      "casesPassed": 214,
+      "qualification": "CDP/native browser correctness, including synthetic IME/clipboard; not human IME or UIKit device proof."
+    },
+    "focused": {
+      "path": "artifacts/engine-0.2.2/g06/gui-tests.log",
+      "sha256": "a20777b7ba11b0e53470e44019d544cdd99a0fc8a714e0284f217afd2b6153e9",
+      "testsPassed": 169
+    },
+    "nativeLogic": {
+      "path": "artifacts/engine-0.2.2/g06/native-all-tests.log",
+      "sha256": "c4b529fbb21d993307f00bf0a1face1ca525473235e8c47639a29253a1681832",
+      "tests": 162,
+      "pass": 160,
+      "skipped": 2,
+      "qualification": "Node logic/transport/launcher tests, not a native phone build."
+    },
+    "iosSdkStatic": {
+      "path": "artifacts/engine-0.2.2/g06/native-ios-example-static.json",
+      "sha256": "0feb19831e564078c99bcfcfa822e5334b703b683aad8edc81f80cefd025d9f4",
+      "compiler": "5.7.3",
+      "qualification": "Static SDK declaration check only. Not an Xcode build or physical iPhone verification."
+    },
+    "iphoneCandidate": {
+      "path": "artifacts/engine-0.2.2/g06/iphone-candidate-20261022T0032Z.zip",
+      "sha256": "d42798fa1d260aeea1c3cf580299188c92c144a580024dc863504108c330975b",
+      "candidateId": "8c4587ae58b3b036ddd9a299ccb682817227a02b1dc7c693dbaf836500b7a291",
+      "filesReadbackVerified": 51,
+      "status": "pending-mac-build-and-device-acceptance"
+    },
+    "deviceAvailability": {
+      "path": "artifacts/engine-0.2.2/g06/device-availability.json",
+      "sha256": "246d4ab1264419a0deefad105dfe069e071592990adfa318e24419625d539b00"
+    },
+    "g05OriginalSummary": {
+      "path": "artifacts/engine-0.2.2/g06/g05-qualified-summary.md",
+      "sha256": "e98cf8d381055ca6f49824123714a4ce526fc87e9f169cd3f24c413484b3508d"
+    },
+    "unicodeNotice": {
+      "path": "review/engine-0.2.2/UNICODE-LICENSE.txt",
+      "sha256": "e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96"
+    }
+  },
+  "boundaries": [
+    "Browser-native input is opt-in with textInputHost: browser; existing Canvas behavior remains the default.",
+    "Native iOS owns UIKit/keyboard APIs; Engine contains no Native SDK imports.",
+    "RTL is logical text/grapheme editing; complete bidirectional layout and shaping are not added.",
+    "Keyboard reveal uses existing scroll containers and field scrolling; fixed custom layouts must respond to surface-relative inset notifications.",
+    "G13 owns formal named exports, public package integration and inclusion of the full Unicode notice inside the future npm package. The private transfer includes the associated notice.",
+    "No formal performance, release or physical-device qualification is inferred from these correctness checks."
+  ],
+  "remaining": [
+    "Mac browser real IME preview/commit/cancel, candidate position and human observation",
+    "Actual Xcode/environment inventory and native build",
+    "Physical iPhone keyboard types, clipboard, selection, rotation/insets, pause/resume and cleanup",
+    "Original-requirement audit and final archive after actual device evidence"
+  ],
+  "originalEvidenceRetained": true,
+  "baselinePromoted": false,
+  "published": false,
+  "requirementAudit": {
+    "auditedAt": "2026-10-22T00:31:30.667768+00:00",
+    "status": "incomplete-real-host-evidence-required",
+    "sourceRequirements": [
+      {
+        "path": "D:\\HaiyueStudio\\milestones\\milestones\\m23-engine-0.2.2\\goals\\g06-text-input.md",
+        "sha256": "2c48002130fcd708457879799ea611aa01d4449ada648668985b27b0d3cbdd95"
+      },
+      {
+        "path": "D:\\HaiyueStudio\\Engine\\config\\layout-022-contract.json",
+        "sha256": "5d2888507a4fa0e511fffbd20ca08b5ca31cd8d9c3e1249dcd08d153ed559d05"
+      }
+    ],
+    "allExistingProofHashesRechecked": true,
+    "currentGlobalSourceFingerprintsRechecked": true,
+    "currentStaticInputsRechecked": true,
+    "items": [
+      {
+        "id": "unicode-regression",
+        "requirement": "复现 A😀B 孤立代理项；按 Unicode 15.1 扩展字素删除和移动",
+        "status": "automated-proven",
+        "evidence": [
+          "artifacts/engine-0.2.2/g06/unicode-before.json",
+          "engine/test/gui-unicode-editing.test.mjs",
+          "proofs.focused",
+          "proofs.browserWebGpu"
+        ]
+      },
+      {
+        "id": "utf16-compatibility",
+        "requirement": "UTF-16 索引吸附、正反选区扩展、替换、长度限制、撤销及取消",
+        "status": "automated-proven",
+        "evidence": [
+          "engine/test/gui-unicode-editing.test.mjs",
+          "engine/test/gui-text-host.test.mjs",
+          "proofs.focused"
+        ]
+      },
+      {
+        "id": "required-corpus",
+        "requirement": "emoji、组合附加符、ZWJ、中文及逻辑 RTL；不扩大到完整双向字形排版",
+        "status": "automated-proven",
+        "evidence": [
+          "engine/test/gui-unicode-editing.test.mjs",
+          "proofs.focused"
+        ]
+      },
+      {
+        "id": "composition-ownership",
+        "requirement": "预编辑与提交分离、只提交一次、取消恢复、失焦确认及迟到回调隔离",
+        "status": "automated-proven",
+        "evidence": [
+          "engine/test/gui-text-host.test.mjs",
+          "../Native/test/gui-text-input.test.mjs",
+          "proofs.focused",
+          "proofs.nativeLogic"
+        ]
+      },
+      {
+        "id": "unified-host",
+        "requirement": "统一输入桥；Engine 不引入平台 SDK；Native 实现 UIKit responder、输入类型和候选矩形",
+        "status": "implemented-static-and-logic-proven-device-pending",
+        "evidence": [
+          "proofs.global",
+          "proofs.iosSdkStatic",
+          "../Native/bridge/input/text-input.ios.ts"
+        ],
+        "remainingEvidence": [
+          "Xcode build output",
+          "actual first-responder and keyboard type observations on iPhone"
+        ]
+      },
+      {
+        "id": "desktop-ime",
+        "requirement": "真实浏览器 IME 预编辑、提交、取消、无重复及候选位置",
+        "status": "missing-human-evidence",
+        "evidence": [
+          "proofs.browserWebGpu"
+        ],
+        "remainingEvidence": [
+          "Mac browser/version and real IME source",
+          "saved browser checkpoint JSON",
+          "human observations of preview/commit/cancel and candidate position; CDP synthetic events do not qualify"
+        ]
+      },
+      {
+        "id": "ios-editing",
+        "requirement": "物理 iPhone 的 Chinese/Latin/emoji、原生选择及系统剪贴板闭环",
+        "status": "missing-device-evidence",
+        "evidence": [
+          "proofs.iphoneCandidate",
+          "proofs.iosSdkStatic"
+        ],
+        "remainingEvidence": [
+          "Xcode build log linked to candidateId",
+          "g06-text-input.jsonl and g06-host.jsonl",
+          "human observations of actual keyboard/clipboard and edit results"
+        ]
+      },
+      {
+        "id": "caret-insets",
+        "requirement": "caret 经宿主坐标映射、键盘遮挡与安全区，当前编辑位置可见",
+        "status": "geometry-automated-device-pending",
+        "evidence": [
+          "engine/test/gui-text-presentation.test.mjs",
+          "proofs.focused",
+          "proofs.browserWebGpu"
+        ],
+        "remainingEvidence": [
+          "physical iPhone candidate/caret visibility with keyboard shown and hidden",
+          "portrait and landscape safe-area observations"
+        ]
+      },
+      {
+        "id": "lifecycle",
+        "requirement": "输入框切换、横竖屏、预编辑期间暂停恢复、失焦及销毁不静默提交",
+        "status": "model-automated-device-pending",
+        "evidence": [
+          "engine/test/gui-text-host.test.mjs",
+          "../Native/test/gui-text-input.test.mjs",
+          "proofs.nativeLogic"
+        ],
+        "remainingEvidence": [
+          "physical rotation, keyboard toggles, A/B focus transfer and background/resume logs and observations"
+        ]
+      },
+      {
+        "id": "demand-invalidation",
+        "requirement": "预编辑及光标相位按需失效；停止或销毁后无定时器/监听/桥接残留",
+        "status": "browser-and-model-proven-device-pending",
+        "evidence": [
+          "engine/test/gui-text-presentation.test.mjs",
+          "proofs.browserWebGpu",
+          "proofs.nativeLogic"
+        ],
+        "remainingEvidence": [
+          "native End action disposal records: responderCount=0, firstResponder=false, observerCount=0, disposed=true",
+          "host cleanup records; counters alone do not prove unobserved native resources"
+        ]
+      },
+      {
+        "id": "environment",
+        "requirement": "保存真实设备与宿主版本，而非仅用户报告版本",
+        "status": "missing-preflight-and-runtime-evidence",
+        "evidence": [
+          "proofs.deviceAvailability"
+        ],
+        "remainingEvidence": [
+          "Mac preflight.json and devices.json",
+          "runtime environment event with iPhone model/OS and candidateId"
+        ]
+      },
+      {
+        "id": "g13-handoff",
+        "requirement": "公共具名入口、正式打包许可通知及整版性能由 G13 集成",
+        "status": "assigned-integration-pending",
+        "evidence": [
+          "boundaries",
+          "review/engine-0.2.2/UNICODE-LICENSE.txt"
+        ],
+        "remainingEvidence": [
+          "G13 formal package/export/notice and combined qualification"
+        ]
+      }
+    ],
+    "completionRule": "Every G06 original requirement needs evidence at its own scope. Synthetic/browser/model/static results do not qualify physical UIKit or human IME. G13 responsibilities remain explicit."
+  }
+}

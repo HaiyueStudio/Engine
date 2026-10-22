@@ -11,11 +11,15 @@ export class GuiFocusManager {
   private roots: readonly GuiElement[] | null = null;
   private modals: {modal: GuiModal; previous: GuiElement | null}[] = [];
   private revision = 0;
+  private readonly changes=new Set<()=>void>();
+  private readonly beforeBlur=new Set<()=>void>();
   private rectFor: (element: GuiElement) => Readonly<GuiRect> = element => element.rect;
 
   get focused(): GuiElement | null { return this.current; }
   get generation(): number { return this.revision; }
   get modal(): GuiModal | null { return this.modals.at(-1)?.modal ?? null; }
+  subscribe(changed:()=>void):()=>void {this.changes.add(changed);return ()=>{this.changes.delete(changed);};}
+  subscribeBeforeBlur(changed:()=>void):()=>void {this.beforeBlur.add(changed);return ()=>{this.beforeBlur.delete(changed);};}
 
   setRoots(roots: Iterable<GuiElement>, rectFor?: (element: GuiElement) => Readonly<GuiRect>): void {
     this.roots = [...roots];
@@ -50,11 +54,13 @@ export class GuiFocusManager {
     if (element && !this.eligible(element)) return;
     if (this.current === element) return;
     const ticket = ++this.revision, previous = this.current;
+    for(const listener of [...this.beforeBlur]){listener();if(ticket!==this.revision)return;}
     this.current = null;
     previous?.handleBlur();
     if (ticket !== this.revision) return;
     this.current = element;
     element?.handleFocus();
+    if(ticket===this.revision)for(const listener of [...this.changes])listener();
   }
 
   blur(): void { this.focus(null); }
@@ -90,7 +96,7 @@ export class GuiFocusManager {
     return target;
   }
 
-  dispose(): void { this.blur(); this.modals = []; this.roots = []; }
+  dispose(): void { this.blur(); this.modals = []; this.roots = []; this.changes.clear();this.beforeBlur.clear(); }
 
   private active(node: GuiElement): boolean { return node.visible && !node.disabled && !isGuiLayoutHidden(node); }
   private eligible(node: GuiElement | null): node is GuiElement {

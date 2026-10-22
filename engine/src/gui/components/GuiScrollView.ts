@@ -2,6 +2,7 @@ import { GuiElement } from './GuiElement';
 import type {GuiActionEvent} from '../GuiTypes';
 import { GuiDirtyFlags, type GuiElementOptions, type GuiRect } from '../GuiTypes';
 import {guiLayoutContentHeight, notifyGuiActivity, registerGuiScrollOffset} from '../GuiLayoutState';
+import {guiScrollOcclusion} from '../input/GuiScrollViewportState';
 
 export interface GuiScrollViewOptions extends GuiElementOptions {
   contentHeight?: number;
@@ -48,7 +49,7 @@ export class GuiScrollView extends GuiElement {
     return this.offset;
   }
   get maxScrollY(): number {
-    return Math.max(0, this.contentHeight - this.rect.height);
+    return Math.max(0, this.contentHeight - Math.max(0,this.rect.height-guiScrollOcclusion(this)));
   }
   setContentHeight(height: number): void {
     const value = Number.isFinite(height) ? Math.max(0, height) : 0;

@@ -7,6 +7,7 @@ import { createCatalog, defaults, normalize, previewStyle, type Parameter, type 
 import {attachGuiLayout} from '@haiyue/extensions/gui-layout';
 import {populateLayoutDemo} from './layout-demo';
 import {attachInputNavigation} from './input-navigation';
+import {attachTextEditing} from './text-editing';
 
 const colors = { panel: '#111c30', border: '#26354d', muted: '#91a3bd', accent: '#7dd3fc' };
 const label = (parent: GuiElement, text: string, x: number, y: number, width: number, fontSize = 14, color = colors.muted) =>
@@ -31,7 +32,8 @@ async function main(): Promise<void> {
   try {
     await engine.init();
     if (disposed) return;
-    const scene = engine.createScene({ name: 'gui-runtime', render3D: false, gui: { loadOp: 'clear' }, pipelineLabel: 'GuiPlaygroundRenderPipeline' });
+    const textWorkflow=new URLSearchParams(location.search).has('text-input');
+    const scene = engine.createScene({ name: 'gui-runtime', render3D: false, gui: { loadOp: 'clear',...(textWorkflow?{textInputHost:'browser' as const,font:{chars:'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 中文你好取消提交A😀Bé👩🏽‍💻•/():;,.?!-_|',fontFamily:'sans-serif'}}:{}) }, pipelineLabel: 'GuiPlaygroundRenderPipeline' });
     const root = new GuiRoot();
     const layoutBinding = attachGuiLayout(root);
     detachLayout = () => layoutBinding.dispose();
@@ -39,6 +41,7 @@ async function main(): Promise<void> {
     entity.addComponent(root);
     scene.add(entity);
     engine.switchScene(scene);
+    if(textWorkflow){detachInput=attachTextEditing(engine,scene.guiSystem!,root);engine.run();status.hidden=true;canvas.dataset.ready='true';return;}
 
     const inputWorkflow=new URLSearchParams(location.search).has('input-navigation');
     detachInput=attachInputNavigation(engine,scene.guiSystem!,root,inputWorkflow);

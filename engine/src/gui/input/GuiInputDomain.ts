@@ -19,6 +19,7 @@ export interface GuiInputParticipant {
   valid(element: GuiElement): boolean;
   cancelPointer(id: number): void;
   leavePointer(event: PointerEvent): void;
+  ownsTextTarget?(target:EventTarget|null):boolean;
 }
 
 interface PointerOwner {participant: GuiInputParticipant | null; target: GuiElement | null; consumed: boolean; preventDefault: boolean;}
@@ -31,7 +32,7 @@ export class GuiInputDomain {
   private readonly participants = new Map<GuiInputParticipant, number>();
   private serial = 0;
   private listening = false;
-  private readonly textEvents = ['compositionstart','compositionend','copy','cut','paste'] as const;
+  private readonly textEvents = ['compositionstart','compositionupdate','compositionend','copy','cut','paste'] as const;
   private readonly pointerEvents = ['pointerdown','pointermove','pointerup','pointercancel'] as const;
   private readonly pointers = new Map<number,PointerOwner>();
   private readonly hovers = new Map<number,GuiInputParticipant>();
@@ -107,10 +108,15 @@ export class GuiInputDomain {
   private onKeyDown = (event: KeyboardEvent): void => {
     this.refresh();
     const active = this.ordered(), owner = this.owner(this.focus.focused, active) ?? active.at(-1);
-    if (owner?.keyboard(event) || this.focus.modal) {consumeInputEvent(event);if(owner?.preventDefault())event.preventDefault();}
+    if (owner?.keyboard(event) || this.focus.modal) {
+      consumeInputEvent(event);
+      const focused=this.focus.focused,preedit=focused&&'isComposing' in focused&&focused.isComposing===true;
+      if(owner?.preventDefault()&&!event.isComposing&&!preedit)event.preventDefault();
+    }
     else this.emitUnhandled(event);
   };
-  private onBlur = (): void => {
+  private onBlur = (event?:Event): void => {
+    if(event?.currentTarget===this.surface&&[...this.participants.keys()].some(p=>p.ownsTextTarget?.((event as FocusEvent).relatedTarget)))return;
     for (const participant of this.participants.keys()) participant.cancel();
     for (const [id,state] of this.pointers) if (!state.consumed) this.emitUnhandled(createGuiSyntheticPointer('pointercancel',id));
     for(const state of this.pointers.values()){state.participant=null;state.target=null;state.consumed=true;}

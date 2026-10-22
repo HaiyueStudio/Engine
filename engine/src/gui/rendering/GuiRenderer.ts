@@ -33,6 +33,7 @@ import {isGuiLayoutHidden, isGuiLayoutManaged} from '../GuiLayoutState';
 import {GuiFontOwner, type GuiAtlasOptions} from '../GuiFontOwner';
 import type {GuiRenderSurface} from './GuiRenderSurface';
 import type {GuiImageSource} from '../components/GuiImage';
+import {guiInputPresentation,guiInputCaretVisible} from '../input/GuiInputPresentation';
 
 type GuiRendererFontOptions = GuiAtlasOptions;
 
@@ -146,6 +147,11 @@ export class GuiRenderer {
   measureTextWidth(text: string, fontSize: number, root?: GuiRoot): number {
     const font = root && this.prepared ? this.fontOwner.forRoot(root) : this.activeFont;
     return font ? measureGuiTextWidth(text, font, fontSize) : text.length * fontSize * 0.55;
+  }
+
+  measureTextLineHeight(fontSize:number,root?:GuiRoot):number {
+    const font=root&&this.prepared?this.fontOwner.forRoot(root):this.activeFont;
+    return font?font.lineHeight/font.size*fontSize:fontSize*1.2;
   }
 
   markDirty(): void {
@@ -510,37 +516,29 @@ export class GuiRenderer {
     this.addRect(input.rect.x, input.rect.y, input.rect.width, input.rect.height, radius, border);
     this.addRect(input.rect.x + 1, input.rect.y + 1, input.rect.width - 2, input.rect.height - 2, Math.max(0, radius - 1), withAlpha(colorToRgba(input.style.backgroundColor, theme.colors.surface), input.disabled ? 0.45 : 1));
 
-    const padding = input.style.padding ?? 8;
-    const text = input.value || input.placeholder;
-    const color = input.value
+    const presentation=guiInputPresentation(input,text=>this.measureTextWidth(text,theme.fontSize),theme.fontSize,this.measureTextLineHeight(theme.fontSize));
+    const previousClip=this.currentClip;this.currentClip=this.clipRect(presentation.clip);
+    const color = input.displayValue
       ? colorToRgba(theme.colors.text, theme.colors.text)
       : colorToRgba(theme.colors.textMuted, theme.colors.textMuted);
 
-    if (input.focused && input.hasSelection && input.value && font) {
-      const selectionStartX = measureGuiTextWidth(input.value.slice(0, input.selectionStart), font, theme.fontSize);
-      const selectionEndX = measureGuiTextWidth(input.value.slice(0, input.selectionEnd), font, theme.fontSize);
-      const x = input.rect.x + padding + selectionStartX;
-      const maxWidth = Math.max(0, input.rect.x + input.rect.width - padding - x);
-      const width = Math.min(Math.max(1, selectionEndX - selectionStartX), maxWidth);
-      if (width > 0) {
-        this.addRect(
-          x,
-          input.rect.y + 5,
-          width,
-          Math.max(10, input.rect.height - 10),
-          2,
-          withAlpha(colorToRgba(theme.colors.primary, theme.colors.primary), 0.42),
-        );
-      }
+    if (input.focused && input.hasSelection && input.value && font && !input.isComposing) {
+      for(const rect of presentation.ranges(input.displaySelectionStart,input.displaySelectionEnd))this.addRect(rect.x,rect.y,rect.width,rect.height,2,withAlpha(colorToRgba(theme.colors.primary,theme.colors.primary),0.42));
     }
 
-    this.addText(text, input.rect.x + padding, input.rect.y, input.rect.width - padding * 2, input.rect.height, theme.fontSize, color, true);
+    const lines=input.displayValue?presentation.lines:input.multiline?input.placeholder.split('\n'):[input.placeholder];
+    for(let row=0;row<lines.length;row++)this.currentTextBatch.addText({text:lines[row]!,x:presentation.origin.x,y:presentation.origin.y+(input.multiline?row*presentation.lineHeight:0),width:Math.max(presentation.clip.width,presentation.contentWidth+2),height:input.multiline?presentation.lineHeight:input.rect.height,fontSize:theme.fontSize,color,multiline:false,wrap:false,verticalAlign:input.multiline?'top':'center',clip:this.currentClip});
 
-    if (input.focused && !input.disabled && !input.readOnly && font) {
-      const beforeCaret = input.value.slice(0, input.selectionFocus);
-      const caretX = input.rect.x + padding + measureGuiTextWidth(beforeCaret, font, theme.fontSize);
-      this.addRect(caretX, input.rect.y + 7, 1.5, Math.max(10, input.rect.height - 14), 0.75, colorToRgba(theme.colors.text, theme.colors.text));
+    const composition=input.composition;
+    if(input.focused&&composition?.text&&font){
+      const range=input.displayCompositionRange!;
+      for(const rect of presentation.ranges(...range))this.addRect(rect.x,rect.y+rect.height-2,rect.width,1,0,colorToRgba(theme.colors.primary,theme.colors.primary));
     }
+
+    if (input.focused && !input.disabled && !input.readOnly && font && !input.hasSelection && (input.isComposing||guiInputCaretVisible(input))) {
+      const rect=presentation.caret;this.addRect(rect.x,rect.y,rect.width,rect.height,0.75,colorToRgba(theme.colors.text,theme.colors.text));
+    }
+    this.currentClip=previousClip;
   }
 
   private addSelect(select: GuiSelect, theme: GuiTheme): void {
