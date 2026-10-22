@@ -9,6 +9,7 @@ import { BaseRenderer } from '../../renderer/BaseRenderer';
 import type { PipelineWarmupPlan } from '../../renderer/PipelineWarmup';
 import { getBuiltin2dUiShader } from '../../shader/BuiltinRenderShader';
 import { GUI_TEXTURED_VERTEX_LAYOUT } from './GuiVertexLayout';
+import {guiImageSourceReady} from './GuiImageSources';
 
 interface ImageGpuData {
   texture: GPUTexture;
@@ -33,6 +34,7 @@ export class GuiImageRenderer extends BaseRenderer {
   private viewportVersion=0;
   private readonly viewportData = new Float32Array(4);
   private readonly groups=new Map<GuiImageBatch,Set<GuiImageGroup>>();
+  private readonly batchVersions=new Map<GuiImageBatch,number>();
   private readonly batchSources=new Map<GuiImageBatch,Set<NonNullable<GuiImageSource>>>();
   private readonly sourceUsers=new Map<NonNullable<GuiImageSource>,Set<GuiImageBatch>>();
   private imageCache = new WeakMap<object, ImageGpuData>();
@@ -85,10 +87,9 @@ export class GuiImageRenderer extends BaseRenderer {
     }
   }
 
-  render(passEncoder: GPURenderPassEncoder, batch: GuiImageBatch, context?:RenderCommandContext): void {
+  render(passEncoder: GPURenderPassEncoder, batch: GuiImageBatch, context?:RenderCommandContext, range?: {group: GuiImageGroup; first: number; count: number}): void {
     if (!this.initialized) return;
-    this.syncSources(batch,new Set(batch.groups.map(group=>group.source)));
-    const previous=this.groups.get(batch)??new Set<GuiImageGroup>(),current=new Set(batch.groups);for(const group of previous)if(!current.has(group))this.resources.release(group);this.groups.set(batch,current);
+    this.syncBatch(batch);
     if(batch.groups.length<1)return;
     const viewport = this.viewportData;
     if (updateGuiViewport(viewport,this.surface,this.engine,this.viewportUploaded)) {
@@ -99,7 +100,7 @@ export class GuiImageRenderer extends BaseRenderer {
     let viewportGroup=this.viewportGroups.get(viewportBuffer);if(!viewportGroup){viewportGroup=this.engine.device.createBindGroup({layout:this.viewportBindGroupLayout,entries:[{binding:0,resource:{buffer:viewportBuffer}}]});this.viewportGroups.set(viewportBuffer,viewportGroup);}
 
     passEncoder.setBindGroup(0, viewportGroup);
-    for (const group of batch.groups) {
+    for (const group of range ? [range.group] : batch.groups) {
       const imageData = this.getImageGpuData(group.source);
       if(!imageData)continue;
       if(imageData.ownsTexture)this.resources.retain(imageData.texture,context);
@@ -109,7 +110,16 @@ export class GuiImageRenderer extends BaseRenderer {
       passEncoder.setPipeline(this.getPipeline(linearTexture));
       passEncoder.setBindGroup(1, imageData.bindGroup);
       passEncoder.setVertexBuffer(0, vertexBuffer);
-      passEncoder.draw(group.vertexCount);
+      passEncoder.draw(range?.count ?? group.vertexCount, 1, range?.first ?? 0);
+    }
+  }
+
+  syncBatch(batch: GuiImageBatch): void {
+    if (!this.initialized) return;
+    if(this.batchVersions.get(batch)!==batch.layoutVersion){
+      this.syncSources(batch,new Set(batch.groups.map(group=>group.source)));
+      const previous=this.groups.get(batch)??new Set<GuiImageGroup>(),current=new Set(batch.groups);for(const group of previous)if(!current.has(group))this.resources.release(group);this.groups.set(batch,current);
+      this.batchVersions.set(batch,batch.layoutVersion);
     }
   }
 
@@ -118,12 +128,12 @@ export class GuiImageRenderer extends BaseRenderer {
     this.addPipelineWarmup(plan, key, 'GUI images', () => this.pipelineDescriptor(), this.engine.device);
   }
 
-  releaseBatch(batch: GuiImageBatch): void {for(const group of this.groups.get(batch)??[])this.resources.release(group);this.groups.delete(batch);this.syncSources(batch,new Set());this.batchSources.delete(batch);}
+  releaseBatch(batch: GuiImageBatch): void {for(const group of this.groups.get(batch)??[])this.resources.release(group);this.groups.delete(batch);this.batchVersions.delete(batch);this.syncSources(batch,new Set());this.batchSources.delete(batch);}
 
   destroy(): void {
     if(!this.initialized)return;
     this.resources.destroy();this.viewportGroups=new WeakMap();this.viewportUploaded=false;this.viewportVersion=0;
-    this.groups.clear();this.batchSources.clear();this.sourceUsers.clear();this.liveImageData.clear();this.imageCache=new WeakMap();
+    this.groups.clear();this.batchVersions.clear();this.batchSources.clear();this.sourceUsers.clear();this.liveImageData.clear();this.imageCache=new WeakMap();
     this.sampler=null;
     this.clearPipelineCache();this.initialized=false;
   }
@@ -137,7 +147,7 @@ export class GuiImageRenderer extends BaseRenderer {
     const previous=this.batchSources.get(batch)??new Set<NonNullable<GuiImageSource>>();
     for(const source of previous)if(!current.has(source)){
       const users=this.sourceUsers.get(source);users?.delete(batch);
-      if(!users?.size){this.sourceUsers.delete(source);if(this.imageCache.get(source)?.ownsTexture)this.invalidateSource(source);}
+      if(!users?.size){this.sourceUsers.delete(source);this.invalidateSource(source);}
     }
     for(const source of current)if(!previous.has(source)){let users=this.sourceUsers.get(source);if(!users){users=new Set();this.sourceUsers.set(source,users);}users.add(batch);}
     this.batchSources.set(batch,current);
@@ -147,7 +157,7 @@ export class GuiImageRenderer extends BaseRenderer {
   }
   private retireImage(data:ImageGpuData):void {if(data.ownsTexture)this.resources.retire(data.texture,true);}
   private getImageGpuData(source: NonNullable<GuiImageSource>): ImageGpuData|null {
-    if(isHtmlImageElement(source)&&(!source.complete||source.naturalWidth===0||source.naturalHeight===0))return null;
+    if(!guiImageSourceReady(source))return null;
     const cacheKey = isGpuTextureSource(source) ? source : source as object;
     const dimensions=isSampleableTextureSource(source)?source.texture:source;
     const sourceVersion = JSON.stringify([isSampleableTextureSource(source)?source.version:0,'width'in dimensions?dimensions.width:0,'height'in dimensions?dimensions.height:0,'currentSrc'in source?source.currentSrc:undefined]);

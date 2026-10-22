@@ -20,6 +20,7 @@ export interface GuiInputOptions extends GuiElementOptions {
 }
 
 export class GuiInput extends GuiElement {
+  static override readonly themeControlType: string = 'GuiInput';
   override handlePointerCancel(event: GuiPointerEvent): void {
     this.selecting = false;guiPasswordCancel(this);cancelGuiInputClick(this);
     super.handlePointerCancel(event);

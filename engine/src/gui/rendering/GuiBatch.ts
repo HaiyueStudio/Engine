@@ -3,10 +3,11 @@ import { GuiShapeCommand } from './GuiDrawCommand';
 import { GUI_SHAPE_VERTEX_LAYOUT } from './GuiVertexLayout';
 
 const VERTICES_PER_QUAD = 6;
-export const GUI_SHAPE_FLOATS_PER_VERTEX = GUI_SHAPE_VERTEX_LAYOUT.floatsPerVertex;
+export const GUI_SHAPE_FLOATS_PER_VERTEX = /* @__PURE__ */ (() => GUI_SHAPE_VERTEX_LAYOUT.floatsPerVertex)();
 
 export class GuiBatch {
   readonly commands: GuiShapeCommand[] = [];
+  readonly commandRanges: {first: number; count: number}[] = [];
   vertexData = new Float32Array(0);
   vertexCount = 0;
   version = 0;
@@ -16,6 +17,7 @@ export class GuiBatch {
 
   clear(options: { releaseVertexData?: boolean } = {}): void {
     this.commands.length = 0;
+    this.commandRanges.length = 0;
     this.vertexCount = 0;
     if (options.releaseVertexData) {
       this.vertexData = new Float32Array(0);
@@ -33,13 +35,19 @@ export class GuiBatch {
   }
 
   rebuild(): void {
+    this.commandRanges.length = 0;
+    let vertices = 0;
+    for (const command of this.commands) {
+      const count = command.strokeWidth ? 36 * 6 : command.roundedMesh ? 36 * 3 : VERTICES_PER_QUAD;
+      this.commandRanges.push({first: vertices, count}); vertices += count;
+    }
     if (this.commands.length === this.retained.length && this.commands.every((c, i) => sameGuiCommand(this.retained[i], c))) {
       this.vertexCount = this.retainedVertexCount;
       this.dirty = false;
       return;
     }
     this.retained = this.commands.map(snapshotGuiCommand);
-    const vertexCount = this.commands.reduce((count, c) => count + (c.strokeWidth ? 36 * 6 : c.roundedMesh ? 36 * 3 : VERTICES_PER_QUAD), 0);
+    const vertexCount = vertices;
     const requiredFloats = vertexCount * GUI_SHAPE_VERTEX_LAYOUT.floatsPerVertex;
     if (this.vertexData.length < requiredFloats) {
       this.vertexData = new Float32Array(nextCapacity(requiredFloats));

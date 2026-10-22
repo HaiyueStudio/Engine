@@ -5,8 +5,9 @@ import type {GuiRoot} from './components/GuiRoot';
 import {GuiInput} from './components/GuiInput';
 import {guiInputCounterText} from './input/GuiInputAdornments';
 import type {GuiElement} from './components/GuiElement';
+import {resolveGuiSkin} from './GuiThemeResolve';
 
-interface InputGlyphs {family:string; dirty:boolean; glyphs:Set<string>; off:()=>void;}
+interface InputGlyphs {dirty:boolean; families:Map<string,Set<string>>; off:()=>void;}
 
 export interface GuiAtlasOptions {
   readonly canvasFactory?: (width: number, height: number) => HTMLCanvasElement;
@@ -24,7 +25,7 @@ export class GuiFontOwner {
   private build(family: string): BitmapFontData {
     const chars=this.options.chars ?? ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~年月日今天周一二三四五六重置旋转翻';
     const required=new Set(guiTextClusters(chars));
-    for(const state of this.roots.values())if(state.family===family)for(const glyph of state.glyphs)required.add(glyph);
+    for(const state of this.roots.values())for(const glyph of state.families.get(family)??[])required.add(glyph);
     let size=this.options.atlasSize??512;
     if(!Number.isSafeInteger(size)||size<=0)throw new RangeError('GUI atlasSize must be a positive integer.');
     for(;;){
@@ -54,35 +55,48 @@ export class GuiFontOwner {
     if (!font) {font = this.build(this.defaultFamily); this.fonts.set(this.defaultFamily, font);}
     return font;
   }
-  forRoot(root: GuiRoot): BitmapFontData {
+  forRoot(root: GuiRoot, element: GuiElement = root.root): BitmapFontData {
     this.prepare();
-    const family = root.theme.fontFamily === 'sans-serif' ? this.defaultFamily : root.theme.fontFamily;
+    const requested = resolveGuiSkin(element).fontFamily ?? root.theme.fontFamily;
+    const family = requested === 'sans-serif' ? this.defaultFamily : requested;
     let state=this.roots.get(root);
     if(!state){
-      state={family,dirty:true,glyphs:new Set(),off:()=>{}};
+      state={dirty:true,families:new Map(),off:()=>{}};
       const observed=state;state.off=root.onInvalidation(()=>{observed.dirty=true;});this.roots.set(root,state);
     }
-    if(state.family!==family){state.family=family;state.dirty=true;}
+    if(!state.families.has(family))state.dirty=true;
+    let changed = state.dirty;
     if(state.dirty){
-      const glyphs=new Set<string>();
+      const families=new Map<string,Set<string>>();
       const visit=(element:GuiElement):void=>{
-        if(element instanceof GuiInput)for(const text of [element.displayValue,element.placeholder,guiInputCounterText(element)??''])for(const glyph of guiTextClusters(text))if(!/^[\r\n]+$/u.test(glyph))glyphs.add(glyph);
+        const requested = resolveGuiSkin(element).fontFamily ?? root.theme.fontFamily;
+        const family = requested === 'sans-serif' ? this.defaultFamily : requested;
+        let glyphs = families.get(family); if (!glyphs) {glyphs = new Set(); families.set(family, glyphs);}
+        const texts = element instanceof GuiInput ? [element.displayValue,element.placeholder,guiInputCounterText(element)??''] : [];
+        if (!(element instanceof GuiInput)) {
+          for (const key of ['text', 'label', 'content', 'displayText'] as const) {
+            if (key in element) {const text = (element as unknown as Record<string, unknown>)[key]; if (typeof text === 'string') texts.push(text);}
+          }
+          if ('visibleNodes' in element) for (const row of (element as unknown as {visibleNodes: readonly {node: {label: string}}[]}).visibleNodes) texts.push(row.node.label);
+        }
+        for(const text of texts)for(const glyph of guiTextClusters(text))if(!/^[\r\n]+$/u.test(glyph))glyphs.add(glyph);
         for(const child of element.children)visit(child);
       };
-      visit(root.root);state.glyphs=glyphs;state.dirty=false;
+      visit(root.root);state.families=families;state.dirty=false;
     }
     let font = this.fonts.get(family);
     const coverage=font&&this.coverage.get(font);
-    if(!font||[...state.glyphs].some(glyph=>!coverage?.has(glyph))){
+    if(!font||[...state.families.get(family)??[]].some(glyph=>!coverage?.has(glyph))){
       // Build before replacement; old recorded/submitted draws retain their atlas through the GPU owner.
       const next=this.build(family);this.fonts.set(family,next);if(font)this.retire(font);font=next;
+      changed = true;
     }
-    this.prune();return font;
+    if (changed) this.prune();return font;
   }
   forget(root: GuiRoot): void {this.roots.get(root)?.off();this.roots.delete(root);this.prune();}
   retain(roots: ReadonlySet<GuiRoot>): void {for(const root of this.roots.keys())if(!roots.has(root))this.forget(root);this.prune();}
   private prune(): void {
-    const used = new Set([...this.roots.values()].map(state=>state.family)); used.add(this.defaultFamily);
+    const used = new Set([...this.roots.values()].flatMap(state=>[...state.families.keys()])); used.add(this.defaultFamily);
     for (const [family, font] of this.fonts) if (!used.has(family)) {this.fonts.delete(family); this.retire(font);}
   }
   destroy(): void {for (const font of this.fonts.values()) this.retire(font); this.fonts.clear(); for(const state of this.roots.values())state.off();this.roots.clear();}

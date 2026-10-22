@@ -10,6 +10,7 @@ export interface GuiCheckboxOptions extends GuiElementOptions {
 }
 
 export class GuiCheckbox extends GuiElement {
+  static override readonly themeControlType: string = 'GuiCheckbox';
   override handleAction(event: GuiActionEvent): void {
     super.handleAction(event);
     if (!event.consumed && event.action === 'confirm') activateGuiElement(this, event);

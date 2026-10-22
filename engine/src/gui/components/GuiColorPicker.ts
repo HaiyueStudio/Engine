@@ -13,6 +13,7 @@ export interface GuiColorPickerOptions extends GuiElementOptions {
 
 /** Engine-rendered RGB editor. Its swatch, HEX input and sliders need no DOM color dialog. */
 export class GuiColorPicker extends GuiElement {
+  static override readonly themeControlType: string = 'GuiColorPicker';
   private currentValue = '#2563eb';
   private readonly swatch: GuiElement;
   private readonly hexInput: GuiInput;

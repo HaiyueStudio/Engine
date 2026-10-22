@@ -49,7 +49,7 @@ export class GuiShapeRenderer extends BaseRenderer {
     }
   }
 
-  render(passEncoder: GPURenderPassEncoder, batch: GuiBatch, context?:RenderCommandContext): void {
+  render(passEncoder: GPURenderPassEncoder, batch: GuiBatch, context?:RenderCommandContext, range?: {first: number; count: number}): void {
     if (!this.initialized || batch.vertexCount <= 0) return;
     const pipeline = this.getPipeline();
 
@@ -67,7 +67,7 @@ export class GuiShapeRenderer extends BaseRenderer {
     passEncoder.setPipeline(pipeline);
     passEncoder.setBindGroup(0, viewportGroup);
     passEncoder.setVertexBuffer(0, vertexBuffer);
-    passEncoder.draw(batch.vertexCount);
+    passEncoder.draw(range?.count ?? batch.vertexCount, 1, range?.first ?? 0);
   }
 
   contributePipelineWarmup(plan: PipelineWarmupPlan): void {

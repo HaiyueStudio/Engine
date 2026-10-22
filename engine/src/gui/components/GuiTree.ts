@@ -28,6 +28,7 @@ export interface GuiTreeOptions<T = string> extends GuiElementOptions {
 }
 
 export class GuiTree<T = string> extends GuiElement {
+  static override readonly themeControlType: string = 'GuiTree';
   nodes: GuiTreeNode<T>[];
   expandedKeys: Set<string>;
   selectedKey: string | null;
@@ -145,20 +146,20 @@ export class GuiTree<T = string> extends GuiElement {
 
   private rebuildVisibleRows(): void {
     const rows: GuiTreeVisibleNode<T>[] = [];
-    const bottom = this.rect.y + this.rect.height;
+    const content = this.getContentRect(), bottom = content.y + content.height;
     const visit = (nodes: GuiTreeNode<T>[], depth: number): boolean => {
       for (const node of nodes) {
         const index = rows.length;
-        const y = this.rect.y + index * this.rowHeight;
+        const y = content.y + index * this.rowHeight;
         if (y >= bottom) return false;
         rows.push({
           node,
           depth,
           index,
           rowRect: {
-            x: this.rect.x,
+            x: content.x,
             y,
-            width: this.rect.width,
+            width: content.width,
             height: this.rowHeight,
           },
         });

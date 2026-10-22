@@ -4,6 +4,27 @@ import type {GuiInvalidation, GuiInvalidationReason, GuiLayoutDelegate} from './
 import {captureGuiLayoutMotion, isGuiLayoutHidden, observeGuiTree, releaseGuiLayout, retainGuiLayout, withGuiAssignments} from './GuiLayoutState';
 import {GuiScrollView} from './components/GuiScrollView';
 import {GuiModal} from './components/GuiModal';
+import type {GuiImageSource} from './components/GuiImage';
+
+const sourceIds = new WeakMap<object, number>();
+let sourceId = 0;
+function sourceKey(source: GuiImageSource | undefined): unknown {
+  if (!source) return null;
+  let id = sourceIds.get(source); if (id === undefined) {id = ++sourceId; sourceIds.set(source, id);}
+  const image = 'texture' in source ? source.texture : source;
+  return [id, 'version' in source ? source.version : 0,
+    'naturalWidth' in image ? image.naturalWidth : 'width' in image ? image.width : 0,
+    'naturalHeight' in image ? image.naturalHeight : 'height' in image ? image.height : 0,
+    'complete' in image ? image.complete : undefined, 'currentSrc' in image ? image.currentSrc : undefined];
+}
+
+function styleKey(element: GuiElement): unknown {
+  const {icon, nineSlice, ...plain} = element.style;
+  // Borrowed handles are opaque. Inspect only identity and actual pixel inputs,
+  // never caller metadata, DOM ownership graphs or GPU internals.
+  return [plain, sourceKey(icon), nineSlice ? [sourceKey(nineSlice.source), nineSlice.sourceWidth,
+    nineSlice.sourceHeight, nineSlice.cuts, nineSlice.uv, nineSlice.contentInsets, nineSlice.pixelRatio, nineSlice.tint] : null];
+}
 
 function validRect(rect: GuiRect): boolean {return [rect.x, rect.y, rect.width, rect.height].every(Number.isFinite) && rect.width >= 0 && rect.height >= 0;}
 function snapshot(root: GuiElement): Map<GuiElement, GuiRect> {
@@ -23,7 +44,7 @@ function union(rects: readonly GuiRect[]): GuiRect {
   return {x, y, width: Math.max(...rects.map(r => r.x + r.width)) - x, height: Math.max(...rects.map(r => r.y + r.height)) - y};
 }
 function inputKey(element: GuiElement): string {
-  return JSON.stringify([element.getLayoutOptions(), element.style, element.visible, element.disabled, element.hovered, element.pressed, element.focused,
+  return JSON.stringify([element.getLayoutOptions(), styleKey(element), element.visible, element.disabled, element.hovered, element.pressed, element.focused,
     'text' in element ? element.text : undefined, 'fontSize' in element ? element.fontSize : undefined, 'value' in element ? element.value : undefined, element instanceof GuiModal ? element.dialogRect : undefined]);
 }
 

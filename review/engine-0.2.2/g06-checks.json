@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "goal": "g06-text-input",
-  "status": "active",
-  "generatedAt": "2026-10-22T06:21:07.577637+00:00",
+  "status": "complete",
+  "generatedAt": "2026-10-22T09:19:41.388706+00:00",
   "problem": "UTF-16 unit deletion split emoji; preedit and committed state needed separate ownership, and DOM line sanitization changed native indices.",
   "method": "Pinned Unicode 15.1 extended graphemes; UTF-16/native coordinate projection; generation-owned host sessions; shared caret/render/scroll geometry and phase-only invalidation; UIKit transport outside Engine.",
-  "conclusion": "Triple-click select-all is implemented and the current source passes 187 focused tests, 1992 repository tests, 12 global gates, 223 browser/WebGPU cases, 166 Native logic tests (2 skipped) and iOS SDK static checks. Real desktop Chinese IME passed on the retained preceding candidate. User confirms the iPhone checks; eight Mac/device reports and candidate linkage remain absent locally. G06 is not complete.",
-  "fullG06Complete": false,
+  "conclusion": "G06 original requirements are complete. Current source passes 187 focused tests, 1992 repository tests, 12 global gates, 223 browser/WebGPU cases, 172 Native logic tests (2 skipped) and iOS static checks with 702 hashed inputs. Retained Windows real Chinese IME and named physical iPhone candidates cover composition/editing, keyboard/insets, lifecycle and text-bridge disposal; final eye-centering human confirmation is preserved separately. All formerly missing Mac reports are imported and hash-verified. Cross-platform evidence is archived losslessly with originals retained. G13 still owns public package/export and whole-version qualification; no version is published or baseline promoted.",
+  "fullG06Complete": true,
   "realDesktopImeVerified": true,
-  "realIosKeyboardVerified": false,
+  "realIosKeyboardVerified": true,
   "unicode": {
     "version": "15.1.0",
     "uax29Revision": 43,
@@ -37,19 +37,20 @@
       "testsPassed": 187
     },
     "nativeLogic": {
-      "path": "artifacts/engine-0.2.2/g06/triple-click/native-tests-final.log",
-      "sha256": "0e1748774427a568bfbaef2013a71dfb15d8a4db98bc8471348a7108b62212ee",
-      "tests": 168,
-      "pass": 166,
+      "path": "artifacts/engine-0.2.2/g06/native-sync-20261022T073628Z/native-tests.log",
+      "sha256": "ebe365aacc34ac87bd749a1c0b67757ea4c30fde35a0c6c3959f70342233433c",
+      "tests": 174,
+      "pass": 172,
       "fail": 0,
       "skipped": 2,
-      "qualification": "Current Native transport/logic tests; physical-device candidate linkage is separate."
+      "qualification": "Current Native root logic suite after fast-forward to 4af7444; physical-device reports remain separate."
     },
     "iosSdkStatic": {
-      "path": "artifacts/engine-0.2.2/g06/triple-click/native-ios-static-final.json",
-      "sha256": "b95ea8a8f5fa52c23010490ee8bd3bf5168f70fb0c229e55de1841375d57554f",
+      "path": "artifacts/engine-0.2.2/g06/native-sync-20261022T073628Z/ios-static.json",
+      "sha256": "5c2857b77c9a8b8b3347c456d0ebf6d00a1edae581316636c91e23984ea611a3",
       "compiler": "5.7.3",
-      "qualification": "Static SDK declaration check only. Not an Xcode build or physical iPhone verification."
+      "typeInputs": 702,
+      "qualification": "Static SDK declaration check only; not an Xcode build or physical iPhone verification."
     },
     "iphoneCandidate": {
       "path": "artifacts/engine-0.2.2/g06/iphone-candidate-20261022T0032Z.zip",
@@ -73,6 +74,26 @@
     "humanDesktopIme": {
       "path": "artifacts/engine-0.2.2/g06/resync-20261022T051835Z/desktop-ime-acceptance.json",
       "sha256": "35eeee63fb1a60cef30b7da7b5992fd577af1e390597f59c369de754eba115e1"
+    },
+    "macEvidenceImport": {
+      "path": "artifacts/engine-0.2.2/g06/mac-import-20261022T070242Z/verification.json",
+      "sha256": "4306f155d2c91e74b5fcfdc021afb557b727388dc8eb414827264976a61acd57"
+    },
+    "nativeSync": {
+      "path": "artifacts/engine-0.2.2/g06/native-sync-20261022T073628Z/result.json",
+      "sha256": "93740574fbe375a3e7c2c6390987f9ab8a75281824ff1b879871ad35205f209b"
+    },
+    "nativeDeviceEvidence": {
+      "path": "artifacts/engine-0.2.2/g06/device-import-20261022T091452Z/result.json",
+      "sha256": "2f9c8d3cc0b16d2f3bdbd4ddbf1ccf9efd32234cd8aaa5831918cc8084725f2f"
+    },
+    "originalContractAudit": {
+      "path": "artifacts/engine-0.2.2/g06/final-20261022T091832Z/original-contract-audit.json",
+      "sha256": "68d00fc7ac938701899e2c8865c87360821a997bd7f4b8e6b268c2f9cc7748e9"
+    },
+    "physicalScopeAudit": {
+      "path": "artifacts/engine-0.2.2/g06/final-20261022T091832Z/physical-scope-audit.json",
+      "sha256": "5ab8a0e1dd9ffb5b5d35aaedebd55d0dd5f787b6bef05c3cc6549fa96303ff13"
     }
   },
   "boundaries": [
@@ -81,19 +102,15 @@
     "RTL is logical text/grapheme editing; complete bidirectional layout and shaping are not added.",
     "Keyboard reveal uses existing scroll containers and field scrolling; fixed custom layouts must respond to surface-relative inset notifications.",
     "G13 owns formal named exports, public package integration and inclusion of the full Unicode notice inside the future npm package. The private transfer includes the associated notice.",
-    "No formal performance, release or physical-device qualification is inferred from these correctness checks."
+    "Physical input qualification is limited to the named candidates and observations in physicalScopeAudit. Formal performance and whole-version release qualification remain with G13."
   ],
-  "remaining": [
-    "Transfer existing Mac build/device reports and current candidate/source manifest; no repeat of confirmed iPhone checks requested",
-    "Final G06 original-requirement audit and evidence archive after Mac evidence linkage",
-    "G13 owns formal public exports, package notice and combined version qualification"
-  ],
+  "remaining": [],
   "originalEvidenceRetained": true,
   "baselinePromoted": false,
   "published": false,
   "requirementAudit": {
-    "auditedAt": "2026-10-22T05:56:10.687029+00:00",
-    "status": "incomplete-real-host-evidence-required",
+    "auditedAt": "2026-10-22T09:19:41.388706+00:00",
+    "status": "passed-original-requirements-at-declared-scopes",
     "sourceRequirements": [
       {
         "path": "D:\\HaiyueStudio\\milestones\\milestones\\m23-engine-0.2.2\\goals\\g06-text-input.md",
@@ -104,14 +121,14 @@
         "sha256": "5d2888507a4fa0e511fffbd20ca08b5ca31cd8d9c3e1249dcd08d153ed559d05"
       }
     ],
-    "allExistingProofHashesRechecked": false,
+    "allExistingProofHashesRechecked": true,
     "currentGlobalSourceFingerprintsRechecked": true,
     "currentStaticInputsRechecked": true,
     "items": [
       {
         "id": "unicode-regression",
         "requirement": "复现 A😀B 孤立代理项；按 Unicode 15.1 扩展字素删除和移动",
-        "status": "automated-proven",
+        "status": "passed-current-source-automation",
         "evidence": [
           "artifacts/engine-0.2.2/g06/unicode-before.json",
           "engine/test/gui-unicode-editing.test.mjs",
@@ -122,7 +139,7 @@
       {
         "id": "utf16-compatibility",
         "requirement": "UTF-16 索引吸附、正反选区扩展、替换、长度限制、撤销及取消",
-        "status": "automated-proven",
+        "status": "passed-current-source-automation",
         "evidence": [
           "engine/test/gui-unicode-editing.test.mjs",
           "engine/test/gui-text-host.test.mjs",
@@ -132,7 +149,7 @@
       {
         "id": "required-corpus",
         "requirement": "emoji、组合附加符、ZWJ、中文及逻辑 RTL；不扩大到完整双向字形排版",
-        "status": "automated-proven",
+        "status": "passed-current-source-automation",
         "evidence": [
           "engine/test/gui-unicode-editing.test.mjs",
           "proofs.focused"
@@ -141,130 +158,138 @@
       {
         "id": "composition-ownership",
         "requirement": "预编辑与提交分离、只提交一次、取消恢复、失焦确认及迟到回调隔离",
-        "status": "automated-proven",
+        "status": "passed-automated-and-recorded-physical-scope",
         "evidence": [
           "engine/test/gui-text-host.test.mjs",
           "../Native/test/gui-text-input.test.mjs",
           "proofs.focused",
-          "proofs.nativeLogic"
-        ]
+          "proofs.nativeLogic",
+          "artifacts/engine-0.2.2/g06/final-20261022T091832Z/physical-scope-audit.json",
+          "artifacts/engine-0.2.2/g06/device-import-20261022T091452Z/result.json"
+        ],
+        "conclusion": "Passed by named candidate build/runtime records, observed human acceptance and current-source regression; individual candidate scopes are retained in physical-scope-audit.json."
       },
       {
         "id": "unified-host",
         "requirement": "统一输入桥；Engine 不引入平台 SDK；Native 实现 UIKit responder、输入类型和候选矩形",
-        "status": "implemented-static-and-logic-proven-device-pending",
+        "status": "passed-automated-and-recorded-physical-scope",
         "evidence": [
           "proofs.global",
           "proofs.iosSdkStatic",
-          "../Native/bridge/input/text-input.ios.ts"
+          "../Native/bridge/input/text-input.ios.ts",
+          "proofs.macEvidenceImport",
+          "proofs.nativeSync",
+          "artifacts/engine-0.2.2/g06/final-20261022T091832Z/physical-scope-audit.json",
+          "artifacts/engine-0.2.2/g06/device-import-20261022T091452Z/result.json"
         ],
-        "remainingEvidence": [
-          "Xcode build output",
-          "actual first-responder and keyboard type observations on iPhone"
-        ]
+        "conclusion": "Passed by named candidate build/runtime records, observed human acceptance and current-source regression; individual candidate scopes are retained in physical-scope-audit.json."
       },
       {
         "id": "desktop-ime",
         "requirement": "真实浏览器 IME 预编辑、提交、取消、无重复及候选位置",
-        "status": "human-proven-for-recorded-browser-candidate",
+        "status": "passed-recorded-real-Windows-IME-and-current-automation",
         "evidence": [
           "proofs.browserWebGpu",
           "proofs.humanDesktopIme"
-        ]
+        ],
+        "conclusion": "Human Windows IME covers preview/candidates, one commit, cancel and resize; current triple-click integration has separate browser/Native selection automation."
       },
       {
         "id": "ios-editing",
         "requirement": "物理 iPhone 的 Chinese/Latin/emoji、原生选择及系统剪贴板闭环",
-        "status": "missing-device-evidence",
+        "status": "passed-automated-and-recorded-physical-scope",
         "evidence": [
           "proofs.iphoneCandidate",
-          "proofs.iosSdkStatic"
+          "proofs.iosSdkStatic",
+          "proofs.macEvidenceImport",
+          "proofs.nativeSync",
+          "artifacts/engine-0.2.2/g06/final-20261022T091832Z/physical-scope-audit.json",
+          "artifacts/engine-0.2.2/g06/device-import-20261022T091452Z/result.json"
         ],
-        "remainingEvidence": [
-          "Xcode build log linked to candidateId",
-          "g06-text-input.jsonl and g06-host.jsonl",
-          "human observations of actual keyboard/clipboard and edit results"
-        ]
+        "conclusion": "Passed by named candidate build/runtime records, observed human acceptance and current-source regression; individual candidate scopes are retained in physical-scope-audit.json."
       },
       {
         "id": "caret-insets",
         "requirement": "caret 经宿主坐标映射、键盘遮挡与安全区，当前编辑位置可见",
-        "status": "geometry-automated-device-pending",
+        "status": "passed-automated-and-recorded-physical-scope",
         "evidence": [
           "engine/test/gui-text-presentation.test.mjs",
           "proofs.focused",
-          "proofs.browserWebGpu"
-        ],
-        "remainingEvidence": [
-          "physical iPhone candidate/caret visibility with keyboard shown and hidden",
-          "portrait and landscape safe-area observations"
+          "proofs.browserWebGpu",
+          "proofs.nativeSync",
+          "artifacts/engine-0.2.2/g06/final-20261022T091832Z/physical-scope-audit.json",
+          "artifacts/engine-0.2.2/g06/device-import-20261022T091452Z/result.json"
         ],
         "humanConfirmation": {
           "path": "artifacts/engine-0.2.2/g06/resync-20261022T051835Z/human-device-confirmation.json",
           "sha256": "24d466829b8722e7a03c196a2d84eabebb8b6c9eb725ff33e333f7aa75034653"
         },
-        "deviceEvidenceAvailability": "human-confirmed; raw Mac reports and source/candidate linkage not yet available locally"
+        "conclusion": "Passed by named candidate build/runtime records, observed human acceptance and current-source regression; individual candidate scopes are retained in physical-scope-audit.json."
       },
       {
         "id": "lifecycle",
         "requirement": "输入框切换、横竖屏、预编辑期间暂停恢复、失焦及销毁不静默提交",
-        "status": "model-automated-device-pending",
+        "status": "passed-automated-and-recorded-physical-scope",
         "evidence": [
           "engine/test/gui-text-host.test.mjs",
           "../Native/test/gui-text-input.test.mjs",
-          "proofs.nativeLogic"
-        ],
-        "remainingEvidence": [
-          "physical rotation, keyboard toggles, A/B focus transfer and background/resume logs and observations"
+          "proofs.nativeLogic",
+          "proofs.nativeSync",
+          "artifacts/engine-0.2.2/g06/final-20261022T091832Z/physical-scope-audit.json",
+          "artifacts/engine-0.2.2/g06/device-import-20261022T091452Z/result.json"
         ],
         "humanConfirmation": {
           "path": "artifacts/engine-0.2.2/g06/resync-20261022T051835Z/human-device-confirmation.json",
           "sha256": "24d466829b8722e7a03c196a2d84eabebb8b6c9eb725ff33e333f7aa75034653"
         },
-        "deviceEvidenceAvailability": "human-confirmed; raw Mac reports and source/candidate linkage not yet available locally"
+        "conclusion": "Passed by named candidate build/runtime records, observed human acceptance and current-source regression; individual candidate scopes are retained in physical-scope-audit.json."
       },
       {
         "id": "demand-invalidation",
         "requirement": "预编辑及光标相位按需失效；停止或销毁后无定时器/监听/桥接残留",
-        "status": "browser-and-model-proven-device-pending",
+        "status": "passed-automated-and-recorded-physical-scope",
         "evidence": [
           "engine/test/gui-text-presentation.test.mjs",
           "proofs.browserWebGpu",
-          "proofs.nativeLogic"
+          "proofs.nativeLogic",
+          "proofs.macEvidenceImport",
+          "proofs.nativeSync",
+          "artifacts/engine-0.2.2/g06/final-20261022T091832Z/physical-scope-audit.json",
+          "artifacts/engine-0.2.2/g06/device-import-20261022T091452Z/result.json"
         ],
-        "remainingEvidence": [
-          "native End action disposal records: responderCount=0, firstResponder=false, observerCount=0, disposed=true",
-          "host cleanup records; counters alone do not prove unobserved native resources"
-        ]
+        "conclusion": "Passed by named candidate build/runtime records, observed human acceptance and current-source regression; individual candidate scopes are retained in physical-scope-audit.json."
       },
       {
         "id": "environment",
         "requirement": "保存真实设备与宿主版本，而非仅用户报告版本",
-        "status": "missing-preflight-and-runtime-evidence",
+        "status": "passed-automated-and-recorded-physical-scope",
         "evidence": [
-          "proofs.deviceAvailability"
+          "proofs.deviceAvailability",
+          "proofs.macEvidenceImport",
+          "proofs.nativeSync",
+          "artifacts/engine-0.2.2/g06/final-20261022T091832Z/physical-scope-audit.json",
+          "artifacts/engine-0.2.2/g06/device-import-20261022T091452Z/result.json"
         ],
-        "remainingEvidence": [
-          "Mac preflight.json and devices.json",
-          "runtime environment event with iPhone model/OS and candidateId"
-        ]
+        "conclusion": "Passed by named candidate build/runtime records, observed human acceptance and current-source regression; individual candidate scopes are retained in physical-scope-audit.json."
       },
       {
         "id": "g13-handoff",
         "requirement": "公共具名入口、正式打包许可通知及整版性能由 G13 集成",
-        "status": "assigned-integration-pending",
+        "status": "handed-to-named-integration-owner",
         "evidence": [
           "boundaries",
           "review/engine-0.2.2/UNICODE-LICENSE.txt"
         ],
-        "remainingEvidence": [
-          "G13 formal package/export/notice and combined qualification"
-        ]
+        "conclusion": "G13 owns formal named exports, public package Unicode notice and combined version/performance qualification. These are integration deliverables, not unfinished G06 runtime work."
       }
     ],
     "completionRule": "Every G06 original requirement needs evidence at its own scope. Synthetic/browser/model/static results do not qualify physical UIKit or human IME. G13 responsibilities remain explicit.",
     "availableCurrentAutomatedProofsHashVerified": true,
-    "missingMacProofs": "See postSyncAcceptance.evidenceAvailabilityAudit; missing files were not treated as verified."
+    "missingMacProofs": "None. The eight original references plus two additional Native result references and all transitive hashes are now available and verified; earlier absence reports remain historical.",
+    "finalAudit": {
+      "path": "artifacts/engine-0.2.2/g06/final-20261022T091832Z/original-contract-audit.json",
+      "sha256": "68d00fc7ac938701899e2c8865c87360821a997bd7f4b8e6b268c2f9cc7748e9"
+    }
   },
   "graphemeRenderingFix": {
     "candidateId": "c82445c392880ff534850ced7ed668c29b59a1a800b9a5fb861b2580a51b30a9",
@@ -354,8 +379,8 @@
   },
   "passwordEyeCentering": {
     "candidateId": "e7051ee3b15bbd9a0e6408de75a77984788480eb4e6a877519f9af8dd3158294",
-    "status": "human-recheck-confirmed-evidence-transfer-pending",
-    "humanAcceptance": "Direct user confirmation in this chat includes final eye centering, rotation, keyboard occlusion and background recovery; original Mac reports still need transfer.",
+    "status": "passed-build-runtime-source-and-human-recheck",
+    "humanAcceptance": "Direct user confirmation covers final eye centering, rotation, keyboard occlusion and background recovery; original Mac build/device evidence is now imported. Final raw run itself records startup only, not an interaction replay.",
     "evidence": [
       {
         "path": "artifacts/engine-0.2.2/g06/eye-center/result.json",
@@ -364,7 +389,7 @@
     ]
   },
   "postSyncAcceptance": {
-    "status": "current-triple-click-source-automation-passed; Mac-evidence-linkage-pending",
+    "status": "complete-at-recorded-host-scopes-with-current-automated-regression",
     "humanDeviceConfirmation": {
       "path": "artifacts/engine-0.2.2/g06/resync-20261022T051835Z/human-device-confirmation.json",
       "sha256": "24d466829b8722e7a03c196a2d84eabebb8b6c9eb725ff33e333f7aa75034653"
@@ -373,10 +398,10 @@
       "path": "artifacts/engine-0.2.2/g06/resync-20261022T051835Z/evidence-sync-audit.json",
       "sha256": "bc2f919099e660add5284bd7a89a1a9a428f44078ca02397aa386f0c77c621b1"
     },
-    "macReferencedReportsMissingLocally": 8,
+    "macReferencedReportsMissingLocally": 0,
     "realDesktopIme": "Human Windows IME passed for the retained pre-triple-click candidate; current pointer integration has additional automated browser acceptance.",
-    "nativeCandidateLinkage": "pending-Mac-evidence-transfer",
-    "priorAutomatedProofs": "Historical; current synced source qualification will be recorded separately.",
+    "nativeCandidateLinkage": "All Native manifest inputs and 529 package members verified. Physical runtime logs identify the retained Mac candidate. Current Windows Engine bundle includes later triple-click integration and is qualified separately.",
+    "priorAutomatedProofs": "Historical snapshots retained; proofs.global/browserWebGpu/nativeLogic/iosSdkStatic identify the current qualified source inputs.",
     "priorReportRetained": {
       "path": "artifacts/engine-0.2.2/g06/resync-20261022T051835Z/g06-checks-before.json",
       "sha256": "2bd46ae10f45721c18ee3d92a7112845d5b2d9204b8c7da5372c956ebf1f8dfe"
@@ -395,12 +420,69 @@
       "globalTests": 1992,
       "globalGates": 12,
       "browserCases": 223,
-      "nativePassed": 166,
+      "nativePassed": 172,
       "nativeSkipped": 2,
-      "iosSdkStatic": "passed"
+      "iosSdkStatic": "passed",
+      "iosSdkStaticTypeInputs": 702
     },
     "allBrowserBytesRecheckedAfterFinalBuild": true,
-    "allStaticInputsRecheckedAfterFinalBuild": true
+    "allStaticInputsRecheckedAfterFinalBuild": true,
+    "originalEightMacReferencesStillMissing": 0,
+    "newlyDiscoveredNativeReferencesMissing": 0,
+    "macEvidenceImport": {
+      "path": "artifacts/engine-0.2.2/g06/mac-import-20261022T070242Z/verification.json",
+      "sha256": "4306f155d2c91e74b5fcfdc021afb557b727388dc8eb414827264976a61acd57"
+    },
+    "macCandidateManifest": {
+      "path": "artifacts/engine-0.2.2/g06/mac-import-20261022T070242Z/qualified-candidate.json",
+      "sha256": "6ff9630f876efe295de9729f703e258a9845440e43252175b2e73fd879b8bbb5",
+      "candidateId": "e7051ee3b15bbd9a0e6408de75a77984788480eb4e6a877519f9af8dd3158294",
+      "digestVerified": true
+    },
+    "beforeMacImport": {
+      "path": "artifacts/engine-0.2.2/g06/mac-import-20261022T070242Z/g06-checks-before-import.json",
+      "sha256": "4a09be0904bcdd9de7db2a168d5d54c67a57928252f02aa14f3d3104e14ef47d"
+    },
+    "repositoryHeadsAtImport": {
+      "Engine": "ec2ea8562dbd2893eb70c8fe998cb2c7f6b4c3ac",
+      "Native": "4800795b31d8109542352f03924c40c1c0cbb374",
+      "milestones": "cfe203f0811e0e364ffcaf121324d161d409c798"
+    },
+    "nativeSync": {
+      "path": "artifacts/engine-0.2.2/g06/native-sync-20261022T073628Z/result.json",
+      "sha256": "93740574fbe375a3e7c2c6390987f9ab8a75281824ff1b879871ad35205f209b"
+    },
+    "beforeNativeSync": {
+      "path": "artifacts/engine-0.2.2/g06/native-sync-20261022T073628Z/g06-checks-before-native-sync.json",
+      "sha256": "3ba6ee0b547a4a225920f2e8b1129b14b0ec16e12a769d7301e9bdf51c4a2117"
+    },
+    "previousNativeProofsRetained": {
+      "nativeLogic": {
+        "path": "artifacts/engine-0.2.2/g06/triple-click/native-tests-final.log",
+        "sha256": "0e1748774427a568bfbaef2013a71dfb15d8a4db98bc8471348a7108b62212ee",
+        "tests": 168,
+        "pass": 166,
+        "fail": 0,
+        "skipped": 2,
+        "qualification": "Current Native transport/logic tests; physical-device candidate linkage is separate."
+      },
+      "iosSdkStatic": {
+        "path": "artifacts/engine-0.2.2/g06/triple-click/native-ios-static-final.json",
+        "sha256": "b95ea8a8f5fa52c23010490ee8bd3bf5168f70fb0c229e55de1841375d57554f",
+        "compiler": "5.7.3",
+        "qualification": "Static SDK declaration check only. Not an Xcode build or physical iPhone verification."
+      }
+    },
+    "nativeRevisionAfterFastForward": "4af74449f433a1cb7a252723faf5b76ea2abce0a",
+    "deviceEvidenceImport": {
+      "path": "artifacts/engine-0.2.2/g06/device-import-20261022T091452Z/result.json",
+      "sha256": "2f9c8d3cc0b16d2f3bdbd4ddbf1ccf9efd32234cd8aaa5831918cc8084725f2f"
+    },
+    "repositoriesAtCompletion": {
+      "Engine": "ec2ea8562dbd2893eb70c8fe998cb2c7f6b4c3ac",
+      "Native": "4af74449f433a1cb7a252723faf5b76ea2abce0a",
+      "milestones": "cfe203f0811e0e364ffcaf121324d161d409c798"
+    }
   },
   "tripleClickSelection": {
     "status": "passed-current-source-automated-acceptance",
@@ -460,6 +542,44 @@
     "archivedReviewSnapshotSha256": "c033c04a3ab72df2f89f3a945cf6ec4196ca4fef01edbbc122465c450cefe04d",
     "reviewSnapshotScope": "Taken before this archive link was added; not a complete cross-platform archive.",
     "missingMacFiles": 8,
-    "fullGoalComplete": false
-  }
+    "fullGoalComplete": false,
+    "snapshotScope": "Historical partial archive and its original pending verdict retained. Complete cross-platform records and final qualification are linked by completionArchive and originalContractAudit."
+  },
+  "integrationHandoff": {
+    "owner": "g13-integration-release",
+    "status": "pending-integration",
+    "items": [
+      "Formal named public exports and package budgets",
+      "Full Unicode 15.1 license notice in distributed npm package",
+      "Combined version, cross-platform performance and final candidate qualification including later G07-G12 changes"
+    ]
+  },
+  "version022Complete": false,
+  "physicalAcceptanceScope": {
+    "status": "passed-for-recorded-candidates-with-current-source-regression",
+    "browser": "Windows human IME candidate 961c9395516b2e2b58a92007b61d9fafc15c864fe595fe79da7aaf0d0eeb6748; original event-trust flags retained.",
+    "iphone": "Earlier named full interaction/disposal runs plus final e7051ee3 build/install/identity/first frame and direct human eye/lifecycle recheck.",
+    "currentTripleClick": "Current automated single/multiline and Native selection synchronization; not relabeled as a physical test of the current binary.",
+    "resourceScope": "Observed owned text responder/observer disposal and zero scheduled callbacks; borrowed Canvas recognizer is not claimed absent.",
+    "audit": {
+      "path": "artifacts/engine-0.2.2/g06/final-20261022T091832Z/physical-scope-audit.json",
+      "sha256": "5ab8a0e1dd9ffb5b5d35aaedebd55d0dd5f787b6bef05c3cc6549fa96303ff13"
+    }
+  },
+  "completionArchive": {
+    "status": "cross-platform-evidence-readback-verified",
+    "archive": {
+      "path": "artifacts/engine-0.2.2/g06/final-20261022T091832Z/g06-cross-platform-evidence.zip",
+      "sha256": "956f77a22f1e11e7b4026cde16a21897980e301863dc41580794dd5131da35f3"
+    },
+    "bytes": 53798749,
+    "filesVerified": 31,
+    "nestedArchiveMembersVerified": 2441,
+    "nestedPayloadHashesVerified": 2437,
+    "originalsRetained": true,
+    "fullG06Complete": true,
+    "releaseQualification": false,
+    "scope": "Original raw/platform/source archives plus immutable original-requirement audit and proof index. Final mutable review/milestone files are bound separately by completion-seal.json."
+  },
+  "completionSealPath": "artifacts/engine-0.2.2/g06/final-20261022T091832Z/completion-seal.json"
 }

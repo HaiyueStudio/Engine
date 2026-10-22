@@ -7,18 +7,22 @@ import {GuiLabel} from './components/GuiLabel';
 import {GuiButton} from './components/GuiButton';
 import {GuiImage} from './components/GuiImage';
 import {measureGuiTextBlock} from './rendering/GuiTextBatch';
+import {guiContentMetrics} from './GuiContent';
 
 const fonts = new WeakMap<object, BitmapFontData>();
 const owners = new WeakMap<GuiRoot, object>();
 const observedFonts = new WeakMap<GuiRoot, BitmapFontData>();
 const rootFonts = new WeakMap<GuiRoot, BitmapFontData>();
 const observedThemes = new WeakMap<GuiRoot, string>();
-const providers = new WeakMap<object, {get: (root: GuiRoot) => BitmapFontData; release: (root: GuiRoot) => void}>();
+const providers = new WeakMap<object, {get: (root: GuiRoot, element?: GuiElement) => BitmapFontData; release: (root: GuiRoot) => void}>();
 const refresh = new WeakSet<object>();
-export function registerGuiFontProvider(owner: object, get: (root: GuiRoot) => BitmapFontData, release: (root: GuiRoot) => void): void {providers.set(owner, {get, release});}
+export function registerGuiFontProvider(owner: object, get: (root: GuiRoot, element?: GuiElement) => BitmapFontData, release: (root: GuiRoot) => void): void {providers.set(owner, {get, release});}
 export function requestGuiFontReload(owner: object): void {refresh.add(owner);}
 export function consumeGuiFontReload(owner: object): boolean {const dirty = refresh.has(owner); refresh.delete(owner); return dirty;}
-export function guiMeasureFontVersion(root: GuiRoot): number {return observedFonts.get(root)?.id ?? 0;}
+export function guiMeasureFontVersion(root: GuiRoot, element?: GuiElement): number {
+  const owner = owners.get(root);
+  return element && owner ? providers.get(owner)?.get(root, element).id ?? observedFonts.get(root)?.id ?? 0 : observedFonts.get(root)?.id ?? 0;
+}
 export function setGuiMeasureFont(owner: object, font: BitmapFontData | null): void {if (font) fonts.set(owner, font); else fonts.delete(owner);}
 export function bindGuiMeasureOwner(root: GuiRoot, owner: object): void {
   owners.set(root, owner);
@@ -36,13 +40,16 @@ export function measureGuiElement(root: GuiRoot, element: GuiElement, width: Gui
   let size = {width: 0, height: 0};
   let minimum = {width: 0, height: 0};
   if (element instanceof GuiLabel || element instanceof GuiButton) {
-    const owner = owners.get(root), font = rootFonts.get(root) ?? (owner && fonts.get(owner));
+    const owner = owners.get(root), font = owner && providers.get(owner)?.get(root, element) || rootFonts.get(root) || (owner && fonts.get(owner));
+    const skin = element.getResolvedStyle();
     if (!font) throw new Error('GUI font metrics are not ready; prepare GuiSystem before measuring text.');
-    const padding = element.style.padding ?? (element instanceof GuiButton ? element.variant === 'outline' ? 4 : 8 : 0);
-    const measured = measureGuiTextBlock(element.text, font, element instanceof GuiLabel ? element.fontSize ?? root.theme.fontSize : root.theme.fontSize, width.mode === 'unbounded' ? Infinity : Math.max(0, width.value! - 2 * padding), element instanceof GuiLabel);
-    size = {width: measured.width + 2 * padding, height: measured.height + 2 * padding};
-    const min = measureGuiTextBlock(element.text, font, element instanceof GuiLabel ? element.fontSize ?? root.theme.fontSize : root.theme.fontSize, element instanceof GuiLabel ? 0 : Infinity, element instanceof GuiLabel);
-    minimum = {width: min.width + padding * 2, height: element.text ? font.lineHeight * (element instanceof GuiLabel ? element.fontSize ?? root.theme.fontSize : root.theme.fontSize) / font.size + padding * 2 : padding * 2};
+    const padding = skin.padding ?? (element instanceof GuiButton ? element.variant === 'outline' ? 4 : 8 : 0);
+    const fontSize = element instanceof GuiLabel ? element.fontSize ?? skin.fontSize ?? root.theme.fontSize : skin.fontSize ?? root.theme.fontSize;
+    const content = guiContentMetrics(element, padding, fontSize);
+    const measured = measureGuiTextBlock(element.text, font, fontSize, width.mode === 'unbounded' ? Infinity : Math.max(0, width.value! - content.horizontal), element instanceof GuiLabel);
+    size = {width: measured.width + content.horizontal, height: Math.max(measured.height, content.iconHeight) + content.vertical};
+    const min = measureGuiTextBlock(element.text, font, fontSize, element instanceof GuiLabel ? 0 : Infinity, element instanceof GuiLabel);
+    minimum = {width: min.width + content.horizontal, height: Math.max(element.text ? font.lineHeight * fontSize / font.size : 0, content.iconHeight) + content.vertical};
   } else if (element instanceof GuiImage && element.source) {
     const source = 'texture' in element.source ? element.source.texture : element.source;
     size = {width: 'naturalWidth' in source ? source.naturalWidth : 'width' in source ? source.width : 0, height: 'naturalHeight' in source ? source.naturalHeight : 'height' in source ? source.height : 0};

@@ -17,6 +17,7 @@ export interface GuiToastOptions extends GuiElementOptions {
 
 /** A non-interactive, single-message popup. show() replaces and restarts the current message. */
 export class GuiToast extends GuiElement {
+  static override readonly themeControlType: string = 'GuiToast';
   text: string;
   icon: GuiImageSource;
   iconKey: string | undefined;

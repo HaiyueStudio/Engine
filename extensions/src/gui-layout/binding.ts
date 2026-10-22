@@ -2,7 +2,7 @@ import {GuiDirtyFlags, GuiElement, GuiLabel, GuiRoot, GuiScrollView, resolveGuiL
 import type {GuiRect} from '@haiyue/engine/gui';
 import {createLayoutSession, LayoutError} from '../layout.js';
 import type {LayoutConstraints, LayoutLength, LayoutMeasure, LayoutNode, LayoutResult, LayoutSession, LayoutStyle} from '../layout.js';
-import {presetStyle} from './presets.js';
+import {frameStyle, presetStyle} from './presets.js';
 import type {GuiLayoutBinding, GuiLayoutOptions, GuiLayoutStyle} from './types.js';
 import {registerGuiLayoutCounters} from './diagnostics.js';
 import {anchoredStyle, captureGuiLayoutStyle, coreStyle} from './style.js';
@@ -10,6 +10,7 @@ import {absoluteRect} from '../layout/box.js';
 import {limitsFrom} from '../layout/validate.js';
 import {createContentMinimumMeasure} from './minimum.js';
 import {GuiLayoutResources} from './resources.js';
+import {rememberLayoutVisibility} from './visibility.js';
 
 interface Island {session: LayoutSession; fingerprint: string; result?: LayoutResult; viewportSession?: LayoutSession; viewportFingerprint?: string; viewportResult?: LayoutResult; contentMeasure?: LayoutMeasure;}
 function length(value: number | `${number}%` | undefined): LayoutLength | undefined {return typeof value === 'string' ? {percent: Number.parseFloat(value)} : value;}
@@ -23,16 +24,21 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = {meas
   return size;
 }}): GuiLayoutBinding {
   const limits = limitsFrom(options.limits);
-  const overrides = new Map<GuiElement, GuiLayoutStyle>(), versions = new WeakMap<GuiElement, number>();
+  let overrides = new WeakMap<GuiElement, GuiLayoutStyle>();
+  const versions = new WeakMap<GuiElement, number>();
   const islands = new Map<GuiElement, Island>();
   const signatures = new WeakMap<GuiElement, string>();
   const counters = {solves: 0, solvedNodes: 0, measurements: 0, sessions: 0};
   const releaseIsland = (island: Island): void => {island.session.dispose(); island.viewportSession?.dispose();};
   const countSessions = (): void => {counters.sessions = [...islands.values()].reduce((sum, island) => sum + (island.viewportSession ? 2 : 1), 0);};
   let disposed = false, uninstall = (): void => {}, unsubscribe = (): void => {};
+  const visibilityOwner = {active: true};
   let metricsVersion = 0;
   const resources = new GuiLayoutResources(root.root, element => {versions.set(element, (versions.get(element) ?? 0) + 1); element.markDirty(GuiDirtyFlags.Layout | GuiDirtyFlags.Visual);});
-  const styleFor = (element: GuiElement): GuiLayoutStyle | undefined => overrides.get(element) ?? presetStyle(element);
+  const styleFor = (element: GuiElement): GuiLayoutStyle | undefined => {
+    const preset = presetStyle(element), override = overrides.get(element), frame = frameStyle(element);
+    return preset || override || frame ? {...preset, ...override, ...frame} : undefined;
+  };
   const owned = (element: GuiElement): void => {
     let current: GuiElement | null = element;
     while (current && current !== root.root) {
@@ -44,10 +50,11 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = {meas
   };
   const dispose = (): void => {
     if (disposed) return; disposed = true;
+    visibilityOwner.active = false;
     unsubscribe(); uninstall();
     resources.suspend();
     for (const island of islands.values()) releaseIsland(island);
-    islands.clear(); overrides.clear();
+    islands.clear(); overrides = new WeakMap();
     counters.sessions = 0;
   };
   const measure: LayoutMeasure = (id, constraints) => {counters.measurements++; return options.measure(id, constraints);};
@@ -86,10 +93,21 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = {meas
           if (style.display === 'none') return {id: item.id, contentVersion: versions.get(item) ?? 0, style, children: []};
           resources.watch(item);
           const managesChildren = item.constructor === GuiElement || item instanceof GuiScrollView;
+          // Leaf measurement already includes its own content insets. Containers
+          // delegate that space to the shared solver unless layout overrides it.
+          if (managesChildren && style.padding === undefined) {
+            const skin = item.getResolvedStyle(), slice = skin.nineSlice, ratio = slice?.pixelRatio ?? 1;
+            const padding = skin.contentInsets ?? slice?.contentInsets ?? (slice ? {
+              left: slice.cuts[0] / ratio, top: slice.cuts[1] / ratio,
+              right: slice.cuts[2] / ratio, bottom: slice.cuts[3] / ratio,
+            } : skin.padding);
+            if (padding !== undefined) style = {...style, padding: typeof padding === 'number' ? {top: padding, right: padding, bottom: padding, left: padding} : padding};
+          }
           const fixedBoundary = !isRoot && configured && !configured.contentMinimum && managesChildren && item.children.length > 0 && typeof style.width === 'number' && typeof style.height === 'number';
           if (fixedBoundary) nested.push(item);
           // Composite controls keep their private children; plain unmanaged nodes are manual islands.
-          const children = !fixedBoundary && configured && managesChildren ? item.children.map(child => build(child)) : [];
+          const ownsFlow = presetStyle(item) !== undefined || overrides.has(item);
+          const children = !fixedBoundary && ownsFlow && managesChildren ? item.children.map(child => build(child)) : [];
           const node = {id: item.id, contentVersion: versions.get(item) ?? 0, style, children};
           if (configured?.contentMinimum) {
             const min = contentMinimum(node);
@@ -154,7 +172,6 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = {meas
       resources.finish();
       for (const [element, island] of islands) if (!liveIslands.has(element)) {releaseIsland(island); islands.delete(element);}
       countSessions();
-      for (const element of overrides.keys()) if (!seen.has(element)) overrides.delete(element);
     },
     suspend() {resources.suspend(); for (const island of islands.values()) releaseIsland(island); islands.clear(); counters.sessions = 0;},
     dispose,
@@ -165,7 +182,7 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = {meas
     for (const [element, island] of islands) {
       let ancestor: GuiElement | null = element;
       while (ancestor && ancestor !== root.root) ancestor = ancestor.parent;
-      if (!ancestor) {releaseIsland(island); islands.delete(element); overrides.delete(element);}
+      if (!ancestor) {releaseIsland(island); islands.delete(element);}
     }
     countSessions();
     if (root.root.getDirtyFlags() & GuiDirtyFlags.Text) metricsVersion++;
@@ -173,7 +190,8 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = {meas
   const binding: GuiLayoutBinding = {
     setStyle(element, style) {
       owned(element);
-      overrides.set(element, captureGuiLayoutStyle({...presetStyle(element), ...overrides.get(element), ...style}));
+      overrides.set(element, captureGuiLayoutStyle({...overrides.get(element), ...style}));
+      rememberLayoutVisibility(element, overrides.get(element)!, visibilityOwner);
       // Mark through the public invalidation path; no private Engine state is accessed.
       element.markDirty(GuiDirtyFlags.Layout);
     },

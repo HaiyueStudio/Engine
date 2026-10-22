@@ -8,6 +8,9 @@ import {attachGuiLayout} from '@haiyue/extensions/gui-layout';
 import {populateLayoutDemo} from './layout-demo';
 import {attachInputNavigation} from './input-navigation';
 import {attachTextEditing} from './text-editing';
+import {attachThemeSkins} from './theme-skins';
+import {attachPanelsTabs} from './panels-tabs';
+import {attachDragDrop} from './drag-drop';
 
 const colors = { panel: '#111c30', border: '#26354d', muted: '#91a3bd', accent: '#7dd3fc' };
 const label = (parent: GuiElement, text: string, x: number, y: number, width: number, fontSize = 14, color = colors.muted) =>
@@ -41,6 +44,9 @@ async function main(): Promise<void> {
     entity.addComponent(root);
     scene.add(entity);
     engine.switchScene(scene);
+    if(new URLSearchParams(location.search).has('drag-drop')){detachInput=attachDragDrop(scene.guiSystem!,root,layoutBinding,canvas);engine.run();status.hidden=true;canvas.dataset.ready='true';return;}
+    if(new URLSearchParams(location.search).has('panels-tabs')){detachInput=attachPanelsTabs(engine,scene.guiSystem!,root,layoutBinding);engine.run();status.hidden=true;canvas.dataset.ready='true';return;}
+    if(new URLSearchParams(location.search).has('theme-skins')){detachInput=attachThemeSkins(engine,scene.guiSystem!,root);engine.run();status.hidden=true;canvas.dataset.ready='true';return;}
     if(textWorkflow){detachInput=attachTextEditing(engine,scene.guiSystem!,root);engine.run();status.hidden=true;canvas.dataset.ready='true';return;}
 
     const inputWorkflow=new URLSearchParams(location.search).has('input-navigation');

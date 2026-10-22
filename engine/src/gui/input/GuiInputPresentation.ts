@@ -2,6 +2,7 @@ import type {GuiInput} from '../components/GuiInput';
 import type {GuiRect} from '../GuiTypes';
 import {guiInputAdornments,guiPasswordMasked} from './GuiInputAdornments';
 import {guiGraphemeBoundaries} from './GuiGraphemes';
+import {guiContentBox} from '../GuiContent';
 
 interface InputView {x:number;y:number;caretVisible:boolean;revision:number;}
 const views=new WeakMap<GuiInput,InputView>();
@@ -13,9 +14,11 @@ export function toggleGuiInputCaret(input:GuiInput):void {const view=state(input
 
 /** Shared geometry for GPU glyphs, pointer selection and the platform candidate window. */
 export function guiInputPresentation(input:GuiInput,measure:(text:string)=>number,fontSize:number,lineHeight=fontSize*1.2){
-  const view=state(input),padding=Math.max(0,input.style.padding??8),r=input.rect;
+  const skin=input.getResolvedStyle(),view=state(input),padding=Math.max(0,skin.padding??8),r=input.rect;
+  const box=guiContentBox(input,8,fontSize),customContent=!!(skin.contentInsets||skin.nineSlice||skin.icon);
   const adornments=guiInputAdornments(input,measure,fontSize);
-  const clip={x:r.x+padding,y:r.y+Math.min(padding,r.height/2),width:Math.max(0,r.width-2*padding-adornments.right),height:Math.max(0,r.height-2*padding-adornments.bottom)};
+  const clip=customContent?{...box.text,width:Math.max(0,box.text.width-adornments.right),height:Math.max(0,box.text.height-adornments.bottom)}:{x:r.x+padding,y:r.y+Math.min(padding,r.height/2),width:Math.max(0,r.width-2*padding-adornments.right),height:Math.max(0,r.height-2*padding-adornments.bottom)};
+  const textY=customContent?clip.y:r.y,textHeight=customContent?clip.height:r.height;
   const text=input.displayValue,lines:string[]=[],starts:number[]=[];
   const oneLine=(value:string)=>value.replace(/\r\n|\r|\n/gu,' ');
   if(input.multiline){let start=0;for(const match of text.matchAll(/\r\n|\r|\n/gu)){starts.push(start);lines.push(text.slice(start,match.index));start=match.index+match[0].length;}starts.push(start);lines.push(text.slice(start));}
@@ -25,7 +28,7 @@ export function guiInputPresentation(input:GuiInput,measure:(text:string)=>numbe
     return {row,x:measure(input.multiline?lines[row]!.slice(0,Math.max(0,index-starts[row]!)):oneLine(text.slice(0,index)))};
   };
   const caret=position(input.displayCaretIndex),width=lines.reduce((max,line)=>Math.max(max,measure(line)),0);
-  const visibleHeight=input.multiline?clip.height:r.height;
+  const visibleHeight=input.multiline?clip.height:textHeight;
   const contentHeight=input.multiline?lines.length*lineHeight:visibleHeight;
   if(input.focused){
     if(caret.x<view.x)view.x=caret.x;else if(caret.x+2>view.x+clip.width)view.x=caret.x+2-clip.width;
@@ -33,11 +36,11 @@ export function guiInputPresentation(input:GuiInput,measure:(text:string)=>numbe
   }
   view.x=Math.max(0,Math.min(Math.max(0,width+2-clip.width),view.x));
   view.y=input.multiline?Math.max(0,Math.min(Math.max(0,contentHeight-visibleHeight),view.y)):0;
-  const origin={x:clip.x-view.x,y:input.multiline?clip.y-view.y:r.y};
-  const caretRect:GuiRect={x:origin.x+caret.x,y:input.multiline?origin.y+caret.row*lineHeight:r.y+7,width:1.5,height:input.multiline?lineHeight:Math.max(10,r.height-14)};
+  const origin={x:clip.x-view.x,y:input.multiline?clip.y-view.y:textY};
+  const caretRect:GuiRect={x:origin.x+caret.x,y:input.multiline?origin.y+caret.row*lineHeight:customContent?textY+Math.max(0,(textHeight-lineHeight)/2):r.y+7,width:1.5,height:input.multiline?lineHeight:customContent?Math.min(lineHeight,textHeight):Math.max(10,r.height-14)};
   const ranges=(from:number,to:number):GuiRect[]=>{
     const rects:GuiRect[]=[];
-    if(!input.multiline){const a=position(from).x,b=position(to).x;return [{x:origin.x+a,y:r.y+5,width:Math.max(1,b-a),height:Math.max(10,r.height-10)}];}
+    if(!input.multiline){const a=position(from).x,b=position(to).x;return [{x:origin.x+a,y:customContent?textY:r.y+5,width:Math.max(1,b-a),height:customContent?textHeight:Math.max(10,r.height-10)}];}
     for(let row=0;row<lines.length;row++){
       const line=lines[row]!,offset=starts[row]!,a=Math.max(0,from-offset),b=Math.min(line.length,to-offset);
       if(b<a||to<=offset||from>offset+line.length)continue;
@@ -54,5 +57,5 @@ export function guiInputPresentation(input:GuiInput,measure:(text:string)=>numbe
     const displayOffset=starts[row]!+offset;
     return guiPasswordMasked(input)?guiGraphemeBoundaries(input.value)[displayOffset]??input.value.length:displayOffset;
   };
-  return {adornments,clip,origin,caret:caretRect,lines,lineHeight,ranges,indexAt,contentWidth:width,contentHeight,scrollX:view.x,scrollY:view.y};
+  return {adornments,clip,origin,textHeight,caret:caretRect,lines,lineHeight,ranges,indexAt,contentWidth:width,contentHeight,scrollX:view.x,scrollY:view.y};
 }

@@ -4,19 +4,24 @@ import { GuiElement } from './GuiElement';
 import type {GuiInvalidation, GuiLayoutDelegate, GuiMeasureConstraint} from '../GuiLayoutTypes';
 import {GuiLayoutOwner} from '../GuiLayoutOwner';
 import {measureGuiElement, releaseGuiMeasureOwner} from '../GuiMeasure';
+import {GuiThemeOwner} from '../GuiThemeOwner';
+import type {GuiThemeResourceBinding} from '../GuiThemeTypes';
+import {disposeGuiRootObservers} from '../GuiLayoutState';
 
 export interface GuiRootOptions extends GuiElementOptions {
   theme?: Partial<GuiTheme> | undefined;
 }
 
 export class GuiRoot extends Component {
-  static override UniqueCheckType = UniqueCheckType.SYMBOL | UniqueCheckType.REPLACE;
-  static override UniqueSymbol = Symbol.for('GuiRoot');
+  // Immutable keys may be removed together with an unused root by consumer bundles.
+  static override UniqueCheckType = /* @__PURE__ */ (() => UniqueCheckType.SYMBOL | UniqueCheckType.REPLACE)();
+  static override UniqueSymbol = /* @__PURE__ */ Symbol.for('GuiRoot');
 
   readonly root: GuiElement;
   theme: GuiTheme;
   viewport: GuiRect = { x: 0, y: 0, width: 1, height: 1 };
   private readonly layoutOwner: GuiLayoutOwner;
+  private readonly themeOwner: GuiThemeOwner;
 
   constructor(options: GuiRootOptions = {}) {
     super('GuiRoot');
@@ -41,6 +46,7 @@ export class GuiRoot extends Component {
       },
     };
     this.layoutOwner = new GuiLayoutOwner(this.root, () => JSON.stringify(this.theme));
+    this.themeOwner = new GuiThemeOwner(this.root, () => this.theme, changed => this.layoutOwner.subscribe(changed));
   }
 
   installLayoutDelegate(delegate: GuiLayoutDelegate): () => void {return this.layoutOwner.install(delegate);}
@@ -52,7 +58,8 @@ export class GuiRoot extends Component {
     return measureGuiElement(this, element, width, height);
   }
 
-  override destroy(): void {try {this.layoutOwner.destroy();} finally {releaseGuiMeasureOwner(this); super.destroy();}}
+  setThemeResource(resource: GuiThemeResourceBinding | null): void {this.root.setThemeResource(resource);}
+  override destroy(): void {try {try {disposeGuiRootObservers(this.root);} finally {try {this.themeOwner.destroy();} finally {this.layoutOwner.destroy();}}} finally {releaseGuiMeasureOwner(this); super.destroy();}}
 
   get dirty(): boolean {
     return this.root.dirty;
@@ -71,6 +78,7 @@ export class GuiRoot extends Component {
   }
 
   layout(width: number, height: number): void {
+    this.themeOwner.sync();
     const previous = this.viewport;
     const next = { x: 0, y: 0, width, height };
     const changed =

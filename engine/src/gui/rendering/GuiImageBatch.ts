@@ -2,7 +2,7 @@ import type { GuiImageSource } from '../components/GuiImage';
 import { GUI_TEXTURED_VERTEX_LAYOUT } from './GuiVertexLayout';
 
 const VERTICES_PER_IMAGE = 6;
-export const GUI_IMAGE_FLOATS_PER_VERTEX = GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex;
+export const GUI_IMAGE_FLOATS_PER_VERTEX = /* @__PURE__ */ (() => GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex)();
 
 export interface GuiImageCommand {
   source: GuiImageSource;
@@ -25,13 +25,17 @@ export interface GuiImageGroup {
 export class GuiImageBatch {
   readonly commands: GuiImageCommand[] = [];
   readonly groups: GuiImageGroup[] = [];
+  readonly commandRanges: {group: GuiImageGroup; first: number; count: number}[] = [];
   private version = 0;
   private readonly cachedGroups: { group: GuiImageGroup; scratch: Float32Array }[] = [];
   dirty = true;
+  get layoutVersion(): number {return this.version;}
 
   clear(): void {
     this.commands.length = 0;
     this.groups.length = 0;
+    this.commandRanges.length = 0;
+    this.version++;
     this.dirty = true;
   }
 
@@ -42,21 +46,20 @@ export class GuiImageBatch {
   }
 
   rebuild(): void {
-    const grouped = new Map<NonNullable<GuiImageSource>, GuiImageCommand[]>();
+    // Only adjacent sources may merge; A/B/A must keep painter order.
+    const grouped: {source: NonNullable<GuiImageSource>; commands: GuiImageCommand[]}[] = [];
     for (const command of this.commands) {
       if (!command.source) continue;
-      let commands = grouped.get(command.source);
-      if (!commands) {
-        commands = [];
-        grouped.set(command.source, commands);
-      }
-      commands.push(command);
+      const previous = grouped[grouped.length - 1];
+      if (previous?.source === command.source) previous.commands.push(command);
+      else grouped.push({source: command.source, commands: [command]});
     }
     this.groups.length = 0;
+    this.commandRanges.length = 0;
     this.version++;
     let slot = 0;
-    this.cachedGroups.length = Math.min(this.cachedGroups.length, grouped.size);
-    for (const [source, commands] of grouped) {
+    this.cachedGroups.length = Math.min(this.cachedGroups.length, grouped.length);
+    for (const {source, commands} of grouped) {
       const vertexCount = commands.length * VERTICES_PER_IMAGE;
       const floatCount = vertexCount * GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex;
       let cached = this.cachedGroups[slot];
@@ -82,6 +85,7 @@ export class GuiImageBatch {
         group.version = this.version;
       }
       this.groups.push(group);
+      for (let index = 0; index < commands.length; index++) this.commandRanges.push({group, first: index * VERTICES_PER_IMAGE, count: VERTICES_PER_IMAGE});
     }
     this.dirty = false;
   }

@@ -2,6 +2,7 @@ import { GuiColorPicker } from './components/GuiColorPicker';
 import { GuiToast } from './components/GuiToast';
 import { GuiHelpDialog } from './components/GuiHelpDialog';
 import { GuiScrollView } from './components/GuiScrollView';
+import { GuiNineSlice } from './components/GuiNineSlice';
 import type { GuiElementOptions, GuiLength, GuiStyle, GuiTheme, GuiFocusOptions, GuiPointerFilter } from './GuiTypes';
 import { requiredItemAt } from '../math/arrayAccess';
 import { EngineError, EngineErrorCode, ErrorDomain } from '../core/EngineError';
@@ -115,6 +116,7 @@ export function deserializeGuiRoot(data: unknown, options: GuiDeserializeOptions
 }
 
 export function serializeGuiElement(element: GuiElement): GuiSerializedElement {
+  if (element instanceof GuiNineSlice) invalidGuiData('Nine-slice resources are runtime bindings; serialize the application resource key and rebind the skin after loading.', '$.type');
   const layout = element.getLayoutOptions();
   const serialized: GuiSerializedElement = {
     type: getSerializedElementType(element),
@@ -455,7 +457,10 @@ function getBaseOptions(data: GuiSerializedElement): GuiElementOptions {
 }
 
 function cloneStyle(style: GuiStyle | undefined): GuiStyle | undefined {
-  return style ? { ...style } : undefined;
+  // v1 keeps its existing wire format. Resource bindings are intentionally
+  // outside it, and local runtime-only styles must never leak GPU handles.
+  if (style) validateStyle(Object.fromEntries(Object.entries(style).filter(([, value]) => value !== undefined)), '$.style');
+  return style ? Object.fromEntries(Object.entries(style).filter(([, value]) => value !== undefined)) : undefined;
 }
 
 function cloneTheme(theme: GuiTheme): Partial<GuiTheme> {

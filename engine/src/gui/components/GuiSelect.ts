@@ -18,6 +18,7 @@ export interface GuiSelectOptions<T = string> extends GuiElementOptions {
 }
 
 export class GuiSelect<T = string> extends GuiElement {
+  static override readonly themeControlType: string = 'GuiSelect';
   override handlePointerCancel(event: GuiPointerEvent): void {
     this.pointerDownInPopup = false;
     super.handlePointerCancel(event);

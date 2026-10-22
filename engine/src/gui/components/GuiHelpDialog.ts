@@ -19,6 +19,7 @@ export interface GuiHelpDialogOptions extends Omit<
 
 /** Persistent, dismissible help with word wrapping and scrollable long content. */
 export class GuiHelpDialog extends GuiModal {
+  static override readonly themeControlType: string = 'GuiHelpDialog';
   readonly body: GuiScrollView;
   private textKey = '';
   constructor(options: GuiHelpDialogOptions = {}) {

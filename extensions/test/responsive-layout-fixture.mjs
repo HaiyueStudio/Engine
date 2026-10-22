@@ -58,12 +58,20 @@ export async function loadResponsiveLayoutModules(workspace) {
 }
 
 async function transpileTree(sourceUrl, prefixes, evaluatorSource) {
-  const { mkdtemp, mkdir, readFile, readdir, writeFile } = await import('node:fs/promises');
+  const { mkdtemp, mkdir, readFile, readdir, writeFile, symlink } = await import('node:fs/promises');
   const { tmpdir } = await import('node:os');
   const path = await import('node:path');
   const { fileURLToPath } = await import('node:url');
   const ts = await import('typescript');
   const sourceRoot = fileURLToPath(sourceUrl), temporary = await mkdtemp(path.join(tmpdir(), 'haiyue-layout-test-'));
+  if (prefixes) {
+    // The isolated runtime still consumes the installed public Engine package.
+    // Do not rewrite its geometry import to a private source module.
+    const packageRoot = fileURLToPath(new URL('..', import.meta.resolve('@haiyue/engine/geometry')));
+    const scope = path.join(temporary, 'node_modules', '@haiyue');
+    await mkdir(scope, {recursive: true});
+    await symlink(packageRoot, path.join(scope, 'engine'), 'junction');
+  }
   for (const file of (await walk(sourceRoot, readdir, path)).filter(file => file.endsWith('.ts'))) {
     if (prefixes && !prefixes.some(prefix => path.relative(sourceRoot,file).replaceAll('\\','/').startsWith(prefix))) continue;
     const output = path.join(temporary, path.relative(sourceRoot, file).replace(/\.ts$/, '.js'));

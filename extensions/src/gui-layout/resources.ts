@@ -35,6 +35,19 @@ export class GuiLayoutResources {
       const texture = 'texture' in source ? source.texture : source;
       image = [identity, 'version' in source ? source.version : 0, 'naturalWidth' in texture ? texture.naturalWidth : 'width' in texture ? texture.width : 0, 'naturalHeight' in texture ? texture.naturalHeight : 'height' in texture ? texture.height : 0];
     }
-    return JSON.stringify(['text' in element ? element.text : undefined, 'fontSize' in element ? element.fontSize : undefined, 'value' in element ? element.value : undefined, 'placeholder' in element ? element.placeholder : undefined, element.style.padding, image]);
+    const skin = element.getResolvedStyle();
+    let icon: readonly unknown[] = [];
+    if (skin.icon) {
+      let identity = this.identities.get(skin.icon);
+      if (!identity) {identity = ++this.identity; this.identities.set(skin.icon, identity);}
+      const source = 'texture' in skin.icon ? skin.icon.texture : skin.icon;
+      icon = [identity, 'version' in skin.icon ? skin.icon.version : 0,
+        'naturalWidth' in source ? source.naturalWidth : 'width' in source ? source.width : 0,
+        'naturalHeight' in source ? source.naturalHeight : 'height' in source ? source.height : 0];
+    }
+    return JSON.stringify(['text' in element ? element.text : undefined, 'fontSize' in element ? element.fontSize : undefined, 'value' in element ? element.value : undefined, 'placeholder' in element ? element.placeholder : undefined,
+      skin.padding, skin.fontFamily, skin.fontSize, skin.contentInsets,
+      skin.nineSlice ? [skin.nineSlice.contentInsets, skin.nineSlice.cuts, skin.nineSlice.pixelRatio] : null,
+      skin.iconSize, skin.iconGap, icon, image]);
   }
 }

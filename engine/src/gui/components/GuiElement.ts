@@ -15,10 +15,17 @@ import {
 import { EventEmitter } from '../../core/EventEmitter';
 import { requiredItemAt } from '../../math/arrayAccess';
 import {assignedGuiRect, isGuiLayoutHidden, notifyGuiInvalidation} from '../GuiLayoutState';
+import type {GuiSkin, GuiThemeResourceBinding} from '../GuiThemeTypes';
+import {notifyGuiThemeTree, resolveGuiSkin} from '../GuiThemeResolve';
+import {guiContentMetrics} from '../GuiContent';
+import type {GuiDragSource, GuiDropTarget} from '../GuiDragTypes';
 
 let guiElementId = 0;
 
 export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
+  static readonly themeControlType: string = 'GuiElement';
+  readonly themeControlType: string;
+  private localThemeResource: GuiThemeResourceBinding | null;
   readonly id: string;
   parent: GuiElement | null = null;
   children: GuiElement[] = [];
@@ -32,6 +39,8 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   pointerFilter: GuiPointerFilter;
   private focusConfiguration: GuiFocusOptions;
   private onAction: ((event: GuiActionEvent) => void) | null;
+  declare private dragConfiguration: GuiDragSource | null | undefined;
+  declare private dropConfiguration: GuiDropTarget | null | undefined;
 
   protected x: GuiLength;
   protected y: GuiLength;
@@ -56,10 +65,14 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
     this.visible = options.visible ?? true;
     this.disabled = options.disabled ?? false;
     this.style = options.style ?? {};
+    this.localThemeResource = options.themeResource ?? null;
+    this.themeControlType = options.themeControlType ?? (this.constructor as typeof GuiElement).themeControlType;
     this.pointerFilter = options.pointerFilter ?? 'stop';
     this.focusConfiguration = Object.freeze({mode: 'none'});
     this.setFocusOptions(options.focus ?? {mode: 'none'});
     this.onAction = options.onAction ?? null;
+    if (options.dragSource != null) this.setDragSource(options.dragSource);
+    if (options.dropTarget != null) this.setDropTarget(options.dropTarget);
     this.onPointerEnter = options.onPointerEnter ?? null;
     this.onPointerLeave = options.onPointerLeave ?? null;
     this.onPointerDown = options.onPointerDown ?? null;
@@ -77,8 +90,45 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   getDirtyFlags(): GuiDirtyFlags {
     return this.dirtyFlags;
   }
+  getResolvedStyle(): GuiSkin {return resolveGuiSkin(this);}
+  /** Content padding stays in logical pixels and shrinks proportionally in tiny controls. */
+  getContentRect(): GuiRect {
+    const skin = this.getResolvedStyle();
+    const insets = skin.contentInsets ?? (skin.nineSlice ? guiContentMetrics(this, 0, skin.fontSize ?? 14).insets : undefined);
+    if (!insets) return this.rect;
+    const xScale = insets.left + insets.right > this.rect.width ? this.rect.width / (insets.left + insets.right) : 1;
+    const yScale = insets.top + insets.bottom > this.rect.height ? this.rect.height / (insets.top + insets.bottom) : 1;
+    return {x: this.rect.x + insets.left * xScale, y: this.rect.y + insets.top * yScale,
+      width: Math.max(0, this.rect.width - (insets.left + insets.right) * xScale),
+      height: Math.max(0, this.rect.height - (insets.top + insets.bottom) * yScale)};
+  }
 
   get focusOptions(): GuiFocusOptions { return this.focusConfiguration; }
+  get dragSource(): GuiDragSource | null {return this.dragConfiguration ?? null;}
+  get dropTarget(): GuiDropTarget | null {return this.dropConfiguration ?? null;}
+  setDragSource(binding: GuiDragSource | null): void {
+    if (binding !== null && (typeof binding?.getData !== 'function' ||
+        (binding.touchGesture !== undefined && !['auto', 'drag'].includes(binding.touchGesture)) ||
+        ['createPreview', 'disposePreview', 'onEnd'].some(key => key in binding && typeof binding[key as keyof GuiDragSource] !== 'function')))
+      throw new TypeError('Invalid GUI drag binding.');
+    if (this.dragSource === binding) return;
+    this.dragConfiguration = binding; this.markDirty(GuiDirtyFlags.Input | GuiDirtyFlags.Visual);
+  }
+  setDropTarget(binding: GuiDropTarget | null): void {
+    if (binding !== null && (typeof binding?.canDrop !== 'function' || typeof binding.drop !== 'function' ||
+        (binding.onHoverChange !== undefined && typeof binding.onHoverChange !== 'function')))
+      throw new TypeError('Invalid GUI drop binding.');
+    if (this.dropTarget === binding) return;
+    this.dropConfiguration = binding; this.markDirty(GuiDirtyFlags.Input | GuiDirtyFlags.Visual);
+  }
+  get themeResource(): GuiThemeResourceBinding | null {return this.localThemeResource;}
+  set themeResource(resource: GuiThemeResourceBinding | null) {this.setThemeResource(resource);}
+  setThemeResource(resource: GuiThemeResourceBinding | null): void {
+    if (resource === this.localThemeResource) return;
+    this.localThemeResource = resource;
+    notifyGuiThemeTree(this);
+    this.markDirty(GuiDirtyFlags.Visual);
+  }
 
   setFocusOptions(options: GuiFocusOptions): void {
     if (!['none', 'click', 'all'].includes(options.mode) ||
@@ -122,6 +172,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
     if (child.parent) child.parent.remove(child);
     child.parent = this;
     this.children.push(child);
+    notifyGuiThemeTree(this, child);
     this.markDirty(GuiDirtyFlags.Children | GuiDirtyFlags.Layout);
     return child;
   }
@@ -131,6 +182,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
     if (index < 0) return false;
     this.children.splice(index, 1);
     child.parent = null;
+    notifyGuiThemeTree(this, child);
     this.markDirty(GuiDirtyFlags.Children | GuiDirtyFlags.Layout);
     return true;
   }
@@ -159,7 +211,9 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   setStyle(style: GuiStyle): void {
     if ((Object.keys(style) as (keyof GuiStyle)[]).every((key) => Object.is(this.style[key], style[key]))) return;
     this.style = { ...this.style, ...style };
-    this.markDirty(GuiDirtyFlags.Visual | (style.padding !== undefined ? GuiDirtyFlags.Layout : GuiDirtyFlags.None));
+    notifyGuiThemeTree(this);
+    const metrics = ['padding', 'fontFamily', 'fontSize', 'icon', 'iconSize', 'iconGap', 'contentInsets', 'nineSlice'] as const;
+    this.markDirty(GuiDirtyFlags.Visual | (metrics.some(key => key in style) ? GuiDirtyFlags.Layout | GuiDirtyFlags.Text : GuiDirtyFlags.None));
   }
 
   layout(parentRect: GuiRect): void {
@@ -167,7 +221,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
     if (assigned) {
       this.rect = {...assigned};
       if (isGuiLayoutHidden(this)) return;
-      for (const child of this.children) child.layout(this.rect);
+      for (const child of this.children) child.layout(this.getContentRect());
       return;
     }
     const width = resolveGuiLength(this.width, parentRect.width, this.rect.width);
@@ -175,7 +229,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
     const x = parentRect.x + resolveGuiLength(this.x, parentRect.width, 0);
     const y = parentRect.y + resolveGuiLength(this.y, parentRect.height, 0);
     this.rect = { x, y, width, height };
-    for (const child of this.children) child.layout(this.rect);
+    for (const child of this.children) child.layout(this.getContentRect());
   }
 
   hitTest(x: number, y: number): GuiElement | null {

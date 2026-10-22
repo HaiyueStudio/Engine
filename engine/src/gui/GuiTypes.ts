@@ -1,3 +1,7 @@
+import type {GuiImageSource} from './components/GuiImage';
+import type {GuiNineSliceOptions, GuiThemeResourceBinding} from './GuiThemeTypes';
+import type {GuiDragSource, GuiDropTarget} from './GuiDragTypes';
+
 export const enum GuiDirtyFlags {
   None = 0,
   Layout = 1 << 0,
@@ -18,6 +22,7 @@ export interface GuiRect {
 }
 
 export interface GuiStyle {
+  palette?: Partial<GuiTheme['colors']>;
   backgroundColor?: string;
   hoverBackgroundColor?: string;
   borderColor?: string;
@@ -26,6 +31,14 @@ export interface GuiStyle {
   opacity?: number;
   radius?: number;
   padding?: number;
+  fontFamily?: string;
+  fontSize?: number;
+  icon?: GuiImageSource;
+  iconSize?: number;
+  iconGap?: number;
+  iconTint?: string;
+  contentInsets?: Readonly<{top: number; right: number; bottom: number; left: number}>;
+  nineSlice?: GuiNineSliceOptions;
 }
 
 export interface GuiTheme {
@@ -102,6 +115,8 @@ export interface GuiActionEvent {
 }
 
 export interface GuiElementOptions {
+  dragSource?: GuiDragSource | null;
+  dropTarget?: GuiDropTarget | null;
   id?: string | undefined;
   x?: GuiLength | undefined;
   y?: GuiLength | undefined;
@@ -110,6 +125,8 @@ export interface GuiElementOptions {
   visible?: boolean | undefined;
   disabled?: boolean | undefined;
   style?: GuiStyle | undefined;
+  themeResource?: GuiThemeResourceBinding | null;
+  themeControlType?: string;
   pointerFilter?: GuiPointerFilter;
   focus?: GuiFocusOptions;
   onAction?: (event: GuiActionEvent) => void;

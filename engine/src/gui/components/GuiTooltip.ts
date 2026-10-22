@@ -11,6 +11,7 @@ export interface GuiTooltipOptions extends GuiElementOptions {
 }
 
 export class GuiTooltip extends GuiElement {
+  static override readonly themeControlType: string = 'GuiTooltip';
   target: GuiElement;
   content: string;
   placement: GuiTooltipPlacement;
@@ -19,6 +20,7 @@ export class GuiTooltip extends GuiElement {
 
   constructor(options: GuiTooltipOptions) {
     super({
+      ...options,
       width: options.width ?? 180,
       height: options.height ?? 30,
       visible: options.visible ?? true,

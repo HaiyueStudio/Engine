@@ -12,6 +12,7 @@ export interface GuiRadioOptions<T = string> extends GuiElementOptions {
 }
 
 export class GuiRadio<T = string> extends GuiElement {
+  static override readonly themeControlType: string = 'GuiRadio';
   override handleAction(event: GuiActionEvent): void {
     super.handleAction(event);
     if (!event.consumed && event.action === 'confirm') activateGuiElement(this, event);

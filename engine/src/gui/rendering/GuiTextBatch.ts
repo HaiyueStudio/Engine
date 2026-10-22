@@ -21,6 +21,7 @@ export interface GuiTextCommand {
 
 export class GuiTextBatch {
   readonly commands: GuiTextCommand[] = [];
+  readonly commandRanges: {first: number; count: number}[] = [];
   vertexData = new Float32Array(0);
   vertexCount = 0;
   version = 0;
@@ -30,6 +31,7 @@ export class GuiTextBatch {
 
   clear(): void {
     this.commands.length = 0;
+    this.commandRanges.length = 0;
     this.vertexCount = 0;
     this.dirty = true;
   }
@@ -44,6 +46,12 @@ export class GuiTextBatch {
     // Layout once, then reuse it for both the size calculation and packing.
     // Re-evaluate font metrics on rebuild: BitmapFontData is mutable.
     const layouts = this.commands.map(command => layoutText(command, font));
+    this.commandRanges.length = 0;
+    let first = 0;
+    for (const layout of layouts) {
+      const count = layout.glyphs.length * VERTICES_PER_GLYPH;
+      this.commandRanges.push({first, count}); first += count;
+    }
     const glyphCount = layouts.reduce((sum, layout) => sum + layout.glyphs.length, 0);
     const vertexCount = glyphCount * VERTICES_PER_GLYPH;
     const requiredFloats = vertexCount * GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex;
@@ -253,5 +261,5 @@ function nextCapacity(required: number): number {
   return capacity;
 }
 
-export const GUI_TEXT_FLOATS_PER_VERTEX = GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex;
+export const GUI_TEXT_FLOATS_PER_VERTEX = /* @__PURE__ */ (() => GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex)();
 export const GUI_TEXT_VERTICES_PER_GLYPH = VERTICES_PER_GLYPH;

@@ -9,6 +9,7 @@ export interface GuiProgressOptions extends GuiElementOptions {
 }
 
 export class GuiProgress extends GuiElement {
+  static override readonly themeControlType: string = 'GuiProgress';
   value: number;
   min: number;
   max: number;

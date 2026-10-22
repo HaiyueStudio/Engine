@@ -9,6 +9,7 @@ export interface GuiSwitchOptions extends GuiCheckboxOptions {
 }
 
 export class GuiSwitch extends GuiCheckbox {
+  static override readonly themeControlType: string = 'GuiSwitch';
   thumbTransitionMs: number;
   colorTransitionMs: number;
   private target: number;

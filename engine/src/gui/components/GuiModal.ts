@@ -32,6 +32,7 @@ export interface GuiModalOptions extends Omit<GuiElementOptions, 'x' | 'y'> {
 }
 
 export class GuiModal extends GuiElement {
+  static override readonly themeControlType: string = 'GuiModal';
   title: string;
   message: string;
   confirmText: string;

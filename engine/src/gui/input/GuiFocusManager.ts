@@ -2,6 +2,7 @@ import {GuiElement} from '../components/GuiElement';
 import {GuiModal} from '../components/GuiModal';
 import {isGuiLayoutHidden} from '../GuiLayoutState';
 import type {GuiRect} from '../GuiTypes';
+import {guiDirectionalTarget} from './GuiNavigation';
 
 type Direction = 'left' | 'right' | 'up' | 'down';
 
@@ -79,19 +80,7 @@ export class GuiFocusManager {
   move(direction: Direction): GuiElement | null {
     this.reconcile();
     if (!this.current) return this.next();
-    const nodes = this.candidates(), explicit = this.current.focusOptions.neighbours?.[direction];
-    const neighbour = explicit ? nodes.find(n => n.id === explicit) : null;
-    if (neighbour && neighbour !== this.current) { this.focus(neighbour); return neighbour; }
-    const origin = this.rectFor(this.current), horizontal = direction === 'left' || direction === 'right';
-    const sign = direction === 'left' || direction === 'up' ? -1 : 1;
-    const scored = nodes.filter(n => n !== this.current).map(node => {
-      const r = this.rectFor(node), dx = r.x + r.width / 2 - origin.x - origin.width / 2;
-      const dy = r.y + r.height / 2 - origin.y - origin.height / 2;
-      const forward = (horizontal ? dx : dy) * sign, cross = horizontal ? dy : dx;
-      return {node, forward, angle: Math.atan2(Math.abs(cross), forward), distance: dx * dx + dy * dy};
-    }).filter(n => n.forward > 0);
-    scored.sort((a,b) => a.angle - b.angle || a.distance - b.distance || (a.node.id < b.node.id ? -1 : a.node.id > b.node.id ? 1 : 0));
-    const target = scored[0]?.node ?? null;
+    const target = guiDirectionalTarget(this.current, this.candidates(), direction, this.rectFor, this.current.focusOptions.neighbours?.[direction]);
     if (target) this.focus(target);
     return target;
   }

@@ -12,6 +12,7 @@ export interface GuiSliderOptions extends GuiElementOptions {
 }
 
 export class GuiSlider extends GuiElement {
+  static override readonly themeControlType: string = 'GuiSlider';
   override handleAction(event: GuiActionEvent): void {
     super.handleAction(event);
     if (event.consumed) return;

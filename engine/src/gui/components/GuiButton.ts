@@ -10,6 +10,7 @@ export interface GuiButtonOptions extends GuiElementOptions {
 }
 
 export class GuiButton extends GuiElement {
+  static override readonly themeControlType: string = 'GuiButton';
   override handleAction(event: GuiActionEvent): void {
     super.handleAction(event);
     if (!event.consumed && event.action === 'confirm') activateGuiElement(this, event);

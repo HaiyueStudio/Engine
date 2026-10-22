@@ -3,6 +3,18 @@ import {GuiDirtyFlags, type GuiRect} from './GuiTypes';
 
 type Sink = (element: GuiElement, flags: GuiDirtyFlags, reason?: 'resource' | 'animation') => void;
 const sinks = new WeakMap<GuiElement, Sink>();
+const disposals = new WeakMap<GuiElement, Set<() => void>>();
+export function observeGuiRootDisposal(root: GuiElement, listener: () => void): () => void {
+  let listeners = disposals.get(root); if (!listeners) {listeners = new Set(); disposals.set(root, listeners);}
+  listeners.add(listener);
+  return () => {listeners.delete(listener); if (!listeners.size && disposals.get(root) === listeners) disposals.delete(root);};
+}
+export function disposeGuiRootObservers(root: GuiElement): void {
+  const listeners = disposals.get(root); disposals.delete(root);
+  const errors: unknown[] = [];
+  for (const listener of listeners ?? []) {try {listener();} catch (error) {errors.push(error);}}
+  if (errors.length) throw new AggregateError(errors, 'GUI root resource cleanup failed.');
+}
 const suspensions = new WeakMap<GuiElement, () => void>();
 const assignments = new WeakMap<GuiElement, GuiRect>();
 const managed = new WeakSet<GuiElement>();

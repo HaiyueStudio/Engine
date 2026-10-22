@@ -7809,6 +7809,10 @@
               "kind": "type"
             },
             {
+              "name": "computeNineSlicePatches",
+              "kind": "value"
+            },
+            {
               "name": "ConeGeometryOptions",
               "kind": "type"
             },
@@ -7959,6 +7963,14 @@
             {
               "name": "LineGeometry",
               "kind": "value"
+            },
+            {
+              "name": "NineSliceOptions",
+              "kind": "type"
+            },
+            {
+              "name": "NineSlicePatch",
+              "kind": "type"
             },
             {
               "name": "PathExtrusionGeometryOptions",

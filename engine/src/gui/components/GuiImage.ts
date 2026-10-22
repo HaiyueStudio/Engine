@@ -12,6 +12,7 @@ export interface GuiImageOptions extends GuiElementOptions {
 }
 
 export class GuiImage extends GuiElement {
+  static override readonly themeControlType: string = 'GuiImage';
   source: GuiImageSource;
   sourceKey: string | null;
   uv: [number, number, number, number];

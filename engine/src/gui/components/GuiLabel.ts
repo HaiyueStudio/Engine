@@ -1,6 +1,7 @@
 import { GuiDirtyFlags, type GuiElementOptions, type GuiRect } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
 import {assignedGuiRect} from '../GuiLayoutState';
+import {guiContentMetrics} from '../GuiContent';
 
 export type GuiLabelTextAlign = 'left' | 'center' | 'right';
 
@@ -16,6 +17,7 @@ const measuredTextWidths = new WeakMap<GuiLabel, number>();
 
 /** Non-interactive text intended for headings, status text, and HUD values. */
 export class GuiLabel extends GuiElement {
+  static override readonly themeControlType: string = 'GuiLabel';
   text: string;
   fontSize: number | undefined;
   textAlign: GuiLabelTextAlign;
@@ -58,11 +60,11 @@ export class GuiLabel extends GuiElement {
     if (!this.autoWidth || assignedGuiRect(this)) return;
     const measuredWidth = measuredTextWidths.get(this);
     if (measuredWidth === undefined) return;
-    const padding = this.style.padding ?? 0;
-    const width = Math.ceil(measuredWidth + padding * 2);
+    const skin = this.getResolvedStyle();
+    const width = Math.ceil(measuredWidth + guiContentMetrics(this, 0, this.fontSize ?? skin.fontSize ?? 14).horizontal);
     if (this.rect.width === width) return;
     this.rect.width = width;
-    for (const child of this.children) child.layout(this.rect);
+    for (const child of this.children) child.layout(this.getContentRect());
   }
 }
 

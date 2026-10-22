@@ -9,6 +9,15 @@ const {attachGuiLayout,createGuiContainer}=await import('../../artifacts/engine-
 const {readGuiLayoutCounters}=await import('../../artifacts/engine-0.2.2/g03/compiled/gui-layout/diagnostics.js');
 const none=()=>({width:0,height:0,minWidth:0,minHeight:0});
 
+test('theme content insets belong to container layout once; colors solve nothing and explicit layout padding wins',()=>{
+ let skin={contentInsets:{left:12,top:6,right:8,bottom:4},color:'red'};const listeners=new Set(),resource={version:1,resolve:type=>type==='*'?skin:{},subscribe(callback){listeners.add(callback);return()=>listeners.delete(callback);}};
+ const root=new GuiRoot(),panel=root.add(createGuiContainer('column',{style:{width:120,height:60}})),child=panel.add(new GuiButton({width:30,height:20}));panel.setThemeResource(resource);
+ const binding=attachGuiLayout(root,{measure:none});root.layout(200,100);root.clearDirty();assert.equal(child.rect.x,12);assert.equal(child.rect.y,6);const initial=readGuiLayoutCounters(binding).solves;
+ skin={...skin,color:'blue'};resource.version++;for(const f of listeners)f();root.layout(200,100);assert.equal(readGuiLayoutCounters(binding).solves,initial);root.clearDirty();
+ skin={...skin,contentInsets:{left:18,top:9,right:8,bottom:4}};resource.version++;for(const f of listeners)f();root.layout(200,100);assert.equal(child.rect.x,18);assert.equal(child.rect.y,9);assert.equal(readGuiLayoutCounters(binding).solves,initial+1);
+ binding.setStyle(panel,{padding:{left:2,top:3,right:2,bottom:3}});root.layout(200,100);assert.equal(child.rect.x,2);assert.equal(child.rect.y,3);binding.dispose();root.destroy();assert.equal(listeners.size,0);
+});
+
 test('reverse flow preserves focus identity and tree order; modal and Toast keep input and animation ownership',()=>{
  const root=new GuiRoot(),row=root.add(createGuiContainer('row',{style:{width:200,height:50,direction:'row-reverse'}}));
  const a=row.add(new GuiButton({width:60,height:30})),b=row.add(new GuiButton({width:60,height:30}));

@@ -16,6 +16,7 @@ export interface GuiScrollViewOptions extends GuiElementOptions {
 
 /** Vertical viewport. Children use content-local coordinates; drawing and hits are clipped. */
 export class GuiScrollView extends GuiElement {
+  static override readonly themeControlType: string = 'GuiScrollView';
   override handleAction(event: GuiActionEvent): void {
     super.handleAction(event);
     if (event.consumed || (event.action !== 'up' && event.action !== 'down')) return;
