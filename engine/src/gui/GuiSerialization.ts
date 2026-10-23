@@ -247,7 +247,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
     case 'color-picker':
       return new GuiColorPicker({ ...base, value: stringProp(props.value, '#2563eb') });
     case 'button':
-      return new GuiButton({ ...base, text: stringProp(props.text, 'Button'), variant: variantProp(props.variant) });
+      return new GuiButton({ ...base, text: stringProp(props.text, 'Button'), variant: variantProp(props.variant), hoverTransition: booleanProp(props.hoverTransition, false), hoverTransitionMs: numberProp(props.hoverTransitionMs, 180) });
     case 'label': {
       const fontSize = optionalNumberProp(props.fontSize);
       return new GuiLabel({
@@ -396,7 +396,7 @@ function serializeElementProps(element: GuiElement): Record<string, unknown> {
       backdropColor: element.backdropColor,
     };
   }
-  if (element instanceof GuiButton) return { text: element.text, variant: element.variant };
+  if (element instanceof GuiButton) return { text: element.text, variant: element.variant, hoverTransition: element.hoverTransition, hoverTransitionMs: element.hoverTransitionMs };
   if (element instanceof GuiLabel) {
     return {
       text: element.text,
@@ -556,8 +556,8 @@ const GUI_ELEMENT_TYPES = new Set<GuiSerializedElementType>([
 ]);
 
 const STRING_PROPS = new Set(['iconKey', 'text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId', 'title', 'message', 'confirmText', 'cancelText', 'backdropColor']);
-const NUMBER_PROPS = new Set(['durationMs', 'animationMs', 'iconSize', 'inertiaStrength', 'thumbTransitionMs', 'colorTransitionMs', 'contentHeight', 'scrollY', 'fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
-const BOOLEAN_PROPS = new Set(['inertia', 'showScrollbar', 'autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
+const NUMBER_PROPS = new Set(['hoverTransitionMs', 'durationMs', 'animationMs', 'iconSize', 'inertiaStrength', 'thumbTransitionMs', 'colorTransitionMs', 'contentHeight', 'scrollY', 'fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
+const BOOLEAN_PROPS = new Set(['hoverTransition', 'inertia', 'showScrollbar', 'autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
 
 function validateProps(type: GuiSerializedElementType, value: unknown, path: string): void {
   const props = recordAt(value, path);

@@ -338,3 +338,8 @@ test('tooltip centers single, explicit multiline and wrapped text without droppi
     }
   }
 });
+
+test('button hover transition options serialize without transient hover state',()=>{
+ const root=new GuiRoot(),button=root.add(new GuiButton({id:'hover',hoverTransition:true,hoverTransitionMs:350}));button.hovered=true;
+ const restored=deserializeGuiRoot(serializeGuiRoot(root)),copy=restored.findById('hover');assert.equal(copy.hoverTransition,true);assert.equal(copy.hoverTransitionMs,350);assert.equal(copy.hovered,false);root.destroy();restored.destroy();
+});

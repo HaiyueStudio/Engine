@@ -7,6 +7,9 @@ import type { IEngine } from '../../core/IEngine';
 import { System } from '../../ecs/System';
 import { World } from '../../ecs/World';
 import { GuiElement } from '../components/GuiElement';
+import {guiButtonHoverAnimating,advanceGuiButtonHover,finishGuiButtonHover} from '../input/GuiButtonHover';
+import {GuiTooltip} from '../components/GuiTooltip';
+import {guiTooltipPending,advanceGuiTooltip} from '../input/GuiTooltipTiming';
 import { GuiButton } from '../components/GuiButton';
 import { GuiInput } from '../components/GuiInput';
 import { GuiLabel, setGuiLabelMeasuredTextWidth } from '../components/GuiLabel';
@@ -297,8 +300,8 @@ export class GuiSystem extends System {
 
   /** Demand-rendering hosts should keep requesting frames while this is true. */
   get animating(): boolean {
-    const active = (element: GuiElement): boolean => element.visible && !isGuiLayoutHidden(element) && !element.disabled &&
-      (((element instanceof GuiScrollView || element instanceof GuiSwitch || element instanceof GuiToast) && element.animating) || element.children.some(active));
+    const active = (element: GuiElement): boolean => element.visible && !isGuiLayoutHidden(element) && (!element.disabled || element instanceof GuiTooltip) &&
+      (((element instanceof GuiScrollView || element instanceof GuiSwitch || element instanceof GuiToast) && element.animating) || (element instanceof GuiTooltip && guiTooltipPending(element)) || (element instanceof GuiButton && guiButtonHoverAnimating(element)) || element.children.some(active));
     for (const root of this.renderRoots()) if (active(root.root)) return true;
     return false;
   }
@@ -314,8 +317,12 @@ export class GuiSystem extends System {
     this.motionFrames.set(frame, frame.frameId);
     const advance = (element: GuiElement, parentActive: boolean): void => {
       const active = parentActive && element.visible && !isGuiLayoutHidden(element) && !element.disabled;
-      if (element instanceof GuiScrollView) {
+      if (element instanceof GuiTooltip) {
+        advanceGuiTooltip(element,parentActive&&element.visible&&!isGuiLayoutHidden(element));
+      } else if (element instanceof GuiScrollView) {
         if (active) element.advanceAnimation(delta); else element.stopInertia();
+      } else if (element instanceof GuiButton) {
+        if(active)advanceGuiButtonHover(element,delta);else finishGuiButtonHover(element);
       } else if (element instanceof GuiSwitch) {
         if (active) element.advanceAnimation(delta); else if (element.animating) element.finishAnimation();
       } else if (element instanceof GuiToast) {
@@ -337,6 +344,8 @@ export class GuiSystem extends System {
     this.fontEventsCleanup?.(); this.fontEventsCleanup = null;
     for (const root of this.roots) {suspendGuiLayout(root.root); this.walkGui(root.root, element => {
       if (element instanceof GuiScrollView) element.stopInertia();
+      else if (element instanceof GuiTooltip) advanceGuiTooltip(element,false);
+      else if (element instanceof GuiButton) finishGuiButtonHover(element);
       else if (element instanceof GuiSwitch && element.animating) element.finishAnimation();
       else if (element instanceof GuiToast) element.hide();
     });}

@@ -3,6 +3,8 @@ import { GuiScrollView } from '../components/GuiScrollView';
 import { GuiToast } from '../components/GuiToast';
 import type { IEngine } from '../../core/IEngine';
 import type { BitmapFontData } from '../../font/BitmapFontData';
+import {guiButtonHoverProgress} from '../input/GuiButtonHover';
+import {resolveGuiSkin,guiThemeState} from '../GuiThemeResolve';
 import { GuiButton } from '../components/GuiButton';
 import { GuiCheckbox } from '../components/GuiCheckbox';
 import { GuiElement } from '../components/GuiElement';
@@ -551,31 +553,25 @@ export class GuiRenderer {
     const box = guiContentBox(button, button.variant === 'outline' ? 4 : 8, theme.fontSize);
     const textRect = style.contentInsets || style.nineSlice || style.icon ? box.text : {x: button.rect.x + padding, y: button.rect.y, width: button.rect.width - padding * 2, height: button.rect.height};
     const radius = this.styleFor(button).radius ?? theme.radius;
-    const border = colorToRgba(this.styleFor(button).borderColor, button.focused ? theme.colors.primary : theme.colors.border);
-    const baseSurface = button.variant === 'primary'
-      ? theme.colors.primary
-      : button.variant === 'danger'
-        ? theme.colors.danger
-        : theme.colors.surface;
-    const surface = button.pressed
-      ? theme.colors.active
-      : button.hovered
-        ? theme.colors.hover
-        : baseSurface;
-    const background = button.hovered
-      ? this.styleFor(button).hoverBackgroundColor ?? this.styleFor(button).backgroundColor
-      : this.styleFor(button).backgroundColor;
-    const textColor = button.hovered
-      ? this.styleFor(button).hoverColor ?? this.styleFor(button).color
-      : this.styleFor(button).color;
+    const progress=guiButtonHoverProgress(button),state=guiThemeState(button);
+    const normal=progress===1?null:!state.hover?style:resolveGuiSkin(button,{...state,hover:false}),hover=progress===0?null:state.hover?style:resolveGuiSkin(button,{...state,hover:true});
+    const colors=(skin:GuiSkin,over:boolean)=>{
+      const palette={...(this.currentRoot?.theme.colors??theme.colors),...skin.palette};
+      const base=button.variant==='primary'?palette.primary:button.variant==='danger'?palette.danger:palette.surface;
+      return {border:colorToRgba(skin.borderColor,button.focused?palette.primary:palette.border),background:colorToRgba(over?skin.hoverBackgroundColor??skin.backgroundColor:skin.backgroundColor,button.pressed?palette.active:over?palette.hover:base),text:colorToRgba(over?skin.hoverColor??skin.color:skin.color,palette.text)};
+    };
+    const from=normal?colors(normal,false):colors(hover!,true),to=hover?colors(hover,true):from;
+    const mix=(a:[number,number,number,number],b:[number,number,number,number]):[number,number,number,number]=>[a[0]+(b[0]-a[0])*progress,a[1]+(b[1]-a[1])*progress,a[2]+(b[2]-a[2])*progress,a[3]+(b[3]-a[3])*progress];
+    const border=style.nineSlice&&guiImageSourceReady(style.nineSlice.source)?colorToRgba('transparent','transparent'):mix(from.border,to.border);
+    const background=style.nineSlice&&guiImageSourceReady(style.nineSlice.source)?colorToRgba('transparent','transparent'):mix(from.background,to.background),textColor=mix(from.text,to.text);
     if (button.variant === 'outline') {
       this.currentBatch.addShape({ ...button.rect, radius, color: border, strokeWidth: 1.5, clip: this.currentClip });
-      this.addCenteredText(button.text, textRect.x, textRect.y, textRect.width, textRect.height, theme.fontSize, colorToRgba(textColor,theme.colors.text));
+      this.addCenteredText(button.text, textRect.x, textRect.y, textRect.width, textRect.height, theme.fontSize, textColor);
       return;
     }
     this.addRect(button.rect.x, button.rect.y, button.rect.width, button.rect.height, radius, border);
-    this.addRect(button.rect.x + 1, button.rect.y + 1, button.rect.width - 2, button.rect.height - 2, Math.max(0, radius - 1), withAlpha(colorToRgba(background, surface), button.disabled ? 0.45 : 1));
-    this.addCenteredText(button.text, textRect.x, textRect.y, textRect.width, textRect.height, theme.fontSize, colorToRgba(textColor, theme.colors.text));
+    this.addRect(button.rect.x + 1, button.rect.y + 1, button.rect.width - 2, button.rect.height - 2, Math.max(0, radius - 1), withAlpha(background, button.disabled ? 0.45 : 1));
+    this.addCenteredText(button.text, textRect.x, textRect.y, textRect.width, textRect.height, theme.fontSize, textColor);
   }
 
   private addLabel(label: GuiLabel, theme: GuiTheme): void {

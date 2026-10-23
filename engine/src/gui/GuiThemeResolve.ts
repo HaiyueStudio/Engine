@@ -23,7 +23,7 @@ function assign(target: GuiSkin, source: GuiSkin): void {
 }
 
 /** Resolve inheritance without projecting into the caller's mutable local style object. */
-export function resolveGuiSkin(element: GuiElement): GuiSkin {
+export function resolveGuiSkin(element: GuiElement, state: GuiThemeState = guiThemeState(element)): GuiSkin {
   const inherited: GuiThemeResourceBinding[] = [];
   let root = element;
   for (let parent = element.parent; parent; parent = parent.parent) {
@@ -32,7 +32,7 @@ export function resolveGuiSkin(element: GuiElement): GuiSkin {
   }
   const parent = element.parent && guiThemeTreeActive(root) ? element.parent.getResolvedStyle() : undefined;
   const result: GuiSkin = {...(parent?.fontFamily !== undefined ? {fontFamily: parent.fontFamily} : {}), ...(parent?.fontSize !== undefined ? {fontSize: parent.fontSize} : {})};
-  const state = guiThemeState(element), type = element.themeControlType;
+  const type = element.themeControlType;
   for (const resource of inherited) assign(result, resource.resolve('*', state));
   for (const resource of inherited) assign(result, resource.resolve(type, state));
   if (element.themeResource) {

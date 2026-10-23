@@ -65,8 +65,8 @@ export function createCatalog(): Demo[] {
     },
     {
       name: 'GuiButton', hint: 'Click the button to see its event below.',
-      parameters: [...size(200), text('text', 'Hello, Engine'), choice('variant', 'primary', ['default', 'primary', 'danger', 'outline'])],
-      create: (p, o, change) => new GuiButton({ ...o, text: s(p, 'text'), variant: s(p, 'variant') as 'primary', onClick: () => change('clicks', n(p, 'clicks') + 1) }),
+      parameters: [...size(200), text('text', 'Hello, Engine'), choice('variant', 'primary', ['default', 'primary', 'danger', 'outline']), boolean('hoverTransition', true), number('hoverTransitionMs', 180, 0, 1500, 20)],
+      create: (p, o, change) => new GuiButton({ ...o, text: s(p, 'text'), variant: s(p, 'variant') as 'primary', hoverTransition: b(p, 'hoverTransition'), hoverTransitionMs: n(p, 'hoverTransitionMs'), onClick: () => change('clicks', n(p, 'clicks') + 1) }),
     },
     {
       name: 'GuiColorPicker', hint: 'Edit HEX or drag RGB channels. Enter confirms HEX.',
@@ -145,7 +145,7 @@ export function createCatalog(): Demo[] {
       create: (p, o) => {
         const host = new GuiElement({ ...o, style: undefined, width: 160, height: 36 });
         const target = host.add(new GuiButton({ width: 160, height: 36, text: 'Hover over me', disabled: o.disabled }));
-        host.add(new GuiTooltip({ ...o, target, content: s(p, 'content'), placement: s(p, 'placement') as 'top', delay: n(p, 'delay') }));
+        host.add(new GuiTooltip({ ...o, id: undefined, x: 0, y: 0, target, content: s(p, 'content'), placement: s(p, 'placement') as 'top', delay: n(p, 'delay') }));
         return host;
       },
     },
