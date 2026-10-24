@@ -7,7 +7,7 @@ import type { GuiImageSource } from '../components/GuiImage';
 import { GUI_IMAGE_FLOATS_PER_VERTEX, GuiImageBatch, type GuiImageGroup } from './GuiImageBatch';
 import { BaseRenderer } from '../../renderer/BaseRenderer';
 import type { PipelineWarmupPlan } from '../../renderer/PipelineWarmup';
-import { getBuiltin2dUiShader } from '../../shader/BuiltinRenderShader';
+import { getBuiltinGuiShader } from '../../shader/BuiltinRenderShader';
 import { GUI_TEXTURED_VERTEX_LAYOUT } from './GuiVertexLayout';
 import {guiImageSourceReady} from './GuiImageSources';
 
@@ -60,7 +60,7 @@ export class GuiImageRenderer extends BaseRenderer {
         { binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'filtering' } },
       ],
     });
-    const generated = getBuiltin2dUiShader(device, 'gui-image', [
+    const generated = getBuiltinGuiShader(device, 'gui-image', [
       this.viewportBindGroupLayout,
       this.imageBindGroupLayout,
     ]);

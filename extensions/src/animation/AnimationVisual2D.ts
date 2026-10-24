@@ -18,6 +18,7 @@ export interface AnimationVisual2DOptions {
   blendMode?: AnimationVisual2DBlendMode;
   /** Declares whether filtered source texels are already premultiplied. */
   textureAlphaMode?: AnimationVisual2DTextureAlphaMode;
+  textureSampling?: Readonly<{filter: 'nearest' | 'linear'; wrapX: 'clamp' | 'repeat' | 'mirror'; wrapY: 'clamp' | 'repeat' | 'mirror'}>;
   /** Source-neutral back-face culling. False draws both triangle faces. */
   culling?: boolean;
   /** Optional explicit UV pairs for arbitrary textured triangle meshes. */
@@ -32,6 +33,8 @@ export interface AnimationVisual2DOptions {
   uvRect?: readonly [number, number, number, number];
   gradient?: AnimationVisualGradient | null;
   effects?: readonly AnimationVisualEffect[];
+  /** Private source-neutral affine bridge, applied after drawable-local paint coordinates. */
+  localTransform?: readonly [number, number, number, number, number, number];
 }
 
 export type AnimationVisual2DBlendMode = 'normal' | 'additive' | 'multiplicative' | 'screen';
@@ -66,6 +69,7 @@ export class AnimationVisual2D extends Component {
   order: number;
   readonly blendMode: AnimationVisual2DBlendMode;
   readonly textureAlphaMode: AnimationVisual2DTextureAlphaMode;
+  readonly textureSampling: AnimationVisual2DOptions['textureSampling'] | null;
   readonly culling: boolean;
   readonly uvs: Float32Array | null;
   readonly sourceOnly: boolean;
@@ -85,6 +89,7 @@ export class AnimationVisual2D extends Component {
   readonly requiresTexture: boolean;
   gradient: AnimationVisualGradient | null;
   readonly effects: readonly AnimationVisualEffect[];
+  readonly localTransform: readonly [number, number, number, number, number, number] | null;
   revision = 0;
 
   constructor(options: AnimationVisual2DOptions) {
@@ -96,6 +101,10 @@ export class AnimationVisual2D extends Component {
     this.order = options.order;
     this.blendMode = options.blendMode ?? 'normal';
     this.textureAlphaMode = options.textureAlphaMode ?? 'straight';
+    if (options.textureSampling && (!['nearest', 'linear'].includes(options.textureSampling.filter)
+      || !['clamp', 'repeat', 'mirror'].includes(options.textureSampling.wrapX) || !['clamp', 'repeat', 'mirror'].includes(options.textureSampling.wrapY)))
+      throw new TypeError('AnimationVisual2D texture sampling is invalid.');
+    this.textureSampling = options.textureSampling ? Object.freeze({...options.textureSampling}) : null;
     if (options.culling !== undefined && typeof options.culling !== 'boolean') {
       throw new AnimationVisual2DConfigurationError(
         'E_ANIMATION_2D_CULLING_INVALID',
@@ -128,6 +137,9 @@ export class AnimationVisual2D extends Component {
     this.requiresTexture = options.requiresTexture ?? false;
     this.gradient = options.gradient ?? null;
     this.effects = Object.freeze(options.effects ? [...options.effects] : []);
+    if (options.localTransform && (options.localTransform.length !== 6 || options.localTransform.some(value => !Number.isFinite(value))))
+      throw new RangeError('AnimationVisual2D local transform needs six finite affine coordinates.');
+    this.localTransform = options.localTransform ? Object.freeze([...options.localTransform]) : null;
   }
 
   setTexture(texture: GPUTexture | null): void {
@@ -199,6 +211,7 @@ export class AnimationVisual2D extends Component {
       sourceOnly: this.sourceOnly,
       ...(this.compositeLayers.length === 0 ? {} : { composite: { layers: this.compositeLayers } }),
       texture: this.texture,
+      ...(this.textureSampling ? {textureSampling: this.textureSampling} : {}),
       textureHandle: this.textureHandle,
       textMaterial: this.textMaterial,
       requiresTexture: this.requiresTexture,
@@ -211,6 +224,7 @@ export class AnimationVisual2D extends Component {
         opacity: this.gradient.opacity,
       } : null,
       effects: this.effects.map(effect => ({ kind: effect.kind, values: new Float32Array(effect.values) })),
+      ...(this.localTransform ? {localTransform: this.localTransform} : {}),
     });
   }
 }

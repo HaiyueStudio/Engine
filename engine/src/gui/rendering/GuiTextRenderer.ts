@@ -6,7 +6,7 @@ import { BitmapFontData } from '../../font/BitmapFontData';
 import { GuiTextBatch, GUI_TEXT_FLOATS_PER_VERTEX } from './GuiTextBatch';
 import { BaseRenderer } from '../../renderer/BaseRenderer';
 import type { PipelineWarmupPlan } from '../../renderer/PipelineWarmup';
-import { getBuiltin2dUiShader } from '../../shader/BuiltinRenderShader';
+import { getBuiltinGuiShader } from '../../shader/BuiltinRenderShader';
 import { GUI_TEXTURED_VERTEX_LAYOUT } from './GuiVertexLayout';
 
 interface FontGpuData {
@@ -53,7 +53,7 @@ export class GuiTextRenderer extends BaseRenderer {
         { binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: { type: 'filtering' } },
       ],
     });
-    const generated = getBuiltin2dUiShader(device, 'gui-text', [
+    const generated = getBuiltinGuiShader(device, 'gui-text', [
       this.viewportBindGroupLayout,
       this.fontBindGroupLayout,
     ]);

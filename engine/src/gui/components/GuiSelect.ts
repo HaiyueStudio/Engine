@@ -1,3 +1,5 @@
+import * as GuiPaint from '../rendering/GuiControlPaintPrimitives';
+import {admitGuiControl} from '../GuiControlIdentity';
 import { containsPoint, GuiDirtyFlags, GuiElementOptions, GuiPointerEvent, GuiRect, GuiValueChangeHandler } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
 import type {GuiActionEvent} from '../GuiTypes';
@@ -18,6 +20,7 @@ export interface GuiSelectOptions<T = string> extends GuiElementOptions {
 }
 
 export class GuiSelect<T = string> extends GuiElement {
+  private static readonly __controlIdentityGuiSelect = /* @__PURE__ */ (() => admitGuiControl(GuiSelect.prototype, 'GuiSelect', undefined, paintGuiSelect))();
   static override readonly themeControlType: string = 'GuiSelect';
   override handlePointerCancel(event: GuiPointerEvent): void {
     this.pointerDownInPopup = false;
@@ -188,3 +191,51 @@ export class GuiSelect<T = string> extends GuiElement {
     this.scrollY = Math.max(0, Math.min(this.maxScrollY, this.scrollY));
   }
 }
+
+/** Original built-in painter; retained with this control, not every GUI owner. */
+function paintGuiSelect(context:GuiPaint.GuiControlPaintContext, select: GuiSelect, theme: GuiPaint.GuiTheme): void {
+    const style = context.styleFor(select), custom = !!(style.contentInsets || style.nineSlice || style.icon), box = GuiPaint.guiContentBox(select, 8, theme.fontSize).text;
+    const radius = context.styleFor(select).radius ?? theme.radius;
+    const border = GuiPaint.colorToRgba(context.styleFor(select).borderColor, select.focused || select.open ? theme.colors.primary : theme.colors.border);
+    context.addRect(select.rect.x, select.rect.y, select.rect.width, select.rect.height, radius, border);
+    context.addRect(select.rect.x + 1, select.rect.y + 1, select.rect.width - 2, select.rect.height - 2, Math.max(0, radius - 1), GuiPaint.withAlpha(GuiPaint.colorToRgba(context.styleFor(select).backgroundColor, theme.colors.surface), select.disabled ? 0.45 : 1));
+    const textColor = select.selectedOption
+      ? GuiPaint.colorToRgba(theme.colors.text, theme.colors.text)
+      : GuiPaint.colorToRgba(theme.colors.textMuted, theme.colors.textMuted);
+    context.addText(select.displayText, custom ? box.x : select.rect.x + 8, custom ? box.y : select.rect.y,
+      Math.max(0, custom ? box.width - 22 : select.rect.width - 30), custom ? box.height : select.rect.height, theme.fontSize, textColor, true);
+
+    const arrowX = select.rect.x + select.rect.width - 18;
+    const arrowY = select.rect.y + select.rect.height * 0.5;
+    context.addRect(arrowX, arrowY - 1, 10, 2, 1, GuiPaint.colorToRgba(theme.colors.textMuted, theme.colors.textMuted));
+    context.addRect(arrowX + 2, arrowY + 3, 6, 2, 1, GuiPaint.colorToRgba(theme.colors.textMuted, theme.colors.textMuted));
+
+    if (!select.open) return;
+    const popup = select.popupRect;
+    context.addPopupRect(popup.x, popup.y, popup.width, popup.height, radius, GuiPaint.colorToRgba(theme.colors.border, theme.colors.border));
+    context.addPopupRect(popup.x + 1, popup.y + 1, popup.width - 2, popup.height - 2, Math.max(0, radius - 1), GuiPaint.colorToRgba(theme.colors.surface, theme.colors.surface));
+
+    const firstIndex = Math.max(0, Math.floor(select.scrollY / select.optionHeight));
+    const localOffset = select.scrollY - firstIndex * select.optionHeight;
+    const visibleCount = Math.min(
+      select.options.length - firstIndex,
+      select.maxVisibleOptions + (localOffset > 0 ? 1 : 0),
+    );
+    for (let i = 0; i < visibleCount; i++) {
+      const optionIndex = firstIndex + i;
+      const option = GuiPaint.requiredItemAt(select.options, optionIndex, 'GUI select options');
+      const y = popup.y + i * select.optionHeight - localOffset;
+      const selected = option.value === select.value;
+      if (selected) {
+        context.addPopupRect(popup.x + 2, y + 2, popup.width - 4, select.optionHeight - 4, Math.max(0, radius - 2), GuiPaint.withAlpha(GuiPaint.colorToRgba(theme.colors.primary, theme.colors.primary), 0.32), popup);
+      }
+      context.addPopupText(option.label, popup.x + 8, y, popup.width - 18, select.optionHeight, theme.fontSize, GuiPaint.withAlpha(GuiPaint.colorToRgba(option.disabled ? theme.colors.textMuted : theme.colors.text, theme.colors.text), option.disabled ? 0.55 : 1), popup, true);
+    }
+    if (select.maxScrollY > 0) {
+      const trackH = popup.height - 8;
+      const thumbH = Math.max(18, trackH * (popup.height / (select.options.length * select.optionHeight)));
+      const thumbY = popup.y + 4 + (trackH - thumbH) * (select.scrollY / select.maxScrollY);
+      context.addPopupRect(popup.x + popup.width - 7, popup.y + 4, 3, trackH, 1.5, GuiPaint.withAlpha(GuiPaint.colorToRgba(theme.colors.border, theme.colors.border), 0.55), popup);
+      context.addPopupRect(popup.x + popup.width - 8, thumbY, 5, thumbH, 2.5, GuiPaint.withAlpha(GuiPaint.colorToRgba(theme.colors.textMuted, theme.colors.textMuted), 0.75), popup);
+    }
+  }

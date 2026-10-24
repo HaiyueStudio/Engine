@@ -1,11 +1,12 @@
+import {isGuiControl} from './GuiControlIdentity';
 import type {BitmapFontData} from '../font/BitmapFontData';
 import {GuiDirtyFlags} from './GuiTypes';
 import type {GuiMeasureConstraint} from './GuiLayoutTypes';
 import type {GuiRoot} from './components/GuiRoot';
 import {GuiElement} from './components/GuiElement';
-import {GuiLabel} from './components/GuiLabel';
-import {GuiButton} from './components/GuiButton';
-import {GuiImage} from './components/GuiImage';
+import {type GuiLabel} from './components/GuiLabel';
+import {type GuiButton} from './components/GuiButton';
+import {type GuiImage} from './components/GuiImage';
 import {measureGuiTextBlock} from './rendering/GuiTextBatch';
 import {guiContentMetrics} from './GuiContent';
 
@@ -39,18 +40,18 @@ export function measureGuiElement(root: GuiRoot, element: GuiElement, width: Gui
   bounded(0, width); bounded(0, height);
   let size = {width: 0, height: 0};
   let minimum = {width: 0, height: 0};
-  if (element instanceof GuiLabel || element instanceof GuiButton) {
+  if (isGuiControl<GuiLabel>(element, 'GuiLabel') || isGuiControl<GuiButton>(element, 'GuiButton')) {
     const owner = owners.get(root), font = owner && providers.get(owner)?.get(root, element) || rootFonts.get(root) || (owner && fonts.get(owner));
     const skin = element.getResolvedStyle();
     if (!font) throw new Error('GUI font metrics are not ready; prepare GuiSystem before measuring text.');
-    const padding = skin.padding ?? (element instanceof GuiButton ? element.variant === 'outline' ? 4 : 8 : 0);
-    const fontSize = element instanceof GuiLabel ? element.fontSize ?? skin.fontSize ?? root.theme.fontSize : skin.fontSize ?? root.theme.fontSize;
+    const padding = skin.padding ?? (isGuiControl<GuiButton>(element, 'GuiButton') ? element.variant === 'outline' ? 4 : 8 : 0);
+    const fontSize = isGuiControl<GuiLabel>(element, 'GuiLabel') ? element.fontSize ?? skin.fontSize ?? root.theme.fontSize : skin.fontSize ?? root.theme.fontSize;
     const content = guiContentMetrics(element, padding, fontSize);
-    const measured = measureGuiTextBlock(element.text, font, fontSize, width.mode === 'unbounded' ? Infinity : Math.max(0, width.value! - content.horizontal), element instanceof GuiLabel);
+    const measured = measureGuiTextBlock(element.text, font, fontSize, width.mode === 'unbounded' ? Infinity : Math.max(0, width.value! - content.horizontal), isGuiControl<GuiLabel>(element, 'GuiLabel'));
     size = {width: measured.width + content.horizontal, height: Math.max(measured.height, content.iconHeight) + content.vertical};
-    const min = measureGuiTextBlock(element.text, font, fontSize, element instanceof GuiLabel ? 0 : Infinity, element instanceof GuiLabel);
+    const min = measureGuiTextBlock(element.text, font, fontSize, isGuiControl<GuiLabel>(element, 'GuiLabel') ? 0 : Infinity, isGuiControl<GuiLabel>(element, 'GuiLabel'));
     minimum = {width: min.width + content.horizontal, height: Math.max(element.text ? font.lineHeight * fontSize / font.size : 0, content.iconHeight) + content.vertical};
-  } else if (element instanceof GuiImage && element.source) {
+  } else if (isGuiControl<GuiImage>(element, 'GuiImage') && element.source) {
     const source = 'texture' in element.source ? element.source.texture : element.source;
     size = {width: 'naturalWidth' in source ? source.naturalWidth : 'width' in source ? source.width : 0, height: 'naturalHeight' in source ? source.naturalHeight : 'height' in source ? source.height : 0};
     minimum = size;

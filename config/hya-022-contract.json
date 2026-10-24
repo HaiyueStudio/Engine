@@ -1,0 +1,2678 @@
+{
+  "schemaVersion": 1,
+  "contract": "engine-022-hya-production-v1",
+  "adr": "docs/for-ai/adr/0134-hya-production-composition-contract.md",
+  "releaseTargets": {
+    "engine": "0.2.2",
+    "extensions": "0.2.2",
+    "animation-spec": "0.2.2-new-composition-format-and-entry",
+    "shader-language": "0.2.1-if-bytes-unchanged"
+  },
+  "versions": {
+    "core": "1.0",
+    "coreBinaryDecode": [
+      1,
+      2
+    ],
+    "coreBinaryEncode": 2,
+    "layout": "HYLA-1.0",
+    "rig": "HYRG-2.0",
+    "stateMachine": [
+      "@1",
+      "@2"
+    ],
+    "data": 1,
+    "interaction": 1,
+    "semantics": 1,
+    "audioEvents": 1,
+    "composition": 1,
+    "formatVersionIndependentOfNpm": true
+  },
+  "limits": {
+    "maxInputBytes": 67108864,
+    "maxJsonNodes": 1000000,
+    "maxDepth": 128,
+    "maxStringBytes": 4194304,
+    "maxParts": 16,
+    "maxTargets": 100000,
+    "maxRequirementsPerPart": 64
+  },
+  "builtInParts": [
+    "org.haiyue.animation-core@1",
+    "org.haiyue.layout-2d@1",
+    "org.haiyue.data-binding@1",
+    "org.haiyue.interaction@1",
+    "org.haiyue.semantics@1",
+    "org.haiyue.audio-events@1",
+    "org.haiyue.animation-state-machine@2"
+  ],
+  "publicEntries": [
+    {
+      "package": "@haiyue/animation-spec",
+      "subpath": "./hya-production",
+      "source": "animation-spec/src/hya-production.ts",
+      "implementationOwner": "g10-hya-capability-contracts",
+      "symbols": [
+        "HYA_COMPOSITION_FORMAT",
+        "HYA_COMPOSITION_VERSION",
+        "DEFAULT_HYA_COMPOSITION_LIMITS",
+        "HyaCompositionValue",
+        "HyaCompositionPart",
+        "HyaCompositionTarget",
+        "HyaCompositionDocument",
+        "HyaCompositionLimits",
+        "HyaCompositionPartValidator",
+        "HyaCompositionParseOptions",
+        "HyaCompositionDiagnostic",
+        "HyaCompositionParseResult",
+        "HyaCompositionPlan",
+        "HyaCompositionErrorCode",
+        "HyaCompositionError",
+        "parseHyaComposition",
+        "encodeHyaComposition",
+        "negotiateHyaComposition",
+        "parseResponsiveLayoutDocument",
+        "encodeResponsiveLayoutDocument",
+        "decodeResponsiveLayoutDocument",
+        "isResponsiveLayoutBinary",
+        "LayoutDiagnostic",
+        "LayoutDiagnosticCode",
+        "ResponsiveLayoutDocument",
+        "LayoutParseOptions",
+        "parseHyaDataBinding",
+        "DataBindingDiagnostic",
+        "DataBindingDiagnosticCode",
+        "HyaDataBindingDocument",
+        "DataBindingParseOptions",
+        "DataValue",
+        "parseHyaInteraction",
+        "InteractionDiagnostic",
+        "InteractionDiagnosticCode",
+        "HyaInteractionDocument",
+        "InteractionParseOptions",
+        "parseHyaSemantics",
+        "SemanticsDiagnostic",
+        "SemanticsDiagnosticCode",
+        "HyaSemanticsDocument",
+        "SemanticsParseOptions",
+        "parseHyaAudioEvents",
+        "AudioEventDiagnostic",
+        "AudioEventDiagnosticCode",
+        "HyaAudioEventDocument",
+        "AudioEventParseOptions",
+        "parseHyaStateMachineV2",
+        "ParseStateMachineV2Options",
+        "migrateHyaStateMachineV1",
+        "HyaStateMachineV1MigrationOptions",
+        "HyaStateMachineV2Document",
+        "HyaStateMachineV1MigrationResult",
+        "StateMachineV2Diagnostic",
+        "StateMachineV2DiagnosticCode"
+      ],
+      "maximumSymbols": 55,
+      "packageIntegrationOwner": "g13-integration-release",
+      "currentlyDeclaredInPackage": false,
+      "stability": "planned-stable-022-named-admission-only"
+    },
+    {
+      "package": "@haiyue/extensions",
+      "subpath": "./hya-player",
+      "implementationOwner": "g11-hya-production-runtime",
+      "symbols": [
+        "createHyaPlayer",
+        "HyaPlayer",
+        "HyaPlayerOptions",
+        "HyaPlayerHost",
+        "HyaFrame",
+        "HyaDiagnostic",
+        "HyaResourcePort",
+        "HyaResourceHandle",
+        "HyaFrameRequest"
+      ],
+      "maximumSymbols": 9,
+      "packageIntegrationOwner": "g13-integration-release",
+      "currentlyDeclaredInPackage": false,
+      "stability": "planned-stable-022-named-admission-only"
+    },
+    {
+      "package": "@haiyue/extensions",
+      "subpath": "./hya-text",
+      "implementationOwner": "g11-hya-production-runtime",
+      "symbols": [
+        "createHyaTextShaper",
+        "HyaTextShaper",
+        "HyaTextRequest",
+        "HyaTextResult",
+        "HyaFontPort",
+        "HyaGlyphRun",
+        "HyaGlyph"
+      ],
+      "maximumSymbols": 7,
+      "packageIntegrationOwner": "g13-integration-release",
+      "currentlyDeclaredInPackage": false,
+      "stability": "planned-stable-022-named-admission-only"
+    },
+    {
+      "package": "@haiyue/extensions",
+      "subpath": "./hya-layout",
+      "implementationOwner": "g11-hya-production-runtime",
+      "symbols": [
+        "createHyaLayout",
+        "HyaLayout",
+        "HyaLayoutRequest",
+        "HyaLayoutFrame",
+        "HyaLayoutNode"
+      ],
+      "maximumSymbols": 5,
+      "packageIntegrationOwner": "g13-integration-release",
+      "currentlyDeclaredInPackage": false,
+      "stability": "planned-stable-022-named-admission-only"
+    },
+    {
+      "package": "@haiyue/extensions",
+      "subpath": "./hya-data",
+      "implementationOwner": "g11-hya-production-runtime",
+      "symbols": [
+        "createHyaData",
+        "HyaData",
+        "HyaDataTransaction",
+        "HyaDataChange",
+        "HyaDataSubscription",
+        "createHyaSemantics",
+        "HyaSemantics",
+        "HyaSemanticSnapshot",
+        "HyaSemanticHost"
+      ],
+      "maximumSymbols": 9,
+      "packageIntegrationOwner": "g13-integration-release",
+      "currentlyDeclaredInPackage": false,
+      "stability": "planned-stable-022-named-admission-only"
+    },
+    {
+      "package": "@haiyue/extensions",
+      "subpath": "./hya-audio",
+      "implementationOwner": "g11-hya-production-runtime",
+      "symbols": [
+        "createHyaAudio",
+        "createBrowserHyaAudioHost",
+        "HyaAudio",
+        "HyaAudioHost",
+        "HyaAudioResource",
+        "HyaAudioRequest",
+        "HyaAudioTrace"
+      ],
+      "maximumSymbols": 7,
+      "packageIntegrationOwner": "g13-integration-release",
+      "currentlyDeclaredInPackage": false,
+      "stability": "planned-stable-022-named-admission-only"
+    }
+  ],
+  "existingEntriesUnchanged": [
+    "@haiyue/animation-spec",
+    "@haiyue/extensions/animation",
+    "@haiyue/extensions/hya-state-machine",
+    "@haiyue/extensions/layout",
+    "@haiyue/extensions/gui-layout"
+  ],
+  "capabilities": [
+    {
+      "id": "core-container",
+      "area": "core",
+      "schema": "animation-spec/schema/animation.schema.json",
+      "parser": "animation-spec/src/parser.ts",
+      "codec": "animation-spec/src/binary.ts",
+      "runtime": "extensions/src/animation/Animation2DRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented",
+        "publicEntries": [
+          "@haiyue/animation-spec",
+          "@haiyue/extensions/animation"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain",
+      "failure": {
+        "code": "E_ANIMATION_UNSUPPORTED_VERSION",
+        "path": "$.version",
+        "capability": "core-container",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "animation-spec/test/animation-spec.test.mjs"
+      ],
+      "requiredEvidence": [
+        "legacy container 1 decode; container 2 deterministic roundtrip; unknown major rejection"
+      ],
+      "negotiationId": "org.haiyue.production.core-container@1",
+      "example": {
+        "status": "existing-public-demo",
+        "manifestId": "animation-spec",
+        "path": "examples/animation-spec/main.ts",
+        "coverage": "legacy HYA binary import/export and playback",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "animation-spec/test/animation-spec.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "legacy container 1 decode; container 2 deterministic roundtrip; unknown major rejection"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "core-visuals",
+      "area": "core",
+      "schema": "animation-spec/schema/animation.schema.json",
+      "parser": "animation-spec/src/parser.ts",
+      "codec": "animation-spec/src/binary.ts",
+      "runtime": "extensions/src/animation/Animation2DRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented",
+        "publicEntries": [
+          "@haiyue/extensions/animation"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain",
+      "failure": {
+        "code": "E_ANIMATION_INVALID_FORMAT",
+        "path": "$.nodes[i].components[j]",
+        "capability": "core-visuals",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "animation-spec/test/animation-spec.test.mjs"
+      ],
+      "requiredEvidence": [
+        "shape/path/sprite hierarchy and transforms; independent native pixels"
+      ],
+      "negotiationId": "org.haiyue.production.core-visuals@1",
+      "example": {
+        "status": "existing-public-demo",
+        "manifestId": "hya-samples",
+        "path": "examples/hya-samples/main.ts",
+        "coverage": "legacy shape/path/sprite sample gallery",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "animation-spec/test/animation-spec.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "shape/path/sprite hierarchy and transforms; independent native pixels"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "core-text",
+      "area": "text",
+      "schema": "animation-spec/schema/animation.schema.json",
+      "parser": "animation-spec/src/parser.ts",
+      "codec": "animation-spec/src/binary.ts",
+      "runtime": "extensions/src/animation/AnimationTextRasterizer.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented",
+        "publicEntries": [
+          "@haiyue/extensions/animation"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain",
+      "failure": {
+        "code": "E_ANIMATION_INVALID_FORMAT",
+        "path": "$.nodes[i].components[j]",
+        "capability": "core-text",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/animation-text-selector-runtime.test.mjs"
+      ],
+      "requiredEvidence": [
+        "real text-document/style-run/font-resource rendering; OpenType remains lazy"
+      ],
+      "negotiationId": "org.haiyue.production.core-text@1",
+      "example": {
+        "status": "existing-public-demo",
+        "manifestId": "hya-samples",
+        "path": "examples/hya-samples/main.ts",
+        "coverage": "legacy text-selector sample; not parameterized glyph/layout composition",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/animation-text-selector-runtime.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "real text-document/style-run/font-resource rendering; OpenType remains lazy"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "safe-text-expression",
+      "area": "expression",
+      "schema": "animation-spec/schema/animation.schema.json",
+      "parser": "animation-spec/src/parser.ts",
+      "codec": "animation-spec/src/binary.ts",
+      "runtime": "extensions/src/animation/Animation2DRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented",
+        "publicEntries": [
+          "@haiyue/animation-spec"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain-bounded-ir",
+      "failure": {
+        "code": "E_ANIMATION_INVALID_FORMAT",
+        "path": "$.nodes[i].components[j].expression",
+        "capability": "safe-text-expression",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "animation-spec/test/animation-spec.test.mjs"
+      ],
+      "requiredEvidence": [
+        "existing bounded safe IR only; no source JS execution"
+      ],
+      "negotiationId": "org.haiyue.production.safe-text-expression@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "animation-spec/test/animation-spec.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "existing bounded safe IR only; no source JS execution"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "layout-geometry",
+      "area": "layout",
+      "schema": "animation-spec/schema/responsive-layout-2d.schema.json",
+      "parser": "animation-spec/src/layout2d/parameterized/parser.ts",
+      "codec": "animation-spec/src/layout2d/parameterized/codec.ts",
+      "runtime": "extensions/src/animation/layout/parameterized/LayoutEvaluator.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver",
+      "failure": {
+        "code": "E_LAYOUT_REFERENCE",
+        "path": "$.artboards[i].nodes[j]",
+        "capability": "layout-geometry",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/shared-layout-hya-compat.test.mjs"
+      ],
+      "requiredEvidence": [
+        "same G02 core and hya-v1 compatibility; nested resize/DPR/RTL geometry"
+      ],
+      "negotiationId": "org.haiyue.production.layout-geometry@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/shared-layout-hya-compat.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "same G02 core and hya-v1 compatibility; nested resize/DPR/RTL geometry"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": [
+        "@haiyue/extensions/layout"
+      ]
+    },
+    {
+      "id": "layout-instances-lists-scroll",
+      "area": "layout",
+      "schema": "animation-spec/schema/responsive-layout-2d.schema.json",
+      "parser": "animation-spec/src/layout2d/parameterized/parser.ts",
+      "codec": "animation-spec/src/layout2d/parameterized/codec.ts",
+      "runtime": "extensions/src/animation/layout/parameterized/LayoutEvaluator.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "unit-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver",
+      "failure": {
+        "code": "E_LAYOUT_RUNTIME_LIMIT",
+        "path": "$.instances",
+        "capability": "layout-instances-lists-scroll",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/layout-component-asset.test.mjs"
+      ],
+      "requiredEvidence": [
+        "stable identities; component replacement; virtualized lists; scroll and reflow; no second layout solver"
+      ],
+      "negotiationId": "org.haiyue.production.layout-instances-lists-scroll@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/layout-component-asset.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "stable identities; component replacement; virtualized lists; scroll and reflow; no second layout solver"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "parameterized-text-shaping",
+      "area": "text",
+      "schema": "animation-spec/schema/responsive-layout-2d.schema.json",
+      "parser": "animation-spec/src/layout2d/parameterized/parser.ts",
+      "codec": "animation-spec/src/layout2d/parameterized/codec.ts",
+      "runtime": "extensions/src/animation/text/parameterized/TextEvaluator.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "unit-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver",
+      "failure": {
+        "code": "E_LAYOUT_RUNTIME_REFERENCE",
+        "path": "$.textBlocks[i]",
+        "capability": "parameterized-text-shaping",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/text-shaping-parity.test.mjs"
+      ],
+      "requiredEvidence": [
+        "actual shaped glyphs, fallback/fonts, language and UTF-16 clusters; declared shaping tuple"
+      ],
+      "negotiationId": "org.haiyue.production.parameterized-text-shaping@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/text-shaping-parity.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "actual shaped glyphs, fallback/fonts, language and UTF-16 clusters; declared shaping tuple"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "parameterized-text-paints",
+      "area": "text",
+      "schema": "animation-spec/schema/responsive-layout-2d.schema.json",
+      "parser": "animation-spec/src/layout2d/parameterized/parser.ts",
+      "codec": "animation-spec/src/layout2d/parameterized/codec.ts",
+      "runtime": "extensions/src/animation/layout/parameterized/LayoutGpuRenderer.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "diagnostic-placeholder",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver-real-glyphs",
+      "failure": {
+        "code": "E_HYA_RUNTIME_CAPABILITY",
+        "path": "$.parts[i].document.textStyles[j]",
+        "capability": "parameterized-text-paints",
+        "status": "planned-runtime-preflight",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/text-shaping-parity.test.mjs"
+      ],
+      "requiredEvidence": [
+        "real glyph paint, clipping, alpha; independent text raster reference; rectangles cannot qualify"
+      ],
+      "negotiationId": "org.haiyue.production.parameterized-text-paints@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/text-shaping-parity.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "real glyph paint, clipping, alpha; independent text raster reference; rectangles cannot qualify"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "text-editing-input",
+      "area": "text",
+      "schema": "animation-spec/schema/responsive-layout-2d.schema.json",
+      "parser": "animation-spec/src/layout2d/parameterized/parser.ts",
+      "codec": "animation-spec/src/layout2d/parameterized/codec.ts",
+      "runtime": "extensions/src/animation/text/parameterized/TextEvaluator.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "unit-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver-via-g06",
+      "failure": {
+        "code": "E_HYA_RUNTIME_HOST_PORT",
+        "path": "$options.gui",
+        "capability": "text-editing-input",
+        "status": "planned-runtime-preflight",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/text-shaping-parity.test.mjs"
+      ],
+      "requiredEvidence": [
+        "reuse GUI committed/preedit, caret and input host; no independent editor/listeners"
+      ],
+      "negotiationId": "org.haiyue.production.text-editing-input@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/text-shaping-parity.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "reuse GUI committed/preedit, caret and input host; no independent editor/listeners"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "images-and-nslice",
+      "area": "assets",
+      "schema": "animation-spec/schema/responsive-layout-2d.schema.json",
+      "parser": "animation-spec/src/layout2d/parameterized/parser.ts",
+      "codec": "animation-spec/src/layout2d/parameterized/codec.ts",
+      "runtime": "extensions/src/animation/layout/parameterized/LayoutGpuRenderer.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "diagnostic-placeholder",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver-real-assets",
+      "failure": {
+        "code": "E_HYA_RUNTIME_RESOURCE",
+        "path": "$.parts[i].document.assets[j]",
+        "capability": "images-and-nslice",
+        "status": "planned-runtime-preflight",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/layout-component-asset.test.mjs"
+      ],
+      "requiredEvidence": [
+        "real decoded images/UV, arbitrary cuts/repeat/mirror via shared geometry; no hash colors"
+      ],
+      "negotiationId": "org.haiyue.production.images-and-nslice@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/layout-component-asset.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "real decoded images/UV, arbitrary cuts/repeat/mirror via shared geometry; no hash colors"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "resource-lifetimes",
+      "area": "assets",
+      "schema": "animation-spec/schema/responsive-layout-2d.schema.json",
+      "parser": "animation-spec/src/layout2d/parameterized/parser.ts",
+      "codec": "animation-spec/src/layout2d/parameterized/codec.ts",
+      "runtime": "extensions/src/animation/layout/parameterized/AssetOwner.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "unit-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver",
+      "failure": {
+        "code": "E_HYA_RUNTIME_GENERATION",
+        "path": "$.resources[id]",
+        "capability": "resource-lifetimes",
+        "status": "planned-runtime-preflight",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/layout-component-asset.test.mjs"
+      ],
+      "requiredEvidence": [
+        "late result released; replacement latest wins; borrowed ownership and GPU retirement/restore"
+      ],
+      "negotiationId": "org.haiyue.production.resource-lifetimes@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/layout-component-asset.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "late result released; replacement latest wins; borrowed ownership and GPU retirement/restore"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "data-transactions",
+      "area": "data",
+      "schema": null,
+      "parser": "animation-spec/src/data-binding/parser.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation/interaction/DataBindingRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "unit-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver",
+      "failure": {
+        "code": "E_DATA_RUNTIME_STATE",
+        "path": "$.transaction",
+        "capability": "data-transactions",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/data-binding-runtime-parity.test.mjs"
+      ],
+      "requiredEvidence": [
+        "atomic ordered changes, rollback, one observer batch; reentrant writes next advance"
+      ],
+      "negotiationId": "org.haiyue.production.data-transactions@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/data-binding-runtime-parity.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "atomic ordered changes, rollback, one observer batch; reentrant writes next advance"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "data-binding-and-converters",
+      "area": "data",
+      "schema": null,
+      "parser": "animation-spec/src/data-binding/parser.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation/interaction/DataBindingRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "unit-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver",
+      "failure": {
+        "code": "E_DATA_BINDING_TYPE",
+        "path": "$.bindings[i]",
+        "capability": "data-binding-and-converters",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/data-binding-parity-contract.test.mjs"
+      ],
+      "requiredEvidence": [
+        "two-way cycles rejected; explicit/default/global/auto; host converter protocols only"
+      ],
+      "negotiationId": "org.haiyue.production.data-binding-and-converters@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/data-binding-parity-contract.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "two-way cycles rejected; explicit/default/global/auto; host converter protocols only"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "data-resource-rebind",
+      "area": "data",
+      "schema": null,
+      "parser": "animation-spec/src/data-binding/parser.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation/interaction/DataResourceOwner.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "unit-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver",
+      "failure": {
+        "code": "E_DATA_RUNTIME_PORT",
+        "path": "$.resources[id]",
+        "capability": "data-resource-rebind",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/data-binding-runtime-parity.test.mjs"
+      ],
+      "requiredEvidence": [
+        "stable list/component identity; resource and component rebind generations"
+      ],
+      "negotiationId": "org.haiyue.production.data-resource-rebind@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/data-binding-runtime-parity.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "stable list/component identity; resource and component rebind generations"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "interaction-routing",
+      "area": "interaction",
+      "schema": null,
+      "parser": "animation-spec/src/interaction/parser.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation/interaction/InteractionRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented",
+        "publicEntries": [
+          "@haiyue/extensions/animation"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver-composed",
+      "failure": {
+        "code": "E_INTERACTION_REFERENCE",
+        "path": "$.listeners[i].target",
+        "capability": "interaction-routing",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/interaction-routing-parity.test.mjs"
+      ],
+      "requiredEvidence": [
+        "GUI owns surface sampling/consumption/focus; logical target aliases; mouse/touch/keyboard/gamepad"
+      ],
+      "negotiationId": "org.haiyue.production.interaction-routing@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/interaction-routing-parity.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "GUI owns surface sampling/consumption/focus; logical target aliases; mouse/touch/keyboard/gamepad"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "semantics",
+      "area": "semantics",
+      "schema": null,
+      "parser": "animation-spec/src/semantics/parser.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation/interaction/SemanticsRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "unit-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver",
+      "failure": {
+        "code": "E_SEMANTICS_REFERENCE",
+        "path": "$.nodes[i].target",
+        "capability": "semantics",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/semantics-accessibility-parity.test.mjs"
+      ],
+      "requiredEvidence": [
+        "same geometry/data generation; stable snapshots, reading/navigation order, reduced motion; host bridge"
+      ],
+      "negotiationId": "org.haiyue.production.semantics@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/semantics-accessibility-parity.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "same geometry/data generation; stable snapshots, reading/navigation order, reduced motion; host bridge"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "audio-events",
+      "area": "audio",
+      "schema": null,
+      "parser": "animation-spec/src/audio/parser.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation/audio/AudioEventRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "unit-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver",
+      "failure": {
+        "code": "E_AUDIO_RUNTIME_PORT",
+        "path": "$.host.audio",
+        "capability": "audio-events",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/audio-event-runtime-parity.test.mjs",
+        "extensions/test/audio-resource-owner-parity.test.mjs"
+      ],
+      "requiredEvidence": [
+        "gesture unlock, sample clock, decode/gain/rate/loop/voice budgets, seek/pause resource traces"
+      ],
+      "negotiationId": "org.haiyue.production.audio-events@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/audio-event-runtime-parity.test.mjs",
+          "extensions/test/audio-resource-owner-parity.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "gesture unlock, sample clock, decode/gain/rate/loop/voice budgets, seek/pause resource traces"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "audio-restricted-host",
+      "area": "audio",
+      "schema": null,
+      "parser": "animation-spec/src/audio/parser.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation/audio/AudioEventRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "degraded",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain-explicit-restriction",
+      "failure": {
+        "code": "E_AUDIO_RUNTIME_PROFILE",
+        "path": "$.playbackProfile",
+        "capability": "audio-restricted-host",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/audio-event-parity-contract.test.mjs"
+      ],
+      "requiredEvidence": [
+        "html-media-restricted never claims sample accuracy; required capabilities fail closed"
+      ],
+      "negotiationId": "org.haiyue.production.audio-restricted-host@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/audio-event-parity-contract.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "html-media-restricted never claims sample accuracy; required capabilities fail closed"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "state-machine-v1",
+      "area": "state",
+      "schema": "animation-spec/schema/animation.schema.json",
+      "parser": "animation-spec/src/state-machine.ts",
+      "codec": "animation-spec/src/binary.ts",
+      "runtime": "extensions/src/animation/Animation2DStateMachineRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented",
+        "publicEntries": [
+          "@haiyue/extensions/hya-state-machine"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain-and-adapt",
+      "failure": {
+        "code": "E_STATE_MACHINE_CHANNEL_ADVANCED_INLINE_UNSUPPORTED",
+        "path": "$.channels[i]",
+        "capability": "state-machine-v1",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+      ],
+      "requiredEvidence": [
+        "legacy channels/diagnostics preserved; migrate once when using existing v2 executor"
+      ],
+      "negotiationId": "org.haiyue.production.state-machine-v1@1",
+      "example": {
+        "status": "existing-public-demo",
+        "manifestId": "hya-state-machine",
+        "path": "examples/hya-state-machine/main.ts",
+        "coverage": "existing single-asset state machine; not the new v2 composition",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "legacy channels/diagnostics preserved; migrate once when using existing v2 executor"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "state-machine-v2",
+      "area": "state",
+      "schema": "animation-spec/schema/state-machine-v2.schema.json",
+      "parser": "animation-spec/src/state-machine-v2/parser.ts",
+      "codec": null,
+      "runtime": "extensions/src/hya-state-machine/v2/StateMachineRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "unit-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver-composed",
+      "failure": {
+        "code": "E_STATE_MACHINE_V2_POLICY",
+        "path": "$.channels[i]",
+        "capability": "state-machine-v2",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/state-machine-v2-parity-contract.test.mjs",
+        "extensions/test/state-machine-state-graph-parity.test.mjs"
+      ],
+      "requiredEvidence": [
+        "reuse existing v2 sampler/mixer/graph; deterministic seek, layers, nested components and trigger traces"
+      ],
+      "negotiationId": "org.haiyue.production.state-machine-v2@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/state-machine-v2-parity-contract.test.mjs",
+          "extensions/test/state-machine-state-graph-parity.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "reuse existing v2 sampler/mixer/graph; deterministic seek, layers, nested components and trigger traces"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "state-vector-paint",
+      "area": "state",
+      "schema": "animation-spec/schema/state-machine-v2.schema.json",
+      "parser": "animation-spec/src/state-machine-v2/parser.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation/Animation2DStateMachineVisualRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "rejected",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver-selected-paths",
+      "failure": {
+        "code": "E_STATE_MACHINE_CHANNEL_ADVANCED_INLINE_UNSUPPORTED",
+        "path": "$.channels[i].path",
+        "capability": "state-vector-paint",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+      ],
+      "requiredEvidence": [
+        "only named fill/stroke color, stroke width and opacity paths; continuous numeric mixing; real pixels"
+      ],
+      "negotiationId": "org.haiyue.production.state-vector-paint@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "only named fill/stroke color, stroke width and opacity paths; continuous numeric mixing; real pixels"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "state-text-animator",
+      "area": "state",
+      "schema": "animation-spec/schema/state-machine-v2.schema.json",
+      "parser": "animation-spec/src/state-machine-v2/parser.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation/Animation2DStateMachineVisualRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "rejected",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver-selected-paths",
+      "failure": {
+        "code": "E_STATE_MACHINE_CHANNEL_ADVANCED_INLINE_UNSUPPORTED",
+        "path": "$.channels[i].path",
+        "capability": "state-text-animator",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+      ],
+      "requiredEvidence": [
+        "named text value/fontSize/tracking/color/opacity; discrete strings, continuous metrics/paints"
+      ],
+      "negotiationId": "org.haiyue.production.state-text-animator@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "named text value/fontSize/tracking/color/opacity; discrete strings, continuous metrics/paints"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "state-resource-switch",
+      "area": "state",
+      "schema": null,
+      "parser": "animation-spec/src/state-machine.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation-state-machine/AnimationStateMachineChannels.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "degraded",
+        "publicEntries": [
+          "@haiyue/extensions/hya-state-machine"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain-discrete",
+      "failure": {
+        "code": "E_STATE_MACHINE_CHANNEL_RESOURCE_SWITCH_OVERLAP",
+        "path": "$.channels[i]",
+        "capability": "state-resource-switch",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+      ],
+      "requiredEvidence": [
+        "dominant weight then stable action order; no overlapping resource-owner blend"
+      ],
+      "negotiationId": "org.haiyue.production.state-resource-switch@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "dominant weight then stable action order; no overlapping resource-owner blend"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "state-audio",
+      "area": "state",
+      "schema": null,
+      "parser": "animation-spec/src/state-machine.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation-state-machine/AnimationStateMachineChannels.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "degraded",
+        "publicEntries": [
+          "@haiyue/extensions/hya-state-machine"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain-discrete",
+      "failure": {
+        "code": "E_STATE_MACHINE_CHANNEL_AUDIO_UNMIXABLE_RANGE",
+        "path": "$.channels[i]",
+        "capability": "state-audio",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+      ],
+      "requiredEvidence": [
+        "ownership/exactly-once cues, reject unmixed ranges; no fade claim through HTML profile"
+      ],
+      "negotiationId": "org.haiyue.production.state-audio@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "ownership/exactly-once cues, reject unmixed ranges; no fade claim through HTML profile"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "state-visual-effects",
+      "area": "state",
+      "schema": null,
+      "parser": "animation-spec/src/state-machine.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation-state-machine/AnimationStateMachineChannels.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "rejected",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "reject",
+      "failure": {
+        "code": "E_STATE_MACHINE_CHANNEL_ADVANCED_INLINE_UNSUPPORTED",
+        "path": "$.channels[i].path",
+        "capability": "state-visual-effects",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+      ],
+      "requiredEvidence": [
+        "visual-effect remains rejected; do not delete old negative fixtures"
+      ],
+      "negotiationId": "org.haiyue.production.state-visual-effects@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "visual-effect remains rejected; do not delete old negative fixtures"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "state-composite-expansion",
+      "area": "state",
+      "schema": null,
+      "parser": "animation-spec/src/state-machine.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation-state-machine/AnimationStateMachineChannels.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "rejected",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "reject",
+      "failure": {
+        "code": "E_STATE_MACHINE_CHANNEL_ADVANCED_INLINE_UNSUPPORTED",
+        "path": "$.channels[i].path",
+        "capability": "state-composite-expansion",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+      ],
+      "requiredEvidence": [
+        "composite-expansion remains rejected; no registry-wide support upgrade"
+      ],
+      "negotiationId": "org.haiyue.production.state-composite-expansion@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/animation-state-machine-channel-mixing.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "composite-expansion remains rejected; no registry-wide support upgrade"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "native-3d",
+      "area": "compatibility",
+      "schema": "animation-spec/schema/animation-3d-extension.schema.json",
+      "parser": "animation-spec/src/native3d/Animation3DParser.ts",
+      "codec": "animation-spec/src/binary.ts",
+      "runtime": "extensions/src/animation3d.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented",
+        "publicEntries": [
+          "@haiyue/animation-spec/native3d",
+          "@haiyue/extensions/animation3d"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain-independent",
+      "failure": {
+        "code": "E_ANIMATION_MISSING_EXTENSION",
+        "path": "$.extensionsRequired",
+        "capability": "native-3d",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "animation-spec/test/animation-3d-contract.test.mjs"
+      ],
+      "requiredEvidence": [
+        "existing focused 3D scope unchanged; new 2D composition does not absorb its renderer"
+      ],
+      "negotiationId": "org.haiyue.production.native-3d@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "animation-spec/test/animation-3d-contract.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "existing focused 3D scope unchanged; new 2D composition does not absorb its renderer"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "sampled-deformable",
+      "area": "compatibility",
+      "schema": "animation-spec/schema/deformable-mesh-2d-extension.schema.json",
+      "parser": "animation-spec/src/deformable2d/extension.ts",
+      "codec": "animation-spec/src/deformable2d/codec.ts",
+      "runtime": "extensions/src/deformable-animation.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented",
+        "publicEntries": [
+          "@haiyue/animation-spec/deformable2d",
+          "@haiyue/extensions/deformable-animation"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain-independent",
+      "failure": {
+        "code": "E_ANIMATION_MISSING_EXTENSION",
+        "path": "$.extensionsRequired",
+        "capability": "sampled-deformable",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "animation-spec/test/deformable2d.test.mjs"
+      ],
+      "requiredEvidence": [
+        "existing baked mesh remains playable through its existing public extension"
+      ],
+      "negotiationId": "org.haiyue.production.sampled-deformable@1",
+      "example": {
+        "status": "existing-public-demo",
+        "manifestId": "live2d-hya",
+        "path": "examples/live2d-hya/main.ts",
+        "coverage": "existing baked mesh playback; not parameterized rigs",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "animation-spec/test/deformable2d.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "existing baked mesh remains playable through its existing public extension"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "parameterized-rig",
+      "area": "historical",
+      "schema": "animation-spec/schema/parameterized-rig-2d.schema.json",
+      "parser": "animation-spec/src/deformable2d/parameterized/parser.ts",
+      "codec": "animation-spec/src/deformable2d/parameterized/codec.ts",
+      "runtime": "extensions/src/deformable-animation/parameterized/ParameterizedRigSolver.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "unit-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain-private-reject-unregistered-composition",
+      "failure": {
+        "code": "E_HYA_COMPOSITION_REQUIRED",
+        "path": "$.parts[i].extension",
+        "capability": "parameterized-rig",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/parameterized-rig-constraint.test.mjs"
+      ],
+      "requiredEvidence": [
+        "preserve HYRG 2.0, fixtures and M07 G04; no current public full-fidelity claim"
+      ],
+      "negotiationId": "org.haiyue.production.parameterized-rig@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/parameterized-rig-constraint.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "preserve HYRG 2.0, fixtures and M07 G04; no current public full-fidelity claim"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": [],
+      "historicalOwner": "m07-rive-hya-full-fidelity/g04-rig-mesh-constraint-parity"
+    },
+    {
+      "id": "vector-visual-sidecar",
+      "area": "historical",
+      "schema": "animation-spec/schema/vector-visual.schema.json",
+      "parser": "animation-spec/src/vector2d/parser.ts",
+      "codec": null,
+      "runtime": "extensions/src/animation/vector/VectorVisualRuntime.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "unit-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain-private-reject-unregistered-composition",
+      "failure": {
+        "code": "E_HYA_COMPOSITION_REQUIRED",
+        "path": "$.parts[i].extension",
+        "capability": "vector-visual-sidecar",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/vector-visual-parity.test.mjs"
+      ],
+      "requiredEvidence": [
+        "preserve private vector/effect experiments and M07 G03; supported core vector components stay on /animation"
+      ],
+      "negotiationId": "org.haiyue.production.vector-visual-sidecar@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/vector-visual-parity.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "preserve private vector/effect experiments and M07 G03; supported core vector components stay on /animation"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": [],
+      "historicalOwner": "m07-rive-hya-full-fidelity/g03-vector-paint-composite-parity"
+    },
+    {
+      "id": "sandbox-script-and-custom-wgsl",
+      "area": "excluded",
+      "schema": null,
+      "parser": "animation-spec/src/script/parser.ts",
+      "codec": null,
+      "runtime": null,
+      "current": {
+        "format": "implemented",
+        "runtime": "not-admitted",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "reject",
+      "failure": {
+        "code": "E_HYA_COMPOSITION_REQUIRED",
+        "path": "$.parts[i].extension",
+        "capability": "sandbox-script-and-custom-wgsl",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/state-machine-v2-parity-contract.test.mjs"
+      ],
+      "requiredEvidence": [
+        "no source runtime, Luau/JS VM or arbitrary shader admission; preserve M07 G09"
+      ],
+      "negotiationId": "org.haiyue.production.sandbox-script-and-custom-wgsl@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/state-machine-v2-parity-contract.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "no source runtime, Luau/JS VM or arbitrary shader admission; preserve M07 G09"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": [],
+      "historicalOwner": "m07-rive-hya-full-fidelity/g09-sandboxed-scripting-custom-rendering"
+    },
+    {
+      "id": "composition-format",
+      "area": "composition",
+      "schema": "animation-spec/schema/hya-composition.schema.json",
+      "parser": "animation-spec/src/composition/parser.ts",
+      "codec": "animation-spec/src/composition/parser.ts",
+      "runtime": null,
+      "current": {
+        "format": "implemented",
+        "runtime": "format-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver",
+      "failure": {
+        "code": "E_HYA_COMPOSITION_REQUIRED",
+        "path": "$.parts[i].extension",
+        "capability": "composition-format",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "animation-spec/test/hya-composition.test.mjs"
+      ],
+      "requiredEvidence": [
+        "strict required/optional, generic host capability negotiation, typed aliases, bounded JSON and deterministic encoding"
+      ],
+      "negotiationId": "org.haiyue.production.composition-format@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "animation-spec/test/hya-composition.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "strict required/optional, generic host capability negotiation, typed aliases, bounded JSON and deterministic encoding"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "composition-runtime",
+      "area": "composition",
+      "schema": "animation-spec/schema/hya-composition.schema.json",
+      "parser": "animation-spec/src/composition/parser.ts",
+      "codec": null,
+      "runtime": null,
+      "current": {
+        "format": "implemented",
+        "runtime": "absent",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver",
+      "failure": {
+        "code": "E_HYA_RUNTIME_CAPABILITY",
+        "path": "$.parts[i].requires[j]",
+        "capability": "composition-runtime",
+        "status": "planned-runtime-preflight",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "animation-spec/test/hya-composition.test.mjs"
+      ],
+      "requiredEvidence": [
+        "all stages, real assets, GUI routing, effects and resource owners; new facade alone cannot qualify"
+      ],
+      "negotiationId": "org.haiyue.production.composition-runtime@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "animation-spec/test/hya-composition.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "all stages, real assets, GUI routing, effects and resource owners; new facade alone cannot qualify"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "incremental-and-resources",
+      "area": "performance",
+      "schema": null,
+      "parser": null,
+      "codec": null,
+      "runtime": "extensions/src/animation/layout/parameterized/LayoutGpuRenderer.ts",
+      "current": {
+        "format": "typed-only",
+        "runtime": "diagnostic-only",
+        "publicEntries": [],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "deliver-g12",
+      "failure": {
+        "code": "E_HYA_QUALIFICATION_RESOURCE",
+        "path": "$.evidence.resources",
+        "capability": "incremental-and-resources",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/layout-component-asset.test.mjs"
+      ],
+      "requiredEvidence": [
+        "static zero solves/uploads; visual-only zero layout; bounded cache/buffer reuse; native resource residue"
+      ],
+      "negotiationId": "org.haiyue.production.incremental-and-resources@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/layout-component-asset.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "static zero solves/uploads; visual-only zero layout; bounded cache/buffer reuse; native resource residue"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "core-compositing-effects",
+      "area": "core",
+      "schema": "animation-spec/schema/animation.schema.json",
+      "parser": "animation-spec/src/parser.ts",
+      "codec": "animation-spec/src/binary.ts",
+      "runtime": "extensions/src/animation/Animation2DRenderSystem.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented",
+        "publicEntries": [
+          "@haiyue/animation-spec",
+          "@haiyue/extensions/animation"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain",
+      "failure": {
+        "code": "E_ANIMATION_INVALID_FORMAT",
+        "path": "$.nodes[i].composite",
+        "capability": "core-compositing-effects",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/animation-runtime.test.mjs"
+      ],
+      "requiredEvidence": [
+        "legacy mask/matte stacks and supported layer effects retain their exact limitations; runtime composite rendering is distinct from rejected state composite-expansion channels"
+      ],
+      "negotiationId": "org.haiyue.production.core-compositing-effects@1",
+      "example": {
+        "status": "existing-public-demo",
+        "manifestId": "hya-samples",
+        "path": "examples/hya-samples/main.ts",
+        "coverage": "legacy mask-stack and drop-shadow-effect samples; not state composite channels",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/animation-runtime.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "legacy mask/matte stacks and supported layer effects retain their exact limitations; runtime composite rendering is distinct from rejected state composite-expansion channels"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "core-particles",
+      "area": "core",
+      "schema": "animation-spec/schema/animation.schema.json",
+      "parser": "animation-spec/src/parser.ts",
+      "codec": "animation-spec/src/binary.ts",
+      "runtime": "extensions/src/animation/Particle2DDescriptorAdapter.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented-with-rejections",
+        "publicEntries": [
+          "@haiyue/animation-spec",
+          "@haiyue/extensions/animation"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain",
+      "failure": {
+        "code": "E_ANIMATION_INVALID_FORMAT",
+        "path": "$.nodes[i].components[j]",
+        "capability": "core-particles",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/animation-runtime.test.mjs"
+      ],
+      "requiredEvidence": [
+        "reuse Engine Particle2D owner; no new simulation; masked particle components remain visibly unsupported and counted; lifecycle unchanged"
+      ],
+      "negotiationId": "org.haiyue.production.core-particles@1",
+      "example": {
+        "status": "existing-public-demo",
+        "manifestId": "hya-samples",
+        "path": "examples/hya-samples/main.ts",
+        "coverage": "existing particle-emitter sample; masked particle support is not claimed",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/animation-runtime.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "reuse Engine Particle2D owner; no new simulation; masked particle components remain visibly unsupported and counted; lifecycle unchanged"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "core-timeline-audio",
+      "area": "core",
+      "schema": "animation-spec/schema/animation.schema.json",
+      "parser": "animation-spec/src/parser.ts",
+      "codec": "animation-spec/src/binary.ts",
+      "runtime": "extensions/src/animation/AnimationAudioClip.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented-with-restrictions",
+        "publicEntries": [
+          "@haiyue/animation-spec",
+          "@haiyue/extensions/animation"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain",
+      "failure": {
+        "code": "E_ANIMATION_INVALID_FORMAT",
+        "path": "$.nodes[i].components[j].resource",
+        "capability": "core-timeline-audio",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "extensions/test/animation-runtime.test.mjs"
+      ],
+      "requiredEvidence": [
+        "legacy audio component and timeline behavior retain autoplay/host restrictions; it is not the new sample-accurate audio-events sidecar or mixed state-audio qualification"
+      ],
+      "negotiationId": "org.haiyue.production.core-timeline-audio@1",
+      "example": {
+        "status": "existing-public-demo",
+        "manifestId": "animation-spec",
+        "path": "examples/animation-spec/main.ts",
+        "coverage": "existing generated tone audio component; not sample-accurate audio-events",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "extensions/test/animation-runtime.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "legacy audio component and timeline behavior retain autoplay/host restrictions; it is not the new sample-accurate audio-events sidecar or mixed state-audio qualification"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "offline-conversion",
+      "area": "build-time",
+      "schema": null,
+      "parser": "animation-spec/src/conversion/OfflineConversionPipeline.ts",
+      "codec": "animation-spec/src/binary.ts",
+      "runtime": "animation-spec/src/conversion/OfflineConversionPipeline.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented",
+        "publicEntries": [
+          "@haiyue/animation-spec/conversion"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain-build-time-only",
+      "failure": {
+        "code": "E_CONVERSION_HASH_MISMATCH",
+        "path": "$.assets[i].integrity",
+        "capability": "offline-conversion",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "animation-spec/test/offline-conversion.test.mjs"
+      ],
+      "requiredEvidence": [
+        "existing host transaction, adapter, hash/abort/strict diagnostic and atomic outputs; source-neutral playback never creates an offline conversion session"
+      ],
+      "negotiationId": "org.haiyue.production.offline-conversion@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "animation-spec/test/offline-conversion.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "existing host transaction, adapter, hash/abort/strict diagnostic and atomic outputs; source-neutral playback never creates an offline conversion session"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "lottie-conversion",
+      "area": "build-time",
+      "schema": null,
+      "parser": "animation-spec/src/lottie/index.ts",
+      "codec": "animation-spec/src/binary.ts",
+      "runtime": "animation-spec/src/lottie/index.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented-with-diagnostics",
+        "publicEntries": [
+          "@haiyue/animation-spec/lottie"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain-build-time-only",
+      "failure": {
+        "code": "E_HYA_COMPOSITION_REQUIRED",
+        "path": "$.parts[i].extension",
+        "capability": "lottie-conversion",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "animation-spec/test/animation-spec.test.mjs"
+      ],
+      "requiredEvidence": [
+        "Lottie converts before delivery; no Lottie composition part or source runtime; preserve existing warning codes/paths and strict TypeError behavior rather than inventing a legacy E-code"
+      ],
+      "negotiationId": "org.haiyue.production.lottie-conversion@1",
+      "example": {
+        "status": "existing-public-demo",
+        "manifestId": "animation-spec",
+        "path": "examples/animation-spec/main.ts",
+        "coverage": "public Lottie conversion before legacy HYA playback; not a source runtime",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "animation-spec/test/animation-spec.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "Lottie converts before delivery; no Lottie composition part or source runtime; preserve existing warning codes/paths and strict TypeError behavior rather than inventing a legacy E-code"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    },
+    {
+      "id": "licensed-clip-baked",
+      "area": "build-time",
+      "schema": null,
+      "parser": "animation-spec/src/live2d/CubismClipBakedAdapter.ts",
+      "codec": "animation-spec/src/binary.ts",
+      "runtime": "animation-spec/src/live2d/CubismClipBakedAdapter.ts",
+      "current": {
+        "format": "implemented",
+        "runtime": "implemented-with-input-limitations",
+        "publicEntries": [
+          "@haiyue/animation-spec/live2d",
+          "@haiyue/animation-spec/live2d/clip-baked",
+          "@haiyue/animation-spec/cubism"
+        ],
+        "formal022Qualification": "not-qualified"
+      },
+      "decision": "retain-build-time-only",
+      "failure": {
+        "code": "E_CUBISM_RUNTIME_INPUT_UNBAKED",
+        "path": "$.recipe.runtimeInputs[i]",
+        "capability": "licensed-clip-baked",
+        "status": "existing-parser-or-runtime",
+        "pathRole": "template; replace indices/IDs with the concrete failing document or option location"
+      },
+      "owners": {
+        "contract": "g10-hya-capability-contracts",
+        "runtime": "g11-hya-production-runtime",
+        "qualification": "g12-hya-production-qualification",
+        "packageAndDevices": "g13-integration-release"
+      },
+      "existingTests": [
+        "animation-spec/test/cubism-clip-baked-adapter.test.mjs"
+      ],
+      "requiredEvidence": [
+        "licensed evaluator remains caller-injected and build-time only; preserve capture/motion sampling and deprecated cubism facade; baked deformable output uses the existing public playback extension"
+      ],
+      "negotiationId": "org.haiyue.production.licensed-clip-baked@1",
+      "example": {
+        "status": "no-capability-specific-public-demo",
+        "manifestId": null,
+        "path": null,
+        "coverage": "Private tests, format snippets and generic galleries do not prove this capability through a public production example.",
+        "formal022Qualified": false
+      },
+      "evidence": {
+        "currentKind": "module-test-sources-only",
+        "paths": [
+          "animation-spec/test/cubism-clip-baked-adapter.test.mjs"
+        ],
+        "formal022": null,
+        "productionRequired": [
+          "licensed evaluator remains caller-injected and build-time only; preserve capture/motion sampling and deprecated cubism facade; baked deformable output uses the existing public playback extension"
+        ],
+        "owner": "g12-hya-production-qualification"
+      },
+      "plannedEntries": []
+    }
+  ],
+  "unclassifiedCapabilities": [],
+  "foundationModules": {
+    "audio": [
+      "audio-events",
+      "audio-restricted-host"
+    ],
+    "binary.ts": [
+      "core-container"
+    ],
+    "composition": [
+      "composition-format"
+    ],
+    "conversion": [
+      "offline-conversion"
+    ],
+    "conversion.ts": [
+      "offline-conversion"
+    ],
+    "cubism": [
+      "licensed-clip-baked"
+    ],
+    "cubism.ts": [
+      "licensed-clip-baked"
+    ],
+    "data-binding": [
+      "data-transactions",
+      "data-binding-and-converters",
+      "data-resource-rebind"
+    ],
+    "deformable2d": [
+      "sampled-deformable",
+      "parameterized-rig"
+    ],
+    "deformable2d.ts": [
+      "sampled-deformable"
+    ],
+    "errors.ts": [
+      "core-container"
+    ],
+    "expression.ts": [
+      "safe-text-expression"
+    ],
+    "extensions.ts": [
+      "core-container"
+    ],
+    "hya-production.ts": [
+      "composition-format"
+    ],
+    "index.ts": [
+      "core-container",
+      "core-visuals"
+    ],
+    "interaction": [
+      "interaction-routing"
+    ],
+    "layout2d": [
+      "layout-geometry",
+      "layout-instances-lists-scroll",
+      "images-and-nslice"
+    ],
+    "live2d": [
+      "licensed-clip-baked"
+    ],
+    "live2d.ts": [
+      "licensed-clip-baked"
+    ],
+    "lottie": [
+      "lottie-conversion"
+    ],
+    "lottie.ts": [
+      "lottie-conversion"
+    ],
+    "native3d": [
+      "native-3d"
+    ],
+    "native3d.ts": [
+      "native-3d"
+    ],
+    "parser.ts": [
+      "core-container"
+    ],
+    "script": [
+      "sandbox-script-and-custom-wgsl"
+    ],
+    "semantics": [
+      "semantics"
+    ],
+    "state-machine-v2": [
+      "state-machine-v2"
+    ],
+    "state-machine.ts": [
+      "state-machine-v1",
+      "state-vector-paint",
+      "state-text-animator",
+      "state-resource-switch",
+      "state-audio",
+      "state-visual-effects",
+      "state-composite-expansion"
+    ],
+    "text-selector.ts": [
+      "core-text"
+    ],
+    "text2d": [
+      "parameterized-text-shaping",
+      "parameterized-text-paints",
+      "text-editing-input"
+    ],
+    "types.ts": [
+      "core-visuals",
+      "core-compositing-effects",
+      "core-particles",
+      "core-timeline-audio"
+    ],
+    "validation.ts": [
+      "core-container"
+    ],
+    "vector2d": [
+      "vector-visual-sidecar"
+    ]
+  },
+  "coreComponentTypes": {
+    "AnimationShape2DComponent": "core-visuals",
+    "AnimationPath2DComponent": "core-visuals",
+    "AnimationSprite2DComponent": "core-visuals",
+    "AnimationText2DComponent": "core-text",
+    "AnimationParticle2DComponent": "core-particles",
+    "AnimationAudioComponent": "core-timeline-audio",
+    "AnimationVectorShapeComponent": "core-visuals",
+    "AnimationExtensionComponent": "core-container"
+  },
+  "newStatePaths": {
+    "vector-paint": [
+      "components.{index}.paint.fill.color",
+      "components.{index}.paint.stroke.color",
+      "components.{index}.paint.stroke.width",
+      "components.{index}.paint.opacity"
+    ],
+    "text-animator": [
+      "components.{index}.text.value",
+      "components.{index}.text.fontSize",
+      "components.{index}.text.tracking",
+      "components.{index}.text.color",
+      "components.{index}.text.opacity"
+    ],
+    "remainingFamiliesRejected": [
+      "visual-effect",
+      "composite-expansion"
+    ],
+    "stringPolicy": "discrete-dominant-weight-then-stable-action-order",
+    "numericPolicy": "existing-v2-override-additive-mask-blending",
+    "bounds": {
+      "color": [
+        0,
+        1
+      ],
+      "opacity": [
+        0,
+        1
+      ],
+      "strokeWidthMinimum": 0,
+      "fontSizeExclusiveMinimum": 0,
+      "tracking": "finite"
+    },
+    "notAnUpgradeToOldRegistry": true
+  },
+  "requiredStages": [
+    "input-queue",
+    "atomic-data",
+    "state-timeline",
+    "text-layout",
+    "geometry-draw",
+    "observable-commit"
+  ],
+  "hostDeclarationNeverOverridesRejection": true,
+  "audioRateRange": [
+    0.0625,
+    16
+  ],
+  "observedGaps": [
+    {
+      "id": "paused-state-seek",
+      "evidence": "artifacts/engine-0.2.2/g10/state-seek-diagnostic.json",
+      "owner": "g11-hya-production-runtime",
+      "requiredBehavior": "silent seek updates paused pose to requested time, restores paused status and emits no one-shot effect"
+    }
+  ],
+  "phaseOwners": {
+    "composition": "g11-hya-production-runtime",
+    "incremental": "g12-hya-production-qualification",
+    "physicalDevicesAndPackedRelease": "g13-integration-release"
+  },
+  "qualification": {
+    "matrix": "review/engine-0.2.2/hya-contract.md",
+    "corpusManifest": "animation-spec/corpus/manifest.json",
+    "manifestSha256": "e861f55f7175c26d30973061365ef5bf942fbd955ca9bfc69dbb69174033c8d9",
+    "unchangedDenominator": 23,
+    "preserveAllCohortsAndFailures": true,
+    "requiredRealIds": [
+      "layers/solid-layer",
+      "large/bodymovin-showcase",
+      "large/banner-ui-text",
+      "large/footage-images-text",
+      "large/monster-mask-stress"
+    ],
+    "interactiveArtifact": {
+      "owner": "g11-hya-production-runtime",
+      "license": "repository MIT plus individually pinned font/image/audio rights",
+      "notARealCorpusSubstitute": true
+    },
+    "requiredWorkloads": [
+      "interactive-small",
+      "layout-1k",
+      "layout-10k-diagnostic",
+      "multi-instance",
+      "real-corpus-small",
+      "real-corpus-large"
+    ],
+    "repetitions": 3,
+    "metrics": [
+      "download",
+      "parse",
+      "prepare",
+      "font-ready",
+      "first-usable-frame",
+      "cpu",
+      "gpu",
+      "queue-wait",
+      "solve",
+      "measure",
+      "upload-bytes",
+      "upload-count",
+      "draw-count",
+      "allocations",
+      "gpu-resource-residue"
+    ],
+    "reference": "independent real glyph/image/N-slice pixels plus ordered data/state/event/semantic/audio trace",
+    "budgets": "Existing production/layout/region/GPU/quality/resource budgets and named exceptions remain unchanged; new per-entry byte limits require pre-candidate G12 measurement and G13 admission, not post-failure inflation.",
+    "publicConsumerDraft": "review/engine-0.2.2/hya-api-draft.d.ts",
+    "currentOfficialPackageQualified": false
+  },
+  "nonGoals": [
+    "Rive branch merge",
+    "arbitrary source full-fidelity",
+    "source runtime or platform SDK",
+    "general script VM",
+    "custom WGSL",
+    "baseline promotion",
+    "publishing"
+  ],
+  "preserveOriginals": true
+}

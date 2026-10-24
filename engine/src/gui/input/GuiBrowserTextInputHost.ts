@@ -95,6 +95,7 @@ export class GuiBrowserTextInputHost implements GuiTextInputHost {
     listen(element,'keydown',event=>{
       const key=event as KeyboardEvent;consumeInputEvent(key);
       if(composing||key.isComposing||key.keyCode===229)return;
+      try{if(request.onKeyboard?.(key)){key.preventDefault();return;}}catch(error){key.preventDefault();throw error;}
       if(!request.multiline&&!key.ctrlKey&&!key.metaKey&&!key.altKey&&(key.key==='Home'||key.key==='End')){
         key.preventDefault();selection();const index=key.key==='Home'?0:committed.length;request.onSelection(key.shiftKey?storedSelection()[0]:index,index,request.generation);return;
       }
@@ -107,6 +108,7 @@ export class GuiBrowserTextInputHost implements GuiTextInputHost {
       else if((key.ctrlKey||key.metaKey)&&key.key.toLowerCase()==='y')command='redo';
       if(command){key.preventDefault();selection();if(!key.repeat||command==='left'||command==='right'||command==='extendLeft'||command==='extendRight')request.onCommand(command);}
     });
+    listen(element,'keyup',event=>{const key=event as KeyboardEvent;consumeInputEvent(key);try{if(request.onKeyboard?.(key)&&!composing&&!key.isComposing)key.preventDefault();}catch(error){key.preventDefault();throw error;}});
     listen(element,'select',selection);listen(document,'selectionchange',selection);
     listen(element,'blur',()=>{if(!closed)request.onFocusLost(request.generation);});
     const viewport=()=>{

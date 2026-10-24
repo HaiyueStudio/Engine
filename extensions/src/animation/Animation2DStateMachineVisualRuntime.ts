@@ -6,6 +6,8 @@ import type { HyaAnimation2DEffectPayload } from './HyaAnimation2DClipAdapter.js
 import {
   Animation2DRuntime,
   type Animation2DRuntimeNode,
+  type Animation2DRuntimeVisual,
+  type Animation2DCoreResourcePort,
 } from './Animation2DRuntime.js';
 import type { Animation2DEffectEvent, Animation2DPose } from './runtime/mixer/index.js';
 import {
@@ -26,8 +28,9 @@ export class Animation2DStateMachineVisualRuntime extends Animation2DRuntime {
     animation: ParsedAnimation,
     runtimeExtensions?: Animation2DExtensionRegistry,
     assetManager?: AssetManager,
+    coreResources?: Animation2DCoreResourcePort,
   ) {
-    super(owner, animation, runtimeExtensions, assetManager);
+    super(owner, animation, runtimeExtensions, assetManager, undefined, coreResources);
     for (const node of this._nodes) {
       for (const particle of node.particles) {
         particle.playing = false;
@@ -65,11 +68,7 @@ export class Animation2DStateMachineVisualRuntime extends Animation2DRuntime {
     this._speed = speed;
     this._opacityMemo.clear();
     for (const node of this._nodes) {
-      node.entity.disabled = false;
-      node.transform.setPosition(node.initialX, node.initialY);
-      node.transform.rotation = node.initialRotation;
-      node.transform.setScale(node.initialScaleX, node.initialScaleY);
-      node.opacity = node.initialOpacity;
+      this._resetPoseNode(node);
     }
     for (const channel of pose.channels) {
       const node = this._nodesById.get(channel.binding.targetId);
@@ -123,6 +122,16 @@ export class Animation2DStateMachineVisualRuntime extends Animation2DRuntime {
     this._lastAppliedTime = Number.NaN;
   }
 
+  /** Default standalone semantics remain the authored initial pose. */
+  protected _resetPoseNode(node: Animation2DRuntimeNode): void {
+      node.entity.disabled = false;
+      node.transform.setPosition(node.initialX, node.initialY);
+      node.transform.rotation = node.initialRotation;
+      node.transform.setScale(node.initialScaleX, node.initialScaleY);
+      node.opacity = node.initialOpacity;
+  }
+  protected _poseVisualAlpha(visual: Animation2DRuntimeVisual): number {return visual.baseAlpha;}
+
   override setPlaying(playing: boolean): void {
     this._playing = playing;
     for (const [key, owners] of this._particleOwners) {
@@ -148,7 +157,7 @@ export class Animation2DStateMachineVisualRuntime extends Animation2DRuntime {
       for (const deferred of node.deferredVisuals.splice(0)) this._materializeCoreVisual(node, deferred);
     }
     for (const visual of node.visuals) {
-      const alpha = visual.baseAlpha * opacity;
+      const alpha = this._poseVisualAlpha(visual) * opacity;
       if (Math.abs(alpha - visual.lastAlpha) < 1e-6) continue;
       visual.color[3] = alpha;
       visual.component.revision++;

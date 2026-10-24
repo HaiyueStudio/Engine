@@ -1,6 +1,7 @@
 import { dts } from 'rollup-plugin-dts';
 
 const input = {
+    'hya-production': 'dist/hya-production.d.ts',
   index: 'dist/index.d.ts',
   lottie: 'dist/lottie.d.ts',
   native3d: 'dist/native3d.d.ts',

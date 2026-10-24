@@ -5,7 +5,7 @@ import type { IEngine } from '../../core/IEngine';
 import { GuiBatch, GUI_SHAPE_FLOATS_PER_VERTEX } from './GuiBatch';
 import { BaseRenderer } from '../../renderer/BaseRenderer';
 import type { PipelineWarmupPlan } from '../../renderer/PipelineWarmup';
-import { getBuiltin2dUiShader } from '../../shader/BuiltinRenderShader';
+import { getBuiltinGuiShader } from '../../shader/BuiltinRenderShader';
 import { GUI_SHAPE_VERTEX_LAYOUT } from './GuiVertexLayout';
 
 export class GuiShapeRenderer extends BaseRenderer {
@@ -35,7 +35,7 @@ export class GuiShapeRenderer extends BaseRenderer {
       this.bindGroupLayout = device.createBindGroupLayout({
       entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }],
     });
-    const generated = getBuiltin2dUiShader(device, 'gui-shape', [this.bindGroupLayout]);
+    const generated = getBuiltinGuiShader(device, 'gui-shape', [this.bindGroupLayout]);
     this.shader = generated.module;
     this.pipelineLayout = generated.pipelineLayout;
     const viewport=this.resources.reserve(this.viewportKey,16,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST,'gui-shape:viewport');

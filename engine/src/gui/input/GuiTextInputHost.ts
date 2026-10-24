@@ -18,6 +18,7 @@ export interface GuiTextInputSession {
 export interface GuiTextInputRequest {
   readonly value:string;readonly selectionUtf16:readonly [number,number];
   readonly inputType:'text'|'email'|'number'|'password';readonly multiline:boolean;readonly generation:number;
+  readonly onKeyboard?:(event:KeyboardEvent)=>boolean;
   readonly onEdit:(edit:GuiTextEdit)=>void;
   /** Full native snapshots are diffed at Engine's pinned grapheme boundaries. */
   readonly onValue:(value:string,selectionUtf16:readonly [number,number],generation:number,eventId?:number)=>void;

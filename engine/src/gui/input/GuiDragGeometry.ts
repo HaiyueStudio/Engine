@@ -1,6 +1,7 @@
-import {GuiInput} from '../components/GuiInput';
-import {GuiSlider} from '../components/GuiSlider';
-import {GuiScrollView} from '../components/GuiScrollView';
+import {isGuiControl} from '../GuiControlIdentity';
+import {type GuiInput} from '../components/GuiInput';
+import {type GuiSlider} from '../components/GuiSlider';
+import {type GuiScrollView} from '../components/GuiScrollView';
 import type {GuiElement} from '../components/GuiElement';
 import {isGuiLayoutHidden} from '../GuiLayoutState';
 import type {GuiRect} from '../GuiTypes';
@@ -15,16 +16,16 @@ export function guiDragSourceFrom(hit: GuiElement | null): GuiElement | null {
   for (let element = hit; element; element = element.parent) {
     if (element.dragSource) return element;
     // Editing, value adjustment and the scroll viewport retain their own gestures.
-    if (element instanceof GuiInput || element instanceof GuiSlider || element instanceof GuiScrollView) return null;
+    if (isGuiControl<GuiInput>(element, 'GuiInput') || isGuiControl<GuiSlider>(element, 'GuiSlider') || isGuiControl<GuiScrollView>(element, 'GuiScrollView')) return null;
   }
   return null;
 }
 export function guiScrollAncestor(element: GuiElement): GuiScrollView | null {
-  for (let parent = element.parent; parent; parent = parent.parent) if (parent instanceof GuiScrollView) return parent;
+  for (let parent = element.parent; parent; parent = parent.parent) if (isGuiControl<GuiScrollView>(parent, 'GuiScrollView')) return parent;
   return null;
 }
 export function revealGuiElement(element: GuiElement): void {
-  for (let parent = element.parent; parent; parent = parent.parent) if (parent instanceof GuiScrollView) {
+  for (let parent = element.parent; parent; parent = parent.parent) if (isGuiControl<GuiScrollView>(parent, 'GuiScrollView')) {
     const top = element.rect.y - parent.rect.y, bottom = top + element.rect.height - parent.rect.height;
     if (top < 0) parent.scrollBy(top); else if (bottom > 0) parent.scrollBy(bottom);
   }

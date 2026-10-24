@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "goal": "g10-hya-capability-contracts",
+  "status": "complete",
+  "capabilities": 40,
+  "foundationModules": 33,
+  "coreComponentTypes": 8,
+  "testsPassed": 2090,
+  "focusedTests": 25,
+  "symbolBudgets": [
+    55,
+    9,
+    7,
+    5,
+    9,
+    7
+  ],
+  "formatBuiltinParts": 7,
+  "formatSources": 41,
+  "proposedFormatBytes": 334408,
+  "packageQualified": false,
+  "productionRuntimeQualified": false,
+  "wholeVersionReady": false,
+  "problem": "Format, private runtime, public consumption and real production qualification were conflated; production composition and public contracts were incomplete.",
+  "method": "Versioned safe composition envelope; exhaustive capability/module/component matrix; named APIs, phases, ownership, strict diagnostics and real-material acceptance contract; isolated private tarball validation.",
+  "conclusion": "Full original G10 contract verified; G11 runtime, G12 production materials/performance and G13 actual package/device/release admission remain explicitly owned.",
+  "proofs": {
+    "required": {
+      "path": "artifacts/engine-0.2.2/g10/required-20261022T164645Z/result.json",
+      "sha256": "0957d25e9e9b817ab82764901a1fef6c9ed6d166e54dd5ef1b8de9e57edea6fb"
+    },
+    "consumer": {
+      "path": "artifacts/engine-0.2.2/g10/consumer-1792687541794/result.json",
+      "sha256": "df56653fe266a1fa570d318fd8ca5fec8852e03d998c53ae9ad72d844fc1c4b8"
+    },
+    "package": {
+      "path": "artifacts/engine-0.2.2/g10/final-20261022T170556Z/public-packages.json",
+      "sha256": "b7b7bed5045f8371f84c493aaeeef36ffd52ef922c8902a94336800bdb98905f"
+    },
+    "focused": {
+      "path": "artifacts/engine-0.2.2/g10/focused-format-complete.log",
+      "sha256": "18dd89233e12215a5ccdc9a91668bc88b7b98642148dcc64fd5359a270690c55"
+    }
+  },
+  "originalContractAudit": {
+    "path": "artifacts/engine-0.2.2/g10/final-20261022T170556Z/original-contract-audit.json",
+    "sha256": "e9fcb932f1fa1d13e66b990dffa38e8266e409af27489f3c1fe49c7c5704d072"
+  },
+  "sourceAudit": {
+    "path": "artifacts/engine-0.2.2/g10/final-20261022T170556Z/source-audit.json",
+    "sha256": "311ae156801b1ffa36f761a92922c9dac5a1fffab29410f819943f29b95b9c7d"
+  },
+  "archive": {
+    "path": "artifacts/engine-0.2.2/g10/final-20261022T170556Z/g10-evidence.zip",
+    "sha256": "421d1b11380797d45e11f32613d7c629f1883bf26bae38110a4e63c28fc366e4",
+    "bytes": 12276427,
+    "verifiedFiles": 379,
+    "originalsRetained": true
+  },
+  "observedRuntimeGap": {
+    "path": "artifacts/engine-0.2.2/g10/state-seek-diagnostic.json",
+    "sha256": "b317c076471f8c21bb62758374a1d62006746f22fd5b4317fae1b907f98ba2ca",
+    "owner": "g11-hya-production-runtime",
+    "status": "unmodified legacy paused seek returns clock 0 instead of requested 0.5; G11 must implement silent composition seek"
+  },
+  "corpusRuntimeFailure": {
+    "path": "artifacts/engine-0.2.2/g10/mask-corpus-diagnostic.json",
+    "sha256": "ee82d6f9d66455515db0265c92fe79e1a36c3c874a55146245ec85d9f687784e"
+  },
+  "unchangedOpenG13Checks": [
+    {
+      "name": "public-package/gui-font",
+      "status": "failed",
+      "gzipBytes": 105353,
+      "maximumBytes": 55000,
+      "budgetChanged": false
+    },
+    {
+      "name": "check:engine:contracts",
+      "status": "failed",
+      "preExistingBareErrors": 10,
+      "source": "engine/src/core/RenderRegionState.ts",
+      "sourceSha256": "c8f6fe29a04a26d6e5579d110b7c7b3f2f7c82cc83ee33f303dccd6b491a97fe",
+      "sourceUnchanged": true
+    }
+  ],
+  "offlineDashboard": {
+    "path": "artifacts/engine-0.2.2/g10/final-20261022T170556Z/corpus-disposition.json",
+    "sha256": "4a4ccbed16f98a1ba576c101e46a58e8a47d947dc28ae1f83b6635d280e114da",
+    "documentedAlias": "missing existing npm script; raw failure retained; G13 tooling owner"
+  },
+  "handoff": {
+    "g11": "typed ports/stages/strict preflight, selected nine channels, real glyph/assets, current-input silent seek and full lifecycle",
+    "g12": "incremental resources, lazy graph, all 23 licensed real materials including the preserved mask-budget failure, three-run metrics and product/tarball evidence",
+    "g13": "actual exports/manifests/declarations and packed consumers, package/contracts/tooling issues, physical Native/devices and complete release qualification"
+  },
+  "originalsRetained": true,
+  "published": false,
+  "committedOrPushed": false,
+  "performanceBaselineChanged": false,
+  "budgetsChanged": false
+}

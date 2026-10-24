@@ -34,7 +34,7 @@ interface Snapshot {
   readonly pendingEffects: readonly TimelineEffectOccurrence[];
 }
 
-interface PreparedFrame {readonly pose: StateMachinePose; readonly snapshot: Snapshot; readonly transaction: number | undefined; readonly delta: number; readonly consumed: ReadonlySet<string>; readonly settled: boolean;}
+interface PreparedFrame {readonly committedStatus?: StateMachineRuntimeStatus; readonly pose: StateMachinePose; readonly snapshot: Snapshot; readonly transaction: number | undefined; readonly delta: number; readonly consumed: ReadonlySet<string>; readonly settled: boolean;}
 
 export interface StateMachineRuntimeOptions {
   readonly invocationPort?: DeterministicInvocationPort; readonly sideEffectPort?: SideEffectPort;
@@ -96,13 +96,17 @@ export class HyaStateMachineRuntimeV2 {
   }
 
   /** Keeps the existing sampler, mixer and nested controllers open through downstream layout/draw. */
-  prepareFrame(deltaSeconds: number, beforeInputs?: () => void): StateMachinePose {
-    return this._prepareFrame(deltaSeconds, beforeInputs, true);
+  prepareFrame(deltaSeconds: number, beforeInputs?: () => void, transport?: Readonly<{sampling: 'running' | 'paused'; committed: 'running' | 'paused' | 'stopped'}>): StateMachinePose {
+    return this._prepareFrame(deltaSeconds, beforeInputs, true, transport);
   }
-  private _prepareFrame(deltaSeconds: number, beforeInputs: (() => void) | undefined, requireTransactionalNested: boolean): StateMachinePose {
+  private _prepareFrame(deltaSeconds: number, beforeInputs: (() => void) | undefined, requireTransactionalNested: boolean, transport?: Readonly<{sampling: 'running' | 'paused'; committed: 'running' | 'paused' | 'stopped'}>): StateMachinePose {
     this._requireActive(); this._requireFrameIdle();
     if (!Number.isFinite(deltaSeconds) || deltaSeconds < 0) throw runtimeError('E_STATE_MACHINE_RUNTIME_TIME', 'Update delta must be finite and non-negative.');
-    const delta = this._status === 'paused' || this._status === 'stopped' ? 0 : deltaSeconds, snapshot = this._snapshot();
+    if (transport && (!['running','paused'].includes(transport.sampling) || !['running','paused','stopped'].includes(transport.committed))) throw runtimeError('E_STATE_MACHINE_RUNTIME_STATE', 'Invalid prepared transport status.');
+    const snapshot = this._snapshot();
+    // Logical intent belongs to this existing checkpoint; do not call borrowed lifecycle ports speculatively.
+    if (transport) this._status = transport.sampling;
+    const delta = this._status === 'paused' || this._status === 'stopped' ? 0 : deltaSeconds;
     let transaction: number | undefined;
     this._preparingFrame = true;
     try {
@@ -120,7 +124,7 @@ export class HyaStateMachineRuntimeV2 {
       for (const effect of this._pendingEffects) this.mixer.submitEffect(effect);
       const settled = this._layers.every(layer => layer.transition === null) && nestedSettled.every(Boolean) && this._triggers.size === 0;
       const pose = this.mixer.prepare(settled); this._requireActive();
-      this._preparedFrame = {pose, snapshot, transaction, delta, consumed, settled}; return pose;
+      this._preparedFrame = {pose, snapshot, transaction, delta, consumed, settled, ...(transport ? {committedStatus:transport.committed} : {})}; return pose;
     } catch (error) {
       this._rollbackFrame(snapshot, transaction); throw error;
     } finally {this._preparingFrame = false;}
@@ -133,6 +137,7 @@ export class HyaStateMachineRuntimeV2 {
         for (const trigger of frame.consumed) this._triggers.delete(trigger);
         this._pendingEffects.length = 0; this._clock += frame.delta; this._settled = frame.settled; this._lastPose = pose;
       }
+      if (frame.committedStatus) this._status = frame.committedStatus;
       this._preparedFrame = undefined; return pose;
     } catch (error) {this._preparedFrame = undefined; this._rollbackFrame(frame.snapshot, frame.transaction); throw error;}
   }

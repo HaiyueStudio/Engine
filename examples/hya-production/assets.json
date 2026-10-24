@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "scope": "Four-part browser composition with real text, images and model bindings; not full font/profile/device qualification.",
+  "font": {
+    "family": "Haiyue G11 Scene Sans",
+    "original": {
+      "url": "https://raw.githubusercontent.com/notofonts/noto-cjk/Sans2.004/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf",
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+    },
+    "license": "FONT-LICENSE.txt",
+    "characters": " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~世乐你保停入切取口图好始存局屏布幕开态换放文暂月本横测海消片状界确窗竖继续缩置认试输重音",
+    "method": "Real CFF contours and advances copied into a renamed finite-glyph subset. Source shaping tables are not copied; this scene uses simple Latin/CJK text. All original copyright/license text retained."
+  },
+  "assets": {
+    "font": {
+      "file": "scene-sans.otf",
+      "bytes": 34264,
+      "sha256": "f62a4977e30d92bc8f9da3eff2707756d3d76bc00be0e549e76c43ca3efa404f",
+      "integrity": "sha256-9ipJd+MNkryPnaPv8nB3VtPXa8AL4OVJ52xDyj76QE8="
+    },
+    "image": {
+      "file": "image.png",
+      "bytes": 79,
+      "sha256": "55ec4acd89bdfb9ac597cca6466bcba70d47dd2ae4a41ba961c537ec0ce4795d",
+      "integrity": "sha256-VexKzYm9+5rFl8ymRmvLpw1H3SrkpBupYcU37AzkeV0="
+    },
+    "alternate": {
+      "file": "alternate.png",
+      "bytes": 80,
+      "sha256": "7025454b19bbbaaed85927731b08046e8bdde6233aa440fc195860fa21a76eaf",
+      "integrity": "sha256-cCVFSxm7uq7YWSdzGwgEbovd5iM6pED8GVhg+iGnbq8="
+    }
+  },
+  "scene": {
+    "file": "scene.json",
+    "sha256": "e5f69096f44e426982f7e00ddc809d44fa7aabe8a4c9282f546441f7f071605e"
+  },
+  "generator": {
+    "file": "build-scene-assets.mjs",
+    "sha256": "a735094475cfb33f5bdf3a18398469542d1360b3e7e07438db48f6dee0a71b49"
+  },
+  "physicalNativeQualified": false,
+  "fullG11Complete": false
+}

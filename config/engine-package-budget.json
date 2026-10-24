@@ -20,22 +20,31 @@
       "maxPackedBytes": 2100000,
       "maxUnpackedBytes": 9000000,
       "capacity": {
-        "reviewed": { "packedBytes": 1874952, "unpackedBytes": 8362294, "fileCount": 613 },
-        "growthReserve": { "packedBytes": 225048, "unpackedBytes": 637706 },
+        "reviewed": {
+          "packedBytes": 1874952,
+          "unpackedBytes": 8362294,
+          "fileCount": 613
+        },
+        "growthReserve": {
+          "packedBytes": 225048,
+          "unpackedBytes": 637706
+        },
         "capabilityBasis": "stable golden path plus focused ECS, scene, rendering, physics, compute, assets, diagnostics, game saves, and experimental runtime seams; 0.2.0 owner-safe audio mixer, multiplayer input and GUI font options; 0.2.1 GPU instances and private Deferred/vertex-color declarations"
       },
       "declaredFiles": [
         "README.md",
         "LICENSE",
         "dist/**/*.js",
-        "dist/**/*.d.ts"
+        "dist/**/*.d.ts",
+        "THIRD_PARTY_NOTICES.txt"
       ],
       "allowedFilePatterns": [
         "package.json",
         "README.md",
         "LICENSE",
         "dist/**/*.js",
-        "dist/**/*.d.ts"
+        "dist/**/*.d.ts",
+        "THIRD_PARTY_NOTICES.txt"
       ]
     },
     "@haiyue/animation-spec": {
@@ -43,8 +52,15 @@
       "maxPackedBytes": 145000,
       "maxUnpackedBytes": 550000,
       "capacity": {
-        "reviewed": { "packedBytes": 130279, "unpackedBytes": 502980, "fileCount": 48 },
-        "growthReserve": { "packedBytes": 14721, "unpackedBytes": 47020 },
+        "reviewed": {
+          "packedBytes": 130279,
+          "unpackedBytes": 502980,
+          "fileCount": 48
+        },
+        "growthReserve": {
+          "packedBytes": 14721,
+          "unpackedBytes": 47020
+        },
         "capabilityBasis": "source-neutral HYA format, native 3D, deformable 2D, and offline Lottie/Cubism adapters; reviewed text style runs and their codec/schema/validation"
       },
       "declaredFiles": [
@@ -71,8 +87,15 @@
       "maxPackedBytes": 550000,
       "maxUnpackedBytes": 3000000,
       "capacity": {
-        "reviewed": { "packedBytes": 513428, "unpackedBytes": 2651601, "fileCount": 188 },
-        "growthReserve": { "packedBytes": 36572, "unpackedBytes": 348399 },
+        "reviewed": {
+          "packedBytes": 513428,
+          "unpackedBytes": 2651601,
+          "fileCount": 188
+        },
+        "growthReserve": {
+          "packedBytes": 36572,
+          "unpackedBytes": 348399
+        },
         "capabilityBasis": "admitted optional animation, asset, text, tile, deformable, and experimental ray tracing runtimes; reviewed OpenType-backed animation text, routed interaction, virtual joystick, i18n and branching narrative"
       },
       "declaredFiles": [
@@ -94,8 +117,15 @@
       "maxPackedBytes": 175000,
       "maxUnpackedBytes": 850000,
       "capacity": {
-        "reviewed": { "packedBytes": 136901, "unpackedBytes": 668355, "fileCount": 70 },
-        "growthReserve": { "packedBytes": 38099, "unpackedBytes": 181645 },
+        "reviewed": {
+          "packedBytes": 136901,
+          "unpackedBytes": 668355,
+          "fileCount": 70
+        },
+        "growthReserve": {
+          "packedBytes": 38099,
+          "unpackedBytes": 181645
+        },
         "capabilityBasis": "typed shader IR/compiler, generated WebGPU shader families, and focused material graph authoring"
       },
       "declaredFiles": [
@@ -120,22 +150,34 @@
       "README.md",
       "LICENSE",
       "dist/**/*.js",
-      "dist/**/*.d.ts"
+      "dist/**/*.d.ts",
+      "THIRD_PARTY_NOTICES.txt"
     ],
     "allowedFilePatterns": [
       "package.json",
       "README.md",
       "LICENSE",
       "dist/**/*.js",
-      "dist/**/*.d.ts"
+      "dist/**/*.d.ts",
+      "THIRD_PARTY_NOTICES.txt"
     ]
   },
   "consumers": {
     "gpu-instances-only": {
       "fixture": "scripts/fixtures/engine-consumers/gpu-instances-only.mjs",
       "maxGzipBytes": 91000,
-      "requiredExports": ["GpuComputeProgram", "GpuInstanceLod", "GpuReadbackRing", "InstancedToonMaterial", "InstancedMesh3DRenderer", "inspectGpuSimulationCapabilities"],
-      "allowedGeneratedShaderArtifacts": ["specialized-rendering-shader-artifact", "compute-shader-artifact"]
+      "requiredExports": [
+        "GpuComputeProgram",
+        "GpuInstanceLod",
+        "GpuReadbackRing",
+        "InstancedToonMaterial",
+        "InstancedMesh3DRenderer",
+        "inspectGpuSimulationCapabilities"
+      ],
+      "allowedGeneratedShaderArtifacts": [
+        "specialized-rendering-shader-artifact",
+        "compute-shader-artifact"
+      ]
     },
     "root-golden-path": {
       "fixture": "scripts/fixtures/engine-consumers/root-golden-path.mjs",
@@ -163,8 +205,12 @@
     "fxaa-only": {
       "fixture": "scripts/fixtures/engine-consumers/fxaa-only.mjs",
       "maxGzipBytes": 14000,
-      "requiredExports": ["FxaaPass"],
-      "allowedGeneratedShaderArtifacts": ["postprocess-shader-artifact"]
+      "requiredExports": [
+        "FxaaPass"
+      ],
+      "allowedGeneratedShaderArtifacts": [
+        "postprocess-shader-artifact"
+      ]
     },
     "geometry-only": {
       "fixture": "scripts/fixtures/engine-consumers/geometry-only.mjs",
@@ -203,26 +249,38 @@
     "audio-mixer-only": {
       "fixture": "scripts/fixtures/engine-consumers/audio-mixer-only.mjs",
       "maxGzipBytes": 4000,
-      "requiredExports": ["OwnerSafeAudioMixer"],
+      "requiredExports": [
+        "OwnerSafeAudioMixer"
+      ],
       "allowedGeneratedShaderArtifacts": []
     },
     "multiplayer-input-only": {
       "fixture": "scripts/fixtures/engine-consumers/multiplayer-input-only.mjs",
       "maxGzipBytes": 6000,
-      "requiredExports": ["BrowserMultiplayerInput", "InputActionMap"],
+      "requiredExports": [
+        "BrowserMultiplayerInput",
+        "InputActionMap"
+      ],
       "allowedGeneratedShaderArtifacts": []
     },
     "font-builder-only": {
       "fixture": "scripts/fixtures/engine-consumers/font-builder-only.mjs",
       "maxGzipBytes": 2000,
-      "requiredExports": ["buildBitmapFont"],
+      "requiredExports": [
+        "buildBitmapFont"
+      ],
       "allowedGeneratedShaderArtifacts": []
     },
     "gui-font": {
       "fixture": "scripts/fixtures/engine-consumers/gui-font.mjs",
       "maxGzipBytes": 55000,
-      "requiredExports": ["GuiSystem", "GuiToast"],
-      "allowedGeneratedShaderArtifacts": ["2d-ui-shader-artifact"]
+      "requiredExports": [
+        "GuiSystem",
+        "GuiToast"
+      ],
+      "allowedGeneratedShaderArtifacts": [
+        "2d-ui-shader-artifact"
+      ]
     }
   },
   "animationSpecConsumers": {
@@ -320,8 +378,14 @@
       "fixture": "scripts/fixtures/engine-consumers/extensions-achievements.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 3500,
-      "requiredExports": ["AchievementRuntime"],
-      "forbiddenStaticTokens": ["class AchievementGui", "class GuiSystem", "class GltfModelSystem"]
+      "requiredExports": [
+        "AchievementRuntime"
+      ],
+      "forbiddenStaticTokens": [
+        "class AchievementGui",
+        "class GuiSystem",
+        "class GltfModelSystem"
+      ]
     },
     "extensions-share-content": {
       "entrypoint": "./share-content",
@@ -375,9 +439,16 @@
         "schemaVersion": 1,
         "maxInitialGzipBytes": 145000,
         "maxTotalGzipBytes": 245000,
-        "deferredModuleMarkers": ["/opentype.module-"]
+        "deferredModuleMarkers": [
+          "/opentype.module"
+        ]
       },
-      "requiredExports": ["Animation2DComponent", "Animation2DRenderSystem", "Animation2DSystem", "createAnimationAssetLoader"]
+      "requiredExports": [
+        "Animation2DComponent",
+        "Animation2DRenderSystem",
+        "Animation2DSystem",
+        "createAnimationAssetLoader"
+      ]
     },
     "extensions-animation3d": {
       "entrypoint": "./animation3d",
@@ -442,58 +513,84 @@
         "schemaVersion": 1,
         "maxInitialGzipBytes": 153500,
         "maxTotalGzipBytes": 255000,
-        "deferredModuleMarkers": ["/opentype.module-"]
+        "deferredModuleMarkers": [
+          "/opentype.module"
+        ]
       },
-      "requiredExports": ["Animation2DStateMachineComponent", "Animation2DStateMachineSystem", "createHyaAnimation2DClips"]
+      "requiredExports": [
+        "Animation2DStateMachineComponent",
+        "Animation2DStateMachineSystem",
+        "createHyaAnimation2DClips"
+      ]
     },
     "extensions-spine": {
       "entrypoint": "./spine",
       "fixture": "scripts/fixtures/engine-consumers/extensions-spine.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 90000,
-      "requiredExports": ["Spine2DComponent", "Spine2DRenderSystem", "createSpinePlugin"]
+      "requiredExports": [
+        "Spine2DComponent",
+        "Spine2DRenderSystem",
+        "createSpinePlugin"
+      ]
     },
     "extensions-tilemap": {
       "entrypoint": "./tilemap",
       "fixture": "scripts/fixtures/engine-consumers/extensions-tilemap.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 45000,
-      "requiredExports": ["Tilemap2DComponent", "Tilemap2DRenderSystem", "createTilemapPlugin"]
+      "requiredExports": [
+        "Tilemap2DComponent",
+        "Tilemap2DRenderSystem",
+        "createTilemapPlugin"
+      ]
     },
     "extensions-canvas-text": {
       "entrypoint": "./canvas-text",
       "fixture": "scripts/fixtures/engine-consumers/extensions-canvas-text.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 50000,
-      "requiredExports": ["CanvasText2DRenderSystem", "CanvasTextComponent"]
+      "requiredExports": [
+        "CanvasText2DRenderSystem",
+        "CanvasTextComponent"
+      ]
     },
     "extensions-tween": {
       "entrypoint": "./tween",
       "fixture": "scripts/fixtures/engine-consumers/extensions-tween.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 32000,
-      "requiredExports": ["Tween2DComponent", "Tween2DSystem"]
+      "requiredExports": [
+        "Tween2DComponent",
+        "Tween2DSystem"
+      ]
     },
     "extensions-grid": {
       "entrypoint": "./grid",
       "fixture": "scripts/fixtures/engine-consumers/extensions-grid.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 9000,
-      "requiredExports": ["Grid2DComponent"]
+      "requiredExports": [
+        "Grid2DComponent"
+      ]
     },
     "extensions-interaction": {
       "entrypoint": "./animation",
       "fixture": "scripts/fixtures/engine-consumers/extensions-interaction.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 55000,
-      "requiredExports": ["InteractionRuntime"]
+      "requiredExports": [
+        "InteractionRuntime"
+      ]
     },
     "extensions-controls": {
       "entrypoint": "./controls",
       "fixture": "scripts/fixtures/engine-consumers/extensions-controls.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 45000,
-      "requiredExports": ["VirtualJoystickControls"]
+      "requiredExports": [
+        "VirtualJoystickControls"
+      ]
     }
   },
   "shaderLanguageConsumers": {

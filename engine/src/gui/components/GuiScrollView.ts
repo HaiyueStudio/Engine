@@ -1,3 +1,4 @@
+import {admitGuiControl} from '../GuiControlIdentity';
 import { GuiElement } from './GuiElement';
 import type {GuiActionEvent} from '../GuiTypes';
 import { GuiDirtyFlags, type GuiElementOptions, type GuiRect } from '../GuiTypes';
@@ -16,6 +17,7 @@ export interface GuiScrollViewOptions extends GuiElementOptions {
 
 /** Vertical viewport. Children use content-local coordinates; drawing and hits are clipped. */
 export class GuiScrollView extends GuiElement {
+  private static readonly __controlIdentityGuiScrollView = /* @__PURE__ */ (() => admitGuiControl(GuiScrollView.prototype, 'GuiScrollView'))();
   static override readonly themeControlType: string = 'GuiScrollView';
   override handleAction(event: GuiActionEvent): void {
     super.handleAction(event);

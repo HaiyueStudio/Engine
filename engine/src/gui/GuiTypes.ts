@@ -22,6 +22,8 @@ export interface GuiRect {
 }
 
 export interface GuiStyle {
+  /** Browser pointer cursor override; omitted values use the control's default. */
+  cursor?: string;
   palette?: Partial<GuiTheme['colors']>;
   backgroundColor?: string;
   hoverBackgroundColor?: string;

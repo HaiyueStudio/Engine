@@ -121,8 +121,13 @@ export class WebAudioBackend implements AudioBackendPort {
     this.scheduled.add(handle);
     const when = request.whenFrame / this.sampleRate;
     const offset = request.offsetFrame / buffer.sampleRate;
-    source.start(when, offset);
-    if (request.stopFrame !== undefined) source.stop(request.stopFrame / this.sampleRate);
+    try {
+      source.start(when, offset);
+      if (request.stopFrame !== undefined) source.stop(request.stopFrame / this.sampleRate);
+    } catch (error) {
+      handle.dispose();
+      throw error;
+    }
     return handle;
   }
 

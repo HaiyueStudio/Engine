@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {resolve,relative} from 'node:path';
+import {createHash} from 'node:crypto';
+import ts from 'typescript';
+import {runChromeWebGpuFixture} from '../../scripts/webgpu-gate/chrome-runner.mjs';
+import {productionFontFixture} from './text-production-font-fixture.mjs';
+const root=process.cwd(),base=resolve('artifacts/engine-0.2.2/g11'),dpr=Number(process.argv[2]??1);
+const sha=p=>createHash('sha256').update(readFileSync(p)).digest('hex'),read=p=>JSON.parse(readFileSync(p,'utf8'));
+const target=resolve('extensions/src/animation/text/production/ProductionBrowserFontPort.ts');
+const out=resolve(base,'browser-text-paint-source-dpr'+dpr+'-'+Date.now()),build=resolve(out,'compiled'),fixture=resolve(out,'fixture');mkdirSync(fixture,{recursive:true});console.log(out);
+const font=productionFontFixture();writeFileSync(resolve(fixture,'document.json'),JSON.stringify(font.document));writeFileSync(resolve(fixture,'font.otf'),font.bytes);
+const options={target:ts.ScriptTarget.ESNext,module:ts.ModuleKind.ESNext,moduleResolution:ts.ModuleResolutionKind.Bundler,strict:true,noUncheckedIndexedAccess:true,exactOptionalPropertyTypes:true,skipLibCheck:true,types:['@webgpu/types'],rootDir:resolve('extensions/src'),outDir:build};
+const host=ts.createCompilerHost(options);
+const program=ts.createProgram([target,resolve('extensions/src/animation/text/production/ProductionTextOwner.ts')],options,host),diagnostics=ts.getPreEmitDiagnostics(program).filter(d=>d.category===ts.DiagnosticCategory.Error);
+assert.equal(diagnostics.length,0,ts.formatDiagnosticsWithColorAndContext(diagnostics,{getCanonicalFileName:p=>p,getCurrentDirectory:()=>root,getNewLine:()=> '\n'}));assert.equal(program.emit().emitSkipped,false);
+const browser=resolve('extensions/test/text-production-paint-browser.mjs'),html=resolve(out,'fixture.html');writeFileSync(html,'<!doctype html><meta charset="utf-8"><title>G11 actual glyph gradient paints</title><pre id="result"></pre><script type="importmap">{"imports":{"opentype.js":"/node_modules/opentype.js/dist/opentype.module.js"}}</script><script type="module" src="/'+relative(root,browser).replaceAll('\\','/')+'"></script>');
+const inputs=Object.fromEntries([...program.getSourceFiles().map(f=>resolve(f.fileName)).filter(p=>p.startsWith(resolve('extensions/src')+'\\')),browser,resolve('extensions/test/text-production-paint-browser-gate.mjs'),resolve('extensions/test/text-production-font-fixture.mjs')].map(p=>[p,sha(p)]));
+let report;try{report=await runChromeWebGpuFixture({root,fixture:relative(root,html).replaceAll('\\','/'),query:{dpr},mounts:[{prefix:'/paint-build',directory:build},{prefix:'/paint-fixture',directory:fixture}],timeoutMs:60000,acceptedStatuses:['passed','failed']});}catch(error){report={status:'failed',error:String(error.stack??error),browserFailure:error.browserFailure};}
+for(const capture of report.captures??[])for(const kind of ['actual','reference'])writeFileSync(resolve(out,capture.id+'-'+kind+'.png'),Buffer.from(capture[kind].split(',')[1],'base64'));delete report.captures;
+const mismatch=(report.httpProvenance?.files??[]).filter(entry=>{const p=entry.sourcePath.startsWith('paint-build/')?resolve(build,entry.sourcePath.slice(12)):entry.sourcePath.startsWith('paint-fixture/')?resolve(fixture,entry.sourcePath.slice(14)):resolve(root,entry.sourcePath);return sha(p)!==entry.sha256;});
+const changed=Object.entries(inputs).filter(([p,h])=>sha(p)!==h).map(([p])=>p);if(mismatch.length||changed.length||!report.httpProvenance?.files?.length)Object.assign(report,{status:'failed',changed,mismatch});
+writeFileSync(resolve(out,'result.json'),JSON.stringify({inputs,font:{sha256:font.sha256,license:font.license},sourceApplied:true,fullG11Complete:false,...report},null,2)+'\n');console.log(JSON.stringify({out,status:report.status,cases:report.caseCount,error:report.error?.slice(0,2500)}));if(report.status!=='passed')process.exitCode=1;

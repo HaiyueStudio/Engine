@@ -1,3 +1,4 @@
+import {getEngineGPUResourceTracker, type GPUResourceScope, type GPUResourceTracker} from '@haiyue/engine/experimental';
 import {
   alignUp4,
   beginRenderCommandPass,
@@ -26,11 +27,14 @@ import {
   createAnimation2DPipeline,
 } from './AnimationVisual2D';
 import { AnimationFormatError, type AnimationCompositeLayer } from '@haiyue/animation-spec';
-import { animationMaskCompositeKey, animationMaskTargetKey, assertAnimationMaskBudget } from './AnimationMaskBudget';
+import { animationMaskCompositeKey, animationMaskTargetKey } from './AnimationMaskBudget';
+import {planAnimationMasks} from './AnimationMaskPlan.js';
+import {AnimationMaskSources} from './AnimationMaskSources.js';
+import {writeAnimationVisualMatrix} from './AnimationVisualMatrix.js';
 import { animationBlendFragmentEntryPoint, animationBlendState } from './AnimationBlendMode';
 
 export interface Animation2DRenderSystemOptions extends RenderSystem2DBaseOptions {
-  /** Bounds view-sized alpha targets used by masks and mattes. */
+  /** Bounds simultaneous view-sized alpha targets. Independent sources may reuse a target. */
   maxMaskTargets?: number;
 }
 
@@ -40,6 +44,10 @@ export interface Animation2DRenderStats {
   readonly compositeLayerCount: number;
   readonly droppedCompositeCount: number;
   readonly maskPixels: number;
+  /** Logical non-transparent sources, including sources whose outputs are not currently visible. */
+  readonly maskSourceCount?: number;
+  /** Actual source-group draws, including recomputation when targets are reused. */
+  readonly maskPassCount?: number;
   readonly effectTargetCount: number;
   readonly droppedEffectCount: number;
   /** Counts the reusable ping-pong RGBA targets owned by each active view. */
@@ -50,6 +58,7 @@ interface EntityGpu {
   buffer: GPUBuffer;
   bindGroup: GPUBindGroup;
   data: Float32Array;
+  uploadedData: Float32Array | null;
   externalTexture: GPUTexture | null;
   externalSource: ImageBitmap | HTMLCanvasElement | HTMLImageElement | null;
   externalVersion: number;
@@ -69,12 +78,20 @@ interface GeometryGpu {
 }
 
 interface MaskTarget {
+  readonly key: string;
+  readonly device: GPUDevice;
+  recordings: number;
+  submitted: boolean;
+  retired: boolean;
+  destroyed: boolean;
   texture: GPUTexture;
   view: GPUTextureView;
   width: number;
   height: number;
   lastFrame: number;
 }
+const maskDeviceOwners = new WeakMap<GPUDevice, Set<(device: GPUDevice) => void>>();
+interface MaskRecording {readonly targets: Set<MaskTarget>; closed: boolean;}
 
 interface EffectTarget {
   textures: readonly [GPUTexture, GPUTexture];
@@ -138,6 +155,7 @@ interface Animation2DSharedGpu {
   readonly textureLayout: GPUBindGroupLayout;
   readonly compositeLayout: GPUBindGroupLayout;
   readonly sampler: GPUSampler;
+  readonly textureSamplers: Map<string, GPUSampler>;
   readonly mipmapSampler: GPUSampler;
   readonly mipmapPipeline: GPURenderPipeline;
   readonly shader: GPUShaderModule;
@@ -157,7 +175,7 @@ function getAnimation2DSharedGpu(
 ): Animation2DSharedGpu {
   return getExtensionSharedRendererResource(
     device,
-    'Animation2D.sharedGpu:v2',
+    'Animation2D.sharedGpu:v3',
     () => createAnimation2DSharedGpu(device, tracker),
   );
 }
@@ -254,6 +272,7 @@ function createAnimation2DSharedGpu(
     textureLayout,
     compositeLayout,
     sampler,
+    textureSamplers: new Map([['linear:clamp:clamp', sampler]]),
     mipmapSampler,
     mipmapPipeline,
     shader,
@@ -270,11 +289,18 @@ function createAnimation2DSharedGpu(
       whiteTexture.destroy();
       transparentTexture.destroy();
       this.pipelines.clear();
+      this.textureSamplers.clear();
     },
   };
 }
 
 export class Animation2DRenderSystem extends RenderSystem2DBase {
+  private bindGroupScope: GPUResourceScope | undefined;
+  private bindGroupTracker: GPUResourceTracker | undefined;
+  private textureFrame = 0;
+  private bindGroupContexts = new WeakMap<RenderCommandContext, {closed: boolean; finish(): void; completions: Set<() => void>}>();
+  private readonly bindGroupRecordings = new Set<{closed: boolean; finish(): void; completions: Set<() => void>}>();
+  private uploadedCamera: Float32Array | null = null;
   private readonly maxMaskTargets: number;
   private rendererReady = false;
   private cameraGpu!: Camera2DGpu;
@@ -282,6 +308,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   private textureLayout!: GPUBindGroupLayout;
   private compositeLayout!: GPUBindGroupLayout;
   private sampler!: GPUSampler;
+  private textureSamplers!: Map<string, GPUSampler>;
   private mipmapSampler!: GPUSampler;
   private mipmapPipeline!: GPURenderPipeline;
   private whiteTexture!: GPUTexture;
@@ -296,20 +323,29 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   private readonly geometryGpu = new Map<string, GeometryGpu>();
   private readonly explicitUvIds = new WeakMap<Float32Array, number>();
   private nextExplicitUvId = 1;
-  private textureBindGroups = new WeakMap<GPUTexture, GPUBindGroup>();
+  private readonly textureBindGroups = new Map<GPUTexture, {samplers: Map<GPUSampler, GPUBindGroup>; lastFrame: number}>();
   private readonly maskTargets = new Map<string, MaskTarget>();
+  private readonly ownedMaskTargets = new Set<MaskTarget>();
+  private readonly retiredMaskTargets = new Set<MaskTarget>();
+  private readonly maskRecordings = new WeakMap<RenderCommandContext, MaskRecording>();
+  private readonly abandonMaskDevice = (device: GPUDevice): void => {
+    for (const target of [...this.ownedMaskTargets]) if (target.device === device) this.finishMaskTarget(target);
+  };
   private readonly effectTargets = new Map<string, EffectTarget>();
   private readonly items: AnimationRenderItem[] = [];
   private readonly sourceItems = new Map<string, AnimationRenderItem[]>();
   private readonly sourceGroupPool: AnimationRenderItem[][] = [];
   private readonly activeMaskTargets = new Map<string, MaskTarget>();
   private readonly compositeBindGroups = new Map<string, GPUBindGroup>();
+  private readonly usedCompositeKeys = new Set<string>();
   private readonly liveGeometryIds = new Set<string>();
   private _visualCount = 0;
   private _maskTargetCount = 0;
   private _compositeLayerCount = 0;
   private _droppedCompositeCount = 0;
   private _maskPixels = 0;
+  private _maskSourceCount = 0;
+  private _maskPassCount = 0;
   private _effectTargetCount = 0;
   private _droppedEffectCount = 0;
   private _effectPixels = 0;
@@ -318,7 +354,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     // Optional extension subpaths can be bundled as independent module graphs.
     // Query by the stable global component symbol so a visual created by the
     // HYA state-machine subpath is visible to the animation renderer subpath.
-    super({ all: [AnimationVisual2D.UniqueSymbol] }, engine, cameraEntity, { ...options, loadOp: options.loadOp ?? 'load' }, 'Animation2DRenderSystem');
+    super({ any: [AnimationVisual2D.UniqueSymbol, AnimationMaskSources.UniqueSymbol] }, engine, cameraEntity, { ...options, loadOp: options.loadOp ?? 'load' }, 'Animation2DRenderSystem');
     this.maxMaskTargets = positiveInteger(options.maxMaskTargets ?? 32, 'maxMaskTargets');
   }
 
@@ -329,6 +365,8 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       compositeLayerCount: this._compositeLayerCount,
       droppedCompositeCount: this._droppedCompositeCount,
       maskPixels: this._maskPixels,
+      maskSourceCount: this._maskSourceCount,
+      maskPassCount: this._maskPassCount,
       effectTargetCount: this._effectTargetCount,
       droppedEffectCount: this._droppedEffectCount,
       effectPixels: this._effectPixels,
@@ -342,20 +380,28 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   record(world: World, context: RenderCommandContext): this {
     if (this.disabled) return this;
     if (!this.rendererReady) this.prepare();
-    if (!this.writeCameraBuffer(context.device.queue, this.cameraGpu.buffer, context)) return this;
+    const camera = this.getCamera2D(context);
+    if (!camera) return this;
+    this.uploadedCamera = uploadChangedFloats(context.device.queue, this.cameraGpu.buffer, this.computeCameraViewProjection(camera, context), this.uploadedCamera);
     const liveEntities = this.beginLiveEntityTracking();
     this.items.length = 0;
+    const knownSourceKeys = new Set<string>();
     const entities = this.entitySet.get(world);
     if (entities) for (const entity of entities) {
-      if (!this.isEntityRenderable(entity)) continue;
+      const catalogue = entity.getComponent(AnimationMaskSources.UniqueSymbol) as AnimationMaskSources | null;
+      for (const key of catalogue?.keys ?? []) knownSourceKeys.add(key);
       const visual = entity.getComponent(AnimationVisual2D.UniqueSymbol) as AnimationVisual2D | null;
       if (!visual) continue;
+      if (visual.sourceOnly) knownSourceKeys.add(visualNodeKey(visual));
+      if (!this.isEntityRenderable(entity)) continue;
       this.items.push({ entity, visual });
       this.markEntityLive(entity);
     }
     this.items.sort(compareItems);
 
     const frame = context.frameData?.frameId ?? 0;
+    this.textureFrame = context.frameData?.frameId ?? this.textureFrame + 1;
+    this.retainBindGroupRecording(context);
     this.sourceItems.clear();
     let sourceGroupCount = 0;
     for (const item of this.items) {
@@ -377,42 +423,40 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     // is exact and avoids allocating one full-viewport target per inactive
     // state. Keep the group keys so alpha-inverted consumers still resolve the
     // correct transparent input instead of being classified as unresolved.
-    const knownSourceKeys = new Set(this.sourceItems.keys());
-    let activeSourceGroupCount = 0;
-    for (const sources of this.sourceItems.values()) {
-      if (sources.some(source => !isFullyTransparent(source.visual))) activeSourceGroupCount++;
-    }
-
     const viewKey = context.view?.key ?? 'default';
-    assertAnimationMaskBudget({
-      groupCount: activeSourceGroupCount,
+    const outputItems = this.items.filter(item => !item.visual.sourceOnly && !isFullyTransparent(item.visual));
+    const maskSources = new Map([...knownSourceKeys].map(key => {
+      const sources = this.sourceItems.get(key) ?? [];
+      const visible = sources.filter(source => !isFullyTransparent(source.visual));
+      return [key, {transparent: visible.length === 0, dependencies: visible.flatMap(source => source.visual.compositeKeys)}] as const;
+    }));
+    const plan = planAnimationMasks(maskSources, outputItems.map(item => item.visual.compositeKeys), {
       maxGroupCount: this.maxMaskTargets,
       width: context.view?.target.width ?? this.engine.width,
       height: context.view?.target.height ?? this.engine.height,
       maxTextureDimension2D: context.device.limits.maxTextureDimension2D,
       viewKey,
     });
+    const transparentSourceKeys = new Set([...maskSources].filter(([, source]) => source.transparent).map(([key]) => key));
 
     const maskTargets = this.activeMaskTargets;
     maskTargets.clear();
-    let maskPixels = 0;
-    let maskCount = 0;
+    this.usedCompositeKeys.clear();
+    const physicalSources = new Map<number, string>();
     let droppedCompositeCount = 0;
     let compositeLayerCount = 0;
     let effectCount = 0;
     let droppedEffectCount = 0;
     let effectPixels = 0;
-    for (const sourceKey of orderSourceGroups(this.sourceItems)) {
+    const renderSource = (sourceKey: string, slot: number): void => {
       const sources = this.sourceItems.get(sourceKey)!;
-      if (sources.every(source => isFullyTransparent(source.visual))) continue;
-      const targetKey = animationMaskTargetKey(viewKey, sourceKey);
+      const previous = physicalSources.get(slot); if (previous !== undefined) maskTargets.delete(previous);
+      const targetKey = animationMaskTargetKey(viewKey, `slot:${slot}`);
       const target = this.getMaskTarget(targetKey, context, frame);
-      maskPixels += target.width * target.height;
-      maskCount++;
       let initialized = false;
       for (const source of sources) {
         if (isFullyTransparent(source.visual)) continue;
-        const resolved = this.resolveCompositeBindGroup(source.visual, maskTargets, knownSourceKeys, viewKey);
+        const resolved = this.resolveCompositeBindGroup(source.visual, maskTargets, transparentSourceKeys, viewKey);
         if (!resolved) throw unresolvedCompositeError(source.visual, viewKey);
         compositeLayerCount += source.visual.compositeLayers.length;
         const effectTarget = source.visual.effects.length > 0 && !context.passEncoder
@@ -435,15 +479,16 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       }
       if (!initialized) this.beginMaskSegment(context, target, sourceKey, false).end();
       maskTargets.set(sourceKey, target);
-    }
+      physicalSources.set(slot, sourceKey);
+    };
 
     const pending: Array<{ item: AnimationRenderItem; composite: GPUBindGroup }> = [];
     const outputFormat = context.view?.target.format ?? this.engine.format;
     let firstOutputSegment = true;
     let visualCount = 0;
-    const flushOutput = (effectItem?: AnimationRenderItem, effectTexture?: GPUTexture): void => {
+    const flushOutput = (effectItem?: AnimationRenderItem, effectTexture?: GPUTexture, final = false): void => {
       if (pending.length === 0 && !effectItem && !firstOutputSegment) return;
-      const { passEncoder, ownsPass } = this.beginOutputSegment(context, firstOutputSegment);
+      const { passEncoder, ownsPass } = this.beginOutputSegment(context, firstOutputSegment, final);
       firstOutputSegment = false;
       applyViewport(passEncoder, context);
       passEncoder.setBindGroup(0, this.cameraGpu.bindGroup);
@@ -470,33 +515,44 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       }
       if (ownsPass) passEncoder.end();
     };
-    for (const item of this.items) {
+    for (const operation of plan.operations) {
+      if (operation.kind === 'source') {
+        // A stored bind group still refers to the physical target: encode its
+        // consumers before that target is cleared for a different logical source.
+        if (pending.length) flushOutput();
+        renderSource(operation.source, operation.slot); continue;
+      }
+      const item = outputItems[operation.index]!;
       const { visual } = item;
-      if (visual.sourceOnly || isFullyTransparent(visual)) continue;
-      const resolved = this.resolveCompositeBindGroup(visual, maskTargets, knownSourceKeys, viewKey);
+      const resolved = this.resolveCompositeBindGroup(visual, maskTargets, transparentSourceKeys, viewKey);
       if (!resolved) throw unresolvedCompositeError(visual, viewKey);
       compositeLayerCount += visual.compositeLayers.length;
       if (visual.effects.length > 0 && !context.passEncoder) {
         const effectTarget = this.renderEffectStack(item, context, resolved, frame);
         effectCount++;
         if (effectPixels === 0) effectPixels = effectTarget.width * effectTarget.height * 2;
-        flushOutput(item, effectTarget.texture);
+        flushOutput(item, effectTarget.texture, operation.index === outputItems.length - 1);
       } else {
         if (visual.effects.length > 0) droppedEffectCount++;
         pending.push({ item, composite: resolved });
       }
     }
-    flushOutput();
+    flushOutput(undefined, undefined, true);
 
     this.releaseEntityGpuEntriesNotIn(this.entityGpu, gpu => this.destroyEntityGpu(gpu), liveEntities);
     this.sweepGeometryGpu();
+    this.sweepTextureBindGroups(context);
     this.sweepMaskTargets(frame, context);
     this.sweepEffectTargets(frame, context);
+    const prefix = animationMaskCompositeKey(viewKey, []);
+    for (const [key, group] of this.compositeBindGroups) if (key.startsWith(prefix) && !this.usedCompositeKeys.has(key)) {this.compositeBindGroups.delete(key); this.retireOwnedBindGroups([group], context);}
     this._visualCount = visualCount;
-    this._maskTargetCount = maskCount;
+    this._maskTargetCount = plan.targetCount;
     this._compositeLayerCount = compositeLayerCount;
     this._droppedCompositeCount = droppedCompositeCount;
-    this._maskPixels = maskPixels;
+    this._maskPixels = plan.targetCount * (context.view?.target.width ?? this.engine.width) * (context.view?.target.height ?? this.engine.height);
+    this._maskSourceCount = plan.sourceCount;
+    this._maskPassCount = plan.sourcePasses;
     this._effectTargetCount = effectCount > 0 ? 1 : 0;
     this._droppedEffectCount = droppedEffectCount;
     this._effectPixels = effectPixels;
@@ -520,19 +576,29 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     this.effectTargets.clear();
     this.activeMaskTargets.clear();
     this.compositeBindGroups.clear();
-    this.textureBindGroups = new WeakMap();
+    this.textureBindGroups.clear();
+    this.bindGroupScope?.release(); this.bindGroupScope = undefined; this.bindGroupTracker = undefined;
+    for (const recording of [...this.bindGroupRecordings]) recording.finish();
+    this.bindGroupContexts = new WeakMap();
+    this.textureFrame = 0;
     this.rendererReady = false;
+    this.uploadedCamera = null;
   }
 
   private prepare(): void {
     const device = requireEngineDevice(this.engine);
     const tracker = getExtensionGPUResourceTracker(this.engine);
     const shared = getAnimation2DSharedGpu(device, tracker);
+    const diagnosticTracker = getEngineGPUResourceTracker(this.engine);
+    this.bindGroupTracker = diagnosticTracker?.debug ? diagnosticTracker : undefined;
+    this.bindGroupScope = this.bindGroupTracker?.createScope('system', this.recoveryLabel + ':bindGroups');
     this.cameraGpu = createCamera2DGpu(device, tracker, shared.cameraLayout);
+    this.bindGroupScope?.trackBindGroup(this.cameraGpu.bindGroup, 'Animation2D.cameraBindGroup');
     this.objectLayout = shared.objectLayout;
     this.textureLayout = shared.textureLayout;
     this.compositeLayout = shared.compositeLayout;
     this.sampler = shared.sampler;
+    this.textureSamplers = shared.textureSamplers;
     this.mipmapSampler = shared.mipmapSampler;
     this.mipmapPipeline = shared.mipmapPipeline;
     this.whiteTexture = shared.whiteTexture;
@@ -569,10 +635,17 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   private beginOutputSegment(
     context: RenderCommandContext,
     first: boolean,
+    final: boolean,
   ): { passEncoder: GPURenderPassEncoder; ownsPass: boolean } {
-    if (first) return beginRenderCommandPass(context);
+    if (first && (final || context.passEncoder)) return beginRenderCommandPass(context);
     if (!context.descriptor) throw new Error('Animation2D ordered effects require an isolated render-pass descriptor.');
-    return { passEncoder: context.encoder.beginRenderPass(cloneRenderPassDescriptor(context.descriptor, 'load')), ownsPass: true };
+    // Resolving a multisampled attachment does not preserve its samples. Every
+    // intermediate segment stores them; the final segment honors the host store policy.
+    const descriptor = cloneRenderPassDescriptor(context.descriptor, {
+      ...(!first ? {loadOp: 'load' as const} : {}),
+      ...(!final ? {colorStoreOp: 'store' as const, depthStoreOp: 'store' as const} : {}),
+    });
+    return beginRenderCommandPass({device: context.device, encoder: context.encoder, descriptor});
   }
 
   private getPipeline(
@@ -663,7 +736,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   ): void {
     const device = requireEngineDevice(this.engine);
     const object = this.getEntityGpu(entity);
-    object.data.set(this.getWorldMatrix2D(entity, context), 0);
+    writeAnimationVisualMatrix(object.data, this.getWorldMatrix2D(entity, context), visual.localTransform);
     object.data.set(visual.color, 16);
     object.data.set(visual.multiplyColor, MULTIPLY_COLOR_OFFSET);
     object.data.set(visual.screenColor, SCREEN_COLOR_OFFSET);
@@ -705,7 +778,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       object.data[EFFECT_KINDS_OFFSET + index] = effectKindCode(effect.kind);
       object.data.set(effect.values.subarray(0, EFFECT_FLOATS), EFFECT_DATA_OFFSET + index * EFFECT_FLOATS);
     }
-    device.queue.writeBuffer(object.buffer, 0, object.data as ArrayBufferView<ArrayBuffer>);
+    object.uploadedData = uploadChangedFloats(device.queue, object.buffer, object.data, object.uploadedData);
     const geometry = this.getGeometryGpu(visual);
     pass.setBindGroup(1, object.bindGroup);
     pass.setBindGroup(2, this.getVisualTextureBindGroup(entity, visual, object, context));
@@ -778,8 +851,9 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       getExtensionGPUResourceTracker(this.engine)?.trackBuffer(buffer, 'Animation2D.objectBuffer', OBJECT_BYTES);
       return {
         buffer,
-        bindGroup: device.createBindGroup({ layout: this.objectLayout, entries: [{ binding: 0, resource: { buffer } }] }),
+        bindGroup: this.createOwnedBindGroup({ layout: this.objectLayout, entries: [{ binding: 0, resource: { buffer } }] }),
         data: new Float32Array(OBJECT_FLOATS),
+        uploadedData: null,
         externalTexture: null,
         externalSource: null,
         externalVersion: -1,
@@ -798,13 +872,14 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     context: RenderCommandContext,
   ): GPUBindGroup {
     const texture = visual.resolveTexture();
-    if (texture) return this.getTextureBindGroup(texture);
+    if (texture) return this.getTextureBindGroup(texture, visual.textureSampling);
     const material = visual.textMaterial;
     const source = material?.texture;
     if (material && isExternalImageSource(source)) {
       const size = externalImageSize(source);
       if (!object.externalTexture || object.externalWidth !== size.width || object.externalHeight !== size.height) {
         const retiredTexture = object.externalTexture;
+        if (object.externalBindGroup) this.retireOwnedBindGroups([object.externalBindGroup], context);
         if (retiredTexture) {
           const retire = () => {
             getExtensionGPUResourceTracker(this.engine)?.untrackTexture(retiredTexture);
@@ -857,37 +932,31 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   }
 
   private generateTextMipChain(
-    device: GPUDevice,
-    texture: GPUTexture,
-    mipLevelCount: number,
-    entityId: number,
+    device: GPUDevice, texture: GPUTexture, mipLevelCount: number, entityId: number,
   ): void {
     if (mipLevelCount <= 1) return;
-    const encoder = device.createCommandEncoder({ label: `Animation2D.textMipmaps:${entityId}` });
-    for (let level = 1; level < mipLevelCount; level++) {
-      const bindGroup = device.createBindGroup({
-        label: `Animation2D.textMipmapBindGroup:${entityId}:${level}`,
-        layout: this.mipmapPipeline.getBindGroupLayout(0),
-        entries: [
-          { binding: 0, resource: texture.createView({ baseMipLevel: level - 1, mipLevelCount: 1 }) },
-          { binding: 1, resource: this.mipmapSampler },
-        ],
-      });
-      const pass = encoder.beginRenderPass({
-        label: `Animation2D.textMipmapPass:${entityId}:${level}`,
-        colorAttachments: [{
-          view: texture.createView({ baseMipLevel: level, mipLevelCount: 1 }),
-          loadOp: 'clear',
-          storeOp: 'store',
-          clearValue: { r: 0, g: 0, b: 0, a: 0 },
-        }],
-      });
-      pass.setPipeline(this.mipmapPipeline);
-      pass.setBindGroup(0, bindGroup);
-      pass.draw(3);
-      pass.end();
-    }
-    device.queue.submit([encoder.finish()]);
+    const encoder = device.createCommandEncoder({label: `Animation2D.textMipmaps:${entityId}`});
+    const groups: GPUBindGroup[] = [];
+    try {
+      for (let level = 1; level < mipLevelCount; level++) {
+        const bindGroup = this.createOwnedBindGroup({
+          label: `Animation2D.textMipmapBindGroup:${entityId}:${level}`,
+          layout: this.mipmapPipeline.getBindGroupLayout(0),
+          entries: [
+            {binding: 0, resource: texture.createView({baseMipLevel: level - 1, mipLevelCount: 1})},
+            {binding: 1, resource: this.mipmapSampler},
+          ],
+        });
+        groups.push(bindGroup);
+        const pass = encoder.beginRenderPass({
+          label: `Animation2D.textMipmapPass:${entityId}:${level}`,
+          colorAttachments: [{view: texture.createView({baseMipLevel: level, mipLevelCount: 1}), loadOp: 'clear', storeOp: 'store', clearValue: {r: 0, g: 0, b: 0, a: 0}}],
+        });
+        pass.setPipeline(this.mipmapPipeline); pass.setBindGroup(0, bindGroup); pass.draw(3); pass.end();
+      }
+      device.queue.submit([encoder.finish()]);
+    } catch (error) {for (const group of groups) this.releaseOwnedBindGroup(group); throw error;}
+    this.retireOwnedBindGroups(groups);
   }
 
   private getGeometryGpu(visual: AnimationVisual2D): GeometryGpu {
@@ -931,26 +1000,101 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     return `${visual.geometry.id}:uv:${uvId}`;
   }
 
-  private getTextureBindGroup(texture: GPUTexture): GPUBindGroup {
-    let bindGroup = this.textureBindGroups.get(texture);
+  private getTextureBindGroup(texture: GPUTexture, sampling: AnimationVisual2D['textureSampling'] = null): GPUBindGroup {
+    let sampler = this.sampler;
+    if (sampling) {
+      const key = `${sampling.filter}:${sampling.wrapX}:${sampling.wrapY}`;
+      sampler = this.textureSamplers.get(key)!;
+      if (!sampler) {
+        const wrap = {clamp: 'clamp-to-edge', repeat: 'repeat', mirror: 'mirror-repeat'} as const;
+        sampler = requireEngineDevice(this.engine).createSampler({magFilter: sampling.filter, minFilter: sampling.filter, mipmapFilter: sampling.filter, addressModeU: wrap[sampling.wrapX], addressModeV: wrap[sampling.wrapY]});
+        this.textureSamplers.set(key, sampler);
+      }
+    }
+    let entry = this.textureBindGroups.get(texture);
+    if (!entry) {entry = {samplers: new Map(), lastFrame: this.textureFrame}; this.textureBindGroups.set(texture, entry);}
+    entry.lastFrame = this.textureFrame;
+    let bindGroup = entry.samplers.get(sampler);
     if (!bindGroup) {
-      bindGroup = this.createTextureBindGroup(texture);
-      this.textureBindGroups.set(texture, bindGroup);
+      bindGroup = this.createTextureBindGroup(texture, sampler);
+      entry.samplers.set(sampler, bindGroup);
     }
     return bindGroup;
   }
 
-  private createTextureBindGroup(texture: GPUTexture): GPUBindGroup {
-    return requireEngineDevice(this.engine).createBindGroup({ layout: this.textureLayout, entries: [
+  private createOwnedBindGroup(descriptor: GPUBindGroupDescriptor): GPUBindGroup {
+    const group = requireEngineDevice(this.engine).createBindGroup(descriptor);
+    this.bindGroupScope?.trackBindGroup(group, descriptor.label ?? 'Animation2D.bindGroup');
+    return group;
+  }
+
+  private releaseOwnedBindGroup(group: GPUBindGroup): void {this.bindGroupTracker?.untrackObject(group);}
+
+  private retainBindGroupRecording(context: RenderCommandContext): void {
+    if (!this.bindGroupTracker || !context.afterSubmit || !context.afterCancel) return;
+    const prior = this.bindGroupContexts.get(context);
+    if (prior) {if (prior.closed) throw new Error('Cannot record bind groups after submission or cancellation.'); return;}
+    let finished = false;
+    const recording = {closed: false, completions: new Set<() => void>(), finish: (): void => {
+      if (finished) return; finished = true; recording.closed = true; this.bindGroupRecordings.delete(recording);
+      for (const complete of recording.completions) complete(); recording.completions.clear();
+    }};
+    this.bindGroupContexts.set(context, recording); this.bindGroupRecordings.add(recording);
+    try {
+      context.afterCancel(() => {if (!recording.closed) recording.finish();});
+      context.afterSubmit(queue => {
+        if (recording.closed) return; recording.closed = true;
+        try {void queue.onSubmittedWorkDone().then(recording.finish, recording.finish);} catch {recording.finish();}
+      });
+    } catch (error) {recording.finish(); throw error;}
+  }
+
+  /** Eviction must wait for every outstanding recording, including other unsubmitted encoders. */
+  private retireOwnedBindGroups(groups: Iterable<GPUBindGroup>, context?: RenderCommandContext): void {
+    const tracker = this.bindGroupTracker;
+    if (!tracker) return;
+    const values = [...groups];
+    if (!values.length) return;
+    let finished = false;
+    const finish = (): void => {if (finished) return; finished = true; for (const group of values) tracker.untrackObject(group);};
+    const submitted = (queue: GPUQueue): void => {try {void queue.onSubmittedWorkDone().then(finish, finish);} catch {finish();}};
+    if (context) {
+      this.retainBindGroupRecording(context);
+      const recordings = [...this.bindGroupRecordings];
+      if (recordings.length) {
+        let remaining = recordings.length;
+        const complete = (): void => {if (--remaining === 0) finish();};
+        for (const recording of recordings) recording.completions.add(complete);
+        return;
+      }
+      if (context.afterSubmit) {
+        try {context.afterCancel?.(finish); context.afterSubmit(submitted);} catch (error) {finish(); throw error;}
+        return;
+      }
+    }
+    // Private mipmap commands are already submitted; direct legacy hosts retain their queue-fence contract.
+    submitted(requireEngineDevice(this.engine).queue);
+  }
+
+  private sweepTextureBindGroups(context: RenderCommandContext): void {
+    for (const [texture, entry] of this.textureBindGroups) {
+      // Retain the previous frame as well, so multiple current-frame views share their original cache.
+      if (entry.lastFrame >= this.textureFrame - 1) continue;
+      this.textureBindGroups.delete(texture); this.retireOwnedBindGroups(entry.samplers.values(), context);
+    }
+  }
+
+  private createTextureBindGroup(texture: GPUTexture, sampler = this.sampler): GPUBindGroup {
+    return this.createOwnedBindGroup({ layout: this.textureLayout, entries: [
       { binding: 0, resource: texture.createView() },
-      { binding: 1, resource: this.sampler },
+      { binding: 1, resource: sampler },
     ] });
   }
 
   private resolveCompositeBindGroup(
     visual: AnimationVisual2D,
     targets: ReadonlyMap<string, MaskTarget>,
-    knownSourceKeys: ReadonlySet<string>,
+    transparentSourceKeys: ReadonlySet<string>,
     viewKey: string,
   ): GPUBindGroup | null {
     if (visual.compositeLayers.length === 0) return this.emptyCompositeBindGroup;
@@ -960,14 +1104,15 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       const target = targets.get(key);
       if (target) {
         resolved.push(target.texture);
-        resolvedKeys.push(key);
+        resolvedKeys.push(`target:${target.key}`);
       } else {
-        if (!knownSourceKeys.has(key)) return null;
+        if (!transparentSourceKeys.has(key)) return null;
         resolved.push(this.transparentTexture);
-        resolvedKeys.push(`transparent:${key}`);
+        resolvedKeys.push('transparent');
       }
     }
     const key = animationMaskCompositeKey(viewKey, resolvedKeys);
+    this.usedCompositeKeys.add(key);
     let bindGroup = this.compositeBindGroups.get(key);
     if (!bindGroup) {
       bindGroup = this.createCompositeBindGroup(resolved);
@@ -977,7 +1122,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   }
 
   private createCompositeBindGroup(textures: readonly GPUTexture[]): GPUBindGroup {
-    return requireEngineDevice(this.engine).createBindGroup({
+    return this.createOwnedBindGroup({
       layout: this.compositeLayout,
       entries: [
         ...Array.from({ length: MAX_COMPOSITE_LAYERS }, (_, binding) => ({
@@ -993,13 +1138,11 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     const width = context.view?.target.width ?? this.engine.width;
     const height = context.view?.target.height ?? this.engine.height;
     let target = this.maskTargets.get(key);
-    if (target && target.width === width && target.height === height) { target.lastFrame = frame; return target; }
+    if (target && target.width === width && target.height === height) {target.lastFrame = frame; this.retainMaskTarget(target, context); return target;}
     if (target) {
       this.maskTargets.delete(key);
       this.compositeBindGroups.clear();
-      const retired = target;
-      context.afterSubmit?.(queue => void queue.onSubmittedWorkDone().then(() => this.destroyMaskTarget(retired)).catch(() => this.destroyMaskTarget(retired)));
-      if (!context.afterSubmit) this.destroyMaskTarget(retired);
+      this.destroyMaskTarget(target);
     }
     const texture = requireEngineDevice(this.engine).createTexture({
       label: `Animation2D.mask:${key}`,
@@ -1008,8 +1151,16 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     });
     getExtensionGPUResourceTracker(this.engine)?.trackTexture(texture, 'Animation2D.maskTexture', estimateTextureBytes([width, height, 1], 'rgba8unorm'));
-    target = { texture, view: texture.createView(), width, height, lastFrame: frame };
+    target = {key, device: context.device, recordings: 0, submitted: false, retired: false, destroyed: false, texture, view: texture.createView(), width, height, lastFrame: frame};
     this.maskTargets.set(key, target);
+    this.ownedMaskTargets.add(target);
+    let owners = maskDeviceOwners.get(context.device);
+    if (!owners) {
+      owners = new Set(); maskDeviceOwners.set(context.device, owners); const live = owners;
+      const device = context.device;
+      void device.lost.then(() => {for (const owner of [...live]) owner(device); live.clear();});
+    }
+    owners.add(this.abandonMaskDevice); this.retainMaskTarget(target, context);
     return target;
   }
 
@@ -1047,10 +1198,9 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       if (target.lastFrame >= frame - 1) continue;
       this.maskTargets.delete(key);
       swept = true;
-      context.afterSubmit?.(queue => void queue.onSubmittedWorkDone().then(() => this.destroyMaskTarget(target)).catch(() => this.destroyMaskTarget(target)));
-      if (!context.afterSubmit) this.destroyMaskTarget(target);
+      this.destroyMaskTarget(target);
     }
-    if (swept) this.compositeBindGroups.clear();
+    if (swept) {this.retireOwnedBindGroups(this.compositeBindGroups.values(), context); this.compositeBindGroups.clear();}
   }
 
   private sweepEffectTargets(frame: number, context: RenderCommandContext): void {
@@ -1069,6 +1219,8 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   }
 
   private destroyEntityGpu(gpu: EntityGpu): void {
+    this.releaseOwnedBindGroup(gpu.bindGroup);
+    if (gpu.externalBindGroup) this.releaseOwnedBindGroup(gpu.externalBindGroup);
     getExtensionGPUResourceTracker(this.engine)?.untrackBuffer(gpu.buffer);
     gpu.buffer.destroy();
     if (gpu.externalTexture) getExtensionGPUResourceTracker(this.engine)?.untrackTexture(gpu.externalTexture);
@@ -1084,8 +1236,48 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
   }
 
   private destroyMaskTarget(target: MaskTarget): void {
-    getExtensionGPUResourceTracker(this.engine)?.untrackTexture(target.texture);
-    target.texture.destroy();
+    if (target.retired || target.destroyed) return; target.retired = true; this.retiredMaskTargets.add(target); this.collectRetiredMaskTargets();
+  }
+
+  /** Retain through the public recording callbacks; no private Engine lifetime type crosses the workspace boundary. */
+  private retainMaskTarget(target: MaskTarget, context: RenderCommandContext): void {
+    if (!context.afterSubmit || !context.afterCancel) {
+      // Legacy direct hosts own unsubmitted encoders; keep their existing queue-fence contract.
+      target.submitted = true; return;
+    }
+    let recording = this.maskRecordings.get(context);
+    if (recording) {
+      if (recording.closed) throw new Error('Cannot record mask targets after submission or cancellation.');
+      if (!recording.targets.has(target)) {recording.targets.add(target); target.recordings++;} return;
+    }
+    recording = {targets: new Set([target]), closed: false}; this.maskRecordings.set(context, recording); target.recordings++;
+    const current = recording;
+    const close = (submitted: boolean): void => {
+      if (current.closed) return; current.closed = true;
+      for (const value of current.targets) {value.recordings--; value.submitted ||= submitted;}
+      current.targets.clear(); this.collectRetiredMaskTargets();
+    };
+    try {context.afterCancel(() => close(false)); context.afterSubmit(() => close(true));}
+    catch (error) {close(false); throw error;}
+  }
+
+  private collectRetiredMaskTargets(): void {
+    const queues = new Map<GPUQueue, MaskTarget[]>();
+    for (const target of this.retiredMaskTargets) {
+      if (target.recordings > 0) continue; this.retiredMaskTargets.delete(target);
+      if (!target.submitted) {this.finishMaskTarget(target); continue;}
+      const values = queues.get(target.device.queue) ?? []; values.push(target); queues.set(target.device.queue, values);
+    }
+    for (const [queue, targets] of queues) {
+      const finish = (): void => {for (const target of targets) this.finishMaskTarget(target);};
+      try {void queue.onSubmittedWorkDone().then(finish, finish);} catch {finish();}
+    }
+  }
+
+  private finishMaskTarget(target: MaskTarget): void {
+    if (target.destroyed) return; target.destroyed = true; this.ownedMaskTargets.delete(target); this.retiredMaskTargets.delete(target);
+    getExtensionGPUResourceTracker(this.engine)?.untrackTexture(target.texture); target.texture.destroy();
+    if (![...this.ownedMaskTargets].some(value => value.device === target.device)) maskDeviceOwners.get(target.device)?.delete(this.abandonMaskDevice);
   }
 
   private destroyEffectTarget(target: EffectTarget): void {
@@ -1099,6 +1291,13 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
 
 function isFullyTransparent(visual: AnimationVisual2D): boolean {
   return visual.color[3] <= 0 && visual.effects.length === 0;
+}
+
+function uploadChangedFloats(queue: GPUQueue, buffer: GPUBuffer, source: Float32Array, previous: Float32Array | null): Float32Array {
+  if (previous?.length === source.length && source.every((value, index) => value === previous[index])) return previous;
+  queue.writeBuffer(buffer, 0, source as ArrayBufferView<ArrayBuffer>);
+  if (previous?.length === source.length) {previous.set(source); return previous;}
+  return new Float32Array(source);
 }
 
 function writeBufferAligned(
@@ -1144,23 +1343,6 @@ function estimateRgba8MipChainBytes(width: number, height: number, mipLevelCount
 
 function compareItems(a: AnimationRenderItem, b: AnimationRenderItem): number {
   return a.visual.instanceId - b.visual.instanceId || a.visual.order - b.visual.order || a.entity.id - b.entity.id;
-}
-
-function orderSourceGroups(groups: ReadonlyMap<string, readonly AnimationRenderItem[]>): string[] {
-  const ordered: string[] = [];
-  const states = new Map<string, 1 | 2>();
-  const visit = (key: string): void => {
-    if (states.get(key) === 2) return;
-    if (states.get(key) === 1) return;
-    states.set(key, 1);
-    for (const item of groups.get(key) ?? []) {
-      for (const dependency of item.visual.compositeKeys) if (groups.has(dependency)) visit(dependency);
-    }
-    states.set(key, 2);
-    ordered.push(key);
-  };
-  for (const key of groups.keys()) visit(key);
-  return ordered;
 }
 
 function compositeModeCode(mode: AnimationCompositeLayer['mode']): number {

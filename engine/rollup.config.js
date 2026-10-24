@@ -31,6 +31,7 @@ export default {
     'physics/backend': 'src/physics/backend.ts',
     postprocess: 'src/postprocess.ts',
     gui: 'src/gui.ts',
+    text: 'src/text.ts',
     compute: 'src/compute.ts',
     scene: 'src/scene.ts',
     input: 'src/input.ts',

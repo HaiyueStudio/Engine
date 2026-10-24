@@ -1,6 +1,6 @@
 {
   "name": "@haiyue/animation-spec",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": false,
   "description": "Source-neutral HYA animation schemas, validation, binary codecs, and conversion adapters.",
   "license": "MIT",
@@ -67,6 +67,10 @@
     "./live2d/clip-baked": {
       "types": "./dist/live2d/clip-baked.d.ts",
       "import": "./dist/live2d/clip-baked.js"
+    },
+    "./hya-production": {
+      "types": "./dist/hya-production.d.ts",
+      "import": "./dist/hya-production.js"
     }
   },
   "scripts": {

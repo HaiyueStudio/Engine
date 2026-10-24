@@ -1,5 +1,6 @@
-import {guiGraphemeBoundaries,guiSnapIndex,guiWellFormedText} from './GuiGraphemes';
+import {guiGraphemeBoundaries,guiSnapIndex,guiWellFormedText,guiTextDifference} from './GuiGraphemes';
 
+export interface GuiTextBufferEdit {readonly previous:string;readonly value:string;readonly startUtf16:number;readonly endUtf16:number;readonly text:string;}
 interface Snapshot {value:string;anchor:number;focus:number;}
 interface Preedit {before:Snapshot;start:number;end:number;text:string;selection:readonly [number,number];}
 
@@ -15,7 +16,7 @@ export class GuiTextBuffer {
   private preedit:Preedit|null=null;
   revision=0;
 
-  constructor(value='',maxLength=Infinity){this.setLimit(maxLength);this.setValue(value);this.select(this.text.length,this.text.length);}
+  constructor(value='',maxLength=Infinity,private readonly committed?:(edit:GuiTextBufferEdit)=>void){this.setLimit(maxLength);this.setValue(value);this.select(this.text.length,this.text.length);}
   get value():string{return this.text;}
   get caret():number{return this.focus;}
   get selectionAnchor():number{return this.anchor;}
@@ -77,8 +78,9 @@ export class GuiTextBuffer {
     // An unrepresentable pasted cluster must not erase the selected text.
     if(text.length&&!inserted.length)return false;
     const next=this.text.slice(0,low)+inserted+this.text.slice(high);
-    if(next===this.text){this.setCaret(low+inserted.length);return true;}
-    this.remember();this.assign(next,low+inserted.length,low+inserted.length,true);
+    const edit=Object.freeze({previous:this.text,value:next,startUtf16:low,endUtf16:high,text:inserted});
+    if(next===this.text){this.setCaret(low+inserted.length);if(high!==low||inserted.length)this.committed?.(edit);return true;}
+    this.remember();this.assign(next,low+inserted.length,low+inserted.length,true);this.committed?.(edit);
     return true;
   }
   beginComposition():void {
@@ -104,11 +106,11 @@ export class GuiTextBuffer {
   }
   undo():void {
     this.cancelComposition();const previous=this.past.pop();if(!previous)return;
-    this.future.push(this.snapshot());this.assign(previous.value,previous.anchor,previous.focus);
+    const before=this.text;this.future.push(this.snapshot());this.assign(previous.value,previous.anchor,previous.focus);if(before!==this.text)this.committed?.(Object.freeze({previous:before,value:this.text,...guiTextDifference(before,this.text)}));
   }
   redo():void {
     this.cancelComposition();const next=this.future.pop();if(!next)return;
-    this.past.push(this.snapshot());this.assign(next.value,next.anchor,next.focus);
+    const before=this.text;this.past.push(this.snapshot());this.assign(next.value,next.anchor,next.focus);if(before!==this.text)this.committed?.(Object.freeze({previous:before,value:this.text,...guiTextDifference(before,this.text)}));
   }
   private snapshot():Snapshot{return {value:this.text,anchor:this.anchor,focus:this.focus};}
   private remember():void {this.past.push(this.snapshot());if(this.past.length>128)this.past.shift();this.future.length=0;}

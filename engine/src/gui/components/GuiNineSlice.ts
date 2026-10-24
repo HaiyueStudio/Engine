@@ -1,3 +1,5 @@
+import * as GuiPaint from '../rendering/GuiControlPaintPrimitives';
+import {admitGuiControl} from '../GuiControlIdentity';
 import {computeNineSlicePatches, type NineSlicePatch} from '../../geometry/NineSlice';
 import {GuiDirtyFlags} from '../GuiTypes';
 import type {GuiNineSliceOptions, GuiSkin} from '../GuiThemeTypes';
@@ -16,6 +18,7 @@ function capture(options: GuiNineSliceOptions): GuiNineSliceOptions {
 
 /** Borrows its texture; only the normal GUI image renderer owns generated uploads. */
 export class GuiNineSlice extends GuiImage {
+  private static readonly __controlIdentityGuiNineSlice = /* @__PURE__ */ (() => admitGuiControl(GuiNineSlice.prototype, 'GuiNineSlice', undefined, paintGuiNineSlice))();
   static override readonly themeControlType: string = 'GuiNineSlice';
   private skin: GuiNineSliceOptions;
 
@@ -50,3 +53,11 @@ export class GuiNineSlice extends GuiImage {
     return {...resolved, contentInsets: this.skin.contentInsets ?? {left: left / ratio, top: top / ratio, right: right / ratio, bottom: bottom / ratio}};
   }
 }
+
+/** Original built-in painter; retained with this control, not every GUI owner. */
+function paintGuiNineSlice(context:GuiPaint.GuiControlPaintContext, image: GuiNineSlice): void {
+    const color = GuiPaint.withAlpha(GuiPaint.colorToRgba(image.tint, '#ffffff'), context.styleFor(image).opacity ?? 1);
+    for (const patch of image.patches) context.currentImageBatch.addImage({source: image.source,
+      x: image.rect.x + patch.rect.x, y: image.rect.y + patch.rect.y, width: patch.rect.width, height: patch.rect.height,
+      uv: [...patch.uv], color, clip: context.clipRect(image.rect)});
+  }

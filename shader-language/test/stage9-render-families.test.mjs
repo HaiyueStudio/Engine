@@ -136,7 +136,12 @@ test('production renderers consume generated outputs and remove the seventeen ha
     '../../engine/src/systems/Particle3DRenderSystem.ts',
   ];
   const engineSources = await Promise.all(engineFiles.map(path => readFile(new URL(path, import.meta.url), 'utf8')));
-  assert.ok(engineSources.slice(0, 7).every(source => /getBuiltin2dUiShader\(/.test(source)));
+  for (const index of [0, 1, 2, 6]) assert.match(engineSources[index], /getBuiltin2dUiShader\(/);
+  for (const [index, pass] of [[3, 'gui-image'], [4, 'gui-shape'], [5, 'gui-text']]) {
+    assert.match(engineSources[index], /getBuiltinGuiShader\(/);
+    assert.ok(engineSources[index].includes(`'${pass}'`), `GUI renderer retains its generated ${pass} pass`);
+    assert.doesNotMatch(engineSources[index], /getBuiltin2dUiShader\(/, 'GUI does not retain the entire 2D family adapter');
+  }
   assert.match(engineSources[7], /getBuiltinDeformationShader\(/);
   assert.ok(engineSources.slice(8).every(source => /getBuiltinSimple3dShader\(/.test(source)));
   assert.ok(engineSources.every(source => !/createShaderModule\(\{[^}]*code:\s*(?:mesh2d|particle2d|particle3d|gui|RADIAL|BITMAP)/s.test(source)));

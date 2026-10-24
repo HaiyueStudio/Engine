@@ -222,8 +222,8 @@
         "easing": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 4, "maxItems": 4 },
         "smoothness": { "type": "number", "minimum": 0, "maximum": 1 },
         "randomSeed": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
-        "startTrack": { "$ref": "#/$defs/vectorTrack" }, "endTrack": { "$ref": "#/$defs/vectorTrack" },
-        "offsetTrack": { "$ref": "#/$defs/vectorTrack" }, "amountTrack": { "$ref": "#/$defs/vectorTrack" }
+        "startTrack": { "$ref": "#/$defs/vectorValueTrack" }, "endTrack": { "$ref": "#/$defs/vectorValueTrack" },
+        "offsetTrack": { "$ref": "#/$defs/vectorValueTrack" }, "amountTrack": { "$ref": "#/$defs/vectorValueTrack" }
       }, "additionalProperties": false
     },
     "textAnimator": {
@@ -232,9 +232,9 @@
         "selector": { "$ref": "#/$defs/textSelector" }, "position": { "$ref": "#/$defs/vec2" }, "scale": { "$ref": "#/$defs/vec2" },
         "rotation": { "type": "number" }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
         "fillColor": { "$ref": "#/$defs/color" }, "tracking": { "type": "number" },
-        "positionTrack": { "$ref": "#/$defs/vectorTrack" }, "scaleTrack": { "$ref": "#/$defs/vectorTrack" },
-        "rotationTrack": { "$ref": "#/$defs/vectorTrack" }, "opacityTrack": { "$ref": "#/$defs/vectorTrack" },
-        "fillColorTrack": { "$ref": "#/$defs/vectorTrack" }, "trackingTrack": { "$ref": "#/$defs/vectorTrack" }
+        "positionTrack": { "$ref": "#/$defs/vectorValueTrack" }, "scaleTrack": { "$ref": "#/$defs/vectorValueTrack" },
+        "rotationTrack": { "$ref": "#/$defs/vectorValueTrack" }, "opacityTrack": { "$ref": "#/$defs/vectorValueTrack" },
+        "fillColorTrack": { "$ref": "#/$defs/vectorValueTrack" }, "trackingTrack": { "$ref": "#/$defs/vectorValueTrack" }
       }, "additionalProperties": false
     },
     "particle2d": {
@@ -488,31 +488,31 @@
             "black": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
             "white": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "number", "minimum": 0, "maximum": 1 } },
             "amount": { "type": "number", "minimum": 0, "maximum": 1 },
-            "blackTrack": { "$ref": "#/$defs/vectorTrack" }, "whiteTrack": { "$ref": "#/$defs/vectorTrack" }, "amountTrack": { "$ref": "#/$defs/vectorTrack" }
+            "blackTrack": { "$ref": "#/$defs/vectorValueTrack" }, "whiteTrack": { "$ref": "#/$defs/vectorValueTrack" }, "amountTrack": { "$ref": "#/$defs/vectorValueTrack" }
           }, "additionalProperties": false
         },
         {
           "type": "object", "required": ["kind", "color"],
           "properties": {
             "kind": { "const": "fill" }, "color": { "$ref": "#/$defs/color" }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
-            "colorTrack": { "$ref": "#/$defs/vectorTrack" }, "opacityTrack": { "$ref": "#/$defs/vectorTrack" }
+            "colorTrack": { "$ref": "#/$defs/vectorValueTrack" }, "opacityTrack": { "$ref": "#/$defs/vectorValueTrack" }
           }, "additionalProperties": false
         },
         {
           "type": "object", "required": ["kind", "opacity"],
-          "properties": { "kind": { "const": "opacity" }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 }, "opacityTrack": { "$ref": "#/$defs/vectorTrack" } },
+          "properties": { "kind": { "const": "opacity" }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 }, "opacityTrack": { "$ref": "#/$defs/vectorValueTrack" } },
           "additionalProperties": false
         },
         {
           "type": "object", "required": ["kind", "matrix"],
           "properties": {
             "kind": { "const": "color-matrix" }, "matrix": { "type": "array", "minItems": 20, "maxItems": 20, "items": { "type": "number" } },
-            "matrixTrack": { "$ref": "#/$defs/vectorTrack" }
+            "matrixTrack": { "$ref": "#/$defs/vectorValueTrack" }
           }, "additionalProperties": false
         },
         {
           "type": "object", "required": ["kind", "radius"],
-          "properties": { "kind": { "const": "blur" }, "radius": { "$ref": "#/$defs/nonNegativeVec2" }, "radiusTrack": { "$ref": "#/$defs/vectorTrack" } },
+          "properties": { "kind": { "const": "blur" }, "radius": { "$ref": "#/$defs/nonNegativeVec2" }, "radiusTrack": { "$ref": "#/$defs/vectorValueTrack" } },
           "additionalProperties": false
         },
         {
@@ -520,8 +520,8 @@
           "properties": {
             "kind": { "const": "drop-shadow" }, "color": { "$ref": "#/$defs/color" }, "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
             "offset": { "$ref": "#/$defs/vec2" }, "blur": { "type": "number", "minimum": 0 },
-            "colorTrack": { "$ref": "#/$defs/vectorTrack" }, "opacityTrack": { "$ref": "#/$defs/vectorTrack" },
-            "offsetTrack": { "$ref": "#/$defs/vectorTrack" }, "blurTrack": { "$ref": "#/$defs/vectorTrack" }
+            "colorTrack": { "$ref": "#/$defs/vectorValueTrack" }, "opacityTrack": { "$ref": "#/$defs/vectorValueTrack" },
+            "offsetTrack": { "$ref": "#/$defs/vectorValueTrack" }, "blurTrack": { "$ref": "#/$defs/vectorValueTrack" }
           }, "additionalProperties": false
         }
       ]

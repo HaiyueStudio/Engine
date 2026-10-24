@@ -1,3 +1,5 @@
+import * as GuiPaint from '../rendering/GuiControlPaintPrimitives';
+import {admitGuiControl} from '../GuiControlIdentity';
 import { containsPoint, GuiDirtyFlags, GuiElementOptions, GuiPointerEvent, GuiRect, GuiValueChangeHandler, type GuiActionEvent } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
 import { requiredItemAt } from '../../math/arrayAccess';
@@ -28,6 +30,7 @@ export interface GuiTreeOptions<T = string> extends GuiElementOptions {
 }
 
 export class GuiTree<T = string> extends GuiElement {
+  private static readonly __controlIdentityGuiTree = /* @__PURE__ */ (() => admitGuiControl(GuiTree.prototype, 'GuiTree', undefined, paintGuiTree))();
   static override readonly themeControlType: string = 'GuiTree';
   nodes: GuiTreeNode<T>[];
   expandedKeys: Set<string>;
@@ -179,3 +182,37 @@ export class GuiTree<T = string> extends GuiElement {
     this.rowsDirty = true;
   }
 }
+
+/** Original built-in painter; retained with this control, not every GUI owner. */
+function paintGuiTree(context:GuiPaint.GuiControlPaintContext, tree: GuiTree, theme: GuiPaint.GuiTheme): void {
+    const content = GuiPaint.guiContentBox(tree, 0, theme.fontSize), textOffset = content.text.x - content.rect.x;
+    const radius = context.styleFor(tree).radius ?? theme.radius;
+    context.addRect(tree.rect.x, tree.rect.y, tree.rect.width, tree.rect.height, radius, GuiPaint.colorToRgba(context.styleFor(tree).borderColor, theme.colors.border));
+    context.addRect(tree.rect.x + 1, tree.rect.y + 1, tree.rect.width - 2, tree.rect.height - 2, Math.max(0, radius - 1), GuiPaint.colorToRgba(context.styleFor(tree).backgroundColor, theme.colors.surface));
+
+    for (const row of tree.visibleNodes) {
+      if (row.rowRect.y + row.rowRect.height > content.rect.y + content.rect.height) continue;
+      const selected = row.node.key === tree.selectedKey;
+      if (selected) {
+        context.addRect(row.rowRect.x + 2, row.rowRect.y + 2, row.rowRect.width - 4, row.rowRect.height - 4, Math.max(0, radius - 2), GuiPaint.withAlpha(GuiPaint.colorToRgba(theme.colors.primary, theme.colors.primary), 0.34));
+      }
+
+      const baseX = row.rowRect.x + textOffset + row.depth * tree.indent + 8;
+      if (row.node.children?.length) {
+        const arrowColor = GuiPaint.colorToRgba(theme.colors.textMuted, theme.colors.textMuted);
+        const cy = row.rowRect.y + row.rowRect.height * 0.5;
+        if (tree.expandedKeys.has(row.node.key)) {
+          context.addRect(baseX, cy - 1, 10, 2, 1, arrowColor);
+        } else {
+          context.addRect(baseX + 2, cy - 5, 2, 10, 1, arrowColor);
+          context.addRect(baseX - 2, cy - 1, 10, 2, 1, arrowColor);
+        }
+      }
+
+      const labelX = baseX + 18;
+      const color = row.node.disabled
+        ? GuiPaint.withAlpha(GuiPaint.colorToRgba(theme.colors.textMuted, theme.colors.textMuted), 0.55)
+        : GuiPaint.colorToRgba(theme.colors.text, theme.colors.text);
+      context.addText(row.node.label, labelX, row.rowRect.y, Math.max(0, row.rowRect.x + row.rowRect.width - labelX - 8), row.rowRect.height, theme.fontSize, color, true);
+    }
+  }

@@ -109,6 +109,8 @@ export interface AudioDecoderPort {
 
 export interface AudioBackendScheduleRequest {
   readonly voiceId: string;
+  /** Routing/trace identity only; gain already includes the runtime-owned bus chain. */
+  readonly bus?: string;
   readonly decoded: DecodedAudioHandle;
   readonly whenFrame: number;
   readonly offsetFrame: number;

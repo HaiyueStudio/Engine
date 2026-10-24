@@ -155,3 +155,25 @@ G03接入约定：
 结论：2065 项全仓测试、27 项定向测试及 447 项浏览器／原生 WebGPU 对照通过，其中 G09 为 107 项。跨区预览与独立直接绘制最大通道差为 1，保持原容差 2；待提交预览在会话结束后的像素差为 0。五轮热身后资源计数相同，静态帧不提交或上传，最终自有 GPU 资源与原生监听残留为 0，业务借用纹理仍存活。接受、拒绝、取消、节点移除、滚动、模态、暂停和鼠标／触摸／键盘生产组合均有证据。详见 [G09 验收记录](g09-checks.json)。
 
 边界：GuiDragSource／GuiDropTarget／GuiDragSession 三个名称仍由 G13 接入公共入口和打包声明；跨平台真机、Native 与正式性能也归 G13。区域应用提供全画布顶层 GUI 覆盖层以承载预览；无需预览的数据拖放不要求该层。整包 GUI-font 为 105353 B／55000 B（G08 为 99511 B，本轮增 5842 B），另有 RenderRegionState 十项既有合同失败；均未放宽预算。叙事 GUI 的新增包体超限已通过消除闲置字段修复，当前 12995 B／13000 B。当前完成仅代表原定 G09 运行实现，不授予整版发布资格。
+
+## G10 HYA 公开能力与格式合同
+
+问题：格式可表达、私有模块可运行、公开包可消费与真实生产验收的边界未统一；参数化占位绘制与旧状态通道限制不能从增加 exports 自动升级。
+
+方法：[ADR 0134](../../docs/for-ai/adr/0134-hya-production-composition-contract.md) 与[执行合同](hya-contract.md)冻结组合 `haiyue-composition@1`、严格能力协商、事务／求值／绘制／事件时序、宿主端口及资源代次。[机器矩阵](../../config/hya-022-contract.json)按 schema／parser／codec／runtime／export／example／evidence 区分 40 项能力，对应全部 33 个格式模块和 8 类 core Component；旧粒子／音频／合成限制、构建期转换与 M07 历史单列。拟议格式入口 55 个符号，五个运行时入口为 9／7／5／9／7；[声明草案](hya-api-draft.d.ts)与隔离 consumer 仅证明设计可消费。
+
+结论：G10 原始合同验收完成。25 项定向测试、2090 项全仓测试及 workspace／全仓类型、构建、边界、API、文档与能力检查通过；旧 HYA 1／2、HYLA 1、HYRG 2 与原反例保持。实际私有格式 tarball 完成运行验证，55 个格式符号在无 DOM／WebGPU 类型的 Node consumer 中通过严格类型检查，37 个运行时声明草案通过独立包类型检查；41 个加载源文件均在 animation-spec 内。旧 dashboard 的全部 64 项缓存校验复用后，在 large/monster-mask-stress 报 E_ANIMATION_LIMIT_EXCEEDED：40 个活动 mask group 超过夹具显式上限 16（renderer 默认 32，亦未调整）。原 degraded 标签、完整 23 项分母、失败与 latest 保持；这是 G11／G12 必须解决的生产验收阻塞，不通过放宽预算或删除素材绕过。 证据逐文件 SHA-256 回读归档，原件保留，详见 [G10 记录](g10-checks.json)。
+
+边界：生产组合运行时、真实字形／图像／N-slice 与选定状态通道归 G11；真实素材、增量、按需闭包和资源／性能归 G12；实际 exports／声明／tarball 与 Native、最终候选归 G13。已复现旧 v2 在暂停后 seek(0.5) 得到 clock=0，原实现未改；G11 必须提供静默 seek 并保留暂停状态。原 GUI-font 105353 B／55000 B 和 RenderRegionState 十项合同失败保持；文档要求的 hya:dashboard:offline npm 别名目前缺失，已保留失败并使用独立候选入口核查。animation-spec 进入拟议 0.2.2 清单，shader-language 字节不变时保留 0.2.1。本阶段未修改正式 manifests／API 基线／原预算，未发布或推广任何基线。
+
+## G11 HYA 组合播放与真实绘制
+
+问题：文本、布局、数据、状态、图像和输入需要同一提交与资源生命周期；GUI 也需要按需加载及一致的鼠标指针反馈。
+
+方法：2026-10-24 用户批准 62 文件具名扩展，完整 135 文件候选按哈希核对后应用。66 份 HYA 运行时复用原状态机、布局器、GUI/G06 和资源 owner；稳定字体配方身份避免缓存淘汰后反复上传。新增共享输入域指针管理：输入框 text、按钮 pointer、style.cursor 覆盖，离开／失焦／禁用／销毁时恢复宿主设置。保留 @haiyue/engine/gui 独立 ESM 入口并验证动态分包；不复制 Engine 类型或新增输入采样器。
+
+结论：工作区与目录回归共 2,383 项通过，102 个构建目标的新鲜度检查通过；类型、API、模块／职责／prepare 与工作区边界检查通过。真实 Chrome 的 8 项指针及 5 项公开组合示例检查通过，图像直接确认 GUI 编辑后的“你好 B”同步进入 HYA 画面。示例使用实际字体／PNG、SHA-256 校验和固定零步长首帧屏障；字体许可保留。四个实际 tarball 的严格类型、75 个公开 ESM 导入与 CLI 通过。
+
+边界：**G11 未完成完整验收，包门禁仍失败**。五个新 HYA 入口尚缺正式 focused consumer；新入口字节预算按冻结合同归 G12 测量、G13 准入，未在失败后补大额度。GUI/font 为 80,635／55,000 B，叙事 GUI 为 19,014／13,000 B；格式包压缩 170,719／145,000 B、展开 666,297／550,000 B。Engine 必需许可文件已加入两套清单，四个原测量 tarball 哈希逐项保持；所有数值政策不变，原报告和失败未改判。此前 382 对独立 PNG、Native 交接与原失败记录继续保留；Apple SDK／物理 iPhone 的 PCM、输入及 VoiceOver、正式增量与性能仍由后续验收完成。
+
+[本次接入与验证](../../artifacts/engine-0.2.2/g11/admission-20261024/result.json) · [原包门禁](../../artifacts/engine-0.2.2/g11/admission-20261024/public-packages.json) · [许可清单复核](../../artifacts/engine-0.2.2/g11/admission-20261024/package-policy-recheck.json) · [示例](../../examples/hya-production/main.ts) · [证据索引](g11-checks.json)

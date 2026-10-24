@@ -1,8 +1,9 @@
+import {isGuiControl} from './GuiControlIdentity';
 import type {BitmapFontData} from '../font/BitmapFontData';
 import {buildBitmapFontGlyphs} from '../font/BitmapFontBuilder';
 import {guiTextClusters,registerGuiTextGlyphs} from './rendering/GuiTextGlyphs';
 import type {GuiRoot} from './components/GuiRoot';
-import {GuiInput} from './components/GuiInput';
+import {type GuiInput} from './components/GuiInput';
 import {guiInputCounterText} from './input/GuiInputAdornments';
 import type {GuiElement} from './components/GuiElement';
 import {resolveGuiSkin} from './GuiThemeResolve';
@@ -72,8 +73,8 @@ export class GuiFontOwner {
         const requested = resolveGuiSkin(element).fontFamily ?? root.theme.fontFamily;
         const family = requested === 'sans-serif' ? this.defaultFamily : requested;
         let glyphs = families.get(family); if (!glyphs) {glyphs = new Set(); families.set(family, glyphs);}
-        const texts = element instanceof GuiInput ? [element.displayValue,element.placeholder,guiInputCounterText(element)??''] : [];
-        if (!(element instanceof GuiInput)) {
+        const texts = isGuiControl<GuiInput>(element, 'GuiInput') ? [element.displayValue,element.placeholder,guiInputCounterText(element)??''] : [];
+        if (!(isGuiControl<GuiInput>(element, 'GuiInput'))) {
           for (const key of ['text', 'label', 'content', 'displayText'] as const) {
             if (key in element) {const text = (element as unknown as Record<string, unknown>)[key]; if (typeof text === 'string') texts.push(text);}
           }
