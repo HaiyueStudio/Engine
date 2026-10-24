@@ -3,6 +3,9 @@ import { Geometry2D } from '@haiyue/engine';
 import earcut from 'earcut';
 
 interface Point { x: number; y: number }
+export interface AnimationStrokeCoveragePort {
+  union(contours: readonly (readonly Readonly<Point>[])[]): readonly Readonly<{rings: readonly (readonly Readonly<Point>[])[]}>[];
+}
 interface Contour { points: Point[]; area: number; parent: number; depth: number; role: 'outer' | 'hole' | 'ignore' }
 interface StrokeSubpath { points: Point[]; closed: boolean }
 
@@ -47,6 +50,7 @@ export interface VectorPathMorphComponent {
 
 const geometryCache = new WeakMap<object, Geometry2D>();
 const strokeGeometryCache = new WeakMap<object, Geometry2D>();
+const strokeCoverageCaches = new WeakMap<AnimationStrokeCoveragePort, WeakMap<object, Geometry2D>>();
 const MAX_FLATTENED_VERTICES = 262_144;
 
 /** Applies ordered source-neutral modifiers after curve flattening. Empty trim ranges return an empty command stream. */
@@ -248,29 +252,33 @@ export function tessellateAnimationPath(component: AnimationPath2DComponent): Ge
 }
 
 /** Tessellates the compact Lottie stroke extension without expanding it in the HYA payload. */
-export function tessellateVectorStrokePath(component: VectorStrokePathComponent, allowEmpty = false): Geometry2D {
-  const cached = strokeGeometryCache.get(component);
+export function tessellateVectorStrokePath(component: VectorStrokePathComponent, allowEmpty = false, coverage?: AnimationStrokeCoveragePort): Geometry2D {
+  let cache = coverage ? strokeCoverageCaches.get(coverage) : strokeGeometryCache;
+  if (!cache) {cache = new WeakMap(); strokeCoverageCaches.set(coverage!, cache);}
+  const cached = cache.get(component);
   if (cached) return cached;
   const flattened = flattenStrokePaths(component);
   const subpaths = component.dash?.length
     ? flattened.flatMap(subpath => dashStrokeSubpath(subpath, component.dash!, component.dashOffset ?? 0))
     : flattened;
-  const contours = subpaths.flatMap(subpath => strokeContours(subpath, component));
+  const contours = subpaths.flatMap(subpath => strokeContours(subpath, component, coverage !== undefined));
   const positions: number[] = [];
   const indices: number[] = [];
-  for (const contour of contours) {
-    if (contour.length < 3) continue;
-    const flat = contour.flatMap(point => [point.x, point.y]);
+  const polygons = coverage ? coverage.union(contours) : contours.map(points => ({rings: [points]}));
+  for (const polygon of polygons) {
+    const flat: number[] = [], holes: number[] = [];
+    for (const [index, ring] of polygon.rings.entries()) {if (index) holes.push(flat.length / 2); for (const point of ring) flat.push(point.x, point.y);}
+    if (flat.length < 6) continue;
     const vertexOffset = positions.length / 2;
     positions.push(...flat);
-    for (const index of earcut(flat, undefined, 2)) indices.push(vertexOffset + index);
+    for (const index of earcut(flat, holes, 2)) indices.push(vertexOffset + index);
   }
   if (indices.length === 0 && !allowEmpty) throw new RangeError('Animation stroke tessellation produced no triangles.');
   const indexArray = indices.length === 0
     ? new Uint16Array([0, 1, 2])
     : positions.length / 2 > 0xffff ? new Uint32Array(indices) : new Uint16Array(indices);
   const geometry = new Geometry2D(indices.length === 0 ? new Float32Array(6) : new Float32Array(positions), indexArray);
-  strokeGeometryCache.set(component, geometry);
+  cache.set(component, geometry);
   return geometry;
 }
 
@@ -460,7 +468,7 @@ function flattenStrokePaths(component: VectorStrokePathComponent): StrokeSubpath
   return subpaths;
 }
 
-function strokeContours(subpath: StrokeSubpath, style: VectorStrokePathComponent): Point[][] {
+function strokeContours(subpath: StrokeSubpath, style: VectorStrokePathComponent, unifiedCoverage = false): Point[][] {
   const points = subpath.points;
   const closed = subpath.closed;
   const halfWidth = style.width / 2;
@@ -498,7 +506,7 @@ function strokeContours(subpath: StrokeSubpath, style: VectorStrokePathComponent
     }
     const cross = incoming.x * outgoing.y - incoming.y * outgoing.x;
     if (Math.abs(cross) < 1e-6) continue;
-    const side = cross > 0 ? 1 : -1;
+    const side = (cross > 0 ? 1 : -1) * (unifiedCoverage ? -1 : 1);
     const incomingNormal = { x: -incoming.y * side, y: incoming.x * side };
     const outgoingNormal = { x: -outgoing.y * side, y: outgoing.x * side };
     const outerIncoming = { x: vertex.x + incomingNormal.x * halfWidth, y: vertex.y + incomingNormal.y * halfWidth };
@@ -508,7 +516,7 @@ function strokeContours(subpath: StrokeSubpath, style: VectorStrokePathComponent
       const denominator = bisector ? bisector.x * outgoingNormal.x + bisector.y * outgoingNormal.y : 0;
       const miterLength = Math.abs(denominator) > 1e-6 ? halfWidth / denominator : Infinity;
       if (bisector && miterLength > 0 && miterLength <= halfWidth * style.miterLimit) {
-        contours.push([outerIncoming, { x: vertex.x + bisector.x * miterLength, y: vertex.y + bisector.y * miterLength }, outerOutgoing]);
+        contours.push([outerIncoming, { x: vertex.x + bisector.x * miterLength, y: vertex.y + bisector.y * miterLength }, outerOutgoing, ...(unifiedCoverage ? [vertex] : [])]);
         continue;
       }
     }
