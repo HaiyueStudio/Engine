@@ -6319,7 +6319,7 @@
     "status": "integrated-cursor-and-lazy-gui-verified-package-gates-pending",
     "proof": {
       "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g11\\admission-20261024\\result.json",
-      "sha256": "a4ed2678165d8cd34bed1af6253caab74dee310b5d302c0fef20607f75589929"
+      "sha256": "b5291748d1425362e1ee4f7178016d8ace971bd5c5d52bdffd0c0b26e60cf3c6"
     },
     "authorizedExternalFiles": 62,
     "productionApplied": true,
@@ -6342,6 +6342,16 @@
     ],
     "numericPoliciesChanged": false,
     "historicalAdmissionEntriesSuperseded": true,
-    "fullG11Complete": false
+    "fullG11Complete": false,
+    "guiRootBoundary": {
+      "entrypoint": "@haiyue/engine/gui",
+      "loading": "direct GUI consumer: static named import or deferred import()",
+      "sharedRuntime": true,
+      "newNpmPackage": false,
+      "cursorOverride": "style.cursor",
+      "legacyEngineRootStillStaticallyIncludesGuiSystem": true,
+      "fullRootGuiDeferralComplete": false,
+      "remainingDesign": "Separate SceneSystems GUI assembly while preserving the synchronous createScene contract."
+    }
   }
 }
