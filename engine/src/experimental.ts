@@ -51,7 +51,8 @@ export { AssetWorkerClient, createAssetWorkerClientFromUrl, createAssetWorkerSou
 export type { AssetWorkerLike, AssetWorkerRequest, AssetWorkerRequestInit, AssetWorkerRequestType, AssetWorkerResponse } from './assets/AssetWorkerClient';
 export { createInlineKtx2TextureWorkerClient, createKtx2TextureLoader, createKtx2TextureWorkerClientFromUrl, createKtx2TextureWorkerSource, inspectKtx2Texture, Ktx2TextureWorkerClient, prepareKtx2TexturePayload, uploadKtx2Texture, uploadPreparedKtx2Texture } from './assets/Ktx2TextureLoader';
 export type { Ktx2SupercompressionDecoder, Ktx2TextureInfo, Ktx2TextureLoaderOptions, Ktx2TexturePayload, Ktx2TextureWorker, Ktx2TextureWorkerOptions } from './assets/Ktx2TextureLoader';
-export { getSceneRenderIntegration, getSceneRenderPipeline, Scene, normalizeSceneOptions } from './scene/Scene';
+export { Scene, normalizeSceneOptions } from './scene/Scene';
+export { getSceneRenderIntegration, getSceneRenderPipeline } from './scene/internal/SceneRenderAccess';
 export type { SceneAssetRequest, SceneCameraOptions, SceneCreateOptions, SceneLoadedAssets, SceneOptions, ScenePreset, SceneRenderViewOptions } from './scene/Scene';
 export { createSceneSystemPlan, SCENE_PRESETS } from './scene/internal/ScenePresetFactory';
 export type { ScenePresetDefinition, SceneSystemPlanEntry, SceneSystemRole } from './scene/internal/ScenePresetFactory';

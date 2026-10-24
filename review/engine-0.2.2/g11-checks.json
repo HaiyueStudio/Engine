@@ -3448,13 +3448,13 @@
       {
         "dpr": 1,
         "samples": 4096,
-        "maximumSampleDifference": 3.814697265625e-06,
+        "maximumSampleDifference": 0.000003814697265625,
         "encodedSha256": "3be666d7668b856b2b3ce297b6a511255c896b8360e716634736d42fa66e51c2"
       },
       {
         "dpr": 2,
         "samples": 4096,
-        "maximumSampleDifference": 3.814697265625e-06,
+        "maximumSampleDifference": 0.000003814697265625,
         "encodedSha256": "3be666d7668b856b2b3ce297b6a511255c896b8360e716634736d42fa66e51c2"
       }
     ],
@@ -3578,13 +3578,13 @@
       {
         "dpr": 1,
         "samples": 4096,
-        "maximumSampleDifference": 3.814697265625e-06,
+        "maximumSampleDifference": 0.000003814697265625,
         "encodedSha256": "3be666d7668b856b2b3ce297b6a511255c896b8360e716634736d42fa66e51c2"
       },
       {
         "dpr": 2,
         "samples": 4096,
-        "maximumSampleDifference": 3.814697265625e-06,
+        "maximumSampleDifference": 0.000003814697265625,
         "encodedSha256": "3be666d7668b856b2b3ce297b6a511255c896b8360e716634736d42fa66e51c2"
       }
     ],
@@ -3728,13 +3728,13 @@
       {
         "dpr": 1,
         "samples": 4096,
-        "maximumSampleDifference": 3.814697265625e-06,
+        "maximumSampleDifference": 0.000003814697265625,
         "encodedSha256": "3be666d7668b856b2b3ce297b6a511255c896b8360e716634736d42fa66e51c2"
       },
       {
         "dpr": 2,
         "samples": 4096,
-        "maximumSampleDifference": 3.814697265625e-06,
+        "maximumSampleDifference": 0.000003814697265625,
         "encodedSha256": "3be666d7668b856b2b3ce297b6a511255c896b8360e716634736d42fa66e51c2"
       }
     ],
@@ -3867,13 +3867,13 @@
       {
         "dpr": 1,
         "samples": 4096,
-        "maximumSampleDifference": 3.814697265625e-06,
+        "maximumSampleDifference": 0.000003814697265625,
         "encodedSha256": "3be666d7668b856b2b3ce297b6a511255c896b8360e716634736d42fa66e51c2"
       },
       {
         "dpr": 2,
         "samples": 4096,
-        "maximumSampleDifference": 3.814697265625e-06,
+        "maximumSampleDifference": 0.000003814697265625,
         "encodedSha256": "3be666d7668b856b2b3ce297b6a511255c896b8360e716634736d42fa66e51c2"
       }
     ],
@@ -4179,7 +4179,7 @@
         "newPixelCases": 6,
         "newPixelMaximum": 0,
         "maximumPixelDifference": 2,
-        "maximumPcmDifference": 3.814697265625e-06,
+        "maximumPcmDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalOwnedProcesses": 0
       },
@@ -4191,7 +4191,7 @@
         "newPixelCases": 6,
         "newPixelMaximum": 0,
         "maximumPixelDifference": 2,
-        "maximumPcmDifference": 3.814697265625e-06,
+        "maximumPcmDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalOwnedProcesses": 0
       }
@@ -4332,7 +4332,7 @@
         "g06ImageMaximumDifference": 0,
         "originalMaximumDifference": 2,
         "rawEscapeStillComposing": true,
-        "pcmMaximumDifference": 3.814697265625e-06,
+        "pcmMaximumDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalOwnedProcesses": 0,
         "mode": "headless native D3D11 browser; not physical IME/device qualification"
@@ -4348,7 +4348,7 @@
         "g06ImageMaximumDifference": 0,
         "originalMaximumDifference": 2,
         "rawEscapeStillComposing": true,
-        "pcmMaximumDifference": 3.814697265625e-06,
+        "pcmMaximumDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalOwnedProcesses": 0,
         "mode": "headless native D3D11 browser; not physical IME/device qualification"
@@ -4447,7 +4447,7 @@
         "retainedControlledEntries": 11,
         "retainedRawEscapeObservations": 1,
         "originalMaximumDifference": 2,
-        "pcmMaximumDifference": 3.814697265625e-06,
+        "pcmMaximumDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalOwnedProcesses": 0,
         "mode": "headless native D3D11 Chrome; not physical IME/iPhone qualification"
@@ -4462,7 +4462,7 @@
         "retainedControlledEntries": 11,
         "retainedRawEscapeObservations": 1,
         "originalMaximumDifference": 2,
-        "pcmMaximumDifference": 3.814697265625e-06,
+        "pcmMaximumDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalOwnedProcesses": 0,
         "mode": "headless native D3D11 Chrome; not physical IME/iPhone qualification"
@@ -4544,7 +4544,7 @@
         "newViewportMaximumDifference": 0,
         "retainedUnqualifiedRawEscapeObservations": 1,
         "originalMaximumDifference": 2,
-        "pcmMaximumDifference": 3.814697265625e-06,
+        "pcmMaximumDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalOwnedProcesses": 0
       },
@@ -4557,7 +4557,7 @@
         "newViewportMaximumDifference": 0,
         "retainedUnqualifiedRawEscapeObservations": 1,
         "originalMaximumDifference": 2,
-        "pcmMaximumDifference": 3.814697265625e-06,
+        "pcmMaximumDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalOwnedProcesses": 0
       }
@@ -4688,7 +4688,7 @@
         "newRouteImages": 8,
         "newRouteMaximumDifference": 0,
         "maximumDifference": 2,
-        "pcmMaximumDifference": 3.814697265625e-06,
+        "pcmMaximumDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalNativeResponders": 0,
         "finalOwnedProcesses": 0
@@ -4700,7 +4700,7 @@
         "newRouteImages": 8,
         "newRouteMaximumDifference": 0,
         "maximumDifference": 2,
-        "pcmMaximumDifference": 3.814697265625e-06,
+        "pcmMaximumDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalNativeResponders": 0,
         "finalOwnedProcesses": 0
@@ -4851,7 +4851,7 @@
         "newGamepadImages": 7,
         "newGamepadMaximumDifference": 0,
         "maximumDifference": 2,
-        "pcmMaximumDifference": 3.814697265625e-06,
+        "pcmMaximumDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalNativeResponders": 0,
         "finalOwnedProcesses": 0
@@ -4863,7 +4863,7 @@
         "newGamepadImages": 7,
         "newGamepadMaximumDifference": 0,
         "maximumDifference": 2,
-        "pcmMaximumDifference": 3.814697265625e-06,
+        "pcmMaximumDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalNativeResponders": 0,
         "finalOwnedProcesses": 0
@@ -4950,7 +4950,7 @@
         "newGamepadImages": 7,
         "newGamepadMaximumDifference": 0,
         "maximumDifference": 2,
-        "pcmMaximumDifference": 3.814697265625e-06,
+        "pcmMaximumDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalOwnedProcesses": 0
       },
@@ -4961,7 +4961,7 @@
         "newGamepadImages": 7,
         "newGamepadMaximumDifference": 0,
         "maximumDifference": 2,
-        "pcmMaximumDifference": 3.814697265625e-06,
+        "pcmMaximumDifference": 0.000003814697265625,
         "finalGpuResources": 0,
         "finalOwnedProcesses": 0
       }
@@ -6353,5 +6353,34 @@
       "fullRootGuiDeferralComplete": false,
       "remainingDesign": "Separate SceneSystems GUI assembly while preserving the synchronous createScene contract."
     }
+  },
+  "currentPackageStructureReview": {
+    "status": "passed-package-consumers-and-structure",
+    "proof": {
+      "path": "artifacts/engine-0.2.2/g11/package-boundary-20261024/result.json",
+      "sha256": "d07c27c769739e0630a820e78076841159a1306e9110659d624c893fc9c4f386"
+    },
+    "supersedesPackageFailureIn": "currentProductionIntegration",
+    "focusedHyaConsumers": 5,
+    "publicRuntimeFactories": 7,
+    "packageGatePassed": true,
+    "workspaceTestsPassed": 2385,
+    "duplicateAudit": {
+      "files": 322,
+      "functions": 552,
+      "exactClones": 0,
+      "identifierNormalizedCandidates": 0,
+      "sourceFingerprint": "89363fe586fc931290acd8fd6ab30c4f826c8ae2eae977d10ad99146ea28e512",
+      "limitation": "Lexical candidates only, not proof of absence of semantic duplication. Smaller helpers, types and generated output require separate ownership review."
+    },
+    "guiAssembly": {
+      "publicTypesShared": true,
+      "synchronousSceneCreationPreserved": true,
+      "accessorsDoNotRetainGuiOrSceneConstruction": true,
+      "fullEngineRootStillIncludesGui": true,
+      "fullRootGuiDeferralClaimed": false,
+      "decision": "docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md"
+    },
+    "fullG11Complete": false
   }
 }

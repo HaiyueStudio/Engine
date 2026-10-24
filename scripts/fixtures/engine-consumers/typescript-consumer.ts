@@ -69,3 +69,28 @@ inspector.requestCapture();
 const frameGraphSnapshot: FrameGraphSnapshot | null = inspector.snapshot();
 void frameGraphSnapshot;
 inspector.dispose();
+
+import { createHyaPlayer, type HyaPlayer, type HyaPlayerOptions } from '@haiyue/extensions/hya-player';
+import { createHyaTextShaper, type HyaFontPort, type HyaTextShaper } from '@haiyue/extensions/hya-text';
+import { createHyaLayout, type HyaLayout } from '@haiyue/extensions/hya-layout';
+import { createHyaData, createHyaSemantics, type HyaData, type HyaSemantics } from '@haiyue/extensions/hya-data';
+import { createHyaAudio, createBrowserHyaAudioHost, type HyaAudio, type HyaAudioHost } from '@haiyue/extensions/hya-audio';
+import type { HyaCompositionDocument, ResponsiveLayoutDocument, HyaDataBindingDocument,
+  HyaSemanticsDocument, HyaAudioEventDocument } from '@haiyue/animation-spec/hya-production';
+
+// Compile actual factory calls across installed declarations, not only unused imports.
+export async function consumeHya(parts: {
+  composition: HyaCompositionDocument; layout: ResponsiveLayoutDocument;
+  data: HyaDataBindingDocument; semantics: HyaSemanticsDocument; audio: HyaAudioEventDocument;
+}, fonts: HyaFontPort, host: HyaAudioHost, options: HyaPlayerOptions): Promise<void> {
+  const data: HyaData = createHyaData(parts.data);
+  const text: HyaTextShaper = await createHyaTextShaper(parts.layout, fonts);
+  const layout: HyaLayout = createHyaLayout(parts.layout, { text });
+  const semantics: HyaSemantics = createHyaSemantics(parts.semantics, { bindings: data, action() {} });
+  const audio: HyaAudio = await createHyaAudio(parts.audio, host);
+  const player: HyaPlayer = await createHyaPlayer(parts.composition, options);
+  player.dispose(); audio.dispose(); semantics.dispose(); layout.dispose(); text.dispose(); data.dispose();
+}
+export function consumeBrowserHyaAudio(context: AudioContext): Promise<HyaAudioHost> {
+  return createBrowserHyaAudioHost(context);
+}

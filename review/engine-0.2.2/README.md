@@ -168,12 +168,14 @@ G03接入约定：
 
 ## G11 HYA 组合播放与真实绘制
 
-问题：文本、布局、数据、状态、图像和输入需要同一提交与资源生命周期；GUI 也需要按需加载及一致的鼠标指针反馈。
+问题：文本、布局、数据、状态、图像与输入需要同一提交和资源生命周期；五个新运行时入口缺少正式独立消费者，旧包体上限又未覆盖新增 GUI／组合格式能力。
 
-方法：2026-10-24 用户批准 62 文件具名扩展，完整 135 文件候选按哈希核对后应用。66 份 HYA 运行时复用原状态机、布局器、GUI/G06 和资源 owner；稳定字体配方身份避免缓存淘汰后反复上传。新增共享输入域指针管理：输入框 text、按钮 pointer、style.cursor 覆盖，离开／失焦／禁用／销毁时恢复宿主设置。保留 @haiyue/engine/gui 独立 ESM 入口并验证直接 GUI 消费者动态分包；不复制 Engine 类型或新增输入采样器。完整 Engine root 仍由 SceneSystems 静态装配 GuiSystem，不能据此宣称主引擎的 GUI 已完全延迟加载；进一步拆开装配边界列为后续方案，须保留同步 createScene 兼容性。
+方法：已批准的 62 文件接入和 66 份运行时保持；五个 focused consumer 从真实安装的 tarball 保留全部七个运行时工厂，独立类型消费编译实际调用，Node 验证六个无设备工厂、事务、暂停 seek、显式音频解锁协议和释放，浏览器音频宿主工厂另检查公开导出／调用类型。重复审查覆盖新旧动画、状态机、共享布局、GUI 和格式共 322 个源文件、552 个至少 200 token 的函数，未发现跨文件完整或仅改标识符的克隆；主能力依赖追踪确认复用原状态机、布局、绘制、G06 编辑与输入 owner。这是有范围的词法与归属审查，不等于证明不存在全部语义重复。
 
-结论：工作区与目录回归共 2,383 项通过，102 个构建目标的新鲜度检查通过；类型、API、模块／职责／prepare 与工作区边界检查通过。真实 Chrome 的 8 项指针及 5 项公开组合示例检查通过，图像直接确认 GUI 编辑后的“你好 B”同步进入 HYA 画面。示例使用实际字体／PNG、SHA-256 校验和固定零步长首帧屏障；字体许可保留。四个实际 tarball 的严格类型、75 个公开 ESM 导入与 CLI 通过。
+结论：2,385 项工作区测试、完整类型／构建、API、模块／职责／prepare、工作区和 Editor 边界检查通过；102 个示例／共享目标新鲜度通过。四个确定性 tarball 的 40 个消费者、全部 75 个 ESM 入口、严格声明、Node 与 CLI 正式包门禁通过。五个新增消费者及原四项字节失败已解决；按用户授权和 [ADR 0135](../../docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md)，格式包 packed／unpacked 上限为 190,000／750,000 B，GUI/font 与叙事 GUI 为 95,000／23,000 B gzip，均记录实测值及有限储备。全部旧报告、旧值和失败保持，资源、画质、性能与设备预算未改变。
 
-边界：**G11 未完成完整验收，包门禁仍失败**。五个新 HYA 入口尚缺正式 focused consumer；新入口字节预算按冻结合同归 G12 测量、G13 准入，未在失败后补大额度。GUI/font 为 80,635／55,000 B，叙事 GUI 为 19,014／13,000 B；格式包压缩 170,719／145,000 B、展开 666,297／550,000 B。Engine 必需许可文件已加入两套清单，四个原测量 tarball 哈希逐项保持；所有数值政策不变，原报告和失败未改判。此前 382 对独立 PNG、Native 交接与原失败记录继续保留；Apple SDK／物理 iPhone 的 PCM、输入及 VoiceOver、正式增量与性能仍由后续验收完成。
+GUI 装配：渲染访问器通过私有 SceneRenderAccess 借用原 owner，经构建器打包后不保留场景构造或提前加载 GUI；独立 @haiyue/engine/gui 仍可动态分包，同步 GUI 场景与独立入口使用同一个 GuiSystem 类型。完整 HaiyueEngine 主入口保留同步 createScene({gui:true}) 默认能力，因此仍含 GUI 构造代码；没有创建第二套 Engine／GUI，也不宣称主入口 GUI 已完全延迟。text／pointer／style.cursor 的既有浏览器证据和真实字体／PNG 组合示例继续保留。
 
-[本次接入与验证](../../artifacts/engine-0.2.2/g11/admission-20261024/result.json) · [原包门禁](../../artifacts/engine-0.2.2/g11/admission-20261024/public-packages.json) · [许可清单复核](../../artifacts/engine-0.2.2/g11/admission-20261024/package-policy-recheck.json) · [示例](../../examples/hya-production/main.ts) · [证据索引](g11-checks.json)
+未完成项：G11 仍未取得完整资格。HYA 组合真实 IME／手柄、Apple SDK 构建、物理 iPhone 的 PCM／输入／VoiceOver 与生命周期、G12 完整素材／增量／长时资源／冷启动／生产性能，以及 G13 最终候选／全局门禁／演练继续验收。原 382 对 PNG、Native 交接及其源码范围保持，不把本轮 Node 包消费冒充设备或真实音频输出。
+
+[当前包门禁](../../artifacts/engine-0.2.2/g11/package-boundary-20261024/final-packed/public-packages.json) · [实现归属审查](../../artifacts/engine-0.2.2/g11/package-boundary-20261024/ownership-review.json) · [原接入与失败](../../artifacts/engine-0.2.2/g11/admission-20261024/result.json) · [示例](../../examples/hya-production/main.ts) · [证据索引](g11-checks.json)

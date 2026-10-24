@@ -84,6 +84,8 @@ textGraphemeBoundaries('A\r\nB'); // [0, 1, 3, 4]
 
 GUI 提供独立 ESM 入口 `@haiyue/engine/gui`，可使用 `import {GuiSystem, GuiInput, GuiButton} from '@haiyue/engine/gui'` 按需构建；需要延迟加载时使用 `await import('@haiyue/engine/gui')`，由应用构建器输出独立 GUI chunk。它与主引擎共享类型和资源，不需要再安装一份 GUI 运行时。入口文件为 `dist/gui.js`，部署时仍需保留它引用的共享 chunks。
 
+主入口保留同步 `createScene({gui: true})` 的默认装配，因此导入完整 `HaiyueEngine` 仍会包含 GUI 构造能力。只借用 `@haiyue/engine/experimental` 的 `getSceneRenderPipeline`／`getSceneRenderIntegration` 不会引入场景构造；它们与延迟 GUI 共用原场景 owner，不创建第二套引擎或 GUI。
+
 浏览器鼠标悬停时，输入框默认使用 `text` 指针，按钮及选择控件默认使用 `pointer`。可通过 `style: {cursor: 'grab'}` 等 CSS cursor 值覆盖；普通元素可继承父节点的设置。离开 GUI、窗口失焦或销毁时恢复应用原有的 canvas 指针。触摸与没有 DOM style 的 Native 宿主不修改浏览器指针。
 
 完整指南、浏览器支持矩阵、示例和 API 稳定性规则位于项目仓库的 `docs/engine-guide`、`docs/api` 与 `docs/for-ai/api-stability.md`。

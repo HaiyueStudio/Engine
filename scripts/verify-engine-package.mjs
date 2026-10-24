@@ -13,7 +13,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { basename, dirname, relative, resolve, sep } from 'node:path';
+import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
@@ -28,22 +28,24 @@ import {
   validateCapabilityPackageBudgetConfig,
   validateEngineConsumerResult,
   validateEnginePackManifest,
+  parsePackageVerificationArgs,
 } from './engine-package-policy.mjs';
 import { npmArgs, npmCommand } from './npm-process.mjs';
 import { measureConsumerLoading, validateConsumerLoading } from './engine-package-loading-policy.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const budget = JSON.parse(readFileSync(resolve(root, 'config/engine-package-budget.json'), 'utf8'));
-const releaseMode = process.argv.includes('--release');
-for (const argument of process.argv.slice(2)) {
-  if (argument !== '--release') throw new Error(`Unknown public package verification argument "${argument}".`);
+const { release: releaseMode, outputDirectory } = parsePackageVerificationArgs(process.argv.slice(2));
+const outputRoot = resolve(root, outputDirectory ?? 'artifacts/release');
+if (!isWithin(outputRoot, resolve(root, 'artifacts'))) {
+  throw new Error('Public package output must stay within the repository artifacts directory.');
 }
 
 const temporaryRoot = realpathSync(mkdtempSync(resolve(tmpdir(), 'haiyue-public-packages-')));
 const npmCacheRoot = resolve(tmpdir(), 'haiyue-g03-public-consumer-npm-cache-v1');
-const reportPath = resolve(root, 'artifacts/release/public-packages.json');
-const legacyReportPath = resolve(root, 'artifacts/release/engine-package.json');
-const tarballOutputRoot = resolve(root, 'artifacts/release/npm');
+const reportPath = resolve(outputRoot, 'public-packages.json');
+const legacyReportPath = resolve(outputRoot, 'engine-package.json');
+const tarballOutputRoot = resolve(outputRoot, 'npm');
 const errors = [];
 errors.push(...validateCapabilityPackageBudgetConfig(budget));
 errors.push(...validateExtensionConsumerCoverage({
@@ -105,6 +107,7 @@ try {
 
   const runtimeChecks = {
     node: runNodeRuntimeConsumer(installed),
+    hya: runHyaRuntimeConsumer(installed),
     typescript: runTypeScriptConsumer(installed, packedPackages),
     exports: runAllExportsConsumer(installed, packedPackages),
     cli: runCliConsumer(installed),
@@ -452,6 +455,14 @@ function runNodeRuntimeConsumer(installed) {
   return commandCheck(result, 'Node ESM runtime');
 }
 
+function runHyaRuntimeConsumer(installed) {
+  const input = resolve(installed.root, 'hya-runtime.mjs');
+  copyFileSync(resolve(root, 'scripts/fixtures/engine-consumers/hya-runtime.mjs'), input);
+  return commandCheck(spawnSync(process.execPath, [input], {
+    cwd: installed.root, encoding: 'utf8', timeout: 30_000,
+  }), 'five focused HYA runtime consumers');
+}
+
 function runTypeScriptConsumer(installed, packages) {
   const source = resolve(root, 'scripts/fixtures/engine-consumers/typescript-consumer.ts');
   const input = resolve(installed.root, 'typescript-consumer.ts');
@@ -689,7 +700,7 @@ function normalizeTemporaryPath(path) {
 
 function isWithin(path, directory) {
   const relativePath = relative(directory, path);
-  return relativePath === '' || (!relativePath.startsWith('..') && !relativePath.includes(`..${sep}`));
+  return relativePath === '' || (!isAbsolute(relativePath) && !relativePath.startsWith('..') && !relativePath.includes(`..${sep}`));
 }
 
 function sha256File(path) {

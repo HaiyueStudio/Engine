@@ -164,3 +164,5 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0131：FrameGraph 下载策略绑定独立页面上下文；相同固定七组限定复核](0131-framegraph-download-context-evidence-reuse.md)
 - [0132：0.2.2 共享布局、GUI 交互与 HYA 生产边界](0132-gui-layout-interaction-022.md)
 - [0133：区域像素缓存与整帧工作集分别计量](0133-region-cache-working-set-accounting.md)
+- [0134：HYA 公开能力与组合合同](0134-hya-production-composition-contract.md)
+- [0135：按能力增长审查包体与 GUI 装配](0135-capability-growth-and-gui-assembly.md)
