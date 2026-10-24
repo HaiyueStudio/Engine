@@ -166,3 +166,4 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0133：区域像素缓存与整帧工作集分别计量](0133-region-cache-working-set-accounting.md)
 - [0134：HYA 公开能力与组合合同](0134-hya-production-composition-contract.md)
 - [0135：按能力增长审查包体与 GUI 装配](0135-capability-growth-and-gui-assembly.md)
+- [0136：先推进 G12，真实输入保留后补](0136-g12-before-physical-input-acceptance.md)

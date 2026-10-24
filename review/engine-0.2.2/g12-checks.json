@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "goal": "g12-hya-production-qualification",
+  "status": "active-preflight-passed-full-qualification-pending",
+  "decision": "docs/for-ai/adr/0136-g12-before-physical-input-acceptance.md",
+  "executionAdmission": {
+    "decision": "Engine/docs/for-ai/adr/0136-g12-before-physical-input-acceptance.md",
+    "authorizedAt": "2026-10-25",
+    "dependency": "g11-hya-production-runtime",
+    "requiredDependencyStatus": "validating",
+    "runtimeCommit": "a4b01682df352aacfbc4b310780a7132b4947b1b",
+    "evidence": "Engine/review/engine-0.2.2/g11-checks.json#currentPackageStructureReview",
+    "preserveDependencyGraph": true,
+    "physicalInputAcceptance": "deferred-until-after-g12; release-blocking",
+    "otherDeviceRequirements": "unchanged"
+  },
+  "coordination": {
+    "singleActiveGoal": "g12-hya-production-qualification",
+    "g11Status": "validating",
+    "originalDependencyPreserved": true,
+    "deferredAcceptance": [
+      {
+        "id": "g11-physical-input-after-g12",
+        "originGoal": "g11-hya-production-runtime",
+        "ownerGoal": "g13-integration-release",
+        "afterGoal": "g12-hya-production-qualification",
+        "status": "pending",
+        "profiles": [
+          "browser-real-ime",
+          "physical-gamepad",
+          "physical-iphone-input"
+        ],
+        "blocksMilestoneCompletion": true,
+        "blocksRelease": true,
+        "syntheticInputIsSubstitute": false,
+        "decision": "Engine/docs/for-ai/adr/0136-g12-before-physical-input-acceptance.md"
+      }
+    ]
+  },
+  "runtimeHandoff": {
+    "commit": "a4b01682df352aacfbc4b310780a7132b4947b1b",
+    "evidence": "review/engine-0.2.2/g11-checks.json#currentPackageStructureReview",
+    "fourTarballHashesVerified": true,
+    "packageGate": "passed"
+  },
+  "structuralProbe": {
+    "path": "artifacts/engine-0.2.2/g12/preflight-20261025/static-public-probe.json",
+    "sha256": "02cfbb53184728bfabe76cb66a53db3217dfdfca0ef14b3aa7175dc562a575e7",
+    "status": "passed-structural-preflight",
+    "qualification": false
+  },
+  "next": [
+    "Freeze full text/image/corpus/product workload provenance before optimization",
+    "Measure actual draw generations, uploads, buffer reuse and long-running resources",
+    "Complete cold-start and three-round production comparisons with existing budgets"
+  ],
+  "realInputAcceptance": "deferred-release-blocking; not accepted",
+  "otherDeviceRequirements": "unchanged",
+  "fullG12Complete": false
+}

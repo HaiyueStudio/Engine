@@ -179,3 +179,11 @@ GUI 装配：渲染访问器通过私有 SceneRenderAccess 借用原 owner，经
 未完成项：G11 仍未取得完整资格。HYA 组合真实 IME／手柄、Apple SDK 构建、物理 iPhone 的 PCM／输入／VoiceOver 与生命周期、G12 完整素材／增量／长时资源／冷启动／生产性能，以及 G13 最终候选／全局门禁／演练继续验收。原 382 对 PNG、Native 交接及其源码范围保持，不把本轮 Node 包消费冒充设备或真实音频输出。
 
 [当前包门禁](../../artifacts/engine-0.2.2/g11/package-boundary-20261024/final-packed/public-packages.json) · [实现归属审查](../../artifacts/engine-0.2.2/g11/package-boundary-20261024/ownership-review.json) · [原接入与失败](../../artifacts/engine-0.2.2/g11/admission-20261024/result.json) · [示例](../../examples/hya-production/main.ts) · [证据索引](g11-checks.json)
+
+## G12 增量、资源与真实素材
+
+问题：真实输入的人工验收尚未结束，不能因此把运行时的增量、素材和资源验证停在等待阶段。
+
+方法与当前结论：按用户 2026-10-25 授权及 [ADR 0136](../../docs/for-ai/adr/0136-g12-before-physical-input-acceptance.md)，G11 保持 validating，G12 已 active，原依赖与发布前真实输入要求保留；其他 Apple 构建、PCM、VoiceOver 及设备要求不变。四个 G11 tarball 的哈希已重核，128／1k／10k 节点的公开入口静态结构预检通过，连续帧的几何、节点身份和公开变化标记保持稳定。该预检无字体、无 GPU，仅为诊断，不替代 G01 文本比例、完整素材、正式性能或设备验收。
+
+未完成项：先冻结真实字体／图像／授权素材和产品场景，再检查实际绘制代次、buffer 复用、上传范围及长时资源，完成冷启动和三轮定量对照。真实 IME／手柄／iPhone 输入在 G12 后补；其修复若改变测量输入，重测受影响的 G12 部分。当前不标记 G11、G12 或整版完成。单一证据入口见 [G12 记录](g12-checks.json)。
