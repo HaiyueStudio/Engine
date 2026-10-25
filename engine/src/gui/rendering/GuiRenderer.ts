@@ -408,10 +408,13 @@ export class GuiRenderer {
     const previousClip = this.currentClip;
     if (element instanceof GuiScrollView) this.currentClip = this.clipRect(element.rect);
     for (const child of element.children) this.collectElement(child, theme);
-    if (element instanceof GuiScrollView && element.showScrollbar && element.maxScrollY > 0) {
+    if (element instanceof GuiScrollView && element.showScrollbar && element.maxScrollOffset > 0) {
       const first = this.currentBatch.commands.length;
-      const r = element.rect, height = Math.min(r.height, Math.max(24, r.height*r.height/element.contentHeight));
-      this.addRect(r.x+r.width-4,r.y+(r.height-height)*element.scrollY/element.maxScrollY,3,height,1.5,colorToRgba(element.getResolvedStyle().borderColor,theme.colors.border));
+      const r = element.rect, horizontal = element.axis === 'horizontal', extent = horizontal ? r.width : r.height;
+      const thumb = Math.min(extent, Math.max(24, extent * extent / (horizontal ? element.contentWidth : element.contentHeight)));
+      const offset = (extent - thumb) * element.scrollOffset / element.maxScrollOffset;
+      this.addRect(horizontal ? r.x + offset : r.x + r.width - 4, horizontal ? r.y + r.height - 4 : r.y + offset,
+        horizontal ? thumb : 3, horizontal ? 3 : thumb, 1.5, colorToRgba(element.getResolvedStyle().borderColor,theme.colors.border));
       if (this.currentCache?.ordered) this.currentCache.plan.shapes(this.currentBatch, first, this.currentLayer);
     }
     this.currentClip = previousClip;

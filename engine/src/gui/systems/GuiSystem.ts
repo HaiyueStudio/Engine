@@ -65,6 +65,7 @@ interface PendingGuiWheelEvent {
   x: number;
   y: number;
   deltaY: number;
+  deltaX: number;
 }
 
 interface CachedCanvasRect {
@@ -130,7 +131,7 @@ export class GuiSystem extends System {
   private pressed: GuiElement | null = null;
   private readonly capturedPointers = new Set<number>();
   private scrollGesture: {
-    view: GuiScrollView; pointerId: number; startY: number; startOffset: number; dragging: boolean;
+    view: GuiScrollView; pointerId: number; startPosition: number; startOffset: number; dragging: boolean;
     samples: { time: number; offset: number }[]; lastMove: number; direction: number;
   } | null = null;
   private readonly pointerStates = new Map<number, {pressed: GuiElement | null; hovered: GuiElement | null; scrollGesture: GuiSystem['scrollGesture']; last: PendingGuiPointerEvent}>();
@@ -430,11 +431,12 @@ export class GuiSystem extends System {
     const canvas = this.engine.canvas;
     if (!canvas) return;
     const rect = this.getCachedCanvasRect(canvas);
-    const pending = this.pendingWheelPool.pop() ?? { native: null, x: 0, y: 0, deltaY: 0 };
+    const pending = this.pendingWheelPool.pop() ?? { native: null, x: 0, y: 0, deltaY: 0, deltaX: 0 };
     pending.native = event;
     pending.x = event.clientX - rect.left;
     pending.y = event.clientY - rect.top;
     pending.deltaY = event.deltaY;
+    pending.deltaX = event.deltaX;
     this.pendingWheel.push(pending);
     event.preventDefault();
   };
@@ -693,7 +695,8 @@ export class GuiSystem extends System {
     const gesture = this.scrollGesture;
     if (gesture && native.pointerId !== gesture.pointerId) return;
     if (gesture && (pending.type === 'pointermove' || pending.type === 'pointerup' || pending.type === 'pointercancel')) {
-      if (pending.type === 'pointermove' && (gesture.dragging || Math.abs(pending.y - gesture.startY) > 6)) {
+      const position = gesture.view.axis === 'horizontal' ? pending.x : pending.y;
+      if (pending.type === 'pointermove' && (gesture.dragging || Math.abs(position - gesture.startPosition) > 6)) {
         if (!gesture.dragging) {
           gesture.dragging = true;
           if (this.pressed) this.pressed.handlePointerCancel(this.makeEvent('pointercancel', this.pressed, pending, native));
@@ -701,17 +704,17 @@ export class GuiSystem extends System {
           this.focus.blur();
           this.updateHover(null, pending);
         }
-        gesture.view.scrollTo(gesture.startOffset + gesture.startY - pending.y);
+        gesture.view.scrollTo(gesture.startOffset + gesture.startPosition - position);
         this.sampleScroll(gesture, timestamp);
       }
       if (gesture.dragging) {
         if (pending.type === 'pointerup' || pending.type === 'pointercancel') {
           if (pending.type === 'pointerup') {
-            gesture.view.scrollTo(gesture.startOffset + gesture.startY - pending.y);
+            gesture.view.scrollTo(gesture.startOffset + gesture.startPosition - position);
             this.sampleScroll(gesture, timestamp);
             const first = gesture.samples[0]!, duration = timestamp - first.time;
             if (timestamp - gesture.lastMove <= 100 && duration > 0)
-              gesture.view.fling((gesture.view.scrollY - first.offset) * 1000 / duration);
+              gesture.view.fling((gesture.view.scrollOffset - first.offset) * 1000 / duration);
           } else gesture.view.stopInertia();
           this.scrollGesture = null;
           this.releasePointerCapture(native.pointerId);
@@ -730,8 +733,8 @@ export class GuiSystem extends System {
       const stopping = scroll?.animating ?? false;
       scroll?.stopInertia();
       this.scrollGesture = scroll ? {
-        view: scroll, pointerId: native.pointerId, startY: pending.y, startOffset: scroll.scrollY,
-        dragging: stopping, samples: [{ time: timestamp, offset: scroll.scrollY }], lastMove: timestamp, direction: 0,
+        view: scroll, pointerId: native.pointerId, startPosition: scroll.axis === 'horizontal' ? pending.x : pending.y, startOffset: scroll.scrollOffset,
+        dragging: stopping, samples: [{ time: timestamp, offset: scroll.scrollOffset }], lastMove: timestamp, direction: 0,
       } : null;
       // A tap during momentum only stops the list; it must not toggle the row under the finger.
       if (stopping) { this.pressed = null; this.focus.blur(); this.updateHover(null, pending); return; }
@@ -843,7 +846,7 @@ export class GuiSystem extends System {
 
   private sampleScroll(gesture: NonNullable<GuiSystem['scrollGesture']>, time: number): void {
     const previous = gesture.samples.at(-1)!;
-    const movement = gesture.view.scrollY - previous.offset;
+    const movement = gesture.view.scrollOffset - previous.offset;
     if (movement) {
       const direction = Math.sign(movement);
       if (gesture.direction && direction !== gesture.direction) gesture.samples = [previous];
@@ -852,12 +855,12 @@ export class GuiSystem extends System {
     }
     // Retain a short recent window, including the release pause; do not reuse stale fling speed.
     while (gesture.samples.length > 1 && time - gesture.samples[0]!.time > 100) gesture.samples.shift();
-    if (time > previous.time) gesture.samples.push({ time, offset: gesture.view.scrollY });
-    else previous.offset = gesture.view.scrollY;
+    if (time > previous.time) gesture.samples.push({ time, offset: gesture.view.scrollOffset });
+    else previous.offset = gesture.view.scrollOffset;
   }
 
   private scrollAncestor(element: GuiElement | null): GuiScrollView | null {
-    for (let node=element;node;node=node.parent) if (node instanceof GuiScrollView && node.maxScrollY>0) return node;
+    for (let node=element;node;node=node.parent) if (node instanceof GuiScrollView && node.maxScrollOffset>0) return node;
     return null;
   }
 
@@ -872,11 +875,12 @@ export class GuiSystem extends System {
       return;
     }
     let scroll = this.scrollAncestor(hit);
-    const delta = pending.deltaY * (native.deltaMode === 1 ? 16 : native.deltaMode === 2 ? (scroll?.rect.height ?? 1) : 1);
     while (scroll) {
-      const previous = scroll.scrollY;
+      const horizontal = scroll.axis === 'horizontal', extent = horizontal ? scroll.rect.width : scroll.rect.height;
+      const delta = (horizontal ? pending.deltaX || pending.deltaY : pending.deltaY) * (native.deltaMode === 1 ? 16 : native.deltaMode === 2 ? extent : 1);
+      const previous = scroll.scrollOffset;
       scroll.scrollBy(delta);
-      if (scroll.scrollY !== previous) {this.inputConsumed=true;break;}
+      if (scroll.scrollOffset !== previous || scroll.animating) {this.inputConsumed=true;break;}
       scroll = this.scrollAncestor(scroll.parent);
     }
   }
@@ -957,7 +961,7 @@ export class GuiSystem extends System {
   }
   private routeWheel(native: WheelEvent): boolean {
     const point=this.inputPoint(native);if(!point?.inside)return false;
-    this.inputConsumed=false;this.dispatchWheelEvent(null,{native,x:point.x,y:point.y,deltaY:native.deltaY});return this.inputConsumed;
+    this.inputConsumed=false;this.dispatchWheelEvent(null,{native,x:point.x,y:point.y,deltaY:native.deltaY,deltaX:native.deltaX});return this.inputConsumed;
   }
   private validPointerTarget(element:GuiElement): boolean {
     let root=element;

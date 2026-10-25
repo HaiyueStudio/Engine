@@ -25,7 +25,9 @@ export function guiScrollAncestor(element: GuiElement): GuiScrollView | null {
 }
 export function revealGuiElement(element: GuiElement): void {
   for (let parent = element.parent; parent; parent = parent.parent) if (parent instanceof GuiScrollView) {
-    const top = element.rect.y - parent.rect.y, bottom = top + element.rect.height - parent.rect.height;
+    const horizontal = parent.axis === 'horizontal';
+    const top = horizontal ? element.rect.x - parent.rect.x : element.rect.y - parent.rect.y;
+    const bottom = top + (horizontal ? element.rect.width - parent.rect.width : element.rect.height - parent.rect.height);
     if (top < 0) parent.scrollBy(top); else if (bottom > 0) parent.scrollBy(bottom);
   }
 }

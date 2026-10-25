@@ -151,10 +151,11 @@ export function createCatalog(): Demo[] {
     },
     {
       name: 'GuiScrollView', hint: 'Scroll or drag the list; try inertia.',
-      parameters: [...size(260, 230), number('items', 12, 4, 24), boolean('showScrollbar', true), boolean('inertia', true), number('inertiaStrength', 1, 0.2, 3, 0.1)],
+      parameters: [...size(260, 230), choice('axis', 'vertical', ['vertical', 'horizontal']), number('items', 12, 4, 24), boolean('showScrollbar', true), boolean('inertia', true), number('inertiaStrength', 1, 0.2, 3, 0.1)],
       create: (p, o, change) => {
-        const view = new GuiScrollView({ ...o, contentHeight: n(p, 'items') * 44 + 12, showScrollbar: b(p, 'showScrollbar'), inertia: b(p, 'inertia'), inertiaStrength: n(p, 'inertiaStrength') });
-        for (let i = 0; i < n(p, 'items'); i++) view.add(new GuiButton({ x: 10, y: 10 + i * 44, width: n(p, 'width') - 34, height: 34, text: `Item ${String(i + 1).padStart(2, '0')}`, onClick: () => change('item', i + 1) }));
+        const horizontal = s(p, 'axis') === 'horizontal';
+        const view = new GuiScrollView({ ...o, axis: horizontal ? 'horizontal' : 'vertical', contentWidth: n(p, 'items') * 150 + 12, contentHeight: n(p, 'items') * 44 + 12, showScrollbar: b(p, 'showScrollbar'), inertia: b(p, 'inertia'), inertiaStrength: n(p, 'inertiaStrength') });
+        for (let i = 0; i < n(p, 'items'); i++) view.add(new GuiButton({ x: horizontal ? 10 + i * 150 : 10, y: horizontal ? 10 : 10 + i * 44, width: horizontal ? 140 : n(p, 'width') - 34, height: horizontal ? Math.max(8, n(p, 'height') - 30) : 34, text: `Item ${String(i + 1).padStart(2, '0')}`, onClick: () => change('item', i + 1) }));
         return view;
       },
     },

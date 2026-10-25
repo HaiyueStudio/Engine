@@ -22,6 +22,7 @@ const retained = new WeakMap<GuiElement, GuiRect>();
 const hidden = new WeakSet<GuiElement>();
 const contentHeights = new WeakMap<GuiElement, number>();
 const scrollOffsets = new WeakMap<GuiElement, () => number>();
+const scrollAxes = new WeakMap<GuiElement, () => 'vertical' | 'horizontal'>();
 const motionSnapshots = new WeakMap<GuiElement, () => () => void>();
 
 export function observeGuiTree(root: GuiElement, sink: Sink, suspend: () => void): () => void {
@@ -39,14 +40,17 @@ export function notifyGuiInvalidation(element: GuiElement, flags: GuiDirtyFlags)
 export function assignedGuiRect(element: GuiElement): GuiRect | undefined {
   const rect = assignments.get(element) ?? retained.get(element);
   if (!rect) return undefined;
-  let offset = 0;
-  for (let ancestor = element.parent; ancestor; ancestor = ancestor.parent) offset += scrollOffsets.get(ancestor)?.() ?? 0;
-  return {...rect, y: rect.y - offset};
+  let x = 0, y = 0;
+  for (let ancestor = element.parent; ancestor; ancestor = ancestor.parent) {
+    const offset = scrollOffsets.get(ancestor)?.() ?? 0;
+    if (scrollAxes.get(ancestor)?.() === 'horizontal') x += offset; else y += offset;
+  }
+  return {...rect, x: rect.x - x, y: rect.y - y};
 }
 export function isGuiLayoutManaged(element: GuiElement): boolean {return managed.has(element);}
 export function isGuiLayoutHidden(element: GuiElement): boolean {return hidden.has(element);}
 export function guiLayoutContentHeight(element: GuiElement): number | undefined {return contentHeights.get(element);}
-export function registerGuiScrollOffset(element: GuiElement, offset: () => number, capture: () => () => void): void {scrollOffsets.set(element, offset); motionSnapshots.set(element, capture);}
+export function registerGuiScrollOffset(element: GuiElement, offset: () => number, capture: () => () => void, axis: () => 'vertical' | 'horizontal' = () => 'vertical'): void {scrollOffsets.set(element, offset); scrollAxes.set(element, axis); motionSnapshots.set(element, capture);}
 export function captureGuiLayoutMotion(element: GuiElement): (() => void) | undefined {return motionSnapshots.get(element)?.();}
 export function retainGuiLayout(element: GuiElement, rect: GuiRect, options: {readonly display?: 'none'; readonly contentHeight?: number} = {}): void {
   managed.add(element); retained.set(element, {...rect});
