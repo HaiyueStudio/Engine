@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>海月 · Gamepad Input</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main>
+    <header><div><div class="eyebrow">HAIYUE ENGINE / INPUT LAB</div><h1>手柄，实时响应<span>Gamepad input</span></h1></div><a href="../">全部示例 ↗</a></header>
+    <section class="toolbar"><label for="device">输入设备</label><select id="device"><option value="">等待手柄连接</option></select><span id="connection" role="status">未连接</span></section>
+    <div class="workspace">
+      <section class="stage" aria-label="虚拟手柄">
+        <div class="stage-heading"><span>STANDARD CONTROLLER</span><span class="live"><i></i> 实时输入</span></div>
+        <div id="controller"></div>
+        <p id="hint" role="status">连接 USB 或蓝牙手柄后，按任意按键唤醒。请保持此页面在前台。</p>
+        <div class="readouts">
+          <div><span>左摇杆 <small>L3</small></span><output id="left-value">X 0.00 · Y 0.00</output></div>
+          <div><span>右摇杆 <small>R3</small></span><output id="right-value">X 0.00 · Y 0.00</output></div>
+          <div><span>左扳机 <small>LT</small></span><output id="lt-value">0%</output><meter id="lt-meter" min="0" max="1" value="0" aria-label="左扳机压力"></meter></div>
+          <div><span>右扳机 <small>RT</small></span><output id="rt-value">0%</output><meter id="rt-meter" min="0" max="1" value="0" aria-label="右扳机压力"></meter></div>
+        </div>
+      </section>
+      <aside><div class="log-heading"><div><div class="eyebrow">ACTIVITY</div><h2>操作记录 <span id="count">0</span></h2></div><button id="clear" type="button">清空</button></div><p class="log-note">最新操作在上方 · 最多保留 100 条</p><ol id="log" aria-label="手柄操作记录"></ol><p id="empty">等待你的第一个操作…</p></aside>
+    </div>
+    <footer><span>摇杆移动 · 按键高亮 · 扳机压力</span><span>Standard 映射 / Xbox 布局标记</span></footer>
+  </main>
+  <script src="../shared/engine.js"></script>
+  <script type="module" src="./bundle.js"></script>
+</body>
+</html>

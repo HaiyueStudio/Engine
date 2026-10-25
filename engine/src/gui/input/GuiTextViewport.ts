@@ -10,7 +10,7 @@ export class GuiTextViewport {
   clear():void {for(const view of this.affected)setGuiScrollOcclusion(view,0);this.affected.clear();}
   reveal(input:GuiInput,caret:GuiRect,viewport:GuiRect):void {
     const parents:GuiScrollView[]=[];
-    for(let parent=input.parent;parent;parent=parent.parent)if(isGuiControl<GuiScrollView>(parent, 'GuiScrollView'))parents.push(parent);
+    for(let parent=input.parent;parent;parent=parent.parent)if(isGuiControl<GuiScrollView>(parent, 'GuiScrollView') && parent.axis === 'vertical')parents.push(parent);
     for(const old of this.affected)if(!parents.includes(old)){setGuiScrollOcclusion(old,0);this.affected.delete(old);}
     let top=viewport.y,bottom=viewport.y+viewport.height;
     // Outer clips constrain every inner scroll container as well.

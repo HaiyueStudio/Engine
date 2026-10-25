@@ -247,7 +247,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
     case 'color-picker':
       return new GuiColorPicker({ ...base, value: stringProp(props.value, '#2563eb') });
     case 'button':
-      return new GuiButton({ ...base, text: stringProp(props.text, 'Button'), variant: variantProp(props.variant) });
+      return new GuiButton({ ...base, text: stringProp(props.text, 'Button'), variant: variantProp(props.variant), hoverTransition: booleanProp(props.hoverTransition, false), hoverTransitionMs: numberProp(props.hoverTransitionMs, 180) });
     case 'label': {
       const fontSize = optionalNumberProp(props.fontSize);
       return new GuiLabel({
@@ -259,7 +259,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
       });
     }
     case 'scroll-view':
-      return new GuiScrollView({ ...base, contentHeight: numberProp(props.contentHeight, 0), scrollY: numberProp(props.scrollY, 0), showScrollbar: booleanProp(props.showScrollbar, true), inertia: booleanProp(props.inertia, false), inertiaStrength: numberProp(props.inertiaStrength, 1) });
+      return new GuiScrollView({ ...base, axis: props.axis === 'horizontal' ? 'horizontal' : 'vertical', contentWidth: numberProp(props.contentWidth, 0), scrollX: numberProp(props.scrollX, 0), contentHeight: numberProp(props.contentHeight, 0), scrollY: numberProp(props.scrollY, 0), showScrollbar: booleanProp(props.showScrollbar, true), inertia: booleanProp(props.inertia, false), inertiaStrength: numberProp(props.inertiaStrength, 1) });
     case 'help-dialog':
       return new GuiHelpDialog({ ...base, title: stringProp(props.title, ''), message: stringProp(props.message, ''), backdropColor: stringProp(props.backdropColor, 'rgba(15,23,42,0.48)') });
     case 'modal':
@@ -382,7 +382,7 @@ function serializeElementProps(element: GuiElement): Record<string, unknown> {
   if (element instanceof GuiToast) return { text: element.text, iconKey: element.iconKey ?? '',
     iconSize: element.iconSize, fontSize: element.fontSize, durationMs: element.durationMs, animationMs: element.animationMs };
   if (element instanceof GuiColorPicker) return { value: element.value };
-  if (element instanceof GuiScrollView) return { contentHeight: element.contentHeight, scrollY: element.scrollY, showScrollbar: element.showScrollbar, inertia: element.inertia, inertiaStrength: element.inertiaStrength };
+  if (element instanceof GuiScrollView) return { ...(element.axis === 'horizontal' ? { axis: element.axis, contentWidth: element.contentWidth, scrollX: element.scrollX } : {}), contentHeight: element.contentHeight, scrollY: element.scrollY, showScrollbar: element.showScrollbar, inertia: element.inertia, inertiaStrength: element.inertiaStrength };
   if (element instanceof GuiModal) {
     return {
       title: element.title,
@@ -396,7 +396,7 @@ function serializeElementProps(element: GuiElement): Record<string, unknown> {
       backdropColor: element.backdropColor,
     };
   }
-  if (element instanceof GuiButton) return { text: element.text, variant: element.variant };
+  if (element instanceof GuiButton) return { text: element.text, variant: element.variant, hoverTransition: element.hoverTransition, hoverTransitionMs: element.hoverTransitionMs };
   if (element instanceof GuiLabel) {
     return {
       text: element.text,
@@ -556,13 +556,17 @@ const GUI_ELEMENT_TYPES = new Set<GuiSerializedElementType>([
 ]);
 
 const STRING_PROPS = new Set(['iconKey', 'text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId', 'title', 'message', 'confirmText', 'cancelText', 'backdropColor']);
-const NUMBER_PROPS = new Set(['durationMs', 'animationMs', 'iconSize', 'inertiaStrength', 'thumbTransitionMs', 'colorTransitionMs', 'contentHeight', 'scrollY', 'fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
-const BOOLEAN_PROPS = new Set(['inertia', 'showScrollbar', 'autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
+const NUMBER_PROPS = new Set(['contentWidth', 'scrollX', 'hoverTransitionMs', 'durationMs', 'animationMs', 'iconSize', 'inertiaStrength', 'thumbTransitionMs', 'colorTransitionMs', 'contentHeight', 'scrollY', 'fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
+const BOOLEAN_PROPS = new Set(['hoverTransition', 'inertia', 'showScrollbar', 'autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
 
 function validateProps(type: GuiSerializedElementType, value: unknown, path: string): void {
   const props = recordAt(value, path);
   for (const [key, prop] of Object.entries(props)) {
     const propPath = `${path}.${key}`;
+    if(type==='scroll-view'&&key==='axis'){
+      if(prop!=='vertical'&&prop!=='horizontal')invalidGuiData('Unknown GUI scroll axis.',propPath);
+      continue;
+    }
     if(type==='input'&&key==='maxLength'){
       if(typeof prop!=='number'||!Number.isSafeInteger(prop)||prop<0)invalidGuiData('GUI maxLength must be a nonnegative UTF-16 integer.',propPath);
       continue;

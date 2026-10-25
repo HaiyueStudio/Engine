@@ -2296,6 +2296,28 @@
         "group": "assets-ui",
         "order": 104
       }
+    },
+    {
+      "id": "gamepad-input",
+      "title": "Gamepad Input · 手柄实时反馈",
+      "entry": "gamepad-input/main.ts",
+      "capabilities": [
+        "gamepad",
+        "input-actions",
+        "experimental-simulation",
+        "svg"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "interaction",
+        "order": 11
+      }
     }
   ],
   "catalog": {

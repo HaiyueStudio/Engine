@@ -106,3 +106,19 @@ Image tint uses the same picker. Only style fields consumed by each component's
 renderer are offered (for example slider/progress background is the track color).
 See the [color-picker API](../api/gui-controls.md#rgb-color-picker) for events and
 serialization.
+## Horizontal game shelves
+
+`GuiScrollView` accepts `axis: 'horizontal'`, `contentWidth` and `scrollX`. The default
+remains vertical. `scrollTo`, `scrollBy` and fling inertia use the chosen axis;
+`scrollOffset` / `maxScrollOffset` report that axis, while `scrollX` and `scrollY`
+report their actual direction. Horizontal views accept trackpad X and ordinary
+mouse-wheel Y, clip drawing and hits, and cancel card clicks when dragged.
+
+```ts
+const shelf = root.add(new GuiScrollView({
+  axis: 'horizontal', width: 600, height: 150, contentWidth: 1200, inertia: true,
+}));
+for (let index = 0; index < 8; index++) {
+  shelf.add(new GuiButton({ x: index * 150, width: 140, height: 120, text: String(index + 1) }));
+}
+```

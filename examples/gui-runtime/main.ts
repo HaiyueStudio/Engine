@@ -1,7 +1,7 @@
 import { Entity, HaiyueEngine } from '@haiyue/engine';
 import {
   GuiButton, GuiColorPicker, GuiElement, GuiInput, GuiLabel, GuiModal, GuiRoot, GuiScrollView,
-  GuiSelect, GuiSlider, GuiSwitch, GuiToast,
+  GuiSelect, GuiSlider, GuiSwitch, GuiToast, GuiTooltip,
 } from '@haiyue/engine/gui';
 import { createCatalog, defaults, normalize, previewStyle, type Parameter, type Value } from './catalog';
 import {attachGuiLayout} from '@haiyue/extensions/gui-layout';
@@ -242,6 +242,9 @@ async function main(): Promise<void> {
     // GUI dispatch runs after layout. Rebuild at the start of the next frame so
     // new controls receive layout and radio-group registration before drawing.
     engine.on('update', () => {
+      const preview=root.findById('preview-component');
+      const tooltip=preview?.children.find(child=>child instanceof GuiTooltip) as GuiTooltip|undefined;
+      canvas.dataset.playground=JSON.stringify({selected:selected.name,names:catalog.map(item=>item.name),values,preview:preview?.rect,hovered:preview?.hovered,tooltip:tooltip?{active:tooltip.active,rect:tooltip.popupRect,id:tooltip.id,hostId:preview?.id}:null,controls:Object.fromEntries(['param-hoverTransition','param-hoverTransitionMs'].map(id=>[id,root.findById(id)?.rect]))});
       const refresh = pendingRefresh;
       pendingRefresh = null;
       if (refresh === 'layout') layout();

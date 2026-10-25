@@ -20,6 +20,9 @@ import { type GuiButton } from '../components/GuiButton';
 import { type GuiInput } from '../components/GuiInput';
 import { type GuiLabel } from '../components/GuiLabel';
 import { type GuiRadio } from '../components/GuiRadio';
+import {guiButtonHoverAnimating,advanceGuiButtonHover,finishGuiButtonHover} from '../input/GuiButtonHover';
+import type {GuiTooltip} from '../components/GuiTooltip';
+import {guiTooltipPending,advanceGuiTooltip} from '../input/GuiTooltipTiming';
 import { GuiRoot } from '../components/GuiRoot';
 import { type GuiSelect } from '../components/GuiSelect';
 import { GuiFocusManager } from '../input/GuiFocusManager';
@@ -64,6 +67,7 @@ interface PendingGuiWheelEvent {
   x: number;
   y: number;
   deltaY: number;
+  deltaX: number;
 }
 
 interface CachedCanvasRect {
@@ -175,7 +179,7 @@ export class GuiSystem extends System {
   private pressed: GuiElement | null = null;
   private readonly capturedPointers = new Set<number>();
   private scrollGesture: {
-    view: GuiScrollView; pointerId: number; startY: number; startOffset: number; dragging: boolean;
+    view: GuiScrollView; pointerId: number; startPosition: number; startOffset: number; dragging: boolean;
     samples: { time: number; offset: number }[]; lastMove: number; direction: number;
   } | null = null;
   private readonly pointerStates = new Map<number, {pressed: GuiElement | null; hovered: GuiElement | null; scrollGesture: GuiSystem['scrollGesture']; last: PendingGuiPointerEvent}>();
@@ -329,8 +333,8 @@ export class GuiSystem extends System {
 
   /** Demand-rendering hosts should keep requesting frames while this is true. */
   get animating(): boolean {
-    const active = (element: GuiElement): boolean => element.visible && !isGuiLayoutHidden(element) && !element.disabled &&
-      (((isGuiControl<GuiScrollView>(element, 'GuiScrollView') || isGuiControl<GuiSwitch>(element, 'GuiSwitch') || isGuiControl<GuiToast>(element, 'GuiToast')) && element.animating) || element.children.some(active));
+    const active = (element: GuiElement): boolean => element.visible && !isGuiLayoutHidden(element) && (!element.disabled || isGuiControl<GuiTooltip>(element, 'GuiTooltip')) &&
+      (((isGuiControl<GuiScrollView>(element, 'GuiScrollView') || isGuiControl<GuiSwitch>(element, 'GuiSwitch') || isGuiControl<GuiToast>(element, 'GuiToast')) && element.animating) || (isGuiControl<GuiTooltip>(element, 'GuiTooltip') && guiTooltipPending(element)) || (isGuiControl<GuiButton>(element, 'GuiButton') && guiButtonHoverAnimating(element)) || element.children.some(active));
     for (const root of this.renderRoots()) if (active(root.root)) return true;
     return false;
   }
@@ -346,8 +350,12 @@ export class GuiSystem extends System {
     this.motionFrames.set(frame, frame.frameId);
     const advance = (element: GuiElement, parentActive: boolean): void => {
       const active = parentActive && element.visible && !isGuiLayoutHidden(element) && !element.disabled;
-      if (isGuiControl<GuiScrollView>(element, 'GuiScrollView')) {
+      if (isGuiControl<GuiTooltip>(element, 'GuiTooltip')) {
+        advanceGuiTooltip(element,parentActive&&element.visible&&!isGuiLayoutHidden(element));
+      } else if (isGuiControl<GuiScrollView>(element, 'GuiScrollView')) {
         if (active) element.advanceAnimation(delta); else element.stopInertia();
+      } else if (isGuiControl<GuiButton>(element, 'GuiButton')) {
+        if(active)advanceGuiButtonHover(element,delta);else finishGuiButtonHover(element);
       } else if (isGuiControl<GuiSwitch>(element, 'GuiSwitch')) {
         if (active) element.advanceAnimation(delta); else if (element.animating) element.finishAnimation();
       } else if (isGuiControl<GuiToast>(element, 'GuiToast')) {
@@ -369,6 +377,8 @@ export class GuiSystem extends System {
     this.fontEventsCleanup?.(); this.fontEventsCleanup = null;
     for (const root of this.roots) {suspendGuiLayout(root.root); this.walkGui(root.root, element => {
       if (isGuiControl<GuiScrollView>(element, 'GuiScrollView')) element.stopInertia();
+      else if (isGuiControl<GuiTooltip>(element, 'GuiTooltip')) advanceGuiTooltip(element,false);
+      else if (isGuiControl<GuiButton>(element, 'GuiButton')) finishGuiButtonHover(element);
       else if (isGuiControl<GuiSwitch>(element, 'GuiSwitch') && element.animating) element.finishAnimation();
       else if (isGuiControl<GuiToast>(element, 'GuiToast')) element.hide();
     });}
@@ -454,11 +464,12 @@ export class GuiSystem extends System {
     const canvas = this.engine.canvas;
     if (!canvas) return;
     const rect = this.getCachedCanvasRect(canvas);
-    const pending = this.pendingWheelPool.pop() ?? { native: null, x: 0, y: 0, deltaY: 0 };
+    const pending = this.pendingWheelPool.pop() ?? { native: null, x: 0, y: 0, deltaY: 0, deltaX: 0 };
     pending.native = event;
     pending.x = event.clientX - rect.left;
     pending.y = event.clientY - rect.top;
     pending.deltaY = event.deltaY;
+    pending.deltaX = event.deltaX;
     this.pendingWheel.push(pending);
     event.preventDefault();
   };
@@ -613,7 +624,8 @@ export class GuiSystem extends System {
     const gesture = this.scrollGesture;
     if (gesture && native.pointerId !== gesture.pointerId) return;
     if (gesture && (pending.type === 'pointermove' || pending.type === 'pointerup' || pending.type === 'pointercancel')) {
-      if (pending.type === 'pointermove' && (gesture.dragging || Math.abs(pending.y - gesture.startY) > 6)) {
+      const position = gesture.view.axis === 'horizontal' ? pending.x : pending.y;
+      if (pending.type === 'pointermove' && (gesture.dragging || Math.abs(position - gesture.startPosition) > 6)) {
         if (!gesture.dragging) {
           gesture.dragging = true;
           if (this.pressed) this.pressed.handlePointerCancel(this.makeEvent('pointercancel', this.pressed, pending, native));
@@ -621,17 +633,17 @@ export class GuiSystem extends System {
           this.focus.blur();
           this.updateHover(null, pending);
         }
-        gesture.view.scrollTo(gesture.startOffset + gesture.startY - pending.y);
+        gesture.view.scrollTo(gesture.startOffset + gesture.startPosition - position);
         this.sampleScroll(gesture, timestamp);
       }
       if (gesture.dragging) {
         if (pending.type === 'pointerup' || pending.type === 'pointercancel') {
           if (pending.type === 'pointerup') {
-            gesture.view.scrollTo(gesture.startOffset + gesture.startY - pending.y);
+            gesture.view.scrollTo(gesture.startOffset + gesture.startPosition - position);
             this.sampleScroll(gesture, timestamp);
             const first = gesture.samples[0]!, duration = timestamp - first.time;
             if (timestamp - gesture.lastMove <= 100 && duration > 0)
-              gesture.view.fling((gesture.view.scrollY - first.offset) * 1000 / duration);
+              gesture.view.fling((gesture.view.scrollOffset - first.offset) * 1000 / duration);
           } else gesture.view.stopInertia();
           this.scrollGesture = null;
           this.releasePointerCapture(native.pointerId);
@@ -650,8 +662,8 @@ export class GuiSystem extends System {
       const stopping = scroll?.animating ?? false;
       scroll?.stopInertia();
       this.scrollGesture = scroll ? {
-        view: scroll, pointerId: native.pointerId, startY: pending.y, startOffset: scroll.scrollY,
-        dragging: stopping, samples: [{ time: timestamp, offset: scroll.scrollY }], lastMove: timestamp, direction: 0,
+        view: scroll, pointerId: native.pointerId, startPosition: scroll.axis === 'horizontal' ? pending.x : pending.y, startOffset: scroll.scrollOffset,
+        dragging: stopping, samples: [{ time: timestamp, offset: scroll.scrollOffset }], lastMove: timestamp, direction: 0,
       } : null;
       // A tap during momentum only stops the list; it must not toggle the row under the finger.
       if (stopping) { this.pressed = null; this.focus.blur(); this.updateHover(null, pending); return; }
@@ -732,7 +744,7 @@ export class GuiSystem extends System {
 
   private sampleScroll(gesture: NonNullable<GuiSystem['scrollGesture']>, time: number): void {
     const previous = gesture.samples.at(-1)!;
-    const movement = gesture.view.scrollY - previous.offset;
+    const movement = gesture.view.scrollOffset - previous.offset;
     if (movement) {
       const direction = Math.sign(movement);
       if (gesture.direction && direction !== gesture.direction) gesture.samples = [previous];
@@ -741,12 +753,12 @@ export class GuiSystem extends System {
     }
     // Retain a short recent window, including the release pause; do not reuse stale fling speed.
     while (gesture.samples.length > 1 && time - gesture.samples[0]!.time > 100) gesture.samples.shift();
-    if (time > previous.time) gesture.samples.push({ time, offset: gesture.view.scrollY });
-    else previous.offset = gesture.view.scrollY;
+    if (time > previous.time) gesture.samples.push({ time, offset: gesture.view.scrollOffset });
+    else previous.offset = gesture.view.scrollOffset;
   }
 
   private scrollAncestor(element: GuiElement | null): GuiScrollView | null {
-    for (let node=element;node;node=node.parent) if (isGuiControl<GuiScrollView>(node, 'GuiScrollView') && node.maxScrollY>0) return node;
+    for (let node=element;node;node=node.parent) if (isGuiControl<GuiScrollView>(node, 'GuiScrollView') && node.maxScrollOffset>0) return node;
     return null;
   }
 
@@ -761,11 +773,12 @@ export class GuiSystem extends System {
       return;
     }
     let scroll = this.scrollAncestor(hit);
-    const delta = pending.deltaY * (native.deltaMode === 1 ? 16 : native.deltaMode === 2 ? (scroll?.rect.height ?? 1) : 1);
     while (scroll) {
-      const previous = scroll.scrollY;
+      const horizontal = scroll.axis === 'horizontal', extent = horizontal ? scroll.rect.width : scroll.rect.height;
+      const delta = (horizontal ? pending.deltaX || pending.deltaY : pending.deltaY) * (native.deltaMode === 1 ? 16 : native.deltaMode === 2 ? extent : 1);
+      const previous = scroll.scrollOffset;
       scroll.scrollBy(delta);
-      if (scroll.scrollY !== previous) {this.inputConsumed=true;break;}
+      if (scroll.scrollOffset !== previous || scroll.animating) {this.inputConsumed=true;break;}
       scroll = this.scrollAncestor(scroll.parent);
     }
   }
@@ -878,7 +891,7 @@ export class GuiSystem extends System {
   }
   private routeWheel(native: WheelEvent): boolean {
     const point=this.inputPoint(native);if(!point?.inside)return false;
-    this.inputConsumed=false;this.dispatchWheelEvent(null,{native,x:point.x,y:point.y,deltaY:native.deltaY});return this.inputConsumed;
+    this.inputConsumed=false;this.dispatchWheelEvent(null,{native,x:point.x,y:point.y,deltaY:native.deltaY,deltaX:native.deltaX});return this.inputConsumed;
   }
   private validPointerTarget(element:GuiElement): boolean {
     let root=element;
