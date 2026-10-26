@@ -115,7 +115,7 @@ try{
           buttons:lastPad?.buttons.map(button=>button.value)??[],axes:lastPad?.axes??[]});
       if(next!==padPhase){
         check(inputAudit.transitions.length<256,'Too many focus transitions');inputAudit.transitions.push({from:padPhase,to:next,tick:padTick,time:performance.now()});padPhase=next;
-        status.textContent=next==='ready'?'READY: hold A about one second, release; left stick left, right, center. Then Save evidence.':next==='waiting-focus'?'Click the HYA text to focus it; release all controls, then wait for READY.':next==='waiting-controller'?'Connect the controller, release controls and keep HYA text focused.':'Release all buttons and center the sticks; waiting for a neutral start.';
+        status.textContent=next==='ready'?'READY: hold A about one second, release; left stick left, right, center. Then Save evidence.':next==='waiting-focus'?'Press B once and release so Chrome can detect the controller; then click the HYA text and wait for READY.':next==='waiting-controller'?'Chrome has not exposed a controller yet. Press B once, release, then click the HYA text again and wait for READY.':'Release all buttons and center the sticks; waiting for READY. Do not start the A test yet.';
       }
       inputAudit.lastSamples.push({tick:padTick,phase:padPhase,focused,foreground:document.hasFocus(),axes:[...(lastPad?.axes??[])],actions:sample.players[0].actions});
       if(inputAudit.lastSamples.length>32)inputAudit.lastSamples.shift();
@@ -130,5 +130,5 @@ try{
   engine.switchScene(scene);engine.run();
   window.g13Physical={ready:true,snapshot,finishSmoke:()=>{check(smoke,'Smoke completion is not available in manual runs');finish();}};
   status.textContent=profile==='browser-real-ime'?'Click HYA text at (20,180). Ctrl+A, real IME nihao → 你好, then save checkpoint. Begin composition and Esc, save checkpoint. Resize/focus/caret inspection, save checkpoint. Finally Save evidence.':
-    'Click HYA text first; release all controls and wait for READY. Hold A about one second and release; left stick left, right, then center. Save evidence.';
+    'First press B once and release so Chrome can detect the controller. Then click HYA text, release all controls and wait for READY. Only then hold A about one second and release; left stick left, right, then center. Save evidence.';
 }catch(error){finish(error);}
