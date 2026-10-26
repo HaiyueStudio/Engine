@@ -4,7 +4,7 @@ import {tessellateAnimationPath, tessellateVectorStrokePath} from '../../Animati
 import type {RuntimeColor, RuntimePaintSource} from '../../text/parameterized/runtime-types.js';
 import type {ProductionGlyph} from '../../text/production/types.js';
 import type {ProductionLayoutFrame, ProductionLayoutNode} from './types.js';
-import {multiplyLayoutTransforms,identityLayoutTransform} from './ProductionLayoutGeometry.js';
+import {multiplyLayoutTransforms,identityLayoutTransform,layoutRectBounds} from './ProductionLayoutGeometry.js';
 
 type Rect = readonly [number, number, number, number];
 type Affine = readonly [number, number, number, number, number, number];
@@ -60,6 +60,10 @@ export function compileProductionDrawPlan(frames: readonly ProductionLayoutFrame
     // The existing renderer uploads xy+uv floats and the original typed indices.
     geometryBytes += geometry.positions.byteLength * 2 + (geometry.indices?.byteLength ?? 0);
     if (!Number.isSafeInteger(geometryBytes) || geometryBytes > maxGeometryBytes) fail('E_HYA_RUNTIME_LIMIT', '$.draw.geometryBytes', 'draw geometry exceeds the private staging ceiling');
+    // Layout planes have a fixed logical camera. Reject only fully outside
+    // output geometry; sources, resource validation and staging limits remain.
+    // Use actual glyph/stroke bounds, never the layout box (text may overflow).
+    if (!sourceOnly && outsideViewport(geometry,transform,viewport,dpr)) return;
     visuals.push(new AnimationVisual2D({geometry, color, instanceId: 0, nodeId: id, order: order++, localTransform: transform,
       sourceOnly, ...(clip ? {composite: {kind: 'mask', source: clip, mode: 'alpha'}} : {}),
       ...(texture ? {textureHandle: {key: id, get value() {return texture.texture;}, release() {/* The plan owns the acquired lease. */}}, textureAlphaMode: texture.alphaMode, ...(texture.sampling ? {textureSampling: texture.sampling} : {}), requiresTexture: true, uvs: screenUvs(geometry)} : {}),
@@ -158,6 +162,15 @@ function geometryBounds(geometry: Geometry2D): Rect {
   let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
   for (let index = 0; index < geometry.positions.length; index += 2) {left = Math.min(left, geometry.positions[index]!); right = Math.max(right, geometry.positions[index]!); top = Math.min(top, geometry.positions[index + 1]!); bottom = Math.max(bottom, geometry.positions[index + 1]!);}
   return [left, top, Math.max(right - left, 1e-12), Math.max(bottom - top, 1e-12)];
+}
+function outsideViewport(geometry: Geometry2D, transform: Affine, viewport: readonly [number,number], dpr: number): boolean {
+  const local=geometryBounds(geometry),bounds=layoutRectBounds(local,transform);
+  // Cover raster coverage and float32 matrix rounding, including cancellation
+  // between large affine terms. Uncertain bounds conservatively remain drawn.
+  const extent=Math.max(Math.abs(local[0]),Math.abs(local[1]),Math.abs(local[0]+local[2]),Math.abs(local[1]+local[3]),1);
+  const roundoff=(extent*(Math.abs(transform[0])+Math.abs(transform[1])+Math.abs(transform[2])+Math.abs(transform[3]))+Math.abs(transform[4])+Math.abs(transform[5]))*2**-20;
+  const margin=1/dpr+roundoff;
+  return bounds[0]+bounds[2]<-margin || bounds[1]+bounds[3]<-margin || bounds[0]>viewport[0]+margin || bounds[1]>viewport[1]+margin;
 }
 function screenUvs(geometry: Geometry2D): Float32Array {
   const bounds = geometryBounds(geometry), values = new Float32Array(geometry.positions.length);

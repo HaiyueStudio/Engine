@@ -13,6 +13,21 @@ function resources(){const device=createAuditGpuDevice(),texture=device.createTe
 function contains(visual,x,y){const {positions:p,indices}=visual.geometry,ids=indices??Uint32Array.from({length:p.length/2},(_,i)=>i);for(let i=0;i<ids.length;i+=3){const points=[...ids.slice(i,i+3)].map(id=>[p[id*2],p[id*2+1]]),cross=(a,b)=>(b[0]-a[0])*(y-a[1])-(b[1]-a[1])*(x-a[0]),s=points.map((a,j)=>cross(a,points[(j+1)%3]));if(s.every(v=>v>=-1e-6)||s.every(v=>v<=1e-6))return true;}return false;}
 const point=(m,x,y)=>[m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]];
 
+test('layout draw lowering rejects only fully offscreen geometry after the original affine',()=>{
+ const nodes=[node({node:'inside',background:[1,0,0,1]}),node({node:'outside',rect:[220,20,20,20],background:[1,0,0,1]}),node({node:'brought-back',rect:[220,20,20,20],transform:[1,0,0,1,-100,0],background:[1,0,0,1]}),node({node:'rotated',rect:[-25,0,20,20],transform:[0,1,-1,0,100,40],background:[1,0,0,1]}),node({node:'edge',rect:[200.25,0,10,10],background:[1,0,0,1]})];
+ const plan=compileProductionDrawPlan([frame(nodes)]),resized=compileProductionDrawPlan([{...frame(nodes),viewport:[300,100]}]);
+ try{assert.equal(plan.visuals.length,4);assert.ok(!plan.visuals.some(v=>v.nodeId.includes('outside')));assert.equal(resized.visuals.length,5);assert.equal(plan.geometryBytes,resized.geometryBytes,'culling cannot hide staging-budget bytes');}finally{plan.release();resized.release();}
+});
+test('offscreen layout boxes keep overflowing visible glyphs and all clip sources',()=>{
+ const plan=compileProductionDrawPlan([frame([node({rect:[250,20,10,20],text:text([glyph(outline,{transform:[1,0,0,1,-150,0]})]),clipShapes:[{rect:[300,0,10,10],radii:[0,0,0,0]}]}),node({node:'away',rect:[250,20,10,20],background:[1,0,0,1]})])]);
+ try{assert.equal(plan.visuals.length,2);assert.equal(plan.visuals[0].sourceOnly,true);assert.ok(plan.visuals[1].nodeId.includes('/glyph/'));assert.equal(plan.visuals[1].compositeKey,plan.visuals[0].nodeKey);}finally{plan.release();}
+});
+test('offscreen resources and geometry limits are still validated and released',()=>{
+ const value=frame([node({rect:[250,0,10,10],source:{kind:'asset',id:'outside'}})]),r=resources();
+ assert.throws(()=>compileProductionDrawPlan([value]),e=>e.code==='E_HYA_RUNTIME_HOST_PORT');assert.throws(()=>compileProductionDrawPlan([value],r.port,1),e=>e.code==='E_HYA_RUNTIME_LIMIT');
+ const plan=compileProductionDrawPlan([value],r.port);assert.equal(plan.visuals.length,0);assert.equal(r.acquired,2);plan.release();assert.equal(r.released,2);
+});
+
 test('drawable affine composes with the existing full world matrix and preserves uniform tail',()=>{
  const world=Float32Array.from([2,1,.5,0, -1,3,0,0, 0,0,1,0, 7,9,2,1]),local=[1.5,.25,-.75,2,3,-4],target=new Float32Array(20).fill(77);writeAnimationVisualMatrix(target,world,local);
  for(const [x,y]of [[0,0],[1,2],[-3,4]]){const [u,v]=point(local,x,y);const actual=Array.from({length:4},(_,r)=>target[r]*x+target[r+4]*y+target[r+12]),expected=Array.from({length:4},(_,r)=>world[r]*u+world[r+4]*v+world[r+12]);assert.deepEqual(actual,expected);}

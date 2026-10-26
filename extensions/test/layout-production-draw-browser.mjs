@@ -4,7 +4,7 @@ import {RttEngine} from '@haiyue/engine/rtt';
 import {RenderPipeline} from '@haiyue/engine/experimental/renderer';
 import {createRenderFrameContext} from '@haiyue/engine/experimental';
 import {getEngineDiagnosticsSnapshot} from '@haiyue/engine/diagnostics';
-import {ProductionDrawOwner,ProductionTextureOwner,ProductionTexturePending,ProductionResourcePending,ProductionTextOwner,ProductionLayoutOwner,ProductionCompositionOwner,LayoutAssetOwner,createProductionBrowserFontPort} from '@g11/draw-candidate';
+import {ProductionDrawOwner,compileProductionDrawPlan,ProductionTextureOwner,ProductionTexturePending,ProductionResourcePending,ProductionTextOwner,ProductionLayoutOwner,ProductionCompositionOwner,LayoutAssetOwner,createProductionBrowserFontPort} from '@g11/draw-candidate';
 import {parseResponsiveLayoutDocument,parseHyaDataBinding,parseHyaStateMachineV2} from '@g11/format';
 const result=document.querySelector('#result'),dpr=Number(new URLSearchParams(location.search).get('dpr')??1),width=480,height=360,cases=[],captures=[],failures=[],errors=[];
 const point=value=>({unit:'point',value}),check=(value,message)=>{if(!value)throw Error(message)},css=color=>`rgba(${color[0]*255},${color[1]*255},${color[2]*255},${color[3]})`;
@@ -90,6 +90,14 @@ try{
    await compare('g12-reused-storage-pixels-'+frame,expected,{owner:incremental.owner,capture:frame===7});
   }
   cases.push({id:'g12-same-capacity-physical-buffer-reuse',frames:8,initialBuffers,subsequentAllocations:0});await closeDraw(incremental);
+ }
+ for(let phase=0;phase<2;phase++){
+  const nodes=Array.from({length:10000},(_,index)=>({part:'g12-cull',instance:'root',artboard:'main',node:String(index),kind:'leaf',rect:[index%40*12,Math.floor(index/40)*10,10,8],opacity:1,background:[index%7/7,.2,.6,.7],borderWidth:[0,0,0,0],cornerRadius:[0,0,0,0],transform:index%31===0?[1,.1,0,1,phase*8,-100]:[1,0,.1,1,phase*8,0]}));
+  const frame={revision:phase,viewport:[width,height],dpr,instances:[],nodes},full=makeDraw(),culled=makeDraw();
+  // A larger lowering viewport retains every positive output. The reference
+  // then uses the original logical camera and draws the full population.
+  const plan=compileProductionDrawPlan([{...frame,viewport:[100000,100000]}],resources),step=full.owner.preparePlan({},String(phase),()=>({...plan,viewport:frame.viewport}));step.commit();step.finalize?.();full.pipeline.execute(world,0,0);const bytes=await pixels();
+  await commit(culled.owner,frame);culled.pipeline.execute(world,0,0);const expected=reference();expected.context.putImageData(new ImageData(new Uint8ClampedArray(bytes),width*dpr,height*dpr),0,0);await compare('g12-10k-conservative-viewport-full-raster-'+phase,expected,{owner:culled.owner,capture:phase===1});check(culled.owner.stats.retainedGeometryBytes===full.owner.stats.retainedGeometryBytes,'culling hid staging-budget bytes');await closeDraw(full);await closeDraw(culled);
  }
  const variants=[{id:'real-wide',w:240,value:'ABA',lines:['ABA']},{id:'real-narrow',w:150,value:'ABA',lines:['AB','A']},{id:'real-emoji',w:240,value:'A😀B',lines:['A😀B']},{id:'real-rounded-selection',w:240,value:'ABA',lines:['ABA'],selection:true},{id:'real-rtl-alpha',w:150,value:'אבב',lines:['אבב'],style:{direction:'rtl',fontSize:50,lineHeight:60,fills:[{source:{kind:'solid',color:[.2,.4,.6,.5]}}]}},{id:'real-fractional-small',w:100,value:'ABAABAABAABA',lines:['ABAAB','AABAA','BA'],style:{fontSize:24,lineHeight:28.8},origin:[20.25,12.5],opacity:.5},{id:'empty-real-caret',w:150,value:'',lines:[''],caret:true}];
  for(const variant of variants){const doc=structuredClone(documentValue);doc.artboards[0].nodes[1].style.width=point(variant.w);if(variant.origin){doc.artboards[0].nodes[0].style.padding=[point(variant.origin[0]),point(variant.origin[1]),point(0),point(0)];doc.artboards[0].nodes[0].visual={opacity:variant.opacity,clip:true};}
