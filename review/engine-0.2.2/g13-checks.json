@@ -199,7 +199,7 @@
       "currentCandidateQualified": false
     },
     "physicalGamepad": {
-      "status": "awaiting-user-launch-and-visible-page-confirmation",
+      "status": "passed-current-public-package-candidate",
       "readiness": "Initial neutral hardware preparation, original editor focus, explicit green READY before the only A hold; every admission blocker is visible.",
       "packedSampler": {
         "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793025611214/packed-sampler-handoff.json",
@@ -246,7 +246,48 @@
         },
         "requiresAdministrator": false,
         "outputPattern": "artifacts/engine-0.2.2/g13/pad-user-start-70187df-<milliseconds>"
-      }
+      },
+      "raw": {
+        "path": "artifacts/engine-0.2.2/g13/pad-user-start-70187df-1793058584710/result.json",
+        "sha256": "01c563876ed96cc0fb92cf6d19b99812fc3b4075e0a38c9885cdc5ea4f972166"
+      },
+      "assessment": {
+        "path": "artifacts/engine-0.2.2/g13/pad-user-start-70187df-1793058584710/operator-assessment.json",
+        "sha256": "685d8eff7ae7278037598d0e11b0e19631e3fb8d48e6565a335f299f16ef4609"
+      },
+      "operatorConfirmed": true,
+      "observed": {
+        "downCount": 1,
+        "upCount": 1,
+        "holdMilliseconds": 1849.2599999904633,
+        "held": true,
+        "left": true,
+        "right": true,
+        "center": true,
+        "axisValue": 0.000015259021896696368,
+        "axisMin": -0.851621271076524,
+        "axisMax": 0.7011978332188906,
+        "hardware": [
+          {
+            "id": "Xbox 360 Controller (XInput STANDARD GAMEPAD)",
+            "index": 0,
+            "mapping": "standard",
+            "buttons": 17,
+            "axes": 4
+          }
+        ],
+        "axisEvents": 357,
+        "commits": [
+          "AAA",
+          "AA"
+        ],
+        "readySamples": 1601,
+        "sceneActionLeaks": 0,
+        "unarmedGuiControls": 0,
+        "gpuResources": 0,
+        "leases": 0
+      },
+      "physicalInputAccepted": true
     },
     "windowsCorrectness": {
       "status": "passed-predecessor-current-run-pending",
@@ -320,10 +361,10 @@
     "status": "pending",
     "runtimePointerBugResolved": true,
     "realBrowserImePassed": true,
-    "currentCandidateImePending": true
+    "currentCandidateImePending": true,
+    "physicalGamepadPassed": true
   },
   "remaining": [
-    "Prepared physical gamepad workflow and independent raw assessment",
     "Current-package-candidate real browser IME qualification",
     "Physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver",
     "Current-candidate GUI/region/HYA and inherited seven-group rendering/performance evidence",
@@ -367,7 +408,7 @@
     }
   },
   "gamepadHandoffRepair": {
-    "status": "runtime-applied-physical-qualification-pending",
+    "status": "applied-and-physically-qualified",
     "source": "engine/src/input/GamepadInputLayers.ts",
     "permanentRegressionTests": 6,
     "focusedInputTests": 42,
