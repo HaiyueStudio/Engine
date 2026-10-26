@@ -248,14 +248,14 @@
         }
       ],
       "captureRevision": "9fad7accfc51b8d9728c2bdb68f7c746e7e7a857",
-      "assessmentRevision": "1fec2d25af5b9cb85e0e28d4bdfa27f0e441d596",
+      "assessmentRevision": "a6f7f148761009eda750b6b7135dfffff928729a",
       "unchangedSamplerAndBuildHashes": true,
       "unchangedBudgets": true,
       "baselinePromoted": false,
       "pressureAnd10k": "全部保留；压力及 10k 帧率为诊断，不是统一设备 FPS 承诺。GPU 原 5% 对照仍检查全部四组。",
       "evidence": {
-        "path": "artifacts/engine-0.2.2/g12/production-reviewed-20261026/result.json",
-        "sha256": "653508e40ed2f1f9933e95fb5d1d0c7fd3d9ec6e7381b8a1bea8219c3e333ba2"
+        "path": "artifacts/engine-0.2.2/g12/production-reviewed-final-20261026/result.json",
+        "sha256": "88bfe84537f91649ae396f0f7ba8cbcf5ccf5708bbb7bf7dd4eef8119e63b715"
       },
       "powerRestore": {
         "path": "artifacts/engine-0.2.2/g12/production-power-batch-20261026/gpu-power-state.json",
@@ -277,8 +277,8 @@
       ]
     },
     "identityAudit": {
-      "path": "artifacts/engine-0.2.2/g12/batch-evidence-audit.json",
-      "sha256": "600f30a4431ee3f9920d86009599a45345a98de501be9267c477656ed202adec"
+      "path": "artifacts/engine-0.2.2/g12/final-evidence-audit.json",
+      "sha256": "905a720eb0ea0de47dff665089836ddd2e4b988557829f58fbcad0cd18997796"
     }
   },
   "preservedFailures": {
