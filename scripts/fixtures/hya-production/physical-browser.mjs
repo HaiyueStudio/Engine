@@ -11,14 +11,20 @@ const profile=new URLSearchParams(location.search).get('profile'), smoke=new URL
 const canvas=document.querySelector('canvas'), status=document.querySelector('#progress'), result=document.querySelector('#result');
 const check=(v,m)=>{if(!v)throw Error(m);};
 const events=[], commits=[], controls=[], failures=[], snapshots=[], hardware=[], leases=new Set();
-let engine,scene,player,context,sampler,offPad,offUpdate,input,environment,done=false,sequence=1,pending=null,polls=0,padTick=0;
+let engine,scene,player,context,sampler,offPad,offUpdate,input,environment,validationDevice,done=false,sequence=1,pending=null,polls=0,padTick=0;
 const snapshot=()=>({time:performance.now(),data:player?.data.read({part:'data',id:'root'},['label']),display:input?.displayValue,
   composing:input?.isComposing,selection:[input?.selectionAnchor,input?.selectionFocus],focused:scene?.guiSystem.focus.focused===input,
   caret:scene?.guiSystem.getInputPresentation(input),commits:commits.length,viewport:[innerWidth,innerHeight]});
 function finish(error){if(done)return;done=true;if(error)failures.push(String(error.stack??error));void cleanup();}
 async function cleanup(){
-  try{offUpdate?.();offPad?.();sampler?.dispose();player?.dispose();scene?.destroy();await engine?.device.queue.onSubmittedWorkDone();
-    engine?.destroy();await context?.close();
+  const release=async run=>{try{await run();}catch(error){failures.push(String(error.stack??error));}};
+  try{
+    await release(()=>engine?.stop());
+    await release(()=>offUpdate?.());await release(()=>offPad?.());await release(()=>sampler?.dispose());
+    await release(()=>player?.dispose());await release(()=>scene?.destroy());
+    await release(()=>validationDevice?.queue.onSubmittedWorkDone());
+    if(validationDevice)await release(async()=>{const error=await validationDevice.popErrorScope();if(error)throw error;});
+    await release(()=>engine?.destroy());await release(()=>context?.close());
     const resources=engine?getEngineDiagnosticsSnapshot(engine).gpuResources:null;
     check(leases.size===0,'Resource leases remain');check(resources?.totals.resources===0,'Owned GPU resources remain');
     check(document.querySelectorAll('[data-haiyue-text-input]').length===0,'Native browser responder remains');
@@ -34,15 +40,15 @@ for(const type of ['compositionstart','compositionupdate','compositionend','befo
   document.addEventListener(type,event=>{
     if(!event.target?.matches?.('[data-haiyue-text-input]')&&type!=='pointerdown')return;
     if(events.length>=4096){finish(Error('Physical trace exceeded bounded event population'));return;}
-    events.push({type,isTrusted:event.isTrusted,data:event.data??null,inputType:event.inputType??null,key:event.key??null,...snapshot()});
+    events.push({type,isTrusted:event.isTrusted,compositionData:event.data??null,inputType:event.inputType??null,key:event.key??null,...snapshot()});
   },true);
 }
 document.querySelector('#checkpoint').onclick=event=>{
-  if(!event.isTrusted||!player)return;const state=snapshot();snapshots.push(state);
+  if(done||!event.isTrusted||!player)return;const state=snapshot();snapshots.push(state);
   status.textContent='Checkpoint '+snapshots.length+' saved.\n'+JSON.stringify(state,null,2);
 };
 document.querySelector('#finish').onclick=event=>{
-  if(!event.isTrusted||!player)return;
+  if(done||!event.isTrusted||!player)return;
   if(profile==='browser-real-ime'){
     check(events.some(e=>e.type==='compositionstart'&&e.isTrusted),'No trusted real composition start');
     check(events.some(e=>e.type==='compositionend'&&e.isTrusted),'No trusted composition end');
@@ -55,6 +61,7 @@ document.querySelector('#finish').onclick=event=>{
 try{
   engine=new HaiyueEngine({canvas,devicePixelRatio:1,msaaSamples:1,diagnostics:{enabled:true},clearColor:{r:.94,g:.94,b:.94,a:1}});await engine.init();
   const info=engine.adapter.info;environment={userAgent:navigator.userAgent,adapter:{vendor:info.vendor,architecture:info.architecture,description:info.description,device:info.device}};
+  validationDevice=engine.device;validationDevice.pushErrorScope('validation');
   engine.device.addEventListener('uncapturederror',event=>finish(Error(event.error.message)));
   const manifest=await(await fetch('/g13-assets/manifest.json')).json(),bytes=new Map();
   for(const [id,a]of Object.entries(manifest.assets)){
