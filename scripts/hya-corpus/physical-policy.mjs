@@ -1,3 +1,31 @@
+// Chromium queues compositionend through DispatchScopedEvent, bypassing the trusted
+// DispatchEvent path. Bound this observed quirk to the tested native browser only;
+// preserve the raw flag and require its complete trusted start/update/input session.
+// https://raw.githubusercontent.com/chromium/chromium/main/third_party/blink/renderer/core/editing/ime/input_method_controller.cc
+export function validateImeSessions(report) {
+  const errors=[],sessions=[];let active;
+  const chromiumScopedEnd=report.browserEvidence?.product==='Chrome/155.0.8059.85'
+    &&report.browserEvidence.nativeBackend===true&&report.browserEvidence.presentationMode==='visible-window';
+  for(const event of report.events??[]){
+    if(event.type==='compositionstart'){
+      if(active)errors.push('Overlapping real composition sessions.');
+      active={responder:event.responder,trusted:event.isTrusted===true,updates:0,inputs:0};
+      if(!active.trusted||!active.responder)errors.push('Composition must begin on a trusted original responder.');
+    }else if(active&&event.responder===active.responder){
+      if(event.type==='compositionupdate'&&event.isTrusted===true)active.updates++;
+      if(event.type==='beforeinput'&&event.isTrusted===true&&event.inputType==='insertCompositionText')active.inputs++;
+      if(event.type==='compositionend'){
+        if(!(event.isTrusted===true||chromiumScopedEnd&&event.isTrusted===false)||!active.updates||!active.inputs)
+          errors.push('Composition end requires a complete trusted native session.');
+        sessions.push({...active,data:event.compositionData,endTrusted:event.isTrusted});active=undefined;
+      }
+    }else if(event.type==='compositionend')errors.push('Composition ended without the same original responder.');
+  }
+  if(active)errors.push('Unfinished composition session.');
+  if(sessions.length<2||!sessions.some(s=>s.data==='你好')||!sessions.some(s=>s.data===''))errors.push('Real commit and cancellation sessions are both required.');
+  return errors;
+}
+
 /** Hardware assertions supplement, and never replace, the operator's real-device confirmation. */
 export function validatePhysicalEvidence(report, confirmation) {
   const errors=[];
@@ -7,9 +35,7 @@ export function validatePhysicalEvidence(report, confirmation) {
   if(report?.leases!==0||report.resources?.totals?.resources!==0)errors.push('Input run must release all owned resources.');
   if(report.profile==='browser-real-ime'){
     const events=report.events??[],commits=report.commits??[],snapshots=report.snapshots??[];
-    for(const type of ['compositionstart','compositionupdate','compositionend'])
-      if(!events.some(e=>e.type===type&&e.isTrusted===true))errors.push('Missing real trusted '+type);
-    if(events.filter(e=>e.type==='compositionstart'&&e.isTrusted).length<2)errors.push('Commit and cancellation must each use real composition.');
+    errors.push(...validateImeSessions(report));
     if(!events.some(e=>e.type==='keydown'&&e.key==='Escape'&&e.isTrusted))errors.push('Missing real cancellation key.');
     if(commits.filter(c=>c.data==='你好').length!==1||commits.some(c=>c.data!=='你好'))errors.push('Expected exactly one committed 你好 and no cancellation commit.');
     if(snapshots.length<3||snapshots.some(s=>s.data!=='你好'||s.composing))errors.push('Commit, cancel and resize checkpoints must retain the committed value.');

@@ -41,6 +41,7 @@ for(const type of ['compositionstart','compositionupdate','compositionend','befo
     if(!event.target?.matches?.('[data-haiyue-text-input]')&&type!=='pointerdown')return;
     if(events.length>=4096){finish(Error('Physical trace exceeded bounded event population'));return;}
     events.push({type,isTrusted:event.isTrusted,compositionData:event.data??null,inputType:event.inputType??null,key:event.key??null,
+      responder:event.target?.dataset?.haiyueTextInput??null,nativeComposing:event.isComposing??null,keyCode:event.keyCode??null,
       button:event.button??null,buttons:event.buttons??null,...snapshot()});
   },true);
 }
@@ -50,13 +51,8 @@ document.querySelector('#checkpoint').onclick=event=>{
 };
 document.querySelector('#finish').onclick=event=>{
   if(done||!event.isTrusted||!player)return;
-  if(profile==='browser-real-ime'){
-    check(events.some(e=>e.type==='compositionstart'&&e.isTrusted),'No trusted real composition start');
-    check(events.some(e=>e.type==='compositionend'&&e.isTrusted),'No trusted composition end');
-    check(commits.some(e=>e.data==='你好'),'No committed 你好');
-    check(snapshots.length>=3,'Save commit/cancel/resize checkpoints first');
-  }else check(controls.some(e=>e.control==='button:0'&&e.phase==='down')&&controls.some(e=>e.control==='button:0'&&e.phase==='up')
-    &&controls.some(e=>e.control==='axis:0'&&e.value<=-.5)&&controls.some(e=>e.control==='axis:0'&&e.value>=.5),'Physical button and axis workflow incomplete');
+  // Always transfer the raw run. The independent physical policy performs admission.
+  // Throwing here would make the shared browser error handler discard the event population.
   snapshots.push(snapshot());finish();
 };
 try{
