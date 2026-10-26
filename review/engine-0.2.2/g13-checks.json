@@ -77,12 +77,12 @@
         }
       },
       "physicalFixtureFollowup": {
-        "revision": "e8d7a91",
+        "revision": "7a4b6d9",
         "runtimeAndBuildInputsUnchanged": true,
-        "releasePolicyTests": 147,
+        "releasePolicyTests": 148,
         "proof": {
-          "path": "artifacts/engine-0.2.2/g13/release-policy-live-progress.log",
-          "sha256": "e72b0b32ad7835e0e80c5fcbdcfccb0d1a8151c4001eb574ebed0e9eaefd7447"
+          "path": "artifacts/engine-0.2.2/g13/release-policy-explicit-readiness.log",
+          "sha256": "8034b205ce62470959b916cda819c1e990fd8424b6de9fd7cec4de1971c27aa5"
         }
       }
     },
@@ -114,10 +114,10 @@
     },
     "releaseRecovery": {
       "status": "passed-complete-release-policy-suite",
-      "tests": 147,
+      "tests": 148,
       "proof": {
-        "path": "artifacts/engine-0.2.2/g13/release-policy-live-progress.log",
-        "sha256": "e72b0b32ad7835e0e80c5fcbdcfccb0d1a8151c4001eb574ebed0e9eaefd7447"
+        "path": "artifacts/engine-0.2.2/g13/release-policy-explicit-readiness.log",
+        "sha256": "8034b205ce62470959b916cda819c1e990fd8424b6de9fd7cec4de1971c27aa5"
       },
       "externalPublicationExecuted": false
     },
@@ -199,9 +199,9 @@
       "currentCandidateQualified": false
     },
     "physicalGamepad": {
-      "status": "awaiting-operator-live-coverage",
-      "rawOutput": "artifacts/engine-0.2.2/g13/pad-manual-70187df-live",
-      "readiness": "Controller detection and neutral hardware first; only then expose the original HYA editor for focus and READY.",
+      "status": "awaiting-operator-explicit-readiness",
+      "rawOutput": "artifacts/engine-0.2.2/g13/pad-manual-70187df-explicit-ready",
+      "readiness": "Initial neutral hardware preparation, original editor focus, explicit green READY before the only A hold; every admission blocker is visible.",
       "packedSampler": {
         "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793025611214/packed-sampler-handoff.json",
         "sha256": "ed58748808fc0fc99a0a3075a54ecaad3ae8860f81070692f0a7827915a438bb"
@@ -224,7 +224,16 @@
         "leftMaximum": -0.5,
         "rightMinimum": 0.5,
         "centerAbsoluteMaximum": 0.15,
-        "originalThresholdsUnchanged": true
+        "originalThresholdsUnchanged": true,
+        "positive": {
+          "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793030393145/result.json",
+          "sha256": "ee05b464795acbb5e62de148f197ad12d08b8b710d63d87194235aeb56f2ac6d"
+        },
+        "negative": {
+          "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793030399626/result.json",
+          "sha256": "c9715e87b3efe38b91476df95944b9ab0df6b47f8f253f18b883eef3e73e5195"
+        },
+        "neutralPreparationAndUnarmedCounterUnchanged": true
       }
     },
     "windowsCorrectness": {
@@ -284,6 +293,10 @@
     "gamepadRightAxisBelowThreshold": {
       "path": "artifacts/engine-0.2.2/g13/pad-manual-70187df-prepared/operator-assessment.json",
       "sha256": "5012549c3b310872e686a956bd7415736f7f72280fea48500c4de56ddffa1f3e"
+    },
+    "gamepadAllMovementsBeforeReady": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-70187df-live/operator-assessment.json",
+      "sha256": "844a8c4eeb77a160f8ff68c6959e5a7bc5528a3d8741d6b5dcaf94c90dff2fa1"
     }
   },
   "currentBlocker": {
