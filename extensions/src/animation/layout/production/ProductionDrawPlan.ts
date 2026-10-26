@@ -5,6 +5,7 @@ import type {RuntimeColor, RuntimePaintSource} from '../../text/parameterized/ru
 import type {ProductionGlyph} from '../../text/production/types.js';
 import type {ProductionLayoutFrame, ProductionLayoutNode} from './types.js';
 import {multiplyLayoutTransforms,identityLayoutTransform,layoutRectBounds} from './ProductionLayoutGeometry.js';
+import {batchProductionDrawVisuals} from './ProductionDrawBatch.js';
 
 type Rect = readonly [number, number, number, number];
 type Affine = readonly [number, number, number, number, number, number];
@@ -24,6 +25,7 @@ export interface ProductionDrawPlan {
   readonly viewport: readonly [number, number]; readonly dpr: number;
   readonly maskSources?: readonly string[];
   readonly visuals: readonly AnimationVisual2D[]; readonly geometryBytes: number;
+  readonly batching?: Readonly<{sourceVisuals: number; drawVisuals: number; additionalGeometryBytes: number}>;
   assertReady(): void;
   release(): void;
 }
@@ -137,7 +139,10 @@ export function compileProductionDrawPlan(frames: readonly ProductionLayoutFrame
       for(const[index,r]of (node.text?.presentation?.composition??[]).entries())box('/composition/'+index,[node.rect[0]+r[0],node.rect[1]+r[1],r[2],r[3]],[0.2,0.4,1,1]);
       control('cursor');
     }
-    return Object.freeze({viewport, dpr, visuals: Object.freeze(visuals), geometryBytes, release, assertReady() {
+    const batched=batchProductionDrawVisuals(visuals,maxGeometryBytes-geometryBytes);
+    const batching=Object.freeze({sourceVisuals:visuals.length,drawVisuals:batched.visuals.length,additionalGeometryBytes:batched.additionalBytes});
+    geometryBytes+=batched.additionalBytes;
+    return Object.freeze({viewport, dpr, visuals: batched.visuals, geometryBytes, batching, release, assertReady() {
       if (released) fail('E_HYA_RUNTIME_DISPOSED', '$.draw', 'draw plan resources were released');
       for (const resource of leases) if (!resource.texture) fail('E_HYA_RUNTIME_HOST_PORT', '$.draw.textures', 'a required texture is not ready');
     }});

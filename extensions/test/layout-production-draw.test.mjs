@@ -13,10 +13,33 @@ function resources(){const device=createAuditGpuDevice(),texture=device.createTe
 function contains(visual,x,y){const {positions:p,indices}=visual.geometry,ids=indices??Uint32Array.from({length:p.length/2},(_,i)=>i);for(let i=0;i<ids.length;i+=3){const points=[...ids.slice(i,i+3)].map(id=>[p[id*2],p[id*2+1]]),cross=(a,b)=>(b[0]-a[0])*(y-a[1])-(b[1]-a[1])*(x-a[0]),s=points.map((a,j)=>cross(a,points[(j+1)%3]));if(s.every(v=>v>=-1e-6)||s.every(v=>v<=1e-6))return true;}return false;}
 const point=(m,x,y)=>[m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]];
 
+test('adjacent equal solids batch without moving a separated painter-order item',()=>{
+ const red=[1,0,0,.5],blue=[0,0,1,.5],value=frame([node({node:'a',background:red}),node({node:'b',rect:[30,20,40,30],background:red}),node({node:'c',background:blue}),node({node:'d',background:red})]),plan=compileProductionDrawPlan([value]);
+ try{assert.equal(plan.batching.sourceVisuals,4);assert.equal(plan.visuals.length,3);assert.equal(plan.visuals[0].geometry.indices.length,12);assert.deepEqual(JSON.parse(plan.visuals[0].nodeId.slice('$batch:'.length)),['["layout","root","a"]/background','["layout","root","b"]/background']);assert.deepEqual(plan.visuals[1].color,blue);assert.deepEqual(plan.visuals[2].color,red);assert.ok(contains(plan.visuals[0],15,25));assert.ok(contains(plan.visuals[0],65,25));}finally{plan.release();}
+});
+test('batch geometry remains inside the original staging guard and falls back at its exact boundary',()=>{
+ const value=frame([node({node:'a',background:[1,0,0,1]}),node({node:'b',background:[1,0,0,1]})]),plan=compileProductionDrawPlan([value]),sourceBytes=plan.geometryBytes-plan.batching.additionalGeometryBytes;
+ try{assert.equal(plan.visuals.length,1);assert.ok(plan.batching.additionalGeometryBytes>0);const tight=compileProductionDrawPlan([value],undefined,sourceBytes);try{assert.equal(tight.visuals.length,2);assert.equal(tight.geometryBytes,sourceBytes);assert.equal(tight.batching.additionalGeometryBytes,0);}finally{tight.release();}assert.throws(()=>compileProductionDrawPlan([value],undefined,sourceBytes-1),e=>e.code==='E_HYA_RUNTIME_LIMIT');}finally{plan.release();}
+});
+test('mask sources, image sampling and gradients retain their independent draw paths',()=>{
+ const r=resources(),images=compileProductionDrawPlan([frame([node({node:'a',source:{kind:'asset',id:'x'}}),node({node:'b',source:{kind:'asset',id:'x'}})])],r.port);
+ try{assert.equal(images.visuals.length,2);assert.equal(images.batching.additionalGeometryBytes,0);}finally{images.release();}assert.equal(r.released,1);
+ const masked=compileProductionDrawPlan([frame([node({node:'a',background:[1,0,0,1],clipShapes:[{rect:[0,0,90,90],radii:[1,1,1,1]}]}),node({node:'b',background:[1,0,0,1],clipShapes:[{rect:[1,0,90,90],radii:[1,1,1,1]}]})])]);try{assert.equal(masked.visuals.filter(v=>v.sourceOnly).length,2);assert.equal(masked.visuals.length,4);}finally{masked.release();}
+ const gradient={...style,fills:[{source:{kind:'linear-gradient',start:[0,0],end:[1,0],stops:[{offset:0,color:[1,0,0,1]},{offset:1,color:[0,1,0,1]}]}}]},painted=compileProductionDrawPlan([frame([node({text:text([glyph(outline),glyph(outline)],{runs:[{font:'f',style:gradient,glyphs:[glyph(outline),glyph(outline)]}]})})])]);try{assert.equal(painted.visuals.length,2);assert.equal(painted.batching.additionalGeometryBytes,0);}finally{painted.release();}
+});
+test('rotated solids retain the original model while axis-aligned fractional placement batches',()=>{
+ const values=[node({node:'a',background:[1,0,0,1],transform:[.5,0,0,.5,.25,.5]}),node({node:'b',background:[1,0,0,1],transform:[.5,0,0,.5,20.25,.5]})],plan=compileProductionDrawPlan([frame(values)]),rotated=compileProductionDrawPlan([frame(values.map(v=>({...v,transform:[0,1,-1,0,100,0]})))]);
+ try{assert.equal(plan.visuals.length,1);assert.ok(contains(plan.visuals[0],10,15));assert.ok(contains(plan.visuals[0],30,15));assert.equal(rotated.visuals.length,2);}finally{plan.release();rotated.release();}
+});
+test('large adjacent runs split before overflowing uint16 indices and keep every triangle',()=>{
+ const count=16384,plan=compileProductionDrawPlan([frame(Array.from({length:count},(_,index)=>node({node:String(index),background:[1,0,0,1]})))]);
+ try{assert.equal(plan.visuals.length,2);assert.equal(plan.visuals.reduce((sum,v)=>sum+v.geometry.indices.length,0),count*6);for(const visual of plan.visuals)assert.ok(visual.geometry.indices.every(index=>index<visual.geometry.vertexCount));}finally{plan.release();}
+});
+
 test('layout draw lowering rejects only fully offscreen geometry after the original affine',()=>{
  const nodes=[node({node:'inside',background:[1,0,0,1]}),node({node:'outside',rect:[220,20,20,20],background:[1,0,0,1]}),node({node:'brought-back',rect:[220,20,20,20],transform:[1,0,0,1,-100,0],background:[1,0,0,1]}),node({node:'rotated',rect:[-25,0,20,20],transform:[0,1,-1,0,100,40],background:[1,0,0,1]}),node({node:'edge',rect:[200.25,0,10,10],background:[1,0,0,1]})];
  const plan=compileProductionDrawPlan([frame(nodes)]),resized=compileProductionDrawPlan([{...frame(nodes),viewport:[300,100]}]);
- try{assert.equal(plan.visuals.length,4);assert.ok(!plan.visuals.some(v=>v.nodeId.includes('outside')));assert.equal(resized.visuals.length,5);assert.equal(plan.geometryBytes,resized.geometryBytes,'culling cannot hide staging-budget bytes');}finally{plan.release();resized.release();}
+ try{assert.equal(plan.batching.sourceVisuals,4);assert.ok(!plan.visuals.some(v=>v.nodeId.includes('outside')));assert.equal(resized.batching.sourceVisuals,5);assert.equal(plan.geometryBytes-plan.batching.additionalGeometryBytes,resized.geometryBytes-resized.batching.additionalGeometryBytes,'culling cannot hide original staging-budget bytes');}finally{plan.release();resized.release();}
 });
 test('offscreen layout boxes keep overflowing visible glyphs and all clip sources',()=>{
  const plan=compileProductionDrawPlan([frame([node({rect:[250,20,10,20],text:text([glyph(outline,{transform:[1,0,0,1,-150,0]})]),clipShapes:[{rect:[300,0,10,10],radii:[0,0,0,0]}]}),node({node:'away',rect:[250,20,10,20],background:[1,0,0,1]})])]);

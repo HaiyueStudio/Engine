@@ -4,7 +4,7 @@ import {RttEngine} from '@haiyue/engine/rtt';
 import {RenderPipeline} from '@haiyue/engine/experimental/renderer';
 import {createRenderFrameContext} from '@haiyue/engine/experimental';
 import {getEngineDiagnosticsSnapshot} from '@haiyue/engine/diagnostics';
-import {ProductionDrawOwner,compileProductionDrawPlan,ProductionTextureOwner,ProductionTexturePending,ProductionResourcePending,ProductionTextOwner,ProductionLayoutOwner,ProductionCompositionOwner,LayoutAssetOwner,createProductionBrowserFontPort} from '@g11/draw-candidate';
+import {ProductionDrawOwner,compileProductionDrawPlan,ProductionTextureOwner,ProductionTexturePending,ProductionResourcePending,ProductionTextOwner,ProductionLayoutOwner,ProductionCompositionOwner,LayoutAssetOwner,createProductionBrowserFontPort,createProductionOutlineFontPort} from '@g11/draw-candidate';
 import {parseResponsiveLayoutDocument,parseHyaDataBinding,parseHyaStateMachineV2} from '@g11/format';
 const result=document.querySelector('#result'),dpr=Number(new URLSearchParams(location.search).get('dpr')??1),width=480,height=360,cases=[],captures=[],failures=[],errors=[];
 const point=value=>({unit:'point',value}),check=(value,message)=>{if(!value)throw Error(message)},css=color=>`rgba(${color[0]*255},${color[1]*255},${color[2]*255},${color[3]})`;
@@ -91,6 +91,15 @@ try{
   }
   cases.push({id:'g12-same-capacity-physical-buffer-reuse',frames:8,initialBuffers,subsequentAllocations:0});await closeDraw(incremental);
  }
+ async function compareBatched(id,frame){
+  const candidate=makeDraw(),referenceDraw=makeDraw(),prepared=compileProductionDrawPlan([frame],resources),sourceBytes=prepared.geometryBytes-prepared.batching.additionalGeometryBytes,original=compileProductionDrawPlan([frame],resources,sourceBytes);check(prepared.batching.drawVisuals<prepared.batching.sourceVisuals,'Batch pixel comparison did not actually batch');check(original.batching.additionalGeometryBytes===0,'Reference did not retain original unbatched draws');
+  const stage=(owner,plan)=>{const step=owner.preparePlan({},id,()=>plan);step.commit();step.finalize?.();};stage(referenceDraw.owner,original);referenceDraw.pipeline.execute(world,0,0);const bytes=await pixels();stage(candidate.owner,prepared);candidate.pipeline.execute(world,0,0);const expected=reference();expected.context.putImageData(new ImageData(new Uint8ClampedArray(bytes),width*dpr,height*dpr),0,0);await compare(id,expected,{owner:candidate.owner,capture:true});Object.assign(cases.at(-1),{originalVisuals:prepared.batching.sourceVisuals,batchedVisuals:prepared.batching.drawVisuals,additionalStagingBytes:prepared.batching.additionalGeometryBytes});await closeDraw(candidate);await closeDraw(referenceDraw);
+ }
+ for(let phase=0;phase<2;phase++){
+  const frame={revision:phase,viewport:[width,height],dpr,instances:[],nodes:Array.from({length:12},(_,index)=>({part:'g12-batch',instance:'root',artboard:'main',node:String(index),kind:'leaf',rect:[12+index*13,20+index*3,40,28],opacity:1,background:[.2,.4,.7,.35],borderWidth:[0,0,0,0],cornerRadius:[0,0,0,0],transform:[phase?.5:1,0,0,phase?.5:1,.25,.5]}))};await compareBatched('g12-adjacent-alpha-solids-unbatched-reference-'+phase,frame);
+ }
+ const outlineText=new ProductionTextOwner(documentValue,createProductionOutlineFontPort(assets));await outlineText.prepare();const outlineLayout=new ProductionLayoutOwner(documentValue,outlineText);
+ try{for(const [index,value]of ['ABA','A😀B'].entries()){const frame=outlineLayout.evaluate({viewport:[width,height],dpr,time:0,strings:{value},styles:{body:{fontSize:48,lineHeight:58}}});await compareBatched('g12-real-outline-batch-unbatched-reference-'+index,frame);}}finally{outlineLayout.dispose();outlineText.dispose();}
  for(let phase=0;phase<2;phase++){
   const nodes=Array.from({length:10000},(_,index)=>({part:'g12-cull',instance:'root',artboard:'main',node:String(index),kind:'leaf',rect:[index%40*12,Math.floor(index/40)*10,10,8],opacity:1,background:[index%7/7,.2,.6,.7],borderWidth:[0,0,0,0],cornerRadius:[0,0,0,0],transform:index%31===0?[1,.1,0,1,phase*8,-100]:[1,0,.1,1,phase*8,0]}));
   const frame={revision:phase,viewport:[width,height],dpr,instances:[],nodes},full=makeDraw(),culled=makeDraw();
