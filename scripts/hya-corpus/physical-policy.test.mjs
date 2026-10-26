@@ -11,7 +11,7 @@ function ime(){return{...base,profile:'browser-real-ime',events:['你好',''].fl
   {type:'compositionend',isTrusted:true,responder:'1',compositionData},
  ]),
   commits:[{data:'你好'}],snapshots:[0,0,1].map(n=>({data:'你好',composing:false,viewport:[800+n*100,600]}))};}
-function pad(){return{...base,profile:'physical-gamepad',polls:100,hardware:[{id:'Physical controller',buttons:16,axes:4}],commits:[{data:'AAA'},{data:'AA'}],controls:[
+function pad(){return{...base,profile:'physical-gamepad',polls:100,inputAudit:{readySamples:100,sceneActionLeaks:0,unarmedGuiControls:0},hardware:[{id:'Physical controller',buttons:16,axes:4}],commits:[{data:'AAA'},{data:'AA'}],controls:[
   {control:'button:0',phase:'down',time:100},{control:'button:0',phase:'up',time:1000},
   ...[-1,1,0].map(value=>({control:'axis:0',phase:'change',value}))]};}
 test('smoke, missing operator or stale bytes cannot become physical acceptance',()=>{
@@ -52,7 +52,8 @@ test('IME requires trusted commit/cancel, exactly one data commit and real resiz
 });
 test('gamepad requires hardware, actual hold duration, no repeats and centered axis',()=>{
   assert.deepEqual(validatePhysicalEvidence(pad(),confirmation),[]);
-  for(const mutate of [r=>r.hardware=[],r=>r.controls[1].time=200,r=>r.controls.push({...r.controls[0]}),r=>r.controls.pop(),r=>r.commits.push({data:'AA'})]){
+  for(const mutate of [r=>r.hardware=[],r=>r.controls[1].time=200,r=>r.controls.push({...r.controls[0]}),r=>r.controls.pop(),r=>r.commits.push({data:'AA'}),
+    r=>r.inputAudit.readySamples=0,r=>r.inputAudit.sceneActionLeaks=1,r=>r.inputAudit.unarmedGuiControls=1]){
     const r=pad();mutate(r);assert.ok(validatePhysicalEvidence(r,confirmation).length);
   }
 });

@@ -16,7 +16,7 @@ const assetRoot=resolve(root,'../Native/examples/hya-production/src/assets'),ass
 for(const file of ['manifest.json','scene.json','scene-sans.otf','FONT-LICENSE.txt','image.png','alternate.png','tone.wav'])copyFileSync(resolve(assetRoot,file),resolve(assets,file));
 const html=resolve(out,'fixture.html');writeFileSync(html,'<!doctype html><meta charset="utf-8"><title>G13 HYA physical input</title><style>body{font:16px system-ui;background:#f0f0f0}canvas{width:480px;height:360px;border:1px solid #789}#progress{white-space:pre-wrap;max-width:700px;height:48px;overflow:auto}#result{font-size:10px}</style><h2>G13 HYA '+profile+'</h2><p id="progress">Preparing…</p><canvas width="480" height="360"></canvas><p><button id="checkpoint">Save checkpoint</button> <button id="finish">Save evidence</button></p><pre id="result"></pre><script type="importmap">'+JSON.stringify({imports:staged.imports})+'</script><script type="module" src="/scripts/fixtures/hya-production/physical-browser.mjs"></script>');
 const mounts=[staged.mount,{prefix:'/g13-assets',directory:assets}];
-const sourceInputs=snapshotSourceInputs(root,['scripts/hya-corpus/qualify-physical.mjs','scripts/fixtures/hya-production/physical-browser.mjs']);
+const sourceInputs=snapshotSourceInputs(root,['scripts/hya-corpus/qualify-physical.mjs','scripts/fixtures/hya-production/physical-browser.mjs','scripts/hya-corpus/physical-gamepad-readiness.mjs']);
 let result;
 try{result=await runChromeWebGpuFixture({root,fixture:relative(root,html).replaceAll('\\','/'),query:{profile,...(smoke?{smoke:'1'}:{})},mounts,
   timeoutMs:smoke?90000:900000,presentation:smoke?null:{mode:'visible',width:1000,height:850},

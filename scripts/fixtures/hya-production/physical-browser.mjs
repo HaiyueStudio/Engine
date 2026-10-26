@@ -6,12 +6,15 @@ import {getSceneRenderPipeline} from '@haiyue/engine/experimental';
 import {beginRenderCommandPass} from '@haiyue/engine/extension-authoring';
 import {createHyaPlayer} from '@haiyue/extensions/hya-player';
 import {createBrowserHyaAudioHost} from '@haiyue/extensions/hya-audio';
+import {physicalGamepadReadiness} from '../../hya-corpus/physical-gamepad-readiness.mjs';
 
 const profile=new URLSearchParams(location.search).get('profile'), smoke=new URLSearchParams(location.search).has('smoke');
 const canvas=document.querySelector('canvas'), status=document.querySelector('#progress'), result=document.querySelector('#result');
 const check=(v,m)=>{if(!v)throw Error(m);};
 const events=[], commits=[], pendingCommitSnapshots=[], controls=[], failures=[], snapshots=[], hardware=[], leases=new Set();
 let engine,scene,player,context,sampler,offPad,offUpdate,input,environment,validationDevice,done=false,sequence=1,pending=null,polls=0,padTick=0;
+let lastPad=null,padPhase='waiting-focus';
+const inputAudit={readySamples:0,sceneActionLeaks:0,unarmedGuiControls:0,transitions:[],lastSamples:[]};
 const snapshot=()=>({time:performance.now(),data:player?.data.read({part:'data',id:'root'},['label']),display:input?.displayValue,
   composing:input?.isComposing,selection:[input?.selectionAnchor,input?.selectionFocus],focused:scene?.guiSystem.focus.focused===input,
   caret:scene?.guiSystem.getInputPresentation(input),commits:commits.length,viewport:[innerWidth,innerHeight]});
@@ -29,7 +32,7 @@ async function cleanup(){
     check(leases.size===0,'Resource leases remain');check(resources?.totals.resources===0,'Owned GPU resources remain');
     check(document.querySelectorAll('[data-haiyue-text-input]').length===0,'Native browser responder remains');
     result.textContent=JSON.stringify({status:failures.length?'failed':smoke?'setup-only':'awaiting-operator-confirmation',profile,
-      smoke,events,commits,controls,snapshots,failures,polls,hardware,resources,leases:leases.size,
+      smoke,events,commits,controls,snapshots,failures,polls,hardware,resources,leases:leases.size,inputAudit,
       physicalInputAccepted:false,environment});
     result.dataset.status=failures.length?'failed':'passed';
   }catch(error){result.textContent=JSON.stringify({status:'failed',error:String(error.stack??error),events,commits,controls,failures});result.dataset.status='failed';}
@@ -82,7 +85,7 @@ try{
     return{value:bytes.get(id).slice(),generation:1,bytes:a.bytes,release(){leases.delete(lease);}};}};
   context=new AudioContext();const audio=await createBrowserHyaAudioHost(context);
   const pendingControls=[];
-  const actions={begin(){pendingControls.length=0;},invoke(action,event){pendingControls.push({port:action.port,target:event.target,...event.gamepad,time:performance.now()});},
+  const actions={begin(){pendingControls.length=0;},invoke(action,event){if(profile==='physical-gamepad'&&padPhase!=='ready')inputAudit.unarmedGuiControls++;pendingControls.push({port:action.port,target:event.target,...event.gamepad,time:performance.now()});},
     commit(){controls.push(...pendingControls);pendingControls.length=0;},rollback(){pendingControls.length=0;}};
   scene=engine.createScene({name:'G13 actual packed seven-part input',render3D:false,render2D:false,
     gui:{loadOp:'load',textInputHost:'browser'},view:{clearColor:{r:.94,g:.94,b:.94,a:1}}});
@@ -90,7 +93,7 @@ try{
     {order:-1,pass:'isolated',loadOp:'clear',depth:false});
   const root=new GuiRoot();scene.add(new Entity('G13 input root').addComponent(root));
   if(profile==='physical-gamepad'){
-    sampler=new BrowserMultiplayerInput({getGamepads:()=>{polls++;const pads=navigator.getGamepads();for(const pad of pads)if(pad?.connected&&!hardware.some(h=>h.index===pad.index&&h.id===pad.id)){check(hardware.length<16,'Too many hardware identities');hardware.push({id:pad.id,index:pad.index,mapping:pad.mapping,buttons:pad.buttons.length,axes:pad.axes.length});}return pads;},players:[{id:'scene',gamepadIndex:0,
+    sampler=new BrowserMultiplayerInput({getGamepads:()=>{polls++;const pads=navigator.getGamepads();lastPad=pads[0]??null;for(const pad of pads)if(pad?.connected&&!hardware.some(h=>h.index===pad.index&&h.id===pad.id)){check(hardware.length<16,'Too many hardware identities');hardware.push({id:pad.id,index:pad.index,mapping:pad.mapping,buttons:pad.buttons.length,axes:pad.axes.length});}return pads;},players:[{id:'scene',gamepadIndex:0,
       bindings:{jump:{gamepadButtons:[0]},move:{gamepadAxes:[{axis:0,deadZone:.001}]}}}]});
     offPad=scene.guiSystem.attachGamepadInput(sampler);
   }
@@ -105,11 +108,20 @@ try{
     const record={time:performance.now(),data:player.data.read({part:'data',id:'root'},['label']),changes};
     commits.push(record);pendingCommitSnapshots.push(record);
   });
-  if(profile==='physical-gamepad'){
-    scene.guiSystem.focus.focus(input);
-  }
   const update=event=>{if(done)return;try{
-    if(sampler){const sample=sampler.sample(++padTick);check(sample.players[0].actions.every(a=>a.value===0),'GUI input leaked to scene');}
+    if(sampler){
+      const sample=sampler.sample(++padTick),focused=scene.guiSystem.focus.focused===input,
+        next=physicalGamepadReadiness(padPhase,{focused,foreground:document.hasFocus()&&!document.hidden,connected:lastPad?.connected===true,
+          buttons:lastPad?.buttons.map(button=>button.value)??[],axes:lastPad?.axes??[]});
+      if(next!==padPhase){
+        check(inputAudit.transitions.length<256,'Too many focus transitions');inputAudit.transitions.push({from:padPhase,to:next,tick:padTick,time:performance.now()});padPhase=next;
+        status.textContent=next==='ready'?'READY: hold A about one second, release; left stick left, right, center. Then Save evidence.':next==='waiting-focus'?'Click the HYA text to focus it; release all controls, then wait for READY.':next==='waiting-controller'?'Connect the controller, release controls and keep HYA text focused.':'Release all buttons and center the sticks; waiting for a neutral start.';
+      }
+      inputAudit.lastSamples.push({tick:padTick,phase:padPhase,focused,foreground:document.hasFocus(),axes:[...(lastPad?.axes??[])],actions:sample.players[0].actions});
+      if(inputAudit.lastSamples.length>32)inputAudit.lastSamples.shift();
+      if(padPhase==='ready'){inputAudit.readySamples++;const leaked=sample.players[0].actions.some(a=>a.value!==0);if(leaked)inputAudit.sceneActionLeaks++;
+        check(!leaked,'GUI input leaked to scene while original HYA editor owned focus');}
+    }
     pending??={sequence:++sequence,deltaSeconds:Math.max(0,event.detail.delta)/1000,viewport:[480,360],dpr:1};
     if(player.advance(pending).ready){pending=null;for(const record of pendingCommitSnapshots.splice(0))record.presentation=snapshot();}
     if(input.isComposing)check(player.data.read({part:'data',id:'root'},['label'])===commits.at(-1)?.data||commits.length===0,'Preedit changed committed data');
@@ -118,5 +130,5 @@ try{
   engine.switchScene(scene);engine.run();
   window.g13Physical={ready:true,snapshot,finishSmoke:()=>{check(smoke,'Smoke completion is not available in manual runs');finish();}};
   status.textContent=profile==='browser-real-ime'?'Click HYA text at (20,180). Ctrl+A, real IME nihao → 你好, then save checkpoint. Begin composition and Esc, save checkpoint. Resize/focus/caret inspection, save checkpoint. Finally Save evidence.':
-    'Focus HYA text. Hold A about one second and release; left stick fully left, right, then center. Save evidence. Do not use simulated controls.';
+    'Click HYA text first; release all controls and wait for READY. Hold A about one second and release; left stick left, right, then center. Save evidence.';
 }catch(error){finish(error);}

@@ -46,6 +46,8 @@ export function validatePhysicalEvidence(report, confirmation) {
     if(snapshots.length<3||snapshots.some(s=>s.data!=='你好'||s.composing))errors.push('Commit, cancel and resize checkpoints must retain the committed value.');
     if(snapshots.length>=3&&snapshots.every(s=>String(s.viewport)===String(snapshots[0].viewport)))errors.push('No actual viewport change recorded.');
   }else if(report.profile==='physical-gamepad'){
+    if(!(report.inputAudit?.readySamples>0)||report.inputAudit.sceneActionLeaks!==0||report.inputAudit.unarmedGuiControls!==0)
+      errors.push('Gamepad workflow requires original GUI focus, neutral acquisition and zero scene leakage.');
     const controls=report.controls??[],down=controls.filter(c=>c.control==='button:0'&&c.phase==='down'),up=controls.filter(c=>c.control==='button:0'&&c.phase==='up');
     if(!report.hardware?.some(h=>h.id&&h.buttons>0&&h.axes>0)||!(report.polls>0))errors.push('No original-sampler hardware identity.');
     if(down.length!==1||up.length!==1||up[0].time-down[0].time<700)errors.push('One sustained A down/up pair of at least 700 ms is required.');
