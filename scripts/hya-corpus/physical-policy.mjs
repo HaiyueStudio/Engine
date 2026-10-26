@@ -42,6 +42,22 @@ export function physicalGamepadProgress(controls) {
     axisValue:axes.at(-1)?.value??null,axisMin:axes.length?Math.min(...axes.map(c=>c.value)):null,axisMax:axes.length?Math.max(...axes.map(c=>c.value)):null};
 }
 
+/** Explain every workflow blocker; recorded movements alone cannot grant admission. */
+export function physicalGamepadWorkflow(controls, audit, commits) {
+  const progress=physicalGamepadProgress(controls),blockers=[];
+  if(!(audit?.readySamples>0))blockers.push('尚未取得原编辑器焦点和回中 READY 起点');
+  if(audit?.unarmedGuiControls!==0)blockers.push(`READY 前已有 ${audit?.unarmedGuiControls} 个事件；请保存本轮失败记录，不能继续补做为通过`);
+  if(audit?.sceneActionLeaks!==0)blockers.push(`场景输入泄漏 ${audit?.sceneActionLeaks} 次`);
+  if(!progress.held)blockers.push(`A 需一次按下和一次释放，至少 700 ms（当前 ${progress.downCount}/${progress.upCount} 次）`);
+  if(!progress.left)blockers.push('左推尚未达到 -0.5');
+  if(!progress.right)blockers.push('右推尚未达到 +0.5');
+  if(!progress.center)blockers.push('尚无 ±0.15 内的回中记录');
+  const commitsValid=JSON.stringify(commits.map(c=>c.data))==='["AAA","AA"]';
+  if(!commitsValid)blockers.push('数据提交必须恰好为 AAA、AA 各一次');
+  return {progress,blockers,complete:blockers.length===0,commitsValid,
+    inputReady:audit?.readySamples>0&&audit?.unarmedGuiControls===0&&audit?.sceneActionLeaks===0};
+}
+
 /** Hardware assertions supplement, and never replace, the operator's real-device confirmation. */
 export function validatePhysicalEvidence(report, confirmation) {
   const errors=[];
@@ -56,13 +72,14 @@ export function validatePhysicalEvidence(report, confirmation) {
     if(snapshots.length<3||snapshots.some(s=>s.data!=='你好'||s.composing))errors.push('Commit, cancel and resize checkpoints must retain the committed value.');
     if(snapshots.length>=3&&snapshots.every(s=>String(s.viewport)===String(snapshots[0].viewport)))errors.push('No actual viewport change recorded.');
   }else if(report.profile==='physical-gamepad'){
-    if(!(report.inputAudit?.readySamples>0)||report.inputAudit.sceneActionLeaks!==0||report.inputAudit.unarmedGuiControls!==0)
+    const workflow=physicalGamepadWorkflow(report.controls??[],report.inputAudit,report.commits??[]);
+    if(!workflow.inputReady)
       errors.push('Gamepad workflow requires original GUI focus, neutral acquisition and zero scene leakage.');
-    const progress=physicalGamepadProgress(report.controls??[]);
+    const {progress}=workflow;
     if(!report.hardware?.some(h=>h.id&&h.buttons>0&&h.axes>0)||!(report.polls>0))errors.push('No original-sampler hardware identity.');
     if(!progress.held)errors.push('One sustained A down/up pair of at least 700 ms is required.');
     if(!progress.left||!progress.right||!progress.center)errors.push('Left, right and centered axis changes are required.');
-    if(JSON.stringify(report.commits?.map(c=>c.data))!==JSON.stringify(['AAA','AA']))errors.push('Gamepad down/up must commit exactly once each.');
+    if(!workflow.commitsValid)errors.push('Gamepad down/up must commit exactly once each.');
   }else errors.push('Unknown physical input profile.');
   return errors;
 }

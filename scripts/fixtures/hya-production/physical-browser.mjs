@@ -7,7 +7,7 @@ import {beginRenderCommandPass} from '@haiyue/engine/extension-authoring';
 import {createHyaPlayer} from '@haiyue/extensions/hya-player';
 import {createBrowserHyaAudioHost} from '@haiyue/extensions/hya-audio';
 import {physicalGamepadReadiness} from '../../hya-corpus/physical-gamepad-readiness.mjs';
-import {physicalGamepadProgress} from '../../hya-corpus/physical-policy.mjs';
+import {physicalGamepadWorkflow} from '../../hya-corpus/physical-policy.mjs';
 
 const profile=new URLSearchParams(location.search).get('profile'), smoke=new URLSearchParams(location.search).has('smoke');
 const canvas=document.querySelector('canvas'), status=document.querySelector('#progress'), result=document.querySelector('#result');
@@ -16,10 +16,14 @@ const events=[], commits=[], pendingCommitSnapshots=[], controls=[], failures=[]
 let engine,scene,player,context,sampler,offPad,offUpdate,input,environment,validationDevice,done=false,sequence=1,pending=null,polls=0,padTick=0;
 let lastPad=null,padPhase='waiting-focus',controllerPrepared=profile!=='physical-gamepad';
 // Hardware detection must finish before the original editor can acquire pointer focus.
-if(!controllerPrepared){canvas.style.visibility='hidden';canvas.style.pointerEvents='none';}
+if(!controllerPrepared){
+  canvas.style.visibility='hidden';canvas.style.pointerEvents='none';
+  Object.assign(status.style,{fontSize:'20px',fontWeight:'700',lineHeight:'26px',height:'104px',maxWidth:'940px',padding:'8px',boxSizing:'border-box'});
+}
 const inputAudit={readySamples:0,sceneActionLeaks:0,unarmedGuiControls:0,transitions:[],lastSamples:[]};
 const snapshot=()=>({time:performance.now(),data:player?.data.read({part:'data',id:'root'},['label']),display:input?.displayValue,
   composing:input?.isComposing,selection:[input?.selectionAnchor,input?.selectionFocus],focused:scene?.guiSystem.focus.focused===input,
+  gamepad:profile==='physical-gamepad'?{phase:padPhase,prepared:controllerPrepared,readySamples:inputAudit.readySamples,unarmedGuiControls:inputAudit.unarmedGuiControls,sceneActionLeaks:inputAudit.sceneActionLeaks}:null,
   caret:scene?.guiSystem.getInputPresentation(input),commits:commits.length,viewport:[innerWidth,innerHeight]});
 function finish(error){if(done)return;done=true;if(error)failures.push(String(error.stack??error));void cleanup();}
 async function cleanup(){
@@ -134,9 +138,14 @@ try{
     pending??={sequence:++sequence,deltaSeconds:Math.max(0,event.detail.delta)/1000,viewport:[480,360],dpr:1};
     if(player.advance(pending).ready){pending=null;for(const record of pendingCommitSnapshots.splice(0))record.presentation=snapshot();}
     if(sampler){
-      const progress=physicalGamepadProgress(controls),display=document.querySelector('#gamepad-progress'),format=value=>value===null?'—':value.toFixed(3);
-      const complete=progress.held&&progress.left&&progress.right&&progress.center&&inputAudit.readySamples>0&&inputAudit.sceneActionLeaks===0&&inputAudit.unarmedGuiControls===0&&JSON.stringify(commits.map(c=>c.data))==='["AAA","AA"]';
-      if(display)display.textContent=`A 长按：${progress.held?'通过':'待完成'}（${format(progress.holdMilliseconds)} ms；只按一次）\n左推：${progress.left?'通过':'待完成'}（最小 ${format(progress.axisMin)}，要求 ≤ -0.5）\n右推：${progress.right?'通过':'待完成'}（最大 ${format(progress.axisMax)}，要求 ≥ 0.5）\n回中：${progress.center?'已记录':'待完成'}；当前轴值 ${format(progress.axisValue)}\n${complete?'操作数据齐全，可以保存证据。':'请等 READY 后完成所有项目，再保存证据。'}`;
+      const workflow=physicalGamepadWorkflow(controls,inputAudit,commits),{progress,complete}=workflow,display=document.querySelector('#gamepad-progress'),format=value=>value===null?'—':value.toFixed(3);
+      const invalid=inputAudit.unarmedGuiControls>0||inputAudit.sceneActionLeaks>0||progress.downCount>1||progress.upCount>1;
+      const preparing=physicalGamepadReadiness('waiting-controller',{focused:true,foreground:document.hasFocus()&&!document.hidden,
+        connected:lastPad?.connected===true,buttons:lastPad?.buttons.map(button=>button.value)??[],axes:lastPad?.axes??[]});
+      const headline=invalid?'本轮已有失败，请保存记录，不能继续补做为通过。':complete?'操作数据齐全：请保存证据。':padPhase==='ready'?'READY：绿色，可以开始 A 长按和左摇杆测试。':
+        !controllerPrepared?'尚未 READY：点准备按钮，按 B 后松开并回中。':!document.hasFocus()?'尚未 READY：请将此测试窗口置于前台。':!scene.guiSystem.focus.focused?'尚未 READY：请点击画布内“你好 A”。':preparing!=='ready'?'尚未 READY：松开所有按钮并将全部摇杆回中（轴绝对值须 ≤ 0.15）。':'尚未 READY：请点击原 HYA 文本。';
+      status.textContent=headline;status.style.background=invalid?'#fee4e2':complete||padPhase==='ready'?'#d1fadf':'#fef0c7';status.style.color=invalid?'#912018':complete||padPhase==='ready'?'#05603a':'#7a2e0e';
+      if(display)display.textContent=`A 长按记录：${progress.held?'满足':'待完成'}（${format(progress.holdMilliseconds)} ms；按下/释放 ${progress.downCount}/${progress.upCount}）\n左推记录：${progress.left?'满足':'待完成'}（${format(progress.axisMin)} ≤ -0.5）\n右推记录：${progress.right?'满足':'待完成'}（${format(progress.axisMax)} ≥ +0.5）\n回中：${progress.center?'已记录':'待完成'}\n当前全部轴：[${(lastPad?.axes??[]).map(format).join(', ')}]\n当前按下按钮：[${(lastPad?.buttons??[]).flatMap((button,index)=>button.value>.000001?[index]:[]).join(', ')}]\nREADY 前事件：${inputAudit.unarmedGuiControls}（必须为 0）\n场景泄漏：${inputAudit.sceneActionLeaks}（必须为 0）\n${complete?'全部条件满足。':workflow.blockers.join('\n')}`;
       document.querySelector('#finish').textContent=complete?'Save evidence (workflow complete)':'Save evidence (incomplete workflow)';
     }
     if(input.isComposing)check(player.data.read({part:'data',id:'root'},['label'])===commits.at(-1)?.data||commits.length===0,'Preedit changed committed data');

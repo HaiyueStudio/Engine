@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {validatePhysicalEvidence,physicalGamepadProgress} from './physical-policy.mjs';
+import {validatePhysicalEvidence,physicalGamepadProgress,physicalGamepadWorkflow} from './physical-policy.mjs';
 const confirmation={confirmed:true,confirmedAt:'2026-10-26T00:00:00Z',note:'Operator performed the real hardware workflow.'};
 const base={status:'awaiting-operator-confirmation',smoke:false,servedBytes:{status:'passed'},changed:[],failures:[],leases:0,resources:{totals:{resources:0}}};
 function ime(){return{...base,profile:'browser-real-ime',events:['你好',''].flatMap(compositionData=>[
@@ -70,4 +70,18 @@ test('live gamepad progress uses the unchanged admission boundaries and rejects 
   assert.equal(physicalGamepadProgress(controls.slice(0,1)).held,false);
   assert.equal(physicalGamepadProgress([...controls,controls[0]]).held,false);
   assert.equal(physicalGamepadProgress([]).axisValue,null);
+});
+
+test('four recorded movements cannot hide an unarmed workflow or another admission blocker',()=>{
+  const report=pad();
+  assert.equal(physicalGamepadWorkflow(report.controls,report.inputAudit,report.commits).complete,true);
+  for(const mutate of [r=>r.inputAudit.unarmedGuiControls=62,r=>r.inputAudit.sceneActionLeaks=1,
+    r=>r.inputAudit.readySamples=0,r=>r.commits.push({data:'AA'}),r=>r.controls.push({...r.controls[0]})]){
+    const changed=structuredClone(report);mutate(changed);
+    const status=physicalGamepadWorkflow(changed.controls,changed.inputAudit,changed.commits);
+    assert.equal(status.complete,false);assert.ok(status.blockers.length>0);
+    assert.ok(validatePhysicalEvidence(changed,confirmation).length>0);
+  }
+  const premature=structuredClone(report);premature.inputAudit.unarmedGuiControls=62;
+  assert.match(physicalGamepadWorkflow(premature.controls,premature.inputAudit,premature.commits).blockers.join('\n'),/62/);
 });
