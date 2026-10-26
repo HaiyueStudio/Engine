@@ -95,10 +95,10 @@
     },
     "releaseRecovery": {
       "status": "passed-complete-release-policy-suite",
-      "tests": 137,
+      "tests": 140,
       "proof": {
-        "path": "artifacts/engine-0.2.2/g13/release-policy-final.log",
-        "sha256": "57a78eec142339ae240e6c003acb05233990b6cc7fb5b32ce2bc6f82046f5278"
+        "path": "artifacts/engine-0.2.2/g13/release-policy-focus-ready.log",
+        "sha256": "6c9f53daab6bf1f4b759478c85bd88bff474eff7c5c7cb858b9bcd038361997f"
       },
       "externalPublicationExecuted": false
     },
@@ -179,7 +179,16 @@
     },
     "physicalGamepad": {
       "status": "awaiting-operator",
-      "rawOutput": "artifacts/engine-0.2.2/g13/pad-manual-6716e9a"
+      "rawOutput": "artifacts/engine-0.2.2/g13/pad-manual-focus-ready",
+      "readiness": "Original editor focus and neutral controller required before GUI consumption assertion",
+      "diagnostic": {
+        "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793023391488/result.json",
+        "sha256": "5c95141850eb1861b1a88aba744294e0fefa8939903363ef99690d87424af418"
+      },
+      "policyTests": {
+        "path": "artifacts/engine-0.2.2/g13/pad-readiness-policy.log",
+        "sha256": "7f14878cf85721ad5b713b43e666643937b2d215084ed7ada8e57fe2120720ab"
+      }
     }
   },
   "preservedFailures": {
@@ -202,6 +211,10 @@
     "trustedEndAssumption": {
       "path": "artifacts/engine-0.2.2/g13/ime-manual-publication-fix/result.json",
       "sha256": "beea299e5a46f8d27603a0f913bc83059e62234293b695c2aed8fe607b1632e0"
+    },
+    "gamepadBeforeFocus": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-6716e9a/result.json",
+      "sha256": "a04e0a211438bbf58e2db91b2c8684175f7fb5985c7439fe270b807e68a92b1e"
     }
   },
   "currentBlocker": {
