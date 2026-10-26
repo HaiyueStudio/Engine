@@ -9,6 +9,10 @@ registerHooks({
     if (specifier === 'pako' && context.parentURL?.startsWith(root)) return { url: new URL('./pako-interop.mjs', import.meta.url).href, shortCircuit: true };
     if (specifier.startsWith('.') && context.parentURL?.startsWith(root)) {
       const url = new URL(specifier, context.parentURL);
+      if (url.pathname.endsWith('.js') && !existsSync(url)) {
+        const typed = new URL(url.href.slice(0, -3) + '.ts');
+        if (existsSync(typed)) return {url: typed.href, shortCircuit: true};
+      }
       if (existsSync(new URL(`${url.href}.ts`))) {
         return { url: `${url.href}.ts`, shortCircuit: true };
       }

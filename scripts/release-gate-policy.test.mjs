@@ -19,13 +19,13 @@ test('native FrameGraph precedes release timing and reuses the example build, wi
     const checks = createReleaseGateChecks(mode);
     assert.deepEqual(checks[0], ['run', 'check:engine:fast']);
     assert.deepEqual(checks[1], ['run', 'verify:framegraph:full']);
-    assert.deepEqual(checks[2], ['run', 'release:021:evidence:check']);
+    assert.deepEqual(checks[2], ['run', 'release:render:evidence:check']);
     assert.ok(checks.findIndex(c => c[1] === 'verify:framegraph:example') > checks.findIndex(c => c[1] === 'check:engine:slow'));
     assert.doesNotMatch(JSON.stringify(checks), /UI|Editor|Games/);
   }
   for (const tier of ['smoke', 'full']) assert.ok(!createEngineSlowChecks(createContentTargetPlan(tier, manifests)).some(c => c[1]?.startsWith('verify:framegraph')));
   assert.ok(!createReleaseGateChecks('artifact').some(c => c[1]?.startsWith('verify:framegraph')));
-  assert.ok(!createReleaseGateChecks('artifact').some(c => c[1] === 'release:021:evidence:check'));
+  assert.ok(!createReleaseGateChecks('artifact').some(c => c[1] === 'release:render:evidence:check'));
   const scripts = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).scripts;
   assert.match(scripts['performance-budget:test'], /framegraph-regression-policy.test.mjs/);
   assert.equal(scripts['verify:framegraph:example'], 'node scripts/verify-framegraph-example.mjs');

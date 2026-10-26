@@ -3317,6 +3317,10 @@
               "kind": "type"
             },
             {
+              "name": "RegionUpdateMode",
+              "kind": "type"
+            },
+            {
               "name": "RegistrationToken",
               "kind": "type"
             },
@@ -3362,6 +3366,14 @@
             },
             {
               "name": "RenderProfileSettings",
+              "kind": "type"
+            },
+            {
+              "name": "RenderRegion",
+              "kind": "type"
+            },
+            {
+              "name": "RenderRegionOptions",
               "kind": "type"
             },
             {
@@ -8283,6 +8295,10 @@
               "kind": "value"
             },
             {
+              "name": "GuiActionEvent",
+              "kind": "type"
+            },
+            {
               "name": "GuiBatch",
               "kind": "value"
             },
@@ -8319,6 +8335,18 @@
               "kind": "value"
             },
             {
+              "name": "GuiDragSession",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDragSource",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDropTarget",
+              "kind": "type"
+            },
+            {
               "name": "GuiElement",
               "kind": "value"
             },
@@ -8329,6 +8357,14 @@
             {
               "name": "GuiFocusManager",
               "kind": "value"
+            },
+            {
+              "name": "GuiFocusMode",
+              "kind": "type"
+            },
+            {
+              "name": "GuiFocusOptions",
+              "kind": "type"
             },
             {
               "name": "GuiFontOptions",
@@ -8375,6 +8411,14 @@
               "kind": "type"
             },
             {
+              "name": "GuiInvalidation",
+              "kind": "type"
+            },
+            {
+              "name": "GuiInvalidationReason",
+              "kind": "type"
+            },
+            {
               "name": "GuiLabel",
               "kind": "value"
             },
@@ -8387,7 +8431,15 @@
               "kind": "type"
             },
             {
+              "name": "GuiLayoutDelegate",
+              "kind": "type"
+            },
+            {
               "name": "GuiLength",
+              "kind": "type"
+            },
+            {
+              "name": "GuiMeasureConstraint",
               "kind": "type"
             },
             {
@@ -8411,7 +8463,19 @@
               "kind": "type"
             },
             {
+              "name": "GuiNineSlice",
+              "kind": "value"
+            },
+            {
+              "name": "GuiNineSliceOptions",
+              "kind": "type"
+            },
+            {
               "name": "GuiPointerEvent",
+              "kind": "type"
+            },
+            {
+              "name": "GuiPointerFilter",
               "kind": "type"
             },
             {
@@ -8499,6 +8563,10 @@
               "kind": "value"
             },
             {
+              "name": "GuiSkin",
+              "kind": "type"
+            },
+            {
               "name": "GuiSlider",
               "kind": "value"
             },
@@ -8535,11 +8603,35 @@
               "kind": "type"
             },
             {
+              "name": "GuiTextComposition",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTextEdit",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTextInputHost",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTextInputSession",
+              "kind": "type"
+            },
+            {
               "name": "GuiTextRenderer",
               "kind": "value"
             },
             {
               "name": "GuiTheme",
+              "kind": "type"
+            },
+            {
+              "name": "GuiThemeResource",
+              "kind": "value"
+            },
+            {
+              "name": "GuiThemeState",
               "kind": "type"
             },
             {
@@ -11171,6 +11263,55 @@
             }
           ]
         },
+        "./gui-layout": {
+          "source": "extensions/src/gui-layout.ts",
+          "exports": [
+            {
+              "name": "attachGuiLayout",
+              "kind": "value"
+            },
+            {
+              "name": "createGuiContainer",
+              "kind": "value"
+            },
+            {
+              "name": "GuiContainerPreset",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLayoutBinding",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLayoutMeasurement",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLayoutOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSplitPanel",
+              "kind": "value"
+            },
+            {
+              "name": "GuiSplitPanelOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTabContainer",
+              "kind": "value"
+            },
+            {
+              "name": "GuiTabContainerOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTabPage",
+              "kind": "type"
+            }
+          ]
+        },
         "./hya-audio": {
           "source": "extensions/src/hya-audio.ts",
           "exports": [
@@ -11479,6 +11620,63 @@
             {
               "name": "validateLocalePack",
               "kind": "value"
+            }
+          ]
+        },
+        "./layout": {
+          "source": "extensions/src/layout.ts",
+          "exports": [
+            {
+              "name": "createLayoutSession",
+              "kind": "value"
+            },
+            {
+              "name": "LayoutConstraints",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutEdges",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutError",
+              "kind": "value"
+            },
+            {
+              "name": "LayoutLength",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutLimits",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutMeasure",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutNode",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutRect",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutResult",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutSession",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutStyle",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutTrack",
+              "kind": "type"
             }
           ]
         },

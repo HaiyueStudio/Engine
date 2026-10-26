@@ -1,7 +1,7 @@
 const FULL_CORRECTNESS_CHECKS = Object.freeze([
   Object.freeze(['run', 'check:engine:fast']),
   Object.freeze(['run', 'verify:framegraph:full']),
-  Object.freeze(['run', 'release:021:evidence:check']),
+  Object.freeze(['run', 'release:render:evidence:check']),
   Object.freeze(['run', 'verify:lighting-scaling:formal']),
   Object.freeze(['run', 'lighting:evidence:check']),
   Object.freeze(['run', 'check:engine:slow', '--', '--content-tier=full']),

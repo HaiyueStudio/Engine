@@ -1,5 +1,7 @@
 # Scrollable GUI and rule help
 
+For the 0.2.2 candidate's shared Flex/Grid core, containers and panel/tab adapter, see [Shared layout](shared-layout.md).
+
 ## Show a short confirmation
 
 The 0.2.1 candidate includes an engine-rendered Toast

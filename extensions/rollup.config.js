@@ -8,6 +8,8 @@ import {
 
 export default {
   input: {
+    layout: 'src/layout.ts',
+    'gui-layout': 'src/gui-layout.ts',
     'hya-player': 'src/hya-player.ts',
     'hya-text': 'src/hya-text.ts',
     'hya-layout': 'src/hya-layout.ts',

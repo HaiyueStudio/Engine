@@ -9,7 +9,8 @@ import {createQualificationOutput} from './qualification-output.mjs';
 import {stageQualifiedPackages,verifyServedBytes,sha256} from './packed-browser.mjs';
 import {snapshotSourceInputs,changedSourceInputs} from './source-snapshot.mjs';
 import {productionLayoutWorkload} from '../fixtures/hya-production/workloads.mjs';
-import {productionWorkloads,assessHyaPacing,compareGpuRows} from './production-policy.mjs';
+import {productionWorkloads,assessHyaPacing} from './production-policy.mjs';
+import {compareProductionGpuCohorts} from './production-cohort-policy.mjs';
 import {waitForProductionResult} from './production-observer.mjs';
 const root=process.cwd(),arg=(key,fallback)=>{const at=process.argv.indexOf(key);return at<0?fallback:process.argv[at+1];};
 const output=createQualificationOutput(root,arg('--output','artifacts/engine-0.2.2/g12/production-'+Date.now())).directory;mkdirSync(output,{recursive:true});
@@ -46,6 +47,10 @@ for(const [index,job]of plan.entries()){
  writeFileSync(resolve(output,'partial.json'),JSON.stringify({plan,captures,failures},null,2)+'\n');console.log(JSON.stringify({capture:index+1,total:plan.length,...job,status:raw.status,pacing:pacing?.status,error:raw.error}));
 }
 // The checked-in numeric budget is recorded below; never derive a new limit from a failing run.
-const gpu=[];if(!diagnostic)for(let round=1;round<=3;round++)for(const workload of productionWorkloads){const pair=captures.filter(c=>c.job.round===round&&c.job.workload.id===workload.id&&!c.job.regional);try{const comparison=compareGpuRows(pair.find(c=>c.job.candidate==='baseline')?.gpu,pair.find(c=>c.job.candidate==='candidate')?.gpu,gpuLimit);gpu.push({round,workload:workload.id,...comparison});if(comparison.status!=='passed')failures.push({round,workload:workload.id,gpu:comparison});}catch(error){failures.push({round,workload:workload.id,reason:String(error)});}}
+const gpu=[];if(!diagnostic)for(const workload of productionWorkloads){
+ const cohorts=candidate=>[1,2,3].map(round=>captures.find(c=>c.job.round===round&&c.job.workload.id===workload.id&&!c.job.regional&&c.job.candidate===candidate)?.gpu);
+ try{const comparison=compareProductionGpuCohorts(cohorts('baseline'),cohorts('candidate'),lighting.sampling,gpuLimit);gpu.push({workload:workload.id,...comparison});if(comparison.status!=='passed')failures.push({workload:workload.id,gpu:comparison});}
+ catch(error){failures.push({workload:workload.id,reason:String(error)});}
+}
 const changed=changedSourceInputs(root,inputs);if(changed.length)failures.push({reason:'Measurement inputs changed',changed});
 const result={schemaVersion:1,status:failures.length?'failed':'passed',scope:diagnostic?'One-case harness diagnosis only; not G12 qualification':'Local native production qualification; baseline retained; no release promotion or physical input claim',diagnostic,host:{cpu:cpus()[0]?.model,logicalCpus:cpus().length,hostname:hostname(),os:release(),hardware},packageReport:{path:packageReport,sha256:sha256(readFileSync(packageReport))},baseline:{path:baseline,sha256:sha256(readFileSync(baseline)),packRecord:baselineRecord.shasum},inputs,budget,originalGpuBudget:lighting.relativeBudgets,gpuLimit,plan,captures,gpu,failures,fullG12Complete:false};writeFileSync(resolve(output,'result.json'),JSON.stringify(result,null,2)+'\n');if(failures.length)process.exitCode=1;

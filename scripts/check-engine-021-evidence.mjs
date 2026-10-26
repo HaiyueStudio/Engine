@@ -85,7 +85,7 @@ for (const kind of ['rooms', 'instances', 'forward']) audits[kind] = await audit
 const result = completeEngine021EvidenceAudit(audits, reports);
 // Rebuild candidate executable chunks instead of trusting archived build summaries.
 // Four entries cover all seven reports; common is shared by correctness and G05.
-const auditDirectory = resolve(root, 'artifacts/engine-0.2.1', `qualification-audit-${new Date().toISOString().replaceAll(':', '-')}`);
+const auditDirectory = resolve(dirname(resolve(root, manifestPath)), `qualification-audit-${new Date().toISOString().replaceAll(':', '-')}`);
 await mkdir(auditDirectory);
 const builds = {}, rebuilds = {};
 for (const [kind, filename] of Object.entries({ common: 'deferred-reference-runtime.mjs', production: 'framegraph-production-fixture.mjs',

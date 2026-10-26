@@ -131,6 +131,14 @@
     "./hya-audio": {
       "types": "./dist/hya-audio.d.ts",
       "import": "./dist/hya-audio.js"
+    },
+    "./layout": {
+      "types": "./dist/layout.d.ts",
+      "import": "./dist/layout.js"
+    },
+    "./gui-layout": {
+      "types": "./dist/gui-layout.d.ts",
+      "import": "./dist/gui-layout.js"
     }
   },
   "scripts": {

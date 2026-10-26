@@ -910,7 +910,16 @@
       "entry": "gui-runtime/main.ts",
       "capabilities": [
         "gui",
-        "2d"
+        "2d",
+        "shared-layout",
+        "flex-layout",
+        "grid-layout",
+        "unicode-text",
+        "gui-input",
+        "theme-skins",
+        "split-panels",
+        "tabs",
+        "semantic-drag-drop"
       ],
       "assets": [],
       "screenshot": {

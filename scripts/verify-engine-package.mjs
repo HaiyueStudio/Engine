@@ -108,6 +108,7 @@ try {
   const runtimeChecks = {
     node: runNodeRuntimeConsumer(installed),
     hya: runHyaRuntimeConsumer(installed),
+    layout: runLayoutRuntimeConsumer(installed),
     typescript: runTypeScriptConsumer(installed, packedPackages),
     exports: runAllExportsConsumer(installed, packedPackages),
     cli: runCliConsumer(installed),
@@ -461,6 +462,14 @@ function runHyaRuntimeConsumer(installed) {
   return commandCheck(spawnSync(process.execPath, [input], {
     cwd: installed.root, encoding: 'utf8', timeout: 30_000,
   }), 'five focused HYA runtime consumers');
+}
+
+function runLayoutRuntimeConsumer(installed) {
+  const input = resolve(installed.root, 'layout-runtime.mjs');
+  copyFileSync(resolve(root, 'scripts/fixtures/engine-consumers/layout-runtime.mjs'), input);
+  return commandCheck(spawnSync(process.execPath, [input], {
+    cwd: installed.root, encoding: 'utf8', timeout: 30_000,
+  }), 'DOM/GPU-free packed layout runtime');
 }
 
 function runTypeScriptConsumer(installed, packages) {

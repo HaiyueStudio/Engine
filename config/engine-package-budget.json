@@ -733,6 +733,55 @@
         "capabilityBasis": "0.2.2 public hya-audio factory closure from isolated installed tarballs; existing production owners reused, no source/private consumer imports",
         "decision": "docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md"
       }
+    },
+    "extensions-layout": {
+      "entrypoint": "./layout",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-layout.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 11000,
+      "requiredExports": [
+        "createLayoutSession",
+        "LayoutError"
+      ],
+      "forbiddenStaticTokens": [
+        "opentype.js",
+        "class Animation2DRenderSystem",
+        "class Render3DSystem",
+        "class NarrativeGui",
+        "class GuiSystem",
+        "class GuiElement",
+        "createHaiyueEngine"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 8964,
+        "growthReserveBytes": 2036,
+        "capabilityBasis": "G01 named layout API; original shared layout core and GUI owners, diagnostic compiled closure then installed tarball verification",
+        "decision": "review/engine-0.2.2/g13-package-admission.md"
+      }
+    },
+    "extensions-gui-layout": {
+      "entrypoint": "./gui-layout",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-layout.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 40000,
+      "requiredExports": [
+        "attachGuiLayout",
+        "createGuiContainer",
+        "GuiSplitPanel",
+        "GuiTabContainer"
+      ],
+      "forbiddenStaticTokens": [
+        "opentype.js",
+        "class Animation2DRenderSystem",
+        "class Render3DSystem",
+        "class NarrativeGui"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 33251,
+        "growthReserveBytes": 6749,
+        "capabilityBasis": "G01 named gui-layout API; original shared layout core and GUI owners, diagnostic compiled closure then installed tarball verification",
+        "decision": "review/engine-0.2.2/g13-package-admission.md"
+      }
     }
   },
   "shaderLanguageConsumers": {
