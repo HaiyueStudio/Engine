@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "goal": "g12-hya-production-qualification",
-  "status": "active-preflight-passed-full-qualification-pending",
+  "status": "active-incremental-cpu-and-correctness-passed-final-production-pending",
   "decision": "docs/for-ai/adr/0136-g12-before-physical-input-acceptance.md",
   "executionAdmission": {
     "decision": "Engine/docs/for-ai/adr/0136-g12-before-physical-input-acceptance.md",
@@ -50,11 +50,55 @@
     "qualification": false
   },
   "next": [
-    "Freeze full text/image/corpus/product workload provenance before optimization",
-    "Measure actual draw generations, uploads, buffer reuse and long-running resources",
-    "Complete cold-start and three-round production comparisons with existing budgets"
+    "Commit validated implementation and bind final clean candidate tarballs",
+    "Refresh final native pixels, public lifecycle and actual product evidence",
+    "Complete three rounds of all 23 licensed corpus entries without latest promotion",
+    "Complete matched production pacing, cold start and separate full-command-buffer GPU comparisons",
+    "Hand final hashes and unchanged device-owned acceptance to G13"
   ],
   "realInputAcceptance": "deferred-release-blocking; not accepted",
   "otherDeviceRequirements": "unchanged",
-  "fullG12Complete": false
+  "fullG12Complete": false,
+  "currentProgress": {
+    "generatedAt": "2026-10-26T07:40:29.823Z",
+    "baseRevision": "79ad044aeb1c349e4a7efe11324e8466da30a648",
+    "sourcePendingCommit": true,
+    "fullWorkspaceTests": 2408,
+    "fullTypecheck": true,
+    "fullBuild": true,
+    "boundaries": true,
+    "api": true,
+    "cpuBefore": {
+      "path": "artifacts/engine-0.2.2/g12/layout-before-20261026/result.json",
+      "sha256": "55c003fb236a90285b94397621463a37595837439174a0f50e1c0a752763e177",
+      "scope": "Original source diagnostic; retains all 27 cohorts, not clean native production evidence"
+    },
+    "cpuCurrent": {
+      "path": "artifacts/engine-0.2.2/g12/layout-final-20261026/result.json",
+      "sha256": "2d76814c934e77a71fe7b3c336801eb4d5f95175c68e3e4ef0d18eae096defe3",
+      "cohorts": 27,
+      "status": "passed",
+      "unchangedBudgets": true
+    },
+    "packageGate": {
+      "path": "artifacts/engine-0.2.2/g12/packed-final-20261026/public-packages.json",
+      "sha256": "3849267020d9c5f832af503f53a813d0ef8e276de2f1dab35891610eadcef2c1"
+    },
+    "priorNativeRegion": {
+      "path": "artifacts/engine-0.2.2/g12/public-depth-final-20261026/result.json",
+      "sha256": "2c522909c21a4c1c8170a8cde819d3a6e4f5a1180b30d5d384753f98334a340b"
+    },
+    "priorProduct": {
+      "path": "artifacts/engine-0.2.2/g12/product-normalized-20261026/result.json",
+      "sha256": "c954acb477d21600280263b9b383cdc2407c31b0a43878bde76425271b0a0358"
+    },
+    "finalNativeAndProductRefreshPending": true,
+    "regionScopeAdmission": "User authorized extensions/src/hya-player.ts on 2026-10-26",
+    "productScopeAdmission": "User authorized named Gravity Maze integration on 2026-10-26",
+    "productionDiagnostic": {
+      "path": "artifacts/engine-0.2.2/g12/production-span-20261026/result.json",
+      "sha256": "00630fa59e8c0d4f1c85711a96066bc9be596df5e425897c08b9dc84253495da"
+    },
+    "productionDiagnosticIsFullQualification": false
+  }
 }

@@ -50,7 +50,7 @@ export class ProductionTextOwner {
     this.shaping = true;
     try {
       const shaped = this.prepared.shape(input); this.assertLive();
-      const result = snapshotTextResult(shaped, input, this.document);
+      const result = snapshotTextResult(shaped, input, this.document, request);
       this.shapes++; this.cache = {key, result}; return result;
     } finally {this.shaping = false;}
   }

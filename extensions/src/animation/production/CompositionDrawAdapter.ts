@@ -8,6 +8,8 @@ import {compileProductionCompositionDrawPlan} from './CompositionDrawPlan.js';
 /** One borrowed generation owner for every core/layout part in the compiled painter order. */
 export class ProductionCompositionDrawAdapter {
   private readonly identity = Object.freeze({});
+  private readonly layoutPaint = new WeakMap<object, number>();
+  private nextLayoutPaint = 0;
   private readonly parts: readonly Readonly<{id: string; kind: 'core' | 'layout'}>[];
   private preparing = false;
   constructor(private readonly draw: ProductionDrawOwner, parts: readonly Readonly<{id: string; kind: 'core' | 'layout'}>[],
@@ -24,7 +26,15 @@ export class ProductionCompositionDrawAdapter {
       const layouts = this.parts.flatMap(part => part.kind === 'layout' ? [frame.layouts[part.id]!] : []);
       for (const part of this.parts) if (part.kind === 'core' ? !cores.has(part.id) : !frame.layouts[part.id]) throw new ProductionFrameError('E_HYA_RUNTIME_REFERENCE', part.id, 'compiled visual source is absent');
       this.textures?.prepare?.(layouts);
-      const revision = JSON.stringify([this.textures?.revision ?? 0, this.parts.map(part => [part.id, part.kind === 'core' ? cores.get(part.id)!.revision : frame.layouts[part.id]!.revision])]);
+      const revision = JSON.stringify([this.textures?.revision ?? 0, this.parts.map(part => {
+        if (part.kind === 'core') return [part.id, cores.get(part.id)!.revision];
+        const layout = frame.layouts[part.id]!;
+        // Layout revisions include advancing instance clocks. Immutable paint
+        // nodes, viewport and DPR are the draw inputs; time alone is not paint.
+        let paint = this.layoutPaint.get(layout.nodes);
+        if (paint === undefined) {paint = ++this.nextLayoutPaint; this.layoutPaint.set(layout.nodes, paint);}
+        return [part.id, paint, layout.viewport, layout.dpr];
+      })]);
       return this.draw.preparePlan(this.identity, revision, () => compileProductionCompositionDrawPlan(this.parts.map(part => part.kind === 'core'
         ? () => cores.get(part.id)!.compile() : () => compileProductionDrawPlan([frame.layouts[part.id]!], this.textures, this.maxGeometryBytes)), this.maxGeometryBytes));
     } finally {this.preparing = false;}

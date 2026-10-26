@@ -14,7 +14,14 @@ export class ProductionLayoutError extends Error {
 function fail(code: string, path: string, message: string): never {throw new ProductionLayoutError(code, path, message);}
 type PreparedText = {shape(request: ProductionTextRequest): ProductionTextResult};
 type Shaped = Readonly<{key: string; result: ProductionTextResult}>;
-interface NodeTextCache {measure?: Shaped; arrange?: Shaped;}
+interface NodeTextCache {measure?: Shaped; arrange?: Shaped; measureHistory?: readonly Shaped[]; arrangeHistory?: readonly Shaped[];}
+interface LayoutInputs {
+  readonly key: string;
+  readonly request: ProductionLayoutRequest;
+  readonly texts: Map<string, Readonly<{block: string; context: LayoutTextContext}>>;
+  readonly bindings: Map<string, Readonly<{context: LayoutTextContext; value: string}>>;
+  readonly assets: Map<string, string | null>;
+}
 type Rect = readonly [number, number, number, number];
 type ScopedText = Pick<ProductionTextRequest, 'strings' | 'selections' | 'cursors' | 'styles'>;
 
@@ -23,6 +30,7 @@ export class ProductionLayoutOwner {
   private readonly evaluator: LayoutEvaluator;
   private readonly rootTransforms: ReadonlyMap<string, LayoutAffine>;
   private readonly nodes: ReadonlyMap<string, ReadonlyMap<string, RuntimeNode>>;
+  private readonly blocks: ReadonlyMap<string, RuntimeLayoutDocument['textBlocks'][number]>;
   private readonly editableText:boolean;
   private readonly signal: AbortSignal | undefined;
   private readonly validateStyles: ((styles: NonNullable<ProductionLayoutRequest['styles']>) => void) | undefined;
@@ -43,9 +51,13 @@ export class ProductionLayoutOwner {
   private nextWidths = new Map<string, number>();
   private priorText = new Map<string, NodeTextCache>();
   private nextText = new Map<string, NodeTextCache>();
+  private layoutInputs: LayoutInputs | undefined;
+  private pendingInputs: LayoutInputs | undefined;
+  private paintRequest: ProductionLayoutRequest | undefined;
+  private paintStylesSame = false;
   private glyphCounts = {measure: 0, arrange: 0};
   private lineCounts = {measure: 0, arrange: 0};
-  private frameState: Readonly<{token: object; revision: number; passes: number; cached: ProductionLayoutOwner['cached']; text: Map<string, NodeTextCache>; widths: Map<string, number>; hint: string | undefined}> | undefined;
+  private frameState: Readonly<{token: object; revision: number; passes: number; cached: ProductionLayoutOwner['cached']; text: Map<string, NodeTextCache>; widths: Map<string, number>; hint: string | undefined; inputs: LayoutInputs | undefined}> | undefined;
 
   constructor(readonly document: RuntimeLayoutDocument, private readonly text?: PreparedText,
     options: Readonly<{editableText?:boolean;signal?: AbortSignal; validateStyles?: (styles: NonNullable<ProductionLayoutRequest['styles']>) => void; resolveText?: (block: string, context: LayoutTextContext) => ScopedText; resolveNode?: (context: LayoutTextContext) => PreparedLayoutNodeBindings; resolveAsset?: (id: string) => string | null}> = {}, limits?: LayoutRuntimeLimits, private readonly part = '') {
@@ -55,13 +67,17 @@ export class ProductionLayoutOwner {
       fail('E_HYA_RUNTIME_HOST_PORT', '$.text', 'a prepared text shaper is required for text nodes');
     const roots = document.instances.map((instance,index) => [instance.id,snapshotLayoutTransform(instance.transform,`$.instances[${index}].transform`)] as const);
     this.nodes = new Map(document.artboards.map(board => [board.id, new Map(board.nodes.map(node => [node.id, node]))]));
-    this.evaluator = new LayoutEvaluator(document, limits, {evaluate: (block, _updates, context) => this.shape(block, context)}, {maxExpandedNodes: 250_000, stableIds: true, ...(options.resolveAsset ? {resolveAsset: options.resolveAsset} : {}),
+    this.blocks = new Map(document.textBlocks.map(block=>[block.id,block]));
+    this.evaluator = new LayoutEvaluator(document, limits, {evaluate: (block, _updates, context) => this.shape(block, context)}, {maxExpandedNodes: 250_000, stableIds: true, ...(options.resolveAsset ? {resolveAsset: (id: string) => {
+      const selected=options.resolveAsset!(id);this.pendingInputs?.assets.set(id,selected);return selected;
+    }} : {}),
       ...(options.resolveNode ? {resolveNode: (context: LayoutTextContext) => {
         const value = snapshotPlainTextData(options.resolveNode!(context), '$.layout.bindings', (path, message, limit) => fail(limit ? 'E_HYA_RUNTIME_LIMIT' : 'E_HYA_RUNTIME_LAYOUT', path, message), {strict: true, maxBytes: 64 * 1024 * 1024}) as PreparedLayoutNodeBindings;
         if (value.itemScope !== undefined && (typeof value.itemScope!=='string'||!value.itemScope) || value.scopes !== undefined && (!isMap(value.scopes) || Object.values(value.scopes).some(ids=>!Array.isArray(ids)||ids.some(id=>typeof id!=='string'||!id)))
           || value.items !== undefined && !Array.isArray(value.items) || value.inputs !== undefined && !isMap(value.inputs)
           || value.replacement !== undefined && value.replacement !== null && (typeof value.replacement !== 'string' || !this.nodes.has(value.replacement)))
           fail('E_HYA_RUNTIME_LAYOUT', '$.layout.bindings', 'invalid scoped list/component inputs');
+        this.pendingInputs?.bindings.set(this.evaluator.nodeKey(context.instanceId,context.node.id),{context,value:JSON.stringify(value)});
         return value;
       }} : {})});
     this.rootTransforms = new Map(roots.map(([id,matrix])=>[this.evaluator.rootKey(id),matrix]));
@@ -85,6 +101,17 @@ export class ProductionLayoutOwner {
     this.evaluating = true; this.request = request;
     this.widths = this.hintKey === hintKey ? this.widthHints : new Map(); this.priorText = this.textCache;
     try {
+      const {strings: _strings, styles: _styles, selections: _selections, cursors: _cursors, ...structural} = request;
+      const timed = this.document.artboards.some(board=>board.nodes.some(node=>node.component))
+        || Object.values(request.scroll??{}).some(value=>value.active!==false&&value.velocity?.some(axis=>axis!==0));
+      const inputKey=JSON.stringify({...structural,time:timed?request.time:0});
+      this.pendingInputs={key:inputKey,request,texts:new Map(),bindings:new Map(),assets:new Map()};
+      this.widths=this.widthHints;this.nextWidths=new Map();this.nextText=new Map();
+      this.glyphCounts={measure:0,arrange:0};this.lineCounts={measure:0,arrange:0};
+      const reused=this.reusePaint(request,key,hintKey,timed);
+      if (reused) return reused;
+      this.pendingInputs={key:inputKey,request,texts:new Map(),bindings:new Map(),assets:new Map()};
+      this.widths = this.hintKey === hintKey ? this.widthHints : new Map();
       const maximum = this.evaluator.limits.maxLayoutPasses;
       let result: LayoutEvaluation | undefined;
       for (let used = 0; used + 2 <= maximum; used += 2) {
@@ -96,34 +123,34 @@ export class ProductionLayoutOwner {
           const frame = this.frame(result, this.revision + 1);
           this.assertLive(); this.revision++; this.passes = used + 2;
           this.textCache = this.nextText; this.widthHints = this.nextWidths; this.hintKey = hintKey;
-          this.cached = Object.freeze({key, frame}); return frame;
+          this.cached = Object.freeze({key, frame}); this.layoutInputs=this.pendingInputs; return frame;
         }
         this.widths = this.nextWidths; this.priorText = this.nextText;
       }
       fail('E_HYA_RUNTIME_LIMIT', '$.layout', 'text/box constraints did not converge within the existing layout pass ceiling');
     } finally {
-      this.request = undefined; this.scopedText.clear(); this.widths = new Map(); this.nextWidths = new Map(); this.priorText = new Map(); this.nextText = new Map(); this.evaluating = false;
+      this.request = undefined; this.pendingInputs=undefined; this.scopedText.clear(); this.widths = new Map(); this.nextWidths = new Map(); this.priorText = new Map(); this.nextText = new Map(); this.evaluating = false;
     }
   }
 
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true; this.signal?.removeEventListener('abort', this.abort); this.evaluator.dispose();
-    this.cached = undefined; this.frameState = undefined; this.textCache.clear(); this.scopedText.clear(); this.widthHints.clear(); this.hintKey = undefined; this.priorText.clear(); this.nextText.clear();
+    this.cached = undefined; this.frameState = undefined; this.layoutInputs=undefined;this.pendingInputs=undefined; this.textCache.clear(); this.scopedText.clear(); this.widthHints.clear(); this.hintKey = undefined; this.priorText.clear(); this.nextText.clear();
   }
   /** Internal whole-player barrier; font handles remain with the borrowed prepared font owner. */
   captureFrame(): object {
     this.assertLive();
     if (this.evaluating || this.frameState) fail('E_HYA_RUNTIME_LAYOUT', '$.layout.frame', 'layout checkpoint requires an idle owner');
     const token = Object.freeze({});
-    this.frameState = {token, revision: this.revision, passes: this.passes, cached: this.cached, text: this.textCache, widths: this.widthHints, hint: this.hintKey};
+    this.frameState = {token, revision: this.revision, passes: this.passes, cached: this.cached, text: this.textCache, widths: this.widthHints, hint: this.hintKey,inputs:this.layoutInputs};
     return token;
   }
   releaseFrame(token: object): void {this.requireFrame(token); this.frameState = undefined;}
   restoreFrame(token: object): void {
     const frame = this.requireFrame(token);
     this.revision = frame.revision; this.passes = frame.passes; this.cached = frame.cached;
-    this.textCache = frame.text; this.widthHints = frame.widths; this.hintKey = frame.hint; this.frameState = undefined;
+    this.textCache = frame.text; this.widthHints = frame.widths; this.hintKey = frame.hint;this.layoutInputs=frame.inputs; this.frameState = undefined;
   }
   private requireFrame(token: object): NonNullable<ProductionLayoutOwner['frameState']> {
     this.assertLive();
@@ -134,42 +161,89 @@ export class ProductionLayoutOwner {
     return Object.freeze({revision: this.revision, layoutPasses: this.passes, shapes: this.shapes, cachedTextNodes: this.textCache.size, disposed: this.disposed});
   }
 
+  private reusePaint(request: ProductionLayoutRequest, key: string, hintKey: string, timed: boolean): ProductionLayoutFrame | undefined {
+    const prior=this.layoutInputs,pending=this.pendingInputs,committed=this.cached?.frame;
+    if (!prior || !pending || !committed || prior.key!==pending.key) return undefined;
+    for (const {context,value} of prior.bindings.values()) {
+      const next=this.evaluator.productionOptions?.resolveNode?.(context)??{};
+      if (JSON.stringify(next)!==value) return undefined;
+    }
+    for (const [id,selected] of prior.assets) if ((this.evaluator.getAsset(id)?.id??null)!==selected) return undefined;
+    this.paintRequest=prior.request;this.paintStylesSame=JSON.stringify(prior.request.styles)===JSON.stringify(request.styles);
+    try {for (const {block,context} of prior.texts.values()) this.shape(block,context);}
+    finally {this.paintRequest=undefined;this.paintStylesSame=false;}
+    for (const [id,phases] of this.textCache) for (const phase of ['measure','arrange'] as const) {
+      const old=phases[phase]?.result,next=this.nextText.get(id)?.[phase]?.result;
+      if (!old || !next || !sameMetrics(old,next)) return undefined;
+    }
+    let changed=false;
+    const nodes=committed.nodes.map(node=>{
+      const text=this.nextText.get(this.evaluator.nodeKey(node.instance,node.node))?.arrange?.result;
+      if (!text || text===node.text) return node;
+      changed=true;return Object.freeze({...node,text});
+    });
+    const frame=Object.freeze({...committed,revision:++this.revision,nodes:changed?Object.freeze(nodes):committed.nodes,
+      instances:timed?committed.instances:Object.freeze(committed.instances.map(instance=>Object.freeze({...instance,times:Object.freeze([request.time])})))});
+    this.textCache=this.nextText;this.widthHints=this.nextWidths;this.layoutInputs=pending;this.passes=0;this.hintKey=hintKey;
+    this.cached=Object.freeze({key,frame});return frame;
+  }
+
   private shape(block: string, context: LayoutTextContext | undefined): TextBlockPose {
     this.assertLive();
     if (!context || !this.request || !this.text) fail('E_HYA_RUNTIME_HOST_PORT', '$.text', 'instance-scoped prepared text is required');
     const id = this.evaluator.nodeKey(context.instanceId, context.node.id), phase = context.phase;
+    this.pendingInputs?.texts.set(JSON.stringify([id,phase]),{block,context});
+    const definition=this.blocks.get(block)!,priorEntry=this.priorText.get(id),previous=priorEntry?.[phase];
+    const historyKey=phase==='measure'?'measureHistory':'arrangeHistory',history=priorEntry?.[historyKey]??(previous?[previous]:[]);
+    if(previous&&!this.resolveText&&this.paintRequest&&this.paintStylesSame
+      &&samePorts(this.request.strings,this.paintRequest.strings,[...definition.runs.map(run=>run.valuePort),definition.input?.valuePort])
+      &&samePorts(this.request.selections,this.paintRequest.selections,[definition.input?.selectionPort])
+      &&samePorts(this.request.cursors,this.paintRequest.cursors,[definition.input?.cursorPort]))return this.retainShape(id,phase,previous,context,history);
     if (!this.scopedText.has(id)) {
       const scoped = snapshotPlainTextData(this.resolveText?.(block, context) ?? {}, '$.layout.bindings', (path, message, limit) => fail(limit ? 'E_HYA_RUNTIME_LIMIT' : 'E_HYA_RUNTIME_LAYOUT', path, message), {strict: true, maxBytes: 64 * 1024 * 1024}) as ScopedText;
       if (scoped.styles) this.validateStyles?.(scoped.styles); this.scopedText.set(id, scoped);
     }
     const scoped = this.scopedText.get(id)!;
-    const strings = {...this.request.strings, ...scoped.strings}, selections = {...this.request.selections, ...scoped.selections}, cursors = {...this.request.cursors, ...scoped.cursors};
+    // A different block's value must not invalidate every prepared glyph in
+    // the document. Validation of all supplied values already ran in snapshot.
+    const strings=ports([this.request.strings,scoped.strings],[...definition.runs.map(run=>run.valuePort),definition.input?.valuePort]);
+    const selections=ports([this.request.selections,scoped.selections],[definition.input?.selectionPort]);
+    const cursors=ports([this.request.cursors,scoped.cursors],[definition.input?.cursorPort]);
     const styles = {...this.request.styles, ...scoped.styles};
     for (const [key, style] of Object.entries(scoped.styles ?? {})) styles[key] = {...this.request.styles?.[key], ...style};
     const width = phase === 'arrange' ? context.rect!.width : this.widths.get(id);
-    const request: ProductionTextRequest = {block,...(this.editableText&&this.document.textBlocks.find(b=>b.id===block)?.input?{editingViewport:true}:{}), dpr: this.request.dpr,
+    const request: ProductionTextRequest = {block,...(this.editableText&&definition.input?{editingViewport:true}:{}), dpr: this.request.dpr,
       ...(phase === 'arrange' ? {rasterOrigin: [context.rect!.x, context.rect!.y] as const} : {}),
       ...(Object.keys(strings).length ? {strings} : {}), ...(Object.keys(selections).length ? {selections} : {}),
       ...(Object.keys(cursors).length ? {cursors} : {}), ...(Object.keys(styles).length ? {styles} : {}),
       constraints: {width: width === undefined ? {mode: 'unbounded'} : {mode: 'exact', value: width},
         height: phase === 'arrange' ? {mode: 'exact', value: context.rect!.height} : {mode: 'unbounded'}}};
-    const key = JSON.stringify(request), previous = this.priorText.get(id)?.[phase];
+    const key = JSON.stringify(request);
+    const retained = history.find(value => value.key === key);
     let shaped: Shaped;
-    if (previous?.key === key) shaped = previous;
+    if (retained) shaped = retained;
     else {
       const result = this.text.shape(request); this.assertLive();
       shaped = Object.freeze({key, result: snapshotTextResult(result, request, this.document)}); this.shapes++;
     }
-    const result = shaped.result;
+    return this.retainShape(id,phase,shaped,context,history);
+  }
+
+  private retainShape(id:string,phase:'measure'|'arrange',shaped:Shaped,context:LayoutTextContext,history:readonly Shaped[]):TextBlockPose {
+    const result = shaped.result,historyKey=phase==='measure'?'measureHistory':'arrangeHistory';
     this.glyphCounts[phase] += result.runs.reduce((count, run) => count + run.glyphs.length, 0);
     this.lineCounts[phase] += result.lines.length;
     if (this.glyphCounts[phase] > this.evaluator.limits.maxGlyphs || this.lineCounts[phase] > this.evaluator.limits.maxLines)
       fail('E_HYA_RUNTIME_LIMIT', '$.layout.text', 'expanded text exceeds the existing glyph/line ceilings');
-    const entry = this.nextText.get(id) ?? {}; entry[phase] = shaped; this.nextText.set(id, entry);
+    const entry = this.nextText.get(id) ?? {}; entry[phase] = shaped;
+    // Keep only three exact immutable requests per node/phase. Repeated values
+    // reuse prepared paint; arbitrary edits cannot grow an unbounded history.
+    entry[historyKey] = Object.freeze([shaped, ...history.filter(value => value !== shaped)].slice(0,3));
+    this.nextText.set(id, entry);
     if (phase === 'arrange') this.nextWidths.set(id, context.rect!.width);
     // Only metrics cross back into the legacy evaluator. Real paint is retained separately,
     // without lossy conversion through its diagnostic glyph rectangles.
-    return Object.freeze({id: block, width: result.size[0], height: result.size[1], contentWidth: result.contentSize[0], contentHeight: result.contentSize[1], glyphs: Object.freeze([]), lines: Object.freeze([]), controls: Object.freeze([])});
+    return Object.freeze({id: result.block, width: result.size[0], height: result.size[1], contentWidth: result.contentSize[0], contentHeight: result.contentSize[1], glyphs: Object.freeze([]), lines: Object.freeze([]), controls: Object.freeze([])});
   }
 
   private frame(layout: LayoutEvaluation, revision: number): ProductionLayoutFrame {
@@ -260,6 +334,17 @@ export class ProductionLayoutOwner {
 
 function sameWidths(a: ReadonlyMap<string, number>, b: ReadonlyMap<string, number>): boolean {
   return a.size === b.size && [...a].every(([key, width]) => b.get(key) === width);
+}
+function sameMetrics(a: ProductionTextResult,b: ProductionTextResult): boolean {
+  return a.size.every((value,index)=>value===b.size[index])&&a.contentSize.every((value,index)=>value===b.contentSize[index]);
+}
+function ports<T>(sources: readonly (Readonly<Record<string,T>>|undefined)[], names: readonly (string|undefined)[]): Record<string,T> {
+  const result:Record<string,T>={};
+  for(const source of sources)for(const name of names)if(name!==undefined&&source&&Object.prototype.hasOwnProperty.call(source,name))result[name]=source[name]!;
+  return result;
+}
+function samePorts<T>(a:Readonly<Record<string,T>>|undefined,b:Readonly<Record<string,T>>|undefined,names:readonly(string|undefined)[]):boolean {
+  return names.every(name=>name===undefined||JSON.stringify(a?.[name])===JSON.stringify(b?.[name]));
 }
 function isMap(value: unknown): value is Record<string, unknown> {return value !== null && typeof value === 'object' && !Array.isArray(value);}
 function isVector(value: unknown, size: number): value is number[] {return Array.isArray(value) && value.length === size && value.every(item => typeof item === 'number' && Number.isFinite(item));}

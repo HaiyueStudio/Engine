@@ -17,6 +17,48 @@ async function setup(mutate = () => {}, options = {}, limits) {
 const request = (width = 240, extra = {}) => ({viewport: [width, 600], dpr: 1, time: 0, ...extra});
 const textNodes = frame => frame.nodes.filter(node => node.kind === 'text');
 
+test('paint-only text and selection changes reuse settled layout; changed metrics still reflow', async () => {
+  const env=await setup();
+  try {
+    const first=env.layout.evaluate(request()),box=textNodes(first)[0].rect;
+    const colored=env.layout.evaluate(request(240,{styles:{body:{fills:[{source:{kind:'solid',color:[1,0,0,1]}}]}}}));
+    assert.equal(env.layout.stats.layoutPasses,0,'paint must not invoke the box solver');
+    assert.deepEqual(textNodes(colored)[0].rect,box);assert.equal(textNodes(colored)[0].text.runs[0].style.fills[0].source.color[0],1);
+    const selected=env.layout.evaluate(request(240,{selections:{selection:[0,1]},cursors:{cursor:1}}));
+    assert.equal(env.layout.stats.layoutPasses,0);assert.ok(textNodes(selected)[0].text.controls.length);
+    const large=env.layout.evaluate(request(240,{styles:{body:{fontSize:140,lineHeight:168}}}));
+    assert.ok(env.layout.stats.layoutPasses>0);assert.ok(textNodes(large)[0].rect[3]>box[3]);
+  } finally {env.dispose();}
+});
+
+test('changing one text port does not reshape an unrelated block or solve equal-width boxes', async () => {
+  const env=await setup(source=>{
+    const block=structuredClone(source.textBlocks[0]);block.id='other';block.runs[0].valuePort='otherValue';block.input.valuePort='otherValue';source.textBlocks.push(block);
+    source.artboards[0].nodes.push({id:'other',parent:'root',kind:'text',text:'other',style:{width:point(240),height:{unit:'hug'}}});
+  });
+  try {
+    const first=env.layout.evaluate(request(240,{strings:{value:'ABA',otherValue:'ABA'}})),shapes=env.layout.stats.shapes;
+    const next=env.layout.evaluate(request(240,{strings:{value:'ABA',otherValue:'BAB'}}));
+    assert.equal(env.layout.stats.layoutPasses,0);assert.equal(env.layout.stats.shapes-shapes,2,'only changed block measure/arrange may shape');
+    assert.equal(textNodes(next)[0].text,textNodes(first)[0].text);assert.notEqual(textNodes(next)[1].text,textNodes(first)[1].text);
+  } finally {env.dispose();}
+});
+
+test('repeated exact paint requests reuse bounded per-node results and evict old edits', async () => {
+ const env=await setup();
+ try{
+  const values=['ABA','BAB','AAA'];for(const value of values)env.layout.evaluate(request(240,{strings:{value}}));
+  const prepared=env.layout.stats.shapes;
+  for(let index=0;index<12;index++)env.layout.evaluate(request(240,{time:index,strings:{value:values[index%3]}}));
+  assert.equal(env.layout.stats.shapes,prepared);
+  env.layout.evaluate(request(240,{strings:{value:'BBB'}}));
+  const afterNew=env.layout.stats.shapes;assert.ok(afterNew>prepared);
+  env.layout.evaluate(request(240,{strings:{value:'ABA'}}));assert.ok(env.layout.stats.shapes>afterNew,'least recently used paint must be evicted');
+  const committed=env.layout.evaluate(request(240,{strings:{value:'ABA'}})),token=env.layout.captureFrame();env.layout.evaluate(request(240,{strings:{value:'BAB'}}));env.layout.restoreFrame(token);
+  assert.equal(env.layout.evaluate(request(240,{strings:{value:'ABA'}})),committed);
+ }finally{env.dispose();}
+});
+
 test('real text/layout snapshots retain authored selection radius and rounded ancestor clip shapes', async () => {
   const env = await setup(source => {source.textBlocks[0].input.selectionRadius = 4; source.artboards[0].nodes[0].visual = {clip: true, cornerRadius: [6, 7, 8, 9]};});
   try {

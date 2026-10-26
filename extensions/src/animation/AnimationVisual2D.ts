@@ -195,9 +195,9 @@ export class AnimationVisual2D extends Component {
     try { return this.textureHandle.value; } catch { return null; }
   }
 
-  override clone(): AnimationVisual2D {
+  override clone(storage: Readonly<{geometry?: Geometry2D; uvs?: Float32Array}> = {}): AnimationVisual2D {
     return new AnimationVisual2D({
-      geometry: this.geometry,
+      geometry: storage.geometry ?? this.geometry,
       color: this.color,
       multiplyColor: this.multiplyColor,
       screenColor: this.screenColor,
@@ -207,7 +207,7 @@ export class AnimationVisual2D extends Component {
       blendMode: this.blendMode,
       textureAlphaMode: this.textureAlphaMode,
       culling: this.culling,
-      ...(this.uvs ? { uvs: this.uvs } : {}),
+      ...(this.uvs ? { uvs: storage.uvs ?? this.uvs } : {}),
       sourceOnly: this.sourceOnly,
       ...(this.compositeLayers.length === 0 ? {} : { composite: { layers: this.compositeLayers } }),
       texture: this.texture,

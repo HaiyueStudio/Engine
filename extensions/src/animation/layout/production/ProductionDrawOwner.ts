@@ -6,6 +6,7 @@ import {Animation2DRenderSystem} from '../../Animation2DRenderSystem.js';
 import type {PreparedProductionFrameStep} from '../../production/FrameTransaction.js';
 import {compileProductionDrawPlan, ProductionDrawError, type ProductionDrawPlan, type ProductionDrawTextures} from './ProductionDrawPlan.js';
 import type {ProductionLayoutFrame} from './types.js';
+import {reuseProductionDrawStorage} from './ProductionDrawReuse.js';
 
 interface Slot {readonly renderer: Animation2DRenderSystem;}
 interface Generation {
@@ -66,7 +67,8 @@ export class ProductionDrawOwner {
   private prepareGeneration(frames: readonly ProductionLayoutFrame[], resourceRevision: string, identity: object | undefined, compile: () => ProductionDrawPlan): PreparedProductionFrameStep {
     this.preparing = true; let next: Generation | undefined, prepared: ProductionDrawPlan | undefined;
     try {
-      const plan = prepared = compile();
+      prepared = compile();
+      const plan = prepared = reuseProductionDrawStorage(prepared,this.current?.plan);
       if (plan.viewport.length !== 2 || plan.viewport.some(value => !Number.isFinite(value) || value <= 0) || !Number.isFinite(plan.dpr) || plan.dpr <= 0
         || !Number.isSafeInteger(plan.geometryBytes) || plan.geometryBytes < 0) fail('E_HYA_RUNTIME_DRAW', '$.draw.plan', 'compiled draw plan has invalid dimensions or accounting');
       plan.assertReady();
@@ -85,7 +87,16 @@ export class ProductionDrawOwner {
       this.live(); this.pending = next;
       let generation: Generation | undefined = next, previous = this.current, closed = false, committed = false;
       return Object.freeze({value: Object.freeze({generation: next.id, visuals: plan.visuals.length}),
-        commit: () => {if (closed) return; closed = true; this.pending = undefined; const value = generation; generation = undefined; if (!this.disposed && value && !value.destroyed) {this.current = value; committed = true;}},
+        commit: () => {if (closed) return; closed = true; this.pending = undefined; const value = generation; generation = undefined; if (!this.disposed && value && !value.destroyed) {
+          // Submitted work is ordered on the same queue. Open recordings must
+          // retain their own world, bindings and geometry until close + fence.
+          if (previous && previous.recordings === 0) for (const slot of [...previous.slots]) {
+            if (slot.renderer.rebindPreparedWorld(previous.world,value.world,value.camera)) {
+              previous.slots.splice(previous.slots.indexOf(slot),1); value.slots.push(slot);
+            }
+          }
+          this.current = value; committed = true;
+        }},
         rollback: () => {if (closed) return; closed = true; this.pending = undefined; const value = generation; generation = undefined; if (value) this.retire(value);},
         finalize: () => {if (!committed) return; const value = previous; previous = undefined; if (value) this.retire(value);},
       });

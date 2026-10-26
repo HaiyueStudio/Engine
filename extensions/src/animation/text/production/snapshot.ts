@@ -2,6 +2,10 @@ import type {RuntimeLayoutDocument} from '../../layout/parameterized/runtime-typ
 import type {ProductionGlyph, ProductionGlyphRun, ProductionTextRequest, ProductionTextResult} from './types.js';
 import {snapshotPlainTextData} from '../PlainTextData.js';
 import {textContent,textClusters} from '../parameterized/TextContent.js';
+const validatedResults=new WeakMap<object,Readonly<{request:ProductionTextRequest;document:RuntimeLayoutDocument}>>();
+function immutableMetadata(value:unknown):boolean {
+  return !value||typeof value!=='object'||Object.isFrozen(value)&&Object.values(value).every(immutableMetadata);
+}
 
 export class ProductionTextError extends Error {
   override readonly name = 'ProductionTextError';
@@ -25,7 +29,9 @@ function offset(value: number, text: string, path: string): void {
   integer(value, path);
   if (value > text.length || value > 0 && value < text.length && /[\uD800-\uDBFF]/u.test(text[value - 1]!) && /[\uDC00-\uDFFF]/u.test(text[value]!)) textFail('E_HYA_RUNTIME_TEXT', path, 'offset is outside the text or splits a UTF-16 surrogate pair');
 }
-export function snapshotTextResult(value: ProductionTextResult, request: ProductionTextRequest, document: RuntimeLayoutDocument): ProductionTextResult {
+export function snapshotTextResult(value: ProductionTextResult, request: ProductionTextRequest, document: RuntimeLayoutDocument, originalRequest: ProductionTextRequest = request): ProductionTextResult {
+  const validated=value&&validatedResults.get(value);
+  if(validated?.request===request&&validated.document===document)return value;
   const path = '$.host.fonts.shape';
   if (!value || value.block !== request.block) textFail('E_HYA_RUNTIME_TEXT', path, 'font result does not match the requested block');
   const size = vector(value.size, 2, `${path}.size`, true) as readonly [number, number];
@@ -40,13 +46,20 @@ export function snapshotTextResult(value: ProductionTextResult, request: Product
   dense(value.runs, path + '.runs'); dense(value.lines, path + '.lines'); dense(value.controls, path + '.controls');
   const fonts = new Set(document.assets.filter(asset => asset.kind === 'font').map(asset => asset.id));
   const styles = new Map(document.textStyles.map(style => [style.id, style])); let glyphs = 0, commands = 0;
+  const preparedStyles=new WeakMap<object,ReturnType<typeof snapshotTextData>>(),expectedStyles=new Map<string,string>();
   const runs: ProductionGlyphRun[] = value.runs.map((run, runIndex) => {
     const p = `${path}.runs[${runIndex}]`, original = run?.style && styles.get(run.style.id);
     if (!run || !original || !fonts.has(run.font) || !Array.isArray(run.glyphs)) textFail('E_HYA_RUNTIME_TEXT', p, 'font run references an unknown style or font');
     dense(run.glyphs, p + '.glyphs');
-    const expected = {...original, ...(request.styles?.[original.id] ?? {})};
-    const style = snapshotTextData(run.style, p + '.style');
-    if (JSON.stringify(style) !== JSON.stringify(snapshotTextData(expected, p + '.expectedStyle'))) textFail('E_HYA_RUNTIME_TEXT', p + '.style', 'font result uses stale style data');
+    let style=preparedStyles.get(run.style);
+    if(!style){
+      const expected = {...original, ...(request.styles?.[original.id] ?? {})};
+      let expectedKey=expectedStyles.get(original.id);
+      if(expectedKey===undefined){expectedKey=JSON.stringify(snapshotTextData(expected,p+'.expectedStyle'));expectedStyles.set(original.id,expectedKey);}
+      style=snapshotTextData(run.style,p+'.style');
+      if(JSON.stringify(style)!==expectedKey)textFail('E_HYA_RUNTIME_TEXT',p+'.style','font result uses stale style data');
+      if(immutableMetadata(run.style))preparedStyles.set(run.style,style);
+    }
     if (!run.style.fontAssets.includes(run.font)) textFail('E_HYA_RUNTIME_TEXT', p + '.font', 'font is outside the requested fallback chain');
     if ((glyphs += run.glyphs.length) > 1_000_000) textFail('E_HYA_RUNTIME_LIMIT', p, 'glyph ceiling exceeded');
     const output: ProductionGlyph[] = run.glyphs.map((glyph: ProductionGlyph, glyphIndex: number) => {
@@ -89,5 +102,8 @@ export function snapshotTextResult(value: ProductionTextResult, request: Product
     const cells=e.cells.map(c=>{if(!c||!boundaries.has(c.start)||!boundaries.has(c.end)||c.end<=c.start)textFail('E_HYA_RUNTIME_TEXT',path+'.editing.range','editing cell must use nonempty grapheme boundaries');line(c.line);return Object.freeze({start:c.start,end:c.end,line:c.line,rect:rect(c.rect,path+'.editing.cell')});});
     editing=Object.freeze({text:e.text,carets:Object.freeze(carets),cells:Object.freeze(cells)});
   }
-  return Object.freeze({...(editing?{editing}:{}),block: value.block, size, contentSize, runs: Object.freeze(runs), lines: Object.freeze(lines), controls: Object.freeze(controls)});
+  const result=Object.freeze({...(editing?{editing}:{}),block: value.block, size, contentSize, runs: Object.freeze(runs), lines: Object.freeze(lines), controls: Object.freeze(controls)});
+  // Only this validator brands its immutable output. The original request
+  // identity lets the borrowing layout owner avoid a second glyph/style copy.
+  validatedResults.set(result,{request:originalRequest,document});return result;
 }

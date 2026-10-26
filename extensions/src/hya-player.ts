@@ -39,6 +39,8 @@ export interface HyaPlayerHost {
   diagnostic?(diagnostic: HyaDiagnostic): void;
 }
 export interface HyaPlayerOptions {
+  /** Borrow an existing G04 region; the host owns its bounds, policy, GUI mapping and disposal. */
+  readonly region?: ReturnType<Scene['renderView']['createRegion']>;
   readonly host: HyaPlayerHost; readonly scene?: Scene; readonly gui?: GuiSystem; readonly root?: GuiRoot; readonly mode: 'evaluate' | 'render';
   readonly viewport: readonly [number, number]; readonly dpr?: number; readonly signal?: AbortSignal;
   readonly parse?: HyaCompositionParseOptions;

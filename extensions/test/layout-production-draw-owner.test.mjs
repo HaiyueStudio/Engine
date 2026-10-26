@@ -20,6 +20,16 @@ function setup(options={}){
  return {device,engine,owner,world,context,fences,diagnostics,notifyLoss:()=>loss.resolve({reason:'destroyed',message:'controlled audit loss notification'}),commit(value,revision){const step=owner.prepare([value],revision);step.commit();step.finalize?.();return step},get acquired(){return acquired},get released(){return released},snapshot:()=>getAuditGpuDeviceState(device).snapshot()};
 }
 
+test('submitted paint-only generations reuse geometry and object buffers; open recordings keep immutable storage',async()=>{
+ const f=setup();f.commit(frame());let context=f.context();f.owner.record(f.world,context);context.submit();
+ const allocated=()=>f.snapshot().calls.filter(call=>call.method==='device.createBuffer').length;
+ const initial=allocated();
+ for(let i=0;i<12;i++){f.commit(frame([i/12,0,1,1]));context=f.context();f.owner.record(f.world,context);context.submit();assert.equal(allocated(),initial,'unchanged topology must reuse physical buffers');}
+ for(let i=0;i<12;i++){const changed=frame();changed.nodes[0].rect=[10,20,41+i,40];f.commit(changed);context=f.context();f.owner.record(f.world,context);context.submit();assert.equal(allocated(),initial,'changed vertices within capacity must reuse physical buffers');}
+ const pending=f.context();f.owner.record(f.world,pending);f.commit(frame([0,1,0,1]));const next=f.context();f.owner.record(f.world,next);assert.ok(allocated()>initial,'unsubmitted generation needs its own immutable storage');pending.cancel();next.submit();
+ f.owner.dispose();for(const fence of f.fences)fence.resolve();await settle();assert.equal(f.owner.stats.retainedGenerations,0);
+});
+
 test('uncommitted and rolled-back plans cannot draw or replace the last committed generation',async()=>{
  const f=setup(),a=frame(),before=f.owner.prepare([a]);assert.throws(()=>f.owner.record(f.world,f.context()),e=>e.code==='E_HYA_RUNTIME_DRAW');before.rollback();assert.equal(f.owner.stats.retainedGenerations,0);
  f.commit(a);const committed=f.owner.stats.generation,candidate=f.owner.prepare([frame([0,1,0,1])]);candidate.rollback();assert.equal(f.owner.stats.generation,committed);assert.equal(f.owner.stats.retainedGenerations,1);f.owner.dispose();await settle();assert.equal(f.owner.stats.retainedGenerations,0);

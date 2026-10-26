@@ -75,6 +75,8 @@ interface GeometryGpu {
   vertexCount: number;
   indexFormat: GPUIndexFormat;
   version: number;
+  uploadedVertices: Float32Array;
+  uploadedIndices: Uint16Array | Uint32Array | null;
 }
 
 interface MaskTarget {
@@ -377,6 +379,47 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     return { pass: 'isolated' as const, loadOp: this.loadOp, sort: this.priority };
   }
 
+  /** @internal Transfer idle prepared storage; an open encoder must keep its immutable bindings. */
+  rebindPreparedWorld(previous: World, next: World, camera: Entity): boolean {
+    if (this.bindGroupRecordings.size) return false;
+    const prior = new Map<string, number>(), duplicates = new Set<string>();
+    for (const entity of previous.entities.values()) {
+      const visual = entity.getComponent(AnimationVisual2D.UniqueSymbol) as AnimationVisual2D | null;
+      if (!visual) continue;
+      if (prior.has(visual.nodeKey)) duplicates.add(visual.nodeKey);
+      prior.set(visual.nodeKey,entity.id);
+    }
+    const targets = new Map<string, Entity>();
+    for (const entity of next.entities.values()) {
+      const visual = entity.getComponent(AnimationVisual2D.UniqueSymbol) as AnimationVisual2D | null;
+      if (!visual) continue;
+      if (targets.has(visual.nodeKey)) duplicates.add(visual.nodeKey);
+      targets.set(visual.nodeKey,entity);
+    }
+    const previousGeometry = new Map<string, number>(), nextGeometry = new Map<string, number>();
+    for (const world of [previous,next]) for (const entity of world.entities.values()) {
+      const visual = entity.getComponent(AnimationVisual2D.UniqueSymbol) as AnimationVisual2D | null;
+      if (visual) {const map=world===previous?previousGeometry:nextGeometry,key=this.geometryKey(visual);map.set(key,(map.get(key)??0)+1);}
+    }
+    for (const [key,entity] of targets) {
+      const old = prior.get(key), gpu = old === undefined ? undefined : this.entityGpu.get(old);
+      if (!gpu || duplicates.has(key)) continue;
+      this.entityGpu.delete(old!); this.entityGpu.set(entity.id,gpu);
+      const before = previous.entities.get(old!)?.getComponent(AnimationVisual2D.UniqueSymbol) as AnimationVisual2D | null;
+      const after = entity.getComponent(AnimationVisual2D.UniqueSymbol) as AnimationVisual2D;
+      if (before) {
+        const from=this.geometryKey(before),to=this.geometryKey(after),storage=this.geometryGpu.get(from),geometry=after.geometry;
+        if (from!==to && storage && !this.geometryGpu.has(to) && previousGeometry.get(from)===1 && nextGeometry.get(to)===1
+          && storage.vertexBuffer.size>=geometry.positions.byteLength*2
+          && (geometry.indices?.length ? !!storage.indexBuffer && storage.indexBuffer.size>=alignUp4(geometry.indices.byteLength) : !storage.indexBuffer)) {
+          this.geometryGpu.delete(from); storage.version=-1; this.geometryGpu.set(to,storage);
+        }
+      }
+    }
+    previous.removeSystem(this); next.addSystem(this); this.setCameraEntity(camera);
+    return true;
+  }
+
   record(world: World, context: RenderCommandContext): this {
     if (this.disabled) return this;
     if (!this.rendererReady) this.prepare();
@@ -484,6 +527,9 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
 
     const pending: Array<{ item: AnimationRenderItem; composite: GPUBindGroup }> = [];
     const outputFormat = context.view?.target.format ?? this.engine.format;
+    // Regional color-only passes explicitly omit depth. Match the borrowed
+    // attachment contract instead of constructing an incompatible pipeline.
+    const outputWithDepth = context.descriptor ? !!context.descriptor.depthStencilAttachment : true;
     let firstOutputSegment = true;
     let visualCount = 0;
     const flushOutput = (effectItem?: AnimationRenderItem, effectTexture?: GPUTexture, final = false): void => {
@@ -496,7 +542,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
         passEncoder.setPipeline(this.getPipeline(
           outputFormat,
           context.view?.sampleCount ?? this.engine.msaaSamples,
-          true,
+          outputWithDepth,
           context.view?.reverseZ ?? this.engine.reverseZ,
           entry.item.visual.blendMode,
           entry.item.visual.textureAlphaMode,
@@ -508,7 +554,7 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       pending.length = 0;
       if (effectItem && effectTexture) {
         passEncoder.setPipeline(this.getPresentPipeline(
-          outputFormat, context.view?.sampleCount ?? this.engine.msaaSamples, true, context.view?.reverseZ ?? this.engine.reverseZ,
+            outputFormat, context.view?.sampleCount ?? this.engine.msaaSamples, outputWithDepth, context.view?.reverseZ ?? this.engine.reverseZ,
         ));
         this.drawEffectResult(passEncoder, effectItem.entity, effectTexture);
         visualCount++;
@@ -964,6 +1010,20 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
     const key = this.geometryKey(visual);
     let gpu = this.geometryGpu.get(key);
     if (gpu && gpu.version === geometry.version) return gpu;
+    if (gpu && gpu.vertexBuffer.size >= geometry.positions.byteLength*2
+      && (geometry.indices?.length ? !!gpu.indexBuffer && gpu.indexBuffer.size>=alignUp4(geometry.indices.byteLength) : !gpu.indexBuffer)) {
+      const device=requireEngineDevice(this.engine),vertices=buildVertices(geometry.positions,visual.uvs);
+      gpu.uploadedVertices=uploadChangedFloats(device.queue,gpu.vertexBuffer,vertices,gpu.uploadedVertices);
+      if (geometry.indices && gpu.indexBuffer) {
+        const previous=gpu.uploadedIndices;
+        if (!previous || previous.constructor!==geometry.indices.constructor || previous.length!==geometry.indices.length || !geometry.indices.every((value,index)=>value===previous[index]))
+          writeBufferAligned(device.queue,gpu.indexBuffer,geometry.indices);
+        gpu.uploadedIndices=geometry.indices.slice();
+      }
+      gpu.vertexCount=geometry.vertexCount;gpu.indexCount=geometry.indices?.length??0;
+      gpu.indexFormat=geometry.indices instanceof Uint32Array?'uint32':'uint16';gpu.version=geometry.version;
+      return gpu;
+    }
     if (gpu) this.destroyGeometryGpu(gpu);
     const vertices = buildVertices(geometry.positions, visual.uvs);
     const device = requireEngineDevice(this.engine);
@@ -985,6 +1045,8 @@ export class Animation2DRenderSystem extends RenderSystem2DBase {
       vertexCount: geometry.vertexCount,
       indexFormat: geometry.indices instanceof Uint32Array ? 'uint32' : 'uint16',
       version: geometry.version,
+      uploadedVertices: new Float32Array(vertices),
+      uploadedIndices: geometry.indices?.slice() ?? null,
     };
     this.geometryGpu.set(key, gpu);
     return gpu;
@@ -1294,9 +1356,14 @@ function isFullyTransparent(visual: AnimationVisual2D): boolean {
 }
 
 function uploadChangedFloats(queue: GPUQueue, buffer: GPUBuffer, source: Float32Array, previous: Float32Array | null): Float32Array {
-  if (previous?.length === source.length && source.every((value, index) => value === previous[index])) return previous;
-  queue.writeBuffer(buffer, 0, source as ArrayBufferView<ArrayBuffer>);
-  if (previous?.length === source.length) {previous.set(source); return previous;}
+  let first=0,last=source.length;
+  if (previous?.length===source.length) {
+    while(first<last && Object.is(source[first],previous[first])) first++;
+    while(last>first && Object.is(source[last-1],previous[last-1])) last--;
+    if (first===last) return previous;
+  }
+  queue.writeBuffer(buffer, first*4, source.subarray(first,last) as ArrayBufferView<ArrayBuffer>);
+  if (previous?.length === source.length) {previous.set(source.subarray(first,last),first); return previous;}
   return new Float32Array(source);
 }
 

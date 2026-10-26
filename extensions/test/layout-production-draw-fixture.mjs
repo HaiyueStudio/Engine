@@ -6,7 +6,7 @@ import {pathToFileURL,fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 const root=fileURLToPath(new URL('../..',import.meta.url));
-export async function buildProductionDrawCandidate(){
+export async function buildProductionDrawCandidate({composition=false}={}){
  const out=resolve(root,'artifacts/engine-0.2.2/g11/draw-candidate-'+Date.now());mkdirSync(out,{recursive:true});
  const virtual=resolve(root,'extensions/src/animation/layout/production/private-draw-fixture.ts');if(existsSync(virtual))throw Error('Virtual fixture source collides with a real file');
  const source=`export {ProductionDrawOwner} from './ProductionDrawOwner.js';
@@ -18,6 +18,7 @@ export {createProductionBrowserFontPort} from '../../text/production/ProductionB
 export {createProductionOutlineFontPort} from '../../text/production/ProductionOutlineFontPort.js';
 export {LayoutAssetOwner} from '../parameterized/AssetOwner.js';
 export {ProductionCompositionOwner} from '../../production/CompositionOwner.js';
+${composition ? "export {ProductionCompositionDrawAdapter} from '../../production/CompositionDrawAdapter.js';" : ''}
 export {ProductionResourcePending} from '../../production/ResourceStage.js';`;
  const bundle=await rollup({input:virtual,external:id=>id.startsWith('@haiyue/engine')||id.startsWith('@haiyue/animation-spec')||['earcut','opentype.js','wgpu-matrix','polygon-clipping/dist/polygon-clipping.esm.js'].includes(id),plugins:[{
   name:'private-source-draw-candidate',resolveId(id,importer){if(resolve(id)===virtual)return virtual;if(!id.startsWith('.'))return null;const p=resolve(dirname(importer),id);for(const value of[p,p.replace(/\.js$/u,'.ts'),p+'.ts',resolve(p,'index.ts')])if(existsSync(value))return value;return null;},

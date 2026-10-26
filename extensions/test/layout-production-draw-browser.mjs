@@ -78,6 +78,19 @@ try{
  const imagePng=image.toDataURL(),imageBytes=new Uint8Array(await(await fetch(imagePng)).arrayBuffer()),digest=new Uint8Array(await crypto.subtle.digest('SHA-256',imageBytes)),integrity='sha256-'+btoa(String.fromCharCode(...digest));
  const base=structuredClone(source);base.assets.push({id:'image',kind:'image',width:8,height:8,source:{kind:'embedded',data:[...imageBytes],integrity}});base.artboards[0].width=width;base.artboards[0].height=height;base.artboards[0].nodes[1].style={width:point(240),height:{unit:'hug'}};base.artboards[0].nodes.push({id:'after',parent:'root',kind:'leaf',style:{width:point(12),height:point(8)},visual:{background:[.8,.1,.2,1]}});
  base.textBlocks[0].input.selectionRadius=4;const documentValue=parseResponsiveLayoutDocument(base);assets=new LayoutAssetOwner(documentValue,{policy:{mode:'deny'}});text=new ProductionTextOwner(documentValue,createProductionBrowserFontPort(assets,{maxBitmapBytes:16*1024*1024}));await text.prepare();resources=new ProductionTextureOwner(engine,new Map([['',assets],['layout',assets]]),{maxTextureBytes:16*1024*1024,maxBitmapBytes:16*1024*1024,maxEntries:512,maxConcurrent:4});
+ {
+  const incremental=makeDraw();let initialBuffers;
+  for(let frame=0;frame<8;frame++){
+   const beforeBuffers=getEngineDiagnosticsSnapshot(engine).gpuResources.byType.buffer?.created??0;
+   const color=[frame/10,.2,.3,1],rect=[16,20,40+frame,24],value={revision:frame,viewport:[width,height],dpr,instances:[],nodes:[{part:'g12',instance:'root',artboard:'main',node:'box',kind:'leaf',rect,opacity:1,background:color,borderWidth:[0,0,0,0],cornerRadius:[0,0,0,0]}]};
+   await commit(incremental.owner,value);incremental.pipeline.execute(world,frame,0);
+   const allocated=(getEngineDiagnosticsSnapshot(engine).gpuResources.byType.buffer?.created??0)-beforeBuffers;
+   if(frame===0)initialBuffers=allocated;else check(allocated===0,'incremental paint/vertices allocated new physical buffers: '+allocated);
+   const expected=reference();expected.context.fillStyle=css(color);expected.context.fillRect(...rect);
+   await compare('g12-reused-storage-pixels-'+frame,expected,{owner:incremental.owner,capture:frame===7});
+  }
+  cases.push({id:'g12-same-capacity-physical-buffer-reuse',frames:8,initialBuffers,subsequentAllocations:0});await closeDraw(incremental);
+ }
  const variants=[{id:'real-wide',w:240,value:'ABA',lines:['ABA']},{id:'real-narrow',w:150,value:'ABA',lines:['AB','A']},{id:'real-emoji',w:240,value:'A😀B',lines:['A😀B']},{id:'real-rounded-selection',w:240,value:'ABA',lines:['ABA'],selection:true},{id:'real-rtl-alpha',w:150,value:'אבב',lines:['אבב'],style:{direction:'rtl',fontSize:50,lineHeight:60,fills:[{source:{kind:'solid',color:[.2,.4,.6,.5]}}]}},{id:'real-fractional-small',w:100,value:'ABAABAABAABA',lines:['ABAAB','AABAA','BA'],style:{fontSize:24,lineHeight:28.8},origin:[20.25,12.5],opacity:.5},{id:'empty-real-caret',w:150,value:'',lines:[''],caret:true}];
  for(const variant of variants){const doc=structuredClone(documentValue);doc.artboards[0].nodes[1].style.width=point(variant.w);if(variant.origin){doc.artboards[0].nodes[0].style.padding=[point(variant.origin[0]),point(variant.origin[1]),point(0),point(0)];doc.artboards[0].nodes[0].visual={opacity:variant.opacity,clip:true};}
   const layout=new ProductionLayoutOwner(doc,text);layouts.push(layout);const frame=layout.evaluate({viewport:[width,height],dpr,time:0,strings:{value:variant.value},...(variant.style?{styles:{body:variant.style}}:{}),...(variant.caret?{cursors:{cursor:0}}:{}),...(variant.selection?{selections:{selection:[0,1]}}:{})}),draw=makeDraw();await commit(draw.owner,frame);draw.pipeline.execute(world,0,0);

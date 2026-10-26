@@ -101,8 +101,8 @@ export function corpusAssetPath(relativePath) {
   return path;
 }
 
-export function generatedHyaPath(id) {
-  return resolve(GENERATED_ROOT, `${safeId(id)}.hya`);
+export function generatedHyaPath(id, directory = GENERATED_ROOT) {
+  return resolve(directory, `${safeId(id)}.hya`);
 }
 
 export function entrySizeClass(entry) {

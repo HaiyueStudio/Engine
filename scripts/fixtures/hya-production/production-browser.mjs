@@ -1,0 +1,57 @@
+import {createProductionScene} from '/g12-production/production-scene.mjs';
+import {createHyaPlayer} from '@haiyue/extensions/hya-player';
+import {parseHyaComposition} from '@haiyue/animation-spec/hya-production';
+import {getSceneRenderIntegration,getSceneRenderPipeline,createRenderFrameContext} from '@haiyue/engine/experimental';
+import {getEngineDiagnosticsSnapshot} from '@haiyue/engine/diagnostics';
+import {RealRendererGpuTimestampProbe} from '/scripts/benchmark/real-renderer-gpu-timestamp.mjs';
+const output=document.querySelector('#result'),canvas=document.querySelector('#canvas'),errors=[],events=[];
+const check=(value,message)=>{if(!value)throw Error(message);},pause=()=>new Promise(resolve=>setTimeout(resolve,0));
+const digest=async bytes=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x=>x.toString(16).padStart(2,'0')).join('');
+for(const type of ['visibilitychange','freeze','resume'])document.addEventListener(type,()=>events.push({type,time:performance.now(),visible:document.visibilityState==='visible',focused:document.hasFocus()}));
+for(const type of ['focus','blur'])window.addEventListener(type,()=>events.push({type,time:performance.now(),visible:document.visibilityState==='visible',focused:document.hasFocus()}));
+let current;const evidence={errors,events,phase:'startup'};
+const progress=phase=>{evidence.phase=phase;document.querySelector('#progress').textContent=phase;};
+for(const type of ['error','unhandledrejection'])window.addEventListener(type,event=>{const error=event.error??event.reason??event.message;errors.push(String(error));current?.engine.stop();output.textContent=JSON.stringify({...evidence,status:'failed',error:String(error?.stack??error)});output.dataset.status='failed';});
+async function oneFrame(engine){await new Promise(resolve=>{engine.once('after-update',()=>{engine.stop();resolve();});engine.run();});}
+try{
+ const config=await(await fetch('/g12-case/config.json',{cache:'no-store'})).json(),{budget,job}=config;
+ async function create(gpuTiming){
+  progress(gpuTiming?'gpu-initialization':'pacing-initialization');const downloads=[],start=performance.now(),response=await fetch('/g12-case/source.json',{cache:'no-store'}),headers=performance.now(),bytes=await response.arrayBuffer(),downloaded=performance.now();check(response.ok,'Actual HYA document download failed');
+  const parsedAt=performance.now(),sourceDocument=JSON.parse(new TextDecoder().decode(bytes)),parsedResult=parseHyaComposition(sourceDocument),parsed=performance.now();
+  const owner=await createProductionScene(canvas,config.scene,{gpuTiming});current=owner;const {engine,scene}=owner;engine.device.addEventListener('uncapturederror',event=>errors.push(event.error.message));engine.device.pushErrorScope('validation');
+  const adapter=engine.adapter.info;check(!adapter.isFallbackAdapter,'Native hardware adapter is required');let leases=0,sequence=0,fontStart;
+  const pipeline=getSceneRenderPipeline(scene);let region;
+  if(job.regional){getSceneRenderIntegration(scene).setExecuteOptions({view:scene.renderView});const bounds={x:0,y:0,width:1280,height:720},common={bounds,clearMode:'on-update',visible:true};const continuous=scene.renderView.createRegion({...common,id:'moving-production-room',updateMode:'continuous'});region=scene.renderView.createRegion({...common,id:'static-hya-overlay',updateMode:'demand'});pipeline.add(scene.render3DSystem,{region:continuous,loadOp:'clear'});}
+  const prepareStarted=performance.now(),player=await createHyaPlayer(sourceDocument,{mode:'render',scene,viewport:[1280,720],dpr:1,...(region?{region}:{}),host:{capabilities:new Set(['org.haiyue.layout-2d@1']),invalidate(){},diagnostic:error=>errors.push(error.message),resources:{async acquire(request){
+   check(request.kind==='font'&&request.asset==='font'&&request.integrity===config.font.integrity,'Undeclared production resource');fontStart??=performance.now();const started=performance.now(),response=await fetch('/g12-font/scene-sans.otf',{cache:'no-store',signal:request.signal}),headers=performance.now(),bytes=new Uint8Array(await response.arrayBuffer()),ended=performance.now();check(response.ok&&bytes.byteLength===config.font.bytes&&await digest(bytes)===config.font.sha256,'Real licensed font bytes changed');downloads.push({asset:'font',started,headers,ended,bytes:bytes.byteLength,sha256:config.font.sha256});leases++;let released=false;return {value:bytes,generation:1,bytes:bytes.byteLength,release(){if(!released){released=true;leases--;}}};
+  }}}});
+  const prepared=performance.now();let firstReady;
+  const advance=delta=>{const frame=player.advance({sequence:++sequence,deltaSeconds:delta,viewport:[1280,720],dpr:1});if(frame.ready)firstReady??=performance.now();return frame;};
+  while(!advance(0).ready){check(performance.now()-prepareStarted<60000,'HYA readiness did not converge');await pause();}
+  const cold={document:{downloadMs:downloaded-start,headersMs:headers-start,bodyMs:downloaded-headers,bytes:bytes.byteLength,sha256:await digest(bytes)},parseMs:parsed-parsedAt,parserDiagnostics:parsedResult.diagnostics,prepareMs:prepared-prepareStarted,fontReady:{ms:fontStart===undefined?0:prepared-fontStart,scope:'Font resource acquisition through completed player preparation; includes internal font parsing and dependent preparation'},firstUsableMs:firstReady-start,downloads};
+  let cpuStart=0,pacingActive=false,pacingOrigin,gpuReplayMs=0;const frames=[],negativeSchedulerDeltas=[];engine.on('update',({detail:{time,delta}})=>{cpuStart=performance.now();if(pacingActive)pacingOrigin??=time;owner.update(gpuTiming?gpuReplayMs:pacingActive?time-pacingOrigin:0);if(delta<0)negativeSchedulerDeltas.push({time,delta});if(!advance(gpuTiming?1/60:Math.max(0,delta)/1000).ready)errors.push('Prepared production HYA became unavailable');});
+  const readyFrames=[];for(let frame=0;frame<budget.readiness.frames;frame++){const row={started:performance.now(),visible:document.visibilityState==='visible',focused:document.hasFocus()};await oneFrame(engine);row.submitted=performance.now();await engine.device.queue.onSubmittedWorkDone();row.completed=performance.now();readyFrames.push(row);}
+  return {owner,engine,player,cold,readyFrames,frames,negativeSchedulerDeltas,startPacing(){pacingActive=true;},setTimingFrame(frame){gpuReplayMs=frame/60*1000;},adapter:{vendor:adapter.vendor,architecture:adapter.architecture,description:adapter.description,device:adapter.device},get cpuStart(){return cpuStart;},async dispose(){engine.stop();player.dispose();for(let boundary=0;boundary<4;boundary++){await engine.device.queue.onSubmittedWorkDone();await pause();}const validation=await engine.device.popErrorScope();if(validation)errors.push(validation.message);owner.dispose();check(leases===0,'Production resource lease residue');const resources=getEngineDiagnosticsSnapshot(engine).gpuResources;check(resources.totals.resources===0,'Production GPU resource residue');current=undefined;return resources;}};
+ }
+ const pacing=await create(false),resourceSamples=[],startedAt=new Date().toISOString();let firstFrame;
+ Object.assign(evidence,{phase:'production-pacing',job,cold:pacing.cold,readyFrames:pacing.readyFrames,frames:pacing.frames,resourceSamples,adapter:pacing.adapter});
+ progress('production-pacing');
+ await new Promise((resolve,reject)=>{
+  pacing.engine.on('after-update',({detail:{time}})=>{try{
+   firstFrame??=time;const snapshot=getEngineDiagnosticsSnapshot(pacing.engine);pacing.frames.push({time,cpuMs:performance.now()-pacing.cpuStart,visible:document.visibilityState==='visible',focused:document.hasFocus(),counters:snapshot.frame.counters});
+   if(!resourceSamples.length||resourceSamples.length===1&&time-firstFrame>=budget.warmupBoundary.seconds*1000)resourceSamples.push({time,resources:snapshot.gpuResources,regions:getSceneRenderPipeline(pacing.owner.scene).getDebugSnapshot().regions});
+   if(time-firstFrame>=(budget.warmupBoundary.seconds+budget.durationSeconds)*1000){pacing.engine.stop();resourceSamples.push({time,resources:snapshot.gpuResources,regions:getSceneRenderPipeline(pacing.owner.scene).getDebugSnapshot().regions});resolve();}
+  }catch(error){pacing.engine.stop();reject(error);}});pacing.startPacing();pacing.engine.run();
+ });
+ const result={status:'passed',job,startedAt,finishedAt:new Date().toISOString(),cold:pacing.cold,readyFrames:pacing.readyFrames,frames:pacing.frames,negativeSchedulerDeltas:pacing.negativeSchedulerDeltas,deltaPolicy:'Raw rAF/Engine times retained; negative scheduler startup deltas adapt to zero for the nonnegative HYA time contract',events,resourceSamples,adapter:pacing.adapter,gpuTimingDuringPacing:false,queueWaitDuringPacing:false,readbackDuringPacing:false};result.cleanup=await pacing.dispose();
+ // Timestamp/readback work is confined to this separate scene/cohort.
+ const timing=await create(true);check(timing.engine.device.features.has('timestamp-query'),'Registered native device lacks requested GPU timing');const gpuSamples=[],gpuWarmup=[],probe=new RealRendererGpuTimestampProbe(timing.engine.device,{includeCompute:true});Object.assign(evidence,{phase:'separate-gpu-cohort',gpuSamples,gpuWarmup});
+ for(let frame=0;frame<42;frame++){
+  progress('separate-gpu-frame-'+frame);
+  timing.setTimingFrame(frame);
+  const before=getEngineDiagnosticsSnapshot(timing.engine).gpuResources.byType.buffer?.created??0,context=createRenderFrameContext(timing.engine,{view:timing.owner.scene.renderView,frameData:timing.owner.scene.world.frameData});probe.beginFrame();context.encoder.beginComputePass(probe.decorateComputePass({label:'G12 span start'})).end();getSceneRenderIntegration(timing.owner.scene).setExecuteOptions({context,view:timing.owner.scene.renderView});await oneFrame(timing.engine);check(!context.submitted,'External GPU cohort context submitted prematurely');context.encoder.beginComputePass(probe.decorateComputePass({label:'G12 span end'})).end();probe.resolve(context.encoder);context.submit();const submitted=performance.now();await timing.engine.device.queue.onSubmittedWorkDone();const queueWaitMs=performance.now()-submitted,timestamps=await probe.readFrame(),snapshot=getEngineDiagnosticsSnapshot(timing.engine);check(timestamps.spanMs>0,'Actual full command-buffer GPU span is unavailable');
+  const row={frame,sceneTimeMs:frame/60*1000,warmup:frame<12,gpuMs:timestamps.spanMs,timestampScope:'All render/compute commands between two empty timestamped compute passes; equal sentinel overhead retained',timestampSentinels:timestamps.passes,queueWaitMs,uploads:snapshot.frame.counters.bufferUploads,uploadBytes:snapshot.frame.counters.bufferUploadBytes,draws:snapshot.frame.counters.draws,allocations:(snapshot.gpuResources.byType.buffer?.created??0)-before,resources:snapshot.gpuResources};(frame<12?gpuWarmup:gpuSamples).push(row);
+ }
+ probe.destroy();result.gpuSamples=gpuSamples;result.gpuWarmup=gpuWarmup;result.gpuCleanup=await timing.dispose();result.errors=errors;check(!errors.length,errors.join(';'));output.textContent=JSON.stringify(result);output.dataset.status='passed';
+}catch(error){output.textContent=JSON.stringify({...evidence,status:'failed',error:String(error.stack??error)});output.dataset.status='failed';}
+finally{try{current?.dispose();}catch{}}

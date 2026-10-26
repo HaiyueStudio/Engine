@@ -5,8 +5,10 @@ import { performance } from 'node:perf_hooks';
 import { convertLottie } from '../../animation-spec/dist/lottie.js';
 import { encodeAnimationBinary, parseAnimation } from '../../animation-spec/dist/index.js';
 import { analyzeLottieFeatures } from './feature-attribution.mjs';
+import {qualificationOutput} from './qualification-output.mjs';
 import {
   ASSET_ROOT,
+  ROOT,
   BROWSER_INPUT_PATH,
   GENERATED_ROOT,
   clearGeneratedCorpus,
@@ -31,6 +33,7 @@ export function measureNodeCorpus(
     batchSize = 50,
     largeIterations = 20,
     largeBatchSize = 1,
+    outputDirectory,
   } = {},
 ) {
   if (!Number.isSafeInteger(iterations) || iterations < 10) {
@@ -45,8 +48,9 @@ export function measureNodeCorpus(
   if (!Number.isSafeInteger(largeBatchSize) || largeBatchSize < 1) {
     throw new Error('HYA large-corpus batch size must be a positive safe integer.');
   }
-  clearGeneratedCorpus();
-  mkdirSync(GENERATED_ROOT, { recursive: true });
+  const isolated=outputDirectory===undefined?undefined:qualificationOutput(ROOT,outputDirectory);
+  if (!isolated) clearGeneratedCorpus();
+  mkdirSync(isolated?.generated??GENERATED_ROOT, { recursive: true });
   const samples = [];
   const browserSamples = [];
 
@@ -66,7 +70,7 @@ export function measureNodeCorpus(
     const conversion = convertLottie(sourceText, conversionOptions);
     const binary = new Uint8Array(encodeAnimationBinary(conversion.document));
     const hyaInput = binary.buffer;
-    const hyaPath = generatedHyaPath(entry.id);
+    const hyaPath = generatedHyaPath(entry.id,isolated?.generated);
     writeFileSync(hyaPath, binary);
 
     const jsonParse = measureIterations(() => JSON.parse(sourceText), sampleIterations, sampleBatchSize);
@@ -171,7 +175,7 @@ export function measureNodeCorpus(
     });
   }
 
-  writeJson(BROWSER_INPUT_PATH, {
+  writeJson(isolated?.browserInput??BROWSER_INPUT_PATH, {
     schemaVersion: 2,
     corpus: manifest.corpus,
     assetRoot: projectUrl(ASSET_ROOT),
@@ -189,8 +193,9 @@ function measureIterations(callback, iterations, batchSize) {
     runBatch(callback, batchSize);
     values[index] = (performance.now() - start) / batchSize;
   }
-  values.sort((a, b) => a - b);
+  const rawSamples=[...values];values.sort((a, b) => a - b);
   return {
+    rawSamples,
     medianMs: percentile(values, 0.5),
     p95Ms: percentile(values, 0.95),
     minMs: values[0] ?? 0,

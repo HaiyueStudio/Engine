@@ -1,0 +1,20 @@
+import {mkdirSync,readFileSync,writeFileSync,copyFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {runChromeWebGpuFixture} from '../webgpu-gate/chrome-runner.mjs';
+import {createQualificationOutput} from './qualification-output.mjs';
+import {stageQualifiedPackages,verifyServedBytes,sha256 as sha} from './packed-browser.mjs';
+import {snapshotSourceInputs,changedSourceInputs} from './source-snapshot.mjs';
+const root=process.cwd(),arg=(name,fallback)=>{const at=process.argv.indexOf(name);return at<0?fallback:process.argv[at+1];};
+const output=createQualificationOutput(root,arg('--output','artifacts/engine-0.2.2/g12/public-'+Date.now()));mkdirSync(output.directory,{recursive:true});
+const reportPath=resolve(root,arg('--packages','artifacts/engine-0.2.2/g12/packed-20261026/public-packages.json')),staged=stageQualifiedPackages(root,reportPath,output.directory),{imports,tarballs}=staged;
+const assets=resolve(output.directory,'assets');mkdirSync(assets,{recursive:true});
+for(const file of ['scene.json','assets.json','scene-sans.otf','image.png','alternate.png','FONT-LICENSE.txt'])copyFileSync(resolve(root,'examples/hya-production',file),resolve(assets,file));
+const html=resolve(output.directory,'fixture.html');writeFileSync(html,'<!doctype html><meta charset="utf-8"><title>G12 packed HYA production</title><pre id="progress"></pre><canvas id="canvas" width="480" height="360" style="width:480px;height:360px"></canvas><pre id="result"></pre><script type="importmap">'+JSON.stringify({imports})+'</script><script type="module" src="/scripts/fixtures/hya-production/public-browser.mjs"></script>');
+const mounts=[staged.mount,{prefix:'/g12-assets',directory:assets}];let result;
+const sourceInputs=snapshotSourceInputs(root,['scripts/hya-corpus','scripts/fixtures/hya-production','scripts/webgpu-gate','examples/hya-production/scene.json','examples/hya-production/assets.json']);
+try{result=await runChromeWebGpuFixture({root,fixture:html.slice(root.length+1).replaceAll('\\','/'),query:{mode:arg('--mode','correctness')},mounts,timeoutMs:180000,acceptedStatuses:['passed','failed'],chunkedResult:true});}catch(error){result={status:'failed',error:String(error.stack??error),browserFailure:error.browserFailure};}
+for(const capture of result.captures??[])writeFileSync(resolve(output.directory,capture.id+'.png'),Buffer.from(capture.png.split(',')[1],'base64'));delete result.captures;
+const servedBytes=verifyServedBytes(root,mounts,result);if(servedBytes.status!=='passed')result={...result,status:'failed',servedBytes};
+const changed=changedSourceInputs(root,sourceInputs);if(changed.length)result.status='failed';
+writeFileSync(resolve(output.directory,'result.json'),JSON.stringify({schemaVersion:1,generatedAt:new Date().toISOString(),sourceInputs,changed,packageReport:{path:reportPath,sha256:sha(readFileSync(reportPath))},tarballs,physicalInputAccepted:false,fullG12Complete:false,...result},null,2)+'\n');
+console.log(JSON.stringify({output:output.directory,status:result.status,cases:result.caseCount,error:result.error,failures:result.failures}));if(result.status!=='passed')process.exitCode=1;
