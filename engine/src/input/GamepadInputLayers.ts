@@ -44,7 +44,8 @@ export class GamepadInputLayers {
       const key=position<buttons?position:~(position-buttons);
       const value=release?0:read(pad,key),previousValue=read(before,key),owner=mask.get(key)?.owner,oldOwner=oldMask.get(key)?.owner;
       const neutral=Math.abs(value)<=(key<0?0.15:0.000_001);
-      const heldOwner=owner??oldOwner;
+      // Only a live claim blocks handoff; oldMask remains for the former owner release edge.
+      const heldOwner=owner;
       if(release?oldOwner!==layer.owner:heldOwner!==undefined&&heldOwner!==layer.owner&&!(neutral&&oldOwner===layer.owner))continue;
       if(value===0&&previousValue===0)continue;
       const phases:('down'|'up'|'change')[]=[],limit=key<0?0.15:threshold;
@@ -54,7 +55,7 @@ export class GamepadInputLayers {
       const sample=Object.freeze({index,control:key<0?'axis:'+~key:'button:'+key,value,previousValue,neutral,phases:Object.freeze(phases)});
       let consumed=true,claimedOwner:Owner=false;
       try{consumed=this.layers.has(layer)&&layer.handle(sample);claimedOwner=layer.owner;}
-      finally{if(consumed&&Math.abs(value)>0.000_001)mask.set(key,{owner:claimedOwner,neutral:key<0?0.15:0.000_001});}
+      finally{if(consumed&&Math.abs(value)>0.000_001&&!(neutral&&owner!==undefined&&owner!==layer.owner))mask.set(key,{owner:claimedOwner,neutral:key<0?0.15:0.000_001});}
     }
   }
 
