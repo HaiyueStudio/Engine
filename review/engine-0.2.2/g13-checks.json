@@ -7,16 +7,16 @@
   "problem": "Finalize public package integration and qualify the same candidate across GUI, HYA, hosts and recoverable release controls.",
   "method": "Frozen named exports, independent installed tarballs, unchanged runtime ownership/budgets, real input before admission, immutable original failures.",
   "candidate": {
-    "revision": "6716e9a0df8480535c7e4bca7711de5a65d5062e",
+    "revision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
     "dirty": false,
-    "role": "public-package candidate; full G13 qualification pending",
+    "role": "public-package candidate; physical and complete G13 qualification remain separately bound",
     "packages": [
       {
         "name": "@haiyue/engine",
         "version": "0.2.2",
-        "sha256": "004d378c8f2d54404b33b9ec5654c39f40eed233b6c63fe087ac145c1b5257ff",
-        "packedBytes": 2021690,
-        "unpackedBytes": 8417758
+        "sha256": "53b700437da1fd31fe98b98b7a55ffea54e33beb183cef956179935cd5d4bcaa",
+        "packedBytes": 2021676,
+        "unpackedBytes": 8417763
       },
       {
         "name": "@haiyue/animation-spec",
@@ -41,8 +41,8 @@
       }
     ],
     "packageReport": {
-      "path": "artifacts/engine-0.2.2/g13/packages-6716e9a/public-packages.json",
-      "sha256": "273f5be918fed7223c43fcfd0279428279468b3026eaa50315f227ddc45b76b8"
+      "path": "artifacts/engine-0.2.2/g13/packages-handoff-compact/public-packages.json",
+      "sha256": "4dda28853d2808ea0c5ea8d1edfc79dd35ead99b4f61e2f305f23c9b34f58527"
     }
   },
   "api": {
@@ -61,15 +61,30 @@
   "verification": {
     "fast": {
       "status": "passed",
+      "revision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
       "workspaceTests": 2416,
-      "releasePolicyTestsAtFinish": 136,
+      "releasePolicyTests": 146,
       "log": {
-        "path": "artifacts/engine-0.2.2/g13/fast-6716e9a.log",
-        "sha256": "49712e596c8aac323524491346558bff7aeb5ab515981d4bed065c3beb436c49"
+        "path": "artifacts/engine-0.2.2/g13/fast-70187df.log",
+        "sha256": "045cbae583218d9ab192037651ff0e976ad3038ec2f97988beeea88b2e4cfa65"
       },
-      "startedRevision": "6716e9a",
-      "finishedRevision": "5ef5a26",
-      "interveningChanges": "Only physical fixture and its policy/tests; runtime, package source/build/config unchanged."
+      "fullBuild": {
+        "status": "passed",
+        "freshExampleTargets": 103,
+        "log": {
+          "path": "artifacts/engine-0.2.2/g13/build-70187df.log",
+          "sha256": "f0b8260238d4e557436be8981c8ee61a4addf9578e30e2ee07ca06378eae0b00"
+        }
+      },
+      "physicalFixtureFollowup": {
+        "revision": "3ceb632b2cac317531a090e6909dce8b368b340a",
+        "runtimeAndBuildInputsUnchanged": true,
+        "releasePolicyTests": 146,
+        "proof": {
+          "path": "artifacts/engine-0.2.2/g13/release-policy-controller-preflight.log",
+          "sha256": "2efaa45650b71e0d9d6b1833e85c31295d59ad5ec46734052098f12bbbeb1183"
+        }
+      }
     },
     "packages": {
       "status": "passed",
@@ -78,8 +93,12 @@
       "domGpuFreeLayout": true,
       "packedGuiLayoutRuntime": true,
       "consumerInstalledBytes": {
-        "path": "artifacts/engine-0.2.2/g13/consumers-6716e9a/installed-byte-audit.json",
-        "sha256": "e31d8766390f6f6402366e67686e127ee1b73a8afcd19d55bed53e9b811e44a7"
+        "path": "artifacts/engine-0.2.2/g13/consumers-70187df/installed-byte-audit.json",
+        "sha256": "e93053f1f0884e0985a66be4deef049463532c4db4b1830e8d1e202619c9cc8b"
+      },
+      "multiplayerInput": {
+        "gzipBytes": 5986,
+        "unchangedBudget": 6000
       }
     },
     "regionContracts": {
@@ -95,31 +114,31 @@
     },
     "releaseRecovery": {
       "status": "passed-complete-release-policy-suite",
-      "tests": 140,
+      "tests": 146,
       "proof": {
-        "path": "artifacts/engine-0.2.2/g13/release-policy-focus-ready.log",
-        "sha256": "6c9f53daab6bf1f4b759478c85bd88bff474eff7c5c7cb858b9bcd038361997f"
+        "path": "artifacts/engine-0.2.2/g13/release-policy-controller-preflight.log",
+        "sha256": "2efaa45650b71e0d9d6b1833e85c31295d59ad5ec46734052098f12bbbeb1183"
       },
       "externalPublicationExecuted": false
     },
     "games": {
       "status": "passed-current-public-packages",
-      "revision": "d8be359",
+      "revision": "d9e1041",
       "types": true,
       "tests": 695,
       "builtGameTargets": 31,
       "logs": [
         {
-          "path": "artifacts/engine-0.2.2/g13/games-typecheck-6716e9a.log",
+          "path": "artifacts/engine-0.2.2/g13/games-typecheck-70187df.log",
           "sha256": "0ecd9dc519d238af11b6e71d95d1a4300b1ed08d472a74691b3000477aa1138a"
         },
         {
-          "path": "artifacts/engine-0.2.2/g13/games-test-6716e9a.log",
-          "sha256": "7db694ee4b0773b1ecb90bbd2f36f43ee913d2b2020efd1713166c0026afbde6"
+          "path": "artifacts/engine-0.2.2/g13/games-test-70187df.log",
+          "sha256": "698fdb730bf84c806dbfa759bee8d6b33c39e051d7135ea458956f40ad2aa0e8"
         },
         {
-          "path": "artifacts/engine-0.2.2/g13/games-build-6716e9a.log",
-          "sha256": "460b913cbc87414caddeb373eeec7d2a86cd10e63f046d85f4709c9d2d60e099"
+          "path": "artifacts/engine-0.2.2/g13/games-build-70187df.log",
+          "sha256": "b42edd58a447d611fd1874437e4060f3b3b31389a92e02955252bf7afeb3cb45"
         }
       ],
       "userGameCommitPreserved": "15ded54",
@@ -127,35 +146,35 @@
     },
     "nativePreparation": {
       "status": "passed-native-source-types-and-ios-javascript-bundle",
-      "revision": "0e4f712",
+      "revision": "0943413",
       "checks": 4,
       "bridgeSources": 23,
       "log": {
-        "path": "artifacts/engine-0.2.2/g13/native-source-6716e9a.log",
-        "sha256": "5be617f8acb131facb64e5c216d8775b1709a5c8d188aa6cc52c36f3af8db43f"
+        "path": "artifacts/engine-0.2.2/g13/native-source-70187df.log",
+        "sha256": "e927beaf2e4609cc7e96497c79935e3d2a6c352167de34154f2d16b0f614001c"
       },
       "appleSdkCompiled": false,
       "physicalNativeQualified": false,
       "transferArchive": {
         "status": "passed-transfer-archive",
-        "revision": "6716e9a0df8480535c7e4bca7711de5a65d5062e",
+        "revision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
         "files": 253,
         "archive": {
-          "path": "artifacts/engine-0.2.2/g13/native-handoff-6716e9a-verified/hya-native-g13-6716e9a.tar.gz",
-          "bytes": 9357073,
-          "sha256": "1c51d523795bd1cff1b56c61c71116948dfd1cb69dd670347828d3ae3d264eb3"
+          "path": "artifacts/engine-0.2.2/g13/native-handoff-70187df-verified/hya-native-g13-70187df.tar.gz",
+          "bytes": 9357064,
+          "sha256": "e08869fae1bbdfe0bed1a65e78a1e19958b56884b0e00e44961bb2ebe5067281"
         },
         "extractedFilesVerified": 254,
         "deterministicTar": {
           "bytes": 10883584,
-          "sha256": "300edd227e1b44273de9789cc3857283b05b5a5f70414f8f8a58f4656d20b1cc"
+          "sha256": "a3597c2f086d774796fce60feea22647ddd26685fc49c21ff4f14a6b7c626ced"
         },
         "appleSdkCompiled": false,
         "physicalNativeQualified": false
       }
     },
     "realBrowserIme": {
-      "status": "passed",
+      "status": "passed-predecessor-package-candidate",
       "raw": {
         "path": "artifacts/engine-0.2.2/g13/ime-manual-native-sessions/result.json",
         "sha256": "2698ad4e0578033fcd24987cf48147c09011f702d72a1641264e7ca255cb8076"
@@ -175,19 +194,33 @@
       "priorAssessment": {
         "path": "artifacts/engine-0.2.2/g13/ime-manual-native-sessions/operator-assessment.json",
         "sha256": "fcb6be2af013484fe6693327d201bd1ebd98efa153fee6cd70e251e5b79acbfa"
-      }
+      },
+      "candidateRevision": "6716e9a0df8480535c7e4bca7711de5a65d5062e",
+      "currentCandidateQualified": false
     },
     "physicalGamepad": {
       "status": "awaiting-operator",
-      "rawOutput": "artifacts/engine-0.2.2/g13/pad-manual-focus-ready",
-      "readiness": "Original editor focus and neutral controller required before GUI consumption assertion",
-      "diagnostic": {
-        "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793023391488/result.json",
-        "sha256": "5c95141850eb1861b1a88aba744294e0fefa8939903363ef99690d87424af418"
+      "rawOutput": "artifacts/engine-0.2.2/g13/pad-manual-70187df-prepared",
+      "readiness": "Controller detection and neutral hardware first; only then expose the original HYA editor for focus and READY.",
+      "packedSampler": {
+        "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793025611214/packed-sampler-handoff.json",
+        "sha256": "ed58748808fc0fc99a0a3075a54ecaad3ae8860f81070692f0a7827915a438bb"
+      },
+      "preparedBrowserDiagnostic": {
+        "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793029295704/result.json",
+        "sha256": "f4aeccc5a7f18c5d1bf8eab5e556eca961a23ed9079640768121fe1f4119882a"
       },
       "policyTests": {
-        "path": "artifacts/engine-0.2.2/g13/pad-readiness-policy.log",
-        "sha256": "7f14878cf85721ad5b713b43e666643937b2d215084ed7ada8e57fe2120720ab"
+        "path": "artifacts/engine-0.2.2/g13/release-policy-controller-preflight.log",
+        "sha256": "2efaa45650b71e0d9d6b1833e85c31295d59ad5ec46734052098f12bbbeb1183"
+      }
+    },
+    "windowsCorrectness": {
+      "status": "passed-predecessor-current-run-pending",
+      "currentCandidateQualified": false,
+      "proof": {
+        "path": "artifacts/engine-0.2.2/g13/windows-correctness-1793023787919/result.json",
+        "sha256": "c110c81cfe2e2c1613f151feb655b8afd094399b5da65f2c8991736aed0cead7"
       }
     }
   },
@@ -215,16 +248,38 @@
     "gamepadBeforeFocus": {
       "path": "artifacts/engine-0.2.2/g13/pad-manual-6716e9a/result.json",
       "sha256": "a04e0a211438bbf58e2db91b2c8684175f7fb5985c7439fe270b807e68a92b1e"
+    },
+    "gamepadMissingAxis": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-focus-ready/operator-assessment.json",
+      "sha256": "d6e9f5ebd249fe2b7a18f215f98caffa5288c1660b969ad5548b95619c32e1b3"
+    },
+    "gamepadWindowTimeout": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-70187df/result.json",
+      "sha256": "def721c91cb962142435115a9e7d32ea3d98c978118706455e5a6c56664590e7"
+    },
+    "gamepadBeforeNeutral": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-70187df-visible-retry/operator-assessment.json",
+      "sha256": "3739aeb23ef8cf264fab85b062b513ba4f3387ebbd80ac1ae8bf440177ee5a42"
+    },
+    "gamepadInitialNeutralObservation": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-70187df-wakeup/operator-assessment.json",
+      "sha256": "6bcdbf7971e0da0536eb6acafc584a68cc6a2de639fed44af9366f35e1c55f1b"
+    },
+    "gamepadInitialBundleBudget": {
+      "path": "artifacts/engine-0.2.2/g13/packages-e3494dc/public-packages.json",
+      "sha256": "84c892afcfc6859894c24b110d9ae16fbf17f31f33cb12258eac30f2b0633589"
     }
   },
   "currentBlocker": {
     "id": "remaining-host-and-global-qualification",
     "status": "pending",
     "runtimePointerBugResolved": true,
-    "realBrowserImePassed": true
+    "realBrowserImePassed": true,
+    "currentCandidateImePending": true
   },
   "remaining": [
-    "Physical gamepad workflow and independent raw assessment",
+    "Prepared physical gamepad workflow and independent raw assessment",
+    "Current-package-candidate real browser IME qualification",
     "Physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver",
     "Current-candidate GUI/region/HYA and inherited seven-group rendering/performance evidence",
     "Same-clean-candidate complete global gate and no-publication rehearsal"
@@ -258,5 +313,28 @@
       "sha256": "d4bc4f54610d0d649b4182c16c9397acc37547a773e5a9a4820f7c72a7594555"
     },
     "logicalValidatorUnchanged": true
+  },
+  "previousPackageCandidate": {
+    "revision": "6716e9a0df8480535c7e4bca7711de5a65d5062e",
+    "packageReport": {
+      "path": "artifacts/engine-0.2.2/g13/packages-6716e9a/public-packages.json",
+      "sha256": "273f5be918fed7223c43fcfd0279428279468b3026eaa50315f227ddc45b76b8"
+    }
+  },
+  "gamepadHandoffRepair": {
+    "status": "runtime-applied-physical-qualification-pending",
+    "source": "engine/src/input/GamepadInputLayers.ts",
+    "permanentRegressionTests": 6,
+    "focusedInputTests": 42,
+    "regression": {
+      "path": "artifacts/engine-0.2.2/g13/handoff-compact-input-tests.log",
+      "sha256": "22907cf0335d67c067cf196f781f43137b231542f7e560df7605522417e1dd2d"
+    },
+    "originalPackedReproduction": {
+      "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793024850389/packed-sampler-handoff.json",
+      "sha256": "13728ef4ba52f0cedc2daae6bf4e144fdca4d9b8df55f9938ceaba5d44307fcd"
+    },
+    "apiChanged": false,
+    "budgetsChanged": false
   }
 }
