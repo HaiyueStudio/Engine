@@ -44,9 +44,7 @@ export class GamepadInputLayers {
       const key=position<buttons?position:~(position-buttons);
       const value=release?0:read(pad,key),previousValue=read(before,key),owner=mask.get(key)?.owner,oldOwner=oldMask.get(key)?.owner;
       const neutral=Math.abs(value)<=(key<0?0.15:0.000_001);
-      // Only a live claim blocks handoff; oldMask remains for the former owner release edge.
-      const heldOwner=owner;
-      if(release?oldOwner!==layer.owner:heldOwner!==undefined&&heldOwner!==layer.owner&&!(neutral&&oldOwner===layer.owner))continue;
+      if(release?oldOwner!==layer.owner:owner!==undefined&&owner!==layer.owner&&!(neutral&&oldOwner===layer.owner))continue;
       if(value===0&&previousValue===0)continue;
       const phases:('down'|'up'|'change')[]=[],limit=key<0?0.15:threshold;
       const pressed=key<0?Math.abs(value)>limit:Math.abs(value)>=limit,wasPressed=key<0?Math.abs(previousValue)>limit:Math.abs(previousValue)>=limit;
