@@ -13,7 +13,9 @@ const canvas=document.querySelector('canvas'), status=document.querySelector('#p
 const check=(v,m)=>{if(!v)throw Error(m);};
 const events=[], commits=[], pendingCommitSnapshots=[], controls=[], failures=[], snapshots=[], hardware=[], leases=new Set();
 let engine,scene,player,context,sampler,offPad,offUpdate,input,environment,validationDevice,done=false,sequence=1,pending=null,polls=0,padTick=0;
-let lastPad=null,padPhase='waiting-focus';
+let lastPad=null,padPhase='waiting-focus',controllerPrepared=profile!=='physical-gamepad';
+// Hardware detection must finish before the original editor can acquire pointer focus.
+if(!controllerPrepared){canvas.style.visibility='hidden';canvas.style.pointerEvents='none';}
 const inputAudit={readySamples:0,sceneActionLeaks:0,unarmedGuiControls:0,transitions:[],lastSamples:[]};
 const snapshot=()=>({time:performance.now(),data:player?.data.read({part:'data',id:'root'},['label']),display:input?.displayValue,
   composing:input?.isComposing,selection:[input?.selectionAnchor,input?.selectionFocus],focused:scene?.guiSystem.focus.focused===input,
@@ -113,6 +115,12 @@ try{
       const sample=sampler.sample(++padTick),focused=scene.guiSystem.focus.focused===input,
         next=physicalGamepadReadiness(padPhase,{focused,foreground:document.hasFocus()&&!document.hidden,connected:lastPad?.connected===true,
           buttons:lastPad?.buttons.map(button=>button.value)??[],axes:lastPad?.axes??[]});
+      if(!controllerPrepared&&physicalGamepadReadiness('waiting-controller',{focused:true,foreground:document.hasFocus()&&!document.hidden,
+        connected:lastPad?.connected===true,buttons:lastPad?.buttons.map(button=>button.value)??[],axes:lastPad?.axes??[]})==='ready'){
+        controllerPrepared=true;canvas.style.visibility='visible';canvas.style.pointerEvents='';
+        const preparation=document.querySelector('#controller');if(preparation)preparation.hidden=true;
+        status.textContent='Controller detected and neutral. Click the HYA text, then wait for READY before starting the A test.';
+      }
       if(next!==padPhase){
         check(inputAudit.transitions.length<256,'Too many focus transitions');inputAudit.transitions.push({from:padPhase,to:next,tick:padTick,time:performance.now()});padPhase=next;
         status.textContent=next==='ready'?'READY: hold A about one second, release; left stick left, right, center. Then Save evidence.':next==='waiting-focus'?'Press B once and release so Chrome can detect the controller; then click the HYA text and wait for READY.':next==='waiting-controller'?'Chrome has not exposed a controller yet. Press B once, release, then click the HYA text again and wait for READY.':'Release all buttons and center the sticks; waiting for READY. Do not start the A test yet.';
@@ -130,5 +138,5 @@ try{
   engine.switchScene(scene);engine.run();
   window.g13Physical={ready:true,snapshot,finishSmoke:()=>{check(smoke,'Smoke completion is not available in manual runs');finish();}};
   status.textContent=profile==='browser-real-ime'?'Click HYA text at (20,180). Ctrl+A, real IME nihao → 你好, then save checkpoint. Begin composition and Esc, save checkpoint. Resize/focus/caret inspection, save checkpoint. Finally Save evidence.':
-    'First press B once and release so Chrome can detect the controller. Then click HYA text, release all controls and wait for READY. Only then hold A about one second and release; left stick left, right, then center. Save evidence.';
+    'Click the controller preparation button, press B once and release. The canvas appears only after Chrome detects a neutral controller. Then click HYA text and wait for READY before starting the A test.';
 }catch(error){finish(error);}
