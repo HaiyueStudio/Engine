@@ -10,7 +10,7 @@ import {createBrowserHyaAudioHost} from '@haiyue/extensions/hya-audio';
 const profile=new URLSearchParams(location.search).get('profile'), smoke=new URLSearchParams(location.search).has('smoke');
 const canvas=document.querySelector('canvas'), status=document.querySelector('#progress'), result=document.querySelector('#result');
 const check=(v,m)=>{if(!v)throw Error(m);};
-const events=[], commits=[], controls=[], failures=[], snapshots=[], hardware=[], leases=new Set();
+const events=[], commits=[], pendingCommitSnapshots=[], controls=[], failures=[], snapshots=[], hardware=[], leases=new Set();
 let engine,scene,player,context,sampler,offPad,offUpdate,input,environment,validationDevice,done=false,sequence=1,pending=null,polls=0,padTick=0;
 const snapshot=()=>({time:performance.now(),data:player?.data.read({part:'data',id:'root'},['label']),display:input?.displayValue,
   composing:input?.isComposing,selection:[input?.selectionAnchor,input?.selectionFocus],focused:scene?.guiSystem.focus.focused===input,
@@ -104,14 +104,18 @@ try{
   while(!player.advance(initial).ready){check(performance.now()<deadline,'Scene resources not ready');await new Promise(r=>setTimeout(r,0));}
   const walk=node=>{if(node instanceof GuiInput){check(!input,'Duplicate editable owner');input=node;}for(const c of node.children)walk(c);};walk(root.root);
   check(input,'Automatic G06 input missing');
-  player.data.subscribe(()=>commits.push(snapshot()));
+  // Data observers run before GUI publication; inspect the editor only after advance returns.
+  player.data.subscribe(changes=>{
+    const record={time:performance.now(),data:player.data.read({part:'data',id:'root'},['label']),changes};
+    commits.push(record);pendingCommitSnapshots.push(record);
+  });
   if(profile==='physical-gamepad'){
     scene.guiSystem.focus.focus(input);
   }
   const update=event=>{if(done)return;try{
     if(sampler){const sample=sampler.sample(++padTick);check(sample.players[0].actions.every(a=>a.value===0),'GUI input leaked to scene');}
     pending??={sequence:++sequence,deltaSeconds:Math.max(0,event.detail.delta)/1000,viewport:[480,360],dpr:1};
-    if(player.advance(pending).ready)pending=null;
+    if(player.advance(pending).ready){pending=null;for(const record of pendingCommitSnapshots.splice(0))record.presentation=snapshot();}
     if(input.isComposing)check(player.data.read({part:'data',id:'root'},['label'])===commits.at(-1)?.data||commits.length===0,'Preedit changed committed data');
   }catch(error){finish(error);}};
   engine.on('update',update);offUpdate=()=>engine.off('update',update);
