@@ -77,12 +77,12 @@
         }
       },
       "physicalFixtureFollowup": {
-        "revision": "7a4b6d9",
+        "revision": "a58e64b",
         "runtimeAndBuildInputsUnchanged": true,
         "releasePolicyTests": 148,
         "proof": {
-          "path": "artifacts/engine-0.2.2/g13/release-policy-explicit-readiness.log",
-          "sha256": "8034b205ce62470959b916cda819c1e990fd8424b6de9fd7cec4de1971c27aa5"
+          "path": "artifacts/engine-0.2.2/g13/release-policy-user-launcher.log",
+          "sha256": "7eba2b0c7a4b5bba4d8dc63e64cac45238fe6423129e8f94a2266ed6ced6b551"
         }
       }
     },
@@ -116,8 +116,8 @@
       "status": "passed-complete-release-policy-suite",
       "tests": 148,
       "proof": {
-        "path": "artifacts/engine-0.2.2/g13/release-policy-explicit-readiness.log",
-        "sha256": "8034b205ce62470959b916cda819c1e990fd8424b6de9fd7cec4de1971c27aa5"
+        "path": "artifacts/engine-0.2.2/g13/release-policy-user-launcher.log",
+        "sha256": "7eba2b0c7a4b5bba4d8dc63e64cac45238fe6423129e8f94a2266ed6ced6b551"
       },
       "externalPublicationExecuted": false
     },
@@ -199,8 +199,7 @@
       "currentCandidateQualified": false
     },
     "physicalGamepad": {
-      "status": "awaiting-operator-explicit-readiness",
-      "rawOutput": "artifacts/engine-0.2.2/g13/pad-manual-70187df-explicit-ready",
+      "status": "awaiting-user-launch-and-visible-page-confirmation",
       "readiness": "Initial neutral hardware preparation, original editor focus, explicit green READY before the only A hold; every admission blocker is visible.",
       "packedSampler": {
         "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793025611214/packed-sampler-handoff.json",
@@ -234,6 +233,19 @@
           "sha256": "c9715e87b3efe38b91476df95944b9ab0df6b47f8f253f18b883eef3e73e5195"
         },
         "neutralPreparationAndUnarmedCounterUnchanged": true
+      },
+      "userLauncher": {
+        "file": {
+          "path": "scripts/start-g13-gamepad-70187df.cmd",
+          "sha256": "9195ffdde7e5a0f8d413875351c2eb2af6b71409bac69ade51b31ceb378d6262"
+        },
+        "candidateRevision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
+        "plan": {
+          "path": "artifacts/engine-0.2.2/g13/user-launcher-plan.log",
+          "sha256": "8d9fb8833572fc4a4838bccac6ce431abfc092e0f2550810cbfeb26043a11dab"
+        },
+        "requiresAdministrator": false,
+        "outputPattern": "artifacts/engine-0.2.2/g13/pad-user-start-70187df-<milliseconds>"
       }
     },
     "windowsCorrectness": {
@@ -297,6 +309,10 @@
     "gamepadAllMovementsBeforeReady": {
       "path": "artifacts/engine-0.2.2/g13/pad-manual-70187df-live/operator-assessment.json",
       "sha256": "844a8c4eeb77a160f8ff68c6959e5a7bc5528a3d8741d6b5dcaf94c90dff2fa1"
+    },
+    "gamepadExplicitWindowTimeout": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-70187df-explicit-ready/result.json",
+      "sha256": "9c9edd1fbda9294ad26408ca1d15b3738450663aacdf0681ec1a0ab313406879"
     }
   },
   "currentBlocker": {
@@ -365,5 +381,12 @@
     },
     "apiChanged": false,
     "budgetsChanged": false
+  },
+  "validationEnvironmentFailures": {
+    "launcherPolicySandboxSymlink": {
+      "path": "artifacts/engine-0.2.2/g13/release-policy-user-launcher-sandbox.log",
+      "sha256": "a2da9ed3e9a4a3708977c7cf64e30be2165caa576ab8888f66e2d46c454239dc"
+    },
+    "originalConditionsRerunPassed": true
   }
 }
