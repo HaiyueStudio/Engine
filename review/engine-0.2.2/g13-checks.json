@@ -290,12 +290,26 @@
       "physicalInputAccepted": true
     },
     "windowsCorrectness": {
-      "status": "passed-predecessor-current-run-pending",
-      "currentCandidateQualified": false,
+      "status": "passed-current-candidate-gui-region-hya-correctness",
+      "revision": "49497cee91957e645949210821e55d7653e9c2f7",
+      "currentCandidateQualified": true,
+      "groups": 16,
       "proof": {
-        "path": "artifacts/engine-0.2.2/g13/windows-correctness-1793023787919/result.json",
-        "sha256": "c110c81cfe2e2c1613f151feb655b8afd094399b5da65f2c8991736aed0cead7"
-      }
+        "path": "artifacts/engine-0.2.2/g13/windows-correctness-1793058738792/result.json",
+        "sha256": "e570e012317923b586f2c1bfa411737ac0472344359bb757eaff58181c0d650e"
+      },
+      "formalPerformanceAccepted": false,
+      "physicalNativeQualified": false
+    },
+    "currentCandidateIme": {
+      "status": "awaiting-user-started-real-browser-input",
+      "candidateRevision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
+      "userLauncher": {
+        "path": "scripts/start-g13-ime-70187df.cmd",
+        "sha256": "19cc5de2275d23be896bee3b39f18aeeefe5c5ec5561497aec4f3593a40f9ab9"
+      },
+      "outputPattern": "artifacts/engine-0.2.2/g13/ime-user-start-70187df-<milliseconds>",
+      "currentCandidateQualified": false
     }
   },
   "preservedFailures": {
@@ -367,7 +381,7 @@
   "remaining": [
     "Current-package-candidate real browser IME qualification",
     "Physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver",
-    "Current-candidate GUI/region/HYA and inherited seven-group rendering/performance evidence",
+    "Inherited seven-group rendering/performance evidence and current HYA production timing",
     "Same-clean-candidate complete global gate and no-publication rehearsal"
   ],
   "publishing": {
