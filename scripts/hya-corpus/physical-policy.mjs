@@ -32,6 +32,16 @@ export function validateImeSessions(report) {
   return errors;
 }
 
+/** Shared observations for the manual display and admission; thresholds stay identical. */
+export function physicalGamepadProgress(controls) {
+  const down=controls.filter(c=>c.control==='button:0'&&c.phase==='down'),up=controls.filter(c=>c.control==='button:0'&&c.phase==='up'),axes=controls.filter(c=>c.control==='axis:0');
+  const holdMilliseconds=down.length===1&&up.length===1?up[0].time-down[0].time:null;
+  return {downCount:down.length,upCount:up.length,holdMilliseconds,
+    held:holdMilliseconds!==null&&holdMilliseconds>=700,
+    left:axes.some(c=>c.value<=-.5),right:axes.some(c=>c.value>=.5),center:axes.some(c=>Math.abs(c.value)<=.15),
+    axisValue:axes.at(-1)?.value??null,axisMin:axes.length?Math.min(...axes.map(c=>c.value)):null,axisMax:axes.length?Math.max(...axes.map(c=>c.value)):null};
+}
+
 /** Hardware assertions supplement, and never replace, the operator's real-device confirmation. */
 export function validatePhysicalEvidence(report, confirmation) {
   const errors=[];
@@ -48,11 +58,10 @@ export function validatePhysicalEvidence(report, confirmation) {
   }else if(report.profile==='physical-gamepad'){
     if(!(report.inputAudit?.readySamples>0)||report.inputAudit.sceneActionLeaks!==0||report.inputAudit.unarmedGuiControls!==0)
       errors.push('Gamepad workflow requires original GUI focus, neutral acquisition and zero scene leakage.');
-    const controls=report.controls??[],down=controls.filter(c=>c.control==='button:0'&&c.phase==='down'),up=controls.filter(c=>c.control==='button:0'&&c.phase==='up');
+    const progress=physicalGamepadProgress(report.controls??[]);
     if(!report.hardware?.some(h=>h.id&&h.buttons>0&&h.axes>0)||!(report.polls>0))errors.push('No original-sampler hardware identity.');
-    if(down.length!==1||up.length!==1||up[0].time-down[0].time<700)errors.push('One sustained A down/up pair of at least 700 ms is required.');
-    if(!controls.some(c=>c.control==='axis:0'&&c.value<=-.5)||!controls.some(c=>c.control==='axis:0'&&c.value>=.5)
-      ||!controls.some(c=>c.control==='axis:0'&&Math.abs(c.value)<=.15))errors.push('Left, right and centered axis changes are required.');
+    if(!progress.held)errors.push('One sustained A down/up pair of at least 700 ms is required.');
+    if(!progress.left||!progress.right||!progress.center)errors.push('Left, right and centered axis changes are required.');
     if(JSON.stringify(report.commits?.map(c=>c.data))!==JSON.stringify(['AAA','AA']))errors.push('Gamepad down/up must commit exactly once each.');
   }else errors.push('Unknown physical input profile.');
   return errors;

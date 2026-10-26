@@ -7,6 +7,7 @@ import {beginRenderCommandPass} from '@haiyue/engine/extension-authoring';
 import {createHyaPlayer} from '@haiyue/extensions/hya-player';
 import {createBrowserHyaAudioHost} from '@haiyue/extensions/hya-audio';
 import {physicalGamepadReadiness} from '../../hya-corpus/physical-gamepad-readiness.mjs';
+import {physicalGamepadProgress} from '../../hya-corpus/physical-policy.mjs';
 
 const profile=new URLSearchParams(location.search).get('profile'), smoke=new URLSearchParams(location.search).has('smoke');
 const canvas=document.querySelector('canvas'), status=document.querySelector('#progress'), result=document.querySelector('#result');
@@ -132,6 +133,12 @@ try{
     }
     pending??={sequence:++sequence,deltaSeconds:Math.max(0,event.detail.delta)/1000,viewport:[480,360],dpr:1};
     if(player.advance(pending).ready){pending=null;for(const record of pendingCommitSnapshots.splice(0))record.presentation=snapshot();}
+    if(sampler){
+      const progress=physicalGamepadProgress(controls),display=document.querySelector('#gamepad-progress'),format=value=>value===null?'—':value.toFixed(3);
+      const complete=progress.held&&progress.left&&progress.right&&progress.center&&inputAudit.readySamples>0&&inputAudit.sceneActionLeaks===0&&inputAudit.unarmedGuiControls===0&&JSON.stringify(commits.map(c=>c.data))==='["AAA","AA"]';
+      if(display)display.textContent=`A 长按：${progress.held?'通过':'待完成'}（${format(progress.holdMilliseconds)} ms；只按一次）\n左推：${progress.left?'通过':'待完成'}（最小 ${format(progress.axisMin)}，要求 ≤ -0.5）\n右推：${progress.right?'通过':'待完成'}（最大 ${format(progress.axisMax)}，要求 ≥ 0.5）\n回中：${progress.center?'已记录':'待完成'}；当前轴值 ${format(progress.axisValue)}\n${complete?'操作数据齐全，可以保存证据。':'请等 READY 后完成所有项目，再保存证据。'}`;
+      document.querySelector('#finish').textContent=complete?'Save evidence (workflow complete)':'Save evidence (incomplete workflow)';
+    }
     if(input.isComposing)check(player.data.read({part:'data',id:'root'},['label'])===commits.at(-1)?.data||commits.length===0,'Preedit changed committed data');
   }catch(error){finish(error);}};
   engine.on('update',update);offUpdate=()=>engine.off('update',update);

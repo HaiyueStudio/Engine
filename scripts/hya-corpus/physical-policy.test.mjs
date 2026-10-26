@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {validatePhysicalEvidence} from './physical-policy.mjs';
+import {validatePhysicalEvidence,physicalGamepadProgress} from './physical-policy.mjs';
 const confirmation={confirmed:true,confirmedAt:'2026-10-26T00:00:00Z',note:'Operator performed the real hardware workflow.'};
 const base={status:'awaiting-operator-confirmation',smoke:false,servedBytes:{status:'passed'},changed:[],failures:[],leases:0,resources:{totals:{resources:0}}};
 function ime(){return{...base,profile:'browser-real-ime',events:['你好',''].flatMap(compositionData=>[
@@ -56,4 +56,18 @@ test('gamepad requires hardware, actual hold duration, no repeats and centered a
     r=>r.inputAudit.readySamples=0,r=>r.inputAudit.sceneActionLeaks=1,r=>r.inputAudit.unarmedGuiControls=1]){
     const r=pad();mutate(r);assert.ok(validatePhysicalEvidence(r,confirmation).length);
   }
+});
+
+test('live gamepad progress uses the unchanged admission boundaries and rejects incomplete or repeated holds',()=>{
+  const controls=[{control:'button:0',phase:'down',time:100},{control:'button:0',phase:'up',time:800},
+    ...[-.5,.5,.15].map(value=>({control:'axis:0',value}))];
+  const progress=physicalGamepadProgress(controls);
+  assert.equal(progress.held,true);assert.equal(progress.left,true);assert.equal(progress.right,true);assert.equal(progress.center,true);
+  for(const [index,value,field]of [[1,799.999,'held'],[2,-.499999,'left'],[3,.499999,'right'],[4,.150001,'center']]){
+    const changed=structuredClone(controls);changed[index][index===1?'time':'value']=value;
+    assert.equal(physicalGamepadProgress(changed)[field],false);
+  }
+  assert.equal(physicalGamepadProgress(controls.slice(0,1)).held,false);
+  assert.equal(physicalGamepadProgress([...controls,controls[0]]).held,false);
+  assert.equal(physicalGamepadProgress([]).axisValue,null);
 });
