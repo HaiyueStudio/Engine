@@ -7,8 +7,9 @@ function ime(){return{...base,profile:'browser-real-ime',events:['你好',''].fl
   {type:'compositionstart',isTrusted:true,responder:'1'},
   {type:'compositionupdate',isTrusted:true,responder:'1',compositionData},
   {type:'beforeinput',inputType:'insertCompositionText',isTrusted:true,responder:'1',compositionData},
+  ...(compositionData===''?[{type:'keydown',key:'Escape',isTrusted:true,responder:'1'}]:[]),
   {type:'compositionend',isTrusted:true,responder:'1',compositionData},
- ]).concat({type:'keydown',key:'Escape',isTrusted:true}),
+ ]),
   commits:[{data:'你好'}],snapshots:[0,0,1].map(n=>({data:'你好',composing:false,viewport:[800+n*100,600]}))};}
 function pad(){return{...base,profile:'physical-gamepad',polls:100,hardware:[{id:'Physical controller',buttons:16,axes:4}],commits:[{data:'AAA'},{data:'AA'}],controls:[
   {control:'button:0',phase:'down',time:100},{control:'button:0',phase:'up',time:1000},
@@ -27,8 +28,20 @@ test('native Chrome scoped end preserves false trust only with complete trusted 
   assert.deepEqual(validatePhysicalEvidence(r,confirmation),[]);
   for(const mutate of [v=>v.browserEvidence.product='Chrome/unknown',v=>v.browserEvidence.nativeBackend=false,
     v=>v.browserEvidence.presentationMode='headless',v=>v.events[0].isTrusted=false,
-    v=>v.events[2].isTrusted=false,v=>v.events[3].responder='other',v=>v.events.splice(7,1),
+    v=>v.events[2].isTrusted=false,v=>v.events[3].responder='other',v=>v.events.splice(v.events.findLastIndex(e=>e.type==='compositionend'),1),
     v=>v.events.filter(e=>e.type==='compositionend').forEach(e=>e.compositionData='你好')]){
+    const changed=structuredClone(r);mutate(changed);assert.ok(validatePhysicalEvidence(changed,confirmation).length);
+  }
+});
+
+test('Windows IME Process/229 cancellation stays raw and requires the same composed session',()=>{
+  const r=ime(),key=r.events.find(e=>e.type==='keydown');
+  Object.assign(key,{key:'Process',keyCode:229,nativeComposing:true});
+  assert.deepEqual(validatePhysicalEvidence(r,confirmation),[]);
+  for(const mutate of [v=>v.events.find(e=>e.type==='keydown').nativeComposing=false,
+    v=>v.events.find(e=>e.type==='keydown').isTrusted=false,
+    v=>v.events.find(e=>e.type==='keydown').responder='other',
+    v=>v.events.find(e=>e.type==='keydown').keyCode=0]){
     const changed=structuredClone(r);mutate(changed);assert.ok(validatePhysicalEvidence(changed,confirmation).length);
   }
 });

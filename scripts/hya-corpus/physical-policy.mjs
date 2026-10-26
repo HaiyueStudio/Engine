@@ -9,14 +9,20 @@ export function validateImeSessions(report) {
   for(const event of report.events??[]){
     if(event.type==='compositionstart'){
       if(active)errors.push('Overlapping real composition sessions.');
-      active={responder:event.responder,trusted:event.isTrusted===true,updates:0,inputs:0};
+      active={responder:event.responder,trusted:event.isTrusted===true,updates:0,inputs:0,cancelKey:false};
       if(!active.trusted||!active.responder)errors.push('Composition must begin on a trusted original responder.');
     }else if(active&&event.responder===active.responder){
       if(event.type==='compositionupdate'&&event.isTrusted===true)active.updates++;
       if(event.type==='beforeinput'&&event.isTrusted===true&&event.inputType==='insertCompositionText')active.inputs++;
+      // Windows IME reports the physical cancellation key as Process/229 while composing.
+      // The empty completed session plus unchanged data proves cancellation; the operator
+      // separately confirms using Esc. Never fabricate or relabel that original key event.
+      if(event.type==='keydown'&&event.isTrusted===true&&(event.key==='Escape'
+        ||event.key==='Process'&&event.keyCode===229&&event.nativeComposing===true))active.cancelKey=true;
       if(event.type==='compositionend'){
         if(!(event.isTrusted===true||chromiumScopedEnd&&event.isTrusted===false)||!active.updates||!active.inputs)
           errors.push('Composition end requires a complete trusted native session.');
+        if(event.compositionData===''&&!active.cancelKey)errors.push('Cancellation requires a real key in the same native session.');
         sessions.push({...active,data:event.compositionData,endTrusted:event.isTrusted});active=undefined;
       }
     }else if(event.type==='compositionend')errors.push('Composition ended without the same original responder.');
@@ -34,9 +40,8 @@ export function validatePhysicalEvidence(report, confirmation) {
   if(report?.servedBytes?.status!=='passed'||report.changed?.length!==0||report.failures?.length!==0)errors.push('Current source, served bytes and all runtime checks must pass.');
   if(report?.leases!==0||report.resources?.totals?.resources!==0)errors.push('Input run must release all owned resources.');
   if(report.profile==='browser-real-ime'){
-    const events=report.events??[],commits=report.commits??[],snapshots=report.snapshots??[];
+    const commits=report.commits??[],snapshots=report.snapshots??[];
     errors.push(...validateImeSessions(report));
-    if(!events.some(e=>e.type==='keydown'&&e.key==='Escape'&&e.isTrusted))errors.push('Missing real cancellation key.');
     if(commits.filter(c=>c.data==='你好').length!==1||commits.some(c=>c.data!=='你好'))errors.push('Expected exactly one committed 你好 and no cancellation commit.');
     if(snapshots.length<3||snapshots.some(s=>s.data!=='你好'||s.composing))errors.push('Commit, cancel and resize checkpoints must retain the committed value.');
     if(snapshots.length>=3&&snapshots.every(s=>String(s.viewport)===String(snapshots[0].viewport)))errors.push('No actual viewport change recorded.');
