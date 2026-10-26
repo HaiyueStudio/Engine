@@ -28,8 +28,10 @@ try{result=await runChromeWebGpuFixture({root,fixture:relative(root,html).replac
       const value=r.result?.result?.value;
       if(value?.status==='failed')throw Error(value.error);
       if(value?.ready){
+        if(!smoke)await cdp.call('Page.bringToFront');
+        const focus=await cdp.call('Runtime.evaluate',{expression:'document.hasFocus()',returnByValue:true});
         const screen=await cdp.call('Page.captureScreenshot',{format:'png'});writeFileSync(resolve(out,'ready.png'),Buffer.from(screen.result.data,'base64'));
-        console.log(JSON.stringify({physicalWindowReady:true,profile,smoke,output}));
+        console.log(JSON.stringify({physicalWindowReady:true,profile,smoke,output,documentFocus:focus.result?.result?.value===true}));
         if(smoke)await cdp.call('Runtime.evaluate',{expression:'window.g13Physical.finishSmoke()'});
         return;
       }
