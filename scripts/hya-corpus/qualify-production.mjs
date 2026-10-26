@@ -10,6 +10,7 @@ import {stageQualifiedPackages,verifyServedBytes,sha256} from './packed-browser.
 import {snapshotSourceInputs,changedSourceInputs} from './source-snapshot.mjs';
 import {productionLayoutWorkload} from '../fixtures/hya-production/workloads.mjs';
 import {productionWorkloads,assessHyaPacing,compareGpuRows} from './production-policy.mjs';
+import {waitForProductionResult} from './production-observer.mjs';
 const root=process.cwd(),arg=(key,fallback)=>{const at=process.argv.indexOf(key);return at<0?fallback:process.argv[at+1];};
 const output=createQualificationOutput(root,arg('--output','artifacts/engine-0.2.2/g12/production-'+Date.now())).directory;mkdirSync(output,{recursive:true});
 const packageReport=resolve(root,arg('--packages','artifacts/engine-0.2.2/g12/packed-final-20261026/public-packages.json')),baseline=resolve(root,arg('--baseline','artifacts/engine-0.2.2/g12/incremental-20261026/haiyue-extensions-0.2.2.tgz'));
@@ -37,7 +38,7 @@ for(const [index,job]of plan.entries()){
  writeFileSync(resolve(directory,'source.json'),JSON.stringify(composition));writeFileSync(resolve(directory,'config.json'),JSON.stringify({budget,job,font:fontManifest.assets.font,scene:budget.workloads.find(w=>w.id==='f0-forward-1')}));
  const html=resolve(directory,'fixture.html');writeFileSync(html,'<!doctype html><meta charset="utf-8"><style>html,body{margin:0}canvas{width:1280px;height:720px}#progress,#result{display:none}</style><canvas id="canvas" width="1280" height="720"></canvas><pre id="progress"></pre><pre id="result"></pre><script type="importmap">'+JSON.stringify({imports:staged.imports})+'</script><script type="module" src="/scripts/fixtures/hya-production/production-browser.mjs"></script>');
  const mounts=[staged.mount,{prefix:'/g12-case',directory},{prefix:'/g12-production',directory:output},{prefix:'/g12-font',directory:resolve(root,'examples/hya-production')}];let raw;
- try{raw=await runChromeWebGpuFixture({root,fixture:html.slice(root.length+1).replaceAll('\\','/'),mounts,timeoutMs:240000,acceptedStatuses:['passed','failed'],chunkedResult:true,presentation:{mode:'visible',width:1320,height:820}});}catch(error){raw={status:'failed',error:String(error.stack??error),browserFailure:error.browserFailure};}
+ try{raw=await runChromeWebGpuFixture({root,fixture:html.slice(root.length+1).replaceAll('\\','/'),mounts,timeoutMs:240000,acceptedStatuses:['passed','failed'],chunkedResult:true,interact:cdp=>waitForProductionResult(cdp,240000),presentation:{mode:'visible',width:1320,height:820}});}catch(error){raw={status:'failed',error:String(error.stack??error),browserFailure:error.browserFailure};}
  const servedBytes=verifyServedBytes(root,mounts,raw);let pacing;
  try{if(raw.status!=='passed'||servedBytes.status!=='passed')throw Error(raw.error??'Native sample or HTTP identity failed');if(raw.adapter?.vendor!==budget.device.vendor||raw.adapter?.architecture!==budget.device.architecture)throw Error('Browser selected a different native GPU');pacing=assessHyaPacing(raw,budget);}catch(error){failures.push({index,job,reason:String(error)});}
  if(job.candidate==='candidate'&&job.workload.class==='normal'&&pacing?.status!=='passed')failures.push({index,job,pacing});
