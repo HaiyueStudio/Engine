@@ -69,7 +69,10 @@ try{
     const sha=[...new Uint8Array(await crypto.subtle.digest('SHA-256',b))].map(v=>v.toString(16).padStart(2,'0')).join('');
     check(b.byteLength===a.bytes&&sha===a.sha256,'Asset integrity mismatch: '+id);bytes.set(id,b);
   }
-  const source=await(await fetch('/g13-assets/scene.json')).json();
+  const sceneBytes=await(await fetch('/g13-assets/scene.json',{cache:'no-store'})).arrayBuffer();
+  const sceneSha=[...new Uint8Array(await crypto.subtle.digest('SHA-256',sceneBytes))].map(v=>v.toString(16).padStart(2,'0')).join('');
+  check(sceneSha===manifest.scene.sha256,'Seven-part scene integrity mismatch');
+  const source=JSON.parse(new TextDecoder().decode(sceneBytes));
   // The fixed Native scene remains the seven-part source; only the test control actions are added.
   if(profile==='physical-gamepad'){
     const interaction=source.parts.find(p=>p.id==='interaction').document;
