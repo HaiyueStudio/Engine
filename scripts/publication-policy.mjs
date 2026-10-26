@@ -34,13 +34,15 @@ export function redactPublicationLog(text) {
 }
 
 /** Persist intent BEFORE submit. A lost acknowledgement is never proof of rejection. */
-export async function runPublication(plan, journal, io, {allowSubmit = false, maxWaitMs = 300000, pollMs = 5000} = {}) {
+export async function runPublication(plan, journal, io, {allowSubmit = false, retryAuth = [], maxWaitMs = 300000, pollMs = 5000} = {}) {
   const id = publicationPlanId(plan);
   if (!Number.isFinite(maxWaitMs) || maxWaitMs < 0 || !Number.isFinite(pollMs) || pollMs <= 0) throw Error('Invalid bounded registry wait.');
+  if (!Array.isArray(retryAuth) || new Set(retryAuth).size !== retryAuth.length || retryAuth.some(name=>!plan.packages.some(p=>p.name===name))
+    || retryAuth.length && !allowSubmit) throw Error('Authentication retry requires explicit named publication authorization.');
   if (journal && (journal.schemaVersion !== 1 || journal.planId !== id)) throw Error('Journal belongs to another frozen candidate.');
   const state = journal ? structuredClone(journal) : {schemaVersion: 1, planId: id, packages: {}};
   const persist = async (entry, status, detail) => {
-    state.packages[entry.name] = {...state.packages[entry.name], status, ...(detail ? {detail: redactPublicationLog(detail)} : {})};
+    state.packages[entry.name] = {...state.packages[entry.name], status, updatedAt:new Date(io.now()).toISOString(), ...(detail ? {detail: redactPublicationLog(detail)} : {})};
     await io.save(structuredClone(state));
   };
   for (const entry of plan.packages) {
@@ -53,22 +55,32 @@ export async function runPublication(plan, journal, io, {allowSubmit = false, ma
       if (remote.status === 'visible') {
         if (remote.integrity !== entry.integrity) throw Error('Published version has conflicting integrity: '+entry.name);
         verifyPublicationBytes(entry, await io.download(entry, remote));
-        state.packages[entry.name] = {...state.packages[entry.name], attempted: true};
+        state.packages[entry.name] = {...state.packages[entry.name], attempted: true, rejectionKind: undefined};
         await persist(entry, 'verified'); break;
       }
       if (remote.status === 'processing') {
         // Processing observed even without a local journal means somebody already submitted it.
         attempted = true;
-        state.packages[entry.name] = {...state.packages[entry.name], attempted: true};
+        state.packages[entry.name] = {...state.packages[entry.name], attempted: true, rejectionKind: undefined};
         await persist(entry, 'processing');
-      } else if (!attempted) {
+      } else {
+        const previous=state.packages[entry.name];
+        if(attempted&&retryAuth.includes(entry.name)){
+          if(previous.rejectionKind!=='authentication')throw Error('Only a definite authentication rejection can be explicitly retried: '+entry.name);
+          if((previous.attemptHistory?.length??0)>=16)throw Error('Authentication retry history limit reached.');
+          state.packages[entry.name]={...previous,attempted:false,attemptHistory:[...(previous.attemptHistory??[]),{status:previous.status,detail:previous.detail,updatedAt:previous.updatedAt}],rejectionKind:undefined};
+          attempted=false;await persist(entry,'reauthorized');
+          retryAuth=retryAuth.filter(name=>name!==entry.name);
+        }
+        if (!attempted) {
         if (!allowSubmit) { await persist(entry, 'not-published'); break; }
-        state.packages[entry.name] = {attempted: true}; attempted = true;
+        state.packages[entry.name] = {...state.packages[entry.name],attempted: true}; attempted = true;
         await persist(entry, 'submitting');
         let submission;
         try { submission = await io.submit(entry); }
         catch (error) { await persist(entry, 'indeterminate', error.message); throw error; }
         if (submission?.status === 'rejected') {
+          if(submission.reason==='authentication')state.packages[entry.name].rejectionKind='authentication';
           await persist(entry, 'rejected', submission.detail);
           throw Error('Publication rejected; no automatic retry: '+entry.name);
         }
@@ -77,7 +89,8 @@ export async function runPublication(plan, journal, io, {allowSubmit = false, ma
           throw Error('Submission acknowledgement missing; resume registry verification, do not resubmit: '+entry.name);
         }
         await persist(entry, 'accepted');
-      } else await persist(entry, 'awaiting-visibility');
+        } else await persist(entry, 'awaiting-visibility');
+      }
       if (io.now()-started >= maxWaitMs) {
         await persist(entry, 'visibility-timeout');
         return {status: 'pending', journal: state, package: entry.name};

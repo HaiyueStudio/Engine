@@ -13,6 +13,8 @@ node scripts/publication.mjs verify --plan <frozen-plan.json> --journal <journal
 
 四包均真实下载并与冻结字节一致后才允许创建 GitHub Release；附件逐项回读校验后才可推进 Pages，并核对部署提交。控制器不会自动发布 GitHub／Pages。G13 仅准备和演练，不执行这些外部动作。
 
+只有记录为 EOTP／E401／ENEEDAUTH 的确定认证拒绝，在用户重新授权后，才可通过 `publish --retry-auth @haiyue/具名包` 恢复同一 journal，旧尝试仍保留。已接受、处理中、响应丢失及 E403 不适用此选项；这些状态继续查询并禁止重复提交。不要通过换用空 journal 来绕过待处理记录。
+
 Engine 独立发布范围由 `review/api/release-manifest.json` 定义：engine、animation-spec、extensions、shader-language 四个 npm 包，以及 Engine examples 静态目录。UI、Editor、Games 按各自仓库发布，参见 [ADR 0105](adr/0105-independent-library-release-gates.md)。
 
 ## 候选验收

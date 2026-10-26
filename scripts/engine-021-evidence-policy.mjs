@@ -1,5 +1,11 @@
 export const ENGINE_021_EVIDENCE_KINDS = Object.freeze(['correctness', 'production', 'resources', 'ablation', 'rooms', 'instances', 'forward']);
 
+/** The seven-report contract is inherited; candidate version and evidence population are not. */
+export function validateEvidenceTargetVersion(manifest, releaseVersion) {
+  if(releaseVersion==='0.2.1'&&manifest.targetVersion===undefined)return;
+  if(manifest.targetVersion!==releaseVersion)throw Error('Qualification target version differs from the current release candidate.');
+}
+
 /** User-approved single repair case, ADR 0129. Digests identify complete immutable populations. */
 export const ENGINE_021_READBACK_REUSE = Object.freeze({
   decision: 'ADR0129-readback-cache-history',

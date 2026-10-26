@@ -74,6 +74,28 @@ test('previously visible verified versions cannot be submitted when the registry
   assert.equal((await runPublication(plan,first.journal,h.io,{allowSubmit:true,maxWaitMs:0})).status,'pending');
   assert.equal(h.submitted.length,0);
 });
+test('a definite authentication rejection can be retried only with an explicit package name, retaining the old attempt',async()=>{
+  const h=harness(()=>({status:'absent'}));h.io.submit=async()=>({status:'rejected',reason:'authentication',detail:'EOTP expired'});
+  await assert.rejects(runPublication(plan,null,h.io,{allowSubmit:true}),/rejected/);
+  const journal=h.saved.at(-1);h.io.submit=async e=>{h.submitted.push(e.name);return{status:'accepted'};};
+  const polled=await runPublication(plan,journal,h.io,{allowSubmit:true,maxWaitMs:0});assert.equal(h.submitted.length,0);
+  const retried=await runPublication(plan,polled.journal,h.io,{allowSubmit:true,retryAuth:[plan.packages[0].name],maxWaitMs:0});
+  assert.equal(h.submitted.length,1);assert.equal(retried.journal.packages[plan.packages[0].name].attemptHistory[0].detail,'EOTP expired');
+});
+
+test('external processing supersedes an earlier authentication rejection and prevents a later retry',async()=>{
+  const h=harness(()=>({status:'processing'})),name=plan.packages[0].name;
+  const journal={schemaVersion:1,planId:publicationPlanId(plan),packages:{[name]:{attempted:true,status:'rejected',rejectionKind:'authentication'}}};
+  const processing=await runPublication(plan,journal,h.io,{maxWaitMs:0});
+  h.io.observe=async()=>({status:'absent'});
+  await assert.rejects(runPublication(plan,processing.journal,h.io,{allowSubmit:true,retryAuth:[name],maxWaitMs:0}),/definite/);
+  assert.equal(h.submitted.length,0);
+});
+test('explicit authentication retry never resubmits indeterminate or processing work',async()=>{
+  const h=harness(()=>({status:'absent'}));const journal={schemaVersion:1,planId:publicationPlanId(plan),packages:{[plan.packages[0].name]:{attempted:true,status:'indeterminate'}}};
+  await assert.rejects(runPublication(plan,journal,h.io,{allowSubmit:true,retryAuth:[plan.packages[0].name],maxWaitMs:0}),/definite/);
+  h.io.observe=async()=>({status:'processing'});await runPublication(plan,journal,h.io,{allowSubmit:true,retryAuth:[plan.packages[0].name],maxWaitMs:0});assert.equal(h.submitted.length,0);
+});
 test('no credentials persist; release attachment mismatch prevents Pages advancement',()=>{
   assert.equal(redactPublicationLog('otp=123456 npm_secret https://user:pass@host'), 'otp=[REDACTED] [REDACTED] https://[REDACTED]@host');
   assert.equal(publicationNextStep({status:'pending'},[]),'wait-for-npm');

@@ -51,7 +51,13 @@ export class ProductionCompositionGuiBridge {
  hit(target:CompositionGuiTarget,x:number,y:number):boolean{
   const r=this.root.viewport,v=this.viewport();return this.enabled&&r.width>0&&r.height>0&&v[0]>0&&v[1]>0&&this.owner.guiHit(target,this.point(x,y));
  }
- enqueue(input:CompositionGuiInput,target?:CompositionGuiTarget):void{if(!this.closed&&!this.synchronizing)this.owner.enqueueGui(input,target);}
+ enqueue(input:CompositionGuiInput,target?:CompositionGuiTarget):void{
+  if(this.closed||this.synchronizing)return;
+  // Pointer Events uses -1 when no button changed. The logical optional button stays absent.
+  if(input.button===-1&&(input.kind==='pointer-move'||input.kind==='pointer-cancel')){
+   const {button,...event}=input;void button;this.owner.enqueueGui(event,target);
+  }else this.owner.enqueueGui(input,target);
+ }
  /** Runs after the original whole-frame barrier; failed frames never publish new HYA focus. */
  sync(focused:string|null):void{
   if(this.closed)return;this.active=true;this.element.visible=true;

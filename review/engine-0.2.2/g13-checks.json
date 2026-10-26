@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "goal": "g13-integration-release",
+  "status": "active",
+  "fullG13Complete": false,
+  "releaseQualified": false,
+  "problem": "Finalize public package integration and qualify the same candidate across GUI, HYA, hosts and recoverable release controls.",
+  "method": "Frozen named exports, independent installed tarballs, unchanged runtime ownership/budgets, real input before admission, immutable original failures.",
+  "candidate": {
+    "revision": "4073c3b46c9df95050a71f3db7ac97eb4eafbae5",
+    "dirty": false,
+    "role": "structural-package-candidate; real-input failure retained",
+    "packages": [
+      {
+        "name": "@haiyue/engine",
+        "version": "0.2.2",
+        "sha256": "004d378c8f2d54404b33b9ec5654c39f40eed233b6c63fe087ac145c1b5257ff",
+        "packedBytes": 2021690,
+        "unpackedBytes": 8417758
+      },
+      {
+        "name": "@haiyue/animation-spec",
+        "version": "0.2.2",
+        "sha256": "71eb24b81b1a07f081138610869c11b759def56aa5853a3030e7a714ad385876",
+        "packedBytes": 170719,
+        "unpackedBytes": 666297
+      },
+      {
+        "name": "@haiyue/extensions",
+        "version": "0.2.2",
+        "sha256": "6433080049f35e724c1cee3527a3870c64bf8f136410b0ae96bb5248361f978a",
+        "packedBytes": 528389,
+        "unpackedBytes": 2053969
+      },
+      {
+        "name": "@haiyue/shader-language",
+        "version": "0.2.2",
+        "sha256": "6a3df405553a2a45d9e76596a3917ea8be5c04e3bc680b3f539cc772ddf75aae",
+        "packedBytes": 148545,
+        "unpackedBytes": 720460
+      }
+    ],
+    "packageReport": {
+      "path": "artifacts/engine-0.2.2/g13/packages-clean-6ac7f17/public-packages.json",
+      "sha256": "25d703c741190a5adb1facf9b9d0cfeb58305fd28dfe9e024e7dc4e7aa3676e0"
+    }
+  },
+  "api": {
+    "namedG01Additions": 47,
+    "removed": 0,
+    "rootSymbols": 30,
+    "coreSymbols": 71,
+    "guiSymbols": 106,
+    "layoutSymbols": 13,
+    "guiLayoutSymbols": 11,
+    "proof": {
+      "path": "artifacts/engine-0.2.2/g13/admitted-api-delta.json",
+      "sha256": "f5123e8a9052e2c367646b1e7031cde0970146263ebdff30cd31f22b17df3765"
+    }
+  },
+  "verification": {
+    "fast": {
+      "status": "passed",
+      "workspaceTests": 2416,
+      "releasePolicyTests": 130,
+      "log": {
+        "path": "artifacts/engine-0.2.2/g13/fast-clean-6ac7f17.log",
+        "sha256": "5ee20812a7f96b25d40ecae934bb2bf7e71c4eb1d3b3e1853f15a73743717e70"
+      },
+      "startedRevision": "6ac7f17",
+      "finishedRevision": "4073c3b46c9df95050a71f3db7ac97eb4eafbae5",
+      "interveningChanges": "Physical test fixture only; public runtime/build/config unchanged."
+    },
+    "packages": {
+      "status": "passed",
+      "independentBundles": 42,
+      "esmEntrypoints": 77,
+      "domGpuFreeLayout": true
+    },
+    "regionContracts": {
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.2/g13/contracts.log",
+        "sha256": "f31c2266aa24f7bd8d8f7eb15df833b8c910a398a3a8aa749983f8cc256b89ff"
+      },
+      "sourceLoaderRegression": {
+        "path": "artifacts/engine-0.2.2/g13/source-loader-regression.log",
+        "sha256": "d25fcd75f6e0f5a1deb2a71fbf8a918473202965b08db29cd58faecc8dd2a92a"
+      }
+    },
+    "releaseRecovery": {
+      "status": "passed-focused",
+      "policyTests": 36,
+      "proof": {
+        "path": "artifacts/engine-0.2.2/g13/recovery-version-policy.log",
+        "sha256": "41b76b1d57eefc130ff80db8d3dd3688e8487b0d48fa45b4cbb0c1e3e1a65f7c"
+      },
+      "externalPublicationExecuted": false
+    },
+    "games": {
+      "status": "passed-current-pre-pointer-candidate",
+      "types": true,
+      "tests": 695,
+      "builtGameTargets": 31,
+      "unresolvedImports": 0,
+      "logs": [
+        {
+          "path": "artifacts/engine-0.2.2/g13/games-typecheck.log",
+          "sha256": "0ecd9dc519d238af11b6e71d95d1a4300b1ed08d472a74691b3000477aa1138a"
+        },
+        {
+          "path": "artifacts/engine-0.2.2/g13/games-test.log",
+          "sha256": "18c0a160119a52c6b00d76787738531ccb1f61104533c5cc4af2c61a52f8b517"
+        },
+        {
+          "path": "artifacts/engine-0.2.2/g13/games-build.log",
+          "sha256": "a82d6d0a9005043671963c41bdeb8190fc66d875c1161dffd0714daa149f075d"
+        }
+      ],
+      "lockChanges": {
+        "path": "artifacts/engine-0.2.2/g13/consumer-lock-diff.json",
+        "sha256": "214f89048c6445bdab815bf51695864484f853a8b7f7857723de8dcdae4e4e64"
+      },
+      "userSokobanWorkPreserved": true
+    },
+    "nativePreparation": {
+      "status": "passed-native-source-types-and-ios-javascript-bundle",
+      "checks": [
+        {
+          "id": "preflight",
+          "exitCode": 0
+        },
+        {
+          "id": "native-sdk-types",
+          "exitCode": 0
+        },
+        {
+          "id": "public-scene-and-byte-tests",
+          "exitCode": 0
+        },
+        {
+          "id": "ios-javascript-bundle",
+          "exitCode": 0
+        }
+      ],
+      "bridgeSources": 23,
+      "log": {
+        "path": "artifacts/engine-0.2.2/g13/native-source-pre-pointer.log",
+        "sha256": "cc9bf754baf85cde4ceece7731ade0ef35af4faf63e4af26a5ab4c90aa1ebb76"
+      },
+      "appleSdkCompiled": false,
+      "physicalNativeQualified": false
+    }
+  },
+  "preservedFailures": {
+    "initialFast": {
+      "path": "artifacts/engine-0.2.2/g13/fast-initial.log",
+      "sha256": "66f895d646386f24fba37a3a3f0177b44889d888e4cf676933680b7ba7ca911b"
+    },
+    "sourceLoader": {
+      "path": "artifacts/engine-0.2.2/g13/fast-integrated.log",
+      "sha256": "348dd82eea3f1c083cdd250759576d2011daaa2d2560ec8a7da7932719d2c9b1"
+    },
+    "physicalIme": {
+      "path": "artifacts/engine-0.2.2/g13/ime-manual-4073c3b/result.json",
+      "sha256": "ea0091424c374ebfe7d58dfab4571c46b1aef006664e1d1e9d44745e18f9d86f"
+    }
+  },
+  "currentBlocker": {
+    "id": "native-pointer-button-minus-one",
+    "status": "approved-and-applied; regression-passed; rebuilding-public-candidate",
+    "file": "extensions/src/animation/production/CompositionGuiBridge.ts",
+    "proposal": {
+      "path": "artifacts/engine-0.2.2/g13/pointer-proposal/pointer.patch",
+      "sha256": "13e68a08376216b29efc9b1e557d41283da033ef906307e13601f6e562be9e87"
+    },
+    "proof": {
+      "path": "artifacts/engine-0.2.2/g13/pointer-proposal/result.json",
+      "sha256": "7be5d2ca886b01a1e24e4373dbbad462396eaaca4a0545feea6db6d4bfc59dca"
+    },
+    "logicalValidatorUnchanged": true
+  },
+  "remaining": [
+    "Requalify pointer adapter in clean public packages and refresh consumers",
+    "Real Windows HYA IME and physical gamepad workflow",
+    "Physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver",
+    "Current-candidate GUI/region/HYA and inherited seven-group rendering/performance evidence",
+    "Same-clean-candidate complete global gate and no-publication rehearsal"
+  ],
+  "publishing": {
+    "executed": false,
+    "push": false,
+    "tag": false,
+    "npm": false,
+    "githubRelease": false,
+    "pages": false
+  },
+  "deviceAvailability": {
+    "windows": true,
+    "gamepad": true,
+    "mac": false,
+    "iphone": false
+  }
+}

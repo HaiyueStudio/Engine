@@ -40,12 +40,13 @@ for(const type of ['compositionstart','compositionupdate','compositionend','befo
   document.addEventListener(type,event=>{
     if(!event.target?.matches?.('[data-haiyue-text-input]')&&type!=='pointerdown')return;
     if(events.length>=4096){finish(Error('Physical trace exceeded bounded event population'));return;}
-    events.push({type,isTrusted:event.isTrusted,compositionData:event.data??null,inputType:event.inputType??null,key:event.key??null,...snapshot()});
+    events.push({type,isTrusted:event.isTrusted,compositionData:event.data??null,inputType:event.inputType??null,key:event.key??null,
+      button:event.button??null,buttons:event.buttons??null,...snapshot()});
   },true);
 }
 document.querySelector('#checkpoint').onclick=event=>{
   if(done||!event.isTrusted||!player)return;const state=snapshot();snapshots.push(state);
-  status.textContent='Checkpoint '+snapshots.length+' saved.\n'+JSON.stringify(state,null,2);
+  status.textContent='Checkpoint '+snapshots.length+' saved. Value: '+JSON.stringify(state.data)+'; composing: '+state.composing;
 };
 document.querySelector('#finish').onclick=event=>{
   if(done||!event.isTrusted||!player)return;

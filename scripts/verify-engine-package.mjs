@@ -109,6 +109,7 @@ try {
     node: runNodeRuntimeConsumer(installed),
     hya: runHyaRuntimeConsumer(installed),
     layout: runLayoutRuntimeConsumer(installed),
+    guiLayout: runGuiLayoutRuntimeConsumer(installed),
     typescript: runTypeScriptConsumer(installed, packedPackages),
     exports: runAllExportsConsumer(installed, packedPackages),
     cli: runCliConsumer(installed),
@@ -470,6 +471,14 @@ function runLayoutRuntimeConsumer(installed) {
   return commandCheck(spawnSync(process.execPath, [input], {
     cwd: installed.root, encoding: 'utf8', timeout: 30_000,
   }), 'DOM/GPU-free packed layout runtime');
+}
+
+function runGuiLayoutRuntimeConsumer(installed) {
+  const input = resolve(installed.root, 'gui-layout-runtime.mjs');
+  copyFileSync(resolve(root, 'scripts/fixtures/engine-consumers/gui-layout-runtime.mjs'), input);
+  return commandCheck(spawnSync(process.execPath, [input], {
+    cwd: installed.root, encoding: 'utf8', timeout: 30_000,
+  }), 'packed GUI layout and skin constructors');
 }
 
 function runTypeScriptConsumer(installed, packages) {
