@@ -302,14 +302,78 @@
       "physicalNativeQualified": false
     },
     "currentCandidateIme": {
-      "status": "awaiting-user-started-real-browser-input",
+      "status": "passed-current-public-package-candidate",
       "candidateRevision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
       "userLauncher": {
         "path": "scripts/start-g13-ime-70187df.cmd",
         "sha256": "19cc5de2275d23be896bee3b39f18aeeefe5c5ec5561497aec4f3593a40f9ab9"
       },
       "outputPattern": "artifacts/engine-0.2.2/g13/ime-user-start-70187df-<milliseconds>",
-      "currentCandidateQualified": false
+      "currentCandidateQualified": true,
+      "raw": {
+        "path": "artifacts/engine-0.2.2/g13/ime-user-start-70187df-1793059045652/result.json",
+        "sha256": "1557f155a8d3d566602540821cf6e27d31a126fa57e6f415e7596674c30ade4c"
+      },
+      "assessment": {
+        "path": "artifacts/engine-0.2.2/g13/ime-user-start-70187df-1793059045652/operator-assessment.json",
+        "sha256": "26b083aa84dbb9e1623547f816a478ec2f537135ce0fe1e448bf297b1c570723"
+      },
+      "operatorConfirmed": true,
+      "observed": {
+        "committedValues": [
+          "你好"
+        ],
+        "compositionEnds": [
+          {
+            "data": "你好",
+            "responder": "1",
+            "isTrusted": false
+          },
+          {
+            "data": "",
+            "responder": "2",
+            "isTrusted": false
+          }
+        ],
+        "checkpoints": [
+          {
+            "data": "你好",
+            "composing": false,
+            "viewport": [
+              984,
+              755
+            ]
+          },
+          {
+            "data": "你好",
+            "composing": false,
+            "viewport": [
+              984,
+              755
+            ]
+          },
+          {
+            "data": "你好",
+            "composing": false,
+            "viewport": [
+              758,
+              593
+            ]
+          },
+          {
+            "data": "你好",
+            "composing": false,
+            "viewport": [
+              758,
+              593
+            ]
+          }
+        ],
+        "gpuResources": 0,
+        "leases": 0
+      },
+      "originalFlags": "Chrome compositionend=false and Windows Process/229 retained; matched complete original responder sessions.",
+      "physicalInputAccepted": true
     }
   },
   "preservedFailures": {
@@ -375,11 +439,10 @@
     "status": "pending",
     "runtimePointerBugResolved": true,
     "realBrowserImePassed": true,
-    "currentCandidateImePending": true,
+    "currentCandidateImePending": false,
     "physicalGamepadPassed": true
   },
   "remaining": [
-    "Current-package-candidate real browser IME qualification",
     "Physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver",
     "Inherited seven-group rendering/performance evidence and current HYA production timing",
     "Same-clean-candidate complete global gate and no-publication rehearsal"
