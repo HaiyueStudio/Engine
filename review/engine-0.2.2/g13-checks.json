@@ -114,12 +114,16 @@
     },
     "releaseRecovery": {
       "status": "passed-complete-release-policy-suite",
-      "tests": 148,
+      "tests": 152,
       "proof": {
+        "path": "artifacts/engine-0.2.2/g13/release-policy-production-launcher-final.log",
+        "sha256": "817b8aa05f289785b59dd22522080c15647186480c1f9d4b00b8254e07674521"
+      },
+      "externalPublicationExecuted": false,
+      "priorProof": {
         "path": "artifacts/engine-0.2.2/g13/release-policy-user-launcher.log",
         "sha256": "7eba2b0c7a4b5bba4d8dc63e64cac45238fe6423129e8f94a2266ed6ced6b551"
-      },
-      "externalPublicationExecuted": false
+      }
     },
     "games": {
       "status": "passed-current-public-packages",
@@ -374,6 +378,40 @@
       },
       "originalFlags": "Chrome compositionend=false and Windows Process/229 retained; matched complete original responder sessions.",
       "physicalInputAccepted": true
+    },
+    "productionSampling": {
+      "status": "prepared-not-started",
+      "candidateRevision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
+      "launcher": {
+        "path": "scripts/start-g13-production-70187df.cmd",
+        "sha256": "6098c6ef99f65f824f292994b0ca4bab9d3934b1025df35eb31f20d6f3dfdd22"
+      },
+      "wrapper": {
+        "path": "scripts/start-g13-production.ps1",
+        "sha256": "ca9ddc8cece5a628bb5377538f5d46cb0091c761028b02c22280cbfd6923f75c"
+      },
+      "worker": {
+        "path": "scripts/run-g13-production-candidate.mjs",
+        "sha256": "131116da80d013f905b201421444d2802490993784485eda44c9a52f481f3e02"
+      },
+      "policy": {
+        "path": "scripts/g13-production-candidate-policy.mjs",
+        "sha256": "798e7ae790d3a1eee0c19640da8c0177b7bc01365c2c8d3b33bf24fbf2a13f02"
+      },
+      "plan": {
+        "path": "artifacts/engine-0.2.2/g13/production-launcher-plan.log",
+        "sha256": "b5917569841ead5abe10eb21ebf851156c6fb9238b95e9d79fb315c8f09cc278"
+      },
+      "policyTests": 152,
+      "proof": {
+        "path": "artifacts/engine-0.2.2/g13/release-policy-production-launcher-final.log",
+        "sha256": "817b8aa05f289785b59dd22522080c15647186480c1f9d4b00b8254e07674521"
+      },
+      "captures": 30,
+      "originalGpuRegressionLimit": 0.05,
+      "backgroundApplicationsRequiredClosed": true,
+      "baselinePromotion": false,
+      "releaseQualified": false
     }
   },
   "preservedFailures": {
