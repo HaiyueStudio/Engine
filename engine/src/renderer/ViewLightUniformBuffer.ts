@@ -1,6 +1,9 @@
 import type { RenderCommandContext } from '../core/RenderCommandContext';
 import { SCENE_RENDER_MAX_LIGHTS, type PbrLightInfo } from '../frame/SceneRenderEnvironment';
 import { getSceneFrameUniformSnapshotMetadata, type SceneFrameUniformSnapshot } from '../frame/SceneFrameUniformLayout';
+import {isSceneFrameUniformStreamRetired} from '../frame/SceneFrameUniformLifetime';
+import {SubmissionLifetime} from '../rtt/SubmissionLifetime';
+import {EngineError,EngineErrorCode} from '../core/EngineError';
 import { FrameRingResource } from './FrameRingResource';
 import { writeBuffer } from './utils';
 
@@ -12,6 +15,9 @@ export const LIGHT_UNIFORM_BINDING = Object.freeze({
 interface Slot {
   readonly index: number;
   readonly data: Float32Array;
+  readonly lifetime: SubmissionLifetime;
+  readonly recordings: WeakSet<object>;
+  reusable: boolean;
   valid: boolean;
   encoder: GPUCommandEncoder | undefined;
 }
@@ -64,16 +70,18 @@ export class ViewLightUniformBuffer {
     if (context?.encoder !== this._encoder) {
       this._encoder = context?.encoder;
       this._epoch++;
-      this._sweep(context);
+      this._sweep();
     }
     const metadata = getSceneFrameUniformSnapshotMetadata(snapshot);
     const stream = metadata?.stream ?? snapshot;
+    if (isSceneFrameUniformStreamRetired(stream)) throw new EngineError(EngineErrorCode.ResourceOwnerReleased, 'Light uniform snapshot owner has retired.');
     let view = this._views.get(stream);
     if (!view) { view = { slots: [], lastEpoch: this._epoch }; this._views.set(stream, view); }
     view.lastEpoch = this._epoch;
     const region = metadata ? (metadata.revision - 1) % 3 : 0;
     this._slot = view.slots[region] ?? (view.slots[region] = this._createSlot(context));
     this.dynamicOffset[0] = this._slot.index * this._stride;
+    this._retainSlot(this._slot);
     this._ring.markUsed();
     return previousBuffer !== this.buffer;
   }
@@ -86,7 +94,8 @@ export class ViewLightUniformBuffer {
     if (changed && slot.valid && this._context && slot.encoder === this._context.encoder) {
       slot = this._slot = this._createSlot(this._context);
       this.dynamicOffset[0] = slot.index * this._stride;
-      this._retireSlots([slot], this._context);
+      this._retainSlot(slot);
+      this._retireSlots([slot]);
     }
     if (changed) {
       writeBuffer(this._device.queue, this.buffer, slot.index * this._stride, this._scratch);
@@ -94,6 +103,7 @@ export class ViewLightUniformBuffer {
       slot.valid = true;
       this.uploadCount++;
     }
+    this._retainSlot(slot);
     slot.encoder = this._context?.encoder;
     this._ring.markUsed();
   }
@@ -114,7 +124,10 @@ export class ViewLightUniformBuffer {
       this._restoreSlot(this._fallback);
       for (const view of this._views.values()) for (const slot of view.slots) if (slot) this._restoreSlot(slot);
     }
-    return { index, data: new Float32Array(this._scratch.length), valid: false, encoder: undefined };
+    const slot: Slot = { index, data: new Float32Array(this._scratch.length), valid: false, encoder: undefined, reusable: true, recordings: new WeakSet<object>(),
+      lifetime: new SubmissionLifetime(this._device, () => { if (!this._destroyed && slot.reusable) this._free.push(index); }),
+    };
+    return slot;
   }
 
   private _restoreSlot(slot: Slot): void {
@@ -125,21 +138,31 @@ export class ViewLightUniformBuffer {
     slot.encoder = undefined;
   }
 
-  private _sweep(context?: RenderCommandContext): void {
+  private _sweep(): void {
     for (const [stream, view] of this._views) {
-      if (this._epoch - view.lastEpoch <= 120) continue;
+      if (!isSceneFrameUniformStreamRetired(stream) && this._epoch - view.lastEpoch <= 120) continue;
       this._views.delete(stream);
-      this._retireSlots(view.slots.filter(Boolean), context);
+      this._retireSlots(view.slots.filter(Boolean));
     }
   }
 
-  private _retireSlots(slots: readonly Slot[], context?: RenderCommandContext): void {
-    const retire = (queue: GPUQueue) => {
-      const release = () => { if (!this._destroyed) for (const slot of slots) this._free.push(slot.index); };
-      void queue.onSubmittedWorkDone().then(release, release);
-    };
-    if (context?.afterSubmit) context.afterSubmit(retire);
-    // Without a submit hook the indices stay owned until destroy, like FrameRingResource generations.
+  private _retainSlot(slot: Slot): void {
+    const context = this._context;
+    if (context?.afterSubmit) {
+      const token = context.encoder ?? context;
+      if (slot.recordings.has(token)) return;
+      slot.lifetime.retainSubmission(token,
+        callback => context.afterSubmit!(callback),
+        context.afterCancel ? callback => context.afterCancel!(callback) : undefined);
+      slot.recordings.add(token);
+    } else {
+      // Legacy recordings lack a safe completion boundary. Keep their indices owned.
+      slot.reusable = false;
+    }
+  }
+
+  private _retireSlots(slots: readonly Slot[]): void {
+    for (const slot of slots) slot.lifetime.retire();
   }
 }
 
