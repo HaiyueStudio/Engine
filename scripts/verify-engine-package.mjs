@@ -31,6 +31,7 @@ import {
   parsePackageVerificationArgs,
 } from './engine-package-policy.mjs';
 import { npmArgs, npmCommand } from './npm-process.mjs';
+import { canonicalPackageMetadata } from './package-metadata-encoding.mjs';
 import { measureConsumerLoading, validateConsumerLoading } from './engine-package-loading-policy.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -205,6 +206,10 @@ function packPublicPackage({ packageName, policy }) {
     const destination = resolve(staging, file.path);
     mkdirSync(dirname(destination), { recursive: true });
     copyFileSync(source, destination);
+    if(policy.metadataLineEndings){
+      const bytes=readFileSync(destination),canonical=canonicalPackageMetadata(bytes,file.path,policy.metadataLineEndings);
+      if(!canonical.equals(bytes))writeFileSync(destination,canonical);
+    }
     chmodSync(destination, file.mode ?? statSync(source).mode);
   }
 
@@ -264,6 +269,7 @@ function packPublicPackage({ packageName, policy }) {
     exportTargets: collectPackageTargets(packagedJson),
     sourceExcludedFiles,
     stagingContentSha256: hashTree(staging),
+    metadataLineEndings: policy.metadataLineEndings ?? {},
     packageJsonSha256: sha256File(resolve(extractedDirectory, 'package.json')),
     errors,
     tarballPath: outputTarball,

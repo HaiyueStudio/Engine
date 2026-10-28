@@ -5,6 +5,7 @@ const revision='a'.repeat(40);
 test('the Windows population keeps every full capture and separate Apple admission',()=>{
   const p=windowsFinalPlan();assert.equal(p.captures,580);assert.equal(p.jobs.length,7);assert.deepEqual(p.jobs.map(j=>j.captures),[4,156,96,24,36,40,224]);
   assert.equal(p.macQualified,false);assert.equal(p.iPhoneQualified,false);assert.equal(p.externalPublishPerformed,false);assert.equal(p.automaticRetry,false);
+  assert.deepEqual(p.hyaFollowups.map(j=>j.id),['layout','corpus']);assert.equal(p.hyaFollowups[0].cohorts,27);assert.equal(p.hyaFollowups[1].denominator,23);assert.equal(p.hyaFollowups[1].rounds,3);
 });
 test('the isolated checkout is bounded to a new named G13 directory',()=>{
   const root=process.cwd(),paths=windowsFinalPaths(root,'1793151130884-1234abcd');assert.equal(assertWindowsFinalLocation(root,paths.output),paths.output);

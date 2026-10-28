@@ -114,10 +114,10 @@
     },
     "releaseRecovery": {
       "status": "passed-complete-release-policy-suite",
-      "tests": 159,
+      "tests": 162,
       "proof": {
-        "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final-census.log",
-        "sha256": "3e2f130527deba02d303fc00aa235e91e7f05ad51f337c8d64ba7d64a94240f3"
+        "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final-encoding.log",
+        "sha256": "a234d8aef5485976e34afeb6cb590b8337dad350f0a64f6d768c68b9fbe61c12"
       },
       "externalPublicationExecuted": false,
       "priorProof": {
@@ -131,6 +131,10 @@
       "priorWindowsEntryProof": {
         "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final.log",
         "sha256": "3105c92359977aea2986bed3b174aa8d824a2d56e647047601ad655049ce01b8"
+      },
+      "priorFoundationRepairProof": {
+        "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final-census.log",
+        "sha256": "3e2f130527deba02d303fc00aa235e91e7f05ad51f337c8d64ba7d64a94240f3"
       }
     },
     "games": {
@@ -495,15 +499,15 @@
       },
       "worker": {
         "path": "scripts/run-g13-windows-final.mjs",
-        "sha256": "4adc693bc985ed3ce7b1797a28474a0bbd7b648dc000630fc895b4aa7b3db968"
+        "sha256": "e9a1917c9e43ed90721a1759f1e3b664d2b96c8195c3bf5b1a867abd4773e4f2"
       },
       "policy": {
         "path": "scripts/g13-windows-final-policy.mjs",
-        "sha256": "8753d28d522bbf8a37b35fc22ab4e75b677167d5108430c8c562581eaaedfd59"
+        "sha256": "f137c76d418cbc6e2bf591194b677ad576d3cb9b97ab79b8512f8c1228f87020"
       },
       "plan": {
-        "path": "artifacts/engine-0.2.2/g13/windows-final-plan.log",
-        "sha256": "45344a30f53ce84796e746f7e3025d6afb7c43ab2d061b0e364bd3b956d9617c"
+        "path": "artifacts/engine-0.2.2/g13/windows-final-plan-complete.log",
+        "sha256": "ef3cab54132c68025e62358dd0ce0e6a5b0b9e8ab1d5f56896bb9321b01e01f6"
       },
       "captures": 580,
       "originalBudgetsUnchanged": true,
@@ -532,6 +536,40 @@
         "originalFailure": {
           "path": "artifacts/engine-0.2.2/g13/windows-final-1793153716500-9f291132/preflight.json",
           "sha256": "2ad19c0fa2bd3b1fbf66eb7a22f34a88d621962983d8453ad0b7381823168c53"
+        }
+      },
+      "hyaFollowups": {
+        "layoutCohorts": 27,
+        "corpusRounds": 3,
+        "corpusDenominator": 23,
+        "offlineAssets": 64
+      },
+      "metadataEncodingRepair": {
+        "problem": "Clean LF checkouts produced different tarballs solely from three qualified CRLF metadata files.",
+        "method": "Explicit staging-only metadata line endings; runtime, declarations, resources and all numerical budgets remain unchanged.",
+        "policy": {
+          "path": "scripts/package-metadata-encoding.mjs",
+          "sha256": "bd448dc2b777e77eaa0ad2327f5f106df00bece3c5edd70f52a7b5291eccefb5"
+        },
+        "packager": {
+          "path": "scripts/verify-engine-package.mjs",
+          "sha256": "2a7000a358b9d8f0d1c58ee41eedcd69f94eb976a76bcaaff724c995f837c7dd"
+        },
+        "configuration": {
+          "path": "config/engine-package-budget.json",
+          "sha256": "d522e8946070039cd70b4c5350a5a0c668a4e8795f3c189d0842ac49822245b5"
+        },
+        "exactFourTarballs": {
+          "path": "artifacts/engine-0.2.2/g13/windows-final-1793153716500-9f291132/metadata-encoding-probe/result.json",
+          "sha256": "1e9a4b227dbca2fe136384b5aca4e692274d0e36344c428843b550a343aabcb3"
+        },
+        "originalFailure": {
+          "path": "artifacts/engine-0.2.2/g13/windows-final-1793153716500-9f291132/preflight-v2.json",
+          "sha256": "97c21d2389fe617b4f918d3e5600d9a444fc264c6aa2fe17e7b8e6128308eadb"
+        },
+        "proof": {
+          "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final-encoding.log",
+          "sha256": "a234d8aef5485976e34afeb6cb590b8337dad350f0a64f6d768c68b9fbe61c12"
         }
       }
     }

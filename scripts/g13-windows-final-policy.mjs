@@ -27,5 +27,6 @@ export function validateWindowsRenderReport(job,report,revision){
   }else if(report.status!=='passed'||report.tier!==(job.id==='correctness'?'full':job.id==='production'?'production-local':'local-full'))throw Error(job.id+': full passing report required');
 }
 export function windowsFinalPlan(){return {version:'0.2.2',scope:'Windows qualification only; Apple device requirements remain pending',jobs:WINDOWS_RENDER_JOBS,captures:WINDOWS_RENDER_JOBS.reduce((n,j)=>n+j.captures,0),
+  hyaFollowups:[{id:'layout',cohorts:27,entry:'scripts/hya-corpus/qualify-layout.mjs'},{id:'corpus',rounds:3,denominator:23,entry:'scripts/hya-corpus/qualify-corpus.mjs'}],
   following:['independent seven-report raw audit and four rebuilt runtimes','complete global release gate','no-publication release rehearsal and independent bundle audit','exact rebuilt tarball comparison'],
   sourceIsolation:'fresh local clone with its own locked dependencies; historical protocol paths stay inside that clone',automaticRetry:false,macQualified:false,iPhoneQualified:false,externalPublishPerformed:false,baselinePromotion:false};}

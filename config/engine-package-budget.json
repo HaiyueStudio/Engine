@@ -81,7 +81,10 @@
         "dist/**/*.js",
         "dist/**/*.d.ts",
         "schema/**/*.json"
-      ]
+      ],
+      "metadataLineEndings": {
+        "package.json": "crlf"
+      }
     },
     "@haiyue/extensions": {
       "workspace": "extensions",
@@ -111,7 +114,10 @@
         "LICENSE",
         "dist/**/*.js",
         "dist/**/*.d.ts"
-      ]
+      ],
+      "metadataLineEndings": {
+        "README.md": "crlf"
+      }
     },
     "@haiyue/shader-language": {
       "workspace": "shader-language",
@@ -141,7 +147,10 @@
         "LICENSE",
         "dist/**/*.js",
         "dist/**/*.d.ts"
-      ]
+      ],
+      "metadataLineEndings": {
+        "package.json": "crlf"
+      }
     }
   },
   "tarball": {

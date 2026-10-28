@@ -59,6 +59,16 @@ if(argv.length===1&&argv[0]==='--prepare'){
       const reportPath=resolve(parent,created[0],'report.json'),report=json(reportPath);validateWindowsRenderReport(job,report,prep.revision);
       if(step.exitCode!==0&&!['rooms','instances','forward'].includes(job.id))throw Error(job.id+': sampling failed');
       const binding={file:relative(checkout,reportPath).replaceAll('\\','/'),sha256:sha(readFileSync(reportPath)),captureRevision:prep.revision};manifest.reports[job.id]=binding;record.reports[job.id]={...binding,originalStatus:report.status};save(resolve(output,'result.json'),record);
+      if(job.id==='resources'){
+        record.hyaFollowups={};
+        for(const followup of windowsFinalPlan().hyaFollowups){
+          clean(root,prep.revision);const target='artifacts/engine-0.2.2/g12/g13-final-'+followup.id+'-'+Date.now();
+          const args=[followup.entry,'--output',target,...(followup.id==='corpus'?['--packages','artifacts/engine-0.2.2/g13/packages-handoff-compact/public-packages.json']:[])];
+          record.steps.push(required(root,output,'hya-'+followup.id,process.execPath,args,1800000));
+          const resultPath=resolve(root,target,'result.json'),result=json(resultPath);assert.equal(result.status,'passed');
+          record.hyaFollowups[followup.id]={file:target+'/result.json',sha256:sha(readFileSync(resultPath)),status:result.status};save(resolve(output,'result.json'),record);
+        }
+      }
     }
     const qualification=resolve(checkout,'artifacts/engine-0.2.2/qualification.json');mkdirSync(dirname(qualification),{recursive:true});save(qualification,manifest);
     record.steps.push(required(checkout,output,'seven-report-audit',process.execPath,['scripts/check-engine-021-evidence.mjs','--manifest=artifacts/engine-0.2.2/qualification.json'],1800000));
