@@ -66,7 +66,7 @@ if(argv.length===1&&argv[0]==='--prepare'){
         const beforeProduction=new Set(readdirSync(resolve(root,'artifacts/engine-0.2.2/g13')));
         record.steps.push(required(root,output,'hya-production',process.execPath,['scripts/run-g13-production-candidate.mjs','--run','--windows-candidate'],7200000));
         const productionLaunches=readdirSync(resolve(root,'artifacts/engine-0.2.2/g13')).filter(name=>!beforeProduction.has(name)&&name.startsWith('production-launch-'));assert.equal(productionLaunches.length,1,'One fresh HYA production launcher required');
-        const productionPath=resolve(root,'artifacts/engine-0.2.2/g13',productionLaunches[0],'launcher.json'),production=json(productionPath);assert.equal(production.status,'passed-local-hya-production');assert.equal(production.independentlyAuditedCaptures,30);assert.deepEqual(production.packageReport,candidate.packageReport);
+        const productionPath=resolve(root,'artifacts/engine-0.2.2/g13',productionLaunches[0],'launcher.json'),production=json(productionPath);assert.equal(production.status,'passed-local-hya-production');assert.equal(production.independentlyAuditedCaptures,30);assert.equal(production.independentlyAuditedGpuWorkloads,4);assert.deepEqual(production.packageReport,candidate.packageReport);
         record.hyaProduction={file:relative(root,productionPath).replaceAll('\\','/'),sha256:sha(readFileSync(productionPath)),status:production.status};save(resolve(output,'result.json'),record);
         record.hyaFollowups={};
         for(const followup of windowsFinalPlan().hyaFollowups){

@@ -7,16 +7,16 @@
   "problem": "Finalize public package integration and qualify the same candidate across GUI, HYA, hosts and recoverable release controls.",
   "method": "Frozen named exports, independent installed tarballs, unchanged runtime ownership/budgets, real input before admission, immutable original failures.",
   "candidate": {
-    "revision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
+    "revision": "d58835a9d14c711f26374c5eed00851f4e4649c2",
     "dirty": false,
-    "role": "public-package candidate; physical and complete G13 qualification remain separately bound",
+    "role": "Repaired runtime package candidate; current formal Windows, physical input and Apple qualifications remain separately bound",
     "packages": [
       {
         "name": "@haiyue/engine",
         "version": "0.2.2",
-        "sha256": "53b700437da1fd31fe98b98b7a55ffea54e33beb183cef956179935cd5d4bcaa",
-        "packedBytes": 2021676,
-        "unpackedBytes": 8417763
+        "sha256": "580bc3b5c0510d1c662116fa577e4a0e34ab4758691ae7a47498611bd8e061bd",
+        "packedBytes": 2021979,
+        "unpackedBytes": 8418559
       },
       {
         "name": "@haiyue/animation-spec",
@@ -41,9 +41,10 @@
       }
     ],
     "packageReport": {
-      "path": "artifacts/engine-0.2.2/g13/packages-handoff-compact/public-packages.json",
-      "sha256": "4dda28853d2808ea0c5ea8d1edfc79dd35ead99b4f61e2f305f23c9b34f58527"
-    }
+      "path": "artifacts/engine-0.2.2/g13/packages-light-lifetime/public-packages.json",
+      "sha256": "62abbce569c707d0a5059366756d4fa204e8b7f42fd19c01d70079dda21283a0"
+    },
+    "runtimeFingerprintSha256": "7043064752e0f602c9e406acae8cf228391e405e5bd434f3bd163e2e7230b1b0"
   },
   "api": {
     "namedG01Additions": 47,
@@ -303,7 +304,9 @@
         "gpuResources": 0,
         "leases": 0
       },
-      "physicalInputAccepted": true
+      "physicalInputAccepted": true,
+      "qualifiedCandidateRevision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
+      "currentCandidateStatus": "pending-repaired-candidate"
     },
     "windowsCorrectness": {
       "status": "passed-current-candidate-gui-region-hya-correctness",
@@ -318,7 +321,7 @@
       "physicalNativeQualified": false
     },
     "currentCandidateIme": {
-      "status": "passed-current-public-package-candidate",
+      "status": "pending-repaired-candidate",
       "candidateRevision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
       "userLauncher": {
         "path": "scripts/start-g13-ime-70187df.cmd",
@@ -389,7 +392,12 @@
         "leases": 0
       },
       "originalFlags": "Chrome compositionend=false and Windows Process/229 retained; matched complete original responder sessions.",
-      "physicalInputAccepted": true
+      "physicalInputAccepted": true,
+      "previousCandidate": "70187df17f91d21e64998ea78ac0a05ee77c825d",
+      "currentPackageReport": {
+        "path": "artifacts/engine-0.2.2/g13/packages-light-lifetime/public-packages.json",
+        "sha256": "62abbce569c707d0a5059366756d4fa204e8b7f42fd19c01d70079dda21283a0"
+      }
     },
     "productionSampling": {
       "status": "passed-current-hya-production",
@@ -576,7 +584,12 @@
         "path": "artifacts/engine-0.2.2/g13/windows-final-1793153716500-9f291132/assessment.json",
         "sha256": "9764a569e3daadc58b76a456d24c595d2a746d047cbb7375b9a33600e7859f00"
       },
-      "hyaProductionCaptures": 30
+      "hyaProductionCaptures": 30,
+      "candidateConfig": {
+        "path": "config/g13-windows-candidate.json",
+        "sha256": "212cac6a9b96da29352af2eeda2719a471473c51a297a7926ea750766b9d4c87"
+      },
+      "inputRenewalRequired": true
     },
     "lightLifetimeRepair": {
       "status": "applied-and-validated-formal-candidate-qualification-pending",
@@ -631,9 +644,28 @@
       "budgetsChanged": false,
       "releasePolicyTests": 165,
       "releasePolicyProof": {
-        "path": "artifacts/engine-0.2.2/g13/light-lifetime-proposal/final-release-policy.log",
-        "sha256": "41cdeee7b155aaaf03826dc8122c87b6d8d016fa39c970cb28f2f1ee18eec765"
+        "path": "artifacts/engine-0.2.2/g13/light-lifetime-proposal/pinned-release-policy.log",
+        "sha256": "1b6ef784cb69887db2a34853e8a51416f9c2259dcd6e3d8ae525a0635cddc1f4"
       }
+    },
+    "repairedPackages": {
+      "status": "passed",
+      "sourceState": {
+        "revision": "d58835a9d14c711f26374c5eed00851f4e4649c2",
+        "workingTreeDirty": false
+      },
+      "report": {
+        "path": "artifacts/engine-0.2.2/g13/packages-light-lifetime/public-packages.json",
+        "sha256": "62abbce569c707d0a5059366756d4fa204e8b7f42fd19c01d70079dda21283a0"
+      },
+      "consumers": 42,
+      "unchangedPackages": [
+        "@haiyue/animation-spec",
+        "@haiyue/extensions",
+        "@haiyue/shader-language"
+      ],
+      "enginePackedGrowthBytes": 303,
+      "originalBudgetsUnchanged": true
     }
   },
   "preservedFailures": {
@@ -701,12 +733,15 @@
     "namedScopeAdmissionPending": false,
     "roomsCpuAbsoluteBudgetUnchanged": true,
     "originalRoomCpuFailureRetained": true,
-    "newCpuDiagnosticDoesNotQualify": true
+    "newCpuDiagnosticDoesNotQualify": true,
+    "newCandidatePacked": true,
+    "physicalWindowsRenewalRequired": true,
+    "oldPhysicalInputQualificationPreserved": true
   },
   "remaining": [
+    "Renew real Windows IME and physical gamepad on the pinned repaired packages; old raw workflows remain qualified only for their captured candidate",
     "Qualify the repaired candidate against the unchanged Edge sparse-256 CPU 4 ms hard budget and complete seven-group population",
-    "Repack and pin the repaired four-package candidate; renew affected HYA production and complete correctness qualification",
-    "Same-clean-candidate complete global gate and no-publication rehearsal",
+    "Renew HYA 30-capture production qualification; same-clean-candidate complete global gate and no-publication rehearsal",
     "Physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver"
   ],
   "publishing": {
@@ -768,5 +803,44 @@
       "sha256": "a2da9ed3e9a4a3708977c7cf64e30be2165caa576ab8888f66e2d46c454239dc"
     },
     "originalConditionsRerunPassed": true
+  },
+  "preLightLifetimeCandidate": {
+    "revision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
+    "dirty": false,
+    "role": "public-package candidate; physical and complete G13 qualification remain separately bound",
+    "packages": [
+      {
+        "name": "@haiyue/engine",
+        "version": "0.2.2",
+        "sha256": "53b700437da1fd31fe98b98b7a55ffea54e33beb183cef956179935cd5d4bcaa",
+        "packedBytes": 2021676,
+        "unpackedBytes": 8417763
+      },
+      {
+        "name": "@haiyue/animation-spec",
+        "version": "0.2.2",
+        "sha256": "71eb24b81b1a07f081138610869c11b759def56aa5853a3030e7a714ad385876",
+        "packedBytes": 170719,
+        "unpackedBytes": 666297
+      },
+      {
+        "name": "@haiyue/extensions",
+        "version": "0.2.2",
+        "sha256": "cc29b1238a57911db251eaa01888cc5eecaeaeb6c7be62c430b58597a21c99ad",
+        "packedBytes": 528424,
+        "unpackedBytes": 2054101
+      },
+      {
+        "name": "@haiyue/shader-language",
+        "version": "0.2.2",
+        "sha256": "6a3df405553a2a45d9e76596a3917ea8be5c04e3bc680b3f539cc772ddf75aae",
+        "packedBytes": 148545,
+        "unpackedBytes": 720460
+      }
+    ],
+    "packageReport": {
+      "path": "artifacts/engine-0.2.2/g13/packages-handoff-compact/public-packages.json",
+      "sha256": "4dda28853d2808ea0c5ea8d1edfc79dd35ead99b4f61e2f305f23c9b34f58527"
+    }
   }
 }

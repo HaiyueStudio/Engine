@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import {spawnSync,execFileSync} from 'node:child_process';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {randomBytes} from 'node:crypto';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {g13PhysicalCandidatePlan} from './g13-production-candidate-policy.mjs';
+import {deferredRuntimeFingerprint} from './webgpu-gate/deferred-fixture-policy.mjs';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),args=process.argv.slice(2),profile=args.find(a=>a.startsWith('--profile='))?.slice(10);
+if(args.length!==(args.includes('--plan')?2:1)||args.some(a=>!a.startsWith('--profile=')&&a!=='--plan'))throw Error('Use --profile=browser-real-ime or --profile=physical-gamepad, optionally --plan');
+const id=Date.now()+'-'+randomBytes(4).toString('hex'),plan=g13PhysicalCandidatePlan(root,id,profile);
+if(args.includes('--plan')){console.log(JSON.stringify(plan,null,2));process.exit(0);}
+const git=values=>execFileSync('git',values,{cwd:root,encoding:'utf8',windowsHide:true}).trim(),revision=git(['rev-parse','HEAD']);
+assert.equal(git(['status','--porcelain']),'','Keep the frozen candidate clean');
+assert.equal((await deferredRuntimeFingerprint(root)).sha256,plan.runtimeFingerprintSha256,'Pinned runtime changed');
+console.log('G13 physical input: '+profile+'; candidate '+plan.candidateRevision.slice(0,7));
+console.log('Evidence: '+plan.output+'; keep this terminal and the test window open.');
+const startedAt=new Date().toISOString(),child=spawnSync(process.execPath,plan.args,{cwd:root,stdio:'inherit',windowsHide:false,timeout:1200000});
+if(child.error)throw child.error;
+assert.equal(git(['rev-parse','HEAD']),revision);assert.equal(git(['status','--porcelain']),'');g13PhysicalCandidatePlan(root,id,profile);
+assert.equal((await deferredRuntimeFingerprint(root)).sha256,plan.runtimeFingerprintSha256,'Pinned runtime changed');
+const raw=JSON.parse(readFileSync(resolve(root,plan.output,'result.json')));
+writeFileSync(resolve(root,plan.output,'launcher.json'),JSON.stringify({schemaVersion:1,revision,dirty:false,startedAt,finishedAt:new Date().toISOString(),exitCode:child.status,candidateRevision:plan.candidateRevision,packageReport:plan.packageReport,runtimeFingerprintSha256:plan.runtimeFingerprintSha256,rawStatus:raw.status,operatorConfirmation:'pending',physicalInputAccepted:false},null,2)+'\n',{flag:'wx'});
+console.log('Recorded. Independent assessment and operator confirmation are still required.');process.exitCode=child.status??1;

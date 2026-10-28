@@ -56,3 +56,9 @@ export function auditG13ProductionGpu(report,rawCaptures,sampling){
   });
   assert.deepEqual(report.gpu,comparisons);assert.ok(comparisons.every(c=>c.status==='passed'),'Original pooled GPU 5% budget failed');return comparisons;
 }
+
+export function g13PhysicalCandidatePlan(root,id,profile,read=path=>readFileSync(path)){
+  if(!['physical-gamepad','browser-real-ime'].includes(profile))throw Error('A named Windows physical input profile is required');
+  const candidate=g13WindowsCandidatePlan(root,id,read),output='artifacts/engine-0.2.2/g13/'+(profile==='physical-gamepad'?'pad':'ime')+'-user-start-current-'+id;
+  return {...candidate,profile,output,args:['scripts/hya-corpus/qualify-physical.mjs','--profile',profile,'--packages',candidate.packageReport.path,'--output',output],operatorConfirmation:'pending',physicalInputAccepted:false};
+}

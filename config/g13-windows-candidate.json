@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "version": "0.2.2",
+  "packageReport": {
+    "path": "artifacts/engine-0.2.2/g13/packages-light-lifetime/public-packages.json",
+    "sha256": "62abbce569c707d0a5059366756d4fa204e8b7f42fd19c01d70079dda21283a0"
+  },
+  "runtimeFingerprintSha256": "7043064752e0f602c9e406acae8cf228391e405e5bd434f3bd163e2e7230b1b0"
+}

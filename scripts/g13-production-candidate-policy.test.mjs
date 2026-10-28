@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
-import {g13ProductionPlan,g13WindowsCandidatePlan,qualifiedProductionPlan,auditG13ProductionGpu} from './g13-production-candidate-policy.mjs';
+import {g13ProductionPlan,g13WindowsCandidatePlan,qualifiedProductionPlan,auditG13ProductionGpu,g13PhysicalCandidatePlan} from './g13-production-candidate-policy.mjs';
 import {productionCapturePlan,compareProductionGpuCohorts} from './hya-corpus/production-cohort-policy.mjs';
 import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
@@ -39,6 +39,8 @@ test('a later Windows candidate pins clean four-package bytes and its runtime wi
  const config={schemaVersion:1,version:'0.2.2',runtimeFingerprintSha256:'c'.repeat(64),packageReport:{path,sha256:sha(bytes)}};
  const read=p=>p===resolve(root,'config/g13-windows-candidate.json')?Buffer.from(JSON.stringify(config)):contents.get(p);
  const plan=g13WindowsCandidatePlan(root,'1793059045652-1234abcd',read);assert.equal(plan.candidateRevision,'b'.repeat(40));assert.equal(plan.runtimeFingerprintSha256,'c'.repeat(64));assert.equal(plan.captures,30);assert.equal(plan.originalGpuRegressionLimit,.05);assert.ok(plan.args.includes(path));
+ for(const profile of ['browser-real-ime','physical-gamepad']){const physical=g13PhysicalCandidatePlan(root,'1793059045652-1234abcd',profile,read);assert.equal(physical.physicalInputAccepted,false);assert.equal(physical.operatorConfirmation,'pending');assert.ok(physical.args.includes(profile));assert.ok(physical.args.includes(path));assert.match(physical.output,/user-start-current-1793059045652-1234abcd$/);}
+ assert.throws(()=>g13PhysicalCandidatePlan(root,'1793059045652-1234abcd','synthetic',read),/named Windows/);
  for(const change of [c=>c.runtimeFingerprintSha256='bad',c=>c.schemaVersion=2,c=>c.packageReport.path='../escape',c=>c.packageReport.sha256='0'.repeat(64)]){const saved=structuredClone(config);change(config);assert.throws(()=>g13WindowsCandidatePlan(root,'1793059045652-1234abcd',read));Object.assign(config,saved);}
  contents.set(resolve(root,packages[0].artifact),Buffer.from('changed'));assert.throws(()=>g13WindowsCandidatePlan(root,'1793059045652-1234abcd',read),/package bytes changed/);
  for(const change of [r=>r.sourceState.workingTreeDirty=true,r=>r.packages[0].version='0.2.1',r=>r.packages[0].name=r.packages[1].name]){const r=structuredClone(report);change(r);const raw=Buffer.from(JSON.stringify(r));assert.throws(()=>qualifiedProductionPlan(root,'1793059045652-1234abcd',{path,sha256:sha(raw)},p=>p===resolve(root,path)?raw:Buffer.from('engine')));}
