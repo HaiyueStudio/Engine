@@ -488,7 +488,7 @@
       "retainedInvestigationCaptures": 15
     },
     "windowsFinal": {
-      "status": "entry-verified-preparation-pending",
+      "status": "failed-independent-run-two-hard-requirements",
       "launcher": {
         "path": "scripts/start-g13-windows-final.cmd",
         "sha256": "5b2492765e741bc8a473415b1bf5a8e18cf1b7e03528f75446ff4fb9f87d73b8"
@@ -571,6 +571,10 @@
           "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final-encoding.log",
           "sha256": "a234d8aef5485976e34afeb6cb590b8337dad350f0a64f6d768c68b9fbe61c12"
         }
+      },
+      "latestAssessment": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793153716500-9f291132/assessment.json",
+        "sha256": "9764a569e3daadc58b76a456d24c595d2a746d047cbb7375b9a33600e7859f00"
       }
     }
   },
@@ -633,17 +637,21 @@
     }
   },
   "currentBlocker": {
-    "id": "remaining-host-and-global-qualification",
-    "status": "pending",
+    "id": "windows-lifecycle-and-room-cpu-budget",
+    "status": "blocked",
     "runtimePointerBugResolved": true,
     "realBrowserImePassed": true,
     "currentCandidateImePending": false,
-    "physicalGamepadPassed": true
+    "physicalGamepadPassed": true,
+    "lightLifetimeProposalPrepared": true,
+    "namedScopeAdmissionPending": true,
+    "roomsCpuAbsoluteBudgetUnchanged": true
   },
   "remaining": [
-    "Physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver",
-    "Inherited seven-group rendering/performance evidence",
-    "Same-clean-candidate complete global gate and no-publication rehearsal"
+    "Resolve retired-view light uniform lifetime and Edge sparse-256 CPU 4 ms hard budget",
+    "Complete all 224 correctness captures and qualify the current complete seven-group population",
+    "Same-clean-candidate complete global gate and no-publication rehearsal",
+    "Physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver"
   ],
   "publishing": {
     "executed": false,
