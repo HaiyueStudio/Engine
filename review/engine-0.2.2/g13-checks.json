@@ -321,82 +321,24 @@
       "physicalNativeQualified": false
     },
     "currentCandidateIme": {
-      "status": "pending-repaired-candidate",
-      "candidateRevision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
-      "userLauncher": {
-        "path": "scripts/start-g13-ime-70187df.cmd",
-        "sha256": "19cc5de2275d23be896bee3b39f18aeeefe5c5ec5561497aec4f3593a40f9ab9"
-      },
-      "outputPattern": "artifacts/engine-0.2.2/g13/ime-user-start-70187df-<milliseconds>",
-      "currentCandidateQualified": true,
+      "status": "passed-real-browser-ime",
+      "candidateRevision": "d58835a9d14c711f26374c5eed00851f4e4649c2",
       "raw": {
-        "path": "artifacts/engine-0.2.2/g13/ime-user-start-70187df-1793059045652/result.json",
-        "sha256": "1557f155a8d3d566602540821cf6e27d31a126fa57e6f415e7596674c30ade4c"
+        "path": "artifacts/engine-0.2.2/g13/ime-user-start-current-1793181287269-6ee552f3/result.json",
+        "sha256": "02c2ee7a50cbfd21bcedadee2be90f5fdb7a850568f75d3d39ef3c5e7ed68a55"
       },
       "assessment": {
-        "path": "artifacts/engine-0.2.2/g13/ime-user-start-70187df-1793059045652/operator-assessment.json",
-        "sha256": "26b083aa84dbb9e1623547f816a478ec2f537135ce0fe1e448bf297b1c570723"
+        "path": "artifacts/engine-0.2.2/g13/ime-user-start-current-1793181287269-6ee552f3/operator-assessment-chrome156.json",
+        "sha256": "40fcf02d07f09dcc19009ce2558265b06fa0a71e0215c01334d5ec9778e0a16d"
       },
       "operatorConfirmed": true,
-      "observed": {
-        "committedValues": [
-          "你好"
-        ],
-        "compositionEnds": [
-          {
-            "data": "你好",
-            "responder": "1",
-            "isTrusted": false
-          },
-          {
-            "data": "",
-            "responder": "2",
-            "isTrusted": false
-          }
-        ],
-        "checkpoints": [
-          {
-            "data": "你好",
-            "composing": false,
-            "viewport": [
-              984,
-              755
-            ]
-          },
-          {
-            "data": "你好",
-            "composing": false,
-            "viewport": [
-              984,
-              755
-            ]
-          },
-          {
-            "data": "你好",
-            "composing": false,
-            "viewport": [
-              758,
-              593
-            ]
-          },
-          {
-            "data": "你好",
-            "composing": false,
-            "viewport": [
-              758,
-              593
-            ]
-          }
-        ],
-        "gpuResources": 0,
-        "leases": 0
+      "originalFailureRetained": {
+        "path": "artifacts/engine-0.2.2/g13/ime-user-start-current-1793181287269-6ee552f3/operator-assessment.json",
+        "sha256": "c79b9eb5053e8c46ee682760bb67fa04d19299920b5aff50c3583fa23e3d3161"
       },
-      "originalFlags": "Chrome compositionend=false and Windows Process/229 retained; matched complete original responder sessions.",
-      "physicalInputAccepted": true,
-      "previousCandidate": "70187df17f91d21e64998ea78ac0a05ee77c825d",
-      "currentPackageReport": {
-        "path": "artifacts/engine-0.2.2/g13/packages-light-lifetime/public-packages.json",
-        "sha256": "62abbce569c707d0a5059366756d4fa204e8b7f42fd19c01d70079dda21283a0"
+      "versionBoundPolicy": {
+        "path": "scripts/hya-corpus/physical-policy.mjs",
+        "sha256": "579852e2e30b2a8a99cd068d6041988b4d6165576635a5769ccb2c6768d094cc"
       }
     },
     "productionSampling": {
@@ -587,9 +529,13 @@
       "hyaProductionCaptures": 30,
       "candidateConfig": {
         "path": "config/g13-windows-candidate.json",
-        "sha256": "212cac6a9b96da29352af2eeda2719a471473c51a297a7926ea750766b9d4c87"
+        "sha256": "1c79126afaf38d145745df8803bd2bb54a55725e3d80e0aa8dd18be2947bd195"
       },
-      "inputRenewalRequired": true
+      "inputRenewalRequired": true,
+      "sourceVariants": {
+        "path": "artifacts/engine-0.2.2/g13/light-lifetime-proposal/source-variants-proof.json",
+        "sha256": "368d770cf7a931a1406e13af195c99e058b8357e70b1df78cc39d2053ae782f1"
+      }
     },
     "lightLifetimeRepair": {
       "status": "applied-and-validated-formal-candidate-qualification-pending",
@@ -644,8 +590,8 @@
       "budgetsChanged": false,
       "releasePolicyTests": 165,
       "releasePolicyProof": {
-        "path": "artifacts/engine-0.2.2/g13/light-lifetime-proposal/pinned-release-policy.log",
-        "sha256": "1b6ef784cb69887db2a34853e8a51416f9c2259dcd6e3d8ae525a0635cddc1f4"
+        "path": "artifacts/engine-0.2.2/g13/light-lifetime-proposal/variant-release-policy.log",
+        "sha256": "093531c9156772464ed4328c3a536743788b04463961243c04fdb33049a0fdb3"
       }
     },
     "repairedPackages": {
@@ -736,10 +682,11 @@
     "newCpuDiagnosticDoesNotQualify": true,
     "newCandidatePacked": true,
     "physicalWindowsRenewalRequired": true,
-    "oldPhysicalInputQualificationPreserved": true
+    "oldPhysicalInputQualificationPreserved": true,
+    "currentCandidateImePassed": true
   },
   "remaining": [
-    "Renew real Windows IME and physical gamepad on the pinned repaired packages; old raw workflows remain qualified only for their captured candidate",
+    "Renew physical gamepad on the pinned repaired packages; current real Chinese IME passed and all old raw workflows remain retained",
     "Qualify the repaired candidate against the unchanged Edge sparse-256 CPU 4 ms hard budget and complete seven-group population",
     "Renew HYA 30-capture production qualification; same-clean-candidate complete global gate and no-publication rehearsal",
     "Physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver"

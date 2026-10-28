@@ -39,8 +39,8 @@ export function qualifiedProductionPlan(root,id,binding,read=path=>readFileSync(
 export function g13WindowsCandidatePlan(root,id,read=path=>readFileSync(path)){
   if(typeof id!=='string'||!/^\d{13}-[a-f0-9]{8}$/.test(id))throw Error('A fresh timestamp/random run identity is required');
   const config=JSON.parse(read(resolve(root,'config/g13-windows-candidate.json')));
-  if(config.schemaVersion!==1||config.version!=='0.2.2'||!/^[a-f0-9]{64}$/.test(config.runtimeFingerprintSha256))throw Error('Pinned Windows runtime fingerprint required');
-  return {...qualifiedProductionPlan(root,id,config.packageReport,read),runtimeFingerprintSha256:config.runtimeFingerprintSha256};
+  if(config.schemaVersion!==1||config.version!=='0.2.2'||!/^[a-f0-9]{64}$/.test(config.runtimeFingerprintSha256)||!/^[a-f0-9]{64}$/.test(config.isolatedRuntimeFingerprintSha256))throw Error('Pinned Windows runtime fingerprints required');
+  return {...qualifiedProductionPlan(root,id,config.packageReport,read),runtimeFingerprintSha256:config.runtimeFingerprintSha256,isolatedRuntimeFingerprintSha256:config.isolatedRuntimeFingerprintSha256};
 }
 
 /** Recompute all pooled GPU comparisons from the separately read capture files. */

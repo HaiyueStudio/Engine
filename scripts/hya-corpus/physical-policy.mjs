@@ -1,10 +1,10 @@
 // Chromium queues compositionend through DispatchScopedEvent, bypassing the trusted
 // DispatchEvent path. Bound this observed quirk to the tested native browser only;
 // preserve the raw flag and require its complete trusted start/update/input session.
-// https://raw.githubusercontent.com/chromium/chromium/main/third_party/blink/renderer/core/editing/ime/input_method_controller.cc
+// Exact 156 source: https://chromium.googlesource.com/chromium/src/+/refs/tags/156.0.8078.48/third_party/blink/renderer/core/editing/ime/input_method_controller.cc
 export function validateImeSessions(report) {
   const errors=[],sessions=[];let active;
-  const chromiumScopedEnd=report.browserEvidence?.product==='Chrome/155.0.8059.85'
+  const chromiumScopedEnd=['Chrome/155.0.8059.85','Chrome/156.0.8078.48'].includes(report.browserEvidence?.product)
     &&report.browserEvidence.nativeBackend===true&&report.browserEvidence.presentationMode==='visible-window';
   for(const event of report.events??[]){
     if(event.type==='compositionstart'){

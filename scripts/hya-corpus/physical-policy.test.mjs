@@ -23,7 +23,8 @@ test('smoke, missing operator or stale bytes cannot become physical acceptance',
 });
 
 test('native Chrome scoped end preserves false trust only with complete trusted sessions',()=>{
-  const r=ime();r.browserEvidence={product:'Chrome/155.0.8059.85',nativeBackend:true,presentationMode:'visible-window'};
+ for(const product of ['Chrome/155.0.8059.85','Chrome/156.0.8078.48']){
+  const r=ime();r.browserEvidence={product,nativeBackend:true,presentationMode:'visible-window'};
   r.events.filter(e=>e.type==='compositionend').forEach(e=>e.isTrusted=false);
   assert.deepEqual(validatePhysicalEvidence(r,confirmation),[]);
   for(const mutate of [v=>v.browserEvidence.product='Chrome/unknown',v=>v.browserEvidence.nativeBackend=false,
@@ -32,6 +33,7 @@ test('native Chrome scoped end preserves false trust only with complete trusted 
     v=>v.events.filter(e=>e.type==='compositionend').forEach(e=>e.compositionData='你好')]){
     const changed=structuredClone(r);mutate(changed);assert.ok(validatePhysicalEvidence(changed,confirmation).length);
   }
+ }
 });
 
 test('Windows IME Process/229 cancellation stays raw and requires the same composed session',()=>{

@@ -40,7 +40,7 @@ if(argv.length===1&&argv[0]==='--prepare'){
     for(const workspace of ['shader-language','engine','animation-spec','extensions'])npmStep(paths.checkout,paths.output,'build-'+workspace,['run','build','-w','./'+workspace],1200000);
     required(paths.checkout,paths.output,'build-a0',process.execPath,['scripts/webgpu-gate/build-framegraph-baseline.mjs'],600000);
     required(paths.checkout,paths.output,'build-current',process.execPath,['scripts/webgpu-gate/build-deferred-fixture.mjs','--framegraph'],600000);
-    clean(root,revision);clean(paths.checkout,revision);assert.equal((await deferredRuntimeFingerprint(paths.checkout)).sha256,candidate.runtimeFingerprintSha256,'Isolated runtime differs');record.status='prepared';record.finishedAt=new Date().toISOString();save(paths.preparation,record);
+    clean(root,revision);clean(paths.checkout,revision);assert.equal((await deferredRuntimeFingerprint(paths.checkout)).sha256,candidate.isolatedRuntimeFingerprintSha256,'Isolated runtime differs');record.status='prepared';record.finishedAt=new Date().toISOString();save(paths.preparation,record);
     save(resolve(root,'artifacts/engine-0.2.2/g13/windows-final-prepared.json'),{output:paths.output,preparationSha256:sha(readFileSync(paths.preparation)),revision});
     console.log('PREPARED: '+paths.output);
   }catch(error){record.status='failed';record.error=String(error.stack??error);save(paths.preparation,record);throw error;}
@@ -48,7 +48,7 @@ if(argv.length===1&&argv[0]==='--prepare'){
   const pointer=json(resolve(root,'artifacts/engine-0.2.2/g13/windows-final-prepared.json')),output=assertWindowsFinalLocation(root,pointer.output),preparation=resolve(output,'preparation.json');
   assert.equal(realpathSync(output),output);assert.equal(sha(readFileSync(preparation)),pointer.preparationSha256);
   const prep=json(preparation),checkout=resolve(output,'checkout');assert.equal(prep.status,'prepared');assert.equal(prep.paths.checkout,checkout);clean(root,prep.revision);clean(checkout,prep.revision);
-  const candidate=g13WindowsCandidatePlan(root,Date.now()+'-'+randomBytes(4).toString('hex'));assert.deepEqual(candidate.packageReport,prep.candidate.packageReport);assert.equal(candidate.runtimeFingerprintSha256,prep.candidate.runtimeFingerprintSha256);assert.equal((await deferredRuntimeFingerprint(checkout)).sha256,candidate.runtimeFingerprintSha256,'Pinned runtime changed');
+  const candidate=g13WindowsCandidatePlan(root,Date.now()+'-'+randomBytes(4).toString('hex'));assert.deepEqual(candidate.packageReport,prep.candidate.packageReport);assert.equal(candidate.runtimeFingerprintSha256,prep.candidate.runtimeFingerprintSha256);assert.equal(candidate.isolatedRuntimeFingerprintSha256,prep.candidate.isolatedRuntimeFingerprintSha256);assert.equal((await deferredRuntimeFingerprint(checkout)).sha256,candidate.isolatedRuntimeFingerprintSha256,'Pinned isolated runtime changed');
   if(existsSync(resolve(output,'result.json')))throw Error('This prepared run already has a result; no automatic retry');
   execFileSync(resolve(process.env.SystemRoot??'C:/Windows','System32/WindowsPowerShell/v1.0/powershell.exe'),['-NoProfile','-NonInteractive','-Command',"$ErrorActionPreference='Stop'; . (Join-Path $env:G13_SOURCE_ROOT 'scripts/webgpu-gate/framegraph-background-policy.ps1'); Assert-G09GpuDiagnosticReady"],{env:{...environment,G13_SOURCE_ROOT:root},stdio:'inherit',windowsHide:true});
   const record={schemaVersion:1,status:'running',revision:prep.revision,dirty:false,startedAt:new Date().toISOString(),checkout,reports:{},steps:[],macQualified:false,iPhoneQualified:false,externalPublishPerformed:false,formalBaselineUpdated:false};save(resolve(output,'result.json'),record);
@@ -86,7 +86,7 @@ if(argv.length===1&&argv[0]==='--prepare'){
     record.steps.push(required(checkout,output,'rehearsal-audit',process.execPath,['scripts/release-rehearsal-policy.mjs','--bundle','artifacts/release/rehearsal'],300000));
     const rebuilt=json(resolve(checkout,'artifacts/release/public-packages.json')),pinned=json(resolve(root,candidate.packageReport.path));
     assert.equal(rebuilt.gate.status,'passed');assert.deepEqual(rebuilt.packages.map(p=>({name:p.name,sha256:p.sha256})).sort((a,b)=>a.name.localeCompare(b.name)),pinned.packages.map(p=>({name:p.name,sha256:p.sha256})).sort((a,b)=>a.name.localeCompare(b.name)));
-    clean(root,prep.revision);clean(checkout,prep.revision);assert.equal((await deferredRuntimeFingerprint(checkout)).sha256,candidate.runtimeFingerprintSha256,'Pinned runtime changed');record.status='passed-windows-global-and-rehearsal';
+    clean(root,prep.revision);clean(checkout,prep.revision);assert.equal((await deferredRuntimeFingerprint(checkout)).sha256,candidate.isolatedRuntimeFingerprintSha256,'Pinned runtime changed');record.status='passed-windows-global-and-rehearsal';
   }catch(error){record.status='failed';record.error=String(error.stack??error);process.exitCode=1;}
   finally{record.finishedAt=new Date().toISOString();save(resolve(output,'result.json'),record);console.log('FINAL STATUS: '+record.status);if(record.error)console.error(record.error);console.log('EVIDENCE: '+output);console.log('Apple qualification remains pending. No version was published and no baseline was promoted.');}
 }else throw Error('Use --plan, --prepare or --run');
