@@ -380,7 +380,7 @@
       "physicalInputAccepted": true
     },
     "productionSampling": {
-      "status": "prepared-not-started",
+      "status": "passed-current-hya-production",
       "candidateRevision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
       "launcher": {
         "path": "scripts/start-g13-production-70187df.cmd",
@@ -411,7 +411,69 @@
       "originalGpuRegressionLimit": 0.05,
       "backgroundApplicationsRequiredClosed": true,
       "baselinePromotion": false,
-      "releaseQualified": false
+      "releaseQualified": false,
+      "captureRevision": "a5908a91740866192900136edcd5f0700c3c114c",
+      "raw": {
+        "path": "artifacts/engine-0.2.2/g12/g13-production-1793151130884-b2c25e04/result.json",
+        "sha256": "5cb24947affb78f6a99fb250b5bc26f5d54a1277a2fd69835e8bc7a5948a422e"
+      },
+      "assessment": {
+        "path": "artifacts/engine-0.2.2/g12/g13-production-1793151130884-b2c25e04/independent-assessment.json",
+        "sha256": "704196cd760d2a54fdc75833f716845872ba273aca740730eab6f774dd7a1bcc"
+      },
+      "launcherResult": {
+        "path": "artifacts/engine-0.2.2/g13/production-launch-1793151130884-b2c25e04/launcher.json",
+        "sha256": "c8a9370642eec4f227263027eed6462603f7d6581b7aff044d8315840a6bf005"
+      },
+      "normalCaptures": 12,
+      "pacing": {
+        "worstP95Ms": 16.900000000001455,
+        "worstP99Ms": 17,
+        "maxLongFrameRatio": 0.0016778523489932886,
+        "maxConsecutiveLongFrames": 1
+      },
+      "gpu": [
+        {
+          "workload": "interactive-small",
+          "status": "passed",
+          "baselineP95Ms": 4.453376,
+          "candidateP95Ms": 4.557824,
+          "regression": 0.023453667509772513,
+          "samplesPerVariant": 90,
+          "regressionLimit": 0.05
+        },
+        {
+          "workload": "layout-1k",
+          "status": "passed",
+          "baselineP95Ms": 21.571584,
+          "candidateP95Ms": 4.023296,
+          "regression": -0.8134909332573815,
+          "samplesPerVariant": 90,
+          "regressionLimit": 0.05
+        },
+        {
+          "workload": "layout-10k-diagnostic",
+          "status": "passed",
+          "baselineP95Ms": 83.972096,
+          "candidateP95Ms": 10.1448,
+          "regression": -0.8791884389785865,
+          "samplesPerVariant": 90,
+          "regressionLimit": 0.05
+        },
+        {
+          "workload": "multi-instance",
+          "status": "passed",
+          "baselineP95Ms": 13.958144,
+          "candidateP95Ms": 4.351968,
+          "regression": -0.688212988775585,
+          "samplesPerVariant": 90,
+          "regressionLimit": 0.05
+        }
+      ],
+      "gpuResourcesAfterCleanup": 0,
+      "gpuTimingResourcesAfterCleanup": 0,
+      "sourceInputsUnchanged": true,
+      "retainedInvestigationCaptures": 15
     }
   },
   "preservedFailures": {
@@ -482,7 +544,7 @@
   },
   "remaining": [
     "Physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver",
-    "Inherited seven-group rendering/performance evidence and current HYA production timing",
+    "Inherited seven-group rendering/performance evidence",
     "Same-clean-candidate complete global gate and no-publication rehearsal"
   ],
   "publishing": {
