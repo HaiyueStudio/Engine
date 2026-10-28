@@ -17,7 +17,7 @@ for(const file of ['manifest.json','scene.json','scene-sans.otf','FONT-LICENSE.t
 const html=resolve(out,'fixture.html');writeFileSync(html,'<!doctype html><meta charset="utf-8"><title>G13 HYA physical input</title><style>body{font:16px system-ui;background:#f0f0f0}canvas{width:480px;height:360px;border:1px solid #789}#progress{white-space:pre-wrap;max-width:700px;height:48px;overflow:auto}#result{font-size:10px}.physical-layout{display:flex;gap:16px;align-items:flex-start}#gamepad-progress{white-space:pre-wrap;font:14px/19px system-ui;margin:0;max-width:430px}</style><h2>G13 HYA '+profile+'</h2><p id="progress">Preparing…</p>'+(profile==='physical-gamepad'?'<button id="controller" type="button">Click here, press B once and release to prepare the controller</button>':'')+'<div class="physical-layout"><canvas width="480" height="360"></canvas>'+(profile==='physical-gamepad'?'<pre id="gamepad-progress"></pre>':'')+'</div><p><button id="checkpoint">Save checkpoint</button> <button id="finish">Save evidence</button></p><pre id="result"></pre><script type="importmap">'+JSON.stringify({imports:staged.imports})+'</script><script type="module" src="/scripts/fixtures/hya-production/physical-browser.mjs"></script>');
 const mounts=[staged.mount,{prefix:'/g13-assets',directory:assets}];
 const sourceInputs=snapshotSourceInputs(root,['scripts/hya-corpus/qualify-physical.mjs','scripts/fixtures/hya-production/physical-browser.mjs','scripts/hya-corpus/physical-gamepad-readiness.mjs','scripts/hya-corpus/physical-policy.mjs']);
-let result;
+let result,detectionTimer,detectionBusy=false,detectionStopped=false;
 try{result=await runChromeWebGpuFixture({root,fixture:relative(root,html).replaceAll('\\','/'),query:{profile,...(smoke?{smoke:'1'}:{})},mounts,
   timeoutMs:smoke?90000:900000,presentation:smoke?null:{mode:'visible',width:1000,height:850},
   acceptedStatuses:['passed','failed','setup-only','awaiting-operator-confirmation'],chunkedResult:true,
@@ -32,6 +32,7 @@ try{result=await runChromeWebGpuFixture({root,fixture:relative(root,html).replac
         const focus=await cdp.call('Runtime.evaluate',{expression:'document.hasFocus()',returnByValue:true});
         const screen=await cdp.call('Page.captureScreenshot',{format:'png'});writeFileSync(resolve(out,'ready.png'),Buffer.from(screen.result.data,'base64'));
         console.log(JSON.stringify({physicalWindowReady:true,profile,smoke,output,documentFocus:focus.result?.result?.value===true}));
+        if(profile==='physical-gamepad'&&!smoke){const observations=[];detectionTimer=setInterval(()=>{if(detectionBusy||detectionStopped)return;detectionBusy=true;void cdp.call('Runtime.evaluate',{expression:'window.g13Physical?.detection?.()',returnByValue:true}).then(response=>{if(detectionStopped)return;observations.push({at:new Date().toISOString(),...response.result?.result?.value});if(observations.length>120)observations.shift();writeFileSync(resolve(out,'detection-live.json'),JSON.stringify({diagnosticOnly:true,readsSamplerStateOnly:true,observations},null,2)+'\n');}).catch(()=>{}).finally(()=>{detectionBusy=false;});},1000);}
         if(smoke)await cdp.call('Runtime.evaluate',{expression:'window.g13Physical.finishSmoke()'});
         return;
       }
@@ -40,6 +41,7 @@ try{result=await runChromeWebGpuFixture({root,fixture:relative(root,html).replac
     throw Error('Physical scene never became ready.');
   }});
 }catch(error){result={status:'failed',error:String(error.stack??error),browserFailure:error.browserFailure};}
+finally{detectionStopped=true;clearInterval(detectionTimer);}
 const servedBytes=verifyServedBytes(root,mounts,result),changed=changedSourceInputs(root,sourceInputs);
 if(servedBytes.status!=='passed'||changed.length)result.status='failed';
 const report={schemaVersion:1,generatedAt:new Date().toISOString(),profile,smoke,sourceInputs,changed,servedBytes,

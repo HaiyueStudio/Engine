@@ -438,7 +438,7 @@
       "retainedInvestigationCaptures": 15
     },
     "windowsFinal": {
-      "status": "new-runtime-candidate-preparation-pending",
+      "status": "manual-gamepad-fixture-update-preparation-pending",
       "launcher": {
         "path": "scripts/start-g13-windows-final.cmd",
         "sha256": "5b2492765e741bc8a473415b1bf5a8e18cf1b7e03528f75446ff4fb9f87d73b8"
@@ -612,6 +612,50 @@
       ],
       "enginePackedGrowthBytes": 303,
       "originalBudgetsUnchanged": true
+    },
+    "gamepadFixtureDetection": {
+      "status": "fixture-repaired-awaiting-real-controller",
+      "problem": "First two operator windows did not retain final results. The shared sampler and browser both detect Xbox 360 in isolated diagnostics; no unique runtime failure was reproduced. The preparation button had no explicit start state and readiness assumed native slot zero.",
+      "method": "Explicit trusted preparation, stable selection across native slots 0–7, unchanged neutral/focus/hold/leak rules, visible poll heartbeat and browser exposure reason, bounded passive sampler-state logs. No additional native polling or input listeners in the formal harness.",
+      "sourceFiles": [
+        {
+          "path": "scripts/fixtures/hya-production/physical-browser.mjs",
+          "sha256": "bcd2e84da941a5df735d04d6db217162fd318996bf7cd94883e505f9dd00f315"
+        },
+        {
+          "path": "scripts/hya-corpus/physical-gamepad-readiness.mjs",
+          "sha256": "2a388e65fcdc163bb298119774a14f9b87083ff64f61976e057385d7667aebff"
+        },
+        {
+          "path": "scripts/hya-corpus/qualify-physical.mjs",
+          "sha256": "3135160e1259db081ea982bf7fd55c2abc8a0a3ea22d809fb180de10cc7de5df"
+        }
+      ],
+      "pureApi": {
+        "path": "artifacts/engine-0.2.2/g13/gamepad-api-diagnostic-1793185134652/result.json",
+        "sha256": "87721649db23de989c48c7f029ca170665447d4bddcbc797b32d64e03d60c15e"
+      },
+      "hyaDiagnostic": {
+        "path": "artifacts/engine-0.2.2/g13/hya-pad-state-diagnostic-1793185446984/result.json",
+        "sha256": "146f75e5d5538e3fe3d787cdc07ea02e86fa1eb465d3f84450a7e38d04786ff9"
+      },
+      "automatedRegression": {
+        "path": "artifacts/engine-0.2.2/g13/gamepad-fixture-slots-1793186059030/result.json",
+        "sha256": "3f3ac908d60e0c462a7068a1cb7a0e277634b24d77cce9719f2569a767045fd2"
+      },
+      "releasePolicy": {
+        "path": "artifacts/engine-0.2.2/g13/gamepad-detection-release-policy.log",
+        "sha256": "e13a884e0b7ec83a416d7d1c57706c92b54f79ff2894ab877faee80848366bd4"
+      },
+      "releasePolicyTests": 167,
+      "imeSmoke": {
+        "path": "artifacts/engine-0.2.2/g13/ime-gamepad-fixture-unaffected-smoke/result.json",
+        "sha256": "78d16f6e181d953c031358b3a13fda3721ef142b70966c7e40c85770dee30736"
+      },
+      "runtimePackagesChanged": false,
+      "physicalInputAccepted": false,
+      "diagnosticRunsNotPromoted": true,
+      "originalRecordsRetained": true
     }
   },
   "preservedFailures": {
@@ -683,7 +727,9 @@
     "newCandidatePacked": true,
     "physicalWindowsRenewalRequired": true,
     "oldPhysicalInputQualificationPreserved": true,
-    "currentCandidateImePassed": true
+    "currentCandidateImePassed": true,
+    "gamepadFixtureRepaired": true,
+    "currentCandidateGamepadPending": true
   },
   "remaining": [
     "Renew physical gamepad on the pinned repaired packages; current real Chinese IME passed and all old raw workflows remain retained",

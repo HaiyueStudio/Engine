@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {physicalGamepadReadiness as step} from './physical-gamepad-readiness.mjs';
+import {physicalGamepadReadiness as step,physicalGamepadSelection,physicalGamepadDetection} from './physical-gamepad-readiness.mjs';
 const neutral={focused:true,foreground:true,connected:true,buttons:[0,0],axes:[0,0]};
 test('loading or an unfocused window never starts a GUI consumption assertion',()=>{
   for(const previous of ['waiting-focus','ready']){
@@ -21,4 +21,18 @@ test('focus loss and disconnect require a new neutral acquisition; no artificial
   assert.equal(step('ready',{...neutral,connected:false}),'waiting-controller');
   assert.equal(step('waiting-controller',{...neutral,axes:[1]}),'waiting-neutral');
   assert.equal(step('waiting-neutral',neutral),'ready');
+});
+
+test('native slots may contain holes and a selected controller never silently switches',()=>{
+  const pad={connected:true,index:2},other={connected:true,index:3},pads=[null,null,pad,other];
+  assert.equal(physicalGamepadSelection(pads).pad,pad);assert.equal(physicalGamepadSelection(pads).index,2);
+  assert.equal(physicalGamepadSelection([null,null,null,other],2),null);
+  assert.equal(physicalGamepadSelection(pads,3).pad,other);assert.equal(physicalGamepadSelection([null,{connected:false}]),null);
+});
+
+test('detection explains preparation, browser exposure, focus and stale sampling separately',()=>{
+  const state={requested:true,foreground:true,suspended:false,polls:10,lastSampleAgeMs:20,connectedIndices:[2],selectedIndex:2,prepared:true};
+  assert.equal(physicalGamepadDetection(state).state,'detected');
+  for(const [change,expected]of [[{requested:false},'start-required'],[{foreground:false},'foreground-required'],[{suspended:true},'sampling-paused'],[{polls:0},'sampling-paused'],[{lastSampleAgeMs:1501},'sampling-paused'],[{connectedIndices:[]},'waiting-browser'],[{selectedIndex:1},'selected-disconnected'],[{prepared:false},'waiting-neutral']])assert.equal(physicalGamepadDetection({...state,...change}).state,expected);
+  assert.equal(physicalGamepadDetection({...state,lastSampleAgeMs:1500}).state,'detected');
 });
