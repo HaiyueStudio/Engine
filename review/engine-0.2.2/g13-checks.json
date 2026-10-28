@@ -438,7 +438,7 @@
       "retainedInvestigationCaptures": 15
     },
     "windowsFinal": {
-      "status": "manual-gamepad-fixture-update-preparation-pending",
+      "status": "failed-rooms-cpu-absolute-budget",
       "launcher": {
         "path": "scripts/start-g13-windows-final.cmd",
         "sha256": "5b2492765e741bc8a473415b1bf5a8e18cf1b7e03528f75446ff4fb9f87d73b8"
@@ -523,19 +523,43 @@
         }
       },
       "latestAssessment": {
-        "path": "artifacts/engine-0.2.2/g13/windows-final-1793153716500-9f291132/assessment.json",
-        "sha256": "9764a569e3daadc58b76a456d24c595d2a746d047cbb7375b9a33600e7859f00"
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/independent-partial-audit.json",
+        "sha256": "7c979a62dd3db8d3e3db28720cdc40d90724441a0fd1b2a6ac77ba7e4e8b935a"
       },
       "hyaProductionCaptures": 30,
       "candidateConfig": {
         "path": "config/g13-windows-candidate.json",
         "sha256": "1c79126afaf38d145745df8803bd2bb54a55725e3d80e0aa8dd18be2947bd195"
       },
-      "inputRenewalRequired": true,
+      "inputRenewalRequired": false,
       "sourceVariants": {
         "path": "artifacts/engine-0.2.2/g13/light-lifetime-proposal/source-variants-proof.json",
         "sha256": "368d770cf7a931a1406e13af195c99e058b8357e70b1df78cc39d2053ae782f1"
-      }
+      },
+      "previousAssessment": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793153716500-9f291132/assessment.json",
+        "sha256": "9764a569e3daadc58b76a456d24c595d2a746d047cbb7375b9a33600e7859f00"
+      },
+      "latestRun": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/result.json",
+        "sha256": "9c8ec531387e16c52ab4edb18d75ffa3a50e773694f9c84ebc9cf6de354c4098"
+      },
+      "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+      "rendererCapturesCompleted": 160,
+      "unexecutedMainQueueCaptures": 420,
+      "hyaProductionCurrentCandidatePassed": true,
+      "correctnessSupplement": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/correctness-supplement.json",
+        "sha256": "9c9498d837ceeec85565570a0d0ba3212dd671f2aa17c4e9abcd8326147d877e",
+        "status": "passed-correctness-supplement",
+        "originalRunStillFailed": true,
+        "independentAudit": {
+          "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/correctness-supplement-audit.json",
+          "sha256": "1702fc29592fe9570ea99f88971a693117db01bf9c44fc3c12ea9fb94342c1c1"
+        },
+        "captures": 224
+      },
+      "remainingRendererCaptures": 196
     },
     "lightLifetimeRepair": {
       "status": "applied-and-validated-formal-candidate-qualification-pending",
@@ -614,9 +638,9 @@
       "originalBudgetsUnchanged": true
     },
     "gamepadFixtureDetection": {
-      "status": "fixture-repaired-awaiting-real-controller",
+      "status": "fixture-repaired-and-physically-qualified",
       "problem": "First two operator windows did not retain final results. The shared sampler and browser both detect Xbox 360 in isolated diagnostics; no unique runtime failure was reproduced. The preparation button had no explicit start state and readiness assumed native slot zero.",
-      "method": "Explicit trusted preparation, stable selection across native slots 0–7, unchanged neutral/focus/hold/leak rules, visible poll heartbeat and browser exposure reason, bounded passive sampler-state logs. No additional native polling or input listeners in the formal harness.",
+      "method": "Explicit trusted preparation, stable selection across native slots 0–7, unchanged neutral/focus/hold/leak rules, visible poll heartbeat and browser exposure reason, bounded passive sampler-state logs. No additional native polling or gamepad listeners in the formal harness.",
       "sourceFiles": [
         {
           "path": "scripts/fixtures/hya-production/physical-browser.mjs",
@@ -653,9 +677,210 @@
         "sha256": "78d16f6e181d953c031358b3a13fda3721ef142b70966c7e40c85770dee30736"
       },
       "runtimePackagesChanged": false,
-      "physicalInputAccepted": false,
+      "physicalInputAccepted": true,
       "diagnosticRunsNotPromoted": true,
       "originalRecordsRetained": true
+    },
+    "currentCandidateGamepad": {
+      "status": "passed-physical-gamepad",
+      "assessment": {
+        "path": "artifacts/engine-0.2.2/g13/pad-user-start-current-1793187944217-53ac46bd/operator-assessment.json",
+        "sha256": "3997a2e5cb7357450b764c64890bf4d27111ecaec4399fb8d0015b86d467c51f"
+      },
+      "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+      "packageCandidate": "d58835a9d14c711f26374c5eed00851f4e4649c2",
+      "holdMilliseconds": 1299.0350000858307,
+      "buttonDown": 1,
+      "buttonUp": 1,
+      "axisMin": -1,
+      "axisMax": 1,
+      "sceneActionLeaks": 0,
+      "unarmedGuiControls": 0,
+      "resources": 0,
+      "leases": 0
+    },
+    "currentCandidateHyaProduction": {
+      "status": "passed",
+      "sourceRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+      "captures": 30,
+      "launcher": {
+        "file": "artifacts/engine-0.2.2/g13/production-launch-1793189615470-32c0d49b/launcher.json",
+        "sha256": "dfeec56c8f7a5c4cb6589fdeaae046036ef39a5a7cef7f564c4fccc0c416592d",
+        "status": "passed-local-hya-production"
+      },
+      "report": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g12\\g13-production-1793189615470-32c0d49b\\result.json",
+        "sha256": "4b1315cdc491296cfdf43c6f297c1685e5e5b31593498946b837e340c4e820f7"
+      },
+      "gpuLimit": 0.05,
+      "gpu": [
+        {
+          "workload": "interactive-small",
+          "status": "passed",
+          "regression": 0.02934326967862133
+        },
+        {
+          "workload": "layout-1k",
+          "status": "passed",
+          "regression": -0.8205882352941176
+        },
+        {
+          "workload": "layout-10k-diagnostic",
+          "status": "passed",
+          "regression": -0.7321958033024957
+        },
+        {
+          "workload": "multi-instance",
+          "status": "passed",
+          "regression": -0.6812472615744121
+        }
+      ],
+      "layout": {
+        "file": "artifacts/engine-0.2.2/g12/g13-final-layout-1793191427071/result.json",
+        "sha256": "dc43ba17a5181662dee3f03366faae99a247b9b68e7988eb76c87c82087e9ba3",
+        "status": "passed"
+      },
+      "corpus": {
+        "file": "artifacts/engine-0.2.2/g12/g13-final-corpus-1793191470315/result.json",
+        "sha256": "378fa2b3c76695623bf1b6e2ceab523ceaaae58125d338ddf94fcc365f4def98",
+        "status": "passed"
+      },
+      "inputHashesVerified": 1142,
+      "fullG13Complete": false,
+      "byteBindings": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/hya-byte-bindings-audit.json",
+        "sha256": "3fb7d509041f7da058ff70d111777e5a681c28b1577c82c398d963ab15cfdb9a"
+      }
+    },
+    "currentCandidateCpuInvestigation": {
+      "status": "unresolved-formal-hard-budget",
+      "audit": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/independent-partial-audit.json",
+        "sha256": "7c979a62dd3db8d3e3db28720cdc40d90724441a0fd1b2a6ac77ba7e4e8b935a"
+      },
+      "profile": {
+        "path": "artifacts/engine-0.2.2/g13/room-cpu-diagnostic-current-1793195171248/summary.json",
+        "sha256": "f44f3658805b6fc64b75e6e94a1f4ca3de8e54107e23129e1d27a73efc9b4039"
+      },
+      "phase": "record",
+      "causalAttribution": "Call-stack hotspot is not proof of the cause of cohort tail variation; current captures do not contain per-core frequency or scheduling traces.",
+      "firstMicroProposal": {
+        "status": "not-applied-insufficient-benefit",
+        "report": {
+          "path": "artifacts/engine-0.2.2/g13/room-validation-proposal/comparison.json",
+          "sha256": "27787eee0ab2f93f10b2d5cb09fa9d7ff87113c73b3220f0ce745061eedad493"
+        },
+        "differentialCases": 465,
+        "existingTestsPassed": 19,
+        "meanSavingsMs": 0.003996049999999
+      },
+      "secondMicroProposal": {
+        "status": "not-applied-unproven-end-to-end-benefit",
+        "report": {
+          "path": "artifacts/engine-0.2.2/g13/room-packing-proposal/comparison.json",
+          "sha256": "7b1bea02f179492a1d082678228c7a4089a66b2c5688864ba922086802178218"
+        },
+        "differentialCases": 465,
+        "existingTestsPassed": 19,
+        "concurrentCorrectnessWorkload": true
+      },
+      "runtimeSourceChanged": false,
+      "budgetsChanged": false,
+      "phaseDecomposition": {
+        "path": "artifacts/engine-0.2.2/g13/room-record-phases-1793197405132/summary.json",
+        "sha256": "7bc4bb27905a9b895d372f43511c48516081511507d6acf1ec0efb1e2b8d4496"
+      },
+      "withinCaptureWindows": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/cpu-within-capture-windows.json",
+        "sha256": "5704636f7cf4ea31b55026b743881c2e7503b2e7128dbe87b8b309cae5c8f46b"
+      },
+      "sharedWarmupDiagnostic": {
+        "status": "inconclusive-common-protocol-unchanged",
+        "report": {
+          "path": "artifacts/engine-0.2.2/g13/room-cpu-warmup-1793197564559/result.json",
+          "sha256": "97500bc6a0eef6bb56dbc2a09ae40290dcf67b1b96a5c686afd586c82465eae6"
+        },
+        "captures": 8,
+        "singleRoundOnly": true,
+        "results": [
+          {
+            "job": {
+              "browserId": "chrome-windows",
+              "algorithm": "tiled",
+              "cpuWarmupFrames": 120
+            },
+            "cpuP95Ms": 4.004999995231628,
+            "overFourMs": 16
+          },
+          {
+            "job": {
+              "browserId": "chrome-windows",
+              "algorithm": "tiled",
+              "cpuWarmupFrames": 360
+            },
+            "cpuP95Ms": 3.209999918937683,
+            "overFourMs": 3
+          },
+          {
+            "job": {
+              "browserId": "chrome-windows",
+              "algorithm": "reference",
+              "cpuWarmupFrames": 360
+            },
+            "cpuP95Ms": 4.449999928474426,
+            "overFourMs": 186
+          },
+          {
+            "job": {
+              "browserId": "chrome-windows",
+              "algorithm": "reference",
+              "cpuWarmupFrames": 120
+            },
+            "cpuP95Ms": 2.7350000143051147,
+            "overFourMs": 1
+          },
+          {
+            "job": {
+              "browserId": "edge-windows",
+              "algorithm": "reference",
+              "cpuWarmupFrames": 360
+            },
+            "cpuP95Ms": 4.90500009059906,
+            "overFourMs": 55
+          },
+          {
+            "job": {
+              "browserId": "edge-windows",
+              "algorithm": "reference",
+              "cpuWarmupFrames": 120
+            },
+            "cpuP95Ms": 3.84499990940094,
+            "overFourMs": 10
+          },
+          {
+            "job": {
+              "browserId": "edge-windows",
+              "algorithm": "tiled",
+              "cpuWarmupFrames": 120
+            },
+            "cpuP95Ms": 3.865000009536743,
+            "overFourMs": 13
+          },
+          {
+            "job": {
+              "browserId": "edge-windows",
+              "algorithm": "tiled",
+              "cpuWarmupFrames": 360
+            },
+            "cpuP95Ms": 3.1649999618530273,
+            "overFourMs": 2
+          }
+        ],
+        "originalCpuWarmupFrames": 120,
+        "gpuWarmupFrames": 120,
+        "protocolChanged": false,
+        "explanation": "Longer CPU warmup lowers tiled P95 but raises reference P95 on both browsers; no shared correction or formal acceptance inferred."
+      }
     }
   },
   "preservedFailures": {
@@ -717,24 +942,29 @@
     }
   },
   "currentBlocker": {
-    "id": "repaired-candidate-formal-windows-qualification",
-    "status": "pending",
-    "lightLifetimeRepairApplied": true,
-    "namedScopeAdmissionPending": false,
-    "roomsCpuAbsoluteBudgetUnchanged": true,
-    "originalRoomCpuFailureRetained": true,
-    "newCpuDiagnosticDoesNotQualify": true,
-    "newCandidatePacked": true,
-    "physicalWindowsRenewalRequired": true,
-    "oldPhysicalInputQualificationPreserved": true,
+    "id": "rooms-sparse-256-cpu-absolute-budget",
+    "status": "failed",
+    "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+    "browser": "chrome-windows",
+    "caseId": "sparse-256",
+    "moving": true,
+    "metric": "cpuP95Ms",
+    "observed": 4.100000023841858,
+    "limit": 4,
+    "sourceSamples": 900,
+    "rawSamplesDropped": false,
+    "allOtherRoomPerformanceChecksPassed": 59,
+    "memoryCapturesPassed": 156,
     "currentCandidateImePassed": true,
-    "gamepadFixtureRepaired": true,
-    "currentCandidateGamepadPending": true
+    "currentCandidateGamepadPassed": true,
+    "currentHyaProductionPassed": true,
+    "correctnessSupplementStatus": "passed-correctness-supplement",
+    "originalReportsModified": false,
+    "lightLifetimeRepairApplied": true
   },
   "remaining": [
-    "Renew physical gamepad on the pinned repaired packages; current real Chinese IME passed and all old raw workflows remain retained",
-    "Qualify the repaired candidate against the unchanged Edge sparse-256 CPU 4 ms hard budget and complete seven-group population",
-    "Renew HYA 30-capture production qualification; same-clean-candidate complete global gate and no-publication rehearsal",
+    "Resolve Chrome moving sparse-256 CPU pooled P95 4.10 ms against unchanged 4 ms; preserve both original Windows failures",
+    "Complete outstanding renderer groups and full global gate plus no-publication rehearsal under explicit candidate/hash binding",
     "Physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver"
   ],
   "publishing": {
