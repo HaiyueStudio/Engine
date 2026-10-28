@@ -488,7 +488,7 @@
       "retainedInvestigationCaptures": 15
     },
     "windowsFinal": {
-      "status": "failed-independent-run-two-hard-requirements",
+      "status": "new-runtime-candidate-preparation-pending",
       "launcher": {
         "path": "scripts/start-g13-windows-final.cmd",
         "sha256": "5b2492765e741bc8a473415b1bf5a8e18cf1b7e03528f75446ff4fb9f87d73b8"
@@ -575,6 +575,64 @@
       "latestAssessment": {
         "path": "artifacts/engine-0.2.2/g13/windows-final-1793153716500-9f291132/assessment.json",
         "sha256": "9764a569e3daadc58b76a456d24c595d2a746d047cbb7375b9a33600e7859f00"
+      },
+      "hyaProductionCaptures": 30
+    },
+    "lightLifetimeRepair": {
+      "status": "applied-and-validated-formal-candidate-qualification-pending",
+      "runtimeCommit": "596dca2",
+      "authorizedFiles": [
+        "engine/src/renderer/ViewLightUniformBuffer.ts",
+        "engine/test/view-light-uniform-lifetime.test.mjs"
+      ],
+      "source": {
+        "path": "engine/src/renderer/ViewLightUniformBuffer.ts",
+        "sha256": "072371e4c55f14d6185e0d6911f0ceec8df401543bb43d7b335049ade534638b"
+      },
+      "tests": {
+        "path": "engine/test/view-light-uniform-lifetime.test.mjs",
+        "sha256": "e51d8c76a122c7a0166d1db41cd9a5c337787f0b51429ae54862296ca6a27fac"
+      },
+      "testProof": {
+        "path": "artifacts/engine-0.2.2/g13/light-lifetime-proposal/applied-tests.log",
+        "sha256": "6b12a4f39aa53b78ec3f8824a9953aec0fe3824a78605837150b977a7518b0e3"
+      },
+      "validation": {
+        "path": "artifacts/engine-0.2.2/g13/light-lifetime-validation-1793179666281/result.json",
+        "sha256": "02d857ec771fe5e27697345b129bb12295a32d6cfcbf416d9ce3fbfdc63bd95e"
+      },
+      "native": {
+        "path": "artifacts/engine-0.2.2/g13/light-lifetime-applied-1793179571224/result.json",
+        "sha256": "169437635d92e6ab353ab0221ff48cdf34056a27b5e0a44c266afa363bf47140"
+      },
+      "focusedTests": 7,
+      "engineTests": 1303,
+      "workspaceTests": 2423,
+      "freshBuildTargets": 103,
+      "originalWarmupSwitches": 24,
+      "originalLifecycleSwitches": 312,
+      "bufferBytes": 775920,
+      "resourceResidual": 0,
+      "cpuDiagnostic": {
+        "originalP95Ms": [
+          3.6299999952316284,
+          3.534999966621399,
+          3.350000023841858
+        ],
+        "repairedP95Ms": [
+          3.765000104904175,
+          3.6100000143051147,
+          3.340000033378601
+        ],
+        "formalPerformanceQualification": false,
+        "originalFailureRetained": true,
+        "unchangedAbsoluteLimitMs": 4
+      },
+      "budgetsChanged": false,
+      "releasePolicyTests": 165,
+      "releasePolicyProof": {
+        "path": "artifacts/engine-0.2.2/g13/light-lifetime-proposal/final-release-policy.log",
+        "sha256": "41cdeee7b155aaaf03826dc8122c87b6d8d016fa39c970cb28f2f1ee18eec765"
       }
     }
   },
@@ -637,19 +695,17 @@
     }
   },
   "currentBlocker": {
-    "id": "windows-lifecycle-and-room-cpu-budget",
-    "status": "blocked",
-    "runtimePointerBugResolved": true,
-    "realBrowserImePassed": true,
-    "currentCandidateImePending": false,
-    "physicalGamepadPassed": true,
-    "lightLifetimeProposalPrepared": true,
-    "namedScopeAdmissionPending": true,
-    "roomsCpuAbsoluteBudgetUnchanged": true
+    "id": "repaired-candidate-formal-windows-qualification",
+    "status": "pending",
+    "lightLifetimeRepairApplied": true,
+    "namedScopeAdmissionPending": false,
+    "roomsCpuAbsoluteBudgetUnchanged": true,
+    "originalRoomCpuFailureRetained": true,
+    "newCpuDiagnosticDoesNotQualify": true
   },
   "remaining": [
-    "Resolve retired-view light uniform lifetime and Edge sparse-256 CPU 4 ms hard budget",
-    "Complete all 224 correctness captures and qualify the current complete seven-group population",
+    "Qualify the repaired candidate against the unchanged Edge sparse-256 CPU 4 ms hard budget and complete seven-group population",
+    "Repack and pin the repaired four-package candidate; renew affected HYA production and complete correctness qualification",
     "Same-clean-candidate complete global gate and no-publication rehearsal",
     "Physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver"
   ],
