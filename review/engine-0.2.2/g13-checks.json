@@ -114,15 +114,19 @@
     },
     "releaseRecovery": {
       "status": "passed-complete-release-policy-suite",
-      "tests": 152,
+      "tests": 156,
       "proof": {
-        "path": "artifacts/engine-0.2.2/g13/release-policy-production-launcher-final.log",
-        "sha256": "817b8aa05f289785b59dd22522080c15647186480c1f9d4b00b8254e07674521"
+        "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final.log",
+        "sha256": "3105c92359977aea2986bed3b174aa8d824a2d56e647047601ad655049ce01b8"
       },
       "externalPublicationExecuted": false,
       "priorProof": {
         "path": "artifacts/engine-0.2.2/g13/release-policy-user-launcher.log",
         "sha256": "7eba2b0c7a4b5bba4d8dc63e64cac45238fe6423129e8f94a2266ed6ced6b551"
+      },
+      "previousProductionLauncherProof": {
+        "path": "artifacts/engine-0.2.2/g13/release-policy-production-launcher-final.log",
+        "sha256": "817b8aa05f289785b59dd22522080c15647186480c1f9d4b00b8254e07674521"
       }
     },
     "games": {
@@ -474,6 +478,36 @@
       "gpuTimingResourcesAfterCleanup": 0,
       "sourceInputsUnchanged": true,
       "retainedInvestigationCaptures": 15
+    },
+    "windowsFinal": {
+      "status": "entry-verified-preparation-pending",
+      "launcher": {
+        "path": "scripts/start-g13-windows-final.cmd",
+        "sha256": "5b2492765e741bc8a473415b1bf5a8e18cf1b7e03528f75446ff4fb9f87d73b8"
+      },
+      "wrapper": {
+        "path": "scripts/start-g13-windows-final.ps1",
+        "sha256": "53d07bc71e5f01bdf35ec9563a552d68848c5809d70ec0deb066a654fa732734"
+      },
+      "worker": {
+        "path": "scripts/run-g13-windows-final.mjs",
+        "sha256": "a95d6bfeab1be9ea1602f2eb9e7c31b7ed76a246e108836d1828b89052bf9886"
+      },
+      "policy": {
+        "path": "scripts/g13-windows-final-policy.mjs",
+        "sha256": "8753d28d522bbf8a37b35fc22ab4e75b677167d5108430c8c562581eaaedfd59"
+      },
+      "plan": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-plan.log",
+        "sha256": "45344a30f53ce84796e746f7e3025d6afb7c43ab2d061b0e364bd3b956d9617c"
+      },
+      "captures": 580,
+      "originalBudgetsUnchanged": true,
+      "sourceIsolation": "One fresh local clean checkout and locked dependency install under G13 artifacts; original protocol paths cannot overwrite historical evidence",
+      "globalGatePassed": false,
+      "rehearsalPassed": false,
+      "macQualified": false,
+      "iPhoneQualified": false
     }
   },
   "preservedFailures": {
