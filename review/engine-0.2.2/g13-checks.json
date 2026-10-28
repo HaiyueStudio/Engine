@@ -114,10 +114,10 @@
     },
     "releaseRecovery": {
       "status": "passed-complete-release-policy-suite",
-      "tests": 156,
+      "tests": 159,
       "proof": {
-        "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final.log",
-        "sha256": "3105c92359977aea2986bed3b174aa8d824a2d56e647047601ad655049ce01b8"
+        "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final-census.log",
+        "sha256": "3e2f130527deba02d303fc00aa235e91e7f05ad51f337c8d64ba7d64a94240f3"
       },
       "externalPublicationExecuted": false,
       "priorProof": {
@@ -127,6 +127,10 @@
       "previousProductionLauncherProof": {
         "path": "artifacts/engine-0.2.2/g13/release-policy-production-launcher-final.log",
         "sha256": "817b8aa05f289785b59dd22522080c15647186480c1f9d4b00b8254e07674521"
+      },
+      "priorWindowsEntryProof": {
+        "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final.log",
+        "sha256": "3105c92359977aea2986bed3b174aa8d824a2d56e647047601ad655049ce01b8"
       }
     },
     "games": {
@@ -491,7 +495,7 @@
       },
       "worker": {
         "path": "scripts/run-g13-windows-final.mjs",
-        "sha256": "a95d6bfeab1be9ea1602f2eb9e7c31b7ed76a246e108836d1828b89052bf9886"
+        "sha256": "4adc693bc985ed3ce7b1797a28474a0bbd7b648dc000630fc895b4aa7b3db968"
       },
       "policy": {
         "path": "scripts/g13-windows-final-policy.mjs",
@@ -507,7 +511,29 @@
       "globalGatePassed": false,
       "rehearsalPassed": false,
       "macQualified": false,
-      "iPhoneQualified": false
+      "iPhoneQualified": false,
+      "cleanCheckoutRepair": {
+        "problem": "Git does not retain the empty cubism directory frozen in the G10 foundation census; a fresh clone exposed the local-only fixture.",
+        "method": "Bootstrap reconstructs only the frozen empty directory; absence of the actual cubism.ts module remains a hard failure.",
+        "runtimeChanged": false,
+        "contractChanged": false,
+        "helper": {
+          "path": "scripts/hya-foundation-layout.mjs",
+          "sha256": "2ff23e7ae8da0866c268e008ddbd39bfdf149095a3c60cb0224de9e96a2faaae"
+        },
+        "bootstrap": {
+          "path": "scripts/release-ci-bootstrap.mjs",
+          "sha256": "17b3826a820a2beb41e9beb6088524b4bf1634f08a5839b480fd36ae5080732a"
+        },
+        "proof": {
+          "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final-census.log",
+          "sha256": "3e2f130527deba02d303fc00aa235e91e7f05ad51f337c8d64ba7d64a94240f3"
+        },
+        "originalFailure": {
+          "path": "artifacts/engine-0.2.2/g13/windows-final-1793153716500-9f291132/preflight.json",
+          "sha256": "2ad19c0fa2bd3b1fbf66eb7a22f34a88d621962983d8453ad0b7381823168c53"
+        }
+      }
     }
   },
   "preservedFailures": {

@@ -7,6 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {npmCommand,npmArgs} from './npm-process.mjs';
 import {WINDOWS_RENDER_JOBS,windowsFinalPaths,assertWindowsFinalLocation,validateWindowsRenderReport,windowsFinalPlan} from './g13-windows-final-policy.mjs';
 import {g13ProductionPlan} from './g13-production-candidate-policy.mjs';
+import {ensureFrozenHyaFoundationLayout} from './hya-foundation-layout.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),argv=process.argv.slice(2);
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex'),json=path=>JSON.parse(readFileSync(path)),save=(path,value)=>writeFileSync(path,JSON.stringify(value,null,2)+'\n');
 const git=(cwd,args)=>execFileSync('git',args,{cwd,encoding:'utf8',windowsHide:true}).trim();
@@ -32,6 +33,7 @@ if(argv.length===1&&argv[0]==='--prepare'){
     required(root,paths.output,'long-paths','git',['-C',paths.checkout,'config','core.longpaths','true']);
     required(root,paths.output,'filemode','git',['-C',paths.checkout,'config','core.filemode','false']);
     required(root,paths.output,'detach','git',['-C',paths.checkout,'checkout','--quiet','--detach',revision],300000);
+    ensureFrozenHyaFoundationLayout(paths.checkout);
     npmStep(paths.checkout,paths.output,'locked-install',['ci','--cache','D:/npm-cache'],1200000);
     clean(paths.checkout,revision);
     for(const workspace of ['shader-language','engine','animation-spec','extensions'])npmStep(paths.checkout,paths.output,'build-'+workspace,['run','build','-w','./'+workspace],1200000);
