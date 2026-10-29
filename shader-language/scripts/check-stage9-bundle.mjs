@@ -24,7 +24,7 @@ evidence.engineArtifactGzipBytes = evidence.engine2dUiArtifactGzipBytes + eviden
 const failures = [];
 const costBudget = loadShaderCostBudget(root);
 for (const [key, value] of Object.entries(evidence)) {
-  if (['simple3dArtifactGzipBytes', 'componentsEvidenceArtifactGzipBytes'].includes(key)) {
+  if (['engine2dUiArtifactGzipBytes', 'simple3dArtifactGzipBytes', 'componentsEvidenceArtifactGzipBytes'].includes(key)) {
     const error = validateProductionBundleCost(key, value, costBudget);
     if (error) failures.push(error);
     continue;

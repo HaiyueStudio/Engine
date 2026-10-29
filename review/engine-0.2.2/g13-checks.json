@@ -950,7 +950,7 @@
       "fullG13Complete": false
     },
     "windowsRemaining": {
-      "status": "entry-implemented-formal-run-pending",
+      "status": "completed-captures-global-gate-failed",
       "operatorSchedule": "run-later",
       "config": {
         "path": "config/g13-windows-remaining.json",
@@ -982,7 +982,40 @@
       "samplerUnchanged": true,
       "automaticRetry": false,
       "fullG13Complete": false,
-      "externalPublishPerformed": false
+      "externalPublishPerformed": false,
+      "run": {
+        "path": "artifacts/engine-0.2.2/g13/windows-remaining-1793238578178-59eefefb/result.json",
+        "sha256": "a23ca3fb26f4756db766ca0d621c007685881ad744802dace7e7419201906011"
+      },
+      "reusedRendererCaptures": 384,
+      "independentSevenReportAudit": {
+        "path": "artifacts/engine-0.2.2/g13/windows-remaining-1793238578178-59eefefb/seven-report-audit.stdout.log",
+        "sha256": "9696d27f3e766fc209cebee0eb589ea817096a5c387f108b86e0c17d7765c126"
+      },
+      "globalGate": {
+        "path": "artifacts/engine-0.2.2/g13/windows-remaining-1793238578178-59eefefb/global-gate.json",
+        "sha256": "84d3214d637f70e31839ea982b80df21fc03e891400581b8edb8e9914f5b0bdb"
+      },
+      "rehearsalStarted": false,
+      "originalFilesModified": false
+    },
+    "stage9SelectiveAdmission": {
+      "decision": "ADR0138-selective-gui-bundle-admission",
+      "status": "applied-focused-checks-passed-global-pending",
+      "artifactAudit": {
+        "path": "artifacts/engine-0.2.2/g13/stage9-admission-proposal/artifact-content-audit.json",
+        "sha256": "35eaeab8304f714dc89a8251c1ccfa8e3eb8a2d053a8f38a2bfa9a98a12d578e"
+      },
+      "originalGzipMaximum": 4742,
+      "currentGzipMaximum": 4800,
+      "observedGzip": 4746,
+      "totalEngineGzip": 11846,
+      "totalEngineGzipMaximum": 12000,
+      "runtimeAndPackagesChanged": false,
+      "gateOnlyEntry": "scripts/start-g13-windows-gates.cmd",
+      "preparedPointer": "artifacts/engine-0.2.2/g13/windows-gates-prepared.json",
+      "newRendererCaptures": 0,
+      "reusedRendererCaptures": 580
     }
   },
   "preservedFailures": {
@@ -1044,21 +1077,16 @@
     }
   },
   "currentBlocker": {
-    "id": "remaining-renderer-groups-and-global-validation",
+    "id": "complete-global-gate-and-rehearsal-after-adr0138",
     "status": "pending",
-    "remainingRendererCaptures": 196,
-    "cpuDecision": "ADR0137-g05-moving-sparse256-cpu-investigation",
-    "originalFailedWindowsRunRetained": true,
-    "currentCandidateImePassed": true,
-    "currentCandidateGamepadPassed": true,
-    "currentCandidateHyaProductionPassed": true,
-    "currentCandidateCorrectnessPassed": 224,
+    "remainingRendererCaptures": 0,
+    "originalGlobalFailureRetained": true,
     "globalGatePassed": false,
-    "rehearsalPassed": false
+    "rehearsalPassed": false,
+    "fullG13Complete": false
   },
   "remaining": [
-    "Complete 196 remaining captures: instances 96, Forward 24, production 36, ablation 40; all unchanged hard requirements remain",
-    "Complete the independent seven-report audit, global gate and no-publication rehearsal under current clean candidate/input/build-byte binding",
+    "Complete fresh four-runtime rebuild and hash-bound reuse of all 580 renderer captures; rerun complete global gate and no-publication rehearsal under ADR 0138",
     "Align Games/Native candidate packages after Windows qualification; physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver remain pending"
   ],
   "publishing": {

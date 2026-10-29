@@ -13,6 +13,7 @@ import { buildDeferredFixture } from './webgpu-gate/deferred-fixture-builder.mjs
 import { ENGINE_021_EVIDENCE_KINDS, validateEngine021EvidenceBindings, validateEngine021CompiledEvidence,
   completeEngine021EvidenceAudit, validateEvidenceTargetVersion, ENGINE_021_READBACK_REUSE, ENGINE_021_PBR_REUSE, ENGINE_021_DOWNLOAD_REUSE } from './engine-021-evidence-policy.mjs';
 
+import {G13_STAGE9_REUSE} from './g13-stage9-reuse-policy.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url)), args = process.argv.slice(2);
 if (args.length > 1 || args.length === 1 && !args[0].startsWith('--manifest=')) throw Error('Use --manifest=<artifacts/.../qualification.json>, or the default artifacts/engine-0.2.1/qualification.json');
 const git = args => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
@@ -45,6 +46,7 @@ const current = { targetVersion, revision: git(['rev-parse', 'HEAD']), dirty: !!
   inputs: { production: await productionEvidenceInputs(root), resources: await studyEvidenceInputs(root, 'resources'),
     ablation: await studyEvidenceInputs(root, 'ablation'), rooms: lightingInputs, instances: lightingInputs, forward: lightingInputs } };
 current.reuseChanges = {};
+current.stage9FixFiles=Object.fromEntries(await Promise.all(Object.keys(G13_STAGE9_REUSE.files).map(async path=>[path,sha256(await readFile(resolve(root,path)))])));
 current.readbackFixFiles = Object.fromEntries(await Promise.all(Object.keys(ENGINE_021_READBACK_REUSE.sourceFiles)
   .map(async path => [path, sha256(await readFile(resolve(root, path)))])));
 current.pbrFixFiles = Object.fromEntries(await Promise.all(Object.keys(ENGINE_021_PBR_REUSE.sourceFiles)
@@ -99,14 +101,17 @@ for (const [kind, filename] of Object.entries({ common: 'deferred-reference-runt
 }
 validateEngine021CompiledEvidence(reports, builds);
 if (git(['rev-parse', 'HEAD']) !== current.revision || git(['status', '--porcelain'])) throw Error('Candidate changed during evidence audit');
-const policyFiles = ['scripts/engine-021-evidence-policy.mjs', 'scripts/check-engine-021-evidence.mjs'];
+const policyFiles = ['scripts/engine-021-evidence-policy.mjs', 'scripts/check-engine-021-evidence.mjs', 'scripts/g13-stage9-reuse-policy.mjs'];
+const stage9Reuse=targetVersion==='0.2.2'&&Object.values(current.reuseChanges).some(paths=>paths.some(p=>Object.hasOwn(G13_STAGE9_REUSE.files,p)));
+
 const evidence = { ...result, schemaVersion: 2, contractId: 'engine-021-evidence-v2', targetVersion, assessedAt: new Date().toISOString(),
   acceptanceRevision: current.revision, dirty: false, manifest: manifestPath, manifestSha256: sha256(manifestBytes),
-  policy: { adr: ['0126', '0127', ...(targetVersion === '0.2.2' && result.assessments.rooms.acceptanceDecision ? ['0137'] : []), ...(manifest.reuseDecision ? ['0129'] : []), ...([ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision) ? ['0130'] : []), ...(manifest.reuseDecision === ENGINE_021_DOWNLOAD_REUSE.decision ? ['0131'] : [])], files: await Promise.all(policyFiles.map(async path => ({ path, sha256: sha256(await readFile(resolve(root, path))) }))) },
+  policy: { adr: ['0126', '0127', ...(stage9Reuse?['0138']:[]), ...(targetVersion === '0.2.2' && result.assessments.rooms.acceptanceDecision ? ['0137'] : []), ...(manifest.reuseDecision ? ['0129'] : []), ...([ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision) ? ['0130'] : []), ...(manifest.reuseDecision === ENGINE_021_DOWNLOAD_REUSE.decision ? ['0131'] : [])], files: await Promise.all(policyFiles.map(async path => ({ path, sha256: sha256(await readFile(resolve(root, path))) }))) },
   ...(manifest.reuseDecision ? { reuseDecision: manifest.reuseDecision, readbackFixFiles: current.readbackFixFiles, ...([ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision) ? { pbrFixFiles: current.pbrFixFiles } : {}), ...(manifest.reuseDecision === ENGINE_021_DOWNLOAD_REUSE.decision ? { downloadFixFiles: current.downloadFixFiles } : {}) } : {}),
   bindings: Object.fromEntries(ENGINE_021_EVIDENCE_KINDS.map(kind => [kind, { ...manifest.reports[kind],
     captureRevision: reports[kind].revision, acceptanceRevision: current.revision, originalStatus: reports[kind].status,
     acceptanceStatus: 'passed', reused: reports[kind].revision !== current.revision }])),
+  ...(stage9Reuse?{stage9Acceptance:{decision:G13_STAGE9_REUSE.decision,files:current.stage9FixFiles}}:{}),
   reuseChanges: current.reuseChanges, rebuilds };
 await writeFile(resolve(auditDirectory, 'report.json'), JSON.stringify(evidence, null, 2) + '\n', { flag: 'wx' });
 console.log(JSON.stringify(evidence, null, 2));

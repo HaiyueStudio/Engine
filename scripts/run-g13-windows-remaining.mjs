@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash,randomBytes} from 'node:crypto';
 import {execFileSync,spawnSync} from 'node:child_process';
 import {hostname,cpus,release} from 'node:os';
+import {G13_STAGE9_REUSE} from './g13-stage9-reuse-policy.mjs';
 import {G13_REUSED_KINDS,windowsRemainingPlan,validateWindowsRemainingConfig,validateWindowsRemainingReuse,windowsRemainingOutput,assertWindowsRemainingOutput} from './g13-windows-remaining-policy.mjs';
 import {validateWindowsRenderReport,validateWindowsG05BudgetSummary} from './g13-windows-final-policy.mjs';
 import {validateEngine021RevisionReuse} from './engine-021-evidence-policy.mjs';
@@ -32,7 +33,7 @@ const free=()=>{const s=statfsSync(root);assert.ok(Number(s.bavail)*Number(s.bsi
 const config=validateWindowsRemainingConfig(json(resolve(root,configFile))),checkout=resolve(root,config.checkout),plan=windowsRemainingPlan();
 assert.equal(realpathSync(checkout),checkout,'Checkout must not be a link');
 if(args.length===1&&args[0]==='--plan'){console.log(JSON.stringify({...plan,config:digest(resolve(root,configFile)),checkout},null,2));process.exit(0);}
-if(args.length!==1||!['--prepare','--verify','--run'].includes(args[0]))throw Error('Use --plan, --prepare, --verify or --run');
+if(args.length!==1||!['--prepare','--verify','--run','--verify-reuse-only'].includes(args[0]))throw Error('Use --plan, --prepare, --verify, --run or --verify-reuse-only');
 if(process.platform!=='win32')throw Error('Registered Windows runner required');
 const env={...process.env};for(const key of ['NODE_AUTH_TOKEN','NPM_TOKEN','GH_TOKEN','GITHUB_TOKEN','COSIGN_PRIVATE_KEY','SIGNING_KEY','NPM_CONFIG_TOKEN','NPM_CONFIG__AUTH','NPM_CONFIG__AUTHTOKEN'])delete env[key];
 function execute(out,id,cwd,command,argv,timeout=7200000){
@@ -42,7 +43,7 @@ function execute(out,id,cwd,command,argv,timeout=7200000){
   const step={id,command,args:argv,startedAt,finishedAt:new Date().toISOString(),exitCode:r.status,error:r.error?.message};save(resolve(out,id+'.json'),step);console.log('END '+id+'; exit '+r.status);if(r.error)throw r.error;return step;
 }
 function required(...a){const step=execute(...a);assert.equal(step.exitCode,0,step.id+' failed; original log retained');return step;}
-function revisionReuse(revision){const changes=git(root,['diff','--no-renames','--name-only',config.captureRevision,revision]).split('\n').filter(Boolean);validateEngine021RevisionReuse(config.captureRevision,{revision,targetVersion:'0.2.2',reuseChanges:{[config.captureRevision]:changes}});return changes;}
+function revisionReuse(revision){const changes=git(root,['diff','--no-renames','--name-only',config.captureRevision,revision]).split('\n').filter(Boolean);const stage9FixFiles=Object.fromEntries(Object.keys(G13_STAGE9_REUSE.files).map(p=>[p,sha(readFileSync(resolve(root,p)))]));for(const kind of G13_REUSED_KINDS)validateEngine021RevisionReuse(config.captureRevision,{revision,targetVersion:'0.2.2',stage9FixFiles,reuseChanges:{[config.captureRevision]:changes}},kind,config.reports[kind]);return changes;}
 
 async function verifyReuse(revision){
   console.log('Verifying original renderer/source/package hashes. No sampling has started.');
@@ -80,6 +81,7 @@ async function verifyReuse(revision){
   return {status:'passed-immutable-reuse-checks',revision,captureRevision:config.captureRevision,sourceChanges:revisionReuse(revision),host:{hostname:hostname(),cpu:cpus()[0].model,os:release(),hardware},prerequisites,rendererCaptures:384,rawBindings,hyaProductionCaptures:30,hyaGpu:gpu.map(g=>({workload:g.workload,status:g.status,regression:g.regression})),layoutCohorts:27,corpusRounds:3,corpusDenominator:23,offlineAssets:64,physicalInputPackageBytesUnchanged:true,originalFilesModified:false,fullG13Complete:false};
 }
 
+if(args[0]==='--verify-reuse-only'){const verified=await verifyReuse(git(root,['rev-parse','HEAD']));console.log(JSON.stringify(verified));process.exit(0);}
 const pointerPath=resolve(root,'artifacts/engine-0.2.2/g13/windows-remaining-prepared.json');
 if(args[0]==='--prepare'){
   const revision=git(root,['rev-parse','HEAD']);clean(root,revision);assert.equal(git(checkout,['status','--porcelain']),'');revisionReuse(revision);free();

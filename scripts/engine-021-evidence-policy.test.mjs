@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {G13_STAGE9_REUSE,isG13Stage9Binding,validateG13Stage9Files,validateG13GateSource} from './g13-stage9-reuse-policy.mjs';
+import './stage9-selective-bundle.test.mjs';
 import { ENGINE_021_EVIDENCE_KINDS as kinds, validateEngine021EvidenceBindings, completeEngine021EvidenceAudit,
   assessEngine021G05Audit, validateEngine021CompiledEvidence, validateEngine021RevisionReuse,
   ENGINE_021_READBACK_REUSE as repair, ENGINE_021_PBR_REUSE as pbrRepair,
@@ -78,6 +80,25 @@ test('ADR 0137 names only 0.2.2 interpretation receipts; runtime and sampling ed
       validateEngine021RevisionReuse(old,{...current,reuseChanges:{[old]:[...current.reuseChanges[old],path]}}),/non-acceptance change/);
   const data=fixture();data.current.targetVersion='0.2.2';
   assert.throws(()=>validate(data),/target version/);data.manifest.targetVersion='0.2.2';assert.doesNotThrow(()=>validate(data));
+});
+
+test('ADR 0138 admits only all seven pinned populations after both exact acceptance-file hashes',()=>{
+  const paths=Object.keys(G13_STAGE9_REUSE.files),stage9FixFiles=Object.fromEntries(Object.entries(G13_STAGE9_REUSE.files).map(([p,h])=>[p,h[0]]));
+  for(const [kind,binding]of Object.entries(G13_STAGE9_REUSE.reports)){
+    const old=binding.captureRevision,current={revision:'a'.repeat(40),targetVersion:'0.2.2',stage9FixFiles,reuseChanges:{[old]:paths}};
+    assert.equal(isG13Stage9Binding(kind,binding),true);
+    assert.doesNotThrow(()=>validateEngine021RevisionReuse(old,current,kind,binding));
+    for(const field of ['file','sha256','captureRevision'])assert.throws(()=>validateEngine021RevisionReuse(old,current,kind,{...binding,[field]:'changed'}));
+    for(const version of ['0.2.1','0.2.3',undefined])assert.throws(()=>validateEngine021RevisionReuse(old,{...current,targetVersion:version},kind,binding));
+    for(const path of paths){const bad={...stage9FixFiles,[path]:'0'.repeat(64)};assert.throws(()=>validateEngine021RevisionReuse(old,{...current,stage9FixFiles:bad},kind,binding),/exact approved/);}
+    for(const path of ['shader-language/stage9-contract.json','engine/src/gui/systems/GuiSystem.ts','config/lighting-performance-021.json','shader-language/scripts/generate-builtin-render-production.mjs'])assert.throws(()=>validateEngine021RevisionReuse(old,{...current,reuseChanges:{[old]:[...paths,path]}},kind,binding));
+  }
+  const lf=Object.fromEntries(Object.entries(G13_STAGE9_REUSE.files).map(([p,h])=>[p,h.at(-1)]));assert.doesNotThrow(()=>validateG13Stage9Files(lf));assert.throws(()=>validateG13Stage9Files({}));
+});
+test('gate-only continuation requires every original population and cannot claim new captures or publication',()=>{
+  const run={status:'failed',revision:'1c3735850159ecc3fbe3d8346f399dd902e2748d',newRendererCaptures:196,reusedRendererCaptures:384,reports:structuredClone(G13_STAGE9_REUSE.reports),error:'global-gate failed',externalPublishPerformed:false,baselinePromoted:false};
+  const original=JSON.stringify(run);assert.deepEqual(validateG13GateSource(run),{status:'passed-pinned-source-only',rendererCaptures:580,newRendererCaptures:0,fullG13Complete:false});assert.equal(JSON.stringify(run),original);
+  for(const mutate of [r=>r.status='passed',r=>r.newRendererCaptures=195,r=>r.reusedRendererCaptures=383,r=>delete r.reports.forward,r=>r.reports.ablation.sha256='0'.repeat(64),r=>r.error='capture failed',r=>r.externalPublishPerformed=true,r=>r.baselinePromoted=true]){const bad=structuredClone(run);mutate(bad);assert.throws(()=>validateG13GateSource(bad));}
 });
 
 function fixture() {

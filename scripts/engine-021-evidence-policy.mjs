@@ -1,3 +1,4 @@
+import {G13_STAGE9_REUSE,isG13Stage9Binding,validateG13Stage9Files} from './g13-stage9-reuse-policy.mjs';
 export const ENGINE_021_EVIDENCE_KINDS = Object.freeze(['correctness', 'production', 'resources', 'ablation', 'rooms', 'instances', 'forward']);
 
 /** The seven-report contract is inherited; candidate version and evidence population are not. */
@@ -109,7 +110,9 @@ const engine022AcceptanceFiles = new Set(['scripts/g13-windows-final-policy.mjs'
   'scripts/g13-windows-final-policy.test.mjs', 'review/engine-0.2.2/g13-checks.json',
   'scripts/g13-windows-remaining-policy.mjs','scripts/run-g13-windows-remaining.mjs',
   'scripts/start-g13-windows-remaining.cmd','scripts/start-g13-windows-remaining.ps1',
-  'config/g13-windows-remaining.json']);
+  'config/g13-windows-remaining.json','scripts/g13-stage9-reuse-policy.mjs',
+  'scripts/run-g13-windows-gates.mjs','scripts/start-g13-windows-gates.cmd',
+  'scripts/start-g13-windows-gates.ps1','scripts/stage9-selective-bundle.test.mjs']);
 
 export function isEngine021ReadbackReuseBinding(kind, binding) {
   const pinned = ENGINE_021_READBACK_REUSE.reports[kind];
@@ -156,6 +159,10 @@ export function validateEngine021RevisionReuse(captureRevision, current, kind, b
   check(Array.isArray(paths), 'Missing verified Git comparison for capture revision');
   if (paths.every(path => acceptancePath(path) || current.targetVersion === '0.2.2'
     && safePath(path) && engine022AcceptanceFiles.has(path))) return;
+  if(current.targetVersion==='0.2.2'&&isG13Stage9Binding(kind,binding)&&binding.captureRevision===captureRevision
+    &&paths.every(path=>acceptancePath(path)||safePath(path)&&(engine022AcceptanceFiles.has(path)||Object.hasOwn(G13_STAGE9_REUSE.files,path)))){
+    validateG13Stage9Files(current.stage9FixFiles);return;
+  }
   check(captureRevision === ENGINE_021_READBACK_REUSE.captureRevision && isEngine021ReadbackReuseBinding(kind, binding),
     'Evidence reuse requires new sampling after non-acceptance change; this is not an ADR 0129 pinned population');
   check(reuseDecision === ENGINE_021_READBACK_REUSE.decision, 'ADR 0129 requires its explicit manifest decision');
