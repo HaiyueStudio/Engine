@@ -106,7 +106,10 @@ const policyFiles = new Set(['scripts/engine-021-evidence-policy.mjs', 'scripts/
   'scripts/check-engine-021-evidence.mjs']);
 // ADR 0137 names interpretation/receipt files only; none is a measurement input.
 const engine022AcceptanceFiles = new Set(['scripts/g13-windows-final-policy.mjs',
-  'scripts/g13-windows-final-policy.test.mjs', 'review/engine-0.2.2/g13-checks.json']);
+  'scripts/g13-windows-final-policy.test.mjs', 'review/engine-0.2.2/g13-checks.json',
+  'scripts/g13-windows-remaining-policy.mjs','scripts/run-g13-windows-remaining.mjs',
+  'scripts/start-g13-windows-remaining.cmd','scripts/start-g13-windows-remaining.ps1',
+  'config/g13-windows-remaining.json']);
 
 export function isEngine021ReadbackReuseBinding(kind, binding) {
   const pinned = ENGINE_021_READBACK_REUSE.reports[kind];

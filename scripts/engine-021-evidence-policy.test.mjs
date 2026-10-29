@@ -66,6 +66,11 @@ test('ADR 0137 names only 0.2.2 interpretation receipts; runtime and sampling ed
     'review/engine-0.2.2/g13-checks.json','docs/for-ai/adr/0137-g05-moving-sparse256-cpu-investigation.md',
   ]}};
   assert.doesNotThrow(() => validateEngine021RevisionReuse(old,current));
+  for(const path of ['scripts/g13-windows-remaining-policy.mjs','scripts/run-g13-windows-remaining.mjs',
+    'scripts/start-g13-windows-remaining.cmd','scripts/start-g13-windows-remaining.ps1','config/g13-windows-remaining.json']){
+    assert.doesNotThrow(()=>validateEngine021RevisionReuse(old,{...current,reuseChanges:{[old]:[...current.reuseChanges[old],path]}}));
+    assert.throws(()=>validateEngine021RevisionReuse(old,{...current,targetVersion:'0.2.1',reuseChanges:{[old]:[path]}}),/non-acceptance change/);
+  }
   for(const targetVersion of [undefined,'0.2.1','0.2.3'])assert.throws(() => validateEngine021RevisionReuse(old,{...current,targetVersion}),/non-acceptance change/);
   for(const path of ['engine/src/frame/DeferredLightTable.ts','scripts/webgpu-gate/deferred-g05-room-fixture.mjs',
     'config/lighting-continuous-021.json','config/lighting-performance-021.json','package-lock.json',

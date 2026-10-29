@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "targetVersion": "0.2.2",
+  "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+  "checkout": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/checkout",
+  "sourceRun": {
+    "file": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/result.json",
+    "sha256": "9c8ec531387e16c52ab4edb18d75ffa3a50e773694f9c84ebc9cf6de354c4098"
+  },
+  "reports": {
+    "resources": {
+      "file": "artifacts/engine-0.2.1/g09/study-resources-2026-10-28T11-52-24.953Z/report.json",
+      "sha256": "c78231ba3c3b7491645bd815429f2c09c2fc284f0143074e8a89f5496016435b",
+      "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+      "originalStatus": "passed"
+    },
+    "rooms": {
+      "file": "artifacts/engine-0.2.1/g05/continuous-rooms-2026-10-28T12-45-54.933Z/report.json",
+      "sha256": "e40d32391440886a1aea899e943716ba24ff9be81a770cd0c9a617629d0610c6",
+      "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+      "originalStatus": "failed"
+    },
+    "correctness": {
+      "file": "artifacts/engine-0.2.1/g09/acceptance-full-2026-10-28T13-52-05.983Z/report.json",
+      "sha256": "52e71431affc6b6e4a9a537ab115e5b333d2fe01eb70f019e44e84158b3a1f69",
+      "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34"
+    }
+  },
+  "support": {
+    "roomDecision": {
+      "file": "artifacts/engine-0.2.2/g13/adr0137-rooms-1793237553903/result.json",
+      "sha256": "5195c0de7631dcbc0f4c773f82b67b2702d0668a3c686d503091e69da377464e"
+    },
+    "correctnessAudit": {
+      "file": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/correctness-supplement-audit.json",
+      "sha256": "1702fc29592fe9570ea99f88971a693117db01bf9c44fc3c12ea9fb94342c1c1"
+    },
+    "hyaByteAudit": {
+      "file": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/hya-byte-bindings-audit.json",
+      "sha256": "3fb7d509041f7da058ff70d111777e5a681c28b1577c82c398d963ab15cfdb9a"
+    },
+    "productionLauncher": {
+      "file": "artifacts/engine-0.2.2/g13/production-launch-1793189615470-32c0d49b/launcher.json",
+      "sha256": "dfeec56c8f7a5c4cb6589fdeaae046036ef39a5a7cef7f564c4fccc0c416592d"
+    },
+    "layout": {
+      "file": "artifacts/engine-0.2.2/g12/g13-final-layout-1793191427071/result.json",
+      "sha256": "dc43ba17a5181662dee3f03366faae99a247b9b68e7988eb76c87c82087e9ba3"
+    },
+    "corpus": {
+      "file": "artifacts/engine-0.2.2/g12/g13-final-corpus-1793191470315/result.json",
+      "sha256": "378fa2b3c76695623bf1b6e2ceab523ceaaae58125d338ddf94fcc365f4def98"
+    },
+    "ime": {
+      "file": "artifacts/engine-0.2.2/g13/ime-user-start-current-1793181287269-6ee552f3/operator-assessment-chrome156.json",
+      "sha256": "40fcf02d07f09dcc19009ce2558265b06fa0a71e0215c01334d5ec9778e0a16d"
+    },
+    "gamepad": {
+      "file": "artifacts/engine-0.2.2/g13/pad-user-start-current-1793187944217-53ac46bd/operator-assessment.json",
+      "sha256": "3997a2e5cb7357450b764c64890bf4d27111ecaec4399fb8d0015b86d467c51f"
+    }
+  }
+}

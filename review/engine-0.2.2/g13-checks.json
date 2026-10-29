@@ -948,6 +948,41 @@
       "allOtherBudgetsUnchanged": true,
       "default021InterpretationUnchanged": true,
       "fullG13Complete": false
+    },
+    "windowsRemaining": {
+      "status": "entry-implemented-formal-run-pending",
+      "operatorSchedule": "run-later",
+      "config": {
+        "path": "config/g13-windows-remaining.json",
+        "sha256": "b379ad5d7cf33bbae1d0df831b50faed7d273b0591a436f112a85ec0b49fac3b"
+      },
+      "policy": {
+        "path": "scripts/g13-windows-remaining-policy.mjs",
+        "sha256": "2a23830c5003dbe412f7badc6819a3134cfc011f3c5b7394925f6c7ef64b9ba2"
+      },
+      "worker": {
+        "path": "scripts/run-g13-windows-remaining.mjs",
+        "sha256": "ccde88b9198ffefd8dcd6ef80f6bf4a103f89d373be70aaae66ef32abd127225"
+      },
+      "entry": {
+        "path": "scripts/start-g13-windows-remaining.cmd",
+        "sha256": "e993cfd0a8a3155e49d0404d3db64ddf7883a9e96e6e9495f63c836b79e1e14d"
+      },
+      "powershell": {
+        "path": "scripts/start-g13-windows-remaining.ps1",
+        "sha256": "c39925f5d8ede28b95d7f8e6e1689514af13b305ada3d1f6b3cc3ac55aa5d73c"
+      },
+      "reuseRendererCaptures": 384,
+      "newRendererCaptures": 196,
+      "totalRendererCaptures": 580,
+      "hyaProductionCapturesReused": 30,
+      "hashChecksBeforePrepareAndRun": true,
+      "originalFailuresRetained": true,
+      "originalBudgetsUnchanged": true,
+      "samplerUnchanged": true,
+      "automaticRetry": false,
+      "fullG13Complete": false,
+      "externalPublishPerformed": false
     }
   },
   "preservedFailures": {

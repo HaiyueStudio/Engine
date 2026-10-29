@@ -17,4 +17,6 @@
 4. 继承 ADR 0126 的严格哈希复核：除其原有具名验收文件和 Markdown 文档外，0.2.2 仅增加 scripts/g13-windows-final-policy.mjs、scripts/g13-windows-final-policy.test.mjs 和 review/engine-0.2.2/g13-checks.json 三份解释／索引文件。仍须 Git 比较、完整原始捕获及当前配置／采样输入一致，并在最终七报告验收时重建、逐字节对照可执行块。运行时、采样器、锁文件或数值预算变化不在此范围内。
 5. 采样提交与验收提交分别记录。现有报告的限定复核只授予 G05 前置解释，不授予完整 G13、Apple、发布或基线晋升资格。剩余组、完整全局门禁和无发布演练仍须完成。
 
+2026-10-29 用户进一步批准严格核对哈希复用已通过数据，按“剩余 196 次捕获 → 全局门禁 → 无发布演练”收尾。仅为编排该任务，再将 config/g13-windows-remaining.json、scripts/g13-windows-remaining-policy.mjs、scripts/run-g13-windows-remaining.mjs、scripts/start-g13-windows-remaining.cmd 和 scripts/start-g13-windows-remaining.ps1 纳入上述 0.2.2 具名验收文件；它们不属于采样输入。继续入口固定复用资源 4／房间 156／正确性 224，补采实例 96／Forward 24／生产 36／消融 40，保留完整七组 580 次覆盖。HYA 30 次、27 组布局、三轮 23 项语料及真实输入仅在原始哈希、对应输入／制品、同机驱动与电源方案一致时复用；最终仍独立审计七报告并重建四类运行时。没有采样器、预热或数值预算的新例外，没有自动重试或发布授权。
+
 当前状态与原始证据见 [G13 验收结论](../../../review/engine-0.2.2/README.md#g13-包集成与发布候选)及[验收索引](../../../review/engine-0.2.2/g13-checks.json)。

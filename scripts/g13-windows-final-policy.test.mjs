@@ -1,7 +1,42 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {WINDOWS_RENDER_JOBS,windowsFinalPaths,assertWindowsFinalLocation,validateWindowsRenderReport,validateWindowsG05BudgetSummary,windowsFinalPlan} from './g13-windows-final-policy.mjs';
+import {readFileSync} from 'node:fs';
+import {windowsRemainingPlan,validateWindowsRemainingConfig,windowsRemainingOutput,assertWindowsRemainingOutput,validateWindowsRemainingReuse} from './g13-windows-remaining-policy.mjs';
 const revision='a'.repeat(40);
+
+test('remaining plan adds exactly 196 untouched captures to the pinned 384, then all final gates',()=>{
+  const p=windowsRemainingPlan();assert.deepEqual(p.jobs.map(j=>[j.id,j.captures]),[['instances',96],['forward',24],['production',36],['ablation',40]]);
+  assert.equal(p.captures,196);assert.equal(p.reused.reduce((n,j)=>n+j.captures,0)+p.captures,580);assert.equal(p.reusedHyaProductionCaptures,30);
+  assert.deepEqual(p.jobs,WINDOWS_RENDER_JOBS.filter(j=>['instances','forward','production','ablation'].includes(j.id)));
+  assert.equal(p.following.length,4);assert.equal(p.automaticRetry,false);assert.equal(p.externalPublishPerformed,false);assert.equal(p.baselinePromoted,false);
+  p.jobs[0].args.push('--smoke');assert.equal(windowsRemainingPlan().jobs[0].args.includes('--smoke'),false);
+});
+const remainingConfig=()=>JSON.parse(readFileSync(new URL('../config/g13-windows-remaining.json',import.meta.url)));
+test('remaining source bindings cannot omit reports, hide overrides or escape artifact paths',()=>{
+  const c=remainingConfig();assert.equal(validateWindowsRemainingConfig(c),c);
+  for(const mutate of [x=>x.targetVersion='0.2.1',x=>x.captureRevision='bad',x=>x.checkout='../checkout',x=>x.sourceRun.sha256='bad',
+    x=>delete x.reports.rooms,x=>x.reports.forward=x.reports.rooms,x=>x.reports.rooms.file='../report.json',
+    x=>x.reports.rooms.file=x.reports.resources.file,x=>x.reports.rooms.captureRevision='f'.repeat(40),
+    x=>delete x.support.gamepad,x=>x.support.ime.file='C:/outside.json',x=>x.gpuLimit=.1]){const bad=structuredClone(c);mutate(bad);assert.throws(()=>validateWindowsRemainingConfig(bad));}
+  const out=windowsRemainingOutput(process.cwd(),'1793151130884-1234abcd');assert.equal(assertWindowsRemainingOutput(process.cwd(),out),out);
+  for(const p of [process.cwd(),out+'/checkout',out+'/../other'])assert.throws(()=>assertWindowsRemainingOutput(process.cwd(),p));
+});
+function remainingFixture(){
+  const c=remainingConfig(),reports={};for(const kind of ['resources','rooms','correctness']){const job=WINDOWS_RENDER_JOBS.find(j=>j.id===kind);reports[kind]={revision:c.captureRevision,dirty:false,status:kind==='rooms'?'failed':'passed',tier:kind==='correctness'?'full':'local-full',suite:kind,plan:new Array(job.captures),entries:Array.from({length:job.captures},()=>({status:'captured'}))};}
+  reports.rooms.assessment=g05Summary('rooms');reports.rooms.assessment.status='failed';Object.assign(reports.rooms.assessment.checks[0],{observed:4.1,passed:false});
+  const run={revision:c.captureRevision,dirty:false,status:'failed',reports:{resources:{...c.reports.resources,originalStatus:'passed'},rooms:{...c.reports.rooms,originalStatus:'failed'}}};
+  const support={roomDecision:{decision:'ADR0137-g05-moving-sparse256-cpu-investigation',status:'passed-adr0137-g05-prerequisite-only',captureRevision:c.captureRevision,originalReport:{sha256:c.reports.rooms.sha256}},correctnessAudit:{status:'passed-independent-correctness-audit',report:{sha256:c.reports.correctness.sha256},audit:{captures:224,pixelPairs:72}},hyaByteAudit:{status:'passed-independent-hya-byte-bindings',productionCaptures:new Array(30),rounds:new Array(3)},productionLauncher:{status:'passed-local-hya-production',originalGpuRegressionLimit:.05,independentlyAuditedCaptures:30},layout:{status:'passed',cohorts:new Array(27)},corpus:{status:'passed',rounds:new Array(3),unchangedDenominator:23},gamepad:{status:'passed-physical-gamepad',physicalInputAccepted:true,errors:[]},ime:{status:'passed-real-browser-ime',errors:[]}};
+  return {c,run,reports,support};
+}
+test('reuse prerequisites preserve the failed room status and reject missing physical/HYA/raw coverage',()=>{
+  const d=remainingFixture(),before=JSON.stringify(d),r=validateWindowsRemainingReuse(d.c,d.run,d.reports,d.support);assert.equal(r.releaseQualified,false);assert.equal(r.rooms.originalStatus,'failed');assert.equal(JSON.stringify(d),before);
+  for(const mutate of [x=>x.run.status='passed',x=>x.run.dirty=true,x=>x.reports.rooms.status='passed',x=>x.reports.correctness.entries.pop(),
+    x=>x.support.roomDecision.originalReport.sha256='0'.repeat(64),x=>x.support.correctnessAudit.audit.captures=223,
+    x=>x.support.hyaByteAudit.productionCaptures.pop(),x=>x.support.productionLauncher.originalGpuRegressionLimit=.1,
+    x=>x.support.layout.cohorts.pop(),x=>x.support.corpus.unchangedDenominator=22,x=>x.support.gamepad.physicalInputAccepted=false,
+    x=>x.support.ime.errors.push('composition failed')]){const bad=remainingFixture();mutate(bad);assert.throws(()=>validateWindowsRemainingReuse(bad.c,bad.run,bad.reports,bad.support));}
+});
 test('the Windows population keeps every full capture and separate Apple admission',()=>{
   const p=windowsFinalPlan();assert.equal(p.captures,580);assert.equal(p.jobs.length,7);assert.deepEqual(p.jobs.map(j=>j.captures),[4,156,96,24,36,40,224]);
   assert.equal(p.macQualified,false);assert.equal(p.iPhoneQualified,false);assert.equal(p.externalPublishPerformed,false);assert.equal(p.automaticRetry,false);
