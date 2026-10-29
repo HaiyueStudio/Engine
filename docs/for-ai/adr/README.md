@@ -167,3 +167,4 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0134：HYA 公开能力与组合合同](0134-hya-production-composition-contract.md)
 - [0135：按能力增长审查包体与 GUI 装配](0135-capability-growth-and-gui-assembly.md)
 - [0136：先推进 G12，真实输入保留后补](0136-g12-before-physical-input-acceptance.md)
+- [0137：0.2.2 动态 sparse-256 CPU 4 ms 作为调查项；原失败、全部样本及预热保持](0137-g05-moving-sparse256-cpu-investigation.md)

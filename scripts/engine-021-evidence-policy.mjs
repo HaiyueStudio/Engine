@@ -104,6 +104,9 @@ const check = (condition, message) => { if (!condition) throw Error(message); };
 const g05Kinds = ['rooms', 'instances', 'forward'];
 const policyFiles = new Set(['scripts/engine-021-evidence-policy.mjs', 'scripts/engine-021-evidence-policy.test.mjs',
   'scripts/check-engine-021-evidence.mjs']);
+// ADR 0137 names interpretation/receipt files only; none is a measurement input.
+const engine022AcceptanceFiles = new Set(['scripts/g13-windows-final-policy.mjs',
+  'scripts/g13-windows-final-policy.test.mjs', 'review/engine-0.2.2/g13-checks.json']);
 
 export function isEngine021ReadbackReuseBinding(kind, binding) {
   const pinned = ENGINE_021_READBACK_REUSE.reports[kind];
@@ -148,7 +151,8 @@ export function validateEngine021RevisionReuse(captureRevision, current, kind, b
   if (captureRevision === current.revision) return;
   const paths = current.reuseChanges?.[captureRevision];
   check(Array.isArray(paths), 'Missing verified Git comparison for capture revision');
-  if (paths.every(acceptancePath)) return;
+  if (paths.every(path => acceptancePath(path) || current.targetVersion === '0.2.2'
+    && safePath(path) && engine022AcceptanceFiles.has(path))) return;
   check(captureRevision === ENGINE_021_READBACK_REUSE.captureRevision && isEngine021ReadbackReuseBinding(kind, binding),
     'Evidence reuse requires new sampling after non-acceptance change; this is not an ADR 0129 pinned population');
   check(reuseDecision === ENGINE_021_READBACK_REUSE.decision, 'ADR 0129 requires its explicit manifest decision');
@@ -165,6 +169,7 @@ export function validateEngine021RevisionReuse(captureRevision, current, kind, b
 /** Identity checks precede independent raw-artifact audits; summary status alone never qualifies a bundle. */
 export function validateEngine021EvidenceBindings(manifest, reports, current) {
   check(manifest?.schemaVersion === 2 && manifest.contractId === 'engine-021-evidence-v2', 'Unknown qualification manifest');
+  if (current.targetVersion !== undefined) validateEvidenceTargetVersion(manifest, current.targetVersion);
   check(manifest.reuseDecision === undefined || [ENGINE_021_READBACK_REUSE.decision, ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision), 'Unknown evidence reuse decision');
   check(/^[a-f0-9]{40}$/.test(current.revision) && current.dirty === false && manifest.revision === current.revision,
     'Qualification requires the current clean revision');
@@ -216,13 +221,25 @@ export function validateEngine021CompiledEvidence(reports, builds) {
   }
 }
 
+export const ENGINE_022_SPARSE256_CPU_DECISION = 'ADR0137-g05-moving-sparse256-cpu-investigation';
+
+function isMovingSparse256CpuCheck(kind, c, targetVersion) {
+  const job = c.job;
+  return targetVersion === '0.2.2' && kind === 'rooms' && c.metric === 'cpuP95Ms' && c.limit === 4
+    && job?.suite === 'rooms' && job.caseId === 'sparse-256' && job.moving === true && job.algorithm === 'tiled'
+    && ['chrome-windows', 'edge-windows'].includes(job.browserId) && job.preference === 'high-performance'
+    && job.full === true && job.idleMs === 0 && job.cohort === 0;
+}
+
 /** Consume only a complete independent raw audit; original measurement status remains unchanged. */
-export function assessEngine021G05Audit(kind, audit) {
+export function assessEngine021G05Audit(kind, audit, targetVersion = '0.2.1') {
+  check(['0.2.1', '0.2.2'].includes(targetVersion), 'Unknown G05 acceptance target version');
   const shape = { rooms: [156, 60, 156, 156], instances: [96, 96, 192, 0], forward: [24, 8, 16, 0] }[kind];
   check(shape && ['passed', 'failed'].includes(audit?.status) && audit.cleanCandidate === true && audit.captures === shape[0] &&
     audit.checks?.length === shape[1] && audit.stability?.length === shape[2] && audit.memory?.length === shape[3],
     `${kind}: incomplete independent G05 audit`);
   const cpuRegressionInvestigations = [];
+  const cpuAbsoluteInvestigations = [], roomCpuBrowsers = new Set();
   for (const c of audit.checks) {
     check(Number.isFinite(c.observed) && c.observed >= 0 && Number.isFinite(c.limit) && c.limit > 0 &&
       c.passed === (c.observed <= c.limit) && (kind !== 'forward' || c.limit === 1.05),
@@ -232,10 +249,16 @@ export function assessEngine021G05Audit(kind, audit) {
     // original 1.05 line, measured values and failed checks remain in the audit.
     if (kind === 'forward' && c.metric === 'cpuP95Ratio') {
       if (!c.passed) cpuRegressionInvestigations.push(c);
+    } else if (isMovingSparse256CpuCheck(kind, c, targetVersion)) {
+      check(!roomCpuBrowsers.has(c.job.browserId), 'rooms: duplicate dynamic sparse-256 CPU check');
+      roomCpuBrowsers.add(c.job.browserId);
+      if (!c.passed) cpuAbsoluteInvestigations.push(c);
     } else check(c.passed, `${kind}: original performance budget failed`);
   }
   if (kind === 'forward') check(audit.checks.filter(c => c.metric === 'cpuP95Ratio').length === 4 &&
     audit.checks.filter(c => c.metric === 'gpuP95Ratio').length === 4, 'forward: incomplete CPU/GPU coverage');
+  if (targetVersion === '0.2.2' && kind === 'rooms') check(roomCpuBrowsers.size === 2,
+    'rooms: complete dynamic sparse-256 CPU browser coverage required');
   for (const m of audit.memory) check(m.status === 'passed' && m.checks?.length > 0 && m.checks.every(c =>
     c.passed === true && Number.isFinite(c.observed) && c.observed >= 0 && Number.isFinite(c.limit) && c.limit > 0 && c.observed <= c.limit),
     `${kind}: original resource budget failed`);
@@ -244,20 +267,23 @@ export function assessEngine021G05Audit(kind, audit) {
     Number.isFinite(s.relativeSpread) && s.relativeSpread >= 0 && Number.isFinite(s.cv) && s.cv >= 0,
     `${kind}: incomplete stability evidence`);
   const warnings = audit.stability.filter(s => !s.stable);
-  check(audit.status === (warnings.length || cpuRegressionInvestigations.length ? 'failed' : 'passed'), `${kind}: inconsistent original audit status`);
+  check(audit.status === (warnings.length || cpuRegressionInvestigations.length || cpuAbsoluteInvestigations.length ? 'failed' : 'passed'), `${kind}: inconsistent original audit status`);
   return { status: 'passed', originalStatus: audit.status, performanceChecks: audit.checks.length,
-    hardPerformanceChecks: kind === 'forward' ? 4 : audit.checks.length,
-    stabilityChecks: audit.stability.length, warnings, cpuRegressionInvestigations,
-    scope: 'ADR 0126/0127 prerequisite only. Cohort variation and Forward CPU 5% excess are investigated. GPU 5%, other budgets, complete production, resources, correctness and release evidence remain required.' };
+    hardPerformanceChecks: kind === 'forward' ? 4 : audit.checks.length - roomCpuBrowsers.size,
+    stabilityChecks: audit.stability.length, warnings, cpuRegressionInvestigations, cpuAbsoluteInvestigations,
+    ...(targetVersion === '0.2.2' && kind === 'rooms' ? { acceptanceDecision: ENGINE_022_SPARSE256_CPU_DECISION } : {}),
+    scope: 'ADR 0126/0127 prerequisite only. Cohort variation and Forward CPU 5% excess are investigated. '
+      + (targetVersion === '0.2.2' ? 'ADR 0137 additionally investigates only Windows moving tiled sparse-256 CPU 4 ms. ' : '')
+      + 'GPU 5%, other budgets, complete production, resources, correctness and release evidence remain required.' };
 }
 
-export function completeEngine021EvidenceAudit(audits, reports) {
+export function completeEngine021EvidenceAudit(audits, reports, targetVersion = '0.2.1') {
   check(same(Object.keys(audits).sort(), [...ENGINE_021_EVIDENCE_KINDS].sort()), 'Missing raw-artifact audit');
   const assessments = {};
   for (const kind of ENGINE_021_EVIDENCE_KINDS) {
     if (g05Kinds.includes(kind)) {
       check(reports?.[kind]?.status === audits[kind]?.status, `${kind}: stored and recalculated original status differ`);
-      assessments[kind] = assessEngine021G05Audit(kind, audits[kind]);
+      assessments[kind] = assessEngine021G05Audit(kind, audits[kind], targetVersion);
     } else check(audits[kind]?.status === 'passed', `${kind}: independent raw-artifact audit did not pass`);
   }
   return { status: 'passed', audited: [...ENGINE_021_EVIDENCE_KINDS], assessments, g09Complete: false, releaseQualified: false,

@@ -39,7 +39,7 @@ for (const kind of ENGINE_021_EVIDENCE_KINDS) {
 const productionConfig = JSON.parse(await readFile(resolve(root, 'config/framegraph-production-021.json')));
 const lightingConfig = JSON.parse(await readFile(resolve(root, 'config/lighting-continuous-021.json')));
 const lightingInputs = await lightingContinuousEvidenceInputs(root, lightingConfig);
-const current = { revision: git(['rev-parse', 'HEAD']), dirty: !!git(['status', '--porcelain']),
+const current = { targetVersion, revision: git(['rev-parse', 'HEAD']), dirty: !!git(['status', '--porcelain']),
   runtime: await deferredRuntimeFingerprint(root), productionConfig, lightingConfig, qualification: await loadFrameGraphQualification(root),
   framegraphBaselineRevision: JSON.parse(await readFile(resolve(root, 'review/engine-0.2.1/g09/dependency-baseline.json'))).revision,
   inputs: { production: await productionEvidenceInputs(root), resources: await studyEvidenceInputs(root, 'resources'),
@@ -84,7 +84,7 @@ audits.production = await auditProductionReport(reports.production, readers.prod
 for (const kind of ['resources', 'ablation']) audits[kind] = await auditFrameGraphStudy(reports[kind], readers[kind]);
 const budget = await readFile(resolve(root, lightingConfig.frozenBudget.path));
 for (const kind of ['rooms', 'instances', 'forward']) audits[kind] = await auditG05ContinuousReport(reports[kind], readers[kind], budget);
-const result = completeEngine021EvidenceAudit(audits, reports);
+const result = completeEngine021EvidenceAudit(audits, reports, targetVersion);
 // Rebuild candidate executable chunks instead of trusting archived build summaries.
 // Four entries cover all seven reports; common is shared by correctness and G05.
 const auditDirectory = resolve(dirname(resolve(root, manifestPath)), `qualification-audit-${new Date().toISOString().replaceAll(':', '-')}`);

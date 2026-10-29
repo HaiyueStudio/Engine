@@ -31,7 +31,7 @@ export function validateWindowsRenderReport(job,report,revision){
 export function validateWindowsG05BudgetSummary(job,report){
   if(!['rooms','instances','forward'].includes(job.id))throw Error('A G05 summary is required');
   if(report.assessment?.status!==report.status)throw Error(job.id+': original summary status differs');
-  return assessEngine021G05Audit(job.id,report.assessment);
+  return assessEngine021G05Audit(job.id,report.assessment,'0.2.2');
 }
 export function windowsFinalPlan(){return {version:'0.2.2',scope:'Windows qualification only; Apple device requirements remain pending',jobs:WINDOWS_RENDER_JOBS,captures:WINDOWS_RENDER_JOBS.reduce((n,j)=>n+j.captures,0),
   hyaProduction:{captures:30,originalGpuRegressionLimit:.05},

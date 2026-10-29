@@ -14,6 +14,67 @@ function g05Audit(kind) {
     memory: Array.from({ length: memory }, () => ({ status: 'passed', checks: [{ passed: true, observed: 1, limit: 2 }] })) };
 }
 
+function movingSparse256Audit() {
+  const audit = g05Audit('rooms');
+  for (const [i, browserId] of ['chrome-windows', 'edge-windows'].entries()) audit.checks[i] = {
+    metric: 'cpuP95Ms', observed: i ? 3.745 : 4.1, limit: 4, passed: i !== 0,
+    job: { suite: 'rooms', cohort: 0, browserId, caseId: 'sparse-256', moving: true,
+      algorithm: 'tiled', preference: 'high-performance', full: true, idleMs: 0 },
+  };
+  audit.status = 'failed';
+  return audit;
+}
+
+test('ADR 0137 admits only the named 0.2.2 CPU line and preserves the original failure', () => {
+  const audit = movingSparse256Audit(), original = JSON.stringify(audit);
+  assert.throws(() => assessEngine021G05Audit('rooms', audit), /original performance budget/);
+  assert.throws(() => assessEngine021G05Audit('rooms', audit, '0.2.1'), /original performance budget/);
+  assert.throws(() => assessEngine021G05Audit('rooms', audit, '0.2.3'), /target version/);
+  const accepted = assessEngine021G05Audit('rooms', audit, '0.2.2');
+  assert.equal(accepted.status, 'passed'); assert.equal(accepted.originalStatus, 'failed');
+  assert.equal(accepted.hardPerformanceChecks, 58);
+  assert.equal(accepted.acceptanceDecision, 'ADR0137-g05-moving-sparse256-cpu-investigation');
+  assert.deepEqual(accepted.cpuAbsoluteInvestigations, [audit.checks[0]]);
+  assert.equal(JSON.stringify(audit), original);
+  const data = fixture(); data.audits.rooms = audit; data.reports.rooms.status = 'failed';
+  assert.throws(() => completeEngine021EvidenceAudit(data.audits, data.reports), /original performance budget/);
+  assert.equal(completeEngine021EvidenceAudit(data.audits, data.reports, '0.2.2').releaseQualified, false);
+});
+
+test('ADR 0137 cannot waive another workload, algorithm, timing channel, limit or malformed raw check', () => {
+  for (const mutate of [
+    c => c.job.caseId = 'sparse-128', c => c.job.moving = false, c => c.job.algorithm = 'reference',
+    c => c.job.suite = 'instances', c => c.job.browserId = 'safari-macos', c => c.job.preference = 'low-power',
+    c => c.job.full = false, c => c.job.idleMs = 120000, c => c.job.cohort = 1, c => delete c.job,
+    c => c.metric = 'gpuP95Ms', c => c.metric = 'frameWallP95Ms', c => c.metric = 'cpuRecordMs',
+    c => c.limit = 3.9, c => c.observed = NaN, c => c.observed = Infinity, c => c.passed = true,
+  ]) { const audit = movingSparse256Audit(); mutate(audit.checks[0]); assert.throws(() => assessEngine021G05Audit('rooms', audit, '0.2.2')); }
+  for (const mutate of [
+    a => { a.checks[2] = {metric:'gpuP95Ms', observed:12.1, limit:12, passed:false}; },
+    a => { a.checks[2] = {metric:'frameWallP95Ms', observed:17, limit:16.666666666666668, passed:false}; },
+    a => { a.memory[0].status = 'failed'; }, a => { a.checks.pop(); }, a => { a.captures--; },
+    a => { a.checks[1].job.browserId = 'chrome-windows'; }, a => { delete a.checks[1].job; },
+    a => { a.cleanCandidate = false; }, a => { a.status = 'passed'; },
+  ]) { const audit = movingSparse256Audit(); mutate(audit); assert.throws(() => assessEngine021G05Audit('rooms', audit, '0.2.2')); }
+  const edge = movingSparse256Audit(); Object.assign(edge.checks[1], {observed:4.2, passed:false});
+  assert.equal(assessEngine021G05Audit('rooms', edge, '0.2.2').cpuAbsoluteInvestigations.length, 2);
+});
+
+test('ADR 0137 names only 0.2.2 interpretation receipts; runtime and sampling edits still require new captures', () => {
+  const old = 'e'.repeat(40), current = {revision:'a'.repeat(40),targetVersion:'0.2.2',reuseChanges:{[old]:[
+    'scripts/g13-windows-final-policy.mjs','scripts/g13-windows-final-policy.test.mjs',
+    'review/engine-0.2.2/g13-checks.json','docs/for-ai/adr/0137-g05-moving-sparse256-cpu-investigation.md',
+  ]}};
+  assert.doesNotThrow(() => validateEngine021RevisionReuse(old,current));
+  for(const targetVersion of [undefined,'0.2.1','0.2.3'])assert.throws(() => validateEngine021RevisionReuse(old,{...current,targetVersion}),/non-acceptance change/);
+  for(const path of ['engine/src/frame/DeferredLightTable.ts','scripts/webgpu-gate/deferred-g05-room-fixture.mjs',
+    'config/lighting-continuous-021.json','config/lighting-performance-021.json','package-lock.json',
+    'review/engine-0.2.2/g04-checks.json','scripts/run-g13-windows-final.mjs'])assert.throws(() =>
+      validateEngine021RevisionReuse(old,{...current,reuseChanges:{[old]:[...current.reuseChanges[old],path]}}),/non-acceptance change/);
+  const data=fixture();data.current.targetVersion='0.2.2';
+  assert.throws(()=>validate(data),/target version/);data.manifest.targetVersion='0.2.2';assert.doesNotThrow(()=>validate(data));
+});
+
 function fixture() {
   const revision = 'a'.repeat(40), runtime = { sha256: 'b'.repeat(64), fileCount: 100 };
   const current = { revision, dirty: false, runtime, framegraphBaselineRevision: 'c'.repeat(40),
