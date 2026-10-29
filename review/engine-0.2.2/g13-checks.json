@@ -438,7 +438,7 @@
       "retainedInvestigationCaptures": 15
     },
     "windowsFinal": {
-      "status": "failed-rooms-cpu-absolute-budget",
+      "status": "g05-prerequisite-reassessed-remaining-validation-pending",
       "launcher": {
         "path": "scripts/start-g13-windows-final.cmd",
         "sha256": "5b2492765e741bc8a473415b1bf5a8e18cf1b7e03528f75446ff4fb9f87d73b8"
@@ -559,7 +559,11 @@
         },
         "captures": 224
       },
-      "remainingRendererCaptures": 196
+      "remainingRendererCaptures": 196,
+      "g05Interpretation": {
+        "file": "artifacts/engine-0.2.2/g13/adr0137-rooms-1793237553903/result.json",
+        "sha256": "5195c0de7631dcbc0f4c773f82b67b2702d0668a3c686d503091e69da377464e"
+      }
     },
     "lightLifetimeRepair": {
       "status": "applied-and-validated-formal-candidate-qualification-pending",
@@ -753,7 +757,7 @@
       }
     },
     "currentCandidateCpuInvestigation": {
-      "status": "unresolved-formal-hard-budget",
+      "status": "investigation-not-blocking-under-adr0137",
       "audit": {
         "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/independent-partial-audit.json",
         "sha256": "7c979a62dd3db8d3e3db28720cdc40d90724441a0fd1b2a6ac77ba7e4e8b935a"
@@ -880,7 +884,70 @@
         "gpuWarmupFrames": 120,
         "protocolChanged": false,
         "explanation": "Longer CPU warmup lowers tiled P95 but raises reference P95 on both browsers; no shared correction or formal acceptance inferred."
-      }
+      },
+      "acceptanceDecision": "ADR0137-g05-moving-sparse256-cpu-investigation"
+    },
+    "movingSparse256CpuInterpretation": {
+      "status": "passed-adr0137-g05-prerequisite-only",
+      "decision": "ADR0137-g05-moving-sparse256-cpu-investigation",
+      "adr": {
+        "path": "docs/for-ai/adr/0137-g05-moving-sparse256-cpu-investigation.md",
+        "sha256": "da626295b0cdb0ab0ef2c54cb92530dd94b0170d8e8fcf2f39e3411866ace1c2"
+      },
+      "assessment": {
+        "file": "artifacts/engine-0.2.2/g13/adr0137-rooms-1793237553903/result.json",
+        "sha256": "5195c0de7631dcbc0f4c773f82b67b2702d0668a3c686d503091e69da377464e"
+      },
+      "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+      "acceptanceRevision": "7acd3e6c448c4740db13dad298168d9ffa6fcea9",
+      "originalReport": {
+        "file": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/checkout/artifacts/engine-0.2.1/g05/continuous-rooms-2026-10-28T12-45-54.933Z/report.json",
+        "sha256": "e40d32391440886a1aea899e943716ba24ff9be81a770cd0c9a617629d0610c6",
+        "status": "failed"
+      },
+      "originalRun": {
+        "file": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/result.json",
+        "sha256": "9c8ec531387e16c52ab4edb18d75ffa3a50e773694f9c84ebc9cf6de354c4098",
+        "status": "failed"
+      },
+      "rawCaptures": 156,
+      "cpuSamplesInAffectedComparison": 900,
+      "hardPerformanceChecks": 58,
+      "cpuAbsoluteInvestigations": [
+        {
+          "job": {
+            "suite": "rooms",
+            "cohort": 0,
+            "browserId": "chrome-windows",
+            "caseId": "sparse-256",
+            "moving": true,
+            "algorithm": "tiled",
+            "preference": "high-performance",
+            "full": true,
+            "idleMs": 0
+          },
+          "metric": "cpuP95Ms",
+          "observed": 4.100000023841858,
+          "limit": 4,
+          "passed": false
+        }
+      ],
+      "sampling": {
+        "warmupFrames": 120,
+        "cpuSamples": 300,
+        "gpuSamples": 300,
+        "cohorts": 3,
+        "interCaseIdleMs": 0,
+        "dropSlowSamples": false,
+        "retry": false
+      },
+      "rebuiltChunks": 4,
+      "originalBudgetChanged": false,
+      "originalReportChanged": false,
+      "originalSamplesChanged": false,
+      "allOtherBudgetsUnchanged": true,
+      "default021InterpretationUnchanged": true,
+      "fullG13Complete": false
     }
   },
   "preservedFailures": {
@@ -942,30 +1009,22 @@
     }
   },
   "currentBlocker": {
-    "id": "rooms-sparse-256-cpu-absolute-budget",
-    "status": "failed",
-    "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
-    "browser": "chrome-windows",
-    "caseId": "sparse-256",
-    "moving": true,
-    "metric": "cpuP95Ms",
-    "observed": 4.100000023841858,
-    "limit": 4,
-    "sourceSamples": 900,
-    "rawSamplesDropped": false,
-    "allOtherRoomPerformanceChecksPassed": 59,
-    "memoryCapturesPassed": 156,
+    "id": "remaining-renderer-groups-and-global-validation",
+    "status": "pending",
+    "remainingRendererCaptures": 196,
+    "cpuDecision": "ADR0137-g05-moving-sparse256-cpu-investigation",
+    "originalFailedWindowsRunRetained": true,
     "currentCandidateImePassed": true,
     "currentCandidateGamepadPassed": true,
-    "currentHyaProductionPassed": true,
-    "correctnessSupplementStatus": "passed-correctness-supplement",
-    "originalReportsModified": false,
-    "lightLifetimeRepairApplied": true
+    "currentCandidateHyaProductionPassed": true,
+    "currentCandidateCorrectnessPassed": 224,
+    "globalGatePassed": false,
+    "rehearsalPassed": false
   },
   "remaining": [
-    "Resolve Chrome moving sparse-256 CPU pooled P95 4.10 ms against unchanged 4 ms; preserve both original Windows failures",
-    "Complete outstanding renderer groups and full global gate plus no-publication rehearsal under explicit candidate/hash binding",
-    "Physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver"
+    "Complete 196 remaining captures: instances 96, Forward 24, production 36, ablation 40; all unchanged hard requirements remain",
+    "Complete the independent seven-report audit, global gate and no-publication rehearsal under current clean candidate/input/build-byte binding",
+    "Align Games/Native candidate packages after Windows qualification; physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver remain pending"
   ],
   "publishing": {
     "executed": false,
@@ -1065,5 +1124,26 @@
       "path": "artifacts/engine-0.2.2/g13/packages-handoff-compact/public-packages.json",
       "sha256": "4dda28853d2808ea0c5ea8d1edfc79dd35ead99b4f61e2f305f23c9b34f58527"
     }
+  },
+  "preAdr0137Blocker": {
+    "id": "rooms-sparse-256-cpu-absolute-budget",
+    "status": "failed",
+    "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+    "browser": "chrome-windows",
+    "caseId": "sparse-256",
+    "moving": true,
+    "metric": "cpuP95Ms",
+    "observed": 4.100000023841858,
+    "limit": 4,
+    "sourceSamples": 900,
+    "rawSamplesDropped": false,
+    "allOtherRoomPerformanceChecksPassed": 59,
+    "memoryCapturesPassed": 156,
+    "currentCandidateImePassed": true,
+    "currentCandidateGamepadPassed": true,
+    "currentHyaProductionPassed": true,
+    "correctnessSupplementStatus": "passed-correctness-supplement",
+    "originalReportsModified": false,
+    "lightLifetimeRepairApplied": true
   }
 }
