@@ -1001,7 +1001,7 @@
     },
     "stage9SelectiveAdmission": {
       "decision": "ADR0138-selective-gui-bundle-admission",
-      "status": "applied-focused-checks-passed-global-pending",
+      "status": "passed-complete-global-gate",
       "artifactAudit": {
         "path": "artifacts/engine-0.2.2/g13/stage9-admission-proposal/artifact-content-audit.json",
         "sha256": "35eaeab8304f714dc89a8251c1ccfa8e3eb8a2d053a8f38a2bfa9a98a12d578e"
@@ -1016,6 +1016,42 @@
       "preparedPointer": "artifacts/engine-0.2.2/g13/windows-gates-prepared.json",
       "newRendererCaptures": 0,
       "reusedRendererCaptures": 580
+    },
+    "windowsGlobal": {
+      "status": "passed",
+      "revision": "95ffbb4b1cacdfdde21e8be6be50961619bcc3df",
+      "gate": {
+        "path": "artifacts/engine-0.2.2/g13/windows-gates-1793254174121-884c75c3/global-gate.json",
+        "sha256": "692a080a59dadfeed4225ea486ca71e0ba0ed6ab1ea8c360041459f58f169073"
+      },
+      "stdout": {
+        "path": "artifacts/engine-0.2.2/g13/windows-gates-1793254174121-884c75c3/global-gate.stdout.log",
+        "sha256": "d3a9d24d32c6d0cf29841744b02230dcad5b990bc6781240895b788047b190d7"
+      },
+      "stderr": {
+        "path": "artifacts/engine-0.2.2/g13/windows-gates-1793254174121-884c75c3/global-gate.stderr.log",
+        "sha256": "5ee3af17acaa0426b195100fcc8d4ada1e0ea8b46be61a7de87ee617e41057e7"
+      },
+      "sevenReportAudit": {
+        "path": "artifacts/engine-0.2.2/g13/windows-gates-1793254174121-884c75c3/seven-report-audit.stdout.log",
+        "sha256": "8825d7dfed14cf1879a832dfc01a507b2c653465f922def1b5c4ac49561ed75f"
+      },
+      "reusedRendererCaptures": 580,
+      "newRendererCaptures": 0,
+      "originalRunStatus": "failed",
+      "originalRun": {
+        "path": "artifacts/engine-0.2.2/g13/windows-gates-1793254174121-884c75c3/result.json",
+        "sha256": "403cbf04d12efce520300b13b94272aa49752f25884a78e2405f0e65f512d0c8"
+      },
+      "rehearsal": {
+        "status": "failed-before-commands",
+        "reason": "Missing docs/engine-guide/release-notes-0.2.2.md",
+        "failureLog": {
+          "path": "artifacts/engine-0.2.2/g13/windows-gates-1793254174121-884c75c3/rehearsal.stderr.log",
+          "sha256": "c7ae865e574949c82e75d4960822663c6a5bdef76287f8ae91445c8cdcd6eae9"
+        }
+      },
+      "allFourPackageBytesMatchQualifiedCandidate": true
     }
   },
   "preservedFailures": {
@@ -1077,16 +1113,15 @@
     }
   },
   "currentBlocker": {
-    "id": "complete-global-gate-and-rehearsal-after-adr0138",
+    "id": "release-rehearsal-after-release-notes",
     "status": "pending",
     "remainingRendererCaptures": 0,
-    "originalGlobalFailureRetained": true,
-    "globalGatePassed": false,
+    "globalGatePassed": true,
     "rehearsalPassed": false,
     "fullG13Complete": false
   },
   "remaining": [
-    "Complete fresh four-runtime rebuild and hash-bound reuse of all 580 renderer captures; rerun complete global gate and no-publication rehearsal under ADR 0138",
+    "Complete no-publication rehearsal after adding the missing 0.2.2 candidate notes; preserve original failure and bind documentation-only reuse to exact hashes",
     "Align Games/Native candidate packages after Windows qualification; physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver remain pending"
   ],
   "publishing": {
