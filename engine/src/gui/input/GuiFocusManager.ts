@@ -1,5 +1,6 @@
+import {isGuiControl} from '../GuiControlIdentity';
 import {GuiElement} from '../components/GuiElement';
-import {GuiModal} from '../components/GuiModal';
+import {type GuiModal} from '../components/GuiModal';
 import {isGuiLayoutHidden} from '../GuiLayoutState';
 import type {GuiRect} from '../GuiTypes';
 import {guiDirectionalTarget} from './GuiNavigation';
@@ -34,7 +35,7 @@ export class GuiFocusManager {
     const visible: GuiModal[] = [];
     const visit = (node: GuiElement): void => {
       if (!this.active(node)) return;
-      if (node instanceof GuiModal) visible.push(node);
+      if (isGuiControl<GuiModal>(node, 'GuiModal')) visible.push(node);
       for (const child of node.children) visit(child);
     };
     for (const root of this.roots) visit(root);

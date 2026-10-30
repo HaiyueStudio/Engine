@@ -1,3 +1,4 @@
+import terser from '@rollup/plugin-terser';
 import {
   cleanOutputDirectory,
   haiyueExternal,
@@ -7,6 +8,13 @@ import {
 
 export default {
   input: {
+    layout: 'src/layout.ts',
+    'gui-layout': 'src/gui-layout.ts',
+    'hya-player': 'src/hya-player.ts',
+    'hya-text': 'src/hya-text.ts',
+    'hya-layout': 'src/hya-layout.ts',
+    'hya-data': 'src/hya-data.ts',
+    'hya-audio': 'src/hya-audio.ts',
     index: 'src/index.ts',
     gltf: 'src/gltf.ts',
     spine: 'src/spine.ts',
@@ -32,6 +40,6 @@ export default {
     'internal/2d-ui-shader-artifact': 'src/shaders/generated/2d-ui-artifact.generated.ts',
   },
   output: libraryOutput(),
-  external: haiyueExternal({ packages: ['@haiyue/engine', '@haiyue/animation-spec'] }),
-  plugins: [cleanOutputDirectory(), ...haiyuePlugins({ commonjsInterop: false })],
+  external: haiyueExternal({ packages: ['@haiyue/engine', '@haiyue/animation-spec', 'opentype.js'] }),
+  plugins: [cleanOutputDirectory(), ...haiyuePlugins({ commonjsInterop: false }), terser({maxWorkers:1,compress:false,mangle:true,keep_classnames:true,keep_fnames:true,format:{comments:"some"}})],
 };

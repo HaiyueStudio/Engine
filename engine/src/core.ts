@@ -1,3 +1,4 @@
+export type { RegionUpdateMode, RenderRegionOptions, RenderRegion } from './core/RenderRegion';
 export { HaiyueEngine } from './core/Engine';
 export type { HaiyueEngineEventMap, HaiyueEngineOptions } from './core/Engine';
 export { EngineEvent, EventEmitter } from './core/EventEmitter';

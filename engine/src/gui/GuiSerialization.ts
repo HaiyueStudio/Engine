@@ -662,7 +662,7 @@ function validateScalar(value: unknown, path: string): void {
 function validateStyle(value: unknown, path: string): void {
   const style = recordAt(value, path);
   for (const [key, item] of Object.entries(style)) {
-    if (key === 'backgroundColor' || key === 'hoverBackgroundColor' || key === 'borderColor' || key === 'color' || key === 'hoverColor') {
+    if (key === 'cursor' || key === 'backgroundColor' || key === 'hoverBackgroundColor' || key === 'borderColor' || key === 'color' || key === 'hoverColor') {
       if (typeof item !== 'string') invalidGuiData(`GUI style ${key} must be a string.`, `${path}.${key}`);
     } else if (key === 'opacity' || key === 'radius' || key === 'padding') {
       if (typeof item !== 'number' || !Number.isFinite(item)) invalidGuiData(`GUI style ${key} must be a finite number.`, `${path}.${key}`);

@@ -5,6 +5,8 @@ import {
   safeExpressionDataResources,
   type AnimationAudioComponent,
   type AnimationComponent,
+  type AnimationImageResource,
+  type AnimationBinaryResource,
   type AnimationComposite,
   type AnimationCompositeLayer,
   type AnimationLayerEffect,
@@ -35,6 +37,7 @@ import {
   type VectorStrokePathComponent,
 } from './AnimationPathTessellator.js';
 import { AnimationVisual2D } from './AnimationVisual2D.js';
+import {AnimationMaskSources} from './AnimationMaskSources.js';
 import { AnimationTextRasterizer, type AnimationOutlineFont } from './AnimationTextRasterizer.js';
 import { loadAnimationOutlineFont } from './AnimationOpenType.js';
 import { AnimationAudioClip } from './AnimationAudioClip.js';
@@ -71,7 +74,7 @@ type CoreVisualComponent =
   | VectorPathMorphComponent
   | VectorStrokePathComponent;
 
-interface DeferredCoreVisual {
+export interface DeferredCoreVisual {
   readonly component: CoreVisualComponent;
   readonly componentIndex: number;
   readonly order: number;
@@ -80,6 +83,20 @@ interface DeferredCoreVisual {
   readonly effects: readonly Readonly<AnimationLayerEffect>[] | undefined;
 }
 
+/** Optional production byte/materialization adapter; the legacy default loader remains unchanged. */
+export interface Animation2DCoreResourcePort {
+  loadTexture(resource: Readonly<AnimationImageResource>, signal: AbortSignal): Promise<AssetHandle<GPUTexture>>;
+  loadBinary(resource: Readonly<AnimationBinaryResource>, signal: AbortSignal): Promise<AssetHandle<ArrayBuffer>>;
+  loadExpressionData(resource: Readonly<AnimationBinaryResource>, signal: AbortSignal): Promise<AssetHandle<unknown>>;
+}
+export function parseAnimationCoreExpressionData(bytes: ArrayBuffer): unknown {
+  if (bytes.byteLength > 1024 * 1024) throw new Error('Expression data exceeds the 1 MiB limit.');
+  return JSON.parse(new TextDecoder().decode(bytes)) as unknown;
+}
+export type AnimationCoreResourceKind = 'image' | 'font' | 'expression-data';
+const completeCoreResource = (): void => {};
+/** Preserve synchronous request creation while observing legacy loaders that throw before returning a promise. */
+function captureCoreAssetRequest<T>(request: () => Promise<T>): Promise<T> {try {return request();} catch (error) {return Promise.reject(error);}}
 let nextRuntimeInstanceId = 1;
 
 export interface Animation2DRuntimeNode {
@@ -115,6 +132,7 @@ export class Animation2DRuntime {
     state: 'loading' | 'loaded' | 'failed';
     readonly rasterizers: Set<AnimationTextRasterizer>;
     outlineFont?: AnimationOutlineFont;
+    nativeFamily?: string;
   }>();
   private readonly _fontFaces: FontFace[] = [];
   private readonly _expressionDataLoads = new Map<string, {
@@ -154,6 +172,7 @@ export class Animation2DRuntime {
     runtimeExtensions?: Animation2DExtensionRegistry,
     private readonly _assetManager?: AssetManager,
     private readonly _nodeOverrides: ReadonlyMap<string, Animation2DNodeOverride> = new Map(),
+    private readonly _coreResources?: Animation2DCoreResourcePort,
   ) {
     for (const id of _animation.extensionsRequired) {
       if (id === HYA_STATE_MACHINE_EXTENSION_ID) continue;
@@ -170,6 +189,8 @@ export class Animation2DRuntime {
     owner.addChild(this._root);
 
     const compositeSources = new Set(_animation.nodes.flatMap(node => compositeLayers(node.composite).map(layer => layer.source)));
+    const knownNodes = new Set(_animation.nodes.map(node => node.id));
+    if (compositeSources.size) this._root.addComponent(new AnimationMaskSources([...compositeSources].filter(id => knownNodes.has(id)).map(id => `${this._instanceId}:${id}`)));
     const sourceGroupByNode = resolveSourceGroups(_animation.nodes, compositeSources);
     const compositeByNode = resolveInheritedComposites(_animation.nodes, sourceGroupByNode);
     const effectsByNode = resolveInheritedEffects(_animation.nodes, sourceGroupByNode);
@@ -396,7 +417,7 @@ export class Animation2DRuntime {
     this._abortController.abort();
     for (const handle of this._assetHandles) handle.release();
     this._assetHandles.length = 0;
-    if (typeof document !== 'undefined' && document.fonts) {
+    if (this._fontFaces.length && typeof document !== 'undefined' && document.fonts) {
       for (const face of this._fontFaces) document.fonts.delete(face);
     }
     this._fontFaces.length = 0;
@@ -425,16 +446,25 @@ export class Animation2DRuntime {
     }
   }
 
+  /** Production observes the original requests; the ordinary runtime keeps its established policy and counters. */
+  protected _coreResourceStarted(_kind: AnimationCoreResourceKind, _id: string): () => void {return completeCoreResource;}
+  protected _coreResourceFailed(_kind: AnimationCoreResourceKind, _id: string, _error: unknown, _hostMissing = false): void {}
+
+  protected get _materializeCoreImages(): boolean {return true;}
+
   private _loadTexture(resourceId: string, apply: (handle: AssetHandle<GPUTexture>) => void): void {
+    if(!this._materializeCoreImages)return;
     const resource = this._animation.resources.find(candidate => candidate.id === resourceId);
-    if (!resource || resource.type !== 'image' || !this._assetManager) {
+    if (!resource || resource.type !== 'image' || !this._assetManager && !this._coreResources) {
       this._failedResourceCount++;
+      this._coreResourceFailed('image', resourceId, new Error('Core image resource or AssetManager is unavailable'), !!resource && resource.type === 'image' && !this._assetManager && !this._coreResources);
       return;
     }
     this._pendingResourceCount++;
+    const complete = this._coreResourceStarted('image', resourceId);
     let request: Promise<AssetHandle<GPUTexture>>;
     try {
-      request = this._assetManager.loadTexture(resource.uri, {
+      request = this._coreResources ? this._coreResources.loadTexture(resource, this._abortController.signal) : this._assetManager!.loadTexture(resource.uri, {
         label: `Animation2D:${resource.id}`,
         // Animation2D composites encoded RGB values directly into the browser's
         // unorm presentation surface, matching Canvas2D and the official Rive
@@ -444,21 +474,25 @@ export class Animation2DRuntime {
         cacheKey: resource.integrity ?? resource.uri,
         signal: this._abortController.signal,
       });
-    } catch {
+    } catch (error) {
       this._pendingResourceCount--;
       this._failedResourceCount++;
+      this._coreResourceFailed('image', resourceId, error); complete();
       return;
     }
     void request.then(handle => {
       if (this._destroyed) { handle.release(); return; }
       this._assetHandles.push(handle);
       apply(handle);
-    }).catch(() => {
-      if (!this._destroyed) this._failedResourceCount++;
+    }).catch(error => {
+      if (!this._destroyed) {this._failedResourceCount++; this._coreResourceFailed('image', resourceId, error);}
     }).finally(() => {
-      this._pendingResourceCount = Math.max(0, this._pendingResourceCount - 1);
+      this._pendingResourceCount = Math.max(0, this._pendingResourceCount - 1); complete();
     });
   }
+
+  protected get _rasterizeCoreText(): boolean {return true;}
+  protected get _materializeCoreFontFace(): boolean {return true;}
 
   protected _materializeCoreVisual(node: Animation2DRuntimeNode, deferred: DeferredCoreVisual): void {
     let visual: ReturnType<typeof createCoreVisual>;
@@ -472,6 +506,7 @@ export class Animation2DRuntime {
         deferred.sourceGroup,
         deferred.composite,
         deferred.effects,
+        this._rasterizeCoreText,
       );
     } catch {
       this._unsupportedComponentCount++;
@@ -500,16 +535,18 @@ export class Animation2DRuntime {
         continue;
       }
       const resource = this._animation.resources.find(candidate => candidate.id === resourceId);
-      if (!resource || resource.type !== 'binary' || !/^application\/json(?:$|;)/i.test(resource.mimeType ?? '') || !this._assetManager) {
+      if (!resource || resource.type !== 'binary' || !/^application\/json(?:$|;)/i.test(resource.mimeType ?? '') || !this._assetManager && !this._coreResources) {
         this._expressionDataLoads.set(resourceId, { state: 'failed', rasterizers: new Set() });
         this._failedResourceCount++;
+        this._coreResourceFailed('expression-data', resourceId, new Error('Core expression JSON resource or AssetManager is unavailable'), !!resource && resource.type === 'binary' && !this._assetManager && !this._coreResources);
         continue;
       }
       const load = { state: 'loading' as const, rasterizers: new Set([rasterizer]) };
       this._expressionDataLoads.set(resourceId, load);
       this._pendingResourceCount++;
+      const complete = this._coreResourceStarted('expression-data', resourceId);
       let retainedHandle: AssetHandle<unknown> | null = null;
-      void this._assetManager.load<unknown>(
+      void captureCoreAssetRequest(() => this._coreResources ? this._coreResources.loadExpressionData(resource, this._abortController.signal) : this._assetManager!.load<unknown>(
         `Animation2D.expression-data:${resource.integrity ?? resource.uri}`,
         async signal => {
           const response = await fetch(resource.uri, signal ? { signal } : {});
@@ -517,12 +554,11 @@ export class Animation2DRuntime {
           const declaredLength = Number(response.headers.get('content-length') ?? 0);
           if (declaredLength > 1024 * 1024) throw new Error('Expression data exceeds the 1 MiB limit.');
           const bytes = await response.arrayBuffer();
-          if (bytes.byteLength > 1024 * 1024) throw new Error('Expression data exceeds the 1 MiB limit.');
-          return JSON.parse(new TextDecoder().decode(bytes)) as unknown;
+          return parseAnimationCoreExpressionData(bytes);
         },
         () => {},
         { signal: this._abortController.signal },
-      ).then(handle => {
+      )).then(handle => {
         retainedHandle = handle;
         if (this._destroyed) { handle.release(); return; }
         this._assetHandles.push(handle);
@@ -533,7 +569,7 @@ export class Animation2DRuntime {
         current.value = handle.value;
         for (const target of current.rasterizers) target.setExpressionData(resourceId, handle.value);
         current.rasterizers.clear();
-      }).catch(() => {
+      }).catch(error => {
         retainedHandle?.release();
         if (!this._destroyed) {
           const current = this._expressionDataLoads.get(resourceId);
@@ -541,10 +577,10 @@ export class Animation2DRuntime {
             current.state = 'failed';
             current.rasterizers.clear();
           }
-          this._failedResourceCount++;
+          this._failedResourceCount++; this._coreResourceFailed('expression-data', resourceId, error);
         }
       }).finally(() => {
-        this._pendingResourceCount = Math.max(0, this._pendingResourceCount - 1);
+        this._pendingResourceCount = Math.max(0, this._pendingResourceCount - 1); complete();
       });
     }
   }
@@ -577,32 +613,34 @@ export class Animation2DRuntime {
     descriptor: { resource: string; family: string; style: 'normal' | 'italic'; weight: string | number },
     rasterizer: AnimationTextRasterizer,
   ): void {
-    const key = `${descriptor.resource}:${descriptor.family}:${descriptor.style}:${descriptor.weight}`;
+    const key = JSON.stringify([descriptor.resource,descriptor.family,descriptor.style,String(descriptor.weight)]);
     const existing = this._fontLoads.get(key);
     if (existing) {
       if (existing.state === 'loaded') {
-        rasterizer.setOutlineFont(descriptor.family, descriptor.style, descriptor.weight, existing.outlineFont);
+        rasterizer.setOutlineFont(descriptor.family, descriptor.style, descriptor.weight, existing.outlineFont,descriptor.resource,existing.nativeFamily);
       }
       else if (existing.state === 'loading') existing.rasterizers.add(rasterizer);
       return;
     }
-    const load = { state: 'loading' as const, rasterizers: new Set([rasterizer]) };
+    const load = { state: 'loading' as const, rasterizers: new Set([rasterizer]), nativeFamily:'HYA-core-'+this._instanceId+'-'+this._fontLoads.size };
     this._fontLoads.set(key, load);
     const resource = this._animation.resources.find(candidate => candidate.id === descriptor.resource);
-    if (!resource || resource.type !== 'binary' || !this._assetManager || typeof FontFace === 'undefined'
-      || typeof document === 'undefined' || !document.fonts) {
+    const platformMissing=this._materializeCoreFontFace&&(typeof FontFace==='undefined'||typeof document==='undefined'||!document.fonts);
+    if (!resource || resource.type !== 'binary' || !this._assetManager && !this._coreResources || platformMissing) {
       this._fontLoads.set(key, { ...load, state: 'failed' });
       this._failedResourceCount++;
+      this._coreResourceFailed('font', descriptor.resource, new Error('Core font resource, AssetManager or font host is unavailable'), !!resource && resource.type === 'binary' && (!this._assetManager && !this._coreResources || platformMissing));
       return;
     }
     this._pendingResourceCount++;
+    const complete = this._coreResourceStarted('font', descriptor.resource);
     let retainedHandle: AssetHandle<ArrayBuffer> | null = null;
     const releaseRetainedHandle = (): void => {
       const handle = retainedHandle;
       retainedHandle = null;
       handle?.release();
     };
-    void this._assetManager.load<ArrayBuffer>(
+    void captureCoreAssetRequest(() => this._coreResources ? this._coreResources.loadBinary(resource, this._abortController.signal) : this._assetManager!.load<ArrayBuffer>(
       `Animation2D.font:${resource.integrity ?? resource.uri}`,
       async signal => {
         const response = await fetch(resource.uri, signal ? { signal } : {});
@@ -611,22 +649,22 @@ export class Animation2DRuntime {
       },
       () => {},
       { signal: this._abortController.signal },
-    ).then(async handle => {
+    )).then(async handle => {
       retainedHandle = handle;
       if (this._destroyed) { releaseRetainedHandle(); return; }
       // Module downloads cannot be aborted, but font asset ownership can end
       // immediately when the runtime is removed, even while import is pending.
       this._abortController.signal.addEventListener('abort', releaseRetainedHandle, { once: true });
-      const face = new FontFace(descriptor.family, handle.value, {
+      const face = this._materializeCoreFontFace ? new FontFace(load.nativeFamily, handle.value, {
         style: descriptor.style,
         weight: String(descriptor.weight),
-      });
-      await face.load();
+      }) : undefined;
+      await face?.load();
       if (this._destroyed) return;
       const outlineFont = await loadAnimationOutlineFont(handle.value);
       if (this._destroyed) return;
-      document.fonts.add(face);
-      this._fontFaces.push(face);
+      if(!outlineFont&&!this._materializeCoreFontFace)throw Object.assign(new Error('CPU core requires a supported outline font'),{code:'E_HYA_RUNTIME_HOST_PORT'});
+      if(face){document.fonts.add(face);this._fontFaces.push(face);}
       this._assetHandles.push(handle);
       retainedHandle = null;
       const current = this._fontLoads.get(key);
@@ -634,11 +672,11 @@ export class Animation2DRuntime {
         current.state = 'loaded';
         if (outlineFont) current.outlineFont = outlineFont;
         for (const target of current.rasterizers) {
-          target.setOutlineFont(descriptor.family, descriptor.style, descriptor.weight, outlineFont);
+          target.setOutlineFont(descriptor.family, descriptor.style, descriptor.weight, outlineFont,descriptor.resource,load.nativeFamily);
         }
         current.rasterizers.clear();
       }
-    }).catch(() => {
+    }).catch(error => {
       releaseRetainedHandle();
       if (!this._destroyed) {
         const current = this._fontLoads.get(key);
@@ -646,11 +684,11 @@ export class Animation2DRuntime {
           current.state = 'failed';
           current.rasterizers.clear();
         }
-        this._failedResourceCount++;
+        this._failedResourceCount++; this._coreResourceFailed('font', descriptor.resource, error);
       }
     }).finally(() => {
       this._abortController.signal.removeEventListener('abort', releaseRetainedHandle);
-      this._pendingResourceCount = Math.max(0, this._pendingResourceCount - 1);
+      this._pendingResourceCount = Math.max(0, this._pendingResourceCount - 1); complete();
     });
   }
 
@@ -702,6 +740,21 @@ export class Animation2DRuntime {
   }
 
   /** @internal Applies state-machine-only component channels to the shared visual instance. */
+  /** Production-only style bridge. Sampling, path modifiers and tessellation stay in the original runtime. */
+  protected _applyProductionVisualStyle(node: Animation2DRuntimeNode, index: number, component: Readonly<AnimationComponent>, time: number, widthChanged: boolean, path?: Float32Array,
+    textDocument?: import('./AnimationTextRasterizer.js').AnimationStateTextDocument, coverage?: import('./AnimationPathTessellator.js').AnimationStrokeCoveragePort): void {
+    for (const visual of node.visuals.filter(value => value.sourceComponentIndex === index)) {
+      if (isVectorShapeComponent(component)) updateVectorVisual(visual, time, path, component, widthChanged, coverage);
+      else if (isVectorStrokePathComponent(component)) {
+        const resolved = resolveVectorStrokePath(component, node.source);
+        if (widthChanged) {const geometry = tessellateVectorStrokePath(resolved, true, coverage); visual.component.geometry.setData(geometry.positions, geometry.indices); visual.component.revision++;}
+        visual.color[0] = resolved.color[0]; visual.color[1] = resolved.color[1]; visual.color[2] = resolved.color[2]; visual.styleAlpha = resolved.color[3];
+      } else if (isText2DComponent(component)) {visual.textRasterizer!.setStateDocument(textDocument ?? {}); visual.textRasterizer!.setTime(time); visual.styleAlpha = 1;}
+      else if (isShape2DComponent(component) || isPath2DComponent(component)) {visual.color[0] = component.fill[0]; visual.color[1] = component.fill[1]; visual.color[2] = component.fill[2]; visual.styleAlpha = component.fill[3];}
+      visual.component.revision++;
+    }
+  }
+
   protected _applyStateMachineVisualChannel(
     node: Animation2DRuntimeNode,
     path: string,
@@ -878,6 +931,7 @@ function createCoreVisual(
   sourceGroup: string | undefined,
   composite: Readonly<AnimationComposite> | undefined,
   effects: readonly Readonly<AnimationLayerEffect>[] | undefined,
+  rasterizeText: boolean,
 ): { component: AnimationVisual2D; runtime: Animation2DRuntimeVisual } {
   let geometry: Geometry2D;
   let color: [number, number, number, number];
@@ -933,7 +987,7 @@ function createCoreVisual(
     color = component.type === 'shape2d' ? [...component.fill]
       : component.type === 'sprite2d' ? [...(component.tint ?? [1, 1, 1, 1])] : [1, 1, 1, 1];
     if (component.type === 'text2d') {
-      textMaterial = new AnimationTextRasterizer(component);
+      textMaterial = new AnimationTextRasterizer(component, {rasterize: rasterizeText});
     }
   }
   const vectorFeather = component.type === ANIMATION_VECTOR_SHAPE_EXTENSION_ID
@@ -1090,11 +1144,12 @@ function updateVectorVisual(
   visual: Animation2DRuntimeVisual,
   time: number,
   pathOverride?: Readonly<Float32Array>,
+  shapeOverride?: Readonly<AnimationVectorShapeComponent>, forceGeometry = false, coverage?: import('./AnimationPathTessellator.js').AnimationStrokeCoveragePort,
 ): void {
-  const shape = visual.vectorShape!;
+  const shape = shapeOverride ?? visual.vectorShape!;
   const paint = visual.vectorPaint!;
   const pathValues = pathOverride ?? sampleVectorShapePath(shape, time);
-  let geometryChanged = shape.morph !== undefined || hasAnimatedVectorModifier(shape);
+  let geometryChanged = forceGeometry || pathOverride !== undefined || shape.morph !== undefined || hasAnimatedVectorModifier(shape);
   if (paint === 'fill') {
     const fill = shape.fill!;
     if (geometryChanged) {
@@ -1135,7 +1190,7 @@ function updateVectorVisual(
         ...(shape.tolerance === undefined ? {} : { tolerance: shape.tolerance }),
         ...(stroke.dash ? { dash: stroke.dash } : {}),
         ...(dashOffset === undefined ? {} : { dashOffset }),
-      }, true);
+      }, true, coverage);
       visual.component.geometry.setData(next.positions, next.indices);
     }
     const sampledColor = stroke.colorTrack ? sampleVectorTrack(stroke.colorTrack, time) : stroke.color;

@@ -24,3 +24,26 @@ HYA parse/codec 失败抛出 `AnimationFormatError`；调用方应记录 code/pa
 当前 Lottie 导入闭环保留拓扑稳定 path morph、动态 solid/gradient paint、stroke width/dash offset、空间 Bézier position、animated trim-path/round-corners、mask/matte graph、动画 text document、web font mapping，以及 character/排除空格/word/line、easing、smoothness、确定性 random range selector。type 15 data layer 以 binary resource 和非视觉 node extension 保留。Text Document Expression 的安全子集会在转换期编译为有版本、无后向跳转、受资源预算约束的 HYA IR，覆盖确定性数学、条件、字符串格式化和固定 JSON Data Layer 只读路径；HYA 不保存或执行原始 JavaScript。转换器 diagnostics 继续对 topology change、动画 mask feather、动画 boolean merge、blend/skew、expression selector、超出安全子集的 text expression 与未知 AE effect/plugin 等未覆盖语义给出精确 JSON path。
 
 `convertLottie(source, { fonts })` 的 `fonts` 以 Lottie `fName` 为 key，value 可以是 URI，也可以包含 `uri/family/style/weight/mimeType/integrity`。映射成功时输出 binary font resource；未映射字体产生 `W_LOTTIE_FONT_SUBSTITUTION`，runtime 使用浏览器 fallback metrics 而不会伪装 fidelity 完整。
+
+## 0.2.2 HYA 组合合同（待包集成）
+
+[ADR 0134](../for-ai/adr/0134-hya-production-composition-contract.md) 准入了拟议的 `@haiyue/animation-spec/hya-production`，当前只有源码入口和隔离合同包验证，正式 package exports 尚未加入。不得按下述设计向 0.2.1 包导入。精确 55 个符号见[机器合同](../../config/hya-022-contract.json)，G13 负责正式声明、tarball 和版本集成。
+
+该入口包含组合格式常量、`HyaCompositionError`、`parseHyaComposition`、`encodeHyaComposition`、`negotiateHyaComposition` 及相关类型，并聚焦暴露原 HYLA parser／codec、数据／交互／语义／音频 parser、状态机 v2 parser 和 v1 migration。它不导入 Engine、DOM、GPU、来源转换器或 OpenType，也不提供绘制运行时。
+
+组合信封的 `format` 为 `haiyue-composition`、`version` 为 `1`。根结构为 `{format, version, parts, targets}`；每个 part 显式声明 `{id, extension, required, requires, dependencies, document}`。document 仍经原格式 parser 验证；targets 通过类型化的分段 address 引用原节点、文本、资源或状态输入，不改变原 ID。
+
+```ts
+// 拟议 0.2.2 入口；正式消费须等待 G13 的 package admission。
+import {parseHyaComposition, negotiateHyaComposition} from '@haiyue/animation-spec/hya-production';
+
+const parsed = parseHyaComposition(bytes); // unknown / JSON 字符串 / UTF-8 buffer
+const plan = negotiateHyaComposition(parsed.document, hostCapabilities);
+// plan.complete 仅表示声明协商未跳过 part；不是实际功能或画质资格。
+```
+
+默认 strict。未知必需 part 始终失败；未知可选 part 仅在显式 `strict:false` 时允许保留原文并跳过，返回 `W_HYA_COMPOSITION_OPTIONAL_SKIPPED`，依赖闭包也随之失效。已知 part 的非法 payload 即使 optional 也失败。`HyaCompositionError` 提供稳定的 `code/path/capability`；包装旧格式失败时保留 `causeCode`。调用方记录这些字段，不解析 message。
+
+总输入上限为 64 MiB、JSON 节点 1,000,000、深度 128、单字符串 UTF-8 4 MiB、part 16、target 100,000、每 part 的 requires 64；调用方只可收紧，原格式内部预算继续生效。整树安全检查先于克隆和 part validator；输出为冻结副本。新信封按确定性 UTF-8 JSON 编码，不替换 HYA container 1／2、HYLA 1.0、HYRG 2.0 或原 sidecar major。
+
+拟议 extensions `/hya-player`、`/hya-text`、`/hya-layout`、`/hya-data`、`/hya-audio` 由 G11 实现，复用原采样／混合、共享布局与 GUI 输入；真实字体／图像／N-slice、资源代次、静默 seek、loop 事件及宿主端口以[执行合同](../../review/engine-0.2.2/hya-contract.md)和[声明草案](../../review/engine-0.2.2/hya-api-draft.d.ts)为准。源码可解析、旧模块测试或隔离类型消费均不代表这些运行时或公开包已合格。

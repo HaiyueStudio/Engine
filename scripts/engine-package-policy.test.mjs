@@ -10,7 +10,16 @@ import {
   validateCapabilityPackageBudgetConfig,
   validateEngineConsumerResult,
   validateEnginePackManifest,
+  parsePackageVerificationArgs,
 } from './engine-package-policy.mjs';
+
+test('package diagnostic output routing preserves default release paths and rejects ambiguous flags', () => {
+  assert.deepEqual(parsePackageVerificationArgs([]), { release: false, outputDirectory: undefined });
+  assert.deepEqual(parsePackageVerificationArgs(['--output-dir', 'artifacts/diagnostic', '--release']),
+    { release: true, outputDirectory: 'artifacts/diagnostic' });
+  for (const args of [['--output-dir'], ['--output-dir', '--release'], ['--release', '--release'],
+    ['--output-dir', 'a', '--output-dir', 'b'], ['--unknown']]) assert.throws(() => parsePackageVerificationArgs(args));
+});
 
 test('split consumer measures static transitive closure and deferred chunks independently', () => {
   const chunk = (fileName, isEntry, imports, dynamicImports, modules) => ({
@@ -61,6 +70,16 @@ test('byte capacity retains reviewed reserve while file counts are observations'
   const fileLimit = structuredClone(budget);
   fileLimit.publicPackages['@haiyue/extensions'].maxFileCount = 200;
   assert.ok(validateCapabilityPackageBudgetConfig(fileLimit).some(error => error.includes('observations, not limits')));
+  const unreviewedConsumerIncrease = structuredClone(budget);
+  unreviewedConsumerIncrease.consumers['gui-font'].maxGzipBytes++;
+  assert.ok(validateCapabilityPackageBudgetConfig(unreviewedConsumerIncrease)
+    .some(error => error.startsWith('gui-font reviewed gzip capacity')));
+  for (const mutate of [review => {review.growthReserveBytes = 0;}, review => {review.capabilityBasis = '';},
+    review => {review.decision = '';}, review => {review.reviewedGzipBytes = -1;}]) {
+    const candidate = structuredClone(budget);
+    mutate(candidate.extensionConsumers['extensions-hya-text'].capacityReview);
+    assert.ok(validateCapabilityPackageBudgetConfig(candidate).some(error => error.startsWith('extensions-hya-text')));
+  }
 });
 
 test('package globs include nested release files without admitting source maps', () => {
@@ -123,6 +142,14 @@ test('the current stable extension surface has real focused packed consumers', (
     [id, readFileSync(new URL('../' + policy.fixture, import.meta.url), 'utf8')]));
   const current = { packageJson, capabilities, consumers: budget.extensionConsumers, fixtures };
   assert.deepEqual(validateExtensionConsumerCoverage(current), []);
+  for (const name of ['player', 'text', 'layout', 'data', 'audio']) {
+    const id = `extensions-hya-${name}`;
+    assert.equal(current.consumers[id].entrypoint, `./hya-${name}`);
+    const omitted = structuredClone(current);
+    delete omitted.consumers[id];
+    assert.ok(validateExtensionConsumerCoverage(omitted)
+      .some(error => error.includes(`/hya-${name} lacks a focused packed consumer`)));
+  }
   const missing = structuredClone(current);
   delete missing.consumers['extensions-achievements'];
   assert.ok(validateExtensionConsumerCoverage(missing).some(error => error.includes('/achievements lacks a focused packed consumer')));

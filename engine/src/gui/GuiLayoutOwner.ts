@@ -1,9 +1,10 @@
+import {isGuiControl} from './GuiControlIdentity';
 import type {GuiElement} from './components/GuiElement';
 import {GuiDirtyFlags, type GuiRect} from './GuiTypes';
 import type {GuiInvalidation, GuiInvalidationReason, GuiLayoutDelegate} from './GuiLayoutTypes';
 import {captureGuiLayoutMotion, isGuiLayoutHidden, observeGuiTree, releaseGuiLayout, retainGuiLayout, withGuiAssignments} from './GuiLayoutState';
-import {GuiScrollView} from './components/GuiScrollView';
-import {GuiModal} from './components/GuiModal';
+import {type GuiScrollView} from './components/GuiScrollView';
+import {type GuiModal} from './components/GuiModal';
 import type {GuiImageSource} from './components/GuiImage';
 
 const sourceIds = new WeakMap<object, number>();
@@ -45,7 +46,7 @@ function union(rects: readonly GuiRect[]): GuiRect {
 }
 function inputKey(element: GuiElement): string {
   return JSON.stringify([element.getLayoutOptions(), styleKey(element), element.visible, element.disabled, element.hovered, element.pressed, element.focused,
-    'text' in element ? element.text : undefined, 'fontSize' in element ? element.fontSize : undefined, 'value' in element ? element.value : undefined, element instanceof GuiModal ? element.dialogRect : undefined]);
+    'text' in element ? element.text : undefined, 'fontSize' in element ? element.fontSize : undefined, 'value' in element ? element.value : undefined, isGuiControl<GuiModal>(element, 'GuiModal') ? element.dialogRect : undefined]);
 }
 
 /** Engine owns validation and commit. An optional adapter owns only rectangle calculation. */
@@ -112,7 +113,7 @@ export class GuiLayoutOwner {
     const version = this.inputVersion(), order = [...previous.keys()], inputs = new Map(order.map(element => [element, inputKey(element)]));
     const children = new Map(order.map(element => [element, [...element.children]])), parents = new Map(order.map(element => [element, element.parent]));
     const motions = order.map(captureGuiLayoutMotion).filter((restore): restore is () => void => restore !== undefined);
-    const dialogRects = order.filter((element): element is GuiModal => element instanceof GuiModal).map(element => ({target: element.dialogRect, rect: {...element.dialogRect}}));
+    const dialogRects = order.filter((element): element is GuiModal => isGuiControl<GuiModal>(element, 'GuiModal')).map(element => ({target: element.dialogRect, rect: {...element.dialogRect}}));
     const metadata = new Map<GuiElement, {readonly display?: 'none'; readonly contentHeight?: number}>(), oldManaged = new Map(this.managed);
     const calculatingDelegate = this.delegate;
     let applying = false;
@@ -122,7 +123,7 @@ export class GuiLayoutOwner {
       delegate.arrange(this.root, Object.freeze({...viewport}), (element, rect, options = {}) => {
         if (!previous.has(element) || next.has(element) || !validRect(rect)) throw new Error('Invalid, duplicate or foreign GUI layout commit.');
         if (options.display !== undefined && options.display !== 'none') throw new Error('Invalid GUI layout display state.');
-        if (options.contentHeight !== undefined && (!(element instanceof GuiScrollView) || !Number.isFinite(options.contentHeight) || options.contentHeight < 0)) throw new Error('Invalid GUI layout content height.');
+        if (options.contentHeight !== undefined && (!(isGuiControl<GuiScrollView>(element, 'GuiScrollView')) || !Number.isFinite(options.contentHeight) || options.contentHeight < 0)) throw new Error('Invalid GUI layout content height.');
         next.set(element, {...rect});
         metadata.set(element, {...options});
       });

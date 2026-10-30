@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "goal": "g12-hya-production-qualification",
+  "status": "complete",
+  "decision": "docs/for-ai/adr/0136-g12-before-physical-input-acceptance.md",
+  "executionAdmission": {
+    "decision": "Engine/docs/for-ai/adr/0136-g12-before-physical-input-acceptance.md",
+    "authorizedAt": "2026-10-25",
+    "dependency": "g11-hya-production-runtime",
+    "requiredDependencyStatus": "validating",
+    "runtimeCommit": "a4b01682df352aacfbc4b310780a7132b4947b1b",
+    "evidence": "Engine/review/engine-0.2.2/g11-checks.json#currentPackageStructureReview",
+    "preserveDependencyGraph": true,
+    "physicalInputAcceptance": "deferred-until-after-g12; release-blocking",
+    "otherDeviceRequirements": "unchanged"
+  },
+  "coordination": {
+    "singleActiveGoal": null,
+    "nextGoal": "g13-integration-release",
+    "g11Status": "validating",
+    "originalDependencyPreserved": true,
+    "deferredAcceptance": [
+      {
+        "id": "g11-physical-input-after-g12",
+        "originGoal": "g11-hya-production-runtime",
+        "ownerGoal": "g13-integration-release",
+        "afterGoal": "g12-hya-production-qualification",
+        "status": "pending",
+        "profiles": [
+          "browser-real-ime",
+          "physical-gamepad",
+          "physical-iphone-input"
+        ],
+        "blocksMilestoneCompletion": true,
+        "blocksRelease": true,
+        "syntheticInputIsSubstitute": false,
+        "decision": "Engine/docs/for-ai/adr/0136-g12-before-physical-input-acceptance.md"
+      }
+    ]
+  },
+  "problem": "静态时钟重建绘制代次，局部文字变化触发整页求解，等容量几何反复分配；视口外图形仍全部提交。",
+  "method": "复用原布局、字体、动画绘制与 G04 区域；按精确输入和容量复用，上传变化范围，相邻同状态纯色几何按画序合批，并按提交／取消及 GPU 完成退役。仅剔除完全在逻辑视口外的实际几何，保留节点求值、mask source、资源校验与原几何预算。",
+  "conclusion": "当前干净 0.2.2 tarball 的布局、原生画质、真实素材、产品流程、资源与三轮生产对照通过。此结论不授予 G11 真实输入、其他设备或整版发布资格。",
+  "runtimeCandidate": {
+    "revision": "9fad7accfc51b8d9728c2bdb68f7c746e7e7a857",
+    "workingTreeDirty": false,
+    "packageGate": {
+      "path": "artifacts/engine-0.2.2/g12/packed-batch-20261026/public-packages.json",
+      "sha256": "111bb16cf9388ec61af6804f0b9951af537563a5e87cf55a50bb6755581f66c2"
+    },
+    "tarballs": [
+      {
+        "name": "@haiyue/engine",
+        "sha256": "ac9863aa76809398594fd0249587499ac44fc934a2cf3ea807b26a969d5ab252",
+        "packedBytes": 2018933
+      },
+      {
+        "name": "@haiyue/animation-spec",
+        "sha256": "71eb24b81b1a07f081138610869c11b759def56aa5853a3030e7a714ad385876",
+        "packedBytes": 170719
+      },
+      {
+        "name": "@haiyue/extensions",
+        "sha256": "2bd6430a1dd30a43bbd9bbc60e59e7e0533ac8b943cd7747ea65d56db786b1dd",
+        "packedBytes": 511624
+      },
+      {
+        "name": "@haiyue/shader-language",
+        "sha256": "6a3df405553a2a45d9e76596a3917ea8be5c04e3bc680b3f539cc772ddf75aae",
+        "packedBytes": 148545
+      }
+    ],
+    "independentConsumers": 40
+  },
+  "verification": {
+    "rootWorkspaceTests": 2416,
+    "fullTypecheck": true,
+    "fullBuild": true,
+    "boundaries": true,
+    "api": true,
+    "logs": [
+      {
+        "path": "artifacts/engine-0.2.2/g12/incremental-20261026/batch-root-typecheck.log",
+        "sha256": "78413a19e222fd8019bf8cd9cc566bd550e776827ba3506d3472b4bbc9e7c2f3"
+      },
+      {
+        "path": "artifacts/engine-0.2.2/g12/incremental-20261026/batch-root-test.log",
+        "sha256": "dd78d2884d188efd1f9769e36b8640fae53e6e98841dcf10ef69caa65f0b95b8"
+      },
+      {
+        "path": "artifacts/engine-0.2.2/g12/incremental-20261026/batch-root-build.log",
+        "sha256": "2fb219551eda25ab6cc4184aa24fbc0aaaa05a64414dd70d0aa014e8c4c119de"
+      },
+      {
+        "path": "artifacts/engine-0.2.2/g12/incremental-20261026/batch-boundaries.log",
+        "sha256": "f7b154f325131ac950f9091b28a7bb6676e275be7f8906d61dc8179b7cb5544f"
+      },
+      {
+        "path": "artifacts/engine-0.2.2/g12/incremental-20261026/batch-api.log",
+        "sha256": "4710a966ea112ce5f8af828b2efbd22daf70cf33066731e5b2ca16e1be2132db"
+      },
+      {
+        "path": "artifacts/engine-0.2.2/g12/incremental-20261026/observer-policy.log",
+        "sha256": "9e25712b6f3df2d7ca02c5067b30079efad882dc3464dcbe6e8b2d46ae06f2f8"
+      }
+    ],
+    "layout": {
+      "cohorts": 27,
+      "status": "passed",
+      "unchangedBudgets": true,
+      "phaseMaxima": [
+        {
+          "id": "hud",
+          "layoutP95Ms": 0,
+          "measureP95Ms": 1.2553999999981897
+        },
+        {
+          "id": "pressure",
+          "layoutP95Ms": 0,
+          "measureP95Ms": 6.394200000024284
+        },
+        {
+          "id": "diagnostic",
+          "layoutP95Ms": 0,
+          "measureP95Ms": 37.27999999986059
+        }
+      ],
+      "evidence": {
+        "path": "artifacts/engine-0.2.2/g12/layout-batch-20261026/result.json",
+        "sha256": "962a225d117ed44fc3c576b3fe8e205037f9029e73c1437087f6a0e4f40fdf58"
+      }
+    },
+    "native": {
+      "checks": 146,
+      "viewportFullRasterPairs": 4,
+      "viewportMaximumChannelDifference": 0,
+      "batchFullRasterPairs": 8,
+      "batchMaximumChannelDifference": 0,
+      "originalTolerance": 2,
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.2/g11/draw-native-dpr1-1793008165194/result.json",
+          "sha256": "20432d31da42bf04321fa032192803cf22c2b2ea3c4156af5ead1c9a46cd248d",
+          "status": "passed"
+        },
+        {
+          "path": "artifacts/engine-0.2.2/g11/draw-native-dpr2-1793008339009/result.json",
+          "sha256": "fa47725f437627effcc1d294dfdc609241ae8ce3f1c6f2024359934166829cda",
+          "status": "passed"
+        }
+      ]
+    },
+    "public": {
+      "checks": 7,
+      "evidence": {
+        "path": "artifacts/engine-0.2.2/g12/public-batch-20261026/result.json",
+        "sha256": "e5ee0461b7fd17f8ef65ba44e937153e176fb1a8f5aaebb28816148841293ed0"
+      }
+    },
+    "product": {
+      "id": "gravity-maze",
+      "checks": 6,
+      "evidence": {
+        "path": "artifacts/engine-0.2.2/g12/product-batch-20261026/result.json",
+        "sha256": "e7477695491e5b3ec26f0cce5983bc058c9e77ace2eb9a5c6e764d71a2ac5120"
+      },
+      "screenshot": {
+        "path": "artifacts/engine-0.2.2/g12/product-batch-20261026/product.png",
+        "sha256": "9e6dd3d2bfe9b454d5fa8e0b675e8ff3a7dfaf68ac4d38f5cfdef1c06be1e4d6"
+      }
+    },
+    "corpus": {
+      "rounds": 3,
+      "denominator": 23,
+      "small": 17,
+      "large": 6,
+      "knownFailedFeatureEntriesPerRound": 1,
+      "unclassifiedFailures": 0,
+      "latestPromoted": false,
+      "minimumLargeFidelity": 0.5390163845174453,
+      "evidence": {
+        "path": "artifacts/engine-0.2.2/g12/corpus-batch-20261026/result.json",
+        "sha256": "48b601ace4fb37533f0f46e8efb0b53857efc36b96492445b6e40a4c29e37f06"
+      },
+      "scope": "通过既定分类／画质／交付检查；原降级／不支持项仍在分母中，不表示全部来源 full-fidelity。"
+    },
+    "resources": {
+      "checks": 10,
+      "frames": 10000,
+      "replacements": 33,
+      "durationMs": 168535.75,
+      "leases": 0,
+      "firstOwnedResources": {
+        "resources": 127,
+        "estimatedBytes": 9719264
+      },
+      "lastOwnedResources": {
+        "resources": 127,
+        "estimatedBytes": 9719264
+      },
+      "finalOwnedGpuResources": 0,
+      "deviceRecoveryMaximumChannelDifference": 0,
+      "allIdleSubmissions": 0,
+      "staticAdditionalUploads": 0,
+      "evidence": {
+        "path": "artifacts/engine-0.2.2/g12/soak-batch-20261026/result.json",
+        "sha256": "f303a1d12214edc5c52695a362350651ac9979bb7717f41602a9a94216cb704a"
+      }
+    },
+    "production": {
+      "captures": 30,
+      "rounds": 3,
+      "normalCandidateCaptures": 12,
+      "normalFrameP95MaxMs": 16.88000000000102,
+      "normalFrameP99MaxMs": 17,
+      "gpuGroups": 4,
+      "gpuRegressionLimit": 0.05,
+      "gpuAggregation": "pool-all-equal-sized-cohorts; nearest-rank P95; 90 measured samples per variant",
+      "roundInvestigations": 12,
+      "gpuComparisons": [
+        {
+          "workload": "interactive-small",
+          "status": "passed",
+          "baselineP95Ms": 3.517472,
+          "candidateP95Ms": 2.97984,
+          "regression": -0.15284613495146526
+        },
+        {
+          "workload": "layout-1k",
+          "status": "passed",
+          "baselineP95Ms": 10.979328,
+          "candidateP95Ms": 6.968288,
+          "regression": -0.365326548218616
+        },
+        {
+          "workload": "layout-10k-diagnostic",
+          "status": "passed",
+          "baselineP95Ms": 84.086784,
+          "candidateP95Ms": 16.996352,
+          "regression": -0.7978713040089629
+        },
+        {
+          "workload": "multi-instance",
+          "status": "passed",
+          "baselineP95Ms": 7.489536,
+          "candidateP95Ms": 7.475168,
+          "regression": -0.0019184098988241916
+        }
+      ],
+      "captureRevision": "9fad7accfc51b8d9728c2bdb68f7c746e7e7a857",
+      "assessmentRevision": "a6f7f148761009eda750b6b7135dfffff928729a",
+      "unchangedSamplerAndBuildHashes": true,
+      "unchangedBudgets": true,
+      "baselinePromoted": false,
+      "pressureAnd10k": "全部保留；压力及 10k 帧率为诊断，不是统一设备 FPS 承诺。GPU 原 5% 对照仍检查全部四组。",
+      "evidence": {
+        "path": "artifacts/engine-0.2.2/g12/production-reviewed-final-20261026/result.json",
+        "sha256": "88bfe84537f91649ae396f0f7ba8cbcf5ccf5708bbb7bf7dd4eef8119e63b715"
+      },
+      "powerRestore": {
+        "path": "artifacts/engine-0.2.2/g12/production-power-batch-20261026/gpu-power-state.json",
+        "sha256": "3c13f5b27445c81a04a1db5defee311e278fcc2a697dc74c0ef754f6573467a2"
+      },
+      "telemetry": {
+        "path": "artifacts/engine-0.2.2/g12/production-power-batch-20261026/observer.json",
+        "sha256": "c9a03b3190a8ce7703e8eaf5c957422186d8e2e09f3082f9b67e576af316a595"
+      },
+      "reviewTests": [
+        {
+          "path": "artifacts/engine-0.2.2/g12/incremental-20261026/pooled-policy.log",
+          "sha256": "2894cbac4970b89f969171cba8aa2a6ce30e5db92f840a542355f464c8204d52"
+        },
+        {
+          "path": "artifacts/engine-0.2.2/g12/incremental-20261026/pooled-benchmark-policy.log",
+          "sha256": "bcd6355581f33b4917d42a93c444fa9b2cc0ed95cce622bf5fb9994c2e158c5c"
+        }
+      ]
+    },
+    "identityAudit": {
+      "path": "artifacts/engine-0.2.2/g12/final-evidence-audit.json",
+      "sha256": "905a720eb0ea0de47dff665089836ddd2e4b988557829f58fbcad0cd18997796"
+    }
+  },
+  "preservedFailures": {
+    "production": {
+      "path": "artifacts/engine-0.2.2/g12/production-qualified-20261026/result.json",
+      "sha256": "215d19e1a5365eeb05910e53f5b7167ccc88384424050d5211d3478226a6040e"
+    },
+    "productionBeforeBatch": {
+      "path": "artifacts/engine-0.2.2/g12/production-viewport-20261026/result.json",
+      "sha256": "155870c9c44feba857c4f4c0a897f5ecf4620b86232907542c187a28b7259850"
+    },
+    "extraPerRoundGate": {
+      "path": "artifacts/engine-0.2.2/g12/production-batch-20261026/result.json",
+      "sha256": "3921827c3146343b8681d1681e5d2277994a146098665be4d78d923b4fba68c2"
+    },
+    "investigation": {
+      "path": "artifacts/engine-0.2.2/g12/gpu-state-investigation.json",
+      "sha256": "648e7c5f10e40fa4724530d78d76c927d4e7a9f9e323ff6f6104b9842f46f550"
+    },
+    "historyDirectory": "artifacts/engine-0.2.2/g12/",
+    "explanation": "旧超时和失败判定不改写。新脚本误增单轮 5% 硬门禁；独立复核器按原合同合并全部三轮等量样本计算 P95，12 项单轮差异保留调查。运行时、原采样器、配置及四包哈希逐项一致，采样和验收提交分别记录；使用用户已批准的严格哈希复核授权。"
+  },
+  "productIntegration": {
+    "repository": "Games",
+    "commit": "860addb",
+    "pushed": false,
+    "sourceScope": "Seven admitted Gravity Maze files only; user Sokoban changes preserved",
+    "candidatePublicTarballQualified": true,
+    "defaultRepositoryDependencies": "0.2.1; convergence to the qualified 0.2.2 packages remains owned by G13",
+    "defaultChecks": {
+      "rulesTests": 695,
+      "rulesStatus": "passed",
+      "typecheck": "failed: old dependencies do not export hya-player",
+      "build": "exit 0 with unresolved hya-player warning; not counted as qualified",
+      "logs": [
+        {
+          "path": "artifacts/engine-0.2.2/g12/incremental-20261026/games-typecheck.log",
+          "sha256": "3ad03b7b167a0d7a47b4fff8334984698d2a359ca5079b2fcb6335043cc702d5"
+        },
+        {
+          "path": "artifacts/engine-0.2.2/g12/incremental-20261026/games-tests.log",
+          "sha256": "00408ecb5cbf45a4a222f81a962dce1e5d6b5f8865ab29c71d3977c0cb76591e"
+        },
+        {
+          "path": "artifacts/engine-0.2.2/g12/incremental-20261026/games-build.log",
+          "sha256": "b80a26dfb5290f5f52f41446dec2f5129a437de78931a24a59e2b60b7d96e70f"
+        }
+      ]
+    }
+  },
+  "handoff": {
+    "ownerGoal": "g13-integration-release",
+    "g11Status": "validating",
+    "releaseBlocking": [
+      "G11 real browser IME, physical gamepad and iPhone input after G12",
+      "Apple SDK build, PCM, VoiceOver and remaining device requirements",
+      "Converge Games dependencies and the product commit, rerun default repository checks",
+      "Final candidate, complete global gate and no-publication rehearsal"
+    ],
+    "realInputAccepted": false,
+    "otherDeviceRequirements": "unchanged",
+    "baselinePromoted": false,
+    "published": false
+  },
+  "fullG12Complete": true,
+  "releaseQualified": false
+}

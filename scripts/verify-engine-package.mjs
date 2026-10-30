@@ -13,7 +13,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { basename, dirname, relative, resolve, sep } from 'node:path';
+import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
@@ -28,22 +28,25 @@ import {
   validateCapabilityPackageBudgetConfig,
   validateEngineConsumerResult,
   validateEnginePackManifest,
+  parsePackageVerificationArgs,
 } from './engine-package-policy.mjs';
 import { npmArgs, npmCommand } from './npm-process.mjs';
+import { canonicalPackageMetadata } from './package-metadata-encoding.mjs';
 import { measureConsumerLoading, validateConsumerLoading } from './engine-package-loading-policy.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const budget = JSON.parse(readFileSync(resolve(root, 'config/engine-package-budget.json'), 'utf8'));
-const releaseMode = process.argv.includes('--release');
-for (const argument of process.argv.slice(2)) {
-  if (argument !== '--release') throw new Error(`Unknown public package verification argument "${argument}".`);
+const { release: releaseMode, outputDirectory } = parsePackageVerificationArgs(process.argv.slice(2));
+const outputRoot = resolve(root, outputDirectory ?? 'artifacts/release');
+if (!isWithin(outputRoot, resolve(root, 'artifacts'))) {
+  throw new Error('Public package output must stay within the repository artifacts directory.');
 }
 
 const temporaryRoot = realpathSync(mkdtempSync(resolve(tmpdir(), 'haiyue-public-packages-')));
 const npmCacheRoot = resolve(tmpdir(), 'haiyue-g03-public-consumer-npm-cache-v1');
-const reportPath = resolve(root, 'artifacts/release/public-packages.json');
-const legacyReportPath = resolve(root, 'artifacts/release/engine-package.json');
-const tarballOutputRoot = resolve(root, 'artifacts/release/npm');
+const reportPath = resolve(outputRoot, 'public-packages.json');
+const legacyReportPath = resolve(outputRoot, 'engine-package.json');
+const tarballOutputRoot = resolve(outputRoot, 'npm');
 const errors = [];
 errors.push(...validateCapabilityPackageBudgetConfig(budget));
 errors.push(...validateExtensionConsumerCoverage({
@@ -105,6 +108,9 @@ try {
 
   const runtimeChecks = {
     node: runNodeRuntimeConsumer(installed),
+    hya: runHyaRuntimeConsumer(installed),
+    layout: runLayoutRuntimeConsumer(installed),
+    guiLayout: runGuiLayoutRuntimeConsumer(installed),
     typescript: runTypeScriptConsumer(installed, packedPackages),
     exports: runAllExportsConsumer(installed, packedPackages),
     cli: runCliConsumer(installed),
@@ -200,6 +206,10 @@ function packPublicPackage({ packageName, policy }) {
     const destination = resolve(staging, file.path);
     mkdirSync(dirname(destination), { recursive: true });
     copyFileSync(source, destination);
+    if(policy.metadataLineEndings){
+      const bytes=readFileSync(destination),canonical=canonicalPackageMetadata(bytes,file.path,policy.metadataLineEndings);
+      if(!canonical.equals(bytes))writeFileSync(destination,canonical);
+    }
     chmodSync(destination, file.mode ?? statSync(source).mode);
   }
 
@@ -259,6 +269,7 @@ function packPublicPackage({ packageName, policy }) {
     exportTargets: collectPackageTargets(packagedJson),
     sourceExcludedFiles,
     stagingContentSha256: hashTree(staging),
+    metadataLineEndings: policy.metadataLineEndings ?? {},
     packageJsonSha256: sha256File(resolve(extractedDirectory, 'package.json')),
     errors,
     tarballPath: outputTarball,
@@ -450,6 +461,30 @@ function runNodeRuntimeConsumer(installed) {
   copyFileSync(source, input);
   const result = spawnSync(process.execPath, [input], { cwd: installed.root, encoding: 'utf8', timeout: 30_000 });
   return commandCheck(result, 'Node ESM runtime');
+}
+
+function runHyaRuntimeConsumer(installed) {
+  const input = resolve(installed.root, 'hya-runtime.mjs');
+  copyFileSync(resolve(root, 'scripts/fixtures/engine-consumers/hya-runtime.mjs'), input);
+  return commandCheck(spawnSync(process.execPath, [input], {
+    cwd: installed.root, encoding: 'utf8', timeout: 30_000,
+  }), 'five focused HYA runtime consumers');
+}
+
+function runLayoutRuntimeConsumer(installed) {
+  const input = resolve(installed.root, 'layout-runtime.mjs');
+  copyFileSync(resolve(root, 'scripts/fixtures/engine-consumers/layout-runtime.mjs'), input);
+  return commandCheck(spawnSync(process.execPath, [input], {
+    cwd: installed.root, encoding: 'utf8', timeout: 30_000,
+  }), 'DOM/GPU-free packed layout runtime');
+}
+
+function runGuiLayoutRuntimeConsumer(installed) {
+  const input = resolve(installed.root, 'gui-layout-runtime.mjs');
+  copyFileSync(resolve(root, 'scripts/fixtures/engine-consumers/gui-layout-runtime.mjs'), input);
+  return commandCheck(spawnSync(process.execPath, [input], {
+    cwd: installed.root, encoding: 'utf8', timeout: 30_000,
+  }), 'packed GUI layout and skin constructors');
 }
 
 function runTypeScriptConsumer(installed, packages) {
@@ -689,7 +724,7 @@ function normalizeTemporaryPath(path) {
 
 function isWithin(path, directory) {
   const relativePath = relative(directory, path);
-  return relativePath === '' || (!relativePath.startsWith('..') && !relativePath.includes(`..${sep}`));
+  return relativePath === '' || (!isAbsolute(relativePath) && !relativePath.startsWith('..') && !relativePath.includes(`..${sep}`));
 }
 
 function sha256File(path) {

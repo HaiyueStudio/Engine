@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { EngineErrorCode, Entity, getSceneRenderPipeline, normalizeSceneOptions, Scene, System } from '../dist/experimental.js';
+import { EngineErrorCode, Entity, getSceneRenderIntegration, getSceneRenderPipeline, normalizeSceneOptions, Scene, System } from '../dist/experimental.js';
+import { GuiSystem } from '../dist/gui.js';
 import { createMockEngine } from './helpers.mjs';
 
 class DummySystem extends System {
@@ -22,6 +23,15 @@ class WarmupSystem extends DummySystem {
     });
   }
 }
+
+test('synchronous GUI scene assembly shares the public GUI class and original render owner', () => {
+  const scene = new Scene(createMockEngine(), { render3D: false, gui: true });
+  try {
+    assert.ok(scene.guiSystem instanceof GuiSystem);
+    assert.equal(getSceneRenderPipeline(scene), getSceneRenderIntegration(scene).pipeline);
+    assert.equal(getSceneRenderPipeline(scene).size, 1);
+  } finally { scene.destroy(); }
+});
 
 test('Scene creates world, render pipeline, and default 3D camera without render systems when disabled', () => {
   const engine = createMockEngine();

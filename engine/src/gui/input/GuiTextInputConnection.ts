@@ -14,6 +14,7 @@ export class GuiTextInputConnection {
   private active:Active|null=null;
   private closed=false;
   constructor(private readonly host:GuiTextInputHost,private readonly options:{
+    keyboard?(event:KeyboardEvent,target:GuiInput):boolean;
     valid(target:GuiInput):boolean;
     caretRect(target:GuiInput):GuiRect;
     viewportInset(inset:{top:number;right:number;bottom:number;left:number}):void;
@@ -55,6 +56,7 @@ export class GuiTextInputConnection {
       };
       let session:GuiTextInputSession;
       try{session=this.host.open({value:target.value,selectionUtf16:[target.selectionAnchor,target.selectionFocus],inputType:target.inputType,multiline:target.multiline,generation:active.generation,
+        onKeyboard:event=>accepts(active.generation)?this.options.keyboard?.(event,target)??false:false,
         onEdit:edit=>{if(!accepts(edit.generation)||!once(edit.eventId))return;target.replaceText(edit.startUtf16,edit.endUtf16,edit.text,edit.selectionUtf16);this.flush(true);},
         onValue:(value,selection,token,eventId)=>{
           if(!accepts(token)||!once(eventId)||target.isComposing)return;

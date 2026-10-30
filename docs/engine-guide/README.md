@@ -34,6 +34,7 @@
 - [Haiyue 0.1.0 首发候选说明](./release-notes-0.1.0.md)
 - [Haiyue 0.2.0 发布候选说明](./release-notes-0.2.0.md)
 - [Haiyue 0.2.1 发布候选说明](./release-notes-0.2.1.md)
+- [Haiyue 0.2.2 发布候选说明](./release-notes-0.2.2.md)
 
 ## 可运行示例
 

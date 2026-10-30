@@ -1,3 +1,6 @@
+import type {BrowserMultiplayerInput} from '../../input/BrowserMultiplayerInput';
+import type {GamepadControlSample} from '../../input/GamepadInputLayers';
+import {InputActionMap} from '../../input/InputActionMap';
 import {GuiFocusManager} from './GuiFocusManager';
 import type {GuiElement} from '../components/GuiElement';
 import type {GuiActionEvent} from '../GuiTypes';
@@ -5,6 +8,7 @@ import {consumeInputEvent,isInputEventConsumed} from '../../input/InputEventCons
 import {createGuiSyntheticPointer} from './GuiActivation';
 import type {GuiInputParticipant} from './GuiInputParticipant';
 import {GuiDragController} from './GuiDragController';
+import {GuiPointerCursor} from './GuiPointerCursor';
 
 interface PointerOwner {participant: GuiInputParticipant | null; target: GuiElement | null; consumed: boolean; preventDefault: boolean;}
 
@@ -14,6 +18,8 @@ const domains = new WeakMap<object, GuiInputDomain>();
 export class GuiInputDomain {
   readonly focus = new GuiFocusManager();
   private readonly participants = new Map<GuiInputParticipant, number>();
+  private readonly keyboardResults=new WeakMap<KeyboardEvent,boolean>();
+  private readonly keyOwners=new Map<string,{participant:GuiInputParticipant|null;target:GuiElement|null;claimed:boolean;consumed:boolean}>();
   private serial = 0;
   private listening = false;
   private readonly textEvents = ['compositionstart','compositionupdate','compositionend','copy','cut','paste'] as const;
@@ -22,7 +28,10 @@ export class GuiInputDomain {
   private readonly hovers = new Map<number,GuiInputParticipant>();
   private readonly unhandled = new Set<(event: Event) => boolean | void>();
   private readonly drag: GuiDragController;
+  private readonly cursor: GuiPointerCursor;
+  private mousePoint: {clientX: number; clientY: number} | null = null;
   constructor(private readonly surface?: HTMLCanvasElement | null) {
+    this.cursor = new GuiPointerCursor(surface);
     this.drag = new GuiDragController(this.focus, () => this.ordered(), (id, owner) => {
       const previous = this.pointers.get(id);
       this.pointers.set(id, {participant: null, target: null, consumed: true, preventDefault: owner.preventDefault()});
@@ -51,6 +60,8 @@ export class GuiInputDomain {
       try {participant.cancel();} catch (error) {errors.push(error);}
       for (const state of this.pointers.values()) if (state.participant === participant) {state.participant = null;state.target = null;}
       for (const [id,p] of this.hovers) if (p === participant) this.hovers.delete(id);
+      for(const state of this.keyOwners.values())if(state.participant===participant){state.participant=null;state.target=null;state.claimed=false;state.consumed=true;}
+      for(const state of this.gamepadOwners.values())if(state.participant===participant){state.participant=null;state.target=null;}
       this.participants.delete(participant);
       this.refresh();
       if (!this.participants.size) {
@@ -69,6 +80,34 @@ export class GuiInputDomain {
   /** Preflight follows visual layer order even when a cached GUI is not recorded again. */
   touch(participant: GuiInputParticipant): void {
     if (this.participants.has(participant)) this.participants.set(participant, ++this.serial);
+  }
+
+  private gamepadBinding:{source:BrowserMultiplayerInput;refs:number;offRaw:()=>void;offActions:()=>void}|null=null;
+  private readonly gamepadOwners=new Map<string,{participant:GuiInputParticipant|null;target:GuiElement|null}>();
+  get hasGamepadInput():boolean{return !!this.gamepadBinding&&!this.gamepadBinding.source.disposed;}
+  attachGamepadInput(source:BrowserMultiplayerInput):()=>void {
+    if(source.disposed)throw new Error('Cannot attach a disposed gamepad sampler.');
+    if(this.gamepadBinding&&this.gamepadBinding.source!==source)throw new Error('One GUI input domain borrows one gamepad sampler. Release the previous attachment first.');
+    if(!this.gamepadBinding){
+      const offActions=source.addGamepadLayer(InputActionMap.guiNavigation(),action=>this.dispatchAction(action as GuiActionEvent['action'],'gamepad'),{capture:()=>{this.refresh();return !!this.focus.focused||!!this.focus.modal;}});
+      let offRaw:()=>void;try{offRaw=source.addGamepadRoute(sample=>this.routeGamepad(sample));}catch(error){offActions();throw error;}
+      this.gamepadBinding={source,refs:0,offRaw,offActions};
+    }
+    const binding=this.gamepadBinding;binding.refs++;let closed=false;
+    return()=>{if(closed)return;closed=true;if(--binding.refs)return;if(this.gamepadBinding===binding)this.gamepadBinding=null;this.gamepadOwners.clear();try{binding.offRaw();}finally{binding.offActions();}};
+  }
+  cancelGamepadFor(element:GuiElement):void {for(const state of this.gamepadOwners.values())for(let node=state.target;node;node=node.parent)if(node===element){state.participant=null;state.target=null;break;}}
+  private routeGamepad(sample:GamepadControlSample):boolean {
+    this.refresh();const key=sample.index+':'+sample.control,held=this.gamepadOwners.get(key),active=this.ordered(),participant=held?held.participant:this.owner(this.focus.focused,active)??active.at(-1),target=held?held.target:this.focus.focused;
+    const state=held??{participant:participant??null,target};let consumed=!!held;
+    if(!held&&participant&&target)this.gamepadOwners.set(key,state);
+    try{
+      if(this.keyboardTarget(participant??null,target))consumed=(participant!.rawGamepad?.(sample,target!)??false)||consumed;
+      consumed=consumed||!!this.focus.modal;
+      if(!consumed&&this.gamepadOwners.get(key)===state)this.gamepadOwners.delete(key);
+      return consumed;
+    }catch(error){this.gamepadOwners.delete(key);throw error;}
+    finally{if(sample.neutral&&this.gamepadOwners.get(key)===state)this.gamepadOwners.delete(key);}
   }
 
   dispatchAction(action: GuiActionEvent['action'], source: GuiActionEvent['source']): boolean {
@@ -92,7 +131,17 @@ export class GuiInputDomain {
       }
       if (modal && !inside && !state.consumed) {this.emitUnhandled(createGuiSyntheticPointer('pointercancel',id));state.consumed=true;}
     }
+    for(const state of this.gamepadOwners.values())if(!this.keyboardTarget(state.participant,state.target)){state.participant=null;state.target=null;}
     this.drag.refresh();
+    this.refreshCursor(active);
+  }
+
+  private refreshCursor(active: readonly GuiInputParticipant[]): void {
+    const point = this.mousePoint;
+    if (!point) {this.cursor.restore(); return;}
+    const modal = this.focus.modal;
+    const participant = (modal ? this.owner(modal, active) : undefined) ?? [...active].reverse().find(p => p.pick(point));
+    this.cursor.update(participant?.pick(point) ?? null);
   }
 
   private ordered(): GuiInputParticipant[] {
@@ -104,18 +153,61 @@ export class GuiInputDomain {
     while (root.parent) root = root.parent;
     return [...ordered].reverse().find(p => p.roots().includes(root));
   }
-  private onKeyDown = (event: KeyboardEvent): void => {
-    this.refresh();
-    const active = this.ordered(), owner = this.owner(this.focus.focused, active) ?? active.at(-1);
-    if (owner?.keyboard(event) || this.focus.modal) {
-      consumeInputEvent(event);
-      const focused=this.focus.focused,preedit=focused&&'isComposing' in focused&&focused.isComposing===true;
-      if(owner?.preventDefault()&&!event.isComposing&&!preedit)event.preventDefault();
+  /** Native G06 responders reuse this same physical-key owner without executing Canvas editing defaults. */
+  routeNativeKeyboard(participant:GuiInputParticipant,event:KeyboardEvent,target:GuiElement):boolean {
+    if(!this.participants.has(participant))return false;return this.routeKeyboard(event,{participant,target});
+  }
+  cancelKeyboardFor(element:GuiElement):void {for(const state of this.keyOwners.values())for(let node=state.target;node;node=node.parent)if(node===element){state.participant=null;state.target=null;state.claimed=false;state.consumed=true;break;}}
+  private keyboardTarget(participant:GuiInputParticipant|null,target:GuiElement|null):boolean {
+    if(!participant||!target||!this.participants.has(participant)||!participant.enabled()||!participant.valid(target))return false;
+    const modal=this.focus.modal;for(let node:GuiElement|null=target;node;node=node.parent)if(node===modal)return true;
+    return !modal;
+  }
+  private routeKeyboard(event:KeyboardEvent,native?:{participant:GuiInputParticipant;target:GuiElement}):boolean {
+    const previous=this.keyboardResults.get(event);if(previous!==undefined)return previous;this.keyboardResults.set(event,true);
+    if(!native&&isInputEventConsumed(event))return true;
+    const value=this.routeKeyboardOnce(event,native);this.keyboardResults.set(event,value);return value;
+  }
+  private routeKeyboardOnce(event:KeyboardEvent,native?:{participant:GuiInputParticipant;target:GuiElement}):boolean {
+    this.refresh();const code=event.code||event.key,held=this.keyOwners.get(code);
+    if(event.type==='keyup'){
+      if(!held)return !!this.focus.modal&&!native;
+      this.keyOwners.delete(code);let handled=false;
+      if(held.claimed&&this.keyboardTarget(held.participant,held.target))handled=held.participant!.rawKeyboard?.(event,held.target!)??false;
+      return handled||held.consumed;
     }
-    else this.emitUnhandled(event);
+    if(event.repeat&&held?.claimed){
+      if(this.keyboardTarget(held.participant,held.target))held.participant!.rawKeyboard?.(event,held.target!);
+      return held.consumed;
+    }
+    const active=this.ordered(),participant=native?.participant??this.owner(this.focus.focused,active)??active.at(-1),target=native?.target??this.focus.focused;
+    const state={participant:participant??null,target,claimed:false,consumed:held?.consumed===true};
+    if((participant&&target)||!!this.focus.modal){
+      if(!held&&this.keyOwners.size>=1024){consumeInputEvent(event);throw new Error('GUI held keyboard state exceeds the original pointer/key ceiling.');}
+      this.keyOwners.set(code,state);
+    }
+    let claimed=false,handled=false;
+    try{
+      if(participant&&target&&(!event.repeat||!held)&&this.keyboardTarget(participant,target))claimed=participant.rawKeyboard?.(event,target)??false;
+      handled=claimed||(!native&&(participant?.keyboard(event)||!!this.focus.modal)||false);
+    }catch(error){this.keyOwners.set(code,{participant:null,target:null,claimed:false,consumed:true});consumeInputEvent(event);throw error;}
+    if(this.keyOwners.get(code)===state){state.claimed=claimed&&state.participant===participant&&state.target===target;state.consumed=handled||state.consumed;}
+    return native?claimed:handled||held?.consumed===true;
+  }
+  private onKeyDown = (event:KeyboardEvent):void => {
+    if(this.routeKeyboard(event)){
+      consumeInputEvent(event);const focused=this.focus.focused,preedit=focused&&'isComposing' in focused&&focused.isComposing===true;
+      const owner=this.owner(focused,this.ordered());if(owner?.preventDefault()&&!event.isComposing&&!preedit)event.preventDefault();
+    }else this.emitUnhandled(event);
+  };
+  private onKeyUp = (event:KeyboardEvent):void => {
+    if(this.routeKeyboard(event)){consumeInputEvent(event);if(!event.isComposing)event.preventDefault();}else this.emitUnhandled(event);
   };
   private onBlur = (event?:Event): void => {
     if(event?.currentTarget===this.surface&&[...this.participants.keys()].some(p=>p.ownsTextTarget?.((event as FocusEvent).relatedTarget)))return;
+    this.mousePoint = null;this.cursor.restore();
+    for(const state of this.keyOwners.values()){state.participant=null;state.target=null;state.claimed=false;state.consumed=true;}
+    for(const state of this.gamepadOwners.values()){state.participant=null;state.target=null;}
     const errors: unknown[] = [];
     try {this.drag.cancel();} catch (error) {errors.push(error);}
     for (const participant of this.participants.keys()) try {participant.cancel();} catch (error) {errors.push(error);}
@@ -135,27 +227,30 @@ export class GuiInputDomain {
 
   private listen(): void {
     if (this.listening || !this.surface) return;
-    this.surface.addEventListener('keydown',this.onKeyDown);this.surface.addEventListener('blur',this.onBlur);
+    this.surface.addEventListener('keydown',this.onKeyDown);this.surface.addEventListener('keyup',this.onKeyUp);this.surface.addEventListener('blur',this.onBlur);
     this.surface.ownerDocument?.defaultView?.addEventListener('blur',this.onBlur);
     this.surface.ownerDocument?.defaultView?.addEventListener('pointerup',this.onOutsideTerminal);
     this.surface.ownerDocument?.defaultView?.addEventListener('pointercancel',this.onOutsideTerminal);
     this.surface.ownerDocument?.addEventListener('visibilitychange',this.onVisibility);
     for(const type of this.textEvents)this.surface.addEventListener(type,this.onText);
     for(const type of this.pointerEvents)this.surface.addEventListener(type,this.onPointer);
+    this.surface.addEventListener('pointerleave',this.onPointerLeave);
     this.surface.addEventListener('lostpointercapture',this.onLostCapture);
     this.surface.addEventListener('wheel',this.onWheel,{passive:false});this.listening=true;
   }
   private releaseListeners(): void {
     if (this.participants.size || this.unhandled.size || !this.listening) return;
-    this.surface?.removeEventListener('keydown',this.onKeyDown);this.surface?.removeEventListener('blur',this.onBlur);
+    this.surface?.removeEventListener('keydown',this.onKeyDown);this.surface?.removeEventListener('keyup',this.onKeyUp);this.surface?.removeEventListener('blur',this.onBlur);
     this.surface?.ownerDocument?.defaultView?.removeEventListener('blur',this.onBlur);
     this.surface?.ownerDocument?.defaultView?.removeEventListener('pointerup',this.onOutsideTerminal);
     this.surface?.ownerDocument?.defaultView?.removeEventListener('pointercancel',this.onOutsideTerminal);
     this.surface?.ownerDocument?.removeEventListener('visibilitychange',this.onVisibility);
     for(const type of this.textEvents)this.surface?.removeEventListener(type,this.onText);
     for(const type of this.pointerEvents)this.surface?.removeEventListener(type,this.onPointer);
+    this.surface?.removeEventListener('pointerleave',this.onPointerLeave);
     this.surface?.removeEventListener('lostpointercapture',this.onLostCapture);this.surface?.removeEventListener('wheel',this.onWheel);
-    this.pointers.clear();this.hovers.clear();this.listening=false;
+    this.mousePoint = null;this.cursor.restore();
+    this.pointers.clear();this.hovers.clear();this.keyOwners.clear();this.listening=false;
   }
   private emitUnhandled(event: Event): void {
     for (const callback of [...this.unhandled]) {
@@ -169,7 +264,13 @@ export class GuiInputDomain {
     return false;
   }
   private onPointer = (raw: Event): void => {
-    try {this.routeNativePointer(raw);} catch (error) {consumeInputEvent(raw); throw error;}
+    const event = raw as PointerEvent;
+    if (event.pointerType === 'mouse') this.mousePoint = event.type === 'pointercancel' ? null : {clientX: event.clientX, clientY: event.clientY};
+    try {this.routeNativePointer(raw);} catch (error) {this.mousePoint=null;this.cursor.restore();consumeInputEvent(raw); throw error;}
+  };
+  private onPointerLeave = (raw: Event): void => {
+    if ((raw as PointerEvent).pointerType !== 'mouse') return;
+    this.mousePoint = null;this.cursor.restore();
   };
   private routeNativePointer(raw: Event): void {
     const event=raw as PointerEvent,id=event.pointerId;this.refresh();

@@ -910,7 +910,16 @@
       "entry": "gui-runtime/main.ts",
       "capabilities": [
         "gui",
-        "2d"
+        "2d",
+        "shared-layout",
+        "flex-layout",
+        "grid-layout",
+        "unicode-text",
+        "gui-input",
+        "theme-skins",
+        "split-panels",
+        "tabs",
+        "semantic-drag-drop"
       ],
       "assets": [],
       "screenshot": {
@@ -2266,6 +2275,35 @@
       "catalog": {
         "group": "rendering",
         "order": 101
+      }
+    },
+    {
+      "id": "hya-production",
+      "title": "HYA Composition & Model Binding",
+      "entry": "hya-production/main.ts",
+      "capabilities": [
+        "hya",
+        "2d",
+        "text",
+        "data-binding"
+      ],
+      "assets": [
+        "hya-production/scene.json",
+        "hya-production/assets.json",
+        "hya-production/scene-sans.otf",
+        "hya-production/image.png",
+        "hya-production/alternate.png",
+        "hya-production/FONT-LICENSE.txt"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 104
       }
     },
     {

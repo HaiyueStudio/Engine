@@ -1,5 +1,20 @@
 # Release process
 
+0.2.2 的可恢复发布入口为 `scripts/publication.mjs`，策略／CLI 测试由 `npm run release:publication:test` 执行。它只接受同一干净提交的四包报告和已完成 G13 的资格文件：
+
+```sh
+node scripts/publication.mjs plan --packages <public-packages.json> --qualification <g13-checks.json> --plan <new-frozen-plan.json>
+node scripts/publication.mjs verify --plan <frozen-plan.json> --journal <journal.json>
+```
+
+正式发布仍需单独明确授权；获得授权后才使用 `publish` 模式。Windows 可从 `scripts/start-publication.cmd` 传递相同参数，入口只要求 Node，不依赖 `pwsh.exe` 或 `Get-FileHash`。实时授权链接仅打印到当前终端，日志去除令牌、验证码和授权 URL；过期链接不复用。iPhone 使用已登录账号的普通 Safari，若先完成登录，需在同一会话返回本次实时链接。
+
+控制器在提交前持久化意图；接受、处理中与可下载是独立状态。等待超时或响应丢失保留 pending，恢复时先查询并下载校验，绝不把 404 当作未曾接受而重复提交。任何同版本 SHA-512／下载 SHA-256 冲突均停止。授权失败、部分成功及原日志保留，不自动 unpublish 或改版本。进程异常终止留下的 `.lock` 必须先确认原 PID 已退出，再人工移除锁后恢复；不得同时开两个发布窗口。
+
+四包均真实下载并与冻结字节一致后才允许创建 GitHub Release；附件逐项回读校验后才可推进 Pages，并核对部署提交。控制器不会自动发布 GitHub／Pages。G13 仅准备和演练，不执行这些外部动作。
+
+只有记录为 EOTP／E401／ENEEDAUTH 的确定认证拒绝，在用户重新授权后，才可通过 `publish --retry-auth @haiyue/具名包` 恢复同一 journal，旧尝试仍保留。已接受、处理中、响应丢失及 E403 不适用此选项；这些状态继续查询并禁止重复提交。不要通过换用空 journal 来绕过待处理记录。
+
 Engine 独立发布范围由 `review/api/release-manifest.json` 定义：engine、animation-spec、extensions、shader-language 四个 npm 包，以及 Engine examples 静态目录。UI、Editor、Games 按各自仓库发布，参见 [ADR 0105](adr/0105-independent-library-release-gates.md)。
 
 ## 候选验收

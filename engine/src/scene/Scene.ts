@@ -6,8 +6,7 @@ import { Entity } from '../ecs/Entity';
 import type { System } from '../ecs/System';
 import type { World } from '../ecs/World';
 import type { GuiSystem } from '../gui/systems/GuiSystem';
-import type { RenderIntegration } from '../renderer/RenderIntegration';
-import type { RenderPipeline, RenderPipelineEntryOptions } from '../renderer/RenderPipeline';
+import type { RenderPipelineEntryOptions } from '../renderer/RenderPipeline';
 import type { PipelineWarmupPlan, PipelineWarmupProgress, PipelineWarmupRunOptions } from '../renderer/PipelineWarmup';
 import type { Mesh2DRenderSystem } from '../systems/Mesh2DRenderSystem';
 import type { Render3DSystem } from '../systems/Render3DSystem';
@@ -25,6 +24,7 @@ import { ScenePlugins } from './internal/ScenePlugins';
 import { normalizeSceneOptions } from './internal/ScenePresetFactory';
 import { SceneRuntime } from './internal/SceneRuntime';
 import { SceneSystems } from './internal/SceneSystems';
+import { bindSceneRenderOwner } from './internal/SceneRenderAccess';
 
 export type {
   SceneAssetRequest,
@@ -37,17 +37,7 @@ export type {
 } from './internal/SceneContracts';
 export { normalizeSceneOptions } from './internal/ScenePresetFactory';
 
-const systemsByScene = new WeakMap<Scene, SceneSystems>();
-
-/** Experimental scheduler accessor. Import from `@haiyue/engine/experimental`. */
-export function getSceneRenderPipeline(scene: Scene): RenderPipeline {
-  return systemsByScene.get(scene)!.renderPipeline;
-}
-
-/** Experimental scheduler accessor. Import from `@haiyue/engine/experimental`. */
-export function getSceneRenderIntegration(scene: Scene): RenderIntegration {
-  return systemsByScene.get(scene)!.renderIntegration;
-}
+export { getSceneRenderPipeline, getSceneRenderIntegration } from './internal/SceneRenderAccess';
 
 /** Public scene facade; lifecycle, systems, assets, presets and plugins live in replaceable services. */
 export class Scene implements ScenePluginScene {
@@ -64,7 +54,7 @@ export class Scene implements ScenePluginScene {
     this.defaults = mergeSceneDefaults(engine.defaults, engine.defaults?.scene, options.defaults);
     this._runtime = new SceneRuntime(engine, options.name ?? 'Scene');
     this._systems = new SceneSystems(engine, this._runtime.world, this.defaults, options);
-    systemsByScene.set(this, this._systems);
+    bindSceneRenderOwner(this, this._systems);
     this._assets = new SceneAssets(engine, this._runtime);
     this._plugins = new ScenePlugins(engine, this, this._systems);
   }

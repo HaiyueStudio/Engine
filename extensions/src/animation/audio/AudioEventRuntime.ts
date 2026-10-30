@@ -30,6 +30,7 @@ interface ActiveVoice {
   readonly clock: RuntimeAudioClockDomain;
   readonly startFrame: number;
   readonly contentAdvanceAtStart: number;
+  readonly playbackRate: number;
   readonly handle: ScheduledAudioHandle;
   stopping: boolean;
 }
@@ -55,11 +56,14 @@ interface PendingVoiceReservation {
   readonly cue: RuntimeAudioCue;
   readonly eventId: string;
   readonly frame: number;
+  readonly clock: RuntimeAudioClockDomain;
   cancelled: boolean;
 }
 
 export interface AudioEventRuntimeOptions {
   readonly resolver?: AudioResourceResolverPort;
+  /** New composition owner semantics; the standalone legacy transport remains unchanged. */
+  readonly compositionTransport?: boolean;
 }
 
 export class AudioEventRuntime {
@@ -84,12 +88,14 @@ export class AudioEventRuntime {
   private paused = false;
   private visibilityPaused = false;
   private disposed = false;
+  private readonly compositionTransport: boolean;
 
   constructor(
     readonly document: RuntimeAudioDocument,
     private readonly backend: AudioBackendPort,
     options: AudioEventRuntimeOptions = {},
   ) {
+    this.compositionTransport = options.compositionTransport ?? false;
     if (backend.profile !== document.playbackProfile) {
       audioRuntimeFail(
         'E_AUDIO_RUNTIME_PROFILE',
@@ -142,10 +148,27 @@ export class AudioEventRuntime {
     await Promise.all(resourceIds.map(resourceId => this.assets.load(resourceId)));
   }
 
+  /** Pure admission for the same original scheduler before a whole-player frame may commit. */
+  assertPreparedAdvance(snapshot: RuntimeClockSnapshot, rate = 1, intent?: Readonly<{active:boolean; relocation?: 'seek' | 'restart' | 'stop'}>): void {
+    this.assertLive(); validateRate(rate); validateSnapshot(snapshot); this.validateTransportRate(rate);
+    let events = 0;
+    for (const domain of clockDomains()) {
+      const state = this.domains[domain];
+      if (!intent?.relocation && snapshot[domain] < state.time) audioRuntimeFail('E_AUDIO_RUNTIME_CLOCK', '$.clock.' + domain, 'clock cannot move backward through advance; use seek or rewind');
+      if (!this.compositionTransport || !(intent?.active ?? !this.paused)) continue;
+      const end = snapshot[domain] + this.document.clock.lookAheadFrames / this.backend.sampleRate * rate;
+      for (const event of this.events[domain]) if (event.time <= end && (intent?.relocation === 'restart' ? true : intent?.relocation === 'seek' ? event.time > snapshot[domain] : !state.scheduledEvents.has(event.id))) {
+        if (++events > this.document.limits.maxEventTokens) audioRuntimeFail('E_AUDIO_RUNTIME_LIMIT', '$.clock.events', 'the original event-token ceiling is exceeded by this complete crossed window');
+        if (event.operation === 'start' && event.time < snapshot[domain] && this.document.clock.lateDecodePolicy === 'error') audioRuntimeFail('E_AUDIO_RUNTIME_CLOCK', '$.clock.' + domain, 'the crossed cue would violate the declared late-decode error policy');
+      }
+    }
+  }
+
   async advance(snapshot: RuntimeClockSnapshot, rate = 1): Promise<void> {
-    this.assertLive();
-    validateRate(rate);
-    validateSnapshot(snapshot);
+    this.assertPreparedAdvance(snapshot, rate);
+    for (const domain of clockDomains()) if (snapshot[domain] < this.domains[domain].time) {
+      audioRuntimeFail('E_AUDIO_RUNTIME_CLOCK', `$.clock.${domain}`, 'clock cannot move backward through advance; use seek or rewind');
+    }
     if (this.paused) return;
     const frame = this.backend.currentFrame();
     for (const domain of clockDomains()) {
@@ -159,6 +182,7 @@ export class AudioEventRuntime {
         );
       }
       this.checkDrift(domain, nextTime, rate, frame);
+      if (this.compositionTransport && rate !== state.rate) await this.changeTransportRate(domain, rate, frame);
       state.time = nextTime;
       state.anchorTime = nextTime;
       state.anchorFrame = frame;
@@ -191,17 +215,32 @@ export class AudioEventRuntime {
       await this.startCue(cue, command.eventId, command.clock, frame, 0);
     } else {
       this.stopCue(cue.id, frame, 'cue-command');
+      if (this.compositionTransport) {
+        this.pausedVoices = this.pausedVoices.filter(voice => voice.cue !== cue.id);
+        for (let index = this.pendingSuspended.length - 1; index >= 0; index--) {
+          if (this.pendingSuspended[index]!.cue === cue.id) this.pendingSuspended.splice(index, 1);
+        }
+        for (const pending of [...this.pendingVoices.values()]) if (pending.cue.id === cue.id) this.cancelPendingVoice(pending, frame, 'cue-command');
+      }
     }
   }
 
   async seek(domain: RuntimeAudioClockDomain, time: number, rate = this.domains[domain].rate): Promise<void> {
     this.assertLive();
     validateRate(rate);
+    this.validateTransportRate(rate);
     if (!Number.isFinite(time) || time < 0) {
       audioRuntimeFail('E_AUDIO_RUNTIME_CLOCK', `$.clock.${domain}`, 'seek time must be finite and non-negative');
     }
     const frame = this.backend.currentFrame();
     this.stopDomain(domain, frame, 'seek');
+    if (this.compositionTransport) {
+      this.pausedVoices = this.pausedVoices.filter(voice => voice.clock !== domain);
+      for (let index = this.pendingSuspended.length - 1; index >= 0; index--) {
+        if (this.pendingSuspended[index]!.clock === domain) this.pendingSuspended.splice(index, 1);
+      }
+      for (const pending of [...this.pendingVoices.values()]) if (pending.clock === domain) this.cancelPendingVoice(pending, frame, 'seek');
+    }
     const state = this.domains[domain];
     state.time = time;
     state.anchorTime = time;
@@ -223,12 +262,15 @@ export class AudioEventRuntime {
     for (const entries of active.values()) {
       for (const event of entries) {
         const cue = this.requireCue(event.cue);
+        if (this.compositionTransport && !cue.loop) continue;
         const resource = this.resources.get(cue.resource)!;
         const contentAdvance = Math.floor((time - event.time) * resource.sampleRate * cue.rate);
-        await this.startCue(cue, event.id, domain, frame, contentAdvance);
+        if (this.compositionTransport && this.paused) {
+          this.pausedVoices.push(Object.freeze({cue: cue.id, eventId: event.id, clock: domain, delayFrames: 0, contentAdvanceFrames: contentAdvance}));
+        } else await this.startCue(cue, event.id, domain, frame, contentAdvance);
       }
     }
-    if (!this.paused) await this.scheduleWindow(domain);
+    if (!this.paused && !this.compositionTransport) await this.scheduleWindow(domain);
   }
 
   async rewind(domain: RuntimeAudioClockDomain): Promise<void> {
@@ -268,7 +310,7 @@ export class AudioEventRuntime {
         const delayFrames = Math.max(0, voice.startFrame - frame);
         const elapsedBackendFrames = Math.max(0, frame - voice.startFrame);
         const elapsedContentFrames = Math.floor(
-          elapsedBackendFrames * voice.cue.rate * resource.sampleRate / this.backend.sampleRate,
+          elapsedBackendFrames * voice.playbackRate * resource.sampleRate / this.backend.sampleRate,
         );
         return Object.freeze({
           cue: voice.cue.id,
@@ -431,12 +473,12 @@ export class AudioEventRuntime {
     const lookAheadSeconds = this.document.clock.lookAheadFrames / this.backend.sampleRate * state.rate;
     const end = state.time + lookAheadSeconds;
     for (const event of this.events[domain]) {
-      if (event.time < state.time || event.time > end || state.scheduledEvents.has(event.id)) continue;
+      if ((!this.compositionTransport && event.time < state.time) || event.time > end || state.scheduledEvents.has(event.id)) continue;
       state.scheduledEvents.add(event.id);
       const frame = state.anchorFrame + Math.round((event.time - state.anchorTime) / state.rate * this.backend.sampleRate);
       const cue = this.requireCue(event.cue);
       if (event.operation === 'start') await this.startCue(cue, event.id, domain, frame, 0);
-      else this.stopCue(cue.id, frame, 'timeline-stop');
+      else this.stopCue(cue.id, this.compositionTransport ? Math.max(frame, this.backend.currentFrame()) : frame, 'timeline-stop');
     }
   }
 
@@ -449,6 +491,7 @@ export class AudioEventRuntime {
     fromSuspendedQueue = false,
   ): Promise<void> {
     if (this.disposed) return;
+    const playbackRate = cue.rate * (this.compositionTransport ? this.domains[clock].rate : 1);
     if (this.backend.kind !== 'offline' && this.backend.state === 'suspended' && !fromSuspendedQueue) {
       if (this.document.clock.suspendedPolicy === 'error') {
         audioRuntimeFail('E_AUDIO_RUNTIME_STATE', '$.backend', 'audio backend is suspended');
@@ -478,7 +521,7 @@ export class AudioEventRuntime {
       for (const voice of overlapping) this.stopVoice(voice, intendedFrame, 'overlap-restart');
       for (const reservation of pendingOverlap) this.cancelPendingVoice(reservation, intendedFrame, 'overlap-restart');
     }
-    const reservation = this.reserveVoice(cue, eventId, intendedFrame);
+    const reservation = this.reserveVoice(cue, eventId, intendedFrame, clock);
     try {
       const generation = this.lifecycleGeneration;
       const decoded = await this.assets.load(cue.resource);
@@ -494,10 +537,10 @@ export class AudioEventRuntime {
         if (this.document.clock.lateDecodePolicy === 'error') {
           audioRuntimeFail('E_AUDIO_RUNTIME_CLOCK', `cues.${cue.id}`, 'audio decode completed after its schedule frame');
         }
-        contentAdvance += Math.floor(lateFrames * cue.rate * decoded.sampleRate / this.backend.sampleRate);
+        contentAdvance += Math.floor(lateFrames * playbackRate * decoded.sampleRate / this.backend.sampleRate);
         this.recordTrace({ kind: 'late-catch-up', cue: cue.id, eventId, frame: now, reason: String(lateFrames) });
       }
-      const playback = resolvePlayback(cue, decoded.frameLength, contentAdvance, this.backend.sampleRate, decoded.sampleRate);
+      const playback = resolvePlayback(playbackRate === cue.rate ? cue : {...cue, rate: playbackRate}, decoded.frameLength, contentAdvance, this.backend.sampleRate, decoded.sampleRate);
       if (!playback) {
         this.recordTrace({ kind: 'late-drop', cue: cue.id, eventId, frame: now, reason: 'cue-already-ended' });
         return;
@@ -507,13 +550,14 @@ export class AudioEventRuntime {
       let voice: ActiveVoice;
       const handle = this.backend.schedule({
         voiceId,
+        bus: cue.bus,
         decoded,
         whenFrame,
         offsetFrame: playback.offsetFrame,
         ...(playback.stopFrameCount === undefined
           ? {}
           : { stopFrame: whenFrame + playback.stopFrameCount }),
-        rate: cue.rate,
+        rate: playbackRate,
         gain: this.effectiveGain(cue),
         ...(cue.loop ? { loop: { startFrame: cue.loop.startFrame, endFrame: cue.loop.endFrame } } : {}),
         onEnded: () => {
@@ -529,6 +573,7 @@ export class AudioEventRuntime {
         clock,
         startFrame: whenFrame,
         contentAdvanceAtStart: contentAdvance,
+        playbackRate,
         handle,
         stopping: false,
       };
@@ -547,7 +592,7 @@ export class AudioEventRuntime {
     }
   }
 
-  private reserveVoice(cue: RuntimeAudioCue, eventId: string, frame: number): PendingVoiceReservation {
+  private reserveVoice(cue: RuntimeAudioCue, eventId: string, frame: number, clock: RuntimeAudioClockDomain): PendingVoiceReservation {
     const live = [...this.voices.values()].filter(voice => !voice.stopping);
     const pending = [...this.pendingVoices.values()].filter(reservation => !reservation.cancelled);
     const resourceVoices = live.filter(voice => voice.cue.resource === cue.resource);
@@ -560,7 +605,7 @@ export class AudioEventRuntime {
     if (remaining.length + remainingPending.length >= this.document.limits.maxVoices) {
       this.stealOrReject(remaining, remainingPending, cue, frame, 'total-voice-limit');
     }
-    const reservation = { id: ++this.reservationSequence, cue, eventId, frame, cancelled: false };
+    const reservation = { id: ++this.reservationSequence, cue, eventId, frame, clock, cancelled: false };
     this.pendingVoices.set(reservation.id, reservation);
     return reservation;
   }
@@ -689,6 +734,27 @@ export class AudioEventRuntime {
       'audio clock anchor was resynchronized',
       Object.freeze({ expectedFrame: expected, observedFrame: frame, driftFrames: drift }),
     );
+  }
+
+  private validateTransportRate(rate: number): void {
+    if (!this.compositionTransport) return;
+    for (const cue of this.cues.values()) if (cue.rate * rate < .0625 || cue.rate * rate > 16) {
+      audioRuntimeFail('E_AUDIO_RUNTIME_PROFILE', `cues.${cue.id}.rate`, 'combined composition and cue rate is outside the audio profile');
+    }
+  }
+
+  private async changeTransportRate(domain: RuntimeAudioClockDomain, rate: number, frame: number): Promise<void> {
+    const previousRate = this.domains[domain].rate;
+    const voices = [...this.voices.values()].filter(voice => voice.clock === domain && !voice.stopping);
+    this.domains[domain].rate = rate;
+    for (const voice of voices) {
+      const resource = this.resources.get(voice.cue.resource)!;
+      const elapsed = Math.max(0, frame - voice.startFrame);
+      const content = voice.contentAdvanceAtStart + Math.floor(elapsed * voice.playbackRate * resource.sampleRate / this.backend.sampleRate);
+      const delay = Math.round(Math.max(0, voice.startFrame - frame) * previousRate / rate);
+      this.stopVoice(voice, frame, 'composition-rate');
+      await this.startCue(voice.cue, voice.eventId, domain, frame + delay, content);
+    }
   }
 
   private effectiveGain(cue: RuntimeAudioCue): number {

@@ -1,3 +1,5 @@
+import * as GuiPaint from '../rendering/GuiControlPaintPrimitives';
+import {admitGuiControl} from '../GuiControlIdentity';
 import type { SampleableTextureSource } from '../../material/BasicMaterial';
 import { GuiDirtyFlags, GuiElementOptions } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
@@ -12,6 +14,7 @@ export interface GuiImageOptions extends GuiElementOptions {
 }
 
 export class GuiImage extends GuiElement {
+  private static readonly __controlIdentityGuiImage = /* @__PURE__ */ (() => admitGuiControl(GuiImage.prototype, 'GuiImage', undefined, paintGuiImage))();
   static override readonly themeControlType: string = 'GuiImage';
   source: GuiImageSource;
   sourceKey: string | null;
@@ -45,3 +48,17 @@ export class GuiImage extends GuiElement {
     this.markDirty(GuiDirtyFlags.Visual);
   }
 }
+
+/** Original built-in painter; retained with this control, not every GUI owner. */
+function paintGuiImage(context:GuiPaint.GuiControlPaintContext, image: GuiImage, theme: GuiPaint.GuiTheme): void {
+    context.currentImageBatch.addImage({
+      source: image.source,
+      x: image.rect.x,
+      y: image.rect.y,
+      width: image.rect.width,
+      height: image.rect.height,
+      uv: image.uv,
+      color: GuiPaint.colorToRgba(image.tint, theme.colors.text),
+      clip: context.clipRect(image.rect),
+    });
+  }

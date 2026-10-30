@@ -1,3 +1,4 @@
+import {EngineError, EngineErrorCode} from './EngineError.js';
 import type {RenderRegion, RenderRegionOptions, RegionUpdateMode} from './RenderRegion';
 import type {ScissorRect} from './ViewportRect';
 
@@ -17,11 +18,11 @@ export interface RegionUpdatePlan extends RegionContentSnapshot {
   readonly onceSerial: number;
 }
 function bounds(rect: Readonly<ScissorRect>): Readonly<ScissorRect> {
-  if (!rect || ![rect.x, rect.y, rect.width, rect.height, rect.x + rect.width, rect.y + rect.height].every(Number.isFinite) || rect.width < 0 || rect.height < 0) throw new Error('Invalid render region bounds.');
+  if (!rect || ![rect.x, rect.y, rect.width, rect.height, rect.x + rect.width, rect.y + rect.height].every(Number.isFinite) || rect.width < 0 || rect.height < 0) throw new EngineError(EngineErrorCode.RenderPipelineInvalidPassState, 'Invalid render region bounds.');
   return Object.freeze({x: rect.x, y: rect.y, width: rect.width, height: rect.height});
 }
 function mode(value: RegionUpdateMode): void {
-  if (!['demand','once','continuous','disabled'].includes(value)) throw new Error('Invalid render region update mode.');
+  if (!['demand','once','continuous','disabled'].includes(value)) throw new EngineError(EngineErrorCode.RenderPipelineInvalidPassState, 'Invalid render region update mode.');
 }
 
 /** Internal scheduling state; no textures, canvas access, GUI or layout dependencies. */
@@ -41,14 +42,14 @@ export class RenderRegionState {
   get isDisposed(): boolean {return this.disposed;}
 
   constructor(options: RenderRegionOptions, private readonly changed: () => void, private readonly removed: () => void) {
-    if (!options || typeof options.id !== 'string' || !options.id.trim()) throw new Error('Render region requires a nonempty ID.');
+    if (!options || typeof options.id !== 'string' || !options.id.trim()) throw new EngineError(EngineErrorCode.RenderPipelineInvalidPassState, 'Render region requires a nonempty ID.');
     mode(options.updateMode);
-    if (!['on-update','once','never-after-initialization'].includes(options.clearMode) || typeof options.visible !== 'boolean') throw new Error('Invalid render region clear mode or visibility.');
+    if (!['on-update','once','never-after-initialization'].includes(options.clearMode) || typeof options.visible !== 'boolean') throw new EngineError(EngineErrorCode.RenderPipelineInvalidPassState, 'Invalid render region clear mode or visibility.');
     this.options = Object.freeze({...options, bounds: bounds(options.bounds)});
     this.onceSerial = options.updateMode === 'once' ? 1 : 0;
     this.handle = Object.freeze({
       id: options.id,
-      invalidate: (reason: string) => {this.live(); if (typeof reason !== 'string' || !reason.trim()) throw new Error('Render region invalidation requires a reason.'); this.revision++; this.changed();},
+      invalidate: (reason: string) => {this.live(); if (typeof reason !== 'string' || !reason.trim()) throw new EngineError(EngineErrorCode.RenderPipelineInvalidPassState, 'Render region invalidation requires a reason.'); this.revision++; this.changed();},
       setBounds: (rect: Readonly<ScissorRect>) => {
         this.live(); const next = bounds(rect), previous = this.options.bounds;
         if (next.x === previous.x && next.y === previous.y && next.width === previous.width && next.height === previous.height) return;
@@ -63,7 +64,7 @@ export class RenderRegionState {
         this.changed();
       },
       setVisible: (visible: boolean) => {
-        this.live(); if (typeof visible !== 'boolean') throw new Error('Invalid render region visibility.');
+        this.live(); if (typeof visible !== 'boolean') throw new EngineError(EngineErrorCode.RenderPipelineInvalidPassState, 'Invalid render region visibility.');
         if (visible === this.options.visible) return;
         this.options = Object.freeze({...this.options, visible}); this.configuration++; this.changed();
       },
@@ -72,14 +73,14 @@ export class RenderRegionState {
     });
     handles.set(this.handle, this);
   }
-  private live(): void {if (this.disposed) throw new Error('Render region is disposed.');}
+  private live(): void {if (this.disposed) throw new EngineError(EngineErrorCode.EngineInvalidState, 'Render region is disposed.');}
   snapshot(): RegionContentSnapshot {
     this.live();
     return Object.freeze({...this.options, revision: this.revision, contentGeneration: this.contentGeneration, initialized: this.initialized,
       dirty: this.revision !== this.renderedRevision, pendingOnce: this.onceSerial > this.consumedOnce});
   }
   prepare(resourceKey: string): RegionUpdatePlan | null {
-    this.live(); if (typeof resourceKey !== 'string' || !resourceKey) throw new Error('Region resource generation requires a key.');
+    this.live(); if (typeof resourceKey !== 'string' || !resourceKey) throw new EngineError(EngineErrorCode.RenderPipelineInvalidPassState, 'Region resource generation requires a key.');
     if (this.resourceKey !== resourceKey) {this.resourceKey = resourceKey; this.configuration++; this.initialized = false;}
     const state = this.snapshot();
     if (!state.visible || state.bounds.width === 0 || state.bounds.height === 0) return null;
@@ -113,8 +114,8 @@ export class RenderRegionCollection {
   get generation(): number {return this.version;}
   get size(): number {return this.regions.size;}
   create(options: RenderRegionOptions): RenderRegion {
-    if (this.disposed) throw new Error('Render view regions are disposed.');
-    if (this.regions.has(options?.id)) throw new Error('Render region IDs must be unique within a view.');
+    if (this.disposed) throw new EngineError(EngineErrorCode.EngineInvalidState, 'Render view regions are disposed.');
+    if (this.regions.has(options?.id)) throw new EngineError(EngineErrorCode.RenderPipelineInvalidPassState, 'Render region IDs must be unique within a view.');
     const state = new RenderRegionState(options, () => {this.version++;}, () => {this.regions.delete(state.handle.id);});
     this.regions.set(state.handle.id, state); this.version++; return state.handle;
   }

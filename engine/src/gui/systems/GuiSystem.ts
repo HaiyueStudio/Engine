@@ -1,26 +1,33 @@
+import type {GuiTextServices} from '../input/GuiTextServices';
+import {getGuiTextServiceFactory} from '../input/GuiTextServiceRegistry';
+import {isGuiControl} from '../GuiControlIdentity';
+import {setGuiLabelMeasuredTextWidth,setGuiHelpDialogTextMetrics} from '../GuiIntrinsicText';
+import {maintainGuiRadioGroups} from '../GuiControlIdentity';
+import type {BrowserMultiplayerInput} from '../../input/BrowserMultiplayerInput';
+import {routeGuiExternalKeyboard,routeGuiExternalGamepad} from '../GuiExternalPresentation';
+import {projectGuiInputGeometry,type GuiInputGeometry,type GuiInputViewSnapshot,type GuiInputPresentation} from '../input/GuiInputPresentation';
+import {bindGuiExternalPresentation,type GuiExternalPresentation} from '../GuiExternalPresentation';
 import {isRegionRenderTarget,getRegionProjection} from '../../core/RegionRenderTarget';
-import { GuiSwitch } from '../components/GuiSwitch';
-import { GuiToast } from '../components/GuiToast';
-import { GuiScrollView } from '../components/GuiScrollView';
-import { GuiHelpDialog, setGuiHelpDialogTextMetrics } from '../components/GuiHelpDialog';
+import { type GuiSwitch } from '../components/GuiSwitch';
+import { type GuiToast } from '../components/GuiToast';
+import { type GuiScrollView } from '../components/GuiScrollView';
+import { type GuiHelpDialog } from '../components/GuiHelpDialog';
 import type { IEngine } from '../../core/IEngine';
 import { System } from '../../ecs/System';
 import { World } from '../../ecs/World';
 import { GuiElement } from '../components/GuiElement';
+import { type GuiButton } from '../components/GuiButton';
+import { type GuiInput } from '../components/GuiInput';
+import { type GuiLabel } from '../components/GuiLabel';
+import { type GuiRadio } from '../components/GuiRadio';
 import {guiButtonHoverAnimating,advanceGuiButtonHover,finishGuiButtonHover} from '../input/GuiButtonHover';
-import {GuiTooltip} from '../components/GuiTooltip';
+import type {GuiTooltip} from '../components/GuiTooltip';
 import {guiTooltipPending,advanceGuiTooltip} from '../input/GuiTooltipTiming';
-import { GuiButton } from '../components/GuiButton';
-import { GuiInput } from '../components/GuiInput';
-import { GuiLabel, setGuiLabelMeasuredTextWidth } from '../components/GuiLabel';
-import { GuiRadio } from '../components/GuiRadio';
 import { GuiRoot } from '../components/GuiRoot';
-import { GuiSelect } from '../components/GuiSelect';
+import { type GuiSelect } from '../components/GuiSelect';
 import { GuiFocusManager } from '../input/GuiFocusManager';
 import { hitTestGui } from '../input/GuiHitTest';
-import {guiPasswordEyeHit} from '../input/GuiInputAdornments';
 import {GuiDirtyFlags, type GuiPointerEvent} from '../GuiTypes';
-import {cancelGuiInputClick} from '../input/GuiInputClickSelection';
 import { GuiRenderer } from '../rendering/GuiRenderer';
 import {bindGuiMeasureOwner, guiMeasureFontVersion, requestGuiFontReload} from '../GuiMeasure';
 import {isGuiLayoutHidden, isGuiLayoutManaged, suspendGuiLayout} from '../GuiLayoutState';
@@ -45,11 +52,6 @@ import {revealGuiElement, visibleGuiHostRect} from '../input/GuiDragGeometry';
 import {createGuiSyntheticPointer} from '../input/GuiActivation';
 import {guiInputProjection,guiInputPoint,guiInputHostRect} from '../input/GuiInputProjection';
 import type {GuiTextInputHost} from '../input/GuiTextInputHost';
-import {GuiTextInputConnection} from '../input/GuiTextInputConnection';
-import {GuiBrowserTextInputHost} from '../input/GuiBrowserTextInputHost';
-import {guiInputPresentation} from '../input/GuiInputPresentation';
-import {GuiCaretClock} from '../input/GuiCaretClock';
-import {GuiTextViewport} from '../input/GuiTextViewport';
 
 interface PendingGuiPointerEvent {
   type: 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel';
@@ -109,7 +111,53 @@ export class GuiSystem extends System {
     super.disabled = value;
     if (changed && value && this.inputDomain) {this.cancelInput();this.inputDomain.refresh();}
   }
+  private textServices:GuiTextServices|null=null;
+  private readonly textSubscriptions:(()=>void)[]=[];
+  private textServiceOptions:GuiSystemOptions={};
+  private textBrowserDocument:Document|undefined;
+  private ensureTextServices():GuiTextServices|null{if(this.disposed)return null;if(this.textServices)return this.textServices;const create=getGuiTextServiceFactory();return create?(this.textServices=create(this.textContext,this.textServiceOptions,this.textBrowserDocument)):null;}
+  private get composing():boolean{return this.textServices?.composing??false;}
+  private get textViewportInset(){return this.textServices?.viewportInset??{top:0,right:0,bottom:0,left:0};}
+  private textCaretRect(input:GuiInput){return this.ensureTextServices()!.textCaretRect(input);}
+  private async writeClipboard(text: string): Promise<void> {
+    if (!text || typeof navigator === 'undefined') return;
+    try {
+      await navigator.clipboard?.writeText(text);
+    } catch {
+      // Clipboard API may be blocked outside a trusted browser gesture.
+    }
+  }
+  private async readClipboard(): Promise<string> {
+    if (typeof navigator === 'undefined') return '';
+    try {
+      return await navigator.clipboard?.readText() ?? '';
+    } catch {
+      return '';
+    }
+  }
+
+  private get textContext(){const system=this;return{
+    dispatchAction:system.dispatchAction.bind(system),
+    writeClipboard:(text:string)=>system.writeClipboard(text),
+    readClipboard:()=>system.readClipboard(),
+    get disposed(){return system.disposed;},
+    get engine(){return system.engine;},
+    get focus(){return system.focus;},
+    get inputDomain(){return system.inputDomain;},
+    get inputParticipant(){return system.inputParticipant;},
+    inputProjection:system.inputProjection.bind(system),
+    get inputWorld(){return system.inputWorld;},
+    get preventDefault(){return system.preventDefault;},
+    get queryDescriptor(){return system.queryDescriptor;},
+    get renderer(){return system.renderer;},
+    get rootFilter(){return system.rootFilter;},
+    get roots(){return system.roots;},
+    get usedBy(){return system.usedBy;},
+    validPointerTarget:system.validPointerTarget.bind(system),
+  };}
   readonly focus: GuiFocusManager;
+  private readonly gamepadBindings=new Set<()=>void>();
+  private readonly externalBindings=new Set<()=>void>();
   private readonly inputDomain: GuiInputDomain;
   private readonly inputParticipant: GuiInputParticipant;
   private readonly unregisterInput: () => void;
@@ -143,14 +191,14 @@ export class GuiSystem extends System {
   private fontEventsGeneration = 0;
   private autoWidthKeys = new WeakMap<GuiLabel, string>();
   private motionFrames = new WeakMap<object, number>();
-  private composing = false;
-  private compositionTarget:GuiInput|null=null;
-  private compositionGeneration=0;
-  private textConnection:GuiTextInputConnection|null=null;
-  private readonly textSubscriptions:(()=>void)[]=[];
-  private readonly caretClock=new GuiCaretClock(input=>this.focus.focused===input&&this.inputParticipant.enabled()&&this.validPointerTarget(input));
-  private textViewportInset={top:0,right:0,bottom:0,left:0};
-  private readonly textViewport=new GuiTextViewport();
+  
+  
+  
+  
+  
+  
+  
+  
   loadOp: 'clear' | 'load';
   readonly recoveryLabel: string;
   readonly recoverySource = { kind: 'render-system' as const, system: 'GuiSystem' as const };
@@ -191,17 +239,22 @@ export class GuiSystem extends System {
         return !this.disabled && !this.disposed && !this.inputSuspended && !this.inputWorld?.disabled &&
           (!this.region || !!region?.visible && region.bounds.width > 0 && region.bounds.height > 0);
       },
-      keyboard: event => {const result=this.handleKeyboardEvent(event);this.synchronizeTextInput();return result;},
-      action: (action,source) => {const result=this.handleAction(action,source);this.synchronizeTextInput();return result;},
+      rawGamepad:(sample,target)=>!this.disabled&&!this.disposed&&this.validPointerTarget(target)&&routeGuiExternalGamepad(target,sample),
+      rawKeyboard:(event,target)=>{
+        if(this.disabled||this.disposed||!this.validPointerTarget(target)||event.isComposing||isGuiControl<GuiInput>(target, 'GuiInput')&&(this.textServices?.composing||target.isComposing))return false;
+        return routeGuiExternalKeyboard(target,event);
+      },
+      keyboard: event => {const result=this.handleKeyboardEvent(event);this.ensureTextServices()?.synchronizeTextInput();return result;},
+      action: (action,source) => {const result=this.handleAction(action,source);this.ensureTextServices()?.synchronizeTextInput();return result;},
       text: event => {
-        if (!(this.focus.focused instanceof GuiInput)) return false;
-        if (event.type === 'compositionstart') this.onCompositionStart();
-        else if (event.type === 'compositionupdate') this.onCompositionUpdate(event as CompositionEvent);
-        else if (event.type === 'compositionend') this.onCompositionEnd(event as CompositionEvent);
-        else if (event.type === 'copy') this.onCopy(event as ClipboardEvent);
-        else if (event.type === 'cut') this.onCut(event as ClipboardEvent);
-        else if (event.type === 'paste') this.onPaste(event as ClipboardEvent);
-        this.synchronizeTextInput();
+        if (!(isGuiControl<GuiInput>(this.focus.focused, 'GuiInput'))) return false;
+        if (event.type === 'compositionstart') this.ensureTextServices()?.onCompositionStart();
+        else if (event.type === 'compositionupdate') this.ensureTextServices()?.onCompositionUpdate(event as CompositionEvent);
+        else if (event.type === 'compositionend') this.ensureTextServices()?.onCompositionEnd(event as CompositionEvent);
+        else if (event.type === 'copy') this.ensureTextServices()?.onCopy(event as ClipboardEvent);
+        else if (event.type === 'cut') this.ensureTextServices()?.onCut(event as ClipboardEvent);
+        else if (event.type === 'paste') this.ensureTextServices()?.onPaste(event as ClipboardEvent);
+        this.ensureTextServices()?.synchronizeTextInput();
         return true;
       },
       preventDefault: () => this.preventDefault,
@@ -214,7 +267,7 @@ export class GuiSystem extends System {
       cancelPointer: (id, preserveCapture) => this.cancelPointer(id, preserveCapture),
       releasePointer: id => this.releasePointerCapture(id),
       leavePointer: event => this.leavePointer(event),
-      ownsTextTarget:target=>this.textConnection?.ownsTarget(target)??false,
+      ownsTextTarget:target=>this.textServices?.connection?.ownsTarget(target)??false,
       hostPoint: event => {
         const point = this.inputPoint(event), projection = this.inputProjection();
         if (!point || !projection) return null;
@@ -232,29 +285,8 @@ export class GuiSystem extends System {
       preview: () => this.globalDragPreview(),
     };
     this.unregisterInput = this.inputDomain.register(this.inputParticipant);
-    if(options.textInputHost){
-      const host=options.textInputHost==='browser'?new GuiBrowserTextInputHost(browserDocument!,()=>engine.canvas?.focus({preventScroll:true}),()=>{const r=engine.canvas?.getBoundingClientRect();return r?{x:r.left,y:r.top,width:r.width,height:r.height}:{x:0,y:0,width:browserDocument!.defaultView!.innerWidth,height:browserDocument!.defaultView!.innerHeight};}):options.textInputHost;
-      this.textConnection=new GuiTextInputConnection(host,{
-        valid:target=>this.inputParticipant.enabled()&&this.validPointerTarget(target),
-        caretRect:target=>this.textCaretRect(target),
-        viewportInset:inset=>{this.textViewportInset={...inset};if(!inset.top&&!inset.right&&!inset.bottom&&!inset.left)this.textViewport.clear();this.textConnection?.target?.markDirty(GuiDirtyFlags.Input);options.onViewportInset?.(inset);},
-        blur:target=>{if(this.focus.focused===target)this.focus.blur();},
-        command:command=>{
-          const target=this.focus.focused;
-          if(!(target instanceof GuiInput))return;
-          if(command==='undo')target.undo();else if(command==='redo')target.redo();
-          else if(command==='left'||command==='right'||command==='extendLeft'||command==='extendRight')target.moveCaret(command==='left'||command==='extendLeft'?-1:1,command==='extendLeft'||command==='extendRight');
-          else if(command==='deleteBackward')target.deleteBackward();else if(command==='deleteForward')target.deleteForward();
-          else if(command==='submit')target.submit();else this.dispatchAction(command==='cancel'?'cancel':command,'keyboard');
-          this.synchronizeTextInput();
-        },
-      });
-    }
-    this.textSubscriptions.push(this.focus.subscribeBeforeBlur(()=>{
-      this.compositionTarget?.cancelComposition();this.compositionTarget=null;this.composing=false;
-      const target=this.textConnection?.target;
-      this.textConnection?.close(!!target&&this.inputParticipant.enabled()&&this.validPointerTarget(target));
-    }),this.focus.subscribe(()=>this.synchronizeTextInput()));
+    this.textServiceOptions=options;this.textBrowserDocument=browserDocument;this.ensureTextServices();
+    this.textSubscriptions.push(this.focus.subscribeBeforeBlur(()=>this.textServices?.beforeBlur()),this.focus.subscribe(()=>this.ensureTextServices()?.synchronizeTextInput()));
     this.recoveryLabel = `${this.name}:${this.id}`;
     this.unregisterRecovery = engine.registerDeviceRecoveryParticipant?.(this) ?? null;
     this.bindCanvas();
@@ -301,8 +333,8 @@ export class GuiSystem extends System {
 
   /** Demand-rendering hosts should keep requesting frames while this is true. */
   get animating(): boolean {
-    const active = (element: GuiElement): boolean => element.visible && !isGuiLayoutHidden(element) && (!element.disabled || element instanceof GuiTooltip) &&
-      (((element instanceof GuiScrollView || element instanceof GuiSwitch || element instanceof GuiToast) && element.animating) || (element instanceof GuiTooltip && guiTooltipPending(element)) || (element instanceof GuiButton && guiButtonHoverAnimating(element)) || element.children.some(active));
+    const active = (element: GuiElement): boolean => element.visible && !isGuiLayoutHidden(element) && (!element.disabled || isGuiControl<GuiTooltip>(element, 'GuiTooltip')) &&
+      (((isGuiControl<GuiScrollView>(element, 'GuiScrollView') || isGuiControl<GuiSwitch>(element, 'GuiSwitch') || isGuiControl<GuiToast>(element, 'GuiToast')) && element.animating) || (isGuiControl<GuiTooltip>(element, 'GuiTooltip') && guiTooltipPending(element)) || (isGuiControl<GuiButton>(element, 'GuiButton') && guiButtonHoverAnimating(element)) || element.children.some(active));
     for (const root of this.renderRoots()) if (active(root.root)) return true;
     return false;
   }
@@ -318,15 +350,15 @@ export class GuiSystem extends System {
     this.motionFrames.set(frame, frame.frameId);
     const advance = (element: GuiElement, parentActive: boolean): void => {
       const active = parentActive && element.visible && !isGuiLayoutHidden(element) && !element.disabled;
-      if (element instanceof GuiTooltip) {
+      if (isGuiControl<GuiTooltip>(element, 'GuiTooltip')) {
         advanceGuiTooltip(element,parentActive&&element.visible&&!isGuiLayoutHidden(element));
-      } else if (element instanceof GuiScrollView) {
+      } else if (isGuiControl<GuiScrollView>(element, 'GuiScrollView')) {
         if (active) element.advanceAnimation(delta); else element.stopInertia();
-      } else if (element instanceof GuiButton) {
+      } else if (isGuiControl<GuiButton>(element, 'GuiButton')) {
         if(active)advanceGuiButtonHover(element,delta);else finishGuiButtonHover(element);
-      } else if (element instanceof GuiSwitch) {
+      } else if (isGuiControl<GuiSwitch>(element, 'GuiSwitch')) {
         if (active) element.advanceAnimation(delta); else if (element.animating) element.finishAnimation();
-      } else if (element instanceof GuiToast) {
+      } else if (isGuiControl<GuiToast>(element, 'GuiToast')) {
         if (active) element.advanceAnimation(delta); else element.hide();
       }
       for (const child of element.children) advance(child, active);
@@ -344,20 +376,21 @@ export class GuiSystem extends System {
     this.autoWidthKeys = new WeakMap();
     this.fontEventsCleanup?.(); this.fontEventsCleanup = null;
     for (const root of this.roots) {suspendGuiLayout(root.root); this.walkGui(root.root, element => {
-      if (element instanceof GuiScrollView) element.stopInertia();
-      else if (element instanceof GuiTooltip) advanceGuiTooltip(element,false);
-      else if (element instanceof GuiButton) finishGuiButtonHover(element);
-      else if (element instanceof GuiSwitch && element.animating) element.finishAnimation();
-      else if (element instanceof GuiToast) element.hide();
+      if (isGuiControl<GuiScrollView>(element, 'GuiScrollView')) element.stopInertia();
+      else if (isGuiControl<GuiTooltip>(element, 'GuiTooltip')) advanceGuiTooltip(element,false);
+      else if (isGuiControl<GuiButton>(element, 'GuiButton')) finishGuiButtonHover(element);
+      else if (isGuiControl<GuiSwitch>(element, 'GuiSwitch') && element.animating) element.finishAnimation();
+      else if (isGuiControl<GuiToast>(element, 'GuiToast')) element.hide();
     });}
   }
 
   override destroy(): this {
     const errors: unknown[] = [];
     const run = (work: () => void): void => {try {work();} catch (error) {errors.push(error);}};
-    run(() => this.caretClock.stop());
-    for (const unsubscribe of this.textSubscriptions) run(unsubscribe); this.textSubscriptions.length = 0;
-    run(() => this.textConnection?.dispose()); this.textConnection = null;
+    for(const release of [...this.externalBindings])run(release);
+    for(const release of [...this.gamepadBindings])run(release);
+    for(const unsubscribe of this.textSubscriptions)run(unsubscribe);this.textSubscriptions.length=0;
+    run(()=>this.textServices?.dispose());this.textServices=null;
     run(() => this.unregisterInput()); run(() => this.unregisterRecovery?.());
     run(() => this.unbindCanvas()); run(() => this.suspendForDeviceLoss());
     const result = super.destroy();
@@ -449,15 +482,10 @@ export class GuiSystem extends System {
     if (this.disabled || this.disposed) return false;
     this.focus.reconcile();
     const focused = this.focus.focused;
-    if (focused instanceof GuiInput && (this.composing || focused.isComposing || event.isComposing)) return true;
-    if(focused instanceof GuiInput&&focused.multiline&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&(event.key==='ArrowUp'||event.key==='ArrowDown')){
-      const root=[...this.roots].find(root=>root.findById(focused.id)===focused),size=this.findThemeFontSize(focused);
-      const presentation=guiInputPresentation(focused,text=>this.renderer.measureTextWidth(text,size,root,focused),size,this.renderer.measureTextLineHeight(size,root,focused));
-      focused.setCaret(presentation.indexAt(presentation.caret.x,presentation.caret.y+(event.key==='ArrowUp'?-1:1)*presentation.lineHeight+presentation.lineHeight/2),event.shiftKey);return true;
-    }
+    if(this.ensureTextServices()?.beforeKeyboard(event))return true;
     const code = event.code || (event.key === ' ' ? 'Space' : event.key);
     if (!event.ctrlKey && !event.metaKey && !event.altKey &&
-        (!(focused instanceof GuiInput) || ['Tab', 'Escape', 'ArrowUp', 'ArrowDown'].includes(code))) {
+        (!(isGuiControl<GuiInput>(focused, 'GuiInput')) || ['Tab', 'Escape', 'ArrowUp', 'ArrowDown'].includes(code))) {
       const chord = code === 'Tab' && event.shiftKey ? 'Shift+Tab' : code;
       for (const action of ['next','previous','left','right','up','down','confirm','cancel'] as const) {
         if (this.navigationMap.matches(action, key => key === chord)) {
@@ -467,72 +495,7 @@ export class GuiSystem extends System {
         }
       }
     }
-    if (!(focused instanceof GuiInput)) return false;
-    if (this.composing || event.isComposing) return true;
-    if (event.altKey) return false;
-    const shortcut = event.metaKey || event.ctrlKey;
-
-    if (shortcut) {
-      const key = event.key.toLowerCase();
-      if(key==='z'){if(event.shiftKey)focused.redo();else focused.undo();return true;}
-      if(key==='y'){focused.redo();return true;}
-      if (key === 'a') {
-        focused.selectAll();
-        return true;
-      }
-      if (key === 'c') {
-          if(focused.inputType!=='password')void this.writeClipboard(focused.selectedText);
-        return true;
-      }
-      if (key === 'x') {
-          if(focused.inputType==='password')return true;
-        void this.writeClipboard(focused.selectedText);
-        if (!focused.readOnly && focused.hasSelection) focused.deleteForward();
-        return true;
-      }
-      if (key === 'v') {
-        const generation = this.focus.generation;
-        void this.readClipboard().then(text => {
-            if (text && this.focus.generation === generation && this.focus.focused === focused && !focused.isComposing && !this.disposed){focused.insertText(text);this.synchronizeTextInput();}
-        });
-        return true;
-      }
-      return false;
-    }
-
-    if (event.key === 'Backspace') {
-      focused.deleteBackward();
-      return true;
-    }
-    if (event.key === 'Delete') {
-      focused.deleteForward();
-      return true;
-    }
-    if (event.key === 'ArrowLeft') {
-      focused.moveCaret(-1, event.shiftKey);
-      return true;
-    }
-    if (event.key === 'ArrowRight') {
-      focused.moveCaret(1, event.shiftKey);
-      return true;
-    }
-    if (event.key === 'Home') {
-      focused.setCaret(0, event.shiftKey);
-      return true;
-    }
-    if (event.key === 'End') {
-      focused.setCaret(focused.value.length, event.shiftKey);
-      return true;
-    }
-    if (event.key === 'Enter') {
-      if(focused.multiline)focused.insertText('\n');else if (!event.repeat) focused.submit();
-      return true;
-    }
-    if (event.key.length === 1) {
-      focused.insertText(event.key);
-      return true;
-    }
-    return false;
+    return this.ensureTextServices()?.editKeyboard(event)??false;
   }
 
   /** Hosts feed already sampled UI actions here; this method never polls devices. */
@@ -568,18 +531,15 @@ export class GuiSystem extends System {
     finally {this.cancelOrdinaryInput();}
   }
   private cancelOrdinaryInput(): void {
-    this.caretClock.stop();
-    this.textViewport.clear();
-    this.textConnection?.close(false);
-    this.compositionTarget?.cancelComposition();this.compositionTarget=null;
+    this.textServices?.cancel();
     for (const id of [...this.pointerStates.keys()]) this.cancelPointer(id);
     if (this.pressed) {this.pressed.pressed = false;this.pressed.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);}
     if (this.hovered) {this.hovered.hovered = false;this.hovered.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);}
     const focused = this.focus.focused;
-    if (focused instanceof GuiInput && [...this.roots].some(root => root.findById(focused.id) === focused)) {focused.selecting = false;cancelGuiInputClick(focused);}
+    if (isGuiControl<GuiInput>(focused, 'GuiInput') && [...this.roots].some(root => root.findById(focused.id) === focused)) {this.ensureTextServices()?.cancelSelection(focused);}
     for (const pointerId of this.capturedPointers) this.releasePointerCapture(pointerId);
     if (this.scrollGesture) {this.scrollGesture.view.stopInertia();this.releasePointerCapture(this.scrollGesture.pointerId);}
-    this.scrollGesture = null;this.pressed = this.hovered = null;this.composing = false;
+    this.scrollGesture = null;this.pressed = this.hovered = null;
     for (const event of this.pending) if (event.native) this.releasePointerCapture(event.native.pointerId);
     this.pending.length = this.pendingWheel.length = 0;
   }
@@ -601,48 +561,17 @@ export class GuiSystem extends System {
     if (errors.length) throw new AggregateError(errors, 'GUI pointer cancellation failed.');
   }
 
-  private onCompositionStart = (): void => {
-    const target=this.focus.focused;if(!(target instanceof GuiInput)||target.readOnly)return;
-    this.composing = true;
-    this.compositionTarget=target;this.compositionGeneration=this.focus.generation;target.beginComposition();
-  };
+  
 
-  private onCompositionUpdate = (event:CompositionEvent): void => {
-    if(this.compositionTarget&&this.focus.focused===this.compositionTarget&&this.focus.generation===this.compositionGeneration)this.compositionTarget.updateComposition(event.data??'');
-  };
+  
 
-  private onCompositionEnd = (event: CompositionEvent): void => {
-    this.composing = false;
-    const focused=this.compositionTarget;this.compositionTarget=null;
-    if(!focused||this.focus.focused!==focused||this.focus.generation!==this.compositionGeneration){focused?.cancelComposition();return;}
-    if(event.data)focused.commitComposition(event.data);else focused.cancelComposition();
-    if (this.preventDefault) event.preventDefault();
-  };
+  
 
-  private onCopy = (event: ClipboardEvent): void => {
-    const focused = this.focus.focused;
-    if (!(focused instanceof GuiInput) || !focused.hasSelection) return;
-    if(focused.inputType==='password'){event.preventDefault();return;}
-    event.clipboardData?.setData('text/plain', focused.selectedText);
-    if (this.preventDefault) event.preventDefault();
-  };
+  
 
-  private onCut = (event: ClipboardEvent): void => {
-    const focused = this.focus.focused;
-    if (!(focused instanceof GuiInput) || !focused.hasSelection || focused.readOnly) return;
-    if(focused.inputType==='password'){event.preventDefault();return;}
-    event.clipboardData?.setData('text/plain', focused.selectedText);
-    focused.deleteForward();
-    if (this.preventDefault) event.preventDefault();
-  };
+  
 
-  private onPaste = (event: ClipboardEvent): void => {
-    const focused = this.focus.focused;
-    if (!(focused instanceof GuiInput) || focused.readOnly) return;
-    const text = event.clipboardData?.getData('text/plain') ?? '';
-    if (text) focused.insertText(text);
-    if (this.preventDefault) event.preventDefault();
-  };
+  
 
   private pushPointerEvent(type: PendingGuiPointerEvent['type'], event: PointerEvent): void {
     if (this.preventDefault) event.preventDefault();
@@ -742,7 +671,7 @@ export class GuiSystem extends System {
       if (hit) {
         // A text responder already owns native focus. Focusing the canvas here
         // would immediately blur and destroy the session just opened above.
-        if(!this.textConnection?.connected)this.engine.canvas?.focus();
+        if(!this.textServices?.connection?.connected)this.engine.canvas?.focus();
         // Input may have completed before this frame drains its event queue.
         // Capturing an ended touch throws on Native and browsers alike.
         const latest = this.pending.findLast(event => event.native?.pointerId === native.pointerId);
@@ -750,7 +679,7 @@ export class GuiSystem extends System {
           this.engine.canvas?.setPointerCapture?.(native.pointerId);
           this.capturedPointers.add(native.pointerId);
         }
-        if (hit instanceof GuiInput && !guiPasswordEyeHit(hit,pending.x,pending.y)) this.updateInputCaretFromPointer(hit, pending, false);
+        if (isGuiControl<GuiInput>(hit, 'GuiInput') && !this.ensureTextServices()?.pointerEye(hit,pending.x,pending.y)) this.ensureTextServices()?.updateInputCaretFromPointer(hit, pending, false);
         hit.handlePointerDown(this.makeEvent('pointerdown', hit, pending, native));
       } else {
         this.focus.blur();
@@ -760,7 +689,7 @@ export class GuiSystem extends System {
 
     if (pending.type === 'pointermove') {
       const target = this.pressed ?? hit;
-      if (target instanceof GuiInput && target.selecting) this.updateInputCaretFromPointer(target, pending, true);
+      if (isGuiControl<GuiInput>(target, 'GuiInput') && target.selecting) this.ensureTextServices()?.updateInputCaretFromPointer(target, pending, true);
       if (target) target.handlePointerMove(this.makeEvent('pointermove', target, pending, native));
       return;
     }
@@ -768,11 +697,11 @@ export class GuiSystem extends System {
     if (pending.type === 'pointerup' || pending.type === 'pointercancel') {
       if (pending.type === 'pointerup') this.updateHover(hit,pending);
       const target = this.pressed;
-      if (target instanceof GuiInput && target.selecting) this.updateInputCaretFromPointer(target, pending, true);
+      if (isGuiControl<GuiInput>(target, 'GuiInput') && target.selecting) this.ensureTextServices()?.updateInputCaretFromPointer(target, pending, true);
       if (target) {
         if (pending.type === 'pointercancel') target.handlePointerCancel(this.makeEvent('pointercancel', target, pending, native));
         else target.handlePointerUp(this.makeEvent('pointerup', target, pending, native));
-        if (target instanceof GuiInput) this.synchronizeTextInput();
+        if (isGuiControl<GuiInput>(target, 'GuiInput')) this.ensureTextServices()?.synchronizeTextInput();
       }
       if (pending.type === 'pointerup' && target && target === hit) {
         target.handleClick(this.makeEvent('click', target, pending, native));
@@ -781,19 +710,11 @@ export class GuiSystem extends System {
       this.pressed = null;
       // Touch has no hover after contact ends, even without a later pointermove.
       if (native.pointerType === 'touch' || pending.type === 'pointercancel') this.updateHover(null, pending);
-      if (native.pointerType === 'touch' && target instanceof GuiButton && this.focus.focused === target) this.focus.blur();
+      if (native.pointerType === 'touch' && isGuiControl<GuiButton>(target, 'GuiButton') && this.focus.focused === target) this.focus.blur();
     }
   }
 
-  private updateInputCaretFromPointer(input: GuiInput, pending: PendingGuiPointerEvent, extendSelection: boolean): void {
-    const fontSize = this.findThemeFontSize(input);
-    const root = [...this.roots].find(root => root.findById(input.id) === input);
-    const presentation=guiInputPresentation(input,text=>this.renderer.measureTextWidth(text,fontSize,root,input),fontSize,this.renderer.measureTextLineHeight(fontSize,root,input));
-    const index=presentation.indexAt(pending.x,pending.y);
-    if (extendSelection) input.setCaret(index, true);
-    else input.setSelection(index, index);
-    this.synchronizeTextInput();
-  }
+  
 
   private releasePointerCapture(pointerId: number): void {
     this.capturedPointers.delete(pointerId);
@@ -802,34 +723,11 @@ export class GuiSystem extends System {
     canvas?.releasePointerCapture?.(pointerId);
   }
 
-  private findThemeFontSize(element: GuiElement): number {
-    const configured = element.getResolvedStyle().fontSize;
-    if (configured !== undefined) return configured;
-    let current: GuiElement | null = element;
-    while (current.parent) current = current.parent;
-    for (const root of this.roots) {
-      if (root.root === current) return root.theme.fontSize;
-    }
-    return 14;
-  }
+  
 
-  private async writeClipboard(text: string): Promise<void> {
-    if (!text || typeof navigator === 'undefined') return;
-    try {
-      await navigator.clipboard?.writeText(text);
-    } catch {
-      // Clipboard API may be blocked outside a trusted browser gesture.
-    }
-  }
+  
 
-  private async readClipboard(): Promise<string> {
-    if (typeof navigator === 'undefined') return '';
-    try {
-      return await navigator.clipboard?.readText() ?? '';
-    } catch {
-      return '';
-    }
-  }
+  
 
   private updateHover(next: GuiElement | null, pending: PendingGuiPointerEvent): void {
     if (this.hovered === next) return;
@@ -860,7 +758,7 @@ export class GuiSystem extends System {
   }
 
   private scrollAncestor(element: GuiElement | null): GuiScrollView | null {
-    for (let node=element;node;node=node.parent) if (node instanceof GuiScrollView && node.maxScrollOffset>0) return node;
+    for (let node=element;node;node=node.parent) if (isGuiControl<GuiScrollView>(node, 'GuiScrollView') && node.maxScrollOffset>0) return node;
     return null;
   }
 
@@ -868,7 +766,7 @@ export class GuiSystem extends System {
     const native = pending.native;
     if (!native) return;
     const hit = hitTestGui(world, this.roots, pending.x, pending.y);
-    if (hit instanceof GuiSelect && hit.open && hit.containsPointIncludingPopup(pending.x, pending.y)) {
+    if (isGuiControl<GuiSelect>(hit, 'GuiSelect') && hit.open && hit.containsPointIncludingPopup(pending.x, pending.y)) {
       hit.scrollBy(pending.deltaY);
       this.inputConsumed=true;
       if(this.preventDefault)native.preventDefault();
@@ -917,6 +815,38 @@ export class GuiSystem extends System {
       },
     };
     return event;
+  }
+
+  /** Borrow one existing sampler; GUI owns neither its clock nor its device listeners. */
+  get hasGamepadInput():boolean{return !this.disposed&&this.inputDomain.hasGamepadInput;}
+  attachGamepadInput(source:BrowserMultiplayerInput):()=>void {
+    if(this.disposed)throw new Error('Cannot attach a gamepad sampler to a disposed GUI system.');const off=this.inputDomain.attachGamepadInput(source);let closed=false;
+    const release=()=>{if(closed)return;closed=true;this.gamepadBindings.delete(release);off();};this.gamepadBindings.add(release);return release;
+  }
+  /** Read the existing G06 geometry/scroll/caret state; no input device or timer is created. */
+  
+  getInputPresentation(input:GuiInput):GuiInputPresentation {if(this.disposed)throw new Error('Cannot query a disposed GUI system.');const service=this.ensureTextServices();if(!service)throw new Error('Input belongs to another GUI owner.');return service.getInputPresentation(input);}
+  /** Pure original G06 projection used with a whole-frame presentation snapshot. */
+  projectInputPresentation(geometry:GuiInputGeometry,state:GuiInputViewSnapshot):GuiInputPresentation {
+    if(this.disposed)throw new Error('Cannot project with a disposed GUI system.');return projectGuiInputGeometry(geometry,state);
+  }
+  /** Share this G05/G06 owner while an extension paints its own subtree and supplies actual text geometry. */
+  bindExternalElement(element:GuiElement,options:GuiExternalPresentation={}):()=>void {
+    if(this.disposed)throw new Error('Cannot attach external presentation to a disposed GUI system.');
+    const unbind=bindGuiExternalPresentation(element,options);let released=false;
+    const inside=(target:GuiElement|null):boolean=>{for(let node=target;node;node=node.parent)if(node===element)return true;return false;};
+    const release=()=>{
+      if(released)return;released=true;this.externalBindings.delete(release);const errors:unknown[]=[],run=(action:()=>void)=>{try{action();}catch(error){errors.push(error);}};
+      this.inputDomain.cancelKeyboardFor(element);this.inputDomain.cancelGamepadFor(element);const previous=element.disabled;element.disabled=true;
+      try{
+        for(const[id,state]of this.pointerStates)if(inside(state.pressed)||!state.pressed&&inside(state.hovered))run(()=>this.cancelPointer(id));
+        if(inside(this.focus.focused))run(()=>this.focus.blur());
+        if(inside(this.textServices?.connection?.target??null))run(()=>this.textServices?.connection?.close(false));
+        run(()=>this.inputDomain.refresh());run(unbind);
+      }finally{element.disabled=previous;}
+      run(()=>options.onRelease?.());if(errors.length)throw new AggregateError(errors,'External GUI presentation cleanup failed.');
+    };
+    this.externalBindings.add(release);return release;
   }
 
   /** Scene/default actions run only after every GUI layer declines the event. */
@@ -991,37 +921,18 @@ export class GuiSystem extends System {
       bindGuiMeasureOwner(root, this.renderer);
       this.measureAutoWidthLabels(root.root, root.theme.fontSize, root);
       root.layout(width, height);
-      if (root.root.dirty) GuiRadio.rebuildGroupRegistry(root.root);
-      else GuiRadio.ensureGroupRegistry(root.root);
+      maintainGuiRadioGroups(root.root, !!root.root.dirty);
       this.roots.add(root);
     }
     const preview = this.dragPreview.root;
     if (preview) {bindGuiMeasureOwner(preview, this.renderer); this.measureAutoWidthLabels(preview.root, preview.theme.fontSize, preview); preview.layout(width, height);}
     for (const root of previous) suspendGuiLayout(root.root);
     this.inputDomain.refresh();
-    this.synchronizeTextInput();
+    this.ensureTextServices()?.synchronizeTextInput();
   }
 
-  private synchronizeTextInput():void {
-    const target=this.focus.focused;
-    if(!(target instanceof GuiInput))this.textViewport.clear();
-    this.caretClock.synchronize(target instanceof GuiInput?target:null);
-    this.textConnection?.synchronize(target instanceof GuiInput&&this.inputParticipant.enabled()&&this.validPointerTarget(target)?target:null);
-  }
-  private textCaretRect(input:GuiInput){
-    const root=[...this.roots].find(root=>root.findById(input.id)===input),size=this.findThemeFontSize(input);
-    const presentation=()=>guiInputPresentation(input,text=>this.renderer.measureTextWidth(text,size,root,input),size,this.renderer.measureTextLineHeight(size,root,input));
-    let local=presentation().caret;
-    const projection=this.inputProjection(),canvas=this.engine.canvas;
-    if(!projection||!canvas)return local;
-    const rect=canvas.getBoundingClientRect(),inset=this.textViewportInset;
-    const left=rect.left+inset.left,top=rect.top+inset.top,right=rect.left+rect.width-inset.right,bottom=rect.top+rect.height-inset.bottom;
-    const toLocal=(x:number,y:number)=>guiInputPoint(x,y,{x:rect.left,y:rect.top,width:rect.width,height:rect.height},projection);
-    const a=toLocal(left,top),b=toLocal(right,bottom);
-    if(a&&b){this.textViewport.reveal(input,local,{x:a.x,y:a.y,width:Math.max(0,b.x-a.x),height:Math.max(0,b.y-a.y)});local=presentation().caret;}
-    const host=guiInputHostRect(local,projection);
-    return {x:rect.left+host.x*rect.width/projection.hostWidth,y:rect.top+host.y*rect.height/projection.hostHeight,width:host.width*rect.width/projection.hostWidth,height:host.height*rect.height/projection.hostHeight};
-  }
+  
+  
 
   private inputRoots(): GuiRoot[] {
     const entities=this.inputWorld?this.entitySet.get(this.inputWorld):null;
@@ -1029,11 +940,11 @@ export class GuiSystem extends System {
   }
 
   private measureAutoWidthLabels(element: GuiElement, themeFontSize: number, root: GuiRoot): void {
-    const measured = element instanceof GuiLabel || element instanceof GuiHelpDialog;
+    const measured = isGuiControl<GuiLabel>(element, 'GuiLabel') || isGuiControl<GuiHelpDialog>(element, 'GuiHelpDialog');
     const version = measured ? guiMeasureFontVersion(root, element) : 0;
     const configuredSize = measured ? element.getResolvedStyle().fontSize ?? themeFontSize : themeFontSize;
-    if (element instanceof GuiHelpDialog) setGuiHelpDialogTextMetrics(element,(text,size)=>this.renderer.measureTextWidth(text,size,root,element), version);
-    if (element instanceof GuiLabel && element.autoWidth && !isGuiLayoutManaged(element)) {
+    if (isGuiControl<GuiHelpDialog>(element, 'GuiHelpDialog')) setGuiHelpDialogTextMetrics(element,(text,size)=>this.renderer.measureTextWidth(text,size,root,element), version);
+    if (isGuiControl<GuiLabel>(element, 'GuiLabel') && element.autoWidth && !isGuiLayoutManaged(element)) {
       const key = JSON.stringify([version, element.text, element.fontSize ?? configuredSize]);
       if (this.autoWidthKeys.get(element) !== key) {
       setGuiLabelMeasuredTextWidth(
@@ -1125,7 +1036,7 @@ export class GuiSystem extends System {
   private closePopupsExcept(hit: GuiElement | null, x: number, y: number): void {
     for (const root of this.roots) {
       this.walkGui(root.root, (element) => {
-        if (!(element instanceof GuiSelect) || !element.open) return;
+        if (!(isGuiControl<GuiSelect>(element, 'GuiSelect')) || !element.open) return;
         if (element === hit && element.containsPointIncludingPopup(x, y)) return;
         element.setOpen(false);
       });
@@ -1137,3 +1048,5 @@ export class GuiSystem extends System {
     for (const child of element.children) this.walkGui(child, visitor);
   }
 }
+
+export type GuiTextServiceContext=GuiSystem['textContext'];

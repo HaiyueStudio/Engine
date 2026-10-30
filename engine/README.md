@@ -57,6 +57,7 @@ engine.run();
 - `@haiyue/engine/assets`：资产加载与生命周期
 - `@haiyue/engine/diagnostics`：只读 frame/GPU resource 聚合快照
 - `@haiyue/engine/extension-authoring`：独立渲染扩展使用的窄稳定 SPI
+- `@haiyue/engine/text`：固定 Unicode 15.1／UAX #29 revision 43 的纯文本字素边界；不创建 GUI、DOM 或设备
 - `@haiyue/engine/geometry`：几何生成和处理
 - `@haiyue/engine/material`：材质和来源无关的材质描述
 - `@haiyue/engine/postprocess`：后处理
@@ -68,9 +69,24 @@ engine.run();
 
 `@haiyue/engine/experimental` 及其细分入口不提供与 stable API 相同的兼容承诺。包内未由 `package.json#exports` 声明的文件属于私有实现。
 
+## 纯文本字素边界
+
+`textGraphemeBoundaries(text)` 返回包含 0 与字符串长度的 UTF-16 偏移，空字符串返回 `[0]`；声明返回只读数组。它与 GUI 编辑使用同一版本的 Unicode 算法，不依赖宿主 ICU，也不提供双向排版或复杂文字 shaping。
+
+```ts
+import {textGraphemeBoundaries} from '@haiyue/engine/text';
+textGraphemeBoundaries('A\r\nB'); // [0, 1, 3, 4]
+```
+
 ## 生命周期
 
 场景切换使用 `engine.switchScene(next, { destroyPrevious: true })`。应用退出时调用 `engine.destroy()`，使 active scene、资产 owner、GPU 资源和监听器按所有权一起释放。
+
+GUI 提供独立 ESM 入口 `@haiyue/engine/gui`，可使用 `import {GuiSystem, GuiInput, GuiButton} from '@haiyue/engine/gui'` 按需构建；需要延迟加载时使用 `await import('@haiyue/engine/gui')`，由应用构建器输出独立 GUI chunk。它与主引擎共享类型和资源，不需要再安装一份 GUI 运行时。入口文件为 `dist/gui.js`，部署时仍需保留它引用的共享 chunks。
+
+主入口保留同步 `createScene({gui: true})` 的默认装配，因此导入完整 `HaiyueEngine` 仍会包含 GUI 构造能力。只借用 `@haiyue/engine/experimental` 的 `getSceneRenderPipeline`／`getSceneRenderIntegration` 不会引入场景构造；它们与延迟 GUI 共用原场景 owner，不创建第二套引擎或 GUI。
+
+浏览器鼠标悬停时，输入框默认使用 `text` 指针，按钮及选择控件默认使用 `pointer`。可通过 `style: {cursor: 'grab'}` 等 CSS cursor 值覆盖；普通元素可继承父节点的设置。离开 GUI、窗口失焦或销毁时恢复应用原有的 canvas 指针。触摸与没有 DOM style 的 Native 宿主不修改浏览器指针。
 
 完整指南、浏览器支持矩阵、示例和 API 稳定性规则位于项目仓库的 `docs/engine-guide`、`docs/api` 与 `docs/for-ai/api-stability.md`。
 
@@ -81,3 +97,5 @@ Repository：[HypnosNova/HaiYue](https://github.com/HypnosNova/HaiYue/tree/main/
 ## License
 
 [MIT](./LICENSE)
+
+Unicode data used by the fixed text boundary algorithm is covered by the notice in [THIRD_PARTY_NOTICES.txt](./THIRD_PARTY_NOTICES.txt).

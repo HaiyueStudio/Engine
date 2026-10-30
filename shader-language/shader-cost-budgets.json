@@ -34,6 +34,7 @@
     "maxProductionGenerationRuns": 1
   },
   "productionBundles": {
+    "engine2dUiArtifactGzipBytes": 4800,
     "simple3dArtifactGzipBytes": 7100,
     "componentsEvidenceArtifactGzipBytes": 2850,
     "deformationArtifactGzipBytes": 9600

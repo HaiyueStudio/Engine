@@ -1768,6 +1768,231 @@
             }
           ]
         },
+        "./hya-production": {
+          "source": "animation-spec/src/hya-production.ts",
+          "exports": [
+            {
+              "name": "AudioEventDiagnostic",
+              "kind": "value"
+            },
+            {
+              "name": "AudioEventDiagnosticCode",
+              "kind": "type"
+            },
+            {
+              "name": "AudioEventParseOptions",
+              "kind": "type"
+            },
+            {
+              "name": "DataBindingDiagnostic",
+              "kind": "value"
+            },
+            {
+              "name": "DataBindingDiagnosticCode",
+              "kind": "type"
+            },
+            {
+              "name": "DataBindingParseOptions",
+              "kind": "type"
+            },
+            {
+              "name": "DataValue",
+              "kind": "type"
+            },
+            {
+              "name": "decodeResponsiveLayoutDocument",
+              "kind": "value"
+            },
+            {
+              "name": "DEFAULT_HYA_COMPOSITION_LIMITS",
+              "kind": "value"
+            },
+            {
+              "name": "encodeHyaComposition",
+              "kind": "value"
+            },
+            {
+              "name": "encodeResponsiveLayoutDocument",
+              "kind": "value"
+            },
+            {
+              "name": "HYA_COMPOSITION_FORMAT",
+              "kind": "value"
+            },
+            {
+              "name": "HYA_COMPOSITION_VERSION",
+              "kind": "value"
+            },
+            {
+              "name": "HyaAudioEventDocument",
+              "kind": "type"
+            },
+            {
+              "name": "HyaCompositionDiagnostic",
+              "kind": "type"
+            },
+            {
+              "name": "HyaCompositionDocument",
+              "kind": "type"
+            },
+            {
+              "name": "HyaCompositionError",
+              "kind": "value"
+            },
+            {
+              "name": "HyaCompositionErrorCode",
+              "kind": "type"
+            },
+            {
+              "name": "HyaCompositionLimits",
+              "kind": "type"
+            },
+            {
+              "name": "HyaCompositionParseOptions",
+              "kind": "type"
+            },
+            {
+              "name": "HyaCompositionParseResult",
+              "kind": "type"
+            },
+            {
+              "name": "HyaCompositionPart",
+              "kind": "type"
+            },
+            {
+              "name": "HyaCompositionPartValidator",
+              "kind": "type"
+            },
+            {
+              "name": "HyaCompositionPlan",
+              "kind": "type"
+            },
+            {
+              "name": "HyaCompositionTarget",
+              "kind": "type"
+            },
+            {
+              "name": "HyaCompositionValue",
+              "kind": "type"
+            },
+            {
+              "name": "HyaDataBindingDocument",
+              "kind": "type"
+            },
+            {
+              "name": "HyaInteractionDocument",
+              "kind": "type"
+            },
+            {
+              "name": "HyaSemanticsDocument",
+              "kind": "type"
+            },
+            {
+              "name": "HyaStateMachineV1MigrationOptions",
+              "kind": "type"
+            },
+            {
+              "name": "HyaStateMachineV1MigrationResult",
+              "kind": "type"
+            },
+            {
+              "name": "HyaStateMachineV2Document",
+              "kind": "type"
+            },
+            {
+              "name": "InteractionDiagnostic",
+              "kind": "value"
+            },
+            {
+              "name": "InteractionDiagnosticCode",
+              "kind": "type"
+            },
+            {
+              "name": "InteractionParseOptions",
+              "kind": "type"
+            },
+            {
+              "name": "isResponsiveLayoutBinary",
+              "kind": "value"
+            },
+            {
+              "name": "LayoutDiagnostic",
+              "kind": "value"
+            },
+            {
+              "name": "LayoutDiagnosticCode",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutParseOptions",
+              "kind": "type"
+            },
+            {
+              "name": "migrateHyaStateMachineV1",
+              "kind": "value"
+            },
+            {
+              "name": "negotiateHyaComposition",
+              "kind": "value"
+            },
+            {
+              "name": "parseHyaAudioEvents",
+              "kind": "value"
+            },
+            {
+              "name": "parseHyaComposition",
+              "kind": "value"
+            },
+            {
+              "name": "parseHyaDataBinding",
+              "kind": "value"
+            },
+            {
+              "name": "parseHyaInteraction",
+              "kind": "value"
+            },
+            {
+              "name": "parseHyaSemantics",
+              "kind": "value"
+            },
+            {
+              "name": "parseHyaStateMachineV2",
+              "kind": "value"
+            },
+            {
+              "name": "parseResponsiveLayoutDocument",
+              "kind": "value"
+            },
+            {
+              "name": "ParseStateMachineV2Options",
+              "kind": "type"
+            },
+            {
+              "name": "ResponsiveLayoutDocument",
+              "kind": "type"
+            },
+            {
+              "name": "SemanticsDiagnostic",
+              "kind": "value"
+            },
+            {
+              "name": "SemanticsDiagnosticCode",
+              "kind": "type"
+            },
+            {
+              "name": "SemanticsParseOptions",
+              "kind": "type"
+            },
+            {
+              "name": "StateMachineV2Diagnostic",
+              "kind": "value"
+            },
+            {
+              "name": "StateMachineV2DiagnosticCode",
+              "kind": "type"
+            }
+          ]
+        },
         "./live2d": {
           "source": "animation-spec/src/live2d.ts",
           "exports": [
@@ -3092,6 +3317,10 @@
               "kind": "type"
             },
             {
+              "name": "RegionUpdateMode",
+              "kind": "type"
+            },
+            {
               "name": "RegistrationToken",
               "kind": "type"
             },
@@ -3137,6 +3366,14 @@
             },
             {
               "name": "RenderProfileSettings",
+              "kind": "type"
+            },
+            {
+              "name": "RenderRegion",
+              "kind": "type"
+            },
+            {
+              "name": "RenderRegionOptions",
               "kind": "type"
             },
             {
@@ -8058,6 +8295,10 @@
               "kind": "value"
             },
             {
+              "name": "GuiActionEvent",
+              "kind": "type"
+            },
+            {
               "name": "GuiBatch",
               "kind": "value"
             },
@@ -8094,6 +8335,18 @@
               "kind": "value"
             },
             {
+              "name": "GuiDragSession",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDragSource",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDropTarget",
+              "kind": "type"
+            },
+            {
               "name": "GuiElement",
               "kind": "value"
             },
@@ -8104,6 +8357,14 @@
             {
               "name": "GuiFocusManager",
               "kind": "value"
+            },
+            {
+              "name": "GuiFocusMode",
+              "kind": "type"
+            },
+            {
+              "name": "GuiFocusOptions",
+              "kind": "type"
             },
             {
               "name": "GuiFontOptions",
@@ -8150,6 +8411,14 @@
               "kind": "type"
             },
             {
+              "name": "GuiInvalidation",
+              "kind": "type"
+            },
+            {
+              "name": "GuiInvalidationReason",
+              "kind": "type"
+            },
+            {
               "name": "GuiLabel",
               "kind": "value"
             },
@@ -8162,7 +8431,15 @@
               "kind": "type"
             },
             {
+              "name": "GuiLayoutDelegate",
+              "kind": "type"
+            },
+            {
               "name": "GuiLength",
+              "kind": "type"
+            },
+            {
+              "name": "GuiMeasureConstraint",
               "kind": "type"
             },
             {
@@ -8186,7 +8463,19 @@
               "kind": "type"
             },
             {
+              "name": "GuiNineSlice",
+              "kind": "value"
+            },
+            {
+              "name": "GuiNineSliceOptions",
+              "kind": "type"
+            },
+            {
               "name": "GuiPointerEvent",
+              "kind": "type"
+            },
+            {
+              "name": "GuiPointerFilter",
               "kind": "type"
             },
             {
@@ -8274,6 +8563,10 @@
               "kind": "value"
             },
             {
+              "name": "GuiSkin",
+              "kind": "type"
+            },
+            {
               "name": "GuiSlider",
               "kind": "value"
             },
@@ -8310,11 +8603,35 @@
               "kind": "type"
             },
             {
+              "name": "GuiTextComposition",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTextEdit",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTextInputHost",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTextInputSession",
+              "kind": "type"
+            },
+            {
               "name": "GuiTextRenderer",
               "kind": "value"
             },
             {
               "name": "GuiTheme",
+              "kind": "type"
+            },
+            {
+              "name": "GuiThemeResource",
+              "kind": "value"
+            },
+            {
+              "name": "GuiThemeState",
               "kind": "type"
             },
             {
@@ -9837,6 +10154,15 @@
             }
           ]
         },
+        "./text": {
+          "source": "engine/src/text.ts",
+          "exports": [
+            {
+              "name": "textGraphemeBoundaries",
+              "kind": "value"
+            }
+          ]
+        },
         "./tween": {
           "source": "engine/src/tween.ts",
           "exports": [
@@ -10937,6 +11263,195 @@
             }
           ]
         },
+        "./gui-layout": {
+          "source": "extensions/src/gui-layout.ts",
+          "exports": [
+            {
+              "name": "attachGuiLayout",
+              "kind": "value"
+            },
+            {
+              "name": "createGuiContainer",
+              "kind": "value"
+            },
+            {
+              "name": "GuiContainerPreset",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLayoutBinding",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLayoutMeasurement",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLayoutOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSplitPanel",
+              "kind": "value"
+            },
+            {
+              "name": "GuiSplitPanelOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTabContainer",
+              "kind": "value"
+            },
+            {
+              "name": "GuiTabContainerOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTabPage",
+              "kind": "type"
+            }
+          ]
+        },
+        "./hya-audio": {
+          "source": "extensions/src/hya-audio.ts",
+          "exports": [
+            {
+              "name": "createBrowserHyaAudioHost",
+              "kind": "value"
+            },
+            {
+              "name": "createHyaAudio",
+              "kind": "value"
+            },
+            {
+              "name": "HyaAudio",
+              "kind": "type"
+            },
+            {
+              "name": "HyaAudioHost",
+              "kind": "type"
+            },
+            {
+              "name": "HyaAudioRequest",
+              "kind": "type"
+            },
+            {
+              "name": "HyaAudioResource",
+              "kind": "type"
+            },
+            {
+              "name": "HyaAudioTrace",
+              "kind": "type"
+            }
+          ]
+        },
+        "./hya-data": {
+          "source": "extensions/src/hya-data.ts",
+          "exports": [
+            {
+              "name": "createHyaData",
+              "kind": "value"
+            },
+            {
+              "name": "createHyaSemantics",
+              "kind": "value"
+            },
+            {
+              "name": "HyaData",
+              "kind": "type"
+            },
+            {
+              "name": "HyaDataChange",
+              "kind": "type"
+            },
+            {
+              "name": "HyaDataSubscription",
+              "kind": "type"
+            },
+            {
+              "name": "HyaDataTransaction",
+              "kind": "type"
+            },
+            {
+              "name": "HyaSemanticHost",
+              "kind": "type"
+            },
+            {
+              "name": "HyaSemantics",
+              "kind": "type"
+            },
+            {
+              "name": "HyaSemanticSnapshot",
+              "kind": "type"
+            }
+          ]
+        },
+        "./hya-layout": {
+          "source": "extensions/src/hya-layout.ts",
+          "exports": [
+            {
+              "name": "createHyaLayout",
+              "kind": "value"
+            },
+            {
+              "name": "HyaLayout",
+              "kind": "type"
+            },
+            {
+              "name": "HyaLayoutFrame",
+              "kind": "type"
+            },
+            {
+              "name": "HyaLayoutNode",
+              "kind": "type"
+            },
+            {
+              "name": "HyaLayoutRequest",
+              "kind": "type"
+            }
+          ]
+        },
+        "./hya-player": {
+          "source": "extensions/src/hya-player.ts",
+          "exports": [
+            {
+              "name": "createHyaPlayer",
+              "kind": "value"
+            },
+            {
+              "name": "HyaDiagnostic",
+              "kind": "type"
+            },
+            {
+              "name": "HyaFrame",
+              "kind": "type"
+            },
+            {
+              "name": "HyaFrameRequest",
+              "kind": "type"
+            },
+            {
+              "name": "HyaPlayer",
+              "kind": "type"
+            },
+            {
+              "name": "HyaPlayerHost",
+              "kind": "type"
+            },
+            {
+              "name": "HyaPlayerOptions",
+              "kind": "type"
+            },
+            {
+              "name": "HyaResourceHandle",
+              "kind": "type"
+            },
+            {
+              "name": "HyaResourcePort",
+              "kind": "type"
+            }
+          ]
+        },
         "./hya-state-machine": {
           "source": "extensions/src/hya-state-machine.ts",
           "exports": [
@@ -10991,6 +11506,39 @@
             {
               "name": "hyaStateMachineChannelCapability",
               "kind": "value"
+            }
+          ]
+        },
+        "./hya-text": {
+          "source": "extensions/src/hya-text.ts",
+          "exports": [
+            {
+              "name": "createHyaTextShaper",
+              "kind": "value"
+            },
+            {
+              "name": "HyaFontPort",
+              "kind": "type"
+            },
+            {
+              "name": "HyaGlyph",
+              "kind": "type"
+            },
+            {
+              "name": "HyaGlyphRun",
+              "kind": "type"
+            },
+            {
+              "name": "HyaTextRequest",
+              "kind": "type"
+            },
+            {
+              "name": "HyaTextResult",
+              "kind": "type"
+            },
+            {
+              "name": "HyaTextShaper",
+              "kind": "type"
             }
           ]
         },
@@ -11072,6 +11620,63 @@
             {
               "name": "validateLocalePack",
               "kind": "value"
+            }
+          ]
+        },
+        "./layout": {
+          "source": "extensions/src/layout.ts",
+          "exports": [
+            {
+              "name": "createLayoutSession",
+              "kind": "value"
+            },
+            {
+              "name": "LayoutConstraints",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutEdges",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutError",
+              "kind": "value"
+            },
+            {
+              "name": "LayoutLength",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutLimits",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutMeasure",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutNode",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutRect",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutResult",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutSession",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutStyle",
+              "kind": "type"
+            },
+            {
+              "name": "LayoutTrack",
+              "kind": "type"
             }
           ]
         },

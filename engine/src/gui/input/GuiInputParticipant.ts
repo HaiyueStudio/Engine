@@ -1,3 +1,4 @@
+import type {GamepadControlSample} from '../../input/GamepadInputLayers';
 import type {GuiElement} from '../components/GuiElement';
 import type {GuiRoot} from '../components/GuiRoot';
 import type {GuiRect, GuiActionEvent} from '../GuiTypes';
@@ -7,6 +8,8 @@ import type {GuiDragPreview} from './GuiDragPreview';
 export interface GuiInputParticipant {
   roots(): readonly GuiElement[];
   enabled(): boolean;
+  rawGamepad?(sample:GamepadControlSample,target:GuiElement):boolean;
+  rawKeyboard?(event:KeyboardEvent,target:GuiElement):boolean;
   keyboard(event: KeyboardEvent): boolean;
   action(action: GuiActionEvent['action'], source: GuiActionEvent['source']): boolean;
   text(event: Event): boolean;

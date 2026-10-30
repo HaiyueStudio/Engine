@@ -2,7 +2,7 @@
   "schemaVersion": 4,
   "budgetPolicy": {
     "model": "reviewed-capability-plus-growth-reserve",
-    "reviewedAt": "2026-10-11",
+    "reviewedAt": "2026-10-24",
     "fileCount": "observe-only",
     "requirements": [
       "Measure a deterministic dist-only npm pack candidate before changing reviewed capacity.",
@@ -10,8 +10,9 @@
       "Increase reviewed capacity only with capability, API, consumer, and bundle evidence.",
       "Keep root and focused consumer closure budgets independent from total package capacity.",
       "File counts describe packaging structure, not release capacity. Review capability ownership, stable API coverage, declaration reachability and focused consumer closures instead; ADR 0122.",
-      "0.2.1 GPU instance and G02 declaration measurements remain historical observations; packed/unpacked byte and focused consumer budgets are unchanged.",
-      "0.2.0 capability attribution and reserve rationale: review/release-0.2.0-capability-budgets.md."
+      "0.2.1 GPU instance and G02 declaration measurements remain historical observations; current 0.2.2 capability allowances are separately reviewed under ADR 0135.",
+      "0.2.0 capability attribution and reserve rationale: review/release-0.2.0-capability-budgets.md.",
+      "0.2.2 capability growth is reviewed under ADR 0135: preserve historical failures, attribute closures and check implementation reuse before increasing byte capacity."
     ]
   },
   "publicPackages": {
@@ -20,32 +21,48 @@
       "maxPackedBytes": 2100000,
       "maxUnpackedBytes": 9000000,
       "capacity": {
-        "reviewed": { "packedBytes": 1874952, "unpackedBytes": 8362294, "fileCount": 613 },
-        "growthReserve": { "packedBytes": 225048, "unpackedBytes": 637706 },
+        "reviewed": {
+          "packedBytes": 1874952,
+          "unpackedBytes": 8362294,
+          "fileCount": 613
+        },
+        "growthReserve": {
+          "packedBytes": 225048,
+          "unpackedBytes": 637706
+        },
         "capabilityBasis": "stable golden path plus focused ECS, scene, rendering, physics, compute, assets, diagnostics, game saves, and experimental runtime seams; 0.2.0 owner-safe audio mixer, multiplayer input and GUI font options; 0.2.1 GPU instances and private Deferred/vertex-color declarations"
       },
       "declaredFiles": [
         "README.md",
         "LICENSE",
         "dist/**/*.js",
-        "dist/**/*.d.ts"
+        "dist/**/*.d.ts",
+        "THIRD_PARTY_NOTICES.txt"
       ],
       "allowedFilePatterns": [
         "package.json",
         "README.md",
         "LICENSE",
         "dist/**/*.js",
-        "dist/**/*.d.ts"
+        "dist/**/*.d.ts",
+        "THIRD_PARTY_NOTICES.txt"
       ]
     },
     "@haiyue/animation-spec": {
       "workspace": "animation-spec",
-      "maxPackedBytes": 145000,
-      "maxUnpackedBytes": 550000,
+      "maxPackedBytes": 190000,
+      "maxUnpackedBytes": 750000,
       "capacity": {
-        "reviewed": { "packedBytes": 130279, "unpackedBytes": 502980, "fileCount": 48 },
-        "growthReserve": { "packedBytes": 14721, "unpackedBytes": 47020 },
-        "capabilityBasis": "source-neutral HYA format, native 3D, deformable 2D, and offline Lottie/Cubism adapters; reviewed text style runs and their codec/schema/validation"
+        "reviewed": {
+          "packedBytes": 170719,
+          "unpackedBytes": 666297,
+          "fileCount": 51
+        },
+        "growthReserve": {
+          "packedBytes": 19281,
+          "unpackedBytes": 83703
+        },
+        "capabilityBasis": "0.2.2 hya-production composition, data, interaction, semantics, audio and state contracts; public declarations, source-neutral parsers and corrected schemas, reviewed under ADR 0135; prior 0.2.1 measurements retained in review."
       },
       "declaredFiles": [
         "dist",
@@ -64,15 +81,25 @@
         "dist/**/*.js",
         "dist/**/*.d.ts",
         "schema/**/*.json"
-      ]
+      ],
+      "metadataLineEndings": {
+        "package.json": "crlf"
+      }
     },
     "@haiyue/extensions": {
       "workspace": "extensions",
       "maxPackedBytes": 550000,
       "maxUnpackedBytes": 3000000,
       "capacity": {
-        "reviewed": { "packedBytes": 513428, "unpackedBytes": 2651601, "fileCount": 188 },
-        "growthReserve": { "packedBytes": 36572, "unpackedBytes": 348399 },
+        "reviewed": {
+          "packedBytes": 513428,
+          "unpackedBytes": 2651601,
+          "fileCount": 188
+        },
+        "growthReserve": {
+          "packedBytes": 36572,
+          "unpackedBytes": 348399
+        },
         "capabilityBasis": "admitted optional animation, asset, text, tile, deformable, and experimental ray tracing runtimes; reviewed OpenType-backed animation text, routed interaction, virtual joystick, i18n and branching narrative"
       },
       "declaredFiles": [
@@ -87,15 +114,25 @@
         "LICENSE",
         "dist/**/*.js",
         "dist/**/*.d.ts"
-      ]
+      ],
+      "metadataLineEndings": {
+        "README.md": "crlf"
+      }
     },
     "@haiyue/shader-language": {
       "workspace": "shader-language",
       "maxPackedBytes": 175000,
       "maxUnpackedBytes": 850000,
       "capacity": {
-        "reviewed": { "packedBytes": 136901, "unpackedBytes": 668355, "fileCount": 70 },
-        "growthReserve": { "packedBytes": 38099, "unpackedBytes": 181645 },
+        "reviewed": {
+          "packedBytes": 136901,
+          "unpackedBytes": 668355,
+          "fileCount": 70
+        },
+        "growthReserve": {
+          "packedBytes": 38099,
+          "unpackedBytes": 181645
+        },
         "capabilityBasis": "typed shader IR/compiler, generated WebGPU shader families, and focused material graph authoring"
       },
       "declaredFiles": [
@@ -110,7 +147,10 @@
         "LICENSE",
         "dist/**/*.js",
         "dist/**/*.d.ts"
-      ]
+      ],
+      "metadataLineEndings": {
+        "package.json": "crlf"
+      }
     }
   },
   "tarball": {
@@ -120,22 +160,34 @@
       "README.md",
       "LICENSE",
       "dist/**/*.js",
-      "dist/**/*.d.ts"
+      "dist/**/*.d.ts",
+      "THIRD_PARTY_NOTICES.txt"
     ],
     "allowedFilePatterns": [
       "package.json",
       "README.md",
       "LICENSE",
       "dist/**/*.js",
-      "dist/**/*.d.ts"
+      "dist/**/*.d.ts",
+      "THIRD_PARTY_NOTICES.txt"
     ]
   },
   "consumers": {
     "gpu-instances-only": {
       "fixture": "scripts/fixtures/engine-consumers/gpu-instances-only.mjs",
       "maxGzipBytes": 91000,
-      "requiredExports": ["GpuComputeProgram", "GpuInstanceLod", "GpuReadbackRing", "InstancedToonMaterial", "InstancedMesh3DRenderer", "inspectGpuSimulationCapabilities"],
-      "allowedGeneratedShaderArtifacts": ["specialized-rendering-shader-artifact", "compute-shader-artifact"]
+      "requiredExports": [
+        "GpuComputeProgram",
+        "GpuInstanceLod",
+        "GpuReadbackRing",
+        "InstancedToonMaterial",
+        "InstancedMesh3DRenderer",
+        "inspectGpuSimulationCapabilities"
+      ],
+      "allowedGeneratedShaderArtifacts": [
+        "specialized-rendering-shader-artifact",
+        "compute-shader-artifact"
+      ]
     },
     "root-golden-path": {
       "fixture": "scripts/fixtures/engine-consumers/root-golden-path.mjs",
@@ -163,8 +215,12 @@
     "fxaa-only": {
       "fixture": "scripts/fixtures/engine-consumers/fxaa-only.mjs",
       "maxGzipBytes": 14000,
-      "requiredExports": ["FxaaPass"],
-      "allowedGeneratedShaderArtifacts": ["postprocess-shader-artifact"]
+      "requiredExports": [
+        "FxaaPass"
+      ],
+      "allowedGeneratedShaderArtifacts": [
+        "postprocess-shader-artifact"
+      ]
     },
     "geometry-only": {
       "fixture": "scripts/fixtures/engine-consumers/geometry-only.mjs",
@@ -203,26 +259,45 @@
     "audio-mixer-only": {
       "fixture": "scripts/fixtures/engine-consumers/audio-mixer-only.mjs",
       "maxGzipBytes": 4000,
-      "requiredExports": ["OwnerSafeAudioMixer"],
+      "requiredExports": [
+        "OwnerSafeAudioMixer"
+      ],
       "allowedGeneratedShaderArtifacts": []
     },
     "multiplayer-input-only": {
       "fixture": "scripts/fixtures/engine-consumers/multiplayer-input-only.mjs",
       "maxGzipBytes": 6000,
-      "requiredExports": ["BrowserMultiplayerInput", "InputActionMap"],
+      "requiredExports": [
+        "BrowserMultiplayerInput",
+        "InputActionMap"
+      ],
       "allowedGeneratedShaderArtifacts": []
     },
     "font-builder-only": {
       "fixture": "scripts/fixtures/engine-consumers/font-builder-only.mjs",
       "maxGzipBytes": 2000,
-      "requiredExports": ["buildBitmapFont"],
+      "requiredExports": [
+        "buildBitmapFont"
+      ],
       "allowedGeneratedShaderArtifacts": []
     },
     "gui-font": {
       "fixture": "scripts/fixtures/engine-consumers/gui-font.mjs",
-      "maxGzipBytes": 55000,
-      "requiredExports": ["GuiSystem", "GuiToast"],
-      "allowedGeneratedShaderArtifacts": ["2d-ui-shader-artifact"]
+      "maxGzipBytes": 95000,
+      "requiredExports": [
+        "GuiSystem",
+        "GuiToast"
+      ],
+      "allowedGeneratedShaderArtifacts": [
+        "2d-ui-shader-artifact"
+      ],
+      "capacityReview": {
+        "previousMaxGzipBytes": 55000,
+        "reviewedGzipBytes": 80635,
+        "growthReserveBytes": 14365,
+        "capabilityBasis": "G03–G11 shared GUI layout, region scheduling, routed input, Unicode editing, skins, drag, cursor and HYA presentation; one Engine GUI owner, no OpenType parser",
+        "decision": "docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md"
+      }
     }
   },
   "animationSpecConsumers": {
@@ -320,8 +395,14 @@
       "fixture": "scripts/fixtures/engine-consumers/extensions-achievements.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 3500,
-      "requiredExports": ["AchievementRuntime"],
-      "forbiddenStaticTokens": ["class AchievementGui", "class GuiSystem", "class GltfModelSystem"]
+      "requiredExports": [
+        "AchievementRuntime"
+      ],
+      "forbiddenStaticTokens": [
+        "class AchievementGui",
+        "class GuiSystem",
+        "class GltfModelSystem"
+      ]
     },
     "extensions-share-content": {
       "entrypoint": "./share-content",
@@ -361,10 +442,17 @@
       "entrypoint": "./narrative",
       "fixture": "scripts/fixtures/engine-consumers/extensions-narrative-gui.mjs",
       "packageName": "@haiyue/extensions",
-      "maxGzipBytes": 13000,
+      "maxGzipBytes": 23000,
       "requiredExports": [
         "NarrativeGui"
-      ]
+      ],
+      "capacityReview": {
+        "previousMaxGzipBytes": 13000,
+        "reviewedGzipBytes": 19014,
+        "growthReserveBytes": 3986,
+        "capabilityBasis": "Narrative GUI adapter plus shared Engine controls and text editing; no second narrative or GUI runtime",
+        "decision": "docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md"
+      }
     },
     "extensions-animation": {
       "entrypoint": "./animation",
@@ -375,9 +463,16 @@
         "schemaVersion": 1,
         "maxInitialGzipBytes": 145000,
         "maxTotalGzipBytes": 245000,
-        "deferredModuleMarkers": ["/opentype.module-"]
+        "deferredModuleMarkers": [
+          "/opentype.module"
+        ]
       },
-      "requiredExports": ["Animation2DComponent", "Animation2DRenderSystem", "Animation2DSystem", "createAnimationAssetLoader"]
+      "requiredExports": [
+        "Animation2DComponent",
+        "Animation2DRenderSystem",
+        "Animation2DSystem",
+        "createAnimationAssetLoader"
+      ]
     },
     "extensions-animation3d": {
       "entrypoint": "./animation3d",
@@ -442,58 +537,260 @@
         "schemaVersion": 1,
         "maxInitialGzipBytes": 153500,
         "maxTotalGzipBytes": 255000,
-        "deferredModuleMarkers": ["/opentype.module-"]
+        "deferredModuleMarkers": [
+          "/opentype.module"
+        ]
       },
-      "requiredExports": ["Animation2DStateMachineComponent", "Animation2DStateMachineSystem", "createHyaAnimation2DClips"]
+      "requiredExports": [
+        "Animation2DStateMachineComponent",
+        "Animation2DStateMachineSystem",
+        "createHyaAnimation2DClips"
+      ]
     },
     "extensions-spine": {
       "entrypoint": "./spine",
       "fixture": "scripts/fixtures/engine-consumers/extensions-spine.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 90000,
-      "requiredExports": ["Spine2DComponent", "Spine2DRenderSystem", "createSpinePlugin"]
+      "requiredExports": [
+        "Spine2DComponent",
+        "Spine2DRenderSystem",
+        "createSpinePlugin"
+      ]
     },
     "extensions-tilemap": {
       "entrypoint": "./tilemap",
       "fixture": "scripts/fixtures/engine-consumers/extensions-tilemap.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 45000,
-      "requiredExports": ["Tilemap2DComponent", "Tilemap2DRenderSystem", "createTilemapPlugin"]
+      "requiredExports": [
+        "Tilemap2DComponent",
+        "Tilemap2DRenderSystem",
+        "createTilemapPlugin"
+      ]
     },
     "extensions-canvas-text": {
       "entrypoint": "./canvas-text",
       "fixture": "scripts/fixtures/engine-consumers/extensions-canvas-text.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 50000,
-      "requiredExports": ["CanvasText2DRenderSystem", "CanvasTextComponent"]
+      "requiredExports": [
+        "CanvasText2DRenderSystem",
+        "CanvasTextComponent"
+      ]
     },
     "extensions-tween": {
       "entrypoint": "./tween",
       "fixture": "scripts/fixtures/engine-consumers/extensions-tween.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 32000,
-      "requiredExports": ["Tween2DComponent", "Tween2DSystem"]
+      "requiredExports": [
+        "Tween2DComponent",
+        "Tween2DSystem"
+      ]
     },
     "extensions-grid": {
       "entrypoint": "./grid",
       "fixture": "scripts/fixtures/engine-consumers/extensions-grid.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 9000,
-      "requiredExports": ["Grid2DComponent"]
+      "requiredExports": [
+        "Grid2DComponent"
+      ]
     },
     "extensions-interaction": {
       "entrypoint": "./animation",
       "fixture": "scripts/fixtures/engine-consumers/extensions-interaction.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 55000,
-      "requiredExports": ["InteractionRuntime"]
+      "requiredExports": [
+        "InteractionRuntime"
+      ]
     },
     "extensions-controls": {
       "entrypoint": "./controls",
       "fixture": "scripts/fixtures/engine-consumers/extensions-controls.mjs",
       "packageName": "@haiyue/extensions",
       "maxGzipBytes": 45000,
-      "requiredExports": ["VirtualJoystickControls"]
+      "requiredExports": [
+        "VirtualJoystickControls"
+      ]
+    },
+    "extensions-hya-player": {
+      "entrypoint": "./hya-player",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-hya-player.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 500000,
+      "requiredExports": [
+        "createHyaPlayer"
+      ],
+      "forbiddenStaticTokens": [
+        "class GltfModelSystem",
+        "class Spine2DRenderSystem",
+        "class Render3DSystem",
+        "class NarrativeGui"
+      ],
+      "loading": {
+        "schemaVersion": 1,
+        "maxInitialGzipBytes": 380000,
+        "maxTotalGzipBytes": 500000,
+        "deferredModuleMarkers": [
+          "/opentype.module"
+        ]
+      },
+      "capacityReview": {
+        "reviewedGzipBytes": 427715,
+        "growthReserveBytes": 72285,
+        "capabilityBasis": "0.2.2 public hya-player factory closure from isolated installed tarballs; existing production owners reused, no source/private consumer imports",
+        "decision": "docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md"
+      }
+    },
+    "extensions-hya-text": {
+      "entrypoint": "./hya-text",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-hya-text.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 20000,
+      "requiredExports": [
+        "createHyaTextShaper"
+      ],
+      "forbiddenStaticTokens": [
+        "class GltfModelSystem",
+        "class Spine2DRenderSystem",
+        "class Render3DSystem",
+        "class NarrativeGui",
+        "class GuiSystem",
+        "class Animation2DRenderSystem",
+        "opentype.js"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 16712,
+        "growthReserveBytes": 3288,
+        "capabilityBasis": "0.2.2 public hya-text factory closure from isolated installed tarballs; existing production owners reused, no source/private consumer imports",
+        "decision": "docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md"
+      }
+    },
+    "extensions-hya-layout": {
+      "entrypoint": "./hya-layout",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-hya-layout.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 60000,
+      "requiredExports": [
+        "createHyaLayout"
+      ],
+      "forbiddenStaticTokens": [
+        "class GltfModelSystem",
+        "class Spine2DRenderSystem",
+        "class Render3DSystem",
+        "class NarrativeGui",
+        "class GuiSystem",
+        "class Animation2DRenderSystem",
+        "opentype.js"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 49578,
+        "growthReserveBytes": 10422,
+        "capabilityBasis": "0.2.2 public hya-layout factory closure from isolated installed tarballs; existing production owners reused, no source/private consumer imports",
+        "decision": "docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md"
+      }
+    },
+    "extensions-hya-data": {
+      "entrypoint": "./hya-data",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-hya-data.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 28000,
+      "requiredExports": [
+        "createHyaData",
+        "createHyaSemantics"
+      ],
+      "forbiddenStaticTokens": [
+        "class GltfModelSystem",
+        "class Spine2DRenderSystem",
+        "class Render3DSystem",
+        "class NarrativeGui",
+        "class GuiSystem",
+        "class Animation2DRenderSystem",
+        "opentype.js"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 23037,
+        "growthReserveBytes": 4963,
+        "capabilityBasis": "0.2.2 public hya-data factory closure from isolated installed tarballs; existing production owners reused, no source/private consumer imports",
+        "decision": "docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md"
+      }
+    },
+    "extensions-hya-audio": {
+      "entrypoint": "./hya-audio",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-hya-audio.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 21000,
+      "requiredExports": [
+        "createHyaAudio",
+        "createBrowserHyaAudioHost"
+      ],
+      "forbiddenStaticTokens": [
+        "class GltfModelSystem",
+        "class Spine2DRenderSystem",
+        "class Render3DSystem",
+        "class NarrativeGui",
+        "class GuiSystem",
+        "class Animation2DRenderSystem",
+        "opentype.js"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 16885,
+        "growthReserveBytes": 4115,
+        "capabilityBasis": "0.2.2 public hya-audio factory closure from isolated installed tarballs; existing production owners reused, no source/private consumer imports",
+        "decision": "docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md"
+      }
+    },
+    "extensions-layout": {
+      "entrypoint": "./layout",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-layout.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 11000,
+      "requiredExports": [
+        "createLayoutSession",
+        "LayoutError"
+      ],
+      "forbiddenStaticTokens": [
+        "opentype.js",
+        "class Animation2DRenderSystem",
+        "class Render3DSystem",
+        "class NarrativeGui",
+        "class GuiSystem",
+        "class GuiElement",
+        "createHaiyueEngine"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 8964,
+        "growthReserveBytes": 2036,
+        "capabilityBasis": "G01 named layout API; original shared layout core and GUI owners, diagnostic compiled closure then installed tarball verification",
+        "decision": "review/engine-0.2.2/g13-package-admission.md"
+      }
+    },
+    "extensions-gui-layout": {
+      "entrypoint": "./gui-layout",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-layout.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 40000,
+      "requiredExports": [
+        "attachGuiLayout",
+        "createGuiContainer",
+        "GuiSplitPanel",
+        "GuiTabContainer"
+      ],
+      "forbiddenStaticTokens": [
+        "opentype.js",
+        "class Animation2DRenderSystem",
+        "class Render3DSystem",
+        "class NarrativeGui"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 33251,
+        "growthReserveBytes": 6749,
+        "capabilityBasis": "G01 named gui-layout API; original shared layout core and GUI owners, diagnostic compiled closure then installed tarball verification",
+        "decision": "review/engine-0.2.2/g13-package-admission.md"
+      }
     }
   },
   "shaderLanguageConsumers": {

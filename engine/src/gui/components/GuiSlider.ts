@@ -1,3 +1,5 @@
+import * as GuiPaint from '../rendering/GuiControlPaintPrimitives';
+import {admitGuiControl} from '../GuiControlIdentity';
 import { GuiDirtyFlags, GuiElementOptions, GuiPointerEvent, GuiValueChangeHandler } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
 import type {GuiActionEvent} from '../GuiTypes';
@@ -12,6 +14,7 @@ export interface GuiSliderOptions extends GuiElementOptions {
 }
 
 export class GuiSlider extends GuiElement {
+  private static readonly __controlIdentityGuiSlider = /* @__PURE__ */ (() => admitGuiControl(GuiSlider.prototype, 'GuiSlider', undefined, paintGuiSlider))();
   static override readonly themeControlType: string = 'GuiSlider';
   override handleAction(event: GuiActionEvent): void {
     super.handleAction(event);
@@ -73,3 +76,14 @@ export class GuiSlider extends GuiElement {
     this.setValue(this.min + (this.max - this.min) * ratio, emit);
   }
 }
+
+/** Original built-in painter; retained with this control, not every GUI owner. */
+function paintGuiSlider(context:GuiPaint.GuiControlPaintContext, slider: GuiSlider, theme: GuiPaint.GuiTheme): void {
+    const trackHeight = 4;
+    const trackY = slider.rect.y + (slider.rect.height - trackHeight) * 0.5;
+    const thumbSize = Math.min(18, slider.rect.height);
+    const thumbX = slider.rect.x + slider.rect.width * slider.ratio - thumbSize * 0.5;
+    context.addRect(slider.rect.x, trackY, slider.rect.width, trackHeight, trackHeight * 0.5, GuiPaint.colorToRgba(context.styleFor(slider).backgroundColor, theme.colors.border));
+    context.addRect(slider.rect.x, trackY, slider.rect.width * slider.ratio, trackHeight, trackHeight * 0.5, GuiPaint.colorToRgba(theme.colors.primary, theme.colors.primary));
+    context.addRect(thumbX, slider.rect.y + (slider.rect.height - thumbSize) * 0.5, thumbSize, thumbSize, thumbSize * 0.5, GuiPaint.colorToRgba(slider.focused ? theme.colors.active : theme.colors.text, theme.colors.text));
+  }

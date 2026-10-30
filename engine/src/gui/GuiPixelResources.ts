@@ -1,5 +1,6 @@
-import {GuiImage, type GuiImageSource} from './components/GuiImage';
-import {GuiToast} from './components/GuiToast';
+import {isGuiControl} from './GuiControlIdentity';
+import {type GuiImage, type GuiImageSource} from './components/GuiImage';
+import {type GuiToast} from './components/GuiToast';
 import type {GuiRoot} from './components/GuiRoot';
 import type {GuiElement} from './components/GuiElement';
 import {observeGuiRootDisposal} from './GuiLayoutState';
@@ -9,9 +10,9 @@ type Source = NonNullable<GuiImageSource>;
 interface Watched {nodes: Set<GuiElement>; key: string; release: () => void;}
 function sources(element: GuiElement, themed: boolean): Set<Source> {
   const result = new Set<Source>();
-  if (element instanceof GuiImage && element.source) result.add(element.source);
+  if (isGuiControl<GuiImage>(element, 'GuiImage') && element.source) result.add(element.source);
   const skin = themed ? element.getResolvedStyle() : undefined;
-  if (element instanceof GuiToast && (skin?.icon ?? element.icon)) result.add((skin?.icon ?? element.icon)!);
+  if (isGuiControl<GuiToast>(element, 'GuiToast') && (skin?.icon ?? element.icon)) result.add((skin?.icon ?? element.icon)!);
   if (themed) {
     if (skin?.icon) result.add(skin.icon);
     if (skin?.nineSlice?.source) result.add(skin.nineSlice.source);
