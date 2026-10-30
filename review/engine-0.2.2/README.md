@@ -176,7 +176,7 @@ G03接入约定：
 
 GUI 装配：渲染访问器通过私有 SceneRenderAccess 借用原 owner，经构建器打包后不保留场景构造或提前加载 GUI；独立 @haiyue/engine/gui 仍可动态分包，同步 GUI 场景与独立入口使用同一个 GuiSystem 类型。完整 HaiyueEngine 主入口保留同步 createScene({gui:true}) 默认能力，因此仍含 GUI 构造代码；没有创建第二套 Engine／GUI，也不宣称主入口 GUI 已完全延迟。text／pointer／style.cursor 的既有浏览器证据和真实字体／PNG 组合示例继续保留。
 
-未完成项：G11 仍未取得完整资格。HYA 组合真实 IME／手柄、Apple SDK 构建、物理 iPhone 的 PCM／输入／VoiceOver 与生命周期、G12 完整素材／增量／长时资源／冷启动／生产性能，以及 G13 最终候选／全局门禁／演练继续验收。原 382 对 PNG、Native 交接及其源码范围保持，不把本轮 Node 包消费冒充设备或真实音频输出。
+原阶段延期项：HYA 真实输入、Apple 构建／音频／VoiceOver、生产性能及最终候选当时继续交 G12／G13 验收；原 382 对 PNG、Native 交接与失败保留。2026-10-30 补充：G12 生产证据及 G13 跨平台验收现已完成，G11 取得完整资格，当前结论见 [G13 索引](g13-checks.json)。
 
 [当前包门禁](../../artifacts/engine-0.2.2/g11/package-boundary-20261024/final-packed/public-packages.json) · [实现归属审查](../../artifacts/engine-0.2.2/g11/package-boundary-20261024/ownership-review.json) · [原接入与失败](../../artifacts/engine-0.2.2/g11/admission-20261024/result.json) · [示例](../../examples/hya-production/main.ts) · [证据索引](g11-checks.json)
 
@@ -206,4 +206,4 @@ Windows 结论（2026-10-30）：完整全局门禁与无发布演练通过。�
 
 消费者收尾：Games d439855 已对齐三份公开包及所有依赖别名，类型、1,166 项规则测试与全部 32 个游戏构建通过；真实 Gravity Maze 的 6 项自动化绘制／生命周期检查通过，非物理输入或正式性能证据。Native be27e22 的安装字节、类型、场景测试及 iOS JavaScript 打包通过；[Mac／iPhone 传输包](../../artifacts/engine-0.2.2/g13/native-handoff-d58835a-verified/hya-native-g13-d58835a.tar.gz)约 9.4 MB，253 项文件及清单共 254 个解压文件逐项校验。Games／Native 原有游戏改动、旧包和候选记录保留。
 
-剩余：Mac／iPhone 的 Apple SDK、NativeScript 元数据、签名安装、组合输入／软键盘／旋转与后台恢复、真实 PCM／实时音频及 VoiceOver。使用传输包内 README 完成真机流程并回传与包哈希绑定的证据。Windows 与本机准备工作完成，G13 仍保持 active，未授予整版发布资格；未推送、打标签、发布包／站点或提升基线。
+跨平台收尾（2026-10-30）：[Mac／iPhone 验收](g13-mac-iphone-20261030.md)通过，23 份宿主修复按原哈希合入 Native 1caaee0；本机类型、45 项测试及 iOS JavaScript 打包通过。归档 2,658 项、849 个安装包文件、71 项宿主及 25 项桥接输入逐项复核，人工 build 17 与标准 build 25 的 96 项输入相同。七组 580 次捕获重新独立审计，四类运行时重建及四包原始哈希一致，完整全局门禁与无发布演练的原结论保持。G11 真实输入延期项已补齐，G13 与 0.2.2 候选验收完成；没有新的性能采样、预算变更、推送、标签、发布或基线推广。

@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "goal": "g13-integration-release",
-  "status": "active",
-  "fullG13Complete": false,
-  "releaseQualified": false,
+  "status": "complete",
+  "fullG13Complete": true,
+  "releaseQualified": true,
   "problem": "Finalize public package integration and qualify the same candidate across GUI, HYA, hosts and recoverable release controls.",
   "method": "Frozen named exports, independent installed tarballs, unchanged runtime ownership/budgets, real input before admission, immutable original failures.",
   "candidate": {
     "revision": "d58835a9d14c711f26374c5eed00851f4e4649c2",
     "dirty": false,
-    "role": "Qualified runtime package bytes for Windows global gates and rehearsal; Apple-device qualification pending",
+    "role": "Qualified 0.2.2 package bytes across Windows global gates/rehearsal and Mac/iPhone acceptance, with byte-bound Native host repairs integrated",
     "packages": [
       {
         "name": "@haiyue/engine",
@@ -44,7 +44,8 @@
       "path": "artifacts/engine-0.2.2/g13/packages-light-lifetime/public-packages.json",
       "sha256": "62abbce569c707d0a5059366756d4fa204e8b7f42fd19c01d70079dda21283a0"
     },
-    "runtimeFingerprintSha256": "7043064752e0f602c9e406acae8cf228391e405e5bd434f3bd163e2e7230b1b0"
+    "runtimeFingerprintSha256": "7043064752e0f602c9e406acae8cf228391e405e5bd434f3bd163e2e7230b1b0",
+    "nativeHostRevision": "1caaee0d1d24daac92b97a2f5e78fefcd8d17154"
   },
   "api": {
     "namedG01Additions": 47,
@@ -1184,6 +1185,55 @@
       "signedNativeAppBuilt": false,
       "physicalNativeQualified": false,
       "userWipPreserved": true
+    },
+    "macIphone20261030": {
+      "status": "passed-mac-iphone-acceptance",
+      "report": {
+        "path": "artifacts/engine-0.2.2/g13/mac-iphone-20261030/result.json",
+        "sha256": "4fe17668a29fef7e9c45db57498766dd04ffe82b8fc9c453a90863175d181985"
+      },
+      "sourceTests": 45,
+      "desktopPcmTests": 33,
+      "appleSdkBuildPassed": true,
+      "metadataGenerated": true,
+      "latestSignedAppReady": true,
+      "latestRepairInstalled": true,
+      "physicalNativeQualified": true,
+      "firstFrameCaptured": true,
+      "physicalOfflinePcmCases": 7,
+      "latestRuntimeRound": 22,
+      "pcmVisibleFeedbackAccepted": true,
+      "keyboardDismissalAccepted": true,
+      "humanImeAccepted": true,
+      "humanLiveAudioAccepted": true,
+      "hostLifecyclePairs": 3,
+      "nativeCorePixelParity": true,
+      "humanVoiceOverAccepted": true,
+      "recordedEndCleanupPassed": true,
+      "nativeSemanticTapReceipt": false,
+      "timelineParityResolved": true,
+      "standardSourceInputsRestored": 96,
+      "standardBuildStartupPassed": true,
+      "humanTransportAccepted": true,
+      "finalOwnedCleanupPassed": true,
+      "evidenceReferencesChecked": 77,
+      "evidenceUniqueFilesChecked": 68,
+      "hostRepairFiles": 23,
+      "finalDocsAndMilestonesChecksPassed": true
+    },
+    "crossPlatformIntegration": {
+      "status": "passed-cross-platform-candidate",
+      "report": {
+        "path": "artifacts/engine-0.2.2/g13/apple-import-20261030-7a83132b/cross-platform-qualification.json",
+        "sha256": "8810068154e3cd5690fc52f86edbc6642ce2629433178f52ab77e3de529867ac"
+      }
+    },
+    "integrationCloseoutChecks": {
+      "status": "passed",
+      "report": {
+        "path": "artifacts/engine-0.2.2/g13/apple-import-20261030-7a83132b/final-local-checks.json",
+        "sha256": "e3effe7ae479d0bfd000733b314548f3a488c11a18d4db89a371f0639d89b1ed"
+      }
     }
   },
   "preservedFailures": {
@@ -1246,20 +1296,17 @@
   },
   "currentBlocker": {
     "id": "apple-physical-qualification",
-    "status": "pending",
+    "status": "resolved",
     "windowsTasksComplete": true,
     "remainingRendererCaptures": 0,
     "globalGatePassed": true,
     "rehearsalPassed": true,
-    "macAvailable": false,
-    "iPhoneAvailable": false,
-    "fullG13Complete": false
+    "macAvailable": true,
+    "iPhoneAvailable": true,
+    "physicalNativeQualified": true,
+    "fullG13Complete": true
   },
-  "remaining": [
-    "On Mac/iPhone: compile current HYA Native candidate with Apple SDK/NativeScript metadata, sign/install, and verify real soft-keyboard/composition/rotation/background input",
-    "On iPhone: verify actual PCM/live audio, unlock/interruption/recovery and VoiceOver; bind all receipts to the exact handoff package hashes",
-    "Complete final cross-platform qualification before any separately authorized publication; no push, tag, npm, GitHub Release, Pages or baseline promotion performed"
-  ],
+  "remaining": [],
   "publishing": {
     "executed": false,
     "push": false,
@@ -1271,8 +1318,8 @@
   "deviceAvailability": {
     "windows": true,
     "gamepad": true,
-    "mac": false,
-    "iphone": false
+    "mac": true,
+    "iphone": true
   },
   "historicalStructuralCandidate": {
     "revision": "4073c3b46c9df95050a71f3db7ac97eb4eafbae5",
@@ -1379,5 +1426,14 @@
     "correctnessSupplementStatus": "passed-correctness-supplement",
     "originalReportsModified": false,
     "lightLifetimeRepairApplied": true
+  },
+  "fullG11Complete": true,
+  "nextIntegrationStep": {
+    "id": "native-host-repair-and-evidence-import",
+    "status": "complete",
+    "report": {
+      "path": "artifacts/engine-0.2.2/g13/apple-import-20261030-7a83132b/cross-platform-qualification.json",
+      "sha256": "8810068154e3cd5690fc52f86edbc6642ce2629433178f52ab77e3de529867ac"
+    }
   }
 }
