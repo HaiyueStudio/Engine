@@ -1,9 +1,16 @@
 import { Entity, HaiyueEngine } from '@haiyue/engine';
 import {
   GuiButton, GuiColorPicker, GuiElement, GuiInput, GuiLabel, GuiModal, GuiRoot, GuiScrollView,
-  GuiSelect, GuiSlider, GuiSwitch, GuiToast,
+  GuiSelect, GuiSlider, GuiSwitch, GuiToast, GuiTooltip,
 } from '@haiyue/engine/gui';
 import { createCatalog, defaults, normalize, previewStyle, type Parameter, type Value } from './catalog';
+import {attachGuiLayout} from '@haiyue/extensions/gui-layout';
+import {populateLayoutDemo} from './layout-demo';
+import {attachInputNavigation} from './input-navigation';
+import {attachTextEditing} from './text-editing';
+import {attachThemeSkins} from './theme-skins';
+import {attachPanelsTabs} from './panels-tabs';
+import {attachDragDrop} from './drag-drop';
 
 const colors = { panel: '#111c30', border: '#26354d', muted: '#91a3bd', accent: '#7dd3fc' };
 const label = (parent: GuiElement, text: string, x: number, y: number, width: number, fontSize = 14, color = colors.muted) =>
@@ -14,22 +21,39 @@ async function main(): Promise<void> {
   const status = document.getElementById('status')!;
   const engine = new HaiyueEngine({ canvas, clearColor: { r: 0.025, g: 0.045, b: 0.085, a: 1 } });
   let disposed = false;
+  let detachLayout: (() => void) | null = null;
+  let detachInput: (() => void) | null = null;
   const cleanup = () => {
     if (disposed) return;
     disposed = true;
     window.removeEventListener('pagehide', cleanup);
+    detachLayout?.(); detachLayout = null;
+    detachInput?.();detachInput=null;
     engine.destroy();
   };
   window.addEventListener('pagehide', cleanup);
   try {
     await engine.init();
     if (disposed) return;
-    const scene = engine.createScene({ name: 'gui-runtime', render3D: false, gui: { loadOp: 'clear' }, pipelineLabel: 'GuiPlaygroundRenderPipeline' });
+    const textWorkflow=new URLSearchParams(location.search).has('text-input');
+    const scene = engine.createScene({ name: 'gui-runtime', render3D: false, gui: { loadOp: 'clear',...(textWorkflow?{textInputHost:'browser' as const,font:{chars:'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 中文你好取消提交A😀Bé👩🏽‍💻•/():;,.?!-_|',fontFamily:'sans-serif'}}:{}) }, pipelineLabel: 'GuiPlaygroundRenderPipeline' });
     const root = new GuiRoot();
+    const layoutBinding = attachGuiLayout(root);
+    detachLayout = () => layoutBinding.dispose();
     const entity = new Entity('gui-playground');
     entity.addComponent(root);
     scene.add(entity);
     engine.switchScene(scene);
+    if(new URLSearchParams(location.search).has('drag-drop')){detachInput=attachDragDrop(scene.guiSystem!,root,layoutBinding,canvas);engine.run();status.hidden=true;canvas.dataset.ready='true';return;}
+    if(new URLSearchParams(location.search).has('panels-tabs')){detachInput=attachPanelsTabs(engine,scene.guiSystem!,root,layoutBinding);engine.run();status.hidden=true;canvas.dataset.ready='true';return;}
+    if(new URLSearchParams(location.search).has('theme-skins')){detachInput=attachThemeSkins(engine,scene.guiSystem!,root);engine.run();status.hidden=true;canvas.dataset.ready='true';return;}
+    if(textWorkflow){detachInput=attachTextEditing(engine,scene.guiSystem!,root);engine.run();status.hidden=true;canvas.dataset.ready='true';return;}
+
+    const inputWorkflow=new URLSearchParams(location.search).has('input-navigation');
+    detachInput=attachInputNavigation(engine,scene.guiSystem!,root,inputWorkflow);
+    if(inputWorkflow) {
+      engine.run();status.hidden=true;canvas.dataset.ready='true';return;
+    }
 
     const catalog = createCatalog();
     const states = new Map(catalog.map(demo => [demo.name, defaults(demo)]));
@@ -83,6 +107,9 @@ async function main(): Promise<void> {
         disabled: values.disabled === true, style: previewStyle(selected, values),
       };
       const component = selected.create(values, options, previewChanged);
+      if (selected.name === 'Layouts') {
+        canvas.dataset.layoutMode = String(values.mode);
+      } else delete canvas.dataset.layoutMode;
       if (component instanceof GuiModal) {
         modal = root.add(component);
         stage.setContentHeight(stageHeight);
@@ -92,6 +119,9 @@ async function main(): Promise<void> {
         }));
       } else {
         stage.add(component);
+        if (selected.name === 'Layouts') {
+          populateLayoutDemo(component, String(values.mode), layoutBinding, value => record('layout action', value));
+        }
         if (component instanceof GuiToast) stage.add(new GuiButton({
           id: 'show-toast', x: Math.max(16, (stageWidth - 160) / 2), y: 8, width: 160, height: 36,
           text: 'Show toast', onClick: () => { component.show(); record('show', component.text); },
@@ -212,6 +242,9 @@ async function main(): Promise<void> {
     // GUI dispatch runs after layout. Rebuild at the start of the next frame so
     // new controls receive layout and radio-group registration before drawing.
     engine.on('update', () => {
+      const preview=root.findById('preview-component');
+      const tooltip=preview?.children.find(child=>child instanceof GuiTooltip) as GuiTooltip|undefined;
+      canvas.dataset.playground=JSON.stringify({selected:selected.name,names:catalog.map(item=>item.name),values,preview:preview?.rect,hovered:preview?.hovered,tooltip:tooltip?{active:tooltip.active,rect:tooltip.popupRect,id:tooltip.id,hostId:preview?.id}:null,controls:Object.fromEntries(['param-hoverTransition','param-hoverTransitionMs'].map(id=>[id,root.findById(id)?.rect]))});
       const refresh = pendingRefresh;
       pendingRefresh = null;
       if (refresh === 'layout') layout();

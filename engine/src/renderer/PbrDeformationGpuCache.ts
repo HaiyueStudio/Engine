@@ -3,6 +3,8 @@ import { alignUp4 } from '../utils/align';
 import { RendererCacheMap } from './RendererCacheMap';
 import { writeBuffer } from './utils';
 import type { LiveIdSet } from './utils';
+import type { RenderCommandContext } from '../core/RenderCommandContext';
+import { RecordedGpuResources } from './RecordedGpuResources';
 
 export interface PbrDeformationGpuData {
   readonly vertexCount: number;
@@ -48,8 +50,10 @@ export class PbrDeformationGpuCache {
   readonly fallbackSkinWeightBuffer: GPUBuffer;
 
   private readonly _entries = new RendererCacheMap<PbrDeformationGpuData>(data => this._destroyEntry(data));
+  private readonly recorded: RecordedGpuResources;
 
   constructor(private readonly _options: PbrDeformationGpuCacheOptions) {
+    this.recorded = new RecordedGpuResources(_options.device);
     const identity = new Float32Array([
       1, 0, 0, 0,
       0, 1, 0, 0,
@@ -59,18 +63,24 @@ export class PbrDeformationGpuCache {
     this.fallbackSkinMatrixBuffer = this._makeStorageBuffer(identity, `${this._label}.fallbackSkinMatrices`, 64);
     this.fallbackSkinJointBuffer = this._makeStorageBuffer(new Float32Array(4), `${this._label}.fallbackSkinJoints`);
     this.fallbackSkinWeightBuffer = this._makeStorageBuffer(new Float32Array(4), `${this._label}.fallbackSkinWeights`);
+    for (const buffer of this.fallbackBuffers) this.recorded.own(buffer, () => buffer.destroy());
   }
 
   private get _label(): string { return this._options.label ?? 'PbrRenderer'; }
 
-  ensure(geometry: Geometry3D): PbrDeformationGpuData {
+  ensure(geometry: Geometry3D, context?: RenderCommandContext): PbrDeformationGpuData {
     const morphEnabled = geometry.morphUseGpu && geometry.hasMorphTargets;
     let data = this._entries.get(geometry.id);
-    if (!data || !this._matches(data, geometry, morphEnabled)) {
+    if (!data || !this._matches(data, geometry, morphEnabled)
+      || (geometry.skinning && data.skinVersion !== geometry.skinning.version && this.recorded.pending(data))) {
       data = this._createEntry(geometry, morphEnabled);
+      const owned = data;
+      this.recorded.own(owned, () => this._destroyBuffers(owned));
       this._entries.set(geometry.id, data);
     }
     this._syncSkinningMatrices(geometry, data);
+    this.recorded.retain(data, context);
+    for (const buffer of this.fallbackBuffers) this.recorded.retain(buffer, context);
     return data;
   }
 
@@ -90,9 +100,7 @@ export class PbrDeformationGpuCache {
 
   destroy(): void {
     this._entries.clear();
-    this.fallbackSkinMatrixBuffer.destroy();
-    this.fallbackSkinJointBuffer.destroy();
-    this.fallbackSkinWeightBuffer.destroy();
+    this.recorded.retireAll();
   }
 
   private _matches(
@@ -201,6 +209,14 @@ export class PbrDeformationGpuCache {
   }
 
   private _destroyEntry(data: PbrDeformationGpuData): void {
+    this.recorded.retire(data);
+  }
+
+  private get fallbackBuffers(): GPUBuffer[] {
+    return [this.fallbackSkinMatrixBuffer, this.fallbackSkinJointBuffer, this.fallbackSkinWeightBuffer];
+  }
+
+  private _destroyBuffers(data: PbrDeformationGpuData): void {
     for (const buffer of new Set(data.morphBuffers)) buffer.destroy();
     data.skinJointBuffer?.destroy();
     data.skinWeightBuffer?.destroy();

@@ -34,6 +34,7 @@ export class DeferredImmutableBufferArena {
   }
 
   acquire(key: object, bytes: Uint8Array<ArrayBuffer>, context: RenderCommandContext): GPUBufferBinding {
+    const encoder=context.encoder;
     if (this._destroyed) throw new Error('Deferred light arena is destroyed.');
     if (context.device !== this._device) throw new Error('Deferred light arena device generation mismatch.');
     if (bytes.byteLength > this.stride) throw new RangeError('Deferred light arena record exceeds its ABI capacity.');
@@ -57,14 +58,15 @@ export class DeferredImmutableBufferArena {
       this._keys.set(key, slot);
       this._write(slot);
     }
-    if (!slot.encoders.has(context.encoder)) {
-      slot.encoders.add(context.encoder);
+    if (!slot.encoders.has(encoder)) {
+      slot.encoders.add(encoder);
       const selected = slot;
+      context.afterCancel?.(() => {selected.encoders.delete(encoder);this._finishDestroy();});
       context.afterSubmit(() => {
         // queue.writeBuffer issued after submit is ordered after that submission.
         // Only unsubmitted encoders need immutable slots; completion notification
         // timing must not change offsets or create new bind groups each frame.
-        selected.encoders.delete(context.encoder);
+        selected.encoders.delete(encoder);
         this._finishDestroy();
       });
     }
@@ -72,12 +74,13 @@ export class DeferredImmutableBufferArena {
     const buffer = this._ring.resource;
     let encoders = this._bufferEncoders.get(buffer);
     if (!encoders) { encoders = new Set(); this._bufferEncoders.set(buffer, encoders); }
-    if (!encoders.has(context.encoder)) {
-      encoders.add(context.encoder);
+    if (!encoders.has(encoder)) {
+      encoders.add(encoder);
       const pending = encoders;
+      context.afterCancel?.(() => {pending.delete(encoder);if(this._retiredBuffers.has(buffer))this._retireBuffer(buffer);});
       context.afterSubmit(queue => {
         const done = () => {
-          pending.delete(context.encoder);
+          pending.delete(encoder);
           if (this._retiredBuffers.has(buffer)) this._retireBuffer(buffer);
         };
         void queue.onSubmittedWorkDone().then(done, done);

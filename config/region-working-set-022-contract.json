@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "contractId": "engine-022-g04-working-set-v1",
+  "status": "accepted",
+  "decision": "docs/for-ai/adr/0133-region-cache-working-set-accounting.md",
+  "amends": "engine-022-g01-v1:region.cacheLimit population only; frozen G01 snapshots remain unchanged",
+  "targetVersion": "0.2.2",
+  "cache": {
+    "maxRegions": 8,
+    "maxRetainedColorBytes": 67108864,
+    "include": "all retained pixel-cache colors, auxiliary visible crops, MSAA, resolve and retirement overlap"
+  },
+  "workingSet": {
+    "include": "normal full-frame composition color, MSAA, resolve and retirement overlap",
+    "previousFramePixels": "forbidden; fully initialize before use in each recording",
+    "budget": "separate from retained pixel cache; include in total GPU resource acceptance"
+  },
+  "requiredMetrics": [
+    "retainedColorBytes",
+    "workingColorBytes",
+    "workingRetiringColorBytes",
+    "regionDepthBytes",
+    "totalRegionAttachmentBytes"
+  ],
+  "totalGpuResources": "report full GPUResourceTracker snapshot in native evidence; regional attachment total is a subset, not total GPU memory or measured driver residency",
+  "qualification": "G04 correctness diagnostics; full production resource and device qualification remains G13"
+}

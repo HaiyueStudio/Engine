@@ -73,3 +73,11 @@ test('full-list selection requires every light to enclose the entire near quad, 
   assert.equal(check([light(1,[0,0,0],Math.sqrt(2))]),null,'tangent numerical boundary keeps GPU culling');
   frame.data[35]=NaN;assert.equal(check([light(1,[0,0,0],2)]),null);
 });
+
+
+test('cancelled tiles and shared reservations release without bypassing another pending encoder',async()=>{
+ const {DeferredAllocationBudget,DeferredSharedAllocationLease}=await importEngineSource('renderer/DeferredAllocationBudget.ts');
+ const device=gpu(),budget=new DeferredAllocationBudget(),owner=new DeferredTileResources(device,budget),lease=new DeferredSharedAllocationLease(budget,100),cancel=[];
+ const older=context(device),newer={...context(device),afterCancel:cb=>cancel.push(cb)},plan=planDeferredTiles(device,32,32),binding=owner.acquire('view',plan,older);owner.acquire('view',plan,newer);lease.retain(older);lease.retain(newer);
+ owner.destroy();lease.destroy();cancel.forEach(cb=>cb());assert.equal(binding.buffer.destroyed,false);assert.ok(budget.bytes>0);await older.submit();await Promise.resolve();assert.equal(binding.buffer.destroyed,true);assert.equal(budget.bytes,0);
+});

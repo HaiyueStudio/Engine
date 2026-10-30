@@ -14,6 +14,7 @@ export class ChannelMixerV2 {
   private _activeTransaction: number | null = null;
   private _sequence = 0;
   private _disposed = false;
+  private _prepared: StateMachinePose | undefined;
 
   constructor(private readonly _sideEffects?: SideEffectPort, private readonly _ownership?: ChannelOwnershipPort) {}
 
@@ -25,14 +26,20 @@ export class ChannelMixerV2 {
   }
 
   submit(sample: TimelineSample): void {
-    this._requireTransaction(); this._contributions.push(...sample.contributions); this._effects.push(...sample.effects);
+    this._requireSubmission(); this._contributions.push(...sample.contributions); this._effects.push(...sample.effects);
   }
 
-  submitContribution(contribution: TimelineContribution): void { this._requireTransaction(); this._contributions.push(contribution); }
-  submitEffect(effect: TimelineEffectOccurrence): void { this._requireTransaction(); this._effects.push(effect); }
+  submitContribution(contribution: TimelineContribution): void { this._requireSubmission(); this._contributions.push(contribution); }
+  submitEffect(effect: TimelineEffectOccurrence): void { this._requireSubmission(); this._effects.push(effect); }
 
   commit(settled = false): StateMachinePose {
+    return this.commitPrepared(this.prepare(settled));
+  }
+
+  /** Composition stages the original mixer without publishing effects/ownership. */
+  prepare(settled = false): StateMachinePose {
     const transaction = this._requireTransaction();
+    if (this._prepared) throw mixerError('E_STATE_MACHINE_MIXER_TRANSACTION', 'Mixer pose is already prepared.');
     try {
       const channels = mixChannels(this._contributions), mixedIds = new Set(channels.map(entry => entry.channel.id));
       for (const owner of this._owners.values()) if (!mixedIds.has(owner.channel.id)) channels.push(Object.freeze({ channel: owner.channel, value: cloneValue(owner.channel.defaultValue ?? null) }));
@@ -43,14 +50,23 @@ export class ChannelMixerV2 {
       const effects = stableUniqueEffects(this._effects).filter(effect => !this._ledger.has(effect.id));
       if (effects.length > 0 && !this._sideEffects) throw mixerError('E_STATE_MACHINE_SIDE_EFFECT_PORT_REQUIRED', 'Side-effect occurrence has no transactional delivery port.');
       for (const effect of effects) this._sideEffects?.invoke(effect);
-      this._ownership?.commit(transaction); this._sideEffects?.commit(transaction);
-      for (const entry of channels) if (entry.channel.policy === 'ownership') this._owners.set(entry.channel.id, Object.freeze({ channel: entry.channel, value: cloneValue(entry.value) }));
-      for (const effect of effects) this._ledger.set(effect.id, { effect });
-      const pose = Object.freeze({ sequence: ++this._sequence, channels: Object.freeze(channels), effects: Object.freeze(effects), settled });
-      this._finish(); return pose;
+      this._requireActive();
+      const pose = Object.freeze({ sequence: this._sequence + 1, channels: Object.freeze(channels), effects: Object.freeze(effects), settled });
+      this._prepared = pose; return pose;
     } catch (error) {
       this._sideEffects?.rollback(transaction); this._ownership?.rollback(transaction); this._finish(); throw error;
     }
+  }
+
+  commitPrepared(pose: StateMachinePose): StateMachinePose {
+    const transaction = this._requireTransaction();
+    if (this._prepared !== pose) throw mixerError('E_STATE_MACHINE_MIXER_TRANSACTION', 'Prepared mixer pose identity does not match.');
+    try {
+      this._ownership?.commit(transaction); this._sideEffects?.commit(transaction);
+      for (const entry of pose.channels) if (entry.channel.policy === 'ownership') this._owners.set(entry.channel.id, Object.freeze({channel: entry.channel, value: cloneValue(entry.value)}));
+      for (const effect of pose.effects) this._ledger.set(effect.id, {effect});
+      this._sequence = pose.sequence; this._finish(); return pose;
+    } catch (error) {this.rollback(); throw error;}
   }
 
   rollback(): void {
@@ -71,7 +87,8 @@ export class ChannelMixerV2 {
   dispose(): void { if (this._disposed) return; this.rollback(); this._sideEffects?.dispose(); this._ownership?.dispose(); this._disposed = true; this._ledger.clear(); this._owners.clear(); this._contributions.length = 0; this._effects.length = 0; }
   get deliveredEffectCount(): number { return this._ledger.size; }
 
-  private _finish(): void { this._activeTransaction = null; this._contributions.length = 0; this._effects.length = 0; }
+  private _finish(): void { this._activeTransaction = null; this._prepared = undefined; this._contributions.length = 0; this._effects.length = 0; }
+  private _requireSubmission(): void { this._requireTransaction(); if (this._prepared) throw mixerError('E_STATE_MACHINE_MIXER_TRANSACTION', 'Prepared mixer submissions are immutable.'); }
   private _requireTransaction(): number { this._requireActive(); if (this._activeTransaction === null) throw mixerError('E_STATE_MACHINE_MIXER_TRANSACTION', 'No mixer transaction is active.'); return this._activeTransaction; }
   private _requireActive(): void { if (this._disposed) throw mixerError('E_STATE_MACHINE_RUNTIME_DISPOSED', 'Channel mixer was disposed.'); }
 }

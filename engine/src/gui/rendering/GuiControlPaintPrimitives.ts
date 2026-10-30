@@ -1,0 +1,11 @@
+export type {GuiControlPaintContext} from './GuiRenderer';
+export type {GuiTheme} from '../GuiTypes';
+export {parseGuiColor as colorToRgba} from '../GuiColor';
+export {guiContentBox} from '../GuiContent';
+export {guiInputCaretVisible} from '../input/GuiInputPresentation';
+export {guiInputPresentation} from '../input/GuiInputPresentation';
+export {guiPasswordRevealed} from '../input/GuiInputAdornments';
+export {isGuiLayoutManaged} from '../GuiLayoutState';
+export {measureGuiTextWidth} from './GuiTextBatch';
+export {requiredItemAt} from '../../math/arrayAccess';
+export {withGuiAlpha as withAlpha} from '../GuiColor';

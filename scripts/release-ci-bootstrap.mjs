@@ -3,6 +3,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { npmArgs, npmCommand } from './npm-process.mjs';
 import { ENGINE_FOUNDATIONS } from './engine-rehearsal-plan.mjs';
+import { ensureFrozenHyaFoundationLayout } from './hya-foundation-layout.mjs';
 
 const toolingRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const pagesExamples = process.argv.includes('--pages-examples');
@@ -10,6 +11,7 @@ const root = pagesExamples
   ? resolve(process.env.PAGES_SOURCE_ROOT ?? toolingRoot)
   : toolingRoot;
 const builds = ENGINE_FOUNDATIONS.map(workspace => [workspace]);
+ensureFrozenHyaFoundationLayout(root);
 for (const argument of process.argv.slice(2)) {
   if (argument !== '--pages-examples') throw new Error(`Unknown bootstrap argument: ${argument}`);
 }

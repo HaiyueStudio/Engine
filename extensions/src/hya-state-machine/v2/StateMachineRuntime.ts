@@ -34,6 +34,8 @@ interface Snapshot {
   readonly pendingEffects: readonly TimelineEffectOccurrence[];
 }
 
+interface PreparedFrame {readonly committedStatus?: StateMachineRuntimeStatus; readonly pose: StateMachinePose; readonly snapshot: Snapshot; readonly transaction: number | undefined; readonly delta: number; readonly consumed: ReadonlySet<string>; readonly settled: boolean;}
+
 export interface StateMachineRuntimeOptions {
   readonly invocationPort?: DeterministicInvocationPort; readonly sideEffectPort?: SideEffectPort;
   readonly ownershipPort?: ChannelOwnershipPort;
@@ -42,6 +44,8 @@ export interface StateMachineRuntimeOptions {
 }
 
 export class HyaStateMachineRuntimeV2 {
+  private _preparedFrame: PreparedFrame | undefined;
+  private _preparingFrame = false;
   readonly sampler: TimelineSamplerV2;
   readonly mixer: ChannelMixerV2;
   readonly nestedOwner: NestedRuntimeOwnerV2;
@@ -88,22 +92,76 @@ export class HyaStateMachineRuntimeV2 {
   getInput(id: string): number | boolean { const input = this._inputs.get(id); if (!input) throw runtimeError('E_STATE_MACHINE_RUNTIME_INPUT', `Unknown input ${id}.`); return input.type === 'trigger' ? this._triggers.has(id) : this._values.get(id)!; }
 
   update(deltaSeconds: number): StateMachinePose {
-    this._requireActive(); if (!Number.isFinite(deltaSeconds) || deltaSeconds < 0) throw runtimeError('E_STATE_MACHINE_RUNTIME_TIME', 'Update delta must be finite and non-negative.');
-    if (this._status === 'stopped') return this._lastPose;
-    const delta = this._status === 'paused' ? 0 : deltaSeconds, snapshot = this._snapshot(), transaction = this.mixer.begin();
+    return this.commitPreparedFrame(this._prepareFrame(deltaSeconds, undefined, false));
+  }
+
+  /** Keeps the existing sampler, mixer and nested controllers open through downstream layout/draw. */
+  prepareFrame(deltaSeconds: number, beforeInputs?: () => void, transport?: Readonly<{sampling: 'running' | 'paused'; committed: 'running' | 'paused' | 'stopped'}>): StateMachinePose {
+    return this._prepareFrame(deltaSeconds, beforeInputs, true, transport);
+  }
+  private _prepareFrame(deltaSeconds: number, beforeInputs: (() => void) | undefined, requireTransactionalNested: boolean, transport?: Readonly<{sampling: 'running' | 'paused'; committed: 'running' | 'paused' | 'stopped'}>): StateMachinePose {
+    this._requireActive(); this._requireFrameIdle();
+    if (!Number.isFinite(deltaSeconds) || deltaSeconds < 0) throw runtimeError('E_STATE_MACHINE_RUNTIME_TIME', 'Update delta must be finite and non-negative.');
+    if (transport && (!['running','paused'].includes(transport.sampling) || !['running','paused','stopped'].includes(transport.committed))) throw runtimeError('E_STATE_MACHINE_RUNTIME_STATE', 'Invalid prepared transport status.');
+    const snapshot = this._snapshot();
+    // Logical intent belongs to this existing checkpoint; do not call borrowed lifecycle ports speculatively.
+    if (transport) this._status = transport.sampling;
+    const delta = this._status === 'paused' || this._status === 'stopped' ? 0 : deltaSeconds;
+    let transaction: number | undefined;
+    this._preparingFrame = true;
     try {
-      this._invocation?.begin(transaction); this.nestedOwner.beginTransaction(transaction); const consumed = new Set<string>(), activeNested = new Set<string>(), nestedSettled: boolean[] = [];
+      beforeInputs?.(); this._requireActive();
+      if (this._status === 'stopped') {
+        this._preparedFrame = {pose: this._lastPose, snapshot, transaction, delta: 0, consumed: new Set(), settled: this._settled};
+        return this._lastPose;
+      }
+      transaction = this.mixer.begin();
+      this._invocation?.begin(transaction); this.nestedOwner.beginTransaction(transaction, requireTransactionalNested);
+      const consumed = new Set<string>(), activeNested = new Set<string>(), nestedSettled: boolean[] = [];
       if (this._status !== 'paused') for (const layer of this._layers) this._advanceLayer(layer, delta, consumed);
       for (const layer of this._layers) this._sampleLayer(layer, delta, consumed, activeNested, nestedSettled);
       this.nestedOwner.reconcile(activeNested);
       for (const effect of this._pendingEffects) this.mixer.submitEffect(effect);
       const settled = this._layers.every(layer => layer.transition === null) && nestedSettled.every(Boolean) && this._triggers.size === 0;
-      const pose = this.mixer.commit(settled); this._invocation?.commit(transaction); this.nestedOwner.commitTransaction(transaction);
-      for (const trigger of consumed) this._triggers.delete(trigger);
-      this._pendingEffects.length = 0; this._clock += delta; this._settled = settled; this._lastPose = pose; return pose;
+      const pose = this.mixer.prepare(settled); this._requireActive();
+      this._preparedFrame = {pose, snapshot, transaction, delta, consumed, settled, ...(transport ? {committedStatus:transport.committed} : {})}; return pose;
     } catch (error) {
-      this.mixer.rollback(); try { this._invocation?.rollback(transaction); } finally { this.nestedOwner.rollbackTransaction(transaction); this._restore(snapshot); } throw error;
+      this._rollbackFrame(snapshot, transaction); throw error;
+    } finally {this._preparingFrame = false;}
+  }
+  commitPreparedFrame(pose: StateMachinePose): StateMachinePose {
+    const frame = this._requirePreparedFrame(pose);
+    try {
+      if (frame.transaction !== undefined) {
+        this.mixer.commitPrepared(pose); this._invocation?.commit(frame.transaction); this.nestedOwner.commitTransaction(frame.transaction);
+        for (const trigger of frame.consumed) this._triggers.delete(trigger);
+        this._pendingEffects.length = 0; this._clock += frame.delta; this._settled = frame.settled; this._lastPose = pose;
+      }
+      if (frame.committedStatus) this._status = frame.committedStatus;
+      this._preparedFrame = undefined; return pose;
+    } catch (error) {this._preparedFrame = undefined; this._rollbackFrame(frame.snapshot, frame.transaction); throw error;}
+  }
+  rollbackPreparedFrame(pose: StateMachinePose): void {
+    const frame = this._requirePreparedFrame(pose); this._preparedFrame = undefined;
+    this._rollbackFrame(frame.snapshot, frame.transaction);
+  }
+  private _rollbackFrame(snapshot: Snapshot, transaction: number | undefined): void {
+    try {this.mixer.rollback();}
+    finally {
+      try {if (transaction !== undefined) this._invocation?.rollback(transaction);}
+      finally {
+        try {if (transaction !== undefined) this.nestedOwner.rollbackTransaction(transaction);}
+        finally {if (this._status !== 'disposed') this._restore(snapshot);}
+      }
     }
+  }
+  private _requirePreparedFrame(pose: StateMachinePose): PreparedFrame {
+    this._requireActive();
+    if (!this._preparedFrame || this._preparedFrame.pose !== pose) throw runtimeError('E_STATE_MACHINE_MIXER_TRANSACTION', 'Prepared state frame identity does not match.');
+    return this._preparedFrame;
+  }
+  private _requireFrameIdle(): void {
+    if (this._preparedFrame || this._preparingFrame) throw runtimeError('E_STATE_MACHINE_MIXER_TRANSACTION', 'State frame is already active.');
   }
 
   evaluate(): StateMachinePose { return this.update(0); }
@@ -115,15 +173,15 @@ export class HyaStateMachineRuntimeV2 {
     const pose = this.update(timeSeconds); this._status = status; return pose;
   }
 
-  pause(): void { this._requireActive(); if (this._status === 'running') { this._status = 'paused'; this.mixer.pause(); this.nestedOwner.pause(); } }
-  resume(): void { this._requireActive(); if (this._status !== 'running') { this._status = 'running'; this.mixer.resume(); this.nestedOwner.resume(); this._settled = false; } }
-  stop(): void { this._requireActive(); this.reset(); this._status = 'stopped'; this.mixer.stop(); this.nestedOwner.stop(); }
+  pause(): void { this._requireActive(); this._requireFrameIdle(); if (this._status === 'running') { this._status = 'paused'; this.mixer.pause(); this.nestedOwner.pause(); } }
+  resume(): void { this._requireActive(); this._requireFrameIdle(); if (this._status !== 'running') { this._status = 'running'; this.mixer.resume(); this.nestedOwner.resume(); this._settled = false; } }
+  stop(): void { this._requireActive(); this._requireFrameIdle(); this.reset(); this._status = 'stopped'; this.mixer.stop(); this.nestedOwner.stop(); }
   reset(): void {
-    this._requireActive(); this.mixer.reset(); this.nestedOwner.reset(); this._clock = 0; this._effectSequence = 0; this._randomState = this._initialRandomState; this._pendingEffects.length = 0; this._triggers.clear(); this._status = 'running'; this._settled = false;
+    this._requireActive(); this._requireFrameIdle(); this.mixer.reset(); this.nestedOwner.reset(); this._clock = 0; this._effectSequence = 0; this._randomState = this._initialRandomState; this._pendingEffects.length = 0; this._triggers.clear(); this._status = 'running'; this._settled = false;
     this._values.clear(); for (const input of this._machine.inputs) if (input.type !== 'trigger') this._values.set(input.id, input.defaultValue!);
     for (const layer of this._layers) { layer.stateId = entryTarget(layer.definition); layer.localTime = 0; layer.transition = null; layer.exited = false; if (layer.stateId) this._queueEffects(layer.definition.id, `state:${layer.stateId}:entry`, layer.states.get(layer.stateId)?.entryEffects, 'start'); }
   }
-  dispose(): void { if (this._status === 'disposed') return; this.mixer.dispose(); this.sampler.dispose(); this.nestedOwner.dispose(); this._pendingEffects.length = 0; this._status = 'disposed'; }
+  dispose(): void { if (this._status === 'disposed') return; if (this._preparedFrame) this.rollbackPreparedFrame(this._preparedFrame.pose); this.mixer.dispose(); this.sampler.dispose(); this.nestedOwner.dispose(); this._pendingEffects.length = 0; this._status = 'disposed'; }
 
   private _advanceLayer(layer: LayerRuntime, delta: number, consumed: Set<string>): void {
     if (layer.exited || layer.stateId === null) return;
@@ -270,7 +328,7 @@ export class HyaStateMachineRuntimeV2 {
   private _restore(snapshot: Snapshot): void { this._clock = snapshot.clock; this._status = snapshot.status; this._settled = snapshot.settled; this._effectSequence = snapshot.effectSequence; this._randomState = snapshot.randomState; this._pendingEffects.length = 0; this._pendingEffects.push(...snapshot.pendingEffects); this._values.clear(); for (const [id, value] of snapshot.inputs) this._values.set(id, value); this._triggers.clear(); for (const id of snapshot.triggers) this._triggers.add(id); snapshot.layers.forEach((state, index) => { const layer = this._layers[index]!; layer.stateId = state.stateId; layer.localTime = state.localTime; layer.exited = state.exited; layer.transition = state.transition ? { ...state.transition } : null; }); }
   private _random(): number { let value = this._randomState; value ^= value << 13; value ^= value >>> 17; value ^= value << 5; this._randomState = value >>> 0; return this._randomState / 0x1_0000_0000; }
   private _setValue(id: string, value: number | boolean): void { if (!Object.is(this._values.get(id), value)) { this._values.set(id, value); this._settled = false; } }
-  private _requireInput(id: string, types: readonly RuntimeInput['type'][]): void { const input = this._inputs.get(id); if (!input || !types.includes(input.type)) throw runtimeError('E_STATE_MACHINE_RUNTIME_INPUT', `Input ${id} must be ${types.join('|')}.`); }
+  private _requireInput(id: string, types: readonly RuntimeInput['type'][]): void { if (this._preparedFrame) throw runtimeError('E_STATE_MACHINE_MIXER_TRANSACTION', 'Prepared state inputs are immutable.'); const input = this._inputs.get(id); if (!input || !types.includes(input.type)) throw runtimeError('E_STATE_MACHINE_RUNTIME_INPUT', `Input ${id} must be ${types.join('|')}.`); }
   private _requireActive(): void { if (this._status === 'disposed') throw runtimeError('E_STATE_MACHINE_RUNTIME_DISPOSED', 'State-machine runtime was disposed.'); }
 }
 

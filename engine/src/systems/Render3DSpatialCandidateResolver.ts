@@ -8,6 +8,10 @@ import { writeDirectionalShadowViewProjection } from '../renderer/DirectionalSha
 import { getSpatialIndexService, type MeshSpatialEntry } from '../spatial/SpatialIndexService';
 import type { RenderViewSnapshot } from '../core/RenderView';
 import { mat4 } from 'wgpu-matrix';
+import {SceneFrameUniformLayout,type SceneFrameUniformSnapshot} from '../frame/SceneFrameUniformLayout';
+
+const viewProjectionOffset=SceneFrameUniformLayout.fields.find(field=>field.name==='viewProjection')!.offset/4;
+interface PlannedSpatialView {readonly sceneFrameUniforms:SceneFrameUniformSnapshot;}
 
 export interface Render3DSpatialCandidateStats {
   readonly used: boolean;
@@ -24,6 +28,7 @@ export class Render3DSpatialCandidateResolver {
   private readonly _entries: MeshSpatialEntry[] = [];
   private readonly _entities = new Set<Entity>();
   private readonly _shadowFrustum = new Frustum();
+  private readonly _viewFrustum = new Frustum();
   private readonly _shadowView = mat4.identity() as Float32Array;
   private readonly _shadowProjection = mat4.identity() as Float32Array;
   private readonly _shadowViewProjection = mat4.identity() as Float32Array;
@@ -49,6 +54,7 @@ export class Render3DSpatialCandidateResolver {
     shadowLights: readonly DirectionalLight[],
     fallbackCamera: Entity,
     frustumCulling: boolean,
+    plannedViews?:ReadonlyMap<string,PlannedSpatialView>,
   ): ReadonlySet<Entity> {
     if (!frustumCulling || entities.size < this._threshold || frameData !== world.frameData) {
       this._setStats(false, 0, 0, entities.size);
@@ -64,18 +70,26 @@ export class Render3DSpatialCandidateResolver {
     let shadowQueryCount = 0;
 
     for (const view of views) {
-      const cameraEntity = view.camera.getComponent(Camera3D) ? view.camera : fallbackCamera;
-      const camera = cameraEntity.getComponent(Camera3D);
-      if (!camera) continue;
-      const cameraFrame = frameData.getCamera3D(
-        cameraEntity,
-        camera,
-        view.width,
-        view.height,
-        view.reverseZ,
-      );
+      const planned=plannedViews?.get(view.key)?.sceneFrameUniforms;
+      let frustum:Frustum;
+      if(planned){
+        // Query the same immutable matrix that geometry will consume. Re-querying
+        // FrameData here can change the aspect/jitter of an already planned view.
+        frustum=this._viewFrustum.setFromViewProjection(planned.data.subarray(viewProjectionOffset,viewProjectionOffset+16));
+      }else{
+        const cameraEntity = view.camera.getComponent(Camera3D) ? view.camera : fallbackCamera;
+        const camera = cameraEntity.getComponent(Camera3D);
+        if (!camera) continue;
+        frustum = frameData.getCamera3D(
+          cameraEntity,
+          camera,
+          view.width,
+          view.height,
+          view.reverseZ,
+        ).frustum;
+      }
       entries.length = 0;
-      index.queryFrustum(cameraFrame.frustum, entries);
+      index.queryFrustum(frustum, entries);
       addEntries(candidates, entries);
       queryCount++;
     }

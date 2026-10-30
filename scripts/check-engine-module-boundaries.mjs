@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+import {engineLayerViolation} from './engine-module-contracts.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const sourceRoot = resolve(root, 'engine/src');
@@ -33,25 +34,7 @@ console.log(`[engine-modules] ${files.length} modules checked: no cycles or reve
 function validateLayerRule(file, target) {
   const from = relative(sourceRoot, file).replaceAll('\\', '/');
   const to = relative(sourceRoot, target).replaceAll('\\', '/');
-  if (from.startsWith('scene/internal/') && to === 'scene/Scene.ts') {
-    violations.push(`${from} imports concrete facade ${to}`);
-  }
-  if (from === 'renderer/RenderPipeline.ts') {
-    const allowed = new Set([
-      'core/IEngine.ts',
-      'core/EngineDiagnosticsAccess.ts',
-      'core/RenderCommandContext.ts',
-      'core/RenderView.ts',
-      'core/renderPassDescriptor.ts',
-      'ecs/World.ts',
-      'renderer/frame-plan/RenderFramePlan.ts',
-      'renderer/frame-plan/RenderPassCompatibility.ts',
-    ]);
-    if (!allowed.has(to)) violations.push(`${from} imports non-contract module ${to}`);
-  }
-  if (from.startsWith('core/') && from !== 'core/Engine.ts' && to === 'scene/Scene.ts') {
-    violations.push(`${from} reverses the core -> scene facade dependency`);
-  }
+  const violation=engineLayerViolation(from,to);if(violation)violations.push(violation);
 }
 
 function collectFiles(directory) {

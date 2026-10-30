@@ -1,0 +1,6 @@
+<!doctype html><meta charset="utf-8"><title>G04 clipped region native pixels</title>
+<canvas width="128" height="80" style="width:128px;height:80px"></canvas>
+<pre id="progress">Loading clipped region verification</pre><pre id="result"></pre>
+<script>addEventListener('error',e=>{const n=document.querySelector('#result');if(!n.dataset.status){n.textContent=JSON.stringify({status:'failed',error:e.message});n.dataset.status='failed'}})</script>
+<script type="importmap">{"imports":{"wgpu-matrix":"/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"}}</script>
+<script type="module" src="./render-region-clipping.mjs"></script>

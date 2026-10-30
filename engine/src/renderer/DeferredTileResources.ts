@@ -59,6 +59,7 @@ export class DeferredTileResources {
   constructor(private readonly _device: GPUDevice, private readonly _budget: DeferredAllocationBudget = getDeferredAllocationBudget(_device)) {}
 
   acquire(key: string, plan: DeferredTilePlan, context: RenderCommandContext): GPUBufferBinding {
+    const encoder=context.encoder;
     if (this._destroyed) throw new Error('Deferred tiles are destroyed.');
     if (context.device !== this._device) throw new Error('Deferred tiles device generation mismatch.');
     if (!context.afterSubmit) throw new Error('Deferred tiles require afterSubmit.');
@@ -92,11 +93,12 @@ export class DeferredTileResources {
     if (actualViewBytes > 64 * 1024 * 1024) throw new DeferredLightingCapabilityError('view-deferred-bytes', actualViewBytes, 64 * 1024 * 1024);
     const record = view.ring.resource;
     view.ring.markUsed();
-    if (!record.encoders.has(context.encoder)) {
-      record.encoders.add(context.encoder);
+    if (!record.encoders.has(encoder)) {
+      record.encoders.add(encoder);
       const live = view.live;
+      context.afterCancel?.(() => {record.encoders.delete(encoder);this._release(record,live);});
       context.afterSubmit(queue => {
-        const done = () => { record.encoders.delete(context.encoder); this._release(record, live); };
+        const done = () => { record.encoders.delete(encoder); this._release(record, live); };
         void queue.onSubmittedWorkDone().then(done, done);
       });
     }

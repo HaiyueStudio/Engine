@@ -1,5 +1,7 @@
 import { ObjectTableSlotAllocator } from './ObjectTableSlotAllocator';
 import type { RenderCommandContext } from '../core/RenderCommandContext';
+import {RecordedGpuResources} from './RecordedGpuResources';
+import {getInstrumentedGPUResourceTracker} from '../core/GPUResourceTracker';
 
 export interface RendererObjectTableOptions {
   device: GPUDevice;
@@ -77,9 +79,12 @@ export class RendererObjectTable {
   private _frameVisitedSlotMin = 0;
   private _frameVisitedSlotMax = 0;
   private _submissionContext: RenderCommandContext | undefined;
+  private readonly _recorded:RecordedGpuResources;
+  private _boundAuxiliary:GPUBuffer|undefined;
 
   constructor(options: RendererObjectTableOptions) {
     this._device = options.device;
+    this._recorded=new RecordedGpuResources(options.device);
     this._bindGroupLayout = options.bindGroupLayout;
     this._binding = options.binding ?? 0;
     this._label = options.label;
@@ -153,12 +158,19 @@ export class RendererObjectTable {
 
   get buffer(): GPUBuffer {
     this.ensureCapacity(1);
+    if(this._submissionContext?.afterSubmit&&(this._dirtySlotCount||this._auxiliary?._dirtySlotCount))this.flushUploads();
+    this._recorded.retain(this._buffer!,this._submissionContext);
     return this._buffer!;
   }
 
   get bindGroup(): GPUBindGroup {
     if (!this._createBindGroup) throw new Error('Raw RendererObjectTable has no bind group.');
     this.ensureCapacity(1);
+    if(this._submissionContext?.afterSubmit&&(this._dirtySlotCount||this._auxiliary?._dirtySlotCount))this.flushUploads();
+    this._refreshBindGroup();
+    this._recorded.retain(this._buffer!,this._submissionContext);
+    this._recorded.retain(this._bindGroup!,this._submissionContext);
+    if(this._auxiliary)this._auxiliary._recorded.retain(this._auxiliary._buffer!,this._submissionContext);
     return this._bindGroup!;
   }
 
@@ -200,13 +212,8 @@ export class RendererObjectTable {
       size: capacity * this.bytesPerSlot,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     });
-    if (this._createBindGroup) {
-      const entries: GPUBindGroupEntry[] = [{ binding: this._binding, resource: { buffer: this._buffer } }];
-      if (this._auxiliary && this._auxiliaryBinding !== undefined) {
-        entries.push({ binding: this._auxiliaryBinding, resource: { buffer: this._auxiliary.buffer } });
-      }
-      this._bindGroup = this._device.createBindGroup({ layout: this._bindGroupLayout, entries });
-    }
+    const buffer=this._buffer;this._recorded.own(buffer,()=>buffer.destroy());
+    this._refreshBindGroup(true);
     this._capacity = capacity;
     this._data = nextData;
     this._committedData = nextCommittedData;
@@ -273,6 +280,15 @@ export class RendererObjectTable {
     stats.uploadedSlotCount = 0;
     stats.wholeTableUpload = false;
     if (this._dirtySlotCount < 1) return stats;
+
+    // A queue write runs before every unsubmitted encoder. Give changed
+    // pending tables their own complete snapshot, including unchanged slots.
+    if(this._recorded.pending(this._buffer)){
+      const previous=this._buffer!,buffer=this._device.createBuffer({label:this._label,size:this._capacity*this.bytesPerSlot,usage:GPUBufferUsage.STORAGE|GPUBufferUsage.COPY_DST});
+      this._buffer=this._recorded.own(buffer,()=>buffer.destroy());this._refreshBindGroup(true);
+      this._device.queue.writeBuffer(buffer,0,this._data);this._committedData.set(this._data);this._retireBuffer(previous);
+      stats.uploadRangeCount=1;stats.uploadedSlotCount=this._capacity;stats.wholeTableUpload=true;this._resetDirtySlots();return stats;
+    }
 
     const usedSlotCount = Math.max(1, this._slots.highWaterMark, this._dirtySlotMax);
     const frameVisitedSpanSlotCount =
@@ -400,11 +416,11 @@ export class RendererObjectTable {
 
   destroy(): void {
     this._auxiliary?.destroy();
-    this._buffer?.destroy();
+    this._recorded.retireAll();
     this._buffer = undefined;
-    for (const buffer of this._retiredBuffers) buffer.destroy();
     this._retiredBuffers.length = 0;
     this._bindGroup = undefined;
+    this._boundAuxiliary=undefined;
     this._capacity = 0;
     this._dirtySlotCount = 0;
     this._dirtySlotMax = 0;
@@ -479,10 +495,17 @@ export class RendererObjectTable {
       this._retiredBuffers.push(buffer);
       return;
     }
-    context.afterSubmit(queue => {
-      const destroy = () => buffer.destroy();
-      void queue.onSubmittedWorkDone().then(destroy, destroy);
-    });
+    this._recorded.retain(buffer,context);this._recorded.retire(buffer);
+  }
+  private _refreshBindGroup(force=false):void {
+    if(!this._createBindGroup||!this._buffer)return;
+    const auxiliary=this._auxiliary?._buffer;
+    if(!force&&this._bindGroup&&this._boundAuxiliary===auxiliary)return;
+    const entries:GPUBindGroupEntry[]=[{binding:this._binding,resource:{buffer:this._buffer}}];
+    if(auxiliary&&this._auxiliaryBinding!==undefined)entries.push({binding:this._auxiliaryBinding,resource:{buffer:auxiliary}});
+    const previous=this._bindGroup,group=this._device.createBindGroup({layout:this._bindGroupLayout,entries});
+    this._bindGroup=this._recorded.own(group,()=>getInstrumentedGPUResourceTracker(this._device)?.untrackObject(group));this._boundAuxiliary=auxiliary;
+    if(previous)this._recorded.retire(previous);
   }
 }
 

@@ -5,6 +5,8 @@ import { writeBuffer as wrtBuf, writeBufferAligned } from './utils';
 import type { LiveIdSet } from './utils';
 import { sharedZeroVectorCache } from './ZeroVectorCache';
 import { alignUp4 } from '../utils/align';
+import type { RenderCommandContext } from '../core/RenderCommandContext';
+import { RecordedGpuResources } from './RecordedGpuResources';
 
 export interface SharedGeometry3DGPUData {
   positionBuf: GPUBuffer;
@@ -47,7 +49,11 @@ export class SharedGeometry3DGPUCache {
   private readonly _entries = new Map<number, CacheEntry>();
   private _ownerGeometryIds = new WeakMap<object, Set<number>>();
 
-  constructor(private readonly _device: GPUDevice, private _tracker?: GPUResourceTracker) {}
+  private readonly recorded: RecordedGpuResources;
+
+  constructor(private readonly _device: GPUDevice, private _tracker?: GPUResourceTracker) {
+    this.recorded = new RecordedGpuResources(_device);
+  }
 
   setTracker(tracker: GPUResourceTracker): void {
     this._tracker = tracker;
@@ -65,7 +71,7 @@ export class SharedGeometry3DGPUCache {
     return this._entries.has(geometryId);
   }
 
-  ensure(geometry: Geometry3D, owner: object): SharedGeometry3DGPUData {
+  ensure(geometry: Geometry3D, owner: object, context?: RenderCommandContext): SharedGeometry3DGPUData {
     let entry = this._entries.get(geometry.id);
     if (!entry) {
       entry = this._createEntry(geometry);
@@ -74,6 +80,7 @@ export class SharedGeometry3DGPUCache {
       this._replaceBuffers(entry, geometry);
     }
     this._addOwner(entry, geometry.id, owner);
+    for (const buffer of this._buffers(entry)) this.recorded.retain(buffer, context);
     return entry;
   }
 
@@ -165,6 +172,7 @@ export class SharedGeometry3DGPUCache {
       usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
     });
     this._tracker?.trackBuffer(buffer, 'SharedGeometry3DGPUCache.vertexBuffer', size);
+    this.recorded.own(buffer, () => { this._tracker?.untrackBuffer(buffer); buffer.destroy(); });
     if (data.byteLength > 0) wrtBuf(this._device.queue, buffer, 0, data);
     return buffer;
   }
@@ -177,6 +185,7 @@ export class SharedGeometry3DGPUCache {
       usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
     });
     this._tracker?.trackBuffer(buffer, 'SharedGeometry3DGPUCache.indexBuffer', size);
+    this.recorded.own(buffer, () => { this._tracker?.untrackBuffer(buffer); buffer.destroy(); });
     writeBufferAligned(this._device.queue, buffer, 0, indices);
     return buffer;
   }
@@ -187,15 +196,11 @@ export class SharedGeometry3DGPUCache {
   }
 
   private _destroyBuffers(entry: SharedGeometry3DGPUData): void {
-    this._tracker?.untrackBuffer(entry.positionBuf);
-    this._tracker?.untrackBuffer(entry.normalBuf);
-    this._tracker?.untrackBuffer(entry.uvBuf);
-    if (entry.uv1Buf) this._tracker?.untrackBuffer(entry.uv1Buf);
-    if (entry.indexBuf) this._tracker?.untrackBuffer(entry.indexBuf);
-    entry.positionBuf.destroy();
-    entry.normalBuf.destroy();
-    entry.uvBuf.destroy();
-    entry.uv1Buf?.destroy();
-    entry.indexBuf?.destroy();
+    for (const buffer of this._buffers(entry)) this.recorded.retire(buffer);
+  }
+
+  private _buffers(entry: SharedGeometry3DGPUData): GPUBuffer[] {
+    return [entry.positionBuf, entry.normalBuf, entry.uvBuf, entry.uv1Buf, entry.indexBuf]
+      .filter((buffer): buffer is GPUBuffer => !!buffer);
   }
 }

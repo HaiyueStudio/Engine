@@ -1,36 +1,13 @@
-# 动画文本 OpenType 按需加载评审
+# 动画文本OpenType：问题、方法、结论
 
-日期：2026-10-11。合同：[ADR 0123](../../docs/for-ai/adr/0123-animation-opentype-on-demand.md)。
+合同见 [ADR 0123](../../docs/for-ai/adr/0123-animation-opentype-on-demand.md)，原证据绑定见[机器记录](animation-opentype-loading-checks.json)。
 
-## 实现边界
+| 问题 | 方法 | 结论与边界 |
+| --- | --- | --- |
+| 无文字动画也在初始闭包下载OpenType | `/animation`、`/hya-state-machine`共用私有异步准备器，首次有效字体触发dynamic import，共享promise，按ArrayBuffer弱引用缓存 | 原独立tarball的初始gzip223,053→125,830B、230,623→133,401B；完整功能分块总量仍受原245,000/255,000B上限约束，不以初始减少冒充总下载减少 |
+| 解析器故障与不支持字体容器容易混淆 | chunk/network失败按资源错误处理；FontFace已接受但轮廓解析不支持时维持Canvas shaping回退 | 并发加载与失败重试遵循不同资源身份，不静默吞掉chunk故障 |
+| 字体准备晚返回可能恢复已销毁纹理 | 准备结束检查owner代次，FontFace/句柄由runtime持有，晚bitmap结果关闭 | 原浏览器三类atlas对照、非空像素与释放验证通过；声明不泄漏第三方开发类型 |
 
-- `/animation` 和 `/hya-state-machine` 通过同一私有 `AnimationOpenType` 准备器加载解析器；rasterizer 仅消费准备好的字体轮廓。公开入口、符号、依赖版本、字体 shaping 与 Canvas 回退语义保持兼容。
-- 字体轮廓通过私有最小绘制结构传递，发布声明不引用 `opentype.js` 的第三方类型，不要求消费者安装开发期的 `@types/opentype.js`。
-- 首次有效字体资源才触发动态加载，并发请求共享 promise，字体结果按 ArrayBuffer 弱引用缓存。chunk 失败不等于不支持字体；分别走资源失败和既有 Canvas 回退路径。
-- 准备结束前检查 owner 销毁状态，FontFace 与句柄仍由 runtime 所有。销毁后的 bitmap 结果关闭，rasterizer 不会恢复纹理。
+实际ESM初始量包含静态传递依赖，动态块独立压缩并计总量；examples的IIFE会内联动态导入，不能据此宣称按需网络节省。现行预算以[包策略](../../config/engine-package-budget.json)为准，所有旧上限及声明保持。
 
-## 测量口径
-
-保留旧完整消费端内联 gzip 指标与 245,000 / 255,000 B 上限，同时新增实际发布包 ES module 输出测量。初始量包括静态依赖传递闭包，各块独立压缩，总量包括所有动态块；未解析引用、OpenType 回流静态闭包、缺少解析器产物均失败。
-
-工作区初测的两个初始量为 125,657 / 133,221 B，新增上限按观测值加 15% 并向上取整到 500 B：145,000 / 153,500 B。动态块总量上限沿用旧完整功能上限，未扩大预算。正式结果以独立打包安装的报告为准。
-
-仓库 examples 使用单文件 IIFE，强制内联动态导入；保持它们兼容，不以该构建宣称下载节省。新增真实浏览器夹具采用分块 ESM，检查请求、字体像素、资源释放。G09 的独立采样、完整验收状态与 5% 预算不变。
-
-## 验证记录
-
-结论：通过。[机器复核](animation-opentype-loading-checks.json)绑定实现、配置、原始日志、修改前 tarball、发布包和浏览器结果的 SHA-256。
-
-| 消费入口 | 修改前初始 gzip | 修改后初始 gzip | 初始减少 | 按需块 gzip | 全部分块 gzip / 原总量上限 |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Animation2D | 223,053 B | 125,830 B | 43.59% | 98,785 B | 224,615 / 245,000 B |
-| HYA 状态机 | 230,623 B | 133,401 B | 42.16% | 98,785 B | 232,186 / 255,000 B |
-
-修改前从保留的真实发布 tarball 重建 ESM 消费端，确认解析器全部位于初始量；修改后从隔离安装的 tarball 测量。完整功能仍保留，分块总量略增。旧内联口径的修改后结果分别为 224,586 / 232,101 B，也通过原上限。
-
-- 新 tarball：530,638 B packed / 2,718,833 B unpacked，低于原 550,000 / 3,000,000 B 上限；203 个文件仅作观察。[独立发布包报告](../../artifacts/engine-0.2.1/opentype-lazy-20261011/public-packages.final.json)确认重复打包一致、全部 66 个公开类型入口及所有消费端通过。
-- 扩展 444 项、全仓 1,468 项测试通过；全仓类型检查、98 个示例构建通过。最后的类型隔离调整再次通过扩展类型检查、43 项字体/动画专项、API 和文档检查。
-- [Chrome 字体验证](../../artifacts/engine-0.2.1/opentype-lazy-20261011/browser.final.json)：无文本/系统字体阶段没有解析器请求，嵌入字体只下载一次；plain / styled / selector 三类 atlas 与同步准备参考的通道差均为 0，绘制像素非空，FontFace 残留为 0，句柄释放一次。它验证字体准备与 Canvas atlas，不作为 G09 GPU 性能资格。
-- 发布策略 73 项、分块策略、依赖边界、API、文档均通过。最初发布策略测试有 3 项因 Windows 沙箱拒绝测试用 symlink 而出现 EPERM；保留原日志，在具备权限的运行环境复测通过，没有删减用例。
-
-实现与验证已完成；未提交、未发布版本。G09 的独立长采样与完整性能资格仍待完成。
+全仓重建/测试计数、沙箱symlink失败与重试、逐包尺寸和浏览器原文见[校验归档](../archive/engine-review-process-20261020.json)。字体准备通过不是G09性能资格，也不单独证明版本已发布。

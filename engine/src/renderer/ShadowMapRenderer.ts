@@ -29,6 +29,8 @@ import {
 } from './DirectionalShadowMath';
 import type { ClippingPlanes } from '../components/ClippingPlanes';
 import { CLIPPING_BLOCK_FLOATS, clippingStateKey, writeClippingBlock } from './ClippingPlanesGpu';
+import { RecordedGpuResources } from './RecordedGpuResources';
+import { registerDirectionalShadowView } from './DirectionalShadowResources';
 
 export interface DirectionalShadowState {
   readonly enabled: boolean;
@@ -111,6 +113,9 @@ export class ShadowMapRenderer extends BaseRenderer {
   private _shaderModules: GPUShaderModule[] = [];
   private readonly _cameraBuffers: GPUBuffer[] = [];
   private readonly _cameraBindGroups: GPUBindGroup[] = [];
+  private readonly _cameraSnapshots: Float32Array[] = [];
+  private recorded!: RecordedGpuResources;
+  private targetWrite: { context: RenderCommandContext | undefined; submitted: boolean } | undefined;
   private readonly _objectTables: RendererObjectTable[] = [];
   private _texture!: GPUTexture;
   private _view!: GPUTextureView;
@@ -154,6 +159,7 @@ export class ShadowMapRenderer extends BaseRenderer {
     this._initialized = true;
     this._engine = engine;
     const device = engine.device;
+    this.recorded = new RecordedGpuResources(device);
     this._geometryCache = getSharedGeometry3DGPUCache(device, getEngineGPUResourceTracker(engine));
     this._cameraLayout = device.createBindGroupLayout({
       entries: [{ binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'uniform' } }],
@@ -164,6 +170,8 @@ export class ShadowMapRenderer extends BaseRenderer {
     ] });
     const coverageLayout = device.createBindGroupLayout({ entries: [...MATERIAL_COVERAGE_LAYOUT] });
     this.coverageBindings = new MaterialCoverageBindings(device, coverageLayout);
+    const coverage = this.coverageBindings;
+    this.recorded.own(coverage, () => coverage.destroy());
     this._skinLayout = device.createBindGroupLayout({
       entries: [
         { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: { type: 'read-only-storage' } },
@@ -183,12 +191,15 @@ export class ShadowMapRenderer extends BaseRenderer {
     this._skinnedPipelineLayout = generated[2]!.pipelineLayout;
     this._cameraBuffers.length = 0;
     this._cameraBindGroups.length = 0;
+    this._cameraSnapshots.length = 0;
     for (let layer = 0; layer < SCENE_RENDER_MAX_DIRECTIONAL_SHADOWS; layer++) {
       const cameraBuffer = device.createBuffer({
         label: 'ShadowMapRenderer.lightCamera',
         size: 64,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       });
+      this.recorded.own(cameraBuffer, () => cameraBuffer.destroy());
+      this._cameraSnapshots.push(new Float32Array(16).fill(Number.NaN));
       this._cameraBuffers.push(cameraBuffer);
       this._cameraBindGroups.push(device.createBindGroup({
         layout: this._cameraLayout,
@@ -257,8 +268,16 @@ export class ShadowMapRenderer extends BaseRenderer {
   get targetRevision(): number { return this._targetRevision; }
 
   /** Ensures one fixed-capacity depth-array target shared by every directional shadow slot. */
-  prepareTarget(size: number): boolean {
-    return this._ensureTarget(size);
+  prepareTarget(size: number, replaceRecordedStorage = false): boolean {
+    return this._ensureTarget(size, replaceRecordedStorage);
+  }
+
+  hasPendingTargetRecords(context?: RenderCommandContext): boolean { return this.recorded.pendingOutsideEncoder(this._texture, context); }
+  /** A cancelled producer also leaves the CPU shadow-cache entry uncommitted. */
+  hasPendingTargetWrites(context?: RenderCommandContext): boolean {
+    if (!this.targetWrite || this.targetWrite.submitted || !!context && this.targetWrite.context === context) return false;
+    const encoder = context?.encoder;
+    return !encoder || this.targetWrite.context?.encoder !== encoder;
   }
 
   /** Defers shared geometry/deformation sweeping until every updated layer is encoded. */
@@ -313,7 +332,24 @@ export class ShadowMapRenderer extends BaseRenderer {
     objectTable.beginUploads(submissionContext);
     const lightViewProjection = this._updateLightMatrix(light, focus, layer);
     this._lightFrustum.setFromViewProjection(lightViewProjection);
+    if (this.recorded.pending(this._cameraBuffers[layer]) && !matrixEquals(this._cameraSnapshots[layer]!, lightViewProjection)) {
+      const previous = this._cameraBuffers[layer]!;
+      const buffer = this._engine.device.createBuffer({ label: 'ShadowMapRenderer.lightCamera', size: 64, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+      this._cameraBuffers[layer] = this.recorded.own(buffer, () => buffer.destroy());
+      this._cameraBindGroups[layer] = this._engine.device.createBindGroup({ layout: this._cameraLayout, entries: [{ binding: 0, resource: { buffer } }] });
+      this.recorded.retire(previous);
+    }
     writeBuffer(this._engine.device.queue, this._cameraBuffers[layer]!, 0, lightViewProjection);
+    this._cameraSnapshots[layer]!.set(lightViewProjection);
+    this.recorded.retain(this._cameraBuffers[layer]!, submissionContext);
+    this.recorded.retain(this.coverageBindings, submissionContext);
+    this.recorded.retain(this._texture, submissionContext);
+    if (submissionContext?.afterSubmit && this.targetWrite?.context !== submissionContext) {
+      const write: { context: RenderCommandContext | undefined; submitted: boolean } = { context: submissionContext, submitted: false };
+      this.targetWrite = write;
+      submissionContext.afterSubmit(() => { write.submitted = true; write.context = undefined; });
+      submissionContext.afterCancel?.(() => { write.context = undefined; });
+    }
     this._liveEntities.clear();
     this._liveGeometries.clear();
     this._liveDeformations.clear();
@@ -369,12 +405,12 @@ export class ShadowMapRenderer extends BaseRenderer {
     for (const item of items) {
       if (!this._liveEntities.has(item.entityId) || !item.geometry || !item.material || !item.worldMatrix) continue;
       const geometry = item.geometry;
-      const sharedGeometry = this._geometryCache.ensure(geometry, this);
+      const sharedGeometry = this._geometryCache.ensure(geometry, this, submissionContext);
       const deformationSupported = auxiliaryUsesDeformation(item.material);
       const morph = deformationSupported && geometry.morphUseGpu && geometry.hasMorphTargets;
       const skinned = deformationSupported && geometry.skinning !== null;
       const deformation = morph || skinned
-        ? this._ensureDeformation(geometry, morph, skinned)
+        ? this._ensureDeformation(geometry, morph, skinned, submissionContext)
         : null;
       if (deformation) {
         this._liveDeformations.add(geometry.id);
@@ -467,9 +503,10 @@ export class ShadowMapRenderer extends BaseRenderer {
     for (const geometryId of this._liveDeformations) this._batchLiveDeformations.add(geometryId);
   }
 
-  private _ensureTarget(size: number): boolean {
-    if (this._mapSize === size && this._texture) return false;
-    this._texture?.destroy();
+  private _ensureTarget(size: number, replaceRecordedStorage = false): boolean {
+    if (this._mapSize === size && this._texture && !replaceRecordedStorage) return false;
+    if (this._texture) this.recorded.retire(this._texture);
+    this.targetWrite = undefined;
     this._mapSize = size;
     this._texture = this._engine.device.createTexture({
       label: 'Haiyue.directional-shadow-map',
@@ -477,6 +514,8 @@ export class ShadowMapRenderer extends BaseRenderer {
       format: 'depth32float',
       usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     });
+    const texture = this._texture;
+    this.recorded.own(texture, () => texture.destroy());
     this._layerViews.length = 0;
     for (let layer = 0; layer < SCENE_RENDER_MAX_DIRECTIONAL_SHADOWS; layer++) {
       this._layerViews.push(this._texture.createView({
@@ -491,6 +530,7 @@ export class ShadowMapRenderer extends BaseRenderer {
       baseArrayLayer: 0,
       arrayLayerCount: SCENE_RENDER_MAX_DIRECTIONAL_SHADOWS,
     });
+    for (const view of [...this._layerViews, this._arrayView]) registerDirectionalShadowView(view, texture, this.recorded);
     this._sampler = this._engine.device.createSampler({
       compare: 'less-equal',
       magFilter: 'linear',
@@ -562,12 +602,16 @@ export class ShadowMapRenderer extends BaseRenderer {
     object.clippingKey = clipKey;
   }
 
-  private _ensureDeformation(geometry: Geometry3D, morph: boolean, skinned: boolean): ShadowDeformationGpuData {
+  private _ensureDeformation(geometry: Geometry3D, morph: boolean, skinned: boolean, context?: RenderCommandContext): ShadowDeformationGpuData {
     let data = this._deformations.get(geometry.id);
-    if (!data || !this._deformationMatches(data, geometry, morph, skinned)) {
+    if (!data || !this._deformationMatches(data, geometry, morph, skinned)
+      || (skinned && data.skinVersion !== geometry.skinning?.version && this.recorded.pending(data))) {
       data = this._createDeformation(geometry, morph, skinned);
+      const owned = data;
+      this.recorded.own(owned, () => this._destroyDeformationBuffers(owned));
       this._deformations.set(geometry.id, data);
     }
+    this.recorded.retain(data, context);
     return data;
   }
 
@@ -644,6 +688,10 @@ export class ShadowMapRenderer extends BaseRenderer {
   }
 
   private _destroyDeformation(data: ShadowDeformationGpuData): void {
+    this.recorded.retire(data);
+  }
+
+  private _destroyDeformationBuffers(data: ShadowDeformationGpuData): void {
     for (const buffer of data.morphBuffers) buffer.destroy();
     data.skinJointBuffer?.destroy();
     data.skinWeightBuffer?.destroy();
@@ -773,16 +821,14 @@ export class ShadowMapRenderer extends BaseRenderer {
   }
 
   destroy(): void {
-    this.coverageBindings?.destroy();
-    for (const buffer of this._cameraBuffers) buffer.destroy();
     this._cameraBuffers.length = 0;
     this._cameraBindGroups.length = 0;
-    this._texture?.destroy();
     for (const objects of this._objects) objects.clear();
     this._objects.length = 0;
     for (const objectTable of this._objectTables) objectTable.destroy();
     this._objectTables.length = 0;
     this._deformations.clear();
+    this.recorded?.retireAll();
     this._geometryCache?.releaseOwner(this);
     this._shaderModules.length = 0;
     this._drawCasters.length = 0;

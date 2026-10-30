@@ -1,22 +1,33 @@
 import { Component, UniqueCheckType } from '../../ecs/Component';
 import { DEFAULT_GUI_THEME, GuiDirtyFlags, GuiElementOptions, GuiRect, GuiTheme } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
+import type {GuiInvalidation, GuiLayoutDelegate, GuiMeasureConstraint} from '../GuiLayoutTypes';
+import {GuiLayoutOwner} from '../GuiLayoutOwner';
+import {measureGuiElement, releaseGuiMeasureOwner} from '../GuiMeasure';
+import {GuiThemeOwner} from '../GuiThemeOwner';
+import type {GuiThemeResourceBinding} from '../GuiThemeTypes';
+import {disposeGuiRootObservers} from '../GuiLayoutState';
 
 export interface GuiRootOptions extends GuiElementOptions {
   theme?: Partial<GuiTheme> | undefined;
 }
 
 export class GuiRoot extends Component {
-  static override UniqueCheckType = UniqueCheckType.SYMBOL | UniqueCheckType.REPLACE;
-  static override UniqueSymbol = Symbol.for('GuiRoot');
+  // Immutable keys may be removed together with an unused root by consumer bundles.
+  static override UniqueCheckType = /* @__PURE__ */ (() => UniqueCheckType.SYMBOL | UniqueCheckType.REPLACE)();
+  static override UniqueSymbol = /* @__PURE__ */ Symbol.for('GuiRoot');
 
   readonly root: GuiElement;
   theme: GuiTheme;
   viewport: GuiRect = { x: 0, y: 0, width: 1, height: 1 };
+  private readonly layoutOwner: GuiLayoutOwner;
+  private readonly themeOwner: GuiThemeOwner;
 
   constructor(options: GuiRootOptions = {}) {
     super('GuiRoot');
     this.root = new GuiElement({
+      ...options,
+      pointerFilter: options.pointerFilter ?? 'pass',
       id: options.id ?? 'gui-root',
       x: options.x ?? 0,
       y: options.y ?? 0,
@@ -34,7 +45,21 @@ export class GuiRoot extends Component {
         ...(options.theme?.colors ?? {}),
       },
     };
+    this.layoutOwner = new GuiLayoutOwner(this.root, () => JSON.stringify(this.theme));
+    this.themeOwner = new GuiThemeOwner(this.root, () => this.theme, changed => this.layoutOwner.subscribe(changed));
   }
+
+  installLayoutDelegate(delegate: GuiLayoutDelegate): () => void {return this.layoutOwner.install(delegate);}
+  onInvalidation(listener: (change: GuiInvalidation) => void): () => void {return this.layoutOwner.subscribe(listener);}
+  measureElement(element: GuiElement, width: GuiMeasureConstraint, height: GuiMeasureConstraint): {readonly width: number; readonly height: number; readonly minWidth: number; readonly minHeight: number} {
+    let ancestor: GuiElement | null = element;
+    while (ancestor && ancestor !== this.root) ancestor = ancestor.parent;
+    if (!ancestor) throw new Error('Cannot measure an element belonging to another GUI root.');
+    return measureGuiElement(this, element, width, height);
+  }
+
+  setThemeResource(resource: GuiThemeResourceBinding | null): void {this.root.setThemeResource(resource);}
+  override destroy(): void {try {try {disposeGuiRootObservers(this.root);} finally {try {this.themeOwner.destroy();} finally {this.layoutOwner.destroy();}}} finally {releaseGuiMeasureOwner(this); super.destroy();}}
 
   get dirty(): boolean {
     return this.root.dirty;
@@ -53,13 +78,16 @@ export class GuiRoot extends Component {
   }
 
   layout(width: number, height: number): void {
+    this.themeOwner.sync();
+    const previous = this.viewport;
     const next = { x: 0, y: 0, width, height };
     const changed =
       this.viewport.width !== width ||
       this.viewport.height !== height;
     this.viewport = next;
     if (changed) this.root.markDirty(GuiDirtyFlags.Layout);
-    if (this.root.dirty) this.root.layout(this.viewport);
+    try {if (!this.layoutOwner.layout(this.viewport) && needsCoordinateLayout(this.root)) this.root.layout(this.viewport);}
+    catch (error) {this.viewport = previous; throw error;}
   }
 
   hitTest(x: number, y: number): GuiElement | null {
@@ -69,4 +97,10 @@ export class GuiRoot extends Component {
   clearDirty(): void {
     this.root.clearDirty();
   }
+}
+
+/** Painting and input state retain the same geometry in the manual layout path. */
+function needsCoordinateLayout(element: GuiElement): boolean {
+  return (element.getDirtyFlags() & (GuiDirtyFlags.Layout | GuiDirtyFlags.Text | GuiDirtyFlags.Children)) !== 0
+    || element.children.some(needsCoordinateLayout);
 }

@@ -1,5 +1,6 @@
 import { mat4 } from 'wgpu-matrix';
 import type { Render3DViewExecutionState } from './Render3DFrameCoordinator';
+import {getRegionSceneProjection,writeRegionRasterProjection} from '../core/RegionSceneProjection';
 
 /** Shared frame packing for pre-light AO and post-light effects. */
 export class Render3DPostSceneFrameContext {
@@ -34,6 +35,11 @@ export class Render3DPostSceneFrameContext {
     frame.projectionMatrix.set(cameraFrame.projectionMatrix);
     frame.viewProjectionMatrix.set(cameraFrame.viewProjectionMatrix);
     frame.inverseViewProjectionMatrix.set(cameraFrame.inverseViewProjectionMatrix);
+    if(getRegionSceneProjection(frameView)){
+      writeRegionRasterProjection(frame.projectionMatrix,cameraFrame.projectionMatrix,frameView);
+      writeRegionRasterProjection(frame.viewProjectionMatrix,cameraFrame.viewProjectionMatrix,frameView);
+      mat4.inverse(frame.viewProjectionMatrix,frame.inverseViewProjectionMatrix);
+    }
     return frame;
   }
 

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "revision": "7d0df288285834e2583f563478f322fdf6743c09",
+  "observedAt": "2026-10-20",
+  "scope": "source/export review plus 40 focused tests; not real corpus or public package qualification",
+  "sourceSha256": {
+    "extensions/src/animation.ts": "9cb175bb35ef984ab1021289ff8307c37a2f75ab0fd8dc51452194316196ab0c",
+    "extensions/src/animation/AnimationAssetLoader.ts": "d9b489d0924fca7939cf6a281762a0ef373c8ba9f22c378635d56623886d272a",
+    "extensions/src/animation/Animation2DExtensionRegistry.ts": "3a68ddbde8a2d42d57fb62659094be313cb9a83f38c09e8fc7b0394c66fe09c3",
+    "extensions/src/animation/AnimationOpenType.ts": "bdae613e3b49cffb17eff3f0abec5e917b660e86643863d0a877608221ce4518",
+    "extensions/src/animation/layout/parameterized/LayoutEvaluator.ts": "d6f4d7120f41cc9bb8259f6be7143c64f413b8657df6d4897c95da8f6d72c985",
+    "extensions/src/animation/layout/parameterized/LayoutGpuRenderer.ts": "105a548329f3077811a6d800c46cfcafa873908ce03888fd21e8a660618231d3",
+    "extensions/src/animation/interaction/DataBindingRuntime.ts": "7fbdf2cbe154d17933e1da19a89d0aa0fe271f038fc9bc9906bb1d437a7b0ee7",
+    "extensions/src/animation/interaction/SemanticsRuntime.ts": "0f6bf782009d1cf23646b951f86bb31cb1ae6d4f34bc98776a333fd463186d48",
+    "animation-spec/src/state-machine.ts": "d6816065ecfc28382b071802273d50857603d0bb192ae1ac1125027b1d2c5251",
+    "extensions/package.json": "884a34382c98c6c36bcc41def78d7c482fb3a5c67952c1afaee28fdbb68c0891",
+    "animation-spec/package.json": "d3b94989b22805e716ce10e9a8cc4fe4cbb71ce8ecfdcb06300c804c8e173ee2"
+  },
+  "testEvidence": {
+    "path": "artifacts/engine-0.2.2/g01/hya-focused-tests.tap",
+    "sha256": "81f44101a66b2118f56c955402752c14cc0292cbf13e7c77ba3f8223c466b624",
+    "tests": 40,
+    "passed": 40,
+    "failed": 0
+  },
+  "findings": [
+    {
+      "id": "hya-public-closure",
+      "observation": "parameterized layout/text and data/semantics/audio have modules/tests, but current exports do not provide corresponding focused entrypoints; InteractionRuntime alone is already public",
+      "owner": "g10-hya-capability-contracts"
+    },
+    {
+      "id": "hya-real-composed-render",
+      "observation": "LayoutGpuRenderer draws glyph bounds/paints and hashed N-slice colors; existing main Animation2D text renderer is a separate real text path. Production parameterized composition must use true glyphs/images/UV and common owners",
+      "owner": "g11-hya-production-runtime"
+    },
+    {
+      "id": "hya-state-channel-gaps",
+      "observation": "state-machine registry explicitly rejects vector-paint/text-animator/visual-effect/composite-expansion; resource/audio channels degraded. Selected paint/text closure planned, unadmitted effects remain diagnosed",
+      "owner": "g11-hya-production-runtime"
+    },
+    {
+      "id": "hya-incremental-upload",
+      "observation": "LayoutGpuRenderer.upload creates new vertex buffer and retires old each upload; full LayoutEvaluator.evaluate is repeated and includes text. Use distinct measured channels before optimization",
+      "owner": "g12-hya-production-qualification"
+    },
+    {
+      "id": "hya-retained-strengths",
+      "observation": "main player, shared state/mixer, asset loader, extension owner, OpenType dynamic import and isolated data/text/layout/interaction/semantics tests exist; reuse rather than reimplement",
+      "owner": "g11-hya-production-runtime"
+    },
+    {
+      "id": "hya-rive-scope",
+      "observation": "Rive converter development remains on separate feature branch; M07 completion of isolated Goals is not current 0.2.2 npm/production qualification",
+      "owner": "g13-integration-release"
+    }
+  ]
+}

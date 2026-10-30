@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "goal": "g08-panels-tabs",
+  "status": "complete",
+  "testsPassed": 2038,
+  "focusedTests": 17,
+  "splitAllocationOracleCases": 48,
+  "browserCases": 84,
+  "maxPanelPixelChannelDifference": 0,
+  "sourceInputs": 1562,
+  "changedSourceInputsDuringFinalRun": [],
+  "servedFileReadsVerified": 589,
+  "sourceEntry": {
+    "schemaVersion": 1,
+    "status": "passed-source-entry-only",
+    "source": "extensions/src/gui-layout.ts",
+    "sourceSha256": "cc22619be93719291a2d87a51f5b0e7e47685472a949b7b7c2ef4b01c9494fc2",
+    "symbols": [
+      "attachGuiLayout",
+      "createGuiContainer",
+      "GuiLayoutOptions",
+      "GuiLayoutBinding",
+      "GuiContainerPreset",
+      "GuiLayoutMeasurement",
+      "GuiSplitPanel",
+      "GuiTabContainer",
+      "GuiSplitPanelOptions",
+      "GuiTabPage",
+      "GuiTabContainerOptions"
+    ],
+    "maximum": 11,
+    "additions": [
+      "GuiSplitPanelOptions",
+      "GuiSplitPanel",
+      "GuiTabPage",
+      "GuiTabContainerOptions",
+      "GuiTabContainer"
+    ],
+    "packageExportPresent": false,
+    "publicPackageQualified": false,
+    "integrationOwner": "g13-integration-release",
+    "note": "This stages exactly the original names in the planned source facade; package manifests, root API and baselines are unchanged."
+  },
+  "wholeVersionReady": false,
+  "packageQualified": false,
+  "unchangedOpenG13Checks": [
+    {
+      "name": "public-package/gui-font",
+      "status": "failed",
+      "gzipBytes": 99511,
+      "maximumBytes": 55000,
+      "budgetChanged": false
+    },
+    {
+      "name": "check:engine:contracts",
+      "status": "failed",
+      "preExistingBareErrors": 10,
+      "source": "engine/src/core/RenderRegionState.ts",
+      "sourceSha256": "c8f6fe29a04a26d6e5579d110b7c7b3f2f7c82cc83ee33f303dccd6b491a97fe",
+      "sourceUnchanged": true
+    }
+  ],
+  "deviceOwnedHandoff": {
+    "owner": "g13-integration-release",
+    "items": [
+      "actual package exports/manifests/declarations and packed consumers",
+      "formal cross-platform/physical touch and Native composition",
+      "formal production performance and final candidate/release gates"
+    ]
+  },
+  "proofs": {
+    "required": {
+      "path": "artifacts/engine-0.2.2/g08/required-20261022T131040Z/result.json",
+      "sha256": "582e44469f80a5b0d3af49d19281156a192a73e9d355d515598b933e0f0158a2"
+    },
+    "browser": {
+      "path": "artifacts/engine-0.2.2/g08/browser-20261022T132103Z/result.json",
+      "sha256": "09d9e67df677a8aafcb210f7a5d9b86c14d154763a0273bedbd6f210c033488e"
+    },
+    "package": {
+      "path": "artifacts/engine-0.2.2/g08/public-packages-final.json",
+      "sha256": "5c05ec7f881984436204d22aba0d83576f1ed12591e02256340c6ff6601b161d"
+    }
+  },
+  "originalsRetained": true,
+  "published": false,
+  "committedOrPushed": false,
+  "fullG08Complete": true,
+  "g08RuntimeVerified": true,
+  "problem": "Applications lacked reusable split allocation and tab page lifecycle, requiring handwritten sizing, input and focus management.",
+  "method": "Composites in gui-layout lower to the existing Grid/Flex core, borrow page objects, detach inactive branches and reuse the existing input/focus/theme and region invalidation contracts.",
+  "conclusion": "Original G08 runtime and production example verified. The five original names are staged in the planned source facade (11/11); package/public admission, cross-platform and final release qualification remain with G13.",
+  "sourceAdmission": {
+    "path": "artifacts/engine-0.2.2/g08/source-admission.json",
+    "sha256": "4f22adad1b29ec48fdd1612414801ea9890a5ba84d6ed6a8876c1575edc1b2cb"
+  },
+  "originalContractAudit": {
+    "path": "artifacts/engine-0.2.2/g08/final-20261022T132135Z/original-contract-audit.json",
+    "sha256": "1a30f546a9a809f0d78110689c66b783b4c4d817cd1ea96bf58f2c33c17a9b74"
+  },
+  "sourceAudit": {
+    "path": "artifacts/engine-0.2.2/g08/final-20261022T132135Z/source-audit.json",
+    "sha256": "bc3fe67e4208bfaa294a9aeb68bc4d823430ecefdf290dcd032710b192808f58"
+  },
+  "archive": {
+    "path": "artifacts/engine-0.2.2/g08/final-20261022T132135Z/g08-evidence.zip",
+    "sha256": "52f91136c39e873530f5ef061165ab797aea27c97a5fd1d7b3fff1d5ef70c964",
+    "bytes": 4535374,
+    "verifiedFiles": 239,
+    "originalsRetained": true
+  },
+  "usage": {
+    "entry": "@haiyue/extensions/gui-layout (planned; package integration remains G13)",
+    "layout": "Attach one GuiLayoutBinding to the GuiRoot; add panel.element and size it through binding.setStyle. Nested panels reuse that same delegate.",
+    "split": "axis selects left/right or top/bottom. ratio is preferred [0,1]; effectiveRatio reports solved allocation. Numeric minima overflow rather than shrink below the contract; a parent scroll container may own that overflow.",
+    "tabs": "Pass the existing guiSystem.focus; pages own their business objects. activate/remove/close/setPageVisible/move manage page lifecycle. Inactive content is detached without changing its visible flag.",
+    "serialization": "Use each composite serialize()/restore() in the application save envelope; restore requires the same page IDs. The existing haiyue.gui v1 schema is unchanged and does not automatically encode these composite layout records.",
+    "themeKeys": [
+      "GuiSplitDivider",
+      "GuiTab",
+      "GuiTabClose"
+    ],
+    "cleanup": "Call dispose() on each composite and the shared binding. Borrowed contents, image/GPU sources and theme resources remain application-owned."
+  }
+}

@@ -17,6 +17,8 @@ import type { PipelineWarmupPlan } from './PipelineWarmup';
 import { RendererCacheMap } from './RendererCacheMap';
 import { alignUp4 } from '../utils/align';
 import type { ClippingPlanes } from '../components/ClippingPlanes';
+import {getRegionSceneProjection,writeRegionRasterProjection} from '../core/RegionSceneProjection';
+import {RegionSceneFrameBinding} from './regions/RegionSceneFrameBinding';
 import { CLIPPING_BLOCK_FLOATS, clippingStateKey, writeClippingBlock } from './ClippingPlanesGpu';
 
 const MOTION_BASE_FLOATS = 68;
@@ -56,6 +58,7 @@ interface MotionGeometryDeformationData {
 }
 
 interface MotionViewState {
+  regionFrame:RegionSceneFrameBinding|null;
   readonly entities: Map<number, MotionEntityState>;
   readonly liveEntities: Set<number>;
   readonly previousViewProjection: Float32Array;
@@ -109,6 +112,7 @@ export class MotionVectorRenderer extends BaseRenderer {
   private readonly _views = new Map<string, MotionViewState>();
   private _activeView: MotionViewState | null = null;
   private _activeContext: RenderCommandContext | null = null;
+  private _activeFrameBinding!:SceneFrameGpuBinding;
   private coverageBindings!: MaterialCoverageBindings;
   private _initialized = false;
 
@@ -157,6 +161,7 @@ export class MotionVectorRenderer extends BaseRenderer {
     let state = this._views.get(options.viewKey);
     if (!state) {
       state = {
+        regionFrame:null,
         entities: new Map(),
         liveEntities: new Set(),
         previousViewProjection: new Float32Array(16),
@@ -176,7 +181,12 @@ export class MotionVectorRenderer extends BaseRenderer {
       };
       this._views.set(options.viewKey, state);
     }
-    state.currentViewProjection.set(sceneFrame.data.subarray(0, 16));
+    const regional=!!getRegionSceneProjection(context.view);
+    if(regional){
+      state.regionFrame??=new RegionSceneFrameBinding(context.device);
+      sceneFrame=state.regionFrame.update(sceneFrame,context.view!,'geometry',context);
+      writeRegionRasterProjection(state.currentViewProjection,sceneFrame.data.subarray(0,16),context.view);
+    }else state.currentViewProjection.set(sceneFrame.data.subarray(0, 16));
     const width = sceneFrame.data[52]!;
     const height = sceneFrame.data[53]!;
     state.currentJitter[0] = (options.projectionJitter[0] ?? 0) / Math.max(1, width);
@@ -199,7 +209,8 @@ export class MotionVectorRenderer extends BaseRenderer {
     }
     state.lastSeenFrameId = options.frameId;
     state.liveEntities.clear();
-    this._cameraDynamicOffset[0] = this._sceneFrameBinding.upload(sceneFrame, context);
+    this._activeFrameBinding=regional?state.regionFrame!.binding:this._sceneFrameBinding;
+    this._cameraDynamicOffset[0] = this._activeFrameBinding.upload(sceneFrame, context);
     this._activeView = state;
     this._activeContext = context;
   }
@@ -292,7 +303,7 @@ export class MotionVectorRenderer extends BaseRenderer {
 
     const pipeline = this._getPipeline(geometry, sourceMaterial);
     pass.setPipeline(pipeline);
-    pass.setBindGroup(0, this._sceneFrameBinding.bindGroup, this._cameraDynamicOffset);
+    pass.setBindGroup(0, this._activeFrameBinding.bindGroup, this._cameraDynamicOffset);
     pass.setBindGroup(1, entity.bindGroup);
     pass.setBindGroup(2, this.coverageBindings.get(coverage));
     pass.setBindGroup(3, entity.skinBindGroup);
@@ -332,6 +343,7 @@ export class MotionVectorRenderer extends BaseRenderer {
     state.lastFrameId = options.frameId;
     state.cameraId = options.cameraId;
     state.historyRevision = options.historyRevision;
+    context.afterCancel?.(()=>{state.valid=false;});
     this._activeView = null;
     this._activeContext = null;
   }
@@ -363,6 +375,7 @@ export class MotionVectorRenderer extends BaseRenderer {
       entity.currentSkinBuffer?.destroy();
       entity.previousSkinBuffer?.destroy();
     }
+    for(const state of this._views.values())state.regionFrame?.destroy();
     this._views.clear();
     this._geoCache?.releaseOwner(this);
     this._deformations.clear();
@@ -637,6 +650,7 @@ export class MotionVectorRenderer extends BaseRenderer {
       if (viewKey === activeViewKey) continue;
       if (frameId >= state.lastSeenFrameId && frameId - state.lastSeenFrameId <= 120) continue;
       this._views.delete(viewKey);
+      state.regionFrame?.destroy();
       for (const entity of state.entities.values()) this._retireEntity(entity, context);
     }
   }

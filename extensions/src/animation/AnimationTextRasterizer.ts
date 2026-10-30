@@ -8,6 +8,15 @@ import { evaluateSafeExpression } from '@haiyue/animation-spec';
 
 /** Private drawing contract; published declarations do not require vendor types. */
 export interface AnimationOutlineFont {
+  readonly unitsPerEm?: number;
+  readonly ascender?: number;
+  readonly descender?: number;
+  getAdvanceWidth?(text: string, fontSize: number, options: {kerning: boolean; features: {liga: boolean; rlig: boolean}}): number;
+  readonly glyphs?: Readonly<{get(index: number): Readonly<{
+    readonly advanceWidth?: number | undefined;
+    getBoundingBox(): Readonly<{x1: number; y1: number; x2: number; y2: number}>;
+    getPath(x: number, y: number, fontSize: number): AnimationOutlinePath;
+  }>}>;
   getPath(text: string, x: number, y: number, fontSize: number,
     options: { kerning: boolean; features: { liga: boolean; rlig: boolean } }): AnimationOutlinePath;
 }
@@ -24,9 +33,23 @@ interface AnimationOutlinePath {
   }[];
 }
 
+export interface AnimationStateTextDocument {readonly value?: string; readonly fontSize?: number; readonly tracking?: number; readonly color?: readonly [number, number, number, number];}
+
 type TextTexture = HTMLCanvasElement | ImageBitmap;
+export interface AnimationTextBitmapSnapshot {
+  readonly value: ImageBitmap; readonly generation: number; readonly bytes: number;
+  /** One idempotent CPU bitmap lease; GPU ownership belongs to the draw/texture owner. */
+  release(): void;
+}
+export class AnimationTextSnapshotPending extends Error {
+  readonly code = 'E_HYA_RUNTIME_RESOURCE_PENDING'; readonly path = '$.core.text.bitmap';
+  constructor(readonly ready: Promise<void>) {super('The latest core text bitmap is pending'); void ready.catch(() => {});}
+}
+interface RetainedBitmap {readonly value: ImageBitmap; readonly generation: number; readonly bytes: number; refs: number; retired: boolean;}
 
 interface ResolvedTextDocument {
+  readonly fontResource?: string|undefined;
+  readonly state?: AnimationStateTextDocument;
   text: string;
   fontFamily: string;
   fontSize: number;
@@ -94,36 +117,92 @@ export class AnimationTextRasterizer {
   private dirty = true;
   private updating = false;
   private destroyed = false;
+  private readonly bitmapSnapshots = new Map<ImageBitmap, RetainedBitmap>();
   private updateToken = 0;
   private readonly animated: boolean;
+  private stateDocument: AnimationStateTextDocument = Object.freeze({});
+  private stateDocumentKey = '{}';
+  private textureFailure: unknown;
+  private textureFailed = false;
+  private readonly readyWaiters = new Set<{resolve(): void; reject(error: unknown): void}>();
   private readonly expressionData = new Map<string, unknown>();
-  private readonly outlineFonts = new Map<string, AnimationOutlineFont>();
+  private readonly outlineFonts = new Map<string, PreparedAnimationFont>();
 
-  constructor(readonly component: Readonly<AnimationText2DComponent>) {
-    this.canvas = typeof document === 'undefined' ? null : document.createElement('canvas');
+  constructor(readonly component: Readonly<AnimationText2DComponent>, options: Readonly<{rasterize?: boolean}> = {}) {
+    this.canvas = options.rasterize === false || typeof document === 'undefined' ? null : document.createElement('canvas');
     this.animated = component.expression !== undefined || (component.documents?.length ?? 0) > 1
       || component.paragraphSpacingTrack !== undefined
       || (component.styleRuns ?? []).some(run => run.fontSizeTrack || run.lineHeightTrack || run.trackingTrack)
       || (component.animators ?? []).some(animator => hasAnimatedAnimator(animator));
-    void this.updateTexture();
+    void this.updateTexture().catch(() => {/* Exposed by whenReady; callers of updateTexture still receive its rejection. */});
   }
+
+  /** Internal production bridge; the original document, shaper and glyph renderer remain authoritative. */
+  setStateDocument(value: AnimationStateTextDocument): void {
+    if (this.destroyed) return;
+    const next = Object.freeze({...value, ...(value.color ? {color: Object.freeze([...value.color]) as readonly [number, number, number, number]} : {})});
+    if (Object.keys(next).some(key => !['value', 'fontSize', 'tracking', 'color'].includes(key)) || next.value !== undefined && typeof next.value !== 'string'
+      || next.fontSize !== undefined && (!Number.isFinite(next.fontSize) || next.fontSize <= 0) || next.tracking !== undefined && !Number.isFinite(next.tracking)
+      || next.color !== undefined && (next.color.length !== 4 || next.color.some(channel => !Number.isFinite(channel)))) throw new TypeError('Invalid production text document override');
+    const key = JSON.stringify(next); if (key === this.stateDocumentKey) return;
+    this.stateDocument = next; this.stateDocumentKey = key; this.textureFailure = undefined; this.textureFailed = false; this.dirty = true; void this.updateTexture().catch(() => {/* Exposed by whenReady; callers of updateTexture still receive its rejection. */});
+  }
+  /** Resolves after the latest queued bitmap generation, rather than the first in-flight bitmap. */
+  whenReady(): Promise<void> {
+    if (this.destroyed) return Promise.reject(new Error('Animation text rasterizer is disposed'));
+    if (this.textureFailed) return Promise.reject(this.textureFailure);
+    if (!this.canvas || !this.updating && !this.dirty) return Promise.resolve();
+    return new Promise((resolve, reject) => this.readyWaiters.add({resolve, reject}));
+  }
+  /** Capture only immutable, ready pixels. A mutable Canvas is never a production snapshot. */
+  acquireTextureSnapshot(): AnimationTextBitmapSnapshot {
+    if (this.destroyed) throw Object.assign(new Error('Animation text rasterizer is disposed'), {code: 'E_HYA_RUNTIME_DISPOSED', path: '$.core.text.bitmap'});
+    if (this.textureFailed) throw this.textureFailure;
+    if (this.updating || this.dirty && this.canvas) throw new AnimationTextSnapshotPending(this.whenReady());
+    const value = this.texture;
+    if (!value || value === this.canvas || typeof (value as ImageBitmap).close !== 'function')
+      throw Object.assign(new Error('Core text drawing needs an immutable bitmap host'), {code: 'E_HYA_RUNTIME_HOST_PORT', path: '$.core.text.bitmap'});
+    const bitmap = value as ImageBitmap, bytes = bitmap.width * bitmap.height * 4;
+    if (!Number.isSafeInteger(bytes) || bytes <= 0) throw new RangeError('Core text bitmap needs finite positive dimensions');
+    let retained = this.bitmapSnapshots.get(bitmap);
+    if (!retained) {retained = {value: bitmap, generation: this.textureVersion, bytes, refs: 0, retired: false}; this.bitmapSnapshots.set(bitmap, retained);}
+    retained.refs++; const owned = retained; let closed = false;
+    return Object.freeze({value: bitmap, generation: owned.generation, bytes: owned.bytes, release: () => {
+      if (closed) return; closed = true; owned.refs--;
+      if (!owned.refs) {this.bitmapSnapshots.delete(bitmap); if (owned.retired) bitmap.close();}
+    }});
+  }
+  private retireTexture(value: TextTexture | null): void {
+    if (!value || value === this.canvas) return;
+    const bitmap = value as ImageBitmap, retained = this.bitmapSnapshots.get(bitmap);
+    if (retained) retained.retired = true; else closeTextTexture(value, this.canvas);
+  }
+  private settleReady(error?: unknown, failed = false): void {for (const waiter of this.readyWaiters) failed ? waiter.reject(error) : waiter.resolve(); this.readyWaiters.clear();}
 
   setTime(time: number): void {
     if (!this.animated) return;
     if (this.time === time && !this.dirty) return;
     this.time = time;
     this.dirty = true;
-    void this.updateTexture();
+    void this.updateTexture().catch(() => {/* Exposed by whenReady; callers of updateTexture still receive its rejection. */});
   }
 
   invalidateFont(): void {
     this.dirty = true;
-    void this.updateTexture();
+    void this.updateTexture().catch(() => {/* Exposed by whenReady; callers of updateTexture still receive its rejection. */});
   }
 
-  setOutlineFont(family: string, style: 'normal' | 'italic', weight: string | number, font: AnimationOutlineFont | undefined): void {
+  setOutlineFont(family: string, style: 'normal' | 'italic', weight: string | number, font: AnimationOutlineFont | undefined, resource?:string, nativeFamily?:string): void {
     if (this.destroyed) return;
-    if (font) this.outlineFonts.set(outlineFontKey(family, style, weight), font);
+    if(font||nativeFamily){
+      const value=Object.freeze({resource,outline:font,nativeFamily:nativeFamily??family}),key=outlineFontKey(family,style,weight,resource);
+      this.outlineFonts.set(key,value);
+      if(resource!==undefined){
+        const familyKey=outlineFontKey(family,style,weight),previous=this.outlineFonts.get(familyKey);
+        if(!previous||!previous.ambiguous&&previous.resource===resource)this.outlineFonts.set(familyKey,value);
+        else this.outlineFonts.set(familyKey,Object.freeze({nativeFamily:family,ambiguous:true}));
+      }
+    }
     this.invalidateFont();
   }
 
@@ -131,15 +210,16 @@ export class AnimationTextRasterizer {
     if (this.destroyed) return;
     this.expressionData.set(resource, value);
     this.dirty = true;
-    void this.updateTexture();
+    void this.updateTexture().catch(() => {/* Exposed by whenReady; callers of updateTexture still receive its rejection. */});
   }
 
   destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
+    this.settleReady(new Error('Animation text rasterizer is disposed'), true);
     this.dirty = false;
     this.updateToken++;
-    closeTextTexture(this.texture, this.canvas);
+    this.retireTexture(this.texture);
     this.texture = null;
     this.outlineFonts.clear();
     this.expressionData.clear();
@@ -147,12 +227,15 @@ export class AnimationTextRasterizer {
 
   async updateTexture(): Promise<void> {
     if (this.destroyed || !this.dirty || this.updating || !this.canvas) return;
+    this.textureFailure = undefined; this.textureFailed = false;
     const token = ++this.updateToken;
     this.dirty = false;
     this.updating = true;
     try {
       this.draw(this.canvas, Number.isFinite(this.time) ? this.time : 0);
+      const previous = this.texture;
       this.texture = this.canvas;
+      this.retireTexture(previous);
       this.textureVersion++;
       if (typeof createImageBitmap !== 'function') return;
       const bitmap = await createImageBitmap(this.canvas, { colorSpaceConversion: 'none' });
@@ -160,22 +243,44 @@ export class AnimationTextRasterizer {
       const retired = this.texture;
       this.texture = bitmap;
       this.textureVersion++;
-      closeTextTexture(retired, this.canvas);
+      this.retireTexture(retired);
+    } catch (error) {
+      this.textureFailure = error; this.textureFailed = true; this.dirty = false; this.settleReady(error, true); throw error;
     } finally {
       this.updating = false;
-      if (this.dirty) void this.updateTexture();
+      if (this.dirty) void this.updateTexture().catch(() => {/* Exposed by whenReady; callers of updateTexture still receive its rejection. */}); else this.settleReady(this.textureFailure, this.textureFailed);
     }
   }
 
+  /** Shared CPU document resolution; raster drawing consumes this exact result too. */
+  evaluateDocument(time: number): Readonly<ResolvedTextDocument> {
+    if (this.destroyed) throw Object.assign(new Error('Animation text rasterizer is disposed'), {code: 'E_HYA_RUNTIME_DISPOSED', path: '$.core.text'});
+    if (!Number.isFinite(time)) throw new RangeError('Text evaluation time must be finite');
+    const resolved = resolveDocument(this.component, time, this.expressionData), state = this.stateDocument;
+    return Object.freeze({...resolved, ...(state.value === undefined ? {} : {text: state.value}), ...(state.fontSize === undefined ? {} : {fontSize: state.fontSize, lineHeight: resolved.lineHeight / resolved.fontSize * state.fontSize}), ...(state.tracking === undefined ? {} : {tracking: state.tracking}), color: Object.freeze([...(state.color ?? resolved.color)]) as readonly [number, number, number, number], state});
+  }
+
+  /** A prepared original OpenType font supplies actual CPU metrics; unsupported hosts never synthesize them. */
+  evaluateOutlineGlyphLayout(time:number):unknown {
+    return this.evaluateGlyphLayout(time,(text,style)=>{
+      const font=selectPreparedFont(this.outlineFonts,style)?.outline;
+      if(!font?.getAdvanceWidth||!font.unitsPerEm||!Number.isFinite(font.ascender)||!Number.isFinite(font.descender))throw Object.assign(new Error('Core glyph evaluation needs a prepared outline font and its actual metrics'),{code:'E_HYA_RUNTIME_HOST_PORT',path:'$.core.text.metrics'});
+      return {width:font.getAdvanceWidth(text,style.fontSize,{kerning:true,features:{liga:true,rlig:true}}),ascent:font.ascender!*style.fontSize/font.unitsPerEm,descent:-font.descender!*style.fontSize/font.unitsPerEm};
+    });
+  }
+
+  /** Internal CPU glyph layout; the real draw path consumes the same plain/styled plan. */
+  evaluateGlyphLayout(time:number,measure:AnimationTextMeasure):unknown {return snapshotCoreTextLayout(this.component,this.evaluateDocument(time),time,measure);}
+
   private draw(canvas: HTMLCanvasElement, time: number): void {
     const component = this.component;
-    const document = resolveDocument(component, time, this.expressionData);
+    const document = this.evaluateDocument(time);
     const width = Math.max(1, Math.ceil(component.size[0]));
     const height = Math.max(1, Math.ceil(component.size[1]));
     const dpr = Math.max(1, Math.min(4, component.resolutionScale ?? 2));
     canvas.width = Math.max(1, Math.ceil(width * dpr));
     canvas.height = Math.max(1, Math.ceil(height * dpr));
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext('2d', {willReadFrequently: true});
     if (!context) return;
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
     // Ask the browser text shaper for geometric precision so Canvas does
@@ -196,99 +301,96 @@ export class AnimationTextRasterizer {
       drawStyledText(context, component, document, time, padding, contentWidth, contentHeight, this.outlineFonts);
       return;
     }
-    let fontSize = document.fontSize;
-    let lineHeight = document.lineHeight;
-    let tracking = document.tracking;
-    context.font = `${document.fontStyle} ${document.fontWeight} ${fontSize}px ${quoteFont(document.fontFamily)}`;
-    context.textBaseline = 'alphabetic';
-    context.textAlign = 'left';
-    let lines = layoutTextLines(context, document.text, contentWidth, component.wrap ?? 'none', tracking);
-    if ((component.fit === 'scale' || component.fit === 'font-size') && lines.length > 0) {
-      const measuredWidth = Math.max(...lines.map(line => measuredLineWidth(context, line, tracking)), 1);
-      const measuredHeight = Math.max(1, lines.length * lineHeight);
-      const continuousScale = Math.min(1, contentWidth / measuredWidth, contentHeight / measuredHeight);
-      const scale = component.fit === 'font-size'
-        ? Math.max(1, Math.floor(fontSize * continuousScale)) / Math.max(1, fontSize)
-        : continuousScale;
-      fontSize *= scale;
-      lineHeight *= scale;
-      tracking *= scale;
-      context.font = `${document.fontStyle} ${document.fontWeight} ${fontSize}px ${quoteFont(document.fontFamily)}`;
-      lines = layoutTextLines(context, document.text, contentWidth, component.wrap ?? 'none', tracking);
-    }
-    const animators = component.animators ?? [];
-    const outlineFont = this.outlineFonts.get(outlineFontKey(document.fontFamily, document.fontStyle, document.fontWeight));
-    const selectorPlans = animators.map(animator => createSelectorIndexPlan(lines, animator));
-    lineHeight = Math.max(1, lineHeight);
-    const textHeight = lines.length * lineHeight;
-    let top = padding;
-    const vertical = component.verticalAlign ?? 'middle';
-    if (vertical === 'middle') top += Math.max(0, (contentHeight - textHeight) / 2);
-    else if (vertical === 'bottom') top += Math.max(0, contentHeight - textHeight);
-    let globalIndex = 0;
-    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
-      const line = lines[lineIndex]!;
-      const advances = line.map(glyph => context.measureText(glyph).width);
-      const baseWidth = advances.reduce((sum, advance) => sum + advance, 0) + Math.max(0, line.length - 1) * tracking;
-      let x = padding;
-      if (document.textAlign === 'center') x += Math.max(0, (contentWidth - baseWidth) / 2);
-      else if (document.textAlign === 'right') x += Math.max(0, contentWidth - baseWidth);
-      const baseline = top + lineIndex * lineHeight + fontSize;
-      if (component.lineBackground) {
-        drawJoinedLineBackground(context, component.lineBackground, [{
-          left: x,
-          top: baseline - fontSize,
-          right: x + baseWidth,
-          bottom: baseline - fontSize + lineHeight,
-        }]);
-      }
-      if (animators.length === 0 && outlineFont) {
-        drawOpenTypeText(context, outlineFont, line.join(''), x, baseline, fontSize, document.color);
-        continue;
-      }
-      for (let glyphIndex = 0; glyphIndex < line.length; glyphIndex++, globalIndex++) {
-        const glyph = line[glyphIndex]!;
-        const advance = advances[glyphIndex] ?? 0;
-        const state = resolveGlyphState(animators, selectorPlans, time, globalIndex, document.color);
-        const centerX = x + advance / 2 + state.x;
-        context.save();
-        context.translate(centerX, baseline + state.y);
-        context.rotate(state.rotation);
-        context.scale(state.scaleX, state.scaleY);
-        context.globalAlpha = state.opacity;
-        context.fillStyle = cssColor(state.color);
-        context.fillText(glyph, -advance / 2, 0);
-        context.restore();
-        x += advance + tracking + state.tracking;
+    const outlineFont=selectPreparedFont(this.outlineFonts,document)?.outline;
+    const plan=evaluatePlainTextLayout(component,document,time,padding,contentWidth,contentHeight,canvasTextMeasure(context,this.outlineFonts));
+    context.font=textFont({...document,fontSize:plan.fontSize},this.outlineFonts);context.textBaseline='alphabetic';context.textAlign='left';
+    for(const layout of plan.layouts){
+      if(component.lineBackground)drawJoinedLineBackground(context,component.lineBackground,[{left:layout.x,top:layout.top,right:layout.x+layout.width,bottom:layout.top+layout.height}]);
+      if(plan.rendering==='run'){if(outlineFont)drawOpenTypeText(context,outlineFont,layout.line.join(''),layout.x,layout.baseline,plan.fontSize,document.color);else{context.fillStyle=cssColor(document.color);context.fillText(layout.line.join(''),layout.x,layout.baseline);}continue;}
+      for(const glyph of layout.glyphs){
+        const state=glyph.state;context.save();context.translate(glyph.centerX,glyph.baseline);context.rotate(state.rotation);context.scale(state.scaleX,state.scaleY);context.globalAlpha=state.opacity;context.fillStyle=cssColor(state.color);
+        if(outlineFont)drawOpenTypeText(context,outlineFont,glyph.value,-glyph.advance/2,0,plan.fontSize,state.color);else context.fillText(glyph.value,-glyph.advance/2,0);context.restore();
       }
     }
   }
 }
 
-function drawStyledText(
-  context: CanvasRenderingContext2D,
-  component: Readonly<AnimationText2DComponent>,
-  document: ResolvedTextDocument,
-  time: number,
-  padding: number,
-  contentWidth: number,
-  contentHeight: number,
-  outlineFonts: ReadonlyMap<string, AnimationOutlineFont>,
-): void {
-  context.textBaseline = 'alphabetic';
-  context.textAlign = 'left';
+export interface AnimationTextMetricStyle {
+ readonly fontResource?:string|undefined;
+ readonly fontFamily:string;readonly fontSize:number;readonly fontWeight:string|number;readonly fontStyle:'normal'|'italic';
+}
+export interface AnimationTextMetric {readonly width:number;readonly ascent:number;readonly descent:number;}
+export type AnimationTextMeasure=(text:string,style:AnimationTextMetricStyle)=>AnimationTextMetric;
+
+/** Adapter to the existing real browser metric source; pure layout never needs a Canvas-shaped object. */
+function canvasTextMeasure(context:CanvasRenderingContext2D,fonts?:ReadonlyMap<string,PreparedAnimationFont>):AnimationTextMeasure {
+ return (text,style)=>{
+  context.font=textFont(style,fonts);setCanvasLetterSpacing(context,0);
+  const sample=context.measureText(text),font=fonts?selectPreparedFont(fonts,style)?.outline:undefined;
+  const width=font?.getAdvanceWidth?.(text,style.fontSize,{kerning:true,features:{liga:true,rlig:true}})??sample.width;
+  if(!Number.isFinite(width)||width<0)throw new RangeError('Font advance must be finite and non-negative');
+  return {width,ascent:positiveMetric(sample.fontBoundingBoxAscent,sample.actualBoundingBoxAscent,style.fontSize*.8),descent:positiveMetric(sample.fontBoundingBoxDescent,sample.actualBoundingBoxDescent,style.fontSize*.2)};
+ };
+}
+
+function evaluatePlainTextLayout(component:Readonly<AnimationText2DComponent>,document:ResolvedTextDocument,time:number,padding:number,contentWidth:number,contentHeight:number,metric:AnimationTextMeasure) {
+ let fontSize=document.fontSize,lineHeight=document.lineHeight,tracking=document.tracking;
+ const measure=(value:string)=>metric(value,{...document,fontSize}).width;
+ const canShapeRun=()=>!(component.animators?.length)&&Math.abs(tracking)<1e-6;
+ let lines=layoutTextLines(document.text,contentWidth,component.wrap??'none',tracking,measure,canShapeRun());
+ if((component.fit==='scale'||component.fit==='font-size')&&lines.length>0){
+  const measuredWidth=Math.max(...lines.map(line=>measuredLineWidth(line,tracking,measure,canShapeRun())),1),measuredHeight=Math.max(1,lines.length*lineHeight);
+  const continuousScale=Math.min(1,contentWidth/measuredWidth,contentHeight/measuredHeight),scale=component.fit==='font-size'?Math.max(1,Math.floor(fontSize*continuousScale))/Math.max(1,fontSize):continuousScale;
+  fontSize*=scale;lineHeight*=scale;tracking*=scale;
+  lines=layoutTextLines(document.text,contentWidth,component.wrap??'none',tracking,measure,canShapeRun());
+ }
+ const animators=component.animators??[],selectorPlans=animators.map(animator=>createSelectorIndexPlan(lines,animator));
+ lineHeight=Math.max(1,lineHeight);const textHeight=lines.length*lineHeight;let top=padding;
+ const vertical=component.verticalAlign??'middle';if(vertical==='middle')top+=Math.max(0,(contentHeight-textHeight)/2);else if(vertical==='bottom')top+=Math.max(0,contentHeight-textHeight);
+ let globalIndex=0;
+ const layouts=lines.map((line,lineIndex)=>{
+  const advances=line.map(measure),width=measuredLineWidth(line,tracking,measure,canShapeRun());let x=padding;
+  if(document.textAlign==='center')x+=Math.max(0,(contentWidth-width)/2);else if(document.textAlign==='right')x+=Math.max(0,contentWidth-width);
+  const baseline=top+lineIndex*lineHeight+fontSize,start=x;
+  const glyphs=line.map((value,index)=>{
+   const advance=advances[index]??0,state=resolveGlyphState(animators,selectorPlans,time,globalIndex++,document.color),glyph={value,advance,x,centerX:x+advance/2+state.x,baseline:baseline+state.y,state};x+=advance+tracking+state.tracking;return glyph;
+  });
+  return {line,glyphs,x:start,baseline,top:baseline-fontSize,height:lineHeight,width};
+ });
+ return {layouts,fontSize,lineHeight,tracking,animators,document,rendering:canShapeRun()?'run' as const:'glyphs' as const,contentSize:[Math.max(0,...layouts.map(line=>line.width)),textHeight] as const};
+}
+
+/** Produces an immutable logical plan; font metrics must come from an explicit real metric source. */
+function snapshotCoreTextLayout(component:Readonly<AnimationText2DComponent>,document:ResolvedTextDocument,time:number,measure:AnimationTextMeasure) {
+ if(typeof measure!=='function')throw Object.assign(new Error('Core glyph layout requires a real font metric port'),{code:'E_HYA_RUNTIME_HOST_PORT',path:'$.core.text.metrics'});
+ const metric:AnimationTextMeasure=(text,style)=>{const value=measure(text,Object.freeze({fontFamily:style.fontFamily,fontSize:style.fontSize,fontWeight:style.fontWeight,fontStyle:style.fontStyle,fontResource:style.fontResource}));if(!value||[value.width,value.ascent,value.descent].some(v=>!Number.isFinite(v)||v<0))throw Object.assign(new Error('Core text metrics must be finite and non-negative'),{code:'E_HYA_RUNTIME_TEXT',path:'$.core.text.metrics'});return value;};
+ const width=Math.max(1,Math.ceil(component.size[0])),height=Math.max(1,Math.ceil(component.size[1])),padding=Math.max(0,component.padding??0),contentWidth=Math.max(1,width-padding*2),contentHeight=Math.max(1,height-padding*2);
+ let output:unknown;
+ if((component.styleRuns?.length??0)>0){
+  const plan=evaluateStyledTextLayout(metric,component,document,time,padding,contentWidth,contentHeight);
+  let index=0;
+  output={kind:'styled',size:[width,height],contentSize:[plan.metrics.width,plan.metrics.height],lines:plan.layouts.map(layout=>{const glyphs=plan.glyphPlans.slice(index,index+layout.line.glyphs.length);index+=glyphs.length;return{x:layout.x,top:layout.top,width:layout.metrics.width,height:layout.height,baseline:layout.baseline,glyphs};})};
+ }else{
+  const plan=evaluatePlainTextLayout(component,document,time,padding,contentWidth,contentHeight,metric);
+  output={kind:'plain',rendering:plan.rendering,size:[width,height],contentSize:plan.contentSize,fontSize:plan.fontSize,lineHeight:plan.lineHeight,tracking:plan.tracking,lines:plan.layouts};
+ }
+ const copy=JSON.parse(JSON.stringify(output)) as unknown;
+ const freeze=(value:unknown):void=>{if(value&&typeof value==='object'){for(const child of Object.values(value))freeze(child);Object.freeze(value);}};freeze(copy);return copy;
+}
+
+function evaluateStyledTextLayout(measure:AnimationTextMeasure,component:Readonly<AnimationText2DComponent>,document:ResolvedTextDocument,time:number,padding:number,contentWidth:number,contentHeight:number) {
   let scale = 1;
   let scaleLineMetrics = false;
   const paragraphSpacing = sampled(component.paragraphSpacingTrack, time, [component.paragraphSpacing ?? 0])[0] ?? 0;
-  let lines = layoutStyledText(context, component, document, contentWidth, scale, scaleLineMetrics, time);
+  let lines = layoutStyledText(measure, component, document, contentWidth, scale, scaleLineMetrics, time);
   if (component.fit === 'font-size' && lines.length > 0) {
     const maxFontSize = Math.max(document.fontSize, ...lines.flatMap(line => line.glyphs.map(glyph => glyph.style.fontSize)));
     let low = 1; let high = Math.max(1, Math.floor(maxFontSize)); let best = 1;
     while (low <= high) {
       const candidate = low + Math.floor((high - low) / 2);
       const candidateScale = candidate / Math.max(1, maxFontSize);
-      const candidateLines = layoutStyledText(context, component, document, contentWidth, candidateScale, false, time);
-      const candidateMetrics = measureStyledBlock(context, candidateLines, document, paragraphSpacing, candidateScale, false);
+      const candidateLines = layoutStyledText(measure, component, document, contentWidth, candidateScale, false, time);
+      const candidateMetrics = measureStyledBlock(measure, candidateLines, document, paragraphSpacing, candidateScale, false);
       if (candidateMetrics.width <= contentWidth && candidateMetrics.height <= contentHeight) {
         best = candidate; low = candidate + 1;
       } else high = candidate - 1;
@@ -297,14 +399,14 @@ function drawStyledText(
     // Font-size fitting preserves authored custom line boxes while
     // stepping the top font size; uniform scaling also scales line metrics.
     scaleLineMetrics = false;
-    lines = layoutStyledText(context, component, document, contentWidth, scale, scaleLineMetrics, time);
+    lines = layoutStyledText(measure, component, document, contentWidth, scale, scaleLineMetrics, time);
   } else if (component.fit === 'scale' && lines.length > 0) {
-    const metrics = measureStyledBlock(context, lines, document, paragraphSpacing, scale, false);
+    const metrics = measureStyledBlock(measure, lines, document, paragraphSpacing, scale, false);
     scale = Math.min(1, contentWidth / Math.max(1, metrics.width), contentHeight / Math.max(1, metrics.height));
     scaleLineMetrics = true;
-    lines = layoutStyledText(context, component, document, contentWidth, scale, scaleLineMetrics, time);
+    lines = layoutStyledText(measure, component, document, contentWidth, scale, scaleLineMetrics, time);
   }
-  const metrics = measureStyledBlock(context, lines, document, paragraphSpacing, scale, scaleLineMetrics);
+  const metrics = measureStyledBlock(measure, lines, document, paragraphSpacing, scale, scaleLineMetrics);
   let top = padding;
   const vertical = component.verticalAlign ?? 'middle';
   if (vertical === 'middle') top += Math.max(0, (contentHeight - metrics.height) / 2);
@@ -315,7 +417,7 @@ function drawStyledText(
   const layouts: StyledLineLayout[] = [];
   let firstLine = true;
   for (const line of lines) {
-    const lineMetrics = measureStyledLine(context, line.glyphs, document, scale, scaleLineMetrics);
+    const lineMetrics = measureStyledLine(measure, line.glyphs, document, scale, scaleLineMetrics);
     let x = padding;
     if (document.textAlign === 'center') x += Math.max(0, (contentWidth - lineMetrics.width) / 2);
     else if (document.textAlign === 'right') x += Math.max(0, contentWidth - lineMetrics.width);
@@ -328,6 +430,25 @@ function drawStyledText(
     if (line.paragraphEnd) top += Math.max(0, paragraphSpacing) * (scaleLineMetrics ? scale : 1);
     firstLine = false;
   }
+
+  let glyphIndex=0;
+  const glyphPlans=layouts.flatMap(layout=>{let trackingOffset=0;return layout.line.glyphs.map((glyph,index)=>{const advance=layout.metrics.advances[index]??0,state=resolveGlyphState(animators,selectorPlans,time,glyphIndex++,glyph.style.color),x=layout.x+layout.metrics.offsets[index]!+trackingOffset;trackingOffset+=state.tracking;return {value:glyph.value,style:glyph.style,advance,x,centerX:x+advance/2+state.x,baseline:layout.baseline+state.y,state};});});
+  return {layouts,metrics,animators,selectorPlans,glyphPlans};
+}
+
+function drawStyledText(
+  context: CanvasRenderingContext2D,
+  component: Readonly<AnimationText2DComponent>,
+  document: ResolvedTextDocument,
+  time: number,
+  padding: number,
+  contentWidth: number,
+  contentHeight: number,
+  outlineFonts: ReadonlyMap<string, PreparedAnimationFont>,
+): void {
+  context.textBaseline = 'alphabetic';
+  context.textAlign = 'left';
+  const {layouts,animators,selectorPlans,glyphPlans}=evaluateStyledTextLayout(canvasTextMeasure(context,outlineFonts),component,document,time,padding,contentWidth,contentHeight);
 
   // Accumulate every glyph rectangle owned by a style, union
   // touching lines into one contour, and paint all backgrounds before any
@@ -374,12 +495,11 @@ function drawStyledText(
     } else for (let glyphIndex = 0; glyphIndex < line.glyphs.length; glyphIndex++, globalIndex++) {
       const glyph = line.glyphs[glyphIndex]!;
       const advance = lineMetrics.advances[glyphIndex] ?? 0;
-      const state = resolveGlyphState(animators, selectorPlans, time, globalIndex, glyph.style.color);
-      const glyphX = x + lineMetrics.offsets[glyphIndex]!;
-      const centerX = glyphX + advance / 2 + state.x;
+      const prepared = glyphPlans[globalIndex]!, state = prepared.state;
+      const centerX = prepared.centerX;
       context.save();
-      context.font = textFont(glyph.style);
-      context.translate(centerX, baseline + state.y);
+      context.font = textFont(glyph.style,outlineFonts);
+      context.translate(centerX, prepared.baseline);
       context.rotate(state.rotation);
       context.scale(state.scaleX, state.scaleY);
       context.globalAlpha = state.opacity;
@@ -396,7 +516,7 @@ function drawShapedStyleSegments(
   offsets: readonly number[],
   x: number,
   baseline: number,
-  outlineFonts: ReadonlyMap<string, AnimationOutlineFont>,
+  outlineFonts: ReadonlyMap<string, PreparedAnimationFont>,
 ): void {
   let start = 0;
   while (start < glyphs.length) {
@@ -404,11 +524,11 @@ function drawShapedStyleSegments(
     while (end < glyphs.length && glyphs[end]!.style.key === glyphs[start]!.style.key) end++;
     const style = glyphs[start]!.style;
     const text = glyphs.slice(start, end).map(glyph => glyph.value).join('');
-    const outlineFont = outlineFonts.get(outlineFontKey(style.fontFamily, style.fontStyle, style.fontWeight));
+    const outlineFont = selectPreparedFont(outlineFonts,style)?.outline;
     if (outlineFont && Math.abs(style.tracking) < 1e-6) {
       drawOpenTypeText(context, outlineFont, text, x + offsets[start]!, baseline, style.fontSize, style.color);
     } else {
-      context.font = textFont(style);
+      context.font = textFont(style,outlineFonts);
       setCanvasLetterSpacing(context, style.tracking);
       context.fillStyle = cssColor(style.color);
       context.fillText(text, x + offsets[start]!, baseline);
@@ -418,9 +538,27 @@ function drawShapedStyleSegments(
   setCanvasLetterSpacing(context, 0);
 }
 
-function outlineFontKey(family: string, style: 'normal' | 'italic', weight: string | number): string {
-  return `${family}\0${style}\0${String(weight)}`;
+function outlineFontKey(family: string, style: 'normal' | 'italic', weight: string | number,resource?:string): string {
+  return JSON.stringify([resource??null,family,style,String(weight)]);
 }
+interface PreparedAnimationFont {
+ readonly resource?:string|undefined;
+ readonly outline?:AnimationOutlineFont|undefined;
+ readonly nativeFamily:string;
+ readonly ambiguous?:boolean;
+}
+type CoreFontSelection=Pick<AnimationTextMetricStyle,'fontFamily'|'fontWeight'|'fontStyle'> & {readonly fontResource?:string|undefined};
+function selectPreparedFont(fonts:ReadonlyMap<string,PreparedAnimationFont>,style:CoreFontSelection):PreparedAnimationFont|undefined {
+ const value=fonts.get(outlineFontKey(style.fontFamily,style.fontStyle,style.fontWeight,style.fontResource));
+ if(value?.ambiguous)throw Object.assign(new Error('Core font family resolves to multiple resources; declare the active fontResource'),{code:'E_HYA_RUNTIME_HOST_PORT',path:'$.core.text.fontResource',capability:'core-text'});
+ return value;
+}
+function inheritedCoreFontResource(value:Readonly<{fontResource?:string|undefined;fontFamily?:string|undefined;fontStyle?:'normal'|'italic'|undefined;fontWeight?:string|number|undefined}>,base:CoreFontSelection):string|undefined {
+ if(value.fontResource!==undefined)return value.fontResource;
+ if((value.fontFamily??base.fontFamily)!==base.fontFamily||(value.fontStyle??base.fontStyle)!==base.fontStyle||String(value.fontWeight??base.fontWeight)!==String(base.fontWeight))return undefined;
+ return base.fontResource;
+}
+
 
 function drawOpenTypeText(
   context: CanvasRenderingContext2D,
@@ -449,7 +587,7 @@ function drawOpenTypePath(context: CanvasRenderingContext2D, path: AnimationOutl
 }
 
 function layoutStyledText(
-  context: CanvasRenderingContext2D,
+  measure: AnimationTextMeasure,
   component: Readonly<AnimationText2DComponent>,
   document: ResolvedTextDocument,
   width: number,
@@ -462,15 +600,16 @@ function layoutStyledText(
     start: run.start,
     end: run.end,
     style: scaledRunStyle({
+      fontResource: inheritedCoreFontResource(run,document),
       fontFamily: run.fontFamily ?? document.fontFamily,
-      fontSize: sampled(run.fontSizeTrack, time, [run.fontSize ?? document.fontSize])[0] ?? run.fontSize ?? document.fontSize,
+      fontSize: document.state?.fontSize ?? sampled(run.fontSizeTrack, time, [run.fontSize ?? document.fontSize])[0] ?? run.fontSize ?? document.fontSize,
       fontWeight: run.fontWeight ?? document.fontWeight,
       fontStyle: run.fontStyle ?? document.fontStyle,
       // Zero is runtime-private shorthand for automatic line height;
       // it is resolved from the loaded font metrics in measureStyledLine.
       lineHeight: sampled(run.lineHeightTrack, time, [run.lineHeight ?? 0])[0] ?? run.lineHeight ?? 0,
-      tracking: sampled(run.trackingTrack, time, [run.tracking ?? document.tracking])[0] ?? run.tracking ?? document.tracking,
-      color: run.color ?? document.color,
+      tracking: document.state?.tracking ?? sampled(run.trackingTrack, time, [run.tracking ?? document.tracking])[0] ?? run.tracking ?? document.tracking,
+      color: document.state?.color ?? run.color ?? document.color,
     }, run.lineBackground ?? component.lineBackground, index + 1, fontScale, scaleLineMetrics),
   }));
   const paragraphs: StyledGlyph[][] = [];
@@ -489,16 +628,16 @@ function layoutStyledText(
     for (const candidateWord of words) {
       const candidate = [...line, ...candidateWord];
       if (component.wrap === 'word' && line.length > 0
-        && measureStyledLine(context, candidate, document, fontScale, scaleLineMetrics).width > width) {
+        && measureStyledLine(measure, candidate, document, fontScale, scaleLineMetrics).width > width) {
         output.push({ glyphs: line, paragraphEnd: false });
         line = [...candidateWord];
       } else line = candidate;
       if (component.wrap === 'word' && line.length > 1
-        && measureStyledLine(context, line, document, fontScale, scaleLineMetrics).width > width) {
+        && measureStyledLine(measure, line, document, fontScale, scaleLineMetrics).width > width) {
         const pending = [...line]; line = [];
         for (const glyph of pending) {
           const forced = [...line, glyph];
-          if (line.length > 0 && measureStyledLine(context, forced, document, fontScale, scaleLineMetrics).width > width) {
+          if (line.length > 0 && measureStyledLine(measure, forced, document, fontScale, scaleLineMetrics).width > width) {
             output.push({ glyphs: line, paragraphEnd: false }); line = [glyph];
           } else line = forced;
         }
@@ -555,6 +694,7 @@ function scaledRunStyle(
   const metricScale = scaleLineMetrics ? fontScale : 1;
   return {
     key,
+    fontResource: source.fontResource,
     fontFamily: source.fontFamily,
     fontSize: source.fontSize * fontScale,
     fontWeight: source.fontWeight,
@@ -576,7 +716,7 @@ function scaledRunStyle(
 }
 
 function measureStyledBlock(
-  context: CanvasRenderingContext2D,
+  measure: AnimationTextMeasure,
   lines: readonly StyledLine[],
   document: ResolvedTextDocument,
   paragraphSpacing: number,
@@ -585,7 +725,7 @@ function measureStyledBlock(
 ): { width: number; height: number } {
   let width = 0; let height = 0; let firstLine = true;
   for (const line of lines) {
-    const metrics = measureStyledLine(context, line.glyphs, document, fontScale, scaleLineMetrics);
+    const metrics = measureStyledLine(measure, line.glyphs, document, fontScale, scaleLineMetrics);
     width = Math.max(width, metrics.width);
     height += firstLine ? metrics.naturalAscent + metrics.descent : metrics.ascent + metrics.descent;
     if (line.paragraphEnd) height += Math.max(0, paragraphSpacing) * (scaleLineMetrics ? fontScale : 1);
@@ -595,7 +735,7 @@ function measureStyledBlock(
 }
 
 function measureStyledLine(
-  context: CanvasRenderingContext2D,
+  measure: AnimationTextMeasure,
   glyphs: readonly StyledGlyph[],
   document: ResolvedTextDocument,
   fontScale: number,
@@ -613,11 +753,8 @@ function measureStyledLine(
     let end = start + 1;
     while (end < sourceGlyphs.length && sourceGlyphs[end]!.style.key === sourceGlyphs[start]!.style.key) end++;
     const style = sourceGlyphs[start]!.style;
-    context.font = textFont(style);
-    setCanvasLetterSpacing(context, 0);
-    const sample = context.measureText(sourceGlyphs.slice(start, end).map(glyph => glyph.value).join(''));
-    const fontAscent = positiveMetric(sample.fontBoundingBoxAscent, sample.actualBoundingBoxAscent, style.fontSize * 0.8);
-    const fontDescent = positiveMetric(sample.fontBoundingBoxDescent, sample.actualBoundingBoxDescent, style.fontSize * 0.2);
+    const sample = measure(sourceGlyphs.slice(start, end).map(glyph => glyph.value).join(''),style);
+    const fontAscent = sample.ascent, fontDescent = sample.descent;
     const metricHeight = Math.max(1e-6, fontAscent + fontDescent);
     const customHeight = style.lineHeight > 0 ? style.lineHeight : metricHeight;
     ascent = Math.max(ascent, customHeight * fontAscent / metricHeight);
@@ -626,7 +763,7 @@ function measureStyledLine(
     let prefix = '';
     for (let index = start; index < end; index++) {
       prefix += sourceGlyphs[index]!.value;
-      const prefixWidth = context.measureText(prefix).width + Math.max(0, index - start) * style.tracking;
+      const prefixWidth = measure(prefix,style).width + Math.max(0, index - start) * style.tracking;
       const offset = width + prefixWidth;
       if (glyphs.length > 0) {
         advances.push(offset - offsets[offsets.length - 1]!);
@@ -636,7 +773,6 @@ function measureStyledLine(
     width = offsets[offsets.length - 1] ?? width;
     start = end;
   }
-  setCanvasLetterSpacing(context, 0);
   return { width, ascent, descent, naturalAscent, advances, offsets };
 }
 
@@ -649,16 +785,18 @@ function setCanvasLetterSpacing(context: CanvasRenderingContext2D, value: number
   if ('letterSpacing' in context) context.letterSpacing = `${value}px`;
 }
 
-function textFont(style: Pick<ResolvedRunStyle, 'fontFamily' | 'fontSize' | 'fontWeight' | 'fontStyle'>): string {
-  return `${style.fontStyle} ${style.fontWeight} ${style.fontSize}px ${quoteFont(style.fontFamily)}`;
+function textFont(style: AnimationTextMetricStyle,fonts?:ReadonlyMap<string,PreparedAnimationFont>): string {
+  const family=fonts?selectPreparedFont(fonts,style)?.nativeFamily??style.fontFamily:style.fontFamily;
+  return `${style.fontStyle} ${style.fontWeight} ${style.fontSize}px ${quoteFont(family)}`;
 }
 
 function layoutTextLines(
-  context: CanvasRenderingContext2D,
   text: string,
   width: number,
   wrap: 'none' | 'word',
   tracking: number,
+  measure: (value: string) => number,
+  wholeRun = false,
 ): string[][] {
   if (wrap === 'none') return text.split(/\r?\n/).map(splitGraphemes);
   const output: string[][] = [];
@@ -668,7 +806,7 @@ function layoutTextLines(
     for (const word of words) {
       const glyphs = splitGraphemes(word);
       const candidate = [...line, ...glyphs];
-      if (line.length > 0 && measuredLineWidth(context, candidate, tracking) > width) {
+      if (line.length > 0 && measuredLineWidth(candidate, tracking, measure, wholeRun) > width) {
         output.push(line);
         line = glyphs;
       } else line = candidate;
@@ -678,8 +816,9 @@ function layoutTextLines(
   return output;
 }
 
-function measuredLineWidth(context: CanvasRenderingContext2D, line: readonly string[], tracking: number): number {
-  return line.reduce((sum, glyph) => sum + context.measureText(glyph).width, 0)
+function measuredLineWidth(line: readonly string[], tracking: number, measure: (value: string) => number, wholeRun = false): number {
+  if(wholeRun)return measure(line.join(''));
+  return line.reduce((sum, glyph) => sum + measure(glyph), 0)
     + Math.max(0, line.length - 1) * tracking;
 }
 
@@ -856,6 +995,7 @@ function resolveDocument(
   }
   const resolved: ResolvedTextDocument = {
     text: keyframe?.text ?? component.text,
+    fontResource: inheritedCoreFontResource(keyframe??{},{fontFamily:component.fontFamily??'sans-serif',fontStyle:component.fontStyle??'normal',fontWeight:component.fontWeight??400,fontResource:component.fontResource}),
     fontFamily: keyframe?.fontFamily ?? component.fontFamily ?? 'sans-serif',
     fontSize: keyframe?.fontSize ?? component.fontSize ?? 28,
     fontWeight: keyframe?.fontWeight ?? component.fontWeight ?? 400,

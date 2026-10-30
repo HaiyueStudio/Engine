@@ -16,6 +16,7 @@ const sequences = new WeakMap<TransientRenderTargetPool, Sequence>();
 export function acquireSequentialAttachments(pool: TransientRenderTargetPool, scope: string, width: number, height: number,
   formats: readonly GPUTextureFormat[], context: RenderCommandContext,
   lifetime: { firstUse: number; lastUse: number }, reverseZ: boolean, reserveBytes: (bytes: number) => () => void) {
+  const encoder=context.encoder;
   let sequence = sequences.get(pool);
   if (!sequence) {
     sequence = { allocator: new TransientTextureAllocator(context.device, reserveBytes, 32, 'deferred-mrt'), release: undefined,
@@ -26,7 +27,7 @@ export function acquireSequentialAttachments(pool: TransientRenderTargetPool, sc
   const viewCount = new Set([...live, ...sequence.pending.keys(), scope]).size;
   if (viewCount > 4) throw new TransientAttachmentCapacityError('view-count', viewCount, 4);
   const pending = sequence.pending.get(scope) ?? new Set<GPUCommandEncoder>();
-  if (!pending.has(context.encoder) && pending.size >= 2) throw new TransientAttachmentCapacityError('live-target-generations', pending.size + 1, 2);
+  if (!pending.has(encoder) && pending.size >= 2) throw new TransientAttachmentCapacityError('live-target-generations', pending.size + 1, 2);
   sequence.views = live; sequence.views.add(scope);
   sequence.release?.(); sequence.release = undefined;
   const allocation = sequence.allocator.acquire(formats.map((format, i) => ({ name: `${scope}:gbuffer:${i}`,
@@ -35,11 +36,12 @@ export function acquireSequentialAttachments(pool: TransientRenderTargetPool, sc
     compatibility: format.startsWith('depth') ? `reverseZ:${reverseZ}` : '', firstUse: lifetime.firstUse, lastUse: lifetime.lastUse,
   })), context);
   sequence.release = allocation.release;
-  if (!pending.has(context.encoder)) {
-    pending.add(context.encoder); sequence.pending.set(scope, pending);
+  if (!pending.has(encoder)) {
+    pending.add(encoder); sequence.pending.set(scope, pending);
     const owner = sequence;
+    context.afterCancel?.(() => {pending.delete(encoder);if(!pending.size)owner.pending.delete(scope);});
     context.afterSubmit!(queue => {
-      pending.delete(context.encoder);
+      pending.delete(encoder);
       if (!pending.size) owner.pending.delete(scope);
       void queue;
     });

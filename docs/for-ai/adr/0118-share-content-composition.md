@@ -30,7 +30,7 @@ WebGPU 提交后的有效帧由宿主在呈现/释放前交给 `captureShareImag
 
 5 个值：captureShareImage、renderShareCard、prepareShareContent、createChallengeLink、parseChallengeLink。
 11 个类型，共 16 个符号，归属新的 share-content 能力预算；不增加既有入口预算或运行时依赖。
-公开 API、示例及验证见 [审阅记录](../../../review/api/share-content-validation.md)。
+公开 API、示例及验证见 [审阅记录](../../../review/api/capability-validation.md)。
 
 ## 边界
 

@@ -16,7 +16,8 @@ export interface GuiVertexLayout<Name extends string> {
 type ShapeField = 'position' | 'color' | 'rect' | 'radius' | 'clip';
 type TexturedField = 'position' | 'uv' | 'color' | 'clip';
 
-export const GUI_SHAPE_VERTEX_LAYOUT = defineGuiVertexLayout<ShapeField>([
+// Pure immutable descriptors must not pull GPU layout setup into leaf-only GUI consumers.
+export const GUI_SHAPE_VERTEX_LAYOUT = /* @__PURE__ */ defineGuiVertexLayout<ShapeField>([
   { name: 'position', shaderLocation: 0, format: 'float32x2' },
   { name: 'color', shaderLocation: 1, format: 'float32x4' },
   { name: 'rect', shaderLocation: 2, format: 'float32x4' },
@@ -24,7 +25,7 @@ export const GUI_SHAPE_VERTEX_LAYOUT = defineGuiVertexLayout<ShapeField>([
   { name: 'clip', shaderLocation: 4, format: 'float32x4' },
 ]);
 
-export const GUI_TEXTURED_VERTEX_LAYOUT = defineGuiVertexLayout<TexturedField>([
+export const GUI_TEXTURED_VERTEX_LAYOUT = /* @__PURE__ */ defineGuiVertexLayout<TexturedField>([
   { name: 'position', shaderLocation: 0, format: 'float32x2' },
   { name: 'uv', shaderLocation: 1, format: 'float32x2' },
   { name: 'color', shaderLocation: 2, format: 'float32x4' },

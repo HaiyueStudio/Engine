@@ -69,3 +69,66 @@ inspector.requestCapture();
 const frameGraphSnapshot: FrameGraphSnapshot | null = inspector.snapshot();
 void frameGraphSnapshot;
 inspector.dispose();
+
+import { createHyaPlayer, type HyaPlayer, type HyaPlayerOptions } from '@haiyue/extensions/hya-player';
+import { createHyaTextShaper, type HyaFontPort, type HyaTextShaper } from '@haiyue/extensions/hya-text';
+import { createHyaLayout, type HyaLayout } from '@haiyue/extensions/hya-layout';
+import { createHyaData, createHyaSemantics, type HyaData, type HyaSemantics } from '@haiyue/extensions/hya-data';
+import { createHyaAudio, createBrowserHyaAudioHost, type HyaAudio, type HyaAudioHost } from '@haiyue/extensions/hya-audio';
+import type { HyaCompositionDocument, ResponsiveLayoutDocument, HyaDataBindingDocument,
+  HyaSemanticsDocument, HyaAudioEventDocument } from '@haiyue/animation-spec/hya-production';
+
+// Compile actual factory calls across installed declarations, not only unused imports.
+export async function consumeHya(parts: {
+  composition: HyaCompositionDocument; layout: ResponsiveLayoutDocument;
+  data: HyaDataBindingDocument; semantics: HyaSemanticsDocument; audio: HyaAudioEventDocument;
+}, fonts: HyaFontPort, host: HyaAudioHost, options: HyaPlayerOptions): Promise<void> {
+  const data: HyaData = createHyaData(parts.data);
+  const text: HyaTextShaper = await createHyaTextShaper(parts.layout, fonts);
+  const layout: HyaLayout = createHyaLayout(parts.layout, { text });
+  const semantics: HyaSemantics = createHyaSemantics(parts.semantics, { bindings: data, action() {} });
+  const audio: HyaAudio = await createHyaAudio(parts.audio, host);
+  const player: HyaPlayer = await createHyaPlayer(parts.composition, options);
+  player.dispose(); audio.dispose(); semantics.dispose(); layout.dispose(); text.dispose(); data.dispose();
+}
+export function consumeBrowserHyaAudio(context: AudioContext): Promise<HyaAudioHost> {
+  return createBrowserHyaAudioHost(context);
+}
+
+import {createLayoutSession, type LayoutNode, type LayoutConstraints, type LayoutMeasure} from '@haiyue/extensions/layout';
+import {attachGuiLayout, createGuiContainer, GuiSplitPanel, GuiTabContainer,
+  type GuiLayoutOptions, type GuiSplitPanelOptions, type GuiTabContainerOptions} from '@haiyue/extensions/gui-layout';
+import type {GuiRoot} from '@haiyue/engine/gui';
+export function consumeLayout(root: LayoutNode, constraints: LayoutConstraints, measure: LayoutMeasure): void {
+  const session = createLayoutSession();
+  session.update(root, constraints, measure, {metricsVersion: 0}); session.dispose();
+}
+export function consumeGuiLayout(root: GuiRoot, options: GuiLayoutOptions,
+  split: GuiSplitPanelOptions, tabs: GuiTabContainerOptions): void {
+  const binding = attachGuiLayout(root, options);
+  const container = createGuiContainer('row');
+  binding.setStyle(container, {grow: 1});
+  new GuiSplitPanel(split); new GuiTabContainer(tabs);
+  binding.dispose();
+}
+
+import {GuiThemeResource, GuiNineSlice, type GuiMeasureConstraint, type GuiLayoutDelegate,
+  type GuiInvalidationReason, type GuiInvalidation, type GuiPointerFilter, type GuiFocusMode,
+  type GuiFocusOptions, type GuiActionEvent, type GuiTextEdit, type GuiTextComposition,
+  type GuiTextInputSession, type GuiTextInputHost, type GuiThemeState, type GuiSkin,
+  type GuiNineSliceOptions, type GuiDragSource, type GuiDropTarget, type GuiDragSession} from '@haiyue/engine/gui';
+import type {RegionUpdateMode, RenderRegionOptions, RenderRegion} from '@haiyue/engine/core';
+export interface AdmittedGuiContracts {
+  measure: GuiMeasureConstraint; delegate: GuiLayoutDelegate; reason: GuiInvalidationReason;
+  invalidation: GuiInvalidation; pointer: GuiPointerFilter; focusMode: GuiFocusMode;
+  focus: GuiFocusOptions; action: GuiActionEvent; edit: GuiTextEdit; composition: GuiTextComposition;
+  session: GuiTextInputSession; host: GuiTextInputHost; state: GuiThemeState; skin: GuiSkin;
+  dragSource: GuiDragSource; dropTarget: GuiDropTarget; dragSession: GuiDragSession;
+  regionMode: RegionUpdateMode; regionOptions: RenderRegionOptions; region: RenderRegion;
+}
+export function consumeGuiResources(root: GuiRoot, image: GuiNineSliceOptions): void {
+  const theme = new GuiThemeResource();
+  root.setThemeResource(theme);
+  const node = root.add(new GuiNineSlice(image));
+  root.remove(node); root.setThemeResource(null); theme.dispose();
+}

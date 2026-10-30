@@ -1,3 +1,5 @@
+import * as GuiPaint from '../rendering/GuiControlPaintPrimitives';
+import {admitGuiControl} from '../GuiControlIdentity';
 import { GuiElementOptions, GuiRect } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
 
@@ -11,6 +13,8 @@ export interface GuiTooltipOptions extends GuiElementOptions {
 }
 
 export class GuiTooltip extends GuiElement {
+  private static readonly __controlIdentityGuiTooltip = /* @__PURE__ */ (() => admitGuiControl(GuiTooltip.prototype, 'GuiTooltip', undefined, paintGuiTooltip))();
+  static override readonly themeControlType: string = 'GuiTooltip';
   target: GuiElement;
   content: string;
   placement: GuiTooltipPlacement;
@@ -19,6 +23,7 @@ export class GuiTooltip extends GuiElement {
 
   constructor(options: GuiTooltipOptions) {
     super({
+      ...options,
       width: options.width ?? 180,
       height: options.height ?? 30,
       visible: options.visible ?? true,
@@ -68,3 +73,21 @@ export class GuiTooltip extends GuiElement {
     return null;
   }
 }
+
+/** Original built-in painter; retained with this control, not every GUI owner. */
+function paintGuiTooltip(context:GuiPaint.GuiControlPaintContext, tooltip: GuiTooltip, theme: GuiPaint.GuiTheme): void {
+    if (!tooltip.active || !tooltip.content) return;
+    const rect = tooltip.popupRect;
+    const radius = context.styleFor(tooltip).radius ?? theme.radius;
+    const style = context.styleFor(tooltip), box = GuiPaint.guiContentBox(tooltip, 8, theme.fontSize, rect);
+    const textRect = style.contentInsets || style.nineSlice || style.icon ? box.text : {x:rect.x + 8,y:rect.y,width:rect.width - 16,height:rect.height};
+    context.addPopupRect(rect.x, rect.y, rect.width, rect.height, radius, GuiPaint.withAlpha(GuiPaint.colorToRgba(context.styleFor(tooltip).backgroundColor, theme.colors.background), 0.96));
+    context.currentPopupTextBatch.addText({
+      text: tooltip.content,
+      ...textRect,
+      fontSize: theme.fontSize,
+      color: GuiPaint.colorToRgba(theme.colors.text, theme.colors.text),
+      multiline: true, wrap: true, verticalAlign: 'center',
+      clip: rect,
+    });
+  }

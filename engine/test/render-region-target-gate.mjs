@@ -1,0 +1,11 @@
+import {execFileSync} from 'node:child_process';
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+import {runChromeWebGpuFixture} from '../../scripts/webgpu-gate/chrome-runner.mjs';
+const root=fileURLToPath(new URL('../..',import.meta.url));
+execFileSync(process.execPath,[resolve(root,'scripts/build-rollup-once.mjs'),'rollup.region-tests.config.js','--expect','../artifacts/engine-0.2.2/g04/target-bundle'],{cwd:resolve(root,'engine'),stdio:'pipe'});
+const fingerprints=Object.fromEntries(['engine/src/core/RenderCommandContext.ts','engine/src/core/IEngine.ts','engine/src/core/EngineError.ts','engine/src/core/EngineDiagnosticsAccess.ts','engine/src/core/GPUResourceTracker.ts','engine/src/postprocess/SceneOutputPass.ts','engine/src/rtt/RttEngine.ts','engine/src/rtt/SubmissionLifetime.ts','engine/src/renderer/regions/RegionColorTarget.ts','engine/src/renderer/regions/RegionCacheBudget.ts','engine/test/fixtures/render-region-target.html','engine/test/fixtures/render-region-target.mjs','engine/test/render-region-target-gate.mjs','engine/rollup.region-tests.config.js'].map(p=>[p,createHash('sha256').update(readFileSync(resolve(root,p))).digest('hex')]));
+let result;try{result=await runChromeWebGpuFixture({root,fixture:'engine/test/fixtures/render-region-target.html',mounts:[{prefix:'/region-target-build',directory:resolve(root,'artifacts/engine-0.2.2/g04/target-bundle')}],acceptedStatuses:['passed','failed'],timeoutMs:60000})}catch(error){result={status:'failed',error:String(error.stack??error),browserFailure:error.browserFailure}}
+const out=resolve(root,`artifacts/engine-0.2.2/g04/native-target-${Date.now()}.json`);mkdirSync(resolve(out,'..'),{recursive:true});writeFileSync(out,JSON.stringify({generatedAt:new Date().toISOString(),sourceRevision:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),sourceSnapshot:'Working-tree source fingerprints; not a clean release candidate',fingerprints,...result},null,2)+'\n');console.log(JSON.stringify({out,status:result.status,cases:result.caseCount,error:result.error}));if(result.status!=='passed'||result.caseCount!==8)process.exitCode=1;

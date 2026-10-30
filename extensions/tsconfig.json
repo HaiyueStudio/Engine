@@ -4,12 +4,45 @@
     "rootDir": "src",
     "outDir": "dist",
     "paths": {
-      "@haiyue/animation-spec": ["../animation-spec/dist/index.d.ts"],
-      "@haiyue/engine/*": ["../engine/dist/*.d.ts"],
-      "@haiyue/engine": ["../engine/dist/index.d.ts"]
+      "@haiyue/animation-spec": [
+        "../animation-spec/dist/index.d.ts"
+      ],
+      "@haiyue/engine/*": [
+        "../engine/dist/*.d.ts"
+      ],
+      "@haiyue/engine": [
+        "../engine/dist/index.d.ts"
+      ],
+      "@haiyue/animation-spec/hya-production": [
+        "../animation-spec/dist/hya-production.d.ts"
+      ],
+      "@haiyue/extensions/hya-player": [
+        "./src/hya-player.ts"
+      ],
+      "@haiyue/extensions/hya-text": [
+        "./src/hya-text.ts"
+      ],
+      "@haiyue/extensions/hya-layout": [
+        "./src/hya-layout.ts"
+      ],
+      "@haiyue/extensions/hya-data": [
+        "./src/hya-data.ts"
+      ],
+      "@haiyue/extensions/hya-audio": [
+        "./src/hya-audio.ts"
+      ]
     },
-    "typeRoots": ["../node_modules", "../node_modules/@types", "../engine/node_modules", "../engine/node_modules/@types"],
-    "types": ["@webgpu/types"]
+    "typeRoots": [
+      "../node_modules",
+      "../node_modules/@types",
+      "../engine/node_modules",
+      "../engine/node_modules/@types"
+    ],
+    "types": [
+      "@webgpu/types"
+    ]
   },
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts"
+  ]
 }

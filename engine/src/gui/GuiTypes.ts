@@ -1,3 +1,7 @@
+import type {GuiImageSource} from './components/GuiImage';
+import type {GuiNineSliceOptions, GuiThemeResourceBinding} from './GuiThemeTypes';
+import type {GuiDragSource, GuiDropTarget} from './GuiDragTypes';
+
 export const enum GuiDirtyFlags {
   None = 0,
   Layout = 1 << 0,
@@ -18,6 +22,9 @@ export interface GuiRect {
 }
 
 export interface GuiStyle {
+  /** Browser pointer cursor override; omitted values use the control's default. */
+  cursor?: string;
+  palette?: Partial<GuiTheme['colors']>;
   backgroundColor?: string;
   hoverBackgroundColor?: string;
   borderColor?: string;
@@ -26,6 +33,14 @@ export interface GuiStyle {
   opacity?: number;
   radius?: number;
   padding?: number;
+  fontFamily?: string;
+  fontSize?: number;
+  icon?: GuiImageSource;
+  iconSize?: number;
+  iconGap?: number;
+  iconTint?: string;
+  contentInsets?: Readonly<{top: number; right: number; bottom: number; left: number}>;
+  nineSlice?: GuiNineSliceOptions;
 }
 
 export interface GuiTheme {
@@ -65,7 +80,7 @@ export const DEFAULT_GUI_THEME: GuiTheme = {
 };
 
 export interface GuiPointerEvent {
-  type: 'pointerenter' | 'pointerleave' | 'pointerdown' | 'pointermove' | 'pointerup' | 'click';
+  type: 'pointerenter' | 'pointerleave' | 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel' | 'click';
   target: unknown;
   currentTarget: unknown;
   x: number;
@@ -76,6 +91,8 @@ export interface GuiPointerEvent {
   buttons: number;
   pointerId: number;
   nativeEvent: PointerEvent;
+  /** Native routing applies pointer filters; direct legacy event emission remains available. */
+  routed?: boolean;
   stopped: boolean;
   defaultPrevented: boolean;
   stopPropagation(): void;
@@ -85,7 +102,23 @@ export interface GuiPointerEvent {
 export type GuiPointerHandler = (event: GuiPointerEvent) => void;
 export type GuiValueChangeHandler<T> = (value: T) => void;
 
+export type GuiPointerFilter = 'stop' | 'pass' | 'ignore';
+export type GuiFocusMode = 'none' | 'click' | 'all';
+export interface GuiFocusOptions {
+  readonly mode: GuiFocusMode;
+  readonly tabIndex?: number;
+  readonly neighbours?: Partial<Record<'left' | 'right' | 'up' | 'down', string>>;
+}
+export interface GuiActionEvent {
+  readonly action: 'next' | 'previous' | 'left' | 'right' | 'up' | 'down' | 'confirm' | 'cancel';
+  readonly source: 'keyboard' | 'gamepad';
+  readonly consumed: boolean;
+  consume(): void;
+}
+
 export interface GuiElementOptions {
+  dragSource?: GuiDragSource | null;
+  dropTarget?: GuiDropTarget | null;
   id?: string | undefined;
   x?: GuiLength | undefined;
   y?: GuiLength | undefined;
@@ -94,11 +127,17 @@ export interface GuiElementOptions {
   visible?: boolean | undefined;
   disabled?: boolean | undefined;
   style?: GuiStyle | undefined;
+  themeResource?: GuiThemeResourceBinding | null;
+  themeControlType?: string;
+  pointerFilter?: GuiPointerFilter;
+  focus?: GuiFocusOptions;
+  onAction?: (event: GuiActionEvent) => void;
   onPointerEnter?: GuiPointerHandler;
   onPointerLeave?: GuiPointerHandler;
   onPointerDown?: GuiPointerHandler;
   onPointerMove?: GuiPointerHandler;
   onPointerUp?: GuiPointerHandler;
+  onPointerCancel?: GuiPointerHandler;
   onClick?: GuiPointerHandler;
 }
 

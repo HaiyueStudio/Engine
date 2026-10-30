@@ -1,3 +1,4 @@
+import {generateGuiRegionHistoryProduction} from './generate-gui-region-history-production.mjs';
 import { generateDeferredFullForwardProduction } from './generate-deferred-full-forward-production.mjs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,6 +37,7 @@ import {
 } from './generate-compute-production.mjs';
 
 export const PRODUCTION_SHADER_GENERATORS = Object.freeze([
+  Object.freeze({id:'gui-region-history',artifactVersion:2,run:generateGuiRegionHistoryProduction,format:(r,write)=>`[shader-language:production:gui-region-history] ${write?'wrote':'verified'} ${r.outputCount} files, passes=${r.passCount}, WGSL=${r.wgslBytes} bytes.`}),
   Object.freeze({
     id: 'deferred-full-forward', artifactVersion: 2, run: generateDeferredFullForwardProduction,
     format: (result, write) => `[shader-language:production:deferred-full-forward] ${write ? 'wrote' : 'verified'} ${result.outputCount} files, passes=${result.passCount}, WGSL=${result.wgslBytes} bytes.`,

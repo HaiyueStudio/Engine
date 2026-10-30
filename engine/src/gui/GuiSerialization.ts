@@ -2,7 +2,8 @@ import { GuiColorPicker } from './components/GuiColorPicker';
 import { GuiToast } from './components/GuiToast';
 import { GuiHelpDialog } from './components/GuiHelpDialog';
 import { GuiScrollView } from './components/GuiScrollView';
-import type { GuiElementOptions, GuiLength, GuiStyle, GuiTheme } from './GuiTypes';
+import { GuiNineSlice } from './components/GuiNineSlice';
+import type { GuiElementOptions, GuiLength, GuiStyle, GuiTheme, GuiFocusOptions, GuiPointerFilter } from './GuiTypes';
 import { requiredItemAt } from '../math/arrayAccess';
 import { EngineError, EngineErrorCode, ErrorDomain } from '../core/EngineError';
 
@@ -63,6 +64,8 @@ export interface GuiSerializedElement {
   visible?: boolean | undefined;
   disabled?: boolean | undefined;
   style?: GuiStyle | undefined;
+  focus?: GuiFocusOptions;
+  pointerFilter?: GuiPointerFilter;
   children?: GuiSerializedElement[];
   props?: Record<string, unknown>;
 }
@@ -103,6 +106,8 @@ export function deserializeGuiRoot(data: unknown, options: GuiDeserializeOptions
     visible: rootElement.visible,
     disabled: rootElement.disabled,
     style: cloneStyle(rootElement.style),
+    focus: rootElement.focusOptions,
+    pointerFilter: rootElement.pointerFilter,
     theme: serialized.theme,
   });
   root.root.children.length = 0;
@@ -111,6 +116,7 @@ export function deserializeGuiRoot(data: unknown, options: GuiDeserializeOptions
 }
 
 export function serializeGuiElement(element: GuiElement): GuiSerializedElement {
+  if (element instanceof GuiNineSlice) invalidGuiData('Nine-slice resources are runtime bindings; serialize the application resource key and rebind the skin after loading.', '$.type');
   const layout = element.getLayoutOptions();
   const serialized: GuiSerializedElement = {
     type: getSerializedElementType(element),
@@ -122,6 +128,8 @@ export function serializeGuiElement(element: GuiElement): GuiSerializedElement {
     visible: element.visible,
     disabled: element.disabled,
     style: cloneStyle(element.style),
+    focus: element.focusOptions,
+    pointerFilter: element.pointerFilter,
   };
   const props = serializeElementProps(element);
   if (Object.keys(props).length > 0) serialized.props = props;
@@ -188,6 +196,19 @@ export function validateGuiSerializedElement(data: unknown, path = '$'): GuiSeri
   }
   optional(element.visible, 'boolean', `${path}.visible`);
   optional(element.disabled, 'boolean', `${path}.disabled`);
+  if (element.pointerFilter !== undefined && !['stop','pass','ignore'].includes(element.pointerFilter as string))
+    invalidGuiData('Unknown GUI pointer filter.', `${path}.pointerFilter`);
+  if (element.focus !== undefined) {
+    const focus = recordAt(element.focus, `${path}.focus`);
+    if (!['none','click','all'].includes(focus.mode as string) || (focus.tabIndex !== undefined && !Number.isSafeInteger(focus.tabIndex)))
+      invalidGuiData('Invalid GUI focus mode or tabIndex.', `${path}.focus`);
+    if (focus.neighbours !== undefined) {
+      const neighbours = recordAt(focus.neighbours, `${path}.focus.neighbours`);
+      for (const [key,value] of Object.entries(neighbours))
+        if (!['left','right','up','down'].includes(key) || typeof value !== 'string' || !value)
+          invalidGuiData('Invalid GUI focus neighbour.', `${path}.focus.neighbours.${key}`);
+    }
+  }
   if (element.style !== undefined) validateStyle(element.style, `${path}.style`);
   if (element.props !== undefined) validateProps(element.type as GuiSerializedElementType, element.props, `${path}.props`);
   let children: GuiSerializedElement[] | undefined;
@@ -205,6 +226,8 @@ export function validateGuiSerializedElement(data: unknown, path = '$'): GuiSeri
     ...(element.visible === undefined ? {} : { visible: element.visible as boolean }),
     ...(element.disabled === undefined ? {} : { disabled: element.disabled as boolean }),
     ...(element.style === undefined ? {} : { style: element.style as GuiStyle }),
+    ...(element.focus === undefined ? {} : {focus: element.focus as unknown as GuiFocusOptions}),
+    ...(element.pointerFilter === undefined ? {} : {pointerFilter: element.pointerFilter as GuiPointerFilter}),
     ...(children === undefined ? {} : { children }),
     ...(element.props === undefined ? {} : { props: element.props as Record<string, unknown> }),
   };
@@ -224,7 +247,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
     case 'color-picker':
       return new GuiColorPicker({ ...base, value: stringProp(props.value, '#2563eb') });
     case 'button':
-      return new GuiButton({ ...base, text: stringProp(props.text, 'Button'), variant: variantProp(props.variant) });
+      return new GuiButton({ ...base, text: stringProp(props.text, 'Button'), variant: variantProp(props.variant), hoverTransition: booleanProp(props.hoverTransition, false), hoverTransitionMs: numberProp(props.hoverTransitionMs, 180) });
     case 'label': {
       const fontSize = optionalNumberProp(props.fontSize);
       return new GuiLabel({
@@ -236,7 +259,7 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
       });
     }
     case 'scroll-view':
-      return new GuiScrollView({ ...base, contentHeight: numberProp(props.contentHeight, 0), scrollY: numberProp(props.scrollY, 0), showScrollbar: booleanProp(props.showScrollbar, true), inertia: booleanProp(props.inertia, false), inertiaStrength: numberProp(props.inertiaStrength, 1) });
+      return new GuiScrollView({ ...base, axis: props.axis === 'horizontal' ? 'horizontal' : 'vertical', contentWidth: numberProp(props.contentWidth, 0), scrollX: numberProp(props.scrollX, 0), contentHeight: numberProp(props.contentHeight, 0), scrollY: numberProp(props.scrollY, 0), showScrollbar: booleanProp(props.showScrollbar, true), inertia: booleanProp(props.inertia, false), inertiaStrength: numberProp(props.inertiaStrength, 1) });
     case 'help-dialog':
       return new GuiHelpDialog({ ...base, title: stringProp(props.title, ''), message: stringProp(props.message, ''), backdropColor: stringProp(props.backdropColor, 'rgba(15,23,42,0.48)') });
     case 'modal':
@@ -258,6 +281,9 @@ function createGuiElement(data: GuiSerializedElement, options: GuiDeserializeOpt
         value: stringProp(props.value, ''),
         placeholder: stringProp(props.placeholder, ''),
         readOnly: booleanProp(props.readOnly, false),
+        ...(props.maxLength===undefined?{}:{maxLength:numberProp(props.maxLength,Infinity)}),
+        inputType:props.inputType==='email'||props.inputType==='number'||props.inputType==='password'?props.inputType:'text',
+        multiline:booleanProp(props.multiline,false),
       });
     case 'checkbox':
       return new GuiCheckbox({ ...base, checked: booleanProp(props.checked, false), label: stringProp(props.label, '') });
@@ -356,7 +382,7 @@ function serializeElementProps(element: GuiElement): Record<string, unknown> {
   if (element instanceof GuiToast) return { text: element.text, iconKey: element.iconKey ?? '',
     iconSize: element.iconSize, fontSize: element.fontSize, durationMs: element.durationMs, animationMs: element.animationMs };
   if (element instanceof GuiColorPicker) return { value: element.value };
-  if (element instanceof GuiScrollView) return { contentHeight: element.contentHeight, scrollY: element.scrollY, showScrollbar: element.showScrollbar, inertia: element.inertia, inertiaStrength: element.inertiaStrength };
+  if (element instanceof GuiScrollView) return { ...(element.axis === 'horizontal' ? { axis: element.axis, contentWidth: element.contentWidth, scrollX: element.scrollX } : {}), contentHeight: element.contentHeight, scrollY: element.scrollY, showScrollbar: element.showScrollbar, inertia: element.inertia, inertiaStrength: element.inertiaStrength };
   if (element instanceof GuiModal) {
     return {
       title: element.title,
@@ -370,7 +396,7 @@ function serializeElementProps(element: GuiElement): Record<string, unknown> {
       backdropColor: element.backdropColor,
     };
   }
-  if (element instanceof GuiButton) return { text: element.text, variant: element.variant };
+  if (element instanceof GuiButton) return { text: element.text, variant: element.variant, hoverTransition: element.hoverTransition, hoverTransitionMs: element.hoverTransitionMs };
   if (element instanceof GuiLabel) {
     return {
       text: element.text,
@@ -379,7 +405,7 @@ function serializeElementProps(element: GuiElement): Record<string, unknown> {
       autoWidth: element.autoWidth,
     };
   }
-  if (element instanceof GuiInput) return { value: element.value, placeholder: element.placeholder, readOnly: element.readOnly };
+  if (element instanceof GuiInput) return { value: element.value, placeholder: element.placeholder, readOnly: element.readOnly, ...(Number.isFinite(element.maxLength)?{maxLength:element.maxLength}:{}), inputType:element.inputType, multiline:element.multiline };
   if (element instanceof GuiSwitch) return { checked: element.checked, label: element.label, thumbTransitionMs: element.thumbTransitionMs, colorTransitionMs: element.colorTransitionMs };
   if (element instanceof GuiCheckbox) return { checked: element.checked, label: element.label };
   if (element instanceof GuiRadio) return { checked: element.checked, label: element.label, group: element.group, value: scalarProp(element.value, null) };
@@ -425,11 +451,16 @@ function getBaseOptions(data: GuiSerializedElement): GuiElementOptions {
     visible: data.visible,
     disabled: data.disabled,
     style: cloneStyle(data.style),
+    ...(data.focus ? {focus: data.focus} : {}),
+    ...(data.pointerFilter ? {pointerFilter: data.pointerFilter} : {}),
   };
 }
 
 function cloneStyle(style: GuiStyle | undefined): GuiStyle | undefined {
-  return style ? { ...style } : undefined;
+  // v1 keeps its existing wire format. Resource bindings are intentionally
+  // outside it, and local runtime-only styles must never leak GPU handles.
+  if (style) validateStyle(Object.fromEntries(Object.entries(style).filter(([, value]) => value !== undefined)), '$.style');
+  return style ? Object.fromEntries(Object.entries(style).filter(([, value]) => value !== undefined)) : undefined;
 }
 
 function cloneTheme(theme: GuiTheme): Partial<GuiTheme> {
@@ -525,13 +556,29 @@ const GUI_ELEMENT_TYPES = new Set<GuiSerializedElementType>([
 ]);
 
 const STRING_PROPS = new Set(['iconKey', 'text', 'variant', 'textAlign', 'placeholder', 'label', 'group', 'content', 'placement', 'sourceKey', 'tint', 'targetId', 'title', 'message', 'confirmText', 'cancelText', 'backdropColor']);
-const NUMBER_PROPS = new Set(['durationMs', 'animationMs', 'iconSize', 'inertiaStrength', 'thumbTransitionMs', 'colorTransitionMs', 'contentHeight', 'scrollY', 'fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
-const BOOLEAN_PROPS = new Set(['inertia', 'showScrollbar', 'autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
+const NUMBER_PROPS = new Set(['contentWidth', 'scrollX', 'hoverTransitionMs', 'durationMs', 'animationMs', 'iconSize', 'inertiaStrength', 'thumbTransitionMs', 'colorTransitionMs', 'contentHeight', 'scrollY', 'fontSize', 'min', 'max', 'step', 'optionHeight', 'maxVisibleOptions', 'rowHeight', 'indent', 'delay']);
+const BOOLEAN_PROPS = new Set(['hoverTransition', 'inertia', 'showScrollbar', 'autoWidth', 'readOnly', 'checked', 'showText', 'showCloseButton', 'showConfirmButton', 'showCancelButton', 'closeOnBackdrop']);
 
 function validateProps(type: GuiSerializedElementType, value: unknown, path: string): void {
   const props = recordAt(value, path);
   for (const [key, prop] of Object.entries(props)) {
     const propPath = `${path}.${key}`;
+    if(type==='scroll-view'&&key==='axis'){
+      if(prop!=='vertical'&&prop!=='horizontal')invalidGuiData('Unknown GUI scroll axis.',propPath);
+      continue;
+    }
+    if(type==='input'&&key==='maxLength'){
+      if(typeof prop!=='number'||!Number.isSafeInteger(prop)||prop<0)invalidGuiData('GUI maxLength must be a nonnegative UTF-16 integer.',propPath);
+      continue;
+    }
+    if(type==='input'&&key==='inputType'){
+      if(prop!=='text'&&prop!=='email'&&prop!=='number'&&prop!=='password')invalidGuiData('Unknown GUI text input type.',propPath);
+      continue;
+    }
+    if(type==='input'&&key==='multiline'){
+      if(typeof prop!=='boolean')invalidGuiData('GUI multiline must be a boolean.',propPath);
+      continue;
+    }
     if (STRING_PROPS.has(key)) {
       if (key === 'sourceKey' && prop === null) continue;
       else if (typeof prop !== 'string') invalidGuiData(`GUI ${key} must be a string.`, propPath);
@@ -615,7 +662,7 @@ function validateScalar(value: unknown, path: string): void {
 function validateStyle(value: unknown, path: string): void {
   const style = recordAt(value, path);
   for (const [key, item] of Object.entries(style)) {
-    if (key === 'backgroundColor' || key === 'hoverBackgroundColor' || key === 'borderColor' || key === 'color' || key === 'hoverColor') {
+    if (key === 'cursor' || key === 'backgroundColor' || key === 'hoverBackgroundColor' || key === 'borderColor' || key === 'color' || key === 'hoverColor') {
       if (typeof item !== 'string') invalidGuiData(`GUI style ${key} must be a string.`, `${path}.${key}`);
     } else if (key === 'opacity' || key === 'radius' || key === 'padding') {
       if (typeof item !== 'number' || !Number.isFinite(item)) invalidGuiData(`GUI style ${key} must be a finite number.`, `${path}.${key}`);

@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "goal": "g01-layout-contracts",
+  "status": "passed",
+  "generatedAt": "2026-10-20T01:57:09.602253+00:00",
+  "qualification": "contracts-and-diagnostic-baseline-only; no runtime-feature or release qualification",
+  "source": {
+    "revision": "7d0df288285834e2583f563478f322fdf6743c09",
+    "branch": "dev/0.2.2",
+    "releaseTag": "v0.2.1",
+    "releaseTagRevision": "e932ef91df917a2d1856155573743f0528035785",
+    "workingTree": "contract/docs/fixture additions; tracked runtime/package/live budget files unchanged; built Engine regenerated from current tracked source"
+  },
+  "checks": [
+    {
+      "id": "current-engine-build",
+      "command": "npm run build:engine",
+      "status": "passed"
+    },
+    {
+      "id": "hya-existing-correctness",
+      "command": "node --test --test-concurrency=1 extensions/test/layout-component-asset.test.mjs extensions/test/text-shaping-parity.test.mjs extensions/test/data-binding-runtime-parity.test.mjs extensions/test/interaction-routing-parity.test.mjs extensions/test/semantics-accessibility-parity.test.mjs extensions/test/animation-state-machine-channel-mixing.test.mjs",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.2/g01/hya-focused-tests.tap",
+      "sha256": "81f44101a66b2118f56c955402752c14cc0292cbf13e7c77ba3f8223c466b624"
+    },
+    {
+      "id": "contract-and-evidence-negative-tests",
+      "command": "node --test scripts/fixtures/layout-contracts/policy.test.mjs",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.2/g01/policy-tests-final.tap",
+      "sha256": "292b564bf7b4c75fb2e712b4564d9aed6dc6f456a3a48018b423e8d462013357"
+    },
+    {
+      "id": "docs",
+      "command": "npm run docs:check",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.2/g01/docs-check-final.log",
+      "sha256": "5e18993cc2552a6ece9eb788a2f11f91ad1504605557035ec8f471d228135144"
+    },
+    {
+      "id": "existing-public-api",
+      "command": "npm run api:check",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.2/g01/api-check.log",
+      "sha256": "3e9ae8d8e9d67efceabcab5fd399ff83241a1438e6f62d91b8ac7a2734a7d511"
+    },
+    {
+      "id": "proposed-type-contract",
+      "command": "node node_modules/typescript/bin/tsc --noEmit --strict --module ESNext --moduleResolution Bundler --target ES2022 --types @webgpu/types review/engine-0.2.2/api-draft.d.ts",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.2/g01/api-draft-types-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "coordination-policy",
+      "command": "npm run check (milestones)",
+      "status": "passed"
+    },
+    {
+      "id": "browser-css-oracle",
+      "command": "node scripts/fixtures/layout-contracts/browser.mjs oracle",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.2/g01/oracle.json",
+      "sha256": "4669b308ec7c0d4a56df15ea1566e3a8fcc32557b8e42ab37815d8526fb41f9a"
+    },
+    {
+      "id": "native-region-baseline",
+      "command": "node scripts/fixtures/layout-contracts/browser.mjs region-baseline",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.2/g01/region-baseline.json",
+      "sha256": "238ce8ecc131aa909ea4572730528603580acd861803482e3106e8a99430117f"
+    },
+    {
+      "id": "diagnostic-population",
+      "command": "node scripts/fixtures/layout-contracts/diagnose.mjs <frozen-output> <current-revision>",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.2/g01/baseline-frozen.json",
+      "sha256": "a5879d965e587c2c8066c19416ea1f1f24a4e0c79cbb390bc2b25bed88d80c36"
+    },
+    {
+      "id": "source-and-config-hash-audit",
+      "command": "compare every frozen source/build/config and HYA source/test fingerprint",
+      "status": "passed"
+    },
+    {
+      "id": "git-scope-and-tag",
+      "command": "git diff --name-only protected runtime/package/live-policy paths empty; HEAD/tag verified",
+      "status": "passed"
+    }
+  ],
+  "requirementsAudit": [
+    {
+      "requirement": "four original layout counterexamples and classification",
+      "evidence": [
+        "artifacts/engine-0.2.2/g01/baseline-frozen.json",
+        "scripts/fixtures/layout-contracts/cases.mjs",
+        "review/engine-0.2.2/layout-contract.md"
+      ],
+      "status": "proven"
+    },
+    {
+      "requirement": "layout support/refusal, measurement, percentages, RTL, invalid data and CSS differences",
+      "evidence": [
+        "config/layout-022-contract.json",
+        "review/engine-0.2.2/layout-contract.md"
+      ],
+      "status": "proven"
+    },
+    {
+      "requirement": "public boundaries, draft types, exact allocations, existing budget preservation",
+      "evidence": [
+        "review/engine-0.2.2/api-draft.d.ts",
+        "config/layout-022-contract.json"
+      ],
+      "status": "proven"
+    },
+    {
+      "requirement": "named stable additions and ADR index",
+      "evidence": [
+        "docs/for-ai/adr/0132-gui-layout-interaction-022.md",
+        "docs/for-ai/adr/README.md"
+      ],
+      "status": "proven"
+    },
+    {
+      "requirement": "package versions and consumer upgrade scope",
+      "evidence": [
+        "config/layout-022-contract.json"
+      ],
+      "status": "proven"
+    },
+    {
+      "requirement": "HUD/1k/10k workload and frozen targets from current observations",
+      "evidence": [
+        "artifacts/engine-0.2.2/g01/baseline-frozen.json",
+        "config/layout-022-contract.json"
+      ],
+      "status": "proven"
+    },
+    {
+      "requirement": "region protocol, persistent target, composition and baseline cost",
+      "evidence": [
+        "review/engine-0.2.2/layout-contract.md",
+        "artifacts/engine-0.2.2/g01/region-baseline.json"
+      ],
+      "status": "proven"
+    },
+    {
+      "requirement": "input, focus, theme, composite and drag/drop semantics",
+      "evidence": [
+        "review/engine-0.2.2/layout-contract.md",
+        "config/layout-022-contract.json"
+      ],
+      "status": "proven"
+    },
+    {
+      "requirement": "Unicode counterexample, UTF-16 compatibility and native device ownership",
+      "evidence": [
+        "artifacts/engine-0.2.2/g01/baseline-frozen.json",
+        "config/layout-022-contract.json"
+      ],
+      "status": "proven"
+    },
+    {
+      "requirement": "one solver, explicit module ownership and HYA plan addition",
+      "evidence": [
+        "docs/for-ai/adr/0132-gui-layout-interaction-022.md",
+        "review/engine-0.2.2/hya-capability-audit.json"
+      ],
+      "status": "proven"
+    }
+  ],
+  "handoff": {
+    "next": "g02-shared-layout",
+    "status": "ready-not-activated",
+    "hyaGoals": [
+      "g10-hya-capability-contracts",
+      "g11-hya-production-runtime",
+      "g12-hya-production-qualification"
+    ],
+    "integration": "g13-integration-release",
+    "deviceEvidencePendingOwners": [
+      "g05-gui-input-navigation",
+      "g06-text-input",
+      "g13-integration-release"
+    ],
+    "publishingAuthorized": false
+  },
+  "deliverableSha256": {
+    "config/layout-022-contract.json": "5d2888507a4fa0e511fffbd20ca08b5ca31cd8d9c3e1249dcd08d153ed559d05",
+    "docs/for-ai/adr/0132-gui-layout-interaction-022.md": "a55ce63c96c6ce411b864b59a3583b47f6e88fc033cddf3571e7a4a5db5aaeca",
+    "review/engine-0.2.2/api-draft.d.ts": "efdb89fba35e43476ce72cb280b24e61cf830c095e2e95a17ccf392563e872da",
+    "review/engine-0.2.2/layout-contract.md": "d0a36ed93c191600a1ae9c248d5eab4e67456e5164cff684c4be8cb9b604ac88",
+    "review/engine-0.2.2/hya-capability-audit.json": "bff024e5e40a793749e148ad1dfb27260553fb3bf996301be7038c6f55ec62da"
+  },
+  "coordinationAudit": {
+    "status": "passed",
+    "goals": 13,
+    "requiredCapabilities": 11,
+    "relativeLinksChecked": 73,
+    "finalIntegrationCoversAllGoals": true,
+    "statusCounts": {
+      "complete": 1,
+      "ready": 1,
+      "draft": 11
+    },
+    "milestoneDependency": "M18 remains active; G02 not activated"
+  },
+  "allExplicitG01RequirementsProven": true
+}

@@ -1,0 +1,1439 @@
+{
+  "schemaVersion": 1,
+  "goal": "g13-integration-release",
+  "status": "complete",
+  "fullG13Complete": true,
+  "releaseQualified": true,
+  "problem": "Finalize public package integration and qualify the same candidate across GUI, HYA, hosts and recoverable release controls.",
+  "method": "Frozen named exports, independent installed tarballs, unchanged runtime ownership/budgets, real input before admission, immutable original failures.",
+  "candidate": {
+    "revision": "d58835a9d14c711f26374c5eed00851f4e4649c2",
+    "dirty": false,
+    "role": "Qualified 0.2.2 package bytes across Windows global gates/rehearsal and Mac/iPhone acceptance, with byte-bound Native host repairs integrated",
+    "packages": [
+      {
+        "name": "@haiyue/engine",
+        "version": "0.2.2",
+        "sha256": "580bc3b5c0510d1c662116fa577e4a0e34ab4758691ae7a47498611bd8e061bd",
+        "packedBytes": 2021979,
+        "unpackedBytes": 8418559
+      },
+      {
+        "name": "@haiyue/animation-spec",
+        "version": "0.2.2",
+        "sha256": "71eb24b81b1a07f081138610869c11b759def56aa5853a3030e7a714ad385876",
+        "packedBytes": 170719,
+        "unpackedBytes": 666297
+      },
+      {
+        "name": "@haiyue/extensions",
+        "version": "0.2.2",
+        "sha256": "cc29b1238a57911db251eaa01888cc5eecaeaeb6c7be62c430b58597a21c99ad",
+        "packedBytes": 528424,
+        "unpackedBytes": 2054101
+      },
+      {
+        "name": "@haiyue/shader-language",
+        "version": "0.2.2",
+        "sha256": "6a3df405553a2a45d9e76596a3917ea8be5c04e3bc680b3f539cc772ddf75aae",
+        "packedBytes": 148545,
+        "unpackedBytes": 720460
+      }
+    ],
+    "packageReport": {
+      "path": "artifacts/engine-0.2.2/g13/packages-light-lifetime/public-packages.json",
+      "sha256": "62abbce569c707d0a5059366756d4fa204e8b7f42fd19c01d70079dda21283a0"
+    },
+    "runtimeFingerprintSha256": "7043064752e0f602c9e406acae8cf228391e405e5bd434f3bd163e2e7230b1b0",
+    "nativeHostRevision": "1caaee0d1d24daac92b97a2f5e78fefcd8d17154"
+  },
+  "api": {
+    "namedG01Additions": 47,
+    "removed": 0,
+    "rootSymbols": 30,
+    "coreSymbols": 71,
+    "guiSymbols": 106,
+    "layoutSymbols": 13,
+    "guiLayoutSymbols": 11,
+    "proof": {
+      "path": "artifacts/engine-0.2.2/g13/admitted-api-delta.json",
+      "sha256": "f5123e8a9052e2c367646b1e7031cde0970146263ebdff30cd31f22b17df3765"
+    }
+  },
+  "verification": {
+    "fast": {
+      "status": "passed",
+      "revision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
+      "workspaceTests": 2416,
+      "releasePolicyTests": 146,
+      "log": {
+        "path": "artifacts/engine-0.2.2/g13/fast-70187df.log",
+        "sha256": "045cbae583218d9ab192037651ff0e976ad3038ec2f97988beeea88b2e4cfa65"
+      },
+      "fullBuild": {
+        "status": "passed",
+        "freshExampleTargets": 103,
+        "log": {
+          "path": "artifacts/engine-0.2.2/g13/build-70187df.log",
+          "sha256": "f0b8260238d4e557436be8981c8ee61a4addf9578e30e2ee07ca06378eae0b00"
+        }
+      },
+      "physicalFixtureFollowup": {
+        "revision": "a58e64b",
+        "runtimeAndBuildInputsUnchanged": true,
+        "releasePolicyTests": 148,
+        "proof": {
+          "path": "artifacts/engine-0.2.2/g13/release-policy-user-launcher.log",
+          "sha256": "7eba2b0c7a4b5bba4d8dc63e64cac45238fe6423129e8f94a2266ed6ced6b551"
+        }
+      }
+    },
+    "packages": {
+      "status": "passed",
+      "independentBundles": 42,
+      "esmEntrypoints": 77,
+      "domGpuFreeLayout": true,
+      "packedGuiLayoutRuntime": true,
+      "consumerInstalledBytes": {
+        "path": "artifacts/engine-0.2.2/g13/consumers-70187df/installed-byte-audit.json",
+        "sha256": "e93053f1f0884e0985a66be4deef049463532c4db4b1830e8d1e202619c9cc8b"
+      },
+      "multiplayerInput": {
+        "gzipBytes": 5986,
+        "unchangedBudget": 6000
+      }
+    },
+    "regionContracts": {
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.2/g13/contracts.log",
+        "sha256": "f31c2266aa24f7bd8d8f7eb15df833b8c910a398a3a8aa749983f8cc256b89ff"
+      },
+      "sourceLoaderRegression": {
+        "path": "artifacts/engine-0.2.2/g13/source-loader-regression.log",
+        "sha256": "d25fcd75f6e0f5a1deb2a71fbf8a918473202965b08db29cd58faecc8dd2a92a"
+      }
+    },
+    "releaseRecovery": {
+      "status": "passed-complete-release-policy-suite",
+      "tests": 162,
+      "proof": {
+        "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final-encoding.log",
+        "sha256": "a234d8aef5485976e34afeb6cb590b8337dad350f0a64f6d768c68b9fbe61c12"
+      },
+      "externalPublicationExecuted": false,
+      "priorProof": {
+        "path": "artifacts/engine-0.2.2/g13/release-policy-user-launcher.log",
+        "sha256": "7eba2b0c7a4b5bba4d8dc63e64cac45238fe6423129e8f94a2266ed6ced6b551"
+      },
+      "previousProductionLauncherProof": {
+        "path": "artifacts/engine-0.2.2/g13/release-policy-production-launcher-final.log",
+        "sha256": "817b8aa05f289785b59dd22522080c15647186480c1f9d4b00b8254e07674521"
+      },
+      "priorWindowsEntryProof": {
+        "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final.log",
+        "sha256": "3105c92359977aea2986bed3b174aa8d824a2d56e647047601ad655049ce01b8"
+      },
+      "priorFoundationRepairProof": {
+        "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final-census.log",
+        "sha256": "3e2f130527deba02d303fc00aa235e91e7f05ad51f337c8d64ba7d64a94240f3"
+      }
+    },
+    "games": {
+      "status": "passed-current-public-packages",
+      "revision": "d9e1041",
+      "types": true,
+      "tests": 695,
+      "builtGameTargets": 31,
+      "logs": [
+        {
+          "path": "artifacts/engine-0.2.2/g13/games-typecheck-70187df.log",
+          "sha256": "0ecd9dc519d238af11b6e71d95d1a4300b1ed08d472a74691b3000477aa1138a"
+        },
+        {
+          "path": "artifacts/engine-0.2.2/g13/games-test-70187df.log",
+          "sha256": "698fdb730bf84c806dbfa759bee8d6b33c39e051d7135ea458956f40ad2aa0e8"
+        },
+        {
+          "path": "artifacts/engine-0.2.2/g13/games-build-70187df.log",
+          "sha256": "b42edd58a447d611fd1874437e4060f3b3b31389a92e02955252bf7afeb3cb45"
+        }
+      ],
+      "userGameCommitPreserved": "15ded54",
+      "allUnrelatedLockEntriesUnchanged": true
+    },
+    "nativePreparation": {
+      "status": "passed-native-source-types-and-ios-javascript-bundle",
+      "revision": "0943413",
+      "checks": 4,
+      "bridgeSources": 23,
+      "log": {
+        "path": "artifacts/engine-0.2.2/g13/native-source-70187df.log",
+        "sha256": "e927beaf2e4609cc7e96497c79935e3d2a6c352167de34154f2d16b0f614001c"
+      },
+      "appleSdkCompiled": false,
+      "physicalNativeQualified": false,
+      "transferArchive": {
+        "status": "passed-transfer-archive",
+        "revision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
+        "files": 253,
+        "archive": {
+          "path": "artifacts/engine-0.2.2/g13/native-handoff-70187df-verified/hya-native-g13-70187df.tar.gz",
+          "bytes": 9357064,
+          "sha256": "e08869fae1bbdfe0bed1a65e78a1e19958b56884b0e00e44961bb2ebe5067281"
+        },
+        "extractedFilesVerified": 254,
+        "deterministicTar": {
+          "bytes": 10883584,
+          "sha256": "a3597c2f086d774796fce60feea22647ddd26685fc49c21ff4f14a6b7c626ced"
+        },
+        "appleSdkCompiled": false,
+        "physicalNativeQualified": false
+      }
+    },
+    "realBrowserIme": {
+      "status": "passed-predecessor-package-candidate",
+      "raw": {
+        "path": "artifacts/engine-0.2.2/g13/ime-manual-native-sessions/result.json",
+        "sha256": "2698ad4e0578033fcd24987cf48147c09011f702d72a1641264e7ca255cb8076"
+      },
+      "assessment": {
+        "path": "artifacts/engine-0.2.2/g13/ime-manual-native-sessions/session-assessment.json",
+        "sha256": "79e7e5e54522a55f3f7836e2dc15e31bc5b62b4514977fb95769f2831d0b1c13"
+      },
+      "operatorConfirmed": true,
+      "committedValues": [
+        "你好"
+      ],
+      "cancellationChanges": 0,
+      "resized": true,
+      "gpuResourceResidue": 0,
+      "originalFlags": "Chrome compositionend=false and Windows Process/229 retained; matched complete original responder sessions.",
+      "priorAssessment": {
+        "path": "artifacts/engine-0.2.2/g13/ime-manual-native-sessions/operator-assessment.json",
+        "sha256": "fcb6be2af013484fe6693327d201bd1ebd98efa153fee6cd70e251e5b79acbfa"
+      },
+      "candidateRevision": "6716e9a0df8480535c7e4bca7711de5a65d5062e",
+      "currentCandidateQualified": false
+    },
+    "physicalGamepad": {
+      "status": "passed-current-public-package-candidate",
+      "readiness": "Initial neutral hardware preparation, original editor focus, explicit green READY before the only A hold; every admission blocker is visible.",
+      "packedSampler": {
+        "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793025611214/packed-sampler-handoff.json",
+        "sha256": "ed58748808fc0fc99a0a3075a54ecaad3ae8860f81070692f0a7827915a438bb"
+      },
+      "preparedBrowserDiagnostic": {
+        "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793029295704/result.json",
+        "sha256": "f4aeccc5a7f18c5d1bf8eab5e556eca961a23ed9079640768121fe1f4119882a"
+      },
+      "policyTests": {
+        "path": "artifacts/engine-0.2.2/g13/release-policy-controller-preflight.log",
+        "sha256": "2efaa45650b71e0d9d6b1833e85c31295d59ad5ec46734052098f12bbbeb1183"
+      },
+      "liveCoverage": {
+        "diagnostic": {
+          "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793029544289/result.json",
+          "sha256": "d1c1274c86a4b05ac4021ec6c73dee10a0afbeb554714648aa426fa5bc1adfba"
+        },
+        "sharedPolicy": "scripts/hya-corpus/physical-policy.mjs",
+        "holdMilliseconds": 700,
+        "leftMaximum": -0.5,
+        "rightMinimum": 0.5,
+        "centerAbsoluteMaximum": 0.15,
+        "originalThresholdsUnchanged": true,
+        "positive": {
+          "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793030393145/result.json",
+          "sha256": "ee05b464795acbb5e62de148f197ad12d08b8b710d63d87194235aeb56f2ac6d"
+        },
+        "negative": {
+          "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793030399626/result.json",
+          "sha256": "c9715e87b3efe38b91476df95944b9ab0df6b47f8f253f18b883eef3e73e5195"
+        },
+        "neutralPreparationAndUnarmedCounterUnchanged": true
+      },
+      "userLauncher": {
+        "file": {
+          "path": "scripts/start-g13-gamepad-70187df.cmd",
+          "sha256": "9195ffdde7e5a0f8d413875351c2eb2af6b71409bac69ade51b31ceb378d6262"
+        },
+        "candidateRevision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
+        "plan": {
+          "path": "artifacts/engine-0.2.2/g13/user-launcher-plan.log",
+          "sha256": "8d9fb8833572fc4a4838bccac6ce431abfc092e0f2550810cbfeb26043a11dab"
+        },
+        "requiresAdministrator": false,
+        "outputPattern": "artifacts/engine-0.2.2/g13/pad-user-start-70187df-<milliseconds>"
+      },
+      "raw": {
+        "path": "artifacts/engine-0.2.2/g13/pad-user-start-70187df-1793058584710/result.json",
+        "sha256": "01c563876ed96cc0fb92cf6d19b99812fc3b4075e0a38c9885cdc5ea4f972166"
+      },
+      "assessment": {
+        "path": "artifacts/engine-0.2.2/g13/pad-user-start-70187df-1793058584710/operator-assessment.json",
+        "sha256": "685d8eff7ae7278037598d0e11b0e19631e3fb8d48e6565a335f299f16ef4609"
+      },
+      "operatorConfirmed": true,
+      "observed": {
+        "downCount": 1,
+        "upCount": 1,
+        "holdMilliseconds": 1849.2599999904633,
+        "held": true,
+        "left": true,
+        "right": true,
+        "center": true,
+        "axisValue": 0.000015259021896696368,
+        "axisMin": -0.851621271076524,
+        "axisMax": 0.7011978332188906,
+        "hardware": [
+          {
+            "id": "Xbox 360 Controller (XInput STANDARD GAMEPAD)",
+            "index": 0,
+            "mapping": "standard",
+            "buttons": 17,
+            "axes": 4
+          }
+        ],
+        "axisEvents": 357,
+        "commits": [
+          "AAA",
+          "AA"
+        ],
+        "readySamples": 1601,
+        "sceneActionLeaks": 0,
+        "unarmedGuiControls": 0,
+        "gpuResources": 0,
+        "leases": 0
+      },
+      "physicalInputAccepted": true,
+      "qualifiedCandidateRevision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
+      "currentCandidateStatus": "pending-repaired-candidate"
+    },
+    "windowsCorrectness": {
+      "status": "passed-current-candidate-gui-region-hya-correctness",
+      "revision": "49497cee91957e645949210821e55d7653e9c2f7",
+      "currentCandidateQualified": true,
+      "groups": 16,
+      "proof": {
+        "path": "artifacts/engine-0.2.2/g13/windows-correctness-1793058738792/result.json",
+        "sha256": "e570e012317923b586f2c1bfa411737ac0472344359bb757eaff58181c0d650e"
+      },
+      "formalPerformanceAccepted": false,
+      "physicalNativeQualified": false
+    },
+    "currentCandidateIme": {
+      "status": "passed-real-browser-ime",
+      "candidateRevision": "d58835a9d14c711f26374c5eed00851f4e4649c2",
+      "raw": {
+        "path": "artifacts/engine-0.2.2/g13/ime-user-start-current-1793181287269-6ee552f3/result.json",
+        "sha256": "02c2ee7a50cbfd21bcedadee2be90f5fdb7a850568f75d3d39ef3c5e7ed68a55"
+      },
+      "assessment": {
+        "path": "artifacts/engine-0.2.2/g13/ime-user-start-current-1793181287269-6ee552f3/operator-assessment-chrome156.json",
+        "sha256": "40fcf02d07f09dcc19009ce2558265b06fa0a71e0215c01334d5ec9778e0a16d"
+      },
+      "operatorConfirmed": true,
+      "originalFailureRetained": {
+        "path": "artifacts/engine-0.2.2/g13/ime-user-start-current-1793181287269-6ee552f3/operator-assessment.json",
+        "sha256": "c79b9eb5053e8c46ee682760bb67fa04d19299920b5aff50c3583fa23e3d3161"
+      },
+      "versionBoundPolicy": {
+        "path": "scripts/hya-corpus/physical-policy.mjs",
+        "sha256": "579852e2e30b2a8a99cd068d6041988b4d6165576635a5769ccb2c6768d094cc"
+      }
+    },
+    "productionSampling": {
+      "status": "passed-current-hya-production",
+      "candidateRevision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
+      "launcher": {
+        "path": "scripts/start-g13-production-70187df.cmd",
+        "sha256": "6098c6ef99f65f824f292994b0ca4bab9d3934b1025df35eb31f20d6f3dfdd22"
+      },
+      "wrapper": {
+        "path": "scripts/start-g13-production.ps1",
+        "sha256": "ca9ddc8cece5a628bb5377538f5d46cb0091c761028b02c22280cbfd6923f75c"
+      },
+      "worker": {
+        "path": "scripts/run-g13-production-candidate.mjs",
+        "sha256": "131116da80d013f905b201421444d2802490993784485eda44c9a52f481f3e02"
+      },
+      "policy": {
+        "path": "scripts/g13-production-candidate-policy.mjs",
+        "sha256": "798e7ae790d3a1eee0c19640da8c0177b7bc01365c2c8d3b33bf24fbf2a13f02"
+      },
+      "plan": {
+        "path": "artifacts/engine-0.2.2/g13/production-launcher-plan.log",
+        "sha256": "b5917569841ead5abe10eb21ebf851156c6fb9238b95e9d79fb315c8f09cc278"
+      },
+      "policyTests": 152,
+      "proof": {
+        "path": "artifacts/engine-0.2.2/g13/release-policy-production-launcher-final.log",
+        "sha256": "817b8aa05f289785b59dd22522080c15647186480c1f9d4b00b8254e07674521"
+      },
+      "captures": 30,
+      "originalGpuRegressionLimit": 0.05,
+      "backgroundApplicationsRequiredClosed": true,
+      "baselinePromotion": false,
+      "releaseQualified": false,
+      "captureRevision": "a5908a91740866192900136edcd5f0700c3c114c",
+      "raw": {
+        "path": "artifacts/engine-0.2.2/g12/g13-production-1793151130884-b2c25e04/result.json",
+        "sha256": "5cb24947affb78f6a99fb250b5bc26f5d54a1277a2fd69835e8bc7a5948a422e"
+      },
+      "assessment": {
+        "path": "artifacts/engine-0.2.2/g12/g13-production-1793151130884-b2c25e04/independent-assessment.json",
+        "sha256": "704196cd760d2a54fdc75833f716845872ba273aca740730eab6f774dd7a1bcc"
+      },
+      "launcherResult": {
+        "path": "artifacts/engine-0.2.2/g13/production-launch-1793151130884-b2c25e04/launcher.json",
+        "sha256": "c8a9370642eec4f227263027eed6462603f7d6581b7aff044d8315840a6bf005"
+      },
+      "normalCaptures": 12,
+      "pacing": {
+        "worstP95Ms": 16.900000000001455,
+        "worstP99Ms": 17,
+        "maxLongFrameRatio": 0.0016778523489932886,
+        "maxConsecutiveLongFrames": 1
+      },
+      "gpu": [
+        {
+          "workload": "interactive-small",
+          "status": "passed",
+          "baselineP95Ms": 4.453376,
+          "candidateP95Ms": 4.557824,
+          "regression": 0.023453667509772513,
+          "samplesPerVariant": 90,
+          "regressionLimit": 0.05
+        },
+        {
+          "workload": "layout-1k",
+          "status": "passed",
+          "baselineP95Ms": 21.571584,
+          "candidateP95Ms": 4.023296,
+          "regression": -0.8134909332573815,
+          "samplesPerVariant": 90,
+          "regressionLimit": 0.05
+        },
+        {
+          "workload": "layout-10k-diagnostic",
+          "status": "passed",
+          "baselineP95Ms": 83.972096,
+          "candidateP95Ms": 10.1448,
+          "regression": -0.8791884389785865,
+          "samplesPerVariant": 90,
+          "regressionLimit": 0.05
+        },
+        {
+          "workload": "multi-instance",
+          "status": "passed",
+          "baselineP95Ms": 13.958144,
+          "candidateP95Ms": 4.351968,
+          "regression": -0.688212988775585,
+          "samplesPerVariant": 90,
+          "regressionLimit": 0.05
+        }
+      ],
+      "gpuResourcesAfterCleanup": 0,
+      "gpuTimingResourcesAfterCleanup": 0,
+      "sourceInputsUnchanged": true,
+      "retainedInvestigationCaptures": 15
+    },
+    "windowsFinal": {
+      "status": "g05-prerequisite-reassessed-remaining-validation-pending",
+      "launcher": {
+        "path": "scripts/start-g13-windows-final.cmd",
+        "sha256": "5b2492765e741bc8a473415b1bf5a8e18cf1b7e03528f75446ff4fb9f87d73b8"
+      },
+      "wrapper": {
+        "path": "scripts/start-g13-windows-final.ps1",
+        "sha256": "53d07bc71e5f01bdf35ec9563a552d68848c5809d70ec0deb066a654fa732734"
+      },
+      "worker": {
+        "path": "scripts/run-g13-windows-final.mjs",
+        "sha256": "e9a1917c9e43ed90721a1759f1e3b664d2b96c8195c3bf5b1a867abd4773e4f2"
+      },
+      "policy": {
+        "path": "scripts/g13-windows-final-policy.mjs",
+        "sha256": "f137c76d418cbc6e2bf591194b677ad576d3cb9b97ab79b8512f8c1228f87020"
+      },
+      "plan": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-plan-complete.log",
+        "sha256": "ef3cab54132c68025e62358dd0ce0e6a5b0b9e8ab1d5f56896bb9321b01e01f6"
+      },
+      "captures": 580,
+      "originalBudgetsUnchanged": true,
+      "sourceIsolation": "One fresh local clean checkout and locked dependency install under G13 artifacts; original protocol paths cannot overwrite historical evidence",
+      "globalGatePassed": false,
+      "rehearsalPassed": false,
+      "macQualified": false,
+      "iPhoneQualified": false,
+      "cleanCheckoutRepair": {
+        "problem": "Git does not retain the empty cubism directory frozen in the G10 foundation census; a fresh clone exposed the local-only fixture.",
+        "method": "Bootstrap reconstructs only the frozen empty directory; absence of the actual cubism.ts module remains a hard failure.",
+        "runtimeChanged": false,
+        "contractChanged": false,
+        "helper": {
+          "path": "scripts/hya-foundation-layout.mjs",
+          "sha256": "2ff23e7ae8da0866c268e008ddbd39bfdf149095a3c60cb0224de9e96a2faaae"
+        },
+        "bootstrap": {
+          "path": "scripts/release-ci-bootstrap.mjs",
+          "sha256": "17b3826a820a2beb41e9beb6088524b4bf1634f08a5839b480fd36ae5080732a"
+        },
+        "proof": {
+          "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final-census.log",
+          "sha256": "3e2f130527deba02d303fc00aa235e91e7f05ad51f337c8d64ba7d64a94240f3"
+        },
+        "originalFailure": {
+          "path": "artifacts/engine-0.2.2/g13/windows-final-1793153716500-9f291132/preflight.json",
+          "sha256": "2ad19c0fa2bd3b1fbf66eb7a22f34a88d621962983d8453ad0b7381823168c53"
+        }
+      },
+      "hyaFollowups": {
+        "layoutCohorts": 27,
+        "corpusRounds": 3,
+        "corpusDenominator": 23,
+        "offlineAssets": 64
+      },
+      "metadataEncodingRepair": {
+        "problem": "Clean LF checkouts produced different tarballs solely from three qualified CRLF metadata files.",
+        "method": "Explicit staging-only metadata line endings; runtime, declarations, resources and all numerical budgets remain unchanged.",
+        "policy": {
+          "path": "scripts/package-metadata-encoding.mjs",
+          "sha256": "bd448dc2b777e77eaa0ad2327f5f106df00bece3c5edd70f52a7b5291eccefb5"
+        },
+        "packager": {
+          "path": "scripts/verify-engine-package.mjs",
+          "sha256": "2a7000a358b9d8f0d1c58ee41eedcd69f94eb976a76bcaaff724c995f837c7dd"
+        },
+        "configuration": {
+          "path": "config/engine-package-budget.json",
+          "sha256": "d522e8946070039cd70b4c5350a5a0c668a4e8795f3c189d0842ac49822245b5"
+        },
+        "exactFourTarballs": {
+          "path": "artifacts/engine-0.2.2/g13/windows-final-1793153716500-9f291132/metadata-encoding-probe/result.json",
+          "sha256": "1e9a4b227dbca2fe136384b5aca4e692274d0e36344c428843b550a343aabcb3"
+        },
+        "originalFailure": {
+          "path": "artifacts/engine-0.2.2/g13/windows-final-1793153716500-9f291132/preflight-v2.json",
+          "sha256": "97c21d2389fe617b4f918d3e5600d9a444fc264c6aa2fe17e7b8e6128308eadb"
+        },
+        "proof": {
+          "path": "artifacts/engine-0.2.2/g13/release-policy-windows-final-encoding.log",
+          "sha256": "a234d8aef5485976e34afeb6cb590b8337dad350f0a64f6d768c68b9fbe61c12"
+        }
+      },
+      "latestAssessment": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/independent-partial-audit.json",
+        "sha256": "7c979a62dd3db8d3e3db28720cdc40d90724441a0fd1b2a6ac77ba7e4e8b935a"
+      },
+      "hyaProductionCaptures": 30,
+      "candidateConfig": {
+        "path": "config/g13-windows-candidate.json",
+        "sha256": "1c79126afaf38d145745df8803bd2bb54a55725e3d80e0aa8dd18be2947bd195"
+      },
+      "inputRenewalRequired": false,
+      "sourceVariants": {
+        "path": "artifacts/engine-0.2.2/g13/light-lifetime-proposal/source-variants-proof.json",
+        "sha256": "368d770cf7a931a1406e13af195c99e058b8357e70b1df78cc39d2053ae782f1"
+      },
+      "previousAssessment": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793153716500-9f291132/assessment.json",
+        "sha256": "9764a569e3daadc58b76a456d24c595d2a746d047cbb7375b9a33600e7859f00"
+      },
+      "latestRun": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/result.json",
+        "sha256": "9c8ec531387e16c52ab4edb18d75ffa3a50e773694f9c84ebc9cf6de354c4098"
+      },
+      "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+      "rendererCapturesCompleted": 160,
+      "unexecutedMainQueueCaptures": 420,
+      "hyaProductionCurrentCandidatePassed": true,
+      "correctnessSupplement": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/correctness-supplement.json",
+        "sha256": "9c9498d837ceeec85565570a0d0ba3212dd671f2aa17c4e9abcd8326147d877e",
+        "status": "passed-correctness-supplement",
+        "originalRunStillFailed": true,
+        "independentAudit": {
+          "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/correctness-supplement-audit.json",
+          "sha256": "1702fc29592fe9570ea99f88971a693117db01bf9c44fc3c12ea9fb94342c1c1"
+        },
+        "captures": 224
+      },
+      "remainingRendererCaptures": 196,
+      "g05Interpretation": {
+        "file": "artifacts/engine-0.2.2/g13/adr0137-rooms-1793237553903/result.json",
+        "sha256": "5195c0de7631dcbc0f4c773f82b67b2702d0668a3c686d503091e69da377464e"
+      }
+    },
+    "lightLifetimeRepair": {
+      "status": "applied-and-validated-formal-candidate-qualification-pending",
+      "runtimeCommit": "596dca2",
+      "authorizedFiles": [
+        "engine/src/renderer/ViewLightUniformBuffer.ts",
+        "engine/test/view-light-uniform-lifetime.test.mjs"
+      ],
+      "source": {
+        "path": "engine/src/renderer/ViewLightUniformBuffer.ts",
+        "sha256": "072371e4c55f14d6185e0d6911f0ceec8df401543bb43d7b335049ade534638b"
+      },
+      "tests": {
+        "path": "engine/test/view-light-uniform-lifetime.test.mjs",
+        "sha256": "e51d8c76a122c7a0166d1db41cd9a5c337787f0b51429ae54862296ca6a27fac"
+      },
+      "testProof": {
+        "path": "artifacts/engine-0.2.2/g13/light-lifetime-proposal/applied-tests.log",
+        "sha256": "6b12a4f39aa53b78ec3f8824a9953aec0fe3824a78605837150b977a7518b0e3"
+      },
+      "validation": {
+        "path": "artifacts/engine-0.2.2/g13/light-lifetime-validation-1793179666281/result.json",
+        "sha256": "02d857ec771fe5e27697345b129bb12295a32d6cfcbf416d9ce3fbfdc63bd95e"
+      },
+      "native": {
+        "path": "artifacts/engine-0.2.2/g13/light-lifetime-applied-1793179571224/result.json",
+        "sha256": "169437635d92e6ab353ab0221ff48cdf34056a27b5e0a44c266afa363bf47140"
+      },
+      "focusedTests": 7,
+      "engineTests": 1303,
+      "workspaceTests": 2423,
+      "freshBuildTargets": 103,
+      "originalWarmupSwitches": 24,
+      "originalLifecycleSwitches": 312,
+      "bufferBytes": 775920,
+      "resourceResidual": 0,
+      "cpuDiagnostic": {
+        "originalP95Ms": [
+          3.6299999952316284,
+          3.534999966621399,
+          3.350000023841858
+        ],
+        "repairedP95Ms": [
+          3.765000104904175,
+          3.6100000143051147,
+          3.340000033378601
+        ],
+        "formalPerformanceQualification": false,
+        "originalFailureRetained": true,
+        "unchangedAbsoluteLimitMs": 4
+      },
+      "budgetsChanged": false,
+      "releasePolicyTests": 165,
+      "releasePolicyProof": {
+        "path": "artifacts/engine-0.2.2/g13/light-lifetime-proposal/variant-release-policy.log",
+        "sha256": "093531c9156772464ed4328c3a536743788b04463961243c04fdb33049a0fdb3"
+      }
+    },
+    "repairedPackages": {
+      "status": "passed",
+      "sourceState": {
+        "revision": "d58835a9d14c711f26374c5eed00851f4e4649c2",
+        "workingTreeDirty": false
+      },
+      "report": {
+        "path": "artifacts/engine-0.2.2/g13/packages-light-lifetime/public-packages.json",
+        "sha256": "62abbce569c707d0a5059366756d4fa204e8b7f42fd19c01d70079dda21283a0"
+      },
+      "consumers": 42,
+      "unchangedPackages": [
+        "@haiyue/animation-spec",
+        "@haiyue/extensions",
+        "@haiyue/shader-language"
+      ],
+      "enginePackedGrowthBytes": 303,
+      "originalBudgetsUnchanged": true
+    },
+    "gamepadFixtureDetection": {
+      "status": "fixture-repaired-and-physically-qualified",
+      "problem": "First two operator windows did not retain final results. The shared sampler and browser both detect Xbox 360 in isolated diagnostics; no unique runtime failure was reproduced. The preparation button had no explicit start state and readiness assumed native slot zero.",
+      "method": "Explicit trusted preparation, stable selection across native slots 0–7, unchanged neutral/focus/hold/leak rules, visible poll heartbeat and browser exposure reason, bounded passive sampler-state logs. No additional native polling or gamepad listeners in the formal harness.",
+      "sourceFiles": [
+        {
+          "path": "scripts/fixtures/hya-production/physical-browser.mjs",
+          "sha256": "bcd2e84da941a5df735d04d6db217162fd318996bf7cd94883e505f9dd00f315"
+        },
+        {
+          "path": "scripts/hya-corpus/physical-gamepad-readiness.mjs",
+          "sha256": "2a388e65fcdc163bb298119774a14f9b87083ff64f61976e057385d7667aebff"
+        },
+        {
+          "path": "scripts/hya-corpus/qualify-physical.mjs",
+          "sha256": "3135160e1259db081ea982bf7fd55c2abc8a0a3ea22d809fb180de10cc7de5df"
+        }
+      ],
+      "pureApi": {
+        "path": "artifacts/engine-0.2.2/g13/gamepad-api-diagnostic-1793185134652/result.json",
+        "sha256": "87721649db23de989c48c7f029ca170665447d4bddcbc797b32d64e03d60c15e"
+      },
+      "hyaDiagnostic": {
+        "path": "artifacts/engine-0.2.2/g13/hya-pad-state-diagnostic-1793185446984/result.json",
+        "sha256": "146f75e5d5538e3fe3d787cdc07ea02e86fa1eb465d3f84450a7e38d04786ff9"
+      },
+      "automatedRegression": {
+        "path": "artifacts/engine-0.2.2/g13/gamepad-fixture-slots-1793186059030/result.json",
+        "sha256": "3f3ac908d60e0c462a7068a1cb7a0e277634b24d77cce9719f2569a767045fd2"
+      },
+      "releasePolicy": {
+        "path": "artifacts/engine-0.2.2/g13/gamepad-detection-release-policy.log",
+        "sha256": "e13a884e0b7ec83a416d7d1c57706c92b54f79ff2894ab877faee80848366bd4"
+      },
+      "releasePolicyTests": 167,
+      "imeSmoke": {
+        "path": "artifacts/engine-0.2.2/g13/ime-gamepad-fixture-unaffected-smoke/result.json",
+        "sha256": "78d16f6e181d953c031358b3a13fda3721ef142b70966c7e40c85770dee30736"
+      },
+      "runtimePackagesChanged": false,
+      "physicalInputAccepted": true,
+      "diagnosticRunsNotPromoted": true,
+      "originalRecordsRetained": true
+    },
+    "currentCandidateGamepad": {
+      "status": "passed-physical-gamepad",
+      "assessment": {
+        "path": "artifacts/engine-0.2.2/g13/pad-user-start-current-1793187944217-53ac46bd/operator-assessment.json",
+        "sha256": "3997a2e5cb7357450b764c64890bf4d27111ecaec4399fb8d0015b86d467c51f"
+      },
+      "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+      "packageCandidate": "d58835a9d14c711f26374c5eed00851f4e4649c2",
+      "holdMilliseconds": 1299.0350000858307,
+      "buttonDown": 1,
+      "buttonUp": 1,
+      "axisMin": -1,
+      "axisMax": 1,
+      "sceneActionLeaks": 0,
+      "unarmedGuiControls": 0,
+      "resources": 0,
+      "leases": 0
+    },
+    "currentCandidateHyaProduction": {
+      "status": "passed",
+      "sourceRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+      "captures": 30,
+      "launcher": {
+        "file": "artifacts/engine-0.2.2/g13/production-launch-1793189615470-32c0d49b/launcher.json",
+        "sha256": "dfeec56c8f7a5c4cb6589fdeaae046036ef39a5a7cef7f564c4fccc0c416592d",
+        "status": "passed-local-hya-production"
+      },
+      "report": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g12\\g13-production-1793189615470-32c0d49b\\result.json",
+        "sha256": "4b1315cdc491296cfdf43c6f297c1685e5e5b31593498946b837e340c4e820f7"
+      },
+      "gpuLimit": 0.05,
+      "gpu": [
+        {
+          "workload": "interactive-small",
+          "status": "passed",
+          "regression": 0.02934326967862133
+        },
+        {
+          "workload": "layout-1k",
+          "status": "passed",
+          "regression": -0.8205882352941176
+        },
+        {
+          "workload": "layout-10k-diagnostic",
+          "status": "passed",
+          "regression": -0.7321958033024957
+        },
+        {
+          "workload": "multi-instance",
+          "status": "passed",
+          "regression": -0.6812472615744121
+        }
+      ],
+      "layout": {
+        "file": "artifacts/engine-0.2.2/g12/g13-final-layout-1793191427071/result.json",
+        "sha256": "dc43ba17a5181662dee3f03366faae99a247b9b68e7988eb76c87c82087e9ba3",
+        "status": "passed"
+      },
+      "corpus": {
+        "file": "artifacts/engine-0.2.2/g12/g13-final-corpus-1793191470315/result.json",
+        "sha256": "378fa2b3c76695623bf1b6e2ceab523ceaaae58125d338ddf94fcc365f4def98",
+        "status": "passed"
+      },
+      "inputHashesVerified": 1142,
+      "fullG13Complete": false,
+      "byteBindings": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/hya-byte-bindings-audit.json",
+        "sha256": "3fb7d509041f7da058ff70d111777e5a681c28b1577c82c398d963ab15cfdb9a"
+      }
+    },
+    "currentCandidateCpuInvestigation": {
+      "status": "investigation-not-blocking-under-adr0137",
+      "audit": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/independent-partial-audit.json",
+        "sha256": "7c979a62dd3db8d3e3db28720cdc40d90724441a0fd1b2a6ac77ba7e4e8b935a"
+      },
+      "profile": {
+        "path": "artifacts/engine-0.2.2/g13/room-cpu-diagnostic-current-1793195171248/summary.json",
+        "sha256": "f44f3658805b6fc64b75e6e94a1f4ca3de8e54107e23129e1d27a73efc9b4039"
+      },
+      "phase": "record",
+      "causalAttribution": "Call-stack hotspot is not proof of the cause of cohort tail variation; current captures do not contain per-core frequency or scheduling traces.",
+      "firstMicroProposal": {
+        "status": "not-applied-insufficient-benefit",
+        "report": {
+          "path": "artifacts/engine-0.2.2/g13/room-validation-proposal/comparison.json",
+          "sha256": "27787eee0ab2f93f10b2d5cb09fa9d7ff87113c73b3220f0ce745061eedad493"
+        },
+        "differentialCases": 465,
+        "existingTestsPassed": 19,
+        "meanSavingsMs": 0.003996049999999
+      },
+      "secondMicroProposal": {
+        "status": "not-applied-unproven-end-to-end-benefit",
+        "report": {
+          "path": "artifacts/engine-0.2.2/g13/room-packing-proposal/comparison.json",
+          "sha256": "7b1bea02f179492a1d082678228c7a4089a66b2c5688864ba922086802178218"
+        },
+        "differentialCases": 465,
+        "existingTestsPassed": 19,
+        "concurrentCorrectnessWorkload": true
+      },
+      "runtimeSourceChanged": false,
+      "budgetsChanged": false,
+      "phaseDecomposition": {
+        "path": "artifacts/engine-0.2.2/g13/room-record-phases-1793197405132/summary.json",
+        "sha256": "7bc4bb27905a9b895d372f43511c48516081511507d6acf1ec0efb1e2b8d4496"
+      },
+      "withinCaptureWindows": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/cpu-within-capture-windows.json",
+        "sha256": "5704636f7cf4ea31b55026b743881c2e7503b2e7128dbe87b8b309cae5c8f46b"
+      },
+      "sharedWarmupDiagnostic": {
+        "status": "inconclusive-common-protocol-unchanged",
+        "report": {
+          "path": "artifacts/engine-0.2.2/g13/room-cpu-warmup-1793197564559/result.json",
+          "sha256": "97500bc6a0eef6bb56dbc2a09ae40290dcf67b1b96a5c686afd586c82465eae6"
+        },
+        "captures": 8,
+        "singleRoundOnly": true,
+        "results": [
+          {
+            "job": {
+              "browserId": "chrome-windows",
+              "algorithm": "tiled",
+              "cpuWarmupFrames": 120
+            },
+            "cpuP95Ms": 4.004999995231628,
+            "overFourMs": 16
+          },
+          {
+            "job": {
+              "browserId": "chrome-windows",
+              "algorithm": "tiled",
+              "cpuWarmupFrames": 360
+            },
+            "cpuP95Ms": 3.209999918937683,
+            "overFourMs": 3
+          },
+          {
+            "job": {
+              "browserId": "chrome-windows",
+              "algorithm": "reference",
+              "cpuWarmupFrames": 360
+            },
+            "cpuP95Ms": 4.449999928474426,
+            "overFourMs": 186
+          },
+          {
+            "job": {
+              "browserId": "chrome-windows",
+              "algorithm": "reference",
+              "cpuWarmupFrames": 120
+            },
+            "cpuP95Ms": 2.7350000143051147,
+            "overFourMs": 1
+          },
+          {
+            "job": {
+              "browserId": "edge-windows",
+              "algorithm": "reference",
+              "cpuWarmupFrames": 360
+            },
+            "cpuP95Ms": 4.90500009059906,
+            "overFourMs": 55
+          },
+          {
+            "job": {
+              "browserId": "edge-windows",
+              "algorithm": "reference",
+              "cpuWarmupFrames": 120
+            },
+            "cpuP95Ms": 3.84499990940094,
+            "overFourMs": 10
+          },
+          {
+            "job": {
+              "browserId": "edge-windows",
+              "algorithm": "tiled",
+              "cpuWarmupFrames": 120
+            },
+            "cpuP95Ms": 3.865000009536743,
+            "overFourMs": 13
+          },
+          {
+            "job": {
+              "browserId": "edge-windows",
+              "algorithm": "tiled",
+              "cpuWarmupFrames": 360
+            },
+            "cpuP95Ms": 3.1649999618530273,
+            "overFourMs": 2
+          }
+        ],
+        "originalCpuWarmupFrames": 120,
+        "gpuWarmupFrames": 120,
+        "protocolChanged": false,
+        "explanation": "Longer CPU warmup lowers tiled P95 but raises reference P95 on both browsers; no shared correction or formal acceptance inferred."
+      },
+      "acceptanceDecision": "ADR0137-g05-moving-sparse256-cpu-investigation"
+    },
+    "movingSparse256CpuInterpretation": {
+      "status": "passed-adr0137-g05-prerequisite-only",
+      "decision": "ADR0137-g05-moving-sparse256-cpu-investigation",
+      "adr": {
+        "path": "docs/for-ai/adr/0137-g05-moving-sparse256-cpu-investigation.md",
+        "sha256": "da626295b0cdb0ab0ef2c54cb92530dd94b0170d8e8fcf2f39e3411866ace1c2"
+      },
+      "assessment": {
+        "file": "artifacts/engine-0.2.2/g13/adr0137-rooms-1793237553903/result.json",
+        "sha256": "5195c0de7631dcbc0f4c773f82b67b2702d0668a3c686d503091e69da377464e"
+      },
+      "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+      "acceptanceRevision": "7acd3e6c448c4740db13dad298168d9ffa6fcea9",
+      "originalReport": {
+        "file": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/checkout/artifacts/engine-0.2.1/g05/continuous-rooms-2026-10-28T12-45-54.933Z/report.json",
+        "sha256": "e40d32391440886a1aea899e943716ba24ff9be81a770cd0c9a617629d0610c6",
+        "status": "failed"
+      },
+      "originalRun": {
+        "file": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/result.json",
+        "sha256": "9c8ec531387e16c52ab4edb18d75ffa3a50e773694f9c84ebc9cf6de354c4098",
+        "status": "failed"
+      },
+      "rawCaptures": 156,
+      "cpuSamplesInAffectedComparison": 900,
+      "hardPerformanceChecks": 58,
+      "cpuAbsoluteInvestigations": [
+        {
+          "job": {
+            "suite": "rooms",
+            "cohort": 0,
+            "browserId": "chrome-windows",
+            "caseId": "sparse-256",
+            "moving": true,
+            "algorithm": "tiled",
+            "preference": "high-performance",
+            "full": true,
+            "idleMs": 0
+          },
+          "metric": "cpuP95Ms",
+          "observed": 4.100000023841858,
+          "limit": 4,
+          "passed": false
+        }
+      ],
+      "sampling": {
+        "warmupFrames": 120,
+        "cpuSamples": 300,
+        "gpuSamples": 300,
+        "cohorts": 3,
+        "interCaseIdleMs": 0,
+        "dropSlowSamples": false,
+        "retry": false
+      },
+      "rebuiltChunks": 4,
+      "originalBudgetChanged": false,
+      "originalReportChanged": false,
+      "originalSamplesChanged": false,
+      "allOtherBudgetsUnchanged": true,
+      "default021InterpretationUnchanged": true,
+      "fullG13Complete": false
+    },
+    "windowsRemaining": {
+      "status": "completed-captures-global-gate-failed",
+      "operatorSchedule": "run-later",
+      "config": {
+        "path": "config/g13-windows-remaining.json",
+        "sha256": "b379ad5d7cf33bbae1d0df831b50faed7d273b0591a436f112a85ec0b49fac3b"
+      },
+      "policy": {
+        "path": "scripts/g13-windows-remaining-policy.mjs",
+        "sha256": "2a23830c5003dbe412f7badc6819a3134cfc011f3c5b7394925f6c7ef64b9ba2"
+      },
+      "worker": {
+        "path": "scripts/run-g13-windows-remaining.mjs",
+        "sha256": "ccde88b9198ffefd8dcd6ef80f6bf4a103f89d373be70aaae66ef32abd127225"
+      },
+      "entry": {
+        "path": "scripts/start-g13-windows-remaining.cmd",
+        "sha256": "e993cfd0a8a3155e49d0404d3db64ddf7883a9e96e6e9495f63c836b79e1e14d"
+      },
+      "powershell": {
+        "path": "scripts/start-g13-windows-remaining.ps1",
+        "sha256": "c39925f5d8ede28b95d7f8e6e1689514af13b305ada3d1f6b3cc3ac55aa5d73c"
+      },
+      "reuseRendererCaptures": 384,
+      "newRendererCaptures": 196,
+      "totalRendererCaptures": 580,
+      "hyaProductionCapturesReused": 30,
+      "hashChecksBeforePrepareAndRun": true,
+      "originalFailuresRetained": true,
+      "originalBudgetsUnchanged": true,
+      "samplerUnchanged": true,
+      "automaticRetry": false,
+      "fullG13Complete": false,
+      "externalPublishPerformed": false,
+      "run": {
+        "path": "artifacts/engine-0.2.2/g13/windows-remaining-1793238578178-59eefefb/result.json",
+        "sha256": "a23ca3fb26f4756db766ca0d621c007685881ad744802dace7e7419201906011"
+      },
+      "reusedRendererCaptures": 384,
+      "independentSevenReportAudit": {
+        "path": "artifacts/engine-0.2.2/g13/windows-remaining-1793238578178-59eefefb/seven-report-audit.stdout.log",
+        "sha256": "9696d27f3e766fc209cebee0eb589ea817096a5c387f108b86e0c17d7765c126"
+      },
+      "globalGate": {
+        "path": "artifacts/engine-0.2.2/g13/windows-remaining-1793238578178-59eefefb/global-gate.json",
+        "sha256": "84d3214d637f70e31839ea982b80df21fc03e891400581b8edb8e9914f5b0bdb"
+      },
+      "rehearsalStarted": false,
+      "originalFilesModified": false
+    },
+    "stage9SelectiveAdmission": {
+      "decision": "ADR0138-selective-gui-bundle-admission",
+      "status": "passed-complete-global-gate",
+      "artifactAudit": {
+        "path": "artifacts/engine-0.2.2/g13/stage9-admission-proposal/artifact-content-audit.json",
+        "sha256": "35eaeab8304f714dc89a8251c1ccfa8e3eb8a2d053a8f38a2bfa9a98a12d578e"
+      },
+      "originalGzipMaximum": 4742,
+      "currentGzipMaximum": 4800,
+      "observedGzip": 4746,
+      "totalEngineGzip": 11846,
+      "totalEngineGzipMaximum": 12000,
+      "runtimeAndPackagesChanged": false,
+      "gateOnlyEntry": "scripts/start-g13-windows-gates.cmd",
+      "preparedPointer": "artifacts/engine-0.2.2/g13/windows-gates-prepared.json",
+      "newRendererCaptures": 0,
+      "reusedRendererCaptures": 580
+    },
+    "windowsGlobal": {
+      "status": "passed",
+      "revision": "95ffbb4b1cacdfdde21e8be6be50961619bcc3df",
+      "gate": {
+        "path": "artifacts/engine-0.2.2/g13/windows-gates-1793254174121-884c75c3/global-gate.json",
+        "sha256": "692a080a59dadfeed4225ea486ca71e0ba0ed6ab1ea8c360041459f58f169073"
+      },
+      "stdout": {
+        "path": "artifacts/engine-0.2.2/g13/windows-gates-1793254174121-884c75c3/global-gate.stdout.log",
+        "sha256": "d3a9d24d32c6d0cf29841744b02230dcad5b990bc6781240895b788047b190d7"
+      },
+      "stderr": {
+        "path": "artifacts/engine-0.2.2/g13/windows-gates-1793254174121-884c75c3/global-gate.stderr.log",
+        "sha256": "5ee3af17acaa0426b195100fcc8d4ada1e0ea8b46be61a7de87ee617e41057e7"
+      },
+      "sevenReportAudit": {
+        "path": "artifacts/engine-0.2.2/g13/windows-gates-1793254174121-884c75c3/seven-report-audit.stdout.log",
+        "sha256": "8825d7dfed14cf1879a832dfc01a507b2c653465f922def1b5c4ac49561ed75f"
+      },
+      "reusedRendererCaptures": 580,
+      "newRendererCaptures": 0,
+      "originalRunStatus": "failed",
+      "originalRun": {
+        "path": "artifacts/engine-0.2.2/g13/windows-gates-1793254174121-884c75c3/result.json",
+        "sha256": "403cbf04d12efce520300b13b94272aa49752f25884a78e2405f0e65f512d0c8"
+      },
+      "rehearsal": {
+        "status": "failed-before-commands",
+        "reason": "Missing docs/engine-guide/release-notes-0.2.2.md",
+        "failureLog": {
+          "path": "artifacts/engine-0.2.2/g13/windows-gates-1793254174121-884c75c3/rehearsal.stderr.log",
+          "sha256": "c7ae865e574949c82e75d4960822663c6a5bdef76287f8ae91445c8cdcd6eae9"
+        },
+        "originalFailurePreserved": true,
+        "currentStatus": "passed-after-documentation-only-repair"
+      },
+      "allFourPackageBytesMatchQualifiedCandidate": true
+    },
+    "windowsRehearsal": {
+      "status": "passed-windows-global-and-rehearsal",
+      "acceptanceRevision": "09b7a8f378deb273c32cc07fa43d994ef22ba901",
+      "captureRevision": "95ffbb4b1cacdfdde21e8be6be50961619bcc3df",
+      "documentationOnlyReuse": true,
+      "documentationChanges": [
+        "CHANGELOG.md",
+        "docs/engine-guide/README.md",
+        "docs/engine-guide/release-notes-0.2.2.md",
+        "review/engine-0.2.2/README.md",
+        "review/engine-0.2.2/g13-checks.json"
+      ],
+      "result": {
+        "path": "artifacts/engine-0.2.2/g13/windows-rehearsal-1793322052793-e78978d5/result.json",
+        "sha256": "f8025395baf04cee15569c0487b0577791d36af5681790e68fbae28ee5ec8326"
+      },
+      "sevenReportAudit": {
+        "path": "artifacts/engine-0.2.2/g13/windows-rehearsal-1793322052793-e78978d5/seven-report-audit.stdout.log",
+        "sha256": "ed04180c5d018f4c4601b166c3df374632599774cff71af987e9224d09375660"
+      },
+      "independentBundleAudit": {
+        "path": "artifacts/engine-0.2.2/g13/windows-rehearsal-1793322052793-e78978d5/rehearsal-audit.stdout.log",
+        "sha256": "140e6575fd614f252486ac5bc57cba204517082099d215d85dbadff040b742f8"
+      },
+      "finalDeepReuseCheck": {
+        "path": "artifacts/engine-0.2.2/g13/windows-rehearsal-1793322052793-e78978d5/reuse-after-rehearsal.stdout.log",
+        "sha256": "3e002cf315384d68d4b454be4a0ea2aad9a7ad9a853930cf11616101bce0ee2b"
+      },
+      "rehearsalReport": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/checkout/artifacts/release/rehearsal/report.json",
+        "sha256": "1e93eb7472f2e399879e0d55d4f2c4f2bdccf5d2c4dc0d2cbc6d7011e5417807"
+      },
+      "reusedRendererCaptures": 580,
+      "newRendererCaptures": 0,
+      "formalExamples": 64,
+      "exampleBuildTargets": 66,
+      "releaseArtifacts": 5,
+      "allFourPackageBytesUnchanged": true,
+      "baselinesUnchanged": true,
+      "externalPublishPerformed": false
+    },
+    "gamesConvergence": {
+      "status": "passed",
+      "commit": "d439855",
+      "userWipPreserved": true,
+      "workingTreeContainsUserChanges": true,
+      "typecheck": "passed",
+      "rulesTests": 1166,
+      "fullGameBuilds": 32,
+      "checks": {
+        "path": "artifacts/engine-0.2.2/g13/games-current-checks.json",
+        "sha256": "f1c684a7374c06ee02f1e58ed48e8a6afd6f53aa71c095d80b8a8d8575b5af7f"
+      },
+      "typecheckLog": {
+        "path": "artifacts/engine-0.2.2/g13/games-current-typecheck.log",
+        "sha256": "0ecd9dc519d238af11b6e71d95d1a4300b1ed08d472a74691b3000477aa1138a"
+      },
+      "testLog": {
+        "path": "artifacts/engine-0.2.2/g13/games-current-tests.log",
+        "sha256": "684eaa0d1e1fb3f0b4ab1ad15f00d9dcff8ac90e473879ca3ac3e75eee56e699"
+      },
+      "buildLog": {
+        "path": "artifacts/engine-0.2.2/g13/games-current-build.log",
+        "sha256": "a98a0011ef621b07edc7f0eb348d27ca716243288cb702c77c071274249634c4"
+      },
+      "installedBytes": {
+        "path": "artifacts/engine-0.2.2/g13/games-installed-candidate.json",
+        "sha256": "adad7daa6ab9a7c5814e15101c45eac6fe54d14b8266dd611ba39549150b476f"
+      },
+      "product": {
+        "status": "passed",
+        "cases": 6,
+        "report": {
+          "path": "artifacts/engine-0.2.2/g12/g13-product-current-1793322693528/result.json",
+          "sha256": "0a2a0c62fc65442045401c77ff5a57a52fddb83f048d257dc21ee02ca42d0b67"
+        },
+        "nativeBackend": true,
+        "presentationMode": "headless",
+        "physicalInputAccepted": false
+      },
+      "uiPackageChanged": false
+    },
+    "nativeCandidateConvergence": {
+      "status": "passed-preparation-only",
+      "commit": "be27e22",
+      "sourceReport": {
+        "repository": "Native",
+        "path": "examples/hya-production/artifacts/native-source-check-1793322624168/result.json",
+        "sha256": "bdf09e085a387aae2db63598d56c789fc0b454e1797a5b00a77d828fdfe19d9b"
+      },
+      "installedBytes": {
+        "path": "artifacts/engine-0.2.2/g13/native-installed-candidate.json",
+        "sha256": "dd1b604d4aa356cf917ba8665f495340cae402d2c710b7ee21ba9c06db354220"
+      },
+      "checks": [
+        {
+          "id": "preflight",
+          "exitCode": 0
+        },
+        {
+          "id": "native-sdk-types",
+          "exitCode": 0
+        },
+        {
+          "id": "public-scene-and-byte-tests",
+          "exitCode": 0
+        },
+        {
+          "id": "ios-javascript-bundle",
+          "exitCode": 0
+        }
+      ],
+      "bridgeSources": 23,
+      "transfer": {
+        "path": "artifacts/engine-0.2.2/g13/native-handoff-d58835a-verified/result.json",
+        "sha256": "b7b2870418af069819d30351960e9dc35a5986006f02693e2d956e435e7cdef2"
+      },
+      "archive": {
+        "path": "artifacts/engine-0.2.2/g13/native-handoff-d58835a-verified/hya-native-g13-d58835a.tar.gz",
+        "bytes": 9357453,
+        "sha256": "b297b69d0e3f77b92c39a459f983017fc9d4f1a34c7bdb452a5dcc00932c23f2"
+      },
+      "files": 253,
+      "extractedFilesVerified": 254,
+      "appleSdkCompiled": false,
+      "nativeScriptMetadataGenerated": false,
+      "signedNativeAppBuilt": false,
+      "physicalNativeQualified": false,
+      "userWipPreserved": true
+    },
+    "macIphone20261030": {
+      "status": "passed-mac-iphone-acceptance",
+      "report": {
+        "path": "artifacts/engine-0.2.2/g13/mac-iphone-20261030/result.json",
+        "sha256": "4fe17668a29fef7e9c45db57498766dd04ffe82b8fc9c453a90863175d181985"
+      },
+      "sourceTests": 45,
+      "desktopPcmTests": 33,
+      "appleSdkBuildPassed": true,
+      "metadataGenerated": true,
+      "latestSignedAppReady": true,
+      "latestRepairInstalled": true,
+      "physicalNativeQualified": true,
+      "firstFrameCaptured": true,
+      "physicalOfflinePcmCases": 7,
+      "latestRuntimeRound": 22,
+      "pcmVisibleFeedbackAccepted": true,
+      "keyboardDismissalAccepted": true,
+      "humanImeAccepted": true,
+      "humanLiveAudioAccepted": true,
+      "hostLifecyclePairs": 3,
+      "nativeCorePixelParity": true,
+      "humanVoiceOverAccepted": true,
+      "recordedEndCleanupPassed": true,
+      "nativeSemanticTapReceipt": false,
+      "timelineParityResolved": true,
+      "standardSourceInputsRestored": 96,
+      "standardBuildStartupPassed": true,
+      "humanTransportAccepted": true,
+      "finalOwnedCleanupPassed": true,
+      "evidenceReferencesChecked": 77,
+      "evidenceUniqueFilesChecked": 68,
+      "hostRepairFiles": 23,
+      "finalDocsAndMilestonesChecksPassed": true
+    },
+    "crossPlatformIntegration": {
+      "status": "passed-cross-platform-candidate",
+      "report": {
+        "path": "artifacts/engine-0.2.2/g13/apple-import-20261030-7a83132b/cross-platform-qualification.json",
+        "sha256": "8810068154e3cd5690fc52f86edbc6642ce2629433178f52ab77e3de529867ac"
+      }
+    },
+    "integrationCloseoutChecks": {
+      "status": "passed",
+      "report": {
+        "path": "artifacts/engine-0.2.2/g13/apple-import-20261030-7a83132b/final-local-checks.json",
+        "sha256": "e3effe7ae479d0bfd000733b314548f3a488c11a18d4db89a371f0639d89b1ed"
+      }
+    }
+  },
+  "preservedFailures": {
+    "initialFast": {
+      "path": "artifacts/engine-0.2.2/g13/fast-initial.log",
+      "sha256": "66f895d646386f24fba37a3a3f0177b44889d888e4cf676933680b7ba7ca911b"
+    },
+    "sourceLoader": {
+      "path": "artifacts/engine-0.2.2/g13/fast-integrated.log",
+      "sha256": "348dd82eea3f1c083cdd250759576d2011daaa2d2560ec8a7da7932719d2c9b1"
+    },
+    "physicalIme": {
+      "path": "artifacts/engine-0.2.2/g13/ime-manual-4073c3b/result.json",
+      "sha256": "ea0091424c374ebfe7d58dfab4571c46b1aef006664e1d1e9d44745e18f9d86f"
+    },
+    "earlyGuiEvidenceRead": {
+      "path": "artifacts/engine-0.2.2/g13/ime-manual-6716e9a/result.json",
+      "sha256": "60a17c6ea76734d7ce0f4403285f793396b2f733a0d71fe80cec7b954100af04"
+    },
+    "trustedEndAssumption": {
+      "path": "artifacts/engine-0.2.2/g13/ime-manual-publication-fix/result.json",
+      "sha256": "beea299e5a46f8d27603a0f913bc83059e62234293b695c2aed8fe607b1632e0"
+    },
+    "gamepadBeforeFocus": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-6716e9a/result.json",
+      "sha256": "a04e0a211438bbf58e2db91b2c8684175f7fb5985c7439fe270b807e68a92b1e"
+    },
+    "gamepadMissingAxis": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-focus-ready/operator-assessment.json",
+      "sha256": "d6e9f5ebd249fe2b7a18f215f98caffa5288c1660b969ad5548b95619c32e1b3"
+    },
+    "gamepadWindowTimeout": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-70187df/result.json",
+      "sha256": "def721c91cb962142435115a9e7d32ea3d98c978118706455e5a6c56664590e7"
+    },
+    "gamepadBeforeNeutral": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-70187df-visible-retry/operator-assessment.json",
+      "sha256": "3739aeb23ef8cf264fab85b062b513ba4f3387ebbd80ac1ae8bf440177ee5a42"
+    },
+    "gamepadInitialNeutralObservation": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-70187df-wakeup/operator-assessment.json",
+      "sha256": "6bcdbf7971e0da0536eb6acafc584a68cc6a2de639fed44af9366f35e1c55f1b"
+    },
+    "gamepadInitialBundleBudget": {
+      "path": "artifacts/engine-0.2.2/g13/packages-e3494dc/public-packages.json",
+      "sha256": "84c892afcfc6859894c24b110d9ae16fbf17f31f33cb12258eac30f2b0633589"
+    },
+    "gamepadRightAxisBelowThreshold": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-70187df-prepared/operator-assessment.json",
+      "sha256": "5012549c3b310872e686a956bd7415736f7f72280fea48500c4de56ddffa1f3e"
+    },
+    "gamepadAllMovementsBeforeReady": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-70187df-live/operator-assessment.json",
+      "sha256": "844a8c4eeb77a160f8ff68c6959e5a7bc5528a3d8741d6b5dcaf94c90dff2fa1"
+    },
+    "gamepadExplicitWindowTimeout": {
+      "path": "artifacts/engine-0.2.2/g13/pad-manual-70187df-explicit-ready/result.json",
+      "sha256": "9c9edd1fbda9294ad26408ca1d15b3738450663aacdf0681ec1a0ab313406879"
+    }
+  },
+  "currentBlocker": {
+    "id": "apple-physical-qualification",
+    "status": "resolved",
+    "windowsTasksComplete": true,
+    "remainingRendererCaptures": 0,
+    "globalGatePassed": true,
+    "rehearsalPassed": true,
+    "macAvailable": true,
+    "iPhoneAvailable": true,
+    "physicalNativeQualified": true,
+    "fullG13Complete": true
+  },
+  "remaining": [],
+  "publishing": {
+    "executed": false,
+    "push": false,
+    "tag": false,
+    "npm": false,
+    "githubRelease": false,
+    "pages": false
+  },
+  "deviceAvailability": {
+    "windows": true,
+    "gamepad": true,
+    "mac": true,
+    "iphone": true
+  },
+  "historicalStructuralCandidate": {
+    "revision": "4073c3b46c9df95050a71f3db7ac97eb4eafbae5",
+    "packageReport": {
+      "path": "artifacts/engine-0.2.2/g13/packages-clean-6ac7f17/public-packages.json",
+      "sha256": "25d703c741190a5adb1facf9b9d0cfeb58305fd28dfe9e024e7dc4e7aa3676e0"
+    }
+  },
+  "pointerRepair": {
+    "status": "applied-and-requalified",
+    "source": "extensions/src/animation/production/CompositionGuiBridge.ts",
+    "regression": {
+      "path": "artifacts/engine-0.2.2/g13/pointer-regression.log",
+      "sha256": "d4bc4f54610d0d649b4182c16c9397acc37547a773e5a9a4820f7c72a7594555"
+    },
+    "logicalValidatorUnchanged": true
+  },
+  "previousPackageCandidate": {
+    "revision": "6716e9a0df8480535c7e4bca7711de5a65d5062e",
+    "packageReport": {
+      "path": "artifacts/engine-0.2.2/g13/packages-6716e9a/public-packages.json",
+      "sha256": "273f5be918fed7223c43fcfd0279428279468b3026eaa50315f227ddc45b76b8"
+    }
+  },
+  "gamepadHandoffRepair": {
+    "status": "applied-and-physically-qualified",
+    "source": "engine/src/input/GamepadInputLayers.ts",
+    "permanentRegressionTests": 6,
+    "focusedInputTests": 42,
+    "regression": {
+      "path": "artifacts/engine-0.2.2/g13/handoff-compact-input-tests.log",
+      "sha256": "22907cf0335d67c067cf196f781f43137b231542f7e560df7605522417e1dd2d"
+    },
+    "originalPackedReproduction": {
+      "path": "artifacts/engine-0.2.2/g13/automated-pad-probe-1793024850389/packed-sampler-handoff.json",
+      "sha256": "13728ef4ba52f0cedc2daae6bf4e144fdca4d9b8df55f9938ceaba5d44307fcd"
+    },
+    "apiChanged": false,
+    "budgetsChanged": false
+  },
+  "validationEnvironmentFailures": {
+    "launcherPolicySandboxSymlink": {
+      "path": "artifacts/engine-0.2.2/g13/release-policy-user-launcher-sandbox.log",
+      "sha256": "a2da9ed3e9a4a3708977c7cf64e30be2165caa576ab8888f66e2d46c454239dc"
+    },
+    "originalConditionsRerunPassed": true
+  },
+  "preLightLifetimeCandidate": {
+    "revision": "70187df17f91d21e64998ea78ac0a05ee77c825d",
+    "dirty": false,
+    "role": "public-package candidate; physical and complete G13 qualification remain separately bound",
+    "packages": [
+      {
+        "name": "@haiyue/engine",
+        "version": "0.2.2",
+        "sha256": "53b700437da1fd31fe98b98b7a55ffea54e33beb183cef956179935cd5d4bcaa",
+        "packedBytes": 2021676,
+        "unpackedBytes": 8417763
+      },
+      {
+        "name": "@haiyue/animation-spec",
+        "version": "0.2.2",
+        "sha256": "71eb24b81b1a07f081138610869c11b759def56aa5853a3030e7a714ad385876",
+        "packedBytes": 170719,
+        "unpackedBytes": 666297
+      },
+      {
+        "name": "@haiyue/extensions",
+        "version": "0.2.2",
+        "sha256": "cc29b1238a57911db251eaa01888cc5eecaeaeb6c7be62c430b58597a21c99ad",
+        "packedBytes": 528424,
+        "unpackedBytes": 2054101
+      },
+      {
+        "name": "@haiyue/shader-language",
+        "version": "0.2.2",
+        "sha256": "6a3df405553a2a45d9e76596a3917ea8be5c04e3bc680b3f539cc772ddf75aae",
+        "packedBytes": 148545,
+        "unpackedBytes": 720460
+      }
+    ],
+    "packageReport": {
+      "path": "artifacts/engine-0.2.2/g13/packages-handoff-compact/public-packages.json",
+      "sha256": "4dda28853d2808ea0c5ea8d1edfc79dd35ead99b4f61e2f305f23c9b34f58527"
+    }
+  },
+  "preAdr0137Blocker": {
+    "id": "rooms-sparse-256-cpu-absolute-budget",
+    "status": "failed",
+    "captureRevision": "e9f257b37ac2196a7b26178e2619702d15233e34",
+    "browser": "chrome-windows",
+    "caseId": "sparse-256",
+    "moving": true,
+    "metric": "cpuP95Ms",
+    "observed": 4.100000023841858,
+    "limit": 4,
+    "sourceSamples": 900,
+    "rawSamplesDropped": false,
+    "allOtherRoomPerformanceChecksPassed": 59,
+    "memoryCapturesPassed": 156,
+    "currentCandidateImePassed": true,
+    "currentCandidateGamepadPassed": true,
+    "currentHyaProductionPassed": true,
+    "correctnessSupplementStatus": "passed-correctness-supplement",
+    "originalReportsModified": false,
+    "lightLifetimeRepairApplied": true
+  },
+  "fullG11Complete": true,
+  "nextIntegrationStep": {
+    "id": "native-host-repair-and-evidence-import",
+    "status": "complete",
+    "report": {
+      "path": "artifacts/engine-0.2.2/g13/apple-import-20261030-7a83132b/cross-platform-qualification.json",
+      "sha256": "8810068154e3cd5690fc52f86edbc6642ce2629433178f52ab77e3de529867ac"
+    }
+  }
+}

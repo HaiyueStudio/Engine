@@ -1182,7 +1182,8 @@ test('Render3DSystem keeps multi-view draw, cull, transparent sort, and readback
       `Render3DSystem.transparentMegaBatch.view.${viewSlot}.sortIndices.readback`,
     ));
   }
-  assert.equal(afterSubmitCallbacks.length, 5); // Four readbacks and HDR attachment retirement.
+  // Four readbacks, HDR attachment retirement and one output parameter lease per view.
+  assert.equal(afterSubmitCallbacks.length, 7);
 });
 
 test('Render3DSystem forwards GPU-driven batch context to compatible non-Basic material renderers', () => {

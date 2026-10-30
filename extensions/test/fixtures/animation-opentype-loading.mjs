@@ -118,7 +118,11 @@ if (scenario === 'idle') {
       const late = new AnimationTextRasterizer(text);
       runtime._loadTextFonts(text, late);
       assert.equal(requests, 2);
-      assert.equal(late.outlineFonts.size, 1, 'later materialized visuals reuse the prepared font synchronously');
+      const decodedFonts = new Set([...late.outlineFonts.values()].map(value => value.outline ?? value));
+      assert.equal(decodedFonts.size, 1, 'resource and family indexes share one decoded font');
+      assert.equal([...decodedFonts][0], runtime._fontLoads.values().next().value.outlineFont,
+        'later materialized visuals reuse the prepared font synchronously');
+      assert.equal(globalThis.fontParseCount, 1, 'later visuals cannot parse the same font again');
       late.destroy();
     }
     runtime.destroy(); second.destroy();

@@ -161,6 +161,14 @@
         "engine/src/shaders/generated/deferred-full-pbr-transmission.generated.wgsl",
         "engine/src/shaders/generated/deferred-full-pbr-transmission-clearcoat.generated.wgsl"
       ]
+    },
+    {
+      "id": "gui-region-history",
+      "status": "generated",
+      "generator": "gui-region-history",
+      "sources": [
+        "engine/src/shaders/generated/2d-ui-region-history.generated.wgsl"
+      ]
     }
   ],
   "inlineShaderSites": [

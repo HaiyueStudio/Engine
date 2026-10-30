@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", "module": "ESNext", "moduleResolution": "bundler",
+    "lib": ["ESNext"], "types": [], "strict": true,
+    "noUncheckedIndexedAccess": true, "exactOptionalPropertyTypes": true,
+    "skipLibCheck": true, "declaration": true,
+    "rootDir": "../src", "outDir": "../../artifacts/engine-0.2.2/g02/pure-layout"
+  },
+  "include": ["../src/layout.ts"]
+}

@@ -30,3 +30,6 @@ export {
 } from './CSGWorker';
 export { createCSGWorkerSource } from './CSGWorkerRuntime';
 export type { IcosahedronGeometryOptions } from './IcosahedronGeometry';
+
+export {computeNineSlicePatches} from './NineSlice';
+export type {NineSliceOptions, NineSlicePatch} from './NineSlice';

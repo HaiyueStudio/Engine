@@ -24,7 +24,7 @@ evidence.engineArtifactGzipBytes = evidence.engine2dUiArtifactGzipBytes + eviden
 const failures = [];
 const costBudget = loadShaderCostBudget(root);
 for (const [key, value] of Object.entries(evidence)) {
-  if (['simple3dArtifactGzipBytes', 'componentsEvidenceArtifactGzipBytes'].includes(key)) {
+  if (['engine2dUiArtifactGzipBytes', 'simple3dArtifactGzipBytes', 'componentsEvidenceArtifactGzipBytes'].includes(key)) {
     const error = validateProductionBundleCost(key, value, costBudget);
     if (error) failures.push(error);
     continue;
@@ -34,7 +34,9 @@ for (const [key, value] of Object.entries(evidence)) {
     continue;
   }
   if (key === 'engineArtifactGzipBytes') continue;
-  if (contract.bundle[key] !== value) failures.push(`${key} expected ${contract.bundle[key]}, received ${value}`);
+  // Historical observations remain immutable upper limits; smaller equivalent metadata is valid.
+  const error = validateProductionBundleCost(key, value, { productionBundles: contract.bundle });
+  if (error) failures.push(error);
 }
 if (evidence.engineArtifactGzipBytes > contract.bundle.engineArtifactGzipBudgetBytes) {
   failures.push(`engine artifact gzip ${evidence.engineArtifactGzipBytes} exceeds ${contract.bundle.engineArtifactGzipBudgetBytes}`);

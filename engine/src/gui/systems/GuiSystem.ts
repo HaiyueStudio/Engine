@@ -1,21 +1,36 @@
-import { GuiSwitch } from '../components/GuiSwitch';
-import { GuiToast } from '../components/GuiToast';
-import { GuiScrollView } from '../components/GuiScrollView';
-import { GuiHelpDialog, setGuiHelpDialogTextMetrics } from '../components/GuiHelpDialog';
+import type {GuiTextServices} from '../input/GuiTextServices';
+import {getGuiTextServiceFactory} from '../input/GuiTextServiceRegistry';
+import {isGuiControl} from '../GuiControlIdentity';
+import {setGuiLabelMeasuredTextWidth,setGuiHelpDialogTextMetrics} from '../GuiIntrinsicText';
+import {maintainGuiRadioGroups} from '../GuiControlIdentity';
+import type {BrowserMultiplayerInput} from '../../input/BrowserMultiplayerInput';
+import {routeGuiExternalKeyboard,routeGuiExternalGamepad} from '../GuiExternalPresentation';
+import {projectGuiInputGeometry,type GuiInputGeometry,type GuiInputViewSnapshot,type GuiInputPresentation} from '../input/GuiInputPresentation';
+import {bindGuiExternalPresentation,type GuiExternalPresentation} from '../GuiExternalPresentation';
+import {isRegionRenderTarget,getRegionProjection} from '../../core/RegionRenderTarget';
+import { type GuiSwitch } from '../components/GuiSwitch';
+import { type GuiToast } from '../components/GuiToast';
+import { type GuiScrollView } from '../components/GuiScrollView';
+import { type GuiHelpDialog } from '../components/GuiHelpDialog';
 import type { IEngine } from '../../core/IEngine';
 import { System } from '../../ecs/System';
 import { World } from '../../ecs/World';
 import { GuiElement } from '../components/GuiElement';
-import { GuiButton } from '../components/GuiButton';
-import { GuiInput } from '../components/GuiInput';
-import { GuiLabel, setGuiLabelMeasuredTextWidth } from '../components/GuiLabel';
-import { GuiRadio } from '../components/GuiRadio';
+import { type GuiButton } from '../components/GuiButton';
+import { type GuiInput } from '../components/GuiInput';
+import { type GuiLabel } from '../components/GuiLabel';
+import { type GuiRadio } from '../components/GuiRadio';
+import {guiButtonHoverAnimating,advanceGuiButtonHover,finishGuiButtonHover} from '../input/GuiButtonHover';
+import type {GuiTooltip} from '../components/GuiTooltip';
+import {guiTooltipPending,advanceGuiTooltip} from '../input/GuiTooltipTiming';
 import { GuiRoot } from '../components/GuiRoot';
-import { GuiSelect } from '../components/GuiSelect';
+import { type GuiSelect } from '../components/GuiSelect';
 import { GuiFocusManager } from '../input/GuiFocusManager';
 import { hitTestGui } from '../input/GuiHitTest';
-import { GuiPointerEvent } from '../GuiTypes';
+import {GuiDirtyFlags, type GuiPointerEvent} from '../GuiTypes';
 import { GuiRenderer } from '../rendering/GuiRenderer';
+import {bindGuiMeasureOwner, guiMeasureFontVersion, requestGuiFontReload} from '../GuiMeasure';
+import {isGuiLayoutHidden, isGuiLayoutManaged, suspendGuiLayout} from '../GuiLayoutState';
 import { getCachedRenderPassDescriptor } from '../../core/renderPassDescriptor';
 import { beginRenderCommandPass } from '../../core/RenderCommandContext';
 import type { RenderCommandContext } from '../../core/RenderCommandContext';
@@ -23,6 +38,20 @@ import { getRenderViewPassOptions } from '../../core/RenderView';
 import { cloneRenderPassDescriptor } from '../../core/renderPassDescriptor';
 import type { RenderPipelineEntryOptions } from '../../renderer/RenderPipeline';
 import type { PipelineWarmupPlan } from '../../renderer/PipelineWarmup';
+import type {RenderRegion} from '../../core/RenderRegion';
+import {getRenderRegionState} from '../../core/RenderRegionState';
+import type {RenderViewSnapshot} from '../../core/RenderView';
+import {GuiPixelResources} from '../GuiPixelResources';
+import {InputMap} from '../../input/InputMap';
+import type {GuiActionEvent} from '../GuiTypes';
+import {GuiInputDomain} from '../input/GuiInputDomain';
+import type {GuiInputParticipant} from '../input/GuiInputParticipant';
+import type {GuiDragSession} from '../GuiDragTypes';
+import {GuiDragPreview} from '../input/GuiDragPreview';
+import {revealGuiElement, visibleGuiHostRect} from '../input/GuiDragGeometry';
+import {createGuiSyntheticPointer} from '../input/GuiActivation';
+import {guiInputProjection,guiInputPoint,guiInputHostRect} from '../input/GuiInputProjection';
+import type {GuiTextInputHost} from '../input/GuiTextInputHost';
 
 interface PendingGuiPointerEvent {
   type: 'pointerdown' | 'pointermove' | 'pointerup' | 'pointercancel';
@@ -30,6 +59,7 @@ interface PendingGuiPointerEvent {
   timestamp?: number;
   x: number;
   y: number;
+  routedHit?: GuiElement | null;
 }
 
 interface PendingGuiWheelEvent {
@@ -37,6 +67,7 @@ interface PendingGuiWheelEvent {
   x: number;
   y: number;
   deltaY: number;
+  deltaX: number;
 }
 
 interface CachedCanvasRect {
@@ -59,6 +90,13 @@ export interface GuiFontOptions {
 }
 
 export interface GuiSystemOptions {
+  /** Platform-owned responder. Named public host types are integrated by G13. */
+  textInputHost?:GuiTextInputHost|'browser';
+  onViewportInset?:(inset:{top:number;right:number;bottom:number;left:number})=>void;
+  /** Bind UI action names through the same InputMap abstraction used by scene actions. */
+  navigationMap?: InputMap;
+  /** Explicit ownership when multiple GUI systems render independent regions/overlays in one World. */
+  roots?: ReadonlySet<GuiRoot>;
   preventDefault?: boolean;
   /** 'clear' resets the canvas; 'load' composites GUI on top of earlier render systems. Defaults to 'load'. */
   loadOp?: 'clear' | 'load';
@@ -67,10 +105,70 @@ export interface GuiSystemOptions {
 }
 
 export class GuiSystem extends System {
-  readonly focus = new GuiFocusManager();
+  override get disabled(): boolean { return super.disabled; }
+  override set disabled(value: boolean) {
+    const changed = super.disabled !== value;
+    super.disabled = value;
+    if (changed && value && this.inputDomain) {this.cancelInput();this.inputDomain.refresh();}
+  }
+  private textServices:GuiTextServices|null=null;
+  private readonly textSubscriptions:(()=>void)[]=[];
+  private textServiceOptions:GuiSystemOptions={};
+  private textBrowserDocument:Document|undefined;
+  private ensureTextServices():GuiTextServices|null{if(this.disposed)return null;if(this.textServices)return this.textServices;const create=getGuiTextServiceFactory();return create?(this.textServices=create(this.textContext,this.textServiceOptions,this.textBrowserDocument)):null;}
+  private get composing():boolean{return this.textServices?.composing??false;}
+  private get textViewportInset(){return this.textServices?.viewportInset??{top:0,right:0,bottom:0,left:0};}
+  private textCaretRect(input:GuiInput){return this.ensureTextServices()!.textCaretRect(input);}
+  private async writeClipboard(text: string): Promise<void> {
+    if (!text || typeof navigator === 'undefined') return;
+    try {
+      await navigator.clipboard?.writeText(text);
+    } catch {
+      // Clipboard API may be blocked outside a trusted browser gesture.
+    }
+  }
+  private async readClipboard(): Promise<string> {
+    if (typeof navigator === 'undefined') return '';
+    try {
+      return await navigator.clipboard?.readText() ?? '';
+    } catch {
+      return '';
+    }
+  }
+
+  private get textContext(){const system=this;return{
+    dispatchAction:system.dispatchAction.bind(system),
+    writeClipboard:(text:string)=>system.writeClipboard(text),
+    readClipboard:()=>system.readClipboard(),
+    get disposed(){return system.disposed;},
+    get engine(){return system.engine;},
+    get focus(){return system.focus;},
+    get inputDomain(){return system.inputDomain;},
+    get inputParticipant(){return system.inputParticipant;},
+    inputProjection:system.inputProjection.bind(system),
+    get inputWorld(){return system.inputWorld;},
+    get preventDefault(){return system.preventDefault;},
+    get queryDescriptor(){return system.queryDescriptor;},
+    get renderer(){return system.renderer;},
+    get rootFilter(){return system.rootFilter;},
+    get roots(){return system.roots;},
+    get usedBy(){return system.usedBy;},
+    validPointerTarget:system.validPointerTarget.bind(system),
+  };}
+  readonly focus: GuiFocusManager;
+  private readonly gamepadBindings=new Set<()=>void>();
+  private readonly externalBindings=new Set<()=>void>();
+  private readonly inputDomain: GuiInputDomain;
+  private readonly inputParticipant: GuiInputParticipant;
+  private readonly unregisterInput: () => void;
+  private inputView: RenderViewSnapshot | undefined;
+  private inputWorld: World | null = null;
+  private inputConsumed = false;
+  private inputSuspended = false;
 
   private engine: IEngine;
   private preventDefault: boolean;
+  private readonly navigationMap: InputMap;
   private pending: PendingGuiPointerEvent[] = [];
   private pendingWheel: PendingGuiWheelEvent[] = [];
   private pendingPool: PendingGuiPointerEvent[] = [];
@@ -79,20 +177,40 @@ export class GuiSystem extends System {
   private canvasRectResetScheduled = false;
   private hovered: GuiElement | null = null;
   private pressed: GuiElement | null = null;
+  private readonly capturedPointers = new Set<number>();
   private scrollGesture: {
-    view: GuiScrollView; pointerId: number; startY: number; startOffset: number; dragging: boolean;
+    view: GuiScrollView; pointerId: number; startPosition: number; startOffset: number; dragging: boolean;
     samples: { time: number; offset: number }[]; lastMove: number; direction: number;
   } | null = null;
+  private readonly pointerStates = new Map<number, {pressed: GuiElement | null; hovered: GuiElement | null; scrollGesture: GuiSystem['scrollGesture']; last: PendingGuiPointerEvent}>();
   private roots = new Set<GuiRoot>();
   private renderer: GuiRenderer;
   private readonly font: GuiFontOptions;
   private disposed = false;
+  private fontEventsCleanup: (() => void) | null = null;
+  private fontEventsGeneration = 0;
+  private autoWidthKeys = new WeakMap<GuiLabel, string>();
   private motionFrames = new WeakMap<object, number>();
-  private composing = false;
+  
+  
+  
+  
+  
+  
+  
+  
   loadOp: 'clear' | 'load';
   readonly recoveryLabel: string;
   readonly recoverySource = { kind: 'render-system' as const, system: 'GuiSystem' as const };
   private readonly unregisterRecovery: (() => void) | null;
+  private readonly rootFilter:ReadonlySet<GuiRoot>|undefined;
+  private readonly regionSubscriptions=new Map<GuiRoot,()=>void>();
+  private region:RenderRegion|null=null;
+  private readonly dragPreview = new GuiDragPreview(() => {
+    const state = this.region ? getRenderRegionState(this.region) : undefined;
+    if (state && !state.isDisposed) this.region!.invalidate('GUI drag preview');
+  }, point => this.localDragPoint(point));
+  private readonly pixelResources=new GuiPixelResources((element,source)=>{this.renderer.invalidateImageSource(source);element.markDirty(GuiDirtyFlags.Layout|GuiDirtyFlags.Visual)});
 
   get renderPipelineOptions(): RenderPipelineEntryOptions {
     return { pass: 'shared', loadOp: this.loadOp, sort: this.priority };
@@ -100,13 +218,75 @@ export class GuiSystem extends System {
 
   constructor(engine: IEngine, options: GuiSystemOptions = {}) {
     super({ all: [GuiRoot] });
+    const browserDocument=engine.canvas?.ownerDocument??globalThis.document;
+    if(options.textInputHost==='browser'&&!browserDocument)throw new Error('Browser text input requires a DOM document; Native hosts must supply a platform responder.');
     this.name = 'GuiSystem';
     this.priority = 10000;
     this.engine = engine;
     this.preventDefault = options.preventDefault ?? true;
+    this.navigationMap = options.navigationMap ?? InputMap.guiNavigation();
     this.loadOp = options.loadOp ?? 'load';
     this.font = Object.freeze({ ...options.font });
+    this.rootFilter=options.roots;
     this.renderer = new GuiRenderer(this.font);
+    this.inputDomain = GuiInputDomain.for(engine.canvas ?? engine, engine.canvas);
+    this.focus = this.inputDomain.focus;
+    this.inputParticipant = {
+      roots: () => this.inputRoots().map(root => root.root),
+      enabled: () => {
+        const state = this.region ? getRenderRegionState(this.region) : undefined;
+        const region = state && !state.isDisposed ? state.snapshot() : null;
+        return !this.disabled && !this.disposed && !this.inputSuspended && !this.inputWorld?.disabled &&
+          (!this.region || !!region?.visible && region.bounds.width > 0 && region.bounds.height > 0);
+      },
+      rawGamepad:(sample,target)=>!this.disabled&&!this.disposed&&this.validPointerTarget(target)&&routeGuiExternalGamepad(target,sample),
+      rawKeyboard:(event,target)=>{
+        if(this.disabled||this.disposed||!this.validPointerTarget(target)||event.isComposing||isGuiControl<GuiInput>(target, 'GuiInput')&&(this.textServices?.composing||target.isComposing))return false;
+        return routeGuiExternalKeyboard(target,event);
+      },
+      keyboard: event => {const result=this.handleKeyboardEvent(event);this.ensureTextServices()?.synchronizeTextInput();return result;},
+      action: (action,source) => {const result=this.handleAction(action,source);this.ensureTextServices()?.synchronizeTextInput();return result;},
+      text: event => {
+        if (!(isGuiControl<GuiInput>(this.focus.focused, 'GuiInput'))) return false;
+        if (event.type === 'compositionstart') this.ensureTextServices()?.onCompositionStart();
+        else if (event.type === 'compositionupdate') this.ensureTextServices()?.onCompositionUpdate(event as CompositionEvent);
+        else if (event.type === 'compositionend') this.ensureTextServices()?.onCompositionEnd(event as CompositionEvent);
+        else if (event.type === 'copy') this.ensureTextServices()?.onCopy(event as ClipboardEvent);
+        else if (event.type === 'cut') this.ensureTextServices()?.onCut(event as ClipboardEvent);
+        else if (event.type === 'paste') this.ensureTextServices()?.onPaste(event as ClipboardEvent);
+        this.ensureTextServices()?.synchronizeTextInput();
+        return true;
+      },
+      preventDefault: () => this.preventDefault,
+      cancel: () => this.cancelInput(),
+      rect: element => {const projection=this.inputProjection();return projection?guiInputHostRect(element.rect,projection):element.rect;},
+      pick: event => this.pickPointer(event),
+      pointer: (event,hit) => this.routePointer(event,hit),
+      wheel: event => this.routeWheel(event),
+      valid: element => this.validPointerTarget(element),
+      cancelPointer: (id, preserveCapture) => this.cancelPointer(id, preserveCapture),
+      releasePointer: id => this.releasePointerCapture(id),
+      leavePointer: event => this.leavePointer(event),
+      ownsTextTarget:target=>this.textServices?.connection?.ownsTarget(target)??false,
+      hostPoint: event => {
+        const point = this.inputPoint(event), projection = this.inputProjection();
+        if (!point || !projection) return null;
+        const rect = guiInputHostRect({x: point.x, y: point.y, width: 0, height: 0}, projection);
+        return {x: rect.x, y: rect.y};
+      },
+      localPoint: point => this.localDragPoint(point),
+      pickHost: point => {
+        const local = this.localDragPoint(point);
+        return local?.inside ? hitTestGui(null, new Set(this.inputRoots()), local.x, local.y) : null;
+      },
+      visibleRect: element => {const projection = this.inputProjection(); return projection ? visibleGuiHostRect(element, projection) : null;},
+      reveal: revealGuiElement,
+      rootFor: element => this.inputRoots().find(root => {for (let node: GuiElement | null = element; node; node = node.parent) if (node === root.root) return true; return false;}) ?? null,
+      preview: () => this.globalDragPreview(),
+    };
+    this.unregisterInput = this.inputDomain.register(this.inputParticipant);
+    this.textServiceOptions=options;this.textBrowserDocument=browserDocument;this.ensureTextServices();
+    this.textSubscriptions.push(this.focus.subscribeBeforeBlur(()=>this.textServices?.beforeBlur()),this.focus.subscribe(()=>this.ensureTextServices()?.synchronizeTextInput()));
     this.recoveryLabel = `${this.name}:${this.id}`;
     this.unregisterRecovery = engine.registerDeviceRecoveryParticipant?.(this) ?? null;
     this.bindCanvas();
@@ -116,8 +296,29 @@ export class GuiSystem extends System {
     this.renderer.contributePipelineWarmup(plan, this.engine);
   }
 
+  /** CPU/input preflight runs even when the retained pixels do not need another draw. */
+  prepareFrame(world:World,_time:number,delta:number,view:RenderViewSnapshot,region:RenderRegion):void {
+    this.inputView=view;
+    this.inputDomain.touch(this.inputParticipant);
+    if(this.disabled){this.stopAnimations();return}
+    if(this.region!==region){this.releaseFrame();this.region=region}
+    this.inputSuspended=false;
+    const roots:GuiRoot[]=[];
+    for(const entity of this.entitySet.get(world)??[]){const root=entity.getComponent(GuiRoot);if(root&&(!this.rootFilter||this.rootFilter.has(root)))roots.push(root)}
+    for(const [root,unsubscribe]of this.regionSubscriptions)if(!roots.includes(root)){unsubscribe();this.regionSubscriptions.delete(root)}
+    for(const root of roots)if(!this.regionSubscriptions.has(root))this.regionSubscriptions.set(root,root.onInvalidation(change=>{
+      if(!getRenderRegionState(region)?.isDisposed&&change.reasons.some(r=>r==='layout'||r==='paint'||r==='resource'||r==='animation'))region.invalidate('GUI content');
+    }));
+    this.pixelResources.sync(roots);this.prepareRoots(world,view.displayWidth,view.displayHeight);this.advanceMotion(world,delta,world.frameData);this.dispatchPendingEvents(world);
+    if(this.animating)region.invalidate('GUI animation');
+  }
+  releaseFrame():void {this.inputSuspended=true;this.cancelInput();for(const unsubscribe of this.regionSubscriptions.values())unsubscribe();this.regionSubscriptions.clear();this.region=null;this.pixelResources.release();this.inputDomain.refresh();}
+
   record(world: World, context: RenderCommandContext): this {
-    if (this.disabled) return this;
+    this.inputView=context.view;
+    if(!this.region)this.inputDomain.touch(this.inputParticipant);
+    if (this.disabled) {this.stopAnimations(); return this;}
+    this.inputSuspended=false;
     this.prepareRoots(world, context.view?.displayWidth, context.view?.displayHeight);
     // RenderIntegration owns this system and disables ordinary autoUpdate.
     // Use the shared frame identity so multiple views never advance motion twice.
@@ -126,14 +327,15 @@ export class GuiSystem extends System {
     this.dispatchPendingEvents(world);
     this.render(context);
     for (const root of this.roots) root.clearDirty();
+    this.dragPreview.root?.clearDirty();
     return this;
   }
 
   /** Demand-rendering hosts should keep requesting frames while this is true. */
   get animating(): boolean {
-    const active = (element: GuiElement): boolean => element.visible && !element.disabled &&
-      (((element instanceof GuiScrollView || element instanceof GuiSwitch || element instanceof GuiToast) && element.animating) || element.children.some(active));
-    for (const root of this.roots) if (active(root.root)) return true;
+    const active = (element: GuiElement): boolean => element.visible && !isGuiLayoutHidden(element) && (!element.disabled || isGuiControl<GuiTooltip>(element, 'GuiTooltip')) &&
+      (((isGuiControl<GuiScrollView>(element, 'GuiScrollView') || isGuiControl<GuiSwitch>(element, 'GuiSwitch') || isGuiControl<GuiToast>(element, 'GuiToast')) && element.animating) || (isGuiControl<GuiTooltip>(element, 'GuiTooltip') && guiTooltipPending(element)) || (isGuiControl<GuiButton>(element, 'GuiButton') && guiButtonHoverAnimating(element)) || element.children.some(active));
+    for (const root of this.renderRoots()) if (active(root.root)) return true;
     return false;
   }
 
@@ -147,12 +349,16 @@ export class GuiSystem extends System {
     if (frame.frameId > 0 && this.motionFrames.get(frame) === frame.frameId) return;
     this.motionFrames.set(frame, frame.frameId);
     const advance = (element: GuiElement, parentActive: boolean): void => {
-      const active = parentActive && element.visible && !element.disabled;
-      if (element instanceof GuiScrollView) {
+      const active = parentActive && element.visible && !isGuiLayoutHidden(element) && !element.disabled;
+      if (isGuiControl<GuiTooltip>(element, 'GuiTooltip')) {
+        advanceGuiTooltip(element,parentActive&&element.visible&&!isGuiLayoutHidden(element));
+      } else if (isGuiControl<GuiScrollView>(element, 'GuiScrollView')) {
         if (active) element.advanceAnimation(delta); else element.stopInertia();
-      } else if (element instanceof GuiSwitch) {
+      } else if (isGuiControl<GuiButton>(element, 'GuiButton')) {
+        if(active)advanceGuiButtonHover(element,delta);else finishGuiButtonHover(element);
+      } else if (isGuiControl<GuiSwitch>(element, 'GuiSwitch')) {
         if (active) element.advanceAnimation(delta); else if (element.animating) element.finishAnimation();
-      } else if (element instanceof GuiToast) {
+      } else if (isGuiControl<GuiToast>(element, 'GuiToast')) {
         if (active) element.advanceAnimation(delta); else element.hide();
       }
       for (const child of element.children) advance(child, active);
@@ -160,26 +366,40 @@ export class GuiSystem extends System {
     const entities = this.entitySet.get(world);
     if (entities) for (const entity of entities) {
       const root = entity.getComponent(GuiRoot);
-      if (root) advance(root.root, true);
+      if (root&&(!this.rootFilter||this.rootFilter.has(root))) advance(root.root, true);
     }
+    if (this.dragPreview.root) advance(this.dragPreview.root.root, true);
   }
 
   stopAnimations(): void {
-    for (const root of this.roots) this.walkGui(root.root, element => {
-      if (element instanceof GuiScrollView) element.stopInertia();
-      else if (element instanceof GuiSwitch && element.animating) element.finishAnimation();
-      else if (element instanceof GuiToast) element.hide();
-    });
+    this.releaseFrame();
+    this.autoWidthKeys = new WeakMap();
+    this.fontEventsCleanup?.(); this.fontEventsCleanup = null;
+    for (const root of this.roots) {suspendGuiLayout(root.root); this.walkGui(root.root, element => {
+      if (isGuiControl<GuiScrollView>(element, 'GuiScrollView')) element.stopInertia();
+      else if (isGuiControl<GuiTooltip>(element, 'GuiTooltip')) advanceGuiTooltip(element,false);
+      else if (isGuiControl<GuiButton>(element, 'GuiButton')) finishGuiButtonHover(element);
+      else if (isGuiControl<GuiSwitch>(element, 'GuiSwitch') && element.animating) element.finishAnimation();
+      else if (isGuiControl<GuiToast>(element, 'GuiToast')) element.hide();
+    });}
   }
 
   override destroy(): this {
-    this.unregisterRecovery?.();
-    this.unbindCanvas();
-    this.suspendForDeviceLoss();
-    return super.destroy();
+    const errors: unknown[] = [];
+    const run = (work: () => void): void => {try {work();} catch (error) {errors.push(error);}};
+    for(const release of [...this.externalBindings])run(release);
+    for(const release of [...this.gamepadBindings])run(release);
+    for(const unsubscribe of this.textSubscriptions)run(unsubscribe);this.textSubscriptions.length=0;
+    run(()=>this.textServices?.dispose());this.textServices=null;
+    run(() => this.unregisterInput()); run(() => this.unregisterRecovery?.());
+    run(() => this.unbindCanvas()); run(() => this.suspendForDeviceLoss());
+    const result = super.destroy();
+    if (errors.length) throw new AggregateError(errors, 'GUI system cleanup failed.');
+    return result;
   }
 
   suspendForDeviceLoss(): void {
+    this.cancelInput();
     this.stopAnimations();
     this.scrollGesture = null;
     if (this.pressed) this.pressed.pressed = false;
@@ -194,43 +414,39 @@ export class GuiSystem extends System {
   }
 
   private bindCanvas(): void {
+    this.ensureFontEvents();
     const canvas = this.engine.canvas;
     if (!canvas) return;
-    canvas.addEventListener('pointerdown', this.onPointerDown);
-    canvas.addEventListener('pointermove', this.onPointerMove);
-    canvas.addEventListener('pointerup', this.onPointerUp);
-    canvas.addEventListener('pointercancel', this.onPointerCancel);
-    canvas.addEventListener('wheel', this.onWheel, { passive: false });
-    canvas.addEventListener('keydown', this.onKeyDown);
-    canvas.addEventListener('compositionstart', this.onCompositionStart);
-    canvas.addEventListener('compositionend', this.onCompositionEnd);
-    canvas.addEventListener('copy', this.onCopy);
-    canvas.addEventListener('cut', this.onCut);
-    canvas.addEventListener('paste', this.onPaste);
     if (canvas.tabIndex < 0) canvas.tabIndex = 0;
   }
 
   private unbindCanvas(): void {
     if (this.disposed) return;
     this.disposed = true;
+    this.fontEventsCleanup?.(); this.fontEventsCleanup = null;
     const canvas = this.engine.canvas;
     if (!canvas) return;
-    canvas.removeEventListener('pointerdown', this.onPointerDown);
-    canvas.removeEventListener('pointermove', this.onPointerMove);
-    canvas.removeEventListener('pointerup', this.onPointerUp);
-    canvas.removeEventListener('pointercancel', this.onPointerCancel);
-    canvas.removeEventListener('wheel', this.onWheel);
-    canvas.removeEventListener('keydown', this.onKeyDown);
-    canvas.removeEventListener('compositionstart', this.onCompositionStart);
-    canvas.removeEventListener('compositionend', this.onCompositionEnd);
-    canvas.removeEventListener('copy', this.onCopy);
-    canvas.removeEventListener('cut', this.onCut);
-    canvas.removeEventListener('paste', this.onPaste);
   }
 
   private onPointerDown = (event: PointerEvent): void => {
     this.pushPointerEvent('pointerdown', event);
   };
+
+  private ensureFontEvents(): void {
+    if (this.disposed || this.fontEventsCleanup || typeof document === 'undefined' || !document.fonts) return;
+    const fonts = document.fonts, generation = ++this.fontEventsGeneration;
+    requestGuiFontReload(this.renderer);
+    const loaded = (): void => {
+      if (this.disposed || generation !== this.fontEventsGeneration) return;
+      requestGuiFontReload(this.renderer);
+      for (const root of this.renderRoots()) root.root.markDirty(GuiDirtyFlags.Text | GuiDirtyFlags.Visual);
+    };
+    fonts.addEventListener('loadingdone', loaded); fonts.addEventListener('loadingerror', loaded);
+    // An already-loaded FontFaceSet was used by the synchronous atlas preparation.
+    // Scheduling its resolved promise again would invalidate the first cached frame.
+    if(fonts.status!=='loaded')void fonts.ready.then(loaded, loaded);
+    this.fontEventsCleanup = () => {this.fontEventsGeneration++; fonts.removeEventListener('loadingdone', loaded); fonts.removeEventListener('loadingerror', loaded);};
+  }
 
   private onPointerMove = (event: PointerEvent): void => {
     this.pushPointerEvent('pointermove', event);
@@ -248,125 +464,114 @@ export class GuiSystem extends System {
     const canvas = this.engine.canvas;
     if (!canvas) return;
     const rect = this.getCachedCanvasRect(canvas);
-    const pending = this.pendingWheelPool.pop() ?? { native: null, x: 0, y: 0, deltaY: 0 };
+    const pending = this.pendingWheelPool.pop() ?? { native: null, x: 0, y: 0, deltaY: 0, deltaX: 0 };
     pending.native = event;
     pending.x = event.clientX - rect.left;
     pending.y = event.clientY - rect.top;
     pending.deltaY = event.deltaY;
+    pending.deltaX = event.deltaX;
     this.pendingWheel.push(pending);
     event.preventDefault();
   };
 
   private onKeyDown = (event: KeyboardEvent): void => {
-    const focused = this.focus.focused;
-    if (!(focused instanceof GuiInput)) return;
-    if (this.composing || event.isComposing) return;
-    if (event.altKey) return;
-    const shortcut = event.metaKey || event.ctrlKey;
+    if (this.handleKeyboardEvent(event) && this.preventDefault) event.preventDefault();
+  };
 
-    if (shortcut) {
-      const key = event.key.toLowerCase();
-      if (key === 'a') {
-        focused.selectAll();
-        event.preventDefault();
-        return;
+  private handleKeyboardEvent(event: KeyboardEvent): boolean {
+    if (this.disabled || this.disposed) return false;
+    this.focus.reconcile();
+    const focused = this.focus.focused;
+    if(this.ensureTextServices()?.beforeKeyboard(event))return true;
+    const code = event.code || (event.key === ' ' ? 'Space' : event.key);
+    if (!event.ctrlKey && !event.metaKey && !event.altKey &&
+        (!(isGuiControl<GuiInput>(focused, 'GuiInput')) || ['Tab', 'Escape', 'ArrowUp', 'ArrowDown'].includes(code))) {
+      const chord = code === 'Tab' && event.shiftKey ? 'Shift+Tab' : code;
+      for (const action of ['next','previous','left','right','up','down','confirm','cancel'] as const) {
+        if (this.navigationMap.matches(action, key => key === chord)) {
+          const handled = event.repeat && (action === 'confirm' || action === 'cancel')
+            ? !!this.focus.focused || !!this.focus.modal : this.dispatchAction(action, 'keyboard');
+          if (handled) return true;
+        }
       }
-      if (key === 'c') {
-        void this.writeClipboard(focused.selectedText);
-        event.preventDefault();
-        return;
-      }
-      if (key === 'x') {
-        void this.writeClipboard(focused.selectedText);
-        if (!focused.readOnly && focused.hasSelection) focused.deleteForward();
-        event.preventDefault();
-        return;
-      }
-      if (key === 'v') {
-        void this.readClipboard().then(text => {
-          if (text) focused.insertText(text);
-        });
-        event.preventDefault();
-        return;
-      }
-      return;
     }
+    return this.ensureTextServices()?.editKeyboard(event)??false;
+  }
 
-    if (event.key === 'Backspace') {
-      focused.deleteBackward();
-      event.preventDefault();
-      return;
-    }
-    if (event.key === 'Delete') {
-      focused.deleteForward();
-      event.preventDefault();
-      return;
-    }
-    if (event.key === 'ArrowLeft') {
-      focused.moveCaret(-1, event.shiftKey);
-      event.preventDefault();
-      return;
-    }
-    if (event.key === 'ArrowRight') {
-      focused.moveCaret(1, event.shiftKey);
-      event.preventDefault();
-      return;
-    }
-    if (event.key === 'Home') {
-      focused.setCaret(0, event.shiftKey);
-      event.preventDefault();
-      return;
-    }
-    if (event.key === 'End') {
-      focused.setCaret(focused.value.length, event.shiftKey);
-      event.preventDefault();
-      return;
-    }
-    if (event.key === 'Enter') {
-      focused.submit();
-      event.preventDefault();
-      return;
-    }
-    if (event.key.length === 1) {
-      focused.insertText(event.key);
-      event.preventDefault();
-    }
-  };
+  /** Hosts feed already sampled UI actions here; this method never polls devices. */
+  dispatchAction(action: GuiActionEvent['action'], source: GuiActionEvent['source'] = 'keyboard'): boolean {
+    if(this.disabled||this.disposed)return false;
+    return this.inputDomain.dispatchAction(action,source);
+  }
+  get dragSession(): GuiDragSession | null {return this.inputDomain.dragSession;}
 
-  private onCompositionStart = (): void => {
-    this.composing = true;
-  };
+  private handleAction(action: GuiActionEvent['action'], source: GuiActionEvent['source']): boolean {
+    if (this.disabled || this.disposed) return false;
+    this.focus.reconcile();
+    let consumed = false;
+    const event: GuiActionEvent = {action, source, get consumed() { return consumed; }, consume() { consumed = true; }};
+    const modal = this.focus.modal;
+    for (let node=this.focus.focused; node && !consumed; node=node.parent) {
+      node.handleAction(event);
+      if (node === modal) break;
+    }
+    if (!consumed) {
+      if (action === 'next' || action === 'previous') consumed = !!this.focus.next(action === 'previous');
+      else if (action === 'left' || action === 'right' || action === 'up' || action === 'down') consumed = !!this.focus.move(action);
+      else if (action === 'cancel' && modal) { modal.close('cancel'); consumed = true; }
+    }
+    this.focus.reconcile();
+    const focused=this.focus.focused;
+    if (focused) revealGuiElement(focused);
+    return consumed || !!modal;
+  }
 
-  private onCompositionEnd = (event: CompositionEvent): void => {
-    this.composing = false;
+  private cancelInput(): void {
+    try {this.inputDomain.cancelDragFor(this.inputParticipant);}
+    finally {this.cancelOrdinaryInput();}
+  }
+  private cancelOrdinaryInput(): void {
+    this.textServices?.cancel();
+    for (const id of [...this.pointerStates.keys()]) this.cancelPointer(id);
+    if (this.pressed) {this.pressed.pressed = false;this.pressed.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);}
+    if (this.hovered) {this.hovered.hovered = false;this.hovered.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Input);}
     const focused = this.focus.focused;
-    if (!(focused instanceof GuiInput) || focused.readOnly) return;
-    if (event.data) focused.insertText(event.data);
-    event.preventDefault();
-  };
+    if (isGuiControl<GuiInput>(focused, 'GuiInput') && [...this.roots].some(root => root.findById(focused.id) === focused)) {this.ensureTextServices()?.cancelSelection(focused);}
+    for (const pointerId of this.capturedPointers) this.releasePointerCapture(pointerId);
+    if (this.scrollGesture) {this.scrollGesture.view.stopInertia();this.releasePointerCapture(this.scrollGesture.pointerId);}
+    this.scrollGesture = null;this.pressed = this.hovered = null;
+    for (const event of this.pending) if (event.native) this.releasePointerCapture(event.native.pointerId);
+    this.pending.length = this.pendingWheel.length = 0;
+  }
 
-  private onCopy = (event: ClipboardEvent): void => {
-    const focused = this.focus.focused;
-    if (!(focused instanceof GuiInput) || !focused.hasSelection) return;
-    event.clipboardData?.setData('text/plain', focused.selectedText);
-    event.preventDefault();
-  };
+  private cancelPointer(id: number, preserveCapture = false): void {
+    const state = this.pointerStates.get(id);
+    if (!state) return;
+    this.pointerStates.delete(id);
+    const native = createGuiSyntheticPointer('pointercancel', id), pending = {...state.last, type:'pointercancel' as const, native};
+    const errors: unknown[] = [];
+    const run = (work: () => void): void => {try {work();} catch (error) {errors.push(error);}};
+    run(() => {if (state.pressed) state.pressed.handlePointerCancel(this.makeEvent('pointercancel', state.pressed, pending, native));});
+    run(() => {if (state.hovered) state.hovered.handlePointerLeave(this.makeEvent('pointerleave', state.hovered, pending, native));});
+    run(() => state.scrollGesture?.view.stopInertia());
+    if (!preserveCapture) run(() => this.releasePointerCapture(id));
+    if (this.pressed === state.pressed) this.pressed = null;
+    if (this.hovered === state.hovered) this.hovered = null;
+    if (this.scrollGesture === state.scrollGesture) this.scrollGesture = null;
+    if (errors.length) throw new AggregateError(errors, 'GUI pointer cancellation failed.');
+  }
 
-  private onCut = (event: ClipboardEvent): void => {
-    const focused = this.focus.focused;
-    if (!(focused instanceof GuiInput) || !focused.hasSelection || focused.readOnly) return;
-    event.clipboardData?.setData('text/plain', focused.selectedText);
-    focused.deleteForward();
-    event.preventDefault();
-  };
+  
 
-  private onPaste = (event: ClipboardEvent): void => {
-    const focused = this.focus.focused;
-    if (!(focused instanceof GuiInput) || focused.readOnly) return;
-    const text = event.clipboardData?.getData('text/plain') ?? '';
-    if (text) focused.insertText(text);
-    event.preventDefault();
-  };
+  
+
+  
+
+  
+
+  
+
+  
 
   private pushPointerEvent(type: PendingGuiPointerEvent['type'], event: PointerEvent): void {
     if (this.preventDefault) event.preventDefault();
@@ -396,37 +601,52 @@ export class GuiSystem extends System {
     return this.canvasRectCache;
   }
 
-  private dispatchPointerEvent(world: World, pending: PendingGuiPointerEvent): void {
+  private dispatchPointerEvent(world: World | null, pending: PendingGuiPointerEvent): void {
+    const id = pending.native?.pointerId ?? 0;
+    const state = this.pointerStates.get(id);
+    this.pressed = state?.pressed ?? null;this.hovered = state?.hovered ?? null;this.scrollGesture = state?.scrollGesture ?? null;
+    this.dispatchPointerState(world, pending);
+    if (pending.type === 'pointercancel' || pending.type === 'pointerup' && pending.native?.pointerType === 'touch') this.pointerStates.delete(id);
+    else this.pointerStates.set(id, {pressed:this.pressed,hovered:this.hovered,scrollGesture:this.scrollGesture,last:{...pending}});
+    // Keep the active gesture visible to lifecycle/motion code when an unrelated finger moves.
+    if (!this.pressed && !this.scrollGesture) {
+      const active = [...this.pointerStates.values()].find(state => state.pressed || state.scrollGesture);
+      if (active) {this.pressed = active.pressed;this.scrollGesture = active.scrollGesture;}
+    }
+  }
+
+  private dispatchPointerState(world: World | null, pending: PendingGuiPointerEvent): void {
     const native = pending.native;
     if (!native) return;
     this.renderer.prepare(this.engine);
-    const hit = hitTestGui(world, this.roots, pending.x, pending.y);
+    const hit = pending.routedHit === undefined ? hitTestGui(world, this.roots, pending.x, pending.y) : pending.routedHit;
     const timestamp = pending.timestamp ?? (Number.isFinite(native.timeStamp) ? native.timeStamp : performance.now());
     const gesture = this.scrollGesture;
     if (gesture && native.pointerId !== gesture.pointerId) return;
     if (gesture && (pending.type === 'pointermove' || pending.type === 'pointerup' || pending.type === 'pointercancel')) {
-      if (pending.type === 'pointermove' && (gesture.dragging || Math.abs(pending.y - gesture.startY) > 6)) {
+      const position = gesture.view.axis === 'horizontal' ? pending.x : pending.y;
+      if (pending.type === 'pointermove' && (gesture.dragging || Math.abs(position - gesture.startPosition) > 6)) {
         if (!gesture.dragging) {
           gesture.dragging = true;
-          if (this.pressed) this.pressed.handlePointerUp(this.makeEvent('pointerup', this.pressed, pending, native));
+          if (this.pressed) this.pressed.handlePointerCancel(this.makeEvent('pointercancel', this.pressed, pending, native));
           this.pressed = null;
           this.focus.blur();
           this.updateHover(null, pending);
         }
-        gesture.view.scrollTo(gesture.startOffset + gesture.startY - pending.y);
+        gesture.view.scrollTo(gesture.startOffset + gesture.startPosition - position);
         this.sampleScroll(gesture, timestamp);
       }
       if (gesture.dragging) {
         if (pending.type === 'pointerup' || pending.type === 'pointercancel') {
           if (pending.type === 'pointerup') {
-            gesture.view.scrollTo(gesture.startOffset + gesture.startY - pending.y);
+            gesture.view.scrollTo(gesture.startOffset + gesture.startPosition - position);
             this.sampleScroll(gesture, timestamp);
             const first = gesture.samples[0]!, duration = timestamp - first.time;
             if (timestamp - gesture.lastMove <= 100 && duration > 0)
-              gesture.view.fling((gesture.view.scrollY - first.offset) * 1000 / duration);
+              gesture.view.fling((gesture.view.scrollOffset - first.offset) * 1000 / duration);
           } else gesture.view.stopInertia();
           this.scrollGesture = null;
-          this.engine.canvas?.releasePointerCapture?.(native.pointerId);
+          this.releasePointerCapture(native.pointerId);
         }
         return;
       }
@@ -442,20 +662,24 @@ export class GuiSystem extends System {
       const stopping = scroll?.animating ?? false;
       scroll?.stopInertia();
       this.scrollGesture = scroll ? {
-        view: scroll, pointerId: native.pointerId, startY: pending.y, startOffset: scroll.scrollY,
-        dragging: stopping, samples: [{ time: timestamp, offset: scroll.scrollY }], lastMove: timestamp, direction: 0,
+        view: scroll, pointerId: native.pointerId, startPosition: scroll.axis === 'horizontal' ? pending.x : pending.y, startOffset: scroll.scrollOffset,
+        dragging: stopping, samples: [{ time: timestamp, offset: scroll.scrollOffset }], lastMove: timestamp, direction: 0,
       } : null;
       // A tap during momentum only stops the list; it must not toggle the row under the finger.
       if (stopping) { this.pressed = null; this.focus.blur(); this.updateHover(null, pending); return; }
       this.focus.focus(hit);
       if (hit) {
-        this.engine.canvas?.focus();
+        // A text responder already owns native focus. Focusing the canvas here
+        // would immediately blur and destroy the session just opened above.
+        if(!this.textServices?.connection?.connected)this.engine.canvas?.focus();
         // Input may have completed before this frame drains its event queue.
         // Capturing an ended touch throws on Native and browsers alike.
         const latest = this.pending.findLast(event => event.native?.pointerId === native.pointerId);
-        if (latest?.type !== 'pointerup' && latest?.type !== 'pointercancel')
+        if (native.isTrusted !== false && latest?.type !== 'pointerup' && latest?.type !== 'pointercancel') {
           this.engine.canvas?.setPointerCapture?.(native.pointerId);
-        if (hit instanceof GuiInput) this.updateInputCaretFromPointer(hit, pending, false);
+          this.capturedPointers.add(native.pointerId);
+        }
+        if (isGuiControl<GuiInput>(hit, 'GuiInput') && !this.ensureTextServices()?.pointerEye(hit,pending.x,pending.y)) this.ensureTextServices()?.updateInputCaretFromPointer(hit, pending, false);
         hit.handlePointerDown(this.makeEvent('pointerdown', hit, pending, native));
       } else {
         this.focus.blur();
@@ -465,64 +689,45 @@ export class GuiSystem extends System {
 
     if (pending.type === 'pointermove') {
       const target = this.pressed ?? hit;
-      if (target instanceof GuiInput && target.selecting) this.updateInputCaretFromPointer(target, pending, true);
+      if (isGuiControl<GuiInput>(target, 'GuiInput') && target.selecting) this.ensureTextServices()?.updateInputCaretFromPointer(target, pending, true);
       if (target) target.handlePointerMove(this.makeEvent('pointermove', target, pending, native));
       return;
     }
 
     if (pending.type === 'pointerup' || pending.type === 'pointercancel') {
-      const target = this.pressed ?? hit;
-      if (target instanceof GuiInput && target.selecting) this.updateInputCaretFromPointer(target, pending, true);
-      if (target) target.handlePointerUp(this.makeEvent('pointerup', target, pending, native));
+      if (pending.type === 'pointerup') this.updateHover(hit,pending);
+      const target = this.pressed;
+      if (isGuiControl<GuiInput>(target, 'GuiInput') && target.selecting) this.ensureTextServices()?.updateInputCaretFromPointer(target, pending, true);
+      if (target) {
+        if (pending.type === 'pointercancel') target.handlePointerCancel(this.makeEvent('pointercancel', target, pending, native));
+        else target.handlePointerUp(this.makeEvent('pointerup', target, pending, native));
+        if (isGuiControl<GuiInput>(target, 'GuiInput')) this.ensureTextServices()?.synchronizeTextInput();
+      }
       if (pending.type === 'pointerup' && target && target === hit) {
         target.handleClick(this.makeEvent('click', target, pending, native));
       }
-      this.engine.canvas?.releasePointerCapture?.(native.pointerId);
+      this.releasePointerCapture(native.pointerId);
       this.pressed = null;
       // Touch has no hover after contact ends, even without a later pointermove.
       if (native.pointerType === 'touch' || pending.type === 'pointercancel') this.updateHover(null, pending);
-      if (native.pointerType === 'touch' && target instanceof GuiButton && this.focus.focused === target) this.focus.blur();
+      if (native.pointerType === 'touch' && isGuiControl<GuiButton>(target, 'GuiButton') && this.focus.focused === target) this.focus.blur();
     }
   }
 
-  private updateInputCaretFromPointer(input: GuiInput, pending: PendingGuiPointerEvent, extendSelection: boolean): void {
-    const fontSize = this.findThemeFontSize(input);
-    const padding = input.style.padding ?? 8;
-    const index = input.getCaretIndexAt(
-      pending.x - input.rect.x,
-      text => this.renderer.measureTextWidth(text, fontSize),
-      padding,
-    );
-    if (extendSelection) input.setCaret(index, true);
-    else input.setSelection(index, index);
+  
+
+  private releasePointerCapture(pointerId: number): void {
+    this.capturedPointers.delete(pointerId);
+    const canvas = this.engine.canvas;
+    if (canvas?.hasPointerCapture && !canvas.hasPointerCapture(pointerId)) return;
+    canvas?.releasePointerCapture?.(pointerId);
   }
 
-  private findThemeFontSize(element: GuiElement): number {
-    let current: GuiElement | null = element;
-    while (current.parent) current = current.parent;
-    for (const root of this.roots) {
-      if (root.root === current) return root.theme.fontSize;
-    }
-    return 14;
-  }
+  
 
-  private async writeClipboard(text: string): Promise<void> {
-    if (!text || typeof navigator === 'undefined') return;
-    try {
-      await navigator.clipboard?.writeText(text);
-    } catch {
-      // Clipboard API may be blocked outside a trusted browser gesture.
-    }
-  }
+  
 
-  private async readClipboard(): Promise<string> {
-    if (typeof navigator === 'undefined') return '';
-    try {
-      return await navigator.clipboard?.readText() ?? '';
-    } catch {
-      return '';
-    }
-  }
+  
 
   private updateHover(next: GuiElement | null, pending: PendingGuiPointerEvent): void {
     if (this.hovered === next) return;
@@ -539,7 +744,7 @@ export class GuiSystem extends System {
 
   private sampleScroll(gesture: NonNullable<GuiSystem['scrollGesture']>, time: number): void {
     const previous = gesture.samples.at(-1)!;
-    const movement = gesture.view.scrollY - previous.offset;
+    const movement = gesture.view.scrollOffset - previous.offset;
     if (movement) {
       const direction = Math.sign(movement);
       if (gesture.direction && direction !== gesture.direction) gesture.samples = [previous];
@@ -548,30 +753,32 @@ export class GuiSystem extends System {
     }
     // Retain a short recent window, including the release pause; do not reuse stale fling speed.
     while (gesture.samples.length > 1 && time - gesture.samples[0]!.time > 100) gesture.samples.shift();
-    if (time > previous.time) gesture.samples.push({ time, offset: gesture.view.scrollY });
-    else previous.offset = gesture.view.scrollY;
+    if (time > previous.time) gesture.samples.push({ time, offset: gesture.view.scrollOffset });
+    else previous.offset = gesture.view.scrollOffset;
   }
 
   private scrollAncestor(element: GuiElement | null): GuiScrollView | null {
-    for (let node=element;node;node=node.parent) if (node instanceof GuiScrollView && node.maxScrollY>0) return node;
+    for (let node=element;node;node=node.parent) if (isGuiControl<GuiScrollView>(node, 'GuiScrollView') && node.maxScrollOffset>0) return node;
     return null;
   }
 
-  private dispatchWheelEvent(world: World, pending: PendingGuiWheelEvent): void {
+  private dispatchWheelEvent(world: World | null, pending: PendingGuiWheelEvent): void {
     const native = pending.native;
     if (!native) return;
     const hit = hitTestGui(world, this.roots, pending.x, pending.y);
-    if (hit instanceof GuiSelect && hit.open && hit.containsPointIncludingPopup(pending.x, pending.y)) {
+    if (isGuiControl<GuiSelect>(hit, 'GuiSelect') && hit.open && hit.containsPointIncludingPopup(pending.x, pending.y)) {
       hit.scrollBy(pending.deltaY);
-      native.preventDefault();
+      this.inputConsumed=true;
+      if(this.preventDefault)native.preventDefault();
       return;
     }
     let scroll = this.scrollAncestor(hit);
-    const delta = pending.deltaY * (native.deltaMode === 1 ? 16 : native.deltaMode === 2 ? (scroll?.rect.height ?? 1) : 1);
     while (scroll) {
-      const previous = scroll.scrollY;
+      const horizontal = scroll.axis === 'horizontal', extent = horizontal ? scroll.rect.width : scroll.rect.height;
+      const delta = (horizontal ? pending.deltaX || pending.deltaY : pending.deltaY) * (native.deltaMode === 1 ? 16 : native.deltaMode === 2 ? extent : 1);
+      const previous = scroll.scrollOffset;
       scroll.scrollBy(delta);
-      if (scroll.scrollY !== previous) break;
+      if (scroll.scrollOffset !== previous || scroll.animating) {this.inputConsumed=true;break;}
       scroll = this.scrollAncestor(scroll.parent);
     }
   }
@@ -582,6 +789,7 @@ export class GuiSystem extends System {
     pending: PendingGuiPointerEvent,
     native: PointerEvent,
   ): GuiPointerEvent {
+    const system=this;
     const event: GuiPointerEvent = {
       type,
       target,
@@ -594,10 +802,12 @@ export class GuiSystem extends System {
       buttons: native.buttons,
       pointerId: native.pointerId,
       nativeEvent: native,
+      routed: true,
       stopped: false,
       defaultPrevented: native.defaultPrevented,
       stopPropagation() {
         event.stopped = true;
+        system.inputConsumed = true;
       },
       preventDefault() {
         event.defaultPrevented = true;
@@ -607,42 +817,164 @@ export class GuiSystem extends System {
     return event;
   }
 
+  /** Borrow one existing sampler; GUI owns neither its clock nor its device listeners. */
+  get hasGamepadInput():boolean{return !this.disposed&&this.inputDomain.hasGamepadInput;}
+  attachGamepadInput(source:BrowserMultiplayerInput):()=>void {
+    if(this.disposed)throw new Error('Cannot attach a gamepad sampler to a disposed GUI system.');const off=this.inputDomain.attachGamepadInput(source);let closed=false;
+    const release=()=>{if(closed)return;closed=true;this.gamepadBindings.delete(release);off();};this.gamepadBindings.add(release);return release;
+  }
+  /** Read the existing G06 geometry/scroll/caret state; no input device or timer is created. */
+  
+  getInputPresentation(input:GuiInput):GuiInputPresentation {if(this.disposed)throw new Error('Cannot query a disposed GUI system.');const service=this.ensureTextServices();if(!service)throw new Error('Input belongs to another GUI owner.');return service.getInputPresentation(input);}
+  /** Pure original G06 projection used with a whole-frame presentation snapshot. */
+  projectInputPresentation(geometry:GuiInputGeometry,state:GuiInputViewSnapshot):GuiInputPresentation {
+    if(this.disposed)throw new Error('Cannot project with a disposed GUI system.');return projectGuiInputGeometry(geometry,state);
+  }
+  /** Share this G05/G06 owner while an extension paints its own subtree and supplies actual text geometry. */
+  bindExternalElement(element:GuiElement,options:GuiExternalPresentation={}):()=>void {
+    if(this.disposed)throw new Error('Cannot attach external presentation to a disposed GUI system.');
+    const unbind=bindGuiExternalPresentation(element,options);let released=false;
+    const inside=(target:GuiElement|null):boolean=>{for(let node=target;node;node=node.parent)if(node===element)return true;return false;};
+    const release=()=>{
+      if(released)return;released=true;this.externalBindings.delete(release);const errors:unknown[]=[],run=(action:()=>void)=>{try{action();}catch(error){errors.push(error);}};
+      this.inputDomain.cancelKeyboardFor(element);this.inputDomain.cancelGamepadFor(element);const previous=element.disabled;element.disabled=true;
+      try{
+        for(const[id,state]of this.pointerStates)if(inside(state.pressed)||!state.pressed&&inside(state.hovered))run(()=>this.cancelPointer(id));
+        if(inside(this.focus.focused))run(()=>this.focus.blur());
+        if(inside(this.textServices?.connection?.target??null))run(()=>this.textServices?.connection?.close(false));
+        run(()=>this.inputDomain.refresh());run(unbind);
+      }finally{element.disabled=previous;}
+      run(()=>options.onRelease?.());if(errors.length)throw new AggregateError(errors,'External GUI presentation cleanup failed.');
+    };
+    this.externalBindings.add(release);return release;
+  }
+
+  /** Scene/default actions run only after every GUI layer declines the event. */
+  onUnhandledInput(callback: (event: Event) => boolean | void): () => void {return this.inputDomain.subscribeUnhandled(callback);}
+
+  private inputProjection() {
+    const root=[...this.roots][0];
+    const width=this.engine.displayWidth??root?.viewport.width??1,height=this.engine.displayHeight??root?.viewport.height??1;
+    const state = this.region ? getRenderRegionState(this.region) : undefined;
+    if (this.region && (!state || state.isDisposed)) return null;
+    const region = state?.snapshot().bounds;
+    return guiInputProjection(width,height,this.inputView,region);
+  }
+  private inputPoint(event: {clientX:number;clientY:number}) {
+    const canvas=this.engine.canvas,projection=this.inputProjection();
+    if(!canvas||!projection)return null;
+    const rect=canvas.getBoundingClientRect();
+    return guiInputPoint(event.clientX,event.clientY,{x:rect.left,y:rect.top,width:rect.width,height:rect.height},projection);
+  }
+  private localDragPoint(point: Readonly<{x: number; y: number}>) {
+    const projection = this.inputProjection();
+    return projection ? guiInputPoint(point.x, point.y, {x: 0, y: 0, width: projection.hostWidth, height: projection.hostHeight}, projection) : null;
+  }
+  private globalDragPreview(): GuiDragPreview | null {
+    const projection = this.inputProjection();
+    if (!projection) return null;
+    const {bounds, clip, hostWidth, hostHeight} = projection;
+    const full = (rect: {x: number; y: number; width: number; height: number}): boolean =>
+      Math.abs(rect.x) < 1e-6 && Math.abs(rect.y) < 1e-6 && Math.abs(rect.width - hostWidth) < 1e-6 && Math.abs(rect.height - hostHeight) < 1e-6;
+    return full(bounds) && full(clip) ? this.dragPreview : null;
+  }
+  private renderRoots(): GuiRoot[] {return this.dragPreview.root ? [...this.roots, this.dragPreview.root] : [...this.roots];}
+  private pickPointer(event: {clientX:number;clientY:number}): GuiElement | null {
+    const point=this.inputPoint(event);
+    return point?.inside?hitTestGui(null,new Set(this.inputRoots()),point.x,point.y):null;
+  }
+  private routePointer(native: PointerEvent,hit?:GuiElement|null): boolean {
+    const point=this.inputPoint(native);if(!point)return false;
+    this.inputConsumed=false;
+    this.dispatchPointerEvent(null,{type:native.type as PendingGuiPointerEvent['type'],native,x:point.x,y:point.y,routedHit:hit===undefined?this.pickPointer(native):hit});
+    return this.inputConsumed;
+  }
+  private routeWheel(native: WheelEvent): boolean {
+    const point=this.inputPoint(native);if(!point?.inside)return false;
+    this.inputConsumed=false;this.dispatchWheelEvent(null,{native,x:point.x,y:point.y,deltaY:native.deltaY,deltaX:native.deltaX});return this.inputConsumed;
+  }
+  private validPointerTarget(element:GuiElement): boolean {
+    let root=element;
+    for(let node:GuiElement|null=element;node;node=node.parent){if(!node.visible||node.disabled||isGuiLayoutHidden(node))return false;root=node;}
+    return this.inputRoots().some(r=>r.root===root);
+  }
+  private leavePointer(native:PointerEvent):void {
+    const state=this.pointerStates.get(native.pointerId),point=this.inputPoint(native);
+    if(!state?.hovered||!point)return;
+    const hovered=state.hovered;state.hovered=null;
+    hovered.handlePointerLeave(this.makeEvent('pointerleave',hovered,{type:'pointermove',native,x:point.x,y:point.y},native));
+    if(this.hovered===hovered)this.hovered=null;
+  }
+
   private prepareRoots(world: World, width = this.engine.displayWidth, height = this.engine.displayHeight): void {
+    this.inputWorld=world;
+    this.ensureFontEvents();
+    const previous = new Set(this.roots);
     this.roots.clear();
     this.renderer.prepare(this.engine);
     const entities = this.entitySet.get(world);
-    if (entities) for (const entity of entities) {
-      const root = entity.getComponent(GuiRoot);
-      if (!root) continue;
-      this.measureAutoWidthLabels(root.root, root.theme.fontSize);
+    const candidates: GuiRoot[] = [];
+    if (entities) for (const entity of entities) {const root = entity.getComponent(GuiRoot); if (root && !root.destroyed && (!this.rootFilter || this.rootFilter.has(root))) candidates.push(root);}
+    this.pixelResources.sync(this.dragPreview.root ? [...candidates, this.dragPreview.root] : candidates);
+    for (const root of candidates) {
+      previous.delete(root);
+      bindGuiMeasureOwner(root, this.renderer);
+      this.measureAutoWidthLabels(root.root, root.theme.fontSize, root);
       root.layout(width, height);
-      if (root.root.dirty) GuiRadio.rebuildGroupRegistry(root.root);
-      else GuiRadio.ensureGroupRegistry(root.root);
+      maintainGuiRadioGroups(root.root, !!root.root.dirty);
       this.roots.add(root);
     }
+    const preview = this.dragPreview.root;
+    if (preview) {bindGuiMeasureOwner(preview, this.renderer); this.measureAutoWidthLabels(preview.root, preview.theme.fontSize, preview); preview.layout(width, height);}
+    for (const root of previous) suspendGuiLayout(root.root);
+    this.inputDomain.refresh();
+    this.ensureTextServices()?.synchronizeTextInput();
   }
 
-  private measureAutoWidthLabels(element: GuiElement, themeFontSize: number): void {
-    if (element instanceof GuiHelpDialog) setGuiHelpDialogTextMetrics(element,(text,size)=>this.renderer.measureTextWidth(text,size));
-    if (element instanceof GuiLabel && element.autoWidth) {
+  
+  
+
+  private inputRoots(): GuiRoot[] {
+    const entities=this.inputWorld?this.entitySet.get(this.inputWorld):null;
+    return [...this.roots].filter(root=>!root.destroyed&&(!this.inputWorld||[...(entities??[])].some(entity=>entity.getComponent(GuiRoot)===root)));
+  }
+
+  private measureAutoWidthLabels(element: GuiElement, themeFontSize: number, root: GuiRoot): void {
+    const measured = isGuiControl<GuiLabel>(element, 'GuiLabel') || isGuiControl<GuiHelpDialog>(element, 'GuiHelpDialog');
+    const version = measured ? guiMeasureFontVersion(root, element) : 0;
+    const configuredSize = measured ? element.getResolvedStyle().fontSize ?? themeFontSize : themeFontSize;
+    if (isGuiControl<GuiHelpDialog>(element, 'GuiHelpDialog')) setGuiHelpDialogTextMetrics(element,(text,size)=>this.renderer.measureTextWidth(text,size,root,element), version);
+    if (isGuiControl<GuiLabel>(element, 'GuiLabel') && element.autoWidth && !isGuiLayoutManaged(element)) {
+      const key = JSON.stringify([version, element.text, element.fontSize ?? configuredSize]);
+      if (this.autoWidthKeys.get(element) !== key) {
       setGuiLabelMeasuredTextWidth(
         element,
-        this.renderer.measureTextWidth(element.text, element.fontSize ?? themeFontSize),
+        this.renderer.measureTextWidth(element.text, element.fontSize ?? configuredSize, root, element),
       );
+      this.autoWidthKeys.set(element, key);
+      }
     }
-    for (const child of element.children) this.measureAutoWidthLabels(child, themeFontSize);
+    for (const child of element.children) this.measureAutoWidthLabels(child, themeFontSize, root);
   }
 
   private dispatchPendingEvents(world: World): void {
     const events = this.pending;
-    for (const event of events) this.dispatchPointerEvent(world, event);
+    const state=this.region?getRenderRegionState(this.region):undefined;
+    const region=state&&!state.isDisposed?state.snapshot():undefined;
+    for (const event of events) {
+      if(region){event.x-=region.bounds.x;event.y-=region.bounds.y;}
+      if(!region||region.visible)this.dispatchPointerEvent(world, event);
+    }
     for (const event of events) {
       event.native = null;
       this.pendingPool.push(event);
     }
     events.length = 0;
     const wheelEvents = this.pendingWheel;
-    for (const event of wheelEvents) this.dispatchWheelEvent(world, event);
+    for (const event of wheelEvents) {
+      if(region){event.x-=region.bounds.x;event.y-=region.bounds.y;}
+      if(!region||region.visible)this.dispatchWheelEvent(world, event);
+    }
     for (const event of wheelEvents) {
       event.native = null;
       this.pendingWheelPool.push(event);
@@ -654,7 +986,7 @@ export class GuiSystem extends System {
   private render(context: RenderCommandContext): void {
     if (this.roots.size === 0) return;
 
-    if (!context.passEncoder) {
+    if (!context.passEncoder && !isRegionRenderTarget(context.view?.target)) {
       context.descriptor = context.view
         ? cloneRenderPassDescriptor(
             context.view.target.getRenderPassDescriptor(getRenderViewPassOptions(context.view)),
@@ -669,20 +1001,42 @@ export class GuiSystem extends System {
     }
 
     const { passEncoder, ownsPass } = beginRenderCommandPass(context);
-    this.renderer.render(
+    const view=context.view,viewport=getRegionProjection(view)??view?.viewport;
+    let surface=view?{width:view.displayWidth,height:view.displayHeight,format:view.target.format,originX:0,originY:0}:null;
+    if(view&&viewport&&viewport.width>0&&viewport.height>0){
+      // Keep fractional translation in the vertex projection rather than relying
+      // on fractional viewport edge coverage.
+      const sx=viewport.width/view.displayWidth,sy=viewport.height/view.displayHeight;
+      surface={width:view.target.width/sx,height:view.target.height/sy,format:view.target.format,originX:-viewport.x/sx,originY:-viewport.y/sy};
+      passEncoder.setViewport(0,0,view.target.width,view.target.height,0,1);
+      const scissor=view.scissor;
+      const x=Math.max(0,Math.floor(viewport.x),scissor?.x??0),y=Math.max(0,Math.floor(viewport.y),scissor?.y??0);
+      const right=Math.min(view.target.width,Math.ceil(viewport.x+viewport.width),scissor?scissor.x+scissor.width:view.target.width),bottom=Math.min(view.target.height,Math.ceil(viewport.y+viewport.height),scissor?scissor.y+scissor.height:view.target.height);
+      passEncoder.setScissorRect(x,y,Math.max(0,right-x),Math.max(0,bottom-y));
+    }else if(view?.scissor){const s=view.scissor;passEncoder.setScissorRect(s.x,s.y,s.width,s.height)}
+    try{this.renderer.render(
       passEncoder,
-      this.roots,
+      this.renderRoots(),
       this.engine,
       context.view?.reverseZ ?? this.engine.reverseZ,
       context.view?.sampleCount ?? this.engine.msaaSamples,
-    );
-    if (ownsPass) passEncoder.end();
+      surface,
+      context,
+    );}finally{
+      if(!ownsPass&&view&&viewport&&viewport.width>0&&viewport.height>0){
+        const restore=view.viewport??{x:0,y:0,width:view.target.width,height:view.target.height};
+        passEncoder.setViewport(restore.x,restore.y,restore.width,restore.height,restore.minDepth??0,restore.maxDepth??1);
+        const scissor=view.scissor??{x:0,y:0,width:view.target.width,height:view.target.height};
+        passEncoder.setScissorRect(scissor.x,scissor.y,scissor.width,scissor.height);
+      }
+      if(ownsPass)passEncoder.end();
+    }
   }
 
   private closePopupsExcept(hit: GuiElement | null, x: number, y: number): void {
     for (const root of this.roots) {
       this.walkGui(root.root, (element) => {
-        if (!(element instanceof GuiSelect) || !element.open) return;
+        if (!(isGuiControl<GuiSelect>(element, 'GuiSelect')) || !element.open) return;
         if (element === hit && element.containsPointIncludingPopup(x, y)) return;
         element.setOpen(false);
       });
@@ -694,3 +1048,5 @@ export class GuiSystem extends System {
     for (const child of element.children) this.walkGui(child, visitor);
   }
 }
+
+export type GuiTextServiceContext=GuiSystem['textContext'];

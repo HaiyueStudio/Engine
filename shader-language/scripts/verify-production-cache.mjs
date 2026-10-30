@@ -16,6 +16,9 @@ const showcasePath = resolve(root, 'examples/shader-language-lab/generated/showc
 const compilerInputs = Object.freeze(['shader-language/dist', 'shader-language/src', 'shader-language/wgsl-module-registry.json', 'shader-language/scripts/wgsl-includes.mjs']);
 
 export const PRODUCTION_CACHE_SCOPES = Object.freeze([
+  scope('gui-region-history', 2,
+    ['shader-language/scripts/generate-gui-region-history-production.mjs', 'shader-language/scripts/compact-artifact-literal.mjs', 'shader-language/src/render-family/stdlib/2d-ui/gui-region-history.wgsl'],
+    ['engine/src/shaders/generated/2d-ui-region-history']),
   scope('deferred-full-forward', 2,
     ['shader-language/scripts/generate-deferred-full-forward-production.mjs', 'shader-language/scripts/shader-source-variant.mjs', 'shader-language/scripts/generate-deferred-lighting-production.mjs',
       'shader-language/scripts/compact-artifact-literal.mjs', 'shader-language/src/deferred-lighting',
@@ -28,7 +31,7 @@ export const PRODUCTION_CACHE_SCOPES = Object.freeze([
     ['shader-language/scripts/generate-builtin-postprocess-production.mjs', 'shader-language/builtin-postprocess-family.json'],
     ['engine/src/shaders/generated/postprocess-']),
   scope('builtin-render', 2,
-    ['shader-language/scripts/generate-builtin-render-production.mjs', 'shader-language/builtin-engine-2d-ui-family.json', 'shader-language/builtin-components-2d-ui-family.json', 'shader-language/builtin-simple-3d-runtime-family.json'],
+    ['shader-language/scripts/generate-builtin-render-production.mjs', 'shader-language/scripts/compact-artifact-literal.mjs', 'shader-language/builtin-engine-2d-ui-family.json', 'shader-language/builtin-components-2d-ui-family.json', 'shader-language/builtin-simple-3d-runtime-family.json'],
     ['engine/src/shaders/generated/2d-ui-', 'extensions/src/shaders/generated/2d-ui-', 'engine/src/shaders/generated/simple3d-']),
   scope('deformation', 2,
     ['shader-language/scripts/generate-deformation-production.mjs', 'shader-language/scripts/compact-artifact-literal.mjs', 'shader-language/builtin-deformation-family.json'],

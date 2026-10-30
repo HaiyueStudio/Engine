@@ -3,6 +3,49 @@ import test from 'node:test';
 import { Entity, Render3DSystem, PostProcessRenderer, RenderView, RttTexture, TransientRenderTargetPool } from '../dist/experimental.js';
 import { RttEngine } from '../dist/rtt.js';
 import { createAuditGpuDevice } from '../../scripts/benchmark/real-renderer-audit-device.mjs';
+import {importEngineSource} from './helpers/internal-source.mjs';
+
+test('unsubmitted output records snapshot changed parameters and retire after every recording boundary',async()=>{
+ const {SceneOutputPass}=await importEngineSource('postprocess/SceneOutputPass.ts');
+ const {setPostProcessSubmission}=await importEngineSource('postprocess/PostProcessSubmission.ts');
+ let complete;const done=new Promise(resolve=>{complete=resolve}),writes=[];
+ const device=createAuditGpuDevice({behaviors:{'queue.onSubmittedWorkDone':()=>done,'queue.writeBuffer':({args})=>writes.push({buffer:args[0],values:[...new Float32Array(args[2])]})}}),pass=new SceneOutputPass();pass.prepare(device);
+ const source=device.createTexture({size:[16,16],format:'rgba16float',usage:GPUTextureUsage.TEXTURE_BINDING});
+ const scope=()=>{const submit=[],cancel=[];return{submit,cancel,bind:()=>setPostProcessSubmission(pass,cb=>submit.push(cb),cb=>cancel.push(cb))}};
+ const encode=(boundary,exposure)=>{boundary.bind();pass.configure('rgba8unorm',exposure,'reinhard');pass.setFrameIdentity(1,'same');pass.apply(device.createCommandEncoder(),source,{},device);setPostProcessSubmission(pass);return pass._bindings.get('same')};
+ const a=scope(),b=scope(),c=scope(),first=encode(a,.25),shared=encode(b,.25),next=encode(c,2);
+ assert.equal(shared,first,'identical parameters may share an immutable pending binding');assert.notEqual(next.uniform,first.uniform);
+ assert.equal(writes.length,2);assert.deepEqual(writes[0].values,[.25,1,1,0]);assert.deepEqual(writes[1].values,[2,1,1,0]);
+ pass.destroy();assert.equal(first.uniform.destroyed,false);assert.equal(next.uniform.destroyed,false);
+ a.cancel.forEach(cb=>cb());assert.equal(first.uniform.destroyed,false,'another unsubmitted encoder still references the same buffer');
+ c.submit.forEach(cb=>cb(device.queue));complete();await done;await Promise.resolve();assert.equal(next.uniform.destroyed,true);assert.equal(first.uniform.destroyed,false);
+ b.submit.forEach(cb=>cb(device.queue));await Promise.resolve();assert.equal(first.uniform.destroyed,true);source.destroy();
+});
+
+test('successfully submitted output parameters reuse capacity and cancellation releases replaced snapshots',async()=>{
+ const {SceneOutputPass}=await importEngineSource('postprocess/SceneOutputPass.ts');const {setPostProcessSubmission}=await importEngineSource('postprocess/PostProcessSubmission.ts');
+ const device=createAuditGpuDevice(),pass=new SceneOutputPass();pass.prepare(device);const source=device.createTexture({size:[16,16],format:'rgba16float',usage:GPUTextureUsage.TEXTURE_BINDING});
+ const submitted=[],cancelled=[];const apply=exposure=>{setPostProcessSubmission(pass,cb=>submitted.push(cb),cb=>cancelled.push(cb));pass.configure('rgba8unorm',exposure,'none');pass.setFrameIdentity(1,'same');pass.apply(device.createCommandEncoder(),source,{},device);setPostProcessSubmission(pass);return pass._bindings.get('same').uniform};
+ const first=apply(.5);submitted.splice(0).forEach(cb=>cb(device.queue));const reused=apply(1);assert.equal(reused,first);
+ const replacement=apply(2);assert.notEqual(replacement,first);cancelled.splice(0).forEach(cb=>cb());await Promise.resolve();assert.equal(first.destroyed,true);
+ pass.destroy();assert.equal(replacement.destroyed,true);source.destroy();
+});
+
+test('managed post chains propagate frame cancellation to their output parameter snapshots',async()=>{
+ const {SceneOutputPass}=await importEngineSource('postprocess/SceneOutputPass.ts'),{PostProcessRenderer}=await importEngineSource('postprocess/PostProcessRenderer.ts');
+ const {setPostProcessFrameCancellation}=await importEngineSource('postprocess/PostProcessSubmission.ts');
+ const device=createAuditGpuDevice(),engine={device,width:16,height:16,format:'rgba8unorm'},renderer=new PostProcessRenderer(),pass=new SceneOutputPass(),submitted=[],cancelled=[];
+ renderer.prepare(engine);renderer.beginFrame(1,cb=>submitted.push(cb));setPostProcessFrameCancellation(renderer,cb=>cancelled.push(cb));
+ pass.configure('rgba8unorm',1,'reinhard');renderer.run(device.createCommandEncoder(),[pass],{}, {frame:{frameId:1,viewKey:'managed'}});
+ const uniform=pass._bindings.get('managed').uniform;pass.destroy();assert.equal(uniform.destroyed,false);assert.ok(cancelled.length>0);
+ cancelled.forEach(cb=>cb());assert.equal(uniform.destroyed,true,'a cancelled frame must not leave an unsubmitted binding lease forever');renderer.destroy();
+});
+
+test('post-chain ping-pong colors remain copyable for clipped output after effects',t=>{
+ const {engine}=fixture(t),renderer=new PostProcessRenderer();renderer.prepare(engine);t.after(()=>renderer.destroy());renderer.captureSceneColor(engine.device.createCommandEncoder());
+ assert.ok(renderer._buf1.usage&GPUTextureUsage.COPY_SRC,'effect output must be a legal source for the final visible crop');
+ assert.ok(renderer._buf1.usage&GPUTextureUsage.COPY_DST,'refraction capture remains a legal destination');
+});
 
 function fixture(t, behaviors = {}) {
   const device = createAuditGpuDevice({ behaviors });
@@ -43,6 +86,14 @@ test('unchanged scene output reuses uniforms, bind groups and pipelines across f
   assert.equal(writes, 1);
   assert.equal(output._bindings.size, 1);
   assert.equal(output._pipelines.size, 1);
+});
+
+test('regional linear display intermediates apply exposure/tone without transfer while ordinary HDR captures stay raw',t=>{
+ const {output,device,texture}=fixture(t);
+ output.configure('rgba16float',2,'reinhard',undefined,true);output.setFrameIdentity(1,'regional');output.apply(device.createCommandEncoder(),texture,{},device);
+ assert.deepEqual([...output._bindings.get('regional').values],[2,1,3,0]);
+ output.configure('rgba16float',2,'reinhard');output.setFrameIdentity(2,'capture');output.apply(device.createCommandEncoder(),texture,{},device);
+ assert.deepEqual([...output._bindings.get('capture').values],[2,1,0,0]);
 });
 
 test('expired output uniforms remain alive until the encoding submission completes', async t => {
@@ -132,6 +183,13 @@ test('viewport-local HDR depth remains local after a full-target view', t => {
   assert.equal(local.texture.width, 8);
   assert.equal(local.texture.height, 8);
   assert.equal(post._postRenderer.sceneDepthView, local);
+});
+
+test('an explicit full-target regional viewport retains the depth used by later overlay producers',t=>{
+ const {engine,device,system}=fixture(t),target=new RttEngine(engine,16,16);t.after(()=>target.destroy());
+ const view=new RenderView({key:'regional-local',target,camera:new Entity(),sampleCount:4,viewport:{x:0,y:0,width:16,height:16}}).snapshot(),post=system._postScenePasses;
+ post.prepare([],{device,encoder:device.createCommandEncoder(),view},false);
+ assert.equal(post.buildScenePassDescriptor('clear',false,view).depthStencilAttachment.view,target.getRenderPassDescriptor(view).depthStencilAttachment.view);
 });
 
 test('HDR RTT format survives resize and cannot alias an UNORM target with equal dimensions', t => {

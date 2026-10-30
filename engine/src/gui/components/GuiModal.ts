@@ -1,3 +1,5 @@
+import * as GuiPaint from '../rendering/GuiControlPaintPrimitives';
+import {admitGuiControl} from '../GuiControlIdentity';
 import {
   GuiDirtyFlags,
   type GuiElementOptions,
@@ -9,6 +11,7 @@ import {
 } from '../GuiTypes';
 import { GuiButton } from './GuiButton';
 import { GuiElement } from './GuiElement';
+import {assignedGuiRect} from '../GuiLayoutState';
 import { GuiLabel } from './GuiLabel';
 
 export type GuiModalCloseReason = 'close' | 'confirm' | 'cancel' | 'backdrop';
@@ -31,6 +34,8 @@ export interface GuiModalOptions extends Omit<GuiElementOptions, 'x' | 'y'> {
 }
 
 export class GuiModal extends GuiElement {
+  private static readonly __controlIdentityGuiModal = /* @__PURE__ */ (() => admitGuiControl(GuiModal.prototype, 'GuiModal', undefined, paintGuiModal))();
+  static override readonly themeControlType: string = 'GuiModal';
   title: string;
   message: string;
   confirmText: string;
@@ -56,6 +61,9 @@ export class GuiModal extends GuiElement {
   constructor(options: GuiModalOptions = {}) {
     super({
       id: options.id,
+      ...(options.focus ? {focus: options.focus} : {}),
+      ...(options.pointerFilter ? {pointerFilter: options.pointerFilter} : {}),
+      ...(options.onAction ? {onAction: options.onAction} : {}),
       width: '100%',
       height: '100%',
       visible: options.visible ?? false,
@@ -192,6 +200,7 @@ export class GuiModal extends GuiElement {
   }
 
   override layout(parentRect: GuiRect): void {
+    parentRect = assignedGuiRect(this) ?? parentRect;
     this.rect = { ...parentRect };
     const availableWidth = Math.max(1, parentRect.width - 32);
     const availableHeight = Math.max(1, parentRect.height - 32);
@@ -247,3 +256,21 @@ export class GuiModal extends GuiElement {
     this.cancelButton.setVisible(this.showCancelButton);
   }
 }
+
+/** Original built-in painter; retained with this control, not every GUI owner. */
+function paintGuiModal(context:GuiPaint.GuiControlPaintContext, modal: GuiModal, theme: GuiPaint.GuiTheme): void {
+    const opacity = context.styleFor(modal).opacity ?? 1;
+    const rect = modal.dialogRect;
+    const radius = context.styleFor(modal).radius ?? theme.radius;
+    const border = GuiPaint.colorToRgba(context.styleFor(modal).borderColor, theme.colors.border);
+    const background = GuiPaint.colorToRgba(context.styleFor(modal).backgroundColor, theme.colors.surface);
+    context.addRect(rect.x, rect.y, rect.width, rect.height, radius, GuiPaint.withAlpha(border, opacity));
+    context.addRect(
+      rect.x + 1,
+      rect.y + 1,
+      Math.max(0, rect.width - 2),
+      Math.max(0, rect.height - 2),
+      Math.max(0, radius - 1),
+      GuiPaint.withAlpha(background, opacity),
+    );
+  }

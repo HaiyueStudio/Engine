@@ -151,6 +151,7 @@ test('production cache is content-addressed per generator family', () => {
   assert.deepEqual(
     PRODUCTION_CACHE_SCOPES.map(scope => scope.id),
     [
+      'gui-region-history',
       'deferred-full-forward',
       'motion-blur',
       'builtin-postprocess',
@@ -204,4 +205,20 @@ test('production bundle admission fails closed and preserves byte limits', async
   for (const actual of [101, NaN, undefined, -1]) assert.ok(validateProductionBundleCost('sample', actual, budget));
   assert.ok(validateProductionBundleCost('unknown', 1, budget));
   assert.ok(validateProductionBundleCost('sample', 1, { productionBundles: { sample: NaN } }));
+});
+
+test('stage9 historical UI byte observations remain immutable maxima for equivalent metadata', async () => {
+  const {readFileSync} = await import('node:fs');
+  const {validateProductionBundleCost} = await import('../scripts/shader-cost-policy.mjs');
+  const historical = JSON.parse(readFileSync(resolve(root, 'shader-language/stage9-contract.json'), 'utf8'));
+  const budget = { productionBundles: historical.bundle };
+  for (const [metric, compactBytes] of [['engine2dUiArtifactRawBytes', 27526], ['engine2dUiArtifactGzipBytes', 4519]]) {
+    assert.equal(validateProductionBundleCost(metric, compactBytes, budget), null);
+    assert.equal(validateProductionBundleCost(metric, historical.bundle[metric], budget), null);
+    assert.match(validateProductionBundleCost(metric, historical.bundle[metric] + 1, budget), /exceeds/);
+    assert.match(validateProductionBundleCost(metric, -1, budget), /valid measurement/);
+  }
+  assert.equal(historical.bundle.engine2dUiArtifactRawBytes, 53787);
+  assert.equal(historical.bundle.engine2dUiArtifactGzipBytes, 4742);
+  assert.equal(historical.bundle.engineArtifactGzipBudgetBytes, 12000);
 });

@@ -1,3 +1,5 @@
+import type {RenderCommandContext} from '@haiyue/engine/extension-authoring';
+import {LayoutGpuStorage} from './LayoutGpuStorage.js';
 import type { LayoutEvaluation, LayoutRect } from './runtime-types.js';
 import type { RuntimeColor, RuntimePaintSource } from '../../text/parameterized/runtime-types.js';
 
@@ -6,13 +8,12 @@ export interface LayoutGpuStats { readonly bufferCount: number; readonly allocat
 export class LayoutGpuRenderer {
   private device: GPUDevice;
   private pipeline: GPURenderPipeline;
-  private buffer: GPUBuffer | undefined;
-  private source = new Float32Array();
+  private readonly storage: LayoutGpuStorage;
   private vertexCount = 0;
   private generation = 0;
   private lost = false;
   private disposed = false;
-  constructor(device: GPUDevice, readonly format: GPUTextureFormat = 'rgba8unorm', private readonly maxGpuBytes = 512 * 1024 * 1024) { this.device = device; this.validateDevice(device); this.pipeline = this.createPipeline(device); this.watchLoss(device, 0); }
+  constructor(device: GPUDevice, readonly format: GPUTextureFormat = 'rgba8unorm', private readonly maxGpuBytes = 512 * 1024 * 1024) { this.device = device; this.storage=new LayoutGpuStorage(device,maxGpuBytes); this.validateDevice(device); this.pipeline = this.createPipeline(device); this.watchLoss(device, 0); }
 
   upload(evaluation: LayoutEvaluation): void {
     this.assertLive(); const values: number[] = [], maximumBytes = Math.min(this.maxGpuBytes, this.device.limits.maxBufferSize);
@@ -30,13 +31,13 @@ export class LayoutGpuRenderer {
       ensureBudget(values, maximumBytes);
     }
     for (let index = 0; index < values.length; index += 6) { values[index] = evaluation.viewport[0] > 0 ? values[index]! / evaluation.viewport[0] * 2 - 1 : -1; values[index + 1] = evaluation.viewport[1] > 0 ? 1 - values[index + 1]! / evaluation.viewport[1] * 2 : 1; }
-    const source = Float32Array.from(values); if (source.byteLength > this.maxGpuBytes || source.byteLength > this.device.limits.maxBufferSize) throw new Error('E_LAYOUT_GPU_BUDGET'); const next = source.byteLength > 0 ? this.device.createBuffer({ label: 'Layout2D.vertices', size: align4(source.byteLength), usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST }) : undefined; if (next) this.device.queue.writeBuffer(next, 0, source); this.buffer?.destroy(); this.buffer = next; this.source = source; this.vertexCount = source.length / 6;
+    const source=Float32Array.from(values);this.storage.upload(source);this.vertexCount=source.length/6;
   }
-  render(pass: GPURenderPassEncoder): void { this.assertLive(); if (!this.buffer || this.vertexCount === 0) return; pass.setPipeline(this.pipeline); pass.setVertexBuffer(0, this.buffer); pass.draw(this.vertexCount); }
-  notifyDeviceLost(): void { if (this.disposed || this.lost) return; this.lost = true; this.buffer?.destroy(); this.buffer = undefined; }
-  recoverDevice(device: GPUDevice, generation = this.generation + 1): void { if (this.disposed) throw new Error('E_LAYOUT_GPU_DISPOSED'); this.notifyDeviceLost(); this.validateDevice(device); this.device = device; this.pipeline = this.createPipeline(device); const next = this.source.byteLength > 0 ? device.createBuffer({ label: 'Layout2D.vertices', size: align4(this.source.byteLength), usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST }) : undefined; if (next) device.queue.writeBuffer(next, 0, this.source); this.buffer = next; this.generation = generation; this.lost = false; this.watchLoss(device, generation); }
-  dispose(): void { if (this.disposed) return; this.disposed = true; this.buffer?.destroy(); this.buffer = undefined; this.source = new Float32Array(); this.vertexCount = 0; }
-  get stats(): LayoutGpuStats { return Object.freeze({ bufferCount: this.buffer ? 1 : 0, allocatedBytes: this.buffer?.size ?? 0, vertexCount: this.vertexCount, generation: this.generation, lost: this.lost, disposed: this.disposed }); }
+  render(pass: GPURenderPassEncoder, lifetime?: Pick<RenderCommandContext,'afterSubmit'|'afterCancel'>): void {this.assertLive();if(!this.vertexCount)return;const buffer=this.storage.record(lifetime);if(!buffer)return;pass.setPipeline(this.pipeline);pass.setVertexBuffer(0,buffer);pass.draw(this.vertexCount);}
+  notifyDeviceLost(): void {if(this.disposed||this.lost)return;this.lost=true;this.storage.lose();}
+  recoverDevice(device: GPUDevice, generation=this.generation+1): void {if(this.disposed)throw Error('E_LAYOUT_GPU_DISPOSED');this.notifyDeviceLost();this.validateDevice(device);this.device=device;this.pipeline=this.createPipeline(device);this.storage.recover(device);this.generation=generation;this.lost=false;this.watchLoss(device,generation);}
+  dispose(): void {if(this.disposed)return;this.disposed=true;this.storage.dispose();this.vertexCount=0;}
+  get stats(): LayoutGpuStats {return Object.freeze({bufferCount:this.storage.count,allocatedBytes:this.storage.bytes,vertexCount:this.vertexCount,generation:this.generation,lost:this.lost,disposed:this.disposed});}
   private validateDevice(device: GPUDevice): void { if (device.limits.maxBufferSize < 24 || device.limits.maxVertexBufferArrayStride < 24) throw new Error('E_LAYOUT_GPU_UNSUPPORTED_LIMITS'); }
   private createPipeline(device: GPUDevice): GPURenderPipeline { return device.createRenderPipeline({ label: 'Layout2D.pipeline', layout: 'auto', vertex: { module: device.createShaderModule({ label: 'Layout2D.shader', code: LAYOUT_GPU_WGSL }), entryPoint: 'vs', buffers: [{ arrayStride: 24, attributes: [{ shaderLocation: 0, format: 'float32x2', offset: 0 }, { shaderLocation: 1, format: 'float32x4', offset: 8 }] }] }, fragment: { module: device.createShaderModule({ label: 'Layout2D.shader', code: LAYOUT_GPU_WGSL }), entryPoint: 'fs', targets: [{ format: this.format, blend: { color: { operation: 'add', srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha' }, alpha: { operation: 'add', srcFactor: 'one', dstFactor: 'one-minus-src-alpha' } } }] }, primitive: { topology: 'triangle-list' } }); }
   private watchLoss(device: GPUDevice, generation: number): void { void device.lost.then(() => { if (!this.disposed && this.device === device && this.generation === generation) this.notifyDeviceLost(); }); }

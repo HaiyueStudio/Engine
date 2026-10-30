@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "model": "reviewed-capability-plus-growth-reserve",
   "principles": [
+    "G13 proposal admits the exact ADR 0134 HYA format/runtime symbol lists (55 plus 37) with zero growth reserve; review/engine-0.2.2/g11-public-api-admission.md. Existing reserves and all performance/package limits are unchanged.",
     "ADR 0117 admits one ColorCMYK export in ./color for the next minor release; root and all growth reserves remain unchanged.",
     "G06 admits 5 Deferred lighting facade symbols in experimental/renderer and the compatibility aggregate; review/engine-0.2.1/g06-example-api-review.md. No stable root or performance budget growth.",
     "ADR 0100 adds optional native GUI/font raster callbacks with zero exported-symbol growth; existing root and domain budgets are unchanged.",
@@ -19,14 +20,24 @@
         {
           "id": "typed-shader-compiler",
           "stability": "stable",
-          "growthReserve": { "ratio": 0.15, "minimumSymbols": 3 },
-          "entrypoints": { ".": 247 }
+          "growthReserve": {
+            "ratio": 0.15,
+            "minimumSymbols": 3
+          },
+          "entrypoints": {
+            ".": 247
+          }
         },
         {
           "id": "material-graph-authoring",
           "stability": "stable",
-          "growthReserve": { "ratio": 0.2, "minimumSymbols": 3 },
-          "entrypoints": { "./material-graph": 15 }
+          "growthReserve": {
+            "ratio": 0.2,
+            "minimumSymbols": 3
+          },
+          "entrypoints": {
+            "./material-graph": 15
+          }
         }
       ]
     },
@@ -34,16 +45,43 @@
       "workspace": "animation-spec",
       "groups": [
         {
+          "id": "hya-production-format",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./hya-production": 55
+          }
+        },
+        {
           "id": "source-neutral-animation-format",
           "stability": "stable",
-          "growthReserve": { "ratio": 0.12, "minimumSymbols": 2 },
-          "entrypoints": { ".": 95, "./native3d": 43, "./deformable2d": 15 }
+          "growthReserve": {
+            "ratio": 0.12,
+            "minimumSymbols": 2
+          },
+          "entrypoints": {
+            ".": 95,
+            "./native3d": 43,
+            "./deformable2d": 15
+          }
         },
         {
           "id": "offline-source-adapters",
           "stability": "stable",
-          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
-          "entrypoints": { "./conversion": 19, "./cubism": 30, "./live2d": 30, "./live2d/clip-baked": 8, "./lottie": 9 }
+          "growthReserve": {
+            "ratio": 0.15,
+            "minimumSymbols": 2
+          },
+          "entrypoints": {
+            "./conversion": 19,
+            "./cubism": 30,
+            "./live2d": 30,
+            "./live2d/clip-baked": 8,
+            "./lottie": 9
+          }
         }
       ]
     },
@@ -53,16 +91,23 @@
         {
           "id": "golden-path",
           "stability": "stable",
-          "growthReserve": { "ratio": 0, "minimumSymbols": 0 },
-          "entrypoints": { ".": 30 }
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            ".": 30
+          }
         },
         {
           "id": "runtime-foundations",
           "stability": "stable",
-          "growthReserve": { "ratio": 0.1, "minimumSymbols": 2 },
+          "growthReserve": {
+            "ratio": 0.1,
+            "minimumSymbols": 2
+          },
           "entrypoints": {
             "./assets": 21,
-            "./core": 68,
             "./diagnostics": 12,
             "./ecs": 22,
             "./extension-authoring": 14,
@@ -73,14 +118,16 @@
         {
           "id": "scene-rendering",
           "stability": "stable",
-          "growthReserve": { "ratio": 0.1, "minimumSymbols": 2 },
+          "growthReserve": {
+            "ratio": 0.1,
+            "minimumSymbols": 2
+          },
           "entrypoints": {
             "./color": 17,
             "./components": 103,
             "./controls": 9,
             "./font": 13,
             "./geometry": 53,
-            "./gui": 86,
             "./input": 3,
             "./lighting": 19,
             "./material": 69,
@@ -96,7 +143,10 @@
         {
           "id": "compute-and-physics",
           "stability": "stable",
-          "growthReserve": { "ratio": 0.12, "minimumSymbols": 2 },
+          "growthReserve": {
+            "ratio": 0.12,
+            "minimumSymbols": 2
+          },
           "entrypoints": {
             "./compute": 7,
             "./physics": 37,
@@ -107,7 +157,10 @@
         {
           "id": "experimental-runtime-seams",
           "stability": "experimental",
-          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
+          "growthReserve": {
+            "ratio": 0.15,
+            "minimumSymbols": 2
+          },
           "entrypoints": {
             "./experimental": 860,
             "./experimental/assets": 38,
@@ -119,6 +172,29 @@
             "./experimental/simulation": 34,
             "./experimental/audio": 5
           }
+        },
+        {
+          "id": "unicode-text-boundaries",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./text": 1
+          }
+        },
+        {
+          "id": "g01-gui-and-region-contracts",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./core": 71,
+            "./gui": 106
+          }
         }
       ]
     },
@@ -126,9 +202,27 @@
       "workspace": "extensions",
       "groups": [
         {
+          "id": "hya-production-runtimes",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./hya-player": 9,
+            "./hya-text": 7,
+            "./hya-layout": 5,
+            "./hya-data": 9,
+            "./hya-audio": 7
+          }
+        },
+        {
           "id": "admitted-optional-runtimes",
           "stability": "stable",
-          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
+          "growthReserve": {
+            "ratio": 0.15,
+            "minimumSymbols": 2
+          },
           "entrypoints": {
             "./animation": 33,
             "./animation3d": 75,
@@ -146,7 +240,10 @@
         {
           "id": "experimental-extension-infrastructure",
           "stability": "experimental",
-          "growthReserve": { "ratio": 0.2, "minimumSymbols": 2 },
+          "growthReserve": {
+            "ratio": 0.2,
+            "minimumSymbols": 2
+          },
           "entrypoints": {
             ".": 2,
             "./experimental/gltf-worker": 11,
@@ -157,38 +254,80 @@
         {
           "id": "experimental-ray-tracing",
           "stability": "experimental",
-          "growthReserve": { "ratio": 0.25, "minimumSymbols": 2 },
-          "entrypoints": { "./ray-tracing": 11 }
+          "growthReserve": {
+            "ratio": 0.25,
+            "minimumSymbols": 2
+          },
+          "entrypoints": {
+            "./ray-tracing": 11
+          }
         },
         {
           "id": "achievements",
           "stability": "stable",
-          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
-          "entrypoints": { "./achievements": 13 }
+          "growthReserve": {
+            "ratio": 0.15,
+            "minimumSymbols": 2
+          },
+          "entrypoints": {
+            "./achievements": 13
+          }
         },
         {
           "id": "share-content",
           "stability": "stable",
-          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
-          "entrypoints": { "./share-content": 16 }
+          "growthReserve": {
+            "ratio": 0.15,
+            "minimumSymbols": 2
+          },
+          "entrypoints": {
+            "./share-content": 16
+          }
         },
         {
           "id": "branching-narrative",
           "stability": "stable",
-          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
-          "entrypoints": { "./narrative": 19 }
+          "growthReserve": {
+            "ratio": 0.15,
+            "minimumSymbols": 2
+          },
+          "entrypoints": {
+            "./narrative": 19
+          }
         },
         {
           "id": "internationalization",
           "stability": "stable",
-          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
-          "entrypoints": { "./i18n": 19 }
+          "growthReserve": {
+            "ratio": 0.15,
+            "minimumSymbols": 2
+          },
+          "entrypoints": {
+            "./i18n": 19
+          }
         },
         {
           "id": "virtual-joystick-controls",
           "stability": "stable",
-          "growthReserve": { "ratio": 0.15, "minimumSymbols": 2 },
-          "entrypoints": { "./controls": 9 }
+          "growthReserve": {
+            "ratio": 0.15,
+            "minimumSymbols": 2
+          },
+          "entrypoints": {
+            "./controls": 9
+          }
+        },
+        {
+          "id": "shared-layout-and-gui-adapter",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./layout": 13,
+            "./gui-layout": 11
+          }
         }
       ]
     }

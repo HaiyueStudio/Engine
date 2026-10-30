@@ -1,0 +1,2127 @@
+{
+  "format": "haiyue-composition",
+  "version": 1,
+  "parts": [
+    {
+      "id": "data",
+      "extension": "org.haiyue.data-binding@1",
+      "required": true,
+      "requires": [],
+      "dependencies": [
+        "state",
+        "layout"
+      ],
+      "document": {
+        "format": "haiyue-data-binding",
+        "version": 1,
+        "extension": "org.haiyue.data-binding@1",
+        "enums": [],
+        "models": [
+          {
+            "id": "Root",
+            "properties": [
+              {
+                "id": "go",
+                "kind": "boolean",
+                "defaultValue": false
+              },
+              {
+                "id": "label",
+                "kind": "string",
+                "defaultValue": "你好 A"
+              }
+            ]
+          }
+        ],
+        "instances": [
+          {
+            "id": "root",
+            "model": "Root",
+            "scope": "local",
+            "values": {
+              "go": false,
+              "label": "你好 A"
+            }
+          }
+        ],
+        "converters": [],
+        "propertyGroups": [],
+        "components": [],
+        "bindings": [
+          {
+            "id": "value",
+            "target": "text",
+            "targetPath": [
+              "strings",
+              "value"
+            ],
+            "source": {
+              "mode": "explicit",
+              "instance": "root",
+              "path": [
+                "label"
+              ]
+            },
+            "direction": "read"
+          },
+          {
+            "id": "write-label",
+            "target": "text",
+            "targetPath": [
+              "strings",
+              "value"
+            ],
+            "source": {
+              "mode": "explicit",
+              "instance": "root",
+              "path": [
+                "label"
+              ]
+            },
+            "direction": "write"
+          },
+          {
+            "id": "go",
+            "target": "go",
+            "targetPath": [
+              "value"
+            ],
+            "source": {
+              "mode": "explicit",
+              "instance": "root",
+              "path": [
+                "go"
+              ]
+            },
+            "direction": "read"
+          },
+          {
+            "id": "write-go",
+            "target": "go",
+            "targetPath": [
+              "value"
+            ],
+            "source": {
+              "mode": "explicit",
+              "instance": "root",
+              "path": [
+                "go"
+              ]
+            },
+            "direction": "write"
+          }
+        ]
+      }
+    },
+    {
+      "id": "state",
+      "extension": "org.haiyue.animation-state-machine@2",
+      "required": true,
+      "requires": [],
+      "dependencies": [
+        "core"
+      ],
+      "document": {
+        "format": "haiyue-animation-state-machine@2",
+        "extension": "org.haiyue.animation-state-machine@2",
+        "channels": [
+          {
+            "id": "style",
+            "target": "node",
+            "path": "components.0.paint.fill.color",
+            "family": "paint-path",
+            "valueKind": "color",
+            "valueSize": 4,
+            "policy": "override",
+            "defaultValue": [
+              1,
+              0,
+              0,
+              1
+            ]
+          }
+        ],
+        "components": [],
+        "clips": [
+          {
+            "id": "0",
+            "duration": 1,
+            "tracks": [
+              {
+                "id": "style",
+                "channel": "style",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [
+                      1,
+                      0,
+                      0,
+                      1
+                    ],
+                    "interpolation": {
+                      "kind": "hold"
+                    }
+                  },
+                  {
+                    "time": 1,
+                    "value": [
+                      1,
+                      0,
+                      0,
+                      1
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "1",
+            "duration": 1,
+            "tracks": [
+              {
+                "id": "style",
+                "channel": "style",
+                "keys": [
+                  {
+                    "time": 0,
+                    "value": [
+                      0,
+                      0,
+                      1,
+                      1
+                    ],
+                    "interpolation": {
+                      "kind": "hold"
+                    }
+                  },
+                  {
+                    "time": 1,
+                    "value": [
+                      0,
+                      0,
+                      1,
+                      1
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "stateMachines": [
+          {
+            "id": "main",
+            "inputs": [
+              {
+                "id": "go",
+                "type": "boolean",
+                "defaultValue": false
+              }
+            ],
+            "layers": [
+              {
+                "id": "base",
+                "order": 0,
+                "states": [
+                  {
+                    "id": "0",
+                    "motion": {
+                      "kind": "clip",
+                      "clip": "0",
+                      "playback": "one-shot"
+                    }
+                  },
+                  {
+                    "id": "1",
+                    "motion": {
+                      "kind": "clip",
+                      "clip": "1",
+                      "playback": "one-shot"
+                    }
+                  }
+                ],
+                "transitions": [
+                  {
+                    "id": "entry",
+                    "from": "@entry",
+                    "to": "0",
+                    "duration": 0,
+                    "conditionGroups": []
+                  },
+                  {
+                    "id": "go",
+                    "from": "0",
+                    "to": "1",
+                    "duration": 1,
+                    "conditionGroups": [
+                      [
+                        {
+                          "kind": "input",
+                          "input": "go",
+                          "comparator": "equal",
+                          "value": true
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "core",
+      "extension": "org.haiyue.animation-core@1",
+      "required": true,
+      "requires": [],
+      "dependencies": [],
+      "document": {
+        "format": "haiyue-animation",
+        "version": "1.0",
+        "canvas": {
+          "width": 320,
+          "height": 480,
+          "coordinateSystem": "screen-y-down"
+        },
+        "duration": 2,
+        "resources": [
+          {
+            "id": "core-image",
+            "type": "image",
+            "uri": "asset:alternate",
+            "width": 3,
+            "height": 3,
+            "mimeType": "image/png",
+            "integrity": "sha256-cCVFSxm7uq7YWSdzGwgEbovd5iM6pED8GVhg+iGnbq8=",
+            "colorSpace": "linear"
+          }
+        ],
+        "extensionsUsed": [],
+        "nodes": [
+          {
+            "id": "node",
+            "transform": {
+              "position": [
+                230,
+                55
+              ]
+            },
+            "components": [
+              {
+                "type": "shape2d",
+                "shape": "rect",
+                "size": [
+                  80,
+                  42
+                ],
+                "fill": [
+                  1,
+                  0,
+                  0,
+                  1
+                ]
+              }
+            ]
+          },
+          {
+            "id": "sprite",
+            "transform": {
+              "position": [
+                230,
+                125
+              ]
+            },
+            "components": [
+              {
+                "type": "sprite2d",
+                "resource": "core-image",
+                "size": [
+                  48,
+                  40
+                ]
+              }
+            ]
+          }
+        ],
+        "tracks": []
+      }
+    },
+    {
+      "id": "layout",
+      "extension": "org.haiyue.layout-2d@1",
+      "required": true,
+      "requires": [],
+      "dependencies": [],
+      "document": {
+        "format": "haiyue-responsive-layout-2d",
+        "version": 1,
+        "extension": "org.haiyue.layout-2d@1",
+        "shaping": {
+          "stack": "haiyue-text-shaping@1",
+          "backendRevision": "g11-owned-font-1",
+          "unicodeVersion": "15.1",
+          "graphemeRevision": "uax29-43",
+          "bidiRevision": "uax9-50"
+        },
+        "assets": [
+          {
+            "id": "font",
+            "kind": "font",
+            "family": "Haiyue G11 Scene Sans",
+            "weight": 400,
+            "style": "normal",
+            "source": {
+              "kind": "referenced",
+              "uri": "asset:font",
+              "integrity": "sha256-9ipJd+MNkryPnaPv8nB3VtPXa8AL4OVJ52xDyj76QE8="
+            },
+            "metrics": {
+              "unitsPerEm": 1000,
+              "ascent": 1160,
+              "descent": -288,
+              "lineGap": 0,
+              "missingGlyph": {
+                "glyphId": 0,
+                "advance": 1000,
+                "bounds": [
+                  100,
+                  -120,
+                  900,
+                  880
+                ]
+              },
+              "glyphs": {
+                "0": {
+                  "glyphId": 17,
+                  "advance": 555,
+                  "bounds": [
+                    50,
+                    -13,
+                    506,
+                    746
+                  ]
+                },
+                "1": {
+                  "glyphId": 18,
+                  "advance": 555,
+                  "bounds": [
+                    88,
+                    0,
+                    490,
+                    733
+                  ]
+                },
+                "2": {
+                  "glyphId": 19,
+                  "advance": 555,
+                  "bounds": [
+                    40,
+                    0,
+                    505,
+                    746
+                  ]
+                },
+                "3": {
+                  "glyphId": 20,
+                  "advance": 555,
+                  "bounds": [
+                    29,
+                    -13,
+                    499,
+                    746
+                  ]
+                },
+                "4": {
+                  "glyphId": 21,
+                  "advance": 555,
+                  "bounds": [
+                    20,
+                    0,
+                    524,
+                    733
+                  ]
+                },
+                "5": {
+                  "glyphId": 22,
+                  "advance": 555,
+                  "bounds": [
+                    27,
+                    -13,
+                    502,
+                    733
+                  ]
+                },
+                "6": {
+                  "glyphId": 23,
+                  "advance": 555,
+                  "bounds": [
+                    56,
+                    -13,
+                    512,
+                    746
+                  ]
+                },
+                "7": {
+                  "glyphId": 24,
+                  "advance": 555,
+                  "bounds": [
+                    49,
+                    0,
+                    508,
+                    733
+                  ]
+                },
+                "8": {
+                  "glyphId": 25,
+                  "advance": 555,
+                  "bounds": [
+                    46,
+                    -13,
+                    509,
+                    744
+                  ]
+                },
+                "9": {
+                  "glyphId": 26,
+                  "advance": 555,
+                  "bounds": [
+                    44,
+                    -13,
+                    501,
+                    746
+                  ]
+                },
+                " ": {
+                  "glyphId": 1,
+                  "advance": 224,
+                  "bounds": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ]
+                },
+                "!": {
+                  "glyphId": 2,
+                  "advance": 323,
+                  "bounds": [
+                    95,
+                    -13,
+                    227,
+                    749
+                  ]
+                },
+                "\"": {
+                  "glyphId": 3,
+                  "advance": 474,
+                  "bounds": [
+                    90,
+                    483,
+                    383,
+                    771
+                  ]
+                },
+                "#": {
+                  "glyphId": 4,
+                  "advance": 555,
+                  "bounds": [
+                    40,
+                    0,
+                    522,
+                    726
+                  ]
+                },
+                "$": {
+                  "glyphId": 5,
+                  "advance": 555,
+                  "bounds": [
+                    58,
+                    -123,
+                    488,
+                    836
+                  ]
+                },
+                "%": {
+                  "glyphId": 6,
+                  "advance": 921,
+                  "bounds": [
+                    39,
+                    -13,
+                    882,
+                    746
+                  ]
+                },
+                "&": {
+                  "glyphId": 7,
+                  "advance": 680,
+                  "bounds": [
+                    36,
+                    -13,
+                    663,
+                    746
+                  ]
+                },
+                "'": {
+                  "glyphId": 8,
+                  "advance": 278,
+                  "bounds": [
+                    90,
+                    483,
+                    186,
+                    771
+                  ]
+                },
+                "(": {
+                  "glyphId": 9,
+                  "advance": 338,
+                  "bounds": [
+                    92,
+                    -196,
+                    295,
+                    818
+                  ]
+                },
+                ")": {
+                  "glyphId": 10,
+                  "advance": 338,
+                  "bounds": [
+                    42,
+                    -196,
+                    246,
+                    818
+                  ]
+                },
+                "*": {
+                  "glyphId": 11,
+                  "advance": 467,
+                  "bounds": [
+                    65,
+                    471,
+                    401,
+                    796
+                  ]
+                },
+                "+": {
+                  "glyphId": 12,
+                  "advance": 555,
+                  "bounds": [
+                    38,
+                    116,
+                    518,
+                    622
+                  ]
+                },
+                ",": {
+                  "glyphId": 13,
+                  "advance": 278,
+                  "bounds": [
+                    53,
+                    -190,
+                    221,
+                    126
+                  ]
+                },
+                "-": {
+                  "glyphId": 14,
+                  "advance": 347,
+                  "bounds": [
+                    46,
+                    245,
+                    302,
+                    315
+                  ]
+                },
+                ".": {
+                  "glyphId": 15,
+                  "advance": 278,
+                  "bounds": [
+                    73,
+                    -13,
+                    205,
+                    126
+                  ]
+                },
+                "/": {
+                  "glyphId": 16,
+                  "advance": 392,
+                  "bounds": [
+                    11,
+                    -179,
+                    377,
+                    794
+                  ]
+                },
+                ":": {
+                  "glyphId": 27,
+                  "advance": 278,
+                  "bounds": [
+                    73,
+                    -13,
+                    205,
+                    530
+                  ]
+                },
+                ";": {
+                  "glyphId": 28,
+                  "advance": 278,
+                  "bounds": [
+                    53,
+                    -190,
+                    221,
+                    530
+                  ]
+                },
+                "<": {
+                  "glyphId": 29,
+                  "advance": 555,
+                  "bounds": [
+                    38,
+                    146,
+                    518,
+                    596
+                  ]
+                },
+                "=": {
+                  "glyphId": 30,
+                  "advance": 555,
+                  "bounds": [
+                    38,
+                    215,
+                    518,
+                    523
+                  ]
+                },
+                ">": {
+                  "glyphId": 31,
+                  "advance": 555,
+                  "bounds": [
+                    38,
+                    146,
+                    518,
+                    596
+                  ]
+                },
+                "?": {
+                  "glyphId": 32,
+                  "advance": 474,
+                  "bounds": [
+                    43,
+                    -13,
+                    421,
+                    762
+                  ]
+                },
+                "@": {
+                  "glyphId": 33,
+                  "advance": 946,
+                  "bounds": [
+                    56,
+                    -173,
+                    889,
+                    722
+                  ]
+                },
+                "A": {
+                  "glyphId": 34,
+                  "advance": 608,
+                  "bounds": [
+                    4,
+                    0,
+                    604,
+                    733
+                  ]
+                },
+                "B": {
+                  "glyphId": 35,
+                  "advance": 657,
+                  "bounds": [
+                    101,
+                    0,
+                    612,
+                    733
+                  ]
+                },
+                "C": {
+                  "glyphId": 36,
+                  "advance": 638,
+                  "bounds": [
+                    58,
+                    -13,
+                    602,
+                    746
+                  ]
+                },
+                "D": {
+                  "glyphId": 37,
+                  "advance": 688,
+                  "bounds": [
+                    101,
+                    0,
+                    629,
+                    733
+                  ]
+                },
+                "E": {
+                  "glyphId": 38,
+                  "advance": 589,
+                  "bounds": [
+                    101,
+                    0,
+                    534,
+                    733
+                  ]
+                },
+                "F": {
+                  "glyphId": 39,
+                  "advance": 552,
+                  "bounds": [
+                    101,
+                    0,
+                    523,
+                    733
+                  ]
+                },
+                "G": {
+                  "glyphId": 40,
+                  "advance": 689,
+                  "bounds": [
+                    58,
+                    -13,
+                    615,
+                    746
+                  ]
+                },
+                "H": {
+                  "glyphId": 41,
+                  "advance": 728,
+                  "bounds": [
+                    101,
+                    0,
+                    628,
+                    733
+                  ]
+                },
+                "I": {
+                  "glyphId": 42,
+                  "advance": 293,
+                  "bounds": [
+                    101,
+                    0,
+                    193,
+                    733
+                  ]
+                },
+                "J": {
+                  "glyphId": 43,
+                  "advance": 535,
+                  "bounds": [
+                    35,
+                    -13,
+                    439,
+                    733
+                  ]
+                },
+                "K": {
+                  "glyphId": 44,
+                  "advance": 646,
+                  "bounds": [
+                    101,
+                    0,
+                    642,
+                    733
+                  ]
+                },
+                "L": {
+                  "glyphId": 45,
+                  "advance": 543,
+                  "bounds": [
+                    101,
+                    0,
+                    514,
+                    733
+                  ]
+                },
+                "M": {
+                  "glyphId": 46,
+                  "advance": 812,
+                  "bounds": [
+                    101,
+                    0,
+                    711,
+                    733
+                  ]
+                },
+                "N": {
+                  "glyphId": 47,
+                  "advance": 723,
+                  "bounds": [
+                    101,
+                    0,
+                    622,
+                    733
+                  ]
+                },
+                "O": {
+                  "glyphId": 48,
+                  "advance": 742,
+                  "bounds": [
+                    58,
+                    -13,
+                    684,
+                    746
+                  ]
+                },
+                "P": {
+                  "glyphId": 49,
+                  "advance": 633,
+                  "bounds": [
+                    101,
+                    0,
+                    584,
+                    733
+                  ]
+                },
+                "Q": {
+                  "glyphId": 50,
+                  "advance": 742,
+                  "bounds": [
+                    58,
+                    -184,
+                    700,
+                    746
+                  ]
+                },
+                "R": {
+                  "glyphId": 51,
+                  "advance": 635,
+                  "bounds": [
+                    101,
+                    0,
+                    607,
+                    733
+                  ]
+                },
+                "S": {
+                  "glyphId": 52,
+                  "advance": 596,
+                  "bounds": [
+                    48,
+                    -13,
+                    553,
+                    746
+                  ]
+                },
+                "T": {
+                  "glyphId": 53,
+                  "advance": 599,
+                  "bounds": [
+                    31,
+                    0,
+                    568,
+                    733
+                  ]
+                },
+                "U": {
+                  "glyphId": 54,
+                  "advance": 721,
+                  "bounds": [
+                    98,
+                    -13,
+                    624,
+                    733
+                  ]
+                },
+                "V": {
+                  "glyphId": 55,
+                  "advance": 575,
+                  "bounds": [
+                    1,
+                    0,
+                    575,
+                    733
+                  ]
+                },
+                "W": {
+                  "glyphId": 56,
+                  "advance": 878,
+                  "bounds": [
+                    26,
+                    0,
+                    851,
+                    733
+                  ]
+                },
+                "X": {
+                  "glyphId": 57,
+                  "advance": 573,
+                  "bounds": [
+                    17,
+                    0,
+                    557,
+                    733
+                  ]
+                },
+                "Y": {
+                  "glyphId": 58,
+                  "advance": 531,
+                  "bounds": [
+                    -1,
+                    0,
+                    532,
+                    733
+                  ]
+                },
+                "Z": {
+                  "glyphId": 59,
+                  "advance": 603,
+                  "bounds": [
+                    50,
+                    0,
+                    556,
+                    733
+                  ]
+                },
+                "[": {
+                  "glyphId": 60,
+                  "advance": 338,
+                  "bounds": [
+                    106,
+                    -170,
+                    304,
+                    792
+                  ]
+                },
+                "\\": {
+                  "glyphId": 61,
+                  "advance": 392,
+                  "bounds": [
+                    15,
+                    -179,
+                    380,
+                    794
+                  ]
+                },
+                "]": {
+                  "glyphId": 62,
+                  "advance": 338,
+                  "bounds": [
+                    34,
+                    -170,
+                    233,
+                    792
+                  ]
+                },
+                "^": {
+                  "glyphId": 63,
+                  "advance": 555,
+                  "bounds": [
+                    68,
+                    317,
+                    488,
+                    749
+                  ]
+                },
+                "_": {
+                  "glyphId": 64,
+                  "advance": 559,
+                  "bounds": [
+                    13,
+                    -140,
+                    545,
+                    -80
+                  ]
+                },
+                "`": {
+                  "glyphId": 65,
+                  "advance": 606,
+                  "bounds": [
+                    144,
+                    640,
+                    366,
+                    872
+                  ]
+                },
+                "a": {
+                  "glyphId": 66,
+                  "advance": 563,
+                  "bounds": [
+                    59,
+                    -13,
+                    483,
+                    557
+                  ]
+                },
+                "b": {
+                  "glyphId": 67,
+                  "advance": 618,
+                  "bounds": [
+                    92,
+                    -13,
+                    567,
+                    796
+                  ]
+                },
+                "c": {
+                  "glyphId": 68,
+                  "advance": 510,
+                  "bounds": [
+                    52,
+                    -13,
+                    482,
+                    557
+                  ]
+                },
+                "d": {
+                  "glyphId": 69,
+                  "advance": 620,
+                  "bounds": [
+                    53,
+                    -13,
+                    528,
+                    796
+                  ]
+                },
+                "e": {
+                  "glyphId": 70,
+                  "advance": 554,
+                  "bounds": [
+                    52,
+                    -13,
+                    512,
+                    557
+                  ]
+                },
+                "f": {
+                  "glyphId": 71,
+                  "advance": 325,
+                  "bounds": [
+                    33,
+                    0,
+                    356,
+                    809
+                  ]
+                },
+                "g": {
+                  "glyphId": 72,
+                  "advance": 564,
+                  "bounds": [
+                    51,
+                    -250,
+                    550,
+                    557
+                  ]
+                },
+                "h": {
+                  "glyphId": 73,
+                  "advance": 607,
+                  "bounds": [
+                    92,
+                    0,
+                    526,
+                    796
+                  ]
+                },
+                "i": {
+                  "glyphId": 74,
+                  "advance": 275,
+                  "bounds": [
+                    78,
+                    0,
+                    199,
+                    775
+                  ]
+                },
+                "j": {
+                  "glyphId": 75,
+                  "advance": 275,
+                  "bounds": [
+                    -44,
+                    -242,
+                    199,
+                    775
+                  ]
+                },
+                "k": {
+                  "glyphId": 76,
+                  "advance": 552,
+                  "bounds": [
+                    92,
+                    0,
+                    542,
+                    796
+                  ]
+                },
+                "l": {
+                  "glyphId": 77,
+                  "advance": 284,
+                  "bounds": [
+                    92,
+                    -13,
+                    241,
+                    796
+                  ]
+                },
+                "m": {
+                  "glyphId": 78,
+                  "advance": 926,
+                  "bounds": [
+                    92,
+                    0,
+                    841,
+                    557
+                  ]
+                },
+                "n": {
+                  "glyphId": 79,
+                  "advance": 610,
+                  "bounds": [
+                    92,
+                    0,
+                    526,
+                    557
+                  ]
+                },
+                "o": {
+                  "glyphId": 80,
+                  "advance": 606,
+                  "bounds": [
+                    52,
+                    -13,
+                    554,
+                    557
+                  ]
+                },
+                "p": {
+                  "glyphId": 81,
+                  "advance": 620,
+                  "bounds": [
+                    92,
+                    -229,
+                    567,
+                    557
+                  ]
+                },
+                "q": {
+                  "glyphId": 82,
+                  "advance": 620,
+                  "bounds": [
+                    53,
+                    -229,
+                    528,
+                    557
+                  ]
+                },
+                "r": {
+                  "glyphId": 83,
+                  "advance": 388,
+                  "bounds": [
+                    92,
+                    0,
+                    390,
+                    557
+                  ]
+                },
+                "s": {
+                  "glyphId": 84,
+                  "advance": 468,
+                  "bounds": [
+                    32,
+                    -13,
+                    431,
+                    557
+                  ]
+                },
+                "t": {
+                  "glyphId": 85,
+                  "advance": 377,
+                  "bounds": [
+                    27,
+                    -13,
+                    363,
+                    696
+                  ]
+                },
+                "u": {
+                  "glyphId": 86,
+                  "advance": 607,
+                  "bounds": [
+                    84,
+                    -13,
+                    516,
+                    543
+                  ]
+                },
+                "v": {
+                  "glyphId": 87,
+                  "advance": 521,
+                  "bounds": [
+                    13,
+                    0,
+                    508,
+                    543
+                  ]
+                },
+                "w": {
+                  "glyphId": 88,
+                  "advance": 802,
+                  "bounds": [
+                    27,
+                    0,
+                    776,
+                    543
+                  ]
+                },
+                "x": {
+                  "glyphId": 89,
+                  "advance": 498,
+                  "bounds": [
+                    15,
+                    0,
+                    483,
+                    543
+                  ]
+                },
+                "y": {
+                  "glyphId": 90,
+                  "advance": 521,
+                  "bounds": [
+                    13,
+                    -234,
+                    508,
+                    543
+                  ]
+                },
+                "z": {
+                  "glyphId": 91,
+                  "advance": 475,
+                  "bounds": [
+                    35,
+                    0,
+                    446,
+                    543
+                  ]
+                },
+                "{": {
+                  "glyphId": 92,
+                  "advance": 338,
+                  "bounds": [
+                    38,
+                    -170,
+                    304,
+                    792
+                  ]
+                },
+                "|": {
+                  "glyphId": 93,
+                  "advance": 270,
+                  "bounds": [
+                    103,
+                    -279,
+                    167,
+                    838
+                  ]
+                },
+                "}": {
+                  "glyphId": 94,
+                  "advance": 338,
+                  "bounds": [
+                    34,
+                    -170,
+                    300,
+                    792
+                  ]
+                },
+                "~": {
+                  "glyphId": 95,
+                  "advance": 555,
+                  "bounds": [
+                    41,
+                    287,
+                    515,
+                    451
+                  ]
+                },
+                "世": {
+                  "glyphId": 96,
+                  "advance": 1000,
+                  "bounds": [
+                    51,
+                    -15,
+                    950,
+                    835
+                  ]
+                },
+                "乐": {
+                  "glyphId": 97,
+                  "advance": 1000,
+                  "bounds": [
+                    38,
+                    -78,
+                    960,
+                    829
+                  ]
+                },
+                "你": {
+                  "glyphId": 98,
+                  "advance": 1000,
+                  "bounds": [
+                    16,
+                    -81,
+                    959,
+                    836
+                  ]
+                },
+                "保": {
+                  "glyphId": 99,
+                  "advance": 1000,
+                  "bounds": [
+                    23,
+                    -80,
+                    981,
+                    837
+                  ]
+                },
+                "停": {
+                  "glyphId": 100,
+                  "advance": 1000,
+                  "bounds": [
+                    32,
+                    -79,
+                    951,
+                    845
+                  ]
+                },
+                "入": {
+                  "glyphId": 101,
+                  "advance": 1000,
+                  "bounds": [
+                    41,
+                    -73,
+                    964,
+                    819
+                  ]
+                },
+                "切": {
+                  "glyphId": 102,
+                  "advance": 1000,
+                  "bounds": [
+                    28,
+                    -79,
+                    940,
+                    801
+                  ]
+                },
+                "取": {
+                  "glyphId": 103,
+                  "advance": 1000,
+                  "bounds": [
+                    38,
+                    -80,
+                    967,
+                    793
+                  ]
+                },
+                "口": {
+                  "glyphId": 104,
+                  "advance": 1000,
+                  "bounds": [
+                    127,
+                    -55,
+                    876,
+                    735
+                  ]
+                },
+                "图": {
+                  "glyphId": 105,
+                  "advance": 1000,
+                  "bounds": [
+                    84,
+                    -80,
+                    917,
+                    796
+                  ]
+                },
+                "好": {
+                  "glyphId": 106,
+                  "advance": 1000,
+                  "bounds": [
+                    26,
+                    -80.22748612183952,
+                    960,
+                    840
+                  ]
+                },
+                "始": {
+                  "glyphId": 107,
+                  "advance": 1000,
+                  "bounds": [
+                    40,
+                    -80,
+                    969,
+                    841
+                  ]
+                },
+                "存": {
+                  "glyphId": 108,
+                  "advance": 1000,
+                  "bounds": [
+                    31,
+                    -79,
+                    957,
+                    840
+                  ]
+                },
+                "局": {
+                  "glyphId": 109,
+                  "advance": 1000,
+                  "bounds": [
+                    28,
+                    -79.13843876330611,
+                    913,
+                    788
+                  ]
+                },
+                "屏": {
+                  "glyphId": 110,
+                  "advance": 1000,
+                  "bounds": [
+                    31,
+                    -82,
+                    947,
+                    792
+                  ]
+                },
+                "布": {
+                  "glyphId": 111,
+                  "advance": 1000,
+                  "bounds": [
+                    31,
+                    -81,
+                    941,
+                    841
+                  ]
+                },
+                "幕": {
+                  "glyphId": 112,
+                  "advance": 1000,
+                  "bounds": [
+                    31,
+                    -80,
+                    970,
+                    840
+                  ]
+                },
+                "开": {
+                  "glyphId": 113,
+                  "advance": 1000,
+                  "bounds": [
+                    52,
+                    -84,
+                    949,
+                    775
+                  ]
+                },
+                "态": {
+                  "glyphId": 114,
+                  "advance": 1000,
+                  "bounds": [
+                    45,
+                    -58,
+                    958,
+                    844
+                  ]
+                },
+                "换": {
+                  "glyphId": 115,
+                  "advance": 1000,
+                  "bounds": [
+                    36,
+                    -81,
+                    969,
+                    842
+                  ]
+                },
+                "放": {
+                  "glyphId": 116,
+                  "advance": 1000,
+                  "bounds": [
+                    25,
+                    -82,
+                    971,
+                    842
+                  ]
+                },
+                "文": {
+                  "glyphId": 117,
+                  "advance": 1000,
+                  "bounds": [
+                    36,
+                    -78,
+                    967,
+                    847
+                  ]
+                },
+                "暂": {
+                  "glyphId": 118,
+                  "advance": 1000,
+                  "bounds": [
+                    53,
+                    -80,
+                    951,
+                    843
+                  ]
+                },
+                "月": {
+                  "glyphId": 119,
+                  "advance": 1000,
+                  "bounds": [
+                    29,
+                    -81,
+                    821,
+                    787
+                  ]
+                },
+                "本": {
+                  "glyphId": 120,
+                  "advance": 1000,
+                  "bounds": [
+                    37,
+                    -80,
+                    965,
+                    839
+                  ]
+                },
+                "横": {
+                  "glyphId": 121,
+                  "advance": 1000,
+                  "bounds": [
+                    27,
+                    -82,
+                    972,
+                    840
+                  ]
+                },
+                "测": {
+                  "glyphId": 122,
+                  "advance": 1000,
+                  "bounds": [
+                    38,
+                    -78,
+                    929,
+                    829
+                  ]
+                },
+                "海": {
+                  "glyphId": 123,
+                  "advance": 1000,
+                  "bounds": [
+                    42,
+                    -71.8113883008419,
+                    963,
+                    841
+                  ]
+                },
+                "消": {
+                  "glyphId": 124,
+                  "advance": 1000,
+                  "bounds": [
+                    38,
+                    -80,
+                    935,
+                    841
+                  ]
+                },
+                "片": {
+                  "glyphId": 125,
+                  "advance": 1000,
+                  "bounds": [
+                    38,
+                    -82,
+                    903,
+                    839
+                  ]
+                },
+                "状": {
+                  "glyphId": 126,
+                  "advance": 1000,
+                  "bounds": [
+                    32,
+                    -78,
+                    973,
+                    841
+                  ]
+                },
+                "界": {
+                  "glyphId": 127,
+                  "advance": 1000,
+                  "bounds": [
+                    45,
+                    -86,
+                    962,
+                    808
+                  ]
+                },
+                "确": {
+                  "glyphId": 128,
+                  "advance": 1000,
+                  "bounds": [
+                    35,
+                    -81,
+                    927,
+                    843
+                  ]
+                },
+                "窗": {
+                  "glyphId": 129,
+                  "advance": 1000,
+                  "bounds": [
+                    77,
+                    -82,
+                    923,
+                    845
+                  ]
+                },
+                "竖": {
+                  "glyphId": 130,
+                  "advance": 1000,
+                  "bounds": [
+                    56,
+                    -59,
+                    956,
+                    819
+                  ]
+                },
+                "继": {
+                  "glyphId": 131,
+                  "advance": 1000,
+                  "bounds": [
+                    36,
+                    -27,
+                    953,
+                    841
+                  ]
+                },
+                "续": {
+                  "glyphId": 132,
+                  "advance": 1000,
+                  "bounds": [
+                    38,
+                    -82,
+                    957,
+                    840
+                  ]
+                },
+                "缩": {
+                  "glyphId": 133,
+                  "advance": 1000,
+                  "bounds": [
+                    39,
+                    -80,
+                    951,
+                    843
+                  ]
+                },
+                "置": {
+                  "glyphId": 134,
+                  "advance": 1000,
+                  "bounds": [
+                    57,
+                    -50,
+                    945,
+                    802
+                  ]
+                },
+                "认": {
+                  "glyphId": 135,
+                  "advance": 1000,
+                  "bounds": [
+                    47,
+                    -80,
+                    968,
+                    839
+                  ]
+                },
+                "试": {
+                  "glyphId": 136,
+                  "advance": 1000,
+                  "bounds": [
+                    50,
+                    -77,
+                    967,
+                    835
+                  ]
+                },
+                "输": {
+                  "glyphId": 137,
+                  "advance": 1000,
+                  "bounds": [
+                    42,
+                    -79,
+                    974,
+                    843
+                  ]
+                },
+                "重": {
+                  "glyphId": 138,
+                  "advance": 1000,
+                  "bounds": [
+                    52,
+                    -48,
+                    949,
+                    834
+                  ]
+                },
+                "音": {
+                  "glyphId": 139,
+                  "advance": 1000,
+                  "bounds": [
+                    55,
+                    -81,
+                    946,
+                    848
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": "image",
+            "kind": "image",
+            "width": 3,
+            "height": 3,
+            "filter": "nearest",
+            "source": {
+              "kind": "referenced",
+              "uri": "asset:image",
+              "integrity": "sha256-VexKzYm9+5rFl8ymRmvLpw1H3SrkpBupYcU37AzkeV0="
+            }
+          },
+          {
+            "id": "alternate",
+            "kind": "image",
+            "width": 3,
+            "height": 3,
+            "filter": "nearest",
+            "source": {
+              "kind": "referenced",
+              "uri": "asset:alternate",
+              "integrity": "sha256-cCVFSxm7uq7YWSdzGwgEbovd5iM6pED8GVhg+iGnbq8="
+            }
+          }
+        ],
+        "textStyles": [
+          {
+            "id": "body",
+            "fontAssets": [
+              "font"
+            ],
+            "fontFamily": "Haiyue G11 Scene Sans",
+            "fontWeight": 400,
+            "fontStyle": "normal",
+            "fontSize": 24,
+            "lineHeight": 36,
+            "tracking": 0,
+            "alignment": "start",
+            "direction": "ltr",
+            "verticalAlignment": "top",
+            "fills": [
+              {
+                "source": {
+                  "kind": "solid",
+                  "color": [
+                    0.02,
+                    0.04,
+                    0.08,
+                    1
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "textBlocks": [
+          {
+            "id": "label",
+            "runs": [
+              {
+                "id": "run",
+                "style": "body",
+                "text": "你好 A",
+                "valuePort": "value"
+              }
+            ],
+            "width": 280,
+            "height": 60,
+            "wrap": "none",
+            "overflow": "clip",
+            "input": {
+              "valuePort": "value",
+              "selectionPort": "selection",
+              "cursorPort": "cursor"
+            }
+          },
+          {
+            "id": "action-label",
+            "runs": [
+              {
+                "id": "caption",
+                "style": "body",
+                "text": "Activate"
+              }
+            ],
+            "width": 116,
+            "height": 36,
+            "wrap": "none",
+            "overflow": "clip"
+          }
+        ],
+        "artboards": [
+          {
+            "id": "main",
+            "width": 320,
+            "height": 480,
+            "root": "root",
+            "nodes": [
+              {
+                "id": "root",
+                "kind": "container",
+                "style": {
+                  "width": {
+                    "unit": "fill"
+                  },
+                  "height": {
+                    "unit": "fill"
+                  }
+                }
+              },
+              {
+                "id": "picture",
+                "parent": "root",
+                "kind": "n-slice",
+                "style": {
+                  "position": "absolute",
+                  "width": {
+                    "unit": "point",
+                    "value": 120
+                  },
+                  "height": {
+                    "unit": "point",
+                    "value": 60
+                  },
+                  "inset": [
+                    {
+                      "unit": "point",
+                      "value": 20
+                    },
+                    {
+                      "unit": "point",
+                      "value": 100
+                    },
+                    {
+                      "unit": "point",
+                      "value": 0
+                    },
+                    {
+                      "unit": "point",
+                      "value": 0
+                    }
+                  ]
+                },
+                "nSlice": {
+                  "source": {
+                    "kind": "asset",
+                    "asset": "image"
+                  },
+                  "sourceSize": [
+                    3,
+                    3
+                  ],
+                  "xCuts": [
+                    1,
+                    2
+                  ],
+                  "yCuts": [
+                    1,
+                    2
+                  ]
+                }
+              },
+              {
+                "id": "text",
+                "parent": "root",
+                "kind": "text",
+                "text": "label",
+                "style": {
+                  "position": "absolute",
+                  "width": {
+                    "unit": "point",
+                    "value": 280
+                  },
+                  "height": {
+                    "unit": "point",
+                    "value": 60
+                  },
+                  "inset": [
+                    {
+                      "unit": "point",
+                      "value": 20
+                    },
+                    {
+                      "unit": "point",
+                      "value": 180
+                    },
+                    {
+                      "unit": "point",
+                      "value": 0
+                    },
+                    {
+                      "unit": "point",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "action",
+                "parent": "root",
+                "kind": "n-slice",
+                "style": {
+                  "position": "absolute",
+                  "width": {
+                    "unit": "point",
+                    "value": 140
+                  },
+                  "height": {
+                    "unit": "point",
+                    "value": 40
+                  },
+                  "inset": [
+                    {
+                      "unit": "point",
+                      "value": 20
+                    },
+                    {
+                      "unit": "point",
+                      "value": 260
+                    },
+                    {
+                      "unit": "point",
+                      "value": 0
+                    },
+                    {
+                      "unit": "point",
+                      "value": 0
+                    }
+                  ]
+                },
+                "nSlice": {
+                  "source": {
+                    "kind": "asset",
+                    "asset": "image"
+                  },
+                  "sourceSize": [
+                    3,
+                    3
+                  ],
+                  "xCuts": [
+                    1,
+                    2
+                  ],
+                  "yCuts": [
+                    1,
+                    2
+                  ]
+                }
+              },
+              {
+                "id": "action-text",
+                "parent": "root",
+                "kind": "text",
+                "text": "action-label",
+                "style": {
+                  "position": "absolute",
+                  "width": {
+                    "unit": "point",
+                    "value": 116
+                  },
+                  "height": {
+                    "unit": "point",
+                    "value": 36
+                  },
+                  "inset": [
+                    {
+                      "unit": "point",
+                      "value": 32
+                    },
+                    {
+                      "unit": "point",
+                      "value": 262
+                    },
+                    {
+                      "unit": "point",
+                      "value": 0
+                    },
+                    {
+                      "unit": "point",
+                      "value": 0
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "instances": [
+          {
+            "id": "stage",
+            "artboard": "main",
+            "fit": "contain",
+            "alignment": [
+              -1,
+              -1
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "targets": [
+    {
+      "id": "picture.alias",
+      "part": "layout",
+      "kind": "asset",
+      "address": [
+        "image"
+      ]
+    },
+    {
+      "id": "node",
+      "part": "core",
+      "kind": "animation-node",
+      "address": [
+        "node"
+      ]
+    },
+    {
+      "id": "go",
+      "part": "state",
+      "kind": "state-input",
+      "address": [
+        "main",
+        "go"
+      ]
+    },
+    {
+      "id": "text",
+      "part": "layout",
+      "kind": "text-block",
+      "address": [
+        "label"
+      ]
+    }
+  ]
+}

@@ -32,12 +32,14 @@ export class DeferredSharedAllocationLease {
   private _retired = false;
   constructor(budget: DeferredAllocationBudget, bytes: number) { this._release = budget.reserve(bytes); }
   retain(context: RenderCommandContext): void {
+    const encoder=context.encoder;
     if (this._retired) throw new Error('Deferred shared reservation is retired.');
     if (!context.afterSubmit) throw new Error('Deferred shared reservation requires afterSubmit.');
-    if (this._encoders.has(context.encoder)) return;
-    this._encoders.add(context.encoder);
+    if (this._encoders.has(encoder)) return;
+    this._encoders.add(encoder);
+    context.afterCancel?.(() => {this._encoders.delete(encoder);this._settle();});
     context.afterSubmit(queue => {
-      const done = () => { this._encoders.delete(context.encoder); this._settle(); };
+      const done = () => { this._encoders.delete(encoder); this._settle(); };
       void queue.onSubmittedWorkDone().then(done, done);
     });
   }

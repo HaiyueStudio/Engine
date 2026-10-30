@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createAuditGpuDevice } from '../../scripts/benchmark/real-renderer-audit-device.mjs';
+import { createAuditGpuDevice,getAuditGpuDeviceState } from '../../scripts/benchmark/real-renderer-audit-device.mjs';
 import { importEngineSource } from './helpers/internal-source.mjs';
 const { TransientTextureAllocator } = await importEngineSource('rtt/TransientTextureAllocator.ts');
 const { acquireSequentialAttachments, releaseSequentialAttachments, getSequentialAttachmentAllocator } = await importEngineSource('rtt/TransientAttachmentSequence.ts');
@@ -94,4 +94,20 @@ test('cached logical slot plans re-resolve physical textures for pending encoder
   assert.equal(pool.planCache.stats.size, 2);
   pool.destroy(); firstContext.submit(); secondContext.submit(); await firstContext.complete(); await secondContext.complete();
   assert.equal(pool.stats.physicalBytes, 0); assert.equal(pool.planCache.stats.size, 0);
+});
+
+
+test('cancelled scratch and MRT records release pending storage without releasing another live encoder',async()=>{
+ const device=createAuditGpuDevice(),pool=new TransientTextureAllocator(device),owner={};
+ const make=()=>{const callbacks=[];return{...context(device),afterCancel:cb=>callbacks.push(cb),cancel:()=>callbacks.splice(0).forEach(cb=>cb())}};
+ const a=make(),b=make(),first=pool.acquire([request('a',0,1)],a),second=pool.acquire([request('b',0,1)],b);first.release();second.release();
+ pool.destroy();a.cancel();assert.equal(first.assignments[0].texture.destroyed,true);assert.equal(second.assignments[0].texture.destroyed,false);b.cancel();assert.equal(pool.stats.physicalBytes,0);
+ for(let i=0;i<20;i++){const ctx=make();acquireSequentialAttachments(owner,'view',32,16,['rgba16float','depth32float'],ctx,{firstUse:0,lastUse:1},false,()=>()=>{});ctx.cancel();}
+ releaseSequentialAttachments(owner);assert.equal(getSequentialAttachmentAllocator(owner).stats.physicalBytes,0);
+});
+
+
+test('invalid scratch plans and retired allocators do not acquire a deferred encoder',async()=>{
+ const {createDeferredRenderFrameContext}=await importEngineSource('core/RenderCommandContext.ts');const device=createAuditGpuDevice(),audit=getAuditGpuDeviceState(device),pool=new TransientTextureAllocator(device),ctx=createDeferredRenderFrameContext({device,width:32,height:16,format:'rgba8unorm',getRenderPassDescriptor:()=>({colorAttachments:[]})});
+ const before=audit.getCallCount('device.createCommandEncoder');assert.throws(()=>pool.acquire([request('bad',2,1)],ctx),/interval/);assert.equal(audit.getCallCount('device.createCommandEncoder'),before);pool.destroy();assert.throws(()=>pool.acquire([request('good',0,1)],ctx),/live device/);assert.equal(audit.getCallCount('device.createCommandEncoder'),before);ctx.cancel();
 });

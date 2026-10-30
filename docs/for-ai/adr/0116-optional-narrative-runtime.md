@@ -31,7 +31,7 @@ JSON schemaVersion 1 定义 dialogue、choice、branch、effect、action、end �
 
 4 个值：NarrativeRuntime、validateNarrativeDefinition、NarrativeGui、connectNarrativeActions。
 15 个类型，共 19 个符号，仅 ./narrative 新增能力预算。根入口和既有预算保持不变。
-[API 与验证](../../../review/api/narrative-validation.md)。
+[API 与验证](../../../review/api/capability-validation.md)。
 
 ## 首版边界
 

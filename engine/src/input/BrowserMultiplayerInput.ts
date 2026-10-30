@@ -1,5 +1,7 @@
 import { hashSimulationState, type SimulationStateValue } from '../simulation/StateHash';
 import { InputActionMap, type InputActionMapDescriptor, type InputActionValue, type StandardGamepadSnapshot } from './InputActionMap';
+import {GamepadInputLayers,type GamepadControlSample} from './GamepadInputLayers';
+import {isInputEventConsumed} from './InputEventConsumption';
 
 export interface PlayerInputSnapshot {
   readonly id: string;
@@ -19,6 +21,10 @@ export interface MultiplayerInputSnapshot {
   readonly hash: string;
 }
 
+/** Configures the host keyboard/gamepad sampler that emits immutable player snapshots.
+ * Routes borrow readonly controls without polling. `release()` preserves release edges;
+ * `reset()` restarts ticks and held state without reattaching listeners.
+ */
 export interface BrowserMultiplayerInputOptions {
   readonly players: readonly Readonly<{
     id: string;
@@ -32,6 +38,10 @@ export interface BrowserMultiplayerInputOptions {
   readonly preventDefault?: boolean;
 }
 
+/** Newest-first routing. Consumed controls and aliases remain masked until neutral,
+   * including after unsubscribe. Capture reserves subthreshold motion before normalization. */
+type GamepadLayerRelease = () => void;
+
 interface PlayerRuntime {
   readonly id: string;
   readonly actionMap: InputActionMap;
@@ -39,7 +49,6 @@ interface PlayerRuntime {
   readonly previous: Map<string, number>;
 }
 
-/** Owner-safe browser keyboard/gamepad sampler that emits immutable per-player tick snapshots. */
 export class BrowserMultiplayerInput {
   readonly actionThreshold: number;
   readonly #players: readonly PlayerRuntime[];
@@ -48,8 +57,11 @@ export class BrowserMultiplayerInput {
   readonly #getGamepads: () => ArrayLike<StandardGamepadSnapshot | null>;
   readonly #preventDefault: boolean;
   readonly #keys = new Set<string>();
+  readonly #unconsumedKeys = new Set<string>();
+  readonly #gamepadLayers = new GamepadInputLayers();
   readonly #mappedKeys = new Set<string>();
   readonly #disconnectedGamepads = new Set<number>();
+  #sampling?:boolean;
   #tick = 0;
   #disposed = false;
   #suspended = false;
@@ -57,7 +69,9 @@ export class BrowserMultiplayerInput {
   readonly #onKeyDown = (event: Event): void => {
     const code = keyboardCode(event);
     if (!code || !this.#mappedKeys.has(code)) return;
+    if(!this.#keys.has(code))this.#unconsumedKeys.add(code);
     this.#keys.add(code);
+    if(isInputEventConsumed(event))this.#unconsumedKeys.delete(code);
     if (this.#preventDefault) event.preventDefault();
   };
 
@@ -65,10 +79,11 @@ export class BrowserMultiplayerInput {
     const code = keyboardCode(event);
     if (!code || !this.#mappedKeys.has(code)) return;
     this.#keys.delete(code);
+    this.#unconsumedKeys.delete(code);
     if (this.#preventDefault) event.preventDefault();
   };
 
-  readonly #onRelease = (): void => { this.#keys.clear(); };
+  readonly #onRelease = (): void => { this.#keys.clear();this.#unconsumedKeys.clear();this.#gamepadLayers.release(); };
   readonly #onGamepadConnected = (event: Event): void => {
     const index = gamepadEventIndex(event);
     if (index !== null) this.#disconnectedGamepads.delete(index);
@@ -79,26 +94,27 @@ export class BrowserMultiplayerInput {
   };
   readonly #onVisibilityChange = (): void => {
     this.#suspended = this.#visibilityTarget?.hidden === true;
-    if (this.#suspended) this.#keys.clear();
+    if (this.#suspended) this.#onRelease();
   };
 
   constructor(options: BrowserMultiplayerInputOptions) {
     if (!options || !Array.isArray(options.players) || options.players.length < 1 || options.players.length > 8) {
       throw new TypeError('Browser multiplayer input requires from 1 to 8 players.');
     }
-    this.actionThreshold = finiteRange(options.actionThreshold ?? 0.5, 0.000_001, 1, 'actionThreshold');
+    this.actionThreshold = range(options.actionThreshold ?? 0.5, 0.000_001, 1, 'actionThreshold');
     const ids = new Set<string>();
     this.#players = Object.freeze(options.players.map((descriptor, index) => {
-      const id = normalizePlayerId(descriptor.id);
+      const id=descriptor.id;
+      if(typeof id!=='string'||!/^[A-Za-z][A-Za-z0-9._:-]{0,31}$/u.test(id))throw new TypeError('Browser multiplayer input player id is invalid.');
       if (ids.has(id)) throw new TypeError(`Browser multiplayer input player id is duplicated: ${id}.`);
       ids.add(id);
       const actionMap = new InputActionMap(descriptor.bindings);
       for (const binding of Object.values(actionMap.toJSON())) for (const code of binding.keys ?? []) this.#mappedKeys.add(code);
-      const gamepadIndex = descriptor.gamepadIndex === undefined ? null : integerRange(descriptor.gamepadIndex, 0, 31, `players[${index}].gamepadIndex`);
+      const gamepadIndex = descriptor.gamepadIndex === undefined ? null : range(descriptor.gamepadIndex, 0, 31, `players[${index}].gamepadIndex`, true);
       return { id, actionMap, gamepadIndex, previous: new Map<string, number>() };
     }));
-    this.#eventTarget = options.eventTarget ?? defaultEventTarget();
-    this.#visibilityTarget = options.visibilityTarget ?? defaultVisibilityTarget();
+    this.#eventTarget = options.eventTarget ?? (typeof globalThis.addEventListener==='function'?globalThis:null);
+    this.#visibilityTarget = options.visibilityTarget ?? (typeof document==='undefined'?null:document);
     this.#getGamepads = options.getGamepads ?? defaultGamepadProvider;
     this.#preventDefault = options.preventDefault ?? false;
     this.#eventTarget?.addEventListener('keydown', this.#onKeyDown);
@@ -114,28 +130,38 @@ export class BrowserMultiplayerInput {
   get suspended(): boolean { return this.#suspended; }
   get disposed(): boolean { return this.#disposed; }
 
-  sample(tick: number): MultiplayerInputSnapshot {
+  addGamepadLayer(bindings: InputActionMap, handle: (action: string, gamepadIndex: number) => boolean, options: {capture?: (gamepadIndex: number) => boolean} = {}): GamepadLayerRelease {
     this.#assertLive();
-    if (!Number.isSafeInteger(tick) || tick !== this.#tick + 1) throw new RangeError(`Browser multiplayer input tick must advance exactly from ${this.#tick} to ${this.#tick + 1}.`);
-    this.#tick = tick;
-    const gamepads = this.#suspended ? EMPTY_GAMEPADS : this.#getGamepads();
-    const players = this.#players.map(player => this.#samplePlayer(player, gamepads));
-    const value = { tick, players } as unknown as SimulationStateValue;
-    return Object.freeze({ tick, players: Object.freeze(players), hash: hashSimulationState(value) });
+    return this.#gamepadLayers.add(bindings,handle,options.capture);
   }
 
-  /** Release held physical state while retaining the previous frame so the next sample reports releases. */
+  addGamepadRoute(handle:(sample:GamepadControlSample)=>boolean):GamepadLayerRelease {this.#assertLive();return this.#gamepadLayers.addRaw(handle);}
+
+  sample(tick: number): MultiplayerInputSnapshot {
+    this.#assertLive();if(this.#sampling)throw new Error('Browser multiplayer input sampling cannot reenter.');this.#sampling=true;try{
+    if (!Number.isSafeInteger(tick) || tick !== this.#tick + 1) throw new RangeError(`Browser multiplayer input tick must advance exactly from ${this.#tick} to ${this.#tick + 1}.`);
+    this.#tick = tick;
+    const rawGamepads = this.#suspended ? EMPTY_GAMEPADS : this.#getGamepads();
+    const gamepads = this.#suspended?EMPTY_GAMEPADS:this.#gamepadLayers.route(Array.from(rawGamepads,(pad,index)=>this.#disconnectedGamepads.has(index)?null:pad),this.actionThreshold);
+    this.#assertLive();if(this.#tick!==tick)throw new Error('Browser multiplayer input tick changed during routing.');
+    const players = this.#players.map(player => this.#samplePlayer(player, gamepads));
+    return snapshot({tick,players:Object.freeze(players)});
+    }finally{this.#sampling=false;}
+  }
+
   release(): this {
     this.#assertLive();
     this.#keys.clear();
+    this.#unconsumedKeys.clear();
+    this.#gamepadLayers.release();
     return this;
   }
 
-  /** Restart tick ownership and discard every held/previous action without reattaching listeners. */
   reset(): this {
     this.#assertLive();
     this.#tick = 0;
     this.#keys.clear();
+    this.#unconsumedKeys.clear();this.#gamepadLayers.clear();
     this.#disconnectedGamepads.clear();
     for (const player of this.#players) player.previous.clear();
     return this;
@@ -145,6 +171,7 @@ export class BrowserMultiplayerInput {
     if (this.#disposed) return;
     this.#disposed = true;
     this.#keys.clear();
+    this.#unconsumedKeys.clear();this.#gamepadLayers.dispose();
     this.#disconnectedGamepads.clear();
     for (const player of this.#players) player.previous.clear();
     this.#eventTarget?.removeEventListener('keydown', this.#onKeyDown);
@@ -157,7 +184,7 @@ export class BrowserMultiplayerInput {
 
   #samplePlayer(player: PlayerRuntime, gamepads: ArrayLike<StandardGamepadSnapshot | null>): PlayerInputSnapshot {
     const values = new Map<string, number>();
-    if (!this.#suspended) mergeValues(values, player.actionMap.sampleKeyboard(this.#keys));
+    if (!this.#suspended) mergeValues(values, player.actionMap.sampleKeyboard(this.#unconsumedKeys));
     const gamepad = player.gamepadIndex === null || this.#disconnectedGamepads.has(player.gamepadIndex) ? null : gamepads[player.gamepadIndex] ?? null;
     mergeValues(values, player.actionMap.sampleGamepad(gamepad));
     const actions = player.actionMap.actionNames().map(action => {
@@ -168,8 +195,7 @@ export class BrowserMultiplayerInput {
       player.previous.set(action, value);
       return Object.freeze({ action, value, held, pressed: held && !wasHeld, released: !held && wasHeld });
     });
-    const value = { id: player.id, actions } as unknown as SimulationStateValue;
-    return Object.freeze({ id: player.id, actions: Object.freeze(actions), hash: hashSimulationState(value) });
+    return snapshot({id:player.id,actions:Object.freeze(actions)});
   }
 
   #assertLive(): void {
@@ -196,29 +222,15 @@ function gamepadEventIndex(event: Event): number | null {
   return Number.isSafeInteger(index) && (index as number) >= 0 && (index as number) <= 31 ? index as number : null;
 }
 
-function defaultEventTarget(): EventTarget | null {
-  return typeof globalThis.addEventListener === 'function' ? globalThis : null;
-}
-
-function defaultVisibilityTarget(): (EventTarget & Readonly<{ hidden?: boolean }>) | null {
-  return typeof document === 'undefined' ? null : document;
-}
-
 function defaultGamepadProvider(): ArrayLike<StandardGamepadSnapshot | null> {
   return typeof navigator === 'undefined' || typeof navigator.getGamepads !== 'function' ? EMPTY_GAMEPADS : navigator.getGamepads();
 }
 
-function normalizePlayerId(value: string): string {
-  if (typeof value !== 'string' || !/^[A-Za-z][A-Za-z0-9._:-]{0,31}$/u.test(value)) throw new TypeError('Browser multiplayer input player id is invalid.');
+function range(value:number,minimum:number,maximum:number,label:string,integer=false):number {
+  if (!(integer?Number.isSafeInteger(value):Number.isFinite(value)) || value<minimum || value>maximum) throw new RangeError(`${label} must be ${integer?'an integer':'a finite number'} from ${minimum} to ${maximum}.`);
   return value;
 }
 
-function finiteRange(value: number, minimum: number, maximum: number, label: string): number {
-  if (!Number.isFinite(value) || value < minimum || value > maximum) throw new RangeError(`${label} must be a finite number from ${minimum} to ${maximum}.`);
-  return value;
-}
-
-function integerRange(value: number, minimum: number, maximum: number, label: string): number {
-  if (!Number.isSafeInteger(value) || value < minimum || value > maximum) throw new RangeError(`${label} must be an integer from ${minimum} to ${maximum}.`);
-  return value;
+function snapshot<T extends object>(value:T):Readonly<T & {hash:string}> {
+  return Object.freeze({...value,hash:hashSimulationState(value as unknown as SimulationStateValue)});
 }

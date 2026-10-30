@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "goal": "g09-drag-drop",
+  "status": "complete",
+  "testsPassed": 2065,
+  "focusedTests": 27,
+  "browserCases": 447,
+  "dragBrowserCases": 107,
+  "maxDragPixelChannelDifference": 1,
+  "pixelToleranceUnchanged": 2,
+  "sourceInputs": 1575,
+  "changedSourceInputsDuringFinalRun": [],
+  "servedFileReadsVerified": 1500,
+  "sourceAdmission": {
+    "plannedNamedTypes": [
+      "GuiDragSource",
+      "GuiDropTarget",
+      "GuiDragSession"
+    ],
+    "newNamedEntryExports": 0,
+    "integrationOwner": "g13-integration-release",
+    "packageQualified": false
+  },
+  "wholeVersionReady": false,
+  "packageQualified": false,
+  "openG13Checks": [
+    {
+      "name": "public-package/gui-font",
+      "status": "failed",
+      "gzipBytes": 105353,
+      "maximumBytes": 55000,
+      "priorG08GzipBytes": 99511,
+      "g09GrowthBytes": 5842,
+      "budgetChanged": false
+    },
+    {
+      "name": "check:engine:contracts",
+      "status": "failed",
+      "preExistingBareErrors": 10,
+      "source": "engine/src/core/RenderRegionState.ts",
+      "sourceSha256": "c8f6fe29a04a26d6e5579d110b7c7b3f2f7c82cc83ee33f303dccd6b491a97fe",
+      "sourceUnchanged": true,
+      "currentReceipt": {
+        "path": "artifacts/engine-0.2.2/g09/contracts-current.log",
+        "sha256": "03de625e71480fa05573f13a29fc7006ec3d4e058bc8aab6235e58e53d8ccae8"
+      },
+      "laterChainedChecks": "not reached after the existing stage3 failure"
+    }
+  ],
+  "narrativeGuiBudget": {
+    "gzipBytes": 12995,
+    "maximumBytes": 13000,
+    "status": "passed",
+    "budgetChanged": false
+  },
+  "diagnosticNotes": [
+    "After host pause the global GUI font atlas is uploaded lazily on the first resumed preview (32 to 33 total fixture textures). The report retains both cold and warm counts; five subsequent cycles must be exactly equal and final teardown must be zero.",
+    "On this Chrome, CDP mouseMoved with button none cleared pointer capture despite buttons 1. Gates use a sustained left button and assert actual capture, including release outside the canvas. Initial failed traces remain retained."
+  ],
+  "deviceOwnedHandoff": {
+    "owner": "g13-integration-release",
+    "items": [
+      "named GuiDragSource/GuiDropTarget/GuiDragSession exports, declarations and packed consumers",
+      "formal cross-platform/physical touch and Native composition",
+      "formal production performance and final candidate/release gates"
+    ]
+  },
+  "proofs": {
+    "required": {
+      "path": "artifacts/engine-0.2.2/g09/required-20261022T152157Z/result.json",
+      "sha256": "745b08669d7a3b293d303339c25957edeb28910d873cd4cae4b09de9c6263577"
+    },
+    "browser": {
+      "path": "artifacts/engine-0.2.2/g09/browser-20261022T153247Z/result.json",
+      "sha256": "d6b19ccf875e25b2793f03ba3037c1917ed2b8c0edf12d75147a60136400b240"
+    },
+    "package": {
+      "path": "artifacts/engine-0.2.2/g09/public-packages-final.json",
+      "sha256": "e33405fbef1b3d628b53eb61bd38503d451c956301d00944d451751dc28e291f"
+    }
+  },
+  "originalsRetained": true,
+  "published": false,
+  "committedOrPushed": false,
+  "fullG09Complete": true,
+  "g09RuntimeVerified": true,
+  "problem": "Applications lacked one semantic transaction across existing GUI pointer, keyboard, regional hit testing and preview lifetimes.",
+  "method": "One private drag controller reuses the existing input domain, coordinates, focus actions and renderer resource owners; ordinary controls allocate no dormant drag slots.",
+  "conclusion": "Original G09 runtime and production composition verified. Public named admission and final package/device/performance qualification remain with G13; original failures and budgets remain.",
+  "originalContractAudit": {
+    "path": "artifacts/engine-0.2.2/g09/final-20261022T153621Z/original-contract-audit.json",
+    "sha256": "2ed8d420e368ff094c466d1fac973142f2483daa53958268c317a2db647c995c"
+  },
+  "sourceAudit": {
+    "path": "artifacts/engine-0.2.2/g09/final-20261022T153621Z/source-audit.json",
+    "sha256": "ef6fb22131308e245beea1731b43feb6930d8a525fd947619e9afb654da21619"
+  },
+  "archive": {
+    "path": "artifacts/engine-0.2.2/g09/final-20261022T153621Z/g09-evidence.zip",
+    "sha256": "e5208ef7142758159efc557aef903bc280a1934f91da0454b8858089afd1624f",
+    "bytes": 5535996,
+    "verifiedFiles": 401,
+    "originalsRetained": true
+  },
+  "usage": {
+    "binding": "Attach structural dragSource/dropTarget options or setDragSource/setDropTarget to ordinary GUI elements. Read/cancel GuiSystem.dragSession.",
+    "payload": "getData returns application-owned unknown data; canDrop/drop receive the same reference and target-local logical coordinates.",
+    "preview": "Optional factory returns an unattached GUI subtree; disposePreview runs after detach. Regional apps provide a topmost full-canvas GUI overlay for previews; data-only dragging does not require it.",
+    "input": "Mouse or touch uses six CSS pixels. Auto touch preserves vertical scrolling; touchGesture drag explicitly owns a dedicated handle. Existing confirm/next/previous/direction/cancel UI actions provide keyboard equivalence.",
+    "cleanup": "Synchronous callbacks; end is exactly once. Throwing drop is attempted once and reports accepted false; Engine does not roll back business side effects. Do not retain payloads/resources in application callbacks unnecessarily.",
+    "serialization": "Protocols, payloads, previews and live sessions are runtime-only; rebind through application IDs after loading. GUI v1 remains unchanged."
+  }
+}

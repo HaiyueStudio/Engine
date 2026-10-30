@@ -31,6 +31,18 @@ export class InputActionMap {
 
   constructor(descriptor: InputActionMapDescriptor = {}) { this.setBindings(descriptor); }
 
+  /** Standard gamepad UI bindings; the host's existing sampler owns polling. */
+  static guiNavigation(): InputActionMap {
+    return new InputActionMap({
+      next:{gamepadButtons:[5]},previous:{gamepadButtons:[4]},
+      left:{gamepadButtons:[14],gamepadAxes:[{axis:0,direction:'negative',deadZone:0.25}]},
+      right:{gamepadButtons:[15],gamepadAxes:[{axis:0,direction:'positive',deadZone:0.25}]},
+      up:{gamepadButtons:[12],gamepadAxes:[{axis:1,direction:'negative',deadZone:0.25}]},
+      down:{gamepadButtons:[13],gamepadAxes:[{axis:1,direction:'positive',deadZone:0.25}]},
+      confirm:{gamepadButtons:[0]},cancel:{gamepadButtons:[1]},
+    });
+  }
+
   static standardGameplay(): InputActionMap {
     return new InputActionMap({
       MoveX: { keys: ['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD'], gamepadAxes: [{ axis: 0, direction: 'both', deadZone: 0.15 }] },

@@ -23,6 +23,8 @@ import type { DeferredLightingBackendPort, DeferredLightingRecordInput } from '.
 import { getPbrDeferredSurfacePort, type PbrDeferredSurfacePort } from './PbrDeferredSurfacePort';
 import type { PbrRenderer } from './PbrRenderer';
 import { getSceneFrameGpuArena, type SceneFrameGpuBinding } from './SceneFrameGpuArena';
+import {getRegionSceneProjection} from '../core/RegionSceneProjection';
+import {RegionSceneFrameBinding} from './regions/RegionSceneFrameBinding';
 
 export interface DeferredReferenceOptions { readonly failurePolicy: 'strict' | 'forward'; readonly tiled?: DeferredTileOptions }
 
@@ -70,6 +72,7 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
   private _lights: DeferredLightGpuTable | undefined;
   private _params: DeferredImmutableBufferArena | undefined;
   private _frame: SceneFrameGpuBinding | undefined;
+  private readonly _regionFrames=new Map<string,{frame:RegionSceneFrameBinding;lastSeen:number}>();
   private _emptyGroups: GPUBindGroup[] = [];
   private _pipelines: Partial<Record<GPUTextureFormat, GPURenderPipeline>> = {};
   private _destroyed = false;
@@ -177,6 +180,15 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
         }
       }
       this._sharedAllocation.retain(input.context);
+      let regionFrame:RegionSceneFrameBinding|undefined;
+      if(getRegionSceneProjection(input.view)){
+        const frameId=input.sceneFrame.frameId;
+        for(const [key,entry]of this._regionFrames)if(frameId-entry.lastSeen>1){entry.frame.destroy();this._regionFrames.delete(key);}
+        let entry=this._regionFrames.get(input.view.key);
+        if(!entry){entry={frame:new RegionSceneFrameBinding(this._device),lastSeen:frameId};this._regionFrames.set(input.view.key,entry);}
+        entry.lastSeen=frameId;regionFrame=entry.frame;
+        input={...input,sceneFrame:regionFrame.update(input.sceneFrame,input.view,'raster',input.context)};
+      }
       this.lastSource = getDeferredWorldLights(input.context.frameData ?? input.world.frameData, input.world);
       if (input.context.viewFamily) retainTransientAttachmentScopes(this._pool, new Set(input.context.viewFamily.views.map(view => view.key)));
       const source = this.lastSource!;
@@ -195,7 +207,7 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
       }
       const parameters = this._params!.acquire(params, new Uint8Array(params.buffer), input.context);
       let attachments!: NonNullable<DeferredReferenceBackend["lastAttachments"]>;
-      const frameOffset = this._frame!.upload(input.sceneFrame, input.context);
+      const frameOffset = (regionFrame?.binding??this._frame!).upload(input.sceneFrame, input.context);
       const bypassReason = this._tiles?.select(input, source, lightView) ?? null;
       const tiled = this._tiles?.prepare(input, lightBindings, frameOffset, bypassReason !== null, memory);
       const resolve = this._resolve!;
@@ -250,6 +262,7 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
           input.applyViewport(pass);
           try {
             input.drawSky(pass);
+            if(getRegionSceneProjection(input.view)){pass.setViewport(0,0,width,height,minDepth,maxDepth);pass.setScissorRect(0,0,width,height);}
             pass.setPipeline(pipelines[input.engine.getDepthFormat(input.view.reverseZ)]!);
             pass.setBindGroup(0, this._frame!.bindGroup, [frameOffset]);
             pass.setBindGroup(1, this._emptyGroups[0]!); pass.setBindGroup(2, this._emptyGroups[1]!);
@@ -301,6 +314,7 @@ export class DeferredReferenceBackend implements DeferredLightingBackendPort {
   }
 
   destroy(abandon = false): void {
+    for(const entry of this._regionFrames.values())entry.frame.destroy(abandon);this._regionFrames.clear();
     releaseSequentialAttachments(this._pool, abandon);
     this._sharedAllocation.destroy(abandon);
     this._ambientOcclusion.destroy(abandon);

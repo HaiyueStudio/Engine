@@ -35,4 +35,4 @@
 
 类型契约与单元测试覆盖 JSON 校验、回退、插值、复数、异步竞争、失败保留、租约释放、局部 dirty。
 [可运行示例](../../../examples/i18n/README.md)用 GPU GUI 演示三种语言与标题图片，`?verify=1` 运行浏览器验收。
-[API 与证据](../../../review/api/i18n-validation.md)。
+[API 与证据](../../../review/api/capability-validation.md)。

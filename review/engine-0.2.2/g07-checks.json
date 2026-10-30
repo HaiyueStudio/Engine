@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "goal": "g07-theme-skins",
+  "status": "complete",
+  "problem": "GUI needed reusable inherited/state-aware skins, consistent font/icon metrics and shared source-independent nine-slice geometry without duplicating HYA math.",
+  "method": "Root-owned subscriptions borrow caller resources; logical content geometry and multiple font atlases match layout and paint. Retained ordered batches preserve compositing and pending submissions. Public Engine geometry supplies the HYA adapter.",
+  "conclusion": "Original G07 runtime verification and the named geometry admission are complete. All 2021 repository tests, 10 other required checks, 288 current-build browser/WebGPU cases and 905 legacy geometry comparisons pass. Package verification still fails the original 55000-byte GUI-font limit; the HEAD baseline already measured 89689 bytes and G07 adds further code. The original failure, all byte budgets and the unrelated RenderRegionState contract failures remain unchanged for G13. This is not whole-version/package/release qualification.",
+  "apiAdmission": {
+    "approvedAt": "2026-10-22",
+    "authorization": "User explicitly approved the named geometry integration, baseline write scope and count correction.",
+    "symbols": [
+      "computeNineSlicePatches",
+      "NineSliceOptions",
+      "NineSlicePatch"
+    ],
+    "baselineFile": "review/baselines/api-surface.json",
+    "frozenG01Revision": "7d0df288285834e2583f563478f322fdf6743c09",
+    "frozenDeclaredCount": 53,
+    "frozenActualCount": 56,
+    "previousBaselineSha256": "ba957f6dad29c006cc746fcd2464254f77f4ee69c9859792e0ac244dc03ec7f7",
+    "acceptedGeometryCount": 59,
+    "existingCapabilityMaximum": 59,
+    "frozenEvidencePreserved": true,
+    "rootExportsUnchanged": true,
+    "remainingGuiEntryOwner": "g13-integration-release",
+    "proposal": "artifacts/engine-0.2.2/g07/geometry-admission-proposal/geometry-and-hya.patch",
+    "proposalValidation": "artifacts/engine-0.2.2/g07/geometry-admission-proposal/validation.json",
+    "applied": true,
+    "appliedValidation": "artifacts/engine-0.2.2/g07/geometry-admission-proposal/applied-validation.json",
+    "frozenCountCorrection": "G01 wrote 53 but its frozen revision already contained 56 geometry exports. Add the original three symbols to 59, retain the existing maximum 59 and all frozen records."
+  },
+  "fullG07Complete": true,
+  "generatedAt": "2026-10-22T11:58:15.548272+00:00",
+  "g07RuntimeVerified": true,
+  "publicGeometryAdmissionVerified": true,
+  "packageQualified": false,
+  "wholeVersionReady": false,
+  "proofs": {
+    "requiredChecks": {
+      "path": "artifacts/engine-0.2.2/g07/required-20261022T114405Z/result.json",
+      "sha256": "5ca077951ecbdb7ba246ca5e7f66d549bd08f76f4693f1d5d254e715f6d6afc6",
+      "passedChecks": 10,
+      "packageCheck": "failed"
+    },
+    "sourceAudit": {
+      "path": "artifacts/engine-0.2.2/g07/final-20261022T115746Z/source-audit.json",
+      "sha256": "6e3d68a60d0395e4205f6a5d538a081369d84a8940c3ab40a6bdb50bc3162c2a"
+    },
+    "browserWebGpu": {
+      "path": "artifacts/engine-0.2.2/g07/browser-20261022T115514Z/result.json",
+      "sha256": "9727119cb895ec8a950e1d071dc525c2ca0c3261b3c37e43a0d2d61075c1e9b8",
+      "cases": 288,
+      "platform": "Windows native WebGPU; logical DPR 1/1.25/2/3 and browser DPR 1/2"
+    },
+    "originalContractAudit": {
+      "path": "artifacts/engine-0.2.2/g07/final-20261022T115746Z/original-contract-audit.json",
+      "sha256": "525b6ee327ac59510ee4c0acce5d5cf8afb53ff4dce0f311ed85c6c855d4b538"
+    },
+    "geometry": {
+      "path": "artifacts/engine-0.2.2/g07/geometry-admission-proposal/applied-validation.json",
+      "sha256": "20f4f318b2fd32c34e1172d0d853164298305dfc8dde1f9bc98467a51258f4bc",
+      "comparisons": 905,
+      "matchingLimitFailures": 68
+    },
+    "package": {
+      "path": "artifacts/engine-0.2.2/g07/public-packages-final.json",
+      "sha256": "87540ae9ea6c38b83751e10f96b1baafdee9a3dec8cb6d4983f8e1acf7b4cc44",
+      "status": "failed",
+      "errors": [
+        "gui-font gzip 99511B exceeds 55000B"
+      ]
+    }
+  },
+  "packageBytes": {
+    "guiFont": {
+      "head": 89689,
+      "current": 99511,
+      "maximum": 55000
+    },
+    "narrativeGui": {
+      "head": 25063,
+      "current": 12748,
+      "maximum": 13000
+    },
+    "controls": {
+      "head": 54751,
+      "current": 40343,
+      "maximum": 45000
+    }
+  },
+  "resourceContract": {
+    "ownership": "Caller owns source images, GPU textures, FontFace and theme resources. Roots own subscriptions; renderers own generated atlases/uploads. Replacement and destruction detach observers and retire only owned GPU resources.",
+    "staticAdditionalUploads": 0,
+    "destroyGpuResidue": 0,
+    "oldRecordingPixelMaxDelta": 0,
+    "oldRecordingComparedComponents": 131072,
+    "opaqueBorrowedMetadata": "Layout snapshots record only identity, pixel dimensions and version; circular/private caller metadata is never serialized."
+  },
+  "compatibility": {
+    "localStylesWin": true,
+    "legacyDefaultSkinsRetained": true,
+    "wireFormat": "haiyue.gui v1 unchanged",
+    "runtimeBindings": "Theme providers and borrowed resources are rebound by the application. Runtime-only local styles and GuiNineSlice serialization fail explicitly rather than exporting GPU handles or silently losing skin data."
+  },
+  "g13Handoff": {
+    "namedGuiExports": [
+      "GuiThemeResource",
+      "GuiThemeState",
+      "GuiSkin",
+      "GuiNineSliceOptions",
+      "GuiNineSlice"
+    ],
+    "geometryAlreadyAdmitted": true,
+    "packageVersionPeerAndFormalCandidate": true,
+    "formalDevicePerformanceAndCrossPlatform": true,
+    "openChecks": [
+      {
+        "name": "public-package/gui-font",
+        "status": "failed",
+        "headGzipBytes": 89689,
+        "currentGzipBytes": 99511,
+        "maximumUnchanged": 55000,
+        "evidence": "artifacts/engine-0.2.2/g07/public-packages-final.json",
+        "action": "Reduce the complete GUI package while retaining original functionality and budget; baseline overage and the G07 increment both remain visible."
+      },
+      {
+        "name": "check:engine:contracts",
+        "status": "failed",
+        "file": "engine/src/core/RenderRegionState.ts",
+        "preExistingBareErrors": 10,
+        "sourceUnchangedFromHead": true,
+        "sourceSha256": "c8f6fe29a04a26d6e5579d110b7c7b3f2f7c82cc83ee33f303dccd6b491a97fe",
+        "evidence": "artifacts/engine-0.2.2/g07/final-global-20261022T104809Z/contracts.log",
+        "action": "G13 resolves the existing public-error contract classification/failure; no gate was changed."
+      }
+    ]
+  },
+  "archive": {
+    "path": "artifacts/engine-0.2.2/g07/final-20261022T115746Z/g07-evidence.zip",
+    "sha256": "449da3d7eb1d1bca4e5732125f783700175573d77588374a3f234bc3e8bb19dc",
+    "bytes": 5903454,
+    "verifiedFiles": 408,
+    "originalsRetained": true,
+    "sourceSupplement": {
+      "path": "artifacts/engine-0.2.2/g07/final-20261022T115746Z/g07-example-api-source.zip",
+      "sha256": "3776300428dd673b0cd5efedd1949124a530a57a0c445ac3628e8e5d6d765eb8",
+      "bytes": 42875,
+      "verifiedFiles": 10,
+      "originalsRetained": true
+    }
+  }
+}

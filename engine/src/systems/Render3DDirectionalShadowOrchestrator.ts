@@ -135,32 +135,36 @@ export class Render3DDirectionalShadowOrchestrator {
     if (renderableCount === 0) return;
 
     const renderer = this._options.getRenderer();
-    const targetChanged = typeof renderer.prepareTarget === 'function'
+    let targetChanged = typeof renderer.prepareTarget === 'function'
       ? renderer.prepareTarget(targetSize)
       : false;
     if (targetChanged) {
       for (const slot of this._slots) slot.cache.invalidate();
     }
+    // Resolve readiness once before deciding whether a held reader requires
+    // independent storage. A new array must initialize every live shadow slot.
+    const jobs = this._slots.map((slot, index) => {
+      if (!this._isRenderable(slot)) return null;
+      const light = slot.light!;
+      const materialRevision = renderer.prepareMaterialCoverage?.(slot.items) ?? 0;
+      const casterRevisionB = (slot.casterRevisionB ^ materialRevision) >>> 0;
+      const cached = slot.cache.matches(light, !targetChanged && this._shadows[index] !== null,
+        slot.casterRevisionA, casterRevisionB, slot.casterCount);
+      return {slot, index, light, casterRevisionB, cached};
+    });
+    const pendingProducer = renderer.hasPendingTargetWrites?.(context) ?? false;
+    if ((pendingProducer || jobs.some(job => job && !job.cached)) && renderer.hasPendingTargetRecords?.(context)) {
+      targetChanged = renderer.prepareTarget(targetSize, true) || targetChanged;
+      if (targetChanged) for (const slot of this._slots) slot.cache.invalidate();
+    }
     let cacheHits = 0;
     let changed = targetChanged;
     renderer.beginLayerBatch?.();
     try {
-      for (let index = 0; index < this._slots.length; index++) {
-        const slot = this._slots[index]!;
-        if (!this._isRenderable(slot)) continue;
-        const light = slot.light!;
-        const materialRevision = renderer.prepareMaterialCoverage?.(slot.items) ?? 0;
-        const casterRevisionB = (slot.casterRevisionB ^ materialRevision) >>> 0;
-        if (slot.cache.matches(
-          light,
-          !targetChanged && this._shadows[index] !== null,
-          slot.casterRevisionA,
-          casterRevisionB,
-          slot.casterCount,
-        )) {
-          cacheHits++;
-          continue;
-        }
+      for (const job of jobs) {
+        if (!job) continue;
+        const {slot, index, light, casterRevisionB} = job;
+        if (!targetChanged && !pendingProducer && job.cached) { cacheHits++; continue; }
         this._shadows[index] = typeof renderer.renderLayer === 'function'
           ? renderer.renderLayer(
             context.encoder,

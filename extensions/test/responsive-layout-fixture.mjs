@@ -46,28 +46,78 @@ export function responsiveLayoutFixture() {
 export async function loadResponsiveLayoutModules(workspace) {
   const [specRoot, runtimeRoot] = await Promise.all([
     transpileTree(new URL('../../animation-spec/src/', import.meta.url)),
-    transpileTree(new URL('../src/animation/', import.meta.url))
+    transpileTree(new URL('../src/', import.meta.url), ['animation/', 'animation-state-machine/', 'layout/', 'hya-state-machine/v2/'], workspace?.evaluatorSource)
   ]);
   const [spec, layoutRuntime, textRuntime] = await Promise.all([
     import(new URL('layout2d/parameterized/index.js', specRoot).href),
-    import(new URL('layout/parameterized/index.js', runtimeRoot).href),
-    import(new URL('text/parameterized/index.js', runtimeRoot).href)
+    import(new URL('animation/layout/parameterized/index.js', runtimeRoot).href),
+    import(new URL('animation/text/parameterized/index.js', runtimeRoot).href)
   ]);
   void workspace;
-  return { spec, runtime: { ...layoutRuntime, ...textRuntime } };
+  const textProduction = await import(new URL('animation/text/production/ProductionTextOwner.js', runtimeRoot).href);
+  const outlineProduction = await import(new URL('animation/text/production/ProductionOutlineFontPort.js', runtimeRoot).href);
+  const layoutProduction = await import(new URL('animation/layout/production/ProductionLayoutOwner.js', runtimeRoot).href);
+  const frameProduction = await import(new URL('animation/production/FrameTransaction.js', runtimeRoot).href);
+  const transactionProduction = await import(new URL('animation/production/TransactionPort.js', runtimeRoot).href);
+  const stateProduction = await import(new URL('animation/production/StateFrameStage.js', runtimeRoot).href);
+  const stateController = await import(new URL('animation/production/StateController.js', runtimeRoot).href);
+  const dataProduction = await import(new URL('animation/production/DataOwner.js', runtimeRoot).href);
+  const compositionProduction = await import(new URL('animation/production/CompositionOwner.js', runtimeRoot).href);
+  const resourceProduction = await import(new URL('animation/production/ResourceStage.js', runtimeRoot).href);
+  const drawProduction = await import(new URL('animation/layout/production/ProductionDrawPlan.js', runtimeRoot).href);
+  const visualMatrix = await import(new URL('animation/AnimationVisualMatrix.js', runtimeRoot).href);
+  return { spec, runtime: { ...layoutRuntime, ...textRuntime }, textProduction, outlineProduction, layoutProduction, drawProduction: {...drawProduction, ...visualMatrix}, frameProduction: {...frameProduction, ...transactionProduction, ...stateProduction, ...stateController, ...dataProduction, ...compositionProduction, ...resourceProduction} };
 }
 
-async function transpileTree(sourceUrl) {
-  const { mkdtemp, mkdir, readFile, readdir, writeFile } = await import('node:fs/promises');
+async function transpileTree(sourceUrl, prefixes, evaluatorSource) {
+  const { mkdtemp, mkdir, readFile, readdir, writeFile, symlink } = await import('node:fs/promises');
   const { tmpdir } = await import('node:os');
   const path = await import('node:path');
   const { fileURLToPath } = await import('node:url');
   const ts = await import('typescript');
   const sourceRoot = fileURLToPath(sourceUrl), temporary = await mkdtemp(path.join(tmpdir(), 'haiyue-layout-test-'));
-  for (const file of (await walk(sourceRoot, readdir, path)).filter(file => file.endsWith('.ts'))) {
-    const output = path.join(temporary, path.relative(sourceRoot, file).replace(/\.ts$/, '.js'));
+  if (prefixes) {
+    // The isolated runtime still consumes the installed public Engine package.
+    // Do not rewrite its geometry import to a private source module.
+    const packageRoot = fileURLToPath(new URL('..', import.meta.resolve('@haiyue/engine/geometry')));
+    const scope = path.join(temporary, 'node_modules', '@haiyue');
+    await mkdir(scope, {recursive: true});
+    await symlink(packageRoot, path.join(scope, 'engine'), 'junction');
+    const formatRoot = fileURLToPath(new URL('..', import.meta.resolve('@haiyue/animation-spec')));
+    await symlink(formatRoot, path.join(scope, 'animation-spec'), 'junction');
+    const opentypeRoot = fileURLToPath(new URL('.', import.meta.resolve('opentype.js/package.json')));
+    await symlink(opentypeRoot, path.join(temporary, 'node_modules', 'opentype.js'), 'junction');
+    const earcutRoot = path.dirname(path.dirname(fileURLToPath(import.meta.resolve('earcut'))));
+    await symlink(earcutRoot, path.join(temporary, 'node_modules', 'earcut'), 'junction');
+    const polygonRoot = fileURLToPath(new URL('..', import.meta.resolve('polygon-clipping/dist/polygon-clipping.esm.js')));
+    await symlink(polygonRoot, path.join(temporary, 'node_modules', 'polygon-clipping'), 'junction');
+  }
+  const files = new Set(await walk(sourceRoot, readdir, path));
+  const pending = [...files].filter(file => /\.(?:ts|js)$/.test(file) && !file.endsWith('.d.ts') &&
+    (!prefixes || prefixes.some(prefix => path.relative(sourceRoot,file).replaceAll('\\','/').startsWith(prefix))));
+  const emitted = new Set();
+  for (const file of pending) {
+    if (emitted.has(file)) continue;
+    emitted.add(file);
+    const output = path.join(temporary, path.relative(sourceRoot, file).replace(/\.ts$/, '.js') + (file.endsWith('.wgsl') ? '.js' : ''));
     await mkdir(path.dirname(output), { recursive: true });
-    const compiled = ts.transpileModule(await readFile(file, 'utf8'), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
+    const relative = path.relative(sourceRoot,file).replaceAll('\\','/');
+    const source = typeof evaluatorSource==='string'&&relative==='animation/layout/parameterized/LayoutEvaluator.ts'?evaluatorSource:await readFile(file,'utf8');
+    // Follow actual runtime imports; copied composition owners also reach the
+    // original state channels, camera helpers and generated shader resources.
+    let compiled = file.endsWith('.wgsl') ? 'export default '+JSON.stringify(source)+';' : file.endsWith('.js') ? source :
+      ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
+    if (!file.endsWith('.wgsl')) for (const {fileName: specifier} of ts.preProcessFile(compiled, true, true).importedFiles) {
+      if (!specifier.startsWith('.')) continue;
+      const base = path.resolve(path.dirname(file), specifier);
+      const dependency = [base, base.replace(/\.js$/, '.ts'), base+'.ts', path.join(base,'index.ts')].find(value => files.has(value));
+      if (!dependency) throw new Error('Missing isolated runtime dependency: '+relative+' -> '+specifier);
+      pending.push(dependency);
+      const emittedDependency = dependency.replace(/\.ts$/, '.js') + (dependency.endsWith('.wgsl') ? '.js' : '');
+      const relativeImport = path.relative(path.dirname(file), emittedDependency).replaceAll('\\','/');
+      const emittedImport = relativeImport.startsWith('.') ? relativeImport : './'+relativeImport;
+      compiled=compiled.replaceAll("'"+specifier+"'", "'"+emittedImport+"'").replaceAll('"'+specifier+'"','"'+emittedImport+'"');
+    }
     await writeFile(output, compiled);
   }
   return new URL(`file:///${temporary.replaceAll('\\', '/')}/`);

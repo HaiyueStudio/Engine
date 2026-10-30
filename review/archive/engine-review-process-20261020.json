@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "archive": "engine-review-process-20261020.zip",
+  "sha256": "86a1a9f2c4e40d15a5c0ad6981f761af292cc11f0ede333047444ce280fa3788",
+  "sourceRevision": "7d0df288285834e2583f563478f322fdf6743c09",
+  "scope": "Superseded review prose and per-command joystick logs; originals before problem/method/conclusion consolidation. No runtime, accepted ADR body, baseline, license, current qualification or artifacts raw capture removed.",
+  "originalBytes": 197620,
+  "archiveBytes": 85963,
+  "files": [
+    {
+      "path": "Engine/review/README.md",
+      "bytes": 1351,
+      "sha256": "565dc6581a52121e91f4aa0b4fec0af968f073328b9438188ea8692e73d9dc47",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/archive/README.md",
+      "bytes": 1442,
+      "sha256": "a4e0bbe313bc090462ef8a35455899695b802bafb5ac67eb93593bf09abf61f7",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/engine-0.2.1/README.md",
+      "bytes": 12699,
+      "sha256": "ccce02d644c4f78006175e765d6604cba76de8ef9bed7b80e6e3996d0fada676",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/engine-0.2.1/g09/README.md",
+      "bytes": 6533,
+      "sha256": "9dfc63e7fbc519e013ef80a8f4ba17dc771ed19555b05cf1e3885c826a32f50c",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/api/README.md",
+      "bytes": 1013,
+      "sha256": "5638fd2a80e95bd175d7d01d86200e5729b681821dd7de673fff3ec95e529060",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/api/i18n-validation.md",
+      "bytes": 3155,
+      "sha256": "a5f8f8a43e49ba96153ca33bf6d41d40fd07c2f5618fcfb1600d23bd4b7aad2e",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/api/narrative-validation.md",
+      "bytes": 3490,
+      "sha256": "6d44f353553ec5a19d0e81b1d94e999df86f862ce32200ba17530aa2069ab7ec",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/api/share-content-validation.md",
+      "bytes": 3371,
+      "sha256": "8e66a7ac2ec843221a43005c92295b83b52f3bb1399f323bca5221d8b2d39286",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-validation.md",
+      "bytes": 3663,
+      "sha256": "cb4210097314e852bcc09c7c2f15c200aa611ace0b6c5544095734974be1be5b",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/api/extensions-capability-review.md",
+      "bytes": 6517,
+      "sha256": "166cde7895be40a4d16e3f4858126b4187c263fe18d866a023f8586757dd6160",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/api/animation-opentype-loading-review.md",
+      "bytes": 3935,
+      "sha256": "3922968870b6732f8299dfd981ae1a92b0468f0a1f8f2d3303d94c6a43544885",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/api/loaders-gl-dependency-review.md",
+      "bytes": 3293,
+      "sha256": "64c782dae06faf8e0a418da801c46a223f9c1c7f95e73838d730ab252eb52611",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/README.md",
+      "bytes": 466,
+      "sha256": "95db84a4ea759477da9fb1d4389771ad694f41cf66f79bf76bbabf02df885352",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/gui-scroll-help/README.md",
+      "bytes": 2937,
+      "sha256": "c25ee8510bdcf8259064acf140a9e802a12ed84c9c68674e455523f30e53f105",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/gui-scroll-help/api-diff.jsonl",
+      "bytes": 301,
+      "sha256": "cbb4cf351c1f986d562840ba0cfa2b0922ad92241885da87f27c5214ab9cbcda",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/gui-text-alignment/README.md",
+      "bytes": 2046,
+      "sha256": "06adb4b3fec991f1a95c24abeaebb84ec717921fe0e36fca6d2f2908091a0f09",
+      "role": "original-before-topic-consolidation"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/api-check.log",
+      "bytes": 997,
+      "sha256": "bad6a0028508cfc07d133903eeca94f081e11a8f8f33dbf8d6a7d5c7ac81b8ac",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/boundaries.log",
+      "bytes": 1457,
+      "sha256": "63367b7682c03079c25952eda641ce67c7b88a6b9673759b2c4be05ac50ad51a",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/browser.log",
+      "bytes": 187,
+      "sha256": "95953994d60b748b23b63b578354ee0efa70d9c89775f58b5cf35f6d1a7fb838",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/catalog.log",
+      "bytes": 874,
+      "sha256": "1bacfd7f4633f1d519b16f976d55788eba2c83aedc2b147a408f3d0c238b9ff1",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/docs-check.log",
+      "bytes": 960,
+      "sha256": "d4a38786d18834f82cc04ada2e426c6e5258495a50eab4427ebb081412137861",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/example-build.log",
+      "bytes": 104,
+      "sha256": "b372393203fefdc9e8436219cad96fbfc8375eb5307656236d0a55bc150e9412",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/example-typecheck.log",
+      "bytes": 69,
+      "sha256": "f11c720d7adc1c8f8817059b4f7a712c81e4036be65df0027b093db6461a56a9",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/extensions-build.log",
+      "bytes": 844,
+      "sha256": "0a3018d10388ff907f88f96f34405f913d7c60a50d3e0b95bca8412f6b71b60a",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/extensions-typecheck.log",
+      "bytes": 269,
+      "sha256": "147e7788f791df2d6995b4ecbc447b5871f5a4c51bc69942c52162c0e4117dd8",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/focused-tests.log",
+      "bytes": 2002,
+      "sha256": "fbc8058ab9e0ecd56132250e12f5e5f7aa4e7804b3834865c1ae2c3e54db4e90",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/package-policy.log",
+      "bytes": 656,
+      "sha256": "2d7c33138d89b9bfe6ee97950f1510db63c0413d2cd679a63e263f4a1728fa78",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/packed-consumer.log",
+      "bytes": 41,
+      "sha256": "25d4094484a09d90de5bb46c1fd6dc71a1e623b0c2ea674ed69768629b0eee04",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/packed-types.log",
+      "bytes": 36,
+      "sha256": "c4f1208f4ec444299f69dfe599661d9193c81f604e6738bb717b19006c7bb2f4",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/repository-tests.log",
+      "bytes": 129946,
+      "sha256": "8557bf275c225f93a87d82c769c36975423e05592b8b352cfb80725691fee02a",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/repository-typecheck.log",
+      "bytes": 2966,
+      "sha256": "31c71a7313afe47d42c3cfa1cea54b749c24fcf7e4240b485c97720184e83a8e",
+      "role": "archived-process-log"
+    },
+    {
+      "path": "Engine/review/api/virtual-joystick-evidence/source-contract-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "role": "archived-process-log"
+    }
+  ]
+}

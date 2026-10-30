@@ -106,3 +106,24 @@ show a red border and leave the last valid color unchanged; Enter restores that
 color. Three-digit shorthand remains editable so six-digit input can be completed.
 Alpha and other CSS color syntaxes are not supported. Serialization preserves
 configuration/value; callbacks and transient input drafts are not serialized.
+
+## Button hover colors (0.2.2 candidate)
+
+`GuiButtonOptions.hoverTransition` / `button.hoverTransition` enables color transitions on pointer enter and leave (default `false`). `hoverTransitionMs` defaults to `180` milliseconds; zero, negative and non-finite values switch instantly. Background, text and border colors interpolate with ease-out cubic timing. Leaving or re-entering mid-transition continues from the current color. Theme-resource hover colors and local `style.hoverBackgroundColor` / `style.hoverColor` are supported. Nine-slice images switch normally without texture crossfades.
+
+`GuiSystem` advances this finite animation through its existing frame loop and demand-rendering contract. Hidden/disabled controls and suspension stop the transition. Serialization saves only the two options. Changing either option during a transition immediately settles to the current hover state.
+
+```ts
+const button = root.add(new GuiButton({
+  text: 'Continue',
+  hoverTransition: true,
+  hoverTransitionMs: 240,
+  style: {backgroundColor: '#2563eb', hoverBackgroundColor: '#3b82f6'},
+}));
+```
+
+The GUI Runtime playground exposes both settings in the GuiButton property panel.
+
+## Input triple click
+
+Three completed primary clicks/taps in the same input select its entire value, including all lines and complete emoji. Adjacent clicks must be within 500 ms and 6 logical pixels. Dragging, cancellation, focus loss, editing the committed value, or pressing the password eye resets the sequence. Read-only inputs may still select text; password clipboard protection remains in effect. The next ordinary click places the caret again.

@@ -18,6 +18,8 @@ import { RendererObjectTable } from './RendererObjectTable';
 import { CurrentDeformationGpuCache } from './CurrentDeformationGpuCache';
 import type { ClippingPlanes } from '../components/ClippingPlanes';
 import { CLIPPING_BLOCK_FLOATS, clippingStateKey, writeClippingBlock } from './ClippingPlanesGpu';
+import type { RenderCommandContext } from '../core/RenderCommandContext';
+import { RecordedGpuResources } from './RecordedGpuResources';
 
 const OBJECT_TABLE_FLOATS = 24;
 const OBJECT_TABLE_MORPH_OFFSET = 16;
@@ -35,6 +37,8 @@ export class OutlineMaskRenderer extends BaseRenderer {
   msaaSamples: 1 | 4 = 1;
 
   private engine!: IEngine;
+  private recorded!: RecordedGpuResources;
+  private submissionContext: RenderCommandContext | undefined;
   private bgl0!: GPUBindGroupLayout;
   private bgl1!: GPUBindGroupLayout;
   private bgl2!: GPUBindGroupLayout;
@@ -59,6 +63,7 @@ export class OutlineMaskRenderer extends BaseRenderer {
     this._initialized = true;
     this.engine = engine;
     const { device } = engine;
+    this.recorded = new RecordedGpuResources(device);
     this.geoCache = getSharedGeometry3DGPUCache(device, getEngineGPUResourceTracker(engine));
     this.sceneFrameBinding = getSceneFrameGpuArena(device).createBinding();
     this.bgl0 = this.sceneFrameBinding.bindGroupLayout;
@@ -75,6 +80,8 @@ export class OutlineMaskRenderer extends BaseRenderer {
       ],
     });
     this.coverageBindings = new MaterialCoverageBindings(device, this.bgl2);
+    const coverage = this.coverageBindings;
+    this.recorded.own(coverage, () => coverage.destroy());
     const generated = getBuiltinDeformationShader(device, 'outline', [this.bgl0, this.bgl1, this.bgl2, this.bgl3]);
     this.shaderModule = generated.module;
     this.pipelineLayout = generated.pipelineLayout;
@@ -89,21 +96,26 @@ export class OutlineMaskRenderer extends BaseRenderer {
     this.deformationCache = new CurrentDeformationGpuCache(device, this.bgl3, 'OutlineMaskRenderer');
   }
 
-  beginView(sceneFrame: SceneFrameUniformSnapshot): void {
-    this.cameraDynamicOffset[0] = this.sceneFrameBinding.upload(sceneFrame);
-    this.objectTable.beginUploads();
+  beginView(sceneFrame: SceneFrameUniformSnapshot, context?: RenderCommandContext): void {
+    this.submissionContext = context;
+    this.recorded.retain(this.coverageBindings, context);
+    this.cameraDynamicOffset[0] = this.sceneFrameBinding.upload(sceneFrame, context);
+    this.objectTable.beginUploads(context);
   }
+
+  endView(): void { this.submissionContext = undefined; }
 
   contributePipelineWarmup(plan: PipelineWarmupPlan): void {
     const reverseZ = this.reverseZ;
     const msaaSamples = this.msaaSamples;
+    const format=this.colorFormat??this.engine.format;
     for (const depthWrite of [true, false]) {
-      const key = encodePrimitivePipelineKey('triangle-list', 'back', 'ccw', undefined, reverseZ, msaaSamples, depthWrite ? 1 : 0);
+      const key = (this.colorFormat??this.engine.format)+":"+encodePrimitivePipelineKey('triangle-list', 'back', 'ccw', undefined, reverseZ, msaaSamples, depthWrite ? 1 : 0);
       this.addPipelineWarmup(
         plan,
         key,
         `Outline mask ${depthWrite ? 'occluded' : 'visible'}`,
-        () => this._pipelineDescriptor('triangle-list', 'back', 'ccw', undefined, depthWrite, reverseZ, msaaSamples),
+        () => this._pipelineDescriptor('triangle-list', 'back', 'ccw', undefined, depthWrite, reverseZ, msaaSamples,format),
         this.engine.device,
       );
     }
@@ -126,8 +138,8 @@ export class OutlineMaskRenderer extends BaseRenderer {
     options: { depthWrite?: boolean; sourceMaterial?: Material | null; coverage?: MaterialCoverageResources | null } = {},
     clippingPlanes: ClippingPlanes | null = null,
   ): void {
-    const geoData = this.geoCache.ensure(geometry, this);
-    const deformation = this.deformationCache.ensure(geometry);
+    const geoData = this.geoCache.ensure(geometry, this, this.submissionContext);
+    const deformation = this.deformationCache.ensure(geometry, this.submissionContext);
     const entData = this.entityCache.ensure(entityId);
     this._writeObject(entData, geometry, clippingPlanes, worldMatrix, auxiliaryUsesDeformation(options.sourceMaterial));
     this.objectTable.flushUploads();
@@ -150,7 +162,7 @@ export class OutlineMaskRenderer extends BaseRenderer {
   }
 
   destroy(): void {
-    this.coverageBindings?.destroy();
+    this.recorded?.retireAll();
     this.sceneFrameBinding?.destroy();
     this.geoCache?.releaseOwner(this);
     this.deformationCache?.destroy();
@@ -205,7 +217,7 @@ export class OutlineMaskRenderer extends BaseRenderer {
     const cullMode = auxiliaryCullMode(geometry, sourceMaterial);
     const frontFace = auxiliaryFrontFace(geometry, sourceMaterial);
     const stripIndexFormat = getStripIndexFormat(geometry);
-    const key = encodePrimitivePipelineKey(topology, cullMode, frontFace, stripIndexFormat, this.reverseZ, this.msaaSamples, depthWrite ? 1 : 0);
+    const key = (this.colorFormat??this.engine.format)+":"+encodePrimitivePipelineKey(topology, cullMode, frontFace, stripIndexFormat, this.reverseZ, this.msaaSamples, depthWrite ? 1 : 0);
     return this.getCachedPipeline(key, () => this.engine.device.createRenderPipeline(
       this._pipelineDescriptor(
         topology,
@@ -227,8 +239,8 @@ export class OutlineMaskRenderer extends BaseRenderer {
     depthWrite: boolean,
     reverseZ: boolean,
     msaaSamples: 1 | 4,
+    format=this.colorFormat??this.engine.format,
   ): GPURenderPipelineDescriptor {
-    const { format } = this.engine;
     return {
       layout: this.pipelineLayout,
       vertex: {

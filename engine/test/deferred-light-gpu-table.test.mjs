@@ -162,3 +162,10 @@ test('a submitted encoder cannot release a shared slot still referenced by an un
   }
   assert.equal(first.source.buffer.destroyed, true);
 });
+
+
+test('cancelling one pending light record preserves other submissions and eventually releases every arena buffer',async()=>{
+ const device=createAuditGpuDevice(),gpu=new DeferredLightGpuTable(device),cpu=new DeferredLightTable(),source=cpu.update([candidate(1)],[]),view=createDeferredReferenceView(source),cancel=[];
+ const older=context(device),newer={...context(device),afterCancel:cb=>cancel.push(cb)},first=gpu.bind(source,view,older);gpu.bind(source,view,newer);
+ gpu.destroy();cancel.forEach(cb=>cb());assert.equal(first.source.buffer.destroyed,false);await older.submit();assert.equal(first.source.buffer.destroyed,true);assert.equal(first.header.buffer.destroyed,true);
+});

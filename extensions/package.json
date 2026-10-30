@@ -1,6 +1,6 @@
 {
   "name": "@haiyue/extensions",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": false,
   "description": "Stable optional HaiYue runtimes for 2D/3D animation, glTF, Spine, tilemaps, text, tweening, and grids.",
   "license": "MIT",
@@ -111,6 +111,34 @@
     "./achievements": {
       "types": "./dist/achievements.d.ts",
       "import": "./dist/achievements.js"
+    },
+    "./hya-player": {
+      "types": "./dist/hya-player.d.ts",
+      "import": "./dist/hya-player.js"
+    },
+    "./hya-text": {
+      "types": "./dist/hya-text.d.ts",
+      "import": "./dist/hya-text.js"
+    },
+    "./hya-layout": {
+      "types": "./dist/hya-layout.d.ts",
+      "import": "./dist/hya-layout.js"
+    },
+    "./hya-data": {
+      "types": "./dist/hya-data.d.ts",
+      "import": "./dist/hya-data.js"
+    },
+    "./hya-audio": {
+      "types": "./dist/hya-audio.d.ts",
+      "import": "./dist/hya-audio.js"
+    },
+    "./layout": {
+      "types": "./dist/layout.d.ts",
+      "import": "./dist/layout.js"
+    },
+    "./gui-layout": {
+      "types": "./dist/gui-layout.d.ts",
+      "import": "./dist/gui-layout.js"
     }
   },
   "scripts": {
@@ -123,15 +151,16 @@
     "draco3dgltf": "^1.5.7",
     "earcut": "^3.0.2",
     "opentype.js": "^1.3.4",
-    "wgpu-matrix": "^3.0.0"
+    "wgpu-matrix": "^3.0.0",
+    "polygon-clipping": "0.15.7"
   },
   "peerDependencies": {
-    "@haiyue/animation-spec": ">=0.2.0 <0.3.0",
-    "@haiyue/engine": ">=0.2.0 <0.3.0"
+    "@haiyue/animation-spec": ">=0.2.2 <0.3.0",
+    "@haiyue/engine": ">=0.2.2 <0.3.0"
   },
   "devDependencies": {
-    "@haiyue/animation-spec": "0.2.1",
-    "@haiyue/engine": "0.2.1",
+    "@haiyue/animation-spec": "0.2.2",
+    "@haiyue/engine": "0.2.2",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-typescript": "^11.0.0",
     "@types/opentype.js": "^1.3.8",

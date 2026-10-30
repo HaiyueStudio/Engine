@@ -25,6 +25,8 @@
 
 `@haiyue/engine/experimental` 是显式选择的低层入口，不提供稳定性承诺。详细规则见 [API stability](../for-ai/api-stability.md)。
 
+0.2.2 开发候选的 [区域渲染语义](region-rendering.md)单列；不据此声称已发布包或具名类型注册完成。
+
 ## 更新 API 文档
 
 ```bash

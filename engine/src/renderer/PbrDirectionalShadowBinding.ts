@@ -1,13 +1,17 @@
 import { SCENE_RENDER_MAX_DIRECTIONAL_SHADOWS } from '../frame/SceneRenderEnvironment';
 import type { DirectionalShadowState } from './ShadowMapRenderer';
 import { writeBuffer } from './utils';
+import type { RenderCommandContext } from '../core/RenderCommandContext';
+import { RecordedGpuResources } from './RecordedGpuResources';
+import { retainDirectionalShadowView } from './DirectionalShadowResources';
 
 const FLOATS_PER_SLOT = 20;
 const BUFFER_BYTES = FLOATS_PER_SLOT * SCENE_RENDER_MAX_DIRECTIONAL_SHADOWS * 4;
 
 /** Owns the fixed PBR directional-shadow array binding and its packed uniform ABI. */
 export class PbrDirectionalShadowBinding {
-  readonly buffer: GPUBuffer;
+  buffer: GPUBuffer;
+  private readonly recorded: RecordedGpuResources;
   readonly data = new Float32Array(BUFFER_BYTES / 4);
   private readonly _uploadedData = new Float32Array(BUFFER_BYTES / 4);
   view: GPUTextureView;
@@ -19,11 +23,8 @@ export class PbrDirectionalShadowBinding {
     private readonly defaultView: GPUTextureView,
     private readonly defaultSampler: GPUSampler,
   ) {
-    this.buffer = device.createBuffer({
-      label: 'PbrRenderer.shadow',
-      size: BUFFER_BYTES,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+    this.recorded = new RecordedGpuResources(device);
+    this.buffer = this.createBuffer();
     this.view = defaultView;
     this.sampler = defaultSampler;
   }
@@ -32,7 +33,7 @@ export class PbrDirectionalShadowBinding {
     const first = shadows.find((shadow): shadow is DirectionalShadowState => shadow !== null);
     const view = first?.arrayView ?? first?.view ?? this.defaultView;
     const sampler = first?.sampler ?? this.defaultSampler;
-    const bindingsChanged = this.view !== view || this.sampler !== sampler;
+    let bindingsChanged = this.view !== view || this.sampler !== sampler;
     this.view = view;
     this.sampler = sampler;
     this.data.fill(0);
@@ -61,22 +62,39 @@ export class PbrDirectionalShadowBinding {
     // A shadow-map redraw advances the scene revision even if its sampling
     // matrix and parameters are unchanged. Only upload changed uniform bytes.
     if (changed) {
+      const fork = this.recorded.pending(this.buffer);
+      if (fork) {
+        const previous = this.buffer;
+        this.buffer = this.createBuffer();
+        this.recorded.retire(previous);
+        bindingsChanged = true;
+      }
       writeBuffer(
         this.device.queue,
         this.buffer,
         0,
         this.data,
         0,
-        uploadSlotSpan * FLOATS_PER_SLOT * 4,
+        fork ? BUFFER_BYTES : uploadSlotSpan * FLOATS_PER_SLOT * 4,
       );
-      for (let index = 0; index < uploadFloatCount; index++) this._uploadedData[index] = this.data[index]!;
+      for (let index = 0; index < (fork ? this.data.length : uploadFloatCount); index++) this._uploadedData[index] = this.data[index]!;
     }
     this._uploadedSlotSpan = activeSlotSpan;
     return bindingsChanged;
   }
 
   destroy(): void {
-    this.buffer.destroy();
+    this.recorded.retireAll();
+  }
+
+  retain(context?: RenderCommandContext): void {
+    this.recorded.retain(this.buffer, context);
+    retainDirectionalShadowView(this.view, context);
+  }
+
+  private createBuffer(): GPUBuffer {
+    const buffer = this.device.createBuffer({ label: 'PbrRenderer.shadow', size: BUFFER_BYTES, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    return this.recorded.own(buffer, () => buffer.destroy());
   }
 }
 

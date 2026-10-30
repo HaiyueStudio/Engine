@@ -1,5 +1,6 @@
 import { bitmapKerningKey, type BitmapFontChar, type BitmapFontData } from '../../font/BitmapFontData';
 import { GUI_TEXTURED_VERTEX_LAYOUT } from './GuiVertexLayout';
+import {guiFontCharacters,guiFontGlyph,guiFontGlyphIsColored} from './GuiTextGlyphs';
 
 const VERTICES_PER_GLYPH = 6;
 
@@ -20,6 +21,7 @@ export interface GuiTextCommand {
 
 export class GuiTextBatch {
   readonly commands: GuiTextCommand[] = [];
+  readonly commandRanges: {first: number; count: number}[] = [];
   vertexData = new Float32Array(0);
   vertexCount = 0;
   version = 0;
@@ -29,6 +31,7 @@ export class GuiTextBatch {
 
   clear(): void {
     this.commands.length = 0;
+    this.commandRanges.length = 0;
     this.vertexCount = 0;
     this.dirty = true;
   }
@@ -43,6 +46,12 @@ export class GuiTextBatch {
     // Layout once, then reuse it for both the size calculation and packing.
     // Re-evaluate font metrics on rebuild: BitmapFontData is mutable.
     const layouts = this.commands.map(command => layoutText(command, font));
+    this.commandRanges.length = 0;
+    let first = 0;
+    for (const layout of layouts) {
+      const count = layout.glyphs.length * VERTICES_PER_GLYPH;
+      this.commandRanges.push({first, count}); first += count;
+    }
     const glyphCount = layouts.reduce((sum, layout) => sum + layout.glyphs.length, 0);
     const vertexCount = glyphCount * VERTICES_PER_GLYPH;
     const requiredFloats = vertexCount * GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex;
@@ -50,9 +59,10 @@ export class GuiTextBatch {
     let offset = 0;
     for (let i = 0; i < layouts.length; i++) {
       const layout = layouts[i]!, command = this.commands[i]!;
+      // Negative RGB marks atlas-colored glyphs; alpha still carries caller opacity.
       for (const glyph of layout.glyphs) {
         offset = pushGlyph(this.scratch, offset, glyph.x0, glyph.y0, glyph.x1, glyph.y1,
-          glyph.u0, glyph.v0, glyph.u1, glyph.v1, command.color,
+          glyph.u0, glyph.v0, glyph.u1, glyph.v1, glyph.colored ? [-1,-1,-1,command.color[3]] : command.color,
           layout.clipX0, layout.clipY0, layout.clipX1, layout.clipY1);
       }
     }
@@ -71,20 +81,26 @@ export class GuiTextBatch {
 
 export function measureGuiTextWidth(text: string, font: BitmapFontData, fontSize: number): number {
   let maxWidth = 0;
-  for (const line of text.split('\n')) {
+  for (const line of text.split(/\r\n|[\r\n]/u)) {
     maxWidth = Math.max(maxWidth, measureGuiLineWidth(line, font, fontSize));
   }
   return maxWidth;
+}
+
+/** @internal Uses exactly the glyph advances, ink bounds, kerning and wrap of drawing. */
+export function measureGuiTextBlock(text: string, font: BitmapFontData, fontSize: number, width: number, wrap: boolean): {width: number; height: number} {
+  const result = layoutText({text, x: 0, y: 0, width, height: Infinity, fontSize, color: [1, 1, 1, 1], multiline: wrap, wrap, verticalAlign: 'top'}, font);
+  return {width: result.advanceWidth, height: text ? result.blockHeight : 0};
 }
 
 function measureGuiLineWidth(text: string, font: BitmapFontData, fontSize: number): number {
   const scale = fontSize / font.size;
   let width = 0;
   let previousCode: number | null = null;
-  for (const char of text) {
+  for (const char of guiFontCharacters(text,font)) {
     const code = char.codePointAt(0);
     if (code === undefined) continue;
-    const glyph = font.chars.get(code) ?? font.chars.get(63);
+    const glyph = guiFontGlyph(char,font);
     if (!glyph) continue;
     if (previousCode !== null) width += (font.kernings.get(bitmapKerningKey(previousCode, code)) ?? 0) * scale;
     width += glyph.xadvance * scale;
@@ -94,6 +110,7 @@ function measureGuiLineWidth(text: string, font: BitmapFontData, fontSize: numbe
 }
 
 interface LaidOutGlyph {
+  colored: boolean;
   x0: number;
   y0: number;
   x1: number;
@@ -110,6 +127,8 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
   clipY0: number;
   clipX1: number;
   clipY1: number;
+  advanceWidth: number;
+  blockHeight: number;
 } {
   const scale = command.fontSize / font.size;
   const clip = command.clip ?? { x: command.x, y: command.y, width: command.width, height: command.height };
@@ -123,10 +142,12 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
   let baselineY = command.y + (command.multiline || command.verticalAlign === 'top' ? 0 : (command.height - font.lineHeight * scale) * 0.5);
   let previousCode: number | null = null;
   const glyphs: LaidOutGlyph[] = [];
+  let advanceWidth = 0;
 
-  for (const char of command.text) {
-    if (char === '\n') {
+  for (const char of guiFontCharacters(command.text,font)) {
+    if (char === '\n' || char === '\r' || char === '\r\n') {
       if (!command.multiline) break;
+      advanceWidth = Math.max(advanceWidth, x - command.x);
       x = command.x;
       baselineY += lineStep;
       previousCode = null;
@@ -135,7 +156,7 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
     }
     const code = char.codePointAt(0);
     if (code === undefined) continue;
-    const glyph: BitmapFontChar | undefined = font.chars.get(code) ?? font.chars.get(63);
+    const glyph: BitmapFontChar | undefined = guiFontGlyph(char,font);
     if (!glyph) continue;
 
     if (previousCode !== null) {
@@ -147,6 +168,7 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
     const x1 = x0 + glyph.width * scale;
     const y1 = y0 + glyph.height * scale;
     if (command.wrap && x1 > clipX1 && x > command.x) {
+      advanceWidth = Math.max(advanceWidth, x - command.x);
       x = command.x;
       baselineY += lineStep;
       previousCode = null;
@@ -162,9 +184,10 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
     const v1 = (glyph.y + glyph.height) / font.scaleH;
 
     if ((centerBlock || (nextY1 >= clipY0 && nextY0 <= clipY1)) && nextX1 >= clipX0 && nextX0 <= clipX1) {
-      glyphs.push({ x0: nextX0, y0: nextY0, x1: nextX1, y1: nextY1, u0, v0, u1, v1 });
+      glyphs.push({ x0: nextX0, y0: nextY0, x1: nextX1, y1: nextY1, u0, v0, u1, v1, colored: guiFontGlyphIsColored(char,font) });
     }
     x += glyph.xadvance * scale;
+    advanceWidth = Math.max(advanceWidth, x - command.x);
     previousCode = code;
 
     if (!command.wrap && x > clipX1) break;
@@ -174,9 +197,9 @@ function layoutText(command: GuiTextCommand, font: BitmapFontData): {
     const blockHeight = baselineY - command.y + font.lineHeight * scale;
     const shift = Math.max(0, (command.height - blockHeight) * 0.5);
     for (const glyph of glyphs) { glyph.y0 += shift; glyph.y1 += shift; }
-    return { glyphs: glyphs.filter(g => g.y1 >= clipY0 && g.y0 <= clipY1), clipX0, clipY0, clipX1, clipY1 };
+    return { glyphs: glyphs.filter(g => g.y1 >= clipY0 && g.y0 <= clipY1), clipX0, clipY0, clipX1, clipY1, advanceWidth, blockHeight };
   }
-  return { glyphs, clipX0, clipY0, clipX1, clipY1 };
+  return { glyphs, clipX0, clipY0, clipX1, clipY1, advanceWidth, blockHeight: baselineY - command.y + font.lineHeight * scale };
 }
 
 function pushGlyph(
@@ -238,5 +261,5 @@ function nextCapacity(required: number): number {
   return capacity;
 }
 
-export const GUI_TEXT_FLOATS_PER_VERTEX = GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex;
+export const GUI_TEXT_FLOATS_PER_VERTEX = /* @__PURE__ */ (() => GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex)();
 export const GUI_TEXT_VERTICES_PER_GLYPH = VERTICES_PER_GLYPH;

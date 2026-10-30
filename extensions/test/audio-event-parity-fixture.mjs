@@ -193,7 +193,10 @@ export async function loadG08Modules() {
     import(new URL('audio-spec/index.js', specRoot).href),
     import(new URL('audio-runtime/index.js', runtimeRoot).href),
   ]);
-  return { audio, runtime };
+  const production = await import(new URL('audio-runtime/ProductionAudioBackend.js', runtimeRoot).href);
+  const browserHost = await import(new URL('audio-runtime/BrowserProductionAudioHost.js', runtimeRoot).href);
+  const productionOwner = await import(new URL('audio-runtime/ProductionAudioOwner.js', runtimeRoot).href);
+  return { audio, runtime, production, browserHost, productionOwner };
 }
 
 async function transpileRoot(name, sourceUrl) {

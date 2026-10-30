@@ -1,5 +1,8 @@
+import * as GuiPaint from '../rendering/GuiControlPaintPrimitives';
+import {admitGuiControl} from '../GuiControlIdentity';
 import { GuiDirtyFlags, GuiElementOptions, GuiPointerEvent, GuiValueChangeHandler } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
+import type {GuiActionEvent} from '../GuiTypes';
 
 export interface GuiSliderOptions extends GuiElementOptions {
   value?: number;
@@ -11,6 +14,16 @@ export interface GuiSliderOptions extends GuiElementOptions {
 }
 
 export class GuiSlider extends GuiElement {
+  private static readonly __controlIdentityGuiSlider = /* @__PURE__ */ (() => admitGuiControl(GuiSlider.prototype, 'GuiSlider', undefined, paintGuiSlider))();
+  static override readonly themeControlType: string = 'GuiSlider';
+  override handleAction(event: GuiActionEvent): void {
+    super.handleAction(event);
+    if (event.consumed) return;
+    if (event.action === 'left' || event.action === 'right') {
+      this.setValue(this.value + (event.action === 'left' ? -1 : 1) * (this.step > 0 ? this.step : (this.max - this.min) / 100), true);
+      event.consume();
+    } else if (event.action === 'confirm') { this.onCommit?.(this.value); event.consume(); }
+  }
   value: number;
   min: number;
   max: number;
@@ -19,7 +32,7 @@ export class GuiSlider extends GuiElement {
   onCommit: GuiValueChangeHandler<number> | null;
 
   constructor(options: GuiSliderOptions = {}) {
-    super({ width: 160, height: 28, ...options });
+    super({ width: 160, height: 28, focus: {mode: 'all'}, ...options });
     this.value = options.value ?? 0;
     this.min = options.min ?? 0;
     this.max = options.max ?? 100;
@@ -63,3 +76,14 @@ export class GuiSlider extends GuiElement {
     this.setValue(this.min + (this.max - this.min) * ratio, emit);
   }
 }
+
+/** Original built-in painter; retained with this control, not every GUI owner. */
+function paintGuiSlider(context:GuiPaint.GuiControlPaintContext, slider: GuiSlider, theme: GuiPaint.GuiTheme): void {
+    const trackHeight = 4;
+    const trackY = slider.rect.y + (slider.rect.height - trackHeight) * 0.5;
+    const thumbSize = Math.min(18, slider.rect.height);
+    const thumbX = slider.rect.x + slider.rect.width * slider.ratio - thumbSize * 0.5;
+    context.addRect(slider.rect.x, trackY, slider.rect.width, trackHeight, trackHeight * 0.5, GuiPaint.colorToRgba(context.styleFor(slider).backgroundColor, theme.colors.border));
+    context.addRect(slider.rect.x, trackY, slider.rect.width * slider.ratio, trackHeight, trackHeight * 0.5, GuiPaint.colorToRgba(theme.colors.primary, theme.colors.primary));
+    context.addRect(thumbX, slider.rect.y + (slider.rect.height - thumbSize) * 0.5, thumbSize, thumbSize, thumbSize * 0.5, GuiPaint.colorToRgba(slider.focused ? theme.colors.active : theme.colors.text, theme.colors.text));
+  }

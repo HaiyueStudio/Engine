@@ -3,12 +3,16 @@ import { getRenderViewPassOptions, type RenderViewSnapshot } from '../core/Rende
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import { getBuiltinPostprocessShader } from './BuiltinPostprocessShader';
 import { isLinearColorTarget } from './SceneColor';
-import { deferPostProcessDisposal } from './PostProcessSubmission';
+import { getPostProcessRecording } from './PostProcessSubmission';
 import { getInstrumentedGPUResourceTracker } from '../core/GPUResourceTracker';
+import {SubmissionLifetime} from '../rtt/SubmissionLifetime';
+import {getRegionSceneProjection} from '../core/RegionSceneProjection';
+import {SceneOutputCrop} from './SceneOutputCrop';
 
 interface OutputBinding {
   readonly uniform: GPUBuffer;
   readonly values: Float32Array;
+  readonly lifetime: SubmissionLifetime;
   source: GPUTexture | null;
   group: GPUBindGroup | null;
   lastFrame: number;
@@ -18,6 +22,7 @@ interface OutputBinding {
 export class SceneOutputPass extends PostProcessPass {
   readonly label = 'Scene output';
   private _device: GPUDevice | null = null;
+  private _sourceCrop:SceneOutputCrop|null=null;
   private _shader!: ReturnType<typeof getBuiltinPostprocessShader>;
   private readonly _pipelines = new Map<string, GPURenderPipeline>();
   private readonly _bindings = new Map<string, OutputBinding>();
@@ -26,17 +31,23 @@ export class SceneOutputPass extends PostProcessPass {
   private _format: GPUTextureFormat = 'rgba8unorm';
   private _exposure = 1;
   private _toneMapping: 'none' | 'reinhard' = 'reinhard';
+  private _displayInLinearTarget=false;
+  private _frameIdentity: {frameId:number;viewKey:string} | undefined;
 
-  configure(format: GPUTextureFormat, exposure: number, toneMapping: 'none' | 'reinhard', view?: RenderViewSnapshot): void {
+  /** Internal compositor identity; this pass does not consume camera matrices. */
+  setFrameIdentity(frameId: number, viewKey: string): void {this._frameIdentity = {frameId,viewKey};}
+
+  configure(format: GPUTextureFormat, exposure: number, toneMapping: 'none' | 'reinhard', view?: RenderViewSnapshot, displayInLinearTarget=false): void {
     if (!Number.isFinite(exposure) || exposure < 0) throw new RangeError('Scene output exposure must be finite and nonnegative.');
     if (toneMapping !== 'none' && toneMapping !== 'reinhard') throw new RangeError('Scene output toneMapping must be none or reinhard.');
-    this._format = format; this._exposure = exposure; this._toneMapping = toneMapping; this._view = view;
+    this._format = format; this._exposure = exposure; this._toneMapping = toneMapping; this._view = view;this._displayInLinearTarget=displayInLinearTarget;
   }
 
   prepare(device: GPUDevice): void {
     if (this._device === device) return;
     if (this._device) this.destroy();
     this._device = device;
+    this._sourceCrop=new SceneOutputCrop(device);
     this._shader = getBuiltinPostprocessShader(device, 'output');
   }
 
@@ -52,21 +63,32 @@ export class SceneOutputPass extends PostProcessPass {
   override setSceneTextures(textures: PostProcessSceneTextures): void { this._textures = textures; }
 
   apply(encoder: GPUCommandEncoder, src: GPUTexture, dst: GPUTextureView, device: GPUDevice): void {
-    const frame = this._textures.frame;
+    const frame = this._textures.frame ?? this._frameIdentity;
     if (!frame) throw new Error('Scene output requires a view frame.');
+    const projection=getRegionSceneProjection(this._view);
+    if(projection)src=this._sourceCrop!.copy(this,encoder,src,projection.crop,frame.frameId);
     for (const [key, binding] of this._bindings) {
       if (frame.frameId - binding.lastFrame <= 120 || key === frame.viewKey) continue;
-      if (deferPostProcessDisposal(this, () => destroyBinding(binding, device))) this._bindings.delete(key);
+      binding.lifetime.retire(); this._bindings.delete(key);
     }
+    // Mode 3 uses the existing display transform without the final transfer;
+    // the regional compositor performs that transfer once after GUI composition.
+    const transfer = isLinearColorTarget(this._format) ? (this._displayInLinearTarget?3:0) : this._format.endsWith('-srgb') ? 2 : 1;
+    const tone = this._toneMapping === 'reinhard' ? 1 : 0;
     let binding = this._bindings.get(frame.viewKey);
+    const changed = !binding || binding.values[0] !== Math.fround(this._exposure) || binding.values[1] !== tone || binding.values[2] !== transfer;
+    // A queue write precedes every as-yet-unsubmitted encoder. Preserve its
+    // immutable parameters instead of overwriting it with a later view/frame.
+    if(binding && changed && binding.lifetime.hasPendingRecordings){binding.lifetime.retire();binding=undefined;}
     if (!binding) {
-      binding = { uniform: device.createBuffer({ label: `SceneOutput.${frame.viewKey}.params`, size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST }),
-        values: new Float32Array([NaN, NaN, NaN, NaN]), source: null, group: null, lastFrame: frame.frameId };
-      this._bindings.set(frame.viewKey, binding);
+      const uniform=device.createBuffer({label:`SceneOutput.${frame.viewKey}.params`,size:16,usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST});
+      const next:OutputBinding={uniform,values:new Float32Array([NaN,NaN,NaN,NaN]),source:null,group:null,lastFrame:frame.frameId,
+        lifetime:new SubmissionLifetime(device,()=>destroyBinding(next,device))};
+      binding=next;this._bindings.set(frame.viewKey,binding);
     }
     binding.lastFrame = frame.frameId;
-    const transfer = isLinearColorTarget(this._format) ? 0 : this._format.endsWith('-srgb') ? 2 : 1;
-    const tone = this._toneMapping === 'reinhard' ? 1 : 0;
+    const recording=getPostProcessRecording(this);
+    if(recording)binding.lifetime.retainSubmission(recording,recording.afterSubmit,recording.afterCancel);
     if (binding.values[0] !== Math.fround(this._exposure) || binding.values[1] !== tone || binding.values[2] !== transfer) {
       binding.values.set([this._exposure, tone, transfer, 0]);
       device.queue.writeBuffer(binding.uniform, 0, binding.values.buffer as ArrayBuffer);
@@ -102,11 +124,9 @@ export class SceneOutputPass extends PostProcessPass {
   }
 
   override destroy(): void {
-    const bindings = [...this._bindings.values()];
-    const device = this._device;
-    const dispose = (): void => { for (const binding of bindings) destroyBinding(binding, device); };
-    if (!deferPostProcessDisposal(this, dispose)) dispose();
-    this._bindings.clear(); this._pipelines.clear(); this._device = null; this._textures = {}; this._view = undefined;
+    this._sourceCrop?.destroy();this._sourceCrop=null;
+    for(const binding of this._bindings.values())binding.lifetime.retire();
+    this._bindings.clear(); this._pipelines.clear(); this._device = null; this._textures = {}; this._view = undefined; this._frameIdentity = undefined;
   }
 
   private _descriptor(format: GPUTextureFormat, blend: boolean, sampleCount: number): GPURenderPipelineDescriptor {

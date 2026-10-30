@@ -245,6 +245,7 @@ export function createAuditGpuDevice(options = {}) {
     value.height = size[1];
     value.depthOrArrayLayers = size[2];
     value.format = descriptor.format;
+    value.usage = descriptor.usage ?? 0;
     value.dimension = descriptor.dimension ?? '2d';
     value.mipLevelCount = descriptor.mipLevelCount ?? 1;
     value.sampleCount = descriptor.sampleCount ?? 1;

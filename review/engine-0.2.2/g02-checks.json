@@ -1,0 +1,406 @@
+{
+  "schemaVersion": 1,
+  "goal": "g02-shared-layout",
+  "status": "complete",
+  "generatedAt": "2026-10-20T07:49:17.518455+00:00",
+  "qualification": "G02 runtime correctness and handoff; not public subpath/tarball, production performance, real HYA glyph/image or release qualification",
+  "sourceRevision": "7d0df288285834e2583f563478f322fdf6743c09",
+  "runtimeFingerprints": {
+    "extensions/src/layout.ts": "4c12999b51305dd22d1087fdc27b514da3c25e91402dd1d09441995075d45609",
+    "extensions/src/layout/box.ts": "9146a96a9bea8ba736afcc5e23fd5e5ca09739f9c62ba6961152a9a5c964e8f6",
+    "extensions/src/layout/flex.ts": "0e42f00518dc1a4af46dfc06b6b6dc55d70047e784e6a331ba79d8d36b46db07",
+    "extensions/src/layout/grid.ts": "994f7230f51cdcd61e41cc9a2906401883ab46da14e02f7a8db2271c4ec13142",
+    "extensions/src/layout/intrinsic.ts": "ab7a15a212aff23fdf2ef101d0a491c6d7ba213f6f30e4796be9834b1b97a979",
+    "extensions/src/layout/session.ts": "a565ea45eed706eed7d1de721367b6e457ea76bd8b7fc577cdba6698883816d8",
+    "extensions/src/layout/types.ts": "a445426463094970bef284c69ad5e635b2d35b1259653aaef2fc7fb3f3edcb69",
+    "extensions/src/layout/validate.ts": "a4894c88e7d68952d4df4a48b1e33b62dcdb2fbe7f2871b982ad441352c5a515",
+    "extensions/src/animation/layout/parameterized/AssetOwner.ts": "48146ce3e6bb3a7766fb3567c77220e5af0446e3db9f3a550f07bb057144c950",
+    "extensions/src/animation/layout/parameterized/index.ts": "2e246af0d977acbaefbdf395aa25fc982270964fb628a95f933ae4ece46977db",
+    "extensions/src/animation/layout/parameterized/LayoutEvaluator.ts": "4cec0b94031fec0be4eb76a32c66488b3cfe9738b5defc22597f7a0ee87d4b1d",
+    "extensions/src/animation/layout/parameterized/LayoutGpuRenderer.ts": "105a548329f3077811a6d800c46cfcafa873908ce03888fd21e8a660618231d3",
+    "extensions/src/animation/layout/parameterized/NSlice.ts": "e3578a310bd7d02ccf493c3e46ef2ef7e4499363cb97793a0d08503942b98edd",
+    "extensions/src/animation/layout/parameterized/runtime-types.ts": "505719283fca57ab0ed3149f65e7e22bbce2af10e69d60b20404b1b85099518e",
+    "extensions/src/animation/layout/parameterized/SharedLayoutAdapter.ts": "6ca0e605d966a8512ccf41a410371f4b53c135d2900e9bf54173ae2ff5f2011a"
+  },
+  "evidence": {
+    "oracles": [
+      "artifacts/engine-0.2.2/g02/oracle-dpr1-1792480775968.json",
+      "artifacts/engine-0.2.2/g02/oracle-dpr2-1792480780448.json"
+    ],
+    "pairedHyaPixels": "artifacts/engine-0.2.2/g02/hya-pixels-1792480608736.json",
+    "independentConsumer": "artifacts/engine-0.2.2/g02/independent-consumer.json",
+    "legacyGeometry": "extensions/test/shared-layout-hya-baseline.json",
+    "legacyFullBefore": "artifacts/engine-0.2.2/g02/hya-before.json",
+    "legacyFullAfter": "artifacts/engine-0.2.2/g02/hya-after-audited.json",
+    "focusedTests": "artifacts/engine-0.2.2/g02/focused-compatibility-final.log",
+    "deviceRecovery": "artifacts/engine-0.2.2/g02/hya-device-recovery-final.log",
+    "compatibilityBoundary": "artifacts/engine-0.2.2/g02/compatibility-boundary.json",
+    "repositoryCheckResult": "artifacts/engine-0.2.2/g02/checks-1792480616392/result.json",
+    "finalCoordinationChecks": "artifacts/engine-0.2.2/g02/coordination-1792482529480/result.json"
+  },
+  "legacyGeometryCases": 64,
+  "fullLegacyEvaluationsUnchanged": 7,
+  "actualPairedPixelCases": 7,
+  "originalFormatVersion": 1,
+  "layoutPasses": 2,
+  "publicExportsChanged": false,
+  "packageVersionsChanged": false,
+  "budgetsChanged": false,
+  "remainingOwners": {
+    "guiAdapter": "G03",
+    "hyaProduction": "G11/G12",
+    "publicExportsAndTarball": "G13",
+    "releasePrerequisite": "M18 release owner"
+  },
+  "focusedTests": 47,
+  "extensionsTests": 506,
+  "oracleCasesPerDpr": 110,
+  "oracleDprs": [
+    1,
+    2
+  ],
+  "runtimeFingerprintAudit": "All 15 current runtime files verified; all actual HTTP-served files and 16 independent compiled files match current bytes.",
+  "allExplicitG02RequirementsProven": true,
+  "pendingCompletionAudit": [],
+  "compatibilityBoundary": {
+    "status": "source-and-regressions-verified",
+    "coreStages": [
+      "flex-clamp-redistribution",
+      "flex-wrap-line-justify",
+      "grid-track-max",
+      "grid-gap"
+    ],
+    "sourceMappingOwner": "extensions/src/animation/layout/parameterized/SharedLayoutAdapter.ts",
+    "movedOutOfCore": [
+      "legacy edge axes/order",
+      "present hug/fill versus absent ratio axes",
+      "zero-inset selection",
+      "absolute default sizing",
+      "fraction normalization",
+      "RTL source ordering",
+      "clamped/overlapping grid cells",
+      "legacy intrinsic Grid flow"
+    ],
+    "referenceGeometryCases": 64,
+    "fullEvaluationCases": 7
+  },
+  "previousRepositoryCheckRun": "artifacts/engine-0.2.2/g02/checks-1792478943809/result.json",
+  "repositoryChecks": [
+    {
+      "id": "extensions-typecheck",
+      "command": "npm run typecheck -w ./extensions",
+      "status": "passed",
+      "startedAt": "2026-10-20T07:16:56.394Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g02\\checks-1792480616392\\extensions-typecheck.log",
+      "finishedAt": "2026-10-20T07:17:10.748Z",
+      "exitCode": 0,
+      "signal": null,
+      "sha256": "1955d2bc290e408967f1d33c0d7e9e17ae3ae0c2bbcea1d9c60c7e755a835e03"
+    },
+    {
+      "id": "extensions-build",
+      "command": "npm run build -w ./extensions",
+      "status": "passed",
+      "startedAt": "2026-10-20T07:17:10.750Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g02\\checks-1792480616392\\extensions-build.log",
+      "finishedAt": "2026-10-20T07:17:28.552Z",
+      "exitCode": 0,
+      "signal": null,
+      "sha256": "99bffb90a41f6c2364c556907ff7038c35d27df359659cfd4a5a16d8358a871e"
+    },
+    {
+      "id": "extensions-tests",
+      "command": "npm test -w ./extensions",
+      "status": "passed",
+      "startedAt": "2026-10-20T07:17:28.554Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g02\\checks-1792480616392\\extensions-tests.log",
+      "finishedAt": "2026-10-20T07:18:39.471Z",
+      "exitCode": 0,
+      "signal": null,
+      "sha256": "ae6dcc5ce2c99bf9f6572a4e880637d444afe3a33861e1efd18a2dd5f67ca61e"
+    },
+    {
+      "id": "repository-typecheck",
+      "command": "npm run typecheck",
+      "status": "passed",
+      "startedAt": "2026-10-20T07:18:39.473Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g02\\checks-1792480616392\\repository-typecheck.log",
+      "finishedAt": "2026-10-20T07:19:45.208Z",
+      "exitCode": 0,
+      "signal": null,
+      "sha256": "964fd268aead91f7f3cd46a44520f87fd2357e6c8615b129224f774298262973"
+    },
+    {
+      "id": "repository-tests",
+      "command": "npm test",
+      "status": "passed",
+      "startedAt": "2026-10-20T07:19:45.210Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g02\\checks-1792480616392\\repository-tests.log",
+      "finishedAt": "2026-10-20T07:22:38.504Z",
+      "exitCode": 0,
+      "signal": null,
+      "sha256": "156f4fce438f69ac3bf5bf759b032ad89c8b4cb2e39271bff4d4c7299bd2b009"
+    },
+    {
+      "id": "repository-build",
+      "command": "npm run build",
+      "status": "passed",
+      "startedAt": "2026-10-20T07:22:38.506Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g02\\checks-1792480616392\\repository-build.log",
+      "finishedAt": "2026-10-20T07:25:46.521Z",
+      "exitCode": 0,
+      "signal": null,
+      "sha256": "47001b67d4aa6bfd08ee068d1a1eeb55514a0440b0f116ae13249a326bd56a90"
+    },
+    {
+      "id": "boundaries",
+      "command": "npm run check:boundaries",
+      "status": "passed",
+      "startedAt": "2026-10-20T07:25:46.523Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g02\\checks-1792480616392\\boundaries.log",
+      "finishedAt": "2026-10-20T07:25:53.297Z",
+      "exitCode": 0,
+      "signal": null,
+      "sha256": "8c8298800aae42378d5713bfcf071e61c796e3e83b1fa91a48f8eceb5f56ad0f"
+    },
+    {
+      "id": "api",
+      "command": "npm run api:check",
+      "status": "passed",
+      "startedAt": "2026-10-20T07:25:53.299Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g02\\checks-1792480616392\\api.log",
+      "finishedAt": "2026-10-20T07:25:54.207Z",
+      "exitCode": 0,
+      "signal": null,
+      "sha256": "f8f181e1f840843584c568e7498df8156433d303bf8ae1e2c4f17e767239fd79"
+    },
+    {
+      "id": "docs",
+      "command": "npm run docs:check",
+      "status": "passed",
+      "startedAt": "2026-10-20T07:25:54.209Z",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g02\\checks-1792480616392\\docs.log",
+      "finishedAt": "2026-10-20T07:25:55.258Z",
+      "exitCode": 0,
+      "signal": null,
+      "sha256": "209442e0b79f6b2a1046ff7a74527741aaa6697679e9875fcf846b5a81f8c52c"
+    }
+  ],
+  "geometryAudit": [
+    {
+      "dpr": 1,
+      "cases": 110,
+      "maximumError": 0.01249999999999929
+    },
+    {
+      "dpr": 2,
+      "cases": 110,
+      "maximumError": 0.01249999999999929
+    }
+  ],
+  "httpProvenanceFilesVerified": {
+    "artifacts/engine-0.2.2/g02/oracle-dpr1-1792480775968.json": 11,
+    "artifacts/engine-0.2.2/g02/oracle-dpr2-1792480780448.json": 11,
+    "artifacts/engine-0.2.2/g02/hya-pixels-1792480608736.json": 17
+  },
+  "g01FrozenDeliverablesUnchanged": [
+    "config/layout-022-contract.json",
+    "docs/for-ai/adr/0132-gui-layout-interaction-022.md",
+    "review/engine-0.2.2/api-draft.d.ts",
+    "review/engine-0.2.2/layout-contract.md",
+    "review/engine-0.2.2/hya-capability-audit.json"
+  ],
+  "requirementsAudit": [
+    {
+      "id": "source-independent-core",
+      "status": "proven",
+      "evidence": [
+        "extensions/src/layout.ts",
+        "extensions/src/layout/types.ts",
+        "artifacts/engine-0.2.2/g02/independent-consumer.json"
+      ],
+      "finding": "Box, constraints, Flex, Grid, measurement and immutable root-coordinate results; relative core imports only; isolated no-DOM/GPU/Engine consumer compiles and executes."
+    },
+    {
+      "id": "supported-box-model",
+      "status": "proven",
+      "evidence": [
+        "extensions/src/layout/box.ts",
+        "extensions/test/shared-layout-core.test.mjs",
+        "artifacts/engine-0.2.2/g02/oracle-dpr1-1792480775968.json",
+        "artifacts/engine-0.2.2/g02/oracle-dpr2-1792480780448.json"
+      ],
+      "finding": "Logical border box, inline percentage edges, min/max/ratio, absolute/relative insets and margins; exact/at-most/unbounded with constrained reflow; no iterative percentage-cycle guessing."
+    },
+    {
+      "id": "flex-frozen-semantics",
+      "status": "proven",
+      "evidence": [
+        "extensions/src/layout/flex.ts",
+        "artifacts/engine-0.2.2/g02/focused-compatibility-final.log",
+        "artifacts/engine-0.2.2/g02/oracle-dpr1-1792480775968.json",
+        "artifacts/engine-0.2.2/g02/oracle-dpr2-1792480780448.json"
+      ],
+      "finding": "Grow, scaled shrink, freeze and redistribute, fractional grow, row/column reverse, RTL, wrap/reverse and main/cross/multiline alignment. Seeded and named DOM comparisons preserve tree order."
+    },
+    {
+      "id": "grid-frozen-semantics",
+      "status": "proven",
+      "evidence": [
+        "extensions/src/layout/grid.ts",
+        "artifacts/engine-0.2.2/g02/focused-compatibility-final.log",
+        "artifacts/engine-0.2.2/g02/oracle-dpr1-1792480775968.json",
+        "artifacts/engine-0.2.2/g02/oracle-dpr2-1792480780448.json"
+      ],
+      "finding": "Explicit px/percent/fr/minmax/max, gaps within spans, bounded fixed max before fr, sparse explicit-first placement, strict public overlap/out-of-range rejection and no implicit tracks."
+    },
+    {
+      "id": "bounded-versioned-session",
+      "status": "proven",
+      "evidence": [
+        "extensions/src/layout/session.ts",
+        "extensions/src/layout/validate.ts",
+        "extensions/test/shared-layout-core.test.mjs",
+        "artifacts/engine-0.2.2/g02/independent-consumer.json",
+        "artifacts/engine-0.2.2/g02/focused-compatibility-final.log"
+      ],
+      "finding": "10k/128/8/4 hard bounds, 10k-node and depth-bound executions, content/metrics/callback identity and explicit invalidation, cache eviction/pruning, 100 repeated fractional updates; callback input capture, typed errors, atomic abort/cache/results and idempotent disposal."
+    },
+    {
+      "id": "real-hya-shared-consumption",
+      "status": "proven",
+      "evidence": [
+        "extensions/src/animation/layout/parameterized/LayoutEvaluator.ts",
+        "extensions/src/animation/layout/parameterized/SharedLayoutAdapter.ts",
+        "artifacts/engine-0.2.2/g02/compatibility-boundary.json"
+      ],
+      "finding": "Existing evaluator calls shared box/intrinsic/Flex/Grid algorithms. Format units/edges/field presence/placement lower in adapter; only four approved core compatibility phases; no retained duplicate legacy solver or fallback."
+    },
+    {
+      "id": "hya-v1-two-phase-and-state-parity",
+      "status": "proven",
+      "evidence": [
+        "extensions/test/shared-layout-hya-baseline.json",
+        "artifacts/engine-0.2.2/g02/hya-before.json",
+        "artifacts/engine-0.2.2/g02/hya-after-audited.json",
+        "extensions/test/layout-component-asset.test.mjs",
+        "artifacts/engine-0.2.2/g02/focused-compatibility-final.log"
+      ],
+      "finding": "64 frozen geometry cases and exact equality of seven full evaluations, two phases unchanged. Existing tests cover text, instance timing/replacement, reflow, list/scroll/N-slice, assets/integrity/abort/disposal and GPU lifecycle."
+    },
+    {
+      "id": "hya-pixels-and-device-lifecycle",
+      "status": "proven",
+      "evidence": [
+        "artifacts/engine-0.2.2/g02/hya-pixels-1792480608736.json",
+        "artifacts/engine-0.2.2/g02/hya-device-recovery-final.log",
+        "extensions/test/layout-webgpu-parity-gate.mjs"
+      ],
+      "finding": "Seven evaluated diagnostic renders have identical nonempty RGBA bytes and strict validation. Existing native gate checks two raster cases and recovered generation 7. Real glyph/image production rendering remains G11."
+    },
+    {
+      "id": "independent-type-and-runtime-consumption",
+      "status": "proven",
+      "evidence": [
+        "extensions/test/shared-layout-pure-tsconfig.json",
+        "extensions/test/shared-layout-consumer.ts",
+        "artifacts/engine-0.2.2/g02/independent-consumer.json"
+      ],
+      "finding": "Outside-repository consumer has no dependencies, only ESNext libraries and no ambient types; type rejection, real execution, repeat determinism, invalidation, versions, node bound, all four non-raiseable limits and disposal verified. Packaged tarball integration belongs to G13."
+    },
+    {
+      "id": "g03-measure-arrange-handoff-and-gates",
+      "status": "proven",
+      "evidence": [
+        "review/engine-0.2.2/README.md",
+        "extensions/src/layout/types.ts",
+        "artifacts/engine-0.2.2/g02/checks-1792480616392/result.json"
+      ],
+      "finding": "Handoff specifies stable identity, content-box callback constraints, border-box output, version invalidation, atomic read-only rect/content bounds, exact/at-most behavior and ownership. G03 owns GUI attachment/incremental scheduling; source entry fits 13 allocated symbols. Nine final workspace/repository commands passed, including 506 extension tests; packages, exports, versions, budgets and prior release tag unchanged."
+    }
+  ],
+  "validationScope": "The nine-command run covers final runtime. Subsequent changes are this report, handoff/status documentation, and the separately rerun independent consumer assertions; no runtime inputs or budgets changed. Original failed/intermediate reports are retained.",
+  "evidenceSha256": {
+    "artifacts/engine-0.2.2/g02/checks-1792480616392/result.json": "ad79302994ad88282995133548799046d09655c494425f8ace2f612b96f9a636",
+    "artifacts/engine-0.2.2/g02/compatibility-boundary.json": "5e9f5cc55327f9982d1210458b0b090c423a489769f1e6da00676355802c72c2",
+    "artifacts/engine-0.2.2/g02/focused-compatibility-final.log": "d72d6bf82e0951aa95cfe453df24eb4054f74bedbf04325ef80751ac04ee9cc3",
+    "artifacts/engine-0.2.2/g02/hya-after-audited.json": "a53e2d0991f96dc011fc8c294dcf71287e589c62bc5ca556d2cf97bd507dc9a3",
+    "artifacts/engine-0.2.2/g02/hya-before.json": "e6384919848aa784c67430356b1a5c7e9dea93a9abef0aebbf67ff03e975b8b7",
+    "artifacts/engine-0.2.2/g02/hya-device-recovery-final.log": "a6dd67c4b590b2a2af6db988081b15d8de240b0fb2f1e1c29307d60e644a3f3b",
+    "artifacts/engine-0.2.2/g02/hya-pixels-1792480608736.json": "dd7c63121d82e8d0d32f7fc6fb1209cb0849352e8f2773c1dad203d30e4f7836",
+    "artifacts/engine-0.2.2/g02/independent-consumer.json": "b87bd1d2531f98a36a034f93a393f6d17f738b868eb3ee32b34a682ec1e4b6ff",
+    "artifacts/engine-0.2.2/g02/oracle-dpr1-1792480775968.json": "2a2a2b9058df1f3e542bca6c57ad034497ac81344a695a1612d316206e6ac35d",
+    "artifacts/engine-0.2.2/g02/oracle-dpr2-1792480780448.json": "16fef13be16058854f89e3c542f7a48abb935415a0bd3b58bdbf73149d5c0453",
+    "extensions/test/shared-layout-hya-baseline.json": "51f7175650321d26d5b66c724605ea71dbcd8794efde84441c5ed7ecf9ca2324",
+    "artifacts/engine-0.2.2/g02/coordination-1792482529480/result.json": "0aeed00936dea6b3a0745ec029948d5b9f953bf845986f311adac9be156352f0"
+  },
+  "testAndHarnessSha256": {
+    "extensions/test/layout-component-asset.test.mjs": "8bf8844fd284e3c2e2b005cb2d56955f05dbc2de9f2d80b3eb1693b71f46524b",
+    "extensions/test/layout-webgpu-parity-fixture.html": "a1e9bd503c8aca5f8b1a449ed5521f2e3c443092f0d13f1d510ca14fb98fd45a",
+    "extensions/test/layout-webgpu-parity-fixture.mjs": "7a46085777b67de7a52c7092b34d16d08f77dc68ad82876d5fdb643e4357ace0",
+    "extensions/test/layout-webgpu-parity-gate.mjs": "8b945db185189d96dac41c2dcef89bd3239a50685b76c46c25d7f7371b6126ab",
+    "extensions/test/responsive-layout-fixture.mjs": "309c758ef15c0102d307fbb7efbc900b7bad4524e1867744d86dfb19855ad432",
+    "extensions/test/shared-layout-browser-gate.mjs": "bf1cd3a74df8a407b9fb24e02659badbbfae37aabac29865caebcc84219806bc",
+    "extensions/test/shared-layout-consumer-gate.mjs": "a87492f3bfa0ead912f6b974e800fe61f6b25ca423cdc5c81084d89a59469316",
+    "extensions/test/shared-layout-consumer.ts": "20f898485ea812bf1cd799534a272825ff766d4e7188888c68b33ea0f1cf9ff7",
+    "extensions/test/shared-layout-core.test.mjs": "f3d23a4fd96b1b20541c213bcbd18400886f9175a1da1b3991f0b8aa366bbbcb",
+    "extensions/test/shared-layout-generate-hya-baseline.mjs": "3dc55e0539d9a21ccbe1f04f769d269b6ed13453f6a849d9eb29710beaa1e4c6",
+    "extensions/test/shared-layout-hya-baseline.json": "51f7175650321d26d5b66c724605ea71dbcd8794efde84441c5ed7ecf9ca2324",
+    "extensions/test/shared-layout-hya-compat.test.mjs": "b69fede79fea7eeac5ea253a2816824ddda74de480478c7a3ee549fed5627d7e",
+    "extensions/test/shared-layout-hya-pixel-gate.mjs": "539003f0a6a6e784c56f13c37255aa4087709bd1e61b6c756740af7d642d4bd8",
+    "extensions/test/shared-layout-hya-pixel.html": "12321b3cb4a4dce66806994af966e99826175f69776c3f1a2986837babe6a7e1",
+    "extensions/test/shared-layout-hya-pixel.mjs": "67861c08e90d6c3a537ccc41066e9dae1452d69e9a054216dbbd4dd441a999a7",
+    "extensions/test/shared-layout-legacy-capture.mjs": "3eb9b52ba2b5e769592d31b8c999de82df93bc46758772dfa015e47041f7063f",
+    "extensions/test/shared-layout-oracle-cases.mjs": "c424f3bb985338ea396534569527e920379d55fc2b6684761c72693e6658b5c6",
+    "extensions/test/shared-layout-oracle.html": "15aef096198592d2be2eebe7f8f4fd5bae3ffd91de2c9461d8370ae1aed5aa89",
+    "extensions/test/shared-layout-oracle.mjs": "e7858628ca2d1d228387046b1c2fa04f60ded87b8887253cf93216847ae436ea",
+    "extensions/test/shared-layout-pure-tsconfig.json": "bb6f9117ca0aad99a9ef6d25ee13e6e3bf668136d952972dcac008cb0a065df1"
+  },
+  "coordinationChecks": [
+    {
+      "id": "docs",
+      "command": "npm run docs:check",
+      "cwd": "D:/HaiyueStudio/Engine",
+      "startedAt": "2026-10-20T07:48:49.482Z",
+      "finishedAt": "2026-10-20T07:48:51.063Z",
+      "exitCode": 0,
+      "status": "passed",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g02\\coordination-1792482529480\\docs.log",
+      "sha256": "4ef843449cb598d0e2090999d1accb8f06ae2ed9cc34d4787990c3488dd062be"
+    },
+    {
+      "id": "milestones",
+      "command": "npm run check",
+      "cwd": "D:/HaiyueStudio/milestones",
+      "startedAt": "2026-10-20T07:48:51.065Z",
+      "finishedAt": "2026-10-20T07:48:51.671Z",
+      "exitCode": 0,
+      "status": "passed",
+      "log": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.2\\g02\\coordination-1792482529480\\milestones.log",
+      "sha256": "c6289cfdbe5368bea8a2f7ebb50fd8111f51d28fed8241021c7bac199e40f2cf"
+    }
+  ],
+  "handoff": {
+    "nextGoal": "g03-gui-layout",
+    "status": "ready",
+    "document": "review/engine-0.2.2/README.md",
+    "sourceEntry": "extensions/src/layout.ts",
+    "ownership": "GUI measurement/arrangement binding and incremental scheduling remain G03; public package registration and tarball qualification remain G13."
+  },
+  "completionAudit": {
+    "status": "passed",
+    "requirementsProven": 10,
+    "auditorSha256": "4d957fb8846d436bb91ceebd020c701a7ed6001e443e86139984174a95d31565",
+    "frozenG01Deliverables": 5,
+    "independentConsumerAfterFinalAssertionUpdate": "passed",
+    "runtimeEditsAfterFinalNineCommandRun": false,
+    "releaseTagUnchanged": "v0.2.1 -> e932ef91df917a2d1856155573743f0528035785",
+    "sourceRevision": "7d0df288285834e2583f563478f322fdf6743c09"
+  },
+  "coordinationDocumentsSha256": {
+    "Engine/review/engine-0.2.2/README.md": "c46e4a1a407c3979317b5e8740acfc4184f01da4f12d35210b8a9e3ebc3baf27",
+    "milestones/milestones/m23-engine-0.2.2/README.md": "782f5fe34de2868eb54a8b9097ef55a5d3bf9b9b8472dbf77d481d5750b124a8",
+    "milestones/milestones/m23-engine-0.2.2/goals/README.md": "7ad64b913873de0b5901b3e37b2b28276198751559d4db545061e3541819dfc2",
+    "milestones/milestones/m23-engine-0.2.2/milestone.json": "5ba5fff3fb4f427526a6f477ea38cc50206a6bce5d7b2a50f3fe7c8974ac89ac"
+  }
+}

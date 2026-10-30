@@ -97,3 +97,7 @@ its asset handles. See the [asset lifecycle guide](../docs/engine-guide/asset-li
 ## Achievements
 
 `@haiyue/extensions/achievements` provides persistent event rules, bounded deduplication and optional localized GPU GUI. Inject a platform port; the extension imports no SDK. See the [guide](../docs/engine-guide/achievements.md) and [example](../examples/achievements/README.md).
+
+## HYA composition (0.2.2)
+
+The focused `hya-player`, `hya-text`, `hya-layout`, `hya-data`, and `hya-audio` subpaths share the original runtime owners. They keep host resources borrowed and publish a complete frame after data, text/layout and drawing are ready. See the [API guide](../docs/api/hya.md) and [public-package example](../examples/hya-production/index.html). The package root remains lightweight.

@@ -2,6 +2,8 @@ import type { Entity } from '../ecs/Entity';
 import type { ScissorRect, ViewportRect } from './ViewportRect';
 import type { RenderPassLoadOp } from './renderPassDescriptor';
 import { EngineError, EngineErrorCode } from './EngineError';
+import type {RenderRegion, RenderRegionOptions} from './RenderRegion';
+import {RenderRegionCollection, bindRenderRegionCollection} from './RenderRegionState';
 
 export type RenderDepthConvention = 'standard' | 'reverse';
 export type RenderSampleCount = 1 | 4;
@@ -75,8 +77,10 @@ export class RenderView {
   excludedEntityIds: ReadonlySet<number> | null;
   postProcessEnabled: boolean;
   private _snapshotCache: RenderViewSnapshot | null = null;
+  private readonly _regions = new RenderRegionCollection();
 
   constructor(options: RenderViewOptions) {
+    bindRenderRegionCollection(this, this._regions);
     this.key = normalizeViewKey(options.key);
     this.camera = options.camera;
     this.target = options.target;
@@ -92,6 +96,11 @@ export class RenderView {
 
   get reverseZ(): boolean { return this.depthConvention === 'reverse'; }
   set reverseZ(value: boolean) { this.depthConvention = value ? 'reverse' : 'standard'; }
+
+  createRegion(options: RenderRegionOptions): RenderRegion {return this._regions.create(options);}
+
+  /** Region handles belong to this view; its render destination remains borrowed. */
+  destroy(): void {this._regions.dispose();}
 
   snapshot(): RenderViewSnapshot {
     const cached = this._snapshotCache;
@@ -118,6 +127,7 @@ export class RenderView {
       displayWidth: viewport?.width ?? this.target.displayWidth,
       displayHeight: viewport?.height ?? this.target.displayHeight,
     });
+    bindRenderRegionCollection(this._snapshotCache, this._regions);
     return this._snapshotCache;
   }
 }

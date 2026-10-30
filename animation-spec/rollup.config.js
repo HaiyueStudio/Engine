@@ -8,6 +8,7 @@ import {
 
 export default {
   input: {
+    'hya-production': 'src/hya-production.ts',
     index: 'src/index.ts',
     lottie: 'src/lottie.ts',
     native3d: 'src/native3d.ts',

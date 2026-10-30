@@ -1,14 +1,13 @@
+type Measure = (text:string,fontSize:number)=>number;
+import {guiHelpDialogTextMetrics} from '../GuiIntrinsicText';
+import {admitGuiControl} from '../GuiControlIdentity';
 import { GuiModal, type GuiModalOptions } from './GuiModal';
 import { GuiLabel } from './GuiLabel';
 import { GuiScrollView } from './GuiScrollView';
 import type { GuiRect } from '../GuiTypes';
+import {GuiDirtyFlags} from '../GuiTypes';
 
-type Measure = (text: string, fontSize: number) => number;
-const textMetrics = new WeakMap<GuiHelpDialog, Measure>();
-/** Internal font adapter; no renderer resources are exposed through the component API. */
-export function setGuiHelpDialogTextMetrics(dialog: GuiHelpDialog, measure: Measure): void {
-  textMetrics.set(dialog, measure);
-}
+export {setGuiHelpDialogTextMetrics} from '../GuiIntrinsicText';
 export interface GuiHelpDialogOptions extends Omit<
   GuiModalOptions,
   'showConfirmButton' | 'showCancelButton' | 'showCloseButton' | 'closeOnBackdrop'
@@ -16,6 +15,8 @@ export interface GuiHelpDialogOptions extends Omit<
 
 /** Persistent, dismissible help with word wrapping and scrollable long content. */
 export class GuiHelpDialog extends GuiModal {
+  private static readonly __controlIdentityGuiHelpDialog = /* @__PURE__ */ (() => admitGuiControl(GuiHelpDialog.prototype, 'GuiHelpDialog'))();
+  static override readonly themeControlType: string = 'GuiHelpDialog';
   readonly body: GuiScrollView;
   private textKey = '';
   constructor(options: GuiHelpDialogOptions = {}) {
@@ -56,8 +57,8 @@ export class GuiHelpDialog extends GuiModal {
     this.body.rect = rect;
     const size = this.messageLabel.fontSize ?? 15,
       lineHeight = size * 1.5;
-    const measure = textMetrics.get(this) ?? ((text: string, s: number) => text.length * s);
-    const key = `${this.message}|${rect.width}|${size}|${textMetrics.has(this)}`;
+    const metrics = guiHelpDialogTextMetrics(this), measure = metrics?.measure ?? ((text: string, s: number) => text.length * s);
+    const key = `${this.message}|${rect.width}|${size}|${metrics?.version ?? 0}`;
     if (key !== this.textKey) {
       this.textKey = key;
       for (const child of [...this.body.children]) this.body.remove(child);

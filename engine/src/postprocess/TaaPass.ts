@@ -6,6 +6,7 @@ import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import { getBuiltinPostprocessShader } from './BuiltinPostprocessShader';
 import { PrecompiledUniformBlockWriter } from '../shader/PrecompiledShaderRuntime';
 import { TaaHistoryStore, type TaaHistory } from './TaaHistoryStore';
+import {registerPostProcessHistoryReset} from './PostProcessHistory';
 
 export interface TaaPassOptions {
   /** Maximum history contribution after validation. Defaults to 0.9. */
@@ -48,6 +49,7 @@ export class TaaPass extends PostProcessPass {
     this.depthThreshold = finiteOption(options.depthThreshold, 0.002, 'depthThreshold');
     this.sharpness = finiteOption(options.sharpness, 0.15, 'sharpness');
     this.jitterScale = finiteOption(options.jitterScale, 1, 'jitterScale');
+    registerPostProcessHistoryReset(this,key=>this.resetHistory(key));
   }
 
   get stats(): { readonly historyCount: number; readonly validHistoryCount: number } {

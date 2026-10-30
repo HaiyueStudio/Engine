@@ -1,3 +1,4 @@
+import terser from '@rollup/plugin-terser';
 import { haiyuePlugins } from '../config/rollup.shared.js';
 
 export default {
@@ -8,5 +9,5 @@ export default {
     sourcemap: true,
     inlineDynamicImports: true,
   },
-  plugins: haiyuePlugins({ declaration: false }),
+  plugins: [...haiyuePlugins({ declaration: false }), terser({maxWorkers:1,compress:false,mangle:true,keep_classnames:true,keep_fnames:true,format:{comments:"some"}})],
 };

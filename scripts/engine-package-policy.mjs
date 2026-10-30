@@ -1,6 +1,20 @@
 import ts from 'typescript';
 import { validateConsumerLoadingPolicy } from './engine-package-loading-policy.mjs';
 
+export function parsePackageVerificationArgs(args) {
+  let release = false, outputDirectory;
+  for (let index = 0; index < args.length; index++) {
+    const argument = args[index];
+    if (argument === '--release' && !release) release = true;
+    else if (argument === '--output-dir' && outputDirectory === undefined) {
+      const value = args[++index];
+      if (!value || value.startsWith('--')) throw new Error('--output-dir requires a directory');
+      outputDirectory = value;
+    } else throw new Error(`Unknown or duplicate public package verification argument "${argument}".`);
+  }
+  return { release, outputDirectory };
+}
+
 const FORBIDDEN_PACKAGE_PATHS = Object.freeze([
   'node_modules/@dimforge/rapier3d-compat/',
   'node_modules/box2d.ts/',
@@ -72,6 +86,19 @@ export function validateEnginePackManifest({
 
 export function validateCapabilityPackageBudgetConfig(budget) {
   const errors = [];
+  for (const section of ['consumers', 'animationSpecConsumers', 'extensionConsumers', 'shaderLanguageConsumers']) {
+    for (const [id, policy] of Object.entries(budget[section] ?? {})) {
+      const review = policy.capacityReview;
+      if (!review) continue; // Existing schema-4 consumers retain their historical contract.
+      if (!Number.isSafeInteger(review.reviewedGzipBytes) || review.reviewedGzipBytes <= 0
+        || !Number.isSafeInteger(review.growthReserveBytes) || review.growthReserveBytes <= 0
+        || policy.maxGzipBytes !== review.reviewedGzipBytes + review.growthReserveBytes
+        || typeof review.capabilityBasis !== 'string' || !review.capabilityBasis.trim()
+        || typeof review.decision !== 'string' || !review.decision.trim()) {
+        errors.push(`${id} reviewed gzip capacity requires measured bytes, positive reserve, capability basis and decision`);
+      }
+    }
+  }
   for (const [id, policy] of Object.entries(budget.extensionConsumers ?? {})) {
     if (policy.loading) errors.push(...validateConsumerLoadingPolicy(policy.loading, policy.maxGzipBytes)
       .map(error => `${id}: ${error}`));

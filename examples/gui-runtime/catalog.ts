@@ -59,9 +59,14 @@ export function createCatalog(): Demo[] {
   const source = createImage();
   const demos: Demo[] = [
     {
+      name: 'Layouts', hint: 'Switch between manual coordinates, Flex wrapping and Grid. Resize the container to compare the same controls.',
+      parameters: [choice('mode', 'Flex', ['Manual', 'Flex', 'Grid']), number('width', 280, 160, 520), number('height', 180, 110, 300)],
+      create: (_p, options) => new GuiElement(options),
+    },
+    {
       name: 'GuiButton', hint: 'Click the button to see its event below.',
-      parameters: [...size(200), text('text', 'Hello, Engine'), choice('variant', 'primary', ['default', 'primary', 'danger', 'outline'])],
-      create: (p, o, change) => new GuiButton({ ...o, text: s(p, 'text'), variant: s(p, 'variant') as 'primary', onClick: () => change('clicks', n(p, 'clicks') + 1) }),
+      parameters: [...size(200), text('text', 'Hello, Engine'), choice('variant', 'primary', ['default', 'primary', 'danger', 'outline']), boolean('hoverTransition', true), number('hoverTransitionMs', 180, 0, 1500, 20)],
+      create: (p, o, change) => new GuiButton({ ...o, text: s(p, 'text'), variant: s(p, 'variant') as 'primary', hoverTransition: b(p, 'hoverTransition'), hoverTransitionMs: n(p, 'hoverTransitionMs'), onClick: () => change('clicks', n(p, 'clicks') + 1) }),
     },
     {
       name: 'GuiColorPicker', hint: 'Edit HEX or drag RGB channels. Enter confirms HEX.',
@@ -140,16 +145,17 @@ export function createCatalog(): Demo[] {
       create: (p, o) => {
         const host = new GuiElement({ ...o, style: undefined, width: 160, height: 36 });
         const target = host.add(new GuiButton({ width: 160, height: 36, text: 'Hover over me', disabled: o.disabled }));
-        host.add(new GuiTooltip({ ...o, target, content: s(p, 'content'), placement: s(p, 'placement') as 'top', delay: n(p, 'delay') }));
+        host.add(new GuiTooltip({ ...o, id: undefined, x: 0, y: 0, target, content: s(p, 'content'), placement: s(p, 'placement') as 'top', delay: n(p, 'delay') }));
         return host;
       },
     },
     {
       name: 'GuiScrollView', hint: 'Scroll or drag the list; try inertia.',
-      parameters: [...size(260, 230), number('items', 12, 4, 24), boolean('showScrollbar', true), boolean('inertia', true), number('inertiaStrength', 1, 0.2, 3, 0.1)],
+      parameters: [...size(260, 230), choice('axis', 'vertical', ['vertical', 'horizontal']), number('items', 12, 4, 24), boolean('showScrollbar', true), boolean('inertia', true), number('inertiaStrength', 1, 0.2, 3, 0.1)],
       create: (p, o, change) => {
-        const view = new GuiScrollView({ ...o, contentHeight: n(p, 'items') * 44 + 12, showScrollbar: b(p, 'showScrollbar'), inertia: b(p, 'inertia'), inertiaStrength: n(p, 'inertiaStrength') });
-        for (let i = 0; i < n(p, 'items'); i++) view.add(new GuiButton({ x: 10, y: 10 + i * 44, width: n(p, 'width') - 34, height: 34, text: `Item ${String(i + 1).padStart(2, '0')}`, onClick: () => change('item', i + 1) }));
+        const horizontal = s(p, 'axis') === 'horizontal';
+        const view = new GuiScrollView({ ...o, axis: horizontal ? 'horizontal' : 'vertical', contentWidth: n(p, 'items') * 150 + 12, contentHeight: n(p, 'items') * 44 + 12, showScrollbar: b(p, 'showScrollbar'), inertia: b(p, 'inertia'), inertiaStrength: n(p, 'inertiaStrength') });
+        for (let i = 0; i < n(p, 'items'); i++) view.add(new GuiButton({ x: horizontal ? 10 + i * 150 : 10, y: horizontal ? 10 : 10 + i * 44, width: horizontal ? 140 : n(p, 'width') - 34, height: horizontal ? Math.max(8, n(p, 'height') - 30) : 34, text: `Item ${String(i + 1).padStart(2, '0')}`, onClick: () => change('item', i + 1) }));
         return view;
       },
     },

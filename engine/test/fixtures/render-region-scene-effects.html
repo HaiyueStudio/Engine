@@ -1,0 +1,6 @@
+<!doctype html><meta charset="utf-8"><title>G04 actual 3D post-effects and cancellation</title>
+<pre id="progress">Loading native 3D projection reference</pre><pre id="result"></pre>
+<script>addEventListener("error",e=>{const n=document.querySelector("#result");if(!n.dataset.status){n.textContent=JSON.stringify({status:"failed",error:e.message});n.dataset.status="failed"}})</script>
+<script>addEventListener("unhandledrejection",e=>{const n=document.querySelector("#result");if(!n.dataset.status){n.textContent=JSON.stringify({status:"failed",error:String(e.reason?.stack??e.reason)});n.dataset.status="failed"}})</script>
+<script type="importmap">{"imports":{"wgpu-matrix":"/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"}}</script>
+<script type="module" src="./render-region-scene-effects.mjs"></script>

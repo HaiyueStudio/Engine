@@ -249,6 +249,7 @@ export function acquireTransientAttachments(
   context: RenderCommandContext,
   limits?: { readonly maxViews: number; readonly maxLiveGenerations: number; readonly reserveBytes?: (bytes: number) => () => void },
 ): { readonly textures: readonly GPUTexture[]; readonly views: readonly GPUTextureView[] } {
+  const encoder=context.encoder;
   if (!context.afterSubmit) throw new Error('Transient MRT attachments require an afterSubmit lifecycle hook.');
   let scopes = attachments.get(pool);
   if (!scopes) { scopes = new Map(); attachments.set(pool, scopes); }
@@ -280,11 +281,12 @@ export function acquireTransientAttachments(
     generations.add(current);
     scopes.set(scope, current);
   }
-  if (!current.encoders.has(context.encoder)) {
-    current.encoders.add(context.encoder);
+  if (!current.encoders.has(encoder)) {
+    current.encoders.add(encoder);
     const generation = current;
+    context.afterCancel?.(() => {generation.encoders.delete(encoder);if(generation.retired)retireAttachments(generation);});
     context.afterSubmit(queue => {
-      const done = () => { generation.encoders.delete(context.encoder); if (generation.retired) retireAttachments(generation); };
+      const done = () => { generation.encoders.delete(encoder); if (generation.retired) retireAttachments(generation); };
       void queue.onSubmittedWorkDone().then(done, done);
     });
   }
