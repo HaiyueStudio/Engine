@@ -5,6 +5,7 @@ import {resolve,dirname} from 'node:path';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
+import {npmCommand,npmArgs} from '../../scripts/npm-process.mjs';
 const root=fileURLToPath(new URL('../..',import.meta.url));
 export async function buildProductionDrawCandidate({composition=false}={}){
  const out=resolve(root,'artifacts/engine-0.2.2/g11/draw-candidate-'+Date.now());mkdirSync(out,{recursive:true});
@@ -33,8 +34,8 @@ export {ProductionResourcePending} from '../../production/ResourceStage.js';`;
  const sources=Object.fromEntries(bundle.watchFiles.filter(p=>p!==virtual).map(p=>[p,sha(p)]));await bundle.close();
  writeFileSync(resolve(stage,'package.json'),JSON.stringify({name:'@haiyue/g11-draw-candidate',version:'0.0.0-g11',private:true,type:'module',license:'MIT',files:['dist'],exports:{'.':'./dist/index.js'},haiyueScope:'Private original-renderer draw/lifetime candidate; not formal HyaPlayer or official package qualification'},null,2));
  writeFileSync(resolve(stage,'LICENSE'),readFileSync(resolve(root,'LICENSE')));
- const pack=JSON.parse(execFileSync(process.execPath,[resolve(dirname(process.execPath),'node_modules/npm/bin/npm-cli.js'),'pack','--offline','--ignore-scripts','--json','--pack-destination',out],{cwd:stage,encoding:'utf8',windowsHide:true}))[0];
- const tarball=resolve(out,pack.filename),consumer=resolve(out,'consumer');mkdirSync(consumer);execFileSync('tar.exe',['-xf',tarball,'-C',consumer],{windowsHide:true});
+ const pack=JSON.parse(execFileSync(npmCommand(),npmArgs(['pack','--offline','--ignore-scripts','--json','--pack-destination',out]),{cwd:stage,encoding:'utf8',windowsHide:true}))[0];
+ const tarball=resolve(out,pack.filename),consumer=resolve(out,'consumer');mkdirSync(consumer);execFileSync('tar',['-xf',tarball,'-C',consumer],{windowsHide:true});
  symlinkSync(resolve(root,'node_modules'),resolve(consumer,'package/node_modules'),'junction');
  const record={status:'packed-private-draw-candidate',sourceEntry:source,sources,tarball:{path:tarball,sha256:sha(tarball)},entry:resolve(consumer,'package/dist/index.js'),fullG11Complete:false};
  writeFileSync(resolve(out,'result.json'),JSON.stringify(record,null,2)+'\n');
