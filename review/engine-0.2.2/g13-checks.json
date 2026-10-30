@@ -9,7 +9,7 @@
   "candidate": {
     "revision": "d58835a9d14c711f26374c5eed00851f4e4649c2",
     "dirty": false,
-    "role": "Repaired runtime package candidate; current formal Windows, physical input and Apple qualifications remain separately bound",
+    "role": "Qualified runtime package bytes for Windows global gates and rehearsal; Apple-device qualification pending",
     "packages": [
       {
         "name": "@haiyue/engine",
@@ -1049,9 +1049,141 @@
         "failureLog": {
           "path": "artifacts/engine-0.2.2/g13/windows-gates-1793254174121-884c75c3/rehearsal.stderr.log",
           "sha256": "c7ae865e574949c82e75d4960822663c6a5bdef76287f8ae91445c8cdcd6eae9"
-        }
+        },
+        "originalFailurePreserved": true,
+        "currentStatus": "passed-after-documentation-only-repair"
       },
       "allFourPackageBytesMatchQualifiedCandidate": true
+    },
+    "windowsRehearsal": {
+      "status": "passed-windows-global-and-rehearsal",
+      "acceptanceRevision": "09b7a8f378deb273c32cc07fa43d994ef22ba901",
+      "captureRevision": "95ffbb4b1cacdfdde21e8be6be50961619bcc3df",
+      "documentationOnlyReuse": true,
+      "documentationChanges": [
+        "CHANGELOG.md",
+        "docs/engine-guide/README.md",
+        "docs/engine-guide/release-notes-0.2.2.md",
+        "review/engine-0.2.2/README.md",
+        "review/engine-0.2.2/g13-checks.json"
+      ],
+      "result": {
+        "path": "artifacts/engine-0.2.2/g13/windows-rehearsal-1793322052793-e78978d5/result.json",
+        "sha256": "f8025395baf04cee15569c0487b0577791d36af5681790e68fbae28ee5ec8326"
+      },
+      "sevenReportAudit": {
+        "path": "artifacts/engine-0.2.2/g13/windows-rehearsal-1793322052793-e78978d5/seven-report-audit.stdout.log",
+        "sha256": "ed04180c5d018f4c4601b166c3df374632599774cff71af987e9224d09375660"
+      },
+      "independentBundleAudit": {
+        "path": "artifacts/engine-0.2.2/g13/windows-rehearsal-1793322052793-e78978d5/rehearsal-audit.stdout.log",
+        "sha256": "140e6575fd614f252486ac5bc57cba204517082099d215d85dbadff040b742f8"
+      },
+      "finalDeepReuseCheck": {
+        "path": "artifacts/engine-0.2.2/g13/windows-rehearsal-1793322052793-e78978d5/reuse-after-rehearsal.stdout.log",
+        "sha256": "3e002cf315384d68d4b454be4a0ea2aad9a7ad9a853930cf11616101bce0ee2b"
+      },
+      "rehearsalReport": {
+        "path": "artifacts/engine-0.2.2/g13/windows-final-1793180933639-1403ddd5/checkout/artifacts/release/rehearsal/report.json",
+        "sha256": "1e93eb7472f2e399879e0d55d4f2c4f2bdccf5d2c4dc0d2cbc6d7011e5417807"
+      },
+      "reusedRendererCaptures": 580,
+      "newRendererCaptures": 0,
+      "formalExamples": 64,
+      "exampleBuildTargets": 66,
+      "releaseArtifacts": 5,
+      "allFourPackageBytesUnchanged": true,
+      "baselinesUnchanged": true,
+      "externalPublishPerformed": false
+    },
+    "gamesConvergence": {
+      "status": "passed",
+      "commit": "d439855",
+      "userWipPreserved": true,
+      "workingTreeContainsUserChanges": true,
+      "typecheck": "passed",
+      "rulesTests": 1166,
+      "fullGameBuilds": 32,
+      "checks": {
+        "path": "artifacts/engine-0.2.2/g13/games-current-checks.json",
+        "sha256": "f1c684a7374c06ee02f1e58ed48e8a6afd6f53aa71c095d80b8a8d8575b5af7f"
+      },
+      "typecheckLog": {
+        "path": "artifacts/engine-0.2.2/g13/games-current-typecheck.log",
+        "sha256": "0ecd9dc519d238af11b6e71d95d1a4300b1ed08d472a74691b3000477aa1138a"
+      },
+      "testLog": {
+        "path": "artifacts/engine-0.2.2/g13/games-current-tests.log",
+        "sha256": "684eaa0d1e1fb3f0b4ab1ad15f00d9dcff8ac90e473879ca3ac3e75eee56e699"
+      },
+      "buildLog": {
+        "path": "artifacts/engine-0.2.2/g13/games-current-build.log",
+        "sha256": "a98a0011ef621b07edc7f0eb348d27ca716243288cb702c77c071274249634c4"
+      },
+      "installedBytes": {
+        "path": "artifacts/engine-0.2.2/g13/games-installed-candidate.json",
+        "sha256": "adad7daa6ab9a7c5814e15101c45eac6fe54d14b8266dd611ba39549150b476f"
+      },
+      "product": {
+        "status": "passed",
+        "cases": 6,
+        "report": {
+          "path": "artifacts/engine-0.2.2/g12/g13-product-current-1793322693528/result.json",
+          "sha256": "0a2a0c62fc65442045401c77ff5a57a52fddb83f048d257dc21ee02ca42d0b67"
+        },
+        "nativeBackend": true,
+        "presentationMode": "headless",
+        "physicalInputAccepted": false
+      },
+      "uiPackageChanged": false
+    },
+    "nativeCandidateConvergence": {
+      "status": "passed-preparation-only",
+      "commit": "be27e22",
+      "sourceReport": {
+        "repository": "Native",
+        "path": "examples/hya-production/artifacts/native-source-check-1793322624168/result.json",
+        "sha256": "bdf09e085a387aae2db63598d56c789fc0b454e1797a5b00a77d828fdfe19d9b"
+      },
+      "installedBytes": {
+        "path": "artifacts/engine-0.2.2/g13/native-installed-candidate.json",
+        "sha256": "dd1b604d4aa356cf917ba8665f495340cae402d2c710b7ee21ba9c06db354220"
+      },
+      "checks": [
+        {
+          "id": "preflight",
+          "exitCode": 0
+        },
+        {
+          "id": "native-sdk-types",
+          "exitCode": 0
+        },
+        {
+          "id": "public-scene-and-byte-tests",
+          "exitCode": 0
+        },
+        {
+          "id": "ios-javascript-bundle",
+          "exitCode": 0
+        }
+      ],
+      "bridgeSources": 23,
+      "transfer": {
+        "path": "artifacts/engine-0.2.2/g13/native-handoff-d58835a-verified/result.json",
+        "sha256": "b7b2870418af069819d30351960e9dc35a5986006f02693e2d956e435e7cdef2"
+      },
+      "archive": {
+        "path": "artifacts/engine-0.2.2/g13/native-handoff-d58835a-verified/hya-native-g13-d58835a.tar.gz",
+        "bytes": 9357453,
+        "sha256": "b297b69d0e3f77b92c39a459f983017fc9d4f1a34c7bdb452a5dcc00932c23f2"
+      },
+      "files": 253,
+      "extractedFilesVerified": 254,
+      "appleSdkCompiled": false,
+      "nativeScriptMetadataGenerated": false,
+      "signedNativeAppBuilt": false,
+      "physicalNativeQualified": false,
+      "userWipPreserved": true
     }
   },
   "preservedFailures": {
@@ -1113,16 +1245,20 @@
     }
   },
   "currentBlocker": {
-    "id": "release-rehearsal-after-release-notes",
+    "id": "apple-physical-qualification",
     "status": "pending",
+    "windowsTasksComplete": true,
     "remainingRendererCaptures": 0,
     "globalGatePassed": true,
-    "rehearsalPassed": false,
+    "rehearsalPassed": true,
+    "macAvailable": false,
+    "iPhoneAvailable": false,
     "fullG13Complete": false
   },
   "remaining": [
-    "Complete no-publication rehearsal after adding the missing 0.2.2 candidate notes; preserve original failure and bind documentation-only reuse to exact hashes",
-    "Align Games/Native candidate packages after Windows qualification; physical iPhone input, Apple SDK/metadata/signed install, PCM/live audio and VoiceOver remain pending"
+    "On Mac/iPhone: compile current HYA Native candidate with Apple SDK/NativeScript metadata, sign/install, and verify real soft-keyboard/composition/rotation/background input",
+    "On iPhone: verify actual PCM/live audio, unlock/interruption/recovery and VoiceOver; bind all receipts to the exact handoff package hashes",
+    "Complete final cross-platform qualification before any separately authorized publication; no push, tag, npm, GitHub Release, Pages or baseline promotion performed"
   ],
   "publishing": {
     "executed": false,
