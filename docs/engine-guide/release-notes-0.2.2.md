@@ -1,6 +1,6 @@
-# Haiyue 0.2.2 发布候选
+# Haiyue 0.2.2 发布说明
 
-0.2.2 尚未发布。本版重点是共享布局、GUI 交互、局部区域更新与 HYA 组合播放。Windows 完整全局门禁、无发布演练、产品候选对齐及 Mac／iPhone 具名验收已通过，完整状态见[验收结论](../../review/engine-0.2.2/README.md)。本页不代替设备验收或正式发布决定。
+0.2.2 已于 2026-10-31 发布，见[正式 Release](https://github.com/HaiyueStudio/Engine/releases/tag/v0.2.2)及[示例站点](https://haiyuestudio.github.io/Engine/)。本版重点是共享布局、GUI 交互、局部区域更新与 HYA 组合播放。Windows 完整全局门禁、无发布演练、产品候选对齐及 Mac／iPhone 具名验收已通过，完整状态见[验收结论](../../review/engine-0.2.2/README.md)。本页不代替设备验收或正式发布决定。
 
 ## 共享布局与 GUI
 
@@ -24,8 +24,8 @@ HYA 支持增量求值、静态帧复用和调用方已有区域的接入。音�
 
 ## 升级与设备边界
 
-四个候选包为 `@haiyue/engine`、`@haiyue/animation-spec`、`@haiyue/extensions`、`@haiyue/shader-language`，版本均为 0.2.2。按各包的公开 exports 使用稳定或明确标注的 experimental 子路径，HYA 格式和 Shader artifact 版本独立管理。
+四个发布包为 `@haiyue/engine`、`@haiyue/animation-spec`、`@haiyue/extensions`、`@haiyue/shader-language`，版本均为 0.2.2。按各包的公开 exports 使用稳定或明确标注的 experimental 子路径，HYA 格式和 Shader artifact 版本独立管理。
 
 升级前保留原锁文件与完整版本集合，在独立消费者中验证安装、声明、渲染、输入和销毁。布局绑定应在所属 GUI root 释放前销毁；区域句柄和借用资源仍由创建方管理。回滚时恢复匹配的锁文件及包集合并重新构建应用，避免混用运行时、声明或格式版本。
 
-本轮 Windows 已验证真实中文 IME、手柄、生产场景、资源生命周期、画质和原生全局门禁。同一候选包加具名 Native 宿主修复已完成 Apple SDK、签名安装及 iPhone 15 Plus／iOS 27.2 beta 的组合输入、音频和 VoiceOver 验收。平台字体差异、短时音频测量及已记录清理计数的范围见验收结论。10k HYA 场景保持诊断用途，不构成所有设备流畅运行的承诺。版本未发布，UI、Editor、Games、Native 和 App Store 提交保持各自的验收与发布流程。
+本轮 Windows 已验证真实中文 IME、手柄、生产场景、资源生命周期、画质和原生全局门禁。同一候选包加具名 Native 宿主修复已完成 Apple SDK、签名安装及 iPhone 15 Plus／iOS 27.2 beta 的组合输入、音频和 VoiceOver 验收。平台字体差异、短时音频测量及已记录清理计数的范围见验收结论。10k HYA 场景保持诊断用途，不构成所有设备流畅运行的承诺。UI、Editor、Games、Native 和 App Store 提交保持各自的验收与发布流程。

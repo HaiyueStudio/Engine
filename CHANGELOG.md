@@ -2,14 +2,14 @@
 
 ## Unreleased
 
-## 0.2.2 （候选，未发布）
+## 0.2.2 - 2026-10-31
 
 - 新增共享 `/layout` 与 `/gui-layout`：Flex／Grid 子集、显式文字测量、容器预设、分隔面板与稳定 ID 标签页；GUI 与 HYA 复用同一布局核心。
 - GUI 增加输入归属、键盘／手柄焦点、固定 Unicode 字素编辑、真实宿主输入桥、三击全选、主题／九宫格、语义拖放及 hover cursor。
 - 区域支持按需／单次／连续／禁用策略和有界像素缓存，静态 GUI 可复用，全部静止时停止呈现提交；工作附件与缓存分别计量。
 - HYA 提供五个独立生产入口、组合事务、真实文字／图像绘制、增量求值及存储复用；不承诺任意 Rive 完整保真或通用脚本执行。
 - 发布控制增加冻结四包、实时授权、接受后可见性等待、逐包下载哈希和中断恢复；设备验收及最终候选资格仍以 G13 记录为准。
-- [0.2.2 候选说明](docs/engine-guide/release-notes-0.2.2.md)列出新增能力、升级方式与设备边界；当前完整资格见 [G13 验收结论](review/engine-0.2.2/README.md)，尚未发布。
+- [0.2.2 发布说明](docs/engine-guide/release-notes-0.2.2.md)列出新增能力、升级方式与设备边界；四包已下载校验，[正式 Release](https://github.com/HaiyueStudio/Engine/releases/tag/v0.2.2)与[示例站点](https://haiyuestudio.github.io/Engine/)已发布，完整资格见 [G13 验收结论](review/engine-0.2.2/README.md)。
 
 ## 0.2.1 （候选，未发布）
 
