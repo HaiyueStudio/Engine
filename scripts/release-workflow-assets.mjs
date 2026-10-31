@@ -8,9 +8,10 @@ import {storedPublicationLog} from './publication-policy.mjs';
 
 export function ghBytes(args,{cwd,spawnImpl=spawn,timeoutMs=300000}={}) {
   const child=spawnImpl('gh',args,{cwd,windowsHide:true,stdio:['ignore','pipe','pipe']});
-  let stderr='';child.stderr.on('data',b=>{stderr=(stderr+storedPublicationLog(b.toString())).slice(-65536);});
+  // Redact after concatenation: a credential may span two stderr chunks.
+  let stderr='';child.stderr.on('data',b=>{stderr=(stderr+b.toString()).slice(-65536);});
   let timer;
-  const completion=new Promise((ok,fail)=>{timer=setTimeout(()=>{child.kill();fail(Error('GitHub raw-byte transport deadline exceeded'));},timeoutMs);child.once('error',fail);child.once('close',code=>code===0?ok():fail(Error('gh exited '+code+': '+stderr)));});
+  const completion=new Promise((ok,fail)=>{timer=setTimeout(()=>{child.kill();fail(Error('GitHub raw-byte transport deadline exceeded'));},timeoutMs);child.once('error',fail);child.once('close',code=>code===0?ok():fail(Error('gh exited '+code+': '+storedPublicationLog(stderr))));});
   // Attach a rejection handler before the stream starts, while preserving failure for its consumer.
   completion.catch(()=>{});
   return (async function*(){try{for await(const b of child.stdout)yield b;await completion;}finally{clearTimeout(timer);if(child.exitCode===null)child.kill();}})();

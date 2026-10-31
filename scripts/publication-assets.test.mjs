@@ -65,10 +65,10 @@ test('transport keeps stderr control characters separate from raw stdout and nev
   for(const exit of [0,1]){
     const output=ghBytes(['api','fake'],{spawnImpl:()=>{
       const child=new EventEmitter();child.stdout=new PassThrough();child.stderr=new PassThrough();child.exitCode=null;child.kill=()=>{};
-      queueMicrotask(()=>{child.stderr.write('\x1b[31mnoise\x00 npm_secret\n');child.stdout.end(bytes);child.stderr.end();child.exitCode=exit;child.emit('close',exit);});return child;
+      queueMicrotask(()=>{child.stderr.write('\x1b[31mnoise\x00 npm_secret\ngh');child.stderr.write('p_transportsecret\n');child.stdout.end(bytes);child.stderr.end();child.exitCode=exit;child.emit('close',exit);});return child;
     }});
     if(exit===0)assert.equal((await verifyAssetStream(asset,output)).sha256,asset.sha256);
-    else await assert.rejects(verifyAssetStream(asset,output),error=>error.message.includes('gh exited 1')&&!error.message.includes('npm_secret')&&!error.message.includes('\x00'));
+    else await assert.rejects(verifyAssetStream(asset,output),error=>error.message.includes('gh exited 1')&&!error.message.includes('npm_secret')&&!error.message.includes('transportsecret')&&!error.message.includes('\x00'));
   }
 });
 
