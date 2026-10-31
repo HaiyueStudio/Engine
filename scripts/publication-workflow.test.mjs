@@ -82,6 +82,18 @@ test('actual independent controller completes after its launching CLI has exited
   assert.ok(Object.values(saved.state.stages).every(s=>s.attempt===1&&s.status==='passed'));
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+test('a rejected independent launch retains a separate startup failure without inventing stage results',()=>{
+ const dir=mkdtempSync(resolve(tmpdir(),'g02-startup-failure-'));
+ const run=args=>spawnSync(process.execPath,['scripts/release-workflow.mjs',...args],{cwd:root,encoding:'utf8',timeout:60000});
+ try{
+  assert.equal(run(['plan','--profile','diagnostic','--output',dir]).status,0);
+  const file=resolve(dir,'run.json'),result=run(['launch','--run',file,'--no-publish','--retry-stage','invalid;stage','--hidden','--close-on-complete']);
+  assert.notEqual(result.status,0);assert.match(result.stderr,/startup failed; evidence/);
+  const saved=JSON.parse(readFileSync(file)),failure=JSON.parse(readFileSync(resolve(dir,`launch.${saved.launch.nonce}.failure.json`)));
+  assert.equal(failure.status,'startup-failed');assert.equal(failure.manifestId,saved.manifestId);assert.equal(failure.published,false);
+  assert.equal(saved.state,null);assert.equal(saved.controller,undefined);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
 test('actual platform CLI prepares, runs and resumes diagnostic workflow without installing copies or publishing',()=>{
  const dir=mkdtempSync(resolve(tmpdir(),'g02-workflow-'));
  const run=args=>spawnSync(process.execPath,['scripts/release-workflow.mjs',...args],{cwd:root,encoding:'utf8',timeout:60000});

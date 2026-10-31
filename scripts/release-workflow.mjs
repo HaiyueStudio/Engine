@@ -51,9 +51,16 @@ async function main(){
     const existing=inspectStateLock(lock,id);if(existing)throw Error(existing.alive?'Controller is already alive; no second launch':'Inspect and unlock the crash lock before launch');
     const nonce=randomBytes(12).toString('hex');
     run.launch={nonce,requestedAt:new Date().toISOString(),independent:true,requestedByPid:process.pid};save(path,run);
-    const result=await launchIndependentWorkflow({root,node:manifest.node,runPath:path,nonce,hidden,closeOnComplete,retryStage});
-    const controller=await confirmIndependentStartup(path,result.pid,nonce);
-    console.log(JSON.stringify({status:'launched-independent',manifestId:id,run:path,...result,controller,published:false}));return;
+    try{
+      const result=await launchIndependentWorkflow({root,node:manifest.node,runPath:path,nonce,hidden,closeOnComplete,retryStage});
+      const controller=await confirmIndependentStartup(path,result.pid,nonce);
+      console.log(JSON.stringify({status:'launched-independent',manifestId:id,run:path,...result,controller,published:false}));
+    }catch(error){
+      const evidence=resolve(dirname(path),`launch.${nonce}.failure.json`);
+      save(evidence,{schemaVersion:1,manifestId:id,nonce,status:'startup-failed',error:storedPublicationLog(error.message),finishedAt:new Date().toISOString(),published:false});
+      throw Error('Independent startup failed; evidence: '+evidence+'; '+error.message);
+    }
+    return;
   }
   if(mode==='status'){
     const owner=inspectStateLock(lock,id);
