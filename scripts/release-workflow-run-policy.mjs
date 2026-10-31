@@ -65,6 +65,6 @@ const cmdQuote=s=>'"'+s.replaceAll('%','%%')+'"';
 const shQuote=s=>"'"+s.replaceAll("'","'\\''")+"'";
 export function workflowLauncher(m,runPath,platform) {
   validateWorkflowManifest(m);if(/[\r\n\x00"]/.test(runPath))throw Error('Invalid run path');
-  if(platform==='win32')return `@echo off\r\nsetlocal EnableExtensions DisableDelayedExpansion\r\ncd /d ${cmdQuote(m.root)}\r\n${cmdQuote(m.node)} scripts\\release-workflow.mjs run --run ${cmdQuote(runPath)} --no-publish\r\nset "workflow_exit=%errorlevel%"\r\necho No-publication validation exit code: %workflow_exit%\r\necho Status and logs: ${cmdQuote(runPath)}\r\npause\r\nexit /b %workflow_exit%\r\n`;
+  if(platform==='win32')return `@echo off\r\nsetlocal EnableExtensions DisableDelayedExpansion\r\ncd /d ${cmdQuote(m.root)}\r\n${cmdQuote(m.node)} scripts\\release-workflow.mjs launch --run ${cmdQuote(runPath)} --no-publish\r\nset "workflow_exit=%errorlevel%"\r\necho Independent launch exit code: %workflow_exit%\r\necho Status and logs: ${cmdQuote(runPath)}\r\npause\r\nexit /b %workflow_exit%\r\n`;
   return `#!/bin/sh\ncd ${shQuote(m.root)} || exit 1\n${shQuote(m.node)} scripts/release-workflow.mjs run --run ${shQuote(runPath)} --no-publish\ncode=$?\nprintf 'No-publication validation exit code: %s\\n' "$code"\nexit "$code"\n`;
 }
