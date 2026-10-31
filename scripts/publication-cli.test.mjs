@@ -42,5 +42,6 @@ test('G11 per-package plan and local preflight execute without a network or subm
     const result=f.run();assert.equal(result.status,0,result.stderr);const plan=JSON.parse(readFileSync(f.plan));assert.equal(plan.schemaVersion,2);assert.equal(plan.version,'0.2.3');
     const journal=resolve(f.directory,'journal.json');const preflight=spawnSync(process.execPath,['scripts/publication.mjs','preflight','--plan',f.plan,'--journal',journal],{cwd:root,encoding:'utf8'});
     assert.equal(preflight.status,0,preflight.stderr);const state=JSON.parse(preflight.stdout);assert.equal(state.networkUsed,false);assert.equal(state.submitted,false);assert.equal(existsSync(journal),false);
+    const noJournal=spawnSync(process.execPath,['scripts/publication.mjs','preflight','--plan',f.plan],{cwd:root,encoding:'utf8'});assert.equal(noJournal.status,0,noJournal.stderr);
   }finally{rmSync(f.directory,{recursive:true,force:true});}
 });

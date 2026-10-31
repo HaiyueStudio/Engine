@@ -1,4 +1,5 @@
 import {createHash} from 'node:crypto';
+import {storedPublicationLog} from './publication-policy.mjs';
 
 export function validateAssetPlan(plan) {
   if(plan?.schemaVersion!==1||!/^[-\w.]+\/[-\w.]+$/.test(plan.repository??'')||!Number.isSafeInteger(plan.releaseId)||plan.releaseId<1
@@ -32,8 +33,9 @@ export async function runReleaseAssets(plan,journal,io,{allowUpload=false,allowR
   if(journal&&(journal.schemaVersion!==1||journal.planId!==id))throw Error('Asset journal belongs to another frozen plan');
   const state=journal?structuredClone(journal):{schemaVersion:1,planId:id,assets:{}};
   const save=async(name,status,extra={})=>{state.assets[name]={...state.assets[name],status,...extra};await io.save(structuredClone(state));};
-  const release=await io.release();
-  if(release.id!==plan.releaseId||release.tag_name!==plan.tag||await io.tagRevision(plan.tag)!==plan.revision)throw Error('Remote release/tag differs from frozen candidate');
+  const assertTarget=async()=>{const target=await io.release();if(target.id!==plan.releaseId||target.tag_name!==plan.tag||await io.tagRevision(plan.tag)!==plan.revision)throw Error('Remote release/tag differs from frozen candidate');return target;};
+  try {
+  const release=await assertTarget();
   // Validate every local file before the first possible remote mutation.
   for(const a of plan.assets)await verifyAssetStream(a,await io.local(a));
   for(const a of plan.assets){
@@ -51,7 +53,7 @@ export async function runReleaseAssets(plan,journal,io,{allowUpload=false,allowR
       if(r.state!=='starter'||!allowRepairIncomplete||!release.draft||r.uploader?.id!==user.id||r.label!==assetLabel(plan,a)
         ||!previous?.attempted)throw Error('Incomplete asset is not an authorized owned draft placeholder: '+a.name);
       // Recheck immediately; a completed or changed asset must never be deleted.
-      const current=await io.asset(r.id),freshRelease=await io.release();
+      const current=await io.asset(r.id),freshRelease=await assertTarget();
       if(current.state!=='starter'||current.name!==a.name||current.label!==r.label||current.uploader?.id!==user.id||!freshRelease.draft)throw Error('Draft placeholder changed before repair');
       await save(a.name,'repair-intent',{remoteId:r.id});
       await io.remove(r.id);await save(a.name,'repaired',{history:[...(previous.history??[]),{status:previous.status,remoteId:r.id}]});
@@ -60,6 +62,7 @@ export async function runReleaseAssets(plan,journal,io,{allowUpload=false,allowR
       await save(a.name,'indeterminate');continue; // Missing acknowledgement is never permission to repeat an upload.
     }
     if(!allowUpload){await save(a.name,'not-uploaded');continue;}
+    await assertTarget();
     await save(a.name,'submitting',{attempted:true,label:assetLabel(plan,a)});
     try {await io.upload(a,assetLabel(plan,a));}
     catch(error){await save(a.name,'indeterminate');throw error;}
@@ -70,5 +73,7 @@ export async function runReleaseAssets(plan,journal,io,{allowUpload=false,allowR
     await save(a.name,'verified',{attempted:true,remoteId:uploaded[0].id,...verified});
   }
   const verified=plan.assets.every(a=>state.assets[a.name]?.status==='verified');
+  state.status=verified?'verified':'pending';await io.save(structuredClone(state));
   return {status:verified?'verified':'pending',journal:state,allAssetsVerified:verified,releasePublished:false,pagesDeployed:false};
+  }catch(error){state.status='failed';state.lastFailure=storedPublicationLog(error.message);await io.save(structuredClone(state));throw error;}
 }

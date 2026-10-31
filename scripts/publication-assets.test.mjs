@@ -30,6 +30,7 @@ test('new upload persists intent before write; partial completion resumes by rea
 test('a lost upload acknowledgement and missing remote result never trigger an automatic repeat',async()=>{
  const h=harness();h.io.upload=async()=>{h.writes.push('upload');throw Error('connection lost');};
  await assert.rejects(runReleaseAssets(plan,null,h.io,{allowUpload:true}),/lost/);
+ assert.equal(h.saved.at(-1).status,'failed');assert.match(h.saved.at(-1).lastFailure,/lost/);
  assert.equal((await runReleaseAssets(plan,h.saved.at(-1),h.io,{allowUpload:true})).status,'pending');assert.deepEqual(h.writes,['upload']);
 });
 test('verified asset disappearing later is pending, never permission to overwrite or reupload',async()=>{
@@ -69,4 +70,11 @@ test('transport keeps stderr control characters separate from raw stdout and nev
     if(exit===0)assert.equal((await verifyAssetStream(asset,output)).sha256,asset.sha256);
     else await assert.rejects(verifyAssetStream(asset,output),error=>error.message.includes('gh exited 1')&&!error.message.includes('npm_secret')&&!error.message.includes('\x00'));
   }
+});
+
+test('target changes before upload stop before mutation and retain a sanitized failure journal',async()=>{
+ const h=harness();let reads=0;h.io.release=async()=>({...h.release,tag_name:++reads===1?plan.tag:'v9.9.9'});
+ await assert.rejects(runReleaseAssets(plan,null,h.io,{allowUpload:true}),/frozen candidate/);assert.deepEqual(h.writes,[]);assert.equal(h.saved.at(-1).status,'failed');
+ const secrets=harness();secrets.io.upload=async()=>{throw Error('lost npm_secret password=hidden');};
+ await assert.rejects(runReleaseAssets(plan,null,secrets.io,{allowUpload:true}));const saved=secrets.saved.at(-1);assert.ok(!JSON.stringify(saved).includes('npm_secret'));assert.ok(!JSON.stringify(saved).includes('hidden'));
 });

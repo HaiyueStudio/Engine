@@ -9,18 +9,18 @@ import {publicationPlanId, validatePublicationPlan, verifyPublicationBytes, runP
 const root=resolve(import.meta.dirname,'..'), args=process.argv.slice(2);
 const mode=args.shift(), value=flag=>{const at=args.indexOf(flag);if(at<0)return;const v=args[at+1];if(!v||v.startsWith('--'))throw Error('Missing '+flag);args.splice(at,2);return v;};
 const planPath=value('--plan'), reportPath=value('--packages'), journalPath=value('--journal'), qualificationPath=value('--qualification'),retryAuth=value('--retry-auth'),confirmPlanId=value('--confirm-plan-id');
-if(args.length||!['plan','preflight','status','unlock-stale','verify','publish'].includes(mode))throw Error('Usage: publication.mjs plan --packages <report> --plan <new-plan> | verify|publish --plan <plan> --journal <journal>');
+if(args.length||!['plan','preflight','status','unlock-stale','verify','publish'].includes(mode))throw Error('Usage: publication.mjs plan --packages REPORT --qualification COMPLETE-QUALIFICATION --plan NEW-FILE | preflight --plan FILE | status|verify|publish --plan FILE --journal FILE | unlock-stale --plan FILE --journal FILE --confirm-plan-id SHA256');
 const read=p=>JSON.parse(readFileSync(resolve(root,p),'utf8'));
 const sha=(b,a='sha256')=>createHash(a).update(b).digest(a==='sha512'?'base64':'hex');
 
 if(mode==='plan'){
-  if(!reportPath||!planPath||!qualificationPath||journalPath||retryAuth||confirmPlanId)throw Error('Plan requires a package report, complete G13 qualification and new plan destination.');
+  if(!reportPath||!planPath||!qualificationPath||journalPath||retryAuth||confirmPlanId)throw Error('Plan requires a package report, completed G13/G11 candidate qualification and new plan destination.');
   const report=read(reportPath);
   if(report.gate?.status!=='passed'||report.sourceState?.workingTreeDirty!==false)throw Error('Plan requires passing packages from a clean candidate.');
   const qualification=read(qualificationPath);
   if(!((qualification.goal==='g13-integration-release'&&qualification.fullG13Complete===true)||(qualification.goal==='g11-integration-candidate'&&qualification.fullG11Complete===true))||qualification.releaseQualified!==true
     ||qualification.revision!==report.sourceState.revision||qualification.packageReport?.sha256!==sha(readFileSync(resolve(root,reportPath))))
-    throw Error('G13 qualification does not match these clean candidate packages.');
+    throw Error('Candidate qualification does not match these clean candidate packages.');
   const plan={schemaVersion:qualification.goal==='g11-integration-candidate'?2:1,version:qualification.targetVersion??report.packages?.[0]?.version,revision:report.sourceState.revision,dirty:false,
     qualification:{path:qualificationPath,sha256:sha(readFileSync(resolve(root,qualificationPath)))},
     packageReport:{path:reportPath,sha256:sha(readFileSync(resolve(root,reportPath)))},
@@ -28,11 +28,11 @@ if(mode==='plan'){
   validatePublicationPlan(plan);mkdirSync(dirname(resolve(root,planPath)),{recursive:true});writeFileSync(resolve(root,planPath),JSON.stringify(plan,null,2)+'\n',{flag:'wx'});
   console.log(JSON.stringify({status:'planned-not-published',planId:publicationPlanId(plan),plan:planPath}));
 }else{
-  if(!planPath||!journalPath||reportPath||qualificationPath)throw Error('Verification/publication requires a frozen plan and journal.');
+  if(!planPath||(!journalPath&&mode!=='preflight')||reportPath||qualificationPath)throw Error('Verification/publication requires a frozen plan and journal.');
   if(retryAuth&&mode!=='publish')throw Error('--retry-auth applies only to a manually reauthorized publish operation.');
   const plan=read(planPath);validatePublicationPlan(plan);
   if(sha(readFileSync(resolve(root,plan.packageReport.path)))!==plan.packageReport.sha256)throw Error('Frozen package report changed.');
-  if(sha(readFileSync(resolve(root,plan.qualification.path)))!==plan.qualification.sha256)throw Error('Frozen G13 qualification changed.');
+  if(sha(readFileSync(resolve(root,plan.qualification.path)))!==plan.qualification.sha256)throw Error('Frozen candidate qualification changed.');
   for(const p of plan.packages)verifyPublicationBytes(p,readFileSync(p.file));
   if(mode==='preflight'){console.log(JSON.stringify({status:'local-preflight-passed',planId:publicationPlanId(plan),packages:plan.packages.map(p=>({name:p.name,version:p.version})),networkUsed:false,submitted:false}));process.exit(0);}
   const journalFile=resolve(root,journalPath);
