@@ -18,6 +18,8 @@ const steps={
 export function releaseWorkflowSteps(profile) {if(!steps[profile])throw Error('Unknown no-publication workflow profile');return structuredClone(steps[profile]);}
 export function workflowId(manifest) {validateWorkflowManifest(manifest);return createHash('sha256').update(JSON.stringify(manifest)).digest('hex');}
 export function validateWorkflowManifest(m) {
+  const nodeMajor=Number(/^v(\d+)\./.exec(m?.host?.nodeVersion??'')?.[1]);
+  if(!['win32','linux','darwin'].includes(m?.host?.platform)||!Number.isSafeInteger(nodeMajor)||nodeMajor<22||!m.host?.architecture)throw Error('Missing supported Node/host identity');
   if(m?.schemaVersion!==1||m.noPublication!==true||!m.root||!m.node||/[\r\n\x00"]/.test(m.root+m.node)||!/^[a-f0-9]{40}$/.test(m.source?.revision??'')||typeof m.source.dirty!=='boolean')throw Error('Invalid no-publication run manifest');
   if(JSON.stringify(m.steps)!==JSON.stringify(releaseWorkflowSteps(m.profile)))throw Error('Workflow commands differ from the selected no-publication profile');
   if(m.profile!=='diagnostic'&&m.source.dirty)throw Error('Formal validation requires clean source');

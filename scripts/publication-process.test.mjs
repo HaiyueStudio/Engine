@@ -8,6 +8,8 @@ import {EventEmitter} from 'node:events';
 import {npmArgs,npmCommand,resolveNpmCli,tarCommand} from './npm-process.mjs';
 import {assertPublicationTerminal,runTerminalNpm} from './publication-terminal.mjs';
 import {createDeterministicTar} from './release-archive.mjs';
+import {stageQualifiedPackages} from './hya-corpus/packed-browser.mjs';
+import {createHash} from 'node:crypto';
 const root=resolve(import.meta.dirname,'..'),tty={stdin:{isTTY:true},stdout:{isTTY:true},stderr:{isTTY:true}};
 test('npm locator handles relocated Node, Debian share layout and PATH symlink without hardcoded Windows path',()=>{
  const env={},found=new Set(['/opt/node/lib/node_modules/npm/bin/npm-cli.js']);
@@ -36,6 +38,23 @@ test('unknown nonzero exit stays indeterminate and never becomes an auth retry',
 });
 test('actual system tar extracts deterministic bytes with no tar.exe platform assumption',()=>{
  const dir=mkdtempSync(resolve(tmpdir(),'g02-tar-'));try{const source=resolve(dir,'source.txt');writeFileSync(source,'exact\x00binary');const archive=resolve(dir,'test.tar');createDeterministicTar(archive,[{source,prefix:'source.txt'}]);const extracted=resolve(dir,'extracted');mkdirSync(extracted);const result=spawnSync(tarCommand(),['-xf',archive,'-C',extracted],{encoding:'utf8',windowsHide:true});assert.equal(result.status,0,result.stderr);assert.deepEqual(readFileSync(resolve(extracted,'source.txt')),Buffer.from('exact\x00binary'));}finally{rmSync(dir,{recursive:true,force:true});}
+});
+test('the actual packed-browser stager extracts all four hashed package fixtures on this platform',()=>{
+ const dir=mkdtempSync(resolve(tmpdir(),'g02 packed browser '));
+ try{
+  const packages=[];
+  for(const workspace of ['engine','animation-spec','extensions','shader-language']){
+   const source=resolve(dir,workspace);mkdirSync(resolve(source,'dist'),{recursive:true});
+   writeFileSync(resolve(source,'package.json'),JSON.stringify({name:'@haiyue/'+workspace,version:'0.2.2',exports:{'.':'./dist/index.js'}}));
+   writeFileSync(resolve(source,'dist/index.js'),'export const fixture=true;');
+   const artifact=resolve(dir,workspace+'.tar');createDeterministicTar(artifact,[{source,prefix:'package'}]);
+   packages.push({workspace,name:'@haiyue/'+workspace,version:'0.2.2',artifact,sha256:createHash('sha256').update(readFileSync(artifact)).digest('hex')});
+  }
+  const report=resolve(dir,'packages.json');writeFileSync(report,JSON.stringify({gate:{status:'passed'},packages}));
+  const result=stageQualifiedPackages(dir,report,resolve(dir,'staged'));assert.equal(result.tarballs.length,4);assert.equal(result.imports['@haiyue/engine'],'/g12-packed/engine/dist/index.js');
+  assert.equal(readFileSync(resolve(result.mount.directory,'engine/dist/index.js'),'utf8'),'export const fixture=true;');
+  writeFileSync(packages[0].artifact,'tampered');assert.throws(()=>stageQualifiedPackages(dir,report,resolve(dir,'rejected')),/tarball changed/);
+ }finally{rmSync(dir,{recursive:true,force:true});}
 });
 test('actual npm --version sees three real TTYs in an independent native console',{skip:!['win32','linux'].includes(process.platform)},()=>{
  const dir=mkdtempSync(resolve(tmpdir(),'g02-physical-tty-')),output=resolve(dir,'probe.json');

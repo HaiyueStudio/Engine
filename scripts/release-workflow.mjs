@@ -28,7 +28,7 @@ async function main(){
   if(mode==='plan'){
     if(!output||runPath||retryStage||confirm)throw Error('Plan requires a new output directory');
     const dir=resolve(root,output);mkdirSync(dir,{recursive:true});const path=resolve(dir,'run.json');
-    const manifest={schemaVersion:1,profile,root,node:process.execPath,noPublication:true,source:snapshot(),steps:releaseWorkflowSteps(profile)};
+    const manifest={schemaVersion:1,profile,root,node:process.execPath,host:{platform:process.platform,architecture:process.arch,nodeVersion:process.version},noPublication:true,source:snapshot(),steps:releaseWorkflowSteps(profile)};
     const id=workflowId(manifest);writeFileSync(path,JSON.stringify({schemaVersion:1,manifestId:id,manifest,state:null},null,2)+'\n',{flag:'wx'});
     const launcher=resolve(dir,process.platform==='win32'?'start.cmd':'start.sh');writeFileSync(launcher,workflowLauncher(manifest,path,process.platform),{flag:'wx',mode:0o700});
     console.log(JSON.stringify({status:'prepared',profile,manifestId:id,run:path,launcher,noPublication:true}));return;
@@ -36,6 +36,7 @@ async function main(){
   if(!runPath||output)throw Error('Existing run manifest required');
   const path=resolve(root,runPath),run=json(path),manifest=run.manifest,id=workflowId(manifest);
   if(run.manifestId!==id||manifest.root!==root)throw Error('Run manifest identity/root changed');
+  if(manifest.host.nodeVersion!==process.version||manifest.node!==process.execPath||manifest.host.platform!==process.platform)throw Error('Prepared Node/host identity changed; prepare a new run');
   const lock=path+'.lock';
   if(mode==='status'){
     const owner=inspectStateLock(lock,id);
@@ -53,7 +54,14 @@ async function main(){
       now:()=>new Date().toISOString(),save:async state=>{run.state=state;save(path,run);},
       verifyInputs:async()=>{if(git(['rev-parse','HEAD'])!==manifest.source.revision)throw Error('Frozen source revision changed');if(manifest.profile!=='diagnostic'&&git(['status','--porcelain']))throw Error('Formal source became dirty');for(const [p,h] of Object.entries(manifest.source.files))if(sha(readFileSync(resolve(root,p)))!==h)throw Error('Frozen workflow input changed: '+p);},
       host:async()=>manifest.profile==='diagnostic'?{platform:process.platform}:process.platform==='win32'?windowsWorkflowHost():{platform:process.platform,blockers:[]},
-      verifyCompleted:async(step,old)=>{for(const key of ['stdout','stderr']){if(!Number.isSafeInteger(old.attempt)||old[key]?.file!==`${step.id}.${old.attempt}.${key}.log`)throw Error('Invalid completed stage log path');if(sha(readFileSync(resolve(dirname(path),old[key].file)))!==old[key].sha256)throw Error('Completed stage log changed: '+step.id);}},
+      verifyCompleted:async(step,old)=>{
+        for(const key of ['stdout','stderr']){if(!Number.isSafeInteger(old.attempt)||old[key]?.file!==`${step.id}.${old.attempt}.${key}.log`)throw Error('Invalid completed stage log path');if(sha(readFileSync(resolve(dirname(path),old[key].file)))!==old[key].sha256)throw Error('Completed stage log changed: '+step.id);}
+        if(step.id==='rehearsal'||step.id==='rehearsal-audit'){
+          // Recheck the actual archived reports, package bytes and checksums, not just an old green log.
+          const audit=execFileSync(process.execPath,['scripts/release-rehearsal-policy.mjs','--bundle','artifacts/release/rehearsal'],{cwd:root,encoding:'utf8',windowsHide:true,timeout:300000,maxBuffer:1048576});
+          run.bundleRevalidation={status:'passed',verifiedAt:new Date().toISOString(),validatorOutputSha256:sha(Buffer.from(audit))};save(path,run);
+        }
+      },
       execute:async(step,attempt)=>{
         const stdout=resolve(dirname(path),`${step.id}.${attempt}.stdout.log`),stderr=resolve(dirname(path),`${step.id}.${attempt}.stderr.log`);
         const out=openSync(stdout,'wx'),err=openSync(stderr,'wx'),env={...process.env};

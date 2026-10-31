@@ -6,11 +6,11 @@ import {resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {releaseWorkflowSteps,workflowId,validateWorkflowManifest,assessWorkflowPreflight,runReleaseWorkflow,workflowLauncher} from './release-workflow-run-policy.mjs';
 const root=resolve(import.meta.dirname,'..');
-const manifest={schemaVersion:1,profile:'diagnostic',root,node:process.execPath,noPublication:true,source:{revision:'a'.repeat(40),dirty:true,files:{'scripts/release-workflow.mjs':'b'.repeat(64)}},steps:releaseWorkflowSteps('diagnostic')};
+const manifest={schemaVersion:1,profile:'diagnostic',root,node:process.execPath,host:{platform:process.platform,architecture:process.arch,nodeVersion:process.version},noPublication:true,source:{revision:'a'.repeat(40),dirty:true,files:{'scripts/release-workflow.mjs':'b'.repeat(64)}},steps:releaseWorkflowSteps('diagnostic')};
 function harness(){const h={saved:[],executed:[],checked:[],host:{platform:'win32',administrator:true,blockers:[]},changed:false};h.io={now:()=>new Date(0).toISOString(),save:async s=>h.saved.push(structuredClone(s)),host:async()=>h.host,verifyInputs:async()=>{if(h.changed)throw Error('inputs changed');},verifyCompleted:async s=>h.checked.push(s.id),execute:async s=>{h.executed.push(s.id);return {exitCode:0};}};return h;}
 test('profiles preserve fixed non-publication commands and reject inserted execution',()=>{
  validateWorkflowManifest(manifest);for(const profile of ['ci','global']){const m={...manifest,profile,source:{...manifest.source,dirty:false},steps:releaseWorkflowSteps(profile)};validateWorkflowManifest(m);assert.ok(m.steps.some(s=>s.id==='rehearsal'));assert.ok(m.steps.some(s=>s.id==='rehearsal-audit'));}
- assert.throws(()=>validateWorkflowManifest({...manifest,noPublication:false}));
+ assert.throws(()=>validateWorkflowManifest({...manifest,noPublication:false}));assert.throws(()=>validateWorkflowManifest({...manifest,host:{...manifest.host,nodeVersion:'v20.0.0'}}));
  assert.throws(()=>validateWorkflowManifest({...manifest,steps:[{id:'publish',kind:'npm',args:['publish']}]}));
  assert.throws(()=>validateWorkflowManifest({...manifest,profile:'global',steps:releaseWorkflowSteps('global')}),/clean/);
 });
