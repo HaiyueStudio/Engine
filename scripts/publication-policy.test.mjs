@@ -102,3 +102,25 @@ test('no credentials persist; release attachment mismatch prevents Pages advance
   assert.equal(publicationNextStep({status:'verified'},[{expectedSha256:sha256,downloadedSha256:'bad'}]),'verify-github-assets');
   assert.equal(publicationNextStep({status:'verified'},[{expectedSha256:sha256,downloadedSha256:sha256}]),'deploy-pages-and-check-deployed-revision');
 });
+
+test('schema 2 permits exact independently versioned packages while legacy plans stay unchanged',()=>{
+  const mixed={...plan,schemaVersion:2,version:'0.2.3',packages:plan.packages.map(p=>({...p,version:p.name==='@haiyue/animation-spec'?'0.2.2':'0.2.3'}))};
+  validatePublicationPlan(mixed);assert.throws(()=>validatePublicationPlan({...mixed,schemaVersion:1}));
+  validatePublicationPlan({...mixed,packages:mixed.packages.filter(p=>p.name!=='@haiyue/animation-spec')});
+  assert.throws(()=>validatePublicationPlan({...mixed,packages:[mixed.packages[0],mixed.packages[0]]}));
+});
+test('metadata visible before tarball delivery is pending/read-only, including on later 404',async()=>{
+  const h=harness(()=>({status:'visible',integrity}));h.io.download=async()=>({status:'unavailable',detail:'HTTP 404'});
+  const first=await runPublication(plan,null,h.io,{allowSubmit:true,maxWaitMs:0});assert.equal(first.status,'pending');
+  assert.equal(first.journal.packages[plan.packages[0].name].status,'download-unavailable');assert.equal(h.submitted.length,0);
+  h.io.observe=async()=>({status:'absent'});await runPublication(plan,first.journal,h.io,{allowSubmit:true,maxWaitMs:0});assert.equal(h.submitted.length,0);
+  h.io.observe=async()=>({status:'visible',integrity});h.io.download=async()=>bytes;
+  assert.equal((await runPublication(plan,first.journal,h.io,{allowSubmit:true})).status,'verified');assert.equal(h.submitted.length,0);
+});
+
+test('failed terminal preflight is not an attempted submission and can start normally later',async()=>{
+  const h=harness(()=>({status:'absent'}));h.io.prepareSubmit=async()=>{throw Error('G02_TERMINAL_REQUIRED');};
+  await assert.rejects(runPublication(plan,null,h.io,{allowSubmit:true}),/TERMINAL/);
+  const before=h.saved.at(-1);assert.equal(before.packages[plan.packages[0].name].status,'not-started');assert.equal(before.packages[plan.packages[0].name].attempted,false);assert.equal(h.submitted.length,0);
+  h.io.prepareSubmit=async()=>{};await runPublication(plan,before,h.io,{allowSubmit:true,maxWaitMs:0});assert.equal(h.submitted.length,1);
+});

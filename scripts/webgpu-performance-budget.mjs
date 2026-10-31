@@ -216,6 +216,7 @@ export function createPerformanceSourceFingerprint(root, benchmarkRoot = root) {
     'scripts/performance-app-cold-start.mjs',
     'scripts/planar-reflection-pixel-baseline.mjs',
     'scripts/verify-webgpu-planar-reflection.mjs',
+    'scripts/release-workflow-planar-policy.mjs',
     'scripts/verify-webgpu-real-renderer-benchmark.mjs',
     'scripts/verify-ambient-occlusion-gpu-cost.mjs',
     'scripts/validate-ambient-occlusion-gpu-cost.mjs',

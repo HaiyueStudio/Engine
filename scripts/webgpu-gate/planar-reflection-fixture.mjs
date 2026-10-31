@@ -1,3 +1,4 @@
+import {createPlanarConfigurations as createConfigurations,PLANAR_BUDGET_CASE_IDS} from '../release-workflow-planar-policy.mjs';
 import {
   createAuditTarget,
   createRealRendererBenchmarkScenario,
@@ -15,12 +16,14 @@ const query = new URLSearchParams(location.search);
 const mode = query.get('mode') === 'full' ? 'full' : 'smoke';
 const warmup = Math.max(3, positiveInteger(query.get('warmup'), 3));
 const samples = positiveInteger(query.get('samples'), 40);
-const budgetCaseIds = new Set([
-  'render3d.planar-reflection.1000e.1m.1b.1v',
-  'render3d.planar-reflection.1000e.2m.3b.4v',
-  'render3d.planar-reflection.10000e.4m.5b.1v',
-  'render3d.planar-reflection.10000e.4m.8b.4v',
-]);
+const budgetCaseIds = new Set(PLANAR_BUDGET_CASE_IDS);
+const fixtureStartedAt=performance.now();
+let currentCase=null;
+function reportProgress(phase,details={}) {
+  const event={schemaVersion:1,suite:'render3d.planar-reflection',mode,phase,caseId:currentCase,elapsedMs:performance.now()-fixtureStartedAt,...details};
+  progressNode.textContent=JSON.stringify(event);
+  console.info('PLANAR_PROGRESS '+JSON.stringify(event));
+}
 
 const benchmarkResults = [];
 try {
@@ -28,11 +31,12 @@ try {
   const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
   if (!adapter) throw new Error('No WebGPU adapter');
   const adapterInfo = plainAdapterInfo(adapter.info ?? {});
+  reportProgress('adapter',{adapter:adapterInfo});
   const configurations = createConfigurations(mode);
   for (let index = 0; index < configurations.length; index++) {
     const configuration = configurations[index];
-    progressNode.textContent = `benchmark ${index + 1}/${configurations.length}: ${caseId(configuration)}`;
-    benchmarkResults.push(await runBenchmarkCase(configuration));
+    currentCase=caseId(configuration);reportProgress('case-setup',{index:index+1,total:configurations.length,configuration});
+    benchmarkResults.push(await runBenchmarkCase(configuration));reportProgress('case-complete',{index:index+1,total:configurations.length});
   }
   assertBenchmarkSemantics(benchmarkResults);
 
@@ -40,7 +44,7 @@ try {
   const visualCases = createVisualCases();
   for (let index = 0; index < visualCases.length; index++) {
     const visualCase = visualCases[index];
-    progressNode.textContent = `pixels ${index + 1}/${visualCases.length}: ${visualCase.id}`;
+    currentCase=visualCase.id;reportProgress('pixels',{index:index+1,total:visualCases.length});
     pixelCases[visualCase.id] = await runPixelCase(visualCase);
   }
   assertPixelSemantics(pixelCases);
@@ -68,26 +72,11 @@ try {
     gate: { status: 'passed', strictValidation: true, asyncPipelines: true, wgslCompilationErrorsFatal: true },
   });
   resultNode.dataset.status = 'passed';
-  progressNode.textContent = 'complete';
+  currentCase=null;reportProgress('complete');
 } catch (error) {
+  reportProgress('error',{error:error instanceof Error?error.message:String(error)});
   resultNode.textContent = JSON.stringify({ status: 'failed', error: error instanceof Error ? (error.stack ?? error.message) : String(error), benchmarkResults });
   resultNode.dataset.status = 'failed';
-}
-
-function createConfigurations(profile) {
-  if (profile !== 'full') {
-    return [
-      { entityCount: 1_000, mirrorCount: 1, maxBounces: 1, viewCount: 1 },
-      { entityCount: 1_000, mirrorCount: 2, maxBounces: 3, viewCount: 4 },
-      { entityCount: 10_000, mirrorCount: 4, maxBounces: 5, viewCount: 1 },
-      { entityCount: 10_000, mirrorCount: 4, maxBounces: 8, viewCount: 4 },
-    ];
-  }
-  return [1_000, 10_000].flatMap(entityCount => [1, 4].flatMap(viewCount => (
-    [1, 2, 4].flatMap(mirrorCount => [1, 3, 5, 8].map(maxBounces => (
-      { entityCount, mirrorCount, maxBounces, viewCount }
-    )))
-  )));
 }
 
 async function runBenchmarkCase(configuration) {
@@ -105,6 +94,7 @@ async function runBenchmarkCase(configuration) {
       mirrorVisibilityCulling: false,
     });
     try {
+      reportProgress('pipeline-warmup');
       const pipelineWarmup = await warmRealRendererBenchmarkPipelines(state);
       const warmupFrames = [];
       for (let index = 0; index < caseWarmup; index++) {
@@ -115,6 +105,7 @@ async function runBenchmarkCase(configuration) {
         warmupFrames.push({ frame: index + 1, wallMs: performance.now() - startedAt,
           uploadBytes: metrics.uploadBytesPerFrame, uploadCalls: metrics.bufferUploadsPerFrame,
           bufferExpansions: metrics.bufferExpansions, lightUploads: metrics.pbrLightUniformUploadsPerFrame });
+        reportProgress('warmup',{frame:index+1,total:caseWarmup});
       }
       resetRealRendererBenchmarkMetrics(state);
       const durations = [];
@@ -122,6 +113,7 @@ async function runBenchmarkCase(configuration) {
         const startedAt = performance.now();
         await runRealRendererBenchmarkFrame(state);
         durations.push(performance.now() - startedAt);
+        if(index===0||(index+1)%10===0||index===caseSamples-1)reportProgress('samples',{frame:index+1,total:caseSamples});
       }
       const timing = summarize(durations);
       const metrics = getRealRendererBenchmarkMetrics(state);

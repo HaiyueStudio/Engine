@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableExtensions DisableDelayedExpansion
 cd /d "%~dp0.."
 where node.exe >nul 2>&1
 if errorlevel 1 (
@@ -7,7 +7,11 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-node.exe scripts\publication.mjs %*
+if /i "%~1"=="workflow" (
+  node.exe scripts\release-workflow.mjs %*
+) else (
+  node.exe scripts\publication.mjs %*
+)
 set "publication_exit=%errorlevel%"
 echo Publication controller exit code: %publication_exit%
 echo Keep this output. Acceptance does not mean registry visibility or hash verification.

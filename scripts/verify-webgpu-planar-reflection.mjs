@@ -1,3 +1,4 @@
+import {planarFixtureProtocol,validatePlanarProgress} from './release-workflow-planar-policy.mjs';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,23 +18,41 @@ import {
 import { shouldWriteFormalPerformanceEvidence } from './performance-evidence-policy.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const long = process.argv.includes('--long');
+const args=process.argv.slice(2),long=args.includes('--long');
+if(long)args.splice(args.indexOf('--long'),1);
+const take=flag=>{const i=args.indexOf(flag);if(i<0)return;const value=args[i+1];if(!value||value.startsWith('--'))throw Error('Missing '+flag);args.splice(i,2);return value;};
+const diagnosticOutput=take('--diagnostic-output'),protocolOnly=args.includes('--protocol');
+if(protocolOnly)args.splice(args.indexOf('--protocol'),1);
+if(args.length)throw Error('Unknown planar arguments: '+args.join(' '));
+const protocol=planarFixtureProtocol({mode:long?'full':'smoke',warmup:Math.max(3,Number(process.env.PLANAR_REFLECTION_WARMUP??3)),samples:Number(process.env.PLANAR_REFLECTION_SAMPLES??40)});
+if(protocolOnly){console.log(JSON.stringify(protocol,null,2));process.exit(0);}
+if(diagnosticOutput&&process.env.UPDATE_PLANAR_REFLECTION_BASELINE==='1')throw Error('Diagnostic output cannot update pixel baselines');
 const baselinePath = resolve(root, 'review/baselines/render-pixels-planar-reflection.json');
-const artifactPath = resolve(root, 'artifacts/webgpu/planar-reflection.json');
+const artifactPath = resolve(root, diagnosticOutput??'artifacts/webgpu/planar-reflection.json');
+if(diagnosticOutput&&!relative(root,artifactPath).replaceAll('\\','/').startsWith('artifacts/'))throw Error('Diagnostic output must stay inside repository artifacts');
 const performanceConfig = loadPerformanceBudgetConfig(root);
 const mode = long ? 'full' : 'smoke';
 const benchmarkRoot = process.env.WEBGPU_BENCHMARK_ROOT ? resolve(process.env.WEBGPU_BENCHMARK_ROOT) : root;
 const sourceFingerprint = createPerformanceSourceFingerprint(root, benchmarkRoot);
-const result = await runChromeWebGpuFixture({
-  root: benchmarkRoot,
-  fixture: 'scripts/webgpu-gate/planar-reflection-fixture.html',
-  query: {
-    mode,
-    warmup: process.env.PLANAR_REFLECTION_WARMUP ?? 3,
-    samples: process.env.PLANAR_REFLECTION_SAMPLES ?? 40,
-  },
-  timeoutMs: long ? 900_000 : 300_000,
-});
+const progress=[];
+let result;
+console.log('[planar-protocol] '+JSON.stringify(protocol));
+try {
+  result=await runChromeWebGpuFixture({root:benchmarkRoot,fixture:'scripts/webgpu-gate/planar-reflection-fixture.html',
+    query:{mode,warmup:protocol.warmup,samples:protocol.samples},timeoutMs:protocol.resultWaitTimeoutMs,
+    interact:async cdp=>{cdp.on('Runtime.consoleAPICalled',event=>{
+      const text=event.args?.[0]?.value;if(typeof text!=='string'||!text.startsWith('PLANAR_PROGRESS '))return;
+      try {const value=validatePlanarProgress(JSON.parse(text.slice(16)));if(progress.length<1024)progress.push(value);console.log('[planar-progress] '+JSON.stringify(value));}
+      catch(error){console.warn('[planar-progress-invalid] '+error.message);}
+    });},
+  });
+} catch(error){
+  const failure={schemaVersion:1,status:'failed',qualification:false,protocol,progress,lastProgress:progress.at(-1),sourceFingerprint,browserFailure:error.browserFailure,error:String(error.stack??error)};
+  const path=artifactPath.replace(/\.json$/,'')+'-failed-'+Date.now()+'.json';mkdirSync(dirname(path),{recursive:true});writeFileSync(path,JSON.stringify(failure,null,2)+'\n',{flag:'wx'});
+  console.error('[planar-failure] '+path);throw error;
+}
+result.executionDiagnostics={protocol,progress};
+if(diagnosticOutput){result.qualification=false;result.evidenceRole='diagnostic-only';}
 if (createPerformanceSourceFingerprint(root, benchmarkRoot) !== sourceFingerprint) {
   throw new Error('Performance executable inputs changed while the planar-reflection fixture was running; discard this evidence and retry.');
 }
@@ -74,8 +93,8 @@ if (process.env.UPDATE_PLANAR_REFLECTION_BASELINE === '1') {
 result.gate.status = !pixelBaselineFailure && (!enforcePerformanceBudget || performanceBudget.status === 'passed') ? 'passed' : 'failed';
 result.evidence = createPerformanceEvidence(root, selected, performanceBudget, result, sourceFingerprint);
 mkdirSync(dirname(artifactPath), { recursive: true });
-writeFileSync(artifactPath, `${JSON.stringify(result, null, 2)}\n`);
-if (shouldWriteFormalPerformanceEvidence(mode)) {
+writeFileSync(artifactPath, `${JSON.stringify(result, null, 2)}\n`,{flag:diagnosticOutput?'wx':'w'});
+if (!diagnosticOutput && shouldWriteFormalPerformanceEvidence(mode)) {
   mkdirSync(dirname(evidencePath), { recursive: true });
   writeFileSync(evidencePath, `${JSON.stringify(result, null, 2)}\n`);
 }

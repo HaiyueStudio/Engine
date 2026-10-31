@@ -1,3 +1,4 @@
+import {tarCommand} from '../npm-process.mjs';
 import {mkdirSync,readFileSync} from 'node:fs';
 import {resolve,relative,isAbsolute} from 'node:path';
 import {createHash} from 'node:crypto';
@@ -13,7 +14,7 @@ export function stageQualifiedPackages(root,reportPath,output,{baselineExtension
   for(const entry of report.packages){
     const source=entry.workspace==='extensions'&&baselineExtensions?resolve(baselineExtensions):resolve(root,entry.artifact),bytes=readFileSync(source),hash=sha256(bytes);
     if(!(entry.workspace==='extensions'&&baselineExtensions)&&hash!==entry.sha256)throw Error('Qualified tarball changed: '+entry.name);
-    const directory=resolve(packages,entry.workspace);mkdirSync(directory,{recursive:true});execFileSync('tar.exe',['-xf',source,'--strip-components=1','-C',directory],{windowsHide:true});
+    const directory=resolve(packages,entry.workspace);mkdirSync(directory,{recursive:true});execFileSync(tarCommand(),['-xf',source,'--strip-components=1','-C',directory],{windowsHide:true});
     const pkg=JSON.parse(readFileSync(resolve(directory,'package.json'),'utf8'));
     if(pkg.name!==entry.name||pkg.version!==entry.version)throw Error('Extracted package identity changed.');
     for(const [key,value]of Object.entries(pkg.exports??{})){const file=typeof value==='string'?value:value.import;if(file?.endsWith('.js'))imports[pkg.name+(key==='.'?'':key.slice(1))]='/g12-packed/'+entry.workspace+'/'+file.replace(/^\.\//,'');}

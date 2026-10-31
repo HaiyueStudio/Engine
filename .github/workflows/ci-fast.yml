@@ -4,10 +4,45 @@ on:
   push:
     branches: [master]
   workflow_dispatch:
+    inputs:
+      workflow_only:
+        description: Run only the Windows/Linux no-publication controller validation
+        type: boolean
+        required: false
+        default: false
 permissions:
   contents: read
 jobs:
+  workflow-no-publication:
+    name: Workflow no-publication (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version-file: .node-version
+      # These controllers and tests use Node built-ins only; no duplicate dependency tree.
+      - run: node --test "scripts/*publication*.test.mjs" "scripts/*release-workflow*.test.mjs"
+      - run: node scripts/release-workflow.mjs plan --profile diagnostic --output artifacts/release/workflow-contract
+      - run: node scripts/release-workflow.mjs run --run artifacts/release/workflow-contract/run.json --no-publish
+      - name: Verify resumable completed stages without repeating them
+        run: node scripts/release-workflow.mjs run --run artifacts/release/workflow-contract/run.json --no-publish
+      - run: node scripts/release-workflow.mjs status --run artifacts/release/workflow-contract/run.json
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        if: always()
+        with:
+          name: workflow-no-publication-${{ matrix.os }}
+          path: artifacts/release/workflow-contract/
+          if-no-files-found: warn
   fast:
+    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.workflow_only }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:

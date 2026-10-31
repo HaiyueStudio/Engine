@@ -34,3 +34,13 @@ test('tampered package bytes stop plan creation before any network request',()=>
   const f=fixture();try{writeFileSync(f.source.packages[0].artifact,'changed');assert.notEqual(f.run().status,0);assert.equal(existsSync(f.plan),false);}
   finally{rmSync(f.directory,{recursive:true,force:true});}
 });
+
+test('G11 per-package plan and local preflight execute without a network or submission',()=>{
+  const f=fixture();try{
+    for(const p of f.source.packages)p.version=p.name==='@haiyue/animation-spec'?'0.2.2':'0.2.3';f.save();
+    const q=JSON.parse(readFileSync(f.qualification));Object.assign(q,{goal:'g11-integration-candidate',fullG11Complete:true,targetVersion:'0.2.3'});writeFileSync(f.qualification,JSON.stringify(q));
+    const result=f.run();assert.equal(result.status,0,result.stderr);const plan=JSON.parse(readFileSync(f.plan));assert.equal(plan.schemaVersion,2);assert.equal(plan.version,'0.2.3');
+    const journal=resolve(f.directory,'journal.json');const preflight=spawnSync(process.execPath,['scripts/publication.mjs','preflight','--plan',f.plan,'--journal',journal],{cwd:root,encoding:'utf8'});
+    assert.equal(preflight.status,0,preflight.stderr);const state=JSON.parse(preflight.stdout);assert.equal(state.networkUsed,false);assert.equal(state.submitted,false);assert.equal(existsSync(journal),false);
+  }finally{rmSync(f.directory,{recursive:true,force:true});}
+});
