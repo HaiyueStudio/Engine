@@ -13,6 +13,8 @@
 
 ## 包入口
 
+- [复合 GUI 与标签页图标](./gui-controls.md)
+
 - [`@haiyue/engine`](./engine.md)
 - [`@haiyue/engine/geometry`](./geometry.md)
 - [`@haiyue/extensions`](./extensions.md)
@@ -48,3 +50,4 @@ npm run api:check
 - [分享内容](share-content.md)：战绩卡、截图编码与挑战链接。
 
 - [Achievements (development candidate)](achievements.md): event rules, durable progress and optional GPU GUI.
+- [Game audio (development candidate)](audio.md): original mixer, profiles, fades and bounded 2D emitters.

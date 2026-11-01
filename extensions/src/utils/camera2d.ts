@@ -22,10 +22,15 @@ export function compute2DViewProjection(
   scratch: Camera2DScratch = createCamera2DScratch(),
 ): Float32Array {
   camera.resize(engine.displayWidth, engine.displayHeight);
-  const transform = cameraEntity.getComponent(Transform3D);
-  if (!transform) return camera.projectionMatrix;
-  transform.updateWorldMatrix();
-  const viewMatrix = mat4.inverse(transform.worldMatrix, scratch.viewMatrix) as Float32Array;
+  const transform = cameraEntity.getComponent(Transform3D) ?? cameraEntity.getComponent(Transform2D);
+  if (!transform && !cameraEntity.parent) return camera.projectionMatrix;
+  const world = cameraEntity.world;
+  if (world) {
+    if (world.frameData.transforms.phaseRevision === 0) world.frameData.transforms.beginPhase(world);
+    world.frameData.transforms.flushDirtyWorldVersions();
+  }
+  const matrix = world ? world.frameData.getWorldMatrix2D(cameraEntity) : get2DEntityWorldMatrix(cameraEntity);
+  const viewMatrix = mat4.inverse(matrix, scratch.viewMatrix) as Float32Array;
   return mat4.multiply(camera.projectionMatrix, viewMatrix, scratch.viewProjMatrix) as Float32Array;
 }
 

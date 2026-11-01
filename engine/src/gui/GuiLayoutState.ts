@@ -1,8 +1,10 @@
 import type {GuiElement} from './components/GuiElement';
 import {GuiDirtyFlags, type GuiRect} from './GuiTypes';
 
-type Sink = (element: GuiElement, flags: GuiDirtyFlags, reason?: 'resource' | 'animation') => void;
+type Sink = (element: GuiElement, flags: GuiDirtyFlags, reason?: 'resource' | 'animation',kind?:number,structure?:number) => void;
+type StructureSink=(parent:GuiElement,child:GuiElement,added:boolean,version:number)=>void;
 const sinks = new WeakMap<GuiElement, Sink>();
+const structures=new WeakMap<GuiElement,StructureSink>(),structureVersions=new WeakMap<GuiElement,number>();
 const disposals = new WeakMap<GuiElement, Set<() => void>>();
 export function observeGuiRootDisposal(root: GuiElement, listener: () => void): () => void {
   let listeners = disposals.get(root); if (!listeners) {listeners = new Set(); disposals.set(root, listeners);}
@@ -25,17 +27,24 @@ const scrollOffsets = new WeakMap<GuiElement, () => number>();
 const scrollAxes = new WeakMap<GuiElement, () => 'vertical' | 'horizontal'>();
 const motionSnapshots = new WeakMap<GuiElement, () => () => void>();
 
-export function observeGuiTree(root: GuiElement, sink: Sink, suspend: () => void): () => void {
+export function observeGuiTree(root: GuiElement, sink: Sink, suspend: () => void,structure?:StructureSink): () => void {
   sinks.set(root, sink);
   suspensions.set(root, suspend);
-  return () => {if (sinks.get(root) === sink) {sinks.delete(root); suspensions.delete(root);}};
+  if(structure)structures.set(root,structure);
+  return () => {if (sinks.get(root) === sink) {sinks.delete(root); suspensions.delete(root);structures.delete(root);}};
+}
+export function guiStructureVersion(element:GuiElement):number {return structureVersions.get(element)??0;}
+export function notifyGuiStructure(parent:GuiElement,child:GuiElement,added:boolean):number {
+  const version=guiStructureVersion(parent)+1;structureVersions.set(parent,version);
+  for(let root:GuiElement|null=parent;root;root=root.parent)structures.get(root)?.(parent,child,added,version);
+  return version;
 }
 export function suspendGuiLayout(root: GuiElement): void {suspensions.get(root)?.();}
 export function notifyGuiActivity(element: GuiElement): void {
   for (let parent: GuiElement | null = element; parent; parent = parent.parent) sinks.get(parent)?.(element, GuiDirtyFlags.None, 'animation');
 }
-export function notifyGuiInvalidation(element: GuiElement, flags: GuiDirtyFlags): void {
-  for (let parent: GuiElement | null = element; parent; parent = parent.parent) sinks.get(parent)?.(element, flags);
+export function notifyGuiInvalidation(element: GuiElement, flags: GuiDirtyFlags,kind=0,structure?:number): void {
+  for (let parent: GuiElement | null = element; parent; parent = parent.parent) sinks.get(parent)?.(element, flags,undefined,kind,structure);
 }
 export function assignedGuiRect(element: GuiElement): GuiRect | undefined {
   const rect = assignments.get(element) ?? retained.get(element);

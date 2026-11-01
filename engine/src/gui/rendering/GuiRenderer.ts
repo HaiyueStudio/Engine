@@ -47,6 +47,8 @@ import {guiContentBox} from '../GuiContent';
 import {applyGuiOpacity} from './GuiOpacity';
 import {guiImageSourceReady} from './GuiImageSources';
 import {isGuiOverlayRoot} from './GuiOverlayRoots';
+import {GuiPaintCache} from './GuiPaintCache';
+import {guiDirtyState} from '../GuiDirtyState';
 
 type GuiRendererFontOptions = GuiAtlasOptions;
 
@@ -55,6 +57,7 @@ type GuiElementRenderer<T extends GuiElement = GuiElement> = (element: T, theme:
 
 interface FontBatches {textBatch: GuiTextBatch; popupTextBatch: GuiTextBatch; modalTextBatch: GuiTextBatch;}
 interface GuiRootRenderCache extends FontBatches {
+  paint:GuiPaintCache|null;
   extraFonts: Map<BitmapFontData, FontBatches>;
   usedFonts: Set<BitmapFontData>;
   plan: GuiPaintPlan;
@@ -107,6 +110,7 @@ export class GuiRenderer {
   private currentModalTextBatch = this.textBatch;
   private currentModalImageBatch = this.imageBatch;
   private readonly fontOptions: GuiRendererFontOptions;
+  private capturePaint:GuiPaintCache|null=null;
 
   private readonly builtinElementRenderers=new WeakMap<object,GuiElementRenderer>();
   private readonly controlPaint=this.createControlPaintContext();
@@ -289,6 +293,7 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
     let cache = this.rootCaches.get(root);
     if (cache) return cache;
     cache = {
+      paint:null,
       extraFonts: new Map(), usedFonts: new Set(), plan: new GuiPaintPlan(), ordered: false,
       font: this.prepared ? this.fontOwner.forRoot(root) : this.defaultFont,
       batch: new GuiBatch(),
@@ -308,6 +313,20 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
   private rebuildRoot(root: GuiRoot, cache: GuiRootRenderCache): void {
     this.resolvedStyles.clear();
     this.currentRoot = root; this.currentCache = cache; this.currentLayer = 0;
+    try {
+    let retained:GuiPaintCache|null=null;
+    const dense=guiDirtyState(root.root)?.dense??false;
+    if(!dense&&!this.needsRebuild&&!this.elementRenderers.size&&!guiThemeTreeActive(root.root)&&cache.paint){
+      this.currentFont=cache.font;
+      const patched=cache.paint.patch(cache.font,cache.batch,cache.textBatch,(element,theme,shapes,texts)=>{
+        this.currentCache=null;this.currentBatch=shapes;this.currentTextBatch=texts;
+        try{this.collectElement(element,theme);}finally{this.currentCache=cache;}
+      });
+      if(patched==='dense')retained=cache.paint;
+      else if(patched){if(patched.shapes)cache.batch.rebuild();if(cache.font)cache.textBatch.rebuild(cache.font);return;}
+    }
+    cache.paint=null;
+    this.capturePaint=retained??(!dense&&!this.elementRenderers.size&&!guiThemeTreeActive(root.root)?GuiPaintCache.capture(root,cache.font):null);
     cache.ordered = guiThemeTreeActive(root.root); cache.plan.clear(); cache.usedFonts.clear();
     for (const batches of cache.extraFonts.values()) for (const batch of [batches.textBatch, batches.popupTextBatch, batches.modalTextBatch]) batch.clear();
     this.currentFont = cache.font;
@@ -345,13 +364,20 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
       } else {batches.textBatch.rebuild(font); batches.popupTextBatch.rebuild(font); batches.modalTextBatch.rebuild(font);}
     }
     if (cache.ordered) cache.plan.compile();
-    this.resetCurrentBatches();
-    this.currentFont = null;
-    this.resolvedStyles.clear();
-    this.currentRoot = null; this.currentCache = null;
+    this.capturePaint?.complete();
+    cache.paint=this.capturePaint;
+    } catch(error){cache.paint=null;throw error;
+    } finally {
+      this.capturePaint=null;this.currentClip=undefined;
+      this.resetCurrentBatches();
+      this.currentFont = null;
+      this.resolvedStyles.clear();
+      this.currentRoot = null; this.currentCache = null;
+    }
   }
 
   private releaseRootCache(cache: GuiRootRenderCache): void {
+    cache.paint=null;
     for (const batches of cache.extraFonts.values()) for (const batch of [batches.textBatch, batches.popupTextBatch, batches.modalTextBatch]) this.textRenderer.releaseBatch(batch);
     cache.extraFonts.clear(); cache.usedFonts.clear(); cache.plan.clear();
     this.shapeRenderer.releaseBatch(cache.batch);
@@ -391,11 +417,16 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
   private collectElement(element: GuiElement, theme: GuiTheme): void {
     if (!element.visible || isGuiLayoutHidden(element)) return;
     const skin = this.styleFor(element);
-    theme = {...theme, fontFamily: skin.fontFamily ?? theme.fontFamily, fontSize: skin.fontSize ?? theme.fontSize,
-      colors: {...theme.colors, ...skin.palette, ...(skin.color !== undefined ? {text: skin.color} : {})}};
+    if(this.elementRenderers.size||element.getResolvedStyle!==GuiElement.prototype.getResolvedStyle||skin.fontFamily!==undefined||skin.fontSize!==undefined||skin.palette!==undefined||skin.color!==undefined)
+      theme = {...theme, fontFamily: skin.fontFamily ?? theme.fontFamily, fontSize: skin.fontSize ?? theme.fontSize,
+        colors: {...theme.colors, ...skin.palette, ...(skin.color !== undefined ? {text: skin.color} : {})}};
     const previousFont = this.currentFont, previousText = this.currentTextBatch, previousPopupText = this.currentPopupTextBatch, previousModalText = this.currentModalTextBatch;
-    if (this.currentRoot && this.currentCache && this.prepared) {
-      const font = this.fontOwner.forRoot(this.currentRoot, element), cache = this.currentCache;
+    const prototype=Object.getPrototypeOf(element) as object;
+    const noText=!this.elementRenderers.size&&element.getResolvedStyle===GuiElement.prototype.getResolvedStyle&&(prototype===GuiElement.prototype||guiControlPrototype(prototype)==='GuiProgress'&&Object.getOwnPropertyDescriptor(element,'showText')?.value===false);
+    if (this.currentRoot && this.currentCache && this.prepared&&!noText) {
+      const font = element.getResolvedStyle===GuiElement.prototype.getResolvedStyle
+        ? this.fontOwner.forFamily(this.currentRoot,skin.fontFamily??this.currentRoot.theme.fontFamily)
+        : this.fontOwner.forRoot(this.currentRoot,element), cache = this.currentCache;
       cache.usedFonts.add(font); this.currentFont = font;
       let batches: FontBatches = cache;
       if (font !== cache.font) {
@@ -453,6 +484,12 @@ private addSlider(slider: GuiSlider, theme: GuiTheme): void {guiControlPainterFo
   }
 
   private addElementShapes(element: GuiElement, theme: GuiTheme): void {
+    const shapes=this.currentBatch.commands.length,texts=this.currentTextBatch.commands.length;
+    this.paintElementShapes(element,theme);
+    this.capturePaint?.record(element,shapes,this.currentBatch.commands.length-shapes,texts,this.currentTextBatch.commands.length-texts,theme);
+  }
+
+  private paintElementShapes(element: GuiElement, theme: GuiTheme): void {
     if(isGuiExternallyPainted(element))return;
     if (isGuiControl<GuiTooltip>(element, 'GuiTooltip') && (!element.active || !element.content)) return;
     const skin = this.styleFor(element);

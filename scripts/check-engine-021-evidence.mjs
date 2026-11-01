@@ -102,11 +102,12 @@ for (const [kind, filename] of Object.entries({ common: 'deferred-reference-runt
 validateEngine021CompiledEvidence(reports, builds);
 if (git(['rev-parse', 'HEAD']) !== current.revision || git(['status', '--porcelain'])) throw Error('Candidate changed during evidence audit');
 const policyFiles = ['scripts/engine-021-evidence-policy.mjs', 'scripts/check-engine-021-evidence.mjs', 'scripts/g13-stage9-reuse-policy.mjs'];
+if(targetVersion==='0.2.3')policyFiles.push('config/gameplay-023-contract.json','docs/for-ai/adr/0139-engine-023-gameplay-contracts.md');
 const stage9Reuse=targetVersion==='0.2.2'&&Object.values(current.reuseChanges).some(paths=>paths.some(p=>Object.hasOwn(G13_STAGE9_REUSE.files,p)));
 
 const evidence = { ...result, schemaVersion: 2, contractId: 'engine-021-evidence-v2', targetVersion, assessedAt: new Date().toISOString(),
   acceptanceRevision: current.revision, dirty: false, manifest: manifestPath, manifestSha256: sha256(manifestBytes),
-  policy: { adr: ['0126', '0127', ...(stage9Reuse?['0138']:[]), ...(targetVersion === '0.2.2' && result.assessments.rooms.acceptanceDecision ? ['0137'] : []), ...(manifest.reuseDecision ? ['0129'] : []), ...([ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision) ? ['0130'] : []), ...(manifest.reuseDecision === ENGINE_021_DOWNLOAD_REUSE.decision ? ['0131'] : [])], files: await Promise.all(policyFiles.map(async path => ({ path, sha256: sha256(await readFile(resolve(root, path))) }))) },
+  policy: { adr: ['0126', '0127', ...(stage9Reuse?['0138']:[]), ...(['0.2.2','0.2.3'].includes(targetVersion) && result.assessments.rooms.acceptanceDecision ? ['0137'] : []), ...(targetVersion==='0.2.3'?['0139']:[]), ...(manifest.reuseDecision ? ['0129'] : []), ...([ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision) ? ['0130'] : []), ...(manifest.reuseDecision === ENGINE_021_DOWNLOAD_REUSE.decision ? ['0131'] : [])], files: await Promise.all(policyFiles.map(async path => ({ path, sha256: sha256(await readFile(resolve(root, path))) }))) },
   ...(manifest.reuseDecision ? { reuseDecision: manifest.reuseDecision, readbackFixFiles: current.readbackFixFiles, ...([ENGINE_021_PBR_REUSE.decision, ENGINE_021_DOWNLOAD_REUSE.decision].includes(manifest.reuseDecision) ? { pbrFixFiles: current.pbrFixFiles } : {}), ...(manifest.reuseDecision === ENGINE_021_DOWNLOAD_REUSE.decision ? { downloadFixFiles: current.downloadFixFiles } : {}) } : {}),
   bindings: Object.fromEntries(ENGINE_021_EVIDENCE_KINDS.map(kind => [kind, { ...manifest.reports[kind],
     captureRevision: reports[kind].revision, acceptanceRevision: current.revision, originalStatus: reports[kind].status,

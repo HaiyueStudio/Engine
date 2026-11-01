@@ -1,6 +1,6 @@
 {
   "name": "@haiyue/extensions",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": false,
   "description": "Stable optional HaiYue runtimes for 2D/3D animation, glTF, Spine, tilemaps, text, tweening, and grids.",
   "license": "MIT",
@@ -139,6 +139,34 @@
     "./gui-layout": {
       "types": "./dist/gui-layout.d.ts",
       "import": "./dist/gui-layout.js"
+    },
+    "./scene-flow": {
+      "types": "./dist/scene-flow.d.ts",
+      "import": "./dist/scene-flow.js"
+    },
+    "./character2d": {
+      "types": "./dist/character2d.d.ts",
+      "import": "./dist/character2d.js"
+    },
+    "./camera2d": {
+      "types": "./dist/camera2d.d.ts",
+      "import": "./dist/camera2d.js"
+    },
+    "./input-actions": {
+      "types": "./dist/input-actions.d.ts",
+      "import": "./dist/input-actions.js"
+    },
+    "./gui-collections": {
+      "types": "./dist/gui-collections.d.ts",
+      "import": "./dist/gui-collections.js"
+    },
+    "./audio": {
+      "types": "./dist/audio.d.ts",
+      "import": "./dist/audio.js"
+    },
+    "./gui-controls": {
+      "types": "./dist/gui-controls.d.ts",
+      "import": "./dist/gui-controls.js"
     }
   },
   "scripts": {
@@ -156,11 +184,11 @@
   },
   "peerDependencies": {
     "@haiyue/animation-spec": ">=0.2.2 <0.3.0",
-    "@haiyue/engine": ">=0.2.2 <0.3.0"
+    "@haiyue/engine": ">=0.2.3 <0.3.0"
   },
   "devDependencies": {
     "@haiyue/animation-spec": "0.2.2",
-    "@haiyue/engine": "0.2.2",
+    "@haiyue/engine": "0.2.3",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-typescript": "^11.0.0",
     "@types/opentype.js": "^1.3.8",

@@ -15,9 +15,9 @@ export function setContainerStyle(element: GuiElement, style: GuiLayoutStyle): v
   presets.set(element, captureGuiLayoutStyle(style));
 }
 export function frameStyle(element: GuiElement): GuiLayoutStyle | undefined {return frames.get(element);}
-export function ownContentFrame(element: GuiElement): () => void {
+export function ownContentFrame(element: GuiElement, configuration?: GuiLayoutStyle): () => void {
   if (frames.has(element)) throw new Error('GUI content already belongs to a composite frame.');
-  const style = Object.freeze({width: 'auto', height: 'auto', grow: 1, basis: 0, minWidth: 0, minHeight: 0} as const);
+  const style = captureGuiLayoutStyle(configuration ?? {width: 'auto', height: 'auto', grow: 1, basis: 0, minWidth: 0, minHeight: 0});
   frames.set(element, style);
   return () => {if (frames.get(element) === style) frames.delete(element);};
 }

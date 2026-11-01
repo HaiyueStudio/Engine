@@ -88,6 +88,7 @@ export class GuiScrollView extends GuiElement {
     const value = Math.max(0, Math.min(this.maxScrollOffset, Number.isFinite(y) ? y : 0));
     if (this.offset === value) return;
     this.offset = value;
+    this.emit('gui:viewport');
     this.layoutContent();
     this.markDirty(GuiDirtyFlags.Layout | GuiDirtyFlags.Visual | GuiDirtyFlags.Input);
   }
@@ -116,10 +117,12 @@ export class GuiScrollView extends GuiElement {
     if (Math.abs(this.velocity) < 12 || next <= 0 || next >= this.maxScrollOffset) this.stopInertia();
   }
   override layout(parentRect: GuiRect): void {
+    const previous = {...this.rect}, offset = this.offset;
     super.layout(parentRect);
     const clamped = Math.max(0, Math.min(this.offset, this.maxScrollOffset));
     if (clamped !== this.offset) this.stopInertia();
     this.offset = clamped;
+    if (offset !== clamped || previous.x !== this.rect.x || previous.y !== this.rect.y || previous.width !== this.rect.width || previous.height !== this.rect.height) this.emit('gui:viewport');
     this.layoutContent();
   }
   private layoutContent(): void {

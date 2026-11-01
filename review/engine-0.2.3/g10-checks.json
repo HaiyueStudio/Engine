@@ -1,0 +1,905 @@
+{
+  "schemaVersion": 1,
+  "goal": "g10-gui-composite-controls",
+  "goalStatus": "complete",
+  "generatedAt": "2026-11-01T04:57:13.294Z",
+  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
+  "dirty": true,
+  "runtimeFeaturesImplemented": true,
+  "releaseQualified": false,
+  "publicationPerformed": false,
+  "performanceBaselinePromoted": false,
+  "summary": {
+    "workspaceTestTotals": [
+      138,
+      1348,
+      127,
+      992,
+      7
+    ],
+    "workspaceTests": 2612,
+    "repositoryPhases": 14,
+    "featurePhases": 13,
+    "builtExampleTargets": 111,
+    "independentSemanticComparisons": 92,
+    "regionalComparisons": 80,
+    "originalRegionalComparisons": 12,
+    "actualApplicationChecks": 9,
+    "independentConsumers": 51,
+    "historicalRecords": 601,
+    "historicalSourceArchives": 7,
+    "sourceSnapshotFiles": 63
+  },
+  "requirements": [
+    {
+      "id": "shared-icon-geometry-and-original-tabs",
+      "status": "passed",
+      "evidence": "engine/test/gui-content-position.test.mjs",
+      "conclusion": "1000 seeded left/no-icon layouts match the frozen legacy geometry exactly. Right icons, theme/local metric invalidation, source readiness/replacement/release and resource-free v1 serialization reuse original owners. Original Tabs identity, state, close veto, hidden content and borrowed lifetimes remain; named header merges preserve omitted fields and explicit icon:undefined clears."
+    },
+    {
+      "id": "breadcrumb-stable-path-and-original-popup",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g10/feature-validation.json",
+      "conclusion": "Stable unique keys, last-enabled/default or explicit-null current, disabled/current no navigation, separators, finite wrapping, dynamic path and menu callbacks pass. Menu uses original modal, buttons, scrolling, focus trap and restoration."
+    },
+    {
+      "id": "badge-format-decoration-and-local-invalidation",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g10/feature-validation.json",
+      "conclusion": "Zero/showZero/overflow/text/dot/five statuses/four corners/offset/standalone validate atomically. Decoration remains outside borrowed content flow and ignores hit/focus; unchanged visible values add no invalidation. No continuous processing timer."
+    },
+    {
+      "id": "collapse-retained-content-and-input-handoff",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g10/application-final/result.json",
+      "conclusion": "Multi/accordion/all-closed, disabled programmatic vs user rules, stable reorder/content swap, nested extra no-toggle, icon/header/right indicator and callback-once pass. Original domain handles before-hide focus/IME. Original content minimum and allocated nested scroll viewport preserve positive independent panel geometry and hit testing. Content stays borrowed and retained."
+    },
+    {
+      "id": "independent-semantics-and-region-cache",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g10/feature-validation.json",
+      "conclusion": "All four DPR/MSAA combinations pass independent original-primitive model projections and separate retained-vs-direct full-frame comparisons. Semantic Collapse reference uses independent explicit expected heights/positions. New tolerance stays 1/255; old G04 tolerance stays 2/255. Static work is zero; original cache fallback is explicit and bounded."
+    },
+    {
+      "id": "actual-installed-consumption-and-lifetimes",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g10/final-candidate/candidate.json",
+      "conclusion": "Canonical deterministic packages installed offline with every extracted file hash, strict declarations and frozen type compatibility; exact three gui-controls runtime values and original class identity. Actual example trusted pointer/key/text flow retains edited text. Browser responder, listeners, theme bindings, row leases, GPU buffers/textures/querySets/estimated bytes all release."
+    },
+    {
+      "id": "physical-and-final-production",
+      "status": "handed-to-g11-device-owner",
+      "evidence": "g10-windows-physical-keyboard-ime-gamepad",
+      "conclusion": "Physical Windows/Mac/iPhone and integrated formal production qualification remain explicitly owned by G11; no automated trace is relabelled as physical evidence."
+    }
+  ],
+  "publicEntries": {
+    "engineGui": {
+      "exports": 107,
+      "newTypes": [
+        "GuiIconPosition"
+      ]
+    },
+    "guiLayout": {
+      "exports": 12,
+      "newTypes": [
+        "GuiTabHeaderOptions"
+      ],
+      "originalClassIdentity": true
+    },
+    "guiControls": {
+      "exports": 12,
+      "runtimeValues": [
+        "GuiBreadcrumb",
+        "GuiBadge",
+        "GuiCollapse"
+      ],
+      "newTypes": 9
+    },
+    "engineRootExportsUnchanged": 30
+  },
+  "ownership": {
+    "geometry": "Original GuiContent/GuiMeasure/theme/image resources own all metrics and pixels. Shared panel-content only validates configuration.",
+    "layout": "Original layout binding hands explicitly configured nested GuiScrollView its parent-allocated viewport, then original content solver computes scroll extent. Original manual-coordinate scroll children stay manual; no second solver.",
+    "input": "Original GuiSystem/input domain/focus/GuiModal/text responder/gamepad sampler; no new DOM GUI, listener owner or input sampler.",
+    "content": "Facade disposal detaches borrowed content and callbacks. Nested controllers, assets and row pools retain their own owners. No extra renderer, font decoder, timer or shader program."
+  },
+  "matrix": [
+    {
+      "mode": "semantic",
+      "dpr": 1,
+      "msaa": 1,
+      "cases": 23,
+      "fullFrameChannelsCompared": 72128000,
+      "maximumChannelDifference": 0,
+      "staticWork": null,
+      "regionFallbacks": [],
+      "finalGpu": {
+        "buffers": 0,
+        "textures": 0,
+        "querySets": 0,
+        "estimatedBytes": 0
+      },
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g10/semantic-final-1-1/result.json",
+        "bytes": 47601,
+        "sha256": "71b686751b3fd316d1fd14b44fec6e58a5948c941404391b4f71d1b8c7b7eeea"
+      }
+    },
+    {
+      "mode": "semantic",
+      "dpr": 1,
+      "msaa": 4,
+      "cases": 23,
+      "fullFrameChannelsCompared": 72128000,
+      "maximumChannelDifference": 1,
+      "staticWork": null,
+      "regionFallbacks": [],
+      "finalGpu": {
+        "buffers": 0,
+        "textures": 0,
+        "querySets": 0,
+        "estimatedBytes": 0
+      },
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g10/semantic-final-1-4/result.json",
+        "bytes": 47587,
+        "sha256": "536fbe42eeca84edd450d220f3951d4750ea7dc9c1f116a238637c4fd08daff7"
+      }
+    },
+    {
+      "mode": "semantic",
+      "dpr": 2,
+      "msaa": 1,
+      "cases": 23,
+      "fullFrameChannelsCompared": 288512000,
+      "maximumChannelDifference": 0,
+      "staticWork": null,
+      "regionFallbacks": [],
+      "finalGpu": {
+        "buffers": 0,
+        "textures": 0,
+        "querySets": 0,
+        "estimatedBytes": 0
+      },
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g10/semantic-final-2-1/result.json",
+        "bytes": 47619,
+        "sha256": "6dfdc2d236278da559deb74e2115b6accbaed8739b55c20803f6255e36b39933"
+      }
+    },
+    {
+      "mode": "semantic",
+      "dpr": 2,
+      "msaa": 4,
+      "cases": 23,
+      "fullFrameChannelsCompared": 288512000,
+      "maximumChannelDifference": 0,
+      "staticWork": null,
+      "regionFallbacks": [],
+      "finalGpu": {
+        "buffers": 0,
+        "textures": 0,
+        "querySets": 0,
+        "estimatedBytes": 0
+      },
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g10/semantic-final-2-4/result.json",
+        "bytes": 47616,
+        "sha256": "a829a826a44b54cf52ee7eb798d3cbf9470f21659d9c51bf8db479afab82b16a"
+      }
+    },
+    {
+      "mode": "cache",
+      "dpr": 1,
+      "msaa": 1,
+      "cases": 20,
+      "fullFrameChannelsCompared": 62720000,
+      "maximumChannelDifference": 0,
+      "staticWork": {
+        "layouts": 0,
+        "measurements": 0,
+        "mainRecords": 0,
+        "staticRecords": 0,
+        "guiUploads": 0
+      },
+      "regionFallbacks": [],
+      "finalGpu": {
+        "buffers": 0,
+        "textures": 0,
+        "querySets": 0,
+        "estimatedBytes": 0
+      },
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g10/cache-final-1-1/result.json",
+        "bytes": 82553,
+        "sha256": "daadb92c5a5247e4e178f25fbf40070ebcd92b263ed8478932fdc4d75325ee20"
+      }
+    },
+    {
+      "mode": "cache",
+      "dpr": 1,
+      "msaa": 4,
+      "cases": 20,
+      "fullFrameChannelsCompared": 62720000,
+      "maximumChannelDifference": 0,
+      "staticWork": {
+        "layouts": 0,
+        "measurements": 0,
+        "mainRecords": 0,
+        "staticRecords": 0,
+        "guiUploads": 0
+      },
+      "regionFallbacks": [],
+      "finalGpu": {
+        "buffers": 0,
+        "textures": 0,
+        "querySets": 0,
+        "estimatedBytes": 0
+      },
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g10/cache-final-1-4/result.json",
+        "bytes": 82612,
+        "sha256": "d5ecfd37e98284bf915a6ffdae01674293e3dcb08811feaf44a967318c82db97"
+      }
+    },
+    {
+      "mode": "cache",
+      "dpr": 2,
+      "msaa": 1,
+      "cases": 20,
+      "fullFrameChannelsCompared": 250880000,
+      "maximumChannelDifference": 0,
+      "staticWork": {
+        "layouts": 0,
+        "measurements": 0,
+        "mainRecords": 0,
+        "staticRecords": 0,
+        "guiUploads": 0
+      },
+      "regionFallbacks": [],
+      "finalGpu": {
+        "buffers": 0,
+        "textures": 0,
+        "querySets": 0,
+        "estimatedBytes": 0
+      },
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g10/cache-final-2-1/result.json",
+        "bytes": 82656,
+        "sha256": "534c62c5dac9cde6627524468cdea8904954f5757759bb37925d2cf453e421fa"
+      }
+    },
+    {
+      "mode": "cache",
+      "dpr": 2,
+      "msaa": 4,
+      "cases": 20,
+      "fullFrameChannelsCompared": 250880000,
+      "maximumChannelDifference": 0,
+      "staticWork": {
+        "layouts": 0,
+        "measurements": 0,
+        "mainRecords": 0,
+        "staticRecords": 0,
+        "guiUploads": 0
+      },
+      "regionFallbacks": [
+        "controls:color-bytes"
+      ],
+      "finalGpu": {
+        "buffers": 0,
+        "textures": 0,
+        "querySets": 0,
+        "estimatedBytes": 0
+      },
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g10/cache-final-2-4/result.json",
+        "bytes": 83662,
+        "sha256": "bd135144549ccd478fc29fc76e071a86bd8cc47557ae16fd36b513d45e9e12e3"
+      }
+    }
+  ],
+  "capacities": [
+    {
+      "id": "extensions-gui-controls",
+      "previousMaximum": null,
+      "reviewedGzipBytes": 25330,
+      "measuredGzipBytes": 26200,
+      "maximum": 29200,
+      "remainingBytes": 3000,
+      "modules": [
+        "@haiyue/engine/dist/chunks/BuiltinRenderShader-SAzVb7-4.js",
+        "@haiyue/engine/dist/chunks/Component-BKpB7Z8-.js",
+        "@haiyue/engine/dist/chunks/EngineError-DZgELhuK.js",
+        "@haiyue/engine/dist/chunks/Global-Ny7k6KJK.js",
+        "@haiyue/engine/dist/chunks/GuiSerialization-BFIwvZa9.js",
+        "@haiyue/engine/dist/chunks/GuiSystem-BsjxefgZ.js",
+        "@haiyue/engine/dist/chunks/arrayAccess-BQLJ0IHW.js",
+        "@haiyue/engine/dist/chunks/text-B2iBQab9.js",
+        "@haiyue/extensions/dist/chunks/panel-state-01cukirk.js",
+        "@haiyue/extensions/dist/chunks/types-iWiNEB4s.js",
+        "@haiyue/extensions/dist/gui-controls.js",
+        "fixture/extensions-gui-controls.mjs"
+      ]
+    },
+    {
+      "id": "extensions-gui-layout",
+      "previousMaximum": 40000,
+      "measuredGzipBytes": 35174,
+      "maximum": 40000,
+      "remainingBytes": 4826
+    }
+  ],
+  "wholePackages": [
+    {
+      "name": "@haiyue/engine",
+      "version": "0.2.2",
+      "packedBytes": 2030802,
+      "sha256": "d4dcac2dfc5ab7d0cfa4c7003ac8138c36ef0237b5c6738014af63c202512666",
+      "deterministicRepackSha256": "d4dcac2dfc5ab7d0cfa4c7003ac8138c36ef0237b5c6738014af63c202512666"
+    },
+    {
+      "name": "@haiyue/animation-spec",
+      "version": "0.2.2",
+      "packedBytes": 170719,
+      "sha256": "71eb24b81b1a07f081138610869c11b759def56aa5853a3030e7a714ad385876",
+      "deterministicRepackSha256": "71eb24b81b1a07f081138610869c11b759def56aa5853a3030e7a714ad385876"
+    },
+    {
+      "name": "@haiyue/extensions",
+      "version": "0.2.2",
+      "packedBytes": 565745,
+      "sha256": "bfcffe9d5e302870d550de4bd7bd51a4463abc460fed46cbd9342e7e7bc49d56",
+      "deterministicRepackSha256": "bfcffe9d5e302870d550de4bd7bd51a4463abc460fed46cbd9342e7e7bc49d56"
+    },
+    {
+      "name": "@haiyue/shader-language",
+      "version": "0.2.2",
+      "packedBytes": 148545,
+      "sha256": "6a3df405553a2a45d9e76596a3917ea8be5c04e3bc680b3f539cc772ddf75aae",
+      "deterministicRepackSha256": "6a3df405553a2a45d9e76596a3917ea8be5c04e3bc680b3f539cc772ddf75aae"
+    }
+  ],
+  "unchangedBudgets": {
+    "allExistingConsumers": true,
+    "wholePackages": true,
+    "performance": true,
+    "gpuFivePercent": true,
+    "resource": true,
+    "pixel": true
+  },
+  "resourceInterpretation": {
+    "regionCache": {
+      "maximumRegions": 8,
+      "maximumRetainedColorBytes": 67108864
+    },
+    "workingAndRetiring": "Normal frame working/retiring and depth attachments are counted separately in each raw frame record and full GPU peak. At high DPR/MSAA the original color-byte limit can trigger direct rendering; do not treat working bytes as retained cache or claim cache coverage for a fallback.",
+    "timing": "CPU render and queue/readback waits are separate diagnostic fields. These pixel checks use explicit completion/readback and are not formal GPU timing or production frame pacing."
+  },
+  "retainedFailures": [
+    {
+      "evidence": "artifacts/engine-0.2.3/g10/semantic-prototype-1/result.json",
+      "resolution": "Independent primitive page reference incorrectly allowed authored absolute children into flow; explicit page-body geometry fixes the reference. Original failure retained; strengthened final reference also independently fixes expected Collapse heights."
+    },
+    {
+      "evidence": "artifacts/engine-0.2.3/g10/application-prototype-1/result.json",
+      "resolution": "Real nested app exposed zero-height/overlapping sections: opt into original content minimum and pass configured nested scroll its allocated viewport. Current source, unit and fresh full native matrix validate the fix."
+    },
+    {
+      "evidence": "artifacts/engine-0.2.3/g10/application-height-fixed/result.json",
+      "resolution": "Example lacked original browser text host: logical GUI focus alone could not receive native text. Configure existing textInputHost:browser in the application; no new text responder. Final installed app validates retained native text and host release."
+    },
+    {
+      "evidence": "artifacts/engine-0.2.3/g10/final-validation.json",
+      "input": "artifacts/engine-0.2.3/g10/catalog-failed-manifest.json",
+      "resolution": "New gui-controls catalog order 24 collided with Tilemap. Only that new entry changes to unused 111. All seven catalog tests and then all fourteen complete repository phases rerun; tests and filters remain unchanged."
+    }
+  ],
+  "protectedHistory": {
+    "audit": {
+      "path": "artifacts/engine-0.2.3/g10/historical-audit.json",
+      "bytes": 160480,
+      "sha256": "dc849fd66bd77b533c6a554f3f1765363f6b1ef92695ac761d2c79e3976bb5d0"
+    },
+    "sourceSnapshot": {
+      "path": "artifacts/engine-0.2.3/g10/source-snapshot.zip",
+      "bytes": 176103,
+      "sha256": "4a5ae667a6463cad18a2cbfe4d1a9c4af2bcecffb9cca4d3501f502aea31f9cd"
+    },
+    "sourceManifest": {
+      "path": "artifacts/engine-0.2.3/g10/source-snapshot-manifest.json",
+      "bytes": 11222,
+      "sha256": "fdace2e4837639d6ba56d4e28fd9d6f664adabc006606aac8157d15e7ef42ae6"
+    },
+    "originalsRetained": true
+  },
+  "handoffs": [
+    {
+      "owner": "g11-integration-candidate",
+      "id": "g10-windows-physical-keyboard-ime-gamepad",
+      "status": "pending-physical",
+      "authority": "M25 README/integration explicitly assign G07/G09/G10 physical evidence to G11; milestones/AGENTS.md permits this named device-owned handoff.",
+      "required": "Bind exact final packages: keyboard/gamepad tabs and close/hidden/state/focus restore; Breadcrumb ancestors, disabled/current paths, menu selection/Esc/scroll; Collapse header/icon/extra/disabled/nested panels and IME before hide; Badge click-through; G07 cross-screen list/tree editing and focus. Browser-driven trusted CDP events are automated coverage, not human IME or controller evidence."
+    },
+    {
+      "owner": "g11-integration-candidate",
+      "id": "g10-mac-iphone-input-and-recovery",
+      "status": "pending-physical",
+      "required": "Fresh Mac/iPhone same-candidate input, soft keyboard, composition/cancel, Collapse and tab focus/retained text, menu modal, DPR/scale, orientation and background recovery. Old 0.2.2 device records grant no new qualification."
+    },
+    {
+      "owner": "g11-integration-candidate",
+      "id": "g10-combined-production-and-version-pair",
+      "status": "pending-integration",
+      "required": "In gameplay-kit combine frozen 12 tabs/8 breadcrumb items/32 badges/16 Collapse panels with G07 lists/tree, scene/input and region owners. Complete formal cold/steady CPU/GPU/queue/upload/resource/frame pacing, global gate and no-publication rehearsal. Atomically pair Engine/extensions/shader-language 0.2.3 and animation-spec 0.2.2, with Engine/extensions peer floor >=0.2.3. Leaf diagnostics do not confer release qualification."
+    }
+  ],
+  "validations": {
+    "repository": {
+      "path": "artifacts/engine-0.2.3/g10/accepted-validation.json",
+      "bytes": 4909,
+      "sha256": "aacbed00720133a359c854973e6c44b50fa5bea092a281b99773f82a2e601c6c"
+    },
+    "feature": {
+      "path": "artifacts/engine-0.2.3/g10/feature-validation.json",
+      "bytes": 3686,
+      "sha256": "c998a2d422c38fb80bd6e3493478c0cbbf7f23012f6393c87e4864cc8b76dbd9"
+    },
+    "visual": {
+      "path": "artifacts/engine-0.2.3/g10/catalog-final/visual-review.json",
+      "bytes": 1274,
+      "sha256": "f9ef518db80c343189cddd097538101a931d63059313da286ebd8a422a41be46"
+    },
+    "completion": {
+      "status": "passed",
+      "logs": [
+        {
+          "path": "artifacts/engine-0.2.3/g10/completion-docs.log",
+          "bytes": 724,
+          "sha256": "079cbcf8f224e50ebe4a6a862fae309bffb5d56cf4355c98e2e42c23bfd611c6"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g10/completion-engine-diff.log",
+          "bytes": 1454,
+          "sha256": "ea48deb086ec8fe8242f55306d5ce1f51d329c6dc93a3be4f95243d42f29c84b"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g10/completion-coordination.log",
+          "bytes": 200,
+          "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g10/completion-coordination-diff.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "coordination": {
+        "path": "artifacts/engine-0.2.3/g10/coordination-update.json",
+        "bytes": 749,
+        "sha256": "af57c86da5b036ac27d471bc9b959bb7504c2487ab8f9bd63c9d937059bdbedc"
+      },
+      "sourceHashesMatched": 63,
+      "archiveHashesMatched": 8
+    }
+  },
+  "files": [
+    {
+      "path": "artifacts/engine-0.2.3/g10/start.json",
+      "bytes": 8209,
+      "sha256": "5a69a95b432b6475c0c095f43f359ee6b7640418f7dccae37ab2842e73320143"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/focused-validation.json",
+      "bytes": 2303,
+      "sha256": "63b49a5a5c448b4972185ce898775361bf866e700b5fed17afeada5f26d74962"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/focused-focused-tests.log",
+      "bytes": 9949,
+      "sha256": "d21b773119a726df4d3241342d29fcf3d0a097c2884717b3751c5586093df23e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/nested-scroll-tests.log",
+      "bytes": 3819,
+      "sha256": "78ed708faf8bf7743be87c992143647948378018be2b08f7808a21748d05fca9"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/policies-frozen.log",
+      "bytes": 538,
+      "sha256": "b29daff898c45f3dfecdaffee646f85da044f09b3f20fbf15f8cb398d16f4870"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/final-validation.json",
+      "bytes": 948,
+      "sha256": "2537bf19596c6de43a26a00640e764c497871ef7287f35aab51bfe950f1d896e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-validation.json",
+      "bytes": 3686,
+      "sha256": "c998a2d422c38fb80bd6e3493478c0cbbf7f23012f6393c87e4864cc8b76dbd9"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/public-packages/public-packages.json",
+      "bytes": 169305,
+      "sha256": "8581522289dda9c7aaa98981f845673532a43d7f813abf46a44ad5489952cc20"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/final-candidate/candidate.json",
+      "bytes": 14363,
+      "sha256": "d8753c132486504b46582432088a92a2dbcb7814c2ac6844b4f3a6c0e07567e9"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/application-final/result.json",
+      "bytes": 66042,
+      "sha256": "08d5629984109ca645a5185f7a8375ecb71cf65f471794927ba536699bb5122b"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/application-final/initial.png",
+      "bytes": 53955,
+      "sha256": "8dd2346b893af2a6557f3b97b91b652cad31d5664431b9139d51af0070f83c22"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/original-regions.json",
+      "bytes": 45080,
+      "sha256": "963eac755b21fc0aef73bb7469f48d50e9a20728634974fea6737d7e4e079202"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/catalog-final/result.json",
+      "bytes": 12946,
+      "sha256": "a9b2b00b1cbeb3a3ceb43a162aa8ecacafe77b11a20b3f1eb7e6c0ab4167dd19"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/catalog-final/example.png",
+      "bytes": 54608,
+      "sha256": "4677cdffa29df666f57f4d6157bce00e00d3a94e01b47223cac4f547a9308c33"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/catalog-final/visual-review.json",
+      "bytes": 1274,
+      "sha256": "f9ef518db80c343189cddd097538101a931d63059313da286ebd8a422a41be46"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-freshness.log",
+      "bytes": 60,
+      "sha256": "b8d13829ac79801bfafdaf3fb79d59dbfb4915aeef51b9c0d79abb97c0d6031e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/consumer-capacity-admission.json",
+      "bytes": 2956,
+      "sha256": "3d792eacbade1673fdb02d08fd84c90c3a8bd1f18e6d80e8ebdadc8793eec626"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/source-audit.json",
+      "bytes": 11606,
+      "sha256": "5c2496f7cf43b5ecf59082de9fd30abdc6939d72fe4f2cd09b683245f1392d70"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/source-snapshot-manifest.json",
+      "bytes": 11222,
+      "sha256": "fdace2e4837639d6ba56d4e28fd9d6f664adabc006606aac8157d15e7ef42ae6"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/source-snapshot-verification.json",
+      "bytes": 242,
+      "sha256": "9f8d4129b7c7079001d2733320136439a017255da6b8d39609f9f50a182830ec"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/historical-audit.json",
+      "bytes": 160480,
+      "sha256": "dc849fd66bd77b533c6a554f3f1765363f6b1ef92695ac761d2c79e3976bb5d0"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/semantic-prototype-1/result.json",
+      "bytes": 41188,
+      "sha256": "4b614d17f96351d21d9afc319908af1f231facc5dafa2655b6b36a8728f378e4"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/application-prototype-1/result.json",
+      "bytes": 7827,
+      "sha256": "4ba35132ec955c59f4a0f23fcceed34718189e95f658d8a72c606853f2245ef5"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/application-height-fixed/result.json",
+      "bytes": 7981,
+      "sha256": "2d8c6f18bff4f295ec3d4f4cb1974d1c68348ecec45287e4a3f636fbaa0e8e11"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/application-text-diagnostic/result.json",
+      "bytes": 21219,
+      "sha256": "28b0febc9f79fe15aea2ce1e4c549f369c8a8a1c249a8c44f38e0fee8688643b"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/create-report.mjs",
+      "bytes": 15108,
+      "sha256": "ed125208843ddacd1e7cad74911d8ded43554fbf2318aa80ec8b9ff691392c4e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/prepare-source-audit.mjs",
+      "bytes": 2594,
+      "sha256": "000a3e83900db59f8df98ad2f973ce146e840fbed7c85409c72674f49bfec8a3"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/audit-history.py",
+      "bytes": 1811,
+      "sha256": "6aa5712cbaeefd9b06c4e90311a2855dcf94d0b2981e96afd9dd73a32e6fb5cf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/snapshot.py",
+      "bytes": 1035,
+      "sha256": "0b0810e3430bb0368c2ce23f159f44dd431f0c7a98366b5a2879911b22d69320"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/run-repository-validation.mjs",
+      "bytes": 2375,
+      "sha256": "a6a3b8af411c45f69bdf120fdf75182f458383a16e2985fe03843036b8091953"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/run-feature-completion.mjs",
+      "bytes": 2300,
+      "sha256": "4e7d7bbce8bbbd747bdb0b09d1708fbbff7d62c01bdc1de271d4f7b515543a45"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/verify-original-regions.mjs",
+      "bytes": 1383,
+      "sha256": "db45b85c108581de761152ceb54553478e0b93b18bd8c0cf946c8996354e36e0"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/verify-catalog.mjs",
+      "bytes": 2559,
+      "sha256": "6a847fa46591f209b6842d3d68763b598ee2586525d8d9bd9d17db9b31736fc8"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-typecheck.log",
+      "bytes": 3217,
+      "sha256": "eb8584756a8653b41cd3f8226a3edb33d5800d6de6e7b73200b2bbd08485ae9e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-build.log",
+      "bytes": 18313,
+      "sha256": "bfb33f7de065e5661e0e68d3d462224ee5c723175137a7c99b2b6f3170024d66"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-test.log",
+      "bytes": 262248,
+      "sha256": "24925777b7871358ec845873529027d688df940038095948a4b3b5cdf9b99c7a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-modules-check.log",
+      "bytes": 180,
+      "sha256": "78943b55e7f88d42de80227a823606538f0e90299203b9490f2911213924aaf7"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-responsibilities-check.log",
+      "bytes": 259,
+      "sha256": "52b89c966f0ecfb0587d1e565ebbdaa72f1c2a1b9f3867641a1d83adc24f9d1a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-renderer-prepare-check.log",
+      "bytes": 239,
+      "sha256": "66bbc4f2490a8418f9be4711d93567477ea7181e4289deea3dd116236518591e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-check-boundaries.log",
+      "bytes": 1037,
+      "sha256": "5f37c4dcd336dc8acdc310fd34911c599bfa7a6c0f87bbd3a647f2d546b48a1d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-docs-check.log",
+      "bytes": 706,
+      "sha256": "fcf45b57e33d7ca8b97d9f8900286d47d36702203d7ce2883a27dfc6454d788d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-api-check.log",
+      "bytes": 158,
+      "sha256": "52eedd5d933b1c615111c13ff308d849101edef1c369d56615dbb7d7f107c6a9"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-fast-gate-policy-test.log",
+      "bytes": 2209,
+      "sha256": "3f828087bb4e40fcf23df66632b5959b60f54237587100fc522a7daee73fa1fa"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-release-policy-test.log",
+      "bytes": 18880,
+      "sha256": "d84cf6022c306754562ba08c3dd59dacc225cd033fb3609fd99b514f725fa139"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-performance-budget-test.log",
+      "bytes": 34768,
+      "sha256": "115a5e51496934a20c560ee8f1aef98d35674ec765fdce10899c743d1df6b179"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-shader-language-check.log",
+      "bytes": 14199,
+      "sha256": "fbd13def53df3b5ca014c31f0c5050cea6770423741f24d35ab7748efcc8cb3b"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-verify-engine-package.log",
+      "bytes": 9106,
+      "sha256": "ee33b5c416c9811301b05b3c8e07795a0dd839c114fb9945ab15fc7833126cba"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-installed-candidate.log",
+      "bytes": 33,
+      "sha256": "a569f24eb368223cee04a9db176836eb4343398b3acfe48bde0e7852c9aea370"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-actual-application.log",
+      "bytes": 128,
+      "sha256": "0cb861c8d435e0d942098b62a0d84bf15f4666395ec85f9e247370f594018e0f"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-semantic-1-1.log",
+      "bytes": 129,
+      "sha256": "64175efe181b647a00d266e9b4e044a20f74717a204390d0f872c18388edc9b2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-semantic-1-4.log",
+      "bytes": 129,
+      "sha256": "891a4418d79053e254183cb20c4721487d422a686d21574f3a8fd74505aad6ce"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-semantic-2-1.log",
+      "bytes": 129,
+      "sha256": "0658f118eea51a116abd427020b5fd81b3fe81215317d1a5bce546ce551d14ab"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-semantic-2-4.log",
+      "bytes": 129,
+      "sha256": "2afc1ddc7532c4712cabb9bd779ade3a553cac123faf943b5255580aa604817e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-cache-1-1.log",
+      "bytes": 138,
+      "sha256": "20f934d38e7ddcbc5c8b41b227f4bec80bcbb87806871160c2e2bde566217e9d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-cache-1-4.log",
+      "bytes": 138,
+      "sha256": "0eb093aa5191324c7a2871ce9d847bc2d04fa52b6e7648c1b3d6124383e0134d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-cache-2-1.log",
+      "bytes": 138,
+      "sha256": "4d8e4059e1f41e3b9f7bde688f265836c5fd53463510843d974adccdf892fabd"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-cache-2-4.log",
+      "bytes": 138,
+      "sha256": "94d9b3fda65e453d364c28cd5e87d6bb74793647cf133f28cba957462c9502f2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-original-regions.log",
+      "bytes": 130,
+      "sha256": "b14f50c4b156cbe2921aea55a12a8ebac1bfd525dfded264d341c267e89b74cf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-catalog.log",
+      "bytes": 78,
+      "sha256": "f52642e9b5deb551525c3be7fb9754c9b544dda434e2e8903f79a91573b17751"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/feature-freshness.log",
+      "bytes": 60,
+      "sha256": "b8d13829ac79801bfafdaf3fb79d59dbfb4915aeef51b9c0d79abb97c0d6031e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/semantic-final-1-1/result.json",
+      "bytes": 47601,
+      "sha256": "71b686751b3fd316d1fd14b44fec6e58a5948c941404391b4f71d1b8c7b7eeea"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/semantic-final-1-4/result.json",
+      "bytes": 47587,
+      "sha256": "536fbe42eeca84edd450d220f3951d4750ea7dc9c1f116a238637c4fd08daff7"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/semantic-final-2-1/result.json",
+      "bytes": 47619,
+      "sha256": "6dfdc2d236278da559deb74e2115b6accbaed8739b55c20803f6255e36b39933"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/semantic-final-2-4/result.json",
+      "bytes": 47616,
+      "sha256": "a829a826a44b54cf52ee7eb798d3cbf9470f21659d9c51bf8db479afab82b16a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/cache-final-1-1/result.json",
+      "bytes": 82553,
+      "sha256": "daadb92c5a5247e4e178f25fbf40070ebcd92b263ed8478932fdc4d75325ee20"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/cache-final-1-4/result.json",
+      "bytes": 82612,
+      "sha256": "d5ecfd37e98284bf915a6ffdae01674293e3dcb08811feaf44a967318c82db97"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/cache-final-2-1/result.json",
+      "bytes": 82656,
+      "sha256": "534c62c5dac9cde6627524468cdea8904954f5757759bb37925d2cf453e421fa"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/cache-final-2-4/result.json",
+      "bytes": 83662,
+      "sha256": "bd135144549ccd478fc29fc76e071a86bd8cc47557ae16fd36b513d45e9e12e3"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/accepted-validation.json",
+      "bytes": 4909,
+      "sha256": "aacbed00720133a359c854973e6c44b50fa5bea092a281b99773f82a2e601c6c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/corrected-validation.json",
+      "bytes": 4423,
+      "sha256": "b16908c712451dc84907bcc45e82fa1114fb6b955a456c36b6e42834f28e3eb4"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/final-test.log",
+      "bytes": 264629,
+      "sha256": "8d916c8c36117da995c5a7412f8324a206bbc741f41d29ce708d391b9a1cbff4"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/catalog-failed-manifest.json",
+      "bytes": 57699,
+      "sha256": "a8cf5f26ea070b0f9358f4b9080a1ce0eeb4e85fdada332430f347294d479458"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/catalog-order-corrected.log",
+      "bytes": 769,
+      "sha256": "a7995e3aa7dbcf5c8dd21fd450321c36c12a4f8dd04bf00513eef6aab2f1fd8f"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/accept-repository-validation.mjs",
+      "bytes": 1462,
+      "sha256": "af7aa18509a8ffa7d3b55b12e5de9175ba049a798db25f8706223711184a00f4"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/update-review-entry.mjs",
+      "bytes": 3935,
+      "sha256": "8c0cf85920a33ad5954287b599d5a5589c613643ed44b2a36a87d929ec34ed63"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/completion-docs.log",
+      "bytes": 724,
+      "sha256": "079cbcf8f224e50ebe4a6a862fae309bffb5d56cf4355c98e2e42c23bfd611c6"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/completion-engine-diff.log",
+      "bytes": 1454,
+      "sha256": "ea48deb086ec8fe8242f55306d5ce1f51d329c6dc93a3be4f95243d42f29c84b"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/completion-coordination.log",
+      "bytes": 200,
+      "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/completion-coordination-diff.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/completion-diff-status.json",
+      "bytes": 1954,
+      "sha256": "a45d68d04e19eebe7f30dd0206d03a4b952082525e28ee7af37c1e6ed2b4f359"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/coordination-update.json",
+      "bytes": 749,
+      "sha256": "af57c86da5b036ac27d471bc9b959bb7504c2487ab8f9bd63c9d937059bdbedc"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/update-coordination.mjs",
+      "bytes": 2456,
+      "sha256": "7620cc14f088481df1de2548e39f4c2c62b13bb76d3fdc39dd5ba5237166b370"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g10/finalize-report.mjs",
+      "bytes": 3316,
+      "sha256": "2cb3f95e1781dc871ac03bbf850ec960457be9855a82a2f9700813c6c89498b9"
+    }
+  ]
+}

@@ -1,6 +1,7 @@
-import { sameGuiCommand, snapshotGuiCommand } from './GuiCommandCache';
+import { snapshotGuiCommand } from './GuiCommandCache';
 import { GuiShapeCommand } from './GuiDrawCommand';
 import { GUI_SHAPE_VERTEX_LAYOUT } from './GuiVertexLayout';
+import {GuiVertexChanges,forgetGuiVertexChanges} from './GuiVertexChanges';
 
 const VERTICES_PER_QUAD = 6;
 export const GUI_SHAPE_FLOATS_PER_VERTEX = /* @__PURE__ */ (() => GUI_SHAPE_VERTEX_LAYOUT.floatsPerVertex)();
@@ -14,6 +15,7 @@ export class GuiBatch {
   dirty = true;
   private retained: GuiShapeCommand[] = [];
   private retainedVertexCount = 0;
+  private forceUpload=false;
 
   clear(options: { releaseVertexData?: boolean } = {}): void {
     this.commands.length = 0;
@@ -24,6 +26,7 @@ export class GuiBatch {
       this.retained = [];
       this.retainedVertexCount = 0;
       this.version++;
+      forgetGuiVertexChanges(this);
     }
     this.dirty = true;
   }
@@ -35,27 +38,48 @@ export class GuiBatch {
   }
 
   rebuild(): void {
+    try{this.rebuildGeometry();}catch(error){this.retained=[];this.forceUpload=true;this.dirty=true;forgetGuiVertexChanges(this);throw error;}
+  }
+  private rebuildGeometry():void {
+    const base=this.version,changes=new GuiVertexChanges();let rebuilt=0;
     this.commandRanges.length = 0;
     let vertices = 0;
     for (const command of this.commands) {
-      const count = command.strokeWidth ? 36 * 6 : command.roundedMesh ? 36 * 3 : VERTICES_PER_QUAD;
+      const count = shapeVertices(command);
       this.commandRanges.push({first: vertices, count}); vertices += count;
     }
-    if (this.commands.length === this.retained.length && this.commands.every((c, i) => sameGuiCommand(this.retained[i], c))) {
-      this.vertexCount = this.retainedVertexCount;
-      this.dirty = false;
-      return;
-    }
-    this.retained = this.commands.map(snapshotGuiCommand);
     const vertexCount = vertices;
     const requiredFloats = vertexCount * GUI_SHAPE_VERTEX_LAYOUT.floatsPerVertex;
     if (this.vertexData.length < requiredFloats) {
-      this.vertexData = new Float32Array(nextCapacity(requiredFloats));
+      const data=new Float32Array(nextCapacity(requiredFloats));data.set(this.vertexData);this.vertexData=data;
     }
-    const data = this.vertexData;
-    let offset = 0;
+    if(this.forceUpload)changes.add(0,requiredFloats*4);
+    let oldFirst=0,changed=this.forceUpload||vertexCount!==this.retainedVertexCount;
+    for(let i=0;i<this.commands.length;i++){
+      const command=this.commands[i]!,previous=this.retained[i],range=this.commandRanges[i]!;
+      const oldCount=previous?shapeVertices(previous):0;
+      if(oldFirst!==range.first||!sameShape(previous,command)){
+        packShape(this.vertexData,range.first*GUI_SHAPE_FLOATS_PER_VERTEX,command);
+        changes.add(range.first*GUI_SHAPE_FLOATS_PER_VERTEX*4,range.count*GUI_SHAPE_FLOATS_PER_VERTEX*4);
+        rebuilt+=range.count;changed=true;this.retained[i]=snapshotGuiCommand(command);
+      }
+      oldFirst+=oldCount;
+    }
+    this.retained.length=this.commands.length;
+    this.retainedVertexCount = this.vertexCount = vertexCount;
+    if(changed)this.version++;
+    this.forceUpload=false;
+    changes.commit(this,base,this.version,{commands:this.commands.length,layouts:0,vertices:rebuilt});
+    this.dirty = false;
+  }
+}
 
-    for (const command of this.commands) {
+function shapeVertices(command:GuiShapeCommand):number {return command.strokeWidth?36*6:command.roundedMesh?36*3:VERTICES_PER_QUAD;}
+function sameShape(a:GuiShapeCommand|undefined,b:GuiShapeCommand):boolean {
+  return !!a&&a.x===b.x&&a.y===b.y&&a.width===b.width&&a.height===b.height&&a.radius===b.radius&&a.strokeWidth===b.strokeWidth&&a.roundedMesh===b.roundedMesh&&a.color.every((v,i)=>v===b.color[i])&&
+    (a.clip===b.clip||!!(a.clip&&b.clip&&a.clip.x===b.clip.x&&a.clip.y===b.clip.y&&a.clip.width===b.clip.width&&a.clip.height===b.clip.height));
+}
+function packShape(data:Float32Array,offset:number,command:GuiShapeCommand):number {
       const x0 = command.x;
       const y0 = command.y;
       const x1 = command.x + command.width;
@@ -77,7 +101,7 @@ export class GuiBatch {
           for (const point of [outer[i]!, outer[j]!, inner[i]!, outer[j]!, inner[j]!, inner[i]!])
             offset = writeVertex(data, offset, point[0], point[1], command, clipX0, clipY0, clipX1, clipY1);
         }
-        continue;
+        return offset;
       }
       if (command.roundedMesh) {
         const edge = outlinePoints(command, 0);
@@ -85,7 +109,7 @@ export class GuiBatch {
           for (const [x, y] of [[(x0 + x1) / 2, (y0 + y1) / 2], edge[i]!, edge[(i + 1) % edge.length]!])
             offset = writeVertex(data, offset, x!, y!, command, clipX0, clipY0, clipX1, clipY1);
         }
-        continue;
+        return offset;
       }
       offset = writeVertex(data, offset, x0, y0, command, clipX0, clipY0, clipX1, clipY1);
       offset = writeVertex(data, offset, x1, y0, command, clipX0, clipY0, clipX1, clipY1);
@@ -93,12 +117,7 @@ export class GuiBatch {
       offset = writeVertex(data, offset, x1, y0, command, clipX0, clipY0, clipX1, clipY1);
       offset = writeVertex(data, offset, x1, y1, command, clipX0, clipY0, clipX1, clipY1);
       offset = writeVertex(data, offset, x0, y1, command, clipX0, clipY0, clipX1, clipY1);
-    }
-
-    this.retainedVertexCount = this.vertexCount = vertexCount;
-    this.version++;
-    this.dirty = false;
-  }
+    return offset;
 }
 
 function nextCapacity(required: number): number {

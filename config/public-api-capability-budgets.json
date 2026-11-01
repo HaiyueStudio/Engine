@@ -2,6 +2,13 @@
   "schemaVersion": 1,
   "model": "reviewed-capability-plus-growth-reserve",
   "principles": [
+    "ADR 0139 / G01 admits exactly GuiIconPosition on Engine ./gui, GuiTabHeaderOptions on existing ./gui-layout and 12 ./gui-controls symbols for G10. Original GuiContent, GUI identity, layout, theme, modal/input and resource owners are reused. Root symbols, old reserves and all performance/resource budgets remain unchanged.",
+    "ADR 0139 / G01 admits exactly 2 Tilemap atlas/transform types for G08 (8→10), preserving existing reserves. Same original component/system identities; existing production palette/textured 2D programs and frame/tracker owners are reused. No other symbols or performance/resource budget change.",
+    "ADR 0139 / G01 admits exactly 9 focused gui-collections symbols for G07; only the numeric window is shared with HYA, original GUI/input owners remain. No root, performance or resource budget growth.",
+    "ADR 0139 / G01 admits exactly seven InputActionMap symbols on Engine ./input and six input-actions symbols on extensions for G06, zero new-entry reserve. Existing class identities, root symbols and existing reserves/budgets remain unchanged.",
+    "ADR 0139 / G01 admits exactly four focused camera2d exports for G05, with zero symbol reserve. Existing entries, performance/resource budgets and capability reserves stay unchanged.",
+    "ADR 0139 / G01 admits 3 physics, 2 backend and 4 character2d exports for G04. Existing Engine reviewed counts increase only by the 3/2 frozen symbols; reserve sizes remain 5/6 and all other entry budgets stay unchanged.",
+    "ADR 0139 / G01 admits exactly 6 focused scene-flow symbols for 0.2.3, zero reserve; G03 serial integration adds only that frozen entry. No root, performance or resource budget change.",
     "G13 proposal admits the exact ADR 0134 HYA format/runtime symbol lists (55 plus 37) with zero growth reserve; review/engine-0.2.2/g11-public-api-admission.md. Existing reserves and all performance/package limits are unchanged.",
     "ADR 0117 admits one ColorCMYK export in ./color for the next minor release; root and all growth reserves remain unchanged.",
     "G06 admits 5 Deferred lighting facade symbols in experimental/renderer and the compatibility aggregate; review/engine-0.2.1/g06-example-api-review.md. No stable root or performance budget growth.",
@@ -128,7 +135,7 @@
             "./controls": 9,
             "./font": 13,
             "./geometry": 53,
-            "./input": 3,
+            "./input": 10,
             "./lighting": 19,
             "./material": 69,
             "./math": 7,
@@ -149,8 +156,8 @@
           },
           "entrypoints": {
             "./compute": 7,
-            "./physics": 37,
-            "./physics/backend": 44,
+            "./physics": 40,
+            "./physics/backend": 46,
             "./physics/components": 13
           }
         },
@@ -193,7 +200,18 @@
           },
           "entrypoints": {
             "./core": 71,
-            "./gui": 106
+            "./gui": 107
+          }
+        },
+        {
+          "id": "game-audio-core",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./audio": 7
           }
         }
       ]
@@ -233,7 +251,7 @@
             "./grid": 2,
             "./hya-state-machine": 13,
             "./spine": 8,
-            "./tilemap": 8,
+            "./tilemap": 10,
             "./tween": 6
           }
         },
@@ -326,7 +344,84 @@
           },
           "entrypoints": {
             "./layout": 13,
-            "./gui-layout": 11
+            "./gui-layout": 12
+          }
+        },
+        {
+          "id": "scene-flow",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./scene-flow": 6
+          }
+        },
+        {
+          "id": "character2d",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./character2d": 4
+          }
+        },
+        {
+          "id": "camera2d",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./camera2d": 4
+          }
+        },
+        {
+          "id": "input-actions",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./input-actions": 6
+          }
+        },
+        {
+          "id": "gui-collections",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./gui-collections": 9
+          }
+        },
+        {
+          "id": "game-audio",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./audio": 5
+          }
+        },
+        {
+          "id": "gui-controls",
+          "stability": "stable",
+          "growthReserve": {
+            "ratio": 0,
+            "minimumSymbols": 0
+          },
+          "entrypoints": {
+            "./gui-controls": 12
           }
         }
       ]

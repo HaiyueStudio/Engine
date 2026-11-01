@@ -1,0 +1,24 @@
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {resolve,relative} from 'node:path';
+import {execFileSync} from 'node:child_process';
+import {runChromeWebGpuFixture} from '../../scripts/webgpu-gate/chrome-runner.mjs';
+import {verifyServedBytes} from '../../scripts/hya-corpus/packed-browser.mjs';
+import {validateCharacterBrowserResult} from './character2d-browser-policy.mjs';
+import {root,sha} from './helpers/public-feature-candidate.mjs';
+if(process.argv.length!==4)throw Error('Usage: character2d-browser-gate.mjs CANDIDATE_JSON NEW_OUTPUT');
+const candidatePath=resolve(root,process.argv[2]),out=resolve(root,process.argv[3]),candidate=JSON.parse(readFileSync(candidatePath));
+if(candidate.status!=='passed'||!candidate.strictInstalledTypecheck||!candidate.installedEsm||!candidate.installedFiles?.every(p=>p.allFileHashesMatched))throw Error('A strictly verified installed candidate is required.');
+for(const p of candidate.packages)if(sha(readFileSync(p.file))!==p.sha256)throw Error('Tarball changed.');
+for(const [path,hash]of Object.entries(candidate.sourceInputs??{}))if(sha(readFileSync(resolve(root,path)))!==hash)throw Error('Candidate source changed: '+path);
+if(sha(readFileSync(resolve(root,candidate.application)))!==candidate.sourceApplicationSha256)throw Error('Application source changed.');
+if(sha(readFileSync(resolve(candidate.consumer,'browser/application.js')))!==candidate.compiledApplicationSha256)throw Error('Compiled application changed.');
+mkdirSync(out,{recursive:true});const fixture=resolve(out,'fixture.html');
+writeFileSync(fixture,'<!doctype html><meta charset="utf-8"><title>G04 packed character2d</title><style>body{margin:0}canvas{width:960px;height:640px}#result{display:none}</style><canvas width="960" height="640"></canvas><pre id="result"></pre><script type="importmap">'+JSON.stringify({imports:candidate.imports})+'</script><script type="module" src="/extensions/test/character2d-browser.mjs"></script>',{flag:'wx'});
+const paths=['engine/src/physics/Physics2DSystem.ts','engine/src/physics/Physics3DSystem.ts','engine/src/physics/FixedStepClock.ts','engine/src/physics/Box2DPhysics2DBackend.ts','engine/src/physics/Box2DShapeCast.ts','engine/src/core/EngineError.ts','extensions/src/character2d.ts','extensions/src/character2d/Character2D.ts','extensions/src/character2d/types.ts','examples/character2d/application.ts','extensions/test/character2d-browser.mjs','extensions/test/character2d-browser-policy.mjs','extensions/test/character2d-browser-gate.mjs','extensions/test/helpers/public-feature-candidate.mjs'];
+const inputs=Object.fromEntries(paths.map(p=>[p,sha(readFileSync(resolve(root,p)))]));let result;
+try{result=await runChromeWebGpuFixture({root,fixture:relative(root,fixture).replaceAll('\\','/'),mounts:candidate.mounts,timeoutMs:180000,acceptedStatuses:['passed','failed'],chunkedResult:true});}catch(error){result={status:'failed',error:String(error.stack??error),browserFailure:error.browserFailure};}
+const servedBytes=verifyServedBytes(root,candidate.mounts,result,{requiredPackages:[]}),policy=validateCharacterBrowserResult(result),served=result.httpProvenance?.files??[];
+const missing=['engine','extensions'].filter(name=>!served.some(f=>f.sourcePath?.startsWith('feature-packages/'+name+'/dist/'))),changed=paths.filter(p=>sha(readFileSync(resolve(root,p)))!==inputs[p]);
+if(servedBytes.status!=='passed'||policy.status!=='passed'||missing.length||changed.length)result={...result,status:'failed'};
+const report={schemaVersion:1,role:'G04 installed feature correctness/resource diagnostic; not G11 release qualification',revision:execFileSync('git',['-c','safe.directory='+root.replaceAll('\\','/'),'rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),dirty:true,inputs,candidate:process.argv[2],candidateSha256:sha(readFileSync(candidatePath)),packages:candidate.packages,servedBytes,policy,missing,changed,...result};
+writeFileSync(resolve(out,'result.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify({status:report.status,checks:report.checks?.length,error:report.error,policy,output:out}));if(report.status!=='passed')process.exitCode=1;

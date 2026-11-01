@@ -28,7 +28,7 @@ export interface MultiplayerInputSnapshot {
 export interface BrowserMultiplayerInputOptions {
   readonly players: readonly Readonly<{
     id: string;
-    bindings: InputActionMapDescriptor;
+    bindings: InputActionMapDescriptor | InputActionMap;
     gamepadIndex?: number;
   }>[];
   readonly eventTarget?: EventTarget;
@@ -47,6 +47,9 @@ interface PlayerRuntime {
   readonly actionMap: InputActionMap;
   readonly gamepadIndex: number | null;
   readonly previous: Map<string, number>;
+  bindings: InputActionMapDescriptor;
+  readonly blockedKeys: Set<string>;
+  readonly blockedPointers: Set<number>;
 }
 
 export class BrowserMultiplayerInput {
@@ -59,7 +62,8 @@ export class BrowserMultiplayerInput {
   readonly #keys = new Set<string>();
   readonly #unconsumedKeys = new Set<string>();
   readonly #gamepadLayers = new GamepadInputLayers();
-  readonly #mappedKeys = new Set<string>();
+  readonly #pointers = new Set<number>();
+  readonly #unconsumedPointers = new Set<number>();
   readonly #disconnectedGamepads = new Set<number>();
   #sampling?:boolean;
   #tick = 0;
@@ -68,8 +72,8 @@ export class BrowserMultiplayerInput {
 
   readonly #onKeyDown = (event: Event): void => {
     const code = keyboardCode(event);
-    if (!code || !this.#mappedKeys.has(code)) return;
-    if(!this.#keys.has(code))this.#unconsumedKeys.add(code);
+    if (!code || !this.#players.some(p=>p.actionMap.actionsForKey(code).length)) return;
+    if(!this.#keys.has(code) && !(event as KeyboardEvent).repeat)this.#unconsumedKeys.add(code);
     this.#keys.add(code);
     if(isInputEventConsumed(event))this.#unconsumedKeys.delete(code);
     if (this.#preventDefault) event.preventDefault();
@@ -77,13 +81,26 @@ export class BrowserMultiplayerInput {
 
   readonly #onKeyUp = (event: Event): void => {
     const code = keyboardCode(event);
-    if (!code || !this.#mappedKeys.has(code)) return;
+    if (!code || (!this.#keys.has(code) && !this.#players.some(p=>p.actionMap.actionsForKey(code).length))) return;
     this.#keys.delete(code);
     this.#unconsumedKeys.delete(code);
+    for(const player of this.#players)player.blockedKeys.delete(code);
     if (this.#preventDefault) event.preventDefault();
   };
 
-  readonly #onRelease = (): void => { this.#keys.clear();this.#unconsumedKeys.clear();this.#gamepadLayers.release(); };
+  readonly #onPointerDown = (event: Event): void => {
+    const button = pointerButton(event); if(button === null || !this.#players.some(p=>p.actionMap.actionsForPointerButton(button).length))return;
+    if(!this.#pointers.has(button))this.#unconsumedPointers.add(button);this.#pointers.add(button);
+    if(isInputEventConsumed(event))this.#unconsumedPointers.delete(button);
+    if(this.#preventDefault)event.preventDefault();
+  };
+  readonly #onPointerUp = (event: Event): void => {
+    const button = pointerButton(event);if(button===null)return;
+    this.#pointers.delete(button);this.#unconsumedPointers.delete(button);
+    for(const player of this.#players)player.blockedPointers.delete(button);
+  };
+  readonly #onPointerCancel = (): void => {this.#pointers.clear();this.#unconsumedPointers.clear();for(const player of this.#players)player.blockedPointers.clear();};
+  readonly #onRelease = (): void => {this.#keys.clear();this.#unconsumedKeys.clear();this.#onPointerCancel();this.#gamepadLayers.release();};
   readonly #onGamepadConnected = (event: Event): void => {
     const index = gamepadEventIndex(event);
     if (index !== null) this.#disconnectedGamepads.delete(index);
@@ -108,10 +125,9 @@ export class BrowserMultiplayerInput {
       if(typeof id!=='string'||!/^[A-Za-z][A-Za-z0-9._:-]{0,31}$/u.test(id))throw new TypeError('Browser multiplayer input player id is invalid.');
       if (ids.has(id)) throw new TypeError(`Browser multiplayer input player id is duplicated: ${id}.`);
       ids.add(id);
-      const actionMap = new InputActionMap(descriptor.bindings);
-      for (const binding of Object.values(actionMap.toJSON())) for (const code of binding.keys ?? []) this.#mappedKeys.add(code);
+      const actionMap = descriptor.bindings instanceof InputActionMap ? descriptor.bindings : new InputActionMap(descriptor.bindings);
       const gamepadIndex = descriptor.gamepadIndex === undefined ? null : range(descriptor.gamepadIndex, 0, 31, `players[${index}].gamepadIndex`, true);
-      return { id, actionMap, gamepadIndex, previous: new Map<string, number>() };
+      return { id, actionMap, gamepadIndex, previous: new Map<string, number>(),bindings:actionMap.toJSON(),blockedKeys:new Set<string>(),blockedPointers:new Set<number>() };
     }));
     this.#eventTarget = options.eventTarget ?? (typeof globalThis.addEventListener==='function'?globalThis:null);
     this.#visibilityTarget = options.visibilityTarget ?? (typeof document==='undefined'?null:document);
@@ -119,6 +135,9 @@ export class BrowserMultiplayerInput {
     this.#preventDefault = options.preventDefault ?? false;
     this.#eventTarget?.addEventListener('keydown', this.#onKeyDown);
     this.#eventTarget?.addEventListener('keyup', this.#onKeyUp);
+    this.#eventTarget?.addEventListener('pointerdown',this.#onPointerDown);
+    this.#eventTarget?.addEventListener('pointerup',this.#onPointerUp);
+    this.#eventTarget?.addEventListener('pointercancel',this.#onPointerCancel);
     this.#eventTarget?.addEventListener('blur', this.#onRelease);
     this.#eventTarget?.addEventListener('gamepadconnected', this.#onGamepadConnected);
     this.#eventTarget?.addEventListener('gamepaddisconnected', this.#onGamepadDisconnected);
@@ -142,9 +161,11 @@ export class BrowserMultiplayerInput {
     if (!Number.isSafeInteger(tick) || tick !== this.#tick + 1) throw new RangeError(`Browser multiplayer input tick must advance exactly from ${this.#tick} to ${this.#tick + 1}.`);
     this.#tick = tick;
     const rawGamepads = this.#suspended ? EMPTY_GAMEPADS : this.#getGamepads();
+    this.#refreshBindings();
     const gamepads = this.#suspended?EMPTY_GAMEPADS:this.#gamepadLayers.route(Array.from(rawGamepads,(pad,index)=>this.#disconnectedGamepads.has(index)?null:pad),this.actionThreshold);
     this.#assertLive();if(this.#tick!==tick)throw new Error('Browser multiplayer input tick changed during routing.');
-    const players = this.#players.map(player => this.#samplePlayer(player, gamepads));
+    const changed=this.#refreshBindings();
+    const players = this.#players.map(player => this.#samplePlayer(player, gamepads,changed.has(player)));
     return snapshot({tick,players:Object.freeze(players)});
     }finally{this.#sampling=false;}
   }
@@ -153,6 +174,7 @@ export class BrowserMultiplayerInput {
     this.#assertLive();
     this.#keys.clear();
     this.#unconsumedKeys.clear();
+    this.#onPointerCancel();
     this.#gamepadLayers.release();
     return this;
   }
@@ -162,6 +184,7 @@ export class BrowserMultiplayerInput {
     this.#tick = 0;
     this.#keys.clear();
     this.#unconsumedKeys.clear();this.#gamepadLayers.clear();
+    this.#onPointerCancel();
     this.#disconnectedGamepads.clear();
     for (const player of this.#players) player.previous.clear();
     return this;
@@ -172,27 +195,45 @@ export class BrowserMultiplayerInput {
     this.#disposed = true;
     this.#keys.clear();
     this.#unconsumedKeys.clear();this.#gamepadLayers.dispose();
+    this.#onPointerCancel();
     this.#disconnectedGamepads.clear();
     for (const player of this.#players) player.previous.clear();
     this.#eventTarget?.removeEventListener('keydown', this.#onKeyDown);
     this.#eventTarget?.removeEventListener('keyup', this.#onKeyUp);
+    this.#eventTarget?.removeEventListener('pointerdown',this.#onPointerDown);
+    this.#eventTarget?.removeEventListener('pointerup',this.#onPointerUp);
+    this.#eventTarget?.removeEventListener('pointercancel',this.#onPointerCancel);
     this.#eventTarget?.removeEventListener('blur', this.#onRelease);
     this.#eventTarget?.removeEventListener('gamepadconnected', this.#onGamepadConnected);
     this.#eventTarget?.removeEventListener('gamepaddisconnected', this.#onGamepadDisconnected);
     this.#visibilityTarget?.removeEventListener('visibilitychange', this.#onVisibilityChange);
   }
 
-  #samplePlayer(player: PlayerRuntime, gamepads: ArrayLike<StandardGamepadSnapshot | null>): PlayerInputSnapshot {
+  #refreshBindings():Set<PlayerRuntime> {
+    const changed=new Set<PlayerRuntime>();
+    for(const player of this.#players)if(player.bindings!==player.actionMap.toJSON()){
+      changed.add(player);player.bindings=player.actionMap.toJSON();
+      for(const code of this.#keys)player.blockedKeys.add(code);
+      for(const button of this.#pointers)player.blockedPointers.add(button);
+      if(player.gamepadIndex!==null)this.#gamepadLayers.release([player.gamepadIndex]);
+    }
+    return changed;
+  }
+  #samplePlayer(player: PlayerRuntime, gamepads: ArrayLike<StandardGamepadSnapshot | null>,bindingChanged=false): PlayerInputSnapshot {
     const values = new Map<string, number>();
-    if (!this.#suspended) mergeValues(values, player.actionMap.sampleKeyboard(this.#unconsumedKeys));
-    const gamepad = player.gamepadIndex === null || this.#disconnectedGamepads.has(player.gamepadIndex) ? null : gamepads[player.gamepadIndex] ?? null;
+    if (!this.#suspended) {
+      mergeValues(values, player.actionMap.sampleKeyboard([...this.#unconsumedKeys].filter(code=>!player.blockedKeys.has(code))));
+      for(const button of this.#unconsumedPointers)if(!player.blockedPointers.has(button))for(const action of player.actionMap.actionsForPointerButton(button))if(Math.abs(values.get(action)??0)<1)values.set(action,1);
+    }
+    const gamepad = bindingChanged || player.gamepadIndex === null || this.#disconnectedGamepads.has(player.gamepadIndex) ? null : gamepads[player.gamepadIndex] ?? null;
     mergeValues(values, player.actionMap.sampleGamepad(gamepad));
-    const actions = player.actionMap.actionNames().map(action => {
+    const names = [...new Set([...player.actionMap.actionNames(),...player.previous.keys()])].sort();
+    const actions = names.map(action => {
       const value = values.get(action) ?? 0;
       const previous = player.previous.get(action) ?? 0;
       const held = Math.abs(value) >= this.actionThreshold;
       const wasHeld = Math.abs(previous) >= this.actionThreshold;
-      player.previous.set(action, value);
+      if(player.actionMap.hasAction(action))player.previous.set(action, value);else player.previous.delete(action);
       return Object.freeze({ action, value, held, pressed: held && !wasHeld, released: !held && wasHeld });
     });
     return snapshot({id:player.id,actions:Object.freeze(actions)});
@@ -215,6 +256,9 @@ function mergeValues(target: Map<string, number>, values: readonly InputActionVa
 function keyboardCode(event: Event): string | null {
   const code = (event as Event & Readonly<{ code?: unknown }>).code;
   return typeof code === 'string' && code.length > 0 ? code : null;
+}
+function pointerButton(event: Event): number | null {
+  const button=(event as PointerEvent).button;return Number.isSafeInteger(button)&&button>=0&&button<=31?button:null;
 }
 
 function gamepadEventIndex(event: Event): number | null {

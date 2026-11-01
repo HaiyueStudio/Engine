@@ -17,11 +17,19 @@ export function validateEngineRehearsalManifest(manifest) {
     id: `${workspace}-npm`, kind: 'npm-package', workspace, packageName: `@haiyue/${workspace}`,
   }));
   expected.push({ id: 'examples-static-catalog', kind: 'static-catalog', workspace: 'examples' });
+  const versions = manifest?.packageVersions;
+  const packageNames = expected.filter(item => item.kind === 'npm-package').map(item => item.packageName).sort();
+  const validVersion = value => typeof value === 'string' && /^\d+\.\d+\.\d+$/u.test(value);
+  if (!validVersion(manifest?.releaseVersion) || versions !== undefined && (
+    !versions || typeof versions !== 'object' || Array.isArray(versions)
+    || JSON.stringify(Object.keys(versions).sort()) !== JSON.stringify(packageNames)
+    || Object.values(versions).some(value => !validVersion(value))
+  )) throw new Error('Engine rehearsal requires an explicit valid version for every declared public package.');
   if (manifest?.artifacts?.length !== expected.length || expected.some(contract => {
     const matches = manifest.artifacts.filter(item => item.id === contract.id);
     return matches.length !== 1 || Object.entries(contract).some(([key, value]) => matches[0][key] !== value)
-      || matches[0].version !== manifest.releaseVersion;
-  })) throw new Error('Engine rehearsal requires exactly four local npm packages and the examples catalog at the release version.');
+      || matches[0].version !== (contract.kind === 'npm-package' && versions ? versions[contract.packageName] : manifest.releaseVersion);
+  })) throw new Error('Engine rehearsal requires exactly four local npm packages at their declared versions and the examples catalog at the release version.');
 }
 export function createEngineRehearsalPlan(root) {
   const manifest = JSON.parse(readFileSync(resolve(root, 'review/api/release-manifest.json')));

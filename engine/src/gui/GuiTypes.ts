@@ -13,6 +13,7 @@ export const enum GuiDirtyFlags {
 }
 
 export type GuiLength = number | `${number}%`;
+export type GuiIconPosition = 'left' | 'right';
 
 export interface GuiRect {
   x: number;
@@ -36,6 +37,7 @@ export interface GuiStyle {
   fontFamily?: string;
   fontSize?: number;
   icon?: GuiImageSource;
+  iconPosition?: GuiIconPosition;
   iconSize?: number;
   iconGap?: number;
   iconTint?: string;

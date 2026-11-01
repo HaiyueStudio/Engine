@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Haiyue HTML-in-Canvas GUI benchmark</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #050b18; }
+    body { font: 12px/1.2 system-ui, sans-serif; color: #dcecff; }
+    #stage {
+      display: block;
+      width: 1280px;
+      height: 720px;
+      contain: strict;
+      background: #07111e;
+    }
+    #dom-root {
+      width: 1280px;
+      height: 720px;
+      display: grid;
+      gap: 1px;
+      padding: 2px;
+      overflow: hidden;
+      contain: layout paint style;
+      background: #07111e;
+      color: #dcecff;
+    }
+    .gui-item {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) 3px;
+      gap: 1px;
+      padding: 1px 2px;
+      overflow: hidden;
+      border: 1px solid rgba(112, 151, 210, 0.28);
+      border-radius: 2px;
+      background: #10233d;
+      color: #dcecff;
+    }
+    .gui-label {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: clip;
+      font-size: 8px;
+      line-height: 1;
+    }
+    .gui-track { display: block; overflow: hidden; border-radius: 2px; background: #243a5c; }
+    .gui-fill { display: block; height: 100%; transform-origin: left center; background: #64c7ff; }
+    #result { position: fixed; inset: auto 0 0; max-height: 35vh; overflow: auto; margin: 0; background: #000d; }
+  </style>
+</head>
+<body>
+  <canvas id="stage" width="1280" height="720" content="drawable">
+    <div id="dom-root" drawable></div>
+  </canvas>
+  <pre id="result" aria-live="polite"></pre>
+  <script type="module" src="./benchmark.mjs"></script>
+</body>
+</html>

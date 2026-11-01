@@ -1,6 +1,8 @@
 import { bitmapKerningKey, type BitmapFontChar, type BitmapFontData } from '../../font/BitmapFontData';
 import { GUI_TEXTURED_VERTEX_LAYOUT } from './GuiVertexLayout';
-import {guiFontCharacters,guiFontGlyph,guiFontGlyphIsColored} from './GuiTextGlyphs';
+import {guiFontCharacters,guiFontGlyph,guiFontGlyphIsColored,guiFontLayoutState} from './GuiTextGlyphs';
+import {snapshotGuiCommand} from './GuiCommandCache';
+import {GuiVertexChanges,forgetGuiVertexChanges} from './GuiVertexChanges';
 
 const VERTICES_PER_GLYPH = 6;
 
@@ -28,6 +30,9 @@ export class GuiTextBatch {
   dirty = true;
   private scratch = new Float32Array(0);
   private retainedVertexCount = 0;
+  private retained:{command:GuiTextCommand;layout:ReturnType<typeof layoutText>;first:number;count:number}[]=[];
+  private fontState:readonly unknown[]=[];
+  private forceUpload=false;
 
   clear(): void {
     this.commands.length = 0;
@@ -43,41 +48,62 @@ export class GuiTextBatch {
   }
 
   rebuild(font: BitmapFontData): void {
-    // Layout once, then reuse it for both the size calculation and packing.
-    // Re-evaluate font metrics on rebuild: BitmapFontData is mutable.
-    const layouts = this.commands.map(command => layoutText(command, font));
+    try{this.rebuildGeometry(font);}catch(error){this.retained=[];this.fontState=[];this.forceUpload=true;this.dirty=true;forgetGuiVertexChanges(this);throw error;}
+  }
+  private rebuildGeometry(font:BitmapFontData):void {
+    const base=this.version,changes=new GuiVertexChanges(),state=this.commands.length?guiFontLayoutState(font,this.commands.reduce((n,c)=>n+c.text.length,0)):[];
+    const stable=state!==undefined&&state.length===this.fontState.length&&state.every((value,i)=>Object.is(value,this.fontState[i]));
+    const next:typeof this.retained=[];let layouts=0,rebuilt=0;
     this.commandRanges.length = 0;
     let first = 0;
-    for (const layout of layouts) {
+    for(let i=0;i<this.commands.length;i++){
+      const command=this.commands[i]!,previous=this.retained[i];
+      const reuse=stable&&previous&&sameTextLayout(previous.command,command);
+      const layout=reuse?previous.layout:layoutText(command,font);if(!reuse)layouts++;
       const count = layout.glyphs.length * VERTICES_PER_GLYPH;
-      this.commandRanges.push({first, count}); first += count;
+      this.commandRanges.push({first, count});
+      next.push({command:previous&&sameTextLayout(previous.command,command)&&previous.command.color.every((v,n)=>v===command.color[n])?previous.command:snapshotGuiCommand(command),layout,first,count});first+=count;
     }
-    const glyphCount = layouts.reduce((sum, layout) => sum + layout.glyphs.length, 0);
-    const vertexCount = glyphCount * VERTICES_PER_GLYPH;
+    const vertexCount = first;
     const requiredFloats = vertexCount * GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex;
-    if (this.scratch.length < requiredFloats) this.scratch = new Float32Array(nextCapacity(requiredFloats));
-    let offset = 0;
-    for (let i = 0; i < layouts.length; i++) {
-      const layout = layouts[i]!, command = this.commands[i]!;
+    if(this.vertexData.length<requiredFloats){const data=new Float32Array(nextCapacity(requiredFloats));data.set(this.vertexData);this.vertexData=data;}
+    const glyphFloats=VERTICES_PER_GLYPH*GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex;
+    if(vertexCount&&this.scratch.length<glyphFloats)this.scratch=new Float32Array(glyphFloats);
+    if(this.forceUpload)changes.add(0,requiredFloats*4);
+    let changed=this.forceUpload||vertexCount!==this.retainedVertexCount;
+    for (let i = 0; i < next.length; i++) {
+      const entry=next[i]!,previous=this.retained[i],{layout,command}=entry;
+      const fixed=previous?.first===entry.first&&sameTextPaint(previous.command,command,previous.layout,layout);
       // Negative RGB marks atlas-colored glyphs; alpha still carries caller opacity.
-      for (const glyph of layout.glyphs) {
-        offset = pushGlyph(this.scratch, offset, glyph.x0, glyph.y0, glyph.x1, glyph.y1,
+      for(let j=0;j<layout.glyphs.length;j++){
+        const glyph=layout.glyphs[j]!;
+        if(fixed&&sameGlyph(previous.layout.glyphs[j],glyph))continue;
+        const offset=(entry.first+j*VERTICES_PER_GLYPH)*GUI_TEXTURED_VERTEX_LAYOUT.floatsPerVertex;
+        pushGlyph(this.scratch, 0, glyph.x0, glyph.y0, glyph.x1, glyph.y1,
           glyph.u0, glyph.v0, glyph.u1, glyph.v1, glyph.colored ? [-1,-1,-1,command.color[3]] : command.color,
           layout.clipX0, layout.clipY0, layout.clipX1, layout.clipY1);
+        rebuilt+=VERTICES_PER_GLYPH;
+        let different=false;for(let n=0;n<glyphFloats&&!different;n++)different=this.vertexData[offset+n]!==this.scratch[n];
+        if(different){this.vertexData.set(this.scratch,offset);changes.add(offset*4,glyphFloats*4);changed=true;}
       }
     }
-    let changed = vertexCount !== this.retainedVertexCount;
-    for (let i = 0; !changed && i < requiredFloats; i++) changed = this.vertexData[i] !== this.scratch[i];
-    if (changed) {
-      const previous = this.vertexData;
-      this.vertexData = this.scratch;
-      this.scratch = previous;
-      this.version++;
-    }
+    if(changed)this.version++;
+    this.forceUpload=false;
+    this.retained=next;this.fontState=state??[];
     this.retainedVertexCount = this.vertexCount = vertexCount;
+    changes.commit(this,base,this.version,{commands:this.commands.length,layouts,vertices:rebuilt});
     this.dirty = false;
   }
 }
+
+function sameTextLayout(a:GuiTextCommand,b:GuiTextCommand):boolean {
+  return a.text===b.text&&a.x===b.x&&a.y===b.y&&a.width===b.width&&a.height===b.height&&a.fontSize===b.fontSize&&a.multiline===b.multiline&&a.verticalAlign===b.verticalAlign&&a.wrap===b.wrap&&a.lineHeight===b.lineHeight&&
+    (a.clip===b.clip||!!(a.clip&&b.clip&&a.clip.x===b.clip.x&&a.clip.y===b.clip.y&&a.clip.width===b.clip.width&&a.clip.height===b.clip.height));
+}
+function sameTextPaint(a:GuiTextCommand,b:GuiTextCommand,x:ReturnType<typeof layoutText>,y:ReturnType<typeof layoutText>):boolean {
+  return a.color.every((v,i)=>v===b.color[i])&&x.clipX0===y.clipX0&&x.clipY0===y.clipY0&&x.clipX1===y.clipX1&&x.clipY1===y.clipY1;
+}
+function sameGlyph(a:LaidOutGlyph|undefined,b:LaidOutGlyph):boolean {return !!a&&a.colored===b.colored&&a.x0===b.x0&&a.y0===b.y0&&a.x1===b.x1&&a.y1===b.y1&&a.u0===b.u0&&a.v0===b.v0&&a.u1===b.u1&&a.v1===b.v1;}
 
 export function measureGuiTextWidth(text: string, font: BitmapFontData, fontSize: number): number {
   let maxWidth = 0;

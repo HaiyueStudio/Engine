@@ -9,6 +9,7 @@ import { GuiElement } from './GuiElement';
 import {activateGuiElement} from '../input/GuiActivation';
 import type {GuiActionEvent} from '../GuiTypes';
 import { GuiDirtyFlags, GuiElementOptions, GuiPointerEvent } from '../GuiTypes';
+import {guiStockTextControl,markGuiTextContentDirty} from '../GuiInvalidationState';
 
 export interface GuiButtonOptions extends GuiElementOptions {
   text?: string;
@@ -51,7 +52,8 @@ export class GuiButton extends GuiElement {
   setText(text: string): void {
     if (this.text === text) return;
     this.text = text;
-    this.markDirty(GuiDirtyFlags.Text | GuiDirtyFlags.Visual);
+    if(guiStockTextControl(this,GuiButton.prototype,GuiElement.prototype))markGuiTextContentDirty(this,GuiElement.prototype,true);
+    else this.markDirty(GuiDirtyFlags.Text | GuiDirtyFlags.Visual);
   }
 }
 

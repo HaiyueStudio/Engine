@@ -48,6 +48,6 @@ export class GuiLayoutResources {
     return JSON.stringify(['text' in element ? element.text : undefined, 'fontSize' in element ? element.fontSize : undefined, 'value' in element ? element.value : undefined, 'placeholder' in element ? element.placeholder : undefined,
       skin.padding, skin.fontFamily, skin.fontSize, skin.contentInsets,
       skin.nineSlice ? [skin.nineSlice.contentInsets, skin.nineSlice.cuts, skin.nineSlice.pixelRatio] : null,
-      skin.iconSize, skin.iconGap, icon, image]);
+      skin.iconSize, skin.iconGap, skin.iconPosition, icon, image]);
   }
 }

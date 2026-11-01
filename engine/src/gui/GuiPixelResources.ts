@@ -5,6 +5,7 @@ import type {GuiRoot} from './components/GuiRoot';
 import type {GuiElement} from './components/GuiElement';
 import {observeGuiRootDisposal} from './GuiLayoutState';
 import {guiThemeTreeActive} from './GuiThemeResolve';
+import {guiPaintOnly,guiTextContentOnly} from './GuiInvalidationState';
 
 type Source = NonNullable<GuiImageSource>;
 interface Watched {nodes: Set<GuiElement>; key: string; release: () => void;}
@@ -37,7 +38,7 @@ export class GuiPixelResources {
       this.roots = active;
       for (const [root, release] of this.rootObservers) if (!active.includes(root)) {release(); this.rootObservers.delete(root);}
       for (const root of active) if (!this.rootObservers.has(root)) {
-        const off = root.onInvalidation(() => this.sync(this.roots));
+        const off = root.onInvalidation(change => {if(!guiPaintOnly(change)&&!guiTextContentOnly(change))this.sync(this.roots);});
         const disposed = observeGuiRootDisposal(root.root, () => this.sync(this.roots.filter(r => r !== root)));
         this.rootObservers.set(root, () => {off(); disposed();});
       }

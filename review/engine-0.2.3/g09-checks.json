@@ -1,0 +1,501 @@
+{
+  "schemaVersion": 1,
+  "goal": "g09-game-audio",
+  "goalStatus": "complete",
+  "generatedAt": "2026-11-01T02:50:12.838Z",
+  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
+  "dirty": true,
+  "runtimeFeaturesImplemented": true,
+  "releaseQualified": false,
+  "publicationPerformed": false,
+  "performanceBaselinePromoted": false,
+  "summary": {
+    "workspaceTestTotals": [
+      138,
+      1343,
+      127,
+      974,
+      7
+    ],
+    "workspaceTests": 2589,
+    "focusedTests": 21,
+    "repositoryPhases": 14,
+    "builtExampleTargets": 110,
+    "nativeCases": 19,
+    "nativeChecks": 42,
+    "hyaCases": 6,
+    "actualApplicationChecks": 6,
+    "cpuCohorts": 12,
+    "cpuSteadySamples": 360,
+    "independentConsumers": 50,
+    "historicalRecords": 556,
+    "sourceSnapshotFiles": 52
+  },
+  "requirements": [
+    {
+      "id": "equivalent-preemption-and-owner-lifecycle",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g09/frozen-focused-tests.log",
+      "conclusion": "5000 seeded operations at each 32/128 population preserve original results, statistics, priority/sequence/ID and global-first/owner-second victim order. Counts are O(1); eviction scans only the minimum candidate without array sorting."
+    },
+    {
+      "id": "game-volumes-profile-fade-and-spatial",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g09/native-final/result.json",
+      "conclusion": "Original mixer owns all voices/nodes. Profiles validate atomically; stereo and attenuation match independent native PCM; initial attenuation is applied before start. Static emitters add zero AudioParam events over 1000 updates."
+    },
+    {
+      "id": "hya-sample-and-borrowed-host",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g09/hya-final/result.json",
+      "conclusion": "Original six analytical/integrity/rate/autoplay contracts preserved through installed public host; real shared native clock, suspend/resume and isolated owner release pass. HYA implementation sources unchanged."
+    },
+    {
+      "id": "installed-public-closure-and-actual-example",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g09/feature-validation.json",
+      "conclusion": "Deterministic raw tarballs, actual npm install, all extracted file hashes, strict declarations (skipLibCheck:false), class identity and real example factory pass. Independent audio closures contain no HYA/GUI/3D runtime."
+    },
+    {
+      "id": "measurable-scheduling-cost-and-resources",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g09/cpu-final/result.json",
+      "conclusion": "Both populations retain all 12 warmups, 30 samples, three rounds and reverse second round. Play/retirement, stats, teardown and residue are separate. Native 32/128 voices peak at 100/388 nodes; final graph/decoded/voice owners release exactly once. CPU diagnostic is not a new hard threshold or formal baseline."
+    },
+    {
+      "id": "physical-audible-and-platforms",
+      "status": "handed-to-g11-device-owner",
+      "evidence": "g09-physical-audible-workflow",
+      "conclusion": "No physical hearing or Mac/iPhone result is fabricated; explicit device-owned closure remains in G11."
+    }
+  ],
+  "publicEntries": {
+    "engine": {
+      "path": "@haiyue/engine/audio",
+      "exports": 7,
+      "originalClassIdentity": true
+    },
+    "extensions": {
+      "path": "@haiyue/extensions/audio",
+      "exports": 5
+    },
+    "experimentalAudioExportsUnchanged": 5,
+    "engineRootExportsUnchanged": 30
+  },
+  "ownership": {
+    "privateProtocol": "haiyue.audio.game-lease.v1",
+    "rationale": "The original mixer maintains a bounded set of actual live voice IDs for each facade and removes them on natural end/eviction. GameAudio holds emitter configuration only and cannot update or stop a foreign same-channel replacement. There is no second node registry, decoder, cache, sample clock or context.",
+    "hya": "Sample-frame scheduler, integrity, codecs, decoded handles and arbitrary bus gains retain their original owner. Borrow one explicit AudioContext through the existing public HYA host; do not multiply its bus gain again or coerce its schedule into tick-based mixer requests.",
+    "scope": "Explicit suspend/resume affects the shared context. Facade disposal leaves mixer, installed buffers, borrowed context and applied global volumes with the application."
+  },
+  "capacities": [
+    {
+      "id": "audio-mixer-only",
+      "previousMaximum": 4000,
+      "reviewedGzipBytes": 6294,
+      "measuredGzipBytes": 6331,
+      "maximum": 7300,
+      "remainingBytes": 969,
+      "modules": [
+        "@haiyue/engine/dist/audio.js",
+        "@haiyue/engine/dist/chunks/EngineError-DZgELhuK.js",
+        "fixture/audio-mixer-only.mjs"
+      ]
+    },
+    {
+      "id": "audio-core",
+      "previousMaximum": null,
+      "reviewedGzipBytes": 6294,
+      "measuredGzipBytes": 6331,
+      "maximum": 7300,
+      "remainingBytes": 969,
+      "modules": [
+        "@haiyue/engine/dist/audio.js",
+        "@haiyue/engine/dist/chunks/EngineError-DZgELhuK.js",
+        "fixture/audio-core.mjs"
+      ]
+    },
+    {
+      "id": "extensions-audio",
+      "previousMaximum": null,
+      "reviewedGzipBytes": 8341,
+      "measuredGzipBytes": 8419,
+      "maximum": 9600,
+      "remainingBytes": 1181,
+      "modules": [
+        "@haiyue/engine/dist/audio.js",
+        "@haiyue/engine/dist/chunks/EngineError-DZgELhuK.js",
+        "@haiyue/extensions/dist/audio.js",
+        "fixture/extensions-audio.mjs"
+      ]
+    }
+  ],
+  "unchangedBudgets": {
+    "allOtherConsumers": true,
+    "wholePackages": true,
+    "performance": true,
+    "gpuFivePercent": true,
+    "resource": true,
+    "pixel": true
+  },
+  "cpuDiagnostic": {
+    "measurement": "actual installed mixer vs frozen legacy with identical audio-node audit host; play includes per-voice retirement, with statistics separate; teardown measured at cohort end; GPU/queue/upload not applicable to this CPU-only scheduler diagnostic",
+    "profile": {
+      "voices": [
+        32,
+        128
+      ],
+      "owners": 4,
+      "perOwner": 32,
+      "warmup": 12,
+      "samples": 30,
+      "rounds": 3,
+      "operationsPerSample": 200,
+      "reverseRound": 2
+    },
+    "comparisons": [
+      {
+        "voices": 32,
+        "legacyPlayP95Ms": 1.7980000000000018,
+        "currentPlayP95Ms": 1.1561999999999841,
+        "legacyStatsP95Ms": 0.41859999999999786,
+        "currentStatsP95Ms": 0.03290000000001214
+      },
+      {
+        "voices": 128,
+        "legacyPlayP95Ms": 5.017400000000009,
+        "currentPlayP95Ms": 0.9870000000000232,
+        "legacyStatsP95Ms": 1.2006000000000085,
+        "currentStatsP95Ms": 0.023300000000006094
+      }
+    ],
+    "formalBaseline": false
+  },
+  "retainedFailures": [
+    {
+      "id": "application-diagnostic",
+      "artifact": "artifacts/engine-0.2.3/g09/application-diagnostic/result.json",
+      "resolution": "Test helper called nonexistent MemorySaveBackend.dispose; fixture clears its own save through the original delete API. Runtime unchanged; actual final application check is new."
+    },
+    {
+      "id": "capacity-schema",
+      "artifact": "artifacts/engine-0.2.3/g09/final-validation.json",
+      "resolution": "Three measuredGzipBytes keys were corrected to the existing reviewedGzipBytes schema. All byte limits unchanged. Original failure and input retained; affected policies and remaining package gate rerun."
+    }
+  ],
+  "protectedHistory": {
+    "audit": {
+      "path": "artifacts/engine-0.2.3/g09/historical-audit.json",
+      "bytes": 148118,
+      "sha256": "2081adc13dd3aa8919374d9f37a784d4a410c8ae1e9cc15c368780689a655049"
+    },
+    "sourceSnapshot": {
+      "path": "artifacts/engine-0.2.3/g09/source-snapshot.zip",
+      "bytes": 138051,
+      "sha256": "cc64ae5c8a3bcf3cf650169627922758ad60df337fe611058594384078a30921"
+    },
+    "sourceManifest": {
+      "path": "artifacts/engine-0.2.3/g09/source-snapshot-manifest.json",
+      "bytes": 9165,
+      "sha256": "e515c62405cf6852f4238540f96d2446a2ead47bb0079a3421751f6e1401b305"
+    },
+    "originalsRetained": true
+  },
+  "handoffs": [
+    {
+      "owner": "g11-integration-candidate",
+      "id": "g09-physical-audible-workflow",
+      "status": "pending-physical",
+      "authority": "M25 README assigns G07/G09/G10 real-device evidence to G11; milestones/AGENTS.md permits explicitly device-owned verification handoff.",
+      "required": "On exact qualified packages, use stereo headphones/speakers: real gesture unlock, left/center/right localization, increasing distance and silence at maxDistance, configured mute/unmute, two-second fade, saved settings restore, scene owner replacement/disposal, suspend/resume and background recovery. Windows physical hearing is not inferred from silent automated checks."
+    },
+    {
+      "owner": "g11-integration-candidate",
+      "id": "g09-mac-iphone-hosts",
+      "status": "pending-physical",
+      "required": "Fresh Mac/iPhone host capability, user-gesture unlock, background/foreground recovery and audible owner-isolation evidence. Keep exact sample clock, codec/integrity and decoded/voice releases. Unsupported stereo is explicit E_AUDIO_CAPABILITY_UNAVAILABLE; do not emulate native PCM with a JS clock."
+    },
+    {
+      "owner": "g11-integration-candidate",
+      "id": "g09-formal-production-and-version-pair",
+      "status": "pending-integration",
+      "required": "Run combined production frame pacing with 32 game voices and the frozen full cold/steady sampling corpus; all existing GPU/performance/resource budgets remain. Atomically set Engine/extensions/shader-language 0.2.3 and animation-spec 0.2.2 and pair the Engine/extensions peer floor >=0.2.3. The private v1 voice lease requires the matching original mixer; no new public port is admitted."
+    }
+  ],
+  "validations": {
+    "repository": {
+      "path": "artifacts/engine-0.2.3/g09/accepted-validation.json",
+      "bytes": 5549,
+      "sha256": "21352134a435ae43aa6ad559a26d3a584b9662731682427fa2a57c5f935a1e62"
+    },
+    "feature": {
+      "path": "artifacts/engine-0.2.3/g09/feature-validation.json",
+      "bytes": 2032,
+      "sha256": "bafff746ae6718e9ef60daa9040526aeffb45c621adcb2fde07eec10176cecf2"
+    },
+    "visual": {
+      "path": "artifacts/engine-0.2.3/g09/catalog-final/visual-review.json",
+      "bytes": 421,
+      "sha256": "504f43b41895561545c4f102d6564afaf9f7fa6b5525217dd420b2710bfaf449"
+    },
+    "completion": {
+      "status": "passed",
+      "logs": [
+        {
+          "path": "artifacts/engine-0.2.3/g09/completion-docs.log",
+          "bytes": 724,
+          "sha256": "acd2372f475be74f6c32141e9603d011c6dad4024127e1a9d09c5af47556eb1a"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g09/completion-engine-diff.log",
+          "bytes": 1454,
+          "sha256": "ea48deb086ec8fe8242f55306d5ce1f51d329c6dc93a3be4f95243d42f29c84b"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g09/completion-coordination.log",
+          "bytes": 200,
+          "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g09/completion-coordination-diff.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "coordination": {
+        "path": "artifacts/engine-0.2.3/g09/coordination-update.json",
+        "bytes": 712,
+        "sha256": "4c846b686602193d98b3520dd66b6068e0c600efd74750e9dfbca05f615a5e35"
+      },
+      "sourceHashesMatched": 52,
+      "archiveHashesMatched": 7
+    }
+  },
+  "files": [
+    {
+      "path": "artifacts/engine-0.2.3/g09/start.json",
+      "bytes": 4971,
+      "sha256": "900aab100ee9d2e070504837e62f8e32718cb831753d4d25d2abcbaf9b004b9c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/focused-validation.json",
+      "bytes": 1332,
+      "sha256": "de573eea3564a3b5cab2e0493d0a205b1a8f269bc161f358858fc84c32f764f6"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/frozen-focused-tests.log",
+      "bytes": 2375,
+      "sha256": "6090e32f50e36a9e5a96468d5b7ccc807070d3497861c089fe6115eb7e454425"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/final-validation.json",
+      "bytes": 3412,
+      "sha256": "9a8ead40214b00bfdf5e251a19dc2661ef92c225323cc5ff37b845fa3e9b2466"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/final-release-policy-test.log",
+      "bytes": 20525,
+      "sha256": "53e93e47e00a997d245b3546e610ee363be4780f63e8a44dc1abd65ff79412f3"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/capacity-schema-failed.json",
+      "bytes": 34830,
+      "sha256": "098bd5f0de43103e01acf63b91e12c63fd03bd5bbb555cdbab6dd7778dab3a8d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/capacity-policy-corrected.log",
+      "bytes": 1236,
+      "sha256": "8c3152647a30fbb008ad47dcbbc90c7c0eb959bcf074d33ad1d4434462ffcf0a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/corrected-validation.json",
+      "bytes": 1371,
+      "sha256": "be176c70267658f3699343a9a3c2539c2c6602dae96251b80f5bf5ebf0d30b2c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/accepted-validation.json",
+      "bytes": 5549,
+      "sha256": "21352134a435ae43aa6ad559a26d3a584b9662731682427fa2a57c5f935a1e62"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/feature-validation.json",
+      "bytes": 2032,
+      "sha256": "bafff746ae6718e9ef60daa9040526aeffb45c621adcb2fde07eec10176cecf2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/public-packages/public-packages.json",
+      "bytes": 166169,
+      "sha256": "9a605bac510b644fe07be34549eacdfd6a179e6a66be1f2c334b583c2d351b8c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/final-candidate/candidate.json",
+      "bytes": 12394,
+      "sha256": "ef378ef944cc3f5ab7b1c68bf98d57527c1c579b6086c47e53f68013da27c452"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/native-final/result.json",
+      "bytes": 34304,
+      "sha256": "9dd18ca846d6639fed596e35bc6e7883d72fe7ec1131ad16ea711735f08ebe96"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/hya-final/result.json",
+      "bytes": 8901,
+      "sha256": "02bde0e1e401fb5355475d8b9b63c8ecf46fa24f22f8d57e4a81309d9d53edd7"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/application-final/result.json",
+      "bytes": 28096,
+      "sha256": "4ff0058bc10021d04c116e4e718a3e361b6def3664ca6f8a9e575f454cc602d2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/cpu-final/result.json",
+      "bytes": 102210,
+      "sha256": "276822acc70d516e869483d27f206dff301cdf975203a3933a4720cd1c2ccb25"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/catalog-final/result.json",
+      "bytes": 12766,
+      "sha256": "3c2d3a5a857e56ea6f5229144bc204c1f93a8c6ae5692fb21d973fe6c3ab83ec"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/catalog-final/example.png",
+      "bytes": 35860,
+      "sha256": "5fdcf5110d18c6ef7eb7b3344e188a3eead854b4dfcb1164d12ad1762b5707bc"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/catalog-final/visual-review.json",
+      "bytes": 421,
+      "sha256": "504f43b41895561545c4f102d6564afaf9f7fa6b5525217dd420b2710bfaf449"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/feature-freshness.log",
+      "bytes": 60,
+      "sha256": "481928a96692406174726dcce12a2c0944b421c24fb0706fa9d6a65d229313e3"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/consumer-capacity-admission.json",
+      "bytes": 2179,
+      "sha256": "9f90a35c3904ba8ee57e95c854a9fe3d1c8ecd0834ceb19b2040821e9b38a4ca"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/source-audit.json",
+      "bytes": 9068,
+      "sha256": "b0ec32c87543724341f85f1407615bd1de1005953ccf7305a04928c472291efd"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/source-snapshot-manifest.json",
+      "bytes": 9165,
+      "sha256": "e515c62405cf6852f4238540f96d2446a2ead47bb0079a3421751f6e1401b305"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/source-snapshot-verification.json",
+      "bytes": 242,
+      "sha256": "321dde7c7e34ee7919f4d146dfc5f8c136e60c7668ab3e60b948965797eeb38c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/historical-audit.json",
+      "bytes": 148118,
+      "sha256": "2081adc13dd3aa8919374d9f37a784d4a410c8ae1e9cc15c368780689a655049"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/native-diagnostic/result.json",
+      "bytes": 33677,
+      "sha256": "601c7981621dc5e913a1ef114327b6c363be013506aaf38120292949a29d3875"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/hya-diagnostic/result.json",
+      "bytes": 8926,
+      "sha256": "0f1b389cd4d3450dbe56b570a1902c11c89934923c653206a9a31c90b21d44c4"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/application-diagnostic/result.json",
+      "bytes": 28189,
+      "sha256": "3fa4e745a076e1259f95db4b819d31534e552baf0c4bdde791ad7e2cc1dae647"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/application-diagnostic-2/result.json",
+      "bytes": 28116,
+      "sha256": "794531cc5ecbf8e2e56dae3683760ecd0fe65e05db7cb4a36310a9b6feb25b69"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/cpu-diagnostic/result.json",
+      "bytes": 102169,
+      "sha256": "b3b54c2df5e9a41b000949fe21400649cb74ef5fb8f51efe05d0be0d00b6f5bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/create-report.mjs",
+      "bytes": 11041,
+      "sha256": "bd7546836a9bd5a5aa0c09a5c083323ea7b1e7a008d95c2728a1c235fa024c2e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/prepare-source-audit.mjs",
+      "bytes": 2717,
+      "sha256": "a8d36fcf9ee52fd17ae58530bb60c4461632a924670d9623a12ad59b1b3346d3"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/audit-history.py",
+      "bytes": 1809,
+      "sha256": "b96c7638f95afc6f10eded1ca053047f4c1567eb564db758ffff53ead5fcde29"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/snapshot.py",
+      "bytes": 1035,
+      "sha256": "3f3977a5d7ed18ca540431356599360b0a25605dcbcac1d2331ce980dacc4cd2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/accept-repository-validation.mjs",
+      "bytes": 2077,
+      "sha256": "fc43dc5f25c064de224684b52ca765c19ff0b35401759960e331f7ed041d0d51"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/run-feature-completion.mjs",
+      "bytes": 2291,
+      "sha256": "6969d55e98b1e2b1adfb65e20f3e2dac5938cd6ed5a73357b9295645d8ecdaeb"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/verify-catalog.mjs",
+      "bytes": 1777,
+      "sha256": "466d30da61ea212795ea50d697a6c96bc1da1729f9f7baf1b79118555d8f29e3"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/completion-docs.log",
+      "bytes": 724,
+      "sha256": "acd2372f475be74f6c32141e9603d011c6dad4024127e1a9d09c5af47556eb1a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/completion-engine-diff.log",
+      "bytes": 1454,
+      "sha256": "ea48deb086ec8fe8242f55306d5ce1f51d329c6dc93a3be4f95243d42f29c84b"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/completion-coordination.log",
+      "bytes": 200,
+      "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/completion-coordination-diff.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/completion-diff-status.json",
+      "bytes": 1978,
+      "sha256": "7d98d5bd27c5e90c274b0df09ec582abc9693199b7bbc3ef80ae5c9c4147a387"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/coordination-update.json",
+      "bytes": 712,
+      "sha256": "4c846b686602193d98b3520dd66b6068e0c600efd74750e9dfbca05f615a5e35"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/update-coordination.mjs",
+      "bytes": 2765,
+      "sha256": "b2ae681bd832c00273b528f0bf45f92b1d20917d7044c6f5400c0b34f1701f97"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g09/finalize-report.mjs",
+      "bytes": 3488,
+      "sha256": "3f0a77074267c5079dc74525ceafcb06bb524ca8d6b44e3247c5c9735d00f9e8"
+    }
+  ]
+}

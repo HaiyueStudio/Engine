@@ -1,0 +1,556 @@
+{
+  "schemaVersion": 1,
+  "goal": "g07-gui-collections",
+  "goalStatus": "complete",
+  "generatedAt": "2026-10-31T14:48:50.169Z",
+  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
+  "dirty": true,
+  "runtimeFeaturesImplemented": true,
+  "releaseQualified": false,
+  "publicationPerformed": false,
+  "baselinePromoted": false,
+  "summary": {
+    "workspaceTestTotals": [
+      138,
+      1337,
+      127,
+      944,
+      7
+    ],
+    "workspaceTests": 2546,
+    "catalogTests": 7,
+    "focusedTests": 20,
+    "builtExampleTargets": 108,
+    "independentConsumers": 48,
+    "nativeWindowCases": 24,
+    "nativeChecks": 7,
+    "regionPixelCases": 12,
+    "historicalRecords": 436
+  },
+  "requirements": [
+    {
+      "id": "bounded-original-gui",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g07/native-final/result.json"
+    },
+    {
+      "id": "stable-keys-anchor-focus-ime-drag",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g07/feature-current-focused.log"
+    },
+    {
+      "id": "hya-and-original-gui-compatibility",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g07/final-test.log"
+    },
+    {
+      "id": "real-tarball-strict-api-and-closure",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g07/public-packages-final/public-packages.json"
+    },
+    {
+      "id": "physical-devices",
+      "status": "handed-to-g11",
+      "handoffs": [
+        {
+          "owner": "g11-integration-candidate",
+          "id": "g07-windows-collections-ime-gamepad",
+          "status": "pending-physical",
+          "workflows": [
+            "cross-window keyboard/gamepad navigation",
+            "edited-row recycle with real IME",
+            "remove focused row",
+            "drag/capture cancellation"
+          ]
+        },
+        {
+          "owner": "g11-integration-candidate",
+          "id": "g07-mac-iphone-collections",
+          "status": "pending-physical",
+          "workflows": [
+            "wheel/touch scrolling",
+            "native keyboard occlusion and composition",
+            "rotation/background restore",
+            "existing region composition"
+          ]
+        }
+      ]
+    }
+  ],
+  "validations": {
+    "repository": {
+      "path": "artifacts/engine-0.2.3/g07/final-validation.json",
+      "bytes": 4050,
+      "sha256": "f0a0d728f2f0e421d373c304259467c74ed55a60874a60cdb5b913a8e4469654"
+    },
+    "currentConvergence": {
+      "path": "artifacts/engine-0.2.3/g07/feature-current-validation.json",
+      "bytes": 3455,
+      "sha256": "d5ca4ff5181c3151fba64f9c6d74ef4c0da3d1f01c856218766d9840c5d2ff7a"
+    },
+    "completion": {
+      "status": "passed",
+      "docs": {
+        "path": "artifacts/engine-0.2.3/g07/docs-completion.log",
+        "bytes": 723,
+        "sha256": "6a7887a331168c52a179b79b5f2c74d15fac6ec501f19c147db2931da8e72e9a"
+      },
+      "coordination": {
+        "path": "artifacts/engine-0.2.3/g07/coordination-completion.log",
+        "bytes": 200,
+        "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+      },
+      "engineDiff": {
+        "path": "artifacts/engine-0.2.3/g07/diff-completion.log",
+        "bytes": 1154,
+        "sha256": "d56efd13d344597bf5f85ae9778946e0ebc942eea28d4cb5e42d116ed58a9b30"
+      },
+      "coordinationDiff": {
+        "path": "artifacts/engine-0.2.3/g07/coordination-diff-completion.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "publicEntry": {
+    "subpath": "@haiyue/extensions/gui-collections",
+    "exactExportCount": 9,
+    "runtimeExports": [
+      "createGuiVirtualList",
+      "createGuiVirtualTree"
+    ],
+    "rootExportsUnchanged": 30
+  },
+  "packageCapacity": {
+    "gzipBytes": 13947,
+    "maxGzipBytes": 15700,
+    "existingEntriesUnchanged": true
+  },
+  "native": {
+    "checks": [
+      "window-matrix",
+      "static-work",
+      "anchor",
+      "offscreen-navigation",
+      "ime-retirement",
+      "tree-expansion",
+      "resource-teardown"
+    ],
+    "adapter": {
+      "vendor": "nvidia",
+      "architecture": "pascal",
+      "description": "",
+      "isFallbackAdapter": false
+    },
+    "staticWork": {
+      "bindings": 0,
+      "created": 0,
+      "layouts": 0,
+      "measurements": 0
+    },
+    "lifecycle": {
+      "created": 37,
+      "disposed": 37,
+      "bindings": 694,
+      "unbound": 694
+    },
+    "finalGpu": {
+      "resources": 0,
+      "estimatedBytes": 0
+    }
+  },
+  "retainedFailures": [
+    "artifacts/engine-0.2.3/g07/collections-tests-1.log",
+    "artifacts/engine-0.2.3/g07/collections-tests-2.log",
+    "artifacts/engine-0.2.3/g07/native-diagnostic/result.json",
+    "artifacts/engine-0.2.3/g07/diagnostic-candidate.log",
+    "artifacts/engine-0.2.3/g07/feature-final-focused.log"
+  ],
+  "design": {
+    "legacyTree": "unchanged; original serialization and prototype preserved",
+    "shared": "pure numeric window; one pooled list also backs tree; original ScrollView and original GUI input/editor/drag owners",
+    "fixedHeight": true,
+    "variableHeight": false,
+    "sameFrame": "setters commit logical state and mark original GUI dirtiness; one final original frame paints current state, no extra frame clock or layout solver"
+  },
+  "protectedHistory": {
+    "audit": {
+      "path": "artifacts/engine-0.2.3/g07/historical-audit.json",
+      "bytes": 115852,
+      "sha256": "2ce4fc365db4d07c5555859f7f378ad6b393204945b4a78eed0c679d14e59e56"
+    },
+    "sourceSnapshot": {
+      "path": "artifacts/engine-0.2.3/g07/source-snapshot.zip",
+      "bytes": 164692,
+      "sha256": "cfb03e82b2c3a8b95912c31eae4362538ab3388107e476bb1e9b770760a8df3a"
+    },
+    "manifest": {
+      "path": "artifacts/engine-0.2.3/g07/source-snapshot-manifest.json",
+      "bytes": 12222,
+      "sha256": "22b0dc9cc5b25f23a20cb5e0ae9d3cefd91709fd964078c2a26ed88055322183"
+    },
+    "verification": {
+      "path": "artifacts/engine-0.2.3/g07/source-snapshot-verification.json",
+      "bytes": 223,
+      "sha256": "9fd67d0f4b7e4c788e231bdf8e64b3fcdc918f266e49bc54e0aab5c915a30b60"
+    }
+  },
+  "handoffs": [
+    {
+      "owner": "g11-integration-candidate",
+      "id": "g07-windows-collections-ime-gamepad",
+      "status": "pending-physical",
+      "workflows": [
+        "cross-window keyboard/gamepad navigation",
+        "edited-row recycle with real IME",
+        "remove focused row",
+        "drag/capture cancellation"
+      ]
+    },
+    {
+      "owner": "g11-integration-candidate",
+      "id": "g07-mac-iphone-collections",
+      "status": "pending-physical",
+      "workflows": [
+        "wheel/touch scrolling",
+        "native keyboard occlusion and composition",
+        "rotation/background restore",
+        "existing region composition"
+      ]
+    }
+  ],
+  "integrationRequirements": [
+    {
+      "owner": "g11-integration-candidate",
+      "id": "g07-version-and-peer-floor",
+      "status": "pending-integration",
+      "required": "Atomically version Engine/extensions to 0.2.3 and require Engine >=0.2.3 <0.3.0: viewport/retirement event cooperation is new in G07. Development tarballs still use local 0.2.2 metadata and must remain paired by SHA-256."
+    }
+  ],
+  "retainedObservations": {
+    "staticCounter": "Initial diagnostic counted cached GuiRoot.layout entry calls; corrected to actual GuiElement.layout. Zero-work requirement unchanged.",
+    "disposal": "Superseded feature-final-focused.log reproduces the attached empty viewport. Current owned viewport retires input, detaches and disables during disposal."
+  },
+  "files": [
+    {
+      "path": "artifacts/engine-0.2.3/g07/audit-history.py",
+      "bytes": 1818,
+      "sha256": "390ff3bc0bdae478fdf85d2b9d2e63a16d61be62db7e2bbbf80046d52b65db04"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/finalize-feature-current.mjs",
+      "bytes": 3314,
+      "sha256": "be596f327b6299553a1c18612bdad60d378b1aaa91d39c9dda31f7c624452bdf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/finalize-feature.mjs",
+      "bytes": 3108,
+      "sha256": "711e642063267de7c66e1e8b133ae59a886d4c3a9dd8758fa2c7a0cd35d2c12a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/measure-capacity.mjs",
+      "bytes": 2368,
+      "sha256": "915a1e516676381afd225b334f004acc894be28d9bb072288316e9a8d2b6d278"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/run-repository-validation.mjs",
+      "bytes": 2349,
+      "sha256": "d46128be901eb5ad5e1a1e63c1122b3212c0d0b777c0c6a0603912da58dd2b42"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/snapshot-source.py",
+      "bytes": 2190,
+      "sha256": "f2b0efa884e9b32f0762c304c820fbfaf529eebef62044b0b7b7e8339ee802cb"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/start.mjs",
+      "bytes": 2326,
+      "sha256": "7fa0e6a4433831fff74d32b47e3aca4dfce7d5653b726d67f015536168d6476a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/verify-catalog.mjs",
+      "bytes": 1698,
+      "sha256": "b489cdb28d19823fb9d68ce83ba971f288a64c82e1a92b343495adec68cfe0aa"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/verify-existing-regions.mjs",
+      "bytes": 1841,
+      "sha256": "903ce9ea01fca70cb9d8f6cfe1810e78aae71008da6a32c12d48061fd69de05d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/write-conclusion.mjs",
+      "bytes": 13184,
+      "sha256": "257b44746cc3c217d3a348c5a88725ba3ae6595803e30174c5d9b3aa7911d426"
+    },
+    {
+      "path": "config/engine-package-budget.json",
+      "bytes": 33049,
+      "sha256": "d34a7336d5778a92302ca2dfa5e231d7461a34ee041c27eb2ac60a9a6c1efca1"
+    },
+    {
+      "path": "config/gameplay-023-contract.json",
+      "bytes": 47325,
+      "sha256": "07ebc65103cc45c6ed9c6333f28ad89066439204348be9d62bdc87fc607c93ca"
+    },
+    {
+      "path": "config/public-api-capability-budgets.json",
+      "bytes": 12383,
+      "sha256": "90213e28250b2c2f9951e69ae432bc356b2ea2c8a1f7f6b7cab0a65340a293a6"
+    },
+    {
+      "path": "docs/api/errors.md",
+      "bytes": 1627,
+      "sha256": "2152c3f48629d39bbf3ceb3a99b5fd37f4ec7f29e50893e6aa85307cea3ac92e"
+    },
+    {
+      "path": "docs/api/errors/E_GUI_COLLECTION_LIMIT.md",
+      "bytes": 644,
+      "sha256": "b5a9f315bb7bbb6bc42f92277c366a6ca6a7a6cf93b03915b4055b6beebe71b1"
+    },
+    {
+      "path": "engine/src/core/EngineError.ts",
+      "bytes": 12776,
+      "sha256": "f7917e5abd70894d70f4601379e627ff648864244cc3bd4bf2132fd26987a007"
+    },
+    {
+      "path": "engine/src/gui/GuiCollectionTypes.ts",
+      "bytes": 558,
+      "sha256": "7d034149a2140fbacb2eb0ed6bbf9d52b1bc83a87c7dcccca75a373845010333"
+    },
+    {
+      "path": "engine/src/gui/components/GuiScrollView.ts",
+      "bytes": 7195,
+      "sha256": "c4a7cf92f97dab24654c30276b466561df8c3103bd2a95ad20656038793cb880"
+    },
+    {
+      "path": "engine/src/gui/components/GuiTree.ts",
+      "bytes": 9285,
+      "sha256": "28698fe838395aada7a4d7ec143d277c680a9db4a647c837930ac50720403fc5"
+    },
+    {
+      "path": "engine/src/gui/rendering/GuiRenderer.ts",
+      "bytes": 35046,
+      "sha256": "46443e531f1940e5aa3c02de60710feab2d0176484c9ebe662e9abef3423655a"
+    },
+    {
+      "path": "engine/src/gui/systems/GuiSystem.ts",
+      "bytes": 57020,
+      "sha256": "f2b13cc87cbb61d1d1bfb62a25f78aa57a10dc0c101d98a2114713d301af5e13"
+    },
+    {
+      "path": "examples/gui-collections/application.ts",
+      "bytes": 3571,
+      "sha256": "a2c0a9c7dde088e6946de76484d86362cc6c3434b38d4ccfd50638ae8df0e4d1"
+    },
+    {
+      "path": "examples/gui-collections/index.html",
+      "bytes": 421,
+      "sha256": "20eab1488c06dae88581e23bbd62630c479f39eb0846e986640bada3213e5945"
+    },
+    {
+      "path": "examples/gui-collections/main.ts",
+      "bytes": 792,
+      "sha256": "d43048e206682f519b08f606ff9a6234943c8f40be62c82824a44796aeef8bd2"
+    },
+    {
+      "path": "examples/manifest.json",
+      "bytes": 58832,
+      "sha256": "670f61961c77112a4144dbcaf3f1db3b7d9e83d8b401442c06889b9cd3b5baf2"
+    },
+    {
+      "path": "extensions/README.md",
+      "bytes": 20208,
+      "sha256": "a6b1371e8edf1b22fe128ae2f35ebce450d8ed230b8771313917b00d47597d1e"
+    },
+    {
+      "path": "extensions/package.json",
+      "bytes": 6136,
+      "sha256": "e8238354b3bfca2cbc3f4b6a78cce8c67f7971775016728dbca744a9a9e80e35"
+    },
+    {
+      "path": "extensions/rollup.config.js",
+      "bytes": 2033,
+      "sha256": "4d1b6b51a44e67218cc445d65315091fd8f834fdc314c8c651631fc7f4f6ea75"
+    },
+    {
+      "path": "extensions/src/animation/layout/parameterized/LayoutEvaluator.ts",
+      "bytes": 29784,
+      "sha256": "bddc8950ccc7cfd3fede31632ca7dccbf483b1932b6b9ec097aff99667c0f1c4"
+    },
+    {
+      "path": "extensions/src/collections/window.ts",
+      "bytes": 369,
+      "sha256": "ba2aff6c17145c3b53189a819fe6cb18b0a42890f8fbcaf0ffaedf3a4562e470"
+    },
+    {
+      "path": "extensions/src/gui-collections.ts",
+      "bytes": 306,
+      "sha256": "ec106152d693bba38c871090b1184d3f7b042f658e46da253c28eea2fc89dfec"
+    },
+    {
+      "path": "extensions/src/gui-collections/List.ts",
+      "bytes": 13287,
+      "sha256": "217fbbb4fae7650385bbd8df94b60e2f7c518931ccd3da3d8b916252d9475941"
+    },
+    {
+      "path": "extensions/src/gui-collections/Tree.ts",
+      "bytes": 6358,
+      "sha256": "5b43a53caf9804ddb5cb06a3e7eebbb2692948bbfa40482fe07a7238e2eb450e"
+    },
+    {
+      "path": "extensions/src/gui-collections/types.ts",
+      "bytes": 2119,
+      "sha256": "d222359e22b77206c4a61395d111b742b8390711ed84a7f3d264c2af0b0dd36e"
+    },
+    {
+      "path": "extensions/test/gui-collections-browser-gate.mjs",
+      "bytes": 3793,
+      "sha256": "e5616a7e3d7561abcae4c193e24e89d60f54b9e1f51fa0b7531b2754aa3b8626"
+    },
+    {
+      "path": "extensions/test/gui-collections-browser-policy.mjs",
+      "bytes": 2348,
+      "sha256": "091e8b80f5dc381c125332a80cbd5db727ff3c6238501040389a41ebd5e0dc12"
+    },
+    {
+      "path": "extensions/test/gui-collections-browser-policy.test.mjs",
+      "bytes": 2007,
+      "sha256": "ea65f3845be9b377cefb8a696f6db8360c0b2ecab888991e54c65a16a230c346"
+    },
+    {
+      "path": "extensions/test/gui-collections-browser.mjs",
+      "bytes": 5327,
+      "sha256": "a503beea9725d9b3e3809f1d8995a2a96a783e790a6b16a51b89690363aaf193"
+    },
+    {
+      "path": "extensions/test/gui-collections-candidate.mjs",
+      "bytes": 2636,
+      "sha256": "d2840955a1b244f3c40c005161febbabc9dcf44525a4bf060c9f914b09f1434b"
+    },
+    {
+      "path": "extensions/test/gui-collections.test.mjs",
+      "bytes": 12227,
+      "sha256": "fc2a92ce730ad51505f4ee3c7340f8bc88d201ada822fd7ab9fc8fcdc2b43b8d"
+    },
+    {
+      "path": "extensions/test/list-window.test.mjs",
+      "bytes": 596,
+      "sha256": "5ed96df64fb610f6b5e5d59544625608852e978ceaa33ddfaead3771f528ad9c"
+    },
+    {
+      "path": "review/baselines/api-surface.json",
+      "bytes": 318140,
+      "sha256": "31f9de7b1457c683bec479bc19c6bf6de610ae7d6d49d2d2211eb4ae95cbec5b"
+    },
+    {
+      "path": "review/engine-0.2.3/README.md",
+      "bytes": 3607,
+      "sha256": "c8e089f5f9c3f10813649eab49215de57c2c3beb9c1844cc3c6ede8011449edd"
+    },
+    {
+      "path": "review/engine-0.2.3/api-contract.d.ts",
+      "bytes": 19620,
+      "sha256": "dd6b53cd8a901905f146bc4c118348e3d08350d6808fe51028a80a52532f3e07"
+    },
+    {
+      "path": "review/engine-0.2.3/contract.md",
+      "bytes": 12895,
+      "sha256": "f4d6912443035836b9295cb38ad7deb8673953abfa475b8cb5e019aac2cec039"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-gui-collections.mjs",
+      "bytes": 94,
+      "sha256": "866af35212c6fd535cfe4646f2babd573a181eb504784909b7d7d0c1e01d3fd7"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/final-validation.json",
+      "bytes": 4050,
+      "sha256": "f0a0d728f2f0e421d373c304259467c74ed55a60874a60cdb5b913a8e4469654"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/feature-current-validation.json",
+      "bytes": 3455,
+      "sha256": "d5ca4ff5181c3151fba64f9c6d74ef4c0da3d1f01c856218766d9840c5d2ff7a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/historical-audit.json",
+      "bytes": 115852,
+      "sha256": "2ce4fc365db4d07c5555859f7f378ad6b393204945b4a78eed0c679d14e59e56"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/final-input-audit.json",
+      "bytes": 8344,
+      "sha256": "48fb7d3241432e1a56500aae69a6033e8cd1454d14248354b1bc8f828f396f10"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/public-packages-final/public-packages.json",
+      "bytes": 162720,
+      "sha256": "a32fd083aa1ba89d31efbb9b489ae62ddfd993374dc94abb3f262d15bdd50bad"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/final-candidate/candidate.json",
+      "bytes": 12761,
+      "sha256": "053dc70aeb70a27ed709ff234cd611f4f64f654639066cbb94b5efa7155a90a7"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/native-final/result.json",
+      "bytes": 51215,
+      "sha256": "8340f2f4b9fb752e19b008708542d1fe15547046829688a9ec27f8c0a58eb01c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/existing-regions-final/result.json",
+      "bytes": 63052,
+      "sha256": "d81471f7a3a91b9bbfbd3b33bd86938a9c734c96f5ac205418375c0d0fd14726"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/catalog-final/result.json",
+      "bytes": 12965,
+      "sha256": "cdc770afd8fa10af98eeb02c3e8cc3c9a7565edb96abb6646d40d575bce806d9"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/catalog-final/example.png",
+      "bytes": 71587,
+      "sha256": "c6cd7a71cbd69704c4a4bd875507cc4224b6ac67f187c953b4c5f457899291c5"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/catalog-final/visual-review.json",
+      "bytes": 404,
+      "sha256": "861d0feef2da3b5caf66c00b36cddc00e0027894d99303b19974b50ee765305d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/source-snapshot.zip",
+      "bytes": 164692,
+      "sha256": "cfb03e82b2c3a8b95912c31eae4362538ab3388107e476bb1e9b770760a8df3a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/source-snapshot-manifest.json",
+      "bytes": 12222,
+      "sha256": "22b0dc9cc5b25f23a20cb5e0ae9d3cefd91709fd964078c2a26ed88055322183"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/source-snapshot-verification.json",
+      "bytes": 223,
+      "sha256": "9fd67d0f4b7e4c788e231bdf8e64b3fcdc918f266e49bc54e0aab5c915a30b60"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/docs-completion.log",
+      "bytes": 723,
+      "sha256": "6a7887a331168c52a179b79b5f2c74d15fac6ec501f19c147db2931da8e72e9a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/diff-completion.log",
+      "bytes": 1154,
+      "sha256": "d56efd13d344597bf5f85ae9778946e0ebc942eea28d4cb5e42d116ed58a9b30"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/coordination-completion.log",
+      "bytes": 200,
+      "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g07/coordination-diff-completion.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

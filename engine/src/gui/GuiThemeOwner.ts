@@ -2,6 +2,8 @@ import {GuiDirtyFlags, type GuiTheme} from './GuiTypes';
 import type {GuiElement} from './components/GuiElement';
 import type {GuiSkin, GuiThemeResourceBinding} from './GuiThemeTypes';
 import {bindGuiThemeRoot, resolveGuiSkin} from './GuiThemeResolve';
+import type {GuiInvalidation} from './GuiLayoutTypes';
+import {guiPaintOnly,guiTextContentOnly} from './GuiInvalidationState';
 
 const identities = new WeakMap<object, number>();
 let identity = 0;
@@ -13,7 +15,7 @@ function id(value: object | null | undefined): number {
 }
 function metrics(skin: GuiSkin): string {
   const icon = skin.icon, insets = skin.contentInsets ?? skin.nineSlice?.contentInsets;
-  return JSON.stringify([skin.fontFamily, skin.fontSize, skin.padding, skin.iconSize, skin.iconGap, id(icon),
+  return JSON.stringify([skin.fontFamily, skin.fontSize, skin.padding, skin.iconSize, skin.iconGap, skin.iconPosition, id(icon),
     icon && 'naturalWidth' in icon ? icon.naturalWidth : icon && 'width' in icon ? icon.width : 0,
     icon && 'naturalHeight' in icon ? icon.naturalHeight : icon && 'height' in icon ? icon.height : 0,
     insets, skin.nineSlice?.cuts, skin.nineSlice?.pixelRatio]);
@@ -35,10 +37,10 @@ export class GuiThemeOwner {
   private palette: string;
 
   constructor(private readonly root: GuiElement, private readonly theme: () => GuiTheme,
-      observe: (changed: () => void) => () => void) {
+      observe: (changed: (change:GuiInvalidation) => void) => () => void) {
     this.palette = this.paletteKey();
     this.unbind = bindGuiThemeRoot(root, theme, element => {if (this.active || hasTheme(element)) this.sync(true);}, () => this.active);
-    this.unobserve = observe(() => {if (this.active) this.sync();});
+    this.unobserve = observe(change => {if (this.active&&!guiPaintOnly(change)&&!guiTextContentOnly(change)) this.sync();});
     this.sync(true);
   }
 
@@ -87,7 +89,7 @@ export class GuiThemeOwner {
 }
 
 function hasLocalTheme(element: GuiElement): boolean {
-  return element.themeControlType === 'GuiNineSlice' || ['fontFamily', 'fontSize', 'icon', 'iconSize', 'contentInsets', 'nineSlice'].some(key => key in element.style);
+  return element.themeControlType === 'GuiNineSlice' || ['fontFamily', 'fontSize', 'icon', 'iconSize', 'iconGap', 'iconPosition', 'contentInsets', 'nineSlice'].some(key => key in element.style);
 }
 function hasTheme(element: GuiElement): boolean {
   return !!element.themeResource || hasLocalTheme(element) || element.children.some(hasTheme);

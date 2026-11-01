@@ -2327,6 +2327,214 @@
         "group": "interaction",
         "order": 11
       }
+    },
+    {
+      "id": "scene-flow",
+      "title": "Scene Flow · Prepare and Transition",
+      "entry": "scene-flow/main.ts",
+      "capabilities": [
+        "scene-flow",
+        "assets",
+        "gui",
+        "2d"
+      ],
+      "assets": [
+        "scene-flow/level.json"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "assets-ui",
+        "order": 24
+      }
+    },
+    {
+      "id": "character2d",
+      "title": "Character 2D · Box2D shape casts",
+      "entry": "character2d/main.ts",
+      "capabilities": [
+        "2d",
+        "physics",
+        "character2d"
+      ],
+      "assets": [],
+      "ci": "full",
+      "catalog": {
+        "group": "physics",
+        "order": 20
+      },
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null
+    },
+    {
+      "id": "camera2d",
+      "title": "Camera 2D · Follow, shake and cached GUI",
+      "entry": "camera2d/main.ts",
+      "capabilities": [
+        "2d",
+        "physics",
+        "camera2d",
+        "gui",
+        "regions"
+      ],
+      "assets": [],
+      "ci": "full",
+      "catalog": {
+        "group": "physics",
+        "order": 21
+      },
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null
+    },
+    {
+      "id": "input-actions",
+      "title": "Input settings · Rebind & Profiles",
+      "entry": "input-actions/main.ts",
+      "capabilities": [
+        "input-actions",
+        "gamepad",
+        "gui",
+        "game-save",
+        "2d"
+      ],
+      "assets": [],
+      "ci": "full",
+      "catalog": {
+        "group": "interaction",
+        "order": 22
+      },
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null
+    },
+    {
+      "id": "gui-collections",
+      "title": "GUI Collections",
+      "entry": "gui-collections/main.ts",
+      "capabilities": [
+        "gui",
+        "virtual-list",
+        "virtual-tree",
+        "stable-keys"
+      ],
+      "assets": [],
+      "ci": "full",
+      "catalog": {
+        "group": "interaction",
+        "order": 23
+      },
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null
+    },
+    {
+      "id": "tilemap",
+      "title": "Tilemap terrain",
+      "entry": "tilemap/main.ts",
+      "capabilities": [
+        "tilemap",
+        "atlas",
+        "dirty-chunks",
+        "2d"
+      ],
+      "assets": [],
+      "ci": "full",
+      "catalog": {
+        "group": "interaction",
+        "order": 24
+      },
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null
+    },
+    {
+      "id": "game-audio",
+      "title": "Game Audio",
+      "entry": "game-audio/main.ts",
+      "capabilities": [
+        "audio",
+        "audio-2d",
+        "volume-profiles",
+        "resource-lifecycle"
+      ],
+      "assets": [],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "interaction",
+        "order": 110
+      }
+    },
+    {
+      "id": "gui-controls",
+      "title": "GUI Composite Controls",
+      "entry": "gui-controls/main.ts",
+      "capabilities": [
+        "gui",
+        "tabs",
+        "breadcrumb",
+        "badge",
+        "collapse"
+      ],
+      "assets": [],
+      "ci": "full",
+      "catalog": {
+        "group": "interaction",
+        "order": 111
+      },
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null
+    },
+    {
+      "id": "gameplay-kit",
+      "title": "Gameplay Kit · Integrated 0.2.3",
+      "entry": "gameplay-kit/main.ts",
+      "capabilities": [
+        "scene-flow",
+        "character2d",
+        "camera2d",
+        "input-actions",
+        "tilemap",
+        "gui-collections",
+        "gui-controls",
+        "audio"
+      ],
+      "assets": [
+        "gameplay-kit/level.json"
+      ],
+      "screenshot": {
+        "required": false,
+        "baseline": null
+      },
+      "performance": null,
+      "ci": "full",
+      "catalog": {
+        "group": "interaction",
+        "order": 112
+      }
     }
   ],
   "catalog": {

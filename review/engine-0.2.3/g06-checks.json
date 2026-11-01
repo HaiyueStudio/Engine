@@ -1,0 +1,1174 @@
+{
+  "schemaVersion": 1,
+  "goal": "g06-input-actions",
+  "goalStatus": "complete",
+  "generatedAt": "2026-10-31T07:58:22.057Z",
+  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
+  "workingTree": "Scoped G01–G06 work remains uncommitted. Source snapshots and exact installed/deterministic tarball hashes bind results; workspace HEAD/index remain unchanged.",
+  "runtimeFeaturesImplemented": true,
+  "releaseQualified": false,
+  "publishingIncluded": false,
+  "publicationPerformed": false,
+  "baselinePromoted": false,
+  "performanceBaselinesPromoted": false,
+  "defaultBranchChanged": false,
+  "summary": {
+    "newFocusedTests": 22,
+    "focusedAndRelatedRegressionTests": 37,
+    "workspaceTests": 2528,
+    "catalogTests": 7,
+    "builtExampleTargets": 107,
+    "deterministicPackages": 4,
+    "independentConsumers": 47,
+    "nativeChecks": 15,
+    "existingRegionalPixelCases": 12,
+    "workloadActions": 128,
+    "rebindAndRestoreCycles": 100,
+    "sourceFiles": 75,
+    "historicalRecordedFilesPreserved": 361,
+    "consumers": [
+      {
+        "id": "multiplayer-input-only",
+        "gzipBytes": 7044
+      },
+      {
+        "id": "input-action-map",
+        "gzipBytes": 2506
+      },
+      {
+        "id": "extensions-input-actions",
+        "gzipBytes": 6221
+      }
+    ],
+    "additionalNativePointerChecks": 7
+  },
+  "requirements": [
+    {
+      "id": "directional-axis-and-boolean-compatibility",
+      "status": "verified-for-g06",
+      "implementation": [
+        "engine/src/input/InputActionMap.ts",
+        "engine/src/input/InputBindings.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g06/baseline-counterexamples.json",
+          "bytes": 481,
+          "sha256": "ecf5c30e4aa8d4de50d3b5d100b02b3cd8043ce1e795c9a7aab22ec986069402"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/preflight-focused-tests.log",
+          "bytes": 4357,
+          "sha256": "4cc76879d0befb7228a87eb91097e12fd377dda1a33de4ebf10feb091ee7d105"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/native-final-format/result.json",
+          "bytes": 38556,
+          "sha256": "81b80cbf580e41bf88a2dd87ad1e652a70db031ed594eff07e80c81b28f22061"
+        }
+      ],
+      "conclusion": "Default keyboard left/A and up/W are -1; right/D and down/S are +1, matching original browser gamepad axes. Same-axis opposing keys cancel. Existing boolean keys remain +1, strongest absolute values retain earlier ties and original positive-scale GUI magnitude semantics remain. Signed scale additionally represents a captured logical negative half-axis without changing the physical sampler."
+    },
+    {
+      "id": "shared-normalization-reverse-indices-and-immutable-snapshots",
+      "status": "verified-for-g06",
+      "implementation": [
+        "engine/src/input/InputBindings.ts",
+        "engine/src/input/InputMap.ts",
+        "engine/src/input/InputActionMap.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g06/preflight-focused-tests.log",
+          "bytes": 4357,
+          "sha256": "4cc76879d0befb7228a87eb91097e12fd377dda1a33de4ebf10feb091ee7d105"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/baseline-counterexamples.json",
+          "bytes": 481,
+          "sha256": "ecf5c30e4aa8d4de50d3b5d100b02b3cd8043ce1e795c9a7aab22ec986069402"
+        }
+      ],
+      "conclusion": "The original boolean/value map owners share one private normalized descriptor/reverse-index implementation. Legacy trimming/string coercion remains; indexed lookups include axis keys. Boolean/action/JSON snapshots do not expose writable owned arrays and remain valid after later sampling/rebinding. Full descriptor replacement validates before commit; sparse or invalid fields do not partially replace the old map."
+    },
+    {
+      "id": "same-sampler-map-owner-and-device-merging",
+      "status": "verified-for-g06",
+      "implementation": [
+        "engine/src/input/BrowserMultiplayerInput.ts",
+        "engine/src/input/GamepadInputLayers.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g06/preflight-focused-tests.log",
+          "bytes": 4357,
+          "sha256": "4cc76879d0befb7228a87eb91097e12fd377dda1a33de4ebf10feb091ee7d105"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/native-final-format/result.json",
+          "bytes": 38556,
+          "sha256": "81b80cbf580e41bf88a2dd87ad1e652a70db031ed594eff07e80c81b28f22061"
+        }
+      ],
+      "conclusion": "Original sampler accepts legacy descriptors or borrows the existing map. It samples keyboard/pointer/original gamepads into its original player state, with one provider call per tick. No extra polling, physics clock or third action-state machine. Original GUI input domain and newest-first gamepad routes retain held claims until neutral."
+    },
+    {
+      "id": "held-owner-handoff-modal-blur-and-disconnect",
+      "status": "verified-for-g06",
+      "implementation": [
+        "engine/src/input/BrowserMultiplayerInput.ts",
+        "engine/src/input/GamepadInputLayers.ts",
+        "engine/src/components/KeyboardComponent.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g06/preflight-focused-tests.log",
+          "bytes": 4357,
+          "sha256": "4cc76879d0befb7228a87eb91097e12fd377dda1a33de4ebf10feb091ee7d105"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/repository-final-test.log",
+          "bytes": 253618,
+          "sha256": "77a3e211364d361ad8915157001b300e57d081730f526e03a2be42a7e73f9daa"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/native-final-format/result.json",
+          "bytes": 38556,
+          "sha256": "81b80cbf580e41bf88a2dd87ad1e652a70db031ed594eff07e80c81b28f22061"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/pointer-owner-final-format/result.json",
+          "bytes": 33916,
+          "sha256": "2a78634176a2cf99b9794a86ea150f75f6b4b0c724341928f2cbc1a976cbf6bc"
+        }
+      ],
+      "conclusion": "Hot rebinding emits removed action releases once, quarantines held keys/pointers/gamepads, and observes map changes even inside provider/route callbacks. Per-device release does not block another original gamepad. GUI takeover releases a previously scene-owned legacy key while preserving raw held state; a consumed initial press never leaks to scene. Long holds, blur/visibility, disconnect/reconnect, aliases and GUI-to-scene neutral handoffs pass."
+    },
+    {
+      "id": "usable-rebind-capture-conflict-and-cancel",
+      "status": "verified-for-g06",
+      "implementation": [
+        "extensions/src/input-actions/BindingProfile.ts",
+        "examples/input-actions/application.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g06/preflight-focused-tests.log",
+          "bytes": 4357,
+          "sha256": "4cc76879d0befb7228a87eb91097e12fd377dda1a33de4ebf10feb091ee7d105"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/native-final-format/result.json",
+          "bytes": 38556,
+          "sha256": "81b80cbf580e41bf88a2dd87ad1e652a70db031ed594eff07e80c81b28f22061"
+        }
+      ],
+      "conclusion": "Caller begins button/negative/positive capture and forwards original host samples. Capturing waits for opener release/per-index neutral, ignores autorepeat and low analog noise, and commits one choice. Reject preserves bindings and reports immutable conflict details; explicit share/replace preserve unrelated controls, actions and opposite physical half-axes. Cancel/dispose and observer cancellation cannot late-commit. Profile creates no listeners, providers, storage or timer."
+    },
+    {
+      "id": "versioned-profile-atomic-restore-and-original-storage",
+      "status": "verified-for-g06",
+      "implementation": [
+        "extensions/src/input-actions/types.ts",
+        "extensions/src/input-actions/BindingProfile.ts",
+        "examples/input-actions/application.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g06/preflight-focused-tests.log",
+          "bytes": 4357,
+          "sha256": "4cc76879d0befb7228a87eb91097e12fd377dda1a33de4ebf10feb091ee7d105"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/native-final-format/result.json",
+          "bytes": 38556,
+          "sha256": "81b80cbf580e41bf88a2dd87ad1e652a70db031ed594eff07e80c81b28f22061"
+        }
+      ],
+      "conclusion": "Format haiyue-input-profile/v1, default maximum 256 actions, configured ceiling 4096; default capture .5/neutral .15. Original normalizer validates entire restoration before writing. Actual installed GUI settings save/restore through GameSaveService and real browser LocalStorageSaveBackend; the borrowed backend can still read the save after application disposal. Observer errors occur after commit and do not undo accepted state."
+    },
+    {
+      "id": "frozen-public-api-and-real-independent-consumer",
+      "status": "verified-for-g06",
+      "implementation": [
+        "engine/src/input.ts",
+        "extensions/src/input-actions.ts",
+        "extensions/package.json"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g06/api-admission.json",
+          "bytes": 1507,
+          "sha256": "6a96f26f2d78cce195097cc49f2d88f169c5751069e29a7ed30a523036b9260c"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/final-feature-candidate-format/candidate.json",
+          "bytes": 12564,
+          "sha256": "e18c4c0041b4d6754c442ec1f49846ec24590a77a6a6cf24bfa510cd6a872195"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/public-packages/public-packages.json",
+          "bytes": 160036,
+          "sha256": "d80e9e410b5511ad89a963b71138714ff1307a63ffc5a5e34806cf546580d3a4"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/final-input-audit.json",
+          "bytes": 110257,
+          "sha256": "9e838b86dbd7bcfd06fc856ea954dd783b578bf067cf198d9bdac15149f64c38"
+        }
+      ],
+      "conclusion": "Exactly seven admitted Engine/input exports and six focused extensions/input-actions exports. Original experimental class identity and other experimental exports remain; root has exactly 30 declarations. Real deterministic tarballs install normally; every installed file matches its tarball. Strict TypeScript with skipLibCheck false checks frozen public members in both directions, with nominal original-map identity substituted for the structural frozen placeholder; fluent returns are projected consistently. ESM separately proves original class identity and live behavior. Lightweight independent closures contain no GUI/3D/physics backend/OpenType implementation."
+    },
+    {
+      "id": "full-rebind-workload-original-regions-and-lifetime",
+      "status": "verified-for-g06",
+      "implementation": [
+        "extensions/test/input-actions-browser.mjs",
+        "extensions/test/input-actions-browser-policy.mjs"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g06/native-final-format/result.json",
+          "bytes": 38556,
+          "sha256": "81b80cbf580e41bf88a2dd87ad1e652a70db031ed594eff07e80c81b28f22061"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/existing-regions-final-format/result.json",
+          "bytes": 62897,
+          "sha256": "58b23e056f991bf1fcb6f6cff17f257fde1bcb8a991d4003c2babf3f417b054f"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/catalog-final-format/result.json",
+          "bytes": 14057,
+          "sha256": "c53f81521c720e8e1e5fa2e578479e53e9fb20a97d6291c9767df80039ff6fb4"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/catalog-final-format/visual-review.json",
+          "bytes": 954,
+          "sha256": "c6f2f6539dfe917c449e8930e84933843ce3156ddd357966a6b4ccbb0e7bfb8f"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/pointer-owner-final-format/result.json",
+          "bytes": 33916,
+          "sha256": "2a78634176a2cf99b9794a86ea150f75f6b4b0c724341928f2cbc1a976cbf6bc"
+        }
+      ],
+      "conclusion": "Actual native browser executes the same installed settings application, original GUI keyboard and pointer activation, held key/gamepad phases and existing persistent storage. The frozen 128-action/100-rebind/100-JSON-restore workload retains old immutable data. Provider/tick counts match; input listeners and tracked GPU resources/bytes return to zero, with no GPU validation errors. Original twelve regional GUI pixel cases and the current catalog example pass."
+    },
+    {
+      "id": "required-gates-capacity-review-history-and-handoff",
+      "status": "verified-for-g06",
+      "implementation": [],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g06/preflight-validation.json",
+          "bytes": 1083,
+          "sha256": "4e3c2b70c2674f559257ba3f9f5b104070ee1ea056ed0c0e747c832f81277093"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/repository-final-validation.json",
+          "bytes": 4193,
+          "sha256": "6fa45d1989092eaf9a2074be42d6453bf2643d8d6746950f0d9a8ccbb1dda1df"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/feature-format-validation.json",
+          "bytes": 1607,
+          "sha256": "26a3758fb2b9d06f7486adc73a9204f6aa3f192f41237ea7ac5b77bd9ce81195"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/capacity-admission.json",
+          "bytes": 1065,
+          "sha256": "d01af44ccebb3e1971aa57b3fa5b313c2521b7b9a6999fd529707c0e421c6b00"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/final-input-audit.json",
+          "bytes": 110257,
+          "sha256": "9e838b86dbd7bcfd06fc856ea954dd783b578bf067cf198d9bdac15149f64c38"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g06/source-snapshot-verification.json",
+          "bytes": 302,
+          "sha256": "2469b6709385212a364ab95970b1deb1754d448930bdb0cbef9f000073e49af0"
+        }
+      ],
+      "conclusion": "Focused types/regressions, required root typecheck/build/test, modules/responsibilities/renderer-prepare, boundaries/docs/API/policy/package gates, complete example build and freshness pass. Only the reviewed multiplayer package capacity grows from 6000 to 8000 after installed measurement and duplicate review; two new finite consumers have capacities 3200/7200. All other existing package, performance/resource budgets and API reserves remain. G01–G05 reports/recorded files remain at originals or verified archive/backup paths. Physical input and combined formal release qualification are handed explicitly to G11."
+    }
+  ],
+  "validations": [
+    {
+      "id": "engine-types",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/preflight-engine-types.log",
+        "bytes": 50,
+        "sha256": "2abfd7135efe445447194306997aa0379a93ff27c3b3bbf250fd8a602c66f6ca"
+      }
+    },
+    {
+      "id": "extension-types",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/preflight-extension-types.log",
+        "bytes": 451,
+        "sha256": "6abc879b1526ad6130f75a552bfdf8bf34dbd0d997d6671571083524164ab29b"
+      }
+    },
+    {
+      "id": "example-types",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/preflight-example-types.log",
+        "bytes": 69,
+        "sha256": "038779bfa094b4d2484adbe96be9b82edd51b70409844cf95c9ce7dcdb184366"
+      }
+    },
+    {
+      "id": "focused-tests",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/preflight-focused-tests.log",
+        "bytes": 4357,
+        "sha256": "4cc76879d0befb7228a87eb91097e12fd377dda1a33de4ebf10feb091ee7d105"
+      }
+    },
+    {
+      "id": "typecheck",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/repository-final-typecheck.log",
+        "bytes": 3205,
+        "sha256": "da41ef1a30c24bff386ba66d0a477c64e7a0ec985d6271ace3dbcf38c74a8034"
+      }
+    },
+    {
+      "id": "build",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/repository-final-build.log",
+        "bytes": 17766,
+        "sha256": "837e3119c6b06890ebad4bbcd51233371ecbc4e8c23b1fb26e2ff4e943ec268b"
+      }
+    },
+    {
+      "id": "test",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/repository-final-test.log",
+        "bytes": 253618,
+        "sha256": "77a3e211364d361ad8915157001b300e57d081730f526e03a2be42a7e73f9daa"
+      }
+    },
+    {
+      "id": "modules:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/repository-final-modules-check.log",
+        "bytes": 180,
+        "sha256": "d079d98f6224491da172cb0e31131fec480fa63631b694d0931f2c2ec431424e"
+      }
+    },
+    {
+      "id": "responsibilities:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/repository-final-responsibilities-check.log",
+        "bytes": 259,
+        "sha256": "52b89c966f0ecfb0587d1e565ebbdaa72f1c2a1b9f3867641a1d83adc24f9d1a"
+      }
+    },
+    {
+      "id": "renderer-prepare:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/repository-final-renderer-prepare-check.log",
+        "bytes": 239,
+        "sha256": "66bbc4f2490a8418f9be4711d93567477ea7181e4289deea3dd116236518591e"
+      }
+    },
+    {
+      "id": "check:boundaries",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/repository-final-check-boundaries.log",
+        "bytes": 1037,
+        "sha256": "6aaf01a2f34c0aefb3aec32ebf5a44d079e0b55563863ee54def54c9b54ceffd"
+      }
+    },
+    {
+      "id": "docs:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/repository-final-docs-check.log",
+        "bytes": 707,
+        "sha256": "396bfcc16bfa2d18c427e977a66b9642edafc0be26f4aaa28953286bfaead3b0"
+      }
+    },
+    {
+      "id": "api:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/repository-final-api-check.log",
+        "bytes": 158,
+        "sha256": "52eedd5d933b1c615111c13ff308d849101edef1c369d56615dbb7d7f107c6a9"
+      }
+    },
+    {
+      "id": "fast-gate-policy:test",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/repository-final-fast-gate-policy-test.log",
+        "bytes": 2210,
+        "sha256": "397154525a37c869fa806bc0800e908d9113b5c2eafc9e77f38b08f0e7f8bd76"
+      }
+    },
+    {
+      "id": "release:policy:test",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/repository-final-release-policy-test.log",
+        "bytes": 18868,
+        "sha256": "8e6456c5a531a55ca01cab98f07a280c8f9d8434186d74e81cc73dd7c9805179"
+      }
+    },
+    {
+      "id": "performance-budget:test",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/repository-final-performance-budget-test.log",
+        "bytes": 34770,
+        "sha256": "365b760297d140f6fad036064bccf7cacdd6c6fafe729db96df7dad3b5a6674c"
+      }
+    },
+    {
+      "id": "verify:engine-package",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/repository-final-verify-engine-package.log",
+        "bytes": 8685,
+        "sha256": "fc9ecb423b3c36e8652dfb5a953dfa888f9de01c5e0b6535e2b9762101e127a1"
+      }
+    },
+    {
+      "id": "catalog-rebuild",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/feature-format-catalog-rebuild.log",
+        "bytes": 14246,
+        "sha256": "ca537a17cdf6952b00a55257b2d39ed7e86b1655dda75ddfdd214ef0d1bcac73"
+      }
+    },
+    {
+      "id": "installed-candidate",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/feature-format-installed-candidate.log",
+        "bytes": 33,
+        "sha256": "a569f24eb368223cee04a9db176836eb4343398b3acfe48bde0e7852c9aea370"
+      }
+    },
+    {
+      "id": "native",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/feature-format-native.log",
+        "bytes": 160,
+        "sha256": "f8cfa9aec89d1f23ca0665764e395ab0185e5c95310203ef6c8aac1c8684f359"
+      }
+    },
+    {
+      "id": "existing-regions",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/feature-format-existing-regions.log",
+        "bytes": 31,
+        "sha256": "f101957323e6d064efd674b8b3373ede5e1ca4035c9af65587a572c6a19a2cf2"
+      }
+    },
+    {
+      "id": "catalog",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/feature-format-catalog.log",
+        "bytes": 623,
+        "sha256": "ab77709543fddc4cda49b7029653ec499dede810c88e5cc8675ab85cb0f22be1"
+      }
+    },
+    {
+      "id": "freshness",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/feature-format-freshness.log",
+        "bytes": 60,
+        "sha256": "ad5cfca64d5512339d3ff566732db71a6b30291da0027dab895bf62c0f54aeb9"
+      }
+    },
+    {
+      "id": "metadata-docs-final",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/metadata-docs-final.log",
+        "bytes": 724,
+        "sha256": "2fd67f9b853a412bf78fb200149b8958fada3b50bbac40a09a1e52b321e85666"
+      }
+    },
+    {
+      "id": "metadata-coordination-final",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/metadata-coordination-final.log",
+        "bytes": 200,
+        "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+      }
+    },
+    {
+      "id": "metadata-diff-final",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/metadata-diff-final.log",
+        "bytes": 114,
+        "sha256": "b0aec28fbf2f5a3a9227b95c645578ee55570e60b3e6ba575ea341bb33c17e90"
+      }
+    },
+    {
+      "id": "storage-policy-final",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/storage-policy-final.log",
+        "bytes": 343,
+        "sha256": "330bce507c05a2dc179ebd8c0c7843dde5b54029fdd7730c3240d88f9b78cdcb"
+      }
+    },
+    {
+      "id": "format-engine-types",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/format-engine-types.log",
+        "bytes": 50,
+        "sha256": "2abfd7135efe445447194306997aa0379a93ff27c3b3bbf250fd8a602c66f6ca"
+      }
+    },
+    {
+      "id": "format-engine-build",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/format-engine-build.log",
+        "bytes": 194,
+        "sha256": "1d8509311c678f51bb243fb2c6f00aa778a3a7c41a5b224467986fef1ad2f1d7"
+      }
+    },
+    {
+      "id": "format-extension-types",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/format-extension-types.log",
+        "bytes": 451,
+        "sha256": "6abc879b1526ad6130f75a552bfdf8bf34dbd0d997d6671571083524164ab29b"
+      }
+    },
+    {
+      "id": "format-extension-build",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/format-extension-build.log",
+        "bytes": 271,
+        "sha256": "8af6c321b658b889938798f73167679b562a967380a76a17d27eff11c4015574"
+      }
+    },
+    {
+      "id": "same-candidate-pointer-ownership",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g06/pointer-proof-format.log",
+        "bytes": 32,
+        "sha256": "b69a307af349af71e1dd6ef70f034af405c445775d89ebf50ad30560cc937959"
+      }
+    }
+  ],
+  "publicEntry": {
+    "engine": "@haiyue/engine/input",
+    "extensions": "@haiyue/extensions/input-actions",
+    "newSymbols": 13,
+    "rootDeclarations": 30,
+    "originalExperimentalClassIdentity": true,
+    "localPackageVersions": {
+      "@haiyue/engine": "0.2.2",
+      "@haiyue/extensions": "0.2.2",
+      "@haiyue/animation-spec": "0.2.2"
+    },
+    "versionNote": "Local 0.2.2 source-version candidate tarballs differ from published immutable 0.2.2 packages. G11 owns planned 0.2.3 package versions and formal qualification."
+  },
+  "packageCapacity": {
+    "decision": {
+      "path": "artifacts/engine-0.2.3/g06/capacity-admission.json",
+      "bytes": 1065,
+      "sha256": "d01af44ccebb3e1971aa57b3fa5b313c2521b7b9a6999fd529707c0e421c6b00"
+    },
+    "initial": {
+      "path": "artifacts/engine-0.2.3/g06/closure-initial.json",
+      "bytes": 1623,
+      "sha256": "2c3f240025f9d22b376c31ee0d0b0156976971fb21354e8b4f92dcfa939e90f7"
+    },
+    "finalConsumers": [
+      {
+        "id": "multiplayer-input-only",
+        "gzipBytes": 7044,
+        "modules": [
+          "@haiyue/engine/dist/chunks/InputActionMap-D6wm23iN.js",
+          "@haiyue/engine/dist/chunks/InputBindings-Dh8J91bA.js",
+          "@haiyue/engine/dist/experimental/simulation.js",
+          "fixture/multiplayer-input-only.mjs"
+        ]
+      },
+      {
+        "id": "input-action-map",
+        "gzipBytes": 2506,
+        "modules": [
+          "@haiyue/engine/dist/chunks/InputActionMap-D6wm23iN.js",
+          "@haiyue/engine/dist/chunks/InputBindings-Dh8J91bA.js",
+          "fixture/input-action-map.mjs"
+        ]
+      },
+      {
+        "id": "extensions-input-actions",
+        "gzipBytes": 6221,
+        "modules": [
+          "@haiyue/engine/dist/chunks/EngineError-cwJJyyUO.js",
+          "@haiyue/engine/dist/chunks/InputActionMap-D6wm23iN.js",
+          "@haiyue/engine/dist/chunks/InputBindings-Dh8J91bA.js",
+          "@haiyue/extensions/dist/input-actions.js",
+          "fixture/extensions-input-actions.mjs"
+        ]
+      }
+    ],
+    "allOtherExistingBudgetsUnchanged": true,
+    "performanceAndResourceBudgetsUnchanged": true
+  },
+  "native": {
+    "adapter": {
+      "vendor": "nvidia",
+      "architecture": "pascal",
+      "description": "",
+      "isFallbackAdapter": false
+    },
+    "browser": {
+      "product": "Chrome/156.0.8078.76",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "url": "http://127.0.0.1:59705/artifacts/engine-0.2.3/g06/native-final-format/fixture.html?",
+      "angleBackend": "d3d11",
+      "nativeBackend": true,
+      "presentationMode": "headless",
+      "storageMode": "isolated-memory-context"
+    },
+    "profile": {
+      "warmupFrames": 12,
+      "actions": 128,
+      "rebindCycles": 100,
+      "heldFrames": 30
+    },
+    "workload": {
+      "actions": 128,
+      "roundTrips": 100,
+      "originalSnapshotRetained": true
+    },
+    "lifecycle": {
+      "polls": 130,
+      "ticks": 130,
+      "remainingListeners": 0,
+      "inputDisposed": true,
+      "borrowedBackendRetained": true,
+      "storageBackend": "local-storage",
+      "persistent": true
+    },
+    "finalGpu": {
+      "resources": 0,
+      "estimatedBytes": 0
+    },
+    "coldStart": {
+      "startedAt": 345.2449999898672,
+      "readyAt": 455.39000000059605
+    },
+    "physicalInputQualified": false,
+    "qualification": false
+  },
+  "retainedFailures": [
+    {
+      "path": "artifacts/engine-0.2.3/g06/focused-1.log",
+      "reason": "Initial clone-and-replace capture reordered unrelated action aliases; capture now validates the whole candidate then patches only changed actions, preserving original order. Existing listener-count test was extended for original-sampler pointer support; its removal assertions remain."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/candidate-1.log",
+      "reason": "Strict test compared a structural frozen namespace placeholder to an original class with private fields; the fixture now separately verifies nominal runtime identity and bidirectional public shape."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/candidate-2.log",
+      "reason": "The same placeholder also appears in fluent this returns; the public-shape comparison explicitly projects these original map returns without dropping method parameters or other return types."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/example-types-1.log",
+      "reason": "Example initial setup used incorrect existing Mesh2D/geometry/material and GuiRoot property shapes; corrected to original public constructors and root element."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/api-admission.log",
+      "reason": "Exact symbol set matched but assertion used a different sort order; expected list now uses the API scanner locale order, without adding/removing symbols."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/catalog-preview/result.json",
+      "reason": "Catalog HTML omitted the existing shared-engine bootstrap, producing HaiyueExampleEngine is not defined. The HTML now loads the original shared script before its bundle. A complete manifest example rebuild refreshes the existing global fingerprint; no bundle is hand-edited and no timeout/policy is relaxed."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/metadata-diff-before-format.log",
+      "reason": "Two TypeScript inputs had a blank line at EOF. Original sources and all prior results remain; only EOF whitespace changed. Both workspace types/builds reran, all four qualified tarballs repacked byte-identically, and the complete example fingerprint, installed candidate and native/region/pointer evidence were regenerated for the current source hashes."
+    }
+  ],
+  "retainedObservations": [
+    {
+      "path": "artifacts/engine-0.2.3/g06/native-1/result.json",
+      "reason": "Passing initial installed native diagnostic used original MemorySaveBackend. Final run adds the actual browser LocalStorage backend and binds fresh deterministic package hashes; the initial result remains."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/closure-initial.json",
+      "reason": "Original installed measurements and the 7044 versus 6000 package capacity observation remain with the named admission decision."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/catalog-preview-2/result.json",
+      "reason": "Actual catalog bootstrap/visual correction passes with 30 ticks and 30 original-provider reads. Final catalog evidence comes from the complete refreshed build."
+    }
+  ],
+  "protectedHistory": {
+    "audit": {
+      "path": "artifacts/engine-0.2.3/g06/final-input-audit.json",
+      "bytes": 110257,
+      "sha256": "9e838b86dbd7bcfd06fc856ea954dd783b578bf067cf198d9bdac15149f64c38"
+    },
+    "sourceSnapshot": {
+      "path": "artifacts/engine-0.2.3/g06/source-snapshot.zip",
+      "bytes": 185286,
+      "sha256": "76c81567f8397ab80ecfdb32233fff15b117c8ca6c77cfb5f1a9090936ea60f7"
+    },
+    "sourceSnapshotVerification": {
+      "path": "artifacts/engine-0.2.3/g06/source-snapshot-verification.json",
+      "bytes": 302,
+      "sha256": "2469b6709385212a364ab95970b1deb1754d448930bdb0cbef9f000073e49af0"
+    },
+    "originalG05Readme": {
+      "path": "artifacts/engine-0.2.3/g06/prior-inputs/review/engine-0.2.3/README.md",
+      "bytes": 4102,
+      "sha256": "a2a6653c60d81b83fa4e6cb2bbc56ee8691499e105b96bc2695f398632a19356"
+    },
+    "historicalGoals": [
+      "g01",
+      "g02",
+      "g03",
+      "g04",
+      "g05"
+    ],
+    "allHistoricalRecordedInputsPreserved": true,
+    "originalFilesRetained": true
+  },
+  "handoffs": [
+    {
+      "owner": "g11-integration-candidate",
+      "candidate": {
+        "path": "artifacts/engine-0.2.3/g06/final-feature-candidate-format/candidate.json",
+        "bytes": 12564,
+        "sha256": "e18c4c0041b4d6754c442ec1f49846ec24590a77a6a6cf24bfa510cd6a872195"
+      },
+      "sourceAudit": {
+        "path": "artifacts/engine-0.2.3/g06/final-input-audit.json",
+        "bytes": 110257,
+        "sha256": "9e838b86dbd7bcfd06fc856ea954dd783b578bf067cf198d9bdac15149f64c38"
+      },
+      "required": [
+        "Bind the exact integrated candidate to real Windows keyboard/mouse/gamepad checks.",
+        "Verify physical left/up negative/right/down positive, held rebind, release-to-capture and opposite directions.",
+        "Verify remap conflict/cancel/save-restore, modal GUI consumption and owner/player change while held, blur and device disconnect/reconnect.",
+        "Combine input profiles with scene flow, characters/camera and remaining capabilities; run formal performance/resource/quality/device matrices, full global gate and no-publication rehearsal."
+      ],
+      "qualification": "Current DOM/gamepad events are programmatic replay and do not grant physical-device qualification; old 0.2.2 physical records are not reused.",
+      "publishingAuthorized": false
+    }
+  ],
+  "files": [
+    {
+      "path": "artifacts/engine-0.2.3/g06/admit-api.mjs",
+      "bytes": 2146,
+      "sha256": "abf73198a29795f6c0d2e40218192060942ddef146e9eb42045318328ed40454"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/admit-capacity.mjs",
+      "bytes": 3687,
+      "sha256": "7bb4e0f96fc5fc34ca92b0a9d92df9dd6d8a1f7df05a4dd764ccd17a82eee8dd"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/align-metadata.mjs",
+      "bytes": 6897,
+      "sha256": "fc947c08b8fdaeb055779e401d92a42571bb69f0a9c270a03f5b2fe1ba14fecb"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/api-admission.json",
+      "bytes": 1507,
+      "sha256": "6a96f26f2d78cce195097cc49f2d88f169c5751069e29a7ed30a523036b9260c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/audit-history.py",
+      "bytes": 2135,
+      "sha256": "76a8cbfe921744df647d45aa423c6d408f9299b50c087a921a8a9884513fc9ec"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/baseline-counterexamples.json",
+      "bytes": 481,
+      "sha256": "ecf5c30e4aa8d4de50d3b5d100b02b3cd8043ce1e795c9a7aab22ec986069402"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/baseline.mjs",
+      "bytes": 1690,
+      "sha256": "12d9ac3e12de93bfb1fc86099c2e73959f9e0377352d2a2984737ff61cd10a66"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/capacity-admission.json",
+      "bytes": 1065,
+      "sha256": "d01af44ccebb3e1971aa57b3fa5b313c2521b7b9a6999fd529707c0e421c6b00"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/check-completion.mjs",
+      "bytes": 2228,
+      "sha256": "5977920ec7e5b10a0d3655bffae73c94fda2a02a643fb7f1be565227fa5ae54a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/finalize-evidence.mjs",
+      "bytes": 10948,
+      "sha256": "34181defd13357264e50fa0937ee4e790e2e772e6ede12c89d50c437cecca427"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/format-normalization.json",
+      "bytes": 1069,
+      "sha256": "38a870152fa8b5522e0130f97457f268761ab27790873d297e470e861098af3c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/format-requalification.json",
+      "bytes": 3701,
+      "sha256": "bb4eafe2d722d269277932085c14b4848bda66aacd9cc9450158df79163e9729"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/inspect-repack.py",
+      "bytes": 835,
+      "sha256": "fe40bd5ea194c4ace3f2d0707801e8e079472df7f205d2098559e3d0cc73724e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/measure-closure.mjs",
+      "bytes": 1716,
+      "sha256": "a0fb3fe997f31f8d53ce2b9f26d1e9c87469227146ecbf2504e63626d2785fe2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/normalize-format.mjs",
+      "bytes": 3454,
+      "sha256": "c8b4d0129431c5bc0606b216453a1e17ba439656393173762227168b135cbc4e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/original-InputActionMap.mjs",
+      "bytes": 6751,
+      "sha256": "f7aca6cb1738d089ac9ada4ffca7234b282ca9dff434d8613dbfaa99dcf16530"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/original-InputMap.mjs",
+      "bytes": 4245,
+      "sha256": "2582ab13931473dd77227bd4bb6ce2f29293f70f9c719fca7b9dd9e3ef074316"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/original-consumption.mjs",
+      "bytes": 260,
+      "sha256": "20f9a23ff198103b1d78d02aa1fda3c50e5fb3b2a441d459b06b96f33ccff999"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/post-format-validation.mjs",
+      "bytes": 1878,
+      "sha256": "2c02691f8d97d01e477a6a8c40ccefe4d5edbce943ca494b44e1e17a878674f7"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/post-validation.mjs",
+      "bytes": 1819,
+      "sha256": "788210ada219b7067960960f16133bd365d03aa120e0892de744b825ba79d57a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/prepare-validation.mjs",
+      "bytes": 510,
+      "sha256": "cd458fe52bbafa29dddfc642fe40b6b393ae9d39368a83e14faa926ab8690e8a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/preserve-pointer-source.mjs",
+      "bytes": 1107,
+      "sha256": "51b3c85b89a9597cc2b97b4fa4ed50aadb02a58dfa199badf6ed0ab00048237e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/rebuild-examples.mjs",
+      "bytes": 397,
+      "sha256": "8f2c51dab3ec3104df89ec1b0d78eaf6bebc32d42096884d7f1216c41cbd4c9d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/record-visual-review.mjs",
+      "bytes": 1170,
+      "sha256": "fc602ec5f04a42319caf1fcb9456237f7dffa9f4dd57e9fd12ea6f394425dcbc"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/register-example.mjs",
+      "bytes": 545,
+      "sha256": "b2511ded1632b8ef910a80901897b3208e55888b42343c4695fdf7bdfcb4419c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/requalify-format-policy.mjs",
+      "bytes": 3622,
+      "sha256": "b64ab59fbbbff3795646d350aea9ddaf49744f88710056753e9ef7151a555435"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/requalify-format.mjs",
+      "bytes": 2401,
+      "sha256": "0772e203e32921a16411b1c9c49219680e35bb89dcade3e0c3232d86d1505bfa"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/run-repository-validation.mjs",
+      "bytes": 2318,
+      "sha256": "30992d0960fb4b62ff726128eeccce6281600af88189280b817d7ea58e18960c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/start.mjs",
+      "bytes": 3938,
+      "sha256": "43c4785c4b19cd57c5601efe3d9d4331b3fd38ec433efa876285238eedbc7db2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/validate-all.mjs",
+      "bytes": 2076,
+      "sha256": "e1843d2dd34b9e9f554bd418d9f6502e9e9a095cfe4dc3fefb24789000971a87"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/verify-catalog.mjs",
+      "bytes": 1688,
+      "sha256": "91d6b2ccca342108519839971c188643eec698923212eba4a9dca2cbb6a510f6"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/verify-existing-regions.mjs",
+      "bytes": 1831,
+      "sha256": "162972d0c39aa9ab1a6411fa195c6f0cbd27997560796f390280daff21da241f"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/verify-pointer-owner.mjs",
+      "bytes": 4693,
+      "sha256": "1c10a1f129a25a208ba8a6a8de08b9240bdad1386a20830a1a21e2e1374ae5a0"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/wire.mjs",
+      "bytes": 1157,
+      "sha256": "87d9834f0ad57bbd1e885243c8b257d6a7b7783fe51fa1a9f5ee10d892c7212b"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g06/write-conclusion.mjs",
+      "bytes": 16110,
+      "sha256": "eb3bcbb7618327c4d9131d679004322bc8b0eb2aa794af8bb2742b3d14638e2c"
+    },
+    {
+      "path": "config/engine-package-budget.json",
+      "bytes": 31975,
+      "sha256": "f0fe1ab137b1aafca3a5bdbf355e92aa89e76e0d3b33b47ec7d77e3a0fefe88b"
+    },
+    {
+      "path": "config/gameplay-023-contract.json",
+      "bytes": 47325,
+      "sha256": "07ebc65103cc45c6ed9c6333f28ad89066439204348be9d62bdc87fc607c93ca"
+    },
+    {
+      "path": "config/public-api-capability-budgets.json",
+      "bytes": 11521,
+      "sha256": "e718b3a85fbbf27d64d62ca88e00a8e3347e31a9ab8301f14a8c1ba9f223a977"
+    },
+    {
+      "path": "docs/api/errors/E_INPUT_BINDING_CONFLICT.md",
+      "bytes": 503,
+      "sha256": "9d64851db17d4d75d84ed6352ae6bf5c9e907b64aedb1afcca8593a1878f2b0b"
+    },
+    {
+      "path": "docs/api/errors/E_INPUT_PROFILE_INVALID.md",
+      "bytes": 743,
+      "sha256": "65a84c1c7148f267763392c16f4778b1b4b4804b860ccad6583dcd6c7377edce"
+    },
+    {
+      "path": "engine/src/components/KeyboardComponent.ts",
+      "bytes": 9023,
+      "sha256": "20539730dd850304cf8ed7e27ee3ff0286cafe0a19b306cb84dea12fd0e6a915"
+    },
+    {
+      "path": "engine/src/core/EngineError.ts",
+      "bytes": 12418,
+      "sha256": "c53332a03c7cab73420fca12817f46a54631d051d90d8800dda6dbcc96e8afb2"
+    },
+    {
+      "path": "engine/src/input.ts",
+      "bytes": 356,
+      "sha256": "793ee7ba75e836021b97f4ecfd7f6802a8162b3a202e833248f0d79cd1424bff"
+    },
+    {
+      "path": "engine/src/input/BrowserMultiplayerInput.ts",
+      "bytes": 14380,
+      "sha256": "0e58ca583b3f766eeefbd6bbb899e22a9de4cae619b6143fe8d22d32dedabe5e"
+    },
+    {
+      "path": "engine/src/input/GamepadInputLayers.ts",
+      "bytes": 7907,
+      "sha256": "24fea54a4a184704aafb9a53b714a7db7b9385cfc04778cc7314645d95c4c73c"
+    },
+    {
+      "path": "engine/src/input/InputActionMap.ts",
+      "bytes": 5792,
+      "sha256": "ad29e343ae23216debe51d350b8fa83c03b1833388b4a8f91f89a2d7dcc6b02b"
+    },
+    {
+      "path": "engine/src/input/InputBindings.ts",
+      "bytes": 5466,
+      "sha256": "04fd0e61ce7ed86373ebf6efcd602d8bfbfa3588806daede781bf971d9adcaae"
+    },
+    {
+      "path": "engine/src/input/InputMap.ts",
+      "bytes": 4270,
+      "sha256": "275e22b447d23c2f54db5d63c826f33bd0284c9b46c382de2802327eae7a2dcc"
+    },
+    {
+      "path": "engine/test/gamepad-multiplayer-input.test.mjs",
+      "bytes": 5912,
+      "sha256": "2e8358343e5265e82464720b9bc2ccf493110aaa32ad277ffc0268dc44df4a21"
+    },
+    {
+      "path": "engine/test/input-actions.test.mjs",
+      "bytes": 7650,
+      "sha256": "24d8c75a9a12183efb98b37f25dacb9b5e312cc1866c0f1482ad26fde04f9dde"
+    },
+    {
+      "path": "engine/test/input-gui-consumption.test.mjs",
+      "bytes": 10476,
+      "sha256": "5210b918c6b5904fee9404729efee854a342a942ed2c22d14847c903d2d8308e"
+    },
+    {
+      "path": "engine/test/input-keyboard-gui.test.mjs",
+      "bytes": 3977,
+      "sha256": "1fc90f1cd41f6968acb6815edbe0a144d12796146dc37c2fb817dcc1528976ba"
+    },
+    {
+      "path": "examples/input-actions/application.ts",
+      "bytes": 8902,
+      "sha256": "746bd2eb3cc8d5002ebcef75a60a6c3a30db13af7e0dec7bb84179ea1391a22a"
+    },
+    {
+      "path": "examples/input-actions/index.html",
+      "bytes": 509,
+      "sha256": "a88f59b77e6b1d6766380d24c49b899c780812f3130511edcba6d074614eba52"
+    },
+    {
+      "path": "examples/input-actions/main.ts",
+      "bytes": 899,
+      "sha256": "487668b6a49a47c88c0defef05e4a336ed5cacb0965e0459ef17a4c875149410"
+    },
+    {
+      "path": "examples/manifest.json",
+      "bytes": 55860,
+      "sha256": "700c7dfc14c669f26b962eac2fa838a472afe1aec5d0e4ec1d5ab4d1d60e3e96"
+    },
+    {
+      "path": "extensions/README.md",
+      "bytes": 18986,
+      "sha256": "3b13593c75508ea3eb790a024febe8ae5f3483f80e73f9192146b6920e342693"
+    },
+    {
+      "path": "extensions/package.json",
+      "bytes": 5820,
+      "sha256": "c97c959eeef4819a5c160b8201f9f5f67459abbc7b123b819bf96b1ff773f51b"
+    },
+    {
+      "path": "extensions/rollup.config.js",
+      "bytes": 1934,
+      "sha256": "2da688057b56ecc0c7e9b1eeff04306bc5c264d0e57f8000baecbc898fecb195"
+    },
+    {
+      "path": "extensions/src/input-actions.ts",
+      "bytes": 454,
+      "sha256": "b120209afa44c0a58c1b7d76a4b97ec850179c89eecf1d96d3abff88a0188bc0"
+    },
+    {
+      "path": "extensions/src/input-actions/BindingProfile.ts",
+      "bytes": 10400,
+      "sha256": "1539b7815a26db7d985b6dcaadf7fee94011d5d3ae90dace60a4ef19c4da1643"
+    },
+    {
+      "path": "extensions/src/input-actions/types.ts",
+      "bytes": 1208,
+      "sha256": "428e7b935726b93a6cc4fc3b68c42986da8476abb86d6d44ebce910f2ce6b1c5"
+    },
+    {
+      "path": "extensions/test/helpers/public-feature-candidate.mjs",
+      "bytes": 7227,
+      "sha256": "6138c03b053da1d829271f4ae04ff5aa42fee190923b7b73a5437332daf01bef"
+    },
+    {
+      "path": "extensions/test/input-actions-browser-gate.mjs",
+      "bytes": 3750,
+      "sha256": "5f391adb07ff05d20aead83b06558e160fe02458c75b1af8672fdb86437dc1e6"
+    },
+    {
+      "path": "extensions/test/input-actions-browser-policy.mjs",
+      "bytes": 2044,
+      "sha256": "5bcdf20b6aa52e063d3d4b53e7f5ebdfde69e0f292039be11e123c54a4102212"
+    },
+    {
+      "path": "extensions/test/input-actions-browser-policy.test.mjs",
+      "bytes": 1464,
+      "sha256": "74e9bcd8674a912ae43ef3136b6c875064d9a35b3c61aef85c73289918a2c708"
+    },
+    {
+      "path": "extensions/test/input-actions-browser.mjs",
+      "bytes": 8112,
+      "sha256": "ec235aa06ba32d2353348d6e3c55c106e83a3082559462175bf356d6cc56287b"
+    },
+    {
+      "path": "extensions/test/input-actions-candidate.mjs",
+      "bytes": 3080,
+      "sha256": "d94f9f551921e0ce9d5a9461c0959b55d4e214f97ea89254ec8d5ef3797540e2"
+    },
+    {
+      "path": "extensions/test/input-actions.test.mjs",
+      "bytes": 9739,
+      "sha256": "06fc31fc855031f87013d6c3c1f0e0fd42fa62db2190d776e3d5ce713c2e93cc"
+    },
+    {
+      "path": "review/baselines/api-surface.json",
+      "bytes": 317087,
+      "sha256": "0f87726d4aa5d4173d46e38a66be0fea5c08867a34e0321530b31cc0dd9b9068"
+    },
+    {
+      "path": "review/engine-0.2.3/README.md",
+      "bytes": 4291,
+      "sha256": "ca169d682c75555bfa38536023bf4b5f19df8dad3e1f70539230cb386017c111"
+    },
+    {
+      "path": "review/engine-0.2.3/api-contract.d.ts",
+      "bytes": 19620,
+      "sha256": "dd6b53cd8a901905f146bc4c118348e3d08350d6808fe51028a80a52532f3e07"
+    },
+    {
+      "path": "review/engine-0.2.3/contract.md",
+      "bytes": 12895,
+      "sha256": "f4d6912443035836b9295cb38ad7deb8673953abfa475b8cb5e019aac2cec039"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-input-actions.mjs",
+      "bytes": 76,
+      "sha256": "b4307265c11c6810bebd9ec13fd653297d90938dbe5dab0902184c1b0e07ef38"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/input-action-map.mjs",
+      "bytes": 53,
+      "sha256": "95c452b666d1c7a71d74f7878e2da18b982160d3bfc0c4d096bbcd012693a792"
+    }
+  ],
+  "formatRequalification": {
+    "path": "artifacts/engine-0.2.3/g06/format-requalification.json",
+    "bytes": 3701,
+    "sha256": "bb4eafe2d722d269277932085c14b4848bda66aacd9cc9450158df79163e9729"
+  }
+}

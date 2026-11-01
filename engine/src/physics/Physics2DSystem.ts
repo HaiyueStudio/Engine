@@ -3,6 +3,9 @@ import { Entity } from '../ecs/Entity';
 import { System } from '../ecs/System';
 import type { World } from '../ecs/World';
 import { requiredItemAt } from '../math/arrayAccess';
+import { EngineError, EngineErrorCode } from '../core/EngineError';
+import { FixedStepClock } from './FixedStepClock';
+import { validateShapeCast } from './Physics2DShapeCast';
 import { createBox2DPhysics2DBackend } from './Box2DPhysics2DBackend';
 import type {
   MutablePhysics2DBodyTransform,
@@ -17,6 +20,7 @@ import type {
   Physics2DCapabilities,
   Physics2DJointHandle,
   Physics2DWorldDriver,
+  Physics2DShapeCastDesc,
 } from './Physics2DBackend';
 import { Physics2DBody } from './Physics2DBody';
 import { Physics2DJoint } from './Physics2DJoint';
@@ -63,6 +67,30 @@ export interface Physics2DRaycastResult {
   readonly distance: number;
   readonly point: readonly [number, number];
   readonly normal: readonly [number, number];
+}
+
+export interface Physics2DShapeCastOptions {
+  readonly shape: 'box' | 'circle';
+  readonly origin: readonly [number, number];
+  readonly translation: readonly [number, number];
+  readonly angle?: number;
+  readonly durationSeconds?: number;
+  readonly width?: number;
+  readonly height?: number;
+  readonly radius?: number;
+  readonly categoryBits?: number;
+  readonly maskBits?: number;
+  readonly exclude?: readonly Physics2DBody[];
+  readonly includeSensors?: boolean;
+  readonly maxCandidates?: number;
+}
+export type Physics2DShapeCastHit = Readonly<{ entity: Entity; body: Physics2DBody; fraction: number; distance: number }>
+  & (Readonly<{ kind: 'impact'; point: readonly [number, number]; normal: readonly [number, number] }>
+    | Readonly<{ kind: 'overlap'; fraction: 0; distance: 0; point: null; normal: null }>);
+export interface Physics2DFixedStepEvent {
+  readonly phase: 'before' | 'after';
+  readonly tick: number;
+  readonly deltaSeconds: number;
 }
 
 export interface Physics2DResourceSnapshot {
@@ -112,22 +140,26 @@ export class Physics2DSystem extends System {
     bullet: false,
     allowSleep: true,
   };
-  private accumulator = 0;
+  private readonly clock = new FixedStepClock();
+  private readonly fixedStepListeners = new Set<(event: Physics2DFixedStepEvent) => void>();
   private physicsTick = 0;
 
   constructor(options: Physics2DSystemOptions = {}) {
     super({ any: [Physics2DBody, Physics2DJoint] });
     this.pixelsPerMeter = options.pixelsPerMeter ?? 100;
-    if (!(this.pixelsPerMeter > 0)) throw new RangeError('Physics2DSystem pixelsPerMeter must be greater than zero.');
+    if (!Number.isFinite(this.pixelsPerMeter) || !(this.pixelsPerMeter > 0)) throw new RangeError('Physics2DSystem pixelsPerMeter must be finite and greater than zero.');
+    this.fixedTimeStep = options.fixedTimeStep ?? 1 / 60;
+    this.maxSubSteps = options.maxSubSteps ?? 5;
+    FixedStepClock.validate(this.fixedTimeStep, this.maxSubSteps, 'Physics2DSystem');
     const gravity = options.gravity ?? DEFAULT_GRAVITY;
     this.backend = options.backend ?? createBox2DPhysics2DBackend();
     this.physicsWorld = this.backend.createWorld({
       gravityX: gravity[0] / this.pixelsPerMeter,
       gravityY: gravity[1] / this.pixelsPerMeter,
     });
-    this.capabilities = this.physicsWorld.capabilities;
-    this.fixedTimeStep = options.fixedTimeStep ?? 1 / 60;
-    this.maxSubSteps = options.maxSubSteps ?? 5;
+    const capabilities = this.physicsWorld.capabilities;
+    this.capabilities = capabilities.shapeCast && typeof this.physicsWorld.castShape !== 'function'
+      ? Object.freeze({ ...capabilities, shapeCast: false }) : capabilities;
     this.velocityIterations = options.velocityIterations ?? 8;
     this.positionIterations = options.positionIterations ?? 3;
     this.syncStaticBodiesFromTransform = options.syncStaticBodiesFromTransform ?? true;
@@ -137,6 +169,39 @@ export class Physics2DSystem extends System {
 
   get backendId(): string {
     return this.physicsWorld.backendId;
+  }
+
+  override get disabled(): boolean { return super.disabled; }
+  override set disabled(value: boolean) { super.disabled = value; if (value) this.clock?.reset(); }
+  get interpolationAlpha(): number { return this.clock.alpha(this.fixedTimeStep); }
+  onFixedStep(listener: (event: Physics2DFixedStepEvent) => void): () => void {
+    if (typeof listener !== 'function') throw new EngineError(EngineErrorCode.GameplayInvalidInput, 'A fixed-step listener must be a function.');
+    this.fixedStepListeners.add(listener);
+    return () => { this.fixedStepListeners.delete(listener); };
+  }
+
+  castShape(options: Physics2DShapeCastOptions): Physics2DShapeCastHit | null {
+    if (!this.capabilities.shapeCast || !this.physicsWorld.castShape) throw new EngineError(EngineErrorCode.PhysicsShapeCastUnsupported, 'This physics backend does not support shape casts.', { docsPath: 'errors/E_PHYSICS_SHAPE_CAST_UNSUPPORTED' });
+    if (!options || !Array.isArray(options.origin) || options.origin.length !== 2 || !Array.isArray(options.translation) || options.translation.length !== 2
+      || (options.exclude !== undefined && (!Array.isArray(options.exclude) || options.exclude.some(body => !body || typeof body !== 'object')))) throw new EngineError(EngineErrorCode.GameplayInvalidInput, 'Shape cast positions and body exclusions must be valid arrays.');
+    const p = this.pixelsPerMeter;
+    const desc: Physics2DShapeCastDesc = {
+      ...options,
+      origin: { x: options.origin[0] / p, y: options.origin[1] / p },
+      translation: { x: options.translation[0] / p, y: options.translation[1] / p },
+      ...(options.width === undefined ? {} : { width: options.width / p }),
+      ...(options.height === undefined ? {} : { height: options.height / p }),
+      ...(options.radius === undefined ? {} : { radius: options.radius / p }),
+      exclude: (options.exclude ?? []).flatMap(body => { const handle = this.bodyHandles.get(body); return handle === undefined ? [] : [handle]; }),
+    };
+    validateShapeCast(desc);
+    const hit = this.physicsWorld.castShape(desc);
+    if (!hit) return null;
+    const entity = this.bodyHandleEntities.get(hit.body), body = entity?.getComponent(Physics2DBody);
+    if (!entity || !body) return null;
+    if (hit.kind === 'overlap') return Object.freeze({ entity, body, kind: 'overlap', fraction: 0, distance: 0, point: null, normal: null });
+    return Object.freeze({ entity, body, kind: 'impact', fraction: hit.fraction, distance: hit.distance * p,
+      point: Object.freeze([hit.point.x * p, hit.point.y * p] as const), normal: Object.freeze([hit.normal.x, hit.normal.y] as const) });
   }
 
   setGravity(gravity: [number, number]): void {
@@ -342,26 +407,27 @@ export class Physics2DSystem extends System {
 
   override update(world: World, _time: number, delta: number): this {
     if (this.disabled) return this;
+    FixedStepClock.validate(this.fixedTimeStep, this.maxSubSteps, 'Physics2DSystem');
+    FixedStepClock.validateDelta(delta);
     this.contactEvents = Object.freeze([]);
     this.syncBodies(world);
     this.syncJoints(world);
 
-    const dt = Math.min(Math.max(delta / 1000, 0), this.fixedTimeStep * this.maxSubSteps);
-    this.accumulator += dt;
-    let steps = 0;
-    while (this.accumulator >= this.fixedTimeStep && steps < this.maxSubSteps) {
-      this.physicsWorld.step(this.fixedTimeStep, this.velocityIterations, this.positionIterations);
+    this.clock.advance(_time, delta, this.fixedTimeStep, this.maxSubSteps, seconds => {
+      this.emitFixedStep('before', this.physicsTick + 1, seconds);
+      this.physicsWorld.step(seconds, this.velocityIterations, this.positionIterations);
       this.captureContactStep();
-      this.accumulator -= this.fixedTimeStep;
-      steps++;
-    }
-    if (steps === this.maxSubSteps) this.accumulator = 0;
+      if (this.fixedStepListeners.size) this.writeBackTransforms();
+      this.emitFixedStep('after', this.physicsTick, seconds);
+    });
 
     this.writeBackTransforms();
     return this;
   }
 
   override destroy(): this {
+    this.fixedStepListeners.clear();
+    this.clock.reset();
     for (const joint of this.jointEntities.keys()) this.destroyJoint(joint);
     for (const body of this.bodyEntities.keys()) this.destroyBody(body);
     this.physicsWorld.destroy();
@@ -379,6 +445,12 @@ export class Physics2DSystem extends System {
     this.staleBodies.length = 0;
     this.staleJoints.length = 0;
     return super.destroy();
+  }
+
+  private emitFixedStep(phase: Physics2DFixedStepEvent['phase'], tick: number, deltaSeconds: number): void {
+    if (!this.fixedStepListeners.size) return;
+    const event = Object.freeze({ phase, tick, deltaSeconds });
+    for (const listener of [...this.fixedStepListeners]) if (this.fixedStepListeners.has(listener)) listener(event);
   }
 
   private syncBodies(world: World): void {

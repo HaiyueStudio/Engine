@@ -1,129 +1,44 @@
-# GUI controls
+# GUI composite controls
 
-## Toast notifications
+The 0.2.3 development candidate adds `GuiIconPosition` to `@haiyue/engine/gui`, `GuiTabHeaderOptions` to the existing `@haiyue/extensions/gui-layout`, and twelve exports to `@haiyue/extensions/gui-controls`. Published 0.2.2 packages do not contain these additions. Use matching Engine/extensions candidates.
 
-`GuiToast` and `GuiToastOptions` are included in the 0.2.1 candidate through the
-stable `@haiyue/engine/gui` entrypoint ([ADR 0128](../for-ai/adr/0128-toast-in-021-release.md)).
-The candidate still requires its final release qualification; see the
-[0.2.1 status](../../review/engine-0.2.1/README.md).
+`GuiStyle.iconPosition` accepts `left` or `right`, defaulting to left. Measurement, theme insets, aspect ratio and painting share the original GuiContent geometry. With no icon there is no icon gap. Images remain borrowed; their original owner handles readiness, replacement and detachment.
 
-| Option / method | Behavior |
+## Tabs
+
+The original `GuiTabContainer` and `GuiTabPage` retain their identities and state format. Page headers accept `icon`, `iconPosition`, `iconSize` and `iconGap`. `setPageHeader(id,options)` merges named fields after validation. Omitted fields remain; explicit `icon: undefined` clears the page icon. Dimensions and gaps must be finite and nonnegative. Existing activation, hidden pages, close veto, reordering and focus history remain available. Only the active page joins the GUI tree. Disposal detaches borrowed page content.
+
+## Breadcrumb
+
+`GuiBreadcrumb` exposes `element`, `currentKey`, `setItems(items)`, `setCurrent(key|null)` and `dispose()`. It exports `GuiBreadcrumbItem`, `GuiBreadcrumbMenuItem` and `GuiBreadcrumbOptions`. Keys must be nonempty and unique across the path and all menu items. Labels, optional icons, disabled flags and per-item separators are captured as immutable configuration; images remain mutable borrowed sources.
+
+The last enabled item is current by default. Current and disabled path items do not navigate. Explicit null selects no current item, including after `setItems`; removing another current key falls back to the last enabled item. Separators default to `/`. Long paths wrap within their available width. Navigation calls `onNavigate(key)` once; the application owns route changes.
+
+Optional one-level menus use original GUI buttons, scrolling and the modal focus domain. Pass the existing GUI system's `focus` manager. Closing restores the trigger focus; selecting returns the menu item's key. No DOM router or browser history is involved.
+
+## Badge
+
+`GuiBadge` exposes `element`, `setValue(value)`, `setOptions(options)` and `dispose()`. It exports `GuiBadgeValue`, `GuiBadgeStatus`, `GuiBadgePlacement` and `GuiBadgeOptions`. Optional `content` is borrowed at construction and cannot be replaced through `setOptions`.
+
+| Option | Behavior |
 | --- | --- |
-| `text` | Short, single-line text; overflow is clipped to the content rectangle. |
-| `icon`, `iconKey` | Optional borrowed GuiImageSource and serialization key; caller owns its lifetime. |
-| `iconSize`, `fontSize` | Logical pixels, defaults 22 and 15. |
-| `durationMs` | Fully visible hold time, default 2200 ms. |
-| `animationMs` | Each fade/slide transition, default 180 ms; 0 means instant. |
-| `show({ text, icon, iconKey, durationMs, animationMs }?)` | Replace and restart one message; omitted values retain configuration. `icon: null` removes the icon. |
-| `hide()` | Immediately cancel and hide. |
-| `progress`, `animating` | Current visibility fraction and finite display lifecycle. |
+| `variant` | `count` by default; also `dot` and `status` |
+| `value` | Nonnegative safe integer or nonempty text; default 0 |
+| `showZero` | Default false; only count zero is hidden |
+| `overflowCount` | Default 99; 100 displays `99+`; text is not overflow-formatted |
+| `status` | `default`, `processing`, `success`, `warning`, `error` |
+| `statusText` | Visible status label and accessible name |
+| `placement` | Default `top-right`; all four corners supported |
+| `offset` | Finite logical `[x,y]`; positive values move right/down |
 
-Normal GUI layout and `style.backgroundColor`, `style.color`, `style.opacity`,
-`style.padding`, `style.radius` apply. Toast starts hidden and never captures input.
-It draws above ordinary content, below modals. Non-finite/negative timings behave
-as zero. Include text glyphs in the GuiSystem font atlas. Serialization stores
-configuration and resolves `iconKey` through `resolveImageSource`, not progress.
-GuiSystem advances it automatically; use its existing `animating`/`stopAnimations`
-contract for on-demand hosts and suspension. No timers or DOM nodes are created.
+Attached decoration is outside content flow and ignores pointer/focus input. Borrowed content keeps its own interaction. Standalone badges participate in normal layout. `setOptions` validates before merging, and unchanged visible text does not invalidate paint. `style` applies to the badge decoration; processing has static status semantics without a timer.
 
-Stable entrypoint: `@haiyue/engine/gui`. New controls are a local development
-candidate requiring a reviewed minor release (ADR 0102).
+## Collapse
 
-| API | Behavior |
-| --- | --- |
-| `GuiScrollView(options?: GuiScrollViewOptions)` | Vertical clipped content viewport using ordinary GuiElement layout options. |
-| `contentHeight?: number` | Content height in logical pixels, default 0. |
-| `scrollY?: number` | Initial vertical offset, default 0; clamped by layout. |
-| `showScrollbar?: boolean` | Show scroll indicator, default true. |
-| `setContentHeight(height)` | Update extent and clamp offset. |
-| `scrollTo(y)` / `scrollBy(delta)` | Set or adjust clamped offset. Non-finite values reset to 0. |
-| `scrollY` / `maxScrollY` | Read-only current and maximum offsets. |
-| `GuiHelpDialog(options?: GuiHelpDialogOptions)` | GuiModal with close button, backdrop dismissal, wrapped scrollable message. |
-| `body: GuiScrollView` | Read-only viewport reference; text children are internally managed. |
-| `GuiButtonOptions.variant: 'outline'` | Draw a transparent outline, respecting radius and border color. |
+`GuiCollapse` exposes `element`, `setItems`, `setExpandedKeys`, `getExpandedKeys`, `toggle` and `dispose()`. It exports `GuiCollapseItem` and `GuiCollapseOptions`. Items use stable unique keys, title/icon configuration, borrowed `content`, optional borrowed `extra`, and a disabled flag. Content and extra nodes must be distinct and unattached to another owner.
 
-Help options inherit GuiModalOptions except action/close visibility and backdrop
-behavior, which the component fixes. Inherited title, message, callbacks and
-style options remain available. Defaults: width 420 and height 390, clamped by
-viewport. Runtime does not require a browser DOM. See the [usage guide](../engine-guide/gui.md)
-and [ADR 0102](../for-ai/adr/0102-gui-scroll-view-and-help-dialog.md).
+Panels default to all closed and multiple expansion. Accordion accepts at most one expanded key. Unknown or duplicate keys reject before mutation. Programmatic changes can expand disabled panels; disabled only blocks user toggles. `setExpandedKeys` and `toggle` default to `notify=false`; real interactions notify once. Callback keys are readonly and ordered by items. Setting the same state does not notify.
 
-## Optional motion
+`toggleArea` is `header` by default or `icon`. `expandIconPosition` is left by default or right. Extra actions do not toggle the panel. Closing moves focus through the existing input domain before hiding; uncommitted composition follows the original editor policy. Hidden content remains owned by the application, with no drawing or hit testing. Reordering preserves sections and content state. Dispose nested controllers explicitly; removing a parent never destroys borrowed children.
 
-Existing controls retain instant behavior unless motion is explicitly enabled.
-
-| Configuration | Default | Behavior |
-| --- | --- | --- |
-| `GuiScrollViewOptions.inertia` / `view.inertia` | `false` | Continue a pointer drag after release with exponential deceleration. |
-| `inertiaStrength` | `1` | Decay multiplier, clamped to 0–4. At 1, the velocity time constant is 325 ms; higher values coast farther, 0 stops momentum. |
-| `GuiSwitchOptions.thumbTransitionMs` / `control.thumbTransitionMs` | `0` | Thumb movement duration in milliseconds, with ease-out interpolation. |
-| `colorTransitionMs` | `0` | Independent track color transition duration in milliseconds. |
-
-A list stops at its bounds, on a new touch, explicit `scrollTo`/`scrollBy`, or
-when its extent changes. Holding before release or cancelling a gesture produces
-no fling. A contact during momentum first stops scrolling without activating the
-row beneath it. Wheel/trackpad events are applied directly so OS momentum is not
-applied twice. Switch reversals start from the currently displayed position/color.
-Non-positive or non-finite switch durations are instant. Initial checked state
-is drawn without an entrance animation.
-
-Ordinary World updates and RenderIntegration advance motion using the engine's
-millisecond delta, exactly once per world frame even when multiple views record GUI. Demand-rendering hosts should request frames while
-`guiSystem.animating` is true, and call `guiSystem.stopAnimations()` when
-suspending. Hidden/disabled subtrees stop automatically on update. Device loss
-also stops motion. Configurations serialize; transient speed/progress does not.
-
-```ts
-import { GuiScrollView, GuiSwitch } from '@haiyue/engine/gui';
-
-const rules = new GuiScrollView({ inertia: true, inertiaStrength: 1 });
-const toggle = rules.add(new GuiSwitch({
-  thumbTransitionMs: 200,
-  colorTransitionMs: 200,
-}));
-```
-
-LED Sudoku uses these values for its lists and switches on browser and Native.
-
-## RGB color picker
-
-`GuiColorPicker` / `GuiColorPickerOptions` are available from
-`@haiyue/engine/gui` (local candidate, [ADR 0103](../for-ai/adr/0103-gui-color-picker.md)).
-The component uses engine GUI rendering and works without a native DOM color dialog.
-
-| API | Behavior |
-| --- | --- |
-| `value?: string` | Initial opaque `#rgb` or `#rrggbb`, default `#2563eb`. Invalid initial values use the default. |
-| `picker.value` | Read-only canonical lowercase `#rrggbb`. |
-| `setValue(value, emit = false)` | Normalize a valid HEX value; ignore invalid input. Changed values emit only when requested. |
-| `onChange?: (value: string) => void` | Fires for valid HEX edits and RGB slider changes. |
-| `onCommit?: (value: string) => void` | Fires on valid HEX submission or slider release. |
-| `width` / `height` | Standard GUI lengths, default 240 × 144. Allow at least 180 × 128 for comfortable editing. |
-| `setDisabled(disabled)` | Disables the picker and its internal input/slider controls. |
-
-HEX input accepts uppercase and surrounding whitespace. Incomplete/invalid drafts
-show a red border and leave the last valid color unchanged; Enter restores that
-color. Three-digit shorthand remains editable so six-digit input can be completed.
-Alpha and other CSS color syntaxes are not supported. Serialization preserves
-configuration/value; callbacks and transient input drafts are not serialized.
-
-## Button hover colors (0.2.2 candidate)
-
-`GuiButtonOptions.hoverTransition` / `button.hoverTransition` enables color transitions on pointer enter and leave (default `false`). `hoverTransitionMs` defaults to `180` milliseconds; zero, negative and non-finite values switch instantly. Background, text and border colors interpolate with ease-out cubic timing. Leaving or re-entering mid-transition continues from the current color. Theme-resource hover colors and local `style.hoverBackgroundColor` / `style.hoverColor` are supported. Nine-slice images switch normally without texture crossfades.
-
-`GuiSystem` advances this finite animation through its existing frame loop and demand-rendering contract. Hidden/disabled controls and suspension stop the transition. Serialization saves only the two options. Changing either option during a transition immediately settles to the current hover state.
-
-```ts
-const button = root.add(new GuiButton({
-  text: 'Continue',
-  hoverTransition: true,
-  hoverTransitionMs: 240,
-  style: {backgroundColor: '#2563eb', hoverBackgroundColor: '#3b82f6'},
-}));
-```
-
-The GUI Runtime playground exposes both settings in the GuiButton property panel.
-
-## Input triple click
-
-Three completed primary clicks/taps in the same input select its entire value, including all lines and complete emoji. Adjacent clicks must be within 500 ms and 6 logical pixels. Dragging, cancellation, focus loss, editing the committed value, or pressing the password eye resets the sequence. Read-only inputs may still select text; password clipboard protection remains in effect. The next ordinary click places the caret again.
+See the [assembly guide](../engine-guide/gui-controls.md) and [runnable example](../../examples/gui-controls/index.html). Real keyboard/IME/gamepad and Mac/iPhone qualifications are bound to the final candidate by G11.

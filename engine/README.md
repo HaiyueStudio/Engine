@@ -1,5 +1,7 @@
 # `@haiyue/engine`
 
+0.2.3 development: `@haiyue/engine/audio` exposes the original owner-safe mixer without changing its experimental class identity. See [game audio](../docs/api/audio.md) for borrowed contexts, volume/capability snapshots and the optional facade. Current published 0.2.2 packages do not contain this stable entry.
+
 海月是面向现代浏览器的 WebGPU-first 2D/3D 游戏引擎。稳定入口提供 ECS、场景、PBR 渲染、资产生命周期、输入、后处理和常用几何能力；高级渲染与诊断协议通过明确的 experimental 子路径隔离。
 
 ## 要求

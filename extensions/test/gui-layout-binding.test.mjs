@@ -2,12 +2,30 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {World} from '@haiyue/engine/ecs';
+import {createAuditGpuDevice} from '../../scripts/benchmark/real-renderer-audit-device.mjs';
 import {GuiRoot,GuiElement,GuiButton,GuiLabel,GuiScrollView,GuiModal,GuiSystem,GuiImage,GuiSwitch,GuiToast,hitTestGui} from '@haiyue/engine/gui';
 const root=fileURLToPath(new URL('../..',import.meta.url));
 execFileSync(process.execPath,[fileURLToPath(new URL('../../node_modules/typescript/bin/tsc',import.meta.url)),'--target','ESNext','--module','ESNext','--moduleResolution','bundler','--strict','--noUncheckedIndexedAccess','--exactOptionalPropertyTypes','--skipLibCheck','--types','@webgpu/types','--rootDir','extensions/src','--outDir','artifacts/engine-0.2.2/g03/compiled','extensions/src/gui-layout.ts'],{cwd:root,stdio:'pipe'});
 const {attachGuiLayout,createGuiContainer}=await import('../../artifacts/engine-0.2.2/g03/compiled/gui-layout.js');
 const {readGuiLayoutCounters}=await import('../../artifacts/engine-0.2.2/g03/compiled/gui-layout/diagnostics.js');
 const none=()=>({width:0,height:0,minWidth:0,minHeight:0});
+
+test('default fixed-size text skips layout; auto width, minima and font metrics still reflow',()=>{
+ const device=createAuditGpuDevice(),engine={device,format:'rgba8unorm',displayWidth:300,displayHeight:200,getDepthFormat:()=> 'depth24plus'};
+ const system=new GuiSystem(engine,{font:{chars:'AB? i',fontSize:10,atlasSize:64,readAtlasPixels:c=>new Uint8Array(c.width*c.height*4),canvasFactory(width,height){const context={font:'',measureText:t=>({width:t.length*5,actualBoundingBoxAscent:8,actualBoundingBoxDescent:2}),clearRect(){},fillText(){}};return {width,height,getContext:()=>context};}}});
+ const world=new World('GUI P0 default measurement'),root=new GuiRoot(),panel=root.add(createGuiContainer('column',{style:{width:150,height:120}})),label=panel.add(new GuiLabel({text:'A',width:80,height:20}));
+ world.createEntity('gui').add(root);world.add(system);system.prepareRoots(world);
+ const binding=attachGuiLayout(root);
+ try{
+  root.layout(300,200);root.clearDirty();const first=readGuiLayoutCounters(binding),rect=label.rect;
+  label.setText('AB');root.layout(300,200);assert.equal(label.rect,rect);assert.deepEqual(readGuiLayoutCounters(binding),first);
+  root.clearDirty();label.setAutoWidth(true);root.layout(300,200);root.clearDirty();const auto=readGuiLayoutCounters(binding);label.setText('A');root.layout(300,200);assert.ok(readGuiLayoutCounters(binding).solves>auto.solves);
+  label.setAutoWidth(false);binding.setStyle(panel,{contentMinimum:true});root.layout(300,200);root.clearDirty();const minimum=readGuiLayoutCounters(binding);label.setText('AB');root.layout(300,200);assert.ok(readGuiLayoutCounters(binding).solves>minimum.solves);
+  binding.setStyle(panel,{contentMinimum:false});root.layout(300,200);root.clearDirty();const metric=readGuiLayoutCounters(binding);label.setFontSize(24);root.layout(300,200);assert.ok(readGuiLayoutCounters(binding).solves>metric.solves);
+  root.clearDirty();const originalMeasure=root.measureElement;root.measureElement=function(...args){return originalMeasure.apply(this,args);};const custom=readGuiLayoutCounters(binding);label.setText('A');root.layout(300,200);assert.ok(readGuiLayoutCounters(binding).solves>custom.solves);
+ }finally{binding.dispose();system.destroy();root.destroy();}
+});
 
 test('theme content insets belong to container layout once; colors solve nothing and explicit layout padding wins',()=>{
  let skin={contentInsets:{left:12,top:6,right:8,bottom:4},color:'red'};const listeners=new Set(),resource={version:1,resolve:type=>type==='*'?skin:{},subscribe(callback){listeners.add(callback);return()=>listeners.delete(callback);}};

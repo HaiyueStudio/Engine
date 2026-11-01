@@ -1,6 +1,7 @@
 import type {RenderCommandContext} from '../../core/RenderCommandContext';
 import {SubmissionLifetime} from '../../rtt/SubmissionLifetime';
 import {writeBuffer} from '../../renderer/utils';
+import {guiVertexChanges} from './GuiVertexChanges';
 
 interface BufferSlot {readonly buffer:GPUBuffer;readonly size:number;version:unknown;}
 type Resource=GPUBuffer|GPUTexture;
@@ -32,7 +33,12 @@ export class GuiGpuResources {
   let slot=this.buffers.get(key);
   if(slot&&slot.version!==version&&this.resources.get(slot.buffer)?.hasPendingRecordings){this.buffers.delete(key);this.retire(slot.buffer);slot=undefined;}
   const buffer=this.reserve(key,size,usage,label);slot=this.buffers.get(key)!;
-  if(slot.version!==version){writeBuffer(this.device.queue,buffer,0,data,0,size);slot.version=version;}
+  if(slot.version!==version){
+   const ranges=guiVertexChanges(key,slot.version,version);
+   if(ranges)for(const range of ranges){const bytes=Math.min(range.size,size-range.offset);if(bytes>0)writeBuffer(this.device.queue,buffer,range.offset,data,range.offset,bytes);}
+   else writeBuffer(this.device.queue,buffer,0,data,0,size);
+   slot.version=version;
+  }
   this.retain(buffer,context);return buffer;
  }
  retain(resource:Resource,context:RenderCommandContext|undefined):void {

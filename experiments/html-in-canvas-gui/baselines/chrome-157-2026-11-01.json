@@ -1,0 +1,4977 @@
+{
+  "schemaVersion": 1,
+  "suite": "html-in-canvas-vs-haiyue-native-gui",
+  "generatedAt": "2026-11-01T10:01:43.165Z",
+  "mode": "stress",
+  "browserPath": "D:\\HaiyueStudio\\Cache\\chrome-for-testing\\157.0.8103.15\\chrome-win64\\chrome.exe",
+  "configuration": {
+    "widgetCounts": [
+      256,
+      1024,
+      4096
+    ],
+    "updateRatios": [
+      0,
+      0.1,
+      1
+    ],
+    "warmupFrames": 30,
+    "sampleFrames": 120,
+    "queueProbeFrames": 8,
+    "viewport": [
+      1280,
+      720
+    ]
+  },
+  "sourceFingerprint": "a13507a3db3da78b066af3cceb274bea792325a0ce07d07bacae4facfbbbe0c1",
+  "cases": [
+    {
+      "id": "native-256-0pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:22:19.922Z",
+      "mode": "native",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 256,
+        "updateRatio": 0,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 65.05999997258186,
+        "effectiveFps": 59.9975295134906,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 16.3650000000016,
+          "mean": 16.66735294117648,
+          "p50": 16.665000000000873,
+          "p95": 16.849999999998545,
+          "max": 16.94999999999709
+        },
+        "missedFrameRatio": 0,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 0,
+          "mean": 0.0027916662395000456,
+          "p50": 0.004999995231628418,
+          "p95": 0.005000025033950806,
+          "max": 0.010000020265579224
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 0.09999999403953552,
+          "mean": 0.138041665405035,
+          "p50": 0.12999999523162842,
+          "p95": 0.18000000715255737,
+          "max": 0.28999999165534973
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 0.19499999284744263,
+          "mean": 0.2949166662991047,
+          "p50": 0.2600000202655792,
+          "p95": 0.550000011920929,
+          "max": 0.6599999964237213
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 0.3050000071525574,
+          "mean": 0.43516666466991105,
+          "p50": 0.4000000059604645,
+          "p95": 0.7149999737739563,
+          "max": 0.8649999797344208
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.044032,
+          "mean": 0.04550826666666667,
+          "p50": 0.045056,
+          "p95": 0.04608,
+          "max": 0.047104
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 13.265000015497208,
+          "mean": 15.945000000298023,
+          "p50": 15.525000005960464,
+          "p95": 18.110000014305115,
+          "max": 18.110000014305115
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564497,
+          "jsHeapUsedBytes": 619605,
+          "jsHeapTotalBytes": 1595253,
+          "breakdown": [
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 205792,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 329521,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 8622313,
+          "jsHeapUsedBytes": 4208710,
+          "jsHeapTotalBytes": 5969706,
+          "breakdown": [
+            {
+              "bytes": 3948544,
+              "types": [
+                "Canvas"
+              ]
+            },
+            {
+              "bytes": 29856,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 2498298,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 2145615,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 4213985,
+          "jsHeapTotalBytes": 8855097,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 4213985,
+          "jsHeapTotalBytes": 8855097,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 8057816,
+        "setupJsHeapBytesDelta": 3589105,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 1048576,
+        "guiElementCount": 769
+      },
+      "scenario": {
+        "rebuildFrames": 1,
+        "drawCallsPerFrame": 2,
+        "htmlTextureUploadsPerFrame": 0
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 30.57346200000029,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": -1,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 1,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 2,
+          "LayoutCount": 1,
+          "RecalcStyleCount": 1,
+          "LayoutDuration": 0.00004500000000000001,
+          "RecalcStyleDuration": 0.000023000000000000017,
+          "DevToolsCommandDuration": 0.10545500000000001,
+          "ScriptDuration": 0.0033069999999999996,
+          "V8CompileDuration": 0,
+          "TaskDuration": 0.363317,
+          "TaskOtherDuration": 0.254487,
+          "ThreadTime": 0.24620999999999998,
+          "ProcessTime": 0.467893,
+          "JSHeapUsedSize": 1821036,
+          "JSHeapTotalSize": 5767168,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 28,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 1.966797,
+          "renderer": 0.525776,
+          "GPU": 2.06388,
+          "network.mojom.NetworkService": 0.245637,
+          "storage.mojom.StorageService": 0.00025999999999999635
+        }
+      }
+    },
+    {
+      "id": "html-256-10pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:22:46.764Z",
+      "mode": "html",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 256,
+        "updateRatio": 0.1,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 7.770000010728836,
+        "effectiveFps": 59.99964706089972,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 16.594999999997526,
+          "mean": 16.666764705882333,
+          "p50": 16.665000000000873,
+          "p95": 16.729999999999563,
+          "max": 16.784999999999854
+        },
+        "missedFrameRatio": 0,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 0.13999998569488525,
+          "mean": 0.2627083351214727,
+          "p50": 0.25,
+          "p95": 0.3700000047683716,
+          "max": 0.5699999928474426
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 1.3900000154972076,
+          "mean": 1.632791667431593,
+          "p50": 1.5550000071525574,
+          "p95": 2.0850000083446503,
+          "max": 2.725000023841858
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 0.04499998688697815,
+          "mean": 0.0820416659116745,
+          "p50": 0.06499999761581421,
+          "p95": 0.14500001072883606,
+          "max": 0.75
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 1.445000022649765,
+          "mean": 1.7185000007351239,
+          "p50": 1.6399999856948853,
+          "p95": 2.1949999928474426,
+          "max": 3.469999998807907
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.014368,
+          "mean": 0.016639999999999985,
+          "p50": 0.016416,
+          "p95": 0.01744,
+          "max": 0.01744
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 27.844999998807907,
+          "mean": 32.582499999552965,
+          "p50": 32.92499998211861,
+          "p95": 36.020000010728836,
+          "max": 36.020000010728836
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564437,
+          "jsHeapUsedBytes": 619629,
+          "jsHeapTotalBytes": 1595253,
+          "breakdown": [
+            {
+              "bytes": 243087,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 292166,
+              "types": [
+                "JavaScript"
+              ]
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 4649078,
+          "jsHeapUsedBytes": 853925,
+          "jsHeapTotalBytes": 2119721,
+          "breakdown": [
+            {
+              "bytes": 386626,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 384140,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 3686400,
+              "types": [
+                "Canvas"
+              ]
+            },
+            {
+              "bytes": 191912,
+              "types": [
+                "DOM"
+              ]
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 881976,
+          "jsHeapTotalBytes": 2121528,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 881976,
+          "jsHeapTotalBytes": 2121528,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 4084641,
+        "setupJsHeapBytesDelta": 234296,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0,
+        "domElementCount": 1025
+      },
+      "scenario": {
+        "paintEvents": 158,
+        "changedElementsTotal": 158,
+        "drawCallsPerFrame": 1,
+        "htmlTextureUploadsPerFrame": 1
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 25.847157999989577,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": 512,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 1281,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 0,
+          "LayoutCount": 159,
+          "RecalcStyleCount": 158,
+          "LayoutDuration": 0.213575,
+          "RecalcStyleDuration": 0.064518,
+          "DevToolsCommandDuration": 0.086801,
+          "ScriptDuration": 0.28891900000000004,
+          "V8CompileDuration": 0,
+          "TaskDuration": 1.648696,
+          "TaskOtherDuration": 0.994883,
+          "ThreadTime": 1.548437,
+          "ProcessTime": 1.757806,
+          "JSHeapUsedSize": 468004,
+          "JSHeapTotalSize": 786432,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 1308,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 1.682502,
+          "renderer": 1.7715150000000002,
+          "GPU": 4.652748,
+          "network.mojom.NetworkService": 0.135604,
+          "storage.mojom.StorageService": 0.0003239999999999979
+        }
+      }
+    },
+    {
+      "id": "native-256-10pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:23:15.511Z",
+      "mode": "native",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 256,
+        "updateRatio": 0.1,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 50.54499998688698,
+        "effectiveFps": 59.007728028918706,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 16.414999999997235,
+          "mean": 16.946932773109253,
+          "p50": 16.665000000000873,
+          "p95": 16.81999999999971,
+          "max": 34.2400000000016
+        },
+        "missedFrameRatio": 0.01680672268907563,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 1.6649999916553497,
+          "mean": 2.534291663765907,
+          "p50": 2.219999998807907,
+          "p95": 4.58500000834465,
+          "max": 7.614999979734421
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 0.5099999904632568,
+          "mean": 0.881666665772597,
+          "p50": 0.8149999976158142,
+          "p95": 1.354999989271164,
+          "max": 3.6849999725818634
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 4.5999999940395355,
+          "mean": 7.654083333164453,
+          "p50": 7.090000003576279,
+          "p95": 12.355000019073486,
+          "max": 20.785000026226044
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 5.159999996423721,
+          "mean": 8.538458333412807,
+          "p50": 7.939999997615814,
+          "p95": 13.660000026226044,
+          "max": 24.469999998807907
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.045056,
+          "mean": 0.04569599999999995,
+          "p50": 0.04608,
+          "p95": 0.04608,
+          "max": 0.047104
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 15.740000009536743,
+          "mean": 23.236874997615814,
+          "p50": 17.694999992847443,
+          "p95": 47.599999994039536,
+          "max": 47.599999994039536
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564493,
+          "jsHeapUsedBytes": 619631,
+          "jsHeapTotalBytes": 1595255,
+          "breakdown": [
+            {
+              "bytes": 193852,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 341457,
+              "types": [
+                "JavaScript"
+              ]
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 9378189,
+          "jsHeapUsedBytes": 4964696,
+          "jsHeapTotalBytes": 7542572,
+          "breakdown": [
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 358190,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 29856,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 5041599,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 3948544,
+              "types": [
+                "Canvas"
+              ]
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 5049541,
+          "jsHeapTotalBytes": 42931897,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 5049541,
+          "jsHeapTotalBytes": 42931897,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 8813696,
+        "setupJsHeapBytesDelta": 4345065,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 1048576,
+        "guiElementCount": 769
+      },
+      "scenario": {
+        "rebuildFrames": 158,
+        "drawCallsPerFrame": 2,
+        "htmlTextureUploadsPerFrame": 0
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 27.707054999977117,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": -1,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 1,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 2,
+          "LayoutCount": 1,
+          "RecalcStyleCount": 1,
+          "LayoutDuration": 0.00005700000000000003,
+          "RecalcStyleDuration": 0.00006999999999999997,
+          "DevToolsCommandDuration": 0.08181300000000001,
+          "ScriptDuration": 0.006113,
+          "V8CompileDuration": 0,
+          "TaskDuration": 2.02455,
+          "TaskOtherDuration": 1.936497,
+          "ThreadTime": 1.901684,
+          "ProcessTime": 2.6401,
+          "JSHeapUsedSize": 2112048,
+          "JSHeapTotalSize": 35913728,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 28,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 1.8234970000000001,
+          "renderer": 2.6534139999999997,
+          "GPU": 2.161117,
+          "network.mojom.NetworkService": 0.18132800000000004,
+          "storage.mojom.StorageService": 0.00019099999999999673
+        }
+      }
+    },
+    {
+      "id": "html-256-100pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:23:45.400Z",
+      "mode": "html",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 256,
+        "updateRatio": 1,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 3.9600000083446503,
+        "effectiveFps": 59.49985125037185,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 15.820000000003347,
+          "mean": 16.80676470588236,
+          "p50": 16.665000000000873,
+          "p95": 16.735000000000582,
+          "max": 34.24499999999898
+        },
+        "missedFrameRatio": 0.008403361344537815,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 0.5150000154972076,
+          "mean": 1.259583336363236,
+          "p50": 1.2549999952316284,
+          "p95": 1.5850000083446503,
+          "max": 2.060000002384186
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 1.3949999809265137,
+          "mean": 1.716375001023213,
+          "p50": 1.594999998807907,
+          "p95": 2.2450000047683716,
+          "max": 3.25
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 0.054999977350234985,
+          "mean": 0.08495833377043406,
+          "p50": 0.06999999284744263,
+          "p95": 0.13499999046325684,
+          "max": 0.7399999797344208
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 1.449999988079071,
+          "mean": 1.804333334416151,
+          "p50": 1.6700000166893005,
+          "p95": 2.365000009536743,
+          "max": 3.9200000166893005
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.014336,
+          "mean": 0.01598693333333331,
+          "p50": 0.016384,
+          "p95": 0.016416,
+          "max": 0.01744
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 29.775000005960464,
+          "mean": 33.28999999910593,
+          "p50": 32.104999989271164,
+          "p95": 38.485000014305115,
+          "max": 38.485000014305115
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564497,
+          "jsHeapUsedBytes": 619603,
+          "jsHeapTotalBytes": 1595251,
+          "breakdown": [
+            {
+              "bytes": 231672,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 303641,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 4654634,
+          "jsHeapUsedBytes": 859443,
+          "jsHeapTotalBytes": 2119719,
+          "breakdown": [
+            {
+              "bytes": 191888,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 395079,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 3686400,
+              "types": [
+                "Canvas"
+              ]
+            },
+            {
+              "bytes": 381267,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 879888,
+          "jsHeapTotalBytes": 2906040,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 879888,
+          "jsHeapTotalBytes": 2906040,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 4090137,
+        "setupJsHeapBytesDelta": 239840,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0,
+        "domElementCount": 1025
+      },
+      "scenario": {
+        "paintEvents": 158,
+        "changedElementsTotal": 158,
+        "drawCallsPerFrame": 1,
+        "htmlTextureUploadsPerFrame": 1
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 28.837557999999262,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": 512,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 1281,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 0,
+          "LayoutCount": 158,
+          "RecalcStyleCount": 158,
+          "LayoutDuration": 0.5811470000000001,
+          "RecalcStyleDuration": 0.15630200000000002,
+          "DevToolsCommandDuration": 0.10094500000000001,
+          "ScriptDuration": 0.294996,
+          "V8CompileDuration": 0,
+          "TaskDuration": 2.406386,
+          "TaskOtherDuration": 1.2729959999999998,
+          "ThreadTime": 2.292919,
+          "ProcessTime": 2.638775,
+          "JSHeapUsedSize": 468408,
+          "JSHeapTotalSize": 1572864,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 1308,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 1.862076,
+          "renderer": 2.6681019999999998,
+          "GPU": 4.470132,
+          "network.mojom.NetworkService": 0.16967300000000002,
+          "storage.mojom.StorageService": 0.0001799999999999996
+        }
+      }
+    },
+    {
+      "id": "native-256-100pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:24:25.173Z",
+      "mode": "native",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 256,
+        "updateRatio": 1,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 93.62999999523163,
+        "effectiveFps": 50.27906996395961,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 16.56999999999971,
+          "mean": 19.888991596638665,
+          "p50": 16.669999999998254,
+          "p95": 33.38999999999942,
+          "max": 33.49500000000262
+        },
+        "missedFrameRatio": 0.19327731092436976,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 12.1700000166893,
+          "mean": 13.646624999245008,
+          "p50": 13.514999985694885,
+          "p95": 15.535000026226044,
+          "max": 17.90999999642372
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 0.5049999952316284,
+          "mean": 0.5843750004967053,
+          "p50": 0.5399999916553497,
+          "p95": 0.8799999952316284,
+          "max": 1.2249999940395355
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 4.609999984502792,
+          "mean": 5.278791666279236,
+          "p50": 5.134999990463257,
+          "p95": 6.129999995231628,
+          "max": 9.254999995231628
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 5.16499999165535,
+          "mean": 5.86491666684548,
+          "p50": 5.740000009536743,
+          "p95": 6.669999986886978,
+          "max": 10.480000019073486
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.580672,
+          "mean": 0.5939714666666667,
+          "p50": 0.59392,
+          "p95": 0.603136,
+          "max": 0.611328
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 25.1700000166893,
+          "mean": 30.94062500447035,
+          "p50": 31.969999998807907,
+          "p95": 34.04000002145767,
+          "max": 34.04000002145767
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564413,
+          "jsHeapUsedBytes": 619605,
+          "jsHeapTotalBytes": 1595253,
+          "breakdown": [
+            {
+              "bytes": 295425,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 239804,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 9382873,
+          "jsHeapUsedBytes": 4969378,
+          "jsHeapTotalBytes": 8066858,
+          "breakdown": [
+            {
+              "bytes": 1404930,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 29856,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 3999543,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 3948544,
+              "types": [
+                "Canvas"
+              ]
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 5047949,
+          "jsHeapTotalBytes": 74389177,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 5047949,
+          "jsHeapTotalBytes": 74389177,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 8818460,
+        "setupJsHeapBytesDelta": 4349773,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 1048576,
+        "guiElementCount": 769
+      },
+      "scenario": {
+        "rebuildFrames": 158,
+        "drawCallsPerFrame": 2,
+        "htmlTextureUploadsPerFrame": 0
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 38.76766799998586,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": 0,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 1,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 2,
+          "LayoutCount": 2,
+          "RecalcStyleCount": 2,
+          "LayoutDuration": 0.016201,
+          "RecalcStyleDuration": 0.00011200000000000001,
+          "DevToolsCommandDuration": 0.017237000000000002,
+          "ScriptDuration": 0.002878,
+          "V8CompileDuration": 0,
+          "TaskDuration": 3.3463030000000002,
+          "TaskOtherDuration": 3.309875,
+          "ThreadTime": 3.2622730000000004,
+          "ProcessTime": 4.002182,
+          "JSHeapUsedSize": 2120304,
+          "JSHeapTotalSize": 69992448,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 28,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 1.9542059999999999,
+          "renderer": 4.084237000000001,
+          "GPU": 2.3209519999999997,
+          "network.mojom.NetworkService": 0.20849100000000004,
+          "storage.mojom.StorageService": 0.0003140000000000018
+        }
+      }
+    },
+    {
+      "id": "native-1024-0pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:25:30.058Z",
+      "mode": "native",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 1024,
+        "updateRatio": 0,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 218.09999999403954,
+        "effectiveFps": 59.99828576326392,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 16.459999999999127,
+          "mean": 16.667142857142853,
+          "p50": 16.665000000000873,
+          "p95": 16.81499999999869,
+          "max": 16.915000000000873
+        },
+        "missedFrameRatio": 0,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 0,
+          "mean": 0.004458333800236384,
+          "p50": 0.004999995231628418,
+          "p95": 0.009999990463256836,
+          "max": 0.010000020265579224
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 0.6649999916553497,
+          "mean": 0.9909583354989687,
+          "p50": 0.9799999892711639,
+          "p95": 1.2899999916553497,
+          "max": 1.550000011920929
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 0.5349999964237213,
+          "mean": 0.9232499981919925,
+          "p50": 0.8799999952316284,
+          "p95": 1.429999977350235,
+          "max": 1.645000010728836
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 1.3199999928474426,
+          "mean": 1.918833332012097,
+          "p50": 1.8350000083446503,
+          "p95": 2.619999974966049,
+          "max": 2.9200000166893005
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.113664,
+          "mean": 0.15901733333333345,
+          "p50": 0.163872,
+          "p95": 0.17312,
+          "max": 0.182304
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 12.575000017881393,
+          "mean": 16.087500005960464,
+          "p50": 15.935000002384186,
+          "p95": 18.070000022649765,
+          "max": 18.070000022649765
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564413,
+          "jsHeapUsedBytes": 619606,
+          "jsHeapTotalBytes": 1595254,
+          "breakdown": [
+            {
+              "bytes": 298768,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 236461,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 13452125,
+          "jsHeapUsedBytes": 9038631,
+          "jsHeapTotalBytes": 10950443,
+          "breakdown": [
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 2173846,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 29856,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 3948544,
+              "types": [
+                "Canvas"
+              ]
+            },
+            {
+              "bytes": 7299879,
+              "types": [
+                "JavaScript"
+              ]
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 9040285,
+          "jsHeapTotalBytes": 11736761,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 9040285,
+          "jsHeapTotalBytes": 11736761,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 12887712,
+        "setupJsHeapBytesDelta": 8419025,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 4194304,
+        "guiElementCount": 3073
+      },
+      "scenario": {
+        "rebuildFrames": 1,
+        "drawCallsPerFrame": 2,
+        "htmlTextureUploadsPerFrame": 0
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 26.90178900002502,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": -1,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 1,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 2,
+          "LayoutCount": 1,
+          "RecalcStyleCount": 1,
+          "LayoutDuration": 0.00003299999999999999,
+          "RecalcStyleDuration": 0.00003200000000000002,
+          "DevToolsCommandDuration": 0.108321,
+          "ScriptDuration": 0.0029049999999999996,
+          "V8CompileDuration": 0,
+          "TaskDuration": 0.7851,
+          "TaskOtherDuration": 0.673809,
+          "ThreadTime": 0.667925,
+          "ProcessTime": 1.17897,
+          "JSHeapUsedSize": 2824172,
+          "JSHeapTotalSize": 5505024,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 28,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 1.951594,
+          "renderer": 1.1920200000000003,
+          "GPU": 2.47801,
+          "network.mojom.NetworkService": 0.186627,
+          "storage.mojom.StorageService": 0.00020900000000000085
+        }
+      }
+    },
+    {
+      "id": "html-1024-10pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:26:03.460Z",
+      "mode": "html",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 1024,
+        "updateRatio": 0.1,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 9.810000002384186,
+        "effectiveFps": 18.214992009894267,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 33.23999999999796,
+          "mean": 54.8998319327731,
+          "p50": 50.030000000002474,
+          "p95": 66.67499999999927,
+          "max": 66.76000000000204
+        },
+        "missedFrameRatio": 1,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 0.24000000953674316,
+          "mean": 0.45458333293596903,
+          "p50": 0.42000001668930054,
+          "p95": 0.6700000166893005,
+          "max": 0.9549999833106995
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 6.314999997615814,
+          "mean": 7.812750000009934,
+          "p50": 7.655000001192093,
+          "p95": 10.360000014305115,
+          "max": 12.0799999833107
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 0.06499999761581421,
+          "mean": 0.10641666650772094,
+          "p50": 0.09000000357627869,
+          "p95": 0.16499999165534973,
+          "max": 0.9150000214576721
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 6.415000021457672,
+          "mean": 7.92262500077486,
+          "p50": 7.754999995231628,
+          "p95": 10.575000017881393,
+          "max": 13.004999995231628
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.017408,
+          "mean": 0.0188757333333333,
+          "p50": 0.018432,
+          "p95": 0.019456,
+          "max": 0.02048
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 79.86000001430511,
+          "mean": 84.89937499910593,
+          "p50": 80.9050000011921,
+          "p95": 96.77499997615814,
+          "max": 96.77499997615814
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564437,
+          "jsHeapUsedBytes": 619630,
+          "jsHeapTotalBytes": 1595254,
+          "breakdown": [
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 244712,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 290541,
+              "types": [
+                "JavaScript"
+              ]
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 5208702,
+          "jsHeapUsedBytes": 928502,
+          "jsHeapTotalBytes": 1857578,
+          "breakdown": [
+            {
+              "bytes": 676928,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 393175,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 452199,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 3686400,
+              "types": [
+                "Canvas"
+              ]
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 950864,
+          "jsHeapTotalBytes": 2121528,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 950864,
+          "jsHeapTotalBytes": 2121528,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 4644265,
+        "setupJsHeapBytesDelta": 308872,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0,
+        "domElementCount": 4097
+      },
+      "scenario": {
+        "paintEvents": 158,
+        "changedElementsTotal": 158,
+        "drawCallsPerFrame": 1,
+        "htmlTextureUploadsPerFrame": 1
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 32.41455399998813,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": 1,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 5121,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 0,
+          "LayoutCount": 160,
+          "RecalcStyleCount": 159,
+          "LayoutDuration": 0.45380699999999996,
+          "RecalcStyleDuration": 0.09704,
+          "DevToolsCommandDuration": 0.003069,
+          "ScriptDuration": 1.2520099999999998,
+          "V8CompileDuration": 0,
+          "TaskDuration": 5.6584710000000005,
+          "TaskOtherDuration": 3.852545,
+          "ThreadTime": 5.638941,
+          "ProcessTime": 6.085375,
+          "JSHeapUsedSize": 538724,
+          "JSHeapTotalSize": 1048576,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 5148,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 1.970884,
+          "renderer": 6.122514000000001,
+          "GPU": 12.132413,
+          "network.mojom.NetworkService": 0.15134200000000003,
+          "storage.mojom.StorageService": 0.0004620000000000041
+        }
+      }
+    },
+    {
+      "id": "native-1024-10pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:26:45.982Z",
+      "mode": "native",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 1024,
+        "updateRatio": 0.1,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 229.62000000476837,
+        "effectiveFps": 22.38255740467664,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 33.229999999995925,
+          "mean": 44.677647058823524,
+          "p50": 49.9800000000032,
+          "p95": 50.05000000000291,
+          "max": 66.83499999999913
+        },
+        "missedFrameRatio": 1,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 19.990000009536743,
+          "mean": 22.13041666597128,
+          "p50": 22.05000001192093,
+          "p95": 23.46000000834465,
+          "max": 31.055000007152557
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 1.9950000047683716,
+          "mean": 2.357541667918364,
+          "p50": 2.205000013113022,
+          "p95": 3.415000021457672,
+          "max": 4.3299999833106995
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 18.139999985694885,
+          "mean": 19.719750000039735,
+          "p50": 19.49500000476837,
+          "p95": 21.430000007152557,
+          "max": 28.37999999523163
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 20.28999999165535,
+          "mean": 22.081125000615916,
+          "p50": 21.805000007152557,
+          "p95": 23.919999986886978,
+          "max": 30.490000009536743
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.699392,
+          "mean": 1.1185149333333335,
+          "p50": 0.718848,
+          "p95": 2.407424,
+          "max": 2.500608
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 48.060000002384186,
+          "mean": 54.70250000059605,
+          "p50": 52.16499999165535,
+          "p95": 61.314999997615814,
+          "max": 61.314999997615814
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564461,
+          "jsHeapUsedBytes": 619632,
+          "jsHeapTotalBytes": 1595256,
+          "breakdown": [
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 341425,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 193852,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 15830149,
+          "jsHeapUsedBytes": 11416789,
+          "jsHeapTotalBytes": 14882605,
+          "breakdown": [
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 1817931,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 29856,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 3948544,
+              "types": [
+                "Canvas"
+              ]
+            },
+            {
+              "bytes": 10033818,
+              "types": [
+                "JavaScript"
+              ]
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 11545425,
+          "jsHeapTotalBytes": 85399225,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 11545425,
+          "jsHeapTotalBytes": 85399225,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 15265688,
+        "setupJsHeapBytesDelta": 10797157,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 4194304,
+        "guiElementCount": 3073
+      },
+      "scenario": {
+        "rebuildFrames": 158,
+        "drawCallsPerFrame": 2,
+        "htmlTextureUploadsPerFrame": 0
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 41.38590100000147,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": -1,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 1,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 2,
+          "LayoutCount": 1,
+          "RecalcStyleCount": 1,
+          "LayoutDuration": 0.000040999999999999967,
+          "RecalcStyleDuration": 0.000030999999999999995,
+          "DevToolsCommandDuration": 0.034647,
+          "ScriptDuration": 0.005209,
+          "V8CompileDuration": 0,
+          "TaskDuration": 7.493078000000001,
+          "TaskOtherDuration": 7.453150000000001,
+          "ThreadTime": 7.342409,
+          "ProcessTime": 9.006784,
+          "JSHeapUsedSize": 3160732,
+          "JSHeapTotalSize": 72613888,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 28,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 1.762835,
+          "renderer": 9.128679,
+          "GPU": 2.195182,
+          "network.mojom.NetworkService": 0.161148,
+          "storage.mojom.StorageService": 0.0003610000000000002
+        }
+      }
+    },
+    {
+      "id": "html-1024-100pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:27:15.936Z",
+      "mode": "html",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 1024,
+        "updateRatio": 1,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 9.844999998807907,
+        "effectiveFps": 17.205383116169592,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 49.779999999998836,
+          "mean": 58.12134453781511,
+          "p50": 50.07500000000073,
+          "p95": 66.72499999999854,
+          "max": 83.375
+        },
+        "missedFrameRatio": 1,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 1.9550000131130219,
+          "mean": 2.7494166659812134,
+          "p50": 2.5399999916553497,
+          "p95": 4.134999990463257,
+          "max": 5.094999998807907
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 6.120000004768372,
+          "mean": 7.975083333005508,
+          "p50": 7.784999996423721,
+          "p95": 10.5,
+          "max": 12.745000004768372
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 0.06999999284744263,
+          "mean": 0.11095833331346512,
+          "p50": 0.0949999988079071,
+          "p95": 0.1899999976158142,
+          "max": 0.2849999964237213
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 6.235000014305115,
+          "mean": 8.089583332339922,
+          "p50": 7.865000009536743,
+          "p95": 10.659999996423721,
+          "max": 12.88500002026558
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.0184,
+          "mean": 0.01946533333333332,
+          "p50": 0.019456,
+          "p95": 0.02048,
+          "max": 0.02048
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 95.2999999821186,
+          "mean": 105.74999999627471,
+          "p50": 96.25,
+          "p95": 131.9200000166893,
+          "max": 131.9200000166893
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564437,
+          "jsHeapUsedBytes": 619604,
+          "jsHeapTotalBytes": 1595252,
+          "breakdown": [
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 330571,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 204682,
+              "types": [
+                "Shared"
+              ]
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 5209126,
+          "jsHeapUsedBytes": 928872,
+          "jsHeapTotalBytes": 2644008,
+          "breakdown": [
+            {
+              "bytes": 383747,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 676904,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 462075,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 3686400,
+              "types": [
+                "Canvas"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 949252,
+          "jsHeapTotalBytes": 3692472,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 949252,
+          "jsHeapTotalBytes": 3692472,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 4644689,
+        "setupJsHeapBytesDelta": 309268,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0,
+        "domElementCount": 4097
+      },
+      "scenario": {
+        "paintEvents": 158,
+        "changedElementsTotal": 158,
+        "drawCallsPerFrame": 1,
+        "htmlTextureUploadsPerFrame": 1
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 28.943350999994436,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": 1,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 5121,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 0,
+          "LayoutCount": 160,
+          "RecalcStyleCount": 159,
+          "LayoutDuration": 2.474847,
+          "RecalcStyleDuration": 0.580468,
+          "DevToolsCommandDuration": 0.087917,
+          "ScriptDuration": 1.3113730000000001,
+          "V8CompileDuration": 0,
+          "TaskDuration": 9.356275,
+          "TaskOtherDuration": 4.90167,
+          "ThreadTime": 9.180608,
+          "ProcessTime": 10.325690000000002,
+          "JSHeapUsedSize": 539336,
+          "JSHeapTotalSize": 2359296,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 5148,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 2.142646,
+          "renderer": 10.321883999999999,
+          "GPU": 12.561121,
+          "network.mojom.NetworkService": 0.22770499999999994,
+          "storage.mojom.StorageService": 0.00022700000000000498
+        }
+      }
+    },
+    {
+      "id": "native-1024-100pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:28:21.959Z",
+      "mode": "native",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 1024,
+        "updateRatio": 1,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 207.2000000178814,
+        "effectiveFps": 4.345792122868324,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 216.52999999999884,
+          "mean": 230.10764705882357,
+          "p50": 233.31500000000233,
+          "p95": 250.02999999999884,
+          "max": 266.7350000000006
+        },
+        "missedFrameRatio": 1,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 200.65999999642372,
+          "mean": 207.80129166444144,
+          "p50": 204.33499997854233,
+          "p95": 228.03999999165535,
+          "max": 240.96500000357628
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 2.0049999952316284,
+          "mean": 2.233250000824531,
+          "p50": 2.1599999964237213,
+          "p95": 2.7450000047683716,
+          "max": 2.9850000143051147
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 17.685000002384186,
+          "mean": 19.350416667262714,
+          "p50": 19.019999980926514,
+          "p95": 21.469999998807907,
+          "max": 26.9549999833107
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 19.7950000166893,
+          "mean": 21.58691666747133,
+          "p50": 21.259999990463257,
+          "p95": 23.810000002384186,
+          "max": 29.939999997615814
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.702464,
+          "mean": 1.1590738666666662,
+          "p50": 0.71984,
+          "p95": 2.111488,
+          "max": 2.51904
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 229.02499997615814,
+          "mean": 239.7175000011921,
+          "p50": 234.3550000190735,
+          "p95": 263.42999997735023,
+          "max": 263.42999997735023
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564437,
+          "jsHeapUsedBytes": 619606,
+          "jsHeapTotalBytes": 1595254,
+          "breakdown": [
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 290711,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 244542,
+              "types": [
+                "Shared"
+              ]
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 15848157,
+          "jsHeapUsedBytes": 11434663,
+          "jsHeapTotalBytes": 14358315,
+          "breakdown": [
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 3948544,
+              "types": [
+                "Canvas"
+              ]
+            },
+            {
+              "bytes": 1961998,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 29856,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 9907759,
+              "types": [
+                "JavaScript"
+              ]
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 11562957,
+          "jsHeapTotalBytes": 94574265,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 11562957,
+          "jsHeapTotalBytes": 94574265,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 15283720,
+        "setupJsHeapBytesDelta": 10815057,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 4194304,
+        "guiElementCount": 3073
+      },
+      "scenario": {
+        "rebuildFrames": 158,
+        "drawCallsPerFrame": 2,
+        "htmlTextureUploadsPerFrame": 0
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 64.84192299999995,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": -1,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 1,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 2,
+          "LayoutCount": 1,
+          "RecalcStyleCount": 1,
+          "LayoutDuration": 0.00004100000000000002,
+          "RecalcStyleDuration": 0.000028999999999999946,
+          "DevToolsCommandDuration": 0.029146,
+          "ScriptDuration": 0.00795,
+          "V8CompileDuration": 0,
+          "TaskDuration": 36.737586,
+          "TaskOtherDuration": 36.70042,
+          "ThreadTime": 36.440731,
+          "ProcessTime": 38.816637,
+          "JSHeapUsedSize": 3178172,
+          "JSHeapTotalSize": 69992448,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 28,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 1.93219,
+          "renderer": 39.00979900000001,
+          "GPU": 2.499845,
+          "network.mojom.NetworkService": 0.196971,
+          "storage.mojom.StorageService": 0.0016499999999999987
+        }
+      }
+    },
+    {
+      "id": "native-4096-0pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:29:53.199Z",
+      "mode": "native",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 4096,
+        "updateRatio": 0,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 2870.1649999916553,
+        "effectiveFps": 59.99662203892723,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 16.3849999999984,
+          "mean": 16.667605042016806,
+          "p50": 16.674999999999272,
+          "p95": 16.799999999999272,
+          "max": 16.895000000000437
+        },
+        "missedFrameRatio": 0,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 0,
+          "mean": 0.0030416660010814667,
+          "p50": 0.004999995231628418,
+          "p95": 0.005000025033950806,
+          "max": 0.010000020265579224
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 2.205000013113022,
+          "mean": 3.1244583318630856,
+          "p50": 2.5999999940395355,
+          "p95": 5.2750000059604645,
+          "max": 5.764999985694885
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 1.1850000023841858,
+          "mean": 2.1799166686832905,
+          "p50": 1.6599999964237213,
+          "p95": 4.155000001192093,
+          "max": 4.330000013113022
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 3.560000002384186,
+          "mean": 5.308125000943741,
+          "p50": 4.215000003576279,
+          "p95": 9.384999990463257,
+          "max": 9.965000003576279
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.883712,
+          "mean": 1.7138768000000002,
+          "p50": 2.141184,
+          "p95": 2.202624,
+          "max": 3.216384
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 11.680000007152557,
+          "mean": 15.956250004470348,
+          "p50": 16.110000014305115,
+          "p95": 18,
+          "max": 18
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564729,
+          "jsHeapUsedBytes": 619606,
+          "jsHeapTotalBytes": 1595254,
+          "breakdown": [
+            {
+              "bytes": 240051,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 295494,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 28489181,
+          "jsHeapUsedBytes": 24075687,
+          "jsHeapTotalBytes": 26416939,
+          "breakdown": [
+            {
+              "bytes": 1495166,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 3948544,
+              "types": [
+                "Canvas"
+              ]
+            },
+            {
+              "bytes": 23015615,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 29856,
+              "types": [
+                "DOM"
+              ]
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 24076801,
+          "jsHeapTotalBytes": 29300409,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 24076801,
+          "jsHeapTotalBytes": 29300409,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 27924452,
+        "setupJsHeapBytesDelta": 23456081,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 12582912,
+        "guiElementCount": 12289
+      },
+      "scenario": {
+        "rebuildFrames": 1,
+        "drawCallsPerFrame": 2,
+        "htmlTextureUploadsPerFrame": 0
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 31.75241200000164,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": 0,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 1,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 2,
+          "LayoutCount": 2,
+          "RecalcStyleCount": 2,
+          "LayoutDuration": 0.020211,
+          "RecalcStyleDuration": 0.00013100000000000004,
+          "DevToolsCommandDuration": 0.006137,
+          "ScriptDuration": 0.002724,
+          "V8CompileDuration": 0,
+          "TaskDuration": 3.993436,
+          "TaskOtherDuration": 3.964233,
+          "ThreadTime": 3.938957,
+          "ProcessTime": 4.566095,
+          "JSHeapUsedSize": 6763260,
+          "JSHeapTotalSize": 14155776,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 28,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 2.013237,
+          "renderer": 4.780138,
+          "GPU": 2.529265,
+          "network.mojom.NetworkService": 0.27386600000000005,
+          "storage.mojom.StorageService": 0.0002050000000000038
+        }
+      }
+    },
+    {
+      "id": "html-4096-10pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:31:02.487Z",
+      "mode": "html",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 4096,
+        "updateRatio": 0.1,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 64.18500000238419,
+        "effectiveFps": 4.229935001183671,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 116.64500000000407,
+          "mean": 236.41025210084032,
+          "p50": 233.3199999999997,
+          "p95": 449.97499999999854,
+          "max": 466.72000000000116
+        },
+        "missedFrameRatio": 1,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 0.8149999976158142,
+          "mean": 1.1979166661699614,
+          "p50": 1.0950000286102295,
+          "p95": 1.7399999797344208,
+          "max": 2.2100000083446503
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 28.634999990463257,
+          "mean": 56.59691666513682,
+          "p50": 32.50499999523163,
+          "p95": 299.88499999046326,
+          "max": 311.9549999833107
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 0.07999998331069946,
+          "mean": 0.10516666968663534,
+          "p50": 0.09000000357627869,
+          "p95": 0.17999997735023499,
+          "max": 0.29499998688697815
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 28.75499999523163,
+          "mean": 56.7052916670839,
+          "p50": 32.59499999880791,
+          "p95": 299.9699999988079,
+          "max": 312.044999986887
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.023552,
+          "mean": 0.031223466666666654,
+          "p50": 0.024576,
+          "p95": 0.038912,
+          "max": 0.136224
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 358.2199999988079,
+          "mean": 386.331875000149,
+          "p50": 379.69999998807907,
+          "p95": 417.66499999165535,
+          "max": 417.66499999165535
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564461,
+          "jsHeapUsedBytes": 619630,
+          "jsHeapTotalBytes": 1595254,
+          "breakdown": [
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 310373,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 224904,
+              "types": [
+                "Shared"
+              ]
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 7419930,
+          "jsHeapUsedBytes": 1199590,
+          "jsHeapTotalBytes": 2381866,
+          "breakdown": [
+            {
+              "bytes": 3686400,
+              "types": [
+                "Canvas"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 2616992,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 724546,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 391992,
+              "types": [
+                "Shared"
+              ]
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 1222052,
+          "jsHeapTotalBytes": 2645816,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 1228600,
+          "jsHeapTotalBytes": 2643896,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 6855469,
+        "setupJsHeapBytesDelta": 579960,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0,
+        "domElementCount": 16385
+      },
+      "scenario": {
+        "paintEvents": 158,
+        "changedElementsTotal": 158,
+        "drawCallsPerFrame": 1,
+        "htmlTextureUploadsPerFrame": 1
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 68.25319199997466,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": 3,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 20481,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 0,
+          "LayoutCount": 159,
+          "RecalcStyleCount": 158,
+          "LayoutDuration": 1.991456,
+          "RecalcStyleDuration": 0.3532,
+          "DevToolsCommandDuration": 0.11490399999999999,
+          "ScriptDuration": 8.869458,
+          "V8CompileDuration": 0,
+          "TaskDuration": 26.981673999999998,
+          "TaskOtherDuration": 15.652656,
+          "ThreadTime": 23.175962,
+          "ProcessTime": 25.108338,
+          "JSHeapUsedSize": 811328,
+          "JSHeapTotalSize": 1310720,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 20508,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 2.004303,
+          "renderer": 25.159648,
+          "GPU": 44.380998999999996,
+          "network.mojom.NetworkService": 0.169234,
+          "storage.mojom.StorageService": 0.0018779999999999977
+        }
+      }
+    },
+    {
+      "id": "native-4096-10pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:32:45.978Z",
+      "mode": "native",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 4096,
+        "updateRatio": 0.1,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 2808.5550000071526,
+        "effectiveFps": 2.126311668510512,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 433.2900000000009,
+          "mean": 470.29794117647066,
+          "p50": 466.6600000000035,
+          "p95": 500.0199999999968,
+          "max": 533.4650000000038
+        },
+        "missedFrameRatio": 1,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 364.6700000166893,
+          "mean": 386.6663333321611,
+          "p50": 384.0600000023842,
+          "p95": 419.7399999797344,
+          "max": 445.8449999988079
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 8.314999997615814,
+          "mean": 9.573333332439264,
+          "p50": 9.484999984502792,
+          "p95": 10.38500002026558,
+          "max": 12.770000010728836
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 67.34000000357628,
+          "mean": 73.31666666766007,
+          "p50": 72.81000000238419,
+          "p95": 78.00999999046326,
+          "max": 89.43999999761581
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 76.77500000596046,
+          "mean": 82.89433333252867,
+          "p50": 82.5949999988079,
+          "p95": 87.49500000476837,
+          "max": 98.00999999046326
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.074752,
+          "mean": 1.4371410666666664,
+          "p50": 0.90928,
+          "p95": 2.747392,
+          "max": 2.876416
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 475.31999999284744,
+          "mean": 500.6031249947846,
+          "p50": 487.6100000143051,
+          "p95": 554.2649999856949,
+          "max": 554.2649999856949
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 562101,
+          "jsHeapUsedBytes": 617296,
+          "jsHeapTotalBytes": 1595256,
+          "breakdown": [
+            {
+              "bytes": 221724,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 311193,
+              "types": [
+                "JavaScript"
+              ]
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 33313473,
+          "jsHeapUsedBytes": 28899981,
+          "jsHeapTotalBytes": 31397677,
+          "breakdown": [
+            {
+              "bytes": 363217,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 29856,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 3948544,
+              "types": [
+                "Canvas"
+              ]
+            },
+            {
+              "bytes": 28971856,
+              "types": [
+                "JavaScript"
+              ]
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 28965869,
+          "jsHeapTotalBytes": 96147129,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 28965869,
+          "jsHeapTotalBytes": 96147129,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 32751372,
+        "setupJsHeapBytesDelta": 28282685,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 12582912,
+        "guiElementCount": 12289
+      },
+      "scenario": {
+        "rebuildFrames": 158,
+        "drawCallsPerFrame": 2,
+        "htmlTextureUploadsPerFrame": 0
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 102.40177699999185,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": 0,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 1,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 2,
+          "LayoutCount": 2,
+          "RecalcStyleCount": 2,
+          "LayoutDuration": 0.014526,
+          "RecalcStyleDuration": 0.000076,
+          "DevToolsCommandDuration": 0.003172,
+          "ScriptDuration": 0.0027589999999999993,
+          "V8CompileDuration": 0,
+          "TaskDuration": 77.25534400000001,
+          "TaskOtherDuration": 77.23481100000001,
+          "ThreadTime": 76.71157,
+          "ProcessTime": 82.067432,
+          "JSHeapUsedSize": 7167752,
+          "JSHeapTotalSize": 72351744,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 28,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 2.5327390000000003,
+          "renderer": 82.110854,
+          "GPU": 3.473491,
+          "network.mojom.NetworkService": 0.25671099999999997,
+          "storage.mojom.StorageService": 0.004751999999999999
+        }
+      }
+    },
+    {
+      "id": "html-4096-100pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:33:57.551Z",
+      "mode": "html",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 4096,
+        "updateRatio": 1,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 37.125,
+        "effectiveFps": 3.8762915746522455,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 216.61999999999534,
+          "mean": 257.9785294117647,
+          "p50": 249.97499999999854,
+          "p95": 366.6449999999968,
+          "max": 466.6100000000006
+        },
+        "missedFrameRatio": 1,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 8.004999995231628,
+          "mean": 11.378625000516573,
+          "p50": 9.91499999165535,
+          "p95": 16.225000023841858,
+          "max": 46.974999994039536
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 29.895000010728836,
+          "mean": 47.99437499965231,
+          "p50": 34.650000005960464,
+          "p95": 160.21000000834465,
+          "max": 233.9800000190735
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 0.07500001788139343,
+          "mean": 0.11812499910593033,
+          "p50": 0.09999999403953552,
+          "p95": 0.22499999403953552,
+          "max": 0.3649999797344208
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 30.055000007152557,
+          "mean": 48.11583333139618,
+          "p50": 34.73499998450279,
+          "p95": 160.3449999988079,
+          "max": 234.0949999988079
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.023552,
+          "mean": 0.04611493333333331,
+          "p50": 0.024576,
+          "p95": 0.13824,
+          "max": 0.30208
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 448.4950000047684,
+          "mean": 470.6875,
+          "p50": 462.0499999821186,
+          "p95": 528.0499999821186,
+          "max": 528.0499999821186
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564413,
+          "jsHeapUsedBytes": 619604,
+          "jsHeapTotalBytes": 1595252,
+          "breakdown": [
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 214556,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 320673,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 7420710,
+          "jsHeapUsedBytes": 1200384,
+          "jsHeapTotalBytes": 3168296,
+          "breakdown": [
+            {
+              "bytes": 378185,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 2616944,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 739181,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 3686400,
+              "types": [
+                "Canvas"
+              ]
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 1220920,
+          "jsHeapTotalBytes": 2643896,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 1229388,
+          "jsHeapTotalBytes": 2643896,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 6856297,
+        "setupJsHeapBytesDelta": 580780,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0,
+        "domElementCount": 16385
+      },
+      "scenario": {
+        "paintEvents": 158,
+        "changedElementsTotal": 158,
+        "drawCallsPerFrame": 1,
+        "htmlTextureUploadsPerFrame": 1
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 70.49199399998179,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": 0,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 20481,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 0,
+          "LayoutCount": 159,
+          "RecalcStyleCount": 158,
+          "LayoutDuration": 10.57364,
+          "RecalcStyleDuration": 2.32606,
+          "DevToolsCommandDuration": 0.008999,
+          "ScriptDuration": 7.615597999999999,
+          "V8CompileDuration": 0,
+          "TaskDuration": 40.853422,
+          "TaskOtherDuration": 20.329124999999998,
+          "ThreadTime": 38.587395,
+          "ProcessTime": 43.454049,
+          "JSHeapUsedSize": 811900,
+          "JSHeapTotalSize": 1310720,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 20508,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 2.1328240000000003,
+          "renderer": 43.512298,
+          "GPU": 47.683727,
+          "network.mojom.NetworkService": 0.16957300000000003,
+          "storage.mojom.StorageService": 0.0017589999999999967
+        }
+      }
+    },
+    {
+      "id": "native-4096-100pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T09:59:21.671Z",
+      "mode": "native",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 4096,
+        "updateRatio": 1,
+        "warmupFrames": 30,
+        "sampleFrames": 30,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": false
+      },
+      "timing": {
+        "setupMs": 2994.949999988079,
+        "effectiveFps": 0.2492178855254596,
+        "frameIntervalMs": {
+          "samples": 29,
+          "min": 3883.2300000000105,
+          "mean": 4012.5531034482756,
+          "p50": 3983.265000000014,
+          "p95": 4149.890000000014,
+          "max": 4216.520000000019
+        },
+        "missedFrameRatio": 1,
+        "updateCpuMs": {
+          "samples": 30,
+          "min": 3812.205000013113,
+          "mean": 3922.1701666702825,
+          "p50": 3894.800000011921,
+          "p95": 4069.705000013113,
+          "max": 4124.959999978542
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 30,
+          "min": 8.615000009536743,
+          "mean": 9.71833333472411,
+          "p50": 9.485000014305115,
+          "p95": 11.275000005960464,
+          "max": 15.169999986886978
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 30,
+          "min": 70.00999999046326,
+          "mean": 75.21066666344801,
+          "p50": 72.86000001430511,
+          "p95": 90.54499998688698,
+          "max": 104.76499998569489
+        },
+        "callbackCpuMs": {
+          "samples": 30,
+          "min": 79.42999997735023,
+          "mean": 84.93200000027815,
+          "p50": 82.9699999988079,
+          "p95": 100.0300000011921,
+          "max": 113.48000001907349
+        },
+        "gpuRenderPassMs": {
+          "samples": 30,
+          "min": 0.147456,
+          "mean": 1.42496,
+          "p50": 0.91136,
+          "p95": 2.748416,
+          "max": 2.852896
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 3955.800000011921,
+          "mean": 3987.986249998212,
+          "p50": 3979.9950000047684,
+          "p95": 4038.809999972582,
+          "max": 4038.809999972582
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 617989,
+          "jsHeapTotalBytes": 1857213,
+          "breakdown": null
+        },
+        "afterSetup": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 28906324,
+          "jsHeapTotalBytes": 96409196,
+          "breakdown": null
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 28896655,
+          "jsHeapTotalBytes": 97982051,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 28896655,
+          "jsHeapTotalBytes": 97982051,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": null,
+        "setupJsHeapBytesDelta": 28288335,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 12582912,
+        "guiElementCount": 12289
+      },
+      "scenario": {
+        "rebuildFrames": 68,
+        "drawCallsPerFrame": 2,
+        "htmlTextureUploadsPerFrame": 0
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 274.0091749999847,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": -1,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 1,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 2,
+          "LayoutCount": 1,
+          "RecalcStyleCount": 1,
+          "LayoutDuration": 0.00002599999999999998,
+          "RecalcStyleDuration": 0.000027000000000000006,
+          "DevToolsCommandDuration": 0.012826,
+          "ScriptDuration": 0.00267,
+          "V8CompileDuration": 0,
+          "TaskDuration": 273.179898,
+          "TaskOtherDuration": 273.16434899999996,
+          "ThreadTime": 271.636364,
+          "ProcessTime": 276.524835,
+          "JSHeapUsedSize": 6991036,
+          "JSHeapTotalSize": 76808192,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 28,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 2.524558,
+          "renderer": 276.717307,
+          "GPU": 4.739389,
+          "network.mojom.NetworkService": 0.352972,
+          "storage.mojom.StorageService": 0.004756000000000003
+        }
+      }
+    },
+    {
+      "id": "html-256-0pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T10:00:35.372Z",
+      "mode": "html",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 256,
+        "updateRatio": 0,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 4.91499999165535,
+        "effectiveFps": 59.99132898438201,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 16.364999999997963,
+          "mean": 16.669075630252124,
+          "p50": 16.669999999998254,
+          "p95": 16.840000000003783,
+          "max": 16.960000000006403
+        },
+        "missedFrameRatio": 0,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 0,
+          "mean": 0.0032083335022131602,
+          "p50": 0.004999995231628418,
+          "p95": 0.009999990463256836,
+          "max": 0.02000001072883606
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 0,
+          "mean": 0,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 0.07000002264976501,
+          "mean": 0.10987499977151553,
+          "p50": 0.09999999403953552,
+          "p95": 0.16500002145767212,
+          "max": 0.20500001311302185
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 0.07000002264976501,
+          "mean": 0.11229166810711225,
+          "p50": 0.10499998927116394,
+          "p95": 0.17000001668930054,
+          "max": 0.20500001311302185
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.167936,
+          "mean": 0.18036053333333343,
+          "p50": 0.180224,
+          "p95": 0.188416,
+          "max": 0.192512
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 11.054999977350235,
+          "mean": 15.979374997317791,
+          "p50": 15.905000001192093,
+          "p95": 18.26000002026558,
+          "max": 18.26000002026558
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564988,
+          "jsHeapUsedBytes": 620146,
+          "jsHeapTotalBytes": 1595722,
+          "breakdown": [
+            {
+              "bytes": 241069,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 294735,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 4645761,
+          "jsHeapUsedBytes": 850474,
+          "jsHeapTotalBytes": 2120190,
+          "breakdown": [
+            {
+              "bytes": 419609,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 3686400,
+              "types": [
+                "Canvas"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 347816,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 191936,
+              "types": [
+                "DOM"
+              ]
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 871455,
+          "jsHeapTotalBytes": 2121999,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 871455,
+          "jsHeapTotalBytes": 2121999,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 4080773,
+        "setupJsHeapBytesDelta": 230328,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0,
+        "domElementCount": 1025
+      },
+      "scenario": {
+        "paintEvents": 1,
+        "changedElementsTotal": 1,
+        "drawCallsPerFrame": 1,
+        "textureUploads": 1,
+        "htmlTextureUploadsPerFrame": 0.006329113924050633
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 37.49627500001225,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": 513,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 1281,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 0,
+          "LayoutCount": 2,
+          "RecalcStyleCount": 2,
+          "LayoutDuration": 0.050560999999999995,
+          "RecalcStyleDuration": 0.0062239999999999995,
+          "DevToolsCommandDuration": 0.08704,
+          "ScriptDuration": 0.005468,
+          "V8CompileDuration": 0,
+          "TaskDuration": 0.274455,
+          "TaskOtherDuration": 0.125162,
+          "ThreadTime": 0.19693000000000002,
+          "ProcessTime": 0.337407,
+          "JSHeapUsedSize": 440008,
+          "JSHeapTotalSize": 786432,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 1308,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 2.1103039999999997,
+          "renderer": 0.414482,
+          "GPU": 2.2253830000000003,
+          "network.mojom.NetworkService": 0.210862,
+          "storage.mojom.StorageService": 0.0004919999999999994
+        }
+      }
+    },
+    {
+      "id": "html-1024-0pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T10:01:03.390Z",
+      "mode": "html",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 1024,
+        "updateRatio": 0,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 9.530000001192093,
+        "effectiveFps": 59.498363794995626,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 15.724999999998545,
+          "mean": 16.80718487394958,
+          "p50": 16.665000000000873,
+          "p95": 16.75500000000102,
+          "max": 34.37000000000262
+        },
+        "missedFrameRatio": 0.008403361344537815,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 0,
+          "mean": 0.003291667252779007,
+          "p50": 0.004999995231628418,
+          "p95": 0.005000025033950806,
+          "max": 0.010000020265579224
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 0,
+          "mean": 0,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 0.0949999988079071,
+          "mean": 0.11941666627923647,
+          "p50": 0.11500000953674316,
+          "p95": 0.14500001072883606,
+          "max": 0.17499998211860657
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 0.0949999988079071,
+          "mean": 0.12191666588187218,
+          "p50": 0.1199999749660492,
+          "p95": 0.15000000596046448,
+          "max": 0.18000000715255737
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.018432,
+          "mean": 0.019405333333333313,
+          "p50": 0.019456,
+          "p95": 0.02048,
+          "max": 0.02048
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 4.830000013113022,
+          "mean": 14.624375004321337,
+          "p50": 16.224999994039536,
+          "p95": 19.525000005960464,
+          "max": 19.525000005960464
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 565040,
+          "jsHeapUsedBytes": 620147,
+          "jsHeapTotalBytes": 1595723,
+          "breakdown": [
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 318688,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 217168,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 5199829,
+          "jsHeapUsedBytes": 919443,
+          "jsHeapTotalBytes": 1858047,
+          "breakdown": [
+            {
+              "bytes": 677120,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 3686400,
+              "types": [
+                "Canvas"
+              ]
+            },
+            {
+              "bytes": 373431,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            },
+            {
+              "bytes": 462878,
+              "types": [
+                "JavaScript"
+              ]
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 941803,
+          "jsHeapTotalBytes": 1859855,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 941803,
+          "jsHeapTotalBytes": 1859855,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 4634789,
+        "setupJsHeapBytesDelta": 299296,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0,
+        "domElementCount": 4097
+      },
+      "scenario": {
+        "paintEvents": 1,
+        "changedElementsTotal": 1,
+        "drawCallsPerFrame": 1,
+        "textureUploads": 1,
+        "htmlTextureUploadsPerFrame": 0.006329113924050633
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 26.97107399997185,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": 1,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 5121,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 0,
+          "LayoutCount": 3,
+          "RecalcStyleCount": 2,
+          "LayoutDuration": 0.082111,
+          "RecalcStyleDuration": 0.039605999999999995,
+          "DevToolsCommandDuration": 0.091294,
+          "ScriptDuration": 0.014645000000000002,
+          "V8CompileDuration": 0,
+          "TaskDuration": 0.45794100000000004,
+          "TaskOtherDuration": 0.230285,
+          "ThreadTime": 0.38011100000000003,
+          "ProcessTime": 0.606792,
+          "JSHeapUsedSize": 520220,
+          "JSHeapTotalSize": 786432,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 5148,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 1.805157,
+          "renderer": 0.719548,
+          "GPU": 2.631762,
+          "network.mojom.NetworkService": 0.14982499999999999,
+          "storage.mojom.StorageService": 0.0002309999999999951
+        }
+      }
+    },
+    {
+      "id": "html-4096-0pct",
+      "schemaVersion": 1,
+      "status": "passed",
+      "generatedAt": "2026-11-01T10:01:31.968Z",
+      "mode": "html",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
+      "crossOriginIsolated": true,
+      "adapter": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": ""
+      },
+      "configuration": {
+        "widgetCount": 4096,
+        "updateRatio": 0,
+        "warmupFrames": 30,
+        "sampleFrames": 120,
+        "queueProbeFrames": 8,
+        "width": 1280,
+        "height": 720
+      },
+      "support": {
+        "htmlInCanvas": {
+          "supported": true,
+          "requestPaint": "function",
+          "updateElementGeometry": "function",
+          "drawElementImageToTexture": "function"
+        },
+        "timestampQuery": true,
+        "userAgentSpecificMemory": true
+      },
+      "timing": {
+        "setupMs": 20.054999977350235,
+        "effectiveFps": 60.00085715510221,
+        "frameIntervalMs": {
+          "samples": 119,
+          "min": 16.409999999999854,
+          "mean": 16.666428571428575,
+          "p50": 16.664999999997235,
+          "p95": 16.80500000000029,
+          "max": 16.924999999999272
+        },
+        "missedFrameRatio": 0,
+        "updateCpuMs": {
+          "samples": 120,
+          "min": 0,
+          "mean": 0.002666667600472768,
+          "p50": 0,
+          "p95": 0.005000025033950806,
+          "max": 0.015000015497207642
+        },
+        "layoutOrUploadCpuMs": {
+          "samples": 120,
+          "min": 0,
+          "mean": 0,
+          "p50": 0,
+          "p95": 0,
+          "max": 0
+        },
+        "encodeSubmitCpuMs": {
+          "samples": 120,
+          "min": 0.07000002264976501,
+          "mean": 0.10795833220084508,
+          "p50": 0.09999999403953552,
+          "p95": 0.16999998688697815,
+          "max": 0.24000000953674316
+        },
+        "callbackCpuMs": {
+          "samples": 120,
+          "min": 0.07000002264976501,
+          "mean": 0.11016666640837987,
+          "p50": 0.10499998927116394,
+          "p95": 0.17500001192092896,
+          "max": 0.24500000476837158
+        },
+        "gpuRenderPassMs": {
+          "samples": 120,
+          "min": 0.023552,
+          "mean": 0.024371200000000013,
+          "p50": 0.024576,
+          "p95": 0.0256,
+          "max": 0.0256
+        },
+        "endToEndQueueCompletionMs": {
+          "samples": 8,
+          "min": 12.195000022649765,
+          "mean": 16.122499998658895,
+          "p50": 16.024999976158142,
+          "p95": 18.930000007152557,
+          "max": 18.930000007152557
+        }
+      },
+      "memory": {
+        "beforeSetup": {
+          "uaBytes": 564956,
+          "jsHeapUsedBytes": 620147,
+          "jsHeapTotalBytes": 1595723,
+          "breakdown": [
+            {
+              "bytes": 29184,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 299911,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 235861,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            }
+          ]
+        },
+        "afterSetup": {
+          "uaBytes": 7412181,
+          "jsHeapUsedBytes": 1190903,
+          "jsHeapTotalBytes": 2382335,
+          "breakdown": [
+            {
+              "bytes": 3686400,
+              "types": [
+                "Canvas"
+              ]
+            },
+            {
+              "bytes": 377840,
+              "types": [
+                "Shared"
+              ]
+            },
+            {
+              "bytes": 730037,
+              "types": [
+                "JavaScript"
+              ]
+            },
+            {
+              "bytes": 2617904,
+              "types": [
+                "DOM"
+              ]
+            },
+            {
+              "bytes": 0,
+              "types": []
+            }
+          ]
+        },
+        "afterRun": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 1213263,
+          "jsHeapTotalBytes": 2384143,
+          "breakdown": null
+        },
+        "afterTeardown": {
+          "uaBytes": null,
+          "jsHeapUsedBytes": 1213263,
+          "jsHeapTotalBytes": 2384143,
+          "breakdown": null
+        },
+        "setupUaBytesDelta": 6847225,
+        "setupJsHeapBytesDelta": 570756,
+        "retainedUaBytesDelta": null
+      },
+      "resources": {
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0,
+        "domElementCount": 16385
+      },
+      "scenario": {
+        "paintEvents": 1,
+        "changedElementsTotal": 1,
+        "drawCallsPerFrame": 1,
+        "textureUploads": 1,
+        "htmlTextureUploadsPerFrame": 0.006329113924050633
+      },
+      "validation": {
+        "scopedError": null,
+        "uncapturedErrors": []
+      },
+      "chrome": {
+        "product": "Chrome/157.0.8103.15",
+        "revision": "@1aa07b638799e59656559ae6c6649d4b197f555e",
+        "jsVersion": "15.7.112.9",
+        "protocolVersion": "1.3",
+        "blinkFeatureForced": "CanvasDrawElement"
+      },
+      "cdp": {
+        "performanceDelta": {
+          "Timestamp": 27.501033999986248,
+          "AudioHandlers": 0,
+          "AudioWorkletProcessors": 0,
+          "Documents": 0,
+          "Frames": 0,
+          "JSEventListeners": 1,
+          "LayoutObjects": 2,
+          "MediaKeySessions": 0,
+          "MediaKeys": 0,
+          "Nodes": 20481,
+          "Resources": 0,
+          "ContextLifecycleStateObservers": 0,
+          "V8PerContextDatas": 0,
+          "WorkerGlobalScopes": 0,
+          "UACSSResources": 0,
+          "RTCPeerConnections": 0,
+          "ResourceFetchers": 0,
+          "AdSubframes": 0,
+          "DetachedScriptStates": 0,
+          "ArrayBufferContents": 0,
+          "LayoutCount": 2,
+          "RecalcStyleCount": 1,
+          "LayoutDuration": 0.101356,
+          "RecalcStyleDuration": 0.08160400000000001,
+          "DevToolsCommandDuration": 0.10170499999999999,
+          "ScriptDuration": 0.037296,
+          "V8CompileDuration": 0,
+          "TaskDuration": 0.775003,
+          "TaskOtherDuration": 0.453042,
+          "ThreadTime": 0.683603,
+          "ProcessTime": 0.975068,
+          "JSHeapUsedSize": 786716,
+          "JSHeapTotalSize": 1048576,
+          "FirstMeaningfulPaint": 0,
+          "DomContentLoaded": 0,
+          "NavigationStart": 0
+        },
+        "domBefore": {
+          "documents": 1,
+          "nodes": 27,
+          "jsEventListeners": 0
+        },
+        "domAfter": {
+          "documents": 1,
+          "nodes": 20508,
+          "jsEventListeners": 1
+        },
+        "processCpuSeconds": {
+          "browser": 1.8390170000000001,
+          "renderer": 0.988058,
+          "GPU": 2.8608919999999998,
+          "network.mojom.NetworkService": 0.13537699999999997,
+          "storage.mojom.StorageService": 0.00021800000000000291
+        }
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "widgetCount": 256,
+      "updateRatio": 0,
+      "html": {
+        "fps": 59.99132898438201,
+        "frameP95Ms": 16.840000000003783,
+        "missedFrameRatio": 0,
+        "callbackP95Ms": 0.17000001668930054,
+        "gpuP95Ms": 0.188416,
+        "queueP95Ms": 18.26000002026558,
+        "taskCpuSeconds": 0.274455,
+        "scriptCpuSeconds": 0.005468,
+        "layoutCpuSeconds": 0.050560999999999995,
+        "recalcStyleCpuSeconds": 0.0062239999999999995,
+        "rendererProcessCpuSeconds": 0.414482,
+        "gpuProcessCpuSeconds": 2.2253830000000003,
+        "setupUaBytesDelta": 4080773,
+        "setupJsHeapBytesDelta": 230328,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0
+      },
+      "native": {
+        "fps": 59.9975295134906,
+        "frameP95Ms": 16.849999999998545,
+        "missedFrameRatio": 0,
+        "callbackP95Ms": 0.7149999737739563,
+        "gpuP95Ms": 0.04608,
+        "queueP95Ms": 18.110000014305115,
+        "taskCpuSeconds": 0.363317,
+        "scriptCpuSeconds": 0.0033069999999999996,
+        "layoutCpuSeconds": 0.00004500000000000001,
+        "recalcStyleCpuSeconds": 0.000023000000000000017,
+        "rendererProcessCpuSeconds": 0.525776,
+        "gpuProcessCpuSeconds": 2.06388,
+        "setupUaBytesDelta": 8057816,
+        "setupJsHeapBytesDelta": 3589105,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 1048576
+      },
+      "ratios": {
+        "fpsHtmlOverNative": 0.9998966535929251,
+        "taskCpuHtmlOverNative": 0.7554146929540869,
+        "setupMemoryHtmlOverNative": 0.5064366076366102,
+        "gpuP95HtmlOverNative": 4.088888888888889
+      }
+    },
+    {
+      "widgetCount": 256,
+      "updateRatio": 0.1,
+      "html": {
+        "fps": 59.99964706089972,
+        "frameP95Ms": 16.729999999999563,
+        "missedFrameRatio": 0,
+        "callbackP95Ms": 2.1949999928474426,
+        "gpuP95Ms": 0.01744,
+        "queueP95Ms": 36.020000010728836,
+        "taskCpuSeconds": 1.648696,
+        "scriptCpuSeconds": 0.28891900000000004,
+        "layoutCpuSeconds": 0.213575,
+        "recalcStyleCpuSeconds": 0.064518,
+        "rendererProcessCpuSeconds": 1.7715150000000002,
+        "gpuProcessCpuSeconds": 4.652748,
+        "setupUaBytesDelta": 4084641,
+        "setupJsHeapBytesDelta": 234296,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0
+      },
+      "native": {
+        "fps": 59.007728028918706,
+        "frameP95Ms": 16.81999999999971,
+        "missedFrameRatio": 0.01680672268907563,
+        "callbackP95Ms": 13.660000026226044,
+        "gpuP95Ms": 0.04608,
+        "queueP95Ms": 47.599999994039536,
+        "taskCpuSeconds": 2.02455,
+        "scriptCpuSeconds": 0.006113,
+        "layoutCpuSeconds": 0.00005700000000000003,
+        "recalcStyleCpuSeconds": 0.00006999999999999997,
+        "rendererProcessCpuSeconds": 2.6534139999999997,
+        "gpuProcessCpuSeconds": 2.161117,
+        "setupUaBytesDelta": 8813696,
+        "setupJsHeapBytesDelta": 4345065,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 1048576
+      },
+      "ratios": {
+        "fpsHtmlOverNative": 1.01680998515135,
+        "taskCpuHtmlOverNative": 0.8143518312711466,
+        "setupMemoryHtmlOverNative": 0.46344246499992736,
+        "gpuP95HtmlOverNative": 0.3784722222222222
+      }
+    },
+    {
+      "widgetCount": 256,
+      "updateRatio": 1,
+      "html": {
+        "fps": 59.49985125037185,
+        "frameP95Ms": 16.735000000000582,
+        "missedFrameRatio": 0.008403361344537815,
+        "callbackP95Ms": 2.365000009536743,
+        "gpuP95Ms": 0.016416,
+        "queueP95Ms": 38.485000014305115,
+        "taskCpuSeconds": 2.406386,
+        "scriptCpuSeconds": 0.294996,
+        "layoutCpuSeconds": 0.5811470000000001,
+        "recalcStyleCpuSeconds": 0.15630200000000002,
+        "rendererProcessCpuSeconds": 2.6681019999999998,
+        "gpuProcessCpuSeconds": 4.470132,
+        "setupUaBytesDelta": 4090137,
+        "setupJsHeapBytesDelta": 239840,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0
+      },
+      "native": {
+        "fps": 50.27906996395961,
+        "frameP95Ms": 33.38999999999942,
+        "missedFrameRatio": 0.19327731092436976,
+        "callbackP95Ms": 6.669999986886978,
+        "gpuP95Ms": 0.603136,
+        "queueP95Ms": 34.04000002145767,
+        "taskCpuSeconds": 3.3463030000000002,
+        "scriptCpuSeconds": 0.002878,
+        "layoutCpuSeconds": 0.016201,
+        "recalcStyleCpuSeconds": 0.00011200000000000001,
+        "rendererProcessCpuSeconds": 4.084237000000001,
+        "gpuProcessCpuSeconds": 2.3209519999999997,
+        "setupUaBytesDelta": 8818460,
+        "setupJsHeapBytesDelta": 4349773,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 1048576
+      },
+      "ratios": {
+        "fpsHtmlOverNative": 1.1833920415198962,
+        "taskCpuHtmlOverNative": 0.7191177846118536,
+        "setupMemoryHtmlOverNative": 0.46381533737183134,
+        "gpuP95HtmlOverNative": 0.02721774193548387
+      }
+    },
+    {
+      "widgetCount": 1024,
+      "updateRatio": 0,
+      "html": {
+        "fps": 59.498363794995626,
+        "frameP95Ms": 16.75500000000102,
+        "missedFrameRatio": 0.008403361344537815,
+        "callbackP95Ms": 0.15000000596046448,
+        "gpuP95Ms": 0.02048,
+        "queueP95Ms": 19.525000005960464,
+        "taskCpuSeconds": 0.45794100000000004,
+        "scriptCpuSeconds": 0.014645000000000002,
+        "layoutCpuSeconds": 0.082111,
+        "recalcStyleCpuSeconds": 0.039605999999999995,
+        "rendererProcessCpuSeconds": 0.719548,
+        "gpuProcessCpuSeconds": 2.631762,
+        "setupUaBytesDelta": 4634789,
+        "setupJsHeapBytesDelta": 299296,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0
+      },
+      "native": {
+        "fps": 59.99828576326392,
+        "frameP95Ms": 16.81499999999869,
+        "missedFrameRatio": 0,
+        "callbackP95Ms": 2.619999974966049,
+        "gpuP95Ms": 0.17312,
+        "queueP95Ms": 18.070000022649765,
+        "taskCpuSeconds": 0.7851,
+        "scriptCpuSeconds": 0.0029049999999999996,
+        "layoutCpuSeconds": 0.00003299999999999999,
+        "recalcStyleCpuSeconds": 0.00003200000000000002,
+        "rendererProcessCpuSeconds": 1.1920200000000003,
+        "gpuProcessCpuSeconds": 2.47801,
+        "setupUaBytesDelta": 12887712,
+        "setupJsHeapBytesDelta": 8419025,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 4194304
+      },
+      "ratios": {
+        "fpsHtmlOverNative": 0.9916677291374483,
+        "taskCpuHtmlOverNative": 0.583290026748185,
+        "setupMemoryHtmlOverNative": 0.3596285360815015,
+        "gpuP95HtmlOverNative": 0.11829944547134937
+      }
+    },
+    {
+      "widgetCount": 1024,
+      "updateRatio": 0.1,
+      "html": {
+        "fps": 18.214992009894267,
+        "frameP95Ms": 66.67499999999927,
+        "missedFrameRatio": 1,
+        "callbackP95Ms": 10.575000017881393,
+        "gpuP95Ms": 0.019456,
+        "queueP95Ms": 96.77499997615814,
+        "taskCpuSeconds": 5.6584710000000005,
+        "scriptCpuSeconds": 1.2520099999999998,
+        "layoutCpuSeconds": 0.45380699999999996,
+        "recalcStyleCpuSeconds": 0.09704,
+        "rendererProcessCpuSeconds": 6.122514000000001,
+        "gpuProcessCpuSeconds": 12.132413,
+        "setupUaBytesDelta": 4644265,
+        "setupJsHeapBytesDelta": 308872,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0
+      },
+      "native": {
+        "fps": 22.38255740467664,
+        "frameP95Ms": 50.05000000000291,
+        "missedFrameRatio": 1,
+        "callbackP95Ms": 23.919999986886978,
+        "gpuP95Ms": 2.407424,
+        "queueP95Ms": 61.314999997615814,
+        "taskCpuSeconds": 7.493078000000001,
+        "scriptCpuSeconds": 0.005209,
+        "layoutCpuSeconds": 0.000040999999999999967,
+        "recalcStyleCpuSeconds": 0.000030999999999999995,
+        "rendererProcessCpuSeconds": 9.128679,
+        "gpuProcessCpuSeconds": 2.195182,
+        "setupUaBytesDelta": 15265688,
+        "setupJsHeapBytesDelta": 10797157,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 4194304
+      },
+      "ratios": {
+        "fpsHtmlOverNative": 0.8138029841973466,
+        "taskCpuHtmlOverNative": 0.7551597621164493,
+        "setupMemoryHtmlOverNative": 0.3042290003568788,
+        "gpuP95HtmlOverNative": 0.008081667375584859
+      }
+    },
+    {
+      "widgetCount": 1024,
+      "updateRatio": 1,
+      "html": {
+        "fps": 17.205383116169592,
+        "frameP95Ms": 66.72499999999854,
+        "missedFrameRatio": 1,
+        "callbackP95Ms": 10.659999996423721,
+        "gpuP95Ms": 0.02048,
+        "queueP95Ms": 131.9200000166893,
+        "taskCpuSeconds": 9.356275,
+        "scriptCpuSeconds": 1.3113730000000001,
+        "layoutCpuSeconds": 2.474847,
+        "recalcStyleCpuSeconds": 0.580468,
+        "rendererProcessCpuSeconds": 10.321883999999999,
+        "gpuProcessCpuSeconds": 12.561121,
+        "setupUaBytesDelta": 4644689,
+        "setupJsHeapBytesDelta": 309268,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0
+      },
+      "native": {
+        "fps": 4.345792122868324,
+        "frameP95Ms": 250.02999999999884,
+        "missedFrameRatio": 1,
+        "callbackP95Ms": 23.810000002384186,
+        "gpuP95Ms": 2.111488,
+        "queueP95Ms": 263.42999997735023,
+        "taskCpuSeconds": 36.737586,
+        "scriptCpuSeconds": 0.00795,
+        "layoutCpuSeconds": 0.00004100000000000002,
+        "recalcStyleCpuSeconds": 0.000028999999999999946,
+        "rendererProcessCpuSeconds": 39.00979900000001,
+        "gpuProcessCpuSeconds": 2.499845,
+        "setupUaBytesDelta": 15283720,
+        "setupJsHeapBytesDelta": 10815057,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 4194304
+      },
+      "ratios": {
+        "fpsHtmlOverNative": 3.959090225607395,
+        "taskCpuHtmlOverNative": 0.2546785463802657,
+        "setupMemoryHtmlOverNative": 0.30389780760181423,
+        "gpuP95HtmlOverNative": 0.009699321047526674
+      }
+    },
+    {
+      "widgetCount": 4096,
+      "updateRatio": 0,
+      "html": {
+        "fps": 60.00085715510221,
+        "frameP95Ms": 16.80500000000029,
+        "missedFrameRatio": 0,
+        "callbackP95Ms": 0.17500001192092896,
+        "gpuP95Ms": 0.0256,
+        "queueP95Ms": 18.930000007152557,
+        "taskCpuSeconds": 0.775003,
+        "scriptCpuSeconds": 0.037296,
+        "layoutCpuSeconds": 0.101356,
+        "recalcStyleCpuSeconds": 0.08160400000000001,
+        "rendererProcessCpuSeconds": 0.988058,
+        "gpuProcessCpuSeconds": 2.8608919999999998,
+        "setupUaBytesDelta": 6847225,
+        "setupJsHeapBytesDelta": 570756,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0
+      },
+      "native": {
+        "fps": 59.99662203892723,
+        "frameP95Ms": 16.799999999999272,
+        "missedFrameRatio": 0,
+        "callbackP95Ms": 9.384999990463257,
+        "gpuP95Ms": 2.202624,
+        "queueP95Ms": 18,
+        "taskCpuSeconds": 3.993436,
+        "scriptCpuSeconds": 0.002724,
+        "layoutCpuSeconds": 0.020211,
+        "recalcStyleCpuSeconds": 0.00013100000000000004,
+        "rendererProcessCpuSeconds": 4.780138,
+        "gpuProcessCpuSeconds": 2.529265,
+        "setupUaBytesDelta": 27924452,
+        "setupJsHeapBytesDelta": 23456081,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 12582912
+      },
+      "ratios": {
+        "fpsHtmlOverNative": 1.0000705892437116,
+        "taskCpuHtmlOverNative": 0.19406921758605872,
+        "setupMemoryHtmlOverNative": 0.24520534906110245,
+        "gpuP95HtmlOverNative": 0.011622501162250116
+      }
+    },
+    {
+      "widgetCount": 4096,
+      "updateRatio": 0.1,
+      "html": {
+        "fps": 4.229935001183671,
+        "frameP95Ms": 449.97499999999854,
+        "missedFrameRatio": 1,
+        "callbackP95Ms": 299.9699999988079,
+        "gpuP95Ms": 0.038912,
+        "queueP95Ms": 417.66499999165535,
+        "taskCpuSeconds": 26.981673999999998,
+        "scriptCpuSeconds": 8.869458,
+        "layoutCpuSeconds": 1.991456,
+        "recalcStyleCpuSeconds": 0.3532,
+        "rendererProcessCpuSeconds": 25.159648,
+        "gpuProcessCpuSeconds": 44.380998999999996,
+        "setupUaBytesDelta": 6855469,
+        "setupJsHeapBytesDelta": 579960,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0
+      },
+      "native": {
+        "fps": 2.126311668510512,
+        "frameP95Ms": 500.0199999999968,
+        "missedFrameRatio": 1,
+        "callbackP95Ms": 87.49500000476837,
+        "gpuP95Ms": 2.747392,
+        "queueP95Ms": 554.2649999856949,
+        "taskCpuSeconds": 77.25534400000001,
+        "scriptCpuSeconds": 0.0027589999999999993,
+        "layoutCpuSeconds": 0.014526,
+        "recalcStyleCpuSeconds": 0.000076,
+        "rendererProcessCpuSeconds": 82.110854,
+        "gpuProcessCpuSeconds": 3.473491,
+        "setupUaBytesDelta": 32751372,
+        "setupJsHeapBytesDelta": 28282685,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 12582912
+      },
+      "ratios": {
+        "fpsHtmlOverNative": 1.9893297223669726,
+        "taskCpuHtmlOverNative": 0.3492531726996128,
+        "setupMemoryHtmlOverNative": 0.20931852870163728,
+        "gpuP95HtmlOverNative": 0.014163250093179277
+      }
+    },
+    {
+      "widgetCount": 4096,
+      "updateRatio": 1,
+      "html": {
+        "fps": 3.8762915746522455,
+        "frameP95Ms": 366.6449999999968,
+        "missedFrameRatio": 1,
+        "callbackP95Ms": 160.3449999988079,
+        "gpuP95Ms": 0.13824,
+        "queueP95Ms": 528.0499999821186,
+        "taskCpuSeconds": 40.853422,
+        "scriptCpuSeconds": 7.615597999999999,
+        "layoutCpuSeconds": 10.57364,
+        "recalcStyleCpuSeconds": 2.32606,
+        "rendererProcessCpuSeconds": 43.512298,
+        "gpuProcessCpuSeconds": 47.683727,
+        "setupUaBytesDelta": 6856297,
+        "setupJsHeapBytesDelta": 580780,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 0
+      },
+      "native": {
+        "fps": 0.2492178855254596,
+        "frameP95Ms": 4149.890000000014,
+        "missedFrameRatio": 1,
+        "callbackP95Ms": 100.0300000011921,
+        "gpuP95Ms": 2.748416,
+        "queueP95Ms": 4038.809999972582,
+        "taskCpuSeconds": 273.179898,
+        "scriptCpuSeconds": 0.00267,
+        "layoutCpuSeconds": 0.00002599999999999998,
+        "recalcStyleCpuSeconds": 0.000027000000000000006,
+        "rendererProcessCpuSeconds": 276.717307,
+        "gpuProcessCpuSeconds": 4.739389,
+        "setupUaBytesDelta": null,
+        "setupJsHeapBytesDelta": 28288335,
+        "explicitGpuTextureBytes": 3686400,
+        "retainedCpuGeometryBytes": 12582912
+      },
+      "ratios": {
+        "fpsHtmlOverNative": 15.553825787741271,
+        "taskCpuHtmlOverNative": 0.14954768743635743,
+        "setupMemoryHtmlOverNative": null,
+        "gpuP95HtmlOverNative": 0.05029806259314456
+      }
+    }
+  ]
+}

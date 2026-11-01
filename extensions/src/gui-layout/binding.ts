@@ -15,14 +15,18 @@ import {rememberLayoutVisibility} from './visibility.js';
 interface Island {session: LayoutSession; fingerprint: string; result?: LayoutResult; viewportSession?: LayoutSession; viewportFingerprint?: string; viewportResult?: LayoutResult; contentMeasure?: LayoutMeasure;}
 function length(value: number | `${number}%` | undefined): LayoutLength | undefined {return typeof value === 'string' ? {percent: Number.parseFloat(value)} : value;}
 function exact(value: number): LayoutConstraints['width'] {return {mode: 'exact', value};}
+const defaultMeasures=new WeakSet<LayoutMeasure>();
+function defaultGuiLayoutOptions(root:GuiRoot):GuiLayoutOptions {
+  const measure:LayoutMeasure=(id,constraints)=>{
+    const element=root.findById(id);
+    if(!element)throw new LayoutError('invalid-input','GUI measurement refers to a removed node.',id);
+    return root.measureElement(element,constraints.width,constraints.height);
+  };
+  defaultMeasures.add(measure);return {measure};
+}
 
 /** Optional GUI adapter. All geometric calculation is delegated to the same pure core as HYA. */
-export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = {measure: (id, constraints) => {
-  const element = root.findById(id);
-  if (!element) throw new LayoutError('invalid-input', 'GUI measurement refers to a removed node.', id);
-  const size = root.measureElement(element, constraints.width, constraints.height);
-  return size;
-}}): GuiLayoutBinding {
+export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = defaultGuiLayoutOptions(root)): GuiLayoutBinding {
   const limits = limitsFrom(options.limits);
   let overrides = new WeakMap<GuiElement, GuiLayoutStyle>();
   const versions = new WeakMap<GuiElement, number>();
@@ -58,7 +62,7 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = {meas
     counters.sessions = 0;
   };
   const measure: LayoutMeasure = (id, constraints) => {counters.measurements++; return options.measure(id, constraints);};
-  uninstall = root.installLayoutDelegate({
+  const delegate:Parameters<GuiRoot['installLayoutDelegate']>[0]={
     measure(element, width, height) {return options.measure(element.id, {width, height});},
     arrange(gui, viewport, commit) {
       if (disposed) throw new LayoutError('disposed', 'GUI binding has been disposed.');
@@ -103,11 +107,15 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = {meas
             } : skin.padding);
             if (padding !== undefined) style = {...style, padding: typeof padding === 'number' ? {top: padding, right: padding, bottom: padding, left: padding} : padding};
           }
-          const fixedBoundary = !isRoot && configured && !configured.contentMinimum && managesChildren && item.children.length > 0 && typeof style.width === 'number' && typeof style.height === 'number';
-          if (fixedBoundary) nested.push(item);
-          // Composite controls keep their private children; plain unmanaged nodes are manual islands.
           const ownsFlow = presetStyle(item) !== undefined || overrides.has(item);
-          const children = !fixedBoundary && ownsFlow && managesChildren ? item.children.map(child => build(child)) : [];
+          const fixedBoundary = !isRoot && configured && !configured.contentMinimum && managesChildren && item.children.length > 0 && typeof style.width === 'number' && typeof style.height === 'number';
+          // A configured scroll flow needs the viewport allocated by its parent before
+          // the original scroll solver measures unbounded content. Manual views stay manual.
+          const scrollBoundary = !isRoot && item instanceof GuiScrollView && ownsFlow;
+          const boundary = fixedBoundary || scrollBoundary;
+          if (boundary) nested.push(item);
+          // Composite controls keep their private children; plain unmanaged nodes are manual islands.
+          const children = !boundary && ownsFlow && managesChildren ? item.children.map(child => build(child)) : [];
           const node = {id: item.id, contentVersion: versions.get(item) ?? 0, style, children};
           if (configured?.contentMinimum) {
             const min = contentMinimum(node);
@@ -175,7 +183,28 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = {meas
     },
     suspend() {resources.suspend(); for (const island of islands.values()) releaseIsland(island); islands.clear(); counters.sessions = 0;},
     dispose,
-  });
+  };
+  // Private cooperation with the original Engine owner; old/custom delegates
+  // keep conservative text invalidation and the stable public signature is unchanged.
+  Object.defineProperty(delegate,Symbol.for('haiyue.gui.text-layout-policy.v1'),{value:(element:GuiElement)=>{
+    if(!defaultMeasures.has(options.measure)||disposed)return true;
+    // Keep custom root measurements conservative without retaining the concrete
+    // GuiRoot runtime (and its font/layout owners) in a layout-only consumer.
+    const inherited=Object.getPrototypeOf(Object.getPrototypeOf(root)) as object|null;
+    if(Object.hasOwn(root,'measureElement')||inherited&&'measureElement' in inherited)return true;
+    const configured=styleFor(element),manual=element.getLayoutOptions(),style=coreStyle(configured);
+    if(configured?.contentMinimum||element instanceof GuiLabel&&element.autoWidth)return true;
+    const width=style.width??length(manual.width),height=style.height??length(manual.height);
+    if(typeof width!=='number'||typeof height!=='number')return true;
+    for(let parent=element.parent;parent;parent=parent.parent){
+      if(styleFor(parent)?.contentMinimum)return true;
+      const prototype=Object.getPrototypeOf(parent);
+      if(prototype!==GuiElement.prototype&&prototype!==GuiScrollView.prototype)return true;
+      if(parent.layout!==prototype.layout||parent.getLayoutOptions!==GuiElement.prototype.getLayoutOptions||parent.getResolvedStyle!==GuiElement.prototype.getResolvedStyle||parent.getContentRect!==GuiElement.prototype.getContentRect)return true;
+    }
+    return false;
+  }});
+  uninstall=root.installLayoutDelegate(delegate);
   unsubscribe = root.onInvalidation(change => {
     if (!change.reasons.includes('layout') && !change.reasons.includes('resource')) return;
     resources.prune();

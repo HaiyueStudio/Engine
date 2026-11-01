@@ -88,7 +88,7 @@
     },
     "@haiyue/extensions": {
       "workspace": "extensions",
-      "maxPackedBytes": 550000,
+      "maxPackedBytes": 570000,
       "maxUnpackedBytes": 3000000,
       "capacity": {
         "reviewed": {
@@ -97,10 +97,10 @@
           "fileCount": 188
         },
         "growthReserve": {
-          "packedBytes": 36572,
+          "packedBytes": 56572,
           "unpackedBytes": 348399
         },
-        "capabilityBasis": "admitted optional animation, asset, text, tile, deformable, and experimental ray tracing runtimes; reviewed OpenType-backed animation text, routed interaction, virtual joystick, i18n and branching narrative"
+        "capabilityBasis": "admitted optional animation, asset, text, tile, deformable, and experimental ray tracing runtimes; reviewed OpenType-backed animation text, routed interaction, virtual joystick, i18n and branching narrative; 0.2.3 G08 borrowed atlas, dirty chunk windows and submission-safe bounded storage reuse original 2D programs and owners"
       },
       "declaredFiles": [
         "README.md",
@@ -258,20 +258,34 @@
     },
     "audio-mixer-only": {
       "fixture": "scripts/fixtures/engine-consumers/audio-mixer-only.mjs",
-      "maxGzipBytes": 4000,
+      "maxGzipBytes": 7300,
       "requiredExports": [
         "OwnerSafeAudioMixer"
       ],
-      "allowedGeneratedShaderArtifacts": []
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "growthReserveBytes": 1006,
+        "capabilityBasis": "G01 exact Engine audio 7 / extensions audio 5 exports; original mixer, private live voice lease and original nodes; no second decoder/cache/context/clock or HYA/GUI/3D closure",
+        "decision": "review/engine-0.2.3/g09-checks.json",
+        "reviewedGzipBytes": 6294
+      }
     },
     "multiplayer-input-only": {
       "fixture": "scripts/fixtures/engine-consumers/multiplayer-input-only.mjs",
-      "maxGzipBytes": 6000,
+      "maxGzipBytes": 8000,
       "requiredExports": [
         "BrowserMultiplayerInput",
         "InputActionMap"
       ],
-      "allowedGeneratedShaderArtifacts": []
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "previousMaxGzipBytes": 6000,
+        "previousObservedGzipBytes": 5986,
+        "reviewedGzipBytes": 7044,
+        "growthReserveBytes": 956,
+        "capabilityBasis": "G06 frozen keyboard axes, pointer actions and borrowed-map held-control quarantine. One shared descriptor/index and original sampler/layers; no duplicate provider or action-state owner. User authorized capacity growth with functionality after duplicate-code review; accepted contracts.md distinguishes package capacity from performance/resource budgets.",
+        "decision": "review/engine-0.2.3/g06-checks.json"
+      }
     },
     "font-builder-only": {
       "fixture": "scripts/fixtures/engine-consumers/font-builder-only.mjs",
@@ -297,6 +311,42 @@
         "growthReserveBytes": 14365,
         "capabilityBasis": "G03–G11 shared GUI layout, region scheduling, routed input, Unicode editing, skins, drag, cursor and HYA presentation; one Engine GUI owner, no OpenType parser",
         "decision": "docs/for-ai/adr/0135-capability-growth-and-gui-assembly.md"
+      }
+    },
+    "input-action-map": {
+      "fixture": "scripts/fixtures/engine-consumers/input-action-map.mjs",
+      "maxGzipBytes": 3200,
+      "requiredExports": [
+        "InputActionMap"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class GuiElement",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 2506,
+        "growthReserveBytes": 694,
+        "capabilityBasis": "G01 exact admitted G06 input capability; actual installed consumer reuses the original map/normalizer and excludes heavy GUI, 3D, physics and OpenType implementations.",
+        "decision": "review/engine-0.2.3/g06-checks.json"
+      }
+    },
+    "audio-core": {
+      "fixture": "scripts/fixtures/engine-consumers/audio-core.mjs",
+      "maxGzipBytes": 7300,
+      "requiredExports": [
+        "OwnerSafeAudioMixer"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "growthReserveBytes": 1006,
+        "capabilityBasis": "G01 exact Engine audio 7 / extensions audio 5 exports; original mixer, private live voice lease and original nodes; no second decoder/cache/context/clock or HYA/GUI/3D closure",
+        "decision": "review/engine-0.2.3/g09-checks.json",
+        "reviewedGzipBytes": 6294
       }
     }
   },
@@ -562,7 +612,7 @@
       "entrypoint": "./tilemap",
       "fixture": "scripts/fixtures/engine-consumers/extensions-tilemap.mjs",
       "packageName": "@haiyue/extensions",
-      "maxGzipBytes": 45000,
+      "maxGzipBytes": 48000,
       "requiredExports": [
         "Tilemap2DComponent",
         "Tilemap2DRenderSystem",
@@ -790,6 +840,171 @@
         "growthReserveBytes": 6749,
         "capabilityBasis": "G01 named gui-layout API; original shared layout core and GUI owners, diagnostic compiled closure then installed tarball verification",
         "decision": "review/engine-0.2.2/g13-package-admission.md"
+      }
+    },
+    "extensions-scene-flow": {
+      "entrypoint": "./scene-flow",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-scene-flow.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 4800,
+      "requiredExports": [
+        "createSceneFlow"
+      ],
+      "forbiddenStaticTokens": [
+        "opentype.js",
+        "class Animation2DRenderSystem",
+        "class Render3DSystem",
+        "class GuiSystem",
+        "class GuiElement",
+        "class HaiyueEngine",
+        "@dimforge/rapier3d-compat",
+        "box2d.ts"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 3946,
+        "growthReserveBytes": 854,
+        "capabilityBasis": "ADR 0139 / G01 exact SceneFlow capability. Independent installed-tarball factory closure is 3946 B; one shared Scene/AssetManager owner, no duplicate loader/cache or GUI/HYA/physics closure. All existing package and consumer limits remain unchanged.",
+        "decision": "review/engine-0.2.3/g03-checks.json"
+      }
+    },
+    "extensions-character2d": {
+      "entrypoint": "./character2d",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-character2d.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 5200,
+      "requiredExports": [
+        "createCharacter2D"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class GuiElement",
+        "class HaiyueEngine",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class Box2DPhysics2D"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 4306,
+        "growthReserveBytes": 894,
+        "capabilityBasis": "ADR 0139 / G01 exact four-symbol character2d capability. Existing public component identities avoid unnecessary matrix/constructor closure; original physics/query/clock owners reused. Pre-admission actual installed consumer is 4306 B gzip versus 32581 B before dependency correction. All prior package, consumer, performance and resource limits remain unchanged.",
+        "decision": "review/engine-0.2.3/g04-checks.json"
+      }
+    },
+    "extensions-camera2d": {
+      "entrypoint": "./camera2d",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-camera2d.mjs",
+      "packageName": "@haiyue/extensions",
+      "maxGzipBytes": 5300,
+      "requiredExports": [
+        "createCamera2DController"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class GuiElement",
+        "class HaiyueEngine",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class Box2DPhysics2D",
+        "class Transform3D"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 4411,
+        "growthReserveBytes": 889,
+        "capabilityBasis": "ADR 0139 / G01 exact four-symbol camera2d capability. Reuses original Camera2D, Transform2D and transform/projection owners; no GUI, physics backend or 3D implementation in the installed factory closure. Finite new capacity admitted before the package gate. All previous package, consumer, performance, resource and capability reserves remain unchanged.",
+        "decision": "review/engine-0.2.3/g05-checks.json"
+      }
+    },
+    "extensions-input-actions": {
+      "entrypoint": "./input-actions",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-input-actions.mjs",
+      "maxGzipBytes": 7200,
+      "requiredExports": [
+        "createInputBindingProfile"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class GuiElement",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 6217,
+        "growthReserveBytes": 983,
+        "capabilityBasis": "G01 exact admitted G06 input capability; actual installed consumer reuses the original map/normalizer and excludes heavy GUI, 3D, physics and OpenType implementations.",
+        "decision": "review/engine-0.2.3/g06-checks.json"
+      }
+    },
+    "extensions-gui-collections": {
+      "entrypoint": "./gui-collections",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-collections.mjs",
+      "maxGzipBytes": 15700,
+      "requiredExports": [
+        "createGuiVirtualList",
+        "createGuiVirtualTree"
+      ],
+      "forbiddenStaticTokens": [
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class LayoutEvaluator",
+        "class GuiSystem"
+      ],
+      "capacityReview": {
+        "reviewedGzipBytes": 13881,
+        "growthReserveBytes": 1819,
+        "capabilityBasis": "G01 exact 9 frozen collection exports; shared pure window and list pooling, original GUI classes, no heavy HYA/OpenType/3D/physics/input-owner duplication. Reviewed bytes use the existing deterministic installed gate when available; final installed bytes must remain inside the finite capacity. Local diagnostic closure is preserved separately.",
+        "decision": "review/engine-0.2.3/g07-checks.json"
+      }
+    },
+    "extensions-audio": {
+      "entrypoint": "./audio",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-audio.mjs",
+      "maxGzipBytes": 9600,
+      "requiredExports": [
+        "createGameAudio"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "growthReserveBytes": 1259,
+        "capabilityBasis": "G01 exact Engine audio 7 / extensions audio 5 exports; original mixer, private live voice lease and original nodes; no second decoder/cache/context/clock or HYA/GUI/3D closure",
+        "decision": "review/engine-0.2.3/g09-checks.json",
+        "reviewedGzipBytes": 8341
+      }
+    },
+    "extensions-gui-controls": {
+      "entrypoint": "./gui-controls",
+      "packageName": "@haiyue/extensions",
+      "fixture": "scripts/fixtures/engine-consumers/extensions-gui-controls.mjs",
+      "maxGzipBytes": 29200,
+      "requiredExports": [
+        "GuiBreadcrumb",
+        "GuiBadge",
+        "GuiCollapse"
+      ],
+      "forbiddenStaticTokens": [
+        "class GuiSystem",
+        "class Render3DSystem",
+        "opentype.js",
+        "rapier3d",
+        "b2World",
+        "class AudioEventRuntime"
+      ],
+      "allowedGeneratedShaderArtifacts": [],
+      "capacityReview": {
+        "reviewedGzipBytes": 25330,
+        "growthReserveBytes": 3870,
+        "capabilityBasis": "G01 exact 12 GUI-controls symbols; original GuiContent/painters, original modal/scroll/focus, borrowed content frames and shared pure layout. Three application-state controllers, no duplicate layout/render/input/font owner. Final installed bytes must fit this finite capacity.",
+        "decision": "review/engine-0.2.3/g10-checks.json"
       }
     }
   },

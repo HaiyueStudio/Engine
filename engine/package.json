@@ -1,6 +1,6 @@
 {
   "name": "@haiyue/engine",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": false,
   "description": "A WebGPU-first 2D/3D game engine with PBR rendering, ECS, assets, animation, physics, and browser tooling.",
   "license": "MIT",
@@ -180,6 +180,10 @@
     "./text": {
       "types": "./dist/text.d.ts",
       "import": "./dist/text.js"
+    },
+    "./audio": {
+      "types": "./dist/audio.d.ts",
+      "import": "./dist/audio.js"
     }
   },
   "scripts": {

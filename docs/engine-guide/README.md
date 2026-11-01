@@ -19,6 +19,8 @@
 
 ## 功能指南
 
+- [用复合 GUI 组织设置页面](./gui-controls.md)
+
 - [项目脚本运行时](./script-runtime.md)
 - [插件开发](./plugin-authoring.md)
 - [Device recovery](./device-recovery.md)
@@ -65,3 +67,6 @@
 
 - [分享战绩和挑战](share-content.md)：生成内容并交给平台分享。
 - [成就规则与展示](achievements.md)：事实、计数、最好成绩、存档与 GPU GUI（开发候选）。
+
+- [Gameplay Kit](gameplay-kit.md)：0.2.3 候选的设置、加载、角色／相机、地图、集合 GUI 和音频组合。
+- [0.2.3 候选说明](release-notes-0.2.3.md)：逐包版本、新能力和验收边界；尚未发布。

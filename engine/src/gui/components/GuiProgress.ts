@@ -2,6 +2,7 @@ import * as GuiPaint from '../rendering/GuiControlPaintPrimitives';
 import {admitGuiControl} from '../GuiControlIdentity';
 import { GuiDirtyFlags, GuiElementOptions } from '../GuiTypes';
 import { GuiElement } from './GuiElement';
+import {guiStockTextControl,markGuiPaintDirty,markGuiTextContentDirty} from '../GuiInvalidationState';
 
 export interface GuiProgressOptions extends GuiElementOptions {
   value?: number;
@@ -35,8 +36,11 @@ export class GuiProgress extends GuiElement {
   setValue(value: number): void {
     const next = Math.min(this.max, Math.max(this.min, value));
     if (this.value === next) return;
+    const text=this.showText?Math.round(this.ratio*100):null;
     this.value = next;
-    this.markDirty(GuiDirtyFlags.Visual | GuiDirtyFlags.Text);
+    if(!guiStockTextControl(this,GuiProgress.prototype,GuiElement.prototype)){this.markDirty(GuiDirtyFlags.Visual|GuiDirtyFlags.Text);return;}
+    if(this.showText&&!Object.is(text,Math.round(this.ratio*100)))markGuiTextContentDirty(this,GuiElement.prototype,true);
+    else markGuiPaintDirty(this);
   }
 }
 

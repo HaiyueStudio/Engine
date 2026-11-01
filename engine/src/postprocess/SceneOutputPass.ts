@@ -22,6 +22,7 @@ interface OutputBinding {
 export class SceneOutputPass extends PostProcessPass {
   readonly label = 'Scene output';
   private _device: GPUDevice | null = null;
+  private _generation = 0;
   private _sourceCrop:SceneOutputCrop|null=null;
   private _shader!: ReturnType<typeof getBuiltinPostprocessShader>;
   private readonly _pipelines = new Map<string, GPURenderPipeline>();
@@ -53,10 +54,15 @@ export class SceneOutputPass extends PostProcessPass {
 
   override contributePipelineWarmup(plan: PipelineWarmupPlan, device: GPUDevice): void {
     const format = this._format;
+    const generation = this._generation;
     for (const sampleCount of [1, 4]) for (const blend of [false, true]) {
       const key = `${format}:${blend}:${sampleCount}`;
       this.addPipelineWarmup(plan, key, 'Scene output', device, () => this._descriptor(format, blend, sampleCount),
-        () => this._pipelines.has(key), pipeline => { this._pipelines.set(key, pipeline); });
+        () => this._generation !== generation || this._device !== device || this._pipelines.has(key), pipeline => {
+          if (this._generation !== generation || this._device !== device || this._pipelines.has(key)) {
+            getInstrumentedGPUResourceTracker(device)?.untrackObject(pipeline);
+          } else this._pipelines.set(key, pipeline);
+        });
     }
   }
 
@@ -124,8 +130,13 @@ export class SceneOutputPass extends PostProcessPass {
   }
 
   override destroy(): void {
+    this._generation++;
     this._sourceCrop?.destroy();this._sourceCrop=null;
     for(const binding of this._bindings.values())binding.lifetime.retire();
+    // Pipelines are immutable and have no destroy(); pending commands retain their
+    // native references. Release only this pass's tracking references, not shared shader state.
+    const tracker = this._device && getInstrumentedGPUResourceTracker(this._device);
+    for (const pipeline of this._pipelines.values()) tracker?.untrackObject(pipeline);
     this._bindings.clear(); this._pipelines.clear(); this._device = null; this._textures = {}; this._view = undefined; this._frameIdentity = undefined;
   }
 

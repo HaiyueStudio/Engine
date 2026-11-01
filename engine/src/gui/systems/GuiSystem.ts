@@ -1,4 +1,5 @@
 import type {GuiTextServices} from '../input/GuiTextServices';
+import {collectionRetire,collectionFocus,collectionFocused,notifyGuiCollection} from '../GuiCollectionTypes';
 import {getGuiTextServiceFactory} from '../input/GuiTextServiceRegistry';
 import {isGuiControl} from '../GuiControlIdentity';
 import {setGuiLabelMeasuredTextWidth,setGuiHelpDialogTextMetrics} from '../GuiIntrinsicText';
@@ -113,6 +114,7 @@ export class GuiSystem extends System {
   }
   private textServices:GuiTextServices|null=null;
   private readonly textSubscriptions:(()=>void)[]=[];
+  private readonly collectionRoots=new Map<GuiElement,()=>void>();
   private textServiceOptions:GuiSystemOptions={};
   private textBrowserDocument:Document|undefined;
   private ensureTextServices():GuiTextServices|null{if(this.disposed)return null;if(this.textServices)return this.textServices;const create=getGuiTextServiceFactory();return create?(this.textServices=create(this.textContext,this.textServiceOptions,this.textBrowserDocument)):null;}
@@ -286,7 +288,10 @@ export class GuiSystem extends System {
     };
     this.unregisterInput = this.inputDomain.register(this.inputParticipant);
     this.textServiceOptions=options;this.textBrowserDocument=browserDocument;this.ensureTextServices();
-    this.textSubscriptions.push(this.focus.subscribeBeforeBlur(()=>this.textServices?.beforeBlur()),this.focus.subscribe(()=>this.ensureTextServices()?.synchronizeTextInput()));
+    this.textSubscriptions.push(this.focus.subscribeBeforeBlur(()=>this.textServices?.beforeBlur()),this.focus.subscribe(()=>{
+      this.ensureTextServices()?.synchronizeTextInput();
+      const element=this.focus.focused;if(element)notifyGuiCollection(element,collectionFocused);
+    }));
     this.recoveryLabel = `${this.name}:${this.id}`;
     this.unregisterRecovery = engine.registerDeviceRecoveryParticipant?.(this) ?? null;
     this.bindCanvas();
@@ -390,6 +395,7 @@ export class GuiSystem extends System {
     for(const release of [...this.externalBindings])run(release);
     for(const release of [...this.gamepadBindings])run(release);
     for(const unsubscribe of this.textSubscriptions)run(unsubscribe);this.textSubscriptions.length=0;
+    for(const unsubscribe of this.collectionRoots.values())run(unsubscribe);this.collectionRoots.clear();
     run(()=>this.textServices?.dispose());this.textServices=null;
     run(() => this.unregisterInput()); run(() => this.unregisterRecovery?.());
     run(() => this.unbindCanvas()); run(() => this.suspendForDeviceLoss());
@@ -668,6 +674,7 @@ export class GuiSystem extends System {
       // A tap during momentum only stops the list; it must not toggle the row under the finger.
       if (stopping) { this.pressed = null; this.focus.blur(); this.updateHover(null, pending); return; }
       this.focus.focus(hit);
+      if(hit)notifyGuiCollection(hit,collectionFocused);
       if (hit) {
         // A text responder already owns native focus. Focusing the canvas here
         // would immediately blur and destroy the session just opened above.
@@ -834,19 +841,27 @@ export class GuiSystem extends System {
   bindExternalElement(element:GuiElement,options:GuiExternalPresentation={}):()=>void {
     if(this.disposed)throw new Error('Cannot attach external presentation to a disposed GUI system.');
     const unbind=bindGuiExternalPresentation(element,options);let released=false;
-    const inside=(target:GuiElement|null):boolean=>{for(let node=target;node;node=node.parent)if(node===element)return true;return false;};
     const release=()=>{
       if(released)return;released=true;this.externalBindings.delete(release);const errors:unknown[]=[],run=(action:()=>void)=>{try{action();}catch(error){errors.push(error);}};
-      this.inputDomain.cancelKeyboardFor(element);this.inputDomain.cancelGamepadFor(element);const previous=element.disabled;element.disabled=true;
-      try{
-        for(const[id,state]of this.pointerStates)if(inside(state.pressed)||!state.pressed&&inside(state.hovered))run(()=>this.cancelPointer(id));
-        if(inside(this.focus.focused))run(()=>this.focus.blur());
-        if(inside(this.textServices?.connection?.target??null))run(()=>this.textServices?.connection?.close(false));
-        run(()=>this.inputDomain.refresh());run(unbind);
-      }finally{element.disabled=previous;}
+      run(()=>this.retireElementInput(element));run(unbind);
       run(()=>options.onRelease?.());if(errors.length)throw new AggregateError(errors,'External GUI presentation cleanup failed.');
     };
     this.externalBindings.add(release);return release;
+  }
+
+  /** Cancel through the existing owners before a pooled subtree changes identity. */
+  private retireElementInput(element:GuiElement):void {
+    const inside=(target:GuiElement|null):boolean=>{for(let node=target;node;node=node.parent)if(node===element)return true;return false;};
+    const errors:unknown[]=[],run=(action:()=>void)=>{try{action();}catch(error){errors.push(error);}};
+    this.inputDomain.cancelKeyboardFor(element);this.inputDomain.cancelGamepadFor(element);
+    const previous=element.disabled;element.disabled=true;
+    try{
+      for(const[id,state]of this.pointerStates)if(inside(state.pressed)||!state.pressed&&inside(state.hovered))run(()=>this.cancelPointer(id));
+      if(inside(this.focus.focused))run(()=>this.focus.blur());
+      if(inside(this.textServices?.connection?.target??null))run(()=>this.textServices?.connection?.close(false));
+      run(()=>this.inputDomain.refresh());
+    }finally{element.disabled=previous;}
+    if(errors.length)throw new AggregateError(errors,'GUI subtree input cleanup failed.');
   }
 
   /** Scene/default actions run only after every GUI layer declines the event. */
@@ -936,7 +951,16 @@ export class GuiSystem extends System {
 
   private inputRoots(): GuiRoot[] {
     const entities=this.inputWorld?this.entitySet.get(this.inputWorld):null;
-    return [...this.roots].filter(root=>!root.destroyed&&(!this.inputWorld||[...(entities??[])].some(entity=>entity.getComponent(GuiRoot)===root)));
+    const roots=[...this.roots].filter(root=>!root.destroyed&&(!this.inputWorld||[...(entities??[])].some(entity=>entity.getComponent(GuiRoot)===root)));
+    const elements=new Set(roots.map(root=>root.root));
+    for(const [root,unsubscribe]of this.collectionRoots)if(!elements.has(root)){unsubscribe();this.collectionRoots.delete(root);}
+    for(const root of elements)if(!this.collectionRoots.has(root)){
+      const retire=(event:{target:GuiElement})=>this.retireElementInput(event.target);
+      const focus=(event:{target:GuiElement})=>this.focus.focus(event.target);
+      root.on(collectionRetire,retire,{capture:true});root.on(collectionFocus,focus,{capture:true});
+      this.collectionRoots.set(root,()=>{root.off(collectionRetire,retire);root.off(collectionFocus,focus);});
+    }
+    return roots;
   }
 
   private measureAutoWidthLabels(element: GuiElement, themeFontSize: number, root: GuiRoot): void {

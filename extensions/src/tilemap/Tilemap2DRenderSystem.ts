@@ -23,12 +23,14 @@ export class Tilemap2DRenderSystem extends RenderSystem2DBase {
       this.renderer = new Tilemap2DRenderer();
       this.renderer.prepare(this.engine);
     }
+    this.renderer.prepare(this.engine);
+    this.renderer.colorFormat=context.view?.target.format??this.engine.format;
     this.renderer.reverseZ = context.view?.reverseZ ?? this.engine.reverseZ;
     this.renderer.msaaSamples = context.view?.sampleCount ?? this.engine.msaaSamples;
     const liveEntities = this.beginLiveEntityTracking();
 
     const camera = this.getCamera2D(context);
-    if (!camera) return this;
+    if (!camera) {this.renderer.releaseEntitiesNotIn(liveEntities);return this;}
     this.renderer.updateCamera(this.computeCameraViewProjection(camera, context));
 
     const { passEncoder, ownsPass } = beginRenderCommandPass(context);
@@ -37,7 +39,7 @@ export class Tilemap2DRenderSystem extends RenderSystem2DBase {
       if (!this.isEntityRenderable(entity)) continue;
       const tilemap = entity.getComponent(Tilemap2DComponent);
       if (!tilemap) continue;
-      this.renderer!.render(passEncoder, entity.id, tilemap, this.getWorldMatrix2D(entity, context));
+      this.renderer!.render(passEncoder, entity.id, tilemap, this.getWorldMatrix2D(entity, context), context);
       this.markEntityLive(entity);
     }
     if (ownsPass) passEncoder.end();

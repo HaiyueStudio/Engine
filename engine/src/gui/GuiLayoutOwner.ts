@@ -6,6 +6,9 @@ import {captureGuiLayoutMotion, isGuiLayoutHidden, observeGuiTree, releaseGuiLay
 import {type GuiScrollView} from './components/GuiScrollView';
 import {type GuiModal} from './components/GuiModal';
 import type {GuiImageSource} from './components/GuiImage';
+import {GuiActivityState} from './GuiActivityState';
+import {GuiDirtyState} from './GuiDirtyState';
+import {GUI_TEXT_LAYOUT_POLICY,guiTextContentChange,guiTextNeedsCoordinates,rememberGuiInvalidation} from './GuiInvalidationState';
 
 const sourceIds = new WeakMap<object, number>();
 let sourceId = 0;
@@ -59,29 +62,44 @@ export class GuiLayoutOwner {
   private arranging = false;
   private destroyed = false;
   private suspended = false;
+  private readonly activity:GuiActivityState;
+  private readonly dirty:GuiDirtyState;
   private managed = new Map<GuiElement, {rect: GuiRect; options: {readonly display?: 'none'; readonly contentHeight?: number}}>();
   constructor(private readonly root: GuiElement, private readonly inputVersion: () => string) {
-    this.unobserve = observeGuiTree(root, (element, flags, reason) => {
+    this.activity=new GuiActivityState(root,element=>this.active(element));
+    this.dirty=new GuiDirtyState(root);
+    this.unobserve = observeGuiTree(root, (element, flags, reason,kind=0,structure) => {
+      const generation=++this.generation;
+      this.dirty.note(element,flags,kind,reason);
       const reasons: GuiInvalidationReason[] = [];
       if (reason) reasons.push(reason);
-      if (flags & (GuiDirtyFlags.Layout | GuiDirtyFlags.Text | GuiDirtyFlags.Children)) {this.needsLayout = true; reasons.push('layout');}
+      let textLayout=!!(flags&GuiDirtyFlags.Text);
+      if(textLayout&&guiTextContentChange(kind)){
+        const policy=(this.delegate as unknown as {[GUI_TEXT_LAYOUT_POLICY]?:(element:GuiElement)=>boolean}|null)?.[GUI_TEXT_LAYOUT_POLICY];
+        try{textLayout=this.delegate?typeof policy!=='function'||policy(element)!==false:guiTextNeedsCoordinates(element);}catch(error){this.needsLayout=true;throw error;}
+      }
+      if (flags & (GuiDirtyFlags.Layout | GuiDirtyFlags.Children)||textLayout) {this.needsLayout = true; reasons.push('layout');}
       if (flags & (GuiDirtyFlags.Visual | GuiDirtyFlags.Text)) reasons.push('paint');
       if (flags & GuiDirtyFlags.Input) reasons.push('input');
-      this.emit(reasons, element.rect);
+      this.emit(reasons, element.rect,undefined,element,flags,kind,generation,structure);
     }, () => {
       if (this.suspended) return;
       this.suspended = true; this.needsLayout = true;
       this.delegate?.suspend?.(); this.emit(['resource'], this.root.rect);
-    });
+    },(parent,child,added,version)=>{this.dirty.invalidate();this.activity.structure(parent,child,added,version);});
   }
-  private emit(reasons: readonly GuiInvalidationReason[], previousBounds: GuiRect, nextBounds?: GuiRect): void {
-    if (this.listeners.size === 0) {this.generation++; return;}
-    const change: GuiInvalidation = Object.freeze({generation: ++this.generation, reasons: Object.freeze([...reasons]), previousBounds: Object.freeze({...previousBounds}), ...(nextBounds ? {nextBounds: Object.freeze({...nextBounds})} : {}), activeAnimation: this.active(this.root)});
+  private emit(reasons: readonly GuiInvalidationReason[], previousBounds: GuiRect, nextBounds?: GuiRect,source?:GuiElement,flags=GuiDirtyFlags.None,kind=0,generation=++this.generation,structure?:number): void {
+    if (this.listeners.size === 0) {this.activity.reset();return;}
+    const change: GuiInvalidation = Object.freeze({generation, reasons: Object.freeze([...reasons]), previousBounds: Object.freeze({...previousBounds}), ...(nextBounds ? {nextBounds: Object.freeze({...nextBounds})} : {}), activeAnimation: this.activity.value(source,flags,structure)});
+    rememberGuiInvalidation(change,kind);
     for (const listener of [...this.listeners]) listener(change);
   }
   private active(element: GuiElement): boolean {
     return element.visible && !isGuiLayoutHidden(element) && !element.disabled && (('animating' in element && element.animating === true) || element.children.some(child => this.active(child)));
   }
+  isDirty():boolean {return this.dirty.isDirty();}
+  clearDirty(fallback:()=>void):void {this.dirty.clear(fallback);}
+  needsCoordinates(fallback:()=>boolean):boolean {return this.dirty.needsCoordinates(fallback);}
   subscribe(listener: (change: GuiInvalidation) => void): () => void {
     if (this.destroyed) throw new Error('GUI root is destroyed.');
     this.listeners.add(listener); return () => {this.listeners.delete(listener);};
@@ -159,7 +177,8 @@ export class GuiLayoutOwner {
   destroy(): void {
     if (this.destroyed) return; this.destroyed = true;
     const delegate = this.delegate; this.delegate = null;
-    this.unobserve(); this.listeners.clear(); this.releaseManaged(); delegate?.dispose();
+    this.unobserve(); this.listeners.clear(); this.releaseManaged();
+    try {delegate?.dispose();} finally {this.activity.reset();this.dirty.dispose();}
   }
-  private releaseManaged(): void {for (const element of this.managed.keys()) releaseGuiLayout(element); this.managed.clear();}
+  private releaseManaged(): void {for (const element of this.managed.keys()) releaseGuiLayout(element); this.managed.clear();this.activity.reset();this.dirty.invalidate();}
 }

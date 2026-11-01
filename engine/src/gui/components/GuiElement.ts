@@ -1,3 +1,6 @@
+import {consumeGuiChange,consumeGuiStructureChange,markGuiStructureDirty,noteGuiTextDirty} from '../GuiInvalidationState';
+import {clearGuiOwnDirty} from '../GuiDirtyState';
+import {notifyGuiStructure} from '../GuiLayoutState';
 import {
   containsPoint,
   GuiDirtyFlags,
@@ -57,6 +60,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
 
   constructor(options: GuiElementOptions = {}) {
     super();
+    if(options.style?.iconPosition!==undefined&&!['left','right'].includes(options.style.iconPosition))throw new TypeError('Invalid GUI icon position.');
     this.id = options.id ?? `gui-${++guiElementId}`;
     this.x = options.x ?? 0;
     this.y = options.y ?? 0;
@@ -156,14 +160,16 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
 
   markDirty(flags = GuiDirtyFlags.Visual): void {
     this.dirtyFlags |= flags;
-    notifyGuiInvalidation(this, flags);
+    const kind=consumeGuiChange(this);
+    noteGuiTextDirty(this,flags,kind);
+    notifyGuiInvalidation(this, flags,kind,consumeGuiStructureChange(this));
     if (flags & (GuiDirtyFlags.Layout | GuiDirtyFlags.Children)) {
       for (let ancestor = this.parent; ancestor; ancestor = ancestor.parent) ancestor.dirtyFlags |= GuiDirtyFlags.Children;
     }
   }
 
   clearDirty(): void {
-    this.dirtyFlags = GuiDirtyFlags.None;
+    clearGuiOwnDirty(this);
     for (const child of this.children) child.clearDirty();
   }
 
@@ -172,8 +178,9 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
     if (child.parent) child.parent.remove(child);
     child.parent = this;
     this.children.push(child);
+    const structure=notifyGuiStructure(this,child,true);
     notifyGuiThemeTree(this, child);
-    this.markDirty(GuiDirtyFlags.Children | GuiDirtyFlags.Layout);
+    markGuiStructureDirty(this,structure);
     return child;
   }
 
@@ -182,8 +189,9 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
     if (index < 0) return false;
     this.children.splice(index, 1);
     child.parent = null;
+    const structure=notifyGuiStructure(this,child,false);
     notifyGuiThemeTree(this, child);
-    this.markDirty(GuiDirtyFlags.Children | GuiDirtyFlags.Layout);
+    markGuiStructureDirty(this,structure);
     return true;
   }
 
@@ -209,10 +217,11 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   }
 
   setStyle(style: GuiStyle): void {
+    if(style.iconPosition!==undefined&&!['left','right'].includes(style.iconPosition))throw new TypeError('Invalid GUI icon position.');
     if ((Object.keys(style) as (keyof GuiStyle)[]).every((key) => Object.is(this.style[key], style[key]))) return;
     this.style = { ...this.style, ...style };
     notifyGuiThemeTree(this);
-    const metrics = ['padding', 'fontFamily', 'fontSize', 'icon', 'iconSize', 'iconGap', 'contentInsets', 'nineSlice'] as const;
+    const metrics = ['padding', 'fontFamily', 'fontSize', 'icon', 'iconPosition', 'iconSize', 'iconGap', 'contentInsets', 'nineSlice'] as const;
     this.markDirty(GuiDirtyFlags.Visual | (metrics.some(key => key in style) ? GuiDirtyFlags.Layout | GuiDirtyFlags.Text : GuiDirtyFlags.None));
   }
 

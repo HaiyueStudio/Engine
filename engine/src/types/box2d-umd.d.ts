@@ -6,7 +6,41 @@ declare module 'box2d.ts/dist/box2d.umd.js' {
     Set(x: number, y: number): void;
   }
 
-  export class b2Shape {}
+  export class b2Shape { m_radius: number; }
+  export const b2_linearSlop: number;
+  export const b2_polygonRadius: number;
+  export class b2Rot { SetAngle(angle: number): this; }
+  export class b2Transform {
+    p: b2Vec2; q: b2Rot;
+    SetIdentity(): this;
+    Copy(other: b2Transform): this;
+  }
+  export class b2DistanceProxy {
+    m_radius: number;
+    SetShape(shape: b2Shape, index: number): void;
+    Copy(other: b2DistanceProxy): this;
+  }
+  export class b2ShapeCastInput {
+    proxyA: b2DistanceProxy; proxyB: b2DistanceProxy;
+    transformA: b2Transform; transformB: b2Transform; translationB: b2Vec2;
+  }
+  export class b2ShapeCastOutput { lambda: number; normal: b2Vec2; point: b2Vec2; iterations: number; }
+  export function b2ShapeCast(output: b2ShapeCastOutput, input: b2ShapeCastInput): boolean;
+  export class b2DistanceInput {
+    proxyA: b2DistanceProxy; proxyB: b2DistanceProxy;
+    transformA: b2Transform; transformB: b2Transform; useRadii: boolean;
+  }
+  export class b2DistanceOutput { pointA: b2Vec2; pointB: b2Vec2; distance: number; }
+  export class b2SimplexCache {}
+  export function b2Distance(output: b2DistanceOutput, cache: b2SimplexCache, input: b2DistanceInput): void;
+  export class b2Manifold { pointCount: number; }
+  export class b2WorldManifold {
+    normal: b2Vec2; points: b2Vec2[]; separations: number[];
+    Initialize(manifold: b2Manifold, a: b2Transform, radiusA: number, b: b2Transform, radiusB: number): void;
+  }
+  export function b2CollidePolygons(output: b2Manifold, a: b2PolygonShape, xa: b2Transform, b: b2PolygonShape, xb: b2Transform): void;
+  export function b2CollideCircles(output: b2Manifold, a: b2CircleShape, xa: b2Transform, b: b2CircleShape, xb: b2Transform): void;
+  export function b2CollidePolygonAndCircle(output: b2Manifold, a: b2PolygonShape, xa: b2Transform, b: b2CircleShape, xb: b2Transform): void;
 
   export class b2CircleShape extends b2Shape {
     constructor(radius?: number);
@@ -22,6 +56,8 @@ declare module 'box2d.ts/dist/box2d.umd.js' {
     GetNext(): b2Fixture | null;
     IsSensor(): boolean;
     GetFilterData(): { categoryBits: number; maskBits: number; groupIndex: number };
+    GetShape(): b2Shape;
+    GetAABB(childIndex: number): b2AABB;
   }
 
   export class b2Contact {
@@ -35,6 +71,8 @@ declare module 'box2d.ts/dist/box2d.umd.js' {
   }
 
   export class b2Body {
+    GetType(): number;
+    GetTransform(): b2Transform;
     SetType(type: number): void;
     SetFixedRotation(fixed: boolean): void;
     SetLinearDamping(damping: number): void;

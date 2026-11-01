@@ -7,6 +7,7 @@ import {measureGuiElement, releaseGuiMeasureOwner} from '../GuiMeasure';
 import {GuiThemeOwner} from '../GuiThemeOwner';
 import type {GuiThemeResourceBinding} from '../GuiThemeTypes';
 import {disposeGuiRootObservers} from '../GuiLayoutState';
+import {guiTextNeedsCoordinates} from '../GuiInvalidationState';
 
 export interface GuiRootOptions extends GuiElementOptions {
   theme?: Partial<GuiTheme> | undefined;
@@ -62,7 +63,7 @@ export class GuiRoot extends Component {
   override destroy(): void {try {try {disposeGuiRootObservers(this.root);} finally {try {this.themeOwner.destroy();} finally {this.layoutOwner.destroy();}}} finally {releaseGuiMeasureOwner(this); super.destroy();}}
 
   get dirty(): boolean {
-    return this.root.dirty;
+    return this.layoutOwner.isDirty();
   }
 
   add<T extends GuiElement>(child: T): T {
@@ -86,7 +87,7 @@ export class GuiRoot extends Component {
       this.viewport.height !== height;
     this.viewport = next;
     if (changed) this.root.markDirty(GuiDirtyFlags.Layout);
-    try {if (!this.layoutOwner.layout(this.viewport) && needsCoordinateLayout(this.root)) this.root.layout(this.viewport);}
+    try {if (!this.layoutOwner.layout(this.viewport) && this.layoutOwner.needsCoordinates(()=>needsCoordinateLayout(this.root))) this.root.layout(this.viewport);}
     catch (error) {this.viewport = previous; throw error;}
   }
 
@@ -95,12 +96,14 @@ export class GuiRoot extends Component {
   }
 
   clearDirty(): void {
-    this.root.clearDirty();
+    this.layoutOwner.clearDirty(()=>this.root.clearDirty());
   }
 }
 
 /** Painting and input state retain the same geometry in the manual layout path. */
 function needsCoordinateLayout(element: GuiElement): boolean {
-  return (element.getDirtyFlags() & (GuiDirtyFlags.Layout | GuiDirtyFlags.Text | GuiDirtyFlags.Children)) !== 0
+  const flags=element.getDirtyFlags();
+  return (flags & (GuiDirtyFlags.Layout | GuiDirtyFlags.Children)) !== 0
+    || !!(flags & GuiDirtyFlags.Text)&&guiTextNeedsCoordinates(element)
     || element.children.some(needsCoordinateLayout);
 }

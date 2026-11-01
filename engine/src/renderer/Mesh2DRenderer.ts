@@ -15,6 +15,7 @@ import type { PipelineWarmupPlan } from './PipelineWarmup';
 import { RendererObjectTable } from './RendererObjectTable';
 import type { RenderCommandContext } from '../core/RenderCommandContext';
 import { getBuiltin2dUiShader } from '../shader/BuiltinRenderShader';
+import { isLinearColorTarget } from '../postprocess/SceneColor';
 
 // ── Cache types ───────────────────────────────────────────────────────────────
 
@@ -45,6 +46,7 @@ export class Mesh2DRenderer extends BaseRenderer {
   readonly materialRenderers = new Material2DRendererRegistry();
 
   private engine!: IEngine;
+  private _targetFormat: GPUTextureFormat | undefined;
 
   private bgl0!: GPUBindGroupLayout;
   private bgl1!: GPUBindGroupLayout;
@@ -130,16 +132,17 @@ export class Mesh2DRenderer extends BaseRenderer {
   }
 
   contributePipelineWarmup(plan: PipelineWarmupPlan): void {
+    const format = this.engine.format;
     const topology: GPUPrimitiveTopology = 'triangle-list';
     const stripIndexFormat = undefined;
     for (const blending of ['none', 'normal', 'additive'] as const) {
       const blendFlag = blending === 'normal' ? 1 : blending === 'additive' ? 2 : 0;
-      const key = encodePrimitivePipelineKey(topology, 'none', 'ccw', stripIndexFormat, this.reverseZ, this.msaaSamples, blendFlag);
+      const key = `${format}:${encodePrimitivePipelineKey(topology, 'none', 'ccw', stripIndexFormat, this.reverseZ, this.msaaSamples, blendFlag)}`;
       this.addPipelineWarmup(
         plan,
         key,
         `Mesh 2D ${blending === 'none' ? 'opaque' : blending}`,
-        () => this._pipelineDescriptor(blending, topology, stripIndexFormat),
+        () => this._pipelineDescriptor(blending, topology, stripIndexFormat, format),
         this.engine.device,
       );
     }
@@ -164,6 +167,7 @@ export class Mesh2DRenderer extends BaseRenderer {
     worldMatrix: Float32Array,
     submissionContext?: RenderCommandContext,
   ): void {
+    this._targetFormat = submissionContext?.view?.target.format ?? this.engine.format;
     this._objectTable.beginUploads(submissionContext);
     const registration = this.materialRenderers.resolve(material);
     if (!registration) {
@@ -186,6 +190,7 @@ export class Mesh2DRenderer extends BaseRenderer {
   ): void {
     const first = items[0];
     if (!first) return;
+    this._targetFormat = submissionContext?.view?.target.format ?? this.engine.format;
     this._objectTable.beginUploads(submissionContext);
     const registration = this.materialRenderers.resolve(first.material);
     if (!registration) {
@@ -215,6 +220,7 @@ export class Mesh2DRenderer extends BaseRenderer {
   ): void {
     const first = items[0];
     if (!first) return;
+    this._targetFormat = submissionContext?.view?.target.format ?? this.engine.format;
     this._objectTable.beginUploads(submissionContext);
     for (const item of items) {
       if (this.materialRenderers.resolve(item.material) === this._basicMaterialRegistration) {
@@ -422,7 +428,9 @@ export class Mesh2DRenderer extends BaseRenderer {
   private _writeObjectUniform(ent: EntGPU, worldMatrix: Float32Array, material: Material2D): void {
     const colorBase = ent.objectSlot * OBJECT_TABLE_FLOATS + OBJECT_TABLE_COLOR_OFFSET;
     const objectTableData = this._objectTable.data;
-    material.color.writeSRGB(objectTableData, colorBase);
+    const format = this._targetFormat ?? this.engine.format;
+    if (isLinearColorTarget(format) || format.endsWith('-srgb')) material.color.writeLinear(objectTableData, colorBase);
+    else material.color.writeSRGB(objectTableData, colorBase);
     const r = objectTableData[colorBase]!;
     const g = objectTableData[colorBase + 1]!;
     const b = objectTableData[colorBase + 2]!;
@@ -462,7 +470,7 @@ export class Mesh2DRenderer extends BaseRenderer {
     const topology = geometry.topology ?? 'triangle-list';
     const stripIndexFormat = getStripIndexFormat(geometry);
     const blendFlag = blending === 'normal' ? 1 : blending === 'additive' ? 2 : 0;
-    const key = encodePrimitivePipelineKey(topology, 'none', 'ccw', stripIndexFormat, this.reverseZ, this.msaaSamples, blendFlag);
+    const key = `${this._targetFormat ?? this.engine.format}:${encodePrimitivePipelineKey(topology, 'none', 'ccw', stripIndexFormat, this.reverseZ, this.msaaSamples, blendFlag)}`;
     return this.getCachedPipeline(key, () => this._makePipeline(blending, topology, stripIndexFormat));
   }
 
@@ -478,8 +486,8 @@ export class Mesh2DRenderer extends BaseRenderer {
     blending: BlendMode2D,
     topology: GPUPrimitiveTopology,
     stripIndexFormat: GPUIndexFormat | undefined,
+    format = this._targetFormat ?? this.engine.format,
   ): GPURenderPipelineDescriptor {
-    const { format } = this.engine;
     const rz   = this.reverseZ;
     const msaa = this.msaaSamples;
 

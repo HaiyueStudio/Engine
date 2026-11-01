@@ -7,8 +7,11 @@ import {type GuiInput} from './components/GuiInput';
 import {guiInputCounterText} from './input/GuiInputAdornments';
 import type {GuiElement} from './components/GuiElement';
 import {resolveGuiSkin} from './GuiThemeResolve';
+import {guiPaintOnly} from './GuiInvalidationState';
+import {GuiGlyphCoverage} from './GuiGlyphCoverage';
+import {guiThemeTreeActive} from './GuiThemeResolve';
 
-interface InputGlyphs {dirty:boolean; families:Map<string,Set<string>>; off:()=>void;}
+interface InputGlyphs {dirty:boolean; families:Map<string,Set<string>>; checked:Map<string,BitmapFontData>; off:()=>void; primitive?:{family:string;coverage:GuiGlyphCoverage}|undefined;}
 
 export interface GuiAtlasOptions {
   readonly canvasFactory?: (width: number, height: number) => HTMLCanvasElement;
@@ -58,16 +61,28 @@ export class GuiFontOwner {
   }
   forRoot(root: GuiRoot, element: GuiElement = root.root): BitmapFontData {
     this.prepare();
-    const requested = resolveGuiSkin(element).fontFamily ?? root.theme.fontFamily;
+    return this.forFamily(root,resolveGuiSkin(element).fontFamily??root.theme.fontFamily);
+  }
+  /** Reuse the collector's already-resolved stock skin, without a second tree lookup. */
+  forFamily(root:GuiRoot,requested:string):BitmapFontData {
+    this.prepare();
     const family = requested === 'sans-serif' ? this.defaultFamily : requested;
     let state=this.roots.get(root);
     if(!state){
-      state={dirty:true,families:new Map(),off:()=>{}};
-      const observed=state;state.off=root.onInvalidation(()=>{observed.dirty=true;});this.roots.set(root,state);
+      state={dirty:true,families:new Map(),checked:new Map(),off:()=>{}};
+      const observed=state;state.off=root.onInvalidation(change=>{if(!guiPaintOnly(change))observed.dirty=true;});this.roots.set(root,state);
     }
     if(!state.families.has(family))state.dirty=true;
     let changed = state.dirty;
     if(state.dirty){
+      const rootFamily=root.theme.fontFamily==='sans-serif'?this.defaultFamily:root.theme.fontFamily;
+      const primitive=state.primitive;
+      if(!guiThemeTreeActive(root.root)&&primitive?.family===rootFamily&&primitive.coverage.update()){
+        state.checked.clear();state.dirty=false;
+      }else{
+      const coverage=!guiThemeTreeActive(root.root)?GuiGlyphCoverage.capture(root.root):null;
+      if(coverage){state.families=new Map([[rootFamily,coverage.glyphs]]);state.primitive={family:rootFamily,coverage};state.checked.clear();state.dirty=false;}
+      else{
       const families=new Map<string,Set<string>>();
       const visit=(element:GuiElement):void=>{
         const requested = resolveGuiSkin(element).fontFamily ?? root.theme.fontFamily;
@@ -83,15 +98,19 @@ export class GuiFontOwner {
         for(const text of texts)for(const glyph of guiTextClusters(text))if(!/^[\r\n]+$/u.test(glyph))glyphs.add(glyph);
         for(const child of element.children)visit(child);
       };
-      visit(root.root);state.families=families;state.dirty=false;
+      visit(root.root);state.families=families;state.checked.clear();state.dirty=false;
+      state.primitive=undefined;
+      }
+      }
     }
     let font = this.fonts.get(family);
     const coverage=font&&this.coverage.get(font);
-    if(!font||[...state.families.get(family)??[]].some(glyph=>!coverage?.has(glyph))){
+    if(!font||state.checked.get(family)!==font&&[...state.families.get(family)??[]].some(glyph=>!coverage?.has(glyph))){
       // Build before replacement; old recorded/submitted draws retain their atlas through the GPU owner.
       const next=this.build(family);this.fonts.set(family,next);if(font)this.retire(font);font=next;
       changed = true;
     }
+    state.checked.set(family,font);
     if (changed) this.prune();return font;
   }
   forget(root: GuiRoot): void {this.roots.get(root)?.off();this.roots.delete(root);this.prune();}

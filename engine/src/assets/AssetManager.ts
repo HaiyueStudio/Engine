@@ -180,7 +180,8 @@ export class AssetManager {
     options: AssetLoadOptions<T> = {},
   ): Promise<AssetHandle<T>> {
     this._assertCanLoad();
-    if (options.signal?.aborted) return Promise.reject(this._abortError(key, options.signal.reason));
+    const requestSignal = combineRequestSignals(options.signal, options.owner?.signal);
+    if (requestSignal?.aborted) return Promise.reject(this._abortError(key, requestSignal.reason));
 
     let record = this._records.get(key) as AssetRecord<T> | undefined;
     if (!record) {
@@ -204,11 +205,11 @@ export class AssetManager {
     }
 
     record.refs++;
-    const requestSignal = combineRequestSignals(options.signal, options.owner?.signal);
     const unsubscribe = options.onProgress && record.job ? record.job.onProgress(options.onProgress) : null;
     return waitForRecord(record.promise, requestSignal).then(
       () => {
         unsubscribe?.();
+        if (requestSignal?.aborted) throw this._abortError(key, requestSignal.reason);
         const state = getRecordState(record!);
         if (this._disposed || state === 'released' || state === 'aborted') {
           throw new EngineError(
@@ -219,12 +220,11 @@ export class AssetManager {
         }
         return this._createHandle(record!);
       },
-      error => {
+    ).catch(error => {
         unsubscribe?.();
         this._releaseRecord(record!);
         throw error;
-      },
-    );
+    });
   }
 
   loadTexture(source: TextureAssetSource, options: TextureAssetOptions = {}): Promise<AssetHandle<GPUTexture>> {
@@ -594,11 +594,8 @@ export class AssetManager {
   private _releaseRecord<T>(record: AssetRecord<T>): void {
     record.refs = Math.max(0, record.refs - 1);
     if (record.refs !== 0) return;
-    if (isPending(getRecordState(record))) {
-      record.controller?.abort('owner-released');
-      return;
-    }
-    this._records.delete(record.key);
+    if (this._records.get(record.key) === record) this._records.delete(record.key);
+    if (isPending(getRecordState(record))) record.controller?.abort('owner-released');
     this._releaseImmediately(record);
   }
 

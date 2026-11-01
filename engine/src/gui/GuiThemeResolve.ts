@@ -19,7 +19,8 @@ export function guiThemeState(element: GuiElement): GuiThemeState {
 }
 
 function assign(target: GuiSkin, source: GuiSkin): void {
-  for (const [key, value] of Object.entries(source)) if (value !== undefined) Object.assign(target, {[key]: key === 'palette' ? {...target.palette, ...source.palette} : value});
+  for (const [key, value] of Object.entries(source)) if (value !== undefined)
+    (target as Record<string,unknown>)[key]=key==='palette'?{...target.palette,...source.palette}:value;
 }
 
 /** Resolve inheritance without projecting into the caller's mutable local style object. */

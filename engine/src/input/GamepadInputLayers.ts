@@ -21,6 +21,7 @@ export class GamepadInputLayers {
   private readonly previous = new Map<number,StandardGamepadSnapshot>();
   private readonly masks = new Map<number,Mask>();
   private released?:boolean;
+  private readonly releasedIndices = new Set<number>();
   private raw = 0;
 
   add(map:InputActionMap,handle:ActionLayer['handle'],capture?:ActionLayer['capture']):()=>void {
@@ -34,8 +35,8 @@ export class GamepadInputLayers {
     this.layers.add(layer);if(!layer.map)this.raw++;
     return()=>{if(this.layers.delete(layer)&&!layer.map)this.raw--;};
   }
-  clear():void {this.previous.clear();this.masks.clear();this.released=false;}
-  release():void {this.released=true;}
+  clear():void {this.previous.clear();this.masks.clear();this.released=false;this.releasedIndices.clear();}
+  release(indices?:readonly number[]):void {if(indices)for(const index of indices)this.releasedIndices.add(index);else this.released=true;}
   dispose():void {this.clear();this.layers.clear();this.raw=0;}
 
   private routeRaw(layer:RawLayer,pad:StandardGamepadSnapshot,before:StandardGamepadSnapshot|null,index:number,mask:Mask,oldMask:Mask,threshold:number,release=false):void {
@@ -61,19 +62,20 @@ export class GamepadInputLayers {
     const result:(StandardGamepadSnapshot|null)[]=[];
     let length=pads.length;for(const index of this.previous.keys())length=Math.max(length,index+1);
     for(let index=0;index<length;index++){
+      const released=this.released||this.releasedIndices.has(index);
       const actual=pads[index],before=this.previous.get(index)??null,connected=actual?.connected===true;
       if(!connected&&(!before||!this.raw)){this.previous.delete(index);this.masks.delete(index);result[index]=null;continue;}
       const pad:StandardGamepadSnapshot=connected?actual!:{connected:false,buttons:[],axes:[]};
       const mask=this.masks.get(index)??new Map<number,Claim>();this.masks.set(index,mask);
       const oldMask=this.raw?new Map(mask):mask;
       for(const[key,claim]of mask)if(key<0?Math.abs(read(pad,key))<=claim.neutral:read(pad,key)<=claim.neutral)mask.delete(key);
-      if(this.released){
+      if(released){
         for(const layer of [...this.layers].reverse())if(!layer.map)this.routeRaw(layer,pad,before,index,mask,oldMask,threshold,true);
         for(let key=-pad.axes.length;key<pad.buttons.length;key++)if((key<0?Math.abs(read(pad,key)):read(pad,key))>(key<0?0.15:0.000_001))mask.set(key,{owner:false,neutral:key<0?0.15:0.000_001});
       }
       for(const layer of [...this.layers].reverse()){
         if(!this.layers.has(layer))continue;
-        if(!layer.map){if(!this.released)this.routeRaw(layer,pad,before,index,mask,oldMask,threshold);continue;}
+        if(!layer.map){if(!released)this.routeRaw(layer,pad,before,index,mask,oldMask,threshold);continue;}
         if(!connected)continue;
         if(layer.capture?.(index))for(const binding of Object.values(layer.map.toJSON()))claim(pad,mask,binding,layer.owner,threshold);
         const available=masked(pad,mask,layer.owner),claimed=new Set<number>();
@@ -90,7 +92,7 @@ export class GamepadInputLayers {
       this.masks.set(index,mask);result[index]=masked(pad,mask);
       this.previous.set(index,{connected:true,buttons:pad.buttons.map(b=>({pressed:b.pressed,value:b.value})),axes:[...pad.axes]});
     }
-    this.released=false;return result;
+    this.released=false;this.releasedIndices.clear();return result;
   }
 }
 

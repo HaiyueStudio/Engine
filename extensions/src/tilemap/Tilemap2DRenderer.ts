@@ -1,289 +1,100 @@
-import { getExtensionGPUResourceTracker, requireEngineDevice, type IEngine } from '@haiyue/engine/extension-authoring';
-import type { Tilemap2DComponent } from './Tilemap2DComponent';
-import {
-  createCamera2DGpu,
-  createCamera2DLayout,
-  createObject2DGpu,
-  createObject2DLayout,
-  destroyCamera2DGpu,
-  destroyObject2DGpu,
-  writeFloatBuffer,
-  writeObjectMatrixIfChanged,
-  type Camera2DGpu,
-  type Object2DGpu,
-} from '../utils/render2dGpu';
-import tilemap2dWgsl from '../shaders/generated/2d-ui-tilemap2d.generated.wgsl';
-
-const TILEMAP_WGSL = tilemap2dWgsl;
-
-const TILEMAP_INITIAL_VERTEX_FLOATS = 36;
-const TILEMAP_INITIAL_VERTEX_BYTES = TILEMAP_INITIAL_VERTEX_FLOATS * 4;
-
-interface EntityGpu {
-  objectGpu: Object2DGpu;
-  vertexBuffer: GPUBuffer;
-  vertexBufferSize: number;
-  vertexData: Float32Array;
-  vertexByteLength: number;
-  vertexCount: number;
-  tilemapSignature: string;
+import{requireEngineDevice,type IEngine,type RenderCommandContext}from'@haiyue/engine/extension-authoring';
+import{EngineError,EngineErrorCode}from'@haiyue/engine/core';
+import type{Tilemap2DComponent}from'./Tilemap2DComponent';
+import{createCamera2DLayout,createObject2DLayout,matrixEquals,writeFloatBuffer}from'../utils/render2dGpu';
+import paletteWgsl from'../shaders/generated/2d-ui-tilemap2d.generated.wgsl';
+import texturedWgsl from'../shaders/generated/2d-ui-spine2d.generated.wgsl';
+import{tileChunks,buildTileVertices,type TileChunk}from'./TilemapGeometry';
+import{tilemapState,tilemapInvalid}from'./TilemapState';
+import{TilemapGpuOwner,type TileBuffer}from'./TilemapGpuOwner';
+interface SharedGpu {camera:GPUBindGroupLayout;object:GPUBindGroupLayout;material:GPUBindGroupLayout;sampler:GPUSampler;palette:GPUShaderModule;atlas:GPUShaderModule;paletteLayout:GPUPipelineLayout;atlasLayout:GPUPipelineLayout;pipelines:Map<string,GPURenderPipeline>;}
+const sharedCache=new WeakMap<GPUDevice,SharedGpu>();
+function sharedGpu(device:GPUDevice):SharedGpu {
+ let value=sharedCache.get(device);if(value)return value;
+ const camera=createCamera2DLayout(device),object=createObject2DLayout(device),material=device.createBindGroupLayout({entries:[{binding:0,visibility:GPUShaderStage.FRAGMENT,texture:{sampleType:'float'}},{binding:1,visibility:GPUShaderStage.FRAGMENT,sampler:{type:'filtering'}}]});
+ value={camera,object,material,sampler:device.createSampler({magFilter:'nearest',minFilter:'nearest',mipmapFilter:'nearest',addressModeU:'clamp-to-edge',addressModeV:'clamp-to-edge'}),palette:device.createShaderModule({code:paletteWgsl}),atlas:device.createShaderModule({code:texturedWgsl}),paletteLayout:device.createPipelineLayout({bindGroupLayouts:[camera,object]}),atlasLayout:device.createPipelineLayout({bindGroupLayouts:[camera,object,material]}),pipelines:new Map()};sharedCache.set(device,value);return value;
 }
-
-interface TilemapSignatureCache {
-  version: number;
-  signature: string;
-}
-
-interface TilemapSharedGpu {
-  cameraLayout: GPUBindGroupLayout;
-  objectLayout: GPUBindGroupLayout;
-  shaderModule: GPUShaderModule;
-  pipelineLayout: GPUPipelineLayout;
-  pipelineCache: Map<number, GPURenderPipeline>;
-}
-
-const tilemapSharedGpuCache = new WeakMap<GPUDevice, TilemapSharedGpu>();
-
-function getTilemapSharedGpu(device: GPUDevice): TilemapSharedGpu {
-  let shared = tilemapSharedGpuCache.get(device);
-  if (shared) return shared;
-
-  const cameraLayout = createCamera2DLayout(device);
-  const objectLayout = createObject2DLayout(device);
-  const shaderModule = device.createShaderModule({ code: TILEMAP_WGSL });
-  const pipelineLayout = device.createPipelineLayout({
-    bindGroupLayouts: [cameraLayout, objectLayout],
-  });
-  shared = {
-    cameraLayout,
-    objectLayout,
-    shaderModule,
-    pipelineLayout,
-    pipelineCache: new Map(),
-  };
-  tilemapSharedGpuCache.set(device, shared);
-  return shared;
-}
-
+interface Uniform {gpu:TileBuffer;group:GPUBindGroup;snapshot:Float32Array;}
+interface VertexSlot {gpu:TileBuffer|null;data:Float32Array;count:number;map:Tilemap2DComponent|null;revision:string;key:number|null;signature:string;}
+interface EntityGpu {pool:VertexSlot[];cache:Map<number,VertexSlot>;streams:VertexSlot[];objects:Uniform[];material:{texture:GPUTexture;version:number|undefined;group:GPUBindGroup}|null;}
+const unavailable=()=>new EngineError(EngineErrorCode.RenderCommandContextInvalid,'Submit or cancel outstanding Tilemap recordings before exhausting the bounded working pool.');
+/** Original 2D ownership and programs, with map revisions independent from bounded GPU windows. */
 export class Tilemap2DRenderer {
-  reverseZ = false;
-  msaaSamples: 1 | 4 = 1;
-
-  private engine!: IEngine;
-  private cameraGpu!: Camera2DGpu;
-  private objectLayout!: GPUBindGroupLayout;
-  private shaderModule!: GPUShaderModule;
-  private pipelineLayout!: GPUPipelineLayout;
-  private sharedGpu!: TilemapSharedGpu;
-  private entityCache = new Map<number, EntityGpu>();
-  private signatureCache = new WeakMap<Tilemap2DComponent, TilemapSignatureCache>();
-  private initialized = false;
-
-  prepare(engine: IEngine): void {
-    if (this.initialized) return;
-    this.initialized = true;
-    this.engine = engine;
-    const device = requireEngineDevice(engine);
-    this.sharedGpu = getTilemapSharedGpu(device);
-    this.cameraGpu = createCamera2DGpu(device, getExtensionGPUResourceTracker(engine), this.sharedGpu.cameraLayout);
-    this.objectLayout = this.sharedGpu.objectLayout;
-    this.shaderModule = this.sharedGpu.shaderModule;
-    this.pipelineLayout = this.sharedGpu.pipelineLayout;
+ reverseZ=false;msaaSamples:1|4=1;colorFormat:GPUTextureFormat|undefined;
+ private engine!:IEngine;private device!:GPUDevice;private shared!:SharedGpu;private owner!:TilemapGpuOwner;
+ private cameras:Uniform[]=[];private viewProjection=new Float32Array(16);private entityCache=new Map<number,EntityGpu>();private initialized=false;
+ private counters={chunkBuilds:0,workingBuilds:0,vertexUploadCalls:0,vertexUploadBytes:0,draws:0,candidateChunks:0,culledRecords:0};
+ prepare(engine:IEngine):void {
+  const device=requireEngineDevice(engine);if(this.initialized&&this.device===device)return;if(this.initialized)this.destroy();
+  this.engine=engine;this.device=device;this.shared=sharedGpu(device);this.owner=new TilemapGpuOwner(engine);this.initialized=true;
+ }
+ updateCamera(viewProjection:Float32Array):void {this.viewProjection.set(viewProjection);}
+ private uniform(pool:Uniform[],matrix:Float32Array,layout:GPUBindGroupLayout,label:string,context:RenderCommandContext):Uniform {
+  let value=pool.find(value=>matrixEquals(value.snapshot,matrix));
+  if(!value){value=pool.find(value=>!value.gpu.leases.size);
+   if(!value){if(pool.length>=32)throw unavailable();const gpu=this.owner.create(64,GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST,label);value={gpu,group:this.device.createBindGroup({layout,entries:[{binding:0,resource:{buffer:gpu.buffer}}]}),snapshot:new Float32Array(16).fill(NaN)};pool.push(value);}
+   writeFloatBuffer(this.device.queue,value.gpu.buffer,matrix);value.snapshot.set(matrix);
   }
-
-  updateCamera(viewProj: Float32Array): void {
-    writeFloatBuffer(requireEngineDevice(this.engine).queue, this.cameraGpu.buffer, viewProj);
+  this.owner.use(value.gpu,context);return value;
+ }
+ private slot():VertexSlot {return {gpu:null,data:new Float32Array(0),count:0,map:null,revision:'',key:null,signature:''};}
+ private upload(slot:VertexSlot,map:Tilemap2DComponent,chunks:readonly TileChunk[],context:RenderCommandContext):void {
+  const built=buildTileVertices(map,chunks,slot.data),stride=tilemapState(map).atlas?8:6,bytes=built.count*stride*4;slot.data=built.data;slot.count=built.count;
+  if(bytes){
+   if(!slot.gpu||slot.gpu.bytes<bytes){
+    const maximum=chunks.reduce((cells,chunk)=>cells+(chunk.x1-chunk.x0)*(chunk.y1-chunk.y0),0)*6*stride*4;
+    const capacity=Math.min(maximum,Math.max(bytes,slot.gpu?slot.gpu.bytes*2:4));
+    if(slot.gpu)this.owner.retire(slot.gpu);slot.gpu=this.owner.create(capacity,GPUBufferUsage.VERTEX|GPUBufferUsage.COPY_DST,'Tilemap2D.vertex');
+   }
+   this.device.queue.writeBuffer(slot.gpu.buffer,0,built.data.buffer as ArrayBuffer,built.data.byteOffset,bytes);this.counters.vertexUploadCalls++;this.counters.vertexUploadBytes+=bytes;
   }
-
-  releaseEntitiesNotIn(liveEntities: ReadonlySet<number>): void {
-    for (const [entityId, entityGpu] of this.entityCache) {
-      if (!liveEntities.has(entityId)) {
-        this.destroyEntityGpu(entityGpu);
-        this.entityCache.delete(entityId);
-      }
-    }
+  slot.map=map;if(slot.gpu)this.owner.use(slot.gpu,context);
+ }
+ private material(entity:EntityGpu,map:Tilemap2DComponent):GPUBindGroup {
+  const atlas=tilemapState(map).atlas!,source=atlas.source,texture=source.texture;
+  if((texture.width!==undefined&&texture.width!==atlas.sourceWidth)||(texture.height!==undefined&&texture.height!==atlas.sourceHeight)||(texture.sampleCount!==undefined&&texture.sampleCount!==1)||(texture.usage!==undefined&&!(texture.usage&GPUTextureUsage.TEXTURE_BINDING)))throw tilemapInvalid('Borrowed atlas texture dimensions, sample count or usage do not match its declaration.');
+  if(!entity.material||entity.material.texture!==texture||!Object.is(entity.material.version,source.version))entity.material={texture,version:source.version,group:this.device.createBindGroup({layout:this.shared.material,entries:[{binding:0,resource:texture.createView()},{binding:1,resource:this.shared.sampler}]})};
+  return entity.material.group;
+ }
+ render(pass:GPURenderPassEncoder,id:number,map:Tilemap2DComponent,world:Float32Array,context:RenderCommandContext):void {
+  const state=tilemapState(map);let entity=this.entityCache.get(id);
+  if(!entity){entity={pool:[],cache:new Map(),streams:[],objects:[],material:null};this.entityCache.set(id,entity);}
+  const range=tileChunks(map,this.viewProjection,world),chunks=range.chunks,wanted=new Set(chunks.map(chunk=>chunk.key));
+  this.counters.candidateChunks+=chunks.length;if(range.culled)this.counters.culledRecords++;
+  const cap=range.legacy?1:state.maxResident;
+  while(entity.pool.length>cap){const slot=entity.pool.pop()!;if(slot.key!==null&&entity.cache.get(slot.key)===slot)entity.cache.delete(slot.key);if(slot.gpu)this.owner.retire(slot.gpu);}
+  const camera=this.uniform(this.cameras,this.viewProjection,this.shared.camera,'Tilemap2D.camera',context),object=this.uniform(entity.objects,world,this.shared.object,'Tilemap2D.object',context);
+  const atlas=!!state.atlas;pass.setPipeline(this.pipeline(atlas));pass.setBindGroup(0,camera.group);pass.setBindGroup(1,object.group);if(atlas)pass.setBindGroup(2,this.material(entity,map));
+  const overflow:TileChunk[]=[];
+  for(const chunk of chunks){
+   const revision=state.fullRevision+':'+(state.dirty.get(chunk.key)??0)+':'+(atlas?1:0);
+   let slot=entity.cache.get(chunk.key);
+   if(!slot||slot.map!==map||slot.revision!==revision){
+    const old=slot;if(slot?.gpu?.leases.size)slot=undefined;
+    if(!slot)slot=entity.pool.find(value=>!value.gpu?.leases.size&&(value.key===null||!wanted.has(value.key)));
+    if(!slot&&entity.pool.length<cap){slot=this.slot();entity.pool.push(slot);}
+    if(!slot){overflow.push(chunk);continue;}
+    if(slot.key!==null&&entity.cache.get(slot.key)===slot)entity.cache.delete(slot.key);
+    if(old&&old!==slot)old.key=null;
+    this.upload(slot,map,[chunk],context);slot.key=chunk.key;slot.revision=revision;entity.cache.set(chunk.key,slot);this.counters.chunkBuilds++;
+   }
+   this.draw(pass,slot,context);
   }
-
-  render(
-    passEncoder: GPURenderPassEncoder,
-    entityId: number,
-    tilemap: Tilemap2DComponent,
-    worldMatrix: Float32Array,
-  ): void {
-    const device = requireEngineDevice(this.engine);
-    const signature = this.computeSignature(tilemap);
-
-    let entityGpu = this.entityCache.get(entityId);
-    if (!entityGpu) {
-      entityGpu = {
-        objectGpu: createObject2DGpu(device, this.objectLayout, getExtensionGPUResourceTracker(this.engine)),
-        vertexBuffer: device.createBuffer({
-          size: TILEMAP_INITIAL_VERTEX_BYTES,
-          usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-        }),
-        vertexBufferSize: TILEMAP_INITIAL_VERTEX_BYTES,
-        vertexData: new Float32Array(TILEMAP_INITIAL_VERTEX_FLOATS),
-        vertexByteLength: 0,
-        vertexCount: 0,
-        tilemapSignature: '',
-      };
-      getExtensionGPUResourceTracker(this.engine)?.trackBuffer(entityGpu.vertexBuffer, 'Tilemap2DRenderer.vertexBuffer', entityGpu.vertexBufferSize);
-      this.entityCache.set(entityId, entityGpu);
-    }
-
-    if (entityGpu.tilemapSignature !== signature) {
-      this.buildVertices(tilemap, entityGpu);
-      entityGpu.tilemapSignature = signature;
-      if (entityGpu.vertexByteLength > entityGpu.vertexBufferSize) {
-        getExtensionGPUResourceTracker(this.engine)?.untrackBuffer(entityGpu.vertexBuffer);
-        entityGpu.vertexBuffer.destroy();
-        entityGpu.vertexBufferSize = Math.max(entityGpu.vertexByteLength, entityGpu.vertexBufferSize * 2);
-        entityGpu.vertexBuffer = device.createBuffer({
-          size: entityGpu.vertexBufferSize,
-          usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-        });
-        getExtensionGPUResourceTracker(this.engine)?.trackBuffer(entityGpu.vertexBuffer, 'Tilemap2DRenderer.vertexBuffer', entityGpu.vertexBufferSize);
-      }
-      if (entityGpu.vertexByteLength > 0) {
-        device.queue.writeBuffer(
-          entityGpu.vertexBuffer,
-          0,
-          entityGpu.vertexData.buffer as ArrayBuffer,
-          entityGpu.vertexData.byteOffset,
-          entityGpu.vertexByteLength,
-        );
-      }
-    }
-
-    if (entityGpu.vertexCount === 0) return;
-
-    writeObjectMatrixIfChanged(device.queue, entityGpu.objectGpu, worldMatrix);
-
-    passEncoder.setPipeline(this.getPipeline());
-    passEncoder.setBindGroup(0, this.cameraGpu.bindGroup);
-    passEncoder.setBindGroup(1, entityGpu.objectGpu.bindGroup);
-    passEncoder.setVertexBuffer(0, entityGpu.vertexBuffer);
-    passEncoder.draw(entityGpu.vertexCount);
+  if(overflow.length){
+   const signature=state.fullRevision+':'+overflow.map(chunk=>chunk.key+':'+(state.dirty.get(chunk.key)??0)).join(',')+':'+atlas;
+   let stream=entity.streams.find(value=>value.map===map&&value.signature===signature);
+   if(!stream){stream=entity.streams.find(value=>!value.gpu?.leases.size);if(!stream){if(entity.streams.length>=32)throw unavailable();stream=this.slot();entity.streams.push(stream);}this.upload(stream,map,overflow,context);stream.signature=signature;this.counters.workingBuilds++;}
+   this.draw(pass,stream,context);
   }
-
-  private computeSignature(tilemap: Tilemap2DComponent): string {
-    const cached = this.signatureCache.get(tilemap);
-    if (cached && cached.version === tilemap.version) {
-      return cached.signature;
-    }
-
-    const signature = String(tilemap.version);
-    this.signatureCache.set(tilemap, {
-      version: tilemap.version,
-      signature,
-    });
-    return signature;
-  }
-
-  private buildVertices(tilemap: Tilemap2DComponent, entityGpu: EntityGpu): void {
-    let count = 0;
-    for (const cell of tilemap.cells) {
-      if (cell > 0) count++;
-    }
-    if (count === 0) {
-      entityGpu.vertexByteLength = 0;
-      entityGpu.vertexCount = 0;
-      return;
-    }
-
-    const requiredFloats = count * 6 * 6;
-    if (entityGpu.vertexData.length < requiredFloats) {
-      entityGpu.vertexData = new Float32Array(Math.max(requiredFloats, entityGpu.vertexData.length * 2, 36));
-    }
-    const vertices = entityGpu.vertexData;
-    let offset = 0;
-    const gap = tilemap.gap;
-    const w = Math.max(0, tilemap.cellWidth - gap);
-    const h = Math.max(0, tilemap.cellHeight - gap);
-
-    const push = (x: number, y: number, color: readonly number[]) => {
-      vertices[offset++] = x;
-      vertices[offset++] = y;
-      vertices[offset++] = color[0] ?? 1;
-      vertices[offset++] = color[1] ?? 1;
-      vertices[offset++] = color[2] ?? 1;
-      vertices[offset++] = color[3] ?? 1;
-    };
-
-    for (let row = 0; row < tilemap.rows; row++) {
-      for (let column = 0; column < tilemap.columns; column++) {
-        const value = tilemap.getCell(column, row);
-        if (value <= 0) continue;
-        const color = tilemap.palette[value] ?? tilemap.palette[1] ?? [1, 1, 1, 1];
-        const x0 = tilemap.originX + column * tilemap.cellWidth + gap * 0.5;
-        const y0 = tilemap.originY + row * tilemap.cellHeight + gap * 0.5;
-        const x1 = x0 + w;
-        const y1 = y0 + h;
-        push(x0, y0, color);
-        push(x1, y0, color);
-        push(x1, y1, color);
-        push(x0, y0, color);
-        push(x1, y1, color);
-        push(x0, y1, color);
-      }
-    }
-    entityGpu.vertexByteLength = requiredFloats * 4;
-    entityGpu.vertexCount = count * 6;
-  }
-
-  private getPipeline(): GPURenderPipeline {
-    const depthFormat = this.engine.getDepthFormat(this.reverseZ);
-    const key = (this.reverseZ ? 1 : 0) | ((this.msaaSamples > 1 ? 1 : 0) << 1);
-    let pipeline = this.sharedGpu.pipelineCache.get(key);
-    if (pipeline) return pipeline;
-
-    const device = requireEngineDevice(this.engine);
-    const { format } = this.engine;
-    const created = device.createRenderPipeline({
-      layout: this.pipelineLayout,
-      vertex: {
-        module: this.shaderModule,
-        entryPoint: 'vs_main',
-        buffers: [{
-          arrayStride: 24,
-          attributes: [
-            { shaderLocation: 0, offset: 0, format: 'float32x2' },
-            { shaderLocation: 1, offset: 8, format: 'float32x4' },
-          ],
-        }],
-      },
-      fragment: {
-        module: this.shaderModule,
-        entryPoint: 'fs_main',
-        targets: [{
-          format,
-          blend: {
-            color: { srcFactor: 'src-alpha', dstFactor: 'one-minus-src-alpha', operation: 'add' },
-            alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha', operation: 'add' },
-          },
-        }],
-      },
-      primitive: { topology: 'triangle-list', cullMode: 'none' },
-      depthStencil: {
-        format: depthFormat,
-        depthWriteEnabled: false,
-        depthCompare: 'always',
-      },
-      multisample: { count: this.msaaSamples },
-    });
-    this.sharedGpu.pipelineCache.set(key, created);
-    return created;
-  }
-
-  destroy(): void {
-    if (this.cameraGpu) destroyCamera2DGpu(this.cameraGpu);
-    for (const entity of this.entityCache.values()) this.destroyEntityGpu(entity);
-    this.entityCache.clear();
-  }
-
-  private destroyEntityGpu(entity: EntityGpu): void {
-    destroyObject2DGpu(entity.objectGpu);
-    getExtensionGPUResourceTracker(this.engine)?.untrackBuffer(entity.vertexBuffer);
-    entity.vertexBuffer.destroy();
-  }
+ }
+ private draw(pass:GPURenderPassEncoder,slot:VertexSlot,context:RenderCommandContext):void {if(!slot.count||!slot.gpu)return;this.owner.use(slot.gpu,context);pass.setVertexBuffer(0,slot.gpu.buffer);pass.draw(slot.count);this.counters.draws++;}
+ private pipeline(atlas:boolean):GPURenderPipeline {
+  const format=this.colorFormat??this.engine.format,depth=this.engine.getDepthFormat(this.reverseZ),key=[format,depth,this.msaaSamples,atlas].join(':');
+  let result=this.shared.pipelines.get(key);if(result)return result;const module=atlas?this.shared.atlas:this.shared.palette;
+  result=this.device.createRenderPipeline({layout:atlas?this.shared.atlasLayout:this.shared.paletteLayout,vertex:{module,entryPoint:'vs_main',buffers:[{arrayStride:atlas?32:24,attributes:atlas?[{shaderLocation:0,offset:0,format:'float32x2'},{shaderLocation:1,offset:8,format:'float32x2'},{shaderLocation:2,offset:16,format:'float32x4'}]:[{shaderLocation:0,offset:0,format:'float32x2'},{shaderLocation:1,offset:8,format:'float32x4'}]}]},fragment:{module,entryPoint:'fs_main',targets:[{format,blend:{color:{srcFactor:atlas?'one':'src-alpha',dstFactor:'one-minus-src-alpha',operation:'add'},alpha:{srcFactor:'one',dstFactor:'one-minus-src-alpha',operation:'add'}}}]},primitive:{topology:'triangle-list',cullMode:'none'},depthStencil:{format:depth,depthWriteEnabled:false,depthCompare:'always'},multisample:{count:this.msaaSamples}});
+  this.shared.pipelines.set(key,result);if(this.shared.pipelines.size>32)this.shared.pipelines.delete(this.shared.pipelines.keys().next().value!);return result;
+ }
+ releaseEntitiesNotIn(live:ReadonlySet<number>):void {for(const[id,entity]of this.entityCache)if(!live.has(id)){for(const slot of [...entity.pool,...entity.streams])if(slot.gpu)this.owner.retire(slot.gpu);for(const uniform of entity.objects)this.owner.retire(uniform.gpu);this.entityCache.delete(id);}}
+ get stats(){let residentChunks=0,workingBytes=0,residentBytes=0,cpuVertexBytes=0,cpuMapBytes=0,dirtyChunks=0,transformEntries=0;const maps=new Set<Tilemap2DComponent>();for(const value of this.entityCache.values()){residentChunks+=value.cache.size;for(const slot of value.pool){residentBytes+=slot.gpu?.bytes??0;cpuVertexBytes+=slot.data.byteLength;if(slot.map)maps.add(slot.map);}for(const slot of value.streams){workingBytes+=slot.gpu?.bytes??0;cpuVertexBytes+=slot.data.byteLength;if(slot.map)maps.add(slot.map);}}for(const map of maps){cpuMapBytes+=map.cells.byteLength;dirtyChunks+=tilemapState(map).dirty.size;transformEntries+=tilemapState(map).transforms.size;}return {...this.counters,residentChunks,residentBytes,workingBytes,cpuVertexBytes,cpuMapBytes,dirtyChunks,transformEntries,...this.owner.stats};}
+ destroy():void {if(!this.initialized)return;this.owner.destroy();this.entityCache.clear();this.cameras=[];this.initialized=false;}
 }

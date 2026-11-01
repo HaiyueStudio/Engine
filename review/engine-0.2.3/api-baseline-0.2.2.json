@@ -1,0 +1,1028 @@
+{
+  "schemaVersion": 1,
+  "purpose": "G01 frozen 0.2.2 affected API subset; not a replacement live baseline",
+  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
+  "sourcePath": "review/baselines/api-surface.json",
+  "sourceSha256": "9647c23bc6edc9948a99b79fac75c0ed1001a6b0deb37091d0cced56a65a8351",
+  "packages": {
+    "@haiyue/engine": {
+      "entrypoints": {
+        ".": {
+          "source": "engine/src/index.ts",
+          "exports": [
+            {
+              "name": "BasicMaterial",
+              "kind": "value"
+            },
+            {
+              "name": "Camera2D",
+              "kind": "value"
+            },
+            {
+              "name": "Camera3D",
+              "kind": "value"
+            },
+            {
+              "name": "CartesianTransform3D",
+              "kind": "value"
+            },
+            {
+              "name": "ColorSRGB",
+              "kind": "value"
+            },
+            {
+              "name": "Component",
+              "kind": "value"
+            },
+            {
+              "name": "createBox3D",
+              "kind": "value"
+            },
+            {
+              "name": "createPlane3D",
+              "kind": "value"
+            },
+            {
+              "name": "createSphere3D",
+              "kind": "value"
+            },
+            {
+              "name": "DirectionalLight",
+              "kind": "value"
+            },
+            {
+              "name": "EngineError",
+              "kind": "value"
+            },
+            {
+              "name": "EngineErrorCode",
+              "kind": "value"
+            },
+            {
+              "name": "Entity",
+              "kind": "value"
+            },
+            {
+              "name": "EnvironmentLight",
+              "kind": "value"
+            },
+            {
+              "name": "Geometry2D",
+              "kind": "value"
+            },
+            {
+              "name": "Geometry3D",
+              "kind": "value"
+            },
+            {
+              "name": "HaiyueEngine",
+              "kind": "value"
+            },
+            {
+              "name": "HaiyueEngineOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Material2D",
+              "kind": "value"
+            },
+            {
+              "name": "Mesh2D",
+              "kind": "value"
+            },
+            {
+              "name": "Mesh3D",
+              "kind": "value"
+            },
+            {
+              "name": "OrbitControl",
+              "kind": "value"
+            },
+            {
+              "name": "PbrMaterial",
+              "kind": "value"
+            },
+            {
+              "name": "RenderProfileName",
+              "kind": "type"
+            },
+            {
+              "name": "Scene",
+              "kind": "value"
+            },
+            {
+              "name": "SceneOptions",
+              "kind": "type"
+            },
+            {
+              "name": "SphericalTransform3D",
+              "kind": "value"
+            },
+            {
+              "name": "System",
+              "kind": "value"
+            },
+            {
+              "name": "Transform2D",
+              "kind": "value"
+            },
+            {
+              "name": "World",
+              "kind": "value"
+            }
+          ]
+        },
+        "./gui": {
+          "source": "engine/src/gui.ts",
+          "exports": [
+            {
+              "name": "containsPoint",
+              "kind": "value"
+            },
+            {
+              "name": "DEFAULT_GUI_THEME",
+              "kind": "value"
+            },
+            {
+              "name": "deserializeGuiElement",
+              "kind": "value"
+            },
+            {
+              "name": "deserializeGuiRoot",
+              "kind": "value"
+            },
+            {
+              "name": "GuiActionEvent",
+              "kind": "type"
+            },
+            {
+              "name": "GuiBatch",
+              "kind": "value"
+            },
+            {
+              "name": "GuiButton",
+              "kind": "value"
+            },
+            {
+              "name": "GuiButtonOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiCheckbox",
+              "kind": "value"
+            },
+            {
+              "name": "GuiCheckboxOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiColorPicker",
+              "kind": "value"
+            },
+            {
+              "name": "GuiColorPickerOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDeserializeOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDirtyFlags",
+              "kind": "value"
+            },
+            {
+              "name": "GuiDragSession",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDragSource",
+              "kind": "type"
+            },
+            {
+              "name": "GuiDropTarget",
+              "kind": "type"
+            },
+            {
+              "name": "GuiElement",
+              "kind": "value"
+            },
+            {
+              "name": "GuiElementOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiFocusManager",
+              "kind": "value"
+            },
+            {
+              "name": "GuiFocusMode",
+              "kind": "type"
+            },
+            {
+              "name": "GuiFocusOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiFontOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiHelpDialog",
+              "kind": "value"
+            },
+            {
+              "name": "GuiHelpDialogOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiImage",
+              "kind": "value"
+            },
+            {
+              "name": "GuiImageBatch",
+              "kind": "value"
+            },
+            {
+              "name": "GuiImageCommand",
+              "kind": "type"
+            },
+            {
+              "name": "GuiImageOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiImageRenderer",
+              "kind": "value"
+            },
+            {
+              "name": "GuiImageSource",
+              "kind": "type"
+            },
+            {
+              "name": "GuiInput",
+              "kind": "value"
+            },
+            {
+              "name": "GuiInputOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiInvalidation",
+              "kind": "type"
+            },
+            {
+              "name": "GuiInvalidationReason",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLabel",
+              "kind": "value"
+            },
+            {
+              "name": "GuiLabelOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLabelTextAlign",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLayoutDelegate",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLength",
+              "kind": "type"
+            },
+            {
+              "name": "GuiMeasureConstraint",
+              "kind": "type"
+            },
+            {
+              "name": "GuiModal",
+              "kind": "value"
+            },
+            {
+              "name": "GuiModalCloseHandler",
+              "kind": "type"
+            },
+            {
+              "name": "GuiModalCloseReason",
+              "kind": "type"
+            },
+            {
+              "name": "GuiModalHandler",
+              "kind": "type"
+            },
+            {
+              "name": "GuiModalOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiNineSlice",
+              "kind": "value"
+            },
+            {
+              "name": "GuiNineSliceOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiPointerEvent",
+              "kind": "type"
+            },
+            {
+              "name": "GuiPointerFilter",
+              "kind": "type"
+            },
+            {
+              "name": "GuiPointerHandler",
+              "kind": "type"
+            },
+            {
+              "name": "GuiProgress",
+              "kind": "value"
+            },
+            {
+              "name": "GuiProgressOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiRadio",
+              "kind": "value"
+            },
+            {
+              "name": "GuiRadioOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiRect",
+              "kind": "type"
+            },
+            {
+              "name": "GuiRenderer",
+              "kind": "value"
+            },
+            {
+              "name": "GuiRgba",
+              "kind": "type"
+            },
+            {
+              "name": "GuiRoot",
+              "kind": "value"
+            },
+            {
+              "name": "GuiRootOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiScrollView",
+              "kind": "value"
+            },
+            {
+              "name": "GuiScrollViewOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSelect",
+              "kind": "value"
+            },
+            {
+              "name": "GuiSelectOption",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSelectOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSerializedElement",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSerializedElementType",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSerializedRoot",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSerializedValue",
+              "kind": "type"
+            },
+            {
+              "name": "GuiShapeCommand",
+              "kind": "type"
+            },
+            {
+              "name": "GuiShapeRenderer",
+              "kind": "value"
+            },
+            {
+              "name": "GuiSkin",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSlider",
+              "kind": "value"
+            },
+            {
+              "name": "GuiSliderOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiStyle",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSwitch",
+              "kind": "value"
+            },
+            {
+              "name": "GuiSwitchOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSystem",
+              "kind": "value"
+            },
+            {
+              "name": "GuiSystemOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTextBatch",
+              "kind": "value"
+            },
+            {
+              "name": "GuiTextCommand",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTextComposition",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTextEdit",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTextInputHost",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTextInputSession",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTextRenderer",
+              "kind": "value"
+            },
+            {
+              "name": "GuiTheme",
+              "kind": "type"
+            },
+            {
+              "name": "GuiThemeResource",
+              "kind": "value"
+            },
+            {
+              "name": "GuiThemeState",
+              "kind": "type"
+            },
+            {
+              "name": "GuiToast",
+              "kind": "value"
+            },
+            {
+              "name": "GuiToastOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTooltip",
+              "kind": "value"
+            },
+            {
+              "name": "GuiTooltipOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTooltipPlacement",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTree",
+              "kind": "value"
+            },
+            {
+              "name": "GuiTreeNode",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTreeOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTreeVisibleNode",
+              "kind": "type"
+            },
+            {
+              "name": "GuiValueChangeHandler",
+              "kind": "type"
+            },
+            {
+              "name": "hitTestGui",
+              "kind": "value"
+            },
+            {
+              "name": "measureGuiTextWidth",
+              "kind": "value"
+            },
+            {
+              "name": "parseGuiColor",
+              "kind": "value"
+            },
+            {
+              "name": "resolveGuiLength",
+              "kind": "value"
+            },
+            {
+              "name": "serializeGuiElement",
+              "kind": "value"
+            },
+            {
+              "name": "serializeGuiRoot",
+              "kind": "value"
+            },
+            {
+              "name": "withGuiAlpha",
+              "kind": "value"
+            }
+          ]
+        },
+        "./input": {
+          "source": "engine/src/input.ts",
+          "exports": [
+            {
+              "name": "InputActionBindings",
+              "kind": "type"
+            },
+            {
+              "name": "InputActionSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "InputMap",
+              "kind": "value"
+            }
+          ]
+        },
+        "./physics": {
+          "source": "engine/src/physics.ts",
+          "exports": [
+            {
+              "name": "Physics2DBody",
+              "kind": "value"
+            },
+            {
+              "name": "Physics2DBodyOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DBodyType",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DContactEvent",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DJoint",
+              "kind": "value"
+            },
+            {
+              "name": "Physics2DJointOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DJointType",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DRaycastResult",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DResourceSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DShapeType",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DSystem",
+              "kind": "value"
+            },
+            {
+              "name": "Physics2DSystemOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DTo3DPlane",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DTo3DRotationAxis",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DTo3DSource",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DTo3DTransformSync",
+              "kind": "value"
+            },
+            {
+              "name": "Physics2DTo3DTransformSyncOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DTo3DTransformSyncSystem",
+              "kind": "value"
+            },
+            {
+              "name": "Physics2DTo3DTransformSyncSystemOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBody",
+              "kind": "value"
+            },
+            {
+              "name": "Physics3DBodyOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBodyRef",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBodyType",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBuoyancy",
+              "kind": "value"
+            },
+            {
+              "name": "Physics3DBuoyancyOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBuoyancySystem",
+              "kind": "value"
+            },
+            {
+              "name": "Physics3DBuoyancySystemOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DContactEvent",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DDragOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DGravitySource",
+              "kind": "value"
+            },
+            {
+              "name": "Physics3DGravitySourceOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DGravitySystem",
+              "kind": "value"
+            },
+            {
+              "name": "Physics3DGravitySystemOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DJoint",
+              "kind": "value"
+            },
+            {
+              "name": "Physics3DJointOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DJointTarget",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DJointType",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DRaycastResult",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DResourceSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DShapeType",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DSystem",
+              "kind": "value"
+            },
+            {
+              "name": "Physics3DSystemOptions",
+              "kind": "type"
+            }
+          ]
+        },
+        "./physics/backend": {
+          "source": "engine/src/physics/backend.ts",
+          "exports": [
+            {
+              "name": "createBox2DPhysics2DBackend",
+              "kind": "value"
+            },
+            {
+              "name": "createRapierPhysics3DBackend",
+              "kind": "value"
+            },
+            {
+              "name": "MutablePhysics2DBodyTransform",
+              "kind": "type"
+            },
+            {
+              "name": "MutablePhysics2DVector",
+              "kind": "type"
+            },
+            {
+              "name": "MutablePhysics3DBodyTransform",
+              "kind": "type"
+            },
+            {
+              "name": "MutablePhysics3DQuaternion",
+              "kind": "type"
+            },
+            {
+              "name": "MutablePhysics3DVector",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DBackend",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DBackendBodyDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DBackendColliderDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DBackendDistanceJointDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DBackendJointDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DBackendMouseJointDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DBackendRevoluteJointDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DBackendWorldOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DBodyHandle",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DBodyRef",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DCapabilities",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DJointHandle",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DJointTarget",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DMouseJointOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DVectorLike",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DWorldDriver",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBackend",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBackendBodyDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBackendColliderDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBackendDragDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBackendFixedJointDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBackendJointDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBackendPrismaticJointDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBackendRevoluteJointDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBackendRopeJointDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBackendSphericalJointDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBackendSpringJointDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBackendWorldOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DBodyHandle",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DCapabilities",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DDragHandle",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DJointHandle",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DQuaternionLike",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DRayCastDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DRayHit",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DVectorLike",
+              "kind": "type"
+            },
+            {
+              "name": "Physics3DWorldDriver",
+              "kind": "type"
+            }
+          ]
+        }
+      }
+    },
+    "@haiyue/extensions": {
+      "entrypoints": {
+        "./gui-layout": {
+          "source": "extensions/src/gui-layout.ts",
+          "exports": [
+            {
+              "name": "attachGuiLayout",
+              "kind": "value"
+            },
+            {
+              "name": "createGuiContainer",
+              "kind": "value"
+            },
+            {
+              "name": "GuiContainerPreset",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLayoutBinding",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLayoutMeasurement",
+              "kind": "type"
+            },
+            {
+              "name": "GuiLayoutOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiSplitPanel",
+              "kind": "value"
+            },
+            {
+              "name": "GuiSplitPanelOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTabContainer",
+              "kind": "value"
+            },
+            {
+              "name": "GuiTabContainerOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTabPage",
+              "kind": "type"
+            }
+          ]
+        },
+        "./tilemap": {
+          "source": "extensions/src/tilemap.ts",
+          "exports": [
+            {
+              "name": "createTilemapPlugin",
+              "kind": "value"
+            },
+            {
+              "name": "Tilemap2DComponent",
+              "kind": "value"
+            },
+            {
+              "name": "Tilemap2DComponentOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Tilemap2DRenderSystem",
+              "kind": "value"
+            },
+            {
+              "name": "Tilemap2DRenderSystemOptions",
+              "kind": "type"
+            },
+            {
+              "name": "TilemapCellValue",
+              "kind": "type"
+            },
+            {
+              "name": "TilemapPaletteColor",
+              "kind": "type"
+            },
+            {
+              "name": "TilemapPluginOptions",
+              "kind": "type"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

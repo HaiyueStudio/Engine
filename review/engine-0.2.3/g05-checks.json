@@ -1,0 +1,1089 @@
+{
+  "schemaVersion": 1,
+  "goal": "g05-camera2d",
+  "goalStatus": "complete",
+  "generatedAt": "2026-10-31T05:59:00.391Z",
+  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
+  "workingTree": "Scoped G01–G05 work remains uncommitted. Current source snapshots, installed-file hashes and deterministic tarball identities bind the evidence; HEAD and index are unchanged.",
+  "runtimeFeaturesImplemented": true,
+  "releaseQualified": false,
+  "publishingIncluded": false,
+  "publicationPerformed": false,
+  "baselinePromoted": false,
+  "defaultBranchChanged": false,
+  "apiBaselineUpdatedWithinFrozenAdmission": true,
+  "performanceBaselinesPromoted": false,
+  "summary": {
+    "newFocusedTests": 27,
+    "focusedAndRelatedRegressionTests": 78,
+    "workspaceTests": 2506,
+    "catalogTests": 7,
+    "builtExampleTargets": 106,
+    "deterministicPackages": 4,
+    "independentConsumers": 45,
+    "nativeChecksPerMsaa": [
+      {
+        "samples": 1,
+        "checks": 87
+      },
+      {
+        "samples": 4,
+        "checks": 87
+      }
+    ],
+    "existingRegionalPixelCases": 12,
+    "cameraConsumerGzipBytes": 4422,
+    "cameraConsumerMaxGzipBytes": 5300,
+    "sourceFiles": 47,
+    "historicalRecordedFilesPreserved": 314
+  },
+  "requirements": [
+    {
+      "id": "one-optional-frozen-camera-controller",
+      "status": "verified-for-g05",
+      "implementation": [
+        "extensions/src/camera2d.ts",
+        "extensions/src/camera2d/types.ts",
+        "extensions/src/camera2d/Camera2DController.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/api-admission.json",
+          "bytes": 568,
+          "sha256": "e83b4d2afad37756ccdf2a4752c89d61c9bc215654fa3fe2cd526d023f2b5bfb"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/final-feature-candidate/candidate.json",
+          "bytes": 13830,
+          "sha256": "e1f82e3eff5adfa1441b7753ed20d9fbfd32816dc2aae38cfa20d170df3aa47b"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/preflight-focused-tests.log",
+          "bytes": 8227,
+          "sha256": "f3e3e77bf6ef5a675561d2d9bcaf0ae5350a35f7ad444944840cff3f64d09bcf"
+        }
+      ],
+      "conclusion": "Exactly four frozen camera2d exports. Reuses original Camera2D/Transform2D identities; no second camera/projection class, default scene installation or public Engine root change. The caller explicitly drives update; no input sampler, timer, listener or physics clock is created."
+    },
+    {
+      "id": "pure-follow-math-deadzone-damping-bounds",
+      "status": "verified-for-g05",
+      "implementation": [
+        "extensions/src/camera2d/follow.ts",
+        "extensions/src/camera2d/Camera2DController.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/preflight-focused-tests.log",
+          "bytes": 8227,
+          "sha256": "f3e3e77bf6ef5a675561d2d9bcaf0ae5350a35f7ad444944840cff3f64d09bcf"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/native-final-msaa-1/result.json",
+          "bytes": 59613,
+          "sha256": "a70374ad472a7e1a01532df2973acacb501c602f7f185cfadcc50a4e76cd38ef"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/native-final-msaa-4/result.json",
+          "bytes": 59705,
+          "sha256": "4dde82b097c9e1800b850ed31e8c9327d11bfb0eb1dfb7e3dd89e26118143d75"
+        }
+      ],
+      "conclusion": "Pure follow math is separated from ECS binding. Exponential 8/s default damping, zero-damping snap, two-axis dead zone, finite deltas, stationary-target analytical 30/60/120/144 Hz and irregular schedules pass. Bounds cover the original viewport footprint, smaller levels, zoom, resize, orientation/scale and planar parents."
+    },
+    {
+      "id": "borrowed-coordinate-and-transform-owners",
+      "status": "verified-for-g05",
+      "implementation": [
+        "extensions/src/camera2d/Camera2DController.ts",
+        "extensions/src/utils/camera2d.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/preflight-focused-tests.log",
+          "bytes": 8227,
+          "sha256": "f3e3e77bf6ef5a675561d2d9bcaf0ae5350a35f7ad444944840cff3f64d09bcf"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/final-input-audit.json",
+          "bytes": 92664,
+          "sha256": "4901b5b05c6be5902c0d4520d1ed973edac130346fc08c4c0437c5215fe6addf"
+        }
+      ],
+      "conclusion": "World-space targets use the existing ECS transform store and original hierarchy matrices. The extension drawing helper now reads the original Transform2D as well as legacy 3D transforms, using the same core store. Original camera/transform/projection/FrameLoop source and all G04 character/physics runtime sources remain byte-identical."
+    },
+    {
+      "id": "presentation-interpolation-reset-and-time-boundary",
+      "status": "verified-for-g05",
+      "implementation": [
+        "extensions/src/camera2d/Camera2DController.ts",
+        "examples/camera2d/application.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/preflight-focused-tests.log",
+          "bytes": 8227,
+          "sha256": "f3e3e77bf6ef5a675561d2d9bcaf0ae5350a35f7ad444944840cff3f64d09bcf"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/native-final-msaa-1/result.json",
+          "bytes": 59613,
+          "sha256": "a70374ad472a7e1a01532df2973acacb501c602f7f185cfadcc50a4e76cd38ef"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/native-final-msaa-4/result.json",
+          "bytes": 59705,
+          "sha256": "4dde82b097c9e1800b850ed31e8c9327d11bfb0eb1dfb7e3dd89e26118143d75"
+        }
+      ],
+      "conclusion": "Optional previous/current/alpha data is borrowed directly from its sole owner; target/physics data is never written. Logical position and bounded seeded shake offset stay separate. Delta zero does not sample or advance; target switching, long frames, explicit reset, disabled/resume and actual device recovery pass. The example retains raw/applied startup deltas and clamps only finite negative engine deltas at the adapter boundary."
+    },
+    {
+      "id": "bounded-lifetime-and-borrowed-resource-disposal",
+      "status": "verified-for-g05",
+      "implementation": [
+        "extensions/src/camera2d/Camera2DController.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/preflight-focused-tests.log",
+          "bytes": 8227,
+          "sha256": "f3e3e77bf6ef5a675561d2d9bcaf0ae5350a35f7ad444944840cff3f64d09bcf"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/native-final-msaa-1/result.json",
+          "bytes": 59613,
+          "sha256": "a70374ad472a7e1a01532df2973acacb501c602f7f185cfadcc50a4e76cd38ef"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/native-final-msaa-4/result.json",
+          "bytes": 59705,
+          "sha256": "4dde82b097c9e1800b850ed31e8c9327d11bfb0eb1dfb7e3dd89e26118143d75"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/lifecycle-before-fix.log",
+          "bytes": 4290,
+          "sha256": "35f4996877cd7afd9955efcd524b1df40e9a38ebd7d572a697d4eb7de9b3fbfc"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/lifecycle-after-fix.log",
+          "bytes": 2155,
+          "sha256": "8f2fc26370523968f0976ae559a710d696cc358e45160d53e5dc75898b581b41"
+        }
+      ],
+      "conclusion": "Duplicate controllers and invalid inputs fail before claiming the camera. Disposal releases callbacks and camera/component references, removes its own offset without clobbering a newer external transform, and permits another owner. Destroy/replacement detaches on update; no borrowed entity, camera, World or engine is destroyed by the factory."
+    },
+    {
+      "id": "actual-installed-public-consumer-and-lightweight-closure",
+      "status": "verified-for-g05",
+      "implementation": [
+        "extensions/test/camera2d-candidate.mjs",
+        "scripts/fixtures/engine-consumers/extensions-camera2d.mjs"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/public-packages/public-packages.json",
+          "bytes": 156174,
+          "sha256": "958c3fb2a9eb68e891639391d0358dd0a208b1940d3555af66de6a1b71222879"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/final-feature-candidate/candidate.json",
+          "bytes": 13830,
+          "sha256": "e1f82e3eff5adfa1441b7753ed20d9fbfd32816dc2aae38cfa20d170df3aa47b"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/closure-initial.json",
+          "bytes": 486,
+          "sha256": "28d2aae6bb114980e0527d676d15aa21cede62a5664dcf99237c7e00e62a0b1c"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/final-input-audit.json",
+          "bytes": 92664,
+          "sha256": "4901b5b05c6be5902c0d4520d1ed973edac130346fc08c4c0437c5215fe6addf"
+        }
+      ],
+      "conclusion": "Exact deterministic tarballs are installed normally. All installed package files match their tarballs; strict TypeScript with skipLibCheck false checks the frozen factory in both directions, and ESM uses the original camera. The focused closure excludes GUI, 3D implementations, physics backends and OpenType. Only its new finite 5,300-byte capacity is admitted; every old package/consumer budget, existing API and capability reserve is unchanged."
+    },
+    {
+      "id": "actual-character-fixed-gui-and-region-composition",
+      "status": "verified-for-g05",
+      "implementation": [
+        "examples/camera2d/application.ts",
+        "engine/src/renderer/Mesh2DRenderer.ts",
+        "engine/src/systems/Mesh2DRenderSystem.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/preflight-focused-tests.log",
+          "bytes": 8227,
+          "sha256": "f3e3e77bf6ef5a675561d2d9bcaf0ae5350a35f7ad444944840cff3f64d09bcf"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/native-final-msaa-1/result.json",
+          "bytes": 59613,
+          "sha256": "a70374ad472a7e1a01532df2973acacb501c602f7f185cfadcc50a4e76cd38ef"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/native-final-msaa-4/result.json",
+          "bytes": 59705,
+          "sha256": "4dde82b097c9e1800b850ed31e8c9327d11bfb0eb1dfb7e3dd89e26118143d75"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/existing-regions-final/result.json",
+          "bytes": 64130,
+          "sha256": "9e380c47fef97fd916140bbf3a40360d1c700674f1556420ebb40e6e47ec9626"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/catalog-final/result.json",
+          "bytes": 13110,
+          "sha256": "904884397689df3b425df45864e2c3f981f8bb0854d284acc48ff2fe482fa502"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/catalog-final/visual-review.json",
+          "bytes": 1023,
+          "sha256": "4f81a25a60ff90cb0c37765f73899a06b406fa816dade62d1624ce85173b8dcf"
+        }
+      ],
+      "conclusion": "Actual 1x and 4x MSAA installed-package scenes pass 87 checks each. Fixed GUI pixels and additional GUI records are exactly zero during camera-only follow/shake; the world changes visibly and the original GUI accepts routed sidebar coordinates. Independent opaque-color and background-color references retain tolerance 2/255. The existing canvas-format coupling is fixed through the original context format, bounded cache key, existing linear/sRGB writers and region-owned descriptor; ordinary canvas clearing and material identities remain. The original twelve regional GUI pixel cases pass against these same installed Engine bytes."
+    },
+    {
+      "id": "production-cohort-and-native-resources",
+      "status": "verified-for-g05",
+      "implementation": [
+        "extensions/test/camera2d-browser.mjs",
+        "extensions/test/camera2d-browser-policy.mjs"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/native-final-msaa-1/result.json",
+          "bytes": 59613,
+          "sha256": "a70374ad472a7e1a01532df2973acacb501c602f7f185cfadcc50a4e76cd38ef"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/native-final-msaa-4/result.json",
+          "bytes": 59705,
+          "sha256": "4dde82b097c9e1800b850ed31e8c9327d11bfb0eb1dfb7e3dd89e26118143d75"
+        }
+      ],
+      "conclusion": "For each MSAA mode: twelve-frame warmup, twenty original-world resource cycles, actual device destroy/recovery and full teardown. No GPU count/byte growth, released-owner residue or world duplication. Region cache remains at most eight regions/64 MiB; working/retiring attachments are recorded separately. Thirty-two real characters plus 128 obstacles and a switching camera run 600 frames in one original world; camera updates change no physical pose and all bodies/colliders/GPU resources end at zero."
+    },
+    {
+      "id": "required-repository-gates-and-preserved-history",
+      "status": "verified-for-g05",
+      "implementation": [],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/preflight-validation.json",
+          "bytes": 1151,
+          "sha256": "f014bcdd5609727ba44942d79e70b0900de8a84ee599ecfd9338da87f2595f3b"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-validation.json",
+          "bytes": 4427,
+          "sha256": "b9255cb98fbbf3b6d48af0b2911d0fa70733831feb5c7b98da90127fdaeb5a62"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/feature-final-validation.json",
+          "bytes": 1434,
+          "sha256": "04b4d7142c482666423129216d6c2e7b49aff0d29081c6007c3bb027c8ccedd6"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/final-input-audit.json",
+          "bytes": 92664,
+          "sha256": "4901b5b05c6be5902c0d4520d1ed973edac130346fc08c4c0437c5215fe6addf"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g05/final-validation/source-snapshot-verification.json",
+          "bytes": 319,
+          "sha256": "18d5e054f5d0713ac36fb4addbaa1a8e83bad7ff93d18d745b4bfbc10d63e6b7"
+        }
+      ],
+      "conclusion": "Focused types and related regressions, required root typecheck/build/test, modules/responsibilities/renderer-prepare, boundaries/docs/API/policy/package checks, manifest example and freshness all pass. G01–G04 recorded files remain at their original or explicitly verified historical snapshot paths. The small current source snapshot is verified file-by-file; originals and all prior failures remain."
+    }
+  ],
+  "validations": [
+    {
+      "id": "engine-types",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/preflight-engine-types.log",
+        "bytes": 50,
+        "sha256": "2abfd7135efe445447194306997aa0379a93ff27c3b3bbf250fd8a602c66f6ca"
+      }
+    },
+    {
+      "id": "extension-types",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/preflight-extension-types.log",
+        "bytes": 451,
+        "sha256": "6abc879b1526ad6130f75a552bfdf8bf34dbd0d997d6671571083524164ab29b"
+      }
+    },
+    {
+      "id": "example-types",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/preflight-example-types.log",
+        "bytes": 69,
+        "sha256": "038779bfa094b4d2484adbe96be9b82edd51b70409844cf95c9ce7dcdb184366"
+      }
+    },
+    {
+      "id": "focused-tests",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/preflight-focused-tests.log",
+        "bytes": 8227,
+        "sha256": "f3e3e77bf6ef5a675561d2d9bcaf0ae5350a35f7ad444944840cff3f64d09bcf"
+      }
+    },
+    {
+      "id": "typecheck",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-typecheck.log",
+        "bytes": 3203,
+        "sha256": "2876210f8a571ec642eb0f4e1de0902aaa349281b0b2e92e29209b44bb2efea2"
+      }
+    },
+    {
+      "id": "build",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-build.log",
+        "bytes": 17615,
+        "sha256": "9e73a72bfde5ebd7f15d17d114940deda71ec0c31408c245c489fa89b21a6677"
+      }
+    },
+    {
+      "id": "test",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-test.log",
+        "bytes": 251118,
+        "sha256": "399885186c42a1e4367c40eb15fc2f2c48e79d8086ae77028f3e1b2cecb8afd1"
+      }
+    },
+    {
+      "id": "modules:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-modules-check.log",
+        "bytes": 180,
+        "sha256": "a0e1b762ab7eb8e3e32eb36124ad24e885029de825491cca8d041e58d01aac78"
+      }
+    },
+    {
+      "id": "responsibilities:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-responsibilities-check.log",
+        "bytes": 259,
+        "sha256": "52b89c966f0ecfb0587d1e565ebbdaa72f1c2a1b9f3867641a1d83adc24f9d1a"
+      }
+    },
+    {
+      "id": "renderer-prepare:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-renderer-prepare-check.log",
+        "bytes": 239,
+        "sha256": "66bbc4f2490a8418f9be4711d93567477ea7181e4289deea3dd116236518591e"
+      }
+    },
+    {
+      "id": "check:boundaries",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-check-boundaries.log",
+        "bytes": 1037,
+        "sha256": "363ef30a3197d364f16db39a5116bf1d5f132b74e8c32eaf2ad604a3892e4545"
+      }
+    },
+    {
+      "id": "docs:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-docs-check.log",
+        "bytes": 706,
+        "sha256": "2c955979d9af2a6ea968214cbcc7f06fac4e2a585beb010e0390ce3fdf210609"
+      }
+    },
+    {
+      "id": "api:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-api-check.log",
+        "bytes": 158,
+        "sha256": "52eedd5d933b1c615111c13ff308d849101edef1c369d56615dbb7d7f107c6a9"
+      }
+    },
+    {
+      "id": "fast-gate-policy:test",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-fast-gate-policy-test.log",
+        "bytes": 2209,
+        "sha256": "ee3f211e6e007517cba326eaa4ed40ac5d5cfdbf01fa13f17e33fe2ea9a4360d"
+      }
+    },
+    {
+      "id": "release:policy:test",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-release-policy-test.log",
+        "bytes": 18872,
+        "sha256": "cab3ee55ae84491823d467a31e0a547279fb2ea8f98db27ad671c235301094dc"
+      }
+    },
+    {
+      "id": "performance-budget:test",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-performance-budget-test.log",
+        "bytes": 34773,
+        "sha256": "3c96dbbfebd533d0f01181fbf7543f7df775b1f9bb7a5dc7f837aa9e46182455"
+      }
+    },
+    {
+      "id": "verify:engine-package",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/repository-final-verify-engine-package.log",
+        "bytes": 8522,
+        "sha256": "2723eebf1f8f90d8e748b8794572dec7509261ed8082cd82343b414105414dcf"
+      }
+    },
+    {
+      "id": "installed-candidate",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/feature-final-installed-candidate.log",
+        "bytes": 154,
+        "sha256": "d492fe0bbe43ff0af65ac986abe5a6a8615e1dd1948440a92f24145264eb0ba8"
+      }
+    },
+    {
+      "id": "native-pair",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/feature-final-native-pair.log",
+        "bytes": 90,
+        "sha256": "e211b3bddd23b7addb07eb3725d53679197fbf96093cc0defa3bc33ad82c26b6"
+      }
+    },
+    {
+      "id": "existing-regions",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/feature-final-existing-regions.log",
+        "bytes": 31,
+        "sha256": "f101957323e6d064efd674b8b3373ede5e1ca4035c9af65587a572c6a19a2cf2"
+      }
+    },
+    {
+      "id": "catalog",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/feature-final-catalog.log",
+        "bytes": 183,
+        "sha256": "0a7f2c3ed06d1536f283e084df8272802bc7a0f6abecf2d69e1900992e8939ea"
+      }
+    },
+    {
+      "id": "freshness",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/feature-final-freshness.log",
+        "bytes": 60,
+        "sha256": "415f59ee65f94f95f2caf3605c1b4ae047b5ada6810de1c241a47d332fef5054"
+      }
+    },
+    {
+      "id": "metadata-docs-final",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/metadata-docs-final.log",
+        "bytes": 724,
+        "sha256": "8a99cfed528d171dd77292becde22d8a44cc76659874d8fa8aa80a1740c20c6c"
+      }
+    },
+    {
+      "id": "metadata-coordination-final",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/metadata-coordination-final.log",
+        "bytes": 200,
+        "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+      }
+    },
+    {
+      "id": "metadata-diff-final",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g05/final-validation/metadata-diff-final.log",
+        "bytes": 114,
+        "sha256": "b0aec28fbf2f5a3a9227b95c645578ee55570e60b3e6ba575ea341bb33c17e90"
+      }
+    }
+  ],
+  "publicEntry": {
+    "subpath": "@haiyue/extensions/camera2d",
+    "exports": [
+      "Camera2DController",
+      "Camera2DControllerOptions",
+      "Camera2DControllerState",
+      "createCamera2DController"
+    ],
+    "rootExportsUnchanged": 30,
+    "localPackageVersions": {
+      "@haiyue/engine": "0.2.2",
+      "@haiyue/extensions": "0.2.2",
+      "@haiyue/animation-spec": "0.2.2"
+    },
+    "versionNote": "Local candidates retain source version 0.2.2, with different bytes from the published 0.2.2 release. G11 owns planned 0.2.3 version integration and formal release qualification."
+  },
+  "device": {
+    "runs": [
+      {
+        "samples": 1,
+        "browser": {
+          "product": "Chrome/156.0.8078.76",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:54155/artifacts/engine-0.2.3/g05/final-validation/native-final-msaa-1/fixture.html?samples=1",
+          "angleBackend": "d3d11",
+          "nativeBackend": true,
+          "presentationMode": "headless",
+          "storageMode": "isolated-memory-context"
+        },
+        "initial": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "device": "",
+          "description": "",
+          "isFallbackAdapter": false
+        },
+        "recovered": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "device": "",
+          "description": "",
+          "isFallbackAdapter": false
+        }
+      },
+      {
+        "samples": 4,
+        "browser": {
+          "product": "Chrome/156.0.8078.76",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "url": "http://127.0.0.1:54239/artifacts/engine-0.2.3/g05/final-validation/native-final-msaa-4/fixture.html?samples=4",
+          "angleBackend": "d3d11",
+          "nativeBackend": true,
+          "presentationMode": "headless",
+          "storageMode": "isolated-memory-context"
+        },
+        "initial": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "device": "",
+          "description": "",
+          "isFallbackAdapter": false
+        },
+        "recovered": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "device": "",
+          "description": "",
+          "isFallbackAdapter": false
+        }
+      }
+    ],
+    "physicalInputQualified": false,
+    "pointerQualification": "Programmatic PointerEvent routing in a real native browser, not physical-user input qualification."
+  },
+  "resourceObservation": {
+    "warmupFrames": 12,
+    "cyclesPerMode": 20,
+    "runs": [
+      {
+        "samples": 1,
+        "baseline": {
+          "resources": 61,
+          "estimatedBytes": 18290432
+        },
+        "finalGpu": {
+          "resources": 0,
+          "estimatedBytes": 0
+        },
+        "worlds": {
+          "activeWorlds": 0,
+          "totalWorlds": 1,
+          "activations": 1,
+          "guiRecords": 3,
+          "resources": {
+            "backendId": "box2d",
+            "bodies": 0,
+            "colliders": 0,
+            "joints": 0,
+            "activeContacts": 0
+          }
+        },
+        "gui": {
+          "pixelDifferences": 0,
+          "worldPixelDifferences": 42888,
+          "litPixels": 7706,
+          "redrawsDuringCameraMove": 0,
+          "physicsUntouched": true,
+          "coordinatesValid": true,
+          "pointerAccepted": true,
+          "floorOracle": true,
+          "floorRgba": [
+            41,
+            74,
+            110,
+            255
+          ],
+          "backgroundOracle": true,
+          "backgroundRgba": [
+            25,
+            25,
+            25,
+            255
+          ],
+          "backgroundExpected": [
+            26,
+            26,
+            26,
+            255
+          ]
+        },
+        "pressure": {
+          "characters": 32,
+          "obstacles": 128,
+          "frames": 600,
+          "beforeDestroy": {
+            "backendId": "box2d",
+            "bodies": 160,
+            "colliders": 160,
+            "joints": 0,
+            "activeContacts": 0
+          },
+          "afterDestroy": {
+            "backendId": "box2d",
+            "bodies": 0,
+            "colliders": 0,
+            "joints": 0,
+            "activeContacts": 0
+          },
+          "createdWorlds": 1,
+          "destroyedWorlds": 1
+        }
+      },
+      {
+        "samples": 4,
+        "baseline": {
+          "resources": 64,
+          "estimatedBytes": 62527232
+        },
+        "finalGpu": {
+          "resources": 0,
+          "estimatedBytes": 0
+        },
+        "worlds": {
+          "activeWorlds": 0,
+          "totalWorlds": 1,
+          "activations": 1,
+          "guiRecords": 3,
+          "resources": {
+            "backendId": "box2d",
+            "bodies": 0,
+            "colliders": 0,
+            "joints": 0,
+            "activeContacts": 0
+          }
+        },
+        "gui": {
+          "pixelDifferences": 0,
+          "worldPixelDifferences": 43150,
+          "litPixels": 7708,
+          "redrawsDuringCameraMove": 0,
+          "physicsUntouched": true,
+          "coordinatesValid": true,
+          "pointerAccepted": true,
+          "floorOracle": true,
+          "floorRgba": [
+            41,
+            74,
+            110,
+            255
+          ],
+          "backgroundOracle": true,
+          "backgroundRgba": [
+            25,
+            25,
+            25,
+            255
+          ],
+          "backgroundExpected": [
+            26,
+            26,
+            26,
+            255
+          ]
+        },
+        "pressure": {
+          "characters": 32,
+          "obstacles": 128,
+          "frames": 600,
+          "beforeDestroy": {
+            "backendId": "box2d",
+            "bodies": 160,
+            "colliders": 160,
+            "joints": 0,
+            "activeContacts": 0
+          },
+          "afterDestroy": {
+            "backendId": "box2d",
+            "bodies": 0,
+            "colliders": 0,
+            "joints": 0,
+            "activeContacts": 0
+          },
+          "createdWorlds": 1,
+          "destroyedWorlds": 1
+        }
+      }
+    ]
+  },
+  "measurementChannels": {
+    "coldStart": "Separate application initialization marks and the first 32 raw/applied frame deltas. These are not the formal fresh-process two-completed-frame/10-second warmup qualification.",
+    "cadence": "Synthetic display-delta schedules prove analytical camera behavior and physics isolation; no claim that a physical monitor ran at 120/144 Hz.",
+    "steady": "Each mode has its own fixed twelve-frame warmup and twenty resource observations, original body/world counts, region-cache bytes, working and retiring bytes, and actual recovery.",
+    "performance": "The 32-character CPU wall observation includes its test loop and queries; elapsed frames and queue completion are separate diagnostic waits. No new noisy microbenchmark budget or formal CPU/GPU timing result is invented. Existing budgets remain; G11 performs combined formal qualification."
+  },
+  "retainedFailures": [
+    {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/focused-1.log",
+      "reason": "Cold parent transform store had no initialized phase; use the original transform store without advancing a World/physics frame. Full matrix comparison treats signed zero numerically equal, preserving every nonzero coefficient."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/examples-typecheck-1.log",
+      "reason": "Initial example omitted required region visible flags; actual typed options corrected."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/native-run-1/result.json",
+      "reason": "Existing FrameLoop can produce a finite negative first delta. The example adapter now preserves raw values and maps finite negatives to zero; the controller still rejects invalid deltas."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/native-run-2/result.json",
+      "reason": "Black regional output; all original assertions retained."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/native-run-3/result.json",
+      "reason": "Raw pixel evidence confirms black GUI/world buffers."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/region-trace-3/result.json",
+      "reason": "Actual validation reports BGRA8Unorm pipeline versus RGBA16Float target, rejecting the whole command buffer; fixed by existing target and color wiring."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/region-trace-1/result.json",
+      "reason": "The first read-only trace attempted a post-instrumentation GPU method wrapper; corrected by the existing pre-device trace pattern."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/lifecycle-before-fix.log",
+      "reason": "Two new boundary regressions reproduce the old behavior: zero-delta suspension was missed, and copying bounds read unrelated enumerable owner fields. Both are corrected without target sampling, transform writes or clock advancement at delta zero."
+    }
+  ],
+  "retainedObservations": [
+    {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/native-pair-1.json",
+      "reason": "Earlier diagnostic passes remain original; final data uses current bytes plus the additional independent background reference and regional descriptor correction."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/native-pair-2.json",
+      "reason": "Pre-admission raw tarball verification before final lifecycle hardening; retained for history. The current result uses newly built deterministic package-gate tarballs."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g05/repository-final-validation.json",
+      "reason": "Initial complete passing repository verification before final lifecycle hardening; all original logs, packages, native results and verified source snapshot remain. The final result uses a new output directory and current packages."
+    }
+  ],
+  "protectedHistory": {
+    "audit": {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/final-input-audit.json",
+      "bytes": 92664,
+      "sha256": "4901b5b05c6be5902c0d4520d1ed973edac130346fc08c4c0437c5215fe6addf"
+    },
+    "sourceSnapshot": {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/source-snapshot.zip",
+      "bytes": 166284,
+      "sha256": "da913d94f4b64f5de940443ca7ed8b82a91712e2f951122ef19764661de788a1"
+    },
+    "sourceSnapshotVerification": {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/source-snapshot-verification.json",
+      "bytes": 319,
+      "sha256": "18d5e054f5d0713ac36fb4addbaa1a8e83bad7ff93d18d745b4bfbc10d63e6b7"
+    },
+    "originalG04Readme": {
+      "path": "artifacts/engine-0.2.3/g05/final-validation/prior-inputs/g04-readme.md",
+      "bytes": 3692,
+      "sha256": "d2b63762bd4c5d7780c723fb7a75c571b4e9b6a83e9cadb672e335cb23b839e1"
+    },
+    "historicalGoals": [
+      "g01",
+      "g02",
+      "g03",
+      "g04"
+    ],
+    "allHistoricalRecordedInputsPreserved": true,
+    "protectedG13Sha256": "0312e5f43ce737c48381d63014a2eb58fda190afaffdbced2869b104a99d3eff",
+    "originalFilesRetained": true
+  },
+  "handoffs": [
+    {
+      "owner": "g11-integration-candidate",
+      "scope": "Combine camera2d with the other frozen capabilities in gameplay-kit, perform planned package/version integration, formal performance/resource/pixel and real-device matrices, full global gate and no-publication rehearsal. G05 does not inherit old release/device qualification or authorize push/tag/npm/Release/Pages."
+    }
+  ],
+  "files": [
+    {
+      "path": "config/engine-package-budget.json",
+      "bytes": 29699,
+      "sha256": "98da47111854257bf89555f8270ca7e504c0575748ad9396d1d61fd342c6785c"
+    },
+    {
+      "path": "config/gameplay-023-contract.json",
+      "bytes": 47325,
+      "sha256": "07ebc65103cc45c6ed9c6333f28ad89066439204348be9d62bdc87fc607c93ca"
+    },
+    {
+      "path": "config/public-api-capability-budgets.json",
+      "bytes": 11014,
+      "sha256": "558cb03096e47dfaa13fe3cb31e3c8f5e8f9ebc6948e41c534847096be2fdebd"
+    },
+    {
+      "path": "docs/api/errors/E_GAMEPLAY_INVALID_INPUT.md",
+      "bytes": 1729,
+      "sha256": "3aee7a8486a09cac003b0f7476408fb5281d6141cff4c6bb34178854e7a7826f"
+    },
+    {
+      "path": "docs/for-ai/adr/0139-engine-023-gameplay-contracts.md",
+      "bytes": 4424,
+      "sha256": "e1f4b4d704b76b4a834d774e0dbf3e23d2b81bf688fdc2a8db2a1f799c63c1cf"
+    },
+    {
+      "path": "engine/src/components/Camera2D.ts",
+      "bytes": 5785,
+      "sha256": "24d69e2dfc07aa0917bec98dcfc19f7c15a994376b2867e02e4ebfdad41598df"
+    },
+    {
+      "path": "engine/src/components/Transform2D.ts",
+      "bytes": 5257,
+      "sha256": "f4fa2c63e84f686b24c0a91e2dbb8939c53d18560cc0eb0586a2a26709f3ff2a"
+    },
+    {
+      "path": "engine/src/frame/FrameData.ts",
+      "bytes": 15906,
+      "sha256": "3ba91e732e2afd148225ed28d0b3dc175f73e702a1cab2a343148b7ff0eefbc7"
+    },
+    {
+      "path": "engine/src/frame/TransformStore.ts",
+      "bytes": 14561,
+      "sha256": "8c0374607c359b2ae5bd49347b86da3180abe5839ec66ec5b40e7aa8a067c2c1"
+    },
+    {
+      "path": "engine/src/physics/Box2DPhysics2DBackend.ts",
+      "bytes": 16313,
+      "sha256": "f03ac1174637e9ae8cd5c9916401fae607620cb525ee6c09c3b269d0ecd8c4e4"
+    },
+    {
+      "path": "engine/src/physics/Box2DShapeCast.ts",
+      "bytes": 8965,
+      "sha256": "1ced01bbdad2301e9c7fdf48c6e5269fe7238d31bc2639286094af1db1949d42"
+    },
+    {
+      "path": "engine/src/physics/FixedStepClock.ts",
+      "bytes": 2100,
+      "sha256": "c60524d54641e6f27a8c88850a1220315781b882721513a470629604149ec02e"
+    },
+    {
+      "path": "engine/src/physics/Physics2DBackend.ts",
+      "bytes": 7464,
+      "sha256": "b21f4674c7c4e082f71b600e029e64a702968d2084574151f3c8f8b0253bab02"
+    },
+    {
+      "path": "engine/src/physics/Physics2DShapeCast.ts",
+      "bytes": 1383,
+      "sha256": "1b8e61fe5bbc520f719731a3417fdf62cb390522f97cd59ee69d7832acab3290"
+    },
+    {
+      "path": "engine/src/physics/Physics2DSystem.ts",
+      "bytes": 32888,
+      "sha256": "0353f33bf5ce81f49d01d0cb23c6b49ac6116f5bb79e5fbda077cec6d5f07ddd"
+    },
+    {
+      "path": "engine/src/physics/Physics3DSystem.ts",
+      "bytes": 32749,
+      "sha256": "c768c6625859367ba5bcd139e7f5acfe3e36471b7eda8bddd4d128b589b4c1bc"
+    },
+    {
+      "path": "engine/src/physics/backend.ts",
+      "bytes": 2035,
+      "sha256": "cc3aa5ff4c5c03e10e89a1307f6cc28a2cb990e82bf1af8fe7efe78d075a1616"
+    },
+    {
+      "path": "engine/src/renderer/Mesh2DRenderer.ts",
+      "bytes": 20892,
+      "sha256": "23362ff530848b4ba9a13c6c3f09a6331d2056ef64cbd54e0973efd7d458b134"
+    },
+    {
+      "path": "engine/src/systems/Mesh2DRenderSystem.ts",
+      "bytes": 7548,
+      "sha256": "9f9abde0e3ce7a20ed9fc86f2f0822e68531c8b3cde236fecc5ede378e0bcd0f"
+    },
+    {
+      "path": "engine/test/mesh2d-target-format.test.mjs",
+      "bytes": 7723,
+      "sha256": "5c63c6e3eb424b9a243b2c31d529fb00858bb9c9249e43897dc78f36fcb8ef43"
+    },
+    {
+      "path": "examples/camera2d/application.ts",
+      "bytes": 9836,
+      "sha256": "3f6d6aea394ef639a82d7db7958de83b02ab283c57900799092dc9086749d135"
+    },
+    {
+      "path": "examples/camera2d/index.html",
+      "bytes": 586,
+      "sha256": "e37893397f5d58563ee2a6940cd6adefce301a766436fecf858d80080bf845e8"
+    },
+    {
+      "path": "examples/camera2d/main.ts",
+      "bytes": 1327,
+      "sha256": "9ca4ef4c5a9405cc24edb33c248a7d0dc41dcdc4d613804943bf65a26936ed99"
+    },
+    {
+      "path": "examples/manifest.json",
+      "bytes": 55369,
+      "sha256": "3c9b1d72d46d45922742f7aef312494093bb3981e72980bf8750529059f30b3e"
+    },
+    {
+      "path": "extensions/README.md",
+      "bytes": 15261,
+      "sha256": "2589b16033f17d1ca5b75521d912a3fa31476d808df30f97b35513042d29074d"
+    },
+    {
+      "path": "extensions/package.json",
+      "bytes": 5702,
+      "sha256": "9203e81f815e8dbc92f7950b13b4cbbbeb5fd58dda4bf927e42be0169fa8a620"
+    },
+    {
+      "path": "extensions/rollup.config.js",
+      "bytes": 1889,
+      "sha256": "da283b47885b61f886f17e6cd57c8baa035762005fbd59b272af0f7e35ace3c9"
+    },
+    {
+      "path": "extensions/src/camera2d.ts",
+      "bytes": 192,
+      "sha256": "4b9df6dcbfb026f0b0e9022fde652577f18f739cbed05f63b948ed4968ee524f"
+    },
+    {
+      "path": "extensions/src/camera2d/Camera2DController.ts",
+      "bytes": 11754,
+      "sha256": "31553afb1e2d2e192302a3f1202ea681235af271b2f1aa2c7c5a55cb156e1697"
+    },
+    {
+      "path": "extensions/src/camera2d/follow.ts",
+      "bytes": 2393,
+      "sha256": "4dff25147cd2d57a5ad0f9322e99738a712951074e7e484b4ff156dd73bf2e16"
+    },
+    {
+      "path": "extensions/src/camera2d/types.ts",
+      "bytes": 878,
+      "sha256": "0547cee8d74b052ea522a9dd0cff0ed0af54328705c3661762faf5a2b5e763aa"
+    },
+    {
+      "path": "extensions/src/character2d.ts",
+      "bytes": 173,
+      "sha256": "f18a5c57a3d142c48563d3919f8700069faaf839755e9180e67ecde66eab2c37"
+    },
+    {
+      "path": "extensions/src/character2d/Character2D.ts",
+      "bytes": 13247,
+      "sha256": "be0574ceb644c315114842e0a82d12d5b4eb99d6a0eb7aeb0d9f5004c85f111f"
+    },
+    {
+      "path": "extensions/src/character2d/types.ts",
+      "bytes": 1047,
+      "sha256": "044432cb645e3a2354afd43f0f50e190b610eb26a363994333c0d66611a076ae"
+    },
+    {
+      "path": "extensions/src/utils/camera2d.ts",
+      "bytes": 3129,
+      "sha256": "6706c6aa7cceab87393c83e3d12d3cd1576d5f73831b85235506c3058b21e8ef"
+    },
+    {
+      "path": "extensions/test/camera2d-browser-gate.mjs",
+      "bytes": 4206,
+      "sha256": "bd4ea9a33345cab3b577829f6f8cd3d85413d2808f41da6a2ca7dc79a88c1980"
+    },
+    {
+      "path": "extensions/test/camera2d-browser-policy.mjs",
+      "bytes": 2744,
+      "sha256": "2a09985da2805a32aab5cde182fdef66019eeedf7ab9c835b55181a79af5cdf6"
+    },
+    {
+      "path": "extensions/test/camera2d-browser-policy.test.mjs",
+      "bytes": 2667,
+      "sha256": "13d53a3ab3a72e2d1f40ed46918ea45ad4fdc1d3bcdbdcc025ae1287f065abe1"
+    },
+    {
+      "path": "extensions/test/camera2d-browser.mjs",
+      "bytes": 13527,
+      "sha256": "ffc7534bac55849d69e3871be57e6c8eb51c8ee7ded290f0a79f72937dc4af99"
+    },
+    {
+      "path": "extensions/test/camera2d-candidate.mjs",
+      "bytes": 2907,
+      "sha256": "76e9304144a7e66a63c3a34a93cd7d26649b4c8d41280e5dd8bd7b90200ef8b2"
+    },
+    {
+      "path": "extensions/test/camera2d.test.mjs",
+      "bytes": 13852,
+      "sha256": "e129573cb40e063feb1944a573130dcea66f90d5b765f3e67d475b678df03c31"
+    },
+    {
+      "path": "extensions/test/helpers/public-feature-candidate.mjs",
+      "bytes": 7227,
+      "sha256": "6138c03b053da1d829271f4ae04ff5aa42fee190923b7b73a5437332daf01bef"
+    },
+    {
+      "path": "review/baselines/api-surface.json",
+      "bytes": 315601,
+      "sha256": "4da436c0468cd565ed758b28cc9521f9cbf87c3c8806a473ea22bc48bc20a6e7"
+    },
+    {
+      "path": "review/engine-0.2.3/README.md",
+      "bytes": 4102,
+      "sha256": "a2a6653c60d81b83fa4e6cb2bbc56ee8691499e105b96bc2695f398632a19356"
+    },
+    {
+      "path": "review/engine-0.2.3/api-contract.d.ts",
+      "bytes": 19620,
+      "sha256": "dd6b53cd8a901905f146bc4c118348e3d08350d6808fe51028a80a52532f3e07"
+    },
+    {
+      "path": "review/engine-0.2.3/contract.md",
+      "bytes": 12895,
+      "sha256": "f4d6912443035836b9295cb38ad7deb8673953abfa475b8cb5e019aac2cec039"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-camera2d.mjs",
+      "bytes": 72,
+      "sha256": "fb420d2a01ffa0d7898cedc28ea91a1d3aff697dea92680bb25988a1243d3364"
+    }
+  ]
+}

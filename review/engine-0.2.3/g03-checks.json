@@ -1,0 +1,661 @@
+{
+  "schemaVersion": 1,
+  "goal": "g03-scene-flow",
+  "goalStatus": "complete",
+  "generatedAt": "2026-10-31T03:33:22.144Z",
+  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
+  "workingTree": "Scoped G03 changes plus preserved uncommitted G01/G02 work; exact sources/configuration archived and hashed. No source/index reset.",
+  "runtimeFeaturesImplemented": true,
+  "releaseQualified": false,
+  "publishingIncluded": false,
+  "publicationPerformed": false,
+  "baselinePromoted": false,
+  "defaultBranchChanged": false,
+  "summary": {
+    "focusedNewTests": 25,
+    "workspaceRuntimeTests": 2441,
+    "catalogTests": 7,
+    "builtFreshExampleTargets": 104,
+    "deterministicPublicPackages": 4,
+    "installedPackageConsumers": 43,
+    "nativeChecks": 202,
+    "productionRequests": 32,
+    "stressRequests": 256,
+    "cancellations": 100,
+    "roundTrips": 20,
+    "peakActualLoaderConcurrency": 4,
+    "factoryClosureGzipBytes": 4235,
+    "newPublicSymbols": 6,
+    "rootExports": 30,
+    "finalGpuResources": 0,
+    "finalEstimatedGpuBytes": 0,
+    "preservedG01G02Records": 238,
+    "preservedG01G02UniqueFiles": 237,
+    "verifiedSnapshotFiles": 34
+  },
+  "requirements": [
+    {
+      "id": "bounded-preparation-and-ordered-bindings",
+      "status": "verified-for-g03",
+      "method": "Use Scene.load without assign, a bounded worker pool, then one assignment per request in declared order after all loads succeed. Keep old Scene.loadMany and synchronous Engine.switchScene source unchanged.",
+      "evidence": [
+        "extensions/test/scene-flow.test.mjs",
+        "engine/test/scene-flow-legacy.test.mjs",
+        "artifacts/engine-0.2.3/g03/feature-final-focused.log"
+      ]
+    },
+    {
+      "id": "cancellation-supersession-late-results-and-ownership",
+      "status": "verified-for-g03",
+      "method": "One pending generation; real request/owner/texture signals; fresh Scene ownership guard; late factory scene destruction; failure releases only new handles. Default destroys previous owned scenes; retain holds them until disposal. Independent asset owners and borrowed active/GUI/audio survive.",
+      "evidence": [
+        "extensions/test/scene-flow.test.mjs",
+        "engine/test/assets-scene-flow.test.mjs",
+        "artifacts/engine-0.2.3/g03/native-final/result.json"
+      ]
+    },
+    {
+      "id": "activation-and-rollback-failure",
+      "status": "verified-for-g03",
+      "method": "Restore the actual old scene, including selected-but-inactive state after a deactivation failure. A failing rollback returns existing SceneInvalidState with activation/rollback causes and still releases new handles and recovery registrations; no false active progress event.",
+      "evidence": [
+        "artifacts/engine-0.2.3/g03/feature-final-focused.log",
+        "artifacts/engine-0.2.3/g03/repository-final-test.log"
+      ]
+    },
+    {
+      "id": "original-asset-manager-races",
+      "status": "verified-for-g03",
+      "method": "Combine owner/request abort before creating a job, recheck at handle delivery, immediately retire a zero-reference pending record and guard same-key deletion by record identity. Original cache, reference counts, late disposal and upload scheduler remain the only owners.",
+      "evidence": [
+        "engine/test/assets-scene-flow.test.mjs",
+        "extensions/test/scene-flow.test.mjs",
+        "artifacts/engine-0.2.3/g03/repository-final-test.log"
+      ]
+    },
+    {
+      "id": "actual-public-tarball-consumption",
+      "status": "verified-for-g03",
+      "method": "Use exactly the deterministic public-package gate tarballs, not a second raw pack. Install in an isolated consumer, strictly compile the exact example against installed declarations with skipLibCheck:false, check frozen factory assignability in both directions, run ESM/root compatibility, then serve installed JS over HTTP with served-byte hashes.",
+      "evidence": [
+        "artifacts/engine-0.2.3/g03/public-packages/public-packages.json",
+        "artifacts/engine-0.2.3/g03/final-feature-candidate/candidate.json",
+        "artifacts/engine-0.2.3/g03/native-final/result.json"
+      ]
+    },
+    {
+      "id": "native-workflow-resources-and-recovery",
+      "status": "verified-for-g03",
+      "method": "Menu/loading/level/return through actual installed packages, failure/cancel/supersession and 256-request stress, fixed finite font/shader warmup, 20 steady roundtrips, 100 real newly-started load cancellations, actual GPU device destruction/recovery and final application teardown. No steady GPU growth, asset/upload/job residue, recovery registration imbalance or WebGPU errors.",
+      "evidence": [
+        "artifacts/engine-0.2.3/g03/native-final/result.json",
+        "artifacts/engine-0.2.3/g03/visual-final/result.json",
+        "artifacts/engine-0.2.3/g03/catalog-native-final.json"
+      ]
+    },
+    {
+      "id": "light-entry-and-existing-constraints",
+      "status": "verified-for-g03",
+      "method": "Exact six frozen symbols and a factory-only independent consumer. Existing APIs and all previous package/consumer limits compare equal to HEAD; new capacity 4800 B gzip was based on a 3946 B installed diagnostic plus 854 B finite reserve. Final 4235 B passes; three retained modules and no heavy GUI/HYA/physics closure.",
+      "evidence": [
+        "artifacts/engine-0.2.3/g03/closure-initial.json",
+        "artifacts/engine-0.2.3/g03/public-packages/public-packages.json",
+        "artifacts/engine-0.2.3/g03/final-input-audit.json"
+      ]
+    }
+  ],
+  "validations": [
+    {
+      "id": "typecheck",
+      "status": "passed",
+      "log": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\repository-final-typecheck.log",
+        "bytes": 3205,
+        "sha256": "55937b64fc545dc3edb49dff64048ea4c07f35f9795e0a479ae78b11f19fd841"
+      }
+    },
+    {
+      "id": "build",
+      "status": "passed",
+      "log": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\repository-final-build.log",
+        "bytes": 17352,
+        "sha256": "4d161a57889f99baead541f347e7b766d9668043900454d4292d57ea23254c98"
+      }
+    },
+    {
+      "id": "test",
+      "status": "passed",
+      "log": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\repository-final-test.log",
+        "bytes": 244363,
+        "sha256": "f7b1cd0a13a3c8a8605f9f5d5c3a61c4356d12738409ee7d782b476b2c03de9c"
+      }
+    },
+    {
+      "id": "modules:check",
+      "status": "passed",
+      "log": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\repository-final-modules-check.log",
+        "bytes": 180,
+        "sha256": "8e7f53623081a292242112798ebf9698180d2f7b1a99a3cb9050d17b1ade0869"
+      }
+    },
+    {
+      "id": "responsibilities:check",
+      "status": "passed",
+      "log": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\repository-final-responsibilities-check.log",
+        "bytes": 259,
+        "sha256": "52b89c966f0ecfb0587d1e565ebbdaa72f1c2a1b9f3867641a1d83adc24f9d1a"
+      }
+    },
+    {
+      "id": "renderer-prepare:check",
+      "status": "passed",
+      "log": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\repository-final-renderer-prepare-check.log",
+        "bytes": 239,
+        "sha256": "66bbc4f2490a8418f9be4711d93567477ea7181e4289deea3dd116236518591e"
+      }
+    },
+    {
+      "id": "check:boundaries",
+      "status": "passed",
+      "log": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\repository-final-check-boundaries.log",
+        "bytes": 1037,
+        "sha256": "39707d103ea82dc7c31e1b762397e2251b14f4928c3ab162f04c9c664b7a612a"
+      }
+    },
+    {
+      "id": "docs:check",
+      "status": "passed",
+      "log": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\repository-final-docs-check.log",
+        "bytes": 706,
+        "sha256": "b1f1ac429427f19f5dfc02b47ceeedfeaf92efc2d9d22ba68f2517133da4e9d7"
+      }
+    },
+    {
+      "id": "api:check",
+      "status": "passed",
+      "log": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\repository-final-api-check.log",
+        "bytes": 158,
+        "sha256": "52eedd5d933b1c615111c13ff308d849101edef1c369d56615dbb7d7f107c6a9"
+      }
+    },
+    {
+      "id": "fast-gate-policy:test",
+      "status": "passed",
+      "log": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\repository-final-fast-gate-policy-test.log",
+        "bytes": 2210,
+        "sha256": "bb0d38de3b2f309559c98f2e66a794adab71890913aa94ae2ac690c51daa9c2b"
+      }
+    },
+    {
+      "id": "release:policy:test",
+      "status": "passed",
+      "log": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\repository-final-release-policy-test.log",
+        "bytes": 18885,
+        "sha256": "cc75fbbb338fcc3ae342700dded279bf4b04f5ee9170c7f9843a129533cebb40"
+      }
+    },
+    {
+      "id": "performance-budget:test",
+      "status": "passed",
+      "log": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\repository-final-performance-budget-test.log",
+        "bytes": 34773,
+        "sha256": "9d82c1c5f765d86758d2954a572fef9e662051e464b9ed6df31279012894034d"
+      }
+    },
+    {
+      "id": "verify:engine-package",
+      "status": "passed",
+      "log": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\repository-final-verify-engine-package.log",
+        "bytes": 8253,
+        "sha256": "a94d06d31b8afaf70985d28ab17d74c2f366f5ac8123fdf51cd4037ccf736cd7"
+      }
+    },
+    {
+      "id": "extensions-typecheck",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g03/feature-final-extensions-typecheck.log",
+        "bytes": 451,
+        "sha256": "6abc879b1526ad6130f75a552bfdf8bf34dbd0d997d6671571083524164ab29b"
+      }
+    },
+    {
+      "id": "focused",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g03/feature-final-focused.log",
+        "bytes": 2791,
+        "sha256": "61bb372f242b92c2b2198f10053bbbf899c63c919b986906c9369194578d0b3a"
+      }
+    },
+    {
+      "id": "installed-candidate",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g03/feature-final-installed-candidate.log",
+        "bytes": 124,
+        "sha256": "f25ee3fdadaad85e7ab4166625fea634e5f264626fce4b9aeb8e4d634451c742"
+      }
+    },
+    {
+      "id": "native",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g03/feature-final-native.log",
+        "bytes": 135,
+        "sha256": "40d0c88acb25dcf35e5790d0a420d0a78a5f1856841b58647f764219d7e76d88"
+      }
+    },
+    {
+      "id": "visual",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g03/feature-final-visual.log",
+        "bytes": 87,
+        "sha256": "51c64e04308df4f9b00a2f15b8ce6831f1441e25181f0c3c6366264e197915e1"
+      }
+    },
+    {
+      "id": "catalog-native",
+      "status": "passed",
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g03/catalog-native-final.json",
+        "bytes": 3059,
+        "sha256": "967666007b593c1197313d095214be7bfa7c195828d34bf315bd978fe3399659"
+      }
+    },
+    {
+      "id": "example-freshness",
+      "status": "passed",
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g03/examples-freshness-final.log",
+        "bytes": 61,
+        "sha256": "07b028e22424363f1ec5760fb60657b3e155f3c7fd0e725db098e79b19385bbf"
+      }
+    },
+    {
+      "id": "input-audit",
+      "status": "passed",
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g03/final-input-audit.json",
+        "bytes": 69895,
+        "sha256": "82d6a1dfffc5e14163434f58d4b6bc0fb3343b3d6b51841843462ad6375f5419"
+      }
+    },
+    {
+      "id": "source-snapshot",
+      "status": "passed",
+      "evidence": {
+        "path": "artifacts/engine-0.2.3/g03/source-snapshot-verification.json",
+        "bytes": 302,
+        "sha256": "3e1bcda08805afa16fb136eb0d75a7ce519cabf589a5d41e16a3bbcab15d2c29"
+      }
+    },
+    {
+      "id": "metadata-docs-final",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g03/metadata-docs-final.log",
+        "bytes": 79,
+        "sha256": "ae4a2c24120abe4d0d2f4c98a47e1c0be4f3638522b1ec6f61b68da6fb79b7b9"
+      }
+    },
+    {
+      "id": "metadata-coordination-final",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g03/metadata-coordination-final.log",
+        "bytes": 106,
+        "sha256": "16324dfee13d9f17437def53f7d755956e02ca1edf4e91c6b90d64092a9740bf"
+      }
+    },
+    {
+      "id": "metadata-diff-final",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g03/metadata-diff-final.log",
+        "bytes": 482,
+        "sha256": "1dbdb65dea37b5e455e09bc78aa8259aff90f23e6b4f06c86dcd30dc51d8cb5d"
+      }
+    }
+  ],
+  "publicEntry": {
+    "package": "@haiyue/extensions",
+    "subpath": "./scene-flow",
+    "exports": [
+      {
+        "name": "createSceneFlow",
+        "kind": "value"
+      },
+      {
+        "name": "PreparedScene",
+        "kind": "type"
+      },
+      {
+        "name": "SceneFlow",
+        "kind": "type"
+      },
+      {
+        "name": "SceneFlowOptions",
+        "kind": "type"
+      },
+      {
+        "name": "SceneFlowProgress",
+        "kind": "type"
+      },
+      {
+        "name": "SceneFlowRequest",
+        "kind": "type"
+      }
+    ],
+    "installedPackages": [
+      {
+        "workspace": "engine",
+        "name": "@haiyue/engine",
+        "version": "0.2.2",
+        "file": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\public-packages\\npm\\haiyue-engine-0.2.2.tgz",
+        "sha256": "8110a46801de3ca776fac5a67f70c01faa4c3414433139824152531a179b3b5b",
+        "integrity": "sha512-+sh6nMNZrQxpqhTEoQsPZHqw2FaBfXVhmnUJIKOwPLwvzWDouQCkzqOLQSGlr3YdUv/4e1BlLUDo1mJOkPo+cA==",
+        "bytes": 2022154
+      },
+      {
+        "workspace": "extensions",
+        "name": "@haiyue/extensions",
+        "version": "0.2.2",
+        "file": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\public-packages\\npm\\haiyue-extensions-0.2.2.tgz",
+        "sha256": "95cac54e152147f3e149f44a0ad8e5bf3fe964ae2eb200e5ab5a7eb4e04157d4",
+        "integrity": "sha512-fVSVeL3W8fyC+5/1/TdQPWdxz690/BWpYXQAGgtdAvEb+SLAWsVmtA8cD69AM9T3HEJu7uV0c46/QaJzyoy3RA==",
+        "bytes": 532122
+      },
+      {
+        "workspace": "animation-spec",
+        "name": "@haiyue/animation-spec",
+        "version": "0.2.2",
+        "file": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g03\\public-packages\\npm\\haiyue-animation-spec-0.2.2.tgz",
+        "sha256": "71eb24b81b1a07f081138610869c11b759def56aa5853a3030e7a714ad385876",
+        "integrity": "sha512-hYUAlmKtfGd+GaO9d5qBa0ykU7AR1sR3+pyzyUqnPzTVOUtdlS+Zph2yIPRNcnj33LIdShdVY5NN1lDeydIsLA==",
+        "bytes": 170719
+      }
+    ],
+    "versions": "Development artifacts still declare 0.2.2. G11 owns the planned atomic version update to 0.2.3; these bytes were not published.",
+    "consumer": {
+      "id": "extensions-scene-flow",
+      "gzipBytes": 4235,
+      "budget": 4800,
+      "modules": [
+        "@haiyue/engine/dist/chunks/EngineError-DPDar39f.js",
+        "@haiyue/extensions/dist/scene-flow.js",
+        "fixture/extensions-scene-flow.mjs"
+      ]
+    }
+  },
+  "device": {
+    "browser": {
+      "product": "Chrome/156.0.8078.76",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "url": "http://127.0.0.1:61596/artifacts/engine-0.2.3/g03/native-final/fixture.html?",
+      "angleBackend": "d3d11",
+      "nativeBackend": true,
+      "presentationMode": "headless",
+      "storageMode": "isolated-memory-context"
+    },
+    "adapters": {
+      "initial": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false,
+        "features": [
+          "core-features-and-limits",
+          "texture-compression-bc"
+        ]
+      },
+      "recovered": {
+        "vendor": "nvidia",
+        "architecture": "pascal",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": false,
+        "features": [
+          "core-features-and-limits",
+          "texture-compression-bc"
+        ]
+      }
+    },
+    "physicalInputQualified": false
+  },
+  "resourceObservation": {
+    "baseline": {
+      "resources": 32,
+      "estimatedBytes": 3532052
+    },
+    "maximumSteadyResources": 32,
+    "maximumSteadyEstimatedBytes": 3532052,
+    "afterDestroy": {
+      "resources": 0,
+      "estimatedBytes": 0
+    },
+    "gpuErrors": []
+  },
+  "measurementChannels": {
+    "coldStart": "Separate application/navigation marks in native-final/result.json; firstRenderedAt is an application animation-frame mark, not a GPU-completion timestamp.",
+    "steady": "Fixed warmup and 20 roundtrips, resource counts/estimated bytes, assets, upload backlog and recovery registrations.",
+    "performance": "Load/roundtrip elapsed observations include deliberate 8ms loader delay, fetch, display frames and queue waits. They are diagnostics, not CPU render or GPU timing qualification. Existing performance budgets remain hard where applicable; G11 obtains formal qualification."
+  },
+  "retainedFailures": [
+    {
+      "path": "artifacts/engine-0.2.3/g03/repository-validation.json",
+      "reason": "Runtime tests passed; catalog gate found the new HTML missing its standard shared Engine script. The source HTML was fixed and the full repository validation rerun."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g03/native-qualified/result.json",
+      "reason": "Frame polling missed an 8ms in-flight load. Fixture synchronization now observes a newly started loader with short timer polling; the 15s deadline, workloads, samples and warmup remain unchanged."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g03/native-qualified-synchronized/result.json",
+      "reason": "Restricted Windows process inspection prevented cleanup of this test Chrome. The same helper was rerun with process-inspection access; cleanup was not bypassed."
+    }
+  ],
+  "protectedHistory": {
+    "audit": {
+      "path": "artifacts/engine-0.2.3/g03/final-input-audit.json",
+      "bytes": 69895,
+      "sha256": "82d6a1dfffc5e14163434f58d4b6bc0fb3343b3d6b51841843462ad6375f5419"
+    },
+    "originalG02Readme": {
+      "path": "artifacts/engine-0.2.3/g03/prior-inputs/g02-readme.md",
+      "bytes": 6257,
+      "sha256": "92d5a82c1500b6d3a663e8a7c84f59f9c7967e6e3074051b2a9061907f0ca6fd"
+    },
+    "protectedG13Sha256": "0312e5f43ce737c48381d63014a2eb58fda190afaffdbced2869b104a99d3eff",
+    "allHistoricalRecordedInputsPreserved": true,
+    "sourceSnapshot": {
+      "path": "artifacts/engine-0.2.3/g03/source-snapshot.zip",
+      "bytes": 115857,
+      "sha256": "9645e1accc75fe1462fe0d9cb4beee1cf98375c602df5eb6bd05f6cb0146bab1"
+    },
+    "sourceSnapshotVerification": {
+      "path": "artifacts/engine-0.2.3/g03/source-snapshot-verification.json",
+      "bytes": 302,
+      "sha256": "3e1bcda08805afa16fb136eb0d75a7ce519cabf589a5d41e16a3bbcab15d2c29"
+    },
+    "originalFilesRetained": true
+  },
+  "handoffs": [
+    {
+      "owner": "g11-integration-candidate",
+      "scope": "Integrate scene-flow with the other frozen 0.2.3 capabilities in gameplay-kit, perform planned package/version integration, formal performance/resource/pixel and real-device matrices, full global gate and no-publication rehearsal. G03 does not inherit 0.2.2 release qualification or authorize push/tag/npm/Release/Pages."
+    }
+  ],
+  "files": [
+    {
+      "path": "config/engine-package-budget.json",
+      "bytes": 27483,
+      "sha256": "4961176f825353fe63e77be97c640f790c1204f6612375295c873311c68e0929"
+    },
+    {
+      "path": "config/gameplay-023-contract.json",
+      "bytes": 47325,
+      "sha256": "07ebc65103cc45c6ed9c6333f28ad89066439204348be9d62bdc87fc607c93ca"
+    },
+    {
+      "path": "config/public-api-capability-budgets.json",
+      "bytes": 10445,
+      "sha256": "661f166d6cd78ad4f80471c2c46e9e18d211dd47bdf03c632a47044884828bcf"
+    },
+    {
+      "path": "docs/api/errors.md",
+      "bytes": 752,
+      "sha256": "47a9c22a872d61aa312c2587620266e9928e7fcd8e2c86a9477cffba05d01a8e"
+    },
+    {
+      "path": "docs/api/errors/E_GAMEPLAY_INVALID_INPUT.md",
+      "bytes": 683,
+      "sha256": "b68375a083c15e6a9dab99edad633af979c3299fa95567b6d260c588c801627b"
+    },
+    {
+      "path": "docs/api/errors/E_SCENE_FLOW_ABORTED.md",
+      "bytes": 557,
+      "sha256": "84322d1a4e8970fab0525909b5b6fd83a217afc802358111523df69fdbdca36f"
+    },
+    {
+      "path": "docs/api/errors/E_SCENE_FLOW_SUPERSEDED.md",
+      "bytes": 405,
+      "sha256": "85a83830aadfadd4b9e747b1d4cfb719bf7642192b7c85af99931aed1f523353"
+    },
+    {
+      "path": "docs/for-ai/adr/0139-engine-023-gameplay-contracts.md",
+      "bytes": 4424,
+      "sha256": "e1f4b4d704b76b4a834d774e0dbf3e23d2b81bf688fdc2a8db2a1f799c63c1cf"
+    },
+    {
+      "path": "engine/src/assets/AssetManager.ts",
+      "bytes": 33256,
+      "sha256": "dfc82af55d9581d0a2f419be8cf9bee26055b11ec75b8d93c4799d73beb868c6"
+    },
+    {
+      "path": "engine/src/core/EngineError.ts",
+      "bytes": 11957,
+      "sha256": "f31839aa048a9c2b4fa25380ca81047fafc775365bc48ca7450a764a9b07411c"
+    },
+    {
+      "path": "engine/test/assets-scene-flow.test.mjs",
+      "bytes": 3186,
+      "sha256": "dd76dacd1637ab815ff07fda1ad4bafd393f7deee0ba466aea03e4692312df9b"
+    },
+    {
+      "path": "engine/test/scene-flow-legacy.test.mjs",
+      "bytes": 1291,
+      "sha256": "8ec6c7ac6d39d9edee7ce58cf3b32d4944a8efb03d50dec301a4064c23abee7c"
+    },
+    {
+      "path": "examples/manifest.json",
+      "bytes": 56866,
+      "sha256": "99d2580f417f06a34e2dd0ffb558fd275f16512997d97261c1706a5361dc648a"
+    },
+    {
+      "path": "examples/scene-flow/application.ts",
+      "bytes": 6738,
+      "sha256": "c709767297e87ede2878de42edf21a01cc3b74a878f8981226100be345cca6b6"
+    },
+    {
+      "path": "examples/scene-flow/index.html",
+      "bytes": 544,
+      "sha256": "7bd68aaa3a5cc52892f68a3402c73cd3f86883e187a59e1f8293a80e5d4f5332"
+    },
+    {
+      "path": "examples/scene-flow/level.json",
+      "bytes": 27,
+      "sha256": "a903d095254ef6ee9e6a7029b434236f431a2285a9b3ddb72d6b3f3f46b9b47d"
+    },
+    {
+      "path": "examples/scene-flow/main.ts",
+      "bytes": 1747,
+      "sha256": "ed6b1eb5b02910a802c091d8458bd3b6ecdd47676d1c94851648b683b7c7a450"
+    },
+    {
+      "path": "extensions/README.md",
+      "bytes": 9009,
+      "sha256": "9bbc2a20d0aecae840cdf79ad5314a88e0f2711249bc6bc61c45674e16b5871b"
+    },
+    {
+      "path": "extensions/package.json",
+      "bytes": 5663,
+      "sha256": "41d6a6047ff2593f857b031dbf6731bc832d5e5571321de444f1d612841d54c4"
+    },
+    {
+      "path": "extensions/rollup.config.js",
+      "bytes": 1817,
+      "sha256": "b5e42167225c3ecc615a34cf5c03700fc66b00d45a154aa72ea1257dbf189150"
+    },
+    {
+      "path": "extensions/src/scene-flow.ts",
+      "bytes": 187,
+      "sha256": "396ceaaf210f536c4c840d6cb6f93453d64609f68484e4a3d736d8e86afdf121"
+    },
+    {
+      "path": "extensions/src/scene-flow/SceneFlow.ts",
+      "bytes": 14132,
+      "sha256": "ba3faad40383dc5606c5fc1165b5876bba58c76092ba797dae58dba300423904"
+    },
+    {
+      "path": "extensions/src/scene-flow/types.ts",
+      "bytes": 1312,
+      "sha256": "a765b2ce8310621116b19bb51dc2c2f24eb5b89917b1feedd790f66fd3fb0d80"
+    },
+    {
+      "path": "extensions/test/scene-flow-browser-gate.mjs",
+      "bytes": 3990,
+      "sha256": "acd926a5771233b79e155affd848374a36c3ba2da6db3ec61a0a17ba6bd3de52"
+    },
+    {
+      "path": "extensions/test/scene-flow-browser.mjs",
+      "bytes": 9963,
+      "sha256": "0bd11b19b82ee4c9c69c9e9319afe7f1d7c9608342722fb1b9958cfe5003ab5a"
+    },
+    {
+      "path": "extensions/test/scene-flow-candidate.mjs",
+      "bytes": 7436,
+      "sha256": "7963b00829569726d03d6797d41f7378879d237996f93bf1fab1897103f14a28"
+    },
+    {
+      "path": "extensions/test/scene-flow.test.mjs",
+      "bytes": 18471,
+      "sha256": "9aa90d79f02863addbf5b717ed098aace6cbb281509d77b02eb24551c6949f9d"
+    },
+    {
+      "path": "review/baselines/api-surface.json",
+      "bytes": 313986,
+      "sha256": "41b04e0c3e9b9e76c6dd506d1a8f9bd5572929dbaeadc483712495d66cb5c920"
+    },
+    {
+      "path": "review/engine-0.2.3/api-contract.d.ts",
+      "bytes": 19620,
+      "sha256": "dd6b53cd8a901905f146bc4c118348e3d08350d6808fe51028a80a52532f3e07"
+    },
+    {
+      "path": "review/engine-0.2.3/contract.md",
+      "bytes": 12895,
+      "sha256": "f4d6912443035836b9295cb38ad7deb8673953abfa475b8cb5e019aac2cec039"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-scene-flow.mjs",
+      "bytes": 65,
+      "sha256": "fc355f92e308894ae0aed59c74df1cce1faef1ffaee19e10b5628170024ab454"
+    }
+  ]
+}

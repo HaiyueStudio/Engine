@@ -5,6 +5,7 @@ import { GuiDirtyFlags, type GuiElementOptions, type GuiRect } from '../GuiTypes
 import { GuiElement } from './GuiElement';
 import {assignedGuiRect} from '../GuiLayoutState';
 import {guiContentMetrics} from '../GuiContent';
+import {guiStockTextControl,markGuiTextContentDirty} from '../GuiInvalidationState';
 
 export type GuiLabelTextAlign = 'left' | 'center' | 'right';
 
@@ -38,7 +39,8 @@ export class GuiLabel extends GuiElement {
   setText(text: string): void {
     if (this.text === text) return;
     this.text = text;
-    this.markDirty(GuiDirtyFlags.Text | GuiDirtyFlags.Visual);
+    if(guiStockTextControl(this,GuiLabel.prototype,GuiElement.prototype))markGuiTextContentDirty(this,GuiElement.prototype,!this.autoWidth);
+    else this.markDirty(GuiDirtyFlags.Text | GuiDirtyFlags.Visual);
   }
 
   setFontSize(fontSize: number | undefined): void {
