@@ -1,0 +1,535 @@
+{
+  "schemaVersion": 1,
+  "goal": "g01-contracts-baseline",
+  "goalStatus": "complete",
+  "generatedAt": "2026-10-31T00:16:21.254477+00:00",
+  "contractId": "haiyue-gameplay-023/1",
+  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
+  "coordinationRevision": "95086536f98eb819f645f47252efd3c6d56f6a89",
+  "workingTree": "uncommitted scoped contract/fixture/index changes; runtime unchanged",
+  "releaseQualified": false,
+  "runtimeFeaturesImplemented": false,
+  "baselinePromoted": false,
+  "publishingIncluded": false,
+  "contract": {
+    "path": "config/gameplay-023-contract.json",
+    "sha256": "07ebc65103cc45c6ed9c6333f28ad89066439204348be9d62bdc87fc607c93ca",
+    "apiDeclarationsSha256": "dd6b53cd8a901905f146bc4c118348e3d08350d6808fe51028a80a52532f3e07",
+    "publishedApiSubsetSha256": "e0e52a56ac8590d9138f4f4589b6e9eb3756eec5b20255b9438c642b6ac05486"
+  },
+  "summary": {
+    "workspaceTests": 2416,
+    "catalogTests": 7,
+    "g01PolicyTests": 25,
+    "coordinationPolicyTests": 13,
+    "builtExampleTargets": 103,
+    "sourceObservationGroups": 9,
+    "realSweepCases": 10,
+    "realManifoldCases": 6,
+    "cpuCohorts": 27,
+    "auditStructuralCohorts": 3,
+    "nativeDirectReferenceCohorts": 2,
+    "iconOracleCases": 8,
+    "releaseQualificationGranted": false
+  },
+  "requirements": [
+    {
+      "id": "source-defects",
+      "status": "verified-for-g01",
+      "reference": "artifacts/engine-0.2.3/g01/source-probes-current.json",
+      "conclusion": "Nine observed groups; original defects remain assigned to G03/G04/G06/G07/G08/G09/G02."
+    },
+    {
+      "id": "published-provenance",
+      "status": "verified-for-g01",
+      "reference": "artifacts/engine-0.2.3/g01/published/verification.json",
+      "conclusion": "All four official 0.2.2 tarballs and receipt match frozen SHA-256; runtime matches published tag."
+    },
+    {
+      "id": "exact-api-and-version-admission",
+      "status": "verified-for-g01",
+      "reference": "config\\gameplay-023-contract.json",
+      "conclusion": "ADR0139: 14 paths, 69 additions including 11 promoted declarations; root30 unchanged; no live package/baseline bump."
+    },
+    {
+      "id": "real-backend-feasibility",
+      "status": "verified-for-g01",
+      "reference": "artifacts/engine-0.2.3/g01/source-probes-current.json",
+      "conclusion": "Ten real Box2D casts, six real manifolds; witness/contact reconstruction, initial penetration, slope, thin wall and kinematic velocity verified. G04 implements actual driver capability."
+    },
+    {
+      "id": "gui-user-additions",
+      "status": "verified-for-g01",
+      "reference": "config\\gameplay-023-contract.json",
+      "conclusion": "Tabs per-page left/right icons, Breadcrumb, Badge and Collapse frozen; shared owner and borrowed lifetime, no alternate GUI framework."
+    },
+    {
+      "id": "workloads-devices-and-resources",
+      "status": "verified-for-g01",
+      "reference": "config\\gameplay-023-contract.json",
+      "conclusion": "Fixed scales/mutations/warmup/finite caps; GPU5, applicable prior budgets and pacing inherited; device owners explicit."
+    },
+    {
+      "id": "hash-reuse",
+      "status": "verified-for-g01",
+      "reference": "config\\gameplay-023-contract.json",
+      "conclusion": "Proposal remains subject to existing named ADR admission; no new runtime reuse exception."
+    },
+    {
+      "id": "clean-named-consumer",
+      "status": "verified-for-g01",
+      "reference": "artifacts/engine-0.2.3/g01/native-consumer-inputs.json",
+      "conclusion": "Clean ios-gui-text-input paths frozen; unrelated Native TankBattle WIP untouched; Games not selected."
+    },
+    {
+      "id": "scope-and-documentation",
+      "status": "verified-for-g01",
+      "reference": "artifacts/engine-0.2.3/g01/coordination-links.json",
+      "conclusion": "61 local links resolve; DAG, scope, source fingerprints and producer states checked."
+    }
+  ],
+  "validations": [
+    {
+      "id": "source-probes",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g01/source-probes-current.json"
+    },
+    {
+      "id": "cpu-structural-diagnostic",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g01/cpu-baseline.json"
+    },
+    {
+      "id": "native-direct-reference",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g01/native-reference.json"
+    },
+    {
+      "id": "independent-icon-oracle",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g01/icon-oracle.json"
+    },
+    {
+      "id": "published-inputs",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g01/published/verification.json"
+    },
+    {
+      "id": "workspace-typecheck",
+      "exitCode": 0,
+      "log": "artifacts/engine-0.2.3/g01/typecheck.log"
+    },
+    {
+      "id": "workspace-build",
+      "exitCode": 0,
+      "log": "artifacts/engine-0.2.3/g01/build-all.log"
+    },
+    {
+      "id": "workspace-test-serial",
+      "exitCode": 0,
+      "log": "artifacts/engine-0.2.3/g01/tests-serial.log"
+    },
+    {
+      "id": "contract-negative-tests",
+      "exitCode": 0,
+      "log": "artifacts/engine-0.2.3/g01/policy-final.log"
+    },
+    {
+      "id": "milestone-negative-tests",
+      "exitCode": 0,
+      "log": "artifacts/engine-0.2.3/g01/milestone-policy-final.log"
+    },
+    {
+      "id": "milestone-check",
+      "exitCode": 0,
+      "log": "artifacts/engine-0.2.3/g01/milestone-final.log"
+    },
+    {
+      "id": "documentation",
+      "exitCode": 0,
+      "log": "artifacts/engine-0.2.3/g01/docs-final.log"
+    },
+    {
+      "id": "api-live-baseline",
+      "exitCode": 0,
+      "log": "artifacts/engine-0.2.3/g01/api-final.log"
+    },
+    {
+      "id": "target-declaration-strict-types",
+      "exitCode": 0,
+      "log": "artifacts/engine-0.2.3/g01/contract-types-final.log"
+    },
+    {
+      "id": "diagnostic-hash-verification",
+      "exitCode": 0,
+      "log": "artifacts/engine-0.2.3/g01/diagnostics-final.log"
+    }
+  ],
+  "retainedFailures": [
+    {
+      "log": "artifacts/engine-0.2.3/g01/tests.log",
+      "reason": "Windows restricted-token symlink EPERM",
+      "resolution": "same test suite, normal administrator permissions"
+    },
+    {
+      "log": "artifacts/engine-0.2.3/g01/tests-elevated.log",
+      "reason": "execution mistake: concurrent build/test temporarily inconsistent dist module",
+      "resolution": "complete build followed by unchanged full test suite serially; exit0"
+    },
+    {
+      "report": "artifacts/engine-0.2.3/g01/probe-assumption-correction.json",
+      "reason": "initial overlap probe assumption corrected using actual library behavior",
+      "resolution": "real manifold/witness contract, source defects preserved; no fabricated original stderr"
+    }
+  ],
+  "deviceHandoffs": [
+    {
+      "id": "Windows-real-IME-gamepad-on-new-widgets",
+      "owner": "g11-integration-candidate",
+      "status": "required-before-candidate-completion"
+    },
+    {
+      "id": "Mac-browser-new-input-audio",
+      "owner": "g11-integration-candidate",
+      "status": "required-before-candidate-completion"
+    },
+    {
+      "id": "physical-iPhone-rotation-keyboard-background-GUI-audio-capability",
+      "owner": "g11-integration-candidate",
+      "status": "required-before-candidate-completion"
+    },
+    {
+      "id": "native-production-pacing-resource-pixel-and-tarball-integration",
+      "owner": "g11-integration-candidate",
+      "status": "required-before-candidate-completion"
+    }
+  ],
+  "nextGoal": "g02-validation-publication",
+  "files": [
+    {
+      "path": "artifacts/engine-0.2.3/g01/api-check.log",
+      "bytes": 163,
+      "sha256": "4710a966ea112ce5f8af828b2efbd22daf70cf33066731e5b2ca16e1be2132db"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/api-final.log",
+      "bytes": 163,
+      "sha256": "4710a966ea112ce5f8af828b2efbd22daf70cf33066731e5b2ca16e1be2132db"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/build-all.log",
+      "bytes": 17776,
+      "sha256": "93ae43d4da32d754fc92abddc531b17efb2994c7e45803cd484b6ecf164a8456"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/build-engine.log",
+      "bytes": 1537,
+      "sha256": "c6d65ba141bca0303c35eadf70b1241127741f62e9c64fcbbd4dad62313e2424"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/build-extensions.log",
+      "bytes": 1142,
+      "sha256": "df286235b876cac22629546d8903b950e0a6707b17c397e35778d0868ae1226f"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/contract-types-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/contract-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/coordination-inputs.json",
+      "bytes": 4422,
+      "sha256": "5bde02fd9cde937b2471504be81fe843f6997f8f80059ed3ad6fc898ce046490"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/coordination-links.json",
+      "bytes": 69,
+      "sha256": "7aee99db8cee9fc14bfc10adc0986e4113488eb11f9907b2885578a1049a95df"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/cpu-baseline.json",
+      "bytes": 1161928,
+      "sha256": "c0efd130dbe5fdb4728b72927fd82e122601f2a29c3e5f1ae7228f01f34b8928"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/diagnostics-final.log",
+      "bytes": 282,
+      "sha256": "27bca8da8dbc9ab339d1779f936c11345866d5f568cc7eb7bb7f052ac6a9bc33"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/docs-check.log",
+      "bytes": 724,
+      "sha256": "7158940300370ee5da99ef956a20c2aca6523fd08842f0fe2681f625c75bc4b5"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/docs-final.log",
+      "bytes": 724,
+      "sha256": "5bad3e9d73549619966df4eb759bce7b79ee3464c29e733f8886d71da25aa97e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/gui-content-reference.mjs",
+      "bytes": 2470,
+      "sha256": "132a1b7aa8921ea5288c00fa7d348a1853830a12d0acb645fb403c11e6923a82"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/icon-oracle.json",
+      "bytes": 7597,
+      "sha256": "d4bc893cfb270f61150b2be79df55021ffae407dba2ead05050c9d1228eeaba2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/milestone-check.log",
+      "bytes": 200,
+      "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/milestone-final.log",
+      "bytes": 200,
+      "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/milestone-policy-final.log",
+      "bytes": 793,
+      "sha256": "9fdfef2705cda8637d8c170a2581cf6f6116ba4a9de3af16a0669b43bdf2eee5"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/milestone-policy-tests.log",
+      "bytes": 794,
+      "sha256": "63b1a2c1314930ba012973f770e7a2cf09d09fd95b12edfd56a9ff1f7b29f7a0"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/native-consumer-inputs.json",
+      "bytes": 1270,
+      "sha256": "5f95577076d782b45a1ee40f648534fd8499d6e86a579f889382f69ef0356765"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/native-reference.json",
+      "bytes": 51662,
+      "sha256": "87d3f2b4f085de44a6ac8fbafae0758fa23d953b1c6bc07d20eade8ed9f925d9"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/policy-final.log",
+      "bytes": 1497,
+      "sha256": "8cb06b55c96d99ae1fd1a297b0b423675335dca90f54bf442a48573186a75819"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/policy-tests-accepted.log",
+      "bytes": 1499,
+      "sha256": "411070718d2733e21616bc2b591f9d7cb67ae77a763c6511445206b252cfcaad"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/policy-tests-final.log",
+      "bytes": 1416,
+      "sha256": "160d6a3c2328fdaee38b5033b5a79c9cb89c4d1b7c24d4173cf70d2fafbafdc9"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/policy-tests.log",
+      "bytes": 1411,
+      "sha256": "51424ed95c96a117878a0bfbda4f599cf596baf54c6197be2548e92ec5dec02b"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/probe-assumption-correction.json",
+      "bytes": 634,
+      "sha256": "33672ae0c6e388ef7a43fa5a083e10c2bdbe0507bbd6e8db55872886747f1112"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/published/animation-spec-0.2.2-metadata.json",
+      "bytes": 3752,
+      "sha256": "c6a15abfc68bad44c49b77f85e8ed229a6dce6d9668f29ca1a2aa140a05af92f"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/published/animation-spec-0.2.2.tgz",
+      "bytes": 170719,
+      "sha256": "71eb24b81b1a07f081138610869c11b759def56aa5853a3030e7a714ad385876"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/published/engine-0.2.2-metadata.json",
+      "bytes": 6132,
+      "sha256": "86fdc33a8f4cf9564c7515f8be7352cf57cebe4975a4346b26bb160847c4fd47"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/published/engine-0.2.2.tgz",
+      "bytes": 2021979,
+      "sha256": "580bc3b5c0510d1c662116fa577e4a0e34ab4758691ae7a47498611bd8e061bd"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/published/extensions-0.2.2-metadata.json",
+      "bytes": 5789,
+      "sha256": "d907a5fcdf916a1f1971cefed8cf715062b3c38694280f4ac8291700d17731c4"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/published/extensions-0.2.2.tgz",
+      "bytes": 528424,
+      "sha256": "cc29b1238a57911db251eaa01888cc5eecaeaeb6c7be62c430b58597a21c99ad"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/published/publication-result.json",
+      "bytes": 23227,
+      "sha256": "0aff32d45c727b85cae88de8109d50008225acdcad33db9968e71d9440ccfa43"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/published/shader-language-0.2.2-metadata.json",
+      "bytes": 2498,
+      "sha256": "660093aae742cb673522277fdd0d710aaa724b0cef5cc298925443b5585cdd08"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/published/shader-language-0.2.2.tgz",
+      "bytes": 148545,
+      "sha256": "6a3df405553a2a45d9e76596a3917ea8be5c04e3bc680b3f539cc772ddf75aae"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/published/verification.json",
+      "bytes": 1805,
+      "sha256": "839949ac77d046b5c7a978fd02af74c61f6fd45f7c3dee5fa6744715d68c9266"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/source-probes-accepted.json",
+      "bytes": 12893,
+      "sha256": "ae999a98eb91863725964538cf08a99a303c64e8112294fb4fe167e0c8be151c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/source-probes-current.json",
+      "bytes": 13071,
+      "sha256": "0fee03ebc34638416775055718fe05fe2ae00d39b06b3183ed304d72fbb4deb0"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/source-probes-final.json",
+      "bytes": 11646,
+      "sha256": "a9b7863285f5fcb3c35b2b903c58cceb8c20f724c808ccfe769d8b75f135af5e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/source-probes-frozen.json",
+      "bytes": 13071,
+      "sha256": "b2b78315100c2e6224f8992525b4f23d61c16df9bf314a9159a2726406598dcf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/source-probes-verified.json",
+      "bytes": 13071,
+      "sha256": "2719fe7189e41f7397cc70f7fe58261d081907c62b540bfa531efca64d6086ca"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/source-probes.json",
+      "bytes": 9668,
+      "sha256": "a766ea2add922684c832965f7ee920ebee531e3e0770442f2b4d05a5a85ed650"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/tag-provenance.json",
+      "bytes": 697,
+      "sha256": "2d130d8d61b289795de07f62a8b2be18447897cb6206a1a4da81157843ca5797"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/tests-elevated.log",
+      "bytes": 141446,
+      "sha256": "c40c368ad077bf33b00e349af9aebab66d8d077c1954e30a35bebf25d72cf957"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/tests-serial.log",
+      "bytes": 244282,
+      "sha256": "a2b351bbca1cc9967cb6d01f4e0f3cc2c117578c5d9b5f01895c57f017179ad9"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/tests.log",
+      "bytes": 15196,
+      "sha256": "1dd366d57afba6d3afec09b06aa0505ea3dc8739cf34f4ef8151b9352f0a9b48"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/typecheck.log",
+      "bytes": 3248,
+      "sha256": "19240aacfa8431085212e5fccac55a7e0ceb11e21733bd5095e5dd577694347e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/verification-attempts.json",
+      "bytes": 731,
+      "sha256": "f947e0b726978708dfaeb429942697ce96e2e0a559b0a9e17b3991eca15b1680"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g01/write-scope-audit.json",
+      "bytes": 1000,
+      "sha256": "167fa21989f6927903fb493d00c2118590ce8088a2391e1a9a1e41b87610f9af"
+    },
+    {
+      "path": "config/gameplay-023-contract.json",
+      "bytes": 47325,
+      "sha256": "07ebc65103cc45c6ed9c6333f28ad89066439204348be9d62bdc87fc607c93ca"
+    },
+    {
+      "path": "docs/for-ai/adr/0139-engine-023-gameplay-contracts.md",
+      "bytes": 4424,
+      "sha256": "e1f4b4d704b76b4a834d774e0dbf3e23d2b81bf688fdc2a8db2a1f799c63c1cf"
+    },
+    {
+      "path": "docs/for-ai/adr/README.md",
+      "bytes": 16411,
+      "sha256": "955c11b944014e68aeff8bfbc9ddb0fc4d09cad3c301a8441db8a0df40a83c68"
+    },
+    {
+      "path": "review/engine-0.2.3/README.md",
+      "bytes": 3457,
+      "sha256": "0b3634cf9abbbba6a0eaf4a62516d8d6907b4d52a7ffdabdc50d8f9a67553919"
+    },
+    {
+      "path": "review/engine-0.2.3/api-baseline-0.2.2.json",
+      "bytes": 26061,
+      "sha256": "e0e52a56ac8590d9138f4f4589b6e9eb3756eec5b20255b9438c642b6ac05486"
+    },
+    {
+      "path": "review/engine-0.2.3/api-contract.d.ts",
+      "bytes": 19620,
+      "sha256": "dd6b53cd8a901905f146bc4c118348e3d08350d6808fe51028a80a52532f3e07"
+    },
+    {
+      "path": "review/engine-0.2.3/contract.md",
+      "bytes": 12895,
+      "sha256": "f4d6912443035836b9295cb38ad7deb8673953abfa475b8cb5e019aac2cec039"
+    },
+    {
+      "path": "scripts/fixtures/engine-023/README.md",
+      "bytes": 950,
+      "sha256": "88f7a10e6dc658e96ef166799a8dd380c63f0be004312cbcd6778aafc052cb0d"
+    },
+    {
+      "path": "scripts/fixtures/engine-023/browser.mjs",
+      "bytes": 2599,
+      "sha256": "b562a0007ffdad11e5b0bd45a4a7c94e6b6c82484ed28d812dc82b8f85577116"
+    },
+    {
+      "path": "scripts/fixtures/engine-023/diagnose.mjs",
+      "bytes": 7252,
+      "sha256": "24cb32ce949fa3378cbf118832e1f071f128b22be6c98fcd263b67c63d4ce789"
+    },
+    {
+      "path": "scripts/fixtures/engine-023/icon-oracle.html",
+      "bytes": 183,
+      "sha256": "051ac6144ffd3c318d0f07f58eda8670ff9ca9665b931a4a7080d0d14882148a"
+    },
+    {
+      "path": "scripts/fixtures/engine-023/icon-oracle.mjs",
+      "bytes": 2214,
+      "sha256": "f8e4d52d02153be3c75e1ac1a0f98fcfc9ea2169d3721a2ac81fa571753f9e01"
+    },
+    {
+      "path": "scripts/fixtures/engine-023/policy.mjs",
+      "bytes": 8129,
+      "sha256": "271baccdd1ab1fa6f7fa2a8ac6d70af091e0d7165815855d0c31b50ecec137d9"
+    },
+    {
+      "path": "scripts/fixtures/engine-023/policy.test.mjs",
+      "bytes": 4822,
+      "sha256": "1e1d8d30ef8e725366d7dbf30437ad07a5529f28cb02e37d8caa5858df287823"
+    },
+    {
+      "path": "scripts/fixtures/engine-023/source-probes.mjs",
+      "bytes": 14948,
+      "sha256": "1576f45df7a8a70291533a32adb7637b310db1b669c9f657cc3dc37cc8989a09"
+    },
+    {
+      "path": "scripts/fixtures/engine-023/verify.mjs",
+      "bytes": 2289,
+      "sha256": "bfcc38d934355e9531d3006a9f315c9026b1c83ab241f48b60e5e08cee348637"
+    }
+  ]
+}

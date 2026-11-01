@@ -4,6 +4,7 @@ export { Physics2DJoint } from './physics/Physics2DJoint';
 export type { Physics2DJointOptions, Physics2DJointType } from './physics/Physics2DJoint';
 export { Physics2DSystem } from './physics/Physics2DSystem';
 export type { Physics2DContactEvent, Physics2DRaycastResult, Physics2DResourceSnapshot, Physics2DSystemOptions } from './physics/Physics2DSystem';
+export type { Physics2DShapeCastOptions, Physics2DShapeCastHit, Physics2DFixedStepEvent } from './physics/Physics2DSystem';
 export { Physics2DTo3DTransformSync } from './components/Physics2DTo3DTransformSync';
 export type { Physics2DTo3DPlane, Physics2DTo3DRotationAxis, Physics2DTo3DSource, Physics2DTo3DTransformSyncOptions } from './components/Physics2DTo3DTransformSync';
 export { Physics2DTo3DTransformSyncSystem } from './systems/Physics2DTo3DTransformSyncSystem';

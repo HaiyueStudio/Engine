@@ -33,7 +33,28 @@ export interface Physics2DCapabilities {
   readonly rayCast: boolean;
   readonly shapeQuery: boolean;
   readonly contactEvents: boolean;
+  readonly shapeCast?: boolean;
 }
+
+export interface Physics2DShapeCastDesc {
+  readonly shape: 'box' | 'circle';
+  readonly origin: Readonly<{ x: number; y: number }>;
+  readonly translation: Readonly<{ x: number; y: number }>;
+  readonly angle?: number;
+  readonly durationSeconds?: number;
+  readonly width?: number;
+  readonly height?: number;
+  readonly radius?: number;
+  readonly categoryBits?: number;
+  readonly maskBits?: number;
+  readonly exclude?: readonly Physics2DBodyHandle[];
+  readonly includeSensors?: boolean;
+  readonly maxCandidates?: number;
+}
+
+export type Physics2DShapeCastResult = Readonly<{ body: Physics2DBodyHandle; fraction: number; distance: number }>
+  & (Readonly<{ kind: 'impact'; point: Readonly<{ x: number; y: number }>; normal: Readonly<{ x: number; y: number }> }>
+    | Readonly<{ kind: 'overlap'; fraction: 0; distance: 0; point: null; normal: null }>);
 
 export interface Physics2DRayCastDesc {
   readonly origin: Physics2DVectorLike;
@@ -167,6 +188,7 @@ export interface Physics2DWorldDriver {
 
   queryPoint(x: number, y: number, visitor: (body: Physics2DBodyHandle) => boolean): void;
   castRay(desc: Physics2DRayCastDesc): Physics2DRayHit | null;
+  castShape?(desc: Physics2DShapeCastDesc): Physics2DShapeCastResult | null;
   queryAabb(desc: Physics2DAabbQueryDesc, visitor: (body: Physics2DBodyHandle) => boolean): void;
   drainContactEvents(visitor: (event: Physics2DContactEvent) => void): void;
 

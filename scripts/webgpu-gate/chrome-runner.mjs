@@ -21,6 +21,13 @@ export function defaultWebGpuAngleBackend(platform = process.platform) {
   return 'vulkan';
 }
 
+/** Automated graphs stay silent; real hearing/unlock requires a visible user-operated window. */
+export function chromeAudioArguments(mode = 'silent', presentation = null) {
+  if (mode === 'silent') return ['--mute-audio', '--autoplay-policy=no-user-gesture-required'];
+  if (mode === 'interactive' && presentation?.mode === 'visible') return [];
+  throw new Error('Interactive audio requires an explicitly visible physical-input window; unknown modes are rejected.');
+}
+
 export async function runChromeWebGpuFixture({
   root,
   browserPath,
@@ -37,6 +44,7 @@ export async function runChromeWebGpuFixture({
   disableDx12InfoCollection = false,
   chunkedResult = false,
   presentation = null,
+  audioMode = 'silent',
 }) {
   const chrome = browserPath ?? process.env.CHROME_PATH ?? defaultChromePath();
   if (!existsSync(chrome)) throw new Error(`Chrome/WebGPU gate requires Chrome. Set CHROME_PATH (looked for ${chrome}).`);
@@ -56,6 +64,7 @@ export async function runChromeWebGpuFixture({
       disableDx12InfoCollection,
       chunkedResult,
       presentation,
+      audioMode,
     );
     result.httpProvenance = fixtureServer.provenance();
     return result;
@@ -157,20 +166,19 @@ async function runChrome(
   disableDx12InfoCollection,
   chunkedResult,
   presentation,
+  audioMode,
 ) {
   const angleBackend = process.env.WEBGPU_ANGLE_BACKEND ?? defaultWebGpuAngleBackend();
   if (process.env.WEBGPU_REQUIRE_NATIVE === '1' && isSoftwareBackend(angleBackend)) {
     throw new Error(`Required browser evidence cannot use software WebGPU backend ${angleBackend}.`);
   }
   const presentationArguments = chromePresentationArguments(presentation);
+  const audioArguments = chromeAudioArguments(audioMode, presentation);
   const profile = mkdtempSync(resolve(tmpdir(), 'haiyue-webgpu-gate-'));
   const launchedAt = new Date().toISOString();
   const child = spawn(binary, [
     ...presentationArguments,
-    // Evidence captures exercise real audio scheduling, but a headless gate
-    // must never emit sound through the user's desktop output device.
-    '--mute-audio',
-    '--autoplay-policy=no-user-gesture-required',
+    ...audioArguments,
     '--no-sandbox',
     '--disable-gpu-sandbox',
     '--enable-unsafe-webgpu',
@@ -285,6 +293,7 @@ async function runChrome(
         angleBackend,
         nativeBackend: !isSoftwareBackend(angleBackend),
         presentationMode: presentation ? 'visible-window' : 'headless',
+        audioMode,
         storageMode: 'isolated-memory-context',
         ...(disableDx12InfoCollection ? { disableDx12InfoCollection: true } : {}),
       };

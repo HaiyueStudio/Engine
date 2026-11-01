@@ -18,7 +18,7 @@ export function guiContentMetrics(element: GuiElement, fallbackPadding: number, 
     iconWidth = scale ? width * scale : size; iconHeight = scale ? height * scale : size;
   }
   const gap = iconWidth > 0 ? skin.iconGap ?? 6 : 0;
-  return {insets, iconWidth, iconHeight, gap, horizontal: insets.left + insets.right + iconWidth + gap, vertical: insets.top + insets.bottom};
+  return {insets, iconWidth, iconHeight, gap, iconPosition:skin.iconPosition ?? 'left', horizontal: insets.left + insets.right + iconWidth + gap, vertical: insets.top + insets.bottom};
 }
 
 export function guiContentBox(element: GuiElement, fallbackPadding: number, fontSize: number, r = element.rect) {
@@ -29,7 +29,8 @@ export function guiContentBox(element: GuiElement, fallbackPadding: number, font
     width: Math.max(0, r.width - (i.left + i.right) * xScale), height: Math.max(0, r.height - (i.top + i.bottom) * yScale)};
   const scale = metrics.iconWidth > 0 && metrics.iconHeight > 0 ? Math.min(1, rect.width / metrics.iconWidth, rect.height / metrics.iconHeight) : 0;
   const width = metrics.iconWidth * scale, height = metrics.iconHeight * scale;
-  const icon = width > 0 ? {x: rect.x, y: rect.y + (rect.height - height) / 2, width, height} : null;
+  const right=metrics.iconPosition==='right';
+  const icon = width > 0 ? {x: right ? rect.x + rect.width - width : rect.x, y: rect.y + (rect.height - height) / 2, width, height} : null;
   const offset = Math.min(rect.width, width + (icon ? metrics.gap : 0));
-  return {rect, icon, text: {...rect, x: rect.x + offset, width: Math.max(0, rect.width - offset)}};
+  return {rect, icon, text: {...rect, x: rect.x + (right ? 0 : offset), width: Math.max(0, rect.width - offset)}};
 }

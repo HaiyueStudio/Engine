@@ -3,6 +3,7 @@ import { Entity } from '../ecs/Entity';
 import { System } from '../ecs/System';
 import type { World } from '../ecs/World';
 import { requiredItemAt } from '../math/arrayAccess';
+import { FixedStepClock } from './FixedStepClock';
 import { mat4, quat } from 'wgpu-matrix';
 import type {
   MutablePhysics3DBodyTransform,
@@ -118,7 +119,7 @@ export class Physics3DSystem extends System {
     lockRotations: [false, false, false],
   };
   private readonly _gravity: [number, number, number];
-  private accumulator = 0;
+  private readonly clock = new FixedStepClock();
   private physicsTick = 0;
 
   constructor(options: Physics3DSystemOptions) {
@@ -129,8 +130,7 @@ export class Physics3DSystem extends System {
     this.maxSubSteps = options.maxSubSteps ?? 5;
     this.solverIterations = options.solverIterations ?? 6;
     this.syncStaticBodiesFromTransform = options.syncStaticBodiesFromTransform ?? true;
-    if (!(this.fixedTimeStep > 0)) throw new RangeError('Physics3DSystem fixedTimeStep must be greater than zero.');
-    if (!(this.maxSubSteps > 0)) throw new RangeError('Physics3DSystem maxSubSteps must be greater than zero.');
+    FixedStepClock.validate(this.fixedTimeStep, this.maxSubSteps, 'Physics3DSystem');
     this.physicsWorld = this.backend.createWorld({
       gravity: vector(this._gravity),
       solverIterations: this.solverIterations,
@@ -143,6 +143,9 @@ export class Physics3DSystem extends System {
   get backendId(): string {
     return this.physicsWorld.backendId;
   }
+
+  override get disabled(): boolean { return super.disabled; }
+  override set disabled(value: boolean) { super.disabled = value; if (value) this.clock?.reset(); }
 
   get gravity(): readonly [number, number, number] {
     return this._gravity;
@@ -416,26 +419,23 @@ export class Physics3DSystem extends System {
 
   override update(world: World, _time: number, delta: number): this {
     if (this.disabled) return this;
+    FixedStepClock.validate(this.fixedTimeStep, this.maxSubSteps, 'Physics3DSystem');
+    FixedStepClock.validateDelta(delta);
     this.contactEvents = Object.freeze([]);
     this.syncBodies(world);
     this.syncJoints(world);
 
-    const dt = Math.min(Math.max(delta / 1000, 0), this.fixedTimeStep * this.maxSubSteps);
-    this.accumulator += dt;
-    let steps = 0;
-    while (this.accumulator >= this.fixedTimeStep && steps < this.maxSubSteps) {
-      this.physicsWorld.step(this.fixedTimeStep);
+    this.clock.advance(_time, delta, this.fixedTimeStep, this.maxSubSteps, seconds => {
+      this.physicsWorld.step(seconds);
       this.captureContactStep();
-      this.accumulator -= this.fixedTimeStep;
-      steps++;
-    }
-    if (steps === this.maxSubSteps) this.accumulator = 0;
+    });
 
     this.writeBackTransforms();
     return this;
   }
 
   override destroy(): this {
+    this.clock.reset();
     for (const joint of this.jointEntities.keys()) this.destroyJoint(joint);
     for (const body of this.bodyEntities.keys()) this.destroyBody(body);
     this.physicsWorld.destroy();

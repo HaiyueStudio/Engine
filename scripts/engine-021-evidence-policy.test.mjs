@@ -27,11 +27,11 @@ function movingSparse256Audit() {
   return audit;
 }
 
-test('ADR 0137 admits only the named 0.2.2 CPU line and preserves the original failure', () => {
+test('ADR 0137 and frozen 0.2.3 inheritance preserve only the named CPU investigation and original failure', () => {
   const audit = movingSparse256Audit(), original = JSON.stringify(audit);
   assert.throws(() => assessEngine021G05Audit('rooms', audit), /original performance budget/);
   assert.throws(() => assessEngine021G05Audit('rooms', audit, '0.2.1'), /original performance budget/);
-  assert.throws(() => assessEngine021G05Audit('rooms', audit, '0.2.3'), /target version/);
+  assert.throws(() => assessEngine021G05Audit('rooms', audit, '0.2.4'), /target version/);
   const accepted = assessEngine021G05Audit('rooms', audit, '0.2.2');
   assert.equal(accepted.status, 'passed'); assert.equal(accepted.originalStatus, 'failed');
   assert.equal(accepted.hardPerformanceChecks, 58);
@@ -41,6 +41,9 @@ test('ADR 0137 admits only the named 0.2.2 CPU line and preserves the original f
   const data = fixture(); data.audits.rooms = audit; data.reports.rooms.status = 'failed';
   assert.throws(() => completeEngine021EvidenceAudit(data.audits, data.reports), /original performance budget/);
   assert.equal(completeEngine021EvidenceAudit(data.audits, data.reports, '0.2.2').releaseQualified, false);
+  const inherited=assessEngine021G05Audit('rooms',audit,'0.2.3');assert.deepEqual(inherited,accepted);
+  assert.equal(completeEngine021EvidenceAudit(data.audits,data.reports,'0.2.3').releaseQualified,false);
+  assert.equal(JSON.stringify(audit),original);
 });
 
 test('ADR 0137 cannot waive another workload, algorithm, timing channel, limit or malformed raw check', () => {
@@ -50,14 +53,14 @@ test('ADR 0137 cannot waive another workload, algorithm, timing channel, limit o
     c => c.job.full = false, c => c.job.idleMs = 120000, c => c.job.cohort = 1, c => delete c.job,
     c => c.metric = 'gpuP95Ms', c => c.metric = 'frameWallP95Ms', c => c.metric = 'cpuRecordMs',
     c => c.limit = 3.9, c => c.observed = NaN, c => c.observed = Infinity, c => c.passed = true,
-  ]) { const audit = movingSparse256Audit(); mutate(audit.checks[0]); assert.throws(() => assessEngine021G05Audit('rooms', audit, '0.2.2')); }
+  ]) { for(const version of ['0.2.2','0.2.3']){const audit = movingSparse256Audit(); mutate(audit.checks[0]); assert.throws(() => assessEngine021G05Audit('rooms', audit, version));} }
   for (const mutate of [
     a => { a.checks[2] = {metric:'gpuP95Ms', observed:12.1, limit:12, passed:false}; },
     a => { a.checks[2] = {metric:'frameWallP95Ms', observed:17, limit:16.666666666666668, passed:false}; },
     a => { a.memory[0].status = 'failed'; }, a => { a.checks.pop(); }, a => { a.captures--; },
     a => { a.checks[1].job.browserId = 'chrome-windows'; }, a => { delete a.checks[1].job; },
     a => { a.cleanCandidate = false; }, a => { a.status = 'passed'; },
-  ]) { const audit = movingSparse256Audit(); mutate(audit); assert.throws(() => assessEngine021G05Audit('rooms', audit, '0.2.2')); }
+  ]) { for(const version of ['0.2.2','0.2.3']){const audit = movingSparse256Audit(); mutate(audit); assert.throws(() => assessEngine021G05Audit('rooms', audit, version));} }
   const edge = movingSparse256Audit(); Object.assign(edge.checks[1], {observed:4.2, passed:false});
   assert.equal(assessEngine021G05Audit('rooms', edge, '0.2.2').cpuAbsoluteInvestigations.length, 2);
 });

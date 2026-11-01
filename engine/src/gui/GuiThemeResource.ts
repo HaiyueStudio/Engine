@@ -18,6 +18,7 @@ const empty: GuiSkin = Object.freeze({});
 let revision = 0;
 
 function skin(value: GuiSkin): GuiSkin {
+  if(value.iconPosition!==undefined&&!['left','right'].includes(value.iconPosition))throw new TypeError('Invalid GUI theme icon position.');
   for (const name of ['fontSize', 'iconSize', 'iconGap', 'radius', 'padding', 'opacity'] as const) {
     const number = value[name];
     if (number !== undefined && (!Number.isFinite(number) || number < 0 || (name === 'opacity' && number > 1))) throw new RangeError(`Invalid theme ${name}.`);

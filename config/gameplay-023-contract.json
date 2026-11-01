@@ -1,0 +1,1804 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haiyue-gameplay-023/1",
+  "status": "frozen",
+  "goal": "g01-contracts-baseline",
+  "releaseQualification": false,
+  "authorization": "User requested complete G01 and named GUI additions; this freezes contracts, not runtime implementation/publication.",
+  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
+  "adr": "docs/for-ai/adr/0139-engine-023-gameplay-contracts.md",
+  "publishedBaseline": {
+    "version": "0.2.2",
+    "tag": "v0.2.2",
+    "tagRevision": "69ad05eacc25675ef6132c2d6da819c2b8d64573",
+    "runtimeBuildRevision": "d58835a9d14c711f26374c5eed00851f4e4649c2",
+    "receipt": "https://github.com/HaiyueStudio/Engine/releases/download/v0.2.2/publication-result.json",
+    "receiptSha256": "0aff32d45c727b85cae88de8109d50008225acdcad33db9968e71d9440ccfa43"
+  },
+  "versions": {
+    "publish": {
+      "@haiyue/engine": "0.2.3",
+      "@haiyue/extensions": "0.2.3",
+      "@haiyue/shader-language": "0.2.3"
+    },
+    "unchanged": {
+      "@haiyue/animation-spec": "0.2.2"
+    },
+    "extensionsEnginePeer": ">=0.2.3 <0.3.0",
+    "breakingChangesAllowed": false,
+    "formatChanges": false,
+    "newThirdPartyDependencies": []
+  },
+  "api": {
+    "rootExportCount": 30,
+    "rootExports": [
+      {
+        "name": "BasicMaterial",
+        "kind": "value"
+      },
+      {
+        "name": "Camera2D",
+        "kind": "value"
+      },
+      {
+        "name": "Camera3D",
+        "kind": "value"
+      },
+      {
+        "name": "CartesianTransform3D",
+        "kind": "value"
+      },
+      {
+        "name": "ColorSRGB",
+        "kind": "value"
+      },
+      {
+        "name": "Component",
+        "kind": "value"
+      },
+      {
+        "name": "createBox3D",
+        "kind": "value"
+      },
+      {
+        "name": "createPlane3D",
+        "kind": "value"
+      },
+      {
+        "name": "createSphere3D",
+        "kind": "value"
+      },
+      {
+        "name": "DirectionalLight",
+        "kind": "value"
+      },
+      {
+        "name": "EngineError",
+        "kind": "value"
+      },
+      {
+        "name": "EngineErrorCode",
+        "kind": "value"
+      },
+      {
+        "name": "Entity",
+        "kind": "value"
+      },
+      {
+        "name": "EnvironmentLight",
+        "kind": "value"
+      },
+      {
+        "name": "Geometry2D",
+        "kind": "value"
+      },
+      {
+        "name": "Geometry3D",
+        "kind": "value"
+      },
+      {
+        "name": "HaiyueEngine",
+        "kind": "value"
+      },
+      {
+        "name": "HaiyueEngineOptions",
+        "kind": "type"
+      },
+      {
+        "name": "Material2D",
+        "kind": "value"
+      },
+      {
+        "name": "Mesh2D",
+        "kind": "value"
+      },
+      {
+        "name": "Mesh3D",
+        "kind": "value"
+      },
+      {
+        "name": "OrbitControl",
+        "kind": "value"
+      },
+      {
+        "name": "PbrMaterial",
+        "kind": "value"
+      },
+      {
+        "name": "RenderProfileName",
+        "kind": "type"
+      },
+      {
+        "name": "Scene",
+        "kind": "value"
+      },
+      {
+        "name": "SceneOptions",
+        "kind": "type"
+      },
+      {
+        "name": "SphericalTransform3D",
+        "kind": "value"
+      },
+      {
+        "name": "System",
+        "kind": "value"
+      },
+      {
+        "name": "Transform2D",
+        "kind": "value"
+      },
+      {
+        "name": "World",
+        "kind": "value"
+      }
+    ],
+    "declarations": "review/engine-0.2.3/api-contract.d.ts",
+    "declarationSha256": "dd6b53cd8a901905f146bc4c118348e3d08350d6808fe51028a80a52532f3e07",
+    "entries": [
+      {
+        "namespace": "GuiCore",
+        "package": "@haiyue/engine",
+        "subpath": "./gui",
+        "stability": "stable-on-integration",
+        "owner": "g10",
+        "baselineExports": [
+          {
+            "name": "containsPoint",
+            "kind": "value"
+          },
+          {
+            "name": "DEFAULT_GUI_THEME",
+            "kind": "value"
+          },
+          {
+            "name": "deserializeGuiElement",
+            "kind": "value"
+          },
+          {
+            "name": "deserializeGuiRoot",
+            "kind": "value"
+          },
+          {
+            "name": "GuiActionEvent",
+            "kind": "type"
+          },
+          {
+            "name": "GuiBatch",
+            "kind": "value"
+          },
+          {
+            "name": "GuiButton",
+            "kind": "value"
+          },
+          {
+            "name": "GuiButtonOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiCheckbox",
+            "kind": "value"
+          },
+          {
+            "name": "GuiCheckboxOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiColorPicker",
+            "kind": "value"
+          },
+          {
+            "name": "GuiColorPickerOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiDeserializeOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiDirtyFlags",
+            "kind": "value"
+          },
+          {
+            "name": "GuiDragSession",
+            "kind": "type"
+          },
+          {
+            "name": "GuiDragSource",
+            "kind": "type"
+          },
+          {
+            "name": "GuiDropTarget",
+            "kind": "type"
+          },
+          {
+            "name": "GuiElement",
+            "kind": "value"
+          },
+          {
+            "name": "GuiElementOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiFocusManager",
+            "kind": "value"
+          },
+          {
+            "name": "GuiFocusMode",
+            "kind": "type"
+          },
+          {
+            "name": "GuiFocusOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiFontOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiHelpDialog",
+            "kind": "value"
+          },
+          {
+            "name": "GuiHelpDialogOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiImage",
+            "kind": "value"
+          },
+          {
+            "name": "GuiImageBatch",
+            "kind": "value"
+          },
+          {
+            "name": "GuiImageCommand",
+            "kind": "type"
+          },
+          {
+            "name": "GuiImageOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiImageRenderer",
+            "kind": "value"
+          },
+          {
+            "name": "GuiImageSource",
+            "kind": "type"
+          },
+          {
+            "name": "GuiInput",
+            "kind": "value"
+          },
+          {
+            "name": "GuiInputOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiInvalidation",
+            "kind": "type"
+          },
+          {
+            "name": "GuiInvalidationReason",
+            "kind": "type"
+          },
+          {
+            "name": "GuiLabel",
+            "kind": "value"
+          },
+          {
+            "name": "GuiLabelOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiLabelTextAlign",
+            "kind": "type"
+          },
+          {
+            "name": "GuiLayoutDelegate",
+            "kind": "type"
+          },
+          {
+            "name": "GuiLength",
+            "kind": "type"
+          },
+          {
+            "name": "GuiMeasureConstraint",
+            "kind": "type"
+          },
+          {
+            "name": "GuiModal",
+            "kind": "value"
+          },
+          {
+            "name": "GuiModalCloseHandler",
+            "kind": "type"
+          },
+          {
+            "name": "GuiModalCloseReason",
+            "kind": "type"
+          },
+          {
+            "name": "GuiModalHandler",
+            "kind": "type"
+          },
+          {
+            "name": "GuiModalOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiNineSlice",
+            "kind": "value"
+          },
+          {
+            "name": "GuiNineSliceOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiPointerEvent",
+            "kind": "type"
+          },
+          {
+            "name": "GuiPointerFilter",
+            "kind": "type"
+          },
+          {
+            "name": "GuiPointerHandler",
+            "kind": "type"
+          },
+          {
+            "name": "GuiProgress",
+            "kind": "value"
+          },
+          {
+            "name": "GuiProgressOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiRadio",
+            "kind": "value"
+          },
+          {
+            "name": "GuiRadioOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiRect",
+            "kind": "type"
+          },
+          {
+            "name": "GuiRenderer",
+            "kind": "value"
+          },
+          {
+            "name": "GuiRgba",
+            "kind": "type"
+          },
+          {
+            "name": "GuiRoot",
+            "kind": "value"
+          },
+          {
+            "name": "GuiRootOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiScrollView",
+            "kind": "value"
+          },
+          {
+            "name": "GuiScrollViewOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiSelect",
+            "kind": "value"
+          },
+          {
+            "name": "GuiSelectOption",
+            "kind": "type"
+          },
+          {
+            "name": "GuiSelectOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiSerializedElement",
+            "kind": "type"
+          },
+          {
+            "name": "GuiSerializedElementType",
+            "kind": "type"
+          },
+          {
+            "name": "GuiSerializedRoot",
+            "kind": "type"
+          },
+          {
+            "name": "GuiSerializedValue",
+            "kind": "type"
+          },
+          {
+            "name": "GuiShapeCommand",
+            "kind": "type"
+          },
+          {
+            "name": "GuiShapeRenderer",
+            "kind": "value"
+          },
+          {
+            "name": "GuiSkin",
+            "kind": "type"
+          },
+          {
+            "name": "GuiSlider",
+            "kind": "value"
+          },
+          {
+            "name": "GuiSliderOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiStyle",
+            "kind": "type"
+          },
+          {
+            "name": "GuiSwitch",
+            "kind": "value"
+          },
+          {
+            "name": "GuiSwitchOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiSystem",
+            "kind": "value"
+          },
+          {
+            "name": "GuiSystemOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiTextBatch",
+            "kind": "value"
+          },
+          {
+            "name": "GuiTextCommand",
+            "kind": "type"
+          },
+          {
+            "name": "GuiTextComposition",
+            "kind": "type"
+          },
+          {
+            "name": "GuiTextEdit",
+            "kind": "type"
+          },
+          {
+            "name": "GuiTextInputHost",
+            "kind": "type"
+          },
+          {
+            "name": "GuiTextInputSession",
+            "kind": "type"
+          },
+          {
+            "name": "GuiTextRenderer",
+            "kind": "value"
+          },
+          {
+            "name": "GuiTheme",
+            "kind": "type"
+          },
+          {
+            "name": "GuiThemeResource",
+            "kind": "value"
+          },
+          {
+            "name": "GuiThemeState",
+            "kind": "type"
+          },
+          {
+            "name": "GuiToast",
+            "kind": "value"
+          },
+          {
+            "name": "GuiToastOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiTooltip",
+            "kind": "value"
+          },
+          {
+            "name": "GuiTooltipOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiTooltipPlacement",
+            "kind": "type"
+          },
+          {
+            "name": "GuiTree",
+            "kind": "value"
+          },
+          {
+            "name": "GuiTreeNode",
+            "kind": "type"
+          },
+          {
+            "name": "GuiTreeOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiTreeVisibleNode",
+            "kind": "type"
+          },
+          {
+            "name": "GuiValueChangeHandler",
+            "kind": "type"
+          },
+          {
+            "name": "hitTestGui",
+            "kind": "value"
+          },
+          {
+            "name": "measureGuiTextWidth",
+            "kind": "value"
+          },
+          {
+            "name": "parseGuiColor",
+            "kind": "value"
+          },
+          {
+            "name": "resolveGuiLength",
+            "kind": "value"
+          },
+          {
+            "name": "serializeGuiElement",
+            "kind": "value"
+          },
+          {
+            "name": "serializeGuiRoot",
+            "kind": "value"
+          },
+          {
+            "name": "withGuiAlpha",
+            "kind": "value"
+          }
+        ],
+        "newExports": [
+          "GuiIconPosition"
+        ],
+        "augmentExisting": [],
+        "targetExportCount": 107,
+        "unusedSymbolReserve": 0
+      },
+      {
+        "namespace": "Physics",
+        "package": "@haiyue/engine",
+        "subpath": "./physics",
+        "stability": "stable-on-integration",
+        "owner": "g04",
+        "baselineExports": [
+          {
+            "name": "Physics2DBody",
+            "kind": "value"
+          },
+          {
+            "name": "Physics2DBodyOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DBodyType",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DContactEvent",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DJoint",
+            "kind": "value"
+          },
+          {
+            "name": "Physics2DJointOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DJointType",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DRaycastResult",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DResourceSnapshot",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DShapeType",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DSystem",
+            "kind": "value"
+          },
+          {
+            "name": "Physics2DSystemOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DTo3DPlane",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DTo3DRotationAxis",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DTo3DSource",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DTo3DTransformSync",
+            "kind": "value"
+          },
+          {
+            "name": "Physics2DTo3DTransformSyncOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DTo3DTransformSyncSystem",
+            "kind": "value"
+          },
+          {
+            "name": "Physics2DTo3DTransformSyncSystemOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBody",
+            "kind": "value"
+          },
+          {
+            "name": "Physics3DBodyOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBodyRef",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBodyType",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBuoyancy",
+            "kind": "value"
+          },
+          {
+            "name": "Physics3DBuoyancyOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBuoyancySystem",
+            "kind": "value"
+          },
+          {
+            "name": "Physics3DBuoyancySystemOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DContactEvent",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DDragOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DGravitySource",
+            "kind": "value"
+          },
+          {
+            "name": "Physics3DGravitySourceOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DGravitySystem",
+            "kind": "value"
+          },
+          {
+            "name": "Physics3DGravitySystemOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DJoint",
+            "kind": "value"
+          },
+          {
+            "name": "Physics3DJointOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DJointTarget",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DJointType",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DRaycastResult",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DResourceSnapshot",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DShapeType",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DSystem",
+            "kind": "value"
+          },
+          {
+            "name": "Physics3DSystemOptions",
+            "kind": "type"
+          }
+        ],
+        "newExports": [
+          "Physics2DShapeCastOptions",
+          "Physics2DShapeCastHit",
+          "Physics2DFixedStepEvent"
+        ],
+        "augmentExisting": [],
+        "targetExportCount": 45,
+        "unusedSymbolReserve": 0
+      },
+      {
+        "namespace": "PhysicsBackend",
+        "package": "@haiyue/engine",
+        "subpath": "./physics/backend",
+        "stability": "stable-on-integration",
+        "owner": "g04",
+        "baselineExports": [
+          {
+            "name": "createBox2DPhysics2DBackend",
+            "kind": "value"
+          },
+          {
+            "name": "createRapierPhysics3DBackend",
+            "kind": "value"
+          },
+          {
+            "name": "MutablePhysics2DBodyTransform",
+            "kind": "type"
+          },
+          {
+            "name": "MutablePhysics2DVector",
+            "kind": "type"
+          },
+          {
+            "name": "MutablePhysics3DBodyTransform",
+            "kind": "type"
+          },
+          {
+            "name": "MutablePhysics3DQuaternion",
+            "kind": "type"
+          },
+          {
+            "name": "MutablePhysics3DVector",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DBackend",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DBackendBodyDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DBackendColliderDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DBackendDistanceJointDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DBackendJointDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DBackendMouseJointDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DBackendRevoluteJointDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DBackendWorldOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DBodyHandle",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DBodyRef",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DCapabilities",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DJointHandle",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DJointTarget",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DMouseJointOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DVectorLike",
+            "kind": "type"
+          },
+          {
+            "name": "Physics2DWorldDriver",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBackend",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBackendBodyDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBackendColliderDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBackendDragDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBackendFixedJointDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBackendJointDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBackendPrismaticJointDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBackendRevoluteJointDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBackendRopeJointDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBackendSphericalJointDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBackendSpringJointDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBackendWorldOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DBodyHandle",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DCapabilities",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DDragHandle",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DJointHandle",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DQuaternionLike",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DRayCastDesc",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DRayHit",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DVectorLike",
+            "kind": "type"
+          },
+          {
+            "name": "Physics3DWorldDriver",
+            "kind": "type"
+          }
+        ],
+        "newExports": [
+          "Physics2DShapeCastDesc",
+          "Physics2DShapeCastResult"
+        ],
+        "augmentExisting": [],
+        "targetExportCount": 46,
+        "unusedSymbolReserve": 0
+      },
+      {
+        "namespace": "Input",
+        "package": "@haiyue/engine",
+        "subpath": "./input",
+        "stability": "stable-on-integration",
+        "owner": "g06",
+        "baselineExports": [
+          {
+            "name": "InputActionBindings",
+            "kind": "type"
+          },
+          {
+            "name": "InputActionSnapshot",
+            "kind": "type"
+          },
+          {
+            "name": "InputMap",
+            "kind": "value"
+          }
+        ],
+        "newExports": [
+          "GamepadAxisBinding",
+          "KeyboardAxisBinding",
+          "InputActionBinding",
+          "InputActionMapDescriptor",
+          "StandardGamepadSnapshot",
+          "InputActionValue",
+          "InputActionMap"
+        ],
+        "augmentExisting": [],
+        "targetExportCount": 10,
+        "unusedSymbolReserve": 0
+      },
+      {
+        "namespace": "AudioCore",
+        "package": "@haiyue/engine",
+        "subpath": "./audio",
+        "stability": "stable-on-integration",
+        "owner": "g09",
+        "baselineExports": [],
+        "newExports": [
+          "AudioMixerBus",
+          "AudioMixerPlayRequest",
+          "OwnerSafeAudioMixerOptions",
+          "AudioMixerStats",
+          "AudioMixerVolumes",
+          "AudioMixerCapabilities",
+          "OwnerSafeAudioMixer"
+        ],
+        "augmentExisting": [],
+        "targetExportCount": 7,
+        "unusedSymbolReserve": 0
+      },
+      {
+        "namespace": "SceneFlow",
+        "package": "@haiyue/extensions",
+        "subpath": "./scene-flow",
+        "stability": "stable-on-integration",
+        "owner": "g03",
+        "baselineExports": [],
+        "newExports": [
+          "SceneFlowProgress",
+          "SceneFlowRequest",
+          "SceneFlowOptions",
+          "PreparedScene",
+          "SceneFlow",
+          "createSceneFlow"
+        ],
+        "augmentExisting": [],
+        "targetExportCount": 6,
+        "unusedSymbolReserve": 0
+      },
+      {
+        "namespace": "Character2D",
+        "package": "@haiyue/extensions",
+        "subpath": "./character2d",
+        "stability": "stable-on-integration",
+        "owner": "g04",
+        "baselineExports": [],
+        "newExports": [
+          "Character2DOptions",
+          "Character2DState",
+          "Character2DController",
+          "createCharacter2D"
+        ],
+        "augmentExisting": [],
+        "targetExportCount": 4,
+        "unusedSymbolReserve": 0
+      },
+      {
+        "namespace": "Camera2D",
+        "package": "@haiyue/extensions",
+        "subpath": "./camera2d",
+        "stability": "stable-on-integration",
+        "owner": "g05",
+        "baselineExports": [],
+        "newExports": [
+          "Camera2DControllerOptions",
+          "Camera2DControllerState",
+          "Camera2DController",
+          "createCamera2DController"
+        ],
+        "augmentExisting": [],
+        "targetExportCount": 4,
+        "unusedSymbolReserve": 0
+      },
+      {
+        "namespace": "InputProfiles",
+        "package": "@haiyue/extensions",
+        "subpath": "./input-actions",
+        "stability": "stable-on-integration",
+        "owner": "g06",
+        "baselineExports": [],
+        "newExports": [
+          "InputBindingSample",
+          "InputBindingConflict",
+          "InputBindingProfileData",
+          "InputBindingProfileOptions",
+          "InputBindingProfile",
+          "createInputBindingProfile"
+        ],
+        "augmentExisting": [],
+        "targetExportCount": 6,
+        "unusedSymbolReserve": 0
+      },
+      {
+        "namespace": "GuiCollections",
+        "package": "@haiyue/extensions",
+        "subpath": "./gui-collections",
+        "stability": "stable-on-integration",
+        "owner": "g07",
+        "baselineExports": [],
+        "newExports": [
+          "GuiCollectionRow",
+          "GuiCollectionStats",
+          "GuiVirtualListOptions",
+          "GuiVirtualTreeNode",
+          "GuiVirtualTreeOptions",
+          "GuiVirtualList",
+          "GuiVirtualTree",
+          "createGuiVirtualList",
+          "createGuiVirtualTree"
+        ],
+        "augmentExisting": [],
+        "targetExportCount": 9,
+        "unusedSymbolReserve": 0
+      },
+      {
+        "namespace": "Tilemap",
+        "package": "@haiyue/extensions",
+        "subpath": "./tilemap",
+        "stability": "stable-on-integration",
+        "owner": "g08",
+        "baselineExports": [
+          {
+            "name": "createTilemapPlugin",
+            "kind": "value"
+          },
+          {
+            "name": "Tilemap2DComponent",
+            "kind": "value"
+          },
+          {
+            "name": "Tilemap2DComponentOptions",
+            "kind": "type"
+          },
+          {
+            "name": "Tilemap2DRenderSystem",
+            "kind": "value"
+          },
+          {
+            "name": "Tilemap2DRenderSystemOptions",
+            "kind": "type"
+          },
+          {
+            "name": "TilemapCellValue",
+            "kind": "type"
+          },
+          {
+            "name": "TilemapPaletteColor",
+            "kind": "type"
+          },
+          {
+            "name": "TilemapPluginOptions",
+            "kind": "type"
+          }
+        ],
+        "newExports": [
+          "TilemapAtlasOptions",
+          "TilemapCellTransform"
+        ],
+        "augmentExisting": [],
+        "targetExportCount": 10,
+        "unusedSymbolReserve": 0
+      },
+      {
+        "namespace": "GameAudio",
+        "package": "@haiyue/extensions",
+        "subpath": "./audio",
+        "stability": "stable-on-integration",
+        "owner": "g09",
+        "baselineExports": [],
+        "newExports": [
+          "GameAudioProfile",
+          "GameAudioOptions",
+          "GameAudioEmitterOptions",
+          "GameAudio",
+          "createGameAudio"
+        ],
+        "augmentExisting": [],
+        "targetExportCount": 5,
+        "unusedSymbolReserve": 0
+      },
+      {
+        "namespace": "GuiLayout",
+        "package": "@haiyue/extensions",
+        "subpath": "./gui-layout",
+        "stability": "stable-on-integration",
+        "owner": "g10",
+        "baselineExports": [
+          {
+            "name": "attachGuiLayout",
+            "kind": "value"
+          },
+          {
+            "name": "createGuiContainer",
+            "kind": "value"
+          },
+          {
+            "name": "GuiContainerPreset",
+            "kind": "type"
+          },
+          {
+            "name": "GuiLayoutBinding",
+            "kind": "type"
+          },
+          {
+            "name": "GuiLayoutMeasurement",
+            "kind": "type"
+          },
+          {
+            "name": "GuiLayoutOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiSplitPanel",
+            "kind": "value"
+          },
+          {
+            "name": "GuiSplitPanelOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiTabContainer",
+            "kind": "value"
+          },
+          {
+            "name": "GuiTabContainerOptions",
+            "kind": "type"
+          },
+          {
+            "name": "GuiTabPage",
+            "kind": "type"
+          }
+        ],
+        "newExports": [
+          "GuiTabHeaderOptions"
+        ],
+        "augmentExisting": [
+          "GuiTabPage",
+          "GuiTabContainer"
+        ],
+        "targetExportCount": 12,
+        "unusedSymbolReserve": 0
+      },
+      {
+        "namespace": "GuiControls",
+        "package": "@haiyue/extensions",
+        "subpath": "./gui-controls",
+        "stability": "stable-on-integration",
+        "owner": "g10",
+        "baselineExports": [],
+        "newExports": [
+          "GuiBreadcrumbMenuItem",
+          "GuiBreadcrumbItem",
+          "GuiBreadcrumbOptions",
+          "GuiBreadcrumb",
+          "GuiBadgeValue",
+          "GuiBadgeStatus",
+          "GuiBadgePlacement",
+          "GuiBadgeOptions",
+          "GuiBadge",
+          "GuiCollapseItem",
+          "GuiCollapseOptions",
+          "GuiCollapse"
+        ],
+        "augmentExisting": [],
+        "targetExportCount": 12,
+        "unusedSymbolReserve": 0
+      }
+    ],
+    "promotions": {
+      "Input": [
+        "GamepadAxisBinding",
+        "InputActionBinding",
+        "InputActionMapDescriptor",
+        "StandardGamepadSnapshot",
+        "InputActionValue",
+        "InputActionMap"
+      ],
+      "AudioCore": [
+        "AudioMixerBus",
+        "AudioMixerPlayRequest",
+        "OwnerSafeAudioMixerOptions",
+        "AudioMixerStats",
+        "OwnerSafeAudioMixer"
+      ]
+    },
+    "identity": "Promoted classes re-export original owners; experimental/simulation and experimental/audio names retained. No aggregate experimental additions.",
+    "liveBaselineMutationInG01": false,
+    "baseline": "review/engine-0.2.3/api-baseline-0.2.2.json",
+    "baselineSha256": "e0e52a56ac8590d9138f4f4589b6e9eb3756eec5b20255b9438c642b6ac05486"
+  },
+  "errors": [
+    {
+      "member": "GameplayInvalidInput",
+      "code": "E_GAMEPLAY_INVALID_INPUT",
+      "owner": "g11",
+      "class": "EngineError",
+      "docsPath": "docs/api/errors.md#e-gameplay-invalid-input"
+    },
+    {
+      "member": "SceneFlowAborted",
+      "code": "E_SCENE_FLOW_ABORTED",
+      "owner": "g03",
+      "class": "EngineError",
+      "docsPath": "docs/api/errors.md#e-scene-flow-aborted"
+    },
+    {
+      "member": "SceneFlowSuperseded",
+      "code": "E_SCENE_FLOW_SUPERSEDED",
+      "owner": "g03",
+      "class": "EngineError",
+      "docsPath": "docs/api/errors.md#e-scene-flow-superseded"
+    },
+    {
+      "member": "PhysicsShapeCastUnsupported",
+      "code": "E_PHYSICS_SHAPE_CAST_UNSUPPORTED",
+      "owner": "g04",
+      "class": "EngineError",
+      "docsPath": "docs/api/errors.md#e-physics-shape-cast-unsupported"
+    },
+    {
+      "member": "PhysicsQueryLimit",
+      "code": "E_PHYSICS_QUERY_LIMIT",
+      "owner": "g04",
+      "class": "EngineError",
+      "docsPath": "docs/api/errors.md#e-physics-query-limit"
+    },
+    {
+      "member": "CharacterBodyOwnership",
+      "code": "E_CHARACTER_BODY_OWNERSHIP",
+      "owner": "g04",
+      "class": "EngineError",
+      "docsPath": "docs/api/errors.md#e-character-body-ownership"
+    },
+    {
+      "member": "InputBindingConflict",
+      "code": "E_INPUT_BINDING_CONFLICT",
+      "owner": "g06",
+      "class": "EngineError",
+      "docsPath": "docs/api/errors.md#e-input-binding-conflict"
+    },
+    {
+      "member": "InputProfileInvalid",
+      "code": "E_INPUT_PROFILE_INVALID",
+      "owner": "g06",
+      "class": "EngineError",
+      "docsPath": "docs/api/errors.md#e-input-profile-invalid"
+    },
+    {
+      "member": "GuiCollectionLimit",
+      "code": "E_GUI_COLLECTION_LIMIT",
+      "owner": "g07",
+      "class": "EngineError",
+      "docsPath": "docs/api/errors.md#e-gui-collection-limit"
+    },
+    {
+      "member": "GuiControlStateInvalid",
+      "code": "E_GUI_CONTROL_STATE_INVALID",
+      "owner": "g10",
+      "class": "EngineError",
+      "docsPath": "docs/api/errors.md#e-gui-control-state-invalid"
+    },
+    {
+      "member": "AudioCapabilityUnavailable",
+      "code": "E_AUDIO_CAPABILITY_UNAVAILABLE",
+      "owner": "g09",
+      "class": "EngineError",
+      "docsPath": "docs/api/errors.md#e-audio-capability-unavailable"
+    }
+  ],
+  "backend": {
+    "package": "box2d.ts",
+    "version": "1.0.2",
+    "shapes": [
+      "box",
+      "circle"
+    ],
+    "algorithm": "installed b2ShapeCast + b2Distance witness + collision manifold",
+    "optionalDriverCapability": true,
+    "publicUnits": "render-units",
+    "driverUnits": "meters",
+    "linearSlopMeters": 0.008,
+    "rawOutputPointUsable": false,
+    "contactPoint": "distance witness on target + target proxy radius * cast normal at TOI",
+    "initialPenetration": "overlap result: fraction=0,distance=0,point=null,normal=null; no automatic depenetration",
+    "touching": "within slop; tangent/away ignored, inward blocked using manifold normal",
+    "maxIterations": 20,
+    "movingPlatforms": "translation-only kinematic constant linear velocity; optional durationSeconds defaults 0 (frozen target); relative translation = caller translation - target velocity * duration; target witness shifted by target displacement * fraction; no rotating/deforming platform promise",
+    "unsupported": "factory fails with E_PHYSICS_SHAPE_CAST_UNSUPPORTED; no ray/AABB approximation",
+    "candidateOverflow": "throw E_PHYSICS_QUERY_LIMIT; never truncate silently",
+    "broadphase": "query swept actor bounds plus swept-AABB candidates from original kinematic body registry when durationSeconds>0; candidate limit applies after conservative filtering; no missed entering platform"
+  },
+  "limits": {
+    "sceneFlow": {
+      "concurrencyDefault": 4,
+      "concurrencyMax": 16,
+      "maxRequestsDefault": 256,
+      "maxRequestsMax": 4096,
+      "preparedScenesPerFlow": 1
+    },
+    "character": {
+      "maxSlidesDefault": 4,
+      "maxSlidesMax": 16,
+      "maxQueryCandidates": 256,
+      "upDefault": [
+        0,
+        1
+      ],
+      "maxSlopeAngleRadians": 0.7853981633974483,
+      "floorSnapDefaultRenderUnits": 4,
+      "safeMarginDefaultMeters": 0.008
+    },
+    "inputProfile": {
+      "maxActionsDefault": 256,
+      "maxActionsMax": 4096,
+      "captureAxisThreshold": 0.5,
+      "neutralThreshold": 0.15,
+      "conflictDefault": "reject"
+    },
+    "collections": {
+      "maxItemsDefault": 100000,
+      "maxItemsMax": 1000000,
+      "overscanDefault": 2,
+      "overscanMax": 32,
+      "maxVisibleRows": 256,
+      "rowHeightBaseline": 28,
+      "viewportBaseline": 560
+    },
+    "tilemap": {
+      "chunkSizeDefault": 32,
+      "chunkSizeMax": 64,
+      "maxResidentChunksDefault": 64,
+      "maxResidentChunksMax": 256,
+      "maxAtlasDimension": 4096,
+      "maxCpuMapCells": 1048576
+    },
+    "audio": {
+      "voicesDefault": 128,
+      "voicesPerOwnerDefault": 32,
+      "voicesAbsoluteMax": 1024,
+      "decodedChannelsMax": 2,
+      "emittersMax": 128
+    },
+    "controls": {
+      "tabsMax": 256,
+      "breadcrumbItemsMax": 128,
+      "breadcrumbMenuItemsMax": 128,
+      "collapseItemsMax": 256,
+      "badgeOverflowDefault": 99
+    }
+  },
+  "gui": {
+    "requiredCapabilities": [
+      "tabs-icon-left-right",
+      "breadcrumb",
+      "badge",
+      "collapse"
+    ],
+    "iconPositions": [
+      "left",
+      "right"
+    ],
+    "iconDefault": "left",
+    "noIconGap": 0,
+    "contentOwner": "existing GuiContent metrics and paint geometry",
+    "contentOwnership": "borrowed",
+    "focusAndImeOwner": "existing GUI input domain and editor",
+    "breadcrumb": {
+      "separator": "/",
+      "currentDefault": "last enabled item",
+      "menuLevels": 1,
+      "navigation": "application callback once; no router/history dependency"
+    },
+    "badge": {
+      "variants": [
+        "count",
+        "dot",
+        "status"
+      ],
+      "showZero": false,
+      "pointerAndFocus": "decoration ignores input; borrowed content keeps input",
+      "processingAnimation": "none required; static status semantics"
+    },
+    "collapse": {
+      "accordionDefault": false,
+      "expandedDefault": [],
+      "preserveContent": true,
+      "toggleDefault": "header",
+      "collapseFocus": "cancel unconfirmed preedit via existing host policy, move to header before detach"
+    }
+  },
+  "sampling": {
+    "warmup": 12,
+    "samplesPerCohort": 30,
+    "rounds": 3,
+    "order": "round 2 reverse workload order",
+    "mutationsPercent": [
+      0,
+      1,
+      10
+    ],
+    "timing": "CPU wall, per-phase raw samples; no GPU timing from audit device",
+    "workloads": [
+      {
+        "id": "hud",
+        "nodes": 128,
+        "textRatio": 0.25,
+        "class": "production",
+        "tree": "one root, flat fixed 40x24 children, wrap, gap 4; fixed synthetic fixture text"
+      },
+      {
+        "id": "pressure",
+        "nodes": 1000,
+        "textRatio": 0.25,
+        "class": "stress",
+        "tree": "same deterministic generator"
+      },
+      {
+        "id": "diagnostic",
+        "nodes": 10000,
+        "textRatio": 0.25,
+        "class": "diagnostic",
+        "tree": "same deterministic generator"
+      }
+    ]
+  },
+  "acceptance": {
+    "cpuPhaseLimitsMs": {
+      "hud": {
+        "layoutP95": 2,
+        "measureP95": 2,
+        "guiUpdateSubmitP95": 4
+      },
+      "pressure": {
+        "layoutP95": 8,
+        "measureP95": 8,
+        "guiUpdateSubmitP95": null
+      },
+      "diagnostic": {
+        "layoutP95": null,
+        "measureP95": null,
+        "guiUpdateSubmitP95": null
+      }
+    },
+    "framePacingSource": "config/framegraph-production-021.json",
+    "targetFps": 60,
+    "frameP95Ms": 20,
+    "frameP99Ms": 34,
+    "longFrameMs": 50,
+    "longFrameRatioMax": 0.01,
+    "consecutiveLongFramesMax": 2,
+    "productionDurationSeconds": 30,
+    "productionWarmupSeconds": 10,
+    "productionRounds": 2,
+    "reversedSecondRound": true,
+    "gpuRegressionPercent": 5,
+    "retainedRegionsMax": 8,
+    "retainedColorBytesMax": 67108864,
+    "destroyResidue": 0,
+    "staticAdditionalUploads": 0,
+    "staticAdditionalLayoutSolves": 0,
+    "oldInvestigations": "Only inherited named ADR scopes 0127/0137; no other CPU waiver. 0.2.2 software timeout exception does not extend.",
+    "newFeatureCpuMicrobenchmarks": "diagnostic only; production pacing and inherited applicable limits remain hard",
+    "pixelReference": "independent reference per new semantic path, full-frame same pixels; old tolerances retained; new 2D fixtures max per-channel delta 1/255",
+    "tilemapComparison": "old palette vs same palette for 5%; new atlas vs independent full redraw atlas established before optimization, no palette/atlas equivalence claim",
+    "resourceAccounting": "all CPU map/chunk, GPU working/retired/cache and audio buffers/nodes separate; finite limits, zero after owner destruction"
+  },
+  "workflows": [
+    {
+      "id": "scene-flow",
+      "owner": "g03",
+      "productionRequests": 32,
+      "stressRequests": 256,
+      "cancellations": 100,
+      "checks": [
+        "rollback",
+        "late-result",
+        "supersession",
+        "borrowed-active-scene",
+        "per-request-signal",
+        "assign-order-legacy"
+      ]
+    },
+    {
+      "id": "character-camera",
+      "owner": "g04/g05",
+      "characters": 32,
+      "obstacles": 128,
+      "refreshHz": [
+        30,
+        60,
+        120,
+        144
+      ],
+      "checks": [
+        "box-circle",
+        "slope-30-45-60",
+        "thin-wall",
+        "moving-platform",
+        "initial-penetration",
+        "pause",
+        "long-frame",
+        "teleport",
+        "restore"
+      ]
+    },
+    {
+      "id": "input-profile",
+      "owner": "g06",
+      "actions": 128,
+      "rebindCycles": 100,
+      "checks": [
+        "MoveX-negative-positive",
+        "MoveY-browser-axis-down-positive",
+        "both-directions-neutral",
+        "modal-handoff",
+        "disconnect",
+        "blur",
+        "conflict",
+        "save-restore"
+      ]
+    },
+    {
+      "id": "gui-collections",
+      "owner": "g07",
+      "logicalItems": [
+        1000,
+        10000
+      ],
+      "productionLogicalItems": 1000,
+      "viewportRows": 20,
+      "overscanPerSide": 2,
+      "expectedMaxRows": 25,
+      "mutationPercent": [
+        0,
+        1,
+        10
+      ],
+      "checks": [
+        "stable-keys",
+        "cross-window-navigation",
+        "edited-row-recycle",
+        "ime-cancel",
+        "remove-focused",
+        "drag-cancel"
+      ],
+      "expectedAlignedMaxRows": 24,
+      "scrollOffsetsRenderUnits": [
+        0,
+        280,
+        2800,
+        14000
+      ]
+    },
+    {
+      "id": "tilemap",
+      "owner": "g08",
+      "mapCells": [
+        16384,
+        262144,
+        1048576
+      ],
+      "productionColumns": 512,
+      "productionRows": 512,
+      "visibleViewport": [
+        1280,
+        720
+      ],
+      "tileSize": 32,
+      "mutationPercent": [
+        0,
+        1,
+        10
+      ],
+      "checks": [
+        "palette-compatibility",
+        "atlas-reference",
+        "alpha-edge",
+        "transform",
+        "chunk-boundary",
+        "retirement",
+        "device-restore"
+      ]
+    },
+    {
+      "id": "audio",
+      "owner": "g09",
+      "voices": [
+        32,
+        128
+      ],
+      "productionVoices": 32,
+      "decodedBytesMax": 67108864,
+      "checks": [
+        "preemption-equivalence",
+        "stereo-left-center-right",
+        "distance-fade",
+        "mute-profile",
+        "borrowed-context",
+        "late-decode",
+        "unlock-suspend-resume"
+      ]
+    },
+    {
+      "id": "gui-controls",
+      "owner": "g10",
+      "tabs": 12,
+      "breadcrumbs": 8,
+      "badges": 32,
+      "collapsePanels": 16,
+      "dpr": [
+        1,
+        2
+      ],
+      "msaa": [
+        1,
+        4
+      ],
+      "checks": [
+        "icons-left-right-none",
+        "theme-image-ready",
+        "navigation-current-disabled",
+        "menu-ownership",
+        "badge-0-99-100",
+        "click-through",
+        "single-multiple-expand",
+        "focus-ime-collapse",
+        "dispose"
+      ]
+    }
+  ],
+  "startup": {
+    "cold": "fresh app process/profile; download/parse/font/first GPU work included; no OS/driver-cache purge",
+    "readiness": "2 real submitted/completed frames; common 10-second warmup starts at first rendered frame, not after readiness; all startup/warmup frames retained",
+    "steady": "same inputs/quality, raw CPU/GPU/wait/upload channels; no capture retry or new hidden cool-down"
+  },
+  "deviceMatrix": {
+    "owner": "g11-integration-candidate",
+    "nativePerformance": "config/release-matrix.json native route; Windows GTX 1070 Ti/i7-7700 60Hz baseline, qualified Mac Metal alternative",
+    "software": "Ubuntu SwiftShader correctness/diagnostic, original full fixture 300s; no inherited timeout exemption",
+    "physicalInput": "Windows real keyboard/IME and physical gamepad for affected flows",
+    "macIphone": "Mac browser plus physical iPhone GUI/navigation/IME, rotation/keyboard/background; affected audio unlock/resume and capability probe; evidence bound to new candidate",
+    "unavailableCapability": "explicit unsupported reason and owner; cannot turn required test into passed"
+  },
+  "reuse": {
+    "status": "proposal-under-existing-ADR-admission",
+    "allowed": "only changes already admitted by ADR0126 or new explicit scoped approval",
+    "requiredHashes": [
+      "runtime",
+      "sampler",
+      "config",
+      "workload",
+      "report",
+      "environment",
+      "rebuilt-executable-blocks"
+    ],
+    "originalFailurePreserved": true,
+    "runtimeChange": "resample affected cases; no blanket reuse permission",
+    "commitOnlyDifference": "does not alone prove invalidity or validity"
+  },
+  "consumers": {
+    "engineExample": {
+      "id": "example:gameplay-kit",
+      "paths": [
+        "Engine/examples/gameplay-kit/**",
+        "Engine/examples/manifest.json"
+      ],
+      "owner": "g11"
+    },
+    "native": {
+      "revision": "1caaee0d1d24daac92b97a2f5e78fefcd8d17154",
+      "paths": [
+        "Native/examples/ios-gui-text-input/src/main-page.ts",
+        "Native/examples/ios-gui-text-input/src/candidate.ts",
+        "Native/examples/ios-gui-text-input/package.json",
+        "Native/examples/ios-gui-text-input/package-lock.json",
+        "Native/examples/ios-gui-text-input/vendor/haiyue-engine-0.2.3.tgz",
+        "Native/examples/ios-gui-text-input/vendor/haiyue-extensions-0.2.3.tgz",
+        "Native/examples/ios-gui-text-input/vendor/qualified-candidate.json",
+        "Native/examples/ios-gui-text-input/artifacts/engine-0.2.3/**"
+      ],
+      "owner": "g11",
+      "baseline": "named paths clean at G01; unrelated TankBattle WIP excluded",
+      "audioBoundary": "existing PCM bank is separate from Web Audio. G09/G11 probe Web Audio host; do not claim PCM interface is an AudioContext. Missing stereo remains explicit capability block, then submit named host-adapter proposal."
+    },
+    "Games": "not selected; no write/check scope"
+  },
+  "deferred": [
+    "rotating/deforming platforms",
+    "capsule/polygon character shapes",
+    "variable-height collection rows",
+    "nested breadcrumb menus",
+    "Badge ribbon",
+    "full Godot parity",
+    "new Engine/GUI assembly class",
+    "Native PCM-to-WebAudio emulation"
+  ]
+}

@@ -38,6 +38,22 @@ test('manifest rejects missing, duplicate, mismatched and Studio artifacts', () 
     const bad = structuredClone(manifest); transform(bad); assert.throws(() => validateEngineRehearsalManifest(bad));
   }
 });
+
+test('independent package versions retain legacy uniform manifests and reject undeclared drift', () => {
+  const uniform = structuredClone(manifest); delete uniform.packageVersions;
+  uniform.releaseVersion = '0.2.2'; for (const item of uniform.artifacts) item.version = '0.2.2';
+  assert.doesNotThrow(() => validateEngineRehearsalManifest(uniform));
+  const mixed = structuredClone(uniform); mixed.releaseVersion = '0.2.3';
+  mixed.packageVersions = Object.fromEntries(mixed.artifacts.filter(item => item.kind === 'npm-package').map(item => [item.packageName, item.workspace === 'animation-spec' ? '0.2.2' : '0.2.3']));
+  for (const item of mixed.artifacts) item.version = mixed.packageVersions[item.packageName] ?? '0.2.3';
+  assert.doesNotThrow(() => validateEngineRehearsalManifest(mixed));
+  for (const transform of [m => delete m.packageVersions['@haiyue/animation-spec'],
+    m => m.packageVersions['@haiyue/unknown'] = '0.2.3', m => m.packageVersions['@haiyue/engine'] = 'latest',
+    m => m.artifacts.find(item => item.workspace === 'animation-spec').version = '0.2.3',
+    m => delete m.packageVersions, m => m.artifacts.find(item => item.workspace === 'examples').version = '0.2.2']) {
+    const bad = structuredClone(mixed); transform(bad); assert.throws(() => validateEngineRehearsalManifest(bad));
+  }
+});
 test('plan CLI runs from a checkout with no dependencies, products or evidence and has no side effects', () => fixture(dir => {
   for (const name of ['release-rehearsal.mjs', 'release-rehearsal-policy.mjs', 'release-supply-chain-policy.mjs', 'release-archive.mjs', 'release-temp-path.mjs', 'release-path-policy.mjs', 'release-duration-policy.mjs', 'npm-process.mjs', 'engine-rehearsal-plan.mjs', 'engine-release-catalog.mjs', 'content-gate-policy.mjs']) {
     mkdirSync(resolve(dir, 'scripts'), { recursive: true }); cpSync(resolve(root, 'scripts', name), resolve(dir, 'scripts', name));

@@ -3,7 +3,8 @@ import type {GuiFocusManager} from '@haiyue/engine/gui';
 import {LayoutError} from '../layout.js';
 import {createGuiContainer, ownContentFrame, setContainerStyle} from './presets.js';
 import {finiteNonnegative, firstFocusable, stateRecord, within} from './panel-state.js';
-import type {GuiTabContainerOptions, GuiTabPage} from './panel-types.js';
+import type {GuiTabContainerOptions, GuiTabPage, GuiTabHeaderOptions} from './panel-types.js';
+import {headerStyle} from './panel-content.js';
 import {layoutStyleVisible} from './visibility.js';
 
 interface PageEntry {
@@ -37,6 +38,7 @@ export class GuiTabContainer {
           (page.hidden !== undefined && typeof page.hidden !== 'boolean') || (page.closable !== undefined && typeof page.closable !== 'boolean'))
         throw new LayoutError('invalid-input', 'Tab pages require unique stable IDs and distinct unattached content.');
       ids.add(page.id); contents.add(page.content);
+      headerStyle(page);
     }
     const tabWidth = finiteNonnegative(options.tabWidth ?? 144, 'Tab width'), tabHeight = finiteNonnegative(options.tabHeight ?? 36, 'Tab height');
     if (tabWidth < 48 || !tabHeight) throw new LayoutError('invalid-input', 'Tab width must be at least 48 and height must be positive.');
@@ -52,7 +54,7 @@ export class GuiTabContainer {
       for (const original of options.pages) {
         const page = Object.freeze({...original}), release = ownContentFrame(page.content);
         const header = createGuiContainer('row', {id: `${this.element.id}:tab:${encodeURIComponent(page.id)}`, style: {width: tabWidth, height: tabHeight, shrink: 0}});
-        const button = header.add(new GuiButton({id: `${header.id}:select`, text: page.title, themeControlType: 'GuiTab',
+        const button = header.add(new GuiButton({id: `${header.id}:select`, text: page.title, style:headerStyle(page), themeControlType: 'GuiTab',
           onClick: () => {if (!this.disposed) this.activate(page.id);},
           onAction: event => {
             if (this.disposed || !['left', 'right'].includes(event.action)) return;
@@ -76,6 +78,13 @@ export class GuiTabContainer {
 
   get activeId(): string | null {return this.current;}
   get pages(): readonly GuiTabPage[] {return Object.freeze(this.entries.map(entry => Object.freeze({...entry.page, hidden: entry.hidden})));}
+  setPageHeader(id:string,options:GuiTabHeaderOptions):void {
+    this.assertLive();const entry=this.required(id);
+    if(!options||typeof options!=='object'||Array.isArray(options)||Object.keys(options).some(k=>!['title','icon','iconPosition','iconSize','iconGap'].includes(k))||Object.hasOwn(options,'title')&&typeof options.title!=='string')throw new LayoutError('invalid-input','Invalid tab header update.');
+    const style=headerStyle(options),next=Object.freeze({...entry.page,...options});
+    if(Object.keys(options).every(key=>Object.is(entry.page[key as keyof GuiTabPage],next[key as keyof GuiTabPage])))return;
+    entry.page=next;entry.button.setText(next.title);entry.button.setStyle(style);
+  }
   activate(id: string): void {
     this.assertLive(); const next = this.entry(id);
     if (!next || next.hidden) throw new LayoutError('invalid-input', 'Cannot activate a missing or hidden tab page.');

@@ -28,6 +28,15 @@ test('checked-in workflows preserve release routing and least-privilege policy',
   assert.doesNotMatch(workflows['deploy-pages.yml'], /release_tag/);
 });
 
+test('G02 adds actual Windows/Linux no-publication execution without disabling PR/master fast checks',()=>{
+ const source=readFileSync(resolve(root,'.github/workflows/ci-fast.yml'),'utf8');
+ assert.match(source,/os: \[ubuntu-latest, windows-latest\]/);
+ assert.match(source,/node --test "scripts\/\*publication\*\.test\.mjs" "scripts\/\*release-workflow\*\.test\.mjs"/);
+ assert.match(source,/run --run artifacts\/release\/workflow-contract\/run\.json --no-publish/);
+ assert.match(source,/if: \$\{\{ github.event_name != 'workflow_dispatch' \|\| !inputs.workflow_only \}\}/);
+ assert.match(source,/name: workflow-no-publication-\$\{\{ matrix.os \}\}/);
+});
+
 test('policy rejects floating actions, secrets and automatic publish commands', () => {
   const errors = validateReleaseWorkflows({
     'bad.yml': `permissions:\n  contents: write\nsteps:\n  - uses: actions/checkout@v6\n  - run: npm publish\n    env:\n      TOKEN: \${{ secrets.NPM_TOKEN }}\n`,

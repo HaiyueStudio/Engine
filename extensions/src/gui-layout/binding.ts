@@ -103,11 +103,15 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = {meas
             } : skin.padding);
             if (padding !== undefined) style = {...style, padding: typeof padding === 'number' ? {top: padding, right: padding, bottom: padding, left: padding} : padding};
           }
-          const fixedBoundary = !isRoot && configured && !configured.contentMinimum && managesChildren && item.children.length > 0 && typeof style.width === 'number' && typeof style.height === 'number';
-          if (fixedBoundary) nested.push(item);
-          // Composite controls keep their private children; plain unmanaged nodes are manual islands.
           const ownsFlow = presetStyle(item) !== undefined || overrides.has(item);
-          const children = !fixedBoundary && ownsFlow && managesChildren ? item.children.map(child => build(child)) : [];
+          const fixedBoundary = !isRoot && configured && !configured.contentMinimum && managesChildren && item.children.length > 0 && typeof style.width === 'number' && typeof style.height === 'number';
+          // A configured scroll flow needs the viewport allocated by its parent before
+          // the original scroll solver measures unbounded content. Manual views stay manual.
+          const scrollBoundary = !isRoot && item instanceof GuiScrollView && ownsFlow;
+          const boundary = fixedBoundary || scrollBoundary;
+          if (boundary) nested.push(item);
+          // Composite controls keep their private children; plain unmanaged nodes are manual islands.
+          const children = !boundary && ownsFlow && managesChildren ? item.children.map(child => build(child)) : [];
           const node = {id: item.id, contentVersion: versions.get(item) ?? 0, style, children};
           if (configured?.contentMinimum) {
             const min = contentMinimum(node);

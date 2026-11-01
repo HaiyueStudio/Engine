@@ -169,3 +169,5 @@ ADR 用于记录会长期约束多个包或多个工作流的设计决策。
 - [0136：先推进 G12，真实输入保留后补](0136-g12-before-physical-input-acceptance.md)
 - [0137：0.2.2 动态 sparse-256 CPU 4 ms 作为调查项；原失败、全部样本及预热保持](0137-g05-moving-sparse256-cpu-investigation.md)
 - [0138：GUI 独立 pass 包体准入；固定七报告哈希复核并完整重跑门禁](0138-selective-gui-bundle-admission.md)
+
+- [0139：0.2.3 游戏流程与 GUI 组件合同](0139-engine-023-gameplay-contracts.md)

@@ -57,6 +57,7 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
 
   constructor(options: GuiElementOptions = {}) {
     super();
+    if(options.style?.iconPosition!==undefined&&!['left','right'].includes(options.style.iconPosition))throw new TypeError('Invalid GUI icon position.');
     this.id = options.id ?? `gui-${++guiElementId}`;
     this.x = options.x ?? 0;
     this.y = options.y ?? 0;
@@ -209,10 +210,11 @@ export class GuiElement extends EventEmitter<Record<string, GuiPointerEvent>> {
   }
 
   setStyle(style: GuiStyle): void {
+    if(style.iconPosition!==undefined&&!['left','right'].includes(style.iconPosition))throw new TypeError('Invalid GUI icon position.');
     if ((Object.keys(style) as (keyof GuiStyle)[]).every((key) => Object.is(this.style[key], style[key]))) return;
     this.style = { ...this.style, ...style };
     notifyGuiThemeTree(this);
-    const metrics = ['padding', 'fontFamily', 'fontSize', 'icon', 'iconSize', 'iconGap', 'contentInsets', 'nineSlice'] as const;
+    const metrics = ['padding', 'fontFamily', 'fontSize', 'icon', 'iconPosition', 'iconSize', 'iconGap', 'contentInsets', 'nineSlice'] as const;
     this.markDirty(GuiDirtyFlags.Visual | (metrics.some(key => key in style) ? GuiDirtyFlags.Layout | GuiDirtyFlags.Text : GuiDirtyFlags.None));
   }
 

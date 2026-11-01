@@ -1,4 +1,5 @@
 import {isInputEventConsumed} from './InputEventConsumption';
+import {InputBindings} from './InputBindings';
 
 export type InputActionBindings = Record<string, string[]>;
 
@@ -12,15 +13,7 @@ type KeyPredicate = (code: string) => boolean;
 
 export class InputMap {
   static isEventConsumed(event: Event): boolean { return isInputEventConsumed(event); }
-  private readonly _bindings = new Map<string, Set<string>>();
-  private readonly _snapshotPressed: string[] = [];
-  private readonly _snapshotDown: string[] = [];
-  private readonly _snapshotUp: string[] = [];
-  private readonly _snapshot: InputActionSnapshot = {
-    pressed: this._snapshotPressed,
-    down: this._snapshotDown,
-    up: this._snapshotUp,
-  };
+  private readonly _bindings = new InputBindings();
 
   constructor(bindings: InputActionBindings = {}) {
     this.setBindings(bindings);
@@ -47,25 +40,23 @@ export class InputMap {
   }
 
   setBindings(bindings: InputActionBindings): this {
-    this._bindings.clear();
+    const next = new Map<string, Readonly<{keys:readonly string[]}>>();
     for (const [action, codes] of Object.entries(bindings)) {
-      this.setAction(action, codes);
+      const name=action.trim(),keys=normalizeCodes(codes);if(!name)continue;
+      if(keys.length)next.set(name,Object.freeze({keys}));else next.delete(name);
     }
+    this._bindings.replace(next);
     return this;
   }
 
   setAction(action: string, codes: Iterable<string>): this {
     const normalizedAction = action.trim();
     if (!normalizedAction) return this;
-    const set = new Set<string>();
-    for (const code of codes) {
-      const normalizedCode = String(code).trim();
-      if (normalizedCode) set.add(normalizedCode);
-    }
-    if (set.size) {
-      this._bindings.set(normalizedAction, set);
+    const keys=normalizeCodes(codes);
+    if (keys.length) {
+      this._bindings.set(normalizedAction, Object.freeze({keys}));
     } else {
-      this._bindings.delete(normalizedAction);
+      this._bindings.remove(normalizedAction);
     }
     return this;
   }
@@ -74,22 +65,16 @@ export class InputMap {
     const normalizedAction = action.trim();
     const normalizedCode = code.trim();
     if (!normalizedAction || !normalizedCode) return this;
-    let set = this._bindings.get(normalizedAction);
-    if (!set) {
-      set = new Set();
-      this._bindings.set(normalizedAction, set);
-    }
-    set.add(normalizedCode);
-    return this;
+    return this.setAction(normalizedAction, [...this.getKeys(normalizedAction),normalizedCode]);
   }
 
   removeAction(action: string): this {
-    this._bindings.delete(action);
+    this._bindings.remove(action);
     return this;
   }
 
   getKeys(action: string): ReadonlySet<string> {
-    return this._bindings.get(action) ?? EMPTY_KEY_SET;
+    return new Set(this._bindings.get(action)?.keys ?? []);
   }
 
   hasAction(action: string): boolean {
@@ -97,14 +82,11 @@ export class InputMap {
   }
 
   hasKey(code: string): boolean {
-    for (const keys of this._bindings.values()) {
-      if (keys.has(code)) return true;
-    }
-    return false;
+    return this._bindings.forKey(code).length > 0;
   }
 
   matches(actionOrCode: string, predicate: KeyPredicate): boolean {
-    const keys = this._bindings.get(actionOrCode);
+    const keys = this._bindings.get(actionOrCode)?.keys;
     if (!keys) return predicate(actionOrCode);
     for (const code of keys) {
       if (predicate(code)) return true;
@@ -113,13 +95,9 @@ export class InputMap {
   }
 
   snapshot(predicates: { pressed: KeyPredicate; down: KeyPredicate; up: KeyPredicate }): InputActionSnapshot {
-    const pressed = this._snapshotPressed;
-    const down = this._snapshotDown;
-    const up = this._snapshotUp;
-    pressed.length = 0;
-    down.length = 0;
-    up.length = 0;
-    for (const [action, keys] of this._bindings) {
+    const pressed: string[] = [], down: string[] = [], up: string[] = [];
+    for (const [action, binding] of this._bindings.entries()) {
+      const keys = binding.keys ?? [];
       for (const code of keys) {
         if (predicates.pressed(code)) {
           pressed.push(action);
@@ -139,16 +117,14 @@ export class InputMap {
         }
       }
     }
-    return this._snapshot;
+    return Object.freeze({pressed:Object.freeze(pressed),down:Object.freeze(down),up:Object.freeze(up)});
   }
 
   toJSON(): InputActionBindings {
-    const result: InputActionBindings = {};
-    for (const [action, keys] of this._bindings) {
-      result[action] = [...keys];
-    }
-    return result;
+    return Object.fromEntries([...this._bindings.entries()].map(([action,binding]) => [action,[...binding.keys ?? []]]));
   }
 }
 
-const EMPTY_KEY_SET: ReadonlySet<string> = Object.freeze(new Set<string>());
+function normalizeCodes(codes:Iterable<string>):readonly string[]{
+  const keys=new Set<string>();for(const code of codes){const normalized=String(code).trim();if(normalized)keys.add(normalized);}return Object.freeze([...keys]);
+}

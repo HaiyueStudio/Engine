@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {profile,validateCharacterBrowserResult as check} from './character2d-browser-policy.mjs';
+const valid=()=>({status:'passed',qualification:false,shapes:profile.shapes.map(shape=>({shape,cadences:profile.cadences.map(hz=>({hz,tickDelta:120,grounded:true,stuck:false,physicalUnaffectedByPresentation:true,position:[0,34]})),samples:Array.from({length:20},()=>({gpu:{resources:10,estimatedBytes:1000},physics:{bodies:5},worlds:1,releasedOwnerResiduals:0})),baseline:{resources:10,estimatedBytes:1000},finalGpu:{resources:0,estimatedBytes:0},worlds:{activeWorlds:0,totalWorlds:1},adapter:{isFallbackAdapter:false},recoveredAdapter:{isFallbackAdapter:false},recoveryReset:true,gpuErrors:[]})),pressure:{characters:32,obstacles:128,frames:600,createdWorlds:1,destroyedWorlds:1,beforeDestroy:{bodies:160},afterDestroy:{bodies:0,colliders:0,joints:0,activeContacts:0},grounded:Array(32).fill(true)}});
+test('feature policy accepts the complete explicit workload and rejects omissions/malformed results',()=>{assert.equal(check(valid()).status,'passed');for(const value of [null,{},[],{status:'passed',shapes:[null]}, {status:'failed'}])assert.equal(check(value).status,'failed');});
+test('missing cadences, skipped ticks, altered physics poses or presentation writes cannot pass',()=>{
+ for(const mutate of [r=>r.shapes.pop(),r=>r.shapes[0].cadences.pop(),r=>r.shapes[0].cadences[0].tickDelta=119,r=>r.shapes[0].cadences[1].position=[1,34],r=>r.shapes[0].cadences[0].position=null,r=>r.shapes[0].cadences[0].physicalUnaffectedByPresentation=false]){const r=valid();mutate(r);assert.equal(check(r).status,'failed');}
+});
+test('resource growth, residual owners, world duplication, software adapters and pressure shortcuts fail',()=>{
+ for(const mutate of [r=>r.shapes[0].samples.pop(),r=>r.shapes[0].samples[0].gpu.resources++,r=>r.shapes[0].samples[0].releasedOwnerResiduals=1,r=>r.shapes[0].worlds.totalWorlds=2,r=>r.shapes[0].finalGpu.resources=1,r=>r.shapes[0].adapter.isFallbackAdapter=true,r=>r.shapes[0].gpuErrors.push('invalid'),r=>r.pressure.frames=599,r=>r.pressure.characters=31,r=>r.pressure.grounded[0]=false,r=>r.pressure.afterDestroy.joints=1,r=>r.pressure.afterDestroy.bodies=1]){const r=valid();mutate(r);assert.equal(check(r).status,'failed');}
+});

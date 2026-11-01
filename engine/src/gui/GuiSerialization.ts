@@ -664,6 +664,8 @@ function validateStyle(value: unknown, path: string): void {
   for (const [key, item] of Object.entries(style)) {
     if (key === 'cursor' || key === 'backgroundColor' || key === 'hoverBackgroundColor' || key === 'borderColor' || key === 'color' || key === 'hoverColor') {
       if (typeof item !== 'string') invalidGuiData(`GUI style ${key} must be a string.`, `${path}.${key}`);
+    } else if (key === 'iconPosition') {
+      if(item!=='left'&&item!=='right')invalidGuiData('Invalid GUI icon position.',`${path}.${key}`);
     } else if (key === 'opacity' || key === 'radius' || key === 'padding') {
       if (typeof item !== 'number' || !Number.isFinite(item)) invalidGuiData(`GUI style ${key} must be a finite number.`, `${path}.${key}`);
     } else {

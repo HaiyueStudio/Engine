@@ -2593,6 +2593,39 @@
             }
           ]
         },
+        "./audio": {
+          "source": "engine/src/audio.ts",
+          "exports": [
+            {
+              "name": "AudioMixerBus",
+              "kind": "type"
+            },
+            {
+              "name": "AudioMixerCapabilities",
+              "kind": "type"
+            },
+            {
+              "name": "AudioMixerPlayRequest",
+              "kind": "type"
+            },
+            {
+              "name": "AudioMixerStats",
+              "kind": "type"
+            },
+            {
+              "name": "AudioMixerVolumes",
+              "kind": "type"
+            },
+            {
+              "name": "OwnerSafeAudioMixer",
+              "kind": "value"
+            },
+            {
+              "name": "OwnerSafeAudioMixerOptions",
+              "kind": "type"
+            }
+          ]
+        },
         "./color": {
           "source": "engine/src/color.ts",
           "exports": [
@@ -8379,6 +8412,10 @@
               "kind": "type"
             },
             {
+              "name": "GuiIconPosition",
+              "kind": "type"
+            },
+            {
               "name": "GuiImage",
               "kind": "value"
             },
@@ -8708,7 +8745,23 @@
           "source": "engine/src/input.ts",
           "exports": [
             {
+              "name": "GamepadAxisBinding",
+              "kind": "type"
+            },
+            {
+              "name": "InputActionBinding",
+              "kind": "type"
+            },
+            {
               "name": "InputActionBindings",
+              "kind": "type"
+            },
+            {
+              "name": "InputActionMap",
+              "kind": "value"
+            },
+            {
+              "name": "InputActionMapDescriptor",
               "kind": "type"
             },
             {
@@ -8716,8 +8769,20 @@
               "kind": "type"
             },
             {
+              "name": "InputActionValue",
+              "kind": "type"
+            },
+            {
               "name": "InputMap",
               "kind": "value"
+            },
+            {
+              "name": "KeyboardAxisBinding",
+              "kind": "type"
+            },
+            {
+              "name": "StandardGamepadSnapshot",
+              "kind": "type"
             }
           ]
         },
@@ -9177,6 +9242,10 @@
               "kind": "type"
             },
             {
+              "name": "Physics2DFixedStepEvent",
+              "kind": "type"
+            },
+            {
               "name": "Physics2DJoint",
               "kind": "value"
             },
@@ -9194,6 +9263,14 @@
             },
             {
               "name": "Physics2DResourceSnapshot",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DShapeCastHit",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DShapeCastOptions",
               "kind": "type"
             },
             {
@@ -9415,6 +9492,14 @@
             },
             {
               "name": "Physics2DMouseJointOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DShapeCastDesc",
+              "kind": "type"
+            },
+            {
+              "name": "Physics2DShapeCastResult",
               "kind": "type"
             },
             {
@@ -10762,6 +10847,52 @@
             }
           ]
         },
+        "./audio": {
+          "source": "extensions/src/audio.ts",
+          "exports": [
+            {
+              "name": "createGameAudio",
+              "kind": "value"
+            },
+            {
+              "name": "GameAudio",
+              "kind": "type"
+            },
+            {
+              "name": "GameAudioEmitterOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GameAudioOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GameAudioProfile",
+              "kind": "type"
+            }
+          ]
+        },
+        "./camera2d": {
+          "source": "extensions/src/camera2d.ts",
+          "exports": [
+            {
+              "name": "Camera2DController",
+              "kind": "type"
+            },
+            {
+              "name": "Camera2DControllerOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Camera2DControllerState",
+              "kind": "type"
+            },
+            {
+              "name": "createCamera2DController",
+              "kind": "value"
+            }
+          ]
+        },
         "./canvas-text": {
           "source": "extensions/src/canvas-text.ts",
           "exports": [
@@ -10780,6 +10911,27 @@
             {
               "name": "CanvasTextComponentOptions",
               "kind": "type"
+            }
+          ]
+        },
+        "./character2d": {
+          "source": "extensions/src/character2d.ts",
+          "exports": [
+            {
+              "name": "Character2DController",
+              "kind": "type"
+            },
+            {
+              "name": "Character2DOptions",
+              "kind": "type"
+            },
+            {
+              "name": "Character2DState",
+              "kind": "type"
+            },
+            {
+              "name": "createCharacter2D",
+              "kind": "value"
             }
           ]
         },
@@ -11263,6 +11415,100 @@
             }
           ]
         },
+        "./gui-collections": {
+          "source": "extensions/src/gui-collections.ts",
+          "exports": [
+            {
+              "name": "createGuiVirtualList",
+              "kind": "value"
+            },
+            {
+              "name": "createGuiVirtualTree",
+              "kind": "value"
+            },
+            {
+              "name": "GuiCollectionRow",
+              "kind": "type"
+            },
+            {
+              "name": "GuiCollectionStats",
+              "kind": "type"
+            },
+            {
+              "name": "GuiVirtualList",
+              "kind": "type"
+            },
+            {
+              "name": "GuiVirtualListOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiVirtualTree",
+              "kind": "type"
+            },
+            {
+              "name": "GuiVirtualTreeNode",
+              "kind": "type"
+            },
+            {
+              "name": "GuiVirtualTreeOptions",
+              "kind": "type"
+            }
+          ]
+        },
+        "./gui-controls": {
+          "source": "extensions/src/gui-controls.ts",
+          "exports": [
+            {
+              "name": "GuiBadge",
+              "kind": "value"
+            },
+            {
+              "name": "GuiBadgeOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiBadgePlacement",
+              "kind": "type"
+            },
+            {
+              "name": "GuiBadgeStatus",
+              "kind": "type"
+            },
+            {
+              "name": "GuiBadgeValue",
+              "kind": "type"
+            },
+            {
+              "name": "GuiBreadcrumb",
+              "kind": "value"
+            },
+            {
+              "name": "GuiBreadcrumbItem",
+              "kind": "type"
+            },
+            {
+              "name": "GuiBreadcrumbMenuItem",
+              "kind": "type"
+            },
+            {
+              "name": "GuiBreadcrumbOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiCollapse",
+              "kind": "value"
+            },
+            {
+              "name": "GuiCollapseItem",
+              "kind": "type"
+            },
+            {
+              "name": "GuiCollapseOptions",
+              "kind": "type"
+            }
+          ]
+        },
         "./gui-layout": {
           "source": "extensions/src/gui-layout.ts",
           "exports": [
@@ -11304,6 +11550,10 @@
             },
             {
               "name": "GuiTabContainerOptions",
+              "kind": "type"
+            },
+            {
+              "name": "GuiTabHeaderOptions",
               "kind": "type"
             },
             {
@@ -11623,6 +11873,35 @@
             }
           ]
         },
+        "./input-actions": {
+          "source": "extensions/src/input-actions.ts",
+          "exports": [
+            {
+              "name": "createInputBindingProfile",
+              "kind": "value"
+            },
+            {
+              "name": "InputBindingConflict",
+              "kind": "type"
+            },
+            {
+              "name": "InputBindingProfile",
+              "kind": "type"
+            },
+            {
+              "name": "InputBindingProfileData",
+              "kind": "type"
+            },
+            {
+              "name": "InputBindingProfileOptions",
+              "kind": "type"
+            },
+            {
+              "name": "InputBindingSample",
+              "kind": "type"
+            }
+          ]
+        },
         "./layout": {
           "source": "extensions/src/layout.ts",
           "exports": [
@@ -11810,6 +12089,35 @@
             }
           ]
         },
+        "./scene-flow": {
+          "source": "extensions/src/scene-flow.ts",
+          "exports": [
+            {
+              "name": "createSceneFlow",
+              "kind": "value"
+            },
+            {
+              "name": "PreparedScene",
+              "kind": "type"
+            },
+            {
+              "name": "SceneFlow",
+              "kind": "type"
+            },
+            {
+              "name": "SceneFlowOptions",
+              "kind": "type"
+            },
+            {
+              "name": "SceneFlowProgress",
+              "kind": "type"
+            },
+            {
+              "name": "SceneFlowRequest",
+              "kind": "type"
+            }
+          ]
+        },
         "./share-content": {
           "source": "extensions/src/share-content.ts",
           "exports": [
@@ -11937,6 +12245,14 @@
             },
             {
               "name": "Tilemap2DRenderSystemOptions",
+              "kind": "type"
+            },
+            {
+              "name": "TilemapAtlasOptions",
+              "kind": "type"
+            },
+            {
+              "name": "TilemapCellTransform",
               "kind": "type"
             },
             {

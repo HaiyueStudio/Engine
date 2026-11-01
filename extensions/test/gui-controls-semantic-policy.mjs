@@ -1,0 +1,8 @@
+export const semanticCaseIds=Object.freeze(['tabs-mixed','tabs-right','tabs-no-icons','tabs-theme-metrics','tabs-hidden-active','breadcrumb-default','breadcrumb-none','breadcrumb-current-disabled','breadcrumb-separators-long','breadcrumb-menu','badge-count','badge-show-zero','badge-overflow-text','badge-dot','badge-status','badge-placements-offsets','badge-standalone','collapse-closed','collapse-multiple','collapse-accordion','collapse-disabled-programmatic','collapse-right-extra','collapse-theme-metrics']);
+export function validateGuiControlsSemantic(r){
+ r=r&&typeof r==='object'?r:{};const errors=[],cases=Array.isArray(r.cases)?r.cases:[],counts={tabs:12,breadcrumb:8,badge:32,collapse:16};
+ if(r.schemaVersion!==1||r.status!=='passed'||r.independentReference!=='original GUI primitive projection from application models'||r.adapter?.isFallbackAdapter!==false||![1,2].includes(r.dpr)||![1,4].includes(r.msaa))errors.push('Independent native semantic proof required.');
+ if(cases.length!==semanticCaseIds.length||semanticCaseIds.some(id=>cases.filter(c=>c?.id===id).length!==1))errors.push('Every semantic reference state is required.');
+ for(const c of cases){if(!c||c.channelsCompared!==1120*700*r.dpr*r.dpr*4||c.maxChannelDifference>1||c.maxChannelDifference<0||!Number.isFinite(c.maxChannelDifference)||c.differentChannels!==0||c.modelAssertions!==true||c.family!==c.id?.split('-')[0]||c.modelCount!==counts[c.family])errors.push('Semantic pixels/model mismatch '+c?.id);}
+ if(!Array.isArray(r.gpuErrors)||r.gpuErrors.length||['buffers','textures','querySets','estimatedBytes'].some(k=>r.residue?.[k]!==0))errors.push('Native validation/residue failure.');return{status:errors.length?'failed':'passed',errors};
+}

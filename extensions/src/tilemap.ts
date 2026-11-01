@@ -4,3 +4,5 @@ export { Tilemap2DRenderSystem } from './tilemap/Tilemap2DRenderSystem';
 export type { Tilemap2DRenderSystemOptions } from './tilemap/Tilemap2DRenderSystem';
 export { createTilemapPlugin } from './tilemap/TilemapPlugin';
 export type { TilemapPluginOptions } from './tilemap/TilemapPlugin';
+
+export type {TilemapAtlasOptions,TilemapCellTransform} from './tilemap/TilemapState';

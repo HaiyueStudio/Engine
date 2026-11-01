@@ -16,6 +16,8 @@ export type {
   Physics2DJointHandle,
   Physics2DVectorLike,
   Physics2DWorldDriver,
+  Physics2DShapeCastDesc,
+  Physics2DShapeCastResult,
 } from '../physics/Physics2DBackend';
 export type { Physics2DBodyRef, Physics2DMouseJointOptions } from '../physics/Physics2DSystem';
 export type { Physics2DJointTarget } from '../physics/Physics2DJoint';

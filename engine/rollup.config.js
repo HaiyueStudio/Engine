@@ -7,6 +7,7 @@ import {
 
 export default {
   input: {
+    audio: 'src/audio.ts',
     index: 'src/index.ts',
     experimental: 'src/experimental.ts',
     'experimental/assets': 'src/experimental/assets.ts',

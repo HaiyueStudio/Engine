@@ -8,8 +8,15 @@ import {
 
 export default {
   input: {
+    audio: 'src/audio.ts',
+    'gui-controls': 'src/gui-controls.ts',
+    'input-actions': 'src/input-actions.ts',
+    camera2d: 'src/camera2d.ts',
+    character2d: 'src/character2d.ts',
+    'scene-flow': 'src/scene-flow.ts',
     layout: 'src/layout.ts',
     'gui-layout': 'src/gui-layout.ts',
+    'gui-collections': 'src/gui-collections.ts',
     'hya-player': 'src/hya-player.ts',
     'hya-text': 'src/hya-text.ts',
     'hya-layout': 'src/hya-layout.ts',

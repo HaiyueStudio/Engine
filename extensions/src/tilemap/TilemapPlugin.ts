@@ -1,3 +1,4 @@
+import {tilemapState,tilemapInvalid} from './TilemapState';
 import type { EnginePlugin } from '@haiyue/engine/core';
 import type { RenderPipelineEntryOptions } from '@haiyue/engine/extension-authoring';
 import { Tilemap2DComponent } from './Tilemap2DComponent';
@@ -32,6 +33,7 @@ export function createTilemapPlugin(options: TilemapPluginOptions = {}): EngineP
         create: () => new Tilemap2DComponent({ columns: 10, rows: 20, cellWidth: 32, cellHeight: 32, gap: 1 }),
         inspector: Tilemap2DComponent.editor,
         serialize(component: Tilemap2DComponent) {
+          if(tilemapState(component).atlas)throw tilemapInvalid('Atlas GPU sources are borrowed runtime handles; rebind the asset after loading instead of serializing GPU objects.');
           return {
             type: 'Tilemap2DComponent',
             columns: component.columns,
@@ -43,11 +45,15 @@ export function createTilemapPlugin(options: TilemapPluginOptions = {}): EngineP
             gap: component.gap,
             cells: Array.from(component.cells),
             palette: component.palette.map(color => [...color]),
+            ...(tilemapState(component).transforms.size?{cellTransforms:[...tilemapState(component).transforms].map(([index,transform])=>[index%component.columns,Math.floor(index/component.columns),transform])}:{}),
+            ...(tilemapState(component).explicitChunks?{chunkSize:tilemapState(component).chunkSize,maxResidentChunks:tilemapState(component).maxResident}:{}),
           };
         },
         deserialize(data: unknown) {
           const value = data as ConstructorParameters<typeof Tilemap2DComponent>[0] & { type?: unknown };
-          return value.type === 'Tilemap2DComponent' ? new Tilemap2DComponent(value) : null;
+          if(value.type!=='Tilemap2DComponent')return null;
+          const component=new Tilemap2DComponent(value),transforms=(data as {cellTransforms?:readonly(readonly[number,number,import('./TilemapState').TilemapCellTransform])[]}).cellTransforms??[];
+          for(const [column,row,transform]of transforms)component.setCellTransform(column,row,transform);return component;
         },
         clone: (component: Tilemap2DComponent) => component.clone(),
         installViewport(viewport: EditorViewportContributionContext) {
@@ -56,7 +62,7 @@ export function createTilemapPlugin(options: TilemapPluginOptions = {}): EngineP
         runtimeExport: {
           imports: [{ from: '@haiyue/extensions/tilemap', names: ['Tilemap2DComponent', 'Tilemap2DRenderSystem'] }],
           systems: ['Tilemap2DRenderSystem'],
-          deserializeExpression: 'new Tilemap2DComponent(data)',
+          deserializeExpression: '(() => { const component=new Tilemap2DComponent(data); if(Array.isArray(data.cellTransforms))for(const [column,row,transform]of data.cellTransforms)component.setCellTransform(column,row,transform); return component; })()',
           installSystems: `  const tilemapCamera = findCamera2DEntity(world);
   if (tilemapCamera && hasComponentType(world, Tilemap2DComponent)) {
     applyViewportSettingsToCamera2D(tilemapCamera, scene.globals);

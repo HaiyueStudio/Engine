@@ -14,6 +14,7 @@ interface KeyState {
   consumed: boolean;
   downFrame: number;
   upFrame: number;
+  actionUpFrame: number;
 }
 
 export class KeyboardComponent extends Component {
@@ -194,8 +195,10 @@ export class KeyboardComponent extends Component {
       consumed: false,
       downFrame: -1,
       upFrame: -1,
+      actionUpFrame: -1,
     };
     if (!state.pressed) {state.downFrame = KeyboardComponent._frame + 1;state.consumed = false;}
+    if(state.pressed&&!state.consumed&&InputMap.isEventConsumed(event)&&state.downFrame<=KeyboardComponent._frame)state.actionUpFrame=KeyboardComponent._frame+1;
     state.consumed ||= InputMap.isEventConsumed(event);
     state.pressed = true;
     KeyboardComponent._keys.set(event.code, state);
@@ -210,7 +213,9 @@ export class KeyboardComponent extends Component {
       consumed: false,
       downFrame: -1,
       upFrame: -1,
+      actionUpFrame: -1,
     };
+    if(state.pressed&&!state.consumed)state.actionUpFrame=KeyboardComponent._frame+1;
     state.consumed ||= InputMap.isEventConsumed(event);
     state.pressed = false;
     state.upFrame = KeyboardComponent._frame + 1;
@@ -219,6 +224,8 @@ export class KeyboardComponent extends Component {
 
   private static _onBlur = (): void => {
     for (const state of KeyboardComponent._keys.values()) {
+      if(!state.pressed)continue;
+      if(!state.consumed)state.actionUpFrame=KeyboardComponent._frame+1;
       state.pressed = false;
       state.upFrame = KeyboardComponent._frame + 1;
     }
@@ -245,7 +252,7 @@ export class KeyboardComponent extends Component {
   };
 
   private static _wasActionKeyReleased = (code: string): boolean => {
-    return !KeyboardComponent._keys.get(code)?.consumed && KeyboardComponent._wasKeyReleased(code);
+    return KeyboardComponent._keys.get(code)?.actionUpFrame === KeyboardComponent._frame;
   };
 
   private static _shouldPreventDefault(event: KeyboardEvent): boolean {

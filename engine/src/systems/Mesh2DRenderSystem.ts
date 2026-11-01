@@ -16,6 +16,7 @@ import type { RenderPipelineEntryOptions } from '../renderer/RenderPipeline';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
 import { getRenderViewPassOptions } from '../core/RenderView';
 import { cloneRenderPassDescriptor } from '../core/renderPassDescriptor';
+import { isRegionRenderTarget } from '../core/RegionRenderTarget';
 
 export interface Mesh2DRenderSystemOptions {
   /** 'clear' resets the canvas each frame; 'load' composites on top of prior content (default 'clear'). */
@@ -109,7 +110,7 @@ export class Mesh2DRenderSystem extends System {
     renderer.updateCamera(cameraFrame.viewProjectionMatrix);
 
     // ── Render pass ──────────────────────────────────────────────────────────
-    if (!context.passEncoder) {
+    if (!context.passEncoder && !isRegionRenderTarget(context.view?.target)) {
       context.descriptor = context.view
         ? cloneRenderPassDescriptor(
             context.view.target.getRenderPassDescriptor(getRenderViewPassOptions(context.view)),

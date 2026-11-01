@@ -1,0 +1,1158 @@
+{
+  "schemaVersion": 1,
+  "goal": "g08-tilemap",
+  "goalStatus": "complete",
+  "generatedAt": "2026-11-01T00:04:20.252Z",
+  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
+  "dirty": true,
+  "runtimeFeaturesImplemented": true,
+  "releaseQualified": false,
+  "publicationPerformed": false,
+  "baselinePromoted": false,
+  "summary": {
+    "workspaceTestTotals": [
+      138,
+      1337,
+      127,
+      963,
+      7
+    ],
+    "builtExampleTargets": 109,
+    "focusedTests": 18,
+    "nativePixelCases": 64,
+    "gpuCohorts": 108,
+    "steadyGpuSamples": 3240,
+    "gpuComparisons": 18,
+    "productionCaptures": 12,
+    "nativeLifecycleChecks": 23,
+    "regionPixelCases": 12,
+    "independentConsumers": 48,
+    "historicalRecords": 500,
+    "workspaceTests": 2565
+  },
+  "requirements": [
+    {
+      "id": "palette-atlas-transform-pixels",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g08/pixels-completion/result.json"
+    },
+    {
+      "id": "static-dirty-bounded-working-retired",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g08/application-completion/result.json"
+    },
+    {
+      "id": "gpu-five-percent",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g08/timing-executable-audit.json"
+    },
+    {
+      "id": "production-pacing",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g08/production-reassessment.json"
+    },
+    {
+      "id": "shader-hya-gui-and-package",
+      "status": "passed",
+      "evidence": "artifacts/engine-0.2.3/g08/accepted-validation.json"
+    }
+  ],
+  "publicEntry": {
+    "subpath": "@haiyue/extensions/tilemap",
+    "exactExportCount": 10,
+    "newTypes": [
+      "TilemapAtlasOptions",
+      "TilemapCellTransform"
+    ],
+    "rootExportsUnchanged": 30
+  },
+  "packageCapacity": {
+    "gzipBytes": 45804,
+    "previousMaxGzipBytes": 45000,
+    "maxGzipBytes": 48000,
+    "wholeExtension": {
+      "schemaVersion": 1,
+      "status": "passed",
+      "authority": "User-authorized capability growth with duplicate implementation review; contracts.md package-capacity rule and serial G08 writeScopes",
+      "previousMaximum": 550000,
+      "measuredPackedBytes": 555813,
+      "maximum": 570000,
+      "reserve": 14187,
+      "consumer": {
+        "id": "extensions-tilemap",
+        "previousMaximum": 45000,
+        "measuredGzipBytes": 45804,
+        "maximum": 48000,
+        "reserve": 2196
+      },
+      "basisSuffix": "; 0.2.3 G08 borrowed atlas, dirty chunk windows and submission-safe bounded storage reuse original 2D programs and owners",
+      "unchanged": "All other package/consumer capacities, historical reviewed byte counts, API reserves, performance, pixel and GPU resource budgets",
+      "implementationReview": "G08 reuses existing generated palette and Spine2D shaders, AssetManager, original frame submit/cancel hooks, GPUResourceTracker and timestamp probe. New chunk state/geometry and recording leases have distinct ownership, no duplicated renderer feature program.",
+      "originalFailure": {
+        "path": "artifacts/engine-0.2.3/g08/public-packages/public-packages.json",
+        "sha256": "96cf2aecef4764515e8b4850e7581e07e9b230ab5431e5b621f5432d67cc7d8b"
+      },
+      "verification": [
+        {
+          "id": "package-policy",
+          "status": "passed",
+          "log": "artifacts/engine-0.2.3/g08/admission-package-policy.log",
+          "startedAt": "2026-10-31T23:49:36.822Z",
+          "exitCode": 0,
+          "finishedAt": "2026-10-31T23:49:37.436Z"
+        },
+        {
+          "id": "verify:engine-package",
+          "status": "passed",
+          "log": "artifacts/engine-0.2.3/g08/admission-verify-engine-package.log",
+          "startedAt": "2026-10-31T23:49:37.437Z",
+          "exitCode": 0,
+          "finishedAt": "2026-10-31T23:51:41.938Z"
+        }
+      ]
+    },
+    "existingOtherEntriesUnchanged": true
+  },
+  "native": {
+    "adapter": {
+      "vendor": "nvidia",
+      "description": "",
+      "isFallbackAdapter": false
+    },
+    "checks": [
+      "native hardware",
+      "actual static frames upload no extra vertices",
+      "actual visible cell rebuilds one chunk",
+      "actual offscreen edit uploads nothing",
+      "pan 0 bounded resident chunks",
+      "pan 1 bounded resident chunks",
+      "pan 2 bounded resident chunks",
+      "pan 3 bounded resident chunks",
+      "pan 4 bounded resident chunks",
+      "pan 5 bounded resident chunks",
+      "pan 6 bounded resident chunks",
+      "pan 7 bounded resident chunks",
+      "pan 8 bounded resident chunks",
+      "pan 9 bounded resident chunks",
+      "pan 10 bounded resident chunks",
+      "pan 11 bounded resident chunks",
+      "resize invalidates and reconstructs bounded geometry",
+      "hidden entity releases resident windows",
+      "device recovery releases old owner and reconstructs renderer",
+      "original AssetManager recreates borrowed atlas",
+      "destroying Tilemap preserves caller-owned atlas",
+      "no validation errors",
+      "application destruction releases all tracked GPU resources"
+    ],
+    "finalGpu": {
+      "resources": 0,
+      "estimatedBytes": 0
+    },
+    "pixelMaxDelta": 1,
+    "gpuComparisons": [
+      {
+        "cells": 16384,
+        "mutation": 0,
+        "atlas": false,
+        "referenceGpuP95Ms": 0.018432,
+        "optimizedGpuP95Ms": 0.018432,
+        "regressionPercent": 0,
+        "passed": true
+      },
+      {
+        "cells": 16384,
+        "mutation": 0,
+        "atlas": true,
+        "referenceGpuP95Ms": 0.022528,
+        "optimizedGpuP95Ms": 0.021504,
+        "regressionPercent": -4.545454545454552,
+        "passed": true
+      },
+      {
+        "cells": 16384,
+        "mutation": 1,
+        "atlas": false,
+        "referenceGpuP95Ms": 0.018432,
+        "optimizedGpuP95Ms": 0.018432,
+        "regressionPercent": 0,
+        "passed": true
+      },
+      {
+        "cells": 16384,
+        "mutation": 1,
+        "atlas": true,
+        "referenceGpuP95Ms": 0.022528,
+        "optimizedGpuP95Ms": 0.02048,
+        "regressionPercent": -9.090909090909083,
+        "passed": true
+      },
+      {
+        "cells": 16384,
+        "mutation": 10,
+        "atlas": false,
+        "referenceGpuP95Ms": 0.018432,
+        "optimizedGpuP95Ms": 0.018432,
+        "regressionPercent": 0,
+        "passed": true
+      },
+      {
+        "cells": 16384,
+        "mutation": 10,
+        "atlas": true,
+        "referenceGpuP95Ms": 0.022528,
+        "optimizedGpuP95Ms": 0.02048,
+        "regressionPercent": -9.090909090909083,
+        "passed": true
+      },
+      {
+        "cells": 262144,
+        "mutation": 0,
+        "atlas": false,
+        "referenceGpuP95Ms": 0.456704,
+        "optimizedGpuP95Ms": 0.029696,
+        "regressionPercent": -93.49775784753363,
+        "passed": true
+      },
+      {
+        "cells": 262144,
+        "mutation": 0,
+        "atlas": true,
+        "referenceGpuP95Ms": 0.449536,
+        "optimizedGpuP95Ms": 0.025568,
+        "regressionPercent": -94.31235763097949,
+        "passed": true
+      },
+      {
+        "cells": 262144,
+        "mutation": 1,
+        "atlas": false,
+        "referenceGpuP95Ms": 0.438272,
+        "optimizedGpuP95Ms": 0.028672,
+        "regressionPercent": -93.45794392523365,
+        "passed": true
+      },
+      {
+        "cells": 262144,
+        "mutation": 1,
+        "atlas": true,
+        "referenceGpuP95Ms": 0.60928,
+        "optimizedGpuP95Ms": 0.031744,
+        "regressionPercent": -94.78991596638654,
+        "passed": true
+      },
+      {
+        "cells": 262144,
+        "mutation": 10,
+        "atlas": false,
+        "referenceGpuP95Ms": 0.594944,
+        "optimizedGpuP95Ms": 0.038912,
+        "regressionPercent": -93.45955249569707,
+        "passed": true
+      },
+      {
+        "cells": 262144,
+        "mutation": 10,
+        "atlas": true,
+        "referenceGpuP95Ms": 0.612384,
+        "optimizedGpuP95Ms": 0.031776,
+        "regressionPercent": -94.81109891832575,
+        "passed": true
+      },
+      {
+        "cells": 1048576,
+        "mutation": 0,
+        "atlas": false,
+        "referenceGpuP95Ms": 2.511872,
+        "optimizedGpuP95Ms": 0.018432,
+        "regressionPercent": -99.26620464737057,
+        "passed": true
+      },
+      {
+        "cells": 1048576,
+        "mutation": 0,
+        "atlas": true,
+        "referenceGpuP95Ms": 1.152,
+        "optimizedGpuP95Ms": 0.021504,
+        "regressionPercent": -98.13333333333333,
+        "passed": true
+      },
+      {
+        "cells": 1048576,
+        "mutation": 1,
+        "atlas": false,
+        "referenceGpuP95Ms": 1.16224,
+        "optimizedGpuP95Ms": 0.016384,
+        "regressionPercent": -98.59030837004406,
+        "passed": true
+      },
+      {
+        "cells": 1048576,
+        "mutation": 1,
+        "atlas": true,
+        "referenceGpuP95Ms": 1.123328,
+        "optimizedGpuP95Ms": 0.021504,
+        "regressionPercent": -98.08568824065634,
+        "passed": true
+      },
+      {
+        "cells": 1048576,
+        "mutation": 10,
+        "atlas": false,
+        "referenceGpuP95Ms": 1.446912,
+        "optimizedGpuP95Ms": 0.016384,
+        "regressionPercent": -98.86765746638359,
+        "passed": true
+      },
+      {
+        "cells": 1048576,
+        "mutation": 10,
+        "atlas": true,
+        "referenceGpuP95Ms": 1.117184,
+        "optimizedGpuP95Ms": 0.02048,
+        "regressionPercent": -98.16681943171403,
+        "passed": true
+      }
+    ],
+    "productionCaptures": [
+      {
+        "atlas": false,
+        "mutation": 0,
+        "round": 1,
+        "frames": 1801,
+        "averageFps": 60.00128264818543,
+        "p50Ms": 16.665000000000873,
+        "p95Ms": 16.80500000000029,
+        "p99Ms": 16.889999999999418,
+        "maxMs": 17.05500000000029,
+        "longFrames": 0,
+        "longFrameRatio": 0,
+        "maxConsecutiveLongFrames": 0
+      },
+      {
+        "atlas": false,
+        "mutation": 1,
+        "round": 1,
+        "frames": 1801,
+        "averageFps": 60.0014225767596,
+        "p50Ms": 16.669999999998254,
+        "p95Ms": 16.82500000001164,
+        "p99Ms": 16.904999999998836,
+        "maxMs": 16.974999999998545,
+        "longFrames": 0,
+        "longFrameRatio": 0,
+        "maxConsecutiveLongFrames": 0
+      },
+      {
+        "atlas": false,
+        "mutation": 10,
+        "round": 1,
+        "frames": 1801,
+        "averageFps": 60.001372602193904,
+        "p50Ms": 16.66500000000815,
+        "p95Ms": 16.794999999998254,
+        "p99Ms": 16.860000000000582,
+        "maxMs": 16.980000000010477,
+        "longFrames": 0,
+        "longFrameRatio": 0,
+        "maxConsecutiveLongFrames": 0
+      },
+      {
+        "atlas": true,
+        "mutation": 0,
+        "round": 1,
+        "frames": 1801,
+        "averageFps": 60.001442566609164,
+        "p50Ms": 16.66500000000815,
+        "p95Ms": 16.81500000000233,
+        "p99Ms": 16.889999999984866,
+        "maxMs": 16.980000000010477,
+        "longFrames": 0,
+        "longFrameRatio": 0,
+        "maxConsecutiveLongFrames": 0
+      },
+      {
+        "atlas": true,
+        "mutation": 1,
+        "round": 1,
+        "frames": 1801,
+        "averageFps": 60.00137260219393,
+        "p50Ms": 16.66500000000815,
+        "p95Ms": 16.80999999999767,
+        "p99Ms": 16.880000000004657,
+        "maxMs": 17.404999999998836,
+        "longFrames": 0,
+        "longFrameRatio": 0,
+        "maxConsecutiveLongFrames": 0
+      },
+      {
+        "atlas": true,
+        "mutation": 10,
+        "round": 1,
+        "frames": 1801,
+        "averageFps": 60.00145256153896,
+        "p50Ms": 16.66500000000815,
+        "p95Ms": 16.79999999998836,
+        "p99Ms": 16.855000000010477,
+        "maxMs": 16.95999999999185,
+        "longFrames": 0,
+        "longFrameRatio": 0,
+        "maxConsecutiveLongFrames": 0
+      },
+      {
+        "atlas": true,
+        "mutation": 10,
+        "round": 2,
+        "frames": 1801,
+        "averageFps": 60.00147255140849,
+        "p50Ms": 16.664999999979045,
+        "p95Ms": 16.79999999998836,
+        "p99Ms": 16.864999999990687,
+        "maxMs": 16.945000000006985,
+        "longFrames": 0,
+        "longFrameRatio": 0,
+        "maxConsecutiveLongFrames": 0
+      },
+      {
+        "atlas": true,
+        "mutation": 1,
+        "round": 2,
+        "frames": 1801,
+        "averageFps": 60.00136260729078,
+        "p50Ms": 16.665000000037253,
+        "p95Ms": 16.805000000051223,
+        "p99Ms": 16.869999999995343,
+        "maxMs": 16.959999999962747,
+        "longFrames": 0,
+        "longFrameRatio": 0,
+        "maxConsecutiveLongFrames": 0
+      },
+      {
+        "atlas": true,
+        "mutation": 0,
+        "round": 2,
+        "frames": 1802,
+        "averageFps": 60.00119536232717,
+        "p50Ms": 16.665000000037253,
+        "p95Ms": 16.819999999948777,
+        "p99Ms": 16.900000000023283,
+        "maxMs": 20.739999999990687,
+        "longFrames": 0,
+        "longFrameRatio": 0,
+        "maxConsecutiveLongFrames": 0
+      },
+      {
+        "atlas": false,
+        "mutation": 10,
+        "round": 2,
+        "frames": 1801,
+        "averageFps": 60.00146255647209,
+        "p50Ms": 16.669999999983702,
+        "p95Ms": 16.794999999983702,
+        "p99Ms": 16.85999999998603,
+        "maxMs": 16.925000000046566,
+        "longFrames": 0,
+        "longFrameRatio": 0,
+        "maxConsecutiveLongFrames": 0
+      },
+      {
+        "atlas": false,
+        "mutation": 1,
+        "round": 2,
+        "frames": 1801,
+        "averageFps": 60.001612480868474,
+        "p50Ms": 16.665000000037253,
+        "p95Ms": 16.79999999998836,
+        "p99Ms": 16.875,
+        "maxMs": 16.929999999993015,
+        "longFrames": 0,
+        "longFrameRatio": 0,
+        "maxConsecutiveLongFrames": 0
+      },
+      {
+        "atlas": false,
+        "mutation": 0,
+        "round": 2,
+        "frames": 1801,
+        "averageFps": 60.00133262260128,
+        "p50Ms": 16.669999999983702,
+        "p95Ms": 16.805000000051223,
+        "p99Ms": 16.884999999951106,
+        "maxMs": 16.96500000002561,
+        "longFrames": 0,
+        "longFrameRatio": 0,
+        "maxConsecutiveLongFrames": 0
+      }
+    ]
+  },
+  "retainedFailures": [
+    "artifacts/engine-0.2.3/g08/native-probe-1.log",
+    "artifacts/engine-0.2.3/g08/native-probe-2.log",
+    "artifacts/engine-0.2.3/g08/timing-diagnostic/result.json",
+    "artifacts/engine-0.2.3/g08/final-validation.json",
+    "artifacts/engine-0.2.3/g08/remaining-validation.json",
+    "artifacts/engine-0.2.3/g08/public-packages/public-packages.json",
+    "artifacts/engine-0.2.3/g08/production-final/result.json",
+    "artifacts/engine-0.2.3/g08/feature-validation.json"
+  ],
+  "protectedHistory": {
+    "audit": {
+      "path": "artifacts/engine-0.2.3/g08/historical-audit.json",
+      "bytes": 132470,
+      "sha256": "396e9c3fe9c830fc0f2a29e171e2275c5f93ecb9d9be291543b852c63e298022"
+    },
+    "sourceSnapshot": {
+      "path": "artifacts/engine-0.2.3/g08/source-snapshot.zip",
+      "bytes": 151086,
+      "sha256": "57b33f294f56aecb80a0f9f1a777115f748f2d6438818c118f9a9d01bb3986de"
+    },
+    "manifest": {
+      "path": "artifacts/engine-0.2.3/g08/source-snapshot-manifest.json",
+      "bytes": 11820,
+      "sha256": "942d647b813859b2960295d9ee1ca992319b45120d69301cb3a572726bbd0f6e"
+    },
+    "verification": {
+      "path": "artifacts/engine-0.2.3/g08/source-snapshot-verification.json",
+      "bytes": 242,
+      "sha256": "59aa50a41114367aff2442f15f63e40abc93428d24e238322aafcc5d64fca986"
+    }
+  },
+  "handoffs": [
+    {
+      "owner": "g11-integration-candidate",
+      "id": "g08-whole-release-qualification",
+      "status": "pending-integration",
+      "required": "Atomic 0.2.3 version/peer floor, combined gameplay-kit, registered clean-runner platform/GPU/resource/production evidence; Windows/Mac/iPhone workflows per frozen matrix. G08 local diagnostics are not release baseline promotion."
+    },
+    {
+      "owner": "g11-integration-candidate",
+      "id": "g08-cold-start-counter-boundary",
+      "status": "pending-integration",
+      "required": "Preserve the signed first Engine delta as startup metadata. The first callback has no previous counter snapshot; collect actual first-frame cumulative upload/draw counters for full cold-start qualification, and do not interpret its current zero differences as zero startup work."
+    }
+  ],
+  "files": [
+    {
+      "path": "artifacts/engine-0.2.3/g08/final-validation.json",
+      "bytes": 2489,
+      "sha256": "1133464d04542d94fcee5f3aa70373e1ca0c68d918f6c055c40a420d586883f0"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/feature-validation.json",
+      "bytes": 2052,
+      "sha256": "c68cb3687fc1b20030a315e7617bfed39b5870697ddf8a3c5f56f417033c2615"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/final-candidate/candidate.json",
+      "bytes": 12604,
+      "sha256": "5477d3259a88855674d83ba7fec27475044ea2e1a7dbf12a8c920c55762a6715"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/public-packages/public-packages.json",
+      "bytes": 162929,
+      "sha256": "96cf2aecef4764515e8b4850e7581e07e9b230ab5431e5b621f5432d67cc7d8b"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/pixels-final/result.json",
+      "bytes": 89143,
+      "sha256": "c27d55e0dc7c5c4d3ea1a1ee881e836c7f2f49f2f53ef699198484a9d4b5eaca"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/application-final/result.json",
+      "bytes": 42028,
+      "sha256": "a48bfbfbcfd2da52e294add3e6a6324fea9077e7a7105fa4fad8504e6751ce61"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/production-final/result.json",
+      "bytes": 15381526,
+      "sha256": "456f0d6a88fa710674dfab2df93238a61fee3ac2851df2a445876b66488e63ca"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/timing-diagnostic-2/result.json",
+      "bytes": 4626098,
+      "sha256": "f568556c3f5d1fabd92a00ef326c488065a4476c27764b1b3447233f47be8f4d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/timing-executable-audit.json",
+      "bytes": 158499,
+      "sha256": "2de8c713dc639cb9f30a9aa47d4c230692eab9c76558874ea7428ec60187cd7b"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/regions-final/result.json",
+      "bytes": 62902,
+      "sha256": "ddac2d771c988344d76244ef2708018838b75f196bf10b42145901f098ceb29d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/catalog-final/result.json",
+      "bytes": 13214,
+      "sha256": "52f21334e9b58e9a18871dbc90e28883fd48d8285594a547792e6c9b73a28a31"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/catalog-final/example.png",
+      "bytes": 9096,
+      "sha256": "03c0e537d664a95c5d62494ef53c3893ef26998657b541e905cd7e0428c808c7"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/historical-audit.json",
+      "bytes": 132470,
+      "sha256": "396e9c3fe9c830fc0f2a29e171e2275c5f93ecb9d9be291543b852c63e298022"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/source-audit.json",
+      "bytes": 12107,
+      "sha256": "bb59cb2950c601ca702cdb1a129c621552f738e5ba82e5250fbd7cc12ccdc8d9"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/source-snapshot.zip",
+      "bytes": 151086,
+      "sha256": "57b33f294f56aecb80a0f9f1a777115f748f2d6438818c118f9a9d01bb3986de"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/source-snapshot-manifest.json",
+      "bytes": 11820,
+      "sha256": "942d647b813859b2960295d9ee1ca992319b45120d69301cb3a572726bbd0f6e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/source-snapshot-verification.json",
+      "bytes": 242,
+      "sha256": "59aa50a41114367aff2442f15f63e40abc93428d24e238322aafcc5d64fca986"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/final-typecheck.log",
+      "bytes": 3205,
+      "sha256": "6d49e0023e6f72977da68ca249d6e8664206dfa098762b7a6e8bf800e0f2a2a2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/final-build.log",
+      "bytes": 18027,
+      "sha256": "259bcc14e531b539ec529d9034c99faa6efb3b4eaea2d57a386c8d08bd54e4fe"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/final-test.log",
+      "bytes": 257468,
+      "sha256": "c3d1215529bcd9645efb9164f56b5f4845f666fa0633f251477cd8518106f0e4"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/final-modules-check.log",
+      "bytes": 180,
+      "sha256": "32cf08eaf49afa08b4bade2146d02538f399fd16bc65fa18741f44bb43a4ce59"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/final-responsibilities-check.log",
+      "bytes": 259,
+      "sha256": "52b89c966f0ecfb0587d1e565ebbdaa72f1c2a1b9f3867641a1d83adc24f9d1a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/final-renderer-prepare-check.log",
+      "bytes": 239,
+      "sha256": "66bbc4f2490a8418f9be4711d93567477ea7181e4289deea3dd116236518591e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/final-check-boundaries.log",
+      "bytes": 1037,
+      "sha256": "0d2e9691db93ce6da4654a750f74c4730a3544fc567da3e48c2dcd71888e2891"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/remaining-docs-check.log",
+      "bytes": 706,
+      "sha256": "493e9960531f86d0b417f8dd9f7d23254bc786d3bc7c7435dcaf3ad6ef8f090c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/remaining-api-check.log",
+      "bytes": 158,
+      "sha256": "52eedd5d933b1c615111c13ff308d849101edef1c369d56615dbb7d7f107c6a9"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/remaining-fast-gate-policy-test.log",
+      "bytes": 2210,
+      "sha256": "77ec62af10506f65b81228c02031aca774dbc4599ea06e616fdb2b321b0ee5bd"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/remaining-release-policy-test.log",
+      "bytes": 18874,
+      "sha256": "061b372571227ff8df01e59f5a0364271c29e53bb288adb7876d03d3367d3f78"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/remaining-performance-budget-test.log",
+      "bytes": 34758,
+      "sha256": "a8d82fb2d615dfae9a4914224e08449db415a8472499138526da371fa87f4c41"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/remaining-shader-language-check.log",
+      "bytes": 14193,
+      "sha256": "6ee0df843595d1d59830dea32b947b96ce69e88840c1aa55b074f0a6acda7e2e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/admission-verify-engine-package.log",
+      "bytes": 7087,
+      "sha256": "cf2898348b4ac33d4481eed882094f10e9f9c7f56e9ffec1be7a279d5553eb7c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/feature-installed.log",
+      "bytes": 33,
+      "sha256": "a569f24eb368223cee04a9db176836eb4343398b3acfe48bde0e7852c9aea370"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/feature-pixels.log",
+      "bytes": 123,
+      "sha256": "e397617f06a9d99c3c80851996b288ff72ff40d957537f69d47e388b81906b8f"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/feature-lifecycle.log",
+      "bytes": 117,
+      "sha256": "8fed79e9edd4ec13e832234f71728ccd60b49839a692af7e796cb55bc0d2f3c0"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/feature-regions.log",
+      "bytes": 31,
+      "sha256": "f101957323e6d064efd674b8b3373ede5e1ca4035c9af65587a572c6a19a2cf2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/feature-catalog.log",
+      "bytes": 91,
+      "sha256": "f7d6a2a4fdb97a8ab9fb3130e1cab70d30ef10fae02c3ec177339635b7e63d8d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/feature-freshness.log",
+      "bytes": 60,
+      "sha256": "002a680ea8f2eaa0c46e99675b14058e701fc470c4bbc6a82be23143dfac7abe"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/feature-timing-input-audit.log",
+      "bytes": 59,
+      "sha256": "eaf5fbdfb559b9323d9ab95888e9e6396e1c8941c092b8f2bface56b80d7525c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/completion-pixels.log",
+      "bytes": 128,
+      "sha256": "8facb2d8c63acfd3828a707b8a5e74c26323a33d85dfb45c7f1d76d6264bb4a3"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/completion-application.log",
+      "bytes": 122,
+      "sha256": "be6c8d983bcaf287762ec1d28d365f7076f207686df150b394fd5fe5a01da9a6"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/production-reassessment.log",
+      "bytes": 87,
+      "sha256": "436eba9c05eebd4303db87801b45048c8c2a993afe68b492de36197ce9820075"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/accepted-validation.json",
+      "bytes": 5237,
+      "sha256": "f32a344ac0975baeb1bce2b4b79761f70c80d22468ea3b6681fcddc7dc232f1d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/public-packages-current/public-packages.json",
+      "bytes": 162970,
+      "sha256": "d416958bdf0cb37a94cb13137f036668d75238bc2f4c33597509db435697860d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/package-capacity-admission.json",
+      "bytes": 1776,
+      "sha256": "fd6aaa0defe20f23900710798105e093efb54e261c2700b8a0c9fc88ffd29250"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/feature-accepted-validation.json",
+      "bytes": 3024,
+      "sha256": "d6e35cd3c4592b58511fa97e21cc4980ed49aee644b5784e8133e0db7882a0c4"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/production-reassessment.json",
+      "bytes": 8261,
+      "sha256": "4a8bc9ecc772748088ddb872ba2e0a3f2eae8a6db088e8a0f3b9ae12962d38f1"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/policies-startup-corrected.log",
+      "bytes": 536,
+      "sha256": "56d731e767fcac4ea47a0558b36befc81b6a598883e908e6a42ff87bebe26f4d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/pixels-completion/result.json",
+      "bytes": 89152,
+      "sha256": "3c139c470960b9a385dac1b14767be71d5cc2fd1f0a6a64931fe2454ceaa87a2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/application-completion/result.json",
+      "bytes": 42038,
+      "sha256": "874249c74f4cd71e0420a4b3a1278d6b6c14cbf176271debcdf2a44e75c6df31"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/admission-package-policy.log",
+      "bytes": 1215,
+      "sha256": "9603af66e9e4c4c6f0d8cab48c21b03a18183237cf8d25cffcfce4dd58e2762e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/admission-verify-engine-package.log",
+      "bytes": 7087,
+      "sha256": "cf2898348b4ac33d4481eed882094f10e9f9c7f56e9ffec1be7a279d5553eb7c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/completion-docs.log",
+      "bytes": 724,
+      "sha256": "f735edcb0a990d7b965b2d3691fc072237b270d43f093e91ac57e78cc99d717a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/completion-engine-diff.log",
+      "bytes": 1822,
+      "sha256": "c0f599cce260cc8859bfca99eb3d6e032fb81ef4dd2c3097c39d9aa304efd89d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/completion-coordination.log",
+      "bytes": 200,
+      "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/completion-coordination-diff.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g08/finalize-report.mjs",
+      "bytes": 2301,
+      "sha256": "b38801f5ebd69b250f53584564fd283ea0ac2be4b7a6056533f26c158b9e9db0"
+    }
+  ],
+  "productionReassessment": {
+    "schemaVersion": 1,
+    "status": "passed",
+    "role": "G08 local production reassessment of signed startup metadata; not formal evidence promotion",
+    "original": {
+      "path": "artifacts/engine-0.2.3/g08/production-final/result.json",
+      "sha256": "456f0d6a88fa710674dfab2df93238a61fee3ac2851df2a445876b66488e63ca",
+      "status": "failed"
+    },
+    "policy": {
+      "status": "passed",
+      "errors": [],
+      "captures": [
+        {
+          "atlas": false,
+          "mutation": 0,
+          "round": 1,
+          "frames": 1801,
+          "averageFps": 60.00128264818543,
+          "p50Ms": 16.665000000000873,
+          "p95Ms": 16.80500000000029,
+          "p99Ms": 16.889999999999418,
+          "maxMs": 17.05500000000029,
+          "longFrames": 0,
+          "longFrameRatio": 0,
+          "maxConsecutiveLongFrames": 0
+        },
+        {
+          "atlas": false,
+          "mutation": 1,
+          "round": 1,
+          "frames": 1801,
+          "averageFps": 60.0014225767596,
+          "p50Ms": 16.669999999998254,
+          "p95Ms": 16.82500000001164,
+          "p99Ms": 16.904999999998836,
+          "maxMs": 16.974999999998545,
+          "longFrames": 0,
+          "longFrameRatio": 0,
+          "maxConsecutiveLongFrames": 0
+        },
+        {
+          "atlas": false,
+          "mutation": 10,
+          "round": 1,
+          "frames": 1801,
+          "averageFps": 60.001372602193904,
+          "p50Ms": 16.66500000000815,
+          "p95Ms": 16.794999999998254,
+          "p99Ms": 16.860000000000582,
+          "maxMs": 16.980000000010477,
+          "longFrames": 0,
+          "longFrameRatio": 0,
+          "maxConsecutiveLongFrames": 0
+        },
+        {
+          "atlas": true,
+          "mutation": 0,
+          "round": 1,
+          "frames": 1801,
+          "averageFps": 60.001442566609164,
+          "p50Ms": 16.66500000000815,
+          "p95Ms": 16.81500000000233,
+          "p99Ms": 16.889999999984866,
+          "maxMs": 16.980000000010477,
+          "longFrames": 0,
+          "longFrameRatio": 0,
+          "maxConsecutiveLongFrames": 0
+        },
+        {
+          "atlas": true,
+          "mutation": 1,
+          "round": 1,
+          "frames": 1801,
+          "averageFps": 60.00137260219393,
+          "p50Ms": 16.66500000000815,
+          "p95Ms": 16.80999999999767,
+          "p99Ms": 16.880000000004657,
+          "maxMs": 17.404999999998836,
+          "longFrames": 0,
+          "longFrameRatio": 0,
+          "maxConsecutiveLongFrames": 0
+        },
+        {
+          "atlas": true,
+          "mutation": 10,
+          "round": 1,
+          "frames": 1801,
+          "averageFps": 60.00145256153896,
+          "p50Ms": 16.66500000000815,
+          "p95Ms": 16.79999999998836,
+          "p99Ms": 16.855000000010477,
+          "maxMs": 16.95999999999185,
+          "longFrames": 0,
+          "longFrameRatio": 0,
+          "maxConsecutiveLongFrames": 0
+        },
+        {
+          "atlas": true,
+          "mutation": 10,
+          "round": 2,
+          "frames": 1801,
+          "averageFps": 60.00147255140849,
+          "p50Ms": 16.664999999979045,
+          "p95Ms": 16.79999999998836,
+          "p99Ms": 16.864999999990687,
+          "maxMs": 16.945000000006985,
+          "longFrames": 0,
+          "longFrameRatio": 0,
+          "maxConsecutiveLongFrames": 0
+        },
+        {
+          "atlas": true,
+          "mutation": 1,
+          "round": 2,
+          "frames": 1801,
+          "averageFps": 60.00136260729078,
+          "p50Ms": 16.665000000037253,
+          "p95Ms": 16.805000000051223,
+          "p99Ms": 16.869999999995343,
+          "maxMs": 16.959999999962747,
+          "longFrames": 0,
+          "longFrameRatio": 0,
+          "maxConsecutiveLongFrames": 0
+        },
+        {
+          "atlas": true,
+          "mutation": 0,
+          "round": 2,
+          "frames": 1802,
+          "averageFps": 60.00119536232717,
+          "p50Ms": 16.665000000037253,
+          "p95Ms": 16.819999999948777,
+          "p99Ms": 16.900000000023283,
+          "maxMs": 20.739999999990687,
+          "longFrames": 0,
+          "longFrameRatio": 0,
+          "maxConsecutiveLongFrames": 0
+        },
+        {
+          "atlas": false,
+          "mutation": 10,
+          "round": 2,
+          "frames": 1801,
+          "averageFps": 60.00146255647209,
+          "p50Ms": 16.669999999983702,
+          "p95Ms": 16.794999999983702,
+          "p99Ms": 16.85999999998603,
+          "maxMs": 16.925000000046566,
+          "longFrames": 0,
+          "longFrameRatio": 0,
+          "maxConsecutiveLongFrames": 0
+        },
+        {
+          "atlas": false,
+          "mutation": 1,
+          "round": 2,
+          "frames": 1801,
+          "averageFps": 60.001612480868474,
+          "p50Ms": 16.665000000037253,
+          "p95Ms": 16.79999999998836,
+          "p99Ms": 16.875,
+          "maxMs": 16.929999999993015,
+          "longFrames": 0,
+          "longFrameRatio": 0,
+          "maxConsecutiveLongFrames": 0
+        },
+        {
+          "atlas": false,
+          "mutation": 0,
+          "round": 2,
+          "frames": 1801,
+          "averageFps": 60.00133262260128,
+          "p50Ms": 16.669999999983702,
+          "p95Ms": 16.805000000051223,
+          "p99Ms": 16.884999999951106,
+          "maxMs": 16.96500000002561,
+          "longFrames": 0,
+          "longFrameRatio": 0,
+          "maxConsecutiveLongFrames": 0
+        }
+      ],
+      "startupInterpretation": "The first warmup callback has no previous presented frame. Its original signed Engine delta is retained as startup metadata; every subsequent interval must be positive and equal consecutive rAF timestamps. All steady samples and pacing limits are unchanged."
+    },
+    "policyChange": [
+      {
+        "path": "extensions/test/tilemap-production-policy.mjs",
+        "originalSha256": "887b29c1fdcf6d73d16abe6040b645e9146e7cd17a70f67073e71e718ed9cbfa",
+        "currentSha256": "3a50193eaf9436299d08500625190fddef3eba907f257e70c49fa391dc4a2722"
+      }
+    ],
+    "proof": [
+      {
+        "atlas": false,
+        "mutation": 0,
+        "round": 1,
+        "retainedStartupDelta": -58.6840000095367,
+        "warmupFrames": 593,
+        "steadyFrames": 1801
+      },
+      {
+        "atlas": false,
+        "mutation": 1,
+        "round": 1,
+        "retainedStartupDelta": -24.24000001073,
+        "warmupFrames": 600,
+        "steadyFrames": 1801
+      },
+      {
+        "atlas": false,
+        "mutation": 10,
+        "round": 1,
+        "retainedStartupDelta": -16.535000013114768,
+        "warmupFrames": 601,
+        "steadyFrames": 1801
+      },
+      {
+        "atlas": true,
+        "mutation": 0,
+        "round": 1,
+        "retainedStartupDelta": -27.60999999284104,
+        "warmupFrames": 600,
+        "steadyFrames": 1801
+      },
+      {
+        "atlas": true,
+        "mutation": 1,
+        "round": 1,
+        "retainedStartupDelta": -34.639999985694885,
+        "warmupFrames": 600,
+        "steadyFrames": 1801
+      },
+      {
+        "atlas": true,
+        "mutation": 10,
+        "round": 1,
+        "retainedStartupDelta": -12.88500000120257,
+        "warmupFrames": 601,
+        "steadyFrames": 1801
+      },
+      {
+        "atlas": true,
+        "mutation": 10,
+        "round": 2,
+        "retainedStartupDelta": -23.599999994039536,
+        "warmupFrames": 601,
+        "steadyFrames": 1801
+      },
+      {
+        "atlas": true,
+        "mutation": 1,
+        "round": 2,
+        "retainedStartupDelta": -57.625000009546056,
+        "warmupFrames": 599,
+        "steadyFrames": 1801
+      },
+      {
+        "atlas": true,
+        "mutation": 0,
+        "round": 2,
+        "retainedStartupDelta": -55.48500000836793,
+        "warmupFrames": 598,
+        "steadyFrames": 1802
+      },
+      {
+        "atlas": false,
+        "mutation": 10,
+        "round": 2,
+        "retainedStartupDelta": -15.789999989268836,
+        "warmupFrames": 601,
+        "steadyFrames": 1801
+      },
+      {
+        "atlas": false,
+        "mutation": 1,
+        "round": 2,
+        "retainedStartupDelta": -18.795000003592577,
+        "warmupFrames": 601,
+        "steadyFrames": 1801
+      },
+      {
+        "atlas": false,
+        "mutation": 0,
+        "round": 2,
+        "retainedStartupDelta": -54.213000007148366,
+        "warmupFrames": 599,
+        "steadyFrames": 1801
+      }
+    ],
+    "rawSamplesModified": false,
+    "discardedSamples": 0,
+    "warmupChanged": false,
+    "steadyPopulationChanged": false,
+    "budgetsChanged": false,
+    "runtimeAndSamplerChanged": false,
+    "firstUploadDrawDeltas": "The first callback has no previous counter snapshot; its zero deltas are not evidence of zero cold-start upload/draw work. Steady deltas and the separate structural/lifecycle counters remain applicable; full cold-start qualification belongs to G11."
+  },
+  "validations": {
+    "repository": {
+      "path": "artifacts/engine-0.2.3/g08/accepted-validation.json",
+      "bytes": 5237,
+      "sha256": "f32a344ac0975baeb1bce2b4b79761f70c80d22468ea3b6681fcddc7dc232f1d"
+    },
+    "feature": {
+      "path": "artifacts/engine-0.2.3/g08/feature-accepted-validation.json",
+      "bytes": 3024,
+      "sha256": "d6e35cd3c4592b58511fa97e21cc4980ed49aee644b5784e8133e0db7882a0c4"
+    },
+    "completion": {
+      "status": "passed",
+      "logs": [
+        {
+          "path": "artifacts/engine-0.2.3/g08/completion-docs.log",
+          "bytes": 724,
+          "sha256": "f735edcb0a990d7b965b2d3691fc072237b270d43f093e91ac57e78cc99d717a"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g08/completion-engine-diff.log",
+          "bytes": 1822,
+          "sha256": "c0f599cce260cc8859bfca99eb3d6e032fb81ef4dd2c3097c39d9aa304efd89d"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g08/completion-coordination.log",
+          "bytes": 200,
+          "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g08/completion-coordination-diff.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "visualReview": {
+        "status": "passed",
+        "artifact": {
+          "path": "artifacts/engine-0.2.3/g08/catalog-final/example.png",
+          "bytes": 9096,
+          "sha256": "03c0e537d664a95c5d62494ef53c3893ef26998657b541e905cd7e0428c808c7"
+        },
+        "observed": "Terrain, transparent empty cells and all four controls are visible; no blank output or corrupted atlas."
+      }
+    }
+  }
+}

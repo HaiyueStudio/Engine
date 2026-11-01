@@ -1,4 +1,4 @@
-import type {GuiElement, GuiElementOptions, GuiFocusManager} from '@haiyue/engine/gui';
+import type {GuiElement, GuiElementOptions, GuiFocusManager, GuiImageSource, GuiIconPosition} from '@haiyue/engine/gui';
 
 export interface GuiSplitPanelOptions {
   readonly axis: 'horizontal' | 'vertical';
@@ -15,7 +15,15 @@ export interface GuiSplitPanelOptions {
   readonly onRatioChange?: (ratio: number) => void;
 }
 
-export interface GuiTabPage {
+export interface GuiTabHeaderOptions {
+  readonly title?: string;
+  /** An explicit undefined clears a page icon. */
+  readonly icon?: GuiImageSource | undefined;
+  readonly iconPosition?: GuiIconPosition;
+  readonly iconSize?: number;
+  readonly iconGap?: number;
+}
+export interface GuiTabPage extends GuiTabHeaderOptions {
   readonly id: string;
   readonly title: string;
   readonly content: GuiElement;

@@ -1,9 +1,13 @@
 import { createGPUResourceOwner, type GPUResourceOwner, type GPUResourceTracker } from '../core/GPUResourceTracker';
 import type { RenderPipelineExecutionBoundary, RenderPipelineSystem } from './RenderPipeline';
 
+interface SystemOwnerLease {readonly owner: GPUResourceOwner; registrations: number;}
+// Pipeline registrations borrow the same original owner. No GPU handles live here.
+const sharedOwners = new WeakMap<GPUResourceTracker, WeakMap<RenderPipelineSystem, SystemOwnerLease>>();
+
 /** Concrete GPU ownership policy kept outside the scheduling/pass core. */
 export class RenderSystemResourceOwnership implements RenderPipelineExecutionBoundary {
-  private readonly _owners = new Map<RenderPipelineSystem, GPUResourceOwner>();
+  private readonly _owners = new Map<RenderPipelineSystem, SystemOwnerLease>();
 
   constructor(private readonly _tracker: GPUResourceTracker) {}
 
@@ -20,24 +24,33 @@ export class RenderSystemResourceOwnership implements RenderPipelineExecutionBou
   }
 
   remove(system: RenderPipelineSystem): void {
-    const owner = this._owners.get(system);
-    if (!owner) return;
+    const lease = this._owners.get(system);
+    if (!lease) return;
     this._owners.delete(system);
-    this._tracker.releaseOwner(owner);
+    if (--lease.registrations === 0) {
+      sharedOwners.get(this._tracker)?.delete(system);
+      this._tracker.releaseOwner(lease.owner);
+    }
   }
 
   clear(): void {
-    for (const owner of this._owners.values()) this._tracker.releaseOwner(owner);
-    this._owners.clear();
+    for (const system of this._owners.keys()) this.remove(system);
   }
 
   private _requireOwner(system: RenderPipelineSystem): GPUResourceOwner {
-    let owner = this._owners.get(system);
-    if (!owner) {
-      owner = createGPUResourceOwner('system', getSystemResourceLabel(system));
-      this._owners.set(system, owner);
+    let lease = this._owners.get(system);
+    if (!lease) {
+      let owners = sharedOwners.get(this._tracker);
+      if (!owners) {owners = new WeakMap(); sharedOwners.set(this._tracker, owners);}
+      lease = owners.get(system);
+      if (!lease) {
+        lease = {owner: createGPUResourceOwner('system', getSystemResourceLabel(system)), registrations: 0};
+        owners.set(system, lease);
+      }
+      lease.registrations++;
+      this._owners.set(system, lease);
     }
-    return owner;
+    return lease.owner;
   }
 }
 

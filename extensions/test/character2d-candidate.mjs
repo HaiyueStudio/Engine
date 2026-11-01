@@ -1,0 +1,18 @@
+import {preparePublicFeatureCandidate} from './helpers/public-feature-candidate.mjs';
+import {readFileSync} from 'node:fs';
+const frozenValues=JSON.parse(readFileSync(new URL('../../config/gameplay-023-contract.json',import.meta.url))).api.rootExports.filter(e=>e.kind==='value').map(e=>e.name).sort();
+const types=`import {createCharacter2D} from '@haiyue/extensions/character2d';
+import {Physics2DSystem} from '@haiyue/engine/physics';
+import type {Character2D as Frozen,Physics as FrozenPhysics} from './api-contract.js';
+const forward:typeof Frozen.createCharacter2D=createCharacter2D;
+const backward:typeof createCharacter2D=forward;void backward;
+declare const physics:Physics2DSystem;
+const cast:(options:FrozenPhysics.Physics2DShapeCastOptions)=>FrozenPhysics.Physics2DShapeCastHit|null=physics.castShape.bind(physics);void cast;
+`;
+const smoke=`import assert from 'node:assert/strict';
+import{Entity,World}from'@haiyue/engine/ecs';import{Transform2D}from'@haiyue/engine/components';import{Physics2DBody,Physics2DSystem}from'@haiyue/engine/physics';import{createCharacter2D}from'@haiyue/extensions/character2d';import*as root from'@haiyue/engine';import*as extRoot from'@haiyue/extensions';
+assert.deepEqual(Object.keys(root).sort(),${JSON.stringify(frozenValues)});assert.deepEqual(Object.keys(extRoot),['RenderSystem2DBase']);const world=new World(),physics=new Physics2DSystem({gravity:[0,0]}),entity=new Entity().addComponent(new Transform2D()).addComponent(new Physics2DBody({type:'kinematic',width:40,height:40}));world.addSystem(physics);world.addEntity(entity);const control=createCharacter2D({physics,entity});control.setVelocity([60,0]);world.update(1000/60,1000/60);assert.equal(control.state.position[0],1);control.dispose();assert.equal(physics.hasBody(entity.getComponent(Physics2DBody)),true);world.destroy();assert.equal(physics.resourceSnapshot().bodies,0);console.log(JSON.stringify({status:'passed',realBox2D:true,rootDeclaredExports:30,esmValueExports:Object.keys(root).length}));
+`;
+if(!process.argv[2]||process.argv.length>4)throw Error('Usage: character2d-candidate.mjs OUTPUT [PUBLIC_PACKAGE_REPORT]');
+const inputs=['engine/src/physics/Physics2DSystem.ts','engine/src/physics/Physics3DSystem.ts','engine/src/physics/FixedStepClock.ts','engine/src/physics/Physics2DBackend.ts','engine/src/physics/Physics2DShapeCast.ts','engine/src/physics/Box2DPhysics2DBackend.ts','engine/src/physics/Box2DShapeCast.ts','engine/src/types/box2d-umd.d.ts','engine/src/core/EngineError.ts','extensions/src/character2d.ts','extensions/src/character2d/Character2D.ts','extensions/src/character2d/types.ts','extensions/rollup.config.js','extensions/package.json','node_modules/box2d.ts/dist/box2d.umd.js'];
+const record=preparePublicFeatureCandidate({output:process.argv[2],application:'examples/character2d/application.ts',types,smoke,reportPath:process.argv[3],inputs});console.log(JSON.stringify({status:record.status,packages:record.packages.length,consumer:record.consumer}));

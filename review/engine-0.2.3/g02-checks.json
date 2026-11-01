@@ -1,0 +1,1224 @@
+{
+  "schemaVersion": 1,
+  "goal": "g02-validation-publication",
+  "goalStatus": "complete",
+  "generatedAt": "2026-10-31T02:19:14.801830+00:00",
+  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
+  "ciRevision": "dce66426661d1c334f6d21d399020447d60c9b3e",
+  "workingTree": "G01 contracts and scoped G02 infrastructure remain in the user workspace; isolated CI commit binds exact selected bytes; workspace HEAD/index unchanged",
+  "runtimeFeaturesImplemented": false,
+  "releaseQualified": false,
+  "publishingIncluded": false,
+  "publicationPerformed": false,
+  "baselinePromoted": false,
+  "defaultBranchChanged": false,
+  "summary": {
+    "focusedTests": 63,
+    "windowsCiTests": 63,
+    "linuxCiTests": 63,
+    "ciSkippedTests": 0,
+    "legacyReleasePolicyTests": 183,
+    "workspaceTests": 2416,
+    "catalogTests": 7,
+    "coordinationPolicyTests": 13,
+    "builtExampleTargets": 103,
+    "readbackNpmPackages": 4,
+    "readbackGithubAssets": 2,
+    "nativeDiagnosticPerformanceCases": 4,
+    "nativeDiagnosticPixelCases": 4,
+    "g01RecordedFilesPreserved": 65,
+    "ciSourceFiles": 26
+  },
+  "requirements": [
+    {
+      "id": "real-interactive-npm-terminal",
+      "status": "verified-for-g02",
+      "implementation": [
+        "scripts/publication-terminal.mjs",
+        "scripts/publication.mjs"
+      ],
+      "evidence": [
+        "artifacts/engine-0.2.3/g02/focused-final-transport-tests.log",
+        "https://github.com/HaiyueStudio/Engine/actions/runs/41159229050"
+      ],
+      "conclusion": "Publish inherits three real TTYs; a missing TTY/npm is not-started before intent. Actual npm --version ran with all three TTYs on Windows and Linux. Permanent diagnostics omit credentials and live passkey links. No publish was attempted."
+    },
+    {
+      "id": "frozen-plan-and-registry-state",
+      "status": "verified-for-g02",
+      "implementation": [
+        "scripts/publication-policy.mjs",
+        "scripts/publication.mjs"
+      ],
+      "evidence": [
+        "artifacts/engine-0.2.3/g02/npm-preflight-final.log",
+        "artifacts/engine-0.2.3/g02/npm-final-readback-journal.json"
+      ],
+      "conclusion": "Legacy schema1 plan and ID retained; schema2 supports exact qualified per-package versions/subsets. Accepted, processing, visible-awaiting-download, download-unavailable, authentication rejection and indeterminate remain distinct. Unknown results and observed immutable versions only read back; explicit named auth retry requires definite prior rejection."
+    },
+    {
+      "id": "platform-tools-and-existing-consumers",
+      "status": "verified-for-g02",
+      "implementation": [
+        "scripts/npm-process.mjs",
+        "scripts/hya-corpus/packed-browser.mjs"
+      ],
+      "evidence": [
+        "artifacts/engine-0.2.3/g02/final-input-audit.json",
+        "https://github.com/HaiyueStudio/Engine/actions/runs/41159229050"
+      ],
+      "conclusion": "Shared npm locator covers relocated Node, Debian and PATH symlinks. System tar and actual four-package packed-browser extraction passed on both hosts. The two previously fixed consumer fixtures remain byte-equivalent to HEAD."
+    },
+    {
+      "id": "raw-release-assets-and-safe-recovery",
+      "status": "verified-for-g02",
+      "implementation": [
+        "scripts/release-workflow-assets-policy.mjs",
+        "scripts/release-workflow-assets.mjs"
+      ],
+      "evidence": [
+        "artifacts/engine-0.2.3/g02/github-final-readback-journal.json",
+        "artifacts/engine-0.2.3/g02/github-final-transport-readback.log"
+      ],
+      "conclusion": "Raw stdout bytes and bounded stderr remain separate; SHA/length verify ANSI/NUL/invalid-UTF8 assets without text conversion or large download copies. Split stderr credentials redact correctly. Persist intent before upload; unknown acknowledgement only reads back. Completed conflicts stop. Explicit repair is restricted to own labelled unfinished draft placeholder with prior intent, rechecked before deletion; release/tag rechecked before mutation. Actual public 0.2.2 tarball and receipt verified read-only."
+    },
+    {
+      "id": "one-state-and-resumable-controller",
+      "status": "verified-for-g02",
+      "implementation": [
+        "scripts/release-workflow-state.mjs",
+        "scripts/release-workflow-run-policy.mjs",
+        "scripts/release-workflow.mjs"
+      ],
+      "evidence": [
+        "artifacts/engine-0.2.3/g02/ci-41159229050-artifact-verification.json",
+        "https://github.com/HaiyueStudio/Engine/actions/runs/41159229050"
+      ],
+      "conclusion": "Atomic fsync/rename state and nonce-owned locks are shared by npm, assets and controller. Frozen commands reuse original global gate/rehearsal validators. Completed stages verify source/host/log hashes; rehearsal resume also revalidates actual package/report bytes. Failed/interrupted stages need named retry; dead locks need exact owner confirmation. No review/dependency clone is created."
+    },
+    {
+      "id": "independent-windows-launch-and-failure-records",
+      "status": "verified-for-g02",
+      "implementation": [
+        "scripts/release-workflow-launch.mjs",
+        "scripts/release-workflow.mjs",
+        "scripts/start-publication.cmd"
+      ],
+      "evidence": [
+        "artifacts/engine-0.2.3/g02/independent-windows-final.json",
+        "https://github.com/HaiyueStudio/Engine/actions/runs/41159229050"
+      ],
+      "conclusion": "WMI directly creates the controller with its own console and provider-job breakaway. Actual controller acknowledgement is required; launch failure has a separate nonce record. Default independent Windows terminal retains exit/output. Local lineage is WmiPrvSE/services, creator already exited, worker completed with three real TTYs. Both CI hosts verified completion after their launching CLI exited."
+    },
+    {
+      "id": "separate-permission-and-background-preflight",
+      "status": "verified-for-g02",
+      "implementation": [
+        "scripts/release-workflow.mjs",
+        "scripts/release-workflow-run-policy.mjs"
+      ],
+      "evidence": [
+        "artifacts/engine-0.2.3/g02/windows-preflight-diagnostic.json",
+        "artifacts/engine-0.2.3/g02/focused-final-transport-tests.log"
+      ],
+      "conclusion": "Actual Windows host inspector confirmed administrator and separately returned background-app blockers. Policy checks permission-required, background-apps and unavailable metadata independently; no formal stage or user-application termination occurred."
+    },
+    {
+      "id": "accurate-planar-progress-and-original-deadline",
+      "status": "verified-for-g02",
+      "implementation": [
+        "scripts/release-workflow-planar-policy.mjs",
+        "scripts/verify-webgpu-planar-reflection.mjs",
+        "scripts/webgpu-gate/planar-reflection-fixture.mjs",
+        "scripts/webgpu-performance-budget.mjs"
+      ],
+      "evidence": [
+        "artifacts/engine-0.2.3/g02/planar-protocol.json",
+        "artifacts/engine-0.2.3/g02/planar-native-final.json",
+        "artifacts/engine-0.2.3/g02/planar-native-final.log",
+        "artifacts/engine-0.2.3/g02/planar-software-diagnostic-failed-1793410348871.json"
+      ],
+      "conclusion": "One protocol preserves smoke4/full48, four original budget IDs, pixel4, warmup3/samples40 and non-budget sample1. Progress reports real setup/pipeline/warmup/sample/pixel/error phases after measured durations. One shared 300s result wait, long900s, unchanged startup limits. Native smoke4+pixel4 passed original checks; current measured source fingerprint matches. SwiftShader No WebGPU adapter is retained as failure, not software qualification or timeout waiver."
+    },
+    {
+      "id": "cross-platform-no-publication-command-and-ci",
+      "status": "verified-for-g02",
+      "implementation": [
+        ".github/workflows/ci-fast.yml",
+        "scripts/publication-workflow.test.mjs",
+        "scripts/publication-process.test.mjs"
+      ],
+      "evidence": [
+        "https://github.com/HaiyueStudio/Engine/actions/runs/41159229050",
+        "artifacts/engine-0.2.3/g02/ci-41159229050-artifact-verification.json"
+      ],
+      "conclusion": "User-authorized isolated CI branch ran 63 tests per Windows/Linux Node22 host with zero skips. Actual formal diagnostic CLI plan/run/resume/status passed; resumes retained attempt1 and exact log hashes. Provider ZIP digests, manifests and stage logs independently verified. workflow_only explicitly skips Fast; this is infrastructure validation, not full candidate qualification."
+    },
+    {
+      "id": "history-budget-and-scope-preservation",
+      "status": "verified-for-g02",
+      "evidence": [
+        "artifacts/engine-0.2.3/g02/final-input-audit.json",
+        "artifacts/engine-0.2.3/g02/prior-inputs/g01-readme.md"
+      ],
+      "conclusion": "All 65 G01 recorded input/evidence files remain available with original SHA; only current README changed and original bytes are archived. Old G13 index hash, runtime source, public API baseline, performance configuration and previously fixed consumers are unchanged. Only the isolated CI branch was pushed; working HEAD and user index stayed unchanged."
+    }
+  ],
+  "validations": [
+    {
+      "id": "fast-gate-policy:test",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/fast-gate-policy-test.log"
+    },
+    {
+      "id": "performance-budget:test",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/performance-budget-test.log"
+    },
+    {
+      "id": "release:policy:test",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/release-policy-test.log"
+    },
+    {
+      "id": "docs:check",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/docs-check.log"
+    },
+    {
+      "id": "api:check",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/api-check.log"
+    },
+    {
+      "id": "typecheck",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/typecheck.log"
+    },
+    {
+      "id": "build",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/build.log"
+    },
+    {
+      "id": "test",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/test.log"
+    },
+    {
+      "id": "final-focused-63",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/focused-final-transport-tests.log"
+    },
+    {
+      "id": "final-legacy-release-policy-183",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/release-policy-final.log"
+    },
+    {
+      "id": "final-docs",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/docs-final.log"
+    },
+    {
+      "id": "final-api",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/api-final.log"
+    },
+    {
+      "id": "coordination-policy-13",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/milestone-policy-final.log"
+    },
+    {
+      "id": "coordination-compatibility",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/milestone-final.log"
+    },
+    {
+      "id": "npm-legacy-plan-preflight",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/npm-preflight-final.log"
+    },
+    {
+      "id": "npm-four-package-readback",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/npm-verify-final.log"
+    },
+    {
+      "id": "github-two-asset-readback",
+      "status": "passed",
+      "exitCode": 0,
+      "report": "artifacts/engine-0.2.3/g02/github-final-transport-readback.log"
+    }
+  ],
+  "validationContext": "Full repository typecheck, build and tests passed serially with unchanged runtime source. Subsequent MJS-only release-control refinements were checked against final bytes by local focused tests and both CI hosts; they do not change runtime dist or the measured native GPU fingerprint. No full 0.2.3 global gate/rehearsal qualification is claimed.",
+  "ci": {
+    "url": "https://github.com/HaiyueStudio/Engine/actions/runs/41159229050",
+    "branch": "codex/g02-validation-publication-023",
+    "revision": "dce66426661d1c334f6d21d399020447d60c9b3e",
+    "platforms": [
+      {
+        "platform": "linux",
+        "architecture": "x64",
+        "nodeVersion": "v22.23.4"
+      },
+      {
+        "platform": "win32",
+        "architecture": "x64",
+        "nodeVersion": "v22.23.4"
+      }
+    ],
+    "providerZipDigestsVerified": true,
+    "manifestAndLogHashesVerified": true,
+    "fullFastSkippedForExplicitWorkflowOnlyDispatch": true,
+    "defaultBranchMergePerformed": false
+  },
+  "retainedFailures": [
+    {
+      "path": "artifacts/engine-0.2.3/g02/independent-windows-entry.json",
+      "reason": "Shell.Application kept child inside the ChatGPT process tree",
+      "resolution": "Direct WMI controller, real lineage and creator-exit completion verified."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/broker-no-publication/run.json",
+      "reason": "Earlier PowerShell intermediary was accepted by WMI but never acknowledged controller startup",
+      "resolution": "Removed intermediary; direct Node controller plus required acknowledgement and retained startup-failure record."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/release-policy-restricted-permission.log",
+      "reason": "Restricted process could not create the original test symlink (EPERM)",
+      "resolution": "Unchanged suite passed with normal administrator permission; 183/183."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/planar-software-diagnostic-failed-1793410348871.json",
+      "reason": "Windows SwiftShader did not provide a WebGPU adapter",
+      "resolution": "Failure retained. No software GPU qualification or inherited timeout exception."
+    }
+  ],
+  "handoffs": [
+    {
+      "owner": "g03-scene-flow",
+      "status": "ready",
+      "scope": "Next serial runtime Goal; no implementation started."
+    },
+    {
+      "owner": "g11-integration-candidate",
+      "status": "required-before-candidate-completion",
+      "scope": "Actual combined 0.2.3 tarballs, production pacing/pixels/resources, required real input/Mac/iPhone flows, software/native qualification, complete global gate and no-publication rehearsal."
+    }
+  ],
+  "irreversibleActions": {
+    "npmSubmit": false,
+    "tag": false,
+    "releaseCreateOrDelete": false,
+    "assetUploadOrDelete": false,
+    "pagesDeploy": false,
+    "userApplicationTermination": false,
+    "baselinePromotion": false,
+    "isolatedCiBranchPushAndDispatch": true
+  },
+  "protectedHistory": {
+    "g01RecordedFiles": 65,
+    "audit": "artifacts/engine-0.2.3/g02/final-input-audit.json",
+    "g13Sha256": "0312e5f43ce737c48381d63014a2eb58fda190afaffdbced2869b104a99d3eff"
+  },
+  "nextGoal": "g03-scene-flow",
+  "files": [
+    {
+      "path": ".github/workflows/ci-fast.yml",
+      "bytes": 2576,
+      "sha256": "a34f44ae2ab1a8ff9ad6f8a51cd0dee116ab48c9626bd139d1bf9816c1a00653"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/api-check.log",
+      "bytes": 163,
+      "sha256": "4710a966ea112ce5f8af828b2efbd22daf70cf33066731e5b2ca16e1be2132db"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/api-final.log",
+      "bytes": 163,
+      "sha256": "4710a966ea112ce5f8af828b2efbd22daf70cf33066731e5b2ca16e1be2132db"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/audit-final-inputs.py",
+      "bytes": 4315,
+      "sha256": "df0882958de82ef381596430e68d3ff554aaec08c78ff07855cdd16c510f186d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/bootstrap-source-diagnostic.ps1",
+      "bytes": 1312,
+      "sha256": "4a7578e838096884d0c76d829825b9ac125fde33d10c0e74b9785f43cc81599d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/broker-launch.log",
+      "bytes": 273,
+      "sha256": "37f047299a93e7e4ca4a24cf74c1e1110703eba44b77982dbc127b3715ef5de9"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/broker-no-publication/run.json",
+      "bytes": 4127,
+      "sha256": "8471afa593e5e8fc61a3a42903a79aa405abd5b47c916fef6a2f139b1db2e5a7"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/broker-no-publication/start.cmd",
+      "bytes": 496,
+      "sha256": "aea180b08c3c79b29a6fcaf2d5d2b49ef128fdd2fc6969c1498aac1874f62d01"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/broker-no-publication-v2/launch.0123456789abcdef01234567.bootstrap.json",
+      "bytes": 202,
+      "sha256": "7be2d8e105d98dd3e8e4b5ecbc0a73444f4f7030f99889d652454d041f9ee636"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/broker-no-publication-v2/launch.bbbbbbbbbbbbbbbbbbbbbbbb.bootstrap.json",
+      "bytes": 201,
+      "sha256": "f63ebed547c8191ec971dfbf813412fcefa7ea11f5793dad8f9a7eb82d16edeb"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/broker-no-publication-v2/planar-protocol.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/broker-no-publication-v2/planar-protocol.1.stdout.log",
+      "bytes": 1043,
+      "sha256": "1d230336b24905997b9ad546e4c4ce1ce6093ac7a4337241d83e01df35e1c3bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/broker-no-publication-v2/publication-contracts.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/broker-no-publication-v2/publication-contracts.1.stdout.log",
+      "bytes": 3596,
+      "sha256": "ad2f769ef7fb1d2e262a49c8cef6f4c6c2b4057bfd617921d49e43c9c8f4c6c9"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/broker-no-publication-v2/run.json",
+      "bytes": 5968,
+      "sha256": "0e3ae187987c1681ccdacd286035b76663b60fafb7ceb029265c1c7639229f03"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/broker-no-publication-v2/start.cmd",
+      "bytes": 502,
+      "sha256": "32daecb534bb3347268abcbbf33ce746a65954348f3cf09cdfa3600b068fb229"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/broker-plan.log",
+      "bytes": 345,
+      "sha256": "12c6b3ea3ccd58bb2bba103149def02db18491fa0b381315f91b7a8387b79e07"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/build.log",
+      "bytes": 17781,
+      "sha256": "612a0e097e5b41f436c99e8bef91f78b5bcc23a4ffc0a8fa709106a7653fbb05"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025676274/planar-protocol.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025676274/planar-protocol.1.stdout.log",
+      "bytes": 1043,
+      "sha256": "1d230336b24905997b9ad546e4c4ce1ce6093ac7a4337241d83e01df35e1c3bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025676274/provider.zip",
+      "bytes": 5468,
+      "sha256": "e63c6b428ba12db66dd4e4329f3153807376e1f625ad8c3ccb420937e3f5a3c2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025676274/publication-contracts.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025676274/publication-contracts.1.stdout.log",
+      "bytes": 8160,
+      "sha256": "91b222df31384ce84f57e5d9cd7462a5185e8aedef2492e5bad01b634421164d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025676274/run.json",
+      "bytes": 5690,
+      "sha256": "68138b2cdd17d002c18150e9d7051bc9dc240543d83193fc7e7af11aed629c14"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025676274/start.cmd",
+      "bytes": 478,
+      "sha256": "2c6ba1a4b3aa5af9e7b0aa857f4235dc25a9b2679a01d32abe07735694e7a4d3"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025728653/planar-protocol.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025728653/planar-protocol.1.stdout.log",
+      "bytes": 1043,
+      "sha256": "1d230336b24905997b9ad546e4c4ce1ce6093ac7a4337241d83e01df35e1c3bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025728653/provider.zip",
+      "bytes": 5575,
+      "sha256": "f6d0fb10cb9f76061014e092e0ce4ca1edf6368e7dc2eaf789b89f6a82a5eb0c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025728653/publication-contracts.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025728653/publication-contracts.1.stdout.log",
+      "bytes": 8402,
+      "sha256": "e2fa5826da3ad2958a77ccab253ffee02b9e3422a0387c2fd95c1a6141b587bb"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025728653/run.json",
+      "bytes": 5920,
+      "sha256": "b12d4bceed2942157cb969d265ca21779c12cbd9341905f7b6d68da9aaa0758b"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025728653/start.cmd",
+      "bytes": 474,
+      "sha256": "5d835c9aaf339af418e8188588ef975122c9c278b1a7324412d571ddd917b0e6"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025997641/planar-protocol.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025997641/planar-protocol.1.stdout.log",
+      "bytes": 1043,
+      "sha256": "1d230336b24905997b9ad546e4c4ce1ce6093ac7a4337241d83e01df35e1c3bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025997641/provider.zip",
+      "bytes": 5579,
+      "sha256": "33152e26541b8d8dcdb2b8743fc9e3a056e5d842ef97c0ca72d953f0c3f21f99"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025997641/publication-contracts.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025997641/publication-contracts.1.stdout.log",
+      "bytes": 8476,
+      "sha256": "5c304cfa9ecb76cbd8e94e1ac19fba8497a9cd3408148350fd005771d8ff0254"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025997641/run.json",
+      "bytes": 5918,
+      "sha256": "6f8a7e7bc75e592cddb28dcb64b510c94450ae73d7435f0d1559d0b2c7716a1c"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13025997641/start.sh",
+      "bytes": 317,
+      "sha256": "e7a3dfc1c6a614e305217234dc55e76baf7681f10f6995339ca6e8eeae735058"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026027423/planar-protocol.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026027423/planar-protocol.1.stdout.log",
+      "bytes": 1043,
+      "sha256": "1d230336b24905997b9ad546e4c4ce1ce6093ac7a4337241d83e01df35e1c3bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026027423/provider.zip",
+      "bytes": 5579,
+      "sha256": "318821f73e56de890629a5bb7c3228dc6ba6be52694967bc47bc397e9ce132b6"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026027423/publication-contracts.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026027423/publication-contracts.1.stdout.log",
+      "bytes": 8399,
+      "sha256": "bec515de7945f02cf3e0a754355856f86542ea761d4ba26a9f2a39df1ef968f7"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026027423/run.json",
+      "bytes": 5920,
+      "sha256": "11009cc688881273220720e0ada6c85837e85f1f73f4b298583305b9b6a2e886"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026027423/start.cmd",
+      "bytes": 474,
+      "sha256": "5d835c9aaf339af418e8188588ef975122c9c278b1a7324412d571ddd917b0e6"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026260096/planar-protocol.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026260096/planar-protocol.1.stdout.log",
+      "bytes": 1043,
+      "sha256": "1d230336b24905997b9ad546e4c4ce1ce6093ac7a4337241d83e01df35e1c3bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026260096/provider.zip",
+      "bytes": 5455,
+      "sha256": "6d5004c16718c023c705e69800650093f0390678ac47afd43c9ac04b3e88f500"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026260096/publication-contracts.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026260096/publication-contracts.1.stdout.log",
+      "bytes": 8229,
+      "sha256": "30deae457e51a5e107a033bbc538ad0f6b10c1e22d3b0415f1a2fbc8edab1aab"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026260096/run.json",
+      "bytes": 5688,
+      "sha256": "2588c8624404d61b47f70a7e676d23e2f9df2c927269e19eb12e9964744bed20"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026260096/start.sh",
+      "bytes": 317,
+      "sha256": "e7a3dfc1c6a614e305217234dc55e76baf7681f10f6995339ca6e8eeae735058"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026765653/planar-protocol.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026765653/planar-protocol.1.stdout.log",
+      "bytes": 1043,
+      "sha256": "1d230336b24905997b9ad546e4c4ce1ce6093ac7a4337241d83e01df35e1c3bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026765653/provider.zip",
+      "bytes": 5570,
+      "sha256": "958761dda048a7251fa6aec5f2e92396ae2371a04ebc4084f8fe8c275109a405"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026765653/publication-contracts.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026765653/publication-contracts.1.stdout.log",
+      "bytes": 8472,
+      "sha256": "728660e934586949250f0088cf49f449f6c8ff504e06ffef3c618ac845a9f760"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026765653/run.json",
+      "bytes": 5918,
+      "sha256": "5d59e9b708928b8dbce17f62319a13aee7ac8398727e603a22d75d291467aeb3"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci/13026765653/start.sh",
+      "bytes": 317,
+      "sha256": "e7a3dfc1c6a614e305217234dc55e76baf7681f10f6995339ca6e8eeae735058"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-124411203550-job-log.json",
+      "bytes": 54424,
+      "sha256": "e1ff8c01fb00895d521455fc53f1c27148757fb15ed5432aeb66f77e1a56f7af"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-124411203721-job-log.json",
+      "bytes": 51087,
+      "sha256": "8cbef4ec7d87b9aebb85595b7bf79ced461a30c3ee16780b86a876d63100e6bb"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-124412818653-job-log.json",
+      "bytes": 54425,
+      "sha256": "9636e8848a4d425fe623915d857f24a36ef2bbdbdddb37807abf4047b2012a01"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-124412818694-job-log.json",
+      "bytes": 51529,
+      "sha256": "60b14871a6055b1ccb314a9f5d283017cb16e8eb7a2b283d20b4d7c8c02938fa"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-41158715081-artifact-verification.json",
+      "bytes": 4671,
+      "sha256": "6b7570f29c889f5da01f5eda2ede4e38ed08dc1153aa77190c5b0786eff1c5b6"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-41158715081-provider-state.json",
+      "bytes": 27114,
+      "sha256": "7d50b418ee25b53fae0879955b640817c361d88b6c2e34760f5bc83dddd81b16"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-41159229050-artifact-verification.json",
+      "bytes": 4671,
+      "sha256": "31d122f19a017d104c38b29efc615bb979f864c38e2f35ab073bb3a2d28994d0"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-41159229050-provider-state.json",
+      "bytes": 27114,
+      "sha256": "06c73a829a628603e9d88f6d2cd3ea197a587a4e8960058b2884ffe02cea8510"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-artifact-verification.json",
+      "bytes": 1659,
+      "sha256": "86d2065da5362ae7210ef87b6f2d4b7bb1cd119ce915d5f4369bd79990c16e7e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-commit-audit-message.txt",
+      "bytes": 239,
+      "sha256": "7269f9c8178a194378b673f039eda86bbc24ab36158d6d803048581b8f7b4898"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-commit-final-message.txt",
+      "bytes": 222,
+      "sha256": "b497872c7234cc4472515824382abae65df77105fad43b8ee341fae3be447f80"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-commit-message.txt",
+      "bytes": 66,
+      "sha256": "c053e5410aa7bcb29ff60024ca5fe311f46bd231b16664013c1b34bb563ebce5"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-final-provider-state.json",
+      "bytes": 27252,
+      "sha256": "6662b68837cb5f5b187c03422b7b7e586caf0a7b30efd61b8f1d4104e4183978"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-inputs.json",
+      "bytes": 47864,
+      "sha256": "99d9dc76bf2df976649d5cb6098a9c9afd9241313d2171afb6b65d2d539eea20"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-linux-job-log.json",
+      "bytes": 49542,
+      "sha256": "d60fc2cee64bc584ccda8a2f46d5a33a813308f3f78c3e74d70ee1669f666ab8"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-provider-state.json",
+      "bytes": 27363,
+      "sha256": "c44895883c3c61330019d3ca33ffbde84a46e2a8d9665bc6dfdb9c56fb173f6d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/ci-windows-job-log.json",
+      "bytes": 53756,
+      "sha256": "0156cd1753d420b74efaa5154ca1d4cdd4fde5ebbb9cc38e512e9ccfd681c675"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/docs-check.log",
+      "bytes": 724,
+      "sha256": "472ffe830be0d9f3fbac3ac3d3019cef17db0184683083bf10c822f4bf656394"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/docs-final.log",
+      "bytes": 725,
+      "sha256": "b9063f40616b2d07107cc75dab8eb3497a16f16d7800bff95b74525050621a7d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/fast-gate-policy-test.log",
+      "bytes": 2237,
+      "sha256": "ad02926ec2b22691a75e3657f4f27fb25702e0c735d82ee5b8956ff1e1d163b5"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/final-input-audit.json",
+      "bytes": 24333,
+      "sha256": "294ac0969f1d54299cccdc66c7afbc5608ffe50cfa2355c3eeb77a4ec4157bec"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/finalize-checks.py",
+      "bytes": 13731,
+      "sha256": "d81517d1b3af98a63effc2f8074ea0b10722ab6faaba1f3215f4cbd34c26d47a"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/focused-completion-tests.log",
+      "bytes": 5990,
+      "sha256": "48b5763dca0cd214744f12c619de27088be3abd758915f95955a4db20068552f"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/focused-final-63-tests.log",
+      "bytes": 6389,
+      "sha256": "78d52b73b127bca4d0f10063f6ae79d20cd1592221b9a0bb162ad4a6ab7f48c1"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/focused-final-tests-v2.log",
+      "bytes": 5886,
+      "sha256": "e13e61ced35d4b9e8f61db51a316d8469bdf3b95af8785c7d2e270ab244ab473"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/focused-final-tests.log",
+      "bytes": 5781,
+      "sha256": "decce9a8b301e71512147145d8a47de1473267b0bae290a3847e3db78ba26246"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/focused-final-transport-tests.log",
+      "bytes": 6393,
+      "sha256": "153479e26c98eb3e2cd014b872a6a1ca8171d31672150e8812a5a1deeb654f4e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/focused-independent-tests.log",
+      "bytes": 6271,
+      "sha256": "06360bf9a6a77daaafa499040b5550f57175ef7c0608ec75985512c278d65d65"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/focused-tests.log",
+      "bytes": 5777,
+      "sha256": "706e3e67728ec2ca9cf369f35b5262f5f9fddf4f8717f53e85312ef429da1e0e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/github-final-readback-journal.json",
+      "bytes": 603,
+      "sha256": "6b0bea2a39397e3b2b9bd60d34b4a6822a45c8be09f5bbadcf66ebfccd4ca88e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/github-final-readback.log",
+      "bytes": 795,
+      "sha256": "2461544c87262c63645959f4d5b3c7794aa4cd1e8ffb5566294b41abb85e7770"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/github-final-transport-readback.log",
+      "bytes": 795,
+      "sha256": "2461544c87262c63645959f4d5b3c7794aa4cd1e8ffb5566294b41abb85e7770"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/github-readback-journal.json",
+      "bytes": 579,
+      "sha256": "207f6e92d6002db9ae077f79288d7eaa344a1466db3d507fa32b0a19d2e8dd17"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/github-readback-plan.json",
+      "bytes": 654,
+      "sha256": "ee8c7940a0347ce4bf9868f608767bca14ef72862065b507d63853aa2ae5cc6b"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/github-readback.log",
+      "bytes": 768,
+      "sha256": "d26259bae477b200adf55bfa4bb15a23fa7429c807155507aaa18891476a1e8f"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/independent-final/planar-protocol.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/independent-final/planar-protocol.1.stdout.log",
+      "bytes": 1043,
+      "sha256": "1d230336b24905997b9ad546e4c4ce1ce6093ac7a4337241d83e01df35e1c3bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/independent-final/publication-contracts.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/independent-final/publication-contracts.1.stdout.log",
+      "bytes": 3601,
+      "sha256": "6ad75781b2a0e97349aeac27fbf9c5b07eaae1c5fb59d51b6707cbc41ff0c9b5"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/independent-final/run.json",
+      "bytes": 6055,
+      "sha256": "f6232e180e672a4f637b0a0325cb71e640e681f18a0276e22da396ee64fa4797"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/independent-final/start.cmd",
+      "bytes": 484,
+      "sha256": "fe6c57070b10f67f7477c55e9bb705a46033310cfa65cfcd81c22f3fd06d9b57"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/independent-plan.log",
+      "bytes": 359,
+      "sha256": "1337daa305da70385cb5005396ea8db94bbbf7390188acc58e58e2f0cb248aa5"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/independent-windows-entry.json",
+      "bytes": 901,
+      "sha256": "74f53963474a32bd42c9518e9f5f9c69f741f26b9ae5dcba1bdcc4e0275a6e0d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/independent-windows-final.json",
+      "bytes": 1148,
+      "sha256": "dedc0b84089a39be8c76772e2049f9c4859d9ef1af2da85be1f844b9794eac4e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/local-workflow-plan.log",
+      "bytes": 347,
+      "sha256": "1351c45cf66b8ccf37832f782acd0ae1db41c5cb71c59e68e8c60a0b4320379d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/local-workflow-resume.log",
+      "bytes": 267,
+      "sha256": "5ff2b609403911ba2229cb74c67774bf47993c81c2a9640a09b413e4fb228a71"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/local-workflow-run.log",
+      "bytes": 609,
+      "sha256": "7afd83b6150c8595f40c34288705546e551bc44557bfa7bcc39f421b258a6edc"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/milestone-final.log",
+      "bytes": 200,
+      "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/milestone-policy-final.log",
+      "bytes": 793,
+      "sha256": "9e2427ef4501f8fa2d7a0e360000354c0aeea2cd2ac9fb4b9ca1a258196fda75"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/npm-final-readback-journal.json",
+      "bytes": 666,
+      "sha256": "cbda7fa251e29e3824502c1cb78488e7dfd2967bf1c6eeb1c95e834efa029900"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/npm-legacy-preflight.log",
+      "bytes": 360,
+      "sha256": "c3d4beda1d7896c0945e2957bb4783e7cdbb4534b878f4bfc4f7f65ca5bc92fb"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/npm-legacy-readback-journal.json",
+      "bytes": 666,
+      "sha256": "322d12fc5b29ea638c06318783d05180d1070507e3a846b34203140110f4e57f"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/npm-legacy-verify.log",
+      "bytes": 818,
+      "sha256": "bc9c1b24f68dbb5804432997eb30cd99a893c37f9434deb61c204ec24d98677b"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/npm-preflight-final.log",
+      "bytes": 361,
+      "sha256": "c448d1b4ed8511d859ed8d47d5541546545a498c3e6c511b962cdd1f2fb9c523"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/npm-verify-final.log",
+      "bytes": 849,
+      "sha256": "b79dfad38e9cced3672628d00760a8e2ef8f404017f3ab176f982cde7104e334"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/performance-budget-test.log",
+      "bytes": 35094,
+      "sha256": "2da0589ca8f4f16866ce0eb44936f1a244dfbdbde78179cc0ebc74e35313ef84"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/planar-native-diagnostic.json",
+      "bytes": 181323,
+      "sha256": "09021580643a9091fe394cad36ef954969177f66ee40bb2e0b98e01e2a7a48a1"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/planar-native-final.json",
+      "bytes": 181345,
+      "sha256": "aac857cb0ca36b6cb5ebab1d7a2ce91aa79972944395a5fc45be3204037eac26"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/planar-native-final.log",
+      "bytes": 11971,
+      "sha256": "88080018be5cfd245eb473720c737f4809ff3d150a670a6ac6bcaca36b6a414d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/planar-native.log",
+      "bytes": 11965,
+      "sha256": "e5ecb42c6985f5a51a6b00d44b883afda2ac3a10c48ed3a74e3e030136b8acc1"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/planar-protocol.json",
+      "bytes": 1043,
+      "sha256": "1d230336b24905997b9ad546e4c4ce1ce6093ac7a4337241d83e01df35e1c3bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/planar-software-diagnostic-failed-1793410348871.json",
+      "bytes": 4127,
+      "sha256": "b0898aa509b1e3fdcfea2e666625c71f4fb39c3172cd9231cc8a6d015d9da01e"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/planar-software.log",
+      "bytes": 3431,
+      "sha256": "17ffad1a326ef4644775d22344910c19486da5c7b74523fccbfb0e944f75c181"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/prepare-final-ci.py",
+      "bytes": 2102,
+      "sha256": "85a3f33fdd018a5fd2ed50622b681bb54af5c8bc01e4b44f2dd2734e8143f89f"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/prior-inputs/g01-readme.md",
+      "bytes": 3457,
+      "sha256": "0b3634cf9abbbba6a0eaf4a62516d8d6907b4d52a7ffdabdc50d8f9a67553919"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/release-policy-final.log",
+      "bytes": 19073,
+      "sha256": "57835e2b0974496f960314ed0733f107fa9a1ea358e94d9dc2cb65d5fff285d1"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/release-policy-restricted-permission.log",
+      "bytes": 22246,
+      "sha256": "d4af8a84030d65e6b92e6d4979f3288bbccd1c2ff31974cfdee5b25cb80bd5b0"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/release-policy-test.log",
+      "bytes": 19070,
+      "sha256": "3053be364965977b1bcc95d31030f1b11b38926845b4cd9f7c02108267910917"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/test-broker-environment.mjs",
+      "bytes": 1477,
+      "sha256": "195b6ea4e7e54091a982134f55961843241b79ed18a0a6a10024c3ec6649774f"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/test.log",
+      "bytes": 244267,
+      "sha256": "ef27cd796bed9f6e8858f534149c3c6b8a6e6b8033f250163276df77c6928ba9"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/typecheck.log",
+      "bytes": 3248,
+      "sha256": "c783c96dbd9ce4c69acaea08972e0654a14bd67eaedc2fd8d774e8ba6f06ab94"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/validation-status.json",
+      "bytes": 1651,
+      "sha256": "237466327fe1a9f938651e4a27c4cd2cb5ed1a5c5085a2d5791188bd024594af"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/verify-final-ci-artifacts.py",
+      "bytes": 3793,
+      "sha256": "9c213296f4f2b228afb7eb8d6105c6bb55828af103c5a536946fe4702e712fc5"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/windows-no-publication/planar-protocol.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/windows-no-publication/planar-protocol.1.stdout.log",
+      "bytes": 1043,
+      "sha256": "1d230336b24905997b9ad546e4c4ce1ce6093ac7a4337241d83e01df35e1c3bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/windows-no-publication/publication-contracts.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/windows-no-publication/publication-contracts.1.stdout.log",
+      "bytes": 3497,
+      "sha256": "8667dcfb5199e52e3a3043368ef58c0682482f915009e96414d14ee937d22a5d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/windows-no-publication/run.json",
+      "bytes": 5670,
+      "sha256": "76f53ddab0c37c494992c2285477f134b66b703651937cda4c049e57eb59877d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/windows-no-publication/start.cmd",
+      "bytes": 498,
+      "sha256": "83d562ae62d5de81791e389513f95c0c60f78aa6b4257e3fcb7e4b999010a241"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/windows-no-publication-final/planar-protocol.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/windows-no-publication-final/planar-protocol.1.stdout.log",
+      "bytes": 1043,
+      "sha256": "1d230336b24905997b9ad546e4c4ce1ce6093ac7a4337241d83e01df35e1c3bf"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/windows-no-publication-final/publication-contracts.1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/windows-no-publication-final/publication-contracts.1.stdout.log",
+      "bytes": 3599,
+      "sha256": "e6e5f0a5adbd28132c8746294582f45f63f8d44dec89009fbd7c872c3599fac7"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/windows-no-publication-final/run.json",
+      "bytes": 5670,
+      "sha256": "bc2dcb9030569dec72050d482a2b59bbf43a0657f6a75ec78f1f3bf153c797d5"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/windows-no-publication-final/start.cmd",
+      "bytes": 510,
+      "sha256": "680581476080ae1b5fed30ea5d11827ad99b1e5ff54136a8fa2aab40655ca3db"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/windows-preflight-diagnostic.json",
+      "bytes": 5304,
+      "sha256": "3f18dea9eda4dc3cf4ca8efce863aa15fd0f38678b7563404217e3b35dbfe9be"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g02/wmi-simple-start.txt",
+      "bytes": 7,
+      "sha256": "03494afd4248c42f5fa1237bf2eeebe751ab8d9c977d55405fcb17469dbd91f8"
+    },
+    {
+      "path": "review/engine-0.2.3/README.md",
+      "bytes": 6257,
+      "sha256": "92d5a82c1500b6d3a663e8a7c84f59f9c7967e6e3074051b2a9061907f0ca6fd"
+    },
+    {
+      "path": "scripts/hya-corpus/packed-browser.mjs",
+      "bytes": 3667,
+      "sha256": "e70ada7119241ebe3da4eca825374b789fb3f4e2653916d6088c4085af1fcfa4"
+    },
+    {
+      "path": "scripts/npm-process.mjs",
+      "bytes": 1488,
+      "sha256": "3478ae71d38fde9206c2d1cfdbec1128d6cc724d0b5a852e35e43f1ca2b1b781"
+    },
+    {
+      "path": "scripts/publication-assets.test.mjs",
+      "bytes": 7712,
+      "sha256": "fbb99795d8aed206b2c62b8d04a2ab57750856f2e05e709b3b4155cdbcf38cea"
+    },
+    {
+      "path": "scripts/publication-cli.test.mjs",
+      "bytes": 4183,
+      "sha256": "0840172cd91af8f945bfba212fa5d43a329e301d07c247d1829a98f95954c279"
+    },
+    {
+      "path": "scripts/publication-planar.test.mjs",
+      "bytes": 2776,
+      "sha256": "005d3eac4db2d62bbe7508ca439dc5071de982f1853c133060039ea25e8b433f"
+    },
+    {
+      "path": "scripts/publication-policy.mjs",
+      "bytes": 8616,
+      "sha256": "df42b8994483b0b159c2141cddc3ce2f09eba1e0463e66a80249ce4528bcedf9"
+    },
+    {
+      "path": "scripts/publication-policy.test.mjs",
+      "bytes": 10254,
+      "sha256": "19d51a106089a0b13d07661a1ec3d1c0553ca463aecd79063b1970fe9d54ed2b"
+    },
+    {
+      "path": "scripts/publication-process.test.mjs",
+      "bytes": 7192,
+      "sha256": "be5e9234992b2a151672eb9e199a64dd9a11e9f45cbfab15304f11ec8815df54"
+    },
+    {
+      "path": "scripts/publication-state.test.mjs",
+      "bytes": 2128,
+      "sha256": "f08df945374f27d2b830cc768dfdc6a7b35a851fc9207a8c54cc20a1acce82be"
+    },
+    {
+      "path": "scripts/publication-terminal.mjs",
+      "bytes": 3170,
+      "sha256": "e29af806800f6452a19eddb6e8ce236b1a0b70978a1b0716494594cb3832dfc8"
+    },
+    {
+      "path": "scripts/publication-tty-probe.mjs",
+      "bytes": 1071,
+      "sha256": "4fcab7fd0fd131de5baa6bf59271611e24c3135c19abd06f9051540f4ce14088"
+    },
+    {
+      "path": "scripts/publication-workflow.test.mjs",
+      "bytes": 10946,
+      "sha256": "6f810d8618c1aa6f5fbfee991b8f4bb6a9b68944a6d62f0c36ad8d247ce36080"
+    },
+    {
+      "path": "scripts/publication.mjs",
+      "bytes": 7533,
+      "sha256": "517859349d0305c35f7b35eed1bc71c3072c8d35dd150bb8139f2ad7fba4f412"
+    },
+    {
+      "path": "scripts/release-workflow-assets-policy.mjs",
+      "bytes": 5569,
+      "sha256": "e5c669dba7c1c58ea898f85d859f271d12d93d01b3c54d7f5df9c1200a118ae2"
+    },
+    {
+      "path": "scripts/release-workflow-assets.mjs",
+      "bytes": 4921,
+      "sha256": "106bfcea2d7e07eea2794ca0cd6be7bc1962c7942b188fd84fa2125c8a5a7952"
+    },
+    {
+      "path": "scripts/release-workflow-launch.mjs",
+      "bytes": 4283,
+      "sha256": "29d39648d2488500cb74fe70a2a15dadfbb8764395fb5a7a441cfae3b1b33866"
+    },
+    {
+      "path": "scripts/release-workflow-planar-policy.mjs",
+      "bytes": 2078,
+      "sha256": "69b0026c476282cb5e9f051e178b1e4782ae8c931e4f40afbe04be1c56f52d75"
+    },
+    {
+      "path": "scripts/release-workflow-policy.test.mjs",
+      "bytes": 7349,
+      "sha256": "37fa512ac61b8d4f7efc32e40e83ae019c9bf2d034641c2424c6ed7b955e386b"
+    },
+    {
+      "path": "scripts/release-workflow-run-policy.mjs",
+      "bytes": 6252,
+      "sha256": "0d362fdfdb48653d85b57048e79a091ac01a6374d60156d0c16e6a7cab672175"
+    },
+    {
+      "path": "scripts/release-workflow-state.mjs",
+      "bytes": 1942,
+      "sha256": "a5fac741148188e439e0024d312b99477d028ae7a1c2e8dac787ea33938da818"
+    },
+    {
+      "path": "scripts/release-workflow.mjs",
+      "bytes": 11136,
+      "sha256": "6dccd2dc5a4714c7484ac27450159ec453209d795042f5efdf641705b290af16"
+    },
+    {
+      "path": "scripts/start-publication.cmd",
+      "bytes": 559,
+      "sha256": "adbf4f9cf7a084acda23c4f17047bb7e25cabadde84499381635e6e87a6ba246"
+    },
+    {
+      "path": "scripts/verify-webgpu-planar-reflection.mjs",
+      "bytes": 7609,
+      "sha256": "258af3f18b90c0efd9f1186f4eb6a7b4c2711a3b723748642bc8611cccaf1bf8"
+    },
+    {
+      "path": "scripts/webgpu-gate/planar-reflection-fixture.mjs",
+      "bytes": 17578,
+      "sha256": "8a2f80f8374e1d1ed27b8627378cd1da2bce91a72f5a60294c8764b84b600e54"
+    },
+    {
+      "path": "scripts/webgpu-performance-budget.mjs",
+      "bytes": 15142,
+      "sha256": "b96b6219046a33bb434ecd689f92c7ff208e56bac28bb834c5b8c20f077216ab"
+    }
+  ],
+  "coordinationFiles": [
+    {
+      "path": "milestones/milestones/m25-engine-0.2.3/milestone.json",
+      "sha256": "73ea6f7c4675abd2e9072ed1657201bc2b551a51ab4f4b37c93254814725039a"
+    },
+    {
+      "path": "milestones/milestones/m25-engine-0.2.3/README.md",
+      "sha256": "df45ff8fd4336647b38dce96d7d152133150cd36bdfe80ffd326f76aa591b8ee"
+    },
+    {
+      "path": "milestones/milestones/README.md",
+      "sha256": "7a5a85b449dcfc9e95cbf3c5cb38e0641fdffc7503795df33d1c512d64490c16"
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 export type { GuiMeasureConstraint, GuiLayoutDelegate, GuiInvalidationReason, GuiInvalidation } from './gui/GuiLayoutTypes';
 export type { GuiPointerFilter, GuiFocusMode, GuiFocusOptions, GuiActionEvent } from './gui/GuiTypes';
+export type {GuiIconPosition} from './gui/GuiTypes';
 export type { GuiTextEdit, GuiTextComposition, GuiTextInputSession, GuiTextInputHost } from './gui/input/GuiTextInputHost';
 export { GuiThemeResource } from './gui/GuiThemeResource';
 export type { GuiThemeState, GuiSkin, GuiNineSliceOptions } from './gui/GuiThemeTypes';

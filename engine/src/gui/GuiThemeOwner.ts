@@ -13,7 +13,7 @@ function id(value: object | null | undefined): number {
 }
 function metrics(skin: GuiSkin): string {
   const icon = skin.icon, insets = skin.contentInsets ?? skin.nineSlice?.contentInsets;
-  return JSON.stringify([skin.fontFamily, skin.fontSize, skin.padding, skin.iconSize, skin.iconGap, id(icon),
+  return JSON.stringify([skin.fontFamily, skin.fontSize, skin.padding, skin.iconSize, skin.iconGap, skin.iconPosition, id(icon),
     icon && 'naturalWidth' in icon ? icon.naturalWidth : icon && 'width' in icon ? icon.width : 0,
     icon && 'naturalHeight' in icon ? icon.naturalHeight : icon && 'height' in icon ? icon.height : 0,
     insets, skin.nineSlice?.cuts, skin.nineSlice?.pixelRatio]);
@@ -87,7 +87,7 @@ export class GuiThemeOwner {
 }
 
 function hasLocalTheme(element: GuiElement): boolean {
-  return element.themeControlType === 'GuiNineSlice' || ['fontFamily', 'fontSize', 'icon', 'iconSize', 'contentInsets', 'nineSlice'].some(key => key in element.style);
+  return element.themeControlType === 'GuiNineSlice' || ['fontFamily', 'fontSize', 'icon', 'iconSize', 'iconGap', 'iconPosition', 'contentInsets', 'nineSlice'].some(key => key in element.style);
 }
 function hasTheme(element: GuiElement): boolean {
   return !!element.themeResource || hasLocalTheme(element) || element.children.some(hasTheme);

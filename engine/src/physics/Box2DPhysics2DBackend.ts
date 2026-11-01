@@ -19,6 +19,8 @@ import type {
   Physics2DWorldDriver,
 } from './Physics2DBackend';
 import type { Physics2DBodyType } from './Physics2DBody';
+import { Box2DShapeCast } from './Box2DShapeCast';
+import type { Physics2DShapeCastDesc, Physics2DShapeCastResult } from './Physics2DBackend';
 
 const BOX2D_CAPABILITIES: Physics2DCapabilities = Object.freeze({
   bodyTypes: Object.freeze(['static', 'dynamic', 'kinematic'] as const),
@@ -29,6 +31,7 @@ const BOX2D_CAPABILITIES: Physics2DCapabilities = Object.freeze({
   rayCast: true,
   shapeQuery: true,
   contactEvents: true,
+  shapeCast: true,
 });
 
 interface JointRecord {
@@ -69,6 +72,7 @@ class Box2DPhysics2DWorld implements Physics2DWorldDriver {
   private nextBodyHandle = 1;
   private nextJointHandle = 1;
   private destroyed = false;
+  private readonly shapeCaster = new Box2DShapeCast();
 
   constructor(options: Physics2DBackendWorldOptions) {
     this.world = new box2d.b2World(new box2d.b2Vec2(options.gravityX, options.gravityY));
@@ -82,6 +86,11 @@ class Box2DPhysics2DWorld implements Physics2DWorldDriver {
 
   setGravity(x: number, y: number): void {
     this.world.SetGravity(new box2d.b2Vec2(x, y));
+  }
+
+  castShape(desc: Physics2DShapeCastDesc): Physics2DShapeCastResult | null {
+    this.assertAlive();
+    return this.shapeCaster.cast(this.world, this.bodies, this.bodyHandles, desc);
   }
 
   createBody(desc: Physics2DBackendBodyDesc): Physics2DBodyHandle {
@@ -375,6 +384,7 @@ class Box2DPhysics2DWorld implements Physics2DWorldDriver {
 
   destroy(): void {
     if (this.destroyed) return;
+    this.shapeCaster.clear();
     for (const handle of [...this.joints.keys()]) this.destroyJoint(handle);
     for (const handle of [...this.bodies.keys()]) this.destroyBody(handle);
     this.world.DestroyBody(this.mouseGroundBody);

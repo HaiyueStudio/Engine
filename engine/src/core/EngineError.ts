@@ -27,6 +27,16 @@ export const EngineErrorCode = {
   SceneDataInvalid: 'E_SCENE_DATA_INVALID',
   SceneDestroyed: 'E_SCENE_DESTROYED',
   SceneInvalidState: 'E_SCENE_INVALID_STATE',
+  GameplayInvalidInput: 'E_GAMEPLAY_INVALID_INPUT',
+  SceneFlowAborted: 'E_SCENE_FLOW_ABORTED',
+  SceneFlowSuperseded: 'E_SCENE_FLOW_SUPERSEDED',
+  PhysicsShapeCastUnsupported: 'E_PHYSICS_SHAPE_CAST_UNSUPPORTED',
+  PhysicsQueryLimit: 'E_PHYSICS_QUERY_LIMIT',
+  CharacterBodyOwnership: 'E_CHARACTER_BODY_OWNERSHIP',
+  InputBindingConflict: 'E_INPUT_BINDING_CONFLICT',
+  InputProfileInvalid: 'E_INPUT_PROFILE_INVALID',
+  GuiCollectionLimit: 'E_GUI_COLLECTION_LIMIT',
+  AudioCapabilityUnavailable: 'E_AUDIO_CAPABILITY_UNAVAILABLE',
   SessionDataInvalid: 'E_SESSION_DATA_INVALID',
   EditorImportFailed: 'E_EDITOR_IMPORT_FAILED',
   ComponentCloneUnsupported: 'E_COMPONENT_CLONE_UNSUPPORTED',
@@ -221,6 +231,11 @@ function inferDomain(code: EngineErrorCode): ErrorDomain {
 }
 
 function inferRecovery(code: EngineErrorCode): ErrorRecovery {
+  if(code===EngineErrorCode.AudioCapabilityUnavailable)return ErrorRecovery.Ignore;
+  if (code === EngineErrorCode.PhysicsShapeCastUnsupported || code === EngineErrorCode.PhysicsQueryLimit
+    || code === EngineErrorCode.CharacterBodyOwnership) return ErrorRecovery.Ignore;
+  if (code === EngineErrorCode.GameplayInvalidInput || code === EngineErrorCode.SceneFlowAborted
+    || code === EngineErrorCode.SceneFlowSuperseded) return ErrorRecovery.Ignore;
   if (code === EngineErrorCode.SessionDataInvalid || code === EngineErrorCode.EditorImportFailed) return ErrorRecovery.Ignore;
   if (code === EngineErrorCode.AssetLoadFailed
     || code === EngineErrorCode.AssetNotReady

@@ -51,7 +51,7 @@ test('blur, visibility, reset and dispose release input without duplicate or sta
   const target = new CountingEventTarget();
   const visibility = new VisibilityTarget();
   const input = new BrowserMultiplayerInput({ eventTarget: target, visibilityTarget: visibility, players: [{ id: 'P1', bindings: { a: { keys: ['KeyJ'] } } }] });
-  assert.deepEqual(target.counts(), { blur: 1, gamepadconnected: 1, gamepaddisconnected: 1, keydown: 1, keyup: 1 });
+  assert.deepEqual(target.counts(), { blur: 1, gamepadconnected: 1, gamepaddisconnected: 1, keydown: 1, keyup: 1, pointercancel:1,pointerdown:1,pointerup:1 });
   assert.deepEqual(visibility.counts(), { visibilitychange: 1 });
 
   target.dispatchKey('keydown', 'KeyJ');
@@ -70,7 +70,7 @@ test('blur, visibility, reset and dispose release input without duplicate or sta
   input.reset().reset();
   assert.equal(input.tick, 0);
   assert.equal(action(input.sample(1), 'P1', 'a').held, false);
-  assert.deepEqual(target.counts(), { blur: 1, gamepadconnected: 1, gamepaddisconnected: 1, keydown: 1, keyup: 1 });
+  assert.deepEqual(target.counts(), { blur: 1, gamepadconnected: 1, gamepaddisconnected: 1, keydown: 1, keyup: 1, pointercancel:1,pointerdown:1,pointerup:1 });
 
   input.dispose(); input.dispose();
   assert.deepEqual(target.counts(), {});

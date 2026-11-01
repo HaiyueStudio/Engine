@@ -1,0 +1,382 @@
+{
+  "schemaVersion": 1,
+  "goal": "g11-integration-candidate",
+  "goalStatus": "active",
+  "generatedAt": "2026-11-01T07:09:18.375Z",
+  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
+  "workingTree": "uncommitted integration; not a clean formal runner",
+  "releaseQualified": false,
+  "publishingIncluded": false,
+  "publicationPerformed": false,
+  "baselinePromoted": false,
+  "versions": {
+    "@haiyue/engine": "0.2.3",
+    "@haiyue/extensions": "0.2.3",
+    "@haiyue/shader-language": "0.2.3",
+    "@haiyue/animation-spec": "0.2.2"
+  },
+  "frozenContracts": [
+    {
+      "path": "config/gameplay-023-contract.json",
+      "bytes": 47325,
+      "sha256": "07ebc65103cc45c6ed9c6333f28ad89066439204348be9d62bdc87fc607c93ca"
+    },
+    {
+      "path": "review/engine-0.2.3/api-contract.d.ts",
+      "bytes": 19620,
+      "sha256": "dd6b53cd8a901905f146bc4c118348e3d08350d6808fe51028a80a52532f3e07"
+    },
+    {
+      "path": "review/engine-0.2.3/contract.md",
+      "bytes": 12895,
+      "sha256": "f4d6912443035836b9295cb38ad7deb8673953abfa475b8cb5e019aac2cec039"
+    }
+  ],
+  "currentCandidate": [
+    {
+      "path": "artifacts/engine-0.2.3/g11/prepared-current-candidate/candidate.json",
+      "bytes": 149463,
+      "sha256": "db0e1284f23b08ffd7ec35f513c0a35691525b1da71731d707a7da1a8b685de1"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g11/prepared-current-candidate/candidate.json.contents.json",
+      "bytes": 912526,
+      "sha256": "eab0830306c64037815650507cd5b4aec73b448ec867b63a87d99fdcb0b9438d"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g11/physical-entry-plan.json",
+      "bytes": 1838,
+      "sha256": "b36e257d8d678ca0cea5f261e6c53599ff676bce333ddf4e6edb441f82b7e7b2"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "package.json",
+      "bytes": 30588,
+      "sha256": "57b2e4c100d0f496bb6d86880642bb4bd9fc26b1329c408aacf179d2c25d0f55"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 72704,
+      "sha256": "cae2b02cc14a515164b2007c4498ec969d5743feb2d66fb1a173a7be9d1cc9e3"
+    },
+    {
+      "path": "engine/package.json",
+      "bytes": 6145,
+      "sha256": "b0febed0ce8477f54cb41880dadfe46fab0d41609cabe7007ea9bb82508f629e"
+    },
+    {
+      "path": "extensions/package.json",
+      "bytes": 6153,
+      "sha256": "edb90b4e83f80f2956ed8be01bcd4bed6eb44c2f6c24bf2427664754df078674"
+    },
+    {
+      "path": "shader-language/package.json",
+      "bytes": 1257,
+      "sha256": "515383753f129fc7eae5acc03b5914fcf5ed1ecd4ed6d83108dc4057f69887f7"
+    },
+    {
+      "path": "animation-spec/package.json",
+      "bytes": 2803,
+      "sha256": "5482a0637abc05bd18e33fbf19cf3c5068dae3ee53354ff3ac88aa7b03ed80aa"
+    },
+    {
+      "path": "examples/gameplay-kit/application.ts",
+      "bytes": 35050,
+      "sha256": "e5457266445680ddfe2f720e869636d36e65795ce5f9bea3ac1e0a43d9b10b29"
+    },
+    {
+      "path": "examples/gameplay-kit/main.ts",
+      "bytes": 817,
+      "sha256": "5c39ad77bd25d50cf69004930fd1da6447b326db3286257f5f31b6303071c961"
+    },
+    {
+      "path": "examples/gameplay-kit/level.json",
+      "bytes": 111,
+      "sha256": "536d8d91e5a0a882e93c50457dc23e703a7f41e35790792159816f886e6c144d"
+    },
+    {
+      "path": "engine/src/renderer/RenderSystemResourceOwnership.ts",
+      "bytes": 2444,
+      "sha256": "c2d31a678aa9bccf3f1c79b796fef53b3d9678931202eaeeb83b7efc30281c03"
+    },
+    {
+      "path": "engine/src/postprocess/SceneOutputPass.ts",
+      "bytes": 9862,
+      "sha256": "551ecb471fa121208132621f0d19e4e681c265381857a30abff062236c461bf7"
+    },
+    {
+      "path": "scripts/engine-021-evidence-policy.mjs",
+      "bytes": 21751,
+      "sha256": "adc0384bf9f06894741684b982ee86fd809c1d567cc6a6775186eeaa72341cf6"
+    },
+    {
+      "path": "scripts/check-engine-021-evidence.mjs",
+      "bytes": 11034,
+      "sha256": "2459e5546d08d9de805295e76185af2e75bd457842389f364a32bd83265f4f3b"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "version-peer-and-external-lock",
+      "required": true,
+      "status": "passed",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/version-integrity.json",
+          "bytes": 513,
+          "sha256": "fa3c39bf1f0f4f88368d612ee15ce44302df224b8cbca1b339239612645ea489"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/rehearsal-plan.json",
+          "bytes": 5192,
+          "sha256": "c256e7f68c3293f6291a5d5806011222821a007d37111e2af954eab08b317a0f"
+        }
+      ],
+      "conclusion": "Frozen mixed versions and extension peer floor aligned; unchanged animation 0.2.2 bytes and external lock entries verified. Plan only, no rehearsal execution."
+    },
+    {
+      "id": "repository-checks",
+      "required": true,
+      "status": "passed-before-latest-repair",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/integration-validation.json",
+          "bytes": 4451,
+          "sha256": "1c4dff8780650dd792581ff505173400fde74dd482e40bb5700018d0f8e848c4"
+        }
+      ],
+      "conclusion": "All 14 repository phases passed before the later SceneOutputPass lifecycle repair; affected final source still requires the full formal global gate."
+    },
+    {
+      "id": "render-system-owner-lifetime",
+      "required": true,
+      "status": "passed-diagnostic",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/owner-regression-before.log",
+          "bytes": 2218,
+          "sha256": "5522731319524e11057a7d426f38c3a428dd92b40ecc497964384d0fca452e51"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/owner-regression-after.log",
+          "bytes": 445,
+          "sha256": "5a5f7e9609359c040818e95ad48d071bc8614c8974f4a1c126b7cd268a69b89b"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/owner-renderer-regressions.log",
+          "bytes": 5597,
+          "sha256": "db7aa803c6c7325490dd4ca1fd5b07fc7e8fc045d930fc2762741badc433f88e"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/prototype-native-6/result.json",
+          "bytes": 63963,
+          "sha256": "57201e1546888381290bbe0f91beaf29e4cc57c0bf7f5644cf46e297821ff600"
+        }
+      ],
+      "conclusion": "Original GPU use-after-destroy retained; shared original owner survives overlapping pipeline registrations and is released on final exit."
+    },
+    {
+      "id": "output-pipeline-growth",
+      "required": true,
+      "status": "passed-diagnostic",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/combined-native-growth-before-2/result.json",
+          "bytes": 510676,
+          "sha256": "afad286dfd0c03f20dbd72149c8313b765f7bbe72fea5e30ab090e0c8bbbaab0"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/output-pipeline-before-valid-fixture.log",
+          "bytes": 2574,
+          "sha256": "c936baad8367629e693d6e75dc6e97b4e21070ddc99f774402720b44f36d2957"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/output-pipeline-after.log",
+          "bytes": 3413,
+          "sha256": "615776f94d1e37877af333218e97e59d44a9d8f2a3e899ed22fa89b9b1437da1"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/output-pipeline-engine-typecheck.log",
+          "bytes": 54,
+          "sha256": "56a09250d42c05f85c8b626a44669230041d026e1fb494c9ecbd859ab30c9dd6"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/output-pipeline-engine-tests.log",
+          "bytes": 132566,
+          "sha256": "f2493521a224d53a43260408fd534213caf657320463bc4df191cff347171fb0"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/combined-native-growth-after/result.json",
+          "bytes": 453185,
+          "sha256": "bf9a6807b6ea47de215489b1b71d0d585c587468c4498bfd67724300760fe53e"
+        }
+      ],
+      "conclusion": "Original tracker grew SceneOutput.pipeline records 40 to 88; repaired native handoffs hold 6 pipelines, with zero final owner residue. 1354 Engine tests pass."
+    },
+    {
+      "id": "combined-settings-and-workflow",
+      "required": true,
+      "status": "passed-diagnostic",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/combined-settings-before/result.json",
+          "bytes": 254655,
+          "sha256": "ef45554665b11f188657a0d3f440d4c3c948a92ea013af3bf7536ae5eb31dc0b"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/combined-settings-after/result.json",
+          "bytes": 464002,
+          "sha256": "22be3de206631e54c8d5e4259aa74b2df45655f72eb89daf7d4fc03ab704e827"
+        }
+      ],
+      "conclusion": "Invalid saved audio left 0 of 128 input bindings; example now rolls back original configurations. 173 installed native checks pass; automated input/audio are not physical qualification."
+    },
+    {
+      "id": "deterministic-public-packages",
+      "required": true,
+      "status": "passed-feature",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/public-packages-output-fixed/public-packages.json",
+          "bytes": 169346,
+          "sha256": "53783732fc9fe16144a34c7abee43f17e4077e082f9c8da1e93e78e6c25aa924"
+        }
+      ],
+      "conclusion": "Fresh deterministic four-package installation and independent consumers pass; exact final application candidate and all formal evidence remain to be frozen."
+    },
+    {
+      "id": "inherited-performance-interpretation",
+      "required": true,
+      "status": "passed-policy-only",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/evidence-023-policy.log",
+          "bytes": 2951,
+          "sha256": "d9d5ba659d2d47d3986451bc019cc2ebc26434bd6366e61b83c8584159afa122"
+        }
+      ],
+      "conclusion": "Only G01-inherited ADR0127/0137 scopes added for target 0.2.3; no old population reuse or additional waiver."
+    },
+    {
+      "id": "native-controls-full-pixel-matrix",
+      "required": true,
+      "status": "passed-feature",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/current-gui-matrix.json",
+          "bytes": 5050,
+          "sha256": "06d7ff1119d7d6c2313a16f37c6cf06a7473df71cf79fe87149eb507ea7b35ca"
+        }
+      ],
+      "conclusion": "Fresh exact candidate: 92 independent semantic and 80 regional full-frame pixel cases across DPR1/2 MSAA1/4, plus 9 browser interaction checks. Physical/production qualification is separate."
+    },
+    {
+      "id": "combined-msaa-and-pixels",
+      "required": true,
+      "status": "in-progress",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/combined-current-msaa4/result.json",
+          "bytes": 465752,
+          "sha256": "4423c1244b3d0330972f8cb22adbf51aa8985833d6cad0a50da9822a01e96a93"
+        }
+      ],
+      "conclusion": "173 integrated installed checks pass at MSAA4 before the small shared audio UI factory/reset change. Final app matrix and remaining full native regression still required."
+    },
+    {
+      "id": "physical-entry-setup",
+      "required": true,
+      "status": "passed-diagnostic",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/chrome-physical-audio-policy.log",
+          "bytes": 1404,
+          "sha256": "5fa80f42c96019d066a3f918c433f481c17496801c06f12220e10569e4ed24f4"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/physical-prepared-entry-smoke/result.json",
+          "bytes": 77055,
+          "sha256": "3b0e9c2fd10d4b32e9c2d28ac43f6620e12ef09dc9e98485bededa7a63ac5619"
+        }
+      ],
+      "conclusion": "Normal gesture-based visible audio separated from unchanged silent automation. 5130 source/installed files verified. Setup-only automated input never grants physical acceptance."
+    },
+    {
+      "id": "native-consumer-preparation",
+      "required": true,
+      "status": "prepared",
+      "evidence": [
+        {
+          "path": "../Native/examples/ios-gui-text-input/vendor/qualified-candidate.json",
+          "bytes": 31617,
+          "sha256": "95a4b91372c0c88b1748fd2beb451acbd52e8300fa0a2ccf1a43b827882aecd8"
+        },
+        {
+          "path": "../Native/examples/ios-gui-text-input/artifacts/engine-0.2.3/g11-native-typecheck-workload.log",
+          "bytes": 73,
+          "sha256": "b0d53d8e53c6a7871ce79dd0a05a3d7e08dfa22f942e4a74b7b73c626dcdc674"
+        },
+        {
+          "path": "../Native/examples/ios-gui-text-input/artifacts/engine-0.2.3/g11-candidate-verification-export.json",
+          "bytes": 204,
+          "sha256": "cc172ae0cd734a06b26d2c7711b28771263c53ca0b058f432d8bf80c91abf0dc"
+        },
+        {
+          "path": "../Native/examples/ios-gui-text-input/artifacts/engine-0.2.3/native-install-integrity-export.json",
+          "bytes": 1723,
+          "sha256": "bd4f817fd17a243c30a1b0208bf9af0c67768537c443116761e678188d5ab6d7"
+        }
+      ],
+      "conclusion": "Current Native source and 151-file candidate verify; 750 existing lock entries preserved and new dependencies match qualified versions. Typecheck is not an iOS build or device acceptance."
+    },
+    {
+      "id": "portable-device-handoff",
+      "required": true,
+      "status": "passed-integrity",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-handoff-ready.json",
+          "bytes": 196,
+          "sha256": "26e24dc166008a25292b8f167bf7cb1bba488df82c32bd9c53158c3c8b178ddd"
+        }
+      ],
+      "conclusion": "5303 payload files extracted and rehashed; relocated Engine candidate preflight passes. Actual Mac/iPhone flows remain required."
+    },
+    {
+      "id": "formal-cold-steady-and-seven-reports",
+      "required": true,
+      "status": "pending",
+      "evidence": [],
+      "conclusion": "Fresh affected reports from one clean registered runner; preserve startup/warmup and original GPU/performance/resource budgets."
+    },
+    {
+      "id": "windows-real-keyboard-ime-gamepad",
+      "required": true,
+      "status": "pending",
+      "evidence": [],
+      "conclusion": "Affected input/rebinding/collection/control flows need current candidate raw physical input plus operator confirmation."
+    },
+    {
+      "id": "mac-and-physical-iphone",
+      "required": true,
+      "status": "pending",
+      "evidence": [],
+      "conclusion": "Current tarballs, GUI/IME/rotation/keyboard/background and explicit audio host capability/unlock/resume proof required. Missing capability is blocking, not passed."
+    },
+    {
+      "id": "ubuntu-software-full-fixture",
+      "required": true,
+      "status": "pending",
+      "evidence": [],
+      "conclusion": "Use GitHub CI; original full planar reflection fixture retains its total 300-second limit. G02 transport CI is a separate passed prerequisite."
+    },
+    {
+      "id": "g02-global-and-no-publication-rehearsal",
+      "required": true,
+      "status": "pending",
+      "evidence": [],
+      "conclusion": "Run G02 global profile after all prerequisite evidence, then independently audit package/provenance/license/SBOM bundle. No push/tag/publication/baseline promotion."
+    }
+  ]
+}

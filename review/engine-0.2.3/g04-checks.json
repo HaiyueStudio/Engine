@@ -1,0 +1,859 @@
+{
+  "schemaVersion": 1,
+  "goal": "g04-character-physics",
+  "goalStatus": "complete",
+  "generatedAt": "2026-10-31T04:36:38.610Z",
+  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
+  "workingTree": "Scoped G01–G04 work remains uncommitted. Source snapshots, installed-file hashes and deterministic tarball identities bind this evidence; source HEAD and index are unchanged.",
+  "runtimeFeaturesImplemented": true,
+  "releaseQualified": false,
+  "publishingIncluded": false,
+  "publicationPerformed": false,
+  "baselinePromoted": false,
+  "defaultBranchChanged": false,
+  "apiBaselineUpdatedWithinFrozenAdmission": true,
+  "performanceBaselinesPromoted": false,
+  "summary": {
+    "focusedTests": 38,
+    "workspaceTests": 2479,
+    "catalogTests": 7,
+    "nativePackedChecks": 207,
+    "legacyFrames": 184,
+    "builtExampleTargets": 105,
+    "deterministicPackages": 4,
+    "independentConsumers": 44,
+    "characterConsumerGzipBytes": 4304,
+    "characterConsumerMaxGzipBytes": 5200,
+    "sourceFiles": 45,
+    "historicalRecordedFilesPreserved": 269
+  },
+  "requirements": [
+    {
+      "id": "actual-box2d-feasibility-before-implementation",
+      "status": "verified-for-g04",
+      "implementation": [
+        "engine/src/physics/Box2DShapeCast.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g04/box2d-feasibility.json",
+          "bytes": 5524,
+          "sha256": "aab681374ed6b44b959764f2498da707c7dfde0ca8687a61d1e2f2a77abbad1e"
+        }
+      ],
+      "conclusion": "Actual installed box2d.ts@1.0.2 geometry passed ten casts and six manifold probes before production changes. Raw output.point zeros are corrected with the target distance witness; a short 45-degree native sigma band is corrected in the query proxy without modifying original collider geometry."
+    },
+    {
+      "id": "optional-compatible-driver-and-real-bounded-sweeps",
+      "status": "verified-for-g04",
+      "implementation": [
+        "engine/src/physics/Physics2DBackend.ts",
+        "engine/src/physics/Physics2DShapeCast.ts",
+        "engine/src/physics/Box2DPhysics2DBackend.ts",
+        "engine/src/physics/Box2DShapeCast.ts",
+        "engine/src/physics/Physics2DSystem.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g04/focused-test-5.log",
+          "bytes": 4066,
+          "sha256": "3ead3f266d0195b47596db6042308d6827fc77b827cac9d45c50c15f793dc5cc"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/api-admission.json",
+          "bytes": 1246,
+          "sha256": "57e03eabe6bce6058170dccfc1a95ad868e49f68b2e480e99757ef08732382e2"
+        }
+      ],
+      "conclusion": "Real box/circle sweep, rotation, high speed, thin walls, deep overlap, contact direction, filters, sensors, stable ties, candidate overflow and translating kinematic targets are covered. Legacy drivers retain optional capability/method compatibility; unsupported or falsely advertised support fails explicitly. Shared descriptor validation; render-unit conversion happens once at the public facade."
+    },
+    {
+      "id": "borrowed-character-move-slide-and-platform-ownership",
+      "status": "verified-for-g04",
+      "implementation": [
+        "extensions/src/character2d/Character2D.ts",
+        "extensions/src/character2d/types.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g04/focused-test-5.log",
+          "bytes": 4066,
+          "sha256": "3ead3f266d0195b47596db6042308d6827fc77b827cac9d45c50c15f793dc5cc"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/native-final/result.json",
+          "bytes": 66340,
+          "sha256": "7b085f5f3480d4c5d3ea8ae35fcb4bd706b9b99621dc199b959d414c5afa7d2f"
+        }
+      ],
+      "conclusion": "Uses the existing same-world kinematic body. Bounded slide and snap, 30/45/60-degree slopes, zero snap, jump detach, platform carry/push/edge/handoff and cleanup pass for box/circle. No automatic depenetration, borrowed body/entity/world destruction, duplicate backend or game gravity/jump state machine."
+    },
+    {
+      "id": "one-private-compatible-2d-3d-physics-clock",
+      "status": "verified-for-g04",
+      "implementation": [
+        "engine/src/physics/FixedStepClock.ts",
+        "engine/src/physics/Physics2DSystem.ts",
+        "engine/src/physics/Physics3DSystem.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g04/legacy-physics.json",
+          "bytes": 99237,
+          "sha256": "98bf58295d566b2ee64ac4d170e9105261d51fc5fc79651c545f44ecaf84e470"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/extracted-physics.json",
+          "bytes": 99237,
+          "sha256": "6d9084477ca810883d76dd507b57c86054e277cf94b633e247b44612a09e8754"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/clock-differential.json",
+          "bytes": 307,
+          "sha256": "caa140ae745f24a33de7fb53d77a8c6eb39a9ae35b85a451fc44829a36419410"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/focused-test-5.log",
+          "bytes": 4066,
+          "sha256": "3ead3f266d0195b47596db6042308d6827fc77b827cac9d45c50c15f793dc5cc"
+        }
+      ],
+      "conclusion": "Both real backends exactly match all 184 pre-refactor step/contact/pose/destroy records. Shared finite input and pre-allocation configuration checks preserve RangeError, finite negative-delta clamping, residual and max-substep reset semantics. Experimental simulation keeps its distinct backlog-retaining policy."
+    },
+    {
+      "id": "read-only-presentation-and-recovery",
+      "status": "verified-for-g04",
+      "implementation": [
+        "extensions/src/character2d/Character2D.ts",
+        "examples/character2d/application.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g04/native-final/result.json",
+          "bytes": 66340,
+          "sha256": "7b085f5f3480d4c5d3ea8ae35fcb4bd706b9b99621dc199b959d414c5afa7d2f"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/focused-test-5.log",
+          "bytes": 4066,
+          "sha256": "3ead3f266d0195b47596db6042308d6827fc77b827cac9d45c50c15f793dc5cc"
+        }
+      ],
+      "conclusion": "Injected 30/60/120/144 Hz display deltas produce the same 120 physical ticks and pose for each shape. A separate drawing entity interpolates snapshots without writing physics. Pause, skipped-world/engine time, long frames, external teleport and actual device destruction/recovery reset presentation."
+    },
+    {
+      "id": "actual-installed-public-packages-and-example",
+      "status": "verified-for-g04",
+      "implementation": [
+        "extensions/test/helpers/public-feature-candidate.mjs",
+        "extensions/test/character2d-candidate.mjs",
+        "examples/character2d/application.ts"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g04/public-packages/public-packages.json",
+          "bytes": 153929,
+          "sha256": "78a42f1fba7266e7d8b2c3b657981651db7b464b459540f1aadfc601145d8fec"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/final-feature-candidate/candidate.json",
+          "bytes": 12583,
+          "sha256": "2a02a293facb40817af7008c643a25d2efd5d539cf8db21653ca01566a4a382d"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/native-final/result.json",
+          "bytes": 66340,
+          "sha256": "7b085f5f3480d4c5d3ea8ae35fcb4bd706b9b99621dc199b959d414c5afa7d2f"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/catalog-final/result.json",
+          "bytes": 34927,
+          "sha256": "ff7c01f07fea48cb370daa8c1be2f5dcd7a19537e2a2e6ecefef76843e2828db"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/catalog-final/visual-review.json",
+          "bytes": 861,
+          "sha256": "21fcd8470106f3ac0da1575c1e0e593366ffc942f54f78362e8a3d0564c80778"
+        }
+      ],
+      "conclusion": "Strict consumer TypeScript checks both directions of the frozen factory type and uses public imports; ESM executes the actual controller. Every installed file matches the selected deterministic tarball. Browser-served bytes, current application and source hashes match. Both box/circle actual catalog examples render and settle; the actual screenshots were visually inspected."
+    },
+    {
+      "id": "bounded-production-resources",
+      "status": "verified-for-g04",
+      "implementation": [
+        "extensions/test/character2d-browser.mjs",
+        "extensions/test/character2d-browser-policy.mjs"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g04/native-final/result.json",
+          "bytes": 66340,
+          "sha256": "7b085f5f3480d4c5d3ea8ae35fcb4bd706b9b99621dc199b959d414c5afa7d2f"
+        }
+      ],
+      "conclusion": "Each shape retains one original world and five bodies through twenty fixed reset/settle cycles after twelve warmup frames. GPU counts/bytes do not grow and end at zero. A separate 32-character/128-obstacle workload runs 600 frames in one actual world; every character grounds and all 160 bodies/colliders are released."
+    },
+    {
+      "id": "lightweight-frozen-api-and-unchanged-existing-budgets",
+      "status": "verified-for-g04",
+      "implementation": [
+        "config/public-api-capability-budgets.json",
+        "config/engine-package-budget.json",
+        "scripts/fixtures/engine-consumers/extensions-character2d.mjs"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g04/closure-initial.json",
+          "bytes": 907,
+          "sha256": "0e6abcfa5bb04fa8c995dc80180c6b52045fae6e24377672f4c3e88a0b72202a"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/closure-light.json",
+          "bytes": 487,
+          "sha256": "af74645f6c2037a6cab620807763ba62a29e8ecf6696397b608edeba8ecc1982"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/api-admission.json",
+          "bytes": 1246,
+          "sha256": "57e03eabe6bce6058170dccfc1a95ad868e49f68b2e480e99757ef08732382e2"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/public-packages/public-packages.json",
+          "bytes": 153929,
+          "sha256": "78a42f1fba7266e7d8b2c3b657981651db7b464b459540f1aadfc601145d8fec"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/final-input-audit.json",
+          "bytes": 80620,
+          "sha256": "1bfd83b9f288f8778d76a0d5080908aa0d98216f59c400f9f11e4a2ba9f9f11d"
+        }
+      ],
+      "conclusion": "Exactly three physics types, two backend types and four character exports are added. Engine root and every other old API stay unchanged. The new 5,200-byte independent consumer has no GUI/3D/OpenType/Box2D/Rapier runtime closure. Existing consumers/package limits and API reserve sizes are unchanged; the 32,581-byte initial closure is retained as evidence of the removed component-constructor dependency."
+    },
+    {
+      "id": "required-repository-validation-and-preserved-history",
+      "status": "verified-for-g04",
+      "implementation": [],
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g04/repository-final-validation.json",
+          "bytes": 4193,
+          "sha256": "88614ef3cdb69a7b8d613977ba77024ba5e1c30ee084139c3c4ed184162c7e56"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/feature-final-validation.json",
+          "bytes": 1075,
+          "sha256": "efa5a995124e103c3c8d5dd6099fa3e275dcf05836f2eea4487f278e559a8657"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/final-input-audit.json",
+          "bytes": 80620,
+          "sha256": "1bfd83b9f288f8778d76a0d5080908aa0d98216f59c400f9f11e4a2ba9f9f11d"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g04/source-snapshot-verification.json",
+          "bytes": 302,
+          "sha256": "c1f1c593ac3c17522b87bf77e0a586b32ee17db7491ce13b968e65c71c771624"
+        }
+      ],
+      "conclusion": "All required root typecheck/build/test, boundaries, responsibilities, renderer-prepare, docs, API, policy and package checks pass. Historical G01/G02/G03 inputs remain available byte-for-byte at their original or explicitly snapshotted paths; protected G13 is unchanged. The small G04 source snapshot is verified file-by-file and originals remain."
+    }
+  ],
+  "validations": [
+    {
+      "id": "typecheck",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/repository-final-typecheck.log",
+        "bytes": 3205,
+        "sha256": "eccb75ae0202c42c6da70795141525870c78cd21a6f62f7d4ba15872d10bfccc"
+      }
+    },
+    {
+      "id": "build",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/repository-final-build.log",
+        "bytes": 17493,
+        "sha256": "bb5665db6e807d92c0777a2173c417f7a8c4d848bd935df662576e8147a6d5b4"
+      }
+    },
+    {
+      "id": "test",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/repository-final-test.log",
+        "bytes": 248255,
+        "sha256": "0310e6fb30510648904754557894dcf3791272d0ab5f39373e80d5a0d88613ab"
+      }
+    },
+    {
+      "id": "modules:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/repository-final-modules-check.log",
+        "bytes": 180,
+        "sha256": "a0e1b762ab7eb8e3e32eb36124ad24e885029de825491cca8d041e58d01aac78"
+      }
+    },
+    {
+      "id": "responsibilities:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/repository-final-responsibilities-check.log",
+        "bytes": 259,
+        "sha256": "52b89c966f0ecfb0587d1e565ebbdaa72f1c2a1b9f3867641a1d83adc24f9d1a"
+      }
+    },
+    {
+      "id": "renderer-prepare:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/repository-final-renderer-prepare-check.log",
+        "bytes": 239,
+        "sha256": "66bbc4f2490a8418f9be4711d93567477ea7181e4289deea3dd116236518591e"
+      }
+    },
+    {
+      "id": "check:boundaries",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/repository-final-check-boundaries.log",
+        "bytes": 1037,
+        "sha256": "363ef30a3197d364f16db39a5116bf1d5f132b74e8c32eaf2ad604a3892e4545"
+      }
+    },
+    {
+      "id": "docs:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/repository-final-docs-check.log",
+        "bytes": 707,
+        "sha256": "05347e7451dbb1bcd123ed1d30f22efae90304725397d07abd8ac2f37dd84d9b"
+      }
+    },
+    {
+      "id": "api:check",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/repository-final-api-check.log",
+        "bytes": 158,
+        "sha256": "52eedd5d933b1c615111c13ff308d849101edef1c369d56615dbb7d7f107c6a9"
+      }
+    },
+    {
+      "id": "fast-gate-policy:test",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/repository-final-fast-gate-policy-test.log",
+        "bytes": 2207,
+        "sha256": "c882f8478df046276d3f68440858180af887d9cf3e9850844db387d181e3d932"
+      }
+    },
+    {
+      "id": "release:policy:test",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/repository-final-release-policy-test.log",
+        "bytes": 18882,
+        "sha256": "4739dd6d940f62c801da781ca5902c1f26a1210d30ac9ec659d301118adcc3fb"
+      }
+    },
+    {
+      "id": "performance-budget:test",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/repository-final-performance-budget-test.log",
+        "bytes": 34782,
+        "sha256": "5e0cd4c2365518ff79932138ab726450cfb6dadd30749f03eb78610681d9fca1"
+      }
+    },
+    {
+      "id": "verify:engine-package",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/repository-final-verify-engine-package.log",
+        "bytes": 8361,
+        "sha256": "d3ea16ff3481a7bffd847a154349e9eff3872baea34d864b2e02eaba43a881b7"
+      }
+    },
+    {
+      "id": "installed-candidate",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/feature-final-installed-candidate.log",
+        "bytes": 136,
+        "sha256": "f2dec084f1449120d8e70fa3f07336c360c8e0115742f26a03eaefc36120c418"
+      }
+    },
+    {
+      "id": "native",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/feature-final-native.log",
+        "bytes": 154,
+        "sha256": "067ba810358b5e85b4ef9c166a1719a37c0538d962b436d7caa639172bfe2158"
+      }
+    },
+    {
+      "id": "catalog",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/feature-final-catalog.log",
+        "bytes": 100,
+        "sha256": "e881ad2aa35bbc550c394f76b8c0f162dd74342e0f03e7ef27610abf448b7a11"
+      }
+    },
+    {
+      "id": "freshness",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/feature-final-freshness.log",
+        "bytes": 60,
+        "sha256": "4b9bd2543e1c0ac9d48d7c535d1e2bd06d86bc7a35b2bb67e57f36105189a206"
+      }
+    },
+    {
+      "id": "metadata-docs-final",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/metadata-docs-final.log",
+        "bytes": 723,
+        "sha256": "5728287d211bdba86c7ffb5583de5b57e24cb09e86e9502b4a13271aa4f7f786"
+      }
+    },
+    {
+      "id": "metadata-coordination-final",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/metadata-coordination-final.log",
+        "bytes": 200,
+        "sha256": "6546a2142b3e3180e09a1c90694ba319087db133d1b7856fd0531fc9782a9bc2"
+      }
+    },
+    {
+      "id": "metadata-diff-final",
+      "status": "passed",
+      "log": {
+        "path": "artifacts/engine-0.2.3/g04/metadata-diff-final.log",
+        "bytes": 163,
+        "sha256": "fbd0a3482056a87f7a4c9ebe3b973f9319ef684661997258205fd5915fd12886"
+      }
+    }
+  ],
+  "publicEntry": {
+    "subpath": "@haiyue/extensions/character2d",
+    "exports": [
+      "Character2DController",
+      "Character2DOptions",
+      "Character2DState",
+      "createCharacter2D"
+    ],
+    "rootExportsUnchanged": 30,
+    "localPackageVersions": {
+      "@haiyue/engine": "0.2.2",
+      "@haiyue/extensions": "0.2.2",
+      "@haiyue/animation-spec": "0.2.2"
+    },
+    "versionNote": "Local candidate packages retain source version 0.2.2; they are not the published 0.2.2 bytes. G11 owns the planned 0.2.3 version integration and release qualification."
+  },
+  "device": {
+    "browser": {
+      "product": "Chrome/156.0.8078.76",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+      "platform": "Win32",
+      "url": "http://127.0.0.1:65152/artifacts/engine-0.2.3/g04/native-final/fixture.html?",
+      "angleBackend": "d3d11",
+      "nativeBackend": true,
+      "presentationMode": "headless",
+      "storageMode": "isolated-memory-context"
+    },
+    "adapters": [
+      {
+        "shape": "box",
+        "initial": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "device": "",
+          "description": "",
+          "isFallbackAdapter": false
+        },
+        "recovered": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "device": "",
+          "description": "",
+          "isFallbackAdapter": false
+        }
+      },
+      {
+        "shape": "circle",
+        "initial": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "device": "",
+          "description": "",
+          "isFallbackAdapter": false
+        },
+        "recovered": {
+          "vendor": "nvidia",
+          "architecture": "pascal",
+          "device": "",
+          "description": "",
+          "isFallbackAdapter": false
+        }
+      }
+    ],
+    "physicalInputQualified": false
+  },
+  "resourceObservation": {
+    "warmupFrames": 12,
+    "cyclesPerShape": 20,
+    "shapes": [
+      {
+        "shape": "box",
+        "baseline": {
+          "resources": 19,
+          "estimatedBytes": 2458524
+        },
+        "finalGpu": {
+          "resources": 0,
+          "estimatedBytes": 0
+        },
+        "worlds": {
+          "activeWorlds": 0,
+          "totalWorlds": 1,
+          "resources": {
+            "backendId": "box2d",
+            "bodies": 0,
+            "colliders": 0,
+            "joints": 0,
+            "activeContacts": 0
+          }
+        }
+      },
+      {
+        "shape": "circle",
+        "baseline": {
+          "resources": 19,
+          "estimatedBytes": 2459160
+        },
+        "finalGpu": {
+          "resources": 0,
+          "estimatedBytes": 0
+        },
+        "worlds": {
+          "activeWorlds": 0,
+          "totalWorlds": 1,
+          "resources": {
+            "backendId": "box2d",
+            "bodies": 0,
+            "colliders": 0,
+            "joints": 0,
+            "activeContacts": 0
+          }
+        }
+      }
+    ],
+    "pressure": {
+      "characters": 32,
+      "obstacles": 128,
+      "frames": 600,
+      "beforeDestroy": {
+        "backendId": "box2d",
+        "bodies": 160,
+        "colliders": 160,
+        "joints": 0,
+        "activeContacts": 0
+      },
+      "afterDestroy": {
+        "backendId": "box2d",
+        "bodies": 0,
+        "colliders": 0,
+        "joints": 0,
+        "activeContacts": 0
+      },
+      "createdWorlds": 1,
+      "destroyedWorlds": 1
+    }
+  },
+  "measurementChannels": {
+    "coldStart": "Application initialization marks are retained separately per shape; they are not GPU completion or formal cold-start qualification.",
+    "steady": "Fixed twelve-frame warmup and twenty native reset/settle cycles per shape, GPU counts/estimated bytes, original world/body counts, and actual device recovery.",
+    "cadence": "Injected display delta schedules validate physics/presentation semantics. They do not claim physical monitors ran at 120/144 Hz.",
+    "performance": "The 32-character CPU wall observation includes all query and test-loop work. Browser elapsed and queue waits are diagnostic observations, separate from CPU render/GPU timing qualification. Existing performance/resource budgets remain unchanged; G11 obtains formal combined qualification."
+  },
+  "retainedFailures": [
+    {
+      "path": "artifacts/engine-0.2.3/g04/character-clock-test-1.log",
+      "reason": "Native short-cast sigma band on the 45-degree slope; corrected only in the backend query proxy, fixed regression retained."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g04/pre-admission-candidate.log",
+      "reason": "Initial smoke mistakenly counted all thirty declaration exports as runtime values; exact frozen twenty-seven runtime names are now checked."
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g04/catalog-1.log",
+      "reason": "Initial invocation used an incorrect catalog script path; corrected to the existing manifest-derived catalog checker."
+    }
+  ],
+  "protectedHistory": {
+    "audit": {
+      "path": "artifacts/engine-0.2.3/g04/final-input-audit.json",
+      "bytes": 80620,
+      "sha256": "1bfd83b9f288f8778d76a0d5080908aa0d98216f59c400f9f11e4a2ba9f9f11d"
+    },
+    "sourceSnapshot": {
+      "path": "artifacts/engine-0.2.3/g04/source-snapshot.zip",
+      "bytes": 149318,
+      "sha256": "4820401ee8b311bd519919cd979de727ff8cf28f603d7157b5d2d30d07eaea31"
+    },
+    "sourceSnapshotVerification": {
+      "path": "artifacts/engine-0.2.3/g04/source-snapshot-verification.json",
+      "bytes": 302,
+      "sha256": "c1f1c593ac3c17522b87bf77e0a586b32ee17db7491ce13b968e65c71c771624"
+    },
+    "originalG03Readme": {
+      "path": "artifacts/engine-0.2.3/g04/prior-inputs/g03-readme.md",
+      "bytes": 8430,
+      "sha256": "02ebbdf0d0b8c039615034aba22064f9ca5502040e5155099ae082cb84b5ad16"
+    },
+    "allHistoricalRecordedInputsPreserved": true,
+    "protectedG13Sha256": "0312e5f43ce737c48381d63014a2eb58fda190afaffdbced2869b104a99d3eff",
+    "originalFilesRetained": true
+  },
+  "handoffs": [
+    {
+      "owner": "g11-integration-candidate",
+      "scope": "Combine with the other frozen capabilities and gameplay-kit, perform planned package/version integration, formal performance/resource/pixel and real-device matrices, full global gate and no-publication rehearsal. G04 does not inherit the old release qualification or authorize push/tag/npm/Release/Pages."
+    }
+  ],
+  "files": [
+    {
+      "path": "config/engine-package-budget.json",
+      "bytes": 28582,
+      "sha256": "6d81ad7fa270ce29bf234e21e82aaf314773a303bfcc6d9a073413705b5822bd"
+    },
+    {
+      "path": "config/gameplay-023-contract.json",
+      "bytes": 47325,
+      "sha256": "07ebc65103cc45c6ed9c6333f28ad89066439204348be9d62bdc87fc607c93ca"
+    },
+    {
+      "path": "config/public-api-capability-budgets.json",
+      "bytes": 10578,
+      "sha256": "886774e01b30573c5d7d807b1f153c5d0a209c36e1f1fadb294a1f7ab9d89133"
+    },
+    {
+      "path": "docs/api/errors.md",
+      "bytes": 1375,
+      "sha256": "482c6044a0ac1bb171df96beda418ec22200b26d5f47730f03340c3ba1a8eb15"
+    },
+    {
+      "path": "docs/api/errors/E_CHARACTER_BODY_OWNERSHIP.md",
+      "bytes": 729,
+      "sha256": "e0e5ad0fc1e705cab2e7d86d045a5dbbc5112bd558fe73d1c3ce735b28bd3a09"
+    },
+    {
+      "path": "docs/api/errors/E_GAMEPLAY_INVALID_INPUT.md",
+      "bytes": 1143,
+      "sha256": "9068f13fb6c6eb5249e4c642f5c56282e9bd5f43c9ffb093a28567e005ec9ad7"
+    },
+    {
+      "path": "docs/api/errors/E_PHYSICS_QUERY_LIMIT.md",
+      "bytes": 625,
+      "sha256": "1fd659ac49bc4453a9ce5aea9979df79d106be68afbd5ed971cea43c9b13557c"
+    },
+    {
+      "path": "docs/api/errors/E_PHYSICS_SHAPE_CAST_UNSUPPORTED.md",
+      "bytes": 621,
+      "sha256": "50e112f40d5e9778877ddb79c154bc927aa2711b1df24795d4a3fe494473ab4b"
+    },
+    {
+      "path": "docs/for-ai/adr/0139-engine-023-gameplay-contracts.md",
+      "bytes": 4424,
+      "sha256": "e1f4b4d704b76b4a834d774e0dbf3e23d2b81bf688fdc2a8db2a1f799c63c1cf"
+    },
+    {
+      "path": "engine/src/core/EngineError.ts",
+      "bytes": 12316,
+      "sha256": "5add2941d4172d7b4b6b8fa210f0f2c7d0a6ac9c24c93c6d01042675ee878941"
+    },
+    {
+      "path": "engine/src/physics.ts",
+      "bytes": 2331,
+      "sha256": "7f59b866dced9447f8df37d9a4ed674c6aa1e9646794fb5585795f89ded99291"
+    },
+    {
+      "path": "engine/src/physics/Box2DPhysics2DBackend.ts",
+      "bytes": 16313,
+      "sha256": "f03ac1174637e9ae8cd5c9916401fae607620cb525ee6c09c3b269d0ecd8c4e4"
+    },
+    {
+      "path": "engine/src/physics/Box2DShapeCast.ts",
+      "bytes": 8965,
+      "sha256": "1ced01bbdad2301e9c7fdf48c6e5269fe7238d31bc2639286094af1db1949d42"
+    },
+    {
+      "path": "engine/src/physics/FixedStepClock.ts",
+      "bytes": 2100,
+      "sha256": "c60524d54641e6f27a8c88850a1220315781b882721513a470629604149ec02e"
+    },
+    {
+      "path": "engine/src/physics/Physics2DBackend.ts",
+      "bytes": 7464,
+      "sha256": "b21f4674c7c4e082f71b600e029e64a702968d2084574151f3c8f8b0253bab02"
+    },
+    {
+      "path": "engine/src/physics/Physics2DShapeCast.ts",
+      "bytes": 1383,
+      "sha256": "1b8e61fe5bbc520f719731a3417fdf62cb390522f97cd59ee69d7832acab3290"
+    },
+    {
+      "path": "engine/src/physics/Physics2DSystem.ts",
+      "bytes": 32888,
+      "sha256": "0353f33bf5ce81f49d01d0cb23c6b49ac6116f5bb79e5fbda077cec6d5f07ddd"
+    },
+    {
+      "path": "engine/src/physics/Physics3DSystem.ts",
+      "bytes": 32749,
+      "sha256": "c768c6625859367ba5bcd139e7f5acfe3e36471b7eda8bddd4d128b589b4c1bc"
+    },
+    {
+      "path": "engine/src/physics/backend.ts",
+      "bytes": 2035,
+      "sha256": "cc3aa5ff4c5c03e10e89a1307f6cc28a2cb990e82bf1af8fe7efe78d075a1616"
+    },
+    {
+      "path": "engine/src/types/box2d-umd.d.ts",
+      "bytes": 6181,
+      "sha256": "6280d73ef57b1c2ddcb4c3c127139ff42edd086b6e17e8c65bf377034710aa6e"
+    },
+    {
+      "path": "engine/test/physics-clock-native.mjs",
+      "bytes": 2214,
+      "sha256": "3898c96e52f7c68ebe5202c34d3993ba5124b6095b71bc54f6f600b2e9b6556b"
+    },
+    {
+      "path": "engine/test/physics-clock.test.mjs",
+      "bytes": 4482,
+      "sha256": "7f81127967c4d6d15218a0602718b344be5ab56e138d3d540e2867ade0471855"
+    },
+    {
+      "path": "engine/test/physics-shape-cast.test.mjs",
+      "bytes": 7080,
+      "sha256": "d41dd31f6c058259a99c7653cbb3345c169b09a49b5629210fb500d76d840fb2"
+    },
+    {
+      "path": "examples/character2d/application.ts",
+      "bytes": 6010,
+      "sha256": "8780e920ee73c89c3a3c7e4ee231b59bb139ed0947853109e07c60206a1e5169"
+    },
+    {
+      "path": "examples/character2d/index.html",
+      "bytes": 973,
+      "sha256": "b166ec9fb7a4dabb5458bc8f9d86577b6d8e5bd78105d0eb3393caae837683e4"
+    },
+    {
+      "path": "examples/character2d/main.ts",
+      "bytes": 2135,
+      "sha256": "cf84aef4f743448a7185a825f4acf119520a2b73a2dec9b2b057a96664c7a479"
+    },
+    {
+      "path": "examples/manifest.json",
+      "bytes": 54893,
+      "sha256": "4683c40f5fdf5a5b7330ce9ec8c7695d2f46ae799718cd603b7503c1b7e3dc48"
+    },
+    {
+      "path": "extensions/README.md",
+      "bytes": 11669,
+      "sha256": "fe6e360db65da0822fe1c8cdc25c1799ec63dcce49e7374dcdb2ceab4f435c61"
+    },
+    {
+      "path": "extensions/package.json",
+      "bytes": 5599,
+      "sha256": "ae1d8024a08afa538926590b0b3f94e14dc5124a662aa3108863b6dbd583b4b8"
+    },
+    {
+      "path": "extensions/rollup.config.js",
+      "bytes": 1856,
+      "sha256": "029c740fb4e710e9e5719404f7dae478d52a07f3e16d42a8b1ab566f4b2ee7e3"
+    },
+    {
+      "path": "extensions/src/character2d.ts",
+      "bytes": 173,
+      "sha256": "f18a5c57a3d142c48563d3919f8700069faaf839755e9180e67ecde66eab2c37"
+    },
+    {
+      "path": "extensions/src/character2d/Character2D.ts",
+      "bytes": 13247,
+      "sha256": "be0574ceb644c315114842e0a82d12d5b4eb99d6a0eb7aeb0d9f5004c85f111f"
+    },
+    {
+      "path": "extensions/src/character2d/types.ts",
+      "bytes": 1047,
+      "sha256": "044432cb645e3a2354afd43f0f50e190b610eb26a363994333c0d66611a076ae"
+    },
+    {
+      "path": "extensions/test/character2d-browser-gate.mjs",
+      "bytes": 4172,
+      "sha256": "4ab30484ca5d0a59cbad1adc06ee2d7bd59bf4cc20e788f92ea96e8c78e946a6"
+    },
+    {
+      "path": "extensions/test/character2d-browser-policy.mjs",
+      "bytes": 2391,
+      "sha256": "0318479c7e4cc2479c1842715769cf5bf1c8417d833b1acca0a05761e631671d"
+    },
+    {
+      "path": "extensions/test/character2d-browser-policy.test.mjs",
+      "bytes": 2335,
+      "sha256": "bf6a9e1e076c8aa65519a5bec1fb2a6d5cd863bea434fa0e9fa74d66e65ef72f"
+    },
+    {
+      "path": "extensions/test/character2d-browser.mjs",
+      "bytes": 8478,
+      "sha256": "03649942669e6b05c9ccbff3fd547b339d57d21a7f8686dbcc6d7b68a6b0c52b"
+    },
+    {
+      "path": "extensions/test/character2d-candidate.mjs",
+      "bytes": 2993,
+      "sha256": "3ba29b175cfb7053a34f4bd3eb82f76782741a8b9130b8019ddce614aacbb739"
+    },
+    {
+      "path": "extensions/test/character2d.test.mjs",
+      "bytes": 15840,
+      "sha256": "a987be1b668b104b790916c7b2019a724cb3eeed259d7932af665485e071bed4"
+    },
+    {
+      "path": "extensions/test/helpers/public-feature-candidate.mjs",
+      "bytes": 7227,
+      "sha256": "6138c03b053da1d829271f4ae04ff5aa42fee190923b7b73a5437332daf01bef"
+    },
+    {
+      "path": "review/baselines/api-surface.json",
+      "bytes": 315055,
+      "sha256": "6d3db0a74f82e3db2e318be4f58b8ab6da2c6d687504afe22a5da20b23488eaa"
+    },
+    {
+      "path": "review/engine-0.2.3/README.md",
+      "bytes": 3692,
+      "sha256": "d2b63762bd4c5d7780c723fb7a75c571b4e9b6a83e9cadb672e335cb23b839e1"
+    },
+    {
+      "path": "review/engine-0.2.3/api-contract.d.ts",
+      "bytes": 19620,
+      "sha256": "dd6b53cd8a901905f146bc4c118348e3d08350d6808fe51028a80a52532f3e07"
+    },
+    {
+      "path": "review/engine-0.2.3/contract.md",
+      "bytes": 12895,
+      "sha256": "f4d6912443035836b9295cb38ad7deb8673953abfa475b8cb5e019aac2cec039"
+    },
+    {
+      "path": "scripts/fixtures/engine-consumers/extensions-character2d.mjs",
+      "bytes": 68,
+      "sha256": "8ba0bf2a49743e24a1f9ad2fa57c2f92e31af1ac6d53d0b2c297f031abd6305a"
+    }
+  ]
+}
