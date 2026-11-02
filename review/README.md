@@ -2,8 +2,9 @@
 
 当前状态从下列入口读取；历史报告中的“当前”“下一步”和预算只代表记录当时的范围。
 
+- [Engine 0.2.3](engine-0.2.3/README.md)：当前游戏能力集成、GUI 修复及尚未完成的整版资格；状态只在 G11 检查索引维护。
 - [Engine 0.2.1](engine-0.2.1/README.md)：问题、结论、解决方法与剩余发布验收。
-- [Engine 0.2.2](engine-0.2.2/README.md)：当前布局/GUI合同、HYA审计和诊断基线。
+- [Engine 0.2.2](engine-0.2.2/README.md)：已发布版本的布局／GUI／HYA 合同、最终验收及保留的调查边界。
 - [G09](engine-0.2.1/g09/README.md)：生产流畅度、资源稳定、优化收益及调查项。
 - [API 与发布范围](api/README.md)：当前独立包范围和专项 API 评审。
 - [可选能力结论](api/capability-validation.md)：摇杆、国际化、剧情与分享的通用方法及设备边界。

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "archive": "engine-review-entry-history-20261102.zip",
+  "sha256": "a20a9dfdb62e10b01b7fbec52aa4c9123f417a24de93f4222862f52e13a5de04",
+  "sourceRevision": "fd4e21ecb6ea2a790f26b994198148c75a601796",
+  "scope": "Original active review entry prose before replacing superseded stage timelines with current problem/method/conclusion summaries. No checks JSON, accepted ADR, runtime, license, baseline or raw capture removed.",
+  "originalBytes": 49368,
+  "archiveBytes": 24814,
+  "files": [
+    {
+      "path": "Engine/review/README.md",
+      "bytes": 1692,
+      "sha256": "abbfb005924cd27058c67e2ae8c2d1cf41ecb565fe0986e5b6b9d47658215565",
+      "role": "original-before-current-conclusion-consolidation"
+    },
+    {
+      "path": "Engine/review/engine-0.2.2/README.md",
+      "bytes": 33814,
+      "sha256": "c97e63cc0ef02a7d341989dd032dd901bfeba015498a18a611ce5745ef720364",
+      "role": "original-before-current-conclusion-consolidation"
+    },
+    {
+      "path": "Engine/review/engine-0.2.3/README.md",
+      "bytes": 12129,
+      "sha256": "5f08d12f05a4ea18646d90ad3f828d43d12bc7d961734d907c259add6fd2d693",
+      "role": "original-before-current-conclusion-consolidation"
+    },
+    {
+      "path": "Engine/review/archive/README.md",
+      "bytes": 1733,
+      "sha256": "4ac4714274cc522105581bc3dea5d45f251130a6977bc1c8256a9291346015c7",
+      "role": "original-before-current-conclusion-consolidation"
+    }
+  ]
+}
