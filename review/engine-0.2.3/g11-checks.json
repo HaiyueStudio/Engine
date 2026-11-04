@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "goal": "g11-integration-candidate",
   "goalStatus": "active",
-  "generatedAt": "2026-11-01T16:52:41.629Z",
-  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
-  "workingTree": "uncommitted integration; not a clean formal runner",
+  "generatedAt": "2026-11-04T15:48:10.517966+00:00",
+  "sourceRevision": "829d3ca2624649172e659b21d990355ee2cf063d",
+  "workingTree": "Current working tree with artifact-retention maintenance; complete non-idle checks passed; clean formal runner pending.",
   "releaseQualified": false,
   "publishingIncluded": false,
   "publicationPerformed": false,
@@ -32,12 +32,18 @@
       "sha256": "f4d6912443035836b9295cb38ad7deb8673953abfa475b8cb5e019aac2cec039"
     }
   ],
-  "currentCandidate": [],
+  "currentCandidate": [
+    {
+      "path": "artifacts/engine-0.2.3/g11/nonidle-20261104/combined-candidate/candidate.json",
+      "bytes": 150330,
+      "sha256": "e419e1729cf3570df5c862c14b9d28ca5230326a3d2e58ea26a017b3fc846376"
+    }
+  ],
   "inputs": [
     {
       "path": "package.json",
-      "bytes": 30588,
-      "sha256": "57b2e4c100d0f496bb6d86880642bb4bd9fc26b1329c408aacf179d2c25d0f55"
+      "bytes": 31117,
+      "sha256": "c477342859ccafdaea1806e7c8367d4f35a8f4a3ef0ae853b932574c2541fcc2"
     },
     {
       "path": "package-lock.json",
@@ -118,7 +124,18 @@
         }
       ],
       "conclusion": "Frozen mixed versions and extension peer floor aligned; unchanged animation 0.2.2 bytes and external lock entries verified. Plan only, no rehearsal execution. GUI P0 changes supersede current-source qualification; retain original evidence.",
-      "historicalStatus": "passed"
+      "historicalStatus": "passed",
+      "currentNonidleVerification": {
+        "status": "passed-working-tree-only",
+        "evidence": [
+          {
+            "path": "artifacts/engine-0.2.3/g11/nonidle-20261104/result.json",
+            "bytes": 10714,
+            "sha256": "e426a66d59a1b0af86db44a002cf8751a7c4d310e6895e973793f2f60a941d4e"
+          }
+        ],
+        "formalQualificationGranted": false
+      }
     },
     {
       "id": "repository-checks",
@@ -142,7 +159,18 @@
         }
       ],
       "conclusion": "Fresh exact-candidate CI bootstrap and complete fast gate pass after the SceneOutputPass repair: foundation builds, typechecks, tests, boundaries, API/docs and production shader checks. Engine has 1354 passing tests. Original Windows-only platform skips remain explicit in the Linux log. Complete content/slow gate and formal global qualification are separate pending requirements. GUI P0 changes supersede current-source qualification; retain original evidence.",
-      "historicalStatus": "passed-current-ci-fast"
+      "historicalStatus": "passed-current-ci-fast",
+      "currentNonidleVerification": {
+        "status": "passed-working-tree-only",
+        "evidence": [
+          {
+            "path": "artifacts/engine-0.2.3/g11/nonidle-20261104/result.json",
+            "bytes": 10714,
+            "sha256": "e426a66d59a1b0af86db44a002cf8751a7c4d310e6895e973793f2f60a941d4e"
+          }
+        ],
+        "formalQualificationGranted": false
+      }
     },
     {
       "id": "render-system-owner-lifetime",
@@ -253,7 +281,18 @@
         }
       ],
       "conclusion": "Clean isolated revision rebuild passes the release-mode four-package gate and all 51 consumers; every tarball SHA-256 equals the current physical/Native candidate, including unchanged published animation 0.2.2. Whole-release qualification remains pending. GUI P0 changes supersede current-source qualification; retain original evidence.",
-      "historicalStatus": "passed-clean-package-check"
+      "historicalStatus": "passed-clean-package-check",
+      "currentNonidleVerification": {
+        "status": "passed-working-tree-only",
+        "evidence": [
+          {
+            "path": "artifacts/engine-0.2.3/g11/nonidle-20261104/result.json",
+            "bytes": 10714,
+            "sha256": "e426a66d59a1b0af86db44a002cf8751a7c4d310e6895e973793f2f60a941d4e"
+          }
+        ],
+        "formalQualificationGranted": false
+      }
     },
     {
       "id": "focused-closure-and-ownership-review",
@@ -657,5 +696,25 @@
       "bytes": 1838,
       "sha256": "b36e257d8d678ca0cea5f261e6c53599ff676bce333ddf4e6edb441f82b7e7b2"
     }
-  ]
+  ],
+  "previousIndex": {
+    "path": "artifacts/engine-0.2.3/g11/nonidle-20261104/g11-checks-before.json",
+    "bytes": 32033,
+    "sha256": "94786197e3aae781faab4b4e1ed615682b3933b13470bd180feaa86e5ce6a76d"
+  },
+  "nonIdlePreparation": {
+    "status": "passed-working-tree-only",
+    "report": {
+      "path": "artifacts/engine-0.2.3/g11/nonidle-20261104/result.json",
+      "bytes": 10714,
+      "sha256": "e426a66d59a1b0af86db44a002cf8751a7c4d310e6895e973793f2f60a941d4e"
+    },
+    "sourceFiles": 3907,
+    "packagesMatchGuiP2": true,
+    "consumerCount": 51,
+    "formalPerformanceCaptured": false,
+    "formalEvidenceReused": false,
+    "cleanFormalRunnerPrepared": false,
+    "published": false
+  }
 }
