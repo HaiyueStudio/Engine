@@ -9,6 +9,16 @@ import {SubmissionLifetime} from '../rtt/SubmissionLifetime';
 import {getRegionSceneProjection} from '../core/RegionSceneProjection';
 import {SceneOutputCrop} from './SceneOutputCrop';
 
+interface OutputPipelineVariant {
+  readonly format: GPUTextureFormat;
+  readonly sampleCount: number;
+  readonly blend?: boolean;
+}
+
+function pipelineKey(format: GPUTextureFormat, blend: boolean, sampleCount: number): string {
+  return `${format}:${blend}:${sampleCount}`;
+}
+
 interface OutputBinding {
   readonly uniform: GPUBuffer;
   readonly values: Float32Array;
@@ -56,7 +66,7 @@ export class SceneOutputPass extends PostProcessPass {
     const format = this._format;
     const generation = this._generation;
     for (const sampleCount of [1, 4]) for (const blend of [false, true]) {
-      const key = `${format}:${blend}:${sampleCount}`;
+      const key = pipelineKey(format, blend, sampleCount);
       this.addPipelineWarmup(plan, key, 'Scene output', device, () => this._descriptor(format, blend, sampleCount),
         () => this._generation !== generation || this._device !== device || this._pipelines.has(key), pipeline => {
           if (this._generation !== generation || this._device !== device || this._pipelines.has(key)) {
@@ -107,7 +117,7 @@ export class SceneOutputPass extends PostProcessPass {
     }
     const blend = this._view?.loadOp === 'load';
     const sampleCount = this._view?.sampleCount ?? 1;
-    const key = `${this._format}:${blend}:${sampleCount}`;
+    const key = pipelineKey(this._format, blend, sampleCount);
     let pipeline = this._pipelines.get(key);
     if (!pipeline) { pipeline = device.createRenderPipeline(this._descriptor(this._format, blend, sampleCount)); this._pipelines.set(key, pipeline); }
     const viewport = this._view?.viewport;
@@ -127,6 +137,22 @@ export class SceneOutputPass extends PostProcessPass {
     if (scissor) pass.setScissorRect(scissor.x, scissor.y, scissor.width, scissor.height);
     else if (target) pass.setScissorRect(0, 0, target.width, target.height);
     pass.setPipeline(pipeline); pass.setBindGroup(0, binding.group); pass.draw(3); pass.end();
+  }
+
+  /** Drop variants no longer reachable by this compositor's attachment topology. */
+  retainPipelineVariants(variants: readonly OutputPipelineVariant[]): void {
+    const keys = new Set<string>();
+    for (const { format, sampleCount, blend } of variants) {
+      if (blend !== true) keys.add(pipelineKey(format, false, sampleCount));
+      if (blend !== false) keys.add(pipelineKey(format, true, sampleCount));
+    }
+    const tracker = this._device && getInstrumentedGPUResourceTracker(this._device);
+    for (const [key, pipeline] of this._pipelines) {
+      if (keys.has(key)) continue;
+      // An already encoded pass retains its native pipeline even after cache eviction.
+      this._pipelines.delete(key);
+      tracker?.untrackObject(pipeline);
+    }
   }
 
   override destroy(): void {

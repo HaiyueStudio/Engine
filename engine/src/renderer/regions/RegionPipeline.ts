@@ -36,6 +36,7 @@ export class RegionPipeline implements RegionExecution {
   private presentation=0;
   private compositionSamples:0|1|4=0;
   private copy = new SceneOutputPass();
+  private copyTopology = '';
   private history:RegionHistoryCopy;
   private copyLifetime:SubmissionLifetime;
   private readonly known = new Set<RenderRegionState>();
@@ -46,7 +47,7 @@ export class RegionPipeline implements RegionExecution {
   constructor(private readonly engine:IEngine) {this.device=engine.device;this.targets=new RegionColorTargets(engine);this.working=new RegionFrameTargets(engine);this.history=new RegionHistoryCopy(this.device);const copy=this.copy;this.copyLifetime=new SubmissionLifetime(this.device,()=>copy.destroy());}
 
   execute<T extends RegionPipelineEntry>(world:World,time:number,delta:number,options:RenderFrameContextOptions&{context?:RenderFrameContext;regionCache?:boolean;frameToken?:WorldFrameToken|undefined},entries:readonly T[],record:(entry:T,context:RenderFrameContext)=>void):RenderFrameContext {
-    if(this.device!==this.engine.device){this.targets.dispose(true);this.working.dispose(true);this.copyLifetime.abandon();this.device=this.engine.device;this.targets=new RegionColorTargets(this.engine);this.working=new RegionFrameTargets(this.engine);this.copy=new SceneOutputPass();this.history=new RegionHistoryCopy(this.device);const copy=this.copy;this.copyLifetime=new SubmissionLifetime(this.device,()=>copy.destroy());this.signature='';this.known.clear()}
+    if(this.device!==this.engine.device){this.targets.dispose(true);this.working.dispose(true);this.copyLifetime.abandon();this.device=this.engine.device;this.targets=new RegionColorTargets(this.engine);this.working=new RegionFrameTargets(this.engine);this.copy=new SceneOutputPass();this.copyTopology='';this.history=new RegionHistoryCopy(this.device);const copy=this.copy;this.copyLifetime=new SubmissionLifetime(this.device,()=>copy.destroy());this.signature='';this.known.clear()}
     const parent=options.view instanceof RenderView?options.view.snapshot():options.view??options.context?.view;
     if(!parent)throw Error('Regional rendering requires its owning RenderView.');
     if(entries.some(e=>!e.region))throw Error('A regional pipeline requires every producer to have an explicit region, including a global overlay region.');
@@ -164,6 +165,14 @@ export class RegionPipeline implements RegionExecution {
       context.endPass();context.view=parent;
       this.copy.setFrameIdentity(++this.frame,`${parent.key}:present`);this.copy.configure(parent.target.format,1,'none',Object.freeze({...parent,viewport:null,scissor:null,loadOp:'clear' as const}));
       this.copy.apply(context.encoder,scratch.sample(context),parent.target.getOutputView(),context.device);draws++;
+      const copyTopology=`${scratch.spec.sampleCount}:${parent.target.format}:${parent.sampleCount}`;
+      if(this.copyTopology!==copyTopology){
+        this.copy.retainPipelineVariants([
+          {format:'rgba16float',sampleCount:scratch.spec.sampleCount},
+          {format:parent.target.format,sampleCount:parent.sampleCount,blend:false},
+        ]);
+        this.copyTopology=copyTopology;
+      }
       // Descriptor versions may advance when this presentation acquires its swapchain view.
       // Capture after encoding, before callers can replace an unsubmitted destination.
       const recordedTargetVersion=targetVersion();
