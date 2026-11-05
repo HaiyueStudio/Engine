@@ -1,4 +1,4 @@
-name: CI Slow
+name: Engine Planar Diagnostic
 
 on:
   pull_request:
@@ -51,16 +51,70 @@ jobs:
       - name: Build Engine foundations and diagnostic inputs
         run: node scripts/release-ci-bootstrap.mjs
 
-      - name: Run Engine slow quality gate
-        run: npm run check:engine:slow -- --content-tier="${CONTENT_TIER}"
-
-      - name: Upload slow-gate reports
+      - name: Profile original SwiftShader workload (diagnostic only)
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/planar-ci-diagnostic
+          node -e 'console.log(JSON.stringify({cpu:require("node:os").cpus()[0]?.model,threads:require("node:os").availableParallelism(),node:process.version,revision:process.env.GITHUB_SHA}))' > artifacts/planar-ci-diagnostic/runner.json
+          cat > artifacts/planar-ci-diagnostic/profile.html <<'HAIYUE_FIXTURE'
+          <!doctype html><meta charset="utf-8"><script type="importmap">{"imports":{"wgpu-matrix":"/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"}}</script><pre id="result"></pre><script type="module" src="./profile.mjs"></script>
+          HAIYUE_FIXTURE
+          cat > artifacts/planar-ci-diagnostic/profile.mjs <<'HAIYUE_FIXTURE'
+          import {createRealRendererBenchmarkScenario, destroyRealRendererBenchmarkScenario, warmRealRendererBenchmarkPipelines, runRealRendererBenchmarkFrame, getRealRendererBenchmarkMetrics} from '/scripts/benchmark/real-renderer-scenario.mjs';
+          import {RealRendererGpuTimestampProbe} from '/scripts/benchmark/real-renderer-gpu-timestamp.mjs';
+          const node=document.querySelector('#result');
+          const runs=[];
+          try {
+           const adapter=await navigator.gpu.requestAdapter({powerPreference:'high-performance'});
+           if(!adapter||adapter.info.architecture!=='swiftshader')throw Error('Need real SwiftShader: '+JSON.stringify(adapter?{vendor:adapter.info.vendor,architecture:adapter.info.architecture}:null));
+           for(const [mirrorCount,maxBounces,viewCount] of [[0,1,1],[4,5,1],[4,8,4]]){
+            const timestamp=adapter.features.has('timestamp-query');
+            const device=await adapter.requestDevice({requiredFeatures:timestamp?['timestamp-query']:[]});
+            device.pushErrorScope('validation');
+            let state,probe,variant='full';
+            let passes=[];
+            const create=device.createCommandEncoder.bind(device);
+            device.createCommandEncoder=(...args)=>{
+             const encoder=create(...args),begin=encoder.beginRenderPass.bind(encoder);
+             encoder.beginRenderPass=descriptor=>{
+              const pass=begin(descriptor),setScissor=pass.setScissorRect.bind(pass);
+              passes.push(descriptor.label??'(unlabelled)');
+              if(variant==='scissor-1px'){setScissor(0,0,1,1);pass.setScissorRect=()=>setScissor(0,0,1,1);}
+              return pass;
+             };
+             return encoder;
+            };
+            try{
+             state=await createRealRendererBenchmarkScenario({device,entityCount:10000,mirrorCount,maxBounces,viewCount,dynamicRatio:.1,mirrorWidth:32,mirrorHeight:32,mirrorVisibilityCulling:false});
+             const start=performance.now();
+             await warmRealRendererBenchmarkPipelines(state);
+             const warmMs=performance.now()-start,frames=[];
+             for(let i=0;i<3;i++)await runRealRendererBenchmarkFrame(state);
+             probe=new RealRendererGpuTimestampProbe(device,{includeCompute:true});
+             for(const next of ['full','scissor-1px','scissor-1px','full']){
+              variant=next;passes=[];
+              await runRealRendererBenchmarkFrame(state,{gpuTimestampProbe:probe});
+              frames.push({variant,passes,...state.lastFrameTiming});
+              console.info('PROFILE '+JSON.stringify({mirrorCount,maxBounces,viewCount,variant,queueWaitMs:state.lastFrameTiming.queueWaitMs,cpuRecordMs:state.lastFrameTiming.cpuRecordMs,sampleWallMs:state.lastFrameTiming.sampleWallMs}));
+             }
+             const metrics=getRealRendererBenchmarkMetrics(state);
+             runs.push({mirrorCount,maxBounces,viewCount,warmMs,timestamp,frames,metrics});
+            } finally {
+             probe?.destroy();if(state)await destroyRealRendererBenchmarkScenario(state);
+             const error=await device.popErrorScope();device.destroy();if(error)throw error;
+            }
+           }
+           node.textContent=JSON.stringify({status:'passed',adapter:'swiftshader',role:'diagnostic-only',runs});node.dataset.status='passed';
+          } catch(error){node.textContent=JSON.stringify({status:'failed',error:String(error.stack??error),runs});node.dataset.status='failed';}
+          HAIYUE_FIXTURE
+          node --input-type=module <<'HAIYUE_NODE'
+          import {runChromeWebGpuFixture} from './scripts/webgpu-gate/chrome-runner.mjs';
+          import {writeFileSync} from 'node:fs';
+          const result=await runChromeWebGpuFixture({root:process.cwd(),fixture:'artifacts/planar-ci-diagnostic/profile.html',timeoutMs:240000,interact:async cdp=>cdp.on('Runtime.consoleAPICalled',event=>{const line=event.args?.[0]?.value;if(typeof line==='string'&&line.startsWith('PROFILE '))console.log(line);})});
+          writeFileSync('artifacts/planar-ci-diagnostic/result.json',JSON.stringify(result,null,2));
+          HAIYUE_NODE
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: slow-gate-${{ env.CONTENT_TIER }}-reports
-          path: |
-            artifacts/benchmarks/*.json
-            artifacts/webgpu/*.json
-          if-no-files-found: warn
-          retention-days: 30
+          name: planar-ci-diagnostic
+          path: artifacts/planar-ci-diagnostic/*.json
