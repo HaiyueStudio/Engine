@@ -21,20 +21,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-slow-${{ github.ref }}
+  group: ci-planar-shaders-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   slow-gate:
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { name: profile-x64, runner: ubuntu-latest, mode: profile, platform: linux64 }
-          - { name: replay-x64, runner: ubuntu-latest, mode: replay, platform: linux64 }
-          - { name: replay-arm64, runner: ubuntu-24.04-arm, mode: replay, platform: linux-arm64 }
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
       BENCHMARK_PROFILE: ci
@@ -56,26 +48,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Provision the same pinned official browser on both architectures
-        if: matrix.mode == 'replay'
-        env:
-          CFT_PLATFORM: ${{ matrix.platform }}
-        run: |
-          set -euo pipefail
-          version=157.0.8103.15
-          browser_dir="$RUNNER_TEMP/planar-browser"
-          mkdir -p "$browser_dir" artifacts/planar-ci-diagnostic
-          curl --fail --silent --show-error --location --retry 2 "https://storage.googleapis.com/chrome-for-testing-public/$version/$CFT_PLATFORM/chrome-$CFT_PLATFORM.zip" --output "$browser_dir/browser.zip"
-          sha256sum "$browser_dir/browser.zip" | cut -d " " -f 1 > artifacts/planar-ci-diagnostic/browser-sha256.txt
-          unzip -q "$browser_dir/browser.zip" -d "$browser_dir"
-          browser="$browser_dir/chrome-$CFT_PLATFORM/chrome"
-          "$browser" --version
-          printf "CHROME_PATH=%s\nWEBGPU_RECORD_PERFORMANCE_EVIDENCE=0\n" "$browser" >> "$GITHUB_ENV"
       - name: Build Engine foundations and diagnostic inputs
         run: node scripts/release-ci-bootstrap.mjs
 
-      - name: Profile original SwiftShader workload (diagnostic only)
-        if: matrix.mode == 'profile'
+      - name: Compare shader arithmetic and verify diagnostic pixel parity
         run: |
           set -euo pipefail
           mkdir -p artifacts/planar-ci-diagnostic
@@ -84,53 +60,83 @@ jobs:
           <!doctype html><meta charset="utf-8"><script type="importmap">{"imports":{"wgpu-matrix":"/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"}}</script><pre id="result"></pre><script type="module" src="./profile.mjs"></script>
           HAIYUE_FIXTURE
           cat > artifacts/planar-ci-diagnostic/profile.mjs <<'HAIYUE_FIXTURE'
-          import {createRealRendererBenchmarkScenario, destroyRealRendererBenchmarkScenario, warmRealRendererBenchmarkPipelines, runRealRendererBenchmarkFrame, resetRealRendererBenchmarkMetrics, getRealRendererBenchmarkMetrics} from '/scripts/benchmark/real-renderer-scenario.mjs';
-          import {RealRendererGpuTimestampProbe} from '/scripts/benchmark/real-renderer-gpu-timestamp.mjs';
-          const node=document.querySelector('#result');
-          const runs=[];
-          try {
-           for(const [mirrorCount,maxBounces,viewCount] of [[0,1,1],[4,5,1],[4,8,4]]){
+          import {createAuditTarget,createRealRendererBenchmarkScenario,destroyRealRendererBenchmarkScenario,warmRealRendererBenchmarkPipelines,runRealRendererBenchmarkFrame,resetRealRendererBenchmarkMetrics} from '/scripts/benchmark/real-renderer-scenario.mjs';
+          const node=document.querySelector('#result'),runs=[];
+          const pcf=`
+            let dimensions = vec2<f32>(textureDimensions(shadowTexture));
+            let position = uv * dimensions - vec2<f32>(0.5);
+            let base = floor(position);
+            let fraction = position - base;
+            let left = vec2<f32>(2.0) - fraction;
+            let right = vec2<f32>(1.0) + fraction;
+            let low = (base - vec2<f32>(0.5) + 1.0 / left) / dimensions;
+            let high = (base + vec2<f32>(1.5) + fraction / right) / dimensions;
+            return (left.x * left.y * textureSampleCompareLevel(shadowTexture, shadowSampler, low, layer, compareDepth)
+              + right.x * left.y * textureSampleCompareLevel(shadowTexture, shadowSampler, vec2<f32>(high.x, low.y), layer, compareDepth)
+              + left.x * right.y * textureSampleCompareLevel(shadowTexture, shadowSampler, vec2<f32>(low.x, high.y), layer, compareDepth)
+              + right.x * right.y * textureSampleCompareLevel(shadowTexture, shadowSampler, high, layer, compareDepth)) / 9.0;
+          `;
+          function transform(code,variant){
+           if(variant==='baseline'||!code.includes('fn fresnelSchlickF90(')||!code.includes('fn shadowVisibility('))return code;
+           const exactPowers=code
+            .replaceAll('pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0)','hy_pow5_probe(clamp(1.0 - cosTheta, 0.0, 1.0))')
+            .replace('let attenuation = pow(clamp(1.0 - distance / max(light.position.w, 0.0001), 0.0, 1.0), 2.0);','let falloff = clamp(1.0 - distance / max(light.position.w, 0.0001), 0.0, 1.0); let attenuation = falloff * falloff;')
+            .replace('var l = normalize(-light.direction.xyz);','var l: vec3<f32>;')
+            .replace('radiance *= attenuation;\n    }','radiance *= attenuation;\n    } else { l = normalize(-light.direction.xyz); }');
+           if(exactPowers===code||!exactPowers.includes('hy_pow5_probe('))throw Error('Power replacement did not match the canonical shader');
+           const source=exactPowers+'\nfn hy_pow5_probe(x: f32) -> f32 { let x2 = x * x; return (x2 * x2) * x; }\n';
+           if(variant!=='powers-and-linear-pcf')return source;
+           const start=source.indexOf('  var visibility = 0.0;',source.indexOf('fn shadowVisibility('));
+           const end=source.indexOf('  return visibility / 9.0;',start);
+           if(start<0||end<0)throw Error('PCF replacement did not match the canonical shader');
+           return source.slice(0,start)+pcf+source.slice(end+'  return visibility / 9.0;'.length);
+          }
+          async function readPixels(device,target){
+           const width=target.width,height=target.height,bytesPerRow=Math.ceil(width*4/256)*256;
+           const buffer=device.createBuffer({size:bytesPerRow*height,usage:GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ});
+           try{
+            const encoder=device.createCommandEncoder();
+            encoder.copyTextureToBuffer({texture:target.colorTexture},{buffer,bytesPerRow},[width,height,1]);device.queue.submit([encoder.finish()]);
+            await buffer.mapAsync(GPUMapMode.READ);
+            const mapped=new Uint8Array(buffer.getMappedRange()),pixels=new Uint8Array(width*height*4);
+            for(let y=0;y<height;y++)pixels.set(mapped.subarray(y*bytesPerRow,y*bytesPerRow+width*4),y*width*4);
+            buffer.unmap();return pixels;
+           }finally{buffer.destroy();}
+          }
+          try{
+           let original=null;
+           for(const variant of ['baseline','powers','powers-and-linear-pcf','baseline']){
             const adapter=await navigator.gpu.requestAdapter({powerPreference:'high-performance'});
-            if(!adapter||adapter.info.architecture!=='swiftshader')throw Error('Need real SwiftShader: '+JSON.stringify(adapter?{vendor:adapter.info.vendor,architecture:adapter.info.architecture}:null));
-            const timestamp=adapter.features.has('timestamp-query');
-            const device=await adapter.requestDevice({requiredFeatures:timestamp?['timestamp-query']:[]});
-            device.pushErrorScope('validation');
-            let state,probe,variant='full';
-            let passes=[];
-            const create=device.createCommandEncoder.bind(device);
-            device.createCommandEncoder=(...args)=>{
-             const encoder=create(...args),begin=encoder.beginRenderPass.bind(encoder);
-             encoder.beginRenderPass=descriptor=>{
-              const pass=begin(descriptor),setScissor=pass.setScissorRect.bind(pass);
-              passes.push(descriptor.label??'(unlabelled)');
-              if(variant==='scissor-1px'){setScissor(0,0,1,1);pass.setScissorRect=()=>setScissor(0,0,1,1);}
-              return pass;
-             };
-             return encoder;
-            };
+            if(adapter?.info.architecture!=='swiftshader')throw Error('Expected SwiftShader');
+            const device=await adapter.requestDevice();device.pushErrorScope('validation');
+            let target,state,modules=0;
             try{
-             state=await createRealRendererBenchmarkScenario({device,entityCount:10000,mirrorCount,maxBounces,viewCount,dynamicRatio:.1,mirrorWidth:32,mirrorHeight:32,mirrorVisibilityCulling:false});
-             const start=performance.now();
+             const createModule=device.createShaderModule.bind(device);
+             device.createShaderModule=descriptor=>{
+              const code=transform(descriptor.code,variant);
+              modules+=Number(code!==descriptor.code);
+              return createModule({...descriptor,code});
+             };
+             target=createAuditTarget(device,960,540,true);
+             state=await createRealRendererBenchmarkScenario({device,target,entityCount:10000,mirrorCount:4,maxBounces:5,viewCount:1,dynamicRatio:.1,mirrorWidth:32,mirrorHeight:32,mirrorVisibilityCulling:false});
              await warmRealRendererBenchmarkPipelines(state);
-             const warmMs=performance.now()-start,frames=[];
              for(let i=0;i<3;i++)await runRealRendererBenchmarkFrame(state);
              resetRealRendererBenchmarkMetrics(state);
-             probe=new RealRendererGpuTimestampProbe(device,{includeCompute:true});
-             for(const next of ['full','scissor-1px','scissor-1px','full']){
-              variant=next;passes=[];
-              await runRealRendererBenchmarkFrame(state,{gpuTimestampProbe:probe});
-              frames.push({variant,passes,...state.lastFrameTiming});
-              console.info('PROFILE '+JSON.stringify({mirrorCount,maxBounces,viewCount,variant,queueWaitMs:state.lastFrameTiming.queueWaitMs,cpuRecordMs:state.lastFrameTiming.cpuRecordMs,sampleWallMs:state.lastFrameTiming.sampleWallMs,gpu:state.lastFrameTiming.gpuTimestamp}));
-             }
-             const metrics=getRealRendererBenchmarkMetrics(state);
-             runs.push({mirrorCount,maxBounces,viewCount,warmMs,timestamp,frames,metrics});
-            } finally {
-             probe?.destroy();if(state)await destroyRealRendererBenchmarkScenario(state);
-             const error=await device.popErrorScope();device.destroy();if(error)throw error;
+             const frames=[];
+             for(let i=0;i<2;i++){await runRealRendererBenchmarkFrame(state);frames.push(state.lastFrameTiming);}
+             if(variant!=='baseline'&&!modules)throw Error('No shader was changed');
+             const pixels=await readPixels(device,target);let changed=0,maxDelta=0;
+             if(original)for(let i=0;i<pixels.length;i++){const delta=Math.abs(pixels[i]-original[i]);changed+=Number(delta!==0);maxDelta=Math.max(maxDelta,delta);}
+             else original=pixels;
+             const record={variant,modules,frames,comparedBytes:pixels.length,changed,maxDelta};
+             runs.push(record);console.info('PROFILE '+JSON.stringify(record));
+            }finally{
+             if(state)await destroyRealRendererBenchmarkScenario(state);
+             target?.destroy();const error=await device.popErrorScope();device.destroy();if(error)throw error;
             }
            }
-           node.textContent=JSON.stringify({status:'passed',adapter:'swiftshader',role:'diagnostic-only',runs});node.dataset.status='passed';
-          } catch(error){node.textContent=JSON.stringify({status:'failed',error:String(error.stack??error),runs});node.dataset.status='failed';}
+           node.textContent=JSON.stringify({status:'passed',role:'diagnostic-only',adapter:'swiftshader',runs});node.dataset.status='passed';
+          }catch(error){node.textContent=JSON.stringify({status:'failed',error:String(error.stack??error),runs});node.dataset.status='failed';}
           HAIYUE_FIXTURE
           node --input-type=module <<'HAIYUE_NODE'
           import {runChromeWebGpuFixture} from './scripts/webgpu-gate/chrome-runner.mjs';
@@ -138,16 +144,8 @@ jobs:
           const result=await runChromeWebGpuFixture({root:process.cwd(),fixture:'artifacts/planar-ci-diagnostic/profile.html',timeoutMs:240000,interact:async cdp=>cdp.on('Runtime.consoleAPICalled',event=>{const line=event.args?.[0]?.value;if(typeof line==='string'&&line.startsWith('PROFILE '))console.log(line);})});
           writeFileSync('artifacts/planar-ci-diagnostic/result.json',JSON.stringify(result,null,2));
           HAIYUE_NODE
-      - name: Run the unchanged planar gate with its original deadline
-        if: matrix.mode == 'replay'
-        run: |
-          uname -m
-          lscpu | grep -E "Model name|^CPU\(s\)"
-          npm run verify:planar-reflection
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
-          name: planar-ci-${{ matrix.name }}
-          path: |
-            artifacts/planar-ci-diagnostic/
-            artifacts/webgpu/planar-reflection*.json
+          name: planar-ci-shader-probe
+          path: artifacts/planar-ci-diagnostic/*.json
