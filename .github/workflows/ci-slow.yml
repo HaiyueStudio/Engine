@@ -1,4 +1,4 @@
-name: CI Slow
+name: Engine SwiftShader planar retest
 
 on:
   pull_request:
@@ -21,12 +21,16 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-slow-${{ github.ref }}
+  group: ci-planar-occlusion-margin-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   slow-gate:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        replica: [1, 2]
     timeout-minutes: 60
     env:
       BENCHMARK_PROFILE: ci
@@ -48,19 +52,183 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Engine foundations and diagnostic inputs
-        run: node scripts/release-ci-bootstrap.mjs
+      - name: Run the unchanged planar-reflection gate
+        env:
+          HAIYUE_BENCHMARK_SCOPE: engine
+        run: |
+          set -euo pipefail
+          uname -m
+          lscpu | grep -E 'Model name|^CPU\(s\)'
+          google-chrome --version
+          npm run verify:planar-reflection
 
-      - name: Run Engine slow quality gate
-        run: npm run check:engine:slow -- --content-tier="${CONTENT_TIER}"
-
-      - name: Upload slow-gate reports
+      - name: Upload unchanged gate results
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
-          name: slow-gate-${{ env.CONTENT_TIER }}-reports
-          path: |
-            artifacts/benchmarks/*.json
-            artifacts/webgpu/*.json
-          if-no-files-found: warn
-          retention-days: 30
+          name: planar-occlusion-gate-${{ matrix.replica }}
+          path: artifacts/webgpu/planar-reflection*.json
+
+      - name: Compare full-size software rendering with occlusion on and off
+        if: matrix.replica == 1 && (success() || failure())
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/planar-occlusion-ab
+          cat > artifacts/planar-occlusion-ab/index.html <<'PLANAR_OCCLUSION_FIXTURE'
+          <!doctype html><meta charset="utf-8"><script type="importmap">{"imports":{"wgpu-matrix":"/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"}}</script><pre id="result"></pre><script type="module" src="./compare.mjs"></script>
+          PLANAR_OCCLUSION_FIXTURE
+          cat > artifacts/planar-occlusion-ab/compare.mjs <<'PLANAR_OCCLUSION_FIXTURE'
+          import {
+            createAuditTarget, createRealRendererBenchmarkScenario, destroyRealRendererBenchmarkScenario,
+            getRealRendererBenchmarkMetrics, resetRealRendererBenchmarkMetrics, runRealRendererBenchmarkFrame,
+            warmRealRendererBenchmarkPipelines,
+          } from '/scripts/benchmark/real-renderer-scenario.mjs';
+
+          const result = document.querySelector('#result');
+          const width = 960, height = 540, viewCount = 4;
+          const small = new URLSearchParams(location.search).get('entities') === '1000';
+          const entityCount = small ? 1000 : 10000;
+          const mirrorCount = small ? 2 : 4;
+          const maxBounces = small ? 3 : 8;
+          const bytesPerRow = Math.ceil(width * 4 / 256) * 256;
+          const viewBytes = bytesPerRow * height;
+          const adapter = await navigator.gpu?.requestAdapter({powerPreference:'high-performance'});
+          const adapterInfo = adapter && {
+            vendor: adapter.info.vendor, architecture: adapter.info.architecture,
+            isFallbackAdapter: adapter.info.isFallbackAdapter,
+          };
+          const runs = [], comparisons = [];
+
+          try {
+            if (!adapter) throw Error('WebGPU adapter unavailable');
+            let baseline;
+            for (const optimized of [false, true]) {
+              const current = optimized ? await navigator.gpu.requestAdapter({powerPreference:'high-performance'}) : adapter;
+              if (!current || current.info.architecture !== adapter.info.architecture) throw Error('Adapter changed between captures');
+              const device = await current.requestDevice();
+              const actualArchitecture = device.adapterInfo?.architecture ?? adapterInfo.architecture;
+              if (actualArchitecture === 'swiftshader' && !optimized) {
+                Object.defineProperty(device, 'adapterInfo', {value:{architecture:'diagnostic-disabled'}});
+              } else if (actualArchitecture !== 'swiftshader' && optimized) {
+                Object.defineProperty(device, 'adapterInfo', {value:{architecture:'swiftshader'}});
+              }
+              const errors = [];
+              device.addEventListener('uncapturederror', event => errors.push(event.error.message));
+              device.pushErrorScope('validation');
+              const target = createAuditTarget(device, width, height, true);
+              const readback = device.createBuffer({size:viewCount * viewBytes,usage:GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ});
+              const run = { optimized, actualArchitecture, forcedNativePath: optimized && actualArchitecture !== 'swiftshader', frames: [], errors };
+              runs.push(run);
+              let state;
+              try {
+                state = await createRealRendererBenchmarkScenario({
+                  device, target, entityCount, mirrorCount, maxBounces, viewCount, dynamicRatio: 0.1,
+                  mirrorWidth: 32, mirrorHeight: 32, mirrorVisibilityCulling: false,
+                });
+                const render = state.render3d;
+                const prepare = render._viewPreparation.prepareGpuDrivenBatches.bind(render._viewPreparation);
+                render._viewPreparation.prepareGpuDrivenBatches = (...args) => {
+                  const view = render._viewPreparation;
+                  if (view.mainView) {
+                    run.frames.at(-1)?.lists.push({
+                      opaqueBefore: view.frameItems.opaqueItems.length, opaqueAfter: view.forwardOpaqueItems.length,
+                      transparentBefore: view.frameItems.transparentItems.length, transparentAfter: view.forwardTransparentItems.length,
+                    });
+                  } else if (view.frameItems.opaqueItems.length !== view.forwardOpaqueItems.length
+                      || view.frameItems.transparentItems.length !== view.forwardTransparentItems.length) {
+                    throw Error('Reflection work was filtered');
+                  }
+                  return prepare(...args);
+                };
+                const post = render._renderPostScenePasses.bind(render);
+                let capturing = false, view = 0;
+                render._renderPostScenePasses = () => {
+                  post();
+                  if (capturing && render._viewPreparation.mainView) {
+                    render._frameExecution.context.encoder.copyTextureToBuffer(
+                      {texture:target.colorTexture}, {buffer:readback,bytesPerRow,offset:viewBytes * view++},
+                      [width,height,1],
+                    );
+                  }
+                };
+                await warmRealRendererBenchmarkPipelines(state);
+                for (let i = 0; i < 3; i++) await runRealRendererBenchmarkFrame(state);
+                resetRealRendererBenchmarkMetrics(state);
+                capturing = true;
+                const pixels = [];
+                for (let i = 0; i < 3; i++) {
+                  const frame = {lists:[]};
+                  run.frames.push(frame);
+                  view = 0;
+                  await runRealRendererBenchmarkFrame(state);
+                  if (view !== viewCount || frame.lists.length !== viewCount) throw Error('Missing view snapshot');
+                  Object.assign(frame,state.lastFrameTiming);
+                  await readback.mapAsync(GPUMapMode.READ);
+                  pixels.push(new Uint8Array(readback.getMappedRange()).slice());
+                  readback.unmap();
+                }
+                run.metrics = getRealRendererBenchmarkMetrics(state);
+                if (!optimized) baseline = pixels;
+                else {
+                  for (let i = 0; i < pixels.length; i++) for (let v = 0; v < viewCount; v++) {
+                    let differingChannels = 0, maxDelta = 0;
+                    for (let y = 0; y < height; y++) for (let x = 0; x < width * 4; x++) {
+                      const index = v * viewBytes + y * bytesPerRow + x;
+                      const delta = Math.abs(pixels[i][index] - baseline[i][index]);
+                      differingChannels += Number(delta !== 0);
+                      maxDelta = Math.max(maxDelta, delta);
+                    }
+                    comparisons.push({frame:i+1,view:v+1,differingChannels,maxDelta});
+                  }
+                }
+              } finally {
+                if (state) {
+                  await destroyRealRendererBenchmarkScenario(state);
+                  run.resourceResidual = state.finalMetrics.liveGpuResources;
+                  run.ownerResidual = state.finalMetrics.ownerResidual;
+                }
+                readback.destroy();
+                target.destroy();
+                const validation = await device.popErrorScope();
+                if (validation) errors.push(validation.message);
+                device.destroy();
+              }
+            }
+            if (runs.some(run => run.errors.length || run.resourceResidual !== 0 || run.ownerResidual !== 0)
+                || comparisons.length !== 12 || comparisons.some(record => record.maxDelta !== 0)
+                || !runs[1].frames.every(frame => frame.lists.every(list => list.opaqueAfter < list.opaqueBefore))) {
+              throw Error('Pixel comparison, participation or resource check failed');
+            }
+            result.textContent = JSON.stringify({status:'passed',role:'diagnostic-only',adapterInfo,width,height,entityCount,mirrorCount,maxBounces,comparisons,runs});
+            result.dataset.status = 'passed';
+          } catch (error) {
+            result.textContent = JSON.stringify({status:'failed',error:String(error.stack ?? error),adapterInfo,comparisons,runs});
+            result.dataset.status = 'failed';
+          }
+          PLANAR_OCCLUSION_FIXTURE
+          cat > artifacts/planar-occlusion-ab/run.mjs <<'PLANAR_OCCLUSION_FIXTURE'
+          import { writeFileSync } from 'node:fs';
+          import { runChromeWebGpuFixture } from '../../scripts/webgpu-gate/chrome-runner.mjs';
+          const root = process.cwd();
+          const result = await runChromeWebGpuFixture({
+            root, fixture:'artifacts/planar-occlusion-ab/index.html', timeoutMs:240000,
+            query:{entities:process.argv[2] ?? '10000'},
+            acceptedStatuses:['passed','failed'],
+          });
+          const output = `artifacts/planar-occlusion-ab/${result.status}-${Date.now()}.json`;
+          writeFileSync(output, JSON.stringify(result,null,2)+'\n', {flag:'wx'});
+          console.log(output);
+          console.log(JSON.stringify({status:result.status, error:result.error, comparisons:result.comparisons,
+            runs:result.runs?.map(({optimized, frames, errors, resourceResidual, ownerResidual}) =>
+              ({optimized,frames:frames.map(({lists,sampleWallMs})=>({lists,sampleWallMs})),errors,resourceResidual,ownerResidual}))}));
+          if (result.status !== 'passed') process.exitCode=1;
+          PLANAR_OCCLUSION_FIXTURE
+          node artifacts/planar-occlusion-ab/run.mjs 1000
+          node artifacts/planar-occlusion-ab/run.mjs 10000
+
+      - name: Upload full-size pixel diagnostics
+        if: always() && matrix.replica == 1
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: planar-occlusion-pixel-diagnostics
+          path: artifacts/planar-occlusion-ab/*.json
