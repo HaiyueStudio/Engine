@@ -60,7 +60,7 @@ jobs:
           <!doctype html><meta charset="utf-8"><script type="importmap">{"imports":{"wgpu-matrix":"/node_modules/wgpu-matrix/dist/3.x/wgpu-matrix.module.js"}}</script><pre id="result"></pre><script type="module" src="./profile.mjs"></script>
           HAIYUE_FIXTURE
           cat > artifacts/planar-ci-diagnostic/profile.mjs <<'HAIYUE_FIXTURE'
-          import {createRealRendererBenchmarkScenario, destroyRealRendererBenchmarkScenario, warmRealRendererBenchmarkPipelines, runRealRendererBenchmarkFrame, getRealRendererBenchmarkMetrics} from '/scripts/benchmark/real-renderer-scenario.mjs';
+          import {createRealRendererBenchmarkScenario, destroyRealRendererBenchmarkScenario, warmRealRendererBenchmarkPipelines, runRealRendererBenchmarkFrame, resetRealRendererBenchmarkMetrics, getRealRendererBenchmarkMetrics} from '/scripts/benchmark/real-renderer-scenario.mjs';
           import {RealRendererGpuTimestampProbe} from '/scripts/benchmark/real-renderer-gpu-timestamp.mjs';
           const node=document.querySelector('#result');
           const runs=[];
@@ -90,12 +90,13 @@ jobs:
              await warmRealRendererBenchmarkPipelines(state);
              const warmMs=performance.now()-start,frames=[];
              for(let i=0;i<3;i++)await runRealRendererBenchmarkFrame(state);
+             resetRealRendererBenchmarkMetrics(state);
              probe=new RealRendererGpuTimestampProbe(device,{includeCompute:true});
              for(const next of ['full','scissor-1px','scissor-1px','full']){
               variant=next;passes=[];
               await runRealRendererBenchmarkFrame(state,{gpuTimestampProbe:probe});
               frames.push({variant,passes,...state.lastFrameTiming});
-              console.info('PROFILE '+JSON.stringify({mirrorCount,maxBounces,viewCount,variant,queueWaitMs:state.lastFrameTiming.queueWaitMs,cpuRecordMs:state.lastFrameTiming.cpuRecordMs,sampleWallMs:state.lastFrameTiming.sampleWallMs}));
+              console.info('PROFILE '+JSON.stringify({mirrorCount,maxBounces,viewCount,variant,queueWaitMs:state.lastFrameTiming.queueWaitMs,cpuRecordMs:state.lastFrameTiming.cpuRecordMs,sampleWallMs:state.lastFrameTiming.sampleWallMs,gpu:state.lastFrameTiming.gpuTimestamp}));
              }
              const metrics=getRealRendererBenchmarkMetrics(state);
              runs.push({mirrorCount,maxBounces,viewCount,warmMs,timestamp,frames,metrics});
