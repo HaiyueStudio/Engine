@@ -26,7 +26,15 @@ concurrency:
 
 jobs:
   slow-gate:
-    runs-on: ubuntu-latest
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: profile-x64, runner: ubuntu-latest, mode: profile, platform: linux64 }
+          - { name: replay-x64, runner: ubuntu-latest, mode: replay, platform: linux64 }
+          - { name: replay-arm64, runner: ubuntu-24.04-arm, mode: replay, platform: linux-arm64 }
     timeout-minutes: 60
     env:
       BENCHMARK_PROFILE: ci
@@ -48,10 +56,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Provision the same pinned official browser on both architectures
+        if: matrix.mode == 'replay'
+        env:
+          CFT_PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          version=157.0.8103.15
+          browser_dir="$RUNNER_TEMP/planar-browser"
+          mkdir -p "$browser_dir" artifacts/planar-ci-diagnostic
+          curl --fail --silent --show-error --location --retry 2 "https://storage.googleapis.com/chrome-for-testing-public/$version/$CFT_PLATFORM/chrome-$CFT_PLATFORM.zip" --output "$browser_dir/browser.zip"
+          sha256sum "$browser_dir/browser.zip" | cut -d " " -f 1 > artifacts/planar-ci-diagnostic/browser-sha256.txt
+          unzip -q "$browser_dir/browser.zip" -d "$browser_dir"
+          browser="$browser_dir/chrome-$CFT_PLATFORM/chrome"
+          "$browser" --version
+          printf "CHROME_PATH=%s\nWEBGPU_RECORD_PERFORMANCE_EVIDENCE=0\n" "$browser" >> "$GITHUB_ENV"
       - name: Build Engine foundations and diagnostic inputs
         run: node scripts/release-ci-bootstrap.mjs
 
       - name: Profile original SwiftShader workload (diagnostic only)
+        if: matrix.mode == 'profile'
         run: |
           set -euo pipefail
           mkdir -p artifacts/planar-ci-diagnostic
@@ -65,9 +89,9 @@ jobs:
           const node=document.querySelector('#result');
           const runs=[];
           try {
-           const adapter=await navigator.gpu.requestAdapter({powerPreference:'high-performance'});
-           if(!adapter||adapter.info.architecture!=='swiftshader')throw Error('Need real SwiftShader: '+JSON.stringify(adapter?{vendor:adapter.info.vendor,architecture:adapter.info.architecture}:null));
            for(const [mirrorCount,maxBounces,viewCount] of [[0,1,1],[4,5,1],[4,8,4]]){
+            const adapter=await navigator.gpu.requestAdapter({powerPreference:'high-performance'});
+            if(!adapter||adapter.info.architecture!=='swiftshader')throw Error('Need real SwiftShader: '+JSON.stringify(adapter?{vendor:adapter.info.vendor,architecture:adapter.info.architecture}:null));
             const timestamp=adapter.features.has('timestamp-query');
             const device=await adapter.requestDevice({requiredFeatures:timestamp?['timestamp-query']:[]});
             device.pushErrorScope('validation');
@@ -114,8 +138,16 @@ jobs:
           const result=await runChromeWebGpuFixture({root:process.cwd(),fixture:'artifacts/planar-ci-diagnostic/profile.html',timeoutMs:240000,interact:async cdp=>cdp.on('Runtime.consoleAPICalled',event=>{const line=event.args?.[0]?.value;if(typeof line==='string'&&line.startsWith('PROFILE '))console.log(line);})});
           writeFileSync('artifacts/planar-ci-diagnostic/result.json',JSON.stringify(result,null,2));
           HAIYUE_NODE
+      - name: Run the unchanged planar gate with its original deadline
+        if: matrix.mode == 'replay'
+        run: |
+          uname -m
+          lscpu | grep -E "Model name|^CPU\(s\)"
+          npm run verify:planar-reflection
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
-          name: planar-ci-diagnostic
-          path: artifacts/planar-ci-diagnostic/*.json
+          name: planar-ci-${{ matrix.name }}
+          path: |
+            artifacts/planar-ci-diagnostic/
+            artifacts/webgpu/planar-reflection*.json
