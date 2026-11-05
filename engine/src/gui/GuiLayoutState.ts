@@ -18,7 +18,8 @@ export function disposeGuiRootObservers(root: GuiElement): void {
   if (errors.length) throw new AggregateError(errors, 'GUI root resource cleanup failed.');
 }
 const suspensions = new WeakMap<GuiElement, () => void>();
-const assignments = new WeakMap<GuiElement, GuiRect>();
+interface AssignmentScope {rects: ReadonlyMap<GuiElement, GuiRect>; parent: AssignmentScope | undefined;}
+let assignments: AssignmentScope | undefined;
 const managed = new WeakSet<GuiElement>();
 const retained = new WeakMap<GuiElement, GuiRect>();
 const hidden = new WeakSet<GuiElement>();
@@ -47,7 +48,9 @@ export function notifyGuiInvalidation(element: GuiElement, flags: GuiDirtyFlags,
   for (let parent: GuiElement | null = element; parent; parent = parent.parent) sinks.get(parent)?.(element, flags,undefined,kind,structure);
 }
 export function assignedGuiRect(element: GuiElement): GuiRect | undefined {
-  const rect = assignments.get(element) ?? retained.get(element);
+  let rect: GuiRect | undefined;
+  for (let scope = assignments; scope && !rect; scope = scope.parent) rect = scope.rects.get(element);
+  rect ??= retained.get(element);
   if (!rect) return undefined;
   let x = 0, y = 0;
   for (let ancestor = element.parent; ancestor; ancestor = ancestor.parent) {
@@ -69,6 +72,7 @@ export function retainGuiLayout(element: GuiElement, rect: GuiRect, options: {re
 export function releaseGuiLayout(element: GuiElement): void {managed.delete(element); retained.delete(element); hidden.delete(element); contentHeights.delete(element);}
 /** Assignment is scoped to a normal traversal so composite controls keep their own children. */
 export function withGuiAssignments(rects: ReadonlyMap<GuiElement, GuiRect>, apply: () => void): void {
-  for (const [element, rect] of rects) assignments.set(element, rect);
-  try {apply();} finally {for (const element of rects.keys()) assignments.delete(element);}
+  const parent = assignments;
+  assignments = {rects, parent};
+  try {apply();} finally {assignments = parent;}
 }

@@ -12,10 +12,11 @@ import {createContentMinimumMeasure} from './minimum.js';
 import {GuiLayoutResources} from './resources.js';
 import {rememberLayoutVisibility} from './visibility.js';
 
-interface Island {session: LayoutSession; fingerprint: string; result?: LayoutResult; viewportSession?: LayoutSession; viewportFingerprint?: string; viewportResult?: LayoutResult; contentMeasure?: LayoutMeasure;}
+interface Island {session: LayoutSession; fingerprint: string; result?: LayoutResult; alternate?: {fingerprint: string; result: LayoutResult} | undefined; viewportSession?: LayoutSession; viewportFingerprint?: string; viewportResult?: LayoutResult; contentMeasure?: LayoutMeasure;}
 function length(value: number | `${number}%` | undefined): LayoutLength | undefined {return typeof value === 'string' ? {percent: Number.parseFloat(value)} : value;}
 function exact(value: number): LayoutConstraints['width'] {return {mode: 'exact', value};}
 const defaultMeasures=new WeakSet<LayoutMeasure>();
+const geometryStyle=Symbol.for('haiyue.gui.layout-style-mutation.v1');
 function defaultGuiLayoutOptions(root:GuiRoot):GuiLayoutOptions {
   const measure:LayoutMeasure=(id,constraints)=>{
     const element=root.findById(id);
@@ -62,7 +63,9 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = defau
     counters.sessions = 0;
   };
   const measure: LayoutMeasure = (id, constraints) => {counters.measurements++; return options.measure(id, constraints);};
-  const delegate:Parameters<GuiRoot['installLayoutDelegate']>[0]={
+  const styleMutations = new WeakSet<GuiElement>();
+  const delegate:Parameters<GuiRoot['installLayoutDelegate']>[0] & {[geometryStyle]:(element:GuiElement)=>boolean}={
+    [geometryStyle]: element => styleMutations.delete(element),
     measure(element, width, height) {return options.measure(element.id, {width, height});},
     arrange(gui, viewport, commit) {
       if (disposed) throw new LayoutError('disposed', 'GUI binding has been disposed.');
@@ -152,8 +155,20 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = defau
         const fingerprint = JSON.stringify([tree, constraints, metricsVersion]);
         let result = island.result;
         if (fingerprint !== island.fingerprint || !result) {
-          result = island.session.update(tree, constraints, scrollViewport ? island.contentMeasure! : measure, {metricsVersion});
-          counters.solves++; counters.solvedNodes += result.solvedNodes;
+          const alternate = island.alternate;
+          const hit = alternate?.fingerprint === fingerprint;
+          const next = hit ? alternate.result : island.session.update(tree, constraints, scrollViewport ? island.contentMeasure! : measure, {metricsVersion});
+          if (!hit) {counters.solves++; counters.solvedNodes += next.solvedNodes;}
+          // A warm solve may hit the session's intrinsic cache. Reuse only across
+          // two solves with no new measurements or removal of a measured node.
+          // User measurement and scroll content retain the original solver path.
+          island.alternate = result && (hit ||
+            !scrollViewport && defaultMeasures.has(options.measure) &&
+            next.measuredNodes === 0 && result.measuredNodes === 0 &&
+            next.rects.size === result.rects.size &&
+            [...result.rects.keys()].every(id => next.rects.has(id)))
+              ? {fingerprint: island.fingerprint, result} : undefined;
+          result = next;
           island.result = result; island.fingerprint = fingerprint;
         }
         for (const [id, rect] of result.rects) {const item = byId.get(id); if (item) output.set(item, {...rect, x: rect.x + origin.x, y: rect.y + origin.y});}
@@ -221,8 +236,11 @@ export function attachGuiLayout(root: GuiRoot, options: GuiLayoutOptions = defau
       owned(element);
       overrides.set(element, captureGuiLayoutStyle({...overrides.get(element), ...style}));
       rememberLayoutVisibility(element, overrides.get(element)!, visibilityOwner);
-      // Mark through the public invalidation path; no private Engine state is accessed.
-      element.markDirty(GuiDirtyFlags.Layout);
+      // Keep normal synchronous invalidation. Only the original pixel source
+      // watcher can defer its redundant rescan until the next prepare.
+      styleMutations.add(element);
+      try {element.markDirty(GuiDirtyFlags.Layout);}
+      finally {styleMutations.delete(element);}
     },
     invalidate(element) {owned(element); versions.set(element, (versions.get(element) ?? 0) + 1); element.markDirty(GuiDirtyFlags.Layout);},
     dispose,
