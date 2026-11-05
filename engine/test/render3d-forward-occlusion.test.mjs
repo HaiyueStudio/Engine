@@ -6,6 +6,7 @@ const { Render3DForwardOcclusion, registerForwardOcclusionRenderer } =
   await importEngineSource('systems/Render3DForwardOcclusion.ts');
 const { MaterialRendererRegistry } = await importEngineSource('renderer/MaterialRendererRegistry.ts');
 const { BasicMaterial } = await importEngineSource('material/BasicMaterial.ts');
+const { PbrMaterial } = await importEngineSource('material/PbrMaterial.ts');
 const { VolumeMaterial } = await importEngineSource('material/VolumeMaterial.ts');
 const { Geometry3D } = await importEngineSource('geometry/Geometry3D.ts');
 
@@ -89,4 +90,18 @@ test('forward occlusion skips empty volume intervals with the eye outside the sl
   const eye = Float32Array.of(0, 0, coplanar.worldMatrix[14]);
   assert.equal(culling.prepare(opaque, [empty, coplanar, filled], view, identity, registry, eye), true);
   assert.deepEqual(culling.transparentItems, [coplanar, filled]);
+});
+
+test('a partially hidden lit triangle keeps only a conservative visible rectangle', () => {
+  const { culling, registry } = create();
+  registerForwardOcclusionRenderer(registry, { materialType: PbrMaterial, renderItem() {} });
+  const cover = draw([-0.9, -0.9, 0, 0.48, -0.9, 0, -0.2, 0.95, 0], 0.2);
+  const lit = draw([-0.36, -0.5, 0, 0.55, -0.5, 0, 0, 0.25, 0], 0.6, new PbrMaterial());
+  const opaque = [lit, ...Array(512).fill(cover)];
+  assert.equal(culling.prepare(opaque, [], view, identity, registry), true);
+  assert.equal(culling.opaqueItems[0], lit);
+  const rectangle = culling.scissors?.rectangles.get(lit);
+  assert(rectangle && rectangle.x > 60 && rectangle.width < 32);
+  culling.clear();
+  assert.equal(culling.scissors, undefined);
 });

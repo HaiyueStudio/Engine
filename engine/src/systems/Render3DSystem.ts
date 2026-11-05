@@ -694,6 +694,7 @@ export class Render3DSystem extends System {
         frameView.target.getRenderPassDescriptor(getRenderViewPassOptions(frameView)),
         frameView.loadOp,
       );
+      this._viewPreparation.selectView(viewIndex, this._viewCollectionOptions, graphPass.passClass === 'view-local');
       this._recordView(
         world,
         context,
@@ -702,7 +703,6 @@ export class Render3DSystem extends System {
         sceneEnvironment,
         viewIndex,
         plannedViews.get(frameView.key),
-        graphPass.passClass === 'view-local',
       );
       viewIndex++;
     }
@@ -750,11 +750,9 @@ export class Render3DSystem extends System {
     worldFrameState: WorldFrameState,
     sceneEnvironment: SceneRenderEnvironment,
     uniformSlot: number,
-    plannedView: Render3DPlannedView | undefined,
-    mainView: boolean,
+    plannedView?: Render3DPlannedView,
   ): void {
     this._framePlan.clear();
-    this._viewPreparation.selectView(uniformSlot, this._viewCollectionOptions, mainView);
     this._reverseZ = frameView.reverseZ;
     this._msaaSamples = frameView.sampleCount;
     const basicRenderer = this._renderers.requireBasic();
@@ -865,19 +863,8 @@ export class Render3DSystem extends System {
     const stats = this._viewPreparation.sort(this.renderSettings, this.transparentSort);
     this.lastOpaqueSortMode = stats.mode;
     this.lastOpaqueSortCount = stats.itemCount;
-    const { context, frameView } = this._frameExecution;
-    const adapter = context.device.adapterInfo ?? this.engine.adapter?.info;
-    if (this._viewPreparation.mainView && adapter?.architecture === 'swiftshader'
-        && this.renderSettings.frustumCulling && !this.renderSettings.gpuDrivenIndirectDraws
-        && !this.renderSettings.gpuCullingReadback && !frameView.reverseZ && frameView.sampleCount === 1
-        && !frameView.viewport && !frameView.scissor && !getRegionSceneProjection(frameView)
-        && !getDeferredLightingBackend(this)) {
-      this._viewPreparation.prepareForwardOcclusion(
-        frameView, this._viewProjMatrix, this.materialRenderers, this._materialRenderContext.eyePosition,
-      );
-    }
+    this._viewPreparation.prepareForwardOcclusion(this._frameExecution, this._viewProjMatrix, this.materialRenderers, this.renderSettings, this._materialRenderContext.eyePosition, !getDeferredLightingBackend(this));
   };
-
   private readonly _prepareGpuDrivenBatchesPass = () => this._measureStage('batch-build', this._prepareGpuDrivenBatchesStage);
   private readonly _prepareGpuDrivenBatchesStage = () => {
     const state = this._frameExecution;
@@ -982,7 +969,7 @@ export class Render3DSystem extends System {
         this.msaaSamples,
       );
 
-      this._submitter.drawOpaqueItems(opaqueItems, passEncoder, viewProj, viewMatrix, submitterOptions);
+      this._submitter.drawOpaqueItems(opaqueItems, passEncoder, viewProj, viewMatrix, submitterOptions, this._viewPreparation.forwardScissors);
       if (needsSceneColorCapture) {
         passEncoder.end();
         const sceneColor = this._postScenePasses.captureSceneColor(context.encoder);

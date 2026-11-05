@@ -10,7 +10,8 @@ import type { Render3DViewCollectionOptions, Render3DSceneCollector } from './Re
 import { Render3DFrameItems } from './Render3DFrameItems';
 import { Render3DForwardOcclusion } from './Render3DForwardOcclusion';
 import type { WorldFrameState } from './Render3DFrameState';
-import type { RenderViewSnapshot } from '../core/RenderView';
+import { getRegionSceneProjection } from '../core/RegionSceneProjection';
+import type { Render3DViewExecutionState } from './Render3DFrameCoordinator';
 import type { MaterialRendererRegistry } from '../renderer/MaterialRendererRegistry';
 import { Render3DGpuDrivenBatchBuilder } from './Render3DGpuDrivenBatchBuilder';
 import { Render3DOpaqueSorter, type Render3DOpaqueSorterStats } from './Render3DOpaqueSorter';
@@ -56,12 +57,22 @@ export class Render3DViewPreparation {
   }
 
   prepareForwardOcclusion(
-    view: RenderViewSnapshot, viewProjection: Float32Array, registry: MaterialRendererRegistry, eyePosition: ArrayLike<number>,
+    { context, frameView }: Render3DViewExecutionState, viewProjection: Float32Array, registry: MaterialRendererRegistry,
+    settings: RenderProfileSettings, eyePosition: ArrayLike<number>, forward: boolean,
   ): void {
+    const adapter = context.device.adapterInfo ?? this._engine.adapter?.info;
+    if (!this._mainView || !forward || adapter?.architecture !== 'swiftshader'
+        || !settings.frustumCulling || settings.gpuDrivenIndirectDraws || settings.gpuCullingReadback
+        || frameView.reverseZ || frameView.sampleCount !== 1 || frameView.viewport || frameView.scissor
+        || getRegionSceneProjection(frameView)) return;
     this._forwardOcclusion ??= new Render3DForwardOcclusion();
     this._useForwardOcclusion = this._forwardOcclusion.prepare(
-      this.frameItems.opaqueItems, this.frameItems.transparentItems, view, viewProjection, registry, eyePosition,
+      this.frameItems.opaqueItems, this.frameItems.transparentItems, frameView, viewProjection, registry, eyePosition,
     );
+  }
+
+  get forwardScissors() {
+    return this._useForwardOcclusion ? this._forwardOcclusion!.scissors : undefined;
   }
 
   get forwardOpaqueItems() {

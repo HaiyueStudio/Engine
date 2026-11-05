@@ -1,5 +1,6 @@
 import { mat4 } from 'wgpu-matrix';
 import type { RenderViewSnapshot } from '../core/RenderView';
+import type { ScissorRect } from '../core/ViewportRect';
 import { BasicMaterial } from '../material/BasicMaterial';
 import { BlinnPhongMaterial } from '../material/BlinnPhongMaterial';
 import { DepthMaterial } from '../material/DepthMaterial';
@@ -31,6 +32,7 @@ const MIN_ITEMS = 512;
 const RASTER_GUARD = 1 / 16;
 const DEPTH_GUARD = 4e-6;
 const FLOAT_ERROR = 2 ** -20;
+const MIN_SCISSOR_PIXELS_SAVED = 128;
 
 interface Edge {
   x: number;
@@ -43,15 +45,27 @@ interface Edge {
 interface Triangle {
   item: number;
   occluder: boolean;
+  allowScissor: boolean;
   nearest: number;
   farthest: number;
   left: number;
   right: number;
   top: number;
   bottom: number;
+  visibleLeft: number;
+  visibleRight: number;
+  visibleTop: number;
+  visibleBottom: number;
+  estimatedPixelsSaved: number;
   a: Edge;
   b: Edge;
   c: Edge;
+}
+
+export interface ForwardOcclusionScissors {
+  readonly rectangles: ReadonlyMap<Render3DRenderItem, ScissorRect>;
+  readonly width: number;
+  readonly height: number;
 }
 
 function edge(): Edge {
@@ -60,7 +74,8 @@ function edge(): Edge {
 
 function triangle(): Triangle {
   return {
-    item: 0, occluder: false, nearest: 0, farthest: 0, left: 0, right: 0, top: 0, bottom: 0,
+    item: 0, occluder: false, allowScissor: false, nearest: 0, farthest: 0, left: 0, right: 0, top: 0, bottom: 0,
+    visibleLeft: 0, visibleRight: 0, visibleTop: 0, visibleBottom: 0, estimatedPixelsSaved: 0,
     a: edge(), b: edge(), c: edge(),
   };
 }
@@ -80,9 +95,13 @@ export class Render3DForwardOcclusion {
   private readonly _inverseWorld = new Float32Array(16);
   private readonly _opaqueItems: Render3DRenderItem[] = [];
   private readonly _transparentItems: Render3DRenderItem[] = [];
+  private readonly _scissorCandidates: Triangle[] = [];
+  private readonly _rectangles = new Map<Render3DRenderItem, ScissorRect>();
+  private readonly _scissors = { rectangles: this._rectangles, width: 0, height: 0 };
 
   get opaqueItems(): readonly Render3DRenderItem[] { return this._opaqueItems; }
   get transparentItems(): readonly Render3DRenderItem[] { return this._transparentItems; }
+  get scissors(): ForwardOcclusionScissors | undefined { return this._rectangles.size ? this._scissors : undefined; }
 
   prepare(
     opaque: readonly Render3DRenderItem[],
@@ -144,20 +163,52 @@ export class Render3DForwardOcclusion {
     // An item is removable only if every one of its triangles is covered.
     for (const t of this._triangles) {
       if (this._rasterize(t, columns)) this._remaining[t.item] = this._remaining[t.item]! - 1;
+      else if (t.allowScissor) this._addScissorCandidate(t, width, height);
     }
     this._triangles.length = 0;
+    this._selectScissors(opaque, width, height);
     for (let i = 0; i < opaque.length; i++) {
       if (this._remaining[i] !== 1) this._opaqueItems.push(opaque[i]!);
     }
     for (let i = 0; i < transparent.length; i++) {
       if (this._remaining[opaque.length + i] !== 1) this._transparentItems.push(transparent[i]!);
     }
-    return this._opaqueItems.length + this._transparentItems.length < count;
+    return this._rectangles.size > 0 || this._opaqueItems.length + this._transparentItems.length < count;
   }
 
   clear(): void {
     this._opaqueItems.length = 0;
     this._transparentItems.length = 0;
+    this._rectangles.clear();
+  }
+
+  private _addScissorCandidate(t: Triangle, width: number, height: number): void {
+    t.visibleRight = Math.min(width, t.visibleRight);
+    t.visibleBottom = Math.min(height, t.visibleBottom);
+    const visibleArea = (t.visibleRight - t.visibleLeft) * (t.visibleBottom - t.visibleTop);
+    const fullArea = (t.right - t.left + 1) * (t.bottom - t.top + 1) * TILE_SIZE * TILE_SIZE;
+    t.estimatedPixelsSaved = fullArea - visibleArea;
+    if (visibleArea > 0 && visibleArea <= fullArea / 2 && t.estimatedPixelsSaved >= MIN_SCISSOR_PIXELS_SAVED) {
+      this._scissorCandidates.push(t);
+    }
+  }
+
+  private _selectScissors(opaque: readonly Render3DRenderItem[], width: number, height: number): void {
+    const candidates = this._scissorCandidates;
+    candidates.sort((a, b) => b.estimatedPixelsSaved - a.estimatedPixelsSaved);
+    // Splitting an instanced run can add two draws. Keep that overhead bounded,
+    // with a smaller cap for views with fewer objects.
+    const limit = Math.min(candidates.length, opaque.length < 2048 ? 64 : 192);
+    this._scissors.width = width;
+    this._scissors.height = height;
+    for (let i = 0; i < limit; i++) {
+      const t = candidates[i]!;
+      this._rectangles.set(opaque[t.item]!, {
+        x: t.visibleLeft, y: t.visibleTop,
+        width: t.visibleRight - t.visibleLeft, height: t.visibleBottom - t.visibleTop,
+      });
+    }
+    candidates.length = 0;
   }
 
   private _append(
@@ -216,6 +267,12 @@ export class Render3DForwardOcclusion {
       const front = frontFace === 'ccw' ? area < 0 : area > 0;
       t.item = item;
       t.occluder = opaque && (cullMode === 'none' || front === (cullMode === 'back'));
+      t.allowScissor = t.occluder && triangleCount === 1
+        && (material instanceof PbrMaterial || material instanceof BlinnPhongMaterial);
+      t.visibleLeft = width;
+      t.visibleTop = height;
+      t.visibleRight = 0;
+      t.visibleBottom = 0;
       t.nearest = nearest;
       t.farthest = farthest;
       t.left = Math.max(0, Math.floor((Math.min(ax, bx, cx) - guard) / TILE_SIZE));
@@ -278,6 +335,7 @@ export class Render3DForwardOcclusion {
         if (aValue > a.guard && bValue > b.guard && cValue > c.guard) {
           covered = false;
           if (!occluder) return false;
+          if (t.allowScissor) includeVisible(t, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE);
           depth[index] = Math.min(depth[index]!, farthest);
           continue;
         }
@@ -296,6 +354,7 @@ export class Render3DForwardOcclusion {
           if (as < -a.sampleGuard || bs < -b.sampleGuard || cs < -c.sampleGuard) continue;
           covered = false;
           if (!occluder) return false;
+          if (t.allowScissor) includeVisible(t, x * TILE_SIZE + (sample & 1), y * TILE_SIZE + (sample >> 1), 1);
           if (as > a.sampleGuard && bs > b.sampleGuard && cs > c.sampleGuard) {
             samples[at] = Math.min(samples[at]!, farthest);
           }
@@ -307,6 +366,13 @@ export class Render3DForwardOcclusion {
     }
     return covered;
   }
+}
+
+function includeVisible(t: Triangle, x: number, y: number, size: number): void {
+  t.visibleLeft = Math.min(t.visibleLeft, x);
+  t.visibleTop = Math.min(t.visibleTop, y);
+  t.visibleRight = Math.max(t.visibleRight, x + size);
+  t.visibleBottom = Math.max(t.visibleBottom, y + size);
 }
 
 function setEdge(edge: Edge, ax: number, ay: number, bx: number, by: number, winding: number, sampleGuard: number): void {
