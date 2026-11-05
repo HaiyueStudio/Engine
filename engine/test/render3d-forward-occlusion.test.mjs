@@ -65,3 +65,14 @@ test('forward occlusion cannot use back faces, clipped draws or unknown renderer
   assert.equal(culling.prepare([hidden, ...Array(1024).fill(occluder)], [], view, identity, registry), false);
   assert.deepEqual(culling.opaqueItems, []);
 });
+
+test('separate occluders can cover different samples of the same tile', () => {
+  const { culling, registry } = create();
+  const seam = 65 / 64 - 1;
+  const left = draw([-0.8, -0.8, 0, seam, -0.8, 0, seam, 0.8, 0], 0.2);
+  const right = draw([seam, -0.8, 0, 0.8, -0.8, 0, seam, 0.8, 0], 0.3);
+  const behind = draw(centerTriangle, 0.6);
+  const occluders = [right, ...Array(512).fill(left)];
+  assert.equal(culling.prepare([behind, ...occluders], [], view, identity, registry), true);
+  assert.deepEqual(culling.opaqueItems, occluders);
+});

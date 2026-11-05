@@ -25,7 +25,7 @@ const MAX_VIEW_PIXELS = 4 * 1024 * 1024;
 const MAX_TRIANGLES_PER_ITEM = 8;
 const MAX_TRIANGLES = 32768;
 const MAX_TILE_VISITS = 8 * 1024 * 1024;
-const MIN_ITEMS = 1024;
+const MIN_ITEMS = 512;
 // Allow for raster subpixel snapping and depth interpolation/storage rounding.
 const RASTER_GUARD = 1 / 16;
 const DEPTH_GUARD = 4e-6;
@@ -36,6 +36,7 @@ interface Edge {
   y: number;
   constant: number;
   guard: number;
+  sampleGuard: number;
 }
 
 interface Triangle {
@@ -53,7 +54,7 @@ interface Triangle {
 }
 
 function edge(): Edge {
-  return { x: 0, y: 0, constant: 0, guard: 0 };
+  return { x: 0, y: 0, constant: 0, guard: 0, sampleGuard: 0 };
 }
 
 function triangle(): Triangle {
@@ -70,6 +71,7 @@ function triangle(): Triangle {
  */
 export class Render3DForwardOcclusion {
   private _depth = new Float32Array(0);
+  private _sampleDepth = new Float32Array(0);
   private _remaining = new Uint8Array(0);
   private readonly _pool: Triangle[] = [];
   private readonly _triangles: Triangle[] = [];
@@ -128,7 +130,9 @@ export class Render3DForwardOcclusion {
 
     const tileCount = columns * rows;
     if (this._depth.length < tileCount) this._depth = new Float32Array(tileCount);
+    if (this._sampleDepth.length < tileCount * 4) this._sampleDepth = new Float32Array(tileCount * 4);
     this._depth.fill(1, 0, tileCount);
+    this._sampleDepth.fill(1, 0, tileCount * 4);
     this._triangles.sort((a, b) => Number(b.occluder) - Number(a.occluder) || a.nearest - b.nearest);
     // An item is removable only if every one of its triangles is covered.
     for (const t of this._triangles) {
@@ -238,11 +242,34 @@ export class Render3DForwardOcclusion {
         const bValue = b.x * centerX + bRow;
         const cValue = c.x * centerX + cRow;
         if (aValue < -a.guard || bValue < -b.guard || cValue < -c.guard) continue;
-        covered = false;
-        if (!occluder) return false;
-        if (farthest < depth[index]! && aValue > a.guard && bValue > b.guard && cValue > c.guard) {
-          depth[index] = farthest;
+        if (aValue > a.guard && bValue > b.guard && cValue > c.guard) {
+          covered = false;
+          if (!occluder) return false;
+          depth[index] = Math.min(depth[index]!, farthest);
+          continue;
         }
+
+        // A coarse tile can have samples covered by different nearer triangles.
+        // Inspect its four pixel centers only when the coarse proof fails.
+        const samples = this._sampleDepth;
+        const first = index * 4;
+        for (let sample = 0; sample < 4; sample++) {
+          const at = first + sample;
+          if (samples[at]! < threshold) continue;
+          const dx = (sample & 1) - 0.5, dy = (sample >> 1) - 0.5;
+          const as = aValue + a.x * dx + a.y * dy;
+          const bs = bValue + b.x * dx + b.y * dy;
+          const cs = cValue + c.x * dx + c.y * dy;
+          if (as < -a.sampleGuard || bs < -b.sampleGuard || cs < -c.sampleGuard) continue;
+          covered = false;
+          if (!occluder) return false;
+          if (as > a.sampleGuard && bs > b.sampleGuard && cs > c.sampleGuard) {
+            samples[at] = Math.min(samples[at]!, farthest);
+          }
+        }
+        if (occluder) depth[index] = Math.min(depth[index]!, Math.max(
+          samples[first]!, samples[first + 1]!, samples[first + 2]!, samples[first + 3]!,
+        ));
       }
     }
     return covered;
@@ -254,8 +281,8 @@ function setEdge(edge: Edge, ax: number, ay: number, bx: number, by: number, win
   edge.y = (bx - ax) * winding;
   edge.constant = -edge.x * ax - edge.y * ay;
   // Guard the pixel centers in this tile and both perturbed endpoints.
-  edge.guard = (Math.abs(edge.x) + Math.abs(edge.y)) * (TILE_SIZE / 2 - 0.5)
-    + guard * (4 * longest + 4 * guard);
+  edge.sampleGuard = guard * (4 * longest + 4 * guard);
+  edge.guard = (Math.abs(edge.x) + Math.abs(edge.y)) * (TILE_SIZE / 2 - 0.5) + edge.sampleGuard;
 }
 
 function projectVertex(
