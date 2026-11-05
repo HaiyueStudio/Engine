@@ -701,6 +701,7 @@ export class Render3DSystem extends System {
         worldFrameState,
         sceneEnvironment,
         viewIndex,
+        graphPass.passClass === 'view-local',
         plannedViews.get(frameView.key),
       );
       viewIndex++;
@@ -749,10 +750,11 @@ export class Render3DSystem extends System {
     worldFrameState: WorldFrameState,
     sceneEnvironment: SceneRenderEnvironment,
     uniformSlot: number,
+    mainView: boolean,
     plannedView?: Render3DPlannedView,
   ): void {
     this._framePlan.clear();
-    this._viewPreparation.selectView(uniformSlot, this._viewCollectionOptions);
+    this._viewPreparation.selectView(uniformSlot, this._viewCollectionOptions, mainView);
     this._reverseZ = frameView.reverseZ;
     this._msaaSamples = frameView.sampleCount;
     const basicRenderer = this._renderers.requireBasic();
@@ -865,7 +867,7 @@ export class Render3DSystem extends System {
     this.lastOpaqueSortCount = stats.itemCount;
     const { context, frameView } = this._frameExecution;
     const adapter = context.device.adapterInfo ?? this.engine.adapter?.info;
-    if (adapter?.architecture === 'swiftshader'
+    if (this._viewPreparation.mainView && adapter?.architecture === 'swiftshader'
         && this.renderSettings.frustumCulling && !this.renderSettings.gpuDrivenIndirectDraws
         && !this.renderSettings.gpuCullingReadback && !frameView.reverseZ && frameView.sampleCount === 1
         && !frameView.viewport && !frameView.scissor && !getRegionSceneProjection(frameView)

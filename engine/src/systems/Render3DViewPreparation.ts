@@ -32,6 +32,7 @@ export class Render3DViewPreparation {
   transparentOrchestrator: Render3DTransparentOrchestrator;
   private _forwardOcclusion: Render3DForwardOcclusion | null = null;
   private _useForwardOcclusion = false;
+  private _mainView = false;
 
   constructor(private readonly _engine: IEngine) {
     this.transparentViews = new Render3DTransparentViewResources(_engine);
@@ -45,7 +46,10 @@ export class Render3DViewPreparation {
     this.transparentViews.beginFrame(viewCount, context);
   }
 
-  selectView(viewIndex: number, options: Render3DViewCollectionOptions): void {
+  get mainView(): boolean { return this._mainView; }
+
+  selectView(viewIndex: number, options: Render3DViewCollectionOptions, mainView: boolean): void {
+    this._mainView = mainView;
     this._useForwardOcclusion = false;
     this._forwardOcclusion?.clear();
     options.transparentBatch = this.transparentViews.select(viewIndex);
@@ -149,6 +153,7 @@ export class Render3DViewPreparation {
   }
 
   endFrame(): void {
+    this._mainView = false;
     this._useForwardOcclusion = false;
     this._forwardOcclusion?.clear();
     this.frameItems.clearReferences();
