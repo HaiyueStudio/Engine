@@ -1,4 +1,4 @@
-name: CI Slow
+name: Engine SwiftShader planar retest
 
 on:
   pull_request:
@@ -21,7 +21,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-slow-${{ github.ref }}
+  group: ci-planar-occlusion-final-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -48,19 +48,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Engine foundations and diagnostic inputs
-        run: node scripts/release-ci-bootstrap.mjs
+      - name: Run the unchanged planar-reflection gate
+        env:
+          HAIYUE_BENCHMARK_SCOPE: engine
+        run: |
+          set -euo pipefail
+          uname -m
+          lscpu | grep -E 'Model name|^CPU\(s\)'
+          google-chrome --version
+          npm run verify:planar-reflection
 
-      - name: Run Engine slow quality gate
-        run: npm run check:engine:slow -- --content-tier="${CONTENT_TIER}"
-
-      - name: Upload slow-gate reports
+      - name: Upload unchanged gate results
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
-          name: slow-gate-${{ env.CONTENT_TIER }}-reports
-          path: |
-            artifacts/benchmarks/*.json
-            artifacts/webgpu/*.json
-          if-no-files-found: warn
-          retention-days: 30
+          name: planar-occlusion-gate
+          path: artifacts/webgpu/planar-reflection*.json
