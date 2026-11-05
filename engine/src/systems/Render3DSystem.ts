@@ -701,8 +701,8 @@ export class Render3DSystem extends System {
         worldFrameState,
         sceneEnvironment,
         viewIndex,
-        graphPass.passClass === 'view-local',
         plannedViews.get(frameView.key),
+        graphPass.passClass === 'view-local',
       );
       viewIndex++;
     }
@@ -750,8 +750,8 @@ export class Render3DSystem extends System {
     worldFrameState: WorldFrameState,
     sceneEnvironment: SceneRenderEnvironment,
     uniformSlot: number,
+    plannedView: Render3DPlannedView | undefined,
     mainView: boolean,
-    plannedView?: Render3DPlannedView,
   ): void {
     this._framePlan.clear();
     this._viewPreparation.selectView(uniformSlot, this._viewCollectionOptions, mainView);
