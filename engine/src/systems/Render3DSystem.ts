@@ -872,7 +872,9 @@ export class Render3DSystem extends System {
         && !this.renderSettings.gpuCullingReadback && !frameView.reverseZ && frameView.sampleCount === 1
         && !frameView.viewport && !frameView.scissor && !getRegionSceneProjection(frameView)
         && !getDeferredLightingBackend(this)) {
-      this._viewPreparation.prepareForwardOcclusion(frameView, this._viewProjMatrix, this.materialRenderers);
+      this._viewPreparation.prepareForwardOcclusion(
+        frameView, this._viewProjMatrix, this.materialRenderers, this._materialRenderContext.eyePosition,
+      );
     }
   };
 

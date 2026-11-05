@@ -55,10 +55,12 @@ export class Render3DViewPreparation {
     options.transparentBatch = this.transparentViews.select(viewIndex);
   }
 
-  prepareForwardOcclusion(view: RenderViewSnapshot, viewProjection: Float32Array, registry: MaterialRendererRegistry): void {
+  prepareForwardOcclusion(
+    view: RenderViewSnapshot, viewProjection: Float32Array, registry: MaterialRendererRegistry, eyePosition: ArrayLike<number>,
+  ): void {
     this._forwardOcclusion ??= new Render3DForwardOcclusion();
     this._useForwardOcclusion = this._forwardOcclusion.prepare(
-      this.frameItems.opaqueItems, this.frameItems.transparentItems, view, viewProjection, registry,
+      this.frameItems.opaqueItems, this.frameItems.transparentItems, view, viewProjection, registry, eyePosition,
     );
   }
 

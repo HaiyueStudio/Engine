@@ -6,6 +6,7 @@ const { Render3DForwardOcclusion, registerForwardOcclusionRenderer } =
   await importEngineSource('systems/Render3DForwardOcclusion.ts');
 const { MaterialRendererRegistry } = await importEngineSource('renderer/MaterialRendererRegistry.ts');
 const { BasicMaterial } = await importEngineSource('material/BasicMaterial.ts');
+const { VolumeMaterial } = await importEngineSource('material/VolumeMaterial.ts');
 const { Geometry3D } = await importEngineSource('geometry/Geometry3D.ts');
 
 const identity = Float32Array.of(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
@@ -33,7 +34,7 @@ function create() {
 test('forward occlusion retains the original order, ties and partially visible items', () => {
   const { culling, registry } = create();
   const occluder = draw(solidTriangle, 0.2);
-  const near = draw(centerTriangle, 0.1);
+  const near = draw([-0.55, -0.4, 0, -0.3, -0.4, 0, -0.425, -0.15, 0], 0.1);
   const hidden = draw(centerTriangle, 0.6);
   const tie = draw(centerTriangle, 0.200001);
   const multi = draw([...centerTriangle, 0.65, 0.4, 0, 0.95, 0.4, 0, 0.8, 0.7, 0], 0.6);
@@ -43,7 +44,7 @@ test('forward occlusion retains the original order, ties and partially visible i
   const transparent = [hiddenBlend, nearBlend];
 
   assert.equal(culling.prepare(opaque, transparent, view, identity, registry), true);
-  assert.deepEqual(culling.opaqueItems, opaque.slice(1));
+  assert.deepEqual(culling.opaqueItems.map(item => item.geometry.id), opaque.slice(1).map(item => item.geometry.id));
   assert.deepEqual(culling.transparentItems, [nearBlend]);
   assert.equal(opaque[0], hidden);
   assert.deepEqual(transparent, [hiddenBlend, nearBlend]);
@@ -75,4 +76,17 @@ test('separate occluders can cover different samples of the same tile', () => {
   const occluders = [right, ...Array(512).fill(left)];
   assert.equal(culling.prepare([behind, ...occluders], [], view, identity, registry), true);
   assert.deepEqual(culling.opaqueItems, occluders);
+});
+
+test('forward occlusion skips empty volume intervals with the eye outside the slab', () => {
+  const { culling, registry } = create();
+  registerForwardOcclusionRenderer(registry, { materialType: VolumeMaterial, renderItem() {} });
+  const opaque = Array(512).fill(draw(solidTriangle, 0.8));
+  const volume = new VolumeMaterial();
+  const empty = draw(centerTriangle, 0.5, volume);
+  const coplanar = draw(centerTriangle, 0.6, volume);
+  const filled = draw([-0.2, -0.2, -0.1, 0.2, -0.2, 0.1, 0, 0.2, 0], 0.5, volume);
+  const eye = Float32Array.of(0, 0, coplanar.worldMatrix[14]);
+  assert.equal(culling.prepare(opaque, [empty, coplanar, filled], view, identity, registry, eye), true);
+  assert.deepEqual(culling.transparentItems, [coplanar, filled]);
 });

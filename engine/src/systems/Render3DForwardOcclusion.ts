@@ -1,3 +1,4 @@
+import { mat4 } from 'wgpu-matrix';
 import type { RenderViewSnapshot } from '../core/RenderView';
 import { BasicMaterial } from '../material/BasicMaterial';
 import { BlinnPhongMaterial } from '../material/BlinnPhongMaterial';
@@ -76,6 +77,7 @@ export class Render3DForwardOcclusion {
   private readonly _pool: Triangle[] = [];
   private readonly _triangles: Triangle[] = [];
   private readonly _projected = new Float64Array(16);
+  private readonly _inverseWorld = new Float32Array(16);
   private readonly _opaqueItems: Render3DRenderItem[] = [];
   private readonly _transparentItems: Render3DRenderItem[] = [];
 
@@ -88,6 +90,7 @@ export class Render3DForwardOcclusion {
     view: RenderViewSnapshot,
     viewProjection: Float32Array,
     registry: MaterialRendererRegistry,
+    eyePosition?: ArrayLike<number>,
   ): boolean {
     this.clear();
     const { width, height } = view;
@@ -113,9 +116,13 @@ export class Render3DForwardOcclusion {
     for (let i = 0; i < count; i++) {
       const isOpaque = i < opaque.length;
       const item = isOpaque ? opaque[i]! : transparent[i - opaque.length]!;
-      const added = this._append(item, i, isOpaque, viewProjection, width, height, columns, rows);
+      const added = this._append(item, i, isOpaque, viewProjection, width, height, columns, rows, eyePosition);
       if (added === 0) continue;
       // Zero denotes an unsupported item. One denotes a proven hidden item.
+      if (added < 0) {
+        this._remaining[i] = 1;
+        continue;
+      }
       this._remaining[i] = added + 1;
       for (let j = this._triangles.length - added; j < this._triangles.length; j++) {
         const projected = this._triangles[j]!;
@@ -157,6 +164,7 @@ export class Render3DForwardOcclusion {
     { geometry, material, clippingPlanes, worldMatrix }: Render3DRenderItem,
     item: number, opaque: boolean, viewProjection: Float32Array,
     width: number, height: number, columns: number, rows: number,
+    eyePosition: ArrayLike<number> | undefined,
   ): number {
     if (!geometry || !material || !worldMatrix || clippingPlanes
         || geometry.morphTargets.length || geometry.skinning || geometry.instanceCount !== 1
@@ -177,6 +185,7 @@ export class Render3DForwardOcclusion {
       if (material.doubleSided) cullMode = 'none';
     } else if (material instanceof VolumeMaterial) {
       if (opaque) return 0;
+      if (eyePosition && this._hasEmptyVolume(geometry, worldMatrix, eyePosition)) return -1;
       cullMode = 'none';
     } else if (!(material instanceof BlinnPhongMaterial)
         && !(opaque && (material instanceof DepthMaterial || material instanceof NormalMaterial))) return 0;
@@ -196,7 +205,10 @@ export class Render3DForwardOcclusion {
       const farthest = Math.max(projected[2]!, projected[6]!, projected[10]!);
       const guard = Math.max(projected[3]!, projected[7]!, projected[11]!) + RASTER_GUARD;
       const area = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
-      const longest = Math.max(Math.hypot(bx - ax, by - ay), Math.hypot(cx - bx, cy - by), Math.hypot(ax - cx, ay - cy));
+      const ab = Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
+      const bc = Math.sqrt((cx - bx) ** 2 + (cy - by) ** 2);
+      const ca = Math.sqrt((ax - cx) ** 2 + (ay - cy) ** 2);
+      const longest = Math.max(ab, bc, ca);
       if (!(nearest > DEPTH_GUARD && farthest < 1 - DEPTH_GUARD && guard < 0.5 && Math.abs(area) > 8 * guard * longest)) {
         this._triangles.length = first;
         return 0;
@@ -215,12 +227,33 @@ export class Render3DForwardOcclusion {
         return 0;
       }
       const winding = Math.sign(area);
-      setEdge(t.a, ax, ay, bx, by, winding, guard, longest);
-      setEdge(t.b, bx, by, cx, cy, winding, guard, longest);
-      setEdge(t.c, cx, cy, ax, ay, winding, guard, longest);
+      setEdge(t.a, ax, ay, bx, by, winding, guard * ab);
+      setEdge(t.b, bx, by, cx, cy, winding, guard * bc);
+      setEdge(t.c, cx, cy, ax, ay, winding, guard * ca);
       this._triangles.push(t);
     }
     return triangleCount;
+  }
+
+  private _hasEmptyVolume(
+    geometry: NonNullable<Render3DRenderItem['geometry']>, world: Float32Array, eye: ArrayLike<number>,
+  ): boolean {
+    const { min, max } = geometry.getBoundingBox();
+    if (min[0] !== max[0] && min[1] !== max[1] && min[2] !== max[2]) return false;
+    const inverse = mat4.inverse(world, this._inverseWorld);
+    for (let axis = 0; axis < 3; axis++) {
+      if (min[axis] !== max[axis]) continue;
+      const x = inverse[axis]! * eye[0]!;
+      const y = inverse[axis + 4]! * eye[1]!;
+      const z = inverse[axis + 8]! * eye[2]!;
+      const offset = inverse[axis + 12]!;
+      const origin = x + y + z + offset;
+      const error = FLOAT_ERROR * (Math.abs(x) + Math.abs(y) + Math.abs(z) + Math.abs(offset));
+      // A ray from outside a zero-width slab has no positive-length interval.
+      // Keep the fragment path when the eye could lie in the slab.
+      if (Number.isFinite(origin) && Math.abs(origin - min[axis]!) > error + 1e-5) return true;
+    }
+    return false;
   }
 
   private _rasterize(t: Triangle, columns: number): boolean {
@@ -276,13 +309,14 @@ export class Render3DForwardOcclusion {
   }
 }
 
-function setEdge(edge: Edge, ax: number, ay: number, bx: number, by: number, winding: number, guard: number, longest: number): void {
+function setEdge(edge: Edge, ax: number, ay: number, bx: number, by: number, winding: number, sampleGuard: number): void {
   edge.x = (ay - by) * winding;
   edge.y = (bx - ax) * winding;
   edge.constant = -edge.x * ax - edge.y * ay;
-  // Guard the pixel centers in this tile and both perturbed endpoints.
-  edge.sampleGuard = guard * (4 * longest + 4 * guard);
-  edge.guard = (Math.abs(edge.x) + Math.abs(edge.y)) * (TILE_SIZE / 2 - 0.5) + edge.sampleGuard;
+  // Moving each vertex by at most the projection guard bounds the support of
+  // the raster triangle in every direction by that same distance.
+  edge.sampleGuard = sampleGuard;
+  edge.guard = (Math.abs(edge.x) + Math.abs(edge.y)) * (TILE_SIZE / 2 - 0.5) + sampleGuard;
 }
 
 function projectVertex(
