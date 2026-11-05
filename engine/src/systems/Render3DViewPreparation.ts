@@ -8,7 +8,10 @@ import type { MaterialRendererRegistration } from '../renderer/MaterialRendererR
 import type { RenderProfileSettings } from '../core/RenderProfile';
 import type { Render3DViewCollectionOptions, Render3DSceneCollector } from './Render3DSceneCollector';
 import { Render3DFrameItems } from './Render3DFrameItems';
+import { Render3DForwardOcclusion } from './Render3DForwardOcclusion';
 import type { WorldFrameState } from './Render3DFrameState';
+import type { RenderViewSnapshot } from '../core/RenderView';
+import type { MaterialRendererRegistry } from '../renderer/MaterialRendererRegistry';
 import { Render3DGpuDrivenBatchBuilder } from './Render3DGpuDrivenBatchBuilder';
 import { Render3DOpaqueSorter, type Render3DOpaqueSorterStats } from './Render3DOpaqueSorter';
 import { Render3DTransparentOrchestrator } from './Render3DTransparentOrchestrator';
@@ -27,6 +30,8 @@ export class Render3DViewPreparation {
   readonly transparentViews: Render3DTransparentViewResources;
   gpuDrivenBatches: Render3DGpuDrivenBatchBuilder;
   transparentOrchestrator: Render3DTransparentOrchestrator;
+  private _forwardOcclusion: Render3DForwardOcclusion | null = null;
+  private _useForwardOcclusion = false;
 
   constructor(private readonly _engine: IEngine) {
     this.transparentViews = new Render3DTransparentViewResources(_engine);
@@ -41,7 +46,24 @@ export class Render3DViewPreparation {
   }
 
   selectView(viewIndex: number, options: Render3DViewCollectionOptions): void {
+    this._useForwardOcclusion = false;
+    this._forwardOcclusion?.clear();
     options.transparentBatch = this.transparentViews.select(viewIndex);
+  }
+
+  prepareForwardOcclusion(view: RenderViewSnapshot, viewProjection: Float32Array, registry: MaterialRendererRegistry): void {
+    this._forwardOcclusion ??= new Render3DForwardOcclusion();
+    this._useForwardOcclusion = this._forwardOcclusion.prepare(
+      this.frameItems.opaqueItems, this.frameItems.transparentItems, view, viewProjection, registry,
+    );
+  }
+
+  get forwardOpaqueItems() {
+    return this._useForwardOcclusion ? this._forwardOcclusion!.opaqueItems : this.frameItems.opaqueItems;
+  }
+
+  get forwardTransparentItems() {
+    return this._useForwardOcclusion ? this._forwardOcclusion!.transparentItems : this.frameItems.transparentItems;
   }
 
   collectView(
@@ -82,8 +104,8 @@ export class Render3DViewPreparation {
   ) {
     return this.gpuDrivenBatches.prepare(
       context,
-      this.frameItems.opaqueItems,
-      this.frameItems.transparentItems,
+      this.forwardOpaqueItems,
+      this.forwardTransparentItems,
       frustum,
       settings.gpuDrivenBatches,
       settings.gpuDrivenDrawCommands,
@@ -127,6 +149,8 @@ export class Render3DViewPreparation {
   }
 
   endFrame(): void {
+    this._useForwardOcclusion = false;
+    this._forwardOcclusion?.clear();
     this.frameItems.clearReferences();
     this.gpuDrivenBatches.clearFrameData();
     this.opaqueSorter.clearReferences();

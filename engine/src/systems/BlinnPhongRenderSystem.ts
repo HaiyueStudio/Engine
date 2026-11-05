@@ -4,6 +4,7 @@ import type { World } from '../ecs/World';
 import type { IEngine } from '../core/IEngine';
 import { BlinnPhongMaterial } from '../material/BlinnPhongMaterial';
 import { BlinnPhongRenderer } from '../renderer/BlinnPhongRenderer';
+import { registerForwardOcclusionRenderer } from './Render3DForwardOcclusion';
 import { Render3DSystem } from './Render3DSystem';
 import type { InternalMaterialRenderContext, MaterialRenderContext } from '../renderer/MaterialRendererRegistry';
 import type { PipelineWarmupPlan } from '../renderer/PipelineWarmup';
@@ -55,7 +56,7 @@ export class BlinnPhongRenderSystem extends System {
     if (this._render3DSystem === render3DSystem) return this;
     this._render3DSystem?.materialRenderers.unregister(BlinnPhongMaterial);
     this._render3DSystem = render3DSystem;
-    render3DSystem.registerMaterialRenderer<BlinnPhongMaterial>({
+    registerForwardOcclusionRenderer<BlinnPhongMaterial>(render3DSystem.materialRenderers, {
       materialType: BlinnPhongMaterial,
       isTransparent: material => material.blending !== 'none',
       transparentDepthSort: material => material.blending !== 'none',

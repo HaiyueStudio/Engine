@@ -863,6 +863,15 @@ export class Render3DSystem extends System {
     const stats = this._viewPreparation.sort(this.renderSettings, this.transparentSort);
     this.lastOpaqueSortMode = stats.mode;
     this.lastOpaqueSortCount = stats.itemCount;
+    const { context, frameView } = this._frameExecution;
+    const adapter = context.device.adapterInfo ?? this.engine.adapter?.info;
+    if (adapter?.architecture === 'swiftshader'
+        && this.renderSettings.frustumCulling && !this.renderSettings.gpuDrivenIndirectDraws
+        && !this.renderSettings.gpuCullingReadback && !frameView.reverseZ && frameView.sampleCount === 1
+        && !frameView.viewport && !frameView.scissor && !getRegionSceneProjection(frameView)
+        && !getDeferredLightingBackend(this)) {
+      this._viewPreparation.prepareForwardOcclusion(frameView, this._viewProjMatrix, this.materialRenderers);
+    }
   };
 
   private readonly _prepareGpuDrivenBatchesPass = () => this._measureStage('batch-build', this._prepareGpuDrivenBatchesStage);
@@ -925,8 +934,8 @@ export class Render3DSystem extends System {
     const { world, context } = state;
     let { postSceneRequirements } = state;
     const { postProcessPasses } = state;
-    const opaqueItems = this._opaqueItems;
-    const transparentItems = this._transparentItems;
+    const opaqueItems = this._viewPreparation.forwardOpaqueItems;
+    const transparentItems = this._viewPreparation.forwardTransparentItems;
     const helperItems = this._helperItems;
     const viewProj = this._viewProjMatrix;
     const viewMatrix = this._viewMatrix;
