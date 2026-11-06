@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "goal": "g11-integration-candidate",
   "goalStatus": "active",
-  "generatedAt": "2026-11-01T16:52:41.629Z",
-  "sourceRevision": "a4d1ceb1600457328f4b436e86e3e7ce98cf4f97",
-  "workingTree": "uncommitted integration; not a clean formal runner",
+  "generatedAt": "2026-11-04T17:00:13.480Z",
+  "sourceRevision": "b61b700aaea35a2cdfe228d2a09c441f477ad812",
+  "workingTree": "Qualification snapshot is clean and immutable; the integration worktree and acceptance index are maintained separately. Formal idle sampling has not started.",
   "releaseQualified": false,
   "publishingIncluded": false,
   "publicationPerformed": false,
@@ -32,12 +32,23 @@
       "sha256": "f4d6912443035836b9295cb38ad7deb8673953abfa475b8cb5e019aac2cec039"
     }
   ],
-  "currentCandidate": [],
+  "currentCandidate": [
+    {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json",
+      "bytes": 150663,
+      "sha256": "e7860cad3338a3e56bd331b3de6c3f170d14e8a136f9f6de82dfe0fb0f49c3d8"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json.contents.json",
+      "bytes": 909351,
+      "sha256": "c305a4905ce16b902a7aaf1ba3d30509b7dd1e95fea2f87ff8ce94e472f49209"
+    }
+  ],
   "inputs": [
     {
       "path": "package.json",
-      "bytes": 30588,
-      "sha256": "57b2e4c100d0f496bb6d86880642bb4bd9fc26b1329c408aacf179d2c25d0f55"
+      "bytes": 31117,
+      "sha256": "c477342859ccafdaea1806e7c8367d4f35a8f4a3ef0ae853b932574c2541fcc2"
     },
     {
       "path": "package-lock.json",
@@ -104,45 +115,77 @@
     {
       "id": "version-peer-and-external-lock",
       "required": true,
-      "status": "historical-before-gui-p0",
+      "status": "passed-clean-candidate",
       "evidence": [
         {
-          "path": "artifacts/engine-0.2.3/g11/version-integrity.json",
-          "bytes": 513,
-          "sha256": "fa3c39bf1f0f4f88368d612ee15ce44302df224b8cbca1b339239612645ea489"
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/clean-build.json",
+          "bytes": 6554,
+          "sha256": "95905d663d33da23928bdf5efb0c7c2eb7ed3e6c09a3bde4d283655b04f6972c"
         },
         {
-          "path": "artifacts/engine-0.2.3/g11/rehearsal-plan.json",
-          "bytes": 5192,
-          "sha256": "c256e7f68c3293f6291a5d5806011222821a007d37111e2af954eab08b317a0f"
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/public-packages.json",
+          "bytes": 169357,
+          "sha256": "c20ba8e4721a21926757cf83006518f509e726378ebd8e59642ff54f679553be"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/supply-chain.json",
+          "bytes": 37480,
+          "sha256": "702ec92ac713a29f4ba0eee5ce59bda1dadf91bb0c0ab47c1e15b4cc71dbb803"
         }
       ],
-      "conclusion": "Frozen mixed versions and extension peer floor aligned; unchanged animation 0.2.2 bytes and external lock entries verified. Plan only, no rehearsal execution. GUI P0 changes supersede current-source qualification; retain original evidence.",
-      "historicalStatus": "passed"
+      "conclusion": "Frozen versions, peers and original Engine lock are verified by the current package gate, locked installation and dependency audit. Native preserves all 761 lock entries, changing only the two admitted local package integrity fields.",
+      "historicalStatus": "passed",
+      "currentNonidleVerification": {
+        "status": "passed-working-tree-only",
+        "evidence": [
+          {
+            "path": "artifacts/engine-0.2.3/g11/nonidle-20261104/result.json",
+            "bytes": 10714,
+            "sha256": "e426a66d59a1b0af86db44a002cf8751a7c4d310e6895e973793f2f60a941d4e"
+          }
+        ],
+        "formalQualificationGranted": false
+      },
+      "priorEvidenceIndex": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
+        "bytes": 34199,
+        "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
+      }
     },
     {
       "id": "repository-checks",
       "required": true,
-      "status": "historical-before-gui-p0",
+      "status": "passed-current-ci-fast",
       "evidence": [
         {
-          "path": "artifacts/engine-0.2.3/g11/integration-validation.json",
-          "bytes": 4451,
-          "sha256": "1c4dff8780650dd792581ff505173400fde74dd482e40bb5700018d0f8e848c4"
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/ci/snapshot-1793811444975/ci-report.json",
+          "bytes": 6717,
+          "sha256": "eb883b85f5278b3ab599f320867298f38c042877792c3171423e789a32fc8684"
         },
         {
-          "path": "artifacts/engine-0.2.3/g11/ci-execution-1793522564308/execution.json",
-          "bytes": 15130,
-          "sha256": "698385c0dfd843b72402ee88959b501da7a431a37962cdd62e0e6ab9892a55b4"
-        },
-        {
-          "path": "artifacts/engine-0.2.3/g11/ci-execution-1793522564308/fast-job-124799414143.log",
-          "bytes": 1407867,
-          "sha256": "0abd9ce3a2dae09b5b1f3add8ebf906c8d8b6e66c2a8209b725d247517963a08"
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/clean-build.json",
+          "bytes": 6554,
+          "sha256": "95905d663d33da23928bdf5efb0c7c2eb7ed3e6c09a3bde4d283655b04f6972c"
         }
       ],
-      "conclusion": "Fresh exact-candidate CI bootstrap and complete fast gate pass after the SceneOutputPass repair: foundation builds, typechecks, tests, boundaries, API/docs and production shader checks. Engine has 1354 passing tests. Original Windows-only platform skips remain explicit in the Linux log. Complete content/slow gate and formal global qualification are separate pending requirements. GUI P0 changes supersede current-source qualification; retain original evidence.",
-      "historicalStatus": "passed-current-ci-fast"
+      "conclusion": "Current clean candidate CI fast result: success. Windows/Linux no-publication controller and full Ubuntu fast jobs are individually recorded; this does not grant formal performance or whole-release qualification.",
+      "historicalStatus": "passed-current-ci-fast",
+      "currentNonidleVerification": {
+        "status": "passed-working-tree-only",
+        "evidence": [
+          {
+            "path": "artifacts/engine-0.2.3/g11/nonidle-20261104/result.json",
+            "bytes": 10714,
+            "sha256": "e426a66d59a1b0af86db44a002cf8751a7c4d310e6895e973793f2f60a941d4e"
+          }
+        ],
+        "formalQualificationGranted": false
+      },
+      "priorEvidenceIndex": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
+        "bytes": 34199,
+        "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
+      }
     },
     {
       "id": "render-system-owner-lifetime",
@@ -234,26 +277,37 @@
     {
       "id": "deterministic-public-packages",
       "required": true,
-      "status": "historical-before-gui-p0",
+      "status": "passed-clean-package-check",
       "evidence": [
         {
-          "path": "artifacts/engine-0.2.3/g11/public-packages-output-fixed/public-packages.json",
-          "bytes": 169346,
-          "sha256": "53783732fc9fe16144a34c7abee43f17e4077e082f9c8da1e93e78e6c25aa924"
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/public-packages.json",
+          "bytes": 169357,
+          "sha256": "c20ba8e4721a21926757cf83006518f509e726378ebd8e59642ff54f679553be"
         },
         {
-          "path": "artifacts/engine-0.2.3/g11/qualification-preparation-1793518854890-34345e2c/checkout/artifacts/engine-0.2.3/g11/qualification-public-packages/public-packages.json",
-          "bytes": 169348,
-          "sha256": "3c7132a3c9c4ae432680f303952d39bfd055a096ecbed09c541596ffb0208fec"
-        },
-        {
-          "path": "artifacts/engine-0.2.3/g11/qualification-preparation-1793518854890-34345e2c/preparation.json",
-          "bytes": 1248731,
-          "sha256": "ad9935afd533076236fbd0efc915ffdc5f42351057ddd69f872ce0ab53d5078f"
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/clean-build.json",
+          "bytes": 6554,
+          "sha256": "95905d663d33da23928bdf5efb0c7c2eb7ed3e6c09a3bde4d283655b04f6972c"
         }
       ],
-      "conclusion": "Clean isolated revision rebuild passes the release-mode four-package gate and all 51 consumers; every tarball SHA-256 equals the current physical/Native candidate, including unchanged published animation 0.2.2. Whole-release qualification remains pending. GUI P0 changes supersede current-source qualification; retain original evidence.",
-      "historicalStatus": "passed-clean-package-check"
+      "conclusion": "All four release-mode deterministic packages and 51 installed consumers pass at the frozen clean revision. Four SHA-256 identities match GUI P2; animation-spec remains 0.2.2. No formal captures were reused.",
+      "historicalStatus": "passed-clean-package-check",
+      "currentNonidleVerification": {
+        "status": "passed-working-tree-only",
+        "evidence": [
+          {
+            "path": "artifacts/engine-0.2.3/g11/nonidle-20261104/result.json",
+            "bytes": 10714,
+            "sha256": "e426a66d59a1b0af86db44a002cf8751a7c4d310e6895e973793f2f60a941d4e"
+          }
+        ],
+        "formalQualificationGranted": false
+      },
+      "priorEvidenceIndex": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
+        "bytes": 34199,
+        "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
+      }
     },
     {
       "id": "focused-closure-and-ownership-review",
@@ -304,7 +358,7 @@
     {
       "id": "combined-msaa-and-pixels",
       "required": true,
-      "status": "historical-before-gui-p0",
+      "status": "passed-formal-7236b39",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/combined-current-msaa4/result.json",
@@ -315,29 +369,94 @@
           "path": "artifacts/engine-0.2.3/g11/qualification-preparation-1793518854890-34345e2c/checkout/artifacts/engine-0.2.3/g11/entry-msaa4-smoke/result.json",
           "bytes": 465802,
           "sha256": "1de70ff3e71575e6b2c234c6548bed313b1bd11355ea86509f9bb90cb5915fee"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-38d9f00/combined-msaa1-formal-report.json",
+          "bytes": 464069,
+          "sha256": "0e4d0a519d9a1320ca7a05f8b58130becdd27a28a55213869cae7fc016551d34"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-38d9f00/combined-msaa4-formal-failure.json",
+          "bytes": 432078,
+          "sha256": "344ea534ae5eb0f2b9a57d64d534b88fd7a91bd319a24861a322b942b4378513"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-38d9f00/combined-msaa4-independent-failure.json",
+          "bytes": 432089,
+          "sha256": "12545d605347b1ffaaf5f856bc4f59ba0715a5ee7e5cf8ed352926eba75f7e11"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-38d9f00/combined-msaa4-descriptor-trace.json",
+          "bytes": 478728,
+          "sha256": "602f481ecdcd0c948d50ea9d14fc3b477dcc04924c2260564189000daf09cc26"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/msaa-output-topology-proposal/msaa-output-topology.patch",
+          "bytes": 10103,
+          "sha256": "df75aa8e1d37a34a9e95fd644273bfea5fb702d07f4f03f76c33f749dd1f5427"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/msaa-output-topology-proposal/combined-summary.json",
+          "bytes": 1554,
+          "sha256": "c8fde5cb2d22b8ee3d624a3331727e0bf06f3d4df58788ea028c427e999b8182"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/msaa-output-topology-proposal/regional-pixels.json",
+          "bytes": 106882,
+          "sha256": "ead2d537442c162f6eea1e9c097195dc9c962696f117c0a51cc6ec066f2bbecc"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/msaa-output-topology-proposal/submission-pixels.json",
+          "bytes": 89160,
+          "sha256": "a0f98378a5abc1ccc8926cbea8529e602100ac5c0987c25be1addaed56e66f94"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/msaa-output-topology-proposal/fallback-pixels.json",
+          "bytes": 255995,
+          "sha256": "f78e36b4df80aaf3be50bb06b68ce8be3810f0d8d7da1c5d9dd7ef62482ad63d"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/msaa-output-topology-proposal/fallback-initial-timeout.json",
+          "bytes": 48826,
+          "sha256": "a6e63aee0cc612c7097c2bfd68ebd364ebe7d5c0b7095ff4646e9a5e17a6ea10"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39/combined-msaa4-packaged-diagnostic.json",
+          "bytes": 464059,
+          "sha256": "a27daa6503e1796f9688fe0e02118f528b3686596814005ea388562b884dfaa7"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39/combined-msaa4-formal-report.json",
+          "bytes": 464044,
+          "sha256": "77978e3035d05704751677b7686bf745e4c343493cc13cc36e4727f69ea3a967"
         }
       ],
-      "conclusion": "173 installed native checks also pass for the final shared-audio-UI application in the isolated candidate at MSAA4; consumer mounts rebound inside that checkout without changing bytes. Complete formal MSAA1/4 and legacy/new pixel populations still required. GUI P0 changes supersede current-source qualification; retain original evidence.",
+      "conclusion": "Formal 38d9f00 passed MSAA1. MSAA4 completed 32 real handoffs but failed the unchanged live pipeline count check (7/7/7/6); independent native repeat failed 6/7/7/7. Texture counts and total estimated GPU bytes were stable at all four handoff checkpoints; output pipeline variants account for the difference. Original runs are preserved. The descriptor trace identifies a temporary rgba16float 4x blend variant retained after retirement pressure drops and the regional compositor returns to 1x. An isolated proposal evicts variants that are no longer reachable while preserving final 4x presentation. Three 4x and one 1x installed native runs each pass all 173 assertions, with 6/6/6/6 live pipelines and zero GPU residue. This does not promote the failed formal result. Approved candidate 7236b39 repeats MSAA4 with the deterministic qualified tarball and again passes 173 assertions, 6/6/6/6 live pipelines and zero residue; the following run performed the formal capture. The formal 7236b39 run passed both sample counts, the installed GUI semantic and pixel matrix, and the 32-handoff check at six pipelines with zero final GPU residue.",
       "historicalStatus": "passed-current-msaa4-diagnostic"
     },
     {
       "id": "physical-entry-setup",
       "required": true,
-      "status": "historical-before-gui-p0",
+      "status": "prepared-current-candidate",
       "evidence": [
         {
-          "path": "artifacts/engine-0.2.3/g11/chrome-physical-audio-policy.log",
-          "bytes": 1404,
-          "sha256": "5fa80f42c96019d066a3f918c433f481c17496801c06f12220e10569e4ed24f4"
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/devices/handoff.json",
+          "bytes": 963,
+          "sha256": "05bc3e5089c868e80b6c934b8f06389b1a4e0805af50346201fccd7a132f58d5"
         },
         {
-          "path": "artifacts/engine-0.2.3/g11/physical-prepared-entry-smoke/result.json",
-          "bytes": 77055,
-          "sha256": "3b0e9c2fd10d4b32e9c2d28ac43f6620e12ef09dc9e98485bededa7a63ac5619"
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/native-preparation-final.json",
+          "bytes": 20544,
+          "sha256": "0dd51400c6e46d96d72260fc9e3646d553ffddd9db960b67bc463425fd9f5c36"
         }
       ],
-      "conclusion": "Normal gesture-based visible audio separated from unchanged silent automation. 5130 source/installed files verified. Setup-only automated input never grants physical acceptance. GUI P0 changes supersede current-source qualification; retain original evidence.",
-      "historicalStatus": "passed-diagnostic"
+      "conclusion": "Portable entry points are bound to the same frozen packages and sources. No physical input or sound was simulated and no device acceptance was granted.",
+      "historicalStatus": "passed-diagnostic",
+      "priorEvidenceIndex": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
+        "bytes": 34199,
+        "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
+      }
     },
     {
       "id": "native-consumer-preparation",
@@ -345,46 +464,41 @@
       "status": "prepared",
       "evidence": [
         {
-          "path": "../Native/examples/ios-gui-text-input/vendor/qualified-candidate.json",
-          "bytes": 31617,
-          "sha256": "95a4b91372c0c88b1748fd2beb451acbd52e8300fa0a2ccf1a43b827882aecd8"
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/native-qualified-candidate.json",
+          "bytes": 31659,
+          "sha256": "8679f36b3610ce1dce7a5dc982cfaff12d2d7bc10df712b72c8fd1fd00a0b718"
         },
         {
-          "path": "../Native/examples/ios-gui-text-input/artifacts/engine-0.2.3/g11-native-typecheck-workload.log",
-          "bytes": 73,
-          "sha256": "b0d53d8e53c6a7871ce79dd0a05a3d7e08dfa22f942e4a74b7b73c626dcdc674"
-        },
-        {
-          "path": "../Native/examples/ios-gui-text-input/artifacts/engine-0.2.3/g11-candidate-verification-export.json",
-          "bytes": 204,
-          "sha256": "cc172ae0cd734a06b26d2c7711b28771263c53ca0b058f432d8bf80c91abf0dc"
-        },
-        {
-          "path": "../Native/examples/ios-gui-text-input/artifacts/engine-0.2.3/native-install-integrity-export.json",
-          "bytes": 1723,
-          "sha256": "bd4f817fd17a243c30a1b0208bf9af0c67768537c443116761e678188d5ab6d7"
-        },
-        {
-          "path": "artifacts/engine-0.2.3/g11/independent-risk-review-1793522045671/report.json",
-          "bytes": 195057,
-          "sha256": "70aaed9c5faa6169c95565a958c959ac18f86b03312717b008eb3f5c5fdf012d"
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/native-preparation-final.json",
+          "bytes": 20544,
+          "sha256": "0dd51400c6e46d96d72260fc9e3646d553ffddd9db960b67bc463425fd9f5c36"
         }
       ],
-      "conclusion": "Current Native source and 151-file candidate verify; 750 existing lock entries preserved and new dependencies match qualified versions. Static review found no Web Audio implementation in the reviewed bridge/runtime or 1006 installed Canvas/Core script sources. PCM supports gain/pan but does not implement the original mixer node graph. This is a capability risk, not an actual device verdict; typecheck is not an iOS build or acceptance."
+      "conclusion": "Refreshed exact Engine/extensions packages; typecheck and all 885 own files across three installed packages pass. The one nested Draco dependency matches the unchanged locked graph. Original 151-file candidate backup and initial enumeration failure remain; TankBattle edits are unchanged. Actual iOS build, device flows and Web Audio capability are pending.",
+      "priorEvidenceIndex": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
+        "bytes": 34199,
+        "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
+      }
     },
     {
       "id": "portable-device-handoff",
       "required": true,
-      "status": "historical-before-gui-p0",
+      "status": "passed-integrity",
       "evidence": [
         {
-          "path": "artifacts/engine-0.2.3/g11/device-handoff-ready.json",
-          "bytes": 196,
-          "sha256": "26e24dc166008a25292b8f167bf7cb1bba488df82c32bd9c53158c3c8b178ddd"
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/devices/handoff.json",
+          "bytes": 963,
+          "sha256": "05bc3e5089c868e80b6c934b8f06389b1a4e0805af50346201fccd7a132f58d5"
         }
       ],
-      "conclusion": "5303 payload files extracted and rehashed; relocated Engine candidate preflight passes. Actual Mac/iPhone flows remain required. GUI P0 changes supersede current-source qualification; retain original evidence.",
-      "historicalStatus": "passed-integrity"
+      "conclusion": "5315 payload files survive full archive extraction and per-file SHA-256 verification; relocated Engine and Native preflights pass. Windows independent terminals, Mac IME/audio launchers and iPhone locked build/collection instructions are included. Actual device acceptance is pending.",
+      "historicalStatus": "passed-integrity",
+      "priorEvidenceIndex": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
+        "bytes": 34199,
+        "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
+      }
     },
     {
       "id": "production-collector-and-raw-audit",
@@ -423,7 +537,7 @@
     {
       "id": "inherited-gui-cpu-phases",
       "required": true,
-      "status": "prepared-diagnostic-exceeded",
+      "status": "passed-formal-7236b39",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/gui-cpu-plan.json",
@@ -464,14 +578,59 @@
           "path": "artifacts/engine-0.2.3/g11/independent-risk-review-1793522045671/report.json",
           "bytes": 195057,
           "sha256": "70aaed9c5faa6169c95565a958c959ac18f86b03312717b008eb3f5c5fdf012d"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-45a1a92/gui-cpu-original-report.json",
+          "bytes": 14203339,
+          "sha256": "8b1c2de22f05150c8ed2ff7dd1f3ccb68e30c3a337b1c8cfcb902c9143276640"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-45a1a92/failed-cpu-independent-audit.json",
+          "bytes": 11370,
+          "sha256": "eb774375eec215a9b81468824ac4c53c42f8ddf9510fd846d4822f14f2d12654"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-38d9f00/diagnostic-verification.json",
+          "bytes": 8089,
+          "sha256": "0002706570857a682744573d6f523541d1666920462c4e24ae4ec57c12a8e1ba"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-38d9f00/ready.json",
+          "bytes": 805,
+          "sha256": "a000c58a958beaab42aafe3976b924457d16e60ae57710d1c442013715b5cc64"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-38d9f00/gui-cpu-formal-report.json",
+          "bytes": 14202681,
+          "sha256": "9db104a47731a7adfd778b88b2d2f2689d32916d76812c3c80e7c946c41fd28b"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-38d9f00/inherited-gui-cpu-raw-audit.stdout.log",
+          "bytes": 27917,
+          "sha256": "534ed7146a61ed176c50a4a9deec2d8f3e1107300d27167450e69e072474e8b9"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39/qualification-result.json",
+          "bytes": 111423,
+          "sha256": "a5abf1cd065eeede637e44c56730c9849e1a32ef6ef7681c08cd49c7fee92a32"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39/inherited-gui-cpu-raw-audit.stdout.log",
+          "bytes": 27935,
+          "sha256": "81800951c026e9a74ec1bfbcf6ebf8ee9eeef224e24de57857c3d73b1877a1c3"
         }
       ],
-      "conclusion": "Original installed GUI/World/layout and shared audit device setup/raw audit pass. Dynamic HUD observations exceed inherited layout 2 ms / GUI update-submit 4 ms. Inspector stacks identify layout transaction/tree validation, control identity and repaint costs; aggregate call sites before attribution, preserve rollback and mutation checks. Instrumented desktop-active diagnostics are not formal timings or a waiver. Formal 27 cohorts with original 12+30 samples and unchanged 2/4/8 ms limits precede expensive captures. No runtime change was applied; cleanup queue calls remain separate from steady submission/readback counts."
+      "conclusion": "Formal 45a1a92 completed 27 cohorts (324 warmups, 810 measured samples) and failed 8; original raw samples and independent failure audit remain. Formal 38d9f00 repeated all 27 cohorts and passed the same gates and independent raw audit. The six dynamic 1,000-control layout cohorts measured 5.76–7.82 ms P95 against 8 ms; dynamic HUD stayed under its original limits. This evidence applies to 38d9f00. The exact clean 7236b39 also passed all 27 formal cohorts and the independent raw audit.",
+      "currentCandidate": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json",
+        "bytes": 150663,
+        "sha256": "e7860cad3338a3e56bd331b3de6c3f170d14e8a136f9f6de82dfe0fb0f49c3d8"
+      }
     },
     {
       "id": "formal-cold-steady-and-seven-reports",
       "required": true,
-      "status": "prepared-not-started",
+      "status": "passed-formal-7236b39-hya-production-pending",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/qualification-entry-ready.json",
@@ -492,9 +651,69 @@
           "path": "artifacts/engine-0.2.3/g11/qualification-plan.json",
           "bytes": 4667,
           "sha256": "dcf84b0c00072a05b6a396e77aa40cc429e7bdd2de1a60582ba7cf9d4c313364"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-38d9f00/qualification-result.json",
+          "bytes": 11192,
+          "sha256": "e0aad0b9ef304d75d8f53fd32ff0f60b23e70691639c274d9c8ab29f0cdc34d4"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39/ready.json",
+          "bytes": 807,
+          "sha256": "7c3ba797bf7ddd4c1d59fef302ed9ada36fa0a831696c182e0a3972a16b10ab1"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39/registration-verification.json",
+          "bytes": 5256,
+          "sha256": "dfb1eb3e52568dab078adc69dcb2f4a4e07c5600129c6bcaff11bbe5fe718ab7"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39/qualification-result.json",
+          "bytes": 111423,
+          "sha256": "a5abf1cd065eeede637e44c56730c9849e1a32ef6ef7681c08cd49c7fee92a32"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39/seven-report-raw-audit.stdout.log",
+          "bytes": 65756,
+          "sha256": "da3913ce51294982b335b02f990dea7a96b9ef292c016966fdd2c6ae699aeaf2"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39/hya-layout-formal-report.json",
+          "bytes": 440337,
+          "sha256": "a8e75de7e1389a93c1894162fc3f3c388574fc35fbac523f23ce530377049149"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39/hya-corpus-formal-report.json",
+          "bytes": 70245,
+          "sha256": "4ddd01ccd5b2d8d9390368f0048ebaeef8b2b81275c32d67e9d4d11cb0659988"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39/hya-production.stderr.log",
+          "bytes": 620,
+          "sha256": "f57b2ba6ad4ef984ef673e2fc8bbd8182a8ed5afbc54414235378f9f85b0adf5"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-resume/verification.json",
+          "bytes": 5678,
+          "sha256": "7ef5f89019febc3b81906fdef582b3c3794651bc2e59e24556159b10c6801077"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-resume/hya-staging-smokes.json",
+          "bytes": 1563,
+          "sha256": "7e3c2d1bb3d03fddbe70e8e4b9f8a6ef592ff95e668d8a930e50328de71e0998"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-resume/hya-gpu-clock-diagnosis.json",
+          "bytes": 11282,
+          "sha256": "b90354adcc73963885761694fc41793ae337273ec7e82f3e6a9e10abe825674a"
         }
       ],
-      "conclusion": "Fresh isolated clean runner prepared with its own locked dependencies, baseline/current builds, canonical packages and hashed controls. First run the original 27 GUI CPU cohorts; hard failure stops before 24 combined and 580 legacy captures, feature/HYA checks, global gate and no-publication rehearsal. Sampling has not started. Original budgets and named-only investigations retained."
+      "conclusion": "45a1a92 stopped at its original GUI CPU failure. 38d9f00 passed GUI CPU and MSAA1, then stopped at MSAA4. No 24 production captures, 580 legacy captures, subsequent checks, global gate or no-publication rehearsal ran on 38d9f00. Clean candidate 7236b39 is registered and verifies 5,138 source and installed files. The same controller, sample populations and budgets are preserved. The exact 7236b39 finished 24 combined production and 580 inherited captures, passing the seven raw report audit (including the original rooms, instances and Forward failure records and existing scoped investigations). HYA layout and corpus passed. HYA production stopped before the first browser because the extracted baseline extension 0.2.2 was compared against the candidate 0.2.3 identity. Separate validated staging and a same-revision continuation preserve all completed evidence. Native small-scene clock diagnosis showed that both a Chrome-only power preference and a matched command prefix left the two arms at different core/memory clocks; the Chrome setting was verified restored. The diagnostic does not establish GPU regression or replace the formal 5% gate. HYA production, global gate and no-publication rehearsal are pending.",
+      "currentCandidate": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json",
+        "bytes": 150663,
+        "sha256": "e7860cad3338a3e56bd331b3de6c3f170d14e8a136f9f6de82dfe0fb0f49c3d8"
+      }
     },
     {
       "id": "windows-real-keyboard-ime-gamepad",
@@ -513,35 +732,35 @@
     {
       "id": "ubuntu-software-full-fixture",
       "required": true,
-      "status": "ci-failed",
+      "status": "ci-failed-current",
       "evidence": [
         {
-          "path": "artifacts/engine-0.2.3/g11/ci-validation-plan.json",
-          "bytes": 3457,
-          "sha256": "fe8b01b8ba0cc5e73e01a6cf64981411183587d68396bd8486e2a734c8b54ad7"
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/ci/snapshot-1793811444975/ci-report.json",
+          "bytes": 6717,
+          "sha256": "eb883b85f5278b3ab599f320867298f38c042877792c3171423e789a32fc8684"
         },
         {
-          "path": "artifacts/engine-0.2.3/g11/ci-planar-protocol.json",
-          "bytes": 1043,
-          "sha256": "1d230336b24905997b9ad546e4c4ce1ce6093ac7a4337241d83e01df35e1c3bf"
+          "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/ci-outcome-review.json",
+          "bytes": 4017,
+          "sha256": "1ebf53b97990af1514204eacd0f162c28c548bbde8784888e7ed0ce4d7a030ec"
         },
         {
-          "path": "artifacts/engine-0.2.3/g11/ci-execution-1793522564308/execution.json",
-          "bytes": 15130,
-          "sha256": "698385c0dfd843b72402ee88959b501da7a431a37962cdd62e0e6ab9892a55b4"
-        },
-        {
-          "path": "artifacts/engine-0.2.3/g11/ci-execution-1793522564308/no-publication-audit.json",
-          "bytes": 1910,
-          "sha256": "710bbdb504cc1c6091368aed92f0aa3e31b2a186c862fac1059921a2460acc74"
-        },
-        {
-          "path": "artifacts/engine-0.2.3/g11/ci-execution-1793522564308/ci-final-audit.json",
-          "bytes": 7874,
-          "sha256": "e2c8ec72566b35c78db6f3c5ade594a1c3bf3af3a0e82c5637a66f1a9b454d87"
+          "path": "artifacts/engine-0.2.3/g11/planar-ci-investigation/result.json",
+          "bytes": 13128,
+          "sha256": "243fbb3ce604c8bee123c880f8cc2ac629d523e243667ba829bec81c0126a45e"
         }
       ],
-      "conclusion": "Authorized exact-candidate branch push and both CI runs completed. Windows/Linux no-publication controllers and complete Ubuntu fast gate passed; ZIP digests and original logs retained. Slow gate failed at the original shared 300-second planar deadline for 10000 entities/4 mirrors/8 bounces/4 views, last progress frame 10/40. All 41 progress events, five raw reports and archive hashes preserved; remaining planar pixels and subsequent slow phases were not executed. Current 5130 candidate files and four package identities still match; master/v0.2.2 unchanged. This remains a hard failure with no inherited software exemption."
+      "conclusion": "Current full-content Ubuntu/SwiftShader status: completed; conclusion: failure. Original workload, shared 300-second deadline and all budgets remain. Previous failure and raw reports are preserved. No 0.2.2 timeout exception is inherited; any current failure remains a hard release blocker. Current stop: 10000 entities/4 mirrors/5 bounces/1 view, samples 20/40 at last progress 248806.54ms; 31 progress events and all five raw reports are retained. The subsequent 8-bounce/4-view case, planar pixel matrix and later slow phases did not run. Isolated SwiftShader diagnosis measured 18.51 s of queue wait per 19.08 s frame in the four-view case. Both pinned Chrome 157 platform replays exceeded the same 300-second deadline. Shader arithmetic trials did not materially reduce it. No change to the gate or runtime was applied.",
+      "historicalFailureIndex": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
+        "bytes": 34199,
+        "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
+      },
+      "priorEvidenceIndex": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
+        "bytes": 34199,
+        "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
+      }
     },
     {
       "id": "g02-global-and-no-publication-rehearsal",
@@ -623,23 +842,40 @@
     }
   ],
   "formalCandidate": {
-    "revision": "e752a15a8c7cf9ae2716ee4fda824e9b98f9bb5d",
+    "revision": "b61b700aaea35a2cdfe228d2a09c441f477ad812",
+    "branch": "codex/g11-qualification-023-b61b700a",
+    "checkout": "D:\\HaiyueStudio\\.reviewed\\engine-023-1793807926852-2ce5ae-canonical",
     "preparation": {
-      "path": "artifacts/engine-0.2.3/g11/qualification-preparation-1793518854890-34345e2c/preparation.json",
-      "bytes": 1248731,
-      "sha256": "ad9935afd533076236fbd0efc915ffdc5f42351057ddd69f872ce0ab53d5078f"
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/clean-build.json",
+      "bytes": 6554,
+      "sha256": "95905d663d33da23928bdf5efb0c7c2eb7ed3e6c09a3bde4d283655b04f6972c"
     },
-    "registration": {
-      "path": "artifacts/engine-0.2.3/g11/qualification-preparation-1793518854890-34345e2c/registration-v4.json",
-      "bytes": 9780,
-      "sha256": "8bd7c1886041bc1d624ecfeeb4734ca8c26e322ba78022e01ee216ee9d245e4f"
+    "freeze": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/frozen-source.json",
+      "bytes": 953143,
+      "sha256": "3510949d8e4b619c4b0378b34aadbef76224687832a35ec50281192395f55dd2"
     },
-    "entry": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g11\\start-windows-current.cmd",
+    "candidate": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json",
+      "bytes": 150663,
+      "sha256": "e7860cad3338a3e56bd331b3de6c3f170d14e8a136f9f6de82dfe0fb0f49c3d8"
+    },
+    "contents": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json.contents.json",
+      "bytes": 909351,
+      "sha256": "c305a4905ce16b902a7aaf1ba3d30509b7dd1e95fea2f87ff8ce94e472f49209"
+    },
+    "packageReport": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/public-packages.json",
+      "bytes": 169357,
+      "sha256": "c20ba8e4721a21926757cf83006518f509e726378ebd8e59642ff54f679553be"
+    },
+    "status": "clean-candidate-prepared",
     "samplingStarted": false,
-    "releaseQualified": false,
-    "status": "superseded-by-gui-p2",
     "entryReady": false,
-    "conclusion": "Original clean snapshot and CI are retained as historical evidence; changed GUI runtime requires new affected qualification. The short entry is intentionally blocked."
+    "formalRunnerRegistered": false,
+    "releaseQualified": false,
+    "conclusion": "Clean source and exact deterministic packages prepared; current GUI phase capture, formal runner registration, actual devices, global gate and no-publication rehearsal remain separate requirements."
   },
   "historicalCandidate": [
     {
@@ -657,5 +893,172 @@
       "bytes": 1838,
       "sha256": "b36e257d8d678ca0cea5f261e6c53599ff676bce333ddf4e6edb441f82b7e7b2"
     }
-  ]
+  ],
+  "previousIndex": {
+    "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
+    "bytes": 34199,
+    "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
+  },
+  "nonIdlePreparation": {
+    "status": "passed-working-tree-only",
+    "report": {
+      "path": "artifacts/engine-0.2.3/g11/nonidle-20261104/result.json",
+      "bytes": 10714,
+      "sha256": "e426a66d59a1b0af86db44a002cf8751a7c4d310e6895e973793f2f60a941d4e"
+    },
+    "sourceFiles": 3907,
+    "packagesMatchGuiP2": true,
+    "consumerCount": 51,
+    "formalPerformanceCaptured": false,
+    "formalEvidenceReused": false,
+    "cleanFormalRunnerPrepared": false,
+    "published": false,
+    "supersededByCleanPreparation": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/clean-build.json",
+      "bytes": 6554,
+      "sha256": "95905d663d33da23928bdf5efb0c7c2eb7ed3e6c09a3bde4d283655b04f6972c"
+    }
+  },
+  "integrationWorktreeRevision": "829d3ca2624649172e659b21d990355ee2cf063d",
+  "inputRoot": "D:\\HaiyueStudio\\.reviewed\\engine-023-1793807926852-2ce5ae-canonical",
+  "historicalFormalCandidates": [
+    {
+      "revision": "e752a15a8c7cf9ae2716ee4fda824e9b98f9bb5d",
+      "status": "superseded-by-gui-p2",
+      "metadata": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
+        "bytes": 34199,
+        "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
+      }
+    }
+  ],
+  "cleanCandidatePreparation": {
+    "revision": "b61b700aaea35a2cdfe228d2a09c441f477ad812",
+    "sourceFiles": 3907,
+    "lineEndingNormalizations": 37,
+    "originalSourceUnchanged": true,
+    "freeze": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/frozen-source.json",
+      "bytes": 953143,
+      "sha256": "3510949d8e4b619c4b0378b34aadbef76224687832a35ec50281192395f55dd2"
+    },
+    "build": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/clean-build.json",
+      "bytes": 6554,
+      "sha256": "95905d663d33da23928bdf5efb0c7c2eb7ed3e6c09a3bde4d283655b04f6972c"
+    },
+    "packages": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/public-packages.json",
+      "bytes": 169357,
+      "sha256": "c20ba8e4721a21926757cf83006518f509e726378ebd8e59642ff54f679553be"
+    },
+    "packagesMatchGuiP2": true,
+    "consumerCount": 51,
+    "supplyChain": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/supply-chain.json",
+      "bytes": 37480,
+      "sha256": "702ec92ac713a29f4ba0eee5ce59bda1dadf91bb0c0ab47c1e15b4cc71dbb803"
+    },
+    "sbom": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/dependencies.cdx.json",
+      "bytes": 40200,
+      "sha256": "05d7d38c97e0381624d8b0a61ad4acd1910111d6336f3bde763a151bf76e14bf"
+    },
+    "candidate": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json",
+      "bytes": 150663,
+      "sha256": "e7860cad3338a3e56bd331b3de6c3f170d14e8a136f9f6de82dfe0fb0f49c3d8"
+    },
+    "contents": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json.contents.json",
+      "bytes": 909351,
+      "sha256": "c305a4905ce16b902a7aaf1ba3d30509b7dd1e95fea2f87ff8ce94e472f49209"
+    },
+    "sourceAndConsumerFiles": 5137,
+    "formalEvidenceReused": false,
+    "published": false
+  },
+  "cloudCI": {
+    "status": "failed",
+    "revision": "b61b700aaea35a2cdfe228d2a09c441f477ad812",
+    "report": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/ci/snapshot-1793811444975/ci-report.json",
+      "bytes": 6717,
+      "sha256": "eb883b85f5278b3ab599f320867298f38c042877792c3171423e789a32fc8684"
+    },
+    "outcome": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/ci-outcome-review.json",
+      "bytes": 4017,
+      "sha256": "1ebf53b97990af1514204eacd0f162c28c548bbde8784888e7ed0ce4d7a030ec"
+    },
+    "controllerAudit": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/cloud-no-publication-audit.json",
+      "bytes": 1068,
+      "sha256": "90d6178bfe44c20f24ff2675da779eb413a1abc6d837a95bde02c9a38c720f36"
+    },
+    "remoteScopeAudit": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/remote-scope-audit.json",
+      "bytes": 745,
+      "sha256": "8d77c51c7e790c949192085dc9cb7eed22566bc2010cfa378d35ab56fc79c44c"
+    },
+    "bulkDiagnosticArchivePolicy": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/ci/bulk-download-policy.json",
+      "bytes": 758,
+      "sha256": "38001aadc81c20174f8d66d3fe9d556f80b1094267f18ff05084665bf6058c28"
+    },
+    "runs": [
+      {
+        "id": 41865996157,
+        "name": "Engine Fast",
+        "url": "https://github.com/HaiyueStudio/Engine/actions/runs/41865996157",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 41866007760,
+        "name": "CI Slow",
+        "url": "https://github.com/HaiyueStudio/Engine/actions/runs/41866007760",
+        "status": "completed",
+        "conclusion": "failure"
+      }
+    ],
+    "originalFailuresPreserved": true,
+    "softwareTimeoutExemption": false,
+    "swiftShaderInvestigation": {
+      "status": "diagnosed-release-blocker-remains",
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/planar-ci-investigation/result.json",
+        "bytes": 13128,
+        "sha256": "243fbb3ce604c8bee123c880f8cc2ac629d523e243667ba829bec81c0126a45e"
+      },
+      "originalGateUnchanged": true,
+      "originalFailuresPreserved": true,
+      "productionOptimizationApplied": false
+    }
+  },
+  "devicePreparation": {
+    "status": "prepared-integrity-verified",
+    "report": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/devices/handoff.json",
+      "bytes": 963,
+      "sha256": "05bc3e5089c868e80b6c934b8f06389b1a4e0805af50346201fccd7a132f58d5"
+    },
+    "archive": {
+      "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g11\\frozen-1793807926852-2ce5ae\\devices\\engine-0.2.3-device-acceptance.tar.gz",
+      "bytes": 19351396,
+      "sha256": "5dab9e48f62e029140c5707d5996a4635829caa9c35d3ea401785fc284deeaa4"
+    },
+    "nativeCandidateId": "g11-023-native-b787ebeb5c092e2b7f7919d8",
+    "nativeManifest": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/native-qualified-candidate.json",
+      "bytes": 31659,
+      "sha256": "8679f36b3610ce1dce7a5dc982cfaff12d2d7bc10df712b72c8fd1fd00a0b718"
+    },
+    "nativePreparation": {
+      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/native-preparation-final.json",
+      "bytes": 20544,
+      "sha256": "0dd51400c6e46d96d72260fc9e3646d553ffddd9db960b67bc463425fd9f5c36"
+    },
+    "actualDeviceAcceptance": "pending"
+  }
 }

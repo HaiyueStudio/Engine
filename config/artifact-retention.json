@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "targetBytes": 5000000000,
+  "lowWaterBytes": 4500000000,
+  "minimumAgeHours": 72,
+  "batchBytes": 268435456,
+  "batchFiles": 1500,
+  "metadataMaximumBytes": 65536,
+  "summaryMaximumBytes": 2097152,
+  "summaryNames": ["report.json", "result.json", "assessment.json", "summary.json", "qualification.json", "candidate-lock.json", "verification.json", "status.json"],
+  "protectedPrefixes": [
+    ".retention/",
+    "webgpu/",
+    "performance/",
+    "engine-0.2.3/",
+    "engine-0.2.2/release-preparation-20261030/",
+    "release/",
+    "production-release-0.2.1-20261019/"
+  ],
+  "metadataExtensions": [".json", ".jsonl", ".md", ".txt", ".log", ".csv", ".cmd", ".ps1", ".sh"],
+  "cacheDirectoryNames": ["node_modules", "checkout", "consumer", "packages", "dist", ".cache", "browser-profile", "chrome-profile"],
+  "preserveEvidence": "All evicted files, including caches, require a durable compressed archive, a SHA-256 manifest and successful streaming readback before source removal. Protected data may exceed the soft target; never evict it to force compliance."
+}
