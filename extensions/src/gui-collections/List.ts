@@ -100,8 +100,20 @@ export class VirtualList<T> implements GuiVirtualList<T> {
     if(key===this.selection)return;this.selection=key;this.element.markDirty(GuiDirtyFlags.Visual|GuiDirtyFlags.Input);this.options.onSelection?.(key);
   }
   private focusKey(key:string):void {
-    const target=this.slots.find(slot=>slot.key===key)?.host??this.element;
-    this.focusElement(target);
+    const slot=this.slots.find(slot=>slot.key===key);
+    // Row hosts retain logical identity; actual controls own editing and focus paint.
+    // The original focus owner rejects ineligible (including layout-hidden) targets.
+    const pending=slot?[slot.row.element]:[];
+    while(pending.length){
+      const target=pending.pop()!;
+      if(!target.visible||target.disabled)continue;
+      if(target.focusOptions.mode!=='none'){
+        this.focusElement(target);
+        if(target.focused)return;
+      }
+      for(let i=target.children.length-1;i>=0;i--)pending.push(target.children[i]!);
+    }
+    this.focusElement(slot?.host??this.element);
   }
   private focusElement(target:GuiElement):void {
     if(this.options.focus)this.options.focus.focus(target);else collectionNotify(target,'gui:collection-focus');
