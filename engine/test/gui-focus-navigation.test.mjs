@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {GuiElement,GuiButton,GuiInput,GuiModal,GuiFocusManager,GuiRoot} from '../dist/gui.js';
+import {GuiElement,GuiButton,GuiInput,GuiModal,GuiFocusManager,GuiRoot,GuiScrollView,GuiSystem} from '../dist/gui.js';
 
 const tree = () => {const root=new GuiElement(),focus=new GuiFocusManager();focus.setRoots([root]);return {root,focus};};
 const button = (root,id,x=0,y=0,focus) => root.add(new GuiButton({id,x,y,width:10,height:10,...(focus?{focus}:{})}));
@@ -124,4 +124,42 @@ test('directional candidates with empty geometry cannot steal focus',()=>{
  const {root,focus}=tree(),origin=button(root,'origin',0,0),valid=button(root,'valid',40,0);
  root.add(new GuiButton({id:'empty',x:15,y:0,width:0,height:10}));
  root.layout({x:0,y:0,width:100,height:100});focus.focus(origin);assert.equal(focus.move('right'),valid);
+});
+
+test('automatic directions skip containing focus targets while explicit and sequential routes remain available',()=>{
+ const {root,focus}=tree(),container=root.add(new GuiScrollView({id:'viewport',width:100,height:100,contentHeight:400}));
+ const a=button(container,'a',0,0),b=button(container,'b',0,80);
+ root.layout({x:0,y:0,width:200,height:200});focus.focus(a);
+ assert.equal(focus.move('down'),b,'the closer viewport center must not replace a neighbouring control');
+ a.setFocusOptions({mode:'all',neighbours:{down:container.id}});focus.focus(a);assert.equal(focus.move('down'),container);
+ focus.focus(a);assert.equal(focus.next(true),container,'sequential focus still includes the scroll container');
+});
+
+test('directions move focused descendants before revealing them in nested vertical and horizontal viewports',()=>{
+ for(const axis of ['vertical','horizontal']){
+  const horizontal=axis==='horizontal',root=new GuiRoot(),system=new GuiSystem({});
+  const outer=root.add(new GuiScrollView({width:160,height:100,contentWidth:400,contentHeight:400,axis}));
+  const inner=outer.add(new GuiScrollView({width:120,height:80,contentWidth:300,contentHeight:300,axis}));
+  const a=inner.add(new GuiButton({id:'a',width:30,height:30}));
+  const b=inner.add(new GuiButton({id:'b',x:horizontal?220:0,y:horizontal?0:220,width:30,height:30}));
+  root.layout(400,300);system.roots.add(root);system.focus.setRoots([root.root]);system.focus.focus(a);
+  try{
+   assert.equal(system.dispatchAction(horizontal?'right':'down','gamepad'),true);assert.equal(system.focus.focused,b);
+   assert.equal(inner.scrollOffset,horizontal?130:170);assert.equal(outer.scrollOffset,0);
+   assert.equal(system.dispatchAction(horizontal?'left':'up','gamepad'),true);assert.equal(system.focus.focused,a);
+   assert.equal(inner.scrollOffset,0);assert.equal(outer.scrollOffset,0);
+   system.focus.focus(inner);system.dispatchAction(horizontal?'right':'down','gamepad');
+   assert.equal(system.focus.focused,inner);assert.equal(inner.scrollOffset,40,'directly focused viewport retains directional scrolling');
+  }finally{system.destroy();root.destroy();}
+ }
+});
+
+test('directions traverse offscreen viewport rows before fixed chrome and can leave at the content boundary',()=>{
+ const {root,focus}=tree(),toolbar=root.add(new GuiButton({id:'toolbar',x:0,y:98,width:100,height:30}));
+ const exit=button(root,'exit',0,50),scroll=root.add(new GuiScrollView({y:100,width:100,height:100,contentHeight:400}));
+ const a=button(scroll,'a',0,170),b=button(scroll,'b',0,208);
+ root.layout({x:0,y:0,width:400,height:300});scroll.scrollTo(180);focus.focus(b);
+ assert.equal(focus.move('up'),a,'clipped content remains before overlapping fixed chrome');
+ assert.equal(focus.move('up'),exit,'a viewport does not trap focus when there is no further row');
+ a.setFocusOptions({mode:'all',neighbours:{up:toolbar.id}});focus.focus(a);assert.equal(focus.move('up'),toolbar);
 });

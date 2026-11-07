@@ -25,7 +25,9 @@ export class GuiScrollView extends GuiElement {
   override handleAction(event: GuiActionEvent): void {
     super.handleAction(event);
     const backward = this.axis === 'horizontal' ? 'left' : 'up', forward = this.axis === 'horizontal' ? 'right' : 'down';
-    if (event.consumed || (event.action !== backward && event.action !== forward)) return;
+    // Descendant actions bubble here before focus navigation. Only direct focus
+    // scrolls; descendant focus moves first and is revealed by GuiSystem.
+    if (!this.focused || event.consumed || (event.action !== backward && event.action !== forward)) return;
     const before = this.scrollOffset;
     this.scrollBy(event.action === backward ? -40 : 40);
     if (before !== this.scrollOffset) event.consume();
