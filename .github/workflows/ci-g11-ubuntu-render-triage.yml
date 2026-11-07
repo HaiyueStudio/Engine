@@ -1,4 +1,4 @@
-name: G11 Ubuntu Render Fix Verification
+name: G11 Ubuntu PBR Font Verification
 
 on:
   push:
@@ -10,11 +10,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        scope: [canvas, texture]
+    timeout-minutes: 20
     env:
       BENCHMARK_PROFILE: ci
       WEBGPU_ANGLE_BACKEND: swiftshader
@@ -27,56 +23,30 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
-      - if: matrix.scope == 'canvas'
-        run: node scripts/release-ci-bootstrap.mjs
-      - if: matrix.scope == 'canvas'
-        run: npm run build:target -- example:motion-blur example:ambient-occlusion example:clipping-planes example:navmesh-first-person example:pbr-showcase example:fog example:ktx2-volume example:gltf-animation3d-crossfade example:shadow-map example:spine-viewer
-      - name: Verify the unchanged gates with the repaired browser launch
+      - name: Install CJK fonts for the unchanged full-page references
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends fonts-noto-cjk
+      - run: node scripts/release-ci-bootstrap.mjs
+      - run: npm run build:target -- example:pbr-showcase
+      - name: Verify every original PBR mode and control
         shell: bash
         run: |
           set -euo pipefail
-          out="$PWD/artifacts/g11-ubuntu-render-fix"
+          out="$PWD/artifacts/g11-ubuntu-pbr-font"
           mkdir -p "$out"
           git rev-parse HEAD > "$out/revision.txt"
           google-chrome --version > "$out/chrome.txt"
-          cat > "$out/chrome-capture" <<'CHROME'
-          #!/usr/bin/env bash
-          printf '%q ' /usr/bin/google-chrome "$@" >> "$CHROME_DIAGNOSTIC_FILE"
-          printf '\n' >> "$CHROME_DIAGNOSTIC_FILE"
-          exec /usr/bin/google-chrome "$@" 2> >(tee -a "$CHROME_DIAGNOSTIC_FILE" >&2)
-          CHROME
-          chmod +x "$out/chrome-capture"
-          export CHROME_PATH="$out/chrome-capture"
-          run_gate() {
-            local name="$1"; shift
-            export CHROME_DIAGNOSTIC_FILE="$out/$name-browser.log"
-            local status=0
-            node "$@" 2>&1 | tee "$out/$name-gate.log" || status=$?
-            printf '%s=%s\n' "$name" "$status" | tee -a "$out/status.txt"
-            if [ "$status" != 0 ]; then failed=1; fi
-          }
-          failed=0
-          if [ "$SCOPE" = canvas ]; then
-            run_gate motion scripts/verify-motion-blur-example.mjs
-            run_gate ao scripts/verify-ambient-occlusion-example.mjs
-            run_gate clipping scripts/verify-clipping-planes-example.mjs
-            run_gate navmesh scripts/verify-navmesh-first-person-example.mjs
-            run_gate pbr scripts/verify-pbr-example.mjs
-            run_gate fog scripts/verify-fog-example.mjs
-            run_gate volume scripts/verify-volume-example.mjs
-            run_gate screenshots scripts/verify-product-screenshot-regressions.mjs --engine
-          else
-            run_gate pixels scripts/verify-pixel-regression.mjs
-            run_gate product-pixels scripts/verify-pixel-regression.mjs --product
-          fi
-          exit "$failed"
-        env:
-          SCOPE: ${{ matrix.scope }}
+          dpkg-query --show fonts-noto-cjk > "$out/fonts-package.txt"
+          fc-match monospace > "$out/fonts.txt"
+          fc-match sans-serif >> "$out/fonts.txt"
+          fc-match ':lang=zh-cn' >> "$out/fonts.txt"
+          node scripts/verify-pbr-example.mjs 2>&1 | tee "$out/pbr-gate.log"
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
-          name: ubuntu-render-fix-${{ matrix.scope }}
+          name: ubuntu-pbr-font
           path: |
-            artifacts/g11-ubuntu-render-fix/
-            artifacts/render-regression/
+            artifacts/g11-ubuntu-pbr-font/
+            artifacts/render-regression/pbr/
           if-no-files-found: warn
