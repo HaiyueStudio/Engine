@@ -23,13 +23,26 @@ const sourceFingerprint = createPerformanceSourceFingerprint(root, benchmarkRoot
 const performanceConfig = loadPerformanceBudgetConfig(root);
 const suiteConfig = performanceConfig.suites['ambient-occlusion.gpu-cost'];
 const enforcePerformanceBudget = shouldEnforceDevicePerformanceBudgets();
-const result = await runChromeWebGpuFixture({
-  root: benchmarkRoot,
-  fixture: 'scripts/webgpu-gate/ambient-occlusion-gpu-cost-fixture.html',
-  query: { warmup, samples },
-  timeoutMs: integerArgument('timeout-ms', mode === 'smoke' ? 180_000 : 600_000),
-  acceptedStatuses: ['passed', 'unavailable'],
-});
+let result;
+try {
+  result = await runChromeWebGpuFixture({
+    root: benchmarkRoot,
+    fixture: 'scripts/webgpu-gate/ambient-occlusion-gpu-cost-fixture.html',
+    query: { warmup, samples },
+    timeoutMs: integerArgument('timeout-ms', mode === 'smoke' ? 180_000 : 600_000),
+    acceptedStatuses: ['passed', 'unavailable'],
+    failureCaptureExpression: 'globalThis.__captureAoCostFailure?.()',
+  });
+} catch (error) {
+  const failurePath = artifactPath.replace(/\.json$/, '') + '-failed-' + Date.now() + '.json';
+  mkdirSync(dirname(failurePath), { recursive: true });
+  writeFileSync(failurePath, JSON.stringify({
+    schemaVersion: 1, suite: 'ambient-occlusion.gpu-cost', status: 'failed', qualification: false,
+    mode, warmup, samples, sourceFingerprint, browserFailure: error.browserFailure, error: String(error.stack ?? error),
+  }, null, 2) + '\n', { flag: 'wx' });
+  console.error('[ambient-occlusion:performance] Original failure retained at ' + relative(root, failurePath));
+  throw error;
+}
 if (createPerformanceSourceFingerprint(root, benchmarkRoot) !== sourceFingerprint) {
   throw new Error('Performance executable inputs changed while the AO fixture was running; discard this evidence and retry.');
 }
