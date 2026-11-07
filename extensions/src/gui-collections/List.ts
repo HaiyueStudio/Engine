@@ -38,7 +38,7 @@ export class VirtualList<T> implements GuiVirtualList<T> {
     const slot=this.slots.find(slot=>contains(slot.host,event.target));
     if(slot?.key!==null&&slot?.key!==undefined){
       this.setSelection(slot.key);
-      if(event.target.focusOptions.mode==='none')this.focusKey(slot.key);
+      if(event.target===slot.host||event.target.focusOptions.mode==='none')this.focusKey(slot.key);
     }
   };
   constructor(private readonly options:GuiVirtualListOptions<T>,private readonly enabled:(item:T)=>boolean=()=>true,private readonly extraAction?:(event:GuiActionEvent)=>void) {
@@ -144,7 +144,7 @@ export class VirtualList<T> implements GuiVirtualList<T> {
       while(this.slots.length<count){
         const row=this.options.createRow();
         if(!row||!(row.element instanceof GuiElement)||row.element.parent||typeof row.bind!=='function'||typeof row.dispose!=='function'||this.slots.some(s=>s.row===row||s.row.element===row.element))throw invalid('createRow must return a fresh original GUI row.');
-        const host=new RowHost({width:'100%',height:this.options.rowHeight,focus:{mode:'all'},pointerFilter:'pass'});host.add(row.element);this.element.add(host);this.slots.push({row,host,key:null,item:undefined,index:-1,unbind:null});
+        const host=new RowHost({width:'100%',height:this.options.rowHeight,focus:{mode:'all',tabIndex:-1},pointerFilter:'pass'});host.add(row.element);this.element.add(host);this.slots.push({row,host,key:null,item:undefined,index:-1,unbind:null});
       }
       for(let index=window.first;index<window.last;index++){
         const key=this.keys[index]!,slot=this.slots.find(s=>s.key===key)??this.slots.find(s=>s.key===null)!;

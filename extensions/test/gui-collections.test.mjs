@@ -85,3 +85,13 @@ test('collection row focus skips disabled and hidden descendants and falls back 
  }});s.element.layout({x:0,y:0,width:400,height:560});focus.setRoots([s.element]);focus.focus(targets[0].input);action(s.element,'down');assert.equal(s.selectedKey,'k1');assert.equal(focus.focused,targets[1].input);s.dispose();
  const label=list(3,{focus});focus.setRoots([label.value.element]);label.value.setSelection('k0');focus.focus(label.value.element);action(label.value.element,'down');assert.equal(label.value.selectedKey,'k1');assert(label.value.element.children.includes(focus.focused));label.value.dispose();
 });
+
+for (const explicitFocus of [true,false]) test(`collection row wrappers never trap Tab or Shift+Tab, explicit focus=${explicitFocus}`,()=>{
+ const canvas=new Surface(),system=new GuiSystem({canvas,displayWidth:400,displayHeight:560}),root=new GuiRoot();system.roots.add(root);
+ const r=rows(GuiInput),s=createGuiVirtualList({items:data(3),keyOf:x=>x.id,rowHeight:28,height:560,createRow:r.createRow,...(explicitFocus?{focus:system.focus}:{})});root.add(s.element);const outside=root.add(new GuiButton({text:'outside'}));root.layout(400,560);system.inputDomain.refresh();
+ const row=key=>r.instances.find(x=>x.binding?.key===key).element;
+ system.focus.focus(row('k0'));system.dispatchAction('next','keyboard');assert.equal(system.focus.focused,row('k1'));system.dispatchAction('next','keyboard');assert.equal(system.focus.focused,row('k2'));system.dispatchAction('next','keyboard');assert.equal(system.focus.focused,outside);
+ for(const key of ['k2','k1','k0']){system.dispatchAction('previous','keyboard');assert.equal(system.focus.focused,row(key));}
+ system.focus.focus(row('k1').parent);assert.equal(system.focus.focused,row('k1'));assert.equal(s.selectedKey,'k1');
+ s.dispose();system.destroy();root.destroy();assert.equal(r.counts.created,r.counts.disposed);
+});
