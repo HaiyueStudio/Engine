@@ -22,11 +22,11 @@ test('click-only focus is programmatically valid and none cannot steal focus',()
  focus.blur();assert.equal(click.focused,false);
 });
 
-test('directions use explicit eligible neighbour, angle, distance and stable ID',()=>{
+test('directions prefer nearby controls with explicit eligible neighbours and stable ties',()=>{
  const {root,focus}=tree(),origin=button(root,'origin'),diagonal=button(root,'diagonal',10,1);
  const farther=button(root,'z',40),closer=button(root,'c',20),tied=button(root,'b',20);
  root.layout({x:0,y:0,width:200,height:100});focus.focus(origin);
- assert.equal(focus.move('right'),tied,'angle precedes distance, IDs break geometric ties');
+ assert.equal(focus.move('right'),diagonal,'nearby overlapping controls precede distant center alignment');
  origin.setFocusOptions({mode:'all',neighbours:{right:'diagonal'}});focus.focus(origin);assert.equal(focus.move('right'),diagonal);
  diagonal.setDisabled(true);focus.focus(origin);assert.equal(focus.move('right'),tied);
  assert.equal(focus.move('up'),null);assert.equal(focus.focused,tied);assert.ok(farther&&closer);
@@ -92,4 +92,36 @@ test('reentrant blur cannot overwrite a newer focus transition; dispose clears a
  const {root,focus}=tree(),a=button(root,'a'),b=button(root,'b'),c=button(root,'c');focus.focus(a);
  a.handleBlur=()=>focus.focus(c);focus.focus(b);assert.equal(focus.focused,c);assert.equal(b.focused,false);
  const generation=focus.generation;focus.dispose();assert.equal(focus.focused,null);assert.equal(c.focused,false);assert.ok(focus.generation>generation);
+});
+
+test('down follows nearby composite rows instead of a distant better-aligned panel',()=>{
+ const {root,focus}=tree();
+ const header=root.add(new GuiButton({id:'header',x:44,y:305,width:314,height:36}));
+ const name=root.add(new GuiInput({id:'name',x:12,y:341,width:456,height:32}));
+ const start=root.add(new GuiButton({id:'start',x:12,y:379,width:456,height:32}));
+ const distant=root.add(new GuiButton({id:'panel-16',x:44,y:631,width:424,height:36}));
+ root.layout({x:0,y:0,width:480,height:720});focus.focus(header);
+ assert.equal(focus.move('down'),name);assert.equal(focus.move('down'),start);
+ assert.equal(focus.move('up'),name);assert.equal(focus.move('up'),header);assert.ok(distant);
+});
+test('directional badge grid reaches the next row before lower wide controls',()=>{
+ const {root,focus}=tree();const first=root.add(new GuiButton({id:'first',x:126,y:103,width:46,height:22}));
+ const below=root.add(new GuiButton({id:'below',x:126,y:129,width:46,height:22}));
+ root.add(new GuiButton({id:'far',x:44,y:631,width:424,height:36}));
+ root.layout({x:0,y:0,width:480,height:720});focus.focus(first);assert.equal(focus.move('down'),below);
+ assert.equal(focus.move('up'),first);
+});
+test('wide adjacent rows remain preferred in all four directional orientations',()=>{
+ for(const direction of ['up','down','left','right']){
+  const {root,focus}=tree(),horizontal=direction==='left'||direction==='right',sign=direction==='left'||direction==='up'?-1:1;
+  const origin=button(root,'origin',200,200);
+  const near=button(root,'near',200+(horizontal?20*sign:2),200+(horizontal?2:20*sign));
+  button(root,'far',200+(horizontal?200*sign:0),200+(horizontal?0:200*sign));
+  root.layout({x:0,y:0,width:500,height:500});focus.focus(origin);assert.equal(focus.move(direction),near,direction);
+ }
+});
+test('directional candidates with empty geometry cannot steal focus',()=>{
+ const {root,focus}=tree(),origin=button(root,'origin',0,0),valid=button(root,'valid',40,0);
+ root.add(new GuiButton({id:'empty',x:15,y:0,width:0,height:10}));
+ root.layout({x:0,y:0,width:100,height:100});focus.focus(origin);assert.equal(focus.move('right'),valid);
 });
