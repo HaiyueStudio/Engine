@@ -7,6 +7,7 @@ import { spawn } from 'node:child_process';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { defaultChromePath, defaultWebGpuAngleBackend } from './webgpu-gate/chrome-runner.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const productFixture = process.argv.includes('--product');
@@ -38,13 +39,13 @@ try {
   const browserResult = await runChromeFixture(chrome, `http://127.0.0.1:${address.port}/`);
   const { status } = browserResult;
   const current = JSON.parse(browserResult.text);
+  if (status !== 'passed') throw new Error(`Pixel fixture failed: ${current.error ?? 'unknown error'}`);
   if (productFixture) {
     const rgba = Buffer.from(current.rgbaBase64 ?? '', 'base64');
     if (rgba.length !== current.width * current.height * 4) throw new Error('Incomplete product RGBA readback.');
     current.visual = { width: current.width, height: current.height, encoding: 'deflate-rgba8', rgba: deflateSync(rgba).toString('base64') };
     delete current.rgbaBase64;
   }
-  if (status !== 'passed') throw new Error(`Pixel fixture failed: ${current.error ?? 'unknown error'}`);
   mkdirSync(resolve(root, 'artifacts/render-regression'), { recursive: true });
   writeFileSync(resolve(root, `artifacts/render-regression/${productFixture ? 'pbr-product' : 'simple'}-candidate.json`), `${JSON.stringify(current, null, 2)}\n`);
   if (process.env.UPDATE_RENDER_BASELINE === '1') {
@@ -78,12 +79,18 @@ try {
 
 async function runChromeFixture(binary, url) {
   const userDataDir = mkdtempSync(resolve(tmpdir(), 'haiyue-render-regression-'));
+  const angleBackend = process.env.WEBGPU_ANGLE_BACKEND ?? defaultWebGpuAngleBackend();
+  // These fixtures read GPU textures directly. They do not need Chromium's display compositor.
+  const gpuArguments = process.platform === 'linux' && angleBackend === 'swiftshader'
+    ? ['--use-angle=vulkan', '--use-gl=angle', '--enable-unsafe-swiftshader',
+      '--disable-gpu-compositing', '--use-webgpu-adapter=swiftshader']
+    : [`--use-angle=${angleBackend}`];
   const child = spawn(binary, [
       '--headless=new',
       '--no-sandbox',
       '--disable-gpu-sandbox',
       '--enable-unsafe-webgpu',
-      `--use-angle=${defaultWebGpuAngleBackend()}`,
+      ...gpuArguments,
       '--remote-debugging-port=0',
       `--user-data-dir=${userDataDir}`,
       url,
@@ -127,18 +134,6 @@ async function runChromeFixture(binary, url) {
       console.warn(`[render-pixels] Could not remove temporary Chrome profile: ${error.message}`);
     }
   }
-}
-
-function defaultChromePath() {
-  if (process.platform === 'darwin') return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-  if (process.platform === 'win32') return 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-  return '/usr/bin/google-chrome';
-}
-
-function defaultWebGpuAngleBackend() {
-  if (process.platform === 'darwin') return 'metal';
-  if (process.platform === 'win32') return 'd3d11';
-  return 'vulkan';
 }
 
 async function waitForValue(read, timeoutMs, label) {
