@@ -1,4 +1,4 @@
-name: G11 Ubuntu Browser Matrix
+name: G11 Ubuntu Presentation Matrix
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        profile: [headless-cpu, headless-gl, headed-gl, headed-vulkan, headed-vulkan-surface, headless-graphite, cft-155, cft-150, cft-beta]
+        profile: [graphite-swift, graphite-vulkan, graphite-compound, x11-gl, x11-vulkan, x11-graphite, headless-angle-vulkan, headless-interop, angle-gles, chrome-shell]
     env:
       BENCHMARK_PROFILE: ci
       WEBGPU_ANGLE_BACKEND: swiftshader
@@ -30,52 +30,62 @@ jobs:
       - run: npm ci
       - run: node scripts/release-ci-bootstrap.mjs
       - run: npm run build:target -- example:ambient-occlusion example:clipping-planes
-      - name: Test original screenshot and WebGPU readback gates
+      - name: Run the unchanged AO and clipping gates
         shell: bash
         run: |
           set -euo pipefail
-          out="$PWD/artifacts/g11-ubuntu-browser-matrix"
+          out="$PWD/artifacts/g11-ubuntu-presentation-matrix"
           mkdir -p "$out"
           git rev-parse HEAD > "$out/revision.txt"
           export BROWSER_BIN=/usr/bin/google-chrome
-          if [[ "$BROWSER_PROFILE" == cft-* ]]; then
-            if [[ "$BROWSER_PROFILE" == cft-beta ]]; then
-              metadata='https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json'
-              url=$(curl -fsSL --retry 3 "$metadata" | jq -er '.channels.Beta.downloads.chrome[] | select(.platform == "linux64") | .url')
-            else
-              metadata='https://googlechromelabs.github.io/chrome-for-testing/latest-versions-per-milestone-with-downloads.json'
-              url=$(curl -fsSL --retry 3 "$metadata" | jq -er --arg major "${BROWSER_PROFILE#cft-}" '.milestones[$major].downloads.chrome[] | select(.platform == "linux64") | .url')
-            fi
+          if [[ "$BROWSER_PROFILE" == x11-* ]]; then
+            export DISPLAY=:89
+            Xvfb "$DISPLAY" -ac -screen 0 1920x1080x24 -nolisten tcp > "$out/xvfb.log" 2>&1 &
+            xserver=$!
+            trap 'kill "$xserver" 2>/dev/null || true' EXIT
+            for i in {1..50}; do
+              if [[ -S /tmp/.X11-unix/X89 ]]; then break; fi
+              kill -0 "$xserver"
+              sleep 0.2
+            done
+            test -S /tmp/.X11-unix/X89
+          elif [[ "$BROWSER_PROFILE" == chrome-shell ]]; then
+            metadata='https://googlechromelabs.github.io/chrome-for-testing/latest-versions-per-milestone-with-downloads.json'
+            url=$(curl -fsSL --retry 3 "$metadata" | jq -er '.milestones["156"].downloads["chrome-headless-shell"][] | select(.platform == "linux64") | .url')
             printf '%s\n' "$url" > "$out/download-url.txt"
             curl -fsSL --retry 3 "$url" -o "$RUNNER_TEMP/cft.zip"
             sha256sum "$RUNNER_TEMP/cft.zip" > "$out/download-sha256.txt"
             unzip -q "$RUNNER_TEMP/cft.zip" -d "$RUNNER_TEMP/cft"
-            BROWSER_BIN="$RUNNER_TEMP/cft/chrome-linux64/chrome"
+            BROWSER_BIN="$RUNNER_TEMP/cft/chrome-headless-shell-linux64/chrome-headless-shell"
           fi
           "$BROWSER_BIN" --version > "$out/chrome.txt"
           cat > "$out/chrome-capture" <<'CHROME'
           #!/usr/bin/env bash
           set -eu
-          args=("$@")
-          chromium=( "$BROWSER_BIN" )
-          if [[ "$BROWSER_PROFILE" == headed-* ]]; then
-            args=()
-            for arg in "$@"; do
-              if [[ "$arg" != --headless* ]]; then args+=("$arg"); fi
-            done
-            chromium=( xvfb-run -a -s "-screen 0 1920x1080x24" "$BROWSER_BIN" )
-          fi
-          args+=(--enable-unsafe-swiftshader --use-gl=angle)
+          args=()
+          for arg in "$@"; do
+            if [[ "$arg" == --use-angle=* ]]; then continue; fi
+            if [[ "$BROWSER_PROFILE" == x11-* && "$arg" == --headless* ]]; then continue; fi
+            args+=("$arg")
+          done
+          args+=(--enable-unsafe-swiftshader --use-gl=angle --ignore-gpu-blocklist)
+          graphite=(--enable-skia-graphite --skia-graphite-dawn-backend=swiftshader --use-webgpu-adapter=swiftshader)
+          vulkan=(--enable-features=Vulkan --use-vulkan=swiftshader --use-webgpu-adapter=swiftshader)
           case "$BROWSER_PROFILE" in
-            headless-cpu) args+=(--disable-gpu-compositing --use-webgpu-adapter=swiftshader) ;;
-            headless-gl|headed-gl) args+=(--disable-features=SkiaGraphite --use-webgpu-adapter=swiftshader) ;;
-            headed-vulkan) args+=(--enable-features=Vulkan --use-vulkan=swiftshader --use-webgpu-adapter=swiftshader --disable-vulkan-surface --disable-features=SkiaGraphite) ;;
-            headed-vulkan-surface) args+=(--enable-features=Vulkan --use-vulkan=swiftshader --use-webgpu-adapter=swiftshader --disable-features=SkiaGraphite) ;;
-            headless-graphite) args+=(--enable-features=Vulkan,SkiaGraphite --use-vulkan=swiftshader --use-webgpu-adapter=swiftshader --disable-vulkan-surface) ;;
+            graphite-swift) args+=(--use-angle=swiftshader "${graphite[@]}") ;;
+            graphite-vulkan) args+=(--use-angle=swiftshader --enable-skia-graphite --skia-graphite-dawn-backend=vulkan "${vulkan[@]}" --disable-vulkan-surface) ;;
+            graphite-compound) args+=(--use-angle=swiftshader "${graphite[@]}" --enable-features=CompoundSharedImageBacking) ;;
+            x11-gl) args+=(--ozone-platform=x11 --use-angle=swiftshader --disable-skia-graphite --use-webgpu-adapter=swiftshader) ;;
+            x11-vulkan) args+=(--ozone-platform=x11 --use-angle=swiftshader "${vulkan[@]}") ;;
+            x11-graphite) args+=(--ozone-platform=x11 --use-angle=swiftshader "${graphite[@]}") ;;
+            headless-angle-vulkan) args+=(--use-angle=vulkan --enable-features=Vulkan,VulkanFromANGLE --use-vulkan=swiftshader --use-webgpu-adapter=swiftshader --disable-vulkan-surface) ;;
+            headless-interop) args+=(--use-angle=gl --use-vulkan=swiftshader --use-webgpu-adapter=swiftshader --enable-features=Vulkan,WebGPUOnVulkanViaGLInterop --disable-vulkan-surface) ;;
+            angle-gles) args+=(--use-angle=swiftshader --use-webgpu-adapter=opengles --disable-skia-graphite) ;;
+            chrome-shell) args+=(--use-angle=swiftshader --enable-gpu "${graphite[@]}") ;;
           esac
-          printf '%q ' "${chromium[@]}" "${args[@]}" >> "$CHROME_DIAGNOSTIC_FILE"
+          printf '%q ' "$BROWSER_BIN" "${args[@]}" >> "$CHROME_DIAGNOSTIC_FILE"
           printf '\n' >> "$CHROME_DIAGNOSTIC_FILE"
-          exec "${chromium[@]}" "${args[@]}" 2> >(tee -a "$CHROME_DIAGNOSTIC_FILE" >&2)
+          exec "$BROWSER_BIN" "${args[@]}" 2> >(tee -a "$CHROME_DIAGNOSTIC_FILE" >&2)
           CHROME
           chmod +x "$out/chrome-capture"
           export CHROME_PATH="$out/chrome-capture"
@@ -96,6 +106,6 @@ jobs:
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
-          name: ubuntu-browser-matrix-${{ matrix.profile }}
-          path: artifacts/g11-ubuntu-browser-matrix/
+          name: ubuntu-presentation-matrix-${{ matrix.profile }}
+          path: artifacts/g11-ubuntu-presentation-matrix/
           if-no-files-found: warn
