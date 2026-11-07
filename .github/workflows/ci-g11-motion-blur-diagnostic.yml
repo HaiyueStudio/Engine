@@ -1,0 +1,68 @@
+name: G11 Motion Blur Diagnosis
+
+on:
+  push:
+    branches: [codex/g11-motion-blur-diagnostic-7236b395]
+
+permissions:
+  contents: read
+
+jobs:
+  motion-blur-diagnosis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      WEBGPU_ANGLE_BACKEND: swiftshader
+      BENCHMARK_PROFILE: ci
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Confirm diagnostic-only change
+        shell: bash
+        run: |
+          set -eu
+          base=7236b3953b42047bf2b9f45485fc29393f51f39b
+          test "$(git rev-parse HEAD^)" = "$base"
+          output=artifacts/g11-motion-blur-diagnosis
+          mkdir -p "$output"
+          printf '%s\n' '.github/workflows/ci-g11-motion-blur-diagnostic.yml' 'scripts/g11-motion-blur-probe.mjs' > "$output/expected-paths.txt"
+          git diff --name-only "$base" HEAD | sort | diff - "$output/expected-paths.txt"
+          printf '%s\n' "$base" > "$output/base-revision.txt"
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Install and build original example
+        shell: bash
+        run: |
+          set -eu
+          npm ci
+          node scripts/release-ci-bootstrap.mjs
+          npm run build:engine
+          npm run build:target -- example:motion-blur
+      - name: Run the original gate and instrumented replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          output=artifacts/g11-motion-blur-diagnosis
+          {
+            uname -a
+            lscpu
+            node --version
+            google-chrome --version
+            sha256sum scripts/verify-motion-blur-example.mjs examples/motion-blur/bundle.js examples/shared/engine.js
+          } > "$output/environment.txt"
+          original_status=0
+          node scripts/verify-motion-blur-example.mjs 2>&1 | tee "$output/original-gate.log" || original_status=$?
+          probe_status=0
+          node scripts/g11-motion-blur-probe.mjs "$PWD" "$output/trace.json" 2>&1 | tee "$output/probe.log" || probe_status=$?
+          printf 'original=%s\nprobe=%s\n' "$original_status" "$probe_status" | tee "$output/exit-codes.txt"
+          test "$original_status" = 0 && test "$probe_status" = 0
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        if: always()
+        with:
+          name: motion-blur-ubuntu-diagnosis
+          path: artifacts/g11-motion-blur-diagnosis/
+          if-no-files-found: error
