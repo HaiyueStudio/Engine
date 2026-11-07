@@ -1,4 +1,4 @@
-name: G11 Ubuntu Render Triage
+name: G11 Ubuntu Browser Matrix
 
 on:
   push:
@@ -10,14 +10,15 @@ permissions:
 jobs:
   triage:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        scope: [ao, tail]
+        profile: [headless-cpu, headless-gl, headed-gl, headed-vulkan, headed-vulkan-surface, headless-graphite, cft-155, cft-150, cft-beta]
     env:
       BENCHMARK_PROFILE: ci
       WEBGPU_ANGLE_BACKEND: swiftshader
+      BROWSER_PROFILE: ${{ matrix.profile }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
@@ -28,27 +29,53 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node scripts/release-ci-bootstrap.mjs
-      - name: Build the targeted examples
-        shell: bash
-        run: |
-          if [ "$SCOPE" = ao ]; then
-            npm run build:target -- example:ambient-occlusion
-          else
-            npm run build:target -- example:clipping-planes example:navmesh-first-person example:pbr-showcase example:fog example:ktx2-volume example:gltf-animation3d-crossfade example:ambient-occlusion example:shadow-map example:spine-viewer
-          fi
-        env:
-          SCOPE: ${{ matrix.scope }}
-      - name: Capture original gates and Chromium diagnostics
+      - run: npm run build:target -- example:ambient-occlusion example:clipping-planes
+      - name: Test original screenshot and WebGPU readback gates
         shell: bash
         run: |
           set -euo pipefail
-          out="$PWD/artifacts/g11-ubuntu-render-triage"
+          out="$PWD/artifacts/g11-ubuntu-browser-matrix"
           mkdir -p "$out"
           git rev-parse HEAD > "$out/revision.txt"
-          google-chrome --version > "$out/chrome.txt"
+          export BROWSER_BIN=/usr/bin/google-chrome
+          if [[ "$BROWSER_PROFILE" == cft-* ]]; then
+            if [[ "$BROWSER_PROFILE" == cft-beta ]]; then
+              metadata='https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json'
+              url=$(curl -fsSL --retry 3 "$metadata" | jq -er '.channels.Beta.downloads.chrome[] | select(.platform == "linux64") | .url')
+            else
+              metadata='https://googlechromelabs.github.io/chrome-for-testing/latest-versions-per-milestone-with-downloads.json'
+              url=$(curl -fsSL --retry 3 "$metadata" | jq -er --arg major "${BROWSER_PROFILE#cft-}" '.milestones[$major].downloads.chrome[] | select(.platform == "linux64") | .url')
+            fi
+            printf '%s\n' "$url" > "$out/download-url.txt"
+            curl -fsSL --retry 3 "$url" -o "$RUNNER_TEMP/cft.zip"
+            sha256sum "$RUNNER_TEMP/cft.zip" > "$out/download-sha256.txt"
+            unzip -q "$RUNNER_TEMP/cft.zip" -d "$RUNNER_TEMP/cft"
+            BROWSER_BIN="$RUNNER_TEMP/cft/chrome-linux64/chrome"
+          fi
+          "$BROWSER_BIN" --version > "$out/chrome.txt"
           cat > "$out/chrome-capture" <<'CHROME'
           #!/usr/bin/env bash
-          exec /usr/bin/google-chrome "$@" 2> >(tee -a "$CHROME_DIAGNOSTIC_FILE" >&2)
+          set -eu
+          args=("$@")
+          chromium=( "$BROWSER_BIN" )
+          if [[ "$BROWSER_PROFILE" == headed-* ]]; then
+            args=()
+            for arg in "$@"; do
+              if [[ "$arg" != --headless* ]]; then args+=("$arg"); fi
+            done
+            chromium=( xvfb-run -a -s "-screen 0 1920x1080x24" "$BROWSER_BIN" )
+          fi
+          args+=(--enable-unsafe-swiftshader --use-gl=angle)
+          case "$BROWSER_PROFILE" in
+            headless-cpu) args+=(--disable-gpu-compositing --use-webgpu-adapter=swiftshader) ;;
+            headless-gl|headed-gl) args+=(--disable-features=SkiaGraphite --use-webgpu-adapter=swiftshader) ;;
+            headed-vulkan) args+=(--enable-features=Vulkan --use-vulkan=swiftshader --use-webgpu-adapter=swiftshader --disable-vulkan-surface --disable-features=SkiaGraphite) ;;
+            headed-vulkan-surface) args+=(--enable-features=Vulkan --use-vulkan=swiftshader --use-webgpu-adapter=swiftshader --disable-features=SkiaGraphite) ;;
+            headless-graphite) args+=(--enable-features=Vulkan,SkiaGraphite --use-vulkan=swiftshader --use-webgpu-adapter=swiftshader --disable-vulkan-surface) ;;
+          esac
+          printf '%q ' "${chromium[@]}" "${args[@]}" >> "$CHROME_DIAGNOSTIC_FILE"
+          printf '\n' >> "$CHROME_DIAGNOSTIC_FILE"
+          exec "${chromium[@]}" "${args[@]}" 2> >(tee -a "$CHROME_DIAGNOSTIC_FILE" >&2)
           CHROME
           chmod +x "$out/chrome-capture"
           export CHROME_PATH="$out/chrome-capture"
@@ -61,24 +88,14 @@ jobs:
             if [ "$status" != 0 ]; then failed=1; fi
           }
           failed=0
-          if [ "$SCOPE" = ao ]; then
-            run_gate ao scripts/verify-ambient-occlusion-example.mjs
-          else
-            run_gate clipping scripts/verify-clipping-planes-example.mjs
-            run_gate navmesh scripts/verify-navmesh-first-person-example.mjs
-            run_gate pbr scripts/verify-pbr-example.mjs
-            run_gate fog scripts/verify-fog-example.mjs
-            run_gate volume scripts/verify-volume-example.mjs
-            run_gate pixels scripts/verify-pixel-regression.mjs
-            run_gate product-pixels scripts/verify-pixel-regression.mjs --product
-            run_gate screenshots scripts/verify-product-screenshot-regressions.mjs --engine
-          fi
+          run_gate ao scripts/verify-ambient-occlusion-example.mjs
+          run_gate clipping scripts/verify-clipping-planes-example.mjs
+          run_gate pixels scripts/verify-pixel-regression.mjs
+          run_gate product-pixels scripts/verify-pixel-regression.mjs --product
           exit "$failed"
-        env:
-          SCOPE: ${{ matrix.scope }}
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
-          name: ubuntu-render-triage-${{ matrix.scope }}
-          path: artifacts/g11-ubuntu-render-triage/
+          name: ubuntu-browser-matrix-${{ matrix.profile }}
+          path: artifacts/g11-ubuntu-browser-matrix/
           if-no-files-found: warn
