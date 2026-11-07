@@ -17,14 +17,14 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
-          fetch-depth: 2
+          fetch-depth: 3
           persist-credentials: false
       - name: Confirm diagnostic-only change
         shell: bash
         run: |
           set -eu
           base=7236b3953b42047bf2b9f45485fc29393f51f39b
-          test "$(git rev-parse HEAD^)" = "$base"
+          git merge-base --is-ancestor "$base" HEAD
           output=artifacts/g11-motion-blur-diagnosis
           mkdir -p "$output"
           printf '%s\n' '.github/workflows/ci-g11-motion-blur-diagnostic.yml' 'scripts/g11-motion-blur-probe.mjs' > "$output/expected-paths.txt"
@@ -42,7 +42,7 @@ jobs:
           node scripts/release-ci-bootstrap.mjs
           npm run build:engine
           npm run build:target -- example:motion-blur
-      - name: Run the original gate and instrumented replay
+      - name: Compare the original gate and Vulkan SwiftShader presentation
         shell: bash
         run: |
           set -euo pipefail
@@ -56,10 +56,33 @@ jobs:
           } > "$output/environment.txt"
           original_status=0
           node scripts/verify-motion-blur-example.mjs 2>&1 | tee "$output/original-gate.log" || original_status=$?
+          cat > "$output/chrome-vulkan-swiftshader" <<'CHROME'
+          #!/bin/sh
+          exec /usr/bin/google-chrome --enable-features=Vulkan --use-vulkan=swiftshader --use-webgpu-adapter=swiftshader --disable-vulkan-surface "$@"
+          CHROME
+          chmod +x "$output/chrome-vulkan-swiftshader"
+          export CHROME_PATH="$PWD/$output/chrome-vulkan-swiftshader"
+          vulkan_status=0
+          node scripts/verify-motion-blur-example.mjs 2>&1 | tee "$output/vulkan-gate.log" || vulkan_status=$?
           probe_status=0
           node scripts/g11-motion-blur-probe.mjs "$PWD" "$output/trace.json" 2>&1 | tee "$output/probe.log" || probe_status=$?
-          printf 'original=%s\nprobe=%s\n' "$original_status" "$probe_status" | tee "$output/exit-codes.txt"
-          test "$original_status" = 0 && test "$probe_status" = 0
+          printf 'original=%s\nvulkan=%s\nprobe=%s\n' "$original_status" "$vulkan_status" "$probe_status" | tee "$output/exit-codes.txt"
+          test "$vulkan_status" = 0
+          test "$probe_status" = 0
+          node --input-type=module - "$output/trace.json" <<'VERIFY'
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+          const trace = JSON.parse(readFileSync(process.argv[2]));
+          assert.equal(trace.result, 'passed');
+          assert.deepEqual(Object.keys(trace.cases), ['raw', 'centered', 'reconstructed', 'velocity', 'split']);
+          for (const [name, item] of Object.entries(trace.cases)) {
+            assert.equal(item.status, 'passed', name);
+            assert.equal(item.progress.find(step => step.phase === 'init-done').adapter, 'swiftshader', name);
+            assert.equal(item.progress.findLast(step => step.phase === 'frame').index, 24, name);
+          }
+          assert.doesNotMatch(trace.browserStderr, /Could not find SharedImageBackingFactory|Unable to create shared image|GPU state invalid/);
+          console.log('Verified SwiftShader, all five cases, 24 frames per case and no shared-image errors.');
+          VERIFY
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
