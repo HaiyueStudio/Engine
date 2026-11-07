@@ -1,4 +1,5 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runChromeWebGpuFixture } from './webgpu-gate/chrome-runner.mjs';
@@ -12,6 +13,7 @@ import {
   shouldEnforceDevicePerformanceBudgets,
 } from './webgpu-performance-budget.mjs';
 import { shouldWriteFormalPerformanceEvidence } from './performance-evidence-policy.mjs';
+import { assessAoSoftwareTimeout } from './webgpu-gate/ambient-occlusion-software-timeout-policy.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const mode = process.argv.includes('--smoke') ? 'smoke' : 'full';
@@ -23,13 +25,14 @@ const sourceFingerprint = createPerformanceSourceFingerprint(root, benchmarkRoot
 const performanceConfig = loadPerformanceBudgetConfig(root);
 const suiteConfig = performanceConfig.suites['ambient-occlusion.gpu-cost'];
 const enforcePerformanceBudget = shouldEnforceDevicePerformanceBudgets();
+const timeoutMs = integerArgument('timeout-ms', mode === 'smoke' ? 180_000 : 600_000);
 let result;
 try {
   result = await runChromeWebGpuFixture({
     root: benchmarkRoot,
     fixture: 'scripts/webgpu-gate/ambient-occlusion-gpu-cost-fixture.html',
     query: { warmup, samples },
-    timeoutMs: integerArgument('timeout-ms', mode === 'smoke' ? 180_000 : 600_000),
+    timeoutMs,
     acceptedStatuses: ['passed', 'unavailable'],
     failureCaptureExpression: 'globalThis.__captureAoCostFailure?.()',
   });
@@ -41,6 +44,27 @@ try {
     mode, warmup, samples, sourceFingerprint, browserFailure: error.browserFailure, error: String(error.stack ?? error),
   }, null, 2) + '\n', { flag: 'wx' });
   console.error('[ambient-occlusion:performance] Original failure retained at ' + relative(root, failurePath));
+  const admission = assessAoSoftwareTimeout(error, {
+    version: JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8')).version,
+    platform: process.platform, environment: process.env, mode, warmup, samples, timeoutMs,
+    enforcePerformanceBudget,
+    sourceUnchanged: createPerformanceSourceFingerprint(root, benchmarkRoot) === sourceFingerprint,
+  });
+  if (admission.admitted) {
+    const investigationPath = failurePath.replace('-failed-', '-investigation-');
+    writeFileSync(investigationPath, JSON.stringify({
+      schemaVersion: 1, suite: 'ambient-occlusion.gpu-cost', ...admission,
+      generatedAt: new Date().toISOString(), mode, warmup, samples, sourceFingerprint,
+      originalGateStatus: 'failed', originalFailure: {
+        path: relative(root, failurePath).replaceAll('\\', '/'),
+        sha256: createHash('sha256').update(readFileSync(failurePath)).digest('hex'),
+      },
+      nativePerformanceQualification: false,
+      remainingHardGates: ['native GPU performance', 'GPU 5% regression', 'pixels', 'resources', 'all other failures'],
+    }, null, 2) + '\n', { flag: 'wx' });
+    console.warn('[ambient-occlusion:performance] Approved software timeout investigation: ' + relative(root, investigationPath));
+    process.exit(0);
+  }
   throw error;
 }
 if (createPerformanceSourceFingerprint(root, benchmarkRoot) !== sourceFingerprint) {

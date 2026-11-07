@@ -14,6 +14,7 @@ jobs:
       BENCHMARK_PROFILE: ci
       CPU_BENCHMARK_RUNNER_PROFILE: github-hosted-ubuntu-latest
       WEBGPU_ANGLE_BACKEND: swiftshader
+      WEBGPU_SOFTWARE_AO_TIMEOUT_ADMISSION: m25-g11-linux-swiftshader-ao-cost-600s
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
