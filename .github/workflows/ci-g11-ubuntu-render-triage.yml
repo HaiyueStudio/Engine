@@ -1,0 +1,84 @@
+name: G11 Ubuntu Render Triage
+
+on:
+  push:
+    branches: [codex/g11-motion-blur-diagnostic-7236b395]
+
+permissions:
+  contents: read
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        scope: [ao, tail]
+    env:
+      BENCHMARK_PROFILE: ci
+      WEBGPU_ANGLE_BACKEND: swiftshader
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: node scripts/release-ci-bootstrap.mjs
+      - name: Build the targeted examples
+        shell: bash
+        run: |
+          if [ "$SCOPE" = ao ]; then
+            npm run build:target -- example:ambient-occlusion
+          else
+            npm run build:target -- example:clipping-planes example:navmesh-first-person example:pbr-showcase example:fog example:ktx2-volume example:gltf-animation3d-crossfade example:ambient-occlusion example:shadow-map example:spine-viewer
+          fi
+        env:
+          SCOPE: ${{ matrix.scope }}
+      - name: Capture original gates and Chromium diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$PWD/artifacts/g11-ubuntu-render-triage"
+          mkdir -p "$out"
+          git rev-parse HEAD > "$out/revision.txt"
+          google-chrome --version > "$out/chrome.txt"
+          cat > "$out/chrome-capture" <<'CHROME'
+          #!/usr/bin/env bash
+          exec /usr/bin/google-chrome "$@" 2> >(tee -a "$CHROME_DIAGNOSTIC_FILE" >&2)
+          CHROME
+          chmod +x "$out/chrome-capture"
+          export CHROME_PATH="$out/chrome-capture"
+          run_gate() {
+            local name="$1"; shift
+            export CHROME_DIAGNOSTIC_FILE="$out/$name-browser.log"
+            local status=0
+            node "$@" 2>&1 | tee "$out/$name-gate.log" || status=$?
+            printf '%s=%s\n' "$name" "$status" | tee -a "$out/status.txt"
+            if [ "$status" != 0 ]; then failed=1; fi
+          }
+          failed=0
+          if [ "$SCOPE" = ao ]; then
+            run_gate ao scripts/verify-ambient-occlusion-example.mjs
+          else
+            run_gate clipping scripts/verify-clipping-planes-example.mjs
+            run_gate navmesh scripts/verify-navmesh-first-person-example.mjs
+            run_gate pbr scripts/verify-pbr-example.mjs
+            run_gate fog scripts/verify-fog-example.mjs
+            run_gate volume scripts/verify-volume-example.mjs
+            run_gate pixels scripts/verify-pixel-regression.mjs
+            run_gate product-pixels scripts/verify-pixel-regression.mjs --product
+            run_gate screenshots scripts/verify-product-screenshot-regressions.mjs --engine
+          fi
+          exit "$failed"
+        env:
+          SCOPE: ${{ matrix.scope }}
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        if: always()
+        with:
+          name: ubuntu-render-triage-${{ matrix.scope }}
+          path: artifacts/g11-ubuntu-render-triage/
+          if-no-files-found: warn
