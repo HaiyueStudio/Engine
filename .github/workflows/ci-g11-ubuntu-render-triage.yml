@@ -1,4 +1,4 @@
-name: G11 Ubuntu Capture Verification
+name: G11 Ubuntu Render Fix Verification
 
 on:
   push:
@@ -8,17 +8,16 @@ permissions:
   contents: read
 
 jobs:
-  capture:
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
-        profile: [fixed-texture, x11-original, x11-vulkan, x11-vulkan-surface, x11-graphite]
+        scope: [canvas, texture]
     env:
       BENCHMARK_PROFILE: ci
       WEBGPU_ANGLE_BACKEND: swiftshader
-      BROWSER_PROFILE: ${{ matrix.profile }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
@@ -28,57 +27,23 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
-      - if: matrix.profile != 'fixed-texture'
+      - if: matrix.scope == 'canvas'
         run: node scripts/release-ci-bootstrap.mjs
-      - if: matrix.profile != 'fixed-texture'
-        run: npm run build:target -- example:ambient-occlusion example:clipping-planes
-      - name: Verify fixed texture readback directly
-        if: matrix.profile == 'fixed-texture'
+      - if: matrix.scope == 'canvas'
+        run: npm run build:target -- example:motion-blur example:ambient-occlusion example:clipping-planes example:navmesh-first-person example:pbr-showcase example:fog example:ktx2-volume example:gltf-animation3d-crossfade example:shadow-map example:spine-viewer
+      - name: Verify the unchanged gates with the repaired browser launch
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p artifacts/g11-ubuntu-capture
-          git rev-parse HEAD > artifacts/g11-ubuntu-capture/revision.txt
-          google-chrome --version > artifacts/g11-ubuntu-capture/chrome.txt
-          node scripts/verify-pixel-regression.mjs 2>&1 | tee artifacts/g11-ubuntu-capture/pixels-gate.log
-          node scripts/verify-pixel-regression.mjs --product 2>&1 | tee artifacts/g11-ubuntu-capture/product-pixels-gate.log
-          cp artifacts/render-regression/*-candidate.json artifacts/g11-ubuntu-capture/
-      - name: Verify the original screenshot gates on a virtual display
-        if: matrix.profile != 'fixed-texture'
-        shell: bash
-        run: |
-          set -euo pipefail
-          out="$PWD/artifacts/g11-ubuntu-capture"
+          out="$PWD/artifacts/g11-ubuntu-render-fix"
           mkdir -p "$out"
           git rev-parse HEAD > "$out/revision.txt"
           google-chrome --version > "$out/chrome.txt"
-          export DISPLAY=:89
-          Xvfb "$DISPLAY" -ac -screen 0 1920x1080x24 -nolisten tcp > "$out/xvfb.log" 2>&1 &
-          xserver=$!
-          trap 'kill "$xserver" 2>/dev/null || true' EXIT
-          for i in {1..50}; do
-            if [[ -S /tmp/.X11-unix/X89 ]]; then break; fi
-            kill -0 "$xserver"
-            sleep 0.2
-          done
-          test -S /tmp/.X11-unix/X89
           cat > "$out/chrome-capture" <<'CHROME'
           #!/usr/bin/env bash
-          set -eu
-          args=()
-          for arg in "$@"; do
-            if [[ "$arg" != --headless* ]]; then args+=("$arg"); fi
-          done
-          args+=(--ozone-platform=x11 --no-first-run --no-default-browser-check --disable-search-engine-choice-screen)
-          vulkan=(--enable-features=Vulkan --use-vulkan=swiftshader --use-webgpu-adapter=swiftshader)
-          case "$BROWSER_PROFILE" in
-            x11-vulkan) args+=("${vulkan[@]}" --disable-vulkan-surface) ;;
-            x11-vulkan-surface) args+=("${vulkan[@]}") ;;
-            x11-graphite) args+=(--enable-skia-graphite --skia-graphite-dawn-backend=swiftshader --use-webgpu-adapter=swiftshader) ;;
-          esac
-          printf '%q ' /usr/bin/google-chrome "${args[@]}" >> "$CHROME_DIAGNOSTIC_FILE"
+          printf '%q ' /usr/bin/google-chrome "$@" >> "$CHROME_DIAGNOSTIC_FILE"
           printf '\n' >> "$CHROME_DIAGNOSTIC_FILE"
-          exec /usr/bin/google-chrome "${args[@]}" 2> >(tee -a "$CHROME_DIAGNOSTIC_FILE" >&2)
+          exec /usr/bin/google-chrome "$@" 2> >(tee -a "$CHROME_DIAGNOSTIC_FILE" >&2)
           CHROME
           chmod +x "$out/chrome-capture"
           export CHROME_PATH="$out/chrome-capture"
@@ -91,12 +56,27 @@ jobs:
             if [ "$status" != 0 ]; then failed=1; fi
           }
           failed=0
-          run_gate ao scripts/verify-ambient-occlusion-example.mjs
-          run_gate clipping scripts/verify-clipping-planes-example.mjs
+          if [ "$SCOPE" = canvas ]; then
+            run_gate motion scripts/verify-motion-blur-example.mjs
+            run_gate ao scripts/verify-ambient-occlusion-example.mjs
+            run_gate clipping scripts/verify-clipping-planes-example.mjs
+            run_gate navmesh scripts/verify-navmesh-first-person-example.mjs
+            run_gate pbr scripts/verify-pbr-example.mjs
+            run_gate fog scripts/verify-fog-example.mjs
+            run_gate volume scripts/verify-volume-example.mjs
+            run_gate screenshots scripts/verify-product-screenshot-regressions.mjs --engine
+          else
+            run_gate pixels scripts/verify-pixel-regression.mjs
+            run_gate product-pixels scripts/verify-pixel-regression.mjs --product
+          fi
           exit "$failed"
+        env:
+          SCOPE: ${{ matrix.scope }}
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
-          name: ubuntu-capture-${{ matrix.profile }}
-          path: artifacts/g11-ubuntu-capture/
+          name: ubuntu-render-fix-${{ matrix.scope }}
+          path: |
+            artifacts/g11-ubuntu-render-fix/
+            artifacts/render-regression/
           if-no-files-found: warn

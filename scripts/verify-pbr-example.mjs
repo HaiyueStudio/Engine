@@ -8,6 +8,7 @@ import { decodePng } from './visual-regression/png.mjs';
 import { createPortablePixelRecord } from './visual-regression/portable-pixels.mjs';
 import { pbrPixelBaselinePath, comparePbrPixelBaseline } from './pbr-example-pixel-policy.mjs';
 import {
+  chromeCanvasArguments,
   defaultChromePath,
   defaultWebGpuAngleBackend,
   startHttpFixtureServer,
@@ -119,6 +120,7 @@ async function capture(binary, url, expectedCoverage, verifyControls = false) {
   const angleBackend = process.env.WEBGPU_ANGLE_BACKEND ?? defaultWebGpuAngleBackend();
   const child = spawn(binary, [
     '--headless=new', '--no-sandbox', '--disable-gpu-sandbox', '--enable-unsafe-webgpu', `--use-angle=${angleBackend}`,
+    ...chromeCanvasArguments(angleBackend),
     '--window-size=960,640', '--force-device-scale-factor=1', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank',
   ], { stdio: ['ignore', 'pipe', 'pipe'] });
   child.stdout.resume();

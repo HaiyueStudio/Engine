@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
 import {
+  chromeCanvasArguments,
   defaultChromePath,
   defaultWebGpuAngleBackend,
   startHttpFixtureServer,
@@ -150,6 +151,7 @@ async function capture(binary, url, name) {
   const angleBackend = process.env.WEBGPU_ANGLE_BACKEND ?? defaultWebGpuAngleBackend();
   const child = spawn(binary, [
     '--headless=new', '--no-sandbox', '--disable-gpu-sandbox', '--enable-unsafe-webgpu', `--use-angle=${angleBackend}`,
+    ...chromeCanvasArguments(angleBackend),
     '--window-size=960,640', '--force-device-scale-factor=1',
     '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank',
   ], { stdio: ['ignore', 'pipe', 'pipe'] });

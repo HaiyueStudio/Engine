@@ -21,6 +21,13 @@ export function defaultWebGpuAngleBackend(platform = process.platform) {
   return 'vulkan';
 }
 
+/** Linux software canvas screenshots need Dawn and the compositor to share ANGLE's GL path. */
+export function chromeCanvasArguments(angleBackend, platform = process.platform) {
+  if (platform !== 'linux' || angleBackend !== 'swiftshader') return [];
+  return ['--enable-unsafe-swiftshader', '--use-gl=angle', '--ignore-gpu-blocklist',
+    '--use-webgpu-adapter=opengles', '--disable-skia-graphite'];
+}
+
 /** Automated graphs stay silent; real hearing/unlock requires a visible user-operated window. */
 export function chromeAudioArguments(mode = 'silent', presentation = null) {
   if (mode === 'silent') return ['--mute-audio', '--autoplay-policy=no-user-gesture-required'];
@@ -184,6 +191,7 @@ async function runChrome(
     '--enable-unsafe-webgpu',
     ...(disableDx12InfoCollection ? ['--disable-gpu-process-for-dx12-info-collection'] : []),
     `--use-angle=${angleBackend}`,
+    ...(visualCapture ? chromeCanvasArguments(angleBackend) : []),
     '--remote-debugging-port=0',
     ...(visualCapture ? [
       `--window-size=${visualCapture.viewportWidth ?? 960},${visualCapture.viewportHeight ?? 540}`,
