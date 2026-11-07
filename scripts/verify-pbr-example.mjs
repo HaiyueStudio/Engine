@@ -64,7 +64,7 @@ const current = {
 };
 writeFileSync(resolve(root, 'artifacts/render-regression/pbr/candidate.json'), `${JSON.stringify(current, null, 2)}\n`);
 if (process.env.UPDATE_PBR_EXAMPLE_BASELINE === '1') {
-  const reference = process.platform === 'win32' ? { ...current, referencePlatform: 'win32' } : current;
+  const reference = process.platform === 'darwin' ? current : { ...current, referencePlatform: process.platform };
   writeFileSync(baselinePath, `${JSON.stringify(reference, null, 2)}\n`);
   console.log(`[pbr-example] Updated ${baselinePath}.`);
 } else {

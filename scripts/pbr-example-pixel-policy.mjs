@@ -5,14 +5,17 @@ const original = 'review/baselines/render-pixels-stage9-pbr-example.json';
 
 export function pbrPixelBaselinePath(platform) {
   if (!['win32', 'darwin', 'linux'].includes(platform)) throw Error(`Unsupported PBR screenshot platform: ${platform}`);
-  return platform === 'win32' ? 'review/baselines/render-pixels-stage9-pbr-example.win32.json' : original;
+  if (platform === 'win32') return 'review/baselines/render-pixels-stage9-pbr-example.win32.json';
+  if (platform === 'linux') return 'review/baselines/render-pixels-stage9-pbr-example.linux.json';
+  return original;
 }
 
 /** Full-page RGBA comparisons retain the original budgets and all six modes. */
 export function comparePbrPixelBaseline(current, baseline, platform) {
   pbrPixelBaselinePath(platform);
   if (platform === 'win32' && baseline?.referencePlatform !== 'win32') throw Error('Windows PBR requires its reviewed Windows full-page baseline');
-  if (platform !== 'win32' && baseline?.referencePlatform) throw Error('PBR baseline belongs to another platform');
+  if (platform === 'linux' && baseline?.referencePlatform !== 'linux') throw Error('Linux PBR requires its reviewed Linux full-page baseline');
+  if (platform === 'darwin' && baseline?.referencePlatform) throw Error('PBR baseline belongs to another platform');
   const identity = { schemaVersion: 3, fixture: 'haiyue-pbr-showcase-clearcoat-chrome-960x640', width: 960, height: 640 };
   for (const [key, value] of Object.entries(identity)) {
     if (current?.[key] !== value || baseline?.[key] !== value) throw Error(`PBR screenshot identity changed at ${key}`);
