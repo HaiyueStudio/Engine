@@ -1,4 +1,4 @@
-name: G11 Ubuntu PBR Font Verification
+name: G11 Ubuntu PBR Font Metrics
 
 on:
   push:
@@ -11,6 +11,10 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        font: [liberation-ui, liberation-all, noto-ui]
     env:
       BENCHMARK_PROFILE: ci
       WEBGPU_ANGLE_BACKEND: swiftshader
@@ -23,30 +27,49 @@ jobs:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
-      - name: Install CJK fonts for the unchanged full-page references
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends fonts-noto-cjk
-      - run: node scripts/release-ci-bootstrap.mjs
-      - run: npm run build:target -- example:pbr-showcase
-      - name: Verify every original PBR mode and control
+      - name: Install and record screenshot fonts
         shell: bash
         run: |
           set -euo pipefail
-          out="$PWD/artifacts/g11-ubuntu-pbr-font"
-          mkdir -p "$out"
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends fonts-noto-cjk fonts-noto-core fonts-liberation
+          out="$PWD/artifacts/g11-ubuntu-pbr-font-metrics"
+          mkdir -p "$out" "$HOME/.config/fontconfig/conf.d"
+          ui='Liberation Sans'
+          mono='DejaVu Sans Mono'
+          if [ "$FONT" = liberation-all ]; then mono='Liberation Mono'; fi
+          if [ "$FONT" = noto-ui ]; then ui='Noto Sans'; fi
+          cat > "$HOME/.config/fontconfig/conf.d/99-haiyue-screenshot.conf" <<FONTCONFIG
+          <?xml version="1.0"?>
+          <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+          <fontconfig>
+            <alias binding="strong"><family>system-ui</family><prefer><family>$ui</family></prefer></alias>
+            <alias binding="strong"><family>ui-monospace</family><prefer><family>$mono</family></prefer></alias>
+            <alias binding="strong"><family>monospace</family><prefer><family>$mono</family></prefer></alias>
+          </fontconfig>
+          FONTCONFIG
+          fc-cache -f
+          cp "$HOME/.config/fontconfig/conf.d/99-haiyue-screenshot.conf" "$out/fontconfig.conf"
+          for family in system-ui ui-monospace monospace sans-serif ':lang=zh-cn'; do
+            fc-match "$family" >> "$out/fonts.txt"
+          done
           git rev-parse HEAD > "$out/revision.txt"
           google-chrome --version > "$out/chrome.txt"
-          dpkg-query --show fonts-noto-cjk > "$out/fonts-package.txt"
-          fc-match monospace > "$out/fonts.txt"
-          fc-match sans-serif >> "$out/fonts.txt"
-          fc-match ':lang=zh-cn' >> "$out/fonts.txt"
-          node scripts/verify-pbr-example.mjs 2>&1 | tee "$out/pbr-gate.log"
+          dpkg-query --show fonts-noto-cjk fonts-noto-core fonts-liberation > "$out/font-packages.txt"
+        env:
+          FONT: ${{ matrix.font }}
+      - run: node scripts/release-ci-bootstrap.mjs
+      - run: npm run build:target -- example:pbr-showcase
+      - name: Verify original PBR references
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/verify-pbr-example.mjs 2>&1 | tee artifacts/g11-ubuntu-pbr-font-metrics/pbr-gate.log
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
-          name: ubuntu-pbr-font
+          name: ubuntu-pbr-font-metrics-${{ matrix.font }}
           path: |
-            artifacts/g11-ubuntu-pbr-font/
+            artifacts/g11-ubuntu-pbr-font-metrics/
             artifacts/render-regression/pbr/
           if-no-files-found: warn
