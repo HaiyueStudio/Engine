@@ -15,7 +15,7 @@ export async function createCollectionExample(canvas:HTMLCanvasElement,count=100
   const items=Array.from({length:count},(_,i)=>({key:'item-'+i,value:'Item '+i})),edits=new Map<string,string>(),rowCounts={created:0,disposed:0,bind:0,unbind:0};
   const list=createGuiVirtualList({items,keyOf:item=>item.key,rowHeight:28,height:560,focus:gui.focus,onSelection:key=>{status.text='Selected '+key;},createRow(){
     rowCounts.created++;const element=new GuiInput({width:'100%',height:28,value:''});
-    return {element,bind(item,key){rowCounts.bind++;element.setValue(edits.get(key)??item.value);const change=()=>edits.set(key,element.value);element.on('change',change);return()=>{element.off('change',change);rowCounts.unbind++;};},dispose(){rowCounts.disposed++;element.removeAllListeners();}};
+    return {element,bind(item,key){rowCounts.bind++;element.setValue(edits.get(key)??item.value);const change=(value:string)=>edits.set(key,value);element.onChange=change;return()=>{if(element.onChange===change)element.onChange=null;rowCounts.unbind++;};},dispose(){rowCounts.disposed++;element.removeAllListeners();}};
   }});left.add(list.element);
   const nodes=Array.from({length:10},(_,i)=>({key:'group-'+i,value:'Group '+i,children:Array.from({length:Math.ceil(count/10)},(_,j)=>({key:'node-'+i+'-'+j,value:'Node '+i+' / '+j,disabled:j===2}))}));
   const tree=createGuiVirtualTree({nodes,rowHeight:28,height:560,focus:gui.focus,expandedKeys:['group-0'],createRow(){const element=new GuiButton({width:'100%',height:28,text:''});return {element,bind(node){element.text=node.value;return()=>{};},dispose(){element.removeAllListeners();}};}});right.add(tree.element);

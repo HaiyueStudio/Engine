@@ -95,3 +95,35 @@ for (const explicitFocus of [true,false]) test(`collection row wrappers never tr
  system.focus.focus(row('k1').parent);assert.equal(system.focus.focused,row('k1'));assert.equal(s.selectedKey,'k1');
  s.dispose();system.destroy();root.destroy();assert.equal(r.counts.created,r.counts.disposed);
 });
+
+// Exercise the actual example factories with the public input and virtual list.
+// Extracting the factory keeps WebGPU/browser setup out of this lifecycle test.
+const rowFactoryFs=await import('node:fs');
+const rowFactoryTs=(await import('typescript')).default;
+function exampleRowFactory(source,context){
+ const file=rowFactoryTs.createSourceFile('application.ts',source,rowFactoryTs.ScriptTarget.Latest,true),factories=[];
+ const visit=node=>{if(rowFactoryTs.isCallExpression(node)&&node.expression.getText(file)==='createGuiVirtualList'){
+  const method=node.arguments[0]?.properties?.find(p=>p.name?.getText(file)==='createRow');if(method)factories.push(method);
+ }rowFactoryTs.forEachChild(node,visit);};visit(file);assert.equal(factories.length,1,'Expected exactly one production list row factory');
+ const js=rowFactoryTs.transpileModule('({'+factories[0].getText(file)+'})',{compilerOptions:{target:rowFactoryTs.ScriptTarget.ES2022}}).outputText.trim().replace(/;$/u,'');
+ return Function(...Object.keys(context),'return '+js)(...Object.values(context)).createRow;
+}
+function registerExampleRowRetention(name,path){
+ test(name+' keeps committed edits by stable key through recycling, cancellation and disposal',()=>{
+  const source=rowFactoryFs.readFileSync(path,'utf8'),edits=new Map(),counts={created:0,disposed:0,bound:0,unbound:0,bind:0,unbind:0},fields=[],records=[],instances=[];
+  const factory=exampleRowFactory(source,{GuiInput,edits,rows:counts,rowCounts:counts,fields,record:(...args)=>records.push(args)});
+  const items=Array.from({length:1000},(_,i)=>({key:'item-'+i,value:'Item '+i}));
+  const value=createGuiVirtualList({items,keyOf:item=>item.key,rowHeight:28,height:560,createRow(){const row=factory();instances.push(row);return row;}});
+  const editor=key=>{value.scrollToKey(key,'start');value.element.layout({x:0,y:0,width:400,height:560});value.setSelection(key);return value.element.children.find(h=>h.children[0] instanceof GuiInput&&h.children[0].value===(edits.get(key)??items.find(i=>i.key===key).value))?.children[0];};
+  try{
+   const row=editor('item-1');assert(row,'Actual editable row missing');row.selectAll();row.insertText('G11-row1');assert.equal(edits.get('item-1'),'G11-row1','Committed input must update the stable-key model');
+   const callback=row.onChange;value.setScrollOffset(14000);assert.notEqual(row.onChange,callback,'Recycling must release the callback for the retired key');
+   const distant=editor('item-500');distant.selectAll();distant.insertText('Other row');assert.equal(edits.get('item-500'),'Other row');assert.equal(edits.get('item-1'),'G11-row1','A rebound editor must not mutate its old key');
+   const restored=editor('item-1');assert.equal(restored.value,'G11-row1');restored.selectAll();restored.beginComposition();restored.updateComposition('pending');restored.cancelComposition();assert.equal(restored.value,'G11-row1');assert.equal(edits.get('item-1'),'G11-row1','Canceled preedit must not replace committed data');
+   restored.selectAll();restored.beginComposition();restored.updateComposition('nihao');restored.commitComposition('你好');assert.equal(edits.get('item-1'),'你好');value.setScrollOffset(14000);assert.equal(editor('item-1').value,'你好','Committed IME text must survive recycling');
+  }finally{value.dispose();}
+  assert(instances.every(row=>row.element.onChange===null),'No disposed row may retain its binding callback');assert.equal(fields.length,0);assert.equal(counts.created,counts.disposed);assert.equal(counts.bound,counts.unbound);assert.equal(counts.bind,counts.unbind);
+ });
+}
+registerExampleRowRetention('gameplay-kit',new URL('../../examples/gameplay-kit/application.ts',import.meta.url));
+registerExampleRowRetention('gui-collections example',new URL('../../examples/gui-collections/application.ts',import.meta.url));
