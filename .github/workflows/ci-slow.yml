@@ -48,6 +48,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install screenshot fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends fonts-noto-cjk
+
       - name: Build Engine foundations and diagnostic inputs
         run: node scripts/release-ci-bootstrap.mjs
 
