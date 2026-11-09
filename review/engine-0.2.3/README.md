@@ -1,6 +1,6 @@
 # Engine 0.2.3 验收入口
 
-Mac 浏览器与物理 iPhone 使用冻结候选 `307771a`。验收分支的解包、校验和回传命令见 [Apple 设备验收入口](apple-device/README.md)。
+Mac 浏览器与物理 iPhone 的修复候选为 `5d8041d`。原候选的真机记录保留其来源。解包、复测和回传命令见 [Apple 设备验收入口](apple-device/README.md)。
 
 G01–G10 已完成，G11 仍在集成／验收。开发候选的 Engine／extensions／shader-language 为 0.2.3，animation-spec 为 0.2.2。整版尚未取得正式平台／性能、真实设备、全局门禁及无发布演练资格，未发布或推广基线。唯一活动检查入口为 [G11 检查索引](g11-checks.json)。
 

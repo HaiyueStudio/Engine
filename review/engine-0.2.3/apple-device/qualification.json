@@ -1,25 +1,28 @@
 {
   "schemaVersion": 1,
-  "engineRevision": "307771ab221c2259a8d35f0f183728d5150c5cae",
-  "candidateSha256": "227781480fd725569757498a0225a5b3a59d3dd380794304b91e406b2d50a23a",
-  "nativeCandidateId": "g11-023-native-f18058babe967c2da7d297cf",
+  "engineRevision": "5d8041d7131fc12a84606586ccfbcc9a5633903c",
+  "candidateSha256": "4018b679bbe8d8e228f050a0b04b7b6c453032f71cba309eddafdc97420ca3cf",
+  "nativeCandidateId": "g11-023-native-b0b8e30232fa4e3adbe1d289",
   "archive": {
-    "name": "engine-0.2.3-real-devices-307771a.tar.gz",
-    "bytes": 19391483,
-    "sha256": "295533d5652ad3c8dd5050b864bb1a1b2033d0e3084a9d2493ecd06086144b07"
+    "name": "engine-0.2.3-real-devices-5d8041d.tar.gz",
+    "bytes": 19396255,
+    "sha256": "7f375a4ff3a8a27525cb58b1ab0a7650a9a87804179a9a6d7ee86d697f16ba1a"
   },
-  "windowsEvidence": {
-    "keyboardIme": {
-      "status": "passed-physical-windows-ime",
-      "reportSha256": "de27d649ae9acec26ffff580fea27b8c3c00e08269b6e62195266a9db703a771"
-    },
-    "gamepad": {
-      "status": "passed-physical-windows-gamepad",
-      "reportSha256": "394a446dcb5ec8a6e8b96173aaab620b27a09dd65441620cc438bb2ea48f0d74"
-    },
-    "hearing": {
-      "status": "passed-physical-windows-hearing",
-      "reportSha256": "6aaf8a42ba9c8235285096aa54b3b1989df83195ffcbd38d035c6594dbad189c"
+  "previousWindowsEvidence": {
+    "engineRevision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+    "stages": {
+      "keyboardIme": {
+        "status": "passed-physical-windows-ime",
+        "reportSha256": "de27d649ae9acec26ffff580fea27b8c3c00e08269b6e62195266a9db703a771"
+      },
+      "gamepad": {
+        "status": "passed-physical-windows-gamepad",
+        "reportSha256": "394a446dcb5ec8a6e8b96173aaab620b27a09dd65441620cc438bb2ea48f0d74"
+      },
+      "hearing": {
+        "status": "passed-physical-windows-hearing",
+        "reportSha256": "6aaf8a42ba9c8235285096aa54b3b1989df83195ffcbd38d035c6594dbad189c"
+      }
     }
   },
   "appleDeviceAcceptance": "pending",

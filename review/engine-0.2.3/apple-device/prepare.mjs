@@ -17,7 +17,7 @@ function prepare() {
   assert.equal(bytes.length, archive.bytes, '验收包大小不符。');
   assert.equal(createHash('sha256').update(bytes).digest('hex'), archive.sha256, '验收包 SHA-256 不符。');
 
-  const outputRoot = fileURLToPath(new URL('../../../artifacts/engine-0.2.3/g11/apple-device-307771a/', import.meta.url));
+  const outputRoot = fileURLToPath(new URL(`../../../artifacts/engine-0.2.3/g11/apple-device-${qualification.engineRevision.slice(0, 7)}/`, import.meta.url));
   mkdirSync(outputRoot, { recursive: true });
   const output = mkdtempSync(join(outputRoot, 'run-'));
   try {
