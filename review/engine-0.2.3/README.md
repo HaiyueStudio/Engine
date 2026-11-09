@@ -1,5 +1,7 @@
 # Engine 0.2.3 验收入口
 
+Mac 浏览器与物理 iPhone 使用冻结候选 `307771a`。验收分支的解包、校验和回传命令见 [Apple 设备验收入口](apple-device/README.md)。
+
 G01–G10 已完成，G11 仍在集成／验收。开发候选的 Engine／extensions／shader-language 为 0.2.3，animation-spec 为 0.2.2。整版尚未取得正式平台／性能、真实设备、全局门禁及无发布演练资格，未发布或推广基线。唯一活动检查入口为 [G11 检查索引](g11-checks.json)。
 
 合同：[ADR 0139](../../docs/for-ai/adr/0139-engine-023-gameplay-contracts.md) · [行为](contract.md) · [目标声明](api-contract.d.ts) · [机器合同](../../config/gameplay-023-contract.json)。本页汇总结论和剩余责任，逐次尝试与本次整理前原文见[归档清单](../archive/engine-review-entry-history-20261102.json)。原 checks JSON、原始捕获、合同和源码身份保留。

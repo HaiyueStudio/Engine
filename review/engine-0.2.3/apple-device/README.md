@@ -1,0 +1,24 @@
+# G11 Mac 与物理 iPhone 验收
+
+验收对象是 Engine `307771a` 和 Native `g11-023-native-f18058babe967c2da7d297cf`。验收分支携带冻结的 18.5 MiB 设备包。准备脚本核对压缩包 SHA-256，再调用原验收程序逐文件核对源码、npm 候选包及 Native 工程。Windows 输入、手柄和听音结论见 [候选收据](qualification.json)。
+
+在 Mac 的 Engine 仓库中执行。需要 Git LFS、Node.js 22 或更新版本，以及 Google Chrome。
+
+```sh
+git fetch origin codex/g11-device-focus-023-3e4cbf7
+GIT_LFS_SKIP_SMUDGE=1 git worktree add --detach ../Engine-g11-mac FETCH_HEAD
+cd ../Engine-g11-mac
+git lfs pull --include='review/engine-0.2.3/apple-device/*.tar.gz' --exclude='' origin
+device_dir="$(node review/engine-0.2.3/apple-device/prepare.mjs)" && cd "$device_dir"
+```
+
+依次运行浏览器验收，每个窗口完成后点“保存本轮记录”。
+
+```sh
+sh start-mac-ime.command
+sh start-mac-audio.command
+```
+
+解包目录的 `README-current.md` 列出浏览器检查步骤、Xcode 与物理 iPhone 预检、构建和收集命令。iPhone 工程位于同一解包目录的 `Native/examples/ios-gui-text-input`。先核对系统键盘、旋转、遮挡和后台恢复，再记录音频宿主能力与实际听感。
+
+完成后回到解包目录运行 `node collect-return.mjs`，把生成的 `device-return-*.tar.gz` 和 IME、听音及 iPhone 的实际观察一起回传。发现异常时也保存原始记录。重新运行准备脚本会创建新的验收目录，之前的记录留在原目录。
