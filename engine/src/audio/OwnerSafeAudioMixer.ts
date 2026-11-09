@@ -23,8 +23,41 @@ export interface OwnerSafeAudioMixerOptions {
   readonly context?: AudioContext;
   readonly contextFactory?: () => AudioContext;
   readonly ownsContext?: boolean;
+  /** An exclusive, owned output for platforms with their own audio engine. */
+  readonly host?: AudioMixerHost;
   readonly maxVoicesTotal?: number;
   readonly maxVoicesPerOwner?: number;
+}
+
+interface AudioMixerHostVoice {
+  readonly nodeCount: number;
+  readonly stereoPan: boolean;
+  start(onEnded: () => void): void;
+  stop(): void;
+  setGain(gain: number): void;
+  setPan(pan: number): void;
+  dispose(): void;
+}
+
+interface AudioMixerHost {
+  readonly state: 'suspended' | 'interrupted' | 'running' | 'closed';
+  readonly stereoPan: boolean;
+  readonly sampleRate: number;
+  /** Output and bus nodes, excluding the nodes reported by each voice. */
+  readonly nodeCount: number;
+  resume(): Promise<void>;
+  suspend(): Promise<void>;
+  decodeAudioData(bytes: ArrayBuffer): Promise<AudioBuffer>;
+  /** Prepare reusable device data when a new buffer is installed. */
+  prepareBuffer?(buffer: AudioBuffer): void;
+  /** Release one installation. Active voices retain their own playback reference. */
+  releaseBuffer?(buffer: AudioBuffer): void;
+  openVoice(buffer: AudioBuffer, options: Readonly<{
+    bus: AudioMixerBus; loop: boolean; frequency: number; gain: number; pan: number;
+  }>): AudioMixerHostVoice;
+  setMasterVolume(value: number): void;
+  setBusVolume(bus: AudioMixerBus, value: number): void;
+  close(): void;
 }
 
 export interface AudioMixerStats {
@@ -45,9 +78,7 @@ interface Voice {
   readonly channel: string;
   readonly priority: number;
   readonly sequence: number;
-  readonly source: AudioBufferSourceNode;
-  readonly gain: GainNode;
-  readonly panner: StereoPannerNode | null;
+  readonly output: AudioMixerHostVoice;
   baseGain:number;
   basePan:number;
   appliedGain:number;
@@ -66,12 +97,25 @@ interface GameAudioLease {
 
 const BUS_IDS: readonly AudioMixerBus[] = Object.freeze(['music', 'sfx', 'ui']);
 
-/** Source-neutral Web Audio owner. Simulation emits immutable events; this adapter owns every node. */
+class WebAudioVoice implements AudioMixerHostVoice {
+  constructor(private readonly context:AudioContext,private readonly source:AudioBufferSourceNode,
+    private readonly gain:GainNode,private readonly panner:StereoPannerNode|null){}
+  get nodeCount():number{return this.panner?3:2;}
+  get stereoPan():boolean{return this.panner!==null;}
+  start(onEnded:()=>void):void{this.source.onended=onEnded;this.source.start();}
+  stop():void{this.source.stop();}
+  setGain(value:number):void{this.gain.gain.setValueAtTime(value,this.context.currentTime);}
+  setPan(value:number):void{this.panner?.pan.setValueAtTime(value,this.context.currentTime);}
+  dispose():void{this.source.onended=null;disconnectWebVoice(this.source,this.gain,this.panner);}
+}
+
+/** One buffer/voice owner for Web Audio or an explicit platform output. */
 export class OwnerSafeAudioMixer {
   readonly maxVoicesTotal: number;
   readonly maxVoicesPerOwner: number;
   readonly #ownsContext: boolean;
   readonly #contextFactory: () => AudioContext;
+  #host: AudioMixerHost | null;
   readonly #buffers = new Map<string, AudioBuffer>();
   readonly #voices = new Map<string, Voice>();
   readonly #channels = new Map<string, string>();
@@ -90,12 +134,15 @@ export class OwnerSafeAudioMixer {
   #stereoPan:boolean|null = null;
 
   constructor(options: OwnerSafeAudioMixerOptions = {}) {
+    if (options.host && (options.context || options.contextFactory || options.ownsContext !== undefined)) throw new TypeError('An audio host cannot be combined with Web Audio context options.');
     this.maxVoicesTotal = integerRange(options.maxVoicesTotal ?? 128, 1, 1024, 'maxVoicesTotal');
     this.maxVoicesPerOwner = integerRange(options.maxVoicesPerOwner ?? 32, 1, this.maxVoicesTotal, 'maxVoicesPerOwner');
     this.#context = options.context ?? null;
+    this.#host = options.host ?? null;
     this.#ownsContext = options.ownsContext ?? options.context === undefined;
     this.#contextFactory = options.contextFactory ?? defaultContextFactory;
     if (this.#context) this.#installGraph(this.#context);
+    if (this.#host) this.#stereoPan = this.#host.stereoPan;
     Object.defineProperty(this,Symbol.for('haiyue.audio.game-lease.v1'),{
       value:Object.freeze({version:1,acquire:()=>this.#newLease()}),
     });
@@ -103,15 +150,16 @@ export class OwnerSafeAudioMixer {
 
   async unlock(): Promise<void> {
     this.#assertLive();
-    const context = this.#requireContext();
-    if (context.state !== 'running') await context.resume();
+    const output = this.#host ?? this.#requireContext();
+    if (output.state !== 'running') await output.resume();
     this.#assertLive();
+    if (this.#host) this.#stereoPan = this.#host.stereoPan;
     this.#unlocked = true;
   }
 
   async suspend(): Promise<void> {
     this.#assertLive();
-    const context = this.#context;
+    const context = this.#host ?? this.#context;
     if (!context || context.state === 'suspended') return;
     await context.suspend();
   }
@@ -122,7 +170,10 @@ export class OwnerSafeAudioMixer {
     this.#assertLive();
     const key = identifier(id, 'buffer id');
     if (!buffer || !Number.isFinite(buffer.sampleRate) || buffer.sampleRate <= 0 || !Number.isSafeInteger(buffer.length) || buffer.length < 1 || !Number.isSafeInteger(buffer.numberOfChannels) || buffer.numberOfChannels < 1 || buffer.numberOfChannels > 2) throw new TypeError('Audio buffer metadata is invalid.');
+    const previous=this.#buffers.get(key);
+    this.#host?.prepareBuffer?.(buffer);
     this.#buffers.set(key, buffer);
+    if(previous)this.#host?.releaseBuffer?.(previous);
     this.#decodeIntents.delete(key);
   }
 
@@ -130,7 +181,7 @@ export class OwnerSafeAudioMixer {
     this.#assertLive();
     const key=identifier(id,'buffer id');
     if (!(bytes instanceof ArrayBuffer) || bytes.byteLength < 12) throw new TypeError('Encoded audio bytes are invalid.');
-    const context = this.#requireContext();
+    const context = this.#host ?? this.#requireContext();
     const intent={};this.#decodeIntents.set(key,intent);
     this.#decodeJobs++;
     try {
@@ -144,7 +195,7 @@ export class OwnerSafeAudioMixer {
 
   play(request: AudioMixerPlayRequest): string | null {
     this.#assertLive();
-    if (!this.#unlocked || !this.#context || this.#context.state !== 'running') return null;
+    if (!this.#unlocked || (this.#host ?? this.#context)?.state !== 'running') return null;
     const owner = identifier(request.owner, 'owner'); const channel = identifier(request.channel, 'channel'); const eventId = identifier(request.eventId, 'event id');
     const buffer = this.#buffers.get(identifier(request.bufferId, 'buffer id'));
     if (!buffer) throw new RangeError(`Unknown audio buffer: ${request.bufferId}.`);
@@ -154,18 +205,15 @@ export class OwnerSafeAudioMixer {
     if(request.loop!==undefined&&typeof request.loop!=='boolean')throw new TypeError('Audio loop must be boolean.');
     const ownerChannel = `${owner}\u0000${channel}`; const replaced = this.#channels.get(ownerChannel); if (request.replaceChannel !== undefined && typeof request.replaceChannel !== 'boolean') throw new TypeError('Audio replaceChannel must be boolean.'); if (replaced && request.replaceChannel === false) return null; if (replaced) this.stopVoice(replaced);
     this.#makeRoom(owner, priority);
-    const context=this.#context;let source:AudioBufferSourceNode|null=null,gain:GainNode|null=null,panner:StereoPannerNode|null=null;
-    let voice:Voice|null=null;
+    const options={bus:request.bus,loop:request.loop??false,frequency,gain:volume,pan};
+    const output=this.#host?this.#host.openVoice(buffer,options):this.#openWebVoice(buffer,options);
+    const sequence=++this.#sequence,id=`voice:${sequence}`;
+    const voice:Voice={id,eventId,owner,channel,priority,sequence,output,baseGain:volume,basePan:pan,appliedGain:volume,appliedPan:pan,lease:null,retired:false};
+    this.#voices.set(id,voice);this.#channels.set(ownerChannel,id);
+    this.#ownerCounts.set(owner,(this.#ownerCounts.get(owner)??0)+1);this.#voiceNodes+=output.nodeCount;
     try{
-      source=context.createBufferSource();gain=context.createGain();panner=typeof context.createStereoPanner==='function'?context.createStereoPanner():null;
-      source.buffer=buffer;source.loop=request.loop??false;source.playbackRate.setValueAtTime(frequency,context.currentTime);gain.gain.setValueAtTime(volume,context.currentTime);
-      source.connect(gain);if(panner){panner.pan.setValueAtTime(pan,context.currentTime);gain.connect(panner);panner.connect(this.#buses.get(request.bus)!);}else gain.connect(this.#buses.get(request.bus)!);
-      const sequence=++this.#sequence,id=`voice:${sequence}`;
-      voice={id,eventId,owner,channel,priority,sequence,source,gain,panner,baseGain:volume,basePan:pan,appliedGain:volume,appliedPan:pan,lease:null,retired:false};
-      const current=voice;source.onended=()=>this.#retire(current);this.#voices.set(id,voice);this.#channels.set(ownerChannel,id);
-      this.#ownerCounts.set(owner,(this.#ownerCounts.get(owner)??0)+1);this.#voiceNodes+=2+(panner?1:0);
-      source.start();return id;
-    }catch(error){if(voice)this.#retire(voice);else for(const node of [source,gain,panner])try{node?.disconnect();}catch{/* already disconnected */}throw error;}
+      output.start(()=>this.#retire(voice));return id;
+    }catch(error){this.#retire(voice);throw error;}
   }
 
   stop(owner: string, channel?: string): number {
@@ -178,38 +226,49 @@ export class OwnerSafeAudioMixer {
     this.#assertLive();
     const ownerId = identifier(owner, 'owner'); const channelId = identifier(channel, 'channel'); const pan = finiteRange(value, -1, 1, 'pan');
     const voiceId = this.#channels.get(`${ownerId}\u0000${channelId}`); const voice = voiceId === undefined ? undefined : this.#voices.get(voiceId);
-    if (!voice?.panner || !this.#context) return false;
-    voice.panner.pan.setValueAtTime(pan, this.#context.currentTime);voice.basePan=pan;voice.appliedPan=pan;return true;
+    if (!voice?.output.stereoPan) return false;
+    voice.output.setPan(pan);voice.basePan=pan;voice.appliedPan=pan;return true;
   }
 
   setGain(owner:string,channel:string,value:number):boolean {
     this.#assertLive();const ownerId=identifier(owner,'owner'),channelId=identifier(channel,'channel'),gain=finiteRange(value,0,4,'gain');
-    const id=this.#channels.get(`${ownerId}\u0000${channelId}`),voice=id===undefined?undefined:this.#voices.get(id);if(!voice||!this.#context)return false;
-    voice.gain.gain.setValueAtTime(gain,this.#context.currentTime);voice.baseGain=gain;voice.appliedGain=gain;return true;
+    const id=this.#channels.get(`${ownerId}\u0000${channelId}`),voice=id===undefined?undefined:this.#voices.get(id);if(!voice)return false;
+    voice.output.setGain(gain);voice.baseGain=gain;voice.appliedGain=gain;return true;
   }
   getVolumes():AudioMixerVolumes {return Object.freeze({master:this.#masterVolume,music:this.#busVolumes.get('music')!,sfx:this.#busVolumes.get('sfx')!,ui:this.#busVolumes.get('ui')!});}
-  getCapabilities():AudioMixerCapabilities {return Object.freeze({stereoPan:this.#stereoPan,maxDecodedChannels:2});}
+  getCapabilities():AudioMixerCapabilities {return Object.freeze({stereoPan:this.#host?.stereoPan??this.#stereoPan,maxDecodedChannels:2});}
 
-  stopVoice(id: string): boolean { const voice = this.#voices.get(id); if (!voice) return false; try { voice.source.stop(); } catch { /* ended already */ } this.#retire(voice); return true; }
+  stopVoice(id: string): boolean { const voice = this.#voices.get(id); if (!voice) return false; try { voice.output.stop(); } catch { /* ended already */ } this.#retire(voice); return true; }
   releaseOwner(owner: string): number { return this.stop(owner); }
 
-  setMasterVolume(value: number): void { this.#masterVolume = finiteRange(value, 0, 4, 'master volume'); if (this.#master && this.#context) this.#master.gain.setValueAtTime(this.#masterVolume, this.#context.currentTime); }
-  setBusVolume(bus: AudioMixerBus, value: number): void { if (!BUS_IDS.includes(bus)) throw new TypeError(`Unknown audio bus: ${String(bus)}.`); const volume = finiteRange(value, 0, 4, 'bus volume'); this.#busVolumes.set(bus, volume); const node = this.#buses.get(bus); if (node && this.#context) node.gain.setValueAtTime(volume, this.#context.currentTime); }
-  removeBuffer(id: string): boolean { this.#decodeIntents.delete(id);return this.#buffers.delete(id); }
+  setMasterVolume(value: number): void { this.#masterVolume = finiteRange(value, 0, 4, 'master volume'); this.#host?.setMasterVolume(this.#masterVolume); if (this.#master && this.#context) this.#master.gain.setValueAtTime(this.#masterVolume, this.#context.currentTime); }
+  setBusVolume(bus: AudioMixerBus, value: number): void { if (!BUS_IDS.includes(bus)) throw new TypeError(`Unknown audio bus: ${String(bus)}.`); const volume = finiteRange(value, 0, 4, 'bus volume'); this.#busVolumes.set(bus, volume); this.#host?.setBusVolume(bus,volume); const node = this.#buses.get(bus); if (node && this.#context) node.gain.setValueAtTime(volume, this.#context.currentTime); }
+  removeBuffer(id: string): boolean {
+    this.#decodeIntents.delete(id);
+    const buffer=this.#buffers.get(id);
+    if(!buffer)return false;
+    this.#buffers.delete(id);this.#host?.releaseBuffer?.(buffer);return true;
+  }
 
   dispose(): void {
     if (this.#disposed) return; this.#disposed = true;
-    for (const voice of this.#voices.values()) this.stopVoice(voice.id);
+    const errors:unknown[]=[];
+    for (const voice of this.#voices.values()) try{this.stopVoice(voice.id);}catch(error){errors.push(error);}
     for (const node of this.#buses.values()) try { node.disconnect(); } catch { /* idempotent */ }
     try { this.#master?.disconnect(); } catch { /* idempotent */ }
     this.#buses.clear(); this.#buffers.clear(); this.#decodeIntents.clear();this.#channels.clear();this.#ownerCounts.clear();this.#master = null;
     if (this.#ownsContext) void this.#context?.close().catch(() => undefined);
     this.#context = null;
+    const host=this.#host;this.#host=null;
+    try{host?.close();}catch(error){errors.push(error);}
+    if(errors.length)throw new AggregateError(errors,'Audio mixer resources failed to close.');
   }
 
   get stats(): AudioMixerStats {
-    const contextState:string|undefined=this.#context?.state;
-    return Object.freeze({ state: this.#disposed || contextState === 'closed' ? 'closed' : !this.#unlocked ? 'locked' : contextState === 'suspended'||contextState==='interrupted' ? 'suspended' : 'running', buffers: this.#buffers.size, voices: this.#voices.size, owners:this.#ownerCounts.size, audioNodes: (this.#master ? 1 : 0) + this.#buses.size + this.#voiceNodes, decodeJobs: this.#decodeJobs, sampleRate: this.#context?.sampleRate ?? null, disposed: this.#disposed });
+    const output=this.#host??this.#context;
+    const contextState:string|undefined=output?.state;
+    const baseNodes=this.#host?.nodeCount??((this.#master?1:0)+this.#buses.size);
+    return Object.freeze({ state: this.#disposed || contextState === 'closed' ? 'closed' : !this.#unlocked ? 'locked' : contextState === 'suspended'||contextState==='interrupted' ? 'suspended' : 'running', buffers: this.#buffers.size, voices: this.#voices.size, owners:this.#ownerCounts.size, audioNodes:baseNodes+this.#voiceNodes, decodeJobs: this.#decodeJobs, sampleRate:output?.sampleRate??null, disposed: this.#disposed });
   }
 
   #requireContext():AudioContext {
@@ -223,6 +282,20 @@ export class OwnerSafeAudioMixer {
       this.#master=master;this.#buses=buses;this.#stereoPan=typeof context.createStereoPanner==='function';
     }catch(error){for(const node of nodes)try{node.disconnect();}catch{/* already disconnected */}throw error;}
   }
+  #openWebVoice(buffer:AudioBuffer,options:Parameters<AudioMixerHost['openVoice']>[1]):AudioMixerHostVoice {
+    const context=this.#context!;
+    let source:AudioBufferSourceNode|null=null,gain:GainNode|null=null,panner:StereoPannerNode|null=null;
+    try{
+      const input=source=context.createBufferSource(),level=gain=context.createGain();
+      const stereo=panner=typeof context.createStereoPanner==='function'?context.createStereoPanner():null;
+      input.buffer=buffer;input.loop=options.loop;input.playbackRate.setValueAtTime(options.frequency,context.currentTime);
+      level.gain.setValueAtTime(options.gain,context.currentTime);input.connect(level);
+      const bus=this.#buses.get(options.bus)!;
+      if(stereo){stereo.pan.setValueAtTime(options.pan,context.currentTime);level.connect(stereo);stereo.connect(bus);}
+      else level.connect(bus);
+      return new WebAudioVoice(context,input,level,stereo);
+    }catch(error){disconnectWebVoice(source,gain,panner);throw error;}
+  }
   #makeRoom(owner:string,incomingPriority:number):void {
     while(this.#voices.size>=this.maxVoicesTotal||(this.#ownerCounts.get(owner)??0)>=this.maxVoicesPerOwner){
       const global=this.#voices.size>=this.maxVoicesTotal;let victim:Voice|undefined;
@@ -231,12 +304,12 @@ export class OwnerSafeAudioMixer {
     }
   }
   #retire(voice:Voice):void {
-    if(voice.retired)return;voice.retired=true;voice.source.onended=null;
-    for(const node of [voice.source,voice.gain,voice.panner])try{node?.disconnect();}catch{/* idempotent */}
-    this.#voices.delete(voice.id);this.#voiceNodes-=2+(voice.panner?1:0);
+    if(voice.retired)return;voice.retired=true;
+    this.#voices.delete(voice.id);this.#voiceNodes-=voice.output.nodeCount;
     const count=(this.#ownerCounts.get(voice.owner)??1)-1;if(count)this.#ownerCounts.set(voice.owner,count);else this.#ownerCounts.delete(voice.owner);
     voice.lease?.voices.delete(voice.id);voice.lease=null;
     const key=`${voice.owner}\u0000${voice.channel}`;if(this.#channels.get(key)===voice.id)this.#channels.delete(key);
+    voice.output.dispose();
   }
   #newLease():GameAudioLease {
     this.#assertLive();const state:VoiceLeaseState={voices:new Set(),closed:false};
@@ -249,16 +322,20 @@ export class OwnerSafeAudioMixer {
         const voice=id===null?undefined:this.#voices.get(id);if(voice){voice.lease=state;voice.baseGain=baseGain;voice.basePan=basePan;state.voices.add(voice.id);}return id;
       },
       spatial:(owner:string,channel:string,value:SpatialGain|null)=>{
-        if(state.closed||this.#disposed||!this.#context)return false;
+        if(state.closed||this.#disposed)return false;
         const id=this.#channels.get(`${owner}\u0000${channel}`),voice=id===undefined?undefined:this.#voices.get(id);if(!voice||voice.lease!==state)return false;
-        if(value)checkedSpatial(value);const when=this.#context.currentTime,gain=value?(value.volume??voice.baseGain)*value.factor:voice.baseGain,pan=value?value.pan:voice.basePan;
-        if(voice.appliedGain!==gain){voice.gain.gain.setValueAtTime(gain,when);voice.appliedGain=gain;}
-        if(voice.panner&&voice.appliedPan!==pan){voice.panner.pan.setValueAtTime(pan,when);voice.appliedPan=pan;}return true;
+        if(value)checkedSpatial(value);const gain=value?(value.volume??voice.baseGain)*value.factor:voice.baseGain,pan=value?value.pan:voice.basePan;
+        if(voice.appliedGain!==gain){voice.output.setGain(gain);voice.appliedGain=gain;}
+        if(voice.output.stereoPan&&voice.appliedPan!==pan){voice.output.setPan(pan);voice.appliedPan=pan;}return true;
       },
       release:()=>{if(state.closed)return;state.closed=true;for(const id of state.voices)this.stopVoice(id);state.voices.clear();},
     });
   }
   #assertLive(): void { if (this.#disposed) throw new Error('Audio mixer is disposed.'); }
+}
+
+function disconnectWebVoice(source:AudioBufferSourceNode|null,gain:GainNode|null,panner:StereoPannerNode|null):void {
+  for(const node of [source,gain,panner])try{node?.disconnect();}catch{/* already disconnected */}
 }
 
 function defaultContextFactory(): AudioContext { const Constructor = globalThis.AudioContext ?? (globalThis as typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext; if (!Constructor) throw new Error('Web Audio is unavailable.'); return new Constructor(); }

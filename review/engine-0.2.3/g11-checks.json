@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "goal": "g11-integration-candidate",
   "goalStatus": "active",
-  "generatedAt": "2026-11-04T17:00:13.480Z",
+  "generatedAt": "2026-11-07T09:03:41.192Z",
   "sourceRevision": "b61b700aaea35a2cdfe228d2a09c441f477ad812",
   "workingTree": "Qualification snapshot is clean and immutable; the integration worktree and acceptance index are maintained separately. Formal idle sampling has not started.",
   "releaseQualified": false,
@@ -34,14 +34,14 @@
   ],
   "currentCandidate": [
     {
-      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json",
-      "bytes": 150663,
-      "sha256": "e7860cad3338a3e56bd331b3de6c3f170d14e8a136f9f6de82dfe0fb0f49c3d8"
+      "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/payload/Engine/artifacts/engine-0.2.3/g11/qualification-candidate-307771a/candidate.json",
+      "bytes": 150834,
+      "sha256": "227781480fd725569757498a0225a5b3a59d3dd380794304b91e406b2d50a23a"
     },
     {
-      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json.contents.json",
-      "bytes": 909351,
-      "sha256": "c305a4905ce16b902a7aaf1ba3d30509b7dd1e95fea2f87ff8ce94e472f49209"
+      "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/payload/Engine/artifacts/engine-0.2.3/g11/qualification-candidate-307771a/candidate.json.contents.json",
+      "bytes": 933272,
+      "sha256": "4821a60a914eaa3634864628120dded5d5e471449a39db544b3dceecaa1eb9ab"
     }
   ],
   "inputs": [
@@ -115,7 +115,7 @@
     {
       "id": "version-peer-and-external-lock",
       "required": true,
-      "status": "passed-clean-candidate",
+      "status": "passed-clean-candidate-307771a",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/clean-build.json",
@@ -131,6 +131,21 @@
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/supply-chain.json",
           "bytes": 37480,
           "sha256": "702ec92ac713a29f4ba0eee5ce59bda1dadf91bb0c0ab47c1e15b4cc71dbb803"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/device-preparation.json",
+          "bytes": 3652,
+          "sha256": "bbe1c4e46659a5bf60dfe1023de09b5a3fb4fd806cdfa5d6dd967bd23aa3fa56"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/device-preparation.json",
+          "bytes": 4234,
+          "sha256": "8de8fa1b788b81f4b233efd9105bfadc6a6f64fac75bea9d4bfa010fd74339c8"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
+          "bytes": 4687,
+          "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
         }
       ],
       "conclusion": "Frozen versions, peers and original Engine lock are verified by the current package gate, locked installation and dependency audit. Native preserves all 761 lock entries, changing only the two admitted local package integrity fields.",
@@ -150,12 +165,13 @@
         "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
         "bytes": 34199,
         "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
-      }
+      },
+      "previousStatusBeforeRowFocusRepair": "passed-clean-candidate"
     },
     {
       "id": "repository-checks",
       "required": true,
-      "status": "passed-current-ci-fast",
+      "status": "passed-local-and-cloud-307771a",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/ci/snapshot-1793811444975/ci-report.json",
@@ -166,9 +182,29 @@
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/clean-build.json",
           "bytes": 6554,
           "sha256": "95905d663d33da23928bdf5efb0c7c2eb7ed3e6c09a3bde4d283655b04f6972c"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/device-preparation.json",
+          "bytes": 3652,
+          "sha256": "bbe1c4e46659a5bf60dfe1023de09b5a3fb4fd806cdfa5d6dd967bd23aa3fa56"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-acceptance.json",
+          "bytes": 12559,
+          "sha256": "6ccabf18f9607211bd2c68ec08c0f39137cf8db06f5af7492ad0f15220997d47"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-progress.json",
+          "bytes": 1246,
+          "sha256": "09a386d08b00f49a5f523dbbfdf30834dd80640658df9b02597acf747b39a7bd"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-acceptance.json",
+          "bytes": 11688,
+          "sha256": "1f4787f7c65bf01cc6a33c262d733e9d40947df5a8f219408383b44253b1da30"
         }
       ],
-      "conclusion": "Current clean candidate CI fast result: success. Windows/Linux no-publication controller and full Ubuntu fast jobs are individually recorded; this does not grant formal performance or whole-release qualification.",
+      "conclusion": "Current local Fast and exact-candidate cloud Fast/no-publication passed; original Windows failure retained.",
       "historicalStatus": "passed-current-ci-fast",
       "currentNonidleVerification": {
         "status": "passed-working-tree-only",
@@ -185,7 +221,8 @@
         "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
         "bytes": 34199,
         "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
-      }
+      },
+      "previousStatusBeforeRowFocusRepair": "passed-current-ci-fast"
     },
     {
       "id": "render-system-owner-lifetime",
@@ -277,7 +314,7 @@
     {
       "id": "deterministic-public-packages",
       "required": true,
-      "status": "passed-clean-package-check",
+      "status": "passed-clean-candidate-307771a",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/public-packages.json",
@@ -288,6 +325,21 @@
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/clean-build.json",
           "bytes": 6554,
           "sha256": "95905d663d33da23928bdf5efb0c7c2eb7ed3e6c09a3bde4d283655b04f6972c"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/device-preparation.json",
+          "bytes": 3652,
+          "sha256": "bbe1c4e46659a5bf60dfe1023de09b5a3fb4fd806cdfa5d6dd967bd23aa3fa56"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/device-preparation.json",
+          "bytes": 4234,
+          "sha256": "8de8fa1b788b81f4b233efd9105bfadc6a6f64fac75bea9d4bfa010fd74339c8"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
+          "bytes": 4687,
+          "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
         }
       ],
       "conclusion": "All four release-mode deterministic packages and 51 installed consumers pass at the frozen clean revision. Four SHA-256 identities match GUI P2; animation-spec remains 0.2.2. No formal captures were reused.",
@@ -307,7 +359,8 @@
         "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
         "bytes": 34199,
         "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
-      }
+      },
+      "previousStatusBeforeRowFocusRepair": "passed-clean-package-check"
     },
     {
       "id": "focused-closure-and-ownership-review",
@@ -437,7 +490,7 @@
     {
       "id": "physical-entry-setup",
       "required": true,
-      "status": "prepared-current-candidate",
+      "status": "passed-setup-only-307771a",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/devices/handoff.json",
@@ -448,20 +501,51 @@
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/native-preparation-final.json",
           "bytes": 20544,
           "sha256": "0dd51400c6e46d96d72260fc9e3646d553ffddd9db960b67bc463425fd9f5c36"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/device-payload/Engine/artifacts/engine-0.2.3/g11/physical-7236b39-setup-smoke/result.json",
+          "bytes": 4988,
+          "sha256": "5ddc3845c8875c57585f4c846ed4604885f5484a0a9fc3e4ae5d6b6de93ffaad"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/verified-device-extraction-r2/Engine/artifacts/engine-0.2.3/g11/physical-7236b39-setup-smoke-r2/result.json",
+          "bytes": 77366,
+          "sha256": "5422f1911f15ecb8ebd02c54890636be042315fe91cf4e7183a58ba6b0a9c0b9"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/device-preparation.json",
+          "bytes": 2817,
+          "sha256": "4b40047110ac8708539690ceae0220fa6ce7212793f0e3914d29f22d9bb9b713"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/device-preparation.json",
+          "bytes": 3652,
+          "sha256": "bbe1c4e46659a5bf60dfe1023de09b5a3fb4fd806cdfa5d6dd967bd23aa3fa56"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/device-preparation.json",
+          "bytes": 4234,
+          "sha256": "8de8fa1b788b81f4b233efd9105bfadc6a6f64fac75bea9d4bfa010fd74339c8"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
+          "bytes": 4687,
+          "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
         }
       ],
-      "conclusion": "Portable entry points are bound to the same frozen packages and sources. No physical input or sound was simulated and no device acceptance was granted.",
+      "conclusion": "The immutable current device payload opens and closes on Windows with 151 served files verified and zero GPU residue. Setup uses automated events and does not qualify physical input. All four devices are available; real workflows are pending.",
       "historicalStatus": "passed-diagnostic",
       "priorEvidenceIndex": {
         "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
         "bytes": 34199,
         "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
-      }
+      },
+      "previousStatusBeforeRowFocusRepair": "passed-setup-only-7236b39"
     },
     {
       "id": "native-consumer-preparation",
       "required": true,
-      "status": "prepared",
+      "status": "prepared-source-and-vendor-307771a",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/native-qualified-candidate.json",
@@ -472,27 +556,83 @@
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/native-preparation-final.json",
           "bytes": 20544,
           "sha256": "0dd51400c6e46d96d72260fc9e3646d553ffddd9db960b67bc463425fd9f5c36"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/native-installed-audit.json",
+          "bytes": 1005,
+          "sha256": "de9c5a38ec8c2bce2c4696734d2d6c9fff72108c3b5903aa9e6165e93bdf1ba0"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/device-preparation.json",
+          "bytes": 3652,
+          "sha256": "bbe1c4e46659a5bf60dfe1023de09b5a3fb4fd806cdfa5d6dd967bd23aa3fa56"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/device-preparation.json",
+          "bytes": 4234,
+          "sha256": "8de8fa1b788b81f4b233efd9105bfadc6a6f64fac75bea9d4bfa010fd74339c8"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
+          "bytes": 4687,
+          "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
         }
       ],
-      "conclusion": "Refreshed exact Engine/extensions packages; typecheck and all 885 own files across three installed packages pass. The one nested Draco dependency matches the unchanged locked graph. Original 151-file candidate backup and initial enumeration failure remain; TankBattle edits are unchanged. Actual iOS build, device flows and Web Audio capability are pending.",
+      "conclusion": "Installed 7236b39 Native example from the unchanged locked dependency graph with refreshed Engine/extensions tarballs. Windows install and typecheck pass; all 885 package-owned files match the qualified three packages. Actual iOS build, physical flows and Web Audio capability are pending.",
       "priorEvidenceIndex": {
         "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
         "bytes": 34199,
         "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
-      }
+      },
+      "previousStatusBeforeRowFocusRepair": "prepared-7236b39"
     },
     {
       "id": "portable-device-handoff",
       "required": true,
-      "status": "passed-integrity",
+      "status": "passed-integrity-307771a",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/devices/handoff.json",
           "bytes": 963,
           "sha256": "05bc3e5089c868e80b6c934b8f06389b1a4e0805af50346201fccd7a132f58d5"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/device-handoff-r2.json",
+          "bytes": 880,
+          "sha256": "9363c88300119947b9a34e70e080770ff2817bfe86a78003cd3ad0c03d03cf23"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/device-preparation.json",
+          "bytes": 2817,
+          "sha256": "4b40047110ac8708539690ceae0220fa6ce7212793f0e3914d29f22d9bb9b713"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1d7c461/device-preparation.json",
+          "bytes": 4009,
+          "sha256": "6c0fb4e31dd6e5b1f4445e1c03bc92f322c014fd2591545fa0cbcafe7e023ba6"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/device-preparation.json",
+          "bytes": 3644,
+          "sha256": "051a76944d48f45ac73e0c95b1d92d75a5522a503f8251a50d4caa9e365b0d6f"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/device-preparation.json",
+          "bytes": 3652,
+          "sha256": "bbe1c4e46659a5bf60dfe1023de09b5a3fb4fd806cdfa5d6dd967bd23aa3fa56"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/device-preparation.json",
+          "bytes": 4234,
+          "sha256": "8de8fa1b788b81f4b233efd9105bfadc6a6f64fac75bea9d4bfa010fd74339c8"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
+          "bytes": 4687,
+          "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
         }
       ],
-      "conclusion": "5315 payload files survive full archive extraction and per-file SHA-256 verification; relocated Engine and Native preflights pass. Windows independent terminals, Mac IME/audio launchers and iPhone locked build/collection instructions are included. Actual device acceptance is pending.",
+      "conclusion": "Fresh admitted runtime, deterministic packages, 1178 canonical source inputs and portable archive verified; automated smoke is not physical acceptance.",
       "historicalStatus": "passed-integrity",
       "priorEvidenceIndex": {
         "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
@@ -630,7 +770,7 @@
     {
       "id": "formal-cold-steady-and-seven-reports",
       "required": true,
-      "status": "passed-formal-7236b39-hya-production-pending",
+      "status": "passed-formal-7236b39",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/qualification-entry-ready.json",
@@ -706,33 +846,515 @@
           "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-resume/hya-gpu-clock-diagnosis.json",
           "bytes": 11282,
           "sha256": "b90354adcc73963885761694fc41793ae337273ec7e82f3e6a9e10abe825674a"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-resume/qualification-result.json",
+          "bytes": 12152,
+          "sha256": "cc950851c7818f3874472bc0b8d0ad4d59631cd468b015c6ef26b88c4599420e"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-resume/hya-production-independent-audit.json",
+          "bytes": 30407,
+          "sha256": "fbbf308980bdc4c6434083b91a57ea9fb7bc3249724099d06d6b8636d5bc0db6"
         }
       ],
-      "conclusion": "45a1a92 stopped at its original GUI CPU failure. 38d9f00 passed GUI CPU and MSAA1, then stopped at MSAA4. No 24 production captures, 580 legacy captures, subsequent checks, global gate or no-publication rehearsal ran on 38d9f00. Clean candidate 7236b39 is registered and verifies 5,138 source and installed files. The same controller, sample populations and budgets are preserved. The exact 7236b39 finished 24 combined production and 580 inherited captures, passing the seven raw report audit (including the original rooms, instances and Forward failure records and existing scoped investigations). HYA layout and corpus passed. HYA production stopped before the first browser because the extracted baseline extension 0.2.2 was compared against the candidate 0.2.3 identity. Separate validated staging and a same-revision continuation preserve all completed evidence. Native small-scene clock diagnosis showed that both a Chrome-only power preference and a matched command prefix left the two arms at different core/memory clocks; the Chrome setting was verified restored. The diagnostic does not establish GPU regression or replace the formal 5% gate. HYA production, global gate and no-publication rehearsal are pending.",
+      "conclusion": "45a1a92 stopped at its original GUI CPU failure. 38d9f00 passed GUI CPU and MSAA1, then stopped at MSAA4. No 24 production captures, 580 legacy captures, subsequent checks, global gate or no-publication rehearsal ran on 38d9f00. Clean candidate 7236b39 is registered and verifies 5,138 source and installed files. The same controller, sample populations and budgets are preserved. The exact 7236b39 finished 24 combined production and 580 inherited captures, passing the seven raw report audit (including the original rooms, instances and Forward failure records and existing scoped investigations). HYA layout and corpus passed. HYA production stopped before the first browser because the extracted baseline extension 0.2.2 was compared against the candidate 0.2.3 identity. Separate validated staging and a same-revision continuation preserve all completed evidence. Native small-scene clock diagnosis showed that both a Chrome-only power preference and a matched command prefix left the two arms at different core/memory clocks; the Chrome setting was verified restored. The diagnostic does not establish GPU regression or replace the formal 5% gate. The same-revision continuation captured and independently audited all 30 HYA cases. All four 90-sample-per-arm GPU comparisons passed the unchanged pooled 5% gate. The global gate also passed. The named rehearsal retry and independent audit subsequently passed, preserving the first npm TLS failure.",
       "currentCandidate": {
-        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json",
-        "bytes": 150663,
-        "sha256": "e7860cad3338a3e56bd331b3de6c3f170d14e8a136f9f6de82dfe0fb0f49c3d8"
+        "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/device-payload-r2/Engine/artifacts/engine-0.2.3/g11/qualification-candidate-7236b39/candidate.json",
+        "bytes": 150740,
+        "sha256": "2697b9334c993d9263ea12cf3fe4426955198091b3dcc4c0bea52643f5c5de61"
       }
     },
     {
       "id": "windows-real-keyboard-ime-gamepad",
       "required": true,
-      "status": "pending",
-      "evidence": [],
-      "conclusion": "Affected input/rebinding/collection/control flows need current candidate raw physical input plus operator confirmation."
+      "status": "passed-windows-ime-gamepad-and-hearing",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/device-preparation.json",
+          "bytes": 2817,
+          "sha256": "4b40047110ac8708539690ceae0220fa6ce7212793f0e3914d29f22d9bb9b713"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/windows-ime-review.json",
+          "bytes": 3796,
+          "sha256": "e6c92a36ea45223228a2555fb9b14b04676513e414f5c1cfcdc6a80cf6346e84"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/navigation-failure.json",
+          "bytes": 2852,
+          "sha256": "0cd993923dd5aece2d4f94e9609eebcb8eb0fded32d078865f6e5bfeac52f991"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1d7c461/device-preparation.json",
+          "bytes": 4009,
+          "sha256": "6c0fb4e31dd6e5b1f4445e1c03bc92f322c014fd2591545fa0cbcafe7e023ba6"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/badge-focus/physical-failure.json",
+          "bytes": 6856,
+          "sha256": "e5b5a7c4dcda08e395916f9a79e06c2d759ba06e158dce63871b12f73ca24433"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/device-preparation.json",
+          "bytes": 3644,
+          "sha256": "051a76944d48f45ac73e0c95b1d92d75a5522a503f8251a50d4caa9e365b0d6f"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/badge-navigation.json",
+          "bytes": 2917,
+          "sha256": "dfad64ec8edec0f84b3f9ce257685a8f6fe01b679eb93a82cca40db96ef77d06"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/gamepad-axis-review.json",
+          "bytes": 3712,
+          "sha256": "9e161e50b0f4e5aa67be6098d6cda8e4be2682b8302ecb78010b9bd339227599"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/physical-review.json",
+          "bytes": 3300,
+          "sha256": "a3e1a2afe2fbb40c6c4a377617b27c65173dc3c64c08798b010626ac8ee6452f"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/connection-isolation-review.json",
+          "bytes": 8968,
+          "sha256": "beb253b1f3ac79ec1e42f4422933ae4038875b597400d371aae580dd1d4b105c"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/wireless-gameplay.json",
+          "bytes": 10166,
+          "sha256": "a6030d2442f1e13ef16d0213bb076c4888fa75ac064267f0201187f88f2791d3"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/wireless-profile.json",
+          "bytes": 4328,
+          "sha256": "4b7b18d2c4d24324b56b31f857b7bfeb0aea4aa28696d0ed1b84de08276a174d"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/physical-failure.json",
+          "bytes": 3319,
+          "sha256": "d460c7171fce6d5634bd894fd7a1aa47f5f0e2f3a5867fdd5a76a14c244f137e"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/device-preparation.json",
+          "bytes": 3652,
+          "sha256": "bbe1c4e46659a5bf60dfe1023de09b5a3fb4fd806cdfa5d6dd967bd23aa3fa56"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/device-preparation.json",
+          "bytes": 4234,
+          "sha256": "8de8fa1b788b81f4b233efd9105bfadc6a6f64fac75bea9d4bfa010fd74339c8"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/edit-retention/physical-failure.json",
+          "bytes": 3903,
+          "sha256": "07c7679be45a973700b91255183ca9d8e69c1e865b7cff57b61785a1aea48ed1"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/operator-stages/collection-edit-retention.json",
+          "bytes": 3619,
+          "sha256": "c6aa23804f1ca096804457f6f6448853cf2255ec0fe42c0d1b8e97f7837186b3"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/audio-audition/physical-failure.json",
+          "bytes": 2352,
+          "sha256": "2956a79b5def38e517c56dbd31b776304c782174af20620fd99b6d57547744ca"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
+          "bytes": 4687,
+          "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-hearing.json",
+          "bytes": 4454,
+          "sha256": "6aaf8a42ba9c8235285096aa54b3b1989df83195ffcbd38d035c6594dbad189c"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-ime.json",
+          "bytes": 4819,
+          "sha256": "de27d649ae9acec26ffff580fea27b8c3c00e08269b6e62195266a9db703a771"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-gamepad.json",
+          "bytes": 4410,
+          "sha256": "394a446dcb5ec8a6e8b96173aaab620b27a09dd65441620cc438bb2ea48f0d74"
+        }
+      ],
+      "conclusion": "Current Windows IME, physical gamepad, and hearing passed on the same candidate. Gamepad evidence covers directional navigation, both MoveX directions, B-to-X-to-B restoration, B jump, one level replacement during a sustained A hold, and clean teardown. Mac and physical iPhone remain separate pending requirements.",
+      "previousFailedStatus": "failed-physical-directional-navigation",
+      "stages": {
+        "audioHearing": {
+          "status": "passed-physical-windows-hearing",
+          "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+          "report": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-hearing.json",
+            "bytes": 4454,
+            "sha256": "6aaf8a42ba9c8235285096aa54b3b1989df83195ffcbd38d035c6594dbad189c"
+          },
+          "physicalInputAccepted": true
+        },
+        "keyboardIme": {
+          "status": "passed-physical-windows-ime",
+          "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+          "report": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-ime.json",
+            "bytes": 4819,
+            "sha256": "de27d649ae9acec26ffff580fea27b8c3c00e08269b6e62195266a9db703a771"
+          },
+          "physicalInputAccepted": true
+        },
+        "gamepad": {
+          "status": "passed-physical-windows-gamepad",
+          "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+          "report": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-gamepad.json",
+            "bytes": 4410,
+            "sha256": "394a446dcb5ec8a6e8b96173aaab620b27a09dd65441620cc438bb2ea48f0d74"
+          },
+          "physicalInputAccepted": true
+        }
+      },
+      "diagnostics": {
+        "rawAllSlots": {
+          "status": "zero-axes-in-raw-browser-awaiting-windows-test",
+          "report": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/physical-review.json",
+            "bytes": 3300,
+            "sha256": "a3e1a2afe2fbb40c6c4a377617b27c65173dc3c64c08798b010626ac8ee6452f"
+          },
+          "preparation": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/preparation.json",
+            "bytes": 2884,
+            "sha256": "6437565c9bbc9eb27d10d87a2aec40dfe2475a93d53b60bfd7d88ade9306f6ab"
+          }
+        },
+        "windowsControllerTest": {
+          "status": "operator-confirmed-axis-movement",
+          "report": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/windows-browser-comparison.json",
+            "bytes": 4506,
+            "sha256": "c01513ea0f0eaedd10ef1a39c00d0aa92c5613342610ec85a00a330754dac4f8"
+          }
+        },
+        "browserComparison": {
+          "status": "chrome-and-edge-zero-axes-windows-test-moves",
+          "report": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/browser-comparison/edge-physical-review.json",
+            "bytes": 4197,
+            "sha256": "7ff1ab936b242d11855040d619c79a34ec2c7ad44af25f7a903af8310f1d0e75"
+          },
+          "preparation": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/windows-browser-comparison.json",
+            "bytes": 4506,
+            "sha256": "c01513ea0f0eaedd10ef1a39c00d0aa92c5613342610ec85a00a330754dac4f8"
+          },
+          "next": "Confirm controller connection and verify model-specific protocol instructions."
+        },
+        "connectionIsolation": {
+          "status": "raw-left-axis-restored-engine-retest-pending",
+          "report": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/connection-isolation-review.json",
+            "bytes": 8968,
+            "sha256": "beb253b1f3ac79ec1e42f4422933ae4038875b597400d371aae580dd1d4b105c"
+          },
+          "preparation": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/connection-isolation-preparation.json",
+            "bytes": 3914,
+            "sha256": "49cd8e7075fc0e909b5c20d0b8390940dc783cdbd2557fb40d9259c33faea2ff"
+          }
+        }
+      },
+      "priorStagesByCandidate": [
+        {
+          "revision": "df89189071ca0f5017d10b4b641b875d0178f882",
+          "stages": {
+            "badgeNavigation": {
+              "status": "operator-confirmed-live-stage-pending-finalization",
+              "report": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/badge-navigation.json",
+                "bytes": 2917,
+                "sha256": "dfad64ec8edec0f84b3f9ce257685a8f6fe01b679eb93a82cca40db96ef77d06"
+              },
+              "finalizedIntegrityReview": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/gamepad-axis-review.json",
+                "bytes": 3712,
+                "sha256": "9e161e50b0f4e5aa67be6098d6cda8e4be2682b8302ecb78010b9bd339227599"
+              }
+            },
+            "longConfirm": {
+              "status": "observed-single-entry",
+              "report": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/gamepad-axis-review.json",
+                "bytes": 3712,
+                "sha256": "9e161e50b0f4e5aa67be6098d6cda8e4be2682b8302ecb78010b9bd339227599"
+              }
+            },
+            "gameplayAxes": {
+              "status": "operator-confirmed-live-gameplay-awaiting-finalization",
+              "report": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/wireless-gameplay.json",
+                "bytes": 10166,
+                "sha256": "a6030d2442f1e13ef16d0213bb076c4888fa75ac064267f0201187f88f2791d3"
+              },
+              "rawPrerequisiteReview": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/connection-isolation-review.json",
+                "bytes": 8968,
+                "sha256": "beb253b1f3ac79ec1e42f4422933ae4038875b597400d371aae580dd1d4b105c"
+              },
+              "finalizedRecordIntegrityReview": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/physical-failure.json",
+                "bytes": 3319,
+                "sha256": "d460c7171fce6d5634bd894fd7a1aa47f5f0e2f3a5867fdd5a76a14c244f137e"
+              }
+            },
+            "profileRestore": {
+              "status": "operator-confirmed-live-profile-and-jump-awaiting-finalization",
+              "report": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/wireless-profile.json",
+                "bytes": 4328,
+                "sha256": "4b7b18d2c4d24324b56b31f857b7bfeb0aea4aa28696d0ed1b84de08276a174d"
+              },
+              "finalizedRecordIntegrityReview": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/physical-failure.json",
+                "bytes": 3319,
+                "sha256": "d460c7171fce6d5634bd894fd7a1aa47f5f0e2f3a5867fdd5a76a14c244f137e"
+              }
+            },
+            "collectionNavigation": {
+              "status": "failed-visible-row-focus",
+              "report": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/physical-failure.json",
+                "bytes": 3319,
+                "sha256": "d460c7171fce6d5634bd894fd7a1aa47f5f0e2f3a5867fdd5a76a14c244f137e"
+              }
+            }
+          }
+        },
+        {
+          "revision": "3e4cbf70bc31dac8319125f27df4be65841622f1",
+          "stages": {},
+          "failure": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/edit-retention/physical-failure.json",
+            "bytes": 3903,
+            "sha256": "07c7679be45a973700b91255183ca9d8e69c1e865b7cff57b61785a1aea48ed1"
+          }
+        },
+        {
+          "revision": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20",
+          "stages": {
+            "collectionEditRetention": {
+              "status": "passed-operator-confirmed-physical-edit-retention",
+              "revision": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20",
+              "report": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/operator-stages/collection-edit-retention.json",
+                "bytes": 3619,
+                "sha256": "c6aa23804f1ca096804457f6f6448853cf2255ec0fe42c0d1b8e97f7837186b3"
+              },
+              "physicalInputAccepted": true
+            },
+            "audioAudition": {
+              "status": "failed-physical-audition-level-comparison",
+              "revision": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20",
+              "report": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/audio-audition/physical-failure.json",
+                "bytes": 2352,
+                "sha256": "2956a79b5def38e517c56dbd31b776304c782174af20620fd99b6d57547744ca"
+              },
+              "physicalInputAccepted": false
+            }
+          }
+        }
+      ]
     },
     {
       "id": "mac-and-physical-iphone",
       "required": true,
-      "status": "pending",
-      "evidence": [],
-      "conclusion": "Current tarballs, GUI/IME/rotation/keyboard/background and explicit audio host capability/unlock/resume proof required. Missing capability is blocking, not passed."
+      "status": "partial-macos-passed-iphone-gui-failed-audio-blocked",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/device-preparation.json",
+          "bytes": 2817,
+          "sha256": "4b40047110ac8708539690ceae0220fa6ce7212793f0e3914d29f22d9bb9b713"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1d7c461/device-preparation.json",
+          "bytes": 4009,
+          "sha256": "6c0fb4e31dd6e5b1f4445e1c03bc92f322c014fd2591545fa0cbcafe7e023ba6"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/device-preparation.json",
+          "bytes": 3644,
+          "sha256": "051a76944d48f45ac73e0c95b1d92d75a5522a503f8251a50d4caa9e365b0d6f"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/device-preparation.json",
+          "bytes": 3652,
+          "sha256": "bbe1c4e46659a5bf60dfe1023de09b5a3fb4fd806cdfa5d6dd967bd23aa3fa56"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/device-preparation.json",
+          "bytes": 4234,
+          "sha256": "8de8fa1b788b81f4b233efd9105bfadc6a6f64fac75bea9d4bfa010fd74339c8"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
+          "bytes": 4687,
+          "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/macos-ime-initial.json",
+          "bytes": 4120,
+          "sha256": "57c5eb6be85d23fcdb8314372d10874c616b00558739320d81c1fdd76191a501"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/macos-ime-followup.json",
+          "bytes": 4381,
+          "sha256": "303564b785a0a32d1168d115954768838a97da56ff90feb203eb8b4be860d365"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/macos-ime-collapse-feedback.json",
+          "bytes": 1792,
+          "sha256": "434b6a9ea9963e520ad619b4ac8bb120c7837d034c1d263232b1183302ab1c2a"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/macos-ime-collapse.json",
+          "bytes": 4171,
+          "sha256": "d85637c4b82f52fbccb824e244f491841a791dfb793c2b8de2e06701e0c7db07"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/macos-ime.json",
+          "bytes": 4557,
+          "sha256": "fccd0d3b0f2dd293567acbc657af3ff4a1ed34d5bdae527c61d9291568723612"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/macos-hearing.json",
+          "bytes": 5300,
+          "sha256": "10e7a2e33785282eee322f5fd99f8dac207ab277f778ba9e04bb83bc17c7d8a8"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/iphone-device-review.json",
+          "bytes": 7971,
+          "sha256": "a0d7d9a81992033b9bf05d3f318999263da5cb4e6182dec306267c76ac9a1969"
+        }
+      ],
+      "conclusion": "Mac IME and hearing passed on 5d8041d. The physical iPhone built and installed successfully and reproduced native preedit retention twice. Badge centering was reported visually. The Native host did not provide AudioContext, so actual hearing remains blocked. Native recognizer ownership and GPU cleanup measurements remain open.",
+      "stages": {
+        "keyboardIme": {
+          "status": "passed-physical-macos-ime",
+          "revision": "5d8041d7131fc12a84606586ccfbcc9a5633903c",
+          "report": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/macos-ime.json",
+            "bytes": 4557,
+            "sha256": "fccd0d3b0f2dd293567acbc657af3ff4a1ed34d5bdae527c61d9291568723612"
+          },
+          "initialReport": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/macos-ime-initial.json",
+            "bytes": 4120,
+            "sha256": "57c5eb6be85d23fcdb8314372d10874c616b00558739320d81c1fdd76191a501"
+          },
+          "physicalInputAccepted": true,
+          "operatorFeedback": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/macos-ime-collapse-feedback.json",
+            "bytes": 1792,
+            "sha256": "434b6a9ea9963e520ad619b4ac8bb120c7837d034c1d263232b1183302ab1c2a"
+          },
+          "repairCandidate": {
+            "status": "passed-physical-macos-ime",
+            "sourceRevision": "5d8041d7131fc12a84606586ccfbcc9a5633903c",
+            "deliveryRevision": "2e91ff56d916d089b6c4a782bb379336f806a371",
+            "branch": "codex/g11-device-focus-023-3e4cbf7",
+            "candidateSha256": "4018b679bbe8d8e228f050a0b04b7b6c453032f71cba309eddafdc97420ca3cf",
+            "nativeCandidateId": "g11-023-native-b0b8e30232fa4e3adbe1d289",
+            "handoff": {
+              "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/handoff.json",
+              "bytes": 1359,
+              "sha256": "4239d815ce64c5bdd5799150acb6e6870ffc27d7456bd4b40066db4d036e6b86"
+            },
+            "archive": {
+              "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/engine-0.2.3-real-devices-5d8041d.tar.gz",
+              "bytes": 19396255,
+              "sha256": "7f375a4ff3a8a27525cb58b1ab0a7650a9a87804179a9a6d7ee86d697f16ba1a"
+            },
+            "verification": {
+              "focusedEngineTests": 54,
+              "guiControlsTests": 15,
+              "windowsChromeTextCases": 23,
+              "packageGate": "passed",
+              "api": "passed",
+              "isolatedDeviceSetup": "setup-only",
+              "applePhysical": "passed-macos-ime"
+            },
+            "releaseQualified": false,
+            "physicalRetest": {
+              "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/macos-ime-collapse.json",
+              "bytes": 4171,
+              "sha256": "d85637c4b82f52fbccb824e244f491841a791dfb793c2b8de2e06701e0c7db07"
+            },
+            "macImeAcceptance": {
+              "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/macos-ime.json",
+              "bytes": 4557,
+              "sha256": "fccd0d3b0f2dd293567acbc657af3ff4a1ed34d5bdae527c61d9291568723612"
+            }
+          },
+          "priorStatus": "failed-macos-ime-implicit-preedit-commit",
+          "collapseRetest": {
+            "status": "passed-physical-macos-ime-collapse",
+            "revision": "5d8041d7131fc12a84606586ccfbcc9a5633903c",
+            "report": {
+              "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/macos-ime-collapse.json",
+              "bytes": 4171,
+              "sha256": "d85637c4b82f52fbccb824e244f491841a791dfb793c2b8de2e06701e0c7db07"
+            },
+            "physicalInputAccepted": true,
+            "fullMacImeAcceptance": false
+          },
+          "previousCandidateReview": {
+            "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+            "report": {
+              "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/macos-ime-followup.json",
+              "bytes": 4381,
+              "sha256": "303564b785a0a32d1168d115954768838a97da56ff90feb203eb8b4be860d365"
+            }
+          },
+          "fullMacImeAcceptance": true
+        },
+        "audioHearing": {
+          "status": "passed-physical-macos-hearing",
+          "revision": "5d8041d7131fc12a84606586ccfbcc9a5633903c",
+          "report": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/macos-hearing.json",
+            "bytes": 5300,
+            "sha256": "10e7a2e33785282eee322f5fd99f8dac207ab277f778ba9e04bb83bc17c7d8a8"
+          },
+          "physicalInputAccepted": true
+        },
+        "physicalIphone": {
+          "status": "failed-physical-iphone-gui-and-blocked-audio",
+          "revision": "5d8041d7131fc12a84606586ccfbcc9a5633903c",
+          "nativeCandidateId": "g11-023-native-b0b8e30232fa4e3adbe1d289",
+          "report": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/iphone-device-review.json",
+            "bytes": 7971,
+            "sha256": "a0d7d9a81992033b9bf05d3f318999263da5cb4e6182dec306267c76ac9a1969"
+          },
+          "physicalInputAccepted": false,
+          "remediation": {
+            "status": "local-fixes-applied-device-retest-pending",
+            "candidateId": "g11-023-iphone-retest-974ac55164759c4455ba",
+            "handoff": {
+              "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/iphone-retest-1794216680631/receipt.json",
+              "bytes": 679,
+              "sha256": "257bbab6b9aa143126b415a676b84ed38db4b8d4c9210a6f3a6e217cb65a1375"
+            }
+          }
+        }
+      }
     },
     {
       "id": "ubuntu-software-full-fixture",
       "required": true,
-      "status": "ci-failed-current",
+      "status": "passed-with-existing-named-ao-investigation",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/ci/snapshot-1793811444975/ci-report.json",
@@ -748,9 +1370,109 @@
           "path": "artifacts/engine-0.2.3/g11/planar-ci-investigation/result.json",
           "bytes": 13128,
           "sha256": "243fbb3ce604c8bee123c880f8cc2ac629d523e243667ba829bec81c0126a45e"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/ci-validation-plan.json",
+          "bytes": 1992,
+          "sha256": "126a72236f15a9fdfc0487f19b9bccd1bacb9c22247ed198b63e8af623dbd964"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/ci-execution.json",
+          "bytes": 1206,
+          "sha256": "046277dc068183de5f543c64b7db1556e76c5760e0e8dc571ec6ae3fc074d490"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/ci-evidence/ci-report.json",
+          "bytes": 3706,
+          "sha256": "262d2f21601234b1b7c40de9a10bf7fb9cb4f27c03d016a98ddcd24de84f4d18"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/ci-evidence/ci-independent-audit.json",
+          "bytes": 2214,
+          "sha256": "3ca5d2eaea06eb1c520b2a81e8bf01809f68654fa864dab9f5e01dd3a4e37ad8"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/ci-evidence/fast-independent-audit.json",
+          "bytes": 818,
+          "sha256": "a5e7828bea9a51eaf65f0b485e8f4839a2f3b751fe2dca96bd4e3d80c1a4e1c3"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/ci-evidence/motion-blur-windows-swiftshader.log",
+          "bytes": 1403,
+          "sha256": "f95fe2ef06604c36485bbe84acea4a0be0d942aa293faa04517a56a633602508"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/motion-blur-diagnosis/motion-blur-ubuntu-audit.json",
+          "bytes": 3846,
+          "sha256": "58bb9e3e5511096a6df55a9c5fec657a81b4d644454453536280d6383e868808"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/motion-blur-diagnosis/windows-readback-qualification.json",
+          "bytes": 3158,
+          "sha256": "664f87c0437a74a8bfb513caa27f134b0f2b635c61c78375cff548001f7a6708"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/motion-blur-diagnosis/ubuntu-offscreen-qualification.json",
+          "bytes": 1442,
+          "sha256": "953781cab065b65ff0d76bfbb229fc13821fe7bcf8bf104420abe9f70760a3fc"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/motion-blur-diagnosis/offscreen-full-ci/ci-execution.json",
+          "bytes": 704,
+          "sha256": "b4c9a52fa89c0989cf9b613450810076d5a4a5f9eafc158e5259fad2cda9c8f4"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/motion-blur-diagnosis/offscreen-full-ci/ci-evidence/ci-report.json",
+          "bytes": 2856,
+          "sha256": "ae559fcfbfdd3d9370631cb367650baa4026388927e7df42f835654bebb01428"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/motion-blur-diagnosis/offscreen-clean-full-ci/ci-evidence/independent-audit.json",
+          "bytes": 1894,
+          "sha256": "c5c53be85c02614645984ce122d3c80d25aac938fb758478dbe5afeb0bef9855"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/ubuntu-unblock/unblock-audit.json",
+          "bytes": 12251,
+          "sha256": "0934a36a51a23aaa7ff98dc11ed62e81d3bcff61281c16db1e0d76242522db33"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/ubuntu-unblock/software-ao-timeout-admission-proposal.json",
+          "bytes": 2593,
+          "sha256": "2c04e916e0b1c6a491f64f1f9cc6aa2a7dbb14478aaab2f3d84eb0df94777f1f"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/ubuntu-unblock/ao-admitted-full-ci/ci-validation-plan.json",
+          "bytes": 1661,
+          "sha256": "b8fd2f235f97dabdafa14654ae653936752ff0a0b33c4b2f9e14a2cc9cd38f81"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/ubuntu-unblock/ao-admitted-full-ci/ci-execution.json",
+          "bytes": 968,
+          "sha256": "a132d7782bd1220048abf028d12097e83836fadf0ab4d805cd1af5666074f238"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/ubuntu-unblock/ao-admitted-ci-audit.json",
+          "bytes": 8642,
+          "sha256": "ddde8a29d4591f5e5e4543db123f84282a0345b4401e295ca226b0d6e9e6180a"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-acceptance.json",
+          "bytes": 12559,
+          "sha256": "6ccabf18f9607211bd2c68ec08c0f39137cf8db06f5af7492ad0f15220997d47"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-progress.json",
+          "bytes": 1246,
+          "sha256": "09a386d08b00f49a5f523dbbfdf30834dd80640658df9b02597acf747b39a7bd"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-acceptance.json",
+          "bytes": 11688,
+          "sha256": "1f4787f7c65bf01cc6a33c262d733e9d40947df5a8f219408383b44253b1da30"
         }
       ],
-      "conclusion": "Current full-content Ubuntu/SwiftShader status: completed; conclusion: failure. Original workload, shared 300-second deadline and all budgets remain. Previous failure and raw reports are preserved. No 0.2.2 timeout exception is inherited; any current failure remains a hard release blocker. Current stop: 10000 entities/4 mirrors/5 bounces/1 view, samples 20/40 at last progress 248806.54ms; 31 progress events and all five raw reports are retained. The subsequent 8-bounce/4-view case, planar pixel matrix and later slow phases did not run. Isolated SwiftShader diagnosis measured 18.51 s of queue wait per 19.08 s frame in the four-view case. Both pinned Chrome 157 platform replays exceeded the same 300-second deadline. Shader arithmetic trials did not materially reduce it. No change to the gate or runtime was applied.",
+      "conclusion": "Current full software GPU workflow passed with the original approved 600s AO timeout investigation; native AO performance is not qualified by software timing.",
       "historicalFailureIndex": {
         "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
         "bytes": 34199,
@@ -760,14 +1482,59 @@
         "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/review-before-index.json",
         "bytes": 34199,
         "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
+      },
+      "previousQualification": {
+        "status": "passed-with-existing-named-ao-investigation",
+        "revision": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20"
       }
     },
     {
       "id": "g02-global-and-no-publication-rehearsal",
       "required": true,
-      "status": "pending",
-      "evidence": [],
-      "conclusion": "Run G02 global profile after all prerequisite evidence, then independently audit package/provenance/license/SBOM bundle. No push/tag/publication/baseline promotion."
+      "status": "passed-formal-7236b39",
+      "evidence": [
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-rehearsal-retry/attempt-1-manifest.json",
+          "bytes": 3183,
+          "sha256": "e22655537250935a2bbf246fb8e0120b903b5324c319a795d13af24052245b81"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-rehearsal-retry/attempt-1/workflow/run.json",
+          "bytes": 5745,
+          "sha256": "1cb139fc89983dfd58d3f7b2f36b36d6d8b9991b3f7f123c2c0f24ec4637dc74"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-rehearsal-retry/attempt-1/workflow/global-gate.1.stdout.log",
+          "bytes": 514165,
+          "sha256": "5cead46b363e05dcd47fab9bcba8b1bf6ab35dcbdb91e39ed6ee79d5809f56dd"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-rehearsal-retry/attempt-1/workflow/rehearsal.1.stderr.log",
+          "bytes": 1380,
+          "sha256": "4c7ffe07aa5cbb40cf035beef97a3dae89855b940b645b416b7e796e3159e801"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-rehearsal-retry/supply-chain-recheck/report.json",
+          "bytes": 37480,
+          "sha256": "0e24e688a57c9298282203e741bf32cc6235d3f00e49ab1d4c7956bb1abb3d82"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-rehearsal-retry/ready.json",
+          "bytes": 704,
+          "sha256": "3762562d4445837a5a1291c1c4a789c771661173bf243a9686acbae5c803e2c4"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39-rehearsal-retry/rehearsal-retry-result.json",
+          "bytes": 1321,
+          "sha256": "8f83bd347c8a3b442161719f9d0c5e071722f03624e3f4f90ef84fdf31ccfff6"
+        },
+        {
+          "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/windows-qualification-audit.json",
+          "bytes": 2960,
+          "sha256": "936d8ae8228dc9e3f691bd65137999189a90bfb555808a35d52efdb78c290e4a"
+        }
+      ],
+      "conclusion": "The frozen 7236b39 passed the complete Windows global gate, official no-publication rehearsal and independent rehearsal audit. All four archived packages match the qualified package hashes. Global gate remained attempt 1; rehearsal attempt 2 retained the first npm TLS failure and its complete SHA-256 archive. This does not grant physical or Ubuntu qualification. No publication, tag, push or baseline promotion."
     },
     {
       "id": "gui-p0-invalidation",
@@ -842,40 +1609,49 @@
     }
   ],
   "formalCandidate": {
-    "revision": "b61b700aaea35a2cdfe228d2a09c441f477ad812",
-    "branch": "codex/g11-qualification-023-b61b700a",
-    "checkout": "D:\\HaiyueStudio\\.reviewed\\engine-023-1793807926852-2ce5ae-canonical",
-    "preparation": {
-      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/clean-build.json",
-      "bytes": 6554,
-      "sha256": "95905d663d33da23928bdf5efb0c7c2eb7ed3e6c09a3bde4d283655b04f6972c"
-    },
-    "freeze": {
-      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/frozen-source.json",
-      "bytes": 953143,
-      "sha256": "3510949d8e4b619c4b0378b34aadbef76224687832a35ec50281192395f55dd2"
-    },
+    "revision": "7236b3953b42047bf2b9f45485fc29393f51f39b",
+    "branch": "codex/g11-qualification-023-7236b395",
+    "checkout": "D:\\HaiyueStudio\\.reviewed\\engine-023-msaa-lifetime-38d9f00",
+    "status": "passed-windows-prerequisites",
     "candidate": {
-      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json",
-      "bytes": 150663,
-      "sha256": "e7860cad3338a3e56bd331b3de6c3f170d14e8a136f9f6de82dfe0fb0f49c3d8"
+      "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/device-payload-r2/Engine/artifacts/engine-0.2.3/g11/qualification-candidate-7236b39/candidate.json",
+      "bytes": 150740,
+      "sha256": "2697b9334c993d9263ea12cf3fe4426955198091b3dcc4c0bea52643f5c5de61"
     },
     "contents": {
-      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json.contents.json",
-      "bytes": 909351,
-      "sha256": "c305a4905ce16b902a7aaf1ba3d30509b7dd1e95fea2f87ff8ce94e472f49209"
+      "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/device-payload-r2/Engine/artifacts/engine-0.2.3/g11/qualification-candidate-7236b39/candidate.json.contents.json",
+      "bytes": 933269,
+      "sha256": "7263b46bfa9d2ed92fbec7f1e17b28865f2f429e88cdd0401ff505b9cc460ac8"
+    },
+    "preparation": {
+      "path": "artifacts/engine-0.2.3/g11/windows-performance-7236b39/preparation.json",
+      "bytes": 474216,
+      "sha256": "ab39230f0f65211f84afadc216364c6f1363cf9226b1267a72e06bf34f31516c"
     },
     "packageReport": {
-      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/public-packages.json",
-      "bytes": 169357,
-      "sha256": "c20ba8e4721a21926757cf83006518f509e726378ebd8e59642ff54f679553be"
+      "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/device-payload-r2/Engine/artifacts/engine-0.2.3/g11/qualification-public-packages/public-packages.json",
+      "bytes": 169356,
+      "sha256": "67344f6f3cbdc9d490a60f2ff4d35f6b708ccdd478c3e198c53eac201b4327e2"
     },
-    "status": "clean-candidate-prepared",
-    "samplingStarted": false,
-    "entryReady": false,
-    "formalRunnerRegistered": false,
-    "releaseQualified": false,
-    "conclusion": "Clean source and exact deterministic packages prepared; current GUI phase capture, formal runner registration, actual devices, global gate and no-publication rehearsal remain separate requirements."
+    "windowsQualification": {
+      "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/windows-qualification-audit.json",
+      "bytes": 2960,
+      "sha256": "936d8ae8228dc9e3f691bd65137999189a90bfb555808a35d52efdb78c290e4a"
+    },
+    "ciPlan": {
+      "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/ci-validation-plan.json",
+      "bytes": 1992,
+      "sha256": "126a72236f15a9fdfc0487f19b9bccd1bacb9c22247ed198b63e8af623dbd964"
+    },
+    "deviceHandoff": {
+      "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/device-handoff-r2.json",
+      "bytes": 880,
+      "sha256": "9363c88300119947b9a34e70e080770ff2817bfe86a78003cd3ad0c03d03cf23"
+    },
+    "samplingStarted": true,
+    "entryReady": true,
+    "formalRunnerRegistered": true,
+    "releaseQualified": false
   },
   "historicalCandidate": [
     {
@@ -930,6 +1706,42 @@
         "bytes": 34199,
         "sha256": "1cf4102a7c2b04b6234aa6e48529b2b306daedf776f2b3e1185775df0bd3e5fd"
       }
+    },
+    {
+      "revision": "b61b700aaea35a2cdfe228d2a09c441f477ad812",
+      "branch": "codex/g11-qualification-023-b61b700a",
+      "checkout": "D:\\HaiyueStudio\\.reviewed\\engine-023-1793807926852-2ce5ae-canonical",
+      "preparation": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/clean-build.json",
+        "bytes": 6554,
+        "sha256": "95905d663d33da23928bdf5efb0c7c2eb7ed3e6c09a3bde4d283655b04f6972c"
+      },
+      "freeze": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/frozen-source.json",
+        "bytes": 953143,
+        "sha256": "3510949d8e4b619c4b0378b34aadbef76224687832a35ec50281192395f55dd2"
+      },
+      "candidate": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json",
+        "bytes": 150663,
+        "sha256": "e7860cad3338a3e56bd331b3de6c3f170d14e8a136f9f6de82dfe0fb0f49c3d8"
+      },
+      "contents": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/candidate.json.contents.json",
+        "bytes": 909351,
+        "sha256": "c305a4905ce16b902a7aaf1ba3d30509b7dd1e95fea2f87ff8ce94e472f49209"
+      },
+      "packageReport": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/public-packages.json",
+        "bytes": 169357,
+        "sha256": "c20ba8e4721a21926757cf83006518f509e726378ebd8e59642ff54f679553be"
+      },
+      "status": "superseded-by-7236b39",
+      "samplingStarted": false,
+      "entryReady": false,
+      "formalRunnerRegistered": false,
+      "releaseQualified": false,
+      "conclusion": "Clean source and exact deterministic packages prepared; current GUI phase capture, formal runner registration, actual devices, global gate and no-publication rehearsal remain separate requirements."
     }
   ],
   "cleanCandidatePreparation": {
@@ -979,18 +1791,14 @@
     "published": false
   },
   "cloudCI": {
-    "status": "failed",
-    "revision": "b61b700aaea35a2cdfe228d2a09c441f477ad812",
+    "status": "passed-with-existing-named-ao-investigation",
+    "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
     "report": {
-      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/ci/snapshot-1793811444975/ci-report.json",
-      "bytes": 6717,
-      "sha256": "eb883b85f5278b3ab599f320867298f38c042877792c3171423e789a32fc8684"
+      "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-acceptance.json",
+      "bytes": 11688,
+      "sha256": "1f4787f7c65bf01cc6a33c262d733e9d40947df5a8f219408383b44253b1da30"
     },
-    "outcome": {
-      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/ci-outcome-review.json",
-      "bytes": 4017,
-      "sha256": "1ebf53b97990af1514204eacd0f162c28c548bbde8784888e7ed0ce4d7a030ec"
-    },
+    "outcome": "Current Fast, Windows/Linux no-publication and full Ubuntu software GPU passed with the existing named AO investigation only.",
     "controllerAudit": {
       "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/cloud-no-publication-audit.json",
       "bytes": 1068,
@@ -1008,18 +1816,38 @@
     },
     "runs": [
       {
-        "id": 41865996157,
-        "name": "Engine Fast",
-        "url": "https://github.com/HaiyueStudio/Engine/actions/runs/41865996157",
-        "status": "completed",
-        "conclusion": "success"
+        "id": 42457853186,
+        "attempt": 1,
+        "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+        "status": "success",
+        "url": "https://github.com/HaiyueStudio/Engine/actions/runs/42457853186",
+        "run": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-evidence/run-42457853186.json",
+          "bytes": 13500,
+          "sha256": "716c53fd50bc65f1b147e229be17215ec15e74f87f68be423405e2854f5c1026"
+        },
+        "jobs": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-evidence/jobs-42457853186.json",
+          "bytes": 13390,
+          "sha256": "5eaeeb01dc8fe4002223d965abae47212b2ea234acf4d105c134c6ba0e16d062"
+        }
       },
       {
-        "id": 41866007760,
-        "name": "CI Slow",
-        "url": "https://github.com/HaiyueStudio/Engine/actions/runs/41866007760",
-        "status": "completed",
-        "conclusion": "failure"
+        "id": 42457859412,
+        "attempt": 1,
+        "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+        "status": "success",
+        "url": "https://github.com/HaiyueStudio/Engine/actions/runs/42457859412",
+        "run": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-evidence/run-42457859412.json",
+          "bytes": 13493,
+          "sha256": "89c90710a252ae331bf3469a1d80ad7d46a86c82dbbd1915be32812867c6f117"
+        },
+        "jobs": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-evidence/jobs-42457859412.json",
+          "bytes": 3930,
+          "sha256": "560df9d14917832e448b758d710763a2654b4f293bad7f0a008d2031f755c5cb"
+        }
       }
     ],
     "originalFailuresPreserved": true,
@@ -1034,31 +1862,935 @@
       "originalGateUnchanged": true,
       "originalFailuresPreserved": true,
       "productionOptimizationApplied": false
+    },
+    "currentCandidate": {
+      "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-acceptance.json",
+        "bytes": 11688,
+        "sha256": "1f4787f7c65bf01cc6a33c262d733e9d40947df5a8f219408383b44253b1da30"
+      }
+    },
+    "requiredForRuntimeRepair": {
+      "status": "passed-with-existing-named-ao-investigation",
+      "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+      "plan": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-validation-plan.json",
+        "bytes": 1790,
+        "sha256": "ea3143f857a619c4f3da4b0039663790e8c40e663ff87ddd54b6b224eff13b2e"
+      },
+      "earlierCiRemainsBoundToItsOwnRevision": true,
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-acceptance.json",
+        "bytes": 11688,
+        "sha256": "1f4787f7c65bf01cc6a33c262d733e9d40947df5a8f219408383b44253b1da30"
+      },
+      "originalFailuresRetained": true
+    },
+    "currentDeviceCandidate": {
+      "schemaVersion": 1,
+      "status": "passed-with-existing-named-ao-investigation",
+      "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+      "branch": "codex/g11-device-focus-023-3e4cbf7",
+      "previousHead": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20",
+      "normalFastForward": true,
+      "authorization": "../focus-3e4cbf7/ci-authorization.json",
+      "dispatched": [
+        {
+          "workflow": "ci-fast.yml",
+          "result": "https://github.com/HaiyueStudio/Engine/actions/runs/42457853186"
+        },
+        {
+          "workflow": "ci-slow.yml",
+          "result": "https://github.com/HaiyueStudio/Engine/actions/runs/42457859412"
+        }
+      ],
+      "retainedPolicies": "Original timeouts, scenes, samples, pixel, resource and performance budgets; existing named AO software timeout investigation only.",
+      "masterPushed": false,
+      "tagged": false,
+      "published": false,
+      "baselinePromoted": false,
+      "releaseQualified": false,
+      "dispatchReport": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-dispatch.json",
+        "bytes": 870,
+        "sha256": "8f631fae6c50542ce78d0a843cc8682bc1df0bdefcccbdb0293fb90ecf3b4c9e"
+      },
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-acceptance.json",
+        "bytes": 11688,
+        "sha256": "1f4787f7c65bf01cc6a33c262d733e9d40947df5a8f219408383b44253b1da30"
+      },
+      "runs": [
+        {
+          "id": 42457853186,
+          "attempt": 1,
+          "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+          "status": "success",
+          "url": "https://github.com/HaiyueStudio/Engine/actions/runs/42457853186",
+          "run": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-evidence/run-42457853186.json",
+            "bytes": 13500,
+            "sha256": "716c53fd50bc65f1b147e229be17215ec15e74f87f68be423405e2854f5c1026"
+          },
+          "jobs": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-evidence/jobs-42457853186.json",
+            "bytes": 13390,
+            "sha256": "5eaeeb01dc8fe4002223d965abae47212b2ea234acf4d105c134c6ba0e16d062"
+          }
+        },
+        {
+          "id": 42457859412,
+          "attempt": 1,
+          "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+          "status": "success",
+          "url": "https://github.com/HaiyueStudio/Engine/actions/runs/42457859412",
+          "run": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-evidence/run-42457859412.json",
+            "bytes": 13493,
+            "sha256": "89c90710a252ae331bf3469a1d80ad7d46a86c82dbbd1915be32812867c6f117"
+          },
+          "jobs": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-evidence/jobs-42457859412.json",
+            "bytes": 3930,
+            "sha256": "560df9d14917832e448b758d710763a2654b4f293bad7f0a008d2031f755c5cb"
+          }
+        }
+      ]
+    },
+    "priorDeviceCandidateRuns": [
+      {
+        "schemaVersion": 1,
+        "status": "dispatched",
+        "authorization": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/ci-authorization.json",
+          "bytes": 1188,
+          "sha256": "033a19d1725f9b184ea3e684756e54f619fbc69f44d99af2b759295bf4cb37c2"
+        },
+        "revision": "3e4cbf70bc31dac8319125f27df4be65841622f1",
+        "branch": "codex/g11-device-focus-023-3e4cbf7",
+        "runs": [
+          {
+            "workflow": "Engine Fast",
+            "runId": 42422599738,
+            "url": "https://github.com/HaiyueStudio/Engine/actions/runs/42422599738"
+          },
+          {
+            "workflow": "CI Slow",
+            "runId": 42422604589,
+            "url": "https://github.com/HaiyueStudio/Engine/actions/runs/42422604589"
+          }
+        ],
+        "knownPhysicalFailure": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/edit-retention/physical-failure.json",
+          "bytes": 3903,
+          "sha256": "07c7679be45a973700b91255183ca9d8e69c1e865b7cff57b61785a1aea48ed1"
+        },
+        "wholeQualification": false,
+        "masterPushed": false,
+        "publicationPerformed": false,
+        "dispatchReport": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/ci-dispatch.json",
+          "bytes": 1036,
+          "sha256": "2035a62551e70b6688d2ff1b08bd8fd48035d598fb8b73025aab8054affc334e"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "status": "passed-with-existing-named-ao-investigation",
+        "revision": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20",
+        "branch": "codex/g11-device-focus-023-3e4cbf7",
+        "previousHead": "3e4cbf70bc31dac8319125f27df4be65841622f1",
+        "normalFastForward": true,
+        "authorization": "../focus-3e4cbf7/ci-authorization.json",
+        "dispatched": [
+          {
+            "workflow": "ci-fast.yml",
+            "result": "https://github.com/HaiyueStudio/Engine/actions/runs/42424258019"
+          },
+          {
+            "workflow": "ci-slow.yml",
+            "result": "https://github.com/HaiyueStudio/Engine/actions/runs/42424261910"
+          }
+        ],
+        "retainedPolicies": "Original scenes, sample counts, pixel/resource/performance budgets and deadlines remain. The existing named AO software-timeout investigation is unchanged; all other failures stop qualification.",
+        "masterPushed": false,
+        "tagged": false,
+        "published": false,
+        "baselinePromoted": false,
+        "releaseQualified": false,
+        "dispatchReport": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-dispatch.json",
+          "bytes": 933,
+          "sha256": "a57bd0dc2fe6aee8870471b3bd060d9b7b38d388333998e10f3ee0a2584b5447"
+        },
+        "windowsFailure": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-windows-initial-failure.json",
+          "bytes": 983,
+          "sha256": "70144c93a70dd5d508a43e4a64b91dc28a6a9645dbe307a0992d0a77bc1461e4"
+        },
+        "report": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-acceptance.json",
+          "bytes": 12559,
+          "sha256": "6ccabf18f9607211bd2c68ec08c0f39137cf8db06f5af7492ad0f15220997d47"
+        },
+        "runs": [
+          {
+            "id": 42424258019,
+            "attempt": 2,
+            "revision": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20",
+            "status": "success",
+            "url": "https://github.com/HaiyueStudio/Engine/actions/runs/42424258019",
+            "run": {
+              "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-evidence/run-42424258019-attempt-2.json",
+              "bytes": 13592,
+              "sha256": "4aa090cf1bd9c16f690680231bdd06097b8a433ac16893c910d45a70100b51cb"
+            },
+            "jobs": {
+              "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-evidence/jobs-42424258019-attempt-2.json",
+              "bytes": 13396,
+              "sha256": "36545b2d2dddd204cf3eb4fac71377df870c81a85a56f491639f63f0eabfe77e"
+            }
+          },
+          {
+            "id": 42424261910,
+            "attempt": 1,
+            "revision": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20",
+            "status": "success",
+            "url": "https://github.com/HaiyueStudio/Engine/actions/runs/42424261910",
+            "run": {
+              "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-evidence/run-42424261910-attempt-1.json",
+              "bytes": 13503,
+              "sha256": "9cba76f8c571f6566344b9ec46210a5d0f999cdbc3edd128df8a0b04cf069cb5"
+            },
+            "jobs": {
+              "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-evidence/jobs-42424261910-attempt-1.json",
+              "bytes": 3930,
+              "sha256": "2e73ea97eee52df3d36900a2e9f28283164562e870bb54a22262d18913b9adbe"
+            }
+          }
+        ]
+      }
+    ],
+    "historicalSummary": {
+      "status": "failed",
+      "revision": "b61b700aaea35a2cdfe228d2a09c441f477ad812",
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/ci/snapshot-1793811444975/ci-report.json",
+        "bytes": 6717,
+        "sha256": "eb883b85f5278b3ab599f320867298f38c042877792c3171423e789a32fc8684"
+      },
+      "outcome": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/ci-outcome-review.json",
+        "bytes": 4017,
+        "sha256": "1ebf53b97990af1514204eacd0f162c28c548bbde8784888e7ed0ce4d7a030ec"
+      },
+      "runs": [
+        {
+          "id": 41865996157,
+          "name": "Engine Fast",
+          "url": "https://github.com/HaiyueStudio/Engine/actions/runs/41865996157",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 41866007760,
+          "name": "CI Slow",
+          "url": "https://github.com/HaiyueStudio/Engine/actions/runs/41866007760",
+          "status": "completed",
+          "conclusion": "failure"
+        }
+      ]
+    },
+    "previousQualification": {
+      "status": "passed-with-existing-named-ao-investigation",
+      "revision": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20",
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-acceptance.json",
+        "bytes": 12559,
+        "sha256": "6ccabf18f9607211bd2c68ec08c0f39137cf8db06f5af7492ad0f15220997d47"
+      },
+      "runs": [
+        {
+          "id": 42424258019,
+          "attempt": 2,
+          "revision": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20",
+          "status": "success",
+          "url": "https://github.com/HaiyueStudio/Engine/actions/runs/42424258019",
+          "run": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-evidence/run-42424258019-attempt-2.json",
+            "bytes": 13592,
+            "sha256": "4aa090cf1bd9c16f690680231bdd06097b8a433ac16893c910d45a70100b51cb"
+          },
+          "jobs": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-evidence/jobs-42424258019-attempt-2.json",
+            "bytes": 13396,
+            "sha256": "36545b2d2dddd204cf3eb4fac71377df870c81a85a56f491639f63f0eabfe77e"
+          }
+        },
+        {
+          "id": 42424261910,
+          "attempt": 1,
+          "revision": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20",
+          "status": "success",
+          "url": "https://github.com/HaiyueStudio/Engine/actions/runs/42424261910",
+          "run": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-evidence/run-42424261910-attempt-1.json",
+            "bytes": 13503,
+            "sha256": "9cba76f8c571f6566344b9ec46210a5d0f999cdbc3edd128df8a0b04cf069cb5"
+          },
+          "jobs": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/ci-evidence/jobs-42424261910-attempt-1.json",
+            "bytes": 3930,
+            "sha256": "2e73ea97eee52df3d36900a2e9f28283164562e870bb54a22262d18913b9adbe"
+          }
+        }
+      ]
     }
   },
   "devicePreparation": {
-    "status": "prepared-integrity-verified",
+    "status": "partial-real-device-acceptance",
     "report": {
-      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/devices/handoff.json",
-      "bytes": 963,
-      "sha256": "05bc3e5089c868e80b6c934b8f06389b1a4e0805af50346201fccd7a132f58d5"
+      "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
+      "bytes": 4687,
+      "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
     },
     "archive": {
-      "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g11\\frozen-1793807926852-2ce5ae\\devices\\engine-0.2.3-device-acceptance.tar.gz",
-      "bytes": 19351396,
-      "sha256": "5dab9e48f62e029140c5707d5996a4635829caa9c35d3ea401785fc284deeaa4"
+      "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g11\\device-acceptance-20261107\\focus-307771a\\engine-0.2.3-real-devices-307771a.tar.gz",
+      "bytes": 19391483,
+      "sha256": "295533d5652ad3c8dd5050b864bb1a1b2033d0e3084a9d2493ecd06086144b07"
     },
-    "nativeCandidateId": "g11-023-native-b787ebeb5c092e2b7f7919d8",
-    "nativeManifest": {
-      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/native-qualified-candidate.json",
-      "bytes": 31659,
-      "sha256": "8679f36b3610ce1dce7a5dc982cfaff12d2d7bc10df712b72c8fd1fd00a0b718"
-    },
+    "nativeCandidateId": "g11-023-native-f18058babe967c2da7d297cf",
     "nativePreparation": {
-      "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/native-preparation-final.json",
-      "bytes": 20544,
-      "sha256": "0dd51400c6e46d96d72260fc9e3646d553ffddd9db960b67bc463425fd9f5c36"
+      "status": "source-and-vendor-bytes-verified",
+      "candidateId": "g11-023-native-f18058babe967c2da7d297cf",
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/handoff.json",
+        "bytes": 1359,
+        "sha256": "28d2c64a4bfa4bc488f982fa3cf737b5bab864ef51f862f48cee822cfbc00cd8"
+      },
+      "installedTypecheck": "Required on Mac; actual iPhone host and hearing acceptance pending."
     },
-    "actualDeviceAcceptance": "pending"
+    "actualDeviceAcceptance": "pending",
+    "historical": {
+      "status": "prepared-integrity-verified",
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/devices/handoff.json",
+        "bytes": 963,
+        "sha256": "05bc3e5089c868e80b6c934b8f06389b1a4e0805af50346201fccd7a132f58d5"
+      },
+      "archive": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g11\\frozen-1793807926852-2ce5ae\\devices\\engine-0.2.3-device-acceptance.tar.gz",
+        "bytes": 19351396,
+        "sha256": "5dab9e48f62e029140c5707d5996a4635829caa9c35d3ea401785fc284deeaa4"
+      },
+      "nativeCandidateId": "g11-023-native-b787ebeb5c092e2b7f7919d8",
+      "nativeManifest": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/bindings/native-qualified-candidate.json",
+        "bytes": 31659,
+        "sha256": "8679f36b3610ce1dce7a5dc982cfaff12d2d7bc10df712b72c8fd1fd00a0b718"
+      },
+      "nativePreparation": {
+        "path": "artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/native-preparation-final.json",
+        "bytes": 20544,
+        "sha256": "0dd51400c6e46d96d72260fc9e3646d553ffddd9db960b67bc463425fd9f5c36"
+      },
+      "actualDeviceAcceptance": "pending"
+    },
+    "currentSupplement": {
+      "status": "partial-real-device-acceptance",
+      "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+      "payloadRevision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
+        "bytes": 4687,
+        "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
+      },
+      "archive": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g11\\device-acceptance-20261107\\focus-307771a\\engine-0.2.3-real-devices-307771a.tar.gz",
+        "bytes": 19391483,
+        "sha256": "295533d5652ad3c8dd5050b864bb1a1b2033d0e3084a9d2493ecd06086144b07"
+      },
+      "actualDeviceAcceptance": "passed-windows-ime-gamepad-and-hearing",
+      "useForFinalAcceptance": false,
+      "ciForThisRuntime": "passed-with-existing-named-ao-investigation",
+      "previousFailure": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/audio-audition/physical-failure.json",
+        "bytes": 2352,
+        "sha256": "2956a79b5def38e517c56dbd31b776304c782174af20620fd99b6d57547744ca"
+      },
+      "windowsLatestReview": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-gamepad.json",
+        "bytes": 4410,
+        "sha256": "394a446dcb5ec8a6e8b96173aaab620b27a09dd65441620cc438bb2ea48f0d74"
+      },
+      "appleLatestReview": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/macos-ime-collapse-feedback.json",
+        "bytes": 1792,
+        "sha256": "434b6a9ea9963e520ad619b4ac8bb120c7837d034c1d263232b1183302ab1c2a"
+      }
+    },
+    "previousPreparedR2": {
+      "status": "prepared-integrity-verified-7236b39",
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/device-handoff-r2.json",
+        "bytes": 880,
+        "sha256": "9363c88300119947b9a34e70e080770ff2817bfe86a78003cd3ad0c03d03cf23"
+      },
+      "archive": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g11\\qualification-7236b39-final\\engine-0.2.3-device-acceptance-7236b39-r2.tar.gz",
+        "bytes": 19385382,
+        "sha256": "926697aec4f2e341fc76f6672c5f82a0b9d8fc3290431872657577694bf386af"
+      },
+      "nativeCandidateId": "g11-023-native-0c1eb5438dad2ecf38505d9f"
+    },
+    "navigationRepair": {
+      "status": "applied-and-fresh-device-package-verified",
+      "appliedRevision": "3e4cbf70bc31dac8319125f27df4be65841622f1",
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/badge-focus/validation.json",
+        "bytes": 4285,
+        "sha256": "b83ee1dceefae24eb79c490f680f43fbd7c0aa5c8abd7b420564a8ec0f334e30"
+      },
+      "requiresFreshDevicePackage": true,
+      "oldDeviceFailureRetained": true,
+      "releaseQualified": false,
+      "freshPreparation": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/device-preparation.json",
+        "bytes": 3652,
+        "sha256": "bbe1c4e46659a5bf60dfe1023de09b5a3fb4fd806cdfa5d6dd967bd23aa3fa56"
+      },
+      "badgeRegression": {
+        "status": "failed-physical-badge-directional-navigation",
+        "report": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/badge-focus/physical-failure.json",
+          "bytes": 6856,
+          "sha256": "e5b5a7c4dcda08e395916f9a79e06c2d759ba06e158dce63871b12f73ca24433"
+        },
+        "fixScopeAlreadyAdmitted": true,
+        "repair": {
+          "status": "applied-focused-and-native-verified",
+          "revision": "df89189071ca0f5017d10b4b641b875d0178f882",
+          "report": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/badge-focus/validation.json",
+            "bytes": 4285,
+            "sha256": "b83ee1dceefae24eb79c490f680f43fbd7c0aa5c8abd7b420564a8ec0f334e30"
+          },
+          "freshDevicePackage": "passed-integrity",
+          "freshPreparation": {
+            "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/device-preparation.json",
+            "bytes": 3652,
+            "sha256": "bbe1c4e46659a5bf60dfe1023de09b5a3fb4fd806cdfa5d6dd967bd23aa3fa56"
+          }
+        }
+      },
+      "previousAppliedRevision": "1d7c4611978b215232c832537f787eeaf7105786",
+      "previousReport": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-proposal/scroll-proposal.json",
+        "bytes": 5919,
+        "sha256": "de3af669a706b7dce61ba66e5d35214ca34a6d47ce0007545c2f4b913c4ffd66"
+      }
+    },
+    "previousFailedSupplement": {
+      "status": "blocked-physical-directional-navigation",
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/device-preparation.json",
+        "bytes": 2817,
+        "sha256": "4b40047110ac8708539690ceae0220fa6ce7212793f0e3914d29f22d9bb9b713"
+      },
+      "archive": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g11\\device-acceptance-20261107\\engine-0.2.3-real-devices-de464ec.tar.gz",
+        "bytes": 19587617,
+        "sha256": "a0b90b165d81b213ffc3504cffa0385e076be4209231fc8c76bca120cddd386c"
+      },
+      "ciRevision": "de464ec7c4a8182b87cba0a38189a0ec4a000587",
+      "payloadRevision": "7236b3953b42047bf2b9f45485fc29393f51f39b",
+      "actualDeviceAcceptance": "failed-physical-directional-navigation",
+      "windowsImeReview": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/windows-ime-review.json",
+        "bytes": 3796,
+        "sha256": "e6c92a36ea45223228a2555fb9b14b04676513e414f5c1cfcdc6a80cf6346e84"
+      },
+      "navigationFailure": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/navigation-failure.json",
+        "bytes": 2852,
+        "sha256": "0cd993923dd5aece2d4f94e9609eebcb8eb0fded32d078865f6e5bfeac52f991"
+      },
+      "useForFinalAcceptance": false,
+      "next": "Build and bind fresh candidate packages, repeat affected real device workflows and obtain affected candidate qualification."
+    },
+    "previousDevicePreparation": {
+      "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/device-preparation.json",
+      "bytes": 4234,
+      "sha256": "8de8fa1b788b81f4b233efd9105bfadc6a6f64fac75bea9d4bfa010fd74339c8"
+    },
+    "previousNativePreparation": {
+      "status": "source-and-vendor-bytes-verified",
+      "candidateId": "g11-023-native-cc890a818fd90ee679acf1c7",
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/handoff.json",
+        "bytes": 1359,
+        "sha256": "be207667ed6de646fd5d510b11ec807b86a8f6797f32bc5161b1cf08e59bd0f3"
+      },
+      "installedTypecheck": "Required on Mac; actual iPhone host and audio acceptance pending."
+    },
+    "failedSupplementHistory": [
+      {
+        "status": "blocked-physical-badge-navigation",
+        "revision": "1d7c4611978b215232c832537f787eeaf7105786",
+        "payloadRevision": "1d7c4611978b215232c832537f787eeaf7105786",
+        "report": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1d7c461/device-preparation.json",
+          "bytes": 4009,
+          "sha256": "6c0fb4e31dd6e5b1f4445e1c03bc92f322c014fd2591545fa0cbcafe7e023ba6"
+        },
+        "archive": {
+          "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g11\\device-acceptance-20261107\\focus-1d7c461\\engine-0.2.3-real-devices-1d7c461.tar.gz",
+          "bytes": 19389597,
+          "sha256": "44cdfa4226b90b1169e372aee17397f488cb52f1b47ad6d42336aea670dd0392"
+        },
+        "actualDeviceAcceptance": "failed-physical-badge-directional-navigation",
+        "useForFinalAcceptance": false,
+        "ciForThisRuntime": "pending",
+        "previousFailure": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/navigation-failure.json",
+          "bytes": 2852,
+          "sha256": "0cd993923dd5aece2d4f94e9609eebcb8eb0fded32d078865f6e5bfeac52f991"
+        },
+        "badgeFailure": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/badge-focus/physical-failure.json",
+          "bytes": 6856,
+          "sha256": "e5b5a7c4dcda08e395916f9a79e06c2d759ba06e158dce63871b12f73ca24433"
+        }
+      },
+      {
+        "status": "prepared-fresh-runtime-devices-pending",
+        "revision": "df89189071ca0f5017d10b4b641b875d0178f882",
+        "payloadRevision": "df89189071ca0f5017d10b4b641b875d0178f882",
+        "report": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/device-preparation.json",
+          "bytes": 3644,
+          "sha256": "051a76944d48f45ac73e0c95b1d92d75a5522a503f8251a50d4caa9e365b0d6f"
+        },
+        "archive": {
+          "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g11\\device-acceptance-20261107\\focus-df89189\\engine-0.2.3-real-devices-df89189.tar.gz",
+          "bytes": 19391251,
+          "sha256": "591cdb40fbff912e517da03a24880d892d1084839eff8521c5c066688dd75a74"
+        },
+        "actualDeviceAcceptance": "failed-visible-row-focus",
+        "useForFinalAcceptance": false,
+        "ciForThisRuntime": "pending",
+        "previousFailure": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/navigation-failure.json",
+          "bytes": 2852,
+          "sha256": "0cd993923dd5aece2d4f94e9609eebcb8eb0fded32d078865f6e5bfeac52f991"
+        },
+        "liveSession": "physical-win32-gamepad-1794058205050-a3ad6d",
+        "badgeStage": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/badge-navigation.json",
+          "bytes": 2917,
+          "sha256": "dfad64ec8edec0f84b3f9ce257685a8f6fe01b679eb93a82cca40db96ef77d06"
+        },
+        "windowsFinalReview": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/gamepad-axis-review.json",
+          "bytes": 3712,
+          "sha256": "9e161e50b0f4e5aa67be6098d6cda8e4be2682b8302ecb78010b9bd339227599"
+        },
+        "axisDiagnostic": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/preparation.json",
+          "bytes": 2884,
+          "sha256": "6437565c9bbc9eb27d10d87a2aec40dfe2475a93d53b60bfd7d88ade9306f6ab"
+        },
+        "rawAxisReview": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/physical-review.json",
+          "bytes": 3300,
+          "sha256": "a3e1a2afe2fbb40c6c4a377617b27c65173dc3c64c08798b010626ac8ee6452f"
+        },
+        "windowsBrowserComparison": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/windows-browser-comparison.json",
+          "bytes": 4506,
+          "sha256": "c01513ea0f0eaedd10ef1a39c00d0aa92c5613342610ec85a00a330754dac4f8"
+        },
+        "edgeRawAxisReview": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/browser-comparison/edge-physical-review.json",
+          "bytes": 4197,
+          "sha256": "7ff1ab936b242d11855040d619c79a34ec2c7ad44af25f7a903af8310f1d0e75"
+        },
+        "connectionIsolation": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/connection-isolation-preparation.json",
+          "bytes": 3914,
+          "sha256": "49cd8e7075fc0e909b5c20d0b8390940dc783cdbd2557fb40d9259c33faea2ff"
+        },
+        "connectionIsolationReview": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/connection-isolation-review.json",
+          "bytes": 8968,
+          "sha256": "beb253b1f3ac79ec1e42f4422933ae4038875b597400d371aae580dd1d4b105c"
+        },
+        "wirelessGameplayStage": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/wireless-gameplay.json",
+          "bytes": 10166,
+          "sha256": "a6030d2442f1e13ef16d0213bb076c4888fa75ac064267f0201187f88f2791d3"
+        },
+        "wirelessProfileStage": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/wireless-profile.json",
+          "bytes": 4328,
+          "sha256": "4b7b18d2c4d24324b56b31f857b7bfeb0aea4aa28696d0ed1b84de08276a174d"
+        },
+        "windowsLatestFinalReview": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/physical-failure.json",
+          "bytes": 3319,
+          "sha256": "d460c7171fce6d5634bd894fd7a1aa47f5f0e2f3a5867fdd5a76a14c244f137e"
+        },
+        "rowFocusProposal": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/proposal.json",
+          "bytes": 5536,
+          "sha256": "898b25552e1db6cca2aa0bc14af7d97376f8bca2ce5ddb4086a6f8d23fe0fc1f"
+        },
+        "rowFocusApplication": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/application.json",
+          "bytes": 1194,
+          "sha256": "f1d4a85c4771f2ac18ad0c679f5a97493ba0bbe3fb2bc9a2dc471b3d1fc9b4ec"
+        }
+      },
+      {
+        "status": "failed-physical-row-edit-retention",
+        "revision": "3e4cbf70bc31dac8319125f27df4be65841622f1",
+        "payloadRevision": "3e4cbf70bc31dac8319125f27df4be65841622f1",
+        "report": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/device-preparation.json",
+          "bytes": 3652,
+          "sha256": "bbe1c4e46659a5bf60dfe1023de09b5a3fb4fd806cdfa5d6dd967bd23aa3fa56"
+        },
+        "archive": {
+          "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g11\\device-acceptance-20261107\\focus-3e4cbf7\\engine-0.2.3-real-devices-3e4cbf7.tar.gz",
+          "bytes": 19391713,
+          "sha256": "db7816ee45954a09a96815b38d972565b2fcbc2b5112a87c1f72b73a926a7344"
+        },
+        "actualDeviceAcceptance": "failed",
+        "useForFinalAcceptance": false,
+        "ciForThisRuntime": "dispatched",
+        "previousFailure": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/physical-failure.json",
+          "bytes": 3319,
+          "sha256": "d460c7171fce6d5634bd894fd7a1aa47f5f0e2f3a5867fdd5a76a14c244f137e"
+        },
+        "rowFocusFollowup": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/followup-validation.json",
+          "bytes": 2254,
+          "sha256": "9032da81dc88f37cb820fd2febb7f2df95ca9a14eb9ef07d0944057ebe605477"
+        },
+        "rowFocusFailure": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/physical-failure.json",
+          "bytes": 3319,
+          "sha256": "d460c7171fce6d5634bd894fd7a1aa47f5f0e2f3a5867fdd5a76a14c244f137e"
+        },
+        "editRetentionFailure": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/edit-retention/physical-failure.json",
+          "bytes": 3903,
+          "sha256": "07c7679be45a973700b91255183ca9d8e69c1e865b7cff57b61785a1aea48ed1"
+        }
+      },
+      {
+        "status": "failed-physical-audio-audition",
+        "revision": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20",
+        "payloadRevision": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20",
+        "report": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/device-preparation.json",
+          "bytes": 4234,
+          "sha256": "8de8fa1b788b81f4b233efd9105bfadc6a6f64fac75bea9d4bfa010fd74339c8"
+        },
+        "archive": {
+          "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g11\\device-acceptance-20261107\\focus-1c84c10\\engine-0.2.3-real-devices-1c84c10.tar.gz",
+          "bytes": 19391587,
+          "sha256": "8833a40e4e4d726322f48cb6d82d18995d7cd76d442a67507922edf4c227c4b9"
+        },
+        "actualDeviceAcceptance": "partial-edit-retention-passed",
+        "useForFinalAcceptance": false,
+        "ciForThisRuntime": "passed-with-existing-named-ao-investigation",
+        "previousFailure": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/edit-retention/physical-failure.json",
+          "bytes": 3903,
+          "sha256": "07c7679be45a973700b91255183ca9d8e69c1e865b7cff57b61785a1aea48ed1"
+        },
+        "windowsLatestReview": {
+          "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/operator-stages/collection-edit-retention.json",
+          "bytes": 3619,
+          "sha256": "c6aa23804f1ca096804457f6f6448853cf2255ec0fe42c0d1b8e97f7837186b3"
+        }
+      }
+    ],
+    "collectionRowRepair": {
+      "status": "applied-and-fresh-package-verified",
+      "revision": "3e4cbf70bc31dac8319125f27df4be65841622f1",
+      "admission": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/admission.json",
+        "bytes": 580,
+        "sha256": "049abf05c45c697240c3239a22260588f78e8d6304da4d347193c365222e3000"
+      },
+      "application": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/followup-application.json",
+        "bytes": 832,
+        "sha256": "2f8ef3ea40f23cb5fa116e8b74a3e0ada21b9c917940318ea46bd7b3d33bdd3b"
+      },
+      "followupValidation": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/followup-validation.json",
+        "bytes": 2254,
+        "sha256": "9032da81dc88f37cb820fd2febb7f2df95ca9a14eb9ef07d0944057ebe605477"
+      },
+      "physicalFailure": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/physical-failure.json",
+        "bytes": 3319,
+        "sha256": "d460c7171fce6d5634bd894fd7a1aa47f5f0e2f3a5867fdd5a76a14c244f137e"
+      },
+      "nativePackageReplay": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-3e4cbf7/packaged-row-focus.json",
+        "bytes": 372860,
+        "sha256": "b0f91d30b3007d30fe375b4c1c1d1b12bec5b29f261dfbf656a2bda1dd09cefe"
+      }
+    },
+    "latestFailedSupplement": {
+      "status": "prepared-fresh-runtime-devices-pending",
+      "revision": "df89189071ca0f5017d10b4b641b875d0178f882",
+      "payloadRevision": "df89189071ca0f5017d10b4b641b875d0178f882",
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/device-preparation.json",
+        "bytes": 3644,
+        "sha256": "051a76944d48f45ac73e0c95b1d92d75a5522a503f8251a50d4caa9e365b0d6f"
+      },
+      "archive": {
+        "path": "D:\\HaiyueStudio\\Engine\\artifacts\\engine-0.2.3\\g11\\device-acceptance-20261107\\focus-df89189\\engine-0.2.3-real-devices-df89189.tar.gz",
+        "bytes": 19391251,
+        "sha256": "591cdb40fbff912e517da03a24880d892d1084839eff8521c5c066688dd75a74"
+      },
+      "actualDeviceAcceptance": "failed-visible-row-focus",
+      "useForFinalAcceptance": false,
+      "ciForThisRuntime": "pending",
+      "previousFailure": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/navigation-failure.json",
+        "bytes": 2852,
+        "sha256": "0cd993923dd5aece2d4f94e9609eebcb8eb0fded32d078865f6e5bfeac52f991"
+      },
+      "liveSession": "physical-win32-gamepad-1794058205050-a3ad6d",
+      "badgeStage": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/badge-navigation.json",
+        "bytes": 2917,
+        "sha256": "dfad64ec8edec0f84b3f9ce257685a8f6fe01b679eb93a82cca40db96ef77d06"
+      },
+      "windowsFinalReview": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/gamepad-axis-review.json",
+        "bytes": 3712,
+        "sha256": "9e161e50b0f4e5aa67be6098d6cda8e4be2682b8302ecb78010b9bd339227599"
+      },
+      "axisDiagnostic": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/preparation.json",
+        "bytes": 2884,
+        "sha256": "6437565c9bbc9eb27d10d87a2aec40dfe2475a93d53b60bfd7d88ade9306f6ab"
+      },
+      "rawAxisReview": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/physical-review.json",
+        "bytes": 3300,
+        "sha256": "a3e1a2afe2fbb40c6c4a377617b27c65173dc3c64c08798b010626ac8ee6452f"
+      },
+      "windowsBrowserComparison": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/windows-browser-comparison.json",
+        "bytes": 4506,
+        "sha256": "c01513ea0f0eaedd10ef1a39c00d0aa92c5613342610ec85a00a330754dac4f8"
+      },
+      "edgeRawAxisReview": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/browser-comparison/edge-physical-review.json",
+        "bytes": 4197,
+        "sha256": "7ff1ab936b242d11855040d619c79a34ec2c7ad44af25f7a903af8310f1d0e75"
+      },
+      "connectionIsolation": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/connection-isolation-preparation.json",
+        "bytes": 3914,
+        "sha256": "49cd8e7075fc0e909b5c20d0b8390940dc783cdbd2557fb40d9259c33faea2ff"
+      },
+      "connectionIsolationReview": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/axis-diagnostic/connection-isolation-review.json",
+        "bytes": 8968,
+        "sha256": "beb253b1f3ac79ec1e42f4422933ae4038875b597400d371aae580dd1d4b105c"
+      },
+      "wirelessGameplayStage": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/wireless-gameplay.json",
+        "bytes": 10166,
+        "sha256": "a6030d2442f1e13ef16d0213bb076c4888fa75ac064267f0201187f88f2791d3"
+      },
+      "wirelessProfileStage": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-df89189/operator-stages/wireless-profile.json",
+        "bytes": 4328,
+        "sha256": "4b7b18d2c4d24324b56b31f857b7bfeb0aea4aa28696d0ed1b84de08276a174d"
+      },
+      "windowsLatestFinalReview": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/physical-failure.json",
+        "bytes": 3319,
+        "sha256": "d460c7171fce6d5634bd894fd7a1aa47f5f0e2f3a5867fdd5a76a14c244f137e"
+      },
+      "rowFocusProposal": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/proposal.json",
+        "bytes": 5536,
+        "sha256": "898b25552e1db6cca2aa0bc14af7d97376f8bca2ce5ddb4086a6f8d23fe0fc1f"
+      },
+      "rowFocusApplication": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/list-focus/application.json",
+        "bytes": 1194,
+        "sha256": "f1d4a85c4771f2ac18ad0c679f5a97493ba0bbe3fb2bc9a2dc471b3d1fc9b4ec"
+      }
+    },
+    "editRetention": {
+      "status": "passed-operator-confirmed-physical-edit-retention",
+      "revision": "1c84c10110b804d96e7817a0ab22dcbf65f1eb20",
+      "failure": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/edit-retention/physical-failure.json",
+        "bytes": 3903,
+        "sha256": "07c7679be45a973700b91255183ca9d8e69c1e865b7cff57b61785a1aea48ed1"
+      },
+      "admission": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/edit-retention/admission.json",
+        "bytes": 421,
+        "sha256": "1ba6ae2ac756933c73046bf44a99bf7e97b3b63e820222ac1bd5193f46fd7c26"
+      },
+      "application": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/edit-retention/application.json",
+        "bytes": 2200,
+        "sha256": "287a30f294bf862e261a3135f9887fe5a644c021b8667d2d8a57f4c289577a55"
+      },
+      "validation": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/edit-retention/validation-v2.json",
+        "bytes": 1727,
+        "sha256": "6469c3d80e9824c869cad15ff9432b6dbdc968641023d6bccb088e01ef41f1ba"
+      },
+      "browser": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/packaged-row-focus.json",
+        "bytes": 373894,
+        "sha256": "3c200998cd61ccbc9a446e4000ee0bbad3bb78cb82c6892fc9ed0c01349679da"
+      },
+      "physicalInputAccepted": true,
+      "acceptanceScope": "collection-edit-retention-only",
+      "physicalReview": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-1c84c10/operator-stages/collection-edit-retention.json",
+        "bytes": 3619,
+        "sha256": "c6aa23804f1ca096804457f6f6448853cf2255ec0fe42c0d1b8e97f7837186b3"
+      }
+    },
+    "audioAuditionRepair": {
+      "status": "passed-physical-windows-hearing",
+      "failure": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/audio-audition/physical-failure.json",
+        "bytes": 2352,
+        "sha256": "2956a79b5def38e517c56dbd31b776304c782174af20620fd99b6d57547744ca"
+      },
+      "application": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/audio-audition/application.json",
+        "bytes": 3369,
+        "sha256": "54df1f25b5abee2eec07a1e3e8e8cb225d676ca550a112e91c6e86a447711248"
+      },
+      "validation": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/audio-audition/validation.json",
+        "bytes": 1784,
+        "sha256": "570b24449e1249dc33797f91c381bcc5197450e0f2794875d1114196744916ee"
+      },
+      "pcm": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/audio-audition/pcm-validation-307771a.json",
+        "bytes": 36424,
+        "sha256": "622196060886ac5868acce2573da5c223267087f83f73dbd03764e91affdb548"
+      },
+      "newScopeRequired": false,
+      "physicalAcceptance": "Windows passed; Mac/iPhone hearing pending",
+      "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+      "preparation": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json",
+        "bytes": 4687,
+        "sha256": "2b04d878cff788c18368f3df2cc313454529418e7056219592a978b2b94c9128"
+      },
+      "physicalReview": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-hearing.json",
+        "bytes": 4454,
+        "sha256": "6aaf8a42ba9c8235285096aa54b3b1989df83195ffcbd38d035c6594dbad189c"
+      }
+    },
+    "packagingRecovery": {
+      "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/packaging-recovery.json",
+      "bytes": 2001,
+      "sha256": "cffaf2a99abbdd019b4af848ce3fb585dc6f09a5c5f152d8634dbd77ecc8352e"
+    },
+    "browserImeCollapseRetest": {
+      "status": "passed-physical-macos-ime",
+      "sourceRevision": "5d8041d7131fc12a84606586ccfbcc9a5633903c",
+      "deliveryRevision": "2e91ff56d916d089b6c4a782bb379336f806a371",
+      "branch": "codex/g11-device-focus-023-3e4cbf7",
+      "candidateSha256": "4018b679bbe8d8e228f050a0b04b7b6c453032f71cba309eddafdc97420ca3cf",
+      "nativeCandidateId": "g11-023-native-b0b8e30232fa4e3adbe1d289",
+      "handoff": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/handoff.json",
+        "bytes": 1359,
+        "sha256": "4239d815ce64c5bdd5799150acb6e6870ffc27d7456bd4b40066db4d036e6b86"
+      },
+      "archive": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/engine-0.2.3-real-devices-5d8041d.tar.gz",
+        "bytes": 19396255,
+        "sha256": "7f375a4ff3a8a27525cb58b1ab0a7650a9a87804179a9a6d7ee86d697f16ba1a"
+      },
+      "verification": {
+        "focusedEngineTests": 54,
+        "guiControlsTests": 15,
+        "windowsChromeTextCases": 23,
+        "packageGate": "passed",
+        "api": "passed",
+        "isolatedDeviceSetup": "setup-only",
+        "applePhysical": "macos-passed-iphone-gui-failed-audio-blocked"
+      },
+      "releaseQualified": false,
+      "physicalRetest": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/macos-ime-collapse.json",
+        "bytes": 4171,
+        "sha256": "d85637c4b82f52fbccb824e244f491841a791dfb793c2b8de2e06701e0c7db07"
+      },
+      "macImeAcceptance": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/macos-ime.json",
+        "bytes": 4557,
+        "sha256": "fccd0d3b0f2dd293567acbc657af3ff4a1ed34d5bdae527c61d9291568723612"
+      },
+      "macHearingAcceptance": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/macos-hearing.json",
+        "bytes": 5300,
+        "sha256": "10e7a2e33785282eee322f5fd99f8dac207ab277f778ba9e04bb83bc17c7d8a8"
+      },
+      "iphoneReview": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-5d8041d/operator-stages/iphone-device-review.json",
+        "bytes": 7971,
+        "sha256": "a0d7d9a81992033b9bf05d3f318999263da5cb4e6182dec306267c76ac9a1969"
+      }
+    }
+  },
+  "previousDeviceCandidate": [
+    {
+      "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/device-payload-r2/Engine/artifacts/engine-0.2.3/g11/qualification-candidate-7236b39/candidate.json",
+      "bytes": 150740,
+      "sha256": "2697b9334c993d9263ea12cf3fe4426955198091b3dcc4c0bea52643f5c5de61"
+    },
+    {
+      "path": "artifacts/engine-0.2.3/g11/qualification-7236b39-final/device-payload-r2/Engine/artifacts/engine-0.2.3/g11/qualification-candidate-7236b39/candidate.json.contents.json",
+      "bytes": 933269,
+      "sha256": "7263b46bfa9d2ed92fbec7f1e17b28865f2f429e88cdd0401ff505b9cc460ac8"
+    }
+  ],
+  "runtimeRepairQualification": {
+    "revision": "307771ab221c2259a8d35f0f183728d5150c5cae",
+    "localFast": "passed",
+    "publicPackages": "passed-identical-library-bytes",
+    "devicePackage": "passed-integrity",
+    "realDevices": "passed-windows-ime-gamepad-and-hearing",
+    "cloudCI": "passed-with-existing-named-ao-investigation",
+    "affectedFormalQualification": "pending",
+    "mainWorkspaceAlignment": {
+      "otherPreexistingSourceDifferences": 29,
+      "report": {
+        "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/main-source-binding.json",
+        "bytes": 2058,
+        "sha256": "c844624bad738faca835d63bb44b5ba10d1695b4103f0af1f424f2f038502502"
+      }
+    },
+    "releaseQualified": false
   }
 }

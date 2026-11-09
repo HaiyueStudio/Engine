@@ -62,3 +62,68 @@ test('the original input owner cancels capture and active drag synchronously bef
  const send=(type,x,y)=>{const event={type,pointerId:1,pointerType:'mouse',button:0,buttons:type==='pointerup'?0:1,clientX:x,clientY:y,isTrusted:true,preventDefault(){}};system.inputDomain.onPointer(event);};
  send('pointerdown',20,12);send('pointermove',42,12);assert(system.dragSession);s.setScrollOffset(14000);assert.equal(system.dragSession,null);assert.equal(ended,1);assert(canceled>=1);assert.equal(canvas.captured.size,0);assert(reboundAfterEnd);send('pointerup',42,12);assert.equal(ended,1);s.dispose();system.destroy();root.destroy();
 });
+
+for (const explicitFocus of [true, false]) for (const Control of [GuiInput, GuiButton]) {
+ test(`collection navigation focuses the live ${Control.name} after one direction, explicit focus=${explicitFocus}`,()=>{
+  const canvas=new Surface(),system=new GuiSystem({canvas,displayWidth:400,displayHeight:560}),root=new GuiRoot();system.roots.add(root);
+  const r=rows(Control),s=createGuiVirtualList({items:data(1000),keyOf:x=>x.id,rowHeight:28,height:560,createRow:r.createRow,...(explicitFocus?{focus:system.focus}:{})});root.add(s.element);root.layout(400,560);system.inputDomain.refresh();
+  const row=key=>r.instances.find(x=>x.binding?.key===key).element;
+  system.focus.focus(row('k0'));system.dispatchAction('down','gamepad');assert.equal(s.selectedKey,'k1');assert.equal(system.focus.focused,row('k1'));assert.equal(row('k1').focused,true);
+  if(Control===GuiInput){row('k1').insertText('z');assert(row('k1').value.includes('z'));assert.equal(row('k0').value,'k0');}
+  else{let clicks=0;row('k1').onClick=()=>clicks++;system.dispatchAction('confirm','gamepad');assert.equal(clicks,1);}
+  system.dispatchAction('up','gamepad');assert.equal(system.focus.focused,row('k0'));assert.equal(row('k0').focused,true);
+  s.setScrollOffset(14000);s.setScrollOffset(0);system.focus.focus(row('k0'));system.dispatchAction('down','keyboard');assert.equal(system.focus.focused,row('k1'));
+  s.dispose();system.destroy();root.destroy();assert.equal(r.counts.created,r.counts.disposed);assert.equal(r.counts.active,0);
+ });
+}
+
+test('collection row focus skips disabled and hidden descendants and falls back for label-only rows',()=>{
+ const focus=new GuiFocusManager(),targets=[];
+ const s=createGuiVirtualList({items:data(3),keyOf:x=>x.id,rowHeight:28,height:560,focus,createRow(){
+  const element=new GuiElement({width:'100%',height:28}),disabled=element.add(new GuiButton({disabled:true})),hidden=element.add(new GuiInput({visible:false})),group=element.add(new GuiElement({height:28})),input=group.add(new GuiInput());targets.push({element,disabled,hidden,input});
+  return{element,bind(){return()=>{};},dispose(){}};
+ }});s.element.layout({x:0,y:0,width:400,height:560});focus.setRoots([s.element]);focus.focus(targets[0].input);action(s.element,'down');assert.equal(s.selectedKey,'k1');assert.equal(focus.focused,targets[1].input);s.dispose();
+ const label=list(3,{focus});focus.setRoots([label.value.element]);label.value.setSelection('k0');focus.focus(label.value.element);action(label.value.element,'down');assert.equal(label.value.selectedKey,'k1');assert(label.value.element.children.includes(focus.focused));label.value.dispose();
+});
+
+for (const explicitFocus of [true,false]) test(`collection row wrappers never trap Tab or Shift+Tab, explicit focus=${explicitFocus}`,()=>{
+ const canvas=new Surface(),system=new GuiSystem({canvas,displayWidth:400,displayHeight:560}),root=new GuiRoot();system.roots.add(root);
+ const r=rows(GuiInput),s=createGuiVirtualList({items:data(3),keyOf:x=>x.id,rowHeight:28,height:560,createRow:r.createRow,...(explicitFocus?{focus:system.focus}:{})});root.add(s.element);const outside=root.add(new GuiButton({text:'outside'}));root.layout(400,560);system.inputDomain.refresh();
+ const row=key=>r.instances.find(x=>x.binding?.key===key).element;
+ system.focus.focus(row('k0'));system.dispatchAction('next','keyboard');assert.equal(system.focus.focused,row('k1'));system.dispatchAction('next','keyboard');assert.equal(system.focus.focused,row('k2'));system.dispatchAction('next','keyboard');assert.equal(system.focus.focused,outside);
+ for(const key of ['k2','k1','k0']){system.dispatchAction('previous','keyboard');assert.equal(system.focus.focused,row(key));}
+ system.focus.focus(row('k1').parent);assert.equal(system.focus.focused,row('k1'));assert.equal(s.selectedKey,'k1');
+ s.dispose();system.destroy();root.destroy();assert.equal(r.counts.created,r.counts.disposed);
+});
+
+// Exercise the actual example factories with the public input and virtual list.
+// Extracting the factory keeps WebGPU/browser setup out of this lifecycle test.
+const rowFactoryFs=await import('node:fs');
+const rowFactoryTs=(await import('typescript')).default;
+function exampleRowFactory(source,context){
+ const file=rowFactoryTs.createSourceFile('application.ts',source,rowFactoryTs.ScriptTarget.Latest,true),factories=[];
+ const visit=node=>{if(rowFactoryTs.isCallExpression(node)&&node.expression.getText(file)==='createGuiVirtualList'){
+  const method=node.arguments[0]?.properties?.find(p=>p.name?.getText(file)==='createRow');if(method)factories.push(method);
+ }rowFactoryTs.forEachChild(node,visit);};visit(file);assert.equal(factories.length,1,'Expected exactly one production list row factory');
+ const js=rowFactoryTs.transpileModule('({'+factories[0].getText(file)+'})',{compilerOptions:{target:rowFactoryTs.ScriptTarget.ES2022}}).outputText.trim().replace(/;$/u,'');
+ return Function(...Object.keys(context),'return '+js)(...Object.values(context)).createRow;
+}
+function registerExampleRowRetention(name,path){
+ test(name+' keeps committed edits by stable key through recycling, cancellation and disposal',()=>{
+  const source=rowFactoryFs.readFileSync(path,'utf8'),edits=new Map(),counts={created:0,disposed:0,bound:0,unbound:0,bind:0,unbind:0},fields=[],records=[],instances=[];
+  const factory=exampleRowFactory(source,{GuiInput,edits,rows:counts,rowCounts:counts,fields,record:(...args)=>records.push(args)});
+  const items=Array.from({length:1000},(_,i)=>({key:'item-'+i,value:'Item '+i}));
+  const value=createGuiVirtualList({items,keyOf:item=>item.key,rowHeight:28,height:560,createRow(){const row=factory();instances.push(row);return row;}});
+  const editor=key=>{value.scrollToKey(key,'start');value.element.layout({x:0,y:0,width:400,height:560});value.setSelection(key);return value.element.children.find(h=>h.children[0] instanceof GuiInput&&h.children[0].value===(edits.get(key)??items.find(i=>i.key===key).value))?.children[0];};
+  try{
+   const row=editor('item-1');assert(row,'Actual editable row missing');row.selectAll();row.insertText('G11-row1');assert.equal(edits.get('item-1'),'G11-row1','Committed input must update the stable-key model');
+   const callback=row.onChange;value.setScrollOffset(14000);assert.notEqual(row.onChange,callback,'Recycling must release the callback for the retired key');
+   const distant=editor('item-500');distant.selectAll();distant.insertText('Other row');assert.equal(edits.get('item-500'),'Other row');assert.equal(edits.get('item-1'),'G11-row1','A rebound editor must not mutate its old key');
+   const restored=editor('item-1');assert.equal(restored.value,'G11-row1');restored.selectAll();restored.beginComposition();restored.updateComposition('pending');restored.cancelComposition();assert.equal(restored.value,'G11-row1');assert.equal(edits.get('item-1'),'G11-row1','Canceled preedit must not replace committed data');
+   restored.selectAll();restored.beginComposition();restored.updateComposition('nihao');restored.commitComposition('你好');assert.equal(edits.get('item-1'),'你好');value.setScrollOffset(14000);assert.equal(editor('item-1').value,'你好','Committed IME text must survive recycling');
+  }finally{value.dispose();}
+  assert(instances.every(row=>row.element.onChange===null),'No disposed row may retain its binding callback');assert.equal(fields.length,0);assert.equal(counts.created,counts.disposed);assert.equal(counts.bound,counts.unbound);assert.equal(counts.bind,counts.unbind);
+ });
+}
+registerExampleRowRetention('gameplay-kit',new URL('../../examples/gameplay-kit/application.ts',import.meta.url));
+registerExampleRowRetention('gui-collections example',new URL('../../examples/gui-collections/application.ts',import.meta.url));

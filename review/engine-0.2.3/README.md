@@ -1,6 +1,6 @@
 # Engine 0.2.3 验收入口
 
-G01–G10 已完成，G11 仍在集成／验收。开发候选的 Engine／extensions／shader-language 为 0.2.3，animation-spec 为 0.2.2。整版尚未取得正式平台／性能、真实设备、全局门禁及无发布演练资格，未发布或推广基线。唯一活动检查入口为 [G11 检查索引](g11-checks.json)。
+G01–G10 已完成，G11 仍在集成／验收。开发候选的 Engine／extensions／shader-language 为 0.2.3，animation-spec 为 0.2.2。原 `7236b39` 的 Windows 正式性能、全局门禁与无发布演练，以及 `de464ec` 的 Ubuntu CI 已通过；方向焦点及示例行编辑回收问题已修复并通过本地检查；当前候选仍需受影响的设备、云端及正式资格。整版未完成验收，未发布或推广基线。唯一活动检查入口为 [G11 检查索引](g11-checks.json)。
 
 合同：[ADR 0139](../../docs/for-ai/adr/0139-engine-023-gameplay-contracts.md) · [行为](contract.md) · [目标声明](api-contract.d.ts) · [机器合同](../../config/gameplay-023-contract.json)。本页汇总结论和剩余责任，逐次尝试与本次整理前原文见[归档清单](../archive/engine-review-entry-history-20261102.json)。原 checks JSON、原始捕获、合同和源码身份保留。
 
@@ -30,24 +30,21 @@ G08–G10 的原生像素、独立消费者、包体、资源及整仓检查均�
 
 ## 干净候选、云端与设备准备
 
-设备包最初绑定候选 `b61b700a`，仅推送独立验收分支 `codex/g11-qualification-023-b61b700a`。3,907 个源文件已绑定；37 处 Windows 换行按仓库规则规范化，仅作用于独立检出。四包确定性检查、51 个独立消费者及 64 项生产依赖审计／SBOM 通过。下文 Windows 复测使用单独冻结的候选。
+当前修复候选为 `307771a`。左／中／右试听改为等距及相同源音量，使用既有声像强度配置，保留距离衰减和远处静音。原浏览器左右总 RMS 为中心的 10%，iPhone 页面旧配置为 20%；新配置的原生离线 PCM 比值均为 1，声道隔离、循环源释放及远处静音通过。完整本地 Fast、四包／51 个消费者、128 次集合操作及 1,960 次导航通过，四个库包字节与 `1c84c10` 一致。[准备结果](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/device-preparation.json)和[原听音失败](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/audio-audition/physical-failure.json)保留。
 
-原候选云端 Engine Fast 通过，完整内容 CI Slow 失败；原始日志、附件哈希及旧失败见 [G11 检查索引](g11-checks.json)。在 10,000 实体／4 镜面／5 次反射／1 视图推进至 20／40 帧后触及 300 秒时限，后续 8 次反射／4 视图及像素检查未执行；31 条进度与五份原始报告保留。
+[当前设备包](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/engine-0.2.3-real-devices-307771a.tar.gz)约 18.5 MiB，5,322 个文件逐一回读校验。Windows 三个 current 入口及[Mac／iPhone 说明](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/README-current.md)已同步。Native 仅在已验证语料上应用具名试听配置与当前 vendor 包并重算来源；真实听音仍需设备记录。
 
-[SwiftShader 平面反射复测](../../artifacts/engine-0.2.3/g11/planar-ci-investigation/forward-occlusion/scissor-retest.json)：`45a1a92` 消除了被证明遮挡的重复主视图片元工作。两个原 runner 分别用 192.3 和 258.8 秒完成同一 300 秒门禁，原场景、样本和画质检查保留。早期软件失败保留，完整软件 CI 仍待复跑。
+当前 [Fast／跨平台无发布入口](https://github.com/HaiyueStudio/Engine/actions/runs/42457853186)和[完整 Ubuntu／SwiftShader CI](https://github.com/HaiyueStudio/Engine/actions/runs/42457859412)均通过。[当前 CI 复核](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/ci-acceptance.json)按官方 SHA-256 核对附件并保留全部原报告；只沿用已批准的 AO 600 秒调查项，保留原失败、部分样本及 8 次预热／30 次采样，不授予软件环境原生性能资格。
 
-[设备验收包](../../artifacts/engine-0.2.3/g11/frozen-1793807926852-2ce5ae/devices/engine-0.2.3-device-acceptance.tar.gz)约 18.5 MiB，5,315 个文件经完整解压及逐文件 SHA-256 回读；搬迁后的 Engine／Native 预检通过。包含 Windows 独立入口、Mac 输入法／听音入口和物理 iPhone 锁定构建／收集说明。Native 已刷新同字节 Engine／extensions，三包 885 个安装文件及类型检查通过；旧候选完整备份，TankBattle 原修改保留。真实设备操作尚未进行。
-
-固定灯光输入的归档误移已按原 SHA-256 恢复并保护，原失败保留；运行时、原结果和验收预算不变。
+历史 `7236b39` 的 Windows 正式性能、资源／画质、全局门禁及无发布演练已通过，`de464ec` 的云端 CI 已通过。原平面反射、运动模糊、PBR、AO、MSAA、输入与灯光归档问题及解决证据在 [G11 索引](g11-checks.json)保留，各自结论仍绑定原候选。
 
 ## 未完成的资格
 
-- Windows 候选 `45a1a92` 的 27 组 GUI CPU 采样有 8 组超限；1,000 控件动态布局 P95 为 12.29–13.35 ms（预算 8 ms）。[原样本复核](../../artifacts/engine-0.2.3/g11/windows-performance-45a1a92/failed-cpu-independent-audit.json)保留。`38d9f00` 按原口径[通过全部 27 组及原始样本复核](../../artifacts/engine-0.2.3/g11/windows-performance-38d9f00/gui-cpu-formal-report.json)，1,000 控件动态布局 P95 为 5.76–7.82 ms；1×MSAA 组合验收通过，4×MSAA 在 32 次切换后的[存活输出管线检查失败](../../artifacts/engine-0.2.3/g11/windows-performance-38d9f00/combined-msaa4-formal-failure.json)。独立复现保留；24 次生产场景、580 次既有捕获、其余对照、全局门禁和无发布演练未开始。
-- 4×MSAA 的区域缓存因旧场景纹理等待回收而短暂回退；恢复 1× 合成后，旧的 4× 混合变体仍在缓存。隔离补丁在合成路径切换时淘汰旧变体，并保留最终 4× 输出。[原门禁诊断复测](../../artifacts/engine-0.2.3/g11/msaa-output-topology-proposal/combined-summary.json)通过 4× 三轮和 1× 一轮，四个检查点均为 6 条管线，销毁后资源归零。补丁已纳入干净候选 `7236b39`，正式包的 4× 复核也通过；[新入口](../../artifacts/engine-0.2.3/g11/windows-performance-7236b39/start-windows-performance-7236b39.cmd)已完成输入校验，正式 1×／4×MSAA 已通过。
-- `7236b39` 的 27 组 GUI CPU、24 次组合生产、580 次既有捕获及七份报告的原始复核均通过；HYA 布局和语料通过。[原运行](../../artifacts/engine-0.2.3/g11/windows-performance-7236b39/qualification-result.json)停在 HYA 首次采样前：旧扩展基线是 0.2.2，脚本误用候选 0.2.3 版本校验。保留原错误和所有报告；[同提交续跑入口](../../artifacts/engine-0.2.3/g11/windows-performance-7236b39-resume/resume-windows-performance-7236b39.cmd)在核对原始哈希后从 HYA 生产开始，全局门禁和无发布演练仍待执行。
-- [HYA 频率诊断](../../artifacts/engine-0.2.3/g11/windows-performance-7236b39-resume/hya-gpu-clock-diagnosis.json)：候选的小场景两次可见帧节奏检查均通过，P95 约 16.86 ms。Chrome 最高性能设置和双方相同的 GPU 预热都未稳定住相同的核心及显存频率，不能据此判定 GPU 回归原因或通过 5% 门禁。Chrome 原设置已核对恢复；正式入口仅修正包身份校验，保留原预热、样本和预算。
-- Windows 真实输入及 Mac／物理 iPhone 流程继续按 G11 验收。Native 所需 Web Audio 节点图能力须真机探测；现有 PCM 声像或类型检查不能替代混音器宿主资格。
-- 当前候选仍需完整云端软件检查。历史平面反射的 300 秒失败及原报告保留，0.2.2 的具名许可不自动延续。
+- 当前候选的 Windows [真实 IME](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-ime.json)、[真实手柄](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-gamepad.json)和[实际听音](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/operator-stages/windows-hearing.json)均通过。手柄覆盖导航、左右移动、B→X→恢复 B、起跳和长按只启动一次，退出后 GPU、关卡、世界和浏览器进程残留为 0。Mac 的中文提交、Esc 取消和 Chrome 进程退出已核对。操作者确认缩放后候选窗跟随光标，列表编辑回收后保留。修复候选 5d8041d 的真机折叠专项通过，收起后未选拼音已取消，重新展开保留原值。同一候选的正常选字和实际听音均已通过。物理 iPhone 已构建安装并回传，原候选复现了折叠残留拼音和 Badge 偏心，音频因原生宿主缺少 AudioContext 未能开始试听；旧记录保留原候选身份。
+- 当前 CI 已通过；受影响正式资格仍需严格核对输入和哈希，不能自动沿用历史候选。
+- 主工作区的 [29 项既存源码差异](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/main-source-binding.json)须在发布前统一；本轮十份 Engine 具名文件已一致，其他差异保留。
+
+iPhone 的折叠预编辑与 Badge 居中修复已通过本地验证。验收页已接入 AVAudioEngine，真机听音、恢复和退出清理待复验。[iPhone 诊断包校验](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/iphone-retest-1794216680631/receipt.json)
 
 运行编号、逐文件哈希、候选输入、未完成设备及正式入口状态只在 [G11 检查索引](g11-checks.json)维护；本页不重复追加执行时间线。
 

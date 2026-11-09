@@ -43,3 +43,33 @@ test('current eviction performs no sorting and current statistics do not iterate
   assert.equal(sorts,Type===Legacy?1:0);assert.equal(iterations,Type===Legacy?2:0);mixer.dispose();
  }
 });
+test('the explicit platform host shares mixer ownership, buffer generations and bus controls',async()=>{
+ const calls=[],outputs=[],tone=audioBuffer('tone');
+ const host={
+  state:'suspended',get stereoPan(){return this.state==='running';},sampleRate:48000,nodeCount:4,
+  async resume(){this.state='running';},async suspend(){this.state='suspended';},close(){this.state='closed';calls.push('close');},
+  async decodeAudioData(){return tone;},prepareBuffer(buffer){calls.push(['prepare',buffer]);},releaseBuffer(buffer){calls.push(['release',buffer]);},
+  setMasterVolume(value){calls.push(['master',value]);},setBusVolume(bus,value){calls.push([bus,value]);},
+  openVoice(buffer,options){
+   const voice={nodeCount:3,stereoPan:true,buffer,options,
+    start(ended){this.ended=ended;},stop(){this.stopped=true;},dispose(){this.disposed=true;},
+    setGain(gain){this.gain=gain;},setPan(pan){this.pan=pan;}};
+   outputs.push(voice);return voice;
+  },
+ };
+ assert.throws(()=>new Mixer({host,context:new AudioContextAudit()}),/cannot be combined/);
+ const mixer=new Mixer({host,maxVoicesTotal:1,maxVoicesPerOwner:1});
+ assert.equal(mixer.getCapabilities().stereoPan,false);
+ assert.equal(await mixer.decodeAndInstall('tone',new ArrayBuffer(12)),tone);
+ await mixer.resume();assert.equal(mixer.getCapabilities().stereoPan,true);
+ const first=mixer.play(audioRequest('old')),replacement=mixer.play(audioRequest('new'));
+ assert.notEqual(first,replacement);assert.equal(outputs[0].stopped,true);assert.equal(outputs[0].disposed,true);
+ outputs[0].ended();assert.equal(mixer.stats.voices,1);assert.equal(mixer.stats.audioNodes,7);
+ mixer.setGain('owner','channel',.5);mixer.setPan('owner','channel',1);
+ assert.equal(outputs[1].gain,.5);assert.equal(outputs[1].pan,1);
+ mixer.setMasterVolume(0);mixer.setBusVolume('ui',4);
+ await mixer.suspend();assert.equal(mixer.play(audioRequest('locked')),null);
+ assert.equal(mixer.removeBuffer('tone'),true);assert.equal(outputs[1].disposed,undefined);
+ mixer.dispose();assert.equal(outputs[1].disposed,true);assert.equal(mixer.stats.audioNodes,0);
+ assert.deepEqual(calls,[['prepare',tone],['master',0],['ui',4],['release',tone],'close']);
+});

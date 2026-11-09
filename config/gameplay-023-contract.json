@@ -1787,7 +1787,7 @@
       ],
       "owner": "g11",
       "baseline": "named paths clean at G01; unrelated TankBattle WIP excluded",
-      "audioBoundary": "existing PCM bank is separate from Web Audio. G09/G11 probe Web Audio host; do not claim PCM interface is an AudioContext. Missing stereo remains explicit capability block, then submit named host-adapter proposal."
+      "audioBoundary": "Browser uses Web Audio. The approved G11 iOS path may use the explicit AVAudioEngine host and must report browser API availability separately. Native stereo, physical hearing, background recovery and resource release remain hard requirements."
     },
     "Games": "not selected; no write/check scope"
   },

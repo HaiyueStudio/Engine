@@ -25,7 +25,7 @@
     "artifacts:test": "node --test scripts/artifact-retention.test.mjs",
     "build": "npm run build -w ./shader-language && npm run build -w ./engine && npm run build -w ./animation-spec && npm run build -w ./extensions && npm run build -w ./examples",
     "typecheck": "npm run typecheck -w ./shader-language && npm run typecheck -w ./engine && npm run typecheck -w ./animation-spec && npm run build -w ./engine && npm run build -w ./animation-spec && npm run typecheck -w ./extensions && npm run typecheck -w ./examples",
-    "test": "npm test -w ./shader-language && npm test -w ./engine && npm test -w ./animation-spec && npm test -w ./extensions && npm run examples:catalog:check",
+    "test": "npm test -w ./shader-language && npm test -w ./engine && npm test -w ./animation-spec && npm test -w ./extensions && npm run examples:catalog:check && node --test examples/gameplay-kit/audio-audition.test.mjs",
     "fast-gate-policy:test": "node --test scripts/example-typescript.test.mjs scripts/example-build-fingerprint.test.mjs scripts/fast-gate-workspace-policy.test.mjs scripts/build-target-routing.test.mjs scripts/capture-ray-tracing-admission-routing.test.mjs scripts/visual-regression/product-screenshot-routing.test.mjs scripts/editor-e2e/largeSceneSplitRouting.test.mjs scripts/benchmark/run-benchmarks-routing.test.mjs scripts/benchmark/suite-split-routing.test.mjs scripts/benchmark/ray-product-candidates-policy.test.mjs scripts/release-no-rive-policy.test.mjs",
     "test:workspaces:fast": "node scripts/run-fast-workspace-tests.mjs",
     "unchecked-index:check": "node scripts/check-no-unchecked-indexed-access.mjs",
