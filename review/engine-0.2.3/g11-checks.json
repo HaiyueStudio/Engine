@@ -1170,7 +1170,7 @@
     {
       "id": "mac-and-physical-iphone",
       "required": true,
-      "status": "partial-macos-passed-iphone-gui-failed-audio-blocked",
+      "status": "partial-macos-and-iphone-gui-passed-iphone-audio-failed",
       "evidence": [
         {
           "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/device-preparation.json",
@@ -1346,6 +1346,35 @@
               "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/iphone-retest-1794216680631/receipt.json",
               "bytes": 679,
               "sha256": "257bbab6b9aa143126b415a676b84ed38db4b8d4c9210a6f3a6e217cb65a1375"
+            },
+            "githubRetest": {
+              "status": "failed-physical-iphone-audio",
+              "branch": "codex/g11-iphone-retest-023",
+              "candidateId": "g11-023-iphone-retest-09047760fb45ef39a9ae",
+              "engineRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+              "nativeRevision": "0fd4407991a47fc670534b3c25939951c9899efb",
+              "gitFileVerification": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/native-git-verification.json",
+                "bytes": 233,
+                "sha256": "25c80726b5b14500ba824c83ff7824d48f6be28033d6f119f0b88569d3d4d23e"
+              },
+              "physicalRetest": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/returned-20261109T132012Z/physical-retest-review.json",
+                "bytes": 1983,
+                "sha256": "8f290da17685e48daf0a655d83b1408bb3a0c2134271b0fa7b8bbb3cf395105e"
+              }
+            },
+            "audioFollowUp": {
+              "status": "remote-native-commit-verified-audio-retest-pending",
+              "branch": "codex/g11-iphone-retest-023",
+              "candidateId": "g11-023-iphone-retest-13f77a20f2966ae65e0f",
+              "engineRevision": "4beb46f6a88fccd8630033bed3cf61ae99087855",
+              "nativeRevision": "6ea965e92d8666401b6fceab8d771140fcd5b130",
+              "gitFileVerification": {
+                "path": "artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/audio-recovery/native-git-verification.json",
+                "bytes": 233,
+                "sha256": "6352700bf83b17f5f548ce2ee12b15be098a9afc9a2c28efc9ceffccd6bf9edf"
+              }
             }
           }
         }

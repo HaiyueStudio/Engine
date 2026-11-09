@@ -44,7 +44,7 @@ G08–G10 的原生像素、独立消费者、包体、资源及整仓检查均�
 - 当前 CI 已通过；受影响正式资格仍需严格核对输入和哈希，不能自动沿用历史候选。
 - 主工作区的 [29 项既存源码差异](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/focus-307771a/main-source-binding.json)须在发布前统一；本轮十份 Engine 具名文件已一致，其他差异保留。
 
-iPhone 的折叠预编辑与 Badge 居中修复已通过本地验证。验收页已接入 AVAudioEngine，真机听音、恢复和退出清理待复验。[iPhone 诊断包校验](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/iphone-retest-1794216680631/receipt.json)
+iPhone 真机已通过折叠预编辑、正常选字、Badge 居中和退出清理。AVAudioEngine 报告双声道且登记了播放请求，实际试听仍无声，切回前台后也未恢复。下一轮保留原失败并复验音频。[iPhone 复验记录](../../artifacts/engine-0.2.3/g11/device-acceptance-20261107/iphone-remediation/github-retest/returned-20261109T132012Z/physical-retest-review.json)
 
 运行编号、逐文件哈希、候选输入、未完成设备及正式入口状态只在 [G11 检查索引](g11-checks.json)维护；本页不重复追加执行时间线。
 
