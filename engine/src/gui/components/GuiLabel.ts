@@ -111,23 +111,28 @@ function paintGuiLabel(context:GuiPaint.GuiControlPaintContext, label: GuiLabel,
     const customContent = !!(style.contentInsets || style.nineSlice || style.icon);
     const x = customContent ? box.text.x : label.rect.x + padding;
     const width = customContent ? box.text.width : Math.max(0, label.rect.width - padding * 2);
+    const layoutManaged = GuiPaint.isGuiLayoutManaged(label);
     let textX = x;
+    let centeredSingleLine = false;
     if (font && label.textAlign !== 'left') {
       const textWidth = GuiPaint.measureGuiTextWidth(label.text, font, fontSize);
       textX = label.textAlign === 'center'
         ? x + Math.max(0, (width - textWidth) * 0.5)
         : x + Math.max(0, width - textWidth);
+      centeredSingleLine = label.autoWidth && label.textAlign === 'center'
+        && textWidth <= width && !/[\r\n]/u.test(label.text);
     }
+    const multiline = layoutManaged && !centeredSingleLine;
     context.currentTextBatch.addText({
       text: label.text,
       x: textX,
-      y: customContent ? box.text.y : label.rect.y + (GuiPaint.isGuiLayoutManaged(label) ? padding : 0),
+      y: customContent ? box.text.y : label.rect.y + (multiline ? padding : 0),
       width: Math.max(0, x + width - textX),
-      height: customContent ? box.text.height : Math.max(0, label.rect.height - (GuiPaint.isGuiLayoutManaged(label) ? padding * 2 : 0)),
+      height: customContent ? box.text.height : Math.max(0, label.rect.height - (multiline ? padding * 2 : 0)),
       fontSize,
       color: GuiPaint.withAlpha(GuiPaint.colorToRgba(context.styleFor(label).color, theme.colors.text), opacity),
-      multiline: GuiPaint.isGuiLayoutManaged(label),
-      wrap: GuiPaint.isGuiLayoutManaged(label),
+      multiline,
+      wrap: multiline,
       clip: context.clipRect(label.rect),
     });
   }

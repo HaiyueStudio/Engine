@@ -47,7 +47,7 @@ GuiBreadcrumb/Badge/Collapse 为组合控制器，element 仍是原 GuiElement�
 | 脏块 | 默认32²块，最多64 resident/可配置≤256；1,048,576 CPU cells上限仅本版 atlas/chunk 路径，旧纯色尺寸语义保持；setCell只标对应块，markDirty/更换cells/尺寸/图集全失效 | raw cells直接修改仍需markDirty；视口裁剪仅axis-aligned平面安全启用，其他保守全候选；工作/退役/缓存全计量，达到上限有界分批/直接绘制，不静默丢画面；shader改源及生成器 |
 | GameAudio | 原mixer借用不dispose、不close context；默认128总/32owner，原最大1024不变；总线volume0..4，mute保留原配置；fade线性时间、update deltaMs一次；profile haiyue-game-audio/v1 | play仍用原request/startTick语义，不把tick解释为新音频时钟；HYA sample时钟不降级；dispose解绑发射器并只停止本wrapper记录的voice ID，不以owner批量误停外部声音；bindEmitter只管理通过本wrapper创建的channel |
 | 2D声像 | listener/emitter回调render-unit，距离衰减 gain=base×max(0,1-distance/maxDistance)^attenuation，attenuation默认1；pan=clamp(dx/maxDistance×panStrength,-1,1)，默认strength1 | 无3DHRTF/效果器图/流媒体；getCapabilities在未建context时stereoPan=null，建成后显式bool；panner=false或尚未建context而为null时绑定发射器抛AudioCapabilityUnavailable，提示先resume再绑定，不把单声道退化算支持 |
-| 宿主 | 支持AudioContext的浏览器真实立体声、解锁/暂停/后台恢复；原Native PCM bank是独立接口，不等于WebAudio | G09/G11物理iPhone记录实际WebAudio能力和受影响恢复；若缺失所需能力保留具名阻塞并提交有限宿主适配提案，不把未测或模拟算通过；本版不授权PCM伪装AudioContext |
+| 宿主 | 浏览器沿用 AudioContext。G11 经批准可通过显式宿主接口接入 iOS AVAudioEngine，原 Native PCM bank 继续独立 | 记录宿主能力、实际立体声、解锁／暂停／后台恢复和释放。保留旧 iPhone 的 Web Audio 缺失记录。缺少实际输出或真机证据仍阻止通过 |
 
 ## 验收与未实施项
 

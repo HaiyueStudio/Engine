@@ -25,6 +25,32 @@ test('text insertion/deletion, wrapping, clipping, reordering and clearing match
  const f=font(),batch=new GuiTextBatch(),a=text('ABC'),b=text('BA',30);let commands=[a,b];
  for(const change of [()=>{},()=>a.text='A',()=>a.text='ABCABC',()=>a.width=7,()=>a.verticalAlign='center',()=>a.clip={x:0,y:10,width:18,height:15},()=>commands.reverse(),()=>commands.splice(1,0,text('C',20)),()=>commands.splice(0,1),()=>commands=[],()=>commands=[text('123',2)]]){change();update(batch,commands,f);equalFresh(batch,commands,f);}
 });
+test('layout-managed badge labels center fitting text and preserve wrapping for larger content',async()=>{
+ const {guiControlPainterFor}=await importEngineSource('gui/GuiControlIdentity.ts');
+ const {retainGuiLayout}=await importEngineSource('gui/GuiLayoutState.ts');
+ const root=new GuiRoot(),f=font(),batch=new GuiTextBatch(),commands=[];
+ f.chars.set(43,{...f.chars.get(63),id:43});
+ const label=root.add(new GuiLabel({autoWidth:true,textAlign:'center',fontSize:10,style:{padding:4,backgroundColor:'#dc2626'}}));
+ const paint=guiControlPainterFor(label,'GuiLabel');
+ const context={activeFont:f,styleFor:item=>item.getResolvedStyle(),addRect(){},currentTextBatch:{addText:command=>commands.push(command)},clipRect:rect=>rect};
+ const draw=(value,width)=>{
+  label.setText(value);label.rect={x:0,y:0,width,height:20};retainGuiLayout(label,label.rect);
+  commands.length=0;paint(context,label,root.theme);update(batch,commands,f);return commands[0];
+ };
+ try{
+  for(const lineHeight of [16,24]){
+   f.lineHeight=lineHeight;for(const glyph of f.chars.values())glyph.yoffset=(lineHeight-glyph.height)/2;
+   for(const [value,width] of [['7',20],['99',20],['99+',26]]){
+    const command=draw(value,width);assert.equal(command.multiline,false);assert.equal(batch.vertexCount,value.length*6);
+    const positions=Array.from({length:batch.vertexCount},(_,i)=>batch.vertexData.subarray(i*12,i*12+2));
+    const xs=positions.map(p=>p[0]),ys=positions.map(p=>p[1]);
+    assert.ok(Math.abs((Math.min(...xs)+Math.max(...xs))/2-width/2)<=.5);
+    assert.equal((Math.min(...ys)+Math.max(...ys))/2,10);
+   }
+  }
+  for(const value of ['ABCD','A\nB']){const command=draw(value,20);assert.equal(command.wrap,true);assert.equal(command.y,4);}
+ }finally{root.destroy();}
+});
 test('shapes rebuild only changed commands and safely shift strokes/rounded geometry',()=>{
  const batch=new GuiBatch(),commands=Array.from({length:128},(_,i)=>shape(i*3));update(batch,commands);commands[63].width=5;update(batch,commands);assert.equal(guiGeometryWork(batch).vertices,6);equalFresh(batch,commands);
  for(const change of [()=>commands[20].strokeWidth=1,()=>commands[40].roundedMesh=true,()=>commands[20].strokeWidth=undefined,()=>commands.reverse(),()=>commands.splice(10,1),()=>commands[12].clip.width=50]){change();update(batch,commands);equalFresh(batch,commands);}
